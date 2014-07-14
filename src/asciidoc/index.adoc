@@ -37864,8 +37864,8 @@ options. The endpoint is available for clients to connect to at URL path `/app/p
 
 		@Override
         public void configureMessageBroker(MessageBrokerRegistry config) {
-            config.setApplicationDestinationPrefixes("/app")
-                .enableSimpleBroker("/queue", "/topic");
+            config.setApplicationDestinationPrefixes("/app");
+            config.enableSimpleBroker("/queue", "/topic");
         }
 
 		@Override
@@ -38001,7 +38001,7 @@ Below is a simple example to illustrate the flow of messages:
 		@Override
 		public void configureMessageBroker(MessageBrokerRegistry registry) {
 			registry.setApplicationDestinationPrefixes("/app");
-			registry.enableSimpleBroker("/topic/");
+			registry.enableSimpleBroker("/topic");
 		}
 
 	}
@@ -38039,17 +38039,28 @@ kinds of arguments and return values supported.
 [[websocket-stomp-handle-annotations]]
 ==== Annotation Message Handling
 
-The `@MessageMapping` annotation is supported on methods of `@Controller`
-as well as on `@RestController`-annotated classes.
-It can be used for mapping methods to path-like message destinations. It is also
-possible to combine with a type-level `@MessageMapping` for expressing shared
-mappings across all annotated methods within a controller.
+The `@MessageMapping` annotation is supported on methods of `@Controller` classes.
+It can be used for mapping methods to message destinations and can also be combined
+with the type-level `@MessageMapping` for expressing shared mappings across all
+annotated methods within a controller.
 
-Destination mappings can contain Ant-style patterns (e.g. "/foo*", "/foo/**")
-and template variables (e.g. "/foo/{id}"), which can then be accessed via
-`@DestinationVariable` method arguments. This should be familiar to Spring MVC
-users, in fact the same `AntPathMatcher` is used for matching destinations based
-on patterns and for extracting template variables.
+By default destination mappings are treated as Ant-style, slash-separated, path
+patterns, e.g. "/foo*", "/foo/**". etc. They can also contain template variables,
+e.g. "/foo/{id}" that can then be referenced via `@DestinationVariable`-annotated
+method arguments.
+
+[NOTE]
+====
+Although Ant-style, slash-separated, path patterns should feel familiar to web
+developers, in message brokers and in messaging it is common to use "." as the
+separator, for example in the names of destinations such as topics, queues,
+exchanges, etc.
+
+Applications can switch to using "." (dot) instead of "/" (slash) as the separator
+for destinations mapped to `@MessageMapping` methods simply by configuring an `AntPathMatcher`
+with a customized path separator property. This can be done easily through
+the provided Java config and XML namespace.
+====
 
 The following method arguments are supported for `@MessageMapping` methods:
 
@@ -38137,6 +38148,21 @@ stores them in memory, and broadcasts messages to connected clients with matchin
 destinations. The broker supports path-like destinations, including subscriptions
 to Ant-style destination patterns.
 
+[NOTE]
+====
+Although Ant-style, slash-separated, path patterns should feel familiar to web
+developers, in message brokers and in messaging it is common to use "." as the
+separator, for example in the names of destinations such as topics, queues,
+exchanges, etc.
+
+Applications can switch to using "." (dot) instead of "/" (slash) as the separator
+for destinations handled by the broker simply by configuring an `AntPathMatcher`
+with a customized path separator property. This can be done easily through
+the provided Java config and XML namespace.
+====
+
+
+
 
 [[websocket-stomp-handle-broker-relay]]
 ==== Full-Featured Broker
@@ -38168,7 +38194,7 @@ Below is example configuration that enables a full-featured broker:
 
 		@Override
 		public void configureMessageBroker(MessageBrokerRegistry registry) {
-			registry.enableStompBrokerRelay("/topic/", "/queue/");
+			registry.enableStompBrokerRelay("/topic", "/queue");
 			registry.setApplicationDestinationPrefixes("/app");
 		}
 

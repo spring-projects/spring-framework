@@ -21,6 +21,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -55,51 +56,38 @@ public final class DestinationPatternsMessageCondition
 	 * @param patterns 0 or more URL patterns; if 0 the condition will match to every request.
 	 */
 	public DestinationPatternsMessageCondition(String... patterns) {
-		this(patterns, null, true);
+		this(patterns, null);
 	}
 
 	/**
-	 * Additional constructor with a customized path matcher.
+	 * Alternative constructor accepting a custom PathMatcher.
 	 * @param patterns the URL patterns to use; if 0, the condition will match to every request.
-	 * @param pathMatcher the customized path matcher to use with patterns
+	 * @param pathMatcher the PathMatcher to use.
 	 */
 	public DestinationPatternsMessageCondition(String[] patterns, PathMatcher pathMatcher) {
-		this(asList(patterns), pathMatcher, true);
+		this(asList(patterns), pathMatcher);
 	}
 
-	/**
-	 * Additional constructor with a customized path matcher and a flag specifying if
-	 * the destination patterns should be prepended with "/".
-	 * @param patterns the URL patterns to use; if 0, the condition will match to every request.
-	 * @param pathMatcher the customized path matcher to use with patterns
-	 * @param prependLeadingSlash to specify whether each pattern that is not empty and does not
-	 * start with "/" will be prepended with "/" or not
-	 * @since 4.1
-	 */
-	public DestinationPatternsMessageCondition(String[] patterns, PathMatcher pathMatcher,
-			boolean prependLeadingSlash) {
-		this(asList(patterns), pathMatcher, prependLeadingSlash);
-	}
-
-	private DestinationPatternsMessageCondition(Collection<String> patterns,
-			PathMatcher pathMatcher, boolean prependLeadingSlash) {
-		this.patterns = Collections.unmodifiableSet(initializePatterns(patterns, prependLeadingSlash));
+	private DestinationPatternsMessageCondition(Collection<String> patterns, PathMatcher pathMatcher) {
 		this.pathMatcher = (pathMatcher != null) ? pathMatcher : new AntPathMatcher();
+		this.patterns = Collections.unmodifiableSet(prependLeadingSlash(patterns, this.pathMatcher));
 	}
 
 	private static List<String> asList(String... patterns) {
 		return patterns != null ? Arrays.asList(patterns) : Collections.<String>emptyList();
 	}
 
-	private static Set<String> initializePatterns(Collection<String> patterns,
-			boolean prependLeadingSlash) {
+	private static Set<String> prependLeadingSlash(Collection<String> patterns, PathMatcher pathMatcher) {
 		if (patterns == null) {
 			return Collections.emptySet();
 		}
+		boolean slashSeparator = pathMatcher.combine("a", "a").equals("a/a");
 		Set<String> result = new LinkedHashSet<String>(patterns.size());
 		for (String pattern : patterns) {
-			if (StringUtils.hasLength(pattern) && !pattern.startsWith("/") && prependLeadingSlash) {
-				pattern = "/" + pattern;
+			if (slashSeparator) {
+				if (StringUtils.hasLength(pattern) && !pattern.startsWith("/")) {
+					pattern = "/" + pattern;
+				}
 			}
 			result.add(pattern);
 		}
@@ -149,7 +137,7 @@ public final class DestinationPatternsMessageCondition
 		else {
 			result.add("");
 		}
-		return new DestinationPatternsMessageCondition(result, this.pathMatcher, false);
+		return new DestinationPatternsMessageCondition(result, this.pathMatcher);
 	}
 
 	/**
@@ -184,7 +172,7 @@ public final class DestinationPatternsMessageCondition
 		}
 
 		Collections.sort(matches, this.pathMatcher.getPatternComparator(destination));
-		return new DestinationPatternsMessageCondition(matches, this.pathMatcher, false);
+		return new DestinationPatternsMessageCondition(matches, this.pathMatcher);
 	}
 
 	/**

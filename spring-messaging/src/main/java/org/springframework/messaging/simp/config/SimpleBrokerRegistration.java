@@ -19,28 +19,25 @@ package org.springframework.messaging.simp.config;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.SubscribableChannel;
 import org.springframework.messaging.simp.broker.SimpleBrokerMessageHandler;
-import org.springframework.util.PathMatcher;
 
 /**
  * Registration class for configuring a {@link SimpleBrokerMessageHandler}.
  *
  * @author Rossen Stoyanchev
- * @author Sebastien Deleuze
  * @since 4.0
  */
 public class SimpleBrokerRegistration extends AbstractBrokerRegistration {
 
 
-	public SimpleBrokerRegistration(SubscribableChannel clientInboundChannel,
-			MessageChannel clientOutboundChannel, String[] destinationPrefixes) {
-
-		super(clientInboundChannel, clientOutboundChannel, destinationPrefixes);
+	public SimpleBrokerRegistration(SubscribableChannel inChannel, MessageChannel outChannel, String[] prefixes) {
+		super(inChannel, outChannel, prefixes);
 	}
 
 
-	protected SimpleBrokerMessageHandler getMessageHandler(SubscribableChannel brokerChannel, PathMatcher pathMatcher) {
+	@Override
+	protected SimpleBrokerMessageHandler getMessageHandler(SubscribableChannel brokerChannel) {
 		return new SimpleBrokerMessageHandler(getClientInboundChannel(),
-				getClientOutboundChannel(), brokerChannel, getDestinationPrefixes(), pathMatcher);
+				getClientOutboundChannel(), brokerChannel, getDestinationPrefixes());
 	}
 
 }

@@ -93,7 +93,9 @@ public class SimpAnnotationMethodMessageHandler extends AbstractMethodMessageHan
 
 	private ConversionService conversionService = new DefaultFormattingConversionService();
 
-	private PathMatcher pathMatcher;
+	private PathMatcher pathMatcher = new AntPathMatcher();
+
+	private boolean slashPathSeparator = true;
 
 	private Validator validator;
 
@@ -112,22 +114,7 @@ public class SimpAnnotationMethodMessageHandler extends AbstractMethodMessageHan
 	 * @param brokerTemplate a messaging template to send application messages to the broker
 	 */
 	public SimpAnnotationMethodMessageHandler(SubscribableChannel clientInboundChannel,
-											  MessageChannel clientOutboundChannel, SimpMessageSendingOperations brokerTemplate) {
-		this(clientInboundChannel, clientOutboundChannel, brokerTemplate, null);
-	}
-
-	/**
-	 * Create an instance of SimpAnnotationMethodMessageHandler with the given
-	 * message channels and broker messaging template.
-	 * @param clientInboundChannel the channel for receiving messages from clients (e.g. WebSocket clients)
-	 * @param clientOutboundChannel the channel for messages to clients (e.g. WebSocket clients)
-	 * @param brokerTemplate a messaging template to send application messages to the broker
-	 * @param pathSeparator the path separator to use with the destination patterns
-	 * @since 4.1
-	 */
-	public SimpAnnotationMethodMessageHandler(SubscribableChannel clientInboundChannel,
-			MessageChannel clientOutboundChannel, SimpMessageSendingOperations brokerTemplate,
-			String pathSeparator) {
+			MessageChannel clientOutboundChannel, SimpMessageSendingOperations brokerTemplate) {
 
 		Assert.notNull(clientInboundChannel, "clientInboundChannel must not be null");
 		Assert.notNull(clientOutboundChannel, "clientOutboundChannel must not be null");
@@ -136,12 +123,41 @@ public class SimpAnnotationMethodMessageHandler extends AbstractMethodMessageHan
 		this.clientInboundChannel = clientInboundChannel;
 		this.clientMessagingTemplate = new SimpMessagingTemplate(clientOutboundChannel);
 		this.brokerTemplate = brokerTemplate;
-		this.pathMatcher = new AntPathMatcher(pathSeparator);
 
 		Collection<MessageConverter> converters = new ArrayList<MessageConverter>();
 		converters.add(new StringMessageConverter());
 		converters.add(new ByteArrayMessageConverter());
 		this.messageConverter = new CompositeMessageConverter(converters);
+	}
+
+
+	/**
+	 * {@inheritDoc}
+	 * <p>Destination prefixes are expected to be slash-separated Strings and
+	 * therefore a slash is automatically appended where missing to ensure a
+	 * proper prefix-based match (i.e. matching complete segments).
+	 *
+	 * <p>Note however that the remaining portion of a destination after the
+	 * prefix may use a different separator (e.g. commonly "." in messaging)
+	 * depending on the configured {@code PathMatcher}.
+	 */
+	@Override
+	public void setDestinationPrefixes(Collection<String> prefixes) {
+		super.setDestinationPrefixes(appendSlashes(prefixes));
+	}
+
+	private static Collection<String> appendSlashes(Collection<String> prefixes) {
+		if (CollectionUtils.isEmpty(prefixes)) {
+			return prefixes;
+		}
+		Collection<String> result = new ArrayList<String>(prefixes.size());
+		for (String prefix : prefixes) {
+			if (!prefix.endsWith("/")) {
+				prefix = prefix + "/";
+			}
+			result.add(prefix);
+		}
+		return result;
 	}
 
 	/**
@@ -189,6 +205,7 @@ public class SimpAnnotationMethodMessageHandler extends AbstractMethodMessageHan
 	public void setPathMatcher(PathMatcher pathMatcher) {
 		Assert.notNull(pathMatcher, "PathMatcher must not be null");
 		this.pathMatcher = pathMatcher;
+		this.slashPathSeparator = this.pathMatcher.combine("a", "a").equals("a/a");
 	}
 
 	/**
@@ -333,31 +350,31 @@ public class SimpAnnotationMethodMessageHandler extends AbstractMethodMessageHan
 		MessageMapping typeAnnotation = AnnotationUtils.findAnnotation(handlerType, MessageMapping.class);
 		MessageMapping messageAnnot = AnnotationUtils.findAnnotation(method, MessageMapping.class);
 		if (messageAnnot != null) {
-			SimpMessageMappingInfo result = createMessageMappingCondition(messageAnnot, typeAnnotation == null);
+			SimpMessageMappingInfo result = createMessageMappingCondition(messageAnnot);
 			if (typeAnnotation != null) {
-				result = createMessageMappingCondition(typeAnnotation, false).combine(result);
+				result = createMessageMappingCondition(typeAnnotation).combine(result);
 			}
 			return result;
 		}
 		SubscribeMapping subsribeAnnotation = AnnotationUtils.findAnnotation(method, SubscribeMapping.class);
 		if (subsribeAnnotation != null) {
-			SimpMessageMappingInfo result = createSubscribeCondition(subsribeAnnotation, typeAnnotation == null);
+			SimpMessageMappingInfo result = createSubscribeCondition(subsribeAnnotation);
 			if (typeAnnotation != null) {
-				result = createMessageMappingCondition(typeAnnotation, false).combine(result);
+				result = createMessageMappingCondition(typeAnnotation).combine(result);
 			}
 			return result;
 		}
 		return null;
 	}
 
-	private SimpMessageMappingInfo createMessageMappingCondition(MessageMapping annotation, boolean prependLeadingSlash) {
+	private SimpMessageMappingInfo createMessageMappingCondition(MessageMapping annotation) {
 		return new SimpMessageMappingInfo(SimpMessageTypeMessageCondition.MESSAGE,
-				new DestinationPatternsMessageCondition(annotation.value(), this.pathMatcher, prependLeadingSlash));
+				new DestinationPatternsMessageCondition(annotation.value(), this.pathMatcher));
 	}
 
-	private SimpMessageMappingInfo createSubscribeCondition(SubscribeMapping annotation, boolean prependLeadingSlash) {
+	private SimpMessageMappingInfo createSubscribeCondition(SubscribeMapping annotation) {
 		return new SimpMessageMappingInfo(SimpMessageTypeMessageCondition.SUBSCRIBE,
-				new DestinationPatternsMessageCondition(annotation.value(), this.pathMatcher, prependLeadingSlash));
+				new DestinationPatternsMessageCondition(annotation.value(), this.pathMatcher));
 	}
 
 	@Override
@@ -374,6 +391,27 @@ public class SimpAnnotationMethodMessageHandler extends AbstractMethodMessageHan
 	@Override
 	protected String getDestination(Message<?> message) {
 		return SimpMessageHeaderAccessor.getDestination(message.getHeaders());
+	}
+
+	@Override
+	protected String getLookupDestination(String destination) {
+		if (destination == null) {
+			return null;
+		}
+		if (CollectionUtils.isEmpty(getDestinationPrefixes())) {
+			return destination;
+		}
+		for (String prefix : getDestinationPrefixes()) {
+			if (destination.startsWith(prefix)) {
+				if (this.slashPathSeparator) {
+					return destination.substring(prefix.length() - 1);
+				}
+				else {
+					return destination.substring(prefix.length());
+				}
+			}
+		}
+		return null;
 	}
 
 	@Override

@@ -330,11 +330,11 @@ class MessageBrokerBeanDefinitionParser implements BeanDefinitionParser {
 		if (simpleBrokerElem != null) {
 			String prefix = simpleBrokerElem.getAttribute("prefix");
 			cavs.addIndexedArgumentValue(3, Arrays.asList(StringUtils.tokenizeToStringArray(prefix, ",")));
-			String defaultSeparator = messageBrokerElement.getAttribute("default-separator");
-			if (!defaultSeparator.isEmpty()) {
-				cavs.addIndexedArgumentValue(4, new AntPathMatcher(defaultSeparator));
-			}
 			brokerDef = new RootBeanDefinition(SimpleBrokerMessageHandler.class, cavs, null);
+			if (messageBrokerElement.hasAttribute("path-matcher")) {
+				brokerDef.getPropertyValues().add("pathMatcher",
+						new RuntimeBeanReference(messageBrokerElement.getAttribute("path-matcher")));
+			}
 		}
 		else if (brokerRelayElem != null) {
 			String prefix = brokerRelayElem.getAttribute("prefix");
@@ -454,15 +454,13 @@ class MessageBrokerBeanDefinitionParser implements BeanDefinitionParser {
 		mpvs.add("destinationPrefixes",Arrays.asList(StringUtils.tokenizeToStringArray(appDestPrefix, ",")));
 		mpvs.add("messageConverter", brokerMessageConverterRef);
 
-		RootBeanDefinition annotationMethodMessageHandlerDef =
-				new RootBeanDefinition(SimpAnnotationMethodMessageHandler.class, cavs, mpvs);
-
-		String defaultSeparator = messageBrokerElement.getAttribute("default-separator");
-		if (!defaultSeparator.isEmpty()) {
-			annotationMethodMessageHandlerDef.getPropertyValues().add("pathMatcher", new AntPathMatcher(defaultSeparator));
+		RootBeanDefinition beanDef = new RootBeanDefinition(SimpAnnotationMethodMessageHandler.class, cavs, mpvs);
+		if (messageBrokerElement.hasAttribute("path-matcher")) {
+			beanDef.getPropertyValues().add("pathMatcher",
+					new RuntimeBeanReference(messageBrokerElement.getAttribute("path-matcher")));
 		}
 
-		registerBeanDef(annotationMethodMessageHandlerDef, parserCxt, source);
+		registerBeanDef(beanDef, parserCxt, source);
 	}
 
 	private RuntimeBeanReference registerUserDestinationResolver(Element messageBrokerElement,

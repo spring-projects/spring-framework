@@ -79,7 +79,7 @@ public class MessageBrokerConfigurationTests {
 
 	private AnnotationConfigApplicationContext customChannelContext;
 
-	private AnnotationConfigApplicationContext customMatchingContext;
+	private AnnotationConfigApplicationContext customPathMatcherContext;
 
 
 	@Before
@@ -101,9 +101,9 @@ public class MessageBrokerConfigurationTests {
 		this.customChannelContext.register(CustomChannelConfig.class);
 		this.customChannelContext.refresh();
 
-		this.customMatchingContext = new AnnotationConfigApplicationContext();
-		this.customMatchingContext.register(CustomMatchingSimpleBrokerConfig.class);
-		this.customMatchingContext.refresh();
+		this.customPathMatcherContext = new AnnotationConfigApplicationContext();
+		this.customPathMatcherContext.register(CustomPathMatcherConfig.class);
+		this.customPathMatcherContext.refresh();
 	}
 
 
@@ -407,17 +407,13 @@ public class MessageBrokerConfigurationTests {
 	}
 
 	@Test
-	public void customMatching() {
-		SimpleBrokerMessageHandler brokerHandler = this.customMatchingContext.getBean(SimpleBrokerMessageHandler.class);
-		DefaultSubscriptionRegistry subscriptionRegistry = (DefaultSubscriptionRegistry)brokerHandler.getSubscriptionRegistry();
-		AntPathMatcher pathMatcher = (AntPathMatcher)subscriptionRegistry.getPathMatcher();
-		DirectFieldAccessor accessor = new DirectFieldAccessor(pathMatcher);
-		assertEquals(".", accessor.getPropertyValue("pathSeparator"));
+	public void customPathMatcher() {
+		SimpleBrokerMessageHandler broker = this.customPathMatcherContext.getBean(SimpleBrokerMessageHandler.class);
+		DefaultSubscriptionRegistry registry = (DefaultSubscriptionRegistry) broker.getSubscriptionRegistry();
+		assertEquals("a.a", registry.getPathMatcher().combine("a", "a"));
 
-		SimpAnnotationMethodMessageHandler messageHandler = customMatchingContext.getBean(SimpAnnotationMethodMessageHandler.class);
-		pathMatcher = (AntPathMatcher)messageHandler.getPathMatcher();
-		accessor = new DirectFieldAccessor(pathMatcher);
-		assertEquals(".", accessor.getPropertyValue("pathSeparator"));
+		SimpAnnotationMethodMessageHandler handler = this.customPathMatcherContext.getBean(SimpAnnotationMethodMessageHandler.class);
+		assertEquals("a.a", handler.getPathMatcher().combine("a", "a"));
 	}
 
 
@@ -504,11 +500,11 @@ public class MessageBrokerConfigurationTests {
 	}
 
 	@Configuration
-	static class CustomMatchingSimpleBrokerConfig extends SimpleBrokerConfig {
+	static class CustomPathMatcherConfig extends SimpleBrokerConfig {
 
 		@Override
 		public void configureMessageBroker(MessageBrokerRegistry registry) {
-			registry.defaultSeparator(".").enableSimpleBroker("/topic", "/queue");
+			registry.setPathMatcher(new AntPathMatcher(".")).enableSimpleBroker("/topic", "/queue");
 		}
 	}
 

@@ -90,27 +90,27 @@ public abstract class AbstractMethodMessageHandler<T>
 
 
 	/**
-	 * Configure one or more prefixes to match to the destinations of handled messages.
-	 * Messages whose destination does not start with one of the configured prefixes
-	 * are ignored. When a destination matches one of the configured prefixes, the
-	 * matching part is removed from destination before performing a lookup for a matching
-	 * message handling method. Prefixes without a trailing slash will have one appended
-	 * automatically.
-	 * <p>By default the list of prefixes is empty in which case all destinations match.
+	 * When this property is configured only messages to destinations matching
+	 * one of the configured prefixes are eligible for handling. When there is a
+	 * match the prefix is removed and only the remaining part of the destination
+	 * is used for method-mapping purposes.
+	 *
+	 * <p>By default no prefixes are configured in which case all messages are
+	 * eligible for handling.
 	 */
 	public void setDestinationPrefixes(Collection<String> prefixes) {
 		this.destinationPrefixes.clear();
 		if (prefixes != null) {
 			for (String prefix : prefixes) {
 				prefix = prefix.trim();
-				if (!prefix.endsWith("/")) {
-					prefix += "/";
-				}
 				this.destinationPrefixes.add(prefix);
 			}
 		}
 	}
 
+	/**
+	 * Return the configured destination prefixes.
+	 */
 	public Collection<String> getDestinationPrefixes() {
 		return this.destinationPrefixes;
 	}
@@ -346,11 +346,11 @@ public abstract class AbstractMethodMessageHandler<T>
 	protected abstract String getDestination(Message<?> message);
 
 	/**
-	 * Find if the given destination matches any of the configured allowed destination
-	 * prefixes and if a match is found return the destination with the prefix removed.
-	 * <p>If no destination prefixes are configured, the destination is returned as is.
-	 * @return the destination to use to find matching message handling methods
-	 * or {@code null} if the destination does not match
+	 * Check whether the given destination (of an incoming message) matches to
+	 * one of the configured destination prefixes and if so return the remaining
+	 * portion of the destination after the matched prefix.
+	 * <p>If there are no matching prefixes, return {@code null}.
+	 * <p>If there are no destination prefixes, return the destination as is.
 	 */
 	protected String getLookupDestination(String destination) {
 		if (destination == null) {
@@ -361,7 +361,7 @@ public abstract class AbstractMethodMessageHandler<T>
 		}
 		for (String prefix : this.destinationPrefixes) {
 			if (destination.startsWith(prefix)) {
-				return destination.substring(prefix.length() - 1);
+				return destination.substring(prefix.length());
 			}
 		}
 		return null;

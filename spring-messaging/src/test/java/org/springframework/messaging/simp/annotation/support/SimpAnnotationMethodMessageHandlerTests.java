@@ -16,6 +16,8 @@
 
 package org.springframework.messaging.simp.annotation.support;
 
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -38,6 +40,7 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.messaging.simp.annotation.SubscribeMapping;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.stereotype.Controller;
+import org.springframework.util.AntPathMatcher;
 import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
 import org.springframework.validation.annotation.Validated;
@@ -148,7 +151,7 @@ public class SimpAnnotationMethodMessageHandlerTests {
 
 	@Test
 	public void simpScope() {
-		ConcurrentHashMap<String, Object> map = new ConcurrentHashMap<>();
+		Map<String, Object> map = new ConcurrentHashMap<>();
 		map.put("name", "value");
 		SimpMessageHeaderAccessor headers = SimpMessageHeaderAccessor.create();
 		headers.setSessionId("session1");
@@ -158,6 +161,33 @@ public class SimpAnnotationMethodMessageHandlerTests {
 		this.messageHandler.handleMessage(message);
 
 		assertEquals("scope", this.testController.method);
+	}
+
+	@Test
+	public void dotPathSeparator() {
+		DotPathSeparatorController controller = new DotPathSeparatorController();
+
+		this.messageHandler.setPathMatcher(new AntPathMatcher("."));
+		this.messageHandler.registerHandler(controller);
+		this.messageHandler.setDestinationPrefixes(Arrays.asList("/app1", "/app2/"));
+
+		SimpMessageHeaderAccessor headers = SimpMessageHeaderAccessor.create();
+		headers.setSessionId("session1");
+		headers.setSessionAttributes(new HashMap<>());
+		headers.setDestination("/app1/pre.foo");
+		Message<?> message = MessageBuilder.withPayload(new byte[0]).setHeaders(headers).build();
+		this.messageHandler.handleMessage(message);
+
+		assertEquals("handleFoo", controller.method);
+
+		headers = SimpMessageHeaderAccessor.create();
+		headers.setSessionId("session1");
+		headers.setSessionAttributes(new HashMap<>());
+		headers.setDestination("/app2/pre.foo");
+		message = MessageBuilder.withPayload(new byte[0]).setHeaders(headers).build();
+		this.messageHandler.handleMessage(message);
+
+		assertEquals("handleFoo", controller.method);
 	}
 
 
@@ -231,6 +261,20 @@ public class SimpAnnotationMethodMessageHandlerTests {
 			this.method = "scope";
 		}
 	}
+
+	@Controller
+	@MessageMapping("pre")
+	private static class DotPathSeparatorController {
+
+		private String method;
+
+
+		@MessageMapping("foo")
+		public void handleFoo() {
+			this.method = "handleFoo";
+		}
+	}
+
 
 	private static class StringTestValidator implements Validator {
 

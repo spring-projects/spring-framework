@@ -607,9 +607,10 @@ public class AntPathMatcherTests {
 	}
 
 	@Test
-	public void noExtensionHandlingWithDotSeparator() {
+	public void testExtensionMappingWithDotPathSeparator() {
 		pathMatcher.setPathSeparator(".");
-		assertEquals("/*.html.hotel.*", pathMatcher.combine("/*.html", "hotel.*"));
+		assertEquals("Extension mapping should be disabled with \".\" as path separator",
+				"/*.html.hotel.*", pathMatcher.combine("/*.html", "hotel.*"));
 	}
 
 }

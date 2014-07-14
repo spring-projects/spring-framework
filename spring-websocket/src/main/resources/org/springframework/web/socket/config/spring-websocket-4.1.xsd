@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 
 <!--
-  ~ Copyright 2002-2013 the original author or authors.
+  ~ Copyright 2002-2014 the original author or authors.
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -19,12 +19,13 @@
 <xsd:schema xmlns="http://www.springframework.org/schema/websocket"
             xmlns:xsd="http://www.w3.org/2001/XMLSchema"
             xmlns:beans="http://www.springframework.org/schema/beans"
+			xmlns:tool="http://www.springframework.org/schema/tool"
             targetNamespace="http://www.springframework.org/schema/websocket"
             elementFormDefault="qualified"
             attributeFormDefault="unqualified">
 
-    <xsd:import namespace="http://www.springframework.org/schema/beans"
-                schemaLocation="http://www.springframework.org/schema/beans/spring-beans-4.0.xsd"/>
+    <xsd:import namespace="http://www.springframework.org/schema/beans" schemaLocation="http://www.springframework.org/schema/beans/spring-beans-4.1.xsd"/>
+	<xsd:import namespace="http://www.springframework.org/schema/tool" schemaLocation="http://www.springframework.org/schema/tool/spring-tool-4.1.xsd" />
 
     <xsd:complexType name="mapping">
         <xsd:annotation>
@@ -687,14 +688,31 @@
                     ]]></xsd:documentation>
                 </xsd:annotation>
             </xsd:attribute>
-			<xsd:attribute name="default-separator" type="xsd:string">
+			<xsd:attribute name="path-matcher" type="xsd:string">
 				<xsd:annotation>
 					<xsd:documentation><![CDATA[
-	Customize the default separator used for destination patterns matching/combining.
-	It could be used to configure "." as the default separator, since it is used in most
-	STOMP broker relay, enabling destination patterns like "/topic/PRICE.STOCK.**".
-	The default separator is "/".
+	A reference to the PathMatcher to use to match the destinations of incoming
+	messages to @MessageMapping and @SubscribeMapping methods.
+
+	By default AntPathMatcher is configured.
+	However applications may provide an AntPathMatcher instance
+	customized to use "." (commonly used in messaging) instead of "/" as path
+	separator or provide a completely different PathMatcher implementation.
+
+	Note that the configured PathMatcher is only used for matching the
+	portion of the destination after the configured prefix. For example given
+	application destination prefix "/app" and destination "/app/price.stock.**",
+	the message might be mapped to a controller with "price" and "stock.**"
+	as its type and method-level mappings respectively.
+
+	When the simple broker is enabled, the PathMatcher configured here is
+	also used to match message destinations when brokering messages.
                     ]]></xsd:documentation>
+					<xsd:appinfo>
+						<tool:annotation kind="ref">
+							<tool:expected-type type="java:org.springframework.util.PathMatcher" />
+						</tool:annotation>
+					</xsd:appinfo>
 				</xsd:annotation>
 			</xsd:attribute>
             <xsd:attribute name="order" type="xsd:token">

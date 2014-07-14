@@ -39,9 +39,9 @@ import org.springframework.messaging.simp.user.UserSessionRegistry;
 import org.springframework.messaging.support.AbstractSubscribableChannel;
 import org.springframework.messaging.support.ExecutorSubscribableChannel;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
-import org.springframework.util.AntPathMatcher;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.MimeTypeUtils;
+import org.springframework.util.PathMatcher;
 import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
 
@@ -206,17 +206,17 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 
 	@Bean
 	public SimpAnnotationMethodMessageHandler simpAnnotationMethodMessageHandler() {
-
-		String defaultSeparator = this.getBrokerRegistry().getDefaultSeparator();
 		SimpAnnotationMethodMessageHandler handler = new SimpAnnotationMethodMessageHandler(
-				clientInboundChannel(), clientOutboundChannel(), brokerMessagingTemplate(), defaultSeparator);
+				clientInboundChannel(), clientOutboundChannel(), brokerMessagingTemplate());
 
 		handler.setDestinationPrefixes(getBrokerRegistry().getApplicationDestinationPrefixes());
 		handler.setMessageConverter(brokerMessageConverter());
 		handler.setValidator(simpValidator());
 
-		AntPathMatcher pathMatcher = new AntPathMatcher(defaultSeparator);
-		handler.setPathMatcher(pathMatcher);
+		PathMatcher pathMatcher = this.getBrokerRegistry().getPathMatcher();
+		if (pathMatcher != null) {
+			handler.setPathMatcher(pathMatcher);
+		}
 		return handler;
 	}
 
@@ -234,9 +234,7 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 
 	@Bean
 	public UserDestinationMessageHandler userDestinationMessageHandler() {
-		UserDestinationMessageHandler handler = new UserDestinationMessageHandler(
-				clientInboundChannel(), brokerChannel(), userDestinationResolver());
-		return handler;
+		return new UserDestinationMessageHandler(clientInboundChannel(), brokerChannel(), userDestinationResolver());
 	}
 
 	@Bean

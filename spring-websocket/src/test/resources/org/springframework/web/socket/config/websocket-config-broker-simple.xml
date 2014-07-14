@@ -2,9 +2,11 @@
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:websocket="http://www.springframework.org/schema/websocket"
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
-		http://www.springframework.org/schema/websocket http://www.springframework.org/schema/websocket/spring-websocket-4.1.xsd">
+		http://www.springframework.org/schema/websocket http://www.springframework.org/schema/websocket/spring-websocket.xsd">
 
-    <websocket:message-broker application-destination-prefix="/app" user-destination-prefix="/personal" default-separator=".">
+    <websocket:message-broker application-destination-prefix="/app"
+							  user-destination-prefix="/personal"
+							  path-matcher="pathMatcher">
 
         <!-- message-size=128*1024, send-buffer-size=1024*1024 -->
         <websocket:transport message-size="131072" send-timeout="25000" send-buffer-size="1048576" />
@@ -21,6 +23,10 @@
         <websocket:simple-broker prefix="/topic, /queue"/>
 
     </websocket:message-broker>
+
+	<bean id="pathMatcher" class="org.springframework.util.AntPathMatcher">
+		<property name="pathSeparator" value="." />
+	</bean>
 
     <bean id="myHandler" class="org.springframework.web.socket.config.TestHandshakeHandler"/>
 

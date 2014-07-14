@@ -51,6 +51,8 @@ public class SimpleBrokerMessageHandler extends AbstractBrokerMessageHandler {
 
 	private SubscriptionRegistry subscriptionRegistry;
 
+	private PathMatcher pathMatcher;
+
 	private MessageHeaderInitializer headerInitializer;
 
 
@@ -58,38 +60,21 @@ public class SimpleBrokerMessageHandler extends AbstractBrokerMessageHandler {
 	 * Create a SimpleBrokerMessageHandler instance with the given message channels
 	 * and destination prefixes.
 	 *
-	 * @param clientInboundChannel the channel for receiving messages from clients (e.g. WebSocket clients)
-	 * @param clientOutboundChannel the channel for sending messages to clients (e.g. WebSocket clients)
+	 * @param inChannel the channel for receiving messages from clients (e.g. WebSocket clients)
+	 * @param outChannel the channel for sending messages to clients (e.g. WebSocket clients)
 	 * @param brokerChannel the channel for the application to send messages to the broker
 	 */
-	public SimpleBrokerMessageHandler(SubscribableChannel clientInboundChannel, MessageChannel clientOutboundChannel,
+	public SimpleBrokerMessageHandler(SubscribableChannel inChannel, MessageChannel outChannel,
 			SubscribableChannel brokerChannel, Collection<String> destinationPrefixes) {
-		this(clientInboundChannel, clientOutboundChannel, brokerChannel, destinationPrefixes, null);
-	}
-
-	/**
-	 * Additional constructor with a customized path matcher.
-	 *
-	 * @param clientInboundChannel the channel for receiving messages from clients (e.g. WebSocket clients)
-	 * @param clientOutboundChannel the channel for sending messages to clients (e.g. WebSocket clients)
-	 * @param brokerChannel the channel for the application to send messages to the broker
-	 * @param pathMatcher the path matcher to use
-	 * @since 4.1
-	 */
-	public SimpleBrokerMessageHandler(SubscribableChannel clientInboundChannel, MessageChannel clientOutboundChannel,
-			SubscribableChannel brokerChannel, Collection<String> destinationPrefixes, PathMatcher pathMatcher) {
 
 		super(destinationPrefixes);
-		Assert.notNull(clientInboundChannel, "'clientInboundChannel' must not be null");
-		Assert.notNull(clientOutboundChannel, "'clientOutboundChannel' must not be null");
+		Assert.notNull(inChannel, "'clientInboundChannel' must not be null");
+		Assert.notNull(outChannel, "'clientOutboundChannel' must not be null");
 		Assert.notNull(brokerChannel, "'brokerChannel' must not be null");
-		this.clientInboundChannel = clientInboundChannel;
-		this.clientOutboundChannel = clientOutboundChannel;
+		this.clientInboundChannel = inChannel;
+		this.clientOutboundChannel = outChannel;
 		this.brokerChannel = brokerChannel;
 		DefaultSubscriptionRegistry subscriptionRegistry = new DefaultSubscriptionRegistry();
-		if(pathMatcher != null) {
-			subscriptionRegistry.setPathMatcher(pathMatcher);
-		}
 		this.subscriptionRegistry = subscriptionRegistry;
 	}
 
@@ -106,13 +91,39 @@ public class SimpleBrokerMessageHandler extends AbstractBrokerMessageHandler {
 		return this.brokerChannel;
 	}
 
+	/**
+	 * Configure a custom SubscriptionRegistry to use for storing subscriptions.
+	 *
+	 * <p><strong>Note</strong> that when a custom PathMatcher is configured via
+	 * {@link #setPathMatcher}, if the custom registry is not an instance of
+	 * {@link DefaultSubscriptionRegistry}, the provided PathMatcher is not used
+	 * and must be configured directly on the custom registry.
+	 */
 	public void setSubscriptionRegistry(SubscriptionRegistry subscriptionRegistry) {
 		Assert.notNull(subscriptionRegistry, "SubscriptionRegistry must not be null");
 		this.subscriptionRegistry = subscriptionRegistry;
+		initPathMatcherToUse();
+	}
+
+	private void initPathMatcherToUse() {
+		if (this.pathMatcher != null) {
+			if (this.subscriptionRegistry instanceof DefaultSubscriptionRegistry) {
+				((DefaultSubscriptionRegistry) this.subscriptionRegistry).setPathMatcher(this.pathMatcher);
+			}
+		}
 	}
 
 	public SubscriptionRegistry getSubscriptionRegistry() {
 		return this.subscriptionRegistry;
+	}
+
+	/**
+	 * When configured, the given PathMatcher is passed down to the
+	 * SubscriptionRegistry to use for matching destination to subscriptions.
+	 */
+	public void setPathMatcher(PathMatcher pathMatcher) {
+		this.pathMatcher = pathMatcher;
+		initPathMatcherToUse();
 	}
 
 	/**

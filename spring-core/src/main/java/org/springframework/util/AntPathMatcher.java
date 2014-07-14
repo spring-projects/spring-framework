@@ -68,23 +68,27 @@ public class AntPathMatcher implements PathMatcher {
 
 	final Map<String, AntPathStringMatcher> stringMatcherCache = new ConcurrentHashMap<String, AntPathStringMatcher>(256);
 
+	private PathSeparatorPatternCache pathSeparatorPatternCache = new PathSeparatorPatternCache(DEFAULT_PATH_SEPARATOR);
+
+
 	/**
-	 * Create a new AntPathMatcher with the default Ant path separator "/".
+	 * Create a new instance with the {@link #DEFAULT_PATH_SEPARATOR}.
 	 */
 	public AntPathMatcher() {
 
 	}
 
 	/**
-	 * Create a new AntPathMatcher.
-	 * @param pathSeparator the path separator to use
+	 * A convenience alternative constructor to use with a custom path separator.
+	 * @param pathSeparator the path separator to use, must not be {@code null}.
 	 * @since 4.1
 	 */
 	public AntPathMatcher(String pathSeparator) {
-		if(pathSeparator != null) {
-			this.pathSeparator = pathSeparator;
-		}
+		Assert.notNull(pathSeparator, "'pathSeparator' is required");
+		this.pathSeparator = pathSeparator;
+		this.pathSeparatorPatternCache = new PathSeparatorPatternCache(pathSeparator);
 	}
+
 
 	/**
 	 * Set the path separator to use for pattern parsing.
@@ -92,6 +96,7 @@ public class AntPathMatcher implements PathMatcher {
 	 */
 	public void setPathSeparator(String pathSeparator) {
 		this.pathSeparator = (pathSeparator != null ? pathSeparator : DEFAULT_PATH_SEPARATOR);
+		this.pathSeparatorPatternCache = new PathSeparatorPatternCache(this.pathSeparator);
 	}
 
 	/**
@@ -447,20 +452,20 @@ public class AntPathMatcher implements PathMatcher {
 
 		// /hotels/* + /booking -> /hotels/booking
 		// /hotels/* + booking -> /hotels/booking
-		if (pattern1.endsWith(this.pathSeparator + "*")) {
-			return separatorConcat(pattern1.substring(0, pattern1.length() - 2), pattern2);
+		if (pattern1.endsWith(this.pathSeparatorPatternCache.getEndsOnWildCard())) {
+			return concat(pattern1.substring(0, pattern1.length() - 2), pattern2);
 		}
 
 		// /hotels/** + /booking -> /hotels/**/booking
 		// /hotels/** + booking -> /hotels/**/booking
-		if (pattern1.endsWith(this.pathSeparator + "**")) {
-			return separatorConcat(pattern1, pattern2);
+		if (pattern1.endsWith(this.pathSeparatorPatternCache.getEndsOnDoubleWildCard())) {
+			return concat(pattern1, pattern2);
 		}
 
 		int starDotPos1 = pattern1.indexOf("*.");
 		if (pattern1ContainsUriVar || starDotPos1 == -1 || this.pathSeparator.equals(".")) {
 			// simply concatenate the two patterns
-			return separatorConcat(pattern1, pattern2);
+			return concat(pattern1, pattern2);
 		}
 		String extension1 = pattern1.substring(starDotPos1 + 1);
 		int dotPos2 = pattern2.indexOf('.');
@@ -470,7 +475,7 @@ public class AntPathMatcher implements PathMatcher {
 		return fileName2 + extension;
 	}
 
-	private String separatorConcat(String path1, String path2) {
+	private String concat(String path1, String path2) {
 		if (path1.endsWith(this.pathSeparator) || path2.startsWith(this.pathSeparator)) {
 			return path1 + path2;
 		}
@@ -760,6 +765,31 @@ public class AntPathMatcher implements PathMatcher {
 				}
 				return this.length;
 			}
+		}
+	}
+
+
+	/**
+	 * A simple cache for patterns that depend on the configured path separator.
+	 */
+	private static class PathSeparatorPatternCache {
+
+		private final String endsOnWildCard;
+
+		private final String endsOnDoubleWildCard;
+
+
+		private PathSeparatorPatternCache(String pathSeparator) {
+			this.endsOnWildCard = pathSeparator + "*";
+			this.endsOnDoubleWildCard = pathSeparator + "**";
+		}
+
+		public String getEndsOnWildCard() {
+			return this.endsOnWildCard;
+		}
+
+		public String getEndsOnDoubleWildCard() {
+			return this.endsOnDoubleWildCard;
 		}
 	}
 
