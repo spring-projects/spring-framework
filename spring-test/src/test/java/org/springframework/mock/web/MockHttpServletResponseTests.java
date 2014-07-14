@@ -17,13 +17,16 @@
 package org.springframework.mock.web;
 
 import java.io.IOException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Date;
+import java.util.TimeZone;
 
 import javax.servlet.http.HttpServletResponse;
 
 import org.junit.Test;
-
 import org.springframework.web.util.WebUtils;
 
 import static org.junit.Assert.*;
@@ -243,4 +246,15 @@ public class MockHttpServletResponseTests {
 		assertEquals(response.getStatus(),HttpServletResponse.SC_NOT_FOUND);
 	}
 
+	/**
+	 * SPR-11912
+	 */
+	@Test
+	public void getDateHeader() {
+		DateFormat format = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz", response.getLocale());
+		format.setTimeZone(TimeZone.getTimeZone("GMT"));		
+		long currentTime = System.currentTimeMillis();
+		response.setDateHeader("testTime", currentTime);		
+		assertEquals(format.format(new Date(currentTime)), response.getHeader("testTime"));
+	}
 }

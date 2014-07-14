@@ -24,6 +24,7 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.UnsupportedEncodingException;
 import java.security.Principal;
+import java.text.SimpleDateFormat;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
@@ -36,6 +37,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.TimeZone;
 
 import javax.servlet.AsyncContext;
 import javax.servlet.DispatcherType;
@@ -197,7 +199,8 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	private boolean requestedSessionIdFromURL = false;
 
 	private final Map<String, Part> parts = new LinkedHashMap<String, Part>();
-
+	
+	private SimpleDateFormat[] formats;
 
 	// ---------------------------------------------------------------------
 	// Constructors
@@ -253,8 +256,15 @@ public class MockHttpServletRequest implements HttpServletRequest {
 		this.method = method;
 		this.requestURI = requestURI;
 		this.locales.add(Locale.ENGLISH);
+		
+		this.formats = new SimpleDateFormat[3];
+		this.formats[0] = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz", this.getLocale()); 
+		this.formats[1] = new SimpleDateFormat("EEEEEE, dd-MMM-yy HH:mm:ss zzz", this.getLocale());
+        this.formats[2] = new SimpleDateFormat("EEE MMMM d HH:mm:ss yyyy", this.getLocale());
+        this.formats[0].setTimeZone(TimeZone.getTimeZone("GMT"));
+        this.formats[1].setTimeZone(TimeZone.getTimeZone("GMT"));
+        this.formats[2].setTimeZone(TimeZone.getTimeZone("GMT"));
 	}
-
 
 	// ---------------------------------------------------------------------
 	// Lifecycle methods
@@ -819,6 +829,9 @@ public class MockHttpServletRequest implements HttpServletRequest {
 		}
 		else if (value instanceof Number) {
 			return ((Number) value).longValue();
+		}
+		else if (value instanceof String) {
+			return FastHttpDateFormat.parseDate((String)value, this.formats); 
 		}
 		else if (value != null) {
 			throw new IllegalArgumentException(
