@@ -99,11 +99,16 @@ public class PropertySourceAnnotationTests {
 		}
 	}
 
-	@Test(expected=IllegalArgumentException.class)
+	@Test
 	public void withUnresolvablePlaceholder() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 		ctx.register(ConfigWithUnresolvablePlaceholder.class);
-		ctx.refresh();
+		try {
+			ctx.refresh();
+		}
+		catch (BeanDefinitionStoreException ex) {
+			assertTrue(ex.getCause() instanceof IllegalArgumentException);
+		}
 	}
 
 	@Test
@@ -124,11 +129,16 @@ public class PropertySourceAnnotationTests {
 		System.clearProperty("path.to.properties");
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void withEmptyResourceLocations() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 		ctx.register(ConfigWithEmptyResourceLocations.class);
-		ctx.refresh();
+		try {
+			ctx.refresh();
+		}
+		catch (BeanDefinitionStoreException ex) {
+			assertTrue(ex.getCause() instanceof IllegalArgumentException);
+		}
 	}
 
 	// SPR-10820
