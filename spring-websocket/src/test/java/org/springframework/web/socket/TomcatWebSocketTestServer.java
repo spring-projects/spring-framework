@@ -30,6 +30,7 @@ import org.apache.tomcat.util.descriptor.web.FilterDef;
 import org.apache.tomcat.util.descriptor.web.FilterMap;
 import org.apache.tomcat.websocket.server.WsContextListener;
 
+import org.springframework.util.Assert;
 import org.springframework.util.SocketUtils;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.servlet.DispatcherServlet;
@@ -41,27 +42,28 @@ import org.springframework.web.servlet.DispatcherServlet;
  */
 public class TomcatWebSocketTestServer implements WebSocketTestServer {
 
-	private final Tomcat tomcatServer;
+	private Tomcat tomcatServer;
 
-	private final int port;
+	private int port = -1;
 
 	private Context context;
 
 
-	public TomcatWebSocketTestServer() {
+	@Override
+	public void setup() {
 		this.port = SocketUtils.findAvailableTcpPort();
 
 		Connector connector = new Connector(Http11NioProtocol.class.getName());
-        connector.setPort(this.port);
+		connector.setPort(this.port);
 
-        File baseDir = createTempDir("tomcat");
-        String baseDirPath = baseDir.getAbsolutePath();
+		File baseDir = createTempDir("tomcat");
+		String baseDirPath = baseDir.getAbsolutePath();
 
 		this.tomcatServer = new Tomcat();
 		this.tomcatServer.setBaseDir(baseDirPath);
 		this.tomcatServer.setPort(this.port);
-        this.tomcatServer.getService().addConnector(connector);
-        this.tomcatServer.setConnector(connector);
+		this.tomcatServer.getService().addConnector(connector);
+		this.tomcatServer.setConnector(connector);
 	}
 
 	private File createTempDir(String prefix) {
@@ -84,7 +86,8 @@ public class TomcatWebSocketTestServer implements WebSocketTestServer {
 
 	@Override
 	public void deployConfig(WebApplicationContext wac, Filter... filters) {
-        this.context = this.tomcatServer.addContext("", System.getProperty("java.io.tmpdir"));
+		Assert.state(this.port != -1, "setup() was never called.");
+		this.context = this.tomcatServer.addContext("", System.getProperty("java.io.tmpdir"));
         this.context.addApplicationListener(WsContextListener.class.getName());
 		Tomcat.addServlet(this.context, "dispatcherServlet", new DispatcherServlet(wac)).setAsyncSupported(true);
 		this.context.addServletMapping("/", "dispatcherServlet");

@@ -29,6 +29,8 @@ public interface WebSocketTestServer {
 
 	int getPort();
 
+	void setup();
+
 	void deployConfig(WebApplicationContext cxt, Filter... filters);
 
 	void undeployConfig();

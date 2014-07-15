@@ -83,6 +83,7 @@ public abstract class AbstractWebSocketIntegrationTests {
 			((Lifecycle) this.webSocketClient).start();
 		}
 
+		this.server.setup();
 		this.server.deployConfig(this.wac);
 		this.server.start();
 	}
@@ -99,14 +100,12 @@ public abstract class AbstractWebSocketIntegrationTests {
 		catch (Throwable t) {
 			logger.error("Failed to stop WebSocket client", t);
 		}
-
 		try {
 			this.server.undeployConfig();
 		}
 		catch (Throwable t) {
 			logger.error("Failed to undeploy application config", t);
 		}
-
 		try {
 			this.server.stop();
 		}
