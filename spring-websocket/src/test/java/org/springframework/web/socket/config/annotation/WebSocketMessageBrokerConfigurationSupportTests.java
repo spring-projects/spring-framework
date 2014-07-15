@@ -74,7 +74,6 @@ public class WebSocketMessageBrokerConfigurationSupportTests {
 
 	@Test
 	public void handlerMapping() {
-
 		SimpleUrlHandlerMapping hm = (SimpleUrlHandlerMapping) this.config.getBean(HandlerMapping.class);
 		assertEquals(1, hm.getOrder());
 
@@ -85,7 +84,6 @@ public class WebSocketMessageBrokerConfigurationSupportTests {
 
 	@Test
 	public void clientInboundChannelSendMessage() throws Exception {
-
 		TestChannel channel = this.config.getBean("clientInboundChannel", TestChannel.class);
 		SubProtocolWebSocketHandler webSocketHandler = this.config.getBean(SubProtocolWebSocketHandler.class);
 

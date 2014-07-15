@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,9 +22,9 @@ import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mockito;
 
-import org.springframework.messaging.support.ExecutorSubscribableChannel;
+import org.springframework.messaging.MessageChannel;
+import org.springframework.messaging.SubscribableChannel;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.HttpRequestHandler;
@@ -32,37 +32,37 @@ import org.springframework.web.socket.messaging.SubProtocolWebSocketHandler;
 import org.springframework.web.socket.server.support.DefaultHandshakeHandler;
 import org.springframework.web.socket.server.support.WebSocketHttpRequestHandler;
 import org.springframework.web.socket.sockjs.support.SockJsHttpRequestHandler;
+import org.springframework.web.socket.sockjs.transport.TransportHandler;
 import org.springframework.web.socket.sockjs.transport.TransportType;
 import org.springframework.web.socket.sockjs.transport.handler.DefaultSockJsService;
 import org.springframework.web.socket.sockjs.transport.handler.WebSocketTransportHandler;
 
 import static org.junit.Assert.*;
+import static org.mockito.Mockito.mock;
 
 /**
- * Test fixture for {@link org.springframework.web.socket.config.annotation.WebMvcStompWebSocketEndpointRegistration}.
+ * Test fixture for
+ * {@link org.springframework.web.socket.config.annotation.WebMvcStompWebSocketEndpointRegistration}.
  *
  * @author Rossen Stoyanchev
  */
-public class WebMvcStompEndpointRegistrationTests {
+public class WebMvcStompWebSocketEndpointRegistrationTests {
 
-	private SubProtocolWebSocketHandler wsHandler;
+	private SubProtocolWebSocketHandler handler;
 
 	private TaskScheduler scheduler;
 
 
 	@Before
 	public void setup() {
-		this.wsHandler = new SubProtocolWebSocketHandler(
-				new ExecutorSubscribableChannel(), new ExecutorSubscribableChannel());
-		this.scheduler = Mockito.mock(TaskScheduler.class);
+		this.handler = new SubProtocolWebSocketHandler(mock(MessageChannel.class), mock(SubscribableChannel.class));
+		this.scheduler = mock(TaskScheduler.class);
 	}
 
 	@Test
 	public void minimalRegistration() {
-
-
-		WebMvcStompWebSocketEndpointRegistration registration = new WebMvcStompWebSocketEndpointRegistration(
-				new String[] {"/foo"}, this.wsHandler, this.scheduler);
+		WebMvcStompWebSocketEndpointRegistration registration =
+				new WebMvcStompWebSocketEndpointRegistration(new String[] {"/foo"}, this.handler, this.scheduler);
 
 		MultiValueMap<HttpRequestHandler, String> mappings = registration.getMappings();
 		assertEquals(1, mappings.size());
@@ -74,12 +74,10 @@ public class WebMvcStompEndpointRegistrationTests {
 
 	@Test
 	public void customHandshakeHandler() {
+		WebMvcStompWebSocketEndpointRegistration registration =
+				new WebMvcStompWebSocketEndpointRegistration(new String[] {"/foo"}, this.handler, this.scheduler);
 
 		DefaultHandshakeHandler handshakeHandler = new DefaultHandshakeHandler();
-
-		WebMvcStompWebSocketEndpointRegistration registration = new WebMvcStompWebSocketEndpointRegistration(
-				new String[] {"/foo"}, this.wsHandler, this.scheduler);
-
 		registration.setHandshakeHandler(handshakeHandler);
 
 		MultiValueMap<HttpRequestHandler, String> mappings = registration.getMappings();
@@ -95,12 +93,10 @@ public class WebMvcStompEndpointRegistrationTests {
 
 	@Test
 	public void customHandshakeHandlerPassedToSockJsService() {
+		WebMvcStompWebSocketEndpointRegistration registration =
+				new WebMvcStompWebSocketEndpointRegistration(new String[] {"/foo"}, this.handler, this.scheduler);
 
 		DefaultHandshakeHandler handshakeHandler = new DefaultHandshakeHandler();
-
-		WebMvcStompWebSocketEndpointRegistration registration = new WebMvcStompWebSocketEndpointRegistration(
-				new String[] {"/foo"}, this.wsHandler, this.scheduler);
-
 		registration.setHandshakeHandler(handshakeHandler);
 		registration.withSockJS();
 
@@ -116,8 +112,8 @@ public class WebMvcStompEndpointRegistrationTests {
 		DefaultSockJsService sockJsService = (DefaultSockJsService) requestHandler.getSockJsService();
 		assertNotNull(sockJsService);
 
-		WebSocketTransportHandler transportHandler =
-				(WebSocketTransportHandler) sockJsService.getTransportHandlers().get(TransportType.WEBSOCKET);
+		Map<TransportType, TransportHandler> handlers = sockJsService.getTransportHandlers();
+		WebSocketTransportHandler transportHandler = (WebSocketTransportHandler) handlers.get(TransportType.WEBSOCKET);
 		assertSame(handshakeHandler, transportHandler.getHandshakeHandler());
 	}
 
