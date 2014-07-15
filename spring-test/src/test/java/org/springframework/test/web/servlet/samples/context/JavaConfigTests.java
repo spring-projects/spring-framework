@@ -51,7 +51,7 @@ import static org.mockito.Mockito.*;
  * @author Sebastien Deleuze
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@WebAppConfiguration("src/test/resources/META-INF/web-resources")
+@WebAppConfiguration("classpath:META-INF/web-resources")
 @ContextHierarchy({
 	@ContextConfiguration(classes = RootConfig.class),
 	@ContextConfiguration(classes = WebConfig.class)
@@ -100,7 +100,7 @@ public class JavaConfigTests {
 
 	@Configuration
 	@EnableWebMvc
-	static class WebConfig extends WebMvcConfigurerAdapter implements TilesWebMvcConfigurer {
+	static class WebConfig extends WebMvcConfigurerAdapter {
 
 		@Autowired
 		private RootConfig rootConfig;
@@ -130,9 +130,11 @@ public class JavaConfigTests {
 			registry.tiles();
 		}
 
-		@Override
-		public void configureTiles(TilesConfigurer configurer) {
+		@Bean
+		public TilesConfigurer tilesConfigurer() {
+			TilesConfigurer configurer = new TilesConfigurer();
 			configurer.setDefinitions("/WEB-INF/**/tiles.xml");
+			return configurer;
 		}
 	}
 

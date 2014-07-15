@@ -54,24 +54,6 @@ public class ViewResolutionIntegrationTests {
 
 
 	@Test
-	public void minimalFreemarkerConfig() throws Exception {
-		MockHttpServletResponse response = runTest(MinimalFreeMarkerWebConfig.class);
-		assertEquals("<html><body>Hello World!</body></html>", response.getContentAsString());
-	}
-
-	@Test
-	public void minimalVelocityConfig() throws Exception {
-		MockHttpServletResponse response = runTest(MinimalVelocityWebConfig.class);
-		assertEquals("<html><body>Hello World!</body></html>", response.getContentAsString());
-	}
-
-	@Test
-	public void minimalTilesConfig() throws Exception {
-		MockHttpServletResponse response = runTest(MinimalTilesWebConfig.class);
-		assertEquals("/WEB-INF/index.jsp", response.getForwardedUrl());
-	}
-
-	@Test
 	public void freemarker() throws Exception {
 		MockHttpServletResponse response = runTest(FreeMarkerWebConfig.class);
 		assertEquals("<html><body>Hello World!</body></html>", response.getContentAsString());
@@ -91,19 +73,19 @@ public class ViewResolutionIntegrationTests {
 
 	@Test
 	public void freemarkerInvalidConfig() throws Exception {
-		this.thrown.expectMessage("It looks like you're trying to configure FreeMarker view resolution.");
+		this.thrown.expectMessage("In addition to a FreeMarker view resolver ");
 		runTest(InvalidFreeMarkerWebConfig.class);
 	}
 
 	@Test
 	public void velocityInvalidConfig() throws Exception {
-		this.thrown.expectMessage("It looks like you're trying to configure Velocity view resolution.");
+		this.thrown.expectMessage("In addition to a Velocity view resolver ");
 		runTest(InvalidVelocityWebConfig.class);
 	}
 
 	@Test
 	public void tilesInvalidConfig() throws Exception {
-		this.thrown.expectMessage("It looks like you're trying to configure Tiles view resolution.");
+		this.thrown.expectMessage("In addition to a Tiles view resolver ");
 		runTest(InvalidTilesWebConfig.class);
 	}
 
@@ -138,6 +120,7 @@ public class ViewResolutionIntegrationTests {
 
 	@EnableWebMvc
 	static abstract class AbstractWebConfig extends WebMvcConfigurerAdapter {
+
 		@Bean
 		public SampleController sampleController() {
 			return new SampleController();
@@ -145,68 +128,55 @@ public class ViewResolutionIntegrationTests {
 	}
 
 	@Configuration
-	static class MinimalFreeMarkerWebConfig extends AbstractWebConfig {
+	static class FreeMarkerWebConfig extends AbstractWebConfig {
+
 		@Override
 		public void configureViewResolvers(ViewResolverRegistry registry) {
 			registry.freeMarker();
 		}
-	}
 
-	@Configuration
-	static class MinimalVelocityWebConfig extends AbstractWebConfig {
-		@Override
-		public void configureViewResolvers(ViewResolverRegistry registry) {
-			registry.velocity();
-		}
-	}
-
-	@Configuration
-	static class MinimalTilesWebConfig extends AbstractWebConfig {
-		@Override
-		public void configureViewResolvers(ViewResolverRegistry registry) {
-			registry.tiles();
-		}
-	}
-
-	@Configuration
-	static class FreeMarkerWebConfig extends AbstractWebConfig implements FreeMarkerWebMvcConfigurer {
-		@Override
-		public void configureViewResolvers(ViewResolverRegistry registry) {
-			registry.freeMarker();
-		}
-		@Override
-		public void configureFreeMarker(FreeMarkerConfigurer configurer) {
+		@Bean
+		public FreeMarkerConfigurer freeMarkerConfigurer() {
+			FreeMarkerConfigurer configurer = new FreeMarkerConfigurer();
 			configurer.setTemplateLoaderPath("/WEB-INF/");
+			return configurer;
 		}
 	}
 
 	@Configuration
-	static class VelocityWebConfig extends AbstractWebConfig implements VelocityWebMvcConfigurer {
+	static class VelocityWebConfig extends AbstractWebConfig {
+
 		@Override
 		public void configureViewResolvers(ViewResolverRegistry registry) {
 			registry.velocity();
 		}
-		@Override
-		public void configureVelocity(VelocityConfigurer configurer) {
+
+		@Bean
+		public VelocityConfigurer velocityConfigurer() {
+			VelocityConfigurer configurer = new VelocityConfigurer();
 			configurer.setResourceLoaderPath("/WEB-INF/");
+			return configurer;
 		}
 	}
 
 	@Configuration
-	static class TilesWebConfig extends AbstractWebConfig implements TilesWebMvcConfigurer {
+	static class TilesWebConfig extends AbstractWebConfig {
+
 		@Override
 		public void configureViewResolvers(ViewResolverRegistry registry) {
 			registry.tiles();
 		}
-		@Override
-		public void configureTiles(TilesConfigurer configurer) {
+
+		@Bean
+		public TilesConfigurer tilesConfigurer() {
+			TilesConfigurer configurer = new TilesConfigurer();
 			configurer.setDefinitions("/WEB-INF/tiles.xml");
+			return configurer;
 		}
 	}
+
 	@Configuration
 	static class InvalidFreeMarkerWebConfig extends WebMvcConfigurationSupport {
-
-		// No @EnableWebMvc and no FreeMarkerConfigurer bean
 
 		@Override
 		public void configureViewResolvers(ViewResolverRegistry registry) {
@@ -217,8 +187,6 @@ public class ViewResolutionIntegrationTests {
 	@Configuration
 	static class InvalidVelocityWebConfig extends WebMvcConfigurationSupport {
 
-		// No @EnableWebMvc and no VelocityConfigurer bean
-
 		@Override
 		public void configureViewResolvers(ViewResolverRegistry registry) {
 			registry.velocity();
@@ -227,8 +195,6 @@ public class ViewResolutionIntegrationTests {
 
 	@Configuration
 	static class InvalidTilesWebConfig extends WebMvcConfigurationSupport {
-
-		// No @EnableWebMvc and no TilesConfigurer bean
 
 		@Override
 		public void configureViewResolvers(ViewResolverRegistry registry) {

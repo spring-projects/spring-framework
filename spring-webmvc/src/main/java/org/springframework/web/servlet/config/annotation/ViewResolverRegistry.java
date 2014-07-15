@@ -130,28 +130,27 @@ public class ViewResolverRegistry {
 	}
 
 	/**
-	 * Enable view resolution by forwarding to JSP pages with a default view name
-	 * prefix of "/WEB-INF/" and a default suffix of ".jsp".
+	 * Register JSP view resolver using a default view name prefix of "/WEB-INF/"
+	 * and a default suffix of ".jsp".
 	 *
-	 * <p>This method may be invoked multiple and each call will register a
-	 * separate ViewResolver instance. Note that since it's not easy to determine
+	 * <p>When this method is invoked more than once, each call will register a
+	 * new ViewResolver instance. Note that since it's not easy to determine
 	 * if a JSP exists without forwarding to it, using multiple JSP-based view
 	 * resolvers only makes sense in combination with the "viewNames" property
-	 * that indicates which view names are handled by which resolver.
+	 * on the resolver indicating which view names are handled by which resolver.
 	 */
 	public UrlBasedViewResolverRegistration jsp() {
 		return jsp("/WEB-INF/", ".jsp");
 	}
 
 	/**
-	 * Enable view resolution by forwarding to JSP pages with the specified
-	 * prefix and suffix.
+	 * Register JSP view resolver with the specified prefix and suffix.
 	 *
-	 * <p>This method may be invoked multiple and each call will register a
-	 * separate ViewResolver instance. Note that since it's not easy to determine
+	 * <p>When this method is invoked more than once, each call will register a
+	 * new ViewResolver instance. Note that since it's not easy to determine
 	 * if a JSP exists without forwarding to it, using multiple JSP-based view
 	 * resolvers only makes sense in combination with the "viewNames" property
-	 * that indicates which view names are handled by which resolver.
+	 * on the resolver indicating which view names are handled by which resolver.
 	 */
 	public UrlBasedViewResolverRegistration jsp(String prefix, String suffix) {
 		InternalResourceViewResolver resolver = new InternalResourceViewResolver();
@@ -162,18 +161,16 @@ public class ViewResolverRegistry {
 	}
 
 	/**
-	 * Enable Tiles-based view resolution.
+	 * Register Tiles 3.x view resolver.
 	 *
-	 * <p>By default tiles definitions are expected to be in "/WEB-INF/tiles.xml".
-	 * To change that and other Tiles-related options please also implement the
-	 * interface {@link TilesWebMvcConfigurer}.
+	 * <p><strong>Note</strong> that you must also configure Tiles by adding a
+	 * {@link org.springframework.web.servlet.view.tiles3.TilesConfigurer} bean.
 	 */
 	public UrlBasedViewResolverRegistration tiles() {
 		if (this.applicationContext != null && !hasBeanOfType(TilesConfigurer.class)) {
-			throw new BeanInitializationException(
-					"It looks like you're trying to configure Tiles view resolution. " +
-					"If not using @EnableWebMvc you must import WebMvcTilesConfiguration, " +
-					"or declare your own TilesConfigurer bean.");
+			throw new BeanInitializationException("In addition to a Tiles view resolver " +
+					"there must also be a single TilesConfigurer bean in this web application context " +
+					"(or its parent).");
 		}
 		TilesRegistration registration = new TilesRegistration();
 		this.viewResolvers.add(registration.getViewResolver());
@@ -181,19 +178,18 @@ public class ViewResolverRegistry {
 	}
 
 	/**
-	 * Enable FreeMarker-based view resolution with an empty default view name
+	 * Register a FreeMarker view resolver with an empty default view name
 	 * prefix and a default suffix of ".ftl".
 	 *
-	 * <p>By default the FreeMarker template loader path is set to "/WEB-INF/".
-	 * To change that and other FreeMarker-related options please also implement
-	 * the interface {@link FreeMarkerWebMvcConfigurer}.
+	 * <p><strong>Note</strong> that you must also configure FreeMarker by adding a
+	 * {@link org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer} bean.
 	 */
 	public UrlBasedViewResolverRegistration freeMarker() {
 		if (this.applicationContext != null && !hasBeanOfType(FreeMarkerConfigurer.class)) {
-			throw new BeanInitializationException(
-					"It looks like you're trying to configure FreeMarker view resolution. " +
-							"If not using @EnableWebMvc you must import WebMvcFreeMarkerConfiguration, " +
-							"or declare your own FreeMarkerConfigurer bean.");
+			throw new BeanInitializationException("In addition to a FreeMarker view resolver " +
+					"there must also be a single FreeMarkerConfig bean in this web application context " +
+					"(or its parent): FreeMarkerConfigurer is the usual implementation. " +
+					"This bean may be given any name.");
 		}
 		FreeMarkerRegistration registration = new FreeMarkerRegistration();
 		this.viewResolvers.add(registration.getViewResolver());
@@ -201,19 +197,18 @@ public class ViewResolverRegistry {
 	}
 
 	/**
-	 * Enable Velocity-based view resolution with an empty default view name
+	 * Register Velocity view resolver with an empty default view name
 	 * prefix, a default suffix of ".vm".
 	 *
-	 * <p>By default the Velocity resource loader path is set to "/WEB-INF/".
-	 * To change that and other Velocity-related options please also implement
-	 * the interface {@link VelocityWebMvcConfigurer}.
+	 * <p><strong>Note</strong> that you must also configure Velocity by adding a
+	 * {@link org.springframework.web.servlet.view.velocity.VelocityConfigurer} bean.
 	 */
 	public UrlBasedViewResolverRegistration velocity() {
 		if (this.applicationContext != null && !hasBeanOfType(VelocityConfigurer.class)) {
-			throw new BeanInitializationException(
-					"It looks like you're trying to configure Velocity view resolution. " +
-					"If not using @EnableWebMvc you must import WebMvcVelocityConfiguration, " +
-					"or declare your own VelocityConfigurer bean.");
+			throw new BeanInitializationException("In addition to a Velocity view resolver " +
+					"there must also be a single VelocityConfig bean in this web application context " +
+					"(or its parent): VelocityConfigurer is the usual implementation. " +
+					"This bean may be given any name.");
 		}
 		VelocityRegistration registration = new VelocityRegistration();
 		this.viewResolvers.add(registration.getViewResolver());
@@ -221,8 +216,8 @@ public class ViewResolverRegistry {
 	}
 
 	/**
-	 * Enable the ability to map view names returned from controllers to
-	 * {@link org.springframework.web.servlet.View} beans.
+	 * Register a bean name view resolver that interprets view names as the names
+	 * of {@link org.springframework.web.servlet.View} beans.
 	 */
 	public void beanName() {
 		BeanNameViewResolver resolver = new BeanNameViewResolver();
