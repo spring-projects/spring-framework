@@ -129,19 +129,21 @@ public class TypeDescriptor implements Serializable {
 	}
 
 	/**
-	 * Variation of {@link #getType()} that accounts for a primitive type by returning its object wrapper type.
-	 * <p>This is useful for conversion service implementations that wish to normalize to object-based types
-	 * and not work with primitive types directly.
+	 * Variation of {@link #getType()} that accounts for a primitive type by
+	 * returning its object wrapper type.
+	 * <p>This is useful for conversion service implementations that wish to
+	 * normalize to object-based types and not work with primitive types directly.
 	 */
 	public Class<?> getObjectType() {
 		return ClassUtils.resolvePrimitiveIfNecessary(getType());
 	}
 
 	/**
-	 * The type of the backing class, method parameter, field, or property described by this TypeDescriptor.
+	 * The type of the backing class, method parameter, field, or property
+	 * described by this TypeDescriptor.
 	 * <p>Returns primitive types as-is.
-	 * <p>See {@link #getObjectType()} for a variation of this operation that resolves primitive types
-	 * to their corresponding Object types if necessary.
+	 * <p>See {@link #getObjectType()} for a variation of this operation that
+	 * resolves primitive types to their corresponding Object types if necessary.
 	 * @return the type, or {@code null}
 	 * @see #getObjectType()
 	 */
@@ -234,7 +236,7 @@ public class TypeDescriptor implements Serializable {
 	 * @return <tt>true</tt> if the annotation is present
 	 */
 	public boolean hasAnnotation(Class<? extends Annotation> annotationType) {
-		return getAnnotation(annotationType) != null;
+		return (getAnnotation(annotationType) != null);
 	}
 
 	/**
