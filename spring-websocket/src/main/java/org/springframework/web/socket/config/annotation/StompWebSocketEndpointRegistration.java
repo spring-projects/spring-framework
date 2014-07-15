@@ -17,6 +17,7 @@
 package org.springframework.web.socket.config.annotation;
 
 import org.springframework.web.socket.server.HandshakeHandler;
+import org.springframework.web.socket.server.HandshakeInterceptor;
 
 /**
  * A contract for configuring a STOMP over WebSocket endpoint.
@@ -35,5 +36,10 @@ public interface StompWebSocketEndpointRegistration {
 	 * Configure the HandshakeHandler to use.
 	 */
 	StompWebSocketEndpointRegistration setHandshakeHandler(HandshakeHandler handshakeHandler);
+
+	/**
+	 * Configure the HandshakeInterceptor's to use.
+	 */
+	StompWebSocketEndpointRegistration addInterceptors(HandshakeInterceptor... interceptors);
 
 }

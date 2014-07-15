@@ -29,7 +29,9 @@ import org.springframework.scheduling.TaskScheduler;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.HttpRequestHandler;
 import org.springframework.web.socket.messaging.SubProtocolWebSocketHandler;
+import org.springframework.web.socket.server.HandshakeInterceptor;
 import org.springframework.web.socket.server.support.DefaultHandshakeHandler;
+import org.springframework.web.socket.server.support.HttpSessionHandshakeInterceptor;
 import org.springframework.web.socket.server.support.WebSocketHttpRequestHandler;
 import org.springframework.web.socket.sockjs.support.SockJsHttpRequestHandler;
 import org.springframework.web.socket.sockjs.transport.TransportHandler;
@@ -38,6 +40,8 @@ import org.springframework.web.socket.sockjs.transport.handler.DefaultSockJsServ
 import org.springframework.web.socket.sockjs.transport.handler.WebSocketTransportHandler;
 
 import static org.junit.Assert.*;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
 
 /**
@@ -73,12 +77,15 @@ public class WebMvcStompWebSocketEndpointRegistrationTests {
 	}
 
 	@Test
-	public void customHandshakeHandler() {
+	public void handshakeHandlerAndInterceptors() {
 		WebMvcStompWebSocketEndpointRegistration registration =
 				new WebMvcStompWebSocketEndpointRegistration(new String[] {"/foo"}, this.handler, this.scheduler);
 
 		DefaultHandshakeHandler handshakeHandler = new DefaultHandshakeHandler();
+		HttpSessionHandshakeInterceptor interceptor = new HttpSessionHandshakeInterceptor();
+
 		registration.setHandshakeHandler(handshakeHandler);
+		registration.addInterceptors(interceptor);
 
 		MultiValueMap<HttpRequestHandler, String> mappings = registration.getMappings();
 		assertEquals(1, mappings.size());
@@ -89,15 +96,19 @@ public class WebMvcStompWebSocketEndpointRegistrationTests {
 		WebSocketHttpRequestHandler requestHandler = (WebSocketHttpRequestHandler) entry.getKey();
 		assertNotNull(requestHandler.getWebSocketHandler());
 		assertSame(handshakeHandler, requestHandler.getHandshakeHandler());
+		assertEquals(Arrays.asList(interceptor), requestHandler.getHandshakeInterceptors());
 	}
 
 	@Test
-	public void customHandshakeHandlerPassedToSockJsService() {
+	public void handshakeHandlerAndInterceptorsWithSockJsService() {
 		WebMvcStompWebSocketEndpointRegistration registration =
 				new WebMvcStompWebSocketEndpointRegistration(new String[] {"/foo"}, this.handler, this.scheduler);
 
 		DefaultHandshakeHandler handshakeHandler = new DefaultHandshakeHandler();
+		HttpSessionHandshakeInterceptor interceptor = new HttpSessionHandshakeInterceptor();
+
 		registration.setHandshakeHandler(handshakeHandler);
+		registration.addInterceptors(interceptor);
 		registration.withSockJS();
 
 		MultiValueMap<HttpRequestHandler, String> mappings = registration.getMappings();
@@ -115,6 +126,7 @@ public class WebMvcStompWebSocketEndpointRegistrationTests {
 		Map<TransportType, TransportHandler> handlers = sockJsService.getTransportHandlers();
 		WebSocketTransportHandler transportHandler = (WebSocketTransportHandler) handlers.get(TransportType.WEBSOCKET);
 		assertSame(handshakeHandler, transportHandler.getHandshakeHandler());
+		assertEquals(Arrays.asList(interceptor), sockJsService.getHandshakeInterceptors());
 	}
 
 }
