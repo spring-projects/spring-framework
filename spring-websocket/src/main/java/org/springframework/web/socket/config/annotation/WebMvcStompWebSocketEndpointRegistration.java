@@ -23,10 +23,13 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.HttpRequestHandler;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.server.HandshakeHandler;
+import org.springframework.web.socket.server.HandshakeInterceptor;
 import org.springframework.web.socket.server.support.WebSocketHttpRequestHandler;
 import org.springframework.web.socket.sockjs.support.SockJsHttpRequestHandler;
 import org.springframework.web.socket.sockjs.SockJsService;
 import org.springframework.web.socket.sockjs.transport.handler.WebSocketTransportHandler;
+
+import java.util.Arrays;
 
 /**
  * An abstract base class class for configuring STOMP over WebSocket/SockJS endpoints.
@@ -44,6 +47,8 @@ public class WebMvcStompWebSocketEndpointRegistration implements StompWebSocketE
 
 	private HandshakeHandler handshakeHandler;
 
+	private HandshakeInterceptor[] interceptors;
+
 	private StompSockJsServiceRegistration registration;
 
 
@@ -58,9 +63,6 @@ public class WebMvcStompWebSocketEndpointRegistration implements StompWebSocketE
 		this.sockJsTaskScheduler = sockJsTaskScheduler;
 	}
 
-	/**
-	 * Provide a custom or pre-configured {@link HandshakeHandler}.
-	 */
 	@Override
 	public StompWebSocketEndpointRegistration setHandshakeHandler(HandshakeHandler handshakeHandler) {
 		Assert.notNull(handshakeHandler, "'handshakeHandler' must not be null");
@@ -68,12 +70,22 @@ public class WebMvcStompWebSocketEndpointRegistration implements StompWebSocketE
 		return this;
 	}
 
-	/**
-	 * Enable SockJS fallback options.
-	 */
+	@Override
+	public StompWebSocketEndpointRegistration addInterceptors(HandshakeInterceptor... interceptors) {
+		this.interceptors = interceptors;
+		return this;
+	}
+
+	protected HandshakeInterceptor[] getInterceptors() {
+		return this.interceptors;
+	}
+
 	@Override
 	public SockJsServiceRegistration withSockJS() {
 		this.registration = new StompSockJsServiceRegistration(this.sockJsTaskScheduler);
+		if (this.interceptors != null) {
+			this.registration.setInterceptors(this.interceptors);
+		}
 		if (this.handshakeHandler != null) {
 			WebSocketTransportHandler transportHandler = new WebSocketTransportHandler(this.handshakeHandler);
 			this.registration.setTransportHandlerOverrides(transportHandler);
@@ -93,9 +105,16 @@ public class WebMvcStompWebSocketEndpointRegistration implements StompWebSocketE
 		}
 		else {
 			for (String path : this.paths) {
-				WebSocketHttpRequestHandler handler = (this.handshakeHandler != null) ?
-						new WebSocketHttpRequestHandler(this.webSocketHandler, this.handshakeHandler) :
-						new WebSocketHttpRequestHandler(this.webSocketHandler);
+				WebSocketHttpRequestHandler handler;
+				if (this.handshakeHandler != null) {
+					handler = new WebSocketHttpRequestHandler(this.webSocketHandler, this.handshakeHandler);
+				}
+				else {
+					handler = new WebSocketHttpRequestHandler(this.webSocketHandler);
+				}
+				if (this.interceptors != null) {
+					handler.setHandshakeInterceptors(Arrays.asList(this.interceptors));
+				}
 				mappings.add(handler, path);
 			}
 		}

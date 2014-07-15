@@ -35,14 +35,14 @@ public interface WebSocketHandlerRegistration {
 	WebSocketHandlerRegistration addHandler(WebSocketHandler handler, String... paths);
 
 	/**
-	 * Configure interceptors for the handshake request.
-	 */
-	WebSocketHandlerRegistration addInterceptors(HandshakeInterceptor... interceptors);
-
-	/**
 	 * Configure the HandshakeHandler to use.
 	 */
 	WebSocketHandlerRegistration setHandshakeHandler(HandshakeHandler handshakeHandler);
+
+	/**
+	 * Configure interceptors for the handshake request.
+	 */
+	WebSocketHandlerRegistration addInterceptors(HandshakeInterceptor... interceptors);
 
 	/**
 	 * Enable SockJS fallback options.

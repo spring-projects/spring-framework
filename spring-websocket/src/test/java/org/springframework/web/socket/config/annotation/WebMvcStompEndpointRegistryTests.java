@@ -35,13 +35,14 @@ import org.springframework.web.util.UrlPathHelper;
 import static org.junit.Assert.*;
 
 /**
- * Test fixture for {@link org.springframework.web.socket.config.annotation.WebMvcStompEndpointRegistry}.
+ * Test fixture for
+ * {@link org.springframework.web.socket.config.annotation.WebMvcStompEndpointRegistry}.
  *
  * @author Rossen Stoyanchev
  */
 public class WebMvcStompEndpointRegistryTests {
 
-	private WebMvcStompEndpointRegistry registry;
+	private WebMvcStompEndpointRegistry endpointRegistry;
 
 	private SubProtocolWebSocketHandler webSocketHandler;
 
@@ -50,22 +51,18 @@ public class WebMvcStompEndpointRegistryTests {
 
 	@Before
 	public void setup() {
-
 		SubscribableChannel inChannel = Mockito.mock(SubscribableChannel.class);
 		SubscribableChannel outChannel = Mockito.mock(SubscribableChannel.class);
-
 		this.webSocketHandler = new SubProtocolWebSocketHandler(inChannel, outChannel);
 		this.userSessionRegistry = new DefaultUserSessionRegistry();
-
-		this.registry = new WebMvcStompEndpointRegistry(this.webSocketHandler,
+		this.endpointRegistry = new WebMvcStompEndpointRegistry(this.webSocketHandler,
 				new WebSocketTransportRegistration(), this.userSessionRegistry, Mockito.mock(TaskScheduler.class));
 	}
 
 
 	@Test
 	public void stompProtocolHandler() {
-
-		this.registry.addEndpoint("/stomp");
+		this.endpointRegistry.addEndpoint("/stomp");
 
 		Map<String, SubProtocolHandler> protocolHandlers = webSocketHandler.getProtocolHandlerMap();
 		assertEquals(3, protocolHandlers.size());
@@ -79,16 +76,15 @@ public class WebMvcStompEndpointRegistryTests {
 
 	@Test
 	public void handlerMapping() {
-
-		SimpleUrlHandlerMapping hm = (SimpleUrlHandlerMapping) this.registry.getHandlerMapping();
+		SimpleUrlHandlerMapping hm = (SimpleUrlHandlerMapping) this.endpointRegistry.getHandlerMapping();
 		assertEquals(0, hm.getUrlMap().size());
 
 		UrlPathHelper pathHelper = new UrlPathHelper();
-		this.registry.setUrlPathHelper(pathHelper);
-		this.registry.addEndpoint("/stompOverWebSocket");
-		this.registry.addEndpoint("/stompOverSockJS").withSockJS();
+		this.endpointRegistry.setUrlPathHelper(pathHelper);
+		this.endpointRegistry.addEndpoint("/stompOverWebSocket");
+		this.endpointRegistry.addEndpoint("/stompOverSockJS").withSockJS();
 
-		hm = (SimpleUrlHandlerMapping) this.registry.getHandlerMapping();
+		hm = (SimpleUrlHandlerMapping) this.endpointRegistry.getHandlerMapping();
 		assertEquals(2, hm.getUrlMap().size());
 		assertNotNull(hm.getUrlMap().get("/stompOverWebSocket"));
 		assertNotNull(hm.getUrlMap().get("/stompOverSockJS/**"));
