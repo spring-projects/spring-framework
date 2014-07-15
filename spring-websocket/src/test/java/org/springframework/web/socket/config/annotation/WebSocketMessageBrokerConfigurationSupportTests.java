@@ -22,6 +22,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 
+import org.hamcrest.Description;
+import org.hamcrest.Matcher;
+import org.hamcrest.Matchers;
+import org.hamcrest.TypeSafeMatcher;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -138,14 +142,16 @@ public class WebSocketMessageBrokerConfigurationSupportTests {
 	public void webSocketMessageBrokerStats() {
 		String name = "webSocketMessageBrokerStats";
 		WebSocketMessageBrokerStats stats = this.config.getBean(name, WebSocketMessageBrokerStats.class);
-		assertEquals("WebSocketSession[0 current WS(0)-HttpStream(0)-HttpPoll(0), " +
-						"0 total, 0 closed abnormally (0 connect failure, 0 send limit, 0 transport error)], " +
-						"stompSubProtocol[processed CONNECT(0)-CONNECTED(0)-DISCONNECT(0)], " +
-						"stompBrokerRelay[null], " +
-						"inboundChannel[pool size = 0, active threads = 0, queued tasks = 0, completed tasks = 0], " +
-						"outboundChannelpool size = 0, active threads = 0, queued tasks = 0, completed tasks = 0], " +
-						"sockJsScheduler[pool size = 1, active threads = 0, queued tasks = 1, completed tasks = 0]",
-				stats.toString());
+		String actual = stats.toString();
+		String expected = "WebSocketSession\\[0 current WS\\(0\\)-HttpStream\\(0\\)-HttpPoll\\(0\\), " +
+				"0 total, 0 closed abnormally \\(0 connect failure, 0 send limit, 0 transport error\\)\\], " +
+				"stompSubProtocol\\[processed CONNECT\\(0\\)-CONNECTED\\(0\\)-DISCONNECT\\(0\\)\\], " +
+				"stompBrokerRelay\\[null\\], " +
+				"inboundChannel\\[pool size = \\d, active threads = \\d, queued tasks = \\d, completed tasks = \\d\\], " +
+				"outboundChannelpool size = \\d, active threads = \\d, queued tasks = \\d, completed tasks = \\d\\], " +
+				"sockJsScheduler\\[pool size = \\d, active threads = \\d, queued tasks = \\d, completed tasks = \\d\\]";
+
+		assertTrue("\nExpected: " + expected.replace("\\", "") + "\n  Actual: " + actual, actual.matches(expected));
 	}
 
 
