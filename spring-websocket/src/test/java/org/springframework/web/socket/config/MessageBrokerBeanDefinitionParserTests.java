@@ -16,6 +16,8 @@
 
 package org.springframework.web.socket.config;
 
+import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.Assert.*;
 
 import java.util.ArrayList;
@@ -60,6 +62,7 @@ import org.springframework.web.socket.handler.WebSocketHandlerDecorator;
 import org.springframework.web.socket.messaging.StompSubProtocolHandler;
 import org.springframework.web.socket.messaging.SubProtocolWebSocketHandler;
 import org.springframework.web.socket.server.HandshakeHandler;
+import org.springframework.web.socket.server.HandshakeInterceptor;
 import org.springframework.web.socket.server.support.WebSocketHttpRequestHandler;
 import org.springframework.web.socket.sockjs.support.SockJsHttpRequestHandler;
 import org.springframework.web.socket.sockjs.transport.TransportType;
@@ -87,9 +90,7 @@ public class MessageBrokerBeanDefinitionParserTests {
 		loadBeanDefinitions("websocket-config-broker-simple.xml");
 
 		HandlerMapping hm = this.appContext.getBean(HandlerMapping.class);
-		assertNotNull(hm);
 		assertThat(hm, Matchers.instanceOf(SimpleUrlHandlerMapping.class));
-
 		SimpleUrlHandlerMapping suhm = (SimpleUrlHandlerMapping) hm;
 		assertThat(suhm.getUrlMap().keySet(), Matchers.hasSize(4));
 		assertThat(suhm.getUrlMap().values(), Matchers.hasSize(4));
@@ -99,9 +100,7 @@ public class MessageBrokerBeanDefinitionParserTests {
 		assertThat(httpRequestHandler, Matchers.instanceOf(WebSocketHttpRequestHandler.class));
 
 		WebSocketHttpRequestHandler wsHttpRequestHandler = (WebSocketHttpRequestHandler) httpRequestHandler;
-
-		HandshakeHandler handshakeHandler = (HandshakeHandler)
-				new DirectFieldAccessor(wsHttpRequestHandler).getPropertyValue("handshakeHandler");
+		HandshakeHandler handshakeHandler = wsHttpRequestHandler.getHandshakeHandler();
 		assertNotNull(handshakeHandler);
 		assertTrue(handshakeHandler instanceof TestHandshakeHandler);
 
@@ -114,8 +113,7 @@ public class MessageBrokerBeanDefinitionParserTests {
 		assertEquals(25 * 1000, subProtocolWsHandler.getSendTimeLimit());
 		assertEquals(1024 * 1024, subProtocolWsHandler.getSendBufferSizeLimit());
 
-		StompSubProtocolHandler stompHandler =
-				(StompSubProtocolHandler) subProtocolWsHandler.getProtocolHandlerMap().get("v12.stomp");
+		StompSubProtocolHandler stompHandler = (StompSubProtocolHandler) subProtocolWsHandler.getProtocolHandlerMap().get("v12.stomp");
 		assertNotNull(stompHandler);
 		assertEquals(128 * 1024, stompHandler.getMessageSizeLimit());
 
@@ -170,8 +168,7 @@ public class MessageBrokerBeanDefinitionParserTests {
 		testChannel("clientOutboundChannel", subscriberTypes, 0);
 		testExecutor("clientOutboundChannel", Runtime.getRuntime().availableProcessors() * 2, Integer.MAX_VALUE, 60);
 
-		subscriberTypes = Arrays.<Class<? extends MessageHandler>>asList(
-				SimpleBrokerMessageHandler.class, UserDestinationMessageHandler.class);
+		subscriberTypes = Arrays.<Class<? extends MessageHandler>>asList(SimpleBrokerMessageHandler.class, UserDestinationMessageHandler.class);
 		testChannel("brokerChannel", subscriberTypes, 0);
 		try {
 			this.appContext.getBean("brokerChannelExecutor", ThreadPoolTaskExecutor.class);

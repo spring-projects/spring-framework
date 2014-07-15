@@ -31,8 +31,6 @@ import org.springframework.web.socket.sockjs.transport.TransportHandlingSockJsSe
 import org.springframework.web.socket.sockjs.transport.handler.DefaultSockJsService;
 import org.springframework.web.socket.sockjs.transport.handler.WebSocketTransportHandler;
 
-import java.util.concurrent.ScheduledThreadPoolExecutor;
-
 /**
  * Provides utility methods for parsing common WebSocket XML namespace elements.
  *
@@ -43,7 +41,7 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 class WebSocketNamespaceUtils {
 
 
-	public static RuntimeBeanReference registerHandshakeHandler(Element element, ParserContext parserContext, Object source) {
+	public static RuntimeBeanReference registerHandshakeHandler(Element element, ParserContext context, Object source) {
 		RuntimeBeanReference handlerRef;
 		Element handlerElem = DomUtils.getChildElementByTagName(element, "handshake-handler");
 		if (handlerElem != null) {
@@ -53,19 +51,19 @@ class WebSocketNamespaceUtils {
 			RootBeanDefinition defaultHandlerDef = new RootBeanDefinition(DefaultHandshakeHandler.class);
 			defaultHandlerDef.setSource(source);
 			defaultHandlerDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
-			String handlerName = parserContext.getReaderContext().registerWithGeneratedName(defaultHandlerDef);
+			String handlerName = context.getReaderContext().registerWithGeneratedName(defaultHandlerDef);
 			handlerRef = new RuntimeBeanReference(handlerName);
 		}
 		return handlerRef;
 	}
 
 	public static RuntimeBeanReference registerSockJsService(Element element, String sockJsSchedulerName,
-			ParserContext parserContext, Object source) {
+			ParserContext context, Object source) {
 
 		Element sockJsElement = DomUtils.getChildElementByTagName(element, "sockjs");
 
 		if (sockJsElement != null) {
-			Element handshakeHandlerElement = DomUtils.getChildElementByTagName(element, "handshake-handler");
+			Element handshakeHandler = DomUtils.getChildElementByTagName(element, "handshake-handler");
 
 			RootBeanDefinition sockJsServiceDef = new RootBeanDefinition(DefaultSockJsService.class);
 			sockJsServiceDef.setSource(source);
@@ -76,28 +74,29 @@ class WebSocketNamespaceUtils {
 				scheduler = new RuntimeBeanReference(customTaskSchedulerName);
 			}
 			else {
-				scheduler = registerSockJsTaskScheduler(sockJsSchedulerName, parserContext, source);
+				scheduler = registerSockJsScheduler(sockJsSchedulerName, context, source);
 			}
 			sockJsServiceDef.getConstructorArgumentValues().addIndexedArgumentValue(0, scheduler);
 
 			Element transportHandlersElement = DomUtils.getChildElementByTagName(sockJsElement, "transport-handlers");
 			if (transportHandlersElement != null) {
-				String registerDefaultsAttribute = transportHandlersElement.getAttribute("register-defaults");
-				if (registerDefaultsAttribute.equals("false")) {
+				String registerDefaults = transportHandlersElement.getAttribute("register-defaults");
+				if (registerDefaults.equals("false")) {
 					sockJsServiceDef.setBeanClass(TransportHandlingSockJsService.class);
 				}
-				ManagedList<?> transportHandlersList = parseBeanSubElements(transportHandlersElement, parserContext);
-				sockJsServiceDef.getConstructorArgumentValues().addIndexedArgumentValue(1, transportHandlersList);
-			} else if(handshakeHandlerElement != null){
-				RuntimeBeanReference handshakeHandlerRef = new RuntimeBeanReference(handshakeHandlerElement.getAttribute("ref"));
+				ManagedList<?> transportHandlers = parseBeanSubElements(transportHandlersElement, context);
+				sockJsServiceDef.getConstructorArgumentValues().addIndexedArgumentValue(1, transportHandlers);
+			}
+			else if (handshakeHandler != null) {
+				RuntimeBeanReference handshakeHandlerRef = new RuntimeBeanReference(handshakeHandler.getAttribute("ref"));
 
-				RootBeanDefinition wsTransportHandler = new RootBeanDefinition(WebSocketTransportHandler.class);
-				wsTransportHandler.setSource(source);
-				wsTransportHandler.getConstructorArgumentValues().addIndexedArgumentValue(0, handshakeHandlerRef);
-				sockJsServiceDef.getConstructorArgumentValues().addIndexedArgumentValue(1, wsTransportHandler);
+				RootBeanDefinition transportHandler = new RootBeanDefinition(WebSocketTransportHandler.class);
+				transportHandler.setSource(source);
+				transportHandler.getConstructorArgumentValues().addIndexedArgumentValue(0, handshakeHandlerRef);
+				sockJsServiceDef.getConstructorArgumentValues().addIndexedArgumentValue(1, transportHandler);
 			}
 
-			String attrValue = sockJsElement.getAttribute("name");
+				String attrValue = sockJsElement.getAttribute("name");
 			if (!attrValue.isEmpty()) {
 				sockJsServiceDef.getPropertyValues().add("name", attrValue);
 			}
@@ -125,43 +124,35 @@ class WebSocketNamespaceUtils {
 			if (!attrValue.isEmpty()) {
 				sockJsServiceDef.getPropertyValues().add("heartbeatTime", Long.valueOf(attrValue));
 			}
-
 			sockJsServiceDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
-			String sockJsServiceName = parserContext.getReaderContext().registerWithGeneratedName(sockJsServiceDef);
+			String sockJsServiceName = context.getReaderContext().registerWithGeneratedName(sockJsServiceDef);
 			return new RuntimeBeanReference(sockJsServiceName);
 		}
-
 		return null;
 	}
 
-	private static RuntimeBeanReference registerSockJsTaskScheduler(String schedulerName,
-			ParserContext parserContext, Object source) {
-
-		if (!parserContext.getRegistry().containsBeanDefinition(schedulerName)) {
+	private static RuntimeBeanReference registerSockJsScheduler(String schedulerName, ParserContext context, Object source) {
+		if (!context.getRegistry().containsBeanDefinition(schedulerName)) {
 			RootBeanDefinition taskSchedulerDef = new RootBeanDefinition(ThreadPoolTaskScheduler.class);
 			taskSchedulerDef.setSource(source);
 			taskSchedulerDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
 			taskSchedulerDef.getPropertyValues().add("poolSize", Runtime.getRuntime().availableProcessors());
 			taskSchedulerDef.getPropertyValues().add("threadNamePrefix", schedulerName + "-");
 			taskSchedulerDef.getPropertyValues().add("removeOnCancelPolicy", true);
-			parserContext.getRegistry().registerBeanDefinition(schedulerName, taskSchedulerDef);
-			parserContext.registerComponent(new BeanComponentDefinition(taskSchedulerDef, schedulerName));
+			context.getRegistry().registerBeanDefinition(schedulerName, taskSchedulerDef);
+			context.registerComponent(new BeanComponentDefinition(taskSchedulerDef, schedulerName));
 		}
-
 		return new RuntimeBeanReference(schedulerName);
 	}
 
-	public static ManagedList<? super Object> parseBeanSubElements(Element parentElement, ParserContext parserContext) {
-
+	public static ManagedList<? super Object> parseBeanSubElements(Element parentElement, ParserContext context) {
 		ManagedList<? super Object> beans = new ManagedList<Object>();
 		if (parentElement != null) {
-			beans.setSource(parserContext.extractSource(parentElement));
-			for (Element beanElement : DomUtils.getChildElementsByTagName(parentElement, new String[] { "bean", "ref" })) {
-				Object object = parserContext.getDelegate().parsePropertySubElement(beanElement, null);
-				beans.add(object);
+			beans.setSource(context.extractSource(parentElement));
+			for (Element beanElement : DomUtils.getChildElementsByTagName(parentElement, new String[] {"bean", "ref"})) {
+				beans.add(context.getDelegate().parsePropertySubElement(beanElement, null));
 			}
 		}
-
 		return beans;
 	}
 
