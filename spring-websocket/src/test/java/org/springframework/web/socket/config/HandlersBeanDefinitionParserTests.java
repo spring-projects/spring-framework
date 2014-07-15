@@ -48,7 +48,9 @@ import org.springframework.web.socket.server.support.DefaultHandshakeHandler;
 import org.springframework.web.socket.server.support.WebSocketHttpRequestHandler;
 import org.springframework.web.socket.sockjs.SockJsService;
 import org.springframework.web.socket.sockjs.support.SockJsHttpRequestHandler;
+import org.springframework.web.socket.sockjs.transport.TransportHandler;
 import org.springframework.web.socket.sockjs.transport.TransportHandlingSockJsService;
+import org.springframework.web.socket.sockjs.transport.TransportType;
 import org.springframework.web.socket.sockjs.transport.handler.DefaultSockJsService;
 import org.springframework.web.socket.sockjs.transport.handler.EventSourceTransportHandler;
 import org.springframework.web.socket.sockjs.transport.handler.HtmlFileTransportHandler;
@@ -79,8 +81,8 @@ public class HandlersBeanDefinitionParserTests {
 		this.appContext = new GenericWebApplicationContext();
 	}
 
-	@Test
 
+	@Test
 	public void webSocketHandlers() {
 		loadBeanDefinitions("websocket-config-handlers.xml");
 
@@ -132,7 +134,6 @@ public class HandlersBeanDefinitionParserTests {
 		assertNotNull(handshakeHandler);
 		assertTrue(handshakeHandler instanceof TestHandshakeHandler);
 		List<HandshakeInterceptor> interceptors = handler.getHandshakeInterceptors();
-		assertNotNull(interceptors);
 		assertThat(interceptors, contains(instanceOf(FooTestInterceptor.class), instanceOf(BarTestInterceptor.class)));
 
 		handler = (WebSocketHttpRequestHandler) urlHandlerMapping.getUrlMap().get("/test");
@@ -142,7 +143,6 @@ public class HandlersBeanDefinitionParserTests {
 		assertNotNull(handshakeHandler);
 		assertTrue(handshakeHandler instanceof TestHandshakeHandler);
 		interceptors = handler.getHandshakeInterceptors();
-		assertNotNull(interceptors);
 		assertThat(interceptors, contains(instanceOf(FooTestInterceptor.class), instanceOf(BarTestInterceptor.class)));
 
 	}
@@ -171,7 +171,9 @@ public class HandlersBeanDefinitionParserTests {
 		assertThat(sockJsService, instanceOf(DefaultSockJsService.class));
 		DefaultSockJsService defaultSockJsService = (DefaultSockJsService) sockJsService;
 		assertThat(defaultSockJsService.getTaskScheduler(), instanceOf(ThreadPoolTaskScheduler.class));
-		assertThat(defaultSockJsService.getTransportHandlers().values(),
+
+		Map<TransportType, TransportHandler> transportHandlers = defaultSockJsService.getTransportHandlers();
+		assertThat(transportHandlers.values(),
 				containsInAnyOrder(
 						instanceOf(XhrPollingTransportHandler.class),
 						instanceOf(XhrReceivingTransportHandler.class),
@@ -181,6 +183,12 @@ public class HandlersBeanDefinitionParserTests {
 						instanceOf(EventSourceTransportHandler.class),
 						instanceOf(HtmlFileTransportHandler.class),
 						instanceOf(WebSocketTransportHandler.class)));
+
+		WebSocketTransportHandler handler = (WebSocketTransportHandler) transportHandlers.get(TransportType.WEBSOCKET);
+		assertEquals(TestHandshakeHandler.class, handler.getHandshakeHandler().getClass());
+
+		List<HandshakeInterceptor> interceptors = defaultSockJsService.getHandshakeInterceptors();
+		assertThat(interceptors, contains(instanceOf(FooTestInterceptor.class), instanceOf(BarTestInterceptor.class)));
 	}
 
 	@Test

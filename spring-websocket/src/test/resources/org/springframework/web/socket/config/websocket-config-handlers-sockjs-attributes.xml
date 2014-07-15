@@ -17,13 +17,8 @@
 		</websocket:sockjs>
 	</websocket:handlers>
 
-	<bean id="testHandler"
-		  class="org.springframework.web.socket.config.TestWebSocketHandler"/>
-
-	<bean id="xhrStreamingTransportHandler"
-		  class="org.springframework.web.socket.sockjs.transport.handler.XhrStreamingTransportHandler"/>
-
-	<bean id="testTaskScheduler"
-		  class="org.springframework.web.socket.config.TestTaskScheduler"/>
+	<bean id="testHandler" class="org.springframework.web.socket.config.TestWebSocketHandler"/>
+	<bean id="testTaskScheduler" class="org.springframework.web.socket.config.TestTaskScheduler"/>
+	<bean id="xhrStreamingTransportHandler" class="org.springframework.web.socket.sockjs.transport.handler.XhrStreamingTransportHandler"/>
 
 </beans>

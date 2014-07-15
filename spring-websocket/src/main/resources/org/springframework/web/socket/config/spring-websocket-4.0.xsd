@@ -589,6 +589,7 @@
 					<xsd:complexType>
 						<xsd:sequence>
 							<xsd:element name="handshake-handler" type="handshake-handler" minOccurs="0" maxOccurs="1"/>
+							<xsd:element name="handshake-interceptors" type="handshake-interceptors" minOccurs="0" maxOccurs="1"/>
 							<xsd:element name="sockjs" type="sockjs-service" minOccurs="0" maxOccurs="1"/>
 						</xsd:sequence>
 						<xsd:attribute name="path" type="xsd:string">

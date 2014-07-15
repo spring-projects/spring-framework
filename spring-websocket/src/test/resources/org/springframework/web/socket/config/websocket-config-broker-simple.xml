@@ -13,10 +13,18 @@
 
 		<websocket:stomp-endpoint path=" /foo,/bar">
 			<websocket:handshake-handler ref="myHandler"/>
+			<websocket:handshake-interceptors>
+				<bean class="org.springframework.web.socket.config.FooTestInterceptor"/>
+				<ref bean="barTestInterceptor"/>
+			</websocket:handshake-interceptors>
 		</websocket:stomp-endpoint>
 
 		<websocket:stomp-endpoint path="/test,/sockjs">
 			<websocket:handshake-handler ref="myHandler"/>
+			<websocket:handshake-interceptors>
+				<bean class="org.springframework.web.socket.config.FooTestInterceptor"/>
+				<ref bean="barTestInterceptor"/>
+			</websocket:handshake-interceptors>
 			<websocket:sockjs/>
 		</websocket:stomp-endpoint>
 
@@ -29,5 +37,6 @@
 	</bean>
 
 	<bean id="myHandler" class="org.springframework.web.socket.config.TestHandshakeHandler"/>
+	<bean id="barTestInterceptor" class="org.springframework.web.socket.config.BarTestInterceptor"/>
 
 </beans>

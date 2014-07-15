@@ -75,15 +75,18 @@ import org.springframework.web.socket.sockjs.transport.handler.WebSocketTranspor
  *
  * @author Brian Clozel
  * @author Artem Bilan
+ * @author Rossen Stoyanchev
  */
 public class MessageBrokerBeanDefinitionParserTests {
 
 	private GenericWebApplicationContext appContext;
 
+
 	@Before
 	public void setup() {
 		this.appContext = new GenericWebApplicationContext();
 	}
+
 
 	@Test
 	public void simpleBroker() {
@@ -103,6 +106,8 @@ public class MessageBrokerBeanDefinitionParserTests {
 		HandshakeHandler handshakeHandler = wsHttpRequestHandler.getHandshakeHandler();
 		assertNotNull(handshakeHandler);
 		assertTrue(handshakeHandler instanceof TestHandshakeHandler);
+		List<HandshakeInterceptor> interceptors = wsHttpRequestHandler.getHandshakeInterceptors();
+		assertThat(interceptors, contains(instanceOf(FooTestInterceptor.class), instanceOf(BarTestInterceptor.class)));
 
 		WebSocketHandler wsHandler = unwrapWebSocketHandler(wsHttpRequestHandler.getWebSocketHandler());
 		assertNotNull(wsHandler);
@@ -139,6 +144,9 @@ public class MessageBrokerBeanDefinitionParserTests {
 		ThreadPoolTaskScheduler scheduler = (ThreadPoolTaskScheduler) defaultSockJsService.getTaskScheduler();
 		assertEquals(Runtime.getRuntime().availableProcessors(), scheduler.getScheduledThreadPoolExecutor().getCorePoolSize());
 		assertTrue(scheduler.getScheduledThreadPoolExecutor().getRemoveOnCancelPolicy());
+
+		interceptors = defaultSockJsService.getHandshakeInterceptors();
+		assertThat(interceptors, contains(instanceOf(FooTestInterceptor.class), instanceOf(BarTestInterceptor.class)));
 
 		UserSessionRegistry userSessionRegistry = this.appContext.getBean(UserSessionRegistry.class);
 		assertNotNull(userSessionRegistry);

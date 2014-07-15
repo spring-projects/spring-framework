@@ -263,12 +263,15 @@ class MessageBrokerBeanDefinitionParser implements BeanDefinitionParser {
 		}
 		else {
 			RuntimeBeanReference handshakeHandler = WebSocketNamespaceUtils.registerHandshakeHandler(element, context, source);
+			Element interceptorsElement = DomUtils.getChildElementByTagName(element, "handshake-interceptors");
+			ManagedList<?> interceptors = WebSocketNamespaceUtils.parseBeanSubElements(interceptorsElement, context);
 			ConstructorArgumentValues cavs = new ConstructorArgumentValues();
 			cavs.addIndexedArgumentValue(0, subProtoHandler);
 			if (handshakeHandler != null) {
 				cavs.addIndexedArgumentValue(1, handshakeHandler);
 			}
 			beanDef = new RootBeanDefinition(WebSocketHttpRequestHandler.class, cavs, null);
+			beanDef.getPropertyValues().add("handshakeInterceptors", interceptors);
 		}
 		return new RuntimeBeanReference(registerBeanDef(beanDef, context, source));
 	}

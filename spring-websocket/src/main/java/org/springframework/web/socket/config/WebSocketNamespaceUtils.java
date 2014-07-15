@@ -96,7 +96,11 @@ class WebSocketNamespaceUtils {
 				sockJsServiceDef.getConstructorArgumentValues().addIndexedArgumentValue(1, transportHandler);
 			}
 
-				String attrValue = sockJsElement.getAttribute("name");
+			Element interceptorsElement = DomUtils.getChildElementByTagName(element, "handshake-interceptors");
+			ManagedList<?> interceptors = WebSocketNamespaceUtils.parseBeanSubElements(interceptorsElement, context);
+			sockJsServiceDef.getPropertyValues().add("handshakeInterceptors", interceptors);
+
+			String attrValue = sockJsElement.getAttribute("name");
 			if (!attrValue.isEmpty()) {
 				sockJsServiceDef.getPropertyValues().add("name", attrValue);
 			}

@@ -8,10 +8,17 @@
 	<websocket:handlers>
 		<websocket:mapping path="/test" handler="testHandler"/>
 		<websocket:mapping path="/foo/" handler="fooHandler"/>
+		<websocket:handshake-handler ref="testHandshakeHandler"/>
+		<websocket:handshake-interceptors>
+			<bean class="org.springframework.web.socket.config.FooTestInterceptor"/>
+			<ref bean="barTestInterceptor"/>
+		</websocket:handshake-interceptors>
 		<websocket:sockjs/>
 	</websocket:handlers>
 
 	<bean id="testHandler" class="org.springframework.web.socket.config.TestWebSocketHandler"/>
 	<bean id="fooHandler" class="org.springframework.web.socket.config.FooWebSocketHandler"/>
+	<bean id="testHandshakeHandler" class="org.springframework.web.socket.config.TestHandshakeHandler"/>
+	<bean id="barTestInterceptor" class="org.springframework.web.socket.config.BarTestInterceptor"/>
 
 </beans>
