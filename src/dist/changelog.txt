@@ -3,6 +3,29 @@ SPRING FRAMEWORK CHANGELOG
 http://www.spring.io
 
 
+Changes in version 3.2.10 (2014-07-15)
+-------------------------------------
+
+restored backward compatibility in RestTemplate's messageConverters (SPR-11962)
+consistent declaration of private static final logger variables	(SPR-11905)
+fixed documentation links (SPR-11935)
+allow HttpHeaders to return getAllow() if it was previously set to an empty collection (SPR-11917)
+improved performance of ReflectionUtils.isCglibRenamedMethod	(SPR-11894)
+provide compatibility with Java 8 (SPR-11979, SPR-11889)
+fixed MBeanExportConfiguration.SpecificPlatform issue (SPR-11877)
+allow manually registered transaction manager to be recognized by qualifiedBeanOfType (SPR-11915)
+fixed misleading exception message for using JPA with custom IsolationLevels (SPR-8325)
+prevented Objects created by FactoryBeans from being processed multiple times by BeanPostProcessors if beans are created lazily (SPR-11937)
+fixed performance regression for custom autowireBean calls with many properties	(SPR-11875)
+fixed ReflectionUtils slow down application startup on WebSphere (SPR-11882)
+revisit class cache in CachedIntrospectionResults (SPR-11867)
+fixed JBoss EAP 5.1.1 VFS compatibility (SPR-11887)
+fixed various Portlet issues (SPR-11295, SPR-11816)
+removed shared state from URIComponentsBuilder across calls of .build() (SPR-11885)
+improved unclear error message on BeanPostProcessor returning null (SPR-11951)
+fixed isGlobalRollbackOnly always returns 'false' with WebSphereUOWTransactionManager (SPR-11876)
+
+
 Changes in version 3.2.9 (2014-05-20)
 -------------------------------------
 
