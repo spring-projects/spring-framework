@@ -22,7 +22,6 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Proxy;
-import java.security.AccessControlException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -365,21 +364,27 @@ public abstract class ClassUtils {
 	 */
 	public static boolean isCacheSafe(Class<?> clazz, ClassLoader classLoader) {
 		Assert.notNull(clazz, "Class must not be null");
-		ClassLoader target = clazz.getClassLoader();
-		if (target == null) {
-			return true;
-		}
-		ClassLoader cur = classLoader;
-		if (cur == target) {
-			return true;
-		}
-		while (cur != null) {
-			cur = cur.getParent();
+		try {
+			ClassLoader target = clazz.getClassLoader();
+			if (target == null) {
+				return true;
+			}
+			ClassLoader cur = classLoader;
 			if (cur == target) {
 				return true;
 			}
+			while (cur != null) {
+				cur = cur.getParent();
+				if (cur == target) {
+					return true;
+				}
+			}
+			return false;
 		}
-		return false;
+		catch (SecurityException ex) {
+			// Probably from the system ClassLoader - let's consider it safe.
+			return true;
+		}
 	}
 
 
@@ -768,7 +773,7 @@ public abstract class ClassUtils {
 					return (specificMethod != null ? specificMethod : method);
 				}
 			}
-			catch (AccessControlException ex) {
+			catch (SecurityException ex) {
 				// Security settings are disallowing reflective access; fall back to 'method' below.
 			}
 		}
