@@ -16,7 +16,7 @@
 package org.springframework.expression.spel.ast;
 
 import org.springframework.asm.MethodVisitor;
-import org.springframework.expression.spel.standard.CodeFlow;
+import org.springframework.expression.spel.CodeFlow;
 import org.springframework.expression.spel.support.BooleanTypedValue;
 
 /**

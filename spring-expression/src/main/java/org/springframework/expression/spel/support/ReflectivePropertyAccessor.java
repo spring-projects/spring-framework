@@ -35,13 +35,12 @@ import org.springframework.core.convert.Property;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.style.ToStringCreator;
 import org.springframework.expression.AccessException;
-import org.springframework.expression.CompilablePropertyAccessor;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.PropertyAccessor;
 import org.springframework.expression.TypedValue;
-import org.springframework.expression.spel.ast.PropertyOrFieldReference;
-import org.springframework.expression.spel.standard.CodeFlow;
+import org.springframework.expression.spel.CodeFlow;
+import org.springframework.expression.spel.CompilablePropertyAccessor;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 
@@ -370,10 +369,10 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 		Method[] methods = getSortedClassMethods(clazz);
 		for (String methodSuffix : methodSuffixes) {
 			for (Method method : methods) {
-				if (method.getName().equals(prefix + methodSuffix)
-						&& method.getParameterTypes().length == numberOfParams
-						&& (!mustBeStatic || Modifier.isStatic(method.getModifiers()))
-						&& (requiredReturnTypes.isEmpty() || requiredReturnTypes.contains(method.getReturnType()))) {
+				if (method.getName().equals(prefix + methodSuffix) &&
+						method.getParameterTypes().length == numberOfParams &&
+						(!mustBeStatic || Modifier.isStatic(method.getModifiers())) &&
+						(requiredReturnTypes.isEmpty() || requiredReturnTypes.contains(method.getReturnType()))) {
 					return method;
 				}
 			}
@@ -649,16 +648,6 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 			}
 			throw new AccessException("Neither getter nor field found for property '" + name + "'");
 		}
-		
-		@Override
-		public Class<?> getPropertyType() {
-			if (member instanceof Field) {
-				return ((Field)member).getType();
-			}
-			else {
-				return ((Method)member).getReturnType();
-			}
-		}
 
 		@Override
 		public boolean canWrite(EvaluationContext context, Object target, String name) {
@@ -678,11 +667,20 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 			}
 			return true;
 		}
-		 
-		@Override
-		public void generateCode(PropertyOrFieldReference propertyReference, MethodVisitor mv,CodeFlow codeflow) {
-			boolean isStatic = Modifier.isStatic(member.getModifiers());
 
+		@Override
+		public Class<?> getPropertyType() {
+			if (member instanceof Field) {
+				return ((Field) member).getType();
+			}
+			else {
+				return ((Method) member).getReturnType();
+			}
+		}
+
+		@Override
+		public void generateCode(String propertyName, MethodVisitor mv, CodeFlow codeflow) {
+			boolean isStatic = Modifier.isStatic(member.getModifiers());
 			String descriptor = codeflow.lastDescriptor();
 			String memberDeclaringClassSlashedDescriptor = member.getDeclaringClass().getName().replace('.','/');
 			if (!isStatic) {
@@ -694,9 +692,12 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 				}
 			}
 			if (member instanceof Field) {
-				mv.visitFieldInsn(isStatic?GETSTATIC:GETFIELD,memberDeclaringClassSlashedDescriptor,member.getName(),CodeFlow.toJVMDescriptor(((Field) member).getType()));
-			} else {
-				mv.visitMethodInsn(isStatic?INVOKESTATIC:INVOKEVIRTUAL, memberDeclaringClassSlashedDescriptor, member.getName(),CodeFlow.createSignatureDescriptor((Method)member),false);
+				mv.visitFieldInsn(isStatic ? GETSTATIC : GETFIELD, memberDeclaringClassSlashedDescriptor,
+						member.getName(), CodeFlow.toJVMDescriptor(((Field) member).getType()));
+			}
+			else {
+				mv.visitMethodInsn(isStatic ? INVOKESTATIC : INVOKEVIRTUAL, memberDeclaringClassSlashedDescriptor,
+						member.getName(), CodeFlow.createSignatureDescriptor((Method) member),false);
 			}
 		}
 

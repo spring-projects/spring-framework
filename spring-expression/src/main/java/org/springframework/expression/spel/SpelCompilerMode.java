@@ -1,11 +1,11 @@
 /*
- * Copyright 2014 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -24,22 +24,24 @@ package org.springframework.expression.spel;
  * @since 4.1
  */
 public enum SpelCompilerMode {
-	/** 
+
+	/**
 	 * The compiler is switched off, this is the default. 
 	 */
-	off,
-	
+	OFF,
+
 	/** 
 	 * In immediate mode, expressions are compiled as soon as possible (usually after 1 interpreted run). 
 	 * If a compiled expression fails it will throw an exception to the caller.
 	 */
-	immediate,
-	
+	IMMEDIATE,
+
 	/** 
 	 * In mixed mode, expression evaluate silently switches between interpreted and compiled over time.
 	 * After a number of runs the expression gets compiled. If it later fails (possibly due to inferred
 	 * type information changing) then that will be caught internally and the system switches back to
 	 * interpreted mode. It may subsequently compile it again later. 
 	 */
-	mixed 
+	MIXED
+
 }

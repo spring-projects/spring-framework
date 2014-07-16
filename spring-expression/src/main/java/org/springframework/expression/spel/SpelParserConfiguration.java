@@ -30,24 +30,42 @@ import org.springframework.core.SpringProperties;
  */
 public class SpelParserConfiguration {
 
-	private final boolean autoGrowNullReferences;
-
-	private final boolean autoGrowCollections;
-	
-	private static SpelCompilerMode defaultCompilerMode = SpelCompilerMode.off;
-	
-	private SpelCompilerMode compilerMode;
-
-	private final int maximumAutoGrowSize;
+	private static final SpelCompilerMode defaultCompilerMode;
 
 	static {
 		String compilerMode = SpringProperties.getProperty("spring.expression.compiler.mode");
-		if (compilerMode != null) {
-			defaultCompilerMode = SpelCompilerMode.valueOf(compilerMode.toLowerCase());
-			// System.out.println("SpelCompiler: switched to "+defaultCompilerMode+" mode");
-		}
+		defaultCompilerMode = (compilerMode != null ?
+				SpelCompilerMode.valueOf(compilerMode.toUpperCase()) : SpelCompilerMode.OFF);
 	}
-	
+
+
+	private final SpelCompilerMode compilerMode;
+
+	private final ClassLoader compilerClassLoader;
+
+	private final boolean autoGrowNullReferences;
+
+	private final boolean autoGrowCollections;
+
+	private final int maximumAutoGrowSize;
+
+
+	/**
+	 * Create a new {@link SpelParserConfiguration} instance with default settings.
+	 */
+	public SpelParserConfiguration() {
+		this(null, null, false, false, Integer.MAX_VALUE);
+	}
+
+	/**
+	 * Create a new {@link SpelParserConfiguration} instance.
+	 * @param compilerMode the compiler mode for the parser
+	 * @param compilerClassLoader the ClassLoader to use as the basis for expression compilation
+	 */
+	public SpelParserConfiguration(SpelCompilerMode compilerMode, ClassLoader compilerClassLoader) {
+		this(compilerMode, compilerClassLoader, false, false, Integer.MAX_VALUE);
+	}
+
 	/**
 	 * Create a new {@link SpelParserConfiguration} instance.
 	 * @param autoGrowNullReferences if null references should automatically grow
@@ -55,7 +73,7 @@ public class SpelParserConfiguration {
 	 * @see #SpelParserConfiguration(boolean, boolean, int)
 	 */
 	public SpelParserConfiguration(boolean autoGrowNullReferences, boolean autoGrowCollections) {
-		this(autoGrowNullReferences, autoGrowCollections, Integer.MAX_VALUE);
+		this(null, null, autoGrowNullReferences, autoGrowCollections, Integer.MAX_VALUE);
 	}
 
 	/**
@@ -65,24 +83,40 @@ public class SpelParserConfiguration {
 	 * @param maximumAutoGrowSize the maximum size that the collection can auto grow
 	 */
 	public SpelParserConfiguration(boolean autoGrowNullReferences, boolean autoGrowCollections, int maximumAutoGrowSize) {
+		this(null, null, autoGrowNullReferences, autoGrowCollections, maximumAutoGrowSize);
+	}
+
+	/**
+	 * Create a new {@link SpelParserConfiguration} instance.
+	 * @param compilerMode the compiler mode that parsers using this configuration object should use
+	 * @param compilerClassLoader the ClassLoader to use as the basis for expression compilation
+	 * @param autoGrowNullReferences if null references should automatically grow
+	 * @param autoGrowCollections if collections should automatically grow
+	 * @param maximumAutoGrowSize the maximum size that the collection can auto grow
+	 */
+	public SpelParserConfiguration(SpelCompilerMode compilerMode, ClassLoader compilerClassLoader,
+			boolean autoGrowNullReferences, boolean autoGrowCollections, int maximumAutoGrowSize) {
+
+		this.compilerMode = (compilerMode != null ? compilerMode : defaultCompilerMode);
+		this.compilerClassLoader = compilerClassLoader;
 		this.autoGrowNullReferences = autoGrowNullReferences;
 		this.autoGrowCollections = autoGrowCollections;
 		this.maximumAutoGrowSize = maximumAutoGrowSize;
-		this.compilerMode = defaultCompilerMode;
 	}
-	
-	/**
-	 * @param compilerMode the compiler mode that parsers using this configuration object should use
-	 */
-	public void setCompilerMode(SpelCompilerMode compilerMode) {
-		this.compilerMode = compilerMode;
-	}
+
 
 	/**
 	 * @return the configuration mode for parsers using this configuration object
 	 */
 	public SpelCompilerMode getCompilerMode() {
 		return this.compilerMode;
+	}
+
+	/**
+	 * @return the ClassLoader to use as the basis for expression compilation
+	 */
+	public ClassLoader getCompilerClassLoader() {
+		return this.compilerClassLoader;
 	}
 
 	/**

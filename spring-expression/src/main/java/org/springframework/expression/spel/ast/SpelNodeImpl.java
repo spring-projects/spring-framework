@@ -21,11 +21,11 @@ import org.springframework.asm.Opcodes;
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.TypedValue;
 import org.springframework.expression.common.ExpressionUtils;
+import org.springframework.expression.spel.CodeFlow;
 import org.springframework.expression.spel.ExpressionState;
 import org.springframework.expression.spel.SpelEvaluationException;
 import org.springframework.expression.spel.SpelMessage;
 import org.springframework.expression.spel.SpelNode;
-import org.springframework.expression.spel.standard.CodeFlow;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.util.Assert;
 
@@ -57,6 +57,7 @@ public abstract class SpelNodeImpl implements SpelNode, Opcodes {
 	 * Ljava/lang/String, I, [I
      */
 	protected String exitTypeDescriptor;
+
 
 	public SpelNodeImpl(int pos, SpelNodeImpl... operands) {
 		this.pos = pos;
@@ -184,7 +185,6 @@ public abstract class SpelNodeImpl implements SpelNode, Opcodes {
 	 * Check whether a node can be compiled to bytecode. The reasoning in each node may
 	 * be different but will typically involve checking whether the exit type descriptor
 	 * of the node is known and any relevant child nodes are compilable.
-	 * 
 	 * @return true if this node can be compiled to bytecode
 	 */
 	public boolean isCompilable() {
@@ -196,7 +196,6 @@ public abstract class SpelNodeImpl implements SpelNode, Opcodes {
 	 * the current expression being compiled is available in the codeflow object. For
 	 * example it will include information about the type of the object currently
 	 * on the stack.
-	 * 
 	 * @param mv the ASM MethodVisitor into which code should be generated
 	 * @param codeflow a context object with info about what is on the stack
 	 */

@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,13 +14,11 @@
  * limitations under the License.
  */
 
-package org.springframework.expression;
+package org.springframework.expression.spel;
 
 import org.springframework.asm.MethodVisitor;
 import org.springframework.asm.Opcodes;
-import org.springframework.expression.spel.ast.PropertyOrFieldReference;
-import org.springframework.expression.spel.standard.CodeFlow;
-
+import org.springframework.expression.PropertyAccessor;
 
 /**
  * A compilable property accessor is able to generate bytecode that represents 
@@ -33,21 +31,22 @@ import org.springframework.expression.spel.standard.CodeFlow;
 public interface CompilablePropertyAccessor extends PropertyAccessor, Opcodes {
 
 	/**
-	 * @return true if this property accessor is currently suitable for compilation.
+	 * Return {@code true} if this property accessor is currently suitable for compilation.
 	 */
 	boolean isCompilable();
 
 	/**
-	 * Generate the bytecode the performs the access operation into the specified MethodVisitor using 
-	 * context information from the codeflow where necessary.
-	 * @param propertyReference the property reference for which code is being generated
+	 * Return the type of the accessed property - may only be known once an access has occurred.
+	 */
+	Class<?> getPropertyType();
+
+	/**
+	 * Generate the bytecode the performs the access operation into the specified MethodVisitor
+	 * using context information from the codeflow where necessary.
+	 * @param propertyName the name of the property
 	 * @param mv the Asm method visitor into which code should be generated
 	 * @param codeflow the current state of the expression compiler
 	 */
-	void generateCode(PropertyOrFieldReference propertyReference, MethodVisitor mv, CodeFlow codeflow);
+	void generateCode(String propertyName, MethodVisitor mv, CodeFlow codeflow);
 
-	/**
-	 * @return the type of the accessed property - may only be known once an access has occurred.
-	 */
-	Class<?> getPropertyType();
 }

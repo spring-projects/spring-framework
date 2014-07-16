@@ -19,9 +19,9 @@ package org.springframework.expression.spel.ast;
 import org.springframework.asm.MethodVisitor;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.TypedValue;
+import org.springframework.expression.spel.CodeFlow;
 import org.springframework.expression.spel.ExpressionState;
 import org.springframework.expression.spel.SpelEvaluationException;
-import org.springframework.expression.spel.standard.CodeFlow;
 
 /**
  * Represents a variable reference, eg. #someVar. Note this is different to a *local*

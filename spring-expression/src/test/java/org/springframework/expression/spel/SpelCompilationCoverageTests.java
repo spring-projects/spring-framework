@@ -25,18 +25,16 @@ import java.util.Map;
 import java.util.StringTokenizer;
 
 import org.junit.Test;
+
 import org.springframework.asm.MethodVisitor;
 import org.springframework.expression.AccessException;
-import org.springframework.expression.CompilablePropertyAccessor;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.Expression;
 import org.springframework.expression.TypedValue;
 import org.springframework.expression.spel.ast.CompoundExpression;
 import org.springframework.expression.spel.ast.OpLT;
-import org.springframework.expression.spel.ast.PropertyOrFieldReference;
 import org.springframework.expression.spel.ast.SpelNodeImpl;
 import org.springframework.expression.spel.ast.Ternary;
-import org.springframework.expression.spel.standard.CodeFlow;
 import org.springframework.expression.spel.standard.SpelCompiler;
 import org.springframework.expression.spel.standard.SpelExpression;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
@@ -2174,63 +2172,7 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		vc = expression.getValue(payload);
 		assertNull(vc);
 	}
-	
-	static class MyAccessor implements CompilablePropertyAccessor {
-		
-		private Method method;
-		
-		public Class<?>[] getSpecificTargetClasses() {
-			return new Class[]{Payload2.class};
-		}
 
-		public boolean canRead(EvaluationContext context, Object target, String name) throws AccessException {
-			// target is a Payload2 instance
-			return true;
-		}
-
-		public TypedValue read(EvaluationContext context, Object target, String name) throws AccessException {
-			Payload2 payload2 = (Payload2)target;
-			return new TypedValue(payload2.getField(name));
-		}
-
-		public boolean canWrite(EvaluationContext context, Object target, String name) throws AccessException {
-			return false;
-		}
-
-		public void write(EvaluationContext context, Object target, String name, Object newValue) throws AccessException {
-		}
-		
-		@Override
-		public boolean isCompilable() {
-			return true;
-		}
-		
-		@Override
-		public void generateCode(PropertyOrFieldReference propertyReference, MethodVisitor mv,CodeFlow codeflow) {
-			if (method == null) {
-				try {
-					method = Payload2.class.getDeclaredMethod("getField", String.class);
-				} catch (Exception e) {}
-			}
-			String descriptor = codeflow.lastDescriptor();
-			String memberDeclaringClassSlashedDescriptor = method.getDeclaringClass().getName().replace('.','/');
-			if (descriptor == null) {
-				codeflow.loadTarget(mv);
-			}
-			if (descriptor == null || !memberDeclaringClassSlashedDescriptor.equals(descriptor.substring(1))) {
-				mv.visitTypeInsn(CHECKCAST, memberDeclaringClassSlashedDescriptor);
-			}
-			mv.visitLdcInsn(propertyReference.getName());
-			mv.visitMethodInsn(INVOKEVIRTUAL, memberDeclaringClassSlashedDescriptor, method.getName(),CodeFlow.createSignatureDescriptor(method),false);
-		}
-
-		@Override
-		public Class<?> getPropertyType() {
-			return Object.class;
-		}
-
-	}
-	
 	@Test
 	public void variantGetter() throws Exception {
 		Payload2Holder holder = new Payload2Holder();
@@ -2257,9 +2199,67 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 //			v = expression.getValue(ctx,holder);
 //		}
 //		System.out.println((System.currentTimeMillis()-stime));
-
 	}
-	
+
+
+	static class MyAccessor implements CompilablePropertyAccessor {
+
+		private Method method;
+
+		public Class<?>[] getSpecificTargetClasses() {
+			return new Class[]{Payload2.class};
+		}
+
+		public boolean canRead(EvaluationContext context, Object target, String name) throws AccessException {
+			// target is a Payload2 instance
+			return true;
+		}
+
+		public TypedValue read(EvaluationContext context, Object target, String name) throws AccessException {
+			Payload2 payload2 = (Payload2)target;
+			return new TypedValue(payload2.getField(name));
+		}
+
+		public boolean canWrite(EvaluationContext context, Object target, String name) throws AccessException {
+			return false;
+		}
+
+		public void write(EvaluationContext context, Object target, String name, Object newValue) throws AccessException {
+		}
+
+		@Override
+		public boolean isCompilable() {
+			return true;
+		}
+
+		@Override
+		public Class<?> getPropertyType() {
+			return Object.class;
+		}
+
+		@Override
+		public void generateCode(String propertyName, MethodVisitor mv,CodeFlow codeflow) {
+			if (method == null) {
+				try {
+					method = Payload2.class.getDeclaredMethod("getField", String.class);
+				}
+				catch (Exception e) {
+				}
+			}
+			String descriptor = codeflow.lastDescriptor();
+			String memberDeclaringClassSlashedDescriptor = method.getDeclaringClass().getName().replace('.','/');
+			if (descriptor == null) {
+				codeflow.loadTarget(mv);
+			}
+			if (descriptor == null || !memberDeclaringClassSlashedDescriptor.equals(descriptor.substring(1))) {
+				mv.visitTypeInsn(CHECKCAST, memberDeclaringClassSlashedDescriptor);
+			}
+			mv.visitLdcInsn(propertyName);
+			mv.visitMethodInsn(INVOKEVIRTUAL, memberDeclaringClassSlashedDescriptor, method.getName(),CodeFlow.createSignatureDescriptor(method),false);
+		}
+	}
+
+
 	static class CompilableMapAccessor implements CompilablePropertyAccessor {
 
 		@Override
@@ -2295,40 +2295,23 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 			return new Class[] {Map.class};
 		}
 
-
-		/**
-		 * Exception thrown from {@code read} in order to reset a cached
-		 * PropertyAccessor, allowing other accessors to have a try.
-		 */
-		@SuppressWarnings("serial")
-		private static class MapAccessException extends AccessException {
-
-			private final String key;
-
-			public MapAccessException(String key) {
-				super(null);
-				this.key = key;
-			}
-
-			@Override
-			public String getMessage() {
-				return "Map does not contain a value for key '" + this.key + "'";
-			}
-		}
-
 		@Override
 		public boolean isCompilable() {
 			return true;
 		}
-		
+
 		@Override
-		public void generateCode(PropertyOrFieldReference propertyReference,
-				MethodVisitor mv, CodeFlow codeflow) {
+		public Class<?> getPropertyType() {
+			return Object.class;
+		}
+
+		@Override
+		public void generateCode(String propertyName, MethodVisitor mv, CodeFlow codeflow) {
 			String descriptor = codeflow.lastDescriptor();
 			if (descriptor == null) {
 				codeflow.loadTarget(mv);
 			}
-			mv.visitLdcInsn(propertyReference.getName());
+			mv.visitLdcInsn(propertyName);
 			mv.visitMethodInsn(INVOKEINTERFACE, "java/util/Map", "get","(Ljava/lang/Object;)Ljava/lang/Object;",true);
 
 //			if (method == null) {
@@ -2348,12 +2331,27 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 //			mv.visitMethodInsn(INVOKEVIRTUAL, memberDeclaringClassSlashedDescriptor, method.getName(),CodeFlow.createDescriptor(method));
 //			   6:	invokeinterface	#6,  2; //InterfaceMethod java/util/Map.get:(Ljava/lang/Object;)Ljava/lang/Object;
 		}
+	}
 
-		@Override
-		public Class<?> getPropertyType() {
-			return Object.class;
+
+	/**
+	 * Exception thrown from {@code read} in order to reset a cached
+	 * PropertyAccessor, allowing other accessors to have a try.
+	 */
+	@SuppressWarnings("serial")
+	private static class MapAccessException extends AccessException {
+
+		private final String key;
+
+		public MapAccessException(String key) {
+			super(null);
+			this.key = key;
 		}
 
+		@Override
+		public String getMessage() {
+			return "Map does not contain a value for key '" + this.key + "'";
+		}
 	}
 
 	

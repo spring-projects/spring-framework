@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,15 +24,15 @@ import java.util.Map;
 import org.springframework.asm.MethodVisitor;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.expression.AccessException;
-import org.springframework.expression.CompilablePropertyAccessor;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.PropertyAccessor;
 import org.springframework.expression.TypedValue;
+import org.springframework.expression.spel.CodeFlow;
+import org.springframework.expression.spel.CompilablePropertyAccessor;
 import org.springframework.expression.spel.ExpressionState;
 import org.springframework.expression.spel.SpelEvaluationException;
 import org.springframework.expression.spel.SpelMessage;
-import org.springframework.expression.spel.standard.CodeFlow;
 import org.springframework.expression.spel.support.ReflectivePropertyAccessor;
 
 /**
@@ -331,19 +331,14 @@ public class PropertyOrFieldReference extends SpelNodeImpl {
 	
 	@Override
 	public boolean isCompilable() {
-		if (this.cachedReadAccessor == null) {
-			return false;
-		}
-		if (this.cachedReadAccessor instanceof CompilablePropertyAccessor) {
-			return ((CompilablePropertyAccessor)this.cachedReadAccessor).isCompilable();
-		}
-		return false;
+		return (this.cachedReadAccessor instanceof CompilablePropertyAccessor &&
+				((CompilablePropertyAccessor) this.cachedReadAccessor).isCompilable());
 	}
 	
 	@Override
-	public void generateCode(MethodVisitor mv,CodeFlow codeflow) {
-		((CompilablePropertyAccessor)this.cachedReadAccessor).generateCode(this, mv, codeflow);
-		codeflow.pushDescriptor(exitTypeDescriptor);
+	public void generateCode(MethodVisitor mv, CodeFlow codeflow) {
+		((CompilablePropertyAccessor) this.cachedReadAccessor).generateCode(this.name, mv, codeflow);
+		codeflow.pushDescriptor(this.exitTypeDescriptor);
 	}
 
 

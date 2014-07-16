@@ -20,10 +20,10 @@ import org.springframework.asm.Label;
 import org.springframework.asm.MethodVisitor;
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.TypedValue;
+import org.springframework.expression.spel.CodeFlow;
 import org.springframework.expression.spel.ExpressionState;
 import org.springframework.expression.spel.SpelEvaluationException;
 import org.springframework.expression.spel.SpelMessage;
-import org.springframework.expression.spel.standard.CodeFlow;
 
 /**
  * Represents a ternary expression, for example: "someCheck()?true:false".
