@@ -23,17 +23,18 @@ import org.junit.Test;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.support.GenericApplicationContext;
+import org.springframework.test.context.BootstrapTestUtils;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.MergedContextConfiguration;
 import org.springframework.web.context.support.GenericWebApplicationContext;
 
 /**
- * Unit tests for {@link ContextLoaderUtils} involving {@link ApplicationContextInitializer}s.
+ * Unit tests for {@link BootstrapTestUtils} involving {@link ApplicationContextInitializer}s.
  *
  * @author Sam Brannen
  * @since 3.1
  */
-public class ContextLoaderUtilsContextInitializerTests extends AbstractContextLoaderUtilsTests {
+public class BootstrapTestUtilsContextInitializerTests extends AbstractContextConfigurationUtilsTests {
 
 	@Test
 	public void buildMergedConfigWithLocalInitializer() {

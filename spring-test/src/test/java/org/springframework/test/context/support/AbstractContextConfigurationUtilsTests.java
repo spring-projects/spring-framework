@@ -41,12 +41,13 @@ import org.springframework.test.context.web.WebAppConfiguration;
 import static org.junit.Assert.*;
 
 /**
- * Abstract base class for tests involving {@link ContextLoaderUtils}.
+ * Abstract base class for tests involving {@link ContextLoaderUtils},
+ * {@link BootstrapTestUtils}, and {@link ActiveProfilesUtils}.
  *
  * @author Sam Brannen
  * @since 3.1
  */
-abstract class AbstractContextLoaderUtilsTests {
+abstract class AbstractContextConfigurationUtilsTests {
 
 	static final Class<?>[] EMPTY_CLASS_ARRAY = new Class<?>[0];
 	static final String[] EMPTY_STRING_ARRAY = new String[0];

@@ -31,12 +31,12 @@ import org.springframework.test.context.web.WebMergedContextConfiguration;
 import static org.junit.Assert.*;
 
 /**
- * Unit tests for {@link ContextLoaderUtils} involving {@link MergedContextConfiguration}.
+ * Unit tests for {@link BootstrapTestUtils} involving {@link MergedContextConfiguration}.
  *
  * @author Sam Brannen
  * @since 3.1
  */
-public class ContextLoaderUtilsMergedConfigTests extends AbstractContextLoaderUtilsTests {
+public class BootstrapTestUtilsMergedConfigTests extends AbstractContextConfigurationUtilsTests {
 
 	@Test
 	public void buildMergedConfigWithoutAnnotation() {
