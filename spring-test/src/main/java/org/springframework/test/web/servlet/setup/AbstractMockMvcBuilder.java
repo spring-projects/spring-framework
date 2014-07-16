@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,6 +49,8 @@ public abstract class AbstractMockMvcBuilder<B extends AbstractMockMvcBuilder<B>
 	private final List<ResultHandler> globalResultHandlers = new ArrayList<ResultHandler>();
 
 	private Boolean dispatchOptions = Boolean.FALSE;
+
+	private final List<MockMvcConfigurer> configurers = new ArrayList<MockMvcConfigurer>(4);
 
 
 
@@ -166,15 +168,27 @@ public abstract class AbstractMockMvcBuilder<B extends AbstractMockMvcBuilder<B>
 	}
 
 	/**
-	 * Should the {@link org.springframework.web.servlet.DispatcherServlet} dispatch OPTIONS request to controllers.
-	 * @param dispatchOptions
-	 * @see org.springframework.web.servlet.DispatcherServlet#setDispatchOptionsRequest(boolean)
+	 * Whether to enable the DispatcherServlet property
+	 * {@link org.springframework.web.servlet.DispatcherServlet#setDispatchOptionsRequest
+	 * dispatchOptionsRequest} which allows processing of HTTP OPTIONS requests.
 	 */
 	@SuppressWarnings("unchecked")
 	public final <T extends B> T dispatchOptions(boolean dispatchOptions) {
 		this.dispatchOptions = dispatchOptions;
 		return (T) this;
 	}
+
+	/**
+	 * Add a {@code MockMvcConfigurer} which encapsulates ways to further configure
+	 * this MockMvcBuilder with some specific purpose in mind.
+	 */
+	@SuppressWarnings("unchecked")
+	public final <T extends B> T add(MockMvcConfigurer configurer) {
+		configurer.afterConfigurerAdded(this);
+		this.configurers.add(configurer);
+		return (T) this;
+	}
+
 
 	/**
 	 * Build a {@link org.springframework.test.web.servlet.MockMvc} instance.
@@ -186,6 +200,10 @@ public abstract class AbstractMockMvcBuilder<B extends AbstractMockMvcBuilder<B>
 
 		ServletContext servletContext = wac.getServletContext();
 		MockServletConfig mockServletConfig = new MockServletConfig(servletContext);
+
+		for (MockMvcConfigurer configurer : this.configurers) {
+			configurer.beforeMockMvcCreated(this, this.defaultRequestBuilder, wac);
+		}
 
 		Filter[] filterArray = this.filters.toArray(new Filter[this.filters.size()]);
 
