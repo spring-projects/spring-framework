@@ -84,6 +84,8 @@ import org.springframework.web.servlet.resource.ResourceHttpRequestHandler;
 import org.springframework.web.servlet.resource.ResourceResolver;
 import org.springframework.web.servlet.resource.ResourceTransformer;
 import org.springframework.web.servlet.theme.ThemeChangeInterceptor;
+import org.springframework.web.servlet.view.groovy.GroovyMarkupConfigurer;
+import org.springframework.web.servlet.view.groovy.GroovyMarkupViewResolver;
 import org.springframework.web.util.UrlPathHelper;
 import org.springframework.web.servlet.view.*;
 import org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer;
@@ -561,11 +563,11 @@ public class MvcNamespaceTests {
 	
 	@Test
 	public void testViewResolution() throws Exception {
-		loadBeanDefinitions("mvc-config-view-resolution.xml", 5);
+		loadBeanDefinitions("mvc-config-view-resolution.xml", 6);
 
 		ViewResolverComposite compositeResolver = this.appContext.getBean(ViewResolverComposite.class);
 		assertNotNull(compositeResolver);
-		assertEquals(7, compositeResolver.getViewResolvers().size());
+		assertEquals(8, compositeResolver.getViewResolvers().size());
 		assertEquals(0, compositeResolver.getOrder());
 
 		List<ViewResolver> resolvers = compositeResolver.getViewResolvers();
@@ -593,8 +595,15 @@ public class MvcNamespaceTests {
 		assertEquals(".vm", accessor.getPropertyValue("suffix"));
 		assertEquals(0, accessor.getPropertyValue("cacheLimit"));
 
-		assertEquals(InternalResourceViewResolver.class, resolvers.get(5).getClass());
+		resolver = resolvers.get(5);
+		GroovyMarkupViewResolver groovyMarkupViewResolver = (GroovyMarkupViewResolver) resolver;
+		accessor = new DirectFieldAccessor(resolver);
+		assertEquals("", accessor.getPropertyValue("prefix"));
+		assertEquals(".tpl", accessor.getPropertyValue("suffix"));
+		assertEquals(1024, accessor.getPropertyValue("cacheLimit"));
+
 		assertEquals(InternalResourceViewResolver.class, resolvers.get(6).getClass());
+		assertEquals(InternalResourceViewResolver.class, resolvers.get(7).getClass());
 
 
 		TilesConfigurer tilesConfigurer = appContext.getBean(TilesConfigurer.class);
@@ -616,11 +625,16 @@ public class MvcNamespaceTests {
 		assertNotNull(velocityConfigurer);
 		accessor = new DirectFieldAccessor(velocityConfigurer);
 		assertEquals("/test", accessor.getPropertyValue("resourceLoaderPath"));
+
+		GroovyMarkupConfigurer groovyMarkupConfigurer = appContext.getBean(GroovyMarkupConfigurer.class);
+		assertNotNull(groovyMarkupConfigurer);
+		accessor = new DirectFieldAccessor(groovyMarkupConfigurer);
+		assertEquals("/test", accessor.getPropertyValue("resourceLoaderPath"));
 	}
 
 	@Test
 	public void testViewResolutionWithContentNegotiation() throws Exception {
-		loadBeanDefinitions("mvc-config-view-resolution-content-negotiation.xml", 5);
+		loadBeanDefinitions("mvc-config-view-resolution-content-negotiation.xml", 6);
 
 		ViewResolverComposite compositeResolver = this.appContext.getBean(ViewResolverComposite.class);
 		assertNotNull(compositeResolver);
@@ -630,7 +644,7 @@ public class MvcNamespaceTests {
 		List<ViewResolver> resolvers = compositeResolver.getViewResolvers();
 		assertEquals(ContentNegotiatingViewResolver.class, resolvers.get(0).getClass());
 		ContentNegotiatingViewResolver cnvr = (ContentNegotiatingViewResolver) resolvers.get(0);
-		assertEquals(5, cnvr.getViewResolvers().size());
+		assertEquals(6, cnvr.getViewResolvers().size());
 		assertEquals(1, cnvr.getDefaultViews().size());
 		assertTrue(cnvr.isUseNotAcceptableStatusCode());
 

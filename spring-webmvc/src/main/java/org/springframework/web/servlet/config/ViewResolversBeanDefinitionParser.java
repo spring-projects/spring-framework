@@ -16,9 +16,7 @@
 
 package org.springframework.web.servlet.config;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.factory.config.BeanDefinition;
@@ -37,6 +35,7 @@ import org.springframework.web.servlet.view.InternalResourceViewResolver;
 
 import org.springframework.web.servlet.view.ViewResolverComposite;
 import org.springframework.web.servlet.view.freemarker.FreeMarkerViewResolver;
+import org.springframework.web.servlet.view.groovy.GroovyMarkupViewResolver;
 import org.springframework.web.servlet.view.tiles3.TilesViewResolver;
 import org.springframework.web.servlet.view.velocity.VelocityViewResolver;
 import org.w3c.dom.Element;
@@ -77,7 +76,7 @@ public class ViewResolversBeanDefinitionParser implements BeanDefinitionParser {
 
 		ManagedList<Object> resolvers = new ManagedList<Object>(4);
 		resolvers.setSource(context.extractSource(element));
-		String[] names = new String[] {"jsp", "tiles", "bean-name", "freemarker", "velocity", "bean", "ref"};
+		String[] names = new String[] {"jsp", "tiles", "bean-name", "freemarker", "velocity", "groovy-markup", "bean", "ref"};
 
 		for (Element resolverElement : DomUtils.getChildElementsByTagName(element, names)) {
 			String name = resolverElement.getLocalName();
@@ -108,6 +107,11 @@ public class ViewResolversBeanDefinitionParser implements BeanDefinitionParser {
 			}
 			else if ("bean-name".equals(name)) {
 				resolverBeanDef = new RootBeanDefinition(BeanNameViewResolver.class);
+			}
+			else if ("groovy-markup".equals(name)) {
+				resolverBeanDef = new RootBeanDefinition(GroovyMarkupViewResolver.class);
+				resolverBeanDef.getPropertyValues().add("suffix", ".tpl");
+				addUrlBasedViewResolverProperties(resolverElement, resolverBeanDef);
 			}
 			else {
 				// Should never happen

@@ -6,7 +6,7 @@
     <title>My First Web Application Using Spring MVC</title>
 </head>
 <body>
-${model.hello}
+${hello}
 </body>
 </html>
 

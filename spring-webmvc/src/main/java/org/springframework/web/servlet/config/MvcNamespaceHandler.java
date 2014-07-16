@@ -39,6 +39,7 @@ public class MvcNamespaceHandler extends NamespaceHandlerSupport {
 		registerBeanDefinitionParser("tiles", new TilesBeanDefinitionParser());
 		registerBeanDefinitionParser("freemarker", new FreeMarkerBeanDefinitionParser());
 		registerBeanDefinitionParser("velocity", new VelocityBeanDefinitionParser());
+		registerBeanDefinitionParser("groovy-markup", new GroovyMarkupBeanDefinitionParser());
 	}
 
 }

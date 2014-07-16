@@ -27,12 +27,12 @@ import org.springframework.mock.web.test.MockServletConfig;
 import org.springframework.mock.web.test.MockServletContext;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
-import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
 import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer;
+import org.springframework.web.servlet.view.groovy.GroovyMarkupConfigurer;
 import org.springframework.web.servlet.view.tiles3.TilesConfigurer;
 import org.springframework.web.servlet.view.velocity.VelocityConfigurer;
 
@@ -72,6 +72,12 @@ public class ViewResolutionIntegrationTests {
 	}
 
 	@Test
+	public void groovyMarkup() throws Exception {
+		MockHttpServletResponse response = runTest(GroovyMarkupWebConfig.class);
+		assertEquals("<html><body>Hello World!</body></html>", response.getContentAsString());
+	}
+
+	@Test
 	public void freemarkerInvalidConfig() throws Exception {
 		this.thrown.expectMessage("In addition to a FreeMarker view resolver ");
 		runTest(InvalidFreeMarkerWebConfig.class);
@@ -87,6 +93,12 @@ public class ViewResolutionIntegrationTests {
 	public void tilesInvalidConfig() throws Exception {
 		this.thrown.expectMessage("In addition to a Tiles view resolver ");
 		runTest(InvalidTilesWebConfig.class);
+	}
+
+	@Test
+	public void groovyMarkupInvalidConfig() throws Exception {
+		this.thrown.expectMessage("In addition to a Groovy Markup Template view resolver ");
+		runTest(InvalidGroovyMarkupWebConfig.class);
 	}
 
 
@@ -112,7 +124,7 @@ public class ViewResolutionIntegrationTests {
 	static class SampleController {
 
 		@RequestMapping(value = "/", method = RequestMethod.GET)
-		public String tiles(@ModelAttribute("model") ModelMap model) {
+		public String sample(ModelMap model) {
 			model.addAttribute("hello", "Hello World!");
 			return "index";
 		}
@@ -176,6 +188,22 @@ public class ViewResolutionIntegrationTests {
 	}
 
 	@Configuration
+	static class GroovyMarkupWebConfig extends AbstractWebConfig {
+
+		@Override
+		public void configureViewResolvers(ViewResolverRegistry registry) {
+			registry.groovyMarkup();
+		}
+
+		@Bean
+		public GroovyMarkupConfigurer groovyMarkupConfigurer() {
+			GroovyMarkupConfigurer configurer = new GroovyMarkupConfigurer();
+			configurer.setResourceLoaderPath("/WEB-INF/");
+			return configurer;
+		}
+	}
+
+	@Configuration
 	static class InvalidFreeMarkerWebConfig extends WebMvcConfigurationSupport {
 
 		@Override
@@ -199,6 +227,15 @@ public class ViewResolutionIntegrationTests {
 		@Override
 		public void configureViewResolvers(ViewResolverRegistry registry) {
 			registry.tiles();
+		}
+	}
+
+	@Configuration
+	static class InvalidGroovyMarkupWebConfig extends WebMvcConfigurationSupport {
+
+		@Override
+		public void configureViewResolvers(ViewResolverRegistry registry) {
+			registry.groovyMarkup();
 		}
 	}
 
