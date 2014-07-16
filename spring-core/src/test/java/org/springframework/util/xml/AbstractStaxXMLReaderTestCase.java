@@ -16,15 +16,22 @@
 
 package org.springframework.util.xml;
 
+import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMResult;
+import javax.xml.transform.sax.SAXSource;
 
+import static org.junit.Assert.assertEquals;
 import org.junit.Before;
 import org.junit.Test;
 import static org.mockito.BDDMockito.*;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
+import org.w3c.dom.Node;
 import org.xml.sax.Attributes;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.InputSource;
@@ -104,6 +111,25 @@ public abstract class AbstractStaxXMLReaderTestCase {
 	}
 
 	@Test
+	public void whitespace() throws Exception {
+		String xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><test><node1> </node1><node2> Some text </node2></test>";
+
+		Transformer transformer = TransformerFactory.newInstance().newTransformer();
+
+		AbstractStaxXMLReader staxXmlReader = createStaxXmlReader(
+				new ByteArrayInputStream(xml.getBytes("UTF-8")));
+
+		SAXSource source = new SAXSource(staxXmlReader, new InputSource());
+		DOMResult result = new DOMResult();
+
+		transformer.transform(source, result);
+
+		Node node1 = result.getNode().getFirstChild().getFirstChild();
+		assertEquals(" ", node1.getTextContent());
+		assertEquals(" Some text ", node1.getNextSibling().getTextContent());
+	}
+
+	@Test
 	public void lexicalHandler() throws Exception {
 		Resource testLexicalHandlerXml = new ClassPathResource("testLexicalHandler.xml", getClass());
 
@@ -130,7 +156,7 @@ public abstract class AbstractStaxXMLReaderTestCase {
 		verifyIdenticalInvocations(expectedLexicalHandler, actualLexicalHandler);
 	}
 
-	private final LexicalHandler mockLexicalHandler() throws Exception {
+	private LexicalHandler mockLexicalHandler() throws Exception {
 		LexicalHandler lexicalHandler = mock(LexicalHandler.class);
 		willAnswer(new CopyCharsAnswer()).given(lexicalHandler).comment(any(char[].class), anyInt(), anyInt());
 		return lexicalHandler;
