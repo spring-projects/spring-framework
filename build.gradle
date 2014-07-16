@@ -15,6 +15,8 @@ configure(allprojects) { project ->
 
 	ext.aspectjVersion       = "1.8.1"
 	ext.eclipseLinkVersion   = "2.4.2"
+	ext.ehcacheVersion       = "2.8.3"
+	ext.ehcacheJCacheVersion = "1.0.0"
 	ext.groovyVersion        = "2.3.3"
 	ext.hibernate3Version    = "3.6.10.Final"
 	ext.hibernate4Version    = "4.3.5.Final"
@@ -578,7 +580,7 @@ project("spring-context-support") {
 		optional("javax.mail:javax.mail-api:1.5.2")
 		optional("javax.cache:cache-api:1.0.0")
 		optional("com.google.guava:guava:17.0")
-		optional("net.sf.ehcache:ehcache-core:2.6.7")
+		optional("net.sf.ehcache:ehcache:${ehcacheVersion}")
 		optional("org.quartz-scheduler:quartz:2.2.1")
 		optional("org.codehaus.fabric3.api:commonj:1.1.0")
 		optional("org.apache.velocity:velocity:1.7")
@@ -591,11 +593,13 @@ project("spring-context-support") {
 			exclude group: "org.olap4j", module: "olap4j"
 			exclude group: "xml-apis", module: "xml-apis"
 		}
+		testCompile(project(":spring-context"))
 		testCompile("org.apache.poi:poi:3.10-FINAL")
 		testCompile("commons-beanutils:commons-beanutils:1.8.0") // for Velocity/JasperReports
 		testCompile("commons-digester:commons-digester:1.8.1") // for Velocity/JasperReports
 		testCompile("org.hsqldb:hsqldb:${hsqldbVersion}")
 		testCompile("org.slf4j:slf4j-api:${slf4jVersion}")
+		testCompile("org.ehcache:jcache:${ehcacheJCacheVersion}")
 		testRuntime("com.sun.mail:javax.mail:1.5.2")
 	}
 

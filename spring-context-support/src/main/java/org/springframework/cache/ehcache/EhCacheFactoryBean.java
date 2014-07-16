@@ -97,6 +97,7 @@ public class EhCacheFactoryBean extends CacheConfiguration implements FactoryBea
 	private Ehcache cache;
 
 
+	@SuppressWarnings("deprecation")
 	public EhCacheFactoryBean() {
 		setMaxEntriesLocalHeap(10000);
 		setMaxElementsOnDisk(10000000);
