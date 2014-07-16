@@ -26,10 +26,10 @@ import org.springframework.test.context.jdbc.SqlConfig.TransactionMode;
 import org.springframework.util.Assert;
 
 /**
- * {@code MergedSqlConfig} encapsulates the <em>merged</em> SQL script configuration
- * declared via {@link SqlConfig @SqlConfig} on a test method and its enclosing
- * test class.
- * <p>Explicit method-level configuration overrides class-level configuration.
+ * {@code MergedSqlConfig} encapsulates the <em>merged</em> {@link SqlConfig @SqlConfig}
+ * attributes declared locally via {@link Sql#config} and globally as a
+ * class-level annotation.
+ * <p>Explicit local configuration attributes override global configuration attributes.
  *
  * @author Sam Brannen
  * @since 4.1
