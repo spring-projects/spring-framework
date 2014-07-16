@@ -37,7 +37,6 @@ import org.springframework.web.servlet.ModelAndView;
  */
 public class ModelResultMatchers {
 
-
 	/**
 	 * Protected constructor.
 	 * Use {@link MockMvcResultMatchers#model()}.
@@ -196,7 +195,6 @@ public class ModelResultMatchers {
 
 		return new ResultMatcher() {
 			@Override
-			@SuppressWarnings("unchecked")
 			public void match(MvcResult mvcResult) throws Exception {
 				ModelAndView mav = getModelAndView(mvcResult);
 				BindingResult result = getBindingResult(mav, name);
