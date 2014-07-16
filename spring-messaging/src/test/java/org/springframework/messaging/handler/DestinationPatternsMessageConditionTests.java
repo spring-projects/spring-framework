@@ -20,7 +20,6 @@ import org.junit.Test;
 
 import org.springframework.messaging.Message;
 import org.springframework.messaging.support.MessageBuilder;
-import org.springframework.util.AntPathMatcher;
 
 import static org.junit.Assert.*;
 
@@ -30,21 +29,6 @@ import static org.junit.Assert.*;
  * @author Rossen Stoyanchev
  */
 public class DestinationPatternsMessageConditionTests {
-
-	@Test
-	public void prependSlash() {
-		DestinationPatternsMessageCondition c = condition("foo");
-		assertEquals("/foo", c.getPatterns().iterator().next());
-	}
-
-	@Test
-	public void prependSlashWithCustomPathSeparator() {
-		DestinationPatternsMessageCondition c =
-				new DestinationPatternsMessageCondition(new String[] {"foo"}, new AntPathMatcher("."));
-
-		assertEquals("Pre-pending should be disabled when not using '/' as path separator",
-				"foo", c.getPatterns().iterator().next());
-	}
 
 	// SPR-8255
 
@@ -87,6 +71,14 @@ public class DestinationPatternsMessageConditionTests {
 	@Test
 	public void matchDirectPath() {
 		DestinationPatternsMessageCondition condition = condition("/foo");
+		DestinationPatternsMessageCondition match = condition.getMatchingCondition(messageTo("/foo"));
+
+		assertNotNull(match);
+	}
+
+	@Test
+	public void matchDirectPathWithoutLeadingSlash() {
+		DestinationPatternsMessageCondition condition = condition("foo");
 		DestinationPatternsMessageCondition match = condition.getMatchingCondition(messageTo("/foo"));
 
 		assertNotNull(match);

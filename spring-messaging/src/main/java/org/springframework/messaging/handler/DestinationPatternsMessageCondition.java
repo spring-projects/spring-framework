@@ -21,7 +21,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -52,7 +51,6 @@ public final class DestinationPatternsMessageCondition
 
 	/**
 	 * Creates a new instance with the given destination patterns.
-	 * Each pattern that is not empty and does not start with "/" is prepended with "/".
 	 * @param patterns 0 or more URL patterns; if 0 the condition will match to every request.
 	 */
 	public DestinationPatternsMessageCondition(String... patterns) {
@@ -70,28 +68,11 @@ public final class DestinationPatternsMessageCondition
 
 	private DestinationPatternsMessageCondition(Collection<String> patterns, PathMatcher pathMatcher) {
 		this.pathMatcher = (pathMatcher != null) ? pathMatcher : new AntPathMatcher();
-		this.patterns = Collections.unmodifiableSet(prependLeadingSlash(patterns, this.pathMatcher));
+		this.patterns = Collections.unmodifiableSet(new LinkedHashSet<String>(patterns));
 	}
 
 	private static List<String> asList(String... patterns) {
 		return patterns != null ? Arrays.asList(patterns) : Collections.<String>emptyList();
-	}
-
-	private static Set<String> prependLeadingSlash(Collection<String> patterns, PathMatcher pathMatcher) {
-		if (patterns == null) {
-			return Collections.emptySet();
-		}
-		boolean slashSeparator = pathMatcher.combine("a", "a").equals("a/a");
-		Set<String> result = new LinkedHashSet<String>(patterns.size());
-		for (String pattern : patterns) {
-			if (slashSeparator) {
-				if (StringUtils.hasLength(pattern) && !pattern.startsWith("/")) {
-					pattern = "/" + pattern;
-				}
-			}
-			result.add(pattern);
-		}
-		return result;
 	}
 
 	public Set<String> getPatterns() {
@@ -146,7 +127,8 @@ public final class DestinationPatternsMessageCondition
 	 * {@link org.springframework.util.PathMatcher#getPatternComparator(String)}.
 	 * @param message the message to match to
 	 * @return the same instance if the condition contains no patterns;
-	 * or a new condition with sorted matching patterns;
+	 * or a new condition with sorted matching patterns (each pattern that is not empty and
+	 * does not start with "/" is prepended with "/");
 	 * or {@code null} either if a destination can not be extracted or there is no match
 	 */
 	@Override
@@ -162,6 +144,9 @@ public final class DestinationPatternsMessageCondition
 
 		List<String> matches = new ArrayList<String>();
 		for (String pattern : patterns) {
+			if (StringUtils.hasLength(pattern) && !pattern.startsWith("/")) {
+				pattern = "/" + pattern;
+			}
 			if (pattern.equals(destination) || this.pathMatcher.match(pattern, destination)) {
 				matches.add(pattern);
 			}

@@ -95,8 +95,6 @@ public class SimpAnnotationMethodMessageHandler extends AbstractMethodMessageHan
 
 	private PathMatcher pathMatcher = new AntPathMatcher();
 
-	private boolean slashPathSeparator = true;
-
 	private Validator validator;
 
 	private MessageHeaderInitializer headerInitializer;
@@ -205,7 +203,6 @@ public class SimpAnnotationMethodMessageHandler extends AbstractMethodMessageHan
 	public void setPathMatcher(PathMatcher pathMatcher) {
 		Assert.notNull(pathMatcher, "PathMatcher must not be null");
 		this.pathMatcher = pathMatcher;
-		this.slashPathSeparator = this.pathMatcher.combine("a", "a").equals("a/a");
 	}
 
 	/**
@@ -403,12 +400,7 @@ public class SimpAnnotationMethodMessageHandler extends AbstractMethodMessageHan
 		}
 		for (String prefix : getDestinationPrefixes()) {
 			if (destination.startsWith(prefix)) {
-				if (this.slashPathSeparator) {
-					return destination.substring(prefix.length() - 1);
-				}
-				else {
-					return destination.substring(prefix.length());
-				}
+				return destination.substring(prefix.length() - 1);
 			}
 		}
 		return null;
