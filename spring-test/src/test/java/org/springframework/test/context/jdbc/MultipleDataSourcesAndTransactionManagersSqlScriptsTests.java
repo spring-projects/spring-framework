@@ -40,6 +40,7 @@ import static org.junit.Assert.*;
 /**
  * Integration tests for {@link Sql @Sql} that verify support for multiple
  * {@link DataSource}s and {@link PlatformTransactionManager}s.
+ * <p>Simultaneously tests for method-level overrides via {@code @SqlConfig}.
  *
  * @author Sam Brannen
  * @since 4.1
@@ -48,6 +49,7 @@ import static org.junit.Assert.*;
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration
 @DirtiesContext
+@SqlConfig(dataSource = "dataSource1", transactionManager = "txMgr1")
 public class MultipleDataSourcesAndTransactionManagersSqlScriptsTests {
 
 	@Autowired
@@ -58,13 +60,13 @@ public class MultipleDataSourcesAndTransactionManagersSqlScriptsTests {
 
 
 	@Test
-	@Sql(scripts = "data-add-dogbert.sql", dataSource = "dataSource1", transactionManager = "txMgr1")
+	@Sql("data-add-dogbert.sql")
 	public void database1() {
 		assertUsers(new JdbcTemplate(dataSource1), "Dilbert", "Dogbert");
 	}
 
 	@Test
-	@Sql(scripts = "data-add-catbert.sql", dataSource = "dataSource2", transactionManager = "txMgr2")
+	@Sql(scripts = "data-add-catbert.sql", config = @SqlConfig(dataSource = "dataSource2", transactionManager = "txMgr2"))
 	public void database2() {
 		assertUsers(new JdbcTemplate(dataSource2), "Dilbert", "Catbert");
 	}

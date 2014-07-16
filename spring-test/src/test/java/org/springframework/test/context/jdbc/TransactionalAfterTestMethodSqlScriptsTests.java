@@ -62,7 +62,7 @@ public class TransactionalAfterTestMethodSqlScriptsTests extends AbstractTransac
 
 	@Test
 	@SqlGroup({//
-		@Sql({ "schema.sql", "data.sql" }),//
+	@Sql({ "schema.sql", "data.sql" }),//
 		@Sql(scripts = "drop-schema.sql", executionPhase = AFTER_TEST_METHOD) //
 	})
 	// test## is required for @FixMethodOrder.
