@@ -40,12 +40,12 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 /**
- *
  * @author Stephane Nicoll
  */
-public class JCacheEhCacheTest extends AbstractAnnotationTests {
+public class JCacheEhCacheTests extends AbstractAnnotationTests {
 
 	private CacheManager jCacheManager;
+
 
 	@Override
 	protected ConfigurableApplicationContext getApplicationContext() {
@@ -59,11 +59,13 @@ public class JCacheEhCacheTest extends AbstractAnnotationTests {
 		jCacheManager.close();
 	}
 
+
 	@Override
 	@Test
 	@Ignore("Multi cache manager support to be added")
 	public void testCustomCacheManager() {
 	}
+
 
 	@Configuration
 	@EnableCaching
@@ -78,16 +80,11 @@ public class JCacheEhCacheTest extends AbstractAnnotationTests {
 		@Bean
 		public CacheManager jCacheManager() {
 			CacheManager cacheManager = Caching.getCachingProvider().getCacheManager();
-			final MutableConfiguration<Object, Object> mutableConfiguration
-					= new MutableConfiguration<Object, Object>();
-			mutableConfiguration.setStoreByValue(false); // Otherwise value has to be Serializable
-			cacheManager.createCache("testCache",
-					new JCacheConfiguration<Object, Object>(mutableConfiguration));
-			cacheManager.createCache("primary",
-					new JCacheConfiguration<Object, Object>(mutableConfiguration));
-			cacheManager.createCache("secondary",
-					new JCacheConfiguration<Object, Object>(mutableConfiguration));
-
+			MutableConfiguration<Object, Object> mutableConfiguration = new MutableConfiguration<Object, Object>();
+			mutableConfiguration.setStoreByValue(false);  // otherwise value has to be Serializable
+			cacheManager.createCache("testCache", new JCacheConfiguration<Object, Object>(mutableConfiguration));
+			cacheManager.createCache("primary", new JCacheConfiguration<Object, Object>(mutableConfiguration));
+			cacheManager.createCache("secondary", new JCacheConfiguration<Object, Object>(mutableConfiguration));
 			return cacheManager;
 		}
 
@@ -111,6 +108,6 @@ public class JCacheEhCacheTest extends AbstractAnnotationTests {
 		public KeyGenerator customKeyGenerator() {
 			return new SomeCustomKeyGenerator();
 		}
-
 	}
+
 }
