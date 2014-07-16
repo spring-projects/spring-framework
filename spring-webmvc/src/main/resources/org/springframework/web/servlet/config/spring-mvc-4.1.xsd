@@ -753,6 +753,16 @@
 								]]></xsd:documentation>
 						</xsd:annotation>
 					</xsd:element>
+					<xsd:element name="groovy-markup" type="urlViewResolverType">
+						<xsd:annotation>
+							<xsd:documentation><![CDATA[
+	Register a GroovyMarkupViewResolver.
+	By default ".tpl" is configured as a view name suffix.
+	To configure Groovy Markup Template you must also add a top-level <mvc:groovy-markup> element.
+	or declare a GroovyMarkupConfigurer bean.
+							]]></xsd:documentation>
+						</xsd:annotation>
+					</xsd:element>
 					<xsd:element ref="beans:bean">
 						<xsd:annotation>
 							<xsd:documentation><![CDATA[
@@ -847,6 +857,24 @@
 				<xsd:annotation>
 					<xsd:documentation><![CDATA[
 	The Velocity resource loader path via a Spring resource location.
+					]]></xsd:documentation>
+				</xsd:annotation>
+			</xsd:attribute>
+		</xsd:complexType>
+	</xsd:element>
+
+	<xsd:element name="groovy-markup">
+		<xsd:annotation>
+			<xsd:documentation><![CDATA[
+	Configure Groovy Markup Template for view resolution by registering a GroovyMarkupConfigurer bean.
+	This is a shortcut alternative to declaring a GroovyMarkupConfigurer bean directly.
+			]]></xsd:documentation>
+		</xsd:annotation>
+		<xsd:complexType>
+			<xsd:attribute name="resource-loader-path" type="xsd:string">
+				<xsd:annotation>
+					<xsd:documentation><![CDATA[
+	The Groovy Markup Template resource loader path via a Spring resource location.
 					]]></xsd:documentation>
 				</xsd:annotation>
 			</xsd:attribute>

@@ -12,6 +12,7 @@
 		<mvc:tiles />
 		<mvc:freemarker prefix="freemarker-" suffix=".freemarker" view-names="my*,*Report" />
 		<mvc:velocity cache-views="false" />
+		<mvc:groovy-markup />
 		<bean class="org.springframework.web.servlet.view.InternalResourceViewResolver" />
 		<ref bean="customResolver" />
 	</mvc:view-resolvers>
@@ -29,6 +30,8 @@
 	</mvc:freemarker>
 
 	<mvc:velocity resource-loader-path="/test" />
+
+	<mvc:groovy-markup resource-loader-path="/test" />
 
 </beans>
  

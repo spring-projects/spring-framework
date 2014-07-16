@@ -25,6 +25,7 @@
 		<mvc:tiles />
 		<mvc:freemarker />
 		<mvc:velocity />
+		<mvc:groovy-markup />
 	</mvc:view-resolvers>
 
 	<mvc:tiles check-refresh="true">
@@ -36,6 +37,8 @@
 	</mvc:freemarker>
 
 	<mvc:velocity resource-loader-path="/org/springframework/web/servlet/view" />
+
+	<mvc:groovy-markup />
 
 </beans>
  

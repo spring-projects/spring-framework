@@ -28,6 +28,8 @@ import org.springframework.web.servlet.view.ContentNegotiatingViewResolver;
 import org.springframework.web.servlet.view.InternalResourceViewResolver;
 import org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer;
 import org.springframework.web.servlet.view.freemarker.FreeMarkerViewResolver;
+import org.springframework.web.servlet.view.groovy.GroovyMarkupConfigurer;
+import org.springframework.web.servlet.view.groovy.GroovyMarkupViewResolver;
 import org.springframework.web.servlet.view.json.MappingJackson2JsonView;
 import org.springframework.web.servlet.view.tiles3.TilesConfigurer;
 import org.springframework.web.servlet.view.tiles3.TilesViewResolver;
@@ -57,6 +59,7 @@ public class ViewResolverRegistryTests {
 		context.registerSingleton("freeMarkerConfigurer", FreeMarkerConfigurer.class);
 		context.registerSingleton("velocityConfigurer", VelocityConfigurer.class);
 		context.registerSingleton("tilesConfigurer", TilesConfigurer.class);
+		context.registerSingleton("groovyMarkupConfigurer", GroovyMarkupConfigurer.class);
 		this.registry = new ViewResolverRegistry();
 		this.registry.setApplicationContext(context);
 		this.registry.setContentNegotiationManager(new ContentNegotiationManager());
@@ -163,6 +166,20 @@ public class ViewResolverRegistryTests {
 		this.registry.freeMarker();
 		FreeMarkerViewResolver resolver = checkAndGetResolver(FreeMarkerViewResolver.class);
 		checkPropertyValues(resolver, "prefix", "", "suffix", ".ftl");
+	}
+
+	@Test
+	public void groovyMarkup() {
+		this.registry.groovyMarkup().prefix("/").suffix(".groovy").cache(true);
+		GroovyMarkupViewResolver resolver = checkAndGetResolver(GroovyMarkupViewResolver.class);
+		checkPropertyValues(resolver, "prefix", "/", "suffix", ".groovy", "cacheLimit", 1024);
+	}
+
+	@Test
+	public void groovyMarkupDefaultValues() {
+		this.registry.groovyMarkup();
+		GroovyMarkupViewResolver resolver = checkAndGetResolver(GroovyMarkupViewResolver.class);
+		checkPropertyValues(resolver, "prefix", "", "suffix", ".tpl");
 	}
 
 	@Test
