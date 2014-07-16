@@ -102,6 +102,7 @@ public abstract class AbstractSockJsIntegrationTests {
 		this.wac.register(TestConfig.class, upgradeStrategyConfigClass());
 		this.wac.refresh();
 		this.server = createWebSocketTestServer();
+		this.server.setup();
 		this.server.deployConfig(this.wac, this.errorFilter);
 		this.server.start();
 		this.baseUrl = "http://localhost:" + this.server.getPort();
