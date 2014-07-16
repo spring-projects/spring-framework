@@ -55,8 +55,8 @@ import org.springframework.util.ResourceUtils;
  * value of the {@link Sql#executionPhase executionPhase} flag.
  *
  * <p>Scripts will be executed either within an existing Spring-managed transaction
- * or within a new, isolated transaction, depending on the configured value of the
- * {@link Sql#requireNewTransaction requireNewTransaction} flag.
+ * or within an isolated transaction, depending on the configured value of
+ * {@link SqlConfig#transactionMode}.
  *
  * <h3>Script Resources</h3>
  * <p>For details on default script detection and how explicit script locations
@@ -65,7 +65,7 @@ import org.springframework.util.ResourceUtils;
  * <h3>Required Spring Beans</h3>
  * <p>A {@link DataSource} and {@link PlatformTransactionManager} must be defined
  * as beans in the Spring {@link ApplicationContext} for the corresponding test.
- * Consult the Javadoc for {@link TestContextTransactionUtils#retrieveDataSource}
+ * Consult the javadocs for {@link TestContextTransactionUtils#retrieveDataSource}
  * and {@link TestContextTransactionUtils#retrieveTransactionManager} for details
  * on the algorithms used to locate these beans.
  *
