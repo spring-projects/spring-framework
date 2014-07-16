@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,9 +44,11 @@ import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.http.client.support.AsyncHttpAccessor;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.util.Assert;
+import org.springframework.util.concurrent.FailureCallback;
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.util.concurrent.ListenableFutureAdapter;
 import org.springframework.util.concurrent.ListenableFutureCallback;
+import org.springframework.util.concurrent.SuccessCallback;
 import org.springframework.web.util.UriTemplate;
 
 /**
@@ -254,15 +256,21 @@ public class AsyncRestTemplate extends AsyncHttpAccessor implements AsyncRestOpe
 
 			@Override
 			public void addCallback(final ListenableFutureCallback<? super URI> callback) {
+				addCallback(callback, callback);
+			}
+
+			@Override
+			public void addCallback(final SuccessCallback<? super URI> successCallback,
+									final FailureCallback failureCallback) {
 				headersFuture.addCallback(new ListenableFutureCallback<HttpHeaders>() {
 					@Override
 					public void onSuccess(HttpHeaders result) {
-						callback.onSuccess(result.getLocation());
+						successCallback.onSuccess(result.getLocation());
 					}
 
 					@Override
 					public void onFailure(Throwable t) {
-						callback.onFailure(t);
+						failureCallback.onFailure(t);
 					}
 				});
 			}
@@ -391,17 +399,21 @@ public class AsyncRestTemplate extends AsyncHttpAccessor implements AsyncRestOpe
 		return new ListenableFuture<Set<HttpMethod>>() {
 
 			@Override
-			public void addCallback(
-					final ListenableFutureCallback<? super Set<HttpMethod>> callback) {
+			public void addCallback(final ListenableFutureCallback<? super Set<HttpMethod>> callback) {
+				addCallback(callback, callback);
+			}
+
+			@Override
+			public void addCallback(final SuccessCallback<? super Set<HttpMethod>> successCallback, final FailureCallback failureCallback) {
 				headersFuture.addCallback(new ListenableFutureCallback<HttpHeaders>() {
 					@Override
 					public void onSuccess(HttpHeaders result) {
-						callback.onSuccess(result.getAllow());
+						successCallback.onSuccess(result.getAllow());
 					}
 
 					@Override
 					public void onFailure(Throwable t) {
-						callback.onFailure(t);
+						failureCallback.onFailure(t);
 					}
 				});
 			}

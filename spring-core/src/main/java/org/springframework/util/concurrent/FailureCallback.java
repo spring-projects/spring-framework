@@ -17,13 +17,18 @@
 package org.springframework.util.concurrent;
 
 /**
- * Defines the contract for callbacks that accept the result of a
+ * Defines the contract for failure callbacks that accept the result of a
  * {@link ListenableFuture}.
  *
- * @author Arjen Poutsma
  * @author Sebastien Deleuze
- * @since 4.0
+ * @since 4.1
  */
-public interface ListenableFutureCallback<T> extends SuccessCallback<T>, FailureCallback {
+public interface FailureCallback {
+
+	/**
+	 * Called when the {@link ListenableFuture} fails to complete.
+	 * @param t the exception that triggered the failure
+	 */
+	void onFailure(Throwable t);
 
 }

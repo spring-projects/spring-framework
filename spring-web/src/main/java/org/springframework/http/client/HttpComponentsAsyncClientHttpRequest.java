@@ -29,12 +29,15 @@ import org.apache.http.nio.client.HttpAsyncClient;
 import org.apache.http.nio.entity.NByteArrayEntity;
 import org.apache.http.protocol.HttpContext;
 
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
+import org.springframework.util.concurrent.FailureCallback;
 import org.springframework.util.concurrent.FutureAdapter;
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.util.concurrent.ListenableFutureCallback;
 import org.springframework.util.concurrent.ListenableFutureCallbackRegistry;
+import org.springframework.util.concurrent.SuccessCallback;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+
 
 /**
  * {@link ClientHttpRequest} implementation that uses Apache HttpComponents HttpClient to
@@ -101,6 +104,14 @@ final class HttpComponentsAsyncClientHttpRequest extends AbstractBufferingAsyncC
 			this.callbacks.addCallback(callback);
 		}
 
+		public void addSuccessCallback(SuccessCallback<? super ClientHttpResponse> callback) {
+			this.callbacks.addSuccessCallback(callback);
+		}
+
+		public void addFailureCallback(FailureCallback callback) {
+			this.callbacks.addFailureCallback(callback);
+		}
+
 		@Override
 		public void completed(HttpResponse result) {
 			this.callbacks.success(new HttpComponentsAsyncClientHttpResponse(result));
@@ -135,6 +146,12 @@ final class HttpComponentsAsyncClientHttpRequest extends AbstractBufferingAsyncC
 		@Override
 		public void addCallback(ListenableFutureCallback<? super ClientHttpResponse> callback) {
 			this.callback.addCallback(callback);
+		}
+
+		@Override
+		public void addCallback(SuccessCallback<? super ClientHttpResponse> successCallback, FailureCallback failureCallback) {
+			this.callback.addSuccessCallback(successCallback);
+			this.callback.addFailureCallback(failureCallback);
 		}
 	}
 

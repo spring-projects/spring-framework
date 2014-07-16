@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,12 +44,18 @@ public abstract class ListenableFutureAdapter<T, S> extends FutureAdapter<T, S>
 
 	@Override
 	public void addCallback(final ListenableFutureCallback<? super T> callback) {
+		addCallback(callback, callback);
+	}
+
+	@Override
+	public void addCallback(final SuccessCallback<? super T> successCallback,
+							final FailureCallback failureCallback) {
 		ListenableFuture<S> listenableAdaptee = (ListenableFuture<S>) getAdaptee();
 		listenableAdaptee.addCallback(new ListenableFutureCallback<S>() {
 			@Override
 			public void onSuccess(S result) {
 				try {
-					callback.onSuccess(adaptInternal(result));
+					successCallback.onSuccess(adaptInternal(result));
 				}
 				catch (ExecutionException ex) {
 					Throwable cause = ex.getCause();
@@ -62,8 +68,9 @@ public abstract class ListenableFutureAdapter<T, S> extends FutureAdapter<T, S>
 
 			@Override
 			public void onFailure(Throwable t) {
-				callback.onFailure(t);
+				failureCallback.onFailure(t);
 			}
 		});
 	}
+
 }
