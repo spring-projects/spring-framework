@@ -149,7 +149,7 @@ public class EnableCachingTests extends AbstractAnnotationTests {
 		@Override
 		@Bean
 		public CacheManager cacheManager() {
-			return CacheTestUtils.createSimpleCacheManager("default", "primary", "secondary");
+			return CacheTestUtils.createSimpleCacheManager("testCache", "primary", "secondary");
 		}
 
 		@Bean
@@ -181,7 +181,7 @@ public class EnableCachingTests extends AbstractAnnotationTests {
 
 		@Bean
 		public CacheManager customCacheManager() {
-			return CacheTestUtils.createSimpleCacheManager("default");
+			return CacheTestUtils.createSimpleCacheManager("testCache");
 		}
 	}
 

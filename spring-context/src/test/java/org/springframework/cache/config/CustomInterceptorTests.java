@@ -92,7 +92,7 @@ public class CustomInterceptorTests {
 
 		@Bean
 		public CacheManager cacheManager() {
-			return CacheTestUtils.createSimpleCacheManager("default", "primary", "secondary");
+			return CacheTestUtils.createSimpleCacheManager("testCache", "primary", "secondary");
 		}
 
 		@Bean

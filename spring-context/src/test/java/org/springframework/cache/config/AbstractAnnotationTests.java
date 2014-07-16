@@ -49,8 +49,6 @@ public abstract class AbstractAnnotationTests {
 
 	protected CacheManager cm;
 
-	protected CacheManager customCm;
-
 	/** @return a refreshed application context */
 	protected abstract ConfigurableApplicationContext getApplicationContext();
 
@@ -60,10 +58,9 @@ public abstract class AbstractAnnotationTests {
 		cs = ctx.getBean("service", CacheableService.class);
 		ccs = ctx.getBean("classService", CacheableService.class);
 		cm = ctx.getBean("cacheManager", CacheManager.class);
-		customCm = ctx.getBean("customCacheManager", CacheManager.class);
 
 		Collection<String> cn = cm.getCacheNames();
-		assertTrue(cn.contains("default"));
+		assertTrue(cn.contains("testCache"));
 		assertTrue(cn.contains("secondary"));
 		assertTrue(cn.contains("primary"));
 	}
@@ -179,7 +176,7 @@ public abstract class AbstractAnnotationTests {
 		assertSame(r1, r2);
 		assertNotSame(r1, r10);
 		service.evictAll(new Object());
-		Cache cache = cm.getCache("default");
+		Cache cache = cm.getCache("testCache");
 		assertNull(cache.get(o1));
 		assertNull(cache.get(o2));
 
@@ -202,7 +199,7 @@ public abstract class AbstractAnnotationTests {
 	}
 
 	public void testUnlessExpression(CacheableService<?> service) throws Exception {
-		Cache cache = cm.getCache("default");
+		Cache cache = cm.getCache("testCache");
 		cache.clear();
 		service.unless(10);
 		service.unless(11);
@@ -249,7 +246,7 @@ public abstract class AbstractAnnotationTests {
 		Object key = new Object();
 		Object r1 = service.name(key);
 		assertSame(r1, service.name(key));
-		Cache cache = cm.getCache("default");
+		Cache cache = cm.getCache("testCache");
 		// assert the method name is used
 		assertNotNull(cache.get(keyName));
 	}
@@ -258,7 +255,7 @@ public abstract class AbstractAnnotationTests {
 		Object key = new Object();
 		Object r1 = service.rootVars(key);
 		assertSame(r1, service.rootVars(key));
-		Cache cache = cm.getCache("default");
+		Cache cache = cm.getCache("testCache");
 		// assert the method name is used
 		String expectedKey = "rootVarsrootVars" + AopProxyUtils.ultimateTargetClass(service) + service;
 		assertNotNull(cache.get(expectedKey));
@@ -292,7 +289,7 @@ public abstract class AbstractAnnotationTests {
 
 	public void testCacheUpdate(CacheableService<?> service) {
 		Object o = new Object();
-		Cache cache = cm.getCache("default");
+		Cache cache = cm.getCache("testCache");
 		assertNull(cache.get(o));
 		Object r1 = service.update(o);
 		assertSame(r1, cache.get(o).get());
@@ -307,7 +304,7 @@ public abstract class AbstractAnnotationTests {
 		Integer one = Integer.valueOf(1);
 		Integer three = Integer.valueOf(3);
 
-		Cache cache = cm.getCache("default");
+		Cache cache = cm.getCache("testCache");
 		assertEquals(one, Integer.valueOf(service.conditionalUpdate(one).toString()));
 		assertNull(cache.get(one));
 
@@ -567,7 +564,7 @@ public abstract class AbstractAnnotationTests {
 
 	@Test
 	public void testClassMethodName() throws Exception {
-		testMethodName(ccs, "namedefault");
+		testMethodName(ccs, "nametestCache");
 	}
 
 	@Test
@@ -585,7 +582,7 @@ public abstract class AbstractAnnotationTests {
 		Object param = new Object();
 		Object r1 = cs.customKeyGenerator(param);
 		assertSame(r1, cs.customKeyGenerator(param));
-		Cache cache = cm.getCache("default");
+		Cache cache = cm.getCache("testCache");
 		// Checks that the custom keyGenerator was used
 		Object expectedKey = SomeCustomKeyGenerator.generateKey("customKeyGenerator", param);
 		assertNotNull(cache.get(expectedKey));
@@ -604,10 +601,12 @@ public abstract class AbstractAnnotationTests {
 
 	@Test
 	public void testCustomCacheManager() {
+		CacheManager customCm = ctx.getBean("customCacheManager", CacheManager.class);
 		Object key = new Object();
 		Object r1 = cs.customCacheManager(key);
 		assertSame(r1, cs.customCacheManager(key));
-		Cache cache = customCm.getCache("default");
+
+		Cache cache = customCm.getCache("testCache");
 		assertNotNull(cache.get(key));
 	}
 
