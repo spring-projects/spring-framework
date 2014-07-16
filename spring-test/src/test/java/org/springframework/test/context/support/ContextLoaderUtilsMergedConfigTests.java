@@ -25,6 +25,10 @@ import org.junit.Test;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.ContextLoader;
 import org.springframework.test.context.MergedContextConfiguration;
+import org.springframework.test.context.web.WebDelegatingSmartContextLoader;
+import org.springframework.test.context.web.WebMergedContextConfiguration;
+
+import static org.junit.Assert.*;
 
 /**
  * Unit tests for {@link ContextLoaderUtils} involving {@link MergedContextConfiguration}.
@@ -92,6 +96,28 @@ public class ContextLoaderUtilsMergedConfigTests extends AbstractContextLoaderUt
 
 		assertMergedConfig(mergedConfig, testClass, EMPTY_STRING_ARRAY, new Class<?>[] { FooConfig.class },
 			DelegatingSmartContextLoader.class);
+	}
+
+	/**
+	 * Introduced to investigate claims made in a discussion on
+	 * <a href="http://stackoverflow.com/questions/24725438/what-could-cause-a-class-implementing-applicationlistenercontextrefreshedevent">Stack Overflow</a>.
+	 */
+	@Test
+	public void buildMergedConfigWithAtWebAppConfigurationWithAnnotationAndClassesOnSuperclass() {
+		Class<?> webTestClass = WebClassesFoo.class;
+		Class<?> standardTestClass = ClassesFoo.class;
+		WebMergedContextConfiguration webMergedConfig = (WebMergedContextConfiguration) buildMergedContextConfiguration(webTestClass);
+		MergedContextConfiguration standardMergedConfig = buildMergedContextConfiguration(standardTestClass);
+
+		assertEquals(webMergedConfig, webMergedConfig);
+		assertEquals(standardMergedConfig, standardMergedConfig);
+		assertNotEquals(standardMergedConfig, webMergedConfig);
+		assertNotEquals(webMergedConfig, standardMergedConfig);
+
+		assertMergedConfig(webMergedConfig, webTestClass, EMPTY_STRING_ARRAY, new Class<?>[] { FooConfig.class },
+			WebDelegatingSmartContextLoader.class);
+		assertMergedConfig(standardMergedConfig, standardTestClass, EMPTY_STRING_ARRAY,
+			new Class<?>[] { FooConfig.class }, DelegatingSmartContextLoader.class);
 	}
 
 	@Test

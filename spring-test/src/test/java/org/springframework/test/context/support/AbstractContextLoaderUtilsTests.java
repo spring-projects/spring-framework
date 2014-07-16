@@ -36,6 +36,7 @@ import org.springframework.test.context.ContextConfigurationAttributes;
 import org.springframework.test.context.ContextLoader;
 import org.springframework.test.context.MergedContextConfiguration;
 import org.springframework.test.context.TestContextBootstrapper;
+import org.springframework.test.context.web.WebAppConfiguration;
 
 import static org.junit.Assert.*;
 
@@ -168,6 +169,10 @@ abstract class AbstractContextLoaderUtilsTests {
 	@ContextConfiguration(classes = FooConfig.class, inheritLocations = false)
 	@ActiveProfiles(profiles = "foo")
 	static class ClassesFoo {
+	}
+
+	@WebAppConfiguration
+	static class WebClassesFoo extends ClassesFoo {
 	}
 
 	@ContextConfiguration(locations = "/bar.xml", inheritLocations = true, loader = AnnotationConfigContextLoader.class)
