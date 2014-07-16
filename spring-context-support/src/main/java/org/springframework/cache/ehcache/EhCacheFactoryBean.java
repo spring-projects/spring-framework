@@ -17,6 +17,7 @@
 package org.springframework.cache.ehcache;
 
 import java.io.IOException;
+import java.lang.reflect.Method;
 import java.util.Set;
 
 import net.sf.ehcache.Cache;
@@ -38,6 +39,7 @@ import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.ReflectionUtils;
 
 /**
  * {@link FactoryBean} that creates a named EhCache {@link net.sf.ehcache.Cache} instance
@@ -64,8 +66,12 @@ import org.springframework.util.ClassUtils;
 public class EhCacheFactoryBean extends CacheConfiguration implements FactoryBean<Ehcache>, BeanNameAware, InitializingBean {
 
 	// EhCache's setStatisticsEnabled(boolean) available? Not anymore as of EhCache 2.7...
-	private static final boolean setStatisticsAvailable =
-			ClassUtils.hasMethod(Ehcache.class, "setStatisticsEnabled", boolean.class);
+	private static final Method setStatisticsEnabledMethod =
+			ClassUtils.getMethodIfAvailable(Ehcache.class, "setStatisticsEnabled", boolean.class);
+
+	// EhCache's setSampledStatisticsEnabled(boolean) available? Not anymore as of EhCache 2.7...
+	private static final Method setSampledStatisticsEnabledMethod =
+			ClassUtils.getMethodIfAvailable(Ehcache.class, "setSampledStatisticsEnabled", boolean.class);
 
 
 	protected final Log logger = LogFactory.getLog(getClass());
@@ -271,14 +277,13 @@ public class EhCacheFactoryBean extends CacheConfiguration implements FactoryBea
 			}
 
 			// Only necessary on EhCache <2.7: As of 2.7, statistics are on by default.
-			if (setStatisticsAvailable) {
-				if (this.statisticsEnabled) {
-					rawCache.setStatisticsEnabled(true);
-				}
-				if (this.sampledStatisticsEnabled) {
-					rawCache.setSampledStatisticsEnabled(true);
-				}
+			if (this.statisticsEnabled && setStatisticsEnabledMethod != null) {
+				ReflectionUtils.invokeMethod(setStatisticsEnabledMethod, rawCache, true);
 			}
+			if (this.sampledStatisticsEnabled && setSampledStatisticsEnabledMethod != null) {
+				ReflectionUtils.invokeMethod(setSampledStatisticsEnabledMethod, rawCache, true);
+			}
+
 			if (this.disabled) {
 				rawCache.setDisabled(true);
 			}
