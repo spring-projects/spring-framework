@@ -74,7 +74,7 @@ class MergedSqlConfig {
 
 	private static String retrieveSeparator(AnnotationAttributes attributes) {
 		String separator = attributes.getString("separator");
-		if (separator != null && separator.equals("")) {
+		if ("".equals(separator)) {
 			separator = ScriptUtils.DEFAULT_STATEMENT_SEPARATOR;
 		}
 		return separator;
@@ -82,7 +82,7 @@ class MergedSqlConfig {
 
 	private static String retrieveCommentPrefix(AnnotationAttributes attributes) {
 		String commentPrefix = attributes.getString("commentPrefix");
-		if (commentPrefix != null && commentPrefix.equals("")) {
+		if ("".equals(commentPrefix)) {
 			commentPrefix = ScriptUtils.DEFAULT_COMMENT_PREFIX;
 		}
 		return commentPrefix;
@@ -90,7 +90,7 @@ class MergedSqlConfig {
 
 	private static String retrieveBlockCommentStartDelimiter(AnnotationAttributes attributes) {
 		String blockCommentStartDelimiter = attributes.getString("blockCommentStartDelimiter");
-		if (blockCommentStartDelimiter != null && blockCommentStartDelimiter.equals("")) {
+		if ("".equals(blockCommentStartDelimiter)) {
 			blockCommentStartDelimiter = ScriptUtils.DEFAULT_BLOCK_COMMENT_START_DELIMITER;
 		}
 		return blockCommentStartDelimiter;
@@ -98,7 +98,7 @@ class MergedSqlConfig {
 
 	private static String retrieveBlockCommentEndDelimiter(AnnotationAttributes attributes) {
 		String blockCommentEndDelimiter = attributes.getString("blockCommentEndDelimiter");
-		if (blockCommentEndDelimiter != null && blockCommentEndDelimiter.equals("")) {
+		if ("".equals(blockCommentEndDelimiter)) {
 			blockCommentEndDelimiter = ScriptUtils.DEFAULT_BLOCK_COMMENT_END_DELIMITER;
 		}
 		return blockCommentEndDelimiter;
