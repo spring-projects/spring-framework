@@ -186,18 +186,18 @@ public class SendToMethodReturnValueHandlerTests {
 	}
 
 	@Test
-	public void sendToDefaultDestinationWithoutLeadingSlash() throws Exception {
+	public void sendToDefaultDestinationWhenUsingDotPathSeparator() throws Exception {
 
 		when(this.messageChannel.send(any(Message.class))).thenReturn(true);
 
-		Message<?> inputMessage = createInputMessage("sess1", "sub1", "/app", "dest", null);
+		Message<?> inputMessage = createInputMessage("sess1", "sub1", "/app/", "dest.foo.bar", null);
 		this.handler.handleReturnValue(PAYLOAD, this.sendToDefaultDestReturnType, inputMessage);
 
 		verify(this.messageChannel, times(1)).send(this.messageCaptor.capture());
 
 		Message<?> message = this.messageCaptor.getAllValues().get(0);
 		SimpMessageHeaderAccessor headers = SimpMessageHeaderAccessor.wrap(message);
-		assertEquals("/topic/dest", headers.getDestination());
+		assertEquals("/topic/dest.foo.bar", headers.getDestination());
 	}
 
 	@Test
@@ -313,19 +313,19 @@ public class SendToMethodReturnValueHandlerTests {
 	}
 
 	@Test
-	public void sendToUserDefaultDestinationWithoutLeadingSlash() throws Exception {
+	public void sendToUserDefaultDestinationWhenUsingDotPathSeparator() throws Exception {
 
 		when(this.messageChannel.send(any(Message.class))).thenReturn(true);
 
 		TestUser user = new TestUser();
-		Message<?> inputMessage = createInputMessage("sess1", "sub1", "/app", "dest", user);
+		Message<?> inputMessage = createInputMessage("sess1", "sub1", "/app/", "dest.foo.bar", user);
 		this.handler.handleReturnValue(PAYLOAD, this.sendToUserDefaultDestReturnType, inputMessage);
 
 		verify(this.messageChannel, times(1)).send(this.messageCaptor.capture());
 
 		Message<?> message = this.messageCaptor.getAllValues().get(0);
 		SimpMessageHeaderAccessor headers = SimpMessageHeaderAccessor.wrap(message);
-		assertEquals("/user/" + user.getName() + "/queue/dest", headers.getDestination());
+		assertEquals("/user/" + user.getName() + "/queue/dest.foo.bar", headers.getDestination());
 	}
 
 	@Test

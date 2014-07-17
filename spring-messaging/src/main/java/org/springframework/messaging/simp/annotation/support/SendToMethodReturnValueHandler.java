@@ -188,11 +188,11 @@ public class SendToMethodReturnValueHandler implements HandlerMethodReturnValueH
 			}
 		}
 		String name = DestinationPatternsMessageCondition.LOOKUP_DESTINATION_HEADER;
-		String destination = (String)message.getHeaders().get(name);
-		if (StringUtils.hasLength(destination) && !destination.startsWith("/")) {
-			destination = "/" + destination;
-		}
-		return new String[] { defaultPrefix + destination };
+		String destination = (String) message.getHeaders().get(name);
+		Assert.hasText(destination, "No lookup destination header in " + message);
+
+		return (destination.startsWith("/") ?
+				new String[] {defaultPrefix + destination} : new String[] {defaultPrefix + "/" + destination});
 	}
 
 	private MessageHeaders createHeaders(String sessionId) {
