@@ -149,17 +149,6 @@ import org.springframework.web.util.UrlPathHelper;
  * 	libraries available on the classpath.
  * </ul>
  *
- * <p>When extending directly from this class instead of using
- * {@link EnableWebMvc @EnableWebMvc}, an extra step is needed if you want to use Tiles, FreeMarker
- * or Velocity view resolution configuration. Since view configurer beans are registered in their own
- * {@link org.springframework.web.servlet.config.annotation.TilesConfigurerConfigurationSupport}
- * and {@link org.springframework.web.servlet.config.annotation.VelocityConfigurerConfigurationSupport}
- * classes, you should also extend those configuration classes (only the ones
- * related to the view technology you are using), or register your own
- * {@link org.springframework.web.servlet.view.tiles3.TilesConfigurer},
- * {@link org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer} or
- * {@link org.springframework.web.servlet.view.velocity.VelocityConfigurer} beans.
- *
  * @see EnableWebMvc
  * @see WebMvcConfigurer
  * @see WebMvcConfigurerAdapter
@@ -783,9 +772,14 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	}
 
 	/**
-	 * Register a {@link org.springframework.web.servlet.view.ViewResolverComposite} that contains an ordered list of
-	 * view resolvers obtained either through
-	 * {@link #configureViewResolvers(ViewResolverRegistry)}.
+	 * Register a {@link org.springframework.web.servlet.view.ViewResolverComposite}
+	 * that contains a chain of view resolvers to use for view resolution.
+	 * By default this resolver is ordered at 0 unless content negotiation view
+	 * resolution is used in which case the order is raised to
+	 * {@link org.springframework.core.Ordered#HIGHEST_PRECEDENCE
+	 * Ordered.HIGHEST_PRECEDENCE}.
+	 *
+	 * @since 4.1
 	 */
 	@Bean
 	public ViewResolver mvcViewResolver() {
