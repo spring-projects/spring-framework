@@ -34,6 +34,7 @@ public class GroovyMarkupBeanDefinitionParser extends AbstractSimpleBeanDefiniti
 
 	public static final String BEAN_NAME = "mvcGroovyMarkupConfigurer";
 
+
 	@Override
 	protected String resolveId(Element element, AbstractBeanDefinition definition, ParserContext parserContext) {
 		return BEAN_NAME;
@@ -45,8 +46,8 @@ public class GroovyMarkupBeanDefinitionParser extends AbstractSimpleBeanDefiniti
 	}
 
 	@Override
-	protected boolean isEligibleAttribute(String attributeName) {
-		return attributeName.equals("resource-loader-path");
+	protected boolean isEligibleAttribute(String name) {
+		return (name.equals("auto-indent") || name.equals("cache-templates") || name.equals("resource-loader-path"));
 	}
 
 }

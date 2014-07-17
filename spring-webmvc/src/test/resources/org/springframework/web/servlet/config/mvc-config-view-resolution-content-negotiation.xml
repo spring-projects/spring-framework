@@ -25,7 +25,7 @@
 		<mvc:tiles />
 		<mvc:freemarker />
 		<mvc:velocity />
-		<mvc:groovy-markup />
+		<mvc:groovy />
 	</mvc:view-resolvers>
 
 	<mvc:tiles check-refresh="true">

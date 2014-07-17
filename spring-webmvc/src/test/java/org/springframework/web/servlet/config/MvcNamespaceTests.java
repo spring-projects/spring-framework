@@ -567,7 +567,7 @@ public class MvcNamespaceTests {
 
 		ViewResolverComposite compositeResolver = this.appContext.getBean(ViewResolverComposite.class);
 		assertNotNull(compositeResolver);
-		assertEquals(8, compositeResolver.getViewResolvers().size());
+		assertEquals("Actual: " + compositeResolver.getViewResolvers(), 8, compositeResolver.getViewResolvers().size());
 		assertEquals(0, compositeResolver.getOrder());
 
 		List<ViewResolver> resolvers = compositeResolver.getViewResolvers();
@@ -628,8 +628,9 @@ public class MvcNamespaceTests {
 
 		GroovyMarkupConfigurer groovyMarkupConfigurer = appContext.getBean(GroovyMarkupConfigurer.class);
 		assertNotNull(groovyMarkupConfigurer);
-		accessor = new DirectFieldAccessor(groovyMarkupConfigurer);
-		assertEquals("/test", accessor.getPropertyValue("resourceLoaderPath"));
+		assertEquals("/test", groovyMarkupConfigurer.getResourceLoaderPath());
+		assertTrue(groovyMarkupConfigurer.isAutoIndent());
+		assertFalse(groovyMarkupConfigurer.isCacheTemplates());
 	}
 
 	@Test

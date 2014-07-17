@@ -218,21 +218,12 @@ public class ViewResolverRegistry {
 	}
 
 	/**
-	 * Register a bean name view resolver that interprets view names as the names
-	 * of {@link org.springframework.web.servlet.View} beans.
-	 */
-	public void beanName() {
-		BeanNameViewResolver resolver = new BeanNameViewResolver();
-		this.viewResolvers.add(resolver);
-	}
-
-	/**
-	 * Register a Groovy Markup Template view resolver with an empty default view name
+	 * Register a Groovy markup view resolver with an empty default view name
 	 * prefix and a default suffix of ".tpl".
 	 */
-	public UrlBasedViewResolverRegistration groovyMarkup() {
+	public UrlBasedViewResolverRegistration groovy() {
 		if (this.applicationContext != null && !hasBeanOfType(GroovyMarkupConfigurer.class)) {
-			throw new BeanInitializationException("In addition to a Groovy Markup Template view resolver " +
+			throw new BeanInitializationException("In addition to a Groovy markup view resolver " +
 					"there must also be a single GroovyMarkupConfig bean in this web application context " +
 					"(or its parent): GroovyMarkupConfigurer is the usual implementation. " +
 					"This bean may be given any name.");
@@ -240,6 +231,15 @@ public class ViewResolverRegistry {
 		GroovyMarkupRegistration registration = new GroovyMarkupRegistration();
 		this.viewResolvers.add(registration.getViewResolver());
 		return registration;
+	}
+
+	/**
+	 * Register a bean name view resolver that interprets view names as the names
+	 * of {@link org.springframework.web.servlet.View} beans.
+	 */
+	public void beanName() {
+		BeanNameViewResolver resolver = new BeanNameViewResolver();
+		this.viewResolvers.add(resolver);
 	}
 
 	/**

@@ -170,14 +170,14 @@ public class ViewResolverRegistryTests {
 
 	@Test
 	public void groovyMarkup() {
-		this.registry.groovyMarkup().prefix("/").suffix(".groovy").cache(true);
+		this.registry.groovy().prefix("/").suffix(".groovy").cache(true);
 		GroovyMarkupViewResolver resolver = checkAndGetResolver(GroovyMarkupViewResolver.class);
 		checkPropertyValues(resolver, "prefix", "/", "suffix", ".groovy", "cacheLimit", 1024);
 	}
 
 	@Test
 	public void groovyMarkupDefaultValues() {
-		this.registry.groovyMarkup();
+		this.registry.groovy();
 		GroovyMarkupViewResolver resolver = checkAndGetResolver(GroovyMarkupViewResolver.class);
 		checkPropertyValues(resolver, "prefix", "", "suffix", ".tpl");
 	}

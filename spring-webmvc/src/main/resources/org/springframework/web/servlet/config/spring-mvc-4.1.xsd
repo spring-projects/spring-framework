@@ -741,8 +741,18 @@
 							<xsd:documentation><![CDATA[
 	Register a VelocityViewResolver.
 	By default ".vm" is configured as a view name suffix.
-	To configure Velocity you must also add a top-level <mvc:velocity> element.
+	To configure Velocity you must also add a top-level <mvc:velocity> element
 	or declare a VelocityConfigurer bean.
+							]]></xsd:documentation>
+						</xsd:annotation>
+					</xsd:element>
+					<xsd:element name="groovy" type="urlViewResolverType">
+						<xsd:annotation>
+							<xsd:documentation><![CDATA[
+	Register a GroovyMarkupViewResolver.
+	By default ".tpl" is configured as a view name suffix.
+	To configure the Groovy markup template engine you must also add a top-level <mvc:groovy-markup> element
+	or declare a GroovyMarkupConfigurer bean.
 							]]></xsd:documentation>
 						</xsd:annotation>
 					</xsd:element>
@@ -751,16 +761,6 @@
 							<xsd:documentation><![CDATA[
 	Register a BeanNameViewResolver bean.
 								]]></xsd:documentation>
-						</xsd:annotation>
-					</xsd:element>
-					<xsd:element name="groovy-markup" type="urlViewResolverType">
-						<xsd:annotation>
-							<xsd:documentation><![CDATA[
-	Register a GroovyMarkupViewResolver.
-	By default ".tpl" is configured as a view name suffix.
-	To configure Groovy Markup Template you must also add a top-level <mvc:groovy-markup> element.
-	or declare a GroovyMarkupConfigurer bean.
-							]]></xsd:documentation>
 						</xsd:annotation>
 					</xsd:element>
 					<xsd:element ref="beans:bean">
@@ -866,15 +866,31 @@
 	<xsd:element name="groovy-markup">
 		<xsd:annotation>
 			<xsd:documentation><![CDATA[
-	Configure Groovy Markup Template for view resolution by registering a GroovyMarkupConfigurer bean.
+	Configure the Groovy markup template engine for view resolution by registering a GroovyMarkupConfigurer bean.
 	This is a shortcut alternative to declaring a GroovyMarkupConfigurer bean directly.
 			]]></xsd:documentation>
 		</xsd:annotation>
 		<xsd:complexType>
+			<xsd:attribute name="auto-indent" type="xsd:boolean">
+				<xsd:annotation>
+					<xsd:documentation><![CDATA[
+	Whether you want the template engine to render indents automatically.
+					]]></xsd:documentation>
+				</xsd:annotation>
+			</xsd:attribute>
+			<xsd:attribute name="cache-templates" type="xsd:boolean">
+				<xsd:annotation>
+					<xsd:documentation><![CDATA[
+	If enabled templates are compiled once for each source (URL or File).
+	It is recommended to keep this flag to true unless you are in development mode
+	and want automatic reloading of templates.
+					]]></xsd:documentation>
+				</xsd:annotation>
+			</xsd:attribute>
 			<xsd:attribute name="resource-loader-path" type="xsd:string">
 				<xsd:annotation>
 					<xsd:documentation><![CDATA[
-	The Groovy Markup Template resource loader path via a Spring resource location.
+	The Groovy markup template engine resource loader path via a Spring resource location.
 					]]></xsd:documentation>
 				</xsd:annotation>
 			</xsd:attribute>

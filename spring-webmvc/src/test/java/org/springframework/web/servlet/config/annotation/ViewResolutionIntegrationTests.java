@@ -97,7 +97,7 @@ public class ViewResolutionIntegrationTests {
 
 	@Test
 	public void groovyMarkupInvalidConfig() throws Exception {
-		this.thrown.expectMessage("In addition to a Groovy Markup Template view resolver ");
+		this.thrown.expectMessage("In addition to a Groovy markup view resolver ");
 		runTest(InvalidGroovyMarkupWebConfig.class);
 	}
 
@@ -192,7 +192,7 @@ public class ViewResolutionIntegrationTests {
 
 		@Override
 		public void configureViewResolvers(ViewResolverRegistry registry) {
-			registry.groovyMarkup();
+			registry.groovy();
 		}
 
 		@Bean
@@ -235,7 +235,7 @@ public class ViewResolutionIntegrationTests {
 
 		@Override
 		public void configureViewResolvers(ViewResolverRegistry registry) {
-			registry.groovyMarkup();
+			registry.groovy();
 		}
 	}
 

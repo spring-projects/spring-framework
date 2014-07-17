@@ -76,7 +76,7 @@ public class ViewResolversBeanDefinitionParser implements BeanDefinitionParser {
 
 		ManagedList<Object> resolvers = new ManagedList<Object>(4);
 		resolvers.setSource(context.extractSource(element));
-		String[] names = new String[] {"jsp", "tiles", "bean-name", "freemarker", "velocity", "groovy-markup", "bean", "ref"};
+		String[] names = new String[] {"jsp", "tiles", "bean-name", "freemarker", "velocity", "groovy", "bean", "ref"};
 
 		for (Element resolverElement : DomUtils.getChildElementsByTagName(element, names)) {
 			String name = resolverElement.getLocalName();
@@ -105,13 +105,13 @@ public class ViewResolversBeanDefinitionParser implements BeanDefinitionParser {
 				resolverBeanDef.getPropertyValues().add("suffix", ".vm");
 				addUrlBasedViewResolverProperties(resolverElement, resolverBeanDef);
 			}
-			else if ("bean-name".equals(name)) {
-				resolverBeanDef = new RootBeanDefinition(BeanNameViewResolver.class);
-			}
-			else if ("groovy-markup".equals(name)) {
+			else if ("groovy".equals(name)) {
 				resolverBeanDef = new RootBeanDefinition(GroovyMarkupViewResolver.class);
 				resolverBeanDef.getPropertyValues().add("suffix", ".tpl");
 				addUrlBasedViewResolverProperties(resolverElement, resolverBeanDef);
+			}
+			else if ("bean-name".equals(name)) {
+				resolverBeanDef = new RootBeanDefinition(BeanNameViewResolver.class);
 			}
 			else {
 				// Should never happen
