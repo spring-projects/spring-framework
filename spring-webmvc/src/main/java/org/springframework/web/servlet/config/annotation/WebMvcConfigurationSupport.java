@@ -354,6 +354,30 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	}
 
 	/**
+	 * Return a handler mapping ordered at -1 to map URL paths to
+	 * status controllers. To configure status controllers, override
+	 * {@link #addStatusControllers}.
+	 */
+	@Bean
+	public HandlerMapping statusControllerHandlerMapping() {
+		StatusControllerRegistry registry = new StatusControllerRegistry();
+		addStatusControllers(registry);
+
+		AbstractHandlerMapping handlerMapping = registry.getHandlerMapping();
+		handlerMapping = handlerMapping != null ? handlerMapping : new EmptyHandlerMapping();
+		handlerMapping.setPathMatcher(mvcPathMatcher());
+		handlerMapping.setUrlPathHelper(mvcUrlPathHelper());
+		return handlerMapping;
+	}
+
+	/**
+	 * Override this method to add status controllers.
+	 * @see StatusControllerRegistry
+	 */
+	protected void addStatusControllers(StatusControllerRegistry registry) {
+	}
+
+	/**
 	 * Return a {@link BeanNameUrlHandlerMapping} ordered at 2 to map URL
 	 * paths to controller bean names.
 	 */

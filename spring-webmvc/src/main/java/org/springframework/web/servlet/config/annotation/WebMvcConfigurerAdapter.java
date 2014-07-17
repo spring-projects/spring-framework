@@ -138,6 +138,14 @@ public abstract class WebMvcConfigurerAdapter implements WebMvcConfigurer {
 	 * <p>This implementation is empty.
 	 */
 	@Override
+	public void addStatusControllers(StatusControllerRegistry registry) {
+	}
+
+	/**
+	 * {@inheritDoc}
+	 * <p>This implementation is empty.
+	 */
+	@Override
 	public void configureViewResolvers(ViewResolverRegistry registry) {
 	}
 

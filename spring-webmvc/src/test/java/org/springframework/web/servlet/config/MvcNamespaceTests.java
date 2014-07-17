@@ -37,6 +37,7 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.format.annotation.DateTimeFormat.ISO;
 import org.springframework.format.support.FormattingConversionServiceFactoryBean;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.mock.web.test.MockHttpServletRequest;
@@ -72,6 +73,7 @@ import org.springframework.web.servlet.handler.*;
 import org.springframework.web.servlet.i18n.LocaleChangeInterceptor;
 import org.springframework.web.servlet.mvc.HttpRequestHandlerAdapter;
 import org.springframework.web.servlet.mvc.SimpleControllerHandlerAdapter;
+import org.springframework.web.servlet.mvc.StatusController;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 import org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder;
@@ -109,7 +111,7 @@ import static org.junit.Assert.*;
 public class MvcNamespaceTests {
 
 	public static final String VIEWCONTROLLER_BEAN_NAME = "org.springframework.web.servlet.config.viewControllerHandlerMapping";
-	
+
 	private GenericWebApplicationContext appContext;
 
 	private TestController handler;
@@ -527,6 +529,42 @@ public class MvcNamespaceTests {
 		BeanNameUrlHandlerMapping beanNameMapping = appContext.getBean(BeanNameUrlHandlerMapping.class);
 		assertNotNull(beanNameMapping);
 		assertEquals(2, beanNameMapping.getOrder());
+	}
+
+	@Test
+	public void testStatusControllers() throws Exception {
+		loadBeanDefinitions("mvc-config-status-controllers.xml", 16);
+
+		SimpleUrlHandlerMapping mapping = appContext.getBean(SimpleUrlHandlerMapping.class);
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/foo");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		HandlerExecutionChain chain = mapping.getHandler(request);
+		assertNotNull(chain);
+		StatusController controller = (StatusController)chain.getHandler();
+		ModelAndView modelAndView = controller.handleRequest(request, response);
+		assertNotNull(modelAndView);
+		assertEquals("view1", modelAndView.getViewName());
+		assertEquals(400, response.getStatus());
+
+		request = new MockHttpServletRequest("GET", "/bar");
+		response = new MockHttpServletResponse();
+		chain = mapping.getHandler(request);
+		assertNotNull(chain);
+		controller = (StatusController)chain.getHandler();
+		modelAndView = controller.handleRequest(request, response);
+		assertNull(modelAndView);
+		assertEquals(400, response.getStatus());
+		assertEquals("Bar", response.getErrorMessage());
+
+		request = new MockHttpServletRequest("GET", "/source");
+		response = new MockHttpServletResponse();
+		chain = mapping.getHandler(request);
+		assertNotNull(chain);
+		controller = (StatusController)chain.getHandler();
+		modelAndView = controller.handleRequest(request, response);
+		assertNull(modelAndView);
+		assertEquals(307, response.getStatus());
+		assertEquals("/destination", response.getHeader(HttpHeaders.LOCATION));
 	}
 
 	@Test

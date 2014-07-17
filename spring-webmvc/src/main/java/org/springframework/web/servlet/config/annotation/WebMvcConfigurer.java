@@ -139,6 +139,12 @@ public interface WebMvcConfigurer {
 	void addViewControllers(ViewControllerRegistry registry);
 
 	/**
+	 * Add status controllers to create a mapping between a URL path and
+	 * status code + eventually a redirect.
+	 */
+	void addStatusControllers(StatusControllerRegistry registry);
+
+	/**
 	 * Configure view resolvers to translate String-based view names returned from
 	 * controllers into concrete {@link org.springframework.web.servlet.View}
 	 * implementations to perform rendering with.

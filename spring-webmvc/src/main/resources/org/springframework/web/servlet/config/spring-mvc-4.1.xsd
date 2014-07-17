@@ -572,31 +572,79 @@
 		</xsd:complexType>
 	</xsd:element>
 
-	<xsd:element name="view-controller">
+	<xsd:complexType name="parameterizable-view-controllers">
+		<xsd:attribute name="path" type="xsd:string" use="required">
+			<xsd:annotation>
+				<xsd:documentation><![CDATA[
+	The URL path the view is mapped to.
+				]]></xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="view-name" type="xsd:string">
+			<xsd:annotation>
+				<xsd:documentation><![CDATA[
+	The name of the view to render. Optional.
+	If not specified, the view name will be determined from the current HttpServletRequest
+	by the DispatcherServlet's RequestToViewNameTranslator.
+				]]></xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+	</xsd:complexType>
+
+	<xsd:element name="view-controller" type="parameterizable-view-controllers">
 		<xsd:annotation>
 			<xsd:documentation
 				source="java:org.springframework.web.servlet.mvc.ParameterizableViewController"><![CDATA[
 	Defines a simple Controller that selects a view to render the response.
 			]]></xsd:documentation>
 		</xsd:annotation>
-		<xsd:complexType>
-			<xsd:attribute name="path" type="xsd:string" use="required">
-				<xsd:annotation>
-					<xsd:documentation><![CDATA[
-	The URL path the view is mapped to.
-					]]></xsd:documentation>
-				</xsd:annotation>
-			</xsd:attribute>
-			<xsd:attribute name="view-name" type="xsd:string">
-				<xsd:annotation>
-					<xsd:documentation><![CDATA[
-	The name of the view to render. Optional.
-	If not specified, the view name will be determined from the current HttpServletRequest
-	by the DispatcherServlet's RequestToViewNameTranslator.
-					]]></xsd:documentation>
-				</xsd:annotation>
-			</xsd:attribute>
-		</xsd:complexType>
+	</xsd:element>
+
+	<xsd:complexType name="status-controllers">
+		<xsd:complexContent>
+			<xsd:extension base="parameterizable-view-controllers">
+				<xsd:attribute name="status-code" type="xsd:string" use="required">
+					<xsd:annotation>
+						<xsd:documentation><![CDATA[
+	The HTTP status code of the response.
+						]]></xsd:documentation>
+					</xsd:annotation>
+				</xsd:attribute>
+				<xsd:attribute name="redirect-path" type="xsd:string">
+					<xsd:annotation>
+						<xsd:documentation><![CDATA[
+	The path where the request should be redirected for 3xx requests.
+	Only for redirect status controllers.
+						]]></xsd:documentation>
+					</xsd:annotation>
+				</xsd:attribute>
+				<xsd:attribute name="use-query-string" type="xsd:string">
+					<xsd:annotation>
+						<xsd:documentation><![CDATA[
+	Define whether the query string of the original request should be added to the redirect path.
+	Only for redirect status controllers, optional.
+						]]></xsd:documentation>
+					</xsd:annotation>
+				</xsd:attribute>
+				<xsd:attribute name="reason" type="xsd:string">
+					<xsd:annotation>
+						<xsd:documentation><![CDATA[
+	Define the error message.
+	Only for non-redirect status controllers, optional.
+						]]></xsd:documentation>
+					</xsd:annotation>
+				</xsd:attribute>
+			</xsd:extension>
+		</xsd:complexContent>
+	</xsd:complexType>
+
+	<xsd:element name="status-controller" type="status-controllers">
+		<xsd:annotation>
+			<xsd:documentation source="java:org.springframework.web.servlet.mvc.StatusController"><![CDATA[
+	Defines a status Controller that returns a specified status code and optionally redirect
+	the request.
+			]]></xsd:documentation>
+		</xsd:annotation>
 	</xsd:element>
 
 	<xsd:complexType name="contentNegotiationType">

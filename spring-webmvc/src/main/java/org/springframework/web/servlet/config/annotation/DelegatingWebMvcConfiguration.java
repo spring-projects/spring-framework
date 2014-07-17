@@ -76,6 +76,11 @@ public class DelegatingWebMvcConfiguration extends WebMvcConfigurationSupport {
 	}
 
 	@Override
+	protected void addStatusControllers(StatusControllerRegistry registry) {
+		this.configurers.addStatusControllers(registry);
+	}
+	
+	@Override
 	protected void configureViewResolvers(ViewResolverRegistry registry) {
 		this.configurers.configureViewResolvers(registry);
 	}
