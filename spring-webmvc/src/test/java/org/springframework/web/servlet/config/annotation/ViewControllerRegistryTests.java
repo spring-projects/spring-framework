@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,28 +36,20 @@ public class ViewControllerRegistryTests {
 
 	private ViewControllerRegistry registry;
 
+
 	@Before
 	public void setUp() {
-		registry = new ViewControllerRegistry();
+		this.registry = new ViewControllerRegistry();
 	}
 
 	@Test
 	public void noViewControllers() throws Exception {
-		assertNull(registry.getHandlerMapping());
+		assertNull(this.registry.getHandlerMapping());
 	}
 
 	@Test
 	public void addViewController() {
-		registry.addViewController("/path");
-		Map<String, ?> urlMap = getHandlerMapping().getUrlMap();
-		ParameterizableViewController controller = (ParameterizableViewController) urlMap.get("/path");
-		assertNotNull(controller);
-		assertNull(controller.getViewName());
-	}
-
-	@Test
-	public void addViewControllerWithViewName() {
-		registry.addViewController("/path").setViewName("viewName");
+		this.registry.addViewController("/path").setViewName("viewName");
 		Map<String, ?> urlMap = getHandlerMapping().getUrlMap();
 		ParameterizableViewController controller = (ParameterizableViewController) urlMap.get("/path");
 		assertNotNull(controller);
@@ -65,18 +57,28 @@ public class ViewControllerRegistryTests {
 	}
 
 	@Test
+	public void addViewControllerWithDefaultViewName() {
+		this.registry.addViewController("/path");
+		Map<String, ?> urlMap = getHandlerMapping().getUrlMap();
+		ParameterizableViewController controller = (ParameterizableViewController) urlMap.get("/path");
+		assertNotNull(controller);
+		assertNull(controller.getViewName());
+	}
+
+	@Test
 	public void order() {
-		registry.addViewController("/path");
+		this.registry.addViewController("/path");
 		SimpleUrlHandlerMapping handlerMapping = getHandlerMapping();
 		assertEquals(1, handlerMapping.getOrder());
 
-		registry.setOrder(2);
+		this.registry.setOrder(2);
 		handlerMapping = getHandlerMapping();
 		assertEquals(2, handlerMapping.getOrder());
 	}
 
+
 	private SimpleUrlHandlerMapping getHandlerMapping() {
-		return (SimpleUrlHandlerMapping) registry.getHandlerMapping();
+		return (SimpleUrlHandlerMapping) this.registry.getHandlerMapping();
 	}
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@ import org.springframework.web.servlet.RequestToViewNameTranslator;
 import org.springframework.web.servlet.mvc.ParameterizableViewController;
 
 /**
- * Encapsulates information required to create a view controller.
+ * Assist with the registration of a single view controller.
  *
  * @author Rossen Stoyanchev
  * @author Keith Donald
@@ -33,37 +33,38 @@ public class ViewControllerRegistration {
 
 	private String viewName;
 
+
 	/**
-	 * Creates a {@link ViewControllerRegistration} with the given URL path. When a request matches
-	 * to the given URL path this view controller will process it.
+	 * Creates a registration for the given URL path (or path pattern).
 	 */
 	public ViewControllerRegistration(String urlPath) {
-		Assert.notNull(urlPath, "A URL path is required to create a view controller.");
+		Assert.notNull(urlPath, "'urlPath' is required.");
 		this.urlPath = urlPath;
 	}
 
+
 	/**
-	 * Sets the view name to use for this view controller. This field is optional. If not specified the
-	 * view controller will return a {@code null} view name, which will be resolved through the configured
-	 * {@link RequestToViewNameTranslator}. By default that means "/foo/bar" would resolve to "foo/bar".
+	 * Set the view name to return.
+	 *
+	 * <p>If not specified, the view controller returns {@code null} as the view
+	 * name in which case the configured {@link RequestToViewNameTranslator}
+	 * selects the view. In effect {@code DefaultRequestToViewNameTranslator}
+	 * translates "/foo/bar" to "foo/bar".
+	 *
+	 * @see org.springframework.web.servlet.view.DefaultRequestToViewNameTranslator
 	 */
 	public void setViewName(String viewName) {
 		this.viewName = viewName;
 	}
 
-	/**
-	 * Returns the URL path for the view controller.
-	 */
+
 	protected String getUrlPath() {
-		return urlPath;
+		return this.urlPath;
 	}
 
-	/**
-	 * Returns the view controllers.
-	 */
 	protected Object getViewController() {
 		ParameterizableViewController controller = new ParameterizableViewController();
-		controller.setViewName(viewName);
+		controller.setViewName(this.viewName);
 		return controller;
 	}
 

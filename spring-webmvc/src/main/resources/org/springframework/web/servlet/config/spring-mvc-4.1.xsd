@@ -583,7 +583,7 @@
 			<xsd:attribute name="path" type="xsd:string" use="required">
 				<xsd:annotation>
 					<xsd:documentation><![CDATA[
-	The URL path the view is mapped to.
+	The URL path or (path pattern) the controller is mapped to.
 					]]></xsd:documentation>
 				</xsd:annotation>
 			</xsd:attribute>
@@ -591,8 +591,10 @@
 				<xsd:annotation>
 					<xsd:documentation><![CDATA[
 	The name of the view to render. Optional.
-	If not specified, the view name will be determined from the current HttpServletRequest
-	by the DispatcherServlet's RequestToViewNameTranslator.
+
+	If not specified, the view controller will return null as the view name in which case
+	the configured RequestToViewNameTranslator selects the view.
+	In  effect the DefaultRequestToViewNameTranslator translates "/foo/bar" to "foo/bar".
 					]]></xsd:documentation>
 				</xsd:annotation>
 			</xsd:attribute>

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,9 +26,9 @@ import org.springframework.web.servlet.handler.AbstractHandlerMapping;
 import org.springframework.web.servlet.handler.SimpleUrlHandlerMapping;
 
 /**
- * Stores registrations of view controllers. A view controller does nothing more than return a specified
- * view name. It saves you from having to write a controller when you want to forward the request straight
- * through to a view such as a JSP.
+ * Enables the registration of view controllers that have no logic other than to
+ * return the view name they're configured with. This is an alternative to
+ * writing a controller manually to do the same.
  *
  * @author Rossen Stoyanchev
  * @author Keith Donald
@@ -40,36 +40,41 @@ public class ViewControllerRegistry {
 
 	private int order = 1;
 
+
+	/**
+	 * Register a view controller mapped to the given URL path or URL path pattern.
+	 */
 	public ViewControllerRegistration addViewController(String urlPath) {
 		ViewControllerRegistration registration = new ViewControllerRegistration(urlPath);
-		registrations.add(registration);
+		this.registrations.add(registration);
 		return registration;
 	}
 
 	/**
-	 * Specify the order to use for ViewControllers mappings relative to other {@link HandlerMapping}s
-	 * configured in the Spring MVC application context. The default value for view controllers is 1,
-	 * which is 1 higher than the value used for annotated controllers.
+	 * Specify the order to use for the {@code HandlerMapping} used to map view
+	 * controllers relative to other handler mappings configured in Spring MVC.
+	 * <p>By default this is set to 1, i.e. right after annotated controllers,
+	 * which are ordered at 0.
 	 */
 	public void setOrder(int order) {
 		this.order = order;
 	}
 
+
 	/**
-	 * Returns a handler mapping with the mapped ViewControllers; or {@code null} in case of no registrations.
+	 * Return the {@code HandlerMapping} that contains the registered view
+	 * controller mappings, or {@code null} for no registrations.
 	 */
 	protected AbstractHandlerMapping getHandlerMapping() {
-		if (registrations.isEmpty()) {
+		if (this.registrations.isEmpty()) {
 			return null;
 		}
-
 		Map<String, Object> urlMap = new LinkedHashMap<String, Object>();
-		for (ViewControllerRegistration registration : registrations) {
+		for (ViewControllerRegistration registration : this.registrations) {
 			urlMap.put(registration.getUrlPath(), registration.getViewController());
 		}
-
 		SimpleUrlHandlerMapping handlerMapping = new SimpleUrlHandlerMapping();
-		handlerMapping.setOrder(order);
+		handlerMapping.setOrder(this.order);
 		handlerMapping.setUrlMap(urlMap);
 		return handlerMapping;
 	}

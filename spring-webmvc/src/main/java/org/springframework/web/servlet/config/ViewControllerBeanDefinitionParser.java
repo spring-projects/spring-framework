@@ -19,7 +19,6 @@ package org.springframework.web.servlet.config;
 import java.util.Map;
 
 import org.springframework.beans.factory.config.BeanDefinition;
-import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.parsing.BeanComponentDefinition;
 import org.springframework.beans.factory.support.ManagedMap;
 import org.springframework.beans.factory.support.RootBeanDefinition;
@@ -36,6 +35,7 @@ import org.w3c.dom.Element;
  *
  * @author Keith Donald
  * @author Christian Dupuis
+ * @author Rossen Stoyanchev
  * @since 3.0
  */
 class ViewControllerBeanDefinitionParser implements BeanDefinitionParser {
@@ -50,48 +50,45 @@ class ViewControllerBeanDefinitionParser implements BeanDefinitionParser {
 		Object source = parserContext.extractSource(element);
 
 		// Register SimpleUrlHandlerMapping for view controllers
-		BeanDefinition handlerMappingDef = registerHandlerMapping(parserContext, source);
+		BeanDefinition handlerMapping = registerHandlerMapping(parserContext, source);
 
 		// Ensure BeanNameUrlHandlerMapping (SPR-8289) and default HandlerAdapters are not "turned off"
 		MvcNamespaceUtils.registerDefaultComponents(parserContext, source);
 
 		// Create view controller bean definition
-		RootBeanDefinition viewControllerDef = new RootBeanDefinition(ParameterizableViewController.class);
-		viewControllerDef.setSource(source);
+		RootBeanDefinition controller = new RootBeanDefinition(ParameterizableViewController.class);
+		controller.setSource(source);
 		if (element.hasAttribute("view-name")) {
-			viewControllerDef.getPropertyValues().add("viewName", element.getAttribute("view-name"));
+			controller.getPropertyValues().add("viewName", element.getAttribute("view-name"));
 		}
 		Map<String, BeanDefinition> urlMap;
-		if (handlerMappingDef.getPropertyValues().contains("urlMap")) {
-			urlMap = (Map<String, BeanDefinition>) handlerMappingDef.getPropertyValues().getPropertyValue("urlMap").getValue();
+		if (handlerMapping.getPropertyValues().contains("urlMap")) {
+			urlMap = (Map<String, BeanDefinition>) handlerMapping.getPropertyValues().getPropertyValue("urlMap").getValue();
 		}
 		else {
 			urlMap = new ManagedMap<String, BeanDefinition>();
-			handlerMappingDef.getPropertyValues().add("urlMap", urlMap);
+			handlerMapping.getPropertyValues().add("urlMap", urlMap);
 		}
-		urlMap.put(element.getAttribute("path"), viewControllerDef);
+		urlMap.put(element.getAttribute("path"), controller);
 
 		return null;
 	}
 
-	private BeanDefinition registerHandlerMapping(ParserContext parserContext, Object source) {
-		if (!parserContext.getRegistry().containsBeanDefinition(HANDLER_MAPPING_BEAN_NAME)) {
-			RuntimeBeanReference pathMatcherRef = MvcNamespaceUtils.registerPathMatcher(null, parserContext, source);
-			RuntimeBeanReference pathHelperRef = MvcNamespaceUtils.registerUrlPathHelper(null, parserContext, source);
-
-			RootBeanDefinition handlerMappingDef = new RootBeanDefinition(SimpleUrlHandlerMapping.class);
-			handlerMappingDef.setSource(source);
-			handlerMappingDef.getPropertyValues().add("order", "1");
-			handlerMappingDef.getPropertyValues().add("pathMatcher", pathMatcherRef).add("urlPathHelper", pathHelperRef);
-			handlerMappingDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
-			parserContext.getRegistry().registerBeanDefinition(HANDLER_MAPPING_BEAN_NAME, handlerMappingDef);
-			parserContext.registerComponent(new BeanComponentDefinition(handlerMappingDef, HANDLER_MAPPING_BEAN_NAME));
-			return handlerMappingDef;
+	private BeanDefinition registerHandlerMapping(ParserContext context, Object source) {
+		if (context.getRegistry().containsBeanDefinition(HANDLER_MAPPING_BEAN_NAME)) {
+			return context.getRegistry().getBeanDefinition(HANDLER_MAPPING_BEAN_NAME);
 		}
-		else {
-			return parserContext.getRegistry().getBeanDefinition(HANDLER_MAPPING_BEAN_NAME);
-		}
+		RootBeanDefinition beanDef = new RootBeanDefinition(SimpleUrlHandlerMapping.class);
+		beanDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
+		context.getRegistry().registerBeanDefinition(HANDLER_MAPPING_BEAN_NAME, beanDef);
+		context.registerComponent(new BeanComponentDefinition(beanDef, HANDLER_MAPPING_BEAN_NAME));
 
+		beanDef.setSource(source);
+		beanDef.getPropertyValues().add("order", "1");
+		beanDef.getPropertyValues().add("pathMatcher", MvcNamespaceUtils.registerPathMatcher(null, context, source));
+		beanDef.getPropertyValues().add("urlPathHelper", MvcNamespaceUtils.registerUrlPathHelper(null, context, source));
+
+		return beanDef;
 	}
 
 }
