@@ -18,6 +18,7 @@ package org.springframework.web.servlet.view;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -25,13 +26,13 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.junit.Test;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockHttpServletResponse;
 import org.springframework.mock.web.test.MockServletContext;
 import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.ui.ModelMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.context.ContextLoader;
 import org.springframework.web.context.support.StaticWebApplicationContext;
 import org.springframework.web.servlet.DispatcherServlet;
@@ -43,8 +44,10 @@ import org.springframework.web.servlet.support.RequestDataValueProcessorWrapper;
 import org.springframework.web.servlet.support.SessionFlashMapManager;
 import org.springframework.web.util.WebUtils;
 
+import static org.hamcrest.core.Is.*;
 import static org.junit.Assert.*;
 import static org.mockito.BDDMockito.*;
+
 
 /**
  * Tests for redirect view, and query string construction.
@@ -323,6 +326,72 @@ public class RedirectViewTests {
 		model.put(key3, val3);
 		String expectedUrlForEncoding = "http://url.somewhere.com?" + key + "=" + val + "&" + key2 + "=" + val2;
 		doTest(model, url, false, expectedUrlForEncoding);
+	}
+
+	// SPR-11821
+
+	@Test
+	public void encodingParam() throws Exception {
+
+		// setup mock components.
+		MockHttpServletRequest request = new MockHttpServletRequest();
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		FlashMap flashMap = new FlashMap();
+		flashMap.put("anyKey", "anyValue");
+		request.setAttribute(DispatcherServlet.OUTPUT_FLASH_MAP_ATTRIBUTE, flashMap);
+		request.setAttribute(DispatcherServlet.FLASH_MAP_MANAGER_ATTRIBUTE,
+				new SessionFlashMapManager());
+		request.setContextPath("/context");
+
+		// setup model.
+		String url = "/path";
+		String paramName1 = "key1 ";
+		String paramName2 = "key2+";
+		String paramName3 = "key3&";
+		String paramName4 = "key4=";
+		String paramName5 = "key5abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._~:@/?!$'()*,;";
+		String paramValue5 = "value5abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._~:@/?!$'()*,;";
+
+		Map<String, Object> model = new LinkedHashMap<String, Object>();
+		// parameters that require encoding
+		model.put(paramName1, "value1 ");
+		model.put(paramName2, "value2+");
+		model.put(paramName3, "value3&");
+		model.put(paramName4, "value4=");
+		// parameters that not require encoding
+		model.put(paramName5, paramValue5);
+
+		// do test.
+		RedirectView redirectView = new RedirectView(url, true);
+		redirectView.renderMergedOutputModel(model, request, response);
+
+		// do assertion.
+		StringBuilder expectedRedirectedUrl = new StringBuilder();
+		expectedRedirectedUrl.append(request.getContextPath()).append(url);
+		// encoded
+		expectedRedirectedUrl.append("?").append("key1%20").append("=").append(
+				"value1%20");
+		expectedRedirectedUrl.append("&").append("key2%2B").append("=").append(
+				"value2%2B");
+		expectedRedirectedUrl.append("&").append("key3%26").append("=").append(
+				"value3%26");
+		expectedRedirectedUrl.append("&").append("key4%3D").append("=").append(
+				"value4%3D");
+		// not encoded
+		expectedRedirectedUrl.append("&").append(paramName5).append("=").append(
+				paramValue5);
+		assertThat(response.getRedirectedUrl(), is(expectedRedirectedUrl.toString()));
+
+		MultiValueMap<String, String> savedTargetRequestParams = flashMap.getTargetRequestParams();
+		String[] targetParameterNames = { paramName1, paramName2, paramName3, paramName4,
+			paramName5 };
+		assertThat(savedTargetRequestParams.size(), is(targetParameterNames.length));
+		for (String targetParameterName : targetParameterNames) {
+			assertThat(targetParameterName + " is not equals.",
+					savedTargetRequestParams.getFirst(targetParameterName),
+					is(model.get(targetParameterName)));
+		}
+
 	}
 
 	private void doTest(Map<String, ?> map, String url, boolean contextRelative, String expectedUrlForEncoding)
