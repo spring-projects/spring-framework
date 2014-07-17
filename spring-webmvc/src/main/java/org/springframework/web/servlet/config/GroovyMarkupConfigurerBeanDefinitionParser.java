@@ -19,18 +19,17 @@ package org.springframework.web.servlet.config;
 import org.w3c.dom.Element;
 
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
-import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.xml.AbstractSimpleBeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
 
 /**
- * Parse the <mvc:groovy-markup> MVC namespace element and register a
+ * Parse the <mvc:groovy-configurer> MVC namespace element and register a
  * GroovyConfigurer bean
  *
  * @author Sebastien Deleuze
  * @since 4.1
  */
-public class GroovyMarkupBeanDefinitionParser extends AbstractSimpleBeanDefinitionParser {
+public class GroovyMarkupConfigurerBeanDefinitionParser extends AbstractSimpleBeanDefinitionParser {
 
 	public static final String BEAN_NAME = "mvcGroovyMarkupConfigurer";
 

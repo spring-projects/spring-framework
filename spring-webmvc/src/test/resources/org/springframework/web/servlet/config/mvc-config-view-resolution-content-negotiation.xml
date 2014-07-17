@@ -28,17 +28,17 @@
 		<mvc:groovy />
 	</mvc:view-resolvers>
 
-	<mvc:tiles check-refresh="true">
+	<mvc:tiles-configurer check-refresh="true">
 		<mvc:definitions location="/org/springframework/web/servlet/resource/tiles/tiles1.xml" />
-	</mvc:tiles>
+	</mvc:tiles-configurer>
 
-	<mvc:freemarker>
+	<mvc:freemarker-configurer>
 		<mvc:template-loader-path location="/org/springframework/web/servlet/view" />
-	</mvc:freemarker>
+	</mvc:freemarker-configurer>
 
-	<mvc:velocity resource-loader-path="/org/springframework/web/servlet/view" />
+	<mvc:velocity-configurer resource-loader-path="/org/springframework/web/servlet/view" />
 
-	<mvc:groovy-markup />
+	<mvc:groovy-configurer />
 
 </beans>
  

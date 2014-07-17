@@ -27,13 +27,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Parse the <mvc:velocity> MVC namespace element and register
+ * Parse the <mvc:freemarker-configurer> MVC namespace element and register
  * FreeMarkerConfigurer bean
  *
  * @author Rossen Stoyanchev
  * @since 4.1
  */
-public class FreeMarkerBeanDefinitionParser extends AbstractSingleBeanDefinitionParser {
+public class FreeMarkerConfigurerBeanDefinitionParser extends AbstractSingleBeanDefinitionParser {
 
 	public static final String BEAN_NAME = "mvcFreeMarkerConfigurer";
 

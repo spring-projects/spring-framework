@@ -28,13 +28,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Parse the <mvc:tiles> MVC namespace element and register
+ * Parse the <mvc:tiles-configurer> MVC namespace element and register
  * TilesConfigurer bean
 
  * @author Rossen Stoyanchev
  * @since 4.1
  */
-public class TilesBeanDefinitionParser extends AbstractSingleBeanDefinitionParser {
+public class TilesConfigurerBeanDefinitionParser extends AbstractSingleBeanDefinitionParser {
 
 	public static final String BEAN_NAME = "mvcTilesConfigurer";
 

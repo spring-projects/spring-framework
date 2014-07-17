@@ -871,7 +871,7 @@
 		</xsd:complexType>
 	</xsd:element>
 
-	<xsd:element name="tiles">
+	<xsd:element name="tiles-configurer">
 		<xsd:annotation>
 			<xsd:documentation><![CDATA[
 	Configure Tiles 3.x by registering a TilesConfigurer bean.
@@ -911,7 +911,7 @@
 		</xsd:complexType>
 	</xsd:element>
 
-	<xsd:element name="freemarker">
+	<xsd:element name="freemarker-configurer">
 		<xsd:annotation>
 			<xsd:documentation><![CDATA[
 	Configure FreeMarker for view resolution by registering a FreeMarkerConfigurer bean.
@@ -935,7 +935,7 @@
 		</xsd:complexType>
 	</xsd:element>
 
-	<xsd:element name="velocity">
+	<xsd:element name="velocity-configurer">
 		<xsd:annotation>
 			<xsd:documentation><![CDATA[
 	Configure Velocity for view resolution by registering a VelocityConfigurer bean.
@@ -953,7 +953,7 @@
 		</xsd:complexType>
 	</xsd:element>
 
-	<xsd:element name="groovy-markup">
+	<xsd:element name="groovy-configurer">
 		<xsd:annotation>
 			<xsd:documentation><![CDATA[
 	Configure the Groovy markup template engine for view resolution by registering a GroovyMarkupConfigurer bean.
