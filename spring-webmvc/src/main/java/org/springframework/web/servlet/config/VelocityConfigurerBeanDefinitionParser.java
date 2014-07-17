@@ -24,13 +24,13 @@ import org.w3c.dom.Element;
 
 
 /**
- * Parse the <mvc:velocity> MVC namespace element and register an
+ * Parse the <mvc:velocity-configurer> MVC namespace element and register an
  * VelocityConfigurer bean
  *
  * @author Rossen Stoyanchev
  * @since 4.1
  */
-public class VelocityBeanDefinitionParser extends AbstractSimpleBeanDefinitionParser {
+public class VelocityConfigurerBeanDefinitionParser extends AbstractSimpleBeanDefinitionParser {
 
 	public static final String BEAN_NAME = "mvcVelocityConfigurer";
 

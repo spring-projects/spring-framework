@@ -19,19 +19,19 @@
 
 	<bean id="customResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver" />
 
-	<mvc:tiles check-refresh="true" validate-definitions="true">
+	<mvc:tiles-configurer check-refresh="true" validate-definitions="true">
 		<mvc:definitions location="/org/springframework/web/servlet/resource/tiles/tiles1.xml" />
 		<mvc:definitions location="/org/springframework/web/servlet/resource/tiles/tiles2.xml" />
-	</mvc:tiles>
+	</mvc:tiles-configurer>
 
-	<mvc:freemarker>
+	<mvc:freemarker-configurer>
 		<mvc:template-loader-path location="/" />
 		<mvc:template-loader-path location="/test" />
-	</mvc:freemarker>
+	</mvc:freemarker-configurer>
 
-	<mvc:velocity resource-loader-path="/test" />
+	<mvc:velocity-configurer resource-loader-path="/test" />
 
-	<mvc:groovy-markup resource-loader-path="/test" cache-templates="false" auto-indent="true" />
+	<mvc:groovy-configurer resource-loader-path="/test" cache-templates="false" auto-indent="true" />
 
 </beans>
  

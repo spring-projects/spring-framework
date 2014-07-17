@@ -49,7 +49,7 @@ import org.w3c.dom.Element;
  * before or after it.
  *
  * <p>When content negotiation is enabled the order property is set to highest priority
- * instead with the ContentNeogitatingViewResolver encapsulating all other registered
+ * instead with the ContentNegotiatingViewResolver encapsulating all other registered
  * view resolver instances. That way the resolvers registered through the MVC namespace
  * form self-encapsulated resolver chain.
  *
@@ -57,9 +57,9 @@ import org.w3c.dom.Element;
  * @author Sebastien Deleuze
  * @author Rossen Stoyanchev
  * @since 4.1
- * @see org.springframework.web.servlet.config.TilesBeanDefinitionParser
- * @see org.springframework.web.servlet.config.FreeMarkerBeanDefinitionParser
- * @see org.springframework.web.servlet.config.VelocityBeanDefinitionParser
+ * @see TilesConfigurerBeanDefinitionParser
+ * @see FreeMarkerConfigurerBeanDefinitionParser
+ * @see VelocityConfigurerBeanDefinitionParser
  */
 public class ViewResolversBeanDefinitionParser implements BeanDefinitionParser {
 
