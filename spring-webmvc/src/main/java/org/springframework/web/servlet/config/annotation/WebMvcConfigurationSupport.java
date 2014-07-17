@@ -81,6 +81,7 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice;
 import org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolver;
 import org.springframework.web.servlet.resource.ResourceUrlProvider;
 import org.springframework.web.servlet.resource.ResourceUrlProviderExposingInterceptor;
+import org.springframework.web.servlet.view.InternalResourceViewResolver;
 import org.springframework.web.servlet.view.ViewResolverComposite;
 import org.springframework.web.util.UrlPathHelper;
 
@@ -779,6 +780,9 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	 * {@link org.springframework.core.Ordered#HIGHEST_PRECEDENCE
 	 * Ordered.HIGHEST_PRECEDENCE}.
 	 *
+	 * <p>An {@code InternalResourceViewResolver} is added by default if no other
+	 * resolvers are configured.
+	 *
 	 * @since 4.1
 	 */
 	@Bean
@@ -788,9 +792,14 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 		registry.setApplicationContext(this.applicationContext);
 		configureViewResolvers(registry);
 
+		List<ViewResolver> viewResolvers = registry.getViewResolvers();
+		if (viewResolvers.isEmpty()) {
+			viewResolvers.add(new InternalResourceViewResolver());
+		}
+
 		ViewResolverComposite composite = new ViewResolverComposite();
 		composite.setOrder(registry.getOrder());
-		composite.setViewResolvers(registry.getViewResolvers());
+		composite.setViewResolvers(viewResolvers);
 		composite.setApplicationContext(this.applicationContext);
 		composite.setServletContext(this.servletContext);
 		return composite;
