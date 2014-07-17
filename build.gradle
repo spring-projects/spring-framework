@@ -6,6 +6,7 @@ buildscript {
 		classpath("org.springframework.build.gradle:propdeps-plugin:0.0.7")
 		classpath("org.asciidoctor:asciidoctor-gradle-plugin:0.7.0")
 		classpath("org.springframework.build.gradle:docbook-reference-plugin:0.2.8")
+		classpath("ws.antonov.gradle.plugins:gradle-plugin-protobuf:0.9.1")
 	}
 }
 
@@ -37,6 +38,7 @@ configure(allprojects) { project ->
 	ext.tiles3Version        = "3.0.4"
 	ext.tomcatVersion        = "8.0.9"
 	ext.xstreamVersion       = "1.4.7"
+	ext.protobufVersion      = "2.5.0"
 
 	ext.gradleScriptDir = "${rootProject.projectDir}/gradle"
 
@@ -611,6 +613,21 @@ project("spring-web") {
 	description = "Spring Web"
 	apply plugin: "groovy"
 
+	// Re-generate Protobuf classes from *.proto files and move them in test sources
+	if (project.hasProperty('genProtobuf')) {
+		apply plugin: 'protobuf'
+
+		task updateGenProtobuf(type:Copy, dependsOn: ":spring-web:generateTestProto") {
+			from "${project.buildDir}/generated-sources/test/"
+			into "${projectDir}/src/test/java"
+			doLast {
+				project.delete "${project.buildDir}/generated-sources/test"
+			}
+		}
+
+		tasks.getByPath("compileTestJava").dependsOn "updateGenProtobuf"
+	}
+
 	dependencies {
 		compile(project(":spring-aop")) // for JaxWsPortProxyFactoryBean
 		compile(project(":spring-beans")) // for MultiPartFilter
@@ -638,6 +655,8 @@ project("spring-web") {
 			exclude group: "javax.servlet", module: "javax.servlet-api"
 		}
 		optional("log4j:log4j:1.2.17")
+        optional("com.googlecode.protobuf-java-format:protobuf-java-format:1.2")
+        optional("com.google.protobuf:protobuf-java:${protobufVersion}")
 		testCompile(project(":spring-context-support"))  // for JafMediaTypeFactory
 		testCompile("xmlunit:xmlunit:1.5")
 		testCompile("org.slf4j:slf4j-jcl:${slf4jVersion}")
