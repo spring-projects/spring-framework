@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,7 +53,7 @@ import org.springframework.web.util.UriUtils;
 import org.springframework.web.util.WebUtils;
 
 /**
- * <p>View that redirects to an absolute, context relative, or current request
+ * View that redirects to an absolute, context relative, or current request
  * relative URL. The URL may be a URI template in which case the URI template
  * variables will be replaced with values available in the model. By default
  * all primitive model attributes (or collections thereof) are exposed as HTTP
@@ -104,6 +104,8 @@ public class RedirectView extends AbstractUrlBasedView implements SmartView {
 	private HttpStatus statusCode;
 
 	private boolean expandUriTemplateVariables = true;
+
+	private boolean propagateQueryParams = false;
 
 
 	/**
@@ -236,6 +238,24 @@ public class RedirectView extends AbstractUrlBasedView implements SmartView {
 	}
 
 	/**
+	 * When set to {@code true} the query string of the current URL is appended
+	 * and thus propagated through to the redirected URL.
+	 * <p>Defaults to {@code false}.
+	 * @since 4.1
+	 */
+	public void setPropagateQueryParams(boolean propagateQueryParams) {
+		this.propagateQueryParams = propagateQueryParams;
+	}
+
+	/**
+	 * Whether to propagate the query params of the current URL.
+	 * @since 4.1
+	 */
+	public boolean isPropagateQueryProperties() {
+		return this.propagateQueryParams;
+	}
+
+	/**
 	 * Returns "true" indicating this view performs a redirect.
 	 */
 	@Override
@@ -307,6 +327,9 @@ public class RedirectView extends AbstractUrlBasedView implements SmartView {
 			Map<String, String> variables = getCurrentRequestUriVariables(request);
 			targetUrl = replaceUriTemplateVariables(targetUrl.toString(), model, variables, enc);
 		}
+		if (isPropagateQueryProperties()) {
+		 	appendCurrentQueryParams(targetUrl, request);
+		}
 		if (this.exposeModelAttributes) {
 			appendQueryProperties(targetUrl, model, enc);
 		}
@@ -347,9 +370,42 @@ public class RedirectView extends AbstractUrlBasedView implements SmartView {
 
 	@SuppressWarnings("unchecked")
 	private Map<String, String> getCurrentRequestUriVariables(HttpServletRequest request) {
-		Map<String, String> uriVars =
-				(Map<String, String>) request.getAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE);
+		String name = HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE;
+		Map<String, String> uriVars = (Map<String, String>) request.getAttribute(name);
 		return (uriVars != null) ? uriVars : Collections.<String, String> emptyMap();
+	}
+
+	/**
+	 * Append the query string of the current request to the target redirect URL.
+	 * @param targetUrl the StringBuilder to append the properties to
+	 * @param request the current request
+	 * @since 4.1
+	 */
+	protected void appendCurrentQueryParams(StringBuilder targetUrl, HttpServletRequest request) {
+
+		String query = request.getQueryString();
+		if (StringUtils.hasText(query)) {
+
+			// Extract anchor fragment, if any.
+			String fragment = null;
+			int anchorIndex = targetUrl.indexOf("#");
+			if (anchorIndex > -1) {
+				fragment = targetUrl.substring(anchorIndex);
+				targetUrl.delete(anchorIndex, targetUrl.length());
+			}
+
+			if (targetUrl.toString().indexOf('?') < 0) {
+				targetUrl.append('?').append(query);
+			}
+			else {
+				targetUrl.append('&').append(query);
+			}
+
+			// Append anchor fragment, if any, to end of URL.
+			if (fragment != null) {
+				targetUrl.append(fragment);
+			}
+		}
 	}
 
 	/**

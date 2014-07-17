@@ -325,6 +325,19 @@ public class RedirectViewTests {
 		doTest(model, url, false, expectedUrlForEncoding);
 	}
 
+	@Test
+	public void propagateQueryParams() throws Exception {
+		RedirectView rv = new RedirectView();
+		rv.setPropagateQueryParams(true);
+		rv.setUrl("http://url.somewhere.com?foo=bar#bazz");
+		MockHttpServletRequest request = createRequest();
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		request.setQueryString("a=b&c=d");
+		rv.render(new HashMap<String, Object>(), request, response);
+		assertEquals(302, response.getStatus());
+		assertEquals("http://url.somewhere.com?foo=bar&a=b&c=d#bazz", response.getHeader("Location"));
+	}
+
 	private void doTest(Map<String, ?> map, String url, boolean contextRelative, String expectedUrlForEncoding)
 			throws Exception {
 		doTest(map, url, contextRelative, true, expectedUrlForEncoding);
