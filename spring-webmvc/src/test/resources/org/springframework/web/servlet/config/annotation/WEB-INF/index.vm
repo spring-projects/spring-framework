@@ -1,1 +1,1 @@
-<html><body>${model.hello}</body></html>
+<html><body>${hello}</body></html>
