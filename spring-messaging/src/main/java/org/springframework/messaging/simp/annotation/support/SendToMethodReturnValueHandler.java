@@ -32,6 +32,7 @@ import org.springframework.messaging.simp.user.DestinationUserNameProvider;
 import org.springframework.messaging.support.MessageHeaderInitializer;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
+import org.springframework.util.StringUtils;
 
 import java.lang.annotation.Annotation;
 import java.security.Principal;
@@ -187,7 +188,11 @@ public class SendToMethodReturnValueHandler implements HandlerMethodReturnValueH
 			}
 		}
 		String name = DestinationPatternsMessageCondition.LOOKUP_DESTINATION_HEADER;
-		return new String[] { defaultPrefix + message.getHeaders().get(name) };
+		String destination = (String)message.getHeaders().get(name);
+		if (StringUtils.hasLength(destination) && !destination.startsWith("/")) {
+			destination = "/" + destination;
+		}
+		return new String[] { defaultPrefix + destination };
 	}
 
 	private MessageHeaders createHeaders(String sessionId) {

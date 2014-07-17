@@ -186,6 +186,21 @@ public class SendToMethodReturnValueHandlerTests {
 	}
 
 	@Test
+	public void sendToDefaultDestinationWithoutLeadingSlash() throws Exception {
+
+		when(this.messageChannel.send(any(Message.class))).thenReturn(true);
+
+		Message<?> inputMessage = createInputMessage("sess1", "sub1", "/app", "dest", null);
+		this.handler.handleReturnValue(PAYLOAD, this.sendToDefaultDestReturnType, inputMessage);
+
+		verify(this.messageChannel, times(1)).send(this.messageCaptor.capture());
+
+		Message<?> message = this.messageCaptor.getAllValues().get(0);
+		SimpMessageHeaderAccessor headers = SimpMessageHeaderAccessor.wrap(message);
+		assertEquals("/topic/dest", headers.getDestination());
+	}
+
+	@Test
 	public void testHeadersToSend() throws Exception {
 
 		Message<?> inputMessage = createInputMessage("sess1", "sub1", "/app", "/dest", null);
@@ -294,6 +309,22 @@ public class SendToMethodReturnValueHandlerTests {
 		SimpMessageHeaderAccessor headers = SimpMessageHeaderAccessor.wrap(message);
 		assertNull(headers.getSessionId());
 		assertNull(headers.getSubscriptionId());
+		assertEquals("/user/" + user.getName() + "/queue/dest", headers.getDestination());
+	}
+
+	@Test
+	public void sendToUserDefaultDestinationWithoutLeadingSlash() throws Exception {
+
+		when(this.messageChannel.send(any(Message.class))).thenReturn(true);
+
+		TestUser user = new TestUser();
+		Message<?> inputMessage = createInputMessage("sess1", "sub1", "/app", "dest", user);
+		this.handler.handleReturnValue(PAYLOAD, this.sendToUserDefaultDestReturnType, inputMessage);
+
+		verify(this.messageChannel, times(1)).send(this.messageCaptor.capture());
+
+		Message<?> message = this.messageCaptor.getAllValues().get(0);
+		SimpMessageHeaderAccessor headers = SimpMessageHeaderAccessor.wrap(message);
 		assertEquals("/user/" + user.getName() + "/queue/dest", headers.getDestination());
 	}
 
