@@ -58,6 +58,6 @@ import org.springframework.context.annotation.Import;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
 @Documented
-@Import({DelegatingWebSocketConfiguration.class, WebSocketScopeConfiguration.class})
+@Import(DelegatingWebSocketConfiguration.class)
 public @interface EnableWebSocket {
 }
