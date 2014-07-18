@@ -574,27 +574,115 @@
 
 	<xsd:element name="view-controller">
 		<xsd:annotation>
-			<xsd:documentation
-				source="java:org.springframework.web.servlet.mvc.ParameterizableViewController"><![CDATA[
-	Defines a simple Controller that selects a view to render the response.
+			<xsd:documentation source="java:org.springframework.web.servlet.mvc.ParameterizableViewController"><![CDATA[
+	Map a simple (logic-less) view controller to a specific URL path (or pattern)
+	in order to render a response with a pre-configured status code and view.
 			]]></xsd:documentation>
 		</xsd:annotation>
 		<xsd:complexType>
 			<xsd:attribute name="path" type="xsd:string" use="required">
 				<xsd:annotation>
 					<xsd:documentation><![CDATA[
-	The URL path or (path pattern) the controller is mapped to.
+	The URL path (or pattern) the controller is mapped to.
 					]]></xsd:documentation>
 				</xsd:annotation>
 			</xsd:attribute>
 			<xsd:attribute name="view-name" type="xsd:string">
 				<xsd:annotation>
 					<xsd:documentation><![CDATA[
-	The name of the view to render. Optional.
+	Set the view name to return. Optional.
 
-	If not specified, the view controller will return null as the view name in which case
-	the configured RequestToViewNameTranslator selects the view.
-	In  effect the DefaultRequestToViewNameTranslator translates "/foo/bar" to "foo/bar".
+	If not specified, the view controller will return null as the
+	view name in which case the configured RequestToViewNameTranslator
+	will select the view name. The DefaultRequestToViewNameTranslator
+	for example translates "/foo/bar" to "foo/bar".
+					]]></xsd:documentation>
+				</xsd:annotation>
+			</xsd:attribute>
+			<xsd:attribute name="status-code" type="xsd:int">
+				<xsd:annotation>
+					<xsd:documentation><![CDATA[
+	Set the status code to set on the response. Optional.
+	If not set the response status will be 200 (OK).
+					]]></xsd:documentation>
+				</xsd:annotation>
+			</xsd:attribute>
+		</xsd:complexType>
+	</xsd:element>
+
+	<xsd:element name="redirect-view-controller">
+		<xsd:annotation>
+			<xsd:documentation source="java:org.springframework.web.servlet.mvc.ParameterizableViewController"><![CDATA[
+	Map a simple (logic-less) view controller to the given URL path (or pattern)
+	in order to redirect to another URL.
+			]]></xsd:documentation>
+		</xsd:annotation>
+		<xsd:complexType>
+			<xsd:attribute name="path" type="xsd:string" use="required">
+				<xsd:annotation>
+					<xsd:documentation><![CDATA[
+	The URL path (or pattern) the controller is mapped to.
+					]]></xsd:documentation>
+				</xsd:annotation>
+			</xsd:attribute>
+			<xsd:attribute name="redirect-url" type="xsd:string" use="required">
+				<xsd:annotation>
+					<xsd:documentation><![CDATA[
+	By default the redirect URL is expected to be relative to the current ServletContext,
+	i.e. as relative to the web application root.
+					]]></xsd:documentation>
+				</xsd:annotation>
+			</xsd:attribute>
+			<xsd:attribute name="status-code" type="xsd:int">
+				<xsd:annotation>
+					<xsd:documentation><![CDATA[
+	Set the specific redirect 3xx status code to use.
+
+	If not set, org.springframework.web.servlet.view.RedirectView
+	will select MOVED_TEMPORARILY (302) by default.
+					]]></xsd:documentation>
+				</xsd:annotation>
+			</xsd:attribute>
+			<xsd:attribute name="context-relative" type="xsd:boolean">
+				<xsd:annotation>
+					<xsd:documentation><![CDATA[
+	Whether to interpret a given redirect URL that starts with a slash ("/")
+	as relative to the current ServletContext, i.e. as relative to the web
+	application root.
+	By default set to "true".
+					]]></xsd:documentation>
+				</xsd:annotation>
+			</xsd:attribute>
+			<xsd:attribute name="keep-query-params" type="xsd:boolean">
+				<xsd:annotation>
+					<xsd:documentation><![CDATA[
+	Whether to propagate the query parameters of the current request through to the target redirect URL.
+	By default set to "false".
+					]]></xsd:documentation>
+				</xsd:annotation>
+			</xsd:attribute>
+		</xsd:complexType>
+	</xsd:element>
+
+	<xsd:element name="status-controller">
+		<xsd:annotation>
+			<xsd:documentation source="java:org.springframework.web.servlet.mvc.ParameterizableViewController"><![CDATA[
+	Map a simple (logic-less) controller to the given URL path (or pattern) in order to
+	sets the response status to the given code without rendering a body.
+			]]></xsd:documentation>
+		</xsd:annotation>
+		<xsd:complexType>
+			<xsd:attribute name="path" type="xsd:string" use="required">
+				<xsd:annotation>
+					<xsd:documentation><![CDATA[
+	The URL path (or pattern) the controller is mapped to.
+					]]></xsd:documentation>
+				</xsd:annotation>
+			</xsd:attribute>
+			<xsd:attribute name="status-code" type="xsd:int" use="required">
+				<xsd:annotation>
+					<xsd:documentation><![CDATA[
+	The status code to set on the response.
 					]]></xsd:documentation>
 				</xsd:annotation>
 			</xsd:attribute>

@@ -26,6 +26,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.DirectFieldAccessor;
 import org.springframework.core.Ordered;
+import org.springframework.http.HttpStatus;
 import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.core.io.FileSystemResourceLoader;
@@ -121,8 +122,12 @@ public class WebMvcConfigurationSupportExtensionTests {
 		assertEquals(1, handlerMapping.getOrder());
 		assertEquals(TestPathHelper.class, handlerMapping.getUrlPathHelper().getClass());
 		assertEquals(TestPathMatcher.class, handlerMapping.getPathMatcher().getClass());
-		HandlerExecutionChain handler = handlerMapping.getHandler(new MockHttpServletRequest("GET", "/path"));
-		assertNotNull(handler.getHandler());
+		chain = handlerMapping.getHandler(new MockHttpServletRequest("GET", "/path"));
+		assertNotNull(chain.getHandler());
+		chain = handlerMapping.getHandler(new MockHttpServletRequest("GET", "/bad"));
+		assertNotNull(chain.getHandler());
+		chain = handlerMapping.getHandler(new MockHttpServletRequest("GET", "/old"));
+		assertNotNull(chain.getHandler());
 
 		handlerMapping = (AbstractHandlerMapping) this.config.resourceHandlerMapping();
 		handlerMapping.setApplicationContext(this.context);
@@ -130,15 +135,15 @@ public class WebMvcConfigurationSupportExtensionTests {
 		assertEquals(Integer.MAX_VALUE - 1, handlerMapping.getOrder());
 		assertEquals(TestPathHelper.class, handlerMapping.getUrlPathHelper().getClass());
 		assertEquals(TestPathMatcher.class, handlerMapping.getPathMatcher().getClass());
-		handler = handlerMapping.getHandler(new MockHttpServletRequest("GET", "/resources/foo.gif"));
-		assertNotNull(handler.getHandler());
+		chain = handlerMapping.getHandler(new MockHttpServletRequest("GET", "/resources/foo.gif"));
+		assertNotNull(chain.getHandler());
 
 		handlerMapping = (AbstractHandlerMapping) this.config.defaultServletHandlerMapping();
 		handlerMapping.setApplicationContext(this.context);
 		assertNotNull(handlerMapping);
 		assertEquals(Integer.MAX_VALUE, handlerMapping.getOrder());
-		handler = handlerMapping.getHandler(new MockHttpServletRequest("GET", "/anyPath"));
-		assertNotNull(handler.getHandler());
+		chain = handlerMapping.getHandler(new MockHttpServletRequest("GET", "/anyPath"));
+		assertNotNull(chain.getHandler());
 	}
 
 	@SuppressWarnings("unchecked")
@@ -347,7 +352,9 @@ public class WebMvcConfigurationSupportExtensionTests {
 
 		@Override
 		public void addViewControllers(ViewControllerRegistry registry) {
-			registry.addViewController("/path");
+			registry.addViewController("/path").setViewName("view");
+			registry.addRedirectViewController("/old", "/new").setStatusCode(HttpStatus.PERMANENT_REDIRECT);
+			registry.addStatusController("/bad", HttpStatus.NOT_FOUND);
 		}
 
 		@Override

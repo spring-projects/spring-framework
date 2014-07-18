@@ -19,19 +19,32 @@ package org.springframework.web.servlet.config;
 import java.util.Map;
 
 import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.config.ConstructorArgumentValues;
 import org.springframework.beans.factory.parsing.BeanComponentDefinition;
 import org.springframework.beans.factory.support.ManagedMap;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.factory.xml.BeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.servlet.handler.SimpleUrlHandlerMapping;
 import org.springframework.web.servlet.mvc.ParameterizableViewController;
+import org.springframework.web.servlet.view.RedirectView;
 import org.w3c.dom.Element;
 
 /**
- * {@link org.springframework.beans.factory.xml.BeanDefinitionParser} that parses a
- * {@code view-controller} element to register a {@link ParameterizableViewController}.
- * Will also register a {@link SimpleUrlHandlerMapping} for view controllers.
+ * {@link org.springframework.beans.factory.xml.BeanDefinitionParser} that
+ * parses the following MVC namespace elements:
+ * <ul>
+ *	<li>{@code <view-controller>}
+ *	<li>{@code <redirect-view-controller>}
+ *	<li>{@code <status-controller>}
+ * </ul>
+ *
+ * <p>All elements result in the registration of a
+ * {@link org.springframework.web.servlet.mvc.ParameterizableViewController
+ * ParameterizableViewController} with all controllers mapped using in a single
+ * {@link org.springframework.web.servlet.handler.SimpleUrlHandlerMapping
+ * SimpleUrlHandlerMapping}.
  *
  * @author Keith Donald
  * @author Christian Dupuis
@@ -50,7 +63,7 @@ class ViewControllerBeanDefinitionParser implements BeanDefinitionParser {
 		Object source = parserContext.extractSource(element);
 
 		// Register SimpleUrlHandlerMapping for view controllers
-		BeanDefinition handlerMapping = registerHandlerMapping(parserContext, source);
+		BeanDefinition hm = registerHandlerMapping(parserContext, source);
 
 		// Ensure BeanNameUrlHandlerMapping (SPR-8289) and default HandlerAdapters are not "turned off"
 		MvcNamespaceUtils.registerDefaultComponents(parserContext, source);
@@ -58,16 +71,41 @@ class ViewControllerBeanDefinitionParser implements BeanDefinitionParser {
 		// Create view controller bean definition
 		RootBeanDefinition controller = new RootBeanDefinition(ParameterizableViewController.class);
 		controller.setSource(source);
-		if (element.hasAttribute("view-name")) {
-			controller.getPropertyValues().add("viewName", element.getAttribute("view-name"));
+
+		HttpStatus statusCode = null;
+		if (element.hasAttribute("status-code")) {
+			int statusValue = Integer.valueOf(element.getAttribute("status-code"));
+			statusCode = HttpStatus.valueOf(statusValue);
 		}
+
+		String name = element.getLocalName();
+		if (name.equals("view-controller")) {
+			if (element.hasAttribute("view-name")) {
+				controller.getPropertyValues().add("viewName", element.getAttribute("view-name"));
+			}
+			if (statusCode != null) {
+				controller.getPropertyValues().add("statusCode", statusCode);
+			}
+		}
+		else if (name.equals("redirect-view-controller")) {
+			controller.getPropertyValues().add("view", getRedirectView(element, statusCode, source));
+		}
+		else if (name.equals("status-controller")) {
+			controller.getPropertyValues().add("statusCode", statusCode);
+			controller.getPropertyValues().add("statusOnly", true);
+		}
+		else {
+			// Should never happen...
+			throw new IllegalStateException("Unexpected tag name: " + name);
+		}
+
 		Map<String, BeanDefinition> urlMap;
-		if (handlerMapping.getPropertyValues().contains("urlMap")) {
-			urlMap = (Map<String, BeanDefinition>) handlerMapping.getPropertyValues().getPropertyValue("urlMap").getValue();
+		if (hm.getPropertyValues().contains("urlMap")) {
+			urlMap = (Map<String, BeanDefinition>) hm.getPropertyValues().getPropertyValue("urlMap").getValue();
 		}
 		else {
 			urlMap = new ManagedMap<String, BeanDefinition>();
-			handlerMapping.getPropertyValues().add("urlMap", urlMap);
+			hm.getPropertyValues().add("urlMap", urlMap);
 		}
 		urlMap.put(element.getAttribute("path"), controller);
 
@@ -89,6 +127,23 @@ class ViewControllerBeanDefinitionParser implements BeanDefinitionParser {
 		beanDef.getPropertyValues().add("urlPathHelper", MvcNamespaceUtils.registerUrlPathHelper(null, context, source));
 
 		return beanDef;
+	}
+
+	private RootBeanDefinition getRedirectView(Element element, HttpStatus status, Object source) {
+		ConstructorArgumentValues cavs = new ConstructorArgumentValues();
+		cavs.addIndexedArgumentValue(0, element.getAttribute("redirect-url"));
+		RootBeanDefinition redirectView = new RootBeanDefinition(RedirectView.class, cavs, null);
+		redirectView.setSource(source);
+		if (status != null) {
+			redirectView.getPropertyValues().add("statusCode", status);
+		}
+		if (element.hasAttribute("context-relative")) {
+			redirectView.getPropertyValues().add("contextRelative", element.getAttribute("context-relative"));
+		}
+		if (element.hasAttribute("keep-query-params")) {
+			redirectView.getPropertyValues().add("propagateQueryParams", element.getAttribute("keep-query-params"));
+		}
+		return redirectView;
 	}
 
 }

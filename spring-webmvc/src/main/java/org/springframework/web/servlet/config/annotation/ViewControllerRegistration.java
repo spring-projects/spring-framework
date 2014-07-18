@@ -16,6 +16,7 @@
 
 package org.springframework.web.servlet.config.annotation;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.util.Assert;
 import org.springframework.web.servlet.RequestToViewNameTranslator;
 import org.springframework.web.servlet.mvc.ParameterizableViewController;
@@ -31,12 +32,9 @@ public class ViewControllerRegistration {
 
 	private final String urlPath;
 
-	private String viewName;
+	private final ParameterizableViewController controller = new ParameterizableViewController();
 
 
-	/**
-	 * Creates a registration for the given URL path (or path pattern).
-	 */
 	public ViewControllerRegistration(String urlPath) {
 		Assert.notNull(urlPath, "'urlPath' is required.");
 		this.urlPath = urlPath;
@@ -44,17 +42,28 @@ public class ViewControllerRegistration {
 
 
 	/**
-	 * Set the view name to return.
+	 * Set the status code to set on the response. Optional.
 	 *
-	 * <p>If not specified, the view controller returns {@code null} as the view
-	 * name in which case the configured {@link RequestToViewNameTranslator}
-	 * selects the view. In effect {@code DefaultRequestToViewNameTranslator}
-	 * translates "/foo/bar" to "foo/bar".
+	 * <p>If not set the response status will be 200 (OK).
+	 */
+	public ViewControllerRegistration setStatusCode(HttpStatus statusCode) {
+		this.controller.setStatusCode(statusCode);
+		return this;
+	}
+
+	/**
+	 * Set the view name to return. Optional.
+	 *
+	 * <p>If not specified, the view controller will return {@code null} as the
+	 * view name in which case the configured {@link RequestToViewNameTranslator}
+	 * will select the view name. The {@code DefaultRequestToViewNameTranslator}
+	 * for example translates "/foo/bar" to "foo/bar".
 	 *
 	 * @see org.springframework.web.servlet.view.DefaultRequestToViewNameTranslator
 	 */
-	public void setViewName(String viewName) {
-		this.viewName = viewName;
+	public ViewControllerRegistration setViewName(String viewName) {
+		this.controller.setViewName(viewName);
+		return this;
 	}
 
 
@@ -62,10 +71,8 @@ public class ViewControllerRegistration {
 		return this.urlPath;
 	}
 
-	protected Object getViewController() {
-		ParameterizableViewController controller = new ParameterizableViewController();
-		controller.setViewName(this.viewName);
-		return controller;
+	protected ParameterizableViewController getViewController() {
+		return this.controller;
 	}
 
 }

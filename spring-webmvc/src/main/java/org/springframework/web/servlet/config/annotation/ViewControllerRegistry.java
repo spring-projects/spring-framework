@@ -21,14 +21,13 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.springframework.web.servlet.HandlerMapping;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.servlet.handler.AbstractHandlerMapping;
 import org.springframework.web.servlet.handler.SimpleUrlHandlerMapping;
 
 /**
- * Enables the registration of view controllers that have no logic other than to
- * return the view name they're configured with. This is an alternative to
- * writing a controller manually to do the same.
+ * Assists with the registration of simple automated controllers pre-configured
+ * with status code and/or a view.
  *
  * @author Rossen Stoyanchev
  * @author Keith Donald
@@ -36,18 +35,46 @@ import org.springframework.web.servlet.handler.SimpleUrlHandlerMapping;
  */
 public class ViewControllerRegistry {
 
-	private final List<ViewControllerRegistration> registrations = new ArrayList<ViewControllerRegistration>();
+	private final List<ViewControllerRegistration> registrations = new ArrayList<ViewControllerRegistration>(4);
+
+	private final List<RedirectViewControllerRegistration> redirectRegistrations =
+			new ArrayList<RedirectViewControllerRegistration>(10);
 
 	private int order = 1;
 
 
 	/**
-	 * Register a view controller mapped to the given URL path or URL path pattern.
+	 * Map a view controller to the given URL path (or pattern) in order to render
+	 * a response with a pre-configured status code and view.
 	 */
 	public ViewControllerRegistration addViewController(String urlPath) {
 		ViewControllerRegistration registration = new ViewControllerRegistration(urlPath);
 		this.registrations.add(registration);
 		return registration;
+	}
+
+	/**
+	 * Map a view controller to the given URL path (or pattern) in order to redirect
+	 * to another URL. By default the redirect URL is expected to be relative to
+	 * the current ServletContext, i.e. as relative to the web application root.
+	 * @since 4.1
+	 */
+	public RedirectViewControllerRegistration addRedirectViewController(String urlPath, String redirectUrl) {
+		RedirectViewControllerRegistration registration = new RedirectViewControllerRegistration(urlPath, redirectUrl);
+		this.redirectRegistrations.add(registration);
+		return registration;
+	}
+
+	/**
+	 * Map a simple controller to the given URL path (or pattern) in order to
+	 * set the response status to the given code without rendering a body.
+	 * @since 4.1
+	 */
+	public void addStatusController(String urlPath, HttpStatus statusCode) {
+		ViewControllerRegistration registration = new ViewControllerRegistration(urlPath);
+		registration.setStatusCode(statusCode);
+		registration.getViewController().setStatusOnly(true);
+		this.registrations.add(registration);
 	}
 
 	/**
@@ -66,11 +93,14 @@ public class ViewControllerRegistry {
 	 * controller mappings, or {@code null} for no registrations.
 	 */
 	protected AbstractHandlerMapping getHandlerMapping() {
-		if (this.registrations.isEmpty()) {
+		if (this.registrations.isEmpty() && this.redirectRegistrations.isEmpty()) {
 			return null;
 		}
 		Map<String, Object> urlMap = new LinkedHashMap<String, Object>();
 		for (ViewControllerRegistration registration : this.registrations) {
+			urlMap.put(registration.getUrlPath(), registration.getViewController());
+		}
+		for (RedirectViewControllerRegistration registration : this.redirectRegistrations) {
 			urlMap.put(registration.getUrlPath(), registration.getViewController());
 		}
 		SimpleUrlHandlerMapping handlerMapping = new SimpleUrlHandlerMapping();
