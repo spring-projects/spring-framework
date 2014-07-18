@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,9 +45,6 @@ public interface JmsOperations {
 
 	/**
 	 * Execute the action specified by the given action object within a JMS Session.
-	 * <p>When used with a 1.0.2 provider, you may need to downcast
-	 * to the appropriate domain implementation, either QueueSession or
-	 * TopicSession in the action objects doInJms callback method.
 	 * @param action callback object that exposes the session
 	 * @return the result object from working with the session
 	 * @throws JmsException if there is any problem

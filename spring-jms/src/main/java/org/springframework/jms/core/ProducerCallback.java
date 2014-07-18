@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,10 +27,7 @@ import javax.jms.Session;
  * argument, often implemented as an anonymous inner class.
  *
  * <p>The typical implementation will perform multiple operations on the
- * supplied JMS {@link Session} and {@link MessageProducer}. When used with
- * a 1.0.2 provider, you need to downcast to the appropriate domain
- * implementation, either {@link javax.jms.QueueSender} or
- * {@link javax.jms.TopicPublisher}, to actually send a message.
+ * supplied JMS {@link Session} and {@link MessageProducer}.
  *
  * @author Mark Pollack
  * @since 1.1

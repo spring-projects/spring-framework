@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -66,10 +66,8 @@ public abstract class JmsDestinationAccessor extends JmsAccessor {
 	/**
 	 * Configure the destination accessor with knowledge of the JMS domain used.
 	 * Default is Point-to-Point (Queues).
-	 * <p>For JMS 1.0.2 based accessors, this tells the JMS provider which class hierarchy
-	 * to use in the implementation of its operations. For JMS 1.1 based accessors, this
-	 * setting does usually not affect operations. However, for both JMS versions, this
-	 * setting tells what type of destination to resolve if dynamic destinations are enabled.
+	 * <p>This setting primarily indicates what type of destination to resolve
+	 * if dynamic destinations are enabled.
 	 * @param pubSubDomain "true" for the Publish/Subscribe domain ({@link javax.jms.Topic Topics}),
 	 * "false" for the Point-to-Point domain ({@link javax.jms.Queue Queues})
 	 * @see #setDestinationResolver

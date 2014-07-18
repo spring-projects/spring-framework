@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -295,7 +295,7 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 	/**
 	 * Set whether to inhibit the delivery of messages published by its own connection.
 	 * Default is "false".
-	 * @see javax.jms.TopicSession#createSubscriber(javax.jms.Topic, String, boolean)
+	 * @see javax.jms.Session#createConsumer(javax.jms.Destination, String, boolean)
 	 */
 	public void setPubSubNoLocal(boolean pubSubNoLocal) {
 		this.pubSubNoLocal = pubSubNoLocal;
@@ -966,10 +966,6 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 	}
 
 
-	//-------------------------------------------------------------------------
-	// JMS 1.1 factory methods, potentially overridden for JMS 1.0.2
-	//-------------------------------------------------------------------------
-
 	/**
 	 * Fetch an appropriate Connection from the given JmsResourceHolder.
 	 * <p>This implementation accepts any JMS 1.1 Connection.
@@ -1013,7 +1009,7 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 	 * Create a JMS MessageProducer for the given Session and Destination,
 	 * configuring it to disable message ids and/or timestamps (if necessary).
 	 * <p>Delegates to {@link #doCreateProducer} for creation of the raw
-	 * JMS MessageProducer, which needs to be specific to JMS 1.1 or 1.0.2.
+	 * JMS MessageProducer.
 	 * @param session the JMS Session to create a MessageProducer for
 	 * @param destination the JMS Destination to create a MessageProducer for
 	 * @return the new JMS MessageProducer
@@ -1071,7 +1067,7 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 	 * Create a JMS MessageProducer for the given Session and Destination,
 	 * configuring it to disable message ids and/or timestamps (if necessary).
 	 * <p>Delegates to {@link #doCreateProducer} for creation of the raw
-	 * JMS MessageProducer, which needs to be specific to JMS 1.1 or 1.0.2.
+	 * JMS MessageProducer.
 	 * @param session the JMS Session to create a QueueBrowser for
 	 * @param queue the JMS Queue to create a QueueBrowser for
 	 * @param messageSelector the message selector for this consumer (can be {@code null})
