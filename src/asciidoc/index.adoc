@@ -32250,7 +32250,7 @@ available. The sample below shows a subset of what is available:
 
 
 [[mvc-config-interceptors]]
-==== Configuring Interceptors
+==== Interceptors
 You can configure `HandlerInterceptors` or `WebRequestInterceptors` to be applied to all
 incoming requests or restricted to specific URL path patterns.
 
@@ -32295,7 +32295,7 @@ And in XML use the `<mvc:interceptors>` element:
 
 
 [[mvc-config-content-negotiation]]
-==== Configuring Content Negotiation
+==== Content Negotiation
 You can configure how Spring MVC determines the requested media types from the client
 for request mapping as well as for content negotiation purposes. The available options
 are to check the file extension in the request URI, the "Accept" header, a request
@@ -32371,7 +32371,7 @@ JSON) if no content types were requested.
 
 
 [[mvc-config-view-controller]]
-==== Configuring View Controllers
+==== View Controllers
 This is a shortcut for defining a `ParameterizableViewController` that immediately
 forwards to a view when invoked. Use it in static cases when there is no Java controller
 logic to execute before the view generates the response.
@@ -32402,43 +32402,13 @@ And the same in XML use the `<mvc:view-controller>` element:
 ----
 
 
-[[mvc-config-view-resolution]]
-==== Configuring View Resolution
-This is a shortcut for defining `ViewResolver` beans that can resolve views by name.
+[[mvc-config-view-resolvers]]
+==== View Resolvers
+The MVC config simplifies the registration of view resolvers.
 
-The API allows to declare view resolvers with default values, and to customize most
-useful properties. Bean name and JSP view resolvers can be declared like bellow:
-
-[source,java,indent=0]
-[subs="verbatim,quotes"]
-----
-	@Configuration
-	@EnableWebMvc
-	public class WebConfig extends WebMvcConfigurerAdapter {
-
-		@Override
-		public void configureViewResolvers(ViewResolverRegistry registry) {
-			registry.beanName();
-			registry.jsp().prefix("/");
-		}
-
-	}
-----
-
-And the same in XML use the `<mvc:view-resolvers>` child elements:
-
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
-----
-	<mvc:view-resolvers>
-		<mvc:bean-name />
-		<mvc:jsp />
-	</mvc:view-resolvers>
-----
-
-Configuring Tiles, Velocity, FreeMarker and Groovy view resolution requires
-declaring both `ViewResolver` (configured thanks to the `ViewResolverRegistry`)
-and configurer beans:
+The following is a Java config example that configures content negotiation view
+resolution using FreeMarker HTML templates and Jackson as a default `View` for
+JSON rendering:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -32449,90 +32419,20 @@ and configurer beans:
 
 		@Override
 		public void configureViewResolvers(ViewResolverRegistry registry) {
-			registry.tiles();
-			registry.velocity();
-			registry.freeMarker().suffix(".fmt").cache(false);
-			registry.groovy();
-		}
-
-		@Bean
-		public TilesConfigurer tilesConfigurer() {
-			return new TilesConfigurer();
-		}
-
-		@Bean
-		public VelocityConfigurer velocityConfigurer() {
-			return new VelocityConfigurer();
-		}
-
-		@Bean
-		public FreeMarkerConfigurer freeMarkerConfigurer() {
-			return new FreeMarkerConfigurer();
-		}
-
-		@Bean
-		public GroovyMarkupConfigurer groovyMarkupConfigurer() {
-			return new GroovyMarkupConfigurer();
-		}
-
-	}
-----
-
-For XML, in addition to the `<mvc:view-resolvers>` child elements, shortcut alternative
-to declaring configurer beans directly are also provided:
-
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
-----
-	<mvc:view-resolvers>
-		<mvc:tiles />
-		<mvc:velocity />
-		<mvc:freemarker />
-		<mvc:groovy />
-	</mvc:view-resolvers>
-
-	<mvc:tiles-configurer>
-		<mvc:definitions location="/tiles/tiles1.xml" />
-	</mvc:tiles-configurer>
-
-	<mvc:velocity-configurer resource-loader-path="/velocity" />
-
-	<mvc:freemarker-configurer>
-		<mvc:template-loader-path location="/freemarker" />
-	</mvc:freemarker-configurer>
-
-	<mvc:groovy-configurer />
-----
-
-It is also possible to declare a `ContentNegotiatingViewResolver` bean thanks to the
-`ViewResolverRegistry`. The `ContentNegotiationManager` used to determine requested media
-types is configured as described in <<mvc-config-content-negotiation>>.
-All other view resolvers declared are automatically added to the `viewResolvers`
-property of the `ContentNegotiatingViewResolver` bean:
-
-[source,java,indent=0]
-[subs="verbatim,quotes"]
-----
-	@Configuration
-	@EnableWebMvc
-	public class WebConfig extends WebMvcConfigurerAdapter {
-
-		@Override
-		public void configureViewResolvers(ViewResolverRegistry registry) {
-			registry.contentNegotiating(new MappingJackson2JsonView());
+			registry.enableContentNegotiation(new MappingJackson2JsonView());
 			registry.jsp();
 		}
 
 	}
 ----
 
-And the same in XML use the `<mvc:content-negotiation>` element:
+And the same in XML:
 
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
 	<mvc:view-resolvers>
-		<mvc:content-negotiation use-not-acceptable="true">
+		<mvc:content-negotiation>
 			<mvc:default-views>
 				<bean class="org.springframework.web.servlet.view.json.MappingJackson2JsonView" />
 			</mvc:default-views>
@@ -32541,9 +32441,59 @@ And the same in XML use the `<mvc:content-negotiation>` element:
 	</mvc:view-resolvers>
 ----
 
+Note however that FreeMarker, Velocity, Tiles, and Groovy Markup also require
+configuration of the underlying view technology.
+
+The MVC namespace provides dedicated elements. For example with FreeMarker:
+
+[source,xml,indent=0]
+[subs="verbatim,quotes"]
+----
+
+	<mvc:view-resolvers>
+		<mvc:content-negotiation>
+			<mvc:default-views>
+				<bean class="org.springframework.web.servlet.view.json.MappingJackson2JsonView" />
+			</mvc:default-views>
+		</mvc:content-negotiation>
+		<mvc:freemarker cache="false" />
+	</mvc:view-resolvers>
+
+	<mvc:freemarker-configurer>
+		<mvc:template-loader-path location="/freemarker" />
+	</mvc:freemarker-configurer>
+
+----
+
+In Java config simply add the respective "Configurer" bean:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@Configuration
+	@EnableWebMvc
+	public class WebConfig extends WebMvcConfigurerAdapter {
+
+		@Override
+		public void configureViewResolvers(ViewResolverRegistry registry) {
+			registry.enableContentNegotiation(new MappingJackson2JsonView());
+			registry.freeMarker().cache(false);
+		}
+
+		@Bean
+		public FreeMarkerConfigurer freeMarkerConfigurer() {
+			FreeMarkerConfigurer configurer = new FreeMarkerConfigurer();
+			configurer.setTemplateLoaderPath("/WEB-INF/");
+			return configurer;
+		}
+
+	}
+----
+
+
 
 [[mvc-config-static-resources]]
-==== Configuring Serving of Resources
+==== Serving of Resources
 This option allows static resource requests following a particular URL pattern to be
 served by a `ResourceHttpRequestHandler` from any of a list of `Resource` locations.
 This provides a convenient way to serve static resources from locations other than the
@@ -32715,67 +32665,10 @@ Spring JSP tags:
 	<script src="${resourceUrl}/dojo/dojo.js" type="text/javascript"> </script>
 ----
 
-[[mvc-config-path-matching]]
-==== Configuring Path Matching
-This is a shortcut for configuring `RequestMappingHandlerMapping` path matching properties, without
-having to <<mvc-config-advanced-java,override this Bean with an advanced setup>>.
-
-An example of enabling pattern match features and using custom matchers, in Java:
-
-[source,java,indent=0]
-[subs="verbatim,quotes"]
-----
-	@Configuration
-	@EnableWebMvc
-	public class WebConfig extends WebMvcConfigurerAdapter {
-
-		@Override
-		public void configurePathMatch(PathMatchConfigurer configurer) {
-			configurer
-			    .setUseSuffixPatternMatch(true)
-			    .setUseTrailingSlashMatch(false)
-			    .setUseRegisteredSuffixPatternMatch(true)
-			    .setPathMatcher(antPathMatcher())
-			    .setUrlPathHelper(urlPathHelper());
-		}
-
-		@Bean
-		public UrlPathHelper urlPathHelper() {
-		    //...
-		}
-
-		@Bean
-		public PathMatcher antPathMatcher() {
-		    //...
-		}
-
-	}
-----
-
-For more details, check out the
-{javadoc-baseurl}/org/springframework/web/servlet/config/annotation/PathMatchConfigurer.html[PathMatchConfigurer] API.
-
-And the same in XML, use the `<mvc:path-matching>` element:
-
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
-----
-    <mvc:annotation-driven>
-        <mvc:path-matching
-            suffix-pattern="true"
-            trailing-slash="false"
-            registered-suffixes-only="true"
-            path-helper="pathHelper"
-            path-matcher="pathMatcher" />
-    </mvc:annotation-driven>
-
-    <bean id="pathHelper" class="org.example.app.MyPathHelper" />
-    <bean id="pathMatcher" class="org.example.app.MyPathMatcher" />
-----
 
 [[mvc-default-servlet-handler]]
-==== mvc:default-servlet-handler
-This tag allows for mapping the `DispatcherServlet` to "/" (thus overriding the mapping
+==== Falling Back On the "Default" Servlet To Serve Resources
+This allows for mapping the `DispatcherServlet` to "/" (thus overriding the mapping
 of the container's default Servlet), while still allowing static resource requests to be
 handled by the container's default Servlet. It configures a
 `DefaultServletHttpRequestHandler` with a URL mapping of "/**" and the lowest priority
@@ -32846,15 +32739,61 @@ Or in XML:
 
 
 
-[[mvc-resources]]
-==== More Spring Web MVC Resources
-See the following links and pointers for more resources about Spring Web MVC:
+[[mvc-config-path-matching]]
+==== Path Matching
+This allows customizing various settings related to URL mapping and path matching.
+For details on the individual options check out the
+{javadoc-baseurl}/org/springframework/web/servlet/config/annotation/PathMatchConfigurer.html[PathMatchConfigurer] API.
 
-* There are many excellent articles and tutorials that show how to build web
-  applications with Spring MVC. Read them at the http://spring.io/docs[Spring
-  Documentation] page.
-* "Expert Spring Web MVC and Web Flow" by Seth Ladd and others (published by Apress) is
-  an excellent hard copy source of Spring Web MVC goodness.
+Below is an example in Java config:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@Configuration
+	@EnableWebMvc
+	public class WebConfig extends WebMvcConfigurerAdapter {
+
+		@Override
+		public void configurePathMatch(PathMatchConfigurer configurer) {
+			configurer
+			    .setUseSuffixPatternMatch(true)
+			    .setUseTrailingSlashMatch(false)
+			    .setUseRegisteredSuffixPatternMatch(true)
+			    .setPathMatcher(antPathMatcher())
+			    .setUrlPathHelper(urlPathHelper());
+		}
+
+		@Bean
+		public UrlPathHelper urlPathHelper() {
+		    //...
+		}
+
+		@Bean
+		public PathMatcher antPathMatcher() {
+		    //...
+		}
+
+	}
+----
+
+And the same in XML, use the `<mvc:path-matching>` element:
+
+[source,xml,indent=0]
+[subs="verbatim,quotes"]
+----
+    <mvc:annotation-driven>
+        <mvc:path-matching
+            suffix-pattern="true"
+            trailing-slash="false"
+            registered-suffixes-only="true"
+            path-helper="pathHelper"
+            path-matcher="pathMatcher" />
+    </mvc:annotation-driven>
+
+    <bean id="pathHelper" class="org.example.app.MyPathHelper" />
+    <bean id="pathMatcher" class="org.example.app.MyPathMatcher" />
+----
 
 
 
