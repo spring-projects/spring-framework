@@ -18,9 +18,14 @@ package org.springframework.test.context.jdbc;
 
 import org.junit.Test;
 import org.mockito.Mockito;
+import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
+import org.springframework.context.ApplicationContext;
+import org.springframework.core.io.Resource;
 import org.springframework.test.context.TestContext;
+import org.springframework.test.context.jdbc.SqlConfig.TransactionMode;
 
 import static org.junit.Assert.*;
+import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.*;
 
 /**
@@ -58,9 +63,37 @@ public class SqlScriptsTestExecutionListenerTests {
 	public void valueAndScriptsDeclared() throws Exception {
 		Class<?> clazz = ValueAndScriptsDeclared.class;
 		Mockito.<Class<?>> when(testContext.getTestClass()).thenReturn(clazz);
-		when(testContext.getTestMethod()).thenReturn(clazz.getDeclaredMethod("valueAndScriptsDeclared"));
+		when(testContext.getTestMethod()).thenReturn(clazz.getDeclaredMethod("foo"));
 
 		assertExceptionContains("Only one declaration of SQL script paths is permitted");
+	}
+
+	@Test
+	public void isolatedTxModeDeclaredWithoutTxMgr() throws Exception {
+		ApplicationContext ctx = mock(ApplicationContext.class);
+		when(ctx.getResource(anyString())).thenReturn(mock(Resource.class));
+		when(ctx.getAutowireCapableBeanFactory()).thenReturn(mock(AutowireCapableBeanFactory.class));
+
+		Class<?> clazz = IsolatedWithoutTxMgr.class;
+		Mockito.<Class<?>> when(testContext.getTestClass()).thenReturn(clazz);
+		when(testContext.getTestMethod()).thenReturn(clazz.getDeclaredMethod("foo"));
+		when(testContext.getApplicationContext()).thenReturn(ctx);
+
+		assertExceptionContains("cannot execute SQL scripts using Transaction Mode [ISOLATED] without a PlatformTransactionManager");
+	}
+
+	@Test
+	public void missingDataSourceAndTxMgr() throws Exception {
+		ApplicationContext ctx = mock(ApplicationContext.class);
+		when(ctx.getResource(anyString())).thenReturn(mock(Resource.class));
+		when(ctx.getAutowireCapableBeanFactory()).thenReturn(mock(AutowireCapableBeanFactory.class));
+
+		Class<?> clazz = MissingDataSourceAndTxMgr.class;
+		Mockito.<Class<?>> when(testContext.getTestClass()).thenReturn(clazz);
+		when(testContext.getTestMethod()).thenReturn(clazz.getDeclaredMethod("foo"));
+		when(testContext.getApplicationContext()).thenReturn(ctx);
+
+		assertExceptionContains("supply at least a DataSource or PlatformTransactionManager");
 	}
 
 	private void assertExceptionContains(String msg) throws Exception {
@@ -69,6 +102,7 @@ public class SqlScriptsTestExecutionListenerTests {
 			fail("Should have thrown an IllegalStateException.");
 		}
 		catch (IllegalStateException e) {
+			// System.err.println(e.getMessage());
 			assertTrue("Exception message should contain: " + msg, e.getMessage().contains(msg));
 		}
 	}
@@ -93,7 +127,21 @@ public class SqlScriptsTestExecutionListenerTests {
 	static class ValueAndScriptsDeclared {
 
 		@Sql(value = "foo", scripts = "bar")
-		public void valueAndScriptsDeclared() {
+		public void foo() {
+		}
+	}
+
+	static class IsolatedWithoutTxMgr {
+
+		@Sql(scripts = "foo.sql", config = @SqlConfig(transactionMode = TransactionMode.ISOLATED))
+		public void foo() {
+		}
+	}
+
+	static class MissingDataSourceAndTxMgr {
+
+		@Sql("foo.sql")
+		public void foo() {
 		}
 	}
 

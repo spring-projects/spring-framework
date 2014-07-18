@@ -43,6 +43,7 @@ import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
+import org.springframework.util.ReflectionUtils;
 import org.springframework.util.ResourceUtils;
 
 /**
@@ -165,24 +166,77 @@ public class SqlScriptsTestExecutionListener extends AbstractTestExecutionListen
 			logger.debug("Executing SQL scripts: " + ObjectUtils.nullSafeToString(scripts));
 		}
 
-		final DataSource dataSource = TestContextTransactionUtils.retrieveDataSource(testContext,
-			mergedSqlConfig.getDataSource());
+		String dsName = mergedSqlConfig.getDataSource();
+		String tmName = mergedSqlConfig.getTransactionManager();
+		DataSource dataSource = TestContextTransactionUtils.retrieveDataSource(testContext, dsName);
 		final PlatformTransactionManager transactionManager = TestContextTransactionUtils.retrieveTransactionManager(
-			testContext, mergedSqlConfig.getTransactionManager());
+			testContext, tmName);
+		final boolean newTxRequired = mergedSqlConfig.getTransactionMode() == TransactionMode.ISOLATED;
 
-		int propagation = (mergedSqlConfig.getTransactionMode() == TransactionMode.ISOLATED) ? TransactionDefinition.PROPAGATION_REQUIRES_NEW
-				: TransactionDefinition.PROPAGATION_REQUIRED;
+		if (transactionManager == null) {
+			if (newTxRequired) {
+				throw new IllegalStateException(String.format("Failed to execute SQL scripts for test context %s: "
+						+ "cannot execute SQL scripts using Transaction Mode "
+						+ "[%s] without a PlatformTransactionManager.", testContext, TransactionMode.ISOLATED));
+			}
 
-		TransactionAttribute transactionAttribute = TestContextTransactionUtils.createDelegatingTransactionAttribute(
-			testContext, new DefaultTransactionAttribute(propagation));
+			if (dataSource == null) {
+				throw new IllegalStateException(String.format("Failed to execute SQL scripts for test context %s: "
+						+ "supply at least a DataSource or PlatformTransactionManager.", testContext));
+			}
 
-		new TransactionTemplate(transactionManager, transactionAttribute).execute(new TransactionCallbackWithoutResult() {
+			// Execute scripts directly against the DataSource
+			populator.execute(dataSource);
+		}
+		else {
+			DataSource dataSourceFromTxMgr = getDataSourceFromTransactionManager(transactionManager);
 
-			@Override
-			public void doInTransactionWithoutResult(TransactionStatus status) {
-				populator.execute(dataSource);
-			};
-		});
+			// Ensure user configured an appropriate DataSource/TransactionManager pair.
+			if ((dataSource != null) && (dataSourceFromTxMgr != null) && !dataSource.equals(dataSourceFromTxMgr)) {
+				throw new IllegalStateException(String.format("Failed to execute SQL scripts for test context %s: "
+						+ "the configured DataSource [%s] (named '%s') is not the one associated "
+						+ "with transaction manager [%s] (named '%s').", testContext, dataSource.getClass().getName(),
+					dsName, transactionManager.getClass().getName(), tmName));
+			}
+
+			if (dataSource == null) {
+				dataSource = dataSourceFromTxMgr;
+				if (dataSource == null) {
+					throw new IllegalStateException(String.format("Failed to execute SQL scripts for test context %s: "
+							+ "could not obtain DataSource from transaction manager [%s] (named '%s').", testContext,
+						transactionManager.getClass().getName(), tmName));
+				}
+			}
+
+			final DataSource finalDataSource = dataSource;
+			int propagation = newTxRequired ? TransactionDefinition.PROPAGATION_REQUIRES_NEW
+					: TransactionDefinition.PROPAGATION_REQUIRED;
+
+			TransactionAttribute transactionAttribute = TestContextTransactionUtils.createDelegatingTransactionAttribute(
+				testContext, new DefaultTransactionAttribute(propagation));
+
+			new TransactionTemplate(transactionManager, transactionAttribute).execute(new TransactionCallbackWithoutResult() {
+
+				@Override
+				public void doInTransactionWithoutResult(TransactionStatus status) {
+					populator.execute(finalDataSource);
+				}
+			});
+		}
+	}
+
+	private DataSource getDataSourceFromTransactionManager(PlatformTransactionManager transactionManager) {
+		try {
+			Method getDataSourceMethod = transactionManager.getClass().getMethod("getDataSource");
+			Object obj = ReflectionUtils.invokeMethod(getDataSourceMethod, transactionManager);
+			if (obj instanceof DataSource) {
+				return (DataSource) obj;
+			}
+		}
+		catch (Exception e) {
+			/* ignore */
+		}
+		return null;
 	}
 
 	private String[] getScripts(Sql sql, TestContext testContext, boolean classLevel) {

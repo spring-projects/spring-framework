@@ -66,21 +66,23 @@ public abstract class TestContextTransactionUtils {
 	/**
 	 * Retrieve the {@link DataSource} to use for the supplied {@linkplain TestContext
 	 * test context}.
-	 * <p>The following algorithm is used to retrieve the {@code DataSource}
-	 * from the {@link org.springframework.context.ApplicationContext ApplicationContext}
+	 * <p>The following algorithm is used to retrieve the {@code DataSource} from
+	 * the {@link org.springframework.context.ApplicationContext ApplicationContext}
 	 * of the supplied test context:
 	 * <ol>
 	 * <li>Look up the {@code DataSource} by type and name, if the supplied
-	 * {@code name} is non-empty.
-	 * <li>Look up the {@code DataSource} by type.
-	 * <li>Look up the {@code DataSource} by type and the
+	 * {@code name} is non-empty, throwing a {@link BeansException} if the named
+	 * {@code DataSource} does not exist.
+	 * <li>Attempt to look up a single {@code DataSource} by type.
+	 * <li>Attempt to look up the {@code DataSource} by type and the
 	 * {@linkplain #DEFAULT_DATA_SOURCE_NAME default data source name}.
 	 * @param testContext the test context for which the {@code DataSource}
 	 * should be retrieved; never {@code null}
 	 * @param name the name of the {@code DataSource} to retrieve; may be {@code null}
 	 * or <em>empty</em>
-	 * @return the {@code DataSource} to use
-	 * @throws BeansException if an error occurs while retrieving the {@code DataSource}
+	 * @return the {@code DataSource} to use, or {@code null} if not found
+	 * @throws BeansException if an error occurs while retrieving an explicitly
+	 * named {@code DataSource}
 	 */
 	public static DataSource retrieveDataSource(TestContext testContext, String name) {
 		Assert.notNull(testContext, "TestContext must not be null");
@@ -91,7 +93,14 @@ public abstract class TestContextTransactionUtils {
 			if (StringUtils.hasText(name)) {
 				return bf.getBean(name, DataSource.class);
 			}
+		}
+		catch (BeansException ex) {
+			logger.error(
+				String.format("Failed to retrieve DataSource named '%s' for test context %s", name, testContext), ex);
+			throw ex;
+		}
 
+		try {
 			if (bf instanceof ListableBeanFactory) {
 				ListableBeanFactory lbf = (ListableBeanFactory) bf;
 
@@ -107,10 +116,10 @@ public abstract class TestContextTransactionUtils {
 			return bf.getBean(DEFAULT_DATA_SOURCE_NAME, DataSource.class);
 		}
 		catch (BeansException ex) {
-			if (logger.isWarnEnabled()) {
-				logger.warn("Caught exception while retrieving DataSource for test context " + testContext, ex);
+			if (logger.isDebugEnabled()) {
+				logger.debug("Caught exception while retrieving DataSource for test context " + testContext, ex);
 			}
-			throw ex;
+			return null;
 		}
 	}
 
@@ -121,20 +130,22 @@ public abstract class TestContextTransactionUtils {
 	 * from the {@link org.springframework.context.ApplicationContext ApplicationContext}
 	 * of the supplied test context:
 	 * <ol>
-	 * <li>Look up the transaction manager by type and name, if the supplied
-	 * {@code name} is non-empty.
-	 * <li>Look up the transaction manager by type.
-	 * <li>Look up the transaction manager via a {@link TransactionManagementConfigurer},
-	 * if present.
-	 * <li>Look up the transaction manager by type and the
+	 * <li>Look up the transaction manager by type and explicit name, if the supplied
+	 * {@code name} is non-empty, throwing a {@link BeansException} if the named
+	 * transaction manager does not exist.
+	 * <li>Attempt to look up the transaction manager by type.
+	 * <li>Attempt to look up the transaction manager via a
+	 * {@link TransactionManagementConfigurer}, if present.
+	 * <li>Attempt to look up the transaction manager by type and the
 	 * {@linkplain #DEFAULT_TRANSACTION_MANAGER_NAME default transaction manager
 	 * name}.
 	 * @param testContext the test context for which the transaction manager
 	 * should be retrieved; never {@code null}
 	 * @param name the name of the transaction manager to retrieve; may be
 	 * {@code null} or <em>empty</em>
-	 * @return the transaction manager to use
-	 * @throws BeansException if an error occurs while retrieving the transaction manager
+	 * @return the transaction manager to use, or {@code null} if not found
+	 * @throws BeansException if an error occurs while retrieving an explicitly
+	 * named transaction manager
 	 */
 	public static PlatformTransactionManager retrieveTransactionManager(TestContext testContext, String name) {
 		Assert.notNull(testContext, "TestContext must not be null");
@@ -145,7 +156,14 @@ public abstract class TestContextTransactionUtils {
 			if (StringUtils.hasText(name)) {
 				return bf.getBean(name, PlatformTransactionManager.class);
 			}
+		}
+		catch (BeansException ex) {
+			logger.error(String.format("Failed to retrieve transaction manager named '%s' for test context %s", name,
+				testContext), ex);
+			throw ex;
+		}
 
+		try {
 			if (bf instanceof ListableBeanFactory) {
 				ListableBeanFactory lbf = (ListableBeanFactory) bf;
 
@@ -172,10 +190,11 @@ public abstract class TestContextTransactionUtils {
 			return bf.getBean(DEFAULT_TRANSACTION_MANAGER_NAME, PlatformTransactionManager.class);
 		}
 		catch (BeansException ex) {
-			if (logger.isWarnEnabled()) {
-				logger.warn("Caught exception while retrieving transaction manager for test context " + testContext, ex);
+			if (logger.isDebugEnabled()) {
+				logger.debug("Caught exception while retrieving transaction manager for test context " + testContext,
+					ex);
 			}
-			throw ex;
+			return null;
 		}
 	}
 

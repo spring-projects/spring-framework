@@ -275,8 +275,10 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 			}
 			catch (RuntimeException ex) {
 				if (logger.isWarnEnabled()) {
-					logger.warn("Caught exception while retrieving transaction manager for test context " + testContext
-							+ " and qualifier [" + qualifier + "]", ex);
+					logger.warn(
+						String.format(
+							"Caught exception while retrieving transaction manager with qualifier '%s' for test context %s",
+							qualifier, testContext), ex);
 				}
 				throw ex;
 			}
@@ -294,7 +296,8 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 	 * @param testContext the test context for which the transaction manager
 	 * should be retrieved
 	 * @return the transaction manager to use, or {@code null} if not found
-	 * @throws BeansException if an error occurs while retrieving the transaction manager
+	 * @throws BeansException if an error occurs while retrieving an explicitly
+	 * named transaction manager
 	 * @see #getTransactionManager(TestContext, String)
 	 */
 	protected PlatformTransactionManager getTransactionManager(TestContext testContext) {

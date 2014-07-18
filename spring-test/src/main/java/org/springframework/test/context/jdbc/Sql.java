@@ -22,9 +22,6 @@ import java.lang.annotation.Repeatable;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
-import org.springframework.jdbc.datasource.init.ScriptUtils;
-import org.springframework.util.ResourceUtils;
-
 import static java.lang.annotation.ElementType.*;
 import static java.lang.annotation.RetentionPolicy.*;
 
@@ -39,8 +36,8 @@ import static java.lang.annotation.RetentionPolicy.*;
  *
  * <p>The configuration options provided by this annotation and
  * {@link SqlConfig @SqlConfig} are equivalent to those supported by
- * {@link ScriptUtils} and
- * {@link org.springframework.jdbc.datasource.init.ResourceDatabasePopulator}
+ * {@link org.springframework.jdbc.datasource.init.ScriptUtils ScriptUtils} and
+ * {@link org.springframework.jdbc.datasource.init.ResourceDatabasePopulator ResourceDatabasePopulator}
  * but are a superset of those provided by the {@code <jdbc:initialize-database/>}
  * XML namespace element. Consult the javadocs of individual attributes in this
  * annotation and {@link SqlConfig @SqlConfig} for details.
@@ -110,9 +107,9 @@ public @interface Sql {
 	 * <em>absolute</em> classpath resource, for example:
 	 * {@code "/org/example/schema.sql"}. A path which references a
 	 * URL (e.g., a path prefixed with
-	 * {@link ResourceUtils#CLASSPATH_URL_PREFIX classpath:},
-	 * {@link ResourceUtils#FILE_URL_PREFIX file:}, {@code http:}, etc.) will be
-	 * loaded using the specified resource protocol.
+	 * {@link org.springframework.util.ResourceUtils#CLASSPATH_URL_PREFIX classpath:},
+	 * {@link org.springframework.util.ResourceUtils#FILE_URL_PREFIX file:},
+	 * {@code http:}, etc.) will be loaded using the specified resource protocol.
 	 * <h3>Default Script Detection</h3>
 	 * <p>If no SQL scripts are specified, an attempt will be made to detect a
 	 * <em>default</em> script depending on where this annotation is declared.
