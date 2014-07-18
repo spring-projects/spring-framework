@@ -85,21 +85,20 @@ public class InterceptorRegistration {
 		if (this.includePatterns.isEmpty() && this.excludePatterns.isEmpty()) {
 			return this.interceptor;
 		}
-		MappedInterceptor mappedInterceptor = new MappedInterceptor(
-				toArray(this.includePatterns), toArray(this.excludePatterns), interceptor);
+
+		String[] include = toArray(this.includePatterns);
+		String[] exclude = toArray(this.excludePatterns);
+		MappedInterceptor mappedInterceptor = new MappedInterceptor(include, exclude, this.interceptor);
+
 		if (this.pathMatcher != null) {
 			mappedInterceptor.setPathMatcher(this.pathMatcher);
 		}
+
 		return mappedInterceptor;
 	}
 
 	private static String[] toArray(List<String> list) {
-		if (CollectionUtils.isEmpty(list)) {
-			return null;
-		}
-		else {
-			return list.toArray(new String[list.size()]);
-		}
+		return (CollectionUtils.isEmpty(list) ? null : list.toArray(new String[list.size()]));
 	}
 
 }
