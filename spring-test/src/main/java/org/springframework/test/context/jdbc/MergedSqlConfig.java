@@ -57,9 +57,9 @@ class MergedSqlConfig {
 
 
 	private static <E extends Enum<?>> E getEnum(AnnotationAttributes attributes, String attributeName,
-			E inheritOrOverrideValue, E defaultValue) {
+			E inheritedOrDefaultValue, E defaultValue) {
 		E value = attributes.getEnum(attributeName);
-		if (value == inheritOrOverrideValue) {
+		if (value == inheritedOrDefaultValue) {
 			value = defaultValue;
 		}
 		return value;
