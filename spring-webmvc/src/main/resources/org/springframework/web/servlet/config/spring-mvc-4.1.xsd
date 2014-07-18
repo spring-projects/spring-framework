@@ -689,7 +689,7 @@
 		</xsd:complexType>
 	</xsd:element>
 
-	<xsd:complexType name="contentNegotiationType">
+	<xsd:complexType name="contentNegotiatingType">
 		<xsd:all>
 			<xsd:element name="default-views" minOccurs="0">
 				<xsd:complexType>
@@ -790,7 +790,7 @@
 		</xsd:annotation>
 		<xsd:complexType>
 			<xsd:choice minOccurs="1" maxOccurs="unbounded">
-				<xsd:element name="content-negotiation" type="contentNegotiationType">
+				<xsd:element name="content-negotiating" type="contentNegotiatingType">
 					<xsd:annotation>
 						<xsd:documentation><![CDATA[
 	Registers a ContentNegotiatingViewResolver with the list of all other registered

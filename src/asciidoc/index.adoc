@@ -32526,17 +32526,17 @@ property of the `ContentNegotiatingViewResolver` bean:
 	}
 ----
 
-And the same in XML use the `<mvc:content-negotiation>` element:
+And the same in XML use the `<mvc:content-negotiating>` element:
 
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
 	<mvc:view-resolvers>
-		<mvc:content-negotiation use-not-acceptable="true">
+		<mvc:content-negotiating use-not-acceptable="true">
 			<mvc:default-views>
 				<bean class="org.springframework.web.servlet.view.json.MappingJackson2JsonView" />
 			</mvc:default-views>
-		</mvc:content-negotiation>
+		</mvc:content-negotiating>
 		<mvc:jsp />
 	</mvc:view-resolvers>
 ----

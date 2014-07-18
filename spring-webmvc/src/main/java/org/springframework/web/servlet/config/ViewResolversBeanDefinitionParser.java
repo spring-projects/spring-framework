@@ -122,7 +122,7 @@ public class ViewResolversBeanDefinitionParser implements BeanDefinitionParser {
 			resolvers.add(resolverBeanDef);
 		}
 
-		List<Element> elementList = DomUtils.getChildElementsByTagName(element, new String[] {"content-negotiation"});
+		List<Element> elementList = DomUtils.getChildElementsByTagName(element, new String[] {"content-negotiating"});
 		if (elementList.isEmpty()) {
 			compositeResolverBeanDef.getPropertyValues().add("order", 0);
 			compositeResolverBeanDef.getPropertyValues().add("viewResolvers", resolvers);
@@ -137,7 +137,7 @@ public class ViewResolversBeanDefinitionParser implements BeanDefinitionParser {
 			compositeResolverBeanDef.getPropertyValues().add("viewResolvers", list);
 		}
 		else if (elementList.size() > 1) {
-			throw new IllegalArgumentException("Only one <content-negotiation> element is allowed.");
+			throw new IllegalArgumentException("Only one <content-negotiating> element is allowed.");
 		}
 
 		String beanName = VIEW_RESOLVER_BEAN_NAME;

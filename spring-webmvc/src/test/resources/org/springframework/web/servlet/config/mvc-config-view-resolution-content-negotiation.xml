@@ -15,11 +15,11 @@
 		  class="org.springframework.web.accept.ContentNegotiationManagerFactoryBean"/>
 
 	<mvc:view-resolvers>
-		<mvc:content-negotiation use-not-acceptable="true">
+		<mvc:content-negotiating use-not-acceptable="true">
 			<mvc:default-views>
 				<bean class="org.springframework.web.servlet.view.json.MappingJackson2JsonView" />
 			</mvc:default-views>
-		</mvc:content-negotiation>
+		</mvc:content-negotiating>
 		<mvc:bean-name />
 		<mvc:jsp />
 		<mvc:tiles />
