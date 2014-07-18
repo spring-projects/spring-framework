@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.servlet.resource;
 
 import java.io.ByteArrayOutputStream;
@@ -69,6 +70,7 @@ public class AppCacheManifestTransfomer implements ResourceTransformer {
 
 	private final String fileExtension;
 
+
 	/**
 	 * Create an AppCacheResourceTransformer that transforms files with extension ".manifest"
 	 */
@@ -90,6 +92,7 @@ public class AppCacheManifestTransfomer implements ResourceTransformer {
 		this.sectionTransformers.put("CACHE:", new CacheSection());
 	}
 
+
 	@Override
 	public Resource transform(HttpServletRequest request, Resource resource, ResourceTransformerChain transformerChain) throws IOException {
 		resource = transformerChain.transform(request, resource);
@@ -102,7 +105,7 @@ public class AppCacheManifestTransfomer implements ResourceTransformer {
 		byte[] bytes = FileCopyUtils.copyToByteArray(resource.getInputStream());
 		String content = new String(bytes, DEFAULT_CHARSET);
 
-		if(!content.startsWith(MANIFEST_HEADER)) {
+		if (!content.startsWith(MANIFEST_HEADER)) {
 			if (logger.isTraceEnabled()) {
 				logger.trace("AppCache manifest does not start with 'CACHE MANIFEST', skipping: " + resource);
 			}
@@ -118,17 +121,14 @@ public class AppCacheManifestTransfomer implements ResourceTransformer {
 
 		Scanner scanner = new Scanner(content);
 		SectionTransformer currentTransformer = this.sectionTransformers.get(MANIFEST_HEADER);
-		while(scanner.hasNextLine()) {
+		while (scanner.hasNextLine()) {
 			String line = scanner.nextLine();
-
-			if(this.sectionTransformers.containsKey(line.trim())) {
+			if (this.sectionTransformers.containsKey(line.trim())) {
 				currentTransformer = this.sectionTransformers.get(line.trim());
 				contentWriter.write(line + "\n");
 				hashBuilder.appendString(line);
 			}
 			else {
-
-
 				contentWriter.write(currentTransformer.transform(line, hashBuilder, resource, transformerChain)  + "\n");
 			}
 		}
@@ -147,22 +147,24 @@ public class AppCacheManifestTransfomer implements ResourceTransformer {
 
 		/**
 		 * Transforms a line in a section of the manifest
-		 *
-		 * The actual transformation depends on the chose transformation strategy
+		 * <p>The actual transformation depends on the chose transformation strategy
 		 * for the current manifest section (CACHE, NETWORK, FALLBACK, etc).
 		 */
 		String transform(String line, HashBuilder builder, Resource resource,
 				ResourceTransformerChain transformerChain) throws IOException;
 	}
 
+
 	private static class NoOpSection implements SectionTransformer {
 
-		public String transform(String line, HashBuilder builder,
-				Resource resource, ResourceTransformerChain transformerChain) throws IOException {
+		public String transform(String line, HashBuilder builder, Resource resource, ResourceTransformerChain transformerChain)
+				throws IOException {
+
 			builder.appendString(line);
 			return line;
 		}
 	}
+
 
 	private static class CacheSection implements SectionTransformer {
 
@@ -172,30 +174,26 @@ public class AppCacheManifestTransfomer implements ResourceTransformer {
 		public String transform(String line, HashBuilder builder,
 				Resource resource, ResourceTransformerChain transformerChain) throws IOException {
 
-			if(isLink(line) && !hasScheme(line)) {
-
+			if (isLink(line) && !hasScheme(line)) {
 				Resource appCacheResource = transformerChain.getResolverChain().resolveResource(null, line, Arrays.asList(resource));
 				String path = transformerChain.getResolverChain().resolveUrlPath(line, Arrays.asList(resource));
-
 				builder.appendResource(appCacheResource);
 				if (logger.isTraceEnabled()) {
 					logger.trace("Link modified: " + path + " (original: " + line + ")");
 				}
-
 				return path;
 			}
-
 			builder.appendString(line);
 			return line;
 		}
 
 		private boolean hasScheme(String link) {
 			int schemeIndex = link.indexOf(":");
-			return link.startsWith("//") || (schemeIndex > 0 && !link.substring(0, schemeIndex).contains("/"));
+			return (link.startsWith("//") || (schemeIndex > 0 && !link.substring(0, schemeIndex).contains("/")));
 		}
 
 		private boolean isLink(String line) {
-			return StringUtils.hasText(line) && !line.startsWith(COMMENT_DIRECTIVE);
+			return (StringUtils.hasText(line) && !line.startsWith(COMMENT_DIRECTIVE));
 		}
 	}
 
@@ -204,7 +202,7 @@ public class AppCacheManifestTransfomer implements ResourceTransformer {
 
 		private final ByteArrayOutputStream baos;
 
-		private HashBuilder(int initialSize) {
+		public HashBuilder(int initialSize) {
 			this.baos = new ByteArrayOutputStream(initialSize);
 		}
 

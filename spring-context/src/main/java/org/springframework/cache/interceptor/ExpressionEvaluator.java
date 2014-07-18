@@ -65,14 +65,11 @@ class ExpressionEvaluator {
 	// shared param discoverer since it caches data internally
 	private final ParameterNameDiscoverer paramNameDiscoverer = new DefaultParameterNameDiscoverer();
 
-	private final Map<ExpressionKey, Expression> keyCache
-			= new ConcurrentHashMap<ExpressionKey, Expression>(64);
+	private final Map<ExpressionKey, Expression> keyCache = new ConcurrentHashMap<ExpressionKey, Expression>(64);
 
-	private final Map<ExpressionKey, Expression> conditionCache
-			= new ConcurrentHashMap<ExpressionKey, Expression>(64);
+	private final Map<ExpressionKey, Expression> conditionCache = new ConcurrentHashMap<ExpressionKey, Expression>(64);
 
-	private final Map<ExpressionKey, Expression> unlessCache
-			= new ConcurrentHashMap<ExpressionKey, Expression>(64);
+	private final Map<ExpressionKey, Expression> unlessCache = new ConcurrentHashMap<ExpressionKey, Expression>(64);
 
 	private final Map<MethodCacheKey, Method> targetMethodCache = new ConcurrentHashMap<MethodCacheKey, Method>(64);
 
@@ -83,32 +80,32 @@ class ExpressionEvaluator {
 	 */
 	public EvaluationContext createEvaluationContext(Collection<? extends Cache> caches,
 			Method method, Object[] args, Object target, Class<?> targetClass) {
-		return createEvaluationContext(caches, method, args, target, targetClass,
-				NO_RESULT);
+
+		return createEvaluationContext(caches, method, args, target, targetClass, NO_RESULT);
 	}
 
 	/**
 	 * Create an {@link EvaluationContext}.
-	 *
 	 * @param caches the current caches
 	 * @param method the method
 	 * @param args the method arguments
 	 * @param target the target object
 	 * @param targetClass the target class
 	 * @param result the return value (can be {@code null}) or
-	 *        {@link #NO_RESULT} if there is no return at this time
+	 * {@link #NO_RESULT} if there is no return at this time
 	 * @return the evaluation context
 	 */
 	public EvaluationContext createEvaluationContext(Collection<? extends Cache> caches,
-			Method method, Object[] args, Object target, Class<?> targetClass,
-			final Object result) {
+			Method method, Object[] args, Object target, Class<?> targetClass, Object result) {
+
 		CacheExpressionRootObject rootObject = new CacheExpressionRootObject(caches,
 				method, args, target, targetClass);
 		CacheEvaluationContext evaluationContext = new CacheEvaluationContext(rootObject,
 				this.paramNameDiscoverer, method, args, targetClass, this.targetMethodCache);
 		if (result == RESULT_UNAVAILABLE) {
 			evaluationContext.addUnavailableVariable(RESULT_VARIABLE);
-		} else if (result != NO_RESULT) {
+		}
+		else if (result != NO_RESULT) {
 			evaluationContext.setVariable(RESULT_VARIABLE, result);
 		}
 		return evaluationContext;
@@ -119,23 +116,21 @@ class ExpressionEvaluator {
 	}
 
 	public boolean condition(String conditionExpression, MethodCacheKey methodKey, EvaluationContext evalContext) {
-		return getExpression(this.conditionCache, conditionExpression, methodKey).getValue(
-				evalContext, boolean.class);
+		return getExpression(this.conditionCache, conditionExpression, methodKey).getValue(evalContext, boolean.class);
 	}
 
 	public boolean unless(String unlessExpression, MethodCacheKey methodKey, EvaluationContext evalContext) {
-		return getExpression(this.unlessCache, unlessExpression, methodKey).getValue(
-				evalContext, boolean.class);
+		return getExpression(this.unlessCache, unlessExpression, methodKey).getValue(evalContext, boolean.class);
 	}
 
 	private Expression getExpression(Map<ExpressionKey, Expression> cache, String expression, MethodCacheKey methodKey) {
 		ExpressionKey key = createKey(methodKey, expression);
-		Expression rtn = cache.get(key);
-		if (rtn == null) {
-			rtn = this.parser.parseExpression(expression);
-			cache.put(key, rtn);
+		Expression expr = cache.get(key);
+		if (expr == null) {
+			expr = this.parser.parseExpression(expression);
+			cache.put(key, expr);
 		}
-		return rtn;
+		return expr;
 	}
 
 	private ExpressionKey createKey(MethodCacheKey methodCacheKey, String expression) {
@@ -144,10 +139,12 @@ class ExpressionEvaluator {
 
 
 	private static class ExpressionKey {
+
 		private final MethodCacheKey methodCacheKey;
+
 		private final String expression;
 
-		private ExpressionKey(MethodCacheKey methodCacheKey, String expression) {
+		public ExpressionKey(MethodCacheKey methodCacheKey, String expression) {
 			this.methodCacheKey = methodCacheKey;
 			this.expression = expression;
 		}
@@ -161,8 +158,8 @@ class ExpressionEvaluator {
 				return false;
 			}
 			ExpressionKey otherKey = (ExpressionKey) other;
-			return (this.methodCacheKey.equals(otherKey.methodCacheKey)
-					&& ObjectUtils.nullSafeEquals(this.expression, otherKey.expression));
+			return (this.methodCacheKey.equals(otherKey.methodCacheKey) &&
+					ObjectUtils.nullSafeEquals(this.expression, otherKey.expression));
 		}
 
 		@Override

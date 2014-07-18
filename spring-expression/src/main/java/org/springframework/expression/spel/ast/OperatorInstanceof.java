@@ -66,7 +66,8 @@ public class OperatorInstanceof extends Operator {
 		Class<?> rightClass = (Class<?>) rightValue;
 		if (leftValue == null) {
 			result = BooleanTypedValue.FALSE;  // null is not an instanceof anything
-		} else {
+		}
+		else {
 			result = BooleanTypedValue.forValue(rightClass.isAssignableFrom(leftValue.getClass()));
 		}
 		this.type = rightClass;
@@ -76,7 +77,7 @@ public class OperatorInstanceof extends Operator {
 
 	@Override
 	public boolean isCompilable() {
-		return this.exitTypeDescriptor != null && getLeftOperand().isCompilable();
+		return (this.exitTypeDescriptor != null && getLeftOperand().isCompilable());
 	}
 	
 	@Override
@@ -85,4 +86,5 @@ public class OperatorInstanceof extends Operator {
 		mv.visitTypeInsn(INSTANCEOF,Type.getInternalName(this.type));
 		codeflow.pushDescriptor(getExitDescriptor());
 	}
+
 }

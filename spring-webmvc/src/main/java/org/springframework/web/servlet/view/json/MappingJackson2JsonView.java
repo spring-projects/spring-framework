@@ -283,7 +283,7 @@ public class MappingJackson2JsonView extends AbstractView {
 		Class<?> serializationView = (Class<?>) model.get(JsonView.class.getName());
 		String jsonpParameterValue = getJsonpParameterValue(request);
 		Object value = filterModel(model);
-		if(serializationView != null || jsonpParameterValue != null) {
+		if (serializationView != null || jsonpParameterValue != null) {
 			MappingJacksonValue container = new MappingJacksonValue(value);
 			container.setSerializationView(serializationView);
 			container.setJsonpFunction(jsonpParameterValue);

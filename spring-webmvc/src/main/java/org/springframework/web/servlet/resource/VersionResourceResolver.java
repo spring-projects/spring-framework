@@ -73,7 +73,7 @@ public class VersionResourceResolver extends AbstractResourceResolver {
 		}
 
 		VersionStrategy versionStrategy = findStrategy(requestPath);
-		if(versionStrategy == null) {
+		if (versionStrategy == null) {
 			return null;
 		}
 
@@ -114,7 +114,7 @@ public class VersionResourceResolver extends AbstractResourceResolver {
 		String baseUrl = chain.resolveUrlPath(resourceUrlPath, locations);
 		if (StringUtils.hasText(baseUrl)) {
 			VersionStrategy versionStrategy = findStrategy(resourceUrlPath);
-			if(versionStrategy == null) {
+			if (versionStrategy == null) {
 				return null;
 			}
 			return versionStrategy.addVersionToUrl(baseUrl, locations, chain);
@@ -129,12 +129,12 @@ public class VersionResourceResolver extends AbstractResourceResolver {
 	protected VersionStrategy findStrategy(String requestPath) {
 		String path = "/".concat(requestPath);
         List<String> matchingPatterns = new ArrayList<String>();
-		for(String pattern : this.versionStrategyMap.keySet()) {
-			if(this.pathMatcher.match(pattern, path)) {
+		for (String pattern : this.versionStrategyMap.keySet()) {
+			if (this.pathMatcher.match(pattern, path)) {
                 matchingPatterns.add(pattern);
 			}
 		}
-        if(!matchingPatterns.isEmpty()) {
+        if (!matchingPatterns.isEmpty()) {
             Comparator<String> comparator = this.pathMatcher.getPatternComparator(path);
             Collections.sort(matchingPatterns, comparator);
             return this.versionStrategyMap.get(matchingPatterns.get(0));

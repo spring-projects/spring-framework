@@ -55,7 +55,8 @@ public aspect JCacheCacheAspect extends JCacheAspectSupport {
 			public Object invoke() {
 				try {
 					return proceed(cachedObject);
-				} catch (Throwable ex) {
+				}
+				catch (Throwable ex) {
 					throw new ThrowableWrapper(ex);
 				}
 			}

@@ -1028,7 +1028,8 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		if (this.dependencyComparator instanceof OrderProviderComparator) {
 			((OrderProviderComparator) this.dependencyComparator)
 					.sortArray(items, createFactoryAwareOrderProvider(matchingBeans));
-		} else {
+		}
+		else {
 			Arrays.sort(items, this.dependencyComparator);
 		}
 	}
@@ -1037,7 +1038,8 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		if (this.dependencyComparator instanceof OrderProviderComparator) {
 			((OrderProviderComparator) this.dependencyComparator)
 					.sortList(items, createFactoryAwareOrderProvider(matchingBeans));
-		} else {
+		}
+		else {
 			Collections.sort(items, this.dependencyComparator);
 		}
 	}

@@ -709,16 +709,16 @@ public class AntPathMatcher implements PathMatcher {
 			protected void initCounters() {
 				int pos = 0;
 				while (pos < this.pattern.length()) {
-					if(this.pattern.charAt(pos) == '{') {
+					if (this.pattern.charAt(pos) == '{') {
 						this.uriVars++;
 						pos++;
 					}
-					else if(this.pattern.charAt(pos) == '*') {
-						if(pos + 1 < this.pattern.length() && this.pattern.charAt(pos + 1) == '*') {
+					else if (this.pattern.charAt(pos) == '*') {
+						if (pos + 1 < this.pattern.length() && this.pattern.charAt(pos + 1) == '*') {
 							this.doubleWildcards++;
 							pos += 2;
 						}
-						else if(!this.pattern.substring(pos - 1).equals(".*")) {
+						else if (!this.pattern.substring(pos - 1).equals(".*")) {
 							this.singleWildcards++;
 							pos++;
 						}

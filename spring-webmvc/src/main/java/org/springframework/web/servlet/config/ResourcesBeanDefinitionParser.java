@@ -110,12 +110,12 @@ class ResourcesBeanDefinitionParser implements BeanDefinitionParser {
 		}
 
 		ManagedList<? super Object> resourceResolvers = parseResourceResolvers(parserContext, element, source);
-		if(!resourceResolvers.isEmpty()) {
+		if (!resourceResolvers.isEmpty()) {
 			resourceHandlerDef.getPropertyValues().add("resourceResolvers", resourceResolvers);
 		}
 
 		ManagedList<? super Object> resourceTransformers = parseResourceTransformers(parserContext, element, source);
-		if(!resourceTransformers.isEmpty()) {
+		if (!resourceTransformers.isEmpty()) {
 			resourceHandlerDef.getPropertyValues().add("resourceTransformers", resourceTransformers);
 		}
 

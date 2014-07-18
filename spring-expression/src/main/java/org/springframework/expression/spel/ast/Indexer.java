@@ -283,7 +283,8 @@ public class Indexer extends SpelNodeImpl {
 			}
 			if (member instanceof Field) {
 				mv.visitFieldInsn(isStatic?GETSTATIC:GETFIELD,memberDeclaringClassSlashedDescriptor,member.getName(),CodeFlow.toJVMDescriptor(((Field) member).getType()));
-			} else {
+			}
+			else {
 				mv.visitMethodInsn(isStatic?INVOKESTATIC:INVOKEVIRTUAL, memberDeclaringClassSlashedDescriptor, member.getName(),CodeFlow.createSignatureDescriptor((Method)member),false);
 			}
 		} 
@@ -556,12 +557,12 @@ public class Indexer extends SpelNodeImpl {
 								Member member = optimalAccessor.member;
 								if (member instanceof Field) {
 									Indexer.this.exitTypeDescriptor = CodeFlow.toDescriptor(((Field)member).getType());
-								} else {
+								}
+								else {
 									Indexer.this.exitTypeDescriptor = CodeFlow.toDescriptor(((Method)member).getReturnType());
 								}
 							}
-							TypedValue value = accessor.read(this.evaluationContext, this.targetObject, this.name);
-							return value;
+							return accessor.read(this.evaluationContext, this.targetObject, this.name);
 						}
 					}
 				}
@@ -679,7 +680,7 @@ public class Indexer extends SpelNodeImpl {
 					throw new SpelEvaluationException(getStartPosition(), SpelMessage.COLLECTION_INDEX_OUT_OF_BOUNDS,
 							this.collection.size(), this.index);
 				}
-				if(this.index >= this.maximumSize) {
+				if (this.index >= this.maximumSize) {
 					throw new SpelEvaluationException(getStartPosition(), SpelMessage.UNABLE_TO_GROW_COLLECTION);
 				}
 				if (this.collectionEntryDescriptor.getElementTypeDescriptor() == null) {

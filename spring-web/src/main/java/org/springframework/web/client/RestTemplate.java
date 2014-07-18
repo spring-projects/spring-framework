@@ -799,7 +799,8 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 		public ResponseEntityResponseExtractor(Type responseType) {
 			if (responseType != null && !Void.class.equals(responseType)) {
 				this.delegate = new HttpMessageConverterExtractor<T>(responseType, getMessageConverters(), logger);
-			} else {
+			}
+			else {
 				this.delegate = null;
 			}
 		}

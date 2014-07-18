@@ -173,8 +173,8 @@ public class JettyWebSocketSession extends AbstractWebSocketSession<Session> {
 
 		List<ExtensionConfig> source = getNativeSession().getUpgradeResponse().getExtensions();
 		this.extensions = new ArrayList<WebSocketExtension>(source.size());
-		for(ExtensionConfig e : source) {
-			this.extensions.add(new WebSocketExtension(e.getName(), e.getParameters()));
+		for (ExtensionConfig ec : source) {
+			this.extensions.add(new WebSocketExtension(ec.getName(), ec.getParameters()));
 		}
 
 		if (this.user == null) {

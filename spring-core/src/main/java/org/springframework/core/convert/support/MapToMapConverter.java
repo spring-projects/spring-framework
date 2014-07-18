@@ -78,7 +78,7 @@ final class MapToMapConverter implements ConditionalGenericConverter {
 				copyRequired = true;
 			}
 		}
-		if(!copyRequired) {
+		if (!copyRequired) {
 			return sourceMap;
 		}
 		Map<Object, Object> targetMap = CollectionFactory.createMap(targetType.getType(), sourceMap.size());

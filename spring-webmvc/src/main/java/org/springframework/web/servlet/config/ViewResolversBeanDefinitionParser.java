@@ -175,7 +175,7 @@ public class ViewResolversBeanDefinitionParser implements BeanDefinitionParser {
 		List<Element> elements = DomUtils.getChildElementsByTagName(resolverElement, new String[] {"default-views"});
 		if (!elements.isEmpty()) {
 			ManagedList<Object> list = new ManagedList<Object>();
-			for(Element element : DomUtils.getChildElementsByTagName(elements.get(0), "bean", "ref")) {
+			for (Element element : DomUtils.getChildElementsByTagName(elements.get(0), "bean", "ref")) {
 				list.add(context.getDelegate().parsePropertySubElement(element, null));
 			}
 			values.add("defaultViews", list);

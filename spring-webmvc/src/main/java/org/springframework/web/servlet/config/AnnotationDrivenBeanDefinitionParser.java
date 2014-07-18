@@ -366,7 +366,7 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 	private void configurePathMatchingProperties(RootBeanDefinition handlerMappingDef,
 	                                             Element element, ParserContext parserContext) {
 		Element pathMatchingElement = DomUtils.getChildElementByTagName(element, "path-matching");
-		if(pathMatchingElement != null) {
+		if (pathMatchingElement != null) {
 			Object source = parserContext.extractSource(element);
 			if (pathMatchingElement.hasAttribute("suffix-pattern")) {
 				Boolean useSuffixPatternMatch = Boolean.valueOf(pathMatchingElement.getAttribute("suffix-pattern"));
@@ -568,7 +568,7 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
             if (StringUtils.hasText("bean")) {
                 reference = new RuntimeBeanReference(refElement.getAttribute("bean"),false);
                 list.add(reference);
-            }else if(StringUtils.hasText("parent")){
+            }else if (StringUtils.hasText("parent")){
                 reference = new RuntimeBeanReference(refElement.getAttribute("parent"),true);
                 list.add(reference);
             }else{

@@ -184,11 +184,11 @@ public class StandardWebSocketSession extends AbstractWebSocketSession<Session> 
 
 		List<Extension> source = getNativeSession().getNegotiatedExtensions();
 		this.extensions = new ArrayList<WebSocketExtension>(source.size());
-		for(Extension e : source) {
-			this.extensions.add(new StandardToWebSocketExtensionAdapter(e));
+		for (Extension ext : source) {
+			this.extensions.add(new StandardToWebSocketExtensionAdapter(ext));
 		}
 
-		if(this.user == null) {
+		if (this.user == null) {
 			this.user = session.getUserPrincipal();
 		}
 	}

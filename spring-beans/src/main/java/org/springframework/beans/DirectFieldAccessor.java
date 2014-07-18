@@ -34,7 +34,7 @@ import org.springframework.util.ReflectionUtils;
  * {@link PropertyAccessor} implementation that directly accesses instance fields.
  * Allows for direct binding to fields instead of going through JavaBean setters.
  *
- * <p>Since 4.1 this implementation supports nested fields traversing.
+ * <p>As of Spring 4.1, this implementation supports nested field traversal.
  *
  * <p>A DirectFieldAccessor's default for the "extractOldValueForEditor" setting
  * is "true", since a field can always be read without side effects.
@@ -188,7 +188,6 @@ public class DirectFieldAccessor extends AbstractPropertyAccessor {
 
 	/**
 	 * Create a root {@link FieldAccessor}.
-	 *
 	 * @param canonicalName the full expression for the field to access
 	 * @param actualName the name of the local (root) property
 	 * @param field the field accessing the property
@@ -212,13 +211,13 @@ public class DirectFieldAccessor extends AbstractPropertyAccessor {
 		private final Field field;
 
 		/**
-		 * Create a new instance.
+		 * Create a new FieldAccessor instance.
 		 * @param parent the parent accessor, if any
 		 * @param canonicalName the full expression for the field to access
 		 * @param actualName the name of the partial expression for this property
 		 * @param field the field accessing the property
 		 */
-		private FieldAccessor(FieldAccessor parent, String canonicalName, String actualName, Field field) {
+		public FieldAccessor(FieldAccessor parent, String canonicalName, String actualName, Field field) {
 			Assert.notNull(canonicalName, "Expression must no be null");
 			Assert.notNull(field, "Field must no be null");
 			this.parents = buildParents(parent);
@@ -229,7 +228,6 @@ public class DirectFieldAccessor extends AbstractPropertyAccessor {
 
 		/**
 		 * Create a child instance.
-		 *
 		 * @param actualName the name of the child property
 		 * @param field the field accessing the child property
 		 */
@@ -238,7 +236,7 @@ public class DirectFieldAccessor extends AbstractPropertyAccessor {
 		}
 
 		public Field getField() {
-			return field;
+			return this.field;
 		}
 
 		public Object getValue() {
@@ -252,9 +250,8 @@ public class DirectFieldAccessor extends AbstractPropertyAccessor {
 			try {
 				this.field.set(localTarget, value);
 			}
-			catch (IllegalAccessException e) {
-				throw new InvalidPropertyException(localTarget.getClass(), canonicalName,
-						"Field is not accessible", e);
+			catch (IllegalAccessException ex) {
+				throw new InvalidPropertyException(localTarget.getClass(), canonicalName, "Field is not accessible", ex);
 			}
 		}
 
@@ -275,8 +272,8 @@ public class DirectFieldAccessor extends AbstractPropertyAccessor {
 				localTarget = autoGrowIfNecessary(parent, parent.getParentValue(localTarget));
 				if (localTarget == null) { // Could not traverse the graph any further
 					throw new NullValueInNestedPathException(getRootClass(), parent.actualName,
-							"Cannot access indexed value of property referenced in indexed " +
-									"property path '" + getField().getName() + "': returned null");
+							"Cannot access indexed value of property referenced in indexed property path '" +
+									getField().getName() + "': returned null");
 				}
 			}
 			return localTarget;
@@ -287,10 +284,10 @@ public class DirectFieldAccessor extends AbstractPropertyAccessor {
 			try {
 				return type.newInstance();
 			}
-			catch (Exception e) {
+			catch (Exception ex) {
 				throw new NullValueInNestedPathException(getRootClass(), this.actualName,
-						"Could not instantiate property type [" + type.getName() + "] to " +
-								"auto-grow nested property path: " + e);
+						"Could not instantiate property type [" + type.getName() +
+								"] to auto-grow nested property path: " + ex);
 			}
 		}
 
@@ -311,7 +308,6 @@ public class DirectFieldAccessor extends AbstractPropertyAccessor {
 			}
 			return parents;
 		}
-
 	}
 
 }

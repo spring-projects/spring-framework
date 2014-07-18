@@ -117,7 +117,7 @@ public class GenericCallMetaDataProvider implements CallMetaDataProvider {
 		else if (isStoresUpperCaseIdentifiers()) {
 			return procedureName.toUpperCase();
 		}
-		else if(isStoresLowerCaseIdentifiers()) {
+		else if (isStoresLowerCaseIdentifiers()) {
 			return procedureName.toLowerCase();
 		}
 		else {
@@ -133,7 +133,7 @@ public class GenericCallMetaDataProvider implements CallMetaDataProvider {
 		else if (isStoresUpperCaseIdentifiers()) {
 			return catalogName.toUpperCase();
 		}
-		else if(isStoresLowerCaseIdentifiers()) {
+		else if (isStoresLowerCaseIdentifiers()) {
 			return catalogName.toLowerCase();
 		}
 		else {
@@ -149,7 +149,7 @@ public class GenericCallMetaDataProvider implements CallMetaDataProvider {
 		else if (isStoresUpperCaseIdentifiers()) {
 			return schemaName.toUpperCase();
 		}
-		else if(isStoresLowerCaseIdentifiers()) {
+		else if (isStoresLowerCaseIdentifiers()) {
 			return schemaName.toLowerCase();
 		}
 		else {
@@ -185,7 +185,7 @@ public class GenericCallMetaDataProvider implements CallMetaDataProvider {
 		else if (isStoresUpperCaseIdentifiers()) {
 			return parameterName.toUpperCase();
 		}
-		else if(isStoresLowerCaseIdentifiers()) {
+		else if (isStoresLowerCaseIdentifiers()) {
 			return parameterName.toLowerCase();
 		}
 		else {

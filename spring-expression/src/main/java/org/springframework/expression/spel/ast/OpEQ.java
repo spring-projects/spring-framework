@@ -105,7 +105,8 @@ public class OpEQ extends Operator {
 			else {
 				throw new IllegalStateException("Unexpected descriptor "+leftDesc);
 			}
-		} else {
+		}
+		else {
 			getLeftOperand().generateCode(mv, codeflow);
 			getRightOperand().generateCode(mv, codeflow);
 			Label leftNotNull = new Label();

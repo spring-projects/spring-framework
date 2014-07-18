@@ -316,12 +316,12 @@ class TypeConverterDelegate {
 					convertedValue = enumField.get(null);
 				}
 				catch (ClassNotFoundException ex) {
-					if(logger.isTraceEnabled()) {
+					if (logger.isTraceEnabled()) {
 						logger.trace("Enum class [" + enumType + "] cannot be loaded", ex);
 					}
 				}
 				catch (Throwable ex) {
-					if(logger.isTraceEnabled()) {
+					if (logger.isTraceEnabled()) {
 						logger.trace("Field [" + fieldName + "] isn't an enum value for type [" + enumType + "]", ex);
 					}
 				}

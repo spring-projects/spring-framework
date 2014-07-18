@@ -219,47 +219,48 @@ public class CodeFlow implements Opcodes {
 	 * @return the JVM descriptor for the class
 	 */
 	public static String toJVMDescriptor(Class<?> clazz) {
-		StringBuilder s= new StringBuilder();
+		StringBuilder sb = new StringBuilder();
 		if (clazz.isArray()) {
 			while (clazz.isArray()) {
-				s.append("[");
+				sb.append("[");
 				clazz = clazz.getComponentType();
 			}
 		}
 		if (clazz.isPrimitive()) {
 			if (clazz == Void.TYPE) {
-				s.append('V');
+				sb.append('V');
 			}
 			else if (clazz == Integer.TYPE) {
-				s.append('I');
+				sb.append('I');
 			}
 			else if (clazz == Boolean.TYPE) {
-				s.append('Z');
+				sb.append('Z');
 			}
 			else if (clazz == Character.TYPE) {
-				s.append('C');
+				sb.append('C');
 			}
 			else if (clazz == Long.TYPE) {
-				s.append('J');
+				sb.append('J');
 			}
 			else if (clazz == Double.TYPE) {
-				s.append('D');
+				sb.append('D');
 			}
 			else if (clazz == Float.TYPE) {
-				s.append('F');
+				sb.append('F');
 			}
 			else if (clazz == Byte.TYPE) {
-				s.append('B');
+				sb.append('B');
 			}
 			else if (clazz == Short.TYPE) {
-				s.append('S');
+				sb.append('S');
 			}
-		} else {
-			s.append("L");
-			s.append(clazz.getName().replace('.', '/'));
-			s.append(";");
 		}
-		return s.toString();
+		else {
+			sb.append("L");
+			sb.append(clazz.getName().replace('.', '/'));
+			sb.append(";");
+		}
+		return sb.toString();
 	}
 
 	/**

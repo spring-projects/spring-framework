@@ -102,7 +102,7 @@ public class CssLinkResourceTransformer implements ResourceTransformer {
 			writer.write(content.substring(index, info.getStart()));
 			String link = content.substring(info.getStart(), info.getEnd());
 			String newLink = null;
-			if(!hasScheme(link)) {
+			if (!hasScheme(link)) {
 				newLink = transformerChain.getResolverChain().resolveUrlPath(link, Arrays.asList(resource));
 			}
 			if (logger.isTraceEnabled()) {
@@ -159,7 +159,8 @@ public class CssLinkResourceTransformer implements ResourceTransformer {
 					index = extractLink(index, content, linkInfos);
 
 				}
-			} while (true);
+			}
+			while (true);
 		}
 
 		private int skipWhitespace(String content, int index) {

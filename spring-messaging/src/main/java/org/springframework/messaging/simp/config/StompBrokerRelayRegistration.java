@@ -192,7 +192,7 @@ public class StompBrokerRelayRegistration extends AbstractBrokerRegistration {
 		if (this.systemHeartbeatReceiveInterval != null) {
 			handler.setSystemHeartbeatReceiveInterval(this.systemHeartbeatReceiveInterval);
 		}
-		if(this.virtualHost != null) {
+		if (this.virtualHost != null) {
 			handler.setVirtualHost(this.virtualHost);
 		}
 

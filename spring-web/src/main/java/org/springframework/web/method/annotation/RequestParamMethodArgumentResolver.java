@@ -176,7 +176,7 @@ public class RequestParamMethodArgumentResolver extends AbstractNamedValueMethod
 			Assert.notNull(multipartRequest, "Expected MultipartHttpServletRequest: is a MultipartResolver configured?");
 			arg = multipartRequest.getFiles(name);
 		}
-		else if(isMultipartFileArray(parameter)) {
+		else if (isMultipartFileArray(parameter)) {
 			assertIsMultipartRequest(servletRequest);
 			Assert.notNull(multipartRequest, "Expected MultipartHttpServletRequest: is a MultipartResolver configured?");
 			arg = multipartRequest.getFiles(name).toArray(new MultipartFile[0]);

@@ -105,7 +105,8 @@ public class OpNE extends Operator {
 			else {
 				throw new IllegalStateException("Unexpected descriptor "+leftDesc);
 			}
-		} else {
+		}
+		else {
 			getLeftOperand().generateCode(mv, codeflow);
 			getRightOperand().generateCode(mv, codeflow);
 			mv.visitJumpInsn(IF_ACMPEQ, elseTarget);

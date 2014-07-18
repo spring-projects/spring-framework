@@ -36,6 +36,7 @@ public class TypeReference extends SpelNodeImpl {
 
 	private transient Class<?> type;
 
+
 	public TypeReference(int pos, SpelNodeImpl qualifiedId) {
 		this(pos,qualifiedId,0);
 	}
@@ -50,7 +51,7 @@ public class TypeReference extends SpelNodeImpl {
 	public TypedValue getValueInternal(ExpressionState state) throws EvaluationException {
 		// TODO possible optimization here if we cache the discovered type reference, but can we do that?
 		String typename = (String) this.children[0].getValueInternal(state).getValue();
-		if (typename.indexOf(".") == -1 && Character.isLowerCase(typename.charAt(0))) {
+		if (typename.indexOf('.') == -1 && Character.isLowerCase(typename.charAt(0))) {
 			TypeCode tc = TypeCode.valueOf(typename.toUpperCase());
 			if (tc != TypeCode.OBJECT) {
 				// it is a primitive type
@@ -69,10 +70,10 @@ public class TypeReference extends SpelNodeImpl {
 	}
 
 	private Class<?> makeArrayIfNecessary(Class<?> clazz) {
-		if (this.dimensions!=0) {
-			for (int i=0;i<this.dimensions;i++) {
-				Object o = Array.newInstance(clazz, 0);
-				clazz = o.getClass();
+		if (this.dimensions != 0) {
+			for (int i = 0; i < this.dimensions; i++) {
+				Object array = Array.newInstance(clazz, 0);
+				clazz = array.getClass();
 			}
 		}
 		return clazz;
@@ -92,7 +93,7 @@ public class TypeReference extends SpelNodeImpl {
 	
 	@Override
 	public boolean isCompilable() {
-		return this.exitTypeDescriptor != null;
+		return (this.exitTypeDescriptor != null);
 	}
 	
 	@Override
@@ -101,21 +102,29 @@ public class TypeReference extends SpelNodeImpl {
 		if (type.isPrimitive()) {
 			if (type == Integer.TYPE) {
 				mv.visitFieldInsn(GETSTATIC, "java/lang/Integer", "TYPE", "Ljava/lang/Class;");
-			} else if (type == Boolean.TYPE) {
+			}
+			else if (type == Boolean.TYPE) {
 				mv.visitFieldInsn(GETSTATIC, "java/lang/Boolean", "TYPE", "Ljava/lang/Class;");
-			} else if (type == Byte.TYPE) {
+			}
+			else if (type == Byte.TYPE) {
 				mv.visitFieldInsn(GETSTATIC, "java/lang/Byte", "TYPE", "Ljava/lang/Class;");
-			} else if (type == Short.TYPE) {
+			}
+			else if (type == Short.TYPE) {
 				mv.visitFieldInsn(GETSTATIC, "java/lang/Short", "TYPE", "Ljava/lang/Class;");
-			} else if (type == Double.TYPE) {
+			}
+			else if (type == Double.TYPE) {
 				mv.visitFieldInsn(GETSTATIC, "java/lang/Double", "TYPE", "Ljava/lang/Class;");
-			} else if (type == Character.TYPE) {
+			}
+			else if (type == Character.TYPE) {
 				mv.visitFieldInsn(GETSTATIC, "java/lang/Character", "TYPE", "Ljava/lang/Class;");
-			} else if (type == Float.TYPE) {
+			}
+			else if (type == Float.TYPE) {
 				mv.visitFieldInsn(GETSTATIC, "java/lang/Float", "TYPE", "Ljava/lang/Class;");
-			} else if (type == Long.TYPE) {
+			}
+			else if (type == Long.TYPE) {
 				mv.visitFieldInsn(GETSTATIC, "java/lang/Long", "TYPE", "Ljava/lang/Class;");
-			} else if (type == Boolean.TYPE) {
+			}
+			else if (type == Boolean.TYPE) {
 				mv.visitFieldInsn(GETSTATIC, "java/lang/Boolean", "TYPE", "Ljava/lang/Class;");
 	        }
 		}

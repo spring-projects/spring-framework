@@ -201,7 +201,8 @@ public class ContentNegotiationManagerFactoryBean
 			PathExtensionContentNegotiationStrategy strategy;
 			if (this.servletContext != null) {
 				strategy = new ServletPathExtensionContentNegotiationStrategy(this.servletContext, this.mediaTypes);
-			} else {
+			}
+			else {
 				strategy = new PathExtensionContentNegotiationStrategy(this.mediaTypes);
 			}
 			strategy.setIgnoreUnknownExtensions(this.ignoreUnknownPathExtensions);

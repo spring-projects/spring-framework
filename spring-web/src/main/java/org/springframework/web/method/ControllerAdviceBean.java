@@ -143,23 +143,23 @@ public class ControllerAdviceBean implements Ordered {
 	 * @since 4.0
 	 */
 	public boolean isApplicableToBeanType(Class<?> beanType) {
-		if(!hasSelectors()) {
+		if (!hasSelectors()) {
 			return true;
 		}
 		else if (beanType != null) {
 			for (Class<?> clazz : this.assignableTypes) {
-				if(ClassUtils.isAssignable(clazz, beanType)) {
+				if (ClassUtils.isAssignable(clazz, beanType)) {
 					return true;
 				}
 			}
 			for (Class<? extends Annotation> annotationClass : this.annotations) {
-				if(AnnotationUtils.findAnnotation(beanType, annotationClass) != null) {
+				if (AnnotationUtils.findAnnotation(beanType, annotationClass) != null) {
 					return true;
 				}
 			}
 			String packageName = beanType.getPackage().getName();
 			for (Package basePackage : this.basePackages) {
-				if(packageName.startsWith(basePackage.getName())) {
+				if (packageName.startsWith(basePackage.getName())) {
 					return true;
 				}
 			}
@@ -226,7 +226,7 @@ public class ControllerAdviceBean implements Ordered {
 		for (String pkgName : basePackageNames) {
 			if (StringUtils.hasText(pkgName)) {
 				Package pkg = Package.getPackage(pkgName);
-				if(pkg != null) {
+				if (pkg != null) {
 					basePackages.add(pkg);
 				}
 				else {

@@ -226,7 +226,7 @@ public class PathResource extends AbstractResource implements WritableResource {
 	 */
 	@Override
 	public OutputStream getOutputStream() throws IOException {
-		if(Files.isDirectory(this.path)) {
+		if (Files.isDirectory(this.path)) {
 			throw new FileNotFoundException(getPath() + " (is a directory)");
 		}
 		return Files.newOutputStream(this.path);

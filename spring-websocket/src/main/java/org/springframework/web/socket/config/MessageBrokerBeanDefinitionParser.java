@@ -132,7 +132,7 @@ class MessageBrokerBeanDefinitionParser implements BeanDefinitionParser {
 			String pathAttribute = endpointElem.getAttribute("path");
 			Assert.state(StringUtils.hasText(pathAttribute), "Invalid <stomp-endpoint> (no path mapping)");
 			List<String> paths = Arrays.asList(StringUtils.tokenizeToStringArray(pathAttribute, ","));
-			for(String path : paths) {
+			for (String path : paths) {
 				path = path.trim();
 				Assert.state(StringUtils.hasText(path), "Invalid <stomp-endpoint> path attribute: " + pathAttribute);
 				if (DomUtils.getChildElementByTagName(endpointElem, "sockjs") != null) {
@@ -374,7 +374,7 @@ class MessageBrokerBeanDefinitionParser implements BeanDefinitionParser {
 		ConstructorArgumentValues cavs = new ConstructorArgumentValues();
 		cavs.addIndexedArgumentValue(0, brokerChannel);
 		RootBeanDefinition beanDef = new RootBeanDefinition(SimpMessagingTemplate.class,cavs, null);
-		if(element.hasAttribute("user-destination-prefix")) {
+		if (element.hasAttribute("user-destination-prefix")) {
 			beanDef.getPropertyValues().add("userDestinationPrefix", element.getAttribute("user-destination-prefix"));
 		}
 		beanDef.getPropertyValues().add("messageConverter", messageConverter);

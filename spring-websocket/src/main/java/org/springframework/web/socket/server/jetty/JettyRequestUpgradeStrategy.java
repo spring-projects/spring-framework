@@ -123,7 +123,7 @@ public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy {
 
 	private List<WebSocketExtension> getWebSocketExtensions() {
 		List<WebSocketExtension> result = new ArrayList<WebSocketExtension>();
-		for(String name : this.factory.getExtensionFactory().getExtensionNames()) {
+		for (String name : this.factory.getExtensionFactory().getExtensionNames()) {
 			result.add(new WebSocketExtension(name));
 		}
 		return result;

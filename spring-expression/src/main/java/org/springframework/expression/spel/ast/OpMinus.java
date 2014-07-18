@@ -193,7 +193,8 @@ public class OpMinus extends Operator {
 				default:
 					throw new IllegalStateException("Unrecognized exit descriptor: '"+this.exitTypeDescriptor+"'");
 			}
-		} else {
+		}
+		else {
 			switch (this.exitTypeDescriptor.charAt(0)) {
 				case 'I':
 					mv.visitInsn(INEG);

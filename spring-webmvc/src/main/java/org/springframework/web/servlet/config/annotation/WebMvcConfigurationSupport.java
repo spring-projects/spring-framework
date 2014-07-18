@@ -218,19 +218,19 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 		handlerMapping.setContentNegotiationManager(mvcContentNegotiationManager());
 
 		PathMatchConfigurer configurer = getPathMatchConfigurer();
-		if(configurer.isUseSuffixPatternMatch() != null) {
+		if (configurer.isUseSuffixPatternMatch() != null) {
 			handlerMapping.setUseSuffixPatternMatch(configurer.isUseSuffixPatternMatch());
 		}
-		if(configurer.isUseRegisteredSuffixPatternMatch() != null) {
+		if (configurer.isUseRegisteredSuffixPatternMatch() != null) {
 			handlerMapping.setUseRegisteredSuffixPatternMatch(configurer.isUseRegisteredSuffixPatternMatch());
 		}
-		if(configurer.isUseTrailingSlashMatch() != null) {
+		if (configurer.isUseTrailingSlashMatch() != null) {
 			handlerMapping.setUseTrailingSlashMatch(configurer.isUseTrailingSlashMatch());
 		}
-		if(configurer.getPathMatcher() != null) {
+		if (configurer.getPathMatcher() != null) {
 			handlerMapping.setPathMatcher(configurer.getPathMatcher());
 		}
-		if(configurer.getUrlPathHelper() != null) {
+		if (configurer.getUrlPathHelper() != null) {
 			handlerMapping.setUrlPathHelper(configurer.getUrlPathHelper());
 		}
 		return handlerMapping;
@@ -534,7 +534,7 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	 */
 	@Bean
 	public PathMatcher mvcPathMatcher() {
-		if(getPathMatchConfigurer().getPathMatcher() != null) {
+		if (getPathMatchConfigurer().getPathMatcher() != null) {
 			return getPathMatchConfigurer().getPathMatcher();
 		}
 		else {
@@ -551,7 +551,7 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	 */
 	@Bean
 	public UrlPathHelper mvcUrlPathHelper() {
-		if(getPathMatchConfigurer().getUrlPathHelper() != null) {
+		if (getPathMatchConfigurer().getUrlPathHelper() != null) {
 			return getPathMatchConfigurer().getUrlPathHelper();
 		}
 		else {

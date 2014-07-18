@@ -134,7 +134,8 @@ public class VariableReference extends SpelNodeImpl {
 	public void generateCode(MethodVisitor mv, CodeFlow codeflow) {
 		if (this.name.equals(ROOT)) {
 			mv.visitVarInsn(ALOAD,1);
-		} else {
+		}
+		else {
 			mv.visitVarInsn(ALOAD, 2);
 			mv.visitLdcInsn(name);
 			mv.visitMethodInsn(INVOKEINTERFACE, "org/springframework/expression/EvaluationContext", "lookupVariable", "(Ljava/lang/String;)Ljava/lang/Object;",true);

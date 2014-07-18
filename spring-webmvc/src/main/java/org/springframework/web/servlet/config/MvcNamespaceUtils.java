@@ -63,8 +63,8 @@ abstract class MvcNamespaceUtils {
 	 * @return a RuntimeBeanReference to this {@link UrlPathHelper} instance
 	 */
 	public static RuntimeBeanReference registerUrlPathHelper(RuntimeBeanReference urlPathHelperRef, ParserContext parserContext, Object source) {
-		if(urlPathHelperRef != null) {
-			if(parserContext.getRegistry().isAlias(URL_PATH_HELPER_BEAN_NAME)) {
+		if (urlPathHelperRef != null) {
+			if (parserContext.getRegistry().isAlias(URL_PATH_HELPER_BEAN_NAME)) {
 				parserContext.getRegistry().removeAlias(URL_PATH_HELPER_BEAN_NAME);
 			}
 			parserContext.getRegistry().registerAlias(urlPathHelperRef.getBeanName(), URL_PATH_HELPER_BEAN_NAME);
@@ -86,8 +86,8 @@ abstract class MvcNamespaceUtils {
 	 * @return a RuntimeBeanReference to this {@link PathMatcher} instance
 	 */
 	public static RuntimeBeanReference registerPathMatcher(RuntimeBeanReference pathMatcherRef, ParserContext parserContext, Object source) {
-		if(pathMatcherRef != null) {
-			if(parserContext.getRegistry().isAlias(PATH_MATCHER_BEAN_NAME)) {
+		if (pathMatcherRef != null) {
+			if (parserContext.getRegistry().isAlias(PATH_MATCHER_BEAN_NAME)) {
 				parserContext.getRegistry().removeAlias(PATH_MATCHER_BEAN_NAME);
 			}
 			parserContext.getRegistry().registerAlias(pathMatcherRef.getBeanName(), PATH_MATCHER_BEAN_NAME);

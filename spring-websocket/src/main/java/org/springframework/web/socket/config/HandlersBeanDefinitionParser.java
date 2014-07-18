@@ -85,7 +85,7 @@ class HandlersBeanDefinitionParser implements BeanDefinitionParser {
 
 		ManagedMap<String, Object> urlMap = new ManagedMap<String, Object>();
 		urlMap.setSource(source);
-		for(Element mappingElement : DomUtils.getChildElementsByTagName(element, "mapping")) {
+		for (Element mappingElement : DomUtils.getChildElementsByTagName(element, "mapping")) {
 			strategy.addMapping(mappingElement, urlMap, context);
 		}
 		handlerMappingDef.getPropertyValues().add("urlMap", urlMap);
@@ -122,7 +122,7 @@ class HandlersBeanDefinitionParser implements BeanDefinitionParser {
 
 			ConstructorArgumentValues cavs = new ConstructorArgumentValues();
 			cavs.addIndexedArgumentValue(0, handlerReference);
-			if(this.handshakeHandlerReference != null) {
+			if (this.handshakeHandlerReference != null) {
 				cavs.addIndexedArgumentValue(1, this.handshakeHandlerReference);
 			}
 			RootBeanDefinition requestHandlerDef = new RootBeanDefinition(WebSocketHttpRequestHandler.class, cavs, null);
