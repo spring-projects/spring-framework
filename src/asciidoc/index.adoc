@@ -28875,6 +28875,26 @@ configuration. For more information on placeholders, see the javadocs of the
 `PropertyPlaceholderConfigurer` class.
 
 
+
+[[mvc-ann-requestmapping-uri-vars-and-file-extensions]]
+===== URI Variables and Suffix Patterns Matching
+By default Spring MVC automatically performs `".*"` suffix pattern matching so
+that a controller mapped to `/person` is also implicitly mapped to `/person.*`.
+This allows indicating content types via file extensions, e.g. `/person.pdf`,
+`/person.xml`, etc. A common pitfall however is when the last path segment of the
+mapping is a URI variable, e.g. `/person/{id}`. While a request for `/person/1.json`
+would correctly result in path variable id=1 and extension ".json", when the id
+naturally contains a dot, e.g. `/person/joe@email.com` the result does not match
+expectations. Clearly here ".com" is not a file extension.
+
+The proper way to address this is to configure Spring MVC to only do suffix pattern
+matching against file extensions registered for content negotiation purposes.
+For more on this, first see <<mvc-config-content-negotiation>> and then
+<<mvc-config-path-matching>> showing how to enable suffix pattern matching
+along with how to use registered suffix patterns only.
+
+
+
 [[mvc-ann-matrix-variables]]
 ===== Matrix Variables
 The URI specification http://tools.ietf.org/html/rfc3986#section-3.3[RFC 3986] defines
@@ -32572,8 +32592,10 @@ An example of enabling pattern match features and using custom matchers, in Java
 
 		@Override
 		public void configurePathMatch(PathMatchConfigurer configurer) {
-			configurer.setUseSuffixPatternMatch(true)
+			configurer
+			    .setUseSuffixPatternMatch(true)
 			    .setUseTrailingSlashMatch(false)
+			    .setUseRegisteredSuffixPatternMatch(true)
 			    .setPathMatcher(antPathMatcher())
 			    .setUrlPathHelper(urlPathHelper());
 		}
@@ -32603,6 +32625,7 @@ And the same in XML, use the `<mvc:path-matching>` element:
         <mvc:path-matching
             suffix-pattern="true"
             trailing-slash="false"
+            registered-suffixes-only="true"
             path-helper="pathHelper"
             path-matcher="pathMatcher" />
     </mvc:annotation-driven>
