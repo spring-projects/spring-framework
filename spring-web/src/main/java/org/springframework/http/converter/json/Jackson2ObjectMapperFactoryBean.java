@@ -341,7 +341,7 @@ public class Jackson2ObjectMapperFactoryBean implements FactoryBean<ObjectMapper
 	/**
 	 * Specify a {@link com.fasterxml.jackson.databind.PropertyNamingStrategy} to
 	 * configure the {@link ObjectMapper} with.
-	 * @@since 4.0.2
+	 * @since 4.0.2
 	 */
 	public void setPropertyNamingStrategy(PropertyNamingStrategy propertyNamingStrategy) {
 		this.propertyNamingStrategy = propertyNamingStrategy;

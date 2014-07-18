@@ -21,8 +21,8 @@ import javax.cache.annotation.CacheResult;
 
 import org.springframework.cache.interceptor.CacheResolver;
 import org.springframework.cache.interceptor.KeyGenerator;
-import org.springframework.util.StringUtils;
 import org.springframework.util.ExceptionTypeFilter;
+import org.springframework.util.StringUtils;
 
 /**
  * The {@link JCacheOperation} implementation for a {@link CacheResult} operation.
@@ -47,8 +47,7 @@ public class CacheResultOperation extends BaseKeyCacheOperation<CacheResult> {
 		CacheResult ann = methodDetails.getCacheAnnotation();
 		this.exceptionTypeFilter = createExceptionTypeFilter(ann.cachedExceptions(), ann.nonCachedExceptions());
 		this.exceptionCacheResolver = exceptionCacheResolver;
-		String exceptionCacheNameCandidate = ann.exceptionCacheName();
-		this.exceptionCacheName = StringUtils.hasText(exceptionCacheNameCandidate) ? exceptionCacheNameCandidate : null;
+		this.exceptionCacheName = (StringUtils.hasText(ann.exceptionCacheName()) ? ann.exceptionCacheName() : null);
 	}
 
 
@@ -58,8 +57,8 @@ public class CacheResultOperation extends BaseKeyCacheOperation<CacheResult> {
 	}
 
 	/**
-	 * Specify if the method should always be invoked regardless of a cache hit. By
-	 * default, the method is only invoked in case of a cache miss.
+	 * Specify if the method should always be invoked regardless of a cache hit.
+	 * By default, the method is only invoked in case of a cache miss.
 	 * @see javax.cache.annotation.CacheResult#skipGet()
 	 */
 	public boolean isAlwaysInvoked() {
@@ -75,7 +74,7 @@ public class CacheResultOperation extends BaseKeyCacheOperation<CacheResult> {
 	}
 
 	/**
-	 * Return the name of the cache to cache exceptions. Return {@link null} if
+	 * Return the name of the cache to cache exceptions, or {@code null} if
 	 * caching exceptions should be disabled.
 	 * @see javax.cache.annotation.CacheResult#exceptionCacheName()
 	 */

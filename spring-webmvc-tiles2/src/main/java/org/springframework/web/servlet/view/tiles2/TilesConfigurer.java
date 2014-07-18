@@ -257,7 +257,7 @@ public class TilesConfigurer implements ServletContextAware, InitializingBean, D
 	}
 
 	/**
-	 * Creates a new instance of {@link SpringTilesInitializer}.
+	 * Creates a new instance of {@code SpringTilesInitializer}.
 	 * <p>Override it to use a different initializer.
 	 * @see org.apache.tiles.web.startup.AbstractTilesListener#createTilesInitializer()
 	 */

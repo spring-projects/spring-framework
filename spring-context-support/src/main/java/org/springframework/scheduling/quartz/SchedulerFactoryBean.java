@@ -310,7 +310,7 @@ public class SchedulerFactoryBean extends SchedulerAccessor implements FactoryBe
 	 * reference into the JobDataMap but rather into the SchedulerContext.
 	 * @param schedulerContextAsMap Map with String keys and any objects as
 	 * values (for example Spring-managed beans)
-	 * @see JobDetailBean#setJobDataAsMap
+	 * @see JobDetailFactoryBean#setJobDataAsMap
 	 */
 	public void setSchedulerContextAsMap(Map<String, ?> schedulerContextAsMap) {
 		this.schedulerContextMap = schedulerContextAsMap;
@@ -328,8 +328,8 @@ public class SchedulerFactoryBean extends SchedulerAccessor implements FactoryBe
 	 * correspond to a "setApplicationContext" method in that scenario.
 	 * <p>Note that BeanFactory callback interfaces like ApplicationContextAware
 	 * are not automatically applied to Quartz Job instances, because Quartz
-	 * itself is reponsible for the lifecycle of its Jobs.
-	 * @see JobDetailBean#setApplicationContextJobDataKey
+	 * itself is responsible for the lifecycle of its Jobs.
+	 * @see JobDetailFactoryBean#setApplicationContextJobDataKey
 	 * @see org.springframework.context.ApplicationContext
 	 */
 	public void setApplicationContextSchedulerContextKey(String applicationContextSchedulerContextKey) {

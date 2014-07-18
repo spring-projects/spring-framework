@@ -39,7 +39,7 @@ import org.springframework.util.CollectionUtils;
  * @since 4.0
  */
 public abstract class AbstractBrokerMessageHandler
-		implements MessageHandler, SmartLifecycle, ApplicationEventPublisherAware {
+		implements MessageHandler, ApplicationEventPublisherAware, SmartLifecycle {
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
@@ -56,9 +56,9 @@ public abstract class AbstractBrokerMessageHandler
 
 	private boolean autoStartup = true;
 
-	private Object lifecycleMonitor = new Object();
-
 	private volatile boolean running = false;
+
+	private final Object lifecycleMonitor = new Object();
 
 
 	public AbstractBrokerMessageHandler() {
@@ -100,7 +100,6 @@ public abstract class AbstractBrokerMessageHandler
 
 	/**
 	 * Check whether this message handler is currently running.
-	 *
 	 * <p>Note that even when this message handler is running the
 	 * {@link #isBrokerAvailable()} flag may still independently alternate between
 	 * being on and off depending on the concrete sub-class implementation.
@@ -110,23 +109,6 @@ public abstract class AbstractBrokerMessageHandler
 		synchronized (this.lifecycleMonitor) {
 			return this.running;
 		}
-	}
-
-	/**
-	 * Whether the message broker is currently available and able to process messages.
-	 *
-	 * <p>Note that this is in addition to the {@link #isRunning()} flag, which
-	 * indicates whether this message handler is running. In other words the message
-	 * handler must first be running and then the {@link #isBrokerAvailable()} flag
-	 * may still independently alternate between being on and off depending on the
-	 * concrete sub-class implementation.
-	 *
-	 * <p>Application components may implement
-	 * {@link org.springframework.context.ApplicationListener<BrokerAvailabilityEvent>>}
-	 * to receive notifications when broker becomes available and unavailable.
-	 */
-	public boolean isBrokerAvailable() {
-		return this.brokerAvailable.get();
 	}
 
 	@Override
@@ -170,6 +152,22 @@ public abstract class AbstractBrokerMessageHandler
 			callback.run();
 		}
 	}
+
+	/**
+	 * Whether the message broker is currently available and able to process messages.
+	 * <p>Note that this is in addition to the {@link #isRunning()} flag, which
+	 * indicates whether this message handler is running. In other words the message
+	 * handler must first be running and then the {@code #isBrokerAvailable()} flag
+	 * may still independently alternate between being on and off depending on the
+	 * concrete sub-class implementation.
+	 * <p>Application components may implement
+	 * {@code org.springframework.context.ApplicationListener&lt;BrokerAvailabilityEvent&gt;}
+	 * to receive notifications when broker becomes available and unavailable.
+	 */
+	public boolean isBrokerAvailable() {
+		return this.brokerAvailable.get();
+	}
+
 
 	@Override
 	public void handleMessage(Message<?> message) {

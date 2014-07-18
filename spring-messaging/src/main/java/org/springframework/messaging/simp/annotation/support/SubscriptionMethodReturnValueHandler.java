@@ -18,6 +18,7 @@ package org.springframework.messaging.simp.annotation.support;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.core.MethodParameter;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
@@ -56,20 +57,19 @@ public class SubscriptionMethodReturnValueHandler implements HandlerMethodReturn
 
 
 	/**
-	 * Class constructor.
-	 *
-	 * @param messagingTemplate a messaging template to send messages to, most
-	 * likely the "clientOutboundChannel", must not be {@link null}.
+	 * Construct a new SubscriptionMethodReturnValueHandler.
+	 * @param messagingTemplate a messaging template to send messages to,
+	 * most likely the "clientOutboundChannel" (must not be {@code null})
 	 */
 	public SubscriptionMethodReturnValueHandler(MessageSendingOperations<String> messagingTemplate) {
 		Assert.notNull(messagingTemplate, "messagingTemplate must not be null");
 		this.messagingTemplate = messagingTemplate;
 	}
 
+
 	/**
 	 * Configure a {@link MessageHeaderInitializer} to apply to the headers of all
 	 * messages sent to the client outbound channel.
-	 *
 	 * <p>By default this property is not set.
 	 */
 	public void setHeaderInitializer(MessageHeaderInitializer headerInitializer) {
@@ -77,7 +77,7 @@ public class SubscriptionMethodReturnValueHandler implements HandlerMethodReturn
 	}
 
 	/**
-	 * @return the configured header initializer.
+	 * Return the configured header initializer.
 	 */
 	public MessageHeaderInitializer getHeaderInitializer() {
 		return this.headerInitializer;
@@ -86,9 +86,9 @@ public class SubscriptionMethodReturnValueHandler implements HandlerMethodReturn
 
 	@Override
 	public boolean supportsReturnType(MethodParameter returnType) {
-		return ((returnType.getMethodAnnotation(SubscribeMapping.class) != null)
-				&& (returnType.getMethodAnnotation(SendTo.class) == null)
-				&& (returnType.getMethodAnnotation(SendToUser.class) == null));
+		return (returnType.getMethodAnnotation(SubscribeMapping.class) != null &&
+				returnType.getMethodAnnotation(SendTo.class) == null &&
+				returnType.getMethodAnnotation(SendToUser.class) == null);
 	}
 
 	@Override
@@ -96,6 +96,7 @@ public class SubscriptionMethodReturnValueHandler implements HandlerMethodReturn
 		if (returnValue == null) {
 			return;
 		}
+
 		MessageHeaders headers = message.getHeaders();
 		String destination = SimpMessageHeaderAccessor.getDestination(headers);
 		String sessionId = SimpMessageHeaderAccessor.getSessionId(headers);

@@ -69,6 +69,7 @@ public class JCacheAspectSupport extends AbstractCacheInvoker implements Initial
 
 	private CacheRemoveAllInterceptor cacheRemoveAllInterceptor;
 
+
 	public void setCacheOperationSource(JCacheOperationSource cacheOperationSource) {
 		Assert.notNull(cacheOperationSource);
 		this.cacheOperationSource = cacheOperationSource;
@@ -158,9 +159,8 @@ public class JCacheAspectSupport extends AbstractCacheInvoker implements Initial
 	/**
 	 * Execute the underlying operation (typically in case of cache miss) and return
 	 * the result of the invocation. If an exception occurs it will be wrapped in
-	 * a {@link CacheOperationInvoker.ThrowableWrapper}: the exception can be handled
-	 * or modified but it <em>must</em> be wrapped in a
-	 * {@link CacheOperationInvoker.ThrowableWrapper} as well.
+	 * a {@code ThrowableWrapper}: the exception can be handled or modified but it
+	 * <em>must</em> be wrapped in a {@code ThrowableWrapper} as well.
 	 * @param invoker the invoker handling the operation being cached
 	 * @return the result of the invocation
 	 * @see CacheOperationInvoker#invoke()
@@ -169,15 +169,18 @@ public class JCacheAspectSupport extends AbstractCacheInvoker implements Initial
 		return invoker.invoke();
 	}
 
+
 	private class CacheOperationInvokerAdapter implements CacheOperationInvoker {
 
 		private final CacheOperationInvoker delegate;
 
-		private CacheOperationInvokerAdapter(CacheOperationInvoker delegate) {this.delegate = delegate;}
+		public CacheOperationInvokerAdapter(CacheOperationInvoker delegate) {
+			this.delegate = delegate;
+		}
 
 		@Override
 		public Object invoke() throws ThrowableWrapper {
-			return invokeOperation(delegate);
+			return invokeOperation(this.delegate);
 		}
 	}
 
