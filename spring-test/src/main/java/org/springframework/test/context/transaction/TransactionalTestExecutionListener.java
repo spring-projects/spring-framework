@@ -56,9 +56,14 @@ import static org.springframework.core.annotation.AnnotationUtils.*;
  *
  * <p>Changes to the database during a test that is run with {@code @Transactional}
  * will be run within a transaction that will, by default, be automatically
- * <em>rolled back</em> after completion of the test. Test methods that are not
- * annotated with {@code @Transactional} (at the class or method level) will not
- * be run within a transaction.
+ * <em>rolled back</em> after completion of the test. Test methods that are
+ * <em>not</em> annotated with {@code @Transactional} (at the class or method
+ * level) will not be run within a transaction. Furthermore, test methods
+ * that <em>are</em> annotated with {@code @Transactional} but have the
+ * {@link org.springframework.transaction.annotation.Transactional#propagation propagation}
+ * type set to
+ * {@link org.springframework.transaction.annotation.Propagation#NOT_SUPPORTED NOT_SUPPORTED}
+ * will not be run within a transaction.
  *
  * <p>Transactional commit and rollback behavior can be configured via the
  * class-level {@link TransactionConfiguration @TransactionConfiguration} and
@@ -67,10 +72,13 @@ import static org.springframework.core.annotation.AnnotationUtils.*;
  * <p>In case there are multiple instances of {@code PlatformTransactionManager}
  * within the test's {@code ApplicationContext}, {@code @TransactionConfiguration}
  * supports configuring the bean name of the {@code PlatformTransactionManager}
- * that should be used to drive transactions. Alternatively,
- * {@link TransactionManagementConfigurer} can be implemented in an
+ * that should be used to drive transactions. Alternatively, a <em>qualifier</em>
+ * may be declared via {@link Transactional#value} or
+ * {@link TransactionManagementConfigurer} can be implemented by an
  * {@link org.springframework.context.annotation.Configuration @Configuration}
- * class.
+ * class. See {@link TestContextTransactionUtils#retrieveTransactionManager()}
+ * for details on the algorithm used to look up a transaction manager in
+ * the test's {@code ApplicationContext}.
  *
  * <p>When executing transactional tests, it is sometimes useful to be able to
  * execute certain <em>set up</em> or <em>tear down</em> code outside of a
