@@ -132,8 +132,8 @@ class TransactionContext {
 		}
 
 		if (logger.isInfoEnabled()) {
-			logger.info(String.format("%s transaction after test execution for test context %s.",
-				(flaggedForRollback ? "Rolled back" : "Committed"), this.testContext));
+			logger.info(String.format("%s transaction for test context %s.", (flaggedForRollback ? "Rolled back"
+					: "Committed"), this.testContext));
 		}
 	}
 
