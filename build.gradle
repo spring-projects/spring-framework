@@ -17,9 +17,9 @@ configure(allprojects) { project ->
 	ext.eclipseLinkVersion   = "2.4.2"
 	ext.ehcacheVersion       = "2.8.3"
 	ext.ehcacheJCacheVersion = "1.0.0"
-	ext.groovyVersion        = "2.3.3"
+	ext.groovyVersion        = "2.3.4"
 	ext.hibernate3Version    = "3.6.10.Final"
-	ext.hibernate4Version    = "4.3.5.Final"
+	ext.hibernate4Version    = "4.3.6.Final"
 	ext.hibVal4Version       = "4.3.1.Final"
 	ext.hibVal5Version       = "5.1.1.Final"
 	ext.hsqldbVersion        = "2.3.2"
@@ -164,7 +164,7 @@ configure(allprojects) { project ->
 		"http://quartz-scheduler.org/api/2.2.0/",
 		"http://fasterxml.github.com/jackson-core/javadoc/2.3.0/",
 		"http://fasterxml.github.com/jackson-databind/javadoc/2.3.0/",
-		"http://hc.apache.org/httpcomponents-client-ga/httpclient/apidocs"
+		"http://hc.apache.org/httpcomponents-client-ga/httpclient/apidocs/"
 	] as String[]
 }
 
