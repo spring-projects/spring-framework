@@ -157,7 +157,7 @@ public abstract class AbstractAdaptableMessageListener
 	}
 
 	/**
-	 * Return the{@link MessagingMessageConverter} for this listener,
+	 * Return the {@link MessagingMessageConverter} for this listener,
 	 * being able to convert {@link org.springframework.messaging.Message}.
 	 */
 	protected final MessagingMessageConverter getMessagingMessageConverter() {
