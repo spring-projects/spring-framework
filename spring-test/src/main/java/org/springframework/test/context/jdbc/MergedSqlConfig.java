@@ -56,52 +56,21 @@ class MergedSqlConfig {
 	private final ErrorMode errorMode;
 
 
-	private static TransactionMode retrieveTransactionMode(AnnotationAttributes attributes) {
-		TransactionMode transactionMode = attributes.getEnum("transactionMode");
-		if (transactionMode == TransactionMode.DEFAULT) {
-			transactionMode = TransactionMode.INFERRED;
+	private static <E extends Enum<?>> E getEnum(AnnotationAttributes attributes, String attributeName,
+			E inheritOrOverrideValue, E defaultValue) {
+		E value = attributes.getEnum(attributeName);
+		if (value == inheritOrOverrideValue) {
+			value = defaultValue;
 		}
-		return transactionMode;
+		return value;
 	}
 
-	private static ErrorMode retrieveErrorMode(AnnotationAttributes attributes) {
-		ErrorMode errorMode = attributes.getEnum("errorMode");
-		if (errorMode == ErrorMode.DEFAULT) {
-			errorMode = ErrorMode.FAIL_ON_ERROR;
+	private static String getString(AnnotationAttributes attributes, String attributeName, String defaultValue) {
+		String value = attributes.getString(attributeName);
+		if ("".equals(value)) {
+			value = defaultValue;
 		}
-		return errorMode;
-	}
-
-	private static String retrieveSeparator(AnnotationAttributes attributes) {
-		String separator = attributes.getString("separator");
-		if ("".equals(separator)) {
-			separator = ScriptUtils.DEFAULT_STATEMENT_SEPARATOR;
-		}
-		return separator;
-	}
-
-	private static String retrieveCommentPrefix(AnnotationAttributes attributes) {
-		String commentPrefix = attributes.getString("commentPrefix");
-		if ("".equals(commentPrefix)) {
-			commentPrefix = ScriptUtils.DEFAULT_COMMENT_PREFIX;
-		}
-		return commentPrefix;
-	}
-
-	private static String retrieveBlockCommentStartDelimiter(AnnotationAttributes attributes) {
-		String blockCommentStartDelimiter = attributes.getString("blockCommentStartDelimiter");
-		if ("".equals(blockCommentStartDelimiter)) {
-			blockCommentStartDelimiter = ScriptUtils.DEFAULT_BLOCK_COMMENT_START_DELIMITER;
-		}
-		return blockCommentStartDelimiter;
-	}
-
-	private static String retrieveBlockCommentEndDelimiter(AnnotationAttributes attributes) {
-		String blockCommentEndDelimiter = attributes.getString("blockCommentEndDelimiter");
-		if ("".equals(blockCommentEndDelimiter)) {
-			blockCommentEndDelimiter = ScriptUtils.DEFAULT_BLOCK_COMMENT_END_DELIMITER;
-		}
-		return blockCommentEndDelimiter;
+		return value;
 	}
 
 	/**
@@ -139,13 +108,15 @@ class MergedSqlConfig {
 
 		this.dataSource = attributes.getString("dataSource");
 		this.transactionManager = attributes.getString("transactionManager");
-		this.transactionMode = retrieveTransactionMode(attributes);
+		this.transactionMode = getEnum(attributes, "transactionMode", TransactionMode.DEFAULT, TransactionMode.INFERRED);
 		this.encoding = attributes.getString("encoding");
-		this.separator = retrieveSeparator(attributes);
-		this.commentPrefix = retrieveCommentPrefix(attributes);
-		this.blockCommentStartDelimiter = retrieveBlockCommentStartDelimiter(attributes);
-		this.blockCommentEndDelimiter = retrieveBlockCommentEndDelimiter(attributes);
-		this.errorMode = retrieveErrorMode(attributes);
+		this.separator = getString(attributes, "separator", ScriptUtils.DEFAULT_STATEMENT_SEPARATOR);
+		this.commentPrefix = getString(attributes, "commentPrefix", ScriptUtils.DEFAULT_COMMENT_PREFIX);
+		this.blockCommentStartDelimiter = getString(attributes, "blockCommentStartDelimiter",
+			ScriptUtils.DEFAULT_BLOCK_COMMENT_START_DELIMITER);
+		this.blockCommentEndDelimiter = getString(attributes, "blockCommentEndDelimiter",
+			ScriptUtils.DEFAULT_BLOCK_COMMENT_END_DELIMITER);
+		this.errorMode = getEnum(attributes, "errorMode", ErrorMode.DEFAULT, ErrorMode.FAIL_ON_ERROR);
 	}
 
 	/**
