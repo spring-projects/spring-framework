@@ -18,7 +18,6 @@ package org.springframework.jms.config;
 
 import org.w3c.dom.Element;
 
-import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.parsing.BeanComponentDefinition;
@@ -36,7 +35,7 @@ import org.springframework.util.StringUtils;
  * @author Stephane Nicoll
  * @since 4.1
  */
-final class AnnotationDrivenJmsBeanDefinitionParser implements BeanDefinitionParser {
+class AnnotationDrivenJmsBeanDefinitionParser implements BeanDefinitionParser {
 
 	@Override
 	public BeanDefinition parse(Element element, ParserContext parserContext) {
@@ -89,7 +88,6 @@ final class AnnotationDrivenJmsBeanDefinitionParser implements BeanDefinitionPar
 		BeanDefinitionBuilder builder = BeanDefinitionBuilder.genericBeanDefinition(
 				"org.springframework.jms.config.JmsListenerEndpointRegistry");
 		builder.getRawBeanDefinition().setSource(source);
-		builder.setAutowireMode(AutowireCapableBeanFactory.AUTOWIRE_BY_TYPE);
 		registerInfrastructureBean(parserContext, builder, AnnotationConfigUtils.JMS_LISTENER_ENDPOINT_REGISTRY_BEAN_NAME);
 	}
 

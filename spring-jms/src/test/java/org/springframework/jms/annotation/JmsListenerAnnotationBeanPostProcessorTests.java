@@ -16,8 +16,6 @@
 
 package org.springframework.jms.annotation;
 
-import static org.junit.Assert.*;
-
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -38,31 +36,34 @@ import org.springframework.jms.config.MethodJmsListenerEndpoint;
 import org.springframework.jms.listener.SimpleMessageListenerContainer;
 import org.springframework.stereotype.Component;
 
+import static org.junit.Assert.*;
+
 /**
- *
  * @author Stephane Nicoll
  */
 public class JmsListenerAnnotationBeanPostProcessorTests {
 
 	@Test
 	public void simpleMessageListener() {
-		final ConfigurableApplicationContext context = new AnnotationConfigApplicationContext(Config.class,
-				SimpleMessageListenerTestBean.class);
+		ConfigurableApplicationContext context = new AnnotationConfigApplicationContext(
+				Config.class, SimpleMessageListenerTestBean.class);
 
 		JmsListenerContainerTestFactory factory = context.getBean(JmsListenerContainerTestFactory.class);
-		assertEquals("one container should have been registered", 1, factory.getContainers().size());
-		MessageListenerTestContainer container = factory.getContainers().get(0);
+		assertEquals("One container should have been registered", 1, factory.getListenerContainers().size());
+		MessageListenerTestContainer container = factory.getListenerContainers().get(0);
 
 		JmsListenerEndpoint endpoint = container.getEndpoint();
 		assertEquals("Wrong endpoint type", MethodJmsListenerEndpoint.class, endpoint.getClass());
 		MethodJmsListenerEndpoint methodEndpoint = (MethodJmsListenerEndpoint) endpoint;
 		assertNotNull(methodEndpoint.getBean());
 		assertNotNull(methodEndpoint.getMethod());
-		assertTrue("Should have been started " + container, container.isStarted());
 
 		SimpleMessageListenerContainer listenerContainer = new SimpleMessageListenerContainer();
-		methodEndpoint.setupMessageContainer(listenerContainer);
+		methodEndpoint.setupListenerContainer(listenerContainer);
 		assertNotNull(listenerContainer.getMessageListener());
+
+		context.start();
+		assertTrue("Should have been started " + container, container.isStarted());
 
 		context.close(); // Close and stop the listeners
 		assertTrue("Should have been stopped " + container, container.isStopped());
@@ -70,14 +71,15 @@ public class JmsListenerAnnotationBeanPostProcessorTests {
 
 	@Test
 	public void metaAnnotationIsDiscovered() {
-		final ConfigurableApplicationContext context = new AnnotationConfigApplicationContext(Config.class,
-				MetaAnnotationTestBean.class);
+		ConfigurableApplicationContext context = new AnnotationConfigApplicationContext(
+				Config.class, MetaAnnotationTestBean.class);
 
 		JmsListenerContainerTestFactory factory = context.getBean(JmsListenerContainerTestFactory.class);
-		assertEquals("one container should have been registered", 1, factory.getContainers().size());
-		JmsListenerEndpoint endpoint = factory.getContainers().get(0).getEndpoint();
+		assertEquals("one container should have been registered", 1, factory.getListenerContainers().size());
+		JmsListenerEndpoint endpoint = factory.getListenerContainers().get(0).getEndpoint();
 		assertEquals("metaTestQueue", ((AbstractJmsListenerEndpoint) endpoint).getDestination());
 	}
+
 
 	@Component
 	static class SimpleMessageListenerTestBean {
@@ -87,6 +89,7 @@ public class JmsListenerAnnotationBeanPostProcessorTests {
 		}
 
 	}
+
 
 	@Component
 	static class MetaAnnotationTestBean {
@@ -101,8 +104,8 @@ public class JmsListenerAnnotationBeanPostProcessorTests {
 	@Target(ElementType.METHOD)
 	@Retention(RetentionPolicy.RUNTIME)
 	static @interface FooListener {
-
 	}
+
 
 	@Configuration
 	static class Config {
@@ -124,6 +127,6 @@ public class JmsListenerAnnotationBeanPostProcessorTests {
 		public JmsListenerContainerTestFactory testFactory() {
 			return new JmsListenerContainerTestFactory();
 		}
-
 	}
+
 }

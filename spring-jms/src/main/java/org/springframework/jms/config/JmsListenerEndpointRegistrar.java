@@ -44,8 +44,8 @@ public class JmsListenerEndpointRegistrar implements ApplicationContextAware, In
 
 	private ApplicationContext applicationContext;
 
-	private final List<JmsListenerEndpointDescriptor> endpointDescriptors
-			= new ArrayList<JmsListenerEndpointDescriptor>();
+	private final List<JmsListenerEndpointDescriptor> endpointDescriptors =
+			new ArrayList<JmsListenerEndpointDescriptor>();
 
 	/**
 	 * Set the {@link JmsListenerEndpointRegistry} instance to use.
@@ -73,11 +73,10 @@ public class JmsListenerEndpointRegistrar implements ApplicationContextAware, In
 	}
 
 	/**
-	 * Set the {@link JmsListenerContainerFactory} to use in case a
-	 * {@link JmsListenerEndpoint} is registered with a {@code null} container
-	 * factory.
-	 * <p>Alternatively, the bean name of the {@link JmsListenerContainerFactory}
-	 * to use can be specified for a lazy lookup, see {@see #setContainerFactoryBeanName}
+	 * Set the {@link JmsListenerContainerFactory} to use in case a {@link JmsListenerEndpoint}
+	 * is registered with a {@code null} container factory.
+	 * <p>Alternatively, the bean name of the {@link JmsListenerContainerFactory} to use
+	 * can be specified for a lazy lookup, see {@link #setContainerFactoryBeanName}.
 	 */
 	public void setContainerFactory(JmsListenerContainerFactory<?> containerFactory) {
 		this.containerFactory = containerFactory;
@@ -108,10 +107,10 @@ public class JmsListenerEndpointRegistrar implements ApplicationContextAware, In
 	}
 
 	/**
-	 * Register a new {@link JmsListenerEndpoint} alongside the {@link JmsListenerContainerFactory}
-	 * to use to create the underlying container.
-	 * <p>The {@code factory} may be {@code null} if the default factory has to be used for that
-	 * endpoint.
+	 * Register a new {@link JmsListenerEndpoint} alongside the
+	 * {@link JmsListenerContainerFactory} to use to create the underlying container.
+	 * <p>The {@code factory} may be {@code null} if the default factory has to be
+	 * used for that endpoint.
 	 */
 	public void registerEndpoint(JmsListenerEndpoint endpoint, JmsListenerContainerFactory<?> factory) {
 		Assert.notNull(endpoint, "Endpoint must be set");
@@ -121,9 +120,8 @@ public class JmsListenerEndpointRegistrar implements ApplicationContextAware, In
 	}
 
 	/**
-	 * Register a new {@link JmsListenerEndpoint} using the default {@link JmsListenerContainerFactory}
-	 * to create the underlying container.
-	 *
+	 * Register a new {@link JmsListenerEndpoint} using the default
+	 * {@link JmsListenerContainerFactory} to create the underlying container.
 	 * @see #setContainerFactory(JmsListenerContainerFactory)
 	 * @see #registerEndpoint(JmsListenerEndpoint, JmsListenerContainerFactory)
 	 */
@@ -139,7 +137,7 @@ public class JmsListenerEndpointRegistrar implements ApplicationContextAware, In
 
 	protected void startAllEndpoints() throws Exception {
 		for (JmsListenerEndpointDescriptor descriptor : endpointDescriptors) {
-			endpointRegistry.createJmsListenerContainer(
+			endpointRegistry.registerListenerContainer(
 					descriptor.endpoint, resolveContainerFactory(descriptor));
 		}
 	}
@@ -152,25 +150,25 @@ public class JmsListenerEndpointRegistrar implements ApplicationContextAware, In
 			return this.containerFactory;
 		}
 		else if (this.containerFactoryBeanName != null) {
-			this.containerFactory =  applicationContext.getBean(
+			this.containerFactory = this.applicationContext.getBean(
 					this.containerFactoryBeanName, JmsListenerContainerFactory.class);
-			return this.containerFactory; // Consider changing this if live change of the factory is required
+			return this.containerFactory;  // Consider changing this if live change of the factory is required
 		}
 		else {
-			throw new IllegalStateException("Could not resolve the "
-					+ JmsListenerContainerFactory.class.getSimpleName() + " to use for ["
-					+ descriptor.endpoint + "] no factory was given and no default is set.");
+			throw new IllegalStateException("Could not resolve the " +
+					JmsListenerContainerFactory.class.getSimpleName() + " to use for [" +
+					descriptor.endpoint + "] no factory was given and no default is set.");
 		}
 	}
 
 
 	private static class JmsListenerEndpointDescriptor {
-		private final JmsListenerEndpoint endpoint;
 
-		private final JmsListenerContainerFactory<?> containerFactory;
+		public final JmsListenerEndpoint endpoint;
 
-		private JmsListenerEndpointDescriptor(JmsListenerEndpoint endpoint,
-				JmsListenerContainerFactory<?> containerFactory) {
+		public final JmsListenerContainerFactory<?> containerFactory;
+
+		public JmsListenerEndpointDescriptor(JmsListenerEndpoint endpoint, JmsListenerContainerFactory<?> containerFactory) {
 			this.endpoint = endpoint;
 			this.containerFactory = containerFactory;
 		}

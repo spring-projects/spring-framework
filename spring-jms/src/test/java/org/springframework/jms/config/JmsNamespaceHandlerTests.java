@@ -145,7 +145,7 @@ public class JmsNamespaceHandlerTests {
 		assertNotNull("No factory registered with testJmsFactory id", factory);
 
 		DefaultMessageListenerContainer container =
-				factory.createMessageListenerContainer(createDummyEndpoint());
+				factory.createListenerContainer(createDummyEndpoint());
 		assertEquals("explicit connection factory not set",
 				context.getBean(EXPLICIT_CONNECTION_FACTORY), container.getConnectionFactory());
 		assertEquals("explicit destination resolver not set",
@@ -156,9 +156,8 @@ public class JmsNamespaceHandlerTests {
 		assertEquals("wrong concurrency", 3, container.getConcurrentConsumers());
 		assertEquals("wrong concurrency", 5, container.getMaxConcurrentConsumers());
 		assertEquals("wrong prefetch", 50, container.getMaxMessagesPerTask());
-		assertSame(context.getBean("testBackOff"),new DirectFieldAccessor(container).getPropertyValue("backOff"));
-
-		assertEquals("phase cannot be customized by the factory", Integer.MAX_VALUE, container.getPhase());
+		assertEquals("Wrong phase", 99, container.getPhase());
+		assertSame(context.getBean("testBackOff"), new DirectFieldAccessor(container).getPropertyValue("backOff"));
 	}
 
 	@Test
@@ -169,14 +168,14 @@ public class JmsNamespaceHandlerTests {
 		assertNotNull("No factory registered with testJcaFactory id", factory);
 
 		JmsMessageEndpointManager container =
-				factory.createMessageListenerContainer(createDummyEndpoint());
+				factory.createListenerContainer(createDummyEndpoint());
 		assertEquals("explicit resource adapter not set",
 				context.getBean("testResourceAdapter"),container.getResourceAdapter());
 		assertEquals("explicit message converter not set",
 				context.getBean("testMessageConverter"), container.getActivationSpecConfig().getMessageConverter());
 		assertEquals("wrong concurrency", 5, container.getActivationSpecConfig().getMaxConcurrency());
 		assertEquals("Wrong prefetch", 50, container.getActivationSpecConfig().getPrefetchSize());
-		assertEquals("phase cannot be customized by the factory", Integer.MAX_VALUE, container.getPhase());
+		assertEquals("Wrong phase", 77, container.getPhase());
 	}
 
 	@Test

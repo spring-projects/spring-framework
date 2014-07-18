@@ -218,8 +218,8 @@
 			<xsd:attribute name="destination-type" default="queue">
 				<xsd:annotation>
 					<xsd:documentation><![CDATA[
-	The JMS destination type for this listener: "queue", "topic" or "durableTopic".
-	The default is "queue".
+	The JMS destination type for this listener: "queue", "topic", "durableTopic",
+	"sharedTopic", "sharedDurableTopic". The default is "queue".
 					]]></xsd:documentation>
 				</xsd:annotation>
 				<xsd:simpleType>
@@ -227,6 +227,8 @@
 						<xsd:enumeration value="queue"/>
 						<xsd:enumeration value="topic"/>
 						<xsd:enumeration value="durableTopic"/>
+						<xsd:enumeration value="sharedTopic"/>
+						<xsd:enumeration value="sharedDurableTopic"/>
 					</xsd:restriction>
 				</xsd:simpleType>
 			</xsd:attribute>
@@ -234,7 +236,7 @@
 				<xsd:annotation>
 					<xsd:documentation><![CDATA[
 	The JMS client id for this listener container.
-	Needs to be specified when using durable subscriptions.
+	Needs to be specified when using subscriptions.
 					]]></xsd:documentation>
 				</xsd:annotation>
 			</xsd:attribute>

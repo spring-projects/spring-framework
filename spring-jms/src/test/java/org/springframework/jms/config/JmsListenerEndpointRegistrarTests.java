@@ -65,8 +65,8 @@ public class JmsListenerEndpointRegistrarTests {
 		registrar.setContainerFactory(containerFactory);
 		registrar.registerEndpoint(endpoint, null);
 		registrar.afterPropertiesSet();
-		assertNotNull("Container not created", registry.getContainer("some id"));
-		assertEquals(1, registry.getContainers().size());
+		assertNotNull("Container not created", registry.getListenerContainer("some id"));
+		assertEquals(1, registry.getListenerContainers().size());
 	}
 
 	@Test
@@ -87,8 +87,8 @@ public class JmsListenerEndpointRegistrarTests {
 		registrar.setContainerFactory(containerFactory);
 		registrar.registerEndpoint(endpoint);
 		registrar.afterPropertiesSet();
-		assertNotNull("Container not created", registry.getContainer("myEndpoint"));
-		assertEquals(1, registry.getContainers().size());
+		assertNotNull("Container not created", registry.getListenerContainer("myEndpoint"));
+		assertEquals(1, registry.getListenerContainers().size());
 	}
 
 }

@@ -269,7 +269,7 @@ public abstract class AbstractAdaptableMessageListener
 		MessageConverter converter = getMessageConverter();
 		if (converter != null) {
 			if (result instanceof org.springframework.messaging.Message) {
-				return messagingMessageConverter.toMessage(result, session);
+				return this.messagingMessageConverter.toMessage(result, session);
 			}
 			else {
 				return converter.toMessage(result, session);

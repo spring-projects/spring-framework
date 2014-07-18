@@ -16,7 +16,6 @@
 
 package org.springframework.jms.config;
 
-
 import javax.jms.ConnectionFactory;
 
 import org.apache.commons.logging.Log;
@@ -55,7 +54,12 @@ public abstract class AbstractJmsListenerContainerFactory<C extends AbstractMess
 
 	private Boolean subscriptionDurable;
 
+	private Boolean subscriptionShared;
+
 	private String clientId;
+
+	private Integer phase;
+
 
 	/**
 	 * @see AbstractMessageListenerContainer#setConnectionFactory(ConnectionFactory)
@@ -114,6 +118,13 @@ public abstract class AbstractJmsListenerContainerFactory<C extends AbstractMess
 	}
 
 	/**
+	 * @see AbstractMessageListenerContainer#setSubscriptionShared(boolean)
+	 */
+	public void setSubscriptionShared(Boolean subscriptionShared) {
+		this.subscriptionShared = subscriptionShared;
+	}
+
+	/**
 	 * @see AbstractMessageListenerContainer#setClientId(String)
 	 */
 	public void setClientId(String clientId) {
@@ -121,12 +132,15 @@ public abstract class AbstractJmsListenerContainerFactory<C extends AbstractMess
 	}
 
 	/**
-	 * Create an empty container instance.
+	 * @see AbstractMessageListenerContainer#setPhase(int)
 	 */
-	protected abstract C createContainerInstance();
+	public void setPhase(int phase) {
+		this.phase = phase;
+	}
+
 
 	@Override
-	public C createMessageListenerContainer(JmsListenerEndpoint endpoint) {
+	public C createListenerContainer(JmsListenerEndpoint endpoint) {
 		C instance = createContainerInstance();
 
 		if (this.connectionFactory != null) {
@@ -141,30 +155,38 @@ public abstract class AbstractJmsListenerContainerFactory<C extends AbstractMess
 		if (this.messageConverter != null) {
 			instance.setMessageConverter(this.messageConverter);
 		}
-
 		if (this.sessionTransacted != null) {
 			instance.setSessionTransacted(this.sessionTransacted);
 		}
 		if (this.sessionAcknowledgeMode != null) {
 			instance.setSessionAcknowledgeMode(this.sessionAcknowledgeMode);
 		}
-
 		if (this.pubSubDomain != null) {
 			instance.setPubSubDomain(this.pubSubDomain);
 		}
 		if (this.subscriptionDurable != null) {
 			instance.setSubscriptionDurable(this.subscriptionDurable);
 		}
+		if (this.subscriptionShared != null) {
+			instance.setSubscriptionShared(this.subscriptionShared);
+		}
 		if (this.clientId != null) {
 			instance.setClientId(this.clientId);
 		}
+		if (this.phase != null) {
+			instance.setPhase(this.phase);
+		}
 
-		endpoint.setupMessageContainer(instance);
-
+		endpoint.setupListenerContainer(instance);
 		initializeContainer(instance);
 
 		return instance;
 	}
+
+	/**
+	 * Create an empty container instance.
+	 */
+	protected abstract C createContainerInstance();
 
 	/**
 	 * Further initialize the specified container.
@@ -172,7 +194,6 @@ public abstract class AbstractJmsListenerContainerFactory<C extends AbstractMess
 	 * configuration if necessary.
 	 */
 	protected void initializeContainer(C instance) {
-
 	}
 
 }

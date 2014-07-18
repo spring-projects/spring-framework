@@ -23,7 +23,6 @@ import org.springframework.jms.listener.MessageListenerContainer;
 import org.springframework.jms.support.converter.MessageConverter;
 
 /**
- *
  * @author Stephane Nicoll
  */
 public class MessageListenerTestContainer
@@ -57,15 +56,13 @@ public class MessageListenerTestContainer
 
 	@Override
 	public void start() throws JmsException {
+		if (!initializationInvoked) {
+			throw new IllegalStateException("afterPropertiesSet should have been invoked before start on " + this);
+		}
 		if (startInvoked) {
 			throw new IllegalStateException("Start already invoked on " + this);
 		}
 		startInvoked = true;
-	}
-
-	@Override
-	public boolean isRunning() {
-		return startInvoked && !stopInvoked;
 	}
 
 	@Override
@@ -77,8 +74,28 @@ public class MessageListenerTestContainer
 	}
 
 	@Override
-	public void setupMessageListener(Object messageListener) {
+	public boolean isRunning() {
+		return startInvoked && !stopInvoked;
+	}
 
+	@Override
+	public int getPhase() {
+		return 0;
+	}
+
+	@Override
+	public boolean isAutoStartup() {
+		return true;
+	}
+
+	@Override
+	public void stop(Runnable callback) {
+		stopInvoked = true;
+		callback.run();
+	}
+
+	@Override
+	public void setupMessageListener(Object messageListener) {
 	}
 
 	@Override
@@ -93,10 +110,6 @@ public class MessageListenerTestContainer
 
 	@Override
 	public void afterPropertiesSet() {
-		if (!startInvoked) {
-			throw new IllegalStateException("Start should have been invoked before " +
-					"afterPropertiesSet on " + this);
-		}
 		initializationInvoked = true;
 	}
 

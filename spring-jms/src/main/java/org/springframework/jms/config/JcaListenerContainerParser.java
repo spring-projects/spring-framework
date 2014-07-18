@@ -19,9 +19,7 @@ package org.springframework.jms.config;
 import org.w3c.dom.Element;
 
 import org.springframework.beans.MutablePropertyValues;
-import org.springframework.beans.PropertyValue;
 import org.springframework.beans.PropertyValues;
-import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.factory.xml.ParserContext;
@@ -42,83 +40,64 @@ class JcaListenerContainerParser extends AbstractListenerContainerParser {
 
 
 	@Override
-	protected PropertyValues parseProperties(Element containerEle, ParserContext parserContext) {
-		final MutablePropertyValues properties = new MutablePropertyValues();
-		PropertyValues containerValues = parseContainerProperties(containerEle, parserContext);
+	protected RootBeanDefinition createContainerFactory(String factoryId, Element containerEle, ParserContext parserContext,
+			PropertyValues commonContainerProperties, PropertyValues specificContainerProperties) {
 
-		// Common values are added to the activationSpecConfig
-		PropertyValues commonValues = parseCommonContainerProperties(containerEle, parserContext);
-		BeanDefinition beanDefinition = getActivationSpecConfigBeanDefinition(containerValues);
-		beanDefinition.getPropertyValues().addPropertyValues(commonValues);
+		RootBeanDefinition factoryDef = new RootBeanDefinition();
+		factoryDef.setBeanClassName("org.springframework.jms.config.DefaultJcaListenerContainerFactory");
 
-		properties.addPropertyValues(containerValues);
-		return properties;
+		factoryDef.getPropertyValues().addPropertyValues(commonContainerProperties);
+		factoryDef.getPropertyValues().addPropertyValues(specificContainerProperties);
+
+		return factoryDef;
 	}
 
 	@Override
-	protected RootBeanDefinition createContainerFactory(String factoryId,
-			Element containerElement, PropertyValues propertyValues) {
-		RootBeanDefinition beanDefinition = new RootBeanDefinition();
-		beanDefinition.setBeanClassName("org.springframework.jms.config.DefaultJcaListenerContainerFactory");
-		beanDefinition.getPropertyValues().addPropertyValues(propertyValues);
-		return beanDefinition;
-	}
+	protected RootBeanDefinition createContainer(Element containerEle, Element listenerEle, ParserContext parserContext,
+			PropertyValues commonContainerProperties, PropertyValues specificContainerProperties) {
 
-	@Override
-	protected BeanDefinition createContainer(ListenerContainerParserContext context) {
 		RootBeanDefinition containerDef = new RootBeanDefinition();
-		containerDef.setSource(context.getSource());
+		containerDef.setSource(parserContext.extractSource(containerEle));
 		containerDef.setBeanClassName("org.springframework.jms.listener.endpoint.JmsMessageEndpointManager");
+		containerDef.getPropertyValues().addPropertyValues(specificContainerProperties);
 
-		applyContainerValues(context, containerDef);
+		RootBeanDefinition configDef = new RootBeanDefinition();
+		configDef.setSource(parserContext.extractSource(containerEle));
+		configDef.setBeanClassName("org.springframework.jms.listener.endpoint.JmsActivationSpecConfig");
+		configDef.getPropertyValues().addPropertyValues(commonContainerProperties);
+		parseListenerConfiguration(listenerEle, parserContext, configDef.getPropertyValues());
 
-
-		BeanDefinition activationSpec = getActivationSpecConfigBeanDefinition(containerDef.getPropertyValues());
-		parseListenerConfiguration(context.getListenerElement(), context.getParserContext(), activationSpec);
-
-		String phase = context.getContainerElement().getAttribute(PHASE_ATTRIBUTE);
-		if (StringUtils.hasText(phase)) {
-			containerDef.getPropertyValues().add("phase", phase);
-		}
+		containerDef.getPropertyValues().add("activationSpecConfig", configDef);
 
 		return containerDef;
 	}
 
-	/**
-	 * The property values provided by the factory element contains a mutable property (the
-	 * activation spec config). To avoid changing the bean definition from the parent, a clone
-	 * bean definition is created for the container being configured.
-	 */
-	private void applyContainerValues(ListenerContainerParserContext context, RootBeanDefinition containerDef) {
-		// Apply settings from the container
-		containerDef.getPropertyValues().addPropertyValues(context.getContainerValues());
+	@Override
+	protected MutablePropertyValues parseCommonContainerProperties(Element containerEle, ParserContext parserContext) {
+		MutablePropertyValues properties = super.parseCommonContainerProperties(containerEle, parserContext);
 
-		// Clone the activationSpecConfig property value as it is mutable
-		PropertyValue pv = containerDef.getPropertyValues().getPropertyValue("activationSpecConfig");
-		RootBeanDefinition activationSpecConfig = new RootBeanDefinition((RootBeanDefinition) pv.getValue());
-		containerDef.getPropertyValues().add("activationSpecConfig", activationSpecConfig);
+		Integer acknowledgeMode = parseAcknowledgeMode(containerEle, parserContext);
+		if (acknowledgeMode != null) {
+			properties.add("acknowledgeMode", acknowledgeMode);
+		}
+
+		String concurrency = containerEle.getAttribute(CONCURRENCY_ATTRIBUTE);
+		if (StringUtils.hasText(concurrency)) {
+			properties.add("concurrency", concurrency);
+		}
+
+		String prefetch = containerEle.getAttribute(PREFETCH_ATTRIBUTE);
+		if (StringUtils.hasText(prefetch)) {
+			properties.add("prefetchSize", new Integer(prefetch));
+		}
+
+		return properties;
 	}
 
 	@Override
-	protected boolean indicatesPubSub(PropertyValues propertyValues) {
-		BeanDefinition configDef = getActivationSpecConfigBeanDefinition(propertyValues);
-		return indicatesPubSubConfig(configDef.getPropertyValues());
-	}
+	protected MutablePropertyValues parseSpecificContainerProperties(Element containerEle, ParserContext parserContext) {
+		MutablePropertyValues properties = new MutablePropertyValues();
 
-	@Override
-	protected PropertyValue getMessageConverter(PropertyValues containerValues) {
-		BeanDefinition configDef = getActivationSpecConfigBeanDefinition(containerValues);
-		return super.getMessageConverter(configDef.getPropertyValues());
-	}
-
-	private BeanDefinition getActivationSpecConfigBeanDefinition(PropertyValues containerValues) {
-		PropertyValue activationSpecConfig = containerValues.getPropertyValue("activationSpecConfig");
-		return (BeanDefinition) activationSpecConfig.getValue();
-	}
-
-	private PropertyValues parseContainerProperties(Element containerEle,
-			ParserContext parserContext) {
-		MutablePropertyValues propertyValues = new MutablePropertyValues();
 		if (containerEle.hasAttribute(RESOURCE_ADAPTER_ATTRIBUTE)) {
 			String resourceAdapterBeanName = containerEle.getAttribute(RESOURCE_ADAPTER_ATTRIBUTE);
 			if (!StringUtils.hasText(resourceAdapterBeanName)) {
@@ -126,8 +105,7 @@ class JcaListenerContainerParser extends AbstractListenerContainerParser {
 						"Listener container 'resource-adapter' attribute contains empty value.", containerEle);
 			}
 			else {
-				propertyValues.add("resourceAdapter",
-						new RuntimeBeanReference(resourceAdapterBeanName));
+				properties.add("resourceAdapter", new RuntimeBeanReference(resourceAdapterBeanName));
 			}
 		}
 
@@ -139,54 +117,23 @@ class JcaListenerContainerParser extends AbstractListenerContainerParser {
 						"'destination-resolver', not both. If you define a dedicated JmsActivationSpecFactory bean, " +
 						"specify the custom DestinationResolver there (if possible).", containerEle);
 			}
-			propertyValues.add("activationSpecFactory",
-					new RuntimeBeanReference(activationSpecFactoryBeanName));
+			properties.add("activationSpecFactory", new RuntimeBeanReference(activationSpecFactoryBeanName));
 		}
 		if (StringUtils.hasText(destinationResolverBeanName)) {
-			propertyValues.add("destinationResolver",
-					new RuntimeBeanReference(destinationResolverBeanName));
+			properties.add("destinationResolver", new RuntimeBeanReference(destinationResolverBeanName));
 		}
 
 		String transactionManagerBeanName = containerEle.getAttribute(TRANSACTION_MANAGER_ATTRIBUTE);
 		if (StringUtils.hasText(transactionManagerBeanName)) {
-			propertyValues.add("transactionManager",
-					new RuntimeBeanReference(transactionManagerBeanName));
+			properties.add("transactionManager", new RuntimeBeanReference(transactionManagerBeanName));
 		}
 
-		RootBeanDefinition configDef = new RootBeanDefinition();
-		configDef.setSource(parserContext.extractSource(configDef));
-		configDef.setBeanClassName("org.springframework.jms.listener.endpoint.JmsActivationSpecConfig");
-
-
-		Integer acknowledgeMode = parseAcknowledgeMode(containerEle, parserContext);
-		if (acknowledgeMode != null) {
-			configDef.getPropertyValues().add("acknowledgeMode", acknowledgeMode);
-		}
-		String concurrency = containerEle.getAttribute(CONCURRENCY_ATTRIBUTE);
-		if (StringUtils.hasText(concurrency)) {
-			configDef.getPropertyValues().add("concurrency", concurrency);
+		String phase = containerEle.getAttribute(PHASE_ATTRIBUTE);
+		if (StringUtils.hasText(phase)) {
+			properties.add("phase", phase);
 		}
 
-		String prefetch = containerEle.getAttribute(PREFETCH_ATTRIBUTE);
-		if (StringUtils.hasText(prefetch)) {
-			configDef.getPropertyValues().add("prefetchSize", new Integer(prefetch));
-		}
-
-		if (containerEle.hasAttribute(MESSAGE_CONVERTER_ATTRIBUTE)) {
-			String messageConverter = containerEle.getAttribute(MESSAGE_CONVERTER_ATTRIBUTE);
-			if (!StringUtils.hasText(messageConverter)) {
-				parserContext.getReaderContext().error(
-						"listener container 'message-converter' attribute contains empty value.", containerEle);
-			}
-			else {
-				configDef.getPropertyValues().add("messageConverter",
-						new RuntimeBeanReference(messageConverter));
-			}
-		}
-
-		propertyValues.add("activationSpecConfig", configDef);
-
-		return propertyValues;
+		return properties;
 	}
 
 }

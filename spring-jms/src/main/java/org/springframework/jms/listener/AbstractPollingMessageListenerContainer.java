@@ -87,8 +87,6 @@ public abstract class AbstractPollingMessageListenerContainer extends AbstractMe
 
 	private boolean sessionTransactedCalled = false;
 
-	private boolean pubSubNoLocal = false;
-
 	private PlatformTransactionManager transactionManager;
 
 	private DefaultTransactionDefinition transactionDefinition = new DefaultTransactionDefinition();
@@ -102,22 +100,6 @@ public abstract class AbstractPollingMessageListenerContainer extends AbstractMe
 	public void setSessionTransacted(boolean sessionTransacted) {
 		super.setSessionTransacted(sessionTransacted);
 		this.sessionTransactedCalled = true;
-	}
-
-	/**
-	 * Set whether to inhibit the delivery of messages published by its own connection.
-	 * Default is "false".
-	 * @see javax.jms.TopicSession#createSubscriber(javax.jms.Topic, String, boolean)
-	 */
-	public void setPubSubNoLocal(boolean pubSubNoLocal) {
-		this.pubSubNoLocal = pubSubNoLocal;
-	}
-
-	/**
-	 * Return whether to inhibit the delivery of messages published by its own connection.
-	 */
-	protected boolean isPubSubNoLocal() {
-		return this.pubSubNoLocal;
 	}
 
 	/**
@@ -452,11 +434,6 @@ public abstract class AbstractPollingMessageListenerContainer extends AbstractMe
 	protected void noMessageReceived(Object invoker, Session session) {
 	}
 
-
-	//-------------------------------------------------------------------------
-	// JMS 1.1 factory methods, potentially overridden for JMS 1.0.2
-	//-------------------------------------------------------------------------
-
 	/**
 	 * Fetch an appropriate Connection from the given JmsResourceHolder.
 	 * <p>This implementation accepts any JMS 1.1 Connection.
@@ -477,32 +454,6 @@ public abstract class AbstractPollingMessageListenerContainer extends AbstractMe
 	 */
 	protected Session getSession(JmsResourceHolder holder) {
 		return holder.getSession();
-	}
-
-	/**
-	 * Create a JMS MessageConsumer for the given Session and Destination.
-	 * <p>This implementation uses JMS 1.1 API.
-	 * @param session the JMS Session to create a MessageConsumer for
-	 * @param destination the JMS Destination to create a MessageConsumer for
-	 * @return the new JMS MessageConsumer
-	 * @throws javax.jms.JMSException if thrown by JMS API methods
-	 */
-	protected MessageConsumer createConsumer(Session session, Destination destination) throws JMSException {
-		// Only pass in the NoLocal flag in case of a Topic:
-		// Some JMS providers, such as WebSphere MQ 6.0, throw IllegalStateException
-		// in case of the NoLocal flag being specified for a Queue.
-		if (isPubSubDomain()) {
-			if (isSubscriptionDurable() && destination instanceof Topic) {
-				return session.createDurableSubscriber(
-						(Topic) destination, getDurableSubscriptionName(), getMessageSelector(), isPubSubNoLocal());
-			}
-			else {
-				return session.createConsumer(destination, getMessageSelector(), isPubSubNoLocal());
-			}
-		}
-		else {
-			return session.createConsumer(destination, getMessageSelector());
-		}
 	}
 
 

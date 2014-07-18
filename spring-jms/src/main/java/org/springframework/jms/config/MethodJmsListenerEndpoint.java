@@ -43,6 +43,7 @@ public class MethodJmsListenerEndpoint extends AbstractJmsListenerEndpoint {
 
 	private JmsHandlerMethodFactory jmsHandlerMethodFactory;
 
+
 	/**
 	 * Set the object instance that should manage this endpoint.
 	 */
@@ -51,19 +52,18 @@ public class MethodJmsListenerEndpoint extends AbstractJmsListenerEndpoint {
 	}
 
 	public Object getBean() {
-		return bean;
+		return this.bean;
 	}
 
 	/**
-	 * Set the method to invoke to process a message managed by this
-	 * endpoint.
+	 * Set the method to invoke to process a message managed by this endpoint.
 	 */
 	public void setMethod(Method method) {
 		this.method = method;
 	}
 
 	public Method getMethod() {
-		return method;
+		return this.method;
 	}
 
 	/**
@@ -75,13 +75,14 @@ public class MethodJmsListenerEndpoint extends AbstractJmsListenerEndpoint {
 		this.jmsHandlerMethodFactory = jmsHandlerMethodFactory;
 	}
 
+
 	@Override
 	protected MessagingMessageListenerAdapter createMessageListener(MessageListenerContainer container) {
-		Assert.state(jmsHandlerMethodFactory != null,
-				"Could not create message listener, message listener factory not set.");
+		Assert.state(this.jmsHandlerMethodFactory != null,
+				"Could not create message listener - message listener factory not set");
 		MessagingMessageListenerAdapter messageListener = createMessageListenerInstance();
 		InvocableHandlerMethod invocableHandlerMethod =
-				jmsHandlerMethodFactory.createInvocableHandlerMethod(getBean(), getMethod());
+				this.jmsHandlerMethodFactory.createInvocableHandlerMethod(getBean(), getMethod());
 		messageListener.setHandlerMethod(invocableHandlerMethod);
 		String responseDestination = getDefaultResponseDestination();
 		if (StringUtils.hasText(responseDestination)) {
@@ -122,12 +123,8 @@ public class MethodJmsListenerEndpoint extends AbstractJmsListenerEndpoint {
 	@Override
 	protected StringBuilder getEndpointDescription() {
 		return super.getEndpointDescription()
-				.append(" | bean='")
-				.append(this.bean)
-				.append("'")
-				.append(" | method='")
-				.append(this.method)
-				.append("'");
+				.append(" | bean='").append(this.bean).append("'")
+				.append(" | method='").append(this.method).append("'");
 	}
 
 }

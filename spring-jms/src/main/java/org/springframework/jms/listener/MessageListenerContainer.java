@@ -16,7 +16,7 @@
 
 package org.springframework.jms.listener;
 
-import org.springframework.context.Lifecycle;
+import org.springframework.context.SmartLifecycle;
 import org.springframework.jms.support.converter.MessageConverter;
 
 /**
@@ -27,7 +27,7 @@ import org.springframework.jms.support.converter.MessageConverter;
  * @author Stephane Nicoll
  * @since 4.1
  */
-public interface MessageListenerContainer extends Lifecycle {
+public interface MessageListenerContainer extends SmartLifecycle {
 
 	/**
 	 * Setup the message listener to use. Throws an {@link IllegalArgumentException}

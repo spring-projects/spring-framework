@@ -79,7 +79,7 @@ public @interface JmsListener {
 	/**
 	 * The unique identifier of the container managing this endpoint.
 	 * <p>if none is specified an auto-generated one is provided.
-	 * @see org.springframework.jms.config.JmsListenerEndpointRegistry#getContainer(String)
+	 * @see org.springframework.jms.config.JmsListenerEndpointRegistry#getListenerContainer(String)
 	 */
 	String id() default "";
 

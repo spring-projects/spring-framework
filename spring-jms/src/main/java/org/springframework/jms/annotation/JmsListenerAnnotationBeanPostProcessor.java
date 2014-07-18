@@ -43,21 +43,21 @@ import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 
 /**
- * Bean post-processor that registers methods annotated with @{@link JmsListener}
+ * Bean post-processor that registers methods annotated with {@link JmsListener}
  * to be invoked by a JMS message listener container created under the cover
  * by a {@link org.springframework.jms.config.JmsListenerContainerFactory} according
  * to the parameters of the annotation.
  *
- * <p>Annotated methods can use flexible arguments as defined by @{@link JmsListener}.
+ * <p>Annotated methods can use flexible arguments as defined by {@link JmsListener}.
  *
  * <p>This post-processor is automatically registered by Spring's
- * {@code <jms:annotation-driven>} XML element, and also by the @{@link EnableJms}
+ * {@code <jms:annotation-driven>} XML element, and also by the {@link EnableJms}
  * annotation.
  *
  * <p>Auto-detect any {@link JmsListenerConfigurer} instances in the container,
  * allowing for customization of the registry to be used, the default container
  * factory or for fine-grained control over endpoints registration. See
- * @{@link EnableJms} Javadoc for complete usage details.
+ * {@link EnableJms} Javadoc for complete usage details.
  *
  * @author Stephane Nicoll
  * @since 4.1
@@ -68,7 +68,6 @@ import org.springframework.util.StringUtils;
  * @see JmsListenerEndpointRegistry
  * @see org.springframework.jms.config.AbstractJmsListenerEndpoint
  * @see MethodJmsListenerEndpoint
- * @see MessageListenerFactory
  */
 public class JmsListenerAnnotationBeanPostProcessor implements BeanPostProcessor, Ordered,
 		ApplicationContextAware, ApplicationListener<ContextRefreshedEvent> {
@@ -78,9 +77,6 @@ public class JmsListenerAnnotationBeanPostProcessor implements BeanPostProcessor
 	 */
 	static final String DEFAULT_JMS_LISTENER_CONTAINER_FACTORY_BEAN_NAME = "jmsListenerContainerFactory";
 
-	private final AtomicInteger counter = new AtomicInteger();
-
-	private ApplicationContext applicationContext;
 
 	private JmsListenerEndpointRegistry endpointRegistry;
 
@@ -88,11 +84,16 @@ public class JmsListenerAnnotationBeanPostProcessor implements BeanPostProcessor
 
 	private final JmsHandlerMethodFactoryAdapter jmsHandlerMethodFactory = new JmsHandlerMethodFactoryAdapter();
 
+	private ApplicationContext applicationContext;
+
 	private final JmsListenerEndpointRegistrar registrar = new JmsListenerEndpointRegistrar();
 
+	private final AtomicInteger counter = new AtomicInteger();
+
+
 	@Override
-	public void setApplicationContext(ApplicationContext applicationContext) {
-		this.applicationContext = applicationContext;
+	public int getOrder() {
+		return LOWEST_PRECEDENCE;
 	}
 
 	/**
@@ -105,8 +106,7 @@ public class JmsListenerAnnotationBeanPostProcessor implements BeanPostProcessor
 
 	/**
 	 * Set the name of the {@link JmsListenerContainerFactory} to use by default.
-	 * <p/>If none is specified, {@value #DEFAULT_JMS_LISTENER_CONTAINER_FACTORY_BEAN_NAME}
-	 * is assumed to be defined.
+	 * <p>If none is specified, "jmsListenerContainerFactory" is assumed to be defined.
 	 */
 	public void setContainerFactoryBeanName(String containerFactoryBeanName) {
 		this.containerFactoryBeanName = containerFactoryBeanName;
@@ -125,9 +125,10 @@ public class JmsListenerAnnotationBeanPostProcessor implements BeanPostProcessor
 	}
 
 	@Override
-	public int getOrder() {
-		return LOWEST_PRECEDENCE;
+	public void setApplicationContext(ApplicationContext applicationContext) {
+		this.applicationContext = applicationContext;
 	}
+
 
 	@Override
 	public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
@@ -162,17 +163,17 @@ public class JmsListenerAnnotationBeanPostProcessor implements BeanPostProcessor
 			catch (NoSuchMethodException ex) {
 				throw new IllegalStateException(String.format(
 						"@JmsListener method '%s' found on bean target class '%s', " +
-								"but not found in any interface(s) for bean JDK proxy. Either " +
-								"pull the method up to an interface or switch to subclass (CGLIB) " +
-								"proxies by setting proxy-target-class/proxyTargetClass " +
-								"attribute to 'true'", method.getName(), method.getDeclaringClass().getSimpleName()));
+						"but not found in any interface(s) for bean JDK proxy. Either " +
+						"pull the method up to an interface or switch to subclass (CGLIB) " +
+						"proxies by setting proxy-target-class/proxyTargetClass " +
+						"attribute to 'true'", method.getName(), method.getDeclaringClass().getSimpleName()));
 			}
 		}
 
 		MethodJmsListenerEndpoint endpoint = new MethodJmsListenerEndpoint();
 		endpoint.setBean(bean);
 		endpoint.setMethod(method);
-		endpoint.setJmsHandlerMethodFactory(jmsHandlerMethodFactory);
+		endpoint.setJmsHandlerMethodFactory(this.jmsHandlerMethodFactory);
 		endpoint.setId(getEndpointId(jmsListener));
 		endpoint.setDestination(jmsListener.destination());
 		if (StringUtils.hasText(jmsListener.selector())) {
@@ -189,12 +190,12 @@ public class JmsListenerAnnotationBeanPostProcessor implements BeanPostProcessor
 		String containerFactoryBeanName = jmsListener.containerFactory();
 		if (StringUtils.hasText(containerFactoryBeanName)) {
 			try {
-				factory = applicationContext.getBean(containerFactoryBeanName, JmsListenerContainerFactory.class);
+				factory = this.applicationContext.getBean(containerFactoryBeanName, JmsListenerContainerFactory.class);
 			}
-			catch (NoSuchBeanDefinitionException e) {
-				throw new BeanInitializationException("Could not register jms listener endpoint on ["
-						+ method + "], no " + JmsListenerContainerFactory.class.getSimpleName() + " with id '"
-						+ containerFactoryBeanName + "' was found in the application context", e);
+			catch (NoSuchBeanDefinitionException ex) {
+				throw new BeanInitializationException("Could not register jms listener endpoint on [" +
+						method + "], no " + JmsListenerContainerFactory.class.getSimpleName() + " with id '" +
+						containerFactoryBeanName + "' was found in the application context", ex);
 			}
 		}
 
@@ -214,21 +215,19 @@ public class JmsListenerAnnotationBeanPostProcessor implements BeanPostProcessor
 			configurer.configureJmsListeners(registrar);
 		}
 
-		registrar.setApplicationContext(this.applicationContext);
+		this.registrar.setApplicationContext(this.applicationContext);
 
-		if (registrar.getEndpointRegistry() == null) {
-			if (endpointRegistry == null) {
-				endpointRegistry = applicationContext
-						.getBean(AnnotationConfigUtils.JMS_LISTENER_ENDPOINT_REGISTRY_BEAN_NAME,
-								JmsListenerEndpointRegistry.class);
+		if (this.registrar.getEndpointRegistry() == null) {
+			if (this.endpointRegistry == null) {
+				this.endpointRegistry = this.applicationContext.getBean(
+						AnnotationConfigUtils.JMS_LISTENER_ENDPOINT_REGISTRY_BEAN_NAME, JmsListenerEndpointRegistry.class);
 			}
-			registrar.setEndpointRegistry(endpointRegistry);
+			this.registrar.setEndpointRegistry(this.endpointRegistry);
 		}
 
 		if (this.containerFactoryBeanName != null) {
-			registrar.setContainerFactoryBeanName(this.containerFactoryBeanName);
+			this.registrar.setContainerFactoryBeanName(this.containerFactoryBeanName);
 		}
-
 
 		// Set the custom handler method factory once resolved by the configurer
 		JmsHandlerMethodFactory handlerMethodFactory = registrar.getJmsHandlerMethodFactory();
@@ -238,10 +237,10 @@ public class JmsListenerAnnotationBeanPostProcessor implements BeanPostProcessor
 
 		// Create all the listeners and starts them
 		try {
-			registrar.afterPropertiesSet();
+			this.registrar.afterPropertiesSet();
 		}
-		catch (Exception e) {
-			throw new BeanInitializationException(e.getMessage(), e);
+		catch (Exception ex) {
+			throw new BeanInitializationException("Failed to initialize JmsListenerEndpointRegistrar", ex);
 		}
 	}
 
@@ -250,10 +249,10 @@ public class JmsListenerAnnotationBeanPostProcessor implements BeanPostProcessor
 			return jmsListener.id();
 		}
 		else {
-			return "org.springframework.jms.JmsListenerEndpointContainer#"
-					+ counter.getAndIncrement();
+			return "org.springframework.jms.JmsListenerEndpointContainer#" + counter.getAndIncrement();
 		}
 	}
+
 
 	/**
 	 * An {@link JmsHandlerMethodFactory} adapter that offers a configurable underlying
@@ -265,7 +264,7 @@ public class JmsListenerAnnotationBeanPostProcessor implements BeanPostProcessor
 
 		private JmsHandlerMethodFactory jmsHandlerMethodFactory;
 
-		private void setJmsHandlerMethodFactory(JmsHandlerMethodFactory jmsHandlerMethodFactory) {
+		public void setJmsHandlerMethodFactory(JmsHandlerMethodFactory jmsHandlerMethodFactory) {
 			this.jmsHandlerMethodFactory = jmsHandlerMethodFactory;
 		}
 
@@ -275,10 +274,10 @@ public class JmsListenerAnnotationBeanPostProcessor implements BeanPostProcessor
 		}
 
 		private JmsHandlerMethodFactory getJmsHandlerMethodFactory() {
-			if (jmsHandlerMethodFactory == null) {
-				jmsHandlerMethodFactory = createDefaultJmsHandlerMethodFactory();
+			if (this.jmsHandlerMethodFactory == null) {
+				this.jmsHandlerMethodFactory = createDefaultJmsHandlerMethodFactory();
 			}
-			return jmsHandlerMethodFactory;
+			return this.jmsHandlerMethodFactory;
 		}
 
 		private JmsHandlerMethodFactory createDefaultJmsHandlerMethodFactory() {

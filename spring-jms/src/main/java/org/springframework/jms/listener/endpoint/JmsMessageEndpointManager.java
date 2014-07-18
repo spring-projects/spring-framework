@@ -144,7 +144,42 @@ public class JmsMessageEndpointManager extends GenericMessageEndpointManager
 	 * should use for activating its listener. Return {@code null} if none is set.
 	 */
 	public JmsActivationSpecConfig getActivationSpecConfig() {
-		return activationSpecConfig;
+		return this.activationSpecConfig;
+	}
+
+	/**
+	 * Set the name of this message endpoint. Populated with the bean name
+	 * automatically when defined within Spring's bean factory.
+	 */
+	@Override
+	public void setBeanName(String beanName) {
+		this.endpointFactory.setBeanName(beanName);
+	}
+
+
+	@Override
+	public void afterPropertiesSet() throws ResourceException {
+		if (this.messageListenerSet) {
+			setMessageEndpointFactory(this.endpointFactory);
+		}
+		if (this.activationSpecConfig != null) {
+			setActivationSpec(
+					this.activationSpecFactory.createActivationSpec(getResourceAdapter(), this.activationSpecConfig));
+		}
+		super.afterPropertiesSet();
+	}
+
+
+	@Override
+	public void setupMessageListener(Object messageListener) {
+		if (messageListener instanceof MessageListener) {
+			setMessageListener((MessageListener) messageListener);
+		}
+		else {
+			throw new IllegalArgumentException("Unsupported message listener '" +
+					messageListener.getClass().getName() + "': only '" + MessageListener.class.getName() +
+					"' type is supported");
+		}
 	}
 
 	@Override
@@ -162,40 +197,7 @@ public class JmsMessageEndpointManager extends GenericMessageEndpointManager
 		if (config != null) {
 			return config.isPubSubDomain();
 		}
-		throw new IllegalStateException("could not determine pubSubDomain, no activation spec config is set");
-	}
-
-	/**
-	 * Set the name of this message endpoint. Populated with the bean name
-	 * automatically when defined within Spring's bean factory.
-	 */
-	@Override
-	public void setBeanName(String beanName) {
-		this.endpointFactory.setBeanName(beanName);
-	}
-
-	@Override
-	public void setupMessageListener(Object messageListener) {
-		if (messageListener instanceof MessageListener) {
-			setMessageListener((MessageListener) messageListener);
-		}
-		else {
-			throw new IllegalArgumentException("Unsupported message listener '"
-					+ messageListener.getClass().getName() + "': only '"
-					+ MessageListener.class.getName() + "' type is supported");
-		}
-	}
-
-	@Override
-	public void afterPropertiesSet() throws ResourceException {
-		if (this.messageListenerSet) {
-			setMessageEndpointFactory(this.endpointFactory);
-		}
-		if (this.activationSpecConfig != null) {
-			setActivationSpec(
-					this.activationSpecFactory.createActivationSpec(getResourceAdapter(), this.activationSpecConfig));
-		}
-		super.afterPropertiesSet();
+		throw new IllegalStateException("Could not determine pubSubDomain - no activation spec config is set");
 	}
 
 }

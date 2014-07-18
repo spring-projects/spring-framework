@@ -28,8 +28,8 @@ import org.springframework.context.annotation.Import;
  * Enable JMS listener annotated endpoints that are created under the cover
  * by a {@link org.springframework.jms.config.JmsListenerContainerFactory
  * JmsListenerContainerFactory}. To be used on
- * @{@link org.springframework.context.annotation.Configuration Configuration} classes
- * as follows:
+ * {@link org.springframework.context.annotation.Configuration Configuration}
+ * classes as follows:
  *
  * <pre class="code">
  * &#064;Configuration
@@ -52,8 +52,8 @@ import org.springframework.context.annotation.Import;
  * used in the sample above, provides the necessary configuration options that are supported by
  * the underlying {@link org.springframework.jms.listener.MessageListenerContainer MessageListenerContainer}.
  *
- * <p>{@code @EnableJms} enables detection of @{@link JmsListener} annotations on
- * any Spring-managed bean in the container. For example, given a class {@code MyService}
+ * <p>{@code @EnableJms} enables detection of {@link JmsListener} annotations on any
+ * Spring-managed bean in the container. For example, given a class {@code MyService}:
  *
  * <pre class="code">
  * package com.acme.foo;
@@ -103,7 +103,7 @@ import org.springframework.context.annotation.Import;
  *
  * <p>Annotated methods can use flexible signature; in particular, it is possible to use
  * the {@link org.springframework.messaging.Message Message} abstraction and related annotations,
- * see @{@link JmsListener} Javadoc for more details. For instance, the following would
+ * see {@link JmsListener} Javadoc for more details. For instance, the following would
  * inject the content of the message and a a custom "myCounter" JMS header:
  *
  * <pre class="code">
@@ -163,7 +163,7 @@ import org.springframework.context.annotation.Import;
  * are created and managed. The example below also demonstrates how to customize the
  * {@code JmsHandlerMethodFactory} to use with a custom {@link org.springframework.validation.Validator
  * Validator} so that payloads annotated with {@link org.springframework.validation.annotation.Validated
- * @Validated} are first validated against a custom {@code Validator}.
+ * Validated} are first validated against a custom {@code Validator}.
  *
  * <pre class="code">
  * &#064;Configuration
