@@ -19,6 +19,7 @@ package org.springframework.jms.listener;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.Executor;
+
 import javax.jms.Connection;
 import javax.jms.Destination;
 import javax.jms.ExceptionListener;
@@ -30,6 +31,7 @@ import javax.jms.Session;
 import javax.jms.Topic;
 
 import org.springframework.jms.support.JmsUtils;
+import org.springframework.jms.util.Jms2Utils;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.util.Assert;
 
@@ -388,7 +390,10 @@ public class SimpleMessageListenerContainer extends AbstractMessageListenerConta
 		// Some JMS providers, such as WebSphere MQ 6.0, throw IllegalStateException
 		// in case of the NoLocal flag being specified for a Queue.
 		if (isPubSubDomain()) {
-			if (isSubscriptionDurable() && destination instanceof Topic) {
+			if (isSharedSubscription() && destination instanceof Topic) {
+				return Jms2Utils.createSharedConsumer(session, (Topic)destination, getSharedSubscriptionName(), 
+						getMessageSelector(), isSubscriptionDurable());
+			}else if (isSubscriptionDurable() && destination instanceof Topic) {
 				return session.createDurableSubscriber(
 						(Topic) destination, getDurableSubscriptionName(), getMessageSelector(), isPubSubNoLocal());
 			}
