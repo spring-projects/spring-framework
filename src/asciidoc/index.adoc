@@ -32402,6 +32402,145 @@ And the same in XML use the `<mvc:view-controller>` element:
 ----
 
 
+[[mvc-config-view-resolution]]
+==== Configuring View Resolution
+This is a shortcut for defining `ViewResolver` beans that can resolve views by name.
+
+The API allows to declare view resolvers with default values, and to customize most
+useful properties. Bean name and JSP view resolvers can be declared like bellow:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@Configuration
+	@EnableWebMvc
+	public class WebConfig extends WebMvcConfigurerAdapter {
+
+		@Override
+		public void configureViewResolvers(ViewResolverRegistry registry) {
+			registry.beanName();
+			registry.jsp().prefix("/");
+		}
+
+	}
+----
+
+And the same in XML use the `<mvc:view-resolvers>` child elements:
+
+[source,xml,indent=0]
+[subs="verbatim,quotes"]
+----
+	<mvc:view-resolvers>
+		<mvc:bean-name />
+		<mvc:jsp />
+	</mvc:view-resolvers>
+----
+
+Configuring Tiles, Velocity, FreeMarker and Groovy view resolution requires
+declaring both `ViewResolver` (configured thanks to the `ViewResolverRegistry`)
+and configurer beans:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@Configuration
+	@EnableWebMvc
+	public class WebConfig extends WebMvcConfigurerAdapter {
+
+		@Override
+		public void configureViewResolvers(ViewResolverRegistry registry) {
+			registry.tiles();
+			registry.velocity();
+			registry.freeMarker().suffix(".fmt").cache(false);
+			registry.groovy();
+		}
+
+		@Bean
+		public TilesConfigurer tilesConfigurer() {
+			return new TilesConfigurer();
+		}
+
+		@Bean
+		public VelocityConfigurer velocityConfigurer() {
+			return new VelocityConfigurer();
+		}
+
+		@Bean
+		public FreeMarkerConfigurer freeMarkerConfigurer() {
+			return new FreeMarkerConfigurer();
+		}
+
+		@Bean
+		public GroovyMarkupConfigurer groovyMarkupConfigurer() {
+			return new GroovyMarkupConfigurer();
+		}
+
+	}
+----
+
+For XML, in addition to the `<mvc:view-resolvers>` child elements, shortcut alternative
+to declaring configurer beans directly are also provided:
+
+[source,xml,indent=0]
+[subs="verbatim,quotes"]
+----
+	<mvc:view-resolvers>
+		<mvc:tiles />
+		<mvc:velocity />
+		<mvc:freemarker />
+		<mvc:groovy />
+	</mvc:view-resolvers>
+
+	<mvc:tiles-configurer>
+		<mvc:definitions location="/tiles/tiles1.xml" />
+	</mvc:tiles-configurer>
+
+	<mvc:velocity-configurer resource-loader-path="/velocity" />
+
+	<mvc:freemarker-configurer>
+		<mvc:template-loader-path location="/freemarker" />
+	</mvc:freemarker-configurer>
+
+	<mvc:groovy-configurer />
+----
+
+It is also possible to declare a `ContentNegotiatingViewResolver` bean thanks to the
+`ViewResolverRegistry`. The `ContentNegotiationManager` used to determine requested media
+types is configured as described in <<mvc-config-content-negotiation>>.
+All other view resolvers declared are automatically added to the `viewResolvers`
+property of the `ContentNegotiatingViewResolver` bean:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@Configuration
+	@EnableWebMvc
+	public class WebConfig extends WebMvcConfigurerAdapter {
+
+		@Override
+		public void configureViewResolvers(ViewResolverRegistry registry) {
+			registry.contentNegotiating(new MappingJackson2JsonView());
+			registry.jsp();
+		}
+
+	}
+----
+
+And the same in XML use the `<mvc:content-negotiation>` element:
+
+[source,xml,indent=0]
+[subs="verbatim,quotes"]
+----
+	<mvc:view-resolvers>
+		<mvc:content-negotiation use-not-acceptable="true">
+			<mvc:default-views>
+				<bean class="org.springframework.web.servlet.view.json.MappingJackson2JsonView" />
+			</mvc:default-views>
+		</mvc:content-negotiation>
+		<mvc:jsp />
+	</mvc:view-resolvers>
+----
+
 
 [[mvc-config-static-resources]]
 ==== Configuring Serving of Resources
