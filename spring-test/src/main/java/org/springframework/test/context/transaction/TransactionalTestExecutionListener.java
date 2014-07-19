@@ -53,15 +53,16 @@ import static org.springframework.core.annotation.AnnotationUtils.*;
  *
  * <h3>Test-managed Transactions</h3>
  * <p><em>Test-managed transactions</em> are transactions that are managed
- * by this listener. Such transactions should not be confused with 
+ * declaratively via this listener or programmatically via
+ * {@link TestTransaction}. Such transactions should not be confused with 
  * <em>Spring-managed transactions</em> (i.e., those managed directly
  * by Spring within the {@code ApplicationContext} loaded for tests) or
  * <em>application-managed transactions</em> (i.e., those managed
  * programmatically within application code that is invoked via tests).
- * Spring-managed transactions and application-managed transactions will
- * typically participate in test-managed transactions; however, caution
- * should be taken if Spring-managed transactions or application-managed
- * transactions are configured with any propagation type other than
+ * Spring-managed and application-managed transactions will typically
+ * participate in test-managed transactions; however, caution should be
+ * taken if Spring-managed or application-managed transactions are
+ * configured with any propagation type other than
  * {@link org.springframework.transaction.annotation.Propagation#REQUIRED REQUIRED}
  * or {@link org.springframework.transaction.annotation.Propagation#SUPPORTS SUPPORTS}.
  *
@@ -72,8 +73,8 @@ import static org.springframework.core.annotation.AnnotationUtils.*;
  * annotated with {@code @Transactional}, each test method within that class
  * hierarchy will be run within a transaction. Test methods that are
  * <em>not</em> annotated with {@code @Transactional} (at the class or method
- * level) will not be run within a transaction. Furthermore, test methods
- * that <em>are</em> annotated with {@code @Transactional} but have the
+ * level) will not be run within a transaction. Furthermore, tests that
+ * <em>are</em> annotated with {@code @Transactional} but have the
  * {@link org.springframework.transaction.annotation.Transactional#propagation propagation}
  * type set to
  * {@link org.springframework.transaction.annotation.Propagation#NOT_SUPPORTED NOT_SUPPORTED}
