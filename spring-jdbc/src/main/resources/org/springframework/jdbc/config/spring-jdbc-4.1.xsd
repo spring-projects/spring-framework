@@ -1,0 +1,182 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<xsd:schema xmlns="http://www.springframework.org/schema/jdbc"
+		xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+		xmlns:beans="http://www.springframework.org/schema/beans"
+		xmlns:tool="http://www.springframework.org/schema/tool"
+		targetNamespace="http://www.springframework.org/schema/jdbc"
+		elementFormDefault="qualified"
+		attributeFormDefault="unqualified">
+
+	<xsd:import namespace="http://www.springframework.org/schema/beans" schemaLocation="http://www.springframework.org/schema/beans/spring-beans-4.1.xsd"/>
+	<xsd:import namespace="http://www.springframework.org/schema/tool" schemaLocation="http://www.springframework.org/schema/tool/spring-tool-4.1.xsd"/>
+
+	<xsd:element name="embedded-database">
+		<xsd:annotation>
+			<xsd:documentation source="java:org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseFactoryBean"><![CDATA[
+	Creates an embedded database instance and makes it available to other beans as a javax.sql.DataSource.
+			]]></xsd:documentation>
+			<xsd:appinfo>
+				<tool:annotation>
+					<tool:exports type="javax.sql.DataSource"/>
+				</tool:annotation>
+			</xsd:appinfo>
+		</xsd:annotation>
+		<xsd:complexType>
+			<xsd:complexContent>
+				<xsd:extension base="beans:identifiedType">
+					<xsd:sequence>
+						<xsd:element name="script" type="scriptType" minOccurs="0" maxOccurs="unbounded">
+							<xsd:annotation>
+								<xsd:documentation><![CDATA[
+			A SQL script to execute during embedded database initialization.
+								]]></xsd:documentation>
+							</xsd:annotation>
+						</xsd:element>
+					</xsd:sequence>
+					<xsd:attribute name="type" type="databaseType" default="HSQL">
+						<xsd:annotation>
+							<xsd:documentation><![CDATA[
+			The type of embedded database to create, such as HSQL, H2 or Derby. Defaults to HSQL.
+							]]></xsd:documentation>
+						</xsd:annotation>
+					</xsd:attribute>
+				</xsd:extension>
+			</xsd:complexContent>
+		</xsd:complexType>
+	</xsd:element>
+
+	<xsd:element name="initialize-database">
+		<xsd:annotation>
+			<xsd:documentation source="java:org.springframework.jdbc.datasource.init.DataSourceInitializer"><![CDATA[
+	Initializes a database instance with SQL scripts provided in nested <script/> elements.
+			]]></xsd:documentation>
+		</xsd:annotation>
+		<xsd:complexType>
+			<xsd:sequence>
+				<xsd:element name="script" type="scriptType" minOccurs="1" maxOccurs="unbounded">
+					<xsd:annotation>
+						<xsd:documentation><![CDATA[
+			A SQL script to execute during database initialization.
+						]]></xsd:documentation>
+					</xsd:annotation>
+				</xsd:element>
+			</xsd:sequence>
+			<xsd:attribute name="data-source" type="xsd:string" default="dataSource">
+				<xsd:annotation>
+					<xsd:documentation><![CDATA[
+			A reference to a data source that should be initialized. Defaults to "dataSource".
+					]]></xsd:documentation>
+					<xsd:appinfo>
+						<tool:annotation kind="ref"/>
+						<tool:expected-type type="javax.sql.DataSource"/>
+					</xsd:appinfo>
+				</xsd:annotation>
+			</xsd:attribute>
+			<xsd:attribute name="enabled" type="xsd:string" use="optional" default="true">
+				<xsd:annotation>
+					<xsd:documentation>
+						Is this bean "enabled", meaning the scripts will be executed?
+						Defaults to true, but can be used to switch on and off the initialization depending on the environment.
+					</xsd:documentation>
+				</xsd:annotation>
+			</xsd:attribute>
+			<xsd:attribute name="ignore-failures" use="optional" default="NONE">
+				<xsd:annotation>
+					<xsd:documentation>
+						Should failed SQL statements be ignored during initialization?
+					</xsd:documentation>
+				</xsd:annotation>
+				<xsd:simpleType>
+					<xsd:restriction base="xsd:string">
+						<xsd:enumeration value="NONE">
+							<xsd:annotation>
+								<xsd:documentation><![CDATA[
+						Do not ignore failures (the default)
+								]]></xsd:documentation>
+							</xsd:annotation>
+						</xsd:enumeration>
+						<xsd:enumeration value="DROPS">
+							<xsd:annotation>
+								<xsd:documentation><![CDATA[
+						Ignore failed DROP statements
+								]]></xsd:documentation>
+							</xsd:annotation>
+						</xsd:enumeration>
+						<xsd:enumeration value="ALL">
+							<xsd:annotation>
+								<xsd:documentation><![CDATA[
+						Ignore all failures
+								]]></xsd:documentation>
+							</xsd:annotation>
+						</xsd:enumeration>
+					</xsd:restriction>
+				</xsd:simpleType>
+			</xsd:attribute>
+		</xsd:complexType>
+	</xsd:element>
+
+	<xsd:complexType name="scriptType">
+		<xsd:attribute name="location" type="xsd:string">
+			<xsd:annotation>
+				<xsd:documentation><![CDATA[
+	The resource location of an SQL script to execute. Can be a single script location or a pattern (e.g. classpath:/com/foo/sql/*-data.sql).
+				]]></xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="encoding" type="xsd:string">
+			<xsd:annotation>
+				<xsd:documentation><![CDATA[
+	The encoding for SQL scripts, if different from the platform encoding.
+				]]></xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="separator" type="xsd:string">
+			<xsd:annotation>
+				<xsd:documentation><![CDATA[
+	The statement separator in the script (the default is to use ';' if it is present in the script, or '\n' otherwise).
+				]]></xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="execution">
+			<xsd:annotation>
+				<xsd:documentation><![CDATA[
+	Indicate the timing of the execution of this script. Use INIT to execute on startup (as a bean initialization) and DESTROY to execute on shutdown (as a bean destruction callback).
+				]]></xsd:documentation>
+			</xsd:annotation>
+			<xsd:simpleType>
+				<xsd:restriction base="xsd:string">
+					<xsd:enumeration value="INIT"/>
+					<xsd:enumeration value="DESTROY"/>
+				</xsd:restriction>
+			</xsd:simpleType>
+		</xsd:attribute>
+	</xsd:complexType>
+
+	<xsd:simpleType name="databaseType">
+		<xsd:restriction base="xsd:string">
+			<xsd:enumeration value="HSQL">
+				<xsd:annotation>
+					<xsd:documentation><![CDATA[
+			Hyper SQL Java Database Engine
+					]]></xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="H2">
+				<xsd:annotation>
+					<xsd:documentation><![CDATA[
+			H2 Java Database Engine
+					]]></xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="DERBY">
+				<xsd:annotation>
+					<xsd:documentation><![CDATA[
+			Derby Java Database Engine
+					]]></xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+		</xsd:restriction>
+	</xsd:simpleType>
+
+</xsd:schema>
