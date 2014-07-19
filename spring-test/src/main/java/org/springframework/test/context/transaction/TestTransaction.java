@@ -23,7 +23,8 @@ import org.springframework.transaction.TransactionStatus;
  * {@code TestTransaction} provides a collection of static utility methods for
  * programmatic interaction with <em>test-managed transactions</em>.
  *
- * <p>Test-managed transactions are transactions that are managed by the <em>Spring TestContext Framework</em>.
+ * <p>Test-managed transactions are transactions that are managed by the
+ * <em>Spring TestContext Framework</em>.
  *
  * <p>Support for {@code TestTransaction} is automatically available whenever
  * the {@link TransactionalTestExecutionListener} is enabled. Note that the

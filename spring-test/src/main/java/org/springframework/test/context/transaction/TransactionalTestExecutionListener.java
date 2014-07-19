@@ -28,7 +28,6 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.annotation.BeanFactoryAnnotationUtils;
-import org.springframework.context.ApplicationContext;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.test.annotation.Rollback;
@@ -38,7 +37,6 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.annotation.AnnotationTransactionAttributeSource;
-import org.springframework.transaction.annotation.TransactionManagementConfigurer;
 import org.springframework.transaction.interceptor.TransactionAttribute;
 import org.springframework.transaction.interceptor.TransactionAttributeSource;
 import org.springframework.util.Assert;
@@ -49,14 +47,30 @@ import static org.springframework.core.annotation.AnnotationUtils.*;
 
 /**
  * {@code TestExecutionListener} that provides support for executing tests
- * within transactions by honoring the
+ * within <em>test-managed transactions</em> by honoring Spring's
  * {@link org.springframework.transaction.annotation.Transactional @Transactional}
- * annotation. Expects a {@link PlatformTransactionManager} bean to be defined in the
- * Spring {@link ApplicationContext} for the test.
+ * annotation.
  *
- * <p>Changes to the database during a test that is run with {@code @Transactional}
- * will be run within a transaction that will, by default, be automatically
- * <em>rolled back</em> after completion of the test. Test methods that are
+ * <h3>Test-managed Transactions</h3>
+ * <p><em>Test-managed transactions</em> are transactions that are managed
+ * by this listener. Such transactions should not be confused with 
+ * <em>Spring-managed transactions</em> (i.e., those managed directly
+ * by Spring within the {@code ApplicationContext} loaded for tests) or
+ * <em>application-managed transactions</em> (i.e., those managed
+ * programmatically within application code that is invoked via tests).
+ * Spring-managed transactions and application-managed transactions will
+ * typically participate in test-managed transactions; however, caution
+ * should be taken if Spring-managed transactions or application-managed
+ * transactions are configured with any propagation type other than
+ * {@link org.springframework.transaction.annotation.Propagation#REQUIRED REQUIRED}
+ * or {@link org.springframework.transaction.annotation.Propagation#SUPPORTS SUPPORTS}.
+ *
+ * <h3>Enabling and Disabling Transactions</h3>
+ * <p>Annotating a test method with {@code @Transactional} causes the test
+ * to be run within a transaction that will, by default, be automatically
+ * <em>rolled back</em> after completion of the test. If a test class is
+ * annotated with {@code @Transactional}, each test method within that class
+ * hierarchy will be run within a transaction. Test methods that are
  * <em>not</em> annotated with {@code @Transactional} (at the class or method
  * level) will not be run within a transaction. Furthermore, test methods
  * that <em>are</em> annotated with {@code @Transactional} but have the
@@ -65,33 +79,49 @@ import static org.springframework.core.annotation.AnnotationUtils.*;
  * {@link org.springframework.transaction.annotation.Propagation#NOT_SUPPORTED NOT_SUPPORTED}
  * will not be run within a transaction.
  *
- * <p>Transactional commit and rollback behavior can be configured via the
- * class-level {@link TransactionConfiguration @TransactionConfiguration} and
- * method-level {@link Rollback @Rollback} annotations.
+ * <h3>Declarative Rollback and Commit Behavior</h3>
+ * <p>By default, test transactions will be automatically <em>rolled back</em>
+ * after completion of the test; however, transactional commit and rollback
+ * behavior can be configured declaratively via the class-level
+ * {@link TransactionConfiguration @TransactionConfiguration} and method-level
+ * {@link Rollback @Rollback} annotations.
  *
- * <p>In case there are multiple instances of {@code PlatformTransactionManager}
- * within the test's {@code ApplicationContext}, {@code @TransactionConfiguration}
- * supports configuring the bean name of the {@code PlatformTransactionManager}
- * that should be used to drive transactions. Alternatively, a <em>qualifier</em>
- * may be declared via {@link Transactional#value} or
- * {@link TransactionManagementConfigurer} can be implemented by an
+ * <h3>Programmatic Transaction Management</h3>
+ * <p>As of Spring Framework 4.1, it is possible to interact with test-managed
+ * transactions programmatically via the static methods in {@link TestTransaction}.
+ * {@code TestTransaction} may be used within <em>test</em> methods,
+ * <em>before</em> methods, and <em>after</em> methods.
+ *
+ * <h3>Executing Code outside of a Transaction</h3>
+ * <p>When executing transactional tests, it is sometimes useful to be able to
+ * execute certain <em>set up</em> or <em>tear down</em> code outside of a
+ * transaction. {@code TransactionalTestExecutionListener} provides such
+ * support for methods annotated with
+ * {@link BeforeTransaction @BeforeTransaction} or
+ * {@link AfterTransaction @AfterTransaction}.
+ *
+ * <h3>Configuring a Transaction Manager</h3>
+ * <p>{@code TransactionalTestExecutionListener} expects a
+ * {@link PlatformTransactionManager} bean to be defined in the Spring
+ * {@code ApplicationContext} for the test. In case there are multiple
+ * instances of {@code PlatformTransactionManager} within the test's
+ * {@code ApplicationContext}, {@code @TransactionConfiguration} supports
+ * configuring the bean name of the {@code PlatformTransactionManager} that
+ * should be used to drive transactions. Alternatively, a <em>qualifier</em>
+ * may be declared via
+ * {@link org.springframework.transaction.annotation.Transactional#value @Transactional("myQualifier")}, or
+ * {@link org.springframework.transaction.annotation.TransactionManagementConfigurer TransactionManagementConfigurer}
+ * can be implemented by an
  * {@link org.springframework.context.annotation.Configuration @Configuration}
  * class. See {@link TestContextTransactionUtils#retrieveTransactionManager()}
  * for details on the algorithm used to look up a transaction manager in
  * the test's {@code ApplicationContext}.
  *
- * <p>When executing transactional tests, it is sometimes useful to be able to
- * execute certain <em>set up</em> or <em>tear down</em> code outside of a
- * transaction. {@code TransactionalTestExecutionListener} provides such
- * support for methods annotated with
- * {@link BeforeTransaction @BeforeTransaction} and
- * {@link AfterTransaction @AfterTransaction}.
- *
  * @author Sam Brannen
  * @author Juergen Hoeller
  * @since 2.5
  * @see TransactionConfiguration
- * @see TransactionManagementConfigurer
+ * @see org.springframework.transaction.annotation.TransactionManagementConfigurer
  * @see org.springframework.transaction.annotation.Transactional
  * @see org.springframework.test.annotation.Rollback
  * @see BeforeTransaction
