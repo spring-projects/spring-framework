@@ -337,6 +337,7 @@ public class UtilNamespaceHandlerTests {
         assertEquals("Incorrect property value", null, props.get("foo"));
         assertEquals("Incorrect property value", "hello", props.get("foo.test1"));
         assertEquals("Incorrect property value", "world", props.get("foo.test2"));
+        assertEquals("Incorrect amount of loaded properties", 2, props.stringPropertyNames().size());
         Properties props2 = (Properties) this.beanFactory.getBean("filteredProperties");
         assertTrue(props == props2);
     }

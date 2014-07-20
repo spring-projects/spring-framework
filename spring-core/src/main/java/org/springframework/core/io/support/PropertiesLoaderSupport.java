@@ -55,7 +55,6 @@ public abstract class PropertiesLoaderSupport {
 
     private String regex;
 
-
 	/**
 	 * Set local properties, e.g. via the "props" tag in XML bean definitions.
 	 * These can be considered defaults, to be overridden by properties
