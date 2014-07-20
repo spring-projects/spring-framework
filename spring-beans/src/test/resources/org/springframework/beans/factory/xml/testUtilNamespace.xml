@@ -156,6 +156,10 @@
 	<util:properties id="myProperties"
 			location="classpath:/org/springframework/beans/factory/xml/util.properties"/>
 
+	<util:properties id="filteredProperties"
+			regex="foo\..*"
+			location="classpath:/org/springframework/beans/factory/xml/util2.properties"/>
+
 	<util:properties id="myScopedProperties"
 			location="classpath:/org/springframework/beans/factory/xml/util.properties,classpath:override.properties"
 			ignore-resource-not-found="true" scope="prototype"/>

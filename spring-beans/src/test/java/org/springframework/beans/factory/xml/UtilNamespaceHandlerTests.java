@@ -190,8 +190,7 @@ public class UtilNamespaceHandlerTests {
 		assertFalse(map == bean2.getSomeMap());
 	}
 
-	@Test
-	public void testNestedShortcutCollections() {
+	public void testNestedShortcutCollections() throws Exception {
 		TestBean bean = (TestBean) this.beanFactory.getBean("nestedShortcutCollections");
 
 		assertEquals(1, bean.getStringArray().length);
@@ -214,8 +213,7 @@ public class UtilNamespaceHandlerTests {
 		assertFalse(set == bean2.getSomeSet());
 	}
 
-	@Test
-	public void testNestedInCollections() {
+	public void testNestedInCollections() throws Exception {
 		TestBean bean = (TestBean) this.beanFactory.getBean("nestedCustomTagBean");
 
 		List list = bean.getSomeList();
@@ -240,8 +238,7 @@ public class UtilNamespaceHandlerTests {
 		assertFalse(map == bean2.getSomeMap());
 	}
 
-	@Test
-	public void testCircularCollections() {
+	public void testCircularCollections() throws Exception {
 		TestBean bean = (TestBean) this.beanFactory.getBean("circularCollectionsBean");
 
 		List list = bean.getSomeList();
@@ -257,8 +254,7 @@ public class UtilNamespaceHandlerTests {
 		assertEquals(bean, map.get("foo"));
 	}
 
-	@Test
-	public void testCircularCollectionBeansStartingWithList() {
+	public void testCircularCollectionBeansStartingWithList() throws Exception {
 		this.beanFactory.getBean("circularList");
 		TestBean bean = (TestBean) this.beanFactory.getBean("circularCollectionBeansBean");
 
@@ -334,6 +330,16 @@ public class UtilNamespaceHandlerTests {
 		Properties props2 = (Properties) this.beanFactory.getBean("myProperties");
 		assertTrue(props == props2);
 	}
+
+@Test
+    public void testLoadFilteredProperties() {
+        Properties props = (Properties) this.beanFactory.getBean("filteredProperties");
+        assertEquals("Incorrect property value", null, props.get("foo"));
+        assertEquals("Incorrect property value", "hello", props.get("foo.test1"));
+        assertEquals("Incorrect property value", "world", props.get("foo.test2"));
+        Properties props2 = (Properties) this.beanFactory.getBean("filteredProperties");
+        assertTrue(props == props2);
+    }
 
 	@Test
 	public void testScopedProperties() {

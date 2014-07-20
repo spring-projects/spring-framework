@@ -18,6 +18,7 @@ package org.springframework.core.io.support;
 
 import java.io.IOException;
 import java.util.Properties;
+import java.util.regex.Pattern;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -51,6 +52,8 @@ public abstract class PropertiesLoaderSupport {
 	private String fileEncoding;
 
 	private PropertiesPersister propertiesPersister = new DefaultPropertiesPersister();
+
+    private String regex;
 
 
 	/**
@@ -174,7 +177,8 @@ public abstract class PropertiesLoaderSupport {
 				try {
 					PropertiesLoaderUtils.fillProperties(
 							props, new EncodedResource(location, this.fileEncoding), this.propertiesPersister);
-				}
+                    filterProperties(props);
+                }
 				catch (IOException ex) {
 					if (this.ignoreResourceNotFound) {
 						if (logger.isWarnEnabled()) {
@@ -189,4 +193,22 @@ public abstract class PropertiesLoaderSupport {
 		}
 	}
 
+    private void filterProperties(Properties props) {
+        if(regex != null){
+            Pattern pattern = Pattern.compile(regex);
+            for(String key : props.stringPropertyNames()){
+                if(!pattern.matcher(key).matches()){
+                    props.remove(key);
+                }
+            }
+        }
+    }
+
+    /**
+     * Set the regex to use for filtering keys in properties files.
+     * The default is null, so filtering does not occur..
+     */
+    public void setRegex(String regex) {
+        this.regex = regex;
+    }
 }

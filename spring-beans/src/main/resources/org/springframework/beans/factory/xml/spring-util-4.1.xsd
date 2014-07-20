@@ -213,6 +213,14 @@
 							]]></xsd:documentation>
 						</xsd:annotation>
 					</xsd:attribute>
+                    <xsd:attribute name="regex" type="xsd:string">
+                        <xsd:annotation>
+                            <xsd:documentation><![CDATA[
+    Regex parameter means filtering all keys, so there are only properties,
+    that match given pattern in result properties.
+							]]></xsd:documentation>
+                        </xsd:annotation>
+                    </xsd:attribute>
 				</xsd:extension>
 			</xsd:complexContent>
 		</xsd:complexType>
