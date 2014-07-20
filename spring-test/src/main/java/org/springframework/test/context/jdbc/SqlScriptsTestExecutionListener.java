@@ -55,20 +55,25 @@ import org.springframework.util.ResourceUtils;
  * {@linkplain java.lang.reflect.Method test method}, depending on the configured
  * value of the {@link Sql#executionPhase executionPhase} flag.
  *
- * <p>Scripts will be executed either within an existing Spring-managed transaction
- * or within an isolated transaction, depending on the configured value of
- * {@link SqlConfig#transactionMode}.
+ * <p>Scripts will be executed without a transaction, within an existing
+ * Spring-managed transaction, or within an isolated transaction, depending
+ * on the configured value of {@link SqlConfig#transactionMode} and the
+ * presence of a transaction manager.
  *
  * <h3>Script Resources</h3>
  * <p>For details on default script detection and how explicit script locations
  * are interpreted, see {@link Sql#scripts}.
  *
  * <h3>Required Spring Beans</h3>
- * <p>A {@link DataSource} and {@link PlatformTransactionManager} must be defined
- * as beans in the Spring {@link ApplicationContext} for the corresponding test.
- * Consult the javadocs for {@link TestContextTransactionUtils#retrieveDataSource}
- * and {@link TestContextTransactionUtils#retrieveTransactionManager} for details
- * on the algorithms used to locate these beans.
+ * <p>A {@link PlatformTransactionManager} <em>and</em> a {@link DataSource},
+ * just a {@link PlatformTransactionManager}, or just a {@link DataSource}
+ * must be defined as beans in the Spring {@link ApplicationContext} for the
+ * corresponding test. Consult the javadocs for {@link SqlConfig#transactionMode},
+ * {@link SqlConfig#transactionManager}, {@link SqlConfig#dataSource},
+ * {@link TestContextTransactionUtils#retrieveDataSource}, and
+ * {@link TestContextTransactionUtils#retrieveTransactionManager} for details
+ * on permissible configuration constellations and on the algorithms used to
+ * locate these beans.
  *
  * @author Sam Brannen
  * @since 4.1
