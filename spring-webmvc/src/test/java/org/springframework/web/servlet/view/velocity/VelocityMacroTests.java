@@ -190,4 +190,66 @@ public class VelocityMacroTests extends TestCase {
 		}
 	}
 
+	// SPR-5172
+	public void testIdContainsBraces() throws Exception {
+		DummyMacroRequestContext rc = new DummyMacroRequestContext(request);
+		Map<String, String> msgMap = new HashMap<String, String>();
+		msgMap.put("hello", "Howdy");
+		msgMap.put("world", "Mundo");
+		rc.setMessageMap(msgMap);
+		Map<String, String> themeMsgMap = new HashMap<String, String>();
+		themeMsgMap.put("hello", "Howdy!");
+		themeMsgMap.put("world", "Mundo!");
+		rc.setThemeMessageMap(themeMsgMap);
+		rc.setContextPath("/springtest");
+
+		TestBean darren = new TestBean("Darren", 99);
+		TestBean fred = new TestBean("Fred");
+		fred.setJedi(true);
+		darren.setSpouse(fred);
+		darren.setJedi(true);
+		darren.setStringArray(new String[] {"John", "Fred"});
+		request.setAttribute("command", darren);
+
+		Map<String, String> names = new HashMap<String, String>();
+		names.put("Darren", "Darren Davison");
+		names.put("John", "John Doe");
+		names.put("Fred", "Fred Bloggs");
+
+		VelocityConfigurer vc = new VelocityConfigurer();
+		vc.setPreferFileSystemAccess(false);
+		VelocityEngine ve = vc.createVelocityEngine();
+
+		Map<String, Object> model = new HashMap<String, Object>();
+		model.put("command", darren);
+		model.put("springMacroRequestContext", rc);
+		model.put("nameOptionMap", names);
+
+		VelocityView view = new VelocityView();
+		view.setBeanName("myView");
+		view.setUrl("org/springframework/web/servlet/view/velocity/test-spr5172.vm");
+		view.setEncoding("UTF-8");
+		view.setExposeSpringMacroHelpers(false);
+		view.setVelocityEngine(ve);
+
+		view.render(model, request, response);
+
+		// tokenize output and ignore whitespace
+		String output = response.getContentAsString();
+		String[] tokens = StringUtils.tokenizeToStringArray(output, "\t\n");
+
+		for (int i = 0; i < tokens.length; i++) {
+			if (tokens[i].equals("FORM1")) assertEquals("<input type=\"text\" id=\"spouses0.name\" name=\"spouses[0].name\" value=\"Fred\" >", tokens[i + 1]); //
+			if (tokens[i].equals("FORM2")) assertEquals("<textarea id=\"spouses0.name\" name=\"spouses[0].name\" >Fred</textarea>", tokens[i + 1]);
+			if (tokens[i].equals("FORM3")) assertEquals("<select id=\"spouses0.name\" name=\"spouses[0].name\" >", tokens[i + 1]);
+			if (tokens[i].equals("FORM4")) assertEquals("<select multiple=\"multiple\" id=\"spouses\" name=\"spouses\" >", tokens[i + 1]);
+			if (tokens[i].equals("FORM5")) assertEquals("<input type=\"radio\" name=\"spouses[0].name\" value=\"Darren\"", tokens[i + 1]);
+			if (tokens[i].equals("FORM6")) assertEquals("<input type=\"password\" id=\"spouses0.name\" name=\"spouses[0].name\" value=\"\" >", tokens[i + 1]);
+			if (tokens[i].equals("FORM7")) assertEquals("<input type=\"hidden\" id=\"spouses0.name\" name=\"spouses[0].name\" value=\"Fred\" >", tokens[i + 1]);
+			if (tokens[i].equals("FORM8")) assertEquals("<input type=\"hidden\" name=\"_spouses0.name\" value=\"on\"/>", tokens[i + 1]);
+			if (tokens[i].equals("FORM8")) assertEquals("<input type=\"checkbox\" id=\"spouses0.name\" name=\"spouses[0].name\" />", tokens[i + 2]);
+			if (tokens[i].equals("FORM9")) assertEquals("<input type=\"hidden\" name=\"_spouses0.jedi\" value=\"on\"/>", tokens[i + 1]);
+			if (tokens[i].equals("FORM9")) assertEquals("<input type=\"checkbox\" id=\"spouses0.jedi\" name=\"spouses[0].jedi\" checked=\"checked\" />", tokens[i + 2]);
+		}
+	}
 }
