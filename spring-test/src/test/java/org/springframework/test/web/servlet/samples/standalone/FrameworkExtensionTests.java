@@ -15,6 +15,7 @@
  */
 package org.springframework.test.web.servlet.samples.standalone;
 
+import static org.mockito.Mockito.mock;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -28,56 +29,72 @@ import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.stereotype.Controller;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.RequestPostProcessor;
+import org.springframework.test.web.servlet.setup.ConfigurableMockMvcBuilder;
+import org.springframework.test.web.servlet.setup.MockMvcConfigurerAdapter;
+import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.context.WebApplicationContext;
+
+import java.security.Principal;
 
 /**
- * Demonstrates how to implement and plug in a custom {@link RequestPostProcessor}.
+ * Demonstrates use of SPI extension points:
+ * <ul>
+ * 	<li> {@link org.springframework.test.web.servlet.request.RequestPostProcessor}
+ * 	for extending request building with custom methods.
+ * 	<li> {@link org.springframework.test.web.servlet.setup.MockMvcConfigurer
+ * 	MockMvcConfigurer} for extending MockMvc building with some automatic setup.
+ * </ul>
  *
  * @author Rossen Stoyanchev
  */
-public class RequestBuilderTests {
+public class FrameworkExtensionTests {
 
 	private MockMvc mockMvc;
 
+
 	@Before
 	public void setup() {
-		this.mockMvc = standaloneSetup(new SampleController())
-				.defaultRequest(get("/").accept(MediaType.TEXT_PLAIN))
-				.alwaysExpect(status().isOk()).build();
+		this.mockMvc = standaloneSetup(new SampleController()).apply(defaultSetup()).build();
 	}
+
 
 	@Test
 	public void fooHeader() throws Exception {
-		this.mockMvc.perform(get("/").with(headers().foo("a=b"))).andExpect(
-				content().string("Foo"));
+		this.mockMvc.perform(get("/").with(headers().foo("a=b"))).andExpect(content().string("Foo"));
 	}
 
 	@Test
 	public void barHeader() throws Exception {
-		this.mockMvc.perform(get("/").with(headers().bar("a=b"))).andExpect(
-				content().string("Bar"));
+		this.mockMvc.perform(get("/").with(headers().bar("a=b"))).andExpect(content().string("Bar"));
 	}
 
-	private static HeaderRequestPostProcessor headers() {
-		return new HeaderRequestPostProcessor();
+
+	private static TestMockMvcConfigurer defaultSetup() {
+		return new TestMockMvcConfigurer();
 	}
+
+	private static TestRequestPostProcessor headers() {
+		return new TestRequestPostProcessor();
+	}
+
 
 
 	/**
-	 * Implementation of {@code RequestPostProcessor} with additional request
-	 * building methods.
+	 * Test {@code RequestPostProcessor}.
 	 */
-	private static class HeaderRequestPostProcessor implements RequestPostProcessor {
+	private static class TestRequestPostProcessor implements RequestPostProcessor {
 
 		private HttpHeaders headers = new HttpHeaders();
 
-		public HeaderRequestPostProcessor foo(String value) {
+
+		public TestRequestPostProcessor foo(String value) {
 			this.headers.add("Foo", value);
 			return this;
 		}
 
-		public HeaderRequestPostProcessor bar(String value) {
+		public TestRequestPostProcessor bar(String value) {
 			this.headers.add("Bar", value);
 			return this;
 		}
@@ -91,19 +108,40 @@ public class RequestBuilderTests {
 		}
 	}
 
+	/**
+	 * Test {@code MockMvcConfigurer}.
+	 */
+	private static class TestMockMvcConfigurer extends MockMvcConfigurerAdapter {
+
+		@Override
+		public void afterConfigurerAdded(ConfigurableMockMvcBuilder<?> builder) {
+			builder.alwaysExpect(status().isOk());
+		}
+
+		@Override
+		public RequestPostProcessor beforeMockMvcCreated(ConfigurableMockMvcBuilder<?> builder, WebApplicationContext context) {
+			return request -> {
+				request.setUserPrincipal(mock(Principal.class));
+				return request;
+			};
+		}
+	}
+
 	@Controller
 	@RequestMapping("/")
 	private static class SampleController {
 
 		@RequestMapping(headers = "Foo")
 		@ResponseBody
-		public String handleFoo() {
+		public String handleFoo(Principal principal) {
+			Assert.isTrue(principal != null);
 			return "Foo";
 		}
 
 		@RequestMapping(headers = "Bar")
 		@ResponseBody
-		public String handleBar() {
+		public String handleBar(Principal principal) {
+			Assert.isTrue(principal != null);
 			return "Bar";
 		}
 	}

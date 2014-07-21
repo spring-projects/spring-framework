@@ -39,7 +39,6 @@ import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.mock.web.MockHttpSession;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.RequestBuilder;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.util.Assert;
 import org.springframework.util.LinkedMultiValueMap;
@@ -68,7 +67,9 @@ import org.springframework.web.util.UriUtils;
  * @author Arjen Poutsma
  * @since 3.2
  */
-public class MockHttpServletRequestBuilder implements RequestBuilder, Mergeable {
+public class MockHttpServletRequestBuilder
+		implements ConfigurableSmartRequestBuilder<MockHttpServletRequestBuilder>, Mergeable {
+
 
 	private final HttpMethod method;
 
@@ -421,6 +422,7 @@ public class MockHttpServletRequestBuilder implements RequestBuilder, Mergeable 
 	 * and be made accessible through static factory methods.
 	 * @param postProcessor a post-processor to add
 	 */
+	@Override
 	public MockHttpServletRequestBuilder with(RequestPostProcessor postProcessor) {
 		Assert.notNull(postProcessor, "postProcessor is required");
 		this.postProcessors.add(postProcessor);
@@ -621,14 +623,6 @@ public class MockHttpServletRequestBuilder implements RequestBuilder, Mergeable 
 		FlashMapManager flashMapManager = getFlashMapManager(request);
 		flashMapManager.saveOutputFlashMap(flashMap, request, new MockHttpServletResponse());
 
-		// Apply post-processors at the very end
-		for (RequestPostProcessor postProcessor : this.postProcessors) {
-			request = postProcessor.postProcessRequest(request);
-			if (request == null) {
-				throw new IllegalStateException("Post-processor [" + postProcessor.getClass().getName() + "] returned null");
-			}
-		}
-
 		request.setAsyncSupported(true);
 
 		return request;
@@ -673,6 +667,18 @@ public class MockHttpServletRequestBuilder implements RequestBuilder, Mergeable 
 			// ignore
 		}
 		return (flashMapManager != null ? flashMapManager : new SessionFlashMapManager());
+	}
+
+	@Override
+	public MockHttpServletRequest postProcessRequest(MockHttpServletRequest request) {
+		for (RequestPostProcessor postProcessor : this.postProcessors) {
+			request = postProcessor.postProcessRequest(request);
+			if (request == null) {
+				throw new IllegalStateException(
+						"Post-processor [" + postProcessor.getClass().getName() + "] returned null");
+			}
+		}
+		return request;
 	}
 
 	private static <T> void addToMultiValueMap(MultiValueMap<String, T> map, String name, T[] values) {

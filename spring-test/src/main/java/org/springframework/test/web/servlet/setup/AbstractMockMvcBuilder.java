@@ -17,7 +17,14 @@
 package org.springframework.test.web.servlet.setup;
 
 import org.springframework.mock.web.MockServletConfig;
-import org.springframework.test.web.servlet.*;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MockMvcBuilderSupport;
+import org.springframework.test.web.servlet.RequestBuilder;
+import org.springframework.test.web.servlet.ResultHandler;
+import org.springframework.test.web.servlet.ResultMatcher;
+import org.springframework.test.web.servlet.request.ConfigurableSmartRequestBuilder;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.test.web.servlet.request.RequestPostProcessor;
 import org.springframework.util.Assert;
 import org.springframework.web.context.WebApplicationContext;
 
@@ -38,7 +45,7 @@ import java.util.List;
  * @since 4.0
  */
 public abstract class AbstractMockMvcBuilder<B extends AbstractMockMvcBuilder<B>>
-		extends MockMvcBuilderSupport implements MockMvcBuilder {
+		extends MockMvcBuilderSupport implements ConfigurableMockMvcBuilder<B> {
 
 	private List<Filter> filters = new ArrayList<Filter>();
 
@@ -53,27 +60,6 @@ public abstract class AbstractMockMvcBuilder<B extends AbstractMockMvcBuilder<B>
 	private final List<MockMvcConfigurer> configurers = new ArrayList<MockMvcConfigurer>(4);
 
 
-
-	/**
-	 * Add filters mapped to any request (i.e. "/*"). For example:
-	 *
-	 * <pre class="code">
-	 * mockMvcBuilder.addFilters(springSecurityFilterChain);
-	 * </pre>
-	 *
-	 * <p>is the equivalent of the following web.xml configuration:
-	 *
-	 * <pre class="code">
-	 * &lt;filter-mapping&gt;
-	 *     &lt;filter-name&gt;springSecurityFilterChain&lt;/filter-name&gt;
-	 *     &lt;url-pattern&gt;/*&lt;/url-pattern&gt;
-	 * &lt;/filter-mapping&gt;
-	 * </pre>
-	 *
-	 * <p>Filters will be invoked in the order in which they are provided.
-	 *
-	 * @param filters the filters to add
-	 */
 	@SuppressWarnings("unchecked")
 	public final <T extends B> T addFilters(Filter... filters) {
 		Assert.notNull(filters, "filters cannot be null");
@@ -85,27 +71,6 @@ public abstract class AbstractMockMvcBuilder<B extends AbstractMockMvcBuilder<B>
 		return (T) this;
 	}
 
-	/**
-	 * Add a filter mapped to a specific set of patterns. For example:
-	 *
-	 * <pre class="code">
-	 * mockMvcBuilder.addFilters(myResourceFilter, "/resources/*");
-	 * </pre>
-	 *
-	 * <p>is the equivalent of:
-	 *
-	 * <pre class="code">
-	 * &lt;filter-mapping&gt;
-	 *     &lt;filter-name&gt;myResourceFilter&lt;/filter-name&gt;
-	 *     &lt;url-pattern&gt;/resources/*&lt;/url-pattern&gt;
-	 * &lt;/filter-mapping&gt;
-	 * </pre>
-	 *
-	 * <p>Filters will be invoked in the order in which they are provided.
-	 *
-	 * @param filter the filter to add
-	 * @param urlPatterns URL patterns to map to; if empty, "/*" is used by default
-	 */
 	@SuppressWarnings("unchecked")
 	public final <T extends B> T addFilter(Filter filter, String... urlPatterns) {
 
@@ -120,70 +85,32 @@ public abstract class AbstractMockMvcBuilder<B extends AbstractMockMvcBuilder<B>
 		return (T) this;
 	}
 
-	/**
-	 * Define default request properties that should be merged into all
-	 * performed requests. In effect this provides a mechanism for defining
-	 * common initialization for all requests such as the content type, request
-	 * parameters, session attributes, and any other request property.
-	 *
-	 * <p>Properties specified at the time of performing a request override the
-	 * default properties defined here.
-	 *
-	 * @param requestBuilder a RequestBuilder; see static factory methods in
-	 * {@link org.springframework.test.web.servlet.request.MockMvcRequestBuilders}
-	 * .
-	 */
 	@SuppressWarnings("unchecked")
 	public final <T extends B> T defaultRequest(RequestBuilder requestBuilder) {
 		this.defaultRequestBuilder = requestBuilder;
 		return (T) this;
 	}
 
-	/**
-	 * Define a global expectation that should <em>always</em> be applied to
-	 * every response. For example, status code 200 (OK), content type
-	 * {@code "application/json"}, etc.
-	 *
-	 * @param resultMatcher a ResultMatcher; see static factory methods in
-	 * {@link org.springframework.test.web.servlet.result.MockMvcResultMatchers}
-	 */
 	@SuppressWarnings("unchecked")
 	public final <T extends B> T alwaysExpect(ResultMatcher resultMatcher) {
 		this.globalResultMatchers.add(resultMatcher);
 		return (T) this;
 	}
 
-	/**
-	 * Define a global action that should <em>always</em> be applied to every
-	 * response. For example, writing detailed information about the performed
-	 * request and resulting response to {@code System.out}.
-	 *
-	 * @param resultHandler a ResultHandler; see static factory methods in
-	 * {@link org.springframework.test.web.servlet.result.MockMvcResultHandlers}
-	 */
 	@SuppressWarnings("unchecked")
 	public final <T extends B> T alwaysDo(ResultHandler resultHandler) {
 		this.globalResultHandlers.add(resultHandler);
 		return (T) this;
 	}
 
-	/**
-	 * Whether to enable the DispatcherServlet property
-	 * {@link org.springframework.web.servlet.DispatcherServlet#setDispatchOptionsRequest
-	 * dispatchOptionsRequest} which allows processing of HTTP OPTIONS requests.
-	 */
 	@SuppressWarnings("unchecked")
 	public final <T extends B> T dispatchOptions(boolean dispatchOptions) {
 		this.dispatchOptions = dispatchOptions;
 		return (T) this;
 	}
 
-	/**
-	 * Add a {@code MockMvcConfigurer} which encapsulates ways to further configure
-	 * this MockMvcBuilder with some specific purpose in mind.
-	 */
 	@SuppressWarnings("unchecked")
-	public final <T extends B> T add(MockMvcConfigurer configurer) {
+	public final <T extends B> T apply(MockMvcConfigurer configurer) {
 		configurer.afterConfigurerAdded(this);
 		this.configurers.add(configurer);
 		return (T) this;
@@ -202,7 +129,15 @@ public abstract class AbstractMockMvcBuilder<B extends AbstractMockMvcBuilder<B>
 		MockServletConfig mockServletConfig = new MockServletConfig(servletContext);
 
 		for (MockMvcConfigurer configurer : this.configurers) {
-			configurer.beforeMockMvcCreated(this, this.defaultRequestBuilder, wac);
+			RequestPostProcessor processor = configurer.beforeMockMvcCreated(this, wac);
+			if (processor != null) {
+				if (this.defaultRequestBuilder == null) {
+					this.defaultRequestBuilder = MockMvcRequestBuilders.get("/");
+				}
+				if (this.defaultRequestBuilder instanceof ConfigurableSmartRequestBuilder) {
+					((ConfigurableSmartRequestBuilder) this.defaultRequestBuilder).with(processor);
+				}
+			}
 		}
 
 		Filter[] filterArray = this.filters.toArray(new Filter[this.filters.size()]);
