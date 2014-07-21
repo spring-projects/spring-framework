@@ -50,6 +50,8 @@ import org.springframework.web.context.support.GenericWebApplicationContext;
  * @see #processContextConfiguration(ContextConfigurationAttributes)
  * @see #detectDefaultConfigurationClasses(Class)
  * @see #loadBeanDefinitions(GenericWebApplicationContext, WebMergedContextConfiguration)
+ * @see GenericXmlWebContextLoader
+ * @see GenericGroovyXmlWebContextLoader
  */
 public class AnnotationConfigWebContextLoader extends AbstractGenericWebContextLoader {
 
