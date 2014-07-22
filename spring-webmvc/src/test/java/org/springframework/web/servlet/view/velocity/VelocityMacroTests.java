@@ -191,6 +191,7 @@ public class VelocityMacroTests extends TestCase {
 	}
 
 	// SPR-5172
+
 	public void testIdContainsBraces() throws Exception {
 		DummyMacroRequestContext rc = new DummyMacroRequestContext(request);
 		Map<String, String> msgMap = new HashMap<String, String>();
