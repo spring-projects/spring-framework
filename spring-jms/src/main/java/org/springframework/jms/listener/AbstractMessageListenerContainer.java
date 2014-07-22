@@ -711,9 +711,14 @@ public abstract class AbstractMessageListenerContainer
 	 * @throws javax.jms.JMSException in case of a rollback error
 	 */
 	protected void rollbackIfNecessary(Session session) throws JMSException {
-		if (session.getTransacted() && isSessionLocallyTransacted(session)) {
-			// Transacted session created by this container -> rollback.
-			JmsUtils.rollbackIfNecessary(session);
+		if (session.getTransacted()) {
+			if (isSessionLocallyTransacted(session)) {
+				// Transacted session created by this container -> rollback.
+				JmsUtils.rollbackIfNecessary(session);
+			}
+		}
+		else {
+			session.recover();
 		}
 	}
 
@@ -725,12 +730,17 @@ public abstract class AbstractMessageListenerContainer
 	 */
 	protected void rollbackOnExceptionIfNecessary(Session session, Throwable ex) throws JMSException {
 		try {
-			if (session.getTransacted() && isSessionLocallyTransacted(session)) {
-				// Transacted session created by this container -> rollback.
-				if (logger.isDebugEnabled()) {
-					logger.debug("Initiating transaction rollback on application exception", ex);
+			if (session.getTransacted()) {
+				if (isSessionLocallyTransacted(session)) {
+					// Transacted session created by this container -> rollback.
+					if (logger.isDebugEnabled()) {
+						logger.debug("Initiating transaction rollback on application exception", ex);
+					}
+					JmsUtils.rollbackIfNecessary(session);
 				}
-				JmsUtils.rollbackIfNecessary(session);
+			}
+			else {
+				session.recover();
 			}
 		}
 		catch (IllegalStateException ex2) {
