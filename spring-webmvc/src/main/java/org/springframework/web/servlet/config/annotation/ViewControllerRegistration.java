@@ -61,9 +61,8 @@ public class ViewControllerRegistration {
 	 *
 	 * @see org.springframework.web.servlet.view.DefaultRequestToViewNameTranslator
 	 */
-	public ViewControllerRegistration setViewName(String viewName) {
+	public void setViewName(String viewName) {
 		this.controller.setViewName(viewName);
-		return this;
 	}
 
 
