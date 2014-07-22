@@ -18,7 +18,6 @@ package org.springframework.web.socket.sockjs.client;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hamcrest.Matchers;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -31,7 +30,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.util.concurrent.ListenableFutureCallback;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
-import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.WebSocketTestServer;
@@ -64,9 +62,7 @@ import java.util.concurrent.TimeUnit;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
-import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.fail;
 
 /**
@@ -166,20 +162,20 @@ public abstract class AbstractSockJsIntegrationTests {
 
 	@Ignore
 	@Test
-	public void closeAfterOneMessageWebSocket() throws Exception {
-		testCloseAfterOneMessage(createWebSocketTransport());
+	public void receiveOneMessageWebSocket() throws Exception {
+		testReceiveOneMessage(createWebSocketTransport());
 	}
 
 	@Test
-	public void closeAfterOneMessageXhrStreaming() throws Exception {
-		testCloseAfterOneMessage(createXhrTransport());
+	public void receiveOneMessageXhrStreaming() throws Exception {
+		testReceiveOneMessage(createXhrTransport());
 	}
 
 	@Test
-	public void closeAfterOneMessageXhr() throws Exception {
+	public void receiveOneMessageXhr() throws Exception {
 		AbstractXhrTransport xhrTransport = createXhrTransport();
 		xhrTransport.setXhrStreamingDisabled(true);
-		testCloseAfterOneMessage(xhrTransport);
+		testReceiveOneMessage(xhrTransport);
 	}
 
 	@Test
@@ -251,7 +247,7 @@ public abstract class AbstractSockJsIntegrationTests {
 		session.close();
 	}
 
-	private void testCloseAfterOneMessage(Transport transport) throws Exception {
+	private void testReceiveOneMessage(Transport transport) throws Exception {
 		TestClientHandler clientHandler = new TestClientHandler();
 		initSockJsClient(transport);
 		this.sockJsClient.doHandshake(clientHandler, this.baseUrl + "/test").get();
@@ -263,16 +259,6 @@ public abstract class AbstractSockJsIntegrationTests {
 		TextMessage message = new TextMessage("message1");
 		serverHandler.session.sendMessage(message);
 		clientHandler.awaitMessage(message, 5000);
-
-		CloseStatus expected = new CloseStatus(3500, "Oops");
-		serverHandler.session.close(expected);
-		CloseStatus actual = clientHandler.awaitCloseStatus(5000);
-		if (transport instanceof XhrTransport) {
-			assertThat(actual, Matchers.anyOf(equalTo(expected), equalTo(new CloseStatus(3000, "Go away!"))));
-		}
-		else {
-			assertEquals(expected, actual);
-		}
 	}
 
 
@@ -324,8 +310,6 @@ public abstract class AbstractSockJsIntegrationTests {
 
 		private volatile Throwable transportError;
 
-		private volatile CloseStatus closeStatus;
-
 
 		@Override
 		public void afterConnectionEstablished(WebSocketSession session) throws Exception {
@@ -340,11 +324,6 @@ public abstract class AbstractSockJsIntegrationTests {
 		@Override
 		public void handleTransportError(WebSocketSession session, Throwable exception) throws Exception {
 			this.transportError = exception;
-		}
-
-		@Override
-		public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
-			this.closeStatus = status;
 		}
 
 		public void awaitMessageCount(final int count, long timeToWait) throws Exception {
@@ -363,14 +342,6 @@ public abstract class AbstractSockJsIntegrationTests {
 			else {
 				fail("Timed out waiting for [" + expected + "]");
 			}
-		}
-
-		public CloseStatus awaitCloseStatus(long timeToWait) throws InterruptedException {
-			awaitEvent(() -> this.closeStatus != null || this.transportError != null, timeToWait, " CloseStatus");
-			if (this.transportError != null) {
-				throw new AssertionError("Transport error", this.transportError);
-			}
-			return this.closeStatus;
 		}
 	}
 
