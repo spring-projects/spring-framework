@@ -112,7 +112,7 @@
  *#
 #macro( springFormInput $path $attributes )
     #springBind($path)
-    <input type="text" id="${status.expression}" name="${status.expression}" value="$!status.value" ${attributes}#springCloseTag()
+    <input type="text" id="#xmlId(${status.expression})" name="${status.expression}" value="$!status.value" ${attributes}#springCloseTag()
 #end
 
 #**
@@ -129,7 +129,7 @@
  *#
 #macro( springFormPasswordInput $path $attributes )
     #springBind($path)
-    <input type="password" id="${status.expression}" name="${status.expression}" value="" ${attributes}#springCloseTag()
+    <input type="password" id="#xmlId(${status.expression})" name="${status.expression}" value="" ${attributes}#springCloseTag()
 #end
 
 #**
@@ -145,7 +145,7 @@
  *#
 #macro( springFormHiddenInput $path $attributes )
     #springBind($path)
-    <input type="hidden" id="${status.expression}" name="${status.expression}" value="$!status.value" ${attributes}#springCloseTag()
+    <input type="hidden" id="#xmlId(${status.expression})" name="${status.expression}" value="$!status.value" ${attributes}#springCloseTag()
 #end
 
 #**
@@ -161,7 +161,7 @@
  *#
 #macro( springFormTextarea $path $attributes )
     #springBind($path)
-    <textarea id="${status.expression}" name="${status.expression}" ${attributes}>$!status.value</textarea>
+    <textarea id="#xmlId(${status.expression})" name="${status.expression}" ${attributes}>$!status.value</textarea>
 #end
 
 #**
@@ -182,7 +182,7 @@
 *#
 #macro( springFormSingleSelect $path $options $attributes )
     #springBind($path)
-    <select id="${status.expression}" name="${status.expression}" ${attributes}>
+    <select id="#xmlId(${status.expression})" name="${status.expression}" ${attributes}>
         #foreach($option in $options.keySet())
             <option value="${option}"
             #if ("$!status.value" == "$option") selected="selected" #end>
@@ -204,7 +204,7 @@
 *#
 #macro( springFormMultiSelect $path $options $attributes )
     #springBind($path)
-    <select multiple="multiple" id="${status.expression}" name="${status.expression}" ${attributes}>
+    <select multiple="multiple" id="#xmlId(${status.expression})" name="${status.expression}" ${attributes}>
         #foreach($option in $options.keySet())
             <option value="${option}"
             #foreach($item in $status.actualValue)
@@ -274,8 +274,8 @@
 *#
 #macro( springFormCheckbox $path $attributes )
     #springBind($path)
-    <input type="hidden" name="_${status.expression}" value="on"/>
-    <input type="checkbox" id="${status.expression}" name="${status.expression}"#if ("$!{status.value}"=="true") checked="checked"#end ${attributes}/>
+    <input type="hidden" name="_#xmlId(${status.expression})" value="on"/>
+    <input type="checkbox" id="#xmlId(${status.expression})" name="${status.expression}"#if ("$!{status.value}"=="true") checked="checked"#end ${attributes}/>
 #end
 
 #**
@@ -316,7 +316,7 @@
  *#
 #macro( springCloseTag )#if ($springXhtmlCompliant)/>#else>#end #end
 
-
+#macro( xmlId $id)#if($id)$id.replaceAll("\[","").replaceAll("\]","")#else$id#end#end
 
 
 
