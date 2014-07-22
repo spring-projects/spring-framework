@@ -655,8 +655,8 @@ project("spring-web") {
 			exclude group: "javax.servlet", module: "javax.servlet-api"
 		}
 		optional("log4j:log4j:1.2.17")
-        optional("com.googlecode.protobuf-java-format:protobuf-java-format:1.2")
-        optional("com.google.protobuf:protobuf-java:${protobufVersion}")
+		optional("com.googlecode.protobuf-java-format:protobuf-java-format:1.2")
+		optional("com.google.protobuf:protobuf-java:${protobufVersion}")
 		testCompile(project(":spring-context-support"))  // for JafMediaTypeFactory
 		testCompile("xmlunit:xmlunit:1.5")
 		testCompile("org.slf4j:slf4j-jcl:${slf4jVersion}")

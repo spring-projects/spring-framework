@@ -28,8 +28,14 @@ import org.springframework.http.MockHttpOutputMessage;
 import org.springframework.protobuf.Msg;
 import org.springframework.protobuf.SecondMsg;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.anyObject;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+
 
 /**
  * Test suite for {@link ProtobufHttpMessageConverter}
@@ -42,6 +48,7 @@ public class ProtobufHttpMessageConverterTests {
 	private ExtensionRegistryInitializer registryInitializer;
 
 	private Msg testMsg;
+
 
 	@Before
 	public void setUp() {
