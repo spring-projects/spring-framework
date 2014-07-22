@@ -91,11 +91,6 @@ public class MethodReference extends SpelNodeImpl {
 		return result;
 	}
 
-	@Override
-	public String getExitDescriptor() {
-		return exitTypeDescriptor;
-	}
-
 	private TypedValue getValueInternal(EvaluationContext evaluationContext,
 			Object value, TypeDescriptor targetType, Object[] arguments) {
 
@@ -360,13 +355,13 @@ public class MethodReference extends SpelNodeImpl {
 		boolean itf = method.getDeclaringClass().isInterface();
 		String methodDeclaringClassSlashedDescriptor = method.getDeclaringClass().getName().replace('.','/');
 		if (!isStaticMethod) {
-			if (descriptor == null || !descriptor.equals(method.getDeclaringClass())) {
-				mv.visitTypeInsn(CHECKCAST, method.getDeclaringClass().getName().replace('.','/'));
+			if (descriptor == null || !descriptor.equals(methodDeclaringClassSlashedDescriptor)) {
+				mv.visitTypeInsn(CHECKCAST, methodDeclaringClassSlashedDescriptor);
 			}
 		}
 		String[] paramDescriptors = CodeFlow.toParamDescriptors(method);
-		for (int c=0;c<children.length;c++) {
-			SpelNodeImpl child = children[c];
+		for (int c = 0; c < this.children.length;c++) {
+			SpelNodeImpl child = this.children[c];
 			codeflow.enterCompilationScope();
 			child.generateCode(mv, codeflow);
 			// Check if need to box it for the method reference?
@@ -379,8 +374,9 @@ public class MethodReference extends SpelNodeImpl {
 			}
 			codeflow.exitCompilationScope();
 		}
-		mv.visitMethodInsn(isStaticMethod?INVOKESTATIC:INVOKEVIRTUAL,methodDeclaringClassSlashedDescriptor,method.getName(),CodeFlow.createSignatureDescriptor(method), itf);
-		codeflow.pushDescriptor(exitTypeDescriptor);
+		mv.visitMethodInsn(isStaticMethod ? INVOKESTATIC : INVOKEVIRTUAL,
+				methodDeclaringClassSlashedDescriptor, method.getName(), CodeFlow.createSignatureDescriptor(method), itf);
+		codeflow.pushDescriptor(this.exitTypeDescriptor);
 	}
 
 }

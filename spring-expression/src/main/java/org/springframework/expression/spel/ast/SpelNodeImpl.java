@@ -56,7 +56,7 @@ public abstract class SpelNodeImpl implements SpelNode, Opcodes {
 	 * does not include the trailing semicolon (for non array reference types). Some examples:
 	 * Ljava/lang/String, I, [I
      */
-	protected String exitTypeDescriptor;
+	protected volatile String exitTypeDescriptor;
 
 
 	public SpelNodeImpl(int pos, SpelNodeImpl... operands) {
@@ -76,7 +76,7 @@ public abstract class SpelNodeImpl implements SpelNode, Opcodes {
 		SpelNodeImpl result = null;
 		if (this.parent != null) {
 			for (SpelNodeImpl child : this.parent.children) {
-				if (this==child) {
+				if (this == child) {
 					break;
 				}
 				result = child;
@@ -92,18 +92,16 @@ public abstract class SpelNodeImpl implements SpelNode, Opcodes {
 		if (this.parent != null) {
 			SpelNodeImpl[] peers = this.parent.children;
 			for (int i = 0, max = peers.length; i < max; i++) {
-				if (peers[i] == this) {
-					if ((i + 1) >= max) {
+				if (this == peers[i]) {
+					if (i + 1 >= max) {
 						return false;
 					}
-
 					Class<?> clazz = peers[i + 1].getClass();
 					for (Class<?> desiredClazz : clazzes) {
 						if (clazz.equals(desiredClazz)) {
 							return true;
 						}
 					}
-
 					return false;
 				}
 			}

@@ -79,16 +79,11 @@ public class PropertyOrFieldReference extends SpelNodeImpl {
 	@Override
 	public TypedValue getValueInternal(ExpressionState state) throws EvaluationException {
 		TypedValue tv = getValueInternal(state.getActiveContextObject(), state.getEvaluationContext(), state.getConfiguration().isAutoGrowNullReferences());
-		if (cachedReadAccessor instanceof CompilablePropertyAccessor) {
-			CompilablePropertyAccessor accessor = (CompilablePropertyAccessor)cachedReadAccessor;
-			exitTypeDescriptor = CodeFlow.toDescriptor(accessor.getPropertyType());
+		if (this.cachedReadAccessor instanceof CompilablePropertyAccessor) {
+			CompilablePropertyAccessor accessor = (CompilablePropertyAccessor) this.cachedReadAccessor;
+			this.exitTypeDescriptor = CodeFlow.toDescriptor(accessor.getPropertyType());
 		}
 		return tv;
-	}
-
-	@Override
-	public String getExitDescriptor() {
-		return exitTypeDescriptor;
 	}
 
 	private TypedValue getValueInternal(TypedValue contextObject, EvaluationContext eContext,
@@ -290,12 +285,14 @@ public class PropertyOrFieldReference extends SpelNodeImpl {
 
 	// TODO when there is more time, remove this and use the version in AstUtils
 	/**
-	 * Determines the set of property resolvers that should be used to try and access a property on the specified target
-	 * type. The resolvers are considered to be in an ordered list, however in the returned list any that are exact
-	 * matches for the input target type (as opposed to 'general' resolvers that could work for any type) are placed at
-	 * the start of the list. In addition, there are specific resolvers that exactly name the class in question and
-	 * resolvers that name a specific class but it is a supertype of the class we have. These are put at the end of the
-	 * specific resolvers set and will be tried after exactly matching accessors but before generic accessors.
+	 * Determines the set of property resolvers that should be used to try and access a property
+	 * on the specified target type. The resolvers are considered to be in an ordered list,
+	 * however in the returned list any that are exact matches for the input target type (as
+	 * opposed to 'general' resolvers that could work for any type) are placed at the start of the
+	 * list. In addition, there are specific resolvers that exactly name the class in question
+	 * and resolvers that name a specific class but it is a supertype of the class we have.
+	 * These are put at the end of the specific resolvers set and will be tried after exactly
+	 * matching accessors but before generic accessors.
 	 * @param contextObject the object upon which property access is being attempted
 	 * @return a list of resolvers that should be tried in order to access the property
 	 */

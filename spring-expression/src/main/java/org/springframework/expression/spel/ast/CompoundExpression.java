@@ -85,13 +85,8 @@ public class CompoundExpression extends SpelNodeImpl {
 	public TypedValue getValueInternal(ExpressionState state) throws EvaluationException {
 		ValueRef ref = getValueRef(state);
 		TypedValue result = ref.getValue();
-		this.exitTypeDescriptor = this.children[this.children.length-1].getExitDescriptor();
+		this.exitTypeDescriptor = this.children[this.children.length - 1].getExitDescriptor();
 		return result;
-	}
-	
-	@Override
-	public String getExitDescriptor() {
-		return this.exitTypeDescriptor;
 	}
 
 	@Override
@@ -118,7 +113,7 @@ public class CompoundExpression extends SpelNodeImpl {
 	
 	@Override
 	public boolean isCompilable() {
-		for (SpelNodeImpl child: children) {
+		for (SpelNodeImpl child: this.children) {
 			if (!child.isCompilable()) {
 				return false;
 			}
@@ -129,16 +124,15 @@ public class CompoundExpression extends SpelNodeImpl {
 	@Override
 	public void generateCode(MethodVisitor mv,CodeFlow codeflow) {	
 		// TODO could optimize T(SomeType).staticMethod - no need to generate the T() part
-		for (int i=0;i<children.length;i++) {
-			SpelNodeImpl child = children[i];
-			if (child instanceof TypeReference && 
-				(i+1) < children.length && 
-				children[i+1] instanceof MethodReference) {
+		for (int i = 0; i < this.children.length;i++) {
+			SpelNodeImpl child = this.children[i];
+			if (child instanceof TypeReference && (i + 1) < this.children.length &&
+					this.children[i+1] instanceof MethodReference) {
 				continue;
 			}
 			child.generateCode(mv, codeflow);
 		}
-		codeflow.pushDescriptor(this.getExitDescriptor());
+		codeflow.pushDescriptor(getExitDescriptor());
 	}
 
 }

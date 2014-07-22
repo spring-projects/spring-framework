@@ -63,7 +63,7 @@ public class CodeFlow implements Opcodes {
 	 * @param descriptor type descriptor for most recently evaluated element
 	 */
 	public void pushDescriptor(String descriptor) {
-		Assert.notNull(descriptor);
+		Assert.notNull(descriptor, "Descriptor must not be null");
 		this.compilationScopes.peek().add(descriptor);
 	}
 

@@ -50,10 +50,10 @@ public class FunctionReference extends SpelNodeImpl {
 
 	private final String name;
 
-	// Captures the most recently used method for the function invocation *if*
-	// the method can safely be used for compilation (i.e. no argument conversion is
-	// going on)
+	// Captures the most recently used method for the function invocation *if* the method
+	// can safely be used for compilation (i.e. no argument conversion is going on)
 	private Method method;
+
 
 	public FunctionReference(String functionName, int pos, SpelNodeImpl... arguments) {
 		super(pos,arguments);
@@ -63,29 +63,29 @@ public class FunctionReference extends SpelNodeImpl {
 
 	@Override
 	public TypedValue getValueInternal(ExpressionState state) throws EvaluationException {
-		TypedValue o = state.lookupVariable(this.name);
-		if (o == null) {
+		TypedValue value = state.lookupVariable(this.name);
+		if (value == null) {
 			throw new SpelEvaluationException(getStartPosition(), SpelMessage.FUNCTION_NOT_DEFINED, this.name);
 		}
 
 		// Two possibilities: a lambda function or a Java static method registered as a function
-		if (!(o.getValue() instanceof Method)) {
-			throw new SpelEvaluationException(SpelMessage.FUNCTION_REFERENCE_CANNOT_BE_INVOKED, this.name, o.getClass());
+		if (!(value.getValue() instanceof Method)) {
+			throw new SpelEvaluationException(SpelMessage.FUNCTION_REFERENCE_CANNOT_BE_INVOKED, this.name, value.getClass());
 		}
+
 		try {
-			return executeFunctionJLRMethod(state, (Method) o.getValue());
+			return executeFunctionJLRMethod(state, (Method) value.getValue());
 		}
-		catch (SpelEvaluationException se) {
-			se.setPosition(getStartPosition());
-			throw se;
+		catch (SpelEvaluationException ex) {
+			ex.setPosition(getStartPosition());
+			throw ex;
 		}
 	}
 
 	/**
 	 * Execute a function represented as a java.lang.reflect.Method.
-	 *
 	 * @param state the expression evaluation state
-	 * @param the java method to invoke
+	 * @param method the method to invoke
 	 * @return the return value of the invoked Java method
 	 * @throws EvaluationException if there is any problem invoking the method
 	 */
@@ -107,11 +107,10 @@ public class FunctionReference extends SpelNodeImpl {
 		// Convert arguments if necessary and remap them for varargs if required
 		if (functionArgs != null) {
 			TypeConverter converter = state.getEvaluationContext().getTypeConverter();
-			argumentConversionOccurred |= ReflectionHelper.convertAllArguments(converter, functionArgs, method);
+			argumentConversionOccurred = ReflectionHelper.convertAllArguments(converter, functionArgs, method);
 		}
 		if (method.isVarArgs()) {
-			functionArgs = ReflectionHelper.setupArgumentsForVarargsInvocation(
-					method.getParameterTypes(), functionArgs);
+			functionArgs = ReflectionHelper.setupArgumentsForVarargsInvocation(method.getParameterTypes(), functionArgs);
 		}
 
 		try {
@@ -161,19 +160,19 @@ public class FunctionReference extends SpelNodeImpl {
 	@Override
 	public boolean isCompilable() {
 		// Don't yet support non-static method compilation.
-		return method!=null && Modifier.isStatic(method.getModifiers());
+		return (this.method != null && Modifier.isStatic(this.method.getModifiers()));
 	}
 	
 	@Override 
 	public void generateCode(MethodVisitor mv,CodeFlow codeflow) {
-		String methodDeclaringClassSlashedDescriptor = method.getDeclaringClass().getName().replace('.','/');
-		String[] paramDescriptors = CodeFlow.toParamDescriptors(method);
-		for (int c = 0; c < children.length; c++) {
-			SpelNodeImpl child = children[c];
+		String methodDeclaringClassSlashedDescriptor = this.method.getDeclaringClass().getName().replace('.','/');
+		String[] paramDescriptors = CodeFlow.toParamDescriptors(this.method);
+		for (int c = 0; c < this.children.length; c++) {
+			SpelNodeImpl child = this.children[c];
 			codeflow.enterCompilationScope();
 			child.generateCode(mv, codeflow);
 			// Check if need to box it for the method reference?
-			if (CodeFlow.isPrimitive(codeflow.lastDescriptor()) && (paramDescriptors[c].charAt(0)=='L')) {
+			if (CodeFlow.isPrimitive(codeflow.lastDescriptor()) && paramDescriptors[c].charAt(0) == 'L') {
 				CodeFlow.insertBoxIfNecessary(mv, codeflow.lastDescriptor().charAt(0));
 			}
 			else if (!codeflow.lastDescriptor().equals(paramDescriptors[c])) {
@@ -182,8 +181,9 @@ public class FunctionReference extends SpelNodeImpl {
 			}
 			codeflow.exitCompilationScope();
 		}
-		mv.visitMethodInsn(INVOKESTATIC,methodDeclaringClassSlashedDescriptor,method.getName(),CodeFlow.createSignatureDescriptor(method),false);
-		codeflow.pushDescriptor(exitTypeDescriptor);
+		mv.visitMethodInsn(INVOKESTATIC, methodDeclaringClassSlashedDescriptor, this.method.getName(),
+				CodeFlow.createSignatureDescriptor(this.method),false);
+		codeflow.pushDescriptor(this.exitTypeDescriptor);
 	}
 
 }
