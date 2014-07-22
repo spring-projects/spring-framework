@@ -105,10 +105,9 @@ public class ViewResolutionIntegrationTests {
 	// SPR-12013
 
 	@Test
-	public void viewResolverBeanWithDefaultViewResolutionConfig() throws Exception {
-		MockHttpServletResponse response = runTest(FreeMarkerBeanBasedWebConfig.class);
-		assertEquals("<html><body>Hello World!</body></html>",
-				response.getContentAsString());
+	public void existingViewResolver() throws Exception {
+		MockHttpServletResponse response = runTest(ExistingViewResolverConfig.class);
+		assertEquals("<html><body>Hello World!</body></html>", response.getContentAsString());
 	}
 
 
@@ -249,8 +248,11 @@ public class ViewResolutionIntegrationTests {
 		}
 	}
 
+	/**
+	 * Test @EnableWebMvc in the presence of pre-existing ViewResolver.
+	 */
 	@Configuration
-	static class FreeMarkerBeanBasedWebConfig extends AbstractWebConfig {
+	static class ExistingViewResolverConfig extends AbstractWebConfig {
 
 		@Bean
 		public FreeMarkerViewResolver freeMarkerViewResolver() {
