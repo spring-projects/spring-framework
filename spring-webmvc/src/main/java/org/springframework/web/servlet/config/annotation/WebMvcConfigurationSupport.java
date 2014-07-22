@@ -19,6 +19,7 @@ package org.springframework.web.servlet.config.annotation;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
@@ -81,7 +82,6 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice;
 import org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolver;
 import org.springframework.web.servlet.resource.ResourceUrlProvider;
 import org.springframework.web.servlet.resource.ResourceUrlProviderExposingInterceptor;
-import org.springframework.web.servlet.view.InternalResourceViewResolver;
 import org.springframework.web.servlet.view.ViewResolverComposite;
 import org.springframework.web.util.UrlPathHelper;
 
@@ -773,15 +773,16 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	}
 
 	/**
-	 * Register a {@link org.springframework.web.servlet.view.ViewResolverComposite}
-	 * that contains a chain of view resolvers to use for view resolution.
+	 * Register a {@link ViewResolverComposite} that contains a chain of view resolvers
+	 * to use for view resolution.
 	 * By default this resolver is ordered at 0 unless content negotiation view
 	 * resolution is used in which case the order is raised to
 	 * {@link org.springframework.core.Ordered#HIGHEST_PRECEDENCE
 	 * Ordered.HIGHEST_PRECEDENCE}.
 	 *
-	 * <p>An {@code InternalResourceViewResolver} is added by default if no other
-	 * resolvers are configured.
+	 * <p>If no other resolvers are configured,
+	 * {@link ViewResolverComposite#resolveViewName(String, Locale)} returns null in order
+	 * to allow other potential {@link ViewResolver} beans to resolve views.
 	 *
 	 * @since 4.1
 	 */
@@ -792,14 +793,9 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 		registry.setApplicationContext(this.applicationContext);
 		configureViewResolvers(registry);
 
-		List<ViewResolver> viewResolvers = registry.getViewResolvers();
-		if (viewResolvers.isEmpty()) {
-			viewResolvers.add(new InternalResourceViewResolver());
-		}
-
 		ViewResolverComposite composite = new ViewResolverComposite();
 		composite.setOrder(registry.getOrder());
-		composite.setViewResolvers(viewResolvers);
+		composite.setViewResolvers(registry.getViewResolvers());
 		composite.setApplicationContext(this.applicationContext);
 		composite.setServletContext(this.servletContext);
 		return composite;
