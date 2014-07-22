@@ -6,6 +6,7 @@ buildscript {
 		classpath("org.springframework.build.gradle:propdeps-plugin:0.0.7")
 		classpath("org.asciidoctor:asciidoctor-gradle-plugin:0.7.0")
 		classpath("org.springframework.build.gradle:docbook-reference-plugin:0.2.8")
+        classpath("ws.antonov.gradle.plugins:gradle-plugin-protobuf:0.9.1")
 	}
 }
 
@@ -37,6 +38,7 @@ configure(allprojects) { project ->
 	ext.tiles3Version        = "3.0.4"
 	ext.tomcatVersion        = "8.0.9"
 	ext.xstreamVersion       = "1.4.7"
+    ext.protoVersion         = "2.5.0"
 
 	ext.gradleScriptDir = "${rootProject.projectDir}/gradle"
 
@@ -610,6 +612,7 @@ project("spring-context-support") {
 project("spring-web") {
 	description = "Spring Web"
 	apply plugin: "groovy"
+    apply plugin: "protobuf"
 
 	dependencies {
 		compile(project(":spring-aop")) // for JaxWsPortProxyFactoryBean
@@ -638,6 +641,8 @@ project("spring-web") {
 			exclude group: "javax.servlet", module: "javax.servlet-api"
 		}
 		optional("log4j:log4j:1.2.17")
+        optional("com.googlecode.protobuf-java-format:protobuf-java-format:1.2")
+        optional("com.google.protobuf:protobuf-java:${protoVersion}")
 		testCompile(project(":spring-context-support"))  // for JafMediaTypeFactory
 		testCompile("xmlunit:xmlunit:1.5")
 		testCompile("org.slf4j:slf4j-jcl:${slf4jVersion}")
