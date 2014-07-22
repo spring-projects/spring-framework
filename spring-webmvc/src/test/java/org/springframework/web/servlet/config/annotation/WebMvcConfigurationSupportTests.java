@@ -17,6 +17,7 @@
 package org.springframework.web.servlet.config.annotation;
 
 import java.util.List;
+import java.util.Locale;
 import javax.servlet.http.HttpServletRequest;
 
 import org.joda.time.DateTime;
@@ -49,7 +50,6 @@ import org.springframework.web.method.support.CompositeUriComponentsContributor;
 import org.springframework.web.servlet.HandlerExceptionResolver;
 import org.springframework.web.servlet.HandlerExecutionChain;
 import org.springframework.web.servlet.ViewResolver;
-import org.springframework.web.servlet.view.InternalResourceViewResolver;
 import org.springframework.web.servlet.view.ViewResolverComposite;
 import org.springframework.web.servlet.handler.AbstractHandlerMapping;
 import org.springframework.web.servlet.handler.BeanNameUrlHandlerMapping;
@@ -205,12 +205,12 @@ public class WebMvcConfigurationSupportTests {
 	}
 	
 	@Test
-	public void viewResolvers() throws Exception {
+	public void emptyViewResolver() throws Exception {
 		ViewResolverComposite compositeResolver = this.wac.getBean(ViewResolverComposite.class);
 		assertEquals(Ordered.LOWEST_PRECEDENCE, compositeResolver.getOrder());
 		List<ViewResolver> resolvers = compositeResolver.getViewResolvers();
-		assertEquals(1, resolvers.size());
-		assertEquals(InternalResourceViewResolver.class, resolvers.get(0).getClass());
+		assertEquals(0, resolvers.size());
+		assertNull(compositeResolver.resolveViewName("anyViewName", Locale.ENGLISH));
 	}
 
 	@Test

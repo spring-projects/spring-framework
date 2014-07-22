@@ -32,6 +32,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
 import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer;
+import org.springframework.web.servlet.view.freemarker.FreeMarkerViewResolver;
 import org.springframework.web.servlet.view.groovy.GroovyMarkupConfigurer;
 import org.springframework.web.servlet.view.tiles3.TilesConfigurer;
 import org.springframework.web.servlet.view.velocity.VelocityConfigurer;
@@ -99,6 +100,15 @@ public class ViewResolutionIntegrationTests {
 	public void groovyMarkupInvalidConfig() throws Exception {
 		this.thrown.expectMessage("In addition to a Groovy markup view resolver ");
 		runTest(InvalidGroovyMarkupWebConfig.class);
+	}
+
+	// SPR-12013
+
+	@Test
+	public void viewResolverBeanWithDefaultViewResolutionConfig() throws Exception {
+		MockHttpServletResponse response = runTest(FreeMarkerBeanBasedWebConfig.class);
+		assertEquals("<html><body>Hello World!</body></html>",
+				response.getContentAsString());
 	}
 
 
@@ -236,6 +246,24 @@ public class ViewResolutionIntegrationTests {
 		@Override
 		public void configureViewResolvers(ViewResolverRegistry registry) {
 			registry.groovy();
+		}
+	}
+
+	@Configuration
+	static class FreeMarkerBeanBasedWebConfig extends AbstractWebConfig {
+
+		@Bean
+		public FreeMarkerViewResolver freeMarkerViewResolver() {
+			FreeMarkerViewResolver viewResolver = new FreeMarkerViewResolver();
+			viewResolver.setSuffix(".ftl");
+			return viewResolver;
+		}
+
+		@Bean
+		public FreeMarkerConfigurer freeMarkerConfigurer() {
+			FreeMarkerConfigurer configurer = new FreeMarkerConfigurer();
+			configurer.setTemplateLoaderPath("/WEB-INF/");
+			return configurer;
 		}
 	}
 
