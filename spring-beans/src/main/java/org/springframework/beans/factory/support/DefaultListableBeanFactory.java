@@ -1205,7 +1205,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	 * Return whether the bean definition for the given bean name has been
 	 * marked as a primary bean.
 	 * @param beanName the name of the bean
-	 * @param beanInstance the corresponding bean instance
+	 * @param beanInstance the corresponding bean instance (can be null)
 	 * @return whether the given bean qualifies as primary
 	 */
 	protected boolean isPrimary(String beanName, Object beanInstance) {
@@ -1221,11 +1221,14 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	 * Return the priority assigned for the given bean instance by
 	 * the {@code javax.annotation.Priority} annotation.
 	 * <p>If the annotation is not present, returns {@code null}.
-	 * @param beanInstance the bean instance to check
+	 * @param beanInstance the bean instance to check (can be null)
 	 * @return the priority assigned to that bean or {@code null} if none is set
 	 */
 	protected Integer getPriority(Object beanInstance) {
-		return OrderUtils.getPriorityValue(beanInstance.getClass());
+		if (beanInstance != null) {
+			return OrderUtils.getPriorityValue(beanInstance.getClass());
+		}
+		return null;
 	}
 
 	/**

@@ -1404,6 +1404,17 @@ public class DefaultListableBeanFactoryTests {
 	}
 
 	@Test
+	public void testGetBeanByTypeWithPriorityAndNullInstance() throws Exception {
+		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
+		RootBeanDefinition bd1 = new RootBeanDefinition(HighPriorityTestBean.class);
+		RootBeanDefinition bd2 = new RootBeanDefinition(NullTestBeanFactoryBean.class);
+		lbf.registerBeanDefinition("bd1", bd1);
+		lbf.registerBeanDefinition("bd2", bd2);
+		TestBean bean = lbf.getBean(TestBean.class);
+		assertThat(bean.getBeanName(), equalTo("bd1"));
+	}
+
+	@Test
 	public void testGetBeanByTypePrimaryHasPrecedenceOverPriority() throws Exception {
 		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
 		RootBeanDefinition bd1 = new RootBeanDefinition(HighPriorityTestBean.class);
@@ -2892,6 +2903,24 @@ public class DefaultListableBeanFactoryTests {
 
 	@Priority(500)
 	private static class LowPriorityTestBean extends TestBean {}
+
+	private static class NullTestBeanFactoryBean<T> implements FactoryBean<TestBean> {
+
+		@Override
+		public TestBean getObject() throws Exception {
+			return null;
+		}
+
+		@Override
+		public Class<?> getObjectType() {
+			return TestBean.class;
+		}
+
+		@Override
+		public boolean isSingleton() {
+			return true;
+		}
+	}
 
 
 }
