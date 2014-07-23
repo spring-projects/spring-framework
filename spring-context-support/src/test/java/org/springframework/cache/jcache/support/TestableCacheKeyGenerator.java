@@ -23,6 +23,7 @@ public class TestableCacheKeyGenerator implements CacheKeyGenerator {
 	}
 
 
+	@SuppressWarnings("serial")
 	private static class SimpleGeneratedCacheKey extends SimpleKey implements GeneratedCacheKey {
 
 		public SimpleGeneratedCacheKey(Object... elements) {
