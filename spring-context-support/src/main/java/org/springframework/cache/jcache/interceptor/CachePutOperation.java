@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.cache.jcache.model;
+package org.springframework.cache.jcache.interceptor;
 
 import java.lang.reflect.Method;
 import java.util.List;
@@ -34,7 +34,7 @@ import org.springframework.util.ExceptionTypeFilter;
  * @since 4.1
  * @see CachePut
  */
-public class CachePutOperation extends BaseKeyCacheOperation<CachePut> {
+class CachePutOperation extends AbstractJCacheKeyOperation<CachePut> {
 
 	private final ExceptionTypeFilter exceptionTypeFilter;
 
@@ -47,8 +47,8 @@ public class CachePutOperation extends BaseKeyCacheOperation<CachePut> {
 		super(methodDetails, cacheResolver, keyGenerator);
 		CachePut ann = methodDetails.getCacheAnnotation();
 		this.exceptionTypeFilter = createExceptionTypeFilter(ann.cacheFor(), ann.noCacheFor());
-		this.valueParameterDetail = initializeValueParameterDetail(methodDetails.getMethod(), allParameterDetails);
-		if (valueParameterDetail == null) {
+		this.valueParameterDetail = initializeValueParameterDetail(methodDetails.getMethod(), this.allParameterDetails);
+		if (this.valueParameterDetail == null) {
 			throw new IllegalArgumentException("No parameter annotated with @CacheValue was found for " +
 					"" + methodDetails.getMethod());
 		}

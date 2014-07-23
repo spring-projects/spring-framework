@@ -14,35 +14,36 @@
  * limitations under the License.
  */
 
-package org.springframework.cache.jcache.model;
+package org.springframework.cache.jcache.interceptor;
 
 import static org.junit.Assert.*;
 
 import javax.cache.annotation.CacheInvocationParameter;
 import javax.cache.annotation.CacheMethodDetails;
-import javax.cache.annotation.CacheRemoveAll;
+import javax.cache.annotation.CacheRemove;
 
 import org.junit.Test;
 
 /**
  * @author Stephane Nicoll
  */
-public class CacheRemoveAllOperationTests extends AbstractCacheOperationTests<CacheRemoveAllOperation> {
+public class CacheRemoveOperationTests extends AbstractCacheOperationTests<CacheRemoveOperation> {
 
 	@Override
-	protected CacheRemoveAllOperation createSimpleOperation() {
-		CacheMethodDetails<CacheRemoveAll> methodDetails = create(CacheRemoveAll.class,
-				SampleObject.class, "simpleRemoveAll");
+	protected CacheRemoveOperation createSimpleOperation() {
+		CacheMethodDetails<CacheRemove> methodDetails = create(CacheRemove.class,
+				SampleObject.class, "simpleRemove", Long.class);
 
-		return new CacheRemoveAllOperation(methodDetails, defaultCacheResolver);
+		return new CacheRemoveOperation(methodDetails, defaultCacheResolver, defaultKeyGenerator);
 	}
 
 	@Test
-	public void simpleRemoveAll() {
-		CacheRemoveAllOperation operation = createSimpleOperation();
+	public void simpleRemove() {
+		CacheRemoveOperation operation = createSimpleOperation();
 
-		CacheInvocationParameter[] allParameters = operation.getAllParameters();
-		assertEquals(0, allParameters.length);
+		CacheInvocationParameter[] allParameters = operation.getAllParameters(2L);
+		assertEquals(1, allParameters.length);
+		assertCacheInvocationParameter(allParameters[0], Long.class, 2L, 0);
 	}
 
 }

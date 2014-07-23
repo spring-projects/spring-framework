@@ -28,7 +28,7 @@ import org.junit.rules.TestName;
 
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
-import org.springframework.cache.jcache.interceptor.SimpleGeneratedCacheKey;
+import org.springframework.cache.interceptor.SimpleKeyGenerator;
 import org.springframework.context.ApplicationContext;
 
 /**
@@ -523,7 +523,7 @@ public abstract class AbstractJCacheAnnotationTests {
 
 
 	private Object createKey(Object... params) {
-		return new SimpleGeneratedCacheKey(params);
+		return SimpleKeyGenerator.generateKey(params);
 	}
 
 	private Cache getCache(String name) {

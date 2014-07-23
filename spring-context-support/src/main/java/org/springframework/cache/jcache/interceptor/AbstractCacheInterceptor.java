@@ -28,7 +28,6 @@ import org.springframework.cache.interceptor.AbstractCacheInvoker;
 import org.springframework.cache.interceptor.CacheErrorHandler;
 import org.springframework.cache.interceptor.CacheOperationInvocationContext;
 import org.springframework.cache.interceptor.CacheOperationInvoker;
-import org.springframework.cache.jcache.model.BaseCacheOperation;
 
 /**
  * A base interceptor for JSR-107 cache annotations.
@@ -37,7 +36,7 @@ import org.springframework.cache.jcache.model.BaseCacheOperation;
  * @since 4.1
  */
 @SuppressWarnings("serial")
-public abstract class AbstractCacheInterceptor<O extends BaseCacheOperation<A>, A extends Annotation>
+abstract class AbstractCacheInterceptor<O extends AbstractJCacheOperation<A>, A extends Annotation>
 		extends AbstractCacheInvoker implements Serializable {
 
 	protected final Log logger = LogFactory.getLog(getClass());

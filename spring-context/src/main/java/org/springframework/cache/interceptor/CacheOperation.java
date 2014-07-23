@@ -29,7 +29,7 @@ import org.springframework.util.Assert;
  * @author Stephane Nicoll
  * @since 3.1
  */
-public abstract class CacheOperation implements BasicCacheOperation {
+public abstract class CacheOperation implements BasicOperation {
 
 	private Set<String> cacheNames = Collections.emptySet();
 

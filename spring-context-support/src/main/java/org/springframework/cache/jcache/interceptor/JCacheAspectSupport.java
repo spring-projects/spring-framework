@@ -25,14 +25,9 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.aop.framework.AopProxyUtils;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.cache.interceptor.AbstractCacheInvoker;
-import org.springframework.cache.interceptor.BasicCacheOperation;
+import org.springframework.cache.interceptor.BasicOperation;
 import org.springframework.cache.interceptor.CacheOperationInvocationContext;
 import org.springframework.cache.interceptor.CacheOperationInvoker;
-import org.springframework.cache.jcache.model.CachePutOperation;
-import org.springframework.cache.jcache.model.CacheRemoveAllOperation;
-import org.springframework.cache.jcache.model.CacheRemoveOperation;
-import org.springframework.cache.jcache.model.CacheResultOperation;
-import org.springframework.cache.jcache.model.JCacheOperation;
 import org.springframework.util.Assert;
 
 /**
@@ -134,7 +129,7 @@ public class JCacheAspectSupport extends AbstractCacheInvoker implements Initial
 
 		CacheOperationInvoker adapter = new CacheOperationInvokerAdapter(invoker);
 
-		BasicCacheOperation operation = context.getOperation();
+		BasicOperation operation = context.getOperation();
 		if (operation instanceof CacheResultOperation) {
 			return cacheResultInterceptor.invoke(
 					(CacheOperationInvocationContext<CacheResultOperation>) context, adapter);

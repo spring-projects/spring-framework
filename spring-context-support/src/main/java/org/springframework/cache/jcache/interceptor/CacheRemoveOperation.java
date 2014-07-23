@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.cache.jcache.model;
+package org.springframework.cache.jcache.interceptor;
 
 import javax.cache.annotation.CacheMethodDetails;
 import javax.cache.annotation.CacheRemove;
@@ -30,7 +30,7 @@ import org.springframework.util.ExceptionTypeFilter;
  * @since 4.1
  * @see CacheRemove
  */
-public class CacheRemoveOperation extends BaseKeyCacheOperation<CacheRemove> {
+class CacheRemoveOperation extends AbstractJCacheKeyOperation<CacheRemove> {
 
 	private final ExceptionTypeFilter exceptionTypeFilter;
 

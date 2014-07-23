@@ -25,6 +25,7 @@ import org.springframework.cache.CacheManager;
 import org.springframework.cache.interceptor.CacheResolver;
 import org.springframework.cache.interceptor.KeyGenerator;
 import org.springframework.cache.interceptor.SimpleCacheResolver;
+import org.springframework.cache.interceptor.SimpleKeyGenerator;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.util.Assert;
@@ -37,35 +38,20 @@ import org.springframework.util.Assert;
  * @author Stephane Nicoll
  * @since 4.1
  */
-public class DefaultJCacheOperationSource extends AnnotationCacheOperationSource
+public class DefaultJCacheOperationSource extends AnnotationJCacheOperationSource
 		implements InitializingBean, ApplicationContextAware {
 
 	private CacheManager cacheManager;
 
-	private KeyGenerator keyGenerator;
+	private KeyGenerator keyGenerator = new SimpleKeyGenerator();
+
+	private KeyGenerator adaptedKeyGenerator;
 
 	private CacheResolver cacheResolver;
 
 	private CacheResolver exceptionCacheResolver;
 
 	private ApplicationContext applicationContext;
-
-	@Override
-	public void afterPropertiesSet() {
-		Assert.state((cacheResolver != null && exceptionCacheResolver != null)
-				|| cacheManager != null, "'cacheManager' is required if cache resolvers are not set.");
-		Assert.state(this.applicationContext != null, "The application context was not injected as it should.");
-
-		if (keyGenerator == null) {
-			keyGenerator = new KeyGeneratorAdapter(this, new SimpleCacheKeyGenerator());
-		}
-		if (cacheResolver == null) {
-			cacheResolver = new SimpleCacheResolver(cacheManager);
-		}
-		if (exceptionCacheResolver == null) {
-			exceptionCacheResolver = new SimpleExceptionCacheResolver(cacheManager);
-		}
-	}
 
 	/**
 	 * Set the default {@link CacheManager} to use to lookup cache by name. Only mandatory
@@ -76,11 +62,16 @@ public class DefaultJCacheOperationSource extends AnnotationCacheOperationSource
 	}
 
 	/**
-	 * Set the default {@link KeyGenerator}. If none is set, a default JSR-107 compliant
-	 * key generator is used.
+	 * Set the default {@link KeyGenerator}. If none is set, a {@link SimpleKeyGenerator}
+	 * honoringKe the JSR-107 {@link javax.cache.annotation.CacheKey} and
+	 * {@link javax.cache.annotation.CacheValue} will be used.
 	 */
 	public void setKeyGenerator(KeyGenerator keyGenerator) {
 		this.keyGenerator = keyGenerator;
+	}
+
+	public KeyGenerator getKeyGenerator() {
+		return this.keyGenerator;
 	}
 
 	/**
@@ -91,6 +82,10 @@ public class DefaultJCacheOperationSource extends AnnotationCacheOperationSource
 		this.cacheResolver = cacheResolver;
 	}
 
+	public CacheResolver getCacheResolver() {
+		return this.cacheResolver;
+	}
+
 	/**
 	 * Set the {@link CacheResolver} to resolve exception caches. If none is set, a default
 	 * implementation using the specified cache manager will be used.
@@ -99,14 +94,33 @@ public class DefaultJCacheOperationSource extends AnnotationCacheOperationSource
 		this.exceptionCacheResolver = exceptionCacheResolver;
 	}
 
+	public CacheResolver getExceptionCacheResolver() {
+		return this.exceptionCacheResolver;
+	}
+
 	@Override
 	public void setApplicationContext(ApplicationContext applicationContext) {
 		this.applicationContext = applicationContext;
 	}
 
 	@Override
+	public void afterPropertiesSet() {
+		Assert.state((this.cacheResolver != null && this.exceptionCacheResolver != null)
+				|| this.cacheManager != null, "'cacheManager' is required if cache resolvers are not set.");
+		Assert.state(this.applicationContext != null, "The application context was not injected as it should.");
+
+		this.adaptedKeyGenerator = new KeyGeneratorAdapter(this, this.keyGenerator);
+		if (this.cacheResolver == null) {
+			this.cacheResolver = new SimpleCacheResolver(this.cacheManager);
+		}
+		if (this.exceptionCacheResolver == null) {
+			this.exceptionCacheResolver = new SimpleExceptionCacheResolver(this.cacheManager);
+		}
+	}
+
+	@Override
 	protected <T> T getBean(Class<T> type) {
-		Map<String, T> map = BeanFactoryUtils.beansOfTypeIncludingAncestors(applicationContext, type);
+		Map<String, T> map = BeanFactoryUtils.beansOfTypeIncludingAncestors(this.applicationContext, type);
 		if (map.size() == 1) {
 			return map.values().iterator().next();
 		}
@@ -116,18 +130,18 @@ public class DefaultJCacheOperationSource extends AnnotationCacheOperationSource
 	}
 
 	@Override
-	public CacheResolver getDefaultCacheResolver() {
-		return cacheResolver;
+	protected CacheResolver getDefaultCacheResolver() {
+		return this.cacheResolver;
 	}
 
 	@Override
-	public CacheResolver getDefaultExceptionCacheResolver() {
-		return exceptionCacheResolver;
+	protected CacheResolver getDefaultExceptionCacheResolver() {
+		return this.exceptionCacheResolver;
 	}
 
 	@Override
-	public KeyGenerator getDefaultKeyGenerator() {
-		return keyGenerator;
+	protected KeyGenerator getDefaultKeyGenerator() {
+		return this.adaptedKeyGenerator;
 	}
 
 }

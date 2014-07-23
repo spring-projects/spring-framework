@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.cache.jcache.model;
+package org.springframework.cache.jcache.interceptor;
 
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
@@ -32,11 +32,12 @@ import org.springframework.cache.interceptor.KeyGenerator;
  * @author Stephane Nicoll
  * @since 4.1
  */
-public abstract class BaseKeyCacheOperation<A extends Annotation> extends BaseCacheOperation<A> {
+abstract class AbstractJCacheKeyOperation<A extends Annotation> extends AbstractJCacheOperation<A> {
 
 	private final KeyGenerator keyGenerator;
 
 	private final List<CacheParameterDetail> keyParameterDetails;
+
 
 	/**
 	 * Create a new instance.
@@ -44,18 +45,20 @@ public abstract class BaseKeyCacheOperation<A extends Annotation> extends BaseCa
 	 * @param cacheResolver the cache resolver to resolve regular caches
 	 * @param keyGenerator the key generator to compute cache keys
 	 */
-	protected BaseKeyCacheOperation(CacheMethodDetails<A> methodDetails,
+	protected AbstractJCacheKeyOperation(CacheMethodDetails<A> methodDetails,
 			CacheResolver cacheResolver, KeyGenerator keyGenerator) {
+
 		super(methodDetails, cacheResolver);
 		this.keyGenerator = keyGenerator;
-		this.keyParameterDetails = initializeKeyParameterDetails(allParameterDetails);
+		this.keyParameterDetails = initializeKeyParameterDetails(this.allParameterDetails);
 	}
+
 
 	/**
 	 * Return the {@link KeyGenerator} to use to compute cache keys.
 	 */
 	public KeyGenerator getKeyGenerator() {
-		return keyGenerator;
+		return this.keyGenerator;
 	}
 
 	/**
@@ -72,7 +75,7 @@ public abstract class BaseKeyCacheOperation<A extends Annotation> extends BaseCa
 	 */
 	public CacheInvocationParameter[] getKeyParameters(Object... values) {
 		List<CacheInvocationParameter> result = new ArrayList<CacheInvocationParameter>();
-		for (CacheParameterDetail keyParameterDetail : keyParameterDetails) {
+		for (CacheParameterDetail keyParameterDetail : this.keyParameterDetails) {
 			int parameterPosition = keyParameterDetail.getParameterPosition();
 			if (parameterPosition >= values.length) {
 				throw new IllegalStateException("Values mismatch, key parameter at position "
@@ -95,7 +98,7 @@ public abstract class BaseKeyCacheOperation<A extends Annotation> extends BaseCa
 				annotated.add(allParameter);
 			}
 		}
-		return annotated.size() == 0 ? all : annotated;
+		return (annotated.isEmpty() ? all : annotated);
 	}
 
 }

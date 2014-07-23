@@ -61,11 +61,11 @@ public class JCacheJavaConfigTests extends AbstractJCacheAnnotationTests {
 		AnnotationConfigApplicationContext context =
 				new AnnotationConfigApplicationContext(FullCachingConfig.class);
 		DefaultJCacheOperationSource cos = context.getBean(DefaultJCacheOperationSource.class);
-		assertSame(context.getBean(KeyGenerator.class), cos.getDefaultKeyGenerator());
+		assertSame(context.getBean(KeyGenerator.class), cos.getKeyGenerator());
 		assertSame(context.getBean("cacheResolver", CacheResolver.class),
-				cos.getDefaultCacheResolver());
+				cos.getCacheResolver());
 		assertSame(context.getBean("exceptionCacheResolver", CacheResolver.class),
-				cos.getDefaultExceptionCacheResolver());
+				cos.getExceptionCacheResolver());
 		JCacheInterceptor interceptor = context.getBean(JCacheInterceptor.class);
 		assertSame(context.getBean("errorHandler", CacheErrorHandler.class), interceptor.getErrorHandler());
 	}
@@ -76,14 +76,14 @@ public class JCacheJavaConfigTests extends AbstractJCacheAnnotationTests {
 				new AnnotationConfigApplicationContext(EmptyConfigSupportConfig.class);
 
 		DefaultJCacheOperationSource cos = context.getBean(DefaultJCacheOperationSource.class);
-		assertNotNull(cos.getDefaultCacheResolver());
-		assertEquals(SimpleCacheResolver.class, cos.getDefaultCacheResolver().getClass());
+		assertNotNull(cos.getCacheResolver());
+		assertEquals(SimpleCacheResolver.class, cos.getCacheResolver().getClass());
 		assertSame(context.getBean(CacheManager.class),
-				((SimpleCacheResolver) cos.getDefaultCacheResolver()).getCacheManager());
-		assertNotNull(cos.getDefaultExceptionCacheResolver());
-		assertEquals(SimpleExceptionCacheResolver.class, cos.getDefaultExceptionCacheResolver().getClass());
+				((SimpleCacheResolver) cos.getCacheResolver()).getCacheManager());
+		assertNotNull(cos.getExceptionCacheResolver());
+		assertEquals(SimpleExceptionCacheResolver.class, cos.getExceptionCacheResolver().getClass());
 		assertSame(context.getBean(CacheManager.class),
-				((SimpleExceptionCacheResolver) cos.getDefaultExceptionCacheResolver()).getCacheManager());
+				((SimpleExceptionCacheResolver) cos.getExceptionCacheResolver()).getCacheManager());
 		context.close();
 	}
 
@@ -93,9 +93,9 @@ public class JCacheJavaConfigTests extends AbstractJCacheAnnotationTests {
 				new AnnotationConfigApplicationContext(FullCachingConfigSupport.class);
 
 		DefaultJCacheOperationSource cos = context.getBean(DefaultJCacheOperationSource.class);
-		assertSame(context.getBean("cacheResolver"), cos.getDefaultCacheResolver());
-		assertSame(context.getBean("keyGenerator"), cos.getDefaultKeyGenerator());
-		assertSame(context.getBean("exceptionCacheResolver"), cos.getDefaultExceptionCacheResolver());
+		assertSame(context.getBean("cacheResolver"), cos.getCacheResolver());
+		assertSame(context.getBean("keyGenerator"), cos.getKeyGenerator());
+		assertSame(context.getBean("exceptionCacheResolver"), cos.getExceptionCacheResolver());
 		context.close();
 	}
 

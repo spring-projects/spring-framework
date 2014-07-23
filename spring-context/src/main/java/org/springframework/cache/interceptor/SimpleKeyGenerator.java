@@ -39,6 +39,13 @@ public class SimpleKeyGenerator implements KeyGenerator {
 
 	@Override
 	public Object generate(Object target, Method method, Object... params) {
+		return generateKey(params);
+	}
+
+	/**
+	 * Generate a key based on the specified parameters.
+	 */
+	public static Object generateKey(Object... params) {
 		if (params.length == 0) {
 			return SimpleKey.EMPTY;
 		}

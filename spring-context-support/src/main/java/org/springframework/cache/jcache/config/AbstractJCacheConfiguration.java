@@ -49,18 +49,17 @@ public class AbstractJCacheConfiguration extends AbstractCachingConfiguration<JC
 	public JCacheOperationSource cacheOperationSource() {
 		DefaultJCacheOperationSource source = new DefaultJCacheOperationSource();
 		if (this.cacheManager != null) {
-			source.setCacheManager(cacheManager);
+			source.setCacheManager(this.cacheManager);
 		}
-		if (keyGenerator != null) {
-			source.setKeyGenerator(keyGenerator);
+		if (this.keyGenerator != null) {
+			source.setKeyGenerator(this.keyGenerator);
 		}
 		if (this.cacheResolver != null) {
-			source.setCacheResolver(cacheResolver);
+			source.setCacheResolver(this.cacheResolver);
 		}
 		if (this.exceptionCacheResolver != null) {
-			source.setExceptionCacheResolver(exceptionCacheResolver);
+			source.setExceptionCacheResolver(this.exceptionCacheResolver);
 		}
-
 		return source;
 	}
 

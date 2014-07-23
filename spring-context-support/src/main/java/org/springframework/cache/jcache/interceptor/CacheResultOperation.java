@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.cache.jcache.model;
+package org.springframework.cache.jcache.interceptor;
 
 import javax.cache.annotation.CacheMethodDetails;
 import javax.cache.annotation.CacheResult;
@@ -31,7 +31,7 @@ import org.springframework.util.StringUtils;
  * @since 4.1
  * @see CacheResult
  */
-public class CacheResultOperation extends BaseKeyCacheOperation<CacheResult> {
+class CacheResultOperation extends AbstractJCacheKeyOperation<CacheResult> {
 
 	private final ExceptionTypeFilter exceptionTypeFilter;
 

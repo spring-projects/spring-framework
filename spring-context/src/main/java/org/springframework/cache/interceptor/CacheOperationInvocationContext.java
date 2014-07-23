@@ -27,7 +27,7 @@ import java.lang.reflect.Method;
  * @author Stephane Nicoll
  * @since 4.1
  */
-public interface CacheOperationInvocationContext<O extends BasicCacheOperation> {
+public interface CacheOperationInvocationContext<O extends BasicOperation> {
 
 	/**
 	 * Return the cache operation

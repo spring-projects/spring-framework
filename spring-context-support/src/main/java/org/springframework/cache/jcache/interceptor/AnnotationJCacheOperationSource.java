@@ -32,12 +32,6 @@ import javax.cache.annotation.CacheResult;
 
 import org.springframework.cache.interceptor.CacheResolver;
 import org.springframework.cache.interceptor.KeyGenerator;
-import org.springframework.cache.jcache.model.CachePutOperation;
-import org.springframework.cache.jcache.model.CacheRemoveAllOperation;
-import org.springframework.cache.jcache.model.CacheRemoveOperation;
-import org.springframework.cache.jcache.model.CacheResultOperation;
-import org.springframework.cache.jcache.model.DefaultCacheMethodDetails;
-import org.springframework.cache.jcache.model.JCacheOperation;
 import org.springframework.util.StringUtils;
 
 /**
@@ -48,8 +42,7 @@ import org.springframework.util.StringUtils;
  * @author Stephane Nicoll
  * @since 4.1
  */
-public abstract class AnnotationCacheOperationSource
-		extends AbstractFallbackJCacheOperationSource {
+public abstract class AnnotationJCacheOperationSource extends AbstractFallbackJCacheOperationSource {
 
 	/**
 	 * Locate or create an instance of the specified {@code type}.
@@ -236,7 +229,6 @@ public abstract class AnnotationCacheOperationSource
 
 	/**
 	 * Generate a default cache name for the specified {@link Method}.
-	 *
 	 * @param method the annotated method
 	 * @return the default cache name, according to JSR-107
 	 */

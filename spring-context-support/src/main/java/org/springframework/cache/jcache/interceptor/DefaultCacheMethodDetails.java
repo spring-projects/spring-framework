@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.cache.jcache.model;
+package org.springframework.cache.jcache.interceptor;
 
 import static java.util.Arrays.*;
 
@@ -32,7 +32,7 @@ import javax.cache.annotation.CacheMethodDetails;
  * @author Stephane Nicoll
  * @since 4.1
  */
-public class DefaultCacheMethodDetails<A extends Annotation> implements CacheMethodDetails<A> {
+class DefaultCacheMethodDetails<A extends Annotation> implements CacheMethodDetails<A> {
 
 	private final Method method;
 
@@ -42,8 +42,8 @@ public class DefaultCacheMethodDetails<A extends Annotation> implements CacheMet
 
 	private final String cacheName;
 
-	public DefaultCacheMethodDetails(Method method, A cacheAnnotation,
-			String cacheName) {
+
+	public DefaultCacheMethodDetails(Method method, A cacheAnnotation, String cacheName) {
 		this.method = method;
 		this.annotations = Collections.unmodifiableSet(
 				new LinkedHashSet<Annotation>(asList(method.getAnnotations())));
@@ -51,32 +51,33 @@ public class DefaultCacheMethodDetails<A extends Annotation> implements CacheMet
 		this.cacheName = cacheName;
 	}
 
+
 	@Override
 	public Method getMethod() {
-		return method;
+		return this.method;
 	}
 
 	@Override
 	public Set<Annotation> getAnnotations() {
-		return annotations;
+		return this.annotations;
 	}
 
 	@Override
 	public A getCacheAnnotation() {
-		return cacheAnnotation;
+		return this.cacheAnnotation;
 	}
 
 	@Override
 	public String getCacheName() {
-		return cacheName;
+		return this.cacheName;
 	}
 
 	@Override
 	public String toString() {
-		final StringBuilder sb = new StringBuilder("details[");
-		sb.append("method=").append(method);
-		sb.append(", cacheAnnotation=").append(cacheAnnotation);
-		sb.append(", cacheName='").append(cacheName).append('\'');
+		StringBuilder sb = new StringBuilder("CacheMethodDetails[");
+		sb.append("method=").append(this.method);
+		sb.append(", cacheAnnotation=").append(this.cacheAnnotation);
+		sb.append(", cacheName='").append(this.cacheName).append('\'');
 		sb.append(']');
 		return sb.toString();
 	}

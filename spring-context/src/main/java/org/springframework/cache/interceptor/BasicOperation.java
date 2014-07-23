@@ -24,7 +24,7 @@ import java.util.Set;
  * @author Stephane Nicoll
  * @since 4.1
  */
-public interface BasicCacheOperation {
+public interface BasicOperation {
 
 	/**
 	 * Return the cache name(s) associated to the operation.

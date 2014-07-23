@@ -23,7 +23,6 @@ import javax.cache.annotation.CacheKeyInvocationContext;
 import org.springframework.cache.interceptor.CacheErrorHandler;
 import org.springframework.cache.interceptor.CacheOperationInvocationContext;
 import org.springframework.cache.interceptor.KeyGenerator;
-import org.springframework.cache.jcache.model.BaseKeyCacheOperation;
 
 /**
  * A base interceptor for JSR-107 key-based cache annotations.
@@ -32,7 +31,7 @@ import org.springframework.cache.jcache.model.BaseKeyCacheOperation;
  * @since 4.1
  */
 @SuppressWarnings("serial")
-public abstract class AbstractKeyCacheInterceptor<O extends BaseKeyCacheOperation<A>, A extends Annotation>
+abstract class AbstractKeyCacheInterceptor<O extends AbstractJCacheKeyOperation<A>, A extends Annotation>
 		extends AbstractCacheInterceptor<O, A> {
 
 	protected AbstractKeyCacheInterceptor(CacheErrorHandler errorHandler) {

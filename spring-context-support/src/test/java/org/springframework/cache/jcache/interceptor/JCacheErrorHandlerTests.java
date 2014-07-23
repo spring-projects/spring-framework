@@ -40,6 +40,7 @@ import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.cache.interceptor.CacheErrorHandler;
+import org.springframework.cache.interceptor.SimpleKeyGenerator;
 import org.springframework.cache.jcache.config.JCacheConfigurerSupport;
 import org.springframework.cache.support.SimpleCacheManager;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
@@ -72,7 +73,7 @@ public class JCacheErrorHandlerTests {
 	@Test
 	public void getFail() {
 		UnsupportedOperationException exception = new UnsupportedOperationException("Test exception on get");
-		SimpleGeneratedCacheKey key = new SimpleGeneratedCacheKey(0L);
+		Object key = SimpleKeyGenerator.generateKey(0L);
 		doThrow(exception).when(cache).get(key);
 
 		this.simpleService.get(0L);
@@ -82,7 +83,7 @@ public class JCacheErrorHandlerTests {
 	@Test
 	public void putFail() {
 		UnsupportedOperationException exception = new UnsupportedOperationException("Test exception on put");
-		SimpleGeneratedCacheKey key = new SimpleGeneratedCacheKey(0L);
+		Object key = SimpleKeyGenerator.generateKey(0L);
 		doThrow(exception).when(cache).put(key, 234L);
 
 		this.simpleService.put(0L, 234L);
@@ -92,7 +93,7 @@ public class JCacheErrorHandlerTests {
 	@Test
 	public void evictFail() {
 		UnsupportedOperationException exception = new UnsupportedOperationException("Test exception on evict");
-		SimpleGeneratedCacheKey key = new SimpleGeneratedCacheKey(0L);
+		Object key = SimpleKeyGenerator.generateKey(0L);
 		doThrow(exception).when(cache).evict(key);
 
 		this.simpleService.evict(0L);

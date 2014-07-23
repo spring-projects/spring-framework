@@ -1,4 +1,4 @@
-package org.springframework.cache.jcache.model;
+package org.springframework.cache.jcache.interceptor;
 
 import javax.cache.annotation.CacheKey;
 import javax.cache.annotation.CachePut;

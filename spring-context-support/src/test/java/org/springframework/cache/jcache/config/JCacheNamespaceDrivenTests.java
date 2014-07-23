@@ -44,7 +44,7 @@ public class JCacheNamespaceDrivenTests extends AbstractJCacheAnnotationTests {
 				"/org/springframework/cache/jcache/config/jCacheNamespaceDriven-resolver.xml");
 
 		DefaultJCacheOperationSource ci = context.getBean(DefaultJCacheOperationSource.class);
-		assertSame(context.getBean("cacheResolver"), ci.getDefaultCacheResolver());
+		assertSame(context.getBean("cacheResolver"), ci.getCacheResolver());
 		context.close();
 	}
 

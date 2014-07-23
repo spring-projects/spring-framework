@@ -33,16 +33,18 @@ import org.springframework.util.Assert;
  * @author Stephane Nicoll
  * @since 4.1
  */
-public abstract class BaseCacheResolver implements CacheResolver, InitializingBean {
+public abstract class AbstractCacheResolver implements CacheResolver, InitializingBean {
 
 	private CacheManager cacheManager;
 
-	protected BaseCacheResolver(CacheManager cacheManager) {
+
+	protected AbstractCacheResolver() {
+	}
+
+	protected AbstractCacheResolver(CacheManager cacheManager) {
 		this.cacheManager = cacheManager;
 	}
 
-	protected BaseCacheResolver() {
-	}
 
 	/**
 	 * Set the {@link CacheManager} that this instance should use.
@@ -55,13 +57,14 @@ public abstract class BaseCacheResolver implements CacheResolver, InitializingBe
 	 * Return the {@link CacheManager} that this instance use.
 	 */
 	public CacheManager getCacheManager() {
-		return cacheManager;
+		return this.cacheManager;
 	}
 
 	@Override
 	public void afterPropertiesSet()  {
-		Assert.notNull(cacheManager, "CacheManager must not be null");
+		Assert.notNull(this.cacheManager, "CacheManager must not be null");
 	}
+
 
 	@Override
 	public Collection<? extends Cache> resolveCaches(CacheOperationInvocationContext<?> context) {
@@ -72,8 +75,11 @@ public abstract class BaseCacheResolver implements CacheResolver, InitializingBe
 		else {
 			Collection<Cache> result = new ArrayList<Cache>();
 			for (String cacheName : cacheNames) {
-				Cache cache = cacheManager.getCache(cacheName);
-				Assert.notNull(cache, "Cannot find cache named '" + cacheName + "' for " + context.getOperation());
+				Cache cache = this.cacheManager.getCache(cacheName);
+				if (cache == null) {
+					throw new IllegalArgumentException("Cannot find cache named '" +
+							cacheName + "' for " + context.getOperation());
+				}
 				result.add(cache);
 			}
 			return result;
@@ -84,7 +90,6 @@ public abstract class BaseCacheResolver implements CacheResolver, InitializingBe
 	 * Provide the name of the cache(s) to resolve against the current cache manager.
 	 * <p>It is acceptable to return {@code null} to indicate that no cache could
 	 * be resolved for this invocation.
-	 *
 	 * @param context the context of the particular invocation
 	 * @return the cache name(s) to resolve or {@code null} if no cache should be resolved
 	 */

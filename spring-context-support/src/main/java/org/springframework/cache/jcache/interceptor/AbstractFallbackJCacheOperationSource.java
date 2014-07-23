@@ -25,7 +25,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.cache.interceptor.MethodCacheKey;
-import org.springframework.cache.jcache.model.JCacheOperation;
 import org.springframework.core.BridgeMethodResolver;
 import org.springframework.util.ClassUtils;
 
@@ -58,7 +57,7 @@ public abstract class AbstractFallbackJCacheOperationSource
 			return cached;
 		}
 		else {
-			JCacheOperation<?> operation = computeCacheOperations(method, targetClass);
+			JCacheOperation<?> operation = computeCacheOperation(method, targetClass);
 			if (operation != null) {
 				if (logger.isDebugEnabled()) {
 					logger.debug("Adding cacheable method '" + method.getName()
@@ -70,7 +69,7 @@ public abstract class AbstractFallbackJCacheOperationSource
 		}
 	}
 
-	private JCacheOperation<?> computeCacheOperations(Method method, Class<?> targetClass) {
+	private JCacheOperation<?> computeCacheOperation(Method method, Class<?> targetClass) {
 		// Don't allow no-public methods as required.
 		if (allowPublicMethodsOnly() && !Modifier.isPublic(method.getModifiers())) {
 			return null;

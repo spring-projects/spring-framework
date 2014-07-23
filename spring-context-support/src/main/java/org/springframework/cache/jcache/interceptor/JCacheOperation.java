@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-package org.springframework.cache.jcache.model;
+package org.springframework.cache.jcache.interceptor;
 
 import java.lang.annotation.Annotation;
 
 import javax.cache.annotation.CacheInvocationParameter;
 import javax.cache.annotation.CacheMethodDetails;
 
-import org.springframework.cache.interceptor.BasicCacheOperation;
+import org.springframework.cache.interceptor.BasicOperation;
 import org.springframework.cache.interceptor.CacheResolver;
 
 /**
@@ -33,8 +33,7 @@ import org.springframework.cache.interceptor.CacheResolver;
  * @author Stephane Nicoll
  * @since 4.1
  */
-public interface JCacheOperation<A extends Annotation>
-		extends CacheMethodDetails<A>, BasicCacheOperation {
+public interface JCacheOperation<A extends Annotation> extends BasicOperation, CacheMethodDetails<A> {
 
 	/**
 	 * Return the {@link CacheResolver} instance to use to resolve the cache to

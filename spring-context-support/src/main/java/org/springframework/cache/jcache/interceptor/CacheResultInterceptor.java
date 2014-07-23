@@ -23,9 +23,8 @@ import org.springframework.cache.interceptor.CacheErrorHandler;
 import org.springframework.cache.interceptor.CacheOperationInvocationContext;
 import org.springframework.cache.interceptor.CacheOperationInvoker;
 import org.springframework.cache.interceptor.CacheResolver;
-import org.springframework.cache.jcache.model.CacheResultOperation;
-import org.springframework.util.SerializationUtils;
 import org.springframework.util.ExceptionTypeFilter;
+import org.springframework.util.SerializationUtils;
 
 /**
  * Intercept methods annotated with {@link CacheResult}.
@@ -34,7 +33,7 @@ import org.springframework.util.ExceptionTypeFilter;
  * @since 4.1
  */
 @SuppressWarnings("serial")
-public class CacheResultInterceptor extends AbstractKeyCacheInterceptor<CacheResultOperation, CacheResult> {
+class CacheResultInterceptor extends AbstractKeyCacheInterceptor<CacheResultOperation, CacheResult> {
 
 	public CacheResultInterceptor(CacheErrorHandler errorHandler) {
 		super(errorHandler);
@@ -43,9 +42,9 @@ public class CacheResultInterceptor extends AbstractKeyCacheInterceptor<CacheRes
 	@Override
 	protected Object invoke(CacheOperationInvocationContext<CacheResultOperation> context,
 			CacheOperationInvoker invoker) {
-		CacheResultOperation operation = context.getOperation();
 
-		final Object cacheKey = generateKey(context);
+		CacheResultOperation operation = context.getOperation();
+		Object cacheKey = generateKey(context);
 
 		Cache cache = resolveCache(context);
 		Cache exceptionCache = resolveExceptionCache(context);

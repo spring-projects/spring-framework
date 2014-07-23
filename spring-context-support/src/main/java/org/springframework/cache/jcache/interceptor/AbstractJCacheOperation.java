@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.cache.jcache.model;
+package org.springframework.cache.jcache.interceptor;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
@@ -40,7 +40,7 @@ import static java.util.Arrays.*;
  * @author Stephane Nicoll
  * @since 4.1
  */
-public abstract class BaseCacheOperation<A extends Annotation> implements JCacheOperation<A> {
+abstract class AbstractJCacheOperation<A extends Annotation> implements JCacheOperation<A> {
 
 	private final CacheMethodDetails<A> methodDetails;
 
@@ -54,7 +54,7 @@ public abstract class BaseCacheOperation<A extends Annotation> implements JCache
 	 * @param methodDetails the {@link CacheMethodDetails} related to the cached method
 	 * @param cacheResolver the cache resolver to resolve regular caches
 	 */
-	protected BaseCacheOperation(CacheMethodDetails<A> methodDetails, CacheResolver cacheResolver) {
+	protected AbstractJCacheOperation(CacheMethodDetails<A> methodDetails, CacheResolver cacheResolver) {
 		Assert.notNull(methodDetails, "method details must not be null.");
 		Assert.notNull(cacheResolver, "cache resolver must not be null.");
 		this.methodDetails = methodDetails;
@@ -159,13 +159,13 @@ public abstract class BaseCacheOperation<A extends Annotation> implements JCache
 
 		private final boolean isValue;
 
-		public CacheParameterDetail(Method m, int parameterPosition) {
-			this.rawType = m.getParameterTypes()[parameterPosition];
+		public CacheParameterDetail(Method method, int parameterPosition) {
+			this.rawType = method.getParameterTypes()[parameterPosition];
 			this.annotations = new LinkedHashSet<Annotation>();
 			boolean foundKeyAnnotation = false;
 			boolean foundValueAnnotation = false;
-			for (Annotation annotation : m.getParameterAnnotations()[parameterPosition]) {
-				annotations.add(annotation);
+			for (Annotation annotation : method.getParameterAnnotations()[parameterPosition]) {
+				this.annotations.add(annotation);
 				if (CacheKey.class.isAssignableFrom(annotation.annotationType())) {
 					foundKeyAnnotation = true;
 				}

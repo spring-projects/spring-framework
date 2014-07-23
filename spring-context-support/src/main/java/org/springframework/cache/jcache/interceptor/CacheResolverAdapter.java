@@ -20,7 +20,7 @@ import org.springframework.util.Assert;
  * @author Stephane Nicoll
  * @since 4.1
  */
-public class CacheResolverAdapter implements CacheResolver {
+class CacheResolverAdapter implements CacheResolver {
 
 	private final javax.cache.annotation.CacheResolver target;
 

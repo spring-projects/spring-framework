@@ -30,7 +30,7 @@ import org.springframework.cache.CacheManager;
  * @author Stephane Nicoll
  * @since 4.1
  */
-public class NamedCacheResolver extends BaseCacheResolver {
+public class NamedCacheResolver extends AbstractCacheResolver {
 
 	private Collection<String> cacheNames;
 
