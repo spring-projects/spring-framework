@@ -55,7 +55,7 @@ configure(allprojects) { project ->
 	compileJava.options*.compilerArgs = [
 		"-Xlint:serial", "-Xlint:varargs", "-Xlint:cast", "-Xlint:classfile",
 		"-Xlint:dep-ann", "-Xlint:divzero", "-Xlint:empty", "-Xlint:finally",
-		"-Xlint:overrides", "-Xlint:path", "-Xlint:-processing", "-Xlint:static",
+		"-Xlint:overrides", "-Xlint:path", "-Xlint:processing", "-Xlint:static",
 		"-Xlint:try", "-Xlint:fallthrough", "-Xlint:rawtypes", "-Xlint:deprecation",
 		"-Xlint:unchecked", "-Xlint:-options", "-Werror"
 	]
@@ -63,7 +63,7 @@ configure(allprojects) { project ->
 	compileTestJava.options*.compilerArgs = [
 		"-Xlint:serial", "-Xlint:varargs", "-Xlint:cast", "-Xlint:classfile",
 		"-Xlint:dep-ann", "-Xlint:divzero", "-Xlint:empty", "-Xlint:finally",
-		"-Xlint:overrides", "-Xlint:path", "-Xlint:-processing", "-Xlint:static",
+		"-Xlint:overrides", "-Xlint:path", "-Xlint:processing", "-Xlint:static",
 		"-Xlint:try", "-Xlint:-fallthrough", "-Xlint:-rawtypes", "-Xlint:-deprecation",
 		"-Xlint:-unchecked", "-Xlint:-options"]
 
