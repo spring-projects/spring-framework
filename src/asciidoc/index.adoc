@@ -41791,9 +41791,9 @@ describes all available attributes:
 
 | concurrency
 | The number of concurrent sessions/consumers to start for this listener. Can either be
-| a simple number indicating the maximum number (e.g. "5") or a range indicating the lower
-| as well as the upper limit (e.g. "3-5"). Note that a specified minimum is just a hint
-| and might be ignored at runtime. Default is the value provided by the container
+  a simple number indicating the maximum number (e.g. "5") or a range indicating the lower
+  as well as the upper limit (e.g. "3-5"). Note that a specified minimum is just a hint
+  and might be ignored at runtime. Default is the value provided by the container
 |===
 
 The `<listener-container/>` element also accepts several optional attributes. This
