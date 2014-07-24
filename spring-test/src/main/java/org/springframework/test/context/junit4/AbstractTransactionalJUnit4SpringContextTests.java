@@ -49,6 +49,17 @@ import org.springframework.transaction.annotation.Transactional;
  * <p>Concrete subclasses must fulfill the same requirements outlined in
  * {@link AbstractJUnit4SpringContextTests}.
  *
+ * <p>The following {@link org.springframework.test.context.TestExecutionListener
+ * TestExecutionListeners} are configured by default:
+ *
+ * <ul>
+ *   <li>{@link org.springframework.test.context.web.ServletTestExecutionListener}
+ *   <li>{@link org.springframework.test.context.support.DependencyInjectionTestExecutionListener}
+ *   <li>{@link org.springframework.test.context.support.DirtiesContextTestExecutionListener}
+ *   <li>{@link org.springframework.test.context.transaction.TransactionalTestExecutionListener}
+ *   <li>{@link org.springframework.test.context.jdbc.SqlScriptsTestExecutionListener}
+ * </ul>
+ *
  * <p>Note: this class serves only as a convenience for extension. If you do not
  * wish for your test classes to be tied to a Spring-specific class hierarchy,
  * you may configure your own custom test classes by using
