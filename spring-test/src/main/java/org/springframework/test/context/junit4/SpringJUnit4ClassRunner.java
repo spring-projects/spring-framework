@@ -70,13 +70,14 @@ import org.springframework.util.ReflectionUtils;
  * <li>{@link org.springframework.test.annotation.IfProfileValue @IfProfileValue}</li>
  * </ul>
  *
- * <p><strong>NOTE:</strong> As of Spring 4.1, {@code SpringJUnit4ClassRunner}
- * requires JUnit 4.9 or higher.
+ * <p><strong>NOTE:</strong> As of Spring Framework 4.1, this class requires JUnit 4.9 or higher.
  *
  * @author Sam Brannen
  * @author Juergen Hoeller
  * @since 2.5
  * @see TestContextManager
+ * @see AbstractJUnit4SpringContextTests
+ * @see AbstractTransactionalJUnit4SpringContextTests
  */
 @SuppressWarnings("deprecation")
 public class SpringJUnit4ClassRunner extends BlockJUnit4ClassRunner {

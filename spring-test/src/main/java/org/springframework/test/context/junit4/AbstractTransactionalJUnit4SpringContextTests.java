@@ -57,6 +57,8 @@ import org.springframework.transaction.annotation.Transactional;
  * &#064;TestExecutionListeners}, {@link Transactional &#064;Transactional},
  * etc.
  *
+ * <p><strong>NOTE:</strong> As of Spring Framework 4.1, this class requires JUnit 4.9 or higher.
+ *
  * @author Sam Brannen
  * @author Juergen Hoeller
  * @since 2.5

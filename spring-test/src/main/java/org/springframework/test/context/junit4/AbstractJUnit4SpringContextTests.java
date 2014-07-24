@@ -33,8 +33,8 @@ import org.springframework.test.context.web.ServletTestExecutionListener;
 
 /**
  * Abstract base test class which integrates the <em>Spring TestContext
- * Framework</em> with explicit {@link ApplicationContext} testing support in a
- * <strong>JUnit 4.9+</strong> environment.
+ * Framework</em> with explicit {@link ApplicationContext} testing support
+ * in a JUnit environment.
  *
  * <p>Concrete subclasses should typically declare a class-level
  * {@link ContextConfiguration &#064;ContextConfiguration} annotation to
@@ -61,6 +61,8 @@ import org.springframework.test.context.web.ServletTestExecutionListener;
  * {@link SpringJUnit4ClassRunner}, {@link ContextConfiguration
  * &#064;ContextConfiguration}, {@link TestExecutionListeners
  * &#064;TestExecutionListeners}, etc.
+ *
+ * <p><strong>NOTE:</strong> As of Spring Framework 4.1, this class requires JUnit 4.9 or higher.
  *
  * @author Sam Brannen
  * @since 2.5
