@@ -23,6 +23,9 @@ import javax.websocket.Extension;
 import org.springframework.web.socket.WebSocketExtension;
 
 /**
+ * Adapt an instance of {@link org.springframework.web.socket.WebSocketExtension} to
+ * the {@link javax.websocket.Extension} interface.
+ *
  * @author Rossen Stoyanchev
  * @since 4.0
  */
@@ -32,9 +35,10 @@ public class WebSocketToStandardExtensionAdapter implements Extension {
 
 	private final List<Parameter> parameters = new ArrayList<Parameter>();
 
-	public WebSocketToStandardExtensionAdapter(final WebSocketExtension ext) {
-		this.name = ext.getName();
-		for (final String paramName : ext.getParameters().keySet()) {
+
+	public WebSocketToStandardExtensionAdapter(final WebSocketExtension extension) {
+		this.name = extension.getName();
+		for (final String paramName : extension.getParameters().keySet()) {
 			this.parameters.add(new Parameter() {
 				@Override
 				public String getName() {
@@ -42,7 +46,7 @@ public class WebSocketToStandardExtensionAdapter implements Extension {
 				}
 				@Override
 				public String getValue() {
-					return ext.getParameters().get(paramName);
+					return extension.getParameters().get(paramName);
 				}
 			});
 		}
