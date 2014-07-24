@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.cache.concurrent;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -70,6 +71,8 @@ public class ConcurrentMapCacheManager implements CacheManager {
 	 * Specify the set of cache names for this CacheManager's 'static' mode.
 	 * <p>The number of caches and their names will be fixed after a call to this method,
 	 * with no creation of further cache regions at runtime.
+	 * <p>Calling this with a {@code null} collection argument resets the
+	 * mode to 'dynamic', allowing for further creation of caches again.
 	 */
 	public void setCacheNames(Collection<String> cacheNames) {
 		if (cacheNames != null) {
@@ -78,6 +81,9 @@ public class ConcurrentMapCacheManager implements CacheManager {
 			}
 			this.dynamic = false;
 		}
+		else {
+			this.dynamic = true;
+		}
 	}
 
 	/**
@@ -85,9 +91,17 @@ public class ConcurrentMapCacheManager implements CacheManager {
 	 * in this cache manager.
 	 * <p>Default is "true", despite ConcurrentHashMap itself not supporting {@code null}
 	 * values. An internal holder object will be used to store user-level {@code null}s.
+	 * <p>Note: A change of the null-value setting will reset all existing caches,
+	 * if any, to reconfigure them with the new null-value requirement.
 	 */
 	public void setAllowNullValues(boolean allowNullValues) {
-		this.allowNullValues = allowNullValues;
+		if (allowNullValues != this.allowNullValues) {
+			this.allowNullValues = allowNullValues;
+			// Need to recreate all Cache instances with the new null-value configuration...
+			for (Map.Entry<String, Cache> entry : this.cacheMap.entrySet()) {
+				entry.setValue(createConcurrentMapCache(entry.getKey()));
+			}
+		}
 	}
 
 	/**
