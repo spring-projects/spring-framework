@@ -54,7 +54,7 @@ import static org.springframework.core.annotation.AnnotationUtils.*;
  * <h3>Test-managed Transactions</h3>
  * <p><em>Test-managed transactions</em> are transactions that are managed
  * declaratively via this listener or programmatically via
- * {@link TestTransaction}. Such transactions should not be confused with 
+ * {@link TestTransaction}. Such transactions should not be confused with
  * <em>Spring-managed transactions</em> (i.e., those managed directly
  * by Spring within the {@code ApplicationContext} loaded for tests) or
  * <em>application-managed transactions</em> (i.e., those managed
@@ -330,7 +330,7 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 	/**
 	 * Get the {@link PlatformTransactionManager transaction manager} to use
 	 * for the supplied {@link TestContext test context}.
-	 * <p>The default implementation simply delegates to 
+	 * <p>The default implementation simply delegates to
 	 * {@link TestContextTransactionUtils#retrieveTransactionManager}.
 	 * @param testContext the test context for which the transaction manager
 	 * should be retrieved

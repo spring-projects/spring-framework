@@ -130,7 +130,7 @@ public class SqlScriptsTestExecutionListener extends AbstractTestExecutionListen
 	}
 
 	/**
-	 * Execute the SQL scripts configured via the supplied {@link Sql @Sql} 
+	 * Execute the SQL scripts configured via the supplied {@link Sql @Sql}
 	 * annotation for the given {@link ExecutionPhase} and {@link TestContext}.
 	 *
 	 * <p>Special care must be taken in order to properly support the configured

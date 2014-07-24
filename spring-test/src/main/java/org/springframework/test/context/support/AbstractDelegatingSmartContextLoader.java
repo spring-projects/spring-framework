@@ -43,7 +43,7 @@ import org.springframework.util.ObjectUtils;
  * that is annotated with {@link ContextConfiguration @ContextConfiguration}, and
  * the candidate that supports the merged, processed configuration will be used to
  * actually {@linkplain #loadContext load} the context.
- * 
+ *
  * <p>Any reference to an <em>XML-based loader</em> can be interpreted to mean
  * a context loader that supports only XML configuration files or one that
  * supports both XML configuration files and Groovy scripts simultaneously.
