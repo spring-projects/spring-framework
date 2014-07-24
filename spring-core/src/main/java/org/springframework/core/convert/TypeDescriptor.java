@@ -153,6 +153,7 @@ public class TypeDescriptor implements Serializable {
 
 	/**
 	 * Return the underlying {@link ResolvableType}.
+	 * @since 4.0
 	 */
 	public ResolvableType getResolvableType() {
 		return this.resolvableType;
@@ -163,9 +164,10 @@ public class TypeDescriptor implements Serializable {
 	 * {@link MethodParameter} or {@link Type} depending on how the {@link TypeDescriptor}
 	 * was constructed. This method is primarily to provide access to additional
 	 * type information or meta-data that alternative JVM languages may provide.
+	 * @since 4.0
 	 */
 	public Object getSource() {
-		return (this.resolvableType == null ? null : this.resolvableType.getSource());
+		return (this.resolvableType != null ? this.resolvableType.getSource() : null);
 	}
 
 	/**
