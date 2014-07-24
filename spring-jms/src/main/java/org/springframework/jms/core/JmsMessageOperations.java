@@ -27,8 +27,8 @@ import org.springframework.messaging.core.MessageReceivingOperations;
 import org.springframework.messaging.core.MessageSendingOperations;
 
 /**
- * A specialization of {@link MessageSendingOperations} and {@link MessageSendingOperations}
- * for JMS related operations that allows to specify a destination name rather than the
+ * A specialization of {@link MessageSendingOperations} and {@link MessageReceivingOperations}
+ * for JMS related operations that allow to specify a destination name rather than the
  * actual {@link javax.jms.Destination}
  *
  * @author Stephane Nicoll
