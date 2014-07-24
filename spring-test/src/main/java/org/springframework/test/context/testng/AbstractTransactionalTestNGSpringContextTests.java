@@ -48,6 +48,17 @@ import org.springframework.transaction.annotation.Transactional;
  * <p>Concrete subclasses must fulfill the same requirements outlined in
  * {@link AbstractTestNGSpringContextTests}.
  *
+ * <p>The following {@link org.springframework.test.context.TestExecutionListener
+ * TestExecutionListeners} are configured by default:
+ *
+ * <ul>
+ *   <li>{@link org.springframework.test.context.web.ServletTestExecutionListener}
+ *   <li>{@link org.springframework.test.context.support.DependencyInjectionTestExecutionListener}
+ *   <li>{@link org.springframework.test.context.support.DirtiesContextTestExecutionListener}
+ *   <li>{@link org.springframework.test.context.transaction.TransactionalTestExecutionListener}
+ *   <li>{@link org.springframework.test.context.jdbc.SqlScriptsTestExecutionListener}
+ * </ul>
+ *
  * @author Sam Brannen
  * @author Juergen Hoeller
  * @since 2.5
