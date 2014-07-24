@@ -34,7 +34,7 @@ import org.springframework.test.context.web.ServletTestExecutionListener;
 /**
  * Abstract base test class which integrates the <em>Spring TestContext
  * Framework</em> with explicit {@link ApplicationContext} testing support
- * in a JUnit environment.
+ * in a <strong>JUnit</strong> environment.
  *
  * <p>Concrete subclasses should typically declare a class-level
  * {@link ContextConfiguration &#064;ContextConfiguration} annotation to
