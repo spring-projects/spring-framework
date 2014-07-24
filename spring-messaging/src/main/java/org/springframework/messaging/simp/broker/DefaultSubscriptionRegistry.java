@@ -316,7 +316,7 @@ public class DefaultSubscriptionRegistry extends AbstractSubscriptionRegistry {
 		public void addSubscription(String destination, String subscriptionId) {
 			Set<String> subs = this.subscriptions.get(destination);
 			if (subs == null) {
-				synchronized(this.monitor) {
+				synchronized (this.monitor) {
 					subs = this.subscriptions.get(destination);
 					if (subs == null) {
 						subs = new HashSet<String>(4);
@@ -331,7 +331,7 @@ public class DefaultSubscriptionRegistry extends AbstractSubscriptionRegistry {
 			for (String destination : this.subscriptions.keySet()) {
 				Set<String> subscriptionIds = this.subscriptions.get(destination);
 				if (subscriptionIds.remove(subscriptionId)) {
-					synchronized(this.monitor) {
+					synchronized (this.monitor) {
 						if (subscriptionIds.isEmpty()) {
 							this.subscriptions.remove(destination);
 						}

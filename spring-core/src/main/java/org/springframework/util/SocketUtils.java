@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -58,25 +58,18 @@ public abstract class SocketUtils {
 	/**
 	 * Although {@code SocketUtils} consists solely of static utility methods,
 	 * this constructor is intentionally {@code public}.
-	 *
 	 * <h4>Rationale</h4>
-	 *
 	 * <p>Static methods from this class may be invoked from within XML
 	 * configuration files using the Spring Expression Language (SpEL) and the
 	 * following syntax.
-	 *
 	 * <pre><code>&lt;bean id="bean1" ... p:port="#{T(org.springframework.util.SocketUtils).findAvailableTcpPort(12000)}" /&gt;</code></pre>
-	 *
 	 * If this constructor were {@code private}, you would be required to supply
 	 * the fully qualified class name to SpEL's {@code T()} function for each usage.
 	 * Thus, the fact that this constructor is {@code public} allows you to reduce
 	 * boilerplate configuration with SpEL as can be seen in the following example.
-	 *
 	 * <pre><code>&lt;bean id="socketUtils" class="org.springframework.util.SocketUtils" /&gt;
-	 *
-	 *&lt;bean id="bean1" ... p:port="#{socketUtils.findAvailableTcpPort(12000)}" /&gt;
-	 *
-	 *&lt;bean id="bean2" ... p:port="#{socketUtils.findAvailableTcpPort(30000)}" /&gt;</code></pre>
+	 * &lt;bean id="bean1" ... p:port="#{socketUtils.findAvailableTcpPort(12000)}" /&gt;
+	 * &lt;bean id="bean2" ... p:port="#{socketUtils.findAvailableTcpPort(30000)}" /&gt;</code></pre>
 	 */
 	public SocketUtils() {
 		/* no-op */
@@ -271,7 +264,8 @@ public abstract class SocketUtils {
 						maxPort, searchCounter));
 				}
 				candidatePort = findRandomPort(minPort, maxPort);
-			} while (!isPortAvailable(candidatePort));
+			}
+			while (!isPortAvailable(candidatePort));
 
 			return candidatePort;
 		}

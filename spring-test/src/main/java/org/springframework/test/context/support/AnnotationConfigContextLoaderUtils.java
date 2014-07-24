@@ -22,6 +22,7 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.SmartContextLoader;
 import org.springframework.util.Assert;
@@ -38,45 +39,12 @@ public abstract class AnnotationConfigContextLoaderUtils {
 	private static final Log logger = LogFactory.getLog(AnnotationConfigContextLoaderUtils.class);
 
 
-	private AnnotationConfigContextLoaderUtils() {
-		/* no-op */
-	}
-
-	private static boolean isStaticNonPrivateAndNonFinal(Class<?> clazz) {
-		Assert.notNull(clazz, "Class must not be null");
-		int modifiers = clazz.getModifiers();
-		return (Modifier.isStatic(modifiers) && !Modifier.isPrivate(modifiers) && !Modifier.isFinal(modifiers));
-	}
-
-	/**
-	 * Determine if the supplied {@link Class} meets the criteria for being
-	 * considered a <em>default configuration class</em> candidate.
-	 *
-	 * <p>Specifically, such candidates:
-	 *
-	 * <ul>
-	 * <li>must not be {@code null}</li>
-	 * <li>must not be {@code private}</li>
-	 * <li>must not be {@code final}</li>
-	 * <li>must be {@code static}</li>
-	 * <li>must be annotated with {@code @Configuration}</li>
-	 * </ul>
-	 *
-	 * @param clazz the class to check
-	 * @return {@code true} if the supplied class meets the candidate criteria
-	 */
-	private static boolean isDefaultConfigurationClassCandidate(Class<?> clazz) {
-		return clazz != null && isStaticNonPrivateAndNonFinal(clazz) && clazz.isAnnotationPresent(Configuration.class);
-	}
-
 	/**
 	 * Detect the default configuration classes for the supplied test class.
-	 *
 	 * <p>The returned class array will contain all static inner classes of
 	 * the supplied class that meet the requirements for {@code @Configuration}
 	 * class implementations as specified in the documentation for
 	 * {@link Configuration @Configuration}.
-	 *
 	 * <p>The implementation of this method adheres to the contract defined in the
 	 * {@link org.springframework.test.context.SmartContextLoader SmartContextLoader}
 	 * SPI. Specifically, this method uses introspection to detect default
@@ -96,7 +64,8 @@ public abstract class AnnotationConfigContextLoaderUtils {
 		for (Class<?> candidate : declaringClass.getDeclaredClasses()) {
 			if (isDefaultConfigurationClassCandidate(candidate)) {
 				configClasses.add(candidate);
-			} else {
+			}
+			else {
 				if (logger.isDebugEnabled()) {
 					logger.debug(String.format(
 						"Ignoring class [%s]; it must be static, non-private, non-final, and annotated "
@@ -115,6 +84,30 @@ public abstract class AnnotationConfigContextLoaderUtils {
 		}
 
 		return configClasses.toArray(new Class<?>[configClasses.size()]);
+	}
+
+	/**
+	 * Determine if the supplied {@link Class} meets the criteria for being
+	 * considered a <em>default configuration class</em> candidate.
+	 * <p>Specifically, such candidates:
+	 * <ul>
+	 * <li>must not be {@code null}</li>
+	 * <li>must not be {@code private}</li>
+	 * <li>must not be {@code final}</li>
+	 * <li>must be {@code static}</li>
+	 * <li>must be annotated with {@code @Configuration}</li>
+	 * </ul>
+	 * @param clazz the class to check
+	 * @return {@code true} if the supplied class meets the candidate criteria
+	 */
+	private static boolean isDefaultConfigurationClassCandidate(Class<?> clazz) {
+		return (clazz != null && isStaticNonPrivateAndNonFinal(clazz) && clazz.isAnnotationPresent(Configuration.class));
+	}
+
+	private static boolean isStaticNonPrivateAndNonFinal(Class<?> clazz) {
+		Assert.notNull(clazz, "Class must not be null");
+		int modifiers = clazz.getModifiers();
+		return (Modifier.isStatic(modifiers) && !Modifier.isPrivate(modifiers) && !Modifier.isFinal(modifiers));
 	}
 
 }

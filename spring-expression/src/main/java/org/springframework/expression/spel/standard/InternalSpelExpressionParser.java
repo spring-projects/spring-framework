@@ -316,13 +316,15 @@ class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
 		SpelNodeImpl expr = null;
 		if (peekToken(TokenKind.DOT,TokenKind.SAFE_NAVI)) {
 			expr = eatDottedNode();
-		} else {
+		}
+		else {
 			expr = maybeEatNonDottedNode();
 		}
 
 		if (expr==null) {
 			return false;
-		} else {
+		}
+		else {
 			push(expr);
 			return true;
 		}
@@ -572,7 +574,8 @@ class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
 			List<SpelNodeImpl> listElements = new ArrayList<SpelNodeImpl>();
 			do {
 				listElements.add(eatExpression());
-			} while (peekToken(TokenKind.COMMA,true));
+			}
+			while (peekToken(TokenKind.COMMA,true));
 
 			closingCurly = eatToken(TokenKind.RCURLY);
 			expr = new InlineList(toPos(t.startpos,closingCurly.endpos),listElements.toArray(new SpelNodeImpl[listElements.size()]));
@@ -599,7 +602,7 @@ class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
 		}
 		nextToken();
 		SpelNodeImpl expr = eatExpression();
-		if(expr == null) {
+		if (expr == null) {
 			raiseInternalException(toPos(t), SpelMessage.MISSING_SELECTION_EXPRESSION);
 		}
 		eatToken(TokenKind.RSQUARE);
@@ -624,13 +627,13 @@ class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
 		Token node = peekToken();
 		while (isValidQualifiedId(node)) {
 			nextToken();
-			if(node.kind != TokenKind.DOT) {
+			if (node.kind != TokenKind.DOT) {
 				qualifiedIdPieces.add(new Identifier(node.stringValue(),toPos(node)));
 			}
 			node = peekToken();
 		}
-		if(qualifiedIdPieces.isEmpty()) {
-			if(node == null) {
+		if (qualifiedIdPieces.isEmpty()) {
+			if (node == null) {
 				raiseInternalException( this.expressionString.length(), SpelMessage.OOD);
 			}
 			raiseInternalException(node.startpos, SpelMessage.NOT_EXPECTED_TOKEN,
@@ -641,10 +644,10 @@ class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
 	}
 
 	private boolean isValidQualifiedId(Token node) {
-		if(node == null || node.kind == TokenKind.LITERAL_STRING) {
+		if (node == null || node.kind == TokenKind.LITERAL_STRING) {
 			return false;
 		}
-		if(node.kind == TokenKind.DOT || node.kind == TokenKind.IDENTIFIER) {
+		if (node.kind == TokenKind.DOT || node.kind == TokenKind.IDENTIFIER) {
 			return true;
 		}
 		String value = node.stringValue();
@@ -667,9 +670,7 @@ class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
 			// TODO what is the end position for a method reference? the name or the last arg?
 			return true;
 		}
-
 		return false;
-
 	}
 
 	//constructor
@@ -784,7 +785,7 @@ class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
 	// | GREATER_THAN_OR_EQUAL | INSTANCEOF | BETWEEN | MATCHES
 	private Token maybeEatRelationalOperator() {
 		Token t = peekToken();
-		if (t==null) {
+		if (t == null) {
 			return null;
 		}
 		if (t.isNumericRelationalOperator()) {
@@ -807,10 +808,10 @@ class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
 
 	private Token eatToken(TokenKind expectedKind) {
 		Token t = nextToken();
-		if (t==null) {
+		if (t == null) {
 			raiseInternalException( this.expressionString.length(), SpelMessage.OOD);
 		}
-		if (t.kind!=expectedKind) {
+		if (t.kind != expectedKind) {
 			raiseInternalException(t.startpos,SpelMessage.NOT_EXPECTED_TOKEN, expectedKind.toString().toLowerCase(),t.getKind().toString().toLowerCase());
 		}
 		return t;
@@ -825,7 +826,7 @@ class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
 			return false;
 		}
 		Token t = peekToken();
-		if (t.kind==desiredTokenKind) {
+		if (t.kind == desiredTokenKind) {
 			if (consumeIfMatched) {
 				this.tokenStreamPointer++;
 			}
@@ -835,7 +836,7 @@ class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
 		if (desiredTokenKind == TokenKind.IDENTIFIER) {
 			// might be one of the textual forms of the operators (e.g. NE for != ) - in which case we can treat it as an identifier
 			// The list is represented here: Tokenizer.alternativeOperatorNames and those ones are in order in the TokenKind enum
-			if (t.kind.ordinal()>=TokenKind.DIV.ordinal() && t.kind.ordinal()<=TokenKind.NOT.ordinal() && t.data!=null) {
+			if (t.kind.ordinal() >= TokenKind.DIV.ordinal() && t.kind.ordinal() <= TokenKind.NOT.ordinal() && t.data != null) {
 				// if t.data were null, we'd know it wasn't the textual form, it was the symbol form
 				return true;
 			}
@@ -848,7 +849,7 @@ class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
 			return false;
 		}
 		Token t = peekToken();
-		return t.kind == possible1 || t.kind == possible2;
+		return (t.kind == possible1 || t.kind == possible2);
 	}
 
 	private boolean peekToken(TokenKind possible1,TokenKind possible2, TokenKind possible3) {
@@ -924,14 +925,14 @@ class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
 	}
 
 	/**
-	 * Compress the start and end of a token into a single int
+	 * Compress the start and end of a token into a single int.
 	 */
 	private int toPos(Token t) {
-		return (t.startpos<<16)+t.endpos;
+		return (t.startpos<<16) + t.endpos;
 	}
 
 	private int toPos(int start,int end) {
-		return (start<<16)+end;
+		return (start<<16) + end;
 	}
 
 }

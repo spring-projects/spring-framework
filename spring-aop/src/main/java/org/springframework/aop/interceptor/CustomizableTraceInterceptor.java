@@ -258,7 +258,7 @@ public class CustomizableTraceInterceptor extends AbstractTraceInterceptor {
 			return returnValue;
 		}
 		catch (Throwable ex) {
-			if(stopWatch.isRunning()) {
+			if (stopWatch.isRunning()) {
 				stopWatch.stop();
 			}
 			exitThroughException = true;
@@ -268,7 +268,7 @@ public class CustomizableTraceInterceptor extends AbstractTraceInterceptor {
 		}
 		finally {
 			if (!exitThroughException) {
-				if(stopWatch.isRunning()) {
+				if (stopWatch.isRunning()) {
 					stopWatch.stop();
 				}
 				writeToLog(logger,

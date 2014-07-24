@@ -72,9 +72,9 @@ public class StreamingSockJsSession extends AbstractHttpSockJsSession {
 				this.byteCount = 0;
 				break;
 			}
-		} while (!getMessageCache().isEmpty());
+		}
+		while (!getMessageCache().isEmpty());
 		scheduleHeartbeat();
 	}
 
 }
-

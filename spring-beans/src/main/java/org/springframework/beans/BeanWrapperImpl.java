@@ -398,7 +398,8 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 					if (pd.getReadMethod() != null || pd.getWriteMethod() != null) {
 						return TypeDescriptor.nested(property(pd), tokens.keys.length);
 					}
-				} else {
+				}
+				else {
 					if (pd.getReadMethod() != null || pd.getWriteMethod() != null) {
 						return new TypeDescriptor(property(pd));
 					}

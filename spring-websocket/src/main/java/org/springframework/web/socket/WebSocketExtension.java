@@ -107,7 +107,7 @@ public class WebSocketExtension {
 		}
 		else {
 			List<WebSocketExtension> result = new ArrayList<WebSocketExtension>();
-			for(String token : extensions.split(",")) {
+			for (String token : extensions.split(",")) {
 				result.add(parseExtension(token));
 			}
 			return result;

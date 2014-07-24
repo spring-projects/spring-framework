@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -172,7 +172,8 @@ final class PropertyMatches {
 				char t_j = s2.charAt(j - 1);
 				if (s_i == t_j) {
 					cost = 0;
-				} else {
+				}
+				else {
 					cost = 1;
 				}
 				d[i][j] = Math.min(Math.min(d[i - 1][j] + 1, d[i][j - 1] + 1),

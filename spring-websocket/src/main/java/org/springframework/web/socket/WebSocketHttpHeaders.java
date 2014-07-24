@@ -122,7 +122,7 @@ public class WebSocketHttpHeaders extends HttpHeaders {
 	 */
 	public void setSecWebSocketExtensions(List<WebSocketExtension> extensions) {
 		List<String> result = new ArrayList<String>(extensions.size());
-		for(WebSocketExtension extension : extensions) {
+		for (WebSocketExtension extension : extensions) {
 			result.add(extension.toString());
 		}
 		set(SEC_WEBSOCKET_EXTENSIONS, toCommaDelimitedString(result));

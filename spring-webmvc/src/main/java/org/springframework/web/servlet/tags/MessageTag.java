@@ -228,7 +228,7 @@ public class MessageTag extends HtmlEscapingAwareTag implements ArgumentAware {
 		if (this.code != null || this.text != null) {
 			// We have a code or default text that we need to resolve.
 			Object[] argumentsArray = resolveArguments(this.arguments);
-			if(!this.nestedArguments.isEmpty()) {
+			if (!this.nestedArguments.isEmpty()) {
 				argumentsArray = appendArguments(argumentsArray,
 						this.nestedArguments.toArray());
 			}
@@ -250,7 +250,7 @@ public class MessageTag extends HtmlEscapingAwareTag implements ArgumentAware {
 	}
 
 	private Object[] appendArguments(Object[] sourceArguments, Object[] additionalArguments) {
-		if(ObjectUtils.isEmpty(sourceArguments)) {
+		if (ObjectUtils.isEmpty(sourceArguments)) {
 			return additionalArguments;
 		}
 		Object[] arguments = new Object[sourceArguments.length + additionalArguments.length];

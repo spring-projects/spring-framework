@@ -72,7 +72,7 @@ final class SimpleStreamingClientHttpRequest extends AbstractClientHttpRequest {
 	@Override
 	protected OutputStream getBodyInternal(HttpHeaders headers) throws IOException {
 		if (this.body == null) {
-			if(this.outputStreaming) {
+			if (this.outputStreaming) {
 				int contentLength = (int) headers.getContentLength();
 				if (contentLength >= 0) {
 					this.connection.setFixedLengthStreamingMode(contentLength);

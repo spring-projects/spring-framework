@@ -118,7 +118,7 @@ public final class Property {
 	}
 
 	Annotation[] getAnnotations() {
-		if(this.annotations == null) {
+		if (this.annotations == null) {
 			this.annotations = resolveAnnotations();
 		}
 		return this.annotations;
@@ -192,7 +192,7 @@ public final class Property {
 
 	private Annotation[] resolveAnnotations() {
 		Annotation[] annotations = annotationCache.get(this);
-		if(annotations == null) {
+		if (annotations == null) {
 			Map<Class<? extends Annotation>, Annotation> annotationMap = new LinkedHashMap<Class<? extends Annotation>, Annotation>();
 			addAnnotationsToMap(annotationMap, getReadMethod());
 			addAnnotationsToMap(annotationMap, getWriteMethod());

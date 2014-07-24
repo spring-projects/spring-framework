@@ -46,7 +46,7 @@ public abstract aspect AbstractDependencyInjectionAspect {
 	 * Select join points in beans to be configured prior to construction?
 	 * By default, use post-construction injection matching the default in the Configurable annotation.
 	 */
-	public pointcut preConstructionConfiguration() : if(false);
+	public pointcut preConstructionConfiguration() : if (false);
 
 	/**
 	 * Select the most-specific initialization join point
@@ -54,7 +54,7 @@ public abstract aspect AbstractDependencyInjectionAspect {
 	 */
 	@CodeGenerationHint(ifNameSuffix="6f1")
 	public pointcut mostSpecificSubTypeConstruction() :
-		if(thisJoinPoint.getSignature().getDeclaringType() == thisJoinPoint.getThis().getClass());
+		if (thisJoinPoint.getSignature().getDeclaringType() == thisJoinPoint.getThis().getClass());
 
 	/**
 	 * Select least specific super type that is marked for DI (so that injection occurs only once with pre-construction inejection

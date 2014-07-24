@@ -103,7 +103,7 @@ public final class ProducesRequestCondition extends AbstractRequestCondition<Pro
 			for (String header : headers) {
 				HeaderExpression expr = new HeaderExpression(header);
 				if ("Accept".equalsIgnoreCase(expr.name)) {
-					for( MediaType mediaType : MediaType.parseMediaTypes(expr.value)) {
+					for ( MediaType mediaType : MediaType.parseMediaTypes(expr.value)) {
 						result.add(new ProduceMediaTypeExpression(mediaType, expr.isNegated));
 					}
 				}

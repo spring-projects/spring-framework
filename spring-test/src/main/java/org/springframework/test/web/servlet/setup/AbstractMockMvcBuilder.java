@@ -76,7 +76,7 @@ public abstract class AbstractMockMvcBuilder<B extends AbstractMockMvcBuilder<B>
 	public final <T extends B> T addFilters(Filter... filters) {
 		Assert.notNull(filters, "filters cannot be null");
 
-		for(Filter f : filters) {
+		for (Filter f : filters) {
 			Assert.notNull(f, "filters cannot contain null values");
 			this.filters.add(f);
 		}
@@ -110,7 +110,7 @@ public abstract class AbstractMockMvcBuilder<B extends AbstractMockMvcBuilder<B>
 		Assert.notNull(filter, "filter cannot be null");
 		Assert.notNull(urlPatterns, "urlPatterns cannot be null");
 
-		if(urlPatterns.length > 0) {
+		if (urlPatterns.length > 0) {
 			filter = new PatternMappingFilterProxy(filter, urlPatterns);
 		}
 

@@ -155,7 +155,7 @@ abstract class SerializableTypeWrapper {
 			return provider.getType();
 		}
 		Type cached = cache.get(provider.getType());
-		if(cached != null) {
+		if (cached != null) {
 			return cached;
 		}
 		for (Class<?> type : SUPPORTED_SERIALIZABLE_TYPES) {

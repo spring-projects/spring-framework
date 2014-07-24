@@ -79,7 +79,7 @@ public aspect AnnotationBeanConfigurerAspect
 	 * An intermediary to match preConstructionConfiguration signature (that doesn't expose the annotation object)
 	 */
 	@CodeGenerationHint(ifNameSuffix="bb0")
-	private pointcut preConstructionConfigurationSupport(Configurable c) : @this(c) && if(c.preConstruction());
+	private pointcut preConstructionConfigurationSupport(Configurable c) : @this(c) && if (c.preConstruction());
 
 	/*
 	 * This declaration shouldn't be needed,

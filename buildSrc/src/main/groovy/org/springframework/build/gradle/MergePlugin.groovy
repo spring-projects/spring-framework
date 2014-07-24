@@ -21,12 +21,9 @@ import org.gradle.api.artifacts.Configuration
 import org.gradle.api.artifacts.ProjectDependency;
 import org.gradle.api.artifacts.maven.Conf2ScopeMapping
 import org.gradle.api.plugins.MavenPlugin
-import org.gradle.api.tasks.*
 import org.gradle.plugins.ide.eclipse.EclipsePlugin
-import org.gradle.plugins.ide.eclipse.model.EclipseClasspath;
 import org.gradle.plugins.ide.idea.IdeaPlugin
 import org.gradle.api.invocation.*
-
 
 /**
  * Gradle plugin that allows projects to merged together. Primarily developed to
@@ -76,13 +73,13 @@ class MergePlugin implements Plugin<Project> {
 
 		// Hook to perform the actual merge logic
 		project.afterEvaluate{
-			if(it.merge.into != null) {
+			if (it.merge.into != null) {
 				setup(it)
 			}
 		}
 
 		// Hook to build runtimeMerge dependencies
-		if(!attachedProjectsEvaluated) {
+		if (!attachedProjectsEvaluated) {
 			project.gradle.projectsEvaluated{
 				postProcessProjects(it)
 			}
@@ -102,7 +99,7 @@ class MergePlugin implements Plugin<Project> {
 		// invoking a task will invoke the task with the same name on 'into' project
 		["sourcesJar", "jar", "javadocJar", "javadoc", "install", "artifactoryPublish"].each {
 			def task = project.tasks.findByPath(it)
-			if(task) {
+			if (task) {
 				task.enabled = false
 				task.dependsOn(project.merge.into.tasks.findByPath(it))
 			}
@@ -120,7 +117,7 @@ class MergePlugin implements Plugin<Project> {
 	private void setupMaven(Project project) {
 		project.configurations.each { configuration ->
 			Conf2ScopeMapping mapping = project.conf2ScopeMappings.getMapping([configuration])
-			if(mapping.scope) {
+			if (mapping.scope) {
 				Configuration intoConfiguration = project.merge.into.configurations.create(
 					project.name + "-" + configuration.name)
 				configuration.excludeRules.each {
@@ -131,7 +128,7 @@ class MergePlugin implements Plugin<Project> {
 				configuration.dependencies.each {
 					def intoCompile = project.merge.into.configurations.getByName("compile")
 					// Protect against changing a compile scope dependency (SPR-10218)
-					if(!intoCompile.dependencies.contains(it)) {
+					if (!intoCompile.dependencies.contains(it)) {
 						intoConfiguration.dependencies.add(it)
 					}
 				}
