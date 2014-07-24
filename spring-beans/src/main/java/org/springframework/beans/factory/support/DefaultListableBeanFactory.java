@@ -1244,15 +1244,9 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	 * on the original bean.
 	 */
 	private boolean isSelfReference(String beanName, String candidateName) {
-		if (beanName.equals(candidateName)) {
-			return true;
-		}
-		if (candidateName != null && containsBeanDefinition(candidateName)) {
-			if (beanName.equals(getMergedLocalBeanDefinition(candidateName).getFactoryBeanName())) {
-				return true;
-			}
-		}
-		return false;
+		return (beanName != null && candidateName != null &&
+				(beanName.equals(candidateName) || (containsBeanDefinition(candidateName) &&
+						beanName.equals(getMergedLocalBeanDefinition(candidateName).getFactoryBeanName()))));
 	}
 
 	/**
