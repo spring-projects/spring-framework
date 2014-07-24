@@ -205,7 +205,7 @@ public class DefaultHandshakeHandler implements HandshakeHandler {
 		Principal user = determineUser(request, wsHandler, attributes);
 
 		if (logger.isTraceEnabled()) {
-			logger.trace("Upgrading to WebSocket");
+			logger.trace("Upgrading to WebSocket, subProtocol=" + subProtocol + ", extensions=" + extensions);
 		}
 		this.requestUpgradeStrategy.upgrade(request, response, subProtocol, extensions, user, wsHandler, attributes);
 		return true;
@@ -300,18 +300,23 @@ public class DefaultHandshakeHandler implements HandshakeHandler {
 
 	/**
 	 * Filter the list of requested WebSocket extensions.
-	 * <p>By default all request extensions are returned. The WebSocket server will further
-	 * compare the requested extensions against the list of supported extensions and
-	 * return only the ones that are both requested and supported.
+	 * <p>As of 4.1 the default implementation of this method filters the list to
+	 * leave only extensions that are both requested and supported.
 	 * @param request the current request
-	 * @param requested the list of extensions requested by the client
-	 * @param supported the list of extensions supported by the server
+	 * @param requestedExtensions the list of extensions requested by the client
+	 * @param supportedExtensions the list of extensions supported by the server
 	 * @return the selected extensions or an empty list
 	 */
 	protected List<WebSocketExtension> filterRequestedExtensions(ServerHttpRequest request,
-			List<WebSocketExtension> requested, List<WebSocketExtension> supported) {
+			List<WebSocketExtension> requestedExtensions, List<WebSocketExtension> supportedExtensions) {
 
-		return requested;
+		List<WebSocketExtension> result = new ArrayList<WebSocketExtension>(requestedExtensions.size());
+		for (WebSocketExtension extension : requestedExtensions) {
+			if (supportedExtensions.contains(extension)) {
+				result.add(extension);
+			}
+		}
+		return result;
 	}
 
 	/**
