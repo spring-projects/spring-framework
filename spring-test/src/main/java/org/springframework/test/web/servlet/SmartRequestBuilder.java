@@ -13,10 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.test.web.servlet;
 
 import org.springframework.mock.web.MockHttpServletRequest;
-import org.springframework.test.web.servlet.request.RequestPostProcessor;
 
 /**
  * Extended variant of a {@link RequestBuilder} that applies its

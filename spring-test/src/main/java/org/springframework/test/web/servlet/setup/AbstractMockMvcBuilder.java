@@ -30,6 +30,7 @@ import org.springframework.web.context.WebApplicationContext;
 
 import javax.servlet.Filter;
 import javax.servlet.ServletContext;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -121,6 +122,7 @@ public abstract class AbstractMockMvcBuilder<B extends AbstractMockMvcBuilder<B>
 	 * Build a {@link org.springframework.test.web.servlet.MockMvc} instance.
 	 */
 	@Override
+	@SuppressWarnings("rawtypes")
 	public final MockMvc build() {
 
 		WebApplicationContext wac = initWebAppContext();

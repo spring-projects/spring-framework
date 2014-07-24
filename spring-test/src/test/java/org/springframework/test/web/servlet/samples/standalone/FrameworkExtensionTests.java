@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,18 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.test.web.servlet.samples.standalone;
 
-import static org.mockito.Mockito.mock;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.springframework.test.web.servlet.setup.MockMvcBuilders.standaloneSetup;
+import java.security.Principal;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.stereotype.Controller;
 import org.springframework.test.web.servlet.MockMvc;
@@ -36,7 +32,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.context.WebApplicationContext;
 
-import java.security.Principal;
+import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.setup.MockMvcBuilders.*;
 
 /**
  * Demonstrates use of SPI extension points:
@@ -48,6 +47,7 @@ import java.security.Principal;
  * </ul>
  *
  * @author Rossen Stoyanchev
+ * @since 4.1
  */
 public class FrameworkExtensionTests {
 
@@ -59,7 +59,6 @@ public class FrameworkExtensionTests {
 		this.mockMvc = standaloneSetup(new SampleController()).apply(defaultSetup()).build();
 	}
 
-
 	@Test
 	public void fooHeader() throws Exception {
 		this.mockMvc.perform(get("/").with(headers().foo("a=b"))).andExpect(content().string("Foo"));
@@ -70,7 +69,6 @@ public class FrameworkExtensionTests {
 		this.mockMvc.perform(get("/").with(headers().bar("a=b"))).andExpect(content().string("Bar"));
 	}
 
-
 	private static TestMockMvcConfigurer defaultSetup() {
 		return new TestMockMvcConfigurer();
 	}
@@ -78,7 +76,6 @@ public class FrameworkExtensionTests {
 	private static TestRequestPostProcessor headers() {
 		return new TestRequestPostProcessor();
 	}
-
 
 
 	/**
@@ -119,7 +116,8 @@ public class FrameworkExtensionTests {
 		}
 
 		@Override
-		public RequestPostProcessor beforeMockMvcCreated(ConfigurableMockMvcBuilder<?> builder, WebApplicationContext context) {
+		public RequestPostProcessor beforeMockMvcCreated(ConfigurableMockMvcBuilder<?> builder,
+				WebApplicationContext context) {
 			return request -> {
 				request.setUserPrincipal(mock(Principal.class));
 				return request;
