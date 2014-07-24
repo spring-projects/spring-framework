@@ -1082,7 +1082,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			}
 		}
 		for (String candidateName : candidateNames) {
-			if (!candidateName.equals(beanName) && isAutowireCandidate(candidateName, descriptor)) {
+			if (!isSelfReference(beanName, candidateName) && isAutowireCandidate(candidateName, descriptor)) {
 				result.put(candidateName, getBean(candidateName));
 			}
 		}
@@ -1107,13 +1107,11 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	 */
 	protected String determineAutowireCandidate(Map<String, Object> candidateBeans, DependencyDescriptor descriptor) {
 		Class<?> requiredType = descriptor.getDependencyType();
-		String primaryCandidate =
-				determinePrimaryCandidate(candidateBeans, requiredType);
+		String primaryCandidate = determinePrimaryCandidate(candidateBeans, requiredType);
 		if (primaryCandidate != null) {
 			return primaryCandidate;
 		}
-		String priorityCandidate =
-				determineHighestPriorityCandidate(candidateBeans, requiredType);
+		String priorityCandidate = determineHighestPriorityCandidate(candidateBeans, requiredType);
 		if (priorityCandidate != null) {
 			return priorityCandidate;
 		}
@@ -1238,6 +1236,23 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	protected boolean matchesBeanName(String beanName, String candidateName) {
 		return (candidateName != null &&
 				(candidateName.equals(beanName) || ObjectUtils.containsElement(getAliases(beanName), candidateName)));
+	}
+
+	/**
+	 * Determine whether the given beanName/candidateName pair indicates a self reference,
+	 * i.e. whether the candidate points back to the original bean or to a factory method
+	 * on the original bean.
+	 */
+	private boolean isSelfReference(String beanName, String candidateName) {
+		if (beanName.equals(candidateName)) {
+			return true;
+		}
+		if (candidateName != null && containsBeanDefinition(candidateName)) {
+			if (beanName.equals(getMergedLocalBeanDefinition(candidateName).getFactoryBeanName())) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/**

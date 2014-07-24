@@ -20,6 +20,7 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import javax.annotation.PostConstruct;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -40,6 +41,7 @@ import org.springframework.core.env.StandardEnvironment;
 import org.springframework.core.io.DescriptiveResource;
 import org.springframework.tests.sample.beans.ITestBean;
 import org.springframework.tests.sample.beans.TestBean;
+import org.springframework.util.Assert;
 
 import static org.junit.Assert.*;
 
@@ -362,10 +364,8 @@ public class ConfigurationClassPostProcessorTests {
 
 	@Test
 	public void genericsBasedInjectionWithWildcardWithExtendsMatch() {
-		beanFactory.registerBeanDefinition("configClass",
-			new RootBeanDefinition(WildcardWithExtendsConfiguration.class));
-		ConfigurationClassPostProcessor pp = new ConfigurationClassPostProcessor();
-		pp.postProcessBeanFactory(beanFactory);
+		beanFactory.registerBeanDefinition("configClass", new RootBeanDefinition(WildcardWithExtendsConfiguration.class));
+		new ConfigurationClassPostProcessor().postProcessBeanFactory(beanFactory);
 
 		assertSame(beanFactory.getBean("stringRepo"), beanFactory.getBean("repoConsumer"));
 	}
@@ -373,8 +373,7 @@ public class ConfigurationClassPostProcessorTests {
 	@Test
 	public void genericsBasedInjectionWithWildcardWithGenericExtendsMatch() {
 		beanFactory.registerBeanDefinition("configClass", new RootBeanDefinition(WildcardWithGenericExtendsConfiguration.class));
-		ConfigurationClassPostProcessor pp = new ConfigurationClassPostProcessor();
-		pp.postProcessBeanFactory(beanFactory);
+		new ConfigurationClassPostProcessor().postProcessBeanFactory(beanFactory);
 
 		assertSame(beanFactory.getBean("genericRepo"), beanFactory.getBean("repoConsumer"));
 	}
@@ -386,6 +385,18 @@ public class ConfigurationClassPostProcessorTests {
 		pp.postProcessBeanFactory(beanFactory);
 		SimpleComponent simpleComponent = beanFactory.getBean(SimpleComponent.class);
 		assertNotNull(simpleComponent);
+	}
+
+	@Test
+	public void testSelfReferenceExclusionForFactoryMethodOnSameBean() {
+		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
+		bpp.setBeanFactory(beanFactory);
+		beanFactory.addBeanPostProcessor(bpp);
+		beanFactory.addBeanPostProcessor(new CommonAnnotationBeanPostProcessor());
+		beanFactory.registerBeanDefinition("configClass", new RootBeanDefinition(ConcreteConfig.class));
+		beanFactory.registerBeanDefinition("serviceBeanProvider", new RootBeanDefinition(ServiceBeanProvider.class));
+		new ConfigurationClassPostProcessor().postProcessBeanFactory(beanFactory);
+		beanFactory.preInstantiateSingletons();
 	}
 
 
@@ -411,7 +422,6 @@ public class ConfigurationClassPostProcessorTests {
 	static class Bar {
 
 		final Foo foo;
-
 
 		public Bar(Foo foo) {
 			this.foo = foo;
@@ -492,7 +502,6 @@ public class ConfigurationClassPostProcessorTests {
 		@Bean
 		public Repository<String> stringRepo() {
 			return new Repository<String>() {
-
 				@Override
 				public String toString() {
 					return "Repository<String>";
@@ -503,7 +512,6 @@ public class ConfigurationClassPostProcessorTests {
 		@Bean
 		public Repository<Integer> integerRepo() {
 			return new Repository<Integer>() {
-
 				@Override
 				public String toString() {
 					return "Repository<Integer>";
@@ -514,7 +522,6 @@ public class ConfigurationClassPostProcessorTests {
 		@Bean
 		public Repository<?> genericRepo() {
 			return new Repository<Object>() {
-
 				@Override
 				public String toString() {
 					return "Repository<Object>";
@@ -530,7 +537,6 @@ public class ConfigurationClassPostProcessorTests {
 		@Scope("prototype")
 		public Repository<String> stringRepo() {
 			return new Repository<String>() {
-
 				@Override
 				public String toString() {
 					return "Repository<String>";
@@ -542,7 +548,6 @@ public class ConfigurationClassPostProcessorTests {
 		@Scope("prototype")
 		public Repository<Integer> integerRepo() {
 			return new Repository<Integer>() {
-
 				@Override
 				public String toString() {
 					return "Repository<Integer>";
@@ -555,7 +560,6 @@ public class ConfigurationClassPostProcessorTests {
 		@SuppressWarnings("rawtypes")
 		public Repository genericRepo() {
 			return new Repository<Object>() {
-
 				@Override
 				public String toString() {
 					return "Repository<Object>";
@@ -756,4 +760,57 @@ public class ConfigurationClassPostProcessorTests {
 			MetaComponentScanConfigurationWithAttributeOverridesClass {
 	}
 
+	public static class ServiceBean {
+
+		private final String parameter;
+
+		public ServiceBean(String parameter) {
+			this.parameter = parameter;
+		}
+
+		public String getParameter() {
+			return parameter;
+		}
+	}
+
+	@Configuration
+	public static abstract class AbstractConfig {
+
+		@Bean
+		public ServiceBean serviceBean() {
+			return provider().getServiceBean();
+		}
+
+		@Bean
+		public ServiceBeanProvider provider() {
+			return new ServiceBeanProvider();
+		}
+	}
+
+	@Configuration
+	public static class ConcreteConfig extends AbstractConfig {
+
+		@Autowired
+		private ServiceBeanProvider provider;
+
+		@Bean
+		@Override
+		public ServiceBeanProvider provider() {
+			return provider;
+		}
+
+		@PostConstruct
+		public void validate() {
+			Assert.notNull(provider);
+		}
+	}
+
+	@Primary
+	public static class ServiceBeanProvider {
+
+		public ServiceBean getServiceBean() {
+			return new ServiceBean("message");
+		}
+	}
 }
+
