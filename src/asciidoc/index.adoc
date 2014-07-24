@@ -38211,7 +38211,7 @@ the specified target destination.
 
 What if you wanted to send messages to connected clients from any part of the
 application? Any application component can send messages to the `"brokerChannel"`.
-The easist way to do that is to have a `SimpMessagingTemplate` injected, and
+The easiest way to do that is to have a `SimpMessagingTemplate` injected, and
 use it to send messages. Typically it should be easy to have it injected by
 type, for example:
 
@@ -40938,8 +40938,7 @@ transactional JMS `Session`.
 The `JmsTemplate` contains many convenience methods to send a message. There are send
 methods that specify the destination using a `javax.jms.Destination` object and those
 that specify the destination using a string for use in a JNDI lookup. The send method
-that takes no destination argument uses the default destination. Here is an example that
-sends a message to a queue using the 1.0.2 implementation.
+that takes no destination argument uses the default destination.
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -42355,11 +42354,11 @@ interface using either source-level metadata or any arbitrary interface.
 
 
 [[jmx-interface-metadata]]
-==== Using Source-Level Metadata (JDK 5.0 annotations)
+==== Using Source-Level Metadata (Java annotations)
 Using the `MetadataMBeanInfoAssembler` you can define the management interfaces for your
 beans using source level metadata. The reading of metadata is encapsulated by the
 `org.springframework.jmx.export.metadata.JmxAttributeSource` interface. Spring JMX
-provides a default implementation which uses JDK 5.0 annotations, namely
+provides a default implementation which uses Java annotations, namely
 `org.springframework.jmx.export.annotation.AnnotationJmxAttributeSource`. The
 `MetadataMBeanInfoAssembler` __must__ be configured with an implementation instance of
 the `JmxAttributeSource` interface for it to function correctly (there is __no__
@@ -42959,7 +42958,7 @@ By default `ConnectorServerFactoryBean` creates a `JMXConnectorServer` bound to
 `"service:jmx:jmxmp://localhost:9875"`. The `serverConnector` bean thus exposes the
 local `MBeanServer` to clients through the JMXMP protocol on localhost, port 9875. Note
 that the JMXMP protocol is marked as optional by the JSR 160 specification: currently,
-the main open-source JMX implementation, MX4J, and the one provided with JDK 5.0
+the main open-source JMX implementation, MX4J, and the one provided with the JDK
 do __not__ support JMXMP.
 
 To specify another URL and register the `JMXConnectorServer` itself with the
@@ -45070,7 +45069,7 @@ executor may be single-threaded or even synchronous. Spring's abstraction hides
 implementation details between Java SE 1.4, Java SE 5 and Java EE environments.
 
 Spring's `TaskExecutor` interface is identical to the `java.util.concurrent.Executor`
-interface. In fact, its primary reason for existence is to abstract away the need for
+interface. In fact, its primary reason for existence was to abstract away the need for
 Java 5 when using thread pools. The interface has a single method `execute(Runnable
 task)` that accepts a task for execution based on the semantics and configuration of the
 thread pool.
@@ -45089,36 +45088,35 @@ behavior, it is possible to use this abstraction for your own needs.
 There are a number of pre-built implementations of `TaskExecutor` included with the
 Spring distribution. In all likelihood, you shouldn't ever need to implement your own.
 
-* `SimpleAsyncTaskExecutor` This implementation does not reuse any threads, rather it
-  starts up a new thread for each invocation. However, it does support a concurrency
-  limit which will block any invocations that are over the limit until a slot has been
-  freed up. If you're looking for true pooling, keep scrolling further down the page.
-* `SyncTaskExecutor` This implementation doesn't execute invocations asynchronously.
-  Instead, each invocation takes place in the calling thread. It is primarily used in
-  situations where multithreading isn't necessary such as simple test cases.
-* `ConcurrentTaskExecutor` This implementation is a wrapper for a Java 5
-  `java.util.concurrent.Executor`. There is an alternative, `ThreadPoolTaskExecutor`,
-  that exposes the `Executor` configuration parameters as bean properties. It is rare to
-  need to use the `ConcurrentTaskExecutor` but if the <<threadPoolTaskExecutor,
-  `ThreadPoolTaskExecutor`>> isn't robust enough for your needs, the
-  `ConcurrentTaskExecutor` is an alternative.
-* `SimpleThreadPoolTaskExecutor` This implementation is actually a subclass of Quartz's
-  `SimpleThreadPool` which listens to Spring's lifecycle callbacks. This is typically
-  used when you have a thread pool that may need to be shared by both Quartz and
-  non-Quartz components.
+* `SimpleAsyncTaskExecutor`
+  This implementation does not reuse any threads, rather it starts up a new thread
+  for each invocation. However, it does support a concurrency limit which will block
+  any invocations that are over the limit until a slot has been freed up. If you
+  re looking for true pooling, keep scrolling further down the page.
+* `SyncTaskExecutor`
+  This implementation doesn't execute invocations asynchronously. Instead, each
+  invocation takes place in the calling thread. It is primarily used in situations
+  where multi-threading isn't necessary such as simple test cases.
+* `ConcurrentTaskExecutor`
+  This implementation is an adapter for a `java.util.concurrent.Executor` object.
+  There is an alternative, `ThreadPoolTaskExecutor, that exposes the `Executor`
+  configuration parameters as bean properties. It is rare to need to use the
+  `ConcurrentTaskExecutor` but if the <<threadPoolTaskExecutor, `ThreadPoolTaskExecutor`>>
+  isn't flexible enough for your needs, the `ConcurrentTaskExecutor` is an alternative.
+* `SimpleThreadPoolTaskExecutor`
+  This implementation is actually a subclass of Quartz's `SimpleThreadPool` which
+  listens to Spring's lifecycle callbacks. This is typically used when you have a
+  thread pool that may need to be shared by both Quartz and non-Quartz components.
 * `ThreadPoolTaskExecutor`
-
-
-This implementation can only be used in a Java 5 environment but is also the most
-commonly used one in that environment. It exposes bean properties for configuring a
-`java.util.concurrent.ThreadPoolExecutor` and wraps it in a `TaskExecutor`. If you need
-something advanced such as a `ScheduledThreadPoolExecutor`, it is recommended that you
-use a <<concurrentTaskExecutor, `ConcurrentTaskExecutor`>> instead.
-
-* `TimerTaskExecutor` This implementation uses a single `TimerTask` as its backing
-  implementation. It's different from the <<syncTaskExecutor, `SyncTaskExecutor`>> in
-  that the method invocations are executed in a separate thread, although they are
-  synchronous in that thread.
+  This implementation is the most commonly used one. It exposes bean properties for
+  configuring a java.util.concurrent.ThreadPoolExecutor` and wraps it in a `TaskExecutor`.
+  If you need to adapt to a different kind of `java.util.concurrent.Executor`, it is
+  recommended that you use a <<concurrentTaskExecutor, `ConcurrentTaskExecutor`>> instead.
+* `TimerTaskExecutor`
+  This implementation uses a single `TimerTask` as its backing implementation.
+  It's different from the <<syncTaskExecutor, `SyncTaskExecutor`>> in that the method
+  invocations are executed in a separate thread, although they are effectively
+  synchronously batched in that thread.
 * `WorkManagerTaskExecutor`
 
 +
@@ -45133,9 +45131,9 @@ Application Server implementations.
 
 This implementation uses the CommonJ WorkManager as its backing implementation and is
 the central convenience class for setting up a CommonJ WorkManager reference in a Spring
-context. Similar to the <<simpleThreadPoolTaskExecutor,
-`SimpleThreadPoolTaskExecutor`>>, this class implements the WorkManager interface and
-therefore can be used directly as a WorkManager as well.
+context. Similar to the <<simpleThreadPoolTaskExecutor, `SimpleThreadPoolTaskExecutor`>>,
+this class implements the WorkManager interface and therefore can be used directly as a
+WorkManager as well.
 
 
 
