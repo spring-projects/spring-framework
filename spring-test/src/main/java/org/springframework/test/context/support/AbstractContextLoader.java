@@ -55,6 +55,7 @@ import org.springframework.util.ResourceUtils;
  * @author Juergen Hoeller
  * @since 2.5
  * @see #generateDefaultLocations
+ * @see #getResourceSuffixes
  * @see #modifyLocations
  */
 public abstract class AbstractContextLoader implements SmartContextLoader {
@@ -144,14 +145,14 @@ public abstract class AbstractContextLoader implements SmartContextLoader {
 	// --- ContextLoader -------------------------------------------------------
 
 	/**
-	 * If the supplied {@code locations} are {@code null} or
-	 * <em>empty</em> and {@link #isGenerateDefaultLocations()} returns
-	 * {@code true}, default locations will be
-	 * {@link #generateDefaultLocations(Class) generated} for the specified
-	 * {@link Class class} and the configured
-	 * {@link #getResourceSuffix() resource suffix}; otherwise, the supplied
-	 * {@code locations} will be {@link #modifyLocations modified} if
-	 * necessary and returned.
+	 * If the supplied {@code locations} are {@code null} or <em>empty</em>
+	 * and {@link #isGenerateDefaultLocations()} returns {@code true},
+	 * default locations will be {@link #generateDefaultLocations(Class)
+	 * generated} (i.e., detected) for the specified {@link Class class}
+	 * and the configured {@linkplain #getResourceSuffixes() resource suffixes};
+	 * otherwise, the supplied {@code locations} will be
+	 * {@linkplain #modifyLocations modified} if necessary and returned.
+	 *
 	 * @param clazz the class with which the locations are associated: to be
 	 * used when generating default locations
 	 * @param locations the unmodified locations to use for loading the
@@ -173,45 +174,57 @@ public abstract class AbstractContextLoader implements SmartContextLoader {
 	/**
 	 * Generate the default classpath resource locations array based on the
 	 * supplied class.
+	 *
 	 * <p>For example, if the supplied class is {@code com.example.MyTest},
 	 * the generated locations will contain a single string with a value of
-	 * &quot;classpath:com/example/MyTest{@code <suffix>}&quot;,
-	 * where {@code <suffix>} is the value of the
-	 * {@link #getResourceSuffix() resource suffix} string.
+	 * {@code "classpath:com/example/MyTest<suffix>"}, where {@code <suffix>}
+	 * is the value of the first configured
+	 * {@linkplain #getResourceSuffixes() resource suffix} for which the
+	 * generated location actually exists in the classpath.
+	 *
 	 * <p>As of Spring 3.1, the implementation of this method adheres to the
 	 * contract defined in the {@link SmartContextLoader} SPI. Specifically,
 	 * this method will <em>preemptively</em> verify that the generated default
 	 * location actually exists. If it does not exist, this method will log a
 	 * warning and return an empty array.
+	 *
 	 * <p>Subclasses can override this method to implement a different
 	 * <em>default location generation</em> strategy.
+	 *
 	 * @param clazz the class for which the default locations are to be generated
 	 * @return an array of default application context resource locations
 	 * @since 2.5
-	 * @see #getResourceSuffix()
+	 * @see #getResourceSuffixes()
 	 */
 	protected String[] generateDefaultLocations(Class<?> clazz) {
 		Assert.notNull(clazz, "Class must not be null");
-		String suffix = getResourceSuffix();
-		Assert.hasText(suffix, "Resource suffix must not be empty");
-		String resourcePath = ClassUtils.convertClassNameToResourcePath(clazz.getName()) + suffix;
-		String prefixedResourcePath = ResourceUtils.CLASSPATH_URL_PREFIX + resourcePath;
-		ClassPathResource classPathResource = new ClassPathResource(resourcePath);
 
-		if (classPathResource.exists()) {
-			if (logger.isInfoEnabled()) {
-				logger.info(String.format("Detected default resource location \"%s\" for test class [%s]",
-					prefixedResourcePath, clazz.getName()));
+		String[] suffixes = getResourceSuffixes();
+		for (String suffix : suffixes) {
+			Assert.hasText(suffix, "Resource suffix must not be empty");
+			String resourcePath = ClassUtils.convertClassNameToResourcePath(clazz.getName()) + suffix;
+			String prefixedResourcePath = ResourceUtils.CLASSPATH_URL_PREFIX + resourcePath;
+			ClassPathResource classPathResource = new ClassPathResource(resourcePath);
+
+			if (classPathResource.exists()) {
+				if (logger.isInfoEnabled()) {
+					logger.info(String.format("Detected default resource location \"%s\" for test class [%s]",
+						prefixedResourcePath, clazz.getName()));
+				}
+				return new String[] { prefixedResourcePath };
 			}
-			return new String[] { prefixedResourcePath };
-		}
-		else {
-			if (logger.isInfoEnabled()) {
-				logger.info(String.format("Could not detect default resource locations for test class [%s]: "
+			else if (logger.isDebugEnabled()) {
+				logger.debug(String.format("Did not detect default resource location for test class [%s]: "
 						+ "%s does not exist", clazz.getName(), classPathResource));
 			}
-			return EMPTY_STRING_ARRAY;
 		}
+
+		if (logger.isInfoEnabled()) {
+			logger.info(String.format("Could not detect default resource locations for test class [%s]: "
+					+ "no resource found for suffixes %s.", clazz.getName(), ObjectUtils.nullSafeToString(suffixes)));
+		}
+
+		return EMPTY_STRING_ARRAY;
 	}
 
 	/**
@@ -250,13 +263,36 @@ public abstract class AbstractContextLoader implements SmartContextLoader {
 	}
 
 	/**
-	 * Get the suffix to append to {@link ApplicationContext} resource locations
-	 * when generating default locations.
-	 * <p>Must be implemented by subclasses.
-	 * @return the resource suffix; should not be {@code null} or empty
+	 * Get the suffix to append to {@link ApplicationContext} resource
+	 * locations when detecting default locations.
+	 *
+	 * <p>Subclasses must provide an implementation of this method that
+	 * returns a single suffix. Alternatively subclasses may provide a
+	 * <em>no-op</em> implementation of this method and override
+	 * {@link #getResourceSuffixes()} in order to provide multiple custom
+	 * suffixes.
+	 *
+	 * @return the resource suffix; never {@code null} or empty
 	 * @since 2.5
 	 * @see #generateDefaultLocations(Class)
+	 * @see #getResourceSuffixes()
 	 */
 	protected abstract String getResourceSuffix();
+
+	/**
+	 * Get the suffixes to append to {@link ApplicationContext} resource
+	 * locations when detecting default locations.
+	 *
+	 * <p>The default implementation simply wraps the value returned by
+	 * {@link #getResourceSuffix()} in a single-element array, but this
+	 * can be overridden by subclasses in order to support multiple suffixes.
+	 *
+	 * @return the resource suffixes; never {@code null} or empty
+	 * @since 4.1
+	 * @see #generateDefaultLocations(Class)
+	 */
+	protected String[] getResourceSuffixes() {
+		return new String[] { getResourceSuffix() };
+	}
 
 }

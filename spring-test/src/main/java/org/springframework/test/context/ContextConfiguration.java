@@ -27,48 +27,52 @@ import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
 
 /**
- * {@code @ContextConfiguration} defines class-level metadata that is
- * used to determine how to load and configure an
- * {@link org.springframework.context.ApplicationContext ApplicationContext}
- * for integration tests.
+ * {@code @ContextConfiguration} defines class-level metadata that is used to determine
+ * how to load and configure an {@link org.springframework.context.ApplicationContext
+ * ApplicationContext} for integration tests.
  *
  * <h3>Supported Resource Types</h3>
  *
- * <p>Prior to Spring 3.1, only path-based resource locations were supported.
- * As of Spring 3.1, {@linkplain #loader context loaders} may choose to support
- * <em>either</em> path-based <em>or</em> class-based resources. As of Spring
- * 4.0.4, {@linkplain #loader context loaders} may choose to support path-based
+ * <p>
+ * Prior to Spring 3.1, only path-based resource locations (typically XML configuration
+ * files) were supported. As of Spring 3.1, {@linkplain #loader context loaders} may
+ * choose to support <em>either</em> path-based <em>or</em> class-based resources. As of
+ * Spring 4.0.4, {@linkplain #loader context loaders} may choose to support path-based
  * <em>and</em> class-based resources simultaneously. Consequently
- * {@code @ContextConfiguration} can be used to declare either path-based
- * resource locations (via the {@link #locations} or {@link #value} attribute)
- * <em>or</em> annotated classes (via the {@link #classes} attribute). Note,
- * however, that most implementations of {@link SmartContextLoader} only support
- * a single resource type.
+ * {@code @ContextConfiguration} can be used to declare either path-based resource
+ * locations (via the {@link #locations} or {@link #value} attribute) <em>or</em>
+ * annotated classes (via the {@link #classes} attribute). Note, however, that most
+ * implementations of {@link SmartContextLoader} only support a single resource type. As
+ * of Spring 4.1, path-based resource locations may be either XML configuration files or
+ * Groovy scripts (if Groovy is on the classpath). Of course, third-party frameworks may
+ * choose to support additional types of path-based resources.
  *
  * <h3>Annotated Classes</h3>
  *
- * <p>The term <em>annotated class</em> can refer to any of the following.
+ * <p>
+ * The term <em>annotated class</em> can refer to any of the following.
  *
  * <ul>
- * <li>A class annotated with
- * {@link org.springframework.context.annotation.Configuration @Configuration}</li>
+ * <li>A class annotated with {@link org.springframework.context.annotation.Configuration
+ * @Configuration}</li>
  * <li>A component (i.e., a class annotated with
  * {@link org.springframework.stereotype.Component @Component},
  * {@link org.springframework.stereotype.Service @Service},
  * {@link org.springframework.stereotype.Repository @Repository}, etc.)</li>
  * <li>A JSR-330 compliant class that is annotated with {@code javax.inject} annotations</li>
- * <li>Any other class that contains
- * {@link org.springframework.context.annotation.Bean @Bean}-methods</li>
+ * <li>Any other class that contains {@link org.springframework.context.annotation.Bean
+ * @Bean}-methods</li>
  * </ul>
  *
- * <p>Consult the Javadoc for
- * {@link org.springframework.context.annotation.Configuration @Configuration} and
- * {@link org.springframework.context.annotation.Bean @Bean}
- * for further information regarding the configuration and semantics of
+ * <p>
+ * Consult the Javadoc for {@link org.springframework.context.annotation.Configuration
+ * @Configuration} and {@link org.springframework.context.annotation.Bean @Bean} for
+ * further information regarding the configuration and semantics of
  * <em>annotated classes</em>.
  *
- * <p>As of Spring Framework 4.0, this annotation may be used as a
- * <em>meta-annotation</em> to create custom <em>composed annotations</em>.
+ * <p>
+ * As of Spring Framework 4.0, this annotation may be used as a <em>meta-annotation</em>
+ * to create custom <em>composed annotations</em>.
  *
  * @author Sam Brannen
  * @since 2.5
@@ -104,20 +108,20 @@ public @interface ContextConfiguration {
 	 * <p>Check out the Javadoc for
 	 * {@link org.springframework.test.context.support.AbstractContextLoader#modifyLocations
 	 * AbstractContextLoader.modifyLocations()} for details on how a location
-	 * String will be interpreted at runtime, in particular in case of a relative
+	 * will be interpreted at runtime, in particular in case of a relative
 	 * path. Also, check out the documentation on
 	 * {@link org.springframework.test.context.support.AbstractContextLoader#generateDefaultLocations
-	 * AbstractContextLoader.generateDefaultLocations()} for details on the default
-	 * locations that are going to be used if none are specified.
+	 * AbstractContextLoader.generateDefaultLocations()} for details on the
+	 * default locations that are going to be used if none are specified.
 	 *
-	 * <p>Note that the above-mentioned default rules only apply for a standard
+	 * <p>Note that the aforementioned default rules only apply for a standard
 	 * {@link org.springframework.test.context.support.AbstractContextLoader
 	 * AbstractContextLoader} subclass such as
-	 * {@link org.springframework.test.context.support.GenericXmlContextLoader
-	 * GenericXmlContextLoader} which is the effective default implementation
-	 * used at runtime if {@code locations} are configured. See the
-	 * documentation for {@link #loader} for further details regarding default
-	 * loaders.
+	 * {@link org.springframework.test.context.support.GenericXmlContextLoader GenericXmlContextLoader} or
+	 * {@link org.springframework.test.context.support.GenericGroovyXmlContextLoader GenericGroovyXmlContextLoader}
+	 * which are the effective default implementations used at runtime if
+	 * {@code locations} are configured. See the documentation for {@link #loader}
+	 * for further details regarding default loaders.
 	 *
 	 * <p>This attribute may <strong>not</strong> be used in conjunction with
 	 * {@link #value}, but it may be used instead of {@link #value}.
@@ -186,17 +190,17 @@ public @interface ContextConfiguration {
 	 * <p>In the following example that uses path-based resource locations, the
 	 * {@link org.springframework.context.ApplicationContext ApplicationContext}
 	 * for {@code ExtendedTest} will be loaded from
-	 * &quot;base-context.xml&quot; <strong>and</strong>
-	 * &quot;extended-context.xml&quot;, in that order. Beans defined in
-	 * &quot;extended-context.xml&quot; may therefore override those defined in
-	 * &quot;base-context.xml&quot;.
+	 * {@code "base-context.xml"} <strong>and</strong>
+	 * {@code "extended-context.xml"}, in that order. Beans defined in
+	 * {@code "extended-context.xml"} may therefore override those defined
+	 * in {@code "base-context.xml"}.
 	 * <pre class="code">
-	 * &#064;ContextConfiguration(&quot;base-context.xml&quot;)
+	 * &#064;ContextConfiguration("base-context.xml")
 	 * public class BaseTest {
 	 *     // ...
 	 * }
 	 *
-	 * &#064;ContextConfiguration(&quot;extended-context.xml&quot;)
+	 * &#064;ContextConfiguration("extended-context.xml")
 	 * public class ExtendedTest extends BaseTest {
 	 *     // ...
 	 * }
@@ -281,16 +285,13 @@ public @interface ContextConfiguration {
 	 * {@link org.springframework.test.context.web.WebAppConfiguration
 	 * &#064;WebAppConfiguration}. For further details on the default behavior
 	 * of various concrete {@code SmartContextLoaders}, check out the Javadoc for
-	 * {@link org.springframework.test.context.support.AbstractContextLoader
-	 * AbstractContextLoader},
-	 * {@link org.springframework.test.context.support.GenericXmlContextLoader
-	 * GenericXmlContextLoader},
-	 * {@link org.springframework.test.context.support.AnnotationConfigContextLoader
-	 * AnnotationConfigContextLoader},
-	 * {@link org.springframework.test.context.web.GenericXmlWebContextLoader
-	 * GenericXmlWebContextLoader}, and
-	 * {@link org.springframework.test.context.web.AnnotationConfigWebContextLoader
-	 * AnnotationConfigWebContextLoader}.
+	 * {@link org.springframework.test.context.support.AbstractContextLoader AbstractContextLoader},
+	 * {@link org.springframework.test.context.support.GenericXmlContextLoader GenericXmlContextLoader},
+	 * {@link org.springframework.test.context.support.GenericGroovyXmlContextLoader GenericGroovyXmlContextLoader},
+	 * {@link org.springframework.test.context.support.AnnotationConfigContextLoader AnnotationConfigContextLoader},
+	 * {@link org.springframework.test.context.web.GenericXmlWebContextLoader GenericXmlWebContextLoader},
+	 * {@link org.springframework.test.context.web.GenericGroovyXmlWebContextLoader GenericGroovyXmlWebContextLoader}, and
+	 * {@link org.springframework.test.context.web.AnnotationConfigWebContextLoader AnnotationConfigWebContextLoader}.
 	 *
 	 * @since 2.5
 	 */
