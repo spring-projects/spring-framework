@@ -684,10 +684,10 @@ project("spring-websocket") {
 			exclude group: "org.apache.tomcat", module: "tomcat-websocket-api"
 			exclude group: "org.apache.tomcat", module: "tomcat-servlet-api"
 		}
-		optional("org.glassfish.tyrus:tyrus-spi:1.7")
-		optional("org.glassfish.tyrus:tyrus-core:1.7")
-		optional("org.glassfish.tyrus:tyrus-server:1.7")
-		optional("org.glassfish.tyrus:tyrus-container-servlet:1.7")
+		optional("org.glassfish.tyrus:tyrus-spi:1.3.5")
+		optional("org.glassfish.tyrus:tyrus-core:1.3.5")
+		optional("org.glassfish.tyrus:tyrus-server:1.3.5")
+		optional("org.glassfish.tyrus:tyrus-container-servlet:1.3.5")
 		optional("org.eclipse.jetty:jetty-webapp:${jettyVersion}") {
 			exclude group: "javax.servlet", module: "javax.servlet"
 		}
