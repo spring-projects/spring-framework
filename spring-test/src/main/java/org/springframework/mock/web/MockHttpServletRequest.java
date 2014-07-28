@@ -58,7 +58,12 @@ import org.springframework.util.StringUtils;
 /**
  * Mock implementation of the {@link javax.servlet.http.HttpServletRequest} interface.
  *
- * <p>As of Spring 4.0, this set of mocks is designed on a Servlet 3.0 baseline.
+ * <p>The default, preferred {@link Locale} for the <em>server</em> mocked
+ * by this request is {@link Locale#ENGLISH}. This value can be changed
+ * via {@link #addPreferredLocale} or {@link #setPreferredLocales}.
+ *
+ * <p>As of Spring Framework 4.0, this set of mocks is designed on a Servlet
+ * 3.0 baseline.
  *
  * @author Juergen Hoeller
  * @author Rod Johnson
