@@ -337,10 +337,120 @@ public class JmsMessagingTemplateTests {
 		assertNull(messagingTemplate.receiveAndConvert("myQueue", String.class));
 	}
 
+	@Test
+	public void sendAndReceive() {
+		Destination destination = new Destination() {};
+		Message<String> request = createTextMessage();
+		javax.jms.Message replyJmsMessage = createJmsTextMessage();
+		given(jmsTemplate.sendAndReceive(eq(destination), anyObject())).willReturn(replyJmsMessage);
+
+		Message<?> actual = messagingTemplate.sendAndReceive(destination, request);
+		verify(jmsTemplate, times(1)).sendAndReceive(eq(destination), anyObject());
+		assertTextMessage(actual);
+	}
+
+	@Test
+	public void sendAndReceiveName() {
+		Message<String> request = createTextMessage();
+		javax.jms.Message replyJmsMessage = createJmsTextMessage();
+		given(jmsTemplate.sendAndReceive(eq("myQueue"), anyObject())).willReturn(replyJmsMessage);
+
+		Message<?> actual = messagingTemplate.sendAndReceive("myQueue", request);
+		verify(jmsTemplate, times(1)).sendAndReceive(eq("myQueue"), anyObject());
+		assertTextMessage(actual);
+	}
+
+	@Test
+	public void sendAndReceiveDefaultDestination() {
+		Destination destination = new Destination() {};
+		messagingTemplate.setDefaultDestination(destination);
+		Message<String> request = createTextMessage();
+		javax.jms.Message replyJmsMessage = createJmsTextMessage();
+		given(jmsTemplate.sendAndReceive(eq(destination), anyObject())).willReturn(replyJmsMessage);
+
+		Message<?> actual = messagingTemplate.sendAndReceive(request);
+		verify(jmsTemplate, times(1)).sendAndReceive(eq(destination), anyObject());
+		assertTextMessage(actual);
+	}
+
+	@Test
+	public void sendAndReceiveDefaultDestinationName() {
+		messagingTemplate.setDefaultDestinationName("myQueue");
+		Message<String> request = createTextMessage();
+		javax.jms.Message replyJmsMessage = createJmsTextMessage();
+		given(jmsTemplate.sendAndReceive(eq("myQueue"), anyObject())).willReturn(replyJmsMessage);
+
+		Message<?> actual = messagingTemplate.sendAndReceive(request);
+		verify(jmsTemplate, times(1)).sendAndReceive(eq("myQueue"), anyObject());
+		assertTextMessage(actual);
+	}
+
+	@Test
+	public void sendAndReceiveNoDefaultSet() {
+		Message<String> message = createTextMessage();
+
+		thrown.expect(IllegalStateException.class);
+		messagingTemplate.sendAndReceive(message);
+	}
+
+	@Test
+	public void convertSendAndReceivePayload() throws JMSException {
+		Destination destination = new Destination() {};
+		javax.jms.Message replyJmsMessage = createJmsTextMessage("My reply");
+		given(jmsTemplate.sendAndReceive(eq(destination), anyObject())).willReturn(replyJmsMessage);
+
+		String reply = messagingTemplate.convertSendAndReceive(destination, "my Payload", String.class);
+		verify(jmsTemplate, times(1)).sendAndReceive(eq(destination), anyObject());
+		assertEquals("My reply", reply);
+	}
+
+	@Test
+	public void convertSendAndReceivePayloadName() throws JMSException {
+		javax.jms.Message replyJmsMessage = createJmsTextMessage("My reply");
+		given(jmsTemplate.sendAndReceive(eq("myQueue"), anyObject())).willReturn(replyJmsMessage);
+
+		String reply = messagingTemplate.convertSendAndReceive("myQueue", "my Payload", String.class);
+		verify(jmsTemplate, times(1)).sendAndReceive(eq("myQueue"), anyObject());
+		assertEquals("My reply", reply);
+	}
+
+	@Test
+	public void convertSendAndReceiveDefaultDestination() throws JMSException {
+		Destination destination = new Destination() {};
+		messagingTemplate.setDefaultDestination(destination);
+		javax.jms.Message replyJmsMessage = createJmsTextMessage("My reply");
+		given(jmsTemplate.sendAndReceive(eq(destination), anyObject())).willReturn(replyJmsMessage);
+
+		String reply = messagingTemplate.convertSendAndReceive("my Payload", String.class);
+		verify(jmsTemplate, times(1)).sendAndReceive(eq(destination), anyObject());
+		assertEquals("My reply", reply);
+	}
+
+	@Test
+	public void convertSendAndReceiveDefaultDestinationName() throws JMSException {
+		messagingTemplate.setDefaultDestinationName("myQueue");
+		javax.jms.Message replyJmsMessage = createJmsTextMessage("My reply");
+		given(jmsTemplate.sendAndReceive(eq("myQueue"), anyObject())).willReturn(replyJmsMessage);
+
+		String reply = messagingTemplate.convertSendAndReceive("my Payload", String.class);
+		verify(jmsTemplate, times(1)).sendAndReceive(eq("myQueue"), anyObject());
+		assertEquals("My reply", reply);
+	}
+
+	@Test
+	public void convertSendAndReceiveNoDefaultSet() throws JMSException {
+		thrown.expect(IllegalStateException.class);
+		messagingTemplate.convertSendAndReceive("my Payload", String.class);
+	}
+
+
+	private Message<String> createTextMessage(String payload) {
+		return MessageBuilder
+				.withPayload(payload).setHeader("foo", "bar").build();
+	}
 
 	private Message<String> createTextMessage() {
-		return MessageBuilder
-				.withPayload("Hello").setHeader("foo", "bar").build();
+		return createTextMessage("Hello");
 	}
 
 	private javax.jms.Message createJmsTextMessage(String payload) {

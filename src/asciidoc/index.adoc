@@ -40722,6 +40722,10 @@ to provide consistent management of QOS values, the `JmsTemplate` must therefore
 specifically enabled to use its own QOS values by setting the boolean property
 `isExplicitQosEnabled` to `true`.
 
+For convenience, `JmsTemplate` also exposes a basic request-reply operation that allows
+to send a message and wait for a reply on a temporary queue that is created as part of
+the operation.
+
 [NOTE]
 ====
 Instances of the `JmsTemplate` class are __thread-safe once configured__. This is

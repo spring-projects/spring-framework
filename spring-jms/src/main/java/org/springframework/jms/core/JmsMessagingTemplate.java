@@ -28,7 +28,7 @@ import org.springframework.jms.support.converter.MessagingMessageConverter;
 import org.springframework.jms.support.converter.SimpleMessageConverter;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessagingException;
-import org.springframework.messaging.core.AbstractMessageReceivingTemplate;
+import org.springframework.messaging.core.AbstractMessagingTemplate;
 import org.springframework.messaging.core.MessagePostProcessor;
 import org.springframework.util.Assert;
 
@@ -38,7 +38,7 @@ import org.springframework.util.Assert;
  * @author Stephane Nicoll
  * @since 4.1
  */
-public class JmsMessagingTemplate extends AbstractMessageReceivingTemplate<Destination>
+public class JmsMessagingTemplate extends AbstractMessagingTemplate<Destination>
 		implements JmsMessageOperations, InitializingBean {
 
 	private JmsTemplate jmsTemplate;
@@ -207,12 +207,75 @@ public class JmsMessagingTemplate extends AbstractMessageReceivingTemplate<Desti
 	}
 
 	@Override
+	public Message<?> sendAndReceive(Message<?> requestMessage) {
+		Destination defaultDestination = getDefaultDestination();
+		if (defaultDestination != null) {
+			return sendAndReceive(defaultDestination, requestMessage);
+		}
+		else {
+			return sendAndReceive(getRequiredDefaultDestinationName(), requestMessage);
+		}
+	}
+
+	@Override
+	public Message<?> sendAndReceive(String destinationName, Message<?> requestMessage)
+			throws MessagingException {
+		return doSendAndReceive(destinationName, requestMessage);
+	}
+
+	@Override
+	public <T> T convertSendAndReceive(String destinationName, Object request, Class<T> targetClass)
+			throws MessagingException {
+		return convertSendAndReceive(destinationName, request, null, targetClass);
+	}
+
+	@Override
+	public <T> T convertSendAndReceive(Object request, Class<T> targetClass) {
+		return convertSendAndReceive(request, targetClass, null);
+	}
+
+	@Override
+	public <T> T convertSendAndReceive(String destinationName, Object request,
+			Map<String, Object> headers, Class<T> targetClass) throws MessagingException {
+
+		return convertSendAndReceive(destinationName, request, headers, targetClass, null);
+	}
+
+	@Override
+	public <T> T convertSendAndReceive(Object request, Class<T> targetClass, MessagePostProcessor postProcessor) {
+		Destination defaultDestination = getDefaultDestination();
+		if (defaultDestination != null) {
+			return convertSendAndReceive(defaultDestination, request, targetClass, postProcessor);
+		}
+		else {
+			return convertSendAndReceive(getRequiredDefaultDestinationName(), request, targetClass, postProcessor);
+		}
+	}
+
+	@Override
+	public <T> T convertSendAndReceive(String destinationName, Object request, Class<T> targetClass,
+			MessagePostProcessor requestPostProcessor) throws MessagingException {
+
+		return convertSendAndReceive(destinationName, request, null, targetClass, requestPostProcessor);
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public <T> T convertSendAndReceive(String destinationName, Object request, Map<String, Object> headers,
+			Class<T> targetClass, MessagePostProcessor postProcessor) {
+
+		Message<?> requestMessage = doConvert(request, headers, postProcessor);
+		Message<?> replyMessage = sendAndReceive(destinationName, requestMessage);
+		return (replyMessage != null ? (T) getMessageConverter().fromMessage(replyMessage, targetClass) : null);
+	}
+
+	@Override
 	protected void doSend(Destination destination, Message<?> message) {
-		this.jmsTemplate.send(destination, new MessagingMessageCreator(message, this.jmsMessageConverter));
+		this.jmsTemplate.send(destination, createMessageCreator(message));
 	}
 
 	protected void doSend(String destinationName, Message<?> message) {
-		this.jmsTemplate.send(destinationName, new MessagingMessageCreator(message, this.jmsMessageConverter));
+		this.jmsTemplate.send(destinationName, createMessageCreator(message));
 	}
 
 	@Override
@@ -224,6 +287,23 @@ public class JmsMessagingTemplate extends AbstractMessageReceivingTemplate<Desti
 	protected Message<?> doReceive(String destinationName) {
 		javax.jms.Message jmsMessage = this.jmsTemplate.receive(destinationName);
 		return doConvert(jmsMessage);
+	}
+
+	@Override
+	protected Message<?> doSendAndReceive(Destination destination, Message<?> requestMessage) {
+		javax.jms.Message jmsMessage = this.jmsTemplate
+				.sendAndReceive(destination, createMessageCreator(requestMessage));
+		return doConvert(jmsMessage);
+	}
+
+	protected Message<?> doSendAndReceive(String destinationName, Message<?> requestMessage) {
+		javax.jms.Message jmsMessage = this.jmsTemplate
+				.sendAndReceive(destinationName, createMessageCreator(requestMessage));
+		return doConvert(jmsMessage);
+	}
+
+	private MessagingMessageCreator createMessageCreator(Message<?> message) {
+		return new MessagingMessageCreator(message, this.jmsMessageConverter);
 	}
 
 	protected String getRequiredDefaultDestinationName() {
