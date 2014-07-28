@@ -23,10 +23,9 @@ import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.util.Assert;
-import org.springframework.util.CollectionUtils;
+import org.springframework.util.ObjectUtils;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.Collection;
 
 /**
  * A convenient base class for a {@code ResponseBodyAdvice} to instruct the
@@ -48,9 +47,9 @@ public abstract class AbstractJsonpResponseBodyAdvice extends AbstractMappingJac
 	private final String[] jsonpQueryParamNames;
 
 
-	protected AbstractJsonpResponseBodyAdvice(Collection<String> queryParamNames) {
-		Assert.isTrue(!CollectionUtils.isEmpty(queryParamNames), "At least one query param name is required");
-		this.jsonpQueryParamNames = queryParamNames.toArray(new String[queryParamNames.size()]);
+	protected AbstractJsonpResponseBodyAdvice(String... queryParamNames) {
+		Assert.isTrue(!ObjectUtils.isEmpty(queryParamNames), "At least one query param name is required");
+		this.jsonpQueryParamNames = queryParamNames;
 	}
 
 

@@ -355,12 +355,12 @@ public class RequestMappingHandlerAdapterTests {
 		}
 	}
 
-	@ControllerAdvice
-	private static class JsonpAdvice extends AbstractJsonpResponseBodyAdvice {
+@ControllerAdvice
+private static class JsonpAdvice extends AbstractJsonpResponseBodyAdvice {
 
-		public JsonpAdvice() {
-			super(Arrays.asList("c"));
-		}
+	public JsonpAdvice() {
+		super("c");
 	}
+}
 
 }
