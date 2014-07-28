@@ -21,10 +21,9 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.GenericXmlApplicationContext;
 
 /**
- *
  * @author Stephane Nicoll
  */
-public class AspectJJcacheNamespaceConfigTests extends AbstractJCacheAnnotationTests {
+public class JCacheAspectJNamespaceConfigTests extends AbstractJCacheAnnotationTests {
 
 	@Override
 	protected ApplicationContext getApplicationContext() {
