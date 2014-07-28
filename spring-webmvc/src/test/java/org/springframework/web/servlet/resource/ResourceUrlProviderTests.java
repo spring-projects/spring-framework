@@ -68,9 +68,9 @@ public class ResourceUrlProviderTests {
 	@Test
 	public void getFingerprintedResourceUrl() {
 		Map<String, VersionStrategy> versionStrategyMap = new HashMap<>();
-		versionStrategyMap.put("/**", new ContentBasedVersionStrategy());
+		versionStrategyMap.put("/**", new ContentVersionStrategy());
 		VersionResourceResolver versionResolver = new VersionResourceResolver();
-		versionResolver.setVersionStrategyMap(versionStrategyMap);
+		versionResolver.setStrategyMap(versionStrategyMap);
 
 		List<ResourceResolver> resolvers = new ArrayList<ResourceResolver>();
 		resolvers.add(versionResolver);

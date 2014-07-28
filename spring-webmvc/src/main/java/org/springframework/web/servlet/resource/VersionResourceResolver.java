@@ -50,6 +50,7 @@ public class VersionResourceResolver extends AbstractResourceResolver {
 
 	private Map<String, VersionStrategy> versionStrategyMap = Collections.emptyMap();
 
+
 	/**
 	 * Set a Map with URL paths as keys and {@code VersionStrategy}
 	 * as values.
@@ -59,9 +60,10 @@ public class VersionResourceResolver extends AbstractResourceResolver {
 	 *
 	 * @param versionStrategyMap map with URLs as keys and version strategies as values
 	 */
-	public void setVersionStrategyMap(Map<String, VersionStrategy> versionStrategyMap) {
+	public void setStrategyMap(Map<String, VersionStrategy> versionStrategyMap) {
 		this.versionStrategyMap = versionStrategyMap;
 	}
+
 
 	@Override
 	protected Resource resolveResourceInternal(HttpServletRequest request, String requestPath,
@@ -72,12 +74,12 @@ public class VersionResourceResolver extends AbstractResourceResolver {
 			return resolved;
 		}
 
-		VersionStrategy versionStrategy = findStrategy(requestPath);
+		VersionStrategy versionStrategy = getStrategyForPath(requestPath);
 		if (versionStrategy == null) {
 			return null;
 		}
 
-		String candidateVersion = versionStrategy.extractVersionFromPath(requestPath);
+		String candidateVersion = versionStrategy.extractVersion(requestPath);
 		if (StringUtils.isEmpty(candidateVersion)) {
 			if (logger.isTraceEnabled()) {
 				logger.trace("No version found in path=\"" + requestPath + "\"");
@@ -85,7 +87,7 @@ public class VersionResourceResolver extends AbstractResourceResolver {
 			return null;
 		}
 
-		String simplePath = versionStrategy.deleteVersionFromPath(requestPath, candidateVersion);
+		String simplePath = versionStrategy.removeVersion(requestPath, candidateVersion);
 
 		if (logger.isTraceEnabled()) {
 			logger.trace("Extracted version from path, re-resolving without version, path=\"" + simplePath + "\"");
@@ -96,7 +98,8 @@ public class VersionResourceResolver extends AbstractResourceResolver {
 			return null;
 		}
 
-		if (versionStrategy.resourceVersionMatches(baseResource, candidateVersion)) {
+		String actualVersion = versionStrategy.getResourceVersion(baseResource);
+		if (candidateVersion.equals(actualVersion)) {
 			if (logger.isTraceEnabled()) {
 				logger.trace("resource matches extracted version");
 			}
@@ -113,11 +116,19 @@ public class VersionResourceResolver extends AbstractResourceResolver {
 	protected String resolveUrlPathInternal(String resourceUrlPath, List<? extends Resource> locations, ResourceResolverChain chain) {
 		String baseUrl = chain.resolveUrlPath(resourceUrlPath, locations);
 		if (StringUtils.hasText(baseUrl)) {
-			VersionStrategy versionStrategy = findStrategy(resourceUrlPath);
+			VersionStrategy versionStrategy = getStrategyForPath(resourceUrlPath);
 			if (versionStrategy == null) {
 				return null;
 			}
-			return versionStrategy.addVersionToUrl(baseUrl, locations, chain);
+			if (logger.isTraceEnabled()) {
+				logger.trace("Getting the original resource to determine version");
+			}
+			Resource resource = chain.resolveResource(null, baseUrl, locations);
+			String version = versionStrategy.getResourceVersion(resource);
+			if (logger.isTraceEnabled()) {
+				logger.trace("Version=" + version);
+			}
+			return versionStrategy.addVersion(baseUrl, version);
 		}
 		return baseUrl;
 	}
@@ -126,7 +137,7 @@ public class VersionResourceResolver extends AbstractResourceResolver {
 	 * Finds a {@code VersionStrategy} for the request path of the requested resource.
 	 * @return an instance of a {@code VersionStrategy} or null if none matches that request path
 	 */
-	protected VersionStrategy findStrategy(String requestPath) {
+	protected VersionStrategy getStrategyForPath(String requestPath) {
 		String path = "/".concat(requestPath);
         List<String> matchingPatterns = new ArrayList<String>();
 		for (String pattern : this.versionStrategyMap.keySet()) {

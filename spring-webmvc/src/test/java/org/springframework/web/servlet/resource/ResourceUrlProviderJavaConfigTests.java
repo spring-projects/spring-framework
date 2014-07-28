@@ -115,9 +115,9 @@ public class ResourceUrlProviderJavaConfigTests {
 		@Override
 		public void addResourceHandlers(ResourceHandlerRegistry registry) {
 			Map<String, VersionStrategy> versionStrategyMap = new HashMap<>();
-			versionStrategyMap.put("/**", new ContentBasedVersionStrategy());
+			versionStrategyMap.put("/**", new ContentVersionStrategy());
 			VersionResourceResolver versionResolver = new VersionResourceResolver();
-			versionResolver.setVersionStrategyMap(versionStrategyMap);
+			versionResolver.setStrategyMap(versionStrategyMap);
 
 			registry.addResourceHandler("/resources/**")
 				.addResourceLocations("classpath:org/springframework/web/servlet/resource/test/")

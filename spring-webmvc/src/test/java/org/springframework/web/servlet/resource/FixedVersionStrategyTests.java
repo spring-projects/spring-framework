@@ -15,15 +15,10 @@
  */
 package org.springframework.web.servlet.resource;
 
-import java.util.Collections;
-import java.util.concurrent.Callable;
-
 import org.junit.Before;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
-
-import org.springframework.core.io.Resource;
 
 /**
  * Unit tests for {@link org.springframework.web.servlet.resource.FixedVersionStrategy}
@@ -33,49 +28,36 @@ public class FixedVersionStrategyTests {
 
 	private final String version = "1df341f";
 
-	private final String resourceId = "js/foo.js";
+	private final String path = "js/foo.js";
 
-	private FixedVersionStrategy versionStrategy;
+	private FixedVersionStrategy strategy;
+
 
 	@Before
 	public void setup() {
-		this.versionStrategy = new FixedVersionStrategy(this.version);
+		this.strategy = new FixedVersionStrategy(this.version);
 	}
+
 
 	@Test(expected = IllegalArgumentException.class)
-	public void constructWithEmptyPrefixVersion() throws Exception {
-
-		FixedVersionStrategy versionStrategy = new FixedVersionStrategy("  ");
-	}
-
-	@Test(expected = IllegalArgumentException.class)
-	public void constructWithEmptyCallableVersion() throws Exception {
-
-		FixedVersionStrategy versionStrategy = new FixedVersionStrategy(
-				new Callable<String>() {
-					@Override
-					public String call() throws Exception {
-						return "  ";
-					}
-				});
+	public void emptyPrefixVersion() throws Exception {
+		new FixedVersionStrategy("  ");
 	}
 
 	@Test
-	public void extractVersionFromPath() throws Exception {
-		assertEquals(this.version + "/", this.versionStrategy.extractVersionFromPath(this.version + "/" + this.resourceId));
-		assertEquals("", this.versionStrategy.extractVersionFromPath(this.resourceId));
+	public void extractVersion() throws Exception {
+		assertEquals(this.version, this.strategy.extractVersion(this.version + "/" + this.path));
+		assertNull(this.strategy.extractVersion(this.path));
 	}
 
 	@Test
-	public void deleteVersionFromPath() throws Exception {
-		assertEquals(this.resourceId,
-				this.versionStrategy.deleteVersionFromPath(this.version + "/" + this.resourceId, this.version + "/"));
+	public void removeVersion() throws Exception {
+		assertEquals("/" + this.path, this.strategy.removeVersion(this.version + "/" + this.path, this.version));
 	}
 
 	@Test
-	public void addVersionToUrl() throws Exception {
-		assertEquals(this.version + "/" + this.resourceId,
-				this.versionStrategy.addVersionToUrl(this.resourceId, Collections.<Resource>emptyList(), null));
-
+	public void addVersion() throws Exception {
+		assertEquals(this.version + "/" + this.path, this.strategy.addVersion(this.path, this.version));
 	}
+
 }

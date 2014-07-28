@@ -78,7 +78,7 @@ public class AppCacheManifestTransformerTests {
 
 		VersionResourceResolver versionResourceResolver = new VersionResourceResolver();
 		versionResourceResolver
-				.setVersionStrategyMap(Collections.singletonMap("/**", new ContentBasedVersionStrategy()));
+				.setStrategyMap(Collections.singletonMap("/**", new ContentVersionStrategy()));
 
 		List<ResourceResolver> resolvers = new ArrayList<ResourceResolver>();
 		resolvers.add(versionResourceResolver);

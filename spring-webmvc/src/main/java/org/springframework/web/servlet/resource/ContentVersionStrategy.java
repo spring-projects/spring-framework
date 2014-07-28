@@ -15,38 +15,39 @@
  */
 package org.springframework.web.servlet.resource;
 
+import java.io.IOException;
+
 import org.springframework.core.io.Resource;
+import org.springframework.util.DigestUtils;
+import org.springframework.util.FileCopyUtils;
 
 /**
- * A {@code VersionStrategy} that relies on a fixed version applied as a request
- * path prefix, e.g. reduced SHA, version name, release date, etc.
- *
- * <p>This is useful for example when {@link ContentVersionStrategy} cannot be
- * used such as when using JavaScript module loaders which are in charge of
- * loading the JavaScript resources and need to know their relative paths.
+ * A {@code VersionStrategy} that calculates an Hex MD5 hashes from the content
+ * of the resource and appends it to the file name, e.g.
+ * {@code "styles/main-e36d2e05253c6c7085a91522ce43a0b4.css"}.
  *
  * @author Brian Clozel
  * @author Rossen Stoyanchev
  * @since 4.1
  * @see VersionResourceResolver
  */
-public class FixedVersionStrategy extends AbstractVersionStrategy {
+public class ContentVersionStrategy extends AbstractVersionStrategy {
 
-	private final String version;
 
-	/**
-	 * Create a new FixedVersionStrategy with the given version string.
-	 * @param version the fixed version string to use
-	 */
-	public FixedVersionStrategy(String version) {
-		super(new PrefixVersionPathStrategy(version));
-		this.version = version;
+	public ContentVersionStrategy() {
+		super(new FileNameVersionPathStrategy());
 	}
 
 
 	@Override
 	public String getResourceVersion(Resource resource) {
-		return this.version;
+		try {
+			byte[] content = FileCopyUtils.copyToByteArray(resource.getInputStream());
+			return DigestUtils.md5DigestAsHex(content);
+		}
+		catch (IOException ex) {
+			throw new IllegalStateException("Failed to calculate hash for resource [" + resource + "]", ex);
+		}
 	}
 
 }
