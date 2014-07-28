@@ -17,8 +17,10 @@
 package org.springframework.test.context.support;
 
 import org.springframework.beans.factory.groovy.GroovyBeanDefinitionReader;
-import org.springframework.beans.factory.support.BeanDefinitionReader;
+import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.context.support.GenericApplicationContext;
+import org.springframework.test.context.MergedContextConfiguration;
+import org.springframework.util.StringUtils;
 
 /**
  * Concrete implementation of {@link AbstractGenericContextLoader} that reads
@@ -36,12 +38,30 @@ import org.springframework.context.support.GenericApplicationContext;
 public class GenericGroovyXmlContextLoader extends GenericXmlContextLoader {
 
 	/**
-	 * Create a new {@link GroovyBeanDefinitionReader}.
-	 * @return a new {@code GroovyBeanDefinitionReader}
+	 * Load bean definitions into the supplied {@link GenericApplicationContext context}
+	 * from the locations in the supplied {@code MergedContextConfiguration}.
+	 *
+	 * <p>If a location ends with the suffix {@code ".xml"}, bean definitions
+	 * will be loaded from that location using an {@link XmlBeanDefinitionReader};
+	 * otherwise, a {@link GroovyBeanDefinitionReader} will be used.
+	 *
+	 * @param context the context into which the bean definitions should be loaded
+	 * @param mergedConfig the merged context configuration
+	 * @see org.springframework.test.context.support.AbstractGenericContextLoader#loadBeanDefinitions
 	 */
 	@Override
-	protected BeanDefinitionReader createBeanDefinitionReader(final GenericApplicationContext context) {
-		return new GroovyBeanDefinitionReader(context);
+	protected void loadBeanDefinitions(GenericApplicationContext context, MergedContextConfiguration mergedConfig) {
+		XmlBeanDefinitionReader xmlReader = new XmlBeanDefinitionReader(context);
+		GroovyBeanDefinitionReader groovyReader = new GroovyBeanDefinitionReader(context);
+
+		for (String location : mergedConfig.getLocations()) {
+			if (StringUtils.endsWithIgnoreCase(location, ".xml")) {
+				xmlReader.loadBeanDefinitions(location);
+			}
+			else {
+				groovyReader.loadBeanDefinitions(location);
+			}
+		}
 	}
 
 	/**
