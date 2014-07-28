@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,7 +45,7 @@ import org.springframework.util.ReflectionUtils;
  */
 abstract class AbstractRecursiveAnnotationVisitor extends AnnotationVisitor {
 
-	protected final Log logger = LogFactory.getLog(this.getClass());
+	protected final Log logger = LogFactory.getLog(getClass());
 
 	protected final AnnotationAttributes attributes;
 
@@ -87,10 +87,10 @@ abstract class AbstractRecursiveAnnotationVisitor extends AnnotationVisitor {
 			}
 		}
 		catch (ClassNotFoundException ex) {
-			this.logger.debug("Failed to classload enum type while reading annotation metadata", ex);
+			logger.debug("Failed to classload enum type while reading annotation metadata", ex);
 		}
 		catch (IllegalAccessException ex) {
-			this.logger.warn("Could not access enum value while reading annotation metadata", ex);
+			logger.warn("Could not access enum value while reading annotation metadata", ex);
 		}
 		return valueToUse;
 	}
@@ -123,8 +123,8 @@ final class RecursiveAnnotationArrayVisitor extends AbstractRecursiveAnnotationV
 		}
 		else {
 			Class<?> arrayClass = newValue.getClass();
-			if(Enum.class.isAssignableFrom(arrayClass)) {
-				while(arrayClass.getSuperclass() != null && !arrayClass.isEnum()) {
+			if (Enum.class.isAssignableFrom(arrayClass)) {
+				while (arrayClass.getSuperclass() != null && !arrayClass.isEnum()) {
 					arrayClass = arrayClass.getSuperclass();
 				}
 			}
@@ -145,8 +145,8 @@ final class RecursiveAnnotationArrayVisitor extends AbstractRecursiveAnnotationV
 
 	public void visitEnd() {
 		if (!this.allNestedAttributes.isEmpty()) {
-			this.attributes.put(this.attributeName, this.allNestedAttributes.toArray(
-					new AnnotationAttributes[this.allNestedAttributes.size()]));
+			this.attributes.put(this.attributeName,
+				this.allNestedAttributes.toArray(new AnnotationAttributes[this.allNestedAttributes.size()]));
 		}
 	}
 }
@@ -161,8 +161,8 @@ class RecursiveAnnotationAttributesVisitor extends AbstractRecursiveAnnotationVi
 
 	private final String annotationType;
 
-	public RecursiveAnnotationAttributesVisitor(
-			String annotationType, AnnotationAttributes attributes, ClassLoader classLoader) {
+	public RecursiveAnnotationAttributesVisitor(String annotationType, AnnotationAttributes attributes,
+			ClassLoader classLoader) {
 		super(classLoader, attributes);
 		this.annotationType = annotationType;
 	}
@@ -173,7 +173,7 @@ class RecursiveAnnotationAttributesVisitor extends AbstractRecursiveAnnotationVi
 			doVisitEnd(annotationClass);
 		}
 		catch (ClassNotFoundException ex) {
-			this.logger.debug("Failed to class-load type while reading annotation metadata. " +
+			logger.debug("Failed to class-load type while reading annotation metadata. " +
 					"This is a non-fatal error, but certain annotation metadata may be unavailable.", ex);
 		}
 	}
@@ -183,8 +183,9 @@ class RecursiveAnnotationAttributesVisitor extends AbstractRecursiveAnnotationVi
 	}
 
 	private void registerDefaultValues(Class<?> annotationClass) {
-		// Only do further scanning for public annotations; we'd run into IllegalAccessExceptions
-		// otherwise, and don't want to mess with accessibility in a SecurityManager environment.
+		// Only do further scanning for public annotations; we'd run into
+		// IllegalAccessExceptions otherwise, and we don't want to mess with
+		// accessibility in a SecurityManager environment.
 		if (Modifier.isPublic(annotationClass.getModifiers())) {
 			// Check declared default values of attributes in the annotation type.
 			Method[] annotationAttributes = annotationClass.getMethods();
@@ -193,15 +194,15 @@ class RecursiveAnnotationAttributesVisitor extends AbstractRecursiveAnnotationVi
 				Object defaultValue = annotationAttribute.getDefaultValue();
 				if (defaultValue != null && !this.attributes.containsKey(attributeName)) {
 					if (defaultValue instanceof Annotation) {
-						defaultValue = AnnotationAttributes.fromMap(
-								AnnotationUtils.getAnnotationAttributes((Annotation) defaultValue, false, true));
+						defaultValue = AnnotationAttributes.fromMap(AnnotationUtils.getAnnotationAttributes(
+							(Annotation) defaultValue, false, true));
 					}
 					else if (defaultValue instanceof Annotation[]) {
 						Annotation[] realAnnotations = (Annotation[]) defaultValue;
 						AnnotationAttributes[] mappedAnnotations = new AnnotationAttributes[realAnnotations.length];
 						for (int i = 0; i < realAnnotations.length; i++) {
-							mappedAnnotations[i] = AnnotationAttributes.fromMap(
-									AnnotationUtils.getAnnotationAttributes(realAnnotations[i], false, true));
+							mappedAnnotations[i] = AnnotationAttributes.fromMap(AnnotationUtils.getAnnotationAttributes(
+								realAnnotations[i], false, true));
 						}
 						defaultValue = mappedAnnotations;
 					}
