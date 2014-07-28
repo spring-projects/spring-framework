@@ -19,9 +19,9 @@ package org.springframework.jms.config;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
 import org.springframework.util.Assert;
 
 /**
@@ -29,23 +29,25 @@ import org.springframework.util.Assert;
  * a {@link JmsListenerEndpointRegistry}.
  *
  * @author Stephane Nicoll
+ * @author Juergen Hoeller
  * @since 4.1
  * @see org.springframework.jms.annotation.JmsListenerConfigurer
  */
-public class JmsListenerEndpointRegistrar implements ApplicationContextAware, InitializingBean {
+public class JmsListenerEndpointRegistrar implements BeanFactoryAware, InitializingBean {
 
 	private JmsListenerEndpointRegistry endpointRegistry;
 
-	private String containerFactoryBeanName;
+	private JmsHandlerMethodFactory jmsHandlerMethodFactory;
 
 	private JmsListenerContainerFactory<?> containerFactory;
 
-	private JmsHandlerMethodFactory jmsHandlerMethodFactory;
+	private String containerFactoryBeanName;
 
-	private ApplicationContext applicationContext;
+	private BeanFactory beanFactory;
 
 	private final List<JmsListenerEndpointDescriptor> endpointDescriptors =
 			new ArrayList<JmsListenerEndpointDescriptor>();
+
 
 	/**
 	 * Set the {@link JmsListenerEndpointRegistry} instance to use.
@@ -59,27 +61,7 @@ public class JmsListenerEndpointRegistrar implements ApplicationContextAware, In
 	 * registrar, may be {@code null}.
 	 */
 	public JmsListenerEndpointRegistry getEndpointRegistry() {
-		return endpointRegistry;
-	}
-
-	/**
-	 * Set the bean name of the {@link JmsListenerContainerFactory} to use in
-	 * case a {@link JmsListenerEndpoint} is registered with a {@code null}
-	 * container factory. Alternatively, the container factory instance can
-	 * be registered directly, see {@link #setContainerFactory(JmsListenerContainerFactory)}
-	 */
-	public void setContainerFactoryBeanName(String containerFactoryBeanName) {
-		this.containerFactoryBeanName = containerFactoryBeanName;
-	}
-
-	/**
-	 * Set the {@link JmsListenerContainerFactory} to use in case a {@link JmsListenerEndpoint}
-	 * is registered with a {@code null} container factory.
-	 * <p>Alternatively, the bean name of the {@link JmsListenerContainerFactory} to use
-	 * can be specified for a lazy lookup, see {@link #setContainerFactoryBeanName}.
-	 */
-	public void setContainerFactory(JmsListenerContainerFactory<?> containerFactory) {
-		this.containerFactory = containerFactory;
+		return this.endpointRegistry;
 	}
 
 	/**
@@ -98,12 +80,69 @@ public class JmsListenerEndpointRegistrar implements ApplicationContextAware, In
 	 * Return the custom {@link JmsHandlerMethodFactory} to use, if any.
 	 */
 	public JmsHandlerMethodFactory getJmsHandlerMethodFactory() {
-		return jmsHandlerMethodFactory;
+		return this.jmsHandlerMethodFactory;
 	}
 
+	/**
+	 * Set the {@link JmsListenerContainerFactory} to use in case a {@link JmsListenerEndpoint}
+	 * is registered with a {@code null} container factory.
+	 * <p>Alternatively, the bean name of the {@link JmsListenerContainerFactory} to use
+	 * can be specified for a lazy lookup, see {@link #setContainerFactoryBeanName}.
+	 */
+	public void setContainerFactory(JmsListenerContainerFactory<?> containerFactory) {
+		this.containerFactory = containerFactory;
+	}
+
+	/**
+	 * Set the bean name of the {@link JmsListenerContainerFactory} to use in case
+	 * a {@link JmsListenerEndpoint} is registered with a {@code null} container factory.
+	 * Alternatively, the container factory instance can be registered directly:
+	 * see {@link #setContainerFactory(JmsListenerContainerFactory)}.
+	 * @see #setBeanFactory
+	 */
+	public void setContainerFactoryBeanName(String containerFactoryBeanName) {
+		this.containerFactoryBeanName = containerFactoryBeanName;
+	}
+
+	/**
+	 * A {@link BeanFactory} only needs to be available in conjunction with
+	 * {@link #setContainerFactoryBeanName}.
+	 */
 	@Override
-	public void setApplicationContext(ApplicationContext applicationContext) {
-		this.applicationContext = applicationContext;
+	public void setBeanFactory(BeanFactory beanFactory) {
+		this.beanFactory = beanFactory;
+	}
+
+
+	@Override
+	public void afterPropertiesSet() {
+		registerAllEndpoints();
+	}
+
+	protected void registerAllEndpoints() {
+		for (JmsListenerEndpointDescriptor descriptor : this.endpointDescriptors) {
+			this.endpointRegistry.registerListenerContainer(descriptor.endpoint, resolveContainerFactory(descriptor));
+		}
+	}
+
+	private JmsListenerContainerFactory<?> resolveContainerFactory(JmsListenerEndpointDescriptor descriptor) {
+		if (descriptor.containerFactory != null) {
+			return descriptor.containerFactory;
+		}
+		else if (this.containerFactory != null) {
+			return this.containerFactory;
+		}
+		else if (this.containerFactoryBeanName != null) {
+			Assert.state(this.beanFactory != null, "BeanFactory must be set to obtain container factory by bean name");
+			this.containerFactory = this.beanFactory.getBean(
+					this.containerFactoryBeanName, JmsListenerContainerFactory.class);
+			return this.containerFactory;  // Consider changing this if live change of the factory is required
+		}
+		else {
+			throw new IllegalStateException("Could not resolve the " +
+					JmsListenerContainerFactory.class.getSimpleName() + " to use for [" +
+					descriptor.endpoint + "] no factory was given and no default is set.");
+		}
 	}
 
 	/**
@@ -127,38 +166,6 @@ public class JmsListenerEndpointRegistrar implements ApplicationContextAware, In
 	 */
 	public void registerEndpoint(JmsListenerEndpoint endpoint) {
 		registerEndpoint(endpoint, null);
-	}
-
-	@Override
-	public void afterPropertiesSet() throws Exception {
-	 	Assert.notNull(applicationContext, "ApplicationContext must not be null");
-		startAllEndpoints();
-	}
-
-	protected void startAllEndpoints() throws Exception {
-		for (JmsListenerEndpointDescriptor descriptor : endpointDescriptors) {
-			endpointRegistry.registerListenerContainer(
-					descriptor.endpoint, resolveContainerFactory(descriptor));
-		}
-	}
-
-	private JmsListenerContainerFactory<?> resolveContainerFactory(JmsListenerEndpointDescriptor descriptor) {
-		if (descriptor.containerFactory != null) {
-			return descriptor.containerFactory;
-		}
-		else if (this.containerFactory != null) {
-			return this.containerFactory;
-		}
-		else if (this.containerFactoryBeanName != null) {
-			this.containerFactory = this.applicationContext.getBean(
-					this.containerFactoryBeanName, JmsListenerContainerFactory.class);
-			return this.containerFactory;  // Consider changing this if live change of the factory is required
-		}
-		else {
-			throw new IllegalStateException("Could not resolve the " +
-					JmsListenerContainerFactory.class.getSimpleName() + " to use for [" +
-					descriptor.endpoint + "] no factory was given and no default is set.");
-		}
 	}
 
 

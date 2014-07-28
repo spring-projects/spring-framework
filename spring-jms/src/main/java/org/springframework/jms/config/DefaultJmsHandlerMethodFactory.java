@@ -20,11 +20,10 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
-import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.format.support.DefaultFormattingConversionService;
 import org.springframework.messaging.converter.GenericMessageConverter;
@@ -36,8 +35,6 @@ import org.springframework.messaging.handler.annotation.support.PayloadArgumentR
 import org.springframework.messaging.handler.invocation.HandlerMethodArgumentResolver;
 import org.springframework.messaging.handler.invocation.HandlerMethodArgumentResolverComposite;
 import org.springframework.messaging.handler.invocation.InvocableHandlerMethod;
-import org.springframework.util.Assert;
-import org.springframework.util.ClassUtils;
 import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
 
@@ -57,15 +54,13 @@ import org.springframework.validation.Validator;
  * can be converted
  *
  * @author Stephane Nicoll
+ * @author Juergen Hoeller
  * @since 4.1
- * @see #setCustomArgumentResolvers(java.util.List)
- * @see #setValidator(Validator)
- * @see #setConversionService(ConversionService)
+ * @see #setConversionService
+ * @see #setValidator
+ * @see #setCustomArgumentResolvers
  */
-public class DefaultJmsHandlerMethodFactory
-		implements JmsHandlerMethodFactory, InitializingBean, ApplicationContextAware {
-
-	private ApplicationContext applicationContext;
+public class DefaultJmsHandlerMethodFactory implements JmsHandlerMethodFactory, BeanFactoryAware, InitializingBean {
 
 	private ConversionService conversionService = new DefaultFormattingConversionService();
 
@@ -73,22 +68,17 @@ public class DefaultJmsHandlerMethodFactory
 
 	private Validator validator = new NoOpValidator();
 
-	private List<HandlerMethodArgumentResolver> customArgumentResolvers
-			= new ArrayList<HandlerMethodArgumentResolver>();
+	private List<HandlerMethodArgumentResolver> customArgumentResolvers;
 
-	private HandlerMethodArgumentResolverComposite argumentResolvers
-			= new HandlerMethodArgumentResolverComposite();
+	private final HandlerMethodArgumentResolverComposite argumentResolvers =
+			new HandlerMethodArgumentResolverComposite();
 
+	private BeanFactory beanFactory;
 
-	@Override
-	public void setApplicationContext(ApplicationContext applicationContext) {
-		this.applicationContext = applicationContext;
-	}
 
 	/**
 	 * Set the {@link ConversionService} to use to convert the original
 	 * message payload or headers.
-	 *
 	 * @see HeaderMethodArgumentResolver
 	 * @see GenericMessageConverter
 	 */
@@ -96,22 +86,13 @@ public class DefaultJmsHandlerMethodFactory
 		this.conversionService = conversionService;
 	}
 
-	protected ConversionService getConversionService() {
-		return conversionService;
-	}
-
 	/**
 	 * Set the {@link MessageConverter} to use. By default a {@link GenericMessageConverter}
 	 * is used.
-	 *
 	 * @see GenericMessageConverter
 	 */
 	public void setMessageConverter(MessageConverter messageConverter) {
 		this.messageConverter = messageConverter;
-	}
-
-	protected MessageConverter getMessageConverter() {
-		return messageConverter;
 	}
 
 	/**
@@ -124,24 +105,12 @@ public class DefaultJmsHandlerMethodFactory
 	}
 
 	/**
-	 * The configured Validator instance
-	 */
-	public Validator getValidator() {
-		return validator;
-	}
-
-	/**
 	 * Set the list of custom {@code HandlerMethodArgumentResolver}s that will be used
 	 * after resolvers for supported argument type.
-	 * @param customArgumentResolvers the list of resolvers; never {@code null}.
+	 * @param customArgumentResolvers the list of resolvers (never {@code null})
 	 */
 	public void setCustomArgumentResolvers(List<HandlerMethodArgumentResolver> customArgumentResolvers) {
-		Assert.notNull(customArgumentResolvers, "The 'customArgumentResolvers' cannot be null.");
 		this.customArgumentResolvers = customArgumentResolvers;
-	}
-
-	public List<HandlerMethodArgumentResolver> getCustomArgumentResolvers() {
-		return customArgumentResolvers;
 	}
 
 	/**
@@ -157,19 +126,25 @@ public class DefaultJmsHandlerMethodFactory
 		this.argumentResolvers.addResolvers(argumentResolvers);
 	}
 
-	public List<HandlerMethodArgumentResolver> getArgumentResolvers() {
-		return this.argumentResolvers.getResolvers();
+	/**
+	 * A {@link BeanFactory} only needs to be available for placeholder resolution
+	 * in handler method arguments; it's optional otherwise.
+	 */
+	@Override
+	public void setBeanFactory(BeanFactory beanFactory) {
+		this.beanFactory = beanFactory;
 	}
 
 	@Override
 	public void afterPropertiesSet() {
-		if (messageConverter == null) {
-			messageConverter = new GenericMessageConverter(getConversionService());
+		if (this.messageConverter == null) {
+			this.messageConverter = new GenericMessageConverter(this.conversionService);
 		}
 		if (this.argumentResolvers.getResolvers().isEmpty()) {
 			this.argumentResolvers.addResolvers(initArgumentResolvers());
 		}
 	}
+
 
 	@Override
 	public InvocableHandlerMethod createInvocableHandlerMethod(Object bean, Method method) {
@@ -179,27 +154,28 @@ public class DefaultJmsHandlerMethodFactory
 	}
 
 	protected List<HandlerMethodArgumentResolver> initArgumentResolvers() {
-		ConfigurableBeanFactory beanFactory =
-				(ClassUtils.isAssignableValue(ConfigurableApplicationContext.class, applicationContext)) ?
-						((ConfigurableApplicationContext) applicationContext).getBeanFactory() : null;
-
 		List<HandlerMethodArgumentResolver> resolvers = new ArrayList<HandlerMethodArgumentResolver>();
+		ConfigurableBeanFactory cbf = (this.beanFactory instanceof ConfigurableBeanFactory ?
+				(ConfigurableBeanFactory) this.beanFactory : null);
 
 		// Annotation-based argument resolution
-		resolvers.add(new HeaderMethodArgumentResolver(getConversionService(), beanFactory));
+		resolvers.add(new HeaderMethodArgumentResolver(this.conversionService, cbf));
 		resolvers.add(new HeadersMethodArgumentResolver());
 
 		// Type-based argument resolution
 		resolvers.add(new MessageMethodArgumentResolver());
 
-		resolvers.addAll(getCustomArgumentResolvers());
-		resolvers.add(new PayloadArgumentResolver(getMessageConverter(), getValidator()));
+		if (this.customArgumentResolvers != null) {
+			resolvers.addAll(this.customArgumentResolvers);
+		}
+		resolvers.add(new PayloadArgumentResolver(this.messageConverter, this.validator));
 
 		return resolvers;
 	}
 
 
 	private static final class NoOpValidator implements Validator {
+
 		@Override
 		public boolean supports(Class<?> clazz) {
 			return false;

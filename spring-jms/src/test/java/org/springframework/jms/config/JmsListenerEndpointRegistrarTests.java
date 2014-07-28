@@ -16,17 +16,16 @@
 
 package org.springframework.jms.config;
 
-import static org.junit.Assert.*;
-
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
-import org.springframework.context.support.StaticApplicationContext;
+import org.springframework.beans.factory.support.StaticListableBeanFactory;
+
+import static org.junit.Assert.*;
 
 /**
- *
  * @author Stephane Nicoll
  */
 public class JmsListenerEndpointRegistrarTests {
@@ -40,10 +39,11 @@ public class JmsListenerEndpointRegistrarTests {
 
 	private final JmsListenerContainerTestFactory containerFactory = new JmsListenerContainerTestFactory();
 
+
 	@Before
 	public void setup() {
 		registrar.setEndpointRegistry(registry);
-		registrar.setApplicationContext(new StaticApplicationContext());
+		registrar.setBeanFactory(new StaticListableBeanFactory());
 	}
 
 	@Test

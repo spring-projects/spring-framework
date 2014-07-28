@@ -16,8 +16,6 @@
 
 package org.springframework.jms.config;
 
-import static org.junit.Assert.*;
-
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -31,7 +29,7 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.rules.TestName;
 
-import org.springframework.context.support.StaticApplicationContext;
+import org.springframework.beans.factory.support.StaticListableBeanFactory;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.core.convert.support.GenericConversionService;
@@ -44,8 +42,9 @@ import org.springframework.messaging.handler.invocation.InvocableHandlerMethod;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.util.ReflectionUtils;
 
+import static org.junit.Assert.*;
+
 /**
- *
  * @author Stephane Nicoll
  */
 public class DefaultJmsHandlerMethodFactoryTests {
@@ -160,15 +159,13 @@ public class DefaultJmsHandlerMethodFactoryTests {
 
 	private DefaultJmsHandlerMethodFactory createInstance() {
 		DefaultJmsHandlerMethodFactory factory = new DefaultJmsHandlerMethodFactory();
-		factory.setApplicationContext(new StaticApplicationContext());
+		factory.setBeanFactory(new StaticListableBeanFactory());
 		return factory;
 	}
 
 	private Method getListenerMethod(String methodName, Class<?>... parameterTypes) {
-		Method method = ReflectionUtils.findMethod(SampleBean.class,
-				methodName, parameterTypes);
-		assertNotNull("no method found with name " + methodName
-				+ " and parameters " + Arrays.toString(parameterTypes));
+		Method method = ReflectionUtils.findMethod(SampleBean.class, methodName, parameterTypes);
+		assertNotNull("no method found with name " + methodName + " and parameters " + Arrays.toString(parameterTypes));
 		return method;
 	}
 
@@ -186,6 +183,7 @@ public class DefaultJmsHandlerMethodFactoryTests {
 			assertEquals("Wrong value for locale", Locale.getDefault(), locale);
 		}
 	}
+
 
 	static class CustomHandlerMethodArgumentResolver implements HandlerMethodArgumentResolver {
 

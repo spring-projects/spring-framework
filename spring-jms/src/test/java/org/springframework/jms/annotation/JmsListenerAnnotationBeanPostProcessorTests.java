@@ -40,6 +40,7 @@ import static org.junit.Assert.*;
 
 /**
  * @author Stephane Nicoll
+ * @author Juergen Hoeller
  */
 public class JmsListenerAnnotationBeanPostProcessorTests {
 
@@ -62,9 +63,7 @@ public class JmsListenerAnnotationBeanPostProcessorTests {
 		methodEndpoint.setupListenerContainer(listenerContainer);
 		assertNotNull(listenerContainer.getMessageListener());
 
-		context.start();
 		assertTrue("Should have been started " + container, container.isStarted());
-
 		context.close(); // Close and stop the listeners
 		assertTrue("Should have been stopped " + container, container.isStopped());
 	}

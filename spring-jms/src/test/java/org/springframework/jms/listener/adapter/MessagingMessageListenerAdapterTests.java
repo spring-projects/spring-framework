@@ -25,7 +25,7 @@ import javax.jms.TextMessage;
 import org.junit.Before;
 import org.junit.Test;
 
-import org.springframework.context.support.StaticApplicationContext;
+import org.springframework.beans.factory.support.StaticListableBeanFactory;
 import org.springframework.jms.StubTextMessage;
 import org.springframework.jms.config.DefaultJmsHandlerMethodFactory;
 import org.springframework.jms.support.JmsHeaders;
@@ -38,7 +38,6 @@ import static org.junit.Assert.*;
 import static org.mockito.BDDMockito.*;
 
 /**
- *
  * @author Stephane Nicoll
  */
 public class MessagingMessageListenerAdapterTests {
@@ -124,7 +123,7 @@ public class MessagingMessageListenerAdapterTests {
 	}
 
 	private void initializeFactory(DefaultJmsHandlerMethodFactory factory) {
-		factory.setApplicationContext(new StaticApplicationContext());
+		factory.setBeanFactory(new StaticListableBeanFactory());
 		factory.afterPropertiesSet();
 	}
 

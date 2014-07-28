@@ -16,16 +16,11 @@
 
 package org.springframework.jms.config;
 
-import static org.junit.Assert.*;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.*;
-
 import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-
 import javax.jms.Destination;
 import javax.jms.InvalidDestinationException;
 import javax.jms.JMSException;
@@ -41,16 +36,16 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.rules.TestName;
 
-import org.springframework.context.support.StaticApplicationContext;
+import org.springframework.beans.factory.support.StaticListableBeanFactory;
 import org.springframework.jms.StubTextMessage;
 import org.springframework.jms.listener.DefaultMessageListenerContainer;
 import org.springframework.jms.listener.MessageListenerContainer;
 import org.springframework.jms.listener.SimpleMessageListenerContainer;
-import org.springframework.jms.listener.adapter.ReplyFailureException;
 import org.springframework.jms.listener.adapter.ListenerExecutionFailedException;
 import org.springframework.jms.listener.adapter.MessagingMessageListenerAdapter;
-import org.springframework.jms.support.JmsMessageHeaderAccessor;
+import org.springframework.jms.listener.adapter.ReplyFailureException;
 import org.springframework.jms.support.JmsHeaders;
+import org.springframework.jms.support.JmsMessageHeaderAccessor;
 import org.springframework.jms.support.destination.DestinationResolver;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
@@ -65,8 +60,12 @@ import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
 import org.springframework.validation.annotation.Validated;
 
+import static org.junit.Assert.*;
+import static org.mockito.BDDMockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+
 /**
- *
  * @author Stephane Nicoll
  */
 public class MethodJmsListenerEndpointTests {
@@ -82,6 +81,7 @@ public class MethodJmsListenerEndpointTests {
 	private final DefaultMessageListenerContainer container = new DefaultMessageListenerContainer();
 
 	private final JmsEndpointSampleBean sample = new JmsEndpointSampleBean();
+
 
 	@Before
 	public void setup() {
@@ -375,10 +375,8 @@ public class MethodJmsListenerEndpointTests {
 	}
 
 	private Method getListenerMethod(String methodName, Class<?>... parameterTypes) {
-		Method method = ReflectionUtils.findMethod(JmsEndpointSampleBean.class,
-				methodName, parameterTypes);
-		assertNotNull("no method found with name " + methodName
-				+ " and parameters " + Arrays.toString(parameterTypes));
+		Method method = ReflectionUtils.findMethod(JmsEndpointSampleBean.class, methodName, parameterTypes);
+		assertNotNull("no method found with name " + methodName + " and parameters " + Arrays.toString(parameterTypes));
 		return method;
 	}
 
@@ -395,12 +393,11 @@ public class MethodJmsListenerEndpointTests {
 	}
 
 	private void initializeFactory(DefaultJmsHandlerMethodFactory factory) {
-		factory.setApplicationContext(new StaticApplicationContext());
+		factory.setBeanFactory(new StaticListableBeanFactory());
 		factory.afterPropertiesSet();
 	}
 
 	private Validator testValidator(final String invalidValue) {
-
 		return new Validator() {
 			@Override
 			public boolean supports(Class<?> clazz) {
@@ -520,11 +517,11 @@ public class MethodJmsListenerEndpointTests {
 
 	}
 
+
 	@SuppressWarnings("serial")
 	static class MyBean implements Serializable {
 		private String name;
 
 	}
-
 
 }
