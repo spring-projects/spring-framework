@@ -18,6 +18,9 @@ package org.springframework.core.type.filter;
 
 import java.io.IOException;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import org.springframework.core.type.ClassMetadata;
 import org.springframework.core.type.classreading.MetadataReader;
 import org.springframework.core.type.classreading.MetadataReaderFactory;
@@ -35,6 +38,8 @@ import org.springframework.core.type.classreading.MetadataReaderFactory;
  * @since 2.5
  */
 public abstract class AbstractTypeHierarchyTraversingFilter implements TypeFilter {
+
+	protected final Log logger = LogFactory.getLog(getClass());
 
 	private final boolean considerInherited;
 
@@ -72,10 +77,16 @@ public abstract class AbstractTypeHierarchyTraversingFilter implements TypeFilte
 				}
 				else {
 					// Need to read super class to determine a match...
-					if (match(metadata.getSuperClassName(), metadataReaderFactory)) {
-						return true;
+					try {
+						if (match(metadata.getSuperClassName(), metadataReaderFactory)) {
+							return true;
+						}
 					}
-				}
+					catch (IOException ex) {
+						logger.debug("Could not read super class [" + metadata.getSuperClassName() +
+								"] of type-filtered class [" + metadata.getClassName() + "]");
+					}
+ 				}
 			}
 		}
 
@@ -90,8 +101,14 @@ public abstract class AbstractTypeHierarchyTraversingFilter implements TypeFilte
 				}
 				else {
 					// Need to read interface to determine a match...
-					if (match(ifc, metadataReaderFactory)) {
-						return true;
+					try {
+						if (match(ifc, metadataReaderFactory)) {
+							return true;
+						}
+					}
+					catch (IOException ex) {
+						logger.debug("Could not read interface [" + ifc + "] for type-filtered class [" +
+								metadata.getClassName() + "]");
 					}
 				}
 			}
