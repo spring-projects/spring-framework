@@ -634,11 +634,37 @@ public class MockHttpServletRequest implements HttpServletRequest {
 		this.locales.addAll(locales);
 	}
 
+	/**
+	 * Returns the first preferred {@linkplain Locale locale} configured
+	 * in this mock request.
+	 * <p>If no locales have been explicitly configured, the default,
+	 * preferred {@link Locale} for the <em>server</em> mocked by this
+	 * request is {@link Locale#ENGLISH}.
+	 * <p>In contrast to the Servlet specification, this mock implementation
+	 * does <strong>not</strong> take into consideration any locales
+	 * specified via the {@code Accept-Language} header.
+	 * @see javax.servlet.ServletRequest#getLocale()
+	 * @see #addPreferredLocale(Locale)
+	 * @see #setPreferredLocales(List)
+	 */
 	@Override
 	public Locale getLocale() {
 		return this.locales.get(0);
 	}
 
+	/**
+	 * Returns an {@linkplain Enumeration enumeration} of the preferred
+	 * {@linkplain Locale locales} configured in this mock request.
+	 * <p>If no locales have been explicitly configured, the default,
+	 * preferred {@link Locale} for the <em>server</em> mocked by this
+	 * request is {@link Locale#ENGLISH}.
+	 * <p>In contrast to the Servlet specification, this mock implementation
+	 * does <strong>not</strong> take into consideration any locales
+	 * specified via the {@code Accept-Language} header.
+	 * @see javax.servlet.ServletRequest#getLocales()
+	 * @see #addPreferredLocale(Locale)
+	 * @see #setPreferredLocales(List)
+	 */
 	@Override
 	public Enumeration<Locale> getLocales() {
 		return Collections.enumeration(this.locales);
