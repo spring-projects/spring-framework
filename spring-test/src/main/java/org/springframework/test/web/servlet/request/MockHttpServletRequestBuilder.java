@@ -39,7 +39,6 @@ import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.mock.web.MockHttpSession;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.util.Assert;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -57,11 +56,11 @@ import org.springframework.web.util.UriComponentsBuilder;
 import org.springframework.web.util.UriUtils;
 
 /**
- * Default builder for {@link MockHttpServletRequest} required as input to
- * perform request in {@link MockMvc}.
+ * Default builder for {@link MockHttpServletRequest} required as input to perform
+ * requests in {@link MockMvc}.
  *
- * <p>Application tests will typically access this builder through the static
- * factory methods in {@link MockMvcBuilders}.
+ * <p>Application tests will typically access this builder through the static factory
+ * methods in {@link org.springframework.test.web.servlet.setup.MockMvcBuilders}.
  *
  * @author Rossen Stoyanchev
  * @author Arjen Poutsma
@@ -69,7 +68,6 @@ import org.springframework.web.util.UriUtils;
  */
 public class MockHttpServletRequestBuilder
 		implements ConfigurableSmartRequestBuilder<MockHttpServletRequestBuilder>, Mergeable {
-
 
 	private final HttpMethod method;
 
@@ -143,6 +141,7 @@ public class MockHttpServletRequestBuilder
 		this.method = httpMethod;
 		this.uriComponents = UriComponentsBuilder.fromUri(uri).build();
 	}
+
 
 	/**
 	 * Add a request parameter to the {@link MockHttpServletRequest}.
@@ -428,6 +427,7 @@ public class MockHttpServletRequestBuilder
 		this.postProcessors.add(postProcessor);
 		return this;
 	}
+
 
 	/**
 	 * {@inheritDoc}

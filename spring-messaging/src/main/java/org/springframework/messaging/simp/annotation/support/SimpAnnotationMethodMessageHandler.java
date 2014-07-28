@@ -310,7 +310,7 @@ public class SimpAnnotationMethodMessageHandler extends AbstractMethodMessageHan
 
 		resolvers.addAll(getCustomArgumentResolvers());
 		resolvers.add(new PayloadArgumentResolver(this.messageConverter,
-				(this.validator != null ? this.validator : new NoopValidator())));
+				(this.validator != null ? this.validator : new NoOpValidator())));
 
 		return resolvers;
 	}
@@ -458,7 +458,7 @@ public class SimpAnnotationMethodMessageHandler extends AbstractMethodMessageHan
 	}
 
 
-	private static final class NoopValidator implements Validator {
+	private static final class NoOpValidator implements Validator {
 
 		@Override
 		public boolean supports(Class<?> clazz) {

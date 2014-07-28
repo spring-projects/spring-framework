@@ -48,7 +48,7 @@ import org.springframework.util.ReflectionUtils;
  */
 abstract class AbstractRecursiveAnnotationVisitor extends AnnotationVisitor {
 
-	protected final Log logger = LogFactory.getLog(this.getClass());
+	protected final Log logger = LogFactory.getLog(getClass());
 
 	protected final AnnotationAttributes attributes;
 
@@ -94,10 +94,10 @@ abstract class AbstractRecursiveAnnotationVisitor extends AnnotationVisitor {
 			}
 		}
 		catch (ClassNotFoundException ex) {
-			this.logger.debug("Failed to classload enum type while reading annotation metadata", ex);
+			logger.debug("Failed to classload enum type while reading annotation metadata", ex);
 		}
 		catch (IllegalAccessException ex) {
-			this.logger.warn("Could not access enum value while reading annotation metadata", ex);
+			logger.warn("Could not access enum value while reading annotation metadata", ex);
 		}
 		return valueToUse;
 	}
@@ -169,7 +169,6 @@ class RecursiveAnnotationAttributesVisitor extends AbstractRecursiveAnnotationVi
 
 	private final String annotationType;
 
-
 	public RecursiveAnnotationAttributesVisitor(String annotationType, AnnotationAttributes attributes,
 			ClassLoader classLoader) {
 		super(classLoader, attributes);
@@ -183,8 +182,8 @@ class RecursiveAnnotationAttributesVisitor extends AbstractRecursiveAnnotationVi
 			doVisitEnd(annotationClass);
 		}
 		catch (ClassNotFoundException ex) {
-			this.logger.debug("Failed to class-load type while reading annotation metadata. "
-					+ "This is a non-fatal error, but certain annotation metadata may be unavailable.", ex);
+			logger.debug("Failed to class-load type while reading annotation metadata. " +
+					"This is a non-fatal error, but certain annotation metadata may be unavailable.", ex);
 		}
 	}
 
@@ -246,7 +245,6 @@ final class AnnotationAttributesReadingVisitor extends RecursiveAnnotationAttrib
 
 	private final Map<String, Set<String>> metaAnnotationMap;
 
-
 	public AnnotationAttributesReadingVisitor(String annotationType,
 			MultiValueMap<String, AnnotationAttributes> attributesMap, Map<String, Set<String>> metaAnnotationMap,
 			ClassLoader classLoader) {
@@ -256,7 +254,6 @@ final class AnnotationAttributesReadingVisitor extends RecursiveAnnotationAttrib
 		this.attributesMap = attributesMap;
 		this.metaAnnotationMap = metaAnnotationMap;
 	}
-
 
 	@Override
 	public void doVisitEnd(Class<?> annotationClass) {
