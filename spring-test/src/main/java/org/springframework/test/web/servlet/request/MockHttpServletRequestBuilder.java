@@ -40,7 +40,6 @@ import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.mock.web.MockHttpSession;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.RequestBuilder;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.util.Assert;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -58,11 +57,11 @@ import org.springframework.web.util.UriComponentsBuilder;
 import org.springframework.web.util.UriUtils;
 
 /**
- * Default builder for {@link MockHttpServletRequest} required as input to
- * perform request in {@link MockMvc}.
+ * Default builder for {@link MockHttpServletRequest} required as input to perform
+ * requests in {@link MockMvc}.
  *
- * <p>Application tests will typically access this builder through the static
- * factory methods in {@link MockMvcBuilders}.
+ * <p>Application tests will typically access this builder through the static factory
+ * methods in {@link org.springframework.test.web.servlet.setup.MockMvcBuilders}.
  *
  * @author Rossen Stoyanchev
  * @author Arjen Poutsma
@@ -426,6 +425,7 @@ public class MockHttpServletRequestBuilder implements RequestBuilder, Mergeable 
 		this.postProcessors.add(postProcessor);
 		return this;
 	}
+
 
 	/**
 	 * {@inheritDoc}

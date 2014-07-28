@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,6 @@ import org.springframework.beans.factory.support.ManagedMap;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.factory.xml.AbstractSingleBeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
-import org.springframework.cache.annotation.AnnotationCacheOperationSource;
 import org.springframework.cache.interceptor.CacheEvictOperation;
 import org.springframework.cache.interceptor.CacheInterceptor;
 import org.springframework.cache.interceptor.CacheOperation;
@@ -78,8 +77,8 @@ class CacheAdviceParser extends AbstractSingleBeanDefinitionParser {
 		}
 		else {
 			// Assume annotations source.
-			builder.addPropertyValue("cacheOperationSources", new RootBeanDefinition(
-					AnnotationCacheOperationSource.class));
+			builder.addPropertyValue("cacheOperationSources",
+					new RootBeanDefinition("org.springframework.cache.annotation.AnnotationCacheOperationSource"));
 		}
 	}
 
@@ -170,7 +169,7 @@ class CacheAdviceParser extends AbstractSingleBeanDefinitionParser {
 
 	private static String getAttributeValue(Element element, String attributeName, String defaultValue) {
 		String attribute = element.getAttribute(attributeName);
-		if(StringUtils.hasText(attribute)) {
+		if (StringUtils.hasText(attribute)) {
 			return attribute.trim();
 		}
 		return defaultValue;

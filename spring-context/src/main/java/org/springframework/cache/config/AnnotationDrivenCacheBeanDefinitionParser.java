@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 
 package org.springframework.cache.config;
 
-import static org.springframework.context.annotation.AnnotationConfigUtils.*;
+import org.w3c.dom.Element;
 
 import org.springframework.aop.config.AopNamespaceUtils;
 import org.springframework.beans.factory.config.BeanDefinition;
@@ -26,10 +26,9 @@ import org.springframework.beans.factory.parsing.CompositeComponentDefinition;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.factory.xml.BeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
-import org.springframework.cache.annotation.AnnotationCacheOperationSource;
 import org.springframework.cache.interceptor.BeanFactoryCacheOperationSourceAdvisor;
 import org.springframework.cache.interceptor.CacheInterceptor;
-import org.w3c.dom.Element;
+import org.springframework.context.annotation.AnnotationConfigUtils;
 
 /**
  * {@link org.springframework.beans.factory.xml.BeanDefinitionParser}
@@ -83,13 +82,13 @@ class AnnotationDrivenCacheBeanDefinitionParser implements BeanDefinitionParser 
 	 * </pre>
 	 */
 	private void registerCacheAspect(Element element, ParserContext parserContext) {
-		if (!parserContext.getRegistry().containsBeanDefinition(CACHE_ASPECT_BEAN_NAME)) {
+		if (!parserContext.getRegistry().containsBeanDefinition(AnnotationConfigUtils.CACHE_ASPECT_BEAN_NAME)) {
 			RootBeanDefinition def = new RootBeanDefinition();
-			def.setBeanClassName(CACHE_ASPECT_CLASS_NAME);
+			def.setBeanClassName(AnnotationConfigUtils.CACHE_ASPECT_CLASS_NAME);
 			def.setFactoryMethodName("aspectOf");
 			parseCacheManagerProperty(element, def);
 			CacheNamespaceHandler.parseKeyGenerator(element, def);
-			parserContext.registerBeanComponent(new BeanComponentDefinition(def, CACHE_ASPECT_BEAN_NAME));
+			parserContext.registerBeanComponent(new BeanComponentDefinition(def, AnnotationConfigUtils.CACHE_ASPECT_BEAN_NAME));
 		}
 	}
 
@@ -102,11 +101,11 @@ class AnnotationDrivenCacheBeanDefinitionParser implements BeanDefinitionParser 
 		public static void configureAutoProxyCreator(Element element, ParserContext parserContext) {
 			AopNamespaceUtils.registerAutoProxyCreatorIfNecessary(parserContext, element);
 
-			if (!parserContext.getRegistry().containsBeanDefinition(CACHE_ADVISOR_BEAN_NAME)) {
+			if (!parserContext.getRegistry().containsBeanDefinition(AnnotationConfigUtils.CACHE_ADVISOR_BEAN_NAME)) {
 				Object eleSource = parserContext.extractSource(element);
 
 				// Create the CacheOperationSource definition.
-				RootBeanDefinition sourceDef = new RootBeanDefinition(AnnotationCacheOperationSource.class);
+				RootBeanDefinition sourceDef = new RootBeanDefinition("org.springframework.cache.annotation.AnnotationCacheOperationSource");
 				sourceDef.setSource(eleSource);
 				sourceDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
 				String sourceName = parserContext.getReaderContext().registerWithGeneratedName(sourceDef);
@@ -129,15 +128,16 @@ class AnnotationDrivenCacheBeanDefinitionParser implements BeanDefinitionParser 
 				if (element.hasAttribute("order")) {
 					advisorDef.getPropertyValues().add("order", element.getAttribute("order"));
 				}
-				parserContext.getRegistry().registerBeanDefinition(CACHE_ADVISOR_BEAN_NAME, advisorDef);
+				parserContext.getRegistry().registerBeanDefinition(AnnotationConfigUtils.CACHE_ADVISOR_BEAN_NAME, advisorDef);
 
 				CompositeComponentDefinition compositeDef = new CompositeComponentDefinition(element.getTagName(),
 						eleSource);
 				compositeDef.addNestedComponent(new BeanComponentDefinition(sourceDef, sourceName));
 				compositeDef.addNestedComponent(new BeanComponentDefinition(interceptorDef, interceptorName));
-				compositeDef.addNestedComponent(new BeanComponentDefinition(advisorDef, CACHE_ADVISOR_BEAN_NAME));
+				compositeDef.addNestedComponent(new BeanComponentDefinition(advisorDef, AnnotationConfigUtils.CACHE_ADVISOR_BEAN_NAME));
 				parserContext.registerComponent(compositeDef);
 			}
 		}
 	}
+
 }
