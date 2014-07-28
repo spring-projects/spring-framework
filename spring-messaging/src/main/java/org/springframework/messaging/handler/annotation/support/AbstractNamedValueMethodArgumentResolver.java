@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -58,14 +58,14 @@ import org.springframework.util.ClassUtils;
  */
 public abstract class AbstractNamedValueMethodArgumentResolver implements HandlerMethodArgumentResolver {
 
+	private final ConversionService conversionService;
+
 	private final ConfigurableBeanFactory configurableBeanFactory;
 
 	private final BeanExpressionContext expressionContext;
 
-	private Map<MethodParameter, NamedValueInfo> namedValueInfoCache =
+	private final Map<MethodParameter, NamedValueInfo> namedValueInfoCache =
 			new ConcurrentHashMap<MethodParameter, NamedValueInfo>(256);
-
-	private ConversionService conversionService;
 
 
 	/**
@@ -77,15 +77,14 @@ public abstract class AbstractNamedValueMethodArgumentResolver implements Handle
 	 * values are not expected to contain expressions
 	 */
 	protected AbstractNamedValueMethodArgumentResolver(ConversionService cs, ConfigurableBeanFactory beanFactory) {
-		this.conversionService = (cs != null) ? cs : new DefaultConversionService();
+		this.conversionService = (cs != null ? cs : new DefaultConversionService());
 		this.configurableBeanFactory = beanFactory;
-		this.expressionContext = (beanFactory != null) ? new BeanExpressionContext(beanFactory, null) : null;
+		this.expressionContext = (beanFactory != null ? new BeanExpressionContext(beanFactory, null) : null);
 	}
 
 
 	@Override
 	public Object resolveArgument(MethodParameter parameter, Message<?> message) throws Exception {
-
 		Class<?> paramType = parameter.getParameterType();
 		NamedValueInfo namedValueInfo = getNamedValueInfo(parameter);
 
@@ -99,7 +98,7 @@ public abstract class AbstractNamedValueMethodArgumentResolver implements Handle
 			}
 			value = handleNullValue(namedValueInfo.name, value, paramType);
 		}
-		else if ("".equals(value) && (namedValueInfo.defaultValue != null)) {
+		else if ("".equals(value) && namedValueInfo.defaultValue != null) {
 			value = resolveDefaultValue(namedValueInfo.defaultValue);
 		}
 
