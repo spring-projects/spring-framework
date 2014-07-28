@@ -26,7 +26,6 @@ import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.xml.BeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
-import org.springframework.context.annotation.AnnotationConfigUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -48,7 +47,7 @@ class AnnotationDrivenJmsBeanDefinitionParser implements BeanDefinitionParser {
 		// Nest the concrete post-processor bean in the surrounding component.
 		BeanDefinitionRegistry registry = parserContext.getRegistry();
 
-		if (registry.containsBeanDefinition(AnnotationConfigUtils.JMS_LISTENER_ANNOTATION_PROCESSOR_BEAN_NAME)) {
+		if (registry.containsBeanDefinition(JmsListenerConfigUtils.JMS_LISTENER_ANNOTATION_PROCESSOR_BEAN_NAME)) {
 			parserContext.getReaderContext().error(
 					"Only one JmsListenerAnnotationBeanPostProcessor may exist within the context.", source);
 		}
@@ -75,7 +74,7 @@ class AnnotationDrivenJmsBeanDefinitionParser implements BeanDefinitionParser {
 			}
 
 			registerInfrastructureBean(parserContext, builder,
-					AnnotationConfigUtils.JMS_LISTENER_ANNOTATION_PROCESSOR_BEAN_NAME);
+					JmsListenerConfigUtils.JMS_LISTENER_ANNOTATION_PROCESSOR_BEAN_NAME);
 		}
 
 		// Finally register the composite component.
@@ -88,7 +87,7 @@ class AnnotationDrivenJmsBeanDefinitionParser implements BeanDefinitionParser {
 		BeanDefinitionBuilder builder = BeanDefinitionBuilder.genericBeanDefinition(
 				"org.springframework.jms.config.JmsListenerEndpointRegistry");
 		builder.getRawBeanDefinition().setSource(source);
-		registerInfrastructureBean(parserContext, builder, AnnotationConfigUtils.JMS_LISTENER_ENDPOINT_REGISTRY_BEAN_NAME);
+		registerInfrastructureBean(parserContext, builder, JmsListenerConfigUtils.JMS_LISTENER_ENDPOINT_REGISTRY_BEAN_NAME);
 	}
 
 	private static void registerInfrastructureBean(

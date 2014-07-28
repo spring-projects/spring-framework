@@ -17,9 +17,9 @@
 package org.springframework.cache.jcache.config;
 
 import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.cache.config.CacheManagementConfigUtils;
 import org.springframework.cache.jcache.interceptor.BeanFactoryJCacheOperationSourceAdvisor;
 import org.springframework.cache.jcache.interceptor.JCacheInterceptor;
-import org.springframework.context.annotation.AnnotationConfigUtils;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Role;
@@ -38,7 +38,7 @@ import org.springframework.context.annotation.Role;
 @Configuration
 public class ProxyJCacheConfiguration extends AbstractJCacheConfiguration {
 
-	@Bean(name = AnnotationConfigUtils.JCACHE_ADVISOR_BEAN_NAME)
+	@Bean(name = CacheManagementConfigUtils.JCACHE_ADVISOR_BEAN_NAME)
 	@Role(BeanDefinition.ROLE_INFRASTRUCTURE)
 	public BeanFactoryJCacheOperationSourceAdvisor cacheAdvisor() {
 		BeanFactoryJCacheOperationSourceAdvisor advisor =
@@ -48,7 +48,6 @@ public class ProxyJCacheConfiguration extends AbstractJCacheConfiguration {
 		advisor.setOrder(this.enableCaching.<Integer>getNumber("order"));
 		return advisor;
 	}
-
 
 	@Bean(name = "jCacheInterceptor")
 	@Role(BeanDefinition.ROLE_INFRASTRUCTURE)

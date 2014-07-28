@@ -30,7 +30,6 @@ import org.springframework.beans.factory.support.ManagedMap;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.factory.xml.AbstractSingleBeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
-import org.springframework.cache.annotation.AnnotationCacheOperationSource;
 import org.springframework.cache.interceptor.CacheEvictOperation;
 import org.springframework.cache.interceptor.CacheInterceptor;
 import org.springframework.cache.interceptor.CacheOperation;
@@ -79,8 +78,8 @@ class CacheAdviceParser extends AbstractSingleBeanDefinitionParser {
 		}
 		else {
 			// Assume annotations source.
-			builder.addPropertyValue("cacheOperationSources", new RootBeanDefinition(
-					AnnotationCacheOperationSource.class));
+			builder.addPropertyValue("cacheOperationSources",
+					new RootBeanDefinition("org.springframework.cache.annotation.AnnotationCacheOperationSource"));
 		}
 	}
 

@@ -29,11 +29,11 @@ import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.SmartInitializingSingleton;
 import org.springframework.beans.factory.config.BeanPostProcessor;
-import org.springframework.context.annotation.AnnotationConfigUtils;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.jms.config.DefaultJmsHandlerMethodFactory;
 import org.springframework.jms.config.JmsHandlerMethodFactory;
+import org.springframework.jms.config.JmsListenerConfigUtils;
 import org.springframework.jms.config.JmsListenerContainerFactory;
 import org.springframework.jms.config.JmsListenerEndpointRegistrar;
 import org.springframework.jms.config.JmsListenerEndpointRegistry;
@@ -153,7 +153,7 @@ public class JmsListenerAnnotationBeanPostProcessor
 			if (this.endpointRegistry == null) {
 				Assert.state(this.beanFactory != null, "BeanFactory must be set to find endpoint registry by bean name");
 				this.endpointRegistry = this.beanFactory.getBean(
-						AnnotationConfigUtils.JMS_LISTENER_ENDPOINT_REGISTRY_BEAN_NAME, JmsListenerEndpointRegistry.class);
+						JmsListenerConfigUtils.JMS_LISTENER_ENDPOINT_REGISTRY_BEAN_NAME, JmsListenerEndpointRegistry.class);
 			}
 			this.registrar.setEndpointRegistry(this.endpointRegistry);
 		}

@@ -21,7 +21,6 @@ import java.util.List;
 
 import org.springframework.context.annotation.AdviceMode;
 import org.springframework.context.annotation.AdviceModeImportSelector;
-import org.springframework.context.annotation.AnnotationConfigUtils;
 import org.springframework.context.annotation.AutoProxyRegistrar;
 import org.springframework.util.ClassUtils;
 
@@ -36,18 +35,25 @@ import org.springframework.util.ClassUtils;
  * @since 3.1
  * @see EnableCaching
  * @see ProxyCachingConfiguration
- * @see AnnotationConfigUtils#CACHE_ASPECT_CONFIGURATION_CLASS_NAME
- * @see AnnotationConfigUtils#JCACHE_ASPECT_CONFIGURATION_CLASS_NAME
  */
 public class CachingConfigurationSelector extends AdviceModeImportSelector<EnableCaching> {
 
 	private static final String PROXY_JCACHE_CONFIGURATION_CLASS =
 			"org.springframework.cache.jcache.config.ProxyJCacheConfiguration";
 
+	private static final String CACHE_ASPECT_CONFIGURATION_CLASS_NAME =
+			"org.springframework.cache.aspectj.AspectJCachingConfiguration";
+
+	private static final String JCACHE_ASPECT_CONFIGURATION_CLASS_NAME =
+			"org.springframework.cache.aspectj.AspectJJCacheConfiguration";
+
+
 	private static final boolean jsr107Present = ClassUtils.isPresent(
 			"javax.cache.Cache", CachingConfigurationSelector.class.getClassLoader());
+
 	private static final boolean jCacheImplPresent = ClassUtils.isPresent(
 			PROXY_JCACHE_CONFIGURATION_CLASS, CachingConfigurationSelector.class.getClassLoader());
+
 
 	/**
 	 * {@inheritDoc}
@@ -74,7 +80,7 @@ public class CachingConfigurationSelector extends AdviceModeImportSelector<Enabl
 		List<String> result = new ArrayList<String>();
 		result.add(AutoProxyRegistrar.class.getName());
 		result.add(ProxyCachingConfiguration.class.getName());
-		if (isJCacheAvailable()) {
+		if (jsr107Present && jCacheImplPresent) {
 			result.add(PROXY_JCACHE_CONFIGURATION_CLASS);
 		}
 		return result.toArray(new String[result.size()]);
@@ -86,19 +92,11 @@ public class CachingConfigurationSelector extends AdviceModeImportSelector<Enabl
 	 */
 	private String[] getAspectJImports() {
 		List<String> result = new ArrayList<String>();
-		result.add(AnnotationConfigUtils.CACHE_ASPECT_CONFIGURATION_CLASS_NAME);
-		if (isJCacheAvailable()) {
-			result.add(AnnotationConfigUtils.JCACHE_ASPECT_CONFIGURATION_CLASS_NAME);
+		result.add(CACHE_ASPECT_CONFIGURATION_CLASS_NAME);
+		if (jsr107Present && jCacheImplPresent) {
+			result.add(JCACHE_ASPECT_CONFIGURATION_CLASS_NAME);
 		}
 		return result.toArray(new String[result.size()]);
-	}
-
-	/**
-	 * Specify if the JSR-107 API and Spring's jCache implementation are available
-	 * in the classpath.
-	 */
-	private boolean isJCacheAvailable() {
-		return jsr107Present && jCacheImplPresent;
 	}
 
 }

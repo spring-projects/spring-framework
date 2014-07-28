@@ -17,10 +17,10 @@
 package org.springframework.cache.annotation;
 
 import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.cache.config.CacheManagementConfigUtils;
 import org.springframework.cache.interceptor.BeanFactoryCacheOperationSourceAdvisor;
 import org.springframework.cache.interceptor.CacheInterceptor;
 import org.springframework.cache.interceptor.CacheOperationSource;
-import org.springframework.context.annotation.AnnotationConfigUtils;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Role;
@@ -37,11 +37,11 @@ import org.springframework.context.annotation.Role;
 @Configuration
 public class ProxyCachingConfiguration extends AbstractCachingConfiguration<CachingConfigurer> {
 
-	@Bean(name=AnnotationConfigUtils.CACHE_ADVISOR_BEAN_NAME)
+	@Bean(name = CacheManagementConfigUtils.CACHE_ADVISOR_BEAN_NAME)
 	@Role(BeanDefinition.ROLE_INFRASTRUCTURE)
 	public BeanFactoryCacheOperationSourceAdvisor cacheAdvisor() {
 		BeanFactoryCacheOperationSourceAdvisor advisor =
-			new BeanFactoryCacheOperationSourceAdvisor();
+				new BeanFactoryCacheOperationSourceAdvisor();
 		advisor.setCacheOperationSource(cacheOperationSource());
 		advisor.setAdvice(cacheInterceptor());
 		advisor.setOrder(this.enableCaching.<Integer>getNumber("order"));
