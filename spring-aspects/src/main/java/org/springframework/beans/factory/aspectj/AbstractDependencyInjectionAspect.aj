@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,20 +27,26 @@ import org.aspectj.lang.annotation.control.CodeGenerationHint;
  * @since 2.5.2
  */
 public abstract aspect AbstractDependencyInjectionAspect {
-	/**
-	 * Select construction join points for objects to inject dependencies
-	 */
-	public abstract pointcut beanConstruction(Object bean);
+
+	private pointcut preConstructionCondition() :
+			leastSpecificSuperTypeConstruction() && preConstructionConfiguration();
+
+	private pointcut postConstructionCondition() :
+			mostSpecificSubTypeConstruction() && !preConstructionConfiguration();
 
 	/**
-	 * Select deserialization join points for objects to inject dependencies
+	 * Select least specific super type that is marked for DI
+	 * (so that injection occurs only once with pre-construction injection).
 	 */
-	public abstract pointcut beanDeserialization(Object bean);
+	public abstract pointcut leastSpecificSuperTypeConstruction();
 
 	/**
-	 * Select join points in a configurable bean
+	 * Select the most-specific initialization join point
+	 * (most concrete class) for the initialization of an instance.
 	 */
-	public abstract pointcut inConfigurableBean();
+	@CodeGenerationHint(ifNameSuffix="6f1")
+	public pointcut mostSpecificSubTypeConstruction() :
+			if (thisJoinPoint.getSignature().getDeclaringType() == thisJoinPoint.getThis().getClass());
 
 	/**
 	 * Select join points in beans to be configured prior to construction?
@@ -49,29 +55,20 @@ public abstract aspect AbstractDependencyInjectionAspect {
 	public pointcut preConstructionConfiguration() : if (false);
 
 	/**
-	 * Select the most-specific initialization join point
-	 * (most concrete class) for the initialization of an instance.
+	 * Select construction join points for objects to inject dependencies.
 	 */
-	@CodeGenerationHint(ifNameSuffix="6f1")
-	public pointcut mostSpecificSubTypeConstruction() :
-		if (thisJoinPoint.getSignature().getDeclaringType() == thisJoinPoint.getThis().getClass());
+	public abstract pointcut beanConstruction(Object bean);
 
 	/**
-	 * Select least specific super type that is marked for DI (so that injection occurs only once with pre-construction inejection
+	 * Select deserialization join points for objects to inject dependencies.
 	 */
-	public abstract pointcut leastSpecificSuperTypeConstruction();
+	public abstract pointcut beanDeserialization(Object bean);
 
 	/**
-	 * Configure the bean
+	 * Select join points in a configurable bean.
 	 */
-	public abstract void configureBean(Object bean);
+	public abstract pointcut inConfigurableBean();
 
-
-	private pointcut preConstructionCondition() :
-		leastSpecificSuperTypeConstruction() && preConstructionConfiguration();
-
-	private pointcut postConstructionCondition() :
-		mostSpecificSubTypeConstruction() && !preConstructionConfiguration();
 
 	/**
 	 * Pre-construction configuration.
@@ -99,5 +96,11 @@ public abstract aspect AbstractDependencyInjectionAspect {
 		beanDeserialization(bean) && inConfigurableBean() {
 		configureBean(bean);
 	}
+
+
+	/**
+	 * Configure the given bean.
+	 */
+	public abstract void configureBean(Object bean);
 
 }

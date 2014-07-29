@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -73,26 +73,34 @@ public class GenericCallMetaDataProvider implements CallMetaDataProvider {
 		try {
 			setSupportsCatalogsInProcedureCalls(databaseMetaData.supportsCatalogsInProcedureCalls());
 		}
-		catch (SQLException se) {
-			logger.warn("Error retrieving 'DatabaseMetaData.supportsCatalogsInProcedureCalls' - " + se.getMessage());
+		catch (SQLException ex) {
+			if (logger.isWarnEnabled()) {
+				logger.warn("Error retrieving 'DatabaseMetaData.supportsCatalogsInProcedureCalls' - " + ex.getMessage());
+			}
 		}
 		try {
 			setSupportsSchemasInProcedureCalls(databaseMetaData.supportsSchemasInProcedureCalls());
 		}
-		catch (SQLException se) {
-			logger.warn("Error retrieving 'DatabaseMetaData.supportsSchemasInProcedureCalls' - " + se.getMessage());
+		catch (SQLException ex) {
+			if (logger.isWarnEnabled()) {
+				logger.warn("Error retrieving 'DatabaseMetaData.supportsSchemasInProcedureCalls' - " + ex.getMessage());
+			}
 		}
 		try {
 			setStoresUpperCaseIdentifiers(databaseMetaData.storesUpperCaseIdentifiers());
 		}
-		catch (SQLException se) {
-			logger.warn("Error retrieving 'DatabaseMetaData.storesUpperCaseIdentifiers' - " + se.getMessage());
+		catch (SQLException ex) {
+			if (logger.isWarnEnabled()) {
+				logger.warn("Error retrieving 'DatabaseMetaData.storesUpperCaseIdentifiers' - " + ex.getMessage());
+			}
 		}
 		try {
 			setStoresLowerCaseIdentifiers(databaseMetaData.storesLowerCaseIdentifiers());
 		}
-		catch (SQLException se) {
-			logger.warn("Error retrieving 'DatabaseMetaData.storesLowerCaseIdentifiers' - " + se.getMessage());
+		catch (SQLException ex) {
+			if (logger.isWarnEnabled()) {
+				logger.warn("Error retrieving 'DatabaseMetaData.storesLowerCaseIdentifiers' - " + ex.getMessage());
+			}
 		}
 	}
 
@@ -341,12 +349,8 @@ public class GenericCallMetaDataProvider implements CallMetaDataProvider {
 						columnType == DatabaseMetaData.procedureColumnInOut ||
 						columnType == DatabaseMetaData.procedureColumnOut)) {
 					if (logger.isDebugEnabled()) {
-						logger.debug("Skipping metadata for: "
-							+ columnName +
-							" " + columnType +
-							" " + procs.getInt("DATA_TYPE") +
-							" " + procs.getString("TYPE_NAME") +
-							" " + procs.getBoolean("NULLABLE") +
+						logger.debug("Skipping metadata for: " + columnType + " " + procs.getInt("DATA_TYPE") +
+							" " + procs.getString("TYPE_NAME") + " " + procs.getBoolean("NULLABLE") +
 							" (probably a member of a collection)"
 						);
 					}
@@ -355,18 +359,19 @@ public class GenericCallMetaDataProvider implements CallMetaDataProvider {
 					CallParameterMetaData meta = new CallParameterMetaData(columnName, columnType,
 							procs.getInt("DATA_TYPE"), procs.getString("TYPE_NAME"), procs.getBoolean("NULLABLE")
 					);
-					callParameterMetaData.add(meta);
+					this.callParameterMetaData.add(meta);
 					if (logger.isDebugEnabled()) {
 						logger.debug("Retrieved metadata: " + meta.getParameterName() + " " +
-								meta.getParameterType() + " " + meta.getSqlType() +
-								" " + meta.getTypeName() + " " + meta.isNullable()
-						);
+								meta.getParameterType() + " " + meta.getSqlType() + " " +
+								meta.getTypeName() + " " + meta.isNullable());
 					}
 				}
 			}
 		}
 		catch (SQLException ex) {
-			logger.warn("Error while retrieving metadata for procedure columns: " + ex);
+			if (logger.isWarnEnabled()) {
+				logger.warn("Error while retrieving metadata for procedure columns: " + ex);
+			}
 		}
 		finally {
 			try {
@@ -375,7 +380,9 @@ public class GenericCallMetaDataProvider implements CallMetaDataProvider {
 				}
 			}
 			catch (SQLException ex) {
-				logger.warn("Problem closing ResultSet for procedure column metadata: " + ex);
+				if (logger.isWarnEnabled()) {
+					logger.warn("Problem closing ResultSet for procedure column metadata: " + ex);
+				}
 			}
 		}
 	}

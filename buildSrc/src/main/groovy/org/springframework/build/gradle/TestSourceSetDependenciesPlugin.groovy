@@ -40,8 +40,7 @@ class TestSourceSetDependenciesPlugin implements Plugin<Project> {
 		}
 	}
 
-	private void collectProjectDependencies(Set<ProjectDependency> projectDependencies,
-			Project project) {
+	private void collectProjectDependencies(Set<ProjectDependency> projectDependencies, Project project) {
 		for (def configurationName in ["compile", "optional", "provided", "testCompile"]) {
 			Configuration configuration = project.getConfigurations().findByName(configurationName)
 			if (configuration) {
