@@ -562,7 +562,7 @@ public abstract class ObjectUtils {
 			return NULL_STRING;
 		}
 		if (obj instanceof String) {
-			return (String) obj;
+			return convertXSSValue((String) obj);
 		}
 		if (obj instanceof Object[]) {
 			return nullSafeToString((Object[]) obj);
@@ -594,7 +594,27 @@ public abstract class ObjectUtils {
 		String str = obj.toString();
 		return (str != null ? str : EMPTY_STRING);
 	}
-
+	
+	/**
+	 * Return a String representation of the converted Object for XSS Script value.
+	 * @param value the value to build a String representation for
+	 * @return a String representation of {@code value}
+	 */
+	public static String convertXSSValue(String value){
+		value = value.replaceAll("&", "&amp;");
+	    value = value.replaceAll("<", "&lt;");
+	    value = value.replaceAll(">", "&gt;");
+	    value = value.replaceAll("%00", null);
+	    value = value.replaceAll("\"", "&#34;");
+	    value = value.replaceAll("\'", "&#39;");
+	    value = value.replaceAll("%", "&#37;");
+	    value = value.replaceAll("../", "");
+	    value = value.replaceAll("..\\\\", "");
+	    value = value.replaceAll("./", "");
+	    value = value.replaceAll("%2F", "");
+	    
+	    return value;
+	}
 	/**
 	 * Return a String representation of the contents of the specified array.
 	 * <p>The String representation consists of a list of the array's elements,
