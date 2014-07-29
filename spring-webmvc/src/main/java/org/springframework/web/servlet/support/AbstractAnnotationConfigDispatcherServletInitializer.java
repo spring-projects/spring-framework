@@ -87,8 +87,8 @@ public abstract class AbstractAnnotationConfigDispatcherServletInitializer
 	 * and/or {@link org.springframework.stereotype.Component @Component} classes to be
 	 * provided to the {@linkplain #createServletApplicationContext() dispatcher servlet
 	 * application context}.
-	 * @return the configuration classes for the dispatcher servlet application context
-	 * (may not be empty or {@code null})
+	 * @return the configuration classes for the dispatcher servlet application context or
+	 * {@code null} if all configuration is specified through root config classes.
 	 */
 	protected abstract Class<?>[] getServletConfigClasses();
 
