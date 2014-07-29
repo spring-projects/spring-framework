@@ -68,7 +68,7 @@ import org.springframework.web.servlet.handler.AbstractHandlerMethodExceptionRes
  * @since 3.1
  */
 public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExceptionResolver
-		implements InitializingBean, ApplicationContextAware {
+		implements ApplicationContextAware, InitializingBean {
 
 	private List<HandlerMethodArgumentResolver> customArgumentResolvers;
 
@@ -289,9 +289,7 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 			ExceptionHandlerMethodResolver resolver = new ExceptionHandlerMethodResolver(bean.getBeanType());
 			if (resolver.hasExceptionMappings()) {
 				this.exceptionHandlerAdviceCache.put(bean, resolver);
-				if (logger.isDebugEnabled()) {
-					logger.debug("Detected @ExceptionHandler methods in " + bean);
-				}
+				logger.info("Detected @ExceptionHandler methods in " + bean);
 			}
 		}
 	}
@@ -347,7 +345,7 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 	 * and if not found, it continues searching for additional {@code @ExceptionHandler}
 	 * methods assuming some {@linkplain ControllerAdvice @ControllerAdvice}
 	 * Spring-managed beans were detected.
-	 * @param handlerMethod the method where the exception was raised, possibly {@code null}
+	 * @param handlerMethod the method where the exception was raised (may be {@code null})
 	 * @param exception the raised exception
 	 * @return a method to handle the exception, or {@code null}
 	 */
