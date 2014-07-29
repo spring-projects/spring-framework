@@ -1419,6 +1419,77 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		assertEquals(-2.0f,expression.getValue());
 	}
 	
+	@Test
+	public void opModulus_12041() throws Exception {
+		expression = parse("2%2");
+		assertEquals(0,expression.getValue());
+		assertCanCompile(expression);
+		assertEquals(0,expression.getValue());
+
+		expression = parse("payload%2==0");
+		assertTrue(expression.getValue(new GenericMessageTestHelper<Integer>(4),Boolean.TYPE));
+		assertFalse(expression.getValue(new GenericMessageTestHelper<Integer>(5),Boolean.TYPE));
+		assertCanCompile(expression);
+		assertTrue(expression.getValue(new GenericMessageTestHelper<Integer>(4),Boolean.TYPE));
+		assertFalse(expression.getValue(new GenericMessageTestHelper<Integer>(5),Boolean.TYPE));
+
+		expression = parse("8%3");
+		assertEquals(2,expression.getValue());
+		assertCanCompile(expression);
+		assertEquals(2,expression.getValue());
+		
+		expression = parse("17L%5L");
+		assertEquals(2L,expression.getValue());
+		assertCanCompile(expression);
+		assertEquals(2L,expression.getValue());
+
+		expression = parse("3.0f%2.0f");
+		assertEquals(1.0f,expression.getValue());
+		assertCanCompile(expression);
+		assertEquals(1.0f,expression.getValue());
+
+		expression = parse("3.0d%4.0d");
+		assertEquals(3.0d,expression.getValue());
+		assertCanCompile(expression);
+		assertEquals(3.0d,expression.getValue());
+
+		expression = parse("T(Float).valueOf(6.0f)%2");
+		assertEquals(0.0f,expression.getValue());
+		assertCantCompile(expression);
+		
+		expression = parse("T(Float).valueOf(6.0f)%4");
+		assertEquals(2.0f,expression.getValue());
+		assertCantCompile(expression);
+
+		expression = parse("T(Float).valueOf(8.0f)%T(Float).valueOf(3.0f)");
+		assertEquals(2.0f,expression.getValue());
+		assertCanCompile(expression);
+		assertEquals(2.0f,expression.getValue());
+
+		expression = parse("13L%T(Long).valueOf(4L)");
+		assertEquals(1L,expression.getValue());
+		assertCanCompile(expression);
+		assertEquals(1L,expression.getValue());
+
+		expression = parse("T(Long).valueOf(44L)%12");
+		assertEquals(8L,expression.getValue());
+		assertCantCompile(expression);
+		
+		expression = parse("T(Long).valueOf(9L)%T(Long).valueOf(2L)");
+		assertEquals(1L,expression.getValue());
+		assertCanCompile(expression);
+		assertEquals(1L,expression.getValue());
+
+		expression = parse("7L%T(Long).valueOf(2L)");
+		assertEquals(1L,expression.getValue());
+		assertCanCompile(expression);
+		assertEquals(1L,expression.getValue());
+
+		expression = parse("T(Float).valueOf(9.0f)%-T(Float).valueOf(4.0f)");
+		assertEquals(1.0f,expression.getValue());
+		assertCanCompile(expression);
+		assertEquals(1.0f,expression.getValue());
+	}
 
 	@Test
 	public void constructorReference() throws Exception {
