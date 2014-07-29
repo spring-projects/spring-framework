@@ -16,8 +16,7 @@
 
 package org.springframework.http.client;
 
-import static org.junit.Assert.*;
-
+import java.io.OutputStream;
 import java.net.URI;
 
 import org.apache.http.client.HttpClient;
@@ -28,6 +27,8 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.params.CoreConnectionPNames;
 import org.junit.Test;
 import org.springframework.http.HttpMethod;
+
+import static org.junit.Assert.*;
 
 public class HttpComponentsClientHttpRequestFactoryTests extends AbstractHttpRequestFactoryTestCase {
 
@@ -73,5 +74,25 @@ public class HttpComponentsClientHttpRequestFactoryTests extends AbstractHttpReq
 		assertEquals("Wrong custom connection timeout", 1234, requestConfig.getConnectTimeout());
 		assertEquals("Wrong custom socket timeout", 4567, requestConfig.getSocketTimeout());
 
+	}
+	
+	/**
+	 * HttpComponentsClientHttpRequestFactory can not use getBody() method if bufferRequestBody set false.
+	 * So recommend use SimpleClientHttpRequestFactory instead of HttpComponentsClientHttpRequestFactory if bufferRequestBody set false.
+	 * (SPR-11981)
+	 * @throws Exception
+	 */
+	@Test
+	(expected=UnsupportedOperationException.class)
+	public void assertBufferedRequestBodyFalseConfig() throws Exception {
+		HttpClient httpClient = HttpClientBuilder.create().build();
+		HttpComponentsClientHttpRequestFactory hrf = new HttpComponentsClientHttpRequestFactory(httpClient);
+		hrf.setBufferRequestBody(false);
+		
+		URI uri = new URI(baseUrl + "/status/ok");
+		HttpComponentsStreamingClientHttpRequest request = (HttpComponentsStreamingClientHttpRequest)hrf.createRequest(uri, HttpMethod.GET);
+		
+		OutputStream os = request.getBody();
+		assertNotNull(os);
 	}
 }
