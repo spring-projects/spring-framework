@@ -46,6 +46,10 @@ public class OpLE extends Operator {
 			throws EvaluationException {
 		Object left = getLeftOperand().getValueInternal(state).getValue();
 		Object right = getRightOperand().getValueInternal(state).getValue();
+
+		leftActualDescriptor = CodeFlow.toDescriptorFromObject(left);
+		rightActualDescriptor = CodeFlow.toDescriptorFromObject(right);
+		
 		if (left instanceof Number && right instanceof Number) {
 			Number leftNumber = (Number) left;
 			Number rightNumber = (Number) right;

@@ -44,6 +44,10 @@ public class OpGE extends Operator {
 	public BooleanTypedValue getValueInternal(ExpressionState state) throws EvaluationException {
 		Object left = getLeftOperand().getValueInternal(state).getValue();
 		Object right = getRightOperand().getValueInternal(state).getValue();
+
+		leftActualDescriptor = CodeFlow.toDescriptorFromObject(left);
+		rightActualDescriptor = CodeFlow.toDescriptorFromObject(right);
+		
 		if (left instanceof Number && right instanceof Number) {
 			Number leftNumber = (Number) left;
 			Number rightNumber = (Number) right;

@@ -2200,8 +2200,230 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 //		}
 //		System.out.println((System.currentTimeMillis()-stime));
 	}
+	
+	@Test
+	public void compilerWithGenerics_12040() {
+		expression = parser.parseExpression("payload!=2");
+		assertTrue(expression.getValue(new GenericMessageTestHelper<Integer>(4),Boolean.class));
+		assertCanCompile(expression);
+		assertFalse(expression.getValue(new GenericMessageTestHelper<Integer>(2),Boolean.class));
+		
+		expression = parser.parseExpression("2!=payload");
+		assertTrue(expression.getValue(new GenericMessageTestHelper<Integer>(4),Boolean.class));
+		assertCanCompile(expression);
+		assertFalse(expression.getValue(new GenericMessageTestHelper<Integer>(2),Boolean.class));
 
+		expression = parser.parseExpression("payload!=6L");
+		assertTrue(expression.getValue(new GenericMessageTestHelper<Long>(4L),Boolean.class));
+		assertCanCompile(expression);
+		assertFalse(expression.getValue(new GenericMessageTestHelper<Long>(6L),Boolean.class));
+		
+		expression = parser.parseExpression("payload==2");
+		assertFalse(expression.getValue(new GenericMessageTestHelper<Integer>(4),Boolean.class));
+		assertCanCompile(expression);
+		assertTrue(expression.getValue(new GenericMessageTestHelper<Integer>(2),Boolean.class));
+		
+		expression = parser.parseExpression("2==payload");
+		assertFalse(expression.getValue(new GenericMessageTestHelper<Integer>(4),Boolean.class));
+		assertCanCompile(expression);
+		assertTrue(expression.getValue(new GenericMessageTestHelper<Integer>(2),Boolean.class));
 
+		expression = parser.parseExpression("payload==6L");
+		assertFalse(expression.getValue(new GenericMessageTestHelper<Long>(4L),Boolean.class));
+		assertCanCompile(expression);
+		assertTrue(expression.getValue(new GenericMessageTestHelper<Long>(6L),Boolean.class));
+
+		expression = parser.parseExpression("2==payload");
+		assertFalse(expression.getValue(new GenericMessageTestHelper<Integer>(4),Boolean.class));
+		assertCanCompile(expression);
+		assertTrue(expression.getValue(new GenericMessageTestHelper<Integer>(2),Boolean.class));
+
+		expression = parser.parseExpression("payload/2");
+		assertEquals(2,expression.getValue(new GenericMessageTestHelper<Integer>(4)));
+		assertCanCompile(expression);
+		assertEquals(3,expression.getValue(new GenericMessageTestHelper<Integer>(6)));
+		
+		expression = parser.parseExpression("100/payload");
+		assertEquals(25,expression.getValue(new GenericMessageTestHelper<Integer>(4)));
+		assertCanCompile(expression);
+		assertEquals(10,expression.getValue(new GenericMessageTestHelper<Integer>(10)));
+		
+		expression = parser.parseExpression("payload+2");
+		assertEquals(6,expression.getValue(new GenericMessageTestHelper<Integer>(4)));
+		assertCanCompile(expression);
+		assertEquals(8,expression.getValue(new GenericMessageTestHelper<Integer>(6)));
+		
+		expression = parser.parseExpression("100+payload");
+		assertEquals(104,expression.getValue(new GenericMessageTestHelper<Integer>(4)));
+		assertCanCompile(expression);
+		assertEquals(110,expression.getValue(new GenericMessageTestHelper<Integer>(10)));
+		
+		expression = parser.parseExpression("payload-2");
+		assertEquals(2,expression.getValue(new GenericMessageTestHelper<Integer>(4)));
+		assertCanCompile(expression);
+		assertEquals(4,expression.getValue(new GenericMessageTestHelper<Integer>(6)));
+		
+		expression = parser.parseExpression("100-payload");
+		assertEquals(96,expression.getValue(new GenericMessageTestHelper<Integer>(4)));
+		assertCanCompile(expression);
+		assertEquals(90,expression.getValue(new GenericMessageTestHelper<Integer>(10)));
+
+		expression = parser.parseExpression("payload*2");
+		assertEquals(8,expression.getValue(new GenericMessageTestHelper<Integer>(4)));
+		assertCanCompile(expression);
+		assertEquals(12,expression.getValue(new GenericMessageTestHelper<Integer>(6)));
+		
+		expression = parser.parseExpression("100*payload");
+		assertEquals(400,expression.getValue(new GenericMessageTestHelper<Integer>(4)));
+		assertCanCompile(expression);
+		assertEquals(1000,expression.getValue(new GenericMessageTestHelper<Integer>(10)));
+
+		expression = parser.parseExpression("payload/2L");
+		assertEquals(2L,expression.getValue(new GenericMessageTestHelper<Long>(4L)));
+		assertCanCompile(expression);
+		assertEquals(3L,expression.getValue(new GenericMessageTestHelper<Long>(6L)));
+		
+		expression = parser.parseExpression("100L/payload");
+		assertEquals(25L,expression.getValue(new GenericMessageTestHelper<Long>(4L)));
+		assertCanCompile(expression);
+		assertEquals(10L,expression.getValue(new GenericMessageTestHelper<Long>(10L)));
+
+		expression = parser.parseExpression("payload/2f");
+		assertEquals(2f,expression.getValue(new GenericMessageTestHelper<Float>(4f)));
+		assertCanCompile(expression);
+		assertEquals(3f,expression.getValue(new GenericMessageTestHelper<Float>(6f)));
+		
+		expression = parser.parseExpression("100f/payload");
+		assertEquals(25f,expression.getValue(new GenericMessageTestHelper<Float>(4f)));
+		assertCanCompile(expression);
+		assertEquals(10f,expression.getValue(new GenericMessageTestHelper<Float>(10f)));
+
+		expression = parser.parseExpression("payload/2d");
+		assertEquals(2d,expression.getValue(new GenericMessageTestHelper<Double>(4d)));
+		assertCanCompile(expression);
+		assertEquals(3d,expression.getValue(new GenericMessageTestHelper<Double>(6d)));
+		
+		expression = parser.parseExpression("100d/payload");
+		assertEquals(25d,expression.getValue(new GenericMessageTestHelper<Double>(4d)));
+		assertCanCompile(expression);
+		assertEquals(10d,expression.getValue(new GenericMessageTestHelper<Double>(10d)));
+	}
+	
+	// The new helper class here uses an upper bound on the generic
+	@Test
+	public void compilerWithGenerics_12040_2() {
+		expression = parser.parseExpression("payload/2");
+		assertEquals(2,expression.getValue(new GenericMessageTestHelper2<Integer>(4)));
+		assertCanCompile(expression);
+		assertEquals(3,expression.getValue(new GenericMessageTestHelper2<Integer>(6)));
+
+		expression = parser.parseExpression("9/payload");
+		assertEquals(1,expression.getValue(new GenericMessageTestHelper2<Integer>(9)));
+		assertCanCompile(expression);
+		assertEquals(3,expression.getValue(new GenericMessageTestHelper2<Integer>(3)));
+
+		expression = parser.parseExpression("payload+2");
+		assertEquals(6,expression.getValue(new GenericMessageTestHelper2<Integer>(4)));
+		assertCanCompile(expression);
+		assertEquals(8,expression.getValue(new GenericMessageTestHelper2<Integer>(6)));
+		
+		expression = parser.parseExpression("100+payload");
+		assertEquals(104,expression.getValue(new GenericMessageTestHelper2<Integer>(4)));
+		assertCanCompile(expression);
+		assertEquals(110,expression.getValue(new GenericMessageTestHelper2<Integer>(10)));
+		
+		expression = parser.parseExpression("payload-2");
+		assertEquals(2,expression.getValue(new GenericMessageTestHelper2<Integer>(4)));
+		assertCanCompile(expression);
+		assertEquals(4,expression.getValue(new GenericMessageTestHelper2<Integer>(6)));
+		
+		expression = parser.parseExpression("100-payload");
+		assertEquals(96,expression.getValue(new GenericMessageTestHelper2<Integer>(4)));
+		assertCanCompile(expression);
+		assertEquals(90,expression.getValue(new GenericMessageTestHelper2<Integer>(10)));
+
+		expression = parser.parseExpression("payload*2");
+		assertEquals(8,expression.getValue(new GenericMessageTestHelper2<Integer>(4)));
+		assertCanCompile(expression);
+		assertEquals(12,expression.getValue(new GenericMessageTestHelper2<Integer>(6)));
+		
+		expression = parser.parseExpression("100*payload");
+		assertEquals(400,expression.getValue(new GenericMessageTestHelper2<Integer>(4)));
+		assertCanCompile(expression);
+		assertEquals(1000,expression.getValue(new GenericMessageTestHelper2<Integer>(10)));
+	}
+	
+	// The other numeric operators
+	@Test
+	public void compilerWithGenerics_12040_3() {
+		expression = parser.parseExpression("payload >= 2");
+		assertTrue(expression.getValue(new GenericMessageTestHelper2<Integer>(4),Boolean.TYPE));
+		assertCanCompile(expression);
+		assertFalse(expression.getValue(new GenericMessageTestHelper2<Integer>(1),Boolean.TYPE));
+
+		expression = parser.parseExpression("2 >= payload");
+		assertFalse(expression.getValue(new GenericMessageTestHelper2<Integer>(5),Boolean.TYPE));
+		assertCanCompile(expression);
+		assertTrue(expression.getValue(new GenericMessageTestHelper2<Integer>(1),Boolean.TYPE));
+
+		expression = parser.parseExpression("payload > 2");
+		assertTrue(expression.getValue(new GenericMessageTestHelper2<Integer>(4),Boolean.TYPE));
+		assertCanCompile(expression);
+		assertFalse(expression.getValue(new GenericMessageTestHelper2<Integer>(1),Boolean.TYPE));
+
+		expression = parser.parseExpression("2 > payload");
+		assertFalse(expression.getValue(new GenericMessageTestHelper2<Integer>(5),Boolean.TYPE));
+		assertCanCompile(expression);
+		assertTrue(expression.getValue(new GenericMessageTestHelper2<Integer>(1),Boolean.TYPE));
+
+		expression = parser.parseExpression("payload <=2");
+		assertTrue(expression.getValue(new GenericMessageTestHelper2<Integer>(1),Boolean.TYPE));
+		assertCanCompile(expression);
+		assertFalse(expression.getValue(new GenericMessageTestHelper2<Integer>(6),Boolean.TYPE));
+
+		expression = parser.parseExpression("2 <= payload");
+		assertFalse(expression.getValue(new GenericMessageTestHelper2<Integer>(1),Boolean.TYPE));
+		assertCanCompile(expression);
+		assertTrue(expression.getValue(new GenericMessageTestHelper2<Integer>(6),Boolean.TYPE));
+
+		expression = parser.parseExpression("payload < 2");
+		assertTrue(expression.getValue(new GenericMessageTestHelper2<Integer>(1),Boolean.TYPE));
+		assertCanCompile(expression);
+		assertFalse(expression.getValue(new GenericMessageTestHelper2<Integer>(6),Boolean.TYPE));
+
+		expression = parser.parseExpression("2 < payload");
+		assertFalse(expression.getValue(new GenericMessageTestHelper2<Integer>(1),Boolean.TYPE));
+		assertCanCompile(expression);
+		assertTrue(expression.getValue(new GenericMessageTestHelper2<Integer>(6),Boolean.TYPE));
+	}
+
+	// ---
+
+	public static class GenericMessageTestHelper<T> {
+		private T payload;
+		
+		GenericMessageTestHelper(T value) {
+			this.payload = value;
+		}
+		
+		public T getPayload() {
+			return payload;
+		}
+	}
+	
+	// This test helper has a bound on the type variable
+	public static class GenericMessageTestHelper2<T extends Number> {
+		private T payload;
+		
+		GenericMessageTestHelper2(T value) {
+			this.payload = value;
+		}
+		
+		public T getPayload() {
+			return payload;
+		}
+	}
+	
 	static class MyAccessor implements CompilablePropertyAccessor {
 
 		private Method method;

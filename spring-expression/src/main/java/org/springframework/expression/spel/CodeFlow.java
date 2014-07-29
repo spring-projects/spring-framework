@@ -106,61 +106,59 @@ public class CodeFlow implements Opcodes {
 		}
 	}
 
-
 	/**
 	 * Insert any necessary cast and value call to convert from a boxed type to a
 	 * primitive value
 	 * @param mv the method visitor into which instructions should be inserted
 	 * @param ch the primitive type desired as output
-	 * @param isObject indicates whether the type on the stack is being thought of
-	 * as Object (and so requires a cast)
+	 * @param stackDescriptor the descriptor of the type on top of the stack
 	 */
-	public static void insertUnboxInsns(MethodVisitor mv, char ch, boolean isObject) {
+	public static void insertUnboxInsns(MethodVisitor mv, char ch, String stackDescriptor) {
 		switch (ch) {
 		case 'I':
-			if (isObject) {
+			if (!stackDescriptor.equals("Ljava/lang/Integer")) {
 				mv.visitTypeInsn(CHECKCAST, "java/lang/Integer");
 			}
 			mv.visitMethodInsn(INVOKEVIRTUAL, "java/lang/Integer", "intValue", "()I", false);
 			break;
 		case 'Z':
-			if (isObject) {
+			if (!stackDescriptor.equals("Ljava/lang/Boolean")) {
 				mv.visitTypeInsn(CHECKCAST, "java/lang/Boolean");
 			}
 			mv.visitMethodInsn(INVOKEVIRTUAL, "java/lang/Boolean", "booleanValue", "()Z", false);
 			break;
 		case 'B':
-			if (isObject) {
+			if (!stackDescriptor.equals("Ljava/lang/Byte")) {
 				mv.visitTypeInsn(CHECKCAST, "java/lang/Byte");
 			}
 			mv.visitMethodInsn(INVOKEVIRTUAL, "java/lang/Byte", "byteValue", "()B", false);
 			break;
 		case 'C':
-			if (isObject) {
+			if (!stackDescriptor.equals("Ljava/lang/Character")) {
 				mv.visitTypeInsn(CHECKCAST, "java/lang/Character");
 			}
 			mv.visitMethodInsn(INVOKEVIRTUAL, "java/lang/Character", "charValue", "()C", false);
 			break;
 		case 'D':
-			if (isObject) {
+			if (!stackDescriptor.equals("Ljava/lang/Double")) {
 				mv.visitTypeInsn(CHECKCAST, "java/lang/Double");
 			}
 			mv.visitMethodInsn(INVOKEVIRTUAL, "java/lang/Double", "doubleValue", "()D", false);
 			break;
 		case 'S':
-			if (isObject) {
+			if (!stackDescriptor.equals("Ljava/lang/Short")) {
 				mv.visitTypeInsn(CHECKCAST, "java/lang/Short");
 			}
 			mv.visitMethodInsn(INVOKEVIRTUAL, "java/lang/Short", "shortValue", "()S", false);
 			break;
 		case 'F':
-			if (isObject) {
+			if (!stackDescriptor.equals("Ljava/lang/Float")) {
 				mv.visitTypeInsn(CHECKCAST, "java/lang/Float");
 			}
 			mv.visitMethodInsn(INVOKEVIRTUAL, "java/lang/Float", "floatValue", "()F", false);
 			break;
 		case 'J':
-			if (isObject) {
+			if (!stackDescriptor.equals("Ljava/lang/Long")) {
 				mv.visitTypeInsn(CHECKCAST, "java/lang/Long");
 			}
 			mv.visitMethodInsn(INVOKEVIRTUAL, "java/lang/Long", "longValue", "()J", false);

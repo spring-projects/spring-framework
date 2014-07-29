@@ -169,13 +169,15 @@ public class OpMinus extends Operator {
 		getLeftOperand().generateCode(mv, codeflow);
 		String leftdesc = getLeftOperand().getExitDescriptor();
 		if (!CodeFlow.isPrimitive(leftdesc)) {
-			CodeFlow.insertUnboxInsns(mv, this.exitTypeDescriptor.charAt(0), false);
+			CodeFlow.insertUnboxInsns(mv, this.exitTypeDescriptor.charAt(0), leftdesc);
 		}	
 		if (this.children.length>1) {
+			codeflow.enterCompilationScope();
 			getRightOperand().generateCode(mv, codeflow);
 			String rightdesc = getRightOperand().getExitDescriptor();
+			codeflow.exitCompilationScope();
 			if (!CodeFlow.isPrimitive(rightdesc)) {
-				CodeFlow.insertUnboxInsns(mv, this.exitTypeDescriptor.charAt(0), false);
+				CodeFlow.insertUnboxInsns(mv, this.exitTypeDescriptor.charAt(0), rightdesc);
 			}
 			switch (this.exitTypeDescriptor.charAt(0)) {
 				case 'I':

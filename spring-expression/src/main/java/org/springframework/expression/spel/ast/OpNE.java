@@ -40,6 +40,8 @@ public class OpNE extends Operator {
 	public BooleanTypedValue getValueInternal(ExpressionState state) throws EvaluationException {
 		Object left = getLeftOperand().getValueInternal(state).getValue();
 		Object right = getRightOperand().getValueInternal(state).getValue();
+		leftActualDescriptor = CodeFlow.toDescriptorFromObject(left);
+		rightActualDescriptor = CodeFlow.toDescriptorFromObject(right);
 		return BooleanTypedValue.forValue(!equalityCheck(state, left, right));
 	}
 
@@ -54,11 +56,9 @@ public class OpNE extends Operator {
 		}
 		String leftdesc = left.getExitDescriptor();
 		String rightdesc = right.getExitDescriptor();
-		if ((CodeFlow.isPrimitiveOrUnboxableSupportedNumberOrBoolean(leftdesc) ||
-				CodeFlow.isPrimitiveOrUnboxableSupportedNumber(rightdesc))) {
-			if (!CodeFlow.areBoxingCompatible(leftdesc, rightdesc)) {
-				return false;
-			}
+		DescriptorComparison dc =  DescriptorComparison.checkNumericCompatibility(leftdesc, rightdesc, leftActualDescriptor, rightActualDescriptor);
+		if (dc.areNumbers) {
+			return dc.areCompatible;
 		}
 		return true;
 	}
@@ -72,19 +72,21 @@ public class OpNE extends Operator {
 		boolean leftPrim = CodeFlow.isPrimitive(leftDesc);
 		boolean rightPrim = CodeFlow.isPrimitive(rightDesc);
 
-		if ((CodeFlow.isPrimitiveOrUnboxableSupportedNumberOrBoolean(leftDesc) || 
-			 CodeFlow.isPrimitiveOrUnboxableSupportedNumberOrBoolean(rightDesc)) && 
-			 CodeFlow.areBoxingCompatible(leftDesc,rightDesc)) {
-			char targetType = CodeFlow.toPrimitiveTargetDesc(leftDesc);
+		DescriptorComparison dc = DescriptorComparison.checkNumericCompatibility(leftDesc, rightDesc, leftActualDescriptor, rightActualDescriptor);
+		
+		if (dc.areNumbers && dc.areCompatible) {
+			char targetType = dc.compatibleType;
 			
 			getLeftOperand().generateCode(mv, codeflow);
 			if (!leftPrim) {
-				CodeFlow.insertUnboxInsns(mv, targetType, false);
+				CodeFlow.insertUnboxInsns(mv, targetType, leftDesc);
 			}
 		
+			codeflow.enterCompilationScope();
 			getRightOperand().generateCode(mv, codeflow);
+			codeflow.exitCompilationScope();
 			if (!rightPrim) {
-				CodeFlow.insertUnboxInsns(mv, targetType, false);
+				CodeFlow.insertUnboxInsns(mv, targetType, rightDesc);
 			}
 			// assert: SpelCompiler.boxingCompatible(leftDesc, rightDesc)
 			if (targetType == 'D') {
