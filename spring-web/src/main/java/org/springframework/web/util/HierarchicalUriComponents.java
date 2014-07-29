@@ -616,7 +616,7 @@ final class HierarchicalUriComponents extends UriComponents {
 
 		@Override
 		public String getPath() {
-			return path;
+			return this.path;
 		}
 
 		@Override

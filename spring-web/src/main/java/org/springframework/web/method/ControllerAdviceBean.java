@@ -72,8 +72,11 @@ public class ControllerAdviceBean implements Ordered {
 	public ControllerAdviceBean(String beanName, BeanFactory beanFactory) {
 		Assert.hasText(beanName, "Bean name must not be null");
 		Assert.notNull(beanFactory, "BeanFactory must not be null");
-		Assert.isTrue(beanFactory.containsBean(beanName),
-				"BeanFactory [" + beanFactory + "] does not contain bean with name '" + beanName + "'");
+
+		if (!beanFactory.containsBean(beanName)) {
+			throw new IllegalArgumentException(
+					"BeanFactory [" + beanFactory + "] does not contain bean with name '" + beanName + "'");
+		}
 
 		this.bean = beanName;
 		this.beanFactory = beanFactory;
@@ -132,7 +135,7 @@ public class ControllerAdviceBean implements Ordered {
 	 * Return a bean instance if necessary resolving the bean name through the BeanFactory.
 	 */
 	public Object resolveBean() {
-		return (this.bean instanceof String) ? this.beanFactory.getBean((String) this.bean) : this.bean;
+		return (this.bean instanceof String ? this.beanFactory.getBean((String) this.bean) : this.bean);
 	}
 
 	/**
@@ -173,20 +176,14 @@ public class ControllerAdviceBean implements Ordered {
 
 
 	@Override
-	public boolean equals(Object o) {
-		if (this == o) {
-			return true;
-		}
-		if (o != null && o instanceof ControllerAdviceBean) {
-			ControllerAdviceBean other = (ControllerAdviceBean) o;
-			return this.bean.equals(other.bean);
-		}
-		return false;
+	public boolean equals(Object other) {
+		return (this == other ||
+				(other instanceof ControllerAdviceBean && this.bean.equals(((ControllerAdviceBean) other).bean)));
 	}
 
 	@Override
 	public int hashCode() {
-		return 31 * this.bean.hashCode();
+		return this.bean.hashCode();
 	}
 
 	@Override
