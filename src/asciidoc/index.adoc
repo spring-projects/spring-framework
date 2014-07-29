@@ -38168,9 +38168,8 @@ method arguments.
 
 [NOTE]
 ====
-Applications can switch to using other path separator like "." (dot) instead of
-"/" (slash) as the separator for destinations mapped to `@MessageMapping`.
-For further details, see <<websocket-stomp-destination-separator>>.
+Applications can also use dot-separated destinations (vs slash).
+See <<websocket-stomp-destination-separator>>.
 ====
 
 The following method arguments are supported for `@MessageMapping` methods:
@@ -38261,9 +38260,8 @@ to Ant-style destination patterns.
 
 [NOTE]
 ====
-Applications can switch to using other path separator like "." (dot) instead of
-"/" (slash) as the separator for destinations mapped to `@MessageMapping`.
-For further details, see <<websocket-stomp-destination-separator>>.
+Applications can also use dot-separated destinations (vs slash).
+See <<websocket-stomp-destination-separator>>.
 ====
 
 
@@ -38396,18 +38394,14 @@ the TCP connection is established is different from the host providing the
 cloud-based STOMP service.
 
 [[websocket-stomp-destination-separator]]
-==== Destination separator
+==== Using Dot as Separator in `@MessageMapping` Destinations
 
-Although Ant-style, slash-separated, path patterns should feel familiar to web developers,
-in message brokers and in messaging it is common to use "." as the separator, for example
-in the names of destinations such as topics, queues, exchanges, etc.
+Although slash-separated path patterns are familiar to web developers, in messaging
+it is common to use "." as separator for example in the names of topics, queues,
+exchanges, etc. Applications can also switch to using "." (dot) instead of "/" (slash)
+as the separator in `@MessageMapping` mappings by configuring a custom `AntPathMatcher`.
 
-Applications can switch to using "." (dot) instead of "/" (slash) as the separator for
-destinations handled by the broker simply by configuring an AntPathMatcher with a customized
-path separator property. This can be done easily through the provided Java config and XML
-namespace.
-
-Below is example configuration that enables using "." separator:
+In Java config:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -38416,10 +38410,7 @@ Below is example configuration that enables using "." separator:
   @EnableWebSocketMessageBroker
   public class WebsocketConfig extends AbstractWebSocketMessageBrokerConfigurer {
 
-    @Override
-    public void registerStompEndpoints(StompEndpointRegistry registry) {
-      registry.addEndpoint("/stomp");
-    }
+    // ...
 
     @Override
     public void configureMessageBroker(MessageBrokerRegistry registry) {
@@ -38431,7 +38422,7 @@ Below is example configuration that enables using "." separator:
   }
 ----
 
-XML configuration equivalent:
+In XML config:
 
 [source,xml,indent=0]
 [subs="verbatim,quotes,attributes"]
@@ -38443,16 +38434,16 @@ XML configuration equivalent:
       http://www.springframework.org/schema/beans
       http://www.springframework.org/schema/beans/spring-beans.xsd
       http://www.springframework.org/schema/websocket
-      http://www.springframework.org/schema/websocket/spring-websocket-4.1.xsd">
-
-    <bean id="pathMatcher" class="org.springframework.util.AntPathMatcher">
-      <constructor-arg index="0" value="." />
-    </bean>
+      http://www.springframework.org/schema/websocket/spring-websocket.xsd">
 
     <websocket:message-broker application-destination-prefix="/app" path-matcher="pathMatcher">
       <websocket:stomp-endpoint path="/stomp" />
       <websocket:simple-broker prefix="/topic, /queue"/>
     </websocket:message-broker>
+
+    <bean id="pathMatcher" class="org.springframework.util.AntPathMatcher">
+      <constructor-arg index="0" value="." />
+    </bean>
 
   </beans>
 ----
@@ -38463,38 +38454,20 @@ And below is a simple example to illustrate a controller with "." separator:
 [subs="verbatim,quotes"]
 ----
   @Controller
-  public class FooController {
-    
-    @MessageMapping("foo.{bar}")
-    public String foo(@DestinationVariable String bar) {
-      return bar;
-    }
-  }
-----
-
-If the application prefix configured is "/app", the foo method will be mapped
-to the "/app/foo.{bar}" destination. If bar="value", "value" will be sent to
-the "/topic/foo.value" destination.
-
-You can also use type + method level `@MessageMapping` annotations:
-
-[source,java,indent=0]
-[subs="verbatim,quotes"]
-----
-  @Controller
   @MessageMapping("foo")
   public class FooController {
-
-    @MessageMapping("{bar}")
-    public String foo(@DestinationVariable String bar) {
-      return bar;
+    
+    @MessageMapping("bar.{baz}")
+    public void handleBaz(@DestinationVariable String baz) {
     }
+
   }
 ----
 
-In this example, the "." separator will be automatically added when combining "foo"
-and "{bar}", so the foo method will be mapped to the "/app/foo.{bar}" destination,
-like in the previous example.
+If the application prefix is set to "/app" then the foo method is effectively mapped to "/app/foo.bar.{baz}".
+
+
+
 
 [[websocket-stomp-authentication]]
 ==== Authentication
