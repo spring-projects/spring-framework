@@ -936,6 +936,7 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 	 */
 	protected Message doSendAndReceive(Session session, Destination destination, MessageCreator messageCreator)
 			throws JMSException {
+
 		Assert.notNull(messageCreator, "MessageCreator must not be null");
 		TemporaryQueue responseQueue = null;
 		MessageProducer producer = null;
@@ -963,7 +964,7 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 
 	/**
 	 * A variant of {@link #execute(SessionCallback, boolean)} that explicitly
-	 * creates a non transactional session. The given {@link SessionCallback}
+	 * creates a non-transactional {@link Session}. The given {@link SessionCallback}
 	 * does not participate in an existing transaction.
 	 */
 	private <T> T executeLocal(SessionCallback<T> action, boolean startConnection) throws JmsException {

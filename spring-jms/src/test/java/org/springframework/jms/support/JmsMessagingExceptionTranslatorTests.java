@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.jms.core;
+package org.springframework.jms.support;
 
 import org.junit.Test;
 
@@ -31,4 +31,5 @@ public class JmsMessagingExceptionTranslatorTests {
 	public void translateNonJmsException() {
 		assertNull(translator.translateExceptionIfPossible(new NullPointerException()));
 	}
+
 }

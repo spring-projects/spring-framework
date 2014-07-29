@@ -23,15 +23,16 @@ import javax.jms.Session;
 
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.jms.JmsException;
+import org.springframework.jms.support.JmsMessagingExceptionTranslator;
 import org.springframework.jms.support.converter.MessageConverter;
 import org.springframework.jms.support.converter.MessagingMessageConverter;
 import org.springframework.jms.support.converter.SimpleMessageConverter;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessagingException;
-import org.springframework.messaging.MessagingExceptionTranslator;
 import org.springframework.messaging.converter.MessageConversionException;
 import org.springframework.messaging.core.AbstractMessagingTemplate;
 import org.springframework.messaging.core.MessagePostProcessor;
+import org.springframework.messaging.support.MessagingExceptionTranslator;
 import org.springframework.util.Assert;
 
 /**
@@ -230,14 +231,14 @@ public class JmsMessagingTemplate extends AbstractMessagingTemplate<Destination>
 	}
 
 	@Override
-	public Message<?> sendAndReceive(String destinationName, Message<?> requestMessage)
-			throws MessagingException {
+	public Message<?> sendAndReceive(String destinationName, Message<?> requestMessage) throws MessagingException {
 		return doSendAndReceive(destinationName, requestMessage);
 	}
 
 	@Override
 	public <T> T convertSendAndReceive(String destinationName, Object request, Class<T> targetClass)
 			throws MessagingException {
+
 		return convertSendAndReceive(destinationName, request, null, targetClass);
 	}
 
@@ -324,8 +325,8 @@ public class JmsMessagingTemplate extends AbstractMessagingTemplate<Destination>
 	@Override
 	protected Message<?> doSendAndReceive(Destination destination, Message<?> requestMessage) {
 		try {
-			javax.jms.Message jmsMessage = this.jmsTemplate
-					.sendAndReceive(destination, createMessageCreator(requestMessage));
+			javax.jms.Message jmsMessage = this.jmsTemplate.sendAndReceive(
+					destination, createMessageCreator(requestMessage));
 			return doConvert(jmsMessage);
 		}
 		catch (JmsException ex) {
@@ -335,8 +336,8 @@ public class JmsMessagingTemplate extends AbstractMessagingTemplate<Destination>
 
 	protected Message<?> doSendAndReceive(String destinationName, Message<?> requestMessage) {
 		try {
-			javax.jms.Message jmsMessage = this.jmsTemplate
-					.sendAndReceive(destinationName, createMessageCreator(requestMessage));
+			javax.jms.Message jmsMessage = this.jmsTemplate.sendAndReceive(
+					destinationName, createMessageCreator(requestMessage));
 			return doConvert(jmsMessage);
 		}
 		catch (JmsException ex) {
@@ -396,10 +397,10 @@ public class JmsMessagingTemplate extends AbstractMessagingTemplate<Destination>
 				return this.messageConverter.toMessage(this.message, session);
 			}
 			catch (JMSException ex) {
-				throw new MessageConversionException("Could not convert '" + message + "'", ex);
+				throw new MessageConversionException("Could not convert '" + this.message + "'", ex);
 			}
 			catch (JmsException ex) {
-				throw new MessageConversionException("Could not convert '" + message + "'", ex);
+				throw new MessageConversionException("Could not convert '" + this.message + "'", ex);
 			}
 		}
 	}

@@ -367,6 +367,7 @@ public interface JmsOperations {
 	 * @return the reply, possibly {@code null} if the message could not be received,
 	 * for example due to a timeout
 	 * @throws JmsException checked JMSException converted to unchecked
+	 * @since 4.1
 	 */
 	Message sendAndReceive(MessageCreator messageCreator) throws JmsException;
 
@@ -380,6 +381,7 @@ public interface JmsOperations {
 	 * @return the reply, possibly {@code null} if the message could not be received,
 	 * for example due to a timeout
 	 * @throws JmsException checked JMSException converted to unchecked
+	 * @since 4.1
 	 */
 	Message sendAndReceive(Destination destination, MessageCreator messageCreator) throws JmsException;
 
@@ -394,6 +396,7 @@ public interface JmsOperations {
 	 * @return the reply, possibly {@code null} if the message could not be received,
 	 * for example due to a timeout
 	 * @throws JmsException checked JMSException converted to unchecked
+	 * @since 4.1
 	 */
 	Message sendAndReceive(String destinationName, MessageCreator messageCreator) throws JmsException;
 

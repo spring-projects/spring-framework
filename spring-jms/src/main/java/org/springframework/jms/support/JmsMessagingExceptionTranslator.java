@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-package org.springframework.jms.core;
+package org.springframework.jms.support;
 
 import org.springframework.jms.InvalidDestinationException;
 import org.springframework.jms.JmsException;
 import org.springframework.jms.support.converter.MessageConversionException;
 import org.springframework.jms.support.destination.DestinationResolutionException;
 import org.springframework.messaging.MessagingException;
-import org.springframework.messaging.MessagingExceptionTranslator;
+import org.springframework.messaging.support.MessagingExceptionTranslator;
 
 /**
  * {@link MessagingExceptionTranslator} capable of translating {@link JmsException}
@@ -41,16 +41,14 @@ public class JmsMessagingExceptionTranslator implements MessagingExceptionTransl
 	}
 
 	private MessagingException convertJmsException(JmsException ex) {
-		if (ex instanceof DestinationResolutionException ||
-				ex instanceof InvalidDestinationException) {
+		if (ex instanceof DestinationResolutionException || ex instanceof InvalidDestinationException) {
 			return new org.springframework.messaging.core.DestinationResolutionException(ex.getMessage(), ex);
 		}
 		if (ex instanceof MessageConversionException) {
 			return new org.springframework.messaging.converter.MessageConversionException(ex.getMessage(), ex);
 		}
-
-
 		// Fallback
 		return new MessagingException(ex.getMessage(), ex);
 	}
+
 }

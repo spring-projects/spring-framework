@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-package org.springframework.messaging;
+package org.springframework.messaging.support;
+
+import org.springframework.messaging.MessagingException;
 
 /**
  * Interface implemented by Spring integrations with messaging technologies
@@ -31,14 +33,15 @@ public interface MessagingExceptionTranslator {
 
 	/**
 	 * Translate the given runtime exception thrown by a messaging implementation
-	 * to a corresponding exception from Spring's generic {@link MessagingException}
-	 * hierarchy, if possible.
-	 * <p>Do not translate exceptions that are not understand by this translator:
-	 * for example, if resulting from user code and unrelated to messaging.
-	 * @param ex a RuntimeException thrown
+	 * to a corresponding exception from Spring's generic
+	 * {@link org.springframework.messaging.MessagingException} hierarchy, if possible.
+	 * <p>Do not translate exceptions that are not understood by this translator:
+	 * for example, if resulting from user code or otherwise unrelated to messaging.
+	 * @param ex a RuntimeException to translate
 	 * @return the corresponding MessagingException (or {@code null} if the
 	 * exception could not be translated, as in this case it may result from
-	 * user code rather than an actual messaging problem)
+	 * user code rather than from an actual messaging problem)
 	 */
 	MessagingException translateExceptionIfPossible(RuntimeException ex);
+
 }
