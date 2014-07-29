@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@ import java.beans.PropertyEditor;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 
@@ -72,34 +71,35 @@ public class RequestParamMethodArgumentResolver extends AbstractNamedValueMethod
 
 	private final boolean useDefaultResolution;
 
+
 	/**
 	 * @param beanFactory a bean factory used for resolving  ${...} placeholder
 	 * and #{...} SpEL expressions in default values, or {@code null} if default
 	 * values are not expected to contain expressions
 	 * @param useDefaultResolution in default resolution mode a method argument
 	 * that is a simple type, as defined in {@link BeanUtils#isSimpleProperty},
-	 * is treated as a request parameter even if it itsn't annotated, the
+	 * is treated as a request parameter even if it it isn't annotated, the
 	 * request parameter name is derived from the method parameter name.
 	 */
-	public RequestParamMethodArgumentResolver(ConfigurableBeanFactory beanFactory,
-											  boolean useDefaultResolution) {
+	public RequestParamMethodArgumentResolver(ConfigurableBeanFactory beanFactory, boolean useDefaultResolution) {
 		super(beanFactory);
 		this.useDefaultResolution = useDefaultResolution;
 	}
 
+
 	/**
 	 * Supports the following:
 	 * <ul>
-	 * 	<li>@RequestParam-annotated method arguments.
-	 * 		This excludes {@link Map} params where the annotation doesn't
-	 * 		specify a name.	See {@link RequestParamMapMethodArgumentResolver}
-	 * 		instead for such params.
-	 * 	<li>Arguments of type {@link MultipartFile}
-	 * 		unless annotated with @{@link RequestPart}.
-	 * 	<li>Arguments of type {@code javax.servlet.http.Part}
-	 * 		unless annotated with @{@link RequestPart}.
-	 * 	<li>In default resolution mode, simple type arguments
-	 * 		even if not with @{@link RequestParam}.
+	 * <li>@RequestParam-annotated method arguments.
+	 * This excludes {@link Map} params where the annotation doesn't
+	 * specify a name.	See {@link RequestParamMapMethodArgumentResolver}
+	 * instead for such params.
+	 * <li>Arguments of type {@link MultipartFile}
+	 * unless annotated with @{@link RequestPart}.
+	 * <li>Arguments of type {@code javax.servlet.http.Part}
+	 * unless annotated with @{@link RequestPart}.
+	 * <li>In default resolution mode, simple type arguments
+	 * even if not with @{@link RequestParam}.
 	 * </ul>
 	 */
 	public boolean supportsParameter(MethodParameter parameter) {
@@ -139,7 +139,6 @@ public class RequestParamMethodArgumentResolver extends AbstractNamedValueMethod
 
 	@Override
 	protected Object resolveName(String name, MethodParameter parameter, NativeWebRequest webRequest) throws Exception {
-
 		Object arg;
 
 		HttpServletRequest servletRequest = webRequest.getNativeRequest(HttpServletRequest.class);
@@ -202,13 +201,14 @@ public class RequestParamMethodArgumentResolver extends AbstractNamedValueMethod
 		throw new MissingServletRequestParameterException(paramName, parameter.getParameterType().getSimpleName());
 	}
 
-	private class RequestParamNamedValueInfo extends NamedValueInfo {
 
-		private RequestParamNamedValueInfo() {
+	private static class RequestParamNamedValueInfo extends NamedValueInfo {
+
+		public RequestParamNamedValueInfo() {
 			super("", false, ValueConstants.DEFAULT_NONE);
 		}
 
-		private RequestParamNamedValueInfo(RequestParam annotation) {
+		public RequestParamNamedValueInfo(RequestParam annotation) {
 			super(annotation.value(), annotation.required(), annotation.defaultValue());
 		}
 	}

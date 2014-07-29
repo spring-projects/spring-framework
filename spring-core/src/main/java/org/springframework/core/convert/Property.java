@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -62,6 +62,7 @@ public final class Property {
 
 	private Annotation[] annotations;
 
+
 	public Property(Class<?> objectType, Method readMethod, Method writeMethod) {
 		this(objectType, readMethod, writeMethod, null);
 	}
@@ -118,7 +119,7 @@ public final class Property {
 	}
 
 	Annotation[] getAnnotations() {
-		if(this.annotations == null) {
+		if (this.annotations == null) {
 			this.annotations = resolveAnnotations();
 		}
 		return this.annotations;
@@ -192,7 +193,7 @@ public final class Property {
 
 	private Annotation[] resolveAnnotations() {
 		Annotation[] annotations = annotationCache.get(this);
-		if(annotations == null) {
+		if (annotations == null) {
 			Map<Class<? extends Annotation>, Annotation> annotationMap = new LinkedHashMap<Class<? extends Annotation>, Annotation>();
 			addAnnotationsToMap(annotationMap, getReadMethod());
 			addAnnotationsToMap(annotationMap, getWriteMethod());
@@ -241,34 +242,25 @@ public final class Property {
 		}
 	}
 
+
 	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int hashCode = 1;
-		hashCode = prime * hashCode + ObjectUtils.nullSafeHashCode(objectType);
-		hashCode = prime * hashCode + ObjectUtils.nullSafeHashCode(readMethod);
-		hashCode = prime * hashCode + ObjectUtils.nullSafeHashCode(writeMethod);
-		hashCode = prime * hashCode + ObjectUtils.nullSafeHashCode(name);
-		return hashCode;
+	public boolean equals(Object other) {
+		if (this == other) {
+			return true;
+		}
+		if (!(other instanceof Property)) {
+			return false;
+		}
+		Property otherProperty = (Property) other;
+		return (ObjectUtils.nullSafeEquals(this.objectType, otherProperty.objectType) &&
+				ObjectUtils.nullSafeEquals(this.name, otherProperty.name) &&
+				ObjectUtils.nullSafeEquals(this.readMethod, otherProperty.readMethod) &&
+				ObjectUtils.nullSafeEquals(this.writeMethod, otherProperty.writeMethod));
 	}
 
 	@Override
-	public boolean equals(Object obj) {
-		if (this == obj) {
-			return true;
-		}
-		if (obj == null) {
-			return false;
-		}
-		if (getClass() != obj.getClass()) {
-			return false;
-		}
-		Property other = (Property) obj;
-		boolean equals = true;
-		equals &= ObjectUtils.nullSafeEquals(objectType, other.objectType);
-		equals &= ObjectUtils.nullSafeEquals(readMethod, other.readMethod);
-		equals &= ObjectUtils.nullSafeEquals(writeMethod, other.writeMethod);
-		equals &= ObjectUtils.nullSafeEquals(name, other.name);
-		return equals;
+	public int hashCode() {
+		return (ObjectUtils.nullSafeHashCode(this.objectType) * 31 + ObjectUtils.nullSafeHashCode(this.name));
 	}
+
 }

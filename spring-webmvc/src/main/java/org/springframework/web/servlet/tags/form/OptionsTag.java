@@ -150,7 +150,8 @@ public class OptionsTag extends AbstractHtmlElementTag {
 		Object itemsObject = null;
 		if (items != null) {
 			itemsObject = (items instanceof String ? evaluate("items", items) : items);
-		} else {
+		}
+		else {
 			Class<?> selectTagBoundType = selectTag.getBindStatus().getValueType();
 			if (selectTagBoundType != null && selectTagBoundType.isEnum()) {
 				itemsObject = selectTagBoundType.getEnumConstants();

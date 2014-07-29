@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,18 +53,17 @@ public class ControllerAdviceBean implements Ordered {
 	 * @param beanFactory a BeanFactory that can be used later to resolve the bean
 	 */
 	public ControllerAdviceBean(String beanName, BeanFactory beanFactory) {
-		Assert.hasText(beanName, "'beanName' must not be null");
-		Assert.notNull(beanFactory, "'beanFactory' must not be null");
-		Assert.isTrue(beanFactory.containsBean(beanName),
-				"Bean factory [" + beanFactory + "] does not contain bean " + "with name [" + beanName + "]");
+		Assert.hasText(beanName, "Bean name must not be null");
+		Assert.notNull(beanFactory, "BeanFactory must not be null");
+
+		if (!beanFactory.containsBean(beanName)) {
+			throw new IllegalArgumentException(
+					"BeanFactory [" + beanFactory + "] does not contain bean with name '" + beanName + "'");
+		}
+
 		this.bean = beanName;
 		this.beanFactory = beanFactory;
 		this.order = initOrderFromBeanType(this.beanFactory.getType(beanName));
-	}
-
-	private static int initOrderFromBeanType(Class<?> beanType) {
-		Order annot = AnnotationUtils.findAnnotation(beanType, Order.class);
-		return (annot != null) ? annot.value() : Ordered.LOWEST_PRECEDENCE;
 	}
 
 	/**
@@ -72,15 +71,55 @@ public class ControllerAdviceBean implements Ordered {
 	 * @param bean the bean
 	 */
 	public ControllerAdviceBean(Object bean) {
-		Assert.notNull(bean, "'bean' must not be null");
+		Assert.notNull(bean, "Bean must not be null");
 		this.bean = bean;
 		this.order = initOrderFromBean(bean);
 		this.beanFactory = null;
 	}
 
-	private static int initOrderFromBean(Object bean) {
-		return (bean instanceof Ordered) ? ((Ordered) bean).getOrder() : initOrderFromBeanType(bean.getClass());
+
+	/**
+	 * Returns the order value extracted from the {@link ControllerAdvice}
+	 * annotation or {@link Ordered#LOWEST_PRECEDENCE} otherwise.
+	 */
+	public int getOrder() {
+		return this.order;
 	}
+
+	/**
+	 * Returns the type of the contained bean.
+	 * If the bean type is a CGLIB-generated class, the original, user-defined class is returned.
+	 */
+	public Class<?> getBeanType() {
+		Class<?> clazz = (this.bean instanceof String ?
+				this.beanFactory.getType((String) this.bean) : this.bean.getClass());
+		return ClassUtils.getUserClass(clazz);
+	}
+
+	/**
+	 * Return a bean instance if necessary resolving the bean name through the BeanFactory.
+	 */
+	public Object resolveBean() {
+		return (this.bean instanceof String ? this.beanFactory.getBean((String) this.bean) : this.bean);
+	}
+
+
+	@Override
+	public boolean equals(Object other) {
+		return (this == other ||
+				(other instanceof ControllerAdviceBean && this.bean.equals(((ControllerAdviceBean) other).bean)));
+	}
+
+	@Override
+	public int hashCode() {
+		return this.bean.hashCode();
+	}
+
+	@Override
+	public String toString() {
+		return this.bean.toString();
+	}
+
 
 	/**
 	 * Find the names of beans annotated with
@@ -97,52 +136,13 @@ public class ControllerAdviceBean implements Ordered {
 		return beans;
 	}
 
-	/**
-	 * Returns the order value extracted from the {@link ControllerAdvice}
-	 * annotation or {@link Ordered#LOWEST_PRECEDENCE} otherwise.
-	 */
-	public int getOrder() {
-		return this.order;
+	private static int initOrderFromBean(Object bean) {
+		return (bean instanceof Ordered ? ((Ordered) bean).getOrder() : initOrderFromBeanType(bean.getClass()));
 	}
 
-	/**
-	 * Returns the type of the contained bean.
-	 * If the bean type is a CGLIB-generated class, the original, user-defined class is returned.
-	 */
-	public Class<?> getBeanType() {
-		Class<?> clazz = (this.bean instanceof String)
-				? this.beanFactory.getType((String) this.bean) : this.bean.getClass();
-
-		return ClassUtils.getUserClass(clazz);
-	}
-
-	/**
-	 * Return a bean instance if necessary resolving the bean name through the BeanFactory.
-	 */
-	public Object resolveBean() {
-		return (this.bean instanceof String) ? this.beanFactory.getBean((String) this.bean) : this.bean;
-	}
-
-	@Override
-	public boolean equals(Object o) {
-		if (this == o) {
-			return true;
-		}
-		if (o != null && o instanceof ControllerAdviceBean) {
-			ControllerAdviceBean other = (ControllerAdviceBean) o;
-			return this.bean.equals(other.bean);
-		}
-		return false;
-	}
-
-	@Override
-	public int hashCode() {
-		return 31 * this.bean.hashCode();
-	}
-
-	@Override
-	public String toString() {
-		return bean.toString();
+	private static int initOrderFromBeanType(Class<?> beanType) {
+		Order ann = AnnotationUtils.findAnnotation(beanType, Order.class);
+		return (ann != null ? ann.value() : Ordered.LOWEST_PRECEDENCE);
 	}
 
 }

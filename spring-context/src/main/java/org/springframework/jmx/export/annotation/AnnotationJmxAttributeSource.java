@@ -141,7 +141,7 @@ public class AnnotationJmxAttributeSource implements JmxAttributeSource, BeanFac
 
 	public ManagedNotification[] getManagedNotifications(Class<?> clazz) throws InvalidMetadataException {
 		ManagedNotifications notificationsAnn = clazz.getAnnotation(ManagedNotifications.class);
-		if(notificationsAnn == null) {
+		if (notificationsAnn == null) {
 			return new ManagedNotification[0];
 		}
 		Annotation[] notifications = notificationsAnn.value();

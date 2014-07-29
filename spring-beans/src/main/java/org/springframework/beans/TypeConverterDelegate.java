@@ -200,13 +200,13 @@ class TypeConverterDelegate {
 				else if (convertedValue instanceof Collection) {
 					// Convert elements to target type, if determined.
 					convertedValue = convertToTypedCollection(
-							(Collection) convertedValue, propertyName, requiredType, typeDescriptor);
+							(Collection<?>) convertedValue, propertyName, requiredType, typeDescriptor);
 					standardConversion = true;
 				}
 				else if (convertedValue instanceof Map) {
 					// Convert keys and values to respective target type, if determined.
 					convertedValue = convertToTypedMap(
-							(Map) convertedValue, propertyName, requiredType, typeDescriptor);
+							(Map<?, ?>) convertedValue, propertyName, requiredType, typeDescriptor);
 					standardConversion = true;
 				}
 				if (convertedValue.getClass().isArray() && Array.getLength(convertedValue) == 1) {
@@ -296,12 +296,12 @@ class TypeConverterDelegate {
 					convertedValue = enumField.get(null);
 				}
 				catch (ClassNotFoundException ex) {
-					if(logger.isTraceEnabled()) {
+					if (logger.isTraceEnabled()) {
 						logger.trace("Enum class [" + enumType + "] cannot be loaded", ex);
 					}
 				}
 				catch (Throwable ex) {
-					if(logger.isTraceEnabled()) {
+					if (logger.isTraceEnabled()) {
 						logger.trace("Field [" + fieldName + "] isn't an enum value for type [" + enumType + "]", ex);
 					}
 				}
@@ -459,10 +459,10 @@ class TypeConverterDelegate {
 	private Object convertToTypedArray(Object input, String propertyName, Class<?> componentType) {
 		if (input instanceof Collection) {
 			// Convert Collection elements to array elements.
-			Collection coll = (Collection) input;
+			Collection<?> coll = (Collection<?>) input;
 			Object result = Array.newInstance(componentType, coll.size());
 			int i = 0;
-			for (Iterator it = coll.iterator(); it.hasNext(); i++) {
+			for (Iterator<?> it = coll.iterator(); it.hasNext(); i++) {
 				Object value = convertIfNecessary(
 						buildIndexedPropertyName(propertyName, i), null, it.next(), componentType);
 				Array.set(result, i, value);
@@ -495,8 +495,8 @@ class TypeConverterDelegate {
 	}
 
 	@SuppressWarnings("unchecked")
-	private Collection convertToTypedCollection(
-			Collection original, String propertyName, Class<?> requiredType, TypeDescriptor typeDescriptor) {
+	private Collection<?> convertToTypedCollection(
+			Collection<?> original, String propertyName, Class<?> requiredType, TypeDescriptor typeDescriptor) {
 
 		if (!Collection.class.isAssignableFrom(requiredType)) {
 			return original;
@@ -519,7 +519,7 @@ class TypeConverterDelegate {
 			return original;
 		}
 
-		Iterator it;
+		Iterator<?> it;
 		try {
 			it = original.iterator();
 			if (it == null) {
@@ -538,13 +538,13 @@ class TypeConverterDelegate {
 			return original;
 		}
 
-		Collection convertedCopy;
+		Collection<Object> convertedCopy;
 		try {
 			if (approximable) {
 				convertedCopy = CollectionFactory.createApproximateCollection(original, original.size());
 			}
 			else {
-				convertedCopy = (Collection) requiredType.newInstance();
+				convertedCopy = (Collection<Object>) requiredType.newInstance();
 			}
 		}
 		catch (Throwable ex) {
@@ -577,8 +577,8 @@ class TypeConverterDelegate {
 	}
 
 	@SuppressWarnings("unchecked")
-	private Map convertToTypedMap(
-			Map original, String propertyName, Class<?> requiredType, TypeDescriptor typeDescriptor) {
+	private Map<?, ?> convertToTypedMap(
+			Map<?, ?> original, String propertyName, Class<?> requiredType, TypeDescriptor typeDescriptor) {
 
 		if (!Map.class.isAssignableFrom(requiredType)) {
 			return original;
@@ -602,7 +602,7 @@ class TypeConverterDelegate {
 			return original;
 		}
 
-		Iterator it;
+		Iterator<?> it;
 		try {
 			it = original.entrySet().iterator();
 			if (it == null) {
@@ -621,13 +621,13 @@ class TypeConverterDelegate {
 			return original;
 		}
 
-		Map convertedCopy;
+		Map<Object, Object> convertedCopy;
 		try {
 			if (approximable) {
 				convertedCopy = CollectionFactory.createApproximateMap(original, original.size());
 			}
 			else {
-				convertedCopy = (Map) requiredType.newInstance();
+				convertedCopy = (Map<Object, Object>) requiredType.newInstance();
 			}
 		}
 		catch (Throwable ex) {
@@ -639,7 +639,7 @@ class TypeConverterDelegate {
 		}
 
 		while (it.hasNext()) {
-			Map.Entry entry = (Map.Entry) it.next();
+			Map.Entry<?, ?> entry = (Map.Entry<?, ?>) it.next();
 			Object key = entry.getKey();
 			Object value = entry.getValue();
 			String keyedPropertyName = buildKeyedPropertyName(propertyName, key);

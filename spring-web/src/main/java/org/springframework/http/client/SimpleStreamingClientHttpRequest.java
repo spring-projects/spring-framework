@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,12 +47,12 @@ final class SimpleStreamingClientHttpRequest extends AbstractClientHttpRequest {
 	private final boolean outputStreaming;
 
 
-	SimpleStreamingClientHttpRequest(HttpURLConnection connection, int chunkSize,
-			boolean outputStreaming) {
+	SimpleStreamingClientHttpRequest(HttpURLConnection connection, int chunkSize, boolean outputStreaming) {
 		this.connection = connection;
 		this.chunkSize = chunkSize;
 		this.outputStreaming = outputStreaming;
 	}
+
 
 	public HttpMethod getMethod() {
 		return HttpMethod.valueOf(this.connection.getRequestMethod());
@@ -70,7 +70,7 @@ final class SimpleStreamingClientHttpRequest extends AbstractClientHttpRequest {
 	@Override
 	protected OutputStream getBodyInternal(HttpHeaders headers) throws IOException {
 		if (this.body == null) {
-			if(this.outputStreaming) {
+			if (this.outputStreaming) {
 				int contentLength = (int) headers.getContentLength();
 				if (contentLength >= 0) {
 					this.connection.setFixedLengthStreamingMode(contentLength);

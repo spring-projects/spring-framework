@@ -149,7 +149,7 @@ public abstract class AbstractSimpleBeanDefinitionParser extends AbstractSingleB
 	 */
 	protected boolean isEligibleAttribute(Attr attribute, ParserContext parserContext) {
 		boolean eligible = isEligibleAttribute(attribute);
-		if(!eligible) {
+		if (!eligible) {
 			String fullName = attribute.getName();
 			eligible = (!fullName.equals("xmlns") && !fullName.startsWith("xmlns:") &&
 					isEligibleAttribute(parserContext.getDelegate().getLocalName(attribute)));

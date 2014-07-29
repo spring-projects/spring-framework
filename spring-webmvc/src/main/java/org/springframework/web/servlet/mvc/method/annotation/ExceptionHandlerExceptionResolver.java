@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.xml.transform.Source;
 
-import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
@@ -68,16 +67,22 @@ import org.springframework.web.servlet.handler.AbstractHandlerMethodExceptionRes
  * @author Rossen Stoyanchev
  * @since 3.1
  */
-public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExceptionResolver implements
-		InitializingBean, ApplicationContextAware {
+public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExceptionResolver
+		implements InitializingBean, ApplicationContextAware {
 
 	private List<HandlerMethodArgumentResolver> customArgumentResolvers;
 
+	private HandlerMethodArgumentResolverComposite argumentResolvers;
+
 	private List<HandlerMethodReturnValueHandler> customReturnValueHandlers;
+
+	private HandlerMethodReturnValueHandlerComposite returnValueHandlers;
 
 	private List<HttpMessageConverter<?>> messageConverters;
 
 	private ContentNegotiationManager contentNegotiationManager = new ContentNegotiationManager();
+
+	private ApplicationContext applicationContext;
 
 	private final Map<Class<?>, ExceptionHandlerMethodResolver> exceptionHandlerCache =
 			new ConcurrentHashMap<Class<?>, ExceptionHandlerMethodResolver>(64);
@@ -85,17 +90,8 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 	private final Map<ControllerAdviceBean, ExceptionHandlerMethodResolver> exceptionHandlerAdviceCache =
 			new LinkedHashMap<ControllerAdviceBean, ExceptionHandlerMethodResolver>();
 
-	private HandlerMethodArgumentResolverComposite argumentResolvers;
 
-	private HandlerMethodReturnValueHandlerComposite returnValueHandlers;
-
-	private ApplicationContext applicationContext;
-
-	/**
-	 * Default constructor.
-	 */
 	public ExceptionHandlerExceptionResolver() {
-
 		StringHttpMessageConverter stringHttpMessageConverter = new StringHttpMessageConverter();
 		stringHttpMessageConverter.setWriteAcceptCharset(false); // See SPR-7316
 
@@ -105,6 +101,7 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 		this.messageConverters.add(new SourceHttpMessageConverter<Source>());
 		this.messageConverters.add(new AllEncompassingFormHttpMessageConverter());
 	}
+
 
 	/**
 	 * Provide resolvers for custom argument types. Custom resolvers are ordered
@@ -194,7 +191,7 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 	 * Return the configured message body converters.
 	 */
 	public List<HttpMessageConverter<?>> getMessageConverters() {
-		return messageConverters;
+		return this.messageConverters;
 	}
 
 	/**
@@ -205,13 +202,14 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 		this.contentNegotiationManager = contentNegotiationManager;
 	}
 
-	public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+	public void setApplicationContext(ApplicationContext applicationContext) {
 		this.applicationContext = applicationContext;
 	}
 
 	public ApplicationContext getApplicationContext() {
 		return this.applicationContext;
 	}
+
 
 	public void afterPropertiesSet() {
 		if (this.argumentResolvers == null) {
@@ -291,10 +289,13 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 			ExceptionHandlerMethodResolver resolver = new ExceptionHandlerMethodResolver(bean.getBeanType());
 			if (resolver.hasExceptionMappings()) {
 				this.exceptionHandlerAdviceCache.put(bean, resolver);
-				logger.info("Detected @ExceptionHandler methods in " + bean);
+				if (logger.isDebugEnabled()) {
+					logger.debug("Detected @ExceptionHandler methods in " + bean);
+				}
 			}
 		}
 	}
+
 
 	/**
 	 * Find an {@code @ExceptionHandler} method and invoke it to handle the raised exception.
@@ -321,7 +322,9 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 			exceptionHandlerMethod.invokeAndHandle(webRequest, mavContainer, exception);
 		}
 		catch (Exception invocationEx) {
-			logger.error("Failed to invoke @ExceptionHandler method: " + exceptionHandlerMethod, invocationEx);
+			if (logger.isErrorEnabled()) {
+				logger.error("Failed to invoke @ExceptionHandler method: " + exceptionHandlerMethod, invocationEx);
+			}
 			return null;
 		}
 
@@ -361,12 +364,14 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 				return new ServletInvocableHandlerMethod(handlerMethod.getBean(), method);
 			}
 		}
+
 		for (Entry<ControllerAdviceBean, ExceptionHandlerMethodResolver> entry : this.exceptionHandlerAdviceCache.entrySet()) {
 			Method method = entry.getValue().resolveMethod(exception);
 			if (method != null) {
 				return new ServletInvocableHandlerMethod(entry.getKey().resolveBean(), method);
 			}
 		}
+
 		return null;
 	}
 
