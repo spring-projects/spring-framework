@@ -32882,6 +32882,70 @@ declaration.
 
 
 
+[[mvc-csrf]]
+==== Cross Site Request Forgery (CSRF) Protection
+
+http://en.wikipedia.org/wiki/Cross-site_request_forgery[CSRF] is a type of malicious exploit
+that forces an end user to execute unwanted actions on a web application in which he/she is
+currently authenticated. The attacker usually create a web page with an link, a form or even
+some Javascript code that will send a malicious request to the web application in order to perform
+unauthorized operations thanks to the identity and credentials of the victim inherited from a previous
+authentication.
+
+Spring Security provides
+http://docs.spring.io/spring-security/site/docs/current/reference/htmlsingle/#csrf[first class CSRF protection],
+and is the recommanded way to protect your Spring MVC based web application from such attack.
+Even if you don't need other additional Spring Security features, you can just declare `CsrfFilter`
+(applies CSRF protection using a
+http://docs.spring.io/spring-security/site/docs/current/reference/htmlsingle/#synchronizer-token-pattern[synchronizer]
+token pattern) and `CsrfRequestDataValueProcessor` (automatically adds the `CsrfToken` into forms
+with hidden inputs when using Spring tag libraries) beans.
+
+Just add the `spring-security-web` dependency to your project as described in the
+http://docs.spring.io/spring-security/site/docs/current/reference/htmlsingle/#get-spring-security[Getting Spring Security]
+section of Spring Security documentation, and declare the following beans:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+  @Configuration
+  public class CsrfConfig {
+
+    @Bean
+    HttpSessionCsrfTokenRepository csrfTokenRepository() {
+      return new HttpSessionCsrfTokenRepository();
+    }
+
+    @Bean
+    CsrfFilter csrfFilter(HttpSessionCsrfTokenRepository csrfTokenRepository) {
+      return new CsrfFilter(csrfTokenRepository);
+    }
+
+    @Bean
+    CsrfRequestDataValueProcessor csrfRequestDataValueProcessor() {
+      return new CsrfRequestDataValueProcessor();
+    }
+
+  }
+----
+
+Or in XML:
+
+[source,xml,indent=0]
+[subs="verbatim,quotes"]
+----
+  <bean id="csrfFilter" class="org.springframework.security.web.csrf.CsrfFilter">
+    <constructor-arg>
+      <bean class="org.springframework.security.web.csrf.HttpSessionCsrfTokenRepository"/>
+    </constructor-arg>
+  </bean>
+ 
+  <bean id="requestDataValueProcessor"
+        class="org.springframework.security.web.servlet.support.csrf.CsrfRequestDataValueProcessor"/>
+----
+
+See http://docs.spring.io/spring-security/site/docs/current/reference/htmlsingle/#csrf-using[Using Spring Security CSRF Protection] section for more details about how to configure and use this CSRF protection.
+
 
 
 [[view]]
