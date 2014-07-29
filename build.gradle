@@ -18,7 +18,7 @@ configure(allprojects) { project ->
 	ext.eclipseLinkVersion   = "2.4.2"
 	ext.ehcacheVersion       = "2.8.3"
 	ext.ehcacheJCacheVersion = "1.0.0"
-	ext.groovyVersion        = "2.3.5"
+	ext.groovyVersion        = "2.3.6"
 	ext.hibernate3Version    = "3.6.10.Final"
 	ext.hibernate4Version    = "4.3.6.Final"
 	ext.hibVal4Version       = "4.3.2.Final"
@@ -564,7 +564,7 @@ project("spring-jdbc") {
 		optional("javax.transaction:javax.transaction-api:1.2")
 		optional("com.mchange:c3p0:0.9.2.1")
 		optional("org.hsqldb:hsqldb:${hsqldbVersion}")
-		optional("com.h2database:h2:1.4.179")
+		optional("com.h2database:h2:1.4.180")
 		optional("org.apache.derby:derby:10.10.2.0")
 		optional("org.apache.derby:derbyclient:10.10.2.0")
 	}
