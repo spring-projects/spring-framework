@@ -562,7 +562,14 @@ public abstract class ObjectUtils {
 			return NULL_STRING;
 		}
 		if (obj instanceof String) {
-			return (String) obj;
+			// added by SPR-10729
+			// obj converting space string if obj contains sneaky values
+			String value = (String) obj;
+			if(value.contains("<") || value.contains(">")){
+				value = value.replaceAll("<", "&lt;");
+				value = value.replaceAll(">", "&gt;");
+			}
+			return value;
 		}
 		if (obj instanceof Object[]) {
 			return nullSafeToString((Object[]) obj);

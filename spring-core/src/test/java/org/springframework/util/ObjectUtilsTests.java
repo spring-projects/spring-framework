@@ -720,6 +720,12 @@ public class ObjectUtilsTests {
 	public void testNullSafeToStringWithStringArrayEqualToNull() {
 		assertEquals("null", ObjectUtils.nullSafeToString((String[]) null));
 	}
+	
+	@Test
+	public void testNullSafeToStringWithXSSValue() {
+		String value = "<script>doBadthings()</script>";
+		assertEquals("&lt;script&gt;doBadthings()&lt;/script&gt;", ObjectUtils.nullSafeToString(value));
+	}
 
 	@Test
 	public void testContainsConstant() {
