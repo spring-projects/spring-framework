@@ -31703,6 +31703,24 @@ or in a JSP:
 ----
 
 
+[[mvc-web-security]]
+=== Web Security
+
+The http://projects.spring.io/spring-security/[Spring Security] project provides features
+to protect web applications from malicious exploits. Check out the reference documentation in the sections on
+http://docs.spring.io/spring-security/site/docs/current/reference/htmlsingle/#csrf["CSRF protection"],
+http://docs.spring.io/spring-security/site/docs/current/reference/htmlsingle/#headers["Security Response Headers"], and also
+http://docs.spring.io/spring-security/site/docs/current/reference/htmlsingle/#mvc["Spring MVC Integration"].
+Note that using Spring Security to secure the application is not necessarily required for all features.
+For example CSRF protection can be added simply by adding the `CsrfFilter` and
+`CsrfRequestDataValueProcessor` to your configuration. See the
+https://github.com/spring-projects/spring-mvc-showcase/commit/361adc124c05a8187b84f25e8a57550bb7d9f8e4[Spring MVC Showcase]
+for an example.
+
+Another option is to use a framework dedicated to Web Security.
+http://hdiv.org/[HDIV] is one such framework and integrates with Spring MVC.
+
+
 
 
 [[mvc-coc]]
@@ -32879,8 +32897,6 @@ by type and then modifying its properties as necessary. For example:
 Note that `MyPostProcessor` needs to be included in an `<component scan />` in order for
 it to be detected or if you prefer you can declare it explicitly with an XML bean
 declaration.
-
-
 
 
 
