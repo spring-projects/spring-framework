@@ -233,6 +233,7 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 		return this.applicationContext;
 	}
 
+
 	@Override
 	public void afterPropertiesSet() {
 		// Do this first, it may add ResponseBodyAdvice beans
@@ -334,6 +335,7 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 
 		return handlers;
 	}
+
 
 	/**
 	 * Find an {@code @ExceptionHandler} method and invoke it to handle the raised exception.

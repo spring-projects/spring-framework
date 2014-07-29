@@ -51,11 +51,11 @@ public aspect AnnotationBeanConfigurerAspect extends AbstractInterfaceDrivenDepe
 
 
 	public void setBeanFactory(BeanFactory beanFactory) {
-		this.beanConfigurerSupport.setBeanFactory(beanFactory);
 		this.beanConfigurerSupport.setBeanWiringInfoResolver(new AnnotationBeanWiringInfoResolver());
+		this.beanConfigurerSupport.setBeanFactory(beanFactory);
 	}
 
-	public void afterPropertiesSet() throws Exception {
+	public void afterPropertiesSet() {
 		this.beanConfigurerSupport.afterPropertiesSet();
 	}
 
@@ -63,7 +63,7 @@ public aspect AnnotationBeanConfigurerAspect extends AbstractInterfaceDrivenDepe
 		this.beanConfigurerSupport.configureBean(bean);
 	}
 
-	public void destroy() throws Exception {
+	public void destroy() {
 		this.beanConfigurerSupport.destroy();
 	}
 
