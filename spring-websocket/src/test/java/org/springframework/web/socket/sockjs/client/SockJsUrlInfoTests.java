@@ -40,7 +40,7 @@ public class SockJsUrlInfoTests {
 	public void serverId() throws Exception {
 		SockJsUrlInfo info = new SockJsUrlInfo(new URI("http://example.com"));
 		int serverId = Integer.valueOf(info.getServerId());
-		assertTrue("Invalid serverId: " + serverId, serverId > 0 && serverId < 1000);
+		assertTrue("Invalid serverId: " + serverId, serverId >= 0 && serverId < 1000);
 	}
 
 	@Test
