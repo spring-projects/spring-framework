@@ -67,7 +67,7 @@ public class MethodJmsListenerEndpoint extends AbstractJmsListenerEndpoint {
 	}
 
 	/**
-	 * Set the {@link DefaultJmsHandlerMethodFactory} to use to build the
+	 * Set the {@link JmsHandlerMethodFactory} to use to build the
 	 * {@link InvocableHandlerMethod} responsible to manage the invocation
 	 * of this endpoint.
 	 */

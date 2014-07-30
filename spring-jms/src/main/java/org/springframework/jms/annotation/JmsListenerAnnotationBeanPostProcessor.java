@@ -68,7 +68,7 @@ import org.springframework.util.StringUtils;
  * @see JmsListenerConfigurer
  * @see JmsListenerEndpointRegistrar
  * @see JmsListenerEndpointRegistry
- * @see org.springframework.jms.config.AbstractJmsListenerEndpoint
+ * @see org.springframework.jms.config.JmsListenerEndpoint
  * @see MethodJmsListenerEndpoint
  */
 public class JmsListenerAnnotationBeanPostProcessor

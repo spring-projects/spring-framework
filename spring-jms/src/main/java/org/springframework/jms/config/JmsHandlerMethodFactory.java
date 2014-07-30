@@ -34,7 +34,7 @@ public interface JmsHandlerMethodFactory {
 	 * JMS method endpoint.
 	 * @param bean the bean instance
 	 * @param method the method to invoke
-	 * @return an JMS-specific {@link InvocableHandlerMethod} suitable for that method
+	 * @return a JMS-specific {@link InvocableHandlerMethod} suitable for that method
 	 */
 	InvocableHandlerMethod createInvocableHandlerMethod(Object bean, Method method);
 
