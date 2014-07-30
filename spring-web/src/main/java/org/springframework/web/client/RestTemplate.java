@@ -593,7 +593,7 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 		if (logger.isDebugEnabled()) {
 			try {
 				logger.debug(method.name() + " request for \"" + url + "\" resulted in " +
-						response.getStatusCode() + " (" + response.getStatusText() + ")");
+						response.getRawStatusCode() + " (" + response.getStatusText() + ")");
 			}
 			catch (IOException e) {
 				// ignore
@@ -605,7 +605,7 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 		if (logger.isWarnEnabled()) {
 			try {
 				logger.warn(method.name() + " request for \"" + url + "\" resulted in " +
-						response.getStatusCode() + " (" + response.getStatusText() + "); invoking error handler");
+						response.getRawStatusCode() + " (" + response.getStatusText() + "); invoking error handler");
 			}
 			catch (IOException e) {
 				// ignore
