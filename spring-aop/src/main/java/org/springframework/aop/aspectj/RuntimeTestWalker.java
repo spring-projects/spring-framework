@@ -50,13 +50,13 @@ import org.springframework.util.ReflectionUtils;
  * migrate to {@code ShadowMatch.getVariablesInvolvedInRuntimeTest()}
  * or some similar operation.
  *
- * <p>See <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=151593"/>.
+ * <p>See <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=151593"/>Bug 151593</a>
  *
  * @author Adrian Colyer
  * @author Ramnivas Laddad
  * @since 2.0
  */
-class RuntimeTestWalker {
+class RuntimeTestWlalker {
 
 	private static final Field residualTestField;
 
