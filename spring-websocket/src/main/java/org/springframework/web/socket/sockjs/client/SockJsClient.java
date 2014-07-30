@@ -25,13 +25,14 @@ import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.util.concurrent.SettableListenableFuture;
-import org.springframework.web.socket.WebSocketExtension;
 import org.springframework.web.socket.WebSocketHandler;
+import org.springframework.web.socket.WebSocketHttpHeaders;
 import org.springframework.web.socket.WebSocketSession;
-import org.springframework.web.socket.client.AbstractWebSocketClient;
+import org.springframework.web.socket.client.WebSocketClient;
 import org.springframework.web.socket.sockjs.frame.Jackson2SockJsMessageCodec;
 import org.springframework.web.socket.sockjs.frame.SockJsMessageCodec;
 import org.springframework.web.socket.sockjs.transport.TransportType;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
 import java.security.Principal;
@@ -55,7 +56,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * @see <a href="http://sockjs.org">http://sockjs.org</a>
  * @see org.springframework.web.socket.sockjs.client.Transport
  */
-public class SockJsClient extends AbstractWebSocketClient implements Lifecycle {
+public class SockJsClient implements WebSocketClient, Lifecycle {
 
 	private static final boolean jackson2Present = ClassUtils.isPresent(
 			"com.fasterxml.jackson.databind.ObjectMapper", SockJsClient.class.getClassLoader());
@@ -201,23 +202,30 @@ public class SockJsClient extends AbstractWebSocketClient implements Lifecycle {
 	}
 
 	@Override
-	protected void assertUri(URI uri) {
-		Assert.notNull(uri, "uri must not be null");
-		String scheme = uri.getScheme();
-		Assert.isTrue(scheme != null && ("ws".equals(scheme) || "wss".equals(scheme)
-				|| "http".equals(scheme) || "https".equals(scheme)), "Invalid scheme: " + scheme);
+	public ListenableFuture<WebSocketSession> doHandshake(WebSocketHandler handler,
+			String uriTemplate, Object... uriVars) {
+
+		Assert.notNull(uriTemplate, "uriTemplate must not be null");
+		URI uri = UriComponentsBuilder.fromUriString(uriTemplate).buildAndExpand(uriVars).encode().toUri();
+		return doHandshake(handler, null, uri);
 	}
 
 	@Override
-	protected ListenableFuture<WebSocketSession> doHandshakeInternal(WebSocketHandler handler,
-			HttpHeaders handshakeHeaders, URI url, List<String> protocols,
-			List<WebSocketExtension> extensions, Map<String, Object> attributes) {
+	public final ListenableFuture<WebSocketSession> doHandshake(WebSocketHandler handler,
+			WebSocketHttpHeaders headers, URI url) {
+
+		Assert.notNull(handler, "'webSocketHandler' is required");
+		Assert.notNull(url, "'url' is required");
+
+		String scheme = url.getScheme();
+		Assert.isTrue(scheme != null && ("ws".equals(scheme) || "wss".equals(scheme) ||
+				"http".equals(scheme) || "https".equals(scheme)), "Invalid scheme: " + scheme);
 
 		SettableListenableFuture<WebSocketSession> connectFuture = new SettableListenableFuture<WebSocketSession>();
 		try {
 			SockJsUrlInfo sockJsUrlInfo = new SockJsUrlInfo(url);
 			ServerInfo serverInfo = getServerInfo(sockJsUrlInfo);
-			createRequest(sockJsUrlInfo, handshakeHeaders, serverInfo).connect(handler, connectFuture);
+			createRequest(sockJsUrlInfo, headers, serverInfo).connect(handler, connectFuture);
 		}
 		catch (Throwable exception) {
 			if (logger.isErrorEnabled()) {
