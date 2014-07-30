@@ -180,8 +180,17 @@ public class Indexer extends SpelNodeImpl {
 		if (this.indexedType == IndexedType.array) {
 			return exitTypeDescriptor != null;
 		}
-		else if (this.indexedType == IndexedType.list || this.indexedType == IndexedType.map) {
-			return true;
+		else if (this.indexedType == IndexedType.list) {
+			return this.children[0].isCompilable();
+		} 
+		else if (this.indexedType == IndexedType.map) {
+			if (this.children[0] instanceof PropertyOrFieldReference) {
+				// Only the name will be used, so that is OK
+				return true;
+			}
+			else {
+				return this.children[0].isCompilable();
+			}
 		}
 		else if (this.indexedType == IndexedType.object) {
 			// If the string name is changing the accessor is clearly going to change (so compilation is not possible)
@@ -207,61 +216,89 @@ public class Indexer extends SpelNodeImpl {
 			if (exitTypeDescriptor == "I") {
 				mv.visitTypeInsn(CHECKCAST,"[I");
 				SpelNodeImpl index = this.children[0];
+				codeflow.enterCompilationScope();
 				index.generateCode(mv, codeflow);
+				codeflow.exitCompilationScope();
 				mv.visitInsn(IALOAD);
 			} 
 			else if (exitTypeDescriptor == "D") {
 				mv.visitTypeInsn(CHECKCAST,"[D");
 				SpelNodeImpl index = this.children[0];
+				codeflow.enterCompilationScope();
 				index.generateCode(mv, codeflow);
 				mv.visitInsn(DALOAD);
 			}
 			else if (exitTypeDescriptor == "J") {
 				mv.visitTypeInsn(CHECKCAST,"[J");
 				SpelNodeImpl index = this.children[0];
+				codeflow.enterCompilationScope();
 				index.generateCode(mv, codeflow);
+				codeflow.exitCompilationScope();
 				mv.visitInsn(LALOAD);
 			}
 			else if (exitTypeDescriptor == "F") {
 				mv.visitTypeInsn(CHECKCAST,"[F");
 				SpelNodeImpl index = this.children[0];
+				codeflow.enterCompilationScope();
 				index.generateCode(mv, codeflow);
+				codeflow.exitCompilationScope();
 				mv.visitInsn(FALOAD);
 			}
 			else if (exitTypeDescriptor == "S") {
 				mv.visitTypeInsn(CHECKCAST,"[S");
 				SpelNodeImpl index = this.children[0];
+				codeflow.enterCompilationScope();
 				index.generateCode(mv, codeflow);
+				codeflow.exitCompilationScope();
 				mv.visitInsn(SALOAD);
 			}
 			else if (exitTypeDescriptor == "B") {
 				mv.visitTypeInsn(CHECKCAST,"[B");
 				SpelNodeImpl index = this.children[0];
+				codeflow.enterCompilationScope();
 				index.generateCode(mv, codeflow);
+				codeflow.exitCompilationScope();
 				mv.visitInsn(BALOAD);
 			}
 			else if (exitTypeDescriptor == "C") {
 				mv.visitTypeInsn(CHECKCAST,"[C");
 				SpelNodeImpl index = this.children[0];
+				codeflow.enterCompilationScope();
 				index.generateCode(mv, codeflow);
+				codeflow.exitCompilationScope();
 				mv.visitInsn(CALOAD);
 			}
 			else { 
 				mv.visitTypeInsn(CHECKCAST,"["+exitTypeDescriptor+(CodeFlow.isPrimitiveArray(exitTypeDescriptor)?"":";"));//depthPlusOne(exitTypeDescriptor)+"Ljava/lang/Object;");
 				SpelNodeImpl index = this.children[0];
+				codeflow.enterCompilationScope();
 				index.generateCode(mv, codeflow);
+				codeflow.exitCompilationScope();
 				mv.visitInsn(AALOAD);
 			}
 		}
 		else if (this.indexedType == IndexedType.list) {
 			mv.visitTypeInsn(CHECKCAST,"java/util/List");
+			codeflow.enterCompilationScope();
 			this.children[0].generateCode(mv, codeflow);
+			codeflow.exitCompilationScope();
 			mv.visitMethodInsn(INVOKEINTERFACE,"java/util/List","get","(I)Ljava/lang/Object;", true);
 			CodeFlow.insertCheckCast(mv,exitTypeDescriptor);
 		}
 		else if (this.indexedType == IndexedType.map) {
 			mv.visitTypeInsn(CHECKCAST,"java/util/Map");
-			this.children[0].generateCode(mv, codeflow);
+			// Special case when the key is an unquoted string literal that will be parsed as
+			// a property/field reference
+			if ((this.children[0] instanceof PropertyOrFieldReference)) {
+				PropertyOrFieldReference reference = (PropertyOrFieldReference) this.children[0];
+				String mapKeyName = reference.getName();
+				mv.visitLdcInsn(mapKeyName);
+			}
+			else {
+				codeflow.enterCompilationScope();
+				this.children[0].generateCode(mv, codeflow);
+				codeflow.exitCompilationScope();
+			}
 			mv.visitMethodInsn(INVOKEINTERFACE,"java/util/Map","get","(Ljava/lang/Object;)Ljava/lang/Object;", true);
 			CodeFlow.insertCheckCast(mv,exitTypeDescriptor);
 		} 

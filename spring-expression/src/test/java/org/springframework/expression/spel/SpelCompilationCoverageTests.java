@@ -37,6 +37,7 @@ import org.springframework.expression.spel.ast.SpelNodeImpl;
 import org.springframework.expression.spel.ast.Ternary;
 import org.springframework.expression.spel.standard.SpelCompiler;
 import org.springframework.expression.spel.standard.SpelExpression;
+import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 
 import static org.junit.Assert.*;
@@ -2468,7 +2469,68 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		assertTrue(expression.getValue(new GenericMessageTestHelper2<Integer>(6),Boolean.TYPE));
 	}
 
+	@Test
+	public void indexerMapAccessor_12045() throws Exception {
+		SpelParserConfiguration spc = new SpelParserConfiguration(SpelCompilerMode.IMMEDIATE,this.getClass().getClassLoader());
+		SpelExpressionParser sep = new SpelExpressionParser(spc);
+		expression=sep.parseExpression("headers[command]");
+		MyMessage root = new MyMessage();
+		assertEquals("wibble",expression.getValue(root));
+		// This next call was failing because the isCompilable check in Indexer did not check on the key being compilable
+		// (and also generateCode in the Indexer was missing the optimization that it didn't need necessarily need to call
+		// generateCode for that accessor)
+		assertEquals("wibble",expression.getValue(root));
+		assertCanCompile(expression);
+
+		// What about a map key that is an expression - ensure the getKey() is evaluated in the right scope
+		expression=sep.parseExpression("headers[getKey()]");
+		assertEquals("wobble",expression.getValue(root));
+		assertEquals("wobble",expression.getValue(root));
+		
+		expression=sep.parseExpression("list[getKey2()]");
+		assertEquals("wobble",expression.getValue(root));
+		assertEquals("wobble",expression.getValue(root));
+		
+		expression = sep.parseExpression("ia[getKey2()]");
+		assertEquals(3,expression.getValue(root));
+		assertEquals(3,expression.getValue(root));
+	}
+
 	// ---
+
+	public static interface Message<T> {
+		MessageHeaders getHeaders();
+		@SuppressWarnings("rawtypes")
+		List getList();
+		int[] getIa();
+	}
+	
+	public static class MyMessage implements Message<String> {
+		public MessageHeaders getHeaders() {
+			MessageHeaders mh = new MessageHeaders();
+			mh.put("command", "wibble");
+			mh.put("command2", "wobble");
+			return mh;
+		}
+		public int[] getIa() { return new int[]{5,3}; }
+		@SuppressWarnings({ "rawtypes", "unchecked" })
+		public List getList() {
+			List l = new ArrayList();
+			l.add("wibble");
+			l.add("wobble");
+			return l;
+		}
+		
+		public String getKey() {
+			return "command2";
+		}
+		
+		public int getKey2() {
+			return 1;
+		}
+	}
+	
+	public static class MessageHeaders extends HashMap<String,Object> {	}
 
 	public static class GenericMessageTestHelper<T> {
 		private T payload;
