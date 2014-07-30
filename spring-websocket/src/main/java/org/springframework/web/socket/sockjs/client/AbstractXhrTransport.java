@@ -29,8 +29,11 @@ import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.sockjs.frame.SockJsFrame;
+import org.springframework.web.socket.sockjs.transport.TransportType;
 
 import java.net.URI;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * Abstract base class for XHR transport implementations to extend.
@@ -59,17 +62,32 @@ public abstract class AbstractXhrTransport implements XhrTransport {
 	private HttpHeaders xhrSendRequestHeaders = new HttpHeaders();
 
 
+	@Override
+	public List<TransportType> getTransportTypes() {
+		return (isXhrStreamingDisabled() ?
+				Arrays.asList(TransportType.XHR) :
+				Arrays.asList(TransportType.XHR_STREAMING, TransportType.XHR));
+	}
+
 	/**
-	 * Whether to attempt to connect with "xhr_streaming" first before trying
-	 * with "xhr" next, see {@link XhrTransport#isXhrStreamingDisabled()}.
+	 * An {@code XhrTransport} can support both the "xhr_streaming" and "xhr"
+	 * SockJS server transports. From a client perspective there is no
+	 * implementation difference.
+	 *
+	 * <p>Typically an {@code XhrTransport} is used as "XHR streaming" first and
+	 * then, if that fails, as "XHR". In some cases however it may be helpful to
+	 * suppress XHR streaming so that only XHR is attempted.
 	 *
 	 * <p>By default this property is set to {@code false} which means both
-	 * "xhr_streaming" and "xhr" will be tried.
+	 * "XHR streaming" and "XHR" apply.
 	 */
 	public void setXhrStreamingDisabled(boolean disabled) {
 		this.xhrStreamingDisabled = disabled;
 	}
 
+	/**
+	 * Whether XHR streaming is disabled or not.
+	 */
 	public boolean isXhrStreamingDisabled() {
 		return this.xhrStreamingDisabled;
 	}

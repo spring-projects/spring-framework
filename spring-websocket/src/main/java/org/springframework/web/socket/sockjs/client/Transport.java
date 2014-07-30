@@ -19,6 +19,9 @@ package org.springframework.web.socket.sockjs.client;
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.WebSocketSession;
+import org.springframework.web.socket.sockjs.transport.TransportType;
+
+import java.util.List;
 
 /**
  * A client-side implementation for a SockJS transport.
@@ -27,6 +30,13 @@ import org.springframework.web.socket.WebSocketSession;
  * @since 4.1
  */
 public interface Transport {
+
+	/**
+	 * Return the SockJS transport types that this transport can be used for.
+	 * In particular since from a client perspective there is no difference
+	 * between XHR and XHR streaming, an {@code XhrTransport} could do both.
+	 */
+	List<TransportType> getTransportTypes();
 
 	/**
 	 * Connect the transport.

@@ -30,8 +30,11 @@ import org.springframework.web.socket.WebSocketHttpHeaders;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.client.WebSocketClient;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
+import org.springframework.web.socket.sockjs.transport.TransportType;
 
 import java.net.URI;
+import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -55,6 +58,11 @@ public class WebSocketTransport implements Transport, Lifecycle {
 		this.webSocketClient = webSocketClient;
 	}
 
+
+	@Override
+	public List<TransportType> getTransportTypes() {
+		return Arrays.asList(TransportType.WEBSOCKET);
+	}
 
 	/**
 	 * Return the configured {@code WebSocketClient}.

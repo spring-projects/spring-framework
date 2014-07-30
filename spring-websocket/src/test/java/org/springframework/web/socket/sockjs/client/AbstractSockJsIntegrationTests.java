@@ -218,7 +218,7 @@ public abstract class AbstractSockJsIntegrationTests {
 		this.errorFilter.sleepDelayMap.put("/xhr_streaming", 10000L);
 		this.errorFilter.responseStatusMap.put("/xhr_streaming", 503);
 		initSockJsClient(createXhrTransport());
-		this.sockJsClient.setTaskScheduler(this.wac.getBean(ThreadPoolTaskScheduler.class));
+		this.sockJsClient.setConnectTimeoutScheduler(this.wac.getBean(ThreadPoolTaskScheduler.class));
 		WebSocketSession clientSession = sockJsClient.doHandshake(clientHandler, this.baseUrl + "/echo").get();
 		assertEquals("Fallback didn't occur", XhrClientSockJsSession.class, clientSession.getClass());
 		TextMessage message = new TextMessage("message1");

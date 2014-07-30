@@ -22,8 +22,11 @@ import org.springframework.util.concurrent.ListenableFutureCallback;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.WebSocketSession;
+import org.springframework.web.socket.sockjs.transport.TransportType;
 
 import java.net.URI;
+import java.util.Arrays;
+import java.util.List;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -44,6 +47,11 @@ class TestTransport implements Transport {
 
 	public TestTransport(String name) {
 		this.name = name;
+	}
+
+	@Override
+	public List<TransportType> getTransportTypes() {
+		return Arrays.asList(TransportType.WEBSOCKET);
 	}
 
 	public TransportRequest getRequest() {
@@ -82,6 +90,13 @@ class TestTransport implements Transport {
 
 		XhrTestTransport(String name) {
 			super(name);
+		}
+
+		@Override
+		public List<TransportType> getTransportTypes() {
+			return (isXhrStreamingDisabled() ?
+					Arrays.asList(TransportType.XHR) :
+					Arrays.asList(TransportType.XHR_STREAMING, TransportType.XHR));
 		}
 
 		public void setStreamingDisabled(boolean streamingDisabled) {
