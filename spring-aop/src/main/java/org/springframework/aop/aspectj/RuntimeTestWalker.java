@@ -56,7 +56,7 @@ import org.springframework.util.ReflectionUtils;
  * @author Ramnivas Laddad
  * @since 2.0
  */
-class RuntimeTestWlalker {
+class RuntimeTestWalker {
 
 	private static final Field residualTestField;
 
