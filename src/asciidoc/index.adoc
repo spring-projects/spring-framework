@@ -38627,7 +38627,7 @@ public class TradeServiceImpl implements TradeService {
 		this.messagingTemplate.convertAndSendToUser(
 				trade.getUserName(), "/queue/position-updates", trade.getResult());
 	}
-
+}
 ----
 
 [NOTE]
@@ -38645,7 +38645,7 @@ for purging inactive destinations.
 
 
 [[websocket-stomp-appplication-context-events]]
-==== ApplicationContext Events
+==== Broker events and message interception
 
 The STOMP messaging support publishes the `ApplicationContext` events listed below.
 To subscribe to receive one or more of these events a Spring managed component can
@@ -38686,7 +38686,82 @@ will typically notice the broker is not responding within 10 seconds. Clients ne
 implement their own reconnect logic.
 ====
 
+An application can also intercept all incoming or outgoing messages by creating a
+`ChannelInterceptor` and registering it on the inbound or outbound channel. See bellow
+an example that filters messages based on the message destination and user:
 
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+public class AccessControlChannelInterceptor extends ChannelInterceptorAdapter {
+
+    @Override
+    public Message<?> preSend(Message<?> message, MessageChannel channel) {
+      Principal user = SimpMessageHeaderAccessor.getUser(message.getHeaders());
+      String destination = SimpMessageHeaderAccessor.getDestination(message.getHeaders());
+      if(isAllowed(destination, user)) {
+        return message;
+      }
+      throw new AccessControlException("Message to destination " + destination
+          + " not allowed for user " + user.getName());
+    }
+
+    private boolean isAllowed(String destination, Principal user) {
+      // ...
+    }
+  }
+----
+
+In Java config:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+  @Configuration
+  @EnableWebSocketMessageBroker
+  public class WebsocketConfig extends AbstractWebSocketMessageBrokerConfigurer {
+
+    // ...
+
+    @Override
+    public void configureClientInboundChannel(ChannelRegistration registration) {
+      registration.setInterceptors(myInterceptor());
+    }
+
+    @Bean
+    public AccessControlChannelInterceptor myInterceptor() {
+      return new AccessControlChannelInterceptor();
+    }
+
+  }
+----
+
+Or in XML config:
+
+[source,xml,indent=0]
+[subs="verbatim,quotes,attributes"]
+----
+  <beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:websocket="http://www.springframework.org/schema/websocket"
+    xsi:schemaLocation="
+      http://www.springframework.org/schema/beans
+      http://www.springframework.org/schema/beans/spring-beans.xsd
+      http://www.springframework.org/schema/websocket
+      http://www.springframework.org/schema/websocket/spring-websocket.xsd">
+
+    <websocket:message-broker application-destination-prefix="/app">
+      <websocket:stomp-endpoint path="/foo"/>
+      <websocket:simple-broker prefix="/topic"/>
+      <websocket:client-inbound-channel>
+        <websocket:interceptors>
+          <bean id="myInterceptor" class="com.foo.AccessControlChannelInterceptor" />
+        </websocket:interceptors>
+      </websocket:client-inbound-channel>
+    </websocket:message-broker>
+
+  </beans>
+----
 
 
 [[websocket-stomp-websocket-scope]]
