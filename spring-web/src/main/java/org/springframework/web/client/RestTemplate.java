@@ -72,48 +72,33 @@ import org.springframework.web.util.UriTemplate;
  * <tr><td>any</td><td>{@link #exchange}</td></tr>
  * <tr><td></td><td>{@link #execute}</td></tr> </table>
  *
- * <p>The {@code exchange} and {@code execute} methods are generalized versions of the more specific methods listed
- * above them. They support additional, less frequently used combinations including support for requests using the
- * HTTP PATCH method. However, note that the underlying HTTP library must also support the desired combination.
+ * <p>In addition the {@code exchange} and {@code execute} methods are generalized versions of
+ * the above methods and can be used to support additional, less frequent combinations (e.g.
+ * HTTP PATCH, HTTP PUT with response body, etc.). Note however that the underlying HTTP
+ * library used must also support the desired combination.
  *
- * <p>For each of these HTTP methods, there are three corresponding Java methods in the {@code RestTemplate}.
- * Two variants take a {@code String} URI as first argument (eg. {@link #getForObject(String, Class, Object[])},
- * {@link #getForObject(String, Class, Map)}), and are capable of substituting any {@linkplain UriTemplate URI templates}
- * in that URL using either a {@code String} variable arguments array, or a {@code Map<String, String>}.
- * The string varargs variant expands the given template variables in order, so that
- * <pre class="code">
- * String result = restTemplate.getForObject("http://example.com/hotels/{hotel}/bookings/{booking}", String.class, "42",
- * "21");
- * </pre>
- * will perform a GET on {@code http://example.com/hotels/42/bookings/21}. The map variant expands the template based
- * on variable name, and is therefore more useful when using many variables, or when a single variable is used multiple
- * times. For example:
- * <pre class="code">
- * Map&lt;String, String&gt; vars = Collections.singletonMap("hotel", "42");
- * String result = restTemplate.getForObject("http://example.com/hotels/{hotel}/rooms/{hotel}", String.class, vars);
- * </pre>
- * will perform a GET on {@code http://example.com/hotels/42/rooms/42}. Alternatively, there are {@link URI} variant
- * methods ({@link #getForObject(URI, Class)}), which do not allow for URI templates, but allow you to reuse a single,
- * expanded URI multiple times.
+ * <p>For each HTTP method there are 3 variants -- two accept a URI template string
+ * and URI variables (array or map) while a third accepts a {@link URI}.
+ * Note that for URI templates it is assumed encoding is necessary, e.g.
+ * {@code restTemplate.getForObject("http://example.com/hotel list")} becomes
+ * {@code "http://example.com/hotel%20list"}. This also means if the URI template
+ * or URI variables are already encoded, double encoding will occur, e.g.
+ * {@code http://example.com/hotel%20list} becomes
+ * {@code http://example.com/hotel%2520list}). To avoid that use a {@code URI} method
+ * variant to provide (or re-use) a previously encoded URI. To prepare such an URI
+ * with full control over encoding, consider using
+ * {@link org.springframework.web.util.UriComponentsBuilder}.
  *
- * <p>Furthermore, the {@code String}-argument methods assume that the URL String is unencoded. This means that
- * <pre class="code">
- * restTemplate.getForObject("http://example.com/hotel list");
- * </pre>
- * will perform a GET on {@code http://example.com/hotel%20list}. As a result, any URL passed that is already encoded
- * will be encoded twice (i.e. {@code http://example.com/hotel%20list} will become {@code
- * http://example.com/hotel%2520list}). If this behavior is undesirable, use the {@code URI}-argument methods, which
- * will not perform any URL encoding.
+ * <p>Internally the template uses {@link HttpMessageConverter} instances to
+ * convert HTTP messages to and from POJOs. Converters for the main mime types
+ * are registered by default but you can also register additional converters
+ * via {@link #setMessageConverters}.
  *
- * <p>Objects passed to and returned from these methods are converted to and from HTTP messages by
- * {@link HttpMessageConverter} instances. Converters for the main mime types are registered by default,
- * but you can also write your own converter and register it via the {@link #setMessageConverters messageConverters}
- * bean property.
- *
- * <p>This template uses a {@link org.springframework.http.client.SimpleClientHttpRequestFactory} and a
- * {@link DefaultResponseErrorHandler} as default strategies for creating HTTP connections or handling HTTP errors,
- * respectively. These defaults can be overridden through the {@link #setRequestFactory(ClientHttpRequestFactory)
- * requestFactory} and {@link #setErrorHandler(ResponseErrorHandler) errorHandler} bean properties.
+ * <p>This template uses a
+ * {@link org.springframework.http.client.SimpleClientHttpRequestFactory} and a
+ * {@link DefaultResponseErrorHandler} as default strategies for creating HTTP
+ * connections or handling HTTP errors, respectively. These defaults can be overridden
+ * through {@link #setRequestFactory} and {@link #setErrorHandler} respectively.
  *
  * @author Arjen Poutsma
  * @author Brian Clozel
