@@ -28862,12 +28862,37 @@ name and the second - the regular expression.For example:
 [[mvc-ann-requestmapping-patterns]]
 ===== Path Patterns
 In addition to URI templates, the `@RequestMapping` annotation also supports Ant-style
-path patterns (for example, `/myPath/*.do`). A combination of URI templates and
-Ant-style globs is also supported (for example, `/owners/*/pets/{petId}`).
+path patterns (for example, `/myPath/*.do`). A combination of URI template variables and
+Ant-style globs is also supported (e.g. `/owners/*/pets/{petId}`).
+
+
+[[mvc-ann-requestmapping-pattern-comparison]]
+===== Path Pattern Comparison
+When a URL matches multiple patterns, a sort is used to find the most specific match.
+
+A pattern with a lower count of URI variables and wild cards is considered more specific.
+For example `/hotels/{hotel}/*` has 1 URI variable and 1 wild card and is considered
+more specific than `/hotels/{hotel}/**` which as 1 URI variable and 2 wild cards.
+
+If two patterns have the same count, the one that is longer is considered more specific.
+For example `/foo/bar*` is longer and considered more specific than `/foo/*`.
+
+When two patterns have the same count and length, the pattern with fewer wild cards is considered more specific.
+For example `/hotels/{hotel}` is more specific than `/hotels/*`.
+
+There are also some additional special rules:
+
+* The *default mapping pattern* `/**` is less specific than any other pattern.
+For example `/api/{a}/{b}/{c}` is more specific.
+* A *prefix pattern* such as `/public/**` is less specific than any other pattern that doesn't contain double wildcards.
+For example `/public/path3/{a}/{b}/{c}` is more specific.
+
+For the full details see `AntPatternComparator` in `AntPathMatcher`. Note that the PathMatcher
+can be customized (see <<mvc-config-path-matching>> in the section on configuring Spring MVC).
 
 
 [[mvc-ann-requestmapping-placeholders]]
-===== Patterns with Placeholders
+===== Path Patterns with Placeholders
 Patterns in `@RequestMapping` annotations support ${...} placeholders against local
 properties and/or system properties and environment variables. This may be useful in
 cases where the path a controller is mapped to may need to be customized through
@@ -28876,8 +28901,8 @@ configuration. For more information on placeholders, see the javadocs of the
 
 
 
-[[mvc-ann-requestmapping-uri-vars-and-file-extensions]]
-===== URI Variables and Suffix Patterns Matching
+[[mvc-ann-requestmapping-suffix-pattern-match]]
+===== Path Pattern Matching By Suffix
 By default Spring MVC automatically performs `".*"` suffix pattern matching so
 that a controller mapped to `/person` is also implicitly mapped to `/person.*`.
 This allows indicating content types via file extensions, e.g. `/person.pdf`,
