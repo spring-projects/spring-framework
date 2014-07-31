@@ -38158,16 +38158,16 @@ so that their session is associated with a concrete user name.
 See the previous section on information about authentication.
 
 Spring's STOMP support recognizes destinations prefixed with `/user/`.
-For example, a client can subscribe to destination `/user/position-updates`.
+For example, a client can subscribe to destination `/user/queue/position-updates`.
 This destination will be handled by the `UserDestinationMessageHandler` and
 transformed into a destination unique to the user's session,
-e.g. `/user/position-updates-123`. This provides the convenience of subscribing
+e.g. `/queue/position-updates-123`. This provides the convenience of subscribing
 to a generically named destination, while also ensuring that it doesn't "collide"
-with any other user that also subscribes to `/user/position-updates`
+with any other user that also subscribes to `/user/queue/position-updates`
 in order to receive stock position updates unique to them.
 
 On the sending side, messages can be sent to a destination such as
-`/user/{username}/position-updates`, which in turn will be translated
+`/user/{username}/queue/position-updates`, which in turn will be translated
 by the `UserDestinationMessageHandler` into the same unique destination
 belonging to the specified user name.
 
