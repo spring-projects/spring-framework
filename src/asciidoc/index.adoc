@@ -38534,16 +38534,16 @@ be plugged in (see examples in <<websocket-server-deployment>>).
 
 An application can send messages targeting a specific user.
 Spring's STOMP support recognizes destinations prefixed with `"/user/"`.
-For example, a client might subscribe to the destination `"/user/position-updates"`.
+For example, a client might subscribe to the destination `"/user/queue/position-updates"`.
 This destination will be handled by the `UserDestinationMessageHandler` and
 transformed into a destination unique to the user session,
-e.g. `"/user/position-updates-user123"`. This provides the convenience of subscribing
+e.g. `"/queue/position-updates-user123"`. This provides the convenience of subscribing
 to a generically named destination while at the same time ensuring no collisions
 with other users subscribing to the same destination so that each user can receive
 unique stock position updates.
 
 On the sending side messages can be sent to a destination such as
-`"/user/{username}/position-updates"`, which in turn will be translated
+`"/user/{username}/queue/position-updates"`, which in turn will be translated
 by the `UserDestinationMessageHandler` into one or more destinations, one for each
 session associated with the user. This allows any component within the application to
 send messages targeting a specific user without necessarily knowing anything more
