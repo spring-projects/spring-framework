@@ -25,6 +25,7 @@ import org.springframework.jms.listener.adapter.MessagingMessageListenerAdapter;
 import org.springframework.jms.support.converter.MessageConverter;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.handler.invocation.InvocableHandlerMethod;
+import org.springframework.messaging.handler.annotation.support.MessageHandlerMethodFactory;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
@@ -41,7 +42,7 @@ public class MethodJmsListenerEndpoint extends AbstractJmsListenerEndpoint {
 
 	private Method method;
 
-	private JmsHandlerMethodFactory jmsHandlerMethodFactory;
+	private MessageHandlerMethodFactory messageHandlerMethodFactory;
 
 
 	/**
@@ -67,22 +68,22 @@ public class MethodJmsListenerEndpoint extends AbstractJmsListenerEndpoint {
 	}
 
 	/**
-	 * Set the {@link JmsHandlerMethodFactory} to use to build the
+	 * Set the {@link MessageHandlerMethodFactory} to use to build the
 	 * {@link InvocableHandlerMethod} responsible to manage the invocation
 	 * of this endpoint.
 	 */
-	public void setJmsHandlerMethodFactory(JmsHandlerMethodFactory jmsHandlerMethodFactory) {
-		this.jmsHandlerMethodFactory = jmsHandlerMethodFactory;
+	public void setMessageHandlerMethodFactory(MessageHandlerMethodFactory messageHandlerMethodFactory) {
+		this.messageHandlerMethodFactory = messageHandlerMethodFactory;
 	}
 
 
 	@Override
 	protected MessagingMessageListenerAdapter createMessageListener(MessageListenerContainer container) {
-		Assert.state(this.jmsHandlerMethodFactory != null,
-				"Could not create message listener - message listener factory not set");
+		Assert.state(this.messageHandlerMethodFactory != null,
+				"Could not create message listener - MessageHandlerMethodFactory not set");
 		MessagingMessageListenerAdapter messageListener = createMessageListenerInstance();
 		InvocableHandlerMethod invocableHandlerMethod =
-				this.jmsHandlerMethodFactory.createInvocableHandlerMethod(getBean(), getMethod());
+				this.messageHandlerMethodFactory.createInvocableHandlerMethod(getBean(), getMethod());
 		messageListener.setHandlerMethod(invocableHandlerMethod);
 		String responseDestination = getDefaultResponseDestination();
 		if (StringUtils.hasText(responseDestination)) {

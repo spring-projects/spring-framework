@@ -27,7 +27,7 @@ import org.junit.Test;
 
 import org.springframework.beans.factory.support.StaticListableBeanFactory;
 import org.springframework.jms.StubTextMessage;
-import org.springframework.jms.config.DefaultJmsHandlerMethodFactory;
+import org.springframework.messaging.handler.annotation.support.DefaultMessageHandlerMethodFactory;
 import org.springframework.jms.support.JmsHeaders;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.converter.MessageConversionException;
@@ -42,7 +42,7 @@ import static org.mockito.BDDMockito.*;
  */
 public class MessagingMessageListenerAdapterTests {
 
-	private final DefaultJmsHandlerMethodFactory factory = new DefaultJmsHandlerMethodFactory();
+	private final DefaultMessageHandlerMethodFactory factory = new DefaultMessageHandlerMethodFactory();
 
 	private final SampleBean sample = new SampleBean();
 
@@ -122,7 +122,7 @@ public class MessagingMessageListenerAdapterTests {
 		return adapter;
 	}
 
-	private void initializeFactory(DefaultJmsHandlerMethodFactory factory) {
+	private void initializeFactory(DefaultMessageHandlerMethodFactory factory) {
 		factory.setBeanFactory(new StaticListableBeanFactory());
 		factory.afterPropertiesSet();
 	}

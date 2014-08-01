@@ -63,16 +63,16 @@
 			<xsd:attribute name="handler-method-factory" type="xsd:string" use="optional">
 				<xsd:annotation>
 					<xsd:documentation><![CDATA[
-	Specifies a custom org.springframework.jms.config.JmsHandlerMethodFactory instance to
-	use to configure the message listener responsible to serve an endpoint detected by this
-	processor. By default, DefaultJmsHandlerMethodFactory is used and it can be configured
+	Specifies a custom org.springframework.messaging.handler.annotation.support.MessageHandlerMethodFactory
+	instance to	use to configure the message listener responsible to serve an endpoint detected by this
+	processor. By default, DefaultMessageHandlerMethodFactory is used and it can be configured
 	further to support additional method arguments or to customize conversion and validation
-	support. See org.springframework.jms.config.DefaultJmsHandlerMethodFactory Javadoc for
-	more details.
+	support. See org.springframework.messaging.handler.annotation.support.DefaultMessageHandlerMethodFactory
+	Javadoc for more details.
 					]]></xsd:documentation>
 					<xsd:appinfo>
 						<tool:annotation kind="ref">
-							<tool:expected-type type="org.springframework.jms.config.JmsHandlerMethodFactory"/>
+							<tool:expected-type type="org.springframework.messaging.handler.annotation.support.MessageHandlerMethodFactory"/>
 						</tool:annotation>
 					</xsd:appinfo>
 				</xsd:annotation>

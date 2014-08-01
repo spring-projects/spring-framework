@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.jms.config;
+package org.springframework.messaging.handler.annotation.support;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -23,6 +23,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+
+import javax.validation.Valid;
 
 import org.junit.Rule;
 import org.junit.Test;
@@ -37,17 +39,20 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.converter.ByteArrayMessageConverter;
 import org.springframework.messaging.converter.MessageConversionException;
 import org.springframework.messaging.converter.MessageConverter;
+import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.handler.invocation.HandlerMethodArgumentResolver;
 import org.springframework.messaging.handler.invocation.InvocableHandlerMethod;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.util.ReflectionUtils;
+import org.springframework.validation.Errors;
+import org.springframework.validation.Validator;
 
 import static org.junit.Assert.*;
 
 /**
  * @author Stephane Nicoll
  */
-public class DefaultJmsHandlerMethodFactoryTests {
+public class DefaultMessageHandlerMethodFactoryTests {
 
 	@Rule
 	public final TestName name = new TestName();
@@ -59,7 +64,7 @@ public class DefaultJmsHandlerMethodFactoryTests {
 
 	@Test
 	public void customConversion() throws Exception {
-		DefaultJmsHandlerMethodFactory instance = createInstance();
+		DefaultMessageHandlerMethodFactory instance = createInstance();
 		GenericConversionService conversionService = new GenericConversionService();
 		conversionService.addConverter(SampleBean.class, String.class, new Converter<SampleBean, String>() {
 			@Override
@@ -79,7 +84,7 @@ public class DefaultJmsHandlerMethodFactoryTests {
 
 	@Test
 	public void customConversionServiceFailure() throws Exception {
-		DefaultJmsHandlerMethodFactory instance = createInstance();
+		DefaultMessageHandlerMethodFactory instance = createInstance();
 		GenericConversionService conversionService = new GenericConversionService();
 		assertFalse("conversion service should fail to convert payload",
 				conversionService.canConvert(Integer.class, String.class));
@@ -95,7 +100,7 @@ public class DefaultJmsHandlerMethodFactoryTests {
 
 	@Test
 	public void customMessageConverterFailure() throws Exception {
-		DefaultJmsHandlerMethodFactory instance = createInstance();
+		DefaultMessageHandlerMethodFactory instance = createInstance();
 		MessageConverter messageConverter = new ByteArrayMessageConverter();
 		instance.setMessageConverter(messageConverter);
 		instance.afterPropertiesSet();
@@ -109,7 +114,7 @@ public class DefaultJmsHandlerMethodFactoryTests {
 
 	@Test
 	public void customArgumentResolver() throws Exception {
-		DefaultJmsHandlerMethodFactory instance = createInstance();
+		DefaultMessageHandlerMethodFactory instance = createInstance();
 		List<HandlerMethodArgumentResolver> customResolvers = new ArrayList<HandlerMethodArgumentResolver>();
 		customResolvers.add(new CustomHandlerMethodArgumentResolver());
 		instance.setCustomArgumentResolvers(customResolvers);
@@ -124,7 +129,7 @@ public class DefaultJmsHandlerMethodFactoryTests {
 
 	@Test
 	public void overrideArgumentResolvers() throws Exception {
-		DefaultJmsHandlerMethodFactory instance = createInstance();
+		DefaultMessageHandlerMethodFactory instance = createInstance();
 		List<HandlerMethodArgumentResolver> customResolvers = new ArrayList<HandlerMethodArgumentResolver>();
 		customResolvers.add(new CustomHandlerMethodArgumentResolver());
 		instance.setArgumentResolvers(customResolvers);
@@ -147,18 +152,53 @@ public class DefaultJmsHandlerMethodFactoryTests {
 		invocableHandlerMethod2.invoke(message);
 	}
 
+	@Test
+	public void noValidationByDefault() throws Exception {
+		DefaultMessageHandlerMethodFactory instance = createInstance();
+		instance.afterPropertiesSet();
+
+		InvocableHandlerMethod invocableHandlerMethod =
+				createInvocableHandlerMethod(instance, "payloadValidation", String.class);
+		invocableHandlerMethod.invoke(MessageBuilder.withPayload("failure").build());
+		assertMethodInvocation(sample, "payloadValidation");
+	}
+
+	@Test
+	public void customValidation() throws Exception {
+		DefaultMessageHandlerMethodFactory instance = createInstance();
+		instance.setValidator(new Validator() {
+			@Override
+			public boolean supports(Class<?> clazz) {
+				return String.class.isAssignableFrom(clazz);
+			}
+			@Override
+			public void validate(Object target, Errors errors) {
+				String value = (String) target;
+				if ("failure".equals(value)) {
+					errors.reject("not a valid value");
+				}
+			}
+		});
+		instance.afterPropertiesSet();
+
+		InvocableHandlerMethod invocableHandlerMethod =
+				createInvocableHandlerMethod(instance, "payloadValidation", String.class);
+		thrown.expect(MethodArgumentNotValidException.class);
+		invocableHandlerMethod.invoke(MessageBuilder.withPayload("failure").build());
+	}
+
 
 	private void assertMethodInvocation(SampleBean bean, String methodName) {
 		assertTrue("Method " + methodName + " should have been invoked", bean.invocations.get(methodName));
 	}
 
 	private InvocableHandlerMethod createInvocableHandlerMethod(
-			DefaultJmsHandlerMethodFactory factory, String methodName, Class<?>... parameterTypes) {
+			DefaultMessageHandlerMethodFactory factory, String methodName, Class<?>... parameterTypes) {
 		return factory.createInvocableHandlerMethod(sample, getListenerMethod(methodName, parameterTypes));
 	}
 
-	private DefaultJmsHandlerMethodFactory createInstance() {
-		DefaultJmsHandlerMethodFactory factory = new DefaultJmsHandlerMethodFactory();
+	private DefaultMessageHandlerMethodFactory createInstance() {
+		DefaultMessageHandlerMethodFactory factory = new DefaultMessageHandlerMethodFactory();
 		factory.setBeanFactory(new StaticListableBeanFactory());
 		return factory;
 	}
@@ -176,6 +216,10 @@ public class DefaultJmsHandlerMethodFactoryTests {
 
 		public void simpleString(String value) {
 			invocations.put("simpleString", true);
+		}
+
+		public void payloadValidation(@Payload @Valid String value) {
+			invocations.put("payloadValidation", true);
 		}
 
 		public void customArgumentResolver(Locale locale) {
@@ -197,5 +241,4 @@ public class DefaultJmsHandlerMethodFactoryTests {
 			return Locale.getDefault();
 		}
 	}
-
 }

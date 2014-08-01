@@ -112,10 +112,10 @@ import org.springframework.context.annotation.Import;
  *     // process incoming message
  * }</pre>
  *
- * These features are abstracted by the {@link org.springframework.jms.config.JmsHandlerMethodFactory
- * JmsHandlerMethodFactory} that is responsible to build the necessary invoker to process
- * the annotated method. By default, {@link org.springframework.jms.config.DefaultJmsHandlerMethodFactory
- * DefaultJmsHandlerMethodFactory} is used.
+ * These features are abstracted by the {@link org.springframework.messaging.handler.annotation.support.MessageHandlerMethodFactory
+ * MessageHandlerMethodFactory} that is responsible to build the necessary invoker to process
+ * the annotated method. By default, {@link org.springframework.messaging.handler.annotation.support.DefaultMessageHandlerMethodFactory
+ * DefaultMessageHandlerMethodFactory} is used.
  *
  * <p>When more control is desired, a {@code @Configuration} class may implement
  * {@link JmsListenerConfigurer}. This allows access to the underlying
@@ -172,7 +172,7 @@ import org.springframework.context.annotation.Import;
  *     &#064;Override
  *     public void configureJmsListeners(JmsListenerEndpointRegistrar registrar) {
  *         registrar.setEndpointRegistry(myJmsListenerEndpointRegistry());
- *         registrar.setJmsHandlerMethodFactory(myJmsHandlerMethodFactory);
+ *         registrar.setMessageHandlerMethodFactory(myJmsHandlerMethodFactory);
  *     }
  *
  *     &#064;Bean
@@ -206,7 +206,7 @@ import org.springframework.context.annotation.Import;
  *     </bean>
  *
  *     <bean id="myJmsHandlerMethodFactory"
- *           class="org.springframework.jms.config.DefaultJmsHandlerMethodFactory">
+ *           class="org.springframework.messaging.handler.support.DefaultJmsHandlerMethodFactory">
  *         <property name="validator" ref="myValidator"/>
  *     </bean>
  *

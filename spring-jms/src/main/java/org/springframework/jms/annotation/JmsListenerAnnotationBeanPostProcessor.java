@@ -31,13 +31,13 @@ import org.springframework.beans.factory.SmartInitializingSingleton;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.AnnotationUtils;
-import org.springframework.jms.config.DefaultJmsHandlerMethodFactory;
-import org.springframework.jms.config.JmsHandlerMethodFactory;
 import org.springframework.jms.config.JmsListenerConfigUtils;
 import org.springframework.jms.config.JmsListenerContainerFactory;
 import org.springframework.jms.config.JmsListenerEndpointRegistrar;
 import org.springframework.jms.config.JmsListenerEndpointRegistry;
 import org.springframework.jms.config.MethodJmsListenerEndpoint;
+import org.springframework.messaging.handler.annotation.support.DefaultMessageHandlerMethodFactory;
+import org.springframework.messaging.handler.annotation.support.MessageHandlerMethodFactory;
 import org.springframework.messaging.handler.invocation.InvocableHandlerMethod;
 import org.springframework.util.Assert;
 import org.springframework.util.ReflectionUtils;
@@ -86,7 +86,7 @@ public class JmsListenerAnnotationBeanPostProcessor
 
 	private BeanFactory beanFactory;
 
-	private final JmsHandlerMethodFactoryAdapter jmsHandlerMethodFactory = new JmsHandlerMethodFactoryAdapter();
+	private final MessageHandlerMethodFactoryAdapter messageHandlerMethodFactory = new MessageHandlerMethodFactoryAdapter();
 
 	private final JmsListenerEndpointRegistrar registrar = new JmsListenerEndpointRegistrar();
 
@@ -115,15 +115,15 @@ public class JmsListenerAnnotationBeanPostProcessor
 	}
 
 	/**
-	 * Set the {@link JmsHandlerMethodFactory} to use to configure the message
+	 * Set the {@link MessageHandlerMethodFactory} to use to configure the message
 	 * listener responsible to serve an endpoint detected by this processor.
-	 * <p>By default, {@link DefaultJmsHandlerMethodFactory} is used and it
+	 * <p>By default, {@link DefaultMessageHandlerMethodFactory} is used and it
 	 * can be configured further to support additional method arguments
 	 * or to customize conversion and validation support. See
-	 * {@link DefaultJmsHandlerMethodFactory} Javadoc for more details.
+	 * {@link DefaultMessageHandlerMethodFactory} Javadoc for more details.
 	 */
-	public void setJmsHandlerMethodFactory(JmsHandlerMethodFactory jmsHandlerMethodFactory) {
-		this.jmsHandlerMethodFactory.setJmsHandlerMethodFactory(jmsHandlerMethodFactory);
+	public void setMessageHandlerMethodFactory(MessageHandlerMethodFactory messageHandlerMethodFactory) {
+		this.messageHandlerMethodFactory.setMessageHandlerMethodFactory(messageHandlerMethodFactory);
 	}
 
 	/**
@@ -163,9 +163,9 @@ public class JmsListenerAnnotationBeanPostProcessor
 		}
 
 		// Set the custom handler method factory once resolved by the configurer
-		JmsHandlerMethodFactory handlerMethodFactory = this.registrar.getJmsHandlerMethodFactory();
+		MessageHandlerMethodFactory handlerMethodFactory = this.registrar.getMessageHandlerMethodFactory();
 		if (handlerMethodFactory != null) {
-			this.jmsHandlerMethodFactory.setJmsHandlerMethodFactory(handlerMethodFactory);
+			this.messageHandlerMethodFactory.setMessageHandlerMethodFactory(handlerMethodFactory);
 		}
 
 		// Actually register all listeners
@@ -216,7 +216,7 @@ public class JmsListenerAnnotationBeanPostProcessor
 		MethodJmsListenerEndpoint endpoint = new MethodJmsListenerEndpoint();
 		endpoint.setBean(bean);
 		endpoint.setMethod(method);
-		endpoint.setJmsHandlerMethodFactory(this.jmsHandlerMethodFactory);
+		endpoint.setMessageHandlerMethodFactory(this.messageHandlerMethodFactory);
 		endpoint.setId(getEndpointId(jmsListener));
 		endpoint.setDestination(jmsListener.destination());
 		if (StringUtils.hasText(jmsListener.selector())) {
@@ -257,33 +257,33 @@ public class JmsListenerAnnotationBeanPostProcessor
 
 
 	/**
-	 * An {@link JmsHandlerMethodFactory} adapter that offers a configurable underlying
+	 * A {@link MessageHandlerMethodFactory} adapter that offers a configurable underlying
 	 * instance to use. Useful if the factory to use is determined once the endpoints
 	 * have been registered but not created yet.
-	 * @see JmsListenerEndpointRegistrar#setJmsHandlerMethodFactory(JmsHandlerMethodFactory)
+	 * @see JmsListenerEndpointRegistrar#setMessageHandlerMethodFactory
 	 */
-	private class JmsHandlerMethodFactoryAdapter implements JmsHandlerMethodFactory {
+	private class MessageHandlerMethodFactoryAdapter implements MessageHandlerMethodFactory {
 
-		private JmsHandlerMethodFactory jmsHandlerMethodFactory;
+		private MessageHandlerMethodFactory messageHandlerMethodFactory;
 
-		public void setJmsHandlerMethodFactory(JmsHandlerMethodFactory jmsHandlerMethodFactory) {
-			this.jmsHandlerMethodFactory = jmsHandlerMethodFactory;
+		public void setMessageHandlerMethodFactory(MessageHandlerMethodFactory messageHandlerMethodFactory) {
+			this.messageHandlerMethodFactory = messageHandlerMethodFactory;
 		}
 
 		@Override
 		public InvocableHandlerMethod createInvocableHandlerMethod(Object bean, Method method) {
-			return getJmsHandlerMethodFactory().createInvocableHandlerMethod(bean, method);
+			return getMessageHandlerMethodFactory().createInvocableHandlerMethod(bean, method);
 		}
 
-		private JmsHandlerMethodFactory getJmsHandlerMethodFactory() {
-			if (this.jmsHandlerMethodFactory == null) {
-				this.jmsHandlerMethodFactory = createDefaultJmsHandlerMethodFactory();
+		private MessageHandlerMethodFactory getMessageHandlerMethodFactory() {
+			if (this.messageHandlerMethodFactory == null) {
+				this.messageHandlerMethodFactory = createDefaultJmsHandlerMethodFactory();
 			}
-			return this.jmsHandlerMethodFactory;
+			return this.messageHandlerMethodFactory;
 		}
 
-		private JmsHandlerMethodFactory createDefaultJmsHandlerMethodFactory() {
-			DefaultJmsHandlerMethodFactory defaultFactory = new DefaultJmsHandlerMethodFactory();
+		private MessageHandlerMethodFactory createDefaultJmsHandlerMethodFactory() {
+			DefaultMessageHandlerMethodFactory defaultFactory = new DefaultMessageHandlerMethodFactory();
 			defaultFactory.setBeanFactory(beanFactory);
 			defaultFactory.afterPropertiesSet();
 			return defaultFactory;

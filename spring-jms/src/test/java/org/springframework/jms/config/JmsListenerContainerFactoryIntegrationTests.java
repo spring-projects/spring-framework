@@ -36,6 +36,7 @@ import org.springframework.jms.listener.SessionAwareMessageListener;
 import org.springframework.jms.support.converter.MessageConversionException;
 import org.springframework.jms.support.converter.MessageConverter;
 import org.springframework.messaging.handler.annotation.Payload;
+import org.springframework.messaging.handler.annotation.support.DefaultMessageHandlerMethodFactory;
 import org.springframework.util.ReflectionUtils;
 
 import static org.junit.Assert.*;
@@ -48,7 +49,7 @@ public class JmsListenerContainerFactoryIntegrationTests {
 
 	private final DefaultJmsListenerContainerFactory containerFactory = new DefaultJmsListenerContainerFactory();
 
-	private final DefaultJmsHandlerMethodFactory factory = new DefaultJmsHandlerMethodFactory();
+	private final DefaultMessageHandlerMethodFactory factory = new DefaultMessageHandlerMethodFactory();
 
 	private final JmsEndpointSampleBean sample = new JmsEndpointSampleBean();
 
@@ -88,11 +89,11 @@ public class JmsListenerContainerFactoryIntegrationTests {
 
 
 	private MethodJmsListenerEndpoint createMethodJmsEndpoint(
-			DefaultJmsHandlerMethodFactory factory, Method method) {
+			DefaultMessageHandlerMethodFactory factory, Method method) {
 		MethodJmsListenerEndpoint endpoint = new MethodJmsListenerEndpoint();
 		endpoint.setBean(sample);
 		endpoint.setMethod(method);
-		endpoint.setJmsHandlerMethodFactory(factory);
+		endpoint.setMessageHandlerMethodFactory(factory);
 		return endpoint;
 	}
 
@@ -107,7 +108,7 @@ public class JmsListenerContainerFactoryIntegrationTests {
 	}
 
 
-	private void initializeFactory(DefaultJmsHandlerMethodFactory factory) {
+	private void initializeFactory(DefaultMessageHandlerMethodFactory factory) {
 		factory.setBeanFactory(new StaticListableBeanFactory());
 		factory.afterPropertiesSet();
 	}

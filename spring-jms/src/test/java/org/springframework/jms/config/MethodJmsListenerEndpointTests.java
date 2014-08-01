@@ -55,6 +55,7 @@ import org.springframework.messaging.handler.annotation.Headers;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.handler.annotation.support.MethodArgumentTypeMismatchException;
+import org.springframework.messaging.handler.annotation.support.DefaultMessageHandlerMethodFactory;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
@@ -76,7 +77,7 @@ public class MethodJmsListenerEndpointTests {
 	@Rule
 	public final ExpectedException thrown = ExpectedException.none();
 
-	private final DefaultJmsHandlerMethodFactory factory = new DefaultJmsHandlerMethodFactory();
+	private final DefaultMessageHandlerMethodFactory factory = new DefaultMessageHandlerMethodFactory();
 
 	private final DefaultMessageListenerContainer container = new DefaultMessageListenerContainer();
 
@@ -103,7 +104,7 @@ public class MethodJmsListenerEndpointTests {
 		MethodJmsListenerEndpoint endpoint = new MethodJmsListenerEndpoint();
 		endpoint.setBean(this);
 		endpoint.setMethod(getTestMethod());
-		endpoint.setJmsHandlerMethodFactory(factory);
+		endpoint.setMessageHandlerMethodFactory(factory);
 
 		assertNotNull(endpoint.createMessageListener(container));
 	}
@@ -304,7 +305,7 @@ public class MethodJmsListenerEndpointTests {
 	public void validatePayloadValid() throws JMSException {
 		String methodName = "validatePayload";
 
-		DefaultJmsHandlerMethodFactory customFactory = new DefaultJmsHandlerMethodFactory();
+		DefaultMessageHandlerMethodFactory customFactory = new DefaultMessageHandlerMethodFactory();
 		customFactory.setValidator(testValidator("invalid value"));
 		initializeFactory(customFactory);
 
@@ -317,7 +318,7 @@ public class MethodJmsListenerEndpointTests {
 
 	@Test
 	public void validatePayloadInvalid() throws JMSException {
-		DefaultJmsHandlerMethodFactory customFactory = new DefaultJmsHandlerMethodFactory();
+		DefaultMessageHandlerMethodFactory customFactory = new DefaultMessageHandlerMethodFactory();
 		customFactory.setValidator(testValidator("invalid value"));
 
 		Method method = getListenerMethod("validatePayload", String.class);
@@ -353,16 +354,16 @@ public class MethodJmsListenerEndpointTests {
 	}
 
 	private MessagingMessageListenerAdapter createInstance(
-			DefaultJmsHandlerMethodFactory factory, Method method, MessageListenerContainer container) {
+			DefaultMessageHandlerMethodFactory factory, Method method, MessageListenerContainer container) {
 		MethodJmsListenerEndpoint endpoint = new MethodJmsListenerEndpoint();
 		endpoint.setBean(sample);
 		endpoint.setMethod(method);
-		endpoint.setJmsHandlerMethodFactory(factory);
+		endpoint.setMessageHandlerMethodFactory(factory);
 		return endpoint.createMessageListener(container);
 	}
 
 	private MessagingMessageListenerAdapter createInstance(
-			DefaultJmsHandlerMethodFactory factory, Method method) {
+			DefaultMessageHandlerMethodFactory factory, Method method) {
 		return createInstance(factory, method, new SimpleMessageListenerContainer());
 	}
 
@@ -392,7 +393,7 @@ public class MethodJmsListenerEndpointTests {
 		assertTrue("Method " + methodName + " should have been invoked", bean.invocations.get(methodName));
 	}
 
-	private void initializeFactory(DefaultJmsHandlerMethodFactory factory) {
+	private void initializeFactory(DefaultMessageHandlerMethodFactory factory) {
 		factory.setBeanFactory(new StaticListableBeanFactory());
 		factory.afterPropertiesSet();
 	}

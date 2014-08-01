@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.jms.config;
+package org.springframework.messaging.handler.annotation.support;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -28,10 +28,6 @@ import org.springframework.core.convert.ConversionService;
 import org.springframework.format.support.DefaultFormattingConversionService;
 import org.springframework.messaging.converter.GenericMessageConverter;
 import org.springframework.messaging.converter.MessageConverter;
-import org.springframework.messaging.handler.annotation.support.HeaderMethodArgumentResolver;
-import org.springframework.messaging.handler.annotation.support.HeadersMethodArgumentResolver;
-import org.springframework.messaging.handler.annotation.support.MessageMethodArgumentResolver;
-import org.springframework.messaging.handler.annotation.support.PayloadArgumentResolver;
 import org.springframework.messaging.handler.invocation.HandlerMethodArgumentResolver;
 import org.springframework.messaging.handler.invocation.HandlerMethodArgumentResolverComposite;
 import org.springframework.messaging.handler.invocation.InvocableHandlerMethod;
@@ -39,11 +35,11 @@ import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
 
 /**
- * The default {@link JmsHandlerMethodFactory} implementation creating an
+ * The default {@link MessageHandlerMethodFactory} implementation creating an
  * {@link InvocableHandlerMethod} with the necessary
  * {@link HandlerMethodArgumentResolver} instances to detect and process
- * all the use cases defined by {@link org.springframework.jms.annotation.JmsListener
- * JmsListener}.
+ * most of  the use cases defined by
+ * {@link org.springframework.messaging.handler.annotation.MessageMapping MessageMapping}
  *
  * <p>Extra method argument resolvers can be added to customize the method
  * signature that can be handled.
@@ -60,7 +56,7 @@ import org.springframework.validation.Validator;
  * @see #setValidator
  * @see #setCustomArgumentResolvers
  */
-public class DefaultJmsHandlerMethodFactory implements JmsHandlerMethodFactory, BeanFactoryAware, InitializingBean {
+public class DefaultMessageHandlerMethodFactory implements MessageHandlerMethodFactory, BeanFactoryAware, InitializingBean {
 
 	private ConversionService conversionService = new DefaultFormattingConversionService();
 

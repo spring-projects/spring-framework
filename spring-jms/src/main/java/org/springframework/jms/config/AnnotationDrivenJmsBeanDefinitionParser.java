@@ -70,7 +70,7 @@ class AnnotationDrivenJmsBeanDefinitionParser implements BeanDefinitionParser {
 
 			String handlerMethodFactory = element.getAttribute("handler-method-factory");
 			if (StringUtils.hasText(handlerMethodFactory)) {
-				builder.addPropertyReference("jmsHandlerMethodFactory", handlerMethodFactory);
+				builder.addPropertyReference("messageHandlerMethodFactory", handlerMethodFactory);
 			}
 
 			registerInfrastructureBean(parserContext, builder,

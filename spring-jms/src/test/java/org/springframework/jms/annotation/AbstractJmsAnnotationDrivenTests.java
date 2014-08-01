@@ -184,7 +184,7 @@ public abstract class AbstractJmsAnnotationDrivenTests {
 
 	/**
 	 * Test for {@link ValidationBean} with a validator ({@link TestValidator}) specified
-	 * in a custom {@link org.springframework.jms.config.DefaultJmsHandlerMethodFactory}.
+	 * in a custom {@link org.springframework.messaging.handler.annotation.support.MessageHandlerMethodFactory}.
 	 *
 	 * The test should throw a {@link org.springframework.jms.listener.adapter.ListenerExecutionFailedException}
 	 */

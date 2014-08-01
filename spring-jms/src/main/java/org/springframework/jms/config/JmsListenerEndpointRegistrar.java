@@ -22,6 +22,8 @@ import java.util.List;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.messaging.handler.annotation.support.DefaultMessageHandlerMethodFactory;
+import org.springframework.messaging.handler.annotation.support.MessageHandlerMethodFactory;
 import org.springframework.util.Assert;
 
 /**
@@ -37,7 +39,7 @@ public class JmsListenerEndpointRegistrar implements BeanFactoryAware, Initializ
 
 	private JmsListenerEndpointRegistry endpointRegistry;
 
-	private JmsHandlerMethodFactory jmsHandlerMethodFactory;
+	private MessageHandlerMethodFactory messageHandlerMethodFactory;
 
 	private JmsListenerContainerFactory<?> containerFactory;
 
@@ -65,22 +67,22 @@ public class JmsListenerEndpointRegistrar implements BeanFactoryAware, Initializ
 	}
 
 	/**
-	 * Set the {@link JmsHandlerMethodFactory} to use to configure the message
+	 * Set the {@link MessageHandlerMethodFactory} to use to configure the message
 	 * listener responsible to serve an endpoint detected by this processor.
-	 * <p>By default, {@link DefaultJmsHandlerMethodFactory} is used and it
+	 * <p>By default, {@link DefaultMessageHandlerMethodFactory} is used and it
 	 * can be configured further to support additional method arguments
 	 * or to customize conversion and validation support. See
-	 * {@link DefaultJmsHandlerMethodFactory} javadoc for more details.
+	 * {@link DefaultMessageHandlerMethodFactory} javadoc for more details.
 	 */
-	public void setJmsHandlerMethodFactory(JmsHandlerMethodFactory jmsHandlerMethodFactory) {
-		this.jmsHandlerMethodFactory = jmsHandlerMethodFactory;
+	public void setMessageHandlerMethodFactory(MessageHandlerMethodFactory messageHandlerMethodFactory) {
+		this.messageHandlerMethodFactory = messageHandlerMethodFactory;
 	}
 
 	/**
-	 * Return the custom {@link JmsHandlerMethodFactory} to use, if any.
+	 * Return the custom {@link MessageHandlerMethodFactory} to use, if any.
 	 */
-	public JmsHandlerMethodFactory getJmsHandlerMethodFactory() {
-		return this.jmsHandlerMethodFactory;
+	public MessageHandlerMethodFactory getMessageHandlerMethodFactory() {
+		return this.messageHandlerMethodFactory;
 	}
 
 	/**
