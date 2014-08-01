@@ -129,13 +129,13 @@ public abstract class MockMvcRequestBuilders {
 	}
 
 	/**
-     * Create a {@link MockHttpServletRequestBuilder} for an OPTIONS request.
-     * @param urlTemplate a URL template; the resulting URL will be encoded
-     * @param urlVariables zero or more URL variables
-     */
-    public static MockHttpServletRequestBuilder options(String urlTemplate, Object... urlVariables) {
-        return new MockHttpServletRequestBuilder(HttpMethod.OPTIONS, urlTemplate, urlVariables);
-    }
+	 * Create a {@link MockHttpServletRequestBuilder} for an OPTIONS request.
+	 * @param urlTemplate a URL template; the resulting URL will be encoded
+	 * @param urlVariables zero or more URL variables
+	 */
+	public static MockHttpServletRequestBuilder options(String urlTemplate, Object... urlVariables) {
+		return new MockHttpServletRequestBuilder(HttpMethod.OPTIONS, urlTemplate, urlVariables);
+	}
 
 	/**
 	 * Create a {@link MockHttpServletRequestBuilder} for an OPTIONS request.
@@ -146,24 +146,24 @@ public abstract class MockMvcRequestBuilders {
 		return new MockHttpServletRequestBuilder(HttpMethod.OPTIONS, uri);
 	}
 
-    /**
-     * Create a {@link MockHttpServletRequestBuilder} for a HEAD request.
-     * @param urlTemplate a URL template; the resulting URL will be encoded
-     * @param urlVariables zero or more URL variables
-     * @since 4.1
-     */
-    public static MockHttpServletRequestBuilder head(String urlTemplate, Object... urlVariables) {
-        return new MockHttpServletRequestBuilder(HttpMethod.HEAD, urlTemplate, urlVariables);
-    }
+	/**
+	 * Create a {@link MockHttpServletRequestBuilder} for a HEAD request.
+	 * @param urlTemplate a URL template; the resulting URL will be encoded
+	 * @param urlVariables zero or more URL variables
+	 * @since 4.1
+	 */
+	public static MockHttpServletRequestBuilder head(String urlTemplate, Object... urlVariables) {
+		return new MockHttpServletRequestBuilder(HttpMethod.HEAD, urlTemplate, urlVariables);
+	}
 
-    /**
-     * Create a {@link MockHttpServletRequestBuilder} for a HEAD request.
-     * @param uri the URL
-     * @since 4.1
-     */
-    public static MockHttpServletRequestBuilder head(URI uri) {
-        return new MockHttpServletRequestBuilder(HttpMethod.HEAD, uri);
-    }
+	/**
+	 * Create a {@link MockHttpServletRequestBuilder} for a HEAD request.
+	 * @param uri the URL
+	 * @since 4.1
+	 */
+	public static MockHttpServletRequestBuilder head(URI uri) {
+		return new MockHttpServletRequestBuilder(HttpMethod.HEAD, uri);
+	}
 
 	/**
 	 * Create a {@link MockHttpServletRequestBuilder} for a request with the given HTTP method.
