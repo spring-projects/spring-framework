@@ -37619,8 +37619,9 @@ SockJS consists of:
 * The https://github.com/sockjs/sockjs-protocol[SockJS protocol]
 defined in the form of executable
 http://sockjs.github.io/sockjs-protocol/sockjs-protocol-0.3.3.html[narrated tests].
-* The https://github.com/sockjs/sockjs-client[SockJS client] - a JavaScript library for use in browsers.
+* The https://github.com/sockjs/sockjs-client[SockJS JavaScript client] - a client library for use in browsers.
 * SockJS server implementations including one in the Spring Framework `spring-websocket` module.
+* As of 4.1 `spring-websocket` also provides a SockJS Java client.
 
 SockJS is designed for use in browsers. It goes to great lengths
 to support a wide range of browser versions using a variety of techniques.
@@ -37886,37 +37887,81 @@ SockJS endpoint prefix thus letting Spring's SockJsService handle it.
 [[websocket-fallback-sockjs-client]]
 ==== SockJS Client
 
-A Java SockJS client is provided, in order to request remote SockJS endpoints without
+A SockJS Java client is provided in order to connect to remote SockJS endpoints without
 using a browser. This can be especially useful when there is a need of bidirectional
-communication between 2 servers where at least one of them is behind a proxy.
+communication between 2 servers over a public network, i.e. where network proxies may
+preclude the use of the WebSocket protocol. A SockJS Java client is also very useful
+for testing purposes for example to simulate a large number of concurrent users.
 
-3 transports are provided:
+The SockJS Java client supports the "websocket", "xhr-streaming", and "xhr-polling"
+transports. The remaining ones only make sense for use in a browser.
 
-* `WebSocketTransport`
-* `RestTemplateXhrTransport`
-* `JettyXhrTransport`
+The `WebSocketTransport` can be configured with:
 
-The code below shows how to send a message to a remote Websocket handler through a
-SockJS endpoint:
+* `StandardWebSocketClient` in a JSR-356 runtime
+* `JettyWebSocketClient` using the Jetty 9+ native WebSocket API
+* Any implementation of Spring's `WebSocketClient`
+
+An `XhrTransport` by definition supports both "xhr-streaming" and "xhr-polling" since
+from a client perspective there is no difference other than in the URL used to connect
+to the server. At present there are two implementations:
+
+* `RestTemplateXhrTransport` uses the RestTemplate for HTTP requests.
+* `JettyXhrTransport` uses Jetty's HttpClient for HTTP requests.
+
+The example below shows how to create a SockJS client and connect to a SockJS endpoint:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-  List<Transport> transports = new ArrayList<>();
-  transports.add(new WebSocketTransport(new StandardWebSocketClient()));
-  transports.add(new RestTemplateXhrTransport(new RestTemplate()));
+  List<Transport> transports = new ArrayList<>(2);
+  transports.add(new WebSocketTransport(StandardWebSocketClient()));
+  transports.add(new RestTemplateXhrTransport());
+
   SockJsClient sockJsClient = new SockJsClient(transports);
-  URI uri = new URI("ws://localhost:8080/myHandler");
-  WebSocketSession session = sockJsClient.doHandshake(new TextWebSocketHandler(),
-    new WebSocketHttpHeaders(), uri).get();
-  session.sendMessage(new TextMessage("Ping"));
+  sockJsClient.doHandshake(new MyWebSocketHandler(), "ws://example.com:8080/sockjs");
 ----
 
 [NOTE]
 ====
-Jackson 2 need to be in the classpath in order to get the default `SockJsMessageCodec`
-created. Alternatively, you can set the message codec to use with `SockJsClient.setMessageCodec()`.
+SockJS uses JSON formatted arrays for messages. By default Jackson 2 is used and needs
+to be on the classpath. Alternatively you can configure a custom implementation of
+`SockJsMessageCodec` and configure it on the SockJsClient.
 ====
+
+To use the SockJsClient for simulating a large number of concurrent users you will
+need to configure the underlying HTTP client (for XHR transports) to allow a sufficient
+number of connections and threads. For example with Jetty:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+HttpClient jettyHttpClient = new HttpClient();
+jettyHttpClient.setMaxConnectionsPerDestination(1000);
+jettyHttpClient.setExecutor(new QueuedThreadPool(1000));
+----
+
+Consider also customizing these server-side SockJS related properties (see Javadoc for details):
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+@Configuration
+public class WebSocketConfig extends WebSocketMessageBrokerConfigurationSupport {
+
+    @Override
+    public void registerStompEndpoints(StompEndpointRegistry registry) {
+        registry.addEndpoint("/sockjs").withSockJS()
+            .setStreamBytesLimit(512 * 1024)
+            .setHttpMessageCacheSize(1000)
+            .setDisconnectDelay(30 * 1000);
+    }
+
+    // ...
+
+}
+----
+
 
 
 
