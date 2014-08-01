@@ -37883,6 +37883,43 @@ Alternatively if the CORS configuration allows it consider excluding URLs with t
 SockJS endpoint prefix thus letting Spring's SockJsService handle it.
 
 
+[[websocket-fallback-sockjs-client]]
+==== SockJS Client
+
+A Java SockJS client is provided, in order to request remote SockJS endpoints without
+using a browser. This can be especially useful when there is a need of bidirectional
+communication between 2 servers where at least one of them is behind a proxy.
+
+3 transports are provided:
+
+* `WebSocketTransport`
+* `RestTemplateXhrTransport`
+* `JettyXhrTransport`
+
+The code below shows how to send a message to a remote Websocket handler through a
+SockJS endpoint:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+  List<Transport> transports = new ArrayList<>();
+  transports.add(new WebSocketTransport(new StandardWebSocketClient()));
+  transports.add(new RestTemplateXhrTransport(new RestTemplate()));
+  SockJsClient sockJsClient = new SockJsClient(transports);
+  URI uri = new URI("ws://localhost:8080/myHandler");
+  WebSocketSession session = sockJsClient.doHandshake(new TextWebSocketHandler(),
+    new WebSocketHttpHeaders(), uri).get();
+  session.sendMessage(new TextMessage("Ping"));
+----
+
+[NOTE]
+====
+Jackson 2 need to be in the classpath in order to get the default `SockJsMessageCodec`
+created. Alternatively, you can set the message codec to use with `SockJsClient.setMessageCodec()`.
+====
+
+
+
 [[websocket-stomp]]
 === STOMP Over WebSocket Messaging Architecture
 The WebSocket protocol defines two main types of messages -- text and binary --
