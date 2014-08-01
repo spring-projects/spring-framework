@@ -81,16 +81,19 @@ public class DefaultTestContextBootstrapper extends AbstractTestContextBootstrap
 	/**
 	 * Builds a standard {@link MergedContextConfiguration}.
 	 */
+	@Override
 	protected MergedContextConfiguration buildMergedContextConfiguration(
 			Class<?> testClass,
 			String[] locations,
 			Class<?>[] classes,
 			Set<Class<? extends ApplicationContextInitializer<? extends ConfigurableApplicationContext>>> initializerClasses,
-			String[] activeProfiles, ContextLoader contextLoader,
-			CacheAwareContextLoaderDelegate cacheAwareContextLoaderDelegate, MergedContextConfiguration parentConfig) {
+			String[] activeProfiles, String[] propertySourceLocations, String[] propertySourceProperties,
+			ContextLoader contextLoader, CacheAwareContextLoaderDelegate cacheAwareContextLoaderDelegate,
+			MergedContextConfiguration parentConfig) {
 
 		return new MergedContextConfiguration(testClass, locations, classes, initializerClasses, activeProfiles,
-			contextLoader, cacheAwareContextLoaderDelegate, parentConfig);
+			propertySourceLocations, propertySourceProperties, contextLoader, cacheAwareContextLoaderDelegate,
+			parentConfig);
 	}
 
 }

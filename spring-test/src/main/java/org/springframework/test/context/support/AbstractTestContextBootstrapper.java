@@ -26,7 +26,6 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.beans.BeanInstantiationException;
 import org.springframework.beans.BeanUtils;
 import org.springframework.context.ApplicationContextInitializer;
@@ -100,13 +99,14 @@ public abstract class AbstractTestContextBootstrapper implements TestContextBoot
 		Class<TestExecutionListeners> annotationType = TestExecutionListeners.class;
 		List<Class<? extends TestExecutionListener>> classesList = new ArrayList<Class<? extends TestExecutionListener>>();
 
-		AnnotationDescriptor<TestExecutionListeners> descriptor =
-				MetaAnnotationUtils.findAnnotationDescriptor(clazz, annotationType);
+		AnnotationDescriptor<TestExecutionListeners> descriptor = MetaAnnotationUtils.findAnnotationDescriptor(clazz,
+			annotationType);
 
 		// Use defaults?
 		if (descriptor == null) {
 			if (logger.isDebugEnabled()) {
-				logger.debug("@TestExecutionListeners is not present for class [" + clazz.getName() + "]: using defaults.");
+				logger.debug("@TestExecutionListeners is not present for class [" + clazz.getName()
+						+ "]: using defaults.");
 			}
 			classesList.addAll(getDefaultTestExecutionListenerClasses());
 		}
@@ -116,19 +116,19 @@ public abstract class AbstractTestContextBootstrapper implements TestContextBoot
 				Class<?> declaringClass = descriptor.getDeclaringClass();
 				AnnotationAttributes annAttrs = descriptor.getAnnotationAttributes();
 				if (logger.isTraceEnabled()) {
-					logger.trace(String.format("Retrieved @TestExecutionListeners attributes [%s] for declaring class [%s].",
-							annAttrs, declaringClass.getName()));
+					logger.trace(String.format(
+						"Retrieved @TestExecutionListeners attributes [%s] for declaring class [%s].", annAttrs,
+						declaringClass.getName()));
 				}
 
-				Class<? extends TestExecutionListener>[] valueListenerClasses =
-						(Class<? extends TestExecutionListener>[]) annAttrs.getClassArray("value");
-				Class<? extends TestExecutionListener>[] listenerClasses =
-						(Class<? extends TestExecutionListener>[]) annAttrs.getClassArray("listeners");
+				Class<? extends TestExecutionListener>[] valueListenerClasses = (Class<? extends TestExecutionListener>[]) annAttrs.getClassArray("value");
+				Class<? extends TestExecutionListener>[] listenerClasses = (Class<? extends TestExecutionListener>[]) annAttrs.getClassArray("listeners");
 				if (!ObjectUtils.isEmpty(valueListenerClasses) && !ObjectUtils.isEmpty(listenerClasses)) {
-					throw new IllegalStateException(String.format("Class [%s] configured with @TestExecutionListeners' " +
-							"'value' [%s] and 'listeners' [%s] attributes. Use one or the other, but not both.",
-							declaringClass.getName(), ObjectUtils.nullSafeToString(valueListenerClasses),
-							ObjectUtils.nullSafeToString(listenerClasses)));
+					throw new IllegalStateException(String.format(
+						"Class [%s] configured with @TestExecutionListeners' "
+								+ "'value' [%s] and 'listeners' [%s] attributes. Use one or the other, but not both.",
+						declaringClass.getName(), ObjectUtils.nullSafeToString(valueListenerClasses),
+						ObjectUtils.nullSafeToString(listenerClasses)));
 				}
 				else if (!ObjectUtils.isEmpty(valueListenerClasses)) {
 					listenerClasses = valueListenerClasses;
@@ -138,7 +138,7 @@ public abstract class AbstractTestContextBootstrapper implements TestContextBoot
 					classesList.addAll(0, Arrays.<Class<? extends TestExecutionListener>> asList(listenerClasses));
 				}
 				descriptor = (annAttrs.getBoolean("inheritListeners") ? MetaAnnotationUtils.findAnnotationDescriptor(
-						descriptor.getRootDeclaringClass().getSuperclass(), annotationType) : null);
+					descriptor.getRootDeclaringClass().getSuperclass(), annotationType) : null);
 			}
 		}
 
@@ -158,10 +158,10 @@ public abstract class AbstractTestContextBootstrapper implements TestContextBoot
 			}
 			if (ncdfe != null) {
 				if (logger.isInfoEnabled()) {
-					logger.info(String.format("Could not instantiate TestExecutionListener [%s]. " +
-							"Specify custom listener classes or make the default listener classes " +
-							"(and their required dependencies) available. Offending class: [%s]",
-							listenerClass.getName(), ncdfe.getMessage()));
+					logger.info(String.format("Could not instantiate TestExecutionListener [%s]. "
+							+ "Specify custom listener classes or make the default listener classes "
+							+ "(and their required dependencies) available. Offending class: [%s]",
+						listenerClass.getName(), ncdfe.getMessage()));
 				}
 			}
 		}
@@ -186,8 +186,8 @@ public abstract class AbstractTestContextBootstrapper implements TestContextBoot
 			}
 			catch (Throwable ex) {
 				if (logger.isDebugEnabled()) {
-					logger.debug("Could not load default TestExecutionListener class [" + className +
-							"]. Specify custom listener classes or make the default listener classes available.", ex);
+					logger.debug("Could not load default TestExecutionListener class [" + className
+							+ "]. Specify custom listener classes or make the default listener classes available.", ex);
 				}
 			}
 		}
@@ -206,15 +206,15 @@ public abstract class AbstractTestContextBootstrapper implements TestContextBoot
 		if (MetaAnnotationUtils.findAnnotationDescriptorForTypes(testClass, ContextConfiguration.class,
 			ContextHierarchy.class) == null) {
 			if (logger.isInfoEnabled()) {
-				logger.info(String.format("Neither @ContextConfiguration nor @ContextHierarchy found for test class [%s]",
-						testClass.getName()));
+				logger.info(String.format(
+					"Neither @ContextConfiguration nor @ContextHierarchy found for test class [%s]",
+					testClass.getName()));
 			}
 			return new MergedContextConfiguration(testClass, null, null, null, null);
 		}
 
 		if (AnnotationUtils.findAnnotation(testClass, ContextHierarchy.class) != null) {
-			Map<String, List<ContextConfigurationAttributes>> hierarchyMap =
-					ContextLoaderUtils.buildContextHierarchyMap(testClass);
+			Map<String, List<ContextConfigurationAttributes>> hierarchyMap = ContextLoaderUtils.buildContextHierarchyMap(testClass);
 			MergedContextConfiguration parentConfig = null;
 			MergedContextConfiguration mergedConfig = null;
 
@@ -228,8 +228,8 @@ public abstract class AbstractTestContextBootstrapper implements TestContextBoot
 				Assert.notEmpty(reversedList, "ContextConfigurationAttributes list must not be empty");
 				Class<?> declaringClass = reversedList.get(0).getDeclaringClass();
 
-				mergedConfig = buildMergedContextConfiguration(
-						declaringClass, reversedList, parentConfig, cacheAwareContextLoaderDelegate);
+				mergedConfig = buildMergedContextConfiguration(declaringClass, reversedList, parentConfig,
+					cacheAwareContextLoaderDelegate);
 				parentConfig = mergedConfig;
 			}
 
@@ -238,8 +238,8 @@ public abstract class AbstractTestContextBootstrapper implements TestContextBoot
 		}
 		else {
 			return buildMergedContextConfiguration(testClass,
-					ContextLoaderUtils.resolveContextConfigurationAttributes(testClass), null,
-					cacheAwareContextLoaderDelegate);
+				ContextLoaderUtils.resolveContextConfigurationAttributes(testClass), null,
+				cacheAwareContextLoaderDelegate);
 		}
 	}
 
@@ -276,7 +276,7 @@ public abstract class AbstractTestContextBootstrapper implements TestContextBoot
 		for (ContextConfigurationAttributes configAttributes : configAttributesList) {
 			if (logger.isTraceEnabled()) {
 				logger.trace(String.format("Processing locations and classes for context configuration attributes %s",
-						configAttributes));
+					configAttributes));
 			}
 			if (contextLoader instanceof SmartContextLoader) {
 				SmartContextLoader smartContextLoader = (SmartContextLoader) contextLoader;
@@ -286,7 +286,7 @@ public abstract class AbstractTestContextBootstrapper implements TestContextBoot
 			}
 			else {
 				String[] processedLocations = contextLoader.processLocations(configAttributes.getDeclaringClass(),
-						configAttributes.getLocations());
+					configAttributes.getLocations());
 				locationsList.addAll(0, Arrays.asList(processedLocations));
 				// Legacy ContextLoaders don't know how to process classes
 			}
@@ -300,9 +300,11 @@ public abstract class AbstractTestContextBootstrapper implements TestContextBoot
 		Set<Class<? extends ApplicationContextInitializer<? extends ConfigurableApplicationContext>>> initializerClasses = //
 		ApplicationContextInitializerUtils.resolveInitializerClasses(configAttributesList);
 		String[] activeProfiles = ActiveProfilesUtils.resolveActiveProfiles(testClass);
+		MergedTestPropertySources mergedTestPropertySources = TestPropertySourceUtils.buildMergedTestPropertySources(testClass);
 
 		return buildMergedContextConfiguration(testClass, locations, classes, initializerClasses, activeProfiles,
-				contextLoader, cacheAwareContextLoaderDelegate, parentConfig);
+			mergedTestPropertySources.getLocations(), mergedTestPropertySources.getProperties(), contextLoader,
+			cacheAwareContextLoaderDelegate, parentConfig);
 	}
 
 	/**
@@ -334,7 +336,7 @@ public abstract class AbstractTestContextBootstrapper implements TestContextBoot
 		}
 		if (logger.isTraceEnabled()) {
 			logger.trace(String.format("Using ContextLoader class [%s] for test class [%s]",
-					contextLoaderClass.getName(), testClass.getName()));
+				contextLoaderClass.getName(), testClass.getName()));
 		}
 		return BeanUtils.instantiateClass(contextLoaderClass, ContextLoader.class);
 	}
@@ -413,6 +415,8 @@ public abstract class AbstractTestContextBootstrapper implements TestContextBoot
 	 * @param classes the merged annotated classes
 	 * @param initializerClasses the merged context initializer classes
 	 * @param activeProfiles the merged active bean definition profiles
+	 * @param propertySourceLocations the merged {@code PropertySource} locations
+	 * @param propertySourceProperties the merged {@code PropertySource} properties
 	 * @param contextLoader the resolved {@code ContextLoader}
 	 * @param cacheAwareContextLoaderDelegate the cache-aware context loader delegate
 	 * to be provided to the instantiated {@code MergedContextConfiguration}
@@ -421,9 +425,12 @@ public abstract class AbstractTestContextBootstrapper implements TestContextBoot
 	 * @return the fully initialized {@code MergedContextConfiguration}
 	 */
 	protected abstract MergedContextConfiguration buildMergedContextConfiguration(
-			Class<?> testClass, String[] locations, Class<?>[] classes,
+			Class<?> testClass,
+			String[] locations,
+			Class<?>[] classes,
 			Set<Class<? extends ApplicationContextInitializer<? extends ConfigurableApplicationContext>>> initializerClasses,
-			String[] activeProfiles, ContextLoader contextLoader,
-			CacheAwareContextLoaderDelegate cacheAwareContextLoaderDelegate, MergedContextConfiguration parentConfig);
+			String[] activeProfiles, String[] propertySourceLocations, String[] propertySourceProperties,
+			ContextLoader contextLoader, CacheAwareContextLoaderDelegate cacheAwareContextLoaderDelegate,
+			MergedContextConfiguration parentConfig);
 
 }

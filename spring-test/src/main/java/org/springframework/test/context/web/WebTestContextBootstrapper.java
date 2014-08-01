@@ -89,20 +89,23 @@ public class WebTestContextBootstrapper extends DefaultTestContextBootstrapper {
 			String[] locations,
 			Class<?>[] classes,
 			Set<Class<? extends ApplicationContextInitializer<? extends ConfigurableApplicationContext>>> initializerClasses,
-			String[] activeProfiles, ContextLoader contextLoader,
-			CacheAwareContextLoaderDelegate cacheAwareContextLoaderDelegate, MergedContextConfiguration parentConfig) {
+			String[] activeProfiles, String[] propertySourceLocations, String[] propertySourceProperties,
+			ContextLoader contextLoader, CacheAwareContextLoaderDelegate cacheAwareContextLoaderDelegate,
+			MergedContextConfiguration parentConfig) {
 
 		WebAppConfiguration webAppConfiguration = AnnotationUtils.findAnnotation(testClass, WebAppConfiguration.class);
 		if (webAppConfiguration != null) {
 			String resourceBasePath = webAppConfiguration.value();
 
 			return new WebMergedContextConfiguration(testClass, locations, classes, initializerClasses, activeProfiles,
-				resourceBasePath, contextLoader, cacheAwareContextLoaderDelegate, parentConfig);
+				propertySourceLocations, propertySourceProperties, resourceBasePath, contextLoader,
+				cacheAwareContextLoaderDelegate, parentConfig);
 		}
 
 		// else...
 		return super.buildMergedContextConfiguration(testClass, locations, classes, initializerClasses, activeProfiles,
-			contextLoader, cacheAwareContextLoaderDelegate, parentConfig);
+			propertySourceLocations, propertySourceProperties, contextLoader, cacheAwareContextLoaderDelegate,
+			parentConfig);
 	}
 
 }

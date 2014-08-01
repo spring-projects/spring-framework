@@ -16,8 +16,13 @@
 
 package org.springframework.test.context.support;
 
+import java.io.IOException;
+import java.io.StringReader;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
 
 import org.apache.commons.logging.Log;
@@ -28,7 +33,12 @@ import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.GenericTypeResolver;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
+import org.springframework.core.env.ConfigurableEnvironment;
+import org.springframework.core.env.MapPropertySource;
+import org.springframework.core.env.PropertySource;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.support.ResourcePropertySource;
 import org.springframework.test.context.ContextConfigurationAttributes;
 import org.springframework.test.context.ContextLoader;
 import org.springframework.test.context.MergedContextConfiguration;
@@ -53,6 +63,7 @@ import org.springframework.util.ResourceUtils;
  *
  * @author Sam Brannen
  * @author Juergen Hoeller
+ * @author Dave Syer
  * @since 2.5
  * @see #generateDefaultLocations
  * @see #getResourceSuffixes
@@ -61,6 +72,8 @@ import org.springframework.util.ResourceUtils;
 public abstract class AbstractContextLoader implements SmartContextLoader {
 
 	private static final String[] EMPTY_STRING_ARRAY = new String[0];
+
+	private static final String LINE_SEPARATOR = System.getProperty("line.separator");
 
 	private static final Log logger = LogFactory.getLog(AbstractContextLoader.class);
 
@@ -96,15 +109,24 @@ public abstract class AbstractContextLoader implements SmartContextLoader {
 	 * <ul>
 	 * <li>Sets the <em>active bean definition profiles</em> from the supplied
 	 * {@code MergedContextConfiguration} in the
-	 * {@link org.springframework.core.env.Environment Environment} of the context.</li>
+	 * {@link org.springframework.core.env.Environment Environment} of the
+	 * context.</li>
+	 * <li>Adds {@link PropertySource PropertySources} for all
+	 * {@linkplain MergedContextConfiguration#getPropertySourceLocations()
+	 * resource locations} and
+	 * {@linkplain MergedContextConfiguration#getPropertySourceProperties()
+	 * inlined properties} from the supplied {@code MergedContextConfiguration}
+	 * to the {@code Environment} of the context.</li>
 	 * <li>Determines what (if any) context initializer classes have been supplied
-	 * via the {@code MergedContextConfiguration} and
-	 * {@linkplain ApplicationContextInitializer#initialize invokes each} with the
+	 * via the {@code MergedContextConfiguration} and instantiates and
+	 * {@linkplain ApplicationContextInitializer#initialize invokes} each with the
 	 * given application context.</li>
+	 * <ul>
+	 * <li>Any {@code ApplicationContextInitializers} implementing
+	 * {@link org.springframework.core.Ordered Ordered} or annotated with {@link
+	 * org.springframework.core.annotation.Order @Order} will be sorted appropriately.</li>
 	 * </ul>
-	 * <p>Any {@code ApplicationContextInitializers} implementing
-	 * {@link org.springframework.core.Ordered Ordered} or marked with {@link
-	 * org.springframework.core.annotation.Order @Order} will be sorted appropriately.
+	 * </ul>
 	 * @param context the newly created application context
 	 * @param mergedConfig the merged context configuration
 	 * @since 3.2
@@ -112,10 +134,79 @@ public abstract class AbstractContextLoader implements SmartContextLoader {
 	 * @see #loadContext(MergedContextConfiguration)
 	 * @see ConfigurableApplicationContext#setId
 	 */
-	@SuppressWarnings("unchecked")
 	protected void prepareContext(ConfigurableApplicationContext context, MergedContextConfiguration mergedConfig) {
 		context.getEnvironment().setActiveProfiles(mergedConfig.getActiveProfiles());
+		addResourcePropertySourcesToEnvironment(context, mergedConfig);
+		addInlinedPropertiesToEnvironment(context, mergedConfig);
+		invokeApplicationContextInitializers(context, mergedConfig);
+	}
 
+	/**
+	 * @since 4.1
+	 */
+	private void addResourcePropertySourcesToEnvironment(ConfigurableApplicationContext context,
+			MergedContextConfiguration mergedConfig) {
+		try {
+			ConfigurableEnvironment environment = context.getEnvironment();
+			String[] locations = mergedConfig.getPropertySourceLocations();
+			for (String location : locations) {
+				String resolvedLocation = environment.resolveRequiredPlaceholders(location);
+				Resource resource = context.getResource(resolvedLocation);
+				ResourcePropertySource ps = new ResourcePropertySource(resource);
+				environment.getPropertySources().addFirst(ps);
+			}
+		}
+		catch (IOException e) {
+			throw new IllegalStateException("Failed to add PropertySource to Environment", e);
+		}
+	}
+
+	/**
+	 * @since 4.1
+	 */
+	private void addInlinedPropertiesToEnvironment(ConfigurableApplicationContext context,
+			MergedContextConfiguration mergedConfig) {
+		String[] keyValuePairs = mergedConfig.getPropertySourceProperties();
+		if (!ObjectUtils.isEmpty(keyValuePairs)) {
+			String name = "test properties " + ObjectUtils.nullSafeToString(keyValuePairs);
+			MapPropertySource ps = new MapPropertySource(name, extractEnvironmentProperties(keyValuePairs));
+			context.getEnvironment().getPropertySources().addFirst(ps);
+		}
+	}
+
+	/**
+	 * Extract environment properties from the supplied key/value pairs.
+	 * <p>Parsing of the key/value pairs is achieved by converting all pairs
+	 * into a single <em>virtual</em> properties file in memory and delegating
+	 * to {@link Properties#load(java.io.Reader)} to parse that virtual file.
+	 * <p>This code has been adapted from Spring Boot's
+	 * {@link org.springframework.boot.test.SpringApplicationContextLoader SpringApplicationContextLoader}.
+	 * @since 4.1
+	 */
+	private Map<String, Object> extractEnvironmentProperties(String[] keyValuePairs) {
+		StringBuilder sb = new StringBuilder();
+		for (String keyValuePair : keyValuePairs) {
+			sb.append(keyValuePair).append(LINE_SEPARATOR);
+		}
+		String content = sb.toString();
+		Properties props = new Properties();
+		try {
+			props.load(new StringReader(content));
+		}
+		catch (IOException e) {
+			throw new IllegalStateException("Failed to load test environment properties from: " + content, e);
+		}
+
+		Map<String, Object> properties = new HashMap<String, Object>();
+		for (String name : props.stringPropertyNames()) {
+			properties.put(name, props.getProperty(name));
+		}
+		return properties;
+	}
+
+	@SuppressWarnings("unchecked")
+	private void invokeApplicationContextInitializers(ConfigurableApplicationContext context,
+			MergedContextConfiguration mergedConfig) {
 		Set<Class<? extends ApplicationContextInitializer<? extends ConfigurableApplicationContext>>> initializerClasses = mergedConfig.getContextInitializerClasses();
 		if (initializerClasses.isEmpty()) {
 			// no ApplicationContextInitializers have been declared -> nothing to do
