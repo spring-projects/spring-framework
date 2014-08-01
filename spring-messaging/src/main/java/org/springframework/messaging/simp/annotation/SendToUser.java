@@ -59,4 +59,13 @@ public @interface SendToUser {
      */
     boolean broadcast() default true;
 
+	/**
+	 * One or more native headers to copy from the input message. Since call and reply using
+   * messages is completely asynchronous, this is useful to implement an RPC pattern where
+   * the message containing the RPC call carry an identifier that is copied on the reply
+   * and that enables the client to associate each reply with a former request he made
+   * <p>By default no header is copied</p>
+	 */
+	String[] copyHeaders() default {};
+
 }
