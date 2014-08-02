@@ -696,7 +696,7 @@ public abstract class AnnotationUtils {
 
 
 	/**
-	 * Default cache key for the TransactionAttribute cache.
+	 * Cache key for the AnnotatedElement cache.
 	 */
 	private static class AnnotationCacheKey {
 
