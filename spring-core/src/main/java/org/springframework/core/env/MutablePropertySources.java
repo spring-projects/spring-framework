@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -66,7 +66,7 @@ public class MutablePropertySources implements PropertySources {
 	}
 
 	/**
-	 * Create a new {@link MutablePropertySources} object and inheriting the given logger,
+	 * Create a new {@link MutablePropertySources} object and inherit the given logger,
 	 * usually from an enclosing {@link Environment}.
 	 */
 	MutablePropertySources(Log logger) {
@@ -130,7 +130,7 @@ public class MutablePropertySources implements PropertySources {
 	}
 
 	/**
-	 * Add the given property source object with precedence immediately lower than
+	 * Add the given property source object with precedence immediately lower
 	 * than the named relative property source.
 	 */
 	public void addAfter(String relativePropertySourceName, PropertySource<?> propertySource) {
@@ -205,7 +205,7 @@ public class MutablePropertySources implements PropertySources {
 	}
 
 	/**
-	 * Log the removal of the given propertySource if it is present.
+	 * Remove the given property source if it is present.
 	 */
 	protected void removeIfPresent(PropertySource<?> propertySource) {
 		if (this.propertySourceList.contains(propertySource)) {
