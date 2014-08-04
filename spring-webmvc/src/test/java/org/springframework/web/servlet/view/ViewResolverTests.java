@@ -21,6 +21,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicInteger;
+
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -32,7 +33,6 @@ import javax.servlet.jsp.jstl.core.Config;
 import javax.servlet.jsp.jstl.fmt.LocalizationContext;
 
 import org.junit.Test;
-
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.PropertyValue;
 import org.springframework.tests.sample.beans.TestBean;
@@ -231,14 +231,14 @@ public class ViewResolverTests {
 	}
 
 	@Test
-	public void testInternalResourceViewResolverWithContextBeans() throws Exception {
+	public void testUrlBasedViewResolverWithContextBeans() throws Exception {
 		MockServletContext sc = new MockServletContext();
 		final StaticWebApplicationContext wac = new StaticWebApplicationContext();
 		wac.registerSingleton("myBean", TestBean.class);
 		wac.registerSingleton("myBean2", TestBean.class);
 		wac.setServletContext(sc);
 		wac.refresh();
-		InternalResourceViewResolver vr = new InternalResourceViewResolver();
+		UrlBasedViewResolver vr = new UrlBasedViewResolver();
 		Properties props = new Properties();
 		props.setProperty("key1", "value1");
 		vr.setAttributes(props);
@@ -246,6 +246,7 @@ public class ViewResolverTests {
 		map.put("key2", new Integer(2));
 		vr.setAttributesMap(map);
 		vr.setExposeContextBeansAsAttributes(true);
+		vr.setViewClass(TestView.class);
 		vr.setApplicationContext(wac);
 
 		MockHttpServletRequest request = new MockHttpServletRequest(sc) {
@@ -271,14 +272,14 @@ public class ViewResolverTests {
 	}
 
 	@Test
-	public void testInternalResourceViewResolverWithSpecificContextBeans() throws Exception {
+	public void testUrlBasedViewResolverWithSpecificContextBeans() throws Exception {
 		MockServletContext sc = new MockServletContext();
 		final StaticWebApplicationContext wac = new StaticWebApplicationContext();
 		wac.registerSingleton("myBean", TestBean.class);
 		wac.registerSingleton("myBean2", TestBean.class);
 		wac.setServletContext(sc);
 		wac.refresh();
-		InternalResourceViewResolver vr = new InternalResourceViewResolver();
+		UrlBasedViewResolver vr = new UrlBasedViewResolver();
 		Properties props = new Properties();
 		props.setProperty("key1", "value1");
 		vr.setAttributes(props);
@@ -286,6 +287,7 @@ public class ViewResolverTests {
 		map.put("key2", new Integer(2));
 		vr.setAttributesMap(map);
 		vr.setExposedContextBeanNames(new String[] {"myBean2"});
+		vr.setViewClass(TestView.class);
 		vr.setApplicationContext(wac);
 
 		MockHttpServletRequest request = new MockHttpServletRequest(sc) {
