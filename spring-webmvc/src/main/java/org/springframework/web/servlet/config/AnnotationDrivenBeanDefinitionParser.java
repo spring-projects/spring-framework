@@ -21,7 +21,6 @@ import java.util.Properties;
 
 import org.w3c.dom.Element;
 
-import org.springframework.beans.BeanMetadataElement;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.config.BeanDefinition;

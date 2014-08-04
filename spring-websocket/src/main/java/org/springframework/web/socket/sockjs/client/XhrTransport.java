@@ -1,8 +1,5 @@
 package org.springframework.web.socket.sockjs.client;
 
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
 
 import java.net.URI;

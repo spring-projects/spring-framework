@@ -22,9 +22,6 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import org.springframework.messaging.Message;
-import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
-
 /**
  * Annotation that indicates the return value of a message-handling method should
  * be sent as a {@link org.springframework.messaging.Message} to the specified

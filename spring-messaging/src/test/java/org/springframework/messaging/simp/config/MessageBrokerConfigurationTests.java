@@ -27,7 +27,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import org.mockito.Mockito;
-import org.springframework.beans.DirectFieldAccessor;
+
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

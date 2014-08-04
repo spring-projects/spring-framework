@@ -20,7 +20,6 @@ import org.springframework.core.io.Resource;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
-import java.util.List;
 
 /**
  * An abstraction for transforming the content of a resource.

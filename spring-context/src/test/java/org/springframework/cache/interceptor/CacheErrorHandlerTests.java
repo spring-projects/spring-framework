@@ -18,11 +18,7 @@ package org.springframework.cache.interceptor;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
-import static org.mockito.BDDMockito.doReturn;
-import static org.mockito.BDDMockito.doThrow;
 import static org.mockito.BDDMockito.*;
-import static org.mockito.BDDMockito.verify;
-import static org.mockito.Mockito.mock;
 
 import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicLong;

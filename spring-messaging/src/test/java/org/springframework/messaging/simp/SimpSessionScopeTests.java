@@ -20,10 +20,9 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
-import org.springframework.beans.BeansException;
+
 import org.springframework.beans.factory.ObjectFactory;
 
-import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import static org.junit.Assert.assertThat;

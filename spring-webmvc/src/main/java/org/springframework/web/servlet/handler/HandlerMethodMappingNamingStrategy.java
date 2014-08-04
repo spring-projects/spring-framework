@@ -18,8 +18,6 @@ package org.springframework.web.servlet.handler;
 
 import org.springframework.web.method.HandlerMethod;
 
-import java.lang.reflect.Method;
-
 /**
  * A strategy for assigning a name to a handler method's mapping.
  *

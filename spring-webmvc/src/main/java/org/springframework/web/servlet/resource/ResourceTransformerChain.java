@@ -20,7 +20,6 @@ import org.springframework.core.io.Resource;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
-import java.util.List;
 
 /**
  * A contract for invoking a chain of {@link ResourceTransformer}s where each resolver

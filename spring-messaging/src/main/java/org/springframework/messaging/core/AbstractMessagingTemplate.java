@@ -19,8 +19,6 @@ package org.springframework.messaging.core;
 import java.util.Map;
 
 import org.springframework.messaging.Message;
-import org.springframework.messaging.MessageHeaders;
-import org.springframework.messaging.converter.MessageConversionException;
 
 /**
  * An extension of {@link AbstractMessageReceivingTemplate} that adds support for

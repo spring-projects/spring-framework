@@ -1,9 +1,7 @@
 package org.springframework.web.socket.sockjs.client;
 
 import org.springframework.http.HttpHeaders;
-import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.sockjs.frame.SockJsMessageCodec;
-import org.springframework.web.socket.sockjs.transport.TransportType;
 
 import java.net.URI;
 import java.security.Principal;

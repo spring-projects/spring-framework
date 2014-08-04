@@ -18,8 +18,6 @@ package org.springframework.beans.factory.support;
 
 import static org.junit.Assert.*;
 import static org.mockito.BDDMockito.*;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
 
 import java.lang.reflect.Method;
 import java.util.HashMap;

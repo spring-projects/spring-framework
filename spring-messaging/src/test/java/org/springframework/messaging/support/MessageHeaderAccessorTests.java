@@ -23,7 +23,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.UUID;
 
-import org.hamcrest.CoreMatchers;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;

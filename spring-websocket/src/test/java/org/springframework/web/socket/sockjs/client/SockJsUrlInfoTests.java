@@ -18,7 +18,7 @@ package org.springframework.web.socket.sockjs.client;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.springframework.web.socket.sockjs.frame.Jackson2SockJsMessageCodec;
+
 import org.springframework.web.socket.sockjs.transport.TransportType;
 
 import java.net.URI;

@@ -16,10 +16,7 @@
 
 package org.springframework.web.socket.sockjs.transport.session;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
-import java.util.Queue;
 
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.sockjs.SockJsTransportFailureException;

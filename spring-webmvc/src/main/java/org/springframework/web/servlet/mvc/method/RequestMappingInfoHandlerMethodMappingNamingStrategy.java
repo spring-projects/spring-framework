@@ -19,8 +19,6 @@ package org.springframework.web.servlet.mvc.method;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.handler.HandlerMethodMappingNamingStrategy;
 
-import java.lang.reflect.Method;
-
 /**
  * A {@link org.springframework.web.servlet.handler.HandlerMethodMappingNamingStrategy
  * HandlerMethodMappingNamingStrategy} for {@code RequestMappingInfo}-based handler
