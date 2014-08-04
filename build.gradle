@@ -1171,7 +1171,7 @@ configure(rootProject) {
 		classifier = "schema"
 		description = "Builds -${classifier} archive containing all " +
 			"XSDs for deployment at http://springframework.org/schema."
-
+		duplicatesStrategy 'exclude'
 		subprojects.each { subproject ->
 			def Properties schemas = new Properties();
 
