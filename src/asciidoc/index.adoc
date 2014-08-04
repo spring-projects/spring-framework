@@ -157,7 +157,27 @@ arithmetic operators, named variables, and retrieval of objects by name from Spr
 IoC container. It also supports list projection and selection as well as common list
 aggregations.
 
+[[overview-aop-instrumentation]]
+==== AOP and Instrumentation
+Spring's <<aop-introduction,__AOP__>> module provides an __AOP Alliance__-compliant
+aspect-oriented programming implementation allowing you to define, for example,
+method-interceptors and pointcuts to cleanly decouple code that implements functionality
+that should be separated. Using source-level metadata functionality, you can also
+incorporate behavioral information into your code, in a manner similar to that of .NET
+attributes.
 
+The separate __Aspects__ module provides integration with AspectJ.
+
+The __Instrumentation__ module provides class instrumentation support and classloader
+implementations to be used in certain application servers.
+
+[[overview-messaging]]
+==== Messaging
+Spring Framework 4 includes a new `spring-messaging` module with key abstractions from
+the _Spring Integration_ project such as `Message`, `MessageChannel`,
+`MessageHandler` and others to serve as a foundation for messaging-based applications. The
+module also includes a set of annotations for mapping messages to methods, similar to the
+Spring MVC annotation based programming model.
 
 [[overview-data-access]]
 ==== Data Access/Integration
@@ -177,7 +197,8 @@ The <<oxm,OXM>> module provides an abstraction layer that supports Object/XML ma
 implementations for JAXB, Castor, XMLBeans, JiBX and XStream.
 
 The Java Messaging Service (<<jms,JMS>>) module contains features for producing and
-consuming messages.
+consuming messages. Since Spring Framework 4.1, it provides an integration with the
+`spring-messaging` module.
 
 The <<transaction,Transaction>> module supports programmatic and declarative transaction
 management for classes that implement special interfaces and for __all your POJOs (plain
@@ -204,19 +225,7 @@ environment and mirrors the functionality of Web-Servlet module.
 
 
 
-[[overview-aop-instrumentation]]
-==== AOP and Instrumentation
-Spring's <<aop-introduction,__AOP__>> module provides an __AOP Alliance__-compliant
-aspect-oriented programming implementation allowing you to define, for example,
-method-interceptors and pointcuts to cleanly decouple code that implements functionality
-that should be separated. Using source-level metadata functionality, you can also
-incorporate behavioral information into your code, in a manner similar to that of .NET
-attributes.
 
-The separate __Aspects__ module provides integration with AspectJ.
-
-The __Instrumentation__ module provides class instrumentation support and classloader
-implementations to be used in certain application servers.
 
 
 
