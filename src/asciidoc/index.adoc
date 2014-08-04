@@ -47844,6 +47844,17 @@ using the aspectj mode in this case.
 
 [[cache-annotation-stereotype]]
 ==== Using custom annotations
+
+.Custom annotation and AspectJ
+****
+This feature only works out-of-the-box with the proxy-based approach but can be enabled
+with a bit of extra effort using AspectJ.
+
+The `spring-aspects` module defines an aspect for the standard annotations only. If you
+have defined your own annotations, you also need to define an aspect for those. Check
+`AnnotationCacheAspect` for an example.
+****
+
 The caching abstraction allows you to use your own annotations to identify what method
 triggers cache population or eviction. This is quite handy as a template mechanism as it
 eliminates the need to duplicate cache annotation declarations (especially useful if the
