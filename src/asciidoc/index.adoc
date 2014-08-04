@@ -47241,7 +47241,7 @@ caching occurs.It as well improves performance but does that by allowing the sam
 to be read multiple times in a fast fashion.
 
 A further explanation of the differences between two can be found
-http://en.wikipedia.org/wiki/Cache#The_difference_between_buffer_and_cache[here].
+http://en.wikipedia.org/wiki/Cache_(computing)#The_difference_between_buffer_and_cache[here].
 ****
 
 At its core, the abstraction applies caching to Java methods, reducing thus the number
