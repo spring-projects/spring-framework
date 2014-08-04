@@ -47301,6 +47301,24 @@ https://code.google.com/p/guava-libraries/wiki/CachesExplained[Guava caches] and
 JSR-107 compliant caches. See <<cache-plug>> for more information on plugging in
 other cache stores/providers.
 
+[IMPORTANT]
+====
+The caching abstraction has no special handling of multi-threaded and multi-process
+environments as such features are handled by the cache implementation. .
+====
+
+If you have a multi-process environment (i.e. an application deployed on several nodes),
+you will need to configure your cache provider accordingly. Depending on your use cases,
+a copy of the same data on several nodes may be enough but if you change the data during
+the course of the application, you may need to enable other propagation mechanisms.
+
+Caching a particular item is a direct equivalent of the typical get-if-not-found-then-
+proceed-and-put-eventually code blocks found with programmatic cache interaction: no locks
+are applied and several threads may try to load the same item concurrently. The same applies
+to eviction: if several threads are trying to update or evict data concurrently, you may
+use stale data. Certain cache providers offer advanced features in that area, refer to
+the documentation of the cache provider that you are using for more details.
+
 To use the cache abstraction, the developer needs to take care of two aspects:
 
 * caching declaration - identify the methods that need to be cached and their policy
