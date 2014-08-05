@@ -29,6 +29,7 @@ import org.springframework.test.web.servlet.ResultMatcher;
  *
  * @author Keesun Baik
  * @author Rossen Stoyanchev
+ * @author Sebastien Deleuze
  * @since 3.2
  */
 public class StatusResultMatchers {
@@ -283,7 +284,7 @@ public class StatusResultMatchers {
 	 * Assert the response status code is {@code HttpStatus.MOVED_TEMPORARILY} (302).
 	 * @see #isFound()
 	 */
-	@SuppressWarnings("deprecation")
+	@Deprecated
 	public ResultMatcher isMovedTemporarily() {
 		return matcher(HttpStatus.MOVED_TEMPORARILY);
 	}
@@ -304,7 +305,9 @@ public class StatusResultMatchers {
 
 	/**
 	 * Assert the response status code is {@code HttpStatus.USE_PROXY} (305).
+	 * @deprecated matching the deprecation of {@code HttpStatus.USE_PROXY}
 	 */
+	@Deprecated
 	public ResultMatcher isUseProxy() {
 		return matcher(HttpStatus.USE_PROXY);
 	}
@@ -415,15 +418,37 @@ public class StatusResultMatchers {
 	}
 
 	/**
-	 * Assert the response status code is {@code HttpStatus.REQUEST_ENTITY_TOO_LARGE} (413).
+	 * Assert the response status code is {@code HttpStatus.PAYLOAD_TOO_LARGE} (413).
+	 * @since 4.1
 	 */
+	public ResultMatcher isPayloadTooLarge() {
+		return matcher(HttpStatus.PAYLOAD_TOO_LARGE);
+	}
+
+	/**
+	 * Assert the response status code is {@code HttpStatus.REQUEST_ENTITY_TOO_LARGE} (413).
+	 * @deprecated matching the deprecation of {@code HttpStatus.REQUEST_ENTITY_TOO_LARGE}
+	 * @see #isPayloadTooLarge()
+	 */
+	@Deprecated
 	public ResultMatcher isRequestEntityTooLarge() {
 		return matcher(HttpStatus.REQUEST_ENTITY_TOO_LARGE);
 	}
 
 	/**
 	 * Assert the response status code is {@code HttpStatus.REQUEST_URI_TOO_LONG} (414).
+	 * @since 4.1
 	 */
+	public ResultMatcher isUriTooLong() {
+		return matcher(HttpStatus.URI_TOO_LONG);
+	}
+
+	/**
+	 * Assert the response status code is {@code HttpStatus.REQUEST_URI_TOO_LONG} (414).
+	 * @deprecated matching the deprecation of {@code HttpStatus.REQUEST_URI_TOO_LONG}
+	 * @see #isUriTooLong()
+	 */
+	@Deprecated
 	public ResultMatcher isRequestUriTooLong() {
 		return matcher(HttpStatus.REQUEST_URI_TOO_LONG);
 	}
@@ -458,7 +483,7 @@ public class StatusResultMatchers {
 
 	/**
 	  * Assert the response status code is {@code HttpStatus.INSUFFICIENT_SPACE_ON_RESOURCE} (419).
-	  * @deprecated matching the deprecation of HttpStatus.INSUFFICIENT_SPACE_ON_RESOURCE
+	  * @deprecated matching the deprecation of {@code HttpStatus.INSUFFICIENT_SPACE_ON_RESOURCE}
 	  */
 	 @Deprecated
 	 public ResultMatcher isInsufficientSpaceOnResource() {
@@ -467,7 +492,7 @@ public class StatusResultMatchers {
 
 	 /**
 	  * Assert the response status code is {@code HttpStatus.METHOD_FAILURE} (420).
-	  * @deprecated matching the deprecation of HttpStatus.METHOD_FAILURE
+	  * @deprecated matching the deprecation of {@code HttpStatus.METHOD_FAILURE}
 	  */
 	 @Deprecated
 	 public ResultMatcher isMethodFailure() {
@@ -476,7 +501,7 @@ public class StatusResultMatchers {
 
 	 /**
 	  * Assert the response status code is {@code HttpStatus.DESTINATION_LOCKED} (421).
-	  * @deprecated matching the deprecation of HttpStatus.DESTINATION_LOCKED
+	  * @deprecated matching the deprecation of {@code HttpStatus.DESTINATION_LOCKED}
 	  */
 	 @Deprecated
 	 public ResultMatcher isDestinationLocked() {

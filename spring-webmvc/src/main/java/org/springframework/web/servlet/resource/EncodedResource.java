@@ -28,14 +28,16 @@ import org.springframework.core.io.Resource;
  *
  * @author Jeremy Grelle
  * @since 4.1
- * @see <a href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.11">RFC2616 HTTP Content-Encoding</a>
+ * @see <a href="http://tools.ietf.org/html/rfc7231#section-3.1.2.2">HTTP/1.1: Semantics
+ * and Content, section 3.1.2.2</a>
  */
 public interface EncodedResource extends Resource {
 
 	/**
 	 * The content coding value, as defined in the IANA registry
 	 * @return the content encoding
-	 * @see <a href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec3.html#sec3.5">RFC 2616 Content codings</a>
+	 * @see <a href="http://tools.ietf.org/html/rfc7231#section-3.1.2.1">HTTP/1.1: Semantics
+	 * and Content, section 3.1.2.1</a>
 	 */
 	public String getContentEncoding();
 
