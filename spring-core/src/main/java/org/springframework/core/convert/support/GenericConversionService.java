@@ -17,9 +17,10 @@
 package org.springframework.core.convert.support;
 
 import java.lang.reflect.Array;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
+import java.util.Deque;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
@@ -518,8 +519,8 @@ public class GenericConversionService implements ConfigurableConversionService {
 		 */
 		public GenericConverter find(TypeDescriptor sourceType, TypeDescriptor targetType) {
 			// Search the full type hierarchy
-			List<Class<?>> sourceCandidates = getClassHierarchy(sourceType.getType());
-			List<Class<?>> targetCandidates = getClassHierarchy(targetType.getType());
+			Iterable<Class<?>> sourceCandidates = getClassHierarchy(sourceType.getType());
+			Iterable<Class<?>> targetCandidates = getClassHierarchy(targetType.getType());
 			for (Class<?> sourceCandidate : sourceCandidates) {
 				for (Class<?> targetCandidate : targetCandidates) {
 					ConvertiblePair convertiblePair = new ConvertiblePair(sourceCandidate, targetCandidate);
@@ -555,41 +556,49 @@ public class GenericConversionService implements ConfigurableConversionService {
 		/**
 		 * Returns an ordered class hierarchy for the given type.
 		 * @param type the type
-		 * @return an ordered list of all classes that the given type extends or implements
+		 * @return an Iterable of all classes that the given type extends or implements
 		 */
-		private List<Class<?>> getClassHierarchy(Class<?> type) {
-			List<Class<?>> hierarchy = new ArrayList<Class<?>>(20);
-			Set<Class<?>> visited = new HashSet<Class<?>>(20);
-			addToClassHierarchy(0, ClassUtils.resolvePrimitiveIfNecessary(type), false, hierarchy, visited);
+		private Iterable<Class<?>> getClassHierarchy(Class<?> type) {
+			Deque<Class<?>> classStack = new ArrayDeque<Class<?>>(20);
+			LinkedHashSet<Class<?>> hierarchy = new LinkedHashSet<Class<?>>(20);
 			boolean array = type.isArray();
-			int i = 0;
-			while (i < hierarchy.size()) {
-				Class<?> candidate = hierarchy.get(i);
-				candidate = (array ? candidate.getComponentType() : ClassUtils.resolvePrimitiveIfNecessary(candidate));
+			
+			classStack.push(ClassUtils.resolvePrimitiveIfNecessary(type));
+
+			Class<?> candidate = null;
+			while((candidate = classStack.pollFirst()) != null) {				
+				candidate = ClassUtils.resolvePrimitiveIfNecessary(candidate);
+				hierarchy.add(!candidate.isArray() && array ? Array.newInstance(candidate, 0).getClass() : candidate);
+				
 				Class<?> superclass = candidate.getSuperclass();
-				if (candidate.getSuperclass() != null && superclass != Object.class) {
-					addToClassHierarchy(i + 1, candidate.getSuperclass(), array, hierarchy, visited);
+				if (superclass != null && superclass != Object.class && superclass != Enum.class) {
+					classStack.push(superclass);
 				}
-				for (Class<?> implementedInterface : candidate.getInterfaces()) {
-					addToClassHierarchy(hierarchy.size(), implementedInterface, array, hierarchy, visited);
+
+				for(Class<?> implementedInterface : candidate.getInterfaces()) {
+					// add interfaces to the other end of the queue, so that
+					// concrete classes always come first in the hierarchy
+					classStack.addLast(implementedInterface);
 				}
-				i++;
 			}
-			addToClassHierarchy(hierarchy.size(), Object.class, array, hierarchy, visited);
-			addToClassHierarchy(hierarchy.size(), Object.class, false, hierarchy, visited);
+			
+			// make sure Enum comes at the "end" of the hierarchy (if necessary)
+			if(type.isEnum()) {
+				if(array) {
+					hierarchy.add(Array.newInstance(Enum.class, 0).getClass());
+				}
+				hierarchy.add(Enum.class);
+			}
+			
+			// always add Object to hierarchy 
+			if(array) {
+				hierarchy.add(Array.newInstance(Object.class, 0).getClass());
+			}
+			hierarchy.add(Object.class);
+			
 			return hierarchy;
 		}
-
-		private void addToClassHierarchy(int index, Class<?> type, boolean asArray,
-				List<Class<?>> hierarchy, Set<Class<?>> visited) {
-			if (asArray) {
-				type = Array.newInstance(type, 0).getClass();
-			}
-			if (visited.add(type)) {
-				hierarchy.add(index, type);
-			}
-		}
-
+		
 		@Override
 		public String toString() {
 			StringBuilder builder = new StringBuilder();
