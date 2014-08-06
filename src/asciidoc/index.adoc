@@ -11058,6 +11058,7 @@ The expression language supports the following functionality
 * Bean references
 * Array construction
 * Inline lists
+* Inline maps
 * Ternary operator
 * Variables
 * User defined functions
@@ -11562,7 +11563,22 @@ Lists can be expressed directly in an expression using `{}` notation.
 entirely composed of fixed literals then a constant list is created to represent the
 expression, rather than building a new list on each evaluation.
 
+[[expressions-inline-maps]]
+==== Inline Maps
+Maps can also be expressed directly in an expression using `{key:value}` notation.
 
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	// evaluates to a Java map containing the two entries
+	Map inventorInfo = (Map) parser.parseExpression("{name:'Nikola',dob:'10-July-1856'}").getValue(context);
+
+	Map mapOfMaps = (Map) parser.parseExpression("{name:{first:'Nikola',last:'Tesla'},dob:{day:10,month:'July',year:1856}}").getValue(context);
+----
+`{:}` by itself means an empty map. For performance reasons, if the map is itself composed
+of fixed literals or other nested constant structures (lists or maps) then a constant map is created
+to represent the expression, rather than building a new map on each evaluation. Quoting of the map keys
+is optional, the examples above are not using quoted keys.
 
 [[expressions-array-construction]]
 ==== Array construction

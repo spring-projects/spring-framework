@@ -39,6 +39,7 @@ import org.springframework.expression.spel.ast.FunctionReference;
 import org.springframework.expression.spel.ast.Identifier;
 import org.springframework.expression.spel.ast.Indexer;
 import org.springframework.expression.spel.ast.InlineList;
+import org.springframework.expression.spel.ast.InlineMap;
 import org.springframework.expression.spel.ast.Literal;
 import org.springframework.expression.spel.ast.MethodReference;
 import org.springframework.expression.spel.ast.NullLiteral;
@@ -515,7 +516,7 @@ class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
 				|| maybeEatIndexer()) {
 			return pop();
 		}
-		else if (maybeEatInlineList()) {
+		else if (maybeEatInlineListOrMap()) {
 			return pop();
 		}
 		else {
@@ -600,7 +601,8 @@ class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
 	}
 
 	// list = LCURLY (element (COMMA element)*) RCURLY
-	private boolean maybeEatInlineList() {
+	// map  = LCURLY (key ':' value (COMMA key ':' value)*) RCURLY
+	private boolean maybeEatInlineListOrMap() {
 		Token t = peekToken();
 		if (!peekToken(TokenKind.LCURLY, true)) {
 			return false;
@@ -608,18 +610,53 @@ class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
 		SpelNodeImpl expr = null;
 		Token closingCurly = peekToken();
 		if (peekToken(TokenKind.RCURLY, true)) {
-			// empty list '[]'
+			// empty list '{}'
 			expr = new InlineList(toPos(t.startpos,closingCurly.endpos));
 		}
-		else {
-			List<SpelNodeImpl> listElements = new ArrayList<SpelNodeImpl>();
-			do {
-				listElements.add(eatExpression());
-			}
-			while (peekToken(TokenKind.COMMA,true));
-
+		else if (peekToken(TokenKind.COLON,true)) {
 			closingCurly = eatToken(TokenKind.RCURLY);
-			expr = new InlineList(toPos(t.startpos,closingCurly.endpos),listElements.toArray(new SpelNodeImpl[listElements.size()]));
+			// empty map '{:}'
+			expr = new InlineMap(toPos(t.startpos,closingCurly.endpos));
+		}
+		else {
+			SpelNodeImpl firstExpression = eatExpression();
+			// Next is either:
+			// '}' - end of list
+			// ',' - more expressions in this list
+			// ':' - this is a map!
+			
+			if (peekToken(TokenKind.RCURLY)) { // list with one item in it
+				List<SpelNodeImpl> listElements = new ArrayList<SpelNodeImpl>();
+				listElements.add(firstExpression);
+				closingCurly = eatToken(TokenKind.RCURLY);
+				expr = new InlineList(toPos(t.startpos,closingCurly.endpos),listElements.toArray(new SpelNodeImpl[listElements.size()]));				
+			}
+			else if (peekToken(TokenKind.COMMA, true)) { // multi item list
+				List<SpelNodeImpl> listElements = new ArrayList<SpelNodeImpl>();
+				listElements.add(firstExpression);
+				do {
+					listElements.add(eatExpression());
+				}
+				while (peekToken(TokenKind.COMMA,true));
+				closingCurly = eatToken(TokenKind.RCURLY);
+				expr = new InlineList(toPos(t.startpos,closingCurly.endpos),listElements.toArray(new SpelNodeImpl[listElements.size()]));
+				
+			}
+			else if (peekToken(TokenKind.COLON, true)) {  // map!
+				List<SpelNodeImpl> mapElements = new ArrayList<SpelNodeImpl>();
+				mapElements.add(firstExpression);
+				mapElements.add(eatExpression());
+				while (peekToken(TokenKind.COMMA,true)) {
+					mapElements.add(eatExpression());
+					eatToken(TokenKind.COLON);
+					mapElements.add(eatExpression());
+				}
+				closingCurly = eatToken(TokenKind.RCURLY);
+				expr = new InlineMap(toPos(t.startpos,closingCurly.endpos),mapElements.toArray(new SpelNodeImpl[mapElements.size()]));
+			}
+			else {
+				raiseInternalException(t.startpos, SpelMessage.OOD);
+			}
 		}
 		this.constructedNodes.push(expr);
 		return true;
@@ -734,7 +771,7 @@ class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
 					}
 					eatToken(TokenKind.RSQUARE);
 				}
-				if (maybeEatInlineList()) {
+				if (maybeEatInlineListOrMap()) {
 					nodes.add(pop());
 				}
 				push(new ConstructorReference(toPos(newToken), dimensions.toArray(new SpelNodeImpl[dimensions.size()]),
