@@ -16,9 +16,7 @@
 
 package org.springframework.web.servlet.view.json;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -29,18 +27,14 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.fasterxml.jackson.annotation.JsonView;
-import com.fasterxml.jackson.core.JsonEncoding;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
 
 import org.springframework.http.converter.json.MappingJacksonValue;
-import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.servlet.View;
-import org.springframework.web.servlet.view.AbstractView;
 
 /**
  * Spring MVC {@link View} that renders JSON content by serializing the model for the current request
@@ -59,7 +53,7 @@ import org.springframework.web.servlet.view.AbstractView;
  * @author Sebastien Deleuze
  * @since 3.1.2
  */
-public class MappingJackson2JsonView extends AbstractView {
+public class MappingJackson2JsonView extends AbstractJackson2View {
 
 	/**
 	 * Default content type: "application/json".
@@ -72,22 +66,11 @@ public class MappingJackson2JsonView extends AbstractView {
 	 */
 	public static final String DEFAULT_JSONP_CONTENT_TYPE = "application/javascript";
 
-
-	private ObjectMapper objectMapper = new ObjectMapper();
-
-	private JsonEncoding encoding = JsonEncoding.UTF8;
-
 	private String jsonPrefix;
-
-	private Boolean prettyPrint;
 
 	private Set<String> modelKeys;
 
 	private boolean extractValueFromSingleKeyModel = false;
-
-	private boolean disableCaching = true;
-
-	private boolean updateContentLength = false;
 
 	private Set<String> jsonpParameterNames = new LinkedHashSet<String>(Arrays.asList("jsonp", "callback"));
 
@@ -96,45 +79,7 @@ public class MappingJackson2JsonView extends AbstractView {
 	 * Construct a new {@code MappingJackson2JsonView}, setting the content type to {@code application/json}.
 	 */
 	public MappingJackson2JsonView() {
-		setContentType(DEFAULT_CONTENT_TYPE);
-		setExposePathVariables(false);
-	}
-
-
-	/**
-	 * Set the {@code ObjectMapper} for this view.
-	 * If not set, a default {@link ObjectMapper#ObjectMapper() ObjectMapper} will be used.
-	 * <p>Setting a custom-configured {@code ObjectMapper} is one way to take further control of
-	 * the JSON serialization process. The other option is to use Jackson's provided annotations
-	 * on the types to be serialized, in which case a custom-configured ObjectMapper is unnecessary.
-	 */
-	public void setObjectMapper(ObjectMapper objectMapper) {
-		Assert.notNull(objectMapper, "'objectMapper' must not be null");
-		this.objectMapper = objectMapper;
-		configurePrettyPrint();
-	}
-
-	/**
-	 * Return the {@code ObjectMapper} for this view.
-	 */
-	public final ObjectMapper getObjectMapper() {
-		return this.objectMapper;
-	}
-
-	/**
-	 * Set the {@code JsonEncoding} for this view.
-	 * By default, {@linkplain JsonEncoding#UTF8 UTF-8} is used.
-	 */
-	public void setEncoding(JsonEncoding encoding) {
-		Assert.notNull(encoding, "'encoding' must not be null");
-		this.encoding = encoding;
-	}
-
-	/**
-	 * Return the {@code JsonEncoding} for this view.
-	 */
-	public final JsonEncoding getEncoding() {
-		return this.encoding;
+		super(new ObjectMapper(), DEFAULT_CONTENT_TYPE);
 	}
 
 	/**
@@ -160,29 +105,9 @@ public class MappingJackson2JsonView extends AbstractView {
 	}
 
 	/**
-	 * Whether to use the default pretty printer when writing JSON.
-	 * This is a shortcut for setting up an {@code ObjectMapper} as follows:
-	 * <pre class="code">
-	 * ObjectMapper mapper = new ObjectMapper();
-	 * mapper.configure(SerializationFeature.INDENT_OUTPUT, true);
-	 * </pre>
-	 * <p>The default value is {@code false}.
+	 * {@inheritDoc}
 	 */
-	public void setPrettyPrint(boolean prettyPrint) {
-		this.prettyPrint = prettyPrint;
-		configurePrettyPrint();
-	}
-
-	private void configurePrettyPrint() {
-		if (this.prettyPrint != null) {
-			this.objectMapper.configure(SerializationFeature.INDENT_OUTPUT, this.prettyPrint);
-		}
-	}
-
-	/**
-	 * Set the attribute in the model that should be rendered by this view.
-	 * When set, all other model attributes will be ignored.
-	 */
+	@Override
 	public void setModelKey(String modelKey) {
 		this.modelKeys = Collections.singleton(modelKey);
 	}
@@ -233,24 +158,6 @@ public class MappingJackson2JsonView extends AbstractView {
 	}
 
 	/**
-	 * Disables caching of the generated JSON.
-	 * <p>Default is {@code true}, which will prevent the client from caching the generated JSON.
-	 */
-	public void setDisableCaching(boolean disableCaching) {
-		this.disableCaching = disableCaching;
-	}
-
-	/**
-	 * Whether to update the 'Content-Length' header of the response. When set to
-	 * {@code true}, the response is buffered in order to determine the content
-	 * length and set the 'Content-Length' header of the response.
-	 * <p>The default setting is {@code false}.
-	 */
-	public void setUpdateContentLength(boolean updateContentLength) {
-		this.updateContentLength = updateContentLength;
-	}
-
-	/**
 	 * Set JSONP request parameter names. Each time a request has one of those
 	 * parameters, the resulting JSON will be wrapped into a function named as
 	 * specified by the JSONP request parameter value.
@@ -260,40 +167,6 @@ public class MappingJackson2JsonView extends AbstractView {
 	 */
 	public void setJsonpParameterNames(Set<String> jsonpParameterNames) {
 		this.jsonpParameterNames = jsonpParameterNames;
-	}
-
-
-	@Override
-	protected void prepareResponse(HttpServletRequest request, HttpServletResponse response) {
-		setResponseContentType(request, response);
-		response.setCharacterEncoding(this.encoding.getJavaName());
-		if (this.disableCaching) {
-			response.addHeader("Pragma", "no-cache");
-			response.addHeader("Cache-Control", "no-cache, no-store, max-age=0");
-			response.addDateHeader("Expires", 1L);
-		}
-	}
-
-	@Override
-	protected void renderMergedOutputModel(Map<String, Object> model, HttpServletRequest request,
-			HttpServletResponse response) throws Exception {
-
-		OutputStream stream = (this.updateContentLength ? createTemporaryOutputStream() : response.getOutputStream());
-
-		Class<?> serializationView = (Class<?>) model.get(JsonView.class.getName());
-		String jsonpParameterValue = getJsonpParameterValue(request);
-		Object value = filterModel(model);
-		if (serializationView != null || jsonpParameterValue != null) {
-			MappingJacksonValue container = new MappingJacksonValue(value);
-			container.setSerializationView(serializationView);
-			container.setJsonpFunction(jsonpParameterValue);
-			value = container;
-		}
-
-		writeContent(stream, value, this.jsonPrefix);
-		if (this.updateContentLength) {
-			writeToResponse(response, (ByteArrayOutputStream) stream);
-		}
 	}
 
 	private String getJsonpParameterValue(HttpServletRequest request) {
@@ -316,6 +189,7 @@ public class MappingJackson2JsonView extends AbstractView {
 	 * @param model the model, as passed on to {@link #renderMergedOutputModel}
 	 * @return the value to be rendered
 	 */
+	@Override
 	protected Object filterModel(Map<String, Object> model) {
 		Map<String, Object> result = new HashMap<String, Object>(model.size());
 		Set<String> modelKeys = (!CollectionUtils.isEmpty(this.modelKeys) ? this.modelKeys : model.keySet());
@@ -328,41 +202,44 @@ public class MappingJackson2JsonView extends AbstractView {
 		return (this.extractValueFromSingleKeyModel && result.size() == 1 ? result.values().iterator().next() : result);
 	}
 
-	/**
-	 * Write the actual JSON content to the stream.
-	 * @param stream the output stream to use
-	 * @param value the value to be rendered, as returned from {@link #filterModel}
-	 * @param jsonPrefix the prefix for this view's JSON output
-	 * (as indicated through {@link #setJsonPrefix}/{@link #setPrefixJson})
-	 * @throws IOException if writing failed
-	 */
-	protected void writeContent(OutputStream stream, Object value, String jsonPrefix)
-			throws IOException {
-
-		JsonGenerator generator = this.objectMapper.getFactory().createGenerator(stream, this.encoding);
-		if (jsonPrefix != null) {
-			generator.writeRaw(jsonPrefix);
+	@Override
+	protected Object filterAndWrapModel(Map<String, Object> model, HttpServletRequest request) {
+		Object value = super.filterAndWrapModel(model, request);
+		String jsonpParameterValue = getJsonpParameterValue(request);
+		if (jsonpParameterValue != null) {
+			if(value instanceof MappingJacksonValue) {
+				((MappingJacksonValue) value).setJsonpFunction(jsonpParameterValue);
+			} else {
+				MappingJacksonValue container = new MappingJacksonValue(value);
+				container.setJsonpFunction(jsonpParameterValue);
+				value = container;
+			}
 		}
-		Class<?> serializationView = null;
+		return value;
+	}
+
+	@Override
+	protected void writePrefix(JsonGenerator generator, Object object) throws IOException {
+		if (this.jsonPrefix != null) {
+			generator.writeRaw(this.jsonPrefix);
+		}
 		String jsonpFunction = null;
-		if (value instanceof MappingJacksonValue) {
-			MappingJacksonValue container = (MappingJacksonValue) value;
-			value = container.getValue();
-			serializationView = container.getSerializationView();
-			jsonpFunction = container.getJsonpFunction();
+		if (object instanceof MappingJacksonValue) {
+			jsonpFunction = ((MappingJacksonValue)object).getJsonpFunction();
 		}
 		if (jsonpFunction != null) {
 			generator.writeRaw(jsonpFunction + "(" );
 		}
-		if (serializationView != null) {
-			this.objectMapper.writerWithView(serializationView).writeValue(generator, value);
-		}
-		else {
-			this.objectMapper.writeValue(generator, value);
+	}
+
+	@Override
+	protected void writeSuffix(JsonGenerator generator, Object object) throws IOException {
+		String jsonpFunction = null;
+		if (object instanceof MappingJacksonValue) {
+			jsonpFunction = ((MappingJacksonValue)object).getJsonpFunction();
 		}
 		if (jsonpFunction != null) {
 			generator.writeRaw(");");
-			generator.flush();
 		}
 	}
 

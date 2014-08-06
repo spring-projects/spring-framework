@@ -18,9 +18,8 @@ package org.springframework.http.converter.json;
 
 /**
  * A simple holder for the POJO to serialize via
- * {@link org.springframework.http.converter.json.MappingJackson2HttpMessageConverter
- * MappingJackson2HttpMessageConverter} along with further serialization
- * instructions to be passed in to the converter.
+ * {@link MappingJackson2HttpMessageConverter} along with further
+ * serialization instructions to be passed in to the converter.
  *
  * <p>On the server side this wrapper is added with a
  * {@code ResponseBodyInterceptor} after content negotiation selects the

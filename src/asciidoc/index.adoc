@@ -31616,7 +31616,7 @@ response. However, it stops short of writing any error content to the body of th
 response while your application may need to add developer-friendly content to every
 error response for example when providing a REST API. You can prepare a `ModelAndView`
 and render error content through view resolution -- i.e. by configuring a
-`ContentNegotiatingViewResolver`, `MappingJacksonJsonView`, and so on. However, you may
+`ContentNegotiatingViewResolver`, `MappingJackson2JsonView`, and so on. However, you may
 prefer to use `@ExceptionHandler` methods instead.
 
 If you prefer to write error content via `@ExceptionHandler` methods you can extend
@@ -32192,9 +32192,12 @@ This is the complete list of HttpMessageConverters set up by mvc:annotation-driv
 .. `FormHttpMessageConverter` converts form data to/from a `MultiValueMap<String,
 String>`.
 .. `Jaxb2RootElementHttpMessageConverter` converts Java objects to/from XML -- added if
-JAXB2 is present on the classpath.
-.. `MappingJackson2HttpMessageConverter` (or `MappingJacksonHttpMessageConverter`)
-converts to/from JSON -- added if Jackson 2 (or Jackson) is present on the classpath.
+JAXB2 is present and Jackson 2 XML extension is not present on the classpath.
+.. `MappingJackson2HttpMessageConverter` converts to/from JSON -- added if Jackson 2
+is present on the classpath.
+.. `MappingJackson2XmlHttpMessageConverter` converts to/from XML -- added if
+https://github.com/FasterXML/jackson-dataformat-xml[Jackson 2 XML extension] is present
+on the classpath.
 .. `AtomFeedHttpMessageConverter` converts Atom feeds -- added if Rome is present on the
 classpath.
 .. `RssChannelHttpMessageConverter` converts RSS feeds -- added if Rome is present on
@@ -35255,10 +35258,10 @@ https://spring.io/blog/2009/03/16/adding-an-atom-view-to-an-application-using-sp
 
 [[view-xml-marshalling]]
 === XML Marshalling View
-The `MarhsallingView` uses an XML `Marshaller` defined in the `org.springframework.oxm`
+The `MarshallingView` uses an XML `Marshaller` defined in the `org.springframework.oxm`
 package to render the response content as XML. The object to be marshalled can be set
 explicitly using `MarhsallingView`'s `modelKey` bean property. Alternatively, the view
-will iterate over all model properties and marshal only those types that are supported
+will iterate over all model properties and marshal the first type that is supported
 by the `Marshaller`. For more information on the functionality in the
 `org.springframework.oxm` package refer to the chapter <<oxm,Marshalling XML using O/X
 Mappers>>.
@@ -35268,8 +35271,7 @@ Mappers>>.
 
 [[view-json-mapping]]
 === JSON Mapping View
-The `MappingJackson2JsonView` (or `MappingJacksonJsonView` depending on the the Jackson
-version you have) uses the Jackson library's `ObjectMapper` to render the response
+The `MappingJackson2JsonView` uses the Jackson library's `ObjectMapper` to render the response
 content as JSON. By default, the entire contents of the model map (with the exception of
 framework-specific classes) will be encoded as JSON. For cases where the contents of the
 map need to be filtered, users may specify a specific set of model attributes to encode
@@ -35280,6 +35282,23 @@ rather than as a map of model attributes.
 JSON mapping can be customized as needed through the use of Jackson's provided
 annotations. When further control is needed, a custom `ObjectMapper` can be injected
 through the `ObjectMapper` property for cases where custom JSON
+serializers/deserializers need to be provided for specific types.
+
+
+
+
+[[view-xml-mapping]]
+=== XML Mapping View
+The `MappingJackson2XmlView` uses the
+https://github.com/FasterXML/jackson-dataformat-xml[Jackson XML extension]'s `XmlMapper`
+to render the response content as XML. If the model contains multiples entries, the
+object to be serialized should be set explicitly using `MappingJackson2XmlView`'s
+`modelKey` bean property. If the model contains a single entry, it will be serialized
+automatically.
+
+XML mapping can be customized as needed through the use of JAXB or Jackson's provided
+annotations. When further control is needed, a custom `XmlMapper` can be injected
+through the `ObjectMapper` property for cases where custom XML
 serializers/deserializers need to be provided for specific types.
 
 
@@ -40459,13 +40478,24 @@ can be injected via constructor or bean properties. By default this converter su
 
 
 [[rest-mapping-json-converter]]
-===== MappingJackson2HttpMessageConverter (or MappingJacksonHttpMessageConverter with Jackson 1.x)
+===== MappingJackson2HttpMessageConverter
 An `HttpMessageConverter` implementation that can read and write JSON using Jackson's
 `ObjectMapper`. JSON mapping can be customized as needed through the use of Jackson's
 provided annotations. When further control is needed, a custom `ObjectMapper` can be
 injected through the `ObjectMapper` property for cases where custom JSON
 serializers/deserializers need to be provided for specific types. By default this
 converter supports ( `application/json`).
+
+
+[[rest-mapping-xml-converter]]
+===== MappingJackson2XmlHttpMessageConverter
+An `HttpMessageConverter` implementation that can read and write XML using
+https://github.com/FasterXML/jackson-dataformat-xml[Jackson XML] extension's
+`XmlMapper`. XML mapping can be customized as needed through the use of JAXB
+or Jackson's provided annotations. When further control is needed, a custom `XmlMapper`
+can be injected through the `ObjectMapper` property for cases where custom XML
+serializers/deserializers need to be provided for specific types. By default this
+converter supports ( `application/xml`).
 
 
 [[rest-source-converter]]

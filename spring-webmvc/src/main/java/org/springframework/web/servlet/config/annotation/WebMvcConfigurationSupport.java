@@ -48,6 +48,7 @@ import org.springframework.http.converter.json.GsonHttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.http.converter.support.AllEncompassingFormHttpMessageConverter;
 import org.springframework.http.converter.xml.Jaxb2RootElementHttpMessageConverter;
+import org.springframework.http.converter.xml.MappingJackson2XmlHttpMessageConverter;
 import org.springframework.http.converter.xml.SourceHttpMessageConverter;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.util.ClassUtils;
@@ -170,6 +171,9 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	private static final boolean jackson2Present =
 			ClassUtils.isPresent("com.fasterxml.jackson.databind.ObjectMapper", WebMvcConfigurationSupport.class.getClassLoader()) &&
 					ClassUtils.isPresent("com.fasterxml.jackson.core.JsonGenerator", WebMvcConfigurationSupport.class.getClassLoader());
+
+	private static final boolean jackson2XmlPresent =
+			ClassUtils.isPresent("com.fasterxml.jackson.dataformat.xml.XmlMapper", WebMvcConfigurationSupport.class.getClassLoader());
 
 	private static final boolean gsonPresent =
 			ClassUtils.isPresent("com.google.gson.Gson", WebMvcConfigurationSupport.class.getClassLoader());
@@ -302,7 +306,7 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 			map.put("atom", MediaType.APPLICATION_ATOM_XML);
 			map.put("rss", MediaType.valueOf("application/rss+xml"));
 		}
-		if (jaxb2Present) {
+		if (jaxb2Present || jackson2XmlPresent) {
 			map.put("xml", MediaType.APPLICATION_XML);
 		}
 		if (jackson2Present || gsonPresent) {
@@ -653,7 +657,10 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 			messageConverters.add(new AtomFeedHttpMessageConverter());
 			messageConverters.add(new RssChannelHttpMessageConverter());
 		}
-		if (jaxb2Present) {
+		if(jackson2XmlPresent) {
+			messageConverters.add(new MappingJackson2XmlHttpMessageConverter());
+		}
+		else if (jaxb2Present) {
 			messageConverters.add(new Jaxb2RootElementHttpMessageConverter());
 		}
 		if (jackson2Present) {

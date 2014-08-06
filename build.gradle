@@ -48,6 +48,7 @@ configure(allprojects) { project ->
 	ext.tomcatVersion        = "8.0.9"
 	ext.xstreamVersion       = "1.4.7"
 	ext.protobufVersion      = "2.5.0"
+	ext.woodstoxVersion      = "4.1.6"
 
 	ext.gradleScriptDir = "${rootProject.projectDir}/gradle"
 
@@ -326,7 +327,7 @@ project("spring-core") {
 		optional("log4j:log4j:1.2.17")
 		testCompile("org.apache.tomcat.embed:tomcat-embed-core:${tomcatVersion}")
 		testCompile("xmlunit:xmlunit:1.5")
-		testCompile("org.codehaus.woodstox:wstx-asl:3.2.7") {
+		testCompile("org.codehaus.woodstox:woodstox-core-asl:${woodstoxVersion}") {
 			exclude group: "stax", module: "stax-api"
 		}
 	}
@@ -665,6 +666,7 @@ project("spring-web") {
 		optional("org.apache.httpcomponents:httpclient:4.3.4")
 		optional("org.apache.httpcomponents:httpasyncclient:4.0.1")
 		optional("com.fasterxml.jackson.core:jackson-databind:${jackson2Version}")
+		optional("com.fasterxml.jackson.dataformat:jackson-dataformat-xml:${jackson2Version}")
 		optional("com.google.code.gson:gson:${gsonVersion}")
 		optional("com.rometools:rome:1.5.0")
 		optional("org.eclipse.jetty:jetty-servlet:${jettyVersion}") {
@@ -824,6 +826,7 @@ project("spring-webmvc") {
 			exclude group: "xml-apis", module: "xml-apis"
 		}
 		optional("com.fasterxml.jackson.core:jackson-databind:${jackson2Version}")
+		optional("com.fasterxml.jackson.dataformat:jackson-dataformat-xml:${jackson2Version}")
 		optional("com.rometools:rome:1.5.0")
 		optional("javax.el:javax.el-api:2.2.5")
 		optional("org.apache.tiles:tiles-api:${tiles3Version}")
