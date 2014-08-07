@@ -53,8 +53,8 @@ import org.springframework.context.ConfigurableApplicationContext;
  * The term <em>annotated class</em> can refer to any of the following.
  *
  * <ul>
- * <li>A class annotated with {@link org.springframework.context.annotation.Configuration
- * @Configuration}</li>
+ * <li>A class annotated with @{@link org.springframework.context.annotation.Configuration
+ * Configuration}</li>
  * <li>A component (i.e., a class annotated with
  * {@link org.springframework.stereotype.Component @Component},
  * {@link org.springframework.stereotype.Service @Service},

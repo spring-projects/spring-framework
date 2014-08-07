@@ -2529,7 +2529,8 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 			return 1;
 		}
 	}
-	
+
+	@SuppressWarnings("serial")
 	public static class MessageHeaders extends HashMap<String,Object> {	}
 
 	public static class GenericMessageTestHelper<T> {

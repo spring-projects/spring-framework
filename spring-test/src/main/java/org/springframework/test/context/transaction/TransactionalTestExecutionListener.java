@@ -114,7 +114,7 @@ import static org.springframework.core.annotation.AnnotationUtils.*;
  * {@link org.springframework.transaction.annotation.TransactionManagementConfigurer TransactionManagementConfigurer}
  * can be implemented by an
  * {@link org.springframework.context.annotation.Configuration @Configuration}
- * class. See {@link TestContextTransactionUtils#retrieveTransactionManager()}
+ * class. See {@link TestContextTransactionUtils#retrieveTransactionManager}
  * for details on the algorithm used to look up a transaction manager in
  * the test's {@code ApplicationContext}.
  *

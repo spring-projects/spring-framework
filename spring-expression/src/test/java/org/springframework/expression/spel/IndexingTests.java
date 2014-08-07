@@ -312,6 +312,7 @@ public class IndexingTests {
 		assertEquals("", expression.getValue(this, String.class));
 	}
 
+	@SuppressWarnings("unchecked")
 	@Test
 	public void resolveCollectionElementType() {
 		listNotGeneric = new ArrayList(2);
@@ -339,6 +340,7 @@ public class IndexingTests {
 
 	}
 
+	@SuppressWarnings("unchecked")
 	@Test
 	public void resolveMapKeyValueTypes() {
 		mapNotGeneric = new HashMap();
@@ -352,6 +354,7 @@ public class IndexingTests {
 	@FieldAnnotation
 	public Map mapNotGeneric;
 
+	@SuppressWarnings("unchecked")
 	@Test
 	public void testListOfScalar() {
 		listOfScalarNotGeneric = new ArrayList(1);
@@ -364,6 +367,7 @@ public class IndexingTests {
 	public List listOfScalarNotGeneric;
 
 
+	@SuppressWarnings("unchecked")
 	@Test
 	public void testListsOfMap() {
 		listOfMapsNotGeneric = new ArrayList();
