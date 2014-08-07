@@ -122,6 +122,11 @@ public class UrlBasedViewResolver extends AbstractCachingViewResolver implements
 	private final Map<String, Object> staticAttributes = new HashMap<String, Object>();
 
 	private Boolean exposePathVariables;
+	
+	private Boolean exposeContextBeansAsAttributes;
+
+	private String[] exposedContextBeanNames;
+	
 
 	/**
 	 * Set the view class that should be used to create views.
@@ -354,6 +359,31 @@ public class UrlBasedViewResolver extends AbstractCachingViewResolver implements
 	public void setExposePathVariables(Boolean exposePathVariables) {
 		this.exposePathVariables = exposePathVariables;
 	}
+	
+	/**
+	 * Set whether to make all Spring beans in the application context accessible
+	 * as request attributes, through lazy checking once an attribute gets accessed.
+	 * <p>This will make all such beans accessible in plain {@code ${...}}
+	 * expressions in a JSP 2.0 page, as well as in JSTL's {@code c:out}
+	 * value expressions.
+	 * <p>Default is "false".
+	 * @see InternalResourceView#setExposeContextBeansAsAttributes
+	 */
+	public void setExposeContextBeansAsAttributes(boolean exposeContextBeansAsAttributes) {
+		this.exposeContextBeansAsAttributes = exposeContextBeansAsAttributes;
+	}
+
+	/**
+	 * Specify the names of beans in the context which are supposed to be exposed.
+	 * If this is non-null, only the specified beans are eligible for exposure as
+	 * attributes.
+	 * @see InternalResourceView#setExposedContextBeanNames
+	 */
+	public void setExposedContextBeanNames(String[] exposedContextBeanNames) {
+		this.exposedContextBeanNames = exposedContextBeanNames;
+	}
+
+	
 
 	@Override
 	protected void initApplicationContext() {
@@ -469,6 +499,12 @@ public class UrlBasedViewResolver extends AbstractCachingViewResolver implements
 		if (this.exposePathVariables != null) {
 			view.setExposePathVariables(exposePathVariables);
 		}
+		if (this.exposeContextBeansAsAttributes != null) {
+			view.setExposeContextBeansAsAttributes(this.exposeContextBeansAsAttributes);
+		}
+		if (this.exposedContextBeanNames != null) {
+			view.setExposedContextBeanNames(this.exposedContextBeanNames);
+		}		
 		return view;
 	}
 
