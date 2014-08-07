@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -70,6 +70,7 @@ public class InternalResourceViewResolver extends UrlBasedViewResolver {
 		setViewClass(viewClass);
 	}
 
+
 	/**
 	 * This resolver requires {@link InternalResourceView}.
 	 */
@@ -78,7 +79,6 @@ public class InternalResourceViewResolver extends UrlBasedViewResolver {
 		return InternalResourceView.class;
 	}
 
-
 	/**
 	 * Specify whether to always include the view rather than forward to it.
 	 * <p>Default is "false". Switch this flag on to enforce the use of a
@@ -86,7 +86,7 @@ public class InternalResourceViewResolver extends UrlBasedViewResolver {
 	 * @see InternalResourceView#setAlwaysInclude
 	 */
 	public void setAlwaysInclude(boolean alwaysInclude) {
-		this.alwaysInclude = Boolean.valueOf(alwaysInclude);
+		this.alwaysInclude = alwaysInclude;
 	}
 
 	/**
@@ -108,7 +108,7 @@ public class InternalResourceViewResolver extends UrlBasedViewResolver {
 	 * attributes.
 	 * @see InternalResourceView#setExposedContextBeanNames
 	 */
-	public void setExposedContextBeanNames(String[] exposedContextBeanNames) {
+	public void setExposedContextBeanNames(String... exposedContextBeanNames) {
 		this.exposedContextBeanNames = exposedContextBeanNames;
 	}
 

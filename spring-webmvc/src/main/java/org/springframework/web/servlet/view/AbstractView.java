@@ -227,7 +227,7 @@ public abstract class AbstractView extends WebApplicationObjectSupport implement
 	}
 
 	/**
-	 * Whether to add path variables in the model or not.
+	 * Specify whether to add path variables to the model or not.
 	 * <p>Path variables are commonly bound to URI template variables through the {@code @PathVariable}
 	 * annotation. They're are effectively URI template variables with type conversion applied to
 	 * them to derive typed Object values. Such values are frequently needed in views for
@@ -235,14 +235,14 @@ public abstract class AbstractView extends WebApplicationObjectSupport implement
 	 * <p>Path variables added to the model override static attributes (see {@link #setAttributes(Properties)})
 	 * but not attributes already present in the model.
 	 * <p>By default this flag is set to {@code true}. Concrete view types can override this.
-	 * @param exposePathVariables {@code true} to expose path variables, and {@code false} otherwise.
+	 * @param exposePathVariables {@code true} to expose path variables, and {@code false} otherwise
 	 */
 	public void setExposePathVariables(boolean exposePathVariables) {
 		this.exposePathVariables = exposePathVariables;
 	}
 
 	/**
-	 * Returns the value of the flag indicating whether path variables should be added to the model or not.
+	 * Return whether to add path variables to the model or not.
 	 */
 	public boolean isExposePathVariables() {
 		return this.exposePathVariables;
