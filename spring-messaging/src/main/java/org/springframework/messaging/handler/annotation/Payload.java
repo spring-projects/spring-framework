@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,14 +25,15 @@ import java.lang.annotation.Target;
 import org.springframework.messaging.converter.MessageConverter;
 
 /**
- * Annotation that binds a method parameter to the payload of a message. The payload may
- * be passed through a {@link MessageConverter} to convert it from serialized form with a
+ * Annotation that binds a method parameter to the payload of a message. Can also
+ * be used to associate a payload to a method invocation. The payload may be passed
+ * through a {@link MessageConverter} to convert it from serialized form with a
  * specific MIME type to an Object matching the target method parameter.
  *
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-@Target(ElementType.PARAMETER)
+@Target({ElementType.PARAMETER, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 public @interface Payload {
