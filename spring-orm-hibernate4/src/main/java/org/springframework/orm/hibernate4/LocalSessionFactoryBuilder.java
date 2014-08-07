@@ -84,24 +84,26 @@ public class LocalSessionFactoryBuilder extends Configuration {
 	private static final String PACKAGE_INFO_SUFFIX = ".package-info";
 
 
-	private static final Set<TypeFilter> entityTypeFilters;
+	private static final Set<TypeFilter> defaultTypeFilters;
 
 	static {
-		entityTypeFilters = new LinkedHashSet<TypeFilter>(4);
-		entityTypeFilters.add(new AnnotationTypeFilter(Entity.class, false));
-		entityTypeFilters.add(new AnnotationTypeFilter(Embeddable.class, false));
-		entityTypeFilters.add(new AnnotationTypeFilter(MappedSuperclass.class, false));
+		defaultTypeFilters = new LinkedHashSet<TypeFilter>(4);
+		defaultTypeFilters.add(new AnnotationTypeFilter(Entity.class, false));
+		defaultTypeFilters.add(new AnnotationTypeFilter(Embeddable.class, false));
+		defaultTypeFilters.add(new AnnotationTypeFilter(MappedSuperclass.class, false));
 		try {
 			@SuppressWarnings("unchecked")
 			Class<? extends Annotation> converterAnnotation = (Class<? extends Annotation>)
 					ClassUtils.forName("javax.persistence.Converter", LocalSessionFactoryBuilder.class.getClassLoader());
-			entityTypeFilters.add(new AnnotationTypeFilter(converterAnnotation, false));
+			defaultTypeFilters.add(new AnnotationTypeFilter(converterAnnotation, false));
 		}
 		catch (ClassNotFoundException ex) {
 			// JPA 2.1 API not available - Hibernate <4.3
 		}
 	}
 
+
+	private TypeFilter[] entityTypeFilters = defaultTypeFilters.toArray(new TypeFilter[defaultTypeFilters.size()]);
 
 	private final ResourcePatternResolver resourcePatternResolver;
 
@@ -194,6 +196,7 @@ public class LocalSessionFactoryBuilder extends Configuration {
 	 * on to the SessionFactory: as an instance, a Class, or a String class name.
 	 * <p>Note that the package location of the {@code MultiTenantConnectionProvider}
 	 * interface changed between Hibernate 4.2 and 4.3. This method accepts both variants.
+	 * @since 4.0
 	 * @see AvailableSettings#MULTI_TENANT_CONNECTION_PROVIDER
 	 */
 	public LocalSessionFactoryBuilder setMultiTenantConnectionProvider(Object multiTenantConnectionProvider) {
@@ -204,6 +207,7 @@ public class LocalSessionFactoryBuilder extends Configuration {
 	/**
 	 * Set a Hibernate 4.1/4.2/4.3 {@code CurrentTenantIdentifierResolver} to be passed
 	 * on to the SessionFactory: as an instance, a Class, or a String class name.
+	 * @since 4.0
 	 * @see AvailableSettings#MULTI_TENANT_IDENTIFIER_RESOLVER
 	 */
 	public LocalSessionFactoryBuilder setCurrentTenantIdentifierResolver(Object currentTenantIdentifierResolver) {
@@ -216,10 +220,24 @@ public class LocalSessionFactoryBuilder extends Configuration {
 	 * Allows for using a Spring-managed RegionFactory instance.
 	 * <p>Note: If this is set, the Hibernate settings should not define a
 	 * cache provider to avoid meaningless double configuration.
+	 * @since 4.0
 	 * @see org.hibernate.cache.spi.RegionFactory
 	 */
 	public LocalSessionFactoryBuilder setCacheRegionFactory(RegionFactory cacheRegionFactory) {
 		this.cacheRegionFactory = cacheRegionFactory;
+		return this;
+	}
+
+	/**
+	 * Specify custom type filters for Spring-based scanning for entity classes.
+	 * <p>Default is to search all specified packages for classes annotated with
+	 * {@code @javax.persistence.Entity}, {@code @javax.persistence.Embeddable}
+	 * or {@code @javax.persistence.MappedSuperclass}.
+	 * @since 4.1
+	 * @see #scanPackages
+	 */
+	public LocalSessionFactoryBuilder setEntityTypeFilters(TypeFilter... entityTypeFilters) {
+		this.entityTypeFilters = entityTypeFilters;
 		return this;
 	}
 
@@ -298,9 +316,11 @@ public class LocalSessionFactoryBuilder extends Configuration {
 	 * the current class descriptor contained in the metadata reader.
 	 */
 	private boolean matchesEntityTypeFilter(MetadataReader reader, MetadataReaderFactory readerFactory) throws IOException {
-		for (TypeFilter filter : entityTypeFilters) {
-			if (filter.match(reader, readerFactory)) {
-				return true;
+		if (this.entityTypeFilters != null) {
+			for (TypeFilter filter : this.entityTypeFilters) {
+				if (filter.match(reader, readerFactory)) {
+					return true;
+				}
 			}
 		}
 		return false;
