@@ -155,12 +155,14 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 		return builder.toString();
 	}
 
+
 	// Static builder methods
 
 	/**
 	 * Creates a builder with the given status.
 	 * @param status the response status
 	 * @return the created builder
+	 * @since 4.1
 	 */
 	public static BodyBuilder status(HttpStatus status) {
 		return new DefaultBuilder(status);
@@ -170,6 +172,7 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 	 * Creates a builder with the given status.
 	 * @param status the response status
 	 * @return the created builder
+	 * @since 4.1
 	 */
 	public static BodyBuilder status(int status) {
 		return status(HttpStatus.valueOf(status));
@@ -178,6 +181,7 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 	/**
 	 * Creates a builder with the status set to {@linkplain HttpStatus#OK OK}.
 	 * @return the created builder
+	 * @since 4.1
 	 */
 	public static BodyBuilder ok() {
 		return status(HttpStatus.OK);
@@ -187,6 +191,7 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 	 * A shortcut for creating a {@code ResponseEntity} with the given body and
 	 * status set to {@linkplain HttpStatus#OK OK}.
 	 * @return the created {@code ResponseEntity}
+	 * @since 4.1
 	 */
 	public static <T> ResponseEntity<T> ok(T body) {
 		BodyBuilder builder = ok();
@@ -198,6 +203,7 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 	 * status and a location header set to the given URI.
 	 * @param location the location URI
 	 * @return the created builder
+	 * @since 4.1
 	 */
 	public static BodyBuilder created(URI location) {
 		BodyBuilder builder = status(HttpStatus.CREATED);
@@ -207,6 +213,7 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 	/**
 	 * Creates a builder with an {@link HttpStatus#ACCEPTED ACCEPTED} status.
 	 * @return the created builder
+	 * @since 4.1
 	 */
 	public static BodyBuilder accepted() {
 		return status(HttpStatus.ACCEPTED);
@@ -215,9 +222,19 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 	/**
 	 * Creates a builder with a {@link HttpStatus#NO_CONTENT NO_CONTENT} status.
 	 * @return the created builder
+	 * @since 4.1
 	 */
 	public static HeadersBuilder<?> noContent() {
 		return status(HttpStatus.NO_CONTENT);
+	}
+
+	/**
+	 * Creates a builder with a {@link HttpStatus#NOT_FOUND NOT_FOUND} status.
+	 * @return the created builder
+	 * @since 4.1
+	 */
+	public static HeadersBuilder<?> notFound() {
+		return status(HttpStatus.NOT_FOUND);
 	}
 
 

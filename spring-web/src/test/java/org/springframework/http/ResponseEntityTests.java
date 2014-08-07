@@ -20,9 +20,13 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
 
-import static org.junit.Assert.*;
 import org.junit.Test;
 
+import static org.junit.Assert.*;
+
+/**
+ * @author Arjen Poutsma
+ */
 public class ResponseEntityTests {
 
 	@Test
@@ -94,6 +98,15 @@ public class ResponseEntityTests {
 
 		assertNotNull(responseEntity);
 		assertEquals(HttpStatus.NO_CONTENT, responseEntity.getStatusCode());
+		assertNull(responseEntity.getBody());
+	}
+
+	@Test
+	public void notFound() throws URISyntaxException {
+		ResponseEntity<Void> responseEntity = ResponseEntity.notFound().build();
+
+		assertNotNull(responseEntity);
+		assertEquals(HttpStatus.NOT_FOUND, responseEntity.getStatusCode());
 		assertNull(responseEntity.getBody());
 	}
 
