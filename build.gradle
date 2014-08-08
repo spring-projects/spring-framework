@@ -28,7 +28,7 @@ configure(allprojects) { project ->
 	ext.gsonVersion          = "2.2.4"
 	ext.jasperReportsVersion = "5.6.0"
 	ext.jettyVersion         = "9.2.2.v20140723"
-	ext.jodaVersion          = "2.3"
+	ext.jodaVersion          = "2.4"
 	ext.junitVersion         = "4.11"
 	ext.openJpaVersion       = "2.2.2"  // 2.3.0 not Java 8 compatible (based on ASM 4)
 	ext.slf4jVersion         = "1.7.7"
@@ -106,7 +106,7 @@ configure(allprojects) { project ->
 		testCompile("org.mockito:mockito-core:1.9.5")
 
 		sniffer("org.codehaus.mojo:animal-sniffer-ant-tasks:${snifferVersion}")
-		javaApiSignature("org.codehaus.mojo.signature:java16:1.1@signature") // As from Java6_18
+		javaApiSignature("org.codehaus.mojo.signature:java16:1.1@signature")  // as from JDK 6 update 18
 	}
 
 	task copyJavaApiSignature(type: Copy) {
@@ -147,9 +147,9 @@ configure(allprojects) { project ->
 	}
 
 	ext.javadocLinks = [
-		"http://docs.oracle.com/javase/7/docs/api/",
+		"http://docs.oracle.com/javase/8/docs/api/",
 		"http://docs.oracle.com/javaee/7/api/",
-		"http://docs.oracle.com/cd/E13222_01/wls/docs90/javadocs/", // CommonJ
+		"http://docs.oracle.com/cd/E13222_01/wls/docs90/javadocs/",  // CommonJ
 		"http://pic.dhe.ibm.com/infocenter/wasinfo/v7r0/topic/com.ibm.websphere.javadoc.doc/web/apidocs/",
 		"http://glassfish.java.net/nonav/docs/v3/api/",
 		"http://docs.jboss.org/jbossas/javadoc/4.0.5/connector/",
