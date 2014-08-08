@@ -159,8 +159,8 @@ public class ComponentScanAnnotationIntegrationTests {
 	@Test
 	public void withCustomTypeFilter() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(ComponentScanWithCustomTypeFilter.class);
-		assertFalse(ctx.getDefaultListableBeanFactory().containsSingleton("kustomBean"));
-		KustomAnnotationAutowiredBean testBean = ctx.getBean("kustomBean", KustomAnnotationAutowiredBean.class);
+		assertFalse(ctx.getDefaultListableBeanFactory().containsSingleton("componentScanParserTests.KustomAnnotationAutowiredBean"));
+		KustomAnnotationAutowiredBean testBean = ctx.getBean("componentScanParserTests.KustomAnnotationAutowiredBean", KustomAnnotationAutowiredBean.class);
 		assertThat(testBean.getDependency(), notNullValue());
 	}
 

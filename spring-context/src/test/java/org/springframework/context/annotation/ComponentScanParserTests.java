@@ -135,7 +135,6 @@ public class ComponentScanParserTests {
 	 * Intentionally spelling "custom" with a "k" since there are numerous
 	 * classes in this package named *Custom*.
 	 */
-	@Component("kustomBean")
 	public static class KustomAnnotationAutowiredBean {
 
 		@Autowired
