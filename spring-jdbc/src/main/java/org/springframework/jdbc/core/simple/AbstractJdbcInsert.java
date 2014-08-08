@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -180,26 +180,26 @@ public abstract class AbstractJdbcInsert {
 	}
 
 	/**
-	 * Get the names of any generated keys
-	 */
-	public String[] getGeneratedKeyNames() {
-		return this.generatedKeyNames;
-	}
-
-	/**
-	 * Set the names of any generated keys
-	 */
-	public void setGeneratedKeyNames(String[] generatedKeyNames) {
-		checkIfConfigurationModificationIsAllowed();
-		this.generatedKeyNames = generatedKeyNames;
-	}
-
-	/**
 	 * Specify the name of a single generated key column
 	 */
 	public void setGeneratedKeyName(String generatedKeyName) {
 		checkIfConfigurationModificationIsAllowed();
 		this.generatedKeyNames = new String[] {generatedKeyName};
+	}
+
+	/**
+	 * Set the names of any generated keys
+	 */
+	public void setGeneratedKeyNames(String... generatedKeyNames) {
+		checkIfConfigurationModificationIsAllowed();
+		this.generatedKeyNames = generatedKeyNames;
+	}
+
+	/**
+	 * Get the names of any generated keys
+	 */
+	public String[] getGeneratedKeyNames() {
+		return this.generatedKeyNames;
 	}
 
 	/**

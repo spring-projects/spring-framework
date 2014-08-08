@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import javax.sql.DataSource;
 
 import org.apache.commons.logging.Log;
@@ -292,7 +291,7 @@ public class TableMetaDataContext {
 	 * Build the insert string based on configuration and metadata information
 	 * @return the insert string to be used
 	 */
-	public String createInsertString(String[] generatedKeyNames) {
+	public String createInsertString(String... generatedKeyNames) {
 		HashSet<String> keys = new HashSet<String>(generatedKeyNames.length);
 		for (String key : generatedKeyNames) {
 			keys.add(key.toUpperCase());

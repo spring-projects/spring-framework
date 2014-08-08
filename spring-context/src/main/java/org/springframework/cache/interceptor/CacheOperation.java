@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,32 +26,32 @@ import org.springframework.util.Assert;
  * Base class for cache operations.
  *
  * @author Costin Leau
+ * @since 3.1
  */
 public abstract class CacheOperation {
 
-	private Set<String> cacheNames = Collections.emptySet();
+	private String name = "";
 
-	private String condition = "";
+	private Set<String> cacheNames = Collections.emptySet();
 
 	private String key = "";
 
-	private String name = "";
+	private String keyGenerator = "";
+
+	private String cacheManager = "";
+
+	private String cacheResolver = "";
+
+	private String condition = "";
 
 
-	public Set<String> getCacheNames() {
-		return cacheNames;
-	}
-
-	public String getCondition() {
-		return condition;
-	}
-
-	public String getKey() {
-		return key;
+	public void setName(String name) {
+		Assert.hasText(name);
+		this.name = name;
 	}
 
 	public String getName() {
-		return name;
+		return this.name;
 	}
 
 	public void setCacheName(String cacheName) {
@@ -59,17 +59,16 @@ public abstract class CacheOperation {
 		this.cacheNames = Collections.singleton(cacheName);
 	}
 
-	public void setCacheNames(String[] cacheNames) {
-		Assert.notEmpty(cacheNames);
+	public void setCacheNames(String... cacheNames) {
 		this.cacheNames = new LinkedHashSet<String>(cacheNames.length);
-		for (String string : cacheNames) {
-			this.cacheNames.add(string);
+		for (String cacheName : cacheNames) {
+			Assert.hasText(cacheName, "Cache name must be non-null if specified");
+			this.cacheNames.add(cacheName);
 		}
 	}
 
-	public void setCondition(String condition) {
-		Assert.notNull(condition);
-		this.condition = condition;
+	public Set<String> getCacheNames() {
+		return this.cacheNames;
 	}
 
 	public void setKey(String key) {
@@ -77,10 +76,46 @@ public abstract class CacheOperation {
 		this.key = key;
 	}
 
-	public void setName(String name) {
-		Assert.hasText(name);
-		this.name = name;
+	public String getKey() {
+		return this.key;
 	}
+
+	public void setKeyGenerator(String keyGenerator) {
+		Assert.notNull(keyGenerator);
+		this.keyGenerator = keyGenerator;
+	}
+
+	public String getKeyGenerator() {
+		return this.keyGenerator;
+	}
+
+	public void setCacheManager(String cacheManager) {
+		Assert.notNull(cacheManager);
+		this.cacheManager = cacheManager;
+	}
+
+	public String getCacheManager() {
+		return this.cacheManager;
+	}
+
+	public void setCacheResolver(String cacheResolver) {
+		Assert.notNull(cacheManager);
+		this.cacheResolver = cacheResolver;
+	}
+
+	public String getCacheResolver() {
+		return this.cacheResolver;
+	}
+
+	public void setCondition(String condition) {
+		Assert.notNull(condition);
+		this.condition = condition;
+	}
+
+	public String getCondition() {
+		return this.condition;
+	}
+
 
 	/**
 	 * This implementation compares the {@code toString()} results.
@@ -116,17 +151,15 @@ public abstract class CacheOperation {
 	 * <p>Available to subclasses, for inclusion in their {@code toString()} result.
 	 */
 	protected StringBuilder getOperationDescription() {
-		StringBuilder result = new StringBuilder();
-		result.append(getClass().getSimpleName());
-		result.append("[");
-		result.append(this.name);
-		result.append("] caches=");
-		result.append(this.cacheNames);
-		result.append(" | key='");
-		result.append(this.key);
-		result.append("' | condition='");
-		result.append(this.condition);
-		result.append("'");
+		StringBuilder result = new StringBuilder(getClass().getSimpleName());
+		result.append("[").append(this.name);
+		result.append("] caches=").append(this.cacheNames);
+		result.append(" | key='").append(this.key);
+		result.append("' | keyGenerator='").append(this.keyGenerator);
+		result.append("' | cacheManager='").append(this.cacheManager);
+		result.append("' | cacheResolver='").append(this.cacheResolver);
+		result.append("' | condition='").append(this.condition).append("'");
 		return result;
 	}
+
 }

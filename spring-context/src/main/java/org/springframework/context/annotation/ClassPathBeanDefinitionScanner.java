@@ -167,7 +167,7 @@ public class ClassPathBeanDefinitionScanner extends ClassPathScanningCandidateCo
 	 * Set the name-matching patterns for determining autowire candidates.
 	 * @param autowireCandidatePatterns the patterns to match against
 	 */
-	public void setAutowireCandidatePatterns(String[] autowireCandidatePatterns) {
+	public void setAutowireCandidatePatterns(String... autowireCandidatePatterns) {
 		this.autowireCandidatePatterns = autowireCandidatePatterns;
 	}
 
@@ -224,7 +224,7 @@ public class ClassPathBeanDefinitionScanner extends ClassPathScanningCandidateCo
 			AnnotationConfigUtils.registerAnnotationConfigProcessors(this.registry);
 		}
 
-		return this.registry.getBeanDefinitionCount() - beanCountAtScanStart;
+		return (this.registry.getBeanDefinitionCount() - beanCountAtScanStart);
 	}
 
 	/**

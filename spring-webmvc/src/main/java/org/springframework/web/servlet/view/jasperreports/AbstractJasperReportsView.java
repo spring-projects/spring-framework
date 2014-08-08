@@ -228,7 +228,7 @@ public abstract class AbstractJasperReportsView extends AbstractUrlBasedView {
 	 * @see net.sf.jasperreports.engine.data.JRBeanCollectionDataSource
 	 * @see net.sf.jasperreports.engine.data.JRBeanArrayDataSource
 	 */
-	public void setSubReportDataKeys(String[] subReportDataKeys) {
+	public void setSubReportDataKeys(String... subReportDataKeys) {
 		this.subReportDataKeys = subReportDataKeys;
 	}
 

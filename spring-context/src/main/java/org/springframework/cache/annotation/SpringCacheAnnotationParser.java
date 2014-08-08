@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,24 +55,25 @@ public class SpringCacheAnnotationParser implements CacheAnnotationParser, Seria
 		Collection<CacheEvict> evicts = getAnnotations(ae, CacheEvict.class);
 		if (evicts != null) {
 			ops = lazyInit(ops);
-			for (CacheEvict e : evicts) {
-				ops.add(parseEvictAnnotation(ae, e));
+			for (CacheEvict evict : evicts) {
+				ops.add(parseEvictAnnotation(ae, evict));
 			}
 		}
-		Collection<CachePut> updates = getAnnotations(ae, CachePut.class);
-		if (updates != null) {
+		Collection<CachePut> puts = getAnnotations(ae, CachePut.class);
+		if (puts != null) {
 			ops = lazyInit(ops);
-			for (CachePut p : updates) {
-				ops.add(parseUpdateAnnotation(ae, p));
+			for (CachePut put : puts) {
+				ops.add(parsePutAnnotation(ae, put));
 			}
 		}
-		Collection<Caching> caching = getAnnotations(ae, Caching.class);
-		if (caching != null) {
+		Collection<Caching> cachings = getAnnotations(ae, Caching.class);
+		if (cachings != null) {
 			ops = lazyInit(ops);
-			for (Caching c : caching) {
-				ops.addAll(parseCachingAnnotation(ae, c));
+			for (Caching caching : cachings) {
+				ops.addAll(parseCachingAnnotation(ae, caching));
 			}
 		}
+
 		return ops;
 	}
 
@@ -81,34 +82,34 @@ public class SpringCacheAnnotationParser implements CacheAnnotationParser, Seria
 	}
 
 	CacheableOperation parseCacheableAnnotation(AnnotatedElement ae, Cacheable caching) {
-		CacheableOperation cuo = new CacheableOperation();
-		cuo.setCacheNames(caching.value());
-		cuo.setCondition(caching.condition());
-		cuo.setUnless(caching.unless());
-		cuo.setKey(caching.key());
-		cuo.setName(ae.toString());
-		return cuo;
+		CacheableOperation op = new CacheableOperation();
+		op.setCacheNames(caching.value());
+		op.setCondition(caching.condition());
+		op.setUnless(caching.unless());
+		op.setKey(caching.key());
+		op.setName(ae.toString());
+		return op;
 	}
 
 	CacheEvictOperation parseEvictAnnotation(AnnotatedElement ae, CacheEvict caching) {
-		CacheEvictOperation ceo = new CacheEvictOperation();
-		ceo.setCacheNames(caching.value());
-		ceo.setCondition(caching.condition());
-		ceo.setKey(caching.key());
-		ceo.setCacheWide(caching.allEntries());
-		ceo.setBeforeInvocation(caching.beforeInvocation());
-		ceo.setName(ae.toString());
-		return ceo;
+		CacheEvictOperation op = new CacheEvictOperation();
+		op.setCacheNames(caching.value());
+		op.setCondition(caching.condition());
+		op.setKey(caching.key());
+		op.setCacheWide(caching.allEntries());
+		op.setBeforeInvocation(caching.beforeInvocation());
+		op.setName(ae.toString());
+		return op;
 	}
 
-	CacheOperation parseUpdateAnnotation(AnnotatedElement ae, CachePut caching) {
-		CachePutOperation cuo = new CachePutOperation();
-		cuo.setCacheNames(caching.value());
-		cuo.setCondition(caching.condition());
-		cuo.setUnless(caching.unless());
-		cuo.setKey(caching.key());
-		cuo.setName(ae.toString());
-		return cuo;
+	CacheOperation parsePutAnnotation(AnnotatedElement ae, CachePut caching) {
+		CachePutOperation op = new CachePutOperation();
+		op.setCacheNames(caching.value());
+		op.setCondition(caching.condition());
+		op.setUnless(caching.unless());
+		op.setKey(caching.key());
+		op.setName(ae.toString());
+		return op;
 	}
 
 	Collection<CacheOperation> parseCachingAnnotation(AnnotatedElement ae, Caching caching) {
@@ -132,7 +133,7 @@ public class SpringCacheAnnotationParser implements CacheAnnotationParser, Seria
 		if (!ObjectUtils.isEmpty(updates)) {
 			ops = lazyInit(ops);
 			for (CachePut update : updates) {
-				ops.add(parseUpdateAnnotation(ae, update));
+				ops.add(parsePutAnnotation(ae, update));
 			}
 		}
 
