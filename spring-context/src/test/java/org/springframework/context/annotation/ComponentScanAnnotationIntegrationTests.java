@@ -23,7 +23,17 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.util.HashSet;
 
+import example.scannable.CustomComponent;
+import example.scannable.CustomStereotype;
+import example.scannable.DefaultNamedComponent;
+import example.scannable.FooService;
+import example.scannable.MessageBean;
+import example.scannable.ScopedProxyTestBean;
+import example.scannable_implicitbasepackage.ComponentScanAnnotatedConfigWithImplicitBasePackage;
+import example.scannable_scoped.CustomScopeAnnotationBean;
+import example.scannable_scoped.MyScope;
 import org.junit.Test;
+
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.factory.annotation.CustomAutowireConfigurer;
 import org.springframework.beans.factory.config.BeanDefinition;
@@ -35,16 +45,6 @@ import org.springframework.context.annotation.componentscan.simple.SimpleCompone
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.tests.context.SimpleMapScope;
 import org.springframework.util.SerializationTestUtils;
-
-import example.scannable.CustomComponent;
-import example.scannable.CustomStereotype;
-import example.scannable.DefaultNamedComponent;
-import example.scannable.FooService;
-import example.scannable.MessageBean;
-import example.scannable.ScopedProxyTestBean;
-import example.scannable_implicitbasepackage.ComponentScanAnnotatedConfigWithImplicitBasePackage;
-import example.scannable_scoped.CustomScopeAnnotationBean;
-import example.scannable_scoped.MyScope;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
@@ -116,10 +116,10 @@ public class ComponentScanAnnotationIntegrationTests {
 		ctx.getBean(ComposedAnnotationConfig.class);
 		ctx.getBean(SimpleComponent.class);
 		assertThat("config class bean not found",
-			ctx.containsBeanDefinition("componentScanAnnotationIntegrationTests.ComposedAnnotationConfig"), is(true));
-		assertThat("@ComponentScan annotated @Configuration class registered directly against "
-				+ "AnnotationConfigApplicationContext did not trigger component scanning as expected",
-			ctx.containsBean("simpleComponent"), is(true));
+				ctx.containsBeanDefinition("componentScanAnnotationIntegrationTests.ComposedAnnotationConfig"), is(true));
+		assertThat("@ComponentScan annotated @Configuration class registered directly against " +
+						"AnnotationConfigApplicationContext did not trigger component scanning as expected",
+				ctx.containsBean("simpleComponent"), is(true));
 	}
 
 	@Test
@@ -159,7 +159,8 @@ public class ComponentScanAnnotationIntegrationTests {
 	@Test
 	public void withCustomTypeFilter() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(ComponentScanWithCustomTypeFilter.class);
-		KustomAnnotationAutowiredBean testBean = ctx.getBean(KustomAnnotationAutowiredBean.class);
+		assertFalse(ctx.getDefaultListableBeanFactory().containsSingleton("kustomBean"));
+		KustomAnnotationAutowiredBean testBean = ctx.getBean("kustomBean", KustomAnnotationAutowiredBean.class);
 		assertThat(testBean.getDependency(), notNullValue());
 	}
 
@@ -294,7 +295,8 @@ class MyScopeMetadataResolver extends AnnotationScopeMetadataResolver {
 		useDefaultFilters=false,
 		includeFilters=@Filter(type=FilterType.CUSTOM, value=ComponentScanParserTests.CustomTypeFilter.class),
 		// exclude this class from scanning since it's in the scanned package
-		excludeFilters=@Filter(type=FilterType.ASSIGNABLE_TYPE, value=ComponentScanWithCustomTypeFilter.class))
+		excludeFilters=@Filter(type=FilterType.ASSIGNABLE_TYPE, value=ComponentScanWithCustomTypeFilter.class),
+		lazyInit = true)
 class ComponentScanWithCustomTypeFilter {
 	@Bean
 	@SuppressWarnings({ "rawtypes", "serial", "unchecked" })

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -161,6 +161,14 @@ public class ClassPathBeanDefinitionScanner extends ClassPathScanningCandidateCo
 	public void setBeanDefinitionDefaults(BeanDefinitionDefaults beanDefinitionDefaults) {
 		this.beanDefinitionDefaults =
 				(beanDefinitionDefaults != null ? beanDefinitionDefaults : new BeanDefinitionDefaults());
+	}
+
+	/**
+	 * Return the defaults to use for detected beans (never {@code null}).
+	 * @since 4.1
+	 */
+	public BeanDefinitionDefaults getBeanDefinitionDefaults() {
+		return this.beanDefinitionDefaults;
 	}
 
 	/**
