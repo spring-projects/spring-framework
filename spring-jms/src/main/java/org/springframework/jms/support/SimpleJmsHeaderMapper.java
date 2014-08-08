@@ -24,11 +24,10 @@ import java.util.Map;
 import java.util.Set;
 import javax.jms.Destination;
 import javax.jms.JMSException;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import javax.jms.Message;
 
 import org.springframework.messaging.MessageHeaders;
+import org.springframework.messaging.support.AbstractHeaderMapper;
 import org.springframework.util.StringUtils;
 
 /**
@@ -51,44 +50,13 @@ import org.springframework.util.StringUtils;
  *
  * @author Mark Fisher
  * @author Gary Russell
+ * @author Stephane Nicoll
  * @since 4.1
  */
-public class SimpleJmsHeaderMapper implements JmsHeaderMapper {
+public class SimpleJmsHeaderMapper extends AbstractHeaderMapper<Message> implements JmsHeaderMapper {
 
 	private static Set<Class<?>> SUPPORTED_PROPERTY_TYPES = new HashSet<Class<?>>(Arrays.asList(new Class<?>[] {
 			Boolean.class, Byte.class, Double.class, Float.class, Integer.class, Long.class, Short.class, String.class}));
-
-
-	private final Log logger = LogFactory.getLog(getClass());
-
-	private String inboundPrefix = "";
-
-	private String outboundPrefix = "";
-
-
-	/**
-	 * Specify a prefix to be appended to the message header name for any
-	 * JMS property that is being mapped into the MessageHeaders. The
-	 * default is an empty string (no prefix).
-	 * <p>This does not affect the JMS properties covered by the specification/API,
-	 * such as JMSCorrelationID, etc. The header names used for mapping such
-	 * properties are all defined in our {@link org.springframework.jms.support.JmsHeaders}.
-	 */
-	public void setInboundPrefix(String inboundPrefix) {
-		this.inboundPrefix = (inboundPrefix != null ? inboundPrefix : "");
-	}
-
-	/**
-	 * Specify a prefix to be appended to the JMS property name for any
-	 * message header that is being mapped into the JMS Message. The
-	 * default is an empty string (no prefix).
-	 * <p>This does not affect the JMS properties covered by the specification/API,
-	 * such as JMSCorrelationID, etc. The header names used for mapping such
-	 * properties are all defined in our {@link org.springframework.jms.support.JmsHeaders}.
-	 */
-	public void setOutboundPrefix(String outboundPrefix) {
-		this.outboundPrefix = (outboundPrefix != null ? outboundPrefix : "");
-	}
 
 
 	@Override
@@ -106,19 +74,19 @@ public class SimpleJmsHeaderMapper implements JmsHeaderMapper {
 					logger.info("failed to set JMSCorrelationID, skipping", e);
 				}
 			}
-			Object jmsReplyTo = headers.get(JmsHeaders.REPLY_TO);
-			if (jmsReplyTo instanceof Destination) {
+			Destination jmsReplyTo = getHeaderIfAvailable(headers, JmsHeaders.REPLY_TO, Destination.class);
+			if (jmsReplyTo != null) {
 				try {
-					jmsMessage.setJMSReplyTo((Destination) jmsReplyTo);
+					jmsMessage.setJMSReplyTo(jmsReplyTo);
 				}
 				catch (Exception e) {
 					logger.info("failed to set JMSReplyTo, skipping", e);
 				}
 			}
-			Object jmsType = headers.get(JmsHeaders.TYPE);
-			if (jmsType instanceof String) {
+			String jmsType = getHeaderIfAvailable(headers, JmsHeaders.TYPE, String.class);
+			if (jmsType != null) {
 				try {
-					jmsMessage.setJMSType((String) jmsType);
+					jmsMessage.setJMSType(jmsType);
 				}
 				catch (Exception e) {
 					logger.info("failed to set JMSType, skipping", e);
@@ -266,30 +234,22 @@ public class SimpleJmsHeaderMapper implements JmsHeaderMapper {
 	 * Add the outbound prefix if necessary.
 	 * <p>Convert {@link MessageHeaders#CONTENT_TYPE} to content_type for JMS compliance.
 	 */
-	private String fromHeaderName(String headerName) {
-		String propertyName = headerName;
-		if (StringUtils.hasText(this.outboundPrefix) && !propertyName.startsWith(this.outboundPrefix)) {
-			propertyName = this.outboundPrefix + headerName;
+	protected String fromHeaderName(String headerName) {
+		if (MessageHeaders.CONTENT_TYPE.equals(headerName)) {
+			return CONTENT_TYPE_PROPERTY;
 		}
-		else if (MessageHeaders.CONTENT_TYPE.equals(headerName)) {
-			propertyName = CONTENT_TYPE_PROPERTY;
-		}
-		return propertyName;
+		return super.fromHeaderName(headerName);
 	}
 
 	/**
 	 * Add the inbound prefix if necessary.
 	 * <p>Convert content_type to {@link MessageHeaders#CONTENT_TYPE}.
 	 */
-	private String toHeaderName(String propertyName) {
-		String headerName = propertyName;
-		if (StringUtils.hasText(this.inboundPrefix) && !headerName.startsWith(this.inboundPrefix)) {
-			headerName = this.inboundPrefix + propertyName;
+	protected String toHeaderName(String propertyName) {
+		if (CONTENT_TYPE_PROPERTY.equals(propertyName)) {
+			return MessageHeaders.CONTENT_TYPE;
 		}
-		else if (CONTENT_TYPE_PROPERTY.equals(propertyName)) {
-			headerName = MessageHeaders.CONTENT_TYPE;
-		}
-		return headerName;
+		return super.toHeaderName(propertyName);
 	}
 
 }
