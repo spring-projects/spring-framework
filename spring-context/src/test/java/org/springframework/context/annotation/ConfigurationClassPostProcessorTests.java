@@ -28,6 +28,7 @@ import org.junit.Test;
 import org.springframework.aop.scope.ScopedObject;
 import org.springframework.aop.scope.ScopedProxyUtils;
 import org.springframework.beans.factory.FactoryBean;
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -39,6 +40,7 @@ import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.annotation.componentscan.simple.SimpleComponent;
 import org.springframework.core.env.StandardEnvironment;
 import org.springframework.core.io.DescriptiveResource;
+import org.springframework.stereotype.Component;
 import org.springframework.tests.sample.beans.ITestBean;
 import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.util.Assert;
@@ -126,17 +128,31 @@ public class ConfigurationClassPostProcessorTests {
 	}
 
 	@Test
-	public void postProcessorWorksWithComposedConfigurationWithAttributeOverridesUsingReflection() {
+	public void postProcessorWorksWithComposedConfigurationWithAttributeOverrideForBasePackageUsingReflection() {
 		RootBeanDefinition beanDefinition = new RootBeanDefinition(
-				ComposedConfigurationWithAttributeOverridesClass.class);
+				ComposedConfigurationWithAttributeOverrideForBasePackage.class);
 		assertSupportForComposedAnnotation(beanDefinition);
 	}
 
 	@Test
-	public void postProcessorWorksWithComposedConfigurationWithAttributeOverridesUsingAsm() {
+	public void postProcessorWorksWithComposedConfigurationWithAttributeOverrideForBasePackageUsingAsm() {
 		RootBeanDefinition beanDefinition = new RootBeanDefinition(
-				ComposedConfigurationWithAttributeOverridesClass.class.getName());
+				ComposedConfigurationWithAttributeOverrideForBasePackage.class.getName());
 		assertSupportForComposedAnnotation(beanDefinition);
+	}
+
+	@Test
+	public void postProcessorWorksWithComposedConfigurationWithAttributeOverrideForExcludeFilterUsingReflection() {
+		RootBeanDefinition beanDefinition = new RootBeanDefinition(
+				ComposedConfigurationWithAttributeOverrideForExcludeFilter.class);
+		assertSupportForComposedAnnotationWithExclude(beanDefinition);
+	}
+
+	@Test
+	public void postProcessorWorksWithComposedConfigurationWithAttributeOverrideForExcludeFilterUsingAsm() {
+		RootBeanDefinition beanDefinition = new RootBeanDefinition(
+				ComposedConfigurationWithAttributeOverrideForExcludeFilter.class.getName());
+		assertSupportForComposedAnnotationWithExclude(beanDefinition);
 	}
 
 	@Test
@@ -179,6 +195,29 @@ public class ConfigurationClassPostProcessorTests {
 		RootBeanDefinition beanDefinition = new RootBeanDefinition(
 				SubMetaComponentScanConfigurationWithAttributeOverridesClass.class.getName());
 		assertSupportForComposedAnnotation(beanDefinition);
+	}
+
+	private void assertSupportForComposedAnnotation(RootBeanDefinition beanDefinition) {
+		beanFactory.registerBeanDefinition("config", beanDefinition);
+		ConfigurationClassPostProcessor pp = new ConfigurationClassPostProcessor();
+		pp.setEnvironment(new StandardEnvironment());
+		pp.postProcessBeanFactory(beanFactory);
+		SimpleComponent simpleComponent = beanFactory.getBean(SimpleComponent.class);
+		assertNotNull(simpleComponent);
+	}
+
+	private void assertSupportForComposedAnnotationWithExclude(RootBeanDefinition beanDefinition) {
+		beanFactory.registerBeanDefinition("config", beanDefinition);
+		ConfigurationClassPostProcessor pp = new ConfigurationClassPostProcessor();
+		pp.setEnvironment(new StandardEnvironment());
+		pp.postProcessBeanFactory(beanFactory);
+		try {
+			beanFactory.getBean(SimpleComponent.class);
+			fail("Should have thrown NoSuchBeanDefinitionException");
+		}
+		catch (NoSuchBeanDefinitionException ex) {
+			// expected
+		}
 	}
 
 	@Test
@@ -376,15 +415,6 @@ public class ConfigurationClassPostProcessorTests {
 		new ConfigurationClassPostProcessor().postProcessBeanFactory(beanFactory);
 
 		assertSame(beanFactory.getBean("genericRepo"), beanFactory.getBean("repoConsumer"));
-	}
-
-	private void assertSupportForComposedAnnotation(RootBeanDefinition beanDefinition) {
-		beanFactory.registerBeanDefinition("config", beanDefinition);
-		ConfigurationClassPostProcessor pp = new ConfigurationClassPostProcessor();
-		pp.setEnvironment(new StandardEnvironment());
-		pp.postProcessBeanFactory(beanFactory);
-		SimpleComponent simpleComponent = beanFactory.getBean(SimpleComponent.class);
-		assertNotNull(simpleComponent);
 	}
 
 	@Test
@@ -718,10 +748,17 @@ public class ConfigurationClassPostProcessorTests {
 	public static @interface ComposedConfigurationWithAttributeOverrides {
 
 		String[] basePackages() default {};
+
+		ComponentScan.Filter[] excludeFilters() default {};
 	}
 
 	@ComposedConfigurationWithAttributeOverrides(basePackages = "org.springframework.context.annotation.componentscan.simple")
-	public static class ComposedConfigurationWithAttributeOverridesClass {
+	public static class ComposedConfigurationWithAttributeOverrideForBasePackage {
+	}
+
+	@ComposedConfigurationWithAttributeOverrides(basePackages = "org.springframework.context.annotation.componentscan.simple",
+			excludeFilters = @ComponentScan.Filter(Component.class))
+	public static class ComposedConfigurationWithAttributeOverrideForExcludeFilter {
 	}
 
 	@ComposedConfigurationWithAttributeOverrides

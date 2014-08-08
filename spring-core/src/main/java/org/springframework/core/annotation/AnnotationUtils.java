@@ -578,34 +578,7 @@ public abstract class AnnotationUtils {
 			if (method.getParameterTypes().length == 0 && method.getReturnType() != void.class) {
 				try {
 					Object value = method.invoke(annotation);
-					if (classValuesAsString) {
-						if (value instanceof Class) {
-							value = ((Class<?>) value).getName();
-						}
-						else if (value instanceof Class[]) {
-							Class<?>[] clazzArray = (Class[]) value;
-							String[] newValue = new String[clazzArray.length];
-							for (int i = 0; i < clazzArray.length; i++) {
-								newValue[i] = clazzArray[i].getName();
-							}
-							value = newValue;
-						}
-					}
-					if (nestedAnnotationsAsMap && value instanceof Annotation) {
-						attrs.put(method.getName(),
-								getAnnotationAttributes((Annotation) value, classValuesAsString, true));
-					}
-					else if (nestedAnnotationsAsMap && value instanceof Annotation[]) {
-						Annotation[] realAnnotations = (Annotation[]) value;
-						AnnotationAttributes[] mappedAnnotations = new AnnotationAttributes[realAnnotations.length];
-						for (int i = 0; i < realAnnotations.length; i++) {
-							mappedAnnotations[i] = getAnnotationAttributes(realAnnotations[i], classValuesAsString, true);
-						}
-						attrs.put(method.getName(), mappedAnnotations);
-					}
-					else {
-						attrs.put(method.getName(), value);
-					}
+					attrs.put(method.getName(), adaptValue(value, classValuesAsString, nestedAnnotationsAsMap));
 				}
 				catch (Exception ex) {
 					throw new IllegalStateException("Could not obtain annotation attribute values", ex);
@@ -613,6 +586,48 @@ public abstract class AnnotationUtils {
 			}
 		}
 		return attrs;
+	}
+
+	/**
+	 * Adapt the given value according to the given class and nested annotation settings.
+	 * @param value the annotation attribute value
+	 * @param classValuesAsString whether to turn Class references into Strings (for
+	 * compatibility with {@link org.springframework.core.type.AnnotationMetadata}
+	 * or to preserve them as Class references
+	 * @param nestedAnnotationsAsMap whether to turn nested Annotation instances into
+	 * {@link AnnotationAttributes} maps (for compatibility with
+	 * {@link org.springframework.core.type.AnnotationMetadata} or to preserve them as
+	 * Annotation instances
+	 * @return the adapted value, or the original value if no adaptation is needed
+	 */
+	static Object adaptValue(Object value, boolean classValuesAsString, boolean nestedAnnotationsAsMap) {
+		if (classValuesAsString) {
+			if (value instanceof Class) {
+				value = ((Class<?>) value).getName();
+			}
+			else if (value instanceof Class[]) {
+				Class<?>[] clazzArray = (Class[]) value;
+				String[] newValue = new String[clazzArray.length];
+				for (int i = 0; i < clazzArray.length; i++) {
+					newValue[i] = clazzArray[i].getName();
+				}
+				value = newValue;
+			}
+		}
+		if (nestedAnnotationsAsMap && value instanceof Annotation) {
+			return getAnnotationAttributes((Annotation) value, classValuesAsString, true);
+		}
+		else if (nestedAnnotationsAsMap && value instanceof Annotation[]) {
+			Annotation[] realAnnotations = (Annotation[]) value;
+			AnnotationAttributes[] mappedAnnotations = new AnnotationAttributes[realAnnotations.length];
+			for (int i = 0; i < realAnnotations.length; i++) {
+				mappedAnnotations[i] = getAnnotationAttributes(realAnnotations[i], classValuesAsString, true);
+			}
+			return mappedAnnotations;
+		}
+		else {
+			return value;
+		}
 	}
 
 	/**
