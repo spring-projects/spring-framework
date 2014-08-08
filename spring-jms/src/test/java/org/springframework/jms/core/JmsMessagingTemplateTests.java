@@ -78,6 +78,11 @@ public class JmsMessagingTemplateTests {
 	}
 
 	@Test
+	public void validateJmsTemplate() {
+		assertSame(this.jmsTemplate, messagingTemplate.getJmsTemplate());
+	}
+
+	@Test
 	public void send() {
 		Destination destination = new Destination() {};
 		Message<String> message = createTextMessage();

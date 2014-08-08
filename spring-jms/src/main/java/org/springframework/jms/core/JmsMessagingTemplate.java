@@ -77,6 +77,13 @@ public class JmsMessagingTemplate extends AbstractMessagingTemplate<Destination>
 	}
 
 	/**
+	 * Return the configured {@link JmsTemplate}.
+	 */
+	public JmsTemplate getJmsTemplate() {
+		return jmsTemplate;
+	}
+
+	/**
 	 * Set the {@link MessageConverter} to use to convert a {@link Message} from
 	 * the messaging to and from a {@link javax.jms.Message}. By default, a
 	 * {@link MessagingMessageConverter} is defined using a {@link SimpleMessageConverter}
