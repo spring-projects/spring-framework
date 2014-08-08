@@ -155,7 +155,7 @@ public class JmsListenerEndpointRegistrar implements BeanFactoryAware, Initializ
 	 */
 	public void registerEndpoint(JmsListenerEndpoint endpoint, JmsListenerContainerFactory<?> factory) {
 		Assert.notNull(endpoint, "Endpoint must be set");
-		Assert.notNull(endpoint.getId(), "Endpoint id must be set");
+		Assert.hasText(endpoint.getId(), "Endpoint id must be set");
 		// Factory may be null, we defer the resolution right before actually creating the container
 		this.endpointDescriptors.add(new JmsListenerEndpointDescriptor(endpoint, factory));
 	}

@@ -59,6 +59,15 @@ public class JmsListenerEndpointRegistrarTests {
 	}
 
 	@Test
+	public void registerEmptyEndpointId() {
+		SimpleJmsListenerEndpoint endpoint = new SimpleJmsListenerEndpoint();
+		endpoint.setId("");
+
+		thrown.expect(IllegalArgumentException.class);
+		registrar.registerEndpoint(endpoint, containerFactory);
+	}
+
+	@Test
 	public void registerNullContainerFactoryIsAllowed() throws Exception {
 		SimpleJmsListenerEndpoint endpoint = new SimpleJmsListenerEndpoint();
 		endpoint.setId("some id");
