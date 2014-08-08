@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -60,7 +60,7 @@ public abstract class AbstractControllerUrlHandlerMapping extends AbstractDetect
 	 * e.g. a {@link org.springframework.web.servlet.handler.BeanNameUrlHandlerMapping},
 	 * alongside this ControllerClassNameHandlerMapping for application controllers.
 	 */
-	public void setExcludedPackages(String[] excludedPackages) {
+	public void setExcludedPackages(String... excludedPackages) {
 		this.excludedPackages = (excludedPackages != null) ?
 				new HashSet<String>(Arrays.asList(excludedPackages)) : new HashSet<String>();
 	}
@@ -69,7 +69,7 @@ public abstract class AbstractControllerUrlHandlerMapping extends AbstractDetect
 	 * Specify controller classes that should be excluded from this mapping.
 	 * Any such classes will simply be ignored by this HandlerMapping.
 	 */
-	public void setExcludedClasses(Class<?>[] excludedClasses) {
+	public void setExcludedClasses(Class<?>... excludedClasses) {
 		this.excludedClasses = (excludedClasses != null) ?
 				new HashSet<Class<?>>(Arrays.asList(excludedClasses)) : new HashSet<Class<?>>();
 	}

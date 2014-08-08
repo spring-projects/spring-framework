@@ -20,6 +20,7 @@ import java.util.Arrays;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.annotation.AnnotationAttributes;
@@ -44,9 +45,9 @@ public class ContextConfigurationAttributes {
 
 	private final Class<?> declaringClass;
 
-	private String[] locations;
-
 	private Class<?>[] classes;
+
+	private String[] locations;
 
 	private final boolean inheritLocations;
 
@@ -58,42 +59,6 @@ public class ContextConfigurationAttributes {
 
 	private final String name;
 
-
-	/**
-	 * Resolve resource locations from the {@link ContextConfiguration#locations() locations}
-	 * and {@link ContextConfiguration#value() value} attributes of the supplied
-	 * {@link ContextConfiguration} annotation.
-	 *
-	 * @throws IllegalStateException if both the locations and value attributes have been declared
-	 */
-	private static String[] resolveLocations(Class<?> declaringClass, ContextConfiguration contextConfiguration) {
-		return resolveLocations(declaringClass, contextConfiguration.locations(), contextConfiguration.value());
-	}
-
-	/**
-	 * Resolve resource locations from the supplied {@code locations} and
-	 * {@code value} arrays, which correspond to attributes of the same names in
-	 * the {@link ContextConfiguration} annotation.
-	 *
-	 * @throws IllegalStateException if both the locations and value attributes have been declared
-	 */
-	private static String[] resolveLocations(Class<?> declaringClass, String[] locations, String[] value) {
-		Assert.notNull(declaringClass, "declaringClass must not be null");
-
-		if (!ObjectUtils.isEmpty(value) && !ObjectUtils.isEmpty(locations)) {
-			String msg = String.format("Test class [%s] has been configured with @ContextConfiguration's 'value' %s "
-					+ "and 'locations' %s attributes. Only one declaration of resource "
-					+ "locations is permitted per @ContextConfiguration annotation.", declaringClass.getName(),
-				ObjectUtils.nullSafeToString(value), ObjectUtils.nullSafeToString(locations));
-			logger.error(msg);
-			throw new IllegalStateException(msg);
-		}
-		else if (!ObjectUtils.isEmpty(value)) {
-			locations = value;
-		}
-
-		return locations;
-	}
 
 	/**
 	 * Construct a new {@link ContextConfigurationAttributes} instance for the
@@ -118,11 +83,9 @@ public class ContextConfigurationAttributes {
 	 */
 	@SuppressWarnings("unchecked")
 	public ContextConfigurationAttributes(Class<?> declaringClass, AnnotationAttributes annAttrs) {
-		this(
-			declaringClass,
+		this(declaringClass,
 			resolveLocations(declaringClass, annAttrs.getStringArray("locations"), annAttrs.getStringArray("value")),
-			annAttrs.getClassArray("classes"),
-			annAttrs.getBoolean("inheritLocations"),
+			annAttrs.getClassArray("classes"), annAttrs.getBoolean("inheritLocations"),
 			(Class<? extends ApplicationContextInitializer<? extends ConfigurableApplicationContext>>[]) annAttrs.getClassArray("initializers"),
 			annAttrs.getBoolean("inheritInitializers"), annAttrs.getString("name"),
 			(Class<? extends ContextLoader>) annAttrs.getClass("loader"));
@@ -133,7 +96,6 @@ public class ContextConfigurationAttributes {
 	 * {@linkplain Class test class} that declared the
 	 * {@link ContextConfiguration @ContextConfiguration} annotation and its
 	 * corresponding attributes.
-	 *
 	 * @param declaringClass the test class that declared {@code @ContextConfiguration}
 	 * @param locations the resource locations declared via {@code @ContextConfiguration}
 	 * @param classes the annotated classes declared via {@code @ContextConfiguration}
@@ -148,6 +110,7 @@ public class ContextConfigurationAttributes {
 	@Deprecated
 	public ContextConfigurationAttributes(Class<?> declaringClass, String[] locations, Class<?>[] classes,
 			boolean inheritLocations, Class<? extends ContextLoader> contextLoaderClass) {
+
 		this(declaringClass, locations, classes, inheritLocations, null, true, null, contextLoaderClass);
 	}
 
@@ -167,8 +130,8 @@ public class ContextConfigurationAttributes {
 	 * @throws IllegalArgumentException if the {@code declaringClass} or {@code contextLoaderClass} is
 	 * {@code null}
 	 */
-	public ContextConfigurationAttributes(Class<?> declaringClass, String[] locations, Class<?>[] classes,
-			boolean inheritLocations,
+	public ContextConfigurationAttributes(
+			Class<?> declaringClass, String[] locations, Class<?>[] classes, boolean inheritLocations,
 			Class<? extends ApplicationContextInitializer<? extends ConfigurableApplicationContext>>[] initializers,
 			boolean inheritInitializers, Class<? extends ContextLoader> contextLoaderClass) {
 		this(declaringClass, locations, classes, inheritLocations, initializers, inheritInitializers, null,
@@ -180,7 +143,6 @@ public class ContextConfigurationAttributes {
 	 * {@linkplain Class test class} that declared the
 	 * {@link ContextConfiguration @ContextConfiguration} annotation and its
 	 * corresponding attributes.
-	 *
 	 * @param declaringClass the test class that declared {@code @ContextConfiguration}
 	 * @param locations the resource locations declared via {@code @ContextConfiguration}
 	 * @param classes the annotated classes declared via {@code @ContextConfiguration}
@@ -192,8 +154,8 @@ public class ContextConfigurationAttributes {
 	 * @throws IllegalArgumentException if the {@code declaringClass} or {@code contextLoaderClass} is
 	 * {@code null}
 	 */
-	public ContextConfigurationAttributes(Class<?> declaringClass, String[] locations, Class<?>[] classes,
-			boolean inheritLocations,
+	public ContextConfigurationAttributes(
+			Class<?> declaringClass, String[] locations, Class<?>[] classes, boolean inheritLocations,
 			Class<? extends ApplicationContextInitializer<? extends ConfigurableApplicationContext>>[] initializers,
 			boolean inheritInitializers, String name, Class<? extends ContextLoader> contextLoaderClass) {
 
@@ -219,73 +181,97 @@ public class ContextConfigurationAttributes {
 		this.contextLoaderClass = contextLoaderClass;
 	}
 
+
+	/**
+	 * Resolve resource locations from the {@link ContextConfiguration#locations() locations}
+	 * and {@link ContextConfiguration#value() value} attributes of the supplied
+	 * {@link ContextConfiguration} annotation.
+	 * @throws IllegalStateException if both the locations and value attributes have been declared
+	 */
+	private static String[] resolveLocations(Class<?> declaringClass, ContextConfiguration contextConfiguration) {
+		return resolveLocations(declaringClass, contextConfiguration.locations(), contextConfiguration.value());
+	}
+
+	/**
+	 * Resolve resource locations from the supplied {@code locations} and
+	 * {@code value} arrays, which correspond to attributes of the same names in
+	 * the {@link ContextConfiguration} annotation.
+	 * @throws IllegalStateException if both the locations and value attributes have been declared
+	 */
+	private static String[] resolveLocations(Class<?> declaringClass, String[] locations, String[] value) {
+		Assert.notNull(declaringClass, "declaringClass must not be null");
+		if (!ObjectUtils.isEmpty(value) && !ObjectUtils.isEmpty(locations)) {
+			throw new IllegalStateException(String.format("Test class [%s] has been configured with " +
+							"@ContextConfiguration's 'value' %s and 'locations' %s attributes. Only one declaration " +
+							"of resource locations is permitted per @ContextConfiguration annotation.",
+					declaringClass.getName(), ObjectUtils.nullSafeToString(value), ObjectUtils.nullSafeToString(locations)));
+		}
+		else if (!ObjectUtils.isEmpty(value)) {
+			locations = value;
+		}
+		return locations;
+	}
+
+
 	/**
 	 * Get the {@linkplain Class class} that declared the
 	 * {@link ContextConfiguration @ContextConfiguration} annotation.
-	 *
-	 * @return the declaring class; never {@code null}
+	 * @return the declaring class (never {@code null})
 	 */
 	public Class<?> getDeclaringClass() {
-		return declaringClass;
+		return this.declaringClass;
+	}
+
+	/**
+	 * Set the <em>processed</em> annotated classes, effectively overriding the
+	 * original value declared via {@link ContextConfiguration @ContextConfiguration}.
+	 * @see #getClasses()
+	 */
+	public void setClasses(Class<?>... classes) {
+		this.classes = classes;
+	}
+
+	/**
+	 * Get the annotated classes that were declared via
+	 * {@link ContextConfiguration @ContextConfiguration}.
+	 * <p>Note: this is a mutable property. The returned value may therefore
+	 * represent a <em>processed</em> value that does not match the original value
+	 * declared via {@link ContextConfiguration @ContextConfiguration}.
+	 * @return the annotated classes; potentially {@code null} or <em>empty</em>
+	 * @see ContextConfiguration#classes
+	 * @see #setClasses(Class[])
+	 */
+	public Class<?>[] getClasses() {
+		return this.classes;
+	}
+
+	/**
+	 * Set the <em>processed</em> resource locations, effectively overriding the
+	 * original value declared via {@link ContextConfiguration @ContextConfiguration}.
+	 * @see #getLocations()
+	 */
+	public void setLocations(String... locations) {
+		this.locations = locations;
 	}
 
 	/**
 	 * Get the resource locations that were declared via
 	 * {@link ContextConfiguration @ContextConfiguration}.
-	 *
 	 * <p>Note: this is a mutable property. The returned value may therefore
 	 * represent a <em>processed</em> value that does not match the original value
 	 * declared via {@link ContextConfiguration @ContextConfiguration}.
-	 *
 	 * @return the resource locations; potentially {@code null} or <em>empty</em>
 	 * @see ContextConfiguration#value
 	 * @see ContextConfiguration#locations
 	 * @see #setLocations(String[])
 	 */
 	public String[] getLocations() {
-		return locations;
-	}
-
-	/**
-	 * Set the <em>processed</em> resource locations, effectively overriding the
-	 * original value declared via {@link ContextConfiguration @ContextConfiguration}.
-	 *
-	 * @see #getLocations()
-	 */
-	public void setLocations(String[] locations) {
-		this.locations = locations;
-	}
-
-	/**
-	 * Get the annotated classes that were declared via
-	 * {@link ContextConfiguration @ContextConfiguration}.
-	 *
-	 * <p>Note: this is a mutable property. The returned value may therefore
-	 * represent a <em>processed</em> value that does not match the original value
-	 * declared via {@link ContextConfiguration @ContextConfiguration}.
-	 *
-	 * @return the annotated classes; potentially {@code null} or <em>empty</em>
-	 * @see ContextConfiguration#classes
-	 * @see #setClasses(Class[])
-	 */
-	public Class<?>[] getClasses() {
-		return classes;
-	}
-
-	/**
-	 * Set the <em>processed</em> annotated classes, effectively overriding the
-	 * original value declared via {@link ContextConfiguration @ContextConfiguration}.
-	 *
-	 * @see #getClasses()
-	 */
-	public void setClasses(Class<?>[] classes) {
-		this.classes = classes;
+		return this.locations;
 	}
 
 	/**
 	 * Determine if this {@code ContextConfigurationAttributes} instance has
 	 * path-based resource locations.
-	 *
 	 * @return {@code true} if the {@link #getLocations() locations} array is not empty
 	 * @see #hasResources()
 	 * @see #hasClasses()
@@ -297,7 +283,6 @@ public class ContextConfigurationAttributes {
 	/**
 	 * Determine if this {@code ContextConfigurationAttributes} instance has
 	 * class-based resources.
-	 *
 	 * @return {@code true} if the {@link #getClasses() classes} array is not empty
 	 * @see #hasResources()
 	 * @see #hasLocations()
@@ -309,7 +294,6 @@ public class ContextConfigurationAttributes {
 	/**
 	 * Determine if this {@code ContextConfigurationAttributes} instance has
 	 * either path-based resource locations or class-based resources.
-	 *
 	 * @return {@code true} if either the {@link #getLocations() locations}
 	 * or the {@link #getClasses() classes} array is not empty
 	 * @see #hasLocations()
@@ -322,7 +306,6 @@ public class ContextConfigurationAttributes {
 	/**
 	 * Get the {@code inheritLocations} flag that was declared via
 	 * {@link ContextConfiguration @ContextConfiguration}.
-	 *
 	 * @return the {@code inheritLocations} flag
 	 * @see ContextConfiguration#inheritLocations
 	 */
@@ -333,7 +316,6 @@ public class ContextConfigurationAttributes {
 	/**
 	 * Get the {@code ApplicationContextInitializer} classes that were declared via
 	 * {@link ContextConfiguration @ContextConfiguration}.
-	 *
 	 * @return the {@code ApplicationContextInitializer} classes
 	 * @since 3.2
 	 */
@@ -344,7 +326,6 @@ public class ContextConfigurationAttributes {
 	/**
 	 * Get the {@code inheritInitializers} flag that was declared via
 	 * {@link ContextConfiguration @ContextConfiguration}.
-	 *
 	 * @return the {@code inheritInitializers} flag
 	 * @since 3.2
 	 */
@@ -355,7 +336,6 @@ public class ContextConfigurationAttributes {
 	/**
 	 * Get the {@code ContextLoader} class that was declared via
 	 * {@link ContextConfiguration @ContextConfiguration}.
-	 *
 	 * @return the {@code ContextLoader} class
 	 * @see ContextConfiguration#loader
 	 */
@@ -366,7 +346,6 @@ public class ContextConfigurationAttributes {
 	/**
 	 * Get the name of the context hierarchy level that was declared via
 	 * {@link ContextConfiguration @ContextConfiguration}.
-	 *
 	 * @return the name of the context hierarchy level or {@code null} if not applicable
 	 * @see ContextConfiguration#name()
 	 * @since 3.2.2
@@ -375,24 +354,6 @@ public class ContextConfigurationAttributes {
 		return this.name;
 	}
 
-	/**
-	 * Generate a unique hash code for all properties of this
-	 * {@code ContextConfigurationAttributes} instance excluding the
-	 * {@linkplain #getName() name}.
-	 */
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + declaringClass.hashCode();
-		result = prime * result + Arrays.hashCode(locations);
-		result = prime * result + Arrays.hashCode(classes);
-		result = prime * result + (inheritLocations ? 1231 : 1237);
-		result = prime * result + Arrays.hashCode(initializers);
-		result = prime * result + (inheritInitializers ? 1231 : 1237);
-		result = prime * result + contextLoaderClass.hashCode();
-		return result;
-	}
 
 	/**
 	 * Determine if the supplied object is equal to this
@@ -407,7 +368,6 @@ public class ContextConfigurationAttributes {
 	 */
 	@Override
 	public boolean equals(Object obj) {
-
 		if (this == obj) {
 			return true;
 		}
@@ -415,8 +375,7 @@ public class ContextConfigurationAttributes {
 			return false;
 		}
 
-		final ContextConfigurationAttributes that = (ContextConfigurationAttributes) obj;
-
+		ContextConfigurationAttributes that = (ContextConfigurationAttributes) obj;
 		if (this.declaringClass == null) {
 			if (that.declaringClass != null) {
 				return false;
@@ -425,27 +384,21 @@ public class ContextConfigurationAttributes {
 		else if (!this.declaringClass.equals(that.declaringClass)) {
 			return false;
 		}
-
 		if (!Arrays.equals(this.locations, that.locations)) {
 			return false;
 		}
-
 		if (!Arrays.equals(this.classes, that.classes)) {
 			return false;
 		}
-
 		if (this.inheritLocations != that.inheritLocations) {
 			return false;
 		}
-
 		if (!Arrays.equals(this.initializers, that.initializers)) {
 			return false;
 		}
-
 		if (this.inheritInitializers != that.inheritInitializers) {
 			return false;
 		}
-
 		if (this.contextLoaderClass == null) {
 			if (that.contextLoaderClass != null) {
 				return false;
@@ -454,8 +407,22 @@ public class ContextConfigurationAttributes {
 		else if (!this.contextLoaderClass.equals(that.contextLoaderClass)) {
 			return false;
 		}
-
 		return true;
+	}
+
+	/**
+	 * Generate a unique hash code for all properties of this
+	 * {@code ContextConfigurationAttributes} instance excluding the
+	 * {@linkplain #getName() name}.
+	 */
+	@Override
+	public int hashCode() {
+		int result = this.declaringClass.hashCode();
+		result = 31 * result + Arrays.hashCode(this.locations);
+		result = 31 * result + Arrays.hashCode(this.classes);
+		result = 31 * result + Arrays.hashCode(this.initializers);
+		result = 31 * result + this.contextLoaderClass.hashCode();
+		return result;
 	}
 
 	/**
@@ -464,16 +431,16 @@ public class ContextConfigurationAttributes {
 	 */
 	@Override
 	public String toString() {
-		return new ToStringCreator(this)//
-		.append("declaringClass", declaringClass.getName())//
-		.append("locations", ObjectUtils.nullSafeToString(locations))//
-		.append("classes", ObjectUtils.nullSafeToString(classes))//
-		.append("inheritLocations", inheritLocations)//
-		.append("initializers", ObjectUtils.nullSafeToString(initializers))//
-		.append("inheritInitializers", inheritInitializers)//
-		.append("name", name)//
-		.append("contextLoaderClass", contextLoaderClass.getName())//
-		.toString();
+		return new ToStringCreator(this)
+				.append("declaringClass", this.declaringClass.getName())
+				.append("locations", ObjectUtils.nullSafeToString(this.locations))
+				.append("classes", ObjectUtils.nullSafeToString(this.classes))
+				.append("inheritLocations", this.inheritLocations)
+				.append("initializers", ObjectUtils.nullSafeToString(this.initializers))
+				.append("inheritInitializers", this.inheritInitializers)
+				.append("name", this.name)
+				.append("contextLoaderClass", this.contextLoaderClass.getName())
+				.toString();
 	}
 
 }

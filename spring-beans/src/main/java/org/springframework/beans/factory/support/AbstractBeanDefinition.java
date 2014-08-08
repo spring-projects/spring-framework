@@ -556,7 +556,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	 * of dependencies like statics (*ugh*) or database preparation on startup.
 	 */
 	@Override
-	public void setDependsOn(String[] dependsOn) {
+	public void setDependsOn(String... dependsOn) {
 		this.dependsOn = dependsOn;
 	}
 

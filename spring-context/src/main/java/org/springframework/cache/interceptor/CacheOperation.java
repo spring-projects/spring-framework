@@ -31,9 +31,9 @@ import org.springframework.util.Assert;
  */
 public abstract class CacheOperation implements BasicOperation {
 
-	private Set<String> cacheNames = Collections.emptySet();
+	private String name = "";
 
-	private String condition = "";
+	private Set<String> cacheNames = Collections.emptySet();
 
 	private String key = "";
 
@@ -43,36 +43,16 @@ public abstract class CacheOperation implements BasicOperation {
 
 	private String cacheResolver = "";
 
-	private String name = "";
+	private String condition = "";
 
 
-	@Override
-	public Set<String> getCacheNames() {
-		return cacheNames;
-	}
-
-	public String getCondition() {
-		return condition;
-	}
-
-	public String getKey() {
-		return key;
-	}
-
-	public String getKeyGenerator() {
-		return keyGenerator;
-	}
-
-	public String getCacheManager() {
-		return cacheManager;
-	}
-
-	public String getCacheResolver() {
-		return cacheResolver;
+	public void setName(String name) {
+		Assert.hasText(name);
+		this.name = name;
 	}
 
 	public String getName() {
-		return name;
+		return this.name;
 	}
 
 	public void setCacheName(String cacheName) {
@@ -80,17 +60,17 @@ public abstract class CacheOperation implements BasicOperation {
 		this.cacheNames = Collections.singleton(cacheName);
 	}
 
-	public void setCacheNames(String[] cacheNames) {
+	public void setCacheNames(String... cacheNames) {
 		this.cacheNames = new LinkedHashSet<String>(cacheNames.length);
 		for (String cacheName : cacheNames) {
-			Assert.hasText(cacheName, "Cache name must be set if specified.");
+			Assert.hasText(cacheName, "Cache name must be non-null if specified");
 			this.cacheNames.add(cacheName);
 		}
 	}
 
-	public void setCondition(String condition) {
-		Assert.notNull(condition);
-		this.condition = condition;
+	@Override
+	public Set<String> getCacheNames() {
+		return this.cacheNames;
 	}
 
 	public void setKey(String key) {
@@ -98,9 +78,17 @@ public abstract class CacheOperation implements BasicOperation {
 		this.key = key;
 	}
 
+	public String getKey() {
+		return this.key;
+	}
+
 	public void setKeyGenerator(String keyGenerator) {
 		Assert.notNull(keyGenerator);
 		this.keyGenerator = keyGenerator;
+	}
+
+	public String getKeyGenerator() {
+		return this.keyGenerator;
 	}
 
 	public void setCacheManager(String cacheManager) {
@@ -108,15 +96,28 @@ public abstract class CacheOperation implements BasicOperation {
 		this.cacheManager = cacheManager;
 	}
 
+	public String getCacheManager() {
+		return this.cacheManager;
+	}
+
 	public void setCacheResolver(String cacheResolver) {
 		Assert.notNull(cacheManager);
 		this.cacheResolver = cacheResolver;
 	}
 
-	public void setName(String name) {
-		Assert.hasText(name);
-		this.name = name;
+	public String getCacheResolver() {
+		return this.cacheResolver;
 	}
+
+	public void setCondition(String condition) {
+		Assert.notNull(condition);
+		this.condition = condition;
+	}
+
+	public String getCondition() {
+		return this.condition;
+	}
+
 
 	/**
 	 * This implementation compares the {@code toString()} results.
@@ -152,23 +153,15 @@ public abstract class CacheOperation implements BasicOperation {
 	 * <p>Available to subclasses, for inclusion in their {@code toString()} result.
 	 */
 	protected StringBuilder getOperationDescription() {
-		StringBuilder result = new StringBuilder();
-		result.append(getClass().getSimpleName());
-		result.append("[");
-		result.append(this.name);
-		result.append("] caches=");
-		result.append(this.cacheNames);
-		result.append(" | key='");
-		result.append(this.key);
-		result.append("' | keyGenerator='");
-		result.append(this.keyGenerator);
-		result.append("' | cacheManager='");
-		result.append(this.cacheManager);
-		result.append("' | cacheResolver='");
-		result.append(this.cacheResolver);
-		result.append("' | condition='");
-		result.append(this.condition);
-		result.append("'");
+		StringBuilder result = new StringBuilder(getClass().getSimpleName());
+		result.append("[").append(this.name);
+		result.append("] caches=").append(this.cacheNames);
+		result.append(" | key='").append(this.key);
+		result.append("' | keyGenerator='").append(this.keyGenerator);
+		result.append("' | cacheManager='").append(this.cacheManager);
+		result.append("' | cacheResolver='").append(this.cacheResolver);
+		result.append("' | condition='").append(this.condition).append("'");
 		return result;
 	}
+
 }

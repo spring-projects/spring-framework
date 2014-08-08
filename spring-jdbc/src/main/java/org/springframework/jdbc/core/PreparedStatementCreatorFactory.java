@@ -129,7 +129,7 @@ public class PreparedStatementCreatorFactory {
 	/**
 	 * Set the column names of the auto-generated keys.
 	 */
-	public void setGeneratedKeysColumnNames(String[] names) {
+	public void setGeneratedKeysColumnNames(String... names) {
 		this.generatedKeysColumnNames = names;
 	}
 
