@@ -26,8 +26,6 @@ import org.apache.openjpa.persistence.OpenJPAEntityManagerFactorySPI;
 import org.apache.openjpa.persistence.OpenJPAEntityManagerSPI;
 import org.apache.openjpa.persistence.PersistenceProviderImpl;
 
-import org.springframework.orm.jpa.JpaDialect;
-
 /**
  * {@link org.springframework.orm.jpa.JpaVendorAdapter} implementation for Apache OpenJPA.
  * Developed and tested against OpenJPA 2.2.
@@ -38,8 +36,8 @@ import org.springframework.orm.jpa.JpaDialect;
  * {@link org.springframework.orm.jpa.persistenceunit.SmartPersistenceUnitInfo#getManagedPackages()})
  * since OpenJPA doesn't use package-level metadata.
  *
- * @author Costin Leau
  * @author Juergen Hoeller
+ * @author Costin Leau
  * @since 2.0
  * @see OpenJpaDialect
  * @see org.apache.openjpa.persistence.PersistenceProviderImpl
@@ -108,7 +106,7 @@ public class OpenJpaVendorAdapter extends AbstractJpaVendorAdapter {
 	}
 
 	@Override
-	public JpaDialect getJpaDialect() {
+	public OpenJpaDialect getJpaDialect() {
 		return this.jpaDialect;
 	}
 
