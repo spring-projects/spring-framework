@@ -22,8 +22,8 @@ import javax.jms.JMSException;
 import javax.jms.Session;
 
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.jms.InvalidDestinationException;
 import org.springframework.jms.JmsException;
-import org.springframework.jms.support.JmsMessagingExceptionTranslator;
 import org.springframework.jms.support.converter.MessageConverter;
 import org.springframework.jms.support.converter.MessagingMessageConverter;
 import org.springframework.jms.support.converter.SimpleMessageConverter;
@@ -31,8 +31,8 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.MessagingException;
 import org.springframework.messaging.converter.MessageConversionException;
 import org.springframework.messaging.core.AbstractMessagingTemplate;
+import org.springframework.messaging.core.DestinationResolutionException;
 import org.springframework.messaging.core.MessagePostProcessor;
-import org.springframework.messaging.support.MessagingExceptionTranslator;
 import org.springframework.util.Assert;
 
 /**
@@ -47,8 +47,6 @@ public class JmsMessagingTemplate extends AbstractMessagingTemplate<Destination>
 	private JmsTemplate jmsTemplate;
 
 	private MessageConverter jmsMessageConverter = new MessagingMessageConverter();
-
-	private MessagingExceptionTranslator exceptionTranslator = new JmsMessagingExceptionTranslator();
 
 	private String defaultDestinationName;
 
@@ -80,7 +78,7 @@ public class JmsMessagingTemplate extends AbstractMessagingTemplate<Destination>
 	 * Return the configured {@link JmsTemplate}.
 	 */
 	public JmsTemplate getJmsTemplate() {
-		return jmsTemplate;
+		return this.jmsTemplate;
 	}
 
 	/**
@@ -98,11 +96,11 @@ public class JmsMessagingTemplate extends AbstractMessagingTemplate<Destination>
 	}
 
 	/**
-	 * Set the {@link MessagingExceptionTranslator} to use. Default to
-	 * {@link JmsMessagingExceptionTranslator}.
+	 * Return the {@link MessageConverter} to use to convert a {@link Message}
+	 * from the messaging to and from a {@link javax.jms.Message}.
 	 */
-	public void setExceptionTranslator(MessagingExceptionTranslator exceptionTranslator) {
-		this.exceptionTranslator = exceptionTranslator;
+	public MessageConverter getJmsMessageConverter() {
+		return this.jmsMessageConverter;
 	}
 
 	/**
@@ -124,8 +122,8 @@ public class JmsMessagingTemplate extends AbstractMessagingTemplate<Destination>
 
 	@Override
 	public void afterPropertiesSet() {
-		Assert.notNull(this.jmsTemplate, "Property 'jmsTemplate' is required");
-		Assert.notNull(this.jmsMessageConverter, "Property 'jmsMessageConverter' is required");
+		Assert.notNull(getJmsTemplate(), "Property 'jmsTemplate' is required");
+		Assert.notNull(getJmsMessageConverter(), "Property 'jmsMessageConverter' is required");
 	}
 
 
@@ -295,7 +293,7 @@ public class JmsMessagingTemplate extends AbstractMessagingTemplate<Destination>
 			this.jmsTemplate.send(destination, createMessageCreator(message));
 		}
 		catch (JmsException ex) {
-			throw translateIfNecessary(ex);
+			throw convertJmsException(ex);
 		}
 	}
 
@@ -304,7 +302,7 @@ public class JmsMessagingTemplate extends AbstractMessagingTemplate<Destination>
 			this.jmsTemplate.send(destinationName, createMessageCreator(message));
 		}
 		catch (JmsException ex) {
-			throw translateIfNecessary(ex);
+			throw convertJmsException(ex);
 		}
 	}
 
@@ -312,20 +310,20 @@ public class JmsMessagingTemplate extends AbstractMessagingTemplate<Destination>
 	protected Message<?> doReceive(Destination destination) {
 		try {
 			javax.jms.Message jmsMessage = this.jmsTemplate.receive(destination);
-			return doConvert(jmsMessage);
+			return convertJmsMessage(jmsMessage);
 		}
 		catch (JmsException ex) {
-			throw translateIfNecessary(ex);
+			throw convertJmsException(ex);
 		}
 	}
 
 	protected Message<?> doReceive(String destinationName) {
 		try {
 			javax.jms.Message jmsMessage = this.jmsTemplate.receive(destinationName);
-			return doConvert(jmsMessage);
+			return convertJmsMessage(jmsMessage);
 		}
 		catch (JmsException ex) {
-			throw translateIfNecessary(ex);
+			throw convertJmsException(ex);
 		}
 	}
 
@@ -334,10 +332,10 @@ public class JmsMessagingTemplate extends AbstractMessagingTemplate<Destination>
 		try {
 			javax.jms.Message jmsMessage = this.jmsTemplate.sendAndReceive(
 					destination, createMessageCreator(requestMessage));
-			return doConvert(jmsMessage);
+			return convertJmsMessage(jmsMessage);
 		}
 		catch (JmsException ex) {
-			throw translateIfNecessary(ex);
+			throw convertJmsException(ex);
 		}
 	}
 
@@ -345,15 +343,15 @@ public class JmsMessagingTemplate extends AbstractMessagingTemplate<Destination>
 		try {
 			javax.jms.Message jmsMessage = this.jmsTemplate.sendAndReceive(
 					destinationName, createMessageCreator(requestMessage));
-			return doConvert(jmsMessage);
+			return convertJmsMessage(jmsMessage);
 		}
 		catch (JmsException ex) {
-			throw translateIfNecessary(ex);
+			throw convertJmsException(ex);
 		}
 	}
 
 	private MessagingMessageCreator createMessageCreator(Message<?> message) {
-		return new MessagingMessageCreator(message, this.jmsMessageConverter);
+		return new MessagingMessageCreator(message, getJmsMessageConverter());
 	}
 
 	protected String getRequiredDefaultDestinationName() {
@@ -365,25 +363,29 @@ public class JmsMessagingTemplate extends AbstractMessagingTemplate<Destination>
 		return name;
 	}
 
-	protected Message<?> doConvert(javax.jms.Message message) {
+	protected Message<?> convertJmsMessage(javax.jms.Message message) {
 		if (message == null) {
 			return null;
 		}
 		try {
-			return (Message<?>) this.jmsMessageConverter.fromMessage(message);
+			return (Message<?>) getJmsMessageConverter().fromMessage(message);
 		}
-		catch (JMSException ex) {
-			throw new MessageConversionException("Could not convert '" + message + "'", ex);
-		}
-		catch (JmsException ex) {
+		catch (Exception ex) {
 			throw new MessageConversionException("Could not convert '" + message + "'", ex);
 		}
 	}
 
 	@SuppressWarnings("ThrowableResultOfMethodCallIgnored")
-	protected RuntimeException translateIfNecessary(RuntimeException rawException) {
-		MessagingException messagingException = this.exceptionTranslator.translateExceptionIfPossible(rawException);
-		return (messagingException != null ? messagingException : rawException);
+	protected MessagingException convertJmsException(JmsException ex) {
+		if (ex instanceof org.springframework.jms.support.destination.DestinationResolutionException ||
+				ex instanceof InvalidDestinationException) {
+			return new DestinationResolutionException(ex.getMessage(), ex);
+		}
+		if (ex instanceof org.springframework.jms.support.converter.MessageConversionException) {
+			return new MessageConversionException(ex.getMessage(), ex);
+		}
+		// Fallback
+		return new MessagingException(ex.getMessage(), ex);
 	}
 
 
@@ -403,10 +405,7 @@ public class JmsMessagingTemplate extends AbstractMessagingTemplate<Destination>
 			try {
 				return this.messageConverter.toMessage(this.message, session);
 			}
-			catch (JMSException ex) {
-				throw new MessageConversionException("Could not convert '" + this.message + "'", ex);
-			}
-			catch (JmsException ex) {
+			catch (Exception ex) {
 				throw new MessageConversionException("Could not convert '" + this.message + "'", ex);
 			}
 		}

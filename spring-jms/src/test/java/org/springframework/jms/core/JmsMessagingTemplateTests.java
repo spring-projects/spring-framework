@@ -26,6 +26,7 @@ import javax.jms.MessageNotWriteableException;
 import javax.jms.Session;
 import javax.jms.TextMessage;
 
+import org.hamcrest.core.StringContains;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -47,14 +48,12 @@ import org.springframework.jms.support.destination.DestinationResolutionExceptio
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessagingException;
 import org.springframework.messaging.converter.GenericMessageConverter;
-import org.springframework.messaging.converter.MessageConversionException;
 import org.springframework.messaging.support.MessageBuilder;
 
 import static org.junit.Assert.*;
 import static org.mockito.BDDMockito.*;
 
 /**
- *
  * @author Stephane Nicoll
  */
 public class JmsMessagingTemplateTests {
@@ -193,16 +192,16 @@ public class JmsMessagingTemplateTests {
 		messagingTemplate.setJmsMessageConverter(new SimpleMessageConverter() {
 			@Override
 			public javax.jms.Message toMessage(Object object, Session session)
-					throws JMSException, MessageConversionException {
-				throw new MessageConversionException("Test exception");
+					throws JMSException, org.springframework.jms.support.converter.MessageConversionException {
+				throw new org.springframework.jms.support.converter.MessageConversionException("Test exception");
 			}
 		});
 
 		messagingTemplate.convertAndSend("myQueue", "msg to convert");
 		verify(jmsTemplate).send(eq("myQueue"), messageCreator.capture());
 
-		thrown.expect(MessageConversionException.class);
-		thrown.expectMessage("Test exception");
+		thrown.expect(org.springframework.messaging.converter.MessageConversionException.class);
+		thrown.expectMessage(new StringContains("Test exception"));
 		messageCreator.getValue().createMessage(mock(Session.class));
 	}
 
