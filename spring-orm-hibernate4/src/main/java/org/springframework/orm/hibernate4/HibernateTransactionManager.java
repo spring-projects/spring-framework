@@ -91,6 +91,9 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * support nested transactions! Hence, do not expect Hibernate access code to
  * semantically participate in a nested transaction.</i>
  *
+ * <p><b>NOTE: Hibernate 4.2+ is strongly recommended for efficient transaction
+ * management with Spring, in particular for transactional Spring JDBC access.</b>
+ *
  * @author Juergen Hoeller
  * @since 3.1
  * @see #setSessionFactory
@@ -437,7 +440,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 					throw new InvalidIsolationLevelException(
 							"HibernateTransactionManager is not allowed to support custom isolation levels: " +
 							"make sure that its 'prepareConnection' flag is on (the default) and that the " +
-							"Hibernate connection release mode is set to 'on_close' (SpringTransactionFactory's default).");
+							"Hibernate connection release mode is set to 'on_close' (the default for JDBC).");
 				}
 				if (logger.isDebugEnabled()) {
 					logger.debug("Not preparing JDBC Connection of Hibernate Session [" + session + "]");

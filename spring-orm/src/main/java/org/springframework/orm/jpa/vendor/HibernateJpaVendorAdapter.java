@@ -33,11 +33,10 @@ import org.hibernate.dialect.Oracle9iDialect;
 import org.hibernate.dialect.PostgreSQLDialect;
 import org.hibernate.dialect.SQLServerDialect;
 
-import org.springframework.orm.jpa.JpaDialect;
-
 /**
  * {@link org.springframework.orm.jpa.JpaVendorAdapter} implementation for
  * Hibernate EntityManager. Developed and tested against Hibernate 3.6 and 4.2/4.3.
+ * <b>Hibernate 4.2+ is strongly recommended for use with Spring 4.0+.</b>
  *
  * <p>Exposes Hibernate's persistence provider and EntityManager extension interface,
  * and adapts {@link AbstractJpaVendorAdapter}'s common configuration settings.
@@ -62,7 +61,7 @@ import org.springframework.orm.jpa.JpaDialect;
  */
 public class HibernateJpaVendorAdapter extends AbstractJpaVendorAdapter {
 
-	private final JpaDialect jpaDialect = new HibernateJpaDialect();
+	private final HibernateJpaDialect jpaDialect = new HibernateJpaDialect();
 
 	private final PersistenceProvider persistenceProvider;
 
@@ -159,7 +158,7 @@ public class HibernateJpaVendorAdapter extends AbstractJpaVendorAdapter {
 	}
 
 	@Override
-	public JpaDialect getJpaDialect() {
+	public HibernateJpaDialect getJpaDialect() {
 		return this.jpaDialect;
 	}
 
