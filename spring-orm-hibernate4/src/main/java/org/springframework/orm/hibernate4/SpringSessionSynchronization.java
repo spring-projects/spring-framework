@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,12 +39,15 @@ class SpringSessionSynchronization implements TransactionSynchronization, Ordere
 
 	private final SessionFactory sessionFactory;
 
+	private final boolean newSession;
+
 	private boolean holderActive = true;
 
 
-	public SpringSessionSynchronization(SessionHolder sessionHolder, SessionFactory sessionFactory) {
+	public SpringSessionSynchronization(SessionHolder sessionHolder, SessionFactory sessionFactory, boolean newSession) {
 		this.sessionHolder = sessionHolder;
 		this.sessionFactory = sessionFactory;
+		this.newSession = newSession;
 	}
 
 	private Session getCurrentSession() {
@@ -111,6 +114,12 @@ class SpringSessionSynchronization implements TransactionSynchronization, Ordere
 		}
 		// Eagerly disconnect the Session here, to make release mode "on_close" work nicely.
 		session.disconnect();
+
+		// Unbind at this point if it's a new Session...
+		if (this.newSession) {
+			TransactionSynchronizationManager.unbindResource(this.sessionFactory);
+			this.holderActive = false;
+		}
 	}
 
 	@Override
@@ -128,6 +137,10 @@ class SpringSessionSynchronization implements TransactionSynchronization, Ordere
 		}
 		finally {
 			this.sessionHolder.setSynchronizedWithTransaction(false);
+			// Call close() at this point if it's a new Session...
+			if (this.newSession) {
+				SessionFactoryUtils.closeSession(this.sessionHolder.getSession());
+			}
 		}
 	}
 
