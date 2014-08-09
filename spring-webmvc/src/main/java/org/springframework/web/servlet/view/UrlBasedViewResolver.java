@@ -119,6 +119,10 @@ public class UrlBasedViewResolver extends AbstractCachingViewResolver implements
 
 	private Boolean exposePathVariables;
 
+	private Boolean exposeContextBeansAsAttributes;
+
+	private String[] exposedContextBeanNames;
+
 	private String[] viewNames;
 
 	private int order = Integer.MAX_VALUE;
@@ -328,6 +332,37 @@ public class UrlBasedViewResolver extends AbstractCachingViewResolver implements
 	}
 
 	/**
+	 * Set whether to make all Spring beans in the application context accessible
+	 * as request attributes, through lazy checking once an attribute gets accessed.
+	 * <p>This will make all such beans accessible in plain {@code ${...}}
+	 * expressions in a JSP 2.0 page, as well as in JSTL's {@code c:out}
+	 * value expressions.
+	 * <p>Default is "false".
+	 * @see AbstractView#setExposeContextBeansAsAttributes
+	 */
+	public void setExposeContextBeansAsAttributes(boolean exposeContextBeansAsAttributes) {
+		this.exposeContextBeansAsAttributes = exposeContextBeansAsAttributes;
+	}
+
+	protected Boolean getExposeContextBeansAsAttributes() {
+		return this.exposeContextBeansAsAttributes;
+	}
+
+	/**
+	 * Specify the names of beans in the context which are supposed to be exposed.
+	 * If this is non-null, only the specified beans are eligible for exposure as
+	 * attributes.
+	 * @see AbstractView#setExposedContextBeanNames
+	 */
+	public void setExposedContextBeanNames(String... exposedContextBeanNames) {
+		this.exposedContextBeanNames = exposedContextBeanNames;
+	}
+
+	protected String[] getExposedContextBeanNames() {
+		return this.exposedContextBeanNames;
+	}
+
+	/**
 	 * Set the view names (or name patterns) that can be handled by this
 	 * {@link org.springframework.web.servlet.ViewResolver}. View names can contain
 	 * simple wildcards such that 'my*', '*Report' and '*Repo*' will all match the
@@ -481,6 +516,14 @@ public class UrlBasedViewResolver extends AbstractCachingViewResolver implements
 		Boolean exposePathVariables = getExposePathVariables();
 		if (exposePathVariables != null) {
 			view.setExposePathVariables(exposePathVariables);
+		}
+		Boolean exposeContextBeansAsAttributes = getExposeContextBeansAsAttributes();
+		if (exposeContextBeansAsAttributes != null) {
+			view.setExposeContextBeansAsAttributes(exposeContextBeansAsAttributes);
+		}
+		String[] exposedContextBeanNames = getExposedContextBeanNames();
+		if (exposedContextBeanNames != null) {
+			view.setExposedContextBeanNames(exposedContextBeanNames);
 		}
 
 		return view;
