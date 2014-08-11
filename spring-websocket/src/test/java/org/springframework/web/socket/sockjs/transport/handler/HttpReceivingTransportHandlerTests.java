@@ -28,7 +28,7 @@ import org.springframework.web.socket.sockjs.transport.session.StubSockJsService
 import org.springframework.web.socket.sockjs.transport.session.TestHttpSockJsSession;
 
 import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
+import static org.mockito.BDDMockito.*;
 
 /**
  * Test fixture for {@link AbstractHttpReceivingTransportHandler} and sub-classes
@@ -110,7 +110,7 @@ public class HttpReceivingTransportHandlerTests  extends AbstractHttpRequestTest
 		TestHttpSockJsSession session = new TestHttpSockJsSession("1", sockJsConfig, wsHandler, null);
 		session.delegateConnectionEstablished();
 
-		doThrow(new Exception()).when(wsHandler).handleMessage(session, new TextMessage("x"));
+		willThrow(new Exception()).given(wsHandler).handleMessage(session, new TextMessage("x"));
 
 		try {
 			XhrReceivingTransportHandler transportHandler = new XhrReceivingTransportHandler();

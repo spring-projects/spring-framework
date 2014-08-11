@@ -16,11 +16,6 @@
 
 package org.springframework.cache.jcache.interceptor;
 
-import static org.mockito.BDDMockito.*;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-
 import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -35,7 +30,6 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.EnableCaching;
@@ -47,8 +41,9 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import static org.mockito.BDDMockito.*;
+
 /**
- *
  * @author Stephane Nicoll
  */
 public class JCacheErrorHandlerTests {
@@ -74,7 +69,7 @@ public class JCacheErrorHandlerTests {
 	public void getFail() {
 		UnsupportedOperationException exception = new UnsupportedOperationException("Test exception on get");
 		Object key = SimpleKeyGenerator.generateKey(0L);
-		doThrow(exception).when(cache).get(key);
+		willThrow(exception).given(cache).get(key);
 
 		this.simpleService.get(0L);
 		verify(errorHandler).handleCacheGetError(exception, cache, key);
@@ -84,7 +79,7 @@ public class JCacheErrorHandlerTests {
 	public void putFail() {
 		UnsupportedOperationException exception = new UnsupportedOperationException("Test exception on put");
 		Object key = SimpleKeyGenerator.generateKey(0L);
-		doThrow(exception).when(cache).put(key, 234L);
+		willThrow(exception).given(cache).put(key, 234L);
 
 		this.simpleService.put(0L, 234L);
 		verify(errorHandler).handleCachePutError(exception, cache, key, 234L);
@@ -94,7 +89,7 @@ public class JCacheErrorHandlerTests {
 	public void evictFail() {
 		UnsupportedOperationException exception = new UnsupportedOperationException("Test exception on evict");
 		Object key = SimpleKeyGenerator.generateKey(0L);
-		doThrow(exception).when(cache).evict(key);
+		willThrow(exception).given(cache).evict(key);
 
 		this.simpleService.evict(0L);
 		verify(errorHandler).handleCacheEvictError(exception, cache, key);
@@ -103,7 +98,7 @@ public class JCacheErrorHandlerTests {
 	@Test
 	public void clearFail() {
 		UnsupportedOperationException exception = new UnsupportedOperationException("Test exception on evict");
-		doThrow(exception).when(cache).clear();
+		willThrow(exception).given(cache).clear();
 
 		this.simpleService.clear();
 		verify(errorHandler).handleCacheClearError(exception, cache);

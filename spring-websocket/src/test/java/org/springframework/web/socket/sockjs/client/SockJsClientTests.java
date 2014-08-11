@@ -16,6 +16,10 @@
 
 package org.springframework.web.socket.sockjs.client;
 
+import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.http.HttpStatus;
@@ -25,13 +29,8 @@ import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.sockjs.client.TestTransport.XhrTestTransport;
 
-import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.List;
-
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.*;
+import static org.junit.Assert.*;
+import static org.mockito.BDDMockito.*;
 
 /**
  * Unit tests for {@link org.springframework.web.socket.sockjs.client.SockJsClient}.
@@ -41,7 +40,7 @@ import static org.mockito.Mockito.*;
 public class SockJsClientTests {
 
 	private static final String URL = "http://example.com";
-	
+
 	private static final WebSocketHandler handler = mock(WebSocketHandler.class);
 
 
@@ -122,7 +121,7 @@ public class SockJsClientTests {
 	@SuppressWarnings("unchecked")
 	public void connectInfoRequestFailure() throws URISyntaxException {
 		HttpServerErrorException exception = new HttpServerErrorException(HttpStatus.SERVICE_UNAVAILABLE);
-		when(this.infoReceiver.executeInfoRequest(any())).thenThrow(exception);
+		given(this.infoReceiver.executeInfoRequest(any())).willThrow(exception);
 		this.sockJsClient.doHandshake(handler, URL).addCallback(this.connectCallback);
 		verify(this.connectCallback).onFailure(exception);
 		assertFalse(this.webSocketTransport.invoked());
@@ -130,7 +129,7 @@ public class SockJsClientTests {
 	}
 
 	private void setupInfoRequest(boolean webSocketEnabled) {
-		when(this.infoReceiver.executeInfoRequest(any())).thenReturn("{\"entropy\":123," +
+		given(this.infoReceiver.executeInfoRequest(any())).willReturn("{\"entropy\":123," +
 				"\"origins\":[\"*:*\"],\"cookie_needed\":true,\"websocket\":" + webSocketEnabled + "}");
 	}
 

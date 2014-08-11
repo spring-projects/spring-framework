@@ -458,8 +458,8 @@ public class JmsMessagingTemplateTests {
 	public void convertMessageConversionExceptionOnSend() throws JMSException {
 		Message<String> message = createTextMessage();
 		MessageConverter messageConverter = mock(MessageConverter.class);
-		doThrow(org.springframework.jms.support.converter.MessageConversionException.class)
-				.when(messageConverter).toMessage(eq(message), anyObject());
+		willThrow(org.springframework.jms.support.converter.MessageConversionException.class)
+				.given(messageConverter).toMessage(eq(message), anyObject());
 		messagingTemplate.setJmsMessageConverter(messageConverter);
 		invokeMessageCreator("myQueue");
 
@@ -471,8 +471,8 @@ public class JmsMessagingTemplateTests {
 	public void convertMessageConversionExceptionOnReceive() throws JMSException {
 		javax.jms.Message message = createJmsTextMessage();
 		MessageConverter messageConverter = mock(MessageConverter.class);
-		doThrow(org.springframework.jms.support.converter.MessageConversionException.class)
-				.when(messageConverter).fromMessage(message);
+		willThrow(org.springframework.jms.support.converter.MessageConversionException.class)
+				.given(messageConverter).fromMessage(message);
 		messagingTemplate.setJmsMessageConverter(messageConverter);
 		given(jmsTemplate.receive("myQueue")).willReturn(message);
 
@@ -482,7 +482,7 @@ public class JmsMessagingTemplateTests {
 
 	@Test
 	public void convertMessageNotReadableException() throws JMSException {
-		doThrow(MessageNotReadableException.class).when(jmsTemplate).receive("myQueue");
+		willThrow(MessageNotReadableException.class).given(jmsTemplate).receive("myQueue");
 
 		thrown.expect(MessagingException.class);
 		messagingTemplate.receive("myQueue");
@@ -491,7 +491,7 @@ public class JmsMessagingTemplateTests {
 	@Test
 	public void convertDestinationResolutionExceptionOnSend() {
 		Destination destination = new Destination() {};
-		doThrow(DestinationResolutionException.class).when(jmsTemplate).send(eq(destination), anyObject());
+		willThrow(DestinationResolutionException.class).given(jmsTemplate).send(eq(destination), anyObject());
 
 		thrown.expect(org.springframework.messaging.core.DestinationResolutionException.class);
 		messagingTemplate.send(destination, createTextMessage());
@@ -500,7 +500,7 @@ public class JmsMessagingTemplateTests {
 	@Test
 	public void convertDestinationResolutionExceptionOnReceive() {
 		Destination destination = new Destination() {};
-		doThrow(DestinationResolutionException.class).when(jmsTemplate).receive(destination);
+		willThrow(DestinationResolutionException.class).given(jmsTemplate).receive(destination);
 
 		thrown.expect(org.springframework.messaging.core.DestinationResolutionException.class);
 		messagingTemplate.receive(destination);
@@ -510,7 +510,7 @@ public class JmsMessagingTemplateTests {
 	public void convertMessageFormatException() throws JMSException {
 		Message<String> message = createTextMessage();
 		MessageConverter messageConverter = mock(MessageConverter.class);
-		doThrow(MessageFormatException.class).when(messageConverter).toMessage(eq(message), anyObject());
+		willThrow(MessageFormatException.class).given(messageConverter).toMessage(eq(message), anyObject());
 		messagingTemplate.setJmsMessageConverter(messageConverter);
 		invokeMessageCreator("myQueue");
 
@@ -522,7 +522,7 @@ public class JmsMessagingTemplateTests {
 	public void convertMessageNotWritableException() throws JMSException {
 		Message<String> message = createTextMessage();
 		MessageConverter messageConverter = mock(MessageConverter.class);
-		doThrow(MessageNotWriteableException.class).when(messageConverter).toMessage(eq(message), anyObject());
+		willThrow(MessageNotWriteableException.class).given(messageConverter).toMessage(eq(message), anyObject());
 		messagingTemplate.setJmsMessageConverter(messageConverter);
 		invokeMessageCreator("myQueue");
 
@@ -532,7 +532,7 @@ public class JmsMessagingTemplateTests {
 
 	@Test
 	public void convertInvalidDestinationExceptionOnSendAndReceiveWithName() {
-		doThrow(InvalidDestinationException.class).when(jmsTemplate).sendAndReceive(eq("unknownQueue"), anyObject());
+		willThrow(InvalidDestinationException.class).given(jmsTemplate).sendAndReceive(eq("unknownQueue"), anyObject());
 
 		thrown.expect(org.springframework.messaging.core.DestinationResolutionException.class);
 		messagingTemplate.sendAndReceive("unknownQueue", createTextMessage());
@@ -541,21 +541,21 @@ public class JmsMessagingTemplateTests {
 	@Test
 	public void convertInvalidDestinationExceptionOnSendAndReceive() {
 		Destination destination = new Destination() {};
-		doThrow(InvalidDestinationException.class).when(jmsTemplate).sendAndReceive(eq(destination), anyObject());
+		willThrow(InvalidDestinationException.class).given(jmsTemplate).sendAndReceive(eq(destination), anyObject());
 
 		thrown.expect(org.springframework.messaging.core.DestinationResolutionException.class);
 		messagingTemplate.sendAndReceive(destination, createTextMessage());
 	}
 
 	private void invokeMessageCreator(String destinationName) {
-		doAnswer(new Answer() {
+		willAnswer(new Answer<Object>() {
 			@Override
 			public Object answer(InvocationOnMock invocation) throws Throwable {
 				MessageCreator messageCreator = (MessageCreator) invocation.getArguments()[1];
 				messageCreator.createMessage(null);
 				return null;
 			}
-		}).when(jmsTemplate).send(eq("myQueue"), anyObject());
+		}).given(jmsTemplate).send(eq("myQueue"), anyObject());
 	}
 
 

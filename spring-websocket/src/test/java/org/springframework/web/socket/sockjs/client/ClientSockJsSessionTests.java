@@ -16,6 +16,11 @@
 
 package org.springframework.web.socket.sockjs.client;
 
+import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.net.URI;
+import java.util.List;
+
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -30,15 +35,9 @@ import org.springframework.web.socket.sockjs.frame.Jackson2SockJsMessageCodec;
 import org.springframework.web.socket.sockjs.frame.SockJsFrame;
 import org.springframework.web.socket.sockjs.transport.TransportType;
 
-import java.io.IOException;
-import java.net.InetSocketAddress;
-import java.net.URI;
-import java.util.List;
-
-import static org.junit.Assert.assertThat;
 import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.*;
+import static org.junit.Assert.*;
+import static org.mockito.BDDMockito.*;
 
 /**
  * Unit tests for
@@ -47,7 +46,7 @@ import static org.mockito.Mockito.*;
  * @author Rossen Stoyanchev
  */
 public class ClientSockJsSessionTests {
-	
+
 	private static final Jackson2SockJsMessageCodec CODEC = new Jackson2SockJsMessageCodec();
 
 	private TestClientSockJsSession session;
@@ -92,7 +91,7 @@ public class ClientSockJsSessionTests {
 
 	@Test
 	public void handleFrameOpenWithWebSocketHandlerException() throws Exception {
-		doThrow(new IllegalStateException("Fake error")).when(this.handler).afterConnectionEstablished(this.session);
+		willThrow(new IllegalStateException("Fake error")).given(this.handler).afterConnectionEstablished(this.session);
 		this.session.handleFrame(SockJsFrame.openFrame().getContent());
 		assertThat(this.session.isOpen(), is(true));
 	}
@@ -129,8 +128,8 @@ public class ClientSockJsSessionTests {
 	@Test
 	public void handleFrameMessageWithWebSocketHandlerException() throws Exception {
 		this.session.handleFrame(SockJsFrame.openFrame().getContent());
-		doThrow(new IllegalStateException("Fake error")).when(this.handler).handleMessage(this.session, new TextMessage("foo"));
-		doThrow(new IllegalStateException("Fake error")).when(this.handler).handleMessage(this.session, new TextMessage("bar"));
+		willThrow(new IllegalStateException("Fake error")).given(this.handler).handleMessage(this.session, new TextMessage("foo"));
+		willThrow(new IllegalStateException("Fake error")).given(this.handler).handleMessage(this.session, new TextMessage("bar"));
 		this.session.handleFrame(SockJsFrame.messageFrame(CODEC, "foo", "bar").getContent());
 		assertThat(this.session.isOpen(), equalTo(true));
 		verify(this.handler).afterConnectionEstablished(this.session);

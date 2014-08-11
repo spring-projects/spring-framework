@@ -16,10 +16,6 @@
 
 package org.springframework.cache.interceptor;
 
-import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
-import static org.mockito.BDDMockito.*;
-
 import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -27,7 +23,6 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CacheConfig;
@@ -41,6 +36,10 @@ import org.springframework.cache.support.SimpleValueWrapper;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import static org.hamcrest.CoreMatchers.*;
+import static org.junit.Assert.*;
+import static org.mockito.BDDMockito.*;
 
 /**
  *
@@ -71,7 +70,7 @@ public class CacheErrorHandlerTests {
 	@Test
 	public void getFail() {
 		UnsupportedOperationException exception = new UnsupportedOperationException("Test exception on get");
-		doThrow(exception).when(cache).get(0L);
+		willThrow(exception).given(cache).get(0L);
 
 		Object result = this.simpleService.get(0L);
 		verify(errorHandler).handleCacheGetError(exception, cache, 0L);
@@ -82,12 +81,12 @@ public class CacheErrorHandlerTests {
 	@Test
 	public void getAndPutFail() {
 		UnsupportedOperationException exception = new UnsupportedOperationException("Test exception on get");
-		doThrow(exception).when(cache).get(0L);
-		doThrow(exception).when(cache).put(0L, 0L); // Update of the cache will fail as well
+		willThrow(exception).given(cache).get(0L);
+		willThrow(exception).given(cache).put(0L, 0L); // Update of the cache will fail as well
 
 		Object counter = this.simpleService.get(0L);
 
-		doReturn(new SimpleValueWrapper(2L)).when(cache).get(0L);
+		willReturn(new SimpleValueWrapper(2L)).given(cache).get(0L);
 		Object counter2 = this.simpleService.get(0L);
 		Object counter3 = this.simpleService.get(0L);
 		assertNotSame(counter, counter2);
@@ -97,7 +96,7 @@ public class CacheErrorHandlerTests {
 	@Test
 	public void getFailProperException() {
 		UnsupportedOperationException exception = new UnsupportedOperationException("Test exception on get");
-		doThrow(exception).when(cache).get(0L);
+		willThrow(exception).given(cache).get(0L);
 
 		cacheInterceptor.setErrorHandler(new SimpleCacheErrorHandler());
 
@@ -108,7 +107,7 @@ public class CacheErrorHandlerTests {
 	@Test
 	public void putFail() {
 		UnsupportedOperationException exception = new UnsupportedOperationException("Test exception on put");
-		doThrow(exception).when(cache).put(0L, 0L);
+		willThrow(exception).given(cache).put(0L, 0L);
 
 		this.simpleService.put(0L);
 		verify(errorHandler).handleCachePutError(exception, cache, 0L, 0L);
@@ -117,7 +116,7 @@ public class CacheErrorHandlerTests {
 	@Test
 	public void putFailProperException() {
 		UnsupportedOperationException exception = new UnsupportedOperationException("Test exception on put");
-		doThrow(exception).when(cache).put(0L, 0L);
+		willThrow(exception).given(cache).put(0L, 0L);
 
 		cacheInterceptor.setErrorHandler(new SimpleCacheErrorHandler());
 
@@ -128,7 +127,7 @@ public class CacheErrorHandlerTests {
 	@Test
 	public void evictFail() {
 		UnsupportedOperationException exception = new UnsupportedOperationException("Test exception on evict");
-		doThrow(exception).when(cache).evict(0L);
+		willThrow(exception).given(cache).evict(0L);
 
 		this.simpleService.evict(0L);
 		verify(errorHandler).handleCacheEvictError(exception, cache, 0L);
@@ -137,7 +136,7 @@ public class CacheErrorHandlerTests {
 	@Test
 	public void evictFailProperException() {
 		UnsupportedOperationException exception = new UnsupportedOperationException("Test exception on evict");
-		doThrow(exception).when(cache).evict(0L);
+		willThrow(exception).given(cache).evict(0L);
 
 		cacheInterceptor.setErrorHandler(new SimpleCacheErrorHandler());
 
@@ -148,7 +147,7 @@ public class CacheErrorHandlerTests {
 	@Test
 	public void clearFail() {
 		UnsupportedOperationException exception = new UnsupportedOperationException("Test exception on evict");
-		doThrow(exception).when(cache).clear();
+		willThrow(exception).given(cache).clear();
 
 		this.simpleService.clear();
 		verify(errorHandler).handleCacheClearError(exception, cache);
@@ -157,7 +156,7 @@ public class CacheErrorHandlerTests {
 	@Test
 	public void clearFailProperException() {
 		UnsupportedOperationException exception = new UnsupportedOperationException("Test exception on evict");
-		doThrow(exception).when(cache).clear();
+		willThrow(exception).given(cache).clear();
 
 		cacheInterceptor.setErrorHandler(new SimpleCacheErrorHandler());
 

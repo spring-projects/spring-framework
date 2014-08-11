@@ -27,7 +27,7 @@ import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.WebSocketHandler;
 
 import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
+import static org.mockito.BDDMockito.*;
 
 /**
  * Test fixture for {@link org.springframework.web.socket.adapter.standard.StandardWebSocketHandlerAdapter}.
@@ -55,13 +55,13 @@ public class StandardWebSocketHandlerAdapterTests {
 
 	@Test
 	public void onOpen() throws Throwable {
-		when(this.session.getId()).thenReturn("123");
+		given(this.session.getId()).willReturn("123");
 		this.adapter.onOpen(this.session, null);
 
 		verify(this.webSocketHandler).afterConnectionEstablished(this.webSocketSession);
 		verify(this.session, atLeast(2)).addMessageHandler(any(MessageHandler.Whole.class));
 
-		when(this.session.getId()).thenReturn("123");
+		given(this.session.getId()).willReturn("123");
 		assertEquals("123", this.webSocketSession.getId());
 	}
 

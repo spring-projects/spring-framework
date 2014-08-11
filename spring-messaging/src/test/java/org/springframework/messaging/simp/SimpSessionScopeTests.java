@@ -20,14 +20,14 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
-
 import org.springframework.beans.factory.ObjectFactory;
+
+import static org.mockito.BDDMockito.*;
 
 import java.util.concurrent.ConcurrentHashMap;
 
 import static org.junit.Assert.assertThat;
 import static org.hamcrest.Matchers.*;
-import static org.mockito.Mockito.*;
 
 /**
  * Unit tests for {@link org.springframework.messaging.simp.SimpSessionScope}.
@@ -67,7 +67,7 @@ public class SimpSessionScopeTests {
 
 	@Test
 	public void getWithObjectFactory() {
-		when(this.objectFactory.getObject()).thenReturn("value");
+		given(this.objectFactory.getObject()).willReturn("value");
 		Object actual = this.scope.get("name", this.objectFactory);
 
 		assertThat(actual, is("value"));

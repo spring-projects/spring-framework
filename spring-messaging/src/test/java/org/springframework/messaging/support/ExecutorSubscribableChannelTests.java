@@ -16,6 +16,8 @@
 
 package org.springframework.messaging.support;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -30,11 +32,8 @@ import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageDeliveryException;
 import org.springframework.messaging.MessageHandler;
 
-import java.util.concurrent.atomic.AtomicInteger;
-
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
-import static org.junit.Assert.assertEquals;
 import static org.mockito.BDDMockito.*;
 
 /**
@@ -170,7 +169,7 @@ public class ExecutorSubscribableChannelTests {
 	@Test
 	public void interceptorWithException() {
 		IllegalStateException expected = new IllegalStateException("Fake exception");
-		doThrow(expected).when(this.handler).handleMessage(this.message);
+		willThrow(expected).given(this.handler).handleMessage(this.message);
 		BeforeHandleInterceptor interceptor = new BeforeHandleInterceptor();
 		this.channel.addInterceptor(interceptor);
 		this.channel.subscribe(this.handler);

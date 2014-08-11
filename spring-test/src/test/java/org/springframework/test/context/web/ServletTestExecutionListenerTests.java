@@ -18,7 +18,7 @@ package org.springframework.test.context.web;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mockito;
+import org.mockito.BDDMockito;
 import org.springframework.context.ApplicationContext;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
@@ -29,8 +29,9 @@ import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletWebRequest;
 
+import static org.mockito.BDDMockito.*;
+
 import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
 import static org.springframework.test.context.web.ServletTestExecutionListener.*;
 
 /**
@@ -75,8 +76,8 @@ public class ServletTestExecutionListenerTests {
 
 	@Before
 	public void setUp() {
-		when(wac.getServletContext()).thenReturn(mockServletContext);
-		when(testContext.getApplicationContext()).thenReturn(wac);
+		given(wac.getServletContext()).willReturn(mockServletContext);
+		given(testContext.getApplicationContext()).willReturn(wac);
 
 		MockHttpServletRequest request = new MockHttpServletRequest(mockServletContext);
 		MockHttpServletResponse response = new MockHttpServletResponse();
@@ -90,8 +91,8 @@ public class ServletTestExecutionListenerTests {
 
 	@Test
 	public void standardApplicationContext() throws Exception {
-		Mockito.<Class<?>> when(testContext.getTestClass()).thenReturn(getClass());
-		when(testContext.getApplicationContext()).thenReturn(mock(ApplicationContext.class));
+		BDDMockito.<Class<?>> given(testContext.getTestClass()).willReturn(getClass());
+		given(testContext.getApplicationContext()).willReturn(mock(ApplicationContext.class));
 
 		listener.beforeTestClass(testContext);
 		assertAttributeExists();
@@ -108,7 +109,7 @@ public class ServletTestExecutionListenerTests {
 
 	@Test
 	public void legacyWebTestCaseWithoutExistingRequestAttributes() throws Exception {
-		Mockito.<Class<?>> when(testContext.getTestClass()).thenReturn(LegacyWebTestCase.class);
+		BDDMockito.<Class<?>> given(testContext.getTestClass()).willReturn(LegacyWebTestCase.class);
 
 		RequestContextHolder.resetRequestAttributes();
 		assertAttributesNotAvailable();
@@ -118,7 +119,7 @@ public class ServletTestExecutionListenerTests {
 		listener.prepareTestInstance(testContext);
 		assertAttributesNotAvailable();
 		verify(testContext, times(0)).setAttribute(RESET_REQUEST_CONTEXT_HOLDER_ATTRIBUTE, Boolean.TRUE);
-		when(testContext.getAttribute(RESET_REQUEST_CONTEXT_HOLDER_ATTRIBUTE)).thenReturn(null);
+		given(testContext.getAttribute(RESET_REQUEST_CONTEXT_HOLDER_ATTRIBUTE)).willReturn(null);
 
 		listener.beforeTestMethod(testContext);
 		assertAttributesNotAvailable();
@@ -131,7 +132,7 @@ public class ServletTestExecutionListenerTests {
 
 	@Test
 	public void legacyWebTestCaseWithPresetRequestAttributes() throws Exception {
-		Mockito.<Class<?>> when(testContext.getTestClass()).thenReturn(LegacyWebTestCase.class);
+		BDDMockito.<Class<?>> given(testContext.getTestClass()).willReturn(LegacyWebTestCase.class);
 
 		listener.beforeTestClass(testContext);
 		assertAttributeExists();
@@ -139,12 +140,12 @@ public class ServletTestExecutionListenerTests {
 		listener.prepareTestInstance(testContext);
 		assertAttributeExists();
 		verify(testContext, times(0)).setAttribute(RESET_REQUEST_CONTEXT_HOLDER_ATTRIBUTE, Boolean.TRUE);
-		when(testContext.getAttribute(RESET_REQUEST_CONTEXT_HOLDER_ATTRIBUTE)).thenReturn(null);
+		given(testContext.getAttribute(RESET_REQUEST_CONTEXT_HOLDER_ATTRIBUTE)).willReturn(null);
 
 		listener.beforeTestMethod(testContext);
 		assertAttributeExists();
 		verify(testContext, times(0)).setAttribute(RESET_REQUEST_CONTEXT_HOLDER_ATTRIBUTE, Boolean.TRUE);
-		when(testContext.getAttribute(RESET_REQUEST_CONTEXT_HOLDER_ATTRIBUTE)).thenReturn(null);
+		given(testContext.getAttribute(RESET_REQUEST_CONTEXT_HOLDER_ATTRIBUTE)).willReturn(null);
 
 		listener.afterTestMethod(testContext);
 		verify(testContext, times(1)).removeAttribute(RESET_REQUEST_CONTEXT_HOLDER_ATTRIBUTE);
@@ -153,7 +154,7 @@ public class ServletTestExecutionListenerTests {
 
 	@Test
 	public void atWebAppConfigTestCaseWithoutExistingRequestAttributes() throws Exception {
-		Mockito.<Class<?>> when(testContext.getTestClass()).thenReturn(AtWebAppConfigWebTestCase.class);
+		BDDMockito.<Class<?>> given(testContext.getTestClass()).willReturn(AtWebAppConfigWebTestCase.class);
 
 		RequestContextHolder.resetRequestAttributes();
 		listener.beforeTestClass(testContext);
@@ -164,7 +165,7 @@ public class ServletTestExecutionListenerTests {
 
 	@Test
 	public void atWebAppConfigTestCaseWithPresetRequestAttributes() throws Exception {
-		Mockito.<Class<?>> when(testContext.getTestClass()).thenReturn(AtWebAppConfigWebTestCase.class);
+		BDDMockito.<Class<?>> given(testContext.getTestClass()).willReturn(AtWebAppConfigWebTestCase.class);
 
 		listener.beforeTestClass(testContext);
 		assertAttributesAvailable();
@@ -177,8 +178,8 @@ public class ServletTestExecutionListenerTests {
 		assertAttributeDoesNotExist();
 		verify(testContext, times(1)).setAttribute(POPULATED_REQUEST_CONTEXT_HOLDER_ATTRIBUTE, Boolean.TRUE);
 		verify(testContext, times(1)).setAttribute(RESET_REQUEST_CONTEXT_HOLDER_ATTRIBUTE, Boolean.TRUE);
-		when(testContext.getAttribute(POPULATED_REQUEST_CONTEXT_HOLDER_ATTRIBUTE)).thenReturn(Boolean.TRUE);
-		when(testContext.getAttribute(RESET_REQUEST_CONTEXT_HOLDER_ATTRIBUTE)).thenReturn(Boolean.TRUE);
+		given(testContext.getAttribute(POPULATED_REQUEST_CONTEXT_HOLDER_ATTRIBUTE)).willReturn(Boolean.TRUE);
+		given(testContext.getAttribute(RESET_REQUEST_CONTEXT_HOLDER_ATTRIBUTE)).willReturn(Boolean.TRUE);
 
 		listener.beforeTestMethod(testContext);
 		assertAttributeDoesNotExist();

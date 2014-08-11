@@ -26,13 +26,13 @@ import org.junit.Test;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketHandler;
+import org.springframework.web.socket.handler.ExceptionWebSocketHandlerDecorator;
 import org.springframework.web.socket.sockjs.SockJsMessageDeliveryException;
 import org.springframework.web.socket.sockjs.SockJsTransportFailureException;
 import org.springframework.web.socket.sockjs.frame.SockJsFrame;
-import org.springframework.web.socket.handler.ExceptionWebSocketHandlerDecorator;
 
 import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
+import static org.mockito.BDDMockito.*;
 
 /**
  * Test fixture for {@link AbstractSockJsSession}.
@@ -108,7 +108,7 @@ public class SockJsSessionTests extends AbstractSockJsSessionTests<TestSockJsSes
 		String msg2 = "message 2";
 		String msg3 = "message 3";
 
-		doThrow(new IOException()).when(this.webSocketHandler).handleMessage(sockJsSession, new TextMessage(msg2));
+		willThrow(new IOException()).given(this.webSocketHandler).handleMessage(sockJsSession, new TextMessage(msg2));
 
 		sockJsSession.delegateConnectionEstablished();
 		try {
@@ -203,7 +203,7 @@ public class SockJsSessionTests extends AbstractSockJsSessionTests<TestSockJsSes
 	@Test
 	public void closeWithWebSocketHandlerExceptions() throws Exception {
 
-		doThrow(new Exception()).when(this.webSocketHandler).afterConnectionClosed(this.session, CloseStatus.NORMAL);
+		willThrow(new Exception()).given(this.webSocketHandler).afterConnectionClosed(this.session, CloseStatus.NORMAL);
 
 		this.session.delegateConnectionEstablished();
 		this.session.setActive(true);
@@ -278,7 +278,7 @@ public class SockJsSessionTests extends AbstractSockJsSessionTests<TestSockJsSes
 	public void scheduleAndCancelHeartbeat() throws Exception {
 
 		ScheduledFuture<?> task = mock(ScheduledFuture.class);
-		doReturn(task).when(this.taskScheduler).schedule(any(Runnable.class), any(Date.class));
+		willReturn(task).given(this.taskScheduler).schedule(any(Runnable.class), any(Date.class));
 
 		this.session.setActive(true);
 		this.session.scheduleHeartbeat();
@@ -286,7 +286,7 @@ public class SockJsSessionTests extends AbstractSockJsSessionTests<TestSockJsSes
 		verify(this.taskScheduler).schedule(any(Runnable.class), any(Date.class));
 		verifyNoMoreInteractions(this.taskScheduler);
 
-		doReturn(false).when(task).isDone();
+		given(task.isDone()).willReturn(false);
 
 		this.session.cancelHeartbeat();
 

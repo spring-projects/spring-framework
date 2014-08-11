@@ -16,9 +16,6 @@
 
 package org.springframework.web.servlet.resource;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -28,10 +25,12 @@ import javax.servlet.http.HttpServletRequest;
 import org.hamcrest.Matchers;
 import org.junit.Before;
 import org.junit.Test;
-
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.util.FileCopyUtils;
+
+import static org.junit.Assert.*;
+import static org.mockito.BDDMockito.*;
 
 /**
  * Unit tests for
@@ -57,8 +56,8 @@ public class AppCacheManifestTransformerTests {
 	@Test
 	public void noTransformIfExtensionNoMatch() throws Exception {
 		Resource resource = mock(Resource.class);
-		when(resource.getFilename()).thenReturn("foobar.file");
-		when(this.chain.transform(this.request, resource)).thenReturn(resource);
+		given(resource.getFilename()).willReturn("foobar.file");
+		given(this.chain.transform(this.request, resource)).willReturn(resource);
 
 		Resource result = this.transformer.transform(this.request, resource, this.chain);
 		assertEquals(resource, result);
@@ -67,7 +66,7 @@ public class AppCacheManifestTransformerTests {
 	@Test
 	public void syntaxErrorInManifest() throws Exception {
 		Resource resource = new ClassPathResource("test/error.manifest", getClass());
-		when(this.chain.transform(this.request, resource)).thenReturn(resource);
+		given(this.chain.transform(this.request, resource)).willReturn(resource);
 
 		Resource result = this.transformer.transform(this.request, resource, this.chain);
 		assertEquals(resource, result);

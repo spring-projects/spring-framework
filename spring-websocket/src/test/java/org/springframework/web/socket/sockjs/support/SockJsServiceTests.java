@@ -18,6 +18,9 @@ package org.springframework.web.socket.sockjs.support;
 
 import java.io.IOException;
 
+import javax.servlet.ServletOutputStream;
+import javax.servlet.http.HttpServletResponse;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.http.HttpStatus;
@@ -31,10 +34,7 @@ import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.sockjs.SockJsException;
 
 import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
-
-import javax.servlet.ServletOutputStream;
-import javax.servlet.http.HttpServletResponse;
+import static org.mockito.BDDMockito.*;
 
 /**
  * Test fixture for {@link AbstractSockJsService}.
@@ -117,8 +117,8 @@ public class SockJsServiceTests extends AbstractHttpRequestTests {
 	public void handleInfoGetWildflyNPE() throws Exception {
 		HttpServletResponse mockResponse = mock(HttpServletResponse.class);
 		ServletOutputStream ous = mock(ServletOutputStream.class);
-		when(mockResponse.getHeaders("Access-Control-Allow-Origin")).thenThrow(NullPointerException.class);
-		when(mockResponse.getOutputStream()).thenReturn(ous);
+		given(mockResponse.getHeaders("Access-Control-Allow-Origin")).willThrow(NullPointerException.class);
+		given(mockResponse.getOutputStream()).willReturn(ous);
 		this.response = new ServletServerHttpResponse(mockResponse);
 
 		handleRequest("GET", "/echo/info", HttpStatus.OK);

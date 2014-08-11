@@ -15,22 +15,19 @@
 
 package org.springframework.web.socket.adapter.standard;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.websocket.Session;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.springframework.http.HttpHeaders;
 import org.springframework.web.socket.handler.TestPrincipal;
 
-import javax.websocket.Session;
-import java.util.HashMap;
-import java.util.Map;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
-import static org.mockito.Mockito.reset;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.when;
+import static org.junit.Assert.*;
+import static org.mockito.BDDMockito.*;
 
 /**
  * Unit tests for {@link org.springframework.web.socket.adapter.standard.StandardWebSocketSession}.
@@ -65,7 +62,7 @@ public class StandardWebSocketSessionTests {
 		TestPrincipal user = new TestPrincipal("joe");
 
 		Session nativeSession = Mockito.mock(Session.class);
-		when(nativeSession.getUserPrincipal()).thenReturn(user);
+		given(nativeSession.getUserPrincipal()).willReturn(user);
 
 		StandardWebSocketSession session = new StandardWebSocketSession(this.headers, this.attributes, null, null);
 		session.initializeNativeSession(nativeSession);
@@ -77,7 +74,7 @@ public class StandardWebSocketSessionTests {
 	public void getPrincipalNone() {
 
 		Session nativeSession = Mockito.mock(Session.class);
-		when(nativeSession.getUserPrincipal()).thenReturn(null);
+		given(nativeSession.getUserPrincipal()).willReturn(null);
 
 		StandardWebSocketSession session = new StandardWebSocketSession(this.headers, this.attributes, null, null);
 		session.initializeNativeSession(nativeSession);
@@ -94,7 +91,7 @@ public class StandardWebSocketSessionTests {
 		String protocol = "foo";
 
 		Session nativeSession = Mockito.mock(Session.class);
-		when(nativeSession.getNegotiatedSubprotocol()).thenReturn(protocol);
+		given(nativeSession.getNegotiatedSubprotocol()).willReturn(protocol);
 
 		StandardWebSocketSession session = new StandardWebSocketSession(this.headers, this.attributes, null, null);
 		session.initializeNativeSession(nativeSession);

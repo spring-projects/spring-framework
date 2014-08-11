@@ -16,6 +16,8 @@
 
 package org.springframework.web.servlet.mvc.method.annotation;
 
+import java.util.Arrays;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -35,10 +37,8 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.method.ControllerAdviceBean;
 
-import java.util.Arrays;
-
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.*;
+import static org.junit.Assert.*;
+import static org.mockito.BDDMockito.*;
 
 /**
  * Unit tests for
@@ -80,9 +80,9 @@ public class ResponseBodyAdviceChainTests {
 		ResponseBodyAdviceChain chain = new ResponseBodyAdviceChain(Arrays.asList(advice));
 
 		String expected = "body++";
-		when(advice.supports(this.returnType, this.converterType)).thenReturn(true);
-		when(advice.beforeBodyWrite(eq(this.body), eq(this.returnType), eq(this.contentType),
-				eq(this.converterType), same(this.request), same(this.response))).thenReturn(expected);
+		given(advice.supports(this.returnType, this.converterType)).willReturn(true);
+		given(advice.beforeBodyWrite(eq(this.body), eq(this.returnType), eq(this.contentType),
+				eq(this.converterType), same(this.request), same(this.response))).willReturn(expected);
 
 		String actual = chain.invoke(this.body, this.returnType,
 				this.contentType, this.converterType, this.request, this.response);

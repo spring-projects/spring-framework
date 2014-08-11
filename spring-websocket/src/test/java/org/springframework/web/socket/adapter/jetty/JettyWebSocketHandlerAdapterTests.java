@@ -24,10 +24,8 @@ import org.junit.Test;
 import org.mockito.Mockito;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.WebSocketHandler;
-import org.springframework.web.socket.adapter.jetty.JettyWebSocketHandlerAdapter;
-import org.springframework.web.socket.adapter.jetty.JettyWebSocketSession;
 
-import static org.mockito.Mockito.*;
+import static org.mockito.BDDMockito.*;
 
 /**
  * Test fixture for {@link org.springframework.web.socket.adapter.jetty.JettyWebSocketHandlerAdapter}.
@@ -48,8 +46,8 @@ public class JettyWebSocketHandlerAdapterTests {
 	@Before
 	public void setup() {
 		this.session = mock(Session.class);
-		when(this.session.getUpgradeRequest()).thenReturn(Mockito.mock(UpgradeRequest.class));
-		when(this.session.getUpgradeResponse()).thenReturn(Mockito.mock(UpgradeResponse.class));
+		given(this.session.getUpgradeRequest()).willReturn(Mockito.mock(UpgradeRequest.class));
+		given(this.session.getUpgradeResponse()).willReturn(Mockito.mock(UpgradeResponse.class));
 
 		this.webSocketHandler = mock(WebSocketHandler.class);
 		this.webSocketSession = new JettyWebSocketSession(null, null);

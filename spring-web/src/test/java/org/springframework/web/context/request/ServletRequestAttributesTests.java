@@ -18,11 +18,11 @@ package org.springframework.web.context.request;
 
 import java.io.Serializable;
 import java.math.BigInteger;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
 import org.junit.Test;
-
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockHttpSession;
 
@@ -157,8 +157,8 @@ public class ServletRequestAttributesTests {
 	public void updateAccessedAttributes() throws Exception {
 		HttpServletRequest request = mock(HttpServletRequest.class);
 		HttpSession session = mock(HttpSession.class);
-		when(request.getSession(anyBoolean())).thenReturn(session);
-		when(session.getAttribute(KEY)).thenReturn(VALUE);
+		given(request.getSession(anyBoolean())).willReturn(session);
+		given(session.getAttribute(KEY)).willReturn(VALUE);
 
 		ServletRequestAttributes attrs = new ServletRequestAttributes(request);
 		assertSame(VALUE, attrs.getAttribute(KEY, RequestAttributes.SCOPE_SESSION));
@@ -202,8 +202,8 @@ public class ServletRequestAttributesTests {
 	private void doSkipImmutableValue(Object immutableValue) {
 		HttpServletRequest request = mock(HttpServletRequest.class);
 		HttpSession session = mock(HttpSession.class);
-		when(request.getSession(anyBoolean())).thenReturn(session);
-		when(session.getAttribute(KEY)).thenReturn(immutableValue);
+		given(request.getSession(anyBoolean())).willReturn(session);
+		given(session.getAttribute(KEY)).willReturn(immutableValue);
 
 		ServletRequestAttributes attrs = new ServletRequestAttributes(request);
 		attrs.getAttribute(KEY, RequestAttributes.SCOPE_SESSION);

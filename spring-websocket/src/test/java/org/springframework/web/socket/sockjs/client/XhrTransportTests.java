@@ -16,6 +16,8 @@
 
 package org.springframework.web.socket.sockjs.client;
 
+import java.net.URI;
+
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.http.HttpHeaders;
@@ -28,15 +30,8 @@ import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.WebSocketSession;
 
-import java.net.URI;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.when;
+import static org.junit.Assert.*;
+import static org.mockito.BDDMockito.*;
 
 /**
  * Unit tests for
@@ -88,8 +83,8 @@ public class XhrTransportTests {
 		handshakeHeaders.setOrigin("foo");
 
 		TransportRequest request = mock(TransportRequest.class);
-		when(request.getSockJsUrlInfo()).thenReturn(new SockJsUrlInfo(new URI("http://example.com")));
-		when(request.getHandshakeHeaders()).thenReturn(handshakeHeaders);
+		given(request.getSockJsUrlInfo()).willReturn(new SockJsUrlInfo(new URI("http://example.com")));
+		given(request.getHandshakeHeaders()).willReturn(handshakeHeaders);
 
 		HttpHeaders requestHeaders = new HttpHeaders();
 		requestHeaders.set("foo", "bar");

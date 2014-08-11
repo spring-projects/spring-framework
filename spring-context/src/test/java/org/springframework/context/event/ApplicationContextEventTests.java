@@ -22,7 +22,6 @@ import java.util.concurrent.Executor;
 
 import org.aopalliance.intercept.MethodInvocation;
 import org.junit.Test;
-
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.support.RootBeanDefinition;
@@ -91,7 +90,7 @@ public class ApplicationContextEventTests {
 		smc.addApplicationListener(listener);
 
 		RuntimeException thrown = new RuntimeException();
-		doThrow(thrown).when(listener).onApplicationEvent(evt);
+		willThrow(thrown).given(listener).onApplicationEvent(evt);
 		try {
 			smc.multicastEvent(evt);
 			fail("Should have thrown RuntimeException");
@@ -111,7 +110,7 @@ public class ApplicationContextEventTests {
 		smc.setErrorHandler(TaskUtils.LOG_AND_SUPPRESS_ERROR_HANDLER);
 		smc.addApplicationListener(listener);
 
-		doThrow(new RuntimeException()).when(listener).onApplicationEvent(evt);
+		willThrow(new RuntimeException()).given(listener).onApplicationEvent(evt);
 		smc.multicastEvent(evt);
 	}
 

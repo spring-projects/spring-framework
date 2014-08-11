@@ -16,6 +16,9 @@
 
 package org.springframework.web.socket.adapter.jetty;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.UpgradeRequest;
 import org.eclipse.jetty.websocket.api.UpgradeResponse;
@@ -24,14 +27,8 @@ import org.junit.Test;
 import org.mockito.Mockito;
 import org.springframework.web.socket.handler.TestPrincipal;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
-import static org.mockito.Mockito.reset;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.when;
+import static org.junit.Assert.*;
+import static org.mockito.BDDMockito.*;
 
 /**
  * Unit tests for {@link org.springframework.web.socket.adapter.jetty.JettyWebSocketSession}.
@@ -63,14 +60,14 @@ public class JettyWebSocketSessionTests {
 		TestPrincipal user = new TestPrincipal("joe");
 
 		UpgradeRequest request = Mockito.mock(UpgradeRequest.class);
-		when(request.getUserPrincipal()).thenReturn(user);
+		given(request.getUserPrincipal()).willReturn(user);
 
 		UpgradeResponse response = Mockito.mock(UpgradeResponse.class);
-		when(response.getAcceptedSubProtocol()).thenReturn(null);
+		given(response.getAcceptedSubProtocol()).willReturn(null);
 
 		Session nativeSession = Mockito.mock(Session.class);
-		when(nativeSession.getUpgradeRequest()).thenReturn(request);
-		when(nativeSession.getUpgradeResponse()).thenReturn(response);
+		given(nativeSession.getUpgradeRequest()).willReturn(request);
+		given(nativeSession.getUpgradeResponse()).willReturn(response);
 
 		JettyWebSocketSession session = new JettyWebSocketSession(attributes);
 		session.initializeNativeSession(nativeSession);
@@ -85,14 +82,14 @@ public class JettyWebSocketSessionTests {
 	public void getPrincipalNotAvailable() {
 
 		UpgradeRequest request = Mockito.mock(UpgradeRequest.class);
-		when(request.getUserPrincipal()).thenReturn(null);
+		given(request.getUserPrincipal()).willReturn(null);
 
 		UpgradeResponse response = Mockito.mock(UpgradeResponse.class);
-		when(response.getAcceptedSubProtocol()).thenReturn(null);
+		given(response.getAcceptedSubProtocol()).willReturn(null);
 
 		Session nativeSession = Mockito.mock(Session.class);
-		when(nativeSession.getUpgradeRequest()).thenReturn(request);
-		when(nativeSession.getUpgradeResponse()).thenReturn(response);
+		given(nativeSession.getUpgradeRequest()).willReturn(request);
+		given(nativeSession.getUpgradeResponse()).willReturn(response);
 
 		JettyWebSocketSession session = new JettyWebSocketSession(attributes);
 		session.initializeNativeSession(nativeSession);
@@ -109,14 +106,14 @@ public class JettyWebSocketSessionTests {
 		String protocol = "foo";
 
 		UpgradeRequest request = Mockito.mock(UpgradeRequest.class);
-		when(request.getUserPrincipal()).thenReturn(null);
+		given(request.getUserPrincipal()).willReturn(null);
 
 		UpgradeResponse response = Mockito.mock(UpgradeResponse.class);
-		when(response.getAcceptedSubProtocol()).thenReturn(protocol);
+		given(response.getAcceptedSubProtocol()).willReturn(protocol);
 
 		Session nativeSession = Mockito.mock(Session.class);
-		when(nativeSession.getUpgradeRequest()).thenReturn(request);
-		when(nativeSession.getUpgradeResponse()).thenReturn(response);
+		given(nativeSession.getUpgradeRequest()).willReturn(request);
+		given(nativeSession.getUpgradeResponse()).willReturn(response);
 
 		JettyWebSocketSession session = new JettyWebSocketSession(attributes);
 		session.initializeNativeSession(nativeSession);

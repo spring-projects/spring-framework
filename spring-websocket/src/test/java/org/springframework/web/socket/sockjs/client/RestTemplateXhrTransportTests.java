@@ -16,6 +16,16 @@
 
 package org.springframework.web.socket.sockjs.client;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URI;
+import java.nio.charset.Charset;
+import java.util.Arrays;
+import java.util.Queue;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.LinkedBlockingDeque;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.core.task.SyncTaskExecutor;
@@ -45,17 +55,7 @@ import org.springframework.web.socket.sockjs.frame.Jackson2SockJsMessageCodec;
 import org.springframework.web.socket.sockjs.frame.SockJsFrame;
 import org.springframework.web.socket.sockjs.transport.TransportType;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URI;
-import java.nio.charset.Charset;
-import java.util.Arrays;
-import java.util.Queue;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.LinkedBlockingDeque;
-
-import static org.mockito.Mockito.*;
+import static org.mockito.BDDMockito.*;
 
 /**
  * Unit tests for {@link RestTemplateXhrTransport}.
@@ -127,7 +127,7 @@ public class RestTemplateXhrTransportTests {
 	public void connectFailure() throws Exception {
 		final HttpServerErrorException expected = new HttpServerErrorException(HttpStatus.INTERNAL_SERVER_ERROR);
 		RestOperations restTemplate = mock(RestOperations.class);
-		when(restTemplate.execute(any(), eq(HttpMethod.POST), any(), any())).thenThrow(expected);
+		given(restTemplate.execute((URI) any(), eq(HttpMethod.POST), any(), any())).willThrow(expected);
 
 		final CountDownLatch latch = new CountDownLatch(1);
 		connect(restTemplate).addCallback(
@@ -189,8 +189,8 @@ public class RestTemplateXhrTransportTests {
 	private ClientHttpResponse response(HttpStatus status, String body) throws IOException {
 		ClientHttpResponse response = mock(ClientHttpResponse.class);
 		InputStream inputStream = getInputStream(body);
-		when(response.getStatusCode()).thenReturn(status);
-		when(response.getBody()).thenReturn(inputStream);
+		given(response.getStatusCode()).willReturn(status);
+		given(response.getBody()).willReturn(inputStream);
 		return response;
 	}
 

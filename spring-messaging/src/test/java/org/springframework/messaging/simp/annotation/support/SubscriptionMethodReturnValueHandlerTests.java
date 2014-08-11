@@ -43,7 +43,7 @@ import org.springframework.messaging.support.MessageHeaderAccessor;
 import org.springframework.util.MimeType;
 
 import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
+import static org.mockito.BDDMockito.*;
 
 /**
  * Test fixture for {@link SubscriptionMethodReturnValueHandler}.
@@ -71,7 +71,6 @@ public class SubscriptionMethodReturnValueHandlerTests {
 
 
 	@Before
-	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void setup() throws Exception {
 
 		MockitoAnnotations.initMocks(this);
@@ -102,7 +101,7 @@ public class SubscriptionMethodReturnValueHandlerTests {
 	@Test
 	public void testMessageSentToChannel() throws Exception {
 
-		when(this.messageChannel.send(any(Message.class))).thenReturn(true);
+		given(this.messageChannel.send(any(Message.class))).willReturn(true);
 
 		String sessionId = "sess1";
 		String subscriptionId = "subs1";
@@ -162,20 +161,17 @@ public class SubscriptionMethodReturnValueHandlerTests {
 	}
 
 
-	@SuppressWarnings("unused")
 	@SubscribeMapping("/data") // not needed for the tests but here for completeness
 	private String getData() {
 		return PAYLOAD;
 	}
 
-	@SuppressWarnings("unused")
 	@SubscribeMapping("/data") // not needed for the tests but here for completeness
 	@SendTo("/sendToDest")
 	private String getDataAndSendTo() {
 		return PAYLOAD;
 	}
 
-	@SuppressWarnings("unused")
 	@MessageMapping("/handle")	// not needed for the tests but here for completeness
 	public String handle() {
 		return PAYLOAD;

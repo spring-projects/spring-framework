@@ -31,11 +31,8 @@ import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.handler.ConcurrentWebSocketSessionDecorator;
 import org.springframework.web.socket.handler.TestWebSocketSession;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.*;
+import static org.junit.Assert.*;
+import static org.mockito.BDDMockito.*;
 
 /**
  * Test fixture for {@link SubProtocolWebSocketHandler}.
@@ -65,8 +62,8 @@ public class SubProtocolWebSocketHandlerTests {
 	public void setup() {
 		MockitoAnnotations.initMocks(this);
 		this.webSocketHandler = new SubProtocolWebSocketHandler(this.inClientChannel, this.outClientChannel);
-		when(stompHandler.getSupportedProtocols()).thenReturn(Arrays.asList("v10.stomp", "v11.stomp", "v12.stomp"));
-		when(mqttHandler.getSupportedProtocols()).thenReturn(Arrays.asList("MQTT"));
+		given(stompHandler.getSupportedProtocols()).willReturn(Arrays.asList("v10.stomp", "v11.stomp", "v12.stomp"));
+		given(mqttHandler.getSupportedProtocols()).willReturn(Arrays.asList("MQTT"));
 		this.session = new TestWebSocketSession();
 		this.session.setId("1");
 	}

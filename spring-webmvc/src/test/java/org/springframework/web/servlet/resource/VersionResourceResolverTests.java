@@ -23,12 +23,11 @@ import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
-
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 
 import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
+import static org.mockito.BDDMockito.*;
 
 /**
  * Unit tests for {@link VersionResourceResolver}
@@ -62,7 +61,7 @@ public class VersionResourceResolverTests {
 	public void resolveResourceExisting() throws Exception {
 		String file = "bar.css";
 		Resource expected = new ClassPathResource("test/" + file, getClass());
-		when(this.chain.resolveResource(null, file, this.locations)).thenReturn(expected);
+		given(this.chain.resolveResource(null, file, this.locations)).willReturn(expected);
 
 		this.resolver.setStrategyMap(Collections.singletonMap("/**", this.versionStrategy));
 		Resource actual = this.resolver.resolveResourceInternal(null, file, this.locations, this.chain);
@@ -74,7 +73,7 @@ public class VersionResourceResolverTests {
 	@Test
 	public void resolveResourceNoVersionStrategy() throws Exception {
 		String file = "missing.css";
-		when(this.chain.resolveResource(null, file, this.locations)).thenReturn(null);
+		given(this.chain.resolveResource(null, file, this.locations)).willReturn(null);
 
 		this.resolver.setStrategyMap(Collections.emptyMap());
 		Resource actual = this.resolver.resolveResourceInternal(null, file, this.locations, this.chain);
@@ -85,8 +84,8 @@ public class VersionResourceResolverTests {
 	@Test
 	public void resolveResourceNoVersionInPath() throws Exception {
 		String file = "bar.css";
-		when(this.chain.resolveResource(null, file, this.locations)).thenReturn(null);
-		when(this.versionStrategy.extractVersion(file)).thenReturn("");
+		given(this.chain.resolveResource(null, file, this.locations)).willReturn(null);
+		given(this.versionStrategy.extractVersion(file)).willReturn("");
 
 		this.resolver.setStrategyMap(Collections.singletonMap("/**", this.versionStrategy));
 		Resource actual = this.resolver.resolveResourceInternal(null, file, this.locations, this.chain);
@@ -100,10 +99,10 @@ public class VersionResourceResolverTests {
 		String versionFile = "bar-version.css";
 		String version = "version";
 		String file = "bar.css";
-		when(this.chain.resolveResource(null, versionFile, this.locations)).thenReturn(null);
-		when(this.chain.resolveResource(null, file, this.locations)).thenReturn(null);
-		when(this.versionStrategy.extractVersion(versionFile)).thenReturn(version);
-		when(this.versionStrategy.removeVersion(versionFile, version)).thenReturn(file);
+		given(this.chain.resolveResource(null, versionFile, this.locations)).willReturn(null);
+		given(this.chain.resolveResource(null, file, this.locations)).willReturn(null);
+		given(this.versionStrategy.extractVersion(versionFile)).willReturn(version);
+		given(this.versionStrategy.removeVersion(versionFile, version)).willReturn(file);
 
 		this.resolver.setStrategyMap(Collections.singletonMap("/**", this.versionStrategy));
 		Resource actual = this.resolver.resolveResourceInternal(null, versionFile, this.locations, this.chain);
@@ -117,11 +116,11 @@ public class VersionResourceResolverTests {
 		String version = "version";
 		String file = "bar.css";
 		Resource expected = new ClassPathResource("test/" + file, getClass());
-		when(this.chain.resolveResource(null, versionFile, this.locations)).thenReturn(null);
-		when(this.chain.resolveResource(null, file, this.locations)).thenReturn(expected);
-		when(this.versionStrategy.extractVersion(versionFile)).thenReturn(version);
-		when(this.versionStrategy.removeVersion(versionFile, version)).thenReturn(file);
-		when(this.versionStrategy.getResourceVersion(expected)).thenReturn("newer-version");
+		given(this.chain.resolveResource(null, versionFile, this.locations)).willReturn(null);
+		given(this.chain.resolveResource(null, file, this.locations)).willReturn(expected);
+		given(this.versionStrategy.extractVersion(versionFile)).willReturn(version);
+		given(this.versionStrategy.removeVersion(versionFile, version)).willReturn(file);
+		given(this.versionStrategy.getResourceVersion(expected)).willReturn("newer-version");
 
 		this.resolver.setStrategyMap(Collections.singletonMap("/**", this.versionStrategy));
 		Resource actual = this.resolver.resolveResourceInternal(null, versionFile, this.locations, this.chain);
@@ -135,11 +134,11 @@ public class VersionResourceResolverTests {
 		String version = "version";
 		String file = "bar.css";
 		Resource expected = new ClassPathResource("test/" + file, getClass());
-		when(this.chain.resolveResource(null, versionFile, this.locations)).thenReturn(null);
-		when(this.chain.resolveResource(null, file, this.locations)).thenReturn(expected);
-		when(this.versionStrategy.extractVersion(versionFile)).thenReturn(version);
-		when(this.versionStrategy.removeVersion(versionFile, version)).thenReturn(file);
-		when(this.versionStrategy.getResourceVersion(expected)).thenReturn(version);
+		given(this.chain.resolveResource(null, versionFile, this.locations)).willReturn(null);
+		given(this.chain.resolveResource(null, file, this.locations)).willReturn(expected);
+		given(this.versionStrategy.extractVersion(versionFile)).willReturn(version);
+		given(this.versionStrategy.removeVersion(versionFile, version)).willReturn(file);
+		given(this.versionStrategy.getResourceVersion(expected)).willReturn(version);
 
 		this.resolver
 				.setStrategyMap(Collections.singletonMap("/**", this.versionStrategy));

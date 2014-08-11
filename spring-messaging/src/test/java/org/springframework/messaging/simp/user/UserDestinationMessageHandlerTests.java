@@ -30,8 +30,9 @@ import org.springframework.messaging.simp.SimpMessageType;
 import org.springframework.messaging.simp.TestPrincipal;
 import org.springframework.messaging.support.MessageBuilder;
 
+import static org.mockito.BDDMockito.*;
+
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.*;
 
 /**
  * Unit tests for {@link org.springframework.messaging.simp.user.UserDestinationMessageHandler}.
@@ -60,7 +61,7 @@ public class UserDestinationMessageHandlerTests {
 	@Test
 	@SuppressWarnings("rawtypes")
 	public void handleSubscribe() {
-		when(this.brokerChannel.send(Mockito.any(Message.class))).thenReturn(true);
+		given(this.brokerChannel.send(Mockito.any(Message.class))).willReturn(true);
 		this.messageHandler.handleMessage(createMessage(SimpMessageType.SUBSCRIBE, "joe", SESSION_ID, "/user/queue/foo"));
 
 		ArgumentCaptor<Message> captor = ArgumentCaptor.forClass(Message.class);
@@ -72,7 +73,7 @@ public class UserDestinationMessageHandlerTests {
 	@Test
 	@SuppressWarnings("rawtypes")
 	public void handleUnsubscribe() {
-		when(this.brokerChannel.send(Mockito.any(Message.class))).thenReturn(true);
+		given(this.brokerChannel.send(Mockito.any(Message.class))).willReturn(true);
 		this.messageHandler.handleMessage(createMessage(SimpMessageType.UNSUBSCRIBE, "joe", "123", "/user/queue/foo"));
 
 		ArgumentCaptor<Message> captor = ArgumentCaptor.forClass(Message.class);
@@ -85,7 +86,7 @@ public class UserDestinationMessageHandlerTests {
 	@SuppressWarnings("rawtypes")
 	public void handleMessage() {
 		this.registry.registerSessionId("joe", "123");
-		when(this.brokerChannel.send(Mockito.any(Message.class))).thenReturn(true);
+		given(this.brokerChannel.send(Mockito.any(Message.class))).willReturn(true);
 		this.messageHandler.handleMessage(createMessage(SimpMessageType.MESSAGE, "joe", "123", "/user/joe/queue/foo"));
 
 		ArgumentCaptor<Message> captor = ArgumentCaptor.forClass(Message.class);

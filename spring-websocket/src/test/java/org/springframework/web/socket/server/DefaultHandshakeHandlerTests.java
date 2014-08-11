@@ -26,14 +26,14 @@ import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.web.socket.AbstractHttpRequestTests;
-import org.springframework.web.socket.server.support.DefaultHandshakeHandler;
 import org.springframework.web.socket.SubProtocolCapable;
 import org.springframework.web.socket.WebSocketExtension;
 import org.springframework.web.socket.WebSocketHandler;
-import org.springframework.web.socket.handler.TextWebSocketHandler;
 import org.springframework.web.socket.WebSocketHttpHeaders;
+import org.springframework.web.socket.handler.TextWebSocketHandler;
+import org.springframework.web.socket.server.support.DefaultHandshakeHandler;
 
-import static org.mockito.Mockito.*;
+import static org.mockito.BDDMockito.*;
 
 /**
  * Test fixture for {@link org.springframework.web.socket.server.support.DefaultHandshakeHandler}.
@@ -60,7 +60,7 @@ public class DefaultHandshakeHandlerTests extends AbstractHttpRequestTests {
 
 		this.handshakeHandler.setSupportedProtocols("stomp", "mqtt");
 
-		when(this.upgradeStrategy.getSupportedVersions()).thenReturn(new String[] {"13"});
+		given(this.upgradeStrategy.getSupportedVersions()).willReturn(new String[] {"13"});
 
 		this.servletRequest.setMethod("GET");
 
@@ -86,8 +86,8 @@ public class DefaultHandshakeHandlerTests extends AbstractHttpRequestTests {
 		WebSocketExtension extension1 = new WebSocketExtension("ext1");
 		WebSocketExtension extension2 = new WebSocketExtension("ext2");
 
-		when(this.upgradeStrategy.getSupportedVersions()).thenReturn(new String[] {"13"});
-		when(this.upgradeStrategy.getSupportedExtensions(this.request)).thenReturn(Arrays.asList(extension1));
+		given(this.upgradeStrategy.getSupportedVersions()).willReturn(new String[] {"13"});
+		given(this.upgradeStrategy.getSupportedExtensions(this.request)).willReturn(Arrays.asList(extension1));
 
 		this.servletRequest.setMethod("GET");
 
@@ -109,7 +109,7 @@ public class DefaultHandshakeHandlerTests extends AbstractHttpRequestTests {
 	@Test
 	public void subProtocolCapableHandler() throws Exception {
 
-		when(this.upgradeStrategy.getSupportedVersions()).thenReturn(new String[]{"13"});
+		given(this.upgradeStrategy.getSupportedVersions()).willReturn(new String[]{"13"});
 
 		this.servletRequest.setMethod("GET");
 
@@ -131,7 +131,7 @@ public class DefaultHandshakeHandlerTests extends AbstractHttpRequestTests {
 	@Test
 	public void subProtocolCapableHandlerNoMatch() throws Exception {
 
-		when(this.upgradeStrategy.getSupportedVersions()).thenReturn(new String[]{"13"});
+		given(this.upgradeStrategy.getSupportedVersions()).willReturn(new String[]{"13"});
 
 		this.servletRequest.setMethod("GET");
 

@@ -19,7 +19,7 @@ package org.springframework.messaging.core;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
+import static org.mockito.BDDMockito.*;
 
 /**
  * Unit tests for {@link CachingDestinationResolverProxy}.
@@ -32,11 +32,11 @@ public class CachingDestinationResolverTests {
 	@Test
 	public void cachedDestination() {
 		@SuppressWarnings("unchecked")
-		DestinationResolver<String> destinationResolver = (DestinationResolver<String>) mock(DestinationResolver.class);
+		DestinationResolver<String> destinationResolver = mock(DestinationResolver.class);
 		CachingDestinationResolverProxy<String> cachingDestinationResolver = new CachingDestinationResolverProxy<String>(destinationResolver);
 
-		when(destinationResolver.resolveDestination("abcd")).thenReturn("dcba");
-		when(destinationResolver.resolveDestination("1234")).thenReturn("4321");
+		given(destinationResolver.resolveDestination("abcd")).willReturn("dcba");
+		given(destinationResolver.resolveDestination("1234")).willReturn("4321");
 
 		assertEquals("dcba", cachingDestinationResolver.resolveDestination("abcd"));
 		assertEquals("4321", cachingDestinationResolver.resolveDestination("1234"));

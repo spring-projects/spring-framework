@@ -24,13 +24,11 @@ import javax.security.auth.Subject;
 
 import org.junit.Before;
 import org.junit.Test;
-
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
-
 import org.springframework.core.MethodParameter;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
@@ -48,7 +46,7 @@ import org.springframework.messaging.support.MessageHeaderAccessor;
 import org.springframework.util.MimeType;
 
 import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
+import static org.mockito.BDDMockito.*;
 
 /**
  * Test fixture for {@link SendToMethodReturnValueHandlerTests}.
@@ -125,7 +123,7 @@ public class SendToMethodReturnValueHandlerTests {
 	@Test
 	public void sendToNoAnnotations() throws Exception {
 
-		when(this.messageChannel.send(any(Message.class))).thenReturn(true);
+		given(this.messageChannel.send(any(Message.class))).willReturn(true);
 
 		Message<?> inputMessage = createInputMessage("sess1", "sub1", "/app", "/dest", null);
 		this.handler.handleReturnValue(PAYLOAD, this.noAnnotationsReturnType, inputMessage);
@@ -143,7 +141,7 @@ public class SendToMethodReturnValueHandlerTests {
 	@Test
 	public void sendTo() throws Exception {
 
-		when(this.messageChannel.send(any(Message.class))).thenReturn(true);
+		given(this.messageChannel.send(any(Message.class))).willReturn(true);
 
 		String sessionId = "sess1";
 		Message<?> inputMessage = createInputMessage(sessionId, "sub1", null, null, null);
@@ -169,7 +167,7 @@ public class SendToMethodReturnValueHandlerTests {
 	@Test
 	public void sendToDefaultDestination() throws Exception {
 
-		when(this.messageChannel.send(any(Message.class))).thenReturn(true);
+		given(this.messageChannel.send(any(Message.class))).willReturn(true);
 
 		String sessionId = "sess1";
 		Message<?> inputMessage = createInputMessage(sessionId, "sub1", "/app", "/dest", null);
@@ -188,7 +186,7 @@ public class SendToMethodReturnValueHandlerTests {
 	@Test
 	public void sendToDefaultDestinationWhenUsingDotPathSeparator() throws Exception {
 
-		when(this.messageChannel.send(any(Message.class))).thenReturn(true);
+		given(this.messageChannel.send(any(Message.class))).willReturn(true);
 
 		Message<?> inputMessage = createInputMessage("sess1", "sub1", "/app/", "dest.foo.bar", null);
 		this.handler.handleReturnValue(PAYLOAD, this.sendToDefaultDestReturnType, inputMessage);
@@ -225,7 +223,7 @@ public class SendToMethodReturnValueHandlerTests {
 	@Test
 	public void sendToUser() throws Exception {
 
-		when(this.messageChannel.send(any(Message.class))).thenReturn(true);
+		given(this.messageChannel.send(any(Message.class))).willReturn(true);
 
 		String sessionId = "sess1";
 		TestUser user = new TestUser();
@@ -250,7 +248,7 @@ public class SendToMethodReturnValueHandlerTests {
 	@Test
 	public void sendToUserSingleSession() throws Exception {
 
-		when(this.messageChannel.send(any(Message.class))).thenReturn(true);
+		given(this.messageChannel.send(any(Message.class))).willReturn(true);
 
 		String sessionId = "sess1";
 		TestUser user = new TestUser();
@@ -277,7 +275,7 @@ public class SendToMethodReturnValueHandlerTests {
 	@Test
 	public void sendToUserWithUserNameProvider() throws Exception {
 
-		when(this.messageChannel.send(any(Message.class))).thenReturn(true);
+		given(this.messageChannel.send(any(Message.class))).willReturn(true);
 
 		String sessionId = "sess1";
 		TestUser user = new UniqueUser();
@@ -296,7 +294,7 @@ public class SendToMethodReturnValueHandlerTests {
 	@Test
 	public void sendToUserDefaultDestination() throws Exception {
 
-		when(this.messageChannel.send(any(Message.class))).thenReturn(true);
+		given(this.messageChannel.send(any(Message.class))).willReturn(true);
 
 		String sessionId = "sess1";
 		TestUser user = new TestUser();
@@ -315,7 +313,7 @@ public class SendToMethodReturnValueHandlerTests {
 	@Test
 	public void sendToUserDefaultDestinationWhenUsingDotPathSeparator() throws Exception {
 
-		when(this.messageChannel.send(any(Message.class))).thenReturn(true);
+		given(this.messageChannel.send(any(Message.class))).willReturn(true);
 
 		TestUser user = new TestUser();
 		Message<?> inputMessage = createInputMessage("sess1", "sub1", "/app/", "dest.foo.bar", user);
@@ -331,7 +329,7 @@ public class SendToMethodReturnValueHandlerTests {
 	@Test
 	public void sendToUserDefaultDestinationSingleSession() throws Exception {
 
-		when(this.messageChannel.send(any(Message.class))).thenReturn(true);
+		given(this.messageChannel.send(any(Message.class))).willReturn(true);
 
 		String sessionId = "sess1";
 		TestUser user = new TestUser();
@@ -366,7 +364,7 @@ public class SendToMethodReturnValueHandlerTests {
 	@Test
 	public void sendToUserSessionWithoutUserName() throws Exception {
 
-		when(this.messageChannel.send(any(Message.class))).thenReturn(true);
+		given(this.messageChannel.send(any(Message.class))).willReturn(true);
 
 		String sessionId = "sess1";
 		Message<?> inputMessage = createInputMessage(sessionId, "sub1", null, null, null);
@@ -419,42 +417,35 @@ public class SendToMethodReturnValueHandlerTests {
 		}
 	}
 
-	@SuppressWarnings("unused")
 	public String handleNoAnnotations() {
 		return PAYLOAD;
 	}
 
-	@SuppressWarnings("unused")
 	@SendTo
 	public String handleAndSendToDefaultDestination() {
 		return PAYLOAD;
 	}
 
-	@SuppressWarnings("unused")
 	@SendTo({"/dest1", "/dest2"})
 	public String handleAndSendTo() {
 		return PAYLOAD;
 	}
 
-	@SuppressWarnings("unused")
 	@SendToUser
 	public String handleAndSendToUserDefaultDestination() {
 		return PAYLOAD;
 	}
 
-	@SuppressWarnings("unused")
 	@SendToUser(broadcast=false)
 	public String handleAndSendToUserDefaultDestinationSingleSession() {
 		return PAYLOAD;
 	}
 
-	@SuppressWarnings("unused")
 	@SendToUser({"/dest1", "/dest2"})
 	public String handleAndSendToUser() {
 		return PAYLOAD;
 	}
 
-	@SuppressWarnings("unused")
 	@SendToUser(value={"/dest1", "/dest2"}, broadcast=false)
 	public String handleAndSendToUserSingleSession() {
 		return PAYLOAD;
