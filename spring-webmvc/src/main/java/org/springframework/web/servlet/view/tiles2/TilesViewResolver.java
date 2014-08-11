@@ -47,7 +47,7 @@ public class TilesViewResolver extends UrlBasedViewResolver {
 	 * Requires {@link TilesView}.
 	 */
 	@Override
-	protected Class requiredViewClass() {
+	protected Class<?> requiredViewClass() {
 		return TilesView.class;
 	}
 

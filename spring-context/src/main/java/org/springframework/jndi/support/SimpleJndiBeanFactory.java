@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-
 import javax.naming.NameNotFoundException;
 import javax.naming.NamingException;
 
@@ -66,23 +65,13 @@ public class SimpleJndiBeanFactory extends JndiLocatorSupport implements BeanFac
 	private final Map<String, Object> singletonObjects = new HashMap<String, Object>();
 
 	/** Cache of the types of nonshareable resources: bean name --> bean type */
-	private final Map<String, Class> resourceTypes = new HashMap<String, Class>();
+	private final Map<String, Class<?>> resourceTypes = new HashMap<String, Class<?>>();
 
 
 	public SimpleJndiBeanFactory() {
 		setResourceRef(true);
 	}
 
-
-	/**
-	 * Set a list of names of shareable JNDI resources,
-	 * which this factory is allowed to cache once obtained.
-	 * @param shareableResources the JNDI names
-	 * (typically within the "java:comp/env/" namespace)
-	 */
-	public void setShareableResources(String[] shareableResources) {
-		this.shareableResources.addAll(Arrays.asList(shareableResources));
-	}
 
 	/**
 	 * Add the name of a shareable JNDI resource,
@@ -92,6 +81,16 @@ public class SimpleJndiBeanFactory extends JndiLocatorSupport implements BeanFac
 	 */
 	public void addShareableResource(String shareableResource) {
 		this.shareableResources.add(shareableResource);
+	}
+
+	/**
+	 * Set a list of names of shareable JNDI resources,
+	 * which this factory is allowed to cache once obtained.
+	 * @param shareableResources the JNDI names
+	 * (typically within the "java:comp/env/" namespace)
+	 */
+	public void setShareableResources(String... shareableResources) {
+		this.shareableResources.addAll(Arrays.asList(shareableResources));
 	}
 
 
@@ -157,8 +156,8 @@ public class SimpleJndiBeanFactory extends JndiLocatorSupport implements BeanFac
 		return !this.shareableResources.contains(name);
 	}
 
-	public boolean isTypeMatch(String name, Class targetType) throws NoSuchBeanDefinitionException {
-		Class type = getType(name);
+	public boolean isTypeMatch(String name, Class<?> targetType) throws NoSuchBeanDefinitionException {
+		Class<?> type = getType(name);
 		return (targetType == null || (type != null && targetType.isAssignableFrom(type)));
 	}
 
@@ -196,7 +195,7 @@ public class SimpleJndiBeanFactory extends JndiLocatorSupport implements BeanFac
 		}
 	}
 
-	private Class doGetType(String name) throws NamingException {
+	private Class<?> doGetType(String name) throws NamingException {
 		if (isSingleton(name)) {
 			Object jndiObject = doGetSingleton(name, null);
 			return (jndiObject != null ? jndiObject.getClass() : null);
@@ -208,7 +207,7 @@ public class SimpleJndiBeanFactory extends JndiLocatorSupport implements BeanFac
 				}
 				else {
 					Object jndiObject = lookup(name, null);
-					Class type = (jndiObject != null ? jndiObject.getClass() : null);
+					Class<?> type = (jndiObject != null ? jndiObject.getClass() : null);
 					this.resourceTypes.put(name, type);
 					return type;
 				}

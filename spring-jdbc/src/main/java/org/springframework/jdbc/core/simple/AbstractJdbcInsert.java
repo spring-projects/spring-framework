@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -180,21 +180,6 @@ public abstract class AbstractJdbcInsert {
 	}
 
 	/**
-	 * Get the names of any generated keys
-	 */
-	public String[] getGeneratedKeyNames() {
-		return this.generatedKeyNames;
-	}
-
-	/**
-	 * Set the names of any generated keys
-	 */
-	public void setGeneratedKeyNames(String[] generatedKeyNames) {
-		checkIfConfigurationModificationIsAllowed();
-		this.generatedKeyNames = generatedKeyNames;
-	}
-
-	/**
 	 * Specify the name of a single generated key column
 	 */
 	public void setGeneratedKeyName(String generatedKeyName) {
@@ -203,14 +188,31 @@ public abstract class AbstractJdbcInsert {
 	}
 
 	/**
-	 * Specify whether the parameter metadata for the call should be used.  The default is true.
+	 * Set the names of any generated keys
+	 */
+	public void setGeneratedKeyNames(String... generatedKeyNames) {
+		checkIfConfigurationModificationIsAllowed();
+		this.generatedKeyNames = generatedKeyNames;
+	}
+
+	/**
+	 * Get the names of any generated keys
+	 */
+	public String[] getGeneratedKeyNames() {
+		return this.generatedKeyNames;
+	}
+
+	/**
+	 * Specify whether the parameter metadata for the call should be used.
+	 * The default is {@code true}.
 	 */
 	public void setAccessTableColumnMetaData(boolean accessTableColumnMetaData) {
 		this.tableMetaDataContext.setAccessTableColumnMetaData(accessTableColumnMetaData);
 	}
 
 	/**
-	 * Specify whether the default for including synonyms should be changed.  The default is false.
+	 * Specify whether the default for including synonyms should be changed.
+	 * The default is {@code false}.
 	 */
 	public void setOverrideIncludeSynonymsDefault(boolean override) {
 		this.tableMetaDataContext.setOverrideIncludeSynonymsDefault(override);
@@ -311,7 +313,7 @@ public abstract class AbstractJdbcInsert {
 	}
 
 	/**
-	 * Method to check whether we are allowd to make any configuration changes at this time.
+	 * Method to check whether we are allowed to make any configuration changes at this time.
 	 * If the class has been compiled, then no further changes to the configuration are allowed.
 	 */
 	protected void checkIfConfigurationModificationIsAllowed() {
@@ -449,12 +451,12 @@ public abstract class AbstractJdbcInsert {
 						"The getGeneratedKeys feature is not supported by this database");
 			}
 			if (getGeneratedKeyNames().length < 1) {
-				throw new InvalidDataAccessApiUsageException("Generated Key Name(s) not specificed. " +
+				throw new InvalidDataAccessApiUsageException("Generated Key Name(s) not specified. " +
 						"Using the generated keys features requires specifying the name(s) of the generated column(s)");
 			}
 			if (getGeneratedKeyNames().length > 1) {
 				throw new InvalidDataAccessApiUsageException(
-						"Current database only supports retreiving the key for a single column. There are " +
+						"Current database only supports retrieving the key for a single column. There are " +
 						getGeneratedKeyNames().length  + " columns specified: " + Arrays.asList(getGeneratedKeyNames()));
 			}
 			// This is a hack to be able to get the generated key from a database that doesn't support
@@ -542,10 +544,10 @@ public abstract class AbstractJdbcInsert {
 	 * @param batch array of Maps with parameter names and values to be used in batch insert
 	 * @return array of number of rows affected
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	protected int[] doExecuteBatch(Map<String, Object>[] batch) {
 		checkCompiled();
-		List<Object>[] batchValues = new ArrayList[batch.length];
+		List[] batchValues = new ArrayList[batch.length];
 		int i = 0;
 		for (Map<String, Object> args : batch) {
 			List<Object> values = matchInParameterValuesWithInsertColumns(args);
@@ -559,10 +561,10 @@ public abstract class AbstractJdbcInsert {
 	 * @param batch array of SqlParameterSource with parameter names and values to be used in insert
 	 * @return array of number of rows affected
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	protected int[] doExecuteBatch(SqlParameterSource[] batch) {
 		checkCompiled();
-		List<Object>[] batchValues = new ArrayList[batch.length];
+		List[] batchValues = new ArrayList[batch.length];
 		int i = 0;
 		for (SqlParameterSource parameterSource : batch) {
 			List<Object> values = matchInParameterValuesWithInsertColumns(parameterSource);
@@ -611,9 +613,9 @@ public abstract class AbstractJdbcInsert {
 	}
 
 	/**
-	 * Match the provided in parameter values with regitered parameters and parameters defined
+	 * Match the provided in parameter values with registered parameters and parameters defined
 	 * via metadata processing.
-	 * @param parameterSource the parameter vakues provided as a {@link SqlParameterSource}
+	 * @param parameterSource the parameter values provided as a {@link SqlParameterSource}
 	 * @return Map with parameter names and values
 	 */
 	protected List<Object> matchInParameterValuesWithInsertColumns(SqlParameterSource parameterSource) {

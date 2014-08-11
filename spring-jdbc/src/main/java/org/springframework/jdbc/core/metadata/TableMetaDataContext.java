@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import javax.sql.DataSource;
 
 import org.apache.commons.logging.Log;
@@ -239,7 +238,7 @@ public class TableMetaDataContext {
 		List<Object> values = new ArrayList<Object>();
 		// for parameter source lookups we need to provide caseinsensitive lookup support since the
 		// database metadata is not necessarily providing case sensitive column names
-		Map caseInsensitiveParameterNames =
+		Map<String, String> caseInsensitiveParameterNames =
 				SqlParameterSourceUtils.extractCaseInsensitiveParameterNames(parameterSource);
 		for (String column : this.tableColumns) {
 			if (parameterSource.hasValue(column)) {
@@ -259,7 +258,7 @@ public class TableMetaDataContext {
 						if (caseInsensitiveParameterNames.containsKey(lowerCaseName)) {
 							values.add(
 									SqlParameterSourceUtils.getTypedValue(parameterSource,
-											(String) caseInsensitiveParameterNames.get(lowerCaseName)));
+											caseInsensitiveParameterNames.get(lowerCaseName)));
 						}
 						else {
 							values.add(null);
@@ -292,7 +291,7 @@ public class TableMetaDataContext {
 	 * Build the insert string based on configuration and metadata information
 	 * @return the insert string to be used
 	 */
-	public String createInsertString(String[] generatedKeyNames) {
+	public String createInsertString(String... generatedKeyNames) {
 		HashSet<String> keys = new HashSet<String>(generatedKeyNames.length);
 		for (String key : generatedKeyNames) {
 			keys.add(key.toUpperCase());

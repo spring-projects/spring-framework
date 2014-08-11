@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,7 +48,7 @@ public class PreparedStatementCreatorFactory {
 	/** The SQL, which won't change when the parameters change */
 	private final String sql;
 
-	/** List of SqlParameter objects. May not be {@code null}. */
+	/** List of SqlParameter objects (may not be {@code null}) */
 	private final List<SqlParameter> declaredParameters;
 
 	private int resultSetType = ResultSet.TYPE_FORWARD_ONLY;
@@ -76,7 +76,7 @@ public class PreparedStatementCreatorFactory {
 	 * @param sql SQL to execute
 	 * @param types int array of JDBC types
 	 */
-	public PreparedStatementCreatorFactory(String sql, int[] types) {
+	public PreparedStatementCreatorFactory(String sql, int... types) {
 		this.sql = sql;
 		this.declaredParameters = SqlParameter.sqlTypesToAnonymousParameterList(types);
 	}
@@ -130,7 +130,7 @@ public class PreparedStatementCreatorFactory {
 	/**
 	 * Set the column names of the auto-generated keys.
 	 */
-	public void setGeneratedKeysColumnNames(String[] names) {
+	public void setGeneratedKeysColumnNames(String... names) {
 		this.generatedKeysColumnNames = names;
 	}
 
@@ -194,13 +194,13 @@ public class PreparedStatementCreatorFactory {
 
 		private final String actualSql;
 
-		private final List parameters;
+		private final List<?> parameters;
 
 		public PreparedStatementCreatorImpl(List<?> parameters) {
 			this(sql, parameters);
 		}
 
-		public PreparedStatementCreatorImpl(String actualSql, List parameters) {
+		public PreparedStatementCreatorImpl(String actualSql, List<?> parameters) {
 			this.actualSql = actualSql;
 			Assert.notNull(parameters, "Parameters List must not be null");
 			this.parameters = parameters;
@@ -281,7 +281,7 @@ public class PreparedStatementCreatorFactory {
 					declaredParameter = declaredParameters.get(i);
 				}
 				if (in instanceof Collection && declaredParameter.getSqlType() != Types.ARRAY) {
-					Collection entries = (Collection) in;
+					Collection<?> entries = (Collection<?>) in;
 					for (Object entry : entries) {
 						if (entry instanceof Object[]) {
 							Object[] valueArray = ((Object[])entry);
