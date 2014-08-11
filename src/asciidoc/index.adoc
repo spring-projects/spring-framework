@@ -42112,8 +42112,10 @@ choices and message redelivery scenarios.
   may occur during the execution of the `MessageListener`.
 
 | destination-type
-| The JMS destination type for this listener: `queue`, `topic` or `durableTopic`. The
-  default is `queue`.
+| The JMS destination type for this listener: `queue`, `topic`, `durableTopic`, `sharedTopic`
+  or `sharedDurableTopic`. This enables potentially the `pubSubDomain`, `subscriptionDurable`
+  and `subscriptionShared` properties of the container. The default is `queue` (i.e. disabling
+  those 3 properties).
 
 | client-id
 | The JMS client id for this listener container. Needs to be specified when using
@@ -42216,8 +42218,10 @@ table:
   method arguments. Default is a `SimpleMessageConverter`.
 
 | destination-type
-| The JMS destination type for this listener: `queue`, `topic` or `durableTopic`. The
-  default is `queue`.
+| The JMS destination type for this listener: `queue`, `topic`, `durableTopic`, `sharedTopic`
+  or `sharedDurableTopic`. This enables potentially the `pubSubDomain`, `subscriptionDurable`
+  and `subscriptionShared` properties of the container. The default is `queue` (i.e. disabling
+  those 3 properties).
 
 | client-id
 | The JMS client id for this listener container. Needs to be specified when using

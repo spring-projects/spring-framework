@@ -219,7 +219,9 @@
 				<xsd:annotation>
 					<xsd:documentation><![CDATA[
 	The JMS destination type for this listener: "queue", "topic", "durableTopic",
-	"sharedTopic", "sharedDurableTopic". The default is "queue".
+	"sharedTopic", "sharedDurableTopic". This enables potentially the "pubSubDomain",
+	"subscriptionDurable" and "subscriptionShared" properties of the container. The
+	default is `queue` (i.e. disabling those 3 properties).
 					]]></xsd:documentation>
 				</xsd:annotation>
 				<xsd:simpleType>
