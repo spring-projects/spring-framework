@@ -86,8 +86,8 @@ public class SpringSessionContext implements CurrentSessionContext {
 		else if (value instanceof SessionHolder) {
 			SessionHolder sessionHolder = (SessionHolder) value;
 			Session session = sessionHolder.getSession();
-			if (TransactionSynchronizationManager.isSynchronizationActive() &&
-					!sessionHolder.isSynchronizedWithTransaction()) {
+			if (!sessionHolder.isSynchronizedWithTransaction() &&
+					TransactionSynchronizationManager.isSynchronizationActive()) {
 				TransactionSynchronizationManager.registerSynchronization(
 						new SpringSessionSynchronization(sessionHolder, this.sessionFactory, false));
 				sessionHolder.setSynchronizedWithTransaction(true);
