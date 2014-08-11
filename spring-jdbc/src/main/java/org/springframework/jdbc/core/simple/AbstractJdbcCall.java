@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,6 +53,9 @@ public abstract class AbstractJdbcCall {
 	/** Lower-level class used to execute SQL */
 	private final JdbcTemplate jdbcTemplate;
 
+	/** Context used to retrieve and manage database metadata */
+	private final CallMetaDataContext callMetaDataContext = new CallMetaDataContext();
+
 	/** List of SqlParameter objects */
 	private final List<SqlParameter> declaredParameters = new ArrayList<SqlParameter>();
 
@@ -66,11 +69,8 @@ public abstract class AbstractJdbcCall {
 	 */
 	private boolean compiled = false;
 
-	/** the generated string used for call statement */
+	/** The generated string used for call statement */
 	private String callString;
-
-	/** context used to retrieve and manage database metadata */
-	private CallMetaDataContext callMetaDataContext = new CallMetaDataContext();
 
 	/**
 	 * Object enabling us to create CallableStatementCreators
@@ -101,13 +101,6 @@ public abstract class AbstractJdbcCall {
 	 */
 	public JdbcTemplate getJdbcTemplate() {
 		return this.jdbcTemplate;
-	}
-
-	/**
-	 * Get the {@link CallableStatementCreatorFactory} being used
-	 */
-	protected CallableStatementCreatorFactory getCallableStatementFactory() {
-		return this.callableStatementFactory;
 	}
 
 	/**
@@ -153,7 +146,7 @@ public abstract class AbstractJdbcCall {
 	}
 
 	/**
-	 * Set the schema name to use,
+	 * Set the schema name to use.
 	 */
 	public void setSchemaName(String schemaName) {
 		this.callMetaDataContext.setSchemaName(schemaName);
@@ -183,8 +176,8 @@ public abstract class AbstractJdbcCall {
 	/**
 	 * Specify whether the call requires a rerurn value.
 	 */
-	public void setReturnValueRequired(boolean b) {
-		this.callMetaDataContext.setReturnValueRequired(b);
+	public void setReturnValueRequired(boolean returnValueRequired) {
+		this.callMetaDataContext.setReturnValueRequired(returnValueRequired);
 	}
 
 	/**
@@ -193,6 +186,28 @@ public abstract class AbstractJdbcCall {
 	public boolean isReturnValueRequired() {
 		return this.callMetaDataContext.isReturnValueRequired();
 	}
+
+	/**
+	 * Specify whether the parameter metadata for the call should be used. The default is true.
+	 */
+	public void setAccessCallParameterMetaData(boolean accessCallParameterMetaData) {
+		this.callMetaDataContext.setAccessCallParameterMetaData(accessCallParameterMetaData);
+	}
+
+	/**
+	 * Get the call string that should be used based on parameters and meta data.
+	 */
+	public String getCallString() {
+		return this.callString;
+	}
+
+	/**
+	 * Get the {@link CallableStatementCreatorFactory} being used
+	 */
+	protected CallableStatementCreatorFactory getCallableStatementFactory() {
+		return this.callableStatementFactory;
+	}
+
 
 	/**
 	 * Add a declared parameter to the list of parameters for the call.
@@ -224,20 +239,6 @@ public abstract class AbstractJdbcCall {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Added row mapper for [" + getProcedureName() + "]: " + parameterName);
 		}
-	}
-
-	/**
-	 * Get the call string that should be used based on parameters and meta data.
-	 */
-	public String getCallString() {
-		return this.callString;
-	}
-
-	/**
-	 * Specify whether the parameter metadata for the call should be used. The default is true.
-	 */
-	public void setAccessCallParameterMetaData(boolean accessCallParameterMetaData) {
-		this.callMetaDataContext.setAccessCallParameterMetaData(accessCallParameterMetaData);
 	}
 
 
@@ -366,17 +367,20 @@ public abstract class AbstractJdbcCall {
 	/**
 	 * Method to perform the actual call processing
 	 */
-	private Map<String, Object> executeCallInternal(Map<String, ?> params) {
-		CallableStatementCreator csc = getCallableStatementFactory().newCallableStatementCreator(params);
+	private Map<String, Object> executeCallInternal(Map<String, ?> args) {
+		CallableStatementCreator csc = getCallableStatementFactory().newCallableStatementCreator(args);
 		if (logger.isDebugEnabled()) {
-			logger.debug("The following parameters are used for call " + getCallString() + " with: " + params);
+			logger.debug("The following parameters are used for call " + getCallString() + " with " + args);
 			int i = 1;
-			for (SqlParameter p : getCallParameters()) {
-				logger.debug(i++ + ": " +  p.getName() + " SQL Type "+ p.getSqlType() + " Type Name " + p.getTypeName() + " " + p.getClass().getName());
+			for (SqlParameter param : getCallParameters()) {
+				logger.debug(i + ": " +  param.getName() + ", SQL type "+ param.getSqlType() + ", type name " +
+						param.getTypeName() + ", parameter class [" + param.getClass().getName() + "]");
+				i++;
 			}
 		}
 		return getJdbcTemplate().call(csc, getCallParameters());
 	}
+
 
 	/**
 	 * Get the name of a single out parameter or return value.
@@ -384,6 +388,14 @@ public abstract class AbstractJdbcCall {
 	 */
 	protected String getScalarOutParameterName() {
 		return this.callMetaDataContext.getScalarOutParameterName();
+	}
+
+	/**
+	 * Get a List of all the call parameters to be used for call. This includes any parameters added
+	 * based on meta data processing.
+	 */
+	protected List<SqlParameter> getCallParameters() {
+		return this.callMetaDataContext.getCallParameters();
 	}
 
 	/**
@@ -414,14 +426,6 @@ public abstract class AbstractJdbcCall {
 	 */
 	protected Map<String, ?> matchInParameterValuesWithCallParameters(Map<String, ?> args) {
 		return this.callMetaDataContext.matchInParameterValuesWithCallParameters(args);
-	}
-
-	/**
-	 * Get a List of all the call parameters to be used for call. This includes any parameters added
-	 * based on meta data processing.
-	 */
-	protected List<SqlParameter> getCallParameters() {
-		return this.callMetaDataContext.getCallParameters();
 	}
 
 }

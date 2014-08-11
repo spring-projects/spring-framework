@@ -47,7 +47,7 @@ public class PreparedStatementCreatorFactory {
 	/** The SQL, which won't change when the parameters change */
 	private final String sql;
 
-	/** List of SqlParameter objects. May not be {@code null}. */
+	/** List of SqlParameter objects (may not be {@code null}) */
 	private final List<SqlParameter> declaredParameters;
 
 	private int resultSetType = ResultSet.TYPE_FORWARD_ONLY;
@@ -75,7 +75,7 @@ public class PreparedStatementCreatorFactory {
 	 * @param sql SQL to execute
 	 * @param types int array of JDBC types
 	 */
-	public PreparedStatementCreatorFactory(String sql, int[] types) {
+	public PreparedStatementCreatorFactory(String sql, int... types) {
 		this.sql = sql;
 		this.declaredParameters = SqlParameter.sqlTypesToAnonymousParameterList(types);
 	}
