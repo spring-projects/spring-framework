@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,7 @@ import org.springframework.orm.jpa.JpaDialect;
 
 /**
  * {@link org.springframework.orm.jpa.JpaVendorAdapter} implementation for Apache OpenJPA.
- * Developed and tested against OpenJPA 2.2.
+ * Developed and tested against OpenJPA 2.2; compatible with OpenJPA 2.3 as well.
  *
  * <p>Exposes OpenJPA's persistence provider and EntityManager extension interface,
  * and supports {@link AbstractJpaVendorAdapter}'s common configuration settings.
@@ -43,9 +43,9 @@ import org.springframework.orm.jpa.JpaDialect;
  */
 public class OpenJpaVendorAdapter extends AbstractJpaVendorAdapter {
 
-	private final PersistenceProvider persistenceProvider = new PersistenceProviderImpl();
+	private final JpaDialect jpaDialect = new OpenJpaDialect();
 
-	private final OpenJpaDialect jpaDialect = new OpenJpaDialect();
+	private final PersistenceProvider persistenceProvider = new PersistenceProviderImpl();
 
 
 	@Override

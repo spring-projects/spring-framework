@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,11 +45,11 @@ import org.springframework.orm.jpa.JpaDialect;
  * <p>Exposes Hibernate's persistence provider and EntityManager extension interface,
  * and supports {@link AbstractJpaVendorAdapter}'s common configuration settings.
  *
- * <p>Note that the package location of Hibernate's JPA support changed from 4.2 to 4.3:
- * from {@code org.hibernate.ejb.HibernateEntityManager(Factory)} to
- * {@code org.hibernate.jpa.HibernateEntityManager(Factory)}. As of Spring 4.0,
- * we're exposing the correct, non-deprecated variant depending on the Hibernate
- * version encountered at runtime, in order to avoid deprecation log entries.
+ * <p>Note that the Java package location of Hibernate's JPA support changed from
+ * 4.2 to 4.3: from {@code org.hibernate.ejb.HibernateEntityManager(Factory)} to
+ * {@code org.hibernate.jpa.HibernateEntityManager(Factory)}.
+ * As of Spring 4.0, we are exposing the appropriate, non-deprecated variant -
+ * depending on the specific Hibernate version encountered at runtime.
  *
  * @author Juergen Hoeller
  * @author Rod Johnson

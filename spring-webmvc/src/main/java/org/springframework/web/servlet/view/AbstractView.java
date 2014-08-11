@@ -276,12 +276,13 @@ public abstract class AbstractView extends WebApplicationObjectSupport implement
 
 		@SuppressWarnings("unchecked")
 		Map<String, Object> pathVars = (this.exposePathVariables ?
-			(Map<String, Object>) request.getAttribute(View.PATH_VARIABLES) : null);
+				(Map<String, Object>) request.getAttribute(View.PATH_VARIABLES) : null);
 
 		// Consolidate static and dynamic model attributes.
 		int size = this.staticAttributes.size();
-		size += (model != null) ? model.size() : 0;
-		size += (pathVars != null) ? pathVars.size() : 0;
+		size += (model != null ? model.size() : 0);
+		size += (pathVars != null ? pathVars.size() : 0);
+
 		Map<String, Object> mergedModel = new LinkedHashMap<String, Object>(size);
 		mergedModel.putAll(this.staticAttributes);
 		if (pathVars != null) {
