@@ -73,6 +73,9 @@ public abstract class AbstractJdbcInsert {
 	/** List of columns objects to be used in insert statement */
 	private final List<String> declaredColumns = new ArrayList<String>();
 
+	/** The names of the columns holding the generated key */
+	private String[] generatedKeyNames = new String[0];
+
 	/**
 	 * Has this operation been compiled? Compilation means at least checking
 	 * that a DataSource or JdbcTemplate has been provided, but subclasses
@@ -85,9 +88,6 @@ public abstract class AbstractJdbcInsert {
 
 	/** The SQL type information for the insert columns */
 	private int[] insertTypes;
-
-	/** The names of the columns holding the generated key */
-	private String[] generatedKeyNames = new String[0];
 
 
 	/**
@@ -119,7 +119,7 @@ public abstract class AbstractJdbcInsert {
 	}
 
 	/**
-	 * Set the name of the table for this insert
+	 * Set the name of the table for this insert.
 	 */
 	public void setTableName(String tableName) {
 		checkIfConfigurationModificationIsAllowed();
@@ -127,14 +127,14 @@ public abstract class AbstractJdbcInsert {
 	}
 
 	/**
-	 * Get the name of the table for this insert
+	 * Get the name of the table for this insert.
 	 */
 	public String getTableName() {
 		return this.tableMetaDataContext.getTableName();
 	}
 
 	/**
-	 * Set the name of the schema for this insert
+	 * Set the name of the schema for this insert.
 	 */
 	public void setSchemaName(String schemaName) {
 		checkIfConfigurationModificationIsAllowed();
@@ -142,14 +142,14 @@ public abstract class AbstractJdbcInsert {
 	}
 
 	/**
-	 * Get the name of the schema for this insert
+	 * Get the name of the schema for this insert.
 	 */
 	public String getSchemaName() {
 		return this.tableMetaDataContext.getSchemaName();
 	}
 
 	/**
-	 * Set the name of the catalog for this insert
+	 * Set the name of the catalog for this insert.
 	 */
 	public void setCatalogName(String catalogName) {
 		checkIfConfigurationModificationIsAllowed();
@@ -157,14 +157,14 @@ public abstract class AbstractJdbcInsert {
 	}
 
 	/**
-	 * Get the name of the catalog for this insert
+	 * Get the name of the catalog for this insert.
 	 */
 	public String getCatalogName() {
 		return this.tableMetaDataContext.getCatalogName();
 	}
 
 	/**
-	 * Set the names of the columns to be used
+	 * Set the names of the columns to be used.
 	 */
 	public void setColumnNames(List<String> columnNames) {
 		checkIfConfigurationModificationIsAllowed();
@@ -173,14 +173,14 @@ public abstract class AbstractJdbcInsert {
 	}
 
 	/**
-	 * Get the names of the columns used
+	 * Get the names of the columns used.
 	 */
 	public List<String> getColumnNames() {
 		return Collections.unmodifiableList(this.declaredColumns);
 	}
 
 	/**
-	 * Specify the name of a single generated key column
+	 * Specify the name of a single generated key column.
 	 */
 	public void setGeneratedKeyName(String generatedKeyName) {
 		checkIfConfigurationModificationIsAllowed();
@@ -188,7 +188,7 @@ public abstract class AbstractJdbcInsert {
 	}
 
 	/**
-	 * Set the names of any generated keys
+	 * Set the names of any generated keys.
 	 */
 	public void setGeneratedKeyNames(String... generatedKeyNames) {
 		checkIfConfigurationModificationIsAllowed();
@@ -196,21 +196,23 @@ public abstract class AbstractJdbcInsert {
 	}
 
 	/**
-	 * Get the names of any generated keys
+	 * Get the names of any generated keys.
 	 */
 	public String[] getGeneratedKeyNames() {
 		return this.generatedKeyNames;
 	}
 
 	/**
-	 * Specify whether the parameter metadata for the call should be used.  The default is true.
+	 * Specify whether the parameter metadata for the call should be used.
+	 * The default is {@code true}.
 	 */
 	public void setAccessTableColumnMetaData(boolean accessTableColumnMetaData) {
 		this.tableMetaDataContext.setAccessTableColumnMetaData(accessTableColumnMetaData);
 	}
 
 	/**
-	 * Specify whether the default for including synonyms should be changed.  The default is false.
+	 * Specify whether the default for including synonyms should be changed.
+	 * The default is {@code false}.
 	 */
 	public void setOverrideIncludeSynonymsDefault(boolean override) {
 		this.tableMetaDataContext.setOverrideIncludeSynonymsDefault(override);
@@ -224,14 +226,14 @@ public abstract class AbstractJdbcInsert {
 	}
 
 	/**
-	 * Get the insert string to be used
+	 * Get the insert string to be used.
 	 */
 	public String getInsertString() {
 		return this.insertString;
 	}
 
 	/**
-	 * Get the array of {@link java.sql.Types} to be used for insert
+	 * Get the array of {@link java.sql.Types} to be used for insert.
 	 */
 	public int[] getInsertTypes() {
 		return this.insertTypes;

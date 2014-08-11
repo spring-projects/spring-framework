@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 package org.springframework.web.servlet.view.xslt;
 
 import java.util.Properties;
-
 import javax.xml.transform.ErrorListener;
 import javax.xml.transform.URIResolver;
 
@@ -49,9 +48,14 @@ public class XsltViewResolver extends UrlBasedViewResolver {
 
 
 	public XsltViewResolver() {
-		setViewClass(XsltView.class);
+		setViewClass(requiredViewClass());
 	}
 
+
+	@Override
+	protected Class<?> requiredViewClass() {
+		return XsltView.class;
+	}
 
 	/**
 	 * Set the name of the model attribute that represents the XSLT Source.
@@ -116,11 +120,6 @@ public class XsltViewResolver extends UrlBasedViewResolver {
 		this.cacheTemplates = cacheTemplates;
 	}
 
-
-	@Override
-	protected Class<?> requiredViewClass() {
-		return XsltView.class;
-	}
 
 	@Override
 	protected AbstractUrlBasedView buildView(String viewName) throws Exception {
