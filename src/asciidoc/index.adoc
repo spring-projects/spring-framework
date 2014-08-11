@@ -1099,7 +1099,7 @@ In most application scenarios, explicit user code is not required to instantiate
 more instances of a Spring IoC container. For example, in a web application scenario, a
 simple eight (or so) lines of boilerplate web descriptor XML in the `web.xml` file
 of the application will typically suffice (see <<context-create>>). If you are using the
-http://spring.io/tools/sts[SpringSource Tool Suite] Eclipse-powered development
+https://spring.io/tools/sts[Spring Tool Suite] Eclipse-powered development
 environment this boilerplate configuration can be easily created with few mouse clicks or
 keystrokes.
 
@@ -2241,7 +2241,7 @@ XML configuration.
 
 The preceding XML is more succinct; however, typos are discovered at runtime rather than
 design time, unless you use an IDE such as http://www.jetbrains.com/idea/[IntelliJ
-IDEA] or the http://www.springsource.com/products/sts[SpringSource Tool Suite] (STS)
+IDEA] or the https://spring.io/tools/sts[Spring Tool Suite] (STS)
 that support automatic property completion when you create bean definitions. Such IDE
 assistance is highly recommended.
 
@@ -3050,7 +3050,7 @@ container, allows this use case to be handled in a clean fashion.
 
 ****
 You can read more about the motivation for Method Injection in
-http://blog.springsource.com/2004/08/06/method-injection/[this blog entry].
+https://spring.io/blog/2004/08/06/method-injection/[this blog entry].
 ****
 
 
@@ -4987,7 +4987,7 @@ No matter the choice, Spring can accommodate both styles and even mix them toget
 It's worth pointing out that through its <<beans-java,JavaConfig>> option, Spring allows
 annotations to be used in a non-invasive way, without touching the target components
 source code and that in terms of tooling, all configuration styles are supported by the
-http://www.springsource.com/products/sts[SpringSource Tool Suite].
+https://spring.io/tools/sts[Spring Tool Suite].
 ****
 
 An alternative to XML setups is provided by annotation-based configuration which rely on
@@ -7426,7 +7426,7 @@ modularity, but determining exactly where the autowired bean definitions are dec
 still somewhat ambiguous. For example, as a developer looking at `ServiceConfig`, how do
 you know exactly where the `@Autowired AccountRepository` bean is declared? It's not
 explicit in the code, and this may be just fine. Remember that the
-http://www.springsource.com/products/sts[SpringSource Tool Suite] provides tooling that
+https://spring.io/tools/sts[Spring Tool Suite] provides tooling that
 can render graphs showing how everything is wired up - that may be all you need. Also,
 your Java IDE can easily find all declarations and uses of the `AccountRepository` type,
 and will quickly show you the location of `@Bean` methods that return that type.
@@ -8483,7 +8483,7 @@ WebApplicationContexts across WAR files. In this case you should look into using
 utility class
 {javadoc-baseurl}/org/springframework/context/access/ContextSingletonBeanFactoryLocator.html[`ContextSingletonBeanFactoryLocator`]
 locator that is described in this
-http://blog.springsource.com/2007/06/11/using-a-shared-parent-application-context-in-a-multi-war-spring-application/[SpringSource
+https://spring.io/blog/2007/06/11/using-a-shared-parent-application-context-in-a-multi-war-spring-application/[Spring
 team blog entry].
 
 
@@ -11020,7 +11020,7 @@ EL, to name a few, the Spring Expression Language was created to provide the Spr
 community with a single well supported expression language that can be used across all
 the products in the Spring portfolio. Its language features are driven by the
 requirements of the projects in the Spring portfolio, including tooling requirements for
-code completion support within the eclipse based SpringSource Tool Suite. That said,
+code completion support within the eclipse based Spring Tool Suite. That said,
 SpEL is based on a technology agnostic API allowing other expression language
 implementations to be integrated should the need arise.
 
@@ -20381,7 +20381,7 @@ Before inclusion in Spring Framework 3.2, the Spring MVC Test framework had alre
 existed as a separate project on GitHub where it grew and evolved through actual use,
 feedback, and the contribution of many.
 
-The standalone https://github.com/SpringSource/spring-test-mvc[spring-test-mvc project]
+The standalone https://github.com/spring-projects/spring-test-mvc[spring-test-mvc project]
 is still available on GitHub and can be used in conjunction with Spring Framework 3.1.x.
 Applications upgrading to 3.2 or later should replace the `spring-test-mvc` dependency with a
 dependency on `spring-test`.
@@ -20752,7 +20752,7 @@ Note that the expectation is __always__ applied and cannot be overridden without
 creating a separate `MockMvc` instance.
 
 When JSON response content contains hypermedia links created with
-https://github.com/SpringSource/spring-hateoas[Spring HATEOAS], the resulting links can
+https://github.com/spring-projects/spring-hateoas[Spring HATEOAS], the resulting links can
 be verified:
 
 [source,java,indent=0]
@@ -20763,7 +20763,7 @@ be verified:
 ----
 
 When XML response content contains hypermedia links created with
-https://github.com/SpringSource/spring-hateoas[Spring HATEOAS], the resulting links can
+https://github.com/spring-projects/spring-hateoas[Spring HATEOAS], the resulting links can
 be verified:
 
 [source,java,indent=0]
@@ -20790,10 +20790,10 @@ last filter will delegates to the `DispatcherServlet`.
 [[spring-mvc-test-server-resources]]
 ====== Further Server-Side Test Examples
 The framework's own tests include
-https://github.com/SpringSource/spring-framework/tree/master/spring-test/src/test/java/org/springframework/test/web/servlet/samples[many
+https://github.com/spring-projects/spring-framework/tree/master/spring-test/src/test/java/org/springframework/test/web/servlet/samples[many
 sample tests] intended to demonstrate how to use Spring MVC Test. Browse these examples
 for further ideas. Also the
-https://github.com/SpringSource/spring-mvc-showcase[spring-mvc-showcase] has full test
+https://github.com/spring-projects/spring-mvc-showcase[spring-mvc-showcase] has full test
 coverage based on Spring MVC Test.
 
 
@@ -20839,7 +20839,7 @@ configuration. Just check the support for code completion on static members.
 [[spring-mvc-test-client-resources]]
 ====== Further Examples of Client-side REST Tests
 Spring MVC Test's own tests include
-https://github.com/SpringSource/spring-framework/tree/master/spring-test/src/test/java/org/springframework/test/web/client/samples[example
+https://github.com/spring-projects/spring-framework/tree/master/spring-test/src/test/java/org/springframework/test/web/client/samples[example
 tests] of client-side REST tests.
 
 
@@ -22975,7 +22975,7 @@ For more information about the Spring Framework's transaction support:
 
 * http://www.javaworld.com/javaworld/jw-01-2009/jw-01-spring-transactions.html[Distributed
   transactions in Spring, with and without XA] is a JavaWorld presentation in which
-  SpringSource's David Syer guides you through seven patterns for distributed
+  Spring's David Syer guides you through seven patterns for distributed
   transactions in Spring applications, three of them with XA and four without.
 * http://www.infoq.com/minibooks/JTDS[Java Transaction Design Strategies] is a book
   available from http://www.infoq.com/[InfoQ] that provides a well-paced introduction
@@ -25772,9 +25772,6 @@ The second option can also be easy. Some suggestions on how to implement this ar
   startup order by putting them in separate ApplicationContext instances (e.g. parent
   has the datasource and child has the business components). This structure is common in
   Spring web applications, but can be more generally applied.
-* Use a modular runtime like SpringSource dm Server and separate the data source and the
-  components that depend on it. E.g. specify the bundle start up order as datasource ->
-  initializer -> business components.
 
 
 
@@ -30859,7 +30856,7 @@ Here is an example configuration of a `ContentNegotiatingViewResolver:`
 		</property>
 	</bean>
 
-	<bean id="content" class="com.springsource.samples.rest.SampleContentAtomView"/>
+	<bean id="content" class="com.foo.samples.rest.SampleContentAtomView"/>
 ----
 
 The `InternalResourceViewResolver` handles the translation of view names and JSP pages,
@@ -35305,8 +35302,7 @@ you need to access the Locale. The HTTP response is passed in only for the setti
 cookies or other HTTP headers. The feed will automatically be written to the response
 object after the method returns.
 
-For an example of creating an Atom view please refer to Alef Arendsen's SpringSource
-Team Blog
+For an example of creating an Atom view please refer to Alef Arendsen's Spring Team Blog
 http://spring.io/blog/2009/03/16/adding-an-atom-view-to-an-application-using-spring-s-rest-support[entry].
 
 
