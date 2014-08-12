@@ -47,7 +47,7 @@ import org.springframework.util.Assert;
  * <p>This converter can be used to bind to typed beans or untyped {@code HashMap}s.
  * By default, it supports {@code application/json} and {@code application/*+json}.
  *
- * <p>Tested against Gson 2.2; compatible with Gson 2.0 and higher.
+ * <p>Tested against Gson 2.3; compatible with Gson 2.0 and higher.
  *
  * @author Roy Clarkson
  * @since 4.1
