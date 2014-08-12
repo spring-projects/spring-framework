@@ -29,7 +29,7 @@ This document is a reference guide to Spring Framework features. If you have any
 requests, comments, or questions on this document, please post them on the
 https://groups.google.com/forum/#!forum/spring-framework-contrib[user mailing
 list]. Questions on the Framework itself should be asked on StackOverflow
-(see http://spring.io/questions[]).
+(see https://spring.io/questions[]).
 --
 
 
@@ -45,7 +45,7 @@ embraced.
 
 If you are just getting started with Spring, you may want to begin with the lighter
 https://spring.io/guides["Getting Started"] guides that are available from
-http://spring.io. As well as being easier to digest, these guide are very
+https://spring.io. As well as being easier to digest, these guide are very
 __task focused__. They also cover other projects from the Spring portfolio that you might
  want to consider when solving a particular problem.
 
@@ -779,8 +779,8 @@ is available on the https://github.com/spring-projects/spring-framework/wiki[Spr
 
 
 === Improved Getting Started Experience
-The new http://spring.io[spring.io] website provides a whole series of
-http://spring.io/guides["Getting Started"] guides to help you learn Spring. You
+The new https://spring.io[spring.io] website provides a whole series of
+https://spring.io/guides["Getting Started"] guides to help you learn Spring. You
 can read more about the guides in the <<overview-getting-started-with-spring>> section
 in this document. The new website also provides a comprehensive overview of the many
 additional projects that are released under the Spring umbrella.
@@ -7758,9 +7758,9 @@ datasource from JNDI when in QA or production
 performance environment
 * registering customized implementations of beans for customer A vs. customer B deployments
 
-Find out more about http://spring.io/blog/2011/02/11/spring-framework-3-1-m1-released/[Environment,
+Find out more about https://spring.io/blog/2011/02/11/spring-framework-3-1-m1-released/[Environment,
 XML Profiles] and the
-http://spring.io/blog/2011/02/14/spring-3-1-m1-introducing-profile/[@Profile annotation].
+https://spring.io/blog/2011/02/14/spring-3-1-m1-introducing-profile/[@Profile annotation].
 
 
 [[beans-property-source-abstraction]]
@@ -7770,7 +7770,7 @@ Spring's <<beans-definition-profiles,Environment abstraction>> provides search o
 over a configurable hierarchy of property sources.
 
 You can find out more about
-http://spring.io/blog/2011/02/15/spring-3-1-m1-unified-property-management/[Unified
+https://spring.io/blog/2011/02/15/spring-3-1-m1-unified-property-management/[Unified
 Property Management], the
 {javadoc-baseurl}/org/springframework/core/env/PropertySource.html[`PropertySource` class]
 and the {javadoc-baseurl}/org/springframework/context/annotation/PropertySource.html[`@PropertySource`
@@ -25849,7 +25849,7 @@ For more comprehensive ORM support, including support for alternative database
 technologies such as MongoDB, you might want to check out the
 http://projects.spring.io/spring-data/[Spring Data] suite of projects. If you are
 a JPA user, the https://spring.io/guides/gs/accessing-data-jpa/[Getting Started Accessing
-Data with JPA] guide from http://spring.io provides a great introduction.
+Data with JPA] guide from https://spring.io provides a great introduction.
 ====
 
 
@@ -30194,7 +30194,7 @@ produced result.
 
 Explaining the motivation for async request processing and when or why to use it are
 beyond the scope of this document. For further information you may wish to read
-http://spring.io/blog/2012/05/07/spring-mvc-3-2-preview-introducing-servlet-3-async-support[this
+https://spring.io/blog/2012/05/07/spring-mvc-3-2-preview-introducing-servlet-3-async-support[this
 blog post series].
 
 
@@ -35303,7 +35303,7 @@ cookies or other HTTP headers. The feed will automatically be written to the res
 object after the method returns.
 
 For an example of creating an Atom view please refer to Alef Arendsen's Spring Team Blog
-http://spring.io/blog/2009/03/16/adding-an-atom-view-to-an-application-using-spring-s-rest-support[entry].
+https://spring.io/blog/2009/03/16/adding-an-atom-view-to-an-application-using-spring-s-rest-support[entry].
 
 
 
@@ -37219,7 +37219,7 @@ few minutes to appear.
 
 Even in cases where latency is crucial, if the volume of messages is
 relatively low (e.g. monitoring network failures) the use of
-http://spring.io/blog/2012/05/08/spring-mvc-3-2-preview-techniques-for-real-time-updates[long polling]
+https://spring.io/blog/2012/05/08/spring-mvc-3-2-preview-techniques-for-real-time-updates[long polling]
 should be considered as a relatively simple alternative that
 works reliably and is comparable by efficiency (again assuming the volume of
 messages is relatively low).
