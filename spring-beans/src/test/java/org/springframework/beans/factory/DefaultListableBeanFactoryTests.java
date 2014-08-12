@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -1343,6 +1343,16 @@ public class DefaultListableBeanFactoryTests {
 		lbf.getBean(TestBean.class);
 	}
 
+	@Test
+	public void testGetBeanByTypeDefinedInParent() {
+		DefaultListableBeanFactory parent = new DefaultListableBeanFactory();
+		RootBeanDefinition bd1 = new RootBeanDefinition(TestBean.class);
+		parent.registerBeanDefinition("bd1", bd1);
+		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory(parent);
+		TestBean bean = lbf.getBean(TestBean.class);
+		assertThat(bean.getBeanName(), equalTo("bd1"));
+	}
+
 	@Test(expected=NoUniqueBeanDefinitionException.class)
 	public void testGetBeanByTypeWithAmbiguity() {
 		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
@@ -1447,6 +1457,95 @@ public class DefaultListableBeanFactoryTests {
 		catch (NoSuchBeanDefinitionException ex) {
 			// expected
 		}
+	}
+
+	@Test(expected = NoSuchBeanDefinitionException.class)
+	public void testGetBeanByTypeInstanceWithNoneFound() {
+		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
+		lbf.getBean(ConstructorDependency.class, 42);
+	}
+
+	@Test
+	public void testGetBeanByTypeInstanceDefinedInParent() {
+		DefaultListableBeanFactory parent = new DefaultListableBeanFactory();
+		RootBeanDefinition bd1 = createConstructorDependencyBeanDefinition(99);
+		parent.registerBeanDefinition("bd1", bd1);
+		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory(parent);
+		ConstructorDependency bean = lbf.getBean(ConstructorDependency.class, 42);
+		assertThat(bean.beanName, equalTo("bd1"));
+		assertThat(bean.spouseAge, equalTo(42));
+	}
+
+	@Test
+	public void testGetBeanByTypeInstanceWithAmbiguity() {
+		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
+		RootBeanDefinition bd1 = createConstructorDependencyBeanDefinition(99);
+		RootBeanDefinition bd2 = new RootBeanDefinition(ConstructorDependency.class);
+		bd2.setScope(RootBeanDefinition.SCOPE_PROTOTYPE);
+		bd2.getConstructorArgumentValues().addGenericArgumentValue("43");
+
+		lbf.registerBeanDefinition("bd1", bd1);
+		lbf.registerBeanDefinition("bd2", bd2);
+
+		thrown.expect(NoUniqueBeanDefinitionException.class);
+		lbf.getBean(ConstructorDependency.class, 42);
+	}
+
+	@Test
+	public void testGetBeanByTypeInstanceWithPrimary() throws Exception {
+		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
+		RootBeanDefinition bd1 = createConstructorDependencyBeanDefinition(99);
+		RootBeanDefinition bd2 = createConstructorDependencyBeanDefinition(43);
+		bd2.setPrimary(true);
+		lbf.registerBeanDefinition("bd1", bd1);
+		lbf.registerBeanDefinition("bd2", bd2);
+		ConstructorDependency bean = lbf.getBean(ConstructorDependency.class, 42);
+		assertThat(bean.beanName, equalTo("bd2"));
+		assertThat(bean.spouseAge, equalTo(42));
+	}
+
+	@Test
+	public void testGetBeanByTypeInstanceWithMultiplePrimary() throws Exception {
+		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
+		RootBeanDefinition bd1 = createConstructorDependencyBeanDefinition(99);
+		RootBeanDefinition bd2 = createConstructorDependencyBeanDefinition(43);
+		bd1.setPrimary(true);
+		bd2.setPrimary(true);
+
+		lbf.registerBeanDefinition("bd1", bd1);
+		lbf.registerBeanDefinition("bd2", bd2);
+		thrown.expect(NoUniqueBeanDefinitionException.class);
+		thrown.expectMessage(containsString("more than one 'primary'"));
+		lbf.getBean(ConstructorDependency.class, 42);
+	}
+
+	@Test
+	public void testGetBeanByTypeInstanceFiltersOutNonAutowireCandidates() {
+		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
+		RootBeanDefinition bd1 = createConstructorDependencyBeanDefinition(99);
+		RootBeanDefinition bd2 = createConstructorDependencyBeanDefinition(43);
+		RootBeanDefinition na1 = createConstructorDependencyBeanDefinition(21);
+		na1.setAutowireCandidate(false);
+
+		lbf.registerBeanDefinition("bd1", bd1);
+		lbf.registerBeanDefinition("na1", na1);
+		ConstructorDependency actual = lbf.getBean(ConstructorDependency.class, 42); // na1 was filtered
+		assertThat(actual.beanName, equalTo("bd1"));
+
+		lbf.registerBeanDefinition("bd2", bd2);
+		try {
+			lbf.getBean(TestBean.class, 67);
+			fail("Should have thrown NoSuchBeanDefinitionException");
+		} catch (NoSuchBeanDefinitionException ex) {
+			// expected
+		}
+	}
+
+	private RootBeanDefinition createConstructorDependencyBeanDefinition(int age) {
+		RootBeanDefinition bd1 = new RootBeanDefinition(ConstructorDependency.class);
+		bd1.setScope(RootBeanDefinition.SCOPE_PROTOTYPE);
+		bd1.getConstructorArgumentValues().addGenericArgumentValue(String.valueOf(age));
+		return bd1;
 	}
 
 	@Test
@@ -2525,17 +2624,30 @@ public class DefaultListableBeanFactoryTests {
 	}
 
 
-	public static class ConstructorDependency {
+	public static class ConstructorDependency implements BeanNameAware {
 
 		public TestBean spouse;
+
+		public int spouseAge;
+
+		private String beanName;
 
 		public ConstructorDependency(TestBean spouse) {
 			this.spouse = spouse;
 		}
 
+		public ConstructorDependency(int spouseAge) {
+			this.spouseAge = spouseAge;
+		}
+
 		@SuppressWarnings("unused")
 		private ConstructorDependency(TestBean spouse, TestBean otherSpouse) {
 			throw new IllegalArgumentException("Should never be called");
+		}
+
+		@Override
+		public void setBeanName(String name) {
+			this.beanName = name;
 		}
 	}
 
@@ -2879,6 +2991,7 @@ public class DefaultListableBeanFactoryTests {
 		}
 	}
 
+
 	@SuppressWarnings("unused")
 	private static class KnowsIfInstantiated {
 
@@ -2898,11 +3011,16 @@ public class DefaultListableBeanFactoryTests {
 
 	}
 
+
 	@Priority(5)
-	private static class HighPriorityTestBean extends TestBean {}
+	private static class HighPriorityTestBean extends TestBean {
+	}
+
 
 	@Priority(500)
-	private static class LowPriorityTestBean extends TestBean {}
+	private static class LowPriorityTestBean extends TestBean {
+	}
+
 
 	private static class NullTestBeanFactoryBean<T> implements FactoryBean<TestBean> {
 
@@ -2921,6 +3039,5 @@ public class DefaultListableBeanFactoryTests {
 			return true;
 		}
 	}
-
 
 }

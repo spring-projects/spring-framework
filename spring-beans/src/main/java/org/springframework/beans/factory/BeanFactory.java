@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -180,6 +180,27 @@ public interface BeanFactory {
 	 * @since 2.5
 	 */
 	Object getBean(String name, Object... args) throws BeansException;
+
+	/**
+	 * Return an instance, which may be shared or independent, of the specified bean.
+	 * <p>Allows for specifying explicit constructor arguments / factory method arguments,
+	 * overriding the specified default arguments (if any) in the bean definition.
+	 * @param requiredType type the bean must match; can be an interface or superclass.
+	 * {@code null} is disallowed.
+	 * <p>This method goes into {@link ListableBeanFactory} by-type lookup territory
+	 * but may also be translated into a conventional by-name lookup based on the name
+	 * of the given type. For more extensive retrieval operations across sets of beans,
+	 * use {@link ListableBeanFactory} and/or {@link BeanFactoryUtils}.
+	 * @param args arguments to use if creating a prototype using explicit arguments to a
+	 * static factory method. It is invalid to use a non-null args value in any other case.
+	 * @return an instance of the bean
+	 * @throws NoSuchBeanDefinitionException if there is no such bean definition
+	 * @throws BeanDefinitionStoreException if arguments have been given but
+	 * the affected bean isn't a prototype
+	 * @throws BeansException if the bean could not be created
+	 * @since 4.1
+	 */
+	<T> T getBean(Class<T> requiredType, Object... args) throws BeansException;
 
 	/**
 	 * Does this bean factory contain a bean definition or externally registered singleton

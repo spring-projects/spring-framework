@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -165,6 +165,11 @@ class StubWebApplicationContext implements WebApplicationContext {
 	@Override
 	public Object getBean(String name, Object... args) throws BeansException {
 		return this.beanFactory.getBean(name, args);
+	}
+
+	@Override
+	public <T> T getBean(Class<T> requiredType, Object... args) throws BeansException {
+		return this.beanFactory.getBean(requiredType, args);
 	}
 
 	@Override

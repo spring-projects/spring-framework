@@ -134,9 +134,18 @@ public class SimpleJndiBeanFactory extends JndiLocatorSupport implements BeanFac
 	public Object getBean(String name, Object... args) throws BeansException {
 		if (args != null) {
 			throw new UnsupportedOperationException(
-					"SimpleJndiBeanFactory does not support explicit bean creation arguments)");
+					"SimpleJndiBeanFactory does not support explicit bean creation arguments");
 		}
 		return getBean(name);
+	}
+
+	@Override
+	public <T> T getBean(Class<T> requiredType, Object... args) throws BeansException {
+		if (args != null) {
+			throw new UnsupportedOperationException(
+					"SimpleJndiBeanFactory does not support explicit bean creation arguments");
+		}
+		return getBean(requiredType);
 	}
 
 	@Override

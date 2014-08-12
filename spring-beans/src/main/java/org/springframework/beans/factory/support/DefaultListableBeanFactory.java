@@ -295,6 +295,11 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 
 	@Override
 	public <T> T getBean(Class<T> requiredType) throws BeansException {
+		return getBean(requiredType, (Object[]) null);
+	}
+
+	@Override
+	public <T> T getBean(Class<T> requiredType, Object... args) throws BeansException {
 		Assert.notNull(requiredType, "Required type must not be null");
 		String[] beanNames = getBeanNamesForType(requiredType);
 		if (beanNames.length > 1) {
@@ -309,25 +314,25 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			}
 		}
 		if (beanNames.length == 1) {
-			return getBean(beanNames[0], requiredType);
+			return getBean(beanNames[0], requiredType, args);
 		}
 		else if (beanNames.length > 1) {
 			Map<String, Object> candidates = new HashMap<String, Object>();
 			for (String beanName : beanNames) {
-				candidates.put(beanName, getBean(beanName, requiredType));
+				candidates.put(beanName, getBean(beanName, requiredType, args));
 			}
 			String primaryCandidate = determinePrimaryCandidate(candidates, requiredType);
 			if (primaryCandidate != null) {
-				return getBean(primaryCandidate, requiredType);
+				return getBean(primaryCandidate, requiredType, args);
 			}
 			String priorityCandidate = determineHighestPriorityCandidate(candidates, requiredType);
 			if (priorityCandidate != null) {
-				return getBean(priorityCandidate, requiredType);
+				return getBean(priorityCandidate, requiredType, args);
 			}
 			throw new NoUniqueBeanDefinitionException(requiredType, candidates.keySet());
 		}
 		else if (getParentBeanFactory() != null) {
-			return getParentBeanFactory().getBean(requiredType);
+			return getParentBeanFactory().getBean(requiredType, args);
 		}
 		else {
 			throw new NoSuchBeanDefinitionException(requiredType);
