@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,10 +22,9 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 import org.junit.Test;
-import org.springframework.beans.BeansException;
+
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
-import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.GenericBeanDefinition;
@@ -42,6 +41,7 @@ import static org.junit.Assert.*;
  * annotation metadata of the @Configuration class that imported it.
  *
  * @author Chris Beams
+ * @author Juergen Hoeller
  * @since 3.1
  */
 public class ImportAwareTests {
@@ -51,8 +51,7 @@ public class ImportAwareTests {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 		ctx.register(ImportingConfig.class);
 		ctx.refresh();
-
-		ctx.getBean("importedConfigBean");
+		assertNotNull(ctx.getBean("importedConfigBean"));
 
 		ImportedConfig importAwareConfig = ctx.getBean(ImportedConfig.class);
 		AnnotationMetadata importMetadata = importAwareConfig.importMetadata;
@@ -68,8 +67,7 @@ public class ImportAwareTests {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 		ctx.register(IndirectlyImportingConfig.class);
 		ctx.refresh();
-
-		ctx.getBean("importedConfigBean");
+		assertNotNull(ctx.getBean("importedConfigBean"));
 
 		ImportedConfig importAwareConfig = ctx.getBean(ImportedConfig.class);
 		AnnotationMetadata importMetadata = importAwareConfig.importMetadata;
@@ -87,6 +85,7 @@ public class ImportAwareTests {
 		ctx.register(ImportingRegistrarConfig.class);
 		ctx.refresh();
 		assertNotNull(ctx.getBean("registrarImportedBean"));
+		assertNotNull(ctx.getBean("otherImportedConfigBean"));
 	}
 
 	@Test
@@ -96,8 +95,11 @@ public class ImportAwareTests {
 		ctx.register(ImportingRegistrarConfigWithImport.class);
 		ctx.refresh();
 		assertNotNull(ctx.getBean("registrarImportedBean"));
+		assertNotNull(ctx.getBean("otherImportedConfigBean"));
+		assertNotNull(ctx.getBean("importedConfigBean"));
 		assertNotNull(ctx.getBean(ImportedConfig.class));
 	}
+
 
 	@Configuration
 	@Import(ImportedConfig.class)
@@ -140,27 +142,39 @@ public class ImportAwareTests {
 	}
 
 
+	@Configuration
+	static class OtherImportedConfig {
+
+		@Bean
+		public String otherImportedConfigBean() {
+			return "";
+		}
+	}
+
+
 	static class BPP implements BeanFactoryAware, BeanPostProcessor {
 
 		@Override
-		public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
+		public Object postProcessBeforeInitialization(Object bean, String beanName) {
 			return bean;
 		}
 
 		@Override
-		public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
+		public Object postProcessAfterInitialization(Object bean, String beanName) {
 			return bean;
 		}
 
 		@Override
-		public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
+		public void setBeanFactory(BeanFactory beanFactory) {
 		}
 	}
+
 
 	@Configuration
 	@EnableImportRegistrar
 	static class ImportingRegistrarConfig {
 	}
+
 
 	@Configuration
 	@EnableImportRegistrar
@@ -174,18 +188,22 @@ public class ImportAwareTests {
 	public @interface EnableImportRegistrar {
 	}
 
+
 	static class ImportedRegistrar implements ImportBeanDefinitionRegistrar {
 
 		static boolean called;
 
 		@Override
-		public void registerBeanDefinitions(AnnotationMetadata importingClassMetadata,
-				BeanDefinitionRegistry registry) {
-			BeanDefinition beanDefinition = new GenericBeanDefinition();
+		public void registerBeanDefinitions(AnnotationMetadata importingClassMetadata, BeanDefinitionRegistry registry) {
+			GenericBeanDefinition beanDefinition = new GenericBeanDefinition();
 			beanDefinition.setBeanClassName(String.class.getName());
-			registry.registerBeanDefinition("registrarImportedBean", beanDefinition );
-			Assert.state(called == false, "ImportedRegistrar called twice");
+			registry.registerBeanDefinition("registrarImportedBean", beanDefinition);
+			GenericBeanDefinition beanDefinition2 = new GenericBeanDefinition();
+			beanDefinition2.setBeanClass(OtherImportedConfig.class);
+			registry.registerBeanDefinition("registrarImportedConfig", beanDefinition2);
+			Assert.state(!called, "ImportedRegistrar called twice");
 			called = true;
 		}
 	}
+
 }

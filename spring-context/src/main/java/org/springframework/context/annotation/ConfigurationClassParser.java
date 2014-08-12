@@ -113,6 +113,8 @@ class ConfigurationClassParser {
 
 	private final ComponentScanAnnotationParser componentScanParser;
 
+	private final ConditionEvaluator conditionEvaluator;
+
 	private final Map<ConfigurationClass, ConfigurationClass> configurationClasses =
 			new LinkedHashMap<ConfigurationClass, ConfigurationClass>();
 
@@ -124,8 +126,6 @@ class ConfigurationClassParser {
 	private final ImportStack importStack = new ImportStack();
 
 	private final List<DeferredImportSelectorHolder> deferredImportSelectors = new LinkedList<DeferredImportSelectorHolder>();
-
-	private final ConditionEvaluator conditionEvaluator;
 
 
 	/**
@@ -486,6 +486,10 @@ class ConfigurationClassParser {
 
 	public Set<ConfigurationClass> getConfigurationClasses() {
 		return this.configurationClasses.keySet();
+	}
+
+	public int getPropertySourceCount() {
+		return this.propertySources.size();
 	}
 
 	public List<PropertySource<?>> getPropertySources() {

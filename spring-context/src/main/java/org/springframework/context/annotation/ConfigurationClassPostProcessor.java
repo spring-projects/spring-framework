@@ -17,6 +17,7 @@
 package org.springframework.context.annotation;
 
 import java.beans.PropertyDescriptor;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -269,7 +270,9 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 	 */
 	public void processConfigBeanDefinitions(BeanDefinitionRegistry registry) {
 		Set<BeanDefinitionHolder> configCandidates = new LinkedHashSet<BeanDefinitionHolder>();
-		for (String beanName : registry.getBeanDefinitionNames()) {
+		String[] candidateNames = registry.getBeanDefinitionNames();
+
+		for (String beanName : candidateNames) {
 			BeanDefinition beanDef = registry.getBeanDefinition(beanName);
 			if (ConfigurationClassUtils.isFullConfigurationClass(beanDef) ||
 					ConfigurationClassUtils.isLiteConfigurationClass(beanDef)) {
@@ -302,32 +305,59 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 		ConfigurationClassParser parser = new ConfigurationClassParser(
 				this.metadataReaderFactory, this.problemReporter, this.environment,
 				this.resourceLoader, this.componentScanBeanNameGenerator, registry);
-		parser.parse(configCandidates);
-		parser.validate();
 
-		// Handle any @PropertySource annotations
-		List<PropertySource<?>> parsedPropertySources = parser.getPropertySources();
-		if (!parsedPropertySources.isEmpty()) {
-			if (!(this.environment instanceof ConfigurableEnvironment)) {
-				logger.warn("Ignoring @PropertySource annotations. " +
-						"Reason: Environment must implement ConfigurableEnvironment");
-			}
-			else {
-				MutablePropertySources envPropertySources = ((ConfigurableEnvironment) this.environment).getPropertySources();
-				for (PropertySource<?> propertySource : parsedPropertySources) {
-					envPropertySources.addLast(propertySource);
+		Set<ConfigurationClass> alreadyParsed = new HashSet<ConfigurationClass>(configCandidates.size());
+		int propertySourceCount = 0;
+		do {
+			parser.parse(configCandidates);
+			parser.validate();
+
+			// Handle any @PropertySource annotations
+			if (parser.getPropertySourceCount() > propertySourceCount) {
+				List<PropertySource<?>> parsedPropertySources = parser.getPropertySources();
+				if (!parsedPropertySources.isEmpty()) {
+					if (!(this.environment instanceof ConfigurableEnvironment)) {
+						logger.warn("Ignoring @PropertySource annotations. " +
+								"Reason: Environment must implement ConfigurableEnvironment");
+					}
+					else {
+						MutablePropertySources envPropertySources = ((ConfigurableEnvironment) this.environment).getPropertySources();
+						for (PropertySource<?> propertySource : parsedPropertySources) {
+							envPropertySources.addLast(propertySource);
+						}
+					}
 				}
+				propertySourceCount = parser.getPropertySourceCount();
+			}
+
+			Set<ConfigurationClass> configClasses = new LinkedHashSet<ConfigurationClass>(parser.getConfigurationClasses());
+			configClasses.removeAll(alreadyParsed);
+
+			// Read the model and create bean definitions based on its content
+			if (this.reader == null) {
+				this.reader = new ConfigurationClassBeanDefinitionReader(registry, this.sourceExtractor,
+						this.problemReporter, this.metadataReaderFactory, this.resourceLoader, this.environment,
+						this.importBeanNameGenerator);
+			}
+			this.reader.loadBeanDefinitions(configClasses);
+			alreadyParsed.addAll(configClasses);
+
+			configCandidates.clear();
+			if (registry.getBeanDefinitionCount() > candidateNames.length) {
+				String[] newCandidateNames = registry.getBeanDefinitionNames();
+				Set<String> oldCandidateNames = new HashSet<String>(Arrays.asList(candidateNames));
+				for (String candidateName : newCandidateNames) {
+					if (!oldCandidateNames.contains(candidateName)) {
+						BeanDefinition beanDef = registry.getBeanDefinition(candidateName);
+						if (ConfigurationClassUtils.checkConfigurationClassCandidate(beanDef, this.metadataReaderFactory)) {
+							configCandidates.add(new BeanDefinitionHolder(beanDef, candidateName));
+						}
+					}
+				}
+				candidateNames = newCandidateNames;
 			}
 		}
-
-		// Read the model and create bean definitions based on its content
-		if (this.reader == null) {
-			this.reader = new ConfigurationClassBeanDefinitionReader(registry, this.sourceExtractor,
-					this.problemReporter, this.metadataReaderFactory, this.resourceLoader, this.environment,
-					this.importBeanNameGenerator);
-		}
-
-		this.reader.loadBeanDefinitions(parser.getConfigurationClasses());
+		while (!configCandidates.isEmpty());
 
 		// Register the ImportRegistry as a bean in order to support ImportAware @Configuration classes
 		if (singletonRegistry != null) {
