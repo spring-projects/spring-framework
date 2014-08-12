@@ -5,7 +5,7 @@ buildscript {
 	dependencies {
 		classpath("org.springframework.build.gradle:propdeps-plugin:0.0.7")
 		classpath("org.asciidoctor:asciidoctor-gradle-plugin:0.7.0")
-		classpath("org.springframework.build.gradle:docbook-reference-plugin:0.2.8")
+		classpath("io.spring.gradle:docbook-reference-plugin:0.3.0")
 		classpath("ws.antonov.gradle.plugins:gradle-plugin-protobuf:0.9.1")
 	}
 }
@@ -136,7 +136,7 @@ configure(allprojects) { project ->
 		inputs.dir sourceSets.main.output.classesDir
 		inputs.dir copyJavaApiSignature.to
 		outputs.upToDateWhen { true }
-		
+
 		doLast {
 			ant.taskdef(
 				name: 'animalSniffer',
@@ -1104,6 +1104,7 @@ configure(rootProject) {
 	reference {
 		sourceDir = asciidoctor.outputDir
 		pdfFilename = "spring-framework-reference.pdf"
+		epubFilename = "spring-framework-reference.epub"
 		expandPlaceholders = ""
 	}
 
