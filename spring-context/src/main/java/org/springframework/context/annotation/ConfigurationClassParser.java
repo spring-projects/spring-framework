@@ -113,6 +113,8 @@ class ConfigurationClassParser {
 
 	private final ComponentScanAnnotationParser componentScanParser;
 
+	private final ConditionEvaluator conditionEvaluator;
+
 	private final Map<ConfigurationClass, ConfigurationClass> configurationClasses =
 			new LinkedHashMap<ConfigurationClass, ConfigurationClass>();
 
@@ -124,8 +126,6 @@ class ConfigurationClassParser {
 	private final ImportStack importStack = new ImportStack();
 
 	private final List<DeferredImportSelectorHolder> deferredImportSelectors = new LinkedList<DeferredImportSelectorHolder>();
-
-	private final ConditionEvaluator conditionEvaluator;
 
 
 	/**
@@ -228,7 +228,7 @@ class ConfigurationClassParser {
 	 * multiple times as relevant sources are discovered.
 	 * @param configClass the configuration class being build
 	 * @param sourceClass a source class
-	 * @return the superclass, {@code null} if none found or previously processed
+	 * @return the superclass, or {@code null} if none found or previously processed
 	 */
 	protected final SourceClass doProcessConfigurationClass(ConfigurationClass configClass, SourceClass sourceClass) throws IOException {
 		// recursively process any member (nested) classes first
@@ -675,7 +675,7 @@ class ConfigurationClassParser {
 			if (this.source instanceof Class<?>) {
 				return (Class<?>) this.source;
 			}
-			String className = ((MetadataReader) source).getClassMetadata().getClassName();
+			String className = ((MetadataReader) this.source).getClassMetadata().getClassName();
 			return resourceLoader.getClassLoader().loadClass(className);
 		}
 
@@ -695,7 +695,6 @@ class ConfigurationClassParser {
 
 		public Collection<SourceClass> getMemberClasses() throws IOException {
 			Object sourceToProcess = this.source;
-
 			if (sourceToProcess instanceof Class<?>) {
 				Class<?> sourceClass = (Class<?>) sourceToProcess;
 				try {

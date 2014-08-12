@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -133,7 +133,7 @@ public class StaticListableBeanFactory implements ListableBeanFactory {
 	public Object getBean(String name, Object... args) throws BeansException {
 		if (args != null) {
 			throw new UnsupportedOperationException(
-					"StaticListableBeanFactory does not support explicit bean creation arguments)");
+					"StaticListableBeanFactory does not support explicit bean creation arguments");
 		}
 		return getBean(name);
 	}
