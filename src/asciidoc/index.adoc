@@ -824,11 +824,6 @@ Spring remains compatible with older versions of Java and the JDK: concretely, J
 and above are still fully supported. However, for newly started development projects
 based on Spring 4, we recommend the use of Java 7 or 8.
 
-Note that the Java 8 bytecode level (`-target 1.8`, as required by `-source 1.8`) is only
-fully supported as of Spring Framework 4.0. In particular, Spring 3.2 based applications
-need to be compiled with a maximum of Java 7 as the target, even if they happen to be
-deployed onto a Java 8 runtime. Please upgrade to Spring 4 for Java 8 based applications.
-
 
 
 
@@ -15786,7 +15781,7 @@ above and can be registered individually for __each__ web application as follows
 	</Context>
 ----
 
-Apache Tomcat 6.0.x (similar to 5.0.x/5.5.x) series supports several context locations:
+Apache Tomcat (6.0+) supports several context locations:
 
 * server configuration file - __$CATALINA_HOME/conf/server.xml__
 * default context configuration - __$CATALINA_HOME/conf/context.xml__ - that affects all
@@ -15801,56 +15796,6 @@ changes to the server configuration. See the Tomcat 6.0.x
 http://tomcat.apache.org/tomcat-6.0-doc/config/context.html[documentation] for more
 details about available context locations.
 
-* Tomcat 5.0.x/5.5.x
-* Copy `org.springframework.instrument.tomcat.jar` into __$CATALINA_HOME__/server/lib,
-  where __$CATALINA_HOME__ represents the root of the Tomcat installation.
-* Instruct Tomcat to use the custom class loader instead of the default one by editing
-  the web application context file:
-
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
-----
-	<Context path="/myWebApp" docBase="/my/webApp/location">
-		<Loader
-			loaderClass="org.springframework.instrument.classloading.tomcat.TomcatInstrumentableClassLoader"/>
-	</Context>
-----
-
-Tomcat 5.0.x and 5.5.x series supports several context locations:
-
-* server configuration file - __$CATALINA_HOME/conf/server.xml__
-* default context configuration - __$CATALINA_HOME/conf/context.xml__ - that affects all
-  deployed web applications
-* per-web application configuration which can be deployed either on the server-side at
-  __$CATALINA_HOME/conf/[enginename]/[hostname]/[webapp]-context.xml__ or embedded
-  inside the web-app archive at __META-INF/context.xml__
-
-For efficiency, the embedded web-app configuration style is recommended recommended
-because it will impact only applications that use the class loader. See the Tomcat 5.x
-http://tomcat.apache.org/tomcat-5.5-doc/config/context.html[documentation] for more
-details about available context locations.
-
-Tomcat versions prior to 5.5.20 contained a bug in the XML configuration parsing that
-prevented usage of the `Loader` tag inside __server.xml__ configuration, regardless of
-whether a class loader is specified or whether it is the official or a custom one. See
-Tomcat's bugzilla for http://issues.apache.org/bugzilla/show_bug.cgi?id=39704[more
-details].
-
-In Tomcat 5.5.x, versions 5.5.20 or later, you should set
-__useSystemClassLoaderAsParent__ to `false` to fix this problem:
-
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
-----
-	<Context path="/myWebApp" docBase="/my/webApp/location">
-		<Loader
-			loaderClass="org.springframework.instrument.classloading.tomcat.TomcatInstrumentableClassLoader"
-					**useSystemClassLoaderAsParent="false"**/>
-	</Context>
-----
-
-This setting is not needed on Tomcat 6 or higher.
-
 Alternatively, consider the use of the Spring-provided generic VM agent, to be specified
 in Tomcat's launch script (see above). This will make instrumentation available to all
 deployed web applications, no matter what ClassLoader they happen to run on.
@@ -15858,7 +15803,7 @@ deployed web applications, no matter what ClassLoader they happen to run on.
 [[aop-aj-ltw-environments-weblogic-oc4j-resin-glassfish-jboss]]
 ====== WebLogic, WebSphere, Resin, GlassFish, JBoss
 Recent versions of WebLogic Server (version 10 and above), IBM WebSphere Application
-Server (version 7 and above), Resin (3.1 and above) and JBoss (5.x or above) provide a
+Server (version 7 and above), Resin (3.1 and above) and JBoss (6.x or above) provide a
 ClassLoader that is capable of local instrumentation. Spring's native LTW leverages such
 ClassLoaders to enable AspectJ weaving. You can enable LTW by simply activating
 load-time weaving as described earlier. Specifically, you do __not__ need to modify the
@@ -46194,12 +46139,6 @@ The supported languages were chosen because __a)__ the languages have a lot of t
 the Java enterprise community, __b)__ no requests were made for other languages at the time
 that this support was added, and __c)__ the Spring developers were most familiar with
 them.
-
-There is nothing stopping the inclusion of further languages though. If you want to see
-support for <__insert your favorite dynamic language here__>, you can always raise an
-issue on Spring's
-http://opensource.atlassian.com/projects/spring/secure/Dashboard.jspa[JIRA] page (or
-implement such support yourself).
 ****
 
 Fully working examples of where this dynamic language support can be immediately useful
