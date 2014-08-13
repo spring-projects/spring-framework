@@ -109,6 +109,7 @@ public class WebMergedContextConfiguration extends MergedContextConfiguration {
 	 * {@link #WebMergedContextConfiguration(Class, String[], Class[], Set, String[], String[], String[], String, ContextLoader, CacheAwareContextLoaderDelegate, MergedContextConfiguration)}
 	 * instead.
 	 */
+	@Deprecated
 	public WebMergedContextConfiguration(
 			Class<?> testClass,
 			String[] locations,
