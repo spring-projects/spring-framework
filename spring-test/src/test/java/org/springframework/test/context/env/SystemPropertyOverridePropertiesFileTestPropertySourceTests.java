@@ -31,7 +31,7 @@ import static org.junit.Assert.*;
 
 /**
  * Integration tests for {@link TestPropertySource @TestPropertySource}
- * support with an explicitly named properties file that overrides a 
+ * support with an explicitly named properties file that overrides a
  * system property.
  *
  * @author Sam Brannen

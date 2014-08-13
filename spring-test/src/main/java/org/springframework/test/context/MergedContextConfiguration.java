@@ -43,7 +43,7 @@ import org.springframework.util.StringUtils;
  * values in the test class hierarchy taking into consideration the semantics
  * of the {@link ContextConfiguration#inheritLocations},
  * {@link ActiveProfiles#inheritProfiles},
- * {@link TestPropertySource#inheritLocations}, and 
+ * {@link TestPropertySource#inheritLocations}, and
  * {@link TestPropertySource#inheritProperties} flags.
  *
  * <p>A {@link SmartContextLoader} uses {@code MergedContextConfiguration}
