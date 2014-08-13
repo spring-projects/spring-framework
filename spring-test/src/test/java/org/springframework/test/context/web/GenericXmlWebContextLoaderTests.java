@@ -37,6 +37,7 @@ public class GenericXmlWebContextLoaderTests {
 
 
 	@Test
+	@SuppressWarnings("deprecation")
 	public void configMustNotContainAnnotatedClasses() throws Exception {
 		expectedException.expect(IllegalStateException.class);
 		expectedException.expectMessage(containsString("does not support annotated classes"));

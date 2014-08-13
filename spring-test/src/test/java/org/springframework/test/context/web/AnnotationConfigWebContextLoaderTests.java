@@ -38,6 +38,7 @@ public class AnnotationConfigWebContextLoaderTests {
 
 
 	@Test
+	@SuppressWarnings("deprecation")
 	public void configMustNotContainLocations() throws Exception {
 		expectedException.expect(IllegalStateException.class);
 		expectedException.expectMessage(containsString("does not support resource locations"));
