@@ -69,28 +69,22 @@ public class ReplaceOverride extends MethodOverride {
 		this.typeIdentifiers.add(identifier);
 	}
 
-
 	@Override
 	public boolean matches(Method method) {
-		// TODO could cache result for efficiency
 		if (!method.getName().equals(getMethodName())) {
-			// It can't match.
 			return false;
 		}
-
 		if (!isOverloaded()) {
-			// No overloaded: don't worry about arg type matching.
+			// Not overloaded: don't worry about arg type matching...
 			return true;
 		}
-
-		// If we get to here, we need to insist on precise argument matching.
+		// If we get here, we need to insist on precise argument matching...
 		if (this.typeIdentifiers.size() != method.getParameterTypes().length) {
 			return false;
 		}
 		for (int i = 0; i < this.typeIdentifiers.size(); i++) {
 			String identifier = this.typeIdentifiers.get(i);
 			if (!method.getParameterTypes()[i].getName().contains(identifier)) {
-				// This parameter cannot match.
 				return false;
 			}
 		}
