@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,24 +27,26 @@ import java.util.Set;
 import javax.sql.DataSource;
 
 import org.springframework.beans.BeansException;
-import org.springframework.tests.sample.beans.ITestBean;
-import org.springframework.tests.sample.beans.IndexedTestBean;
-import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.beans.factory.DisposableBean;
-import org.springframework.tests.sample.beans.factory.DummyFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.support.MethodReplacer;
+import org.springframework.tests.sample.beans.ITestBean;
+import org.springframework.tests.sample.beans.IndexedTestBean;
+import org.springframework.tests.sample.beans.TestBean;
+import org.springframework.tests.sample.beans.factory.DummyFactory;
 
 /**
  * Types used by {@link XmlBeanFactoryTests} and its attendant XML config files.
  *
  * @author Chris Beams
  */
-final class XmlBeanFactoryTestTypes { }
+final class XmlBeanFactoryTestTypes {
+}
+
 
 /**
  * Simple bean used to check constructor dependency checking.
@@ -176,15 +178,10 @@ abstract class ConstructorInjectedOverrides {
 
 	protected abstract FactoryMethods createFactoryMethods();
 
-	/**
-	 * @return Returns the setterString.
-	 */
 	public String getSetterString() {
 		return setterString;
 	}
-	/**
-	 * @param setterString The setterString to set.
-	 */
+
 	public void setSetterString(String setterString) {
 		this.setterString = setterString;
 	}
@@ -502,7 +499,7 @@ abstract class OverrideOneMethod extends MethodReplaceCandidate implements Overr
 		return new TestBean();
 	}
 
-	public TestBean invokesOverridenMethodOnSelf() {
+	public TestBean invokesOverriddenMethodOnSelf() {
 		return getPrototypeDependency();
 	}
 
