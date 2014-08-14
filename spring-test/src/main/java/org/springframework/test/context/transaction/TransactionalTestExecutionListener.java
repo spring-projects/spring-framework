@@ -145,6 +145,14 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 
 
 	/**
+	 * Returns {@code 4000}.
+	 */
+	@Override
+	public final int getOrder() {
+		return 4000;
+	}
+
+	/**
 	 * If the test method of the supplied {@linkplain TestContext test context}
 	 * is configured to run within a transaction, this method will run
 	 * {@link BeforeTransaction @BeforeTransaction} methods and start a new

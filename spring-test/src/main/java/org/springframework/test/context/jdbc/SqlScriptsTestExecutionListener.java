@@ -90,6 +90,14 @@ public class SqlScriptsTestExecutionListener extends AbstractTestExecutionListen
 
 
 	/**
+	 * Returns {@code 5000}.
+	 */
+	@Override
+	public final int getOrder() {
+		return 5000;
+	}
+
+	/**
 	 * Execute SQL scripts configured via {@link Sql @Sql} for the supplied
 	 * {@link TestContext} <em>before</em> the current test method.
 	 */

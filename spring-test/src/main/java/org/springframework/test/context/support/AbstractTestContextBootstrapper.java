@@ -31,7 +31,9 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.annotation.AnnotationAttributes;
+import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.core.io.support.SpringFactoriesLoader;
 import org.springframework.test.context.BootstrapContext;
 import org.springframework.test.context.CacheAwareContextLoaderDelegate;
 import org.springframework.test.context.ContextConfiguration;
@@ -55,11 +57,10 @@ import org.springframework.util.StringUtils;
  * provides most of the behavior required by a bootstrapper.
  *
  * <p>Concrete subclasses typically will only need to provide implementations for
- * the following {@code abstract} methods:
+ * the following methods:
  * <ul>
- * <li>{@link #getDefaultTestExecutionListenerClassNames}
  * <li>{@link #getDefaultContextLoaderClass}
- * <li>{@link #buildMergedContextConfiguration}
+ * <li>{@link #processMergedContextConfiguration}
  * </ul>
  *
  * @author Sam Brannen
@@ -98,6 +99,7 @@ public abstract class AbstractTestContextBootstrapper implements TestContextBoot
 		Class<?> clazz = getBootstrapContext().getTestClass();
 		Class<TestExecutionListeners> annotationType = TestExecutionListeners.class;
 		List<Class<? extends TestExecutionListener>> classesList = new ArrayList<Class<? extends TestExecutionListener>>();
+		boolean usingDefaults = false;
 
 		AnnotationDescriptor<TestExecutionListeners> descriptor = MetaAnnotationUtils.findAnnotationDescriptor(clazz,
 			annotationType);
@@ -105,9 +107,10 @@ public abstract class AbstractTestContextBootstrapper implements TestContextBoot
 		// Use defaults?
 		if (descriptor == null) {
 			if (logger.isDebugEnabled()) {
-				logger.debug("@TestExecutionListeners is not present for class [" + clazz.getName()
-						+ "]: using defaults.");
+				logger.debug(String.format("@TestExecutionListeners is not present for class [%s]: using defaults.",
+					clazz.getName()));
 			}
+			usingDefaults = true;
 			classesList.addAll(getDefaultTestExecutionListenerClasses());
 		}
 		else {
@@ -142,6 +145,20 @@ public abstract class AbstractTestContextBootstrapper implements TestContextBoot
 			}
 		}
 
+		List<TestExecutionListener> listeners = instantiateListeners(classesList);
+
+		// Sort by Ordered/@Order if we loaded default listeners.
+		if (usingDefaults) {
+			AnnotationAwareOrderComparator.sort(listeners);
+		}
+
+		if (logger.isInfoEnabled()) {
+			logger.info(String.format("Using TestExecutionListeners: %s", listeners));
+		}
+		return listeners;
+	}
+
+	private List<TestExecutionListener> instantiateListeners(List<Class<? extends TestExecutionListener>> classesList) {
 		List<TestExecutionListener> listeners = new ArrayList<TestExecutionListener>(classesList.size());
 		for (Class<? extends TestExecutionListener> listenerClass : classesList) {
 			NoClassDefFoundError ncdfe = null;
@@ -192,6 +209,28 @@ public abstract class AbstractTestContextBootstrapper implements TestContextBoot
 			}
 		}
 		return defaultListenerClasses;
+	}
+
+	/**
+	 * Get the names of the default {@link TestExecutionListener} classes for
+	 * this bootstrapper.
+	 * <p>The default implementation looks up all
+	 * {@code org.springframework.test.context.TestExecutionListener} entries
+	 * configured in all {@code META-INF/spring.factories} files on the classpath.
+	 * <p>This method is invoked by {@link #getDefaultTestExecutionListenerClasses()}.
+	 * @return an <em>unmodifiable</em> list of names of default {@code TestExecutionListener}
+	 * classes
+	 * @see SpringFactoriesLoader#loadFactoryNames
+	 */
+	protected List<String> getDefaultTestExecutionListenerClassNames() {
+		final List<String> classNames = SpringFactoriesLoader.loadFactoryNames(TestExecutionListener.class,
+			getClass().getClassLoader());
+
+		if (logger.isInfoEnabled()) {
+			logger.info(String.format("Loaded default TestExecutionListener class names from location [%s]: %s",
+				SpringFactoriesLoader.FACTORIES_RESOURCE_LOCATION, classNames));
+		}
+		return Collections.unmodifiableList(classNames);
 	}
 
 	/**
@@ -302,9 +341,11 @@ public abstract class AbstractTestContextBootstrapper implements TestContextBoot
 		String[] activeProfiles = ActiveProfilesUtils.resolveActiveProfiles(testClass);
 		MergedTestPropertySources mergedTestPropertySources = TestPropertySourceUtils.buildMergedTestPropertySources(testClass);
 
-		return buildMergedContextConfiguration(testClass, locations, classes, initializerClasses, activeProfiles,
-			mergedTestPropertySources.getLocations(), mergedTestPropertySources.getProperties(), contextLoader,
-			cacheAwareContextLoaderDelegate, parentConfig);
+		MergedContextConfiguration mergedConfig = new MergedContextConfiguration(testClass, locations, classes,
+			initializerClasses, activeProfiles, mergedTestPropertySources.getLocations(),
+			mergedTestPropertySources.getProperties(), contextLoader, cacheAwareContextLoaderDelegate, parentConfig);
+
+		return processMergedContextConfiguration(mergedConfig);
 	}
 
 	/**
@@ -384,15 +425,6 @@ public abstract class AbstractTestContextBootstrapper implements TestContextBoot
 	}
 
 	/**
-	 * Get the names of the default {@link TestExecutionListener} classes for
-	 * this bootstrapper.
-	 * <p>This method is invoked by {@link #getDefaultTestExecutionListenerClasses()}.
-	 * @return an <em>unmodifiable</em> list of names of default {@code
-	 * TestExecutionListener} classes
-	 */
-	protected abstract List<String> getDefaultTestExecutionListenerClassNames();
-
-	/**
 	 * Determine the default {@link ContextLoader} class to use for the supplied
 	 * test class.
 	 * <p>The class returned by this method will only be used if a {@code ContextLoader}
@@ -403,34 +435,19 @@ public abstract class AbstractTestContextBootstrapper implements TestContextBoot
 	protected abstract Class<? extends ContextLoader> getDefaultContextLoaderClass(Class<?> testClass);
 
 	/**
-	 * Build a {@link MergedContextConfiguration} instance from the supplied,
-	 * merged values.
-	 * <p>Concrete subclasses typically will only need to instantiate
-	 * {@link MergedContextConfiguration} (or a specialized subclass thereof)
-	 * from the provided values; further processing and merging of values is likely
-	 * unnecessary.
-	 * @param testClass the test class for which the {@code MergedContextConfiguration}
-	 * should be built (must not be {@code null})
-	 * @param locations the merged resource locations
-	 * @param classes the merged annotated classes
-	 * @param initializerClasses the merged context initializer classes
-	 * @param activeProfiles the merged active bean definition profiles
-	 * @param propertySourceLocations the merged {@code PropertySource} locations
-	 * @param propertySourceProperties the merged {@code PropertySource} properties
-	 * @param contextLoader the resolved {@code ContextLoader}
-	 * @param cacheAwareContextLoaderDelegate the cache-aware context loader delegate
-	 * to be provided to the instantiated {@code MergedContextConfiguration}
-	 * @param parentConfig the merged context configuration for the parent application
-	 * context in a context hierarchy, or {@code null} if there is no parent
-	 * @return the fully initialized {@code MergedContextConfiguration}
+	 * Process the supplied, newly instantiated {@link MergedContextConfiguration} instance.
+	 * <p>The returned {@link MergedContextConfiguration} instance may be a wrapper
+	 * around or a replacement for the original.
+	 * <p>The default implementation simply returns the supplied instance unmodified.
+	 * <p>Concrete subclasses may choose to return a specialized subclass of
+	 * {@link MergedContextConfiguration} based on properties in the supplied instance.
+	 * @param mergedConfig the {@code MergedContextConfiguration} to process;
+	 * never {@code null}
+	 * @return a fully initialized {@code MergedContextConfiguration}; never
+	 * {@code null}
 	 */
-	protected abstract MergedContextConfiguration buildMergedContextConfiguration(
-			Class<?> testClass,
-			String[] locations,
-			Class<?>[] classes,
-			Set<Class<? extends ApplicationContextInitializer<? extends ConfigurableApplicationContext>>> initializerClasses,
-			String[] activeProfiles, String[] propertySourceLocations, String[] propertySourceProperties,
-			ContextLoader contextLoader, CacheAwareContextLoaderDelegate cacheAwareContextLoaderDelegate,
-			MergedContextConfiguration parentConfig);
+	protected MergedContextConfiguration processMergedContextConfiguration(MergedContextConfiguration mergedConfig) {
+		return mergedConfig;
+	}
 
 }
