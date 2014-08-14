@@ -79,6 +79,7 @@ public class MergedContextConfiguration implements Serializable {
 	private final String[] propertySourceProperties;
 	private final ContextLoader contextLoader;
 	private final CacheAwareContextLoaderDelegate cacheAwareContextLoaderDelegate;
+
 	private final MergedContextConfiguration parent;
 
 
@@ -183,6 +184,18 @@ public class MergedContextConfiguration implements Serializable {
 			CacheAwareContextLoaderDelegate cacheAwareContextLoaderDelegate, MergedContextConfiguration parent) {
 		this(testClass, locations, classes, contextInitializerClasses, activeProfiles, null, null, contextLoader,
 			cacheAwareContextLoaderDelegate, parent);
+	}
+
+	/**
+	 * Create a new {@code MergedContextConfiguration} instance by copying
+	 * all fields from the supplied {@code MergedContextConfiguration}.
+	 * @since 4.1
+	 */
+	public MergedContextConfiguration(MergedContextConfiguration mergedConfig) {
+		this(mergedConfig.testClass, mergedConfig.locations, mergedConfig.classes,
+			mergedConfig.contextInitializerClasses, mergedConfig.activeProfiles, mergedConfig.propertySourceLocations,
+			mergedConfig.propertySourceProperties, mergedConfig.contextLoader,
+			mergedConfig.cacheAwareContextLoaderDelegate, mergedConfig.parent);
 	}
 
 	/**

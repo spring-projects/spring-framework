@@ -84,8 +84,7 @@ public class WebMergedContextConfiguration extends MergedContextConfiguration {
 			String[] activeProfiles, String resourceBasePath, ContextLoader contextLoader) {
 
 		this(testClass, locations, classes, contextInitializerClasses, activeProfiles, null, null, resourceBasePath,
-			contextLoader,
-			null, null);
+			contextLoader, null, null);
 	}
 
 	/**
@@ -120,6 +119,19 @@ public class WebMergedContextConfiguration extends MergedContextConfiguration {
 
 		this(testClass, locations, classes, contextInitializerClasses, activeProfiles, null, null, resourceBasePath,
 			contextLoader, cacheAwareContextLoaderDelegate, parent);
+	}
+
+	/**
+	 * Create a new {@code WebMergedContextConfiguration} instance by copying
+	 * all properties from the supplied {@code MergedContextConfiguration}.
+	 * <p>If an <em>empty</em> value is supplied for the {@code resourceBasePath}
+	 * an empty string will be used.
+	 * @param resourceBasePath the resource path to the root directory of the web application
+	 * @since 4.1
+	 */
+	public WebMergedContextConfiguration(MergedContextConfiguration mergedConfig, String resourceBasePath) {
+		super(mergedConfig);
+		this.resourceBasePath = !StringUtils.hasText(resourceBasePath) ? "" : resourceBasePath;
 	}
 
 	/**

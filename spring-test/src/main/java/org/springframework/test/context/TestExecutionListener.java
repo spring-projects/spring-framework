@@ -23,7 +23,13 @@ package org.springframework.test.context;
  * <p>Concrete implementations must provide a {@code public} no-args constructor,
  * so that listeners can be instantiated transparently by tools and configuration
  * mechanisms.
- * <p>Spring provides the following out-of-the-box implementations:
+ * <p>Implementations may optionally declare the position in which they should
+ * be ordered among the chain of default listeners via the
+ * {@link org.springframework.core.Ordered Order} interface or
+ * {@link org.springframework.core.annotation.Order @Order} annotation. See
+ * {@link TestContextBootstrapper#getTestExecutionListeners()} for details.
+ * <p>Spring provides the following out-of-the-box implementations (all of
+ * which are annotated with {@code @Order}):
  * <ul>
  * <li>{@link org.springframework.test.context.web.ServletTestExecutionListener
  * ServletTestExecutionListener}</li>

@@ -63,8 +63,16 @@ public interface TestContextBootstrapper {
 	 * for the test class in the {@link BootstrapContext} associated with this bootstrapper.
 	 * <p>If {@link TestExecutionListeners @TestExecutionListeners} is not
 	 * <em>present</em> on the test class in the {@code BootstrapContext},
-	 * <em>default</em> listeners should be returned. Concrete implementations
-	 * are free to determine what comprises the set of default listeners.
+	 * <em>default</em> listeners should be returned. Furthermore, default
+	 * listeners must be sorted using
+	 * {@link org.springframework.core.annotation.AnnotationAwareOrderComparator
+	 * AnnotationAwareOrderComparator}.
+	 * <p>Concrete implementations are free to determine what comprises the
+	 * set of default listeners. However, by default, the Spring TestContext
+	 * Framework will use the
+	 * {@link org.springframework.core.io.support.SpringFactoriesLoader SpringFactoriesLoader}
+	 * mechanism to look up all {@code TestExecutionListener} class names
+	 * configured in all {@code META-INF/spring.factories} files on the classpath.
 	 * <p>The {@link TestExecutionListeners#inheritListeners() inheritListeners}
 	 * flag of {@link TestExecutionListeners @TestExecutionListeners} must be
 	 * taken into consideration. Specifically, if the {@code inheritListeners}

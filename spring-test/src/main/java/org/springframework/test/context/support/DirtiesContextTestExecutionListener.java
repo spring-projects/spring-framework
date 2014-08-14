@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,20 +48,11 @@ public class DirtiesContextTestExecutionListener extends AbstractTestExecutionLi
 
 
 	/**
-	 * Marks the {@linkplain ApplicationContext application context} of the supplied
-	 * {@linkplain TestContext test context} as
-	 * {@linkplain TestContext#markApplicationContextDirty(DirtiesContext.HierarchyMode) dirty}
-	 * and sets {@link DependencyInjectionTestExecutionListener#REINJECT_DEPENDENCIES_ATTRIBUTE}
-	 * in the test context to {@code true}.
-	 * @param testContext the test context whose application context should
-	 * marked as dirty
-	 * @param hierarchyMode the context cache clearing mode to be applied if the
-	 * context is part of a hierarchy; may be {@code null}
-	 * @since 3.2.2
+	 * Returns {@code 3000}.
 	 */
-	protected void dirtyContext(TestContext testContext, HierarchyMode hierarchyMode) {
-		testContext.markApplicationContextDirty(hierarchyMode);
-		testContext.setAttribute(DependencyInjectionTestExecutionListener.REINJECT_DEPENDENCIES_ATTRIBUTE, Boolean.TRUE);
+	@Override
+	public final int getOrder() {
+		return 3000;
 	}
 
 	/**
@@ -130,6 +121,23 @@ public class DirtiesContextTestExecutionListener extends AbstractTestExecutionLi
 			HierarchyMode hierarchyMode = annAttrs.<HierarchyMode> getEnum("hierarchyMode");
 			dirtyContext(testContext, hierarchyMode);
 		}
+	}
+
+	/**
+	 * Marks the {@linkplain ApplicationContext application context} of the supplied
+	 * {@linkplain TestContext test context} as
+	 * {@linkplain TestContext#markApplicationContextDirty(DirtiesContext.HierarchyMode) dirty}
+	 * and sets {@link DependencyInjectionTestExecutionListener#REINJECT_DEPENDENCIES_ATTRIBUTE}
+	 * in the test context to {@code true}.
+	 * @param testContext the test context whose application context should
+	 * marked as dirty
+	 * @param hierarchyMode the context cache clearing mode to be applied if the
+	 * context is part of a hierarchy; may be {@code null}
+	 * @since 3.2.2
+	 */
+	protected void dirtyContext(TestContext testContext, HierarchyMode hierarchyMode) {
+		testContext.markApplicationContextDirty(hierarchyMode);
+		testContext.setAttribute(DependencyInjectionTestExecutionListener.REINJECT_DEPENDENCIES_ATTRIBUTE, Boolean.TRUE);
 	}
 
 }

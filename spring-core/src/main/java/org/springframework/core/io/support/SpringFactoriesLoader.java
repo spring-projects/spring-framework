@@ -27,7 +27,7 @@ import java.util.Properties;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import org.springframework.core.OrderComparator;
+import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.core.io.UrlResource;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
@@ -48,12 +48,13 @@ import org.springframework.util.StringUtils;
  *
  * @author Arjen Poutsma
  * @author Juergen Hoeller
+ * @author Sam Brannen
  * @since 3.2
  */
 public abstract class SpringFactoriesLoader {
 
 	/** The location to look for the factories. Can be present in multiple JAR files. */
-	private static final String FACTORIES_RESOURCE_LOCATION = "META-INF/spring.factories";
+	public static final String FACTORIES_RESOURCE_LOCATION = "META-INF/spring.factories";
 
 	private static final Log logger = LogFactory.getLog(SpringFactoriesLoader.class);
 
@@ -61,7 +62,7 @@ public abstract class SpringFactoriesLoader {
 	/**
 	 * Load the factory implementations of the given type from the default location,
 	 * using the given class loader.
-	 * <p>The returned factories are ordered in accordance with the {@link OrderComparator}.
+	 * <p>The returned factories are ordered in accordance with the {@link AnnotationAwareOrderComparator}.
 	 * @param factoryClass the interface or abstract class representing the factory
 	 * @param classLoader the ClassLoader to use for loading (can be {@code null} to use the default)
 	 */
@@ -79,7 +80,7 @@ public abstract class SpringFactoriesLoader {
 		for (String factoryName : factoryNames) {
 			result.add(instantiateFactory(factoryName, factoryClass, classLoaderToUse));
 		}
-		OrderComparator.sort(result);
+		AnnotationAwareOrderComparator.sort(result);
 		return result;
 	}
 
