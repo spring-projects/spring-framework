@@ -680,7 +680,12 @@
 					<xsd:attribute name="name" type="xsd:string">
 						<xsd:annotation>
 							<xsd:documentation><![CDATA[
-	The name of the lookup method. This method must take no arguments.
+	The name of the lookup method. This method may have arguments which
+	will be passed on to the target constructor or factory method. Note
+	that for backwards compatibility reasons, in a scenario with overloaded
+	non-abstract methods of the given name, only the no-arg variant of a
+	method will be turned into a container-driven lookup method.
+	Consider using the @Lookup annotation for more specific demarcation.
 							]]></xsd:documentation>
 						</xsd:annotation>
 					</xsd:attribute>
@@ -688,9 +693,10 @@
 						<xsd:annotation>
 							<xsd:documentation><![CDATA[
 	The name of the bean in the current or ancestor factories that
-	the lookup method should resolve to. Often this bean will be a
+	the lookup method should resolve to. Usually this bean will be a
 	prototype, in which case the lookup method will return a distinct
-	instance on every invocation. This is useful for single-threaded objects.
+	instance on every invocation. If not specified, the lookup method's
+	return type will be used for a type-based lookup.
 							]]></xsd:documentation>
 						</xsd:annotation>
 					</xsd:attribute>
