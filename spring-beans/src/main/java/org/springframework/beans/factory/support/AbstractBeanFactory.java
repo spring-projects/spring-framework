@@ -285,8 +285,8 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 				if (dependsOn != null) {
 					for (String dependsOnBean : dependsOn) {
 						if (isDependent(beanName, dependsOnBean)) {
-							throw new BeanCreationException("Circular depends-on relationship between '" +
-									beanName + "' and '" + dependsOnBean + "'");
+							throw new BeanCreationException(mbd.getResourceDescription(), beanName,
+									"Circular depends-on relationship between '" + beanName + "' and '" + dependsOnBean + "'");
 						}
 						registerDependentBean(dependsOnBean, beanName);
 						getBean(dependsOnBean);
@@ -1274,7 +1274,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 		// Check validity of the usage of the args parameter. This can
 		// only be used for prototypes constructed via a factory method.
 		if (args != null && !mbd.isPrototype()) {
-			throw new BeanDefinitionStoreException(
+			throw new BeanDefinitionStoreException(mbd.getResourceDescription(), beanName,
 					"Can only specify arguments for the getBean method when referring to a prototype bean definition");
 		}
 	}
@@ -1625,8 +1625,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	 * instantiation within this class is performed by this method.
 	 * @param beanName the name of the bean
 	 * @param mbd the merged bean definition for the bean
-	 * @param args arguments to use if creating a prototype using explicit arguments to a
-	 * static factory method. This parameter must be {@code null} except in this case.
+	 * @param args arguments to use if creating a prototype using explicit arguments
 	 * @return a new instance of the bean
 	 * @throws BeanCreationException if the bean could not be created
 	 */

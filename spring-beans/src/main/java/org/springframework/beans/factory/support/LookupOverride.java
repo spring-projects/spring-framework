@@ -37,8 +37,7 @@ public class LookupOverride extends MethodOverride {
 
 	/**
 	 * Construct a new LookupOverride.
-	 * @param methodName the name of the method to override.
-	 * This method must have no arguments.
+	 * @param methodName the name of the method to override
 	 * @param beanName the name of the bean in the current BeanFactory
 	 * that the overridden method should return
 	 */
@@ -47,6 +46,7 @@ public class LookupOverride extends MethodOverride {
 		Assert.notNull(beanName, "Bean name must not be null");
 		this.beanName = beanName;
 	}
+
 
 	/**
 	 * Return the name of the bean that should be returned by this method.
@@ -63,10 +63,6 @@ public class LookupOverride extends MethodOverride {
 		return (method.getName().equals(getMethodName()) && method.getParameterTypes().length == 0);
 	}
 
-	@Override
-	public String toString() {
-		return "LookupOverride for method '" + getMethodName() + "'; will return bean '" + this.beanName + "'";
-	}
 
 	@Override
 	public boolean equals(Object other) {
@@ -77,6 +73,11 @@ public class LookupOverride extends MethodOverride {
 	@Override
 	public int hashCode() {
 		return (29 * super.hashCode() + ObjectUtils.nullSafeHashCode(this.beanName));
+	}
+
+	@Override
+	public String toString() {
+		return "LookupOverride for method '" + getMethodName() + "'";
 	}
 
 }

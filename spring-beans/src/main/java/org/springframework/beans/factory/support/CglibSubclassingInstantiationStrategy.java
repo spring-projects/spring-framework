@@ -25,7 +25,6 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.BeanInstantiationException;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.BeanFactory;
-
 import org.springframework.cglib.core.SpringNamingPolicy;
 import org.springframework.cglib.proxy.Callback;
 import org.springframework.cglib.proxy.CallbackFilter;
@@ -89,13 +88,12 @@ public class CglibSubclassingInstantiationStrategy extends SimpleInstantiationSt
 	 */
 	private static class CglibSubclassCreator {
 
-		private static final Class<?>[] CALLBACK_TYPES = new Class<?>[] { NoOp.class,
-			LookupOverrideMethodInterceptor.class, ReplaceOverrideMethodInterceptor.class };
+		private static final Class<?>[] CALLBACK_TYPES = new Class<?>[]
+				{NoOp.class, LookupOverrideMethodInterceptor.class, ReplaceOverrideMethodInterceptor.class};
 
 		private final RootBeanDefinition beanDefinition;
 
 		private final BeanFactory owner;
-
 
 		CglibSubclassCreator(RootBeanDefinition beanDefinition, BeanFactory owner) {
 			this.beanDefinition = beanDefinition;
@@ -113,7 +111,6 @@ public class CglibSubclassingInstantiationStrategy extends SimpleInstantiationSt
 		 */
 		Object instantiate(Constructor<?> ctor, Object[] args) {
 			Class<?> subclass = createEnhancedSubclass(this.beanDefinition);
-
 			Object instance;
 			if (ctor == null) {
 				instance = BeanUtils.instantiate(subclass);
@@ -123,19 +120,17 @@ public class CglibSubclassingInstantiationStrategy extends SimpleInstantiationSt
 					Constructor<?> enhancedSubclassConstructor = subclass.getConstructor(ctor.getParameterTypes());
 					instance = enhancedSubclassConstructor.newInstance(args);
 				}
-				catch (Exception e) {
+				catch (Exception ex) {
 					throw new BeanInstantiationException(this.beanDefinition.getBeanClass(), String.format(
-						"Failed to invoke construcor for CGLIB enhanced subclass [%s]", subclass.getName()), e);
+							"Failed to invoke constructor for CGLIB enhanced subclass [%s]", subclass.getName()), ex);
 				}
 			}
-
 			// SPR-10785: set callbacks directly on the instance instead of in the
 			// enhanced class (via the Enhancer) in order to avoid memory leaks.
 			Factory factory = (Factory) instance;
-			factory.setCallbacks(new Callback[] { NoOp.INSTANCE,//
-				new LookupOverrideMethodInterceptor(beanDefinition, owner),//
-				new ReplaceOverrideMethodInterceptor(beanDefinition, owner) });
-
+			factory.setCallbacks(new Callback[] {NoOp.INSTANCE,
+					new LookupOverrideMethodInterceptor(this.beanDefinition, this.owner),
+					new ReplaceOverrideMethodInterceptor(this.beanDefinition, this.owner)});
 			return instance;
 		}
 
@@ -153,6 +148,7 @@ public class CglibSubclassingInstantiationStrategy extends SimpleInstantiationSt
 		}
 	}
 
+
 	/**
 	 * Class providing hashCode and equals methods required by CGLIB to
 	 * ensure that CGLIB doesn't generate a distinct class per bean.
@@ -161,7 +157,6 @@ public class CglibSubclassingInstantiationStrategy extends SimpleInstantiationSt
 	private static class CglibIdentitySupport {
 
 		private final RootBeanDefinition beanDefinition;
-
 
 		CglibIdentitySupport(RootBeanDefinition beanDefinition) {
 			this.beanDefinition = beanDefinition;
@@ -173,8 +168,8 @@ public class CglibSubclassingInstantiationStrategy extends SimpleInstantiationSt
 
 		@Override
 		public boolean equals(Object other) {
-			return other.getClass().equals(this.getClass())
-					&& ((CglibIdentitySupport) other).getBeanDefinition().equals(this.getBeanDefinition());
+			return (getClass().equals(other.getClass()) &&
+					this.beanDefinition.equals(((CglibIdentitySupport) other).beanDefinition));
 		}
 
 		@Override
@@ -183,13 +178,13 @@ public class CglibSubclassingInstantiationStrategy extends SimpleInstantiationSt
 		}
 	}
 
+
 	/**
 	 * CGLIB callback for filtering method interception behavior.
 	 */
 	private static class MethodOverrideCallbackFilter extends CglibIdentitySupport implements CallbackFilter {
 
 		private static final Log logger = LogFactory.getLog(MethodOverrideCallbackFilter.class);
-
 
 		MethodOverrideCallbackFilter(RootBeanDefinition beanDefinition) {
 			super(beanDefinition);
@@ -210,10 +205,11 @@ public class CglibSubclassingInstantiationStrategy extends SimpleInstantiationSt
 			else if (methodOverride instanceof ReplaceOverride) {
 				return METHOD_REPLACER;
 			}
-			throw new UnsupportedOperationException("Unexpected MethodOverride subclass: "
-					+ methodOverride.getClass().getName());
+			throw new UnsupportedOperationException("Unexpected MethodOverride subclass: " +
+					methodOverride.getClass().getName());
 		}
 	}
+
 
 	/**
 	 * CGLIB MethodInterceptor to override methods, replacing them with an
@@ -222,7 +218,6 @@ public class CglibSubclassingInstantiationStrategy extends SimpleInstantiationSt
 	private static class LookupOverrideMethodInterceptor extends CglibIdentitySupport implements MethodInterceptor {
 
 		private final BeanFactory owner;
-
 
 		LookupOverrideMethodInterceptor(RootBeanDefinition beanDefinition, BeanFactory owner) {
 			super(beanDefinition);
@@ -245,7 +240,6 @@ public class CglibSubclassingInstantiationStrategy extends SimpleInstantiationSt
 
 		private final BeanFactory owner;
 
-
 		ReplaceOverrideMethodInterceptor(RootBeanDefinition beanDefinition, BeanFactory owner) {
 			super(beanDefinition);
 			this.owner = owner;
@@ -255,7 +249,7 @@ public class CglibSubclassingInstantiationStrategy extends SimpleInstantiationSt
 		public Object intercept(Object obj, Method method, Object[] args, MethodProxy mp) throws Throwable {
 			ReplaceOverride ro = (ReplaceOverride) getBeanDefinition().getMethodOverrides().getOverride(method);
 			// TODO could cache if a singleton for minor performance optimization
-			MethodReplacer mr = owner.getBean(ro.getMethodReplacerBeanName(), MethodReplacer.class);
+			MethodReplacer mr = this.owner.getBean(ro.getMethodReplacerBeanName(), MethodReplacer.class);
 			return mr.reimplement(obj, method, args);
 		}
 	}
