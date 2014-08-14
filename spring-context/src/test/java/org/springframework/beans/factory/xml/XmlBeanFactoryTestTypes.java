@@ -174,7 +174,6 @@ abstract class ConstructorInjectedOverrides {
 		return this.tb;
 	}
 
-
 	protected abstract FactoryMethods createFactoryMethods();
 
 	/**
@@ -229,7 +228,6 @@ class DerivedConstructorDependenciesBean extends ConstructorDependenciesBean {
 	private void destroy() {
 		this.destroyed = true;
 	}
-
 }
 
 
@@ -240,7 +238,6 @@ class DerivedConstructorDependenciesBean extends ConstructorDependenciesBean {
 interface DummyBo {
 
 	void something();
-
 }
 
 
@@ -258,9 +255,7 @@ class DummyBoImpl implements DummyBo {
 
 	@Override
 	public void something() {
-
 	}
-
 }
 
 
@@ -274,7 +269,6 @@ class DummyDao {
 	public DummyDao(DataSource ds) {
 		this.ds = ds;
 	}
-
 }
 
 
@@ -289,7 +283,6 @@ class DummyReferencer {
 	private TestBean testBean2;
 
 	private DummyFactory dummyFactory;
-
 
 	public DummyReferencer() {
 	}
@@ -321,7 +314,6 @@ class DummyReferencer {
 	public TestBean getTestBean2() {
 		return testBean2;
 	}
-
 }
 
 
@@ -370,12 +362,10 @@ class FactoryMethods {
 		return Collections.EMPTY_LIST;
 	}
 
-
 	private int num = 0;
 	private String name = "default";
 	private TestBean tb;
 	private String stringValue;
-
 
 	/**
 	 * Constructor is private: not for use outside this class,
@@ -421,7 +411,6 @@ class FactoryMethods {
 	public void setName(String name) {
 		this.name = name;
 	}
-
 }
 
 /**
@@ -436,7 +425,6 @@ class FixedMethodReplacer implements MethodReplacer {
 	public Object reimplement(Object obj, Method method, Object[] args) throws Throwable {
 		return VALUE;
 	}
-
 }
 
 
@@ -469,21 +457,16 @@ class MethodReplaceCandidate {
 	public String replaceMe(String echo) {
 		return echo;
 	}
-
 }
 
 
 /**
  * Bean that exposes a simple property that can be set
  * to a mix of references and individual values.
- *
- * @author Rod Johnson
- * @since 27.05.2003
  */
 class MixedCollectionBean {
 
 	private Collection<?> jumble;
-
 
 	public void setJumble(Collection<?> jumble) {
 		this.jumble = jumble;
@@ -492,7 +475,6 @@ class MixedCollectionBean {
 	public Collection<?> getJumble() {
 		return jumble;
 	}
-
 }
 
 
@@ -504,7 +486,6 @@ interface OverrideInterface {
 	TestBean getPrototypeDependency();
 
 	TestBean getPrototypeDependency(Object someParam);
-
 }
 
 
@@ -563,7 +544,6 @@ abstract class OverrideOneMethodSubclass extends OverrideOneMethod {
 		// This implementation does nothing!
 		// It's not overloaded
 	}
-
 }
 
 
@@ -590,7 +570,6 @@ class ProtectedLifecycleBean implements BeanNameAware, BeanFactoryAware, Initial
 	protected boolean postProcessedAfterInit;
 
 	protected boolean destroyed;
-
 
 	public void setInitMethodDeclared(boolean initMethodDeclared) {
 		this.initMethodDeclared = initMethodDeclared;
@@ -707,7 +686,6 @@ class ProtectedLifecycleBean implements BeanNameAware, BeanFactoryAware, Initial
 			return bean;
 		}
 	}
-
 }
 
 
@@ -722,7 +700,6 @@ class ReverseMethodReplacer implements MethodReplacer, Serializable {
 		String s = (String) args[0];
 		return new StringBuffer(s).reverse().toString();
 	}
-
 }
 
 
@@ -733,7 +710,6 @@ class ReverseMethodReplacer implements MethodReplacer, Serializable {
 abstract class SerializableMethodReplacerCandidate extends MethodReplaceCandidate implements Serializable {
 
 	//public abstract Point getPoint();
-
 }
 
 
@@ -769,5 +745,4 @@ class SingleSimpleTypeConstructorBean {
 	public String getTestString() {
 		return testString;
 	}
-
 }
