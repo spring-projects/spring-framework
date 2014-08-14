@@ -486,8 +486,7 @@ public class Jackson2ObjectMapperFactoryBean implements FactoryBean<ObjectMapper
 
 	@Override
 	public Class<?> getObjectType() {
-		Assert.notNull(this.objectMapper, "ObjectMapper must not be null");
-		return this.objectMapper.getClass();
+		return (this.objectMapper != null) ? this.objectMapper.getClass() : null;
 	}
 
 	@Override
