@@ -20,7 +20,11 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import java.util.HashMap;
+import java.util.Map;
 
+import org.hamcrest.Matcher;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.mockito.InOrder;
 import org.springframework.beans.BeansException;
@@ -41,6 +45,7 @@ import org.springframework.core.type.AnnotationMetadata;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
+import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.*;
 
 /**
@@ -49,6 +54,13 @@ import static org.mockito.Mockito.*;
  * @author Phillip Webb
  */
 public class ImportSelectorTests {
+
+	static Map<Class<?>, String> importFrom = new HashMap<Class<?>, String>();
+
+	@BeforeClass
+	public static void clearImportFrom() {
+		ImportSelectorTests.importFrom.clear();
+	}
 
 	@Test
 	public void importSelectors() {
@@ -67,14 +79,23 @@ public class ImportSelectorTests {
 
 	@Test
 	public void invokeAwareMethodsInImportSelector() {
-
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(AwareConfig.class);
 		context.getBean(MessageSource.class);
-
 		assertThat(SampleRegistrar.beanFactory, is((BeanFactory) context.getBeanFactory()));
 		assertThat(SampleRegistrar.classLoader, is(context.getBeanFactory().getBeanClassLoader()));
 		assertThat(SampleRegistrar.resourceLoader, is(notNullValue()));
 		assertThat(SampleRegistrar.environment, is((Environment) context.getEnvironment()));
+	}
+
+	@Test
+	public void correctMetaDataOnIndirectImports() throws Exception {
+		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(IndirectConfig.class);
+		Matcher<String> isFromIndirect = equalTo(IndirectImport.class.getName());
+		System.out.println(importFrom);
+		assertThat(importFrom.get(ImportSelector1.class), isFromIndirect);
+		assertThat(importFrom.get(ImportSelector2.class), isFromIndirect);
+		assertThat(importFrom.get(DeferredImportSelector1.class), isFromIndirect);
+		assertThat(importFrom.get(DeferredImportSelector2.class), isFromIndirect);
 	}
 
 	@Configuration
@@ -133,6 +154,7 @@ public class ImportSelectorTests {
 
 		@Override
 		public String[] selectImports(AnnotationMetadata importingClassMetadata) {
+			ImportSelectorTests.importFrom.put(getClass(), importingClassMetadata.getClassName());
 			return new String[] { ImportedSelector1.class.getName() };
 		}
 	}
@@ -141,6 +163,7 @@ public class ImportSelectorTests {
 
 		@Override
 		public String[] selectImports(AnnotationMetadata importingClassMetadata) {
+			ImportSelectorTests.importFrom.put(getClass(), importingClassMetadata.getClassName());
 			return new String[] { ImportedSelector2.class.getName() };
 		}
 	}
@@ -149,6 +172,7 @@ public class ImportSelectorTests {
 
 		@Override
 		public String[] selectImports(AnnotationMetadata importingClassMetadata) {
+			ImportSelectorTests.importFrom.put(getClass(), importingClassMetadata.getClassName());
 			return new String[] { DeferredImportedSelector1.class.getName() };
 		}
 
@@ -163,6 +187,7 @@ public class ImportSelectorTests {
 
 		@Override
 		public String[] selectImports(AnnotationMetadata importingClassMetadata) {
+			ImportSelectorTests.importFrom.put(getClass(), importingClassMetadata.getClassName());
 			return new String[] { DeferredImportedSelector2.class.getName() };
 		}
 
@@ -202,6 +227,24 @@ public class ImportSelectorTests {
 		public String d() {
 			return "d";
 		}
+	}
+
+	@Configuration
+	@Import(IndirectImportSelector.class)
+	public static class IndirectConfig {
+
+	}
+
+	public static class IndirectImportSelector implements ImportSelector {
+		@Override
+		public String[] selectImports(AnnotationMetadata importingClassMetadata) {
+			return new String[] { IndirectImport.class.getName()};
+		}
+	}
+
+	@Sample
+	public static class IndirectImport {
+
 	}
 
 }
