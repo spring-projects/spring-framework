@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -1228,7 +1228,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 		// Check validity of the usage of the args parameter. This can
 		// only be used for prototypes constructed via a factory method.
 		if (args != null && !mbd.isPrototype()) {
-			throw new BeanDefinitionStoreException(
+			throw new BeanDefinitionStoreException(mbd.getResourceDescription(), beanName,
 					"Can only specify arguments for the getBean method when referring to a prototype bean definition");
 		}
 	}

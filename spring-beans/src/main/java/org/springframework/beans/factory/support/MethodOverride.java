@@ -52,6 +52,7 @@ public abstract class MethodOverride implements BeanMetadataElement {
 		this.methodName = methodName;
 	}
 
+
 	/**
 	 * Return the name of the method to be overridden.
 	 */
@@ -97,6 +98,7 @@ public abstract class MethodOverride implements BeanMetadataElement {
 	 * @return whether this override matches the given method
 	 */
 	public abstract boolean matches(Method method);
+
 
 	@Override
 	public boolean equals(Object other) {

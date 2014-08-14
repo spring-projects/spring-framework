@@ -236,7 +236,8 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 						Annotation annotation = findAutowiredAnnotation(candidate);
 						if (annotation != null) {
 							if (requiredConstructor != null) {
-								throw new BeanCreationException("Invalid autowire-marked constructor: " + candidate +
+								throw new BeanCreationException(beanName,
+										"Invalid autowire-marked constructor: " + candidate +
 										". Found another constructor with 'required' Autowired annotation: " +
 										requiredConstructor);
 							}
@@ -247,10 +248,10 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 							boolean required = determineRequiredStatus(annotation);
 							if (required) {
 								if (!candidates.isEmpty()) {
-									throw new BeanCreationException(
+									throw new BeanCreationException(beanName,
 											"Invalid autowire-marked constructors: " + candidates +
 											". Found another constructor with 'required' Autowired annotation: " +
-											requiredConstructor);
+											candidate);
 								}
 								requiredConstructor = candidate;
 							}
