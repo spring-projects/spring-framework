@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,12 +27,14 @@ import org.springframework.messaging.Message;
 import org.springframework.util.Assert;
 
 /**
+ * A HandlerMethodReturnValueHandler that wraps and delegates to others.
+ *
  * @author Rossen Stoyanchev
  * @since 4.0
  */
 public class HandlerMethodReturnValueHandlerComposite implements HandlerMethodReturnValueHandler {
 
-	private static Log logger = LogFactory.getLog(HandlerMethodReturnValueHandlerComposite.class);
+	private static final Log logger = LogFactory.getLog(HandlerMethodReturnValueHandlerComposite.class);
 
 	private final List<HandlerMethodReturnValueHandler> returnValueHandlers = new ArrayList<HandlerMethodReturnValueHandler>();
 
@@ -79,9 +81,6 @@ public class HandlerMethodReturnValueHandlerComposite implements HandlerMethodRe
 	private HandlerMethodReturnValueHandler getReturnValueHandler(MethodParameter returnType) {
 		for (HandlerMethodReturnValueHandler handler : this.returnValueHandlers) {
 			if (handler.supportsReturnType(returnType)) {
-				if (logger.isTraceEnabled()) {
-					logger.trace("Processing return value with " + handler);
-				}
 				return handler;
 			}
 		}
@@ -94,6 +93,9 @@ public class HandlerMethodReturnValueHandlerComposite implements HandlerMethodRe
 
 		HandlerMethodReturnValueHandler handler = getReturnValueHandler(returnType);
 		Assert.notNull(handler, "No handler for return value type [" + returnType.getParameterType().getName() + "]");
+		if (logger.isTraceEnabled()) {
+			logger.trace("Processing return value with " + handler);
+		}
 		handler.handleReturnValue(returnValue, returnType, message);
 	}
 

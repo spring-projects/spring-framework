@@ -88,6 +88,14 @@ public class ServletTestExecutionListener extends AbstractTestExecutionListener 
 
 
 	/**
+	 * Returns {@code 1000}.
+	 */
+	@Override
+	public final int getOrder() {
+		return 1000;
+	}
+
+	/**
 	 * Sets up thread-local state during the <em>test instance preparation</em>
 	 * callback phase via Spring Web's {@link RequestContextHolder}, but only if
 	 * the {@linkplain TestContext#getTestClass() test class} is annotated with

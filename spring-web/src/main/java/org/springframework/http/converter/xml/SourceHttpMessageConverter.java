@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,12 +20,14 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.StringReader;
 import java.util.HashSet;
 import java.util.Set;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.stream.XMLInputFactory;
+import javax.xml.stream.XMLResolver;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.transform.Result;
@@ -39,6 +41,7 @@ import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 
 import org.w3c.dom.Document;
+import org.xml.sax.EntityResolver;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
@@ -58,6 +61,7 @@ import org.springframework.util.StreamUtils;
  * that can read and write {@link Source} objects.
  *
  * @author Arjen Poutsma
+ * @author Rossen Stoyanchev
  * @since 3.0
  */
 public class SourceHttpMessageConverter<T extends Source> extends AbstractHttpMessageConverter<T> {
@@ -96,11 +100,12 @@ public class SourceHttpMessageConverter<T extends Source> extends AbstractHttpMe
 	}
 
 	/**
-	 * @return the configured value for whether XML external entities are allowed.
+	 * Returns the configured value for whether XML external entities are allowed.
 	 */
 	public boolean isProcessExternalEntities() {
 		return this.processExternalEntities;
 	}
+
 
 	@Override
 	public boolean supports(Class<?> clazz) {
@@ -136,8 +141,11 @@ public class SourceHttpMessageConverter<T extends Source> extends AbstractHttpMe
 			DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
 			documentBuilderFactory.setNamespaceAware(true);
 			documentBuilderFactory.setFeature(
-					"http://xml.org/sax/features/external-general-entities", this.processExternalEntities);
+					"http://xml.org/sax/features/external-general-entities", isProcessExternalEntities());
 			DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
+			if (!isProcessExternalEntities()) {
+				documentBuilder.setEntityResolver(NO_OP_ENTITY_RESOLVER);
+			}
 			Document document = documentBuilder.parse(body);
 			return new DOMSource(document);
 		}
@@ -152,9 +160,11 @@ public class SourceHttpMessageConverter<T extends Source> extends AbstractHttpMe
 	private SAXSource readSAXSource(InputStream body) throws IOException {
 		try {
 			XMLReader reader = XMLReaderFactory.createXMLReader();
-			reader.setFeature(
-					"http://xml.org/sax/features/external-general-entities", this.processExternalEntities);
+			reader.setFeature("http://xml.org/sax/features/external-general-entities", isProcessExternalEntities());
 			byte[] bytes = StreamUtils.copyToByteArray(body);
+			if (!isProcessExternalEntities()) {
+				reader.setEntityResolver(NO_OP_ENTITY_RESOLVER);
+			}
 			return new SAXSource(reader, new InputSource(new ByteArrayInputStream(bytes)));
 		}
 		catch (SAXException ex) {
@@ -165,7 +175,10 @@ public class SourceHttpMessageConverter<T extends Source> extends AbstractHttpMe
 	private Source readStAXSource(InputStream body) {
 		try {
 			XMLInputFactory inputFactory = XMLInputFactory.newFactory();
-			inputFactory.setProperty(XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES, this.processExternalEntities);
+			inputFactory.setProperty(XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES, isProcessExternalEntities());
+			if (!isProcessExternalEntities()) {
+				inputFactory.setXMLResolver(NO_OP_XML_RESOLVER);
+			}
 			XMLStreamReader streamReader = inputFactory.createXMLStreamReader(body);
 			return new StAXSource(streamReader);
 		}
@@ -230,5 +243,20 @@ public class SourceHttpMessageConverter<T extends Source> extends AbstractHttpMe
 			this.count += len;
 		}
 	}
+
+
+	private static final EntityResolver NO_OP_ENTITY_RESOLVER = new EntityResolver() {
+		@Override
+		public InputSource resolveEntity(String publicId, String systemId) {
+			return new InputSource(new StringReader(""));
+		}
+	};
+
+	private static final XMLResolver NO_OP_XML_RESOLVER = new XMLResolver() {
+		@Override
+		public Object resolveEntity(String publicID, String systemID, String base, String ns) {
+			return new ByteArrayInputStream(new byte[0]);
+		}
+	};
 
 }

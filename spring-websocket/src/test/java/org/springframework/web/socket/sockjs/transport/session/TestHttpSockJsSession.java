@@ -54,6 +54,11 @@ public class TestHttpSockJsSession extends AbstractHttpSockJsSession {
 	}
 
 	@Override
+	protected boolean isStreaming() {
+		return true;
+	}
+
+	@Override
 	public String getAcceptedProtocol() {
 		return this.subProtocol;
 	}

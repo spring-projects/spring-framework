@@ -23,6 +23,7 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.util.Assert;
 
 /**
@@ -88,21 +89,21 @@ public class TestContextManager {
 
 
 	/**
-	 * Construct a new {@code TestContextManager} for the specified {@linkplain Class
-	 * test class} and automatically {@link #registerTestExecutionListeners register} the
+	 * Construct a new {@code TestContextManager} for the specified {@linkplain Class test class}
+	 * and automatically {@link #registerTestExecutionListeners register} the
 	 * {@link TestExecutionListener TestExecutionListeners} configured for the test class
 	 * via the {@link TestExecutionListeners @TestExecutionListeners} annotation.
 	 * @param testClass the test class to be managed
-	 * @see #registerTestExecutionListeners(List)
+	 * @see #registerTestExecutionListeners
 	 */
 	public TestContextManager(Class<?> testClass) {
-		CacheAwareContextLoaderDelegate cacheAwareContextLoaderDelegate = new DefaultCacheAwareContextLoaderDelegate(
-			contextCache);
+		CacheAwareContextLoaderDelegate cacheAwareContextLoaderDelegate = new DefaultCacheAwareContextLoaderDelegate(contextCache);
 		BootstrapContext bootstrapContext = new DefaultBootstrapContext(testClass, cacheAwareContextLoaderDelegate);
 		this.testContextBootstrapper = BootstrapUtils.resolveTestContextBootstrapper(bootstrapContext);
-		this.testContext = new DefaultTestContext(testContextBootstrapper);
-		registerTestExecutionListeners(testContextBootstrapper.getTestExecutionListeners());
+		this.testContext = new DefaultTestContext(this.testContextBootstrapper);
+		registerTestExecutionListeners(this.testContextBootstrapper.getTestExecutionListeners());
 	}
+
 
 	/**
 	 * Get the {@link TestContext} managed by this {@code TestContextManager}.
@@ -148,8 +149,7 @@ public class TestContextManager {
 	 * registered for this {@code TestContextManager} in reverse order.
 	 */
 	private List<TestExecutionListener> getReversedTestExecutionListeners() {
-		List<TestExecutionListener> listenersReversed = new ArrayList<TestExecutionListener>(
-			getTestExecutionListeners());
+		List<TestExecutionListener> listenersReversed = new ArrayList<TestExecutionListener>(getTestExecutionListeners());
 		Collections.reverse(listenersReversed);
 		return listenersReversed;
 	}
@@ -168,9 +168,9 @@ public class TestContextManager {
 	 * @see #getTestExecutionListeners()
 	 */
 	public void beforeTestClass() throws Exception {
-		final Class<?> testClass = getTestContext().getTestClass();
+		Class<?> testClass = getTestContext().getTestClass();
 		if (logger.isTraceEnabled()) {
-			logger.trace("beforeTestClass(): class [" + testClass + "]");
+			logger.trace("beforeTestClass(): class [" + testClass.getName() + "]");
 		}
 		getTestContext().updateState(null, null, null);
 
@@ -179,8 +179,8 @@ public class TestContextManager {
 				testExecutionListener.beforeTestClass(getTestContext());
 			}
 			catch (Exception ex) {
-				logger.warn("Caught exception while allowing TestExecutionListener [" + testExecutionListener
-						+ "] to process 'before class' callback for test class [" + testClass + "]", ex);
+				logger.warn("Caught exception while allowing TestExecutionListener [" + testExecutionListener +
+						"] to process 'before class' callback for test class [" + testClass + "]", ex);
 				throw ex;
 			}
 		}
@@ -212,8 +212,8 @@ public class TestContextManager {
 				testExecutionListener.prepareTestInstance(getTestContext());
 			}
 			catch (Exception ex) {
-				logger.error("Caught exception while allowing TestExecutionListener [" + testExecutionListener
-						+ "] to prepare test instance [" + testInstance + "]", ex);
+				logger.error("Caught exception while allowing TestExecutionListener [" + testExecutionListener +
+						"] to prepare test instance [" + testInstance + "]", ex);
 				throw ex;
 			}
 		}
@@ -249,9 +249,9 @@ public class TestContextManager {
 				testExecutionListener.beforeTestMethod(getTestContext());
 			}
 			catch (Exception ex) {
-				logger.warn("Caught exception while allowing TestExecutionListener [" + testExecutionListener
-						+ "] to process 'before' execution of test method [" + testMethod + "] for test instance ["
-						+ testInstance + "]", ex);
+				logger.warn("Caught exception while allowing TestExecutionListener [" + testExecutionListener +
+						"] to process 'before' execution of test method [" + testMethod + "] for test instance [" +
+						testInstance + "]", ex);
 				throw ex;
 			}
 		}
@@ -284,8 +284,8 @@ public class TestContextManager {
 	public void afterTestMethod(Object testInstance, Method testMethod, Throwable exception) throws Exception {
 		Assert.notNull(testInstance, "testInstance must not be null");
 		if (logger.isTraceEnabled()) {
-			logger.trace("afterTestMethod(): instance [" + testInstance + "], method [" + testMethod + "], exception ["
-					+ exception + "]");
+			logger.trace("afterTestMethod(): instance [" + testInstance + "], method [" + testMethod +
+					"], exception [" + exception + "]");
 		}
 		getTestContext().updateState(testInstance, testMethod, exception);
 
@@ -297,9 +297,9 @@ public class TestContextManager {
 				testExecutionListener.afterTestMethod(getTestContext());
 			}
 			catch (Exception ex) {
-				logger.warn("Caught exception while allowing TestExecutionListener [" + testExecutionListener
-						+ "] to process 'after' execution for test: method [" + testMethod + "], instance ["
-						+ testInstance + "], exception [" + exception + "]", ex);
+				logger.warn("Caught exception while allowing TestExecutionListener [" + testExecutionListener +
+						"] to process 'after' execution for test: method [" + testMethod + "], instance [" +
+						testInstance + "], exception [" + exception + "]", ex);
 				if (afterTestMethodException == null) {
 					afterTestMethodException = ex;
 				}
@@ -325,9 +325,9 @@ public class TestContextManager {
 	 * @see #getTestExecutionListeners()
 	 */
 	public void afterTestClass() throws Exception {
-		final Class<?> testClass = getTestContext().getTestClass();
+		Class<?> testClass = getTestContext().getTestClass();
 		if (logger.isTraceEnabled()) {
-			logger.trace("afterTestClass(): class [" + testClass + "]");
+			logger.trace("afterTestClass(): class [" + testClass.getName() + "]");
 		}
 		getTestContext().updateState(null, null, null);
 
@@ -339,8 +339,8 @@ public class TestContextManager {
 				testExecutionListener.afterTestClass(getTestContext());
 			}
 			catch (Exception ex) {
-				logger.warn("Caught exception while allowing TestExecutionListener [" + testExecutionListener
-						+ "] to process 'after class' callback for test class [" + testClass + "]", ex);
+				logger.warn("Caught exception while allowing TestExecutionListener [" + testExecutionListener +
+						"] to process 'after class' callback for test class [" + testClass + "]", ex);
 				if (afterTestClassException == null) {
 					afterTestClassException = ex;
 				}

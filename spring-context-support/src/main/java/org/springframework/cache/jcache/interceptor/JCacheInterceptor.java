@@ -35,11 +35,11 @@ import org.springframework.cache.interceptor.CacheOperationInvoker;
  * <p>JCacheInterceptors are thread-safe.
  *
  * @author Stephane Nicoll
+ * @since 4.1
  * @see org.springframework.cache.interceptor.CacheInterceptor
  */
 @SuppressWarnings("serial")
-public class JCacheInterceptor extends JCacheAspectSupport
-		implements MethodInterceptor, Serializable {
+public class JCacheInterceptor extends JCacheAspectSupport implements MethodInterceptor, Serializable {
 
 	@Override
 	public Object invoke(final MethodInvocation invocation) throws Throwable {

@@ -37,7 +37,7 @@ public interface JmsListenerConfigurer {
 
 	/**
 	 * Callback allowing a {@link org.springframework.jms.config.JmsListenerEndpointRegistry
-	 * JmsListenerEndpointRegistry} and specific {@link org.springframework.jms.config.AbstractJmsListenerEndpoint
+	 * JmsListenerEndpointRegistry} and specific {@link org.springframework.jms.config.JmsListenerEndpoint
 	 * JmsListenerEndpoint} instances to be registered against the given
 	 * {@link JmsListenerEndpointRegistrar}. The default
 	 * {@link org.springframework.jms.config.JmsListenerContainerFactory JmsListenerContainerFactory}

@@ -25,6 +25,7 @@ import org.springframework.jms.listener.adapter.MessagingMessageListenerAdapter;
 import org.springframework.jms.support.converter.MessageConverter;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.handler.invocation.InvocableHandlerMethod;
+import org.springframework.messaging.handler.annotation.support.MessageHandlerMethodFactory;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
@@ -41,7 +42,8 @@ public class MethodJmsListenerEndpoint extends AbstractJmsListenerEndpoint {
 
 	private Method method;
 
-	private JmsHandlerMethodFactory jmsHandlerMethodFactory;
+	private MessageHandlerMethodFactory messageHandlerMethodFactory;
+
 
 	/**
 	 * Set the object instance that should manage this endpoint.
@@ -51,37 +53,37 @@ public class MethodJmsListenerEndpoint extends AbstractJmsListenerEndpoint {
 	}
 
 	public Object getBean() {
-		return bean;
+		return this.bean;
 	}
 
 	/**
-	 * Set the method to invoke to process a message managed by this
-	 * endpoint.
+	 * Set the method to invoke to process a message managed by this endpoint.
 	 */
 	public void setMethod(Method method) {
 		this.method = method;
 	}
 
 	public Method getMethod() {
-		return method;
+		return this.method;
 	}
 
 	/**
-	 * Set the {@link DefaultJmsHandlerMethodFactory} to use to build the
+	 * Set the {@link MessageHandlerMethodFactory} to use to build the
 	 * {@link InvocableHandlerMethod} responsible to manage the invocation
 	 * of this endpoint.
 	 */
-	public void setJmsHandlerMethodFactory(JmsHandlerMethodFactory jmsHandlerMethodFactory) {
-		this.jmsHandlerMethodFactory = jmsHandlerMethodFactory;
+	public void setMessageHandlerMethodFactory(MessageHandlerMethodFactory messageHandlerMethodFactory) {
+		this.messageHandlerMethodFactory = messageHandlerMethodFactory;
 	}
+
 
 	@Override
 	protected MessagingMessageListenerAdapter createMessageListener(MessageListenerContainer container) {
-		Assert.state(jmsHandlerMethodFactory != null,
-				"Could not create message listener, message listener factory not set.");
+		Assert.state(this.messageHandlerMethodFactory != null,
+				"Could not create message listener - MessageHandlerMethodFactory not set");
 		MessagingMessageListenerAdapter messageListener = createMessageListenerInstance();
 		InvocableHandlerMethod invocableHandlerMethod =
-				jmsHandlerMethodFactory.createInvocableHandlerMethod(getBean(), getMethod());
+				this.messageHandlerMethodFactory.createInvocableHandlerMethod(getBean(), getMethod());
 		messageListener.setHandlerMethod(invocableHandlerMethod);
 		String responseDestination = getDefaultResponseDestination();
 		if (StringUtils.hasText(responseDestination)) {
@@ -122,12 +124,8 @@ public class MethodJmsListenerEndpoint extends AbstractJmsListenerEndpoint {
 	@Override
 	protected StringBuilder getEndpointDescription() {
 		return super.getEndpointDescription()
-				.append(" | bean='")
-				.append(this.bean)
-				.append("'")
-				.append(" | method='")
-				.append(this.method)
-				.append("'");
+				.append(" | bean='").append(this.bean).append("'")
+				.append(" | method='").append(this.method).append("'");
 	}
 
 }

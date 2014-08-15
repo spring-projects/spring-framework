@@ -93,7 +93,6 @@ public class MapAccessTests extends AbstractExpressionTests {
 	public void testGetValueFromRootMap() {
 		Map<String, String> map = new HashMap<String, String>();
 		map.put("key", "value");
-		EvaluationContext context = new StandardEvaluationContext(map);
 
 		ExpressionParser spelExpressionParser = new SpelExpressionParser();
 		Expression expr = spelExpressionParser.parseExpression("#root['key']");
@@ -168,11 +167,11 @@ public class MapAccessTests extends AbstractExpressionTests {
 			this.priority = priority;
 		}
 
-		public Map getProperties() {
+		public Map<String,String> getProperties() {
 			return properties;
 		}
 
-		public void setProperties(Map properties) {
+		public void setProperties(Map<String,String> properties) {
 			this.properties = properties;
 		}
 	}
@@ -198,7 +197,7 @@ public class MapAccessTests extends AbstractExpressionTests {
 		@Override
 		@SuppressWarnings("unchecked")
 		public void write(EvaluationContext context, Object target, String name, Object newValue) throws AccessException {
-			((Map) target).put(name, newValue);
+			((Map<Object,Object>) target).put(name, newValue);
 		}
 
 		@Override

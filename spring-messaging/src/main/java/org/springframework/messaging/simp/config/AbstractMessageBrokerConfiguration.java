@@ -41,6 +41,7 @@ import org.springframework.messaging.support.ExecutorSubscribableChannel;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.MimeTypeUtils;
+import org.springframework.util.PathMatcher;
 import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
 
@@ -205,13 +206,17 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 
 	@Bean
 	public SimpAnnotationMethodMessageHandler simpAnnotationMethodMessageHandler() {
-
 		SimpAnnotationMethodMessageHandler handler = new SimpAnnotationMethodMessageHandler(
 				clientInboundChannel(), clientOutboundChannel(), brokerMessagingTemplate());
 
 		handler.setDestinationPrefixes(getBrokerRegistry().getApplicationDestinationPrefixes());
 		handler.setMessageConverter(brokerMessageConverter());
 		handler.setValidator(simpValidator());
+
+		PathMatcher pathMatcher = this.getBrokerRegistry().getPathMatcher();
+		if (pathMatcher != null) {
+			handler.setPathMatcher(pathMatcher);
+		}
 		return handler;
 	}
 
@@ -229,9 +234,7 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 
 	@Bean
 	public UserDestinationMessageHandler userDestinationMessageHandler() {
-		UserDestinationMessageHandler handler = new UserDestinationMessageHandler(
-				clientInboundChannel(), brokerChannel(), userDestinationResolver());
-		return handler;
+		return new UserDestinationMessageHandler(clientInboundChannel(), brokerChannel(), userDestinationResolver());
 	}
 
 	@Bean
@@ -250,6 +253,8 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 		List<MessageConverter> converters = new ArrayList<MessageConverter>();
 		boolean registerDefaults = configureMessageConverters(converters);
 		if (registerDefaults) {
+			converters.add(new StringMessageConverter());
+			converters.add(new ByteArrayMessageConverter());
 			if (jackson2Present) {
 				DefaultContentTypeResolver resolver = new DefaultContentTypeResolver();
 				resolver.setDefaultMimeType(MimeTypeUtils.APPLICATION_JSON);
@@ -257,8 +262,6 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 				converter.setContentTypeResolver(resolver);
 				converters.add(converter);
 			}
-			converters.add(new StringMessageConverter());
-			converters.add(new ByteArrayMessageConverter());
 		}
 		return new CompositeMessageConverter(converters);
 	}
@@ -313,7 +316,7 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 	protected Validator simpValidator() {
 		Validator validator = getValidator();
 		if (validator == null) {
-			if(this.applicationContext.containsBean(MVC_VALIDATOR_NAME)) {
+			if (this.applicationContext.containsBean(MVC_VALIDATOR_NAME)) {
 				validator = this.applicationContext.getBean(MVC_VALIDATOR_NAME, Validator.class);
 			}
 			else if (ClassUtils.isPresent("javax.validation.Validator", getClass().getClassLoader())) {
@@ -357,17 +360,20 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 	private static final AbstractBrokerMessageHandler noopBroker = new AbstractBrokerMessageHandler() {
 
 		@Override
-		protected void startInternal() {
+		public void start() {
 		}
 
 		@Override
-		protected void stopInternal() {
+		public void stop() {
+		}
+
+		@Override
+		public void handleMessage(Message<?> message) {
 		}
 
 		@Override
 		protected void handleMessageInternal(Message<?> message) {
 		}
-
 	};
 
 }

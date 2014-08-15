@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import java.util.Map;
 import javax.portlet.PortletConfig;
 import javax.portlet.PortletContext;
 import javax.portlet.PortletRequest;
+import javax.portlet.PortletResponse;
 import javax.portlet.PortletSession;
 import javax.servlet.ServletContext;
 
@@ -125,6 +126,7 @@ public abstract class PortletApplicationContextUtils {
 		}
 
 		beanFactory.registerResolvableDependency(PortletRequest.class, new RequestObjectFactory());
+		beanFactory.registerResolvableDependency(PortletResponse.class, new ResponseObjectFactory());
 		beanFactory.registerResolvableDependency(PortletSession.class, new SessionObjectFactory());
 		beanFactory.registerResolvableDependency(WebRequest.class, new WebRequestObjectFactory());
 	}
@@ -256,6 +258,28 @@ public abstract class PortletApplicationContextUtils {
 
 
 	/**
+	 * Factory that exposes the current response object on demand.
+	 */
+	@SuppressWarnings("serial")
+	private static class ResponseObjectFactory implements ObjectFactory<PortletResponse>, Serializable {
+
+		@Override
+		public PortletResponse getObject() {
+			PortletResponse response = currentRequestAttributes().getResponse();
+			if (response == null) {
+				throw new IllegalStateException("Current portlet response not available");
+			}
+			return response;
+		}
+
+		@Override
+		public String toString() {
+			return "Current PortletResponse";
+		}
+	}
+
+
+	/**
 	 * Factory that exposes the current session object on demand.
 	 */
 	@SuppressWarnings("serial")
@@ -281,7 +305,8 @@ public abstract class PortletApplicationContextUtils {
 
 		@Override
 		public WebRequest getObject() {
-			return new PortletWebRequest(currentRequestAttributes().getRequest());
+			PortletRequestAttributes requestAttr = currentRequestAttributes();
+			return new PortletWebRequest(requestAttr.getRequest(), requestAttr.getResponse());
 		}
 
 		@Override

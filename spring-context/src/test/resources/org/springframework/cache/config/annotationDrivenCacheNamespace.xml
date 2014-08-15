@@ -7,7 +7,8 @@
        		http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd
        		http://www.springframework.org/schema/cache http://www.springframework.org/schema/cache/spring-cache.xsd">
 
-	<cache:annotation-driven proxy-target-class="false" order="0" key-generator="keyGenerator"/>
+	<cache:annotation-driven proxy-target-class="false" order="0"
+							 key-generator="keyGenerator" error-handler="errorHandler"/>
 
 	<aop:config>
 		<aop:advisor advice-ref="debugInterceptor" pointcut="execution(* *..CacheableService.*(..))" order="1"/>
@@ -16,7 +17,7 @@
 	<bean id="cacheManager" class="org.springframework.cache.support.SimpleCacheManager">
 		<property name="caches">
 			<set>
-				<bean class="org.springframework.cache.concurrent.ConcurrentMapCacheFactoryBean" p:name="default"/>
+				<bean class="org.springframework.cache.concurrent.ConcurrentMapCacheFactoryBean" p:name="testCache"/>
 				<bean class="org.springframework.cache.concurrent.ConcurrentMapCacheFactoryBean" p:name="primary"/>
 				<bean class="org.springframework.cache.concurrent.ConcurrentMapCacheFactoryBean" p:name="secondary"/>
 			</set>
@@ -31,12 +32,14 @@
 
 	<bean id="keyGenerator" class="org.springframework.cache.config.SomeKeyGenerator"/>
 
+	<bean id="errorHandler" class="org.springframework.cache.interceptor.SimpleCacheErrorHandler"/>
+
 	<bean id="customKeyGenerator" class="org.springframework.cache.config.SomeCustomKeyGenerator"/>
 
 	<bean id="customCacheManager" class="org.springframework.cache.support.SimpleCacheManager">
 		<property name="caches">
 			<set>
-				<bean class="org.springframework.cache.concurrent.ConcurrentMapCacheFactoryBean" p:name="default"/>
+				<bean class="org.springframework.cache.concurrent.ConcurrentMapCacheFactoryBean" p:name="testCache"/>
 			</set>
 		</property>
 	</bean>

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -106,8 +106,6 @@ public class UrlBasedViewResolver extends AbstractCachingViewResolver implements
 
 	private String suffix = "";
 
-	private String[] viewNames = null;
-
 	private String contentType;
 
 	private boolean redirectContextRelative = true;
@@ -116,12 +114,19 @@ public class UrlBasedViewResolver extends AbstractCachingViewResolver implements
 
 	private String requestContextAttribute;
 
-	private int order = Integer.MAX_VALUE;
-
 	/** Map of static attributes, keyed by attribute name (String) */
 	private final Map<String, Object> staticAttributes = new HashMap<String, Object>();
 
 	private Boolean exposePathVariables;
+
+	private Boolean exposeContextBeansAsAttributes;
+
+	private String[] exposedContextBeanNames;
+
+	private String[] viewNames;
+
+	private int order = Integer.MAX_VALUE;
+
 
 	/**
 	 * Set the view class that should be used to create views.
@@ -304,13 +309,67 @@ public class UrlBasedViewResolver extends AbstractCachingViewResolver implements
 	}
 
 	/**
+	 * Specify whether views resolved by this resolver should add path variables to the model or not.
+	 * <p>>The default setting is to let each View decide (see {@link AbstractView#setExposePathVariables}.
+	 * However, you can use this property to override that.
+	 * @param exposePathVariables
+	 * <ul>
+	 * <li>{@code true} - all Views resolved by this resolver will expose path variables
+	 * <li>{@code false} - no Views resolved by this resolver will expose path variables
+	 * <li>{@code null} - individual Views can decide for themselves (this is used by the default)
+	 * <ul>
+	 * @see AbstractView#setExposePathVariables
+	 */
+	public void setExposePathVariables(Boolean exposePathVariables) {
+		this.exposePathVariables = exposePathVariables;
+	}
+
+	/**
+	 * Return whether views resolved by this resolver should add path variables to the model or not.
+	 */
+	protected Boolean getExposePathVariables() {
+		return this.exposePathVariables;
+	}
+
+	/**
+	 * Set whether to make all Spring beans in the application context accessible
+	 * as request attributes, through lazy checking once an attribute gets accessed.
+	 * <p>This will make all such beans accessible in plain {@code ${...}}
+	 * expressions in a JSP 2.0 page, as well as in JSTL's {@code c:out}
+	 * value expressions.
+	 * <p>Default is "false".
+	 * @see AbstractView#setExposeContextBeansAsAttributes
+	 */
+	public void setExposeContextBeansAsAttributes(boolean exposeContextBeansAsAttributes) {
+		this.exposeContextBeansAsAttributes = exposeContextBeansAsAttributes;
+	}
+
+	protected Boolean getExposeContextBeansAsAttributes() {
+		return this.exposeContextBeansAsAttributes;
+	}
+
+	/**
+	 * Specify the names of beans in the context which are supposed to be exposed.
+	 * If this is non-null, only the specified beans are eligible for exposure as
+	 * attributes.
+	 * @see AbstractView#setExposedContextBeanNames
+	 */
+	public void setExposedContextBeanNames(String... exposedContextBeanNames) {
+		this.exposedContextBeanNames = exposedContextBeanNames;
+	}
+
+	protected String[] getExposedContextBeanNames() {
+		return this.exposedContextBeanNames;
+	}
+
+	/**
 	 * Set the view names (or name patterns) that can be handled by this
 	 * {@link org.springframework.web.servlet.ViewResolver}. View names can contain
 	 * simple wildcards such that 'my*', '*Report' and '*Repo*' will all match the
 	 * view name 'myReport'.
 	 * @see #canHandle
 	 */
-	public void setViewNames(String[] viewNames) {
+	public void setViewNames(String... viewNames) {
 		this.viewNames = viewNames;
 	}
 
@@ -339,22 +398,6 @@ public class UrlBasedViewResolver extends AbstractCachingViewResolver implements
 		return this.order;
 	}
 
-	/**
-	 * Whether views resolved by this resolver should add path variables the model or not.
-	 * The default setting is to allow each View decide (see {@link AbstractView#setExposePathVariables(boolean)}.
-	 * However, you can use this property to override that.
-	 * @param exposePathVariables
-	 * 	<ul>
-	 * 		<li>{@code true} - all Views resolved by this resolver will expose path variables
-	 * 		<li>{@code false} - no Views resolved by this resolver will expose path variables
-	 * 		<li>{@code null} - individual Views can decide for themselves (this is used by the default)
-	 * 	<ul>
-	 * 	@see AbstractView#setExposePathVariables(boolean)
-	 */
-	public void setExposePathVariables(Boolean exposePathVariables) {
-		this.exposePathVariables = exposePathVariables;
-	}
-
 	@Override
 	protected void initApplicationContext() {
 		super.initApplicationContext();
@@ -362,6 +405,7 @@ public class UrlBasedViewResolver extends AbstractCachingViewResolver implements
 			throw new IllegalArgumentException("Property 'viewClass' is required");
 		}
 	}
+
 
 	/**
 	 * This implementation returns just the view name,
@@ -460,15 +504,28 @@ public class UrlBasedViewResolver extends AbstractCachingViewResolver implements
 	protected AbstractUrlBasedView buildView(String viewName) throws Exception {
 		AbstractUrlBasedView view = (AbstractUrlBasedView) BeanUtils.instantiateClass(getViewClass());
 		view.setUrl(getPrefix() + viewName + getSuffix());
+
 		String contentType = getContentType();
 		if (contentType != null) {
 			view.setContentType(contentType);
 		}
+
 		view.setRequestContextAttribute(getRequestContextAttribute());
 		view.setAttributesMap(getAttributesMap());
-		if (this.exposePathVariables != null) {
+
+		Boolean exposePathVariables = getExposePathVariables();
+		if (exposePathVariables != null) {
 			view.setExposePathVariables(exposePathVariables);
 		}
+		Boolean exposeContextBeansAsAttributes = getExposeContextBeansAsAttributes();
+		if (exposeContextBeansAsAttributes != null) {
+			view.setExposeContextBeansAsAttributes(exposeContextBeansAsAttributes);
+		}
+		String[] exposedContextBeanNames = getExposedContextBeanNames();
+		if (exposedContextBeanNames != null) {
+			view.setExposedContextBeanNames(exposedContextBeanNames);
+		}
+
 		return view;
 	}
 

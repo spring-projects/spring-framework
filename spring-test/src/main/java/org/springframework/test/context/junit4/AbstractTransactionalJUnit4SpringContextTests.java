@@ -26,6 +26,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.init.ResourceDatabasePopulator;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestExecutionListeners;
+import org.springframework.test.context.jdbc.SqlScriptsTestExecutionListener;
 import org.springframework.test.context.transaction.TransactionalTestExecutionListener;
 import org.springframework.test.jdbc.JdbcTestUtils;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -48,6 +49,17 @@ import org.springframework.transaction.annotation.Transactional;
  * <p>Concrete subclasses must fulfill the same requirements outlined in
  * {@link AbstractJUnit4SpringContextTests}.
  *
+ * <p>The following {@link org.springframework.test.context.TestExecutionListener
+ * TestExecutionListeners} are configured by default:
+ *
+ * <ul>
+ *   <li>{@link org.springframework.test.context.web.ServletTestExecutionListener}
+ *   <li>{@link org.springframework.test.context.support.DependencyInjectionTestExecutionListener}
+ *   <li>{@link org.springframework.test.context.support.DirtiesContextTestExecutionListener}
+ *   <li>{@link org.springframework.test.context.transaction.TransactionalTestExecutionListener}
+ *   <li>{@link org.springframework.test.context.jdbc.SqlScriptsTestExecutionListener}
+ * </ul>
+ *
  * <p>Note: this class serves only as a convenience for extension. If you do not
  * wish for your test classes to be tied to a Spring-specific class hierarchy,
  * you may configure your own custom test classes by using
@@ -56,6 +68,8 @@ import org.springframework.transaction.annotation.Transactional;
  * &#064;TestExecutionListeners}, {@link Transactional &#064;Transactional},
  * etc.
  *
+ * <p><strong>NOTE:</strong> As of Spring Framework 4.1, this class requires JUnit 4.9 or higher.
+ *
  * @author Sam Brannen
  * @author Juergen Hoeller
  * @since 2.5
@@ -63,6 +77,7 @@ import org.springframework.transaction.annotation.Transactional;
  * @see org.springframework.test.context.ContextConfiguration
  * @see org.springframework.test.context.TestExecutionListeners
  * @see org.springframework.test.context.transaction.TransactionalTestExecutionListener
+ * @see org.springframework.test.context.jdbc.SqlScriptsTestExecutionListener
  * @see org.springframework.test.context.transaction.TransactionConfiguration
  * @see org.springframework.transaction.annotation.Transactional
  * @see org.springframework.test.annotation.Rollback
@@ -71,7 +86,7 @@ import org.springframework.transaction.annotation.Transactional;
  * @see org.springframework.test.jdbc.JdbcTestUtils
  * @see org.springframework.test.context.testng.AbstractTransactionalTestNGSpringContextTests
  */
-@TestExecutionListeners(TransactionalTestExecutionListener.class)
+@TestExecutionListeners({ TransactionalTestExecutionListener.class, SqlScriptsTestExecutionListener.class })
 @Transactional
 public abstract class AbstractTransactionalJUnit4SpringContextTests extends AbstractJUnit4SpringContextTests {
 

@@ -17,12 +17,9 @@
 package org.springframework.web.servlet.view.json;
 
 import java.io.IOException;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
+import com.fasterxml.jackson.annotation.JsonView;
 import org.junit.Before;
 import org.junit.Test;
 import org.mozilla.javascript.Context;
@@ -53,6 +50,7 @@ import static org.mockito.Mockito.*;
  * @author Jeremy Grelle
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
+ * @author Sebastien Deleuze
  */
 public class MappingJackson2JsonViewTests {
 
@@ -274,6 +272,65 @@ public class MappingJackson2JsonViewTests {
 		assertSame(bean2, ((Map) actual).get("foo2"));
 	}
 
+	@Test
+	public void renderSimpleBeanWithJsonView() throws Exception {
+		Object bean = new TestBeanSimple();
+		Map<String, Object> model = new HashMap<String, Object>();
+		model.put("bindingResult", mock(BindingResult.class, "binding_result"));
+		model.put("foo", bean);
+		model.put(JsonView.class.getName(), MyJacksonView1.class);
+
+		view.setUpdateContentLength(true);
+		view.render(model, request, response);
+
+		String content = response.getContentAsString();
+		assertTrue(content.length() > 0);
+		assertEquals(content.length(), response.getContentLength());
+		assertTrue(content.contains("foo"));
+		assertFalse(content.contains("boo"));
+		assertFalse(content.contains(JsonView.class.getName()));
+	}
+
+	@Test
+	public void renderWithJsonpDefaultParameterName() throws Exception {
+		Map<String, Object> model = new HashMap<String, Object>();
+		model.put("foo", "bar");
+		request.addParameter("otherparam", "value");
+		request.addParameter("jsonp", "jsonpCallback");
+
+		view.render(model, request, response);
+
+		String content = response.getContentAsString();
+		assertEquals("jsonpCallback({\"foo\":\"bar\"});", content);
+	}
+
+	@Test
+	public void renderWithCallbackDefaultParameterName() throws Exception {
+		Map<String, Object> model = new HashMap<String, Object>();
+		model.put("foo", "bar");
+		request.addParameter("otherparam", "value");
+		request.addParameter("callback", "jsonpCallback");
+
+		view.render(model, request, response);
+
+		String content = response.getContentAsString();
+		assertEquals("jsonpCallback({\"foo\":\"bar\"});", content);
+	}
+
+	@Test
+	 public void renderWithCustomJsonpParameterName() throws Exception {
+		Map<String, Object> model = new HashMap<String, Object>();
+		model.put("foo", "bar");
+		request.addParameter("otherparam", "value");
+		request.addParameter("custom", "jsonpCallback");
+		view.setJsonpParameterNames(new LinkedHashSet(Arrays.asList("jsonp", "callback", "custom")));
+
+		view.render(model, request, response);
+
+		String content = response.getContentAsString();
+		assertEquals("jsonpCallback({\"foo\":\"bar\"});", content);
+	}
+
 	private void validateResult() throws Exception {
 		Object jsResult =
 				jsContext.evaluateString(jsScope, "(" + response.getContentAsString() + ")", "JSON Stream", 1, null);
@@ -282,27 +339,37 @@ public class MappingJackson2JsonViewTests {
 	}
 
 
+	public interface MyJacksonView1 {
+	}
+
+
+	public interface MyJacksonView2 {
+	}
+
+
 	@SuppressWarnings("unused")
 	public static class TestBeanSimple {
 
-		private String value = "foo";
+		@JsonView(MyJacksonView1.class)
+		private String property1 = "foo";
 
 		private boolean test = false;
 
-		private long number = 42;
+		@JsonView(MyJacksonView2.class)
+		private String property2 = "boo";
 
 		private TestChildBean child = new TestChildBean();
 
-		public String getValue() {
-			return value;
+		public String getProperty1() {
+			return property1;
 		}
 
 		public boolean getTest() {
 			return test;
 		}
 
-		public long getNumber() {
-			return number;
+		public String getProperty2() {
+			return property2;
 		}
 
 		public Date getNow() {
@@ -317,7 +384,6 @@ public class MappingJackson2JsonViewTests {
 
 	@JsonSerialize(using=TestBeanSimpleSerializer.class)
 	public static class TestBeanSimpleAnnotated extends TestBeanSimple {
-
 	}
 
 

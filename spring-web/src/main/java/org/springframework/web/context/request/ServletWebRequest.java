@@ -52,8 +52,6 @@ public class ServletWebRequest extends ServletRequestAttributes implements Nativ
 	private static final String METHOD_HEAD = "HEAD";
 
 
-	private HttpServletResponse response;
-
 	private boolean notModified = false;
 
 
@@ -71,17 +69,9 @@ public class ServletWebRequest extends ServletRequestAttributes implements Nativ
 	 * @param response current HTTP response (for automatic last-modified handling)
 	 */
 	public ServletWebRequest(HttpServletRequest request, HttpServletResponse response) {
-		this(request);
-		this.response = response;
+		super(request, response);
 	}
 
-
-	/**
-	 * Exposes the native {@link HttpServletRequest} that we're wrapping (if any).
-	 */
-	public final HttpServletResponse getResponse() {
-		return this.response;
-	}
 
 	@Override
 	public Object getNativeRequest() {
@@ -181,8 +171,9 @@ public class ServletWebRequest extends ServletRequestAttributes implements Nativ
 	@Override
 	@SuppressWarnings("deprecation")
 	public boolean checkNotModified(long lastModifiedTimestamp) {
+		HttpServletResponse response = getResponse();
 		if (lastModifiedTimestamp >= 0 && !this.notModified &&
-				(this.response == null || !this.response.containsHeader(HEADER_LAST_MODIFIED))) {
+				(response == null || !response.containsHeader(HEADER_LAST_MODIFIED))) {
 			long ifModifiedSince = -1;
 			try {
 				ifModifiedSince = getRequest().getDateHeader(HEADER_IF_MODIFIED_SINCE);
@@ -202,12 +193,12 @@ public class ServletWebRequest extends ServletRequestAttributes implements Nativ
 				}
 			}
 			this.notModified = (ifModifiedSince >= (lastModifiedTimestamp / 1000 * 1000));
-			if (this.response != null) {
+			if (response != null) {
 				if (this.notModified && supportsNotModifiedStatus()) {
-					this.response.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
+					response.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
 				}
 				else {
-					this.response.setDateHeader(HEADER_LAST_MODIFIED, lastModifiedTimestamp);
+					response.setDateHeader(HEADER_LAST_MODIFIED, lastModifiedTimestamp);
 				}
 			}
 		}
@@ -216,16 +207,17 @@ public class ServletWebRequest extends ServletRequestAttributes implements Nativ
 
 	@Override
 	public boolean checkNotModified(String etag) {
+		HttpServletResponse response = getResponse();
 		if (StringUtils.hasLength(etag) && !this.notModified &&
-				(this.response == null || !this.response.containsHeader(HEADER_ETAG))) {
+				(response == null || !response.containsHeader(HEADER_ETAG))) {
 			String ifNoneMatch = getRequest().getHeader(HEADER_IF_NONE_MATCH);
 			this.notModified = etag.equals(ifNoneMatch);
-			if (this.response != null) {
+			if (response != null) {
 				if (this.notModified && supportsNotModifiedStatus()) {
-					this.response.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
+					response.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
 				}
 				else {
-					this.response.setHeader(HEADER_ETAG, etag);
+					response.setHeader(HEADER_ETAG, etag);
 				}
 			}
 		}

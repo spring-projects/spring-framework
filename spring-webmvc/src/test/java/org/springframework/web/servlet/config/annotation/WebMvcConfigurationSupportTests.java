@@ -17,15 +17,17 @@
 package org.springframework.web.servlet.config.annotation;
 
 import java.util.List;
+import java.util.Locale;
 import javax.servlet.http.HttpServletRequest;
 
 import org.joda.time.DateTime;
 import org.junit.Before;
 import org.junit.Test;
-
+import org.springframework.beans.DirectFieldAccessor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Scope;
+import org.springframework.core.Ordered;
 import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -35,6 +37,8 @@ import org.springframework.http.HttpEntity;
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockServletContext;
 import org.springframework.stereotype.Controller;
+import org.springframework.util.AntPathMatcher;
+import org.springframework.util.PathMatcher;
 import org.springframework.validation.Validator;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -45,17 +49,21 @@ import org.springframework.web.context.support.AnnotationConfigWebApplicationCon
 import org.springframework.web.method.support.CompositeUriComponentsContributor;
 import org.springframework.web.servlet.HandlerExceptionResolver;
 import org.springframework.web.servlet.HandlerExecutionChain;
+import org.springframework.web.servlet.ViewResolver;
+import org.springframework.web.servlet.view.ViewResolverComposite;
 import org.springframework.web.servlet.handler.AbstractHandlerMapping;
 import org.springframework.web.servlet.handler.BeanNameUrlHandlerMapping;
 import org.springframework.web.servlet.handler.ConversionServiceExposingInterceptor;
 import org.springframework.web.servlet.handler.HandlerExceptionResolverComposite;
 import org.springframework.web.servlet.mvc.annotation.ResponseStatusExceptionResolver;
 import org.springframework.web.servlet.mvc.method.annotation.ExceptionHandlerExceptionResolver;
+import org.springframework.web.servlet.mvc.method.annotation.JsonViewResponseBodyAdvice;
 import org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 import org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolver;
 import org.springframework.web.servlet.resource.ResourceUrlProviderExposingInterceptor;
+import org.springframework.web.util.UrlPathHelper;
 
 import static org.junit.Assert.*;
 
@@ -64,6 +72,7 @@ import static org.junit.Assert.*;
  *
  * @author Rossen Stoyanchev
  * @author Juergen Hoeller
+ * @author Sebastien Deleuze
  */
 public class WebMvcConfigurationSupportTests {
 
@@ -157,6 +166,11 @@ public class WebMvcConfigurationSupportTests {
 		Validator validator = initializer.getValidator();
 		assertNotNull(validator);
 		assertTrue(validator instanceof LocalValidatorFactoryBean);
+
+		DirectFieldAccessor fieldAccessor = new DirectFieldAccessor(adapter);
+		List<Object> interceptors = (List<Object>) fieldAccessor.getPropertyValue("responseBodyAdvice");
+		assertEquals(1, interceptors.size());
+		assertEquals(JsonViewResponseBodyAdvice.class, interceptors.get(0).getClass());
 	}
 
 	@Test
@@ -183,6 +197,30 @@ public class WebMvcConfigurationSupportTests {
 
 		ExceptionHandlerExceptionResolver eher = (ExceptionHandlerExceptionResolver) expectedResolvers.get(0);
 		assertNotNull(eher.getApplicationContext());
+
+		DirectFieldAccessor fieldAccessor = new DirectFieldAccessor(eher);
+		List<Object> interceptors = (List<Object>) fieldAccessor.getPropertyValue("responseBodyAdvice");
+		assertEquals(1, interceptors.size());
+		assertEquals(JsonViewResponseBodyAdvice.class, interceptors.get(0).getClass());
+	}
+	
+	@Test
+	public void emptyViewResolver() throws Exception {
+		ViewResolverComposite compositeResolver = this.wac.getBean(ViewResolverComposite.class);
+		assertEquals(Ordered.LOWEST_PRECEDENCE, compositeResolver.getOrder());
+		List<ViewResolver> resolvers = compositeResolver.getViewResolvers();
+		assertEquals(0, resolvers.size());
+		assertNull(compositeResolver.resolveViewName("anyViewName", Locale.ENGLISH));
+	}
+
+	@Test
+	public void defaultPathMatchConfiguration() throws Exception {
+		UrlPathHelper urlPathHelper = this.wac.getBean(UrlPathHelper.class);
+		PathMatcher pathMatcher = this.wac.getBean(PathMatcher.class);
+
+		assertNotNull(urlPathHelper);
+		assertNotNull(pathMatcher);
+		assertEquals(AntPathMatcher.class, pathMatcher.getClass());
 	}
 
 

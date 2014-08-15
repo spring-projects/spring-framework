@@ -35,6 +35,9 @@ import org.springframework.scheduling.SchedulingAwareRunnable;
 import org.springframework.scheduling.SchedulingTaskExecutor;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.backoff.BackOff;
+import org.springframework.util.backoff.BackOffExecution;
+import org.springframework.util.backoff.FixedBackOff;
 
 /**
  * Message listener container variant that uses plain JMS client APIs, specifically
@@ -170,7 +173,7 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 
 	private Executor taskExecutor;
 
-	private long recoveryInterval = DEFAULT_RECOVERY_INTERVAL;
+	private BackOff backOff = createDefaultBackOff(DEFAULT_RECOVERY_INTERVAL);
 
 	private int cacheLevel = CACHE_AUTO;
 
@@ -218,12 +221,28 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 	}
 
 	/**
+	 * Specify the {@link BackOff} instance to use to compute the interval
+	 * between recovery attempts. If the {@link BackOffExecution} implementation
+	 * returns {@link BackOffExecution#STOP}, this listener container will not further
+	 * attempt to recover.
+	 * <p>The {@link #setRecoveryInterval(long) recovery interval} is ignored
+	 * when this property is set.
+	 */
+	public void setBackOff(BackOff backOff) {
+		this.backOff = backOff;
+	}
+
+	/**
 	 * Specify the interval between recovery attempts, in <b>milliseconds</b>.
-	 * The default is 5000 ms, that is, 5 seconds.
+	 * The default is 5000 ms, that is, 5 seconds. This is a convenience method
+	 * to create a {@link FixedBackOff} with the specified interval.
+	 * <p>For more recovery options, consider specifying a {@link BackOff}
+	 * instance instead.
+	 * @see #setBackOff(BackOff)
 	 * @see #handleListenerSetupFailure
 	 */
 	public void setRecoveryInterval(long recoveryInterval) {
-		this.recoveryInterval = recoveryInterval;
+		this.backOff = createDefaultBackOff(recoveryInterval);
 	}
 
 	/**
@@ -243,12 +262,13 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 	 * <p>Default is {@link #CACHE_NONE} if an external transaction manager has been specified
 	 * (to reobtain all resources freshly within the scope of the external transaction),
 	 * and {@link #CACHE_CONSUMER} otherwise (operating with local JMS resources).
-	 * <p>Some J2EE servers only register their JMS resources with an ongoing XA
+	 * <p>Some JavaEE servers only register their JMS resources with an ongoing XA
 	 * transaction in case of a freshly obtained JMS {@code Connection} and {@code Session},
 	 * which is why this listener container by default does not cache any of those.
-	 * However, if you want to optimize for a specific server, consider switching
-	 * this setting to at least {@link #CACHE_CONNECTION} or {@link #CACHE_SESSION}
-	 * even in conjunction with an external transaction manager.
+	 * However, depending on how smart your JavaEE server is with respect to the caching
+	 * of transactional resource, consider switching this setting to at least
+	 * {@link #CACHE_CONNECTION} or {@link #CACHE_SESSION} even in conjunction with an
+	 * external transaction manager.
 	 * @see #CACHE_NONE
 	 * @see #CACHE_CONNECTION
 	 * @see #CACHE_SESSION
@@ -275,6 +295,7 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 	 * ({@link #setConcurrentConsumers}) and will slowly scale up to the maximum number
 	 * of consumers {@link #setMaxConcurrentConsumers} in case of increasing load.
 	 */
+	@Override
 	public void setConcurrency(String concurrency) {
 		try {
 			int separatorIndex = concurrency.indexOf('-');
@@ -879,6 +900,7 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 	 * @see #stop()
 	 */
 	protected void refreshConnectionUntilSuccessful() {
+		BackOffExecution execution = backOff.start();
 		while (isRunning()) {
 			try {
 				if (sharedConnectionEnabled()) {
@@ -897,8 +919,8 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 				}
 				StringBuilder msg = new StringBuilder();
 				msg.append("Could not refresh JMS Connection for destination '");
-				msg.append(getDestinationDescription()).append("' - retrying in ");
-				msg.append(this.recoveryInterval).append(" ms. Cause: ");
+				msg.append(getDestinationDescription()).append("' - retrying using ");
+				msg.append(execution).append(". Cause: ");
 				msg.append(ex instanceof JMSException ? JmsUtils.buildExceptionMessage((JMSException) ex) : ex.getMessage());
 				if (logger.isDebugEnabled()) {
 					logger.error(msg, ex);
@@ -907,7 +929,14 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 					logger.error(msg);
 				}
 			}
-			sleepInbetweenRecoveryAttempts();
+			if (!applyBackOffTime(execution)) {
+				StringBuilder msg = new StringBuilder();
+				msg.append("Stopping container for destination '")
+						.append(getDestinationDescription())
+						.append("' - back off policy does not allow ").append("for further attempts.");
+				logger.error(msg.toString());
+				stop();
+			}
 		}
 	}
 
@@ -931,19 +960,30 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 	}
 
 	/**
-	 * Sleep according to the specified recovery interval.
-	 * Called between recovery attempts.
+	 * Apply the next back off time using the specified {@link BackOffExecution}.
+	 * <p>Return {@code true} if the back off period has been applied and a new
+	 * attempt to recover should be made, {@code false} if no further attempt
+	 * should be made.
 	 */
-	protected void sleepInbetweenRecoveryAttempts() {
-		if (this.recoveryInterval > 0) {
+	protected boolean applyBackOffTime(BackOffExecution execution) {
+		long interval = execution.nextBackOff();
+		if (interval == BackOffExecution.STOP) {
+			return false;
+		}
+		else {
 			try {
-				Thread.sleep(this.recoveryInterval);
+				Thread.sleep(interval);
 			}
 			catch (InterruptedException interEx) {
 				// Re-interrupt current thread, to allow other threads to react.
 				Thread.currentThread().interrupt();
 			}
 		}
+		return true;
+	}
+
+	private FixedBackOff createDefaultBackOff(long interval) {
+		return new FixedBackOff(interval, Long.MAX_VALUE);
 	}
 
 	/**
@@ -1000,11 +1040,6 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 			}
 			catch (Throwable ex) {
 				clearResources();
-				if (!this.lastMessageSucceeded) {
-					// We failed more than once in a row - sleep for recovery interval
-					// even before first recovery attempt.
-					sleepInbetweenRecoveryAttempts();
-				}
 				this.lastMessageSucceeded = false;
 				boolean alreadyRecovered = false;
 				synchronized (recoveryMonitor) {

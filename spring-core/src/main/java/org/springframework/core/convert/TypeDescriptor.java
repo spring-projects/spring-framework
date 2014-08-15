@@ -129,19 +129,21 @@ public class TypeDescriptor implements Serializable {
 	}
 
 	/**
-	 * Variation of {@link #getType()} that accounts for a primitive type by returning its object wrapper type.
-	 * <p>This is useful for conversion service implementations that wish to normalize to object-based types
-	 * and not work with primitive types directly.
+	 * Variation of {@link #getType()} that accounts for a primitive type by
+	 * returning its object wrapper type.
+	 * <p>This is useful for conversion service implementations that wish to
+	 * normalize to object-based types and not work with primitive types directly.
 	 */
 	public Class<?> getObjectType() {
 		return ClassUtils.resolvePrimitiveIfNecessary(getType());
 	}
 
 	/**
-	 * The type of the backing class, method parameter, field, or property described by this TypeDescriptor.
+	 * The type of the backing class, method parameter, field, or property
+	 * described by this TypeDescriptor.
 	 * <p>Returns primitive types as-is.
-	 * <p>See {@link #getObjectType()} for a variation of this operation that resolves primitive types
-	 * to their corresponding Object types if necessary.
+	 * <p>See {@link #getObjectType()} for a variation of this operation that
+	 * resolves primitive types to their corresponding Object types if necessary.
 	 * @return the type, or {@code null}
 	 * @see #getObjectType()
 	 */
@@ -151,6 +153,7 @@ public class TypeDescriptor implements Serializable {
 
 	/**
 	 * Return the underlying {@link ResolvableType}.
+	 * @since 4.0
 	 */
 	public ResolvableType getResolvableType() {
 		return this.resolvableType;
@@ -161,9 +164,10 @@ public class TypeDescriptor implements Serializable {
 	 * {@link MethodParameter} or {@link Type} depending on how the {@link TypeDescriptor}
 	 * was constructed. This method is primarily to provide access to additional
 	 * type information or meta-data that alternative JVM languages may provide.
+	 * @since 4.0
 	 */
 	public Object getSource() {
-		return (this.resolvableType == null ? null : this.resolvableType.getSource());
+		return (this.resolvableType != null ? this.resolvableType.getSource() : null);
 	}
 
 	/**
@@ -234,7 +238,7 @@ public class TypeDescriptor implements Serializable {
 	 * @return <tt>true</tt> if the annotation is present
 	 */
 	public boolean hasAnnotation(Class<? extends Annotation> annotationType) {
-		return getAnnotation(annotationType) != null;
+		return (getAnnotation(annotationType) != null);
 	}
 
 	/**
@@ -701,8 +705,7 @@ public class TypeDescriptor implements Serializable {
 			}
 		}
 		if (nested == ResolvableType.NONE) {
-			throw new IllegalStateException(
-					"Unable to obtain nested generic from " + typeDescriptor + " at level " + nestingLevel);
+			return null;
 		}
 		return getRelatedIfResolvable(typeDescriptor, nested);
 	}

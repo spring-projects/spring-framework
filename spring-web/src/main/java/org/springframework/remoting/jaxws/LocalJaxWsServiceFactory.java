@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import javax.xml.ws.WebServiceFeature;
 import javax.xml.ws.handler.HandlerResolver;
 
 import org.springframework.core.io.Resource;
+import org.springframework.lang.UsesJava7;
 import org.springframework.util.Assert;
 
 /**
@@ -146,6 +147,7 @@ public class LocalJaxWsServiceFactory {
 	 * @see #setServiceName
 	 * @see #setWsdlDocumentUrl
 	 */
+	@UsesJava7  // optional use of Service#create with WebServiceFeature[]
 	public Service createJaxWsService() {
 		Assert.notNull(this.serviceName, "No service name specified");
 		Service service;

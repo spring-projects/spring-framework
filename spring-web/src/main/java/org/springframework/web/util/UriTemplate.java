@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -86,10 +86,10 @@ public class UriTemplate implements Serializable {
 	 * UriTemplate template = new UriTemplate("http://example.com/hotels/{hotel}/bookings/{booking}");
 	 * Map&lt;String, String&gt; uriVariables = new HashMap&lt;String, String&gt;();
 	 * uriVariables.put("booking", "42");
-	 * uriVariables.put("hotel", "1");
+	 * uriVariables.put("hotel", "Rest & Relax");
 	 * System.out.println(template.expand(uriVariables));
 	 * </pre>
-	 * will print: <blockquote>{@code http://example.com/hotels/1/bookings/42}</blockquote>
+	 * will print: <blockquote>{@code http://example.com/hotels/Rest%20%26%20Relax/bookings/42}</blockquote>
 	 * @param uriVariables the map of URI variables
 	 * @return the expanded URI
 	 * @throws IllegalArgumentException if {@code uriVariables} is {@code null};
@@ -107,9 +107,9 @@ public class UriTemplate implements Serializable {
      * <p>Example:
      * <pre class="code">
      * UriTemplate template = new UriTemplate("http://example.com/hotels/{hotel}/bookings/{booking}");
-     * System.out.println(template.expand("1", "42));
+     * System.out.println(template.expand("Rest & Relax", "42));
      * </pre>
-     * will print: <blockquote>{@code http://example.com/hotels/1/bookings/42}</blockquote>
+     * will print: <blockquote>{@code http://example.com/hotels/Rest%20%26%20Relax/bookings/42}</blockquote>
      * @param uriVariableValues the array of URI variables
      * @return the expanded URI
      * @throws IllegalArgumentException if {@code uriVariables} is {@code null}

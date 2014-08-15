@@ -26,8 +26,10 @@ will exist. However, it should be easy to isolate these dependencies from the re
 your code base.
 
 This document is a reference guide to Spring Framework features. If you have any
-requests, comments, or questions on this document, please post them on the user mailing
-list or on the support forums at http://forum.spring.io/[].
+requests, comments, or questions on this document, please post them on the
+https://groups.google.com/forum/#!forum/spring-framework-contrib[user mailing
+list]. Questions on the Framework itself should be asked on StackOverflow
+(see https://spring.io/questions[]).
 --
 
 
@@ -43,7 +45,7 @@ embraced.
 
 If you are just getting started with Spring, you may want to begin with the lighter
 https://spring.io/guides["Getting Started"] guides that are available from
-http://spring.io. As well as being easier to digest, these guide are very
+https://spring.io. As well as being easier to digest, these guide are very
 __task focused__. They also cover other projects from the Spring portfolio that you might
  want to consider when solving a particular problem.
 
@@ -155,7 +157,27 @@ arithmetic operators, named variables, and retrieval of objects by name from Spr
 IoC container. It also supports list projection and selection as well as common list
 aggregations.
 
+[[overview-aop-instrumentation]]
+==== AOP and Instrumentation
+Spring's <<aop-introduction,__AOP__>> module provides an __AOP Alliance__-compliant
+aspect-oriented programming implementation allowing you to define, for example,
+method-interceptors and pointcuts to cleanly decouple code that implements functionality
+that should be separated. Using source-level metadata functionality, you can also
+incorporate behavioral information into your code, in a manner similar to that of .NET
+attributes.
 
+The separate __Aspects__ module provides integration with AspectJ.
+
+The __Instrumentation__ module provides class instrumentation support and classloader
+implementations to be used in certain application servers.
+
+[[overview-messaging]]
+==== Messaging
+Spring Framework 4 includes a new `spring-messaging` module with key abstractions from
+the _Spring Integration_ project such as `Message`, `MessageChannel`,
+`MessageHandler` and others to serve as a foundation for messaging-based applications. The
+module also includes a set of annotations for mapping messages to methods, similar to the
+Spring MVC annotation based programming model.
 
 [[overview-data-access]]
 ==== Data Access/Integration
@@ -175,7 +197,8 @@ The <<oxm,OXM>> module provides an abstraction layer that supports Object/XML ma
 implementations for JAXB, Castor, XMLBeans, JiBX and XStream.
 
 The Java Messaging Service (<<jms,JMS>>) module contains features for producing and
-consuming messages.
+consuming messages. Since Spring Framework 4.1, it provides an integration with the
+`spring-messaging` module.
 
 The <<transaction,Transaction>> module supports programmatic and declarative transaction
 management for classes that implement special interfaces and for __all your POJOs (plain
@@ -202,19 +225,7 @@ environment and mirrors the functionality of Web-Servlet module.
 
 
 
-[[overview-aop-instrumentation]]
-==== AOP and Instrumentation
-Spring's <<aop-introduction,__AOP__>> module provides an __AOP Alliance__-compliant
-aspect-oriented programming implementation allowing you to define, for example,
-method-interceptors and pointcuts to cleanly decouple code that implements functionality
-that should be separated. Using source-level metadata functionality, you can also
-incorporate behavioral information into your code, in a manner similar to that of .NET
-attributes.
 
-The separate __Aspects__ module provides integration with AspectJ.
-
-The __Instrumentation__ module provides class instrumentation support and classloader
-implementations to be used in certain application servers.
 
 
 
@@ -768,8 +779,8 @@ is available on the https://github.com/spring-projects/spring-framework/wiki[Spr
 
 
 === Improved Getting Started Experience
-The new http://spring.io[spring.io] website provides a whole series of
-http://spring.io/guides["Getting Started"] guides to help you learn Spring. You
+The new https://spring.io[spring.io] website provides a whole series of
+https://spring.io/guides["Getting Started"] guides to help you learn Spring. You
 can read more about the guides in the <<overview-getting-started-with-spring>> section
 in this document. The new website also provides a comprehensive overview of the many
 additional projects that are released under the Spring umbrella.
@@ -812,11 +823,6 @@ Spring remains compatible with older versions of Java and the JDK: concretely, J
 (specifically, a minimum level equivalent to JDK 6 update 18, as released in January 2010)
 and above are still fully supported. However, for newly started development projects
 based on Spring 4, we recommend the use of Java 7 or 8.
-
-Note that the Java 8 bytecode level (`-target 1.8`, as required by `-source 1.8`) is only
-fully supported as of Spring Framework 4.0. In particular, Spring 3.2 based applications
-need to be compiled with a maximum of Java 7 as the target, even if they happen to be
-deployed onto a Java 8 runtime. Please upgrade to Spring 4 for Java 8 based applications.
 
 
 
@@ -1088,7 +1094,7 @@ In most application scenarios, explicit user code is not required to instantiate
 more instances of a Spring IoC container. For example, in a web application scenario, a
 simple eight (or so) lines of boilerplate web descriptor XML in the `web.xml` file
 of the application will typically suffice (see <<context-create>>). If you are using the
-http://spring.io/tools/sts[SpringSource Tool Suite] Eclipse-powered development
+https://spring.io/tools/sts[Spring Tool Suite] Eclipse-powered development
 environment this boilerplate configuration can be easily created with few mouse clicks or
 keystrokes.
 
@@ -1241,7 +1247,7 @@ The following example shows the data access objects `daos.xml` file:
 			<!-- additional collaborators and configuration for this bean go here -->
 		</bean>
 
-		<bean id="itemDao" class="org.springframework.samples.jpetstore.dao.jpa.JapItemDao">
+		<bean id="itemDao" class="org.springframework.samples.jpetstore.dao.jpa.JpaItemDao">
 			<!-- additional collaborators and configuration for this bean go here -->
 		</bean>
 
@@ -1282,7 +1288,7 @@ to load bean definitions from another file or files. For example:
 	</beans>
 ----
 
-In the preceding example, external bean definitions are loaded from three files,
+In the preceding example, external bean definitions are loaded from three files:
 `services.xml`, `messageSource.xml`, and `themeSource.xml`. All location paths are
 relative to the definition file doing the importing, so `services.xml` must be in the
 same directory or classpath location as the file doing the importing, while
@@ -1511,7 +1517,7 @@ You use the `Class` property in one of two ways:
   equivalent to Java code using the `new` operator.
 * To specify the actual class containing the `static` factory method that will be
   invoked to create the object, in the less common case where the container invokes a
-  `static`, __factory__ method on a class to create the bean. The object type returned
+  `static` __factory__ method on a class to create the bean. The object type returned
   from the invocation of the `static` factory method may be the same class or another
   class entirely.
 
@@ -2046,12 +2052,12 @@ part of a Spring XML configuration file specifies some bean definitions:
 [subs="verbatim,quotes"]
 ----
 	<bean id="exampleBean" class="examples.ExampleBean">
-		<!-- setter injection using the nested <ref/> element -->
+		<!-- setter injection using the nested ref element -->
 		<property name="beanOne">
 			<ref bean="anotherExampleBean"/>
 		</property>
 
-		<!-- setter injection using the neater 'ref' attribute -->
+		<!-- setter injection using the neater ref attribute -->
 		<property name="beanTwo" ref="yetAnotherBean"/>
 		<property name="integerProperty" value="1"/>
 	</bean>
@@ -2091,12 +2097,12 @@ in the XML file. The following example uses constructor-based DI:
 [subs="verbatim,quotes"]
 ----
 	<bean id="exampleBean" class="examples.ExampleBean">
-		<!-- constructor injection using the nested <ref/> element -->
+		<!-- constructor injection using the nested ref element -->
 		<constructor-arg>
 			<ref bean="anotherExampleBean"/>
 		</constructor-arg>
 
-		<!-- constructor injection using the neater 'ref' attribute -->
+		<!-- constructor injection using the neater ref attribute -->
 		<constructor-arg ref="yetAnotherBean"/>
 
 		<constructor-arg type="int" value="1"/>
@@ -2230,7 +2236,7 @@ XML configuration.
 
 The preceding XML is more succinct; however, typos are discovered at runtime rather than
 design time, unless you use an IDE such as http://www.jetbrains.com/idea/[IntelliJ
-IDEA] or the http://www.springsource.com/products/sts[SpringSource Tool Suite] (STS)
+IDEA] or the https://spring.io/tools/sts[Spring Tool Suite] (STS)
 that support automatic property completion when you create bean definitions. Such IDE
 assistance is highly recommended.
 
@@ -2297,18 +2303,12 @@ likely fatal results) when the `client` bean is actually instantiated. If the `c
 bean is a <<beans-factory-scopes,prototype>> bean, this typo and the resulting exception
 may only be discovered long after the container is deployed.
 
-Additionally, if the referenced bean is in the same XML unit, and the bean name is the
-bean __id__, you can use the `local` attribute, which allows the XML parser itself to
-validate the bean id earlier, at XML document parse time.
-
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
-----
-	<property name="targetName">
-		<!-- a bean with id theTargetBean must exist; otherwise an exception will be thrown -->
-		<idref bean="theTargetBean"/>
-	</property>
-----
+[NOTE]
+====
+The `local` attribute on the `idref` element is no longer supported in the 4.0 beans xsd
+since it does not provide value over a regular `bean` reference anymore. Simply change
+your existing `idref local` references to `idref bean` when upgrading to the 4.0 schema.
+====
 
 A common place (at least in versions earlier than Spring 2.0) where the `<idref/>` element
 brings value is in the configuration of <<aop-pfb-1,AOP interceptors>> in a
@@ -2360,7 +2360,7 @@ container with a proxy that will have the same name as the parent bean.
 [subs="verbatim,quotes"]
 ----
 	<!-- in the child (descendant) context -->
-	<bean id="accountService" <-- bean name is the same as the parent bean -->
+	<bean id="accountService" <!-- bean name is the same as the parent bean -->
 		class="org.springframework.aop.framework.ProxyFactoryBean">
 		<property name="target">
 			<ref parent="accountService"/> <!-- notice how we refer to the parent bean -->
@@ -2586,7 +2586,14 @@ following XML-based configuration metadata snippet sets the email property to th
 ----
 
 The preceding example is equivalent to the following Java code:
-`exampleBean.setEmail("")`. The `<null/>` element handles `null` values. For example:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+        exampleBean.setEmail("")
+----
+
+The `<null/>` element handles `null` values. For example:
 
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
@@ -2599,7 +2606,12 @@ The preceding example is equivalent to the following Java code:
 ----
 
 The above configuration is equivalent to the following Java code:
-`exampleBean.setEmail(null)`.
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	exampleBean.setEmail(null)
+----
 
 
 [[beans-p-namespace]]
@@ -3033,7 +3045,7 @@ container, allows this use case to be handled in a clean fashion.
 
 ****
 You can read more about the motivation for Method Injection in
-http://blog.springsource.com/2004/08/06/method-injection/[this blog entry].
+https://spring.io/blog/2004/08/06/method-injection/[this blog entry].
 ****
 
 
@@ -3233,7 +3245,7 @@ The following scopes are supported out of the box. You can also create
 <<beans-factory-scopes-custom,a custom scope.>>
 
 [[beans-factory-scopes-tbl]]
-.Bean scopesThread-scoped beans
+.Bean scopes
 |===
 | Scope| Description
 
@@ -3257,6 +3269,10 @@ The following scopes are supported out of the box. You can also create
 | Scopes a single bean definition to the lifecycle of a global HTTP `Session`. Typically
   only valid when used in a portlet context. Only valid in the context of a web-aware
   Spring `ApplicationContext`.
+
+| <<beans-factory-scopes-application,application>>
+| Scopes a single bean definition to the lifecycle of a `ServletContext`. Only valid in
+  the context of a web-aware Spring `ApplicationContext`.
 |===
 
 [NOTE]
@@ -3495,6 +3511,25 @@ as having `global session` scope, the standard HTTP `Session` scope is used, and
 error is raised.
 
 
+[[beans-factory-scopes-application]]
+===== Application scope
+Consider the following bean definition:
+
+[source,xml,indent=0]
+[subs="verbatim,quotes"]
+----
+	<bean id="appPreferences" class="com.foo.AppPreferences" scope="application"/>
+----
+
+The Spring container creates a new instance of the `AppPreferences` bean by using the
+`appPreferences` bean definition once for the entire web application. That is, the
+`appPreferences` bean is scoped at the `ServletContext` level, stored as a regular
+`ServletContext` attribute. This is somewhat similar to a Spring singleton bean but
+differs in two important ways: It is a singleton per `ServletContext`, not per Spring
+'ApplicationContext' (or which there may be several in any given web application),
+and it is actually exposed and therefore visible as a `ServletContext` attribute.
+
+
 [[beans-factory-scopes-other-injection]]
 ===== Scoped beans as dependencies
 The Spring IoC container manages not only the instantiation of your objects (beans), but
@@ -3602,8 +3637,8 @@ the `<aop:scoped-proxy/>` element, __a CGLIB-based class proxy is created__.
 
 [NOTE]
 ====
-CGLIB proxies only intercept public method calls! Do not call non-public
-methods on such a proxy; they will not be delegated to the scoped target object.
+CGLIB proxies only intercept public method calls! Do not call non-public methods
+on such a proxy; they will not be delegated to the actual scoped target object.
 ====
 
 Alternatively, you can configure the Spring container to create standard JDK
@@ -3779,7 +3814,7 @@ of the scope. You can also do the `Scope` registration declaratively, using the
 
 [NOTE]
 ====
-When you place <aop:scoped-proxy/> in a `FactoryBean` implementation, it is the factory
+When you place `<aop:scoped-proxy/>` in a `FactoryBean` implementation, it is the factory
 bean itself that is scoped, not the object returned from `getObject()`.
 ====
 
@@ -4074,7 +4109,7 @@ lifecycle requirements (e.g. starts and stops some background process):
 ----
 
 Any Spring-managed object may implement that interface. Then, when the
-ApplicationContext itself starts and stops, it will cascade those calls to all Lifecycle
+`ApplicationContext` itself starts and stops, it will cascade those calls to all `Lifecycle`
 implementations defined within that context. It does this by delegating to a
 `LifecycleProcessor`:
 
@@ -4126,7 +4161,7 @@ another option, namely the `getPhase()` method as defined on its super-interface
 
 When starting, the objects with the lowest phase start first, and when stopping, the
 reverse order is followed. Therefore, an object that implements `SmartLifecycle` and
-whose getPhase() method returns `Integer.MIN_VALUE` would be among the first to start
+whose `getPhase()` method returns `Integer.MIN_VALUE` would be among the first to start
 and the last to stop. At the other end of the spectrum, a phase value of
 `Integer.MAX_VALUE` would indicate that the object should be started last and stopped
 first (likely because it depends on other processes to be running). When considering the
@@ -4136,7 +4171,7 @@ negative phase value would indicate that an object should start before those sta
 components (and stop after them), and vice versa for any positive phase value.
 
 As you can see the stop method defined by `SmartLifecycle` accepts a callback. Any
-implementation __must__ invoke that callback's run() method after that implementation's
+implementation __must__ invoke that callback's `run()` method after that implementation's
 shutdown process is complete. That enables asynchronous shutdown where necessary since
 the default implementation of the `LifecycleProcessor` interface,
 `DefaultLifecycleProcessor`, will wait up to its timeout value for the group of objects
@@ -4156,14 +4191,14 @@ defining the following would be sufficient:
 
 As mentioned, the `LifecycleProcessor` interface defines callback methods for the
 refreshing and closing of the context as well. The latter will simply drive the shutdown
-process as if stop() had been called explicitly, but it will happen when the context is
+process as if `stop()` had been called explicitly, but it will happen when the context is
 closing. The 'refresh' callback on the other hand enables another feature of
 `SmartLifecycle` beans. When the context is refreshed (after all objects have been
 instantiated and initialized), that callback will be invoked, and at that point the
 default lifecycle processor will check the boolean value returned by each
 `SmartLifecycle` object's `isAutoStartup()` method. If "true", then that object will be
 started at that point rather than waiting for an explicit invocation of the context's or
-its own start() method (unlike the context refresh, the context start does not happen
+its own `start()` method (unlike the context refresh, the context start does not happen
 automatically for a standard context implementation). The "phase" value as well as any
 "depends-on" relationships will determine the startup order in the same way as described
 above.
@@ -4216,8 +4251,8 @@ declared on the `AbstractApplicationContext` class:
 [[beans-factory-aware]]
 ==== ApplicationContextAware and BeanNameAware
 
-When an `ApplicationContext` creates a class that implements the
-`org.springframework.context.ApplicationContextAware` interface, the class is provided
+When an `ApplicationContext` creates an object instance that implements the
+`org.springframework.context.ApplicationContextAware` interface, the instance is provided
 with a reference to that `ApplicationContext`.
 
 [source,java,indent=0]
@@ -4237,8 +4272,8 @@ additional functionality. One use would be the programmatic retrieval of other b
 Sometimes this capability is useful; however, in general you should avoid it, because it
 couples the code to Spring and does not follow the Inversion of Control style, where
 collaborators are provided to beans as properties. Other methods of the
-ApplicationContext provide access to file resources, publishing application events, and
-accessing a MessageSource. These additional features are described in
+`ApplicationContext` provide access to file resources, publishing application events, and
+accessing a `MessageSource`. These additional features are described in
 <<context-introduction>>
 
 As of Spring 2.5, autowiring is another alternative to obtain reference to the
@@ -4252,7 +4287,7 @@ parameter that is expecting the `ApplicationContext` type if the field, construc
 method in question carries the `@Autowired` annotation. For more information, see
 <<beans-autowired-annotation>>.
 
-When an ApplicationContext creates a class that implements the
+When an `ApplicationContext` creates a class that implements the
 `org.springframework.beans.factory.BeanNameAware` interface, the class is provided with
 a reference to the name defined in its associated object definition.
 
@@ -4501,6 +4536,14 @@ configuration metadata which implement the `BeanPostProcessor` interface. The
 `ApplicationContext` registers these beans as post-processors so that they can be called
 later upon bean creation. Bean post-processors can be deployed in the container just
 like any other beans.
+
+Note that when declaring a ++BeanPostProcessor++ using an `@Bean` factory method on a
+configuration class, the return type of the factory method should be the implementation
+class itself or at least the `org.springframework.beans.factory.config.BeanPostProcessor`
+interface, clearly indicating the post-processor nature of that bean. Otherwise, the
+`ApplicationContext` won't be able to autodetect it by type before fully creating it.
+Since a ++BeanPostProcessor++ needs to be instantiated early in order to apply to the
+initialization of other beans in the context, this early type detection is critical.
 
 [NOTE]
 ====
@@ -4939,7 +4982,7 @@ No matter the choice, Spring can accommodate both styles and even mix them toget
 It's worth pointing out that through its <<beans-java,JavaConfig>> option, Spring allows
 annotations to be used in a non-invasive way, without touching the target components
 source code and that in terms of tooling, all configuration styles are supported by the
-http://www.springsource.com/products/sts[SpringSource Tool Suite].
+https://spring.io/tools/sts[Spring Tool Suite].
 ****
 
 An alternative to XML setups is provided by annotation-based configuration which rely on
@@ -5940,10 +5983,28 @@ are eligible for such autodetection:
 	}
 ----
 
-To autodetect these classes and register the corresponding beans, you need to include
-the following element in XML, where the base-package element is a common parent package
-for the two classes. (Alternatively, you can specify a comma-separated list that
-includes the parent package of each class.)
+To autodetect these classes and register the corresponding beans, you need to add
+`@ComponentScan` to your `@Configuration` class, where the `basePackages` attribute
+is a common parent package for the two classes. (Alternatively, you can specify a
+comma-separated list that includes the parent package of each class.)
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@Configuration
+	@ComponentScan(basePackages = "org.example")
+	public class AppConfig  {
+    	...
+	}
+----
+
+[NOTE]
+====
+for concision, the above may have used the `value` attribute of the
+annotation, i.e. `ComponentScan("org.example")`
+====
+
+The following is an alternative using XML
 
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
@@ -5999,8 +6060,9 @@ with a value of false.
 By default, classes annotated with `@Component`, `@Repository`, `@Service`,
 `@Controller`, or a custom annotation that itself is annotated with `@Component` are the
 only detected candidate components. However, you can modify and extend this behavior
-simply by applying custom filters. Add them as __include-filter__ or __exclude-filter__
-sub-elements of the `component-scan` element. Each filter element requires the `type`
+simply by applying custom filters. Add them as __includeFilters__ or __excludeFilters__
+parameters of the `@ComponentScan` annotation (or as __include-filter__ or __exclude-filter__
+sub-elements of the `component-scan` element). Each filter element requires the `type`
 and `expression` attributes. The following table describes the filtering options.
 
 [[beans-scanning-filters-tbl]]
@@ -6008,7 +6070,7 @@ and `expression` attributes. The following table describes the filtering options
 |===
 | Filter Type| Example Expression| Description
 
-| annotation
+| annotation (default)
 | `org.example.SomeAnnotation`
 | An annotation to be present at the type level in target components.
 
@@ -6029,8 +6091,23 @@ and `expression` attributes. The following table describes the filtering options
 | A custom implementation of the `org.springframework.core.type .TypeFilter` interface.
 |===
 
-The following example shows the XML configuration ignoring all `@Repository` annotations
+The following example shows the configuration ignoring all `@Repository` annotations
 and using "stub" repositories instead.
+
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@Configuration
+    @ComponentScan(basePackages = "org.example",
+    		includeFilters = @Filter(type = FilterType.REGEX, pattern = ".*Stub.*Repository"),
+    		excludeFilters = @Filter(Repository.class))
+    public class AppConfig {
+    	...
+    }
+----
+
+and the equivalent using XML
 
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
@@ -6047,10 +6124,10 @@ and using "stub" repositories instead.
 
 [NOTE]
 ====
-You can also disable the default filters by providing __use-default-filters="false"__ as
-an attribute of the <component-scan/> element. This will in effect disable automatic
-detection of classes annotated with `@Component`, `@Repository`, `@Service`, or
-`@Controller`.
+You can also disable the default filters by setting `useDefaultFilters=false` on the annotation or
+providing `use-default-filters="false"` as an attribute of the <component-scan/> element. This
+will in effect disable automatic detection of classes annotated with `@Component`, `@Repository`,
+`@Service`, or `@Controller`.
 ====
 
 
@@ -6195,6 +6272,16 @@ interface, and be sure to include a default no-arg constructor. Then, provide th
 fully-qualified class name when configuring the scanner:
 ====
 
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@Configuration
+    @ComponentScan(basePackages = "org.example", nameGenerator = MyNameGenerator.class)
+    public class AppConfig {
+    	...
+    }
+----
+
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -6236,6 +6323,16 @@ interface, and be sure to include a default no-arg constructor. Then, provide th
 fully-qualified class name when configuring the scanner:
 ====
 
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@Configuration
+	@ComponentScan(basePackages = "org.example", scopeResolver = MyScopeResolver.class)
+	public class AppConfig {
+    	...
+    }
+----
+
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -6250,6 +6347,16 @@ scoped objects. The reasoning is described in <<beans-factory-scopes-other-injec
 For this purpose, a __scoped-proxy__ attribute is available on the component-scan
 element. The three possible values are: no, interfaces, and targetClass. For example,
 the following configuration will result in standard JDK dynamic proxies:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@Configuration
+	@ComponentScan(basePackages = "org.example", scopedProxy = ScopedProxyMode.INTERFACES)
+	public class AppConfig {
+    	...
+    }
+----
 
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
@@ -6446,12 +6553,14 @@ can be used in a similar fashion:
 When using `@Named`, it is possible to use
 component-scanning in the exact same way as when using Spring annotations:
 
-[source,xml,indent=0]
+[source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	<beans>
-		<context:component-scan base-package="org.example"/>
-	</beans>
+	@Configuration
+	@ComponentScan(basePackages = "org.example")
+	public class AppConfig  {
+    	...
+	}
 ----
 
 
@@ -6648,8 +6757,23 @@ when programmatically building an `AnnotationConfigApplicationContext`.
 [[beans-java-instantiating-container-scan]]
 ===== Enabling component scanning with scan(String...)
 
-Experienced Spring users will be familiar with the following commonly-used XML
-declaration from Spring's `context:` namespace
+To enable component scanning, just annotate your `@Configuration` class as follows:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@Configuration
+	@ComponentScan(basePackages = "com.acme")
+	public class AppConfig  {
+    	...
+	}
+----
+
+[TIP]
+====
+
+Experienced Spring users will be familiar with the XML declaration equivalent from
+Spring's `context:` namespace
 
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
@@ -6658,6 +6782,8 @@ declaration from Spring's `context:` namespace
 		<context:component-scan base-package="com.acme"/>
 	</beans>
 ----
+====
+
 
 In the example above, the `com.acme` package will be scanned, looking for any
 `@Component`-annotated classes, and those classes will be registered as Spring bean
@@ -7295,7 +7421,7 @@ modularity, but determining exactly where the autowired bean definitions are dec
 still somewhat ambiguous. For example, as a developer looking at `ServiceConfig`, how do
 you know exactly where the `@Autowired AccountRepository` bean is declared? It's not
 explicit in the code, and this may be just fine. Remember that the
-http://www.springsource.com/products/sts[SpringSource Tool Suite] provides tooling that
+https://spring.io/tools/sts[Spring Tool Suite] provides tooling that
 can render graphs showing how everything is wired up - that may be all you need. Also,
 your Java IDE can easily find all declarations and uses of the `AccountRepository` type,
 and will quickly show you the location of `@Bean` methods that return that type.
@@ -7627,9 +7753,9 @@ datasource from JNDI when in QA or production
 performance environment
 * registering customized implementations of beans for customer A vs. customer B deployments
 
-Find out more about http://spring.io/blog/2011/02/11/spring-framework-3-1-m1-released/[Environment,
+Find out more about https://spring.io/blog/2011/02/11/spring-framework-3-1-m1-released/[Environment,
 XML Profiles] and the
-http://spring.io/blog/2011/02/14/spring-3-1-m1-introducing-profile/[@Profile annotation].
+https://spring.io/blog/2011/02/14/spring-3-1-m1-introducing-profile/[@Profile annotation].
 
 
 [[beans-property-source-abstraction]]
@@ -7639,10 +7765,10 @@ Spring's <<beans-definition-profiles,Environment abstraction>> provides search o
 over a configurable hierarchy of property sources.
 
 You can find out more about
-http://spring.io/blog/2011/02/15/spring-3-1-m1-unified-property-management/[Unified
+https://spring.io/blog/2011/02/15/spring-3-1-m1-unified-property-management/[Unified
 Property Management], the
 {javadoc-baseurl}/org/springframework/core/env/PropertySource.html[`PropertySource` class]
-and the {javadoc-baseurl}org/springframework/context/annotation/PropertySource.html[`@PropertySource`
+and the {javadoc-baseurl}/org/springframework/context/annotation/PropertySource.html[`@PropertySource`
 annotation].
 
 
@@ -7697,7 +7823,7 @@ interfaces to provide additional functionality in a more __application
 framework-oriented style__. Many people use the `ApplicationContext` in a completely
 declarative fashion, not even creating it programmatically, but instead relying on
 support classes such as `ContextLoader` to automatically instantiate an
-`ApplicationContext` as part of the normal startup process of a J2EE web application.
+`ApplicationContext` as part of the normal startup process of a Java EE web application.
 
 To enhance `BeanFactory` functionality in a more framework-oriented style the context
 package also provides the following functionality:
@@ -8180,14 +8306,14 @@ the `contextConfigLocation` parameter just as the listener does.
 
 
 [[context-deploy-rar]]
-==== Deploying a Spring ApplicationContext as a J2EE RAR file
+==== Deploying a Spring ApplicationContext as a Java EE RAR file
 It is possible to deploy a Spring ApplicationContext as a RAR file, encapsulating the
-context and all of its required bean classes and library JARs in a J2EE RAR deployment
+context and all of its required bean classes and library JARs in a Java EE RAR deployment
 unit. This is the equivalent of bootstrapping a standalone ApplicationContext, just hosted
-in J2EE environment, being able to access the J2EE servers facilities. RAR deployment is a
-more natural alternative to scenario of deploying a headless WAR file, in effect, a WAR
+in Java EE environment, being able to access the Java EE servers facilities. RAR deployment
+is  more natural alternative to scenario of deploying a headless WAR file, in effect, a WAR
 file without any HTTP entry points that is used only for bootstrapping a Spring
-ApplicationContext in a J2EE environment.
+ApplicationContext in a Java EE environment.
 
 RAR deployment is ideal for application contexts that do not need HTTP entry points but
 rather consist only of message endpoints and scheduled jobs. Beans in such a context can
@@ -8201,7 +8327,7 @@ Check out the JavaDoc of the
 {javadoc-baseurl}/org/springframework/jca/context/SpringContextResourceAdapter.html[`SpringContextResourceAdapter`]
 class for the configuration details involved in RAR deployment.
 
-__For a simple deployment of a Spring ApplicationContext as a J2EE RAR file:__ package
+__For a simple deployment of a Spring ApplicationContext as a Java EE RAR file:__ package
 all application classes into a RAR file, which is a standard JAR file with a different
 file extension. Add all required library JARs into the root of the RAR archive. Add a
 "META-INF/ra.xml" deployment descriptor (as shown in ++SpringContextResourceAdapter++'s
@@ -8352,7 +8478,7 @@ WebApplicationContexts across WAR files. In this case you should look into using
 utility class
 {javadoc-baseurl}/org/springframework/context/access/ContextSingletonBeanFactoryLocator.html[`ContextSingletonBeanFactoryLocator`]
 locator that is described in this
-http://blog.springsource.com/2007/06/11/using-a-shared-parent-application-context-in-a-multi-war-spring-application/[SpringSource
+https://spring.io/blog/2007/06/11/using-a-shared-parent-application-context-in-a-multi-war-spring-application/[Spring
 team blog entry].
 
 
@@ -10889,7 +11015,7 @@ EL, to name a few, the Spring Expression Language was created to provide the Spr
 community with a single well supported expression language that can be used across all
 the products in the Spring portfolio. Its language features are driven by the
 requirements of the projects in the Spring portfolio, including tooling requirements for
-code completion support within the eclipse based SpringSource Tool Suite. That said,
+code completion support within the eclipse based Spring Tool Suite. That said,
 SpEL is based on a technology agnostic API allowing other expression language
 implementations to be integrated should the need arise.
 
@@ -10927,6 +11053,7 @@ The expression language supports the following functionality
 * Bean references
 * Array construction
 * Inline lists
+* Inline maps
 * Ternary operator
 * Variables
 * User defined functions
@@ -11431,7 +11558,22 @@ Lists can be expressed directly in an expression using `{}` notation.
 entirely composed of fixed literals then a constant list is created to represent the
 expression, rather than building a new list on each evaluation.
 
+[[expressions-inline-maps]]
+==== Inline Maps
+Maps can also be expressed directly in an expression using `{key:value}` notation.
 
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	// evaluates to a Java map containing the two entries
+	Map inventorInfo = (Map) parser.parseExpression("{name:'Nikola',dob:'10-July-1856'}").getValue(context);
+
+	Map mapOfMaps = (Map) parser.parseExpression("{name:{first:'Nikola',last:'Tesla'},dob:{day:10,month:'July',year:1856}}").getValue(context);
+----
+`{:}` by itself means an empty map. For performance reasons, if the map is itself composed
+of fixed literals or other nested constant structures (lists or maps) then a constant map is created
+to represent the expression, rather than building a new map on each evaluation. Quoting of the map keys
+is optional, the examples above are not using quoted keys.
 
 [[expressions-array-construction]]
 ==== Array construction
@@ -12362,7 +12504,7 @@ style.
 
 [[aop-introduction-proxies]]
 ==== AOP Proxies
-Spring AOP defaults to using standard J2SE __dynamic proxies__ for AOP proxies. This
+Spring AOP defaults to using standard JDK __dynamic proxies__ for AOP proxies. This
 enables any interface (or set of interfaces) to be proxied.
 
 Spring AOP can also use CGLIB proxies. This is necessary to proxy classes, rather than
@@ -15639,7 +15781,7 @@ above and can be registered individually for __each__ web application as follows
 	</Context>
 ----
 
-Apache Tomcat 6.0.x (similar to 5.0.x/5.5.x) series supports several context locations:
+Apache Tomcat (6.0+) supports several context locations:
 
 * server configuration file - __$CATALINA_HOME/conf/server.xml__
 * default context configuration - __$CATALINA_HOME/conf/context.xml__ - that affects all
@@ -15654,56 +15796,6 @@ changes to the server configuration. See the Tomcat 6.0.x
 http://tomcat.apache.org/tomcat-6.0-doc/config/context.html[documentation] for more
 details about available context locations.
 
-* Tomcat 5.0.x/5.5.x
-* Copy `org.springframework.instrument.tomcat.jar` into __$CATALINA_HOME__/server/lib,
-  where __$CATALINA_HOME__ represents the root of the Tomcat installation.
-* Instruct Tomcat to use the custom class loader instead of the default one by editing
-  the web application context file:
-
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
-----
-	<Context path="/myWebApp" docBase="/my/webApp/location">
-		<Loader
-			loaderClass="org.springframework.instrument.classloading.tomcat.TomcatInstrumentableClassLoader"/>
-	</Context>
-----
-
-Tomcat 5.0.x and 5.5.x series supports several context locations:
-
-* server configuration file - __$CATALINA_HOME/conf/server.xml__
-* default context configuration - __$CATALINA_HOME/conf/context.xml__ - that affects all
-  deployed web applications
-* per-web application configuration which can be deployed either on the server-side at
-  __$CATALINA_HOME/conf/[enginename]/[hostname]/[webapp]-context.xml__ or embedded
-  inside the web-app archive at __META-INF/context.xml__
-
-For efficiency, the embedded web-app configuration style is recommended recommended
-because it will impact only applications that use the class loader. See the Tomcat 5.x
-http://tomcat.apache.org/tomcat-5.5-doc/config/context.html[documentation] for more
-details about available context locations.
-
-Tomcat versions prior to 5.5.20 contained a bug in the XML configuration parsing that
-prevented usage of the `Loader` tag inside __server.xml__ configuration, regardless of
-whether a class loader is specified or whether it is the official or a custom one. See
-Tomcat's bugzilla for http://issues.apache.org/bugzilla/show_bug.cgi?id=39704[more
-details].
-
-In Tomcat 5.5.x, versions 5.5.20 or later, you should set
-__useSystemClassLoaderAsParent__ to `false` to fix this problem:
-
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
-----
-	<Context path="/myWebApp" docBase="/my/webApp/location">
-		<Loader
-			loaderClass="org.springframework.instrument.classloading.tomcat.TomcatInstrumentableClassLoader"
-					**useSystemClassLoaderAsParent="false"**/>
-	</Context>
-----
-
-This setting is not needed on Tomcat 6 or higher.
-
 Alternatively, consider the use of the Spring-provided generic VM agent, to be specified
 in Tomcat's launch script (see above). This will make instrumentation available to all
 deployed web applications, no matter what ClassLoader they happen to run on.
@@ -15711,7 +15803,7 @@ deployed web applications, no matter what ClassLoader they happen to run on.
 [[aop-aj-ltw-environments-weblogic-oc4j-resin-glassfish-jboss]]
 ====== WebLogic, WebSphere, Resin, GlassFish, JBoss
 Recent versions of WebLogic Server (version 10 and above), IBM WebSphere Application
-Server (version 7 and above), Resin (3.1 and above) and JBoss (5.x or above) provide a
+Server (version 7 and above), Resin (3.1 and above) and JBoss (6.x or above) provide a
 ClassLoader that is capable of local instrumentation. Spring's native LTW leverages such
 ClassLoaders to enable AspectJ weaving. You can enable LTW by simply activating
 load-time weaving as described earlier. Specifically, you do __not__ need to modify the
@@ -20122,12 +20214,12 @@ work__.
 
 [[testcontext-support-classes-junit4]]
 ====== JUnit support classes
-The `org.springframework.test.context.junit4` package provides support classes for JUnit
-4.5+ based test cases.
+The `org.springframework.test.context.junit4` package provides support classes for
+JUnit-based test cases.
 
 * `AbstractJUnit4SpringContextTests`: Abstract base test class that integrates the
   __Spring TestContext Framework__ with explicit `ApplicationContext` testing support in
-  a JUnit 4.5+ environment.
+  a JUnit 4.9+ environment.
   When you extend `AbstractJUnit4SpringContextTests`, you can access the following
   `protected` instance variable:
 ** `applicationContext`: Use this variable to perform explicit bean lookups or to test
@@ -20159,8 +20251,8 @@ using `@RunWith(SpringJUnit4ClassRunner.class)`, `@ContextConfiguration`,
 
 [[testcontext-junit4-runner]]
 ====== Spring JUnit Runner
-The __Spring TestContext Framework__ offers full integration with JUnit 4.5+ through a
-custom runner (tested on JUnit 4.5 -- 4.11). By annotating test classes with
+The __Spring TestContext Framework__ offers full integration with JUnit 4.9+ through a
+custom runner (tested on JUnit 4.9 -- 4.11). By annotating test classes with
 `@RunWith(SpringJUnit4ClassRunner.class)`, developers can implement standard JUnit-based
 unit and integration tests and simultaneously reap the benefits of the TestContext
 framework such as support for loading application contexts, dependency injection of test
@@ -20234,7 +20326,7 @@ Before inclusion in Spring Framework 3.2, the Spring MVC Test framework had alre
 existed as a separate project on GitHub where it grew and evolved through actual use,
 feedback, and the contribution of many.
 
-The standalone https://github.com/SpringSource/spring-test-mvc[spring-test-mvc project]
+The standalone https://github.com/spring-projects/spring-test-mvc[spring-test-mvc project]
 is still available on GitHub and can be used in conjunction with Spring Framework 3.1.x.
 Applications upgrading to 3.2 or later should replace the `spring-test-mvc` dependency with a
 dependency on `spring-test`.
@@ -20605,7 +20697,7 @@ Note that the expectation is __always__ applied and cannot be overridden without
 creating a separate `MockMvc` instance.
 
 When JSON response content contains hypermedia links created with
-https://github.com/SpringSource/spring-hateoas[Spring HATEOAS], the resulting links can
+https://github.com/spring-projects/spring-hateoas[Spring HATEOAS], the resulting links can
 be verified:
 
 [source,java,indent=0]
@@ -20616,7 +20708,7 @@ be verified:
 ----
 
 When XML response content contains hypermedia links created with
-https://github.com/SpringSource/spring-hateoas[Spring HATEOAS], the resulting links can
+https://github.com/spring-projects/spring-hateoas[Spring HATEOAS], the resulting links can
 be verified:
 
 [source,java,indent=0]
@@ -20643,10 +20735,10 @@ last filter will delegates to the `DispatcherServlet`.
 [[spring-mvc-test-server-resources]]
 ====== Further Server-Side Test Examples
 The framework's own tests include
-https://github.com/SpringSource/spring-framework/tree/master/spring-test/src/test/java/org/springframework/test/web/servlet/samples[many
+https://github.com/spring-projects/spring-framework/tree/master/spring-test/src/test/java/org/springframework/test/web/servlet/samples[many
 sample tests] intended to demonstrate how to use Spring MVC Test. Browse these examples
 for further ideas. Also the
-https://github.com/SpringSource/spring-mvc-showcase[spring-mvc-showcase] has full test
+https://github.com/spring-projects/spring-mvc-showcase[spring-mvc-showcase] has full test
 coverage based on Spring MVC Test.
 
 
@@ -20692,7 +20784,7 @@ configuration. Just check the support for code completion on static members.
 [[spring-mvc-test-client-resources]]
 ====== Further Examples of Client-side REST Tests
 Spring MVC Test's own tests include
-https://github.com/SpringSource/spring-framework/tree/master/spring-test/src/test/java/org/springframework/test/web/client/samples[example
+https://github.com/spring-projects/spring-framework/tree/master/spring-test/src/test/java/org/springframework/test/web/client/samples[example
 tests] of client-side REST tests.
 
 
@@ -20701,7 +20793,7 @@ tests] of client-side REST tests.
 ==== PetClinic Example
 The PetClinic application, available on
 https://github.com/spring-projects/spring-petclinic[Github], illustrates several features
-of the __Spring TestContext Framework__ in a JUnit 4.5+ environment. Most test
+of the __Spring TestContext Framework__ in a JUnit environment. Most test
 functionality is included in the `AbstractClinicTests`, for which a partial listing
 is shown below:
 
@@ -20969,7 +21061,7 @@ applications. Many high-end applications use a single, highly scalable database 
 Oracle RAC) instead. Standalone transaction managers such as
 http://www.atomikos.com/[Atomikos Transactions] and http://jotm.objectweb.org/[JOTM]
 are other options. Of course, you may need other application server capabilities such as
-Java Message Service (JMS) and J2EE Connector Architecture (JCA).
+Java Message Service (JMS) and Java EE Connector Architecture (JCA).
 
 The Spring Framework __gives you the choice of when to scale your application to a fully
 loaded application server__. Gone are the days when the only alternative to using EJB
@@ -22198,12 +22290,12 @@ application context.
 ----
 	<tx:annotation-driven/>
 
-		<bean id="transactionManager1" class="org.springframework.jdbc.DataSourceTransactionManager">
+		<bean id="transactionManager1" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
 			...
 			<qualifier value="order"/>
 		</bean>
 
-		<bean id="transactionManager2" class="org.springframework.jdbc.DataSourceTransactionManager">
+		<bean id="transactionManager2" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
 			...
 			<qualifier value="account"/>
 		</bean>
@@ -22828,7 +22920,7 @@ For more information about the Spring Framework's transaction support:
 
 * http://www.javaworld.com/javaworld/jw-01-2009/jw-01-spring-transactions.html[Distributed
   transactions in Spring, with and without XA] is a JavaWorld presentation in which
-  SpringSource's David Syer guides you through seven patterns for distributed
+  Spring's David Syer guides you through seven patterns for distributed
   transactions in Spring applications, three of them with XA and four without.
 * http://www.infoq.com/minibooks/JTDS[Java Transaction Design Strategies] is a book
   available from http://www.infoq.com/[InfoQ] that provides a well-paced introduction
@@ -23454,7 +23546,7 @@ parameters.
 
 		SqlParameterSource namedParameters = new MapSqlParameterSource("first_name", firstName);
 
-		return this.namedParameterJdbcTemplate.queryForObject(sql, Integer.class, namedParameters);
+		return this.namedParameterJdbcTemplate.queryForObject(sql, namedParameters, Integer.class);
 	}
 ----
 
@@ -23485,7 +23577,7 @@ The following example shows the use of the `Map`-based style.
 
 		Map<String, String> namedParameters = Collections.singletonMap("first_name", firstName);
 
-		return this.namedParameterJdbcTemplate.queryForObject(sql, Integer.class, namedParameters);
+		return this.namedParameterJdbcTemplate.queryForObject(sql, namedParameters,  Integer.class);
 	}
 ----
 
@@ -23546,7 +23638,7 @@ of named parameter values.
 
 		SqlParameterSource namedParameters = new BeanPropertySqlParameterSource(exampleActor);
 
-		return this.namedParameterJdbcTemplate.queryForObject(sql, Integer.class, namedParameters);
+		return this.namedParameterJdbcTemplate.queryForObject(sql, namedParameters, Integer.class);
 	}
 ----
 
@@ -25229,23 +25321,21 @@ dependency injection.
 	final InputStreamReader clobReader = new InputStreamReader(clobIs);
 	jdbcTemplate.execute(
 		"INSERT INTO lob_table (id, a_clob, a_blob) VALUES (?, ?, ?)",
-		new AbstractLobCreatingPreparedStatementCallback(lobHandler) { <<1>>
-	protected void setValues(PreparedStatement ps, LobCreator lobCreator) throws SQLException { ps.setLong(1, 1L); lobCreator.setClobAsCharacterStream(ps, 2, clobReader, (int)clobIn.length()); <<2>>
-	lobCreator.setBlobAsBinaryStream(ps, 3, blobIs, (int)blobIn.length()); <<3>>
-	} }
+		new AbstractLobCreatingPreparedStatementCallback(lobHandler) { # <1>
+			protected void setValues(PreparedStatement ps, LobCreator lobCreator) throws SQLException {
+				ps.setLong(1, 1L);
+				lobCreator.setClobAsCharacterStream(ps, 2, clobReader, (int)clobIn.length()); # <2>
+				lobCreator.setBlobAsBinaryStream(ps, 3, blobIs, (int)blobIn.length()); # <3>
+			}
+		}
 	);
 	blobIs.close();
 	clobReader.close();
 ----
 
-<<1>>
-Pass in the lobHandler that in this example is a plain `DefaultLobHandler`
-
-<<2>>
-Using the method `setClobAsCharacterStream`, pass in the contents of the CLOB.
-
-<<3>>
-Using the method `setBlobAsBinaryStream`, pass in the contents of the BLOB.
+<1> Pass in the lobHandler that in this example is a plain `DefaultLobHandler`
+<2> Using the method `setClobAsCharacterStream`, pass in the contents of the CLOB.
+<3> Using the method `setBlobAsBinaryStream`, pass in the contents of the BLOB.
 
 Now it's time to read the LOB data from the database. Again, you use a `JdbcTemplate`
 with the same instance variable `l` `obHandler` and a reference to a `DefaultLobHandler`.
@@ -25257,16 +25347,13 @@ with the same instance variable `l` `obHandler` and a reference to a `DefaultLob
 		new RowMapper<Map<String, Object>>() {
 			public Map<String, Object> mapRow(ResultSet rs, int i) throws SQLException {
 				Map<String, Object> results = new HashMap<String, Object>();
-				String clobText = lobHandler.getClobAsString(rs, "a_clob"); <<1>>
-	results.put("CLOB", clobText); byte[] blobBytes = lobHandler.getBlobAsBytes(rs, "a_blob"); <<2>>
+				String clobText = lobHandler.getClobAsString(rs, "a_clob"); # <1>
+	results.put("CLOB", clobText); byte[] blobBytes = lobHandler.getBlobAsBytes(rs, "a_blob"); # <2>
 	results.put("BLOB", blobBytes); return results; } });
 ----
 
-<<1>>
-Using the method `getClobAsString`, retrieve the contents of the CLOB.
-
-<<2>>
-Using the method `getBlobAsBytes`, retrieve the contents of the BLOB.
+<1> Using the method `getClobAsString`, retrieve the contents of the CLOB.
+<2> Using the method `getBlobAsBytes`, retrieve the contents of the BLOB.
 
 
 
@@ -25630,9 +25717,6 @@ The second option can also be easy. Some suggestions on how to implement this ar
   startup order by putting them in separate ApplicationContext instances (e.g. parent
   has the datasource and child has the business components). This structure is common in
   Spring web applications, but can be more generally applied.
-* Use a modular runtime like SpringSource dm Server and separate the data source and the
-  components that depend on it. E.g. specify the bundle start up order as datasource ->
-  initializer -> business components.
 
 
 
@@ -25710,7 +25794,7 @@ For more comprehensive ORM support, including support for alternative database
 technologies such as MongoDB, you might want to check out the
 http://projects.spring.io/spring-data/[Spring Data] suite of projects. If you are
 a JPA user, the https://spring.io/guides/gs/accessing-data-jpa/[Getting Started Accessing
-Data with JPA] guide from http://spring.io provides a great introduction.
+Data with JPA] guide from https://spring.io provides a great introduction.
 ====
 
 
@@ -28200,6 +28284,37 @@ With the above Servlet configuration in place, you will need to have a file call
 Spring Web MVC-specific components (beans). You can change the exact location of this
 configuration file through a Servlet initialization parameter (see below for details).
 
+It is also possible to have just one root context for single DispatcherServlet scenarios
+by setting an empty contextConfigLocation servlet init parameter, as shown below:
+
+[source,xml,indent=0]
+[subs="verbatim,quotes"]
+----
+	<web-app>
+		<context-param>
+			<param-name>contextConfigLocation</param-name>
+			<param-value>/WEB-INF/root-context.xml</param-value>
+		</context-param>
+		<servlet>
+			<servlet-name>dispatcher</servlet-name>
+			<servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+			<init-param>
+				<param-name>contextConfigLocation</param-name>
+				<param-value></param-value>
+			</init-param>
+			<load-on-startup>1</load-on-startup>
+		</servlet>
+		<servlet-mapping>
+			<servlet-name>dispatcher</servlet-name>
+			<url-pattern>/*</url-pattern>
+		</servlet-mapping>
+		<listener>
+			<listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+		</listener>
+	</web-app>
+----
+
+
 The `WebApplicationContext` is an extension of the plain `ApplicationContext` that has
 some extra features necessary for web applications. It differs from a normal
 `ApplicationContext` in that it is capable of resolving themes (see
@@ -28714,17 +28829,62 @@ name and the second - the regular expression.For example:
 [[mvc-ann-requestmapping-patterns]]
 ===== Path Patterns
 In addition to URI templates, the `@RequestMapping` annotation also supports Ant-style
-path patterns (for example, `/myPath/*.do`). A combination of URI templates and
-Ant-style globs is also supported (for example, `/owners/*/pets/{petId}`).
+path patterns (for example, `/myPath/*.do`). A combination of URI template variables and
+Ant-style globs is also supported (e.g. `/owners/*/pets/{petId}`).
+
+
+[[mvc-ann-requestmapping-pattern-comparison]]
+===== Path Pattern Comparison
+When a URL matches multiple patterns, a sort is used to find the most specific match.
+
+A pattern with a lower count of URI variables and wild cards is considered more specific.
+For example `/hotels/{hotel}/*` has 1 URI variable and 1 wild card and is considered
+more specific than `/hotels/{hotel}/**` which as 1 URI variable and 2 wild cards.
+
+If two patterns have the same count, the one that is longer is considered more specific.
+For example `/foo/bar*` is longer and considered more specific than `/foo/*`.
+
+When two patterns have the same count and length, the pattern with fewer wild cards is considered more specific.
+For example `/hotels/{hotel}` is more specific than `/hotels/*`.
+
+There are also some additional special rules:
+
+* The *default mapping pattern* `/**` is less specific than any other pattern.
+For example `/api/{a}/{b}/{c}` is more specific.
+* A *prefix pattern* such as `/public/**` is less specific than any other pattern that doesn't contain double wildcards.
+For example `/public/path3/{a}/{b}/{c}` is more specific.
+
+For the full details see `AntPatternComparator` in `AntPathMatcher`. Note that the PathMatcher
+can be customized (see <<mvc-config-path-matching>> in the section on configuring Spring MVC).
 
 
 [[mvc-ann-requestmapping-placeholders]]
-===== Patterns with Placeholders
+===== Path Patterns with Placeholders
 Patterns in `@RequestMapping` annotations support ${...} placeholders against local
 properties and/or system properties and environment variables. This may be useful in
 cases where the path a controller is mapped to may need to be customized through
 configuration. For more information on placeholders, see the javadocs of the
 `PropertyPlaceholderConfigurer` class.
+
+
+
+[[mvc-ann-requestmapping-suffix-pattern-match]]
+===== Path Pattern Matching By Suffix
+By default Spring MVC automatically performs `".*"` suffix pattern matching so
+that a controller mapped to `/person` is also implicitly mapped to `/person.*`.
+This allows indicating content types via file extensions, e.g. `/person.pdf`,
+`/person.xml`, etc. A common pitfall however is when the last path segment of the
+mapping is a URI variable, e.g. `/person/{id}`. While a request for `/person/1.json`
+would correctly result in path variable id=1 and extension ".json", when the id
+naturally contains a dot, e.g. `/person/joe@email.com` the result does not match
+expectations. Clearly here ".com" is not a file extension.
+
+The proper way to address this is to configure Spring MVC to only do suffix pattern
+matching against file extensions registered for content negotiation purposes.
+For more on this, first see <<mvc-config-content-negotiation>> and then
+<<mvc-config-path-matching>> showing how to enable suffix pattern matching
+along with how to use registered suffix patterns only.
+
 
 
 [[mvc-ann-matrix-variables]]
@@ -29112,6 +29272,8 @@ The following are the supported return types:
   asynchronously in a thread managed by Spring MVC.
 * A `DeferredResult<?>` can be returned when the application wants to produce the return
   value from a thread of its own choosing.
+* A `ListenableFuture<?>` can be returned when the application wants to produce the return
+  value from a thread of its own choosing.
 * Any other return type is considered to be a single model attribute to be exposed to
   the view, using the attribute name specified through `@ModelAttribute` at the method
   level (or the default attribute name based on the return type class name). The model
@@ -29266,7 +29428,7 @@ JSON, XML or custom MediaType content. For convenience, instead of annotating al
 `@RequestMapping` methods with `@ResponseBody`, you can annotate your Controller Class
 with `@RestController`.
 
-{javadoc-baseurl}org/springframework/web/bind/annotation/RestController.html[`@RestController`]
+{javadoc-baseurl}/org/springframework/web/bind/annotation/RestController.html[`@RestController`]
 is a stereotype annotation that combines `@ResponseBody` and `@Controller`. More than
 that, it gives more meaning to your Controller and also may carry additional semantics
 in future releases of the framework.
@@ -29820,6 +29982,76 @@ Check out the
 {javadoc-baseurl}/org/springframework/web/bind/annotation/ControllerAdvice.html[`@ControllerAdvice`
 documentation] for more details.
 
+[[mvc-ann-jsonview]]
+===== Jackson Serialization View Support
+
+It can sometimes be useful to filter contextually the object that will be serialized to the
+HTTP response body. In order to provide such capability, Spring MVC has built-in support for
+rendering with http://wiki.fasterxml.com/JacksonJsonViews[Jackson's Serialization Views].
+
+To use it with `@ResponseBody` controller method or methods return `ResponseEntity`, simply
+add the `@JsonView` annotation:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@RestController
+	public class UserController {
+
+		@RequestMapping(value = "/user", method = RequestMethod.GET)
+		@JsonView(User.WithoutPasswordView.class)
+		public User getUser() {
+			return new User("eric", "7!jd#h23");
+		}
+	}
+
+	public class User {
+
+		public interface WithoutPasswordView {};
+		public interface WithPasswordView extends WithoutPasswordView {};
+
+		private String username;
+		private String password;
+
+		public User() {
+		}
+
+		public User(String username, String password) {
+			this.username = username;
+			this.password = password;
+		}
+
+		@JsonView(WithoutPasswordView.class)
+		public String getUsername() {
+			return this.username;
+		}
+
+		@JsonView(WithPasswordView.class)
+		public String getPassword() {
+			return this.password;
+		}
+	}
+----
+
+For controllers relying on view resolution, simply add the serialization view class
+to the model:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@Controller
+	public class UserController extends AbstractController {
+
+		@RequestMapping(value = "/user", method = RequestMethod.GET)
+		public String getUser(Model model) {
+			model.addAttribute("user", new User("eric", "7!jd#h23"));
+			model.addAttribute(JsonView.class.getName(), User.WithoutPasswordView.class);
+			return "userView";
+		}
+	}
+
+----
+
 [[mvc-ann-async]]
 ==== Asynchronous Request Processing
 Spring MVC 3.2 introduced Servlet 3 based asynchronous request processing. Instead of
@@ -29907,7 +30139,7 @@ produced result.
 
 Explaining the motivation for async request processing and when or why to use it are
 beyond the scope of this document. For further information you may wish to read
-http://spring.io/blog/2012/05/07/spring-mvc-3-2-preview-introducing-servlet-3-async-support[this
+https://spring.io/blog/2012/05/07/spring-mvc-3-2-preview-introducing-servlet-3-async-support[this
 blog post series].
 
 
@@ -30569,7 +30801,7 @@ Here is an example configuration of a `ContentNegotiatingViewResolver:`
 		</property>
 	</bean>
 
-	<bean id="content" class="com.springsource.samples.rest.SampleContentAtomView"/>
+	<bean id="content" class="com.foo.samples.rest.SampleContentAtomView"/>
 ----
 
 The `InternalResourceViewResolver` handles the translation of view names and JSP pages,
@@ -31384,7 +31616,7 @@ response. However, it stops short of writing any error content to the body of th
 response while your application may need to add developer-friendly content to every
 error response for example when providing a REST API. You can prepare a `ModelAndView`
 and render error content through view resolution -- i.e. by configuring a
-`ContentNegotiatingViewResolver`, `MappingJacksonJsonView`, and so on. However, you may
+`ContentNegotiatingViewResolver`, `MappingJackson2JsonView`, and so on. However, you may
 prefer to use `@ExceptionHandler` methods instead.
 
 If you prefer to write error content via `@ExceptionHandler` methods you can extend
@@ -31461,6 +31693,24 @@ or in a JSP:
 		reason:<%=request.getAttribute("javax.servlet.error.message") %>
 	}
 ----
+
+
+[[mvc-web-security]]
+=== Web Security
+
+The http://projects.spring.io/spring-security/[Spring Security] project provides features
+to protect web applications from malicious exploits. Check out the reference documentation in the sections on
+http://docs.spring.io/spring-security/site/docs/current/reference/htmlsingle/#csrf["CSRF protection"],
+http://docs.spring.io/spring-security/site/docs/current/reference/htmlsingle/#headers["Security Response Headers"], and also
+http://docs.spring.io/spring-security/site/docs/current/reference/htmlsingle/#mvc["Spring MVC Integration"].
+Note that using Spring Security to secure the application is not necessarily required for all features.
+For example CSRF protection can be added simply by adding the `CsrfFilter` and
+`CsrfRequestDataValueProcessor` to your configuration. See the
+https://github.com/spring-projects/spring-mvc-showcase/commit/361adc124c05a8187b84f25e8a57550bb7d9f8e4[Spring MVC Showcase]
+for an example.
+
+Another option is to use a framework dedicated to Web Security.
+http://hdiv.org/[HDIV] is one such framework and integrates with Spring MVC.
 
 
 
@@ -31888,7 +32138,9 @@ To enable MVC Java config add the annotation `@EnableWebMvc` to one of your
 	}
 ----
 
-To achieve the same in XML use the `mvc:annotation-driven` element:
+To achieve the same in XML use the `mvc:annotation-driven` element in your
+DispatcherServlet context (or in your root context if you have no DispatcherServlet
+context defined):
 
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
@@ -31940,9 +32192,12 @@ This is the complete list of HttpMessageConverters set up by mvc:annotation-driv
 .. `FormHttpMessageConverter` converts form data to/from a `MultiValueMap<String,
 String>`.
 .. `Jaxb2RootElementHttpMessageConverter` converts Java objects to/from XML -- added if
-JAXB2 is present on the classpath.
-.. `MappingJackson2HttpMessageConverter` (or `MappingJacksonHttpMessageConverter`)
-converts to/from JSON -- added if Jackson 2 (or Jackson) is present on the classpath.
+JAXB2 is present and Jackson 2 XML extension is not present on the classpath.
+.. `MappingJackson2HttpMessageConverter` converts to/from JSON -- added if Jackson 2
+is present on the classpath.
+.. `MappingJackson2XmlHttpMessageConverter` converts to/from XML -- added if
+https://github.com/FasterXML/jackson-dataformat-xml[Jackson 2 XML extension] is present
+on the classpath.
 .. `AtomFeedHttpMessageConverter` converts Atom feeds -- added if Rome is present on the
 classpath.
 .. `RssChannelHttpMessageConverter` converts RSS feeds -- added if Rome is present on
@@ -32008,7 +32263,7 @@ available. The sample below shows a subset of what is available:
 
 
 [[mvc-config-interceptors]]
-==== Configuring Interceptors
+==== Interceptors
 You can configure `HandlerInterceptors` or `WebRequestInterceptors` to be applied to all
 incoming requests or restricted to specific URL path patterns.
 
@@ -32053,7 +32308,7 @@ And in XML use the `<mvc:interceptors>` element:
 
 
 [[mvc-config-content-negotiation]]
-==== Configuring Content Negotiation
+==== Content Negotiation
 You can configure how Spring MVC determines the requested media types from the client
 for request mapping as well as for content negotiation purposes. The available options
 are to check the file extension in the request URI, the "Accept" header, a request
@@ -32129,7 +32384,7 @@ JSON) if no content types were requested.
 
 
 [[mvc-config-view-controller]]
-==== Configuring View Controllers
+==== View Controllers
 This is a shortcut for defining a `ParameterizableViewController` that immediately
 forwards to a view when invoked. Use it in static cases when there is no Java controller
 logic to execute before the view generates the response.
@@ -32160,9 +32415,98 @@ And the same in XML use the `<mvc:view-controller>` element:
 ----
 
 
+[[mvc-config-view-resolvers]]
+==== View Resolvers
+The MVC config simplifies the registration of view resolvers.
+
+The following is a Java config example that configures content negotiation view
+resolution using FreeMarker HTML templates and Jackson as a default `View` for
+JSON rendering:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@Configuration
+	@EnableWebMvc
+	public class WebConfig extends WebMvcConfigurerAdapter {
+
+		@Override
+		public void configureViewResolvers(ViewResolverRegistry registry) {
+			registry.enableContentNegotiation(new MappingJackson2JsonView());
+			registry.jsp();
+		}
+
+	}
+----
+
+And the same in XML:
+
+[source,xml,indent=0]
+[subs="verbatim,quotes"]
+----
+	<mvc:view-resolvers>
+		<mvc:content-negotiation>
+			<mvc:default-views>
+				<bean class="org.springframework.web.servlet.view.json.MappingJackson2JsonView" />
+			</mvc:default-views>
+		</mvc:content-negotiation>
+		<mvc:jsp />
+	</mvc:view-resolvers>
+----
+
+Note however that FreeMarker, Velocity, Tiles, and Groovy Markup also require
+configuration of the underlying view technology.
+
+The MVC namespace provides dedicated elements. For example with FreeMarker:
+
+[source,xml,indent=0]
+[subs="verbatim,quotes"]
+----
+
+	<mvc:view-resolvers>
+		<mvc:content-negotiation>
+			<mvc:default-views>
+				<bean class="org.springframework.web.servlet.view.json.MappingJackson2JsonView" />
+			</mvc:default-views>
+		</mvc:content-negotiation>
+		<mvc:freemarker cache="false" />
+	</mvc:view-resolvers>
+
+	<mvc:freemarker-configurer>
+		<mvc:template-loader-path location="/freemarker" />
+	</mvc:freemarker-configurer>
+
+----
+
+In Java config simply add the respective "Configurer" bean:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@Configuration
+	@EnableWebMvc
+	public class WebConfig extends WebMvcConfigurerAdapter {
+
+		@Override
+		public void configureViewResolvers(ViewResolverRegistry registry) {
+			registry.enableContentNegotiation(new MappingJackson2JsonView());
+			registry.freeMarker().cache(false);
+		}
+
+		@Bean
+		public FreeMarkerConfigurer freeMarkerConfigurer() {
+			FreeMarkerConfigurer configurer = new FreeMarkerConfigurer();
+			configurer.setTemplateLoaderPath("/WEB-INF/");
+			return configurer;
+		}
+
+	}
+----
+
+
 
 [[mvc-config-static-resources]]
-==== Configuring Serving of Resources
+==== Serving of Resources
 This option allows static resource requests following a particular URL pattern to be
 served by a `ResourceHttpRequestHandler` from any of a list of `Resource` locations.
 This provides a convenient way to serve static resources from locations other than the
@@ -32334,64 +32678,10 @@ Spring JSP tags:
 	<script src="${resourceUrl}/dojo/dojo.js" type="text/javascript"> </script>
 ----
 
-[[mvc-config-path-matching]]
-==== Configuring Path Matching
-This is a shortcut for configuring `RequestMappingHandlerMapping` path matching properties, without
-having to <<mvc-config-advanced-java,override this Bean with an advanced setup>>.
-
-An example of enabling pattern match features and using custom matchers, in Java:
-
-[source,java,indent=0]
-[subs="verbatim,quotes"]
-----
-	@Configuration
-	@EnableWebMvc
-	public class WebConfig extends WebMvcConfigurerAdapter {
-
-		@Override
-		public void configurePathMatch(PathMatchConfigurer configurer) {
-			configurer.setUseSuffixPatternMatch(true)
-			    .setUseTrailingSlashMatch(false)
-			    .setPathMatcher(antPathMatcher())
-			    .setUrlPathHelper(urlPathHelper());
-		}
-
-		@Bean
-		public UrlPathHelper urlPathHelper() {
-		    //...
-		}
-
-		@Bean
-		public PathMatcher antPathMatcher() {
-		    //...
-		}
-
-	}
-----
-
-For more details, check out the
-{javadoc-baseurl}/org/springframework/web/servlet/config/annotation/PathMatchConfigurer.html[PathMatchConfigurer] API.
-
-And the same in XML, use the `<mvc:path-matching>` element:
-
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
-----
-    <mvc:annotation-driven>
-        <mvc:path-matching
-            suffix-pattern="true"
-            trailing-slash="false"
-            path-helper="pathHelper"
-            path-matcher="pathMatcher" />
-    </mvc:annotation-driven>
-
-    <bean id="pathHelper" class="org.example.app.MyPathHelper" />
-    <bean id="pathMatcher" class="org.example.app.MyPathMatcher" />
-----
 
 [[mvc-default-servlet-handler]]
-==== mvc:default-servlet-handler
-This tag allows for mapping the `DispatcherServlet` to "/" (thus overriding the mapping
+==== Falling Back On the "Default" Servlet To Serve Resources
+This allows for mapping the `DispatcherServlet` to "/" (thus overriding the mapping
 of the container's default Servlet), while still allowing static resource requests to be
 handled by the container's default Servlet. It configures a
 `DefaultServletHttpRequestHandler` with a URL mapping of "/**" and the lowest priority
@@ -32462,15 +32752,61 @@ Or in XML:
 
 
 
-[[mvc-resources]]
-==== More Spring Web MVC Resources
-See the following links and pointers for more resources about Spring Web MVC:
+[[mvc-config-path-matching]]
+==== Path Matching
+This allows customizing various settings related to URL mapping and path matching.
+For details on the individual options check out the
+{javadoc-baseurl}/org/springframework/web/servlet/config/annotation/PathMatchConfigurer.html[PathMatchConfigurer] API.
 
-* There are many excellent articles and tutorials that show how to build web
-  applications with Spring MVC. Read them at the http://spring.io/docs[Spring
-  Documentation] page.
-* "Expert Spring Web MVC and Web Flow" by Seth Ladd and others (published by Apress) is
-  an excellent hard copy source of Spring Web MVC goodness.
+Below is an example in Java config:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@Configuration
+	@EnableWebMvc
+	public class WebConfig extends WebMvcConfigurerAdapter {
+
+		@Override
+		public void configurePathMatch(PathMatchConfigurer configurer) {
+			configurer
+			    .setUseSuffixPatternMatch(true)
+			    .setUseTrailingSlashMatch(false)
+			    .setUseRegisteredSuffixPatternMatch(true)
+			    .setPathMatcher(antPathMatcher())
+			    .setUrlPathHelper(urlPathHelper());
+		}
+
+		@Bean
+		public UrlPathHelper urlPathHelper() {
+		    //...
+		}
+
+		@Bean
+		public PathMatcher antPathMatcher() {
+		    //...
+		}
+
+	}
+----
+
+And the same in XML, use the `<mvc:path-matching>` element:
+
+[source,xml,indent=0]
+[subs="verbatim,quotes"]
+----
+    <mvc:annotation-driven>
+        <mvc:path-matching
+            suffix-pattern="true"
+            trailing-slash="false"
+            registered-suffixes-only="true"
+            path-helper="pathHelper"
+            path-matcher="pathMatcher" />
+    </mvc:annotation-driven>
+
+    <bean id="pathHelper" class="org.example.app.MyPathHelper" />
+    <bean id="pathMatcher" class="org.example.app.MyPathMatcher" />
+----
 
 
 
@@ -32556,8 +32892,6 @@ by type and then modifying its properties as necessary. For example:
 Note that `MyPostProcessor` needs to be included in an `<component scan />` in order for
 it to be detected or if you prefer you can declare it explicitly with an XML bean
 declaration.
-
-
 
 
 
@@ -34916,19 +35250,18 @@ you need to access the Locale. The HTTP response is passed in only for the setti
 cookies or other HTTP headers. The feed will automatically be written to the response
 object after the method returns.
 
-For an example of creating an Atom view please refer to Alef Arendsen's SpringSource
-Team Blog
-http://spring.io/blog/2009/03/16/adding-an-atom-view-to-an-application-using-spring-s-rest-support[entry].
+For an example of creating an Atom view please refer to Alef Arendsen's Spring Team Blog
+https://spring.io/blog/2009/03/16/adding-an-atom-view-to-an-application-using-spring-s-rest-support[entry].
 
 
 
 
 [[view-xml-marshalling]]
 === XML Marshalling View
-The `MarhsallingView` uses an XML `Marshaller` defined in the `org.springframework.oxm`
+The `MarshallingView` uses an XML `Marshaller` defined in the `org.springframework.oxm`
 package to render the response content as XML. The object to be marshalled can be set
 explicitly using `MarhsallingView`'s `modelKey` bean property. Alternatively, the view
-will iterate over all model properties and marshal only those types that are supported
+will iterate over all model properties and marshal the first type that is supported
 by the `Marshaller`. For more information on the functionality in the
 `org.springframework.oxm` package refer to the chapter <<oxm,Marshalling XML using O/X
 Mappers>>.
@@ -34938,8 +35271,7 @@ Mappers>>.
 
 [[view-json-mapping]]
 === JSON Mapping View
-The `MappingJackson2JsonView` (or `MappingJacksonJsonView` depending on the the Jackson
-version you have) uses the Jackson library's `ObjectMapper` to render the response
+The `MappingJackson2JsonView` uses the Jackson library's `ObjectMapper` to render the response
 content as JSON. By default, the entire contents of the model map (with the exception of
 framework-specific classes) will be encoded as JSON. For cases where the contents of the
 map need to be filtered, users may specify a specific set of model attributes to encode
@@ -34950,6 +35282,23 @@ rather than as a map of model attributes.
 JSON mapping can be customized as needed through the use of Jackson's provided
 annotations. When further control is needed, a custom `ObjectMapper` can be injected
 through the `ObjectMapper` property for cases where custom JSON
+serializers/deserializers need to be provided for specific types.
+
+
+
+
+[[view-xml-mapping]]
+=== XML Mapping View
+The `MappingJackson2XmlView` uses the
+https://github.com/FasterXML/jackson-dataformat-xml[Jackson XML extension]'s `XmlMapper`
+to render the response content as XML. If the model contains multiples entries, the
+object to be serialized should be set explicitly using `MappingJackson2XmlView`'s
+`modelKey` bean property. If the model contains a single entry, it will be serialized
+automatically.
+
+XML mapping can be customized as needed through the use of JAXB or Jackson's provided
+annotations. When further control is needed, a custom `XmlMapper` can be injected
+through the `ObjectMapper` property for cases where custom XML
 serializers/deserializers need to be provided for specific types.
 
 
@@ -36834,7 +37183,7 @@ few minutes to appear.
 
 Even in cases where latency is crucial, if the volume of messages is
 relatively low (e.g. monitoring network failures) the use of
-http://spring.io/blog/2012/05/08/spring-mvc-3-2-preview-techniques-for-real-time-updates[long polling]
+https://spring.io/blog/2012/05/08/spring-mvc-3-2-preview-techniques-for-real-time-updates[long polling]
 should be considered as a relatively simple alternative that
 works reliably and is comparable by efficiency (again assuming the volume of
 messages is relatively low).
@@ -37255,8 +37604,9 @@ SockJS consists of:
 * The https://github.com/sockjs/sockjs-protocol[SockJS protocol]
 defined in the form of executable
 http://sockjs.github.io/sockjs-protocol/sockjs-protocol-0.3.3.html[narrated tests].
-* The https://github.com/sockjs/sockjs-client[SockJS client] - a JavaScript library for use in browsers.
+* The https://github.com/sockjs/sockjs-client[SockJS JavaScript client] - a client library for use in browsers.
 * SockJS server implementations including one in the Spring Framework `spring-websocket` module.
+* As of 4.1 `spring-websocket` also provides a SockJS Java client.
 
 SockJS is designed for use in browsers. It goes to great lengths
 to support a wide range of browser versions using a variety of techniques.
@@ -37519,6 +37869,87 @@ Alternatively if the CORS configuration allows it consider excluding URLs with t
 SockJS endpoint prefix thus letting Spring's SockJsService handle it.
 
 
+[[websocket-fallback-sockjs-client]]
+==== SockJS Client
+
+A SockJS Java client is provided in order to connect to remote SockJS endpoints without
+using a browser. This can be especially useful when there is a need of bidirectional
+communication between 2 servers over a public network, i.e. where network proxies may
+preclude the use of the WebSocket protocol. A SockJS Java client is also very useful
+for testing purposes for example to simulate a large number of concurrent users.
+
+The SockJS Java client supports the "websocket", "xhr-streaming", and "xhr-polling"
+transports. The remaining ones only make sense for use in a browser.
+
+The `WebSocketTransport` can be configured with:
+
+* `StandardWebSocketClient` in a JSR-356 runtime
+* `JettyWebSocketClient` using the Jetty 9+ native WebSocket API
+* Any implementation of Spring's `WebSocketClient`
+
+An `XhrTransport` by definition supports both "xhr-streaming" and "xhr-polling" since
+from a client perspective there is no difference other than in the URL used to connect
+to the server. At present there are two implementations:
+
+* `RestTemplateXhrTransport` uses the RestTemplate for HTTP requests.
+* `JettyXhrTransport` uses Jetty's HttpClient for HTTP requests.
+
+The example below shows how to create a SockJS client and connect to a SockJS endpoint:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+  List<Transport> transports = new ArrayList<>(2);
+  transports.add(new WebSocketTransport(StandardWebSocketClient()));
+  transports.add(new RestTemplateXhrTransport());
+
+  SockJsClient sockJsClient = new SockJsClient(transports);
+  sockJsClient.doHandshake(new MyWebSocketHandler(), "ws://example.com:8080/sockjs");
+----
+
+[NOTE]
+====
+SockJS uses JSON formatted arrays for messages. By default Jackson 2 is used and needs
+to be on the classpath. Alternatively you can configure a custom implementation of
+`SockJsMessageCodec` and configure it on the SockJsClient.
+====
+
+To use the SockJsClient for simulating a large number of concurrent users you will
+need to configure the underlying HTTP client (for XHR transports) to allow a sufficient
+number of connections and threads. For example with Jetty:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+HttpClient jettyHttpClient = new HttpClient();
+jettyHttpClient.setMaxConnectionsPerDestination(1000);
+jettyHttpClient.setExecutor(new QueuedThreadPool(1000));
+----
+
+Consider also customizing these server-side SockJS related properties (see Javadoc for details):
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+@Configuration
+public class WebSocketConfig extends WebSocketMessageBrokerConfigurationSupport {
+
+    @Override
+    public void registerStompEndpoints(StompEndpointRegistry registry) {
+        registry.addEndpoint("/sockjs").withSockJS()
+            .setStreamBytesLimit(512 * 1024)
+            .setHttpMessageCacheSize(1000)
+            .setDisconnectDelay(30 * 1000);
+    }
+
+    // ...
+
+}
+----
+
+
+
+
 [[websocket-stomp]]
 === STOMP Over WebSocket Messaging Architecture
 The WebSocket protocol defines two main types of messages -- text and binary --
@@ -37642,8 +38073,8 @@ options. The endpoint is available for clients to connect to at URL path `/app/p
 
 		@Override
         public void configureMessageBroker(MessageBrokerRegistry config) {
-            config.setApplicationDestinationPrefixes("/app")
-                .enableSimpleBroker("/queue", "/topic");
+            config.setApplicationDestinationPrefixes("/app");
+            config.enableSimpleBroker("/queue", "/topic");
         }
 
 		@Override
@@ -37716,61 +38147,51 @@ sections <<websocket-stomp-handle-broker-relay-configure>> and
 [[websocket-stomp-message-flow]]
 ==== Flow of Messages
 
-When a STOMP endpoint is configured, the Spring application becomes the broker to
-connected clients. It handles incoming messages and broadcasts messages back.
-This section provides the big picture of how messages are handled and how
-they flow inside the application.
+When a STOMP endpoint is configured, the Spring application acts as the STOMP broker
+to connected clients. It handles incoming messages and sends messages back.
+This section provides a big picture overview of how messages flow inside the application.
 
-The `spring-messaging` module contains a number of abstractions for use in
-messaging applications which originated in the
-https://spring.io/spring-integration[Spring Integration] project and
-have been in use for a long time but are now part of the Spring Framework.
-Listed below are some of the main building blocks:
+The `spring-messaging` module contains a number of abstractions that originated in the
+https://spring.io/spring-integration[Spring Integration] project and are intended
+for use as building blocks in messaging applications:
 
-* {javadoc-baseurl}/org/springframework/messaging/Message.html[Message]
+* {javadoc-baseurl}/org/springframework/messaging/Message.html[Message] --
 represents a message with headers and a payload.
-* {javadoc-baseurl}/org/springframework/messaging/MessageHandler.html[MessageHandler]
-a simple contract components that handle a message.
-* {javadoc-baseurl}/org/springframework/messaging/MessageChannel.html[MessageChannel]
-a simple contract for sending a message that enables loose coupling between
-senders and receivers.
-* {javadoc-baseurl}/org/springframework/messaging/SubscribableChannel.html[SubscribableChannel]
+* {javadoc-baseurl}/org/springframework/messaging/MessageHandler.html[MessageHandler] --
+a contract for handling a message.
+* {javadoc-baseurl}/org/springframework/messaging/MessageChannel.html[MessageChannel] --
+a contract for sending a message enabling loose coupling between senders and receivers.
+* {javadoc-baseurl}/org/springframework/messaging/SubscribableChannel.html[SubscribableChannel] --
 extends `MessageChannel` and sends messages to registered `MessageHandler` subscribers.
-* {javadoc-baseurl}/org/springframework/messaging/support/ExecutorSubscribableChannel.html[ExecutorSubscribableChannel]
+* {javadoc-baseurl}/org/springframework/messaging/support/ExecutorSubscribableChannel.html[ExecutorSubscribableChannel] --
 a concrete implementation of `SubscribableChannel` that can deliver messages
-asynchronously using threads from a thread pool.
+asynchronously through a thread pool.
 
-The above building blocks can be used to construct a message flow.
+The provided STOMP over WebSocket config, both Java and XML, uses the above to
+assemble a concrete message flow including the following 3 channels:
 
-The provided configuration for STOMP over WebSocket, both Java config and XML namespace,
-assemble just such a concrete message flow that consists of the following 3
-subscribable channels:
+* `"clientInboundChannel"` -- for messages from WebSocket clients. Every incoming
+WebSocket message carrying a STOMP frame is sent through this channel.
+* `"clientOutboundChannel"` -- for messages to WebSocket clients. Every outgoing
+STOMP message from the broker is sent through this channel before getting sent
+to a client's WebSocket session.
+* `"brokerChannel"` -- for messages to the broker from within the application.
+Every message sent from the application to the broker passes through this channel.
 
-* `"clientInboundChannel"` for messages from WebSocket clients; every incoming
-WebSocket message that is decoded and turned into a Spring Message representing
-a STOMP frame is passed through this channel.
-* `"clientOutboundChannel"` for messages to WebSocket clients; every outgoing
-Spring Message representing a STOMP frame that is encoded and sent as a
-WebSocket message is passed through this channel.
-* `"brokerChannel"` for messages to the broker from within the application and
-ultimately intended to reach connected clients; every message that the application
-wants to send to clients passes through this channel.
-
-Messages through `"clientInboundChannel"` can flow to annotated
+Messages on the `"clientInboundChannel"` can flow to annotated
 methods for application handling (e.g. a stock trade execution request) or can
 be forwarded to the broker (e.g. client subscribing for stock quotes).
 The STOMP destination is used for simple prefix-based routing. For example
-the "/app" prefix routes messages annotated methods while the "/topic" or
-"/queue" prefix route messages to the broker.
+the "/app" prefix could route messages to annotated methods while the "/topic"
+and "/queue" prefixes could route messages to the broker.
 
 When a message-handling annotated method has a return type, its return
 value is sent as the payload of a Spring Message to the `"brokerChannel"`.
-The broker in turn broadcasts the message to clients. Sending an object as
-the payload of a Message to a specific destination can also easily be done
-from anywhere in the application with the help of a messaging template.
-For example a an HTTP POST handling method can broadcast a message to
-connected clients or a service component may periodically broadcast
-stock quotes.
+The broker in turn broadcasts the message to clients. Sending a message
+to a destination can also be done from anywhere in the application with
+the help of a messaging template. For example a an HTTP POST handling method
+can broadcast a message to connected clients or a service component may
+periodically broadcast stock quotes.
 
 Below is a simple example to illustrate the flow of messages:
 
@@ -37789,7 +38210,7 @@ Below is a simple example to illustrate the flow of messages:
 		@Override
 		public void configureMessageBroker(MessageBrokerRegistry registry) {
 			registry.setApplicationDestinationPrefixes("/app");
-			registry.enableSimpleBroker("/topic/");
+			registry.enableSimpleBroker("/topic");
 		}
 
 	}
@@ -37806,7 +38227,7 @@ Below is a simple example to illustrate the flow of messages:
 
 ----
 
-The following explains how messages flow given the above:
+The following explains the message flow for the above exmaple:
 
 * WebSocket clients connect to the WebSocket endpoint at "/portfolio".
 * Subscriptions to "/topic/greeting" pass through the "clientInboundChannel"
@@ -37827,17 +38248,21 @@ kinds of arguments and return values supported.
 [[websocket-stomp-handle-annotations]]
 ==== Annotation Message Handling
 
-The `@MessageMapping` annotation is supported on methods of `@Controller`
-as well as on `@RestController`-annotated classes.
-It can be used for mapping methods to path-like message destinations. It is also
-possible to combine with a type-level `@MessageMapping` for expressing shared
-mappings across all annotated methods within a controller.
+The `@MessageMapping` annotation is supported on methods of `@Controller` classes.
+It can be used for mapping methods to message destinations and can also be combined
+with the type-level `@MessageMapping` for expressing shared mappings across all
+annotated methods within a controller.
 
-Destination mappings can contain Ant-style patterns (e.g. "/foo*", "/foo/**")
-and template variables (e.g. "/foo/{id}"), which can then be accessed via
-`@DestinationVariable` method arguments. This should be familiar to Spring MVC
-users, in fact the same `AntPathMatcher` is used for matching destinations based
-on patterns and for extracting template variables.
+By default destination mappings are treated as Ant-style, slash-separated, path
+patterns, e.g. "/foo*", "/foo/**". etc. They can also contain template variables,
+e.g. "/foo/{id}" that can then be referenced via `@DestinationVariable`-annotated
+method arguments.
+
+[NOTE]
+====
+Applications can also use dot-separated destinations (vs slash).
+See <<websocket-stomp-destination-separator>>.
+====
 
 The following method arguments are supported for `@MessageMapping` methods:
 
@@ -37887,7 +38312,7 @@ the specified target destination.
 
 What if you wanted to send messages to connected clients from any part of the
 application? Any application component can send messages to the `"brokerChannel"`.
-The easist way to do that is to have a `SimpMessagingTemplate` injected, and
+The easiest way to do that is to have a `SimpMessagingTemplate` injected, and
 use it to send messages. Typically it should be easy to have it injected by
 type, for example:
 
@@ -37925,6 +38350,14 @@ stores them in memory, and broadcasts messages to connected clients with matchin
 destinations. The broker supports path-like destinations, including subscriptions
 to Ant-style destination patterns.
 
+[NOTE]
+====
+Applications can also use dot-separated destinations (vs slash).
+See <<websocket-stomp-destination-separator>>.
+====
+
+
+
 
 [[websocket-stomp-handle-broker-relay]]
 ==== Full-Featured Broker
@@ -37956,7 +38389,7 @@ Below is example configuration that enables a full-featured broker:
 
 		@Override
 		public void configureMessageBroker(MessageBrokerRegistry registry) {
-			registry.enableStompBrokerRelay("/topic/", "/queue/");
+			registry.enableStompBrokerRelay("/topic", "/queue");
 			registry.setApplicationDestinationPrefixes("/app");
 		}
 
@@ -37997,7 +38430,7 @@ it acts as a "relay" forwarding messages in both directions.
 
 [NOTE]
 ====
-Please add a dependency on `org.projectreactor:reactor-tcp` for TCP connection management.
+Please add a dependency on `org.projectreactor:reactor-net` for TCP connection management.
 ====
 
 Furthermore, application components (e.g. HTTP request handling methods,
@@ -38052,6 +38485,82 @@ and may be useful for example in a cloud environment where the actual host to wh
 the TCP connection is established is different from the host providing the
 cloud-based STOMP service.
 
+[[websocket-stomp-destination-separator]]
+==== Using Dot as Separator in `@MessageMapping` Destinations
+
+Although slash-separated path patterns are familiar to web developers, in messaging
+it is common to use "." as separator for example in the names of topics, queues,
+exchanges, etc. Applications can also switch to using "." (dot) instead of "/" (slash)
+as the separator in `@MessageMapping` mappings by configuring a custom `AntPathMatcher`.
+
+In Java config:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+  @Configuration
+  @EnableWebSocketMessageBroker
+  public class WebsocketConfig extends AbstractWebSocketMessageBrokerConfigurer {
+
+    // ...
+
+    @Override
+    public void configureMessageBroker(MessageBrokerRegistry registry) {
+      registry.enableStompBrokerRelay("/queue/", "/topic/");
+      registry.setApplicationDestinationPrefixes("/app");
+      registry.setPathMatcher(new AntPathMatcher("."));
+    }
+
+  }
+----
+
+In XML config:
+
+[source,xml,indent=0]
+[subs="verbatim,quotes,attributes"]
+----
+  <beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:websocket="http://www.springframework.org/schema/websocket"
+    xsi:schemaLocation="
+      http://www.springframework.org/schema/beans
+      http://www.springframework.org/schema/beans/spring-beans.xsd
+      http://www.springframework.org/schema/websocket
+      http://www.springframework.org/schema/websocket/spring-websocket.xsd">
+
+    <websocket:message-broker application-destination-prefix="/app" path-matcher="pathMatcher">
+      <websocket:stomp-endpoint path="/stomp" />
+      <websocket:simple-broker prefix="/topic, /queue"/>
+    </websocket:message-broker>
+
+    <bean id="pathMatcher" class="org.springframework.util.AntPathMatcher">
+      <constructor-arg index="0" value="." />
+    </bean>
+
+  </beans>
+----
+
+And below is a simple example to illustrate a controller with "." separator:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+  @Controller
+  @MessageMapping("foo")
+  public class FooController {
+    
+    @MessageMapping("bar.{baz}")
+    public void handleBaz(@DestinationVariable String baz) {
+    }
+
+  }
+----
+
+If the application prefix is set to "/app" then the foo method is effectively mapped to "/app/foo.bar.{baz}".
+
+
+
+
 [[websocket-stomp-authentication]]
 ==== Authentication
 
@@ -38091,36 +38600,265 @@ be plugged in (see examples in <<websocket-server-deployment>>).
 ==== User Destinations
 
 An application can send messages targeting a specific user.
-In order for a connected user to receive messages, they must be authenticated
-so that their session is associated with a concrete user name.
-See the previous section on information about authentication.
-
-Spring's STOMP support recognizes destinations prefixed with `/user/`.
-For example, a client can subscribe to destination `/user/position-updates`.
+Spring's STOMP support recognizes destinations prefixed with `"/user/"`.
+For example, a client might subscribe to the destination `"/user/queue/position-updates"`.
 This destination will be handled by the `UserDestinationMessageHandler` and
-transformed into a destination unique to the user's session,
-e.g. `/user/position-updates-123`. This provides the convenience of subscribing
-to a generically named destination, while also ensuring that it doesn't "collide"
-with any other user that also subscribes to `/user/position-updates`
-in order to receive stock position updates unique to them.
+transformed into a destination unique to the user session,
+e.g. `"/queue/position-updates-user123"`. This provides the convenience of subscribing
+to a generically named destination while at the same time ensuring no collisions
+with other users subscribing to the same destination so that each user can receive
+unique stock position updates.
 
-On the sending side, messages can be sent to a destination such as
-`/user/{username}/position-updates`, which in turn will be translated
-by the `UserDestinationMessageHandler` into the same unique destination
-belonging to the specified user name.
+On the sending side messages can be sent to a destination such as
+`"/user/{username}/queue/position-updates"`, which in turn will be translated
+by the `UserDestinationMessageHandler` into one or more destinations, one for each
+session associated with the user. This allows any component within the application to
+send messages targeting a specific user without necessarily knowing anything more
+than their name and the generic destination. This is also supported through an
+annotation as well as a messaging template.
 
-This allows any component within the application to send messages to a specific
-user without necessarily knowing anything more than their name and a generic
-destination.
+For example message-handling method can send messages to the user associated with
+the message being handled through the `@SendToUser` annotation:
 
-When this is used with an external message broker, check the broker documentation
-on how to manage inactive queues, so that when the user session is over, all
-unique user queues are removed. For example, RabbitMQ creates auto-delete queues
-when destinations like `/exchange/amq.direct/position-updates` are used.
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+@Controller
+public class PortfolioController {
+
+    @MessageMapping("/trade")
+    @SendToUser("/queue/position-updates")
+    public TradeResult executeTrade(Trade trade, Principal principal) {
+        // ...
+        return tradeResult;
+    }
+}
+----
+
+If the user has more than one sessions, by default all of the sessions subscribed
+to the given destination are targeted. However sometimes, it may be necessary to
+target only the session that sent the message being handled. This can be done by
+setting the `broadcast` attribute to false, for example:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+@Controller
+public class MyController {
+
+    @MessageMapping("/action")
+    public void handleAction() throws Exception{
+        // raise MyBusinessException here
+    }
+
+    @MessageExceptionHandler
+    @SendToUser(value="/queue/errors", broadcast=false)
+    public ApplicationError handleException(MyBusinessException exception) {
+        // ...
+        return appError;
+    }
+}
+----
+
+
+[NOTE]
+====
+While user destinations generally imply an authenticated user, it isn't required
+strictly. A WebSocket session that is not associated with an authenticated user
+can subscribe to a user destination. In such cases the `@SendToUser` annotation
+will behave exactly the same as with `broadcast=false`, i.e. targeting only the
+session that sent the message being handled.
+====
+
+It is also possible to send a message to user destinations from any application
+component by injecting the `SimpMessageTemplate` created by the Java config or
+XML namespace, for example (the bean name is "brokerMessagingTemplate` if required
+for qualification with `@Qualifier`):
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+@Service
+public class TradeServiceImpl implements TradeService {
+
+	private final SimpMessageTemplate messagingTemplate;
+
+	@Autowired
+	public TradeServiceImpl(SimpMessageTemplate messagingTemplate) {
+		this.messagingTemplate = messagingTemplate;
+	}
+
+	// ...
+
+	public void afterTradeExecuted(Trade trade) {
+		this.messagingTemplate.convertAndSendToUser(
+				trade.getUserName(), "/queue/position-updates", trade.getResult());
+	}
+}
+----
+
+[NOTE]
+====
+When using user destinations with an external message broker, check the broker
+documentation on how to manage inactive queues, so that when the user session is
+over, all unique user queues are removed. For example, RabbitMQ creates auto-delete
+queues when destinations like `/exchange/amq.direct/position-updates` are used.
 So in that case the client could subscribe to `/user/exchange/amq.direct/position-updates`.
 ActiveMQ has http://activemq.apache.org/delete-inactive-destinations.html[configuration options]
 for purging inactive destinations.
+====
 
+
+
+
+[[websocket-stomp-appplication-context-events]]
+==== Listening To ApplicationContext Events and Intercepting Messages
+
+Several `ApplicationContext` events (listed below) are published and can be
+received by implementing Spring's `ApplicationListener` interface.
+
+* `BrokerAvailabilityEvent` -- indicates when the broker becomes available/unavailable.
+While the "simple" broker becomes available immediately on startup and remains so while
+the application is running, the STOMP "broker relay" may lose its connection
+to the full featured broker for example if the broker is restarted. The broker relay
+has reconnect logic and will re-establish the "system" connection to the broker
+when it comes back, hence this event is published whenever the state changes from connected
+to disconnected and vice versa. Components using the `SimpMessagingTemplate` should
+subscribe to this event and avoid sending messages at times when the broker is not
+available. In any case they should be prepared to handle `MessageDeliveryException`
+when sending a message.
+* `SessionConnectEvent` -- published when a new STOMP CONNECT is received
+indicating the start of a new client session. The event contains the message representing the
+connect including the session id, user information (if any), and any custom headers the client
+may have sent. This is useful for tracking client sessions. Components subscribed
+to this event can wrap the contained message using `SimpMessageHeaderAccessor` or
+`StompMessageHeaderAccessor`.
+* `SessionConnectedEvent` -- published shortly after a `SessionConnectEvent` when the
+broker has sent a STOMP CONNECTED frame in response to the CONNECT. At this point the
+STOMP session can be considered fully established.
+* `SessionSubscribeEvent` -- published when a new STOMP SUBSCRIBE is received.
+* `SessionUnsubscribeEvent` -- published when a new STOMP UNSUBSCRIBE is received.
+* `SessionDisconnectEvent` -- published when a STOMP session ends. The DISCONNECT may
+have been sent from the client or it may also be automatically generated when the
+WebSocket session is closed. In some cases this event may be published more than once
+per session. Components should be idempotent to multiple disconnect events.
+
+[NOTE]
+====
+When using a full-featured broker, the STOMP "broker relay" automatically reconnects the
+"system" connection should the broker become temporarily unavailable. Client connections
+however are not automatically reconnected. Assuming heartbeats are enabled, the client
+will typically notice the broker is not responding within 10 seconds. Clients need to
+implement their own reconnect logic.
+====
+
+Furthermore, an application can directly intercept every incoming and outgoing message by
+registering a `ChannelInterceptor` on the respective message channel. For example
+to intercept inbound messages:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+  @Configuration
+  @EnableWebSocketMessageBroker
+  public class WebsocketConfig extends AbstractWebSocketMessageBrokerConfigurer {
+
+    @Override
+    public void configureClientInboundChannel(ChannelRegistration registration) {
+      registration.setInterceptors(new MyChannelInterceptor());
+    }
+  }
+----
+
+A custom `ChannelInterceptor` can extend the empty method base class
+`ChannelInterceptorAdapter` and use `StompHeaderAccessor` or `SimpMessageHeaderAccessor`
+to access information about the message.
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+  public class MyChannelInterceptor extends ChannelInterceptorAdapter {
+
+    @Override
+    public Message<?> preSend(Message<?> message, MessageChannel channel) {
+      StompHeaderAccessor accessor = StompHeaderAccessor.wrap(message);
+      StompCommand command = accessor.getStompCommand();
+      // ...
+      return message;
+    }
+  }
+----
+
+
+
+[[websocket-stomp-websocket-scope]]
+==== WebSocket Scope
+
+Each WebSocket session has a map of attributes. The map is attached as a header to
+inbound client messages and may be accessed from a controller method, for example:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+@Controller
+public class MyController {
+
+    @MessageMapping("/action")
+    public void handle(SimpMessageHeaderAccessor headerAccessor) {
+        Map<String, Object> attrs = headerAccessor.getSessionAttributes();
+        // ...
+    }
+}
+----
+
+It is also possible to declare a Spring-managed bean in the `"websocket"` scope.
+WebSocket-scoped beans can be injected into controllers and any channel interceptors
+registered on the "clientInboundChannel". Those are typically singletons and live
+longer than any individual WebSocket session. Therefore you will need to use a
+scope proxy mode for WebSocket-scoped beans:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+@Component
+@Scope(value="websocket", proxyMode = ScopedProxyMode.TARGET_CLASS)
+public class MyBean {
+
+    @PostConstruct
+    public void init() {
+        // Invoked after dependencies injected
+    }
+
+    // ...
+
+    @PreDestroy
+    public void destroy() {
+        // Invoked when the WebSocket session ends
+    }
+}
+
+@Controller
+public class MyController {
+
+    private final MyBean myBean;
+
+    @Autowired
+    public MyController(MyBean myBean) {
+        this.myBean = myBean;
+    }
+
+    @MessageMapping("/action")
+    public void handle() {
+        // this.myBean from the current WebSocket session
+    }
+}
+----
+
+As with any custom scope, Spring initializes a new MyBean instance the first
+time it is accessed from the controller and stores the instance in the WebSocket
+session attributes. The same instance is returned subsequently until the session
+ends. WebSocket-scoped beans will have all Spring lifecycle methods invoked as
+shown in the examples above.
 
 
 
@@ -38285,6 +39023,63 @@ instance can be broadcast through the broker to WebSocket clients connected
 through any other application instances.
 
 
+
+[[websocket-stomp-stats]]
+==== Runtime Monitoring
+
+When using `@EnableWebSocketMessageBroker` or `<websocket:message-broker>` key
+infrastructure components automatically gather stats and counters that provide
+important insight into the internal state of the application. The configuration
+also declares a bean of type `WebSocketMessageBrokerStats` that gathers all
+available information in one place and by default logs it at INFO once
+every 30 minutes. This bean can be exported to JMX through Spring's
+`MBeanExporter` for viewing at runtime for example through JDK's jconsole.
+Below is a summary of the available information.
+
+Client WebSocket Sessions::
+    Current::: indicates how many client sessions there are
+    currently with the count further broken down by WebSocket vs HTTP
+    streaming and polling SockJS sessions.
+    Total::: indicates how many total sessions have been established.
+    Abnormally Closed:::
+        Connect Failures:::: these are sessions that got established but were
+        closed after not having received any messages within 60 seconds. This is
+        usually an indication of proxy or network issues.
+        Send Limit Exceeded:::: sessions closed after exceeding the configured send
+        timeout or the send buffer limits which can occur with slow clients
+        (see previous section).
+        Transport Errors:::: sessions closed after a transport error such as
+        failure to read or write to a WebSocket connection or
+        HTTP request/response.
+    STOMP Frames::: the total number of CONNECT, CONNECTED, and DISCONNECT frames
+    processed indicating how many clients connected on the STOMP level. Note that
+    the DISCONNECT count may be lower when sessions get closed abnormally or when
+    clients close without sending a DISCONNECT frame.
+STOMP Broker Relay::
+    TCP Connections::: indicates how many TCP connections on behalf of client
+    WebSocket sessions are established to the broker. This should be equal to the
+    number of client WebSocket sessions + 1 additional shared "system" connection
+    for sending messages from within the application.
+    STOMP Frames::: the total number of CONNECT, CONNECTED, and DISCONNECT frames
+    forwarded to or received from the broker on behalf of clients. Note that a
+    DISCONNECT frame is sent to the broker regardless of how the client WebSocket
+    session was closed. Therefore a lower DISCONNECT frame count is an indication
+    that the broker is pro-actively closing connections, may be because of a
+    heartbeat that didn't arrive in time, an invalid input frame, or other.
+Client Inbound Channel:: stats from thread pool backing the "clientInboundChannel"
+    providing insight into the health of incoming message processing. Tasks queueing
+    up here is an indication the application may be too slow to handle messages.
+    If there I/O bound tasks (e.g. slow database query, HTTP request to 3rd party
+    REST API, etc) consider increasing the thread pool size.
+Client Outbound Channel:: stats from the thread pool backing the "clientOutboundChannel"
+    providing insight into the health of broadcasting messages to clients. Tasks
+    queueing up here is an indication clients are too slow to consume messages.
+    One way to address this is to increase the thread pool size to accommodate the
+    number of concurrent slow clients expected. Another option is to reduce the
+    send timeout and send buffer size limits (see the previous section).
+SockJS Task Scheduler:: stats from thread pool of the SockJS task scheduler which
+    is used to send heartbeats. Note that when heartbeats are negotiated on the
+    STOMP level the SockJS heartbeats are disabled.
 
 [[websocket-stomp-testing]]
 ==== Testing Annotated Controller Methods
@@ -38728,11 +39523,11 @@ and return types are complex types that cannot be serialized using the serializa
 mechanisms Hessian and Burlap use (refer to the next section for more considerations
 when choosing a remoting technology).
 
-Under the hood, Spring uses either the standard facilities provided by J2SE to perform
-HTTP calls or Commons `HttpClient`. Use the latter if you need more advanced and
-easy-to-use functionality. Refer to
-http://jakarta.apache.org/commons/httpclient[jakarta.apache.org/commons/httpclient] for
-more info.
+Under the hood, Spring uses either the standard facilities provided by the JDK or
+Apache `HttpComponents` to perform HTTP calls. Use the latter if you need more
+advanced and easier-to-use functionality. Refer to
+http://hc.apache.org/httpcomponents-client-ga/[hc.apache.org/httpcomponents-client-ga/]
+for more information.
 
 
 
@@ -38831,14 +39626,14 @@ to HTTP POST requests to the URL pointing to the exported service.
 ----
 
 As mentioned before, you can choose what HTTP client you want to use. By default, the
-`HttpInvokerProxy` uses the J2SE HTTP functionality, but you can also use the Commons
-`HttpClient` by setting the `httpInvokerRequestExecutor` property:
+`HttpInvokerProxy` uses the JDK's HTTP functionality, but you can also use the Apache
+`HttpComponents` client by setting the `httpInvokerRequestExecutor` property:
 
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
 	<property name="httpInvokerRequestExecutor">
-		<bean class="org.springframework.remoting.httpinvoker.CommonsHttpInvokerRequestExecutor"/>
+		<bean class="org.springframework.remoting.httpinvoker.HttpComponentsHttpInvokerRequestExecutor"/>
 	</property>
 ----
 
@@ -39477,15 +40272,15 @@ the `RestTemplate` as follows:
 
 [TIP]
 ====
-Apache HttpClient supports gzip encoding via the `DecompressingHttpClient`. To use it,
+Apache HttpClient supports gzip encoding. To use it,
 construct a `HttpComponentsClientHttpRequestFactory` like so:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	HttpClient httpClient = new DecompressingHttpClient(new DefaultHttpClient());
-	ClientHttpRequestFactory requestFactory = new HttpComponentsClientHttpRequestFactory(httpClient);
-	RestTemplate template = new RestTemplate(requestFactory);
+	HttpClient httpClient = HttpClientBuilder.create().build();
+    ClientHttpRequestFactory requestFactory = new HttpComponentsClientHttpRequestFactory(httpClient);
+    RestTemplate restTemplate = new RestTemplate(requestFactory);
 ----
 ====
 The general callback interface is `RequestCallback` and is called when the execute
@@ -39595,6 +40390,20 @@ In the above example, we first prepare a request entity that contains the
 `MyRequestHeader` header. We then retrieve the response, and read the `MyResponseHeader`
 and body.
 
+[[rest-template-jsonview]]
+===== Jackson JSON Views support
+
+It is possible to specify a http://wiki.fasterxml.com/JacksonJsonViews[Jackson JSON View]
+to serialize only a subset of the object properties. For example:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	JacksonSerializationValue jsv = new JacksonSerializationValue(new User("eric", "7!jd#h23"),
+		User.WithoutPasswordView.class);
+	HttpEntity<JacksonSerializationValue> entity = new HttpEntity<JacksonSerializationValue>(jsv);
+	String s = template.postForObject("http://example.com/user", entity, String.class);
+----
 
 
 [[rest-message-conversion]]
@@ -39669,13 +40478,24 @@ can be injected via constructor or bean properties. By default this converter su
 
 
 [[rest-mapping-json-converter]]
-===== MappingJackson2HttpMessageConverter (or MappingJacksonHttpMessageConverter with Jackson 1.x)
+===== MappingJackson2HttpMessageConverter
 An `HttpMessageConverter` implementation that can read and write JSON using Jackson's
 `ObjectMapper`. JSON mapping can be customized as needed through the use of Jackson's
 provided annotations. When further control is needed, a custom `ObjectMapper` can be
 injected through the `ObjectMapper` property for cases where custom JSON
 serializers/deserializers need to be provided for specific types. By default this
 converter supports ( `application/json`).
+
+
+[[rest-mapping-xml-converter]]
+===== MappingJackson2XmlHttpMessageConverter
+An `HttpMessageConverter` implementation that can read and write XML using
+https://github.com/FasterXML/jackson-dataformat-xml[Jackson XML] extension's
+`XmlMapper`. XML mapping can be customized as needed through the use of JAXB
+or Jackson's provided annotations. When further control is needed, a custom `XmlMapper`
+can be injected through the `ObjectMapper` property for cases where custom XML
+serializers/deserializers need to be provided for specific types. By default this
+converter supports ( `application/xml`).
 
 
 [[rest-source-converter]]
@@ -40042,7 +40862,8 @@ JMS can be roughly divided into two areas of functionality, namely the productio
 consumption of messages. The `JmsTemplate` class is used for message production and
 synchronous message reception. For asynchronous reception similar to Java EE's
 message-driven bean style, Spring provides a number of message listener containers that
-are used to create Message-Driven POJOs (MDPs).
+are used to create Message-Driven POJOs (MDPs). Spring also provides a declarative way
+of creating message listeners.
 
 The package `org.springframework.jms.core` provides the core functionality for using
 JMS. It contains JMS template classes that simplify the use of the JMS by handling the
@@ -40066,6 +40887,13 @@ abstraction to convert between Java objects and JMS messages.
 The package `org.springframework.jms.support.destination` provides various strategies
 for managing JMS destinations, such as providing a service locator for destinations
 stored in JNDI.
+
+The package `org.springframework.jms.annotation` provides the necessary infrastructure
+to support annotation-driven listener endpoints using `@JmsListener`.
+
+The package `org.springframework.jms.config` provides the parser implementation for the
+`jms` namespace as well the java config support to configure listener containers and
+create listener endpoints.
 
 Finally, the package `org.springframework.jms.connection` provides an implementation of
 the `ConnectionFactory` suitable for use in standalone applications. It also contains an
@@ -40103,12 +40931,16 @@ avoid duplication in the number of send methods. Similarly, the timeout value fo
 synchronous receive calls is set using the property `setReceiveTimeout`.
 
 Some JMS providers allow the setting of default QOS values administratively through the
-configuration of the ConnectionFactory. This has the effect that a call to
+configuration of the `ConnectionFactory`. This has the effect that a call to
 `MessageProducer`'s send method `send(Destination destination, Message message)` will
 use different QOS default values than those specified in the JMS specification. In order
 to provide consistent management of QOS values, the `JmsTemplate` must therefore be
 specifically enabled to use its own QOS values by setting the boolean property
 `isExplicitQosEnabled` to `true`.
+
+For convenience, `JmsTemplate` also exposes a basic request-reply operation that allows
+to send a message and wait for a reply on a temporary queue that is created as part of
+the operation.
 
 [NOTE]
 ====
@@ -40119,6 +40951,10 @@ clear, the `JmsTemplate` is stateful, in that it maintains a reference to a
 `ConnectionFactory`, but this state is __not__ conversational state.
 ====
 
+As of Spring Framework 4.1, `JmsMessagingTemplate` is built on top of `JmsTemplate`
+and provides an integration with the messaging abstraction, i.e.
+`org.springframework.messaging.Message`. This allows you to create the message to
+send in generic manner.
 
 
 [[jms-connections]]
@@ -40151,7 +40987,7 @@ ConnectionFactory->Connection->Session->MessageProducer->send
 
 Between the ConnectionFactory and the Send operation there are three intermediate
 objects that are created and destroyed. To optimise the resource usage and increase
-performance two implementations of IConnectionFactory are provided.
+performance two implementations of `ConnectionFactory` are provided.
 
 
 [[jms-connection-factory]]
@@ -40172,7 +41008,7 @@ cache size is set to 1, use the property `SessionCacheSize` to increase the numb
 cached sessions. Note that the number of actual cached sessions will be more than that
 number as sessions are cached based on their acknowledgment mode, so there can be up to
 4 cached session instances when `SessionCacheSize` is set to one, one for each
-AcknowledgementMode. MessageProducers and MessageConsumers are cached within their
+`AcknowledgementMode`. MessageProducers and MessageConsumers are cached within their
 owning session and also take into account the unique properties of the producers and
 consumers when caching. MessageProducers are cached based on their destination.
 MessageConsumers are cached based on a key composed of the destination, selector,
@@ -40230,10 +41066,12 @@ operations that do not refer to a specific destination.
 One of the most common uses of JMS messages in the EJB world is to drive message-driven
 beans (MDBs). Spring offers a solution to create message-driven POJOs (MDPs) in a way
 that does not tie a user to an EJB container. (See <<jms-asynchronousMessageReception>>
-for detailed coverage of Spring's MDP support.)
+for detailed coverage of Spring's MDP support.) As from Spring Framework 4.1, endpoint
+methods can be simply annotated using `@JmsListener` see <<jms-annotated>> for more
+details.
 
 A message listener container is used to receive messages from a JMS message queue and
-drive the MessageListener that is injected into it. The listener container is
+drive the `MessageListener` that is injected into it. The listener container is
 responsible for all threading of message reception and dispatches into the listener for
 processing. A message listener container is the intermediary between an MDP and a
 messaging provider, and takes care of registering to receive messages, participating in
@@ -40268,6 +41106,15 @@ This listener container strikes a good balance between low requirements on the J
 provider, advanced functionality such as transaction participation, and compatibility
 with Java EE environments.
 
+The cache level of the container can be customized. Note that when no caching is enabled,
+a new connection and a new session is created for each message reception. Combining this
+with a non durable subscription with high loads may lead to message lost. Make sure to
+use a proper cache level in such case.
+
+This container also has recoverable capabilities when the broker goes down. By default,
+a simple `BackOff` implementation retries every 5 seconds. It is possible to specify
+a custom `BackOff` implementation for more fine-grained recovery options, see
+`ExponentialBackOff` for an example.
 
 
 [[jms-tx]]
@@ -40311,8 +41158,7 @@ transactional JMS `Session`.
 The `JmsTemplate` contains many convenience methods to send a message. There are send
 methods that specify the destination using a `javax.jms.Destination` object and those
 that specify the destination using a string for use in a JNDI lookup. The send method
-that takes no destination argument uses the default destination. Here is an example that
-sends a message to a queue using the 1.0.2 implementation.
+that takes no destination argument uses the default destination.
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -40460,6 +41306,15 @@ the receiver should wait before giving up waiting for a message.
 
 [[jms-asynchronousMessageReception]]
 ==== Asynchronous Reception - Message-Driven POJOs
+
+[NOTE]
+====
+Spring also supports annotated-listener endpoints through the use of the `@JmsListener`
+and provides an open infrastructure to register endpoints programmatically. This
+is by far the most convenient way to setup an asynchronous receiver, see
+<<jms-annotated-support>> for more details.
+====
+
 In a fashion similar to a Message-Driven Bean (MDB) in the EJB world, the Message-Driven
 POJO (MDP) acts as a receiver for JMS messages. The one restriction (but see also below
 for the discussion of the `MessageListenerAdapter` class) on an MDP is that it must
@@ -40846,10 +41701,237 @@ contract.
 
 
 
+[[jms-annotated]]
+=== Annotation-driven listener endpoints
+The easiest way to receive a message asynchronously is to use the annotated listener
+endpoint infrastructure. In a nutshell, it allows you to expose a method of a managed
+bean as a JMS listener endpoint.
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+    @Component
+    public class MyService {
+
+    	@JmsListener(destination = "myDestination")
+    	public void processOrder(String data) { ... }
+    }
+----
+
+The idea of the example above is that whenever a message is available on the
+`javax.jms.Destination` "myDestination", the `processOrder` method is invoked
+accordingly (in this case, with the content of the JMS message similarly to
+what the <<jms-receiving-async-message-listener-adapter, `MessageListenerAdapter`>>
+provides).
+
+The annotated endpoint infrastructure creates a message listener container
+behind the scenes for each annotated method, using a `JmsListenerContainerFactory`.
+
+[[jms-annotated-support]]
+==== Enable listener endpoint annotations
+
+To enable support for `@JmsListener` annotations add `@EnableJms` to one of
+your `@Configuration` classes.
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@Configuration
+	@EnableJms
+	public class AppConfig {
+
+		@Bean
+		public DefaultJmsListenerContainerFactory jmsListenerContainerFactory() {
+			DefaultJmsListenerContainerFactory factory =
+					new DefaultJmsListenerContainerFactory();
+			factory.setConnectionFactory(connectionFactory());
+			factory.setDestinationResolver(destinationResolver());
+			factory.setConcurrency("3-10");
+			return factory;
+		}
+	}
+----
+
+By default, the infrastructure looks for a bean named `jmsListenerContainerFactory`
+as the source for the factory to use to create message listener containers. In this
+case, and ignoring the JMS infrastructure setup, the `processOrder` method can be
+invoked with a core poll size of 3 threads and a maximum pool size of 10 threads.
+
+It is possible to customize the listener container factory to use per annotation or
+an explicit default can be configured by implementing the `JmsListenerConfigurer`
+interface. The default is only required if at least one endpoint is registered
+without a specific container factory. See the javadoc for full details and examples.
+
+If you prefer <<jms-namespace,XML configuration>> use the `<jms:annotation-driven>`
+element.
+
+[source,xml,indent=0]
+[subs="verbatim,quotes"]
+----
+	<jms:annotation-driven/>
+
+    <bean id="jmsListenerContainerFactory"
+            class="org.springframework.jms.config.DefaultJmsListenerContainerFactory">
+        <property name="connectionFactory" ref="connectionFactory"/>
+        <property name="destinationResolver" ref="destinationResolver"/>
+        <property name="concurrency" value="3-10"/>
+    </bean>
+----
+
+[[jms-annotated-programmatic-registration]]
+==== Programmatic endpoints registration
+
+`JmsListenerEndpoint` provides a model of an JMS endpoint and is responsible for configuring
+the container for that model. The infrastructure allows you to configure endpoints
+programmatically in addition to the ones that are detected by the `JmsListener` annotation.
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@Configuration
+	@EnableJms
+	public class AppConfig implements JmsListenerConfigurer {
+
+		@Override
+		public void configureJmsListeners(JmsListenerEndpointRegistrar registrar) {
+			SimpleJmsListenerEndpoint endpoint = new SimpleJmsListenerEndpoint();
+			endpoint.setDestination("anotherQueue");
+			endpoint.setMessageListener(message -> {
+				// processing
+			});
+			registrar.registerEndpoint(endpoint);
+		}
+	}
+----
+
+In the example above, we used `SimpleJmsListenerEndpoint` which provides the actual
+`MessageListener` to invoke but you could just as well build your own endpoint variant
+describing a custom invocation mechanism.
+
+It should be noted that you could just as well skip the use of `@JmsListener` altogether
+and only register your endpoints programmatically through `JmsListenerConfigurer`.
+
+[[jms-annotated-method-signature]]
+==== Annotated endpoint method signature
+
+So far, we have been injecting a simple `String` in our endpoint but it can actually
+have a very flexible method signature. Let's rewrite it to inject the `Order` with
+a custom header:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@Component
+	public class MyService {
+
+    	@JmsListener(destination = "myDestination")
+    	public void processOrder(Order order, @Header("order_type") String orderType) {
+        	...
+    	}
+	}
+----
+
+These are the main elements you can inject in JMS listener endpoints:
+
+* The raw `javax.jms.Message` or any of its subclasses (provided of course that it
+  matches the incoming message type).
+* The `javax.jms.Session` for optional access to the native JMS API e.g. for sending
+  a custom reply.
+* The `org.springframework.messaging.Message` representing the incoming JMS message.
+  Note that this message holds both the custom and the standard headers (as defined
+  by `JmsHeaders`).
+* `@Header`-annotated method arguments to extract a specific header value, including
+  standard JMS headers.
+* `@Headers`-annotated argument that must also be assignable to `java.util.Map` for
+  getting access to all headers.
+* A non-annotated element that is not one of the supported types (i.e. `Message` and
+  `Session`) is considered to be the payload. You can make that explicit by annotating
+  the parameter with `@Payload`. You can also turn on validation by adding an extra
+  `@Validated`.
+
+The ability to inject Spring's `Message` abstraction is particularly useful to benefit
+from all the information stored in the transport-specific message without relying on
+transport-specific API.
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@JmsListener(destination = "myDestination")
+	public void processOrder(Message<Order> order) { ... }
+----
+
+Handling of method arguments is provided by `DefaultJmsHandlerMethodFactory` which can be
+further customized to support additional method arguments. The conversion and validation
+support can be customized there as well.
+
+For instance, if we want to make sure our `Order` is valid before processing it, we can
+annotate the payload with `@Valid` and configure the necessary validator as follows:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@Configuration
+	@EnableJms
+	public class AppConfig implements JmsListenerConfigurer {
+
+    	@Override
+    	public void configureJmsListeners(JmsListenerEndpointRegistrar registrar) {
+        	registrar.setJmsHandlerMethodFactory(myJmsHandlerMethodFactory());
+    	}
+
+    	@Bean
+    	public DefaultJmsHandlerMethodFactory myJmsHandlerMethodFactory() {
+        	DefaultJmsHandlerMethodFactory factory = new DefaultJmsHandlerMethodFactory();
+        	factory.setValidator(myValidator());
+        	return factory;
+    	}
+	}
+----
+
+[[jms-annotated-reply]]
+==== Reply management
+
+The existing support in <<jms-receiving-async-message-listener-adapter,MessageListenerAdapter>>
+already allows your method to have a non-`void` return type. When that's the case, the result of
+the invocation is encapsulated in a `javax.jms.Message` sent either in the destination specified
+in the `JMSReplyTo` header of the original message or in the default destination configured on
+the listener. That default destination can now be set using the `@SendTo` annotation of the
+messaging abstraction.
+
+Assuming our `processOrder` method should now return an `OrderStatus`, it is possible to write it
+as follow to automatically send a reply:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@JmsListener(destination = "myDestination")
+	@SendTo("status")
+	public OrderStatus processOrder(Order order) {
+    	// order processing
+    	return status;
+	}
+----
+
+If you need to set additional headers in a transport-independent manner, you could return a
+`Message` instead, something like:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@JmsListener(destination = "myDestination")
+	@SendTo("status")
+	public Message<OrderStatus> processOrder(Order order) {
+    	// order processing
+    	return MessageBuilder
+        	    .withPayload(status)
+            	.setHeader("code", 1234)
+            	.build();
+	}
+----
 
 [[jms-namespace]]
 === JMS Namespace Support
-Spring 2.5 introduces an XML namespace for simplifying JMS configuration. To use the JMS
+Spring provides an XML namespace for simplifying JMS configuration. To use the JMS
 namespace elements you will need to reference the JMS schema:
 
 [source,xml,indent=0]
@@ -40868,9 +41950,11 @@ namespace elements you will need to reference the JMS schema:
 	</beans>
 ----
 
-The namespace consists of two top-level elements: `<listener-container/>` and
-`<jca-listener-container/>` both of which may contain one or more `<listener/>` child
-elements. Here is an example of a basic configuration for two listeners.
+The namespace consists of three top-level elements: `<annotation-driven/>`, `<listener-container/>`
+and `<jca-listener-container/>`. `<annotation-driven` enables the use of <<jms-annotated,
+annotation-driven listener endpoints>>. `<listener-container/>` and `<jca-listener-container/>`
+defines shared listener container configuration and may contain `<listener/>` child elements. Here
+is an example of a basic configuration for two listeners.
 
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
@@ -40923,6 +42007,12 @@ describes all available attributes:
 
 | selector
 | An optional message selector for this listener.
+
+| concurrency
+| The number of concurrent sessions/consumers to start for this listener. Can either be
+  a simple number indicating the maximum number (e.g. "5") or a range indicating the lower
+  as well as the upper limit (e.g. "3-5"). Note that a specified minimum is just a hint
+  and might be ignored at runtime. Default is the value provided by the container
 |===
 
 The `<listener-container/>` element also accepts several optional attributes. This
@@ -40930,6 +42020,9 @@ allows for customization of the various strategies (for example, `taskExecutor` 
 `destinationResolver`) as well as basic JMS settings and resource references. Using
 these attributes, it is possible to define highly-customized listener containers while
 still benefiting from the convenience of the namespace.
+
+Such settings can be automatically exposed as a `JmsListenerContainerFactory` by
+specifying the id of the bean to expose through the `factory-id` attribute.
 
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
@@ -40967,6 +42060,10 @@ choices and message redelivery scenarios.
   Default is Spring's standard `DefaultMessageListenerContainer` or
   `SimpleMessageListenerContainer`, according to the "container-type" attribute.
 
+| factory-id
+| Exposes the settings defined by this element as a `JmsListenerContainerFactory`
+  with the specified id so that they can be reused with other endpoints.
+
 | connection-factory
 | A reference to the JMS `ConnectionFactory` bean (the default bean name is
   `'connectionFactory'`).
@@ -40986,8 +42083,10 @@ choices and message redelivery scenarios.
   may occur during the execution of the `MessageListener`.
 
 | destination-type
-| The JMS destination type for this listener: `queue`, `topic` or `durableTopic`. The
-  default is `queue`.
+| The JMS destination type for this listener: `queue`, `topic`, `durableTopic`, `sharedTopic`
+  or `sharedDurableTopic`. This enables potentially the `pubSubDomain`, `subscriptionDurable`
+  and `subscriptionShared` properties of the container. The default is `queue` (i.e. disabling
+  those 3 properties).
 
 | client-id
 | The JMS client id for this listener container. Needs to be specified when using
@@ -41026,9 +42125,18 @@ choices and message redelivery scenarios.
 | The timeout to use for receive calls (in milliseconds). The default is `1000` ms (1
   sec); `-1` indicates no timeout at all.
 
+| back-off
+| Specify the `BackOff` instance to use to compute the interval between recovery
+  attempts. If the `BackOffExecution` implementation returns `BackOffExecution#STOP`,
+  the listener container will not further attempt to recover. The `recovery-interval`
+  value is ignored when this property is set. The default is a `FixedBackOff` with
+  an interval of 5000 ms, that is 5 seconds.
+
 | recovery-interval
-| Specify the interval between recovery attempts, in milliseconds. The default is `5000`
-  ms, that is, 5 seconds.
+| Specify the interval between recovery attempts, in milliseconds. Convenience
+  way to create a `FixedBackOff` with the specified interval. For more recovery
+  options, consider specifying a BackOff instance instead. The default is 5000 ms,
+  that is 5 seconds.
 
 | phase
 | The lifecycle phase within which this container should start and stop. The lower the
@@ -41061,6 +42169,10 @@ table:
 |===
 | Attribute| Description
 
+| factory-id
+| Exposes the settings defined by this element as a `JmsListenerContainerFactory`
+  with the specified id so that they can be reused with other endpoints.
+
 | resource-adapter
 | A reference to the JCA `ResourceAdapter` bean (the default bean name is
   `'resourceAdapter'`).
@@ -41077,8 +42189,10 @@ table:
   method arguments. Default is a `SimpleMessageConverter`.
 
 | destination-type
-| The JMS destination type for this listener: `queue`, `topic` or `durableTopic`. The
-  default is `queue`.
+| The JMS destination type for this listener: `queue`, `topic`, `durableTopic`, `sharedTopic`
+  or `sharedDurableTopic`. This enables potentially the `pubSubDomain`, `subscriptionDurable`
+  and `subscriptionShared` properties of the container. The default is `queue` (i.e. disabling
+  those 3 properties).
 
 | client-id
 | The JMS client id for this listener container. Needs to be specified when using
@@ -41221,6 +42335,13 @@ With this configuration the `testBean` bean is exposed as an MBean under the
 are exposed as attributes and all __public__ methods (bar those inherited from the
 `Object` class) are exposed as operations.
 
+[NOTE]
+====
+`MBeanExporter` is a `Lifecycle` bean (see <<beans-factory-lifecycle-processor>>)
+and MBeans are exported as late as possible during the application lifecycle by default. It
+is possible to configure the `phase` at which the export happens or disable automatic
+registration by setting the `autoStartup` flag.
+====
 
 
 [[jmx-exporting-mbeanserver]]
@@ -41457,11 +42578,11 @@ interface using either source-level metadata or any arbitrary interface.
 
 
 [[jmx-interface-metadata]]
-==== Using Source-Level Metadata (JDK 5.0 annotations)
+==== Using Source-Level Metadata (Java annotations)
 Using the `MetadataMBeanInfoAssembler` you can define the management interfaces for your
 beans using source level metadata. The reading of metadata is encapsulated by the
 `org.springframework.jmx.export.metadata.JmxAttributeSource` interface. Spring JMX
-provides a default implementation which uses JDK 5.0 annotations, namely
+provides a default implementation which uses Java annotations, namely
 `org.springframework.jmx.export.annotation.AnnotationJmxAttributeSource`. The
 `MetadataMBeanInfoAssembler` __must__ be configured with an implementation instance of
 the `JmxAttributeSource` interface for it to function correctly (there is __no__
@@ -42061,7 +43182,7 @@ By default `ConnectorServerFactoryBean` creates a `JMXConnectorServer` bound to
 `"service:jmx:jmxmp://localhost:9875"`. The `serverConnector` bean thus exposes the
 local `MBeanServer` to clients through the JMXMP protocol on localhost, port 9875. Note
 that the JMXMP protocol is marked as optional by the JSR 160 specification: currently,
-the main open-source JMX implementation, MX4J, and the one provided with J2SE 5.0
+the main open-source JMX implementation, MX4J, and the one provided with the JDK
 do __not__ support JMXMP.
 
 To specify another URL and register the `JMXConnectorServer` itself with the
@@ -42544,8 +43665,8 @@ homepage] at Oracle
 [[cci-introduction]]
 === Introduction
 Java EE provides a specification to standardize access to enterprise information systems
-(EIS): the JCA (J2EE Connector Architecture). This specification is divided into several
-different parts:
+(EIS): the JCA (Java EE Connector Architecture). This specification is divided into
+several different parts:
 
 * SPI (Service provider interfaces) that the connector provider must implement. These
   interfaces constitute a resource adapter which can be deployed on a Java EE
@@ -44172,7 +45293,7 @@ executor may be single-threaded or even synchronous. Spring's abstraction hides
 implementation details between Java SE 1.4, Java SE 5 and Java EE environments.
 
 Spring's `TaskExecutor` interface is identical to the `java.util.concurrent.Executor`
-interface. In fact, its primary reason for existence is to abstract away the need for
+interface. In fact, its primary reason for existence was to abstract away the need for
 Java 5 when using thread pools. The interface has a single method `execute(Runnable
 task)` that accepts a task for execution based on the semantics and configuration of the
 thread pool.
@@ -44191,36 +45312,35 @@ behavior, it is possible to use this abstraction for your own needs.
 There are a number of pre-built implementations of `TaskExecutor` included with the
 Spring distribution. In all likelihood, you shouldn't ever need to implement your own.
 
-* `SimpleAsyncTaskExecutor` This implementation does not reuse any threads, rather it
-  starts up a new thread for each invocation. However, it does support a concurrency
-  limit which will block any invocations that are over the limit until a slot has been
-  freed up. If you're looking for true pooling, keep scrolling further down the page.
-* `SyncTaskExecutor` This implementation doesn't execute invocations asynchronously.
-  Instead, each invocation takes place in the calling thread. It is primarily used in
-  situations where multithreading isn't necessary such as simple test cases.
-* `ConcurrentTaskExecutor` This implementation is a wrapper for a Java 5
-  `java.util.concurrent.Executor`. There is an alternative, `ThreadPoolTaskExecutor`,
-  that exposes the `Executor` configuration parameters as bean properties. It is rare to
-  need to use the `ConcurrentTaskExecutor` but if the <<threadPoolTaskExecutor,
-  `ThreadPoolTaskExecutor`>> isn't robust enough for your needs, the
-  `ConcurrentTaskExecutor` is an alternative.
-* `SimpleThreadPoolTaskExecutor` This implementation is actually a subclass of Quartz's
-  `SimpleThreadPool` which listens to Spring's lifecycle callbacks. This is typically
-  used when you have a thread pool that may need to be shared by both Quartz and
-  non-Quartz components.
+* `SimpleAsyncTaskExecutor`
+  This implementation does not reuse any threads, rather it starts up a new thread
+  for each invocation. However, it does support a concurrency limit which will block
+  any invocations that are over the limit until a slot has been freed up. If you
+  re looking for true pooling, keep scrolling further down the page.
+* `SyncTaskExecutor`
+  This implementation doesn't execute invocations asynchronously. Instead, each
+  invocation takes place in the calling thread. It is primarily used in situations
+  where multi-threading isn't necessary such as simple test cases.
+* `ConcurrentTaskExecutor`
+  This implementation is an adapter for a `java.util.concurrent.Executor` object.
+  There is an alternative, `ThreadPoolTaskExecutor, that exposes the `Executor`
+  configuration parameters as bean properties. It is rare to need to use the
+  `ConcurrentTaskExecutor` but if the <<threadPoolTaskExecutor, `ThreadPoolTaskExecutor`>>
+  isn't flexible enough for your needs, the `ConcurrentTaskExecutor` is an alternative.
+* `SimpleThreadPoolTaskExecutor`
+  This implementation is actually a subclass of Quartz's `SimpleThreadPool` which
+  listens to Spring's lifecycle callbacks. This is typically used when you have a
+  thread pool that may need to be shared by both Quartz and non-Quartz components.
 * `ThreadPoolTaskExecutor`
-
-
-This implementation can only be used in a Java 5 environment but is also the most
-commonly used one in that environment. It exposes bean properties for configuring a
-`java.util.concurrent.ThreadPoolExecutor` and wraps it in a `TaskExecutor`. If you need
-something advanced such as a `ScheduledThreadPoolExecutor`, it is recommended that you
-use a <<concurrentTaskExecutor, `ConcurrentTaskExecutor`>> instead.
-
-* `TimerTaskExecutor` This implementation uses a single `TimerTask` as its backing
-  implementation. It's different from the <<syncTaskExecutor, `SyncTaskExecutor`>> in
-  that the method invocations are executed in a separate thread, although they are
-  synchronous in that thread.
+  This implementation is the most commonly used one. It exposes bean properties for
+  configuring a java.util.concurrent.ThreadPoolExecutor` and wraps it in a `TaskExecutor`.
+  If you need to adapt to a different kind of `java.util.concurrent.Executor`, it is
+  recommended that you use a <<concurrentTaskExecutor, `ConcurrentTaskExecutor`>> instead.
+* `TimerTaskExecutor`
+  This implementation uses a single `TimerTask` as its backing implementation.
+  It's different from the <<syncTaskExecutor, `SyncTaskExecutor`>> in that the method
+  invocations are executed in a separate thread, although they are effectively
+  synchronously batched in that thread.
 * `WorkManagerTaskExecutor`
 
 +
@@ -44235,9 +45355,9 @@ Application Server implementations.
 
 This implementation uses the CommonJ WorkManager as its backing implementation and is
 the central convenience class for setting up a CommonJ WorkManager reference in a Spring
-context. Similar to the <<simpleThreadPoolTaskExecutor,
-`SimpleThreadPoolTaskExecutor`>>, this class implements the WorkManager interface and
-therefore can be used directly as a WorkManager as well.
+context. Similar to the <<simpleThreadPoolTaskExecutor, `SimpleThreadPoolTaskExecutor`>>,
+this class implements the WorkManager interface and therefore can be used directly as a
+WorkManager as well.
 
 
 
@@ -45049,12 +46169,6 @@ The supported languages were chosen because __a)__ the languages have a lot of t
 the Java enterprise community, __b)__ no requests were made for other languages at the time
 that this support was added, and __c)__ the Spring developers were most familiar with
 them.
-
-There is nothing stopping the inclusion of further languages though. If you want to see
-support for <__insert your favorite dynamic language here__>, you can always raise an
-issue on Spring's
-http://opensource.atlassian.com/projects/spring/secure/Dashboard.jspa[JIRA] page (or
-implement such support yourself).
 ****
 
 Fully working examples of where this dynamic language support can be immediately useful
@@ -46112,7 +47226,7 @@ caching occurs.It as well improves performance but does that by allowing the sam
 to be read multiple times in a fast fashion.
 
 A further explanation of the differences between two can be found
-http://en.wikipedia.org/wiki/Cache#The_difference_between_buffer_and_cache[here].
+http://en.wikipedia.org/wiki/Cache_(computing)#The_difference_between_buffer_and_cache[here].
 ****
 
 At its core, the abstraction applies caching to Java methods, reducing thus the number
@@ -46151,6 +47265,24 @@ http://ehcache.org/[EhCache], Gemfire cache,
 https://code.google.com/p/guava-libraries/wiki/CachesExplained[Guava caches] and
 JSR-107 compliant caches. See <<cache-plug>> for more information on plugging in
 other cache stores/providers.
+
+[IMPORTANT]
+====
+The caching abstraction has no special handling of multi-threaded and multi-process
+environments as such features are handled by the cache implementation. .
+====
+
+If you have a multi-process environment (i.e. an application deployed on several nodes),
+you will need to configure your cache provider accordingly. Depending on your use cases,
+a copy of the same data on several nodes may be enough but if you change the data during
+the course of the application, you may need to enable other propagation mechanisms.
+
+Caching a particular item is a direct equivalent of the typical get-if-not-found-then-
+proceed-and-put-eventually code blocks found with programmatic cache interaction: no locks
+are applied and several threads may try to load the same item concurrently. The same applies
+to eviction: if several threads are trying to update or evict data concurrently, you may
+use stale data. Certain cache providers offer advanced features in that area, refer to
+the documentation of the cache provider that you are using for more details.
 
 To use the cache abstraction, the developer needs to take care of two aspects:
 
@@ -46465,11 +47597,13 @@ than method flow optimization:
 [IMPORTANT]
 ====
 Note that using `@CachePut` and `@Cacheable` annotations on the same method is generally
-discouraged because they have different behaviors. While the latter causes the method
-execution to be skipped by using the cache, the former forces the execution in order to
-execute a cache update. This leads to unexpected behavior and with the exception of
+strongly discouraged because they have different behaviors. While the latter causes the
+method execution to be skipped by using the cache, the former forces the execution in
+order to execute a cache update. This leads to unexpected behavior and with the exception of
 specific corner-cases (such as annotations having conditions that exclude them from each
-other), such declarations should be avoided.
+other), such declarations should be avoided. Note also that such conditions should not rely
+on the result object (i.e. the `#result` variable) as these are validated upfront to confirm
+the exclusion.
 ====
 
 
@@ -46616,8 +47750,28 @@ application through AOP. The configuration is intentionally similar with that of
 | `cache-manager`
 | N/A (See `CachingConfigurer` javadocs)
 | cacheManager
-| Name of cache manager to use. Only required if the name of the cache manager is not
-  `cacheManager`.
+| Name of cache manager to use. A default `CacheResolver` will be initialized behind
+  the scenes with this cache manager (or `cacheManager`if not set). For more
+  fine-grained management of the cache resolution, consider setting the 'cache-resolver'
+  attribute.
+
+| `cache-resolver`
+| N/A (See `CachingConfigurer` javadocs)
+| A `SimpleCacheResolver` using the configured `cacheManager`.
+| The bean name of the CacheResolver that is to be used to resolve the backing caches.
+  This attribute is not required, and only needs to be specified as an alternative to
+  the 'cache-manager' attribute.
+
+| `key-generator`
+| N/A (See `CachingConfigurer` javadocs)
+| `SimpleKeyGenerator`
+| Name of the custom key generator to use.
+
+| `error-handler`
+| N/A (See `CachingConfigurer` javadocs)
+| `SimpleCacheErrorHandler`
+| Name of the custom cache error handler to use. By default, any exception throw during
+  a cache related operations are thrown back at the client.
 
 | `mode`
 | `mode`
@@ -46693,6 +47847,17 @@ using the aspectj mode in this case.
 
 [[cache-annotation-stereotype]]
 ==== Using custom annotations
+
+.Custom annotation and AspectJ
+****
+This feature only works out-of-the-box with the proxy-based approach but can be enabled
+with a bit of extra effort using AspectJ.
+
+The `spring-aspects` module defines an aspect for the standard annotations only. If you
+have defined your own annotations, you also need to define an aspect for those. Check
+`AnnotationCacheAspect` for an example.
+****
+
 The caching abstraction allows you to use your own annotations to identify what method
 triggers cache population or eviction. This is quite handy as a template mechanism as it
 eliminates the need to duplicate cache annotation declarations (especially useful if the

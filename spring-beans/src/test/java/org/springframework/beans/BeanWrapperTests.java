@@ -68,7 +68,12 @@ import static org.junit.Assert.*;
  * @author Chris Beams
  * @author Dave Syer
  */
-public final class BeanWrapperTests {
+public final class BeanWrapperTests extends AbstractConfigurablePropertyAccessorTests {
+
+	@Override
+	protected ConfigurablePropertyAccessor createAccessor(Object target) {
+		return new BeanWrapperImpl(target);
+	}
 
 	@Test
 	public void testNullNestedTypeDescriptor() {
@@ -116,48 +121,6 @@ public final class BeanWrapperTests {
 		assertEquals("9", foo.listOfMaps.get(0).get("luckyNumber"));
 	}
 
-	@Test
-	public void testIsReadablePropertyNotReadable() {
-		NoRead nr = new NoRead();
-		BeanWrapper bw = new BeanWrapperImpl(nr);
-		assertFalse(bw.isReadableProperty("age"));
-	}
-
-	/**
-	 * Shouldn't throw an exception: should just return false
-	 */
-	@Test
-	public void testIsReadablePropertyNoSuchProperty() {
-		NoRead nr = new NoRead();
-		BeanWrapper bw = new BeanWrapperImpl(nr);
-		assertFalse(bw.isReadableProperty("xxxxx"));
-	}
-
-	@Test
-	public void testIsReadablePropertyNull() {
-		NoRead nr = new NoRead();
-		BeanWrapper bw = new BeanWrapperImpl(nr);
-		try {
-			bw.isReadableProperty(null);
-			fail("Can't inquire into readability of null property");
-		}
-		catch (IllegalArgumentException ex) {
-			// expected
-		}
-	}
-
-	@Test
-	public void testIsWritablePropertyNull() {
-		NoRead nr = new NoRead();
-		BeanWrapper bw = new BeanWrapperImpl(nr);
-		try {
-			bw.isWritableProperty(null);
-			fail("Can't inquire into writability of null property");
-		}
-		catch (IllegalArgumentException ex) {
-			// expected
-		}
-	}
 
 	@Test
 	public void testReadableAndWritableForIndexedProperties() {
@@ -1636,12 +1599,6 @@ public final class BeanWrapperTests {
 	}
 
 
-	@SuppressWarnings("unused")
-	private static class NoRead {
-
-		public void setAge(int age) {
-		}
-	}
 
 
 	@SuppressWarnings("unused")

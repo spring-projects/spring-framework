@@ -43,7 +43,7 @@ public class EnableCachingIntegrationTests {
 	private void fooGetSimple(ApplicationContext context, FooService service) {
 		CacheManager cacheManager = context.getBean(CacheManager.class);
 
-		Cache cache = cacheManager.getCache("default");
+		Cache cache = cacheManager.getCache("testCache");
 
 		Object key = new Object();
 		assertCacheMiss(key, cache);
@@ -57,7 +57,7 @@ public class EnableCachingIntegrationTests {
 		@Override
 		@Bean
 		public CacheManager cacheManager() {
-			return CacheTestUtils.createSimpleCacheManager("default");
+			return CacheTestUtils.createSimpleCacheManager("testCache");
 		}
 	}
 
@@ -85,7 +85,7 @@ public class EnableCachingIntegrationTests {
 		public Object getSimple(Object key);
 	}
 
-	@CacheConfig(cacheNames = "default")
+	@CacheConfig(cacheNames = "testCache")
 	private static class FooServiceImpl implements FooService {
 		private final AtomicLong counter = new AtomicLong();
 

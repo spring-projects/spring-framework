@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,8 +24,12 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.util.UriComponents;
 
 import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 /**
+ * Unit tests for
+ * {@link org.springframework.web.servlet.support.ServletUriComponentsBuilder}.
+ *
  * @author Rossen Stoyanchev
  */
 public class ServletUriComponentsBuilderTests {
@@ -46,7 +50,6 @@ public class ServletUriComponentsBuilderTests {
 		request.setRequestURI("/mvc-showcase/data/param");
 		request.setQueryString("foo=123");
 		String result = ServletUriComponentsBuilder.fromRequest(request).build().toUriString();
-
 		assertEquals("http://localhost/mvc-showcase/data/param?foo=123", result);
 	}
 
@@ -54,7 +57,6 @@ public class ServletUriComponentsBuilderTests {
 	public void fromRequestEncodedPath() {
 		request.setRequestURI("/mvc-showcase/data/foo%20bar");
 		String result = ServletUriComponentsBuilder.fromRequest(request).build().toUriString();
-
 		assertEquals("http://localhost/mvc-showcase/data/foo%20bar", result);
 	}
 
@@ -62,7 +64,6 @@ public class ServletUriComponentsBuilderTests {
 	public void fromRequestAtypicalHttpPort() {
 		request.setServerPort(8080);
 		String result = ServletUriComponentsBuilder.fromRequest(request).build().toUriString();
-
 		assertEquals("http://localhost:8080", result);
 	}
 
@@ -71,7 +72,6 @@ public class ServletUriComponentsBuilderTests {
 		request.setScheme("https");
 		request.setServerPort(9043);
 		String result = ServletUriComponentsBuilder.fromRequest(request).build().toUriString();
-
 		assertEquals("https://localhost:9043", result);
 	}
 
@@ -80,24 +80,22 @@ public class ServletUriComponentsBuilderTests {
 		request.setRequestURI("/mvc-showcase/data/param");
 		request.setQueryString("foo=123");
 		String result = ServletUriComponentsBuilder.fromRequestUri(request).build().toUriString();
-
 		assertEquals("http://localhost/mvc-showcase/data/param", result);
 	}
 
 	@Test
-	public void fromRequestWithForwardedHostHeader() {
+	public void fromRequestWithForwardedHost() {
 		request.addHeader("X-Forwarded-Host", "anotherHost");
 		request.setRequestURI("/mvc-showcase/data/param");
 		request.setQueryString("foo=123");
 		String result = ServletUriComponentsBuilder.fromRequest(request).build().toUriString();
-
 		assertEquals("http://anotherHost/mvc-showcase/data/param?foo=123", result);
 	}
 
 	// SPR-10701
 
 	@Test
-	public void fromRequestWithForwardedHostAndPortHeader() {
+	public void fromRequestWithForwardedHostIncludingPort() {
 		request.addHeader("X-Forwarded-Host", "webtest.foo.bar.com:443");
 		request.setRequestURI("/mvc-showcase/data/param");
 		request.setQueryString("foo=123");
@@ -112,8 +110,44 @@ public class ServletUriComponentsBuilderTests {
 	@Test
 	public void fromRequestWithForwardedHostMultiValuedHeader() {
 		this.request.addHeader("X-Forwarded-Host", "a.example.org, b.example.org, c.example.org");
-
 		assertEquals("a.example.org", ServletUriComponentsBuilder.fromRequest(this.request).build().getHost());
+	}
+
+	// SPR-11855
+
+	@Test
+	public void fromRequestWithForwardedHostAndPort() {
+		this.request.addHeader("X-Forwarded-Host", "foobarhost");
+		this.request.addHeader("X-Forwarded-Port", "9090");
+		this.request.setServerPort(8080);
+		UriComponents uriComponents = ServletUriComponentsBuilder.fromRequest(this.request).build();
+
+		assertEquals("foobarhost", uriComponents.getHost());
+		assertEquals(9090, uriComponents.getPort());
+	}
+
+	// SPR-11872
+
+	@Test
+	public void fromRequestWithForwardedHostWithDefaultPort() {
+		this.request.setServerPort(10080);
+		this.request.addHeader("X-Forwarded-Host", "example.org");
+		UriComponents result = ServletUriComponentsBuilder.fromRequest(request).build();
+
+		assertEquals("example.org", result.getHost());
+		assertEquals("should have used the default port of the forwarded request", -1, result.getPort());
+	}
+
+	@Test
+	public void fromRequestWithForwardedHostWithForwardedScheme() {
+		this.request.setServerPort(10080);
+		this.request.addHeader("X-Forwarded-Proto", "https");
+		this.request.addHeader("X-Forwarded-Host", "example.org");
+		UriComponents result = ServletUriComponentsBuilder.fromRequest(request).build();
+
+		assertEquals("example.org", result.getHost());
+		assertEquals("should have derived scheme from header", "https", result.getScheme());
+		assertEquals("should have used the default port of the forwarded request", -1, result.getPort());
 	}
 
 	@Test
@@ -121,7 +155,6 @@ public class ServletUriComponentsBuilderTests {
 		request.setRequestURI("/mvc-showcase/data/param");
 		request.setQueryString("foo=123");
 		String result = ServletUriComponentsBuilder.fromContextPath(request).build().toUriString();
-
 		assertEquals("http://localhost/mvc-showcase", result);
 	}
 
@@ -131,7 +164,6 @@ public class ServletUriComponentsBuilderTests {
 		request.setServletPath("/app");
 		request.setQueryString("foo=123");
 		String result = ServletUriComponentsBuilder.fromServletMapping(request).build().toUriString();
-
 		assertEquals("http://localhost/mvc-showcase/app", result);
 	}
 
@@ -142,7 +174,6 @@ public class ServletUriComponentsBuilderTests {
 		RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(this.request));
 		try {
 			String result = ServletUriComponentsBuilder.fromCurrentRequest().build().toUriString();
-
 			assertEquals("http://localhost/mvc-showcase/data/param?foo=123", result);
 		}
 		finally {
@@ -158,7 +189,6 @@ public class ServletUriComponentsBuilderTests {
 		ServletUriComponentsBuilder builder = ServletUriComponentsBuilder.fromRequestUri(this.request);
 		String extension = builder.removePathExtension();
 		String result = builder.path("/pages/1.{ext}").buildAndExpand(extension).toUriString();
-
 		assertEquals("http://localhost/rest/books/6/pages/1.json", result);
 	}
 

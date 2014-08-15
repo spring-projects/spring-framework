@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@ import org.hamcrest.Matchers;
 import org.junit.Test;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.web.servlet.StubMvcResult;
-import org.springframework.test.web.servlet.result.ContentResultMatchers;
 
 /**
  * @author Rossen Stoyanchev
@@ -76,6 +75,16 @@ public class ContentResultMatchersTests {
 	@Test(expected=AssertionError.class)
 	public void bytesNoMatch() throws Exception {
 		new ContentResultMatchers().bytes("bogus".getBytes()).match(getStubMvcResult());
+	}
+
+	@Test
+	public void json() throws Exception {
+		new ContentResultMatchers().json("{\n \"foo\" : \"bar\"         \n}").match(getStubMvcResult());
+	}
+
+	@Test(expected=AssertionError.class)
+	public void jsonNoMatch() throws Exception {
+		new ContentResultMatchers().json("{\n\"fooo\":\"bar\"\n}").match(getStubMvcResult());
 	}
 
 

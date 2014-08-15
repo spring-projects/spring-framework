@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,7 +53,7 @@ import org.springframework.beans.factory.xml.XmlReaderContext;
 import org.springframework.core.io.DescriptiveResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.EncodedResource;
-import org.springframework.core.io.support.ResourcePatternUtils;
+import org.springframework.util.StringUtils;
 
 /**
  * A Groovy-based reader for Spring bean definitions: like a Groovy builder,
@@ -107,6 +107,9 @@ import org.springframework.core.io.support.ResourcePatternUtils;
  *         }
  *     }
  * }</pre>
+ *
+ * <p><b>This bean definition reader also understands XML bean definition files,
+ * allowing for seamless mixing and matching with Groovy bean definition files.</b>
  *
  * <p>Typically applied to a
  * {@link org.springframework.beans.factory.support.DefaultListableBeanFactory}
@@ -187,7 +190,9 @@ public class GroovyBeanDefinitionReader extends AbstractBeanDefinitionReader imp
 	// TRADITIONAL BEAN DEFINITION READER METHODS
 
 	/**
-	 * Load bean definitions from the specified Groovy script.
+	 * Load bean definitions from the specified Groovy script or XML file.
+	 * <p>Note that ".xml" files will be parsed as XML content; all other kinds
+	 * of resources will be parsed as Groovy scripts.
 	 * @param resource the resource descriptor for the Groovy script
 	 * @return the number of bean definitions found
 	 * @throws BeanDefinitionStoreException in case of loading or parsing errors
@@ -197,14 +202,22 @@ public class GroovyBeanDefinitionReader extends AbstractBeanDefinitionReader imp
 	}
 
 	/**
-	 * Load bean definitions from the specified Groovy script.
+	 * Load bean definitions from the specified Groovy script or XML file.
+	 * <p>Note that ".xml" files will be parsed as XML content; all other kinds
+	 * of resources will be parsed as Groovy scripts.
 	 * @param encodedResource the resource descriptor for the Groovy script,
 	 * allowing to specify an encoding to use for parsing the file
 	 * @return the number of bean definitions found
 	 * @throws BeanDefinitionStoreException in case of loading or parsing errors
 	 */
 	public int loadBeanDefinitions(EncodedResource encodedResource) throws BeanDefinitionStoreException {
-		Closure beans = new Closure(this){
+		// Check for XML files and redirect them to the XmlBeanDefinitionReader
+		String filename = encodedResource.getResource().getFilename();
+		if (StringUtils.endsWithIgnoreCase(filename, ".xml")) {
+			return this.xmlBeanDefinitionReader.loadBeanDefinitions(encodedResource);
+		}
+
+		Closure beans = new Closure(this) {
 			public Object call(Object[] args) {
 				invokeBeanDefiningClosure((Closure) args[0]);
 				return null;
@@ -213,7 +226,7 @@ public class GroovyBeanDefinitionReader extends AbstractBeanDefinitionReader imp
 		Binding binding = new Binding() {
 			@Override
 			public void setVariable(String name, Object value) {
-				if (currentBeanDefinition !=null) {
+				if (currentBeanDefinition != null) {
 					applyPropertyToBeanDefinition(name, value);
 				}
 				else {
@@ -321,17 +334,7 @@ public class GroovyBeanDefinitionReader extends AbstractBeanDefinitionReader imp
 	 * @param resourcePattern the resource pattern
 	 */
 	public void importBeans(String resourcePattern) throws IOException {
-		Resource[] resources =
-				ResourcePatternUtils.getResourcePatternResolver(getResourceLoader()).getResources(resourcePattern);
-		for (Resource resource : resources) {
-			String filename = resource.getFilename();
-			if (filename.endsWith(".groovy")) {
-				loadBeanDefinitions(resource);
-			}
-			else if (filename.endsWith(".xml")) {
-				this.xmlBeanDefinitionReader.loadBeanDefinitions(resource);
-			}
-		}
+		loadBeanDefinitions(resourcePattern);
 	}
 
 
@@ -410,7 +413,7 @@ public class GroovyBeanDefinitionReader extends AbstractBeanDefinitionReader imp
 			}
 			dp.apply();
 		}
-		deferredProperties.clear();
+		this.deferredProperties.clear();
 	}
 
 	/**

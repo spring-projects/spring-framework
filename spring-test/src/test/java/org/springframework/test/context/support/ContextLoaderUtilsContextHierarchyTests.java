@@ -42,7 +42,7 @@ import static org.junit.Assert.*;
  * @author Sam Brannen
  * @since 3.2.2
  */
-public class ContextLoaderUtilsContextHierarchyTests extends AbstractContextLoaderUtilsTests {
+public class ContextLoaderUtilsContextHierarchyTests extends AbstractContextConfigurationUtilsTests {
 
 	private void debugConfigAttributes(List<ContextConfigurationAttributes> configAttributesList) {
 		// for (ContextConfigurationAttributes configAttributes : configAttributesList) {

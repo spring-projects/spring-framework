@@ -32,7 +32,7 @@ import org.springframework.oxm.Unmarshaller;
 import org.springframework.oxm.UnmarshallingFailureException;
 
 import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
+import static org.mockito.BDDMockito.*;
 
 /**
  * Tests for {@link MarshallingHttpMessageConverter}.
@@ -45,8 +45,8 @@ public class MarshallingHttpMessageConverterTests {
 	public void canRead() throws Exception {
 		Unmarshaller unmarshaller = mock(Unmarshaller.class);
 
-		when(unmarshaller.supports(Integer.class)).thenReturn(false);
-		when(unmarshaller.supports(String.class)).thenReturn(true);
+		given(unmarshaller.supports(Integer.class)).willReturn(false);
+		given(unmarshaller.supports(String.class)).willReturn(true);
 
 		MarshallingHttpMessageConverter converter = new MarshallingHttpMessageConverter();
 		converter.setUnmarshaller(unmarshaller);
@@ -60,8 +60,8 @@ public class MarshallingHttpMessageConverterTests {
 	public void canWrite() throws Exception {
 		Marshaller marshaller = mock(Marshaller.class);
 
-		when(marshaller.supports(Integer.class)).thenReturn(false);
-		when(marshaller.supports(String.class)).thenReturn(true);
+		given(marshaller.supports(Integer.class)).willReturn(false);
+		given(marshaller.supports(String.class)).willReturn(true);
 
 		MarshallingHttpMessageConverter converter = new MarshallingHttpMessageConverter();
 		converter.setMarshaller(marshaller);
@@ -77,7 +77,7 @@ public class MarshallingHttpMessageConverterTests {
 		MockHttpInputMessage inputMessage = new MockHttpInputMessage(body.getBytes("UTF-8"));
 
 		Unmarshaller unmarshaller = mock(Unmarshaller.class);
-		when(unmarshaller.unmarshal(isA(StreamSource.class))).thenReturn(body);
+		given(unmarshaller.unmarshal(isA(StreamSource.class))).willReturn(body);
 
 		MarshallingHttpMessageConverter converter = new MarshallingHttpMessageConverter();
 		converter.setUnmarshaller(unmarshaller);
@@ -92,7 +92,7 @@ public class MarshallingHttpMessageConverterTests {
 
 		Marshaller marshaller = mock(Marshaller.class);
 		Unmarshaller unmarshaller = mock(Unmarshaller.class);
-		when(unmarshaller.unmarshal(isA(StreamSource.class))).thenReturn(Integer.valueOf(3));
+		given(unmarshaller.unmarshal(isA(StreamSource.class))).willReturn(Integer.valueOf(3));
 
 		MarshallingHttpMessageConverter converter = new MarshallingHttpMessageConverter(marshaller, unmarshaller);
 		converter.read(String.class, inputMessage);
@@ -104,7 +104,7 @@ public class MarshallingHttpMessageConverterTests {
 		UnmarshallingFailureException ex = new UnmarshallingFailureException("forced");
 
 		Unmarshaller unmarshaller = mock(Unmarshaller.class);
-		when(unmarshaller.unmarshal(isA(StreamSource.class))).thenThrow(ex);
+		given(unmarshaller.unmarshal(isA(StreamSource.class))).willThrow(ex);
 
 		MarshallingHttpMessageConverter converter = new MarshallingHttpMessageConverter();
 		converter.setUnmarshaller(unmarshaller);
@@ -124,7 +124,7 @@ public class MarshallingHttpMessageConverterTests {
 		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
 
 		Marshaller marshaller = mock(Marshaller.class);
-		doNothing().when(marshaller).marshal(eq(body), isA(Result.class));
+		willDoNothing().given(marshaller).marshal(eq(body), isA(Result.class));
 
 		MarshallingHttpMessageConverter converter = new MarshallingHttpMessageConverter(marshaller);
 		converter.write(body, null, outputMessage);
@@ -140,7 +140,7 @@ public class MarshallingHttpMessageConverterTests {
 		MarshallingFailureException ex = new MarshallingFailureException("forced");
 
 		Marshaller marshaller = mock(Marshaller.class);
-		doThrow(ex).when(marshaller).marshal(eq(body), isA(Result.class));
+		willThrow(ex).given(marshaller).marshal(eq(body), isA(Result.class));
 
 		try {
 			MarshallingHttpMessageConverter converter = new MarshallingHttpMessageConverter(marshaller);

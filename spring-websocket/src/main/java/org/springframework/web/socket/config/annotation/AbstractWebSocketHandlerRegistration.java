@@ -38,15 +38,15 @@ import org.springframework.web.socket.sockjs.transport.handler.WebSocketTranspor
  */
 public abstract class AbstractWebSocketHandlerRegistration<M> implements WebSocketHandlerRegistration {
 
-	private MultiValueMap<WebSocketHandler, String> handlerMap = new LinkedMultiValueMap<WebSocketHandler, String>();
+	private final TaskScheduler sockJsTaskScheduler;
 
-	private HandshakeInterceptor[] interceptors;
+	private MultiValueMap<WebSocketHandler, String> handlerMap = new LinkedMultiValueMap<WebSocketHandler, String>();
 
 	private HandshakeHandler handshakeHandler;
 
-	private SockJsServiceRegistration sockJsServiceRegistration;
+	private HandshakeInterceptor[] interceptors;
 
-	private final TaskScheduler sockJsTaskScheduler;
+	private SockJsServiceRegistration sockJsServiceRegistration;
 
 
 	public AbstractWebSocketHandlerRegistration(TaskScheduler defaultTaskScheduler) {
@@ -68,8 +68,8 @@ public abstract class AbstractWebSocketHandlerRegistration<M> implements WebSock
 		return this;
 	}
 
-	public HandshakeHandler getHandshakeHandler() {
-		return handshakeHandler;
+	protected HandshakeHandler getHandshakeHandler() {
+		return this.handshakeHandler;
 	}
 
 	@Override
@@ -82,30 +82,21 @@ public abstract class AbstractWebSocketHandlerRegistration<M> implements WebSock
 		return this.interceptors;
 	}
 
-	/**
-	 * @param interceptors the interceptors to set
-	 */
-	public void setInterceptors(HandshakeInterceptor[] interceptors) {
-		this.interceptors = interceptors;
-	}
-
 	@Override
 	public SockJsServiceRegistration withSockJS() {
-
 		this.sockJsServiceRegistration = new SockJsServiceRegistration(this.sockJsTaskScheduler);
-		this.sockJsServiceRegistration.setInterceptors(this.interceptors);
-
+		if (this.interceptors != null) {
+			this.sockJsServiceRegistration.setInterceptors(this.interceptors);
+		}
 		if (this.handshakeHandler != null) {
 			WebSocketTransportHandler transportHandler = new WebSocketTransportHandler(this.handshakeHandler);
 			this.sockJsServiceRegistration.setTransportHandlerOverrides(transportHandler);
 		}
-
 		return this.sockJsServiceRegistration;
 	}
 
-	public final M getMappings() {
+	protected final M getMappings() {
 		M mappings = createMappings();
-
 		if (this.sockJsServiceRegistration != null) {
 			SockJsService sockJsService = this.sockJsServiceRegistration.getSockJsService();
 			for (WebSocketHandler wsHandler : this.handlerMap.keySet()) {

@@ -535,7 +535,7 @@ public class MockHttpServletResponse implements HttpServletResponse {
 
 	@Override
 	public void setStatus(int status) {
-		if(!this.isCommitted()) {
+		if (!this.isCommitted()) {
 			this.status = status;
 		}
 	}
@@ -543,7 +543,7 @@ public class MockHttpServletResponse implements HttpServletResponse {
 	@Override
 	@Deprecated
 	public void setStatus(int status, String errorMessage) {
-		if(!this.isCommitted()) {
+		if (!this.isCommitted()) {
 			this.status = status;
 			this.errorMessage = errorMessage;
 		}

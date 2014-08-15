@@ -19,51 +19,18 @@ package org.springframework.messaging.core;
 import java.util.Map;
 
 import org.springframework.messaging.Message;
-import org.springframework.messaging.MessageHeaders;
-import org.springframework.messaging.converter.MessageConversionException;
 
 /**
- * An extension of {@link AbstractMessageSendingTemplate} that adds support for
- * receive as well as request-reply style operations as defined by
- * {@link MessageReceivingOperations} and {@link MessageRequestReplyOperations}.
+ * An extension of {@link AbstractMessageReceivingTemplate} that adds support for
+ * request-reply style operations as defined by {@link MessageRequestReplyOperations}.
  *
  * @author Mark Fisher
  * @author Rossen Stoyanchev
+ * @author Stephane Nicoll
  * @since 4.0
  */
-public abstract class AbstractMessagingTemplate<D> extends AbstractMessageSendingTemplate<D>
-		implements MessageRequestReplyOperations<D>, MessageReceivingOperations<D> {
-
-
-	@Override
-	public Message<?> receive() {
-		return receive(getRequiredDefaultDestination());
-	}
-
-	@Override
-	public Message<?> receive(D destination) {
-		return doReceive(destination);
-	}
-
-	protected abstract Message<?> doReceive(D destination);
-
-
-	@Override
-	public <T> T receiveAndConvert(Class<T> targetClass) {
-		return receiveAndConvert(getRequiredDefaultDestination(), targetClass);
-	}
-
-	@SuppressWarnings("unchecked")
-	@Override
-	public <T> T receiveAndConvert(D destination, Class<T> targetClass) {
-		Message<?> message = doReceive(destination);
-		if (message != null) {
-			return (T) getMessageConverter().fromMessage(message, targetClass);
-		}
-		else {
-			return null;
-		}
-	}
+public abstract class AbstractMessagingTemplate<D> extends AbstractMessageReceivingTemplate<D>
+		implements MessageRequestReplyOperations<D> {
 
 	@Override
 	public Message<?> sendAndReceive(Message<?> requestMessage) {
@@ -108,20 +75,7 @@ public abstract class AbstractMessagingTemplate<D> extends AbstractMessageSendin
 	public <T> T convertSendAndReceive(D destination, Object request, Map<String, Object> headers,
 			Class<T> targetClass, MessagePostProcessor postProcessor) {
 
-		MessageHeaders messageHeaders = (headers != null ? new MessageHeaders(headers) : null);
-		Message<?> requestMessage = getMessageConverter().toMessage(request, messageHeaders);
-
-		if (requestMessage == null) {
-			String payloadType = (request != null ? request.getClass().getName() : null);
-			Object contentType = (messageHeaders != null ? messageHeaders.get(MessageHeaders.CONTENT_TYPE) : null);
-			throw new MessageConversionException("Unable to convert payload with type '" + payloadType +
-					"', contentType='" + contentType + "', converter=[" + getMessageConverter() + "]");
-		}
-
-		if (postProcessor != null) {
-			requestMessage = postProcessor.postProcessMessage(requestMessage);
-		}
-
+		Message<?> requestMessage = doConvert(request, headers, postProcessor);
 		Message<?> replyMessage = sendAndReceive(destination, requestMessage);
 		return (replyMessage != null ? (T) getMessageConverter().fromMessage(replyMessage, targetClass) : null);
 	}

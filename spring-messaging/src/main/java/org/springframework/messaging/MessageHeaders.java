@@ -36,18 +36,19 @@ import org.springframework.util.AlternativeJdkIdGenerator;
 import org.springframework.util.IdGenerator;
 
 /**
- * The headers for a {@link Message}
- * <p>
- * <b>IMPORTANT</b>: This class is immutable. Any mutating operation such as
+ * The headers for a {@link Message}.
+ *
+ * <p><b>IMPORTANT</b>: This class is immutable. Any mutating operation such as
  * {@code put(..)}, {@code putAll(..)} and others will throw
  * {@link UnsupportedOperationException}.
  * <p>Subclasses do have access to the raw headers, however, via {@link #getRawHeaders()}.
- * <p>
- * One way to create message headers is to use the
+ *
+ * <p>One way to create message headers is to use the
  * {@link org.springframework.messaging.support.MessageBuilder MessageBuilder}:
  * <pre class="code">
  * MessageBuilder.withPayload("foo").setHeader("key1", "value1").setHeader("key2", "value2");
  * </pre>
+ *
  * A second option is to create {@link org.springframework.messaging.support.GenericMessage}
  * passing a payload as {@link Object} and headers as a {@link Map java.util.Map}:
  * <pre class="code">
@@ -56,6 +57,7 @@ import org.springframework.util.IdGenerator;
  * headers.put("key2", "value2");
  * new GenericMessage("foo", headers);
  * </pre>
+ *
  * A third option is to use {@link org.springframework.messaging.support.MessageHeaderAccessor}
  * or one of its sub-classes to create specific categories of headers.
  *
@@ -101,7 +103,6 @@ public class MessageHeaders implements Map<String, Object>, Serializable {
 	/**
 	 * Construct a {@link MessageHeaders} with the given headers. An {@link #ID} and
 	 * {@link #TIMESTAMP} headers will also be added, overriding any existing values.
-	 *
 	 * @param headers a map with headers to add
 	 */
 	public MessageHeaders(Map<String, Object> headers) {
@@ -110,14 +111,12 @@ public class MessageHeaders implements Map<String, Object>, Serializable {
 
 	/**
 	 * Constructor providing control over the ID and TIMESTAMP header values.
-	 *
 	 * @param headers a map with headers to add
 	 * @param id the {@link #ID} header value
 	 * @param timestamp the {@link #TIMESTAMP} header value
 	 */
 	protected MessageHeaders(Map<String, Object> headers, UUID id, Long timestamp) {
-
-		this.headers = (headers != null) ? new HashMap<String, Object>(headers) : new HashMap<String, Object>();
+		this.headers = (headers != null ? new HashMap<String, Object>(headers) : new HashMap<String, Object>());
 
 		if (id == null) {
 			this.headers.put(ID, getIdGenerator().generateId());
@@ -146,7 +145,7 @@ public class MessageHeaders implements Map<String, Object>, Serializable {
 	}
 
 	protected static IdGenerator getIdGenerator() {
-		return ((idGenerator != null) ? idGenerator : defaultIdGenerator);
+		return (idGenerator != null ? idGenerator : defaultIdGenerator);
 	}
 
 	public UUID getId() {
@@ -179,20 +178,14 @@ public class MessageHeaders implements Map<String, Object>, Serializable {
 	}
 
 	@Override
-	public int hashCode() {
-		return this.headers.hashCode();
+	public boolean equals(Object other) {
+		return (this == other ||
+				(other instanceof MessageHeaders && this.headers.equals(((MessageHeaders) other).headers)));
 	}
 
 	@Override
-	public boolean equals(Object object) {
-		if (this == object) {
-			return true;
-		}
-		if (object != null && object instanceof MessageHeaders) {
-			MessageHeaders other = (MessageHeaders) object;
-			return this.headers.equals(other.headers);
-		}
-		return false;
+	public int hashCode() {
+		return this.headers.hashCode();
 	}
 
 	@Override
@@ -200,9 +193,8 @@ public class MessageHeaders implements Map<String, Object>, Serializable {
 		return this.headers.toString();
 	}
 
-	/*
-	 * Map implementation
-	 */
+
+	// Map implementation
 
 	public boolean containsKey(Object key) {
 		return this.headers.containsKey(key);
@@ -236,7 +228,8 @@ public class MessageHeaders implements Map<String, Object>, Serializable {
 		return Collections.unmodifiableCollection(this.headers.values());
 	}
 
-	// Unsupported operations
+
+	// Unsupported Map operations
 
 	/**
 	 * Since MessageHeaders are immutable, the call to this method will result in {@link UnsupportedOperationException}.
@@ -266,6 +259,7 @@ public class MessageHeaders implements Map<String, Object>, Serializable {
 		throw new UnsupportedOperationException("MessageHeaders is immutable");
 	}
 
+
 	// Serialization methods
 
 	private void writeObject(ObjectOutputStream out) throws IOException {
@@ -277,7 +271,7 @@ public class MessageHeaders implements Map<String, Object>, Serializable {
 		}
 		for (String key : keysToRemove) {
 			if (logger.isInfoEnabled()) {
-				logger.info("removing non-serializable header: " + key);
+				logger.info("Removing non-serializable header: " + key);
 			}
 			this.headers.remove(key);
 		}

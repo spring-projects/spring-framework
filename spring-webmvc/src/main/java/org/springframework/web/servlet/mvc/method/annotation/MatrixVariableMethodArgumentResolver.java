@@ -115,9 +115,11 @@ public class MatrixVariableMethodArgumentResolver extends AbstractNamedValueMeth
 
 	@Override
 	protected void handleMissingValue(String name, MethodParameter param) throws ServletRequestBindingException {
-		String paramType = param.getParameterType().getName();
-		throw new ServletRequestBindingException(
-				"Missing matrix variable '" + name + "' for method parameter type [" + paramType + "]");
+		Class<?> paramType = param.getParameterType();
+		if (!paramType.getName().equals("java.util.Optional")) {
+			throw new ServletRequestBindingException(
+					"Missing matrix variable '" + name + "' for method parameter type [" + paramType.getName() + "]");
+		}
 	}
 
 

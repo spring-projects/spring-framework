@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,10 +21,10 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
 
-import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.annotation.BeanFactoryAnnotationUtils;
+import org.springframework.core.task.AsyncListenableTaskExecutor;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.core.task.support.TaskExecutorAdapter;
 import org.springframework.util.Assert;
@@ -41,6 +41,7 @@ import org.springframework.util.StringUtils;
  * bean to be used when executing it, e.g. through an annotation attribute.
  *
  * @author Chris Beams
+ * @author Juergen Hoeller
  * @since 3.1.2
  */
 public abstract class AsyncExecutionAspectSupport implements BeanFactoryAware {
@@ -81,13 +82,14 @@ public abstract class AsyncExecutionAspectSupport implements BeanFactoryAware {
 	 * Set the {@link BeanFactory} to be used when looking up executors by qualifier.
 	 */
 	@Override
-	public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
+	public void setBeanFactory(BeanFactory beanFactory) {
 		this.beanFactory = beanFactory;
 	}
 
 
 	/**
 	 * Determine the specific executor to use when executing the given method.
+	 * Should preferably return an {@link AsyncListenableTaskExecutor} implementation.
 	 * @return the executor to use (or {@code null}, but just if no default executor has been set)
 	 */
 	protected AsyncTaskExecutor determineAsyncExecutor(Method method) {
@@ -104,8 +106,8 @@ public abstract class AsyncExecutionAspectSupport implements BeanFactoryAware {
 			else if (executorToUse == null) {
 				return null;
 			}
-			executor = (executorToUse instanceof AsyncTaskExecutor ?
-					(AsyncTaskExecutor) executorToUse : new TaskExecutorAdapter(executorToUse));
+			executor = (executorToUse instanceof AsyncListenableTaskExecutor ?
+					(AsyncListenableTaskExecutor) executorToUse : new TaskExecutorAdapter(executorToUse));
 			this.executors.put(method, executor);
 		}
 		return executor;

@@ -46,19 +46,22 @@ public class GuavaCache implements Cache {
 
 
 	/**
-	 * Create a {@link GuavaCache} instance.
+	 * Create a {@link GuavaCache} instance with the specified name and the
+	 * given internal {@link com.google.common.cache.Cache} to use.
 	 * @param name the name of the cache
-	 * @param cache backing Guava Cache instance
+	 * @param cache the backing Guava Cache instance
 	 */
 	public GuavaCache(String name, com.google.common.cache.Cache<Object, Object> cache) {
 		this(name, cache, true);
 	}
 
 	/**
-	 * Create a {@link GuavaCache} instance.
+	 * Create a {@link GuavaCache} instance with the specified name and the
+	 * given internal {@link com.google.common.cache.Cache} to use.
 	 * @param name the name of the cache
-	 * @param cache backing Guava Cache instance
-	 * @param allowNullValues whether to accept and convert null values for this cache
+	 * @param cache the backing Guava Cache instance
+	 * @param allowNullValues whether to accept and convert {@code null}
+	 * values for this cache
 	 */
 	public GuavaCache(String name, com.google.common.cache.Cache<Object, Object> cache, boolean allowNullValues) {
 		Assert.notNull(name, "Name must not be null");
@@ -110,8 +113,9 @@ public class GuavaCache implements Cache {
 			PutIfAbsentCallable callable = new PutIfAbsentCallable(value);
 			Object result = this.cache.get(key, callable);
 			return (callable.called ? null : toWrapper(result));
-		} catch (ExecutionException e) {
-			throw new IllegalArgumentException(e);
+		}
+		catch (ExecutionException ex) {
+			throw new IllegalStateException(ex);
 		}
 	}
 
@@ -161,19 +165,21 @@ public class GuavaCache implements Cache {
 	private static class NullHolder implements Serializable {
 	}
 
+
 	private class PutIfAbsentCallable implements Callable<Object> {
-		private boolean called;
 
 		private final Object value;
 
-		private PutIfAbsentCallable(Object value) {
+		private boolean called;
+
+		public PutIfAbsentCallable(Object value) {
 			this.value = value;
 		}
 
 		@Override
 		public Object call() throws Exception {
-			called = true;
-			return toStoreValue(value);
+			this.called = true;
+			return toStoreValue(this.value);
 		}
 	}
 

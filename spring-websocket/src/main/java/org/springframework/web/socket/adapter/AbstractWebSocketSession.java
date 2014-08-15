@@ -40,7 +40,8 @@ import org.springframework.web.socket.WebSocketSession;
  */
 public abstract class AbstractWebSocketSession<T> implements NativeWebSocketSession {
 
-	protected final Log logger = LogFactory.getLog(getClass());
+	protected static final Log logger = LogFactory.getLog(NativeWebSocketSession.class);
+
 
 	private T nativeSession;
 
@@ -144,7 +145,12 @@ public abstract class AbstractWebSocketSession<T> implements NativeWebSocketSess
 
 	@Override
 	public String toString() {
-		return "WebSocket session id=" + getId();
+		if (this.nativeSession != null) {
+			return getClass().getSimpleName() + "[id=" + getId() + ", uri=" + getUri() + "]";
+		}
+		else {
+			return getClass().getSimpleName() + "[nativeSession=null]";
+		}
 	}
 
 }

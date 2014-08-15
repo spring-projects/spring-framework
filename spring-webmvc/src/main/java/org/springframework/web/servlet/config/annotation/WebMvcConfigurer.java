@@ -80,7 +80,14 @@ public interface WebMvcConfigurer {
 	void configureAsyncSupport(AsyncSupportConfigurer configurer);
 
 	/**
-	 * Configure path matching options.
+	 * Helps with configuring HandlerMappings path matching options such as trailing slash match,
+	 * suffix registration, path matcher and path helper.
+	 * Configured path matcher and path helper instances are shared for:
+	 * <ul>
+	 *     <li>RequestMappings</li>
+	 *     <li>ViewControllerMappings</li>
+	 *     <li>ResourcesMappings</li>
+	 * </ul>
 	 * @since 4.0.3
 	 */
 	void configurePathMatch(PathMatchConfigurer configurer);
@@ -126,10 +133,20 @@ public interface WebMvcConfigurer {
 	MessageCodesResolver getMessageCodesResolver();
 
 	/**
-	 * Add view controllers to create a direct mapping between a URL path and
-	 * view name without the need for a controller in between.
+	 * Configure simple automated controllers pre-configured with the response
+	 * status code and/or a view to render the response body. This is useful in
+	 * cases where there is no need for custom controller logic -- e.g. render a
+	 * home page, perform simple site URL redirects, return a 404 status with
+	 * HTML content, a 204 with no content, and more.
 	 */
 	void addViewControllers(ViewControllerRegistry registry);
+
+	/**
+	 * Configure view resolvers to translate String-based view names returned from
+	 * controllers into concrete {@link org.springframework.web.servlet.View}
+	 * implementations to perform rendering with.
+	 */
+	void configureViewResolvers(ViewResolverRegistry registry);
 
 	/**
 	 * Add handlers to serve static resources such as images, js, and, css

@@ -34,8 +34,6 @@ import org.junit.rules.ExpectedException;
 
 import org.springframework.cache.Cache;
 import org.springframework.cache.jcache.AbstractJCacheTests;
-import org.springframework.cache.jcache.model.CacheResultOperation;
-import org.springframework.cache.jcache.model.DefaultCacheMethodDetails;
 import org.springframework.util.Assert;
 import org.springframework.util.ReflectionUtils;
 

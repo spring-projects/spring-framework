@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -229,7 +229,8 @@ public class StopWatch {
 		sb.append('\n');
 		if (!this.keepTaskList) {
 			sb.append("No task info kept");
-		} else {
+		}
+		else {
 			sb.append("-----------------------------------------\n");
 			sb.append("ms     %     Task name\n");
 			sb.append("-----------------------------------------\n");
@@ -261,7 +262,8 @@ public class StopWatch {
 				long percent = Math.round((100.0 * task.getTimeSeconds()) / getTotalTimeSeconds());
 				sb.append(" = ").append(percent).append("%");
 			}
-		} else {
+		}
+		else {
 			sb.append("; no task info kept");
 		}
 		return sb.toString();

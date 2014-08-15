@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -91,6 +91,18 @@ public class ContentNegotiationConfigurer {
 	public ContentNegotiationConfigurer replaceMediaTypes(Map<String, MediaType> mediaTypes) {
 		this.mediaTypes.clear();
 		mediaTypes(mediaTypes);
+		return this;
+	}
+
+	/**
+	 * Whether to ignore requests that have a file extension that does not match
+	 * any mapped media types. Setting this to {@code false} will result in a
+	 * {@code HttpMediaTypeNotAcceptableException} when there is no match.
+	 *
+	 * <p>By default this is set to {@code true}.
+	 */
+	public ContentNegotiationConfigurer ignoreUnknownPathExtensions(boolean ignore) {
+		this.factoryBean.setIgnoreUnknownPathExtensions(ignore);
 		return this;
 	}
 

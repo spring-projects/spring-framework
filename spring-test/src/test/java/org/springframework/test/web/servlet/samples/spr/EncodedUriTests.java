@@ -40,6 +40,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
+import org.springframework.web.servlet.config.annotation.ViewResolverRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -94,6 +95,11 @@ public class EncodedUriTests {
 		public HandlerMappingConfigurer myHandlerMappingConfigurer() {
 			return new HandlerMappingConfigurer();
 		}
+
+		@Override
+		public void configureViewResolvers(ViewResolverRegistry registry) {
+			registry.jsp("", "");
+		}
 	}
 
 	@Controller
@@ -115,9 +121,7 @@ public class EncodedUriTests {
 
 				// URL decode after request mapping, not before.
 				requestMappingHandlerMapping.setUrlDecode(false);
-
 			}
-
 			return bean;
 		}
 

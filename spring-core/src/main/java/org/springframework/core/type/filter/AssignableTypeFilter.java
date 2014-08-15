@@ -16,6 +16,8 @@
 
 package org.springframework.core.type.filter;
 
+import org.springframework.util.ClassUtils;
+
 /**
  * A simple filter which matches classes that are assignable to a given type.
  *
@@ -61,13 +63,13 @@ public class AssignableTypeFilter extends AbstractTypeHierarchyTraversingFilter 
 		else if (Object.class.getName().equals(typeName)) {
 			return false;
 		}
-		else if (typeName.startsWith("java.")) {
+		else if (typeName.startsWith("java")) {
 			try {
-				Class<?> clazz = getClass().getClassLoader().loadClass(typeName);
+				Class<?> clazz = ClassUtils.forName(typeName, getClass().getClassLoader());
 				return this.targetType.isAssignableFrom(clazz);
 			}
-			catch (ClassNotFoundException ex) {
-				// Class not found - can't determine a match that way.
+			catch (Throwable ex) {
+				// Class not regularly loadable - can't determine a match that way.
 			}
 		}
 		return null;

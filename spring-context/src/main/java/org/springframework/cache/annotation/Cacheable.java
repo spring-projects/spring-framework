@@ -26,8 +26,15 @@ import java.lang.annotation.Target;
 /**
  * Annotation indicating that a method (or all the methods on a class) can be cached.
  *
- * <p>The method arguments and signature are used for computing the key while the
- * returned instance is used as the cache value.
+ * <p>Each time a targeted method is invoked, a caching behavior will be applied,
+ * checking whether the method has been already executed for the given arguments. A
+ * sensible default simply uses the method parameters to compute the key but a SpEL
+ * expression can be provided ({@link #key()}) or a custom
+ * {@link org.springframework.cache.interceptor.KeyGenerator KeyGenerator} implementation
+ * can replace the default one ({@link #keyGenerator()}).
+ *
+ * <p>If no value is found in the cache for the computed key, the method is executed
+ * and the returned instance is used as the cache value.
  *
  * @author Costin Leau
  * @author Phillip Webb

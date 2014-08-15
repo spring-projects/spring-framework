@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,8 +24,13 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 import org.junit.Test;
 
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyZeroInteractions;
+
 /**
  * @author Arjen Poutsma
+ * @author Sebastien Deleuze
  */
 public class ListenableFutureTaskTests {
 
@@ -77,6 +82,33 @@ public class ListenableFutureTaskTests {
 		task.run();
 	}
 
+	@Test
+	public void successWithLambdas() throws ExecutionException, InterruptedException {
+		final String s = "Hello World";
+		Callable<String> callable = () -> s;
+		SuccessCallback<String> successCallback = mock(SuccessCallback.class);
+		FailureCallback failureCallback = mock(FailureCallback.class);
+		ListenableFutureTask<String> task = new ListenableFutureTask<>(callable);
+		task.addCallback(successCallback, failureCallback);
+		task.run();
+		verify(successCallback).onSuccess(s);
+		verifyZeroInteractions(failureCallback);
+	}
 
+	@Test
+	public void failureWithLambdas() throws ExecutionException, InterruptedException {
+		final String s = "Hello World";
+		IOException ex = new IOException(s);
+		Callable<String> callable = () -> {
+			throw ex;
+		};
+		SuccessCallback<String> successCallback = mock(SuccessCallback.class);
+		FailureCallback failureCallback = mock(FailureCallback.class);
+		ListenableFutureTask<String> task = new ListenableFutureTask<>(callable);
+		task.addCallback(successCallback, failureCallback);
+		task.run();
+		verify(failureCallback).onFailure(ex);
+		verifyZeroInteractions(successCallback);
+	}
 
 }

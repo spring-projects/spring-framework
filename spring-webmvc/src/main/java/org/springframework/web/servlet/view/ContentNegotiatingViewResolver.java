@@ -221,11 +221,22 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport 
 	}
 
 	/**
+	 * Whether to return HTTP Status 406 if no suitable is found.
+	 */
+	public boolean isUseNotAcceptableStatusCode() {
+		return this.useNotAcceptableStatusCode;
+	}
+
+	/**
 	 * Set the default views to use when a more specific view can not be obtained
 	 * from the {@link ViewResolver} chain.
 	 */
 	public void setDefaultViews(List<View> defaultViews) {
 		this.defaultViews = defaultViews;
+	}
+
+	public List<View> getDefaultViews() {
+		return Collections.unmodifiableList(this.defaultViews);
 	}
 
 	/**
@@ -234,6 +245,10 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport 
 	 */
 	public void setViewResolvers(List<ViewResolver> viewResolvers) {
 		this.viewResolvers = viewResolvers;
+	}
+
+	public List<ViewResolver> getViewResolvers() {
+		return Collections.unmodifiableList(this.viewResolvers);
 	}
 
 

@@ -396,7 +396,7 @@ final class HierarchicalUriComponents extends UriComponents {
 				String path = getPath();
 				if (StringUtils.hasLength(path) && path.charAt(0) != PATH_DELIMITER) {
 					// Only prefix the path delimiter if something exists before it
-					if(getScheme() != null || getUserInfo() != null || getHost() != null || getPort() != -1) {
+					if (getScheme() != null || getUserInfo() != null || getHost() != null || getPort() != -1) {
 						path = PATH_DELIMITER + path;
 					}
 				}
@@ -616,7 +616,7 @@ final class HierarchicalUriComponents extends UriComponents {
 
 		@Override
 		public String getPath() {
-			return path;
+			return this.path;
 		}
 
 		@Override
@@ -664,7 +664,7 @@ final class HierarchicalUriComponents extends UriComponents {
 		private final List<String> pathSegments;
 
 		public PathSegmentComponent(List<String> pathSegments) {
-			this.pathSegments = Collections.unmodifiableList(pathSegments);
+			this.pathSegments = Collections.unmodifiableList(new ArrayList<String>(pathSegments));
 		}
 
 		@Override

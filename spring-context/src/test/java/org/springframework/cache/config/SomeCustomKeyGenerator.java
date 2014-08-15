@@ -26,7 +26,7 @@ import java.lang.reflect.Method;
  *
  * @author Stephane Nicoll
  */
-final class SomeCustomKeyGenerator implements KeyGenerator {
+public final class SomeCustomKeyGenerator implements KeyGenerator {
 
     @Override
     public Object generate(Object target, Method method, Object... params) {

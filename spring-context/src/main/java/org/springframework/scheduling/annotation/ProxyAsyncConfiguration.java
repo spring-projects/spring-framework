@@ -19,11 +19,11 @@ package org.springframework.scheduling.annotation;
 import java.lang.annotation.Annotation;
 
 import org.springframework.beans.factory.config.BeanDefinition;
-import org.springframework.context.annotation.AnnotationConfigUtils;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Role;
 import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.scheduling.config.TaskManagementConfigUtils;
 import org.springframework.util.Assert;
 
 /**
@@ -39,7 +39,7 @@ import org.springframework.util.Assert;
 @Configuration
 public class ProxyAsyncConfiguration extends AbstractAsyncConfiguration {
 
-	@Bean(name=AnnotationConfigUtils.ASYNC_ANNOTATION_PROCESSOR_BEAN_NAME)
+	@Bean(name = TaskManagementConfigUtils.ASYNC_ANNOTATION_PROCESSOR_BEAN_NAME)
 	@Role(BeanDefinition.ROLE_INFRASTRUCTURE)
 	public AsyncAnnotationBeanPostProcessor asyncAdvisor() {
 		Assert.notNull(this.enableAsync, "@EnableAsync annotation metadata was not injected");

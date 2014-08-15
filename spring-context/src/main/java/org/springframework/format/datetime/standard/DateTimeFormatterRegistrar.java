@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,7 @@ import java.util.Map;
 import org.springframework.format.FormatterRegistrar;
 import org.springframework.format.FormatterRegistry;
 import org.springframework.format.annotation.DateTimeFormat.ISO;
+import org.springframework.lang.UsesJava8;
 
 /**
  * Configures the JSR-310 <code>java.time</code> formatting system for use with Spring.
@@ -46,6 +47,7 @@ import org.springframework.format.annotation.DateTimeFormat.ISO;
  * @see org.springframework.format.datetime.DateFormatterRegistrar
  * @see org.springframework.format.datetime.joda.DateTimeFormatterFactoryBean
  */
+@UsesJava8
 public class DateTimeFormatterRegistrar implements FormatterRegistrar {
 
 	private static enum Type {DATE, TIME, DATE_TIME}

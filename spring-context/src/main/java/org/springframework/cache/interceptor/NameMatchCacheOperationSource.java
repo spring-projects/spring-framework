@@ -32,6 +32,7 @@ import org.springframework.util.PatternMatchUtils;
  * by registered name.
  *
  * @author Costin Leau
+ * @since 3.1
  */
 @SuppressWarnings("serial")
 public class NameMatchCacheOperationSource implements CacheOperationSource, Serializable {

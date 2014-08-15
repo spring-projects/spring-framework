@@ -20,6 +20,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import org.w3c.dom.Element;
+
 import org.springframework.beans.factory.config.TypedStringValue;
 import org.springframework.beans.factory.parsing.ReaderContext;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
@@ -28,7 +30,6 @@ import org.springframework.beans.factory.support.ManagedMap;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.factory.xml.AbstractSingleBeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
-import org.springframework.cache.annotation.AnnotationCacheOperationSource;
 import org.springframework.cache.interceptor.CacheEvictOperation;
 import org.springframework.cache.interceptor.CacheInterceptor;
 import org.springframework.cache.interceptor.CacheOperation;
@@ -37,7 +38,6 @@ import org.springframework.cache.interceptor.CacheableOperation;
 import org.springframework.cache.interceptor.NameMatchCacheOperationSource;
 import org.springframework.util.StringUtils;
 import org.springframework.util.xml.DomUtils;
-import org.w3c.dom.Element;
 
 /**
  * {@link org.springframework.beans.factory.xml.BeanDefinitionParser
@@ -75,10 +75,11 @@ class CacheAdviceParser extends AbstractSingleBeanDefinitionParser {
 			// Using attributes source.
 			List<RootBeanDefinition> attributeSourceDefinitions = parseDefinitionsSources(cacheDefs, parserContext);
 			builder.addPropertyValue("cacheOperationSources", attributeSourceDefinitions);
-		} else {
+		}
+		else {
 			// Assume annotations source.
-			builder.addPropertyValue("cacheOperationSources", new RootBeanDefinition(
-					AnnotationCacheOperationSource.class));
+			builder.addPropertyValue("cacheOperationSources",
+					new RootBeanDefinition("org.springframework.cache.annotation.AnnotationCacheOperationSource"));
 		}
 	}
 
@@ -178,8 +179,6 @@ class CacheAdviceParser extends AbstractSingleBeanDefinitionParser {
 
 	/**
 	 * Simple, reusable class used for overriding defaults.
-	 *
-	 * @author Costin Leau
 	 */
 	private static class Props {
 
@@ -195,7 +194,6 @@ class CacheAdviceParser extends AbstractSingleBeanDefinitionParser {
 
 		private String[] caches = null;
 
-
 		Props(Element root) {
 			String defaultCache = root.getAttribute("cache");
 			key = root.getAttribute("key");
@@ -209,7 +207,6 @@ class CacheAdviceParser extends AbstractSingleBeanDefinitionParser {
 			}
 		}
 
-
 		<T extends CacheOperation> T merge(Element element, ReaderContext readerCtx, T op) {
 			String cache = element.getAttribute("cache");
 
@@ -217,7 +214,8 @@ class CacheAdviceParser extends AbstractSingleBeanDefinitionParser {
 			String[] localCaches = caches;
 			if (StringUtils.hasText(cache)) {
 				localCaches = StringUtils.commaDelimitedListToStringArray(cache.trim());
-			} else {
+			}
+			else {
 				if (caches == null) {
 					readerCtx.error("No cache specified specified for " + element.getNodeName(), element);
 				}
@@ -240,16 +238,16 @@ class CacheAdviceParser extends AbstractSingleBeanDefinitionParser {
 		}
 
 		String merge(Element element, ReaderContext readerCtx) {
-			String m = element.getAttribute(METHOD_ATTRIBUTE);
-
-			if (StringUtils.hasText(m)) {
-				return m.trim();
-			}
+			String method = element.getAttribute(METHOD_ATTRIBUTE);
 			if (StringUtils.hasText(method)) {
-				return method;
+				return method.trim();
+			}
+			if (StringUtils.hasText(this.method)) {
+				return this.method;
 			}
 			readerCtx.error("No method specified for " + element.getNodeName(), element);
 			return null;
 		}
 	}
+
 }

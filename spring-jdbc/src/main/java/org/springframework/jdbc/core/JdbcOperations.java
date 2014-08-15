@@ -291,7 +291,7 @@ public interface JdbcOperations {
 	 * @return an array of the number of rows affected by each statement
 	 * @throws DataAccessException if there is any problem executing the batch
 	 */
-	int[] batchUpdate(String[] sql) throws DataAccessException;
+	int[] batchUpdate(String... sql) throws DataAccessException;
 
 
 	//-------------------------------------------------------------------------

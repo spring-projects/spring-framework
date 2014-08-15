@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -60,9 +60,6 @@ public class BeanCreatingHandlerProvider<T> implements BeanFactoryAware {
 	}
 
 	public T getHandler() {
-		if (logger.isTraceEnabled()) {
-			logger.trace("Creating instance for handler type " + this.handlerType);
-		}
 		if (this.beanFactory == null) {
 			logger.warn("No BeanFactory available, attempting to use default constructor");
 			return BeanUtils.instantiate(this.handlerType);
@@ -74,16 +71,13 @@ public class BeanCreatingHandlerProvider<T> implements BeanFactoryAware {
 
 	public void destroy(T handler) {
 		if (this.beanFactory != null) {
-			if (logger.isTraceEnabled()) {
-				logger.trace("Destroying handler instance " + handler);
-			}
 			this.beanFactory.destroyBean(handler);
 		}
 	}
 
 	@Override
 	public String toString() {
-		return "BeanCreatingHandlerProvider [handlerClass=" + this.handlerType + "]";
+		return "BeanCreatingHandlerProvider[handlerType=" + this.handlerType + "]";
 	}
 
 }

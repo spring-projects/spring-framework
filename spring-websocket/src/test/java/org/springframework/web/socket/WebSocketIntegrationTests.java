@@ -23,17 +23,17 @@ import java.util.Arrays;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.web.socket.handler.TextWebSocketHandler;
-import org.springframework.web.socket.handler.AbstractWebSocketHandler;
-import org.springframework.web.socket.client.standard.StandardWebSocketClient;
 import org.springframework.web.socket.client.jetty.JettyWebSocketClient;
-import org.springframework.web.socket.server.support.DefaultHandshakeHandler;
+import org.springframework.web.socket.client.standard.StandardWebSocketClient;
 import org.springframework.web.socket.config.annotation.EnableWebSocket;
 import org.springframework.web.socket.config.annotation.WebSocketConfigurer;
 import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry;
+import org.springframework.web.socket.handler.TextWebSocketHandler;
+import org.springframework.web.socket.server.support.DefaultHandshakeHandler;
 
 import static org.junit.Assert.*;
 
@@ -47,52 +47,46 @@ public class WebSocketIntegrationTests extends  AbstractWebSocketIntegrationTest
 
 	@Parameterized.Parameters
 	public static Iterable<Object[]> arguments() {
-		return Arrays.asList(new Object[][]{
+		return Arrays.asList(new Object[][] {
 				{new JettyWebSocketTestServer(), new JettyWebSocketClient()},
 				{new TomcatWebSocketTestServer(), new StandardWebSocketClient()},
 				{new UndertowTestServer(), new JettyWebSocketClient()}
 		});
-	};
+	}
 
 
 	@Override
 	protected Class<?>[] getAnnotatedConfigClasses() {
-		return new Class<?>[] { TestWebSocketConfigurer.class };
+		return new Class<?>[] { TestConfig.class };
 	}
 
 	@Test
 	public void subProtocolNegotiation() throws Exception {
-
 		WebSocketHttpHeaders headers = new WebSocketHttpHeaders();
 		headers.setSecWebSocketProtocol("foo");
-
-		WebSocketSession session = this.webSocketClient.doHandshake(
-				new AbstractWebSocketHandler() {}, headers, new URI(getWsBaseUrl() + "/ws")).get();
-
+		URI url = new URI(getWsBaseUrl() + "/ws");
+		WebSocketSession session = this.webSocketClient.doHandshake(new TextWebSocketHandler(), headers, url).get();
 		assertEquals("foo", session.getAcceptedProtocol());
 	}
 
 
 	@Configuration
 	@EnableWebSocket
-	static class TestWebSocketConfigurer implements WebSocketConfigurer {
+	static class TestConfig implements WebSocketConfigurer {
 
 		@Autowired
-		private DefaultHandshakeHandler handshakeHandler; // can't rely on classpath for server detection
+		private DefaultHandshakeHandler handshakeHandler;  // can't rely on classpath for server detection
 
 		@Override
 		public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
 			this.handshakeHandler.setSupportedProtocols("foo", "bar", "baz");
-			registry.addHandler(serverHandler(), "/ws").setHandshakeHandler(this.handshakeHandler);
+			registry.addHandler(handler(), "/ws").setHandshakeHandler(this.handshakeHandler);
 		}
 
 		@Bean
-		public TestServerWebSocketHandler serverHandler() {
-			return new TestServerWebSocketHandler();
+		public TextWebSocketHandler handler() {
+			return new TextWebSocketHandler();
 		}
-	}
-
-	private static class TestServerWebSocketHandler extends TextWebSocketHandler {
 	}
 
 }

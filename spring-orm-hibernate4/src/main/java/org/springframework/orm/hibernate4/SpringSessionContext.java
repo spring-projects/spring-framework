@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,11 @@
 package org.springframework.orm.hibernate4;
 
 import java.lang.reflect.Method;
+import javax.transaction.Status;
+import javax.transaction.SystemException;
+import javax.transaction.TransactionManager;
 
+import org.apache.commons.logging.LogFactory;
 import org.hibernate.FlushMode;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
@@ -44,6 +48,8 @@ public class SpringSessionContext implements CurrentSessionContext {
 
 	private final SessionFactoryImplementor sessionFactory;
 
+	private TransactionManager transactionManager;
+
 	private CurrentSessionContext jtaSessionContext;
 
 
@@ -56,13 +62,14 @@ public class SpringSessionContext implements CurrentSessionContext {
 		try {
 			Object jtaPlatform = sessionFactory.getServiceRegistry().getService(ConfigurableJtaPlatform.jtaPlatformClass);
 			Method rtmMethod = ConfigurableJtaPlatform.jtaPlatformClass.getMethod("retrieveTransactionManager");
-			Object transactionManager = ReflectionUtils.invokeMethod(rtmMethod, jtaPlatform);
-			if (transactionManager != null) {
+			this.transactionManager = (TransactionManager) ReflectionUtils.invokeMethod(rtmMethod, jtaPlatform);
+			if (this.transactionManager != null) {
 				this.jtaSessionContext = new SpringJtaSessionContext(sessionFactory);
 			}
 		}
 		catch (Exception ex) {
-			throw new IllegalStateException("Could not introspect Hibernate JtaPlatform for SpringJtaSessionContext", ex);
+			LogFactory.getLog(SpringSessionContext.class).warn(
+					"Could not introspect Hibernate JtaPlatform for SpringJtaSessionContext", ex);
 		}
 	}
 
@@ -79,10 +86,10 @@ public class SpringSessionContext implements CurrentSessionContext {
 		else if (value instanceof SessionHolder) {
 			SessionHolder sessionHolder = (SessionHolder) value;
 			Session session = sessionHolder.getSession();
-			if (TransactionSynchronizationManager.isSynchronizationActive() &&
-					!sessionHolder.isSynchronizedWithTransaction()) {
+			if (!sessionHolder.isSynchronizedWithTransaction() &&
+					TransactionSynchronizationManager.isSynchronizationActive()) {
 				TransactionSynchronizationManager.registerSynchronization(
-						new SpringSessionSynchronization(sessionHolder, this.sessionFactory));
+						new SpringSessionSynchronization(sessionHolder, this.sessionFactory, false));
 				sessionHolder.setSynchronizedWithTransaction(true);
 				// Switch to FlushMode.AUTO, as we have to assume a thread-bound Session
 				// with FlushMode.MANUAL, which needs to allow flushing within the transaction.
@@ -95,15 +102,36 @@ public class SpringSessionContext implements CurrentSessionContext {
 			}
 			return session;
 		}
-		else if (this.jtaSessionContext != null) {
-			Session session = this.jtaSessionContext.currentSession();
-			if (TransactionSynchronizationManager.isSynchronizationActive()) {
-				TransactionSynchronizationManager.registerSynchronization(new SpringFlushSynchronization(session));
+
+		if (this.transactionManager != null) {
+			try {
+				if (this.transactionManager.getStatus() == Status.STATUS_ACTIVE) {
+					Session session = this.jtaSessionContext.currentSession();
+					if (TransactionSynchronizationManager.isSynchronizationActive()) {
+						TransactionSynchronizationManager.registerSynchronization(new SpringFlushSynchronization(session));
+					}
+					return session;
+				}
 			}
+			catch (SystemException ex) {
+				throw new HibernateException("JTA TransactionManager found but status check failed", ex);
+			}
+		}
+
+		if (TransactionSynchronizationManager.isSynchronizationActive()) {
+			Session session = this.sessionFactory.openSession();
+			if (TransactionSynchronizationManager.isCurrentTransactionReadOnly()) {
+				session.setFlushMode(FlushMode.MANUAL);
+			}
+			SessionHolder sessionHolder = new SessionHolder(session);
+			TransactionSynchronizationManager.registerSynchronization(
+					new SpringSessionSynchronization(sessionHolder, this.sessionFactory, true));
+			TransactionSynchronizationManager.bindResource(this.sessionFactory, sessionHolder);
+			sessionHolder.setSynchronizedWithTransaction(true);
 			return session;
 		}
 		else {
-			throw new HibernateException("No Session found for current thread");
+			throw new HibernateException("Could not obtain transaction-synchronized Session for current thread");
 		}
 	}
 

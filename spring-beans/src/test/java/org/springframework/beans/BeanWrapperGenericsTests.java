@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import static org.junit.Assert.*;
 import org.junit.Test;
 
 import org.springframework.beans.propertyeditors.CustomNumberEditor;
@@ -39,6 +38,8 @@ import org.springframework.tests.sample.beans.GenericBean;
 import org.springframework.tests.sample.beans.GenericIntegerBean;
 import org.springframework.tests.sample.beans.GenericSetOfIntegerBean;
 import org.springframework.tests.sample.beans.TestBean;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Juergen Hoeller
@@ -483,6 +484,29 @@ public class BeanWrapperGenericsTests {
 		BeanWrapper bw = new BeanWrapperImpl(bean);
 		bw.setPropertyValue("id", "10");
 		assertEquals(new Long(10), bean.getId());
+	}
+
+	@Test
+	public void testUntypedPropertyWithMapAtRuntime() {
+		class Holder<D> {
+			private final D data;
+			public Holder(D data) {
+				this.data = data;
+			}
+			public D getData() {
+				return this.data;
+			}
+		}
+
+		Map<String, Object> data = new HashMap<String, Object>();
+		data.put("x", "y");
+		Holder<Map<String, Object>> context = new Holder<Map<String,Object>>(data);
+
+		BeanWrapper bw = PropertyAccessorFactory.forBeanPropertyAccess(context);
+		assertEquals("y", bw.getPropertyValue("data['x']"));
+
+		bw.setPropertyValue("data['message']", "it works!");
+		assertEquals(data.get("message"), "it works!");
 	}
 
 

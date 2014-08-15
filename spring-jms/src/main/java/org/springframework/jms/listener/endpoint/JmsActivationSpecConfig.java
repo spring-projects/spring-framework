@@ -48,7 +48,9 @@ public class JmsActivationSpecConfig {
 
 	private boolean subscriptionDurable = false;
 
-	private String durableSubscriptionName;
+	private boolean subscriptionShared = false;
+
+	private String subscriptionName;
 
 	private String clientId;
 
@@ -81,18 +83,41 @@ public class JmsActivationSpecConfig {
 
 	public void setSubscriptionDurable(boolean subscriptionDurable) {
 		this.subscriptionDurable = subscriptionDurable;
+		if (subscriptionDurable) {
+			this.pubSubDomain = true;
+		}
 	}
 
 	public boolean isSubscriptionDurable() {
 		return this.subscriptionDurable;
 	}
 
+	public void setSubscriptionShared(boolean subscriptionShared) {
+		this.subscriptionShared = subscriptionShared;
+		if (subscriptionShared) {
+			this.pubSubDomain = true;
+		}
+	}
+
+	public boolean isSubscriptionShared() {
+		return this.subscriptionShared;
+	}
+
+	public void setSubscriptionName(String subscriptionName) {
+		this.subscriptionName = subscriptionName;
+	}
+
+	public String getSubscriptionName() {
+		return this.subscriptionName;
+	}
+
 	public void setDurableSubscriptionName(String durableSubscriptionName) {
-		this.durableSubscriptionName = durableSubscriptionName;
+		this.subscriptionName = durableSubscriptionName;
+		this.subscriptionDurable = true;
 	}
 
 	public String getDurableSubscriptionName() {
-		return this.durableSubscriptionName;
+		return (this.subscriptionDurable ? this.subscriptionName : null);
 	}
 
 	public void setClientId(String clientId) {
@@ -217,7 +242,7 @@ public class JmsActivationSpecConfig {
 	 * Return the {@link MessageConverter} to use, if any.
 	 */
 	public MessageConverter getMessageConverter() {
-		return messageConverter;
+		return this.messageConverter;
 	}
 
 }

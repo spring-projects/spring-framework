@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,7 @@ import java.util.Properties;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import org.springframework.core.OrderComparator;
+import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.core.io.UrlResource;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
@@ -48,12 +48,13 @@ import org.springframework.util.StringUtils;
  *
  * @author Arjen Poutsma
  * @author Juergen Hoeller
+ * @author Sam Brannen
  * @since 3.2
  */
 public abstract class SpringFactoriesLoader {
 
 	/** The location to look for the factories. Can be present in multiple JAR files. */
-	private static final String FACTORIES_RESOURCE_LOCATION = "META-INF/spring.factories";
+	public static final String FACTORIES_RESOURCE_LOCATION = "META-INF/spring.factories";
 
 	private static final Log logger = LogFactory.getLog(SpringFactoriesLoader.class);
 
@@ -61,7 +62,7 @@ public abstract class SpringFactoriesLoader {
 	/**
 	 * Load the factory implementations of the given type from the default location,
 	 * using the given class loader.
-	 * <p>The returned factories are ordered in accordance with the {@link OrderComparator}.
+	 * <p>The returned factories are ordered in accordance with the {@link AnnotationAwareOrderComparator}.
 	 * @param factoryClass the interface or abstract class representing the factory
 	 * @param classLoader the ClassLoader to use for loading (can be {@code null} to use the default)
 	 */
@@ -79,16 +80,16 @@ public abstract class SpringFactoriesLoader {
 		for (String factoryName : factoryNames) {
 			result.add(instantiateFactory(factoryName, factoryClass, classLoaderToUse));
 		}
-		OrderComparator.sort(result);
+		AnnotationAwareOrderComparator.sort(result);
 		return result;
 	}
 
 	public static List<String> loadFactoryNames(Class<?> factoryClass, ClassLoader classLoader) {
 		String factoryClassName = factoryClass.getName();
 		try {
-			List<String> result = new ArrayList<String>();
 			Enumeration<URL> urls = (classLoader != null ? classLoader.getResources(FACTORIES_RESOURCE_LOCATION) :
 					ClassLoader.getSystemResources(FACTORIES_RESOURCE_LOCATION));
+			List<String> result = new ArrayList<String>();
 			while (urls.hasMoreElements()) {
 				URL url = urls.nextElement();
 				Properties properties = PropertiesLoaderUtils.loadProperties(new UrlResource(url));

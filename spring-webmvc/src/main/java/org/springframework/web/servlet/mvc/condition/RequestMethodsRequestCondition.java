@@ -99,7 +99,7 @@ public final class RequestMethodsRequestCondition extends AbstractRequestConditi
 			return this;
 		}
 		RequestMethod incomingRequestMethod = getRequestMethod(request);
-		if(incomingRequestMethod != null) {
+		if (incomingRequestMethod != null) {
 			for (RequestMethod method : this.methods) {
 				if (method.equals(incomingRequestMethod)) {
 					return new RequestMethodsRequestCondition(method);

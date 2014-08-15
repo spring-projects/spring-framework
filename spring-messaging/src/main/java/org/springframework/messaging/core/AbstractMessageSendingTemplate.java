@@ -34,6 +34,7 @@ import org.springframework.util.Assert;
  *
  * @author Mark Fisher
  * @author Rossen Stoyanchev
+ * @author Stephane Nicoll
  * @since 4.0
  */
 public abstract class AbstractMessageSendingTemplate<D> implements MessageSendingOperations<D> {
@@ -99,7 +100,7 @@ public abstract class AbstractMessageSendingTemplate<D> implements MessageSendin
 
 	@Override
 	public void convertAndSend(Object payload) throws MessagingException {
-		convertAndSend(getRequiredDefaultDestination(), payload);
+		convertAndSend(payload, null);
 	}
 
 	@Override
@@ -128,6 +129,20 @@ public abstract class AbstractMessageSendingTemplate<D> implements MessageSendin
 	public void convertAndSend(D destination, Object payload, Map<String, Object> headers,
 			MessagePostProcessor postProcessor) throws MessagingException {
 
+		Message<?> message = doConvert(payload, headers, postProcessor);
+		send(destination, message);
+	}
+
+	/**
+	 * Convert the given Object to serialized form, possibly using a
+	 * {@link MessageConverter}, wrap it as a message with the given
+	 * headers and apply the given post processor.
+	 * @param payload the Object to use as payload
+	 * @param headers headers for the message to send
+	 * @param postProcessor the post processor to apply to the message
+	 * @return the converted message
+	 */
+	protected Message<?> doConvert(Object payload, Map<String, Object> headers, MessagePostProcessor postProcessor) {
 		MessageHeaders messageHeaders = null;
 		Map<String, Object> headersToUse = processHeadersToSend(headers);
 		if (headersToUse != null) {
@@ -149,7 +164,7 @@ public abstract class AbstractMessageSendingTemplate<D> implements MessageSendin
 		if (postProcessor != null) {
 			message = postProcessor.postProcessMessage(message);
 		}
-		send(destination, message);
+		return message;
 	}
 
 	/**

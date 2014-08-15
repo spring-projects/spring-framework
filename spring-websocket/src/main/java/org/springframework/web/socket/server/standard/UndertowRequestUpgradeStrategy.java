@@ -16,33 +16,41 @@
 
 package org.springframework.web.socket.server.standard;
 
-import io.undertow.server.HttpServerExchange;
-import io.undertow.server.HttpUpgradeListener;
-import io.undertow.servlet.api.InstanceFactory;
-import io.undertow.servlet.api.InstanceHandle;
-import io.undertow.servlet.websockets.ServletWebSocketHttpExchange;
-import io.undertow.websockets.core.WebSocketChannel;
-import io.undertow.websockets.core.protocol.Handshake;
-import io.undertow.websockets.core.protocol.version07.Hybi07Handshake;
-import io.undertow.websockets.core.protocol.version08.Hybi08Handshake;
-import io.undertow.websockets.core.protocol.version13.Hybi13Handshake;
-import io.undertow.websockets.jsr.ConfiguredServerEndpoint;
-import io.undertow.websockets.jsr.EncodingFactory;
-import io.undertow.websockets.jsr.EndpointSessionHandler;
-import io.undertow.websockets.jsr.ServerWebSocketContainer;
-import io.undertow.websockets.jsr.handshake.HandshakeUtil;
-import org.springframework.http.server.ServerHttpRequest;
-import org.springframework.http.server.ServerHttpResponse;
-import org.springframework.web.socket.server.HandshakeFailureException;
-import org.xnio.StreamConnection;
-
+import java.lang.reflect.Constructor;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.websocket.Decoder;
 import javax.websocket.Encoder;
 import javax.websocket.Endpoint;
 import javax.websocket.Extension;
-import java.util.*;
+
+import io.undertow.server.HttpServerExchange;
+import io.undertow.server.HttpUpgradeListener;
+import io.undertow.servlet.api.InstanceFactory;
+import io.undertow.servlet.api.InstanceHandle;
+import io.undertow.servlet.websockets.ServletWebSocketHttpExchange;
+import io.undertow.websockets.core.WebSocketChannel;
+import io.undertow.websockets.core.WebSocketVersion;
+import io.undertow.websockets.core.protocol.Handshake;
+import io.undertow.websockets.jsr.ConfiguredServerEndpoint;
+import io.undertow.websockets.jsr.EncodingFactory;
+import io.undertow.websockets.jsr.EndpointSessionHandler;
+import io.undertow.websockets.jsr.ServerWebSocketContainer;
+import io.undertow.websockets.jsr.handshake.HandshakeUtil;
+import io.undertow.websockets.jsr.handshake.JsrHybi07Handshake;
+import io.undertow.websockets.jsr.handshake.JsrHybi08Handshake;
+import io.undertow.websockets.jsr.handshake.JsrHybi13Handshake;
+import org.springframework.util.ClassUtils;
+import org.xnio.StreamConnection;
+
+import org.springframework.http.server.ServerHttpRequest;
+import org.springframework.http.server.ServerHttpResponse;
+import org.springframework.web.socket.server.HandshakeFailureException;
 
 
 /**
@@ -54,27 +62,47 @@ import java.util.*;
  */
 public class UndertowRequestUpgradeStrategy extends AbstractStandardUpgradeStrategy {
 
-	private final Handshake[] handshakes;
+	private static final Constructor<ServletWebSocketHttpExchange> exchangeConstructor;
 
-	private final String[] supportedVersions;
+	private static final boolean undertow10Present;
+
+	static {
+		Class<ServletWebSocketHttpExchange> type = ServletWebSocketHttpExchange.class;
+		Class<?>[] paramTypes = new Class<?>[] {HttpServletRequest.class, HttpServletResponse.class, Set.class};
+		if (ClassUtils.hasConstructor(type, paramTypes)) {
+			exchangeConstructor = ClassUtils.getConstructorIfAvailable(type, paramTypes);
+			undertow10Present = false;
+		}
+		else {
+			paramTypes = new Class<?>[] {HttpServletRequest.class, HttpServletResponse.class};
+			exchangeConstructor = ClassUtils.getConstructorIfAvailable(type, paramTypes);
+			undertow10Present = true;
+		}
+	}
+
+	private static final String[] supportedVersions = new String[] {
+			WebSocketVersion.V13.toHttpHeaderValue(),
+			WebSocketVersion.V08.toHttpHeaderValue(),
+			WebSocketVersion.V07.toHttpHeaderValue()
+	};
+
+
+	private Set<WebSocketChannel> peerConnections;
 
 
 	public UndertowRequestUpgradeStrategy() {
-		this.handshakes = new Handshake[] { new Hybi13Handshake(), new Hybi08Handshake(), new Hybi07Handshake() };
-		this.supportedVersions = initSupportedVersions(this.handshakes);
+		if (undertow10Present) {
+			this.peerConnections = null;
+		}
+		else {
+			this.peerConnections = Collections.newSetFromMap(new ConcurrentHashMap<WebSocketChannel, Boolean>());
+		}
 	}
 
-	private String[] initSupportedVersions(Handshake[] handshakes) {
-		String[] versions = new String[handshakes.length];
-		for (int i=0; i < versions.length; i++) {
-			versions[i] = handshakes[i].getVersion().toHttpHeaderValue();
-		}
-		return versions;
-	}
 
 	@Override
 	public String[] getSupportedVersions() {
-		return this.supportedVersions;
+		return supportedVersions;
 	}
 
 	@Override
@@ -84,22 +112,24 @@ public class UndertowRequestUpgradeStrategy extends AbstractStandardUpgradeStrat
 		HttpServletRequest servletRequest = getHttpServletRequest(request);
 		HttpServletResponse servletResponse = getHttpServletResponse(response);
 
-		final ServletWebSocketHttpExchange exchange = new ServletWebSocketHttpExchange(servletRequest, servletResponse);
+		final ServletWebSocketHttpExchange exchange = createHttpExchange(servletRequest, servletResponse);
 		exchange.putAttachment(HandshakeUtil.PATH_PARAMS, Collections.<String, String>emptyMap());
 
 		ServerWebSocketContainer wsContainer = (ServerWebSocketContainer) getContainer(servletRequest);
 		final EndpointSessionHandler endpointSessionHandler = new EndpointSessionHandler(wsContainer);
 
-		final Handshake handshake = getHandshakeToUse(exchange);
-
 		final ConfiguredServerEndpoint configuredServerEndpoint = createConfiguredServerEndpoint(
 				selectedProtocol, selectedExtensions, endpoint, servletRequest);
+
+		final Handshake handshake = getHandshakeToUse(exchange, configuredServerEndpoint);
 
 		exchange.upgradeChannel(new HttpUpgradeListener() {
 			@Override
 			public void handleUpgrade(StreamConnection connection, HttpServerExchange serverExchange) {
 				WebSocketChannel channel = handshake.createChannel(exchange, connection, exchange.getBufferPool());
-				HandshakeUtil.setConfig(channel, configuredServerEndpoint);
+				if (peerConnections != null) {
+					peerConnections.add(channel);
+				}
 				endpointSessionHandler.onConnect(exchange, channel);
 			}
 		});
@@ -107,11 +137,29 @@ public class UndertowRequestUpgradeStrategy extends AbstractStandardUpgradeStrat
 		handshake.handshake(exchange);
 	}
 
-	private Handshake getHandshakeToUse(ServletWebSocketHttpExchange exchange) {
-		for (Handshake handshake : this.handshakes) {
-			if (handshake.matches(exchange)) {
-				return handshake;
-			}
+	private ServletWebSocketHttpExchange createHttpExchange(HttpServletRequest request, HttpServletResponse response) {
+		try {
+			return (this.peerConnections != null ?
+					exchangeConstructor.newInstance(request, response, this.peerConnections) :
+					exchangeConstructor.newInstance(request, response));
+		}
+		catch (Exception ex) {
+			throw new HandshakeFailureException("Failed to instantiate ServletWebSocketHttpExchange", ex);
+		}
+	}
+
+	private Handshake getHandshakeToUse(ServletWebSocketHttpExchange exchange, ConfiguredServerEndpoint endpoint) {
+		Handshake handshake = new JsrHybi13Handshake(endpoint);
+		if (handshake.matches(exchange)) {
+			return handshake;
+		}
+		handshake = new JsrHybi08Handshake(endpoint);
+		if (handshake.matches(exchange)) {
+			return handshake;
+		}
+		handshake = new JsrHybi07Handshake(endpoint);
+		if (handshake.matches(exchange)) {
+			return handshake;
 		}
 		// Should never occur
 		throw new HandshakeFailureException("No matching Undertow Handshake found: " + exchange.getRequestHeaders());
@@ -125,8 +173,7 @@ public class UndertowRequestUpgradeStrategy extends AbstractStandardUpgradeStrat
 		endpointRegistration.setSubprotocols(Arrays.asList(selectedProtocol));
 		endpointRegistration.setExtensions(selectedExtensions);
 
-		return new ConfiguredServerEndpoint(endpointRegistration,
-				new EndpointInstanceFactory(endpoint), null,
+		return new ConfiguredServerEndpoint(endpointRegistration, new EndpointInstanceFactory(endpoint), null,
 				new EncodingFactory(
 						Collections.<Class<?>, List<InstanceFactory<? extends Encoder>>>emptyMap(),
 						Collections.<Class<?>, List<InstanceFactory<? extends Decoder>>>emptyMap(),
@@ -145,7 +192,6 @@ public class UndertowRequestUpgradeStrategy extends AbstractStandardUpgradeStrat
 
 		@Override
 		public InstanceHandle<Endpoint> createInstance() throws InstantiationException {
-
 			return new InstanceHandle<Endpoint>() {
 				@Override
 				public Endpoint getInstance() {

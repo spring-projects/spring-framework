@@ -23,6 +23,7 @@ import org.junit.Test;
 import org.springframework.aop.aspectj.annotation.AnnotationAwareAspectJAutoProxyCreator;
 import org.springframework.aop.interceptor.SimpleTraceInterceptor;
 import org.springframework.aop.support.DefaultPointcutAdvisor;
+import org.springframework.beans.factory.support.RootBeanDefinition;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
@@ -48,6 +49,39 @@ public class BeanMethodPolymorphismTests {
 	public void beanMethodOverriding() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 		ctx.register(OverridingConfig.class);
+		ctx.setAllowBeanDefinitionOverriding(false);
+		ctx.refresh();
+		assertFalse(ctx.getDefaultListableBeanFactory().containsSingleton("testBean"));
+		assertEquals("overridden", ctx.getBean("testBean", TestBean.class).toString());
+		assertTrue(ctx.getDefaultListableBeanFactory().containsSingleton("testBean"));
+	}
+
+	@Test
+	public void beanMethodOverridingOnASM() {
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
+		ctx.registerBeanDefinition("config", new RootBeanDefinition(OverridingConfig.class.getName()));
+		ctx.setAllowBeanDefinitionOverriding(false);
+		ctx.refresh();
+		assertFalse(ctx.getDefaultListableBeanFactory().containsSingleton("testBean"));
+		assertEquals("overridden", ctx.getBean("testBean", TestBean.class).toString());
+		assertTrue(ctx.getDefaultListableBeanFactory().containsSingleton("testBean"));
+	}
+
+	@Test
+	public void beanMethodOverridingWithNarrowedReturnType() {
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
+		ctx.register(NarrowedOverridingConfig.class);
+		ctx.setAllowBeanDefinitionOverriding(false);
+		ctx.refresh();
+		assertFalse(ctx.getDefaultListableBeanFactory().containsSingleton("testBean"));
+		assertEquals("overridden", ctx.getBean("testBean", TestBean.class).toString());
+		assertTrue(ctx.getDefaultListableBeanFactory().containsSingleton("testBean"));
+	}
+
+	@Test
+	public void beanMethodOverridingWithNarrowedReturnTypeOnASM() {
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
+		ctx.registerBeanDefinition("config", new RootBeanDefinition(NarrowedOverridingConfig.class.getName()));
 		ctx.setAllowBeanDefinitionOverriding(false);
 		ctx.refresh();
 		assertFalse(ctx.getDefaultListableBeanFactory().containsSingleton("testBean"));
@@ -173,6 +207,26 @@ public class BeanMethodPolymorphismTests {
 	}
 
 
+	static class ExtendedTestBean extends TestBean {
+	}
+
+
+	@Configuration
+	static class NarrowedOverridingConfig extends BaseConfig {
+
+		@Bean @Lazy
+		@Override
+		public ExtendedTestBean testBean() {
+			return new ExtendedTestBean() {
+				@Override
+				public String toString() {
+					return "overridden";
+				}
+			};
+		}
+	}
+
+
 	@Configuration
 	static class ConfigWithOverloading {
 
@@ -196,7 +250,7 @@ public class BeanMethodPolymorphismTests {
 			return "regular";
 		}
 
-		@Bean
+		@Bean @Lazy
 		String aString(Integer dependency) {
 			return "overloaded" + dependency;
 		}

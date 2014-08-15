@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,32 +59,34 @@ public final class DestinationPatternsMessageCondition
 	}
 
 	/**
-	 * Additional constructor with flags for using suffix pattern (.*) and
-	 * trailing slash matches.
+	 * Alternative constructor accepting a custom PathMatcher.
 	 * @param patterns the URL patterns to use; if 0, the condition will match to every request.
-	 * @param pathMatcher for path matching with patterns
+	 * @param pathMatcher the PathMatcher to use.
 	 */
-	public DestinationPatternsMessageCondition(String[] patterns,PathMatcher pathMatcher) {
+	public DestinationPatternsMessageCondition(String[] patterns, PathMatcher pathMatcher) {
 		this(asList(patterns), pathMatcher);
 	}
 
 	private DestinationPatternsMessageCondition(Collection<String> patterns, PathMatcher pathMatcher) {
-		this.patterns = Collections.unmodifiableSet(prependLeadingSlash(patterns));
 		this.pathMatcher = (pathMatcher != null) ? pathMatcher : new AntPathMatcher();
+		this.patterns = Collections.unmodifiableSet(prependLeadingSlash(patterns, this.pathMatcher));
 	}
 
 	private static List<String> asList(String... patterns) {
 		return patterns != null ? Arrays.asList(patterns) : Collections.<String>emptyList();
 	}
 
-	private static Set<String> prependLeadingSlash(Collection<String> patterns) {
+	private static Set<String> prependLeadingSlash(Collection<String> patterns, PathMatcher pathMatcher) {
 		if (patterns == null) {
 			return Collections.emptySet();
 		}
+		boolean slashSeparator = pathMatcher.combine("a", "a").equals("a/a");
 		Set<String> result = new LinkedHashSet<String>(patterns.size());
 		for (String pattern : patterns) {
-			if (StringUtils.hasLength(pattern) && !pattern.startsWith("/")) {
-				pattern = "/" + pattern;
+			if (slashSeparator) {
+				if (StringUtils.hasLength(pattern) && !pattern.startsWith("/")) {
+					pattern = "/" + pattern;
+				}
 			}
 			result.add(pattern);
 		}

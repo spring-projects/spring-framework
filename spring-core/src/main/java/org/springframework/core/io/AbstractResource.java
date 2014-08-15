@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -129,7 +129,7 @@ public abstract class AbstractResource implements Resource {
 			long size = 0;
 			byte[] buf = new byte[255];
 			int read;
-			while((read = is.read(buf)) != -1) {
+			while ((read = is.read(buf)) != -1) {
 				size += read;
 			}
 			return size;

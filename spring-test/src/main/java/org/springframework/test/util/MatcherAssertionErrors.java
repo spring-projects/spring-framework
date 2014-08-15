@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hamcrest.StringDescription;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.ReflectionUtils;
 
 /**
  * A replacement of {@link org.hamcrest.MatcherAssert} that removes the need to
@@ -28,6 +29,7 @@ import org.springframework.util.ClassUtils;
  * compatibility with Hamcrest 1.1 (also embedded in JUnit 4.4 through 4.8).
  *
  * @author Rossen Stoyanchev
+ * @author Sam Brannen
  * @since 3.2
  */
 public abstract class MatcherAssertionErrors {
@@ -66,7 +68,8 @@ public abstract class MatcherAssertionErrors {
 			description.appendDescriptionOf(matcher);
 			if (describeMismatchMethod != null) {
 				description.appendText("\n     but: ");
-				matcher.describeMismatch(actual, description);
+				// matcher.describeMismatch(actual, description);
+				ReflectionUtils.invokeMethod(describeMismatchMethod, matcher, actual, description);
 			}
 			else {
 				description.appendText("\n     got: ");

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -118,16 +118,6 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
 	 * @see #setEnvironment
 	 */
 	protected void doRegisterBeanDefinitions(Element root) {
-		String profileSpec = root.getAttribute(PROFILE_ATTRIBUTE);
-		if (StringUtils.hasText(profileSpec)) {
-			Assert.state(this.environment != null, "Environment must be set for evaluating profiles");
-			String[] specifiedProfiles = StringUtils.tokenizeToStringArray(
-					profileSpec, BeanDefinitionParserDelegate.MULTI_VALUE_ATTRIBUTE_DELIMITERS);
-			if (!this.environment.acceptsProfiles(specifiedProfiles)) {
-				return;
-			}
-		}
-
 		// Any nested <beans> elements will cause recursion in this method. In
 		// order to propagate and preserve <beans> default-* attributes correctly,
 		// keep track of the current (parent) delegate, which may be null. Create
@@ -136,6 +126,18 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
 		// this behavior emulates a stack of delegates without actually necessitating one.
 		BeanDefinitionParserDelegate parent = this.delegate;
 		this.delegate = createDelegate(this.readerContext, root, parent);
+
+		if (this.delegate.isDefaultNamespace(root)) {
+			String profileSpec = root.getAttribute(PROFILE_ATTRIBUTE);
+			if (StringUtils.hasText(profileSpec)) {
+				Assert.state(this.environment != null, "Environment must be set for evaluating profiles");
+				String[] specifiedProfiles = StringUtils.tokenizeToStringArray(
+						profileSpec, BeanDefinitionParserDelegate.MULTI_VALUE_ATTRIBUTE_DELIMITERS);
+				if (!this.environment.acceptsProfiles(specifiedProfiles)) {
+					return;
+				}
+			}
+		}
 
 		preProcessXml(root);
 		parseBeanDefinitions(root, this.delegate);

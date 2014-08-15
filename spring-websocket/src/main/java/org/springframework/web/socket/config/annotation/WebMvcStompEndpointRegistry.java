@@ -21,6 +21,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.context.ApplicationContext;
 import org.springframework.messaging.simp.user.UserSessionRegistry;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.util.Assert;
@@ -32,12 +33,14 @@ import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.messaging.StompSubProtocolHandler;
 import org.springframework.web.socket.messaging.SubProtocolWebSocketHandler;
 import org.springframework.web.socket.handler.WebSocketHandlerDecorator;
+import org.springframework.web.util.UrlPathHelper;
 
 /**
  * A registry for STOMP over WebSocket endpoints that maps the endpoints with a
  * {@link SimpleUrlHandlerMapping} for use in Spring MVC.
  *
  * @author Rossen Stoyanchev
+ * @author Artem Bilan
  * @since 4.0
  */
 public class WebMvcStompEndpointRegistry implements StompEndpointRegistry {
@@ -54,6 +57,8 @@ public class WebMvcStompEndpointRegistry implements StompEndpointRegistry {
 	private final TaskScheduler sockJsScheduler;
 
 	private int order = 1;
+
+	private UrlPathHelper urlPathHelper;
 
 
 	public WebMvcStompEndpointRegistry(WebSocketHandler webSocketHandler,
@@ -90,6 +95,9 @@ public class WebMvcStompEndpointRegistry implements StompEndpointRegistry {
 		return (SubProtocolWebSocketHandler) actual;
 	}
 
+	protected void setApplicationContext(ApplicationContext applicationContext) {
+		this.stompHandler.setApplicationEventPublisher(applicationContext);
+	}
 
 	@Override
 	public StompWebSocketEndpointRegistration addEndpoint(String... paths) {
@@ -114,6 +122,18 @@ public class WebMvcStompEndpointRegistry implements StompEndpointRegistry {
 	}
 
 	/**
+	 * Set the UrlPathHelper to configure on the {@code SimpleUrlHandlerMapping}
+	 * used to map handshake requests.
+	 */
+	public void setUrlPathHelper(UrlPathHelper urlPathHelper) {
+		this.urlPathHelper = urlPathHelper;
+	}
+
+	public UrlPathHelper getUrlPathHelper() {
+		return this.urlPathHelper;
+	}
+
+	/**
 	 * Return a handler mapping with the mapped ViewControllers; or {@code null} in case of no registrations.
 	 */
 	public AbstractHandlerMapping getHandlerMapping() {
@@ -129,6 +149,9 @@ public class WebMvcStompEndpointRegistry implements StompEndpointRegistry {
 		SimpleUrlHandlerMapping hm = new SimpleUrlHandlerMapping();
 		hm.setUrlMap(urlMap);
 		hm.setOrder(this.order);
+		if (this.urlPathHelper != null) {
+			hm.setUrlPathHelper(this.urlPathHelper);
+		}
 		return hm;
 	}
 

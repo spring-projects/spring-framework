@@ -16,8 +16,10 @@
 
 package org.springframework.expression.spel.ast;
 
+import org.springframework.asm.MethodVisitor;
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.TypedValue;
+import org.springframework.expression.spel.CodeFlow;
 import org.springframework.expression.spel.ExpressionState;
 import org.springframework.expression.spel.SpelEvaluationException;
 
@@ -81,7 +83,10 @@ public class CompoundExpression extends SpelNodeImpl {
 	 */
 	@Override
 	public TypedValue getValueInternal(ExpressionState state) throws EvaluationException {
-		return getValueRef(state).getValue();
+		ValueRef ref = getValueRef(state);
+		TypedValue result = ref.getValue();
+		this.exitTypeDescriptor = this.children[this.children.length - 1].getExitDescriptor();
+		return result;
 	}
 
 	@Override
@@ -104,6 +109,30 @@ public class CompoundExpression extends SpelNodeImpl {
 			sb.append(getChild(i).toStringAST());
 		}
 		return sb.toString();
+	}
+	
+	@Override
+	public boolean isCompilable() {
+		for (SpelNodeImpl child: this.children) {
+			if (!child.isCompilable()) {
+				return false;
+			}
+		}
+		return true;
+	}
+	
+	@Override
+	public void generateCode(MethodVisitor mv,CodeFlow codeflow) {	
+		// TODO could optimize T(SomeType).staticMethod - no need to generate the T() part
+		for (int i = 0; i < this.children.length;i++) {
+			SpelNodeImpl child = this.children[i];
+			if (child instanceof TypeReference && (i + 1) < this.children.length &&
+					this.children[i+1] instanceof MethodReference) {
+				continue;
+			}
+			child.generateCode(mv, codeflow);
+		}
+		codeflow.pushDescriptor(getExitDescriptor());
 	}
 
 }

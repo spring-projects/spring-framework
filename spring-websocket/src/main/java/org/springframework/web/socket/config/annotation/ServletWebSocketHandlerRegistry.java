@@ -29,6 +29,7 @@ import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.servlet.handler.AbstractHandlerMapping;
 import org.springframework.web.servlet.handler.SimpleUrlHandlerMapping;
 import org.springframework.web.socket.WebSocketHandler;
+import org.springframework.web.util.UrlPathHelper;
 
 /**
  * A {@link WebSocketHandlerRegistry} that maps {@link WebSocketHandler}s to URLs for use
@@ -44,6 +45,10 @@ public class ServletWebSocketHandlerRegistry implements WebSocketHandlerRegistry
 
 	private TaskScheduler sockJsTaskScheduler;
 
+	private int order = 1;
+
+	private UrlPathHelper urlPathHelper;
+
 
 	public ServletWebSocketHandlerRegistry(ThreadPoolTaskScheduler sockJsTaskScheduler) {
 		this.sockJsTaskScheduler = sockJsTaskScheduler;
@@ -56,6 +61,31 @@ public class ServletWebSocketHandlerRegistry implements WebSocketHandlerRegistry
 		registration.addHandler(webSocketHandler, paths);
 		this.registrations.add(registration);
 		return registration;
+	}
+
+	/**
+	 * Set the order for the resulting {@link SimpleUrlHandlerMapping} relative to
+	 * other handler mappings configured in Spring MVC.
+	 * <p>The default value is 1.
+	 */
+	public void setOrder(int order) {
+		this.order = order;
+	}
+
+	public int getOrder() {
+		return this.order;
+	}
+
+	/**
+	 * Set the UrlPathHelper to configure on the {@code SimpleUrlHandlerMapping}
+	 * used to map handshake requests.
+	 */
+	public void setUrlPathHelper(UrlPathHelper urlPathHelper) {
+		this.urlPathHelper = urlPathHelper;
+	}
+
+	public UrlPathHelper getUrlPathHelper() {
+		return this.urlPathHelper;
 	}
 
 	/**
@@ -73,6 +103,10 @@ public class ServletWebSocketHandlerRegistry implements WebSocketHandlerRegistry
 		}
 		SimpleUrlHandlerMapping hm = new SimpleUrlHandlerMapping();
 		hm.setUrlMap(urlMap);
+		hm.setOrder(this.order);
+		if (this.urlPathHelper != null) {
+			hm.setUrlPathHelper(this.urlPathHelper);
+		}
 		return hm;
 	}
 

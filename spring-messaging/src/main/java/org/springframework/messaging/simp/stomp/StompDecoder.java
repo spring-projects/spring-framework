@@ -24,7 +24,6 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.messaging.Message;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.messaging.support.MessageHeaderInitializer;
@@ -51,7 +50,8 @@ public class StompDecoder {
 
 	static final byte[] HEARTBEAT_PAYLOAD = new byte[] {'\n'};
 
-	private final Log logger = LogFactory.getLog(StompDecoder.class);
+	private static final Log logger = LogFactory.getLog(StompDecoder.class);
+
 
 	private MessageHeaderInitializer headerInitializer;
 
@@ -156,13 +156,13 @@ public class StompDecoder {
 				headerAccessor.updateSimpMessageHeadersFromStompHeaders();
 				headerAccessor.setLeaveMutable(true);
 				decodedMessage = MessageBuilder.createMessage(payload, headerAccessor.getMessageHeaders());
-				if (logger.isDebugEnabled()) {
-					logger.debug("Decoded " + decodedMessage);
+				if (logger.isTraceEnabled()) {
+					logger.trace("Decoded " + headerAccessor.getDetailedLogMessage(payload));
 				}
 			}
 			else {
 				if (logger.isTraceEnabled()) {
-					logger.trace("Received incomplete frame. Resetting buffer.");
+					logger.trace("Incomplete frame, resetting input buffer.");
 				}
 				if (headers != null && headerAccessor != null) {
 					String name = NativeMessageHeaderAccessor.NATIVE_HEADERS;
@@ -176,13 +176,13 @@ public class StompDecoder {
 			}
 		}
 		else {
-			if (logger.isTraceEnabled()) {
-				logger.trace("Decoded heartbeat");
-			}
 			StompHeaderAccessor headerAccessor = StompHeaderAccessor.createForHeartbeat();
 			initHeaders(headerAccessor);
 			headerAccessor.setLeaveMutable(true);
 			decodedMessage = MessageBuilder.createMessage(HEARTBEAT_PAYLOAD, headerAccessor.getMessageHeaders());
+			if (logger.isTraceEnabled()) {
+				logger.trace("Decoded " + headerAccessor.getDetailedLogMessage(null));
+			}
 		}
 		return decodedMessage;
 	}
@@ -224,8 +224,8 @@ public class StompDecoder {
 				int colonIndex = header.indexOf(':');
 				if ((colonIndex <= 0) || (colonIndex == header.length() - 1)) {
 					if (buffer.remaining() > 0) {
-						throw new StompConversionException(
-								"Illegal header: '" + header + "'. A header must be of the form <name>:<value>");
+						throw new StompConversionException("Illegal header: '" + header +
+								"'. A header must be of the form <name>:<value>.");
 					}
 				}
 				else {

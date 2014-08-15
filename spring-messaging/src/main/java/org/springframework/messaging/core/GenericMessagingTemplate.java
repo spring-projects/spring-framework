@@ -149,9 +149,9 @@ public class GenericMessagingTemplate extends AbstractDestinationResolvingMessag
 		try {
 			doSend(channel, requestMessage);
 		}
-		catch (RuntimeException e) {
+		catch (RuntimeException ex) {
 			tempReplyChannel.setSendFailed(true);
-			throw e;
+			throw ex;
 		}
 
 		Message<?> replyMessage = this.doReceive(tempReplyChannel);
@@ -182,7 +182,6 @@ public class GenericMessagingTemplate extends AbstractDestinationResolvingMessag
 		private volatile boolean hasTimedOut;
 
 		private volatile boolean hasSendFailed;
-
 
 		public void setSendFailed(boolean hasSendError) {
 			this.hasSendFailed = hasSendError;

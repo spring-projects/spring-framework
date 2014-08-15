@@ -51,7 +51,7 @@ import org.springframework.util.ClassUtils;
  * to enable or disable Jackson features from within XML configuration.
  *
  * <p>Example usage with
- * {@link org.springframework.http.converter.json.MappingJackson2HttpMessageConverter}:
+ * {@link MappingJackson2HttpMessageConverter}:
  *
  * <pre class="code">
  * &lt;bean class="org.springframework.http.converter.json.MappingJackson2HttpMessageConverter">
@@ -245,6 +245,13 @@ public class Jackson2ObjectMapperFactoryBean implements FactoryBean<ObjectMapper
 	}
 
 	/**
+	 * Shortcut for {@link MapperFeature#DEFAULT_VIEW_INCLUSION} option.
+	 */
+	public void setDefaultViewInclusion(boolean defaultViewInclusion) {
+		this.features.put(MapperFeature.DEFAULT_VIEW_INCLUSION, defaultViewInclusion);
+	}
+
+	/**
 	 * Shortcut for {@link SerializationFeature#FAIL_ON_EMPTY_BEANS} option.
 	 */
 	public void setFailOnEmptyBeans(boolean failOnEmptyBeans) {
@@ -334,7 +341,7 @@ public class Jackson2ObjectMapperFactoryBean implements FactoryBean<ObjectMapper
 	/**
 	 * Specify a {@link com.fasterxml.jackson.databind.PropertyNamingStrategy} to
 	 * configure the {@link ObjectMapper} with.
-	 * @@since 4.0.2
+	 * @since 4.0.2
 	 */
 	public void setPropertyNamingStrategy(PropertyNamingStrategy propertyNamingStrategy) {
 		this.propertyNamingStrategy = propertyNamingStrategy;
@@ -479,7 +486,7 @@ public class Jackson2ObjectMapperFactoryBean implements FactoryBean<ObjectMapper
 
 	@Override
 	public Class<?> getObjectType() {
-		return ObjectMapper.class;
+		return (this.objectMapper != null) ? this.objectMapper.getClass() : null;
 	}
 
 	@Override

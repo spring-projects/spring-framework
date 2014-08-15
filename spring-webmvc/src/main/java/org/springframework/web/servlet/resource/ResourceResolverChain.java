@@ -30,7 +30,6 @@ import org.springframework.core.io.Resource;
  * @author Rossen Stoyanchev
  * @author Sam Brannen
  * @since 4.1
- * @see ResourceResolver
  */
 public interface ResourceResolverChain {
 

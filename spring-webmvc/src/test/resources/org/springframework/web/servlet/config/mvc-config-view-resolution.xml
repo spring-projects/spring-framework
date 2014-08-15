@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	   xmlns:mvc="http://www.springframework.org/schema/mvc"
+	   xsi:schemaLocation="
+		http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+	<mvc:view-resolvers>
+		<mvc:bean-name />
+		<mvc:jsp view-class="org.springframework.web.servlet.view.InternalResourceView" />
+		<mvc:tiles />
+		<mvc:freemarker prefix="freemarker-" suffix=".freemarker" view-names="my*,*Report" />
+		<mvc:velocity cache-views="false" />
+		<mvc:groovy />
+		<bean class="org.springframework.web.servlet.view.InternalResourceViewResolver" />
+		<ref bean="customResolver" />
+	</mvc:view-resolvers>
+
+	<bean id="customResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver" />
+
+	<mvc:tiles-configurer check-refresh="true" validate-definitions="true">
+		<mvc:definitions location="/org/springframework/web/servlet/resource/tiles/tiles1.xml" />
+		<mvc:definitions location="/org/springframework/web/servlet/resource/tiles/tiles2.xml" />
+	</mvc:tiles-configurer>
+
+	<mvc:freemarker-configurer>
+		<mvc:template-loader-path location="/" />
+		<mvc:template-loader-path location="/test" />
+	</mvc:freemarker-configurer>
+
+	<mvc:velocity-configurer resource-loader-path="/test" />
+
+	<mvc:groovy-configurer resource-loader-path="/test" cache-templates="false" auto-indent="true" />
+
+</beans>
+ 

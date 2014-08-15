@@ -33,10 +33,12 @@ import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 /**
- * An implementation of {@link org.springframework.messaging.simp.SimpMessageSendingOperations}.
+ * An implementation of
+ * {@link org.springframework.messaging.simp.SimpMessageSendingOperations}.
  *
  * <p>Also provides methods for sending messages to a user. See
- * {@link org.springframework.messaging.simp.user.UserDestinationResolver UserDestinationResolver}
+ * {@link org.springframework.messaging.simp.user.UserDestinationResolver
+ * UserDestinationResolver}
  * for more on user destinations.
  *
  * @author Rossen Stoyanchev
@@ -47,11 +49,11 @@ public class SimpMessagingTemplate extends AbstractMessageSendingTemplate<String
 
 	private final MessageChannel messageChannel;
 
-	private String userDestinationPrefix = "/user/";
-
-	private MessageHeaderInitializer headerInitializer;
+	private String destinationPrefix = "/user/";
 
 	private volatile long sendTimeout = -1;
+
+	private MessageHeaderInitializer headerInitializer;
 
 
 	/**
@@ -59,7 +61,7 @@ public class SimpMessagingTemplate extends AbstractMessageSendingTemplate<String
 	 * @param messageChannel the message channel (must not be {@code null})
 	 */
 	public SimpMessagingTemplate(MessageChannel messageChannel) {
-		Assert.notNull(messageChannel, "MessageChannel must not be null");
+		Assert.notNull(messageChannel, "'messageChannel' must not be null");
 		this.messageChannel = messageChannel;
 	}
 
@@ -77,15 +79,30 @@ public class SimpMessagingTemplate extends AbstractMessageSendingTemplate<String
 	 * @see org.springframework.messaging.simp.user.UserDestinationMessageHandler
 	 */
 	public void setUserDestinationPrefix(String prefix) {
-		Assert.notNull(prefix, "UserDestinationPrefix must not be null");
-		this.userDestinationPrefix = prefix;
+		Assert.hasText(prefix, "'destinationPrefix' must not be empty");
+		this.destinationPrefix = prefix.endsWith("/") ? prefix : prefix + "/";
+
 	}
 
 	/**
 	 * Return the configured user destination prefix.
 	 */
 	public String getUserDestinationPrefix() {
-		return this.userDestinationPrefix;
+		return this.destinationPrefix;
+	}
+
+	/**
+	 * Specify the timeout value to use for send operations (in milliseconds).
+	 */
+	public void setSendTimeout(long sendTimeout) {
+		this.sendTimeout = sendTimeout;
+	}
+
+	/**
+	 * Return the configured send timeout (in milliseconds).
+	 */
+	public long getSendTimeout() {
+		return this.sendTimeout;
 	}
 
 	/**
@@ -102,20 +119,6 @@ public class SimpMessagingTemplate extends AbstractMessageSendingTemplate<String
 	 */
 	public MessageHeaderInitializer getHeaderInitializer() {
 		return this.headerInitializer;
-	}
-
-	/**
-	 * Specify the timeout value to use for send operations (in milliseconds).
-	 */
-	public void setSendTimeout(long sendTimeout) {
-		this.sendTimeout = sendTimeout;
-	}
-
-	/**
-	 * Return the configured send timeout (in milliseconds).
-	 */
-	public long getSendTimeout() {
-		return this.sendTimeout;
 	}
 
 
@@ -219,7 +222,7 @@ public class SimpMessagingTemplate extends AbstractMessageSendingTemplate<String
 
 		Assert.notNull(user, "User must not be null");
 		user = StringUtils.replace(user, "/", "%2F");
-		super.convertAndSend(this.userDestinationPrefix + user + destination, payload, headers, postProcessor);
+		super.convertAndSend(this.destinationPrefix + user + destination, payload, headers, postProcessor);
 	}
 
 

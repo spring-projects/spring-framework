@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,13 +53,15 @@ public class MutablePersistenceUnitInfo implements SmartPersistenceUnitInfo {
 
 	private DataSource jtaDataSource;
 
-	private List<String> mappingFileNames = new LinkedList<String>();
+	private final List<String> mappingFileNames = new LinkedList<String>();
 
 	private List<URL> jarFileUrls = new LinkedList<URL>();
 
 	private URL persistenceUnitRootUrl;
 
-	private List<String> managedClassNames = new LinkedList<String>();
+	private final List<String> managedClassNames = new LinkedList<String>();
+
+	private final List<String> managedPackages = new LinkedList<String>();
 
 	private boolean excludeUnlistedClasses = false;
 
@@ -161,6 +163,15 @@ public class MutablePersistenceUnitInfo implements SmartPersistenceUnitInfo {
 		return this.managedClassNames;
 	}
 
+	public void addManagedPackage(String packageName) {
+		this.managedPackages.add(packageName);
+	}
+
+	@Override
+	public List<String> getManagedPackages() {
+		return this.managedPackages;
+	}
+
 	public void setExcludeUnlistedClasses(boolean excludeUnlistedClasses) {
 		this.excludeUnlistedClasses = excludeUnlistedClasses;
 	}
@@ -251,13 +262,7 @@ public class MutablePersistenceUnitInfo implements SmartPersistenceUnitInfo {
 
 	@Override
 	public String toString() {
-		StringBuilder builder = new StringBuilder();
-		builder.append("PersistenceUnitInfo: name '");
-		builder.append(this.persistenceUnitName);
-		builder.append("', root URL [");
-		builder.append(this.persistenceUnitRootUrl);
-		builder.append("]");
-		return builder.toString();
+		return "PersistenceUnitInfo: name '" + this.persistenceUnitName + "', root URL [" + this.persistenceUnitRootUrl + "]";
 	}
 
 }

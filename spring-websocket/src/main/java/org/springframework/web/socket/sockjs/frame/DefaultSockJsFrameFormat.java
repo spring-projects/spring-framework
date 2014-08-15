@@ -19,6 +19,10 @@ package org.springframework.web.socket.sockjs.frame;
 import org.springframework.util.Assert;
 
 /**
+ * A default implementation of
+ * {@link org.springframework.web.socket.sockjs.frame.SockJsFrameFormat} that relies
+ * on {@link java.lang.String#format(String, Object...)}..
+ *
  * @author Rossen Stoyanchev
  * @since 4.0
  */
@@ -33,14 +37,9 @@ public class DefaultSockJsFrameFormat implements SockJsFrameFormat {
 	}
 
 
-	/**
-	 * @param frame the SockJs frame.
-	 * @return new SockJsFrame instance with the formatted content
-	 */
 	@Override
-	public SockJsFrame format(SockJsFrame frame) {
-		String content = String.format(this.format, preProcessContent(frame.getContent()));
-		return new SockJsFrame(content);
+	public String format(SockJsFrame frame) {
+		return String.format(this.format, preProcessContent(frame.getContent()));
 	}
 
 	protected String preProcessContent(String content) {

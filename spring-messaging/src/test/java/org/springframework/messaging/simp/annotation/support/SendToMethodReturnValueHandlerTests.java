@@ -24,13 +24,11 @@ import javax.security.auth.Subject;
 
 import org.junit.Before;
 import org.junit.Test;
-
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
-
 import org.springframework.core.MethodParameter;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
@@ -48,7 +46,7 @@ import org.springframework.messaging.support.MessageHeaderAccessor;
 import org.springframework.util.MimeType;
 
 import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
+import static org.mockito.BDDMockito.*;
 
 /**
  * Test fixture for {@link SendToMethodReturnValueHandlerTests}.
@@ -74,7 +72,9 @@ public class SendToMethodReturnValueHandlerTests {
 	private MethodParameter sendToReturnType;
 	private MethodParameter sendToDefaultDestReturnType;
 	private MethodParameter sendToUserReturnType;
+	private MethodParameter sendToUserSingleSessionReturnType;
 	private MethodParameter sendToUserDefaultDestReturnType;
+	private MethodParameter sendToUserSingleSessionDefaultDestReturnType;
 
 
 	@Before
@@ -101,8 +101,14 @@ public class SendToMethodReturnValueHandlerTests {
 		method = this.getClass().getDeclaredMethod("handleAndSendToUser");
 		this.sendToUserReturnType = new MethodParameter(method, -1);
 
+		method = this.getClass().getDeclaredMethod("handleAndSendToUserSingleSession");
+		this.sendToUserSingleSessionReturnType = new MethodParameter(method, -1);
+
 		method = this.getClass().getDeclaredMethod("handleAndSendToUserDefaultDestination");
 		this.sendToUserDefaultDestReturnType = new MethodParameter(method, -1);
+
+		method = this.getClass().getDeclaredMethod("handleAndSendToUserDefaultDestinationSingleSession");
+		this.sendToUserSingleSessionDefaultDestReturnType = new MethodParameter(method, -1);
 	}
 
 
@@ -117,7 +123,7 @@ public class SendToMethodReturnValueHandlerTests {
 	@Test
 	public void sendToNoAnnotations() throws Exception {
 
-		when(this.messageChannel.send(any(Message.class))).thenReturn(true);
+		given(this.messageChannel.send(any(Message.class))).willReturn(true);
 
 		Message<?> inputMessage = createInputMessage("sess1", "sub1", "/app", "/dest", null);
 		this.handler.handleReturnValue(PAYLOAD, this.noAnnotationsReturnType, inputMessage);
@@ -135,7 +141,7 @@ public class SendToMethodReturnValueHandlerTests {
 	@Test
 	public void sendTo() throws Exception {
 
-		when(this.messageChannel.send(any(Message.class))).thenReturn(true);
+		given(this.messageChannel.send(any(Message.class))).willReturn(true);
 
 		String sessionId = "sess1";
 		Message<?> inputMessage = createInputMessage(sessionId, "sub1", null, null, null);
@@ -161,7 +167,7 @@ public class SendToMethodReturnValueHandlerTests {
 	@Test
 	public void sendToDefaultDestination() throws Exception {
 
-		when(this.messageChannel.send(any(Message.class))).thenReturn(true);
+		given(this.messageChannel.send(any(Message.class))).willReturn(true);
 
 		String sessionId = "sess1";
 		Message<?> inputMessage = createInputMessage(sessionId, "sub1", "/app", "/dest", null);
@@ -175,6 +181,21 @@ public class SendToMethodReturnValueHandlerTests {
 		assertEquals("/topic/dest", headers.getDestination());
 		assertEquals(MIME_TYPE, headers.getContentType());
 		assertNull("Subscription id should not be copied", headers.getSubscriptionId());
+	}
+
+	@Test
+	public void sendToDefaultDestinationWhenUsingDotPathSeparator() throws Exception {
+
+		given(this.messageChannel.send(any(Message.class))).willReturn(true);
+
+		Message<?> inputMessage = createInputMessage("sess1", "sub1", "/app/", "dest.foo.bar", null);
+		this.handler.handleReturnValue(PAYLOAD, this.sendToDefaultDestReturnType, inputMessage);
+
+		verify(this.messageChannel, times(1)).send(this.messageCaptor.capture());
+
+		Message<?> message = this.messageCaptor.getAllValues().get(0);
+		SimpMessageHeaderAccessor headers = SimpMessageHeaderAccessor.wrap(message);
+		assertEquals("/topic/dest.foo.bar", headers.getDestination());
 	}
 
 	@Test
@@ -202,12 +223,37 @@ public class SendToMethodReturnValueHandlerTests {
 	@Test
 	public void sendToUser() throws Exception {
 
-		when(this.messageChannel.send(any(Message.class))).thenReturn(true);
+		given(this.messageChannel.send(any(Message.class))).willReturn(true);
 
 		String sessionId = "sess1";
 		TestUser user = new TestUser();
 		Message<?> inputMessage = createInputMessage(sessionId, "sub1", null, null, user);
 		this.handler.handleReturnValue(PAYLOAD, this.sendToUserReturnType, inputMessage);
+
+		verify(this.messageChannel, times(2)).send(this.messageCaptor.capture());
+
+		Message<?> message = this.messageCaptor.getAllValues().get(0);
+		SimpMessageHeaderAccessor headers = SimpMessageHeaderAccessor.wrap(message);
+		assertNull(headers.getSessionId());
+		assertNull(headers.getSubscriptionId());
+		assertEquals("/user/" + user.getName() + "/dest1", headers.getDestination());
+
+		message = this.messageCaptor.getAllValues().get(1);
+		headers = SimpMessageHeaderAccessor.wrap(message);
+		assertNull(headers.getSessionId());
+		assertNull(headers.getSubscriptionId());
+		assertEquals("/user/" + user.getName() + "/dest2", headers.getDestination());
+	}
+
+	@Test
+	public void sendToUserSingleSession() throws Exception {
+
+		given(this.messageChannel.send(any(Message.class))).willReturn(true);
+
+		String sessionId = "sess1";
+		TestUser user = new TestUser();
+		Message<?> inputMessage = createInputMessage(sessionId, "sub1", null, null, user);
+		this.handler.handleReturnValue(PAYLOAD, this.sendToUserSingleSessionReturnType, inputMessage);
 
 		verify(this.messageChannel, times(2)).send(this.messageCaptor.capture());
 
@@ -229,7 +275,7 @@ public class SendToMethodReturnValueHandlerTests {
 	@Test
 	public void sendToUserWithUserNameProvider() throws Exception {
 
-		when(this.messageChannel.send(any(Message.class))).thenReturn(true);
+		given(this.messageChannel.send(any(Message.class))).willReturn(true);
 
 		String sessionId = "sess1";
 		TestUser user = new UniqueUser();
@@ -248,12 +294,47 @@ public class SendToMethodReturnValueHandlerTests {
 	@Test
 	public void sendToUserDefaultDestination() throws Exception {
 
-		when(this.messageChannel.send(any(Message.class))).thenReturn(true);
+		given(this.messageChannel.send(any(Message.class))).willReturn(true);
 
 		String sessionId = "sess1";
 		TestUser user = new TestUser();
 		Message<?> inputMessage = createInputMessage(sessionId, "sub1", "/app", "/dest", user);
 		this.handler.handleReturnValue(PAYLOAD, this.sendToUserDefaultDestReturnType, inputMessage);
+
+		verify(this.messageChannel, times(1)).send(this.messageCaptor.capture());
+
+		Message<?> message = this.messageCaptor.getAllValues().get(0);
+		SimpMessageHeaderAccessor headers = SimpMessageHeaderAccessor.wrap(message);
+		assertNull(headers.getSessionId());
+		assertNull(headers.getSubscriptionId());
+		assertEquals("/user/" + user.getName() + "/queue/dest", headers.getDestination());
+	}
+
+	@Test
+	public void sendToUserDefaultDestinationWhenUsingDotPathSeparator() throws Exception {
+
+		given(this.messageChannel.send(any(Message.class))).willReturn(true);
+
+		TestUser user = new TestUser();
+		Message<?> inputMessage = createInputMessage("sess1", "sub1", "/app/", "dest.foo.bar", user);
+		this.handler.handleReturnValue(PAYLOAD, this.sendToUserDefaultDestReturnType, inputMessage);
+
+		verify(this.messageChannel, times(1)).send(this.messageCaptor.capture());
+
+		Message<?> message = this.messageCaptor.getAllValues().get(0);
+		SimpMessageHeaderAccessor headers = SimpMessageHeaderAccessor.wrap(message);
+		assertEquals("/user/" + user.getName() + "/queue/dest.foo.bar", headers.getDestination());
+	}
+
+	@Test
+	public void sendToUserDefaultDestinationSingleSession() throws Exception {
+
+		given(this.messageChannel.send(any(Message.class))).willReturn(true);
+
+		String sessionId = "sess1";
+		TestUser user = new TestUser();
+		Message<?> inputMessage = createInputMessage(sessionId, "sub1", "/app", "/dest", user);
+		this.handler.handleReturnValue(PAYLOAD, this.sendToUserSingleSessionDefaultDestReturnType, inputMessage);
 
 		verify(this.messageChannel, times(1)).send(this.messageCaptor.capture());
 
@@ -276,16 +357,28 @@ public class SendToMethodReturnValueHandlerTests {
 
 		handler.handleReturnValue(PAYLOAD, this.sendToUserDefaultDestReturnType, inputMessage);
 
-		ArgumentCaptor<MessageHeaders> captor = ArgumentCaptor.forClass(MessageHeaders.class);
-		verify(messagingTemplate).convertAndSendToUser(eq("joe"), eq("/queue/dest"), eq(PAYLOAD), captor.capture());
+		verify(messagingTemplate).convertAndSendToUser(eq("joe"), eq("/queue/dest"), eq(PAYLOAD));
+		verifyNoMoreInteractions(messagingTemplate);
+	}
 
-		SimpMessageHeaderAccessor headerAccessor =
-				MessageHeaderAccessor.getAccessor(captor.getValue(), SimpMessageHeaderAccessor.class);
+	@Test
+	public void sendToUserSessionWithoutUserName() throws Exception {
 
-		assertNotNull(headerAccessor);
-		assertTrue(headerAccessor.isMutable());
-		assertEquals("sess1", headerAccessor.getSessionId());
-		assertNull("Subscription id should not be copied", headerAccessor.getSubscriptionId());
+		given(this.messageChannel.send(any(Message.class))).willReturn(true);
+
+		String sessionId = "sess1";
+		Message<?> inputMessage = createInputMessage(sessionId, "sub1", null, null, null);
+		this.handler.handleReturnValue(PAYLOAD, this.sendToUserReturnType, inputMessage);
+
+		verify(this.messageChannel, times(2)).send(this.messageCaptor.capture());
+
+		SimpMessageHeaderAccessor headers = SimpMessageHeaderAccessor.wrap(this.messageCaptor.getAllValues().get(0));
+		assertEquals("/user/sess1/dest1", headers.getDestination());
+		assertEquals("sess1", headers.getSessionId());
+
+		headers = SimpMessageHeaderAccessor.wrap(this.messageCaptor.getAllValues().get(1));
+		assertEquals("/user/sess1/dest2", headers.getDestination());
+		assertEquals("sess1", headers.getSessionId());
 	}
 
 
@@ -343,8 +436,18 @@ public class SendToMethodReturnValueHandlerTests {
 		return PAYLOAD;
 	}
 
+	@SendToUser(broadcast=false)
+	public String handleAndSendToUserDefaultDestinationSingleSession() {
+		return PAYLOAD;
+	}
+
 	@SendToUser({"/dest1", "/dest2"})
 	public String handleAndSendToUser() {
+		return PAYLOAD;
+	}
+
+	@SendToUser(value={"/dest1", "/dest2"}, broadcast=false)
+	public String handleAndSendToUserSingleSession() {
 		return PAYLOAD;
 	}
 

@@ -370,7 +370,7 @@ class ConstructorResolver {
 			factoryBean = this.beanFactory.getBean(factoryBeanName);
 			if (factoryBean == null) {
 				throw new BeanCreationException(mbd.getResourceDescription(), beanName,
-						"factory-bean '" + factoryBeanName + "' returned null");
+						"factory-bean '" + factoryBeanName + "' (or a BeanPostProcessor involved) returned null");
 			}
 			factoryClass = factoryBean.getClass();
 			isStatic = false;

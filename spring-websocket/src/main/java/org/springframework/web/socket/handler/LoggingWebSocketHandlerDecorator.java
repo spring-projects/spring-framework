@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,7 +31,7 @@ import org.springframework.web.socket.WebSocketSession;
  */
 public class LoggingWebSocketHandlerDecorator extends WebSocketHandlerDecorator {
 
-	private final Log logger = LogFactory.getLog(LoggingWebSocketHandlerDecorator.class);
+	private static final Log logger = LogFactory.getLog(LoggingWebSocketHandlerDecorator.class);
 
 
 	public LoggingWebSocketHandlerDecorator(WebSocketHandler delegate) {
@@ -42,7 +42,7 @@ public class LoggingWebSocketHandlerDecorator extends WebSocketHandlerDecorator 
 	@Override
 	public void afterConnectionEstablished(WebSocketSession session) throws Exception {
 		if (logger.isDebugEnabled()) {
-			logger.debug("Connection established, "	+ session + ", uri=" + session.getUri());
+			logger.debug("New "	+ session);
 		}
 		super.afterConnectionEstablished(session);
 	}
@@ -50,7 +50,7 @@ public class LoggingWebSocketHandlerDecorator extends WebSocketHandlerDecorator 
 	@Override
 	public void handleMessage(WebSocketSession session, WebSocketMessage<?> message) throws Exception {
 		if (logger.isTraceEnabled()) {
-			logger.trace(message + ", " + session);
+			logger.trace("Handling " + message + " in " + session);
 		}
 		super.handleMessage(session, message);
 	}
@@ -58,7 +58,7 @@ public class LoggingWebSocketHandlerDecorator extends WebSocketHandlerDecorator 
 	@Override
 	public void handleTransportError(WebSocketSession session, Throwable exception) throws Exception {
 		if (logger.isErrorEnabled()) {
-			logger.error("Transport error for " + session, exception);
+			logger.error("Transport error in " + session, exception);
 		}
 		super.handleTransportError(session, exception);
 	}
@@ -66,7 +66,7 @@ public class LoggingWebSocketHandlerDecorator extends WebSocketHandlerDecorator 
 	@Override
 	public void afterConnectionClosed(WebSocketSession session, CloseStatus closeStatus) throws Exception {
 		if (logger.isDebugEnabled()) {
-			logger.debug("Connection closed for " + session + ", " + closeStatus);
+			logger.debug(session + " closed with " + closeStatus);
 		}
 		super.afterConnectionClosed(session, closeStatus);
 	}

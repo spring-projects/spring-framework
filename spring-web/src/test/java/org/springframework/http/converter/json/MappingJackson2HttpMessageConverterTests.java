@@ -24,6 +24,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.fasterxml.jackson.annotation.JsonView;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
@@ -34,6 +35,7 @@ import org.springframework.http.MockHttpInputMessage;
 import org.springframework.http.MockHttpOutputMessage;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 
+import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
 
 /**
@@ -237,6 +239,57 @@ public class MappingJackson2HttpMessageConverterTests {
 		assertEquals(")]}',\"foo\"", outputMessage.getBodyAsString(Charset.forName("UTF-8")));
 	}
 
+	@Test
+	public void jsonView() throws Exception {
+		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
+		JacksonViewBean bean = new JacksonViewBean();
+		bean.setWithView1("with");
+		bean.setWithView2("with");
+		bean.setWithoutView("without");
+
+		MappingJacksonValue jacksonValue = new MappingJacksonValue(bean);
+		jacksonValue.setSerializationView(MyJacksonView1.class);
+		this.converter.writeInternal(jacksonValue, outputMessage);
+
+		String result = outputMessage.getBodyAsString(Charset.forName("UTF-8"));
+		assertThat(result, containsString("\"withView1\":\"with\""));
+		assertThat(result, containsString("\"withoutView\":\"without\""));
+		assertThat(result, not(containsString("\"withView2\":\"with\"")));
+	}
+
+	@Test
+	public void jsonp() throws Exception {
+		MappingJacksonValue jacksonValue = new MappingJacksonValue("foo");
+		jacksonValue.setSerializationView(MyJacksonView1.class);
+		jacksonValue.setJsonpFunction("callback");
+
+		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
+		this.converter.writeInternal(jacksonValue, outputMessage);
+
+		assertEquals("callback(\"foo\");", outputMessage.getBodyAsString(Charset.forName("UTF-8")));
+	}
+
+	@Test
+	public void jsonpAndJsonView() throws Exception {
+		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
+		JacksonViewBean bean = new JacksonViewBean();
+		bean.setWithView1("with");
+		bean.setWithView2("with");
+		bean.setWithoutView("without");
+
+		MappingJacksonValue jacksonValue = new MappingJacksonValue(bean);
+		jacksonValue.setSerializationView(MyJacksonView1.class);
+		jacksonValue.setJsonpFunction("callback");
+		this.converter.writeInternal(jacksonValue, outputMessage);
+
+		String result = outputMessage.getBodyAsString(Charset.forName("UTF-8"));
+		assertThat(result, startsWith("callback("));
+		assertThat(result, endsWith(");"));
+		assertThat(result, containsString("\"withView1\":\"with\""));
+		assertThat(result, containsString("\"withoutView\":\"without\""));
+		assertThat(result, not(containsString("\"withView2\":\"with\"")));
+	}
+
 
 	public static class MyBean {
 
@@ -312,6 +365,44 @@ public class MappingJackson2HttpMessageConverterTests {
 
 		public void setName(String name) {
 			this.name = name;
+		}
+	}
+
+	private interface MyJacksonView1 {};
+	private interface MyJacksonView2 {};
+
+	private static class JacksonViewBean {
+
+		@JsonView(MyJacksonView1.class)
+		private String withView1;
+
+		@JsonView(MyJacksonView2.class)
+		private String withView2;
+
+		private String withoutView;
+
+		public String getWithView1() {
+			return withView1;
+		}
+
+		public void setWithView1(String withView1) {
+			this.withView1 = withView1;
+		}
+
+		public String getWithView2() {
+			return withView2;
+		}
+
+		public void setWithView2(String withView2) {
+			this.withView2 = withView2;
+		}
+
+		public String getWithoutView() {
+			return withoutView;
+		}
+
+		public void setWithoutView(String withoutView) {
+			this.withoutView = withoutView;
 		}
 	}
 

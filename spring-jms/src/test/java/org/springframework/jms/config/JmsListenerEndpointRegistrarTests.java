@@ -16,17 +16,16 @@
 
 package org.springframework.jms.config;
 
-import static org.junit.Assert.*;
-
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
-import org.springframework.context.support.StaticApplicationContext;
+import org.springframework.beans.factory.support.StaticListableBeanFactory;
+
+import static org.junit.Assert.*;
 
 /**
- *
  * @author Stephane Nicoll
  */
 public class JmsListenerEndpointRegistrarTests {
@@ -40,10 +39,11 @@ public class JmsListenerEndpointRegistrarTests {
 
 	private final JmsListenerContainerTestFactory containerFactory = new JmsListenerContainerTestFactory();
 
+
 	@Before
 	public void setup() {
 		registrar.setEndpointRegistry(registry);
-		registrar.setApplicationContext(new StaticApplicationContext());
+		registrar.setBeanFactory(new StaticListableBeanFactory());
 	}
 
 	@Test
@@ -59,14 +59,23 @@ public class JmsListenerEndpointRegistrarTests {
 	}
 
 	@Test
+	public void registerEmptyEndpointId() {
+		SimpleJmsListenerEndpoint endpoint = new SimpleJmsListenerEndpoint();
+		endpoint.setId("");
+
+		thrown.expect(IllegalArgumentException.class);
+		registrar.registerEndpoint(endpoint, containerFactory);
+	}
+
+	@Test
 	public void registerNullContainerFactoryIsAllowed() throws Exception {
 		SimpleJmsListenerEndpoint endpoint = new SimpleJmsListenerEndpoint();
 		endpoint.setId("some id");
 		registrar.setContainerFactory(containerFactory);
 		registrar.registerEndpoint(endpoint, null);
 		registrar.afterPropertiesSet();
-		assertNotNull("Container not created", registry.getContainer("some id"));
-		assertEquals(1, registry.getContainers().size());
+		assertNotNull("Container not created", registry.getListenerContainer("some id"));
+		assertEquals(1, registry.getListenerContainers().size());
 	}
 
 	@Test
@@ -87,8 +96,8 @@ public class JmsListenerEndpointRegistrarTests {
 		registrar.setContainerFactory(containerFactory);
 		registrar.registerEndpoint(endpoint);
 		registrar.afterPropertiesSet();
-		assertNotNull("Container not created", registry.getContainer("myEndpoint"));
-		assertEquals(1, registry.getContainers().size());
+		assertNotNull("Container not created", registry.getListenerContainer("myEndpoint"));
+		assertEquals(1, registry.getListenerContainers().size());
 	}
 
 }

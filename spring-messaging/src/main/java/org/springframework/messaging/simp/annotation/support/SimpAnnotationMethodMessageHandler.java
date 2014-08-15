@@ -52,6 +52,7 @@ import org.springframework.messaging.handler.invocation.AbstractExceptionHandler
 import org.springframework.messaging.handler.invocation.AbstractMethodMessageHandler;
 import org.springframework.messaging.handler.invocation.HandlerMethodArgumentResolver;
 import org.springframework.messaging.handler.invocation.HandlerMethodReturnValueHandler;
+import org.springframework.messaging.simp.SimpAttributesContextHolder;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessageMappingInfo;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
@@ -94,6 +95,8 @@ public class SimpAnnotationMethodMessageHandler extends AbstractMethodMessageHan
 
 	private PathMatcher pathMatcher = new AntPathMatcher();
 
+	private boolean slashPathSeparator = true;
+
 	private Validator validator;
 
 	private MessageHeaderInitializer headerInitializer;
@@ -125,6 +128,36 @@ public class SimpAnnotationMethodMessageHandler extends AbstractMethodMessageHan
 		converters.add(new StringMessageConverter());
 		converters.add(new ByteArrayMessageConverter());
 		this.messageConverter = new CompositeMessageConverter(converters);
+	}
+
+
+	/**
+	 * {@inheritDoc}
+	 * <p>Destination prefixes are expected to be slash-separated Strings and
+	 * therefore a slash is automatically appended where missing to ensure a
+	 * proper prefix-based match (i.e. matching complete segments).
+	 *
+	 * <p>Note however that the remaining portion of a destination after the
+	 * prefix may use a different separator (e.g. commonly "." in messaging)
+	 * depending on the configured {@code PathMatcher}.
+	 */
+	@Override
+	public void setDestinationPrefixes(Collection<String> prefixes) {
+		super.setDestinationPrefixes(appendSlashes(prefixes));
+	}
+
+	private static Collection<String> appendSlashes(Collection<String> prefixes) {
+		if (CollectionUtils.isEmpty(prefixes)) {
+			return prefixes;
+		}
+		Collection<String> result = new ArrayList<String>(prefixes.size());
+		for (String prefix : prefixes) {
+			if (!prefix.endsWith("/")) {
+				prefix = prefix + "/";
+			}
+			result.add(prefix);
+		}
+		return result;
 	}
 
 	/**
@@ -172,6 +205,7 @@ public class SimpAnnotationMethodMessageHandler extends AbstractMethodMessageHan
 	public void setPathMatcher(PathMatcher pathMatcher) {
 		Assert.notNull(pathMatcher, "PathMatcher must not be null");
 		this.pathMatcher = pathMatcher;
+		this.slashPathSeparator = this.pathMatcher.combine("a", "a").equals("a/a");
 	}
 
 	/**
@@ -185,7 +219,7 @@ public class SimpAnnotationMethodMessageHandler extends AbstractMethodMessageHan
 	 * The configured Validator instance
 	 */
 	public Validator getValidator() {
-		return validator;
+		return this.validator;
 	}
 
 	/**
@@ -276,7 +310,7 @@ public class SimpAnnotationMethodMessageHandler extends AbstractMethodMessageHan
 
 		resolvers.addAll(getCustomArgumentResolvers());
 		resolvers.add(new PayloadArgumentResolver(this.messageConverter,
-				(this.validator != null ? this.validator : new NoopValidator())));
+				(this.validator != null ? this.validator : new NoOpValidator())));
 
 		return resolvers;
 	}
@@ -313,36 +347,34 @@ public class SimpAnnotationMethodMessageHandler extends AbstractMethodMessageHan
 
 	@Override
 	protected SimpMessageMappingInfo getMappingForMethod(Method method, Class<?> handlerType) {
-		MessageMapping typeAnnot = AnnotationUtils.findAnnotation(handlerType, MessageMapping.class);
+		MessageMapping typeAnnotation = AnnotationUtils.findAnnotation(handlerType, MessageMapping.class);
 		MessageMapping messageAnnot = AnnotationUtils.findAnnotation(method, MessageMapping.class);
 		if (messageAnnot != null) {
 			SimpMessageMappingInfo result = createMessageMappingCondition(messageAnnot);
-			if (typeAnnot != null) {
-				result = createMessageMappingCondition(typeAnnot).combine(result);
+			if (typeAnnotation != null) {
+				result = createMessageMappingCondition(typeAnnotation).combine(result);
 			}
 			return result;
 		}
-
-		SubscribeMapping subsribeAnnot = AnnotationUtils.findAnnotation(method, SubscribeMapping.class);
-		if (subsribeAnnot != null) {
-			SimpMessageMappingInfo result = createSubscribeCondition(subsribeAnnot);
-			if (typeAnnot != null) {
-				result = createMessageMappingCondition(typeAnnot).combine(result);
+		SubscribeMapping subsribeAnnotation = AnnotationUtils.findAnnotation(method, SubscribeMapping.class);
+		if (subsribeAnnotation != null) {
+			SimpMessageMappingInfo result = createSubscribeCondition(subsribeAnnotation);
+			if (typeAnnotation != null) {
+				result = createMessageMappingCondition(typeAnnotation).combine(result);
 			}
 			return result;
 		}
-
 		return null;
 	}
 
 	private SimpMessageMappingInfo createMessageMappingCondition(MessageMapping annotation) {
 		return new SimpMessageMappingInfo(SimpMessageTypeMessageCondition.MESSAGE,
-				new DestinationPatternsMessageCondition(annotation.value()));
+				new DestinationPatternsMessageCondition(annotation.value(), this.pathMatcher));
 	}
 
 	private SimpMessageMappingInfo createSubscribeCondition(SubscribeMapping annotation) {
 		return new SimpMessageMappingInfo(SimpMessageTypeMessageCondition.SUBSCRIBE,
-				new DestinationPatternsMessageCondition(annotation.value()));
+				new DestinationPatternsMessageCondition(annotation.value(), this.pathMatcher));
 	}
 
 	@Override
@@ -359,6 +391,27 @@ public class SimpAnnotationMethodMessageHandler extends AbstractMethodMessageHan
 	@Override
 	protected String getDestination(Message<?> message) {
 		return SimpMessageHeaderAccessor.getDestination(message.getHeaders());
+	}
+
+	@Override
+	protected String getLookupDestination(String destination) {
+		if (destination == null) {
+			return null;
+		}
+		if (CollectionUtils.isEmpty(getDestinationPrefixes())) {
+			return destination;
+		}
+		for (String prefix : getDestinationPrefixes()) {
+			if (destination.startsWith(prefix)) {
+				if (this.slashPathSeparator) {
+					return destination.substring(prefix.length() - 1);
+				}
+				else {
+					return destination.substring(prefix.length());
+				}
+			}
+		}
+		return null;
 	}
 
 	@Override
@@ -390,7 +443,13 @@ public class SimpAnnotationMethodMessageHandler extends AbstractMethodMessageHan
 			accessor.setHeader(DestinationVariableMethodArgumentResolver.DESTINATION_TEMPLATE_VARIABLES_HEADER, vars);
 		}
 
-		super.handleMatch(mapping, handlerMethod, lookupDestination, message);
+		try {
+			SimpAttributesContextHolder.setAttributesFromMessage(message);
+			super.handleMatch(mapping, handlerMethod, lookupDestination, message);
+		}
+		finally {
+			SimpAttributesContextHolder.resetAttributes();
+		}
 	}
 
 	@Override
@@ -399,7 +458,7 @@ public class SimpAnnotationMethodMessageHandler extends AbstractMethodMessageHan
 	}
 
 
-	private static final class NoopValidator implements Validator {
+	private static final class NoOpValidator implements Validator {
 
 		@Override
 		public boolean supports(Class<?> clazz) {

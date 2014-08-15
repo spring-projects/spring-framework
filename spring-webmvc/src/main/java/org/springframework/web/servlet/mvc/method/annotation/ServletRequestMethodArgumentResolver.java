@@ -29,6 +29,7 @@ import javax.servlet.http.HttpSession;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpMethod;
+import org.springframework.lang.UsesJava8;
 import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.ServletWebRequest;
@@ -133,6 +134,7 @@ public class ServletRequestMethodArgumentResolver implements HandlerMethodArgume
 	/**
 	 * Inner class to avoid a hard-coded dependency on Java 8's {@link java.time.ZoneId}.
 	 */
+	@UsesJava8
 	private static class ZoneIdResolver {
 
 		public static Object resolveZoneId(HttpServletRequest request) {

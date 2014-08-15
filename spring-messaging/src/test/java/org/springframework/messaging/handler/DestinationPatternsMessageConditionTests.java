@@ -20,6 +20,7 @@ import org.junit.Test;
 
 import org.springframework.messaging.Message;
 import org.springframework.messaging.support.MessageBuilder;
+import org.springframework.util.AntPathMatcher;
 
 import static org.junit.Assert.*;
 
@@ -34,6 +35,15 @@ public class DestinationPatternsMessageConditionTests {
 	public void prependSlash() {
 		DestinationPatternsMessageCondition c = condition("foo");
 		assertEquals("/foo", c.getPatterns().iterator().next());
+	}
+
+	@Test
+	public void prependSlashWithCustomPathSeparator() {
+		DestinationPatternsMessageCondition c =
+				new DestinationPatternsMessageCondition(new String[] {"foo"}, new AntPathMatcher("."));
+
+		assertEquals("Pre-pending should be disabled when not using '/' as path separator",
+				"foo", c.getPatterns().iterator().next());
 	}
 
 	// SPR-8255

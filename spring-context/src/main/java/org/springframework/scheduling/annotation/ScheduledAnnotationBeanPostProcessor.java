@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,13 +23,14 @@ import java.util.TimeZone;
 import java.util.concurrent.ScheduledExecutorService;
 
 import org.springframework.aop.support.AopUtils;
+import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.DisposableBean;
+import org.springframework.beans.factory.ListableBeanFactory;
+import org.springframework.beans.factory.SmartInitializingSingleton;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
-import org.springframework.context.ApplicationListener;
 import org.springframework.context.EmbeddedValueResolverAware;
-import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.scheduling.TaskScheduler;
@@ -57,7 +58,7 @@ import org.springframework.util.StringValueResolver;
  * <p>Auto-detects any {@link SchedulingConfigurer} instances in the container,
  * allowing for customization of the scheduler to be used or for fine-grained control
  * over task registration (e.g. registration of {@link Trigger} tasks.
- * See @{@link EnableScheduling} Javadoc for complete usage details.
+ * See the @{@link EnableScheduling} javadocs for complete usage details.
  *
  * @author Mark Fisher
  * @author Juergen Hoeller
@@ -70,17 +71,22 @@ import org.springframework.util.StringValueResolver;
  * @see org.springframework.scheduling.config.ScheduledTaskRegistrar
  */
 public class ScheduledAnnotationBeanPostProcessor
-		implements BeanPostProcessor, Ordered, EmbeddedValueResolverAware, ApplicationContextAware,
-		ApplicationListener<ContextRefreshedEvent>, DisposableBean {
+		implements BeanPostProcessor, Ordered, EmbeddedValueResolverAware, BeanFactoryAware,
+		SmartInitializingSingleton, DisposableBean {
 
 	private Object scheduler;
 
 	private StringValueResolver embeddedValueResolver;
 
-	private ApplicationContext applicationContext;
+	private ListableBeanFactory beanFactory;
 
 	private final ScheduledTaskRegistrar registrar = new ScheduledTaskRegistrar();
 
+
+	@Override
+	public int getOrder() {
+		return LOWEST_PRECEDENCE;
+	}
 
 	/**
 	 * Set the {@link org.springframework.scheduling.TaskScheduler} that will invoke
@@ -96,15 +102,62 @@ public class ScheduledAnnotationBeanPostProcessor
 		this.embeddedValueResolver = resolver;
 	}
 
+	/**
+	 * Making a {@link BeanFactory} available is optional; if not set,
+	 * {@link SchedulingConfigurer} beans won't get autodetected and
+	 * a {@link #setScheduler scheduler} has to be explicitly configured.
+	 */
 	@Override
-	public void setApplicationContext(ApplicationContext applicationContext) {
-		this.applicationContext = applicationContext;
+	public void setBeanFactory(BeanFactory beanFactory) {
+		this.beanFactory = (beanFactory instanceof ListableBeanFactory ? (ListableBeanFactory) beanFactory : null);
 	}
 
-	@Override
-	public int getOrder() {
-		return LOWEST_PRECEDENCE;
+	/**
+	 * @deprecated as of Spring 4.1, in favor of {@link #setBeanFactory}
+	 */
+	@Deprecated
+	public void setApplicationContext(ApplicationContext applicationContext) {
+		this.beanFactory = applicationContext;
 	}
+
+
+	@Override
+	public void afterSingletonsInstantiated() {
+		if (this.scheduler != null) {
+			this.registrar.setScheduler(this.scheduler);
+		}
+
+		if (this.beanFactory != null) {
+			Map<String, SchedulingConfigurer> configurers = this.beanFactory.getBeansOfType(SchedulingConfigurer.class);
+			for (SchedulingConfigurer configurer : configurers.values()) {
+				configurer.configureTasks(this.registrar);
+			}
+		}
+
+		if (this.registrar.hasTasks() && this.registrar.getScheduler() == null) {
+			Assert.state(this.beanFactory != null, "BeanFactory must be set to find scheduler by type");
+			Map<String, ? super Object> schedulers = new HashMap<String, Object>();
+			schedulers.putAll(this.beanFactory.getBeansOfType(TaskScheduler.class));
+			schedulers.putAll(this.beanFactory.getBeansOfType(ScheduledExecutorService.class));
+			if (schedulers.size() == 0) {
+				// do nothing -> fall back to default scheduler
+			}
+			else if (schedulers.size() == 1) {
+				this.registrar.setScheduler(schedulers.values().iterator().next());
+			}
+			else if (schedulers.size() >= 2){
+				throw new IllegalStateException(
+						"More than one TaskScheduler and/or ScheduledExecutorService  " +
+								"exist within the context. Remove all but one of the beans; or " +
+								"implement the SchedulingConfigurer interface and call " +
+								"ScheduledTaskRegistrar#setScheduler explicitly within the " +
+								"configureTasks() callback. Found the following beans: " + schedulers.keySet());
+			}
+		}
+
+		this.registrar.afterPropertiesSet();
+	}
+
 
 	@Override
 	public Object postProcessBeforeInitialization(Object bean, String beanName) {
@@ -254,44 +307,6 @@ public class ScheduledAnnotationBeanPostProcessor
 		}
 	}
 
-	@Override
-	public void onApplicationEvent(ContextRefreshedEvent event) {
-		if (event.getApplicationContext() != this.applicationContext) {
-			return;
-		}
-
-		if (this.scheduler != null) {
-			this.registrar.setScheduler(this.scheduler);
-		}
-
-		Map<String, SchedulingConfigurer> configurers =
-				this.applicationContext.getBeansOfType(SchedulingConfigurer.class);
-		for (SchedulingConfigurer configurer : configurers.values()) {
-			configurer.configureTasks(this.registrar);
-		}
-
-		if (this.registrar.hasTasks() && this.registrar.getScheduler() == null) {
-			Map<String, ? super Object> schedulers = new HashMap<String, Object>();
-			schedulers.putAll(this.applicationContext.getBeansOfType(TaskScheduler.class));
-			schedulers.putAll(this.applicationContext.getBeansOfType(ScheduledExecutorService.class));
-			if (schedulers.size() == 0) {
-				// do nothing -> fall back to default scheduler
-			}
-			else if (schedulers.size() == 1) {
-				this.registrar.setScheduler(schedulers.values().iterator().next());
-			}
-			else if (schedulers.size() >= 2){
-				throw new IllegalStateException(
-						"More than one TaskScheduler and/or ScheduledExecutorService  " +
-						"exist within the context. Remove all but one of the beans; or " +
-						"implement the SchedulingConfigurer interface and call " +
-						"ScheduledTaskRegistrar#setScheduler explicitly within the " +
-						"configureTasks() callback. Found the following beans: " + schedulers.keySet());
-			}
-		}
-
-		this.registrar.afterPropertiesSet();
-	}
 
 	@Override
 	public void destroy() {

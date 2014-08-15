@@ -28,7 +28,7 @@
 		<property name="caches">
 			<set>
 				<bean class="org.springframework.cache.concurrent.ConcurrentMapCacheFactoryBean">
-					<property name="name" value="default"/>
+					<property name="name" value="testCache"/>
 				</bean>
 				<bean class="org.springframework.cache.concurrent.ConcurrentMapCacheFactoryBean">
 					<property name="name" value="primary"/>
@@ -46,7 +46,7 @@
 		<property name="caches">
 			<set>
 				<bean class="org.springframework.cache.concurrent.ConcurrentMapCacheFactoryBean">
-					<property name="name" value="default"/>
+					<property name="name" value="testCache"/>
 				</bean>
 			</set>
 		</property>

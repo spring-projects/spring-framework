@@ -16,14 +16,10 @@
 
 package org.springframework.jms.config;
 
-import static org.junit.Assert.*;
-import static org.mockito.BDDMockito.*;
-
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
-
 import javax.jms.ConnectionFactory;
 import javax.jms.Message;
 import javax.jms.MessageListener;
@@ -49,6 +45,11 @@ import org.springframework.jms.listener.adapter.MessageListenerAdapter;
 import org.springframework.jms.listener.endpoint.JmsMessageEndpointManager;
 import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.util.ErrorHandler;
+import org.springframework.util.backoff.BackOff;
+import org.springframework.util.backoff.FixedBackOff;
+
+import static org.junit.Assert.*;
+import static org.mockito.BDDMockito.*;
 
 /**
  * @author Mark Fisher
@@ -101,13 +102,9 @@ public class JmsNamespaceHandlerTests {
 		for (DefaultMessageListenerContainer container : containers.values()) {
 			if (container.getConnectionFactory().equals(defaultConnectionFactory)) {
 				defaultConnectionFactoryCount++;
-				assertEquals(2, container.getConcurrentConsumers());
-				assertEquals(3, container.getMaxConcurrentConsumers());
 			}
 			else if (container.getConnectionFactory().equals(explicitConnectionFactory)) {
 				explicitConnectionFactoryCount++;
-				assertEquals(3, container.getConcurrentConsumers());
-				assertEquals(5, container.getMaxConcurrentConsumers());
 			}
 		}
 
@@ -148,7 +145,7 @@ public class JmsNamespaceHandlerTests {
 		assertNotNull("No factory registered with testJmsFactory id", factory);
 
 		DefaultMessageListenerContainer container =
-				factory.createMessageListenerContainer(createDummyEndpoint());
+				factory.createListenerContainer(createDummyEndpoint());
 		assertEquals("explicit connection factory not set",
 				context.getBean(EXPLICIT_CONNECTION_FACTORY), container.getConnectionFactory());
 		assertEquals("explicit destination resolver not set",
@@ -159,8 +156,8 @@ public class JmsNamespaceHandlerTests {
 		assertEquals("wrong concurrency", 3, container.getConcurrentConsumers());
 		assertEquals("wrong concurrency", 5, container.getMaxConcurrentConsumers());
 		assertEquals("wrong prefetch", 50, container.getMaxMessagesPerTask());
-
-		assertEquals("phase cannot be customized by the factory", Integer.MAX_VALUE, container.getPhase());
+		assertEquals("Wrong phase", 99, container.getPhase());
+		assertSame(context.getBean("testBackOff"), new DirectFieldAccessor(container).getPropertyValue("backOff"));
 	}
 
 	@Test
@@ -171,14 +168,14 @@ public class JmsNamespaceHandlerTests {
 		assertNotNull("No factory registered with testJcaFactory id", factory);
 
 		JmsMessageEndpointManager container =
-				factory.createMessageListenerContainer(createDummyEndpoint());
+				factory.createListenerContainer(createDummyEndpoint());
 		assertEquals("explicit resource adapter not set",
 				context.getBean("testResourceAdapter"),container.getResourceAdapter());
 		assertEquals("explicit message converter not set",
 				context.getBean("testMessageConverter"), container.getActivationSpecConfig().getMessageConverter());
 		assertEquals("wrong concurrency", 5, container.getActivationSpecConfig().getMaxConcurrency());
 		assertEquals("Wrong prefetch", 50, container.getActivationSpecConfig().getPrefetchSize());
-		assertEquals("phase cannot be customized by the factory", Integer.MAX_VALUE, container.getPhase());
+		assertEquals("Wrong phase", 77, container.getPhase());
 	}
 
 	@Test
@@ -214,13 +211,42 @@ public class JmsNamespaceHandlerTests {
 
 	@Test
 	public void testRecoveryInterval() {
-		long recoveryInterval1 = getRecoveryInterval("listener1");
-		long recoveryInterval2 = getRecoveryInterval("listener2");
+		Object testBackOff = context.getBean("testBackOff");
+		BackOff backOff1 = getBackOff("listener1");
+		BackOff backOff2 = getBackOff("listener2");
 		long recoveryInterval3 = getRecoveryInterval(DefaultMessageListenerContainer.class.getName() + "#0");
 
-		assertEquals(1000L, recoveryInterval1);
-		assertEquals(1000L, recoveryInterval2);
+		assertSame(testBackOff, backOff1);
+		assertSame(testBackOff, backOff2);
 		assertEquals(DefaultMessageListenerContainer.DEFAULT_RECOVERY_INTERVAL, recoveryInterval3);
+	}
+
+	@Test
+	public void testConcurrency() {
+		// JMS
+		DefaultMessageListenerContainer listener0 = this.context
+				.getBean(DefaultMessageListenerContainer.class.getName() + "#0", DefaultMessageListenerContainer.class);
+		DefaultMessageListenerContainer listener1 = this.context
+				.getBean("listener1", DefaultMessageListenerContainer.class);
+		DefaultMessageListenerContainer listener2 = this.context
+				.getBean("listener2", DefaultMessageListenerContainer.class);
+
+		assertEquals("Wrong concurrency on listener using placeholder", 2, listener0.getConcurrentConsumers());
+		assertEquals("Wrong concurrency on listener using placeholder", 3, listener0.getMaxConcurrentConsumers());
+		assertEquals("Wrong concurrency on listener1", 3, listener1.getConcurrentConsumers());
+		assertEquals("Wrong max concurrency on listener1", 5, listener1.getMaxConcurrentConsumers());
+		assertEquals("Wrong custom concurrency on listener2", 5, listener2.getConcurrentConsumers());
+		assertEquals("Wrong custom max concurrency on listener2", 10, listener2.getMaxConcurrentConsumers());
+
+		// JCA
+		JmsMessageEndpointManager listener3 = this.context
+				.getBean("listener3", JmsMessageEndpointManager.class);
+		JmsMessageEndpointManager listener4 = this.context
+				.getBean("listener4", JmsMessageEndpointManager.class);
+		assertEquals("Wrong concurrency on listener3", 5,
+				listener3.getActivationSpecConfig().getMaxConcurrency());
+		assertEquals("Wrong custom concurrency on listener4", 7,
+				listener4.getActivationSpecConfig().getMaxConcurrency());
 	}
 
 	@Test
@@ -298,10 +324,15 @@ public class JmsNamespaceHandlerTests {
 		return (ErrorHandler) new DirectFieldAccessor(container).getPropertyValue("errorHandler");
 	}
 
-	private long getRecoveryInterval(String containerBeanName) {
+	private BackOff getBackOff(String containerBeanName) {
 		DefaultMessageListenerContainer container = this.context.getBean(containerBeanName, DefaultMessageListenerContainer.class);
-		Long recoveryInterval = (Long) new DirectFieldAccessor(container).getPropertyValue("recoveryInterval");
-		return recoveryInterval.longValue();
+		return (BackOff) new DirectFieldAccessor(container).getPropertyValue("backOff");
+	}
+
+	private long getRecoveryInterval(String containerBeanName) {
+		BackOff backOff = getBackOff(containerBeanName);
+		assertEquals(FixedBackOff.class, backOff.getClass());
+		return ((FixedBackOff)backOff).getInterval();
 	}
 
 	private int getPhase(String containerBeanName) {

@@ -72,7 +72,10 @@ public abstract class ResourceUtils {
 	/** URL protocol for an entry from a JBoss jar file: "vfszip" */
 	public static final String URL_PROTOCOL_VFSZIP = "vfszip";
 
-	/** URL protocol for a JBoss VFS resource: "vfs" */
+	/** URL protocol for a JBoss file system resource: "vfsfile" */
+	public static final String URL_PROTOCOL_VFSFILE = "vfsfile";
+
+	/** URL protocol for a general JBoss VFS resource: "vfs" */
 	public static final String URL_PROTOCOL_VFS = "vfs";
 
 	/** Separator between JAR URL and file path within the JAR */
@@ -248,27 +251,26 @@ public abstract class ResourceUtils {
 
 	/**
 	 * Determine whether the given URL points to a resource in the file system,
-	 * that is, has protocol "file" or "vfs".
+	 * that is, has protocol "file", "vfsfile" or "vfs".
 	 * @param url the URL to check
 	 * @return whether the URL has been identified as a file system URL
 	 */
 	public static boolean isFileURL(URL url) {
 		String protocol = url.getProtocol();
-		return (URL_PROTOCOL_FILE.equals(protocol) || URL_PROTOCOL_VFS.equals(protocol));
+		return (URL_PROTOCOL_FILE.equals(protocol) || URL_PROTOCOL_VFSFILE.equals(protocol) ||
+				URL_PROTOCOL_VFS.equals(protocol));
 	}
 
 	/**
 	 * Determine whether the given URL points to a resource in a jar file,
-	 * that is, has protocol "jar", "zip", "wsjar" or "code-source".
-	 * <p>"zip" and "wsjar" are used by WebLogic Server and WebSphere, respectively,
-	 * but can be treated like jar files.
+	 * that is, has protocol "jar", "zip", "vfszip" or "wsjar".
 	 * @param url the URL to check
 	 * @return whether the URL has been identified as a JAR URL
 	 */
 	public static boolean isJarURL(URL url) {
 		String protocol = url.getProtocol();
 		return (URL_PROTOCOL_JAR.equals(protocol) || URL_PROTOCOL_ZIP.equals(protocol) ||
-				URL_PROTOCOL_WSJAR.equals(protocol) || URL_PROTOCOL_VFSZIP.equals(protocol));
+				URL_PROTOCOL_VFSZIP.equals(protocol) || URL_PROTOCOL_WSJAR.equals(protocol));
 	}
 
 	/**

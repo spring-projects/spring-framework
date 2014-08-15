@@ -34,7 +34,7 @@ import static org.junit.Assert.*;
  * @author Sam Brannen
  * @since 3.1
  */
-public class ContextLoaderUtilsConfigurationAttributesTests extends AbstractContextLoaderUtilsTests {
+public class ContextLoaderUtilsConfigurationAttributesTests extends AbstractContextConfigurationUtilsTests {
 
 	private void assertLocationsFooAttributes(ContextConfigurationAttributes attributes) {
 		assertAttributes(attributes, LocationsFoo.class, new String[] { "/foo.xml" }, EMPTY_CLASS_ARRAY,

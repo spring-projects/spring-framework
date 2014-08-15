@@ -62,6 +62,7 @@ public class PayloadArgumentResolver implements HandlerMethodArgumentResolver {
 		this.validator = validator;
 	}
 
+
 	@Override
 	public boolean supportsParameter(MethodParameter parameter) {
 		return true;
@@ -69,14 +70,12 @@ public class PayloadArgumentResolver implements HandlerMethodArgumentResolver {
 
 	@Override
 	public Object resolveArgument(MethodParameter param, Message<?> message) throws Exception {
-
 		Payload annot = param.getParameterAnnotation(Payload.class);
 		if ((annot != null) && StringUtils.hasText(annot.value())) {
-			throw new IllegalStateException("@Payload SpEL expressions not supported by this resolver.");
+			throw new IllegalStateException("@Payload SpEL expressions not supported by this resolver");
 		}
 
 		Object payload = message.getPayload();
-
 		if (isEmptyPayload(payload)) {
 			if (annot == null || annot.required()) {
 				String paramName = getParameterName(param);
@@ -122,7 +121,7 @@ public class PayloadArgumentResolver implements HandlerMethodArgumentResolver {
 			return ((byte[]) payload).length == 0;
 		}
 		else if (payload instanceof String) {
-			return ((String) payload).trim().equals("");
+			return !StringUtils.hasText((String) payload);
 		}
 		else {
 			return false;
@@ -130,14 +129,12 @@ public class PayloadArgumentResolver implements HandlerMethodArgumentResolver {
 	}
 
 	protected void validate(Message<?> message, MethodParameter parameter, Object target) {
-
 		if (this.validator == null) {
 			return;
 		}
 
 		for (Annotation annot : parameter.getParameterAnnotations()) {
 			if (annot.annotationType().getSimpleName().startsWith("Valid")) {
-
 				BeanPropertyBindingResult bindingResult =
 						new BeanPropertyBindingResult(target, getParameterName(parameter));
 

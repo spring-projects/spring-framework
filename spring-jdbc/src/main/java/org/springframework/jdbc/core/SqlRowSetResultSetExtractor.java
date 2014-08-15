@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ package org.springframework.jdbc.core;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-
 import javax.sql.rowset.CachedRowSet;
 import javax.sql.rowset.RowSetFactory;
 import javax.sql.rowset.RowSetProvider;
@@ -26,6 +25,8 @@ import javax.sql.rowset.RowSetProvider;
 import org.springframework.core.JdkVersion;
 import org.springframework.jdbc.support.rowset.ResultSetWrappingSqlRowSet;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
+import org.springframework.lang.UsesJava7;
+import org.springframework.util.ClassUtils;
 
 /**
  * {@link ResultSetExtractor} implementation that returns a Spring {@link SqlRowSet}
@@ -109,6 +110,7 @@ public class SqlRowSetResultSetExtractor implements ResultSetExtractor<SqlRowSet
 	/**
 	 * Inner class to avoid a hard dependency on JDBC 4.1 RowSetProvider class.
 	 */
+	@UsesJava7
 	private static class StandardCachedRowSetFactory implements CachedRowSetFactory {
 
 		private final RowSetFactory rowSetFactory;
@@ -134,12 +136,14 @@ public class SqlRowSetResultSetExtractor implements ResultSetExtractor<SqlRowSet
 	 */
 	private static class SunCachedRowSetFactory implements CachedRowSetFactory {
 
-		private static final Class<?> IMPLEMENTATION_CLASS;
+		private static final Class<?> implementationClass;
+
 		static {
 			try {
-				IMPLEMENTATION_CLASS = Class.forName("com.sun.rowset.CachedRowSetImpl");
+				implementationClass = ClassUtils.forName("com.sun.rowset.CachedRowSetImpl",
+						SqlRowSetResultSetExtractor.class.getClassLoader());
 			}
-			catch (ClassNotFoundException ex) {
+			catch (Throwable ex) {
 				throw new IllegalStateException(ex);
 			}
 		}
@@ -147,12 +151,9 @@ public class SqlRowSetResultSetExtractor implements ResultSetExtractor<SqlRowSet
 		@Override
 		public CachedRowSet createCachedRowSet() throws SQLException {
 			try {
-				return (CachedRowSet) IMPLEMENTATION_CLASS.newInstance();
+				return (CachedRowSet) implementationClass.newInstance();
 			}
-			catch (InstantiationException ex) {
-				throw new IllegalStateException(ex);
-			}
-			catch (IllegalAccessException ex) {
+			catch (Throwable ex) {
 				throw new IllegalStateException(ex);
 			}
 		}

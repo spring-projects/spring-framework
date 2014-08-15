@@ -17,9 +17,7 @@
 package org.springframework.web.socket.messaging;
 
 
-import org.springframework.context.ApplicationEvent;
 import org.springframework.messaging.Message;
-import org.springframework.util.Assert;
 
 /**
  * Event raised when a new WebSocket client using a Simple Messaging Protocol
@@ -29,50 +27,15 @@ import org.springframework.util.Assert;
  * but rather the client's first attempt to connect within the the sub-protocol,
  * for example sending the STOMP CONNECT frame.
  *
- * <p>The provided {@link #getMessage() message} can be examined to check
- * information about the connected user, The session id, and any headers
- * sent by the client, for STOMP check the class
- * {@link org.springframework.messaging.simp.stomp.StompHeaderAccessor}.
- * For example:
- *
- * <pre class="code">
- * StompHeaderAccessor headers = StompHeaderAccessor.wrap(message);
- * headers.getSessionId();
- * headers.getSessionAttributes();
- * headers.getPrincipal();
- * </pre>
- *
  * @author Rossen Stoyanchev
  * @since 4.0.3
  */
 @SuppressWarnings("serial")
-public class SessionConnectEvent extends ApplicationEvent {
-
-	private final Message<byte[]> message;
+public class SessionConnectEvent extends AbstractSubProtocolEvent {
 
 
-	/**
-	 * Create a new SessionConnectEvent.
-	 *
-	 * @param source the component that published the event (never {@code null})
-	 * @param message the connect message
-	 */
 	public SessionConnectEvent(Object source, Message<byte[]> message) {
-		super(source);
-		Assert.notNull(message, "'message' must not be null");
-		this.message = message;
+		super(source, message);
 	}
 
-	/**
-	 * Return the connect message.
-	 */
-	public Message<byte[]> getMessage() {
-		return this.message;
-	}
-
-
-	@Override
-	public String toString() {
-		return "SessionConnectEvent: message=" + message;
-	}
 }

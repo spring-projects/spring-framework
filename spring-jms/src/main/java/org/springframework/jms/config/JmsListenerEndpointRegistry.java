@@ -18,39 +18,49 @@ package org.springframework.jms.config;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.factory.BeanInitializationException;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.context.SmartLifecycle;
 import org.springframework.jms.listener.MessageListenerContainer;
 import org.springframework.util.Assert;
 
 /**
- * Create the necessary {@link MessageListenerContainer} instances
- * for the registered {@linkplain JmsListenerEndpoint endpoints}. Also
- * manage the lifecycle of the containers, in particular with the
- * lifecycle of the application context.
+ * Creates the necessary {@link MessageListenerContainer} instances for the
+ * registered {@linkplain JmsListenerEndpoint endpoints}. Also manages the
+ * lifecycle of the listener containers, in particular within the lifecycle
+ * of the application context.
  *
- * <p>Contrary to {@link MessageListenerContainer} created manually,
- * containers managed by this instances are not registered in the
- * application context and are not candidates for autowiring. Use
- * {@link #getContainers()} if you need to access the containers
- * of this instance for management purposes. If you need to access
- * a particular container, use {@link #getContainer(String)} with the
- * id of the endpoint.
+ * <p>Contrary to {@link MessageListenerContainer}s created manually, listener
+ * containers managed by registry are not beans in the application context and
+ * are not candidates for autowiring. Use {@link #getListenerContainers()} if
+ * you need to access this registry's listener containers for management purposes.
+ * If you need to access to a specific message listener container, use
+ * {@link #getListenerContainer(String)} with the id of the endpoint.
  *
  * @author Stephane Nicoll
+ * @author Juergen Hoeller
  * @since 4.1
  * @see JmsListenerEndpoint
  * @see MessageListenerContainer
  * @see JmsListenerContainerFactory
  */
-public class JmsListenerEndpointRegistry implements DisposableBean {
+public class JmsListenerEndpointRegistry implements DisposableBean, SmartLifecycle {
 
-	private final Map<String, MessageListenerContainer> containers =
-			new HashMap<String, MessageListenerContainer>();
+	protected final Log logger = LogFactory.getLog(getClass());
+
+	private final Map<String, MessageListenerContainer> listenerContainers =
+			new LinkedHashMap<String, MessageListenerContainer>();
+
+	private int phase = Integer.MAX_VALUE;
+
 
 	/**
 	 * Return the {@link MessageListenerContainer} with the specified id or
@@ -59,72 +69,149 @@ public class JmsListenerEndpointRegistry implements DisposableBean {
 	 * @return the container or {@code null} if no container with that id exists
 	 * @see JmsListenerEndpoint#getId()
 	 */
-	public MessageListenerContainer getContainer(String id) {
-		Assert.notNull(id, "the container identifier must be set.");
-		return containers.get(id);
+	public MessageListenerContainer getListenerContainer(String id) {
+		Assert.notNull(id, "Container identifier must not be null");
+		return this.listenerContainers.get(id);
 	}
 
 	/**
 	 * Return the managed {@link MessageListenerContainer} instance(s).
 	 */
-	public Collection<MessageListenerContainer> getContainers() {
-		return Collections.unmodifiableCollection(containers.values());
+	public Collection<MessageListenerContainer> getListenerContainers() {
+		return Collections.unmodifiableCollection(this.listenerContainers.values());
 	}
+
 
 	/**
 	 * Create a message listener container for the given {@link JmsListenerEndpoint}.
 	 * <p>This create the necessary infrastructure to honor that endpoint
 	 * with regards to its configuration.
 	 * @param endpoint the endpoint to add
-	 * @see #getContainers()
-	 * @see #getContainer(String)
+	 * @see #getListenerContainers()
+	 * @see #getListenerContainer(String)
 	 */
-	public void createJmsListenerContainer(JmsListenerEndpoint endpoint, JmsListenerContainerFactory<?> factory) {
+	public void registerListenerContainer(JmsListenerEndpoint endpoint, JmsListenerContainerFactory<?> factory) {
 		Assert.notNull(endpoint, "Endpoint must not be null");
 		Assert.notNull(factory, "Factory must not be null");
 
 		String id = endpoint.getId();
 		Assert.notNull(id, "Endpoint id must not be null");
-		Assert.state(!containers.containsKey(id), "another endpoint is already " +
-				"registered with id '" + id + "'");
+		Assert.state(!this.listenerContainers.containsKey(id),
+				"Another endpoint is already registered with id '" + id + "'");
 
-		MessageListenerContainer container = doCreateJmsListenerContainer(endpoint, factory);
-		containers.put(id, container);
+		MessageListenerContainer container = createListenerContainer(endpoint, factory);
+		this.listenerContainers.put(id, container);
 	}
 
 	/**
 	 * Create and start a new container using the specified factory.
 	 */
-	protected MessageListenerContainer doCreateJmsListenerContainer(JmsListenerEndpoint endpoint,
+	protected MessageListenerContainer createListenerContainer(JmsListenerEndpoint endpoint,
 			JmsListenerContainerFactory<?> factory) {
-		MessageListenerContainer container = factory.createMessageListenerContainer(endpoint);
-		initializeContainer(container);
-		return container;
+
+		MessageListenerContainer listenerContainer = factory.createListenerContainer(endpoint);
+
+		if (listenerContainer instanceof InitializingBean) {
+			try {
+				((InitializingBean) listenerContainer).afterPropertiesSet();
+			}
+			catch (Exception ex) {
+				throw new BeanInitializationException("Failed to initialize message listener container", ex);
+			}
+		}
+
+		int containerPhase = listenerContainer.getPhase();
+		if (containerPhase < Integer.MAX_VALUE) {  // a custom phase value
+			if (this.phase < Integer.MAX_VALUE && this.phase != containerPhase) {
+				throw new IllegalStateException("Encountered phase mismatch between container factory definitions: " +
+						this.phase + " vs " + containerPhase);
+			}
+			this.phase = listenerContainer.getPhase();
+		}
+
+		return listenerContainer;
+	}
+
+
+	@Override
+	public void destroy() {
+		for (MessageListenerContainer listenerContainer : getListenerContainers()) {
+			if (listenerContainer instanceof DisposableBean) {
+				try {
+					((DisposableBean) listenerContainer).destroy();
+				}
+				catch (Throwable ex) {
+					logger.warn("Failed to destroy message listener container", ex);
+				}
+			}
+		}
+	}
+
+
+	// Delegating implementation of SmartLifecycle
+
+	@Override
+	public int getPhase() {
+		return this.phase;
 	}
 
 	@Override
-	public void destroy() throws Exception {
-		for (MessageListenerContainer container : getContainers()) {
-			stopContainer(container);
-		}
+	public boolean isAutoStartup() {
+		return true;
 	}
 
-	protected void initializeContainer(MessageListenerContainer container) {
-		container.start();
-		if (container instanceof InitializingBean) {
-			try {
-				((InitializingBean) container).afterPropertiesSet();
-			}
-			catch (Exception e) {
-				throw new BeanInitializationException("Could not start message listener container", e);
+	@Override
+	public void start() {
+		for (MessageListenerContainer listenerContainer : getListenerContainers()) {
+			if (listenerContainer.isAutoStartup()) {
+				listenerContainer.start();
 			}
 		}
 	}
 
-	protected void stopContainer(MessageListenerContainer container) throws Exception {
-		container.stop();
-		if (container instanceof DisposableBean) {
-			((DisposableBean) container).destroy();
+	@Override
+	public void stop() {
+		for (MessageListenerContainer listenerContainer : getListenerContainers()) {
+			listenerContainer.stop();
+		}
+	}
+
+	@Override
+	public void stop(Runnable callback) {
+		Collection<MessageListenerContainer> listenerContainers = getListenerContainers();
+		AggregatingCallback aggregatingCallback = new AggregatingCallback(listenerContainers.size(), callback);
+		for (MessageListenerContainer listenerContainer : listenerContainers) {
+			listenerContainer.stop(aggregatingCallback);
+		}
+	}
+
+	@Override
+	public boolean isRunning() {
+		for (MessageListenerContainer listenerContainer : getListenerContainers()) {
+			if (listenerContainer.isRunning()) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+
+	private static class AggregatingCallback implements Runnable {
+
+		private final AtomicInteger count;
+
+		private final Runnable finishCallback;
+
+		public AggregatingCallback(int count, Runnable finishCallback) {
+			this.count = new AtomicInteger(count);
+			this.finishCallback = finishCallback;
+		}
+
+		@Override
+		public void run() {
+			if (this.count.decrementAndGet() == 0) {
+				this.finishCallback.run();
+			}
 		}
 	}
 

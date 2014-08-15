@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,17 +42,17 @@ class GenericTypeAwarePropertyDescriptor extends PropertyDescriptor {
 
 	private final Class<?> beanClass;
 
+	private final Class<?> propertyEditorClass;
+
 	private final Method readMethod;
 
 	private final Method writeMethod;
 
-	private final Class<?> propertyEditorClass;
-
 	private volatile Set<Method> ambiguousWriteMethods;
 
-	private Class<?> propertyType;
-
 	private MethodParameter writeMethodParameter;
+
+	private Class<?> propertyType;
 
 
 	public GenericTypeAwarePropertyDescriptor(Class<?> beanClass, String propertyName,
@@ -78,25 +78,42 @@ class GenericTypeAwarePropertyDescriptor extends PropertyDescriptor {
 		this.readMethod = readMethodToUse;
 		this.writeMethod = writeMethodToUse;
 
-		if (this.writeMethod != null && this.readMethod == null) {
-			// Write method not matched against read method: potentially ambiguous through
-			// several overloaded variants, in which case an arbitrary winner has been chosen
-			// by the JDK's JavaBeans Introspector...
-			Set<Method> ambiguousCandidates = new HashSet<Method>();
-			for (Method method : beanClass.getMethods()) {
-				if (method.getName().equals(writeMethodToUse.getName()) &&
-						!method.equals(writeMethodToUse) && !method.isBridge()) {
-					ambiguousCandidates.add(method);
+		if (this.writeMethod != null) {
+			if (this.readMethod == null) {
+				// Write method not matched against read method: potentially ambiguous through
+				// several overloaded variants, in which case an arbitrary winner has been chosen
+				// by the JDK's JavaBeans Introspector...
+				Set<Method> ambiguousCandidates = new HashSet<Method>();
+				for (Method method : beanClass.getMethods()) {
+					if (method.getName().equals(writeMethodToUse.getName()) &&
+							!method.equals(writeMethodToUse) && !method.isBridge()) {
+						ambiguousCandidates.add(method);
+					}
+				}
+				if (!ambiguousCandidates.isEmpty()) {
+					this.ambiguousWriteMethods = ambiguousCandidates;
 				}
 			}
-			if (!ambiguousCandidates.isEmpty()) {
-				this.ambiguousWriteMethods = ambiguousCandidates;
-			}
+			this.writeMethodParameter = new MethodParameter(this.writeMethod, 0);
+			GenericTypeResolver.resolveParameterType(this.writeMethodParameter, this.beanClass);
+		}
+
+		if (this.readMethod != null) {
+			this.propertyType = GenericTypeResolver.resolveReturnType(this.readMethod, this.beanClass);
+		}
+		else if (this.writeMethodParameter != null) {
+			this.propertyType = this.writeMethodParameter.getParameterType();
 		}
 	}
 
+
 	public Class<?> getBeanClass() {
 		return this.beanClass;
+	}
+
+	@Override
+	public Class<?> getPropertyEditorClass() {
+		return this.propertyEditorClass;
 	}
 
 	@Override
@@ -120,39 +137,13 @@ class GenericTypeAwarePropertyDescriptor extends PropertyDescriptor {
 		return this.writeMethod;
 	}
 
-	@Override
-	public Class<?> getPropertyEditorClass() {
-		return this.propertyEditorClass;
-	}
-
-	@Override
-	public synchronized Class<?> getPropertyType() {
-		if (this.propertyType == null) {
-			if (this.readMethod != null) {
-				this.propertyType = GenericTypeResolver.resolveReturnType(this.readMethod, this.beanClass);
-			}
-			else {
-				MethodParameter writeMethodParam = getWriteMethodParameter();
-				if (writeMethodParam != null) {
-					this.propertyType = writeMethodParam.getParameterType();
-				}
-				else {
-					this.propertyType = super.getPropertyType();
-				}
-			}
-		}
-		return this.propertyType;
-	}
-
-	public synchronized MethodParameter getWriteMethodParameter() {
-		if (this.writeMethod == null) {
-			return null;
-		}
-		if (this.writeMethodParameter == null) {
-			this.writeMethodParameter = new MethodParameter(this.writeMethod, 0);
-			GenericTypeResolver.resolveParameterType(this.writeMethodParameter, this.beanClass);
-		}
+	public MethodParameter getWriteMethodParameter() {
 		return this.writeMethodParameter;
+	}
+
+	@Override
+	public Class<?> getPropertyType() {
+		return this.propertyType;
 	}
 
 }

@@ -547,10 +547,8 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	}
 
 	@Override
-	public int[] batchUpdate(final String[] sql) throws DataAccessException {
-
+	public int[] batchUpdate(final String... sql) throws DataAccessException {
 		Assert.notEmpty(sql, "SQL array must not be empty");
-
 		if (logger.isDebugEnabled()) {
 			logger.debug("Executing SQL batch update of " + sql.length + " statements");
 		}
@@ -561,9 +559,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 
 			@Override
 			public int[] doInStatement(Statement stmt) throws SQLException, DataAccessException {
-
 				int[] rowsAffected = new int[sql.length];
-
 				if (JdbcUtils.supportsBatchUpdates(stmt.getConnection())) {
 					for (String sqlStmt : sql) {
 						this.currSql = appendSql(this.currSql, sqlStmt);
@@ -608,6 +604,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 				return this.currSql;
 			}
 		}
+
 		return execute(new BatchUpdateStatementCallback());
 	}
 

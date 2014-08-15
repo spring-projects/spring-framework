@@ -61,8 +61,9 @@ public class SampleTests {
 		@SuppressWarnings("unused")
 		Person ludwig = restTemplate.getForObject("/composers/{id}", Person.class, 42);
 
-		// person.getName().equals("Ludwig van Beethoven")
-		// person.getDouble().equals(1.6035)
+		// We are only validating the request. The response is mocked out.
+		// hotel.getId() == 42
+		// hotel.getName().equals("Holiday Inn")
 
 		this.mockServer.verify();
 	}

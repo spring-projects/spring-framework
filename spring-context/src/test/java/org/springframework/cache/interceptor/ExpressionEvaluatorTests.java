@@ -21,9 +21,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 import org.springframework.cache.annotation.AnnotationCacheOperationSource;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
@@ -42,9 +40,6 @@ import static org.junit.Assert.*;
  * @author Stephane Nicoll
  */
 public class ExpressionEvaluatorTests {
-
-	@Rule
-	public ExpectedException thrown = ExpectedException.none();
 
 	private ExpressionEvaluator eval = new ExpressionEvaluator();
 
@@ -111,6 +106,18 @@ public class ExpressionEvaluatorTests {
 		EvaluationContext context = createEvaluationContext(ExpressionEvaluator.NO_RESULT);
 		Object value = new SpelExpressionParser().parseExpression("#result").getValue(context);
 		assertThat(value, nullValue());
+	}
+
+	@Test
+	public void unavailableReturnValue() throws Exception {
+		EvaluationContext context = createEvaluationContext(ExpressionEvaluator.RESULT_UNAVAILABLE);
+		try {
+			new SpelExpressionParser().parseExpression("#result").getValue(context);
+			fail("Should have failed to parse expression, result not available");
+		}
+		catch (VariableNotAvailableException e) {
+			assertEquals("wrong variable name", "result", e.getName());
+		}
 	}
 
 	private EvaluationContext createEvaluationContext(Object result) {

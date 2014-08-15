@@ -18,6 +18,8 @@ package org.springframework.web.socket;
 
 import org.springframework.web.context.WebApplicationContext;
 
+import javax.servlet.Filter;
+
 /**
  * Contract for a test server to use for WebSocket integration tests.
  *
@@ -27,7 +29,9 @@ public interface WebSocketTestServer {
 
 	int getPort();
 
-	void deployConfig(WebApplicationContext cxt);
+	void setup();
+
+	void deployConfig(WebApplicationContext cxt, Filter... filters);
 
 	void undeployConfig();
 

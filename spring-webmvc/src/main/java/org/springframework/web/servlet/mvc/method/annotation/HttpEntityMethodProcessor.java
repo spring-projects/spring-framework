@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@ import java.util.List;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpInputMessage;
+import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.server.ServletServerHttpRequest;
@@ -37,10 +37,10 @@ import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.ModelAndViewContainer;
 
 /**
- * Resolves {@link HttpEntity} method argument values and also handles
- * both {@link HttpEntity} and {@link ResponseEntity} return values.
+ * Resolves {@link HttpEntity} and {@link RequestEntity} method argument values
+ * and also handles {@link HttpEntity} and {@link ResponseEntity} return values.
  *
- * <p>An {@link HttpEntity} return type has a set purpose. Therefore this
+ * <p>An {@link HttpEntity} return type has a specific purpose. Therefore this
  * handler should be configured ahead of handlers that support any return
  * value type annotated with {@code @ModelAttribute} or {@code @ResponseBody}
  * to ensure they don't take over.
@@ -57,19 +57,25 @@ public class HttpEntityMethodProcessor extends AbstractMessageConverterMethodPro
 
 	public HttpEntityMethodProcessor(List<HttpMessageConverter<?>> messageConverters,
 			ContentNegotiationManager contentNegotiationManager) {
-
 		super(messageConverters, contentNegotiationManager);
 	}
 
+	public HttpEntityMethodProcessor(List<HttpMessageConverter<?>> messageConverters,
+			ContentNegotiationManager contentNegotiationManager, List<Object> responseBodyAdvice) {
+		super(messageConverters, contentNegotiationManager, responseBodyAdvice);
+	}
 
-	@Override
+
+		@Override
 	public boolean supportsParameter(MethodParameter parameter) {
-		return HttpEntity.class.equals(parameter.getParameterType());
+		return HttpEntity.class.equals(parameter.getParameterType()) ||
+				RequestEntity.class.equals(parameter.getParameterType());
 	}
 
 	@Override
 	public boolean supportsReturnType(MethodParameter returnType) {
-		return HttpEntity.class.isAssignableFrom(returnType.getParameterType());
+		return HttpEntity.class.equals(returnType.getParameterType()) ||
+				ResponseEntity.class.equals(returnType.getParameterType());
 	}
 
 	@Override
@@ -77,11 +83,18 @@ public class HttpEntityMethodProcessor extends AbstractMessageConverterMethodPro
 			NativeWebRequest webRequest, WebDataBinderFactory binderFactory)
 			throws IOException, HttpMediaTypeNotSupportedException {
 
-		HttpInputMessage inputMessage = createInputMessage(webRequest);
+		ServletServerHttpRequest inputMessage = createInputMessage(webRequest);
 		Type paramType = getHttpEntityType(parameter);
 
 		Object body = readWithMessageConverters(webRequest, parameter, paramType);
-		return new HttpEntity<Object>(body, inputMessage.getHeaders());
+		if (RequestEntity.class.equals(parameter.getParameterType())) {
+			return new RequestEntity<Object>(body, inputMessage.getHeaders(),
+					inputMessage.getMethod(), inputMessage.getURI());
+		}
+		else {
+			return new HttpEntity<Object>(body, inputMessage.getHeaders());
+
+		}
 	}
 
 	private Type getHttpEntityType(MethodParameter parameter) {

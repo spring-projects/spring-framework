@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,7 +46,7 @@ import org.springframework.util.Assert;
  * @see ClassPathBeanDefinitionScanner
  * @see org.springframework.context.support.GenericXmlApplicationContext
  */
-public class AnnotationConfigApplicationContext extends GenericApplicationContext {
+public class AnnotationConfigApplicationContext extends GenericApplicationContext implements AnnotationConfigRegistry {
 
 	private final AnnotatedBeanDefinitionReader reader;
 
@@ -135,12 +135,11 @@ public class AnnotationConfigApplicationContext extends GenericApplicationContex
 		this.scanner.setScopeMetadataResolver(scopeMetadataResolver);
 	}
 
+
 	/**
 	 * Register one or more annotated classes to be processed.
-	 * Note that {@link #refresh()} must be called in order for the context
-	 * to fully process the new class.
-	 * <p>Calls to {@code register} are idempotent; adding the same
-	 * annotated class more than once has no additional effect.
+	 * <p>Note that {@link #refresh()} must be called in order for the context
+	 * to fully process the new classes.
 	 * @param annotatedClasses one or more annotated classes,
 	 * e.g. {@link Configuration @Configuration} classes
 	 * @see #scan(String...)
@@ -153,8 +152,8 @@ public class AnnotationConfigApplicationContext extends GenericApplicationContex
 
 	/**
 	 * Perform a scan within the specified base packages.
-	 * Note that {@link #refresh()} must be called in order for the context to
-	 * fully process the new class.
+	 * <p>Note that {@link #refresh()} must be called in order for the context
+	 * to fully process the new classes.
 	 * @param basePackages the packages to check for annotated classes
 	 * @see #register(Class...)
 	 * @see #refresh()
@@ -163,6 +162,7 @@ public class AnnotationConfigApplicationContext extends GenericApplicationContex
 		Assert.notEmpty(basePackages, "At least one base package must be specified");
 		this.scanner.scan(basePackages);
 	}
+
 
 	@Override
 	protected void prepareRefresh() {

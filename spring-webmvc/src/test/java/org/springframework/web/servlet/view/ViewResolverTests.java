@@ -132,12 +132,12 @@ public class ViewResolverTests {
 		View view = vr.resolveViewName("example1", Locale.getDefault());
 		assertEquals("Correct view class", JstlView.class, view.getClass());
 		assertEquals("Correct URL", "example1", ((InternalResourceView) view).getUrl());
-		assertEquals("Correct contentType", "myContentType", ((InternalResourceView) view).getContentType());
+		assertEquals("Correct textContentType", "myContentType", ((InternalResourceView) view).getContentType());
 
 		view = vr.resolveViewName("example2", Locale.getDefault());
 		assertEquals("Correct view class", JstlView.class, view.getClass());
 		assertEquals("Correct URL", "example2", ((InternalResourceView) view).getUrl());
-		assertEquals("Correct contentType", "myContentType", ((InternalResourceView) view).getContentType());
+		assertEquals("Correct textContentType", "myContentType", ((InternalResourceView) view).getContentType());
 
 		HttpServletRequest request = new MockHttpServletRequest(wac.getServletContext());
 		HttpServletResponse response = new MockHttpServletResponse();

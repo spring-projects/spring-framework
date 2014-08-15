@@ -21,8 +21,8 @@ import java.lang.annotation.Annotation;
 import org.springframework.util.ClassUtils;
 
 /**
- * General utility for determining the order of an object based
- * on its type declaration.
+ * General utility for determining the order of an object based on its type declaration.
+ * Handles Spring's {@link Order} annotation as well as {@link javax.annotation.Priority}.
  *
  * @author Stephane Nicoll
  * @since 4.1
@@ -35,6 +35,7 @@ public abstract class OrderUtils {
 
 	private static final boolean priorityPresent =
 			ClassUtils.isPresent(PRIORITY_ANNOTATION_CLASS_NAME, OrderUtils.class.getClassLoader());
+
 
 	/**
 	 * Return the order on the specified {@code type} or the specified
@@ -56,8 +57,8 @@ public abstract class OrderUtils {
 	}
 
 	/**
-	 * Return the value of the {@code javax.annotation.Priority} annotation set on the
-	 * specified type or {@code null} if none is set.
+	 * Return the value of the {@code javax.annotation.Priority} annotation set
+	 * on the specified type or {@code null} if none is set.
 	 * @param type the type to handle
 	 * @return the priority value if the annotation is set, {@code null} otherwise
 	 */

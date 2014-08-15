@@ -514,7 +514,7 @@ public abstract class AbstractReflectiveMBeanInfoAssembler extends AbstractMBean
 
 		MBeanParameterInfo[] info = new MBeanParameterInfo[paramNames.length];
 		Class<?>[] typeParameters = method.getParameterTypes();
-		for(int i = 0; i < info.length; i++) {
+		for (int i = 0; i < info.length; i++) {
 			info[i] = new MBeanParameterInfo(paramNames[i], typeParameters[i].getName(), paramNames[i]);
 		}
 

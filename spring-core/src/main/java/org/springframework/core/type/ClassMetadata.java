@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,6 +37,12 @@ public interface ClassMetadata {
 	 * Return whether the underlying class represents an interface.
 	 */
 	boolean isInterface();
+
+	/**
+	 * Return whether the underlying class represents an annotation.
+	 * @since 4.1
+	 */
+	boolean isAnnotation();
 
 	/**
 	 * Return whether the underlying class is marked as abstract.
@@ -100,6 +106,7 @@ public interface ClassMetadata {
 	 * access, and private classes and interfaces declared by the class, but excludes
 	 * inherited classes and interfaces. An empty array is returned if no member classes
 	 * or interfaces exist.
+	 * @since 3.1
 	 */
 	String[] getMemberClassNames();
 

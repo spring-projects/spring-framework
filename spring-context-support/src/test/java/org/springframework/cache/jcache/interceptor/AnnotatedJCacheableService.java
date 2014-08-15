@@ -29,6 +29,7 @@ import javax.cache.annotation.CacheResult;
 import javax.cache.annotation.CacheValue;
 
 import org.springframework.cache.Cache;
+import org.springframework.cache.interceptor.SimpleKeyGenerator;
 import org.springframework.cache.jcache.config.JCacheableService;
 import org.springframework.cache.jcache.support.TestableCacheKeyGenerator;
 import org.springframework.cache.jcache.support.TestableCacheResolverFactory;
@@ -109,7 +110,7 @@ public class AnnotatedJCacheableService implements JCacheableService<Long> {
 	@Override
 	@CachePut(afterInvocation = false)
 	public void earlyPut(String id, @CacheValue Object value) {
-		SimpleGeneratedCacheKey key = new SimpleGeneratedCacheKey(id);
+		Object key = SimpleKeyGenerator.generateKey(id);
 		Cache.ValueWrapper valueWrapper = defaultCache.get(key);
 		if (valueWrapper == null) {
 			throw new AssertionError("Excepted value to be put in cache with key " + key);
@@ -141,7 +142,7 @@ public class AnnotatedJCacheableService implements JCacheableService<Long> {
 	@Override
 	@CacheRemove(afterInvocation = false)
 	public void earlyRemove(String id) {
-		SimpleGeneratedCacheKey key = new SimpleGeneratedCacheKey(id);
+		Object key = SimpleKeyGenerator.generateKey(id);
 		Cache.ValueWrapper valueWrapper = defaultCache.get(key);
 		if (valueWrapper != null) {
 			throw new AssertionError("Value with key " + key + " expected to be already remove from cache");

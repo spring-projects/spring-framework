@@ -306,8 +306,10 @@ public class MessageListenerAdapterTests {
 		};
 		try {
 			adapter.onMessage(sentTextMessage, session);
-			fail("expected InvalidDestinationException");
-		} catch(InvalidDestinationException ex) { /* expected */ }
+			fail("expected CouldNotSendReplyException with InvalidDestinationException");
+		} catch(ReplyFailureException ex) {
+			assertEquals(InvalidDestinationException.class, ex.getCause().getClass());
+		}
 
 		verify(responseTextMessage).setJMSCorrelationID(CORRELATION_ID);
 		verify(delegate).handleMessage(sentTextMessage);
@@ -342,8 +344,10 @@ public class MessageListenerAdapterTests {
 		};
 		try {
 			adapter.onMessage(sentTextMessage, session);
-			fail("expected JMSException");
-		} catch(JMSException ex) { /* expected */ }
+			fail("expected CouldNotSendReplyException with JMSException");
+		} catch(ReplyFailureException ex) {
+			assertEquals(JMSException.class, ex.getCause().getClass());
+		}
 
 		verify(responseTextMessage).setJMSCorrelationID(CORRELATION_ID);
 		verify(messageProducer).close();
@@ -420,8 +424,10 @@ public class MessageListenerAdapterTests {
 		adapter.setMessageConverter(null);
 		try {
 			adapter.onMessage(sentTextMessage, session);
-			fail("expected MessageConversionException");
-		} catch(MessageConversionException ex) { /* expected */ }
+			fail("expected CouldNotSendReplyException with MessageConversionException");
+		} catch(ReplyFailureException ex) {
+			assertEquals(MessageConversionException.class, ex.getCause().getClass());
+		}
 	}
 
 	@Test

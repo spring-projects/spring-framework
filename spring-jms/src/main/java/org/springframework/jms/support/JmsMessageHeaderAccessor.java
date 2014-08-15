@@ -18,10 +18,8 @@ package org.springframework.jms.support;
 
 import java.util.List;
 import java.util.Map;
-
 import javax.jms.Destination;
 
-import org.springframework.jms.support.converter.JmsHeaders;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.support.NativeMessageHeaderAccessor;
 
@@ -40,14 +38,6 @@ public class JmsMessageHeaderAccessor extends NativeMessageHeaderAccessor {
 
 	protected JmsMessageHeaderAccessor(Message<?> message) {
 		super(message);
-	}
-
-
-	/**
-	 * Create {@link JmsMessageHeaderAccessor} from the headers of an existing message.
-	 */
-	public static JmsMessageHeaderAccessor wrap(Message<?> message) {
-		return new JmsMessageHeaderAccessor(message);
 	}
 
 
@@ -129,6 +119,16 @@ public class JmsMessageHeaderAccessor extends NativeMessageHeaderAccessor {
 	 */
 	public Long getTimestamp() {
 		return (Long) getHeader(JmsHeaders.TIMESTAMP);
+	}
+
+
+	// Static factory method
+
+	/**
+	 * Create a {@link JmsMessageHeaderAccessor} from the headers of an existing message.
+	 */
+	public static JmsMessageHeaderAccessor wrap(Message<?> message) {
+		return new JmsMessageHeaderAccessor(message);
 	}
 
 }

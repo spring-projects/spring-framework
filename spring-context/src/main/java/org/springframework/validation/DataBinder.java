@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -189,8 +189,8 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	 * <p>If "true", a null path location will be populated with a default object value and traversed
 	 * instead of resulting in an exception. This flag also enables auto-growth of collection elements
 	 * when accessing an out-of-bounds index.
-	 * <p>Default is "true" on a standard DataBinder. Note that this feature is only supported
-	 * for bean property access (DataBinder's default mode), not for field access.
+	 * <p>Default is "true" on a standard DataBinder. Note that since Spring 4.1 this feature is supported
+	 * for bean property access (DataBinder's default mode) and field access.
 	 * @see #initBeanPropertyAccess()
 	 * @see org.springframework.beans.BeanWrapper#setAutoGrowNestedPaths
 	 */
@@ -246,7 +246,7 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	public void initDirectFieldAccess() {
 		Assert.state(this.bindingResult == null,
 				"DataBinder is already initialized - call initDirectFieldAccess before other configuration methods");
-		this.bindingResult = new DirectFieldBindingResult(getTarget(), getObjectName());
+		this.bindingResult = new DirectFieldBindingResult(getTarget(), getObjectName(), isAutoGrowNestedPaths());
 		if (this.conversionService != null) {
 			this.bindingResult.initConversion(this.conversionService);
 		}

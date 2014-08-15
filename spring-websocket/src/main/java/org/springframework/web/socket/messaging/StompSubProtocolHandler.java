@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -33,11 +34,12 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
+import org.springframework.messaging.simp.SimpAttributes;
+import org.springframework.messaging.simp.SimpAttributesContextHolder;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessageType;
 import org.springframework.messaging.simp.stomp.BufferingStompDecoder;
 import org.springframework.messaging.simp.stomp.StompCommand;
-import org.springframework.messaging.simp.stomp.StompConversionException;
 import org.springframework.messaging.simp.stomp.StompDecoder;
 import org.springframework.messaging.simp.stomp.StompEncoder;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
@@ -97,6 +99,8 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 	private MessageHeaderInitializer headerInitializer;
 
 	private ApplicationEventPublisher eventPublisher;
+
+	private final Stats stats = new Stats();
 
 
 	/**
@@ -166,6 +170,13 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 		this.eventPublisher = applicationEventPublisher;
 	}
 
+	/**
+	 * Return a String describing internal state and counters.
+	 */
+	public String getStatsInfo() {
+		return this.stats.toString();
+	}
+
 
 	/**
 	 * Handle incoming WebSocket messages from clients.
@@ -186,30 +197,30 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 
 			messages = decoder.decode(byteBuffer);
 			if (messages.isEmpty()) {
-				logger.debug("Incomplete STOMP frame content received," + "buffered=" +
-						decoder.getBufferSize() + ", buffer size limit=" + decoder.getBufferSizeLimit());
+				if (logger.isTraceEnabled()) {
+					logger.trace("Incomplete STOMP frame content received in session " +
+							session + ", bufferSize=" + decoder.getBufferSize() +
+							", bufferSizeLimit=" + decoder.getBufferSizeLimit() + ".");
+				}
 				return;
 			}
 		}
 		catch (Throwable ex) {
-			logger.error("Failed to parse WebSocket message to STOMP frame(s)", ex);
+			if (logger.isErrorEnabled()) {
+				logger.error("Failed to parse " + webSocketMessage +
+						" in session " + session.getId() + ". Sending STOMP ERROR to client.", ex);
+			}
 			sendErrorMessage(session, ex);
 			return;
 		}
 
 		for (Message<byte[]> message : messages) {
 			try {
-
 				StompHeaderAccessor headerAccessor =
 						MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
 
 				if (logger.isTraceEnabled()) {
-					if (headerAccessor.isHeartbeat()) {
-						logger.trace("Received heartbeat from client session=" + session.getId());
-					}
-					else {
-						logger.trace("Received message from client session=" + session.getId());
-					}
+					logger.trace("From client: " + headerAccessor.getShortLogMessage(message.getPayload()));
 				}
 
 				headerAccessor.setSessionId(session.getId());
@@ -217,15 +228,35 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 				headerAccessor.setUser(session.getPrincipal());
 				headerAccessor.setImmutable();
 
-				if (this.eventPublisher != null && StompCommand.CONNECT.equals(headerAccessor.getCommand())) {
-					publishEvent(new SessionConnectEvent(this, message));
+				if (this.eventPublisher != null) {
+					if (StompCommand.CONNECT.equals(headerAccessor.getCommand())) {
+						this.stats.incrementConnectCount();
+						publishEvent(new SessionConnectEvent(this, message));
+					}
+					else if (StompCommand.DISCONNECT.equals(headerAccessor.getCommand())) {
+						this.stats.incrementDisconnectCount();
+					}
+					else if (StompCommand.SUBSCRIBE.equals(headerAccessor.getCommand())) {
+						publishEvent(new SessionSubscribeEvent(this, message));
+					}
+					else if (StompCommand.UNSUBSCRIBE.equals(headerAccessor.getCommand())) {
+						publishEvent(new SessionUnsubscribeEvent(this, message));
+					}
 				}
 
-				outputChannel.send(message);
+				try {
+					SimpAttributesContextHolder.setAttributesFromMessage(message);
+					outputChannel.send(message);
+				}
+				finally {
+					SimpAttributesContextHolder.resetAttributes();
+				}
 			}
 			catch (Throwable ex) {
-				logger.error("Terminating STOMP session due to failure to send message", ex);
+				logger.error("Failed to send STOMP message from client to application MessageChannel" +
+						" in session " + session.getId() + ". Sending STOMP ERROR to client.", ex);
 				sendErrorMessage(session, ex);
+
 			}
 		}
 	}
@@ -235,12 +266,11 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 			this.eventPublisher.publishEvent(event);
 		}
 		catch (Throwable ex) {
-			logger.error("Error while publishing " + event, ex);
+			logger.error("Error publishing " + event + ".", ex);
 		}
 	}
 
 	protected void sendErrorMessage(WebSocketSession session, Throwable error) {
-
 		StompHeaderAccessor headerAccessor = StompHeaderAccessor.create(StompCommand.ERROR);
 		headerAccessor.setMessage(error.getMessage());
 		byte[] bytes = this.stompEncoder.encode(headerAccessor.getMessageHeaders(), EMPTY_PAYLOAD);
@@ -248,7 +278,7 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 			session.sendMessage(new TextMessage(bytes));
 		}
 		catch (Throwable ex) {
-			// ignore
+			logger.error("Failed to send STOMP ERROR to client.", ex);
 		}
 	}
 
@@ -258,71 +288,41 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 	@SuppressWarnings("unchecked")
 	@Override
 	public void handleMessageToClient(WebSocketSession session, Message<?> message) {
-
 		if (!(message.getPayload() instanceof byte[])) {
-			logger.error("Ignoring message, expected byte[] content: " + message);
+			logger.error("Expected byte[] payload. Ignoring " + message + ".");
 			return;
 		}
-
-		MessageHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(message, MessageHeaderAccessor.class);
-		if (accessor == null) {
-			logger.error("No header accessor: " + message);
-			return;
-		}
-
-		StompHeaderAccessor stompAccessor;
-		if (accessor instanceof StompHeaderAccessor) {
-			stompAccessor = (StompHeaderAccessor) accessor;
-		}
-		else if (accessor instanceof SimpMessageHeaderAccessor) {
-			stompAccessor = StompHeaderAccessor.wrap(message);
-			if (SimpMessageType.CONNECT_ACK.equals(stompAccessor.getMessageType())) {
-				StompHeaderAccessor connectedHeaders = StompHeaderAccessor.create(StompCommand.CONNECTED);
-				connectedHeaders.setVersion(getVersion(stompAccessor));
-				connectedHeaders.setHeartbeat(0, 0); // no heart-beat support with simple broker
-				stompAccessor = connectedHeaders;
-			}
-			else if (stompAccessor.getCommand() == null || StompCommand.SEND.equals(stompAccessor.getCommand())) {
-				stompAccessor.updateStompCommandAsServerMessage();
-			}
-		}
-		else {
-			// Should not happen
-			logger.error("Unexpected header accessor type: " + accessor);
-			return;
-		}
-
+		StompHeaderAccessor stompAccessor = getStompHeaderAccessor(message);
 		StompCommand command = stompAccessor.getCommand();
 		if (StompCommand.MESSAGE.equals(command)) {
 			if (stompAccessor.getSubscriptionId() == null) {
-				logger.error("Ignoring message, no subscriptionId header: " + message);
-				return;
+				logger.warn("No STOMP \"subscription\" header in " + message);
 			}
 			String origDestination = stompAccessor.getFirstNativeHeader(SimpMessageHeaderAccessor.ORIGINAL_DESTINATION);
 			if (origDestination != null) {
 				stompAccessor = toMutableAccessor(stompAccessor, message);
+				stompAccessor.removeNativeHeader(SimpMessageHeaderAccessor.ORIGINAL_DESTINATION);
 				stompAccessor.setDestination(origDestination);
 			}
 		}
 		else if (StompCommand.CONNECTED.equals(command)) {
+			this.stats.incrementConnectedCount();
 			stompAccessor = afterStompSessionConnected(message, stompAccessor, session);
 			if (this.eventPublisher != null && StompCommand.CONNECTED.equals(command)) {
 				publishEvent(new SessionConnectedEvent(this, (Message<byte[]>) message));
 			}
 		}
-
 		try {
 			byte[] bytes = this.stompEncoder.encode(stompAccessor.getMessageHeaders(), (byte[]) message.getPayload());
-			TextMessage textMessage = new TextMessage(bytes);
-
-			session.sendMessage(textMessage);
+			session.sendMessage(new TextMessage(bytes));
 		}
 		catch (SessionLimitExceededException ex) {
 			// Bad session, just get out
 			throw ex;
 		}
 		catch (Throwable ex) {
-			sendErrorMessage(session, ex);
+			logger.error("Failed to send WebSocket message to client in session " + session.getId() + ".", ex);
+			command = StompCommand.ERROR;
 		}
 		finally {
 			if (StompCommand.ERROR.equals(command)) {
@@ -336,58 +336,89 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 		}
 	}
 
+	private  StompHeaderAccessor getStompHeaderAccessor(Message<?> message) {
+		MessageHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(message, MessageHeaderAccessor.class);
+		if (accessor == null) {
+			// Shouldn't happen (only broker broadcasts directly to clients)
+			throw new IllegalStateException("No header accessor in " + message + ".");
+		}
+		StompHeaderAccessor stompAccessor;
+		if (accessor instanceof StompHeaderAccessor) {
+			stompAccessor = (StompHeaderAccessor) accessor;
+		}
+		else if (accessor instanceof SimpMessageHeaderAccessor) {
+			stompAccessor = StompHeaderAccessor.wrap(message);
+			if (SimpMessageType.CONNECT_ACK.equals(stompAccessor.getMessageType())) {
+				stompAccessor = convertConnectAcktoStompConnected(stompAccessor);
+			}
+			else if (stompAccessor.getCommand() == null || StompCommand.SEND.equals(stompAccessor.getCommand())) {
+				stompAccessor.updateStompCommandAsServerMessage();
+			}
+		}
+		else {
+			// Shouldn't happen (only broker broadcasts directly to clients)
+			throw new IllegalStateException(
+					"Unexpected header accessor type: " + accessor.getClass() + " in " + message + ".");
+		}
+		return stompAccessor;
+	}
+
+	/**
+	 * The simple broker produces {@code SimpMessageType.CONNECT_ACK} that's not STOMP
+	 * specific and needs to be turned into a STOMP CONNECTED frame.
+	 */
+	private StompHeaderAccessor convertConnectAcktoStompConnected(StompHeaderAccessor connectAckHeaders) {
+		String name = StompHeaderAccessor.CONNECT_MESSAGE_HEADER;
+		Message<?> message = (Message<?>) connectAckHeaders.getHeader(name);
+		Assert.notNull(message, "Original STOMP CONNECT not found in " + connectAckHeaders);
+		StompHeaderAccessor connectHeaders = MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
+		String version;
+		Set<String> acceptVersions = connectHeaders.getAcceptVersion();
+		if (acceptVersions.contains("1.2")) {
+			version = "1.2";
+		}
+		else if (acceptVersions.contains("1.1")) {
+			version = "1.1";
+		}
+		else if (acceptVersions.isEmpty()) {
+			version = null;
+		}
+		else {
+			throw new IllegalArgumentException("Unsupported STOMP version '" + acceptVersions + "'");
+		}
+		StompHeaderAccessor connectedHeaders = StompHeaderAccessor.create(StompCommand.CONNECTED);
+		connectedHeaders.setVersion(version);
+		connectedHeaders.setHeartbeat(0, 0); // not supported
+		return connectedHeaders;
+	}
+
 	protected StompHeaderAccessor toMutableAccessor(StompHeaderAccessor headerAccessor, Message<?> message) {
 		return (headerAccessor.isMutable() ? headerAccessor : StompHeaderAccessor.wrap(message));
 	}
 
-	private String getVersion(StompHeaderAccessor connectAckHeaders) {
-
-		String name = StompHeaderAccessor.CONNECT_MESSAGE_HEADER;
-		Message<?> connectMessage = (Message<?>) connectAckHeaders.getHeader(name);
-		Assert.notNull(connectMessage, "CONNECT_ACK does not contain original CONNECT " + connectAckHeaders);
-
-		StompHeaderAccessor connectHeaders =
-				MessageHeaderAccessor.getAccessor(connectMessage, StompHeaderAccessor.class);
-
-		Set<String> acceptVersions = connectHeaders.getAcceptVersion();
-		if (acceptVersions.contains("1.2")) {
-			return "1.2";
-		}
-		else if (acceptVersions.contains("1.1")) {
-			return "1.1";
-		}
-		else if (acceptVersions.isEmpty()) {
-			return null;
-		}
-		else {
-			throw new StompConversionException("Unsupported version '" + acceptVersions + "'");
-		}
-	}
-
-	private StompHeaderAccessor afterStompSessionConnected(
-			Message<?> message, StompHeaderAccessor headerAccessor, WebSocketSession session) {
+	private StompHeaderAccessor afterStompSessionConnected(Message<?> message, StompHeaderAccessor accessor,
+			WebSocketSession session) {
 
 		Principal principal = session.getPrincipal();
 		if (principal != null) {
-			headerAccessor = toMutableAccessor(headerAccessor, message);
-			headerAccessor.setNativeHeader(CONNECTED_USER_HEADER, principal.getName());
+			accessor = toMutableAccessor(accessor, message);
+			accessor.setNativeHeader(CONNECTED_USER_HEADER, principal.getName());
 			if (this.userSessionRegistry != null) {
-				String userName = resolveNameForUserSessionRegistry(principal);
+				String userName = getSessionRegistryUserName(principal);
 				this.userSessionRegistry.registerSessionId(userName, session.getId());
 			}
 		}
-		long[] heartbeat = headerAccessor.getHeartbeat();
+		long[] heartbeat = accessor.getHeartbeat();
 		if (heartbeat[1] > 0) {
 			session = WebSocketSessionDecorator.unwrap(session);
 			if (session instanceof SockJsSession) {
-				logger.debug("STOMP heartbeats negotiated, disabling SockJS heartbeats.");
 				((SockJsSession) session).disableHeartbeat();
 			}
 		}
-		return headerAccessor;
+		return accessor;
 	}
 
-	private String resolveNameForUserSessionRegistry(Principal principal) {
+	private String getSessionRegistryUserName(Principal principal) {
 		String userName = principal.getName();
 		if (principal instanceof DestinationUserNameProvider) {
 			userName = ((DestinationUserNameProvider) principal).getDestinationUserName();
@@ -410,31 +441,68 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 
 	@Override
 	public void afterSessionEnded(WebSocketSession session, CloseStatus closeStatus, MessageChannel outputChannel) {
-
 		this.decoders.remove(session.getId());
-
 		Principal principal = session.getPrincipal();
-		if ((this.userSessionRegistry != null) && (principal != null)) {
-			String userName = resolveNameForUserSessionRegistry(principal);
+		if (principal != null && this.userSessionRegistry != null) {
+			String userName = getSessionRegistryUserName(principal);
 			this.userSessionRegistry.unregisterSessionId(userName, session.getId());
 		}
-
-		if (logger.isDebugEnabled()) {
-			logger.debug("WebSocket session ended, sending DISCONNECT message to broker");
+		if (this.eventPublisher != null) {
+			publishEvent(new SessionDisconnectEvent(this, session.getId(), closeStatus));
 		}
+		Message<?> message = createDisconnectMessage(session);
+		SimpAttributes simpAttributes = SimpAttributes.fromMessage(message);
+		try {
+			SimpAttributesContextHolder.setAttributes(simpAttributes);
+			outputChannel.send(message);
+		}
+		finally {
+			SimpAttributesContextHolder.resetAttributes();
+			simpAttributes.sessionCompleted();
+		}
+	}
 
+	private Message<?> createDisconnectMessage(WebSocketSession session) {
 		StompHeaderAccessor headerAccessor = StompHeaderAccessor.create(StompCommand.DISCONNECT);
 		if (getHeaderInitializer() != null) {
 			getHeaderInitializer().initHeaders(headerAccessor);
 		}
 		headerAccessor.setSessionId(session.getId());
-		Message<?> message = MessageBuilder.createMessage(EMPTY_PAYLOAD, headerAccessor.getMessageHeaders());
+		headerAccessor.setSessionAttributes(session.getAttributes());
+		return MessageBuilder.createMessage(EMPTY_PAYLOAD, headerAccessor.getMessageHeaders());
+	}
 
-		if (this.eventPublisher != null) {
-			publishEvent(new SessionDisconnectEvent(this, session.getId(), closeStatus));
+	@Override
+	public String toString() {
+		return "StompSubProtocolHandler" + getSupportedProtocols();
+	}
+
+	private class Stats {
+
+		private final AtomicInteger connect = new AtomicInteger();
+
+		private final AtomicInteger connected = new AtomicInteger();
+
+		private final AtomicInteger disconnect = new AtomicInteger();
+
+
+		public void incrementConnectCount() {
+			this.connect.incrementAndGet();
 		}
 
-		outputChannel.send(message);
+		public void incrementConnectedCount() {
+			this.connected.incrementAndGet();
+		}
+
+		public void incrementDisconnectCount() {
+			this.disconnect.incrementAndGet();
+		}
+
+
+		public String toString() {
+			return "processed CONNECT(" + this.connect.get() + ")-CONNECTED(" +
+					this.connected.get() + ")-DISCONNECT(" + this.disconnect.get() + ")";
+		}
 	}
 
 }

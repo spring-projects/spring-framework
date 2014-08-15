@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -58,7 +58,12 @@ import org.springframework.util.StringUtils;
 /**
  * Mock implementation of the {@link javax.servlet.http.HttpServletRequest} interface.
  *
- * <p>As of Spring 4.0, this set of mocks is designed on a Servlet 3.0 baseline.
+ * <p>The default, preferred {@link Locale} for the <em>server</em> mocked
+ * by this request is {@link Locale#ENGLISH}. This value can be changed
+ * via {@link #addPreferredLocale} or {@link #setPreferredLocales}.
+ *
+ * <p>As of Spring Framework 4.0, this set of mocks is designed on a Servlet
+ * 3.0 baseline.
  *
  * @author Juergen Hoeller
  * @author Rod Johnson
@@ -103,6 +108,9 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	private static final String CONTENT_TYPE_HEADER = "Content-Type";
 
 	private static final String CHARSET_PREFIX = "charset=";
+
+	private static final ServletInputStream EMPTY_SERVLET_INPUT_STREAM =
+			new DelegatingServletInputStream(new ByteArrayInputStream(new byte[0]));
 
 
 	private boolean active = true;
@@ -375,7 +383,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 			return new DelegatingServletInputStream(new ByteArrayInputStream(this.content));
 		}
 		else {
-			return null;
+			return EMPTY_SERVLET_INPUT_STREAM;
 		}
 	}
 
@@ -626,11 +634,37 @@ public class MockHttpServletRequest implements HttpServletRequest {
 		this.locales.addAll(locales);
 	}
 
+	/**
+	 * Returns the first preferred {@linkplain Locale locale} configured
+	 * in this mock request.
+	 * <p>If no locales have been explicitly configured, the default,
+	 * preferred {@link Locale} for the <em>server</em> mocked by this
+	 * request is {@link Locale#ENGLISH}.
+	 * <p>In contrast to the Servlet specification, this mock implementation
+	 * does <strong>not</strong> take into consideration any locales
+	 * specified via the {@code Accept-Language} header.
+	 * @see javax.servlet.ServletRequest#getLocale()
+	 * @see #addPreferredLocale(Locale)
+	 * @see #setPreferredLocales(List)
+	 */
 	@Override
 	public Locale getLocale() {
 		return this.locales.get(0);
 	}
 
+	/**
+	 * Returns an {@linkplain Enumeration enumeration} of the preferred
+	 * {@linkplain Locale locales} configured in this mock request.
+	 * <p>If no locales have been explicitly configured, the default,
+	 * preferred {@link Locale} for the <em>server</em> mocked by this
+	 * request is {@link Locale#ENGLISH}.
+	 * <p>In contrast to the Servlet specification, this mock implementation
+	 * does <strong>not</strong> take into consideration any locales
+	 * specified via the {@code Accept-Language} header.
+	 * @see javax.servlet.ServletRequest#getLocales()
+	 * @see #addPreferredLocale(Locale)
+	 * @see #setPreferredLocales(List)
+	 */
 	@Override
 	public Enumeration<Locale> getLocales() {
 		return Collections.enumeration(this.locales);

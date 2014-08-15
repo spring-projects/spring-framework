@@ -20,9 +20,9 @@ import javax.cache.annotation.CacheKeyInvocationContext;
 import javax.cache.annotation.CachePut;
 
 import org.springframework.cache.Cache;
+import org.springframework.cache.interceptor.CacheErrorHandler;
 import org.springframework.cache.interceptor.CacheOperationInvocationContext;
 import org.springframework.cache.interceptor.CacheOperationInvoker;
-import org.springframework.cache.jcache.model.CachePutOperation;
 
 /**
  * Intercept methods annotated with {@link CachePut}.
@@ -31,16 +31,21 @@ import org.springframework.cache.jcache.model.CachePutOperation;
  * @since 4.1
  */
 @SuppressWarnings("serial")
-public class CachePutInterceptor extends AbstractKeyCacheInterceptor<CachePutOperation, CachePut> {
+class CachePutInterceptor extends AbstractKeyCacheInterceptor<CachePutOperation, CachePut> {
+
+	public CachePutInterceptor(CacheErrorHandler errorHandler) {
+		super(errorHandler);
+	}
 
 	@Override
 	protected Object invoke(CacheOperationInvocationContext<CachePutOperation> context,
 			CacheOperationInvoker invoker) {
+
 		CacheKeyInvocationContext<CachePut> invocationContext = createCacheKeyInvocationContext(context);
 		CachePutOperation operation = context.getOperation();
 
-		final boolean earlyPut = operation.isEarlyPut();
-		final Object value = invocationContext.getValueParameter().getValue();
+		boolean earlyPut = operation.isEarlyPut();
+		Object value = invocationContext.getValueParameter().getValue();
 
 		if (earlyPut) {
 			cacheValue(context, value);
@@ -53,19 +58,19 @@ public class CachePutInterceptor extends AbstractKeyCacheInterceptor<CachePutOpe
 			}
 			return result;
 		}
-		catch (CacheOperationInvoker.ThrowableWrapper t) {
-			Throwable ex = t.getOriginal();
-			if (!earlyPut && operation.getExceptionTypeFilter().match(ex.getClass())) {
+		catch (CacheOperationInvoker.ThrowableWrapper ex) {
+			Throwable original = ex.getOriginal();
+			if (!earlyPut && operation.getExceptionTypeFilter().match(original.getClass())) {
 				cacheValue(context, value);
 			}
-			throw t;
+			throw ex;
 		}
 	}
 
 	protected void cacheValue(CacheOperationInvocationContext<CachePutOperation> context, Object value) {
 		Object key = generateKey(context);
 		Cache cache = resolveCache(context);
-		cache.put(key, value);
+		doPut(cache, key, value);
 	}
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,6 +33,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.lang.UsesSunHttpServer;
 
 /**
  * {@link org.springframework.beans.factory.FactoryBean} that creates a simple
@@ -51,6 +52,7 @@ import org.springframework.beans.factory.InitializingBean;
  * @see #setPort
  * @see #setContexts
  */
+@UsesSunHttpServer
 public class SimpleHttpServerFactoryBean implements FactoryBean<HttpServer>, InitializingBean, DisposableBean {
 
 	protected final Log logger = LogFactory.getLog(getClass());

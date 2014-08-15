@@ -49,6 +49,8 @@ import org.springframework.util.ObjectUtils;
  * @see #processContextConfiguration(ContextConfigurationAttributes)
  * @see #detectDefaultConfigurationClasses(Class)
  * @see #loadBeanDefinitions(GenericApplicationContext, MergedContextConfiguration)
+ * @see GenericXmlContextLoader
+ * @see GenericGroovyXmlContextLoader
  */
 public class AnnotationConfigContextLoader extends AbstractGenericContextLoader {
 

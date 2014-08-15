@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,8 +29,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
-import java.util.WeakHashMap;
+import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -38,6 +37,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.core.MethodParameter;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.ConcurrentReferenceHashMap;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 
@@ -57,9 +57,8 @@ public abstract class BeanUtils {
 
 	private static final Log logger = LogFactory.getLog(BeanUtils.class);
 
-	// Effectively using a WeakHashMap as a Set
-	private static final Map<Class<?>, Boolean> unknownEditorTypes =
-			Collections.synchronizedMap(new WeakHashMap<Class<?>, Boolean>());
+	private static final Set<Class<?>> unknownEditorTypes =
+			Collections.newSetFromMap(new ConcurrentReferenceHashMap<Class<?>, Boolean>(64));
 
 
 	/**
@@ -404,7 +403,7 @@ public abstract class BeanUtils {
 	 * @return the corresponding editor, or {@code null} if none found
 	 */
 	public static PropertyEditor findEditorByConvention(Class<?> targetType) {
-		if (targetType == null || targetType.isArray() || unknownEditorTypes.containsKey(targetType)) {
+		if (targetType == null || targetType.isArray() || unknownEditorTypes.contains(targetType)) {
 			return null;
 		}
 		ClassLoader cl = targetType.getClassLoader();
@@ -431,7 +430,7 @@ public abstract class BeanUtils {
 					logger.warn("Editor class [" + editorName +
 							"] does not implement [java.beans.PropertyEditor] interface");
 				}
-				unknownEditorTypes.put(targetType, Boolean.TRUE);
+				unknownEditorTypes.add(targetType);
 				return null;
 			}
 			return (PropertyEditor) instantiateClass(editorClass);
@@ -441,7 +440,7 @@ public abstract class BeanUtils {
 				logger.debug("No property editor [" + editorName + "] found for type " +
 						targetType.getName() + " according to 'Editor' suffix convention");
 			}
-			unknownEditorTypes.put(targetType, Boolean.TRUE);
+			unknownEditorTypes.add(targetType);
 			return null;
 		}
 	}

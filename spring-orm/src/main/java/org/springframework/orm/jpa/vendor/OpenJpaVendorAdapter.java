@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,18 +26,20 @@ import org.apache.openjpa.persistence.OpenJPAEntityManagerFactorySPI;
 import org.apache.openjpa.persistence.OpenJPAEntityManagerSPI;
 import org.apache.openjpa.persistence.PersistenceProviderImpl;
 
-import org.springframework.orm.jpa.JpaDialect;
-
 /**
  * {@link org.springframework.orm.jpa.JpaVendorAdapter} implementation for Apache OpenJPA.
  * Developed and tested against OpenJPA 2.2.
  *
  * <p>Exposes OpenJPA's persistence provider and EntityManager extension interface,
- * and supports {@link AbstractJpaVendorAdapter}'s common configuration settings.
+ * and adapts {@link AbstractJpaVendorAdapter}'s common configuration settings.
+ * No support for the detection of annotated packages (through
+ * {@link org.springframework.orm.jpa.persistenceunit.SmartPersistenceUnitInfo#getManagedPackages()})
+ * since OpenJPA doesn't use package-level metadata.
  *
- * @author Costin Leau
  * @author Juergen Hoeller
+ * @author Costin Leau
  * @since 2.0
+ * @see OpenJpaDialect
  * @see org.apache.openjpa.persistence.PersistenceProviderImpl
  * @see org.apache.openjpa.persistence.OpenJPAEntityManager
  */
@@ -104,7 +106,7 @@ public class OpenJpaVendorAdapter extends AbstractJpaVendorAdapter {
 	}
 
 	@Override
-	public JpaDialect getJpaDialect() {
+	public OpenJpaDialect getJpaDialect() {
 		return this.jpaDialect;
 	}
 

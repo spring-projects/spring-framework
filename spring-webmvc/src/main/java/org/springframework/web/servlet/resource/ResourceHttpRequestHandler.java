@@ -90,6 +90,8 @@ public class ResourceHttpRequestHandler extends WebContentGenerator implements H
 
 	private final List<ResourceResolver> resourceResolvers = new ArrayList<ResourceResolver>();
 
+	private final List<ResourceTransformer> resourceTransformers = new ArrayList<ResourceTransformer>();
+
 
 	public ResourceHttpRequestHandler() {
 		super(METHOD_GET, METHOD_HEAD);
@@ -112,8 +114,8 @@ public class ResourceHttpRequestHandler extends WebContentGenerator implements H
 
 	/**
 	 * Configure the list of {@link ResourceResolver}s to use.
-	 * <p>
-	 * By default {@link PathResourceResolver} is configured. If using this property, it
+	 *
+	 * <p>By default {@link PathResourceResolver} is configured. If using this property, it
 	 * is recommended to add {@link PathResourceResolver} as the last resolver.
 	 */
 	public void setResourceResolvers(List<ResourceResolver> resourceResolvers) {
@@ -123,8 +125,29 @@ public class ResourceHttpRequestHandler extends WebContentGenerator implements H
 		}
 	}
 
+	/**
+	 * Return the list of configured resource resolvers.
+	 */
 	public List<ResourceResolver> getResourceResolvers() {
 		return this.resourceResolvers;
+	}
+
+	/**
+	 * Configure the list of {@link ResourceTransformer}s to use.
+	 * <p>By default no transformers are configured for use.
+	 */
+	public void setResourceTransformers(List<ResourceTransformer> resourceTransformers) {
+		this.resourceTransformers.clear();
+		if (resourceTransformers != null) {
+			this.resourceTransformers.addAll(resourceTransformers);
+		}
+	}
+
+	/**
+	 * Return the list of configured resource transformers.
+	 */
+	public List<ResourceTransformer> getResourceTransformers() {
+		return this.resourceTransformers;
 	}
 
 
@@ -201,11 +224,14 @@ public class ResourceHttpRequestHandler extends WebContentGenerator implements H
 			}
 			return null;
 		}
-		return createResourceResolverChain().resolveResource(request, path, getLocations());
-	}
-
-	ResourceResolverChain createResourceResolverChain() {
-		return new DefaultResourceResolverChain(getResourceResolvers());
+		ResourceResolverChain resolveChain = new DefaultResourceResolverChain(getResourceResolvers());
+		Resource resource = resolveChain.resolveResource(request, path, getLocations());
+		if (resource == null || getResourceTransformers().isEmpty()) {
+			return resource;
+		}
+		ResourceTransformerChain transformChain = new DefaultResourceTransformerChain(resolveChain, getResourceTransformers());
+		resource = transformChain.transform(request, resource);
+		return resource;
 	}
 
 	/**

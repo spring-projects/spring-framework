@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.springframework.core.task.AsyncListenableTaskExecutor;
 import org.springframework.core.task.TaskRejectedException;
+import org.springframework.lang.UsesJava7;
 import org.springframework.scheduling.SchedulingTaskExecutor;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.Trigger;
@@ -48,6 +49,7 @@ import org.springframework.util.concurrent.ListenableFutureTask;
  * @author Mark Fisher
  * @since 3.0
  * @see #setPoolSize
+ * @see #setRemoveOnCancelPolicy
  * @see #setThreadFactory
  * @see #setErrorHandler
  */
@@ -56,6 +58,8 @@ public class ThreadPoolTaskScheduler extends ExecutorConfigurationSupport
 		implements AsyncListenableTaskExecutor, SchedulingTaskExecutor, TaskScheduler {
 
 	private volatile int poolSize = 1;
+
+	private volatile Boolean removeOnCancelPolicy;
 
 	private volatile ScheduledExecutorService scheduledExecutor;
 
@@ -76,6 +80,19 @@ public class ThreadPoolTaskScheduler extends ExecutorConfigurationSupport
 	}
 
 	/**
+	 * Set the same property on ScheduledExecutorService (JDK 1.7+).
+	 * There is no default. If not set, the executor property is not set.
+	 * <p><b>This setting can be modified at runtime, for example through JMX.</b>
+	 */
+	@UsesJava7
+	public void setRemoveOnCancelPolicy(boolean removeOnCancelPolicy) {
+		this.removeOnCancelPolicy = removeOnCancelPolicy;
+		if (this.scheduledExecutor instanceof ScheduledThreadPoolExecutor) {
+			((ScheduledThreadPoolExecutor) this.scheduledExecutor).setRemoveOnCancelPolicy(removeOnCancelPolicy);
+		}
+	}
+
+	/**
 	 * Set a custom {@link ErrorHandler} strategy.
 	 */
 	public void setErrorHandler(ErrorHandler errorHandler) {
@@ -83,11 +100,17 @@ public class ThreadPoolTaskScheduler extends ExecutorConfigurationSupport
 		this.errorHandler = errorHandler;
 	}
 
+	@UsesJava7
 	@Override
 	protected ExecutorService initializeExecutor(
 			ThreadFactory threadFactory, RejectedExecutionHandler rejectedExecutionHandler) {
 
 		this.scheduledExecutor = createExecutor(this.poolSize, threadFactory, rejectedExecutionHandler);
+
+		if (this.scheduledExecutor instanceof ScheduledThreadPoolExecutor && this.removeOnCancelPolicy != null) {
+			((ScheduledThreadPoolExecutor) this.scheduledExecutor).setRemoveOnCancelPolicy(this.removeOnCancelPolicy);
+		}
+
 		return this.scheduledExecutor;
 	}
 
@@ -143,6 +166,19 @@ public class ThreadPoolTaskScheduler extends ExecutorConfigurationSupport
 			return this.poolSize;
 		}
 		return getScheduledThreadPoolExecutor().getPoolSize();
+	}
+
+	/**
+	 * Return the current setting of removeOnCancelPolicy.
+	 * <p>Requires an underlying {@link ScheduledThreadPoolExecutor} and JDK 1.7+.
+	 */
+	@UsesJava7
+	public boolean isRemoveOnCancelPolicy() {
+		if (this.scheduledExecutor == null) {
+			// Not initialized yet: return false (the default of the executor)
+			return false;
+		}
+		return getScheduledThreadPoolExecutor().getRemoveOnCancelPolicy();
 	}
 
 	/**

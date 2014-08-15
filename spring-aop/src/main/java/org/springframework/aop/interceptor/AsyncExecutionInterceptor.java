@@ -29,9 +29,11 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.core.BridgeMethodResolver;
 import org.springframework.core.Ordered;
+import org.springframework.core.task.AsyncListenableTaskExecutor;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
+import org.springframework.util.concurrent.ListenableFuture;
 
 /**
  * AOP Alliance {@code MethodInterceptor} that processes method invocations
@@ -72,10 +74,11 @@ public class AsyncExecutionInterceptor extends AsyncExecutionAspectSupport
 
 	private AsyncUncaughtExceptionHandler exceptionHandler;
 
+
 	/**
 	 * Create a new {@code AsyncExecutionInterceptor}.
 	 * @param defaultExecutor the {@link Executor} (typically a Spring {@link AsyncTaskExecutor}
-	 * or {@link java.util.concurrent.ExecutorService}) to delegate to.
+	 * or {@link java.util.concurrent.ExecutorService}) to delegate to
 	 * @param exceptionHandler the {@link AsyncUncaughtExceptionHandler} to use
 	 */
 	public AsyncExecutionInterceptor(Executor defaultExecutor, AsyncUncaughtExceptionHandler exceptionHandler) {
@@ -90,6 +93,7 @@ public class AsyncExecutionInterceptor extends AsyncExecutionAspectSupport
 		this(defaultExecutor, new SimpleAsyncUncaughtExceptionHandler());
 	}
 
+
 	/**
 	 * Supply the {@link AsyncUncaughtExceptionHandler} to use to handle exceptions
 	 * thrown by invoking asynchronous methods with a {@code void} return type.
@@ -97,6 +101,7 @@ public class AsyncExecutionInterceptor extends AsyncExecutionAspectSupport
 	public void setExceptionHandler(AsyncUncaughtExceptionHandler exceptionHandler) {
 		this.exceptionHandler = exceptionHandler;
 	}
+
 
 	/**
 	 * Intercept the given method invocation, submit the actual calling of the method to
@@ -108,36 +113,40 @@ public class AsyncExecutionInterceptor extends AsyncExecutionAspectSupport
 	@Override
 	public Object invoke(final MethodInvocation invocation) throws Throwable {
 		Class<?> targetClass = (invocation.getThis() != null ? AopUtils.getTargetClass(invocation.getThis()) : null);
-		Method tmp = ClassUtils.getMostSpecificMethod(invocation.getMethod(), targetClass);
-		final Method specificMethod = BridgeMethodResolver.findBridgedMethod(tmp);
+		Method specificMethod = ClassUtils.getMostSpecificMethod(invocation.getMethod(), targetClass);
+		final Method userDeclaredMethod = BridgeMethodResolver.findBridgedMethod(specificMethod);
 
-		AsyncTaskExecutor executor = determineAsyncExecutor(specificMethod);
+		AsyncTaskExecutor executor = determineAsyncExecutor(userDeclaredMethod);
 		if (executor == null) {
 			throw new IllegalStateException(
 					"No executor specified and no default executor set on AsyncExecutionInterceptor either");
 		}
 
-		Future<?> result = executor.submit(
-				new Callable<Object>() {
-					@Override
-					public Object call() throws Exception {
-						try {
-							Object result = invocation.proceed();
-							if (result instanceof Future) {
-								return ((Future<?>) result).get();
-							}
-						}
-						catch (Throwable ex) {
-							handleError(ex, specificMethod, invocation.getArguments());
-						}
-						return null;
+		Callable<Object> task = new Callable<Object>() {
+			@Override
+			public Object call() throws Exception {
+				try {
+					Object result = invocation.proceed();
+					if (result instanceof Future) {
+						return ((Future<?>) result).get();
 					}
-				});
+				}
+				catch (Throwable ex) {
+					handleError(ex, userDeclaredMethod, invocation.getArguments());
+				}
+				return null;
+			}
+		};
 
-		if (Future.class.isAssignableFrom(invocation.getMethod().getReturnType())) {
-			return result;
+		Class<?> returnType = invocation.getMethod().getReturnType();
+		if (ListenableFuture.class.isAssignableFrom(returnType)) {
+			return ((AsyncListenableTaskExecutor) executor).submitListenable(task);
+		}
+		else if (Future.class.isAssignableFrom(returnType)) {
+			return executor.submit(task);
 		}
 		else {
+			executor.submit(task);
 			return null;
 		}
 	}
@@ -150,7 +159,6 @@ public class AsyncExecutionInterceptor extends AsyncExecutionAspectSupport
 	 * for all other cases, the exception will not be transmitted back to the client.
 	 * In that later case, the current {@link AsyncUncaughtExceptionHandler} will be
 	 * used to manage such exception.
-	 *
 	 * @param ex the exception to handle
 	 * @param method the method that was invoked
 	 * @param params the parameters used to invoke the method
@@ -159,13 +167,14 @@ public class AsyncExecutionInterceptor extends AsyncExecutionAspectSupport
 		if (method.getReturnType().isAssignableFrom(Future.class)) {
 			ReflectionUtils.rethrowException(ex);
 		}
-		else { // Could not transmit the exception to the caller with default executor
+		else {
+			// Could not transmit the exception to the caller with default executor
 			try {
-				exceptionHandler.handleUncaughtException(ex, method, params);
+				this.exceptionHandler.handleUncaughtException(ex, method, params);
 			}
-			catch (Exception e) {
-				logger.error("exception handler has thrown an unexpected " +
-						"exception while invoking '" + method.toGenericString() + "'", e);
+			catch (Throwable ex2) {
+				logger.error("Exception handler for async method '" + method.toGenericString() +
+						"' threw unexpected exception itself", ex2);
 			}
 		}
 	}
@@ -175,8 +184,8 @@ public class AsyncExecutionInterceptor extends AsyncExecutionAspectSupport
 	 * Subclasses may override to provide support for extracting qualifier information,
 	 * e.g. via an annotation on the given method.
 	 * @return always {@code null}
-	 * @see #determineAsyncExecutor(Method)
 	 * @since 3.1.2
+	 * @see #determineAsyncExecutor(Method)
 	 */
 	@Override
 	protected String getExecutorQualifier(Method method) {

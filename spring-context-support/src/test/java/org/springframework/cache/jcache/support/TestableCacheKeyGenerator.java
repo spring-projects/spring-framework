@@ -6,7 +6,7 @@ import javax.cache.annotation.CacheKeyGenerator;
 import javax.cache.annotation.CacheKeyInvocationContext;
 import javax.cache.annotation.GeneratedCacheKey;
 
-import org.springframework.cache.jcache.interceptor.SimpleGeneratedCacheKey;
+import org.springframework.cache.interceptor.SimpleKey;
 
 /**
  * A simple test key generator that only takes the first key arguments into
@@ -20,6 +20,16 @@ public class TestableCacheKeyGenerator implements CacheKeyGenerator {
 	@Override
 	public GeneratedCacheKey generateCacheKey(CacheKeyInvocationContext<? extends Annotation> context) {
 		return new SimpleGeneratedCacheKey(context.getKeyParameters()[0]);
+	}
+
+
+	@SuppressWarnings("serial")
+	private static class SimpleGeneratedCacheKey extends SimpleKey implements GeneratedCacheKey {
+
+		public SimpleGeneratedCacheKey(Object... elements) {
+			super(elements);
+		}
+
 	}
 
 }

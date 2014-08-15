@@ -16,9 +16,6 @@
 
 package org.springframework.messaging.simp.annotation.support;
 
-import java.lang.annotation.Annotation;
-import java.security.Principal;
-
 import org.springframework.core.MethodParameter;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.messaging.Message;
@@ -35,6 +32,9 @@ import org.springframework.messaging.simp.user.DestinationUserNameProvider;
 import org.springframework.messaging.support.MessageHeaderInitializer;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
+
+import java.lang.annotation.Annotation;
+import java.security.Principal;
 
 /**
  * A {@link HandlerMethodReturnValueHandler} for sending to destinations specified in a
@@ -133,24 +133,33 @@ public class SendToMethodReturnValueHandler implements HandlerMethodReturnValueH
 	}
 
 	@Override
-	public void handleReturnValue(Object returnValue, MethodParameter returnType, Message<?> message)
-			throws Exception {
-
+	public void handleReturnValue(Object returnValue, MethodParameter returnType, Message<?> message) throws Exception {
 		if (returnValue == null) {
 			return;
 		}
-
 		MessageHeaders headers = message.getHeaders();
 		String sessionId = SimpMessageHeaderAccessor.getSessionId(headers);
 
 		SendToUser sendToUser = returnType.getMethodAnnotation(SendToUser.class);
 		if (sendToUser != null) {
+			boolean broadcast = sendToUser.broadcast();
 			String user = getUserName(message, headers);
+			if (user == null) {
+				if (sessionId == null) {
+					throw new MissingSessionUserException(message);
+				}
+				user = sessionId;
+				broadcast = false;
+			}
 			String[] destinations = getTargetDestinations(sendToUser, message, this.defaultUserDestinationPrefix);
 			for (String destination : destinations) {
-				this.messagingTemplate.convertAndSendToUser(user, destination, returnValue, createHeaders(sessionId));
+				if (broadcast) {
+					this.messagingTemplate.convertAndSendToUser(user, destination, returnValue);
+				}
+				else {
+					this.messagingTemplate.convertAndSendToUser(user, destination, returnValue, createHeaders(sessionId));
+				}
 			}
-			return;
 		}
 		else {
 			SendTo sendTo = returnType.getMethodAnnotation(SendTo.class);
@@ -163,17 +172,14 @@ public class SendToMethodReturnValueHandler implements HandlerMethodReturnValueH
 
 	protected String getUserName(Message<?> message, MessageHeaders headers) {
 		Principal principal = SimpMessageHeaderAccessor.getUser(headers);
-		if (principal == null) {
-			throw new MissingSessionUserException(message);
+		if (principal != null) {
+			return (principal instanceof DestinationUserNameProvider ?
+					((DestinationUserNameProvider) principal).getDestinationUserName() : principal.getName());
 		}
-		if (principal instanceof DestinationUserNameProvider) {
-			return ((DestinationUserNameProvider) principal).getDestinationUserName();
-		}
-		return principal.getName();
+		return null;
 	}
 
 	protected String[] getTargetDestinations(Annotation annotation, Message<?> message, String defaultPrefix) {
-
 		if (annotation != null) {
 			String[] value = (String[]) AnnotationUtils.getValue(annotation);
 			if (!ObjectUtils.isEmpty(value)) {
@@ -181,7 +187,11 @@ public class SendToMethodReturnValueHandler implements HandlerMethodReturnValueH
 			}
 		}
 		String name = DestinationPatternsMessageCondition.LOOKUP_DESTINATION_HEADER;
-		return new String[] { defaultPrefix + message.getHeaders().get(name) };
+		String destination = (String) message.getHeaders().get(name);
+		Assert.hasText(destination, "No lookup destination header in " + message);
+
+		return (destination.startsWith("/") ?
+				new String[] {defaultPrefix + destination} : new String[] {defaultPrefix + "/" + destination});
 	}
 
 	private MessageHeaders createHeaders(String sessionId) {

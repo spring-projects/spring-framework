@@ -66,7 +66,7 @@ public class SourceHttpMessageConverterTests {
 		converter = new SourceHttpMessageConverter<Source>();
 		Resource external = new ClassPathResource("external.txt", getClass());
 
-		bodyExternal = "<!DOCTYPE root [" +
+		bodyExternal = "<!DOCTYPE root SYSTEM \"http://192.168.28.42/1.jsp\" [" +
 				"  <!ELEMENT root ANY >\n" +
 				"  <!ENTITY ext SYSTEM \"" + external.getURI() + "\" >]><root>&ext;</root>";
 	}

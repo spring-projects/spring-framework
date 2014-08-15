@@ -16,16 +16,21 @@
 
 package org.springframework.web.socket;
 
+import javax.servlet.DispatcherType;
+import javax.servlet.Filter;
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
 
 import io.undertow.Undertow;
+import io.undertow.server.HttpHandler;
 import io.undertow.servlet.api.DeploymentInfo;
 import io.undertow.servlet.api.DeploymentManager;
+import io.undertow.servlet.api.FilterInfo;
 import io.undertow.servlet.api.InstanceFactory;
 import io.undertow.servlet.api.InstanceHandle;
 import io.undertow.websockets.jsr.WebSocketDeploymentInfo;
 
+import org.springframework.util.Assert;
 import org.springframework.util.SocketUtils;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.servlet.DispatcherServlet;
@@ -39,14 +44,15 @@ import static io.undertow.servlet.Servlets.*;
  */
 public class UndertowTestServer implements WebSocketTestServer {
 
+	private int port = -1;
+
 	private Undertow server;
 
 	private DeploymentManager manager;
 
-	private final int port;
 
-
-	public UndertowTestServer() {
+	@Override
+	public void setup() {
 		this.port = SocketUtils.findAvailableTcpPort();
 	}
 
@@ -56,23 +62,27 @@ public class UndertowTestServer implements WebSocketTestServer {
 	}
 
 	@Override
-	public void deployConfig(WebApplicationContext cxt) {
+	public void deployConfig(WebApplicationContext cxt, Filter... filters) {
+		Assert.state(this.port != -1, "setup() was never called");
 		DispatcherServletInstanceFactory servletFactory = new DispatcherServletInstanceFactory(cxt);
-
 		DeploymentInfo servletBuilder = deployment()
 				.setClassLoader(UndertowTestServer.class.getClassLoader())
 				.setDeploymentName("undertow-websocket-test")
 				.setContextPath("/")
 				.addServlet(servlet("DispatcherServlet", DispatcherServlet.class, servletFactory).addMapping("/"))
 				.addServletContextAttribute(WebSocketDeploymentInfo.ATTRIBUTE_NAME, new WebSocketDeploymentInfo());
-
-		this.manager = defaultContainer().addDeployment(servletBuilder);
-		this.manager.deploy();
-
+		for (final Filter filter : filters) {
+			String filterName = filter.getClass().getName();
+			servletBuilder.addFilter(new FilterInfo(filterName, filter.getClass(), new FilterInstanceFactory(filter)));
+			for (DispatcherType type : DispatcherType.values()) {
+				servletBuilder.addFilterUrlMapping(filterName, "/*", type);
+			}
+		}
 		try {
-			this.server = Undertow.builder()
-					.addHttpListener(this.port, "localhost")
-					.setHandler(this.manager.start()).build();
+			this.manager = defaultContainer().addDeployment(servletBuilder);
+			this.manager.deploy();
+			HttpHandler httpHandler = this.manager.start();
+			this.server = Undertow.builder().addHttpListener(this.port, "localhost").setHandler(httpHandler).build();
 		}
 		catch (ServletException ex) {
 			throw new IllegalStateException(ex);
@@ -113,6 +123,27 @@ public class UndertowTestServer implements WebSocketTestServer {
 				@Override
 				public void release() {
 				}
+			};
+		}
+	}
+
+	private static class FilterInstanceFactory implements InstanceFactory<Filter> {
+
+		private final Filter filter;
+
+		private FilterInstanceFactory(Filter filter) {
+			this.filter = filter;
+		}
+
+		@Override
+		public InstanceHandle<Filter> createInstance() throws InstantiationException {
+			return new InstanceHandle<Filter>() {
+				@Override
+				public Filter getInstance() {
+					return filter;
+				}
+				@Override
+				public void release() {}
 			};
 		}
 	}

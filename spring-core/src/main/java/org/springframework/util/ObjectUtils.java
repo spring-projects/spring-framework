@@ -155,7 +155,7 @@ public abstract class ObjectUtils {
 	 */
 	public static <E extends Enum<?>> E caseInsensitiveValueOf(E[] enumValues, String constant) {
 		for (E candidate : enumValues) {
-			if(candidate.toString().equalsIgnoreCase(constant)) {
+			if (candidate.toString().equalsIgnoreCase(constant)) {
 				return candidate;
 			}
 		}

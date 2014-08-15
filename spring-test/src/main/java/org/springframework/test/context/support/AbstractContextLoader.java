@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,30 +16,38 @@
 
 package org.springframework.test.context.support;
 
+import java.io.IOException;
+import java.io.StringReader;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.beans.BeanUtils;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.GenericTypeResolver;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
+import org.springframework.core.env.ConfigurableEnvironment;
+import org.springframework.core.env.MapPropertySource;
+import org.springframework.core.env.PropertySource;
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.core.io.support.ResourcePatternUtils;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.support.ResourcePropertySource;
 import org.springframework.test.context.ContextConfigurationAttributes;
 import org.springframework.test.context.ContextLoader;
 import org.springframework.test.context.MergedContextConfiguration;
 import org.springframework.test.context.SmartContextLoader;
+import org.springframework.test.context.util.TestContextResourceUtils;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.ResourceUtils;
-import org.springframework.util.StringUtils;
 
 /**
  * Abstract application context loader that provides a basis for all concrete
@@ -55,15 +63,17 @@ import org.springframework.util.StringUtils;
  *
  * @author Sam Brannen
  * @author Juergen Hoeller
+ * @author Dave Syer
  * @since 2.5
  * @see #generateDefaultLocations
+ * @see #getResourceSuffixes
  * @see #modifyLocations
  */
 public abstract class AbstractContextLoader implements SmartContextLoader {
 
 	private static final String[] EMPTY_STRING_ARRAY = new String[0];
 
-	private static final String SLASH = "/";
+	private static final String LINE_SEPARATOR = System.getProperty("line.separator");
 
 	private static final Log logger = LogFactory.getLog(AbstractContextLoader.class);
 
@@ -87,7 +97,8 @@ public abstract class AbstractContextLoader implements SmartContextLoader {
 	 */
 	@Override
 	public void processContextConfiguration(ContextConfigurationAttributes configAttributes) {
-		String[] processedLocations = processLocations(configAttributes.getDeclaringClass(), configAttributes.getLocations());
+		String[] processedLocations = processLocations(configAttributes.getDeclaringClass(),
+			configAttributes.getLocations());
 		configAttributes.setLocations(processedLocations);
 	}
 
@@ -98,15 +109,24 @@ public abstract class AbstractContextLoader implements SmartContextLoader {
 	 * <ul>
 	 * <li>Sets the <em>active bean definition profiles</em> from the supplied
 	 * {@code MergedContextConfiguration} in the
-	 * {@link org.springframework.core.env.Environment Environment} of the context.</li>
+	 * {@link org.springframework.core.env.Environment Environment} of the
+	 * context.</li>
+	 * <li>Adds {@link PropertySource PropertySources} for all
+	 * {@linkplain MergedContextConfiguration#getPropertySourceLocations()
+	 * resource locations} and
+	 * {@linkplain MergedContextConfiguration#getPropertySourceProperties()
+	 * inlined properties} from the supplied {@code MergedContextConfiguration}
+	 * to the {@code Environment} of the context.</li>
 	 * <li>Determines what (if any) context initializer classes have been supplied
-	 * via the {@code MergedContextConfiguration} and
-	 * {@linkplain ApplicationContextInitializer#initialize invokes each} with the
+	 * via the {@code MergedContextConfiguration} and instantiates and
+	 * {@linkplain ApplicationContextInitializer#initialize invokes} each with the
 	 * given application context.</li>
+	 * <ul>
+	 * <li>Any {@code ApplicationContextInitializers} implementing
+	 * {@link org.springframework.core.Ordered Ordered} or annotated with {@link
+	 * org.springframework.core.annotation.Order @Order} will be sorted appropriately.</li>
 	 * </ul>
-	 * <p>Any {@code ApplicationContextInitializers} implementing
-	 * {@link org.springframework.core.Ordered Ordered} or marked with {@link
-	 * org.springframework.core.annotation.Order @Order} will be sorted appropriately.
+	 * </ul>
 	 * @param context the newly created application context
 	 * @param mergedConfig the merged context configuration
 	 * @since 3.2
@@ -114,29 +134,96 @@ public abstract class AbstractContextLoader implements SmartContextLoader {
 	 * @see #loadContext(MergedContextConfiguration)
 	 * @see ConfigurableApplicationContext#setId
 	 */
-	@SuppressWarnings("unchecked")
 	protected void prepareContext(ConfigurableApplicationContext context, MergedContextConfiguration mergedConfig) {
 		context.getEnvironment().setActiveProfiles(mergedConfig.getActiveProfiles());
+		addResourcePropertySourcesToEnvironment(context, mergedConfig);
+		addInlinedPropertiesToEnvironment(context, mergedConfig);
+		invokeApplicationContextInitializers(context, mergedConfig);
+	}
 
-		Set<Class<? extends ApplicationContextInitializer<? extends ConfigurableApplicationContext>>> initializerClasses =
-				mergedConfig.getContextInitializerClasses();
+	/**
+	 * @since 4.1
+	 */
+	private void addResourcePropertySourcesToEnvironment(ConfigurableApplicationContext context,
+			MergedContextConfiguration mergedConfig) {
+		try {
+			ConfigurableEnvironment environment = context.getEnvironment();
+			String[] locations = mergedConfig.getPropertySourceLocations();
+			for (String location : locations) {
+				String resolvedLocation = environment.resolveRequiredPlaceholders(location);
+				Resource resource = context.getResource(resolvedLocation);
+				ResourcePropertySource ps = new ResourcePropertySource(resource);
+				environment.getPropertySources().addFirst(ps);
+			}
+		}
+		catch (IOException e) {
+			throw new IllegalStateException("Failed to add PropertySource to Environment", e);
+		}
+	}
+
+	/**
+	 * @since 4.1
+	 */
+	private void addInlinedPropertiesToEnvironment(ConfigurableApplicationContext context,
+			MergedContextConfiguration mergedConfig) {
+		String[] keyValuePairs = mergedConfig.getPropertySourceProperties();
+		if (!ObjectUtils.isEmpty(keyValuePairs)) {
+			String name = "test properties " + ObjectUtils.nullSafeToString(keyValuePairs);
+			MapPropertySource ps = new MapPropertySource(name, extractEnvironmentProperties(keyValuePairs));
+			context.getEnvironment().getPropertySources().addFirst(ps);
+		}
+	}
+
+	/**
+	 * Extract environment properties from the supplied key/value pairs.
+	 * <p>Parsing of the key/value pairs is achieved by converting all pairs
+	 * into a single <em>virtual</em> properties file in memory and delegating
+	 * to {@link Properties#load(java.io.Reader)} to parse that virtual file.
+	 * <p>This code has been adapted from Spring Boot's
+	 * {@link org.springframework.boot.test.SpringApplicationContextLoader SpringApplicationContextLoader}.
+	 * @since 4.1
+	 */
+	private Map<String, Object> extractEnvironmentProperties(String[] keyValuePairs) {
+		StringBuilder sb = new StringBuilder();
+		for (String keyValuePair : keyValuePairs) {
+			sb.append(keyValuePair).append(LINE_SEPARATOR);
+		}
+		String content = sb.toString();
+		Properties props = new Properties();
+		try {
+			props.load(new StringReader(content));
+		}
+		catch (IOException e) {
+			throw new IllegalStateException("Failed to load test environment properties from: " + content, e);
+		}
+
+		Map<String, Object> properties = new HashMap<String, Object>();
+		for (String name : props.stringPropertyNames()) {
+			properties.put(name, props.getProperty(name));
+		}
+		return properties;
+	}
+
+	@SuppressWarnings("unchecked")
+	private void invokeApplicationContextInitializers(ConfigurableApplicationContext context,
+			MergedContextConfiguration mergedConfig) {
+		Set<Class<? extends ApplicationContextInitializer<? extends ConfigurableApplicationContext>>> initializerClasses = mergedConfig.getContextInitializerClasses();
 		if (initializerClasses.isEmpty()) {
 			// no ApplicationContextInitializers have been declared -> nothing to do
 			return;
 		}
 
-		List<ApplicationContextInitializer<ConfigurableApplicationContext>> initializerInstances =
-				new ArrayList<ApplicationContextInitializer<ConfigurableApplicationContext>>();
+		List<ApplicationContextInitializer<ConfigurableApplicationContext>> initializerInstances = new ArrayList<ApplicationContextInitializer<ConfigurableApplicationContext>>();
 		Class<?> contextClass = context.getClass();
 
 		for (Class<? extends ApplicationContextInitializer<? extends ConfigurableApplicationContext>> initializerClass : initializerClasses) {
 			Class<?> initializerContextClass = GenericTypeResolver.resolveTypeArgument(initializerClass,
-					ApplicationContextInitializer.class);
+				ApplicationContextInitializer.class);
 			Assert.isAssignable(initializerContextClass, contextClass, String.format(
-					"Could not add context initializer [%s] since its generic parameter [%s] " +
-					"is not assignable from the type of application context used by this " +
-					"context loader [%s]: ", initializerClass.getName(), initializerContextClass.getName(),
-					contextClass.getName()));
+				"Could not add context initializer [%s] since its generic parameter [%s] "
+						+ "is not assignable from the type of application context used by this "
+						+ "context loader [%s]: ", initializerClass.getName(), initializerContextClass.getName(),
+				contextClass.getName()));
 			initializerInstances.add((ApplicationContextInitializer<ConfigurableApplicationContext>) BeanUtils.instantiateClass(initializerClass));
 		}
 
@@ -149,14 +236,14 @@ public abstract class AbstractContextLoader implements SmartContextLoader {
 	// --- ContextLoader -------------------------------------------------------
 
 	/**
-	 * If the supplied {@code locations} are {@code null} or
-	 * <em>empty</em> and {@link #isGenerateDefaultLocations()} returns
-	 * {@code true}, default locations will be
-	 * {@link #generateDefaultLocations(Class) generated} for the specified
-	 * {@link Class class} and the configured
-	 * {@link #getResourceSuffix() resource suffix}; otherwise, the supplied
-	 * {@code locations} will be {@link #modifyLocations modified} if
-	 * necessary and returned.
+	 * If the supplied {@code locations} are {@code null} or <em>empty</em>
+	 * and {@link #isGenerateDefaultLocations()} returns {@code true},
+	 * default locations will be {@link #generateDefaultLocations(Class)
+	 * generated} (i.e., detected) for the specified {@link Class class}
+	 * and the configured {@linkplain #getResourceSuffixes() resource suffixes};
+	 * otherwise, the supplied {@code locations} will be
+	 * {@linkplain #modifyLocations modified} if necessary and returned.
+	 *
 	 * @param clazz the class with which the locations are associated: to be
 	 * used when generating default locations
 	 * @param locations the unmodified locations to use for loading the
@@ -171,65 +258,70 @@ public abstract class AbstractContextLoader implements SmartContextLoader {
 	 */
 	@Override
 	public final String[] processLocations(Class<?> clazz, String... locations) {
-		return (ObjectUtils.isEmpty(locations) && isGenerateDefaultLocations()) ?
-				generateDefaultLocations(clazz) : modifyLocations(clazz, locations);
+		return (ObjectUtils.isEmpty(locations) && isGenerateDefaultLocations()) ? generateDefaultLocations(clazz)
+				: modifyLocations(clazz, locations);
 	}
 
 	/**
 	 * Generate the default classpath resource locations array based on the
 	 * supplied class.
+	 *
 	 * <p>For example, if the supplied class is {@code com.example.MyTest},
 	 * the generated locations will contain a single string with a value of
-	 * &quot;classpath:/com/example/MyTest{@code <suffix>}&quot;,
-	 * where {@code <suffix>} is the value of the
-	 * {@link #getResourceSuffix() resource suffix} string.
+	 * {@code "classpath:com/example/MyTest<suffix>"}, where {@code <suffix>}
+	 * is the value of the first configured
+	 * {@linkplain #getResourceSuffixes() resource suffix} for which the
+	 * generated location actually exists in the classpath.
+	 *
 	 * <p>As of Spring 3.1, the implementation of this method adheres to the
 	 * contract defined in the {@link SmartContextLoader} SPI. Specifically,
 	 * this method will <em>preemptively</em> verify that the generated default
 	 * location actually exists. If it does not exist, this method will log a
 	 * warning and return an empty array.
+	 *
 	 * <p>Subclasses can override this method to implement a different
 	 * <em>default location generation</em> strategy.
+	 *
 	 * @param clazz the class for which the default locations are to be generated
 	 * @return an array of default application context resource locations
 	 * @since 2.5
-	 * @see #getResourceSuffix()
+	 * @see #getResourceSuffixes()
 	 */
 	protected String[] generateDefaultLocations(Class<?> clazz) {
 		Assert.notNull(clazz, "Class must not be null");
-		String suffix = getResourceSuffix();
-		Assert.hasText(suffix, "Resource suffix must not be empty");
-		String resourcePath = SLASH + ClassUtils.convertClassNameToResourcePath(clazz.getName()) + suffix;
-		String prefixedResourcePath = ResourceUtils.CLASSPATH_URL_PREFIX + resourcePath;
-		ClassPathResource classPathResource = new ClassPathResource(resourcePath, clazz);
 
-		if (classPathResource.exists()) {
-			if (logger.isInfoEnabled()) {
-				logger.info(String.format("Detected default resource location \"%s\" for test class [%s]",
+		String[] suffixes = getResourceSuffixes();
+		for (String suffix : suffixes) {
+			Assert.hasText(suffix, "Resource suffix must not be empty");
+			String resourcePath = ClassUtils.convertClassNameToResourcePath(clazz.getName()) + suffix;
+			String prefixedResourcePath = ResourceUtils.CLASSPATH_URL_PREFIX + resourcePath;
+			ClassPathResource classPathResource = new ClassPathResource(resourcePath);
+
+			if (classPathResource.exists()) {
+				if (logger.isInfoEnabled()) {
+					logger.info(String.format("Detected default resource location \"%s\" for test class [%s]",
 						prefixedResourcePath, clazz.getName()));
+				}
+				return new String[] { prefixedResourcePath };
 			}
-			return new String[] {prefixedResourcePath};
-		}
-		else {
-			if (logger.isInfoEnabled()) {
-				logger.info(String.format("Could not detect default resource locations for test class [%s]: " +
-						"%s does not exist", clazz.getName(), classPathResource));
+			else if (logger.isDebugEnabled()) {
+				logger.debug(String.format("Did not detect default resource location for test class [%s]: "
+						+ "%s does not exist", clazz.getName(), classPathResource));
 			}
-			return EMPTY_STRING_ARRAY;
 		}
+
+		if (logger.isInfoEnabled()) {
+			logger.info(String.format("Could not detect default resource locations for test class [%s]: "
+					+ "no resource found for suffixes %s.", clazz.getName(), ObjectUtils.nullSafeToString(suffixes)));
+		}
+
+		return EMPTY_STRING_ARRAY;
 	}
 
 	/**
 	 * Generate a modified version of the supplied locations array and return it.
-	 * <p>A plain path &mdash; for example, &quot;context.xml&quot; &mdash; will
-	 * be treated as a classpath resource that is relative to the package in which
-	 * the specified class is defined. A path starting with a slash is treated
-	 * as an absolute classpath location, for example:
-	 * &quot;/org/springframework/whatever/foo.xml&quot;. A path which
-	 * references a URL (e.g., a path prefixed with
-	 * {@link ResourceUtils#CLASSPATH_URL_PREFIX classpath:},
-	 * {@link ResourceUtils#FILE_URL_PREFIX file:}, {@code http:},
-	 * etc.) will be added to the results unchanged.
+	 * <p>The default implementation simply delegates to
+	 * {@link TestContextResourceUtils#convertToClasspathResourcePaths}.
 	 * <p>Subclasses can override this method to implement a different
 	 * <em>location modification</em> strategy.
 	 * @param clazz the class with which the locations are associated
@@ -238,21 +330,7 @@ public abstract class AbstractContextLoader implements SmartContextLoader {
 	 * @since 2.5
 	 */
 	protected String[] modifyLocations(Class<?> clazz, String... locations) {
-		String[] modifiedLocations = new String[locations.length];
-		for (int i = 0; i < locations.length; i++) {
-			String path = locations[i];
-			if (path.startsWith(SLASH)) {
-				modifiedLocations[i] = ResourceUtils.CLASSPATH_URL_PREFIX + path;
-			}
-			else if (!ResourcePatternUtils.isUrl(path)) {
-				modifiedLocations[i] = ResourceUtils.CLASSPATH_URL_PREFIX + SLASH +
-						StringUtils.cleanPath(ClassUtils.classPackageAsResourcePath(clazz) + SLASH + path);
-			}
-			else {
-				modifiedLocations[i] = StringUtils.cleanPath(path);
-			}
-		}
-		return modifiedLocations;
+		return TestContextResourceUtils.convertToClasspathResourcePaths(clazz, locations);
 	}
 
 	/**
@@ -276,13 +354,36 @@ public abstract class AbstractContextLoader implements SmartContextLoader {
 	}
 
 	/**
-	 * Get the suffix to append to {@link ApplicationContext} resource locations
-	 * when generating default locations.
-	 * <p>Must be implemented by subclasses.
-	 * @return the resource suffix; should not be {@code null} or empty
+	 * Get the suffix to append to {@link ApplicationContext} resource
+	 * locations when detecting default locations.
+	 *
+	 * <p>Subclasses must provide an implementation of this method that
+	 * returns a single suffix. Alternatively subclasses may provide a
+	 * <em>no-op</em> implementation of this method and override
+	 * {@link #getResourceSuffixes()} in order to provide multiple custom
+	 * suffixes.
+	 *
+	 * @return the resource suffix; never {@code null} or empty
 	 * @since 2.5
 	 * @see #generateDefaultLocations(Class)
+	 * @see #getResourceSuffixes()
 	 */
 	protected abstract String getResourceSuffix();
+
+	/**
+	 * Get the suffixes to append to {@link ApplicationContext} resource
+	 * locations when detecting default locations.
+	 *
+	 * <p>The default implementation simply wraps the value returned by
+	 * {@link #getResourceSuffix()} in a single-element array, but this
+	 * can be overridden by subclasses in order to support multiple suffixes.
+	 *
+	 * @return the resource suffixes; never {@code null} or empty
+	 * @since 4.1
+	 * @see #generateDefaultLocations(Class)
+	 */
+	protected String[] getResourceSuffixes() {
+		return new String[] { getResourceSuffix() };
+	}
 
 }

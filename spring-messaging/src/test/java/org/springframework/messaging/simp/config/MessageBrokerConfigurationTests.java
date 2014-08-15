@@ -20,12 +20,14 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.hamcrest.Matchers;
 import org.junit.Before;
 import org.junit.Test;
 
 import org.mockito.Mockito;
+
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -38,6 +40,7 @@ import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.SimpMessageType;
 import org.springframework.messaging.simp.annotation.SubscribeMapping;
 import org.springframework.messaging.simp.annotation.support.SimpAnnotationMethodMessageHandler;
+import org.springframework.messaging.simp.broker.DefaultSubscriptionRegistry;
 import org.springframework.messaging.simp.broker.SimpleBrokerMessageHandler;
 import org.springframework.messaging.simp.user.UserDestinationMessageHandler;
 import org.springframework.messaging.simp.user.UserSessionRegistry;
@@ -51,6 +54,7 @@ import org.springframework.messaging.support.ExecutorSubscribableChannel;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Controller;
+import org.springframework.util.AntPathMatcher;
 import org.springframework.util.MimeTypeUtils;
 import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
@@ -63,6 +67,7 @@ import static org.junit.Assert.*;
  *
  * @author Rossen Stoyanchev
  * @author Brian Clozel
+ * @author Sebastien Deleuze
  */
 public class MessageBrokerConfigurationTests {
 
@@ -73,6 +78,8 @@ public class MessageBrokerConfigurationTests {
 	private AnnotationConfigApplicationContext defaultContext;
 
 	private AnnotationConfigApplicationContext customChannelContext;
+
+	private AnnotationConfigApplicationContext customPathMatcherContext;
 
 
 	@Before
@@ -93,6 +100,10 @@ public class MessageBrokerConfigurationTests {
 		this.customChannelContext = new AnnotationConfigApplicationContext();
 		this.customChannelContext.register(CustomChannelConfig.class);
 		this.customChannelContext.refresh();
+
+		this.customPathMatcherContext = new AnnotationConfigApplicationContext();
+		this.customPathMatcherContext.register(CustomPathMatcherConfig.class);
+		this.customPathMatcherContext.refresh();
 	}
 
 
@@ -141,6 +152,7 @@ public class MessageBrokerConfigurationTests {
 
 		StompHeaderAccessor headers = StompHeaderAccessor.create(StompCommand.SUBSCRIBE);
 		headers.setSessionId("sess1");
+		headers.setSessionAttributes(new ConcurrentHashMap<>());
 		headers.setSubscriptionId("subs1");
 		headers.setDestination("/foo");
 		Message<?> message = MessageBuilder.withPayload(new byte[0]).setHeaders(headers).build();
@@ -152,7 +164,7 @@ public class MessageBrokerConfigurationTests {
 
 		assertEquals(SimpMessageType.MESSAGE, headers.getMessageType());
 		assertEquals("/foo", headers.getDestination());
-		assertEquals("\"bar\"", new String((byte[]) message.getPayload()));
+		assertEquals("bar", new String((byte[]) message.getPayload()));
 	}
 
 	@Test
@@ -164,7 +176,7 @@ public class MessageBrokerConfigurationTests {
 		headers.setSessionId("sess1");
 		headers.setSubscriptionId("subs1");
 		headers.setDestination("/foo");
-		Message<?> message = MessageBuilder.withPayload(new byte[0]).setHeaders(headers).build();
+		Message<?> message = MessageBuilder.createMessage(new byte[0], headers.getMessageHeaders());
 
 		// subscribe
 		broker.handleMessage(message);
@@ -172,7 +184,7 @@ public class MessageBrokerConfigurationTests {
 		headers = StompHeaderAccessor.create(StompCommand.SEND);
 		headers.setSessionId("sess1");
 		headers.setDestination("/foo");
-		message = MessageBuilder.withPayload("bar".getBytes()).setHeaders(headers).build();
+		message = MessageBuilder.createMessage("bar".getBytes(), headers.getMessageHeaders());
 
 		// message
 		broker.handleMessage(message);
@@ -230,8 +242,10 @@ public class MessageBrokerConfigurationTests {
 				this.simpleBrokerContext.getBean(SimpAnnotationMethodMessageHandler.class);
 
 		StompHeaderAccessor headers = StompHeaderAccessor.create(StompCommand.SEND);
+		headers.setSessionId("sess1");
+		headers.setSessionAttributes(new ConcurrentHashMap<>());
 		headers.setDestination("/foo");
-		Message<?> message = MessageBuilder.withPayload(new byte[0]).setHeaders(headers).build();
+		Message<?> message = MessageBuilder.createMessage(new byte[0], headers.getMessageHeaders());
 
 		messageHandler.handleMessage(message);
 
@@ -240,7 +254,7 @@ public class MessageBrokerConfigurationTests {
 
 		assertEquals(SimpMessageType.MESSAGE, headers.getMessageType());
 		assertEquals("/bar", headers.getDestination());
-		assertEquals("\"bar\"", new String((byte[]) message.getPayload()));
+		assertEquals("bar", new String((byte[]) message.getPayload()));
 	}
 
 	@Test
@@ -252,7 +266,7 @@ public class MessageBrokerConfigurationTests {
 
 		StompHeaderAccessor headers = StompHeaderAccessor.create(StompCommand.SEND);
 		headers.setDestination("/user/joe/foo");
-		Message<?> message = MessageBuilder.withPayload(new byte[0]).setHeaders(headers).build();
+		Message<?> message = MessageBuilder.createMessage(new byte[0], headers.getMessageHeaders());
 
 		messageHandler.handleMessage(message);
 
@@ -286,11 +300,11 @@ public class MessageBrokerConfigurationTests {
 
 		List<MessageConverter> converters = compositeConverter.getConverters();
 		assertThat(converters.size(), Matchers.is(3));
-		assertThat(converters.get(0), Matchers.instanceOf(MappingJackson2MessageConverter.class));
-		assertThat(converters.get(1), Matchers.instanceOf(StringMessageConverter.class));
-		assertThat(converters.get(2), Matchers.instanceOf(ByteArrayMessageConverter.class));
+		assertThat(converters.get(0), Matchers.instanceOf(StringMessageConverter.class));
+		assertThat(converters.get(1), Matchers.instanceOf(ByteArrayMessageConverter.class));
+		assertThat(converters.get(2), Matchers.instanceOf(MappingJackson2MessageConverter.class));
 
-		ContentTypeResolver resolver = ((MappingJackson2MessageConverter) converters.get(0)).getContentTypeResolver();
+		ContentTypeResolver resolver = ((MappingJackson2MessageConverter) converters.get(2)).getContentTypeResolver();
 		assertEquals(MimeTypeUtils.APPLICATION_JSON, ((DefaultContentTypeResolver) resolver).getDefaultMimeType());
 	}
 
@@ -346,9 +360,9 @@ public class MessageBrokerConfigurationTests {
 		assertThat(compositeConverter.getConverters().size(), Matchers.is(4));
 		Iterator<MessageConverter> iterator = compositeConverter.getConverters().iterator();
 		assertThat(iterator.next(), Matchers.is(testConverter));
-		assertThat(iterator.next(), Matchers.instanceOf(MappingJackson2MessageConverter.class));
 		assertThat(iterator.next(), Matchers.instanceOf(StringMessageConverter.class));
 		assertThat(iterator.next(), Matchers.instanceOf(ByteArrayMessageConverter.class));
+		assertThat(iterator.next(), Matchers.instanceOf(MappingJackson2MessageConverter.class));
 	}
 
 	@Test
@@ -390,6 +404,16 @@ public class MessageBrokerConfigurationTests {
 				this.simpleBrokerContext.getBean(SimpAnnotationMethodMessageHandler.class);
 
 		assertThat(messageHandler.getValidator(), Matchers.notNullValue(Validator.class));
+	}
+
+	@Test
+	public void customPathMatcher() {
+		SimpleBrokerMessageHandler broker = this.customPathMatcherContext.getBean(SimpleBrokerMessageHandler.class);
+		DefaultSubscriptionRegistry registry = (DefaultSubscriptionRegistry) broker.getSubscriptionRegistry();
+		assertEquals("a.a", registry.getPathMatcher().combine("a", "a"));
+
+		SimpAnnotationMethodMessageHandler handler = this.customPathMatcherContext.getBean(SimpAnnotationMethodMessageHandler.class);
+		assertEquals("a.a", handler.getPathMatcher().combine("a", "a"));
 	}
 
 
@@ -472,6 +496,15 @@ public class MessageBrokerConfigurationTests {
 					this.interceptor, this.interceptor, this.interceptor);
 			registry.configureBrokerChannel().taskExecutor()
 					.corePoolSize(31).maxPoolSize(32).keepAliveSeconds(33).queueCapacity(34);
+		}
+	}
+
+	@Configuration
+	static class CustomPathMatcherConfig extends SimpleBrokerConfig {
+
+		@Override
+		public void configureMessageBroker(MessageBrokerRegistry registry) {
+			registry.setPathMatcher(new AntPathMatcher(".")).enableSimpleBroker("/topic", "/queue");
 		}
 	}
 

@@ -24,10 +24,12 @@ import org.springframework.cache.CacheManager;
 import org.springframework.cache.CacheTestUtils;
 import org.springframework.cache.annotation.CachingConfigurerSupport;
 import org.springframework.cache.annotation.EnableCaching;
+import org.springframework.cache.interceptor.CacheErrorHandler;
 import org.springframework.cache.interceptor.CacheInterceptor;
 import org.springframework.cache.interceptor.CacheResolver;
 import org.springframework.cache.interceptor.KeyGenerator;
 import org.springframework.cache.interceptor.NamedCacheResolver;
+import org.springframework.cache.interceptor.SimpleCacheErrorHandler;
 import org.springframework.cache.interceptor.SimpleCacheResolver;
 import org.springframework.cache.support.NoOpCacheManager;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -50,9 +52,15 @@ public class EnableCachingTests extends AbstractAnnotationTests {
 	}
 
 	@Test
-	public void testKeyStrategy() throws Exception {
+	public void testKeyStrategy() {
 		CacheInterceptor ci = ctx.getBean(CacheInterceptor.class);
 		assertSame(ctx.getBean("keyGenerator", KeyGenerator.class), ci.getKeyGenerator());
+	}
+
+	@Test
+	public void testCacheErrorHandler() {
+		CacheInterceptor ci = ctx.getBean(CacheInterceptor.class);
+		assertSame(ctx.getBean("errorHandler", CacheErrorHandler.class), ci.getErrorHandler());
 	}
 
 	// --- local tests -------
@@ -141,7 +149,7 @@ public class EnableCachingTests extends AbstractAnnotationTests {
 		@Override
 		@Bean
 		public CacheManager cacheManager() {
-			return CacheTestUtils.createSimpleCacheManager("default", "primary", "secondary");
+			return CacheTestUtils.createSimpleCacheManager("testCache", "primary", "secondary");
 		}
 
 		@Bean
@@ -160,6 +168,12 @@ public class EnableCachingTests extends AbstractAnnotationTests {
 			return new SomeKeyGenerator();
 		}
 
+		@Override
+		@Bean
+		public CacheErrorHandler errorHandler() {
+			return new SimpleCacheErrorHandler();
+		}
+
 		@Bean
 		public KeyGenerator customKeyGenerator() {
 			return new SomeCustomKeyGenerator();
@@ -167,7 +181,7 @@ public class EnableCachingTests extends AbstractAnnotationTests {
 
 		@Bean
 		public CacheManager customCacheManager() {
-			return CacheTestUtils.createSimpleCacheManager("default");
+			return CacheTestUtils.createSimpleCacheManager("testCache");
 		}
 	}
 

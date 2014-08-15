@@ -23,10 +23,13 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Query;
+import javax.persistence.TransactionRequiredException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -60,6 +63,23 @@ import org.springframework.util.CollectionUtils;
 public abstract class SharedEntityManagerCreator {
 
 	private static final Class<?>[] NO_ENTITY_MANAGER_INTERFACES = new Class<?>[0];
+
+	private static final Set<String> transactionRequiringMethods = new HashSet<String>(6);
+
+	private static final Set<String> queryTerminationMethods = new HashSet<String>(3);
+
+	static {
+		transactionRequiringMethods.add("joinTransaction");
+		transactionRequiringMethods.add("flush");
+		transactionRequiringMethods.add("persist");
+		transactionRequiringMethods.add("merge");
+		transactionRequiringMethods.add("remove");
+		transactionRequiringMethods.add("refresh");
+
+		queryTerminationMethods.add("getResultList");
+		queryTerminationMethods.add("getSingleResult");
+		queryTerminationMethods.add("executeUpdate");
+	}
 
 
 	/**
@@ -246,6 +266,13 @@ public abstract class SharedEntityManagerCreator {
 				}
 				// Still perform unwrap call on target EntityManager.
 			}
+			else if (transactionRequiringMethods.contains(method.getName())) {
+				// We need a transactional target now, according to the JPA spec.
+				// Otherwise, the operation would get accepted but remain unflushed...
+				if (target == null) {
+					throw new TransactionRequiredException("No transactional EntityManager available");
+				}
+			}
 
 			// Regular EntityManager operations.
 			boolean isNewEm = false;
@@ -337,8 +364,7 @@ public abstract class SharedEntityManagerCreator {
 				throw ex.getTargetException();
 			}
 			finally {
-				if (method.getName().equals("getResultList") || method.getName().equals("getSingleResult") ||
-						method.getName().equals("executeUpdate")) {
+				if (queryTerminationMethods.contains(method.getName())) {
 					// Actual execution of the query: close the EntityManager right
 					// afterwards, since that was the only reason we kept it open.
 					EntityManagerFactoryUtils.closeEntityManager(this.em);

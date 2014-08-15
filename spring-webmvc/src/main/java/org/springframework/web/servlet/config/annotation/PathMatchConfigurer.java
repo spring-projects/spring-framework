@@ -20,12 +20,19 @@ import org.springframework.util.PathMatcher;
 import org.springframework.web.util.UrlPathHelper;
 
 /**
- * Helps with configuring {@link org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping}
- * path matching options such as trailing slash match, suffix registration or path matcher/helper.
+ * Helps with configuring HandlerMappings path matching options such as trailing slash match,
+ * suffix registration, path matcher and path helper.
+ * Configured path matcher and path helper instances are shared for:
+ * <ul>
+ *     <li>RequestMappings</li>
+ *     <li>ViewControllerMappings</li>
+ *     <li>ResourcesMappings</li>
+ * </ul>
  *
  * @author Brian Clozel
  * @since 4.0.3
  * @see org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping
+ * @see org.springframework.web.servlet.handler.SimpleUrlHandlerMapping
  */
 public class PathMatchConfigurer {
 
@@ -100,7 +107,6 @@ public class PathMatchConfigurer {
 		this.pathMatcher = pathMatcher;
 		return this;
 	}
-
 
 	public Boolean isUseSuffixPatternMatch() {
 		return this.useSuffixPatternMatch;

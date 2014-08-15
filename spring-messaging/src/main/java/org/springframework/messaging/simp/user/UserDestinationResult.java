@@ -45,7 +45,6 @@ public class UserDestinationResult {
 		Assert.notNull(sourceDestination, "'sourceDestination' must not be null");
 		Assert.notNull(targetDestinations, "'targetDestinations' must not be null");
 		Assert.notNull(subscribeDestination, "'subscribeDestination' must not be null");
-		Assert.notNull(user, "'user' must not be null");
 
 		this.sourceDestination = sourceDestination;
 		this.targetDestinations = targetDestinations;
@@ -91,5 +90,11 @@ public class UserDestinationResult {
 	 */
 	public String getUser() {
 		return this.user;
+	}
+
+	@Override
+	public String toString() {
+		return "UserDestinationResult[source=" + this.sourceDestination + ", target=" + this.targetDestinations +
+				", subscribeDestination=" + this.subscribeDestination + ", user=" + this.user + "]";
 	}
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.test.MockHttpServletRequest;
+import org.springframework.web.HttpMediaTypeNotAcceptableException;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.ServletWebRequest;
 
@@ -41,6 +42,7 @@ public class ContentNegotiationManagerFactoryBeanTests {
 
 	private MockHttpServletRequest servletRequest;
 
+
 	@Before
 	public void setup() {
 		this.servletRequest = new MockHttpServletRequest();
@@ -49,6 +51,7 @@ public class ContentNegotiationManagerFactoryBeanTests {
 		this.factoryBean = new ContentNegotiationManagerFactoryBean();
 		this.factoryBean.setServletContext(this.servletRequest.getServletContext());
 	}
+
 
 	@Test
 	public void defaultSettings() throws Exception {
@@ -60,11 +63,16 @@ public class ContentNegotiationManagerFactoryBeanTests {
 		assertEquals("Should be able to resolve file extensions by default",
 				Arrays.asList(MediaType.IMAGE_GIF), manager.resolveMediaTypes(this.webRequest));
 
-		this.servletRequest.setRequestURI("/flower?format=gif");
-		this.servletRequest.addParameter("format", "gif");
+		this.servletRequest.setRequestURI("/flower.xyz");
+
+		assertEquals("Should ignore unknown extensions by default",
+				Collections.<MediaType>emptyList(), manager.resolveMediaTypes(this.webRequest));
+
+		this.servletRequest.setRequestURI("/flower");
+		this.servletRequest.setParameter("format", "gif");
 
 		assertEquals("Should not resolve request parameters by default",
-				Collections.emptyList(), manager.resolveMediaTypes(this.webRequest));
+				Collections.<MediaType>emptyList(), manager.resolveMediaTypes(this.webRequest));
 
 		this.servletRequest.setRequestURI("/flower");
 		this.servletRequest.addHeader("Accept", MediaType.IMAGE_GIF_VALUE);
@@ -75,7 +83,7 @@ public class ContentNegotiationManagerFactoryBeanTests {
 
 	@Test
 	public void addMediaTypes() throws Exception {
-		Map<String, MediaType> mediaTypes = new HashMap<String, MediaType>();
+		Map<String, MediaType> mediaTypes = new HashMap<>();
 		mediaTypes.put("json", MediaType.APPLICATION_JSON);
 		this.factoryBean.addMediaTypes(mediaTypes);
 
@@ -86,11 +94,26 @@ public class ContentNegotiationManagerFactoryBeanTests {
 		assertEquals(Arrays.asList(MediaType.APPLICATION_JSON), manager.resolveMediaTypes(this.webRequest));
 	}
 
+	// SPR-10170
+
+	@Test(expected = HttpMediaTypeNotAcceptableException.class)
+	public void favorPathExtensionWithUnknownMediaType() throws Exception {
+		this.factoryBean.setFavorPathExtension(true);
+		this.factoryBean.setIgnoreUnknownPathExtensions(false);
+		this.factoryBean.afterPropertiesSet();
+		ContentNegotiationManager manager = this.factoryBean.getObject();
+
+		this.servletRequest.setRequestURI("/flower.xyz");
+		this.servletRequest.addParameter("format", "json");
+
+		manager.resolveMediaTypes(this.webRequest);
+	}
+
 	@Test
 	public void favorParameter() throws Exception {
 		this.factoryBean.setFavorParameter(true);
 
-		Map<String, MediaType> mediaTypes = new HashMap<String, MediaType>();
+		Map<String, MediaType> mediaTypes = new HashMap<>();
 		mediaTypes.put("json", MediaType.APPLICATION_JSON);
 		this.factoryBean.addMediaTypes(mediaTypes);
 
@@ -103,6 +126,20 @@ public class ContentNegotiationManagerFactoryBeanTests {
 		assertEquals(Arrays.asList(MediaType.APPLICATION_JSON), manager.resolveMediaTypes(this.webRequest));
 	}
 
+	// SPR-10170
+
+	@Test(expected = HttpMediaTypeNotAcceptableException.class)
+	public void favorParameterWithUnknownMediaType() throws HttpMediaTypeNotAcceptableException {
+		this.factoryBean.setFavorParameter(true);
+		this.factoryBean.afterPropertiesSet();
+		ContentNegotiationManager manager = this.factoryBean.getObject();
+
+		this.servletRequest.setRequestURI("/flower");
+		this.servletRequest.setParameter("format", "xyz");
+
+		manager.resolveMediaTypes(this.webRequest);
+	}
+
 	@Test
 	public void ignoreAcceptHeader() throws Exception {
 		this.factoryBean.setIgnoreAcceptHeader(true);
@@ -112,7 +149,7 @@ public class ContentNegotiationManagerFactoryBeanTests {
 		this.servletRequest.setRequestURI("/flower");
 		this.servletRequest.addHeader("Accept", MediaType.IMAGE_GIF_VALUE);
 
-		assertEquals(Collections.emptyList(), manager.resolveMediaTypes(this.webRequest));
+		assertEquals(Collections.<MediaType>emptyList(), manager.resolveMediaTypes(this.webRequest));
 	}
 
 	@Test

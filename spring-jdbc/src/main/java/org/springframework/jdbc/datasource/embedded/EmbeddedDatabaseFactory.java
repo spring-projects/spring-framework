@@ -20,7 +20,6 @@ import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.logging.Logger;
-
 import javax.sql.DataSource;
 
 import org.apache.commons.logging.Log;
@@ -63,7 +62,8 @@ public class EmbeddedDatabaseFactory {
 	 */
 	public static final String DEFAULT_DATABASE_NAME = "testdb";
 
-	private static Log logger = LogFactory.getLog(EmbeddedDatabaseFactory.class);
+
+	private static final Log logger = LogFactory.getLog(EmbeddedDatabaseFactory.class);
 
 	private String databaseName = DEFAULT_DATABASE_NAME;
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -142,10 +142,10 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 	private static Class<? extends Annotation> ejbRefClass = null;
 
 	static {
-		ClassLoader cl = CommonAnnotationBeanPostProcessor.class.getClassLoader();
 		try {
 			@SuppressWarnings("unchecked")
-			Class<? extends Annotation> clazz = (Class<? extends Annotation>) cl.loadClass("javax.xml.ws.WebServiceRef");
+			Class<? extends Annotation> clazz = (Class<? extends Annotation>)
+					ClassUtils.forName("javax.xml.ws.WebServiceRef", CommonAnnotationBeanPostProcessor.class.getClassLoader());
 			webServiceRefClass = clazz;
 		}
 		catch (ClassNotFoundException ex) {
@@ -153,7 +153,8 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 		}
 		try {
 			@SuppressWarnings("unchecked")
-			Class<? extends Annotation> clazz = (Class<? extends Annotation>) cl.loadClass("javax.ejb.EJB");
+			Class<? extends Annotation> clazz = (Class<? extends Annotation>)
+					ClassUtils.forName("javax.ejb.EJB", CommonAnnotationBeanPostProcessor.class.getClassLoader());
 			ejbRefClass = clazz;
 		}
 		catch (ClassNotFoundException ex) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,16 +26,19 @@ import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.util.WebUtils;
 
 /**
- * Convenient superclass for application objects running in a WebApplicationContext.
- * Provides {@code getWebApplicationContext()}, {@code getServletContext()},
- * and {@code getTempDir()} methods.
+ * Convenient superclass for application objects running in a {@link WebApplicationContext}.
+ * Provides {@code getWebApplicationContext()}, {@code getServletContext()}, and
+ * {@code getTempDir()} accessors.
+ *
+ * <p>Note: It is generally recommended to use individual callback interfaces for the actual
+ * callbacks needed. This broad base class is primarily intended for use within the framework,
+ * in case of {@link ServletContext} access etc typically being needed.
  *
  * @author Juergen Hoeller
  * @since 28.08.2003
  * @see SpringBeanAutowiringSupport
  */
-public abstract class WebApplicationObjectSupport extends ApplicationObjectSupport
-		implements ServletContextAware {
+public abstract class WebApplicationObjectSupport extends ApplicationObjectSupport implements ServletContextAware {
 
 	private ServletContext servletContext;
 

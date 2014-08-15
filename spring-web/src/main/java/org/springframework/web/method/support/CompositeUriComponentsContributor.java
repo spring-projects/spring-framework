@@ -38,7 +38,7 @@ import org.springframework.web.util.UriComponentsBuilder;
  */
 public class CompositeUriComponentsContributor implements UriComponentsContributor {
 
-	private final List<UriComponentsContributor> contributors = new LinkedList<UriComponentsContributor>();
+	private final List<Object> contributors = new LinkedList<Object>();
 
 	private final ConversionService conversionService;
 
@@ -81,18 +81,13 @@ public class CompositeUriComponentsContributor implements UriComponentsContribut
 	 * will be used by default.
 	 * @param contributors a collection of {@link UriComponentsContributor}
 	 * or {@link HandlerMethodArgumentResolver}s.
-	 * @param conversionService a ConversionService to use when method argument values
+	 * @param cs a ConversionService to use when method argument values
 	 * need to be formatted as Strings before being added to the URI
 	 */
-	public CompositeUriComponentsContributor(Collection<?> contributors, ConversionService conversionService) {
+	public CompositeUriComponentsContributor(Collection<?> contributors, ConversionService cs) {
 		Assert.notNull(contributors, "'uriComponentsContributors' must not be null");
-		for (Object contributor : contributors) {
-			if (contributor instanceof UriComponentsContributor) {
-				this.contributors.add((UriComponentsContributor) contributor);
-			}
-		}
-		this.conversionService =
-				(conversionService != null ? conversionService : new DefaultFormattingConversionService());
+		this.contributors.addAll(contributors);
+		this.conversionService = (cs != null ? cs : new DefaultFormattingConversionService());
 	}
 
 
@@ -102,9 +97,17 @@ public class CompositeUriComponentsContributor implements UriComponentsContribut
 
 	@Override
 	public boolean supportsParameter(MethodParameter parameter) {
-		for (UriComponentsContributor contributor : this.contributors) {
-			if (contributor.supportsParameter(parameter)) {
-				return true;
+		for (Object c : this.contributors) {
+			if (c instanceof UriComponentsContributor) {
+				UriComponentsContributor contributor = (UriComponentsContributor) c;
+				if (contributor.supportsParameter(parameter)) {
+					return true;
+				}
+			}
+			else if (c instanceof HandlerMethodArgumentResolver) {
+				if (((HandlerMethodArgumentResolver) c).supportsParameter(parameter)) {
+					return false;
+				}
 			}
 		}
 		return false;
@@ -114,10 +117,18 @@ public class CompositeUriComponentsContributor implements UriComponentsContribut
 	public void contributeMethodArgument(MethodParameter parameter, Object value,
 			UriComponentsBuilder builder, Map<String, Object> uriVariables, ConversionService conversionService) {
 
-		for (UriComponentsContributor contributor : this.contributors) {
-			if (contributor.supportsParameter(parameter)) {
-				contributor.contributeMethodArgument(parameter, value, builder, uriVariables, conversionService);
-				break;
+		for (Object c : this.contributors) {
+			if (c instanceof UriComponentsContributor) {
+				UriComponentsContributor contributor = (UriComponentsContributor) c;
+				if (contributor.supportsParameter(parameter)) {
+					contributor.contributeMethodArgument(parameter, value, builder, uriVariables, conversionService);
+					break;
+				}
+			}
+			else if (c instanceof HandlerMethodArgumentResolver) {
+				if (((HandlerMethodArgumentResolver) c).supportsParameter(parameter)) {
+					break;
+				}
 			}
 		}
 	}

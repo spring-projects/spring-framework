@@ -16,9 +16,11 @@
 
 package org.springframework.cache.config;
 
-import static org.junit.Assert.assertSame;
+import static org.junit.Assert.*;
 
 import org.junit.Test;
+
+import org.springframework.cache.interceptor.CacheErrorHandler;
 import org.springframework.cache.interceptor.CacheInterceptor;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.support.GenericXmlApplicationContext;
@@ -26,6 +28,7 @@ import org.springframework.context.support.GenericXmlApplicationContext;
 /**
  * @author Costin Leau
  * @author Chris Beams
+ * @author Stephane Nicoll
  */
 public class AnnotationNamespaceDrivenTests extends AbstractAnnotationTests {
 
@@ -36,9 +39,36 @@ public class AnnotationNamespaceDrivenTests extends AbstractAnnotationTests {
 	}
 
 	@Test
-	public void testKeyStrategy() throws Exception {
+	public void testKeyStrategy() {
 		CacheInterceptor ci = ctx.getBean("org.springframework.cache.interceptor.CacheInterceptor#0",
 				CacheInterceptor.class);
 		assertSame(ctx.getBean("keyGenerator"), ci.getKeyGenerator());
+	}
+
+	@Test
+	public void cacheResolver() {
+		ConfigurableApplicationContext context = new GenericXmlApplicationContext(
+				"/org/springframework/cache/config/annotationDrivenCacheNamespace-resolver.xml");
+
+		CacheInterceptor ci = context.getBean(CacheInterceptor.class);
+		assertSame(context.getBean("cacheResolver"), ci.getCacheResolver());
+		context.close();
+	}
+
+	@Test
+	public void bothSetOnlyResolverIsUsed() {
+		ConfigurableApplicationContext context = new GenericXmlApplicationContext(
+				"/org/springframework/cache/config/annotationDrivenCacheNamespace-manager-resolver.xml");
+
+		CacheInterceptor ci = context.getBean(CacheInterceptor.class);
+		assertSame(context.getBean("cacheResolver"), ci.getCacheResolver());
+		context.close();
+	}
+
+	@Test
+	public void testCacheErrorHandler() {
+		CacheInterceptor ci = ctx.getBean("org.springframework.cache.interceptor.CacheInterceptor#0",
+				CacheInterceptor.class);
+		assertSame(ctx.getBean("errorHandler", CacheErrorHandler.class), ci.getErrorHandler());
 	}
 }

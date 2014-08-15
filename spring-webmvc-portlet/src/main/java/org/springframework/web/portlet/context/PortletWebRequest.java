@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,9 +39,6 @@ import org.springframework.web.portlet.util.PortletUtils;
  */
 public class PortletWebRequest extends PortletRequestAttributes implements NativeWebRequest {
 
-	private PortletResponse response;
-
-
 	/**
 	 * Create a new PortletWebRequest instance for the given request.
 	 * @param request current portlet request
@@ -56,17 +53,9 @@ public class PortletWebRequest extends PortletRequestAttributes implements Nativ
 	 * @param response current portlet response
 	 */
 	public PortletWebRequest(PortletRequest request, PortletResponse response) {
-		this(request);
-		this.response = response;
+		super(request, response);
 	}
 
-
-	/**
-	 * Exposes the native {@link PortletResponse} that we're wrapping (if any).
-	 */
-	public final PortletResponse getResponse() {
-		return this.response;
-	}
 
 	@Override
 	public Object getNativeRequest() {

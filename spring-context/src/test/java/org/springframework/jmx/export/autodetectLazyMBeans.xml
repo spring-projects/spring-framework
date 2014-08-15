@@ -17,10 +17,4 @@
 		<property name="name" value="Juergen Hoeller"/>
 	</bean>
 
-	<bean id="connector" class="org.springframework.jmx.support.ConnectorServerFactoryBean">
-		<property name="server">
-			<ref local="server"/>
-		</property>
-	</bean>
-
 </beans>

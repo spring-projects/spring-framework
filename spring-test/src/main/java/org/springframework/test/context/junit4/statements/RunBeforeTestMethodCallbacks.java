@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,10 +22,9 @@ import org.junit.runners.model.Statement;
 import org.springframework.test.context.TestContextManager;
 
 /**
- * {@code RunBeforeTestMethodCallbacks} is a custom JUnit 4.5+
- * {@link Statement} which allows the <em>Spring TestContext Framework</em> to
- * be plugged into the JUnit execution chain by calling
- * {@link TestContextManager#beforeTestMethod(Object, Method)
+ * {@code RunBeforeTestMethodCallbacks} is a custom JUnit {@link Statement} which allows
+ * the <em>Spring TestContext Framework</em> to be plugged into the JUnit execution chain
+ * by calling {@link TestContextManager#beforeTestMethod(Object, Method)
  * beforeTestMethod()} on the supplied {@link TestContextManager}.
  *
  * @see #evaluate()
@@ -63,10 +62,9 @@ public class RunBeforeTestMethodCallbacks extends Statement {
 	}
 
 	/**
-	 * Calls {@link TestContextManager#beforeTestMethod(Object, Method)} and
-	 * then invokes the next {@link Statement} in the execution chain (typically
-	 * an instance of {@link org.junit.internal.runners.statements.RunBefores
-	 * RunBefores}).
+	 * Calls {@link TestContextManager#beforeTestMethod(Object, Method)} and then invokes
+	 * the next {@link Statement} in the execution chain (typically an instance of
+	 * {@link org.junit.internal.runners.statements.RunBefores RunBefores}).
 	 */
 	@Override
 	public void evaluate() throws Throwable {

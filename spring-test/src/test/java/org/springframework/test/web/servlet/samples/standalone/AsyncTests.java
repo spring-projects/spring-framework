@@ -34,6 +34,8 @@ import org.springframework.test.web.Person;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.ui.Model;
+import org.springframework.util.concurrent.ListenableFuture;
+import org.springframework.util.concurrent.ListenableFutureTask;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.context.request.async.DeferredResult;
@@ -96,11 +98,29 @@ public class AsyncTests {
 				.andExpect(content().string("{\"name\":\"Joe\",\"someDouble\":0.0,\"someBoolean\":false}"));
 	}
 
+	@Test
+	public void testListenableFuture() throws Exception {
+		MvcResult mvcResult = this.mockMvc.perform(get("/1").param("listenableFuture", "true"))
+				.andExpect(request().asyncStarted())
+				.andReturn();
+
+		this.asyncController.onMessage("Joe");
+
+		this.mockMvc.perform(asyncDispatch(mvcResult))
+				.andExpect(status().isOk())
+				.andExpect(content().contentType(MediaType.APPLICATION_JSON))
+				.andExpect(content().string("{\"name\":\"Joe\",\"someDouble\":0.0,\"someBoolean\":false}"));
+	}
+
 
 	@Controller
 	private static class AsyncController {
 
-		private Collection<DeferredResult<Person>> deferredResults = new CopyOnWriteArrayList<DeferredResult<Person>>();
+		private Collection<DeferredResult<Person>> deferredResults =
+				new CopyOnWriteArrayList<DeferredResult<Person>>();
+
+		private Collection<ListenableFutureTask<Person>> futureTasks =
+				new CopyOnWriteArrayList<ListenableFutureTask<Person>>();
 
 
 		@RequestMapping(value="/{id}", params="callable", produces="application/json")
@@ -130,10 +150,27 @@ public class AsyncTests {
 			return deferredResult;
 		}
 
+		@RequestMapping(value="/{id}", params="listenableFuture", produces="application/json")
+		@ResponseBody
+		public ListenableFuture<Person> getListenableFuture() {
+			ListenableFutureTask<Person> futureTask = new ListenableFutureTask<Person>(new Callable<Person>() {
+				@Override
+				public Person call() throws Exception {
+					return new Person("Joe");
+				}
+			});
+			this.futureTasks.add(futureTask);
+			return futureTask;
+		}
+
 		public void onMessage(String name) {
 			for (DeferredResult<Person> deferredResult : this.deferredResults) {
 				deferredResult.setResult(new Person(name));
 				this.deferredResults.remove(deferredResult);
+			}
+			for (ListenableFutureTask<Person> futureTask : this.futureTasks) {
+				futureTask.run();
+				this.futureTasks.remove(futureTask);
 			}
 		}
 	}

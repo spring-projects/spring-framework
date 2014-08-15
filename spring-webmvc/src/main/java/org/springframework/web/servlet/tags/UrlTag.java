@@ -295,6 +295,18 @@ public class UrlTag extends HtmlEscapingAwareTag implements ParamAware {
 					throw new JspException(ex);
 				}
 			}
+			else {
+				template = URL_TEMPLATE_DELIMITER_PREFIX + "/" + param.getName() + URL_TEMPLATE_DELIMITER_SUFFIX;
+				if (uri.contains(template)) {
+					usedParams.add(param.getName());
+					try {
+						uri = uri.replace(template, UriUtils.encodePathSegment(param.getValue(), encoding));
+					}
+					catch (UnsupportedEncodingException ex) {
+						throw new JspException(ex);
+					}
+				}
+			}
 		}
 		return uri;
 	}

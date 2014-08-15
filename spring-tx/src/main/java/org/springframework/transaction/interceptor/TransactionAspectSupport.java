@@ -33,6 +33,7 @@ import org.springframework.util.StringUtils;
 
 import java.lang.reflect.Method;
 import java.util.Properties;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Base class for transactional aspects, such as the {@link TransactionInterceptor}
@@ -75,6 +76,9 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 	private static final ThreadLocal<TransactionInfo> transactionInfoHolder =
 			new NamedThreadLocal<TransactionInfo>("Current aspect-driven transaction");
 
+
+	private final ConcurrentHashMap<String, PlatformTransactionManager> transactionManagerCache =
+			new ConcurrentHashMap<String, PlatformTransactionManager>();
 
 	/**
 	 * Subclasses can use this to return the current TransactionInfo.
@@ -328,13 +332,27 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 		}
 		String qualifier = txAttr.getQualifier();
 		if (StringUtils.hasLength(qualifier)) {
-			return BeanFactoryAnnotationUtils.qualifiedBeanOfType(this.beanFactory, PlatformTransactionManager.class, qualifier);
+			PlatformTransactionManager txManager = this.transactionManagerCache.get(qualifier);
+			if (txManager == null) {
+				txManager = BeanFactoryAnnotationUtils.qualifiedBeanOfType(
+						this.beanFactory, PlatformTransactionManager.class, qualifier);
+				this.transactionManagerCache.putIfAbsent(qualifier, txManager);
+			}
+			return txManager;
 		}
 		else if (this.transactionManagerBeanName != null) {
-			return this.beanFactory.getBean(this.transactionManagerBeanName, PlatformTransactionManager.class);
+			PlatformTransactionManager txManager  = this.transactionManagerCache.get(this.transactionManagerBeanName);
+			if (txManager == null) {
+				txManager = this.beanFactory.getBean(
+						this.transactionManagerBeanName, PlatformTransactionManager.class);
+				this.transactionManagerCache.putIfAbsent(this.transactionManagerBeanName, txManager);
+			}
+			return txManager;
 		}
 		else {
-			return this.beanFactory.getBean(PlatformTransactionManager.class);
+			// Lookup the default transaction manager and store it for next call
+			this.transactionManager = this.beanFactory.getBean(PlatformTransactionManager.class);
+			return this.transactionManager;
 		}
 	}
 

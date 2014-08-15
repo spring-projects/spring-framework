@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,23 +45,21 @@ import org.springframework.web.context.WebApplicationContext;
  *
  * @author Rossen Stoyanchev
  * @since 4.0
- *
  * @see ServerEndpointExporter
  */
 public class SpringConfigurator extends Configurator {
 
-	private static Log logger = LogFactory.getLog(SpringConfigurator.class);
+	private static final String NO_VALUE = ObjectUtils.identityToString(new Object());
+
+	private static final Log logger = LogFactory.getLog(SpringConfigurator.class);
 
 	private static final Map<String, Map<Class<?>, String>> cache =
 			new ConcurrentHashMap<String, Map<Class<?>, String>>();
-
-	private static final String NO_VALUE = ObjectUtils.identityToString(new Object());
 
 
 	@SuppressWarnings("unchecked")
 	@Override
 	public <T> T getEndpointInstance(Class<T> endpointClass) throws InstantiationException {
-
 		WebApplicationContext wac = ContextLoader.getCurrentWebApplicationContext();
 		if (wac == null) {
 			String message = "Failed to find the root WebApplicationContext. Was ContextLoaderListener not used?";
@@ -99,7 +97,6 @@ public class SpringConfigurator extends Configurator {
 	}
 
 	private String getBeanNameByType(WebApplicationContext wac, Class<?> endpointClass) {
-
 		String wacId = wac.getId();
 
 		Map<Class<?>, String> beanNamesByType = cache.get(wacId);
@@ -116,15 +113,14 @@ public class SpringConfigurator extends Configurator {
 			else {
 				beanNamesByType.put(endpointClass, NO_VALUE);
 				if (names.length > 1) {
-					String message = "Found multiple @ServerEndpoint's of type " + endpointClass + ", names=" + names;
-					logger.error(message);
-					throw new IllegalStateException(message);
+					throw new IllegalStateException("Found multiple @ServerEndpoint's of type [" +
+							endpointClass.getName() + "]: bean names " + names);
 				}
 			}
 		}
 
 		String beanName = beanNamesByType.get(endpointClass);
-		return NO_VALUE.equals(beanName) ? null : beanName;
+		return (NO_VALUE.equals(beanName) ? null : beanName);
 	}
 
 }

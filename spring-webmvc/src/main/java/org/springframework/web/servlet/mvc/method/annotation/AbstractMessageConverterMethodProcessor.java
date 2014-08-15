@@ -54,6 +54,8 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 
 	private final ContentNegotiationManager contentNegotiationManager;
 
+	private final ResponseBodyAdviceChain adviceChain;
+
 
 	protected AbstractMessageConverterMethodProcessor(List<HttpMessageConverter<?>> messageConverters) {
 		this(messageConverters, null);
@@ -61,9 +63,15 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 
 	protected AbstractMessageConverterMethodProcessor(List<HttpMessageConverter<?>> messageConverters,
 			ContentNegotiationManager manager) {
+		this(messageConverters, manager, null);
+	}
+
+	protected AbstractMessageConverterMethodProcessor(List<HttpMessageConverter<?>> messageConverters,
+			ContentNegotiationManager manager, List<Object> responseBodyAdvice) {
 
 		super(messageConverters);
 		this.contentNegotiationManager = (manager != null ? manager : new ContentNegotiationManager());
+		this.adviceChain = new ResponseBodyAdviceChain(responseBodyAdvice);
 	}
 
 
@@ -140,6 +148,8 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 			selectedMediaType = selectedMediaType.removeQualityValue();
 			for (HttpMessageConverter<?> messageConverter : this.messageConverters) {
 				if (messageConverter.canWrite(returnValueClass, selectedMediaType)) {
+					returnValue = this.adviceChain.invoke(returnValue, returnType, selectedMediaType,
+							(Class<HttpMessageConverter<?>>) messageConverter.getClass(), inputMessage, outputMessage);
 					((HttpMessageConverter<T>) messageConverter).write(returnValue, selectedMediaType, outputMessage);
 					if (logger.isDebugEnabled()) {
 						logger.debug("Written [" + returnValue + "] as \"" + selectedMediaType + "\" using [" +

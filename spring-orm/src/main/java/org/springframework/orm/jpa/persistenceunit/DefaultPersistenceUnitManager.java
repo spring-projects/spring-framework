@@ -86,7 +86,9 @@ import org.springframework.util.ResourceUtils;
 public class DefaultPersistenceUnitManager
 		implements PersistenceUnitManager, ResourceLoaderAware, LoadTimeWeaverAware, InitializingBean {
 
-	private static final String ENTITY_CLASS_RESOURCE_PATTERN = "/**/*.class";
+	private static final String CLASS_RESOURCE_PATTERN = "/**/*.class";
+
+	private static final String PACKAGE_INFO_SUFFIX = ".package-info";
 
 	private static final String DEFAULT_ORM_XML_RESOURCE = "META-INF/orm.xml";
 
@@ -117,7 +119,7 @@ public class DefaultPersistenceUnitManager
 		try {
 			@SuppressWarnings("unchecked")
 			Class<? extends Annotation> converterAnnotation = (Class<? extends Annotation>)
-					DefaultPersistenceUnitManager.class.getClassLoader().loadClass("javax.persistence.Converter");
+					ClassUtils.forName("javax.persistence.Converter", DefaultPersistenceUnitManager.class.getClassLoader());
 			entityTypeFilters.add(new AnnotationTypeFilter(converterAnnotation, false));
 		}
 		catch (ClassNotFoundException ex) {
@@ -213,6 +215,11 @@ public class DefaultPersistenceUnitManager
 	 * may live next to regularly defined units originating from {@code persistence.xml}.
 	 * Its name is determined by {@link #setDefaultPersistenceUnitName}: by default,
 	 * it's simply "default".
+	 * <p><p>Note: There may be limitations in comparison to regular JPA scanning.</b>
+	 * In particular, JPA providers may pick up annotated packages for provider-specific
+	 * annotations only when driven by {@code persistence.xml}. As of 4.1, Spring's
+	 * scan can detect annotated packages as well if supported by the given
+	 * {@link org.springframework.orm.jpa.JpaVendorAdapter} (e.g. for Hibernate).
 	 * <p>If no explicit {@link #setMappingResources mapping resources} have been
 	 * specified in addition to these packages, this manager looks for a default
 	 * {@code META-INF/orm.xml} file in the classpath, registering it as a mapping
@@ -512,7 +519,7 @@ public class DefaultPersistenceUnitManager
 			for (String pkg : this.packagesToScan) {
 				try {
 					String pattern = ResourcePatternResolver.CLASSPATH_ALL_URL_PREFIX +
-							ClassUtils.convertClassNameToResourcePath(pkg) + ENTITY_CLASS_RESOURCE_PATTERN;
+							ClassUtils.convertClassNameToResourcePath(pkg) + CLASS_RESOURCE_PATTERN;
 					Resource[] resources = this.resourcePatternResolver.getResources(pattern);
 					MetadataReaderFactory readerFactory = new CachingMetadataReaderFactory(this.resourcePatternResolver);
 					for (Resource resource : resources) {
@@ -527,6 +534,10 @@ public class DefaultPersistenceUnitManager
 										scannedUnit.setPersistenceUnitRootUrl(ResourceUtils.extractJarFileURL(url));
 									}
 								}
+							}
+							else if (className.endsWith(PACKAGE_INFO_SUFFIX)) {
+								scannedUnit.addManagedPackage(
+										className.substring(0, className.length() - PACKAGE_INFO_SUFFIX.length()));
 							}
 						}
 					}

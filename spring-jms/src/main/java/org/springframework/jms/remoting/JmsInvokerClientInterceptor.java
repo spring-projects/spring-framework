@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,10 +24,6 @@ import javax.jms.MessageConsumer;
 import javax.jms.MessageFormatException;
 import javax.jms.MessageProducer;
 import javax.jms.Queue;
-import javax.jms.QueueConnection;
-import javax.jms.QueueConnectionFactory;
-import javax.jms.QueueSender;
-import javax.jms.QueueSession;
 import javax.jms.Session;
 import javax.jms.TemporaryQueue;
 
@@ -48,7 +44,6 @@ import org.springframework.remoting.support.DefaultRemoteInvocationFactory;
 import org.springframework.remoting.support.RemoteInvocation;
 import org.springframework.remoting.support.RemoteInvocationFactory;
 import org.springframework.remoting.support.RemoteInvocationResult;
-import org.springframework.util.ClassUtils;
 
 /**
  * {@link org.aopalliance.intercept.MethodInterceptor} for accessing a
@@ -74,8 +69,6 @@ import org.springframework.util.ClassUtils;
  * @see org.springframework.jms.remoting.JmsInvokerProxyFactoryBean
  */
 public class JmsInvokerClientInterceptor implements MethodInterceptor, InitializingBean {
-
-	private static final boolean jms11Available = ClassUtils.hasMethod(ConnectionFactory.class, "createConnection");
 
 	private ConnectionFactory connectionFactory;
 
@@ -263,25 +256,14 @@ public class JmsInvokerClientInterceptor implements MethodInterceptor, Initializ
 	 * Create a new JMS Connection for this JMS invoker.
 	 */
 	protected Connection createConnection() throws JMSException {
-		ConnectionFactory cf = getConnectionFactory();
-		if (jms11Available) {
-			return cf.createConnection();
-		}
-		else {
-			return ((QueueConnectionFactory) cf).createQueueConnection();
-		}
+		return getConnectionFactory().createConnection();
 	}
 
 	/**
 	 * Create a new JMS Session for this JMS invoker.
 	 */
 	protected Session createSession(Connection con) throws JMSException {
-		if (jms11Available) {
-			return con.createSession(false, Session.AUTO_ACKNOWLEDGE);
-		}
-		else {
-			return ((QueueConnection) con).createQueueSession(false, Session.AUTO_ACKNOWLEDGE);
-		}
+		return con.createSession(false, Session.AUTO_ACKNOWLEDGE);
 	}
 
 	/**
@@ -345,25 +327,11 @@ public class JmsInvokerClientInterceptor implements MethodInterceptor, Initializ
 		MessageProducer producer = null;
 		MessageConsumer consumer = null;
 		try {
-			if (jms11Available) {
-				// Standard JMS 1.1 API usage...
-				responseQueue = session.createTemporaryQueue();
-				producer = session.createProducer(queue);
-				consumer = session.createConsumer(responseQueue);
-				requestMessage.setJMSReplyTo(responseQueue);
-				producer.send(requestMessage);
-			}
-			else {
-				// Perform all calls on QueueSession reference for JMS 1.0.2 compatibility...
-				// DEPRECATED but kept around with the deprecated JmsTemplate102 etc classes for the time being.
-				QueueSession queueSession = (QueueSession) session;
-				responseQueue = queueSession.createTemporaryQueue();
-				QueueSender sender = queueSession.createSender(queue);
-				producer = sender;
-				consumer = queueSession.createReceiver(responseQueue);
-				requestMessage.setJMSReplyTo(responseQueue);
-				sender.send(requestMessage);
-			}
+			responseQueue = session.createTemporaryQueue();
+			producer = session.createProducer(queue);
+			consumer = session.createConsumer(responseQueue);
+			requestMessage.setJMSReplyTo(responseQueue);
+			producer.send(requestMessage);
 			long timeout = getReceiveTimeout();
 			return (timeout > 0 ? consumer.receive(timeout) : consumer.receive());
 		}

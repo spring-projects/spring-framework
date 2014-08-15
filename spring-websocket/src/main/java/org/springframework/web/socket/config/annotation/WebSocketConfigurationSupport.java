@@ -19,7 +19,6 @@ package org.springframework.web.socket.config.annotation;
 import org.springframework.context.annotation.Bean;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.web.servlet.HandlerMapping;
-import org.springframework.web.servlet.handler.AbstractHandlerMapping;
 
 /**
  * Configuration support for WebSocket request handling.
@@ -33,9 +32,7 @@ public class WebSocketConfigurationSupport {
 	public HandlerMapping webSocketHandlerMapping() {
 		ServletWebSocketHandlerRegistry registry = new ServletWebSocketHandlerRegistry(defaultSockJsTaskScheduler());
 		registerWebSocketHandlers(registry);
-		AbstractHandlerMapping hm = registry.getHandlerMapping();
-		hm.setOrder(1);
-		return hm;
+		return registry.getHandlerMapping();
 	}
 
 	protected void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
@@ -62,6 +59,8 @@ public class WebSocketConfigurationSupport {
 	public ThreadPoolTaskScheduler defaultSockJsTaskScheduler() {
 		ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
 		scheduler.setThreadNamePrefix("SockJS-");
+		scheduler.setPoolSize(Runtime.getRuntime().availableProcessors());
+		scheduler.setRemoveOnCancelPolicy(true);
 		return scheduler;
 	}
 

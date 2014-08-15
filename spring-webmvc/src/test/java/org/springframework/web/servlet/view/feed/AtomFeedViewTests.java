@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,9 +24,9 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.sun.syndication.feed.atom.Content;
-import com.sun.syndication.feed.atom.Entry;
-import com.sun.syndication.feed.atom.Feed;
+import com.rometools.rome.feed.atom.Content;
+import com.rometools.rome.feed.atom.Entry;
+import com.rometools.rome.feed.atom.Feed;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -67,6 +67,7 @@ public class AtomFeedViewTests {
 		assertXMLEqual(expected, response.getContentAsString());
 	}
 
+
 	private static class MyAtomFeedView extends AbstractAtomFeedView {
 
 		@Override
@@ -90,4 +91,5 @@ public class AtomFeedViewTests {
 			return entries;
 		}
 	}
+
 }

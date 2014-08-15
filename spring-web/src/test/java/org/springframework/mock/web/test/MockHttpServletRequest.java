@@ -107,6 +107,9 @@ public class MockHttpServletRequest implements HttpServletRequest {
 
 	private static final String CHARSET_PREFIX = "charset=";
 
+	private static final ServletInputStream EMPTY_SERVLET_INPUT_STREAM =
+			new DelegatingServletInputStream(new ByteArrayInputStream(new byte[0]));
+
 
 	private boolean active = true;
 
@@ -378,7 +381,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 			return new DelegatingServletInputStream(new ByteArrayInputStream(this.content));
 		}
 		else {
-			return null;
+			return EMPTY_SERVLET_INPUT_STREAM;
 		}
 	}
 

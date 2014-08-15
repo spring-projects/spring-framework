@@ -25,7 +25,6 @@ import javax.cache.annotation.CacheInvocationContext;
 import javax.cache.annotation.CacheInvocationParameter;
 
 import org.springframework.cache.interceptor.CacheOperationInvocationContext;
-import org.springframework.cache.jcache.model.JCacheOperation;
 
 /**
  * The default {@link CacheOperationInvocationContext} implementation used
@@ -35,7 +34,7 @@ import org.springframework.cache.jcache.model.JCacheOperation;
  * @author Stephane Nicoll
  * @since 4.1
  */
-public class DefaultCacheInvocationContext<A extends Annotation>
+class DefaultCacheInvocationContext<A extends Annotation>
 		implements CacheInvocationContext<A>, CacheOperationInvocationContext<JCacheOperation<A>> {
 
 	private final JCacheOperation<A> operation;
@@ -56,42 +55,42 @@ public class DefaultCacheInvocationContext<A extends Annotation>
 
 	@Override
 	public JCacheOperation<A> getOperation() {
-		return operation;
+		return this.operation;
 	}
 
 	@Override
 	public Method getMethod() {
-		return operation.getMethod();
+		return this.operation.getMethod();
 	}
 
 	@Override
 	public Object[] getArgs() {
-		return args.clone();
+		return this.args.clone();
 	}
 
 	@Override
 	public Set<Annotation> getAnnotations() {
-		return operation.getAnnotations();
+		return this.operation.getAnnotations();
 	}
 
 	@Override
 	public A getCacheAnnotation() {
-		return operation.getCacheAnnotation();
+		return this.operation.getCacheAnnotation();
 	}
 
 	@Override
 	public String getCacheName() {
-		return operation.getCacheName();
+		return this.operation.getCacheName();
 	}
 
 	@Override
 	public Object getTarget() {
-		return target;
+		return this.target;
 	}
 
 	@Override
 	public CacheInvocationParameter[] getAllParameters() {
-		return allParameters.clone();
+		return this.allParameters.clone();
 	}
 
 	@Override

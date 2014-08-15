@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -169,13 +170,10 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	private long startupDate;
 
 	/** Flag that indicates whether this context is currently active */
-	private boolean active = false;
+	private final AtomicBoolean active = new AtomicBoolean();
 
 	/** Flag that indicates whether this context has been closed already */
-	private boolean closed = false;
-
-	/** Synchronization monitor for the "active" flag */
-	private final Object activeMonitor = new Object();
+	private final AtomicBoolean closed = new AtomicBoolean();
 
 	/** Synchronization monitor for the "refresh" and "destroy" */
 	private final Object startupShutdownMonitor = new Object();
@@ -486,6 +484,8 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 			}
 
 			catch (BeansException ex) {
+				logger.warn("Exception encountered during context initialization - cancelling refresh attempt", ex);
+
 				// Destroy already created singletons to avoid dangling resources.
 				destroyBeans();
 
@@ -504,10 +504,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 */
 	protected void prepareRefresh() {
 		this.startupDate = System.currentTimeMillis();
-
-		synchronized (this.activeMonitor) {
-			this.active = true;
-		}
+		this.active.set(true);
 
 		if (logger.isInfoEnabled()) {
 			logger.info("Refreshing " + this);
@@ -553,7 +550,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	protected void prepareBeanFactory(ConfigurableListableBeanFactory beanFactory) {
 		// Tell the internal bean factory to use the context's class loader etc.
 		beanFactory.setBeanClassLoader(getClassLoader());
-		beanFactory.setBeanExpressionResolver(new StandardBeanExpressionResolver());
+		beanFactory.setBeanExpressionResolver(new StandardBeanExpressionResolver(beanFactory.getBeanClassLoader()));
 		beanFactory.addPropertyEditorRegistrar(new ResourceEditorRegistrar(this, getEnvironment()));
 
 		// Configure the bean factory with context callbacks.
@@ -785,9 +782,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 * @param ex the exception that led to the cancellation
 	 */
 	protected void cancelRefresh(BeansException ex) {
-		synchronized (this.activeMonitor) {
-			this.active = false;
-		}
+		this.active.set(false);
 	}
 
 
@@ -862,13 +857,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 * @see #registerShutdownHook()
 	 */
 	protected void doClose() {
-		boolean actuallyClose;
-		synchronized (this.activeMonitor) {
-			actuallyClose = this.active && !this.closed;
-			this.closed = true;
-		}
-
-		if (actuallyClose) {
+		if (this.active.get() && this.closed.compareAndSet(false, true)) {
 			if (logger.isInfoEnabled()) {
 				logger.info("Closing " + this);
 			}
@@ -900,9 +889,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 			// Let subclasses do some final clean-up if they wish...
 			onClose();
 
-			synchronized (this.activeMonitor) {
-				this.active = false;
-			}
+			this.active.set(false);
 		}
 	}
 
@@ -935,9 +922,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 
 	@Override
 	public boolean isActive() {
-		synchronized (this.activeMonitor) {
-			return this.active;
-		}
+		return this.active.get();
 	}
 
 	/**
@@ -950,14 +935,12 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 * no-op if {@link #getBeanFactory()} itself throws an exception in such a case.
 	 */
 	protected void assertBeanFactoryActive() {
-		synchronized (this.activeMonitor) {
-			if (!this.active) {
-				if (this.closed) {
-					throw new IllegalStateException(getDisplayName() + " has been closed already");
-				}
-				else {
-					throw new IllegalStateException(getDisplayName() + " has not been refreshed yet");
-				}
+		if (!this.active.get()) {
+			if (this.closed.get()) {
+				throw new IllegalStateException(getDisplayName() + " has been closed already");
+			}
+			else {
+				throw new IllegalStateException(getDisplayName() + " has not been refreshed yet");
 			}
 		}
 	}
@@ -989,6 +972,12 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	public Object getBean(String name, Object... args) throws BeansException {
 		assertBeanFactoryActive();
 		return getBeanFactory().getBean(name, args);
+	}
+
+	@Override
+	public <T> T getBean(Class<T> requiredType, Object... args) throws BeansException {
+		assertBeanFactoryActive();
+		return getBeanFactory().getBean(requiredType, args);
 	}
 
 	@Override

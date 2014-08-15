@@ -23,14 +23,14 @@ import org.springframework.cache.interceptor.CacheResolver;
  * Extension of {@link CachingConfigurer} for the JSR-107 implementation.
  *
  * <p>To be implemented by classes annotated with
- * @{@link org.springframework.cache.annotation.EnableCaching} that wish or
- * need to specify explicitly how exception caches are resolved for
+ * {@link org.springframework.cache.annotation.EnableCaching} that wish
+ * or need to specify explicitly how exception caches are resolved for
  * annotation-driven cache management. Consider extending {@link JCacheConfigurerSupport},
  * which provides a stub implementation of all interface methods.
  *
- * <p>See @{@link org.springframework.cache.annotation.EnableCaching} for
- * general examples and context; see {@link #exceptionCacheResolver()} for detailed
- * instructions.
+ * <p>See {@link org.springframework.cache.annotation.EnableCaching} for
+ * general examples and context; see {@link #exceptionCacheResolver()} for
+ * detailed instructions.
  *
  * @author Stephane Nicoll
  * @since 4.1

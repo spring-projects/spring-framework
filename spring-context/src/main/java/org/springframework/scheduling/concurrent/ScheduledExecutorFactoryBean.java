@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.ThreadFactory;
 
 import org.springframework.beans.factory.FactoryBean;
+import org.springframework.lang.UsesJava7;
 import org.springframework.scheduling.support.DelegatingErrorHandlingRunnable;
 import org.springframework.scheduling.support.TaskUtils;
 import org.springframework.util.Assert;
@@ -56,6 +57,7 @@ import org.springframework.util.ObjectUtils;
  * @author Juergen Hoeller
  * @since 2.0
  * @see #setPoolSize
+ * @see #setRemoveOnCancelPolicy(boolean)
  * @see #setThreadFactory
  * @see ScheduledExecutorTask
  * @see java.util.concurrent.ScheduledExecutorService
@@ -66,6 +68,8 @@ public class ScheduledExecutorFactoryBean extends ExecutorConfigurationSupport
 		implements FactoryBean<ScheduledExecutorService> {
 
 	private int poolSize = 1;
+
+	private Boolean removeOnCancelPolicy;
 
 	private ScheduledExecutorTask[] scheduledExecutorTasks;
 
@@ -83,6 +87,14 @@ public class ScheduledExecutorFactoryBean extends ExecutorConfigurationSupport
 	public void setPoolSize(int poolSize) {
 		Assert.isTrue(poolSize > 0, "'poolSize' must be 1 or higher");
 		this.poolSize = poolSize;
+	}
+
+	/**
+	 * Set the same property on ScheduledExecutorService (JDK 1.7+).
+	 * There is no default. If not set, the executor property is not set.
+	 */
+	public void setRemoveOnCancelPolicy(boolean removeOnCancelPolicy) {
+		this.removeOnCancelPolicy = removeOnCancelPolicy;
 	}
 
 	/**
@@ -124,11 +136,16 @@ public class ScheduledExecutorFactoryBean extends ExecutorConfigurationSupport
 
 
 	@Override
+	@UsesJava7
 	protected ExecutorService initializeExecutor(
 			ThreadFactory threadFactory, RejectedExecutionHandler rejectedExecutionHandler) {
 
 		ScheduledExecutorService executor =
 				createExecutor(this.poolSize, threadFactory, rejectedExecutionHandler);
+
+		if (executor instanceof ScheduledThreadPoolExecutor && this.removeOnCancelPolicy != null) {
+			((ScheduledThreadPoolExecutor) executor).setRemoveOnCancelPolicy(this.removeOnCancelPolicy);
+		}
 
 		// Register specified ScheduledExecutorTasks, if necessary.
 		if (!ObjectUtils.isEmpty(this.scheduledExecutorTasks)) {
@@ -198,7 +215,6 @@ public class ScheduledExecutorFactoryBean extends ExecutorConfigurationSupport
 				new DelegatingErrorHandlingRunnable(task.getRunnable(), TaskUtils.LOG_AND_SUPPRESS_ERROR_HANDLER) :
 				new DelegatingErrorHandlingRunnable(task.getRunnable(), TaskUtils.LOG_AND_PROPAGATE_ERROR_HANDLER));
 	}
-
 
 	@Override
 	public ScheduledExecutorService getObject() {

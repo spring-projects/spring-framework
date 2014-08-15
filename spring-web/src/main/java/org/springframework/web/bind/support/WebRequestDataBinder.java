@@ -116,7 +116,7 @@ public class WebRequestDataBinder extends WebDataBinder {
 	public void bind(WebRequest request) {
 		MutablePropertyValues mpvs = new MutablePropertyValues(request.getParameterMap());
 
-		if(isMultipartRequest(request) && (request instanceof NativeWebRequest)) {
+		if (isMultipartRequest(request) && (request instanceof NativeWebRequest)) {
 			MultipartRequest multipartRequest = ((NativeWebRequest) request).getNativeRequest(MultipartRequest.class);
 			if (multipartRequest != null) {
 				bindMultipart(multipartRequest.getMultiFileMap(), mpvs);

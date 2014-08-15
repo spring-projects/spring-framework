@@ -50,7 +50,7 @@ public class BrokerAvailabilityEvent extends ApplicationEvent {
 
 	@Override
 	public String toString() {
-		return "BrokerAvailabilityEvent=" + this.brokerAvailable;
+		return "BrokerAvailabilityEvent[available=" + this.brokerAvailable + ", " + getSource() + "]";
 	}
 
 }

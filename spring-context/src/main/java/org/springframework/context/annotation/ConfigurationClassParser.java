@@ -24,6 +24,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -112,17 +113,19 @@ class ConfigurationClassParser {
 
 	private final ComponentScanAnnotationParser componentScanParser;
 
-	private final Set<ConfigurationClass> configurationClasses = new LinkedHashSet<ConfigurationClass>();
+	private final ConditionEvaluator conditionEvaluator;
+
+	private final Map<ConfigurationClass, ConfigurationClass> configurationClasses =
+			new LinkedHashMap<ConfigurationClass, ConfigurationClass>();
 
 	private final Map<String, ConfigurationClass> knownSuperclasses = new HashMap<String, ConfigurationClass>();
 
-	private final MultiValueMap<String, PropertySource<?>> propertySources = new LinkedMultiValueMap<String, PropertySource<?>>();
+	private final MultiValueMap<String, ResourcePropertySource> propertySources =
+			new LinkedMultiValueMap<String, ResourcePropertySource>();
 
 	private final ImportStack importStack = new ImportStack();
 
 	private final List<DeferredImportSelectorHolder> deferredImportSelectors = new LinkedList<DeferredImportSelectorHolder>();
-
-	private final ConditionEvaluator conditionEvaluator;
 
 
 	/**
@@ -155,8 +158,11 @@ class ConfigurationClassParser {
 					parse(bd.getBeanClassName(), holder.getBeanName());
 				}
 			}
-			catch (IOException ex) {
-				throw new BeanDefinitionStoreException("Failed to load bean class: " + bd.getBeanClassName(), ex);
+			catch (BeanDefinitionStoreException ex) {
+				throw ex;
+			}
+			catch (Exception ex) {
+				throw new BeanDefinitionStoreException("Failed to parse configuration class [" + bd.getBeanClassName() + "]", ex);
 			}
 		}
 		processDeferredImportSelectors();
@@ -188,13 +194,23 @@ class ConfigurationClassParser {
 			return;
 		}
 
-		if (this.configurationClasses.contains(configClass) && configClass.getBeanName() != null) {
-			// Explicit bean definition found, probably replacing an import.
-			// Let's remove the old one and go with the new one.
-			this.configurationClasses.remove(configClass);
-			for (Iterator<ConfigurationClass> it = this.knownSuperclasses.values().iterator(); it.hasNext();) {
-				if (configClass.equals(it.next())) {
-					it.remove();
+		ConfigurationClass existingClass = this.configurationClasses.get(configClass);
+		if (existingClass != null) {
+			if (configClass.isImported()) {
+				if (existingClass.isImported()) {
+					existingClass.mergeImportedBy(configClass);
+				}
+				// Otherwise ignore new imported config class; existing non-imported class overrides it.
+				return;
+			}
+			else {
+				// Explicit bean definition found, probably replacing an import.
+				// Let's remove the old one and go with the new one.
+				this.configurationClasses.remove(configClass);
+				for (Iterator<ConfigurationClass> it = this.knownSuperclasses.values().iterator(); it.hasNext(); ) {
+					if (configClass.equals(it.next())) {
+						it.remove();
+					}
 				}
 			}
 		}
@@ -206,7 +222,7 @@ class ConfigurationClassParser {
 		}
 		while (sourceClass != null);
 
-		this.configurationClasses.add(configClass);
+		this.configurationClasses.put(configClass, configClass);
 	}
 
 	/**
@@ -215,7 +231,7 @@ class ConfigurationClassParser {
 	 * multiple times as relevant sources are discovered.
 	 * @param configClass the configuration class being build
 	 * @param sourceClass a source class
-	 * @return the superclass, {@code null} if none found or previously processed
+	 * @return the superclass, or {@code null} if none found or previously processed
 	 */
 	protected final SourceClass doProcessConfigurationClass(ConfigurationClass configClass, SourceClass sourceClass) throws IOException {
 		// recursively process any member (nested) classes first
@@ -245,7 +261,7 @@ class ConfigurationClassParser {
 		}
 
 		// process any @Import annotations
-		processImports(configClass, sourceClass, getImports(sourceClass), true);
+		processImports(configClass, sourceClass, getImports(sourceClass), true, false);
 
 		// process any @ImportResource annotations
 		if (sourceClass.getMetadata().isAnnotated(ImportResource.class.getName())) {
@@ -267,15 +283,10 @@ class ConfigurationClassParser {
 		// process superclass, if any
 		if (sourceClass.getMetadata().hasSuperClass()) {
 			String superclass = sourceClass.getMetadata().getSuperClassName();
-			if (!this.knownSuperclasses.containsKey(superclass)) {
+			if (!superclass.startsWith("java") && !this.knownSuperclasses.containsKey(superclass)) {
 				this.knownSuperclasses.put(superclass, configClass);
 				// superclass found, return its annotation metadata and recurse
-				try {
-					return sourceClass.getSuperClass();
-				}
-				catch (ClassNotFoundException ex) {
-					throw new IllegalStateException(ex);
-				}
+				return sourceClass.getSuperClass();
 			}
 		}
 
@@ -310,16 +321,10 @@ class ConfigurationClassParser {
 		}
 		for (String location : locations) {
 			try {
-				Resource resource = this.resourceLoader.getResource(
-						this.environment.resolveRequiredPlaceholders(location));
-				if (!StringUtils.hasText(name) || this.propertySources.containsKey(name)) {
-					// We need to ensure unique names when the property source will ultimately end up in a composite
-					ResourcePropertySource ps = new ResourcePropertySource(resource);
-					this.propertySources.add((StringUtils.hasText(name) ? name : ps.getName()), ps);
-				}
-				else {
-					this.propertySources.add(name, new ResourcePropertySource(name, resource));
-				}
+				String resolvedLocation = this.environment.resolveRequiredPlaceholders(location);
+				Resource resource = this.resourceLoader.getResource(resolvedLocation);
+				ResourcePropertySource ps = new ResourcePropertySource(resource);
+				this.propertySources.add((StringUtils.hasText(name) ? name : ps.getName()), ps);
 			}
 			catch (IllegalArgumentException ex) {
 				// from resolveRequiredPlaceholders
@@ -360,39 +365,38 @@ class ConfigurationClassParser {
 	 * @throws IOException if there is any problem reading metadata from the named class
 	 */
 	private void collectImports(SourceClass sourceClass, Set<SourceClass> imports, Set<SourceClass> visited) throws IOException {
-		try {
-			if (visited.add(sourceClass)) {
-				for (SourceClass annotation : sourceClass.getAnnotations()) {
-					String annName = annotation.getMetadata().getClassName();
-					if (!annName.startsWith("java") && !annName.equals(Import.class.getName())) {
-						collectImports(annotation, imports, visited);
-					}
+		if (visited.add(sourceClass)) {
+			for (SourceClass annotation : sourceClass.getAnnotations()) {
+				String annName = annotation.getMetadata().getClassName();
+				if (!annName.startsWith("java") && !annName.equals(Import.class.getName())) {
+					collectImports(annotation, imports, visited);
 				}
-				imports.addAll(sourceClass.getAnnotationAttributes(Import.class.getName(), "value"));
 			}
-		}
-		catch (ClassNotFoundException ex) {
-			throw new NestedIOException("Unable to collect imports", ex);
+			imports.addAll(sourceClass.getAnnotationAttributes(Import.class.getName(), "value"));
 		}
 	}
 
 	private void processDeferredImportSelectors() {
 		Collections.sort(this.deferredImportSelectors, DEFERRED_IMPORT_COMPARATOR);
 		for (DeferredImportSelectorHolder deferredImport : this.deferredImportSelectors) {
+			ConfigurationClass configClass = deferredImport.getConfigurationClass();
 			try {
-				ConfigurationClass configClass = deferredImport.getConfigurationClass();
 				String[] imports = deferredImport.getImportSelector().selectImports(configClass.getMetadata());
-				processImports(configClass, asSourceClass(configClass), asSourceClasses(imports), false);
+				processImports(configClass, asSourceClass(configClass), asSourceClasses(imports), false, true);
+			}
+			catch (BeanDefinitionStoreException ex) {
+				throw ex;
 			}
 			catch (Exception ex) {
-				throw new BeanDefinitionStoreException("Failed to load bean class: ", ex);
+				throw new BeanDefinitionStoreException("Failed to process import candidates for configuration class [" +
+						configClass.getMetadata().getClassName() + "]", ex);
 			}
 		}
 		this.deferredImportSelectors.clear();
 	}
 
 	private void processImports(ConfigurationClass configClass, SourceClass currentSourceClass,
-			Collection<SourceClass> importCandidates, boolean checkForCircularImports) throws IOException {
+			Collection<SourceClass> importCandidates, boolean checkForCircularImports, boolean deferred) throws IOException {
 
 		if (importCandidates.isEmpty()) {
 			return;
@@ -409,13 +413,13 @@ class ConfigurationClassParser {
 						Class<?> candidateClass = candidate.loadClass();
 						ImportSelector selector = BeanUtils.instantiateClass(candidateClass, ImportSelector.class);
 						invokeAwareMethods(selector);
-						if (selector instanceof DeferredImportSelector) {
+						if (!deferred && selector instanceof DeferredImportSelector) {
 							this.deferredImportSelectors.add(new DeferredImportSelectorHolder(configClass, (DeferredImportSelector) selector));
 						}
 						else {
 							String[] importClassNames = selector.selectImports(currentSourceClass.getMetadata());
 							Collection<SourceClass> importSourceClasses = asSourceClasses(importClassNames);
-							processImports(configClass, currentSourceClass, importSourceClasses, false);
+							processImports(configClass, currentSourceClass, importSourceClasses, false, false);
 						}
 					}
 					else if (candidate.isAssignable(ImportBeanDefinitionRegistrar.class)) {
@@ -432,8 +436,12 @@ class ConfigurationClassParser {
 					}
 				}
 			}
-			catch (ClassNotFoundException ex) {
-				throw new NestedIOException("Failed to load import candidate class", ex);
+			catch (BeanDefinitionStoreException ex) {
+				throw ex;
+			}
+			catch (Exception ex) {
+				throw new BeanDefinitionStoreException("Failed to process import candidates for configuration class [" +
+						configClass.getMetadata().getClassName() + "]", ex);
 			}
 			finally {
 				this.importStack.pop();
@@ -471,26 +479,30 @@ class ConfigurationClassParser {
 	 * @see ConfigurationClass#validate
 	 */
 	public void validate() {
-		for (ConfigurationClass configClass : this.configurationClasses) {
+		for (ConfigurationClass configClass : this.configurationClasses.keySet()) {
 			configClass.validate(this.problemReporter);
 		}
 	}
 
 	public Set<ConfigurationClass> getConfigurationClasses() {
-		return this.configurationClasses;
+		return this.configurationClasses.keySet();
+	}
+
+	public int getPropertySourceCount() {
+		return this.propertySources.size();
 	}
 
 	public List<PropertySource<?>> getPropertySources() {
 		List<PropertySource<?>> propertySources = new LinkedList<PropertySource<?>>();
-		for (Map.Entry<String, List<PropertySource<?>>> entry : this.propertySources.entrySet()) {
+		for (Map.Entry<String, List<ResourcePropertySource>> entry : this.propertySources.entrySet()) {
 			propertySources.add(0, collatePropertySources(entry.getKey(), entry.getValue()));
 		}
 		return propertySources;
 	}
 
-	private PropertySource<?> collatePropertySources(String name, List<PropertySource<?>> propertySources) {
+	private PropertySource<?> collatePropertySources(String name, List<ResourcePropertySource> propertySources) {
 		if (propertySources.size() == 1) {
-			return propertySources.get(0);
+			return propertySources.get(0).withName(name);
 		}
 		CompositePropertySource result = new CompositePropertySource(name);
 		for (int i = propertySources.size() - 1; i >= 0; i--) {
@@ -508,28 +520,24 @@ class ConfigurationClassParser {
 	 * Factory method to obtain a {@link SourceClass} from a {@link ConfigurationClass}.
 	 */
 	public SourceClass asSourceClass(ConfigurationClass configurationClass) throws IOException {
-		try {
-			AnnotationMetadata metadata = configurationClass.getMetadata();
-			if (metadata instanceof StandardAnnotationMetadata) {
-				return asSourceClass(((StandardAnnotationMetadata) metadata).getIntrospectedClass());
-			}
-			return asSourceClass(configurationClass.getMetadata().getClassName());
+		AnnotationMetadata metadata = configurationClass.getMetadata();
+		if (metadata instanceof StandardAnnotationMetadata) {
+			return asSourceClass(((StandardAnnotationMetadata) metadata).getIntrospectedClass());
 		}
-		catch (ClassNotFoundException ex) {
-			throw new IllegalStateException(ex);
-		}
+		return asSourceClass(configurationClass.getMetadata().getClassName());
 	}
 
 	/**
 	 * Factory method to obtain a {@link SourceClass} from a {@link Class}.
 	 */
-	public SourceClass asSourceClass(Class<?> classType) throws IOException, ClassNotFoundException {
+	public SourceClass asSourceClass(Class<?> classType) throws IOException {
 		try {
 			// Sanity test that we can read annotations, if not fall back to ASM
 			classType.getAnnotations();
 			return new SourceClass(classType);
 		}
 		catch (Throwable ex) {
+			// Enforce ASM via class name resolution
 			return asSourceClass(classType.getName());
 		}
 	}
@@ -537,7 +545,7 @@ class ConfigurationClassParser {
 	/**
 	 * Factory method to obtain {@link SourceClass}s from class names.
 	 */
-	public Collection<SourceClass> asSourceClasses(String[] classNames) throws IOException, ClassNotFoundException {
+	public Collection<SourceClass> asSourceClasses(String[] classNames) throws IOException {
 		List<SourceClass> annotatedClasses = new ArrayList<SourceClass>();
 		for (String className : classNames) {
 			annotatedClasses.add(asSourceClass(className));
@@ -548,10 +556,15 @@ class ConfigurationClassParser {
 	/**
 	 * Factory method to obtain a {@link SourceClass} from a class name.
 	 */
-	public SourceClass asSourceClass(String className) throws IOException, ClassNotFoundException {
+	public SourceClass asSourceClass(String className) throws IOException {
 		if (className.startsWith("java")) {
 			// Never use ASM for core java types
-			return new SourceClass(this.resourceLoader.getClassLoader().loadClass(className));
+			try {
+				return new SourceClass(this.resourceLoader.getClassLoader().loadClass(className));
+			}
+			catch (ClassNotFoundException ex) {
+				throw new NestedIOException("Failed to load class [" + className + "]", ex);
+			}
 		}
 		return new SourceClass(this.metadataReaderFactory.getMetadataReader(className));
 	}
@@ -645,7 +658,7 @@ class ConfigurationClassParser {
 	 */
 	private class SourceClass {
 
-		private final Object source; // Class or MetaDataReader
+		private final Object source;  // Class or MetaDataReader
 
 		private final AnnotationMetadata metadata;
 
@@ -667,7 +680,7 @@ class ConfigurationClassParser {
 			if (this.source instanceof Class<?>) {
 				return (Class<?>) this.source;
 			}
-			String className = ((MetadataReader) source).getClassMetadata().getClassName();
+			String className = ((MetadataReader) this.source).getClassMetadata().getClassName();
 			return resourceLoader.getClassLoader().loadClass(className);
 		}
 
@@ -686,33 +699,35 @@ class ConfigurationClassParser {
 		}
 
 		public Collection<SourceClass> getMemberClasses() throws IOException {
-			List<SourceClass> members = new ArrayList<SourceClass>();
-			if (this.source instanceof Class<?>) {
-				Class<?> sourceClass = (Class<?>) this.source;
-				for (Class<?> declaredClass : sourceClass.getDeclaredClasses()) {
-					try {
+			Object sourceToProcess = this.source;
+			if (sourceToProcess instanceof Class<?>) {
+				Class<?> sourceClass = (Class<?>) sourceToProcess;
+				try {
+					Class<?>[] declaredClasses = sourceClass.getDeclaredClasses();
+					List<SourceClass> members = new ArrayList<SourceClass>(declaredClasses.length);
+					for (Class<?> declaredClass : declaredClasses) {
 						members.add(asSourceClass(declaredClass));
 					}
-					catch (ClassNotFoundException ex) {
-						// ignore
-					}
+					return members;
+				}
+				catch (NoClassDefFoundError err) {
+					// getDeclaredClasses() failed because of non-resolvable dependencies
+					// -> fall back to ASM below
+					sourceToProcess = metadataReaderFactory.getMetadataReader(sourceClass.getName());
 				}
 			}
-			else {
-				MetadataReader sourceReader = (MetadataReader) source;
-				for (String memberClassName : sourceReader.getClassMetadata().getMemberClassNames()) {
-					try {
-						members.add(asSourceClass(memberClassName));
-					}
-					catch (ClassNotFoundException ex) {
-						// ignore
-					}
-				}
+
+			// ASM-based resolution - safe for non-resolvable classes as well
+			MetadataReader sourceReader = (MetadataReader) sourceToProcess;
+			String[] memberClassNames = sourceReader.getClassMetadata().getMemberClassNames();
+			List<SourceClass> members = new ArrayList<SourceClass>(memberClassNames.length);
+			for (String memberClassName : memberClassNames) {
+				members.add(asSourceClass(memberClassName));
 			}
 			return members;
 		}
 
-		public SourceClass getSuperClass() throws IOException, ClassNotFoundException {
+		public SourceClass getSuperClass() throws IOException {
 			if (this.source instanceof Class<?>) {
 				return asSourceClass(((Class<?>) this.source).getSuperclass());
 			}
@@ -733,9 +748,7 @@ class ConfigurationClassParser {
 			return result;
 		}
 
-		public Collection<SourceClass> getAnnotationAttributes(String annotationType, String attribute)
-				throws IOException, ClassNotFoundException {
-
+		public Collection<SourceClass> getAnnotationAttributes(String annotationType, String attribute) throws IOException {
 			Map<String, Object> annotationAttributes = this.metadata.getAnnotationAttributes(annotationType, true);
 			if (annotationAttributes == null || !annotationAttributes.containsKey(attribute)) {
 				return Collections.emptySet();
@@ -748,7 +761,7 @@ class ConfigurationClassParser {
 			return result;
 		}
 
-		private SourceClass getRelated(String className) throws IOException, ClassNotFoundException {
+		private SourceClass getRelated(String className) throws IOException {
 			if (this.source instanceof Class<?>) {
 				try {
 					Class<?> clazz = resourceLoader.getClassLoader().loadClass(className);
@@ -757,7 +770,7 @@ class ConfigurationClassParser {
 				catch (ClassNotFoundException ex) {
 					// Ignore -> fall back to ASM next, except for core java types.
 					if (className.startsWith("java")) {
-						throw ex;
+						throw new NestedIOException("Failed to load class [" + className + "]", ex);
 					}
 					return new SourceClass(metadataReaderFactory.getMetadataReader(className));
 				}

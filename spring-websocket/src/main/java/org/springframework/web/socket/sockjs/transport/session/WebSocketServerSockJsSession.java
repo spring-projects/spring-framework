@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,8 @@ import java.net.URI;
 import java.security.Principal;
 import java.util.List;
 import java.util.Map;
+import java.util.Queue;
+import java.util.concurrent.LinkedBlockingDeque;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.util.Assert;
@@ -34,7 +36,6 @@ import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.adapter.NativeWebSocketSession;
 import org.springframework.web.socket.sockjs.SockJsTransportFailureException;
 import org.springframework.web.socket.sockjs.frame.SockJsFrame;
-import org.springframework.web.socket.sockjs.frame.SockJsMessageCodec;
 import org.springframework.web.socket.sockjs.transport.SockJsServiceConfig;
 
 /**
@@ -46,6 +47,14 @@ import org.springframework.web.socket.sockjs.transport.SockJsServiceConfig;
 public class WebSocketServerSockJsSession extends AbstractSockJsSession implements NativeWebSocketSession {
 
 	private WebSocketSession webSocketSession;
+
+	private volatile boolean openFrameSent;
+
+	private final Queue<String> initSessionCache = new LinkedBlockingDeque<String>();
+
+	private final Object initSessionLock = new Object();
+
+	private volatile boolean disconnected;
 
 
 	public WebSocketServerSockJsSession(String id, SockJsServiceConfig config,
@@ -143,27 +152,34 @@ public class WebSocketServerSockJsSession extends AbstractSockJsSession implemen
 
 
 	public void initializeDelegateSession(WebSocketSession session) {
-		this.webSocketSession = session;
-		try {
-			TextMessage message = new TextMessage(SockJsFrame.openFrame().getContent());
-			this.webSocketSession.sendMessage(message);
-			scheduleHeartbeat();
-			delegateConnectionEstablished();
-		}
-		catch (Exception ex) {
-			tryCloseWithSockJsTransportError(ex, CloseStatus.SERVER_ERROR);
+		synchronized (this.initSessionLock) {
+			this.webSocketSession = session;
+			try {
+				// Let "our" handler know before sending the open frame to the remote handler
+				delegateConnectionEstablished();
+				this.webSocketSession.sendMessage(new TextMessage(SockJsFrame.openFrame().getContent()));
+
+				// Flush any messages cached in the mean time
+				while (!this.initSessionCache.isEmpty()) {
+					writeFrame(SockJsFrame.messageFrame(getMessageCodec(), this.initSessionCache.poll()));
+				}
+				scheduleHeartbeat();
+				this.openFrameSent = true;
+			}
+			catch (Exception ex) {
+				tryCloseWithSockJsTransportError(ex, CloseStatus.SERVER_ERROR);
+			}
 		}
 	}
 
 	@Override
 	public boolean isActive() {
-		return ((this.webSocketSession != null) && this.webSocketSession.isOpen());
+		return (this.webSocketSession != null && this.webSocketSession.isOpen() && !this.disconnected);
 	}
 
 	public void handleMessage(TextMessage message, WebSocketSession wsSession) throws Exception {
 		String payload = message.getPayload();
 		if (StringUtils.isEmpty(payload)) {
-			logger.trace("Ignoring empty message");
 			return;
 		}
 		String[] messages;
@@ -180,17 +196,27 @@ public class WebSocketServerSockJsSession extends AbstractSockJsSession implemen
 
 	@Override
 	public void sendMessageInternal(String message) throws SockJsTransportFailureException {
+
+		// Open frame not sent yet?
+		// If in the session initialization thread, then cache, otherwise wait.
+
+		if (!this.openFrameSent) {
+			synchronized (this.initSessionLock) {
+				if (!this.openFrameSent) {
+					this.initSessionCache.add(message);
+					return;
+				}
+			}
+		}
 		cancelHeartbeat();
-		SockJsMessageCodec messageCodec = getSockJsServiceConfig().getMessageCodec();
-		SockJsFrame frame = SockJsFrame.messageFrame(messageCodec, message);
-		writeFrame(frame);
+		writeFrame(SockJsFrame.messageFrame(getMessageCodec(), message));
 		scheduleHeartbeat();
 	}
 
 	@Override
 	protected void writeFrameInternal(SockJsFrame frame) throws IOException {
 		if (logger.isTraceEnabled()) {
-			logger.trace("Write " + frame);
+			logger.trace("Writing " + frame);
 		}
 		TextMessage message = new TextMessage(frame.getContent());
 		this.webSocketSession.sendMessage(message);
@@ -198,8 +224,11 @@ public class WebSocketServerSockJsSession extends AbstractSockJsSession implemen
 
 	@Override
 	protected void disconnect(CloseStatus status) throws IOException {
-		if (isActive()) {
-			this.webSocketSession.close(status);
+		synchronized (this) {
+			if (isActive()) {
+				this.disconnected = true;
+				this.webSocketSession.close(status);
+			}
 		}
 	}
 

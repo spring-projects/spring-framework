@@ -25,17 +25,17 @@ import java.util.List;
  */
 public class JmsListenerContainerTestFactory implements JmsListenerContainerFactory<MessageListenerTestContainer> {
 
-	private final List<MessageListenerTestContainer> containers =
+	private final List<MessageListenerTestContainer> listenerContainers =
 			new ArrayList<MessageListenerTestContainer>();
 
-	public List<MessageListenerTestContainer> getContainers() {
-		return containers;
+	public List<MessageListenerTestContainer> getListenerContainers() {
+		return listenerContainers;
 	}
 
 	@Override
-	public MessageListenerTestContainer createMessageListenerContainer(JmsListenerEndpoint endpoint) {
+	public MessageListenerTestContainer createListenerContainer(JmsListenerEndpoint endpoint) {
 		MessageListenerTestContainer container = new MessageListenerTestContainer(endpoint);
-		this.containers.add(container);
+		this.listenerContainers.add(container);
 		return container;
 	}
 

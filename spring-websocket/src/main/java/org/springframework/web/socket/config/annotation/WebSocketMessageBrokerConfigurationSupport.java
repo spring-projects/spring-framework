@@ -16,12 +16,17 @@
 
 package org.springframework.web.socket.config.annotation;
 
+import java.util.Collections;
+
+import org.springframework.beans.factory.config.CustomScopeConfigurer;
 import org.springframework.context.annotation.Bean;
+import org.springframework.messaging.simp.SimpSessionScope;
 import org.springframework.messaging.simp.config.AbstractMessageBrokerConfiguration;
-import org.springframework.messaging.simp.user.UserSessionRegistry;
+import org.springframework.messaging.simp.stomp.StompBrokerRelayMessageHandler;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.socket.WebSocketHandler;
+import org.springframework.web.socket.config.WebSocketMessageBrokerStats;
 import org.springframework.web.socket.messaging.SubProtocolWebSocketHandler;
 
 /**
@@ -33,6 +38,7 @@ import org.springframework.web.socket.messaging.SubProtocolWebSocketHandler;
  * also be extended directly.
  *
  * @author Rossen Stoyanchev
+ * @author Artem Bilan
  * @since 4.0
  */
 public abstract class WebSocketMessageBrokerConfigurationSupport extends AbstractMessageBrokerConfiguration {
@@ -43,19 +49,15 @@ public abstract class WebSocketMessageBrokerConfigurationSupport extends Abstrac
 	protected WebSocketMessageBrokerConfigurationSupport() {
 	}
 
+
 	@Bean
 	public HandlerMapping stompWebSocketHandlerMapping() {
 
-		WebSocketHandler webSocketHandler = subProtocolWebSocketHandler();
-		UserSessionRegistry sessionRegistry = userSessionRegistry();
-		WebSocketTransportRegistration transportRegistration = getTransportRegistration();
-		ThreadPoolTaskScheduler taskScheduler = messageBrokerSockJsTaskScheduler();
+		WebMvcStompEndpointRegistry registry = new WebMvcStompEndpointRegistry(subProtocolWebSocketHandler(),
+				getTransportRegistration(), userSessionRegistry(), messageBrokerSockJsTaskScheduler());
 
-		WebMvcStompEndpointRegistry registry = new WebMvcStompEndpointRegistry(
-				webSocketHandler, transportRegistration, sessionRegistry, taskScheduler);
-
+		registry.setApplicationContext(getApplicationContext());
 		registerStompEndpoints(registry);
-
 		return registry.getHandlerMapping();
 	}
 
@@ -74,6 +76,8 @@ public abstract class WebSocketMessageBrokerConfigurationSupport extends Abstrac
 
 	protected void configureWebSocketTransport(WebSocketTransportRegistration registry) {
 	}
+
+	protected abstract void registerStompEndpoints(StompEndpointRegistry registry);
 
 	/**
 	 * The default TaskScheduler to use if none is configured via
@@ -95,11 +99,35 @@ public abstract class WebSocketMessageBrokerConfigurationSupport extends Abstrac
 	@Bean
 	public ThreadPoolTaskScheduler messageBrokerSockJsTaskScheduler() {
 		ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
-		scheduler.setPoolSize(Runtime.getRuntime().availableProcessors());
 		scheduler.setThreadNamePrefix("MessageBrokerSockJS-");
+		scheduler.setPoolSize(Runtime.getRuntime().availableProcessors());
+		scheduler.setRemoveOnCancelPolicy(true);
 		return scheduler;
 	}
 
-	protected abstract void registerStompEndpoints(StompEndpointRegistry registry);
+	@Bean
+	public static CustomScopeConfigurer webSocketScopeConfigurer() {
+		CustomScopeConfigurer configurer = new CustomScopeConfigurer();
+		configurer.setScopes(Collections.<String, Object>singletonMap("websocket", new SimpSessionScope()));
+		return configurer;
+	}
+
+	@Bean
+	public WebSocketMessageBrokerStats webSocketMessageBrokerStats() {
+		StompBrokerRelayMessageHandler brokerRelay =
+				stompBrokerRelayMessageHandler() instanceof StompBrokerRelayMessageHandler ?
+						(StompBrokerRelayMessageHandler) stompBrokerRelayMessageHandler() : null;
+
+		// Ensure STOMP endpoints are registered
+		stompWebSocketHandlerMapping();
+
+		WebSocketMessageBrokerStats stats = new WebSocketMessageBrokerStats();
+		stats.setSubProtocolWebSocketHandler((SubProtocolWebSocketHandler) subProtocolWebSocketHandler());
+		stats.setStompBrokerRelay(brokerRelay);
+		stats.setInboundChannelExecutor(clientInboundChannelExecutor());
+		stats.setOutboundChannelExecutor(clientOutboundChannelExecutor());
+		stats.setSockJsTaskScheduler(messageBrokerSockJsTaskScheduler());
+		return stats;
+	}
 
 }

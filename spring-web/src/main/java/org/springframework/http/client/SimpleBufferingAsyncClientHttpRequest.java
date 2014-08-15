@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,7 +37,7 @@ import org.springframework.util.concurrent.ListenableFuture;
  *
  * @author Arjen Poutsma
  * @since 3.0
- * @see org.springframework.http.client.SimpleClientHttpRequestFactory#createRequest(java.net.URI, org.springframework.http.HttpMethod)
+ * @see org.springframework.http.client.SimpleClientHttpRequestFactory#createRequest
  */
 final class SimpleBufferingAsyncClientHttpRequest extends AbstractBufferingAsyncClientHttpRequest {
 
@@ -47,12 +47,15 @@ final class SimpleBufferingAsyncClientHttpRequest extends AbstractBufferingAsync
 
 	private final AsyncListenableTaskExecutor taskExecutor;
 
+
 	SimpleBufferingAsyncClientHttpRequest(HttpURLConnection connection,
 			boolean outputStreaming, AsyncListenableTaskExecutor taskExecutor) {
+
 		this.connection = connection;
 		this.outputStreaming = outputStreaming;
 		this.taskExecutor = taskExecutor;
 	}
+
 
 	@Override
 	public HttpMethod getMethod() {
@@ -72,7 +75,8 @@ final class SimpleBufferingAsyncClientHttpRequest extends AbstractBufferingAsync
 	@Override
 	protected ListenableFuture<ClientHttpResponse> executeInternal(
 			final HttpHeaders headers, final byte[] bufferedOutput) throws IOException {
-		return taskExecutor.submitListenable(new Callable<ClientHttpResponse>() {
+
+		return this.taskExecutor.submitListenable(new Callable<ClientHttpResponse>() {
 			@Override
 			public ClientHttpResponse call() throws Exception {
 				for (Map.Entry<String, List<String>> entry : headers.entrySet()) {
@@ -81,11 +85,9 @@ final class SimpleBufferingAsyncClientHttpRequest extends AbstractBufferingAsync
 						connection.addRequestProperty(headerName, headerValue);
 					}
 				}
-
 				if (connection.getDoOutput() && outputStreaming) {
 					connection.setFixedLengthStreamingMode(bufferedOutput.length);
 				}
-
 				connection.connect();
 				if (connection.getDoOutput()) {
 					FileCopyUtils.copy(bufferedOutput, connection.getOutputStream());

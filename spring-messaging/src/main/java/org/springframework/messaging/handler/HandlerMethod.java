@@ -21,7 +21,6 @@ import java.lang.reflect.Method;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.core.BridgeMethodResolver;
 import org.springframework.core.MethodParameter;
@@ -44,7 +43,6 @@ import org.springframework.util.ClassUtils;
  */
 public class HandlerMethod {
 
-	/** Logger that is available to subclasses */
 	protected final Log logger = LogFactory.getLog(HandlerMethod.class);
 
 	private final Object bean;
@@ -236,6 +234,11 @@ public class HandlerMethod {
 	@Override
 	public int hashCode() {
 		return this.bean.hashCode() * 31 + this.method.hashCode();
+	}
+
+	public String getShortLogMessage() {
+		int args = method.getParameterTypes().length;
+		return getBeanType().getName() + "#" + this.method.getName() + "[" + args + " args]";
 	}
 
 	@Override

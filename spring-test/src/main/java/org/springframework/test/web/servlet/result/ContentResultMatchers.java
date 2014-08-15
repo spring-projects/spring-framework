@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ import javax.xml.transform.dom.DOMSource;
 
 import org.hamcrest.Matcher;
 import org.springframework.http.MediaType;
+import org.springframework.test.util.JsonExpectationsHelper;
 import org.springframework.test.util.XmlExpectationsHelper;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultMatcher;
@@ -44,6 +45,8 @@ public class ContentResultMatchers {
 
 	private final XmlExpectationsHelper xmlHelper;
 
+	private final JsonExpectationsHelper jsonHelper;
+
 
 	/**
 	 * Protected constructor.
@@ -51,6 +54,7 @@ public class ContentResultMatchers {
 	 */
 	protected ContentResultMatchers() {
 		this.xmlHelper = new XmlExpectationsHelper();
+		this.jsonHelper = new JsonExpectationsHelper();
 	}
 
 	/**
@@ -206,6 +210,28 @@ public class ContentResultMatchers {
 			public void match(MvcResult result) throws Exception {
 				String content = result.getResponse().getContentAsString();
 				xmlHelper.assertSource(content, matcher);
+			}
+		};
+	}
+
+	/**
+	 * Parse the response content and the given string as JSON and assert the two
+	 * are "similar" - i.e. they contain the same attribute-value pairs
+	 * regardless of order and formatting.
+	 *
+	 * <p>Use of this matcher requires the <a
+	 * href="http://jsonassert.skyscreamer.org/">JSONassert<a/> library.
+	 *
+	 * @param jsonContent the expected JSON content
+	 * @since 4.1
+	 */
+	public ResultMatcher json(final String jsonContent) {
+		return new ResultMatcher() {
+
+			@Override
+			public void match(MvcResult result) throws Exception {
+				String content = result.getResponse().getContentAsString();
+				jsonHelper.assertJsonEqual(jsonContent, content);
 			}
 		};
 	}

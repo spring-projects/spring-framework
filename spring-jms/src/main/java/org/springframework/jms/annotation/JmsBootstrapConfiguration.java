@@ -17,10 +17,10 @@
 package org.springframework.jms.annotation;
 
 import org.springframework.beans.factory.config.BeanDefinition;
-import org.springframework.context.annotation.AnnotationConfigUtils;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Role;
+import org.springframework.jms.config.JmsListenerConfigUtils;
 import org.springframework.jms.config.JmsListenerEndpointRegistry;
 
 /**
@@ -40,13 +40,13 @@ import org.springframework.jms.config.JmsListenerEndpointRegistry;
 @Configuration
 public class JmsBootstrapConfiguration {
 
-	@Bean(name = AnnotationConfigUtils.JMS_LISTENER_ANNOTATION_PROCESSOR_BEAN_NAME)
+	@Bean(name = JmsListenerConfigUtils.JMS_LISTENER_ANNOTATION_PROCESSOR_BEAN_NAME)
 	@Role(BeanDefinition.ROLE_INFRASTRUCTURE)
 	public JmsListenerAnnotationBeanPostProcessor jmsListenerAnnotationProcessor() {
 		return new JmsListenerAnnotationBeanPostProcessor();
 	}
 
-	@Bean(name = AnnotationConfigUtils.JMS_LISTENER_ENDPOINT_REGISTRY_BEAN_NAME)
+	@Bean(name = JmsListenerConfigUtils.JMS_LISTENER_ENDPOINT_REGISTRY_BEAN_NAME)
 	public JmsListenerEndpointRegistry defaultJmsListenerEndpointRegistry() {
 		return new JmsListenerEndpointRegistry();
 	}

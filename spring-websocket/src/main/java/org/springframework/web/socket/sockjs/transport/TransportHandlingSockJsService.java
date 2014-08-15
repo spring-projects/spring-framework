@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -156,7 +156,7 @@ public class TransportHandlingSockJsService extends AbstractSockJsService implem
 
 		TransportHandler transportHandler = this.handlers.get(TransportType.WEBSOCKET);
 		if (!(transportHandler instanceof HandshakeHandler)) {
-			logger.warn("No handler for raw WebSocket messages");
+			logger.error("No handler configured for raw WebSocket messages");
 			response.setStatusCode(HttpStatus.NOT_FOUND);
 			return;
 		}
@@ -192,16 +192,14 @@ public class TransportHandlingSockJsService extends AbstractSockJsService implem
 
 		TransportType transportType = TransportType.fromValue(transport);
 		if (transportType == null) {
-			if (logger.isDebugEnabled()) {
-				logger.debug("Unknown transport type: " + transportType);
-			}
+			logger.error("Unknown transport type for " + request.getURI());
 			response.setStatusCode(HttpStatus.NOT_FOUND);
 			return;
 		}
 
 		TransportHandler transportHandler = this.handlers.get(transportType);
 		if (transportHandler == null) {
-			logger.debug("Transport handler not found");
+			logger.error("No TransportHandler for " + request.getURI());
 			response.setStatusCode(HttpStatus.NOT_FOUND);
 			return;
 		}
@@ -238,7 +236,11 @@ public class TransportHandlingSockJsService extends AbstractSockJsService implem
 				}
 				else {
 					response.setStatusCode(HttpStatus.NOT_FOUND);
-					logger.warn("Session not found");
+					if (logger.isDebugEnabled()) {
+						logger.debug("Session not found, sessionId=" + sessionId +
+								". The session may have been closed " +
+								"(e.g. missed heart-beat) while a message was coming in.");
+					}
 					return;
 				}
 			}
@@ -275,17 +277,11 @@ public class TransportHandlingSockJsService extends AbstractSockJsService implem
 		if (session != null) {
 			return session;
 		}
-
 		if (this.sessionCleanupTask == null) {
 			scheduleSessionTask();
 		}
-
-		if (logger.isDebugEnabled()) {
-			logger.debug("Creating new session with session id \"" + sessionId + "\"");
-		}
 		session = sessionFactory.createSession(sessionId, handler, attributes);
 		this.sessions.put(sessionId, session);
-
 		return session;
 	}
 
@@ -295,31 +291,24 @@ public class TransportHandlingSockJsService extends AbstractSockJsService implem
 			if (this.sessionCleanupTask != null) {
 				return;
 			}
+			final List<String> removedSessionIds = new ArrayList<String>();
 			this.sessionCleanupTask = getTaskScheduler().scheduleAtFixedRate(new Runnable() {
 				@Override
 				public void run() {
-					try {
-						int count = sessions.size();
-						if (logger.isTraceEnabled() && (count != 0)) {
-							logger.trace("Checking " + count + " session(s) for timeouts [" + getName() + "]");
-						}
-						for (SockJsSession session : sessions.values()) {
+					for (SockJsSession session : sessions.values()) {
+						try {
 							if (session.getTimeSinceLastActive() > getDisconnectDelay()) {
-								if (logger.isTraceEnabled()) {
-									logger.trace("Removing " + session + " for [" + getName() + "]");
-								}
-								session.close();
 								sessions.remove(session.getId());
+								session.close();
 							}
 						}
-						if (logger.isTraceEnabled() && count > 0) {
-							logger.trace(sessions.size() + " remaining session(s) [" + getName() + "]");
+						catch (Throwable ex) {
+							logger.error("Failed to close " + session, ex);
 						}
 					}
-					catch (Throwable ex) {
-						if (logger.isErrorEnabled()) {
-							logger.error("Failed to complete session timeout checks for [" + getName() + "]", ex);
-						}
+					if (logger.isDebugEnabled() && !removedSessionIds.isEmpty()) {
+						logger.debug("Closed " + removedSessionIds.size() + " sessions " + removedSessionIds);
+						removedSessionIds.clear();
 					}
 				}
 			}, getDisconnectDelay());

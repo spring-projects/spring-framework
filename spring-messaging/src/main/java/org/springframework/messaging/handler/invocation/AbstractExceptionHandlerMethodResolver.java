@@ -94,7 +94,7 @@ public abstract class AbstractExceptionHandlerMethodResolver {
 	 */
 	private Method getMappedMethod(Class<? extends Exception> exceptionType) {
 		List<Class<? extends Throwable>> matches = new ArrayList<Class<? extends Throwable>>();
-		for(Class<? extends Throwable> mappedException : this.mappedMethods.keySet()) {
+		for (Class<? extends Throwable> mappedException : this.mappedMethods.keySet()) {
 			if (mappedException.isAssignableFrom(exceptionType)) {
 				matches.add(mappedException);
 			}

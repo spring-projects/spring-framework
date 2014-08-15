@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,9 +42,11 @@ final class MapToMapConverter implements ConditionalGenericConverter {
 
 	private final ConversionService conversionService;
 
+
 	public MapToMapConverter(ConversionService conversionService) {
 		this.conversionService = conversionService;
 	}
+
 
 	@Override
 	public Set<ConvertiblePair> getConvertibleTypes() {
@@ -78,7 +80,7 @@ final class MapToMapConverter implements ConditionalGenericConverter {
 				copyRequired = true;
 			}
 		}
-		if(!copyRequired) {
+		if (!copyRequired) {
 			return sourceMap;
 		}
 		Map<Object, Object> targetMap = CollectionFactory.createMap(targetType.getType(), sourceMap.size());
@@ -87,6 +89,7 @@ final class MapToMapConverter implements ConditionalGenericConverter {
 		}
 		return targetMap;
 	}
+
 
 	// internal helpers
 
@@ -114,10 +117,12 @@ final class MapToMapConverter implements ConditionalGenericConverter {
 		return this.conversionService.convert(sourceValue, sourceType.getMapValueTypeDescriptor(sourceValue), targetType);
 	}
 
+
 	private static class MapEntry {
 
-		private Object key;
-		private Object value;
+		private final Object key;
+
+		private final Object value;
 
 		public MapEntry(Object key, Object value) {
 			this.key = key;
@@ -125,7 +130,7 @@ final class MapToMapConverter implements ConditionalGenericConverter {
 		}
 
 		public void addToMap(Map<Object, Object> map) {
-			map.put(key, value);
+			map.put(this.key, this.value);
 		}
 	}
 

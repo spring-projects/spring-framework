@@ -134,6 +134,10 @@ public final class MockMvc {
 		MockHttpServletRequest request = requestBuilder.buildRequest(this.servletContext);
 		MockHttpServletResponse response = new MockHttpServletResponse();
 
+		if (requestBuilder instanceof SmartRequestBuilder) {
+			request = ((SmartRequestBuilder) requestBuilder).postProcessRequest(request);
+		}
+
 		final MvcResult mvcResult = new DefaultMvcResult(request, response);
 		request.setAttribute(MVC_RESULT_ATTRIBUTE, mvcResult);
 

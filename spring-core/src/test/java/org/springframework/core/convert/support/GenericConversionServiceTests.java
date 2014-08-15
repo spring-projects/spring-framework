@@ -57,6 +57,7 @@ import static org.junit.Assert.*;
  * @author Keith Donald
  * @author Juergen Hoeller
  * @author Phillip Webb
+ * @author David Haraburda
  */
 public class GenericConversionServiceTests {
 
@@ -759,6 +760,20 @@ public class GenericConversionServiceTests {
 	}
 
 	@Test
+	public void testStringToEnumWithInterfaceConversion() {
+		conversionService.addConverterFactory(new StringToEnumConverterFactory());
+		conversionService.addConverterFactory(new StringToMyEnumInterfaceConverterFactory());
+		assertEquals(MyEnum.A, conversionService.convert("1", MyEnum.class));
+	}
+
+	@Test
+	public void testStringToEnumWithBaseInterfaceConversion() {
+		conversionService.addConverterFactory(new StringToEnumConverterFactory());
+		conversionService.addConverterFactory(new StringToMyEnumBaseInterfaceConverterFactory());
+		assertEquals(MyEnum.A, conversionService.convert("base1", MyEnum.class));
+	}
+
+	@Test
 	public void convertNullAnnotatedStringToString() throws Exception {
 		DefaultConversionService.addDefaultConverters(conversionService);
 		String source = null;
@@ -930,19 +945,34 @@ public class GenericConversionServiceTests {
 		}
 	}
 
+	interface MyEnumBaseInterface {
+		String getBaseCode();
+	}
 
-	interface MyEnumInterface {
-
+	interface MyEnumInterface extends MyEnumBaseInterface {
 		String getCode();
 	}
 
 	public static enum MyEnum implements MyEnumInterface {
 
-		A {
-			@Override
-			public String getCode() {
-				return "1";
-			}
+		A("1"),
+		B("2"),
+		C("3");
+
+		private String code;
+
+		MyEnum(String code) {
+			this.code = code;
+		}
+
+		@Override
+		public String getCode() {
+			return code;
+		}
+
+		@Override
+		public String getBaseCode() {
+			return "base" + code;
 		}
 	}
 
@@ -970,6 +1000,59 @@ public class GenericConversionServiceTests {
 			return source.getCode();
 		}
 	}
+
+	private static class StringToMyEnumInterfaceConverterFactory implements ConverterFactory<String, MyEnumInterface> {
+
+		@SuppressWarnings("unchecked")
+		public <T extends MyEnumInterface> Converter<String, T> getConverter(Class<T> targetType) {
+			return new StringToMyEnumInterfaceConverter(targetType);
+		}
+
+		private static class StringToMyEnumInterfaceConverter<T extends Enum<?> & MyEnumInterface> implements Converter<String, T> {
+			private final Class<T> enumType;
+
+			public StringToMyEnumInterfaceConverter(Class<T> enumType) {
+				this.enumType = enumType;
+			}
+
+			public T convert(String source) {
+				for (T value : enumType.getEnumConstants()) {
+					if (value.getCode().equals(source)) {
+						return value;
+					}
+				}
+				return null;
+			}
+		}
+
+	}
+
+	private static class StringToMyEnumBaseInterfaceConverterFactory implements ConverterFactory<String, MyEnumBaseInterface> {
+
+		@SuppressWarnings("unchecked")
+		public <T extends MyEnumBaseInterface> Converter<String, T> getConverter(Class<T> targetType) {
+			return new StringToMyEnumBaseInterfaceConverter(targetType);
+		}
+
+		private static class StringToMyEnumBaseInterfaceConverter<T extends Enum<?> & MyEnumBaseInterface> implements Converter<String, T> {
+			private final Class<T> enumType;
+
+			public StringToMyEnumBaseInterfaceConverter(Class<T> enumType) {
+				this.enumType = enumType;
+			}
+
+			public T convert(String source) {
+				for (T value : enumType.getEnumConstants()) {
+					if (value.getBaseCode().equals(source)) {
+						return value;
+					}
+				}
+				return null;
+			}
+		}
+
+	}
+
 
 	public static class MyStringToStringCollectionConverter implements Converter<String, Collection<String>> {
 

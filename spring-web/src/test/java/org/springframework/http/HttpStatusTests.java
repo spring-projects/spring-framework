@@ -54,7 +54,7 @@ public class HttpStatusTests {
 		statusCodes.put(304, "NOT_MODIFIED");
 		statusCodes.put(305, "USE_PROXY");
 		statusCodes.put(307, "TEMPORARY_REDIRECT");
-		statusCodes.put(308, "RESUME_INCOMPLETE");
+		statusCodes.put(308, "PERMANENT_REDIRECT");
 
 		statusCodes.put(400, "BAD_REQUEST");
 		statusCodes.put(401, "UNAUTHORIZED");
@@ -69,8 +69,8 @@ public class HttpStatusTests {
 		statusCodes.put(410, "GONE");
 		statusCodes.put(411, "LENGTH_REQUIRED");
 		statusCodes.put(412, "PRECONDITION_FAILED");
-		statusCodes.put(413, "REQUEST_ENTITY_TOO_LARGE");
-		statusCodes.put(414, "REQUEST_URI_TOO_LONG");
+		statusCodes.put(413, "PAYLOAD_TOO_LARGE");
+		statusCodes.put(414, "URI_TOO_LONG");
 		statusCodes.put(415, "UNSUPPORTED_MEDIA_TYPE");
 		statusCodes.put(416, "REQUESTED_RANGE_NOT_SATISFIABLE");
 		statusCodes.put(417, "EXPECTATION_FAILED");
@@ -115,7 +115,7 @@ public class HttpStatusTests {
 
 		for (HttpStatus status : HttpStatus.values()) {
 			int value = status.value();
-			if (value == 302) {
+			if (value == 302 || value == 413 || value == 414) {
 				continue;
 			}
 			assertTrue("Map has no value for [" + value + "]", statusCodes.containsKey(value));

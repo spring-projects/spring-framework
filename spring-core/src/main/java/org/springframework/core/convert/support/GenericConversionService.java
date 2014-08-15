@@ -55,6 +55,7 @@ import org.springframework.util.StringUtils;
  * @author Juergen Hoeller
  * @author Chris Beams
  * @author Phillip Webb
+ * @author David Haraburda
  * @since 3.0
  */
 public class GenericConversionService implements ConfigurableConversionService {
@@ -69,6 +70,20 @@ public class GenericConversionService implements ConfigurableConversionService {
 	 * returned.
 	 */
 	private static final GenericConverter NO_MATCH = new NoOpConverter("NO_MATCH");
+
+
+	/** Java 8's java.util.Optional.empty() */
+	private static Object javaUtilOptionalEmpty = null;
+
+	static {
+		try {
+			Class<?> clazz = ClassUtils.forName("java.util.Optional", GenericConversionService.class.getClassLoader());
+			javaUtilOptionalEmpty = ClassUtils.getMethod(clazz, "empty").invoke(null);
+		}
+		catch (Exception ex) {
+			// Java 8 not available - conversion to Optional not supported then.
+		}
+	}
 
 
 	private final Converters converters = new Converters();
@@ -204,13 +219,18 @@ public class GenericConversionService implements ConfigurableConversionService {
 
 	/**
 	 * Template method to convert a null source.
-	 * <p>Default implementation returns {@code null}.
+	 * <p>Default implementation returns {@code null} or the Java 8
+	 * {@link java.util.Optional#empty()} instance if the target type is
+	 * {@code java.uti.Optional}.
 	 * Subclasses may override to return custom null objects for specific target types.
 	 * @param sourceType the sourceType to convert from
 	 * @param targetType the targetType to convert to
 	 * @return the converted null object
 	 */
 	protected Object convertNullSource(TypeDescriptor sourceType, TypeDescriptor targetType) {
+		if (javaUtilOptionalEmpty != null && targetType.getObjectType().equals(javaUtilOptionalEmpty.getClass())) {
+			return javaUtilOptionalEmpty;
+		}
 		return null;
 	}
 
@@ -548,17 +568,29 @@ public class GenericConversionService implements ConfigurableConversionService {
 				Class<?> candidate = hierarchy.get(i);
 				candidate = (array ? candidate.getComponentType() : ClassUtils.resolvePrimitiveIfNecessary(candidate));
 				Class<?> superclass = candidate.getSuperclass();
-				if (candidate.getSuperclass() != null && superclass != Object.class) {
+				if (candidate.getSuperclass() != null && superclass != Object.class && superclass != Enum.class) {
 					addToClassHierarchy(i + 1, candidate.getSuperclass(), array, hierarchy, visited);
 				}
-				for (Class<?> implementedInterface : candidate.getInterfaces()) {
-					addToClassHierarchy(hierarchy.size(), implementedInterface, array, hierarchy, visited);
-				}
+				addInterfacesToClassHierarchy(candidate, array, hierarchy, visited);
 				i++;
 			}
+
+			if (type.isEnum()) {
+				addToClassHierarchy(hierarchy.size(), Enum.class, array, hierarchy, visited);
+				addToClassHierarchy(hierarchy.size(), Enum.class, false, hierarchy, visited);
+				addInterfacesToClassHierarchy(Enum.class, array, hierarchy, visited);
+			}
+
 			addToClassHierarchy(hierarchy.size(), Object.class, array, hierarchy, visited);
 			addToClassHierarchy(hierarchy.size(), Object.class, false, hierarchy, visited);
 			return hierarchy;
+		}
+
+		private void addInterfacesToClassHierarchy(Class<?> type, boolean asArray,
+				List<Class<?>> hierarchy, Set<Class<?>> visited) {
+			for (Class<?> implementedInterface : type.getInterfaces()) {
+				addToClassHierarchy(hierarchy.size(), implementedInterface, asArray, hierarchy, visited);
+			}
 		}
 
 		private void addToClassHierarchy(int index, Class<?> type, boolean asArray,

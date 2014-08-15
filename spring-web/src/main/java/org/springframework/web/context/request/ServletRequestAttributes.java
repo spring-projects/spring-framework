@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,16 @@
 
 package org.springframework.web.context.request;
 
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.springframework.util.Assert;
+import org.springframework.util.NumberUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.util.WebUtils;
 
@@ -45,8 +49,19 @@ public class ServletRequestAttributes extends AbstractRequestAttributes {
 	public static final String DESTRUCTION_CALLBACK_NAME_PREFIX =
 			ServletRequestAttributes.class.getName() + ".DESTRUCTION_CALLBACK.";
 
+	protected static final Set<Class<?>> immutableValueTypes = new HashSet<Class<?>>(16);
+
+	static {
+		immutableValueTypes.addAll(NumberUtils.STANDARD_NUMBER_TYPES);
+		immutableValueTypes.add(Boolean.class);
+		immutableValueTypes.add(Character.class);
+		immutableValueTypes.add(String.class);
+	}
+
 
 	private final HttpServletRequest request;
+
+	private HttpServletResponse response;
 
 	private volatile HttpSession session;
 
@@ -62,12 +77,29 @@ public class ServletRequestAttributes extends AbstractRequestAttributes {
 		this.request = request;
 	}
 
+	/**
+	 * Create a new ServletRequestAttributes instance for the given request.
+	 * @param request current HTTP request
+	 * @param response current HTTP response (for optional exposure)
+	 */
+	public ServletRequestAttributes(HttpServletRequest request, HttpServletResponse response) {
+		this(request);
+		this.response = response;
+	}
+
 
 	/**
 	 * Exposes the native {@link HttpServletRequest} that we're wrapping.
 	 */
 	public final HttpServletRequest getRequest() {
 		return this.request;
+	}
+
+	/**
+	 * Exposes the native {@link HttpServletResponse} that we're wrapping (if any).
+	 */
+	public final HttpServletResponse getResponse() {
+		return this.response;
 	}
 
 	/**
@@ -228,7 +260,7 @@ public class ServletRequestAttributes extends AbstractRequestAttributes {
 					String name = entry.getKey();
 					Object newValue = entry.getValue();
 					Object oldValue = this.session.getAttribute(name);
-					if (oldValue == newValue) {
+					if (oldValue == newValue && !isImmutableSessionAttribute(name, newValue)) {
 						this.session.setAttribute(name, newValue);
 					}
 				}
@@ -238,6 +270,22 @@ public class ServletRequestAttributes extends AbstractRequestAttributes {
 			}
 		}
 		this.sessionAttributesToUpdate.clear();
+	}
+
+	/**
+	 * Determine whether the given value is to be considered as an immutable session
+	 * attribute, that is, doesn't have to be re-set via {@code session.setAttribute}
+	 * since its value cannot meaningfully change internally.
+	 * <p>The default implementation returns {@code true} for {@code String},
+	 * {@code Character}, {@code Boolean} and standard {@code Number} values.
+	 * @param name the name of the attribute
+	 * @param value the corresponding value to check
+	 * @return {@code true} if the value is to be considered as immutable for the
+	 * purposes of session attribute management; {@code false} otherwise
+	 * @see #updateAccessedSessionAttributes()
+	 */
+	protected boolean isImmutableSessionAttribute(String name, Object value) {
+		return (value == null || immutableValueTypes.contains(value.getClass()));
 	}
 
 	/**

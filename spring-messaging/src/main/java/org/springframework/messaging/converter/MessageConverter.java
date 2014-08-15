@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,7 +38,7 @@ public interface MessageConverter {
 	 * conversion, it should return {@code null}.
 	 * @param message the input message
 	 * @param targetClass the target class for the conversion
-	 * @return the result of the conversion or {@code null} if the converter cannot
+	 * @return the result of the conversion, or {@code null} if the converter cannot
 	 * perform the conversion
 	 */
 	Object fromMessage(Message<?> message, Class<?> targetClass);

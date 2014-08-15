@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -43,6 +44,7 @@ import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.servlet.handler.SimpleUrlHandlerMapping;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
+import org.springframework.web.socket.config.WebSocketMessageBrokerStats;
 import org.springframework.web.socket.handler.TestWebSocketSession;
 import org.springframework.web.socket.messaging.StompSubProtocolHandler;
 import org.springframework.web.socket.messaging.StompTextMessageBuilder;
@@ -50,6 +52,7 @@ import org.springframework.web.socket.messaging.SubProtocolHandler;
 import org.springframework.web.socket.messaging.SubProtocolWebSocketHandler;
 
 import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 /**
  * Test fixture for
@@ -71,7 +74,6 @@ public class WebSocketMessageBrokerConfigurationSupportTests {
 
 	@Test
 	public void handlerMapping() {
-
 		SimpleUrlHandlerMapping hm = (SimpleUrlHandlerMapping) this.config.getBean(HandlerMapping.class);
 		assertEquals(1, hm.getOrder());
 
@@ -82,7 +84,6 @@ public class WebSocketMessageBrokerConfigurationSupportTests {
 
 	@Test
 	public void clientInboundChannelSendMessage() throws Exception {
-
 		TestChannel channel = this.config.getBean("clientInboundChannel", TestChannel.class);
 		SubProtocolWebSocketHandler webSocketHandler = this.config.getBean(SubProtocolWebSocketHandler.class);
 
@@ -128,8 +129,25 @@ public class WebSocketMessageBrokerConfigurationSupportTests {
 		ThreadPoolTaskScheduler taskScheduler =
 				this.config.getBean("messageBrokerSockJsTaskScheduler", ThreadPoolTaskScheduler.class);
 
-		assertEquals(Runtime.getRuntime().availableProcessors(),
-				taskScheduler.getScheduledThreadPoolExecutor().getCorePoolSize());
+		ScheduledThreadPoolExecutor executor = taskScheduler.getScheduledThreadPoolExecutor();
+		assertEquals(Runtime.getRuntime().availableProcessors(), executor.getCorePoolSize());
+		assertTrue(executor.getRemoveOnCancelPolicy());
+	}
+
+	@Test
+	public void webSocketMessageBrokerStats() {
+		String name = "webSocketMessageBrokerStats";
+		WebSocketMessageBrokerStats stats = this.config.getBean(name, WebSocketMessageBrokerStats.class);
+		String actual = stats.toString();
+		String expected = "WebSocketSession\\[0 current WS\\(0\\)-HttpStream\\(0\\)-HttpPoll\\(0\\), " +
+				"0 total, 0 closed abnormally \\(0 connect failure, 0 send limit, 0 transport error\\)\\], " +
+				"stompSubProtocol\\[processed CONNECT\\(0\\)-CONNECTED\\(0\\)-DISCONNECT\\(0\\)\\], " +
+				"stompBrokerRelay\\[null\\], " +
+				"inboundChannel\\[pool size = \\d, active threads = \\d, queued tasks = \\d, completed tasks = \\d\\], " +
+				"outboundChannelpool size = \\d, active threads = \\d, queued tasks = \\d, completed tasks = \\d\\], " +
+				"sockJsScheduler\\[pool size = \\d, active threads = \\d, queued tasks = \\d, completed tasks = \\d\\]";
+
+		assertTrue("\nExpected: " + expected.replace("\\", "") + "\n  Actual: " + actual, actual.matches(expected));
 	}
 
 

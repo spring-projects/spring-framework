@@ -82,7 +82,7 @@
  *   by user config.
  *#
 #macro( springBind $path )
-    #if("$!springHtmlEscape" != "")
+    #if("$!springHtmlEscape"!="")
         #set( $status = $springMacroRequestContext.getBindStatus($path, $springHtmlEscape) )
     #else
         #set( $status = $springMacroRequestContext.getBindStatus($path) )
@@ -112,7 +112,7 @@
  *#
 #macro( springFormInput $path $attributes )
     #springBind($path)
-    <input type="text" id="${status.expression}" name="${status.expression}" value="$!status.value" ${attributes}#springCloseTag()
+    <input type="text" id="#springXmlId(${status.expression})" name="${status.expression}" value="$!status.value" ${attributes}#springCloseTag()
 #end
 
 #**
@@ -129,7 +129,7 @@
  *#
 #macro( springFormPasswordInput $path $attributes )
     #springBind($path)
-    <input type="password" id="${status.expression}" name="${status.expression}" value="" ${attributes}#springCloseTag()
+    <input type="password" id="#springXmlId(${status.expression})" name="${status.expression}" value="" ${attributes}#springCloseTag()
 #end
 
 #**
@@ -145,7 +145,7 @@
  *#
 #macro( springFormHiddenInput $path $attributes )
     #springBind($path)
-    <input type="hidden" id="${status.expression}" name="${status.expression}" value="$!status.value" ${attributes}#springCloseTag()
+    <input type="hidden" id="#springXmlId(${status.expression})" name="${status.expression}" value="$!status.value" ${attributes}#springCloseTag()
 #end
 
 #**
@@ -161,7 +161,7 @@
  *#
 #macro( springFormTextarea $path $attributes )
     #springBind($path)
-    <textarea id="${status.expression}" name="${status.expression}" ${attributes}>$!status.value</textarea>
+    <textarea id="#springXmlId(${status.expression})" name="${status.expression}" ${attributes}>$!status.value</textarea>
 #end
 
 #**
@@ -182,10 +182,10 @@
 *#
 #macro( springFormSingleSelect $path $options $attributes )
     #springBind($path)
-    <select id="${status.expression}" name="${status.expression}" ${attributes}>
+    <select id="#springXmlId(${status.expression})" name="${status.expression}" ${attributes}>
         #foreach($option in $options.keySet())
             <option value="${option}"
-            #if("$!status.value" == "$option") selected="selected" #end>
+            #if("$!status.value"=="$option") selected="selected" #end>
             ${options.get($option)}</option>
         #end
     </select>
@@ -204,11 +204,11 @@
 *#
 #macro( springFormMultiSelect $path $options $attributes )
     #springBind($path)
-    <select multiple="multiple" id="${status.expression}" name="${status.expression}" ${attributes}>
+    <select multiple="multiple" id="#springXmlId(${status.expression})" name="${status.expression}" ${attributes}>
         #foreach($option in $options.keySet())
             <option value="${option}"
             #foreach($item in $status.actualValue)
-                #if($item == $option) selected="selected" #end
+                #if($item==$option) selected="selected" #end
             #end
             >${options.get($option)}</option>
         #end
@@ -231,7 +231,7 @@
     #springBind($path)
     #foreach($option in $options.keySet())
         <input type="radio" name="${status.expression}" value="${option}"
-        #if("$!status.value" == "$option") checked="checked" #end
+        #if("$!status.value"=="$option") checked="checked" #end
         ${attributes}
         #springCloseTag()
         ${options.get($option)} ${separator}
@@ -255,7 +255,7 @@
     #foreach($option in $options.keySet())
         <input type="checkbox" name="${status.expression}" value="${option}" 
         #foreach($item in $status.actualValue)
-            #if($item == $option) checked="checked" #end 
+            #if($item==$option) checked="checked" #end
         #end
         ${attributes} #springCloseTag()
         ${options.get($option)} ${separator}
@@ -274,8 +274,8 @@
 *#
 #macro( springFormCheckbox $path $attributes )
     #springBind($path)
-    <input type="hidden" name="_${status.expression}" value="on"/>
-    <input type="checkbox" id="${status.expression}" name="${status.expression}"#if("$!{status.value}"=="true") checked="checked"#end ${attributes}/>
+    <input type="hidden" name="_#springXmlId(${status.expression})" value="on"/>
+    <input type="checkbox" id="#springXmlId(${status.expression})" name="${status.expression}"#if("$!{status.value}"=="true") checked="checked"#end ${attributes}/>
 #end
 
 #**
@@ -293,10 +293,10 @@
 *#
 #macro( springShowErrors $separator $classOrStyle )
     #foreach($error in $status.errorMessages)
-        #if($classOrStyle == "")
+        #if($classOrStyle=="")
             <b>${error}</b>
         #else
-            #if($classOrStyle.indexOf(":") == -1)
+            #if($classOrStyle.indexOf(":")==-1)
                 #set($attr="class")
             #else
                 #set($attr="style")
@@ -314,9 +314,6 @@
  * depending on the value of a 'springXhtmlCompliant' variable in the
  * template context.
  *#
-#macro( springCloseTag )#if($springXhtmlCompliant)/>#else>#end #end
+#macro( springCloseTag )#if($springXhtmlCompliant)/>#else>#end#end
 
-
-
-
-
+#macro( springXmlId $id)#if($id)$id.replaceAll("\[","").replaceAll("\]","")#else$id#end#end

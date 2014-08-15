@@ -43,13 +43,17 @@ import org.springframework.jdbc.core.BeanPropertyRowMapper;
  * try using column aliases in the SQL statement like "select fname as first_name from customer".
  *
  * <p>Please note that this class is designed to provide convenience rather than high performance.
- * For best performance consider using a custom RowMapper.
+ * For best performance, consider using a custom {@link org.springframework.jdbc.core.RowMapper}
+ * implementation.
  *
  * @author Thomas Risberg
  * @author Juergen Hoeller
  * @since 2.5
  * @see ParameterizedRowMapper
+ * @deprecated along with {@link SimpleJdbcTemplate}, in favor of the regular
+ * {@link org.springframework.jdbc.core.BeanPropertyRowMapper}
  */
+@Deprecated
 public class ParameterizedBeanPropertyRowMapper<T> extends BeanPropertyRowMapper<T>
 		implements ParameterizedRowMapper<T> {
 

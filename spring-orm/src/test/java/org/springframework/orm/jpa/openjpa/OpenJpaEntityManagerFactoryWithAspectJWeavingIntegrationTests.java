@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,16 +16,14 @@
 
 package org.springframework.orm.jpa.openjpa;
 
-import org.junit.Ignore;
 
 /**
- * Test that AspectJ weaving (in particular the currently shipped aspects) work with JPA
- * (see SPR-3873 for more details).
+ * Test that AspectJ weaving (in particular the currently shipped aspects) works
+ * with JPA (see SPR-3873 for more details).
  *
  * @author Ramnivas Laddad
  * @author Chris Beams
  */
-@Ignore("This test causes gradle to hang. See SPR-10333.")
 public class OpenJpaEntityManagerFactoryWithAspectJWeavingIntegrationTests extends OpenJpaEntityManagerFactoryIntegrationTests {
 
 	@Override

@@ -16,16 +16,11 @@
 
 package org.springframework.jms.config;
 
-import static org.junit.Assert.*;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.*;
-
 import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-
 import javax.jms.Destination;
 import javax.jms.InvalidDestinationException;
 import javax.jms.JMSException;
@@ -41,15 +36,16 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.rules.TestName;
 
-import org.springframework.context.support.StaticApplicationContext;
+import org.springframework.beans.factory.support.StaticListableBeanFactory;
 import org.springframework.jms.StubTextMessage;
 import org.springframework.jms.listener.DefaultMessageListenerContainer;
 import org.springframework.jms.listener.MessageListenerContainer;
 import org.springframework.jms.listener.SimpleMessageListenerContainer;
 import org.springframework.jms.listener.adapter.ListenerExecutionFailedException;
 import org.springframework.jms.listener.adapter.MessagingMessageListenerAdapter;
+import org.springframework.jms.listener.adapter.ReplyFailureException;
+import org.springframework.jms.support.JmsHeaders;
 import org.springframework.jms.support.JmsMessageHeaderAccessor;
-import org.springframework.jms.support.converter.JmsHeaders;
 import org.springframework.jms.support.destination.DestinationResolver;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
@@ -59,13 +55,17 @@ import org.springframework.messaging.handler.annotation.Headers;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.handler.annotation.support.MethodArgumentTypeMismatchException;
+import org.springframework.messaging.handler.annotation.support.DefaultMessageHandlerMethodFactory;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
 import org.springframework.validation.annotation.Validated;
 
+import static org.junit.Assert.*;
+import static org.mockito.BDDMockito.*;
+import static org.mockito.Mockito.mock;
+
 /**
- *
  * @author Stephane Nicoll
  */
 public class MethodJmsListenerEndpointTests {
@@ -76,11 +76,12 @@ public class MethodJmsListenerEndpointTests {
 	@Rule
 	public final ExpectedException thrown = ExpectedException.none();
 
-	private final DefaultJmsHandlerMethodFactory factory = new DefaultJmsHandlerMethodFactory();
+	private final DefaultMessageHandlerMethodFactory factory = new DefaultMessageHandlerMethodFactory();
 
 	private final DefaultMessageListenerContainer container = new DefaultMessageListenerContainer();
 
 	private final JmsEndpointSampleBean sample = new JmsEndpointSampleBean();
+
 
 	@Before
 	public void setup() {
@@ -102,7 +103,7 @@ public class MethodJmsListenerEndpointTests {
 		MethodJmsListenerEndpoint endpoint = new MethodJmsListenerEndpoint();
 		endpoint.setBean(this);
 		endpoint.setMethod(getTestMethod());
-		endpoint.setJmsHandlerMethodFactory(factory);
+		endpoint.setMessageHandlerMethodFactory(factory);
 
 		assertNotNull(endpoint.createMessageListener(container));
 	}
@@ -132,6 +133,17 @@ public class MethodJmsListenerEndpointTests {
 		Session session = mock(Session.class);
 		StubTextMessage message = createSimpleJmsTextMessage("my payload");
 		message.setIntProperty("myCounter", 55);
+		listener.onMessage(message, session);
+		assertDefaultListenerMethodInvocation();
+	}
+
+	@Test
+	public void resolveCustomHeaderNameAndPayload() throws JMSException {
+		MessagingMessageListenerAdapter listener = createDefaultInstance(String.class, int.class);
+
+		Session session = mock(Session.class);
+		StubTextMessage message = createSimpleJmsTextMessage("my payload");
+		message.setIntProperty("myCounter", 24);
 		listener.onMessage(message, session);
 		assertDefaultListenerMethodInvocation();
 	}
@@ -275,7 +287,7 @@ public class MethodJmsListenerEndpointTests {
 		Session session = mock(Session.class);
 		given(session.createTextMessage("content")).willReturn(reply);
 
-		thrown.expect(ListenerExecutionFailedException.class);
+		thrown.expect(ReplyFailureException.class);
 		thrown.expectCause(Matchers.isA(InvalidDestinationException.class));
 		listener.onMessage(createSimpleJmsTextMessage("content"), session);
 	}
@@ -292,7 +304,7 @@ public class MethodJmsListenerEndpointTests {
 	public void validatePayloadValid() throws JMSException {
 		String methodName = "validatePayload";
 
-		DefaultJmsHandlerMethodFactory customFactory = new DefaultJmsHandlerMethodFactory();
+		DefaultMessageHandlerMethodFactory customFactory = new DefaultMessageHandlerMethodFactory();
 		customFactory.setValidator(testValidator("invalid value"));
 		initializeFactory(customFactory);
 
@@ -305,7 +317,7 @@ public class MethodJmsListenerEndpointTests {
 
 	@Test
 	public void validatePayloadInvalid() throws JMSException {
-		DefaultJmsHandlerMethodFactory customFactory = new DefaultJmsHandlerMethodFactory();
+		DefaultMessageHandlerMethodFactory customFactory = new DefaultMessageHandlerMethodFactory();
 		customFactory.setValidator(testValidator("invalid value"));
 
 		Method method = getListenerMethod("validatePayload", String.class);
@@ -341,16 +353,16 @@ public class MethodJmsListenerEndpointTests {
 	}
 
 	private MessagingMessageListenerAdapter createInstance(
-			DefaultJmsHandlerMethodFactory factory, Method method, MessageListenerContainer container) {
+			DefaultMessageHandlerMethodFactory factory, Method method, MessageListenerContainer container) {
 		MethodJmsListenerEndpoint endpoint = new MethodJmsListenerEndpoint();
 		endpoint.setBean(sample);
 		endpoint.setMethod(method);
-		endpoint.setJmsHandlerMethodFactory(factory);
+		endpoint.setMessageHandlerMethodFactory(factory);
 		return endpoint.createMessageListener(container);
 	}
 
 	private MessagingMessageListenerAdapter createInstance(
-			DefaultJmsHandlerMethodFactory factory, Method method) {
+			DefaultMessageHandlerMethodFactory factory, Method method) {
 		return createInstance(factory, method, new SimpleMessageListenerContainer());
 	}
 
@@ -363,10 +375,8 @@ public class MethodJmsListenerEndpointTests {
 	}
 
 	private Method getListenerMethod(String methodName, Class<?>... parameterTypes) {
-		Method method = ReflectionUtils.findMethod(JmsEndpointSampleBean.class,
-				methodName, parameterTypes);
-		assertNotNull("no method found with name " + methodName
-				+ " and parameters " + Arrays.toString(parameterTypes));
+		Method method = ReflectionUtils.findMethod(JmsEndpointSampleBean.class, methodName, parameterTypes);
+		assertNotNull("no method found with name " + methodName + " and parameters " + Arrays.toString(parameterTypes));
 		return method;
 	}
 
@@ -382,13 +392,12 @@ public class MethodJmsListenerEndpointTests {
 		assertTrue("Method " + methodName + " should have been invoked", bean.invocations.get(methodName));
 	}
 
-	private void initializeFactory(DefaultJmsHandlerMethodFactory factory) {
-		factory.setApplicationContext(new StaticApplicationContext());
+	private void initializeFactory(DefaultMessageHandlerMethodFactory factory) {
+		factory.setBeanFactory(new StaticListableBeanFactory());
 		factory.afterPropertiesSet();
 	}
 
 	private Validator testValidator(final String invalidValue) {
-
 		return new Validator() {
 			@Override
 			public boolean supports(Class<?> clazz) {
@@ -425,10 +434,16 @@ public class MethodJmsListenerEndpointTests {
 			assertEquals("Wrong message payload", "test", message.getPayload());
 		}
 
-		public void resolveHeaderAndPayload(@Payload String content, @Header("myCounter") int counter) {
+		public void resolveHeaderAndPayload(@Payload String content, @Header int myCounter) {
 			invocations.put("resolveHeaderAndPayload", true);
 			assertEquals("Wrong @Payload resolution", "my payload", content);
-			assertEquals("Wrong @Header resolution", 55, counter);
+			assertEquals("Wrong @Header resolution", 55, myCounter);
+		}
+
+		public void resolveCustomHeaderNameAndPayload(@Payload String content, @Header("myCounter") int counter) {
+			invocations.put("resolveCustomHeaderNameAndPayload", true);
+			assertEquals("Wrong @Payload resolution", "my payload", content);
+			assertEquals("Wrong @Header resolution", 24, counter);
 		}
 
 		public void resolveHeaders(String content, @Headers Map<String, Object> headers) {
@@ -502,11 +517,11 @@ public class MethodJmsListenerEndpointTests {
 
 	}
 
+
 	@SuppressWarnings("serial")
 	static class MyBean implements Serializable {
 		private String name;
 
 	}
-
 
 }

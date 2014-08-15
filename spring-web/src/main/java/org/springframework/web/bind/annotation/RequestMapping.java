@@ -204,6 +204,9 @@ import java.util.concurrent.Callable;
  * <li>A {@link org.springframework.web.context.request.async.DeferredResult}
  * which the application uses to produce a return value in a separate
  * thread of its own choosing, as an alternative to returning a Callable.
+ * <li>A {@link org.springframework.util.concurrent.ListenableFuture}
+ * which the application uses to produce a return value in a separate
+ * thread of its own choosing, as an alternative to returning a Callable.
  * <li>{@code void} if the method handles the response itself (by
  * writing the response content directly, declaring an argument of type
  * {@link javax.servlet.ServletResponse} / {@link javax.servlet.http.HttpServletResponse}
@@ -262,6 +265,16 @@ import java.util.concurrent.Callable;
 @Documented
 @Mapping
 public @interface RequestMapping {
+
+	/**
+	 * Assign a name to this mapping.
+	 * <p><b>Supported at the type level as well as at the method level!</b>
+	 * When used on both levels, a combined name is derived by concatenation
+	 * with "#" as separator.
+	 * @see org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder
+	 * @see org.springframework.web.servlet.handler.HandlerMethodMappingNamingStrategy
+	 */
+	String name() default "";
 
 	/**
 	 * The primary mapping expressed by this annotation.
@@ -370,7 +383,7 @@ public @interface RequestMapping {
 	 * all requests with a {@code Accept} other than "text/plain".
 	 * <p><b>Supported at the type level as well as at the method level!</b>
 	 * When used at the type level, all method-level mappings override
-	 * this consumes restriction.
+	 * this produces restriction.
 	 * @see org.springframework.http.MediaType
 	 */
 	String[] produces() default {};

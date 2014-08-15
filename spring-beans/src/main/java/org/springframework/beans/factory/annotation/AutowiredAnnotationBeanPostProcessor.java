@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
@@ -44,10 +45,12 @@ import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.BeanFactoryUtils;
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.config.DependencyDescriptor;
 import org.springframework.beans.factory.config.InstantiationAwareBeanPostProcessorAdapter;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
+import org.springframework.beans.factory.support.LookupOverride;
 import org.springframework.beans.factory.support.MergedBeanDefinitionPostProcessor;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.core.BridgeMethodResolver;
@@ -96,6 +99,12 @@ import org.springframework.util.StringUtils;
  * thus the latter configuration will override the former for properties wired through
  * both approaches.
  *
+ * <p>In addition to regular injection points as discussed above, this post-processor
+ * also handles Spring's {@link Lookup @Lookup} annotation which identifies lookup
+ * methods to be replaced by the container at runtime. This is essentially a type-safe
+ * version of {@code getBean(Class, args)} and {@code getBean(String, args)},
+ * See {@link Lookup @Lookup's javadoc} for details.
+ *
  * @author Juergen Hoeller
  * @author Mark Fisher
  * @since 2.5
@@ -119,6 +128,9 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 
 	private ConfigurableListableBeanFactory beanFactory;
 
+	private final Set<String> lookupMethodsChecked =
+			Collections.newSetFromMap(new ConcurrentHashMap<String, Boolean>(64));
+
 	private final Map<Class<?>, Constructor<?>[]> candidateConstructorsCache =
 			new ConcurrentHashMap<Class<?>, Constructor<?>[]>(64);
 
@@ -135,9 +147,9 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 	public AutowiredAnnotationBeanPostProcessor() {
 		this.autowiredAnnotationTypes.add(Autowired.class);
 		this.autowiredAnnotationTypes.add(Value.class);
-		ClassLoader cl = AutowiredAnnotationBeanPostProcessor.class.getClassLoader();
 		try {
-			this.autowiredAnnotationTypes.add((Class<? extends Annotation>) cl.loadClass("javax.inject.Inject"));
+			this.autowiredAnnotationTypes.add((Class<? extends Annotation>)
+					ClassUtils.forName("javax.inject.Inject", AutowiredAnnotationBeanPostProcessor.class.getClassLoader()));
 			logger.info("JSR-330 'javax.inject.Inject' annotation found and supported for autowiring");
 		}
 		catch (ClassNotFoundException ex) {
@@ -224,7 +236,28 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 	}
 
 	@Override
-	public Constructor<?>[] determineCandidateConstructors(Class<?> beanClass, String beanName) throws BeansException {
+	public Constructor<?>[] determineCandidateConstructors(Class<?> beanClass, final String beanName) throws BeansException {
+		if (!this.lookupMethodsChecked.contains(beanName)) {
+			ReflectionUtils.doWithMethods(beanClass, new ReflectionUtils.MethodCallback() {
+				@Override
+				public void doWith(Method method) throws IllegalArgumentException, IllegalAccessException {
+					Lookup lookup = method.getAnnotation(Lookup.class);
+					if (lookup != null) {
+						LookupOverride override = new LookupOverride(method, lookup.value());
+						try {
+							RootBeanDefinition mbd = (RootBeanDefinition) beanFactory.getMergedBeanDefinition(beanName);
+							mbd.getMethodOverrides().addOverride(override);
+						}
+						catch (NoSuchBeanDefinitionException ex) {
+							throw new BeanCreationException(beanName,
+									"Cannot apply @Lookup to beans without corresponding bean definition");
+						}
+					}
+				}
+			});
+			this.lookupMethodsChecked.add(beanName);
+		}
+
 		// Quick check on the concurrent map first, with minimal locking.
 		Constructor<?>[] candidateConstructors = this.candidateConstructorsCache.get(beanClass);
 		if (candidateConstructors == null) {
@@ -239,7 +272,8 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 						AnnotationAttributes annotation = findAutowiredAnnotation(candidate);
 						if (annotation != null) {
 							if (requiredConstructor != null) {
-								throw new BeanCreationException("Invalid autowire-marked constructor: " + candidate +
+								throw new BeanCreationException(beanName,
+										"Invalid autowire-marked constructor: " + candidate +
 										". Found another constructor with 'required' Autowired annotation: " +
 										requiredConstructor);
 							}
@@ -250,10 +284,10 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 							boolean required = determineRequiredStatus(annotation);
 							if (required) {
 								if (!candidates.isEmpty()) {
-									throw new BeanCreationException(
+									throw new BeanCreationException(beanName,
 											"Invalid autowire-marked constructors: " + candidates +
 											". Found another constructor with 'required' Autowired annotation: " +
-											requiredConstructor);
+											candidate);
 								}
 								requiredConstructor = candidate;
 							}

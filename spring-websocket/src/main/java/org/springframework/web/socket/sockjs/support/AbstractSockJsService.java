@@ -90,35 +90,48 @@ public abstract class AbstractSockJsService implements SockJsService {
 
 
 	/**
-	 * A unique name for the service mainly for logging purposes.
+	 * A scheduler instance to use for scheduling heart-beat messages.
+	 */
+	public TaskScheduler getTaskScheduler() {
+		return this.taskScheduler;
+	}
+
+	/**
+	 * Set a unique name for this service (mainly for logging purposes).
 	 */
 	public void setName(String name) {
 		this.name = name;
 	}
 
+	/**
+	 * Return the unique name associated with this service.
+	 */
 	public String getName() {
 		return this.name;
 	}
 
 	/**
-	 * Transports which don't support cross-domain communication natively (e.g.
-	 * "eventsource", "htmlfile") rely on serving a simple page (using the
-	 * "foreign" domain) from an invisible iframe. Code run from this iframe
-	 * doesn't need to worry about cross-domain issues since it is running from
-	 * a domain local to the SockJS server. The iframe does need to load the
-	 * SockJS javascript client library and this option allows configuring that url.
-	 * For more details see the reference documentation.
-	 *
+	 * Transports with no native cross-domain communication (e.g. "eventsource",
+	 * "htmlfile") must get a simple page from the "foreign" domain in an invisible
+	 * iframe so that code in the iframe can run from  a domain local to the SockJS
+	 * server. Since the iframe needs to load the SockJS javascript client library,
+	 * this property allows specifying where to load it from.
 	 * <p>By default this is set to point to
 	 * "https://d1fxtkz8shb9d2.cloudfront.net/sockjs-0.3.4.min.js".
+	 * However, it can also be set to point to a URL served by the application.
+	 * <p>Note that it's possible to specify a relative URL in which case the URL
+	 * must be relative to the iframe URL. For example assuming a SockJS endpoint
+	 * mapped to "/sockjs", and resulting iframe URL "/sockjs/iframe.html", then the
+	 * the relative URL must start with "../../" to traverse up to the location
+	 * above the SockJS mapping. In case of a prefix-based Servlet mapping one more
+	 * traversal may be needed.
 	 */
 	public void setSockJsClientLibraryUrl(String clientLibraryUrl) {
 		this.clientLibraryUrl = clientLibraryUrl;
 	}
 
 	/**
-	 * The URL to the SockJS JavaScript client library.
-	 * @see #setSockJsClientLibraryUrl(String)
+	 * Return he URL to the SockJS JavaScript client library.
 	 */
 	public String getSockJsClientLibraryUrl() {
 		return this.clientLibraryUrl;
@@ -128,7 +141,7 @@ public abstract class AbstractSockJsService implements SockJsService {
 	 * Streaming transports save responses on the client side and don't free
 	 * memory used by delivered messages. Such transports need to recycle the
 	 * connection once in a while. This property sets a minimum number of bytes
-	 * that can be send over a single HTTP streaming request before it will be
+	 * that can be sent over a single HTTP streaming request before it will be
 	 * closed. After that client will open a new request. Setting this value to
 	 * one effectively disables streaming and will make streaming transports to
 	 * behave like polling transports.
@@ -138,6 +151,10 @@ public abstract class AbstractSockJsService implements SockJsService {
 		this.streamBytesLimit = streamBytesLimit;
 	}
 
+	/**
+	 * Return the minimum number of bytes that can be sent over a single HTTP
+	 * streaming request before it will be closed.
+	 */
 	public int getStreamBytesLimit() {
 		return this.streamBytesLimit;
 	}
@@ -147,16 +164,13 @@ public abstract class AbstractSockJsService implements SockJsService {
 	 * clients with a "cookie_needed" boolean property that indicates whether the use of a
 	 * JSESSIONID cookie is required for the application to function correctly, e.g. for
 	 * load balancing or in Java Servlet containers for the use of an HTTP session.
-	 *
 	 * <p>This is especially important for IE 8,9 that support XDomainRequest -- a modified
 	 * AJAX/XHR -- that can do requests across domains but does not send any cookies. In
 	 * those cases, the SockJS client prefers the "iframe-htmlfile" transport over
 	 * "xdr-streaming" in order to be able to send cookies.
-	 *
 	 * <p>The SockJS protocol also expects a SockJS service to echo back the JSESSIONID
 	 * cookie when this property is set to true. However, when running in a Servlet
 	 * container this is not necessary since the container takes care of it.
-	 *
 	 * <p>The default value is "true" to maximize the chance for applications to work
 	 * correctly in IE 8,9 with support for cookies (and the JSESSIONID cookie in
 	 * particular). However, an application can choose to set this to "false" if
@@ -167,32 +181,28 @@ public abstract class AbstractSockJsService implements SockJsService {
 	}
 
 	/**
-	 * Whether JSESSIONID cookie is required for the application to function. For
-	 * more detail see {@link #setSessionCookieNeeded(boolean)}.
+	 * Return whether the JSESSIONID cookie is required for the application to function.
 	 */
 	public boolean isSessionCookieNeeded() {
 		return this.sessionCookieNeeded;
 	}
 
 	/**
-	 * The amount of time in milliseconds when the server has not sent any
-	 * messages and after which the server should send a heartbeat frame to the
-	 * client in order to keep the connection from breaking.
+	 * Specify the amount of time in milliseconds when the server has not sent
+	 * any messages and after which the server should send a heartbeat frame
+	 * to the client in order to keep the connection from breaking.
 	 * <p>The default value is 25,000 (25 seconds).
 	 */
 	public void setHeartbeatTime(long heartbeatTime) {
 		this.heartbeatTime = heartbeatTime;
 	}
 
+	/**
+	 * Return the amount of time in milliseconds when the server has not sent
+	 * any messages.
+	 */
 	public long getHeartbeatTime() {
 		return this.heartbeatTime;
-	}
-
-	/**
-	 * A scheduler instance to use for scheduling heart-beat messages.
-	 */
-	public TaskScheduler getTaskScheduler() {
-		return this.taskScheduler;
 	}
 
 	/**
@@ -213,12 +223,12 @@ public abstract class AbstractSockJsService implements SockJsService {
 	}
 
 	/**
-	 * The number of server-to-client messages that a session can cache while waiting for
-	 * the next HTTP polling request from the client. All HTTP transports use this
+	 * The number of server-to-client messages that a session can cache while waiting
+	 * for the next HTTP polling request from the client. All HTTP transports use this
 	 * property since even streaming transports recycle HTTP requests periodically.
-	 * <p>The amount of time between HTTP requests should be relatively brief and will not
-	 * exceed the allows disconnect delay (see
-	 * {@link #setDisconnectDelay(long)}), 5 seconds by default.
+	 * <p>The amount of time between HTTP requests should be relatively brief and will
+	 * not exceed the allows disconnect delay (see {@link #setDisconnectDelay(long)});
+	 * 5 seconds by default.
 	 * <p>The default size is 100.
 	 */
 	public void setHttpMessageCacheSize(int httpMessageCacheSize) {
@@ -233,7 +243,7 @@ public abstract class AbstractSockJsService implements SockJsService {
 	}
 
 	/**
-	 * Some load balancers don't support WebSocket. This option can be used to
+	 * Some load balancers do not support WebSocket. This option can be used to
 	 * disable the WebSocket transport on the server side.
 	 * <p>The default value is "true".
 	 */
@@ -242,8 +252,7 @@ public abstract class AbstractSockJsService implements SockJsService {
 	}
 
 	/**
-	 * Whether WebSocket transport is enabled.
-	 * @see #setWebSocketEnabled(boolean)
+	 * Return whether WebSocket transport is enabled.
 	 */
 	public boolean isWebSocketEnabled() {
 		return this.webSocketEnabled;
@@ -251,57 +260,54 @@ public abstract class AbstractSockJsService implements SockJsService {
 
 
 	/**
-	 * {@inheritDoc}
-	 * <p>This method determines the SockJS path and handles SockJS static URLs. Session
-	 * URLs and raw WebSocket requests are delegated to abstract methods.
+	 * This method determines the SockJS path and handles SockJS static URLs.
+	 * Session URLs and raw WebSocket requests are delegated to abstract methods.
 	 */
 	@Override
 	public final void handleRequest(ServerHttpRequest request, ServerHttpResponse response,
 			String sockJsPath, WebSocketHandler wsHandler) throws SockJsException {
 
 		if (sockJsPath == null) {
-			if (logger.isWarnEnabled()) {
-				logger.warn("No SockJS path provided, URI=\"" + request.getURI());
-			}
+			logger.error("Expected SockJS path. Failing request: " + request.getURI());
 			response.setStatusCode(HttpStatus.NOT_FOUND);
 			return;
-		}
-
-		if (logger.isDebugEnabled()) {
-			logger.debug(request.getMethod() + " with SockJS path [" + sockJsPath + "]");
 		}
 
 		try {
 			request.getHeaders();
 		}
 		catch (InvalidMediaTypeException ex) {
-			if (logger.isWarnEnabled()) {
-				logger.warn("Invalid media type ignored: " + ex.getMediaType());
-			}
+			// As per SockJS protocol content-type can be ignored (it's always json)
 		}
 
+		String requestInfo = logger.isDebugEnabled() ? request.getMethod() + " " + request.getURI() : "";
 		try {
 			if (sockJsPath.equals("") || sockJsPath.equals("/")) {
+				logger.debug(requestInfo);
 				response.getHeaders().setContentType(new MediaType("text", "plain", Charset.forName("UTF-8")));
 				response.getBody().write("Welcome to SockJS!\n".getBytes("UTF-8"));
 			}
 			else if (sockJsPath.equals("/info")) {
+				logger.debug(requestInfo);
 				this.infoHandler.handle(request, response);
 			}
 			else if (sockJsPath.matches("/iframe[0-9-.a-z_]*.html")) {
+				logger.debug(requestInfo);
 				this.iframeHandler.handle(request, response);
 			}
 			else if (sockJsPath.equals("/websocket")) {
 				if (isWebSocketEnabled()) {
+					logger.debug(requestInfo);
 					handleRawWebSocketRequest(request, response, wsHandler);
+				}
+				else if (logger.isDebugEnabled()) {
+					logger.debug("WebSocket disabled, ignoring " + requestInfo);
 				}
 			}
 			else {
 				String[] pathSegments = StringUtils.tokenizeToStringArray(sockJsPath.substring(1), "/");
 				if (pathSegments.length != 3) {
-					if (logger.isWarnEnabled()) {
-						logger.warn("Expected \"/{server}/{session}/{transport}\" but got \"" + sockJsPath + "\"");
-					}
+					logger.error("Ignoring invalid transport request " + requestInfo);
 					response.setStatusCode(HttpStatus.NOT_FOUND);
 					return;
 				}
@@ -309,7 +315,13 @@ public abstract class AbstractSockJsService implements SockJsService {
 				String sessionId = pathSegments[1];
 				String transport = pathSegments[2];
 
-				if (!validateRequest(serverId, sessionId, transport)) {
+				if (!isWebSocketEnabled() && transport.equals("websocket")) {
+					logger.debug("WebSocket transport is disabled, ignoring " + requestInfo);
+					response.setStatusCode(HttpStatus.NOT_FOUND);
+					return;
+				}
+				else if (!validateRequest(serverId, sessionId, transport)) {
+					logger.error("Ignoring transport request " + requestInfo);
 					response.setStatusCode(HttpStatus.NOT_FOUND);
 					return;
 				}
@@ -324,21 +336,14 @@ public abstract class AbstractSockJsService implements SockJsService {
 
 	protected boolean validateRequest(String serverId, String sessionId, String transport) {
 		if (!StringUtils.hasText(serverId) || !StringUtils.hasText(sessionId) || !StringUtils.hasText(transport)) {
-			logger.warn("Empty server, session, or transport value");
+			logger.error("No server, session, or transport path segment");
 			return false;
 		}
-
 		// Server and session id's must not contain "."
 		if (serverId.contains(".") || sessionId.contains(".")) {
-			logger.warn("Server or session contain a \".\"");
+			logger.error("Either server or session contains a \".\" which is not allowed by SockJS protocol.");
 			return false;
 		}
-
-		if (!isWebSocketEnabled() && transport.equals("websocket")) {
-			logger.warn("Websocket transport is disabled");
-			return false;
-		}
-
 		return true;
 	}
 
@@ -357,19 +362,20 @@ public abstract class AbstractSockJsService implements SockJsService {
 
 
 	protected void addCorsHeaders(ServerHttpRequest request, ServerHttpResponse response, HttpMethod... httpMethods) {
-
 		HttpHeaders requestHeaders = request.getHeaders();
 		HttpHeaders responseHeaders = response.getHeaders();
-
-		// Perhaps a CORS Filter has already added this?
-		if (!CollectionUtils.isEmpty(responseHeaders.get("Access-Control-Allow-Origin"))) {
-			logger.debug("Skip adding CORS headers, response already contains \"Access-Control-Allow-Origin\"");
-			return;
+		try {
+			// Perhaps a CORS Filter has already added this?
+			if (!CollectionUtils.isEmpty(responseHeaders.get("Access-Control-Allow-Origin"))) {
+				return;
+			}
+		}
+		catch (NullPointerException npe) {
+			// See SPR-11919 and https://issues.jboss.org/browse/WFLY-3474
 		}
 
 		String origin = requestHeaders.getFirst("origin");
-		origin = ((origin == null) || origin.equals("null")) ? "*" : origin;
-
+		origin = (origin == null || origin.equals("null") ? "*" : origin);
 		responseHeaders.add("Access-Control-Allow-Origin", origin);
 		responseHeaders.add("Access-Control-Allow-Credentials", "true");
 
@@ -396,7 +402,7 @@ public abstract class AbstractSockJsService implements SockJsService {
 	}
 
 	protected void sendMethodNotAllowed(ServerHttpResponse response, HttpMethod... httpMethods) {
-		logger.debug("Sending Method Not Allowed (405)");
+		logger.error("Sending Method Not Allowed (405)");
 		response.setStatusCode(HttpStatus.METHOD_NOT_ALLOWED);
 		response.getHeaders().setAllow(new HashSet<HttpMethod>(Arrays.asList(httpMethods)));
 	}
@@ -432,6 +438,7 @@ public abstract class AbstractSockJsService implements SockJsService {
 			}
 		}
 	};
+
 
 	private final SockJsRequestHandler iframeHandler = new SockJsRequestHandler() {
 

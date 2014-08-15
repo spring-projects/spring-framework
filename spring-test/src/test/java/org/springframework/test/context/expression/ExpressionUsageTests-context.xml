@@ -30,7 +30,7 @@
 	</bean>
 
 	<!-- spr5847 -->
-	
+
 	<bean id="andy"
 		class="org.springframework.test.context.expression.ExpressionUsageTests$Foo">
 		<property name="name" value="#{properties.username}" />

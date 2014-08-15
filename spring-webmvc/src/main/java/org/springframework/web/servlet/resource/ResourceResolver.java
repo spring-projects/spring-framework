@@ -44,7 +44,7 @@ public interface ResourceResolver {
 	 * @param request the current request
 	 * @param requestPath the portion of the request path to use
 	 * @param locations the locations to search in when looking up resources
-	 * @param chain the chain of resolvers to delegate to
+	 * @param chain the chain of remaining resolvers to delegate to
 	 * @return the resolved resource or {@code null} if unresolved
 	 */
 	Resource resolveResource(HttpServletRequest request, String requestPath, List<? extends Resource> locations,

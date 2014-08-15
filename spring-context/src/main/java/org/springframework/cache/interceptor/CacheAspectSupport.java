@@ -17,6 +17,7 @@
 package org.springframework.cache.interceptor;
 
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedList;
@@ -69,7 +70,8 @@ import org.springframework.util.StringUtils;
  * @author Stephane Nicoll
  * @since 3.1
  */
-public abstract class CacheAspectSupport implements InitializingBean, ApplicationContextAware {
+public abstract class CacheAspectSupport extends AbstractCacheInvoker
+		implements InitializingBean, ApplicationContextAware {
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
@@ -168,6 +170,7 @@ public abstract class CacheAspectSupport implements InitializingBean, Applicatio
 				"to use or set the cache manager to create a default cache resolver based on it.");
 		Assert.state(this.cacheOperationSource != null, "The 'cacheOperationSources' property is required: " +
 				"If there are no cacheable methods, then don't use a cache aspect.");
+		Assert.state(this.getErrorHandler() != null, "The 'errorHandler' is required.");
 		Assert.state(this.applicationContext != null, "The application context was not injected as it should.");
 		this.initialized = true;
 	}
@@ -282,6 +285,20 @@ public abstract class CacheAspectSupport implements InitializingBean, Applicatio
 		return invoker.invoke();
 	}
 
+	/**
+	 * Execute the underlying operation (typically in case of cache miss) and return
+	 * the result of the invocation. If an exception occurs it will be wrapped in
+	 * a {@link CacheOperationInvoker.ThrowableWrapper}: the exception can be handled
+	 * or modified but it <em>must</em> be wrapped in a
+	 * {@link CacheOperationInvoker.ThrowableWrapper} as well.
+	 * @param invoker the invoker handling the operation being cached
+	 * @return the result of the invocation
+	 * @see CacheOperationInvoker#invoke()
+	 */
+	protected Object invokeOperation(CacheOperationInvoker invoker) {
+		return invoker.invoke();
+	}
+
 	private Class<?> getTargetClass(Object target) {
 		Class<?> targetClass = AopProxyUtils.ultimateTargetClass(target);
 		if (targetClass == null && target != null) {
@@ -306,13 +323,13 @@ public abstract class CacheAspectSupport implements InitializingBean, Applicatio
 		Cache.ValueWrapper result = null;
 
 		// If there are no put requests, just use the cache hit
-		if (cachePutRequests.isEmpty() && contexts.get(CachePutOperation.class).isEmpty()) {
+		if (cachePutRequests.isEmpty() && !hasCachePut(contexts)) {
 			result = cacheHit;
 		}
 
 		// Invoke the method if don't have a cache hit
 		if (result == null) {
-			result = new SimpleValueWrapper(invoker.invoke());
+			result = new SimpleValueWrapper(invokeOperation(invoker));
 		}
 
 		// Collect any explicit @CachePuts
@@ -329,6 +346,27 @@ public abstract class CacheAspectSupport implements InitializingBean, Applicatio
 		return result.get();
 	}
 
+	private boolean hasCachePut(CacheOperationContexts contexts) {
+		// Evaluate the conditions *without* the result object because we don't have it yet.
+		Collection<CacheOperationContext> cachePutContexts = contexts.get(CachePutOperation.class);
+		Collection<CacheOperationContext> excluded = new ArrayList<CacheOperationContext>();
+		for (CacheOperationContext context : cachePutContexts) {
+			try {
+				if (!context.isConditionPassing(ExpressionEvaluator.RESULT_UNAVAILABLE)) {
+	                excluded.add(context);
+				}
+			}
+			catch (VariableNotAvailableException e) {
+				// Ignoring failure due to missing result, consider the cache put has
+				// to proceed
+			}
+		}
+		// check if  all puts have been excluded by condition
+		return cachePutContexts.size() != excluded.size();
+
+
+	}
+
 	private void processCacheEvicts(Collection<CacheOperationContext> contexts, boolean beforeInvocation, Object result) {
 		for (CacheOperationContext context : contexts) {
 			CacheEvictOperation operation = (CacheEvictOperation) context.metadata.operation;
@@ -343,14 +381,14 @@ public abstract class CacheAspectSupport implements InitializingBean, Applicatio
 		for (Cache cache : context.getCaches()) {
 			if (operation.isCacheWide()) {
 				logInvalidating(context, operation, null);
-				cache.clear();
+				doClear(cache);
 			}
 			else {
 				if (key == null) {
 					key = context.generateKey(result);
 				}
 				logInvalidating(context, operation, key);
-				cache.evict(key);
+				doEvict(cache, key);
 			}
 		}
 	}
@@ -402,7 +440,7 @@ public abstract class CacheAspectSupport implements InitializingBean, Applicatio
 
 	private Cache.ValueWrapper findInCaches(CacheOperationContext context, Object key) {
 		for (Cache cache : context.getCaches()) {
-			Cache.ValueWrapper wrapper = cache.get(key);
+			Cache.ValueWrapper wrapper = doGet(cache, key);
 			if (wrapper != null) {
 				return wrapper;
 			}
@@ -571,7 +609,7 @@ public abstract class CacheAspectSupport implements InitializingBean, Applicatio
 	}
 
 
-	private static class CachePutRequest {
+	private class CachePutRequest {
 
 		private final CacheOperationContext context;
 
@@ -585,7 +623,7 @@ public abstract class CacheAspectSupport implements InitializingBean, Applicatio
 		public void apply(Object result) {
 			if (this.context.canPutToCache(result)) {
 				for (Cache cache : this.context.getCaches()) {
-					cache.put(this.key, result);
+					doPut(cache, this.key, result);
 				}
 			}
 		}

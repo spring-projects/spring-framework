@@ -17,17 +17,22 @@
 package org.springframework.web.socket.messaging;
 
 import java.util.Arrays;
+import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.beans.DirectFieldAccessor;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.SubscribableChannel;
+import org.springframework.web.socket.CloseStatus;
+import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.handler.ConcurrentWebSocketSessionDecorator;
 import org.springframework.web.socket.handler.TestWebSocketSession;
 
-import static org.mockito.Mockito.*;
+import static org.junit.Assert.*;
+import static org.mockito.BDDMockito.*;
 
 /**
  * Test fixture for {@link SubProtocolWebSocketHandler}.
@@ -56,11 +61,9 @@ public class SubProtocolWebSocketHandlerTests {
 	@Before
 	public void setup() {
 		MockitoAnnotations.initMocks(this);
-
 		this.webSocketHandler = new SubProtocolWebSocketHandler(this.inClientChannel, this.outClientChannel);
-		when(stompHandler.getSupportedProtocols()).thenReturn(Arrays.asList("v10.stomp", "v11.stomp", "v12.stomp"));
-		when(mqttHandler.getSupportedProtocols()).thenReturn(Arrays.asList("MQTT"));
-
+		given(stompHandler.getSupportedProtocols()).willReturn(Arrays.asList("v10.stomp", "v11.stomp", "v12.stomp"));
+		given(mqttHandler.getSupportedProtocols()).willReturn(Arrays.asList("MQTT"));
 		this.session = new TestWebSocketSession();
 		this.session.setId("1");
 	}
@@ -110,7 +113,7 @@ public class SubProtocolWebSocketHandlerTests {
 	@Test
 	public void emptySubProtocol() throws Exception {
 		this.session.setAcceptedProtocol("");
-		this.webSocketHandler.setDefaultProtocolHandler(defaultHandler);
+		this.webSocketHandler.setDefaultProtocolHandler(this.defaultHandler);
 		this.webSocketHandler.afterConnectionEstablished(session);
 
 		verify(this.defaultHandler).afterSessionStarted(
@@ -139,5 +142,34 @@ public class SubProtocolWebSocketHandlerTests {
 		this.webSocketHandler.setProtocolHandlers(Arrays.asList(stompHandler, mqttHandler));
 		this.webSocketHandler.afterConnectionEstablished(session);
 	}
+
+	@Test
+	public void checkSession() throws Exception {
+		TestWebSocketSession session1 = new TestWebSocketSession("id1");
+		TestWebSocketSession session2 = new TestWebSocketSession("id2");
+		session1.setAcceptedProtocol("v12.stomp");
+		session2.setAcceptedProtocol("v12.stomp");
+
+		this.webSocketHandler.setProtocolHandlers(Arrays.asList(this.stompHandler));
+		this.webSocketHandler.afterConnectionEstablished(session1);
+		this.webSocketHandler.afterConnectionEstablished(session2);
+		session1.setOpen(true);
+		session2.setOpen(true);
+
+		long sixtyOneSecondsAgo = System.currentTimeMillis() - 61 * 1000;
+		new DirectFieldAccessor(this.webSocketHandler).setPropertyValue("lastSessionCheckTime", sixtyOneSecondsAgo);
+		Map<String, ?> sessions = (Map<String, ?>) new DirectFieldAccessor(this.webSocketHandler).getPropertyValue("sessions");
+		new DirectFieldAccessor(sessions.get("id1")).setPropertyValue("createTime", sixtyOneSecondsAgo);
+		new DirectFieldAccessor(sessions.get("id2")).setPropertyValue("createTime", sixtyOneSecondsAgo);
+
+		this.webSocketHandler.start();
+		this.webSocketHandler.handleMessage(session1, new TextMessage("foo"));
+
+		assertTrue(session1.isOpen());
+		assertFalse(session2.isOpen());
+		assertNull(session1.getCloseStatus());
+		assertEquals(CloseStatus.SESSION_NOT_RELIABLE, session2.getCloseStatus());
+	}
+
 
 }

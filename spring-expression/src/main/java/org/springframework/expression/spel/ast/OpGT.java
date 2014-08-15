@@ -18,7 +18,9 @@ package org.springframework.expression.spel.ast;
 
 import java.math.BigDecimal;
 
+import org.springframework.asm.MethodVisitor;
 import org.springframework.expression.EvaluationException;
+import org.springframework.expression.spel.CodeFlow;
 import org.springframework.expression.spel.ExpressionState;
 import org.springframework.expression.spel.support.BooleanTypedValue;
 import org.springframework.util.NumberUtils;
@@ -35,6 +37,7 @@ public class OpGT extends Operator {
 
 	public OpGT(int pos, SpelNodeImpl... operands) {
 		super(">", pos, operands);
+		this.exitTypeDescriptor = "Z";
 	}
 
 	@Override
@@ -42,6 +45,9 @@ public class OpGT extends Operator {
 		Object left = getLeftOperand().getValueInternal(state).getValue();
 		Object right = getRightOperand().getValueInternal(state).getValue();
 
+		leftActualDescriptor = CodeFlow.toDescriptorFromObject(left);
+		rightActualDescriptor = CodeFlow.toDescriptorFromObject(right);
+		
 		if (left instanceof Number && right instanceof Number) {
 			Number leftNumber = (Number) left;
 			Number rightNumber = (Number) right;
@@ -75,4 +81,13 @@ public class OpGT extends Operator {
 		return BooleanTypedValue.forValue(state.getTypeComparator().compare(left, right) > 0);
 	}
 
+	@Override
+	public boolean isCompilable() {
+		return isCompilableOperatorUsingNumerics();
+	}
+	
+	@Override
+	public void generateCode(MethodVisitor mv, CodeFlow codeflow) {
+		generateComparisonCode(mv, codeflow, IFLE, IF_ICMPLE);
+	}
 }

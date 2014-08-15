@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -10,6 +10,7 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
+
 package org.springframework.test.web.servlet.samples.standalone;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -53,7 +54,7 @@ public class FilterTests {
 		standaloneSetup(new PersonController())
 			.addFilters(new ContinueFilter()).build()
 			.perform(post("/persons").param("name", "Andy"))
-				.andExpect(status().isMovedTemporarily())
+				.andExpect(status().isFound())
 				.andExpect(redirectedUrl("/person/1"))
 				.andExpect(model().size(1))
 				.andExpect(model().attributeExists("id"))
@@ -90,7 +91,7 @@ public class FilterTests {
 		standaloneSetup(new PersonController())
 			.addFilter(new RedirectFilter(), "/p", "/person").build()
 			.perform(post("/persons").param("name", "Andy"))
-				.andExpect(status().isMovedTemporarily())
+				.andExpect(status().isFound())
 				.andExpect(redirectedUrl("/person/1"))
 				.andExpect(model().size(1))
 				.andExpect(model().attributeExists("id"))

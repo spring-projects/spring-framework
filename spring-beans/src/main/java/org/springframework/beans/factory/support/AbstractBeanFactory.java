@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -124,7 +124,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	/** Resolution strategy for expressions in bean definition values */
 	private BeanExpressionResolver beanExpressionResolver;
 
-	/** Spring 3.0 ConversionService to use instead of PropertyEditors */
+	/** Spring ConversionService to use instead of PropertyEditors */
 	private ConversionService conversionService;
 
 	/** Custom PropertyEditorRegistrars to apply to the beans of this factory */
@@ -160,9 +160,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	private final Map<String, RootBeanDefinition> mergedBeanDefinitions =
 			new ConcurrentHashMap<String, RootBeanDefinition>(64);
 
-	/**
-	 * Names of beans that have already been created at least once
-	 */
+	/** Names of beans that have already been created at least once */
 	private final Set<String> alreadyCreated = Collections.newSetFromMap(new ConcurrentHashMap<String, Boolean>(64));
 
 	/** Names of beans that are currently in creation */
@@ -287,8 +285,8 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 				if (dependsOn != null) {
 					for (String dependsOnBean : dependsOn) {
 						if (isDependent(beanName, dependsOnBean)) {
-							throw new BeanCreationException("Circular depends-on relationship between '" +
-									beanName + "' and '" + dependsOnBean + "'");
+							throw new BeanCreationException(mbd.getResourceDescription(), beanName,
+									"Circular depends-on relationship between '" + beanName + "' and '" + dependsOnBean + "'");
 						}
 						registerDependentBean(dependsOnBean, beanName);
 						getBean(dependsOnBean);
@@ -1276,7 +1274,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 		// Check validity of the usage of the args parameter. This can
 		// only be used for prototypes constructed via a factory method.
 		if (args != null && !mbd.isPrototype()) {
-			throw new BeanDefinitionStoreException(
+			throw new BeanDefinitionStoreException(mbd.getResourceDescription(), beanName,
 					"Can only specify arguments for the getBean method when referring to a prototype bean definition");
 		}
 	}
@@ -1627,8 +1625,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	 * instantiation within this class is performed by this method.
 	 * @param beanName the name of the bean
 	 * @param mbd the merged bean definition for the bean
-	 * @param args arguments to use if creating a prototype using explicit arguments to a
-	 * static factory method. This parameter must be {@code null} except in this case.
+	 * @param args arguments to use if creating a prototype using explicit arguments
 	 * @return a new instance of the bean
 	 * @throws BeanCreationException if the bean could not be created
 	 */

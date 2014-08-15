@@ -38,7 +38,8 @@ import org.springframework.web.socket.sockjs.transport.handler.WebSocketTranspor
 import static org.junit.Assert.*;
 
 /**
- * Test fixture for {@link org.springframework.web.socket.config.annotation.AbstractWebSocketHandlerRegistration}.
+ * Test fixture for
+ * {@link org.springframework.web.socket.config.annotation.AbstractWebSocketHandlerRegistration}.
  *
  * @author Rossen Stoyanchev
  */
@@ -57,98 +58,92 @@ public class WebSocketHandlerRegistrationTests {
 
 	@Test
 	public void minimal() {
-
-		WebSocketHandler wsHandler = new TextWebSocketHandler();
-		this.registration.addHandler(wsHandler, "/foo", "/bar");
+		WebSocketHandler handler = new TextWebSocketHandler();
+		this.registration.addHandler(handler, "/foo", "/bar");
 
 		List<Mapping> mappings = this.registration.getMappings();
 		assertEquals(2, mappings.size());
 
 		Mapping m1 = mappings.get(0);
-		assertEquals(wsHandler, m1.webSocketHandler);
+		assertEquals(handler, m1.webSocketHandler);
 		assertEquals("/foo", m1.path);
 
 		Mapping m2 = mappings.get(1);
-		assertEquals(wsHandler, m2.webSocketHandler);
+		assertEquals(handler, m2.webSocketHandler);
 		assertEquals("/bar", m2.path);
 	}
 
 	@Test
 	public void interceptors() {
-
-		WebSocketHandler wsHandler = new TextWebSocketHandler();
+		WebSocketHandler handler = new TextWebSocketHandler();
 		HttpSessionHandshakeInterceptor interceptor = new HttpSessionHandshakeInterceptor();
 
-		this.registration.addHandler(wsHandler, "/foo").addInterceptors(interceptor);
+		this.registration.addHandler(handler, "/foo").addInterceptors(interceptor);
 
 		List<Mapping> mappings = this.registration.getMappings();
 		assertEquals(1, mappings.size());
 
-		Mapping m1 = mappings.get(0);
-		assertEquals(wsHandler, m1.webSocketHandler);
-		assertEquals("/foo", m1.path);
-		assertArrayEquals(new HandshakeInterceptor[] { interceptor }, m1.interceptors);
+		Mapping mapping = mappings.get(0);
+		assertEquals(handler, mapping.webSocketHandler);
+		assertEquals("/foo", mapping.path);
+		assertArrayEquals(new HandshakeInterceptor[] {interceptor}, mapping.interceptors);
 	}
 
 	@Test
 	public void interceptorsPassedToSockJsRegistration() {
-
-		WebSocketHandler wsHandler = new TextWebSocketHandler();
+		WebSocketHandler handler = new TextWebSocketHandler();
 		HttpSessionHandshakeInterceptor interceptor = new HttpSessionHandshakeInterceptor();
 
-		this.registration.addHandler(wsHandler, "/foo").addInterceptors(interceptor).withSockJS();
+		this.registration.addHandler(handler, "/foo").addInterceptors(interceptor).withSockJS();
 
 		List<Mapping> mappings = this.registration.getMappings();
 		assertEquals(1, mappings.size());
 
-		Mapping m1 = mappings.get(0);
-		assertEquals(wsHandler, m1.webSocketHandler);
-		assertEquals("/foo/**", m1.path);
-		assertNotNull(m1.sockJsService);
-		assertEquals(Arrays.asList(interceptor), m1.sockJsService.getHandshakeInterceptors());
+		Mapping mapping = mappings.get(0);
+		assertEquals(handler, mapping.webSocketHandler);
+		assertEquals("/foo/**", mapping.path);
+		assertNotNull(mapping.sockJsService);
+		assertEquals(Arrays.asList(interceptor), mapping.sockJsService.getHandshakeInterceptors());
 	}
 
 	@Test
 	public void handshakeHandler() {
-
-		WebSocketHandler wsHandler = new TextWebSocketHandler();
+		WebSocketHandler handler = new TextWebSocketHandler();
 		HandshakeHandler handshakeHandler = new DefaultHandshakeHandler();
 
-		this.registration.addHandler(wsHandler, "/foo").setHandshakeHandler(handshakeHandler);
+		this.registration.addHandler(handler, "/foo").setHandshakeHandler(handshakeHandler);
 
 		List<Mapping> mappings = this.registration.getMappings();
 		assertEquals(1, mappings.size());
 
-		Mapping m1 = mappings.get(0);
-		assertEquals(wsHandler, m1.webSocketHandler);
-		assertEquals("/foo", m1.path);
-		assertSame(handshakeHandler, m1.handshakeHandler);
+		Mapping mapping = mappings.get(0);
+		assertEquals(handler, mapping.webSocketHandler);
+		assertEquals("/foo", mapping.path);
+		assertSame(handshakeHandler, mapping.handshakeHandler);
 	}
 
 	@Test
 	public void handshakeHandlerPassedToSockJsRegistration() {
-
-		WebSocketHandler wsHandler = new TextWebSocketHandler();
+		WebSocketHandler handler = new TextWebSocketHandler();
 		HandshakeHandler handshakeHandler = new DefaultHandshakeHandler();
 
-		this.registration.addHandler(wsHandler, "/foo").setHandshakeHandler(handshakeHandler).withSockJS();
+		this.registration.addHandler(handler, "/foo").setHandshakeHandler(handshakeHandler).withSockJS();
 
 		List<Mapping> mappings = this.registration.getMappings();
 		assertEquals(1, mappings.size());
 
-		Mapping m1 = mappings.get(0);
-		assertEquals(wsHandler, m1.webSocketHandler);
-		assertEquals("/foo/**", m1.path);
-		assertNotNull(m1.sockJsService);
+		Mapping mapping = mappings.get(0);
+		assertEquals(handler, mapping.webSocketHandler);
+		assertEquals("/foo/**", mapping.path);
+		assertNotNull(mapping.sockJsService);
 
 		WebSocketTransportHandler transportHandler =
-				(WebSocketTransportHandler) m1.sockJsService.getTransportHandlers().get(TransportType.WEBSOCKET);
+				(WebSocketTransportHandler) mapping.sockJsService.getTransportHandlers().get(TransportType.WEBSOCKET);
 		assertSame(handshakeHandler, transportHandler.getHandshakeHandler());
 	}
 
 
 	private static class TestWebSocketHandlerRegistration  extends AbstractWebSocketHandlerRegistration<List<Mapping>> {
-
 
 		public TestWebSocketHandlerRegistration(TaskScheduler sockJsTaskScheduler) {
 			super(sockJsTaskScheduler);
@@ -167,14 +162,12 @@ public class WebSocketHandlerRegistrationTests {
 		}
 
 		@Override
-		protected void addWebSocketHandlerMapping(List<Mapping> mappings,
-				WebSocketHandler wsHandler, HandshakeHandler handshakeHandler,
-				HandshakeInterceptor[] interceptors, String path) {
+		protected void addWebSocketHandlerMapping(List<Mapping> mappings, WebSocketHandler handler,
+				HandshakeHandler handshakeHandler, HandshakeInterceptor[] interceptors, String path) {
 
-			mappings.add(new Mapping(wsHandler, path, handshakeHandler, interceptors));
+			mappings.add(new Mapping(handler, path, handshakeHandler, interceptors));
 		}
 	}
-
 
 	private static class Mapping {
 

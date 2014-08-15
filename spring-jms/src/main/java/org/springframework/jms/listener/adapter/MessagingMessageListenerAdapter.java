@@ -16,16 +16,14 @@
 
 package org.springframework.jms.listener.adapter;
 
-import java.util.Map;
-
 import javax.jms.JMSException;
 import javax.jms.Session;
 
-import org.springframework.jms.support.converter.JmsHeaderMapper;
+import org.springframework.jms.support.JmsHeaderMapper;
+import org.springframework.jms.support.converter.MessageConversionException;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessagingException;
 import org.springframework.messaging.handler.invocation.InvocableHandlerMethod;
-import org.springframework.messaging.support.MessageBuilder;
 
 /**
  * A {@link javax.jms.MessageListener} adapter that invokes a configurable
@@ -58,46 +56,55 @@ public class MessagingMessageListenerAdapter extends AbstractAdaptableMessageLis
 		this.handlerMethod = handlerMethod;
 	}
 
+
 	@Override
 	public void onMessage(javax.jms.Message jmsMessage, Session session) throws JMSException {
-		try {
-			Message<?> message = toMessagingMessage(jmsMessage);
-			if (logger.isDebugEnabled()) {
-				logger.debug("Processing [" + message + "]");
-			}
-			Object result = handlerMethod.invoke(message, jmsMessage, session);
-			if (result != null) {
-				handleResult(result, jmsMessage, session);
-			}
-			else {
-				logger.trace("No result object given - no result to handle");
-			}
+		Message<?> message = toMessagingMessage(jmsMessage);
+		if (logger.isDebugEnabled()) {
+			logger.debug("Processing [" + message + "]");
 		}
-		catch (MessagingException e) {
-			throw new ListenerExecutionFailedException(createMessagingErrorMessage("Listener method could not " +
-					"be invoked with the incoming message"), e);
+		Object result = invokeHandler(jmsMessage, session, message);
+		if (result != null) {
+			handleResult(result, jmsMessage, session);
 		}
-		catch (Exception e) {
-			throw new ListenerExecutionFailedException("Listener method '"
-					+ handlerMethod.getMethod().toGenericString() + "' threw exception", e);
+		else {
+			logger.trace("No result object given - no result to handle");
 		}
 	}
 
 	@SuppressWarnings("unchecked")
-	protected Message<?> toMessagingMessage(javax.jms.Message jmsMessage) throws JMSException {
-		Map<String, Object> mappedHeaders = getHeaderMapper().toHeaders(jmsMessage);
-		Object convertedObject = extractMessage(jmsMessage);
-		MessageBuilder<Object> builder = (convertedObject instanceof org.springframework.messaging.Message) ?
-				MessageBuilder.fromMessage((org.springframework.messaging.Message<Object>) convertedObject) :
-				MessageBuilder.withPayload(convertedObject);
-		return builder.copyHeadersIfAbsent(mappedHeaders).build();
+	protected Message<?> toMessagingMessage(javax.jms.Message jmsMessage) {
+		try {
+			return (Message<?>) getMessagingMessageConverter().fromMessage(jmsMessage);
+		}
+		catch (JMSException ex) {
+			throw new MessageConversionException("Could not unmarshal message", ex);
+		}
+	}
+
+	/**
+	 * Invoke the handler, wrapping any exception to a {@link ListenerExecutionFailedException}
+	 * with a dedicated error message.
+	 */
+	private Object invokeHandler(javax.jms.Message jmsMessage, Session session, Message<?> message) {
+		try {
+			return this.handlerMethod.invoke(message, jmsMessage, session);
+		}
+		catch (MessagingException ex) {
+			throw new ListenerExecutionFailedException(createMessagingErrorMessage("Listener method could not " +
+					"be invoked with the incoming message"), ex);
+		}
+		catch (Exception ex) {
+			throw new ListenerExecutionFailedException("Listener method '" +
+					this.handlerMethod.getMethod().toGenericString() + "' threw exception", ex);
+		}
 	}
 
 	private String createMessagingErrorMessage(String description) {
 		StringBuilder sb = new StringBuilder(description).append("\n")
 				.append("Endpoint handler details:\n")
-				.append("Method [").append(handlerMethod.getMethod()).append("]\n")
-				.append("Bean [").append(handlerMethod.getBean()).append("]\n");
+				.append("Method [").append(this.handlerMethod.getMethod()).append("]\n")
+				.append("Bean [").append(this.handlerMethod.getBean()).append("]\n");
 		return sb.toString();
 	}
 

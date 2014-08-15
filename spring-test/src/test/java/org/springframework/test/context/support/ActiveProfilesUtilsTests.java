@@ -39,7 +39,7 @@ import static org.springframework.test.context.support.ActiveProfilesUtils.*;
  * @author Michail Nikolaev
  * @since 3.1
  */
-public class ActiveProfilesUtilsTests extends AbstractContextLoaderUtilsTests {
+public class ActiveProfilesUtilsTests extends AbstractContextConfigurationUtilsTests {
 
 	private void assertResolvedProfiles(Class<?> testClass, String... expected) {
 		assertNotNull(testClass);

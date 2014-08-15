@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -68,6 +68,27 @@ public class AntPathMatcher implements PathMatcher {
 
 	final Map<String, AntPathStringMatcher> stringMatcherCache = new ConcurrentHashMap<String, AntPathStringMatcher>(256);
 
+	private PathSeparatorPatternCache pathSeparatorPatternCache = new PathSeparatorPatternCache(DEFAULT_PATH_SEPARATOR);
+
+
+	/**
+	 * Create a new instance with the {@link #DEFAULT_PATH_SEPARATOR}.
+	 */
+	public AntPathMatcher() {
+
+	}
+
+	/**
+	 * A convenience alternative constructor to use with a custom path separator.
+	 * @param pathSeparator the path separator to use, must not be {@code null}.
+	 * @since 4.1
+	 */
+	public AntPathMatcher(String pathSeparator) {
+		Assert.notNull(pathSeparator, "'pathSeparator' is required");
+		this.pathSeparator = pathSeparator;
+		this.pathSeparatorPatternCache = new PathSeparatorPatternCache(pathSeparator);
+	}
+
 
 	/**
 	 * Set the path separator to use for pattern parsing.
@@ -75,6 +96,7 @@ public class AntPathMatcher implements PathMatcher {
 	 */
 	public void setPathSeparator(String pathSeparator) {
 		this.pathSeparator = (pathSeparator != null ? pathSeparator : DEFAULT_PATH_SEPARATOR);
+		this.pathSeparatorPatternCache = new PathSeparatorPatternCache(this.pathSeparator);
 	}
 
 	/**
@@ -430,20 +452,20 @@ public class AntPathMatcher implements PathMatcher {
 
 		// /hotels/* + /booking -> /hotels/booking
 		// /hotels/* + booking -> /hotels/booking
-		if (pattern1.endsWith("/*")) {
-			return slashConcat(pattern1.substring(0, pattern1.length() - 2), pattern2);
+		if (pattern1.endsWith(this.pathSeparatorPatternCache.getEndsOnWildCard())) {
+			return concat(pattern1.substring(0, pattern1.length() - 2), pattern2);
 		}
 
 		// /hotels/** + /booking -> /hotels/**/booking
 		// /hotels/** + booking -> /hotels/**/booking
-		if (pattern1.endsWith("/**")) {
-			return slashConcat(pattern1, pattern2);
+		if (pattern1.endsWith(this.pathSeparatorPatternCache.getEndsOnDoubleWildCard())) {
+			return concat(pattern1, pattern2);
 		}
 
 		int starDotPos1 = pattern1.indexOf("*.");
-		if (pattern1ContainsUriVar || starDotPos1 == -1) {
+		if (pattern1ContainsUriVar || starDotPos1 == -1 || this.pathSeparator.equals(".")) {
 			// simply concatenate the two patterns
-			return slashConcat(pattern1, pattern2);
+			return concat(pattern1, pattern2);
 		}
 		String extension1 = pattern1.substring(starDotPos1 + 1);
 		int dotPos2 = pattern2.indexOf('.');
@@ -453,11 +475,11 @@ public class AntPathMatcher implements PathMatcher {
 		return fileName2 + extension;
 	}
 
-	private String slashConcat(String path1, String path2) {
-		if (path1.endsWith("/") || path2.startsWith("/")) {
+	private String concat(String path1, String path2) {
+		if (path1.endsWith(this.pathSeparator) || path2.startsWith(this.pathSeparator)) {
 			return path1 + path2;
 		}
-		return path1 + "/" + path2;
+		return path1 + this.pathSeparator + path2;
 	}
 
 	/**
@@ -565,6 +587,16 @@ public class AntPathMatcher implements PathMatcher {
 	/**
 	 * The default {@link Comparator} implementation returned by
 	 * {@link #getPatternComparator(String)}.
+	 * <p>In order, the most "generic" pattern is determined by the following:
+	 * <ul>
+	 *     <li>if it's null or a capture all pattern (i.e. it is equal to "/**")</li>
+	 *     <li>if the other pattern is an actual match</li>
+	 *     <li>if it's a catch-all pattern (i.e. it ends with "**"</li>
+	 *     <li>if it's got more "*" than the other pattern</li>
+	 *     <li>if it's got more "{foo}" than the other pattern</li>
+	 *     <li>if it's shorter than the other pattern</li>
+	 * </ul>
+	 * </p>
 	 */
 	protected static class AntPatternComparator implements Comparator<String> {
 
@@ -574,15 +606,26 @@ public class AntPathMatcher implements PathMatcher {
 			this.path = path;
 		}
 
+		/**
+		 * Compare two patterns to determine which should match first, i.e. which is the most specific
+		 * regarding the current path.
+		 *
+		 * @return a negative integer, zero, or a positive integer as pattern1 is
+		 * more specific, equally specific, or less specific than pattern2.
+		 */
 		@Override
 		public int compare(String pattern1, String pattern2) {
-			if (isNullOrCaptureAllPattern(pattern1) && isNullOrCaptureAllPattern(pattern2)) {
+
+			PatternInfo info1 = new PatternInfo(pattern1);
+			PatternInfo info2 = new PatternInfo(pattern2);
+
+			if (info1.isLeastSpecific() && info2.isLeastSpecific()) {
 				return 0;
 			}
-			else if (isNullOrCaptureAllPattern(pattern1)) {
+			else if (info1.isLeastSpecific()) {
 				return 1;
 			}
-			else if (isNullOrCaptureAllPattern(pattern2)) {
+			else if (info2.isLeastSpecific()) {
 				return -1;
 			}
 
@@ -598,59 +641,155 @@ public class AntPathMatcher implements PathMatcher {
 				return 1;
 			}
 
-			int wildCardCount1 = getWildCardCount(pattern1);
-			int wildCardCount2 = getWildCardCount(pattern2);
-
-			int bracketCount1 = StringUtils.countOccurrencesOf(pattern1, "{");
-			int bracketCount2 = StringUtils.countOccurrencesOf(pattern2, "{");
-
-			int totalCount1 = wildCardCount1 + bracketCount1;
-			int totalCount2 = wildCardCount2 + bracketCount2;
-
-			if (totalCount1 != totalCount2) {
-				return totalCount1 - totalCount2;
+			if (info1.isPrefixPattern() && info2.getDoubleWildcards() == 0) {
+				return 1;
 			}
-
-			int pattern1Length = getPatternLength(pattern1);
-			int pattern2Length = getPatternLength(pattern2);
-
-			if (pattern1Length != pattern2Length) {
-				return pattern2Length - pattern1Length;
-			}
-
-			if (wildCardCount1 < wildCardCount2) {
+			else if (info2.isPrefixPattern() && info1.getDoubleWildcards() == 0) {
 				return -1;
 			}
-			else if (wildCardCount2 < wildCardCount1) {
+
+			if (info1.getTotalCount() != info2.getTotalCount()) {
+				return info1.getTotalCount() - info2.getTotalCount();
+			}
+
+			if (info1.getLength() != info2.getLength()) {
+				return info2.getLength() - info1.getLength();
+			}
+
+			if (info1.getSingleWildcards() < info2.getSingleWildcards()) {
+				return -1;
+			}
+			else if (info2.getSingleWildcards() < info1.getSingleWildcards()) {
 				return 1;
 			}
 
-			if (bracketCount1 < bracketCount2) {
+			if (info1.getUriVars() < info2.getUriVars()) {
 				return -1;
 			}
-			else if (bracketCount2 < bracketCount1) {
+			else if (info2.getUriVars() < info1.getUriVars()) {
 				return 1;
 			}
 
 			return 0;
 		}
 
-		private boolean isNullOrCaptureAllPattern(String pattern) {
-			return pattern == null || "/**".equals(pattern);
-		}
-
-		private int getWildCardCount(String pattern) {
-			if (pattern.endsWith(".*")) {
-				pattern = pattern.substring(0, pattern.length() - 2);
-			}
-			return StringUtils.countOccurrencesOf(pattern, "*");
-		}
-
 		/**
-		 * Returns the length of the given pattern, where template variables are considered to be 1 long.
+		 * Value class that holds information about the pattern, e.g. number of
+		 * occurrences of "*", "**", and "{" pattern elements.
 		 */
-		private int getPatternLength(String pattern) {
-			return VARIABLE_PATTERN.matcher(pattern).replaceAll("#").length();
+		private static class PatternInfo {
+
+			private final String pattern;
+
+			private int uriVars;
+
+			private int singleWildcards;
+
+			private int doubleWildcards;
+
+			private boolean catchAllPattern;
+
+			private boolean prefixPattern;
+
+			private Integer length;
+
+
+			public PatternInfo(String pattern) {
+				this.pattern = pattern;
+				if (this.pattern != null) {
+					initCounters();
+					this.catchAllPattern = this.pattern.equals("/**");
+					this.prefixPattern = !this.catchAllPattern && this.pattern.endsWith("/**");
+				}
+				if (this.uriVars == 0) {
+					this.length = (this.pattern != null ? this.pattern.length() : 0);
+				}
+			}
+
+			protected void initCounters() {
+				int pos = 0;
+				while (pos < this.pattern.length()) {
+					if (this.pattern.charAt(pos) == '{') {
+						this.uriVars++;
+						pos++;
+					}
+					else if (this.pattern.charAt(pos) == '*') {
+						if (pos + 1 < this.pattern.length() && this.pattern.charAt(pos + 1) == '*') {
+							this.doubleWildcards++;
+							pos += 2;
+						}
+						else if (!this.pattern.substring(pos - 1).equals(".*")) {
+							this.singleWildcards++;
+							pos++;
+						}
+						else {
+							pos++;
+						}
+					}
+					else {
+						pos++;
+					}
+				}
+			}
+
+			public int getUriVars() {
+				return this.uriVars;
+			}
+
+			public int getSingleWildcards() {
+				return this.singleWildcards;
+			}
+
+			public int getDoubleWildcards() {
+				return this.doubleWildcards;
+			}
+
+			public boolean isLeastSpecific() {
+				return (this.pattern == null || this.catchAllPattern);
+			}
+
+			public boolean isPrefixPattern() {
+				return this.prefixPattern;
+			}
+
+			public int getTotalCount() {
+				return this.uriVars + this.singleWildcards + (2 * this.doubleWildcards);
+			}
+
+			/**
+			 * Returns the length of the given pattern, where template variables are considered to be 1 long.
+			 */
+			public int getLength() {
+				if (this.length == null) {
+					this.length = VARIABLE_PATTERN.matcher(this.pattern).replaceAll("#").length();
+				}
+				return this.length;
+			}
+		}
+	}
+
+
+	/**
+	 * A simple cache for patterns that depend on the configured path separator.
+	 */
+	private static class PathSeparatorPatternCache {
+
+		private final String endsOnWildCard;
+
+		private final String endsOnDoubleWildCard;
+
+
+		private PathSeparatorPatternCache(String pathSeparator) {
+			this.endsOnWildCard = pathSeparator + "*";
+			this.endsOnDoubleWildCard = pathSeparator + "**";
+		}
+
+		public String getEndsOnWildCard() {
+			return this.endsOnWildCard;
+		}
+
+		public String getEndsOnDoubleWildCard() {
+			return this.endsOnDoubleWildCard;
 		}
 	}
 

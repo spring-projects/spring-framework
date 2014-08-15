@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,12 +21,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.asm.MethodVisitor;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.expression.AccessException;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.PropertyAccessor;
 import org.springframework.expression.TypedValue;
+import org.springframework.expression.spel.CodeFlow;
+import org.springframework.expression.spel.CompilablePropertyAccessor;
 import org.springframework.expression.spel.ExpressionState;
 import org.springframework.expression.spel.SpelEvaluationException;
 import org.springframework.expression.spel.SpelMessage;
@@ -75,8 +78,12 @@ public class PropertyOrFieldReference extends SpelNodeImpl {
 
 	@Override
 	public TypedValue getValueInternal(ExpressionState state) throws EvaluationException {
-		return getValueInternal(state.getActiveContextObject(), state.getEvaluationContext(),
-				state.getConfiguration().isAutoGrowNullReferences());
+		TypedValue tv = getValueInternal(state.getActiveContextObject(), state.getEvaluationContext(), state.getConfiguration().isAutoGrowNullReferences());
+		if (this.cachedReadAccessor instanceof CompilablePropertyAccessor) {
+			CompilablePropertyAccessor accessor = (CompilablePropertyAccessor) this.cachedReadAccessor;
+			this.exitTypeDescriptor = CodeFlow.toDescriptor(accessor.getPropertyType());
+		}
+		return tv;
 	}
 
 	private TypedValue getValueInternal(TypedValue contextObject, EvaluationContext eContext,
@@ -278,12 +285,14 @@ public class PropertyOrFieldReference extends SpelNodeImpl {
 
 	// TODO when there is more time, remove this and use the version in AstUtils
 	/**
-	 * Determines the set of property resolvers that should be used to try and access a property on the specified target
-	 * type. The resolvers are considered to be in an ordered list, however in the returned list any that are exact
-	 * matches for the input target type (as opposed to 'general' resolvers that could work for any type) are placed at
-	 * the start of the list. In addition, there are specific resolvers that exactly name the class in question and
-	 * resolvers that name a specific class but it is a supertype of the class we have. These are put at the end of the
-	 * specific resolvers set and will be tried after exactly matching accessors but before generic accessors.
+	 * Determines the set of property resolvers that should be used to try and access a property
+	 * on the specified target type. The resolvers are considered to be in an ordered list,
+	 * however in the returned list any that are exact matches for the input target type (as
+	 * opposed to 'general' resolvers that could work for any type) are placed at the start of the
+	 * list. In addition, there are specific resolvers that exactly name the class in question
+	 * and resolvers that name a specific class but it is a supertype of the class we have.
+	 * These are put at the end of the specific resolvers set and will be tried after exactly
+	 * matching accessors but before generic accessors.
 	 * @param contextObject the object upon which property access is being attempted
 	 * @return a list of resolvers that should be tried in order to access the property
 	 */
@@ -316,6 +325,18 @@ public class PropertyOrFieldReference extends SpelNodeImpl {
 		resolvers.addAll(generalAccessors);
 		return resolvers;
 	}
+	
+	@Override
+	public boolean isCompilable() {
+		return (this.cachedReadAccessor instanceof CompilablePropertyAccessor &&
+				((CompilablePropertyAccessor) this.cachedReadAccessor).isCompilable());
+	}
+	
+	@Override
+	public void generateCode(MethodVisitor mv, CodeFlow codeflow) {
+		((CompilablePropertyAccessor) this.cachedReadAccessor).generateCode(this.name, mv, codeflow);
+		codeflow.pushDescriptor(this.exitTypeDescriptor);
+	}
 
 
 	private static class AccessorLValue implements ValueRef {
@@ -338,7 +359,12 @@ public class PropertyOrFieldReference extends SpelNodeImpl {
 
 		@Override
 		public TypedValue getValue() {
-			return this.ref.getValueInternal(this.contextObject, this.eContext, this.autoGrowNullReferences);
+			TypedValue value = this.ref.getValueInternal(this.contextObject, this.eContext, this.autoGrowNullReferences);
+			if (ref.cachedReadAccessor instanceof CompilablePropertyAccessor) {
+				CompilablePropertyAccessor accessor = (CompilablePropertyAccessor)this.ref.cachedReadAccessor;
+				this.ref.exitTypeDescriptor = CodeFlow.toDescriptor(accessor.getPropertyType());
+			}
+			return value;
 		}
 
 		@Override

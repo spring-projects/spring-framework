@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,9 +35,11 @@ import org.springframework.transaction.TransactionSystemException;
 import org.springframework.transaction.support.CallbackPreferringPlatformTransactionManager;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
 import org.springframework.transaction.support.DefaultTransactionStatus;
+import org.springframework.transaction.support.SmartTransactionObject;
 import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
+import org.springframework.transaction.support.TransactionSynchronizationUtils;
 import org.springframework.util.ReflectionUtils;
 
 /**
@@ -308,7 +310,7 @@ public class WebSphereUowTransactionManager extends JtaTransactionManager
 	/**
 	 * Adapter that executes the given Spring transaction within the WebSphere UOWAction shape.
 	 */
-	private class UOWActionAdapter<T> implements UOWAction {
+	private class UOWActionAdapter<T> implements UOWAction, SmartTransactionObject {
 
 		private final TransactionDefinition definition;
 
@@ -372,6 +374,16 @@ public class WebSphereUowTransactionManager extends JtaTransactionManager
 				ReflectionUtils.rethrowRuntimeException(this.exception);
 			}
 			return this.result;
+		}
+
+		@Override
+		public boolean isRollbackOnly() {
+			return uowManager.getRollbackOnly();
+		}
+
+		@Override
+		public void flush() {
+			TransactionSynchronizationUtils.triggerFlush();
 		}
 	}
 

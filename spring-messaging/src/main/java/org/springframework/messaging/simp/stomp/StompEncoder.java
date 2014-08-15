@@ -26,7 +26,6 @@ import java.util.Map.Entry;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.messaging.Message;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessageType;
@@ -74,7 +73,6 @@ public final class StompEncoder  {
 			DataOutputStream output = new DataOutputStream(baos);
 
 			if (SimpMessageType.HEARTBEAT.equals(SimpMessageHeaderAccessor.getMessageType(headers))) {
-				logger.trace("Encoded heartbeat");
 				output.write(StompDecoder.HEARTBEAT_PAYLOAD);
 			}
 			else {
@@ -91,7 +89,7 @@ public final class StompEncoder  {
 			return baos.toByteArray();
 		}
 		catch (IOException e) {
-			throw new StompConversionException("Failed to encode STOMP frame",  e);
+			throw new StompConversionException("Failed to encode STOMP frame, headers=" + headers + ".",  e);
 		}
 	}
 
@@ -102,8 +100,8 @@ public final class StompEncoder  {
 		Map<String,List<String>> nativeHeaders =
 				(Map<String, List<String>>) headers.get(NativeMessageHeaderAccessor.NATIVE_HEADERS);
 
-		if (logger.isDebugEnabled()) {
-			logger.debug("Encoding STOMP " + command + ", headers=" + nativeHeaders);
+		if (logger.isTraceEnabled()) {
+			logger.trace("Encoding STOMP " + command + ", headers=" + nativeHeaders + ".");
 		}
 
 		if (nativeHeaders == null) {
@@ -114,8 +112,12 @@ public final class StompEncoder  {
 
 		for (Entry<String, List<String>> entry : nativeHeaders.entrySet()) {
 			byte[] key = encodeHeaderString(entry.getKey(), shouldEscape);
+			if (command.requiresContentLength() && "content-length".equals(entry.getKey())) {
+				continue;
+			}
 			List<String> values = entry.getValue();
-			if (StompHeaderAccessor.STOMP_PASSCODE_HEADER.equals(entry.getKey())) {
+			if (StompCommand.CONNECT.equals(command) &&
+					StompHeaderAccessor.STOMP_PASSCODE_HEADER.equals(entry.getKey())) {
 				values = Arrays.asList(StompHeaderAccessor.getPasscode(headers));
 			}
 			for (String value : values) {

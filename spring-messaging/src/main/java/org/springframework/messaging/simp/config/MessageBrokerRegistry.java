@@ -24,11 +24,13 @@ import org.springframework.messaging.SubscribableChannel;
 import org.springframework.messaging.simp.broker.SimpleBrokerMessageHandler;
 import org.springframework.messaging.simp.stomp.StompBrokerRelayMessageHandler;
 import org.springframework.util.Assert;
+import org.springframework.util.PathMatcher;
 
 /**
  * A registry for configuring message broker options.
  *
  * @author Rossen Stoyanchev
+ * @author Sebastien Deleuze
  * @since 4.0
  */
 public class MessageBrokerRegistry {
@@ -44,6 +46,8 @@ public class MessageBrokerRegistry {
 	private String[] applicationDestinationPrefixes;
 
 	private String userDestinationPrefix;
+
+	private PathMatcher pathMatcher;
 
 	private ChannelRegistration brokerChannelRegistration = new ChannelRegistration();
 
@@ -109,6 +113,31 @@ public class MessageBrokerRegistry {
 	}
 
 	/**
+	 * Configure the PathMatcher to use to match the destinations of incoming
+	 * messages to {@code @MessageMapping} and {@code @SubscribeMapping} methods.
+	 *
+	 * <p>By default {@link org.springframework.util.AntPathMatcher} is configured.
+	 * However applications may provide an {@code AntPathMatcher} instance
+	 * customized to use "." (commonly used in messaging) instead of "/" as path
+	 * separator or provide a completely different PathMatcher implementation.
+	 *
+	 * <p>Note that the configured PathMatcher is only used for matching the
+	 * portion of the destination after the configured prefix. For example given
+	 * application destination prefix "/app" and destination "/app/price.stock.**",
+	 * the message might be mapped to a controller with "price" and "stock.**"
+	 * as its type and method-level mappings respectively.
+	 *
+	 * <p>When the simple broker is enabled, the PathMatcher configured here is
+	 * also used to match message destinations when brokering messages.
+	 *
+	 * @since 4.1
+	 */
+	public MessageBrokerRegistry setPathMatcher(PathMatcher pathMatcher) {
+		this.pathMatcher = pathMatcher;
+		return this;
+	}
+
+	/**
 	 * Customize the channel used to send messages from the application to the message
 	 * broker. By default messages from the application to the message broker are sent
 	 * synchronously, which means application code sending a message will find out
@@ -124,7 +153,9 @@ public class MessageBrokerRegistry {
 			enableSimpleBroker();
 		}
 		if (this.simpleBrokerRegistration != null) {
-			return this.simpleBrokerRegistration.getMessageHandler(brokerChannel);
+			SimpleBrokerMessageHandler handler = this.simpleBrokerRegistration.getMessageHandler(brokerChannel);
+			handler.setPathMatcher(this.pathMatcher);
+			return handler;
 		}
 		return null;
 	}
@@ -145,7 +176,12 @@ public class MessageBrokerRegistry {
 		return this.userDestinationPrefix;
 	}
 
+	protected PathMatcher getPathMatcher() {
+		return this.pathMatcher;
+	}
+
 	protected ChannelRegistration getBrokerChannelRegistration() {
 		return this.brokerChannelRegistration;
 	}
+
 }

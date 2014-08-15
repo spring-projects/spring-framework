@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,6 @@ import org.junit.Test;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessageType;
-import org.springframework.messaging.simp.broker.DefaultSubscriptionRegistry;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.util.MultiValueMap;
 
@@ -35,6 +34,7 @@ import static org.junit.Assert.*;
  * Test fixture for {@link org.springframework.messaging.simp.broker.DefaultSubscriptionRegistry}.
  *
  * @author Rossen Stoyanchev
+ * @author Sebastien Deleuze
  */
 public class DefaultSubscriptionRegistryTests {
 
@@ -131,6 +131,95 @@ public class DefaultSubscriptionRegistryTests {
 		assertEquals(Arrays.asList(subsId), actual.get(sessId));
 	}
 
+	// SPR-11657
+
+	@Test
+	public void registerSubscriptionsWithSimpleAndPatternDestinations() {
+
+		String sess1 = "sess01";
+		String sess2 = "sess02";
+
+		String subs1 = "subs01";
+		String subs2 = "subs02";
+		String subs3 = "subs03";
+
+		this.registry.registerSubscription(subscribeMessage(sess1, subs2, "/topic/PRICE.STOCK.NASDAQ.IBM"));
+		this.registry.registerSubscription(subscribeMessage(sess1, subs1, "/topic/PRICE.STOCK.*.IBM"));
+		MultiValueMap<String, String> actual = this.registry.findSubscriptions(message("/topic/PRICE.STOCK.NASDAQ.IBM"));
+		assertEquals(1, actual.size());
+		assertEquals(Arrays.asList(subs2, subs1), actual.get(sess1));
+
+		this.registry.registerSubscription(subscribeMessage(sess2, subs1, "/topic/PRICE.STOCK.NASDAQ.IBM"));
+		this.registry.registerSubscription(subscribeMessage(sess2, subs2, "/topic/PRICE.STOCK.NYSE.IBM"));
+		this.registry.registerSubscription(subscribeMessage(sess2, subs3, "/topic/PRICE.STOCK.NASDAQ.GOOG"));
+		actual = this.registry.findSubscriptions(message("/topic/PRICE.STOCK.NASDAQ.IBM"));
+		assertEquals(2, actual.size());
+		assertEquals(Arrays.asList(subs2, subs1), actual.get(sess1));
+		assertEquals(Arrays.asList(subs1), actual.get(sess2));
+
+		this.registry.unregisterAllSubscriptions(sess1);
+		actual = this.registry.findSubscriptions(message("/topic/PRICE.STOCK.NASDAQ.IBM"));
+		assertEquals(1, actual.size());
+		assertEquals(Arrays.asList(subs1), actual.get(sess2));
+
+		this.registry.registerSubscription(subscribeMessage(sess1, subs1, "/topic/PRICE.STOCK.*.IBM"));
+		this.registry.registerSubscription(subscribeMessage(sess1, subs2, "/topic/PRICE.STOCK.NASDAQ.IBM"));
+		actual = this.registry.findSubscriptions(message("/topic/PRICE.STOCK.NASDAQ.IBM"));
+		assertEquals(2, actual.size());
+		assertEquals(Arrays.asList(subs1, subs2), actual.get(sess1));
+		assertEquals(Arrays.asList(subs1), actual.get(sess2));
+
+		this.registry.unregisterSubscription(unsubscribeMessage(sess1, subs2));
+		actual = this.registry.findSubscriptions(message("/topic/PRICE.STOCK.NASDAQ.IBM"));
+		assertEquals(2, actual.size());
+		assertEquals(Arrays.asList(subs1), actual.get(sess1));
+		assertEquals(Arrays.asList(subs1), actual.get(sess2));
+
+		this.registry.unregisterSubscription(unsubscribeMessage(sess1, subs1));
+		actual = this.registry.findSubscriptions(message("/topic/PRICE.STOCK.NASDAQ.IBM"));
+		assertEquals(1, actual.size());
+		assertEquals(Arrays.asList(subs1), actual.get(sess2));
+
+		this.registry.unregisterSubscription(unsubscribeMessage(sess2, subs1));
+		actual = this.registry.findSubscriptions(message("/topic/PRICE.STOCK.NASDAQ.IBM"));
+		assertEquals(0, actual.size());
+	}
+
+	// SPR-11755
+
+	@Test
+	public void registerAndUnregisterMultipleDestinations() {
+
+		String sess1 = "sess01";
+		String sess2 = "sess02";
+
+		String subs1 = "subs01";
+		String subs2 = "subs02";
+		String subs3 = "subs03";
+		String subs4 = "subs04";
+		String subs5 = "subs05";
+
+		this.registry.registerSubscription(subscribeMessage(sess1, subs1, "/topic/PRICE.STOCK.NASDAQ.IBM"));
+		this.registry.registerSubscription(subscribeMessage(sess1, subs2, "/topic/PRICE.STOCK.NYSE.IBM"));
+		this.registry.registerSubscription(subscribeMessage(sess1, subs3, "/topic/PRICE.STOCK.NASDAQ.GOOG"));
+
+		this.registry.findSubscriptions(message("/topic/PRICE.STOCK.NYSE.IBM"));
+		this.registry.findSubscriptions(message("/topic/PRICE.STOCK.NASDAQ.GOOG"));
+		this.registry.findSubscriptions(message("/topic/PRICE.STOCK.NASDAQ.IBM"));
+
+		this.registry.unregisterSubscription(unsubscribeMessage(sess1, subs1));
+		this.registry.unregisterSubscription(unsubscribeMessage(sess1, subs2));
+		this.registry.unregisterSubscription(unsubscribeMessage(sess1, subs3));
+
+		this.registry.registerSubscription(subscribeMessage(sess1, subs1, "/topic/PRICE.STOCK.NASDAQ.IBM"));
+		this.registry.registerSubscription(subscribeMessage(sess1, subs2, "/topic/PRICE.STOCK.NYSE.IBM"));
+		this.registry.registerSubscription(subscribeMessage(sess1, subs3, "/topic/PRICE.STOCK.NASDAQ.GOOG"));
+		this.registry.registerSubscription(subscribeMessage(sess1, subs4, "/topic/PRICE.STOCK.NYSE.IBM"));
+		this.registry.registerSubscription(subscribeMessage(sess2, subs5, "/topic/PRICE.STOCK.NASDAQ.GOOG"));
+		this.registry.unregisterAllSubscriptions(sess1);
+		this.registry.unregisterAllSubscriptions(sess2);
+	}
+
 	@Test
 	public void registerSubscriptionWithDestinationPatternRegex() {
 
@@ -179,6 +268,27 @@ public class DefaultSubscriptionRegistryTests {
 		assertEquals("Expected three elements " + actual, 2, actual.size());
 		assertEquals(subscriptionIds, sort(actual.get(sessIds.get(1))));
 		assertEquals(subscriptionIds, sort(actual.get(sessIds.get(2))));
+	}
+
+	// SPR-11931
+
+	@Test
+	public void registerTwiceAndUnregisterSubscriptions() {
+
+		this.registry.registerSubscription(subscribeMessage("sess01", "subs01", "/foo"));
+		this.registry.registerSubscription(subscribeMessage("sess01", "subs02", "/foo"));
+		MultiValueMap<String, String> actual = this.registry.findSubscriptions(message("/foo"));
+		assertEquals("Expected 1 element", 1, actual.size());
+		assertEquals(Arrays.asList("subs01", "subs02"), actual.get("sess01"));
+
+		this.registry.unregisterSubscription(unsubscribeMessage("sess01", "subs01"));
+		actual = this.registry.findSubscriptions(message("/foo"));
+		assertEquals("Expected 1 element", 1, actual.size());
+		assertEquals(Arrays.asList("subs02"), actual.get("sess01"));
+
+		this.registry.unregisterSubscription(unsubscribeMessage("sess01", "subs02"));
+		actual = this.registry.findSubscriptions(message("/foo"));
+		assertEquals("Expected no element", 0, actual.size());
 	}
 
 	@Test

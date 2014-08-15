@@ -1401,6 +1401,11 @@ public class EvaluationTests extends AbstractExpressionTests {
 		expectFailNotAssignable(parser, ctx, "--({1,2,3})");
 		expectFailSetValueNotSupported(parser, ctx, "({1,2,3})=({1,2,3})");
 
+		// InlineMap
+		expectFailNotAssignable(parser, ctx, "({'a':1,'b':2,'c':3})++");
+		expectFailNotAssignable(parser, ctx, "--({'a':1,'b':2,'c':3})");
+		expectFailSetValueNotSupported(parser, ctx, "({'a':1,'b':2,'c':3})=({'a':1,'b':2,'c':3})");
+
 		// BeanReference
 		ctx.setBeanResolver(new MyBeanResolver());
 		expectFailNotAssignable(parser, ctx, "@foo++");

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,6 +52,20 @@ import org.springframework.util.StringUtils;
 class TypeConverterDelegate {
 
 	private static final Log logger = LogFactory.getLog(TypeConverterDelegate.class);
+
+	/** Java 8's java.util.Optional.empty() instance */
+	private static Object javaUtilOptionalEmpty = null;
+
+	static {
+		try {
+			Class<?> clazz = ClassUtils.forName("java.util.Optional", TypeConverterDelegate.class.getClassLoader());
+			javaUtilOptionalEmpty = ClassUtils.getMethod(clazz, "empty").invoke(null);
+		}
+		catch (Exception ex) {
+			// Java 8 not available - conversion to Optional not supported then.
+		}
+	}
+
 
 	private final PropertyEditorRegistrySupport propertyEditorRegistry;
 
@@ -244,6 +258,12 @@ class TypeConverterDelegate {
 					standardConversion = true;
 				}
 			}
+			else {
+				// convertedValue == null
+				if (javaUtilOptionalEmpty != null && requiredType.equals(javaUtilOptionalEmpty.getClass())) {
+					convertedValue = javaUtilOptionalEmpty;
+				}
+			}
 
 			if (!ClassUtils.isAssignableValue(requiredType, convertedValue)) {
 				if (firstAttemptEx != null) {
@@ -289,19 +309,19 @@ class TypeConverterDelegate {
 			if (index > - 1) {
 				String enumType = trimmedValue.substring(0, index);
 				String fieldName = trimmedValue.substring(index + 1);
-				ClassLoader loader = this.targetObject.getClass().getClassLoader();
+				ClassLoader cl = this.targetObject.getClass().getClassLoader();
 				try {
-					Class<?> enumValueType = loader.loadClass(enumType);
+					Class<?> enumValueType = ClassUtils.forName(enumType, cl);
 					Field enumField = enumValueType.getField(fieldName);
 					convertedValue = enumField.get(null);
 				}
 				catch (ClassNotFoundException ex) {
-					if(logger.isTraceEnabled()) {
-						logger.trace("Enum class [" + enumType + "] cannot be loaded from [" + loader + "]", ex);
+					if (logger.isTraceEnabled()) {
+						logger.trace("Enum class [" + enumType + "] cannot be loaded", ex);
 					}
 				}
 				catch (Throwable ex) {
-					if(logger.isTraceEnabled()) {
+					if (logger.isTraceEnabled()) {
 						logger.trace("Field [" + fieldName + "] isn't an enum value for type [" + enumType + "]", ex);
 					}
 				}

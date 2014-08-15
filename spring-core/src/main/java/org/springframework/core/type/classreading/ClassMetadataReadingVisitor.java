@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,6 +47,8 @@ class ClassMetadataReadingVisitor extends ClassVisitor implements ClassMetadata 
 
 	private boolean isInterface;
 
+	private boolean isAnnotation;
+
 	private boolean isAbstract;
 
 	private boolean isFinal;
@@ -71,9 +73,10 @@ class ClassMetadataReadingVisitor extends ClassVisitor implements ClassMetadata 
 	public void visit(int version, int access, String name, String signature, String supername, String[] interfaces) {
 		this.className = ClassUtils.convertResourcePathToClassName(name);
 		this.isInterface = ((access & Opcodes.ACC_INTERFACE) != 0);
+		this.isAnnotation = ((access & Opcodes.ACC_ANNOTATION) != 0);
 		this.isAbstract = ((access & Opcodes.ACC_ABSTRACT) != 0);
 		this.isFinal = ((access & Opcodes.ACC_FINAL) != 0);
-		if (supername != null) {
+		if (supername != null && !this.isInterface) {
 			this.superClassName = ClassUtils.convertResourcePathToClassName(supername);
 		}
 		this.interfaces = new String[interfaces.length];
@@ -144,6 +147,11 @@ class ClassMetadataReadingVisitor extends ClassVisitor implements ClassMetadata 
 	@Override
 	public boolean isInterface() {
 		return this.isInterface;
+	}
+
+	@Override
+	public boolean isAnnotation() {
+		return this.isAnnotation;
 	}
 
 	@Override

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,25 +38,24 @@ import org.springframework.web.servlet.config.annotation.DefaultServletHandlerCo
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
+import org.springframework.web.servlet.config.annotation.ViewResolverRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
-import org.springframework.web.servlet.view.UrlBasedViewResolver;
 import org.springframework.web.servlet.view.tiles3.TilesConfigurer;
-import org.springframework.web.servlet.view.tiles3.TilesView;
 
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.*;
-
+import static org.mockito.BDDMockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-import static org.mockito.Mockito.*;
 
 /**
  * Tests with Java configuration.
  *
  * @author Rossen Stoyanchev
  * @author Sam Brannen
+ * @author Sebastien Deleuze
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@WebAppConfiguration("src/test/resources/META-INF/web-resources")
+@WebAppConfiguration("classpath:META-INF/web-resources")
 @ContextHierarchy({
 	@ContextConfiguration(classes = RootConfig.class),
 	@ContextConfiguration(classes = WebConfig.class)
@@ -75,7 +74,7 @@ public class JavaConfigTests {
 	@Before
 	public void setup() {
 		this.mockMvc = MockMvcBuilders.webAppContextSetup(this.wac).build();
-		when(this.personDao.getPerson(5L)).thenReturn(new Person("Joe"));
+		given(this.personDao.getPerson(5L)).willReturn(new Person("Joe"));
 	}
 
 	@Test
@@ -130,17 +129,15 @@ public class JavaConfigTests {
 			configurer.enable();
 		}
 
-		@Bean
-		public UrlBasedViewResolver urlBasedViewResolver() {
-			UrlBasedViewResolver resolver = new UrlBasedViewResolver();
-			resolver.setViewClass(TilesView.class);
-			return resolver;
+		@Override
+		public void configureViewResolvers(ViewResolverRegistry registry) {
+			registry.tiles();
 		}
 
 		@Bean
 		public TilesConfigurer tilesConfigurer() {
 			TilesConfigurer configurer = new TilesConfigurer();
-			configurer.setDefinitions(new String[] {"/WEB-INF/**/tiles.xml"});
+			configurer.setDefinitions("/WEB-INF/**/tiles.xml");
 			return configurer;
 		}
 	}

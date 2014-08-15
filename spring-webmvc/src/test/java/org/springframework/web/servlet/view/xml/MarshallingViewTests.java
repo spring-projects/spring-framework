@@ -19,6 +19,8 @@ package org.springframework.web.servlet.view.xml;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import javax.xml.bind.JAXBElement;
+import javax.xml.namespace.QName;
 import javax.xml.transform.stream.StreamResult;
 
 import org.junit.Before;
@@ -35,6 +37,7 @@ import static org.mockito.BDDMockito.*;
 
 /**
  * @author Arjen Poutsma
+ * @author Juergen Hoeller
  */
 public class MarshallingViewTests {
 
@@ -77,6 +80,25 @@ public class MarshallingViewTests {
 		MockHttpServletResponse response = new MockHttpServletResponse();
 
 		given(marshallerMock.supports(Object.class)).willReturn(true);
+		marshallerMock.marshal(eq(toBeMarshalled), isA(StreamResult.class));
+
+		view.render(model, request, response);
+		assertEquals("Invalid content type", "application/xml", response.getContentType());
+		assertEquals("Invalid content length", 0, response.getContentLength());
+	}
+
+	@Test
+	public void renderModelKeyWithJaxbElement() throws Exception {
+		String toBeMarshalled = "value";
+		String modelKey = "key";
+		view.setModelKey(modelKey);
+		Map<String, Object> model = new HashMap<String, Object>();
+		model.put(modelKey, new JAXBElement<String>(new QName("model"), String.class, toBeMarshalled));
+
+		MockHttpServletRequest request = new MockHttpServletRequest();
+		MockHttpServletResponse response = new MockHttpServletResponse();
+
+		given(marshallerMock.supports(String.class)).willReturn(true);
 		marshallerMock.marshal(eq(toBeMarshalled), isA(StreamResult.class));
 
 		view.render(model, request, response);

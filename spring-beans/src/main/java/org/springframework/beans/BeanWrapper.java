@@ -79,22 +79,6 @@ public interface BeanWrapper extends ConfigurablePropertyAccessor {
 	PropertyDescriptor getPropertyDescriptor(String propertyName) throws InvalidPropertyException;
 
 	/**
-	 * Set whether this BeanWrapper should attempt to "auto-grow" a
-	 * nested path that contains a {@code null} value.
-	 * <p>If {@code true}, a {@code null} path location will be populated
-	 * with a default object value and traversed instead of resulting in a
-	 * {@link NullValueInNestedPathException}. Turning this flag on also enables
-	 * auto-growth of collection elements when accessing an out-of-bounds index.
-	 * <p>Default is {@code false} on a plain BeanWrapper.
-	 */
-	void setAutoGrowNestedPaths(boolean autoGrowNestedPaths);
-
-	/**
-	 * Return whether "auto-growing" of nested paths has been activated.
-	 */
-	boolean isAutoGrowNestedPaths();
-
-	/**
 	 * Specify a limit for array and collection auto-growing.
 	 * <p>Default is unlimited on a plain BeanWrapper.
 	 */

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -97,13 +97,12 @@ public class ServletUriComponentsBuilder extends UriComponentsBuilder {
 	 */
 	public static ServletUriComponentsBuilder fromRequest(HttpServletRequest request) {
 		String scheme = request.getScheme();
-		int port = request.getServerPort();
 		String host = request.getServerName();
+		int port = request.getServerPort();
 
-		String header = request.getHeader("X-Forwarded-Host");
-
-		if (StringUtils.hasText(header)) {
-			String[] hosts = StringUtils.commaDelimitedListToStringArray(header);
+		String hostHeader = request.getHeader("X-Forwarded-Host");
+		if (StringUtils.hasText(hostHeader)) {
+			String[] hosts = StringUtils.commaDelimitedListToStringArray(hostHeader);
 			String hostToUse = hosts[0];
 			if (hostToUse.contains(":")) {
 				String[] hostAndPort = StringUtils.split(hostToUse, ":");
@@ -112,13 +111,24 @@ public class ServletUriComponentsBuilder extends UriComponentsBuilder {
 			}
 			else {
 				host = hostToUse;
+				port = -1;
 			}
+		}
+
+		String portHeader = request.getHeader("X-Forwarded-Port");
+		if (StringUtils.hasText(portHeader)) {
+			port = Integer.parseInt(portHeader);
+		}
+
+		String protocolHeader = request.getHeader("X-Forwarded-Proto");
+		if (StringUtils.hasText(protocolHeader)) {
+			scheme = protocolHeader;
 		}
 
 		ServletUriComponentsBuilder builder = new ServletUriComponentsBuilder();
 		builder.scheme(scheme);
 		builder.host(host);
-		if ((scheme.equals("http") && port != 80) || (scheme.equals("https") && port != 443)) {
+		if (scheme.equals("http") && port != 80 || scheme.equals("https") && port != 443) {
 			builder.port(port);
 		}
 		builder.pathFromRequest(request);

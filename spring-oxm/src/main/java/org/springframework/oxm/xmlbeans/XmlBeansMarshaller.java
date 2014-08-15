@@ -125,7 +125,7 @@ public class XmlBeansMarshaller extends AbstractMarshaller {
 
 	@Override
 	protected void marshalDomNode(Object graph, Node node) throws XmlMappingException {
-		Document document = node.getNodeType() == Node.DOCUMENT_NODE ? (Document) node : node.getOwnerDocument();
+		Document document = (node.getNodeType() == Node.DOCUMENT_NODE ? (Document) node : node.getOwnerDocument());
 		Node xmlBeansNode = ((XmlObject) graph).newDomNode(getXmlOptions());
 		NodeList xmlBeansChildNodes = xmlBeansNode.getChildNodes();
 		for (int i = 0; i < xmlBeansChildNodes.getLength(); i++) {
@@ -277,19 +277,27 @@ public class XmlBeansMarshaller extends AbstractMarshaller {
 	 */
 	protected void validate(XmlObject object) throws ValidationFailureException {
 		if (isValidating() && object != null) {
-			// create a temporary xmlOptions just for validation
-			XmlOptions validateOptions = getXmlOptions() != null ? getXmlOptions() : new XmlOptions();
+			XmlOptions validateOptions = getXmlOptions();
+			if (validateOptions == null) {
+				// Create temporary XmlOptions just for validation
+				validateOptions = new XmlOptions();
+			}
 			List<XmlError> errorsList = new ArrayList<XmlError>();
 			validateOptions.setErrorListener(errorsList);
 			if (!object.validate(validateOptions)) {
-				StringBuilder builder = new StringBuilder("Could not validate XmlObject :");
+				StringBuilder sb = new StringBuilder("Failed to validate XmlObject: ");
+				boolean first = true;
 				for (XmlError error : errorsList) {
 					if (error instanceof XmlValidationError) {
-						builder.append(error.toString());
+						if (!first) {
+							sb.append("; ");
+						}
+						sb.append(error.toString());
+						first = false;
 					}
 				}
 				throw new ValidationFailureException("XMLBeans validation failure",
-						new XmlException(builder.toString(), null, errorsList));
+						new XmlException(sb.toString(), null, errorsList));
 			}
 		}
 	}
@@ -306,7 +314,7 @@ public class XmlBeansMarshaller extends AbstractMarshaller {
 	 */
 	protected XmlMappingException convertXmlBeansException(Exception ex, boolean marshalling) {
 		if (ex instanceof XMLStreamValidationException) {
-			return new ValidationFailureException("XmlBeans validation exception", ex);
+			return new ValidationFailureException("XMLBeans validation exception", ex);
 		}
 		else if (ex instanceof XmlException || ex instanceof SAXException) {
 			if (marshalling) {

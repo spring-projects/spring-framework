@@ -30,6 +30,7 @@ import javax.jms.MessageConsumer;
 import javax.jms.MessageProducer;
 import javax.jms.Queue;
 import javax.jms.Session;
+import javax.jms.TemporaryQueue;
 import javax.jms.TextMessage;
 import javax.naming.Context;
 
@@ -66,12 +67,13 @@ import static org.mockito.BDDMockito.*;
  *
  * @author Andre Biryukov
  * @author Mark Pollack
+ * @author Stephane Nicoll
  */
 public class JmsTemplateTests {
 
 	private Context jndiContext;
 	private ConnectionFactory connectionFactory;
-	private Connection connection;
+	protected Connection connection;
 	private Session session;
 	private Destination queue;
 
@@ -120,6 +122,9 @@ public class JmsTemplateTests {
 		return false;
 	}
 
+	protected Session getLocalSession() {
+		return session;
+	}
 
 	@Test
 	public void testExceptionStackTrace() {
@@ -628,6 +633,89 @@ public class JmsTemplateTests {
 			verify(textMessage).acknowledge();
 		}
 		verify(messageConsumer).close();
+	}
+
+	@Test
+	public void testSendAndReceiveDefaultDestination() throws Exception {
+		doTestSendAndReceive(true, true, 1000L);
+	}
+
+	@Test
+	public void testSendAndReceiveDefaultDestinationName() throws Exception {
+		doTestSendAndReceive(false, true, 1000L);
+	}
+
+	@Test
+	public void testSendAndReceiveDestination() throws Exception {
+		doTestSendAndReceive(true, false, 1000L);
+	}
+
+	@Test
+	public void testSendAndReceiveDestinationName() throws Exception {
+		doTestSendAndReceive(false, false, 1000L);
+	}
+
+	private void doTestSendAndReceive(boolean explicitDestination, boolean useDefaultDestination, long timeout)
+			throws Exception {
+
+		JmsTemplate template = createTemplate();
+		template.setConnectionFactory(connectionFactory);
+
+		String destinationName = "testDestination";
+		if (useDefaultDestination) {
+			if (explicitDestination) {
+				template.setDefaultDestination(queue);
+			}
+			else {
+				template.setDefaultDestinationName(destinationName);
+			}
+		}
+		template.setReceiveTimeout(timeout);
+
+		Session localSession = getLocalSession();
+		TemporaryQueue replyDestination = mock(TemporaryQueue.class);
+		MessageProducer messageProducer = mock(MessageProducer.class);
+		given(localSession.createProducer(queue)).willReturn(messageProducer);
+		given(localSession.createTemporaryQueue()).willReturn(replyDestination);
+
+		MessageConsumer messageConsumer = mock(MessageConsumer.class);
+		given(localSession.createConsumer(replyDestination)).willReturn(messageConsumer);
+
+
+		TextMessage request = mock(TextMessage.class);
+		MessageCreator messageCreator = mock(MessageCreator.class);
+		given(messageCreator.createMessage(localSession)).willReturn(request);
+
+		TextMessage reply = mock(TextMessage.class);
+		if (timeout == JmsTemplate.RECEIVE_TIMEOUT_NO_WAIT) {
+			given(messageConsumer.receiveNoWait()).willReturn(reply);
+		}
+		else if (timeout == JmsTemplate.RECEIVE_TIMEOUT_INDEFINITE_WAIT) {
+			given(messageConsumer.receive()).willReturn(reply);
+		}
+		else {
+			given(messageConsumer.receive(timeout)).willReturn(reply);
+		}
+
+		Message message = null;
+		if (useDefaultDestination) {
+			message = template.sendAndReceive(messageCreator);
+		}
+		else if (explicitDestination) {
+			message = template.sendAndReceive(queue, messageCreator);
+		}
+		else {
+			message = template.sendAndReceive(destinationName, messageCreator);
+		}
+
+		// replyTO set on the request
+		verify(request).setJMSReplyTo(replyDestination);
+		assertSame("Reply message not received", reply, message);
+		verify(connection).start();
+		verify(connection).close();
+		verify(localSession).close();
+		verify(messageConsumer).close();
+		verify(messageProducer).close();
 	}
 
 	@Test

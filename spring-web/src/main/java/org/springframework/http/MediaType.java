@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,7 +41,8 @@ import org.springframework.util.comparator.CompoundComparator;
  * @author Juergen Hoeller
  * @author Rossen Stoyanchev
  * @since 3.0
- * @see <a href="http://tools.ietf.org/html/rfc2616#section-3.7">HTTP 1.1, section 3.7</a>
+ * @see <a href="http://tools.ietf.org/html/rfc7231#section-3.1.1.1">HTTP 1.1: Semantics
+ * and Content, section 3.1.1.1</a>
  */
 public class MediaType extends MimeType implements Serializable {
 
@@ -431,7 +432,8 @@ public class MediaType extends MimeType implements Serializable {
 	 * <blockquote>audio/basic == text/html</blockquote>
 	 * <blockquote>audio/basic == audio/wave</blockquote>
 	 * @param mediaTypes the list of media types to be sorted
-	 * @see <a href="http://tools.ietf.org/html/rfc2616#section-14.1">HTTP 1.1, section 14.1</a>
+	 * @see <a href="http://tools.ietf.org/html/rfc7231#section-5.3.2">HTTP 1.1: Semantics
+	 * and Content, section 5.3.2</a>
 	 */
 	public static void sortBySpecificity(List<MediaType> mediaTypes) {
 		Assert.notNull(mediaTypes, "'mediaTypes' must not be null");

@@ -63,16 +63,16 @@
 			<xsd:attribute name="handler-method-factory" type="xsd:string" use="optional">
 				<xsd:annotation>
 					<xsd:documentation><![CDATA[
-	Specifies a custom org.springframework.jms.config.JmsHandlerMethodFactory instance to
-	use to configure the message listener responsible to serve an endpoint detected by this
-	processor. By default, DefaultJmsHandlerMethodFactory is used and it can be configured
+	Specifies a custom org.springframework.messaging.handler.annotation.support.MessageHandlerMethodFactory
+	instance to	use to configure the message listener responsible to serve an endpoint detected by this
+	processor. By default, DefaultMessageHandlerMethodFactory is used and it can be configured
 	further to support additional method arguments or to customize conversion and validation
-	support. See org.springframework.jms.config.DefaultJmsHandlerMethodFactory Javadoc for
-	more details.
+	support. See org.springframework.messaging.handler.annotation.support.DefaultMessageHandlerMethodFactory
+	Javadoc for more details.
 					]]></xsd:documentation>
 					<xsd:appinfo>
 						<tool:annotation kind="ref">
-							<tool:expected-type type="org.springframework.jms.config.JmsHandlerMethodFactory"/>
+							<tool:expected-type type="org.springframework.messaging.handler.annotation.support.MessageHandlerMethodFactory"/>
 						</tool:annotation>
 					</xsd:appinfo>
 				</xsd:annotation>
@@ -218,8 +218,10 @@
 			<xsd:attribute name="destination-type" default="queue">
 				<xsd:annotation>
 					<xsd:documentation><![CDATA[
-	The JMS destination type for this listener: "queue", "topic" or "durableTopic".
-	The default is "queue".
+	The JMS destination type for this listener: "queue", "topic", "durableTopic",
+	"sharedTopic", "sharedDurableTopic". This enables potentially the "pubSubDomain",
+	"subscriptionDurable" and "subscriptionShared" properties of the container. The
+	default is `queue` (i.e. disabling those 3 properties).
 					]]></xsd:documentation>
 				</xsd:annotation>
 				<xsd:simpleType>
@@ -227,6 +229,8 @@
 						<xsd:enumeration value="queue"/>
 						<xsd:enumeration value="topic"/>
 						<xsd:enumeration value="durableTopic"/>
+						<xsd:enumeration value="sharedTopic"/>
+						<xsd:enumeration value="sharedDurableTopic"/>
 					</xsd:restriction>
 				</xsd:simpleType>
 			</xsd:attribute>
@@ -234,7 +238,7 @@
 				<xsd:annotation>
 					<xsd:documentation><![CDATA[
 	The JMS client id for this listener container.
-	Needs to be specified when using durable subscriptions.
+	Needs to be specified when using subscriptions.
 					]]></xsd:documentation>
 				</xsd:annotation>
 			</xsd:attribute>
@@ -318,11 +322,29 @@
 					]]></xsd:documentation>
 				</xsd:annotation>
 			</xsd:attribute>
+			<xsd:attribute name="back-off" type="xsd:string">
+				<xsd:annotation>
+					<xsd:documentation><![CDATA[
+	 Specify the BackOff instance to use to compute the interval between recovery
+	 attempts. If the BackOff implementation returns "BackOffExecution#STOP", the listener
+	 container will not further attempt to recover. The recovery-interval value is
+	 ignored when this property is set. The default is a FixedBackOff with an
+	 interval of 5000 ms, that is 5 seconds.
+					]]></xsd:documentation>
+					<xsd:appinfo>
+						<tool:annotation kind="ref">
+							<tool:expected-type type="org.springframework.util.backoff.BackOff"/>
+						</tool:annotation>
+					</xsd:appinfo>
+				</xsd:annotation>
+			</xsd:attribute>
 			<xsd:attribute name="recovery-interval" type="xsd:string">
 				<xsd:annotation>
 					<xsd:documentation><![CDATA[
-	Specify the interval between recovery attempts, in milliseconds.
-	The default is 5000 ms, that is, 5 seconds.
+	Specify the interval between recovery attempts, in milliseconds. Convenience
+	way to create a FixedBackOff with the specified interval. For more recovery
+	options, consider specifying a BackOff instance instead. The default is
+	5000 ms, that is 5 seconds.
 					]]></xsd:documentation>
 				</xsd:annotation>
 			</xsd:attribute>
@@ -570,6 +592,17 @@
 	Note: This only applies to a listener method with a return value,
 	for which each result object will be converted into a response message.
 				]]></xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="concurrency" type="xsd:string">
+			<xsd:annotation>
+				<xsd:documentation><![CDATA[
+	The number of concurrent sessions/consumers to start for this listener.
+	Can either be a simple number indicating the maximum number (e.g. "5")
+	or a range indicating the lower as well as the upper limit (e.g. "3-5").
+	Note that a specified minimum is just a hint and might be ignored at runtime.
+	Default is the value provided by the container.
+					]]></xsd:documentation>
 			</xsd:annotation>
 		</xsd:attribute>
 	</xsd:complexType>

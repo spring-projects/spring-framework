@@ -25,14 +25,12 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
 import org.springframework.beans.factory.BeanCreationException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
-import org.springframework.jms.config.DefaultJmsHandlerMethodFactory;
-import org.springframework.jms.config.JmsHandlerMethodFactory;
+import org.springframework.messaging.handler.annotation.support.DefaultMessageHandlerMethodFactory;
+import org.springframework.messaging.handler.annotation.support.MessageHandlerMethodFactory;
 import org.springframework.jms.config.JmsListenerContainerTestFactory;
 import org.springframework.jms.config.JmsListenerEndpointRegistrar;
 import org.springframework.jms.config.JmsListenerEndpointRegistry;
@@ -42,7 +40,6 @@ import org.springframework.jms.listener.adapter.MessageListenerAdapter;
 import org.springframework.messaging.handler.annotation.support.MethodArgumentNotValidException;
 
 /**
- *
  * @author Stephane Nicoll
  */
 public class EnableJmsTests extends AbstractJmsAnnotationDrivenTests {
@@ -202,12 +199,12 @@ public class EnableJmsTests extends AbstractJmsAnnotationDrivenTests {
 
 		@Override
 		public void configureJmsListeners(JmsListenerEndpointRegistrar registrar) {
-			registrar.setJmsHandlerMethodFactory(jmsHandlerMethodFactory());
+			registrar.setMessageHandlerMethodFactory(customMessageHandlerMethodFactory());
 		}
 
 		@Bean
-		public JmsHandlerMethodFactory jmsHandlerMethodFactory() {
-			DefaultJmsHandlerMethodFactory factory = new DefaultJmsHandlerMethodFactory();
+		public MessageHandlerMethodFactory customMessageHandlerMethodFactory() {
+			DefaultMessageHandlerMethodFactory factory = new DefaultMessageHandlerMethodFactory();
 			factory.setValidator(new TestValidator());
 			return factory;
 		}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -62,9 +62,7 @@ public class DefaultJmsActivationSpecFactoryTests extends TestCase {
 		Destination destination = new StubQueue();
 
 		DestinationResolver destinationResolver = mock(DestinationResolver.class);
-
-		given(destinationResolver.resolveDestinationName(null, "destinationname",
-				false)).willReturn(destination);
+		given(destinationResolver.resolveDestinationName(null, "destinationname", false)).willReturn(destination);
 
 		DefaultJmsActivationSpecFactory activationSpecFactory = new DefaultJmsActivationSpecFactory();
 		activationSpecFactory.setDestinationResolver(destinationResolver);

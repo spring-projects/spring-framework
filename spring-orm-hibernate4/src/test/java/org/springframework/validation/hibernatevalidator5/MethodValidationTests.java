@@ -25,7 +25,11 @@ import javax.validation.groups.Default;
 import org.junit.Test;
 
 import org.springframework.aop.framework.ProxyFactory;
+import org.springframework.beans.MutablePropertyValues;
 import org.springframework.context.support.StaticApplicationContext;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.annotation.AsyncAnnotationAdvisor;
+import org.springframework.scheduling.annotation.AsyncAnnotationBeanPostProcessor;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.validation.beanvalidation.MethodValidationInterceptor;
 import org.springframework.validation.beanvalidation.MethodValidationPostProcessor;
@@ -46,6 +50,7 @@ public class MethodValidationTests {
 		MyValidBean bean = new MyValidBean();
 		ProxyFactory proxyFactory = new ProxyFactory(bean);
 		proxyFactory.addAdvice(new MethodValidationInterceptor());
+		proxyFactory.addAdvisor(new AsyncAnnotationAdvisor());
 		doTestProxyValidation((MyValidInterface) proxyFactory.getProxy());
 	}
 
@@ -53,6 +58,9 @@ public class MethodValidationTests {
 	public void testMethodValidationPostProcessor() {
 		StaticApplicationContext ac = new StaticApplicationContext();
 		ac.registerSingleton("mvpp", MethodValidationPostProcessor.class);
+		MutablePropertyValues pvs = new MutablePropertyValues();
+		pvs.add("beforeExistingAdvisors", false);
+		ac.registerSingleton("aapp", AsyncAnnotationBeanPostProcessor.class, pvs);
 		ac.registerSingleton("bean", MyValidBean.class);
 		ac.refresh();
 		doTestProxyValidation(ac.getBean("bean", MyValidInterface.class));
@@ -82,6 +90,22 @@ public class MethodValidationTests {
 		catch (javax.validation.ValidationException ex) {
 			// expected
 		}
+
+		proxy.myValidAsyncMethod("value", 5);
+		try {
+			proxy.myValidAsyncMethod("value", 15);
+			fail("Should have thrown MethodConstraintViolationException");
+		}
+		catch (javax.validation.ValidationException ex) {
+			// expected
+		}
+		try {
+			proxy.myValidAsyncMethod(null, 5);
+			fail("Should have thrown MethodConstraintViolationException");
+		}
+		catch (javax.validation.ValidationException ex) {
+			// expected
+		}
 	}
 
 
@@ -92,12 +116,18 @@ public class MethodValidationTests {
 		public Object myValidMethod(String arg1, int arg2) {
 			return (arg2 == 0 ? null : "value");
 		}
+
+		@Override
+		public void myValidAsyncMethod(String arg1, int arg2) {
+		}
 	}
 
 
 	public interface MyValidInterface {
 
 		@NotNull Object myValidMethod(@NotNull(groups = MyGroup.class) String arg1, @Max(10) int arg2);
+
+		@Async void myValidAsyncMethod(@NotNull(groups = MyGroup.class) String arg1, @Max(10) int arg2);
 	}
 
 

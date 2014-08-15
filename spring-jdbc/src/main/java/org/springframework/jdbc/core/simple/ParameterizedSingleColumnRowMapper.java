@@ -32,7 +32,10 @@ import org.springframework.jdbc.core.SingleColumnRowMapper;
  *
  * @author Juergen Hoeller
  * @since 2.5.2
+ * @deprecated along with {@link SimpleJdbcTemplate}, in favor of the regular
+ * {@link org.springframework.jdbc.core.SingleColumnRowMapper}
  */
+@Deprecated
 public class ParameterizedSingleColumnRowMapper<T> extends SingleColumnRowMapper<T>
 		implements ParameterizedRowMapper<T> {
 
@@ -42,9 +45,9 @@ public class ParameterizedSingleColumnRowMapper<T> extends SingleColumnRowMapper
 	 * @param requiredType the type that each result object is expected to match
 	 */
 	public static <T> ParameterizedSingleColumnRowMapper<T> newInstance(Class<T> requiredType) {
-		ParameterizedSingleColumnRowMapper<T> rm = new ParameterizedSingleColumnRowMapper<T>();
-		rm.setRequiredType(requiredType);
-		return rm;
+		ParameterizedSingleColumnRowMapper<T> newInstance = new ParameterizedSingleColumnRowMapper<T>();
+		newInstance.setRequiredType(requiredType);
+		return newInstance;
 	}
 
 }

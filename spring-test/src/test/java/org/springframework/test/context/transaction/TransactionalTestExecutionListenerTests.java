@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +19,9 @@ package org.springframework.test.context.transaction;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
+import org.junit.After;
 import org.junit.Test;
-import org.mockito.Mockito;
+import org.mockito.BDDMockito;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.TestContext;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -30,7 +31,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.SimpleTransactionStatus;
 
 import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
+import static org.mockito.BDDMockito.*;
 import static org.springframework.transaction.annotation.Propagation.*;
 
 /**
@@ -64,24 +65,26 @@ public class TransactionalTestExecutionListenerTests {
 
 	private void assertBeforeTestMethodWithTransactionalTestMethod(Class<? extends Invocable> clazz, boolean invokedInTx)
 			throws Exception {
-		Mockito.<Class<?>> when(testContext.getTestClass()).thenReturn(clazz);
+		BDDMockito.<Class<?>> given(testContext.getTestClass()).willReturn(clazz);
 		Invocable instance = clazz.newInstance();
-		when(testContext.getTestInstance()).thenReturn(instance);
-		when(testContext.getTestMethod()).thenReturn(clazz.getDeclaredMethod("transactionalTest"));
+		given(testContext.getTestInstance()).willReturn(instance);
+		given(testContext.getTestMethod()).willReturn(clazz.getDeclaredMethod("transactionalTest"));
 
 		assertFalse(instance.invoked);
+		TransactionContextHolder.removeCurrentTransactionContext();
 		listener.beforeTestMethod(testContext);
 		assertEquals(invokedInTx, instance.invoked);
 	}
 
 	private void assertBeforeTestMethodWithNonTransactionalTestMethod(Class<? extends Invocable> clazz)
 			throws Exception {
-		Mockito.<Class<?>> when(testContext.getTestClass()).thenReturn(clazz);
+		BDDMockito.<Class<?>> given(testContext.getTestClass()).willReturn(clazz);
 		Invocable instance = clazz.newInstance();
-		when(testContext.getTestInstance()).thenReturn(instance);
-		when(testContext.getTestMethod()).thenReturn(clazz.getDeclaredMethod("nonTransactionalTest"));
+		given(testContext.getTestInstance()).willReturn(instance);
+		given(testContext.getTestMethod()).willReturn(clazz.getDeclaredMethod("nonTransactionalTest"));
 
 		assertFalse(instance.invoked);
+		TransactionContextHolder.removeCurrentTransactionContext();
 		listener.beforeTestMethod(testContext);
 		assertFalse(instance.invoked);
 	}
@@ -92,26 +95,28 @@ public class TransactionalTestExecutionListenerTests {
 	}
 
 	private void assertAfterTestMethodWithTransactionalTestMethod(Class<? extends Invocable> clazz) throws Exception {
-		Mockito.<Class<?>> when(testContext.getTestClass()).thenReturn(clazz);
+		BDDMockito.<Class<?>> given(testContext.getTestClass()).willReturn(clazz);
 		Invocable instance = clazz.newInstance();
-		when(testContext.getTestInstance()).thenReturn(instance);
-		when(testContext.getTestMethod()).thenReturn(clazz.getDeclaredMethod("transactionalTest"));
+		given(testContext.getTestInstance()).willReturn(instance);
+		given(testContext.getTestMethod()).willReturn(clazz.getDeclaredMethod("transactionalTest"));
 
-		when(tm.getTransaction(Mockito.any(TransactionDefinition.class))).thenReturn(new SimpleTransactionStatus());
+		given(tm.getTransaction(BDDMockito.any(TransactionDefinition.class))).willReturn(new SimpleTransactionStatus());
 
 		assertFalse(instance.invoked);
+		TransactionContextHolder.removeCurrentTransactionContext();
 		listener.beforeTestMethod(testContext);
 		listener.afterTestMethod(testContext);
 		assertTrue(instance.invoked);
 	}
 
 	private void assertAfterTestMethodWithNonTransactionalTestMethod(Class<? extends Invocable> clazz) throws Exception {
-		Mockito.<Class<?>> when(testContext.getTestClass()).thenReturn(clazz);
+		BDDMockito.<Class<?>> given(testContext.getTestClass()).willReturn(clazz);
 		Invocable instance = clazz.newInstance();
-		when(testContext.getTestInstance()).thenReturn(instance);
-		when(testContext.getTestMethod()).thenReturn(clazz.getDeclaredMethod("nonTransactionalTest"));
+		given(testContext.getTestInstance()).willReturn(instance);
+		given(testContext.getTestMethod()).willReturn(clazz.getDeclaredMethod("nonTransactionalTest"));
 
 		assertFalse(instance.invoked);
+		TransactionContextHolder.removeCurrentTransactionContext();
 		listener.beforeTestMethod(testContext);
 		listener.afterTestMethod(testContext);
 		assertFalse(instance.invoked);
@@ -119,7 +124,7 @@ public class TransactionalTestExecutionListenerTests {
 
 	private void assertTransactionConfigurationAttributes(Class<?> clazz, String transactionManagerName,
 			boolean defaultRollback) {
-		Mockito.<Class<?>> when(testContext.getTestClass()).thenReturn(clazz);
+		BDDMockito.<Class<?>> given(testContext.getTestClass()).willReturn(clazz);
 
 		TransactionConfigurationAttributes attributes = listener.retrieveConfigurationAttributes(testContext);
 		assertNotNull(attributes);
@@ -128,9 +133,14 @@ public class TransactionalTestExecutionListenerTests {
 	}
 
 	private void assertIsRollback(Class<?> clazz, boolean rollback) throws NoSuchMethodException, Exception {
-		Mockito.<Class<?>> when(testContext.getTestClass()).thenReturn(clazz);
-		when(testContext.getTestMethod()).thenReturn(clazz.getDeclaredMethod("test"));
+		BDDMockito.<Class<?>> given(testContext.getTestClass()).willReturn(clazz);
+		given(testContext.getTestMethod()).willReturn(clazz.getDeclaredMethod("test"));
 		assertEquals(rollback, listener.isRollback(testContext));
+	}
+
+	@After
+	public void cleanUpThreadLocalStateForSubsequentTestClassesInSuite() {
+		TransactionContextHolder.removeCurrentTransactionContext();
 	}
 
 	@Test
@@ -192,14 +202,12 @@ public class TransactionalTestExecutionListenerTests {
 
 	@Test
 	public void retrieveConfigurationAttributesWithMissingTransactionConfiguration() throws Exception {
-		assertTransactionConfigurationAttributes(MissingTransactionConfigurationTestCase.class, "transactionManager",
-			true);
+		assertTransactionConfigurationAttributes(MissingTransactionConfigurationTestCase.class, "", true);
 	}
 
 	@Test
 	public void retrieveConfigurationAttributesWithEmptyTransactionConfiguration() throws Exception {
-		assertTransactionConfigurationAttributes(EmptyTransactionConfigurationTestCase.class, "transactionManager",
-			true);
+		assertTransactionConfigurationAttributes(EmptyTransactionConfigurationTestCase.class, "", true);
 	}
 
 	@Test

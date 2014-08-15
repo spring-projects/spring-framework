@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,11 +17,12 @@
 package org.springframework.context.annotation.configuration;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+import java.util.Set;
+import javax.inject.Provider;
 
 import org.junit.Test;
-import org.springframework.tests.sample.beans.ITestBean;
-import org.springframework.tests.sample.beans.TestBean;
 
 import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.beans.factory.BeanFactory;
@@ -49,6 +50,8 @@ import org.springframework.context.annotation.ConfigurationClassPostProcessor;
 import org.springframework.context.annotation.Scope;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.support.GenericApplicationContext;
+import org.springframework.tests.sample.beans.ITestBean;
+import org.springframework.tests.sample.beans.TestBean;
 
 import static org.junit.Assert.*;
 
@@ -115,7 +118,28 @@ public class ConfigurationClassProcessingTests {
 		try {
 			factory.getBean("methodName");
 			fail("bean should not have been registered with 'methodName'");
-		} catch (NoSuchBeanDefinitionException ex) { /* expected */ }
+		}
+		catch (NoSuchBeanDefinitionException ex) {
+			// expected
+		}
+	}
+
+	@Test  // SPR-11830
+	public void configWithBeanWithProviderImplementation() {
+		GenericApplicationContext ac = new GenericApplicationContext();
+		AnnotationConfigUtils.registerAnnotationConfigProcessors(ac);
+		ac.registerBeanDefinition("config", new RootBeanDefinition(ConfigWithBeanWithProviderImplementation.class));
+		ac.refresh();
+		assertSame(ac.getBean("customName"), ConfigWithBeanWithProviderImplementation.testBean);
+	}
+
+	@Test  // SPR-11830
+	public void configWithSetWithProviderImplementation() {
+		GenericApplicationContext ac = new GenericApplicationContext();
+		AnnotationConfigUtils.registerAnnotationConfigProcessors(ac);
+		ac.registerBeanDefinition("config", new RootBeanDefinition(ConfigWithSetWithProviderImplementation.class));
+		ac.refresh();
+		assertSame(ac.getBean("customName"), ConfigWithSetWithProviderImplementation.set);
 	}
 
 	@Test(expected=BeanDefinitionParsingException.class)
@@ -124,7 +148,7 @@ public class ConfigurationClassProcessingTests {
 	}
 
 	@Test
-	public void simplestPossibleConfiguration() {
+	public void simplestPossibleConfig() {
 		BeanFactory factory = initBeanFactory(SimplestPossibleConfig.class);
 		String stringBean = factory.getBean("stringBean", String.class);
 		assertEquals(stringBean, "foo");
@@ -202,39 +226,12 @@ public class ConfigurationClassProcessingTests {
 
 	@Configuration
 	static class ConfigWithBeanWithCustomName {
+
 		static TestBean testBean = new TestBean();
+
 		@Bean(name="customName")
 		public TestBean methodName() {
 			return testBean;
-		}
-	}
-
-
-	@Configuration
-	static class ConfigWithFinalBean {
-		public final @Bean TestBean testBean() {
-			return new TestBean();
-		}
-	}
-
-
-	@Configuration
-	static class SimplestPossibleConfig {
-		public @Bean String stringBean() {
-			return "foo";
-		}
-	}
-
-
-	@Configuration
-	static class ConfigWithNonSpecificReturnTypes {
-		public @Bean Object stringBean() {
-			return "foo";
-		}
-		public @Bean FactoryBean<?> factoryBean() {
-			ListFactoryBean fb = new ListFactoryBean();
-			fb.setSourceList(Arrays.asList("element1", "element2"));
-			return fb;
 		}
 	}
 
@@ -247,6 +244,63 @@ public class ConfigurationClassProcessingTests {
 		@Bean(name={"name1", "alias1", "alias2", "alias3"})
 		public TestBean methodName() {
 			return testBean;
+		}
+	}
+
+
+	@Configuration
+	static class ConfigWithBeanWithProviderImplementation implements Provider<TestBean> {
+
+		static TestBean testBean = new TestBean();
+
+		@Bean(name="customName")
+		public TestBean get() {
+			return testBean;
+		}
+	}
+
+
+	@Configuration
+	static class ConfigWithSetWithProviderImplementation implements Provider<Set<String>> {
+
+		static Set<String> set = Collections.singleton("value");
+
+		@Bean(name="customName")
+		public Set<String> get() {
+			return set;
+		}
+	}
+
+
+	@Configuration
+	static class ConfigWithFinalBean {
+
+		public final @Bean TestBean testBean() {
+			return new TestBean();
+		}
+	}
+
+
+	@Configuration
+	static class SimplestPossibleConfig {
+
+		public @Bean String stringBean() {
+			return "foo";
+		}
+	}
+
+
+	@Configuration
+	static class ConfigWithNonSpecificReturnTypes {
+
+		public @Bean Object stringBean() {
+			return "foo";
+		}
+
+		public @Bean FactoryBean<?> factoryBean() {
+			ListFactoryBean fb = new ListFactoryBean();
+			fb.setSourceList(Arrays.asList("element1", "element2"));
+			return fb;
 		}
 	}
 

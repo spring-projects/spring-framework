@@ -34,12 +34,6 @@ import org.junit.Test;
 import org.springframework.cache.interceptor.CacheResolver;
 import org.springframework.cache.interceptor.KeyGenerator;
 import org.springframework.cache.jcache.AbstractJCacheTests;
-import org.springframework.cache.jcache.model.BaseKeyCacheOperation;
-import org.springframework.cache.jcache.model.CachePutOperation;
-import org.springframework.cache.jcache.model.CacheRemoveAllOperation;
-import org.springframework.cache.jcache.model.CacheRemoveOperation;
-import org.springframework.cache.jcache.model.CacheResultOperation;
-import org.springframework.cache.jcache.model.JCacheOperation;
 import org.springframework.cache.jcache.support.TestableCacheKeyGenerator;
 import org.springframework.cache.jcache.support.TestableCacheResolver;
 import org.springframework.cache.jcache.support.TestableCacheResolverFactory;
@@ -142,7 +136,8 @@ public class AnnotationCacheOperationSourceTests extends AbstractJCacheTests {
 				getCacheOperation(CacheResultOperation.class, CustomService.class, name.getMethodName(), Long.class);
 		assertJCacheResolver(operation.getCacheResolver(), TestableCacheResolver.class);
 		assertJCacheResolver(operation.getExceptionCacheResolver(), null);
-		assertEquals(defaultKeyGenerator, operation.getKeyGenerator());
+		assertEquals(KeyGeneratorAdapter.class, operation.getKeyGenerator().getClass());
+		assertEquals(defaultKeyGenerator, ((KeyGeneratorAdapter) operation.getKeyGenerator()).getTarget());
 	}
 
 	@Test
@@ -184,9 +179,10 @@ public class AnnotationCacheOperationSourceTests extends AbstractJCacheTests {
 		assertCacheKeyGenerator(operation.getKeyGenerator(), TestableCacheKeyGenerator.class);
 	}
 
-	private void assertDefaults(BaseKeyCacheOperation<?> operation) {
+	private void assertDefaults(AbstractJCacheKeyOperation<?> operation) {
 		assertEquals(defaultCacheResolver, operation.getCacheResolver());
-		assertEquals(defaultKeyGenerator, operation.getKeyGenerator());
+		assertEquals(KeyGeneratorAdapter.class, operation.getKeyGenerator().getClass());
+		assertEquals(defaultKeyGenerator, ((KeyGeneratorAdapter) operation.getKeyGenerator()).getTarget());
 	}
 
 	protected <T extends JCacheOperation<?>> T getDefaultCacheOperation(Class<T> operationType, Class<?>... parameterTypes) {

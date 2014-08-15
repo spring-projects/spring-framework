@@ -23,7 +23,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.web.socket.AbstractHttpRequestTests;
 import org.springframework.web.socket.WebSocketHandler;
@@ -35,7 +34,7 @@ import org.springframework.web.socket.sockjs.transport.session.StubSockJsService
 import org.springframework.web.socket.sockjs.transport.session.TestSockJsSession;
 
 import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
+import static org.mockito.BDDMockito.*;
 
 /**
  * Test fixture for {@link org.springframework.web.socket.sockjs.transport.handler.DefaultSockJsService}.
@@ -72,9 +71,9 @@ public class DefaultSockJsServiceTests extends AbstractHttpRequestTests {
 		Map<String, Object> attributes = Collections.emptyMap();
 		this.session = new TestSockJsSession(sessionId, new StubSockJsServiceConfig(), this.wsHandler, attributes);
 
-		when(this.xhrHandler.getTransportType()).thenReturn(TransportType.XHR);
-		when(this.xhrHandler.createSession(sessionId, this.wsHandler, attributes)).thenReturn(this.session);
-		when(this.xhrSendHandler.getTransportType()).thenReturn(TransportType.XHR_SEND);
+		given(this.xhrHandler.getTransportType()).willReturn(TransportType.XHR);
+		given(this.xhrHandler.createSession(sessionId, this.wsHandler, attributes)).willReturn(this.session);
+		given(this.xhrSendHandler.getTransportType()).willReturn(TransportType.XHR_SEND);
 
 		this.service = new TransportHandlingSockJsService(this.taskScheduler, this.xhrHandler, this.xhrSendHandler);
 	}

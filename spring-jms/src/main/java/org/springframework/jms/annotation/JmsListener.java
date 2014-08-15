@@ -48,7 +48,7 @@ import org.springframework.messaging.handler.annotation.MessageMapping;
  * arguments including the support of validation</li>
  * <li>{@link org.springframework.messaging.handler.annotation.Header @Header}-annotated method
  * arguments to extract a specific header value, including standard JMS headers defined by
- * {@link org.springframework.jms.support.converter.JmsHeaders JmsHeaders}</li>
+ * {@link org.springframework.jms.support.JmsHeaders JmsHeaders}</li>
  * <li>{@link org.springframework.messaging.handler.annotation.Headers @Headers}-annotated
  * argument that must also be assignable to {@link java.util.Map} for getting access to all
  * headers.</li>
@@ -79,7 +79,7 @@ public @interface JmsListener {
 	/**
 	 * The unique identifier of the container managing this endpoint.
 	 * <p>if none is specified an auto-generated one is provided.
-	 * @see org.springframework.jms.config.JmsListenerEndpointRegistry#getContainer(String)
+	 * @see org.springframework.jms.config.JmsListenerEndpointRegistry#getListenerContainer(String)
 	 */
 	String id() default "";
 
@@ -106,5 +106,14 @@ public @interface JmsListener {
 	 * <p>See the JMS specification for a detailed definition of selector expressions.
 	 */
 	String selector() default "";
+
+	/**
+	 * The concurrency for the listener, if any.
+	 * <p>The concurrency limits can be a "lower-upper" String, e.g. "5-10", or a simple
+	 * upper limit String, e.g. "10" (the lower limit will be 1 in this case).
+	 * <p>The underlying container may or may not support all features. For instance, it
+	 * may not be able to scale: in that case only the upper value is used.
+	 */
+	String concurrency() default "";
 
 }

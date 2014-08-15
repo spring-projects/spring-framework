@@ -33,9 +33,9 @@ import java.util.List;
  */
 public class CachingResourceResolver extends AbstractResourceResolver {
 
-	private static final String REQUEST_PATH_PREFIX = "requestPath:";
+	public static final String RESOLVED_RESOURCE_CACHE_KEY_PREFIX = "resolvedResource:";
 
-	private static final String RESOURCE_URL_PATH_PREFIX = "resourceUrlPath:";
+	public static final String RESOLVED_URL_PATH_CACHE_KEY_PREFIX = "resolvedUrlPath:";
 
 
 	private final Cache cache;
@@ -57,7 +57,7 @@ public class CachingResourceResolver extends AbstractResourceResolver {
 	protected Resource resolveResourceInternal(HttpServletRequest request, String requestPath,
 			List<? extends Resource> locations, ResourceResolverChain chain) {
 
-		String key = REQUEST_PATH_PREFIX + requestPath;
+		String key = RESOLVED_RESOURCE_CACHE_KEY_PREFIX + requestPath;
 		Resource resource = this.cache.get(key, Resource.class);
 
 		if (resource != null) {
@@ -82,7 +82,7 @@ public class CachingResourceResolver extends AbstractResourceResolver {
 	protected String resolveUrlPathInternal(String resourceUrlPath,
 			List<? extends Resource> locations, ResourceResolverChain chain) {
 
-		String key = RESOURCE_URL_PATH_PREFIX + resourceUrlPath;
+		String key = RESOLVED_URL_PATH_CACHE_KEY_PREFIX + resourceUrlPath;
 		String resolvedUrlPath = this.cache.get(key, String.class);
 
 		if (resolvedUrlPath != null) {

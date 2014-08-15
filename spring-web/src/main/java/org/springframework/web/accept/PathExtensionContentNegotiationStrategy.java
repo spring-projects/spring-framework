@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,6 +32,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.http.MediaType;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
+import org.springframework.web.HttpMediaTypeNotAcceptableException;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.util.UrlPathHelper;
 import org.springframework.web.util.WebUtils;
@@ -65,6 +66,8 @@ public class PathExtensionContentNegotiationStrategy extends AbstractMappingCont
 
 	private boolean useJaf = JAF_PRESENT;
 
+	private boolean ignoreUnknownExtensions = true;
+
 
 	/**
 	 * Create an instance with the given extension-to-MediaType lookup.
@@ -82,13 +85,29 @@ public class PathExtensionContentNegotiationStrategy extends AbstractMappingCont
 		super(null);
 	}
 
+
 	/**
-	 * Indicate whether to use the Java Activation Framework to map from file extensions to media types.
-	 * <p>Default is {@code true}, i.e. the Java Activation Framework is used (if available).
+	 * Indicate whether to use the Java Activation Framework to map from file
+	 * extensions to media types.
+	 *
+	 * <p>Default is {@code true}, i.e. the Java Activation Framework is used
+	 * (if available).
 	 */
 	public void setUseJaf(boolean useJaf) {
 		this.useJaf = useJaf;
 	}
+
+	/**
+	 * Whether to ignore requests that have a file extension that does not match
+	 * any mapped media types. Setting this to {@code false} will result in a
+	 * {@code HttpMediaTypeNotAcceptableException}.
+	 *
+	 * <p>By default this is set to {@code true}.
+	 */
+	public void setIgnoreUnknownExtensions(boolean ignoreUnknownExtensions) {
+		this.ignoreUnknownExtensions = ignoreUnknownExtensions;
+	}
+
 
 	@Override
 	protected String getMediaTypeKey(NativeWebRequest webRequest) {
@@ -108,12 +127,17 @@ public class PathExtensionContentNegotiationStrategy extends AbstractMappingCont
 	}
 
 	@Override
-	protected MediaType handleNoMatch(NativeWebRequest webRequest, String extension) {
+	protected MediaType handleNoMatch(NativeWebRequest webRequest, String extension)
+			throws HttpMediaTypeNotAcceptableException {
+
 		if (this.useJaf) {
 			MediaType jafMediaType = JafMediaTypeFactory.getMediaType("file." + extension);
 			if (jafMediaType != null && !MediaType.APPLICATION_OCTET_STREAM.equals(jafMediaType)) {
 				return jafMediaType;
 			}
+		}
+		if (!this.ignoreUnknownExtensions) {
+			throw new HttpMediaTypeNotAcceptableException(getAllMediaTypes());
 		}
 		return null;
 	}

@@ -23,11 +23,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.junit.Before;
-import org.junit.Test;
-
-import org.springframework.beans.FatalBeanException;
-
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
@@ -48,8 +43,13 @@ import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.databind.ser.BasicSerializerFactory;
 import com.fasterxml.jackson.databind.ser.Serializers;
 import com.fasterxml.jackson.databind.ser.std.ClassSerializer;
-import com.fasterxml.jackson.databind.ser.std.NumberSerializers.NumberSerializer;
+import com.fasterxml.jackson.databind.ser.std.NumberSerializer;
 import com.fasterxml.jackson.databind.type.SimpleType;
+import com.fasterxml.jackson.dataformat.xml.XmlMapper;
+import org.junit.Before;
+import org.junit.Test;
+
+import org.springframework.beans.FatalBeanException;
 
 import static org.junit.Assert.*;
 
@@ -71,7 +71,7 @@ public class Jackson2ObjectMapperFactoryBeanTests {
 	}
 
 	@Test
-	public void testSettersWithNullValues() {
+	public void settersWithNullValues() {
 		// Should not crash:
 		factory.setSerializers((JsonSerializer<?>[]) null);
 		factory.setSerializersByType(null);
@@ -81,15 +81,16 @@ public class Jackson2ObjectMapperFactoryBeanTests {
 	}
 
 	@Test(expected = FatalBeanException.class)
-	public void testUnknownFeature() {
+	public void unknownFeature() {
 		this.factory.setFeaturesToEnable(Boolean.TRUE);
 		this.factory.afterPropertiesSet();
 	}
 
 	@Test
-	public void testBooleanSetters() {
+	public void booleanSetters() {
 		this.factory.setAutoDetectFields(false);
 		this.factory.setAutoDetectGettersSetters(false);
+		this.factory.setDefaultViewInclusion(false);
 		this.factory.setFailOnEmptyBeans(false);
 		this.factory.setIndentOutput(true);
 		this.factory.afterPropertiesSet();
@@ -100,13 +101,14 @@ public class Jackson2ObjectMapperFactoryBeanTests {
 		assertFalse(objectMapper.getDeserializationConfig().isEnabled(MapperFeature.AUTO_DETECT_FIELDS));
 		assertFalse(objectMapper.getSerializationConfig().isEnabled(MapperFeature.AUTO_DETECT_GETTERS));
 		assertFalse(objectMapper.getDeserializationConfig().isEnabled(MapperFeature.AUTO_DETECT_SETTERS));
+		assertFalse(objectMapper.getDeserializationConfig().isEnabled(MapperFeature.DEFAULT_VIEW_INCLUSION));
 		assertFalse(objectMapper.getSerializationConfig().isEnabled(SerializationFeature.FAIL_ON_EMPTY_BEANS));
 		assertTrue(objectMapper.getSerializationConfig().isEnabled(SerializationFeature.INDENT_OUTPUT));
 		assertTrue(objectMapper.getSerializationConfig().getSerializationInclusion() == JsonInclude.Include.ALWAYS);
 	}
 
 	@Test
-	public void testSetNotNullSerializationInclusion() {
+	public void setNotNullSerializationInclusion() {
 		factory.afterPropertiesSet();
 		assertTrue(factory.getObject().getSerializationConfig().getSerializationInclusion() == JsonInclude.Include.ALWAYS);
 
@@ -116,7 +118,7 @@ public class Jackson2ObjectMapperFactoryBeanTests {
 	}
 
 	@Test
-	public void testSetNotDefaultSerializationInclusion() {
+	public void setNotDefaultSerializationInclusion() {
 		factory.afterPropertiesSet();
 		assertTrue(factory.getObject().getSerializationConfig().getSerializationInclusion() == JsonInclude.Include.ALWAYS);
 
@@ -126,7 +128,7 @@ public class Jackson2ObjectMapperFactoryBeanTests {
 	}
 
 	@Test
-	public void testSetNotEmptySerializationInclusion() {
+	public void setNotEmptySerializationInclusion() {
 		factory.afterPropertiesSet();
 		assertTrue(factory.getObject().getSerializationConfig().getSerializationInclusion() == JsonInclude.Include.ALWAYS);
 
@@ -136,7 +138,7 @@ public class Jackson2ObjectMapperFactoryBeanTests {
 	}
 
 	@Test
-	public void testDateTimeFormatSetter() {
+	public void dateTimeFormatSetter() {
 		SimpleDateFormat dateFormat = new SimpleDateFormat(DATE_FORMAT);
 
 		this.factory.setDateFormat(dateFormat);
@@ -147,7 +149,7 @@ public class Jackson2ObjectMapperFactoryBeanTests {
 	}
 
 	@Test
-	public void testSimpleDateFormatStringSetter() {
+	public void simpleDateFormatStringSetter() {
 		SimpleDateFormat dateFormat = new SimpleDateFormat(DATE_FORMAT);
 
 		this.factory.setSimpleDateFormat(DATE_FORMAT);
@@ -158,26 +160,31 @@ public class Jackson2ObjectMapperFactoryBeanTests {
 	}
 
 	@Test
-	public void testSetModules() {
-		JsonSerializer serializer1 = new NumberSerializer();
+	public void setModules() {
+		NumberSerializer serializer1 = new NumberSerializer();
 		SimpleModule module = new SimpleModule();
-		module.addSerializer(Boolean.class,serializer1);
+		module.addSerializer(Integer.class, serializer1);
 
-		this.factory.setModules(Arrays.asList(new Module[]{module}));
+		this.factory.setModules(Arrays.asList(new Module[] {module}));
 		this.factory.afterPropertiesSet();
 		ObjectMapper objectMapper = this.factory.getObject();
 
 		Serializers serializers = getSerializerFactoryConfig(objectMapper).serializers().iterator().next();
-		assertTrue(serializers.findSerializer(null, SimpleType.construct(Boolean.class), null) == serializer1);
+		assertTrue(serializers.findSerializer(null, SimpleType.construct(Integer.class), null) == serializer1);
 	}
 
 	@Test
-	public void testSimpleSetup() {
+	public void simpleSetup() {
 		this.factory.afterPropertiesSet();
 
 		assertNotNull(this.factory.getObject());
 		assertTrue(this.factory.isSingleton());
 		assertEquals(ObjectMapper.class, this.factory.getObjectType());
+	}
+
+	@Test
+	public void undefinedObjectType() {
+		assertEquals(null, this.factory.getObjectType());
 	}
 
 	private static SerializerFactoryConfig getSerializerFactoryConfig(ObjectMapper objectMapper) {
@@ -189,7 +196,7 @@ public class Jackson2ObjectMapperFactoryBeanTests {
 	}
 
 	@Test
-	public void testPropertyNamingStrategy() {
+	public void propertyNamingStrategy() {
 		PropertyNamingStrategy strategy = new PropertyNamingStrategy.LowerCaseWithUnderscoresStrategy();
 		this.factory.setPropertyNamingStrategy(strategy);
 		this.factory.afterPropertiesSet();
@@ -199,17 +206,16 @@ public class Jackson2ObjectMapperFactoryBeanTests {
 	}
 
 	@Test
-	public void testCompleteSetup() {
+	public void completeSetup() {
 		NopAnnotationIntrospector annotationIntrospector = NopAnnotationIntrospector.instance;
 		ObjectMapper objectMapper = new ObjectMapper();
 
+		factory.setObjectMapper(objectMapper);
 		assertTrue(this.factory.isSingleton());
 		assertEquals(ObjectMapper.class, this.factory.getObjectType());
 
 		Map<Class<?>, JsonDeserializer<?>> deserializers = new HashMap<Class<?>, JsonDeserializer<?>>();
 		deserializers.put(Date.class, new DateDeserializer());
-
-		factory.setObjectMapper(objectMapper);
 
 		JsonSerializer<Class<?>> serializer1 = new ClassSerializer();
 		JsonSerializer<Number> serializer2 = new NumberSerializer();
@@ -253,10 +259,21 @@ public class Jackson2ObjectMapperFactoryBeanTests {
 		assertTrue(objectMapper.getFactory().isEnabled(JsonGenerator.Feature.WRITE_NUMBERS_AS_STRINGS));
 
 		assertFalse(objectMapper.getSerializationConfig().isEnabled(MapperFeature.AUTO_DETECT_GETTERS));
+		assertTrue(objectMapper.getDeserializationConfig().isEnabled(MapperFeature.DEFAULT_VIEW_INCLUSION));
 		assertFalse(objectMapper.getDeserializationConfig().isEnabled(MapperFeature.AUTO_DETECT_FIELDS));
 		assertFalse(objectMapper.getFactory().isEnabled(JsonParser.Feature.AUTO_CLOSE_SOURCE));
 		assertFalse(objectMapper.getFactory().isEnabled(JsonGenerator.Feature.QUOTE_FIELD_NAMES));
 		assertTrue(objectMapper.getSerializationConfig().getSerializationInclusion() == JsonInclude.Include.NON_NULL);
+	}
+
+	@Test
+	public void xmlMapper() {
+		this.factory.setObjectMapper(new XmlMapper());
+		this.factory.afterPropertiesSet();
+
+		assertNotNull(this.factory.getObject());
+		assertTrue(this.factory.isSingleton());
+		assertEquals(XmlMapper.class, this.factory.getObjectType());
 	}
 
 }
