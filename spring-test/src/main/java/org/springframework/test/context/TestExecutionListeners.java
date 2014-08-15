@@ -75,7 +75,7 @@ public @interface TestExecutionListeners {
 		 * locally declared listeners will simply be appended to the list of default
 		 * listeners when merged.
 		 */
-		MERGE_WITH_DEFAULTS,
+		MERGE_WITH_DEFAULTS
 	}
 
 
@@ -133,10 +133,9 @@ public @interface TestExecutionListeners {
 	 * 	// ...
 	 * }</pre>
 	 *
-	 * <p>
-	 * If {@code inheritListeners} is set to {@code false}, the listeners for the
-	 * annotated class will <em>shadow</em> and effectively replace any listeners
-	 * defined by a superclass.
+	 * <p>If {@code inheritListeners} is set to {@code false}, the listeners for
+	 * the annotated class will <em>shadow</em> and effectively replace any
+	 * listeners defined by a superclass.
 	 */
 	boolean inheritListeners() default true;
 
