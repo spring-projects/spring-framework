@@ -227,10 +227,18 @@ configure(subprojects - project(":spring-build-src")) { subproject ->
 		logging.captureStandardOutput LogLevel.INFO // suppress "## warnings" message
 	}
 
-	task sourcesJar(type: Jar, dependsOn:classes) {
-		classifier = "sources"
-		from sourceSets.main.allJava.srcDirs
-		include "**/*.java", "**/*.aj"
+	task sourcesJar(type: Jar, dependsOn: classes) {
+		classifier = 'sources'
+		from sourceSets.main.allJava.srcDirs, sourceSets.main.resources.srcDirs
+		// sourceSets.main.allGroovy.srcDirs can only be applied to groovy projects
+		include '**/*.java'
+		include '**/*.groovy'
+		include '**/*.aj'
+		include 'META-INF/spring.factories'
+		include 'META-INF/services/*'
+		include '**/*.properties'
+		include '**/*.xml'
+		include '**/*.types'
 	}
 
 	task javadocJar(type: Jar) {
@@ -625,7 +633,7 @@ project("spring-context-support") {
 		testRuntime("com.sun.mail:javax.mail:1.5.2")
 	}
 
-	// pick up **/*.types files in src/main
+	// pick up **/mime.types files in src/main
 	sourceSets.main.resources.srcDirs += "src/main/java"
 }
 
