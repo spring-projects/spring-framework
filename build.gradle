@@ -229,8 +229,7 @@ configure(subprojects - project(":spring-build-src")) { subproject ->
 
 	task sourcesJar(type: Jar, dependsOn: classes) {
 		classifier = 'sources'
-		from sourceSets.main.allJava.srcDirs, sourceSets.main.resources.srcDirs
-		// sourceSets.main.allGroovy.srcDirs can only be applied to groovy projects
+		from sourceSets.main.allSource
 		include '**/*.java'
 		include '**/*.groovy'
 		include '**/*.aj'
