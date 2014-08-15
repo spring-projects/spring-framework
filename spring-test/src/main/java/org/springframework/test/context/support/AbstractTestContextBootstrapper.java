@@ -150,7 +150,7 @@ public abstract class AbstractTestContextBootstrapper implements TestContextBoot
 					if (logger.isDebugEnabled()) {
 						logger.debug(String.format(
 							"Merging default listeners with listeners configured via @TestExecutionListeners for class [%s].",
-							clazz.getName()));
+							descriptor.getRootDeclaringClass().getName()));
 					}
 					usingDefaults = true;
 					classesList.addAll(getDefaultTestExecutionListenerClasses());
