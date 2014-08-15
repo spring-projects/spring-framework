@@ -18,23 +18,30 @@ package org.springframework.test.context;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import org.junit.Test;
+import org.springframework.core.Ordered;
+import org.springframework.test.context.jdbc.SqlScriptsTestExecutionListener;
 import org.springframework.test.context.support.AbstractTestExecutionListener;
+import org.springframework.test.context.support.DependencyInjectionTestExecutionListener;
+import org.springframework.test.context.support.DirtiesContextTestExecutionListener;
+import org.springframework.test.context.transaction.TransactionalTestExecutionListener;
+import org.springframework.test.context.web.ServletTestExecutionListener;
 
+import static java.util.Arrays.*;
 import static org.junit.Assert.*;
+import static org.springframework.test.context.TestExecutionListeners.MergeMode.*;
 
 /**
- * <p>
- * JUnit 4 based unit test for the {@link TestExecutionListeners
- * &#064;TestExecutionListeners} annotation, which verifies:
- * </p>
+ * Unit tests for the {@link TestExecutionListeners @TestExecutionListeners}
+ * annotation, which verify:
  * <ul>
  * <li>Proper registering of {@link TestExecutionListener listeners} in
  * conjunction with a {@link TestContextManager}</li>
- * <li><em>Inherited</em> functionality proposed in <a
- * href="http://opensource.atlassian.com/projects/spring/browse/SPR-3896"
- * target="_blank">SPR-3896</a></li>
+ * <li><em>Inherited</em> functionality proposed in
+ * <a href="https://jira.spring.io/browse/SPR-3896" target="_blank">SPR-3896</a></li>
  * </ul>
  *
  * @author Sam Brannen
@@ -42,140 +49,195 @@ import static org.junit.Assert.*;
  */
 public class TestExecutionListenersTests {
 
+	private List<Class<?>> classes(TestContextManager testContextManager) {
+		return testContextManager.getTestExecutionListeners().stream().map(listener -> listener.getClass()).collect(
+			Collectors.toList());
+	}
+
+	private List<String> names(List<Class<?>> classes) {
+		return classes.stream().map(clazz -> clazz.getSimpleName()).collect(Collectors.toList());
+	}
+
+	private void assertRegisteredListeners(Class<?> testClass, List<Class<?>> expected) {
+		TestContextManager testContextManager = new TestContextManager(testClass);
+		assertEquals("TELs registered for " + testClass.getSimpleName(), names(expected),
+			names(classes(testContextManager)));
+	}
+
 	@Test
-	public void verifyNumDefaultListenersRegistered() throws Exception {
-		TestContextManager testContextManager = new TestContextManager(DefaultListenersExampleTestCase.class);
-		assertEquals("Num registered TELs for DefaultListenersExampleTestCase.", 5,
+	public void defaultListeners() {
+		List<Class<?>> expected = asList(ServletTestExecutionListener.class,
+			DependencyInjectionTestExecutionListener.class, DirtiesContextTestExecutionListener.class,
+			TransactionalTestExecutionListener.class, SqlScriptsTestExecutionListener.class);
+		assertRegisteredListeners(DefaultListenersTestCase.class, expected);
+	}
+
+	/**
+	 * @since 4.1
+	 */
+	@Test
+	public void defaultListenersMergedWithCustomListenerPrepended() {
+		List<Class<?>> expected = asList(QuuxTestExecutionListener.class, ServletTestExecutionListener.class,
+			DependencyInjectionTestExecutionListener.class, DirtiesContextTestExecutionListener.class,
+			TransactionalTestExecutionListener.class, SqlScriptsTestExecutionListener.class);
+		assertRegisteredListeners(MergedDefaultListenersWithCustomListenerPrependedTestCase.class, expected);
+	}
+
+	/**
+	 * @since 4.1
+	 */
+	@Test
+	public void defaultListenersMergedWithCustomListenerAppended() {
+		List<Class<?>> expected = asList(ServletTestExecutionListener.class,
+			DependencyInjectionTestExecutionListener.class, DirtiesContextTestExecutionListener.class,
+			TransactionalTestExecutionListener.class, SqlScriptsTestExecutionListener.class,
+			BazTestExecutionListener.class);
+		assertRegisteredListeners(MergedDefaultListenersWithCustomListenerAppendedTestCase.class, expected);
+	}
+
+	/**
+	 * @since 4.1
+	 */
+	@Test
+	public void defaultListenersMergedWithCustomListenerInserted() {
+		List<Class<?>> expected = asList(ServletTestExecutionListener.class,
+			DependencyInjectionTestExecutionListener.class, BarTestExecutionListener.class,
+			DirtiesContextTestExecutionListener.class, TransactionalTestExecutionListener.class,
+			SqlScriptsTestExecutionListener.class);
+		assertRegisteredListeners(MergedDefaultListenersWithCustomListenerInsertedTestCase.class, expected);
+	}
+
+	@Test
+	public void nonInheritedDefaultListeners() {
+		assertRegisteredListeners(NonInheritedDefaultListenersTestCase.class, asList(QuuxTestExecutionListener.class));
+	}
+
+	@Test
+	public void inheritedDefaultListeners() {
+		assertRegisteredListeners(InheritedDefaultListenersTestCase.class, asList(QuuxTestExecutionListener.class));
+		assertRegisteredListeners(SubInheritedDefaultListenersTestCase.class, asList(QuuxTestExecutionListener.class));
+		assertRegisteredListeners(SubSubInheritedDefaultListenersTestCase.class,
+			asList(QuuxTestExecutionListener.class, EnigmaTestExecutionListener.class));
+	}
+
+	@Test
+	public void customListeners() {
+		TestContextManager testContextManager = new TestContextManager(ExplicitListenersTestCase.class);
+		assertEquals("Num registered TELs for ExplicitListenersTestCase.", 3,
 			testContextManager.getTestExecutionListeners().size());
 	}
 
 	@Test
-	public void verifyNumNonInheritedDefaultListenersRegistered() throws Exception {
+	public void nonInheritedListeners() {
+		TestContextManager testContextManager = new TestContextManager(NonInheritedListenersTestCase.class);
+		assertEquals("Num registered TELs for NonInheritedListenersTestCase.", 1,
+			testContextManager.getTestExecutionListeners().size());
+	}
+
+	@Test
+	public void inheritedListeners() {
+		TestContextManager testContextManager = new TestContextManager(InheritedListenersTestCase.class);
+		assertEquals("Num registered TELs for InheritedListenersTestCase.", 4,
+			testContextManager.getTestExecutionListeners().size());
+	}
+
+	@Test
+	public void customListenersRegisteredViaMetaAnnotation() {
+		TestContextManager testContextManager = new TestContextManager(MetaTestCase.class);
+		assertEquals("Num registered TELs for MetaTestCase.", 3, testContextManager.getTestExecutionListeners().size());
+	}
+
+	@Test
+	public void nonInheritedListenersRegisteredViaMetaAnnotation() {
+		TestContextManager testContextManager = new TestContextManager(MetaNonInheritedListenersTestCase.class);
+		assertEquals("Num registered TELs for MetaNonInheritedListenersTestCase.", 1,
+			testContextManager.getTestExecutionListeners().size());
+	}
+
+	@Test
+	public void inheritedListenersRegisteredViaMetaAnnotation() {
+		TestContextManager testContextManager = new TestContextManager(MetaInheritedListenersTestCase.class);
+		assertEquals("Num registered TELs for MetaInheritedListenersTestCase.", 4,
+			testContextManager.getTestExecutionListeners().size());
+	}
+
+	@Test
+	public void customListenersRegisteredViaMetaAnnotationWithOverrides() {
+		TestContextManager testContextManager = new TestContextManager(MetaWithOverridesTestCase.class);
+		assertEquals("Num registered TELs for MetaWithOverridesTestCase.", 3,
+			testContextManager.getTestExecutionListeners().size());
+	}
+
+	@Test
+	public void customsListenersRegisteredViaMetaAnnotationWithInheritedListenersWithOverrides() {
 		TestContextManager testContextManager = new TestContextManager(
-			NonInheritedDefaultListenersExampleTestCase.class);
-		assertEquals("Num registered TELs for NonInheritedDefaultListenersExampleTestCase.", 1,
+			MetaInheritedListenersWithOverridesTestCase.class);
+		assertEquals("Num registered TELs for MetaInheritedListenersWithOverridesTestCase.", 5,
 			testContextManager.getTestExecutionListeners().size());
 	}
 
 	@Test
-	public void verifyNumInheritedDefaultListenersRegistered() throws Exception {
-		TestContextManager testContextManager = new TestContextManager(InheritedDefaultListenersExampleTestCase.class);
-		assertEquals("Num registered TELs for InheritedDefaultListenersExampleTestCase.", 1,
-			testContextManager.getTestExecutionListeners().size());
-
-		testContextManager = new TestContextManager(SubInheritedDefaultListenersExampleTestCase.class);
-		assertEquals("Num registered TELs for SubInheritedDefaultListenersExampleTestCase.", 1,
-			testContextManager.getTestExecutionListeners().size());
-
-		testContextManager = new TestContextManager(SubSubInheritedDefaultListenersExampleTestCase.class);
-		assertEquals("Num registered TELs for SubSubInheritedDefaultListenersExampleTestCase.", 2,
-			testContextManager.getTestExecutionListeners().size());
-	}
-
-	@Test
-	public void verifyNumListenersRegistered() throws Exception {
-		TestContextManager testContextManager = new TestContextManager(ExampleTestCase.class);
-		assertEquals("Num registered TELs for ExampleTestCase.", 3,
-			testContextManager.getTestExecutionListeners().size());
-	}
-
-	@Test
-	public void verifyNumNonInheritedListenersRegistered() throws Exception {
-		TestContextManager testContextManager = new TestContextManager(NonInheritedListenersExampleTestCase.class);
-		assertEquals("Num registered TELs for NonInheritedListenersExampleTestCase.", 1,
-			testContextManager.getTestExecutionListeners().size());
-	}
-
-	@Test
-	public void verifyNumInheritedListenersRegistered() throws Exception {
-		TestContextManager testContextManager = new TestContextManager(InheritedListenersExampleTestCase.class);
-		assertEquals("Num registered TELs for InheritedListenersExampleTestCase.", 4,
-			testContextManager.getTestExecutionListeners().size());
-	}
-
-	@Test
-	public void verifyNumListenersRegisteredViaMetaAnnotation() throws Exception {
-		TestContextManager testContextManager = new TestContextManager(MetaExampleTestCase.class);
-		assertEquals("Num registered TELs for MetaExampleTestCase.", 3,
-			testContextManager.getTestExecutionListeners().size());
-	}
-
-	@Test
-	public void verifyNumNonInheritedListenersRegisteredViaMetaAnnotation() throws Exception {
-		TestContextManager testContextManager = new TestContextManager(MetaNonInheritedListenersExampleTestCase.class);
-		assertEquals("Num registered TELs for MetaNonInheritedListenersExampleTestCase.", 1,
-			testContextManager.getTestExecutionListeners().size());
-	}
-
-	@Test
-	public void verifyNumInheritedListenersRegisteredViaMetaAnnotation() throws Exception {
-		TestContextManager testContextManager = new TestContextManager(MetaInheritedListenersExampleTestCase.class);
-		assertEquals("Num registered TELs for MetaInheritedListenersExampleTestCase.", 4,
-			testContextManager.getTestExecutionListeners().size());
-	}
-
-	@Test
-	public void verifyNumListenersRegisteredViaMetaAnnotationWithOverrides() throws Exception {
-		TestContextManager testContextManager = new TestContextManager(MetaWithOverridesExampleTestCase.class);
-		assertEquals("Num registered TELs for MetaWithOverridesExampleTestCase.", 3,
-			testContextManager.getTestExecutionListeners().size());
-	}
-
-	@Test
-	public void verifyNumListenersRegisteredViaMetaAnnotationWithInheritedListenersWithOverrides() throws Exception {
+	public void customListenersRegisteredViaMetaAnnotationWithNonInheritedListenersWithOverrides() {
 		TestContextManager testContextManager = new TestContextManager(
-			MetaInheritedListenersWithOverridesExampleTestCase.class);
-		assertEquals("Num registered TELs for MetaInheritedListenersWithOverridesExampleTestCase.", 5,
-			testContextManager.getTestExecutionListeners().size());
-	}
-
-	@Test
-	public void verifyNumListenersRegisteredViaMetaAnnotationWithNonInheritedListenersWithOverrides() throws Exception {
-		TestContextManager testContextManager = new TestContextManager(
-			MetaNonInheritedListenersWithOverridesExampleTestCase.class);
-		assertEquals("Num registered TELs for MetaNonInheritedListenersWithOverridesExampleTestCase.", 8,
+			MetaNonInheritedListenersWithOverridesTestCase.class);
+		assertEquals("Num registered TELs for MetaNonInheritedListenersWithOverridesTestCase.", 8,
 			testContextManager.getTestExecutionListeners().size());
 	}
 
 	@Test(expected = IllegalStateException.class)
-	public void verifyDuplicateListenersConfigThrowsException() throws Exception {
-		new TestContextManager(DuplicateListenersConfigExampleTestCase.class);
+	public void listenersAndValueAttributesDeclared() {
+		new TestContextManager(DuplicateListenersConfigTestCase.class);
 	}
 
 
-	static class DefaultListenersExampleTestCase {
+	// -------------------------------------------------------------------
+
+	static class DefaultListenersTestCase {
+	}
+
+	@TestExecutionListeners(listeners = { QuuxTestExecutionListener.class,
+		DependencyInjectionTestExecutionListener.class }, mergeMode = MERGE_WITH_DEFAULTS)
+	static class MergedDefaultListenersWithCustomListenerPrependedTestCase {
+	}
+
+	@TestExecutionListeners(listeners = BazTestExecutionListener.class, mergeMode = MERGE_WITH_DEFAULTS)
+	static class MergedDefaultListenersWithCustomListenerAppendedTestCase {
+	}
+
+	@TestExecutionListeners(listeners = BarTestExecutionListener.class, mergeMode = MERGE_WITH_DEFAULTS)
+	static class MergedDefaultListenersWithCustomListenerInsertedTestCase {
 	}
 
 	@TestExecutionListeners(QuuxTestExecutionListener.class)
-	static class InheritedDefaultListenersExampleTestCase extends DefaultListenersExampleTestCase {
+	static class InheritedDefaultListenersTestCase extends DefaultListenersTestCase {
 	}
 
-	static class SubInheritedDefaultListenersExampleTestCase extends InheritedDefaultListenersExampleTestCase {
+	static class SubInheritedDefaultListenersTestCase extends InheritedDefaultListenersTestCase {
 	}
 
 	@TestExecutionListeners(EnigmaTestExecutionListener.class)
-	static class SubSubInheritedDefaultListenersExampleTestCase extends SubInheritedDefaultListenersExampleTestCase {
+	static class SubSubInheritedDefaultListenersTestCase extends SubInheritedDefaultListenersTestCase {
 	}
 
 	@TestExecutionListeners(listeners = { QuuxTestExecutionListener.class }, inheritListeners = false)
-	static class NonInheritedDefaultListenersExampleTestCase extends InheritedDefaultListenersExampleTestCase {
+	static class NonInheritedDefaultListenersTestCase extends InheritedDefaultListenersTestCase {
 	}
 
 	@TestExecutionListeners({ FooTestExecutionListener.class, BarTestExecutionListener.class,
 		BazTestExecutionListener.class })
-	static class ExampleTestCase {
+	static class ExplicitListenersTestCase {
 	}
 
 	@TestExecutionListeners(QuuxTestExecutionListener.class)
-	static class InheritedListenersExampleTestCase extends ExampleTestCase {
+	static class InheritedListenersTestCase extends ExplicitListenersTestCase {
 	}
 
 	@TestExecutionListeners(listeners = QuuxTestExecutionListener.class, inheritListeners = false)
-	static class NonInheritedListenersExampleTestCase extends InheritedListenersExampleTestCase {
+	static class NonInheritedListenersTestCase extends InheritedListenersTestCase {
 	}
 
 	@TestExecutionListeners(listeners = FooTestExecutionListener.class, value = BarTestExecutionListener.class)
-	static class DuplicateListenersConfigExampleTestCase {
+	static class DuplicateListenersConfigTestCase {
 	}
 
 	@TestExecutionListeners({//
@@ -224,15 +286,15 @@ public class TestExecutionListenersTests {
 	}
 
 	@MetaListeners
-	static class MetaExampleTestCase {
+	static class MetaTestCase {
 	}
 
 	@MetaInheritedListeners
-	static class MetaInheritedListenersExampleTestCase extends MetaExampleTestCase {
+	static class MetaInheritedListenersTestCase extends MetaTestCase {
 	}
 
 	@MetaNonInheritedListeners
-	static class MetaNonInheritedListenersExampleTestCase extends MetaInheritedListenersExampleTestCase {
+	static class MetaNonInheritedListenersTestCase extends MetaInheritedListenersTestCase {
 	}
 
 	@MetaListenersWithOverrides(listeners = {//
@@ -240,11 +302,11 @@ public class TestExecutionListenersTests {
 		BarTestExecutionListener.class,//
 		BazTestExecutionListener.class //
 	})
-	static class MetaWithOverridesExampleTestCase {
+	static class MetaWithOverridesTestCase {
 	}
 
 	@MetaInheritedListenersWithOverrides(listeners = { FooTestExecutionListener.class, BarTestExecutionListener.class })
-	static class MetaInheritedListenersWithOverridesExampleTestCase extends MetaWithOverridesExampleTestCase {
+	static class MetaInheritedListenersWithOverridesTestCase extends MetaWithOverridesTestCase {
 	}
 
 	@MetaNonInheritedListenersWithOverrides(listeners = {//
@@ -253,20 +315,36 @@ public class TestExecutionListenersTests {
 		BazTestExecutionListener.class //
 	},//
 	inheritListeners = true)
-	static class MetaNonInheritedListenersWithOverridesExampleTestCase extends
-			MetaInheritedListenersWithOverridesExampleTestCase {
+	static class MetaNonInheritedListenersWithOverridesTestCase extends MetaInheritedListenersWithOverridesTestCase {
 	}
 
 	static class FooTestExecutionListener extends AbstractTestExecutionListener {
 	}
 
 	static class BarTestExecutionListener extends AbstractTestExecutionListener {
+
+		@Override
+		public int getOrder() {
+			// 2500 is between DependencyInjectionTestExecutionListener (2000) and
+			// DirtiesContextTestExecutionListener (3000)
+			return 2500;
+		}
 	}
 
 	static class BazTestExecutionListener extends AbstractTestExecutionListener {
+
+		@Override
+		public int getOrder() {
+			return Ordered.LOWEST_PRECEDENCE;
+		}
 	}
 
 	static class QuuxTestExecutionListener extends AbstractTestExecutionListener {
+
+		@Override
+		public int getOrder() {
+			return Ordered.HIGHEST_PRECEDENCE;
+		}
 	}
 
 	static class EnigmaTestExecutionListener extends AbstractTestExecutionListener {

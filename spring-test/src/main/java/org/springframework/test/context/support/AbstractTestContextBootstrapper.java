@@ -19,6 +19,7 @@ package org.springframework.test.context.support;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -45,6 +46,7 @@ import org.springframework.test.context.SmartContextLoader;
 import org.springframework.test.context.TestContextBootstrapper;
 import org.springframework.test.context.TestExecutionListener;
 import org.springframework.test.context.TestExecutionListeners;
+import org.springframework.test.context.TestExecutionListeners.MergeMode;
 import org.springframework.test.util.MetaAnnotationUtils;
 import org.springframework.test.util.MetaAnnotationUtils.AnnotationDescriptor;
 import org.springframework.util.Assert;
@@ -137,12 +139,35 @@ public abstract class AbstractTestContextBootstrapper implements TestContextBoot
 					listenerClasses = valueListenerClasses;
 				}
 
-				if (listenerClasses != null) {
-					classesList.addAll(0, Arrays.<Class<? extends TestExecutionListener>> asList(listenerClasses));
+				boolean inheritListeners = annAttrs.getBoolean("inheritListeners");
+				AnnotationDescriptor<TestExecutionListeners> superDescriptor = MetaAnnotationUtils.findAnnotationDescriptor(
+					descriptor.getRootDeclaringClass().getSuperclass(), annotationType);
+
+				// If there are no listeners to inherit, we might need to merge the
+				// locally declared listeners with the defaults.
+				if ((!inheritListeners || superDescriptor == null)
+						&& (annAttrs.getEnum("mergeMode") == MergeMode.MERGE_WITH_DEFAULTS)) {
+					if (logger.isDebugEnabled()) {
+						logger.debug(String.format(
+							"Merging default listeners with listeners configured via @TestExecutionListeners for class [%s].",
+							clazz.getName()));
+					}
+					usingDefaults = true;
+					classesList.addAll(getDefaultTestExecutionListenerClasses());
 				}
-				descriptor = (annAttrs.getBoolean("inheritListeners") ? MetaAnnotationUtils.findAnnotationDescriptor(
-					descriptor.getRootDeclaringClass().getSuperclass(), annotationType) : null);
+
+				classesList.addAll(0, Arrays.<Class<? extends TestExecutionListener>> asList(listenerClasses));
+
+				descriptor = (inheritListeners ? superDescriptor : null);
 			}
+		}
+
+		// Remove possible duplicates if we loaded default listeners.
+		if (usingDefaults) {
+			Set<Class<? extends TestExecutionListener>> classesSet = new HashSet<Class<? extends TestExecutionListener>>();
+			classesSet.addAll(classesList);
+			classesList.clear();
+			classesList.addAll(classesSet);
 		}
 
 		List<TestExecutionListener> listeners = instantiateListeners(classesList);
