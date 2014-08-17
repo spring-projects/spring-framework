@@ -220,7 +220,7 @@ public class JdbcTemplateQueryTests {
 		String sql = "SELECT AGE FROM CUSTMR WHERE ID = 3";
 		given(this.resultSet.next()).willReturn(true, false);
 		given(this.resultSet.getInt(1)).willReturn(22);
-		int i = this.template.queryForInt(sql);
+		int i = this.template.queryForObject(sql,Integer.class).intValue();
 		assertEquals("Return of an int", 22, i);
 		verify(this.resultSet).close();
 		verify(this.statement).close();
@@ -231,7 +231,7 @@ public class JdbcTemplateQueryTests {
 		String sql = "SELECT AGE FROM CUSTMR WHERE ID = 3";
 		given(this.resultSet.next()).willReturn(true, false);
 		given(this.resultSet.getLong(1)).willReturn(87L);
-		long l = this.template.queryForLong(sql);
+		long l = this.template.queryForObject(sql, Long.class).longValue();
 		assertEquals("Return of a long", 87, l);
 		verify(this.resultSet).close();
 		verify(this.statement).close();
@@ -342,7 +342,7 @@ public class JdbcTemplateQueryTests {
 		String sql = "SELECT AGE FROM CUSTMR WHERE ID = ?";
 		given(this.resultSet.next()).willReturn(true, false);
 		given(this.resultSet.getInt(1)).willReturn(22);
-		int i = this.template.queryForInt(sql, new Object[] {3});
+		int i = this.template.queryForObject(sql, new Object[] {3}, Integer.class).intValue();
 		assertEquals("Return of an int", 22, i);
 		verify(this.preparedStatement).setObject(1, 3);
 		verify(this.resultSet).close();
@@ -354,7 +354,7 @@ public class JdbcTemplateQueryTests {
 		String sql = "SELECT AGE FROM CUSTMR WHERE ID = ?";
 		given(this.resultSet.next()).willReturn(true, false);
 		given(this.resultSet.getLong(1)).willReturn(87L);
-		long l = this.template.queryForLong(sql, new Object[] {3});
+		long l = this.template.queryForObject(sql, new Object[] {3}, Long.class).longValue();
 		assertEquals("Return of a long", 87, l);
 		verify(this.preparedStatement).setObject(1, 3);
 		verify(this.resultSet).close();
