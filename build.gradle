@@ -407,7 +407,7 @@ project("spring-aop") {
 		compile("aopalliance:aopalliance:1.0")
 		optional("org.aspectj:aspectjweaver:${aspectjVersion}")
 		optional("commons-pool:commons-pool:1.6")
-		optional("com.jamonapi:jamon:2.76")
+		optional("com.jamonapi:jamon:2.78")
 	}
 }
 
