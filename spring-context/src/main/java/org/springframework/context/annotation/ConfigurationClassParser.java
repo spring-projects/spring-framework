@@ -172,24 +172,24 @@ class ConfigurationClassParser {
 	 * @return annotation metadata of superclass, {@code null} if none found or previously processed
 	 */
 	protected AnnotationMetadata doProcessConfigurationClass(ConfigurationClass configClass, AnnotationMetadata metadata) throws IOException {
-		// recursively process any member (nested) classes first
+		// Recursively process any member (nested) classes first
 		processMemberClasses(metadata);
 
-		// process any @PropertySource annotations
+		// Process any @PropertySource annotations
 		AnnotationAttributes propertySource = MetadataUtils.attributesFor(metadata,
 				org.springframework.context.annotation.PropertySource.class);
 		if (propertySource != null) {
 			processPropertySource(propertySource);
 		}
 
-		// process any @ComponentScan annotations
+		// Process any @ComponentScan annotations
 		AnnotationAttributes componentScan = MetadataUtils.attributesFor(metadata, ComponentScan.class);
 		if (componentScan != null) {
-			// the config class is annotated with @ComponentScan -> perform the scan immediately
+			// The config class is annotated with @ComponentScan -> perform the scan immediately
 			Set<BeanDefinitionHolder> scannedBeanDefinitions =
 					this.componentScanParser.parse(componentScan, metadata.getClassName());
 
-			// check the set of scanned definitions for any further config classes and parse recursively if necessary
+			// Check the set of scanned definitions for any further config classes and parse recursively if necessary
 			for (BeanDefinitionHolder holder : scannedBeanDefinitions) {
 				if (ConfigurationClassUtils.checkConfigurationClassCandidate(holder.getBeanDefinition(), this.metadataReaderFactory)) {
 					this.parse(holder.getBeanDefinition().getBeanClassName(), holder.getBeanName());
@@ -197,7 +197,7 @@ class ConfigurationClassParser {
 			}
 		}
 
-		// process any @Import annotations
+		// Process any @Import annotations
 		Set<Object> imports = new LinkedHashSet<Object>();
 		Set<Object> visited = new LinkedHashSet<Object>();
 		collectImports(metadata, imports, visited);
@@ -205,7 +205,7 @@ class ConfigurationClassParser {
 			processImport(configClass, metadata, imports, true);
 		}
 
-		// process any @ImportResource annotations
+		// Process any @ImportResource annotations
 		if (metadata.isAnnotated(ImportResource.class.getName())) {
 			AnnotationAttributes importResource = MetadataUtils.attributesFor(metadata, ImportResource.class);
 			String[] resources = importResource.getStringArray("value");
@@ -216,13 +216,13 @@ class ConfigurationClassParser {
 			}
 		}
 
-		// process individual @Bean methods
+		// Process individual @Bean methods
 		Set<MethodMetadata> beanMethods = metadata.getAnnotatedMethods(Bean.class.getName());
 		for (MethodMetadata methodMetadata : beanMethods) {
 			configClass.addBeanMethod(new BeanMethod(methodMetadata, configClass));
 		}
 
-		// process superclass, if any
+		// Process superclass, if any
 		if (metadata.hasSuperClass()) {
 			String superclass = metadata.getSuperClassName();
 			if (!superclass.startsWith("java") && !this.knownSuperclasses.containsKey(superclass)) {
@@ -239,7 +239,7 @@ class ConfigurationClassParser {
 			}
 		}
 
-		// no superclass, processing is complete
+		// No superclass -> processing is complete
 		return null;
 	}
 
