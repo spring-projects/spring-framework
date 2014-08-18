@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,7 +45,7 @@ import org.springframework.core.io.Resource;
  * also necessary for loading EhCache configuration from a non-default config location.
  *
  * <p>Note: As of Spring 4.0, Spring's EhCache support requires EhCache 2.1 or higher.
- * We recommend the use of EhCache 2.5 or higher.
+ * We strongly recommend the use of EhCache 2.5 or higher.
  *
  * @author Juergen Hoeller
  * @author Dmitriy Kopylenko
@@ -132,7 +132,7 @@ public class EhCacheManagerFactoryBean implements FactoryBean<CacheManager>, Ini
 
 
 	@Override
-	public void afterPropertiesSet() throws IOException, CacheException {
+	public void afterPropertiesSet() throws CacheException, IOException {
 		logger.info("Initializing EhCache CacheManager");
 		InputStream is = (this.configLocation != null ? this.configLocation.getInputStream() : null);
 		try {
