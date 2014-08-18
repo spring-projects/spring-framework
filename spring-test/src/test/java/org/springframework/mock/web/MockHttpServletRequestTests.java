@@ -261,5 +261,34 @@ public class MockHttpServletRequestTests {
 			assertEquals("enumeration element #" + ++count, enum1.nextElement(), enum2.nextElement());
 		}
 	}
-
+	
+	/**
+	 * SPR-12088
+	 */
+    @Test
+    public void getServerName() {
+        assertEquals("localhost", request.getServerName());
+        assertEquals(80, request.getServerPort());
+        
+        request.setServerName("127.0.0.1");
+        request.setServerPort(8080);
+        
+        assertEquals("127.0.0.1", request.getServerName());
+        assertEquals(8080, request.getServerPort());        
+    }
+    
+	@Test
+	public void getServerNameWithHeader() {
+		request.addHeader("Host", "12.34.56.78:90");	
+		assertEquals("12.34.56.78", request.getServerName());
+		assertEquals(90, request.getServerPort());
+	}
+		
+    @Test
+    public void getServerNameWithHeaderWithoutPort() {
+        request.addHeader("Host", "23.45.67.89");    
+        assertEquals("23.45.67.89", request.getServerName());
+        assertEquals(80, request.getServerPort());
+    }
+    
 }
