@@ -16,14 +16,14 @@ ext {
 	linkIssue = 'https://jira.spring.io/browse/SPR'
 	linkScmUrl = 'https://github.com/spring-projects/spring-framework'
 	linkScmConnection = 'scm:git:git://github.com/spring-projects/spring-framework.git'
-	linkScmDevConnection = 'scm:git:ssh://git@github.com:spring-projects/spring-framwork.git'
+	linkScmDevConnection = 'scm:git:ssh://git@github.com:spring-projects/spring-framework.git'
 }
 
 configure(allprojects) { project ->
 	group = "org.springframework"
 	version = qualifyVersionIfNecessary(version)
 
-	ext.aspectjVersion       = "1.8.1"
+	ext.aspectjVersion       = "1.8.2"
 	ext.eclipseLinkVersion   = "2.4.2"
 	ext.ehcacheVersion       = "2.8.3"
 	ext.ehcacheJCacheVersion = "1.0.0"
@@ -33,7 +33,7 @@ configure(allprojects) { project ->
 	ext.hibVal4Version       = "4.3.2.Final"
 	ext.hibVal5Version       = "5.1.2.Final"
 	ext.hsqldbVersion        = "2.3.2"
-	ext.jackson2Version      = "2.4.1"
+	ext.jackson2Version      = "2.4.2"
 	ext.gsonVersion          = "2.3"
 	ext.jasperReportsVersion = "5.6.0"
 	ext.jettyVersion         = "9.2.2.v20140723"
