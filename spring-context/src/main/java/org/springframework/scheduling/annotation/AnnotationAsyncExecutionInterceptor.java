@@ -46,7 +46,7 @@ public class AnnotationAsyncExecutionInterceptor extends AsyncExecutionIntercept
 	 * executor has been qualified at the method level using {@link Async#value()}
 	 */
 	public AnnotationAsyncExecutionInterceptor(Executor defaultExecutor) {
-		this(defaultExecutor, new SimpleAsyncUncaughtExceptionHandler());
+		super(defaultExecutor);
 	}
 
 	/**

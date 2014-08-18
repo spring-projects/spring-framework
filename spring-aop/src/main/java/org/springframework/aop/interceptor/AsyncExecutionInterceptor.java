@@ -23,8 +23,6 @@ import java.util.concurrent.Future;
 
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 import org.springframework.aop.support.AopUtils;
 import org.springframework.core.BridgeMethodResolver;
@@ -32,7 +30,6 @@ import org.springframework.core.Ordered;
 import org.springframework.core.task.AsyncListenableTaskExecutor;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.util.ClassUtils;
-import org.springframework.util.ReflectionUtils;
 import org.springframework.util.concurrent.ListenableFuture;
 
 /**
@@ -70,11 +67,6 @@ import org.springframework.util.concurrent.ListenableFuture;
 public class AsyncExecutionInterceptor extends AsyncExecutionAspectSupport
 		implements MethodInterceptor, Ordered {
 
-	private final Log logger = LogFactory.getLog(getClass());
-
-	private AsyncUncaughtExceptionHandler exceptionHandler;
-
-
 	/**
 	 * Create a new {@code AsyncExecutionInterceptor}.
 	 * @param defaultExecutor the {@link Executor} (typically a Spring {@link AsyncTaskExecutor}
@@ -82,26 +74,15 @@ public class AsyncExecutionInterceptor extends AsyncExecutionAspectSupport
 	 * @param exceptionHandler the {@link AsyncUncaughtExceptionHandler} to use
 	 */
 	public AsyncExecutionInterceptor(Executor defaultExecutor, AsyncUncaughtExceptionHandler exceptionHandler) {
-		super(defaultExecutor);
-		this.exceptionHandler = exceptionHandler;
+		super(defaultExecutor, exceptionHandler);
 	}
 
 	/**
 	 * Create a new instance with a default {@link AsyncUncaughtExceptionHandler}.
 	 */
 	public AsyncExecutionInterceptor(Executor defaultExecutor) {
-		this(defaultExecutor, new SimpleAsyncUncaughtExceptionHandler());
+		super(defaultExecutor);
 	}
-
-
-	/**
-	 * Supply the {@link AsyncUncaughtExceptionHandler} to use to handle exceptions
-	 * thrown by invoking asynchronous methods with a {@code void} return type.
-	 */
-	public void setExceptionHandler(AsyncUncaughtExceptionHandler exceptionHandler) {
-		this.exceptionHandler = exceptionHandler;
-	}
-
 
 	/**
 	 * Intercept the given method invocation, submit the actual calling of the method to
@@ -148,34 +129,6 @@ public class AsyncExecutionInterceptor extends AsyncExecutionAspectSupport
 		else {
 			executor.submit(task);
 			return null;
-		}
-	}
-
-	/**
-	 * Handles a fatal error thrown while asynchronously invoking the specified
-	 * {@link Method}.
-	 * <p>If the return type of the method is a {@link Future} object, the original
-	 * exception can be propagated by just throwing it at the higher level. However,
-	 * for all other cases, the exception will not be transmitted back to the client.
-	 * In that later case, the current {@link AsyncUncaughtExceptionHandler} will be
-	 * used to manage such exception.
-	 * @param ex the exception to handle
-	 * @param method the method that was invoked
-	 * @param params the parameters used to invoke the method
-	 */
-	protected void handleError(Throwable ex, Method method, Object... params) throws Exception {
-		if (method.getReturnType().isAssignableFrom(Future.class)) {
-			ReflectionUtils.rethrowException(ex);
-		}
-		else {
-			// Could not transmit the exception to the caller with default executor
-			try {
-				this.exceptionHandler.handleUncaughtException(ex, method, params);
-			}
-			catch (Throwable ex2) {
-				logger.error("Exception handler for async method '" + method.toGenericString() +
-						"' threw unexpected exception itself", ex2);
-			}
 		}
 	}
 
