@@ -23,7 +23,9 @@ import java.util.concurrent.Future;
 import org.aspectj.lang.reflect.MethodSignature;
 
 import org.springframework.aop.interceptor.AsyncExecutionAspectSupport;
+import org.springframework.core.task.AsyncListenableTaskExecutor;
 import org.springframework.core.task.AsyncTaskExecutor;
+import org.springframework.util.concurrent.ListenableFuture;
 
 /**
  * Abstract aspect that routes selected methods asynchronously.
@@ -75,11 +77,16 @@ public abstract aspect AbstractAsyncExecutionAspect extends AsyncExecutionAspect
 				}
 				return null;
 			}};
-		Future<?> result = executor.submit(callable);
-		if (Future.class.isAssignableFrom(methodSignature.getReturnType())) {
-			return result;
+
+		Class<?> returnType = methodSignature.getReturnType();
+		if (ListenableFuture.class.isAssignableFrom(returnType)) {
+			return ((AsyncListenableTaskExecutor) executor).submitListenable(callable);
+		}
+		else if (Future.class.isAssignableFrom(returnType)) {
+			return executor.submit(callable);
 		}
 		else {
+			executor.submit(callable);
 			return null;
 		}
 	}
