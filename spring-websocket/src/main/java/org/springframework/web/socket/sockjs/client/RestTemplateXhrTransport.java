@@ -16,6 +16,11 @@
 
 package org.springframework.web.socket.sockjs.client;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URI;
+
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.http.HttpHeaders;
@@ -37,11 +42,6 @@ import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.sockjs.frame.SockJsFrame;
-
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URI;
 
 /**
  * An {@code XhrTransport} implementation that uses a
@@ -76,12 +76,9 @@ public class RestTemplateXhrTransport extends AbstractXhrTransport implements Xh
 
 	/**
 	 * Configure the {@code TaskExecutor} to use to execute XHR receive requests.
-	 *
 	 * <p>By default {@link org.springframework.core.task.SimpleAsyncTaskExecutor
 	 * SimpleAsyncTaskExecutor} is configured which creates a new thread every
 	 * time the transports connects.
-	 *
-	 * @param taskExecutor the task executor, cannot be {@code null}
 	 */
 	public void setTaskExecutor(TaskExecutor taskExecutor) {
 		Assert.notNull(this.taskExecutor);
@@ -148,42 +145,10 @@ public class RestTemplateXhrTransport extends AbstractXhrTransport implements Xh
 
 
 	/**
-	 * A RequestCallback to add the headers and (optionally) String content.
-	 */
-	private static class XhrRequestCallback implements RequestCallback {
-
-		private final HttpHeaders headers;
-
-		private final String body;
-
-
-		public XhrRequestCallback(HttpHeaders headers) {
-			this(headers, null);
-		}
-
-		public XhrRequestCallback(HttpHeaders headers, String body) {
-			this.headers = headers;
-			this.body = body;
-		}
-
-
-		@Override
-		public void doWithRequest(ClientHttpRequest request) throws IOException {
-			if (this.headers != null) {
-				request.getHeaders().putAll(this.headers);
-			}
-			if (this.body != null) {
-				StreamUtils.copy(this.body, SockJsFrame.CHARSET, request.getBody());
-			}
-		}
-	}
-
-	/**
 	 * A simple ResponseExtractor that reads the body into a String.
 	 */
 	private final static ResponseExtractor<ResponseEntity<String>> textExtractor =
 			new ResponseExtractor<ResponseEntity<String>>() {
-
 				@Override
 				public ResponseEntity<String> extractData(ClientHttpResponse response) throws IOException {
 					if (response.getBody() == null) {
@@ -196,6 +161,37 @@ public class RestTemplateXhrTransport extends AbstractXhrTransport implements Xh
 				}
 			};
 
+
+	/**
+	 * A RequestCallback to add the headers and (optionally) String content.
+	 */
+	private static class XhrRequestCallback implements RequestCallback {
+
+		private final HttpHeaders headers;
+
+		private final String body;
+
+		public XhrRequestCallback(HttpHeaders headers) {
+			this(headers, null);
+		}
+
+		public XhrRequestCallback(HttpHeaders headers, String body) {
+			this.headers = headers;
+			this.body = body;
+		}
+
+		@Override
+		public void doWithRequest(ClientHttpRequest request) throws IOException {
+			if (this.headers != null) {
+				request.getHeaders().putAll(this.headers);
+			}
+			if (this.body != null) {
+				StreamUtils.copy(this.body, SockJsFrame.CHARSET, request.getBody());
+			}
+		}
+	}
+
+
 	/**
 	 * Splits the body of an HTTP response into SockJS frames and delegates those
 	 * to an {@link XhrClientSockJsSession}.
@@ -204,11 +200,9 @@ public class RestTemplateXhrTransport extends AbstractXhrTransport implements Xh
 
 		private final XhrClientSockJsSession sockJsSession;
 
-
 		public XhrReceiveExtractor(XhrClientSockJsSession sockJsSession) {
 			this.sockJsSession = sockJsSession;
 		}
-
 
 		@Override
 		public Object extractData(ClientHttpResponse response) throws IOException {
@@ -262,4 +256,3 @@ public class RestTemplateXhrTransport extends AbstractXhrTransport implements Xh
 	}
 
 }
-
