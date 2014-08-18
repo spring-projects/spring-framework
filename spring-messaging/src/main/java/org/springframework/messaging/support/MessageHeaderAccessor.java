@@ -540,7 +540,7 @@ public class MessageHeaderAccessor {
 
 	@Override
 	public String toString() {
-		return getClass().getSimpleName() + "[headers=" + this.headers + "]";
+		return getClass().getSimpleName() + " [headers=" + this.headers + "]";
 	}
 
 

@@ -256,17 +256,14 @@ class ConfigurationClassParser {
 
 		// Process any @ComponentScan annotations
 		AnnotationAttributes componentScan = AnnotationConfigUtils.attributesFor(sourceClass.getMetadata(), ComponentScan.class);
-		if (componentScan != null) {
-			// the config class is annotated with @ComponentScan -> perform the scan immediately
-			if (!this.conditionEvaluator.shouldSkip(sourceClass.getMetadata(), ConfigurationPhase.REGISTER_BEAN)) {
-				Set<BeanDefinitionHolder> scannedBeanDefinitions =
-						this.componentScanParser.parse(componentScan, sourceClass.getMetadata().getClassName());
-
-				// check the set of scanned definitions for any further config classes and parse recursively if necessary
-				for (BeanDefinitionHolder holder : scannedBeanDefinitions) {
-					if (ConfigurationClassUtils.checkConfigurationClassCandidate(holder.getBeanDefinition(), this.metadataReaderFactory)) {
-						parse(holder.getBeanDefinition().getBeanClassName(), holder.getBeanName());
-					}
+		if (componentScan != null && !this.conditionEvaluator.shouldSkip(sourceClass.getMetadata(), ConfigurationPhase.REGISTER_BEAN)) {
+			// The config class is annotated with @ComponentScan -> perform the scan immediately
+			Set<BeanDefinitionHolder> scannedBeanDefinitions =
+					this.componentScanParser.parse(componentScan, sourceClass.getMetadata().getClassName());
+			// Check the set of scanned definitions for any further config classes and parse recursively if necessary
+			for (BeanDefinitionHolder holder : scannedBeanDefinitions) {
+				if (ConfigurationClassUtils.checkConfigurationClassCandidate(holder.getBeanDefinition(), this.metadataReaderFactory)) {
+					parse(holder.getBeanDefinition().getBeanClassName(), holder.getBeanName());
 				}
 			}
 		}
@@ -301,7 +298,7 @@ class ConfigurationClassParser {
 			}
 		}
 
-		// No superclass, processing is complete
+		// No superclass -> processing is complete
 		return null;
 	}
 

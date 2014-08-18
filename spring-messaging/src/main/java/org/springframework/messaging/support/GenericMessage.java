@@ -22,7 +22,6 @@ import java.util.Map;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.util.Assert;
-import org.springframework.util.ObjectUtils;
 
 /**
  * An implementation of {@link Message} with a generic payload.
@@ -68,8 +67,8 @@ public class GenericMessage<T> implements Message<T>, Serializable {
 	 * @param headers message headers
 	 */
 	public GenericMessage(T payload, MessageHeaders headers) {
-		Assert.notNull(payload, "'payload must not be null");
-		Assert.notNull(headers, "'headers' must not be null");
+		Assert.notNull(payload, "Payload must not be null");
+		Assert.notNull(headers, "MessageHeaders must not be null");
 		this.payload = payload;
 		this.headers = headers;
 	}
@@ -84,31 +83,31 @@ public class GenericMessage<T> implements Message<T>, Serializable {
 	}
 
 
-	public boolean equals(Object obj) {
-		if (this == obj) {
+	public boolean equals(Object other) {
+		if (this == other) {
 			return true;
 		}
-		if (obj != null && obj instanceof GenericMessage<?>) {
-			GenericMessage<?> other = (GenericMessage<?>) obj;
-			return (ObjectUtils.nullSafeEquals(this.headers.getId(), other.headers.getId()) &&
-					this.headers.equals(other.headers) && this.payload.equals(other.payload));
+		if (!(other instanceof GenericMessage)) {
+			return false;
 		}
-		return false;
+		GenericMessage<?> otherMessage = (GenericMessage<?>) other;
+		return (this.payload.equals(otherMessage.payload) && this.headers.equals(otherMessage.headers));
 	}
 
 	public int hashCode() {
-		return this.headers.hashCode() * 23 + ObjectUtils.nullSafeHashCode(this.payload);
+		return (this.payload.hashCode() * 23 + this.headers.hashCode());
 	}
 
 	public String toString() {
 		StringBuilder sb = new StringBuilder(getClass().getSimpleName());
+		sb.append(" [payload=");
 		if (this.payload instanceof byte[]) {
-			sb.append("[payload byte[").append(((byte[]) this.payload).length).append("]]");
+			sb.append("byte[").append(((byte[]) this.payload).length).append("]");
 		}
 		else {
-			sb.append("[payload=").append(this.payload).append("]");
+			sb.append(this.payload);
 		}
-		sb.append("[headers=").append(this.headers).append("]");
+		sb.append(", headers=").append(this.headers).append("]");
 		return sb.toString();
 	}
 

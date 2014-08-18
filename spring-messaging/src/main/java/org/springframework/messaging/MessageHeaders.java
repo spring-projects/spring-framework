@@ -149,19 +149,19 @@ public class MessageHeaders implements Map<String, Object>, Serializable {
 	}
 
 	public UUID getId() {
-		return this.get(ID, UUID.class);
+		return get(ID, UUID.class);
 	}
 
 	public Long getTimestamp() {
-		return this.get(TIMESTAMP, Long.class);
+		return get(TIMESTAMP, Long.class);
 	}
 
 	public Object getReplyChannel() {
-		return this.get(REPLY_CHANNEL);
+		return get(REPLY_CHANNEL);
 	}
 
 	public Object getErrorChannel() {
-		return this.get(ERROR_CHANNEL);
+		return get(ERROR_CHANNEL);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -195,7 +195,7 @@ public class MessageHeaders implements Map<String, Object>, Serializable {
 	}
 
 
-	// Map implementation
+	// Delegating Map implementation
 
 	public boolean containsKey(Object key) {
 		return this.headers.containsKey(key);
