@@ -544,7 +544,16 @@ public class MockHttpServletRequest implements HttpServletRequest {
 
 	@Override
 	public String getServerName() {
-		return this.serverName;
+		String host = this.getHeader("Host");
+		if (host == null) {
+			host = this.serverName;
+        } else {
+            if (host.indexOf(':') != -1) {
+                host = host.substring(0, host.indexOf(':'));
+            }
+        }
+		
+		return host;
 	}
 
 	public void setServerPort(int serverPort) {
@@ -553,6 +562,14 @@ public class MockHttpServletRequest implements HttpServletRequest {
 
 	@Override
 	public int getServerPort() {
+		String host = this.getHeader("Host");
+		if (host != null) {
+			final int colonIndex = host.indexOf(':');
+			if (colonIndex != -1) {
+				return Integer.parseInt(host.substring(colonIndex + 1));
+			}
+		}
+
 		return this.serverPort;
 	}
 
