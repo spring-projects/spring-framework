@@ -8,6 +8,12 @@ buildscript {
 	}
 }
 
+ext {
+	moduleProjects  = subprojects.findAll {
+		!it.name.equals('spring-build-src') && !it.name.equals('spring-framework-bom')
+	}
+}
+
 configure(allprojects) { project ->
 	group = "org.springframework"
 	version = qualifyVersionIfNecessary(version)
@@ -944,8 +950,8 @@ configure(rootProject) {
 		classifier = "schema"
 		description = "Builds -${classifier} archive containing all " +
 			"XSDs for deployment at http://springframework.org/schema."
-
-		subprojects.each { subproject ->
+		duplicatesStrategy 'exclude'
+		moduleProjects.each { subproject ->
 			def Properties schemas = new Properties();
 
 			subproject.sourceSets.main.resources.find {
@@ -991,7 +997,7 @@ configure(rootProject) {
 			into "${baseDir}/schema"
 		}
 
-		subprojects.each { subproject ->
+		moduleProjects.each { subproject ->
 			into ("${baseDir}/libs") {
 				from subproject.jar
 				if (subproject.tasks.findByPath("sourcesJar")) {
