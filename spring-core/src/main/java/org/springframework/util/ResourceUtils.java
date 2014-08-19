@@ -57,6 +57,9 @@ public abstract class ResourceUtils {
 	/** URL prefix for loading from the file system: "file:" */
 	public static final String FILE_URL_PREFIX = "file:";
 
+	/** URL prefix for loading from the file system: "jar:" */
+	public static final String JAR_URL_PREFIX = "jar:";
+
 	/** URL protocol for a file in the file system: "file" */
 	public static final String URL_PROTOCOL_FILE = "file";
 
@@ -78,7 +81,10 @@ public abstract class ResourceUtils {
 	/** URL protocol for a general JBoss VFS resource: "vfs" */
 	public static final String URL_PROTOCOL_VFS = "vfs";
 
-	/** Separator between JAR URL and file path within the JAR */
+	/** File extension for a regular jar file: ".jar" */
+	public static final String JAR_FILE_EXTENSION = ".jar";
+
+	/** Separator between JAR URL and file path within the JAR: "!/" */
 	public static final String JAR_URL_SEPARATOR = "!/";
 
 
@@ -271,6 +277,18 @@ public abstract class ResourceUtils {
 		String protocol = url.getProtocol();
 		return (URL_PROTOCOL_JAR.equals(protocol) || URL_PROTOCOL_ZIP.equals(protocol) ||
 				URL_PROTOCOL_VFSZIP.equals(protocol) || URL_PROTOCOL_WSJAR.equals(protocol));
+	}
+
+	/**
+	 * Determine whether the given URL points to a jar file itself,
+	 * that is, has protocol "file" and ends with the ".jar" extension.
+	 * @param url the URL to check
+	 * @return whether the URL has been identified as a JAR file URL
+	 * @since 4.1
+	 */
+	public static boolean isJarFileURL(URL url) {
+		return (URL_PROTOCOL_FILE.equals(url.getProtocol()) &&
+				url.getPath().toLowerCase().endsWith(JAR_FILE_EXTENSION));
 	}
 
 	/**
