@@ -20,6 +20,7 @@ import java.util.HashMap;
 
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -144,6 +145,29 @@ public final class FlashMap extends HashMap<String, Object> implements Comparabl
 		else {
 			return other.targetRequestParams.size() - this.targetRequestParams.size();
 		}
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (obj != null && obj instanceof FlashMap) {
+			FlashMap other = (FlashMap) obj;
+			if (this.targetRequestParams.equals(other.targetRequestParams) &&
+					ObjectUtils.nullSafeEquals(this.targetRequestPath, other.targetRequestPath)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	@Override
+	public int hashCode() {
+		int result = super.hashCode();
+		result = 31 * result + (this.targetRequestPath != null ? this.targetRequestPath.hashCode() : 0);
+		result = 31 * result + this.targetRequestParams.hashCode();
+		return result;
 	}
 
 	@Override
