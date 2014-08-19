@@ -188,13 +188,13 @@ public class CachedIntrospectionResults {
 		results = new CachedIntrospectionResults(beanClass);
 		if (ClassUtils.isCacheSafe(beanClass, CachedIntrospectionResults.class.getClassLoader()) ||
 				isClassLoaderAccepted(beanClass.getClassLoader())) {
-			strongClassCache.put(beanClass, results);
+			strongClassCache.putIfAbsent(beanClass, results);
 		}
 		else {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Not strongly caching class [" + beanClass.getName() + "] because it is not cache-safe");
 			}
-			softClassCache.put(beanClass, results);
+			softClassCache.putIfAbsent(beanClass, results);
 		}
 		return results;
 	}
@@ -295,7 +295,7 @@ public class CachedIntrospectionResults {
 									"; editor [" + pd.getPropertyEditorClass().getName() + "]" : ""));
 				}
 				pd = buildGenericTypeAwarePropertyDescriptor(beanClass, pd);
-				this.propertyDescriptorCache.put(pd.getName(), pd);
+				this.propertyDescriptorCache.putIfAbsent(pd.getName(), pd);
 			}
 
 			this.typeDescriptorCache = new ConcurrentHashMap<PropertyDescriptor, TypeDescriptor>();
@@ -348,7 +348,7 @@ public class CachedIntrospectionResults {
 	}
 
 	void addTypeDescriptor(PropertyDescriptor pd, TypeDescriptor td) {
-		this.typeDescriptorCache.put(pd, td);
+		this.typeDescriptorCache.putIfAbsent(pd, td);
 	}
 
 	TypeDescriptor getTypeDescriptor(PropertyDescriptor pd) {
