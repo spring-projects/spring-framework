@@ -59,16 +59,15 @@ public final class FlashMap extends HashMap<String, Object> implements Comparabl
 
 	/**
 	 * Provide a URL path to help identify the target request for this FlashMap.
-	 * The path may be absolute (e.g. /application/resource) or relative to the
-	 * current request (e.g. ../resource).
-	 * @param path the URI path
+	 * <p>The path may be absolute (e.g. "/application/resource") or relative to the
+	 * current request (e.g. "../resource").
 	 */
 	public void setTargetRequestPath(String path) {
 		this.targetRequestPath = path;
 	}
 
 	/**
-	 * Return the target URL path or {@code null}.
+	 * Return the target URL path (or {@code null} if none specified).
 	 */
 	public String getTargetRequestPath() {
 		return this.targetRequestPath;
@@ -76,7 +75,7 @@ public final class FlashMap extends HashMap<String, Object> implements Comparabl
 
 	/**
 	 * Provide request parameters identifying the request for this FlashMap.
-	 * @param params a Map with the names and values of expected parameters.
+	 * @param params a Map with the names and values of expected parameters
 	 */
 	public FlashMap addTargetRequestParams(MultiValueMap<String, String> params) {
 		if (params != null) {
@@ -91,8 +90,8 @@ public final class FlashMap extends HashMap<String, Object> implements Comparabl
 
 	/**
 	 * Provide a request parameter identifying the request for this FlashMap.
-	 * @param name the expected parameter name, skipped if empty or {@code null}
-	 * @param value the expected value, skipped if empty or {@code null}
+	 * @param name the expected parameter name (skipped if empty or {@code null})
+	 * @param value the expected value (skipped if empty or {@code null})
 	 */
 	public FlashMap addTargetRequestParam(String name, String value) {
 		if (StringUtils.hasText(name) && StringUtils.hasText(value)) {
@@ -118,17 +117,14 @@ public final class FlashMap extends HashMap<String, Object> implements Comparabl
 	}
 
 	/**
-	 * Whether this instance has expired depending on the amount of elapsed
-	 * time since the call to {@link #startExpirationPeriod}.
+	 * Return whether this instance has expired depending on the amount of
+	 * elapsed time since the call to {@link #startExpirationPeriod}.
 	 */
 	public boolean isExpired() {
-		if (this.expirationStartTime != 0) {
-			return (System.currentTimeMillis() - this.expirationStartTime > this.timeToLive * 1000);
-		}
-		else {
-			return false;
-		}
+		return (this.expirationStartTime != 0 &&
+				(System.currentTimeMillis() - this.expirationStartTime > this.timeToLive * 1000));
 	}
+
 
 	/**
 	 * Compare two FlashMaps and prefer the one that specifies a target URL
@@ -148,24 +144,23 @@ public final class FlashMap extends HashMap<String, Object> implements Comparabl
 	}
 
 	@Override
-	public boolean equals(Object obj) {
-		if (this == obj) {
+	public boolean equals(Object other) {
+		if (this == other) {
 			return true;
 		}
-		if (obj != null && obj instanceof FlashMap) {
-			FlashMap other = (FlashMap) obj;
-			if (this.targetRequestParams.equals(other.targetRequestParams) &&
-					ObjectUtils.nullSafeEquals(this.targetRequestPath, other.targetRequestPath)) {
-				return true;
-			}
+		if (!(other instanceof FlashMap)) {
+			return false;
 		}
-		return false;
+		FlashMap otherFlashMap = (FlashMap) other;
+		return (super.equals(otherFlashMap) &&
+				ObjectUtils.nullSafeEquals(this.targetRequestPath, otherFlashMap.targetRequestPath) &&
+				this.targetRequestParams.equals(otherFlashMap.targetRequestParams));
 	}
 
 	@Override
 	public int hashCode() {
 		int result = super.hashCode();
-		result = 31 * result + (this.targetRequestPath != null ? this.targetRequestPath.hashCode() : 0);
+		result = 31 * result + ObjectUtils.nullSafeHashCode(this.targetRequestPath);
 		result = 31 * result + this.targetRequestParams.hashCode();
 		return result;
 	}
