@@ -69,19 +69,25 @@ public class EhCacheCacheManager extends AbstractTransactionSupportingCacheManag
 		return this.cacheManager;
 	}
 
+	@Override
+	public void afterPropertiesSet() {
+		if (getCacheManager() == null) {
+			setCacheManager(EhCacheManagerUtils.buildCacheManager());
+		}
+		super.afterPropertiesSet();
+	}
+
 
 	@Override
 	protected Collection<Cache> loadCaches() {
-		net.sf.ehcache.CacheManager cacheManager = getCacheManager();
-		Assert.notNull(cacheManager, "A backing EhCache CacheManager is required");
-		Status status = cacheManager.getStatus();
+		Status status = getCacheManager().getStatus();
 		Assert.isTrue(Status.STATUS_ALIVE.equals(status),
 				"An 'alive' EhCache CacheManager is required - current cache is " + status.toString());
 
-		String[] names = cacheManager.getCacheNames();
+		String[] names = getCacheManager().getCacheNames();
 		Collection<Cache> caches = new LinkedHashSet<Cache>(names.length);
 		for (String name : names) {
-			caches.add(new EhCacheCache(cacheManager.getEhcache(name)));
+			caches.add(new EhCacheCache(getCacheManager().getEhcache(name)));
 		}
 		return caches;
 	}

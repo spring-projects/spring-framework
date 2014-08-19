@@ -8,6 +8,10 @@
 		<property name="exposeSchedulerInRepository" value="true"/>
 	</bean>
 
+	<bean id="otherScheduler" class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
+		<property name="schedulerName" value="otherScheduler"/>
+	</bean>
+
 	<bean class="org.springframework.scheduling.quartz.SchedulerAccessorBean">
 		<property name="schedulerName" value="myScheduler"/>
 		<property name="triggers">

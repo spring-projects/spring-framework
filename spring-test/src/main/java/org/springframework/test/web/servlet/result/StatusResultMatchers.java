@@ -283,6 +283,7 @@ public class StatusResultMatchers {
 	/**
 	 * Assert the response status code is {@code HttpStatus.MOVED_TEMPORARILY} (302).
 	 * @see #isFound()
+	 * @deprecated in favor of {@link #isFound()}
 	 */
 	@Deprecated
 	public ResultMatcher isMovedTemporarily() {

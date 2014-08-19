@@ -1332,7 +1332,7 @@ public final class XmlBeanFactoryTests {
 		// This differs from Spring's AOP support, which has a distinct notion
 		// of a "target" object, meaning that the target needs explicit knowledge
 		// of AOP proxying to invoke an advised method on itself.
-		TestBean jenny3 = oom.invokesOverridenMethodOnSelf();
+		TestBean jenny3 = oom.invokesOverriddenMethodOnSelf();
 		assertEquals("Jenny", jenny3.getName());
 		assertNotSame(jenny1, jenny3);
 

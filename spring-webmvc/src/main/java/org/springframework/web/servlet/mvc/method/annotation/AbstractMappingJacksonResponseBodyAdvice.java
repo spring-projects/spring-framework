@@ -27,8 +27,7 @@ import org.springframework.http.server.ServerHttpResponse;
 /**
  * A convenient base class for {@code ResponseBodyAdvice} implementations
  * that customize the response before JSON serialization with
- * {@link org.springframework.http.converter.json.MappingJackson2HttpMessageConverter
- * MappingJackson2HttpMessageConverter}.
+ * {@link MappingJackson2HttpMessageConverter}.
  *
  * @author Rossen Stoyanchev
  * @since 4.1

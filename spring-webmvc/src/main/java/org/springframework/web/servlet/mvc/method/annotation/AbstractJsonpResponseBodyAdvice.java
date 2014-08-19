@@ -29,8 +29,8 @@ import javax.servlet.http.HttpServletRequest;
 
 /**
  * A convenient base class for a {@code ResponseBodyAdvice} to instruct the
- * {@link org.springframework.http.converter.json.MappingJackson2HttpMessageConverter
- * MappingJackson2HttpMessageConverter} to serialize with JSONP formatting.
+ * {@link org.springframework.http.converter.json.MappingJackson2HttpMessageConverter}
+ * to serialize with JSONP formatting.
  *
  * <p>Sub-classes must specify the query parameter name(s) to check for the name
  * of the JSONP callback function.

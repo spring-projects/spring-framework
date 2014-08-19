@@ -43,22 +43,61 @@ public abstract class AbstractCacheManager implements CacheManager, Initializing
 	private Set<String> cacheNames = new LinkedHashSet<String>(16);
 
 
+	// Early cache initialization on startup
+
 	@Override
 	public void afterPropertiesSet() {
 		Collection<? extends Cache> caches = loadCaches();
 
-		// preserve the initial order of the cache names
+		// Preserve the initial order of the cache names
 		this.cacheMap.clear();
 		this.cacheNames.clear();
 		for (Cache cache : caches) {
-			this.cacheMap.put(cache.getName(), decorateCache(cache));
-			this.cacheNames.add(cache.getName());
+			addCache(cache);
 		}
 	}
+
+	/**
+	 * Load the initial caches for this cache manager.
+	 * <p>Called by {@link #afterPropertiesSet()} on startup.
+	 * The returned collection may be empty but must not be {@code null}.
+	 */
+	protected abstract Collection<? extends Cache> loadCaches();
+
+
+	// Lazy cache initialization on access
+
+	@Override
+	public Cache getCache(String name) {
+		Cache cache = lookupCache(name);
+		if (cache != null) {
+			return cache;
+		}
+		else {
+			Cache missingCache = getMissingCache(name);
+			if (missingCache != null) {
+				addCache(missingCache);
+				return lookupCache(name);  // may be decorated
+			}
+			return null;
+		}
+	}
+
+	@Override
+	public Collection<String> getCacheNames() {
+		return Collections.unmodifiableSet(this.cacheNames);
+	}
+
+
+	// Common cache initialization delegates/callbacks
 
 	protected final void addCache(Cache cache) {
 		this.cacheMap.put(cache.getName(), decorateCache(cache));
 		this.cacheNames.add(cache.getName());
+	}
+
+	protected final Cache lookupCache(String name) {
+		return this.cacheMap.get(name);
 	}
 
 	/**
@@ -86,36 +125,5 @@ public abstract class AbstractCacheManager implements CacheManager, Initializing
 	protected Cache getMissingCache(String name) {
 		return null;
 	}
-
-	@Override
-	public Cache getCache(String name) {
-		Cache cache = lookupCache(name);
-		if (cache != null) {
-			return cache;
-		}
-		else {
-			Cache missingCache = getMissingCache(name);
-			if (missingCache != null) {
-				addCache(missingCache);
-				return lookupCache(name); // May be decorated
-			}
-			return null;
-		}
-	}
-
-	@Override
-	public Collection<String> getCacheNames() {
-		return Collections.unmodifiableSet(this.cacheNames);
-	}
-
-	private Cache lookupCache(String name) {
-		return this.cacheMap.get(name);
-	}
-
-	/**
-	 * Load the caches for this cache manager. Occurs at startup.
-	 * The returned collection must not be null.
-	 */
-	protected abstract Collection<? extends Cache> loadCaches();
 
 }

@@ -42,6 +42,8 @@ import static org.junit.Assert.*;
  */
 public class MockHttpServletRequestTests {
 
+	private static final String HOST = "Host";
+
 	private MockHttpServletRequest request = new MockHttpServletRequest();
 
 
@@ -210,6 +212,86 @@ public class MockHttpServletRequestTests {
 		List<Locale> preferredLocales = Arrays.asList(Locale.ITALY, Locale.CHINA);
 		request.setPreferredLocales(preferredLocales);
 		assertEqualEnumerations(Collections.enumeration(preferredLocales), request.getLocales());
+	}
+
+	@Test
+	public void getServerNameWithDefaultName() {
+		assertEquals("localhost", request.getServerName());
+	}
+
+	@Test
+	public void getServerNameWithCustomName() {
+		request.setServerName("example.com");
+		assertEquals("example.com", request.getServerName());
+	}
+
+	@Test
+	public void getServerNameViaHostHeaderWithoutPort() {
+		String testServer = "test.server";
+		request.addHeader(HOST, testServer);
+		assertEquals(testServer, request.getServerName());
+	}
+
+	@Test
+	public void getServerNameViaHostHeaderWithPort() {
+		String testServer = "test.server";
+		request.addHeader(HOST, testServer + ":8080");
+		assertEquals(testServer, request.getServerName());
+	}
+
+	@Test
+	public void getServerNameViaHostHeaderAsIpv6AddressWithoutPort() {
+		String ipv6Address = "[2001:db8:0:1]";
+		request.addHeader(HOST, ipv6Address);
+		assertEquals("2001:db8:0:1", request.getServerName());
+	}
+
+	@Test
+	public void getServerNameViaHostHeaderAsIpv6AddressWithPort() {
+		String ipv6Address = "[2001:db8:0:1]:8081";
+		request.addHeader(HOST, ipv6Address);
+		assertEquals("2001:db8:0:1", request.getServerName());
+	}
+
+	@Test
+	public void getServerPortWithDefaultPort() {
+		assertEquals(80, request.getServerPort());
+	}
+
+	@Test
+	public void getServerPortWithCustomPort() {
+		request.setServerPort(8080);
+		assertEquals(8080, request.getServerPort());
+	}
+
+	@Test
+	public void getServerPortViaHostHeaderAsIpv6AddressWithoutPort() {
+		String testServer = "[2001:db8:0:1]";
+		request.addHeader(HOST, testServer);
+		assertEquals(80, request.getServerPort());
+	}
+
+	@Test
+	public void getServerPortViaHostHeaderAsIpv6AddressWithPort() {
+		String testServer = "[2001:db8:0:1]";
+		int testPort = 9999;
+		request.addHeader(HOST, testServer + ":" + testPort);
+		assertEquals(testPort, request.getServerPort());
+	}
+
+	@Test
+	public void getServerPortViaHostHeaderWithoutPort() {
+		String testServer = "test.server";
+		request.addHeader(HOST, testServer);
+		assertEquals(80, request.getServerPort());
+	}
+
+	@Test
+	public void getServerPortViaHostHeaderWithPort() {
+		String testServer = "test.server";
+		int testPort = 9999;
+		request.addHeader(HOST, testServer + ":" + testPort);
+		assertEquals(testPort, request.getServerPort());
 	}
 
 	@Test

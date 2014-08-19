@@ -53,22 +53,19 @@ import org.springframework.context.ConfigurableApplicationContext;
  * The term <em>annotated class</em> can refer to any of the following.
  *
  * <ul>
- * <li>A class annotated with @{@link org.springframework.context.annotation.Configuration
- * Configuration}</li>
+ * <li>A class annotated with {@link org.springframework.context.annotation.Configuration @Configuration}</li>
  * <li>A component (i.e., a class annotated with
  * {@link org.springframework.stereotype.Component @Component},
  * {@link org.springframework.stereotype.Service @Service},
  * {@link org.springframework.stereotype.Repository @Repository}, etc.)</li>
  * <li>A JSR-330 compliant class that is annotated with {@code javax.inject} annotations</li>
- * <li>Any other class that contains {@link org.springframework.context.annotation.Bean
- * @Bean}-methods</li>
+ * <li>Any other class that contains {@link org.springframework.context.annotation.Bean @Bean}-methods</li>
  * </ul>
  *
  * <p>
- * Consult the Javadoc for {@link org.springframework.context.annotation.Configuration
- * @Configuration} and {@link org.springframework.context.annotation.Bean @Bean} for
- * further information regarding the configuration and semantics of
- * <em>annotated classes</em>.
+ * Consult the Javadoc for {@link org.springframework.context.annotation.Configuration @Configuration}
+ * and {@link org.springframework.context.annotation.Bean @Bean} for further
+ * information regarding the configuration and semantics of <em>annotated classes</em>.
  *
  * <p>
  * As of Spring Framework 4.0, this annotation may be used as a <em>meta-annotation</em>
@@ -78,6 +75,7 @@ import org.springframework.context.ConfigurableApplicationContext;
  * @since 2.5
  * @see ContextHierarchy
  * @see ActiveProfiles
+ * @see TestPropertySource
  * @see ContextLoader
  * @see SmartContextLoader
  * @see ContextConfigurationAttributes

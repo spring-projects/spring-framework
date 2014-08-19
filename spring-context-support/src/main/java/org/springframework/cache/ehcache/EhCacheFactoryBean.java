@@ -16,7 +16,6 @@
 
 package org.springframework.cache.ehcache;
 
-import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.Set;
 
@@ -231,7 +230,7 @@ public class EhCacheFactoryBean extends CacheConfiguration implements FactoryBea
 
 
 	@Override
-	public void afterPropertiesSet() throws CacheException, IOException {
+	public void afterPropertiesSet() throws CacheException {
 		// If no cache name given, use bean name as cache name.
 		String cacheName = getName();
 		if (cacheName == null) {

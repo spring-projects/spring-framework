@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,7 +44,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
  * Examples of defining expectations on XML response content with XMLUnit.
  *
  * @author Rossen Stoyanchev
- *
+ * @author Sam Brannen
  * @see ContentAssertionTests
  * @see XpathAssertionTests
  */
@@ -65,9 +65,9 @@ public class XmlContentAssertionTests {
 	@Before
 	public void setup() {
 		this.mockMvc = standaloneSetup(new MusicController())
-				.defaultRequest(get("/").accept(MediaType.APPLICATION_XML))
+				.defaultRequest(get("/").accept(MediaType.APPLICATION_XML, MediaType.parseMediaType("application/xml;charset=UTF-8")))
 				.alwaysExpect(status().isOk())
-				.alwaysExpect(content().contentType(MediaType.APPLICATION_XML))
+				.alwaysExpect(content().contentType(MediaType.parseMediaType("application/xml;charset=UTF-8")))
 				.build();
 	}
 
@@ -78,7 +78,6 @@ public class XmlContentAssertionTests {
 
 	@Test
 	public void testNodeHamcrestMatcher() throws Exception {
-
 		this.mockMvc.perform(get("/music/people"))
 			.andExpect(content().node(hasXPath("/people/composers/composer[1]")));
 	}

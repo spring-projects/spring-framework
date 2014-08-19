@@ -51,7 +51,7 @@ import org.springframework.util.ClassUtils;
  * to enable or disable Jackson features from within XML configuration.
  *
  * <p>Example usage with
- * {@link org.springframework.http.converter.json.MappingJackson2HttpMessageConverter}:
+ * {@link MappingJackson2HttpMessageConverter}:
  *
  * <pre class="code">
  * &lt;bean class="org.springframework.http.converter.json.MappingJackson2HttpMessageConverter">
@@ -486,7 +486,7 @@ public class Jackson2ObjectMapperFactoryBean implements FactoryBean<ObjectMapper
 
 	@Override
 	public Class<?> getObjectType() {
-		return ObjectMapper.class;
+		return (this.objectMapper != null) ? this.objectMapper.getClass() : null;
 	}
 
 	@Override
