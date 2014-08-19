@@ -26,6 +26,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.logging.Log;
@@ -112,14 +113,14 @@ public class CachedIntrospectionResults {
 	 * Map keyed by Class containing CachedIntrospectionResults, strongly held.
 	 * This variant is being used for cache-safe bean classes.
 	 */
-	static final Map<Class<?>, CachedIntrospectionResults> strongClassCache =
+	static final ConcurrentMap<Class<?>, CachedIntrospectionResults> strongClassCache =
 			new ConcurrentHashMap<Class<?>, CachedIntrospectionResults>(64);
 
 	/**
 	 * Map keyed by Class containing CachedIntrospectionResults, softly held.
 	 * This variant is being used for non-cache-safe bean classes.
 	 */
-	static final Map<Class<?>, CachedIntrospectionResults> softClassCache =
+	static final ConcurrentMap<Class<?>, CachedIntrospectionResults> softClassCache =
 			new ConcurrentReferenceHashMap<Class<?>, CachedIntrospectionResults>(64);
 
 
@@ -188,13 +189,19 @@ public class CachedIntrospectionResults {
 		results = new CachedIntrospectionResults(beanClass);
 		if (ClassUtils.isCacheSafe(beanClass, CachedIntrospectionResults.class.getClassLoader()) ||
 				isClassLoaderAccepted(beanClass.getClassLoader())) {
-			strongClassCache.putIfAbsent(beanClass, results);
+			CachedIntrospectionResults existing = strongClassCache.putIfAbsent(beanClass, results);
+			if(existing != null){
+				results = existing;
+			}
 		}
 		else {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Not strongly caching class [" + beanClass.getName() + "] because it is not cache-safe");
 			}
-			softClassCache.putIfAbsent(beanClass, results);
+			CachedIntrospectionResults existing = softClassCache.putIfAbsent(beanClass, results);
+			if(existing != null){
+				results = existing;
+			}
 		}
 		return results;
 	}
@@ -246,7 +253,7 @@ public class CachedIntrospectionResults {
 	private final Map<String, PropertyDescriptor> propertyDescriptorCache;
 
 	/** TypeDescriptor objects keyed by PropertyDescriptor */
-	private final Map<PropertyDescriptor, TypeDescriptor> typeDescriptorCache;
+	private final ConcurrentMap<PropertyDescriptor, TypeDescriptor> typeDescriptorCache;
 
 
 	/**
@@ -295,7 +302,7 @@ public class CachedIntrospectionResults {
 									"; editor [" + pd.getPropertyEditorClass().getName() + "]" : ""));
 				}
 				pd = buildGenericTypeAwarePropertyDescriptor(beanClass, pd);
-				this.propertyDescriptorCache.putIfAbsent(pd.getName(), pd);
+				this.propertyDescriptorCache.put(pd.getName(), pd);
 			}
 
 			this.typeDescriptorCache = new ConcurrentHashMap<PropertyDescriptor, TypeDescriptor>();
