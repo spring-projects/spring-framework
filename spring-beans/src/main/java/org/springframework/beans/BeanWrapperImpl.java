@@ -480,8 +480,7 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 		}
 		TypeDescriptor td = cachedIntrospectionResults.getTypeDescriptor(pd);
 		if (td == null) {
-			td = new TypeDescriptor(property(pd));
-			cachedIntrospectionResults.addTypeDescriptor(pd, td);
+			td = cachedIntrospectionResults.addTypeDescriptor(pd, new TypeDescriptor(property(pd)));
 		}
 		return convertForProperty(propertyName, null, value, td);
 	}
