@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
+import java.util.concurrent.locks.ReentrantLock;
 
 import org.springframework.context.ResourceLoaderAware;
 import org.springframework.core.io.DefaultResourceLoader;
@@ -95,12 +96,12 @@ import org.springframework.util.StringUtils;
 public class ReloadableResourceBundleMessageSource extends AbstractMessageSource
 		implements ResourceLoaderAware {
 
-	private static final String PROPERTIES_SUFFIX = ".properties";
+	protected static final String PROPERTIES_SUFFIX = ".properties";
 
-	private static final String XML_SUFFIX = ".xml";
+	protected static final String XML_SUFFIX = ".xml";
 
 
-	private String[] basenames = new String[0];
+	protected String[] basenames = new String[0];
 
 	private String defaultEncoding;
 
@@ -108,21 +109,32 @@ public class ReloadableResourceBundleMessageSource extends AbstractMessageSource
 
 	private boolean fallbackToSystemLocale = true;
 
-	private long cacheMillis = -1;
+	private boolean preferStaleOverLocking = false;
+
+	protected long cacheMillis = -1;
 
 	private PropertiesPersister propertiesPersister = new DefaultPropertiesPersister();
 
-	private ResourceLoader resourceLoader = new DefaultResourceLoader();
+	protected ResourceLoader resourceLoader = new DefaultResourceLoader();
 
 	/** Cache to hold filename lists per Locale */
-	private final Map<String, Map<Locale, List<String>>> cachedFilenames =
+	protected final Map<String, Map<Locale, List<String>>> cachedFilenames =
 			new HashMap<String, Map<Locale, List<String>>>();
 
+	/** Lock object for cachedFilenames **/
+	private Object lockCachedFilenames = new Object();
+
 	/** Cache to hold already loaded properties per filename */
-	private final Map<String, PropertiesHolder> cachedProperties = new HashMap<String, PropertiesHolder>();
+	protected final Map<String, PropertiesHolder> cachedProperties = new HashMap<String, PropertiesHolder>();
+
+	/** Lock object for cachedProperties **/
+	private final ReentrantLock lockCachedProperties = new ReentrantLock();
 
 	/** Cache to hold merged loaded properties per locale */
-	private final Map<Locale, PropertiesHolder> cachedMergedProperties = new HashMap<Locale, PropertiesHolder>();
+	protected final Map<Locale, PropertiesHolder> cachedMergedProperties = new HashMap<Locale, PropertiesHolder>();
+
+	/** Lock object for cachedMergedProperties **/
+	private Object lockCachedMergedProperties= new Object();
 
 
 	/**
@@ -231,6 +243,27 @@ public class ReloadableResourceBundleMessageSource extends AbstractMessageSource
 		this.cacheMillis = (cacheSeconds * 1000);
 	}
 
+
+	/**
+	 * Set user preference to stale data over locking while a thread is updating
+	 * underlying properties files.
+	 * <ul>
+	 * <li>Default is "false", indicating user wants updated messages, if they
+	 * are updated in underlying properties file and messages are older than
+	 * cacheSeconds. "false" value will lock all the reader threads while
+	 * writer thread is updating messages.
+	 * <li>A true value will indicates that calls to getMessage() will be full
+	 * filled with stale messages (if messages are older than cacheSeconds and
+	 * properties file is updated) while another thread is updating the messages
+	 * in the properties file. True value will not lock reader threads.
+	 * <li>This flag eliminates intermittent locking at cost of returning stale
+	 * messages.
+	 * </ul>
+	 */
+	public void setPreferStaleOverLocking(boolean preferStaleOverLocking) {
+		this.preferStaleOverLocking = preferStaleOverLocking;
+	}
+
 	/**
 	 * Set the PropertiesPersister to use for parsing properties files.
 	 * <p>The default is a DefaultPropertiesPersister.
@@ -322,8 +355,14 @@ public class ReloadableResourceBundleMessageSource extends AbstractMessageSource
 	 * cached forever.
 	 */
 	protected PropertiesHolder getMergedProperties(Locale locale) {
-		synchronized (this.cachedMergedProperties) {
-			PropertiesHolder mergedHolder = this.cachedMergedProperties.get(locale);
+		// No lock for reader threads
+		PropertiesHolder mergedHolder = this.cachedMergedProperties.get(locale);
+		if (mergedHolder != null) {
+			return mergedHolder;
+		}
+		//Lock for update threads but only first thread will update.
+		synchronized (lockCachedMergedProperties) {
+			mergedHolder = this.cachedMergedProperties.get(locale);
 			if (mergedHolder != null) {
 				return mergedHolder;
 			}
@@ -355,8 +394,17 @@ public class ReloadableResourceBundleMessageSource extends AbstractMessageSource
 	 * @see #calculateFilenamesForLocale
 	 */
 	protected List<String> calculateAllFilenames(String basename, Locale locale) {
-		synchronized (this.cachedFilenames) {
-			Map<Locale, List<String>> localeMap = this.cachedFilenames.get(basename);
+		// No lock for reader threads
+		Map<Locale, List<String>> localeMap = this.cachedFilenames.get(basename);
+	    if (localeMap != null) {
+			List<String> filenames = localeMap.get(locale);
+			if (filenames != null) {
+				return filenames;
+			}
+		}
+	    // Update threads are synchronized, but only first thread will update.
+		synchronized (lockCachedFilenames) {
+			localeMap = this.cachedFilenames.get(basename);
 			if (localeMap != null) {
 				List<String> filenames = localeMap.get(locale);
 				if (filenames != null) {
@@ -432,15 +480,38 @@ public class ReloadableResourceBundleMessageSource extends AbstractMessageSource
 	 * @return the current PropertiesHolder for the bundle
 	 */
 	protected PropertiesHolder getProperties(String filename) {
-		synchronized (this.cachedProperties) {
-			PropertiesHolder propHolder = this.cachedProperties.get(filename);
-			if (propHolder != null &&
+		PropertiesHolder propHolder = this.cachedProperties.get(filename);
+		if (propHolder != null &&
+				(propHolder.getRefreshTimestamp() < 0 ||
+				 propHolder.getRefreshTimestamp() > System.currentTimeMillis() - this.cacheMillis)) {
+			// up to date
+			return propHolder;
+		}
+		// If stale acceptable don't lock thread
+		if (propHolder != null && preferStaleOverLocking) {
+			if (lockCachedProperties.tryLock()){
+				try{
+					return refreshProperties(filename, propHolder);
+				} finally {
+					lockCachedProperties.unlock();
+				}
+			} else {
+				return this.cachedProperties.get(filename);
+			}
+		} else { // lock thread and do refresh
+			lockCachedProperties.lock();
+			try {
+				propHolder = this.cachedProperties.get(filename);
+				if (propHolder != null &&
 					(propHolder.getRefreshTimestamp() < 0 ||
 					 propHolder.getRefreshTimestamp() > System.currentTimeMillis() - this.cacheMillis)) {
-				// up to date
-				return propHolder;
+				 	 // up to date
+					return propHolder;
+				}
+				return refreshProperties(filename, propHolder);
+			}finally {
+				lockCachedProperties.unlock();
 			}
-			return refreshProperties(filename, propHolder);
 		}
 	}
 
@@ -561,12 +632,8 @@ public class ReloadableResourceBundleMessageSource extends AbstractMessageSource
 	 */
 	public void clearCache() {
 		logger.debug("Clearing entire resource bundle cache");
-		synchronized (this.cachedProperties) {
-			this.cachedProperties.clear();
-		}
-		synchronized (this.cachedMergedProperties) {
-			this.cachedMergedProperties.clear();
-		}
+		this.cachedProperties.clear();
+		this.cachedMergedProperties.clear();
 	}
 
 	/**
