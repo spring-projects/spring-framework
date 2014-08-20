@@ -262,7 +262,7 @@ public class NamedParameterQueryTests {
 
 		MapSqlParameterSource parms = new MapSqlParameterSource();
 		parms.addValue("id", 3);
-		int i = template.queryForInt("SELECT AGE FROM CUSTMR WHERE ID = :id", parms);
+		int i = template.queryForObject("SELECT AGE FROM CUSTMR WHERE ID = :id", parms, Integer.class).intValue();
 
 		assertEquals("Return of an int", 22, i);
 		verify(connection).prepareStatement("SELECT AGE FROM CUSTMR WHERE ID = ?");
@@ -278,7 +278,7 @@ public class NamedParameterQueryTests {
 		BeanPropertySqlParameterSource parms = new BeanPropertySqlParameterSource(
 				new ParameterBean(3));
 
-		long l = template.queryForLong("SELECT AGE FROM CUSTMR WHERE ID = :id", parms);
+		long l = template.queryForObject("SELECT AGE FROM CUSTMR WHERE ID = :id", parms, Long.class).longValue();
 
 		assertEquals("Return of a long", 87, l);
 		verify(connection).prepareStatement("SELECT AGE FROM CUSTMR WHERE ID = ?");

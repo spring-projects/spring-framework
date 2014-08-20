@@ -108,7 +108,7 @@ public class InitializeDatabaseIntegrationTests {
 
 	private void assertCorrectSetup(DataSource dataSource) {
 		JdbcTemplate t = new JdbcTemplate(dataSource);
-		assertEquals(1, t.queryForInt("select count(*) from T_TEST"));
+		assertEquals(1, t.queryForObject("select count(*) from T_TEST", Integer.class).intValue());
 	}
 
 	public static class CacheData implements InitializingBean {
