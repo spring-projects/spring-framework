@@ -373,8 +373,15 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 	 * @see #registerDependentBean
 	 */
 	public void registerContainedBean(String containedBeanName, String containingBeanName) {
+		// A quick check for an existing entry upfront, avoiding synchronization...
+		Set<String> containedBeans = this.containedBeanMap.get(containingBeanName);
+		if (containedBeans != null && containedBeans.contains(containedBeanName)) {
+			return;
+		}
+
+		// No entry yet -> fully synchronized manipulation of the dependentBeans Set
 		synchronized (this.containedBeanMap) {
-			Set<String> containedBeans = this.containedBeanMap.get(containingBeanName);
+			containedBeans = this.containedBeanMap.get(containingBeanName);
 			if (containedBeans == null) {
 				containedBeans = new LinkedHashSet<String>(8);
 				this.containedBeanMap.put(containingBeanName, containedBeans);
@@ -391,9 +398,16 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 	 * @param dependentBeanName the name of the dependent bean
 	 */
 	public void registerDependentBean(String beanName, String dependentBeanName) {
+		// A quick check for an existing entry upfront, avoiding synchronization...
 		String canonicalName = canonicalName(beanName);
+		Set<String> dependentBeans = this.dependentBeanMap.get(canonicalName);
+		if (dependentBeans != null && dependentBeans.contains(dependentBeanName)) {
+			return;
+		}
+
+		// No entry yet -> fully synchronized manipulation of the dependentBeans Set
 		synchronized (this.dependentBeanMap) {
-			Set<String> dependentBeans = this.dependentBeanMap.get(canonicalName);
+			dependentBeans = this.dependentBeanMap.get(canonicalName);
 			if (dependentBeans == null) {
 				dependentBeans = new LinkedHashSet<String>(8);
 				this.dependentBeanMap.put(canonicalName, dependentBeans);
@@ -417,7 +431,8 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 	 * @param dependentBeanName the name of the dependent bean
 	 */
 	protected boolean isDependent(String beanName, String dependentBeanName) {
-		Set<String> dependentBeans = this.dependentBeanMap.get(beanName);
+		String canonicalName = canonicalName(beanName);
+		Set<String> dependentBeans = this.dependentBeanMap.get(canonicalName);
 		if (dependentBeans == null) {
 			return false;
 		}
