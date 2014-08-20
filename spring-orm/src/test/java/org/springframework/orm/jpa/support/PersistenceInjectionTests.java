@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -138,6 +138,26 @@ public class PersistenceInjectionTests extends AbstractEntityManagerFactoryBeanT
 		bean.getEntityManager().flush();
 		verify(mockEm2).getTransaction();
 		verify(mockEm2).flush();
+	}
+
+	@Test
+	public void testInjectionIntoExistingObjects() {
+		EntityManager mockEm = mock(EntityManager.class);
+		given(mockEmf.createEntityManager()).willReturn(mockEm);
+
+		GenericApplicationContext gac = new GenericApplicationContext();
+		gac.getDefaultListableBeanFactory().registerSingleton("entityManagerFactory", mockEmf);
+		gac.registerBeanDefinition("annotationProcessor",
+				new RootBeanDefinition(PersistenceAnnotationBeanPostProcessor.class));
+		gac.refresh();
+
+		DefaultPrivatePersistenceContextField existingBean1 = new DefaultPrivatePersistenceContextField();
+		gac.getAutowireCapableBeanFactory().autowireBean(existingBean1);
+		assertNotNull(existingBean1.em);
+
+		DefaultPublicPersistenceContextSetter existingBean2 = new DefaultPublicPersistenceContextSetter();
+		gac.getAutowireCapableBeanFactory().autowireBean(existingBean2);
+		assertNotNull(existingBean2.em);
 	}
 
 	@Test
