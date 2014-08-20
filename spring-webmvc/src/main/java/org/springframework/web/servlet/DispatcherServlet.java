@@ -877,12 +877,11 @@ public class DispatcherServlet extends FrameworkServlet {
 			doDispatch(request, response);
 		}
 		finally {
-			if (WebAsyncUtils.getAsyncManager(request).isConcurrentHandlingStarted()) {
-				return;
-			}
-			// Restore the original attribute snapshot, in case of an include.
-			if (attributesSnapshot != null) {
-				restoreAttributesAfterInclude(request, attributesSnapshot);
+			if (!WebAsyncUtils.getAsyncManager(request).isConcurrentHandlingStarted()) {
+				// Restore the original attribute snapshot, in case of an include.
+				if (attributesSnapshot != null) {
+					restoreAttributesAfterInclude(request, attributesSnapshot);
+				}
 			}
 		}
 	}
@@ -940,14 +939,11 @@ public class DispatcherServlet extends FrameworkServlet {
 					return;
 				}
 
-				try {
-					// Actually invoke the handler.
-					mv = ha.handle(processedRequest, response, mappedHandler.getHandler());
-				}
-				finally {
-					if (asyncManager.isConcurrentHandlingStarted()) {
-						return;
-					}
+				// Actually invoke the handler.
+				mv = ha.handle(processedRequest, response, mappedHandler.getHandler());
+
+				if (asyncManager.isConcurrentHandlingStarted()) {
+					return;
 				}
 
 				applyDefaultViewName(request, mv);
@@ -967,12 +963,15 @@ public class DispatcherServlet extends FrameworkServlet {
 		finally {
 			if (asyncManager.isConcurrentHandlingStarted()) {
 				// Instead of postHandle and afterCompletion
-				mappedHandler.applyAfterConcurrentHandlingStarted(processedRequest, response);
-				return;
+				if (mappedHandler != null) {
+					mappedHandler.applyAfterConcurrentHandlingStarted(processedRequest, response);
+				}
 			}
-			// Clean up any resources used by a multipart request.
-			if (multipartRequestParsed) {
-				cleanupMultipart(processedRequest);
+			else {
+				// Clean up any resources used by a multipart request.
+				if (multipartRequestParsed) {
+					cleanupMultipart(processedRequest);
+				}
 			}
 		}
 	}

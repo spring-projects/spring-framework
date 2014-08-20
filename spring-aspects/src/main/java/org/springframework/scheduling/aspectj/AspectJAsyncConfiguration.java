@@ -29,6 +29,7 @@ import org.springframework.scheduling.config.TaskManagementConfigUtils;
  * to enable AspectJ-based asynchronous method execution.
  *
  * @author Chris Beams
+ * @author Stephane Nicoll
  * @since 3.1
  * @see EnableAsync
  * @see org.springframework.scheduling.annotation.AsyncConfigurationSelector
@@ -43,6 +44,9 @@ public class AspectJAsyncConfiguration extends AbstractAsyncConfiguration {
 		AnnotationAsyncExecutionAspect asyncAspect = AnnotationAsyncExecutionAspect.aspectOf();
 		if (this.executor != null) {
 			asyncAspect.setExecutor(this.executor);
+		}
+		if (this.exceptionHandler != null) {
+			asyncAspect.setExceptionHandler(this.exceptionHandler);
 		}
 		return asyncAspect;
 	}

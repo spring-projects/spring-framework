@@ -21,8 +21,10 @@ import java.io.IOException;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.net.JarURLConnection;
+import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.net.URLClassLoader;
 import java.net.URLConnection;
 import java.util.Collections;
 import java.util.Enumeration;
@@ -310,12 +312,17 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 			URL url = resourceUrls.nextElement();
 			result.add(convertClassLoaderURL(url));
 		}
+		if ("".equals(path)) {
+			// The above result is likely to be incomplete, i.e. only containing file system references.
+			// We need to have pointers to each of the jar files on the classpath as well...
+			addAllClassLoaderJarRoots(cl, result);
+		}
 		return result.toArray(new Resource[result.size()]);
 	}
 
 	/**
-	 * Convert the given URL as returned from the ClassLoader into a Resource object.
-	 * <p>The default implementation simply creates a UrlResource instance.
+	 * Convert the given URL as returned from the ClassLoader into a {@link Resource}.
+	 * <p>The default implementation simply creates a {@link UrlResource} instance.
 	 * @param url a URL as returned from the ClassLoader
 	 * @return the corresponding Resource object
 	 * @see java.lang.ClassLoader#getResources
@@ -323,6 +330,53 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 	 */
 	protected Resource convertClassLoaderURL(URL url) {
 		return new UrlResource(url);
+	}
+
+	/**
+	 * Search all {@link URLClassLoader} URLs for jar file references and add them to the
+	 * given set of resources in the form of pointers to the root of the jar file content.
+	 * @param classLoader the ClassLoader to search (including its ancestors)
+	 * @param result the set of resources to add jar roots to
+	 */
+	private void addAllClassLoaderJarRoots(ClassLoader classLoader, Set<Resource> result) {
+		if (classLoader instanceof URLClassLoader) {
+			try {
+				for (URL url : ((URLClassLoader) classLoader).getURLs()) {
+					if (ResourceUtils.isJarFileURL(url)) {
+						try {
+							UrlResource jarResource = new UrlResource(
+									ResourceUtils.JAR_URL_PREFIX + url.toString() + ResourceUtils.JAR_URL_SEPARATOR);
+							if (jarResource.exists()) {
+								result.add(jarResource);
+							}
+						}
+						catch (MalformedURLException ex) {
+							if (logger.isDebugEnabled()) {
+								logger.debug("Cannot search for matching files underneath [" + url +
+										"] because it cannot be converted to a valid 'jar:' URL: " + ex.getMessage());
+							}
+						}
+					}
+				}
+			}
+			catch (Exception ex) {
+				if (logger.isDebugEnabled()) {
+					logger.debug("Cannot introspect jar files since ClassLoader [" + classLoader +
+							"] does not support 'getURLs()': " + ex);
+				}
+			}
+		}
+		if (classLoader != null) {
+			try {
+				addAllClassLoaderJarRoots(classLoader.getParent(), result);
+			}
+			catch (Exception ex) {
+				if (logger.isDebugEnabled()) {
+					logger.debug("Cannot introspect jar files in parent ClassLoader since [" + classLoader +
+							"] does not support 'getParent()': " + ex);
+				}
+			}
+		}
 	}
 
 	/**

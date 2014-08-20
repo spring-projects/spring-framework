@@ -140,6 +140,11 @@ public final class HeadersRequestCondition extends AbstractRequestCondition<Head
 		}
 
 		@Override
+		protected boolean isCaseSensitiveName() {
+			return false;
+		}
+
+		@Override
 		protected String parseValue(String valueExpression) {
 			return valueExpression;
 		}
@@ -152,14 +157,6 @@ public final class HeadersRequestCondition extends AbstractRequestCondition<Head
 		@Override
 		protected boolean matchValue(HttpServletRequest request) {
 			return value.equals(request.getHeader(name));
-		}
-
-		@Override
-		public int hashCode() {
-			int result = name.toLowerCase().hashCode();
-			result = 31 * result + (value != null ? value.hashCode() : 0);
-			result = 31 * result + (isNegated ? 1 : 0);
-			return result;
 		}
 	}
 

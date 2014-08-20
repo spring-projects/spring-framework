@@ -20,12 +20,11 @@ import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.json.AbstractJackson2HttpMessageConverter;
-import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 
 /**
- * Implementation of {@link org.springframework.http.converter.HttpMessageConverter HttpMessageConverter} that
- * can read and write XML using <a href="https://github.com/FasterXML/jackson-dataformat-xml">Jackson 2.x extension component for
- * reading and writing XML encoded data</a>.
+ * Implementation of {@link org.springframework.http.converter.HttpMessageConverter HttpMessageConverter}
+ * that can read and write XML using <a href="https://github.com/FasterXML/jackson-dataformat-xml">
+ * Jackson 2.x extension component for reading and writing XML encoded data</a>.
  *
  * @author Sebastien Deleuze
  * @since 4.1
@@ -33,8 +32,7 @@ import org.springframework.http.converter.json.MappingJackson2HttpMessageConvert
 public class MappingJackson2XmlHttpMessageConverter extends AbstractJackson2HttpMessageConverter {
 
 	public MappingJackson2XmlHttpMessageConverter() {
-		super(new XmlMapper(),
-				new MediaType("application", "xml", MappingJackson2HttpMessageConverter.DEFAULT_CHARSET));
+		super(new XmlMapper(), new MediaType("application", "xml", DEFAULT_CHARSET));
 	}
 
 }

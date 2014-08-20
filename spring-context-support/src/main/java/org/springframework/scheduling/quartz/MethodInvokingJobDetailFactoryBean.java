@@ -170,7 +170,7 @@ public class MethodInvokingJobDetailFactoryBean extends ArgumentConvertingMethod
 		// Build JobDetail instance.
 		JobDetailImpl jdi = new JobDetailImpl();
 		jdi.setName(name);
-		jdi.setGroup(group);
+		jdi.setGroup(this.group);
 		jdi.setJobClass((Class) jobClass);
 		jdi.setDurability(true);
 		jdi.getJobDataMap().put("methodInvoker", this);

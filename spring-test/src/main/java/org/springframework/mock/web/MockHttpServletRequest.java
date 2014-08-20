@@ -107,6 +107,8 @@ public class MockHttpServletRequest implements HttpServletRequest {
 
 	private static final String CONTENT_TYPE_HEADER = "Content-Type";
 
+	private static final String HOST_HEADER = "Host";
+
 	private static final String CHARSET_PREFIX = "charset=";
 
 	private static final ServletInputStream EMPTY_SERVLET_INPUT_STREAM =
@@ -544,6 +546,19 @@ public class MockHttpServletRequest implements HttpServletRequest {
 
 	@Override
 	public String getServerName() {
+		String host = getHeader(HOST_HEADER);
+		if (host != null) {
+			host = host.trim();
+			if (host.startsWith("[")) {
+				host = host.substring(1, host.indexOf(']'));
+			}
+			else if (host.contains(":")) {
+				host = host.substring(0, host.indexOf(':'));
+			}
+			return host;
+		}
+
+		// else
 		return this.serverName;
 	}
 
@@ -553,6 +568,22 @@ public class MockHttpServletRequest implements HttpServletRequest {
 
 	@Override
 	public int getServerPort() {
+		String host = getHeader(HOST_HEADER);
+		if (host != null) {
+			host = host.trim();
+			int idx;
+			if (host.startsWith("[")) {
+				idx = host.indexOf(':', host.indexOf(']'));
+			}
+			else {
+				idx = host.indexOf(':');
+			}
+			if (idx != -1) {
+				return Integer.parseInt(host.substring(idx + 1));
+			}
+		}
+
+		// else
 		return this.serverPort;
 	}
 
