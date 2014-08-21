@@ -374,12 +374,13 @@ public abstract class SharedEntityManagerCreator {
 		}
 
 		@Override
-		protected void finalize() {
+		protected void finalize() throws Throwable {
 			// Trigger explicit EntityManager.close() call on garbage collection,
 			// in particular for open/close statistics to be in sync. This is
 			// only relevant if the Query object has not been executed, e.g.
 			// when just used for the early validation of query definitions.
 			EntityManagerFactoryUtils.closeEntityManager(this.em);
+			super.finalize();
 		}
 	}
 
