@@ -21,6 +21,7 @@ import java.util.LinkedList;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
@@ -187,7 +188,7 @@ public class MutablePropertySources implements PropertySources {
 	}
 
 	@Override
-	public synchronized String toString() {
+	public String toString() {
 		String[] names = new String[this.size()];
 		for (int i=0; i < size(); i++) {
 			names[i] = this.propertySourceList.get(i).getName();
