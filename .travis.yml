@@ -1,0 +1,20 @@
+language: java
+
+sudo: required
+dist: trusty
+
+# required for oraclejdk9 to be available
+group: edge
+
+jdk:
+  - oraclejdk9
+  - oraclejdk8
+
+matrix:
+  - allow_failures:
+    # allow java9 builds to fail until Java 9 is actually released (estimated to be March, 2018)
+    - jdk: oraclejdk9
+
+script:
+ - java -version
+ - ./gradlew check
