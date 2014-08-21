@@ -16,10 +16,7 @@
 
 package org.springframework.web.socket.handler;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
@@ -35,8 +32,6 @@ import org.springframework.util.Assert;
  */
 public class BeanCreatingHandlerProvider<T> implements BeanFactoryAware {
 
-	private static final Log logger = LogFactory.getLog(BeanCreatingHandlerProvider.class);
-
 	private final Class<? extends T> handlerType;
 
 	private AutowireCapableBeanFactory beanFactory;
@@ -49,29 +44,29 @@ public class BeanCreatingHandlerProvider<T> implements BeanFactoryAware {
 
 
 	@Override
-	public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
+	public void setBeanFactory(BeanFactory beanFactory) {
 		if (beanFactory instanceof AutowireCapableBeanFactory) {
 			this.beanFactory = (AutowireCapableBeanFactory) beanFactory;
-		}
-	}
-
-	public Class<? extends T> getHandlerType() {
-		return this.handlerType;
-	}
-
-	public T getHandler() {
-		if (this.beanFactory == null) {
-			logger.warn("No BeanFactory available, attempting to use default constructor");
-			return BeanUtils.instantiate(this.handlerType);
-		}
-		else {
-			return this.beanFactory.createBean(this.handlerType);
 		}
 	}
 
 	public void destroy(T handler) {
 		if (this.beanFactory != null) {
 			this.beanFactory.destroyBean(handler);
+		}
+	}
+
+
+	public Class<? extends T> getHandlerType() {
+		return this.handlerType;
+	}
+
+	public T getHandler() {
+		if (this.beanFactory != null) {
+			return this.beanFactory.createBean(this.handlerType);
+		}
+		else {
+			return BeanUtils.instantiate(this.handlerType);
 		}
 	}
 
