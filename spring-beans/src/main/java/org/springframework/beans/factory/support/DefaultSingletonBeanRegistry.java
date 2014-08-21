@@ -379,7 +379,7 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 			return;
 		}
 
-		// No entry yet -> fully synchronized manipulation of the dependentBeans Set
+		// No entry yet -> fully synchronized manipulation of the containedBeans Set
 		synchronized (this.containedBeanMap) {
 			containedBeans = this.containedBeanMap.get(containingBeanName);
 			if (containedBeans == null) {

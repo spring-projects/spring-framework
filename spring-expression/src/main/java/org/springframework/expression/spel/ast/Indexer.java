@@ -179,19 +179,13 @@ public class Indexer extends SpelNodeImpl {
 	@Override
 	public boolean isCompilable() {
 		if (this.indexedType == IndexedType.array) {
-			return exitTypeDescriptor != null;
+			return (this.exitTypeDescriptor != null);
 		}
 		else if (this.indexedType == IndexedType.list) {
 			return this.children[0].isCompilable();
 		} 
 		else if (this.indexedType == IndexedType.map) {
-			if (this.children[0] instanceof PropertyOrFieldReference) {
-				// Only the name will be used, so that is OK
-				return true;
-			}
-			else {
-				return this.children[0].isCompilable();
-			}
+			return (this.children[0] instanceof PropertyOrFieldReference || this.children[0].isCompilable());
 		}
 		else if (this.indexedType == IndexedType.object) {
 			// If the string name is changing the accessor is clearly going to change (so compilation is not possible)
@@ -199,22 +193,21 @@ public class Indexer extends SpelNodeImpl {
 					(this.cachedReadAccessor instanceof ReflectivePropertyAccessor.OptimalPropertyAccessor) &&
 					(getChild(0) instanceof StringLiteral)) {
 				return true;
-			};
+			}
 		}
 		return false;
 	}
 	
 	@Override
 	public void generateCode(MethodVisitor mv, CodeFlow codeflow) {
-		String s = codeflow.lastDescriptor();
-		
-		if (s == null) {
-			// stack is empty, should use context object
+		String descriptor = codeflow.lastDescriptor();
+		if (descriptor == null) {
+			// Stack is empty, should use context object
 			codeflow.loadTarget(mv);
 		}
 		
 		if (this.indexedType == IndexedType.array) {
-			if ("I".equals(exitTypeDescriptor)) {
+			if ("I".equals(this.exitTypeDescriptor)) {
 				mv.visitTypeInsn(CHECKCAST,"[I");
 				SpelNodeImpl index = this.children[0];
 				codeflow.enterCompilationScope();
@@ -222,47 +215,47 @@ public class Indexer extends SpelNodeImpl {
 				codeflow.exitCompilationScope();
 				mv.visitInsn(IALOAD);
 			} 
-			else if ("D".equals(exitTypeDescriptor)) {
-				mv.visitTypeInsn(CHECKCAST,"[D");
+			else if ("D".equals(this.exitTypeDescriptor)) {
+				mv.visitTypeInsn(CHECKCAST, "[D");
 				SpelNodeImpl index = this.children[0];
 				codeflow.enterCompilationScope();
 				index.generateCode(mv, codeflow);
 				mv.visitInsn(DALOAD);
 			}
-			else if ("J".equals(exitTypeDescriptor)) {
-				mv.visitTypeInsn(CHECKCAST,"[J");
+			else if ("J".equals(this.exitTypeDescriptor)) {
+				mv.visitTypeInsn(CHECKCAST, "[J");
 				SpelNodeImpl index = this.children[0];
 				codeflow.enterCompilationScope();
 				index.generateCode(mv, codeflow);
 				codeflow.exitCompilationScope();
 				mv.visitInsn(LALOAD);
 			}
-			else if ("F".equals(exitTypeDescriptor)) {
-				mv.visitTypeInsn(CHECKCAST,"[F");
+			else if ("F".equals(this.exitTypeDescriptor)) {
+				mv.visitTypeInsn(CHECKCAST, "[F");
 				SpelNodeImpl index = this.children[0];
 				codeflow.enterCompilationScope();
 				index.generateCode(mv, codeflow);
 				codeflow.exitCompilationScope();
 				mv.visitInsn(FALOAD);
 			}
-			else if ("S".equals(exitTypeDescriptor)) {
-				mv.visitTypeInsn(CHECKCAST,"[S");
+			else if ("S".equals(this.exitTypeDescriptor)) {
+				mv.visitTypeInsn(CHECKCAST, "[S");
 				SpelNodeImpl index = this.children[0];
 				codeflow.enterCompilationScope();
 				index.generateCode(mv, codeflow);
 				codeflow.exitCompilationScope();
 				mv.visitInsn(SALOAD);
 			}
-			else if ("B".equals(exitTypeDescriptor)) {
-				mv.visitTypeInsn(CHECKCAST,"[B");
+			else if ("B".equals(this.exitTypeDescriptor)) {
+				mv.visitTypeInsn(CHECKCAST, "[B");
 				SpelNodeImpl index = this.children[0];
 				codeflow.enterCompilationScope();
 				index.generateCode(mv, codeflow);
 				codeflow.exitCompilationScope();
 				mv.visitInsn(BALOAD);
 			}
-			else if ("C".equals(exitTypeDescriptor)) {
-				mv.visitTypeInsn(CHECKCAST,"[C");
+			else if ("C".equals(this.exitTypeDescriptor)) {
+				mv.visitTypeInsn(CHECKCAST, "[C");
 				SpelNodeImpl index = this.children[0];
 				codeflow.enterCompilationScope();
 				index.generateCode(mv, codeflow);
@@ -270,7 +263,9 @@ public class Indexer extends SpelNodeImpl {
 				mv.visitInsn(CALOAD);
 			}
 			else { 
-				mv.visitTypeInsn(CHECKCAST,"["+exitTypeDescriptor+(CodeFlow.isPrimitiveArray(exitTypeDescriptor)?"":";"));//depthPlusOne(exitTypeDescriptor)+"Ljava/lang/Object;");
+				mv.visitTypeInsn(CHECKCAST, "["+ this.exitTypeDescriptor +
+						(CodeFlow.isPrimitiveArray(this.exitTypeDescriptor) ? "" : ";"));
+						//depthPlusOne(exitTypeDescriptor)+"Ljava/lang/Object;");
 				SpelNodeImpl index = this.children[0];
 				codeflow.enterCompilationScope();
 				index.generateCode(mv, codeflow);
@@ -279,15 +274,15 @@ public class Indexer extends SpelNodeImpl {
 			}
 		}
 		else if (this.indexedType == IndexedType.list) {
-			mv.visitTypeInsn(CHECKCAST,"java/util/List");
+			mv.visitTypeInsn(CHECKCAST, "java/util/List");
 			codeflow.enterCompilationScope();
 			this.children[0].generateCode(mv, codeflow);
 			codeflow.exitCompilationScope();
-			mv.visitMethodInsn(INVOKEINTERFACE,"java/util/List","get","(I)Ljava/lang/Object;", true);
-			CodeFlow.insertCheckCast(mv,exitTypeDescriptor);
+			mv.visitMethodInsn(INVOKEINTERFACE, "java/util/List", "get", "(I)Ljava/lang/Object;", true);
+			CodeFlow.insertCheckCast(mv, this.exitTypeDescriptor);
 		}
 		else if (this.indexedType == IndexedType.map) {
-			mv.visitTypeInsn(CHECKCAST,"java/util/Map");
+			mv.visitTypeInsn(CHECKCAST, "java/util/Map");
 			// Special case when the key is an unquoted string literal that will be parsed as
 			// a property/field reference
 			if ((this.children[0] instanceof PropertyOrFieldReference)) {
@@ -300,16 +295,14 @@ public class Indexer extends SpelNodeImpl {
 				this.children[0].generateCode(mv, codeflow);
 				codeflow.exitCompilationScope();
 			}
-			mv.visitMethodInsn(INVOKEINTERFACE,"java/util/Map","get","(Ljava/lang/Object;)Ljava/lang/Object;", true);
-			CodeFlow.insertCheckCast(mv,exitTypeDescriptor);
+			mv.visitMethodInsn(INVOKEINTERFACE, "java/util/Map", "get", "(Ljava/lang/Object;)Ljava/lang/Object;", true);
+			CodeFlow.insertCheckCast(mv, this.exitTypeDescriptor);
 		} 
 		else if (this.indexedType == IndexedType.object) {
 			ReflectivePropertyAccessor.OptimalPropertyAccessor accessor =
-					(ReflectivePropertyAccessor.OptimalPropertyAccessor)this.cachedReadAccessor;
+					(ReflectivePropertyAccessor.OptimalPropertyAccessor) this.cachedReadAccessor;
 			Member member = accessor.member;
 			boolean isStatic = Modifier.isStatic(member.getModifiers());
-
-			String descriptor = codeflow.lastDescriptor();
 			String memberDeclaringClassSlashedDescriptor = member.getDeclaringClass().getName().replace('.','/');
 			if (!isStatic) {
 				if (descriptor == null) {
@@ -320,13 +313,16 @@ public class Indexer extends SpelNodeImpl {
 				}
 			}
 			if (member instanceof Field) {
-				mv.visitFieldInsn(isStatic?GETSTATIC:GETFIELD,memberDeclaringClassSlashedDescriptor,member.getName(),CodeFlow.toJVMDescriptor(((Field) member).getType()));
+				mv.visitFieldInsn(isStatic ? GETSTATIC : GETFIELD, memberDeclaringClassSlashedDescriptor,
+						member.getName(), CodeFlow.toJVMDescriptor(((Field) member).getType()));
 			}
 			else {
-				mv.visitMethodInsn(isStatic?INVOKESTATIC:INVOKEVIRTUAL, memberDeclaringClassSlashedDescriptor, member.getName(),CodeFlow.createSignatureDescriptor((Method)member),false);
+				mv.visitMethodInsn(isStatic? INVOKESTATIC : INVOKEVIRTUAL, memberDeclaringClassSlashedDescriptor,
+						member.getName(), CodeFlow.createSignatureDescriptor((Method) member), false);
 			}
 		} 
-		codeflow.pushDescriptor(exitTypeDescriptor);
+
+		codeflow.pushDescriptor(this.exitTypeDescriptor);
 	}
 
 	@Override
