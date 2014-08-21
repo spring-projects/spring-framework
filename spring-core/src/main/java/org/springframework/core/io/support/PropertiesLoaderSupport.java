@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -66,7 +66,7 @@ public abstract class PropertiesLoaderSupport {
 	 * Set local properties, e.g. via the "props" tag in XML bean definitions,
 	 * allowing for merging multiple properties sets into one.
 	 */
-	public void setPropertiesArray(Properties[] propertiesArray) {
+	public void setPropertiesArray(Properties... propertiesArray) {
 		this.localProperties = propertiesArray;
 	}
 
@@ -88,7 +88,7 @@ public abstract class PropertiesLoaderSupport {
 	 * Hence, make sure that the most specific files are the last
 	 * ones in the given list of locations.
 	 */
-	public void setLocations(Resource[] locations) {
+	public void setLocations(Resource... locations) {
 		this.locations = locations;
 	}
 

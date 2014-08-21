@@ -231,16 +231,16 @@ class ConfigurationClassParser {
 	 * @return the superclass, or {@code null} if none found or previously processed
 	 */
 	protected final SourceClass doProcessConfigurationClass(ConfigurationClass configClass, SourceClass sourceClass) throws IOException {
-		// recursively process any member (nested) classes first
+		// Recursively process any member (nested) classes first
 		processMemberClasses(configClass, sourceClass);
 
-		// process any @PropertySource annotations
+		// Process any @PropertySource annotations
 		for (AnnotationAttributes propertySource : AnnotationConfigUtils.attributesForRepeatable(
 				sourceClass.getMetadata(), PropertySources.class, org.springframework.context.annotation.PropertySource.class)) {
 			processPropertySource(propertySource);
 		}
 
-		// process any @ComponentScan annotations
+		// Process any @ComponentScan annotations
 		AnnotationAttributes componentScan = AnnotationConfigUtils.attributesFor(sourceClass.getMetadata(), ComponentScan.class);
 		if (componentScan != null) {
 			// the config class is annotated with @ComponentScan -> perform the scan immediately
@@ -257,10 +257,10 @@ class ConfigurationClassParser {
 			}
 		}
 
-		// process any @Import annotations
+		// Process any @Import annotations
 		processImports(configClass, sourceClass, getImports(sourceClass), true);
 
-		// process any @ImportResource annotations
+		// Process any @ImportResource annotations
 		if (sourceClass.getMetadata().isAnnotated(ImportResource.class.getName())) {
 			AnnotationAttributes importResource = AnnotationConfigUtils.attributesFor(sourceClass.getMetadata(), ImportResource.class);
 			String[] resources = importResource.getStringArray("value");
@@ -271,18 +271,18 @@ class ConfigurationClassParser {
 			}
 		}
 
-		// process individual @Bean methods
+		// Process individual @Bean methods
 		Set<MethodMetadata> beanMethods = sourceClass.getMetadata().getAnnotatedMethods(Bean.class.getName());
 		for (MethodMetadata methodMetadata : beanMethods) {
 			configClass.addBeanMethod(new BeanMethod(methodMetadata, configClass));
 		}
 
-		// process superclass, if any
+		// Process superclass, if any
 		if (sourceClass.getMetadata().hasSuperClass()) {
 			String superclass = sourceClass.getMetadata().getSuperClassName();
 			if (!superclass.startsWith("java") && !this.knownSuperclasses.containsKey(superclass)) {
 				this.knownSuperclasses.put(superclass, configClass);
-				// superclass found, return its annotation metadata and recurse
+				// Superclass found, return its annotation metadata and recurse
 				try {
 					return sourceClass.getSuperClass();
 				}
@@ -292,7 +292,7 @@ class ConfigurationClassParser {
 			}
 		}
 
-		// no superclass, processing is complete
+		// No superclass, processing is complete
 		return null;
 	}
 
