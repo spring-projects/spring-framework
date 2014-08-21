@@ -37,6 +37,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeanWrapper;
@@ -148,7 +149,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			new ConcurrentHashMap<String, BeanWrapper>(16);
 
 	/** Cache of filtered PropertyDescriptors: bean Class -> PropertyDescriptor array */
-	private final Map<Class<?>, PropertyDescriptor[]> filteredPropertyDescriptorsCache =
+	private final ConcurrentMap<Class<?>, PropertyDescriptor[]> filteredPropertyDescriptorsCache =
 			new ConcurrentHashMap<Class<?>, PropertyDescriptor[]>(64);
 
 
@@ -1315,17 +1316,13 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	protected PropertyDescriptor[] filterPropertyDescriptorsForDependencyCheck(BeanWrapper bw, boolean cache) {
 		PropertyDescriptor[] filtered = this.filteredPropertyDescriptorsCache.get(bw.getWrappedClass());
 		if (filtered == null) {
+			filtered = filterPropertyDescriptorsForDependencyCheck(bw);
 			if (cache) {
-				synchronized (this.filteredPropertyDescriptorsCache) {
-					filtered = this.filteredPropertyDescriptorsCache.get(bw.getWrappedClass());
-					if (filtered == null) {
-						filtered = filterPropertyDescriptorsForDependencyCheck(bw);
-						this.filteredPropertyDescriptorsCache.put(bw.getWrappedClass(), filtered);
-					}
+				PropertyDescriptor[] existing =
+						this.filteredPropertyDescriptorsCache.putIfAbsent(bw.getWrappedClass(), filtered);
+				if (existing != null) {
+					filtered = existing;
 				}
-			}
-			else {
-				filtered = filterPropertyDescriptorsForDependencyCheck(bw);
 			}
 		}
 		return filtered;
