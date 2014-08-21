@@ -76,6 +76,15 @@ public class PropertySourceAnnotationTests {
 		assertThat(ctx.getBean(TestBean.class).getName(), equalTo("p1TestBean"));
 	}
 
+	@Test
+	public void withTestProfileBeans() {
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
+		ctx.register(ConfigWithTestProfileBeans.class);
+		ctx.refresh();
+		assertTrue(ctx.containsBean("testBean"));
+		assertTrue(ctx.containsBean("testProfileBean"));
+	}
+
 	/**
 	 * Tests the LIFO behavior of @PropertySource annotaitons.
 	 * The last one registered should 'win'.
@@ -211,6 +220,7 @@ public class PropertySourceAnnotationTests {
 	@Configuration
 	@PropertySource(value="classpath:${unresolvable:org/springframework/context/annotation}/p1.properties")
 	static class ConfigWithUnresolvablePlaceholderAndDefault {
+
 		@Inject Environment env;
 
 		@Bean
@@ -223,6 +233,7 @@ public class PropertySourceAnnotationTests {
 	@Configuration
 	@PropertySource(value="classpath:${path.to.properties}/p1.properties")
 	static class ConfigWithResolvablePlaceholder {
+
 		@Inject Environment env;
 
 		@Bean
@@ -232,10 +243,10 @@ public class PropertySourceAnnotationTests {
 	}
 
 
-
 	@Configuration
 	@PropertySource(name="p1", value="classpath:org/springframework/context/annotation/p1.properties")
 	static class ConfigWithExplicitName {
+
 		@Inject Environment env;
 
 		@Bean
@@ -248,9 +259,24 @@ public class PropertySourceAnnotationTests {
 	@Configuration
 	@PropertySource("classpath:org/springframework/context/annotation/p1.properties")
 	static class ConfigWithImplicitName {
+
 		@Inject Environment env;
 
 		@Bean
+		public TestBean testBean() {
+			return new TestBean(env.getProperty("testbean.name"));
+		}
+	}
+
+
+	@Configuration
+	@PropertySource(name="p1", value="classpath:org/springframework/context/annotation/p1.properties")
+	@ComponentScan("org.springframework.context.annotation.spr12111")
+	static class ConfigWithTestProfileBeans {
+
+		@Inject Environment env;
+
+		@Bean @Profile("test")
 		public TestBean testBean() {
 			return new TestBean(env.getProperty("testbean.name"));
 		}
@@ -287,7 +313,7 @@ public class PropertySourceAnnotationTests {
 	@Configuration
 	@PropertySources({
 		@PropertySource("classpath:org/springframework/context/annotation/p1.properties"),
-		@PropertySource("classpath:org/springframework/context/annotation/p2.properties"),
+		@PropertySource("classpath:${base.package}/p2.properties"),
 	})
 	static class ConfigWithPropertySources {
 	}

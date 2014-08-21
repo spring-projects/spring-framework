@@ -21,7 +21,6 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -57,10 +56,7 @@ import org.springframework.context.annotation.ConfigurationClassEnhancer.Enhance
 import org.springframework.context.annotation.ConfigurationClassParser.ImportRegistry;
 import org.springframework.core.Ordered;
 import org.springframework.core.PriorityOrdered;
-import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.Environment;
-import org.springframework.core.env.MutablePropertySources;
-import org.springframework.core.env.PropertySource;
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.type.AnnotationMetadata;
@@ -307,28 +303,9 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 				this.resourceLoader, this.componentScanBeanNameGenerator, registry);
 
 		Set<ConfigurationClass> alreadyParsed = new HashSet<ConfigurationClass>(configCandidates.size());
-		int propertySourceCount = 0;
 		do {
 			parser.parse(configCandidates);
 			parser.validate();
-
-			// Handle any @PropertySource annotations
-			if (parser.getPropertySourceCount() > propertySourceCount) {
-				List<PropertySource<?>> parsedPropertySources = parser.getPropertySources();
-				if (!parsedPropertySources.isEmpty()) {
-					if (!(this.environment instanceof ConfigurableEnvironment)) {
-						logger.warn("Ignoring @PropertySource annotations. " +
-								"Reason: Environment must implement ConfigurableEnvironment");
-					}
-					else {
-						MutablePropertySources envPropertySources = ((ConfigurableEnvironment) this.environment).getPropertySources();
-						for (PropertySource<?> propertySource : parsedPropertySources) {
-							envPropertySources.addLast(propertySource);
-						}
-					}
-				}
-				propertySourceCount = parser.getPropertySourceCount();
-			}
 
 			Set<ConfigurationClass> configClasses = new LinkedHashSet<ConfigurationClass>(parser.getConfigurationClasses());
 			configClasses.removeAll(alreadyParsed);

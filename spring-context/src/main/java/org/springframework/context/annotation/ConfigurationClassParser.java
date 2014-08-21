@@ -55,7 +55,9 @@ import org.springframework.core.NestedIOException;
 import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.core.env.CompositePropertySource;
+import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.Environment;
+import org.springframework.core.env.MutablePropertySources;
 import org.springframework.core.env.PropertySource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
@@ -120,8 +122,8 @@ class ConfigurationClassParser {
 
 	private final Map<String, ConfigurationClass> knownSuperclasses = new HashMap<String, ConfigurationClass>();
 
-	private final MultiValueMap<String, ResourcePropertySource> propertySources =
-			new LinkedMultiValueMap<String, ResourcePropertySource>();
+	private final MultiValueMap<Object, PropertySourceDescriptor> propertySources =
+			new LinkedMultiValueMap<Object, PropertySourceDescriptor>();
 
 	private final ImportStack importStack = new ImportStack();
 
@@ -234,16 +236,19 @@ class ConfigurationClassParser {
 	 * @return the superclass, or {@code null} if none found or previously processed
 	 */
 	protected final SourceClass doProcessConfigurationClass(ConfigurationClass configClass, SourceClass sourceClass) throws IOException {
-		// recursively process any member (nested) classes first
+		// Recursively process any member (nested) classes first
 		processMemberClasses(configClass, sourceClass);
 
-		// process any @PropertySource annotations
+		// Process any @PropertySource annotations
 		for (AnnotationAttributes propertySource : AnnotationConfigUtils.attributesForRepeatable(
 				sourceClass.getMetadata(), PropertySources.class, org.springframework.context.annotation.PropertySource.class)) {
 			processPropertySource(propertySource);
 		}
 
-		// process any @ComponentScan annotations
+		// Register PropertySources with Environment
+		registerPropertySources();
+
+		// Process any @ComponentScan annotations
 		AnnotationAttributes componentScan = AnnotationConfigUtils.attributesFor(sourceClass.getMetadata(), ComponentScan.class);
 		if (componentScan != null) {
 			// the config class is annotated with @ComponentScan -> perform the scan immediately
@@ -260,10 +265,10 @@ class ConfigurationClassParser {
 			}
 		}
 
-		// process any @Import annotations
+		// Process any @Import annotations
 		processImports(configClass, sourceClass, getImports(sourceClass), true, false);
 
-		// process any @ImportResource annotations
+		// Process any @ImportResource annotations
 		if (sourceClass.getMetadata().isAnnotated(ImportResource.class.getName())) {
 			AnnotationAttributes importResource = AnnotationConfigUtils.attributesFor(sourceClass.getMetadata(), ImportResource.class);
 			String[] resources = importResource.getStringArray("value");
@@ -274,23 +279,23 @@ class ConfigurationClassParser {
 			}
 		}
 
-		// process individual @Bean methods
+		// Process individual @Bean methods
 		Set<MethodMetadata> beanMethods = sourceClass.getMetadata().getAnnotatedMethods(Bean.class.getName());
 		for (MethodMetadata methodMetadata : beanMethods) {
 			configClass.addBeanMethod(new BeanMethod(methodMetadata, configClass));
 		}
 
-		// process superclass, if any
+		// Process superclass, if any
 		if (sourceClass.getMetadata().hasSuperClass()) {
 			String superclass = sourceClass.getMetadata().getSuperClassName();
 			if (!superclass.startsWith("java") && !this.knownSuperclasses.containsKey(superclass)) {
 				this.knownSuperclasses.put(superclass, configClass);
-				// superclass found, return its annotation metadata and recurse
+				// Superclass found, return its annotation metadata and recurse
 				return sourceClass.getSuperClass();
 			}
 		}
 
-		// no superclass, processing is complete
+		// No superclass, processing is complete
 		return null;
 	}
 
@@ -310,9 +315,8 @@ class ConfigurationClassParser {
 	/**
 	 * Process the given <code>@PropertySource</code> annotation metadata.
 	 * @param propertySource metadata for the <code>@PropertySource</code> annotation found
-	 * @throws IOException if loading a property source failed
 	 */
-	private void processPropertySource(AnnotationAttributes propertySource) throws IOException {
+	private void processPropertySource(AnnotationAttributes propertySource) {
 		String name = propertySource.getString("name");
 		String[] locations = propertySource.getStringArray("value");
 		boolean ignoreResourceNotFound = propertySource.getBoolean("ignoreResourceNotFound");
@@ -320,24 +324,61 @@ class ConfigurationClassParser {
 			throw new IllegalArgumentException("At least one @PropertySource(value) location is required");
 		}
 		for (String location : locations) {
-			try {
-				String resolvedLocation = this.environment.resolveRequiredPlaceholders(location);
-				Resource resource = this.resourceLoader.getResource(resolvedLocation);
-				ResourcePropertySource ps = new ResourcePropertySource(resource);
-				this.propertySources.add((StringUtils.hasText(name) ? name : ps.getName()), ps);
-			}
-			catch (IllegalArgumentException ex) {
-				// from resolveRequiredPlaceholders
-				if (!ignoreResourceNotFound) {
-					throw ex;
+			this.propertySources.add((StringUtils.hasText(name) ? name : this.propertySources.size()),
+					new PropertySourceDescriptor(location, ignoreResourceNotFound));
+		}
+	}
+
+	/**
+	 * Register all discovered property sources with the {@link Environment}.
+	 * @throws IOException in case of property loading failure
+	 */
+	private void registerPropertySources() throws IOException {
+		if (!(this.environment instanceof ConfigurableEnvironment)) {
+			return;
+		}
+		MutablePropertySources envPropertySources = ((ConfigurableEnvironment) this.environment).getPropertySources();
+
+		String lastName = null;
+		for (Map.Entry<Object, List<PropertySourceDescriptor>> entry : this.propertySources.entrySet()) {
+			Object key = entry.getKey();
+			String name = (key instanceof String ? (String) key : null);
+
+			List<PropertySourceDescriptor> descriptors = entry.getValue();
+			List<ResourcePropertySource> resources = new ArrayList<ResourcePropertySource>(descriptors.size());
+
+			for (PropertySourceDescriptor descriptor : descriptors) {
+				try {
+					String resolvedLocation = this.environment.resolveRequiredPlaceholders(descriptor.location);
+					Resource resource = this.resourceLoader.getResource(resolvedLocation);
+					ResourcePropertySource ps = new ResourcePropertySource(resource);
+					resources.add(ps);
+					if (name == null) {
+						name = ps.getName();
+					}
+				}
+				catch (IllegalArgumentException ex) {
+					// from resolveRequiredPlaceholders
+					if (!descriptor.ignoreResourceNotFound) {
+						throw ex;
+					}
+				}
+				catch (FileNotFoundException ex) {
+					// from ResourcePropertySource constructor
+					if (!descriptor.ignoreResourceNotFound) {
+						throw ex;
+					}
 				}
 			}
-			catch (FileNotFoundException ex) {
-				// from ResourcePropertySource constructor
-				if (!ignoreResourceNotFound) {
-					throw ex;
-				}
+
+			PropertySource<?> ps = collatePropertySources(name, resources);
+			if (lastName != null) {
+				envPropertySources.addBefore(lastName, ps);
 			}
+			else {
+				envPropertySources.addLast(ps);
+			}
+			lastName = name;
 		}
 	}
 
@@ -486,18 +527,6 @@ class ConfigurationClassParser {
 
 	public Set<ConfigurationClass> getConfigurationClasses() {
 		return this.configurationClasses.keySet();
-	}
-
-	public int getPropertySourceCount() {
-		return this.propertySources.size();
-	}
-
-	public List<PropertySource<?>> getPropertySources() {
-		List<PropertySource<?>> propertySources = new LinkedList<PropertySource<?>>();
-		for (Map.Entry<String, List<ResourcePropertySource>> entry : this.propertySources.entrySet()) {
-			propertySources.add(0, collatePropertySources(entry.getKey(), entry.getValue()));
-		}
-		return propertySources;
 	}
 
 	private PropertySource<?> collatePropertySources(String name, List<ResourcePropertySource> propertySources) {
@@ -793,6 +822,19 @@ class ConfigurationClassParser {
 		public String toString() {
 			return this.metadata.getClassName();
 		}
+	}
+
+
+	private static class PropertySourceDescriptor {
+
+		public PropertySourceDescriptor(String location, boolean ignoreResourceNotFound) {
+			this.location = location;
+			this.ignoreResourceNotFound = ignoreResourceNotFound;
+		}
+
+		public final String location;
+
+		public final boolean ignoreResourceNotFound;
 	}
 
 
