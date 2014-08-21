@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ import javax.portlet.PortletContext;
 
 import org.springframework.core.env.EnumerablePropertySource;
 import org.springframework.core.env.PropertySource;
-import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 
 /**
  * {@link PropertySource} that reads init parameters from a {@link PortletContext} object.
@@ -37,11 +37,12 @@ public class PortletContextPropertySource extends EnumerablePropertySource<Portl
 
 	@Override
 	public String[] getPropertyNames() {
-		return CollectionUtils.toArray(this.source.getInitParameterNames(), EMPTY_NAMES_ARRAY);
+		return StringUtils.toStringArray(this.source.getInitParameterNames());
 	}
 
 	@Override
 	public String getProperty(String name) {
 		return this.source.getInitParameter(name);
 	}
+
 }
