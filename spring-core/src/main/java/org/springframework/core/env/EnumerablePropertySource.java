@@ -45,6 +45,7 @@ import org.springframework.util.Assert;
  */
 public abstract class EnumerablePropertySource<T> extends PropertySource<T> {
 
+	@Deprecated
 	protected static final String[] EMPTY_NAMES_ARRAY = new String[0];
 
 	protected final Log logger = LogFactory.getLog(getClass());
