@@ -21,7 +21,6 @@ import java.util.concurrent.Executor;
 
 import org.springframework.aop.interceptor.AsyncExecutionInterceptor;
 import org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler;
-import org.springframework.aop.interceptor.SimpleAsyncUncaughtExceptionHandler;
 import org.springframework.core.annotation.AnnotationUtils;
 
 /**
@@ -46,7 +45,7 @@ public class AnnotationAsyncExecutionInterceptor extends AsyncExecutionIntercept
 	 * executor has been qualified at the method level using {@link Async#value()}
 	 */
 	public AnnotationAsyncExecutionInterceptor(Executor defaultExecutor) {
-		this(defaultExecutor, new SimpleAsyncUncaughtExceptionHandler());
+		super(defaultExecutor);
 	}
 
 	/**

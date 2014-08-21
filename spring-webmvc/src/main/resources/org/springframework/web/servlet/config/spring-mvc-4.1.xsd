@@ -8,8 +8,8 @@
 		elementFormDefault="qualified"
 		attributeFormDefault="unqualified">
 
-	<xsd:import namespace="http://www.springframework.org/schema/beans" schemaLocation="http://www.springframework.org/schema/beans/spring-beans-4.1.xsd" />
-	<xsd:import namespace="http://www.springframework.org/schema/tool" schemaLocation="http://www.springframework.org/schema/tool/spring-tool-4.1.xsd" />
+	<xsd:import namespace="http://www.springframework.org/schema/beans" schemaLocation="http://www.springframework.org/schema/beans/spring-beans-4.1.xsd"/>
+	<xsd:import namespace="http://www.springframework.org/schema/tool" schemaLocation="http://www.springframework.org/schema/tool/spring-tool-4.1.xsd"/>
 
 	<xsd:element name="annotation-driven">
 		<xsd:annotation>
@@ -17,9 +17,8 @@
 	Configures the annotation-driven Spring MVC Controller programming model.
 	Note that this tag works in Web MVC only, not in Portlet MVC!
 
-	See org.springframework.web.servlet.config.annotation.EnableWebMvc Javadoc for
-	information on code-based alternatives to enabling annotation-driven Spring MVC
-	support.
+	See org.springframework.web.servlet.config.annotation.EnableWebMvc javadoc for details
+	on code-based alternatives to enabling annotation-driven Spring MVC support.
 			]]></xsd:documentation>
 		</xsd:annotation>
 		<xsd:complexType>
@@ -28,7 +27,7 @@
 					<xsd:annotation>
 						<xsd:documentation><![CDATA[
 	Configures the path matching part of the Spring MVC Controller programming model.
-	Like annotation-driven, code-based alternatives are also documented in EnableWebMvc Javadoc.
+	Like annotation-driven, code-based alternatives are also documented in EnableWebMvc javadoc.
 						]]></xsd:documentation>
 					</xsd:annotation>
 					<xsd:complexType>
@@ -96,14 +95,14 @@
 								<xsd:element ref="beans:bean">
 									<xsd:annotation>
 										<xsd:documentation><![CDATA[
-		An HttpMessageConverter bean definition.
+	An HttpMessageConverter bean definition.
 										]]></xsd:documentation>
 									</xsd:annotation>
 								</xsd:element>
 								<xsd:element ref="beans:ref">
 									<xsd:annotation>
 										<xsd:documentation><![CDATA[
-		A reference to an HttpMessageConverter bean.
+	A reference to an HttpMessageConverter bean.
 										]]></xsd:documentation>
 									</xsd:annotation>
 								</xsd:element>
@@ -234,7 +233,7 @@
 								<xsd:documentation source="java:org.springframework.core.task.AsyncTaskExecutor"><![CDATA[
 	The bean name of a default AsyncTaskExecutor to use when a controller method returns a {@link Callable}.
 	Controller methods can override this default on a per-request basis by returning an AsyncTask.
-	By default a SimpleAsyncTaskExecutor is used which does not re-use threads and is not recommended for production.
+	By default, a SimpleAsyncTaskExecutor is used which does not re-use threads and is not recommended for production.
 								]]></xsd:documentation>
 								<xsd:appinfo>
 									<tool:annotation kind="ref">
@@ -318,7 +317,7 @@
 				<xsd:annotation>
 					<xsd:documentation><![CDATA[
 	Matrix variables can appear in any path segment, each matrix variable separated with a ";" (semicolon).
-	For example "/cars;color=red;year=2012". By default they're removed from the URL. If this property
+	For example "/cars;color=red;year=2012". By default, they're removed from the URL. If this property
 	is set to true, matrix variables are not removed from the URL, and the request mapping pattern
 	must use URI variable in path segments where matrix variables are expected. For example "/{cars}".
 	Matrix variables can then be injected into a controller method with @MatrixVariable.
@@ -328,7 +327,7 @@
 			<xsd:attribute name="ignore-default-model-on-redirect" type="xsd:boolean">
 				<xsd:annotation>
 					<xsd:documentation><![CDATA[
-	By default the content of the "default" model is used both during rendering and redirect scenarios.
+	By default, the content of the "default" model is used both during rendering and redirect scenarios.
 	Alternatively a controller method can declare a RedirectAttributes argument and use it to provide attributes for a redirect.
 	Setting this flag to true ensures the "default" model is never used in a redirect scenario even if a RedirectAttributes argument is not declared.
 	Setting it to false means the "default" model may be used in a redirect if the controller method doesn't declare a RedirectAttributes argument.
@@ -628,7 +627,7 @@
 			<xsd:attribute name="redirect-url" type="xsd:string" use="required">
 				<xsd:annotation>
 					<xsd:documentation><![CDATA[
-	By default the redirect URL is expected to be relative to the current ServletContext,
+	By default, the redirect URL is expected to be relative to the current ServletContext,
 	i.e. as relative to the web application root.
 					]]></xsd:documentation>
 				</xsd:annotation>
@@ -648,16 +647,15 @@
 					<xsd:documentation><![CDATA[
 	Whether to interpret a given redirect URL that starts with a slash ("/")
 	as relative to the current ServletContext, i.e. as relative to the web
-	application root.
-	By default set to "true".
+	application root. The default is "true".
 					]]></xsd:documentation>
 				</xsd:annotation>
 			</xsd:attribute>
 			<xsd:attribute name="keep-query-params" type="xsd:boolean">
 				<xsd:annotation>
 					<xsd:documentation><![CDATA[
-	Whether to propagate the query parameters of the current request through to the target redirect URL.
-	By default set to "false".
+	Whether to propagate the query parameters of the current request through
+	to the target redirect URL. The default is "false".
 					]]></xsd:documentation>
 				</xsd:annotation>
 			</xsd:attribute>
@@ -783,7 +781,7 @@
 	before or after it.
 
 	When content negotiation is enabled the order property is set to highest priority
-	instead with the ContentNeogitatingViewResolver encapsulating all other registered
+	instead with the ContentNegotiatingViewResolver encapsulating all other registered
 	view resolver instances. That way the resolvers registered through the MVC namespace
 	form self-encapsulated resolver chain.
 			]]></xsd:documentation>
@@ -794,17 +792,17 @@
 					<xsd:annotation>
 						<xsd:documentation><![CDATA[
 	Registers a ContentNegotiatingViewResolver with the list of all other registered
-	ViewResolver instances used to set its "viewResolvers" property. See the Javadoc
+	ViewResolver instances used to set its "viewResolvers" property. See the javadoc
 	of ContentNegotiatingViewResolver for more details.
-					]]></xsd:documentation>
+						]]></xsd:documentation>
 					</xsd:annotation>
 				</xsd:element>
 					<xsd:element name="jsp" type="urlViewResolverType">
 						<xsd:annotation>
 							<xsd:documentation><![CDATA[
 	Register an InternalResourceViewResolver bean for JSP rendering.
-	By default "/WEB-INF/" is registered as a view name prefix and ".jsp" as a suffix.
-								]]></xsd:documentation>
+	By default, "/WEB-INF/" is registered as a view name prefix and ".jsp" as a suffix.
+							]]></xsd:documentation>
 						</xsd:annotation>
 					</xsd:element>
 					<xsd:element name="tiles" type="urlViewResolverType">
@@ -813,14 +811,14 @@
 	Register a TilesViewResolver based on Tiles 3.x.
 	To configure Tiles you must also add a top-level <mvc:tiles> element
 	or declare a TilesConfigurer bean.
-								]]></xsd:documentation>
+							]]></xsd:documentation>
 						</xsd:annotation>
 					</xsd:element>
 					<xsd:element name="freemarker" type="urlViewResolverType">
 						<xsd:annotation>
 							<xsd:documentation><![CDATA[
 	Register a FreeMarkerViewResolver.
-	By default ".ftl" is configured as a view name suffix.
+	By default, ".ftl" is configured as a view name suffix.
 	To configure FreeMarker you must also add a top-level <mvc:freemarker> element
 	or declare a FreeMarkerConfigurer bean.
 							]]></xsd:documentation>
@@ -830,7 +828,7 @@
 						<xsd:annotation>
 							<xsd:documentation><![CDATA[
 	Register a VelocityViewResolver.
-	By default ".vm" is configured as a view name suffix.
+	By default, ".vm" is configured as a view name suffix.
 	To configure Velocity you must also add a top-level <mvc:velocity> element
 	or declare a VelocityConfigurer bean.
 							]]></xsd:documentation>
@@ -840,7 +838,7 @@
 						<xsd:annotation>
 							<xsd:documentation><![CDATA[
 	Register a GroovyMarkupViewResolver.
-	By default ".tpl" is configured as a view name suffix.
+	By default, ".tpl" is configured as a view name suffix.
 	To configure the Groovy markup template engine you must also add a top-level <mvc:groovy-markup> element
 	or declare a GroovyMarkupConfigurer bean.
 							]]></xsd:documentation>
@@ -850,21 +848,21 @@
 						<xsd:annotation>
 							<xsd:documentation><![CDATA[
 	Register a BeanNameViewResolver bean.
-								]]></xsd:documentation>
+							]]></xsd:documentation>
 						</xsd:annotation>
 					</xsd:element>
 					<xsd:element ref="beans:bean">
 						<xsd:annotation>
 							<xsd:documentation><![CDATA[
 	Register a ViewResolver as a direct bean declaration.
-								]]></xsd:documentation>
+							]]></xsd:documentation>
 						</xsd:annotation>
 					</xsd:element>
 					<xsd:element ref="beans:ref">
 						<xsd:annotation>
 							<xsd:documentation><![CDATA[
 	Register a ViewResolver through references to an existing bean declaration.
-								]]></xsd:documentation>
+							]]></xsd:documentation>
 						</xsd:annotation>
 					</xsd:element>
 			</xsd:choice>
@@ -887,7 +885,7 @@
 								<xsd:documentation><![CDATA[
 	The location of a file containing Tiles definitions (or a Spring resource pattern).
 	If no Tiles definitions are registerd, then "/WEB-INF/tiles.xml" is expected to exists.
-				]]></xsd:documentation>
+								]]></xsd:documentation>
 							</xsd:annotation>
 						</xsd:attribute>
 					</xsd:complexType>
@@ -898,14 +896,14 @@
 					<xsd:documentation><![CDATA[
 	Whether to check Tiles definition files for a refresh at runtime.
 	Default is "false".
-				]]></xsd:documentation>
+					]]></xsd:documentation>
 				</xsd:annotation>
 			</xsd:attribute>
 			<xsd:attribute name="validate-definitions" type="xsd:boolean">
 				<xsd:annotation>
 					<xsd:documentation><![CDATA[
 	Whether to validate the Tiles XML definitions. Default is "true".
-				]]></xsd:documentation>
+					]]></xsd:documentation>
 				</xsd:annotation>
 			</xsd:attribute>
 		</xsd:complexType>
@@ -926,7 +924,7 @@
 							<xsd:annotation>
 								<xsd:documentation><![CDATA[
 	The location of a FreeMarker template loader path (or a Spring resource pattern).
-				]]></xsd:documentation>
+								]]></xsd:documentation>
 							</xsd:annotation>
 						</xsd:attribute>
 					</xsd:complexType>

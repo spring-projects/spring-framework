@@ -132,6 +132,11 @@ public final class ParamsRequestCondition extends AbstractRequestCondition<Param
 		}
 
 		@Override
+		protected boolean isCaseSensitiveName() {
+			return true;
+		}
+
+		@Override
 		protected String parseValue(String valueExpression) {
 			return valueExpression;
 		}

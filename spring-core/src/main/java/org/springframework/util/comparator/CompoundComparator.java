@@ -59,7 +59,7 @@ public class CompoundComparator<T> implements Comparator<T>, Serializable {
 	 * @param comparators the comparators to build into a compound comparator
 	 * @see InvertibleComparator
 	 */
-	@SuppressWarnings({ "unchecked", "rawtypes" })
+	@SuppressWarnings("unchecked")
 	public CompoundComparator(Comparator... comparators) {
 		Assert.notNull(comparators, "Comparators must not be null");
 		this.comparators = new ArrayList<InvertibleComparator>(comparators.length);

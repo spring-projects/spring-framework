@@ -53,8 +53,8 @@ import org.springframework.util.ClassUtils;
  * @author Sebastien Deleuze
  * @since 4.1
  */
-public abstract class AbstractJackson2HttpMessageConverter extends
-		AbstractHttpMessageConverter<Object> implements GenericHttpMessageConverter<Object> {
+public abstract class AbstractJackson2HttpMessageConverter extends AbstractHttpMessageConverter<Object>
+		implements GenericHttpMessageConverter<Object> {
 
 	public static final Charset DEFAULT_CHARSET = Charset.forName("UTF-8");
 
@@ -81,6 +81,7 @@ public abstract class AbstractJackson2HttpMessageConverter extends
 		super(supportedMediaTypes);
 		this.objectMapper = objectMapper;
 	}
+
 
 	/**
 	 * Set the {@code ObjectMapper} for this view.
@@ -125,6 +126,7 @@ public abstract class AbstractJackson2HttpMessageConverter extends
 			this.objectMapper.configure(SerializationFeature.INDENT_OUTPUT, this.prettyPrint);
 		}
 	}
+
 
 	@Override
 	public boolean canRead(Class<?> clazz, MediaType mediaType) {

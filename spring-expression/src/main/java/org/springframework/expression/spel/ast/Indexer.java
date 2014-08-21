@@ -44,6 +44,7 @@ import org.springframework.expression.spel.support.ReflectivePropertyAccessor;
  *
  * @author Andy Clement
  * @author Phillip Webb
+ * @author Stephane Nicoll
  * @since 3.0
  */
 // TODO support multidimensional arrays
@@ -213,7 +214,7 @@ public class Indexer extends SpelNodeImpl {
 		}
 		
 		if (this.indexedType == IndexedType.array) {
-			if (exitTypeDescriptor == "I") {
+			if ("I".equals(exitTypeDescriptor)) {
 				mv.visitTypeInsn(CHECKCAST,"[I");
 				SpelNodeImpl index = this.children[0];
 				codeflow.enterCompilationScope();
@@ -221,14 +222,14 @@ public class Indexer extends SpelNodeImpl {
 				codeflow.exitCompilationScope();
 				mv.visitInsn(IALOAD);
 			} 
-			else if (exitTypeDescriptor == "D") {
+			else if ("D".equals(exitTypeDescriptor)) {
 				mv.visitTypeInsn(CHECKCAST,"[D");
 				SpelNodeImpl index = this.children[0];
 				codeflow.enterCompilationScope();
 				index.generateCode(mv, codeflow);
 				mv.visitInsn(DALOAD);
 			}
-			else if (exitTypeDescriptor == "J") {
+			else if ("J".equals(exitTypeDescriptor)) {
 				mv.visitTypeInsn(CHECKCAST,"[J");
 				SpelNodeImpl index = this.children[0];
 				codeflow.enterCompilationScope();
@@ -236,7 +237,7 @@ public class Indexer extends SpelNodeImpl {
 				codeflow.exitCompilationScope();
 				mv.visitInsn(LALOAD);
 			}
-			else if (exitTypeDescriptor == "F") {
+			else if ("F".equals(exitTypeDescriptor)) {
 				mv.visitTypeInsn(CHECKCAST,"[F");
 				SpelNodeImpl index = this.children[0];
 				codeflow.enterCompilationScope();
@@ -244,7 +245,7 @@ public class Indexer extends SpelNodeImpl {
 				codeflow.exitCompilationScope();
 				mv.visitInsn(FALOAD);
 			}
-			else if (exitTypeDescriptor == "S") {
+			else if ("S".equals(exitTypeDescriptor)) {
 				mv.visitTypeInsn(CHECKCAST,"[S");
 				SpelNodeImpl index = this.children[0];
 				codeflow.enterCompilationScope();
@@ -252,7 +253,7 @@ public class Indexer extends SpelNodeImpl {
 				codeflow.exitCompilationScope();
 				mv.visitInsn(SALOAD);
 			}
-			else if (exitTypeDescriptor == "B") {
+			else if ("B".equals(exitTypeDescriptor)) {
 				mv.visitTypeInsn(CHECKCAST,"[B");
 				SpelNodeImpl index = this.children[0];
 				codeflow.enterCompilationScope();
@@ -260,7 +261,7 @@ public class Indexer extends SpelNodeImpl {
 				codeflow.exitCompilationScope();
 				mv.visitInsn(BALOAD);
 			}
-			else if (exitTypeDescriptor == "C") {
+			else if ("C".equals(exitTypeDescriptor)) {
 				mv.visitTypeInsn(CHECKCAST,"[C");
 				SpelNodeImpl index = this.children[0];
 				codeflow.enterCompilationScope();

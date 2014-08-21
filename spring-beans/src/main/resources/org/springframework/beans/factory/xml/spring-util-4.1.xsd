@@ -177,14 +177,23 @@
 					<xsd:attribute name="id" type="xsd:string"/>
 					<xsd:attribute name="location" type="xsd:string">
 						<xsd:annotation>
-							<xsd:appinfo>
-								<tool:annotation>
-									<tool:expected-type type="org.springframework.core.io.Resource"/>
-								</tool:annotation>
-							</xsd:appinfo>
+							<xsd:documentation><![CDATA[
+	The location of the properties file, as a Spring resource location: a URL,
+	a "classpath:" pseudo URL, or a relative file path. Multiple locations may be
+	specified, separated by commas.
+				]]></xsd:documentation>
 						</xsd:annotation>
 					</xsd:attribute>
-					<xsd:attribute name="local-override" type="xsd:boolean">
+					<xsd:attribute name="ignore-resource-not-found" type="xsd:boolean" default="false">
+						<xsd:annotation>
+							<xsd:documentation><![CDATA[
+	Specifies if failure to find the property resource location should be ignored.
+	Default is "false", meaning that if there is no file in the location specified
+	an exception will be raised at runtime.
+				]]></xsd:documentation>
+						</xsd:annotation>
+					</xsd:attribute>
+					<xsd:attribute name="local-override" type="xsd:boolean" default="false">
 						<xsd:annotation>
 							<xsd:documentation><![CDATA[
 	Specifies whether local properties override properties from files.

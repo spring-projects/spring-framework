@@ -305,7 +305,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		if (beanNames.length > 1) {
 			ArrayList<String> autowireCandidates = new ArrayList<String>();
 			for (String beanName : beanNames) {
-				if (getBeanDefinition(beanName).isAutowireCandidate()) {
+				if (!containsBeanDefinition(beanName) || getBeanDefinition(beanName).isAutowireCandidate()) {
 					autowireCandidates.add(beanName);
 				}
 			}

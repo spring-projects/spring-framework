@@ -46,6 +46,7 @@ import org.springframework.web.util.WebUtils;
  *
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
+ * @author Juergen Hoeller
  * @since 3.0
  */
 public class ShallowEtagHeaderFilter extends OncePerRequestFilter {
@@ -243,6 +244,17 @@ public class ShallowEtagHeaderFilter extends OncePerRequestFilter {
 		public void setContentLength(int len) {
 			if (len > this.content.capacity()) {
 				this.content.resize(len);
+			}
+		}
+
+		// Overrides Servlet 3.1 setContentLengthLong(long) at runtime
+		public void setContentLengthLong(long len) {
+			if (len > Integer.MAX_VALUE) {
+				throw new IllegalArgumentException("Content-Length exceeds ShallowEtagHeaderFilter's maximum (" +
+						Integer.MAX_VALUE + "): " + len);
+			}
+			if (len > this.content.capacity()) {
+				this.content.resize((int) len);
 			}
 		}
 

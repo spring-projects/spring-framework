@@ -20,6 +20,10 @@ import java.lang.reflect.Method;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
+import java.util.concurrent.Future;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
@@ -28,11 +32,12 @@ import org.springframework.core.task.AsyncListenableTaskExecutor;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.core.task.support.TaskExecutorAdapter;
 import org.springframework.util.Assert;
+import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 
 /**
  * Base class for asynchronous method execution aspects, such as
- * {@link org.springframework.scheduling.annotation.AnnotationAsyncExecutionInterceptor}
+ * {@code org.springframework.scheduling.annotation.AnnotationAsyncExecutionInterceptor}
  * or {@code org.springframework.scheduling.aspectj.AnnotationAsyncExecutionAspect}.
  *
  * <p>Provides support for <i>executor qualification</i> on a method-by-method basis.
@@ -42,13 +47,18 @@ import org.springframework.util.StringUtils;
  *
  * @author Chris Beams
  * @author Juergen Hoeller
+ * @author Stephane Nicoll
  * @since 3.1.2
  */
 public abstract class AsyncExecutionAspectSupport implements BeanFactoryAware {
 
+	protected final Log logger = LogFactory.getLog(getClass());
+
 	private final Map<Method, AsyncTaskExecutor> executors = new ConcurrentHashMap<Method, AsyncTaskExecutor>(16);
 
 	private Executor defaultExecutor;
+
+	private AsyncUncaughtExceptionHandler exceptionHandler;
 
 	private BeanFactory beanFactory;
 
@@ -58,9 +68,18 @@ public abstract class AsyncExecutionAspectSupport implements BeanFactoryAware {
 	 * executor unless individual async methods indicate via qualifier that a more
 	 * specific executor should be used.
 	 * @param defaultExecutor the executor to use when executing asynchronous methods
+	 * @param exceptionHandler the {@link AsyncUncaughtExceptionHandler} to use
+	 */
+	public AsyncExecutionAspectSupport(Executor defaultExecutor, AsyncUncaughtExceptionHandler exceptionHandler) {
+		this.defaultExecutor = defaultExecutor;
+		this.exceptionHandler = exceptionHandler;
+	}
+
+	/**
+	 * Create a new instance with a default {@link AsyncUncaughtExceptionHandler}.
 	 */
 	public AsyncExecutionAspectSupport(Executor defaultExecutor) {
-		this.defaultExecutor = defaultExecutor;
+		this(defaultExecutor, new SimpleAsyncUncaughtExceptionHandler());
 	}
 
 
@@ -76,6 +95,14 @@ public abstract class AsyncExecutionAspectSupport implements BeanFactoryAware {
 	 */
 	public void setExecutor(Executor defaultExecutor) {
 		this.defaultExecutor = defaultExecutor;
+	}
+
+	/**
+	 * Supply the {@link AsyncUncaughtExceptionHandler} to use to handle exceptions
+	 * thrown by invoking asynchronous methods with a {@code void} return type.
+	 */
+	public void setExceptionHandler(AsyncUncaughtExceptionHandler exceptionHandler) {
+		this.exceptionHandler = exceptionHandler;
 	}
 
 	/**
@@ -124,5 +151,33 @@ public abstract class AsyncExecutionAspectSupport implements BeanFactoryAware {
 	 * @see #determineAsyncExecutor(Method)
 	 */
 	protected abstract String getExecutorQualifier(Method method);
+
+	/**
+	 * Handles a fatal error thrown while asynchronously invoking the specified
+	 * {@link Method}.
+	 * <p>If the return type of the method is a {@link java.util.concurrent.Future} object, the original
+	 * exception can be propagated by just throwing it at the higher level. However,
+	 * for all other cases, the exception will not be transmitted back to the client.
+	 * In that later case, the current {@link AsyncUncaughtExceptionHandler} will be
+	 * used to manage such exception.
+	 * @param ex the exception to handle
+	 * @param method the method that was invoked
+	 * @param params the parameters used to invoke the method
+	 */
+	protected void handleError(Throwable ex, Method method, Object... params) throws Exception {
+		if (method.getReturnType().isAssignableFrom(Future.class)) {
+			ReflectionUtils.rethrowException(ex);
+		}
+		else {
+			// Could not transmit the exception to the caller with default executor
+			try {
+				this.exceptionHandler.handleUncaughtException(ex, method, params);
+			}
+			catch (Throwable ex2) {
+				logger.error("Exception handler for async method '" + method.toGenericString() +
+						"' threw unexpected exception itself", ex2);
+			}
+		}
+	}
 
 }

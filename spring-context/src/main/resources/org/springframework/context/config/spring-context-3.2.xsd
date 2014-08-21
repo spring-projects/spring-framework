@@ -25,24 +25,25 @@
 				<xsd:documentation><![CDATA[
 	The location of the properties file to resolve placeholders against, as a Spring
 	resource location: a URL, a "classpath:" pseudo URL, or a relative file path.
-	Multiple locations may be specified, separated by commas. If neither location nor properties-ref is
-	specified, placeholders will be resolved against system properties.
+	Multiple locations may be specified, separated by commas. If neither location nor
+	properties-ref is specified, placeholders will be resolved against system properties.
 				]]></xsd:documentation>
 			</xsd:annotation>
 		</xsd:attribute>
 		<xsd:attribute name="properties-ref" type="xsd:string">
 			<xsd:annotation>
 				<xsd:documentation source="java:java.util.Properties"><![CDATA[
-	The bean name of a Java Properties object that will be used for property substitution.
-	If neither location nor properties-ref is specified, placeholders will be resolved against system properties.
+	The bean name of a Properties object that will be used for property substitution.
+	If neither location nor properties-ref is specified, placeholders will be resolved
+	against system properties.
 				]]></xsd:documentation>
 			</xsd:annotation>
 		</xsd:attribute>
 		<xsd:attribute name="file-encoding" type="xsd:string">
 			<xsd:annotation>
 				<xsd:documentation><![CDATA[
-	Specifies the encoding to use for parsing properties files.  Default is none,
-	using the java.util.Properties default encoding.  Only applies to classic
+	Specifies the encoding to use for parsing properties files. Default is none,
+	using the java.util.Properties default encoding. Only applies to classic
 	properties files, not to XML files.
 				]]></xsd:documentation>
 			</xsd:annotation>
@@ -50,39 +51,36 @@
 		<xsd:attribute name="order" type="xsd:integer">
 			<xsd:annotation>
 				<xsd:documentation><![CDATA[
-	Specifies the order for this placeholder configurer.  If more than one is present in a context
-	the order can be important since the first one to be match a placeholder will win.  Often used
-	in conjunction with
+	Specifies the order for this placeholder configurer. If more than one is present
+	in a context, the order can be important since the first one to be match a
+	placeholder will win.
 				]]></xsd:documentation>
 			</xsd:annotation>
 		</xsd:attribute>
-		<xsd:attribute name="ignore-resource-not-found" type="xsd:boolean"
-			default="false">
+		<xsd:attribute name="ignore-resource-not-found" type="xsd:boolean" default="false">
 			<xsd:annotation>
 				<xsd:documentation><![CDATA[
-	Specifies if failure to find the property resource location should be ignored.  Default
-	is "false", meaning that if there is no file in the location specified an exception will
-	be raised at runtime.
+	Specifies if failure to find the property resource location should be ignored.
+	Default is "false", meaning that if there is no file in the location specified
+	an exception will be raised at runtime.
 				]]></xsd:documentation>
 			</xsd:annotation>
 		</xsd:attribute>
-		<xsd:attribute name="ignore-unresolvable" type="xsd:boolean"
-			default="false">
+		<xsd:attribute name="ignore-unresolvable" type="xsd:boolean" default="false">
 			<xsd:annotation>
 				<xsd:documentation><![CDATA[
-	Specifies if failure to find the property value to replace a key should be ignored.  Default
-	is "false", meaning that this placeholder configurer will raise an exception if it cannot resolve
-	a key.  Set to "true" to allow the configurer to pass on the key to any others in
-	the context that have not yet visited the key in question.
+	Specifies if failure to find the property value to replace a key should be ignored.
+	Default is "false", meaning that this placeholder configurer will raise an exception
+	if it cannot resolve a key. Set to "true" to allow the configurer to pass on the key
+	to any others in the context that have not yet visited the key in question.
 				]]></xsd:documentation>
 			</xsd:annotation>
 		</xsd:attribute>
-		<xsd:attribute name="local-override" type="xsd:boolean"
-			default="false">
+		<xsd:attribute name="local-override" type="xsd:boolean" default="false">
 			<xsd:annotation>
 				<xsd:documentation><![CDATA[
-	Specifies whether local properties override properties from files.  Default
-	is "false": Properties from files override local defaults.
+	Specifies whether local properties override properties from files.
+	Default is "false": Properties from files override local defaults.
 				]]></xsd:documentation>
 			</xsd:annotation>
 		</xsd:attribute>
@@ -104,12 +102,11 @@
 	traditional PropertyPlaceholderConfigurer component will be registered instead of the
 	new PropertySourcesPlaceholderConfigurer.
 
-	See ConfigurableEnvironment Javadoc for more information on using.
+	See ConfigurableEnvironment javadoc for more information on using.
 			]]></xsd:documentation>
 			<xsd:appinfo>
 				<tool:annotation>
-					<tool:exports
-						type="org.springframework.context.support.PropertySourcesPlaceholderConfigurer"/>
+					<tool:exports type="org.springframework.context.support.PropertySourcesPlaceholderConfigurer"/>
 				</tool:annotation>
 			</xsd:appinfo>
 		</xsd:annotation>
@@ -130,7 +127,7 @@
 	newer PropertySourcesPlaceholderConfigurer variant. In this case, the Spring Environment
 	and its property sources are not interrogated when resolving placeholders. Users are
 	encouraged to consider this attribute deprecated, and to take advantage of
-	Environment/PropertySource mechanisms. See ConfigurableEnvironment Javadoc for examples.
+	Environment/PropertySource mechanisms. See ConfigurableEnvironment javadoc for examples.
 
 	"ENVIRONMENT" indicates placeholders should be resolved against the current Environment and against any local properties;
 	"NEVER" indicates placeholders should be resolved only against local properties and never against system properties;
@@ -184,7 +181,7 @@
 	@TransactionAttribute annotation. Consider the use of the <tx:annotation-driven>
 	tag for that purpose.
 
-	See Javadoc for org.springframework.context.annotation.AnnotationConfigApplicationContext
+	See javadoc for org.springframework.context.annotation.AnnotationConfigApplicationContext
 	for information on code-based alternatives to bootstrapping annotation-driven support.
 	from XML.
 			]]></xsd:documentation>
@@ -211,7 +208,7 @@
 	definitions just like to regular bean definitions, but it won't apply to the component
 	scan settings themselves.
 
-	See Javadoc for org.springframework.context.annotation.ComponentScan for information
+	See javadoc for org.springframework.context.annotation.ComponentScan for information
 	on code-based alternatives to bootstrapping component-scanning.
 			]]></xsd:documentation>
 		</xsd:annotation>
@@ -336,7 +333,7 @@
 	This will only happen if the AnnotationBeanConfigurerAspect is on the classpath
 	(i.e. spring-aspects.jar), effectively activating "spring-configured" by default.
 
-	See Javadoc for org.springframework.context.annotation.EnableLoadTimeWeaving
+	See javadoc for org.springframework.context.annotation.EnableLoadTimeWeaving
 	for information on code-based alternatives to bootstrapping load-time weaving support.
 			]]></xsd:documentation>
 			<xsd:appinfo>

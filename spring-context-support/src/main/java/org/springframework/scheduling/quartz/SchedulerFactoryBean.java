@@ -475,7 +475,6 @@ public class SchedulerFactoryBean extends SchedulerAccessor implements FactoryBe
 			configTimeNonTransactionalDataSourceHolder.set(this.nonTransactionalDataSource);
 		}
 
-
 		// Get Scheduler instance from SchedulerFactory.
 		try {
 			this.scheduler = createScheduler(schedulerFactory, this.schedulerName);

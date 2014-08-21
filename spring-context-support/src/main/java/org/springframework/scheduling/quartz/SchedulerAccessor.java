@@ -124,7 +124,7 @@ public abstract class SchedulerAccessor implements ResourceLoaderAware {
 	 */
 	public void setJobDetails(JobDetail... jobDetails) {
 		// Use modifiable ArrayList here, to allow for further adding of
-		// JobDetail objects during autodetection of JobDetailAwareTriggers.
+		// JobDetail objects during autodetection of JobDetail-aware Triggers.
 		this.jobDetails = new ArrayList<JobDetail>(Arrays.asList(jobDetails));
 	}
 

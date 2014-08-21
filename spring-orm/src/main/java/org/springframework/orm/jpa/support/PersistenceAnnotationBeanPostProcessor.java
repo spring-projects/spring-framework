@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -713,8 +713,8 @@ public class PersistenceAnnotationBeanPostProcessor
 				em = ExtendedEntityManagerCreator.createContainerManagedEntityManager(
 						emf, this.properties, this.synchronizedWithTransaction);
 			}
-			if (em instanceof EntityManagerProxy &&
-					beanFactory != null && !beanFactory.isPrototype(requestingBeanName)) {
+			if (em instanceof EntityManagerProxy && beanFactory != null &&
+					beanFactory.containsBean(requestingBeanName) && !beanFactory.isPrototype(requestingBeanName)) {
 				extendedEntityManagersToClose.put(target, ((EntityManagerProxy) em).getTargetEntityManager());
 			}
 			return em;

@@ -54,6 +54,7 @@ public class MappingJackson2HttpMessageConverter extends AbstractJackson2HttpMes
 				new MediaType("application", "*+json", DEFAULT_CHARSET));
 	}
 
+
 	/**
 	 * Specify a custom prefix to use for this view's JSON output.
 	 * Default is none.
@@ -75,15 +76,14 @@ public class MappingJackson2HttpMessageConverter extends AbstractJackson2HttpMes
 		this.jsonPrefix = (prefixJson ? "{} && " : null);
 	}
 
+
 	@Override
 	protected void writePrefix(JsonGenerator generator, Object object) throws IOException {
 		if (this.jsonPrefix != null) {
 			generator.writeRaw(this.jsonPrefix);
 		}
-		String jsonpFunction = null;
-		if (object instanceof MappingJacksonValue) {
-			jsonpFunction = ((MappingJacksonValue)object).getJsonpFunction();
-		}
+		String jsonpFunction =
+				(object instanceof MappingJacksonValue ? ((MappingJacksonValue) object).getJsonpFunction() : null);
 		if (jsonpFunction != null) {
 			generator.writeRaw(jsonpFunction + "(");
 		}
@@ -91,10 +91,8 @@ public class MappingJackson2HttpMessageConverter extends AbstractJackson2HttpMes
 
 	@Override
 	protected void writeSuffix(JsonGenerator generator, Object object) throws IOException {
-		String jsonpFunction = null;
-		if (object instanceof MappingJacksonValue) {
-			jsonpFunction = ((MappingJacksonValue)object).getJsonpFunction();
-		}
+		String jsonpFunction =
+				(object instanceof MappingJacksonValue ? ((MappingJacksonValue) object).getJsonpFunction() : null);
 		if (jsonpFunction != null) {
 			generator.writeRaw(");");
 		}

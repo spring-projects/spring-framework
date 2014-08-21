@@ -239,7 +239,7 @@ public abstract class StatementCreatorUtils {
 	 * respecting database-specific peculiarities.
 	 */
 	private static void setNull(PreparedStatement ps, int paramIndex, int sqlType, String typeName) throws SQLException {
-		if (sqlType == SqlTypeValue.TYPE_UNKNOWN) {
+		if (sqlType == SqlTypeValue.TYPE_UNKNOWN || sqlType == Types.OTHER) {
 			boolean useSetObject = false;
 			Integer sqlTypeToUse = null;
 			DatabaseMetaData dbmd = null;
@@ -385,7 +385,7 @@ public abstract class StatementCreatorUtils {
 				ps.setObject(paramIndex, inValue, Types.TIMESTAMP);
 			}
 		}
-		else if (sqlType == SqlTypeValue.TYPE_UNKNOWN) {
+		else if (sqlType == SqlTypeValue.TYPE_UNKNOWN || sqlType == Types.OTHER) {
 			if (isStringValue(inValue.getClass())) {
 				ps.setString(paramIndex, inValue.toString());
 			}

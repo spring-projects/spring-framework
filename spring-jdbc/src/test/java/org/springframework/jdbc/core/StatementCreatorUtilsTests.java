@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -260,6 +260,17 @@ public class StatementCreatorUtilsTests {
 		java.util.Calendar cal = new GregorianCalendar();
 		StatementCreatorUtils.setParameterValue(preparedStatement, 1, SqlTypeValue.TYPE_UNKNOWN, null, cal);
 		verify(preparedStatement).setTimestamp(1, new java.sql.Timestamp(cal.getTime().getTime()), cal);
+	}
+
+	@Test  // SPR-8571
+	public void testSetParameterValueWithStringAndVendorSpecificType() throws SQLException {
+		StatementCreatorUtils.setParameterValue(preparedStatement, 1, Types.OTHER, null, "test");
+		verify(preparedStatement).setString(1, "test");
+	}
+	@Test  // SPR-8571
+	public void testSetParameterValueWithNullAndVendorSpecificType() throws SQLException {
+		StatementCreatorUtils.setParameterValue(preparedStatement, 1, Types.OTHER, null, null);
+		verify(preparedStatement).setNull(1, Types.NULL);
 	}
 
 }
