@@ -43,13 +43,13 @@ public class MessageBrokerRegistry {
 
 	private StompBrokerRelayRegistration brokerRelayRegistration;
 
+	private final ChannelRegistration brokerChannelRegistration = new ChannelRegistration();
+
 	private String[] applicationDestinationPrefixes;
 
 	private String userDestinationPrefix;
 
 	private PathMatcher pathMatcher;
-
-	private ChannelRegistration brokerChannelRegistration = new ChannelRegistration();
 
 
 	public MessageBrokerRegistry(SubscribableChannel clientInboundChannel, MessageChannel clientOutboundChannel) {
@@ -58,6 +58,7 @@ public class MessageBrokerRegistry {
 		this.clientInboundChannel = clientInboundChannel;
 		this.clientOutboundChannel = clientOutboundChannel;
 	}
+
 
 	/**
 	 * Enable a simple message broker and configure one or more prefixes to filter
@@ -81,6 +82,21 @@ public class MessageBrokerRegistry {
 	}
 
 	/**
+	 * Customize the channel used to send messages from the application to the message
+	 * broker. By default, messages from the application to the message broker are sent
+	 * synchronously, which means application code sending a message will find out
+	 * if the message cannot be sent through an exception. However, this can be changed
+	 * if the broker channel is configured here with task executor properties.
+	 */
+	public ChannelRegistration configureBrokerChannel() {
+		return this.brokerChannelRegistration;
+	}
+
+	protected ChannelRegistration getBrokerChannelRegistration() {
+		return this.brokerChannelRegistration;
+	}
+
+	/**
 	 * Configure one or more prefixes to filter destinations targeting application
 	 * annotated methods. For example destinations prefixed with "/app" may be
 	 * processed by annotated methods while other destinations may target the
@@ -93,6 +109,11 @@ public class MessageBrokerRegistry {
 	public MessageBrokerRegistry setApplicationDestinationPrefixes(String... prefixes) {
 		this.applicationDestinationPrefixes = prefixes;
 		return this;
+	}
+
+	protected Collection<String> getApplicationDestinationPrefixes() {
+		return (this.applicationDestinationPrefixes != null ?
+				Arrays.asList(this.applicationDestinationPrefixes) : null);
 	}
 
 	/**
@@ -112,24 +133,24 @@ public class MessageBrokerRegistry {
 		return this;
 	}
 
+	protected String getUserDestinationPrefix() {
+		return this.userDestinationPrefix;
+	}
+
 	/**
 	 * Configure the PathMatcher to use to match the destinations of incoming
 	 * messages to {@code @MessageMapping} and {@code @SubscribeMapping} methods.
-	 *
 	 * <p>By default {@link org.springframework.util.AntPathMatcher} is configured.
 	 * However applications may provide an {@code AntPathMatcher} instance
 	 * customized to use "." (commonly used in messaging) instead of "/" as path
 	 * separator or provide a completely different PathMatcher implementation.
-	 *
 	 * <p>Note that the configured PathMatcher is only used for matching the
 	 * portion of the destination after the configured prefix. For example given
 	 * application destination prefix "/app" and destination "/app/price.stock.**",
 	 * the message might be mapped to a controller with "price" and "stock.**"
 	 * as its type and method-level mappings respectively.
-	 *
 	 * <p>When the simple broker is enabled, the PathMatcher configured here is
 	 * also used to match message destinations when brokering messages.
-	 *
 	 * @since 4.1
 	 */
 	public MessageBrokerRegistry setPathMatcher(PathMatcher pathMatcher) {
@@ -137,19 +158,13 @@ public class MessageBrokerRegistry {
 		return this;
 	}
 
-	/**
-	 * Customize the channel used to send messages from the application to the message
-	 * broker. By default messages from the application to the message broker are sent
-	 * synchronously, which means application code sending a message will find out
-	 * if the message cannot be sent through an exception. However, this can be changed
-	 * if the broker channel is configured here with task executor properties.
-	 */
-	public ChannelRegistration configureBrokerChannel() {
-		return this.brokerChannelRegistration;
+	protected PathMatcher getPathMatcher() {
+		return this.pathMatcher;
 	}
 
+
 	protected SimpleBrokerMessageHandler getSimpleBroker(SubscribableChannel brokerChannel) {
-		if ((this.simpleBrokerRegistration == null) && (this.brokerRelayRegistration == null)) {
+		if (this.simpleBrokerRegistration == null && this.brokerRelayRegistration == null) {
 			enableSimpleBroker();
 		}
 		if (this.simpleBrokerRegistration != null) {
@@ -165,23 +180,6 @@ public class MessageBrokerRegistry {
 			return this.brokerRelayRegistration.getMessageHandler(brokerChannel);
 		}
 		return null;
-	}
-
-	protected Collection<String> getApplicationDestinationPrefixes() {
-		return (this.applicationDestinationPrefixes != null)
-				? Arrays.asList(this.applicationDestinationPrefixes) : null;
-	}
-
-	protected String getUserDestinationPrefix() {
-		return this.userDestinationPrefix;
-	}
-
-	protected PathMatcher getPathMatcher() {
-		return this.pathMatcher;
-	}
-
-	protected ChannelRegistration getBrokerChannelRegistration() {
-		return this.brokerChannelRegistration;
 	}
 
 }

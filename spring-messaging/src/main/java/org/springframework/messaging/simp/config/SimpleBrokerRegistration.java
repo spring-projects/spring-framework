@@ -28,11 +28,9 @@ import org.springframework.messaging.simp.broker.SimpleBrokerMessageHandler;
  */
 public class SimpleBrokerRegistration extends AbstractBrokerRegistration {
 
-
 	public SimpleBrokerRegistration(SubscribableChannel inChannel, MessageChannel outChannel, String[] prefixes) {
 		super(inChannel, outChannel, prefixes);
 	}
-
 
 	@Override
 	protected SimpleBrokerMessageHandler getMessageHandler(SubscribableChannel brokerChannel) {

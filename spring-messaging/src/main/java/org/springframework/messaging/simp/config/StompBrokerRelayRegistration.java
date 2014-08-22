@@ -74,12 +74,10 @@ public class StompBrokerRelayRegistration extends AbstractBrokerRegistration {
 		return this;
 	}
 
-
 	/**
 	 * Set the login to use when creating connections to the STOMP broker on
 	 * behalf of connected clients.
-	 * <p>
-	 * By default this is set to "guest".
+	 * <p>By default this is set to "guest".
 	 */
 	public StompBrokerRelayRegistration setClientLogin(String login) {
 		Assert.hasText(login, "clientLogin must not be empty");
@@ -90,8 +88,7 @@ public class StompBrokerRelayRegistration extends AbstractBrokerRegistration {
 	/**
 	 * Set the passcode to use when creating connections to the STOMP broker on
 	 * behalf of connected clients.
-	 * <p>
-	 * By default this is set to "guest".
+	 * <p>By default this is set to "guest".
 	 */
 	public StompBrokerRelayRegistration setClientPasscode(String passcode) {
 		Assert.hasText(passcode, "clientPasscode must not be empty");
@@ -103,8 +100,7 @@ public class StompBrokerRelayRegistration extends AbstractBrokerRegistration {
 	 * Set the login for the shared "system" connection used to send messages to
 	 * the STOMP broker from within the application, i.e. messages not associated
 	 * with a specific client session (e.g. REST/HTTP request handling method).
-	 * <p>
-	 * By default this is set to "guest".
+	 * <p>By default this is set to "guest".
 	 */
 	public StompBrokerRelayRegistration setSystemLogin(String login) {
 		Assert.hasText(login, "systemLogin must not be empty");
@@ -116,8 +112,7 @@ public class StompBrokerRelayRegistration extends AbstractBrokerRegistration {
 	 * Set the passcode for the shared "system" connection used to send messages to
 	 * the STOMP broker from within the application, i.e. messages not associated
 	 * with a specific client session (e.g. REST/HTTP request handling method).
-	 * <p>
-	 * By default this is set to "guest".
+	 * <p>By default this is set to "guest".
 	 */
 	public StompBrokerRelayRegistration setSystemPasscode(String passcode) {
 		Assert.hasText(passcode, "systemPasscode must not be empty");
@@ -173,7 +168,6 @@ public class StompBrokerRelayRegistration extends AbstractBrokerRegistration {
 
 
 	protected StompBrokerRelayMessageHandler getMessageHandler(SubscribableChannel brokerChannel) {
-
 		StompBrokerRelayMessageHandler handler = new StompBrokerRelayMessageHandler(getClientInboundChannel(),
 				getClientOutboundChannel(), brokerChannel, getDestinationPrefixes());
 

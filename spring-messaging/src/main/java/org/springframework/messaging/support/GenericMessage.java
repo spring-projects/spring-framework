@@ -22,6 +22,7 @@ import java.util.Map;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.util.Assert;
+import org.springframework.util.ObjectUtils;
 
 /**
  * An implementation of {@link Message} with a generic payload.
@@ -90,12 +91,14 @@ public class GenericMessage<T> implements Message<T>, Serializable {
 		if (!(other instanceof GenericMessage)) {
 			return false;
 		}
-		GenericMessage<?> otherMessage = (GenericMessage<?>) other;
-		return (this.payload.equals(otherMessage.payload) && this.headers.equals(otherMessage.headers));
+		GenericMessage<?> otherMsg = (GenericMessage<?>) other;
+		// Using nullSafeEquals for proper array equals comparisons
+		return (ObjectUtils.nullSafeEquals(this.payload, otherMsg.payload) && this.headers.equals(otherMsg.headers));
 	}
 
 	public int hashCode() {
-		return (this.payload.hashCode() * 23 + this.headers.hashCode());
+		// Using nullSafeHashCode for proper array hashCode handling
+		return (ObjectUtils.nullSafeHashCode(this.payload) * 23 + this.headers.hashCode());
 	}
 
 	public String toString() {

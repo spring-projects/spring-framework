@@ -38,10 +38,11 @@ public abstract class AbstractHeaderMapper<T> implements HeaderMapper<T> {
 
 	private String outboundPrefix = "";
 
+
 	/**
 	 * Specify a prefix to be appended to the message header name for any
-	 * user-defined property that is being mapped into the MessageHeaders. The
-	 * default is an empty string (no prefix).
+	 * user-defined property that is being mapped into the MessageHeaders.
+	 * The default is an empty String (no prefix).
 	 */
 	public void setInboundPrefix(String inboundPrefix) {
 		this.inboundPrefix = (inboundPrefix != null ? inboundPrefix : "");
@@ -50,15 +51,16 @@ public abstract class AbstractHeaderMapper<T> implements HeaderMapper<T> {
 	/**
 	 * Specify a prefix to be appended to the protocol property name for any
 	 * user-defined message header that is being mapped into the protocol-specific
-	 * Message. The default is an empty string (no prefix).
+	 * Message. The default is an empty String (no prefix).
 	 */
 	public void setOutboundPrefix(String outboundPrefix) {
 		this.outboundPrefix = (outboundPrefix != null ? outboundPrefix : "");
 	}
 
+
 	/**
-	 * Generate the name to use to set the header defined by the specified {@code headerName} to
-	 * the protocol specific message.
+	 * Generate the name to use to set the header defined by the specified
+	 * {@code headerName} to the protocol specific message.
 	 * @see #setOutboundPrefix
 	 */
 	protected String fromHeaderName(String headerName) {
@@ -70,8 +72,8 @@ public abstract class AbstractHeaderMapper<T> implements HeaderMapper<T> {
 	}
 
 	/**
-	 * Generate the name to use to set the header defined by the specified {@code propertyName} to
-	 * the {@link MessageHeaders} instance.
+	 * Generate the name to use to set the header defined by the specified
+	 * {@code propertyName} to the {@link MessageHeaders} instance.
 	 * @see #setInboundPrefix(String)
 	 */
 	protected String toHeaderName(String propertyName) {
@@ -83,8 +85,8 @@ public abstract class AbstractHeaderMapper<T> implements HeaderMapper<T> {
 	}
 
 	/**
-	 * Return the header value or {@code null} if it does not exist or does not match
-	 * the requested {@code type}.
+	 * Return the header value, or {@code null} if it does not exist
+	 * or does not match the requested {@code type}.
 	 */
 	protected <V> V getHeaderIfAvailable(Map<String, Object> headers, String name, Class<V> type) {
 		Object value = headers.get(name);
@@ -102,4 +104,5 @@ public abstract class AbstractHeaderMapper<T> implements HeaderMapper<T> {
 			return type.cast(value);
 		}
 	}
+
 }
