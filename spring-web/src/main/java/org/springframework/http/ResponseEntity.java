@@ -159,7 +159,7 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 	// Static builder methods
 
 	/**
-	 * Creates a builder with the given status.
+	 * Create a builder with the given status.
 	 * @param status the response status
 	 * @return the created builder
 	 * @since 4.1
@@ -169,7 +169,7 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 	}
 
 	/**
-	 * Creates a builder with the given status.
+	 * Create a builder with the given status.
 	 * @param status the response status
 	 * @return the created builder
 	 * @since 4.1
@@ -179,7 +179,7 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 	}
 
 	/**
-	 * Creates a builder with the status set to {@linkplain HttpStatus#OK OK}.
+	 * Create a builder with the status set to {@linkplain HttpStatus#OK OK}.
 	 * @return the created builder
 	 * @since 4.1
 	 */
@@ -189,7 +189,7 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 
 	/**
 	 * A shortcut for creating a {@code ResponseEntity} with the given body and
-	 * status set to {@linkplain HttpStatus#OK OK}.
+	 * the status set to {@linkplain HttpStatus#OK OK}.
 	 * @return the created {@code ResponseEntity}
 	 * @since 4.1
 	 */
@@ -199,8 +199,8 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 	}
 
 	/**
-	 * Creates a new builder with a {@linkplain HttpStatus#CREATED CREATED}
-	 * status and a location header set to the given URI.
+	 * Create a new builder with a {@linkplain HttpStatus#CREATED CREATED} status
+	 * and a location header set to the given URI.
 	 * @param location the location URI
 	 * @return the created builder
 	 * @since 4.1
@@ -211,7 +211,7 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 	}
 
 	/**
-	 * Creates a builder with an {@link HttpStatus#ACCEPTED ACCEPTED} status.
+	 * Create a builder with an {@linkplain HttpStatus#ACCEPTED ACCEPTED} status.
 	 * @return the created builder
 	 * @since 4.1
 	 */
@@ -220,7 +220,7 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 	}
 
 	/**
-	 * Creates a builder with a {@link HttpStatus#NO_CONTENT NO_CONTENT} status.
+	 * Create a builder with a {@linkplain HttpStatus#NO_CONTENT NO_CONTENT} status.
 	 * @return the created builder
 	 * @since 4.1
 	 */
@@ -229,7 +229,7 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 	}
 
 	/**
-	 * Creates a builder with a {@link HttpStatus#BAD_REQUEST} status.
+	 * Create a builder with a {@linkplain HttpStatus#BAD_REQUEST BAD_REQUEST} status.
 	 * @return the created builder
 	 * @since 4.1
 	 */
@@ -238,7 +238,7 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 	}
 
 	/**
-	 * Creates a builder with a {@link HttpStatus#NOT_FOUND NOT_FOUND} status.
+	 * Create a builder with a {@linkplain HttpStatus#NOT_FOUND NOT_FOUND} status.
 	 * @return the created builder
 	 * @since 4.1
 	 */
@@ -273,7 +273,7 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 		B allow(HttpMethod... allowedMethods);
 
 		/**
-		 * Sets the entity tag of the body, as specified by the {@code ETag} header.
+		 * Set the entity tag of the body, as specified by the {@code ETag} header.
 		 * @param eTag the new entity tag
 		 * @return this builder
 		 * @see HttpHeaders#setETag(String)
@@ -281,7 +281,7 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 		B eTag(String eTag);
 
 		/**
-		 * Sets the time the resource was last changed, as specified by the
+		 * Set the time the resource was last changed, as specified by the
 		 * {@code Last-Modified} header.
 		 * <p>The date should be specified as the number of milliseconds since
 		 * January 1, 1970 GMT.
@@ -300,12 +300,11 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 		B location(URI location);
 
 		/**
-		 * Builds the response entity with no body.
+		 * Build the response entity with no body.
 		 * @return the response entity
 		 * @see BodyBuilder#body(Object)
 		 */
 		ResponseEntity<Void> build();
-
 	}
 
 
@@ -334,13 +333,12 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 		BodyBuilder contentType(MediaType contentType);
 
 		/**
-		 * Sets the body of the response entity and returns it.
+		 * Set the body of the response entity and returns it.
 		 * @param body the body of the response entity
 		 * @param <T> the type of the body
 		 * @return the built response entity
 		 */
 		<T> ResponseEntity<T> body(T body);
-
 	}
 
 
@@ -409,8 +407,6 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 		public <T> ResponseEntity<T> body(T body) {
 			return new ResponseEntity<T>(body, this.headers, this.status);
 		}
-
 	}
-
 
 }

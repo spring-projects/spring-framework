@@ -34,7 +34,7 @@ public class ResponseEntityTests {
 		String headerName = "My-Custom-Header";
 		String headerValue1 = "HeaderValue1";
 		String headerValue2 = "HeaderValue2";
-		Integer entity = new Integer(42);
+		Integer entity = 42;
 
 		ResponseEntity<Integer> responseEntity =
 				ResponseEntity.status(HttpStatus.OK).header(headerName, headerValue1, headerValue2).body(entity);
@@ -60,7 +60,7 @@ public class ResponseEntityTests {
 
 	@Test
 	public void okEntity() {
-		Integer entity = new Integer(42);
+		Integer entity = 42;
 		ResponseEntity<Integer> responseEntity = ResponseEntity.ok(entity);
 
 		assertNotNull(responseEntity);
@@ -150,6 +150,5 @@ public class ResponseEntityTests {
 
 		assertNull(responseEntity.getBody());
 	}
-
 
 }
