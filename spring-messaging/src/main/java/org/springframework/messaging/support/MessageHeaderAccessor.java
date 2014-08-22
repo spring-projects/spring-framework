@@ -51,7 +51,7 @@ import org.springframework.util.StringUtils;
  *
  * <pre class="code">
  * MessageHeaderAccessor accessor = new MessageHeaderAccessor();
- * accessor.set("foo", "bar");
+ * accessor.setHeader("foo", "bar");
  * Message message = MessageBuilder.createMessage("payload", accessor.getMessageHeaders());
  * </pre>
  *
@@ -61,14 +61,14 @@ import org.springframework.util.StringUtils;
  *
  * <pre class="code">
  * MessageHeaderAccessor accessor = new MessageHeaderAccessor();
- * accessor.set("foo", "bar");
+ * accessor.setHeader("foo", "bar");
  * accessor.setLeaveMutable(true);
  * Message message = MessageBuilder.createMessage("payload", accessor.getMessageHeaders());
  *
  * // later on in the same thread...
  *
  * MessageHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(message);
- * accessor.set("bar", "baz");
+ * accessor.setHeader("bar", "baz");
  * accessor.setImmutable();
  * </pre>
  *
@@ -111,6 +111,7 @@ import org.springframework.util.StringUtils;
  * header accessors. The most likely usage however is through sub-classes.
  *
  * @author Rossen Stoyanchev
+ * @author Juergen Hoeller
  * @since 4.0
  */
 public class MessageHeaderAccessor {
@@ -129,9 +130,9 @@ public class MessageHeaderAccessor {
 
 	private boolean leaveMutable = false;
 
-	private boolean enableTimestamp = false;
-
 	private boolean modified = false;
+
+	private boolean enableTimestamp = false;
 
 	private IdGenerator idGenerator;
 
@@ -156,34 +157,17 @@ public class MessageHeaderAccessor {
 	}
 
 
+	/**
+	 * Build a 'nested' accessor for the given message.
+	 * @param message the message to build a new accessor for
+	 * @return the nested accessor (typically a specific subclass)
+	 */
 	protected MessageHeaderAccessor createAccessor(Message<?> message) {
 		return new MessageHeaderAccessor(message);
 	}
 
-	/**
-	 * Return the underlying {@code MessageHeaders} instance.
-	 * <p>Unless {@link #setLeaveMutable(boolean)} was set to {@code true}, after
-	 * this call, the headers are immutable and this accessor can no longer
-	 * modify them.
-	 * <p>This method always returns the same {@code MessageHeaders} instance if
-	 * invoked multiples times. To obtain a copy of the underlying headers instead
-	 * use {@link #toMap()}.
-	 */
-	public MessageHeaders getMessageHeaders() {
-		if (!this.leaveMutable) {
-			setImmutable();
-		}
-		return this.headers;
-	}
 
-	/**
-	 * Return a copy of the underlying header values.
-	 * <p>This method can be invoked many times, with modifications in between
-	 * where each new call returns a fresh copy of the current header values.
-	 */
-	public Map<String, Object> toMap() {
-		return new HashMap<String, Object>(this.headers);
-	}
+	// Configuration properties
 
 	/**
 	 * By default when {@link #getMessageHeaders()} is called, {@code "this"}
@@ -227,21 +211,30 @@ public class MessageHeaderAccessor {
 	}
 
 	/**
-	 * A package private mechanism to enables the automatic addition of the
-	 * {@link org.springframework.messaging.MessageHeaders#TIMESTAMP} header.
-	 * <p>By default this property is set to false.
-	 * @see IdTimestampMessageHeaderInitializer
+	 * Mark the underlying message headers as modified.
+	 * @param modified typically {@code true}, or {@code false} to reset the flag
+	 * @since 4.1
 	 */
-	void setEnableTimestamp(boolean enableTimestamp) {
-		this.enableTimestamp = enableTimestamp;
+	protected void setModified(boolean modified) {
+		this.modified = modified;
 	}
 
+	/**
+	 * Check whether the underlying message headers have been marked as modified.
+	 * @return {@code true} if the flag has been set, {@code false} otherwise
+	 */
 	public boolean isModified() {
 		return this.modified;
 	}
 
-	protected void setModified(boolean modified) {
-		this.modified = modified;
+	/**
+	 * A package private mechanism to enables the automatic addition of the
+	 * {@link org.springframework.messaging.MessageHeaders#TIMESTAMP} header.
+	 * <p>By default, this property is set to {@code false}.
+	 * @see IdTimestampMessageHeaderInitializer
+	 */
+	void setEnableTimestamp(boolean enableTimestamp) {
+		this.enableTimestamp = enableTimestamp;
 	}
 
 	/**
@@ -254,6 +247,53 @@ public class MessageHeaderAccessor {
 		this.idGenerator = idGenerator;
 	}
 
+
+	// Accessors for the resulting MessageHeaders
+
+	/**
+	 * Return the underlying {@code MessageHeaders} instance.
+	 * <p>Unless {@link #setLeaveMutable(boolean)} was set to {@code true}, after
+	 * this call, the headers are immutable and this accessor can no longer
+	 * modify them.
+	 * <p>This method always returns the same {@code MessageHeaders} instance if
+	 * invoked multiples times. To obtain a copy of the underlying headers, use
+	 * {@link #toMessageHeaders()} or {@link #toMap()} instead.
+	 * @since 4.1
+	 */
+	public MessageHeaders getMessageHeaders() {
+		if (!this.leaveMutable) {
+			setImmutable();
+		}
+		return this.headers;
+	}
+
+	/**
+	 * Return a copy of the underlying header values as a {@link MessageHeaders} object.
+	 * <p>This method can be invoked many times, with modifications in between
+	 * where each new call returns a fresh copy of the current header values.
+	 * @since 4.1
+	 */
+	public MessageHeaders toMessageHeaders() {
+		return new MessageHeaders(this.headers);
+	}
+
+	/**
+	 * Return a copy of the underlying header values as a plain {@link Map} object.
+	 * <p>This method can be invoked many times, with modifications in between
+	 * where each new call returns a fresh copy of the current header values.
+	 */
+	public Map<String, Object> toMap() {
+		return new HashMap<String, Object>(this.headers);
+	}
+
+
+	// Generic header accessors
+
+	/**
+	 * Retrieve the value for the header with the given name.
+	 * @param headerName the name of the header
+	 * @return the associated value, or {@code null} if none found
+	 */
 	public Object getHeader(String headerName) {
 		return this.headers.get(headerName);
 	}
@@ -289,10 +329,6 @@ public class MessageHeaderAccessor {
 		}
 	}
 
-	protected boolean isReadOnly(String headerName) {
-		return MessageHeaders.ID.equals(headerName) || MessageHeaders.TIMESTAMP.equals(headerName);
-	}
-
 	/**
 	 * Set the value for the given header name only if the header name is not
 	 * already associated with a value.
@@ -300,6 +336,15 @@ public class MessageHeaderAccessor {
 	public void setHeaderIfAbsent(String name, Object value) {
 		if (getHeader(name) == null) {
 			setHeader(name, value);
+		}
+	}
+
+	/**
+	 * Remove the value for the given header name.
+	 */
+	public void removeHeader(String headerName) {
+		if (StringUtils.hasLength(headerName) && !isReadOnly(headerName)) {
+			setHeader(headerName, null);
 		}
 	}
 
@@ -338,15 +383,6 @@ public class MessageHeaderAccessor {
 	}
 
 	/**
-	 * Remove the value for the given header name.
-	 */
-	public void removeHeader(String headerName) {
-		if (StringUtils.hasLength(headerName) && !isReadOnly(headerName)) {
-			setHeader(headerName, null);
-		}
-	}
-
-	/**
 	 * Copy the name-value pairs from the provided Map.
 	 * <p>This operation will overwrite any existing values. Use
 	 * {@link #copyHeadersIfAbsent(Map)} to avoid overwriting values.
@@ -370,12 +406,19 @@ public class MessageHeaderAccessor {
 		if (headersToCopy != null) {
 			Set<String> keys = headersToCopy.keySet();
 			for (String key : keys) {
-				if (!this.isReadOnly(key)) {
+				if (!isReadOnly(key)) {
 					setHeaderIfAbsent(key, headersToCopy.get(key));
 				}
 			}
 		}
 	}
+
+	protected boolean isReadOnly(String headerName) {
+		return (MessageHeaders.ID.equals(headerName) || MessageHeaders.TIMESTAMP.equals(headerName));
+	}
+
+
+	// Specific header accessors
 
 	public UUID getId() {
 		return (UUID) getHeader(MessageHeaders.ID);
@@ -383,6 +426,10 @@ public class MessageHeaderAccessor {
 
 	public Long getTimestamp() {
 		return (Long) getHeader(MessageHeaders.TIMESTAMP);
+	}
+
+	public void setReplyChannelName(String replyChannelName) {
+		setHeader(MessageHeaders.REPLY_CHANNEL, replyChannelName);
 	}
 
 	public void setReplyChannel(MessageChannel replyChannel) {
@@ -393,8 +440,8 @@ public class MessageHeaderAccessor {
         return getHeader(MessageHeaders.REPLY_CHANNEL);
     }
 
-	public void setReplyChannelName(String replyChannelName) {
-		setHeader(MessageHeaders.REPLY_CHANNEL, replyChannelName);
+	public void setErrorChannelName(String errorChannelName) {
+		setHeader(MessageHeaders.ERROR_CHANNEL, errorChannelName);
 	}
 
 	public void setErrorChannel(MessageChannel errorChannel) {
@@ -405,18 +452,16 @@ public class MessageHeaderAccessor {
         return getHeader(MessageHeaders.ERROR_CHANNEL);
     }
 
-	public void setErrorChannelName(String errorChannelName) {
-		setHeader(MessageHeaders.ERROR_CHANNEL, errorChannelName);
-	}
-
-    public MimeType getContentType() {
-        return (MimeType) getHeader(MessageHeaders.CONTENT_TYPE);
-    }
-
 	public void setContentType(MimeType contentType) {
 		setHeader(MessageHeaders.CONTENT_TYPE, contentType);
 	}
 
+	public MimeType getContentType() {
+		return (MimeType) getHeader(MessageHeaders.CONTENT_TYPE);
+	}
+
+
+	// Log message stuff
 
 	/**
 	 * Return a concise message for logging purposes.
@@ -495,9 +540,11 @@ public class MessageHeaderAccessor {
 
 	@Override
 	public String toString() {
-		return getClass().getSimpleName() + " [headers=" + this.headers + "]";
+		return getClass().getSimpleName() + "[headers=" + this.headers + "]";
 	}
 
+
+	// Static factory methods
 
 	/**
 	 * Return the original {@code MessageHeaderAccessor} used to create the headers

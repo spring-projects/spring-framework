@@ -148,11 +148,12 @@ public final class MessageBuilder<T> {
 		if (this.originalMessage != null && !this.headerAccessor.isModified()) {
 			return this.originalMessage;
 		}
+		MessageHeaders headersToUse = this.headerAccessor.toMessageHeaders();
 		if (this.payload instanceof Throwable) {
-			return (Message<T>) new ErrorMessage((Throwable) this.payload, this.headerAccessor.toMap());
+			return (Message<T>) new ErrorMessage((Throwable) this.payload, headersToUse);
 		}
 		else {
-			return new GenericMessage<T>(this.payload, this.headerAccessor.toMap());
+			return new GenericMessage<T>(this.payload, headersToUse);
 		}
 	}
 
