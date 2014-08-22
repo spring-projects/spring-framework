@@ -362,6 +362,7 @@ public class PropertySourceAnnotationTests {
 	static class ConfigWithEmptyResourceLocations {
 	}
 
+
 	@Import({ ConfigImportedWithSameSourceImportedInDifferentOrder.class })
 	@PropertySources({
 		@PropertySource("classpath:org/springframework/context/annotation/p1.properties"),
@@ -371,6 +372,7 @@ public class PropertySourceAnnotationTests {
 	public static class ConfigWithSameSourceImportedInDifferentOrder {
 
 	}
+
 
 	@Configuration
 	@PropertySources({

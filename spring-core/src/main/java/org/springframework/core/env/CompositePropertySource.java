@@ -55,15 +55,24 @@ public class CompositePropertySource extends PropertySource<Object> {
 		return null;
 	}
 
+	/**
+	 * Add the given {@link PropertySource} to the end of the chain.
+	 * @param propertySource the PropertySource to add
+	 */
 	public void addPropertySource(PropertySource<?> propertySource) {
 		this.propertySources.add(propertySource);
 	}
 
+	/**
+	 * Add the given {@link PropertySource} to the start of the chain.
+	 * @param propertySource the PropertySource to add
+	 * @since 4.1
+	 */
 	public void addFirstPropertySource(PropertySource<?> propertySource) {
-		List<PropertySource<?>> exisiting = new ArrayList<PropertySource<?>>(this.propertySources);
+		List<PropertySource<?>> existing = new ArrayList<PropertySource<?>>(this.propertySources);
 		this.propertySources.clear();
 		this.propertySources.add(propertySource);
-		this.propertySources.addAll(exisiting);
+		this.propertySources.addAll(existing);
 	}
 
 	@Override

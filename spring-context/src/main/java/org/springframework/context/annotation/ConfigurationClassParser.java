@@ -34,6 +34,7 @@ import java.util.Stack;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.Aware;
 import org.springframework.beans.factory.BeanClassLoaderAware;
@@ -244,12 +245,12 @@ class ConfigurationClassParser {
 		// Process any @PropertySource annotations
 		for (AnnotationAttributes propertySource : AnnotationConfigUtils.attributesForRepeatable(
 				sourceClass.getMetadata(), PropertySources.class, org.springframework.context.annotation.PropertySource.class)) {
-			if (!(this.environment instanceof ConfigurableEnvironment)) {
-				logger.warn("Ignoring @PropertySource annotation on "
-						+ sourceClass.getMetadata().getClassName()
-						+ "Reason: Environment must implement ConfigurableEnvironment");
-			} else {
+			if (this.environment instanceof ConfigurableEnvironment) {
 				processPropertySource(propertySource);
+			}
+			else {
+				logger.warn("Ignoring @PropertySource annotation on [" + sourceClass.getMetadata().getClassName() +
+						"]. Reason: Environment must implement ConfigurableEnvironment");
 			}
 		}
 
@@ -329,7 +330,11 @@ class ConfigurationClassParser {
 		Assert.isTrue(locations.length > 0, "At least one @PropertySource(value) location is required");
 		for (String location : locations) {
 			try {
-				processPropertySourceLocation(name, location);
+				String resolvedLocation = this.environment.resolveRequiredPlaceholders(location);
+				Resource resource = this.resourceLoader.getResource(resolvedLocation);
+				ResourcePropertySource rps = (StringUtils.hasText(name) ?
+						new ResourcePropertySource(name, resource) : new ResourcePropertySource(resource));
+				addPropertySource(rps);
 			}
 			catch (IllegalArgumentException ex) {
 				// from resolveRequiredPlaceholders
@@ -346,38 +351,30 @@ class ConfigurationClassParser {
 		}
 	}
 
-	private void processPropertySourceLocation(String name, String location) throws IOException, FileNotFoundException {
-		String resolvedLocation = this.environment.resolveRequiredPlaceholders(location);
-		Resource resource = this.resourceLoader.getResource(resolvedLocation);
-		AnnotationPropertySource propertySource = (StringUtils.hasText(name) ?
-				new AnnotationPropertySource(name, resource) : new AnnotationPropertySource(resource));
-		addPropertySource(propertySource);
-	}
-
-	private void addPropertySource(AnnotationPropertySource propertySource) {
+	private void addPropertySource(ResourcePropertySource propertySource) {
 		String name = propertySource.getName();
 		MutablePropertySources propertySources = ((ConfigurableEnvironment) this.environment).getPropertySources();
 		if (propertySources.contains(name) && this.propertySourceNames.contains(name)) {
 			// We've already added a version, we need to extend it
 			PropertySource<?> existing = propertySources.get(name);
 			if (existing instanceof CompositePropertySource) {
-				((CompositePropertySource) existing).addFirstPropertySource(
-						propertySource.resourceNamedPropertySource());
+				((CompositePropertySource) existing).addFirstPropertySource(propertySource.withResourceName());
 			}
 			else {
-				if (existing instanceof AnnotationPropertySource) {
-					existing = ((AnnotationPropertySource) existing).resourceNamedPropertySource();
+				if (existing instanceof ResourcePropertySource) {
+					existing = ((ResourcePropertySource) existing).withResourceName();
 				}
 				CompositePropertySource composite = new CompositePropertySource(name);
-				composite.addPropertySource(propertySource.resourceNamedPropertySource());
+				composite.addPropertySource(propertySource.withResourceName());
 				composite.addPropertySource(existing);
 				propertySources.replace(name, composite);
 			}
 		}
 		else {
-			if(this.propertySourceNames.isEmpty()) {
+			if (this.propertySourceNames.isEmpty()) {
 				propertySources.addLast(propertySource);
-			} else {
+			}
+			else {
 				String firstProcessed = this.propertySourceNames.iterator().next();
 				propertySources.addBefore(firstProcessed, propertySource);
 			}
@@ -829,36 +826,6 @@ class ConfigurationClassParser {
 					attemptedImport.getSimpleName(), attemptedImport.getSimpleName(), importStack),
 					new Location(importStack.peek().getResource(), metadata));
 		}
-	}
-
-
-	private static class AnnotationPropertySource extends ResourcePropertySource {
-
-		/** The resource name or null if the same as getName() */
-		private final String resourceName;
-
-		public AnnotationPropertySource(Resource resource) throws IOException {
-			super(resource);
-			this.resourceName = null;
-		}
-
-		public AnnotationPropertySource(String name, Resource resource) throws IOException {
-			super(name, resource);
-			this.resourceName = getNameForResource(resource);
-		}
-
-		protected AnnotationPropertySource(String name, Map<String, Object> source) {
-			super(name, source);
-			this.resourceName = null;
-		}
-
-		public AnnotationPropertySource resourceNamedPropertySource() {
-			if (this.resourceName == null) {
-				return this;
-			}
-			return new AnnotationPropertySource(this.resourceName, getSource());
-		}
-
 	}
 
 }
