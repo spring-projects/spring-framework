@@ -20,7 +20,6 @@ import java.util.Collections;
 
 import org.junit.Test;
 
-import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
 /**
@@ -39,8 +38,11 @@ public class CompositePropertySourceTests {
 		composite.addPropertySource(p3);
 		composite.addPropertySource(p1);
 		composite.addFirstPropertySource(p1);
-		assertThat(composite.toString(), containsString("MapPropertySource [name='p1'], "
-				+ "MapPropertySource [name='p2'], MapPropertySource [name='p3']"));
+		String s = composite.toString();
+		int i1 = s.indexOf("name='p1'");
+		int i2 = s.indexOf("name='p2'");
+		int i3 = s.indexOf("name='p3'");
+		assertTrue("Bad order: " + s, ((i1 < i2) && (i2 < i3)));
 	}
 
 }
