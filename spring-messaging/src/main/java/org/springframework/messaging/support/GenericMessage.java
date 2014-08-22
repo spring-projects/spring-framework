@@ -71,20 +71,21 @@ public class GenericMessage<T> implements Message<T>, Serializable {
 	}
 
 
-	public boolean equals(Object obj) {
-		if (this == obj) {
+	public boolean equals(Object other) {
+		if (this == other) {
 			return true;
 		}
-		if (obj != null && obj instanceof GenericMessage<?>) {
-			GenericMessage<?> other = (GenericMessage<?>) obj;
-			return (ObjectUtils.nullSafeEquals(this.headers.getId(), other.headers.getId()) &&
-					this.headers.equals(other.headers) && this.payload.equals(other.payload));
+		if (!(other instanceof GenericMessage)) {
+			return false;
 		}
-		return false;
+		GenericMessage<?> otherMsg = (GenericMessage<?>) other;
+		// Using nullSafeEquals for proper array equals comparisons
+		return (ObjectUtils.nullSafeEquals(this.payload, otherMsg.payload) && this.headers.equals(otherMsg.headers));
 	}
 
 	public int hashCode() {
-		return (this.headers.hashCode() * 23 + ObjectUtils.nullSafeHashCode(this.payload));
+		// Using nullSafeHashCode for proper array hashCode handling
+		return (ObjectUtils.nullSafeHashCode(this.payload) * 23 + this.headers.hashCode());
 	}
 
 	public String toString() {
