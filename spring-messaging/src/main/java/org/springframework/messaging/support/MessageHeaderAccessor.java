@@ -94,7 +94,7 @@ public class MessageHeaderAccessor {
 	}
 
 	public boolean isModified() {
-		return (!this.headers.isEmpty());
+		return !this.headers.isEmpty();
 	}
 
 	public Object getHeader(String headerName) {
@@ -132,10 +132,6 @@ public class MessageHeaderAccessor {
 		}
 	}
 
-	protected boolean isReadOnly(String headerName) {
-		return MessageHeaders.ID.equals(headerName) || MessageHeaders.TIMESTAMP.equals(headerName);
-	}
-
 	/**
 	 * Set the value for the given header name only if the header name is not
 	 * already associated with a value.
@@ -143,6 +139,15 @@ public class MessageHeaderAccessor {
 	public void setHeaderIfAbsent(String name, Object value) {
 		if (getHeader(name) == null) {
 			setHeader(name, value);
+		}
+	}
+
+	/**
+	 * Remove the value for the given header name.
+	 */
+	public void removeHeader(String headerName) {
+		if (StringUtils.hasLength(headerName) && !isReadOnly(headerName)) {
+			setHeader(headerName, null);
 		}
 	}
 
@@ -182,15 +187,6 @@ public class MessageHeaderAccessor {
 	}
 
 	/**
-	 * Remove the value for the given header name.
-	 */
-	public void removeHeader(String headerName) {
-		if (StringUtils.hasLength(headerName) && !isReadOnly(headerName)) {
-			setHeader(headerName, null);
-		}
-	}
-
-	/**
 	 * Copy the name-value pairs from the provided Map.
 	 * <p>This operation will overwrite any existing values. Use
 	 * {@link #copyHeadersIfAbsent(Map)} to avoid overwriting values.
@@ -214,12 +210,17 @@ public class MessageHeaderAccessor {
 		if (headersToCopy != null) {
 			Set<String> keys = headersToCopy.keySet();
 			for (String key : keys) {
-				if (!this.isReadOnly(key)) {
+				if (!isReadOnly(key)) {
 					setHeaderIfAbsent(key, headersToCopy.get(key));
 				}
 			}
 		}
 	}
+
+	protected boolean isReadOnly(String headerName) {
+		return (MessageHeaders.ID.equals(headerName) || MessageHeaders.TIMESTAMP.equals(headerName));
+	}
+
 
 	public UUID getId() {
 		return (UUID) getHeader(MessageHeaders.ID);
@@ -227,6 +228,10 @@ public class MessageHeaderAccessor {
 
 	public Long getTimestamp() {
 		return (Long) getHeader(MessageHeaders.TIMESTAMP);
+	}
+
+	public void setReplyChannelName(String replyChannelName) {
+		setHeader(MessageHeaders.REPLY_CHANNEL, replyChannelName);
 	}
 
 	public void setReplyChannel(MessageChannel replyChannel) {
@@ -237,8 +242,8 @@ public class MessageHeaderAccessor {
         return getHeader(MessageHeaders.REPLY_CHANNEL);
     }
 
-	public void setReplyChannelName(String replyChannelName) {
-		setHeader(MessageHeaders.REPLY_CHANNEL, replyChannelName);
+	public void setErrorChannelName(String errorChannelName) {
+		setHeader(MessageHeaders.ERROR_CHANNEL, errorChannelName);
 	}
 
 	public void setErrorChannel(MessageChannel errorChannel) {
@@ -249,16 +254,12 @@ public class MessageHeaderAccessor {
         return getHeader(MessageHeaders.ERROR_CHANNEL);
     }
 
-	public void setErrorChannelName(String errorChannelName) {
-		setHeader(MessageHeaders.ERROR_CHANNEL, errorChannelName);
-	}
-
-    public MimeType getContentType() {
-        return (MimeType) getHeader(MessageHeaders.CONTENT_TYPE);
-    }
-
 	public void setContentType(MimeType contentType) {
 		setHeader(MessageHeaders.CONTENT_TYPE, contentType);
+	}
+
+	public MimeType getContentType() {
+		return (MimeType) getHeader(MessageHeaders.CONTENT_TYPE);
 	}
 
 

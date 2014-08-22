@@ -60,7 +60,7 @@ import org.springframework.util.IdGenerator;
  * </pre>
  *
  * A third option is to use {@link org.springframework.messaging.support.MessageHeaderAccessor}
- * or one of its sub-classes to create specific categories of headers.
+ * or one of its subclasses to create specific categories of headers.
  *
  * @author Arjen Poutsma
  * @author Mark Fisher
@@ -135,6 +135,7 @@ public final class MessageHeaders implements Map<String, Object>, Serializable {
 		return (T) value;
 	}
 
+
 	@Override
 	public boolean equals(Object other) {
 		return (this == other ||
@@ -193,28 +194,32 @@ public final class MessageHeaders implements Map<String, Object>, Serializable {
 	// Unsupported Map operations
 
 	/**
-	 * Since MessageHeaders are immutable, the call to this method will result in {@link UnsupportedOperationException}.
+	 * Since MessageHeaders are immutable, the call to this method
+	 * will result in {@link UnsupportedOperationException}.
 	 */
 	public Object put(String key, Object value) {
 		throw new UnsupportedOperationException("MessageHeaders is immutable");
 	}
 
 	/**
-	 * Since MessageHeaders are immutable, the call to this method will result in {@link UnsupportedOperationException}.
+	 * Since MessageHeaders are immutable, the call to this method
+	 * will result in {@link UnsupportedOperationException}.
 	 */
-	public void putAll(Map<? extends String, ? extends Object> t) {
+	public void putAll(Map<? extends String, ? extends Object> map) {
 		throw new UnsupportedOperationException("MessageHeaders is immutable");
 	}
 
 	/**
-	 * Since MessageHeaders are immutable, the call to this method will result in {@link UnsupportedOperationException}.
+	 * Since MessageHeaders are immutable, the call to this method
+	 * will result in {@link UnsupportedOperationException}.
 	 */
 	public Object remove(Object key) {
 		throw new UnsupportedOperationException("MessageHeaders is immutable");
 	}
 
 	/**
-	 * Since MessageHeaders are immutable, the call to this method will result in {@link UnsupportedOperationException}.
+	 * Since MessageHeaders are immutable, the call to this method
+	 * will result in {@link UnsupportedOperationException}.
 	 */
 	public void clear() {
 		throw new UnsupportedOperationException("MessageHeaders is immutable");

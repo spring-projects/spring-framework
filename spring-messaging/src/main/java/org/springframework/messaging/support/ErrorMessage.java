@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,6 @@ import java.util.Map;
  * @author Mark Fisher
  * @author Oleg Zhurakousky
  * @since 4.0
- *
  * @see MessageBuilder
  */
 public class ErrorMessage extends GenericMessage<Throwable> {
@@ -34,8 +33,7 @@ public class ErrorMessage extends GenericMessage<Throwable> {
 
 	/**
 	 * Create a new message with the given payload.
-	 *
-	 * @param payload the message payload, never {@code null}
+	 * @param payload the message payload (never {@code null})
 	 */
 	public ErrorMessage(Throwable payload) {
 		super(payload);
@@ -43,8 +41,7 @@ public class ErrorMessage extends GenericMessage<Throwable> {
 
 	/**
 	 * Create a new message with the given payload and headers.
-	 *
-	 * @param payload the message payload, never {@code null}
+	 * @param payload the message payload (never {@code null})
 	 * @param headers message headers
 	 */
 	public ErrorMessage(Throwable payload, Map<String, Object> headers) {

@@ -30,7 +30,6 @@ import org.springframework.util.ObjectUtils;
  *
  * @author Mark Fisher
  * @since 4.0
- *
  * @see MessageBuilder
  */
 public class GenericMessage<T> implements Message<T>, Serializable {
@@ -45,32 +44,47 @@ public class GenericMessage<T> implements Message<T>, Serializable {
 
 	/**
 	 * Create a new message with the given payload.
-	 *
-	 * @param payload the message payload, never {@code null}
+	 * @param payload the message payload (never {@code null})
 	 */
 	public GenericMessage(T payload) {
-		this(payload, null);
+		this(payload, new MessageHeaders(null));
 	}
 
 	/**
 	 * Create a new message with the given payload and headers.
-	 *
-	 * @param payload the message payload, never {@code null}
+	 * @param payload the message payload (never {@code null})
 	 * @param headers message headers
 	 */
 	public GenericMessage(T payload, Map<String, Object> headers) {
-		Assert.notNull(payload, "payload must not be null");
+		Assert.notNull(payload, "Payload must not be null");
 		this.headers = new MessageHeaders(headers);
 		this.payload = payload;
 	}
 
 
+	public T getPayload() {
+		return this.payload;
+	}
+
 	public MessageHeaders getHeaders() {
 		return this.headers;
 	}
 
-	public T getPayload() {
-		return this.payload;
+
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (obj != null && obj instanceof GenericMessage<?>) {
+			GenericMessage<?> other = (GenericMessage<?>) obj;
+			return (ObjectUtils.nullSafeEquals(this.headers.getId(), other.headers.getId()) &&
+					this.headers.equals(other.headers) && this.payload.equals(other.payload));
+		}
+		return false;
+	}
+
+	public int hashCode() {
+		return (this.headers.hashCode() * 23 + ObjectUtils.nullSafeHashCode(this.payload));
 	}
 
 	public String toString() {
@@ -84,22 +98,6 @@ public class GenericMessage<T> implements Message<T>, Serializable {
 		}
 		sb.append("[Headers=").append(this.headers).append("]");
 		return sb.toString();
-	}
-
-	public int hashCode() {
-		return this.headers.hashCode() * 23 + ObjectUtils.nullSafeHashCode(this.payload);
-	}
-
-	public boolean equals(Object obj) {
-		if (this == obj) {
-			return true;
-		}
-		if (obj != null && obj instanceof GenericMessage<?>) {
-			GenericMessage<?> other = (GenericMessage<?>) obj;
-			return (this.headers.getId().equals(other.headers.getId()) &&
-					this.headers.equals(other.headers) && this.payload.equals(other.payload));
-		}
-		return false;
 	}
 
 }
