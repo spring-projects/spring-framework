@@ -16,7 +16,9 @@
 
 package org.springframework.core.env;
 
+import java.util.ArrayList;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -25,6 +27,7 @@ import java.util.Set;
  * share the same name, e.g. when multiple values are supplied to {@code @PropertySource}.
  *
  * @author Chris Beams
+ * @author Phillip Webb
  * @since 3.1.1
  */
 public class CompositePropertySource extends PropertySource<Object> {
@@ -54,6 +57,13 @@ public class CompositePropertySource extends PropertySource<Object> {
 
 	public void addPropertySource(PropertySource<?> propertySource) {
 		this.propertySources.add(propertySource);
+	}
+
+	public void addFirstPropertySource(PropertySource<?> propertySource) {
+		List<PropertySource<?>> exisiting = new ArrayList<PropertySource<?>>(this.propertySources);
+		this.propertySources.clear();
+		this.propertySources.add(propertySource);
+		this.propertySources.addAll(exisiting);
 	}
 
 	@Override

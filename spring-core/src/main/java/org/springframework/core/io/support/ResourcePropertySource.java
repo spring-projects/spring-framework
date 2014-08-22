@@ -115,7 +115,7 @@ public class ResourcePropertySource extends PropertiesPropertySource {
 		this(new DefaultResourceLoader().getResource(location));
 	}
 
-	private ResourcePropertySource(String name, Map<String, Object> source) {
+	protected ResourcePropertySource(String name, Map<String, Object> source) {
 		super(name, source);
 	}
 
@@ -137,7 +137,7 @@ public class ResourcePropertySource extends PropertiesPropertySource {
 	 * empty, return the class name of the resource plus its identity hash code.
 	 * @see org.springframework.core.io.Resource#getDescription()
 	 */
-	private static String getNameForResource(Resource resource) {
+	protected static String getNameForResource(Resource resource) {
 		String name = resource.getDescription();
 		if (!StringUtils.hasText(name)) {
 			name = resource.getClass().getSimpleName() + "@" + System.identityHashCode(resource);

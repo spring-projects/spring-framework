@@ -210,6 +210,14 @@ public class PropertySourceAnnotationTests {
 		assertThat(ctx.getEnvironment().containsProperty("from.p2"), is(true));
 	}
 
+	@Test
+	public void withSameSourceImportedInDifferentOrder() throws Exception {
+		AnnotationConfigApplicationContext ctx =new AnnotationConfigApplicationContext(ConfigWithSameSourceImportedInDifferentOrder.class);
+		assertThat(ctx.getEnvironment().containsProperty("from.p1"), is(true));
+		assertThat(ctx.getEnvironment().containsProperty("from.p2"), is(true));
+		assertThat(ctx.getEnvironment().getProperty("testbean.name"), equalTo("p2TestBean"));
+	}
+
 
 	@Configuration
 	@PropertySource(value="classpath:${unresolvable}/p1.properties")
@@ -352,6 +360,24 @@ public class PropertySourceAnnotationTests {
 	@Configuration
 	@PropertySource(value = {})
 	static class ConfigWithEmptyResourceLocations {
+	}
+
+	@Import({ ConfigImportedWithSameSourceImportedInDifferentOrder.class })
+	@PropertySources({
+		@PropertySource("classpath:org/springframework/context/annotation/p1.properties"),
+		@PropertySource("classpath:org/springframework/context/annotation/p2.properties")
+	})
+	@Configuration
+	public static class ConfigWithSameSourceImportedInDifferentOrder {
+
+	}
+
+	@Configuration
+	@PropertySources({
+		@PropertySource("classpath:org/springframework/context/annotation/p2.properties"),
+		@PropertySource("classpath:org/springframework/context/annotation/p1.properties")
+	})
+	public static class ConfigImportedWithSameSourceImportedInDifferentOrder {
 	}
 
 }
