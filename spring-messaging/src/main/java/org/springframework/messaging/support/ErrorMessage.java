@@ -16,9 +16,9 @@
 
 package org.springframework.messaging.support;
 
-import org.springframework.messaging.MessageHeaders;
-
 import java.util.Map;
+
+import org.springframework.messaging.MessageHeaders;
 
 /**
  * A {@link GenericMessage} with a {@link Throwable} payload.
@@ -26,7 +26,6 @@ import java.util.Map;
  * @author Mark Fisher
  * @author Oleg Zhurakousky
  * @since 4.0
- *
  * @see MessageBuilder
  */
 public class ErrorMessage extends GenericMessage<Throwable> {
@@ -36,8 +35,7 @@ public class ErrorMessage extends GenericMessage<Throwable> {
 
 	/**
 	 * Create a new message with the given payload.
-	 *
-	 * @param payload the message payload, never {@code null}
+	 * @param payload the message payload (never {@code null})
 	 */
 	public ErrorMessage(Throwable payload) {
 		super(payload);
@@ -46,8 +44,7 @@ public class ErrorMessage extends GenericMessage<Throwable> {
 	/**
 	 * Create a new message with the given payload and headers.
 	 * The content of the given header map is copied.
-	 *
-	 * @param payload the message payload, never {@code null}
+	 * @param payload the message payload (never {@code null})
 	 * @param headers message headers to use for initialization
 	 */
 	public ErrorMessage(Throwable payload, Map<String, Object> headers) {
@@ -56,11 +53,9 @@ public class ErrorMessage extends GenericMessage<Throwable> {
 
 	/**
 	 * A constructor with the {@link MessageHeaders} instance to use.
-	 *
-	 * <p><strong>Note:</strong> the given {@code MessageHeaders} instance is used
-	 * directly in the new message, i.e. it is not copied.
-	 *
-	 * @param payload the message payload, never {@code null}
+	 * <p><strong>Note:</strong> the given {@code MessageHeaders} instance
+	 * is used directly in the new message, i.e. it is not copied.
+	 * @param payload the message payload (never {@code null})
 	 * @param headers message headers
 	 */
 	public ErrorMessage(Throwable payload, MessageHeaders headers) {

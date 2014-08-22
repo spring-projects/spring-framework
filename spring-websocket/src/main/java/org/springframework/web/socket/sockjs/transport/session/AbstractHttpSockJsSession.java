@@ -177,13 +177,11 @@ public abstract class AbstractHttpSockJsSession extends AbstractSockJsSession {
 	/**
 	 * Handle the first request for receiving messages on a SockJS HTTP transport
 	 * based session.
-	 *
 	 * <p>Long polling-based transports (e.g. "xhr", "jsonp") complete the request
 	 * after writing the open frame. Streaming-based transports ("xhr_streaming",
 	 * "eventsource", and "htmlfile") leave the response open longer for further
 	 * streaming of message frames but will also close it eventually after some
 	 * amount of data has been sent.
-	 *
 	 * @param request the current request
 	 * @param response the current response
 	 * @param frameFormat the transport-specific SocksJS frame format to use
@@ -235,13 +233,11 @@ public abstract class AbstractHttpSockJsSession extends AbstractSockJsSession {
 	/**
 	 * Handle all requests, except the first one, to receive messages on a SockJS
 	 * HTTP transport based session.
-	 *
 	 * <p>Long polling-based transports (e.g. "xhr", "jsonp") complete the request
 	 * after writing any buffered message frames (or the next one). Streaming-based
 	 * transports ("xhr_streaming", "eventsource", and "htmlfile") leave the
 	 * response open longer for further streaming of message frames but will also
 	 * close it eventually after some amount of data has been sent.
-	 *
 	 * @param request the current request
 	 * @param response the current response
 	 * @param frameFormat the transport-specific SocksJS frame format to use
@@ -302,7 +298,7 @@ public abstract class AbstractHttpSockJsSession extends AbstractSockJsSession {
 
 	/**
 	 * Called when the connection is active and ready to write to the response.
-	 * Sub-classes should implement but never call this method directly.
+	 * Subclasses should implement but never call this method directly.
 	 */
 	protected abstract void flushCache() throws SockJsTransportFailureException;
 

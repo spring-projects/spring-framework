@@ -45,6 +45,7 @@ import org.springframework.util.Assert;
  * {@link ServerHttpRequest} implementation that is based on a {@link HttpServletRequest}.
  *
  * @author Arjen Poutsma
+ * @author Rossen Stoyanchev
  * @since 3.0
  */
 public class ServletServerHttpRequest implements ServerHttpRequest {
