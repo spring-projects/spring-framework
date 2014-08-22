@@ -102,6 +102,15 @@ public class ResponseEntityTests {
 	}
 
 	@Test
+	public void badRequest() throws URISyntaxException {
+		ResponseEntity<Void> responseEntity = ResponseEntity.badRequest().build();
+
+		assertNotNull(responseEntity);
+		assertEquals(HttpStatus.BAD_REQUEST, responseEntity.getStatusCode());
+		assertNull(responseEntity.getBody());
+	}
+
+	@Test
 	public void notFound() throws URISyntaxException {
 		ResponseEntity<Void> responseEntity = ResponseEntity.notFound().build();
 

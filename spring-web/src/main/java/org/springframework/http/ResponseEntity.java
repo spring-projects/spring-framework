@@ -229,6 +229,15 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 	}
 
 	/**
+	 * Creates a builder with a {@link HttpStatus#BAD_REQUEST} status.
+	 * @return the created builder
+	 * @since 4.1
+	 */
+	public static BodyBuilder badRequest() {
+		return status(HttpStatus.BAD_REQUEST);
+	}
+
+	/**
 	 * Creates a builder with a {@link HttpStatus#NOT_FOUND NOT_FOUND} status.
 	 * @return the created builder
 	 * @since 4.1
