@@ -1061,7 +1061,7 @@ public class DispatcherServlet extends FrameworkServlet {
 	 */
 	protected HttpServletRequest checkMultipart(HttpServletRequest request) throws MultipartException {
 		if (this.multipartResolver != null && this.multipartResolver.isMultipart(request)) {
-			if (request instanceof MultipartHttpServletRequest) {
+			if (WebUtils.getNativeRequest(request, MultipartHttpServletRequest.class) != null) {
 				logger.debug("Request is already a MultipartHttpServletRequest - if not in a forward, " +
 						"this typically results from an additional MultipartFilter in web.xml");
 			}
@@ -1079,13 +1079,13 @@ public class DispatcherServlet extends FrameworkServlet {
 
 	/**
 	 * Clean up any resources used by the given multipart request (if any).
-	 * @param servletRequest current HTTP request
+	 * @param request current HTTP request
 	 * @see MultipartResolver#cleanupMultipart
 	 */
-	protected void cleanupMultipart(HttpServletRequest servletRequest) {
-		MultipartHttpServletRequest req = WebUtils.getNativeRequest(servletRequest, MultipartHttpServletRequest.class);
-		if (req != null) {
-			this.multipartResolver.cleanupMultipart(req);
+	protected void cleanupMultipart(HttpServletRequest request) {
+		MultipartHttpServletRequest multipartRequest = WebUtils.getNativeRequest(request, MultipartHttpServletRequest.class);
+		if (multipartRequest != null) {
+			this.multipartResolver.cleanupMultipart(multipartRequest);
 		}
 	}
 
