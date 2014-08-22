@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletRequestWrapper;
 import javax.servlet.http.HttpServletResponse;
 
 import junit.framework.TestCase;
@@ -217,6 +218,22 @@ public class DispatcherServletTests extends TestCase {
 		MultipartHttpServletRequest multipartRequest = multipartResolver.resolveMultipart(request);
 		complexDispatcherServlet.service(multipartRequest, response);
 		multipartResolver.cleanupMultipart(multipartRequest);
+		assertNull(request.getAttribute(SimpleMappingExceptionResolver.DEFAULT_EXCEPTION_ATTRIBUTE));
+		assertNotNull(request.getAttribute("cleanedUp"));
+	}
+
+	public void testExistingMultipartRequestButWrapped() throws Exception {
+		MockHttpServletRequest request = new MockHttpServletRequest(getServletContext(), "GET", "/locale.do;abc=def");
+		request.addPreferredLocale(Locale.CANADA);
+		request.addUserRole("role1");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		ComplexWebApplicationContext.MockMultipartResolver multipartResolver =
+				(ComplexWebApplicationContext.MockMultipartResolver) complexDispatcherServlet.getWebApplicationContext()
+						.getBean("multipartResolver");
+		MultipartHttpServletRequest multipartRequest = multipartResolver.resolveMultipart(request);
+		complexDispatcherServlet.service(new HttpServletRequestWrapper(multipartRequest), response);
+		multipartResolver.cleanupMultipart(multipartRequest);
+		assertNull(request.getAttribute(SimpleMappingExceptionResolver.DEFAULT_EXCEPTION_ATTRIBUTE));
 		assertNotNull(request.getAttribute("cleanedUp"));
 	}
 
