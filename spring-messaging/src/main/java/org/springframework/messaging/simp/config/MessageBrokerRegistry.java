@@ -41,11 +41,11 @@ public class MessageBrokerRegistry {
 
 	private StompBrokerRelayRegistration brokerRelayRegistration;
 
+	private final ChannelRegistration brokerChannelRegistration = new ChannelRegistration();
+
 	private String[] applicationDestinationPrefixes;
 
 	private String userDestinationPrefix;
-
-	private ChannelRegistration brokerChannelRegistration = new ChannelRegistration();
 
 
 	public MessageBrokerRegistry(SubscribableChannel clientInboundChannel, MessageChannel clientOutboundChannel) {
@@ -54,6 +54,7 @@ public class MessageBrokerRegistry {
 		this.clientInboundChannel = clientInboundChannel;
 		this.clientOutboundChannel = clientOutboundChannel;
 	}
+
 
 	/**
 	 * Enable a simple message broker and configure one or more prefixes to filter
@@ -77,6 +78,21 @@ public class MessageBrokerRegistry {
 	}
 
 	/**
+	 * Customize the channel used to send messages from the application to the message
+	 * broker. By default, messages from the application to the message broker are sent
+	 * synchronously, which means application code sending a message will find out
+	 * if the message cannot be sent through an exception. However, this can be changed
+	 * if the broker channel is configured here with task executor properties.
+	 */
+	public ChannelRegistration configureBrokerChannel() {
+		return this.brokerChannelRegistration;
+	}
+
+	protected ChannelRegistration getBrokerChannelRegistration() {
+		return this.brokerChannelRegistration;
+	}
+
+	/**
 	 * Configure one or more prefixes to filter destinations targeting application
 	 * annotated methods. For example destinations prefixed with "/app" may be
 	 * processed by annotated methods while other destinations may target the
@@ -89,6 +105,11 @@ public class MessageBrokerRegistry {
 	public MessageBrokerRegistry setApplicationDestinationPrefixes(String... prefixes) {
 		this.applicationDestinationPrefixes = prefixes;
 		return this;
+	}
+
+	protected Collection<String> getApplicationDestinationPrefixes() {
+		return (this.applicationDestinationPrefixes != null ?
+				Arrays.asList(this.applicationDestinationPrefixes) : null);
 	}
 
 	/**
@@ -108,19 +129,13 @@ public class MessageBrokerRegistry {
 		return this;
 	}
 
-	/**
-	 * Customize the channel used to send messages from the application to the message
-	 * broker. By default messages from the application to the message broker are sent
-	 * synchronously, which means application code sending a message will find out
-	 * if the message cannot be sent through an exception. However, this can be changed
-	 * if the broker channel is configured here with task executor properties.
-	 */
-	public ChannelRegistration configureBrokerChannel() {
-		return this.brokerChannelRegistration;
+	protected String getUserDestinationPrefix() {
+		return this.userDestinationPrefix;
 	}
 
+
 	protected SimpleBrokerMessageHandler getSimpleBroker(SubscribableChannel brokerChannel) {
-		if ((this.simpleBrokerRegistration == null) && (this.brokerRelayRegistration == null)) {
+		if (this.simpleBrokerRegistration == null && this.brokerRelayRegistration == null) {
 			enableSimpleBroker();
 		}
 		if (this.simpleBrokerRegistration != null) {
@@ -136,16 +151,4 @@ public class MessageBrokerRegistry {
 		return null;
 	}
 
-	protected Collection<String> getApplicationDestinationPrefixes() {
-		return (this.applicationDestinationPrefixes != null)
-				? Arrays.asList(this.applicationDestinationPrefixes) : null;
-	}
-
-	protected String getUserDestinationPrefix() {
-		return this.userDestinationPrefix;
-	}
-
-	protected ChannelRegistration getBrokerChannelRegistration() {
-		return this.brokerChannelRegistration;
-	}
 }
