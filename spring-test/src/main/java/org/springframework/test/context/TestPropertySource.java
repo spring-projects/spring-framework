@@ -199,7 +199,7 @@ public @interface TestPropertySource {
 	 *
 	 * <h3>Precedence</h3>
 	 * <p>Properties declared via this attribute have higher precedence than
-	 * properties loaded from resource {@link locations}.
+	 * properties loaded from resource {@link #locations}.
 	 *
 	 * <p>This attribute may be used in conjunction with {@link #value}
 	 * <em>or</em> {@link #locations}.
