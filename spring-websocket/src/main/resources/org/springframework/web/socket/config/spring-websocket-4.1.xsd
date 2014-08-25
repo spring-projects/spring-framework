@@ -224,6 +224,14 @@
                 ]]></xsd:documentation>
 			</xsd:annotation>
 		</xsd:attribute>
+		<xsd:attribute name="message-codec" type="xsd:string">
+			<xsd:annotation>
+				<xsd:documentation source="java:org.springframework.web.socket.sockjs.support.AbstractSockJsService"><![CDATA[
+	The bean name of a SockJsMessageCodec to use for encoding and decoding SockJS messages.
+	By default Jackson2SockJsMessageCodec is used requiring the Jackson library to be present on the classpath.
+                ]]></xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
 	</xsd:complexType>
 
 	<xsd:complexType name="stomp-broker-relay">

@@ -128,6 +128,10 @@ class WebSocketNamespaceUtils {
 			if (!attrValue.isEmpty()) {
 				sockJsServiceDef.getPropertyValues().add("heartbeatTime", Long.valueOf(attrValue));
 			}
+			attrValue = sockJsElement.getAttribute("message-codec");
+			if (!attrValue.isEmpty()) {
+				sockJsServiceDef.getPropertyValues().add("messageCodec", new RuntimeBeanReference(attrValue));
+			}
 			sockJsServiceDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
 			String sockJsServiceName = context.getReaderContext().registerWithGeneratedName(sockJsServiceDef);
 			return new RuntimeBeanReference(sockJsServiceName);

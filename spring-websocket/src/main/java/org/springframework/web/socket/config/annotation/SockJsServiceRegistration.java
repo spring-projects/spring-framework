@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.socket.server.HandshakeInterceptor;
 import org.springframework.web.socket.sockjs.SockJsService;
+import org.springframework.web.socket.sockjs.frame.SockJsMessageCodec;
 import org.springframework.web.socket.sockjs.transport.TransportHandler;
 import org.springframework.web.socket.sockjs.transport.handler.DefaultSockJsService;
 import org.springframework.web.socket.sockjs.transport.TransportHandlingSockJsService;
@@ -60,6 +61,8 @@ public class SockJsServiceRegistration {
 	private final List<TransportHandler> transportHandlerOverrides = new ArrayList<TransportHandler>();
 
 	private final List<HandshakeInterceptor> interceptors = new ArrayList<HandshakeInterceptor>();
+
+	private SockJsMessageCodec messageCodec;
 
 
 	public SockJsServiceRegistration(TaskScheduler defaultTaskScheduler) {
@@ -200,6 +203,18 @@ public class SockJsServiceRegistration {
 		return this;
 	}
 
+	/**
+	 * The codec to use for encoding and decoding SockJS messages.
+	 * <p>By default {@code Jackson2SockJsMessageCodec} is used requiring the
+	 * Jackson library to be present on the classpath.
+	 * @param codec the codec to use.
+	 * @since 4.1
+	 */
+	public SockJsServiceRegistration setMessageCodec(SockJsMessageCodec codec) {
+		this.messageCodec = codec;
+		return this;
+	}
+
 	protected SockJsService getSockJsService() {
 		TransportHandlingSockJsService service = createSockJsService();
 		service.setHandshakeInterceptors(this.interceptors);
@@ -223,6 +238,9 @@ public class SockJsServiceRegistration {
 		}
 		if (this.webSocketEnabled != null) {
 			service.setWebSocketEnabled(this.webSocketEnabled);
+		}
+		if (this.messageCodec != null) {
+			service.setMessageCodec(this.messageCodec);
 		}
 		return service;
 	}

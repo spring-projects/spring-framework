@@ -16,6 +16,8 @@
 
 package org.springframework.web.socket.config;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -45,6 +47,7 @@ import org.springframework.web.socket.server.HandshakeInterceptor;
 import org.springframework.web.socket.server.support.DefaultHandshakeHandler;
 import org.springframework.web.socket.server.support.WebSocketHttpRequestHandler;
 import org.springframework.web.socket.sockjs.SockJsService;
+import org.springframework.web.socket.sockjs.frame.SockJsMessageCodec;
 import org.springframework.web.socket.sockjs.support.SockJsHttpRequestHandler;
 import org.springframework.web.socket.sockjs.transport.TransportHandler;
 import org.springframework.web.socket.sockjs.transport.TransportHandlingSockJsService;
@@ -218,6 +221,7 @@ public class HandlersBeanDefinitionParserTests {
 		assertEquals(256, transportService.getDisconnectDelay());
 		assertEquals(1024, transportService.getHttpMessageCacheSize());
 		assertEquals(20, transportService.getHeartbeatTime());
+		assertEquals(TestMessageCodec.class, transportService.getMessageCodec().getClass());
 	}
 
 	private void loadBeanDefinitions(String fileName) {
@@ -327,4 +331,22 @@ class TestTaskScheduler implements TaskScheduler {
 		return null;
 	}
 
+}
+
+class TestMessageCodec implements SockJsMessageCodec {
+
+	@Override
+	public String encode(String... messages) {
+		return null;
+	}
+
+	@Override
+	public String[] decode(String content) throws IOException {
+		return new String[0];
+	}
+
+	@Override
+	public String[] decodeInputStream(InputStream content) throws IOException {
+		return new String[0];
+	}
 }
