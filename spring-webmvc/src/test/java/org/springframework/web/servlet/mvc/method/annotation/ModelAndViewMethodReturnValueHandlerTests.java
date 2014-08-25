@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -104,7 +104,7 @@ public class ModelAndViewMethodReturnValueHandlerTests {
 	}
 
 	@Test
-	public void handleRedirectAttributesWithViewInstance() throws Exception {
+	public void handleRedirectAttributesWithViewName() throws Exception {
 		RedirectAttributesModelMap redirectAttributes  = new RedirectAttributesModelMap();
 		mavContainer.setRedirectModel(redirectAttributes);
 
@@ -114,7 +114,22 @@ public class ModelAndViewMethodReturnValueHandlerTests {
 		ModelMap model = mavContainer.getModel();
 		assertEquals("redirect:viewName", mavContainer.getViewName());
 		assertEquals("attrValue", model.get("attrName"));
-		assertSame("RedirectAttributes should be used if controller redirects", redirectAttributes, model);
+		assertSame(redirectAttributes, model);
+	}
+
+	@Test
+	public void handleRedirectAttributesWithCustomPrefix() throws Exception {
+		RedirectAttributesModelMap redirectAttributes  = new RedirectAttributesModelMap();
+		mavContainer.setRedirectModel(redirectAttributes);
+
+		ModelAndView mav = new ModelAndView("myRedirect:viewName", "attrName", "attrValue");
+		handler.setRedirectPatterns("myRedirect:*");
+		handler.handleReturnValue(mav, returnParamModelAndView, mavContainer, webRequest);
+
+		ModelMap model = mavContainer.getModel();
+		assertEquals("myRedirect:viewName", mavContainer.getViewName());
+		assertEquals("attrValue", model.get("attrName"));
+		assertSame(redirectAttributes, model);
 	}
 
 	@Test
@@ -137,10 +152,12 @@ public class ModelAndViewMethodReturnValueHandlerTests {
 		return new MethodParameter(method, -1);
 	}
 
+	@SuppressWarnings("unused")
 	ModelAndView modelAndView() {
 		return null;
 	}
 
+	@SuppressWarnings("unused")
 	String viewName() {
 		return null;
 	}
