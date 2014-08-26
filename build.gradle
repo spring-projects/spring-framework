@@ -156,10 +156,10 @@ configure(subprojects - project(":spring-build-src")) { subproject ->
 		logging.captureStandardOutput LogLevel.INFO // suppress "## warnings" message
 	}
 
-	task sourcesJar(type: Jar, dependsOn:classes) {
-		classifier = "sources"
-		from sourceSets.main.allJava.srcDirs
-		include "**/*.java", "**/*.aj"
+	task sourcesJar(type: Jar, dependsOn: classes) {
+		classifier = 'sources'
+		from sourceSets.main.allSource
+		// don't include or exclude anything explicitly by default. See SPR-12085.
 	}
 
 	task javadocJar(type: Jar) {
