@@ -49,6 +49,10 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.ReflectionUtils;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 
 /**
  * Abstract base class for HandlerMethod-based message handling. Provides most of
@@ -337,6 +341,15 @@ public abstract class AbstractMethodMessageHandler<T>
 
 		if (logger.isDebugEnabled()) {
 			logger.debug("Searching methods to handle " + headerAccessor.getShortLogMessage(message.getPayload()));
+		}
+		
+		if(message.getHeaders().containsKey("simpUser")){
+			Authentication authentication = message.getHeaders().get("simpUser", Authentication.class);
+			
+			SecurityContext context = SecurityContextHolder.createEmptyContext();
+			context.setAuthentication(authentication);
+			
+			SecurityContextHolder.setContext(context);
 		}
 
 		handleMessageInternal(message, lookupDestination);
