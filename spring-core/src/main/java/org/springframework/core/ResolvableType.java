@@ -808,7 +808,11 @@ public final class ResolvableType implements Serializable {
 
 	@Override
 	public int hashCode() {
-		return ObjectUtils.nullSafeHashCode(this.type);
+		int hashCode = ObjectUtils.nullSafeHashCode(this.type);
+		hashCode = 31 * hashCode + ObjectUtils.nullSafeHashCode(getSource());
+		hashCode = 31 * hashCode + variableResolverSourceHashCode();
+		hashCode = 31 * hashCode + ObjectUtils.nullSafeHashCode(this.componentType);
+		return hashCode;
 	}
 
 	/**
@@ -836,6 +840,14 @@ public final class ResolvableType implements Serializable {
 			return false;
 		}
 		return ObjectUtils.nullSafeEquals(this.variableResolver.getSource(), other.getSource());
+	}
+
+	private int variableResolverSourceHashCode() {
+		int hashCode = 0;
+		if (this.variableResolver != null) {
+			hashCode = ObjectUtils.nullSafeHashCode(this.variableResolver.getSource());
+		}
+		return hashCode;
 	}
 
 	private static ResolvableType[] forTypes(Type[] types, VariableResolver owner) {
