@@ -86,7 +86,7 @@ public class MockServletContextTests {
 	 */
 	@Test
 	public void getMimeTypeWithCustomConfiguredType() {
-		FileTypeMap defaultFileTypeMap = MimetypesFileTypeMap.getDefaultFileTypeMap();
+		FileTypeMap defaultFileTypeMap = FileTypeMap.getDefaultFileTypeMap();
 		assertThat(defaultFileTypeMap, instanceOf(MimetypesFileTypeMap.class));
 		MimetypesFileTypeMap mimetypesFileTypeMap = (MimetypesFileTypeMap) defaultFileTypeMap;
 		mimetypesFileTypeMap.addMimeTypes("text/enigma    enigma");

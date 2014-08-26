@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,6 +45,7 @@ import javax.servlet.descriptor.JspConfigDescriptor;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
@@ -152,8 +153,8 @@ public class MockServletContext implements ServletContext {
 
 
 	/**
-	 * Create a new MockServletContext, using no base path and a
-	 * DefaultResourceLoader (i.e. the classpath root as WAR root).
+	 * Create a new {@code MockServletContext}, using no base path and a
+	 * {@link DefaultResourceLoader} (i.e. the classpath root as WAR root).
 	 * @see org.springframework.core.io.DefaultResourceLoader
 	 */
 	public MockServletContext() {
@@ -161,7 +162,7 @@ public class MockServletContext implements ServletContext {
 	}
 
 	/**
-	 * Create a new MockServletContext, using a DefaultResourceLoader.
+	 * Create a new {@code MockServletContext}, using a {@link DefaultResourceLoader}.
 	 * @param resourceBasePath the root directory of the WAR (should not end with a slash)
 	 * @see org.springframework.core.io.DefaultResourceLoader
 	 */
@@ -170,7 +171,7 @@ public class MockServletContext implements ServletContext {
 	}
 
 	/**
-	 * Create a new MockServletContext, using the specified ResourceLoader
+	 * Create a new {@code MockServletContext}, using the specified {@link ResourceLoader}
 	 * and no base path.
 	 * @param resourceLoader the ResourceLoader to use (or null for the default)
 	 */
@@ -179,8 +180,8 @@ public class MockServletContext implements ServletContext {
 	}
 
 	/**
-	 * Create a new MockServletContext using the supplied resource base path and
-	 * resource loader.
+	 * Create a new {@code MockServletContext} using the supplied resource base
+	 * path and resource loader.
 	 * <p>Registers a {@link MockRequestDispatcher} for the Servlet named
 	 * {@literal 'default'}.
 	 * @param resourceBasePath the root directory of the WAR (should not end with a slash)
@@ -201,8 +202,8 @@ public class MockServletContext implements ServletContext {
 	}
 
 	/**
-	 * Build a full resource location for the given path,
-	 * prepending the resource base path of this MockServletContext.
+	 * Build a full resource location for the given path, prepending the resource
+	 * base path of this {@code MockServletContext}.
 	 * @param path the path as specified
 	 * @return the full resource path
 	 */
@@ -271,10 +272,23 @@ public class MockServletContext implements ServletContext {
 	}
 
 	/**
-	 * This method uses the Java Activation framework, which returns "application/octet-stream"
-	 * when the mime type is unknown (i.e. it never returns {@code null}). In order to maintain
-	 * the {@link ServletContext#getMimeType(String)} contract, this method returns {@code null}
-	 * if the mimeType is "application/octet-stream", as of Spring 3.2.2.
+	 * This method uses the default
+	 * {@link javax.activation.FileTypeMap#getDefaultFileTypeMap() FileTypeMap}
+	 * from the Java Activation Framework to resolve MIME types.
+	 * <p>The Java Activation Framework returns {@code "application/octet-stream"}
+	 * if the MIME type is unknown (i.e., it never returns {@code null}). Thus, in
+	 * order to honor the {@link ServletContext#getMimeType(String)} contract,
+	 * this method returns {@code null} if the MIME type is
+	 * {@code "application/octet-stream"}.
+	 * <p>{@code MockServletContext} does not provide a direct mechanism for
+	 * setting a custom MIME type; however, if the default {@code FileTypeMap}
+	 * is an instance of {@code javax.activation.MimetypesFileTypeMap}, a custom
+	 * MIME type named {@code text/enigma} can be registered for a custom
+	 * {@code .puzzle} file extension in the following manner:
+	 * <pre style="code">
+	 * MimetypesFileTypeMap mimetypesFileTypeMap = (MimetypesFileTypeMap) FileTypeMap.getDefaultFileTypeMap();
+	 * mimetypesFileTypeMap.addMimeTypes("text/enigma    puzzle");
+	 * </pre>
 	 */
 	@Override
 	public String getMimeType(String filePath) {
