@@ -233,14 +233,7 @@ configure(subprojects - project(":spring-build-src")) { subproject ->
 	task sourcesJar(type: Jar, dependsOn: classes) {
 		classifier = 'sources'
 		from sourceSets.main.allSource
-		include '**/*.java'
-		include '**/*.groovy'
-		include '**/*.aj'
-		include 'META-INF/spring.factories'
-		include 'META-INF/services/*'
-		include '**/*.properties'
-		include '**/*.xml'
-		include '**/*.types'
+		// don't include or exclude anything explicitly by default. See SPR-12085.
 	}
 
 	task javadocJar(type: Jar) {
