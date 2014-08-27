@@ -109,14 +109,13 @@ public class ResourceHandlerRegistryTests {
 
 	@Test
 	public void simpleResourceChain() throws Exception {
-
 		ResourceResolver mockResolver = Mockito.mock(ResourceResolver.class);
 		ResourceTransformer mockTransformer = Mockito.mock(ResourceTransformer.class);
 		this.registration.addResolver(mockResolver).addTransformer(mockTransformer);
 
 		ResourceHttpRequestHandler handler = getHandler("/resources/**");
 		List<ResourceResolver> resolvers = handler.getResourceResolvers();
-		assertThat(resolvers, Matchers.hasSize(3));
+		assertThat(resolvers.toString(), resolvers, Matchers.hasSize(3));
 		assertThat(resolvers.get(0), Matchers.instanceOf(CachingResourceResolver.class));
 		CachingResourceResolver cachingResolver = (CachingResourceResolver) resolvers.get(0);
 		assertThat(cachingResolver.getCache(), Matchers.instanceOf(ConcurrentMapCache.class));
@@ -146,15 +145,16 @@ public class ResourceHandlerRegistryTests {
 	public void versionResourceChain() throws Exception {
 		this.registration
 				.addTransformer(new AppCacheManifestTransfomer())
-				.addVersion("fixed", "/**/*.js")
-				.addVersionHash("/**");
+				.addFixedVersionStrategy("fixed", "/**/*.js")
+				.addContentVersionStrategy("/**");
 
 		ResourceHttpRequestHandler handler = getHandler("/resources/**");
 		List<ResourceResolver> resolvers = handler.getResourceResolvers();
-		assertThat(resolvers, Matchers.hasSize(3));
+		assertThat(resolvers.toString(), resolvers, Matchers.hasSize(3));
 		assertThat(resolvers.get(0), Matchers.instanceOf(CachingResourceResolver.class));
 		assertThat(resolvers.get(1), Matchers.instanceOf(VersionResourceResolver.class));
 		DirectFieldAccessor fieldAccessor = new DirectFieldAccessor(resolvers.get(1));
+		@SuppressWarnings("unchecked")
 		Map<String, VersionStrategy> strategies =
 				(Map<String, VersionStrategy>) fieldAccessor.getPropertyValue("versionStrategyMap");
 		assertNotNull(strategies.get("/**/*.js"));
@@ -164,8 +164,8 @@ public class ResourceHandlerRegistryTests {
 		List<ResourceTransformer> transformers = handler.getResourceTransformers();
 		assertThat(transformers, Matchers.hasSize(3));
 		assertThat(transformers.get(0), Matchers.instanceOf(CachingResourceTransformer.class));
-		assertThat(transformers.get(1), Matchers.instanceOf(CssLinkResourceTransformer.class));
-		assertThat(transformers.get(2), Matchers.instanceOf(AppCacheManifestTransfomer.class));
+		assertThat(transformers.get(1), Matchers.instanceOf(AppCacheManifestTransfomer.class));
+		assertThat(transformers.get(2), Matchers.instanceOf(CssLinkResourceTransformer.class));
 	}
 
 	@Test
@@ -176,27 +176,33 @@ public class ResourceHandlerRegistryTests {
 				.addTransformer(cachingTransformer)
 				.addTransformer(new AppCacheManifestTransfomer())
 				.addResolver(cachingResolver)
-				.addVersion("fixed", "/**/*.js")
-				.addVersionHash("/**")
+				.addFixedVersionStrategy("fixed", "/**/*.js")
+				.addContentVersionStrategy("/**")
+				.addResolver(new CustomPathResourceResolver())
 				.setCachePeriod(3600);
 
 		ResourceHttpRequestHandler handler = getHandler("/resources/**");
 		List<ResourceResolver> resolvers = handler.getResourceResolvers();
-		assertThat(resolvers, Matchers.hasSize(3));
+		assertThat(resolvers.toString(), resolvers, Matchers.hasSize(3));
 		assertThat(resolvers.get(0), Matchers.equalTo(cachingResolver));
 		assertThat(resolvers.get(1), Matchers.instanceOf(VersionResourceResolver.class));
-		assertThat(resolvers.get(2), Matchers.instanceOf(PathResourceResolver.class));
+		assertThat(resolvers.get(2), Matchers.instanceOf(CustomPathResourceResolver.class));
 
 		List<ResourceTransformer> transformers = handler.getResourceTransformers();
 		assertThat(transformers, Matchers.hasSize(3));
 		assertThat(transformers.get(0), Matchers.equalTo(cachingTransformer));
-		assertThat(transformers.get(1), Matchers.instanceOf(CssLinkResourceTransformer.class));
-		assertThat(transformers.get(2), Matchers.instanceOf(AppCacheManifestTransfomer.class));
+		assertThat(transformers.get(1), Matchers.instanceOf(AppCacheManifestTransfomer.class));
+		assertThat(transformers.get(2), Matchers.instanceOf(CssLinkResourceTransformer.class));
 	}
 
 	private ResourceHttpRequestHandler getHandler(String pathPattern) {
 		SimpleUrlHandlerMapping handlerMapping = (SimpleUrlHandlerMapping) this.registry.getHandlerMapping();
 		return (ResourceHttpRequestHandler) handlerMapping.getUrlMap().get(pathPattern);
+	}
+
+
+	private static class CustomPathResourceResolver extends PathResourceResolver {
+
 	}
 
 }

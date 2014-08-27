@@ -113,7 +113,7 @@ public class ResourceUrlProviderJavaConfigTests {
 		public void addResourceHandlers(ResourceHandlerRegistry registry) {
 			registry.addResourceHandler("/resources/**")
 				.addResourceLocations("classpath:org/springframework/web/servlet/resource/test/")
-				.addVersionHash("/**");
+				.addContentVersionStrategy("/**");
 		}
 	}
 

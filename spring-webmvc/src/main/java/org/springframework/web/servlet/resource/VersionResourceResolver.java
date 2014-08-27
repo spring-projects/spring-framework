@@ -48,7 +48,8 @@ public class VersionResourceResolver extends AbstractResourceResolver {
 
 	private AntPathMatcher pathMatcher = new AntPathMatcher();
 
-	private Map<String, VersionStrategy> versionStrategyMap = Collections.emptyMap();
+	/** Map from path pattern -> VersionStrategy */
+	private final Map<String, VersionStrategy> versionStrategyMap = new HashMap<String, VersionStrategy>();
 
 
 	/**
@@ -58,12 +59,19 @@ public class VersionResourceResolver extends AbstractResourceResolver {
 	 * <p>Supports direct URL matches and Ant-style pattern matches. For syntax
 	 * details, see the {@link org.springframework.util.AntPathMatcher} javadoc.
 	 *
-	 * @param versionStrategyMap map with URLs as keys and version strategies as values
+	 * @param map map with URLs as keys and version strategies as values
 	 */
-	public void setStrategyMap(Map<String, VersionStrategy> versionStrategyMap) {
-		this.versionStrategyMap = versionStrategyMap;
+	public void setStrategyMap(Map<String, VersionStrategy> map) {
+		this.versionStrategyMap.clear();
+		this.versionStrategyMap.putAll(map);
 	}
 
+	/**
+	 * Return the map with version strategies keyed by path pattern.
+	 */
+	public Map<String, VersionStrategy> getVersionStrategyMap() {
+		return this.versionStrategyMap;
+	}
 
 	@Override
 	protected Resource resolveResourceInternal(HttpServletRequest request, String requestPath,

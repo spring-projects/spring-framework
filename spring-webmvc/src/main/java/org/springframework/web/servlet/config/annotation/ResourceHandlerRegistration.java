@@ -63,13 +63,14 @@ public class ResourceHandlerRegistration {
 
 	private List<ResourceResolver> customResolvers = new ArrayList<ResourceResolver>();
 
-	private List<ResourceTransformer> customTransformers = new ArrayList<ResourceTransformer>();
+	private VersionResourceResolver versionResolver;
 
-	private Map<String, VersionStrategy> versionStrategies = new HashMap<String, VersionStrategy>();
+	private List<ResourceTransformer> customTransformers = new ArrayList<ResourceTransformer>();
 
 	private boolean isDevMode = false;
 
 	private Cache resourceCache;
+
 
 	/**
 	 * Create a {@link ResourceHandlerRegistration} instance.
@@ -81,6 +82,7 @@ public class ResourceHandlerRegistration {
 		this.resourceLoader = resourceLoader;
 		this.pathPatterns = pathPatterns;
 	}
+
 
 	/**
 	 * Add one or more resource locations from which to serve static content. Each location must point to a valid
@@ -151,25 +153,6 @@ public class ResourceHandlerRegistration {
 	}
 
 	/**
-	 * Apply Resource Versioning on the matching resources; this will update resources' URLs to include
-	 * a version string calculated by a {@link VersionStrategy}. This is often used for cache busting.
-	 * <p>Note that a {@link CssLinkResourceTransformer} will be automatically registered to
-	 * support versioned resources in CSS files.</p>
-	 * @param strategy the versioning strategy to use
-	 * @param pathPatterns one or more resource URL path patterns
-	 * @return the same {@link ResourceHandlerRegistration} instance for chained method invocation
-	 * @see VersionResourceResolver
-	 * @see VersionStrategy
-	 * @since 4.1
-	 */
-	public ResourceHandlerRegistration addVersionStrategy(VersionStrategy strategy, String... pathPatterns) {
-		for(String pattern : pathPatterns) {
-			this.versionStrategies.put(pattern, strategy);
-		}
-		return this;
-	}
-
-	/**
 	 * Apply Resource Versioning on the matching resources using a {@link FixedVersionStrategy}.
 	 * <p>This strategy uses that fixed version string and adds it as a prefix in the resource path,
 	 * e.g. {@code fixedversion/js/main.js}.</p>
@@ -187,7 +170,7 @@ public class ResourceHandlerRegistration {
 	 * @see FixedVersionStrategy
 	 * @since 4.1
 	 */
-	public ResourceHandlerRegistration addVersion(String fixedVersion, String... pathPatterns) {
+	public ResourceHandlerRegistration addFixedVersionStrategy(String fixedVersion, String... pathPatterns) {
 		addVersionStrategy(new FixedVersionStrategy(fixedVersion), pathPatterns);
 		return this;
 	}
@@ -204,8 +187,33 @@ public class ResourceHandlerRegistration {
 	 * @see ContentVersionStrategy
 	 * @since 4.1
 	 */
-	public ResourceHandlerRegistration addVersionHash(String... pathPatterns) {
+	public ResourceHandlerRegistration addContentVersionStrategy(String... pathPatterns) {
 		addVersionStrategy(new ContentVersionStrategy(), pathPatterns);
+		return this;
+	}
+
+
+	/**
+	 * Apply Resource Versioning on the matching resources; this will update resources' URLs to include
+	 * a version string calculated by a {@link VersionStrategy}. This is often used for cache busting.
+	 * <p>Note that a {@link CssLinkResourceTransformer} will be automatically registered to
+	 * support versioned resources in CSS files.</p>
+	 * @param strategy the versioning strategy to use
+	 * @param pathPatterns one or more resource URL path patterns
+	 * @return the same {@link ResourceHandlerRegistration} instance for chained method invocation
+	 * @see VersionResourceResolver
+	 * @see VersionStrategy
+	 * @since 4.1
+	 */
+	public ResourceHandlerRegistration addVersionStrategy(VersionStrategy strategy, String... pathPatterns) {
+		if (this.versionResolver == null) {
+			this.versionResolver = new VersionResourceResolver();
+			this.customResolvers.add(this.versionResolver);
+			this.customTransformers.add(new CssLinkResourceTransformer());
+		}
+		for(String pattern : pathPatterns) {
+			this.versionResolver.getVersionStrategyMap().put(pattern, strategy);
+		}
 		return this;
 	}
 
@@ -243,44 +251,32 @@ public class ResourceHandlerRegistration {
 	}
 
 	protected List<ResourceResolver> getResourceResolvers() {
-		List<ResourceResolver> resolvers = new ArrayList<ResourceResolver>();
-		boolean hasCachingResolver = false;
-		if(!this.customResolvers.isEmpty()) {
-			if(ClassUtils.isAssignable(CachingResourceResolver.class, this.customResolvers.get(0).getClass())) {
-				hasCachingResolver = true;
-			}
+		if (this.customResolvers.isEmpty()) {
+			return null;
 		}
-		if(!hasCachingResolver && !this.isDevMode) {
+		List<ResourceResolver> resolvers = new ArrayList<ResourceResolver>();
+		ResourceResolver first = this.customResolvers.get(0);
+		if (!ClassUtils.isAssignable(CachingResourceResolver.class, first.getClass()) && !this.isDevMode) {
 			resolvers.add(new CachingResourceResolver(getDefaultResourceCache()));
 		}
 		resolvers.addAll(this.customResolvers);
-		if(!this.versionStrategies.isEmpty()) {
-			VersionResourceResolver versionResolver = new VersionResourceResolver();
-			versionResolver.setStrategyMap(this.versionStrategies);
-			resolvers.add(versionResolver);
+		ResourceResolver last = this.customResolvers.get(this.customResolvers.size() - 1);
+		if (!ClassUtils.isAssignable(PathResourceResolver.class, last.getClass())) {
+			resolvers.add(new PathResourceResolver());
 		}
-		resolvers.add(new PathResourceResolver());
 		return resolvers;
 	}
 
 	protected List<ResourceTransformer> getResourceTransformers() {
-		List<ResourceTransformer> transformers = new ArrayList<ResourceTransformer>();
-		boolean hasCachingTransformer = false;
-		if(!this.customTransformers.isEmpty() || !this.versionStrategies.isEmpty()) {
-			if(!this.customTransformers.isEmpty()) {
-				if(ClassUtils.isAssignable(CachingResourceTransformer.class, this.customTransformers.get(0).getClass())) {
-					hasCachingTransformer = true;
-				}
-			}
-			if(!hasCachingTransformer && !this.isDevMode) {
-				transformers.add(new CachingResourceTransformer(getDefaultResourceCache()));
-			}
-			transformers.addAll(this.customTransformers);
-			if(!this.versionStrategies.isEmpty()) {
-				int cssLinkTransformerPosition = (hasCachingTransformer || !this.isDevMode) ? 1 : 0;
-				transformers.add(cssLinkTransformerPosition, new CssLinkResourceTransformer());
-			}
+		if (this.customTransformers.isEmpty()) {
+			return null;
 		}
+		List<ResourceTransformer> transformers = new ArrayList<ResourceTransformer>();
+		ResourceTransformer first = this.customTransformers.get(0);
+		if (!ClassUtils.isAssignable(CachingResourceTransformer.class, first.getClass()) && !this.isDevMode) {
+			transformers.add(new CachingResourceTransformer(getDefaultResourceCache()));
+		}
+		transformers.addAll(this.customTransformers);
 		return transformers;
 	}
 
@@ -291,11 +287,11 @@ public class ResourceHandlerRegistration {
 		Assert.isTrue(!CollectionUtils.isEmpty(locations), "At least one location is required for resource handling.");
 		ResourceHttpRequestHandler requestHandler = new ResourceHttpRequestHandler();
 		List<ResourceResolver> resourceResolvers = getResourceResolvers();
-		if (!resourceResolvers.isEmpty()) {
+		if (!CollectionUtils.isEmpty(resourceResolvers)) {
 			requestHandler.setResourceResolvers(resourceResolvers);
 		}
 		List<ResourceTransformer> resourceTransformers = getResourceTransformers();
-		if (!resourceTransformers.isEmpty()) {
+		if (!CollectionUtils.isEmpty(resourceTransformers)) {
 			requestHandler.setResourceTransformers(resourceTransformers);
 		}
 		requestHandler.setLocations(this.locations);
