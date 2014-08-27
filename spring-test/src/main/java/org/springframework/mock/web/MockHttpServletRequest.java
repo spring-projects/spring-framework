@@ -110,6 +110,8 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	private static final String HOST_HEADER = "Host";
 
 	private static final String CHARSET_PREFIX = "charset=";
+	
+	private static final String HTTPS = "https";
 
 	private static final ServletInputStream EMPTY_SERVLET_INPUT_STREAM =
 			new DelegatingServletInputStream(new ByteArrayInputStream(new byte[0]));
@@ -707,7 +709,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 
 	@Override
 	public boolean isSecure() {
-		return this.secure;
+		return this.secure || this.getScheme().equalsIgnoreCase(HTTPS);
 	}
 
 	@Override
