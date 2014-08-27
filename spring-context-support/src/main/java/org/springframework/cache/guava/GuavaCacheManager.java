@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.cache.guava;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -29,6 +30,7 @@ import com.google.common.cache.CacheLoader;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.util.Assert;
+import org.springframework.util.ObjectUtils;
 
 /**
  * {@link CacheManager} implementation that lazily builds {@link GuavaCache}
@@ -45,6 +47,7 @@ import org.springframework.util.Assert;
  * <p>Requires Google Guava 12.0 or higher.
  *
  * @author Juergen Hoeller
+ * @author Stephane Nicoll
  * @since 4.0
  * @see GuavaCache
  */
@@ -81,6 +84,8 @@ public class GuavaCacheManager implements CacheManager {
 	 * Specify the set of cache names for this CacheManager's 'static' mode.
 	 * <p>The number of caches and their names will be fixed after a call to this method,
 	 * with no creation of further cache regions at runtime.
+	 * <p>Calling this with a {@code null} collection argument resets the
+	 * mode to 'dynamic', allowing for further creation of caches again.
 	 */
 	public void setCacheNames(Collection<String> cacheNames) {
 		if (cacheNames != null) {
@@ -88,6 +93,9 @@ public class GuavaCacheManager implements CacheManager {
 				this.cacheMap.put(name, createGuavaCache(name));
 			}
 			this.dynamic = false;
+		}
+		else {
+			this.dynamic = true;
 		}
 	}
 
@@ -99,7 +107,7 @@ public class GuavaCacheManager implements CacheManager {
 	 */
 	public void setCacheBuilder(CacheBuilder<Object, Object> cacheBuilder) {
 		Assert.notNull(cacheBuilder, "CacheBuilder must not be null");
-		this.cacheBuilder = cacheBuilder;
+		doSetCacheBuilder(cacheBuilder);
 	}
 
 	/**
@@ -109,7 +117,7 @@ public class GuavaCacheManager implements CacheManager {
 	 * @see com.google.common.cache.CacheBuilder#from(CacheBuilderSpec)
 	 */
 	public void setCacheBuilderSpec(CacheBuilderSpec cacheBuilderSpec) {
-		this.cacheBuilder = CacheBuilder.from(cacheBuilderSpec);
+		doSetCacheBuilder(CacheBuilder.from(cacheBuilderSpec));
 	}
 
 	/**
@@ -120,7 +128,7 @@ public class GuavaCacheManager implements CacheManager {
 	 * @see com.google.common.cache.CacheBuilder#from(String)
 	 */
 	public void setCacheSpecification(String cacheSpecification) {
-		this.cacheBuilder = CacheBuilder.from(cacheSpecification);
+		doSetCacheBuilder(CacheBuilder.from(cacheSpecification));
 	}
 
 	/**
@@ -131,7 +139,10 @@ public class GuavaCacheManager implements CacheManager {
 	 * @see com.google.common.cache.LoadingCache
 	 */
 	public void setCacheLoader(CacheLoader<Object, Object> cacheLoader) {
-		this.cacheLoader = cacheLoader;
+		if (!ObjectUtils.nullSafeEquals(this.cacheLoader, cacheLoader)) {
+			this.cacheLoader = cacheLoader;
+			refreshKnownCaches();
+		}
 	}
 
 	/**
@@ -141,7 +152,10 @@ public class GuavaCacheManager implements CacheManager {
 	 * An internal holder object will be used to store user-level {@code null}s.
 	 */
 	public void setAllowNullValues(boolean allowNullValues) {
-		this.allowNullValues = allowNullValues;
+		if (this.allowNullValues != allowNullValues) {
+			this.allowNullValues = allowNullValues;
+			refreshKnownCaches();
+		}
 	}
 
 	/**
@@ -193,6 +207,22 @@ public class GuavaCacheManager implements CacheManager {
 		}
 		else {
 			return this.cacheBuilder.build();
+		}
+	}
+
+	private void doSetCacheBuilder(CacheBuilder<Object, Object> cacheBuilder) {
+		if (!ObjectUtils.nullSafeEquals(this.cacheBuilder, cacheBuilder)) {
+			this.cacheBuilder = cacheBuilder;
+			refreshKnownCaches();
+		}
+	}
+
+	/**
+	 * Create the known caches again with the current state of this manager.
+	 */
+	private void refreshKnownCaches() {
+		for (Map.Entry<String, Cache> entry : this.cacheMap.entrySet()) {
+			entry.setValue(createGuavaCache(entry.getKey()));
 		}
 	}
 
