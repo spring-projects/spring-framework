@@ -48003,8 +48003,9 @@ conditional computations:
 
 | result
 | evaluation context
-| The result of the method call (the value to be cached). Only available in ' `unless`'
-  expressions and ' `cache evict`' expression (when `beforeInvocation` is `false`).
+| The result of the method call (the value to be cached). Only available in `unless`'
+  expressions, `cache put` expression (to compute the `key`) or `cache evict`
+  expression (when `beforeInvocation` is `false`).
 | `#result`
 |===
 
@@ -48033,7 +48034,7 @@ strongly discouraged because they have different behaviors. While the latter cau
 method execution to be skipped by using the cache, the former forces the execution in
 order to execute a cache update. This leads to unexpected behavior and with the exception of
 specific corner-cases (such as annotations having conditions that exclude them from each
-other), such declarations should be avoided. Note also that such conditions should not rely
+other), such declaration should be avoided. Note also that such condition should not rely
 on the result object (i.e. the `#result` variable) as these are validated upfront to confirm
 the exclusion.
 ====
