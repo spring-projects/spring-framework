@@ -52,7 +52,7 @@ final class HierarchicalUriComponents extends UriComponents {
 
 	private final String host;
 
-	private final int port;
+	private final String port;
 
 	private final PathComponent path;
 
@@ -73,7 +73,7 @@ final class HierarchicalUriComponents extends UriComponents {
 	 * @param encoded whether the components are already encoded
 	 * @param verify whether the components need to be checked for illegal characters
 	 */
-	HierarchicalUriComponents(String scheme, String userInfo, String host, int port, PathComponent path,
+	HierarchicalUriComponents(String scheme, String userInfo, String host, String port, PathComponent path,
 			MultiValueMap<String, String> queryParams, String fragment, boolean encoded, boolean verify) {
 
 		super(scheme, fragment);
@@ -109,7 +109,7 @@ final class HierarchicalUriComponents extends UriComponents {
 
 	@Override
 	public int getPort() {
-		return this.port;
+		return Integer.parseInt(this.port);
 	}
 
 	@Override
@@ -308,6 +308,7 @@ final class HierarchicalUriComponents extends UriComponents {
 		String expandedScheme = expandUriComponent(getScheme(), uriVariables);
 		String expandedUserInfo = expandUriComponent(this.userInfo, uriVariables);
 		String expandedHost = expandUriComponent(this.host, uriVariables);
+		String expandedPort = expandUriComponent(this.port, uriVariables);
 		PathComponent expandedPath = this.path.expand(uriVariables);
 		MultiValueMap<String, String> expandedQueryParams =
 				new LinkedMultiValueMap<String, String>(this.queryParams.size());
@@ -321,7 +322,7 @@ final class HierarchicalUriComponents extends UriComponents {
 			expandedQueryParams.put(expandedName, expandedValues);
 		}
 		String expandedFragment = expandUriComponent(this.getFragment(), uriVariables);
-		return new HierarchicalUriComponents(expandedScheme, expandedUserInfo, expandedHost, this.port, expandedPath,
+		return new HierarchicalUriComponents(expandedScheme, expandedUserInfo, expandedHost, expandedPort, expandedPath,
 				expandedQueryParams, expandedFragment, false, false);
 	}
 
@@ -359,7 +360,7 @@ final class HierarchicalUriComponents extends UriComponents {
 			if (this.host != null) {
 				uriBuilder.append(host);
 			}
-			if (this.port != -1) {
+			if (!"-1".equals(this.port)) {
 				uriBuilder.append(':');
 				uriBuilder.append(port);
 			}
@@ -432,7 +433,7 @@ final class HierarchicalUriComponents extends UriComponents {
 		int result = ObjectUtils.nullSafeHashCode(getScheme());
 		result = 31 * result + ObjectUtils.nullSafeHashCode(this.userInfo);
 		result = 31 * result + ObjectUtils.nullSafeHashCode(this.host);
-		result = 31 * result + this.port;
+		result = 31 * result + ObjectUtils.nullSafeHashCode(this.port);
 		result = 31 * result + this.path.hashCode();
 		result = 31 * result + this.queryParams.hashCode();
 		result = 31 * result + ObjectUtils.nullSafeHashCode(getFragment());

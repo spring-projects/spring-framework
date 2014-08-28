@@ -229,6 +229,14 @@ public class RestTemplateIntegrationTests extends AbstractJettyServerTestCase {
 		assertTrue(s.contains("\"without\":\"without\""));
 	}
 
+	// SPR-12123
+
+	@Test
+	public void serverPort() {
+		String s = template.getForObject("http://localhost:{port}/get", String.class, port);
+		assertEquals("Invalid content", helloWorld, s);
+	}
+
 	public interface MyJacksonView1 {};
 	public interface MyJacksonView2 {};
 
