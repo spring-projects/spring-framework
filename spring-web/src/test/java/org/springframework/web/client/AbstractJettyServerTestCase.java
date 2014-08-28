@@ -54,6 +54,7 @@ public class AbstractJettyServerTestCase {
 
 	protected static String helloWorld = "H\u00e9llo W\u00f6rld";
 
+	protected static int port;
 	protected static String baseUrl;
 
 	protected static MediaType textContentType;
@@ -63,7 +64,7 @@ public class AbstractJettyServerTestCase {
 
 	@BeforeClass
 	public static void startJettyServer() throws Exception {
-		int port = SocketUtils.findAvailableTcpPort();
+		port = SocketUtils.findAvailableTcpPort();
 		jettyServer = new Server(port);
 		baseUrl = "http://localhost:" + port;
 		ServletContextHandler handler = new ServletContextHandler();
