@@ -143,10 +143,11 @@ public class ResourceHandlerRegistryTests {
 
 	@Test
 	public void versionResourceChain() throws Exception {
-		this.registration
-				.addTransformer(new AppCacheManifestTransfomer())
+		VersionResourceResolver versionResolver = new VersionResourceResolver()
 				.addFixedVersionStrategy("fixed", "/**/*.js")
 				.addContentVersionStrategy("/**");
+
+		this.registration.addResolver(versionResolver).addTransformer(new AppCacheManifestTransfomer());
 
 		ResourceHttpRequestHandler handler = getHandler("/resources/**");
 		List<ResourceResolver> resolvers = handler.getResourceResolvers();
@@ -164,21 +165,24 @@ public class ResourceHandlerRegistryTests {
 		List<ResourceTransformer> transformers = handler.getResourceTransformers();
 		assertThat(transformers, Matchers.hasSize(3));
 		assertThat(transformers.get(0), Matchers.instanceOf(CachingResourceTransformer.class));
-		assertThat(transformers.get(1), Matchers.instanceOf(AppCacheManifestTransfomer.class));
-		assertThat(transformers.get(2), Matchers.instanceOf(CssLinkResourceTransformer.class));
+		assertThat(transformers.get(1), Matchers.instanceOf(CssLinkResourceTransformer.class));
+		assertThat(transformers.get(2), Matchers.instanceOf(AppCacheManifestTransfomer.class));
 	}
 
 	@Test
 	public void customResourceChain() throws Exception {
+		VersionResourceResolver versionResolver = new VersionResourceResolver()
+				.addFixedVersionStrategy("fixed", "/**/*.js")
+				.addContentVersionStrategy("/**");
+
 		CachingResourceResolver cachingResolver = Mockito.mock(CachingResourceResolver.class);
 		CachingResourceTransformer cachingTransformer = Mockito.mock(CachingResourceTransformer.class);
 		this.registration
+				.addResolver(cachingResolver)
+				.addResolver(versionResolver)
+				.addResolver(new CustomPathResourceResolver())
 				.addTransformer(cachingTransformer)
 				.addTransformer(new AppCacheManifestTransfomer())
-				.addResolver(cachingResolver)
-				.addFixedVersionStrategy("fixed", "/**/*.js")
-				.addContentVersionStrategy("/**")
-				.addResolver(new CustomPathResourceResolver())
 				.setCachePeriod(3600);
 
 		ResourceHttpRequestHandler handler = getHandler("/resources/**");
@@ -191,8 +195,8 @@ public class ResourceHandlerRegistryTests {
 		List<ResourceTransformer> transformers = handler.getResourceTransformers();
 		assertThat(transformers, Matchers.hasSize(3));
 		assertThat(transformers.get(0), Matchers.equalTo(cachingTransformer));
-		assertThat(transformers.get(1), Matchers.instanceOf(AppCacheManifestTransfomer.class));
-		assertThat(transformers.get(2), Matchers.instanceOf(CssLinkResourceTransformer.class));
+		assertThat(transformers.get(1), Matchers.instanceOf(CssLinkResourceTransformer.class));
+		assertThat(transformers.get(2), Matchers.instanceOf(AppCacheManifestTransfomer.class));
 	}
 
 	private ResourceHttpRequestHandler getHandler(String pathPattern) {

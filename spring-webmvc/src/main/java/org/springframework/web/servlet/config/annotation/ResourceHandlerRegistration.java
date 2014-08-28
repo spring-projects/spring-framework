@@ -17,9 +17,7 @@
 package org.springframework.web.servlet.config.annotation;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.springframework.cache.Cache;
 import org.springframework.cache.concurrent.ConcurrentMapCache;
@@ -63,9 +61,11 @@ public class ResourceHandlerRegistration {
 
 	private List<ResourceResolver> customResolvers = new ArrayList<ResourceResolver>();
 
-	private VersionResourceResolver versionResolver;
-
 	private List<ResourceTransformer> customTransformers = new ArrayList<ResourceTransformer>();
+
+	private boolean hasVersionResolver;
+
+	private boolean hasCssLinkTransformer;
 
 	private boolean isDevMode = false;
 
@@ -123,6 +123,9 @@ public class ResourceHandlerRegistration {
 	public ResourceHandlerRegistration addResolver(ResourceResolver resolver) {
 		Assert.notNull(resolver, "The provided ResourceResolver should not be null");
 		this.customResolvers.add(resolver);
+		if (resolver instanceof VersionResourceResolver) {
+			this.hasVersionResolver = true;
+		}
 		return this;
 	}
 
@@ -149,70 +152,8 @@ public class ResourceHandlerRegistration {
 	public ResourceHandlerRegistration addTransformer(ResourceTransformer transformer) {
 		Assert.notNull(transformer, "The provided ResourceTransformer should not be null");
 		this.customTransformers.add(transformer);
-		return this;
-	}
-
-	/**
-	 * Apply Resource Versioning on the matching resources using a {@link FixedVersionStrategy}.
-	 * <p>This strategy uses that fixed version string and adds it as a prefix in the resource path,
-	 * e.g. {@code fixedversion/js/main.js}.</p>
-	 * <p>There are many ways to get a version string for your application:</p>
-	 * <ul>
-	 *     <li>create a string using the current date, a source of random numbers at runtime</li>
-	 *     <li>fetch a version string from a property source or an Env variable, using SpEL or @Value</li>
-	 * </ul>
-	 * <p>Note that a {@link CssLinkResourceTransformer} will be automatically registered to
-	 * support versioned resources in CSS files.</p>
-	 * @param fixedVersion a version string
-	 * @param pathPatterns one or more resource URL path patterns
-	 * @return the same {@link ResourceHandlerRegistration} instance for chained method invocation
-	 * @see VersionResourceResolver
-	 * @see FixedVersionStrategy
-	 * @since 4.1
-	 */
-	public ResourceHandlerRegistration addFixedVersionStrategy(String fixedVersion, String... pathPatterns) {
-		addVersionStrategy(new FixedVersionStrategy(fixedVersion), pathPatterns);
-		return this;
-	}
-
-	/**
-	 * Apply Resource Versioning on the matching resources using a {@link ContentVersionStrategy}.
-	 * <p>This strategy uses the content of the Resource to create a String hash and adds it
-	 * in the resource filename, e.g. {@code css/main-e36d2e05253c6c7085a91522ce43a0b4.css}.</p>
-	 * <p>Note that a {@link CssLinkResourceTransformer} will be automatically registered to
-	 * support versioned resources in CSS files.</p>
-	 * @param pathPatterns one or more resource URL path patterns
-	 * @return the same {@link ResourceHandlerRegistration} instance for chained method invocation
-	 * @see VersionResourceResolver
-	 * @see ContentVersionStrategy
-	 * @since 4.1
-	 */
-	public ResourceHandlerRegistration addContentVersionStrategy(String... pathPatterns) {
-		addVersionStrategy(new ContentVersionStrategy(), pathPatterns);
-		return this;
-	}
-
-
-	/**
-	 * Apply Resource Versioning on the matching resources; this will update resources' URLs to include
-	 * a version string calculated by a {@link VersionStrategy}. This is often used for cache busting.
-	 * <p>Note that a {@link CssLinkResourceTransformer} will be automatically registered to
-	 * support versioned resources in CSS files.</p>
-	 * @param strategy the versioning strategy to use
-	 * @param pathPatterns one or more resource URL path patterns
-	 * @return the same {@link ResourceHandlerRegistration} instance for chained method invocation
-	 * @see VersionResourceResolver
-	 * @see VersionStrategy
-	 * @since 4.1
-	 */
-	public ResourceHandlerRegistration addVersionStrategy(VersionStrategy strategy, String... pathPatterns) {
-		if (this.versionResolver == null) {
-			this.versionResolver = new VersionResourceResolver();
-			this.customResolvers.add(this.versionResolver);
-			this.customTransformers.add(new CssLinkResourceTransformer());
-		}
-		for(String pattern : pathPatterns) {
-			this.versionResolver.getVersionStrategyMap().put(pattern, strategy);
+		if (transformer instanceof CssLinkResourceTransformer) {
+			this.hasCssLinkTransformer = true;
 		}
 		return this;
 	}
@@ -273,10 +214,20 @@ public class ResourceHandlerRegistration {
 		}
 		List<ResourceTransformer> transformers = new ArrayList<ResourceTransformer>();
 		ResourceTransformer first = this.customTransformers.get(0);
-		if (!ClassUtils.isAssignable(CachingResourceTransformer.class, first.getClass()) && !this.isDevMode) {
-			transformers.add(new CachingResourceTransformer(getDefaultResourceCache()));
+		ResourceTransformer cachingTransformer = null;
+		if (!this.isDevMode) {
+			if (ClassUtils.isAssignable(CachingResourceTransformer.class, first.getClass())) {
+				cachingTransformer = first;
+			}
+			else {
+				cachingTransformer = new CachingResourceTransformer(getDefaultResourceCache());
+				transformers.add(cachingTransformer);
+			}
 		}
 		transformers.addAll(this.customTransformers);
+		if (this.hasVersionResolver && !this.hasCssLinkTransformer) {
+			transformers.add(cachingTransformer != null ? 1 : 0, new CssLinkResourceTransformer());
+		}
 		return transformers;
 	}
 

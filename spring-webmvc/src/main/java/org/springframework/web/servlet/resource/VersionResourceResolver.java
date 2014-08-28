@@ -24,23 +24,26 @@ import org.springframework.util.AntPathMatcher;
 import org.springframework.util.StringUtils;
 
 /**
- * A {@code ResourceResolver} that resolves request paths containing a version
- * string, i.e. version information about the resource being requested.
- * This resolver can be useful to set up HTTP caching strategies by changing
- * resources' URLs as they are updated.
+ * Resolves request paths containing a version string that can be used as part
+ * of an HTTP caching strategy in which a resource is cached with a far future
+ * date (e.g. 1 year) and cached until the version, and therefore the URL, is
+ * changed.
  *
- * <p>Because resource versioning depends on the resource types, this {@code ResourceResolver}
- * needs to be configured with at least one {@link VersionStrategy}. The process of matching
- * and generating version strings is delegated to the {@code VersionStrategy}.
+ * <p>Different versioning strategies exist and this resolver must be configured
+ * with one or more such strategies along with path mappings to indicate which
+ * strategy applies to which resources.
  *
- * <p>When resolving resources, this resolver will first delegate to the chain to locate
- * an existing resource and then attempt to extract a version string from the request path
- * and then find a resource that matches that version.
+ * <p>{@code ContentVersionStrategy} is a good default choice except in cases
+ * where it cannot be used. Most notably the {@code ContentVersionStrategy}
+ * cannot be combined with JavaScript module loaders. For such cases the
+ * {@code FixedVersionStrategy} is a better choice.
  *
- * <p>When resolving URLs, this resolver will, if necessary, add a version string in the
- * request path.
+ * <p>Note that using this resolver to serve CSS files means the
+ * {@link CssLinkResourceTransformer} should also be used in order to modify
+ * links within CSS files to also contain versions.
  *
  * @author Brian Clozel
+ * @author Rossen Stoyanchev
  * @since 4.1
  * @see VersionStrategy
  */
@@ -69,9 +72,58 @@ public class VersionResourceResolver extends AbstractResourceResolver {
 	/**
 	 * Return the map with version strategies keyed by path pattern.
 	 */
-	public Map<String, VersionStrategy> getVersionStrategyMap() {
+	public Map<String, VersionStrategy> getStrategyMap() {
 		return this.versionStrategyMap;
 	}
+
+	/**
+	 * Insert a content-based version in resource URLs that match the given path
+	 * patterns. The version is computed from the content of the file, e.g.
+	 * {@code "css/main-e36d2e05253c6c7085a91522ce43a0b4.css"}. This is a good
+	 * default strategy to use except when it cannot be, for example when using
+	 * JavaScript module loaders, use {@link #addFixedVersionStrategy} instead
+	 * for serving JavaScript files.
+	 * @param pathPatterns one or more resource URL path patterns
+	 * @return the current instance for chained method invocation
+	 * @see ContentVersionStrategy
+	 */
+	public VersionResourceResolver addContentVersionStrategy(String... pathPatterns) {
+		addVersionStrategy(new ContentVersionStrategy(), pathPatterns);
+		return this;
+	}
+
+	/**
+	 * Insert a fixed, prefix-based version in resource URLs that match the given
+	 * path patterns, e.g. {@code "{version}/js/main.js"}. This is useful (vs
+	 * content-based versions) when using JavaScript module loaders.
+	 * <p>The version may be a random number, the current date, fetched from a
+	 * git commit sha, a property file, environment variable, and set with SpEL
+	 * expressions in the configuration (e.g. see {@code @Value} in Java config).
+	 * @param version a version string
+	 * @param pathPatterns one or more resource URL path patterns
+	 * @return the current instance for chained method invocation
+	 * @see FixedVersionStrategy
+	 */
+	public VersionResourceResolver addFixedVersionStrategy(String version, String... pathPatterns) {
+		addVersionStrategy(new FixedVersionStrategy(version), pathPatterns);
+		return this;
+	}
+
+	/**
+	 * Register a custom VersionStrategy to apply to resource URLs that match the
+	 * given path patterns.
+	 * @param strategy the custom strategy
+	 * @param pathPatterns one or more resource URL path patterns
+	 * @return the current instance for chained method invocation
+	 * @see VersionStrategy
+	 */
+	public VersionResourceResolver addVersionStrategy(VersionStrategy strategy, String... pathPatterns) {
+		for(String pattern : pathPatterns) {
+			getStrategyMap().put(pattern, strategy);
+		}
+		return this;
+	}
+
 
 	@Override
 	protected Resource resolveResourceInternal(HttpServletRequest request, String requestPath,
