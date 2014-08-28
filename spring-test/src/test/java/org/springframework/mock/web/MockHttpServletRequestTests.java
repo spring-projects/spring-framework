@@ -334,6 +334,38 @@ public class MockHttpServletRequestTests {
 		assertEquals("http://localhost", requestURL.toString());
 	}
 
+	@Test
+	public void isSecureWithHttpSchemeAndSecureFlagIsFalse() {
+		assertFalse(request.isSecure());
+		request.setScheme("http");
+		request.setSecure(false);
+		assertFalse(request.isSecure());
+	}
+
+	@Test
+	public void isSecureWithHttpSchemeAndSecureFlagIsTrue() {
+		assertFalse(request.isSecure());
+		request.setScheme("http");
+		request.setSecure(true);
+		assertTrue(request.isSecure());
+	}
+
+	@Test
+	public void isSecureWithHttpsSchemeAndSecureFlagIsFalse() {
+		assertFalse(request.isSecure());
+		request.setScheme("https");
+		request.setSecure(false);
+		assertTrue(request.isSecure());
+	}
+
+	@Test
+	public void isSecureWithHttpsSchemeAndSecureFlagIsTrue() {
+		assertFalse(request.isSecure());
+		request.setScheme("https");
+		request.setSecure(true);
+		assertTrue(request.isSecure());
+	}
+
 	private void assertEqualEnumerations(Enumeration<?> enum1, Enumeration<?> enum2) {
 		assertNotNull(enum1);
 		assertNotNull(enum2);

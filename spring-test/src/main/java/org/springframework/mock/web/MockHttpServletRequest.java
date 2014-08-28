@@ -75,10 +75,14 @@ import org.springframework.util.StringUtils;
  */
 public class MockHttpServletRequest implements HttpServletRequest {
 
+	private static final String HTTP = "http";
+
+	private static final String HTTPS = "https";
+
 	/**
 	 * The default protocol: 'http'.
 	 */
-	public static final String DEFAULT_PROTOCOL = "http";
+	public static final String DEFAULT_PROTOCOL = HTTP;
 
 	/**
 	 * The default server address: '127.0.0.1'.
@@ -701,13 +705,29 @@ public class MockHttpServletRequest implements HttpServletRequest {
 		return Collections.enumeration(this.locales);
 	}
 
+	/**
+	 * Set the boolean {@code secure} flag indicating whether the mock request
+	 * was made using a secure channel, such as HTTPS.
+	 * @param secure a boolean indicating if the mock request was made using a
+	 * secure channel
+	 * @see #isSecure()
+	 * @see #getScheme()
+	 * @see #setScheme(String)
+	 */
 	public void setSecure(boolean secure) {
 		this.secure = secure;
 	}
 
+	/**
+	 * Returns {@code true} if the {@link #setSecure secure} flag has been set
+	 * to {@code true} or if the {@link #getScheme scheme} is {@code https}.
+	 * <p>
+	 * {@inheritDoc}
+	 * @see javax.servlet.ServletRequest#isSecure()
+	 */
 	@Override
 	public boolean isSecure() {
-		return this.secure;
+		return this.secure || HTTPS.equalsIgnoreCase(this.getScheme());
 	}
 
 	@Override
@@ -1021,7 +1041,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 		StringBuffer url = new StringBuffer(this.scheme).append("://").append(this.serverName);
 
 		if (this.serverPort > 0
-				&& (("http".equalsIgnoreCase(scheme) && this.serverPort != 80) || ("https".equalsIgnoreCase(scheme) && this.serverPort != 443))) {
+				&& ((HTTP.equalsIgnoreCase(scheme) && this.serverPort != 80) || (HTTPS.equalsIgnoreCase(scheme) && this.serverPort != 443))) {
 			url.append(':').append(this.serverPort);
 		}
 
