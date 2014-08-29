@@ -16,38 +16,32 @@
 
 package org.springframework.test.util;
 
-import static org.junit.Assert.*;
-import static org.springframework.test.util.ReflectionTestUtils.*;
-
 import org.junit.Ignore;
 import org.junit.Test;
-
-import org.springframework.test.AssertThrows;
 import org.springframework.test.util.subpackage.Component;
 import org.springframework.test.util.subpackage.LegacyEntity;
 import org.springframework.test.util.subpackage.Person;
+
+import static org.junit.Assert.*;
+import static org.springframework.test.util.ReflectionTestUtils.*;
 
 /**
  * Unit tests for {@link ReflectionTestUtils}.
  *
  * @author Sam Brannen
  * @author Juergen Hoeller
+ * @author Lei Zhiyuan
  */
-@SuppressWarnings("deprecation")
 public class ReflectionTestUtilsTests {
 
 	private static final Float PI = new Float((float) 22 / 7);
 
 	private final Person person = new Person();
+	
 	private final Component component = new Component();
 
-
 	@Test
-	public void setAndGetFields() throws Exception {
-
-		// ---------------------------------------------------------------------
-		// Standard
-
+	public void setAndGetStandardFields() {
 		setField(person, "id", new Long(99), long.class);
 		setField(person, "name", "Tom");
 		setField(person, "age", new Integer(42));
@@ -68,10 +62,10 @@ public class ReflectionTestUtilsTests {
 		assertEquals("blue", getField(person, "eyeColor"));
 		assertEquals(Boolean.TRUE, getField(person, "likesPets"));
 		assertEquals(PI, getField(person, "favoriteNumber"));
+	}
 
-		// ---------------------------------------------------------------------
-		// Null - non-primitives
-
+	@Test
+	public void setAndGetNonPrivateFieldsNull() {
 		setField(person, "name", null, String.class);
 		setField(person, "eyeColor", null, String.class);
 		setField(person, "favoriteNumber", null, Number.class);
@@ -79,40 +73,26 @@ public class ReflectionTestUtilsTests {
 		assertNull("name (protected field)", person.getName());
 		assertNull("eye color (package private field)", person.getEyeColor());
 		assertNull("'favorite number' (package field)", person.getFavoriteNumber());
+	}
 
-		// ---------------------------------------------------------------------
-		// Null - primitives
+	@Test(expected = IllegalArgumentException.class)
+	public void setPersonIdFieldNull() throws Exception {
+		setField(person, "id", null, long.class);
+	}
 
-		new AssertThrows(IllegalArgumentException.class,
-			"Calling setField() with NULL for a primitive type should throw an IllegalArgumentException.") {
+	@Test(expected = IllegalArgumentException.class)
+	public void setPersonAgeFieldNull() throws Exception {
+		setField(person, "age", null, int.class);
+	}
 
-			@Override
-			public void test() throws Exception {
-				setField(person, "id", null, long.class);
-			}
-		}.runTest();
-
-		new AssertThrows(IllegalArgumentException.class,
-			"Calling setField() with NULL for a primitive type should throw an IllegalArgumentException.") {
-
-			@Override
-			public void test() throws Exception {
-				setField(person, "age", null, int.class);
-			}
-		}.runTest();
-
-		new AssertThrows(IllegalArgumentException.class,
-			"Calling setField() with NULL for a primitive type should throw an IllegalArgumentException.") {
-
-			@Override
-			public void test() throws Exception {
-				setField(person, "likesPets", null, boolean.class);
-			}
-		}.runTest();
+	@Test(expected = IllegalArgumentException.class)
+	public void setPersonLikesPetsNull() throws Exception {
+		setField(person, "likesPets", null, boolean.class);
 	}
 
 	/**
-	 * Verifies behavior requested in <a href="https://jira.spring.io/browse/SPR-9571">SPR-9571</a>.
+	 * Verifies behavior requested in <a
+	 * href="https://jira.spring.io/browse/SPR-9571">SPR-9571</a>.
 	 */
 	@Test
 	public void setFieldOnLegacyEntityWithSideEffectsInToString() {
@@ -123,11 +103,7 @@ public class ReflectionTestUtilsTests {
 	}
 
 	@Test
-	public void invokeSetterAndMethods() throws Exception {
-
-		// ---------------------------------------------------------------------
-		// Standard - properties
-
+	public void invokeSetterAndGetterMethodStandandProperties() {
 		invokeSetterMethod(person, "id", new Long(99), long.class);
 		invokeSetterMethod(person, "name", "Tom");
 		invokeSetterMethod(person, "age", new Integer(42));
@@ -148,10 +124,10 @@ public class ReflectionTestUtilsTests {
 		assertEquals("blue", invokeGetterMethod(person, "eyeColor"));
 		assertEquals(Boolean.TRUE, invokeGetterMethod(person, "likesPets"));
 		assertEquals(PI, invokeGetterMethod(person, "favoriteNumber"));
+	}
 
-		// ---------------------------------------------------------------------
-		// Standard - setter methods
-
+	@Test
+	public void invokeSetterAndGetterMethodStandandMethods() {
 		invokeSetterMethod(person, "setId", new Long(1), long.class);
 		invokeSetterMethod(person, "setName", "Jerry", String.class);
 		invokeSetterMethod(person, "setAge", new Integer(33), int.class);
@@ -172,10 +148,10 @@ public class ReflectionTestUtilsTests {
 		assertEquals("green", invokeGetterMethod(person, "getEyeColor"));
 		assertEquals(Boolean.FALSE, invokeGetterMethod(person, "likesPets"));
 		assertEquals(new Integer(42), invokeGetterMethod(person, "getFavoriteNumber"));
+	}
 
-		// ---------------------------------------------------------------------
-		// Null - non-primitives
-
+	@Test
+	public void invokeSetterAndGetterMethodNonPrivateProperty() {
 		invokeSetterMethod(person, "name", null, String.class);
 		invokeSetterMethod(person, "eyeColor", null, String.class);
 		invokeSetterMethod(person, "favoriteNumber", null, Number.class);
@@ -183,36 +159,21 @@ public class ReflectionTestUtilsTests {
 		assertNull("name (private method)", person.getName());
 		assertNull("eye color (package private method)", person.getEyeColor());
 		assertNull("'favorite number' (protected method for a Number)", person.getFavoriteNumber());
+	}
 
-		// ---------------------------------------------------------------------
-		// Null - primitives
+	@Test(expected = IllegalArgumentException.class)
+	public void invokeSetterMethodIdPropertyNull() throws Exception {
+		invokeSetterMethod(person, "id", null, long.class);
+	}
 
-		new AssertThrows(IllegalArgumentException.class,
-			"Calling invokeSetterMethod() with NULL for a primitive type should throw an IllegalArgumentException.") {
+	@Test(expected = IllegalArgumentException.class)
+	public void invokeSetterMethodAgePropertyNull() throws Exception {
+		invokeSetterMethod(person, "age", null, int.class);
+	}
 
-			@Override
-			public void test() throws Exception {
-				invokeSetterMethod(person, "id", null, long.class);
-			}
-		}.runTest();
-
-		new AssertThrows(IllegalArgumentException.class,
-			"Calling invokeSetterMethod() with NULL for a primitive type should throw an IllegalArgumentException.") {
-
-			@Override
-			public void test() throws Exception {
-				invokeSetterMethod(person, "age", null, int.class);
-			}
-		}.runTest();
-
-		new AssertThrows(IllegalArgumentException.class,
-			"Calling invokeSetterMethod() with NULL for a primitive type should throw an IllegalArgumentException.") {
-
-			@Override
-			public void test() throws Exception {
-				invokeSetterMethod(person, "likesPets", null, boolean.class);
-			}
-		}.runTest();
+	@Test(expected = IllegalArgumentException.class)
+	public void invokeSetterMethodLikesPetsPropertyNull() throws Exception {
+		invokeSetterMethod(person, "likesPets", null, boolean.class);
 	}
 
 	@Test
@@ -276,5 +237,4 @@ public class ReflectionTestUtilsTests {
 	public void invokeMethodWithTooManyArguments() {
 		invokeMethod(component, "configure", new Integer(42), "enigma", "baz", "quux");
 	}
-
 }
