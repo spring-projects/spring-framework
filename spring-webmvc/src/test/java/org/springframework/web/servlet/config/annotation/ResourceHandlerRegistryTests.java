@@ -30,7 +30,7 @@ import org.springframework.mock.web.test.MockServletContext;
 import org.springframework.web.context.support.GenericWebApplicationContext;
 import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.servlet.handler.SimpleUrlHandlerMapping;
-import org.springframework.web.servlet.resource.AppCacheManifestTransfomer;
+import org.springframework.web.servlet.resource.AppCacheManifestTransformer;
 import org.springframework.web.servlet.resource.CachingResourceResolver;
 import org.springframework.web.servlet.resource.CachingResourceTransformer;
 import org.springframework.web.servlet.resource.CssLinkResourceTransformer;
@@ -145,7 +145,7 @@ public class ResourceHandlerRegistryTests {
 				.addContentVersionStrategy("/**");
 
 		this.registration.resourceChain(true).addResolver(versionResolver)
-				.addTransformer(new AppCacheManifestTransfomer());
+				.addTransformer(new AppCacheManifestTransformer());
 
 		ResourceHttpRequestHandler handler = getHandler("/resources/**");
 		List<ResourceResolver> resolvers = handler.getResourceResolvers();
@@ -158,7 +158,7 @@ public class ResourceHandlerRegistryTests {
 		assertThat(transformers, Matchers.hasSize(3));
 		assertThat(transformers.get(0), Matchers.instanceOf(CachingResourceTransformer.class));
 		assertThat(transformers.get(1), Matchers.instanceOf(CssLinkResourceTransformer.class));
-		assertThat(transformers.get(2), Matchers.instanceOf(AppCacheManifestTransfomer.class));
+		assertThat(transformers.get(2), Matchers.instanceOf(AppCacheManifestTransformer.class));
 	}
 
 	@Test
@@ -167,7 +167,7 @@ public class ResourceHandlerRegistryTests {
 		VersionResourceResolver versionResolver = Mockito.mock(VersionResourceResolver.class);
 		PathResourceResolver pathResourceResolver = new PathResourceResolver();
 		CachingResourceTransformer cachingTransformer = Mockito.mock(CachingResourceTransformer.class);
-		AppCacheManifestTransfomer appCacheTransformer = Mockito.mock(AppCacheManifestTransfomer.class);
+		AppCacheManifestTransformer appCacheTransformer = Mockito.mock(AppCacheManifestTransformer.class);
 		CssLinkResourceTransformer cssLinkTransformer = new CssLinkResourceTransformer();
 
 		this.registration.setCachePeriod(3600)

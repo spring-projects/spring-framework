@@ -16,6 +16,8 @@
 
 package org.springframework.web.servlet.config;
 
+import static org.junit.Assert.*;
+
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.reflect.Method;
@@ -30,6 +32,7 @@ import org.junit.Test;
 import org.springframework.beans.DirectFieldAccessor;
 import org.springframework.beans.TypeMismatchException;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
+import org.springframework.cache.concurrent.ConcurrentMapCache;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.core.Ordered;
 import org.springframework.core.convert.ConversionService;
@@ -76,14 +79,19 @@ import org.springframework.web.servlet.mvc.SimpleControllerHandlerAdapter;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 import org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder;
+import org.springframework.web.servlet.resource.AppCacheManifestTransformer;
+import org.springframework.web.servlet.resource.CachingResourceResolver;
 import org.springframework.web.servlet.resource.CachingResourceTransformer;
+import org.springframework.web.servlet.resource.ContentVersionStrategy;
 import org.springframework.web.servlet.resource.CssLinkResourceTransformer;
 import org.springframework.web.servlet.resource.DefaultServletHttpRequestHandler;
+import org.springframework.web.servlet.resource.FixedVersionStrategy;
 import org.springframework.web.servlet.resource.GzipResourceResolver;
 import org.springframework.web.servlet.resource.PathResourceResolver;
 import org.springframework.web.servlet.resource.ResourceHttpRequestHandler;
 import org.springframework.web.servlet.resource.ResourceResolver;
 import org.springframework.web.servlet.resource.ResourceTransformer;
+import org.springframework.web.servlet.resource.VersionResourceResolver;
 import org.springframework.web.servlet.theme.ThemeChangeInterceptor;
 import org.springframework.web.servlet.view.groovy.GroovyMarkupConfigurer;
 import org.springframework.web.servlet.view.groovy.GroovyMarkupViewResolver;
@@ -95,8 +103,6 @@ import org.springframework.web.servlet.view.tiles3.TilesConfigurer;
 import org.springframework.web.servlet.view.tiles3.TilesViewResolver;
 import org.springframework.web.servlet.view.velocity.VelocityConfigurer;
 import org.springframework.web.servlet.view.velocity.VelocityViewResolver;
-
-import static org.junit.Assert.*;
 
 /**
  * Tests loading actual MVC namespace configuration.
@@ -328,7 +334,7 @@ public class MvcNamespaceTests {
 
 	@Test
 	public void testResourcesWithResolversTransformers() throws Exception {
-		loadBeanDefinitions("mvc-config-resources-resolvers-transformers.xml", 10);
+		loadBeanDefinitions("mvc-config-resources-chain.xml", 8);
 
 		SimpleUrlHandlerMapping mapping = appContext.getBean(SimpleUrlHandlerMapping.class);
 		assertNotNull(mapping);
@@ -338,14 +344,54 @@ public class MvcNamespaceTests {
 		assertNotNull(handler);
 
 		List<ResourceResolver> resolvers = handler.getResourceResolvers();
-		assertThat(resolvers, Matchers.hasSize(2));
-		assertThat(resolvers.get(0), Matchers.instanceOf(PathResourceResolver.class));
+		assertThat(resolvers, Matchers.hasSize(3));
+		assertThat(resolvers.get(0), Matchers.instanceOf(CachingResourceResolver.class));
+		assertThat(resolvers.get(1), Matchers.instanceOf(VersionResourceResolver.class));
+		assertThat(resolvers.get(2), Matchers.instanceOf(PathResourceResolver.class));
+
+		CachingResourceResolver cachingResolver = (CachingResourceResolver) resolvers.get(0);
+		assertThat(cachingResolver.getCache(), Matchers.instanceOf(TestResourceCache.class));
+
+		VersionResourceResolver versionResolver = (VersionResourceResolver) resolvers.get(1);
+		assertThat(versionResolver.getStrategyMap().get("/**/*.js"),
+				Matchers.instanceOf(FixedVersionStrategy.class));
+		assertThat(versionResolver.getStrategyMap().get("/**"),
+				Matchers.instanceOf(ContentVersionStrategy.class));
+
+		List<ResourceTransformer> transformers = handler.getResourceTransformers();
+		assertThat(transformers, Matchers.hasSize(3));
+		assertThat(transformers.get(0), Matchers.instanceOf(CachingResourceTransformer.class));
+		assertThat(transformers.get(1), Matchers.instanceOf(CssLinkResourceTransformer.class));
+		assertThat(transformers.get(2), Matchers.instanceOf(AppCacheManifestTransformer.class));
+	}
+
+	@Test
+	public void testResourcesWithResolversTransformersCustom() throws Exception {
+		loadBeanDefinitions("mvc-config-resources-chain-no-auto.xml", 9);
+
+		SimpleUrlHandlerMapping mapping = appContext.getBean(SimpleUrlHandlerMapping.class);
+		assertNotNull(mapping);
+		assertNotNull(mapping.getUrlMap().get("/resources/**"));
+		ResourceHttpRequestHandler handler = appContext.getBean((String)mapping.getUrlMap().get("/resources/**"),
+				ResourceHttpRequestHandler.class);
+		assertNotNull(handler);
+
+		List<ResourceResolver> resolvers = handler.getResourceResolvers();
+		assertThat(resolvers, Matchers.hasSize(3));
+		assertThat(resolvers.get(0), Matchers.instanceOf(VersionResourceResolver.class));
 		assertThat(resolvers.get(1), Matchers.instanceOf(GzipResourceResolver.class));
+		assertThat(resolvers.get(2), Matchers.instanceOf(PathResourceResolver.class));
+
+		VersionResourceResolver versionResolver = (VersionResourceResolver) resolvers.get(0);
+		assertThat(versionResolver.getStrategyMap().get("/**/*.js"),
+				Matchers.instanceOf(FixedVersionStrategy.class));
+		assertThat(versionResolver.getStrategyMap().get("/**"),
+				Matchers.instanceOf(ContentVersionStrategy.class));
 
 		List<ResourceTransformer> transformers = handler.getResourceTransformers();
 		assertThat(transformers, Matchers.hasSize(2));
 		assertThat(transformers.get(0), Matchers.instanceOf(CachingResourceTransformer.class));
-		assertThat(transformers.get(1), Matchers.instanceOf(CssLinkResourceTransformer.class));
+		assertThat(transformers.get(1), Matchers.instanceOf(AppCacheManifestTransformer.class));
 	}
 
 	@Test
@@ -822,6 +868,12 @@ public class MvcNamespaceTests {
 	}
 
 	public static class TestPathHelper extends UrlPathHelper { }
+
+	public static class TestResourceCache extends ConcurrentMapCache {
+		public TestResourceCache(String name) {
+			super(name);
+		}
+	}
 
 
 }

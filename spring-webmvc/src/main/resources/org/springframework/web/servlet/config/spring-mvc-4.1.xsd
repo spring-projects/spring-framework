@@ -338,6 +338,77 @@
 		</xsd:complexType>
 	</xsd:element>
 
+	<xsd:complexType name="resource-cache">
+		<xsd:annotation>
+			<xsd:documentation source="org.springframework.web.servlet.resource.CachingResourceResolver"><![CDATA[
+	A ResourceResolver that resolves resources from a Cache or otherwise delegates to the resolver chain
+	and saves the result in the cache. Can use a custom Cache if provided as a bean reference in the "cache" attribute.
+			]]></xsd:documentation>
+		</xsd:annotation>
+		<xsd:attribute name="cache" type="xsd:string" use="optional"/>
+	</xsd:complexType>
+
+	<xsd:complexType name="content-version-strategy">
+		<xsd:annotation>
+			<xsd:documentation source="org.springframework.web.servlet.resource.ContentVersionStrategy"><![CDATA[
+	A VersionStrategy that calculates an Hex MD5 hashes from the content of the resource and appends it
+	to the file name, e.g. "styles/main-e36d2e05253c6c7085a91522ce43a0b4.css".
+			]]></xsd:documentation>
+		</xsd:annotation>
+		<xsd:attribute name="patterns" type="xsd:string" use="required" />
+	</xsd:complexType>
+
+	<xsd:complexType name="fixed-version-strategy">
+		<xsd:annotation>
+			<xsd:documentation source="org.springframework.web.servlet.resource.FixedVersionStrategy"><![CDATA[
+	A VersionStrategy that relies on a fixed version applied as a request path prefix,
+	e.g. reduced SHA, version name, release date, etc.
+			]]></xsd:documentation>
+		</xsd:annotation>
+		<xsd:attribute name="version" type="xsd:string" use="required" />
+		<xsd:attribute name="patterns" type="xsd:string" use="required" />
+	</xsd:complexType>
+
+	<xsd:complexType name="resource-version-strategy">
+		<xsd:annotation>
+			<xsd:documentation source="org.springframework.web.servlet.resource.VersionStrategy"><![CDATA[
+	A strategy for extracting and embedding a resource version in its URL path.
+			]]></xsd:documentation>
+		</xsd:annotation>
+		<xsd:choice minOccurs="1" maxOccurs="1">
+			<xsd:element ref="beans:bean">
+				<xsd:annotation>
+					<xsd:documentation source="org.springframework.web.servlet.resource.VersionStrategy"><![CDATA[
+	A VersionStrategy bean definition.
+					]]></xsd:documentation>
+				</xsd:annotation>
+			</xsd:element>
+			<xsd:element ref="beans:ref">
+				<xsd:annotation>
+					<xsd:documentation source="org.springframework.web.servlet.resource.VersionStrategy"><![CDATA[
+	A reference to a VersionStrategy bean.
+					]]></xsd:documentation>
+				</xsd:annotation>
+			</xsd:element>
+		</xsd:choice>
+		<xsd:attribute name="patterns" type="xsd:string" use="required" />
+	</xsd:complexType>
+
+	<xsd:complexType name="version-resolver">
+		<xsd:annotation>
+			<xsd:documentation source="org.springframework.web.servlet.resource.VersionResourceResolver"><![CDATA[
+	Resolves request paths containing a version string that can be used as part of an HTTP caching strategy
+	in which a resource is cached with a far future date (e.g. 1 year) and cached until the version,
+	and therefore the URL, is changed.
+			]]></xsd:documentation>
+		</xsd:annotation>
+		<xsd:choice maxOccurs="unbounded">
+			<xsd:element type="content-version-strategy" name="content-version-strategy" />
+			<xsd:element type="fixed-version-strategy" name="fixed-version-strategy" />
+			<xsd:element type="resource-version-strategy" name="version-strategy" />
+		</xsd:choice>
+	</xsd:complexType>
+
 	<xsd:complexType name="resource-resolvers">
 		<xsd:annotation>
 			<xsd:documentation source="org.springframework.web.servlet.resource.ResourceResolver"><![CDATA[
@@ -348,6 +419,7 @@
 		</xsd:annotation>
 		<xsd:sequence>
 			<xsd:choice maxOccurs="unbounded">
+				<xsd:element type="version-resolver" name="version-resolver" />
 				<xsd:element ref="beans:bean">
 					<xsd:annotation>
 						<xsd:documentation source="org.springframework.web.servlet.resource.ResourceResolver"><![CDATA[
@@ -393,6 +465,22 @@
 		</xsd:sequence>
 	</xsd:complexType>
 
+	<xsd:complexType name="resource-chain">
+		<xsd:annotation>
+			<xsd:documentation source="org.springframework.web.servlet.config.annotation.ResourceChainRegistration"><![CDATA[
+	Assists with the registration of resource resolvers and transformers.
+	Unless set to "false", the auto-registration add default Resolvers (a PathResourceResolver) and Transformers
+	(CssLinkResourceTransformer, if a VersionResourceResolver has been manually registered).
+			]]></xsd:documentation>
+		</xsd:annotation>
+		<xsd:sequence>
+			<xsd:element name="resource-cache" type="resource-cache" minOccurs="0" maxOccurs="1"/>
+			<xsd:element name="resolvers" type="resource-resolvers" minOccurs="0" maxOccurs="1"/>
+			<xsd:element name="transformers" type="resource-transformers" minOccurs="0" maxOccurs="1"/>
+		</xsd:sequence>
+		<xsd:attribute name="auto-registration" type="xsd:boolean" default="true" use="optional"/>
+	</xsd:complexType>
+
 	<xsd:element name="resources">
 		<xsd:annotation>
 			<xsd:documentation
@@ -403,8 +491,7 @@
 		</xsd:annotation>
 		<xsd:complexType>
 			<xsd:sequence>
-				<xsd:element name="resolvers" type="resource-resolvers" minOccurs="0" maxOccurs="1"/>
-				<xsd:element name="transformers" type="resource-transformers" minOccurs="0" maxOccurs="1"/>
+				<xsd:element name="resource-chain" type="resource-chain" minOccurs="0" maxOccurs="1"/>
 			</xsd:sequence>
 			<xsd:attribute name="mapping" use="required" type="xsd:string">
 				<xsd:annotation>

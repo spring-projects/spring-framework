@@ -34,13 +34,13 @@ import static org.mockito.BDDMockito.*;
 
 /**
  * Unit tests for
- * {@link AppCacheManifestTransfomer}.
+ * {@link AppCacheManifestTransformer}.
  *
  * @author Brian Clozel
  */
 public class AppCacheManifestTransformerTests {
 
-	private AppCacheManifestTransfomer transformer;
+	private AppCacheManifestTransformer transformer;
 
 	private ResourceTransformerChain chain;
 
@@ -48,7 +48,7 @@ public class AppCacheManifestTransformerTests {
 
 	@Before
 	public void setup() {
-		this.transformer = new AppCacheManifestTransfomer();
+		this.transformer = new AppCacheManifestTransformer();
 		this.chain = mock(ResourceTransformerChain.class);
 		this.request = mock(HttpServletRequest.class);
 	}
