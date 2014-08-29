@@ -993,7 +993,7 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 				}
 			}
 
-			publishRequestHandledEvent(request, startTime, failureCause);
+			publishRequestHandledEvent(request, response, startTime, failureCause);
 		}
 	}
 
@@ -1054,7 +1054,7 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 		}
 	}
 
-	private void publishRequestHandledEvent(HttpServletRequest request, long startTime, Throwable failureCause) {
+	private void publishRequestHandledEvent(HttpServletRequest request, HttpServletResponse response, long startTime, Throwable failureCause) {
 		if (this.publishEvents) {
 			// Whether or not we succeeded, publish an event.
 			long processingTime = System.currentTimeMillis() - startTime;
@@ -1063,7 +1063,7 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 							request.getRequestURI(), request.getRemoteAddr(),
 							request.getMethod(), getServletConfig().getServletName(),
 							WebUtils.getSessionId(request), getUsernameForRequest(request),
-							processingTime, failureCause));
+							processingTime, failureCause, response.getStatus()));
 		}
 	}
 
