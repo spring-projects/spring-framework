@@ -17,9 +17,11 @@
 package org.springframework.test;
 
 /**
- * Simple method object encapsulation of the 'test-for-Exception' scenario (for JUnit).
+ * {@code AssertThrows} is a simple method object that encapsulates the
+ * <em>'test-for-exception'</em> scenario for unit testing. Intended for
+ * use with JUnit or TestNG.
  *
- * <p>Used like so:
+ * <p>Given the following business class...
  *
  * <pre class="code">
  * // the class under test
@@ -32,8 +34,8 @@ package org.springframework.test;
  *    }
  * }</pre>
  *
- * The test for the above bad argument path can be expressed using the
- * {@link AssertThrows} class like so:
+ * <p>The test for the above bad argument path can be expressed using
+ * {@code AssertThrows} like so:
  *
  * <pre class="code">
  * public class FooTest {
@@ -46,21 +48,19 @@ package org.springframework.test;
  *    }
  * }</pre>
  *
- * This will result in the test passing if the {@code Foo.someBusinessLogic(..)}
- * method threw an {@link IllegalArgumentException}; if it did not, the
+ * <p>This will result in the test passing if the {@code Foo.someBusinessLogic(..)}
+ * method threw an {@code IllegalArgumentException}; if it did not, the
  * test would fail with the following message:
  *
- * <pre class="code">
- * "Must have thrown a [class java.lang.IllegalArgumentException]"</pre>
+ * <pre class="code">"Must have thrown a [class java.lang.IllegalArgumentException]"</pre>
  *
- * If the <b>wrong</b> type of {@link Exception} was thrown, the
- * test will also fail, this time with a message similar to the following:
+ * <p>If the <strong>wrong</strong> type of {@code Exception} was thrown,
+ * the test will also fail, this time with a message similar to the following:
  *
- * <pre class="code">
- * "java.lang.AssertionError: Was expecting a [class java.lang.UnsupportedOperationException] to be thrown, but instead a [class java.lang.IllegalArgumentException] was thrown"</pre>
+ * <pre class="code">"java.lang.AssertionError: Was expecting a [class java.lang.UnsupportedOperationException] to be thrown, but instead a [class java.lang.IllegalArgumentException] was thrown"</pre>
  *
- * The test for the correct {@link Exception} respects polymorphism,
- * so you can test that any old {@link Exception} is thrown like so:
+ * <p>The test for the correct {@code Exception} respects polymorphism,
+ * so you can test that any old {@code Exception} is thrown like so:
  *
  * <pre class="code">
  * public class FooTest {
@@ -74,14 +74,13 @@ package org.springframework.test;
  *    }
  * }</pre>
  *
- * Intended for use with JUnit 4 and TestNG (as of Spring 3.0).
- * You might want to compare this class with the
- * {@code junit.extensions.ExceptionTestCase} class.
- *
  * @author Rick Evans
  * @author Juergen Hoeller
+ * @author Sam Brannen
  * @since 2.0
- * @deprecated favor use of JUnit 4's {@code @Test(expected=...)} support
+ * @deprecated Favor use of JUnit's {@code @Test(expected=...)} or
+ * {@code @Rule ExpectedException} support or TestNG's
+ * {@code @Test(expectedExceptions=...)} support
  */
 @Deprecated
 @SuppressWarnings({ "unchecked", "rawtypes" })
@@ -95,24 +94,24 @@ public abstract class AssertThrows {
 
 
 	/**
-	 * Create a new instance of the {@link AssertThrows} class.
+	 * Create a new instance of the {@code AssertThrows} class.
 	 * @param expectedException the {@link Exception} expected to be
 	 * thrown during the execution of the surrounding test
 	 * @throws IllegalArgumentException if the supplied {@code expectedException} is
-	 * {@code null}; or if said argument is not an {@link Exception}-derived class
+	 * {@code null}; or if said argument is not an {@code Exception}-derived class
 	 */
 	public AssertThrows(Class expectedException) {
 		this(expectedException, null);
 	}
 
 	/**
-	 * Create a new instance of the {@link AssertThrows} class.
+	 * Create a new instance of the {@code AssertThrows} class.
 	 * @param expectedException the {@link Exception} expected to be
 	 * thrown during the execution of the surrounding test
 	 * @param failureMessage the extra, contextual failure message that will be
 	 * included in the failure text if the text fails (can be {@code null})
 	 * @throws IllegalArgumentException if the supplied {@code expectedException} is
-	 * {@code null}; or if said argument is not an {@link Exception}-derived class
+	 * {@code null}; or if said argument is not an {@code Exception}-derived class
 	 */
 	public AssertThrows(Class expectedException, String failureMessage) {
 		if (expectedException == null) {
@@ -163,8 +162,8 @@ public abstract class AssertThrows {
 
 	/**
 	 * The main template method that drives the running of the
-	 * {@link #test() test logic} and the
-	 * {@link #checkExceptionExpectations(Exception) checking} of the
+	 * {@linkplain #test() test logic} and the
+	 * {@linkplain #checkExceptionExpectations(Exception) checking} of the
 	 * resulting (expected) {@link java.lang.Exception}.
 	 * @see #test()
 	 * @see #doFail()
@@ -184,12 +183,13 @@ public abstract class AssertThrows {
 	/**
 	 * Template method called when the test fails; i.e. the expected
 	 * {@link java.lang.Exception} is <b>not</b> thrown.
-	 * <p>The default implementation simply fails the test via a call to
-	 * {@link org.junit.Assert#fail(String)}.
+	 * <p>The default implementation simply fails the test by throwing an
+	 * {@link AssertionError}.
 	 * <p>If you want to customize the failure message, consider overriding
 	 * {@link #createMessageForNoExceptionThrown()}, and / or supplying an
-	 * extra, contextual failure message via the appropriate constructor overload.
+	 * extra, contextual failure message via the appropriate constructor.
 	 * @see #getFailureMessage()
+	 * @see #createMessageForNoExceptionThrown()
 	 */
 	protected void doFail() {
 		throw new AssertionError(createMessageForNoExceptionThrown());
@@ -212,7 +212,7 @@ public abstract class AssertThrows {
 
 	/**
 	 * Does the donkey work of checking (verifying) that the
-	 * {@link Exception} that was thrown in the body of a test is
+	 * {@link Exception} that was thrown in the body of the test is
 	 * an instance of the {@link #getExpectedException()} class (or an
 	 * instance of a subclass).
 	 * <p>If you want to customize the failure message, consider overriding
