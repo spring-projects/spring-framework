@@ -32,6 +32,8 @@ import org.junit.Test;
 import org.springframework.beans.DirectFieldAccessor;
 import org.springframework.beans.TypeMismatchException;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
+import org.springframework.cache.Cache;
+import org.springframework.cache.CacheManager;
 import org.springframework.cache.concurrent.ConcurrentMapCache;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.core.Ordered;
@@ -350,7 +352,8 @@ public class MvcNamespaceTests {
 		assertThat(resolvers.get(2), Matchers.instanceOf(PathResourceResolver.class));
 
 		CachingResourceResolver cachingResolver = (CachingResourceResolver) resolvers.get(0);
-		assertThat(cachingResolver.getCache(), Matchers.instanceOf(TestResourceCache.class));
+		assertThat(cachingResolver.getCache(), Matchers.instanceOf(ConcurrentMapCache.class));
+		assertEquals("test-resource-cache", cachingResolver.getCache().getName());
 
 		VersionResourceResolver versionResolver = (VersionResourceResolver) resolvers.get(1);
 		assertThat(versionResolver.getStrategyMap().get("/**/*.js"),
@@ -363,6 +366,10 @@ public class MvcNamespaceTests {
 		assertThat(transformers.get(0), Matchers.instanceOf(CachingResourceTransformer.class));
 		assertThat(transformers.get(1), Matchers.instanceOf(CssLinkResourceTransformer.class));
 		assertThat(transformers.get(2), Matchers.instanceOf(AppCacheManifestTransformer.class));
+
+		CachingResourceTransformer cachingTransformer = (CachingResourceTransformer) transformers.get(0);
+		assertThat(cachingTransformer.getCache(), Matchers.instanceOf(ConcurrentMapCache.class));
+		assertEquals("test-resource-cache", cachingTransformer.getCache().getName());
 	}
 
 	@Test
@@ -869,9 +876,15 @@ public class MvcNamespaceTests {
 
 	public static class TestPathHelper extends UrlPathHelper { }
 
-	public static class TestResourceCache extends ConcurrentMapCache {
-		public TestResourceCache(String name) {
-			super(name);
+	public static class TestCacheManager implements CacheManager {
+		@Override
+		public Cache getCache(String name) {
+			return new ConcurrentMapCache(name);
+		}
+
+		@Override
+		public Collection<String> getCacheNames() {
+			return null;
 		}
 	}
 

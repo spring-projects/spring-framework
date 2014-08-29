@@ -19,6 +19,7 @@ package org.springframework.web.servlet.resource;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.cache.Cache;
+import org.springframework.cache.CacheManager;
 import org.springframework.core.io.Resource;
 import org.springframework.util.Assert;
 
@@ -40,6 +41,9 @@ public class CachingResourceTransformer implements ResourceTransformer {
 
 	private final Cache cache;
 
+	public CachingResourceTransformer(CacheManager cacheManager, String cacheName) {
+		this(cacheManager.getCache(cacheName));
+	}
 
 	public CachingResourceTransformer(Cache cache) {
 		Assert.notNull(cache, "'cache' is required");

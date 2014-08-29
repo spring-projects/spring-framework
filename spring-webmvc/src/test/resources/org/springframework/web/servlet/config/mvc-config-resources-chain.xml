@@ -23,7 +23,7 @@
 
 	<mvc:resources mapping="/resources/**" location="/, classpath:/META-INF/">
 		<mvc:resource-chain>
-			<mvc:resource-cache cache="resourceCache"/>
+			<mvc:resource-cache cache-manager="resourceCache" cache-name="test-resource-cache"/>
 			<mvc:resolvers>
 				<mvc:version-resolver>
 					<mvc:fixed-version-strategy version="abc" patterns="/**/*.js"/>
@@ -36,7 +36,5 @@
 		</mvc:resource-chain>
 	</mvc:resources>
 
-	<bean id="resourceCache" class="org.springframework.web.servlet.config.MvcNamespaceTests$TestResourceCache">
-		<constructor-arg name="name" value="resourceCache"/>
-	</bean>
+	<bean id="resourceCache" class="org.springframework.web.servlet.config.MvcNamespaceTests$TestCacheManager"/>
 </beans>

@@ -342,10 +342,12 @@
 		<xsd:annotation>
 			<xsd:documentation source="org.springframework.web.servlet.resource.CachingResourceResolver"><![CDATA[
 	A ResourceResolver that resolves resources from a Cache or otherwise delegates to the resolver chain
-	and saves the result in the cache. Can use a custom Cache if provided as a bean reference in the "cache" attribute.
+	and saves the result in the cache. Can use a custom Cache if a CacheManager is provided as a bean reference
+	in the "cache-manager" attribute, and the cache name provided in the "cache-name" attribute.
 			]]></xsd:documentation>
 		</xsd:annotation>
-		<xsd:attribute name="cache" type="xsd:string" use="optional"/>
+		<xsd:attribute name="cache-manager" type="xsd:string" use="optional"/>
+		<xsd:attribute name="cache-name" type="xsd:string" use="optional"/>
 	</xsd:complexType>
 
 	<xsd:complexType name="content-version-strategy">

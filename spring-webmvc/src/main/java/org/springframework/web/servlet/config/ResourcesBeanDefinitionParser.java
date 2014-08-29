@@ -181,10 +181,12 @@ class ResourcesBeanDefinitionParser implements BeanDefinitionParser {
 			cachingTransformerDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
 			cachingTransformerDef.setConstructorArgumentValues(cavs);
 
-			String cacheBeanName = resourceCacheElement.getAttribute("cache");
-			if (StringUtils.hasText(cacheBeanName)) {
-				RuntimeBeanReference cacheRef = new RuntimeBeanReference(cacheBeanName);
-				cavs.addIndexedArgumentValue(0, cacheRef);
+			String cacheManagerName = resourceCacheElement.getAttribute("cache-manager");
+			String cacheName = resourceCacheElement.getAttribute("cache-name");
+			if (StringUtils.hasText(cacheManagerName) && StringUtils.hasText(cacheName)) {
+				RuntimeBeanReference cacheManagerRef = new RuntimeBeanReference(cacheManagerName);
+				cavs.addIndexedArgumentValue(0, cacheManagerRef);
+				cavs.addIndexedArgumentValue(1, cacheName);
 			}
 			else {
 				ConstructorArgumentValues cacheCavs = new ConstructorArgumentValues();

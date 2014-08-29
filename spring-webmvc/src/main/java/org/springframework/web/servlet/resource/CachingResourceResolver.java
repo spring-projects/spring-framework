@@ -17,6 +17,7 @@
 package org.springframework.web.servlet.resource;
 
 import org.springframework.cache.Cache;
+import org.springframework.cache.CacheManager;
 import org.springframework.core.io.Resource;
 import org.springframework.util.Assert;
 
@@ -40,6 +41,9 @@ public class CachingResourceResolver extends AbstractResourceResolver {
 
 	private final Cache cache;
 
+	public CachingResourceResolver(CacheManager cacheManager, String cacheName) {
+		this(cacheManager.getCache(cacheName));
+	}
 
 	public CachingResourceResolver(Cache cache) {
 		Assert.notNull(cache, "'cache' is required");
