@@ -70,7 +70,7 @@ public class UriComponentsBuilder {
 
 	private static final String HOST_PATTERN = "(" + HOST_IPV6_PATTERN + "|" + HOST_IPV4_PATTERN + ")";
 
-	private static final String PORT_PATTERN = "(\\d*)";
+	private static final String PORT_PATTERN = "(\\d*(?:\\{[^/]+?\\})?)";
 
 	private static final String PATH_PATTERN = "([^?#]*)";
 
@@ -96,7 +96,7 @@ public class UriComponentsBuilder {
 
 	private String host;
 
-	private int port = -1;
+	private String port = "-1";
 
 	private CompositePathComponentBuilder pathBuilder = new CompositePathComponentBuilder();
 
@@ -192,7 +192,7 @@ public class UriComponentsBuilder {
 				builder.userInfo(userInfo);
 				builder.host(host);
 				if (StringUtils.hasLength(port)) {
-					builder.port(Integer.parseInt(port));
+					builder.port(port);
 				}
 				builder.path(path);
 				builder.query(query);
@@ -237,7 +237,7 @@ public class UriComponentsBuilder {
 			builder.host(host);
 			String port = m.group(7);
 			if (StringUtils.hasLength(port)) {
-				builder.port(Integer.parseInt(port));
+				builder.port(port);
 			}
 			builder.path(m.group(8));
 			builder.query(m.group(10));
@@ -272,7 +272,7 @@ public class UriComponentsBuilder {
 			return new OpaqueUriComponents(this.scheme, this.ssp, this.fragment);
 		}
 		else {
-			return new HierarchicalUriComponents(this.scheme, this.userInfo, this.host, this.port,
+			return new HierarchicalUriComponents(this.scheme, this.userInfo, this.host, String.valueOf(this.port),
 					this.pathBuilder.build(), this.queryParams, this.fragment, encoded, true);
 		}
 	}
@@ -333,7 +333,7 @@ public class UriComponentsBuilder {
 				this.host = uri.getHost();
 			}
 			if (uri.getPort() != -1) {
-				this.port = uri.getPort();
+				this.port = String.valueOf(uri.getPort());
 			}
 			if (StringUtils.hasLength(uri.getRawPath())) {
 				this.pathBuilder = new CompositePathComponentBuilder(uri.getRawPath());
@@ -353,7 +353,7 @@ public class UriComponentsBuilder {
 	private void resetHierarchicalComponents() {
 		this.userInfo = null;
 		this.host = null;
-		this.port = -1;
+		this.port = "-1";
 		this.pathBuilder = new CompositePathComponentBuilder();
 		this.queryParams.clear();
 	}
@@ -393,7 +393,7 @@ public class UriComponentsBuilder {
 				this.host = uriComponents.getHost();
 			}
 			if (uriComponents.getPort() != -1) {
-				this.port = uriComponents.getPort();
+				this.port = String.valueOf(uriComponents.getPort());
 			}
 			if (StringUtils.hasLength(uriComponents.getPath())) {
 				List<String> segments = uriComponents.getPathSegments();
@@ -462,6 +462,18 @@ public class UriComponentsBuilder {
 	 */
 	public UriComponentsBuilder port(int port) {
 		Assert.isTrue(port >= -1, "'port' must not be < -1");
+		this.port = String.valueOf(port);
+		resetSchemeSpecificPart();
+		return this;
+	}
+
+	/**
+	 * Set the URI port. Passing {@code "-1"} will clear the port of this builder.
+	 * The given port may contain URI template variables.
+	 * @param port the URI port
+	 * @return this UriComponentsBuilder
+	 */
+	public UriComponentsBuilder port(String port) {
 		this.port = port;
 		resetSchemeSpecificPart();
 		return this;

@@ -80,6 +80,28 @@ public class UriComponentsTests {
 		assertEquals("http://example.com/1 2 3 4", uriComponents.toUriString());
 	}
 
+	// SPR-12123
+
+	@Test
+	public void port() {
+		UriComponents uriComponents1 = UriComponentsBuilder.fromUriString(
+				"http://example.com:8080/bar").build();
+		UriComponents uriComponents2 = UriComponentsBuilder.fromUriString(
+				"http://example.com/bar").port(8080).build();
+		UriComponents uriComponents3 = UriComponentsBuilder.fromUriString(
+				"http://example.com/bar").port("{port}").build().expand(8080);
+		UriComponents uriComponents4 = UriComponentsBuilder.fromUriString(
+				"http://example.com/bar").port("808{digit}").build().expand(0);
+		assertEquals(8080, uriComponents1.getPort());
+		assertEquals("http://example.com:8080/bar", uriComponents1.toUriString());
+		assertEquals(8080, uriComponents2.getPort());
+		assertEquals("http://example.com:8080/bar", uriComponents2.toUriString());
+		assertEquals(8080, uriComponents3.getPort());
+		assertEquals("http://example.com:8080/bar", uriComponents3.toUriString());
+		assertEquals(8080, uriComponents4.getPort());
+		assertEquals("http://example.com:8080/bar", uriComponents4.toUriString());
+	}
+
 	@Test(expected = IllegalStateException.class)
 	public void expandEncoded() {
 		UriComponentsBuilder.fromPath("/{foo}").build().encode().expand("bar");
