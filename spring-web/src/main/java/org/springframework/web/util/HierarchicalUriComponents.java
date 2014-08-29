@@ -109,6 +109,13 @@ final class HierarchicalUriComponents extends UriComponents {
 
 	@Override
 	public int getPort() {
+		if (this.port == null) {
+			return -1;
+		}
+		else if (this.port.contains("{")) {
+			throw new IllegalStateException(
+					"The port contains a URI variable but has not been expanded yet: " + this.port);
+		}
 		return Integer.parseInt(this.port);
 	}
 
@@ -360,7 +367,7 @@ final class HierarchicalUriComponents extends UriComponents {
 			if (this.host != null) {
 				uriBuilder.append(host);
 			}
-			if (!"-1".equals(this.port)) {
+			if (getPort() != -1) {
 				uriBuilder.append(':');
 				uriBuilder.append(port);
 			}

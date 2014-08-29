@@ -96,7 +96,7 @@ public class UriComponentsBuilder {
 
 	private String host;
 
-	private String port = "-1";
+	private String port;
 
 	private CompositePathComponentBuilder pathBuilder = new CompositePathComponentBuilder();
 
@@ -272,7 +272,7 @@ public class UriComponentsBuilder {
 			return new OpaqueUriComponents(this.scheme, this.ssp, this.fragment);
 		}
 		else {
-			return new HierarchicalUriComponents(this.scheme, this.userInfo, this.host, String.valueOf(this.port),
+			return new HierarchicalUriComponents(this.scheme, this.userInfo, this.host, this.port,
 					this.pathBuilder.build(), this.queryParams, this.fragment, encoded, true);
 		}
 	}
@@ -353,7 +353,7 @@ public class UriComponentsBuilder {
 	private void resetHierarchicalComponents() {
 		this.userInfo = null;
 		this.host = null;
-		this.port = "-1";
+		this.port = null;
 		this.pathBuilder = new CompositePathComponentBuilder();
 		this.queryParams.clear();
 	}
@@ -468,8 +468,9 @@ public class UriComponentsBuilder {
 	}
 
 	/**
-	 * Set the URI port. Passing {@code "-1"} will clear the port of this builder.
-	 * The given port may contain URI template variables.
+	 * Set the URI port. Use this method only when the port needs to be
+	 * parameterized with a URI variable. Otherwise use {@link #port(int)}.
+	 * Passing {@code null} will clear the port of this builder.
 	 * @param port the URI port
 	 * @return this UriComponentsBuilder
 	 */
