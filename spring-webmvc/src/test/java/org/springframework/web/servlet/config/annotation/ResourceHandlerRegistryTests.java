@@ -17,14 +17,12 @@
 package org.springframework.web.servlet.config.annotation;
 
 import java.util.List;
-import java.util.Map;
 
 import org.hamcrest.Matchers;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 
-import org.springframework.beans.DirectFieldAccessor;
 import org.springframework.cache.concurrent.ConcurrentMapCache;
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockHttpServletResponse;
@@ -41,7 +39,6 @@ import org.springframework.web.servlet.resource.ResourceHttpRequestHandler;
 import org.springframework.web.servlet.resource.ResourceResolver;
 import org.springframework.web.servlet.resource.ResourceTransformer;
 import org.springframework.web.servlet.resource.VersionResourceResolver;
-import org.springframework.web.servlet.resource.VersionStrategy;
 
 import static org.junit.Assert.*;
 
@@ -108,10 +105,10 @@ public class ResourceHandlerRegistryTests {
 	}
 
 	@Test
-	public void simpleResourceChain() throws Exception {
+	public void resourceChain() throws Exception {
 		ResourceResolver mockResolver = Mockito.mock(ResourceResolver.class);
 		ResourceTransformer mockTransformer = Mockito.mock(ResourceTransformer.class);
-		this.registration.addResolver(mockResolver).addTransformer(mockTransformer);
+		this.registration.resourceChain(true).addResolver(mockResolver).addTransformer(mockTransformer);
 
 		ResourceHttpRequestHandler handler = getHandler("/resources/**");
 		List<ResourceResolver> resolvers = handler.getResourceResolvers();
@@ -129,8 +126,8 @@ public class ResourceHandlerRegistryTests {
 	}
 
 	@Test
-	public void noCacheResourceChain() throws Exception {
-		this.registration.enableDevMode();
+	public void resourceChainWithoutCaching() throws Exception {
+		this.registration.resourceChain(false);
 
 		ResourceHttpRequestHandler handler = getHandler("/resources/**");
 		List<ResourceResolver> resolvers = handler.getResourceResolvers();
@@ -142,24 +139,19 @@ public class ResourceHandlerRegistryTests {
 	}
 
 	@Test
-	public void versionResourceChain() throws Exception {
+	public void resourceChainWithVersionResolver() throws Exception {
 		VersionResourceResolver versionResolver = new VersionResourceResolver()
 				.addFixedVersionStrategy("fixed", "/**/*.js")
 				.addContentVersionStrategy("/**");
 
-		this.registration.addResolver(versionResolver).addTransformer(new AppCacheManifestTransfomer());
+		this.registration.resourceChain(true).addResolver(versionResolver)
+				.addTransformer(new AppCacheManifestTransfomer());
 
 		ResourceHttpRequestHandler handler = getHandler("/resources/**");
 		List<ResourceResolver> resolvers = handler.getResourceResolvers();
 		assertThat(resolvers.toString(), resolvers, Matchers.hasSize(3));
 		assertThat(resolvers.get(0), Matchers.instanceOf(CachingResourceResolver.class));
-		assertThat(resolvers.get(1), Matchers.instanceOf(VersionResourceResolver.class));
-		DirectFieldAccessor fieldAccessor = new DirectFieldAccessor(resolvers.get(1));
-		@SuppressWarnings("unchecked")
-		Map<String, VersionStrategy> strategies =
-				(Map<String, VersionStrategy>) fieldAccessor.getPropertyValue("versionStrategyMap");
-		assertNotNull(strategies.get("/**/*.js"));
-		assertNotNull(strategies.get("/**"));
+		assertThat(resolvers.get(1), Matchers.sameInstance(versionResolver));
 		assertThat(resolvers.get(2), Matchers.instanceOf(PathResourceResolver.class));
 
 		List<ResourceTransformer> transformers = handler.getResourceTransformers();
@@ -170,43 +162,40 @@ public class ResourceHandlerRegistryTests {
 	}
 
 	@Test
-	public void customResourceChain() throws Exception {
-		VersionResourceResolver versionResolver = new VersionResourceResolver()
-				.addFixedVersionStrategy("fixed", "/**/*.js")
-				.addContentVersionStrategy("/**");
-
+	public void resourceChainWithOverrides() throws Exception {
 		CachingResourceResolver cachingResolver = Mockito.mock(CachingResourceResolver.class);
+		VersionResourceResolver versionResolver = Mockito.mock(VersionResourceResolver.class);
+		PathResourceResolver pathResourceResolver = new PathResourceResolver();
 		CachingResourceTransformer cachingTransformer = Mockito.mock(CachingResourceTransformer.class);
-		this.registration
-				.addResolver(cachingResolver)
-				.addResolver(versionResolver)
-				.addResolver(new CustomPathResourceResolver())
-				.addTransformer(cachingTransformer)
-				.addTransformer(new AppCacheManifestTransfomer())
-				.setCachePeriod(3600);
+		AppCacheManifestTransfomer appCacheTransformer = Mockito.mock(AppCacheManifestTransfomer.class);
+		CssLinkResourceTransformer cssLinkTransformer = new CssLinkResourceTransformer();
+
+		this.registration.setCachePeriod(3600)
+				.resourceChain(false)
+					.addResolver(cachingResolver)
+					.addResolver(versionResolver)
+					.addResolver(pathResourceResolver)
+					.addTransformer(cachingTransformer)
+					.addTransformer(appCacheTransformer)
+					.addTransformer(cssLinkTransformer);
 
 		ResourceHttpRequestHandler handler = getHandler("/resources/**");
 		List<ResourceResolver> resolvers = handler.getResourceResolvers();
 		assertThat(resolvers.toString(), resolvers, Matchers.hasSize(3));
-		assertThat(resolvers.get(0), Matchers.equalTo(cachingResolver));
-		assertThat(resolvers.get(1), Matchers.instanceOf(VersionResourceResolver.class));
-		assertThat(resolvers.get(2), Matchers.instanceOf(CustomPathResourceResolver.class));
+		assertThat(resolvers.get(0), Matchers.sameInstance(cachingResolver));
+		assertThat(resolvers.get(1), Matchers.sameInstance(versionResolver));
+		assertThat(resolvers.get(2), Matchers.sameInstance(pathResourceResolver));
 
 		List<ResourceTransformer> transformers = handler.getResourceTransformers();
 		assertThat(transformers, Matchers.hasSize(3));
-		assertThat(transformers.get(0), Matchers.equalTo(cachingTransformer));
-		assertThat(transformers.get(1), Matchers.instanceOf(CssLinkResourceTransformer.class));
-		assertThat(transformers.get(2), Matchers.instanceOf(AppCacheManifestTransfomer.class));
+		assertThat(transformers.get(0), Matchers.sameInstance(cachingTransformer));
+		assertThat(transformers.get(1), Matchers.sameInstance(appCacheTransformer));
+		assertThat(transformers.get(2), Matchers.sameInstance(cssLinkTransformer));
 	}
 
 	private ResourceHttpRequestHandler getHandler(String pathPattern) {
 		SimpleUrlHandlerMapping handlerMapping = (SimpleUrlHandlerMapping) this.registry.getHandlerMapping();
 		return (ResourceHttpRequestHandler) handlerMapping.getUrlMap().get(pathPattern);
-	}
-
-
-	private static class CustomPathResourceResolver extends PathResourceResolver {
-
 	}
 
 }
