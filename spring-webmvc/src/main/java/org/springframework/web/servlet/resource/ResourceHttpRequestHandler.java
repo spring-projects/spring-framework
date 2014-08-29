@@ -86,11 +86,11 @@ public class ResourceHttpRequestHandler extends WebContentGenerator implements H
 
 	private static final String CONTENT_ENCODING = "Content-Encoding";
 
-	private List<Resource> locations;
+	private final List<Resource> locations = new ArrayList<Resource>(4);
 
-	private final List<ResourceResolver> resourceResolvers = new ArrayList<ResourceResolver>();
+	private final List<ResourceResolver> resourceResolvers = new ArrayList<ResourceResolver>(4);
 
-	private final List<ResourceTransformer> resourceTransformers = new ArrayList<ResourceTransformer>();
+	private final List<ResourceTransformer> resourceTransformers = new ArrayList<ResourceTransformer>(4);
 
 
 	public ResourceHttpRequestHandler() {
@@ -105,7 +105,8 @@ public class ResourceHttpRequestHandler extends WebContentGenerator implements H
 	 */
 	public void setLocations(List<Resource> locations) {
 		Assert.notEmpty(locations, "Locations list must not be empty");
-		this.locations = locations;
+		this.locations.clear();
+		this.locations.addAll(locations);
 	}
 
 	public List<Resource> getLocations() {
@@ -154,7 +155,8 @@ public class ResourceHttpRequestHandler extends WebContentGenerator implements H
 	@Override
 	public void afterPropertiesSet() throws Exception {
 		if (logger.isWarnEnabled() && CollectionUtils.isEmpty(this.locations)) {
-			logger.warn("Locations list is empty. No resources will be served");
+			logger.warn("Locations list is empty. No resources will be served unless a " +
+					"custom ResourceResolver is configured as an alternative to PathResourceResolver.");
 		}
 	}
 

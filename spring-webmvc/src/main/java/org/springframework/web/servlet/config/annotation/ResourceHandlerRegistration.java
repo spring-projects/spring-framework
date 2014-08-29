@@ -141,7 +141,6 @@ public class ResourceHandlerRegistration {
 	 * Returns a {@link ResourceHttpRequestHandler} instance.
 	 */
 	protected ResourceHttpRequestHandler getRequestHandler() {
-		Assert.isTrue(!CollectionUtils.isEmpty(locations), "At least one location is required for resource handling.");
 		ResourceHttpRequestHandler handler = new ResourceHttpRequestHandler();
 		if (this.resourceChainRegistration != null) {
 			handler.setResourceResolvers(this.resourceChainRegistration.getResourceResolvers());
