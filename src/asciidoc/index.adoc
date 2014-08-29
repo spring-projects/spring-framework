@@ -18742,7 +18742,7 @@ conjunction with `@ContextConfiguration`.
 ====
 If the default conventions are sufficient for your test configuration, you can avoid
 using `@TransactionConfiguration` altogether. In other words, if you have only one
-transaction manger -- or if you have multiple transaction mangers but the transaction
+transaction manager -- or if you have multiple transaction managers but the transaction
 manager for tests is named "transactionManager" or specified via a
 `TransactionManagementConfigurer` -- and if you want transactions to roll back
 automatically, then there is no need to annotate your test class with
