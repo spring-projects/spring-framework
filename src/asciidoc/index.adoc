@@ -18940,10 +18940,9 @@ test (see `@Repeat`), as well as any __set up__ or __tear down__ of the test fix
 Spring's `@Timed` annotation has different semantics than JUnit's `@Test(timeout=...)`
 support. Specifically, due to the manner in which JUnit handles test execution timeouts
 (that is, by executing the test method in a separate `Thread`), `@Test(timeout=...)`
-applies to __each iteration__ in the case of repetitions and preemptively fails the test
-if the test takes too long. Spring's `@Timed`, on the other hand, times the __total__
-test execution time (including all repetitions) and does not preemptively fail the test
-but rather waits for the test to complete before failing.
+preemptively fails the test if the test takes too long. Spring's `@Timed`, on the other
+hand, does not preemptively fail the test but rather waits for the test to complete
+before failing.
 
 * `@Repeat`
 
