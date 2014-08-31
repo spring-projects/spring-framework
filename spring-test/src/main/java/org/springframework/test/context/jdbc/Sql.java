@@ -54,6 +54,7 @@ import static java.lang.annotation.RetentionPolicy.*;
  *
  * @author Sam Brannen
  * @since 4.1
+ * @see SqlConfig
  * @see SqlGroup
  * @see SqlScriptsTestExecutionListener
  * @see org.springframework.transaction.annotation.Transactional

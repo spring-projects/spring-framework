@@ -78,6 +78,7 @@ import org.springframework.util.ResourceUtils;
  * @author Sam Brannen
  * @since 4.1
  * @see Sql
+ * @see SqlConfig
  * @see SqlGroup
  * @see org.springframework.test.context.transaction.TestContextTransactionUtils
  * @see org.springframework.test.context.transaction.TransactionalTestExecutionListener
