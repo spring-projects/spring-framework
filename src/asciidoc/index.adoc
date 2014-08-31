@@ -18585,6 +18585,55 @@ and registering it via the `resolver` attribute of `@ActiveProfiles`.
 See <<testcontext-ctx-management-env-profiles>> and the `@ActiveProfiles` javadocs
 for examples and further details.
 
+* `@TestPropertySource`
+
++
+
+A class-level annotation that is used to configure the locations of properties files and
+inlined properties to be added to the `Environment`'s set of `PropertySources` for an
+`ApplicationContext` loaded for an integration test.
+
++ 
+
+Test property sources have higher precedence than those loaded from the operating
+system's environment or Java system properties as well as property sources added by the
+application declaratively via `@PropertySource` or programmatically. Thus, test property
+sources can be used to selectively override properties defined in system and application
+property sources. Furthermore, inlined properties have higher precedence than properties
+loaded from resource locations.
+
++
+
+The following example demonstrates how to declare a properties file from the classpath.
+
++
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@ContextConfiguration
+	**@TestPropertySource**("/test.properties")
+	public class MyIntegrationTests {
+		// class body...
+	}
+----
+
++
+
+The following example demonstrates how to declare _inlined_ properties.
+
++
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@ContextConfiguration
+	**@TestPropertySource**(properties = { "timezone = GMT", "port: 4242" })
+	public class MyIntegrationTests {
+		// class body...
+	}
+----
+
 * `@DirtiesContext`
 
 +
@@ -19061,6 +19110,7 @@ Each of the following may be used as meta-annotations in conjunction with the
 * `@ContextConfiguration`
 * `@ContextHierarchy`
 * `@ActiveProfiles`
+* `@TestPropertySource`
 * `@DirtiesContext`
 * `@WebAppConfiguration`
 * `@TestExecutionListeners`
@@ -20017,6 +20067,173 @@ corresponding javadocs.
 	}
 ----
 
+[[testcontext-ctx-management-property-sources]]
+====== Context configuration with test property sources
+
+Spring 3.1 introduced first-class support in the framework for the notion of an
+environment with a hierarchy of _property sources_, and since Spring 4.1 integration
+tests can be configured with test-specific property sources. In contrast to the
+`@PropertySource` annotation used on `@Configuration` classes, the `@TestPropertySource`
+annotation can be declared on a test class to declare resource locations for test
+properties files or _inlined_ properties. These test property sources will be added to
+the `Environment`'s set of `PropertySources` for the `ApplicationContext` loaded for the
+annotated integration test.
+
+[NOTE]
+====
+`@TestPropertySource` may be used with any implementation of the `SmartContextLoader`
+SPI, but `@TestPropertySource` is not supported with implementations of the older
+`ContextLoader` SPI.
+
+Implementations of `SmartContextLoader` gain access to merged test property source values
+via the `getPropertySourceLocations()` and `getPropertySourceProperties()` methods in
+`MergedContextConfiguration`.
+====
+
+*Declaring test property sources*
+
+Test properties files can be configured via the `locations` or `value` attribute of
+`@TestPropertySource` as shown in the following example.
+
+Both traditional and XML-based properties file formats are supported -- for example,
+`"classpath:/com/example/test.properties"` or `"file:/path/to/file.xml"`.
+
+Each path will be interpreted as a Spring `Resource`. A plain path -- for example,
+`"test.properties"` -- will be treated as a classpath resource that is _relative_ to the
+package in which the test class is defined. A path starting with a slash will be treated
+as an _absolute_ classpath resource, for example: `"/org/example/test.xml"`. A path which
+references a URL (e.g., a path prefixed with `classpath:`, `file:`, `http:`, etc.) will
+be loaded using the specified resource protocol. Resource location wildcards (e.g.
+`**/*.properties`) are not permitted: each location must evaluate to exactly one
+`.properties` or `.xml` resource.
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@ContextConfiguration
+	@TestPropertySource("/test.properties")
+	public class MyIntegrationTests {
+		// class body...
+	}
+----
+
+_Inlined_ properties in the form of key-value pairs can be configured via the
+`properties` attribute of `@TestPropertySource` as shown in the following example. All
+key-value pairs will be added to the enclosing `Environment` as a single test
+`PropertySource` with the highest precedence.
+
+The supported syntax for key-value pairs is the same as the syntax defined for entries in
+a Java properties file:
+
+* `"key=value"`
+* `"key:value"`
+* `"key value"`
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@ContextConfiguration
+	@TestPropertySource(properties = {"timezone = GMT", "port: 4242"})
+	public class MyIntegrationTests {
+		// class body...
+	}
+----
+
+*Default properties file detection*
+
+If `@TestPropertySource` is declared as an empty annotation (i.e., without explicit
+values for the `locations` or `properties` attributes), an attempt will be made to detect
+a _default_ properties file relative to the class that declared the annotation. For
+example, if the annotated test class is `com.example.MyTest`, the corresponding default
+properties file is `"classpath:com/example/MyTest.properties"`. If the default cannot be
+detected, an `IllegalStateException` will be thrown.
+
+*Precedence*
+
+Test property sources have higher precedence than those loaded from the operating
+system's environment or Java system properties as well as property sources added by the
+application declaratively via `@PropertySource` or programmatically. Thus, test property
+sources can be used to selectively override properties defined in system and application
+property sources. Furthermore, inlined properties have higher precedence than properties
+loaded from resource locations.
+
+In the following example, the `timezone` and `port` properties as well as any properties
+defined in `"/test.properties"` will override any properties of the same name that are
+defined in system and application property sources. Furthermore, if the
+`"/test.properties"` file defines entries for the `timezone` and `port` properties those
+will be overridden by the _inlined_ properties declared via the `properties` attribute.
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@ContextConfiguration
+	@TestPropertySource(
+		locations = "/test.properties",
+		properties = {"timezone = GMT", "port: 4242"}
+	)
+	public class MyIntegrationTests {
+		// class body...
+	}
+----
+
+*Inheriting and overriding test property sources*
+
+`@TestPropertySource` supports boolean `inheritLocations` and `inheritProperties`
+attributes that denote whether resource locations for properties files and inlined
+properties declared by superclasses should be __inherited__. The default value for both
+flags is `true`. This means that a test class inherits the locations and inlined
+properties declared by any superclasses. Specifically, the locations and inlined
+properties for a test class are appended to the locations and inlined properties declared
+by superclasses. Thus, subclasses have the option of __extending__ the locations and
+inlined properties. Note that properties that appear later will __shadow__ (i.e..,
+override) properties of the same name that appear earlier. In addition, the
+aforementioned precedence rules apply for inherited test property sources as well.
+
+If `@TestPropertySource`'s `inheritLocations` or `inheritProperties` attribute is set to
+`false`, the locations or inlined properties, respectively, for the test class __shadow__
+and effectively replace the configuration defined by superclasses.
+
+In the following example, the `ApplicationContext` for `BaseTest` will be loaded using
+only the `"base.properties"` file as a test property source. In contrast, the
+`ApplicationContext` for `ExtendedTest` will be loaded using the `"base.properties"`
+**and** `"extended.properties"` files as test property source locations.
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@TestPropertySource("base.properties")
+	@ContextConfiguration
+	public class BaseTest {
+		// ...
+	}
+
+	@TestPropertySource("extended.properties")
+	@ContextConfiguration
+	public class ExtendedTest extends BaseTest {
+		// ...
+	}
+----
+
+In the following example, the `ApplicationContext` for `BaseTest` will be loaded using only
+the _inlined_ `key1` property. In contrast, the `ApplicationContext` for `ExtendedTest` will be
+loaded using the _inlined_ `key1` and `key2` properties.
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@TestPropertySource(properties = "key1 = value1")
+	@ContextConfiguration
+	public class BaseTest {
+		// ...
+	}
+
+	@TestPropertySource(properties = "key2 = value2")
+	@ContextConfiguration
+	public class ExtendedTest extends BaseTest {
+		// ...
+	}
+----
+
 [[testcontext-ctx-management-web]]
 ====== Loading a WebApplicationContext
 Spring 3.2 introduced support for loading a `WebApplicationContext` in integration
@@ -20171,11 +20388,12 @@ whereas, the other mocks are managed per test method by the
 
 [[testcontext-ctx-management-caching]]
 ====== Context caching
-Once the TestContext framework loads an `ApplicationContext` (or
-`WebApplicationContext`) for a test, that context will be cached and reused for __all__
-subsequent tests that declare the same unique context configuration within the same test
-suite. To understand how caching works, it is important to understand what is meant by
-__unique__ and __test suite__.
+
+Once the TestContext framework loads an `ApplicationContext` (or `WebApplicationContext`)
+for a test, that context will be cached and reused for __all__ subsequent tests that
+declare the same unique context configuration within the same test suite. To understand
+how caching works, it is important to understand what is meant by __unique__ and __test
+suite__.
 
 An `ApplicationContext` can be __uniquely__ identified by the combination of
 configuration parameters that are used to load it. Consequently, the unique combination
@@ -20187,19 +20405,23 @@ the context cache key:
 * `classes` __(from @ContextConfiguration)__
 * `contextInitializerClasses` __(from @ContextConfiguration)__
 * `contextLoader` __(from @ContextConfiguration)__
+* `parent` __(from @ContextHierarchy)__
 * `activeProfiles` __(from @ActiveProfiles)__
+* `propertySourceLocations` __(from @TestPropertySource)__
+* `propertySourceProperties` __(from @TestPropertySource)__
 * `resourceBasePath` __(from @WebAppConfiguration)__
 
 For example, if `TestClassA` specifies `{"app-config.xml", "test-config.xml"}` for the
 `locations` (or `value`) attribute of `@ContextConfiguration`, the TestContext framework
-will load the corresponding `ApplicationContext` and store it in a `static` context
-cache under a key that is based solely on those locations. So if `TestClassB` also
-defines `{"app-config.xml", "test-config.xml"}` for its locations (either explicitly or
+will load the corresponding `ApplicationContext` and store it in a `static` context cache
+under a key that is based solely on those locations. So if `TestClassB` also defines
+`{"app-config.xml", "test-config.xml"}` for its locations (either explicitly or
 implicitly through inheritance) but does not define `@WebAppConfiguration`, a different
-`ContextLoader`, different active profiles, or different context initializers, then the
-same `ApplicationContext` will be shared by both test classes. This means that the setup
-cost for loading an application context is incurred only once (per test suite), and
-subsequent test execution is much faster.
+`ContextLoader`, different active profiles, different context initializers, different
+test property sources, or a different parent context, then the same `ApplicationContext`
+will be shared by both test classes. This means that the setup cost for loading an
+application context is incurred only once (per test suite), and subsequent test execution
+is much faster.
 
 .Test suites and forked processes
 [NOTE]
