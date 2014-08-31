@@ -854,7 +854,7 @@ Spring Framework 4.0. The same applies to Hibernate Validator 5.0 as a Bean Vali
 
 
 
-
+[[groovy-bean-definition-dsl]]
 === Groovy Bean Definition DSL
 With Spring Framework 4.0 it is now possible to define external bean configuration using
 a Groovy DSL. This is similar in concept to using XML bean definitions, but allows for
@@ -19216,18 +19216,24 @@ Spring provides the following implementations:
 +
 
 ** `DelegatingSmartContextLoader`: one of two default loaders which delegates internally
-to an `AnnotationConfigContextLoader` or a `GenericXmlContextLoader` depending either on
-the configuration declared for the test class or on the presence of default locations or
-default configuration classes.
+to an `AnnotationConfigContextLoader`, a `GenericXmlContextLoader`, or a
+`GenericGroovyXmlContextLoader` depending either on the configuration declared for the
+test class or on the presence of default locations or default configuration classes.
+Groovy support is only enabled if Groovy is on the classpath.
 ** `WebDelegatingSmartContextLoader`: one of two default loaders which delegates
-internally to an `AnnotationConfigWebContextLoader` or a `GenericXmlWebContextLoader`
-depending either on the configuration declared for the test class or on the presence of
-default locations or default configuration classes. A web `ContextLoader` will only be
-used if `@WebAppConfiguration` is present on the test class.
+internally to an `AnnotationConfigWebContextLoader`, a `GenericXmlWebContextLoader`, or a
+`GenericGroovyXmlWebContextLoader` depending either on the configuration declared for the
+test class or on the presence of default locations or default configuration classes. A
+web `ContextLoader` will only be used if `@WebAppConfiguration` is present on the test
+class. Groovy support is only enabled if Groovy is on the classpath.
 ** `AnnotationConfigContextLoader`: loads a standard `ApplicationContext` from
 __annotated classes__.
 ** `AnnotationConfigWebContextLoader`: loads a `WebApplicationContext` from __annotated
 classes__.
+** `GenericGroovyXmlContextLoader`: loads a standard `ApplicationContext` from __resource
+locations__ that are either Groovy scripts or XML configuration files.
+** `GenericGroovyXmlWebContextLoader`: loads a `WebApplicationContext` from __resource
+locations__ that are either Groovy scripts or XML configuration files.
 ** `GenericXmlContextLoader`: loads a standard `ApplicationContext` from XML __resource
 locations__.
 ** `GenericXmlWebContextLoader`: loads a `WebApplicationContext` from XML __resource
@@ -19253,7 +19259,6 @@ provide access to the `ApplicationContext` automatically.
 .@Autowired ApplicationContext
 [TIP]
 ====
-
 As an alternative to implementing the `ApplicationContextAware` interface, you can
 inject the application context for your test class through the `@Autowired` annotation
 on either a field or setter method. For example:
@@ -19310,12 +19315,13 @@ implement and configure your own custom `SmartContextLoader` for advanced use ca
 
 [[testcontext-ctx-management-xml]]
 ====== Context configuration with XML resources
+
 To load an `ApplicationContext` for your tests using XML configuration files, annotate
-your test class with `@ContextConfiguration` and configure the `locations` attribute
-with an array that contains the resource locations of XML configuration metadata. A
-plain or relative path -- for example `"context.xml"` -- will be treated as a classpath
-resource that is relative to the package in which the test class is defined. A path
-starting with a slash is treated as an absolute classpath location, for example
+your test class with `@ContextConfiguration` and configure the `locations` attribute with
+an array that contains the resource locations of XML configuration metadata. A plain or
+relative path -- for example `"context.xml"` -- will be treated as a classpath resource
+that is relative to the package in which the test class is defined. A path starting with
+a slash is treated as an absolute classpath location, for example
 `"/org/example/config.xml"`. A path which represents a resource URL (i.e., a path
 prefixed with `classpath:`, `file:`, `http:`, etc.) will be used __as is__.
 
@@ -19349,10 +19355,10 @@ demonstrated in the following example.
 
 If you omit both the `locations` and `value` attributes from the `@ContextConfiguration`
 annotation, the TestContext framework will attempt to detect a default XML resource
-location. Specifically, `GenericXmlContextLoader` detects a default location based on
-the name of the test class. If your class is named `com.example.MyTest`,
-`GenericXmlContextLoader` loads your application context from
-`"classpath:/com/example/MyTest-context.xml"`.
+location. Specifically, `GenericXmlContextLoader` and `GenericXmlWebContextLoader` detect
+a default location based on the name of the test class. If your class is named
+`com.example.MyTest`, `GenericXmlContextLoader` loads your application context from
+`"classpath:com/example/MyTest-context.xml"`.
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -19361,15 +19367,89 @@ the name of the test class. If your class is named `com.example.MyTest`,
 
 	@RunWith(SpringJUnit4ClassRunner.class)
 	// ApplicationContext will be loaded from
-	// "classpath:/com/example/MyTest-context.xml"
+	// "classpath:com/example/MyTest-context.xml"
 	**@ContextConfiguration**
 	public class MyTest {
 		// class body...
 	}
 ----
 
+[[testcontext-ctx-management-groovy]]
+====== Context configuration with Groovy scripts
+
+To load an `ApplicationContext` for your tests using Groovy scripts that utilize the
+<<groovy-bean-definition-dsl>>, annotate your test class with `@ContextConfiguration` and
+configure the `locations` or `value` attribute with an array that contains the resource
+locations of Groovy scripts. Resource lookup semantics for Groovy scripts are the same as
+those described for <<testcontext-ctx-management-xml,XML configuration files>>.
+
+
+.Enabling Groovy script support
+[TIP]
+====
+Support for using Groovy scripts to load an `ApplicationContext` in the Spring
+TestContext Framework is enabled automatically if Groovy is on the classpath.
+====
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@RunWith(SpringJUnit4ClassRunner.class)
+	// ApplicationContext will be loaded from "/AppConfig.groovy" and
+	// "/TestConfig.groovy" in the root of the classpath
+	**@ContextConfiguration({"/AppConfig.groovy", "/TestConfig.Groovy"})**
+	public class MyTest {
+		// class body...
+	}
+----
+
+If you omit both the `locations` and `value` attributes from the `@ContextConfiguration`
+annotation, the TestContext framework will attempt to detect a default Groovy script.
+Specifically, `GenericGroovyXmlContextLoader` and `GenericGroovyXmlWebContextLoader`
+detect a default location based on the name of the test class. If your class is named
+`com.example.MyTest`, the Groovy context loader will load your application context from
+`"classpath:com/example/MyTestContext.groovy"`.
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	package com.example;
+
+	@RunWith(SpringJUnit4ClassRunner.class)
+	// ApplicationContext will be loaded from
+	// "classpath:com/example/MyTestContext.groovy"
+	**@ContextConfiguration**
+	public class MyTest {
+		// class body...
+	}
+----
+
+.Declaring XML config and Groovy scripts simultaneously
+[TIP]
+====
+Both XML configuration files and Groovy scripts can be declared simultaneously via the
+`locations` or `value` attribute of `@ContextConfiguration`. If the path to a configured
+resource location ends with `.xml` it will be loaded using an `XmlBeanDefinitionReader`;
+otherwise it will be loaded using a `GroovyBeanDefinitionReader`.
+
+The following listing demonstrates how to combine both in an integration test.
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@RunWith(SpringJUnit4ClassRunner.class)
+	// ApplicationContext will be loaded from
+	// "/app-config.xml" and "/TestConfig.groovy"
+	@ContextConfiguration({ "/app-config.xml", "/TestConfig.groovy" })
+	public class MyTest {
+		// class body...
+	}
+----
+====
+
 [[testcontext-ctx-management-javaconfig]]
 ====== Context configuration with annotated classes
+
 To load an `ApplicationContext` for your tests using __annotated classes__ (see
 <<beans-java>>), annotate your test class with `@ContextConfiguration` and configure the
 `classes` attribute with an array that contains references to annotated classes.
@@ -19388,7 +19468,6 @@ To load an `ApplicationContext` for your tests using __annotated classes__ (see
 .Annotated Classes
 [TIP]
 ====
-
 The term __annotated class__ can refer to any of the following.
 
 * A class annotated with `@Configuration`
@@ -19403,13 +19482,14 @@ the discussion of __`@Bean` Lite Mode__.
 
 If you omit the `classes` attribute from the `@ContextConfiguration` annotation, the
 TestContext framework will attempt to detect the presence of default configuration
-classes. Specifically, `AnnotationConfigContextLoader` will detect all static inner
-classes of the test class that meet the requirements for configuration class
-implementations as specified in the `@Configuration` javadocs. In the following
-example, the `OrderServiceTest` class declares a static inner configuration class named
-`Config` that will be automatically used to load the `ApplicationContext` for the test
-class. Note that the name of the configuration class is arbitrary. In addition, a test
-class can contain more than one static inner configuration class if desired.
+classes. Specifically, `AnnotationConfigContextLoader` and
+`AnnotationConfigWebContextLoader` will detect all static inner classes of the test class
+that meet the requirements for configuration class implementations as specified in the
+`@Configuration` javadocs. In the following example, the `OrderServiceTest` class
+declares a static inner configuration class named `Config` that will be automatically
+used to load the `ApplicationContext` for the test class. Note that the name of the
+configuration class is arbitrary. In addition, a test class can contain more than one
+static inner configuration class if desired.
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -19444,34 +19524,37 @@ class can contain more than one static inner configuration class if desired.
 ----
 
 [[testcontext-ctx-management-mixed-config]]
-====== Mixing XML resources and annotated classes
-It may sometimes be desirable to mix XML resources and annotated classes (i.e.,
-typically `@Configuration` classes) to configure an `ApplicationContext` for your tests.
-For example, if you use XML configuration in production, you may decide that you want to
-use `@Configuration` classes to configure specific Spring-managed components for your
-tests, or vice versa.
+====== Mixing XML, Groovy scripts, and annotated classes
 
-Furthermore, some third-party frameworks (like Spring Boot) provide first-class
-support for loading an `ApplicationContext` from different types of resources
-simultaneously (e.g., XML configuration files and `@Configuration` classes). The Spring
+It may sometimes be desirable to mix XML configuration files, Groovy scripts, and
+annotated classes (i.e., typically `@Configuration` classes) to configure an
+`ApplicationContext` for your tests. For example, if you use XML configuration in
+production, you may decide that you want to use `@Configuration` classes to configure
+specific Spring-managed components for your tests, or vice versa.
+
+Furthermore, some third-party frameworks (like Spring Boot) provide first-class support
+for loading an `ApplicationContext` from different types of resources simultaneously
+(e.g., XML configuration files, Groovy scripts, and `@Configuration` classes). The Spring
 Framework historically has not supported this for standard deployments. Consequently,
-each of the `SmartContextLoader` implementations that the Spring Framework delivers in
-the `spring-test` module supports only one resource type per test context;
-however, this does not mean that you cannot use both. Third-party frameworks may
-choose to support the declaration of both `locations` and `classes` via
+most of the `SmartContextLoader` implementations that the Spring Framework delivers in
+the `spring-test` module support only one resource type per test context; however, this
+does not mean that you cannot use both. One exception to the general rule is that the
+`GenericGroovyXmlContextLoader` and `GenericGroovyXmlWebContextLoader` support both XML
+configuration files and Groovy scripts simultaneously. Furthermore, third-party
+frameworks may choose to support the declaration of both `locations` and `classes` via
 `@ContextConfiguration`, and with the standard testing support in the TestContext
 framework, you have the following options.
 
-If you want to use XML __and__ `@Configuration` classes to configure your tests, you
-will have to pick one as the __entry point__, and that one will have to include or
-import the other. For example, in XML you can include `@Configuration` classes via
-component scanning or define them as normal Spring beans in XML; whereas, in a
-`@Configuration` class you can use `@ImportResource` to import XML configuration files.
-Note that this behavior is semantically equivalent to how you configure your application
-in production: in production configuration you will define either a set of XML resource
-locations or a set of `@Configuration` classes that your production `ApplicationContext`
-will be loaded from, but you still have the freedom to include or import the other type
-of configuration.
+If you want to use resource locations (e.g., XML or Groovy) __and__ `@Configuration`
+classes to configure your tests, you will have to pick one as the __entry point__, and
+that one will have to include or import the other. For example, in XML or Groovy scripts
+you can include `@Configuration` classes via component scanning or define them as normal
+Spring beans; whereas, in a `@Configuration` class you can use `@ImportResource` to
+import XML configuration files. Note that this behavior is semantically equivalent to how
+you configure your application in production: in production configuration you will define
+either a set of XML or Groovy resource locations or a set of `@Configuration` classes
+that your production `ApplicationContext` will be loaded from, but you still have the
+freedom to include or import the other type of configuration.
 
 [[testcontext-ctx-management-initializers]]
 ====== Context configuration with context initializers
