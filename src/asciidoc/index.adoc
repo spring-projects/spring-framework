@@ -19245,8 +19245,9 @@ semantics, and execution of SQL scripts configured via the `@Sql` annotation.
 
 +
 
-As of Spring 3.1, implement `SmartContextLoader` instead of this interface in order to
-provide support for annotated classes and active bean definition profiles.
+Implement `SmartContextLoader` instead of this interface in order to provide support for
+annotated classes, active bean definition profiles, test property sources, context
+hierarchies, and ++WebApplicationContext++s.
 
 * `SmartContextLoader`: Extension of the `ContextLoader` interface introduced in Spring
   3.1.
@@ -19256,8 +19257,8 @@ provide support for annotated classes and active bean definition profiles.
 The `SmartContextLoader` SPI supersedes the `ContextLoader` SPI that was introduced in
 Spring 2.5. Specifically, a `SmartContextLoader` can choose to process resource
 `locations`, annotated `classes`, or context `initializers`. Furthermore, a
-`SmartContextLoader` can set active bean definition profiles in the context that it
-loads.
+`SmartContextLoader` can set active bean definition profiles and test property sources in
+the context that it loads.
 
 +
 
@@ -19295,9 +19296,37 @@ The following sections explain how to configure the TestContext framework throug
 annotations and provide working examples of how to write unit and integration tests with
 the framework.
 
+[[testcontext-tel-config]]
+===== TestExecutionListener registration and ordering
+
+Custom ++TestExecutionListener++s can be registered for a test class and its subclasses
+via the `@TestExecutionListeners` annotation (see
+<<integration-testing-annotations,annotation support>> for details). This mechanism is
+suitable for custom listeners that are used in limited testing scenarios; however, it can
+become cumbersome if a custom listener needs to be used across a test suite. To address
+this issue, Spring Framework 4.1 supports discovery of _default_ `TestExecutionListener`
+implementations via the `SpringFactoriesLoader` mechanism. Specifically, the
+`spring-test` module declares all core default ++TestExecutionListener++s under the
+`org.springframework.test.context.TestExecutionListener` key in its
+`META-INF/spring.factories` properties file, and third-party frameworks and developers
+can contribute to the list of default ++TestExecutionListener++s in the same manner via
+their own `META-INF/spring.factories` properties file.
+
+When the TestContext framework discovers default ++TestExecutionListeners++ via the
+aforementioned `SpringFactoriesLoader` mechanism, the instantiated listeners are sorted
+using Spring's `AnnotationAwareOrderComparator` which honors Spring's `Ordered` interface
+and `@Order` annotation for ordering. `AbstractTestExecutionListener` and all default
+++TestExecutionListener++s provided by Spring implement `Ordered` with appropriate
+values. Third-party frameworks and developers should therefore make sure that their
+_default_ ++TestExecutionListener++s are registered in the proper order by implementing
+`Ordered` or declaring `@Order`. Consult the javadocs for the `getOrder()` methods of the
+core default ++TestExecutionListener++s for details on what values are assigned to each
+core listener.
+
 
 [[testcontext-ctx-management]]
 ===== Context management
+
 Each `TestContext` provides context management and caching support for the test instance
 it is responsible for. Test instances do not automatically receive access to the
 configured `ApplicationContext`. However, if a test class implements the
