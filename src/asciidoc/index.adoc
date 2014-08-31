@@ -18154,7 +18154,6 @@ dealing with Spring MVC `ModelAndView` objects.
 .Unit testing Spring MVC Controllers
 [TIP]
 ====
-
 To test your Spring MVC ++Controller++s, use `ModelAndViewAssert` combined with
 `MockHttpServletRequest`, `MockHttpSession`, and so on from the <<mock-objects-servlet,
 `org.springframework.mock.web`>> package.
@@ -18319,10 +18318,22 @@ See support classes for the <<testcontext-support-classes,TestContext framework>
 ==== JDBC Testing Support
 The `org.springframework.test.jdbc` package contains `JdbcTestUtils`, which is a
 collection of JDBC related utility functions intended to simplify standard database
-testing scenarios. __Note that <<testcontext-support-classes-junit4,
+testing scenarios. Specifically, `JdbcTestUtils` provides the following static utility
+methods.
+
+* `countRowsInTable(..)`: counts the number of rows in the given table
+* `countRowsInTableWhere(..)`: counts the number of rows in the given table, using
+the provided `WHERE` clause
+* `deleteFromTables(..)`: deletes all rows from the specified tables
+* `deleteFromTableWhere(..)`: deletes rows from the given table, using the provided
+`WHERE` clause
+* `dropTables(..)`: drops the specified tables
+
+__Note that <<testcontext-support-classes-junit4,
 `AbstractTransactionalJUnit4SpringContextTests`>> and
 <<testcontext-support-classes-testng, `AbstractTransactionalTestNGSpringContextTests`>>
-provide convenience methods which delegate to `JdbcTestUtils` internally.__
+provide convenience methods which delegate to the aforementioned methods in
+`JdbcTestUtils`.__
 
 The `spring-jdbc` module provides support for configuring and launching an embedded
 database which can be used in integration tests that interact with a database. For
@@ -18810,6 +18821,75 @@ transaction has ended for test methods configured to run within a transaction vi
 	}
 ----
 
+* `@Sql`
+
++
+
+Used to annotate a test class or test method to configure SQL scripts to be executed
+against a given database during integration tests.
+
++
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@Test
+	**@Sql**({"/test-schema.sql", "/test-user-data.sql"})
+	public void userTest {
+		// execute code that relies on the test schema and test data
+	}
+----
+
++
+
+See <<testcontext-executing-sql-declaratively>> for further details.
+
+* `@SqlConfig`
+
++
+
+Defines metadata that is used to determine how to parse and execute SQL scripts
+configured via the `@Sql` annotation.
+
++
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@Test
+	@Sql(
+		scripts = "/test-user-data.sql",
+		config = **@SqlConfig**(commentPrefix = "`", separator = "@@")
+	)
+	public void userTest {
+		// execute code that relies on the test data
+	}
+----
+
+* `@SqlGroup`
+
++
+
+A container annotation that aggregates several `@Sql` annotations. Can be used natively,
+declaring several nested `@Sql` annotations. Can also be used in conjunction with Java
+8's support for repeatable annotations, where `@Sql` can simply be declared several times
+on the same class or method, implicitly generating this container annotation.
+
++
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@Test
+	**@SqlGroup**({
+		@Sql(scripts = "/test-schema.sql", config = @SqlConfig(commentPrefix = "`")),
+		@Sql("/test-user-data.sql")
+	)}
+	public void userTest {
+		// execute code that uses the test schema and test data
+	}
+----
+
 
 [[integration-testing-annotations-standard]]
 ===== Standard Annotation Support
@@ -18971,9 +19051,9 @@ well as any __set up__ or __tear down__ of the test fixture.
 
 [[integration-testing-annotations-meta]]
 ===== Meta-Annotation Support for Testing
-As of Spring Framework 4.0, it is now possible to use test-related annotations
-as <<beans-meta-annotations,meta-annotations>> in order to create custom
-_composed annotations_ and reduce configuration duplication across a test suite.
+As of Spring Framework 4.0, it is possible to use test-related annotations as
+<<beans-meta-annotations,meta-annotations>> in order to create custom _composed annotations_
+and reduce configuration duplication across a test suite.
 
 Each of the following may be used as meta-annotations in conjunction with the
 <<testcontext-framework,TestContext framework>>.
@@ -18989,6 +19069,9 @@ Each of the following may be used as meta-annotations in conjunction with the
 * `@AfterTransaction`
 * `@TransactionConfiguration`
 * `@Rollback`
+* `@Sql`
+* `@SqlConfig`
+* `@SqlGroup`
 * `@Repeat`
 * `@Timed`
 * `@IfProfileValue`
@@ -19098,12 +19181,13 @@ Spring test suite for further information and examples of various implementation
   events published by the `TestContextManager` with which the listener is registered.
 +
 
-Spring provides four `TestExecutionListener` implementations that are configured by
+Spring provides five `TestExecutionListener` implementations that are configured by
 default: `ServletTestExecutionListener`, `DependencyInjectionTestExecutionListener`,
-`DirtiesContextTestExecutionListener`, and `TransactionalTestExecutionListener`.
-Respectively, they support Servlet API mocks for a `WebApplicationContext`, dependency
-injection of the test instance, handling of the `@DirtiesContext` annotation, and
-transactional test execution with default rollback semantics.
+`DirtiesContextTestExecutionListener`, `TransactionalTestExecutionListener`, and
+`SqlScriptsTestExecutionListener`. Respectively, they support Servlet API mocks for
+a `WebApplicationContext`, dependency injection of the test instance, handling of
+the `@DirtiesContext` annotation, transactional test execution with default rollback
+semantics, and execution of SQL scripts configured via the `@Sql` annotation.
 
 * `ContextLoader`: Strategy interface introduced in Spring 2.5 for loading an
   `ApplicationContext` for an integration test managed by the Spring TestContext
@@ -20549,7 +20633,6 @@ __after transaction method__ is executed at the appropriate time.
 
 [TIP]
 ====
-
 Any __before methods__ (such as methods annotated with JUnit's `@Before`) and any
 __after methods__ (such as methods annotated with JUnit's `@After`) are executed
 __within__ a transaction. In addition, methods annotated with `@BeforeTransaction` or
@@ -20560,7 +20643,9 @@ to run within a transaction.
 The following JUnit-based example displays a fictitious integration testing scenario
 highlighting several transaction-related annotations. Consult the
 <<integration-testing-annotations,annotation support>> section for further information
-and configuration examples.
+and configuration examples. <<testcontext-executing-sql-declaratively-tx,
+Transaction management for `@Sql`>> contains an additional example using `@Sql` for
+declarative SQL script execution with default transaction rollback semantics.
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -20601,6 +20686,8 @@ and configuration examples.
 	}
 ----
 
+
+[[testcontext-tx-false-positives]]
 .Avoid false positives when testing ORM code
 [NOTE]
 ====
@@ -20640,43 +20727,320 @@ work__.
 ====
 
 
+[[testcontext-executing-sql]]
+===== Executing SQL scripts
+
+When writing integration tests against a relational database, it is often beneficial
+to execute SQL scripts to modify the database schema or insert test data into tables.
+The `spring-jdbc` module provides support for _initializing_ an embedded or existing
+database by executing SQL scripts when the Spring `ApplicationContext` is loaded. See
+<<jdbc-embedded-database-support>> and <<jdbc-embedded-database-dao-testing>> for
+details.
+
+Although it is very useful to initialize a database for testing _once_ when the
+`ApplicationContext` is loaded, sometimes it is essential to be able to modify the
+database _during_ integration tests. The following sections explain how to execute SQL
+scripts programmatically and declaratively during integration tests.
+
+[[testcontext-executing-sql-programmatically]]
+====== Executing SQL scripts programmatically
+
+Spring provides the following options for executing SQL scripts programmatically within
+integration test methods.
+
+* `org.springframework.jdbc.datasource.init.ScriptUtils`
+* `org.springframework.jdbc.datasource.init.ResourceDatabasePopulator`
+* `org.springframework.test.context.junit4.AbstractTransactionalJUnit4SpringContextTests`
+* `org.springframework.test.context.testng.AbstractTransactionalTestNGSpringContextTests`
+
+`ScriptUtils` provides a collection of static utility methods for working with SQL scripts
+and is mainly intended for internal use within the framework. However, if you require
+full control over how SQL scripts are parsed and executed, `ScriptUtils` may suit your
+needs better than some of the other alternatives described below. Consult the javadocs for
+individual methods in `ScriptUtils` for further details.
+
+`ResourceDatabasePopulator` provides a simple object-based API for programmatically
+populating, initializing, or cleaning up a database using SQL scripts defined in
+external resources. `ResourceDatabasePopulator` provides options for configuring the
+character encoding, statement separator, comment delimiters, and error handling flags
+used when parsing and executing the scripts, and each of the configuration options has
+a reasonable default value. Consult the javadocs for details on default values. To
+execute the scripts configured in a `ResourceDatabasePopulator`, you can invoke either
+the `populate(Connection)` method to execute the populator against a
+`java.sql.Connection` or the `execute(DataSource)` method to execute the populator
+against a `javax.sql.DataSource`. The following example specifies SQL scripts for a test
+schema and test data, sets the statement separator to `"@@"`, and then executes the
+scripts against a `DataSource`.
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@Test
+	public void databaseTest {
+		ResourceDatabasePopulator populator = new ResourceDatabasePopulator();
+		populator.addScripts(
+			new ClassPathResource("test-schema.sql"), 
+			new ClassPathResource("test-data.sql"));
+		populator.setSeparator("@@");
+		populator.execute(this.dataSource);
+		// execute code that uses the test schema and data
+	}
+----
+
+Note that `ResourceDatabasePopulator` internally delegates to `ScriptUtils` for parsing
+and executing SQL scripts. Similarly, the `executeSqlScript(..)` methods in
+<<testcontext-support-classes-junit4, `AbstractTransactionalJUnit4SpringContextTests`>> and
+<<testcontext-support-classes-testng, `AbstractTransactionalTestNGSpringContextTests`>>
+internally use a `ResourceDatabasePopulator` for executing SQL scripts. Consult the javadocs
+for the various `executeSqlScript(..)` methods for further details.
+
+
+[[testcontext-executing-sql-declaratively]]
+====== Executing SQL scripts declaratively with `@Sql`
+
+In addition to the aforementioned mechanisms for executing SQL scripts
+_programmatically_, SQL scripts can also be configured _declaratively_ in the Spring
+TestContext Framework. Specifically, the `@Sql` annotation can be declared on a test
+class or test method to configure the resource paths to SQL scripts that should be
+executed against a given database either before or after an integration test method. Note
+that method-level declarations override class-level declarations and that support for
+`@Sql` is provided by the `SqlScriptsTestExecutionListener` which is enabled by default.
+
+*Path resource semantics*
+
+Each path will be interpreted as a Spring `Resource`. A plain path -- for example,
+`"schema.sql"` -- will be treated as a classpath resource that is _relative_ to the
+package in which the test class is defined. A path starting with a slash will be treated
+as an _absolute_ classpath resource, for example: `"/org/example/schema.sql"`. A path
+which references a URL (e.g., a path prefixed with `classpath:`, `file:`, `http:`, etc.)
+will be loaded using the specified resource protocol.
+
+The following example demonstrates how to use `@Sql` at the class level and at the method
+level within a JUnit-based integration test class.
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@RunWith(SpringJUnit4ClassRunner.class)
+	@ContextConfiguration
+	@Sql("/test-schema.sql")
+	public class DatabaseTests {
+
+		@Test
+		public void emptySchemaTest {
+			// execute code that uses the test schema without any test data
+		}
+
+		@Test
+		@Sql({"/test-schema.sql", "/test-user-data.sql"})
+		public void userTest {
+			// execute code that uses the test schema and test data
+		}
+	}
+----
+
+*Default script detection*
+
+If no SQL scripts are specified, an attempt will be made to detect a `default` script
+depending on where `@Sql` is declared. If a default cannot be detected, an
+`IllegalStateException` will be thrown.
+
+* __class-level declaration__: if the annotated test class is `com.example.MyTest`, the
+	corresponding default script is `"classpath:com/example/MyTest.sql"`.
+* __method-level declaration__: if the annotated test method is named `testMethod()` and is
+	defined in the class `com.example.MyTest`, the corresponding default script is
+	`"classpath:com/example/MyTest.testMethod.sql"`.
+
+*Declaring multiple `@Sql` sets*
+
+If multiple sets of SQL scripts need to be configured for a given test class or test
+method but with different syntax configuration, different error handling rules, or
+different execution phases per set, it is possible to declare multiple instances of
+`@Sql`. With Java 8, `@Sql` can be used as a _repeatable_ annotation. Otherwise, the
+`@SqlGroup` annotation can be used as an explicit container for declaring multiple
+instances of `@Sql`.
+
+The following example demonstrates the use of `@Sql` as a repeatable annotation using
+Java 8. In this scenario the `test-schema.sql` script uses a different syntax for
+single-line comments.
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@Test
+	@Sql(scripts = "/test-schema.sql", config = @SqlConfig(commentPrefix = "`"))
+	@Sql("/test-user-data.sql")
+	public void userTest {
+		// execute code that uses the test schema and test data
+	}
+----
+
+The following example is identical to the above except that the `@Sql` declarations are
+grouped together within `@SqlGroup` for compatibility with Java 6 and Java 7.
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@Test
+	@SqlGroup({
+		@Sql(scripts = "/test-schema.sql", config = @SqlConfig(commentPrefix = "`")),
+		@Sql("/test-user-data.sql")
+	)}
+	public void userTest {
+		// execute code that uses the test schema and test data
+	}
+----
+
+*Script execution phases*
+
+By default, SQL scripts will be executed _before_ the corresponding test method. However,
+if a particular set of scripts needs to be executed _after_ the test method -- for
+example, to clean up database state -- the `executionPhase` attribute in `@Sql` can be
+used as seen in the following example. Note that `ISOLATED` and `AFTER_TEST_METHOD` are
+statically imported from `Sql.TransactionMode` and `Sql.ExecutionPhase` respectively.
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@Test
+	@Sql(
+		scripts = "create-test-data.sql",
+		config = @SqlConfig(transactionMode = ISOLATED)
+	)
+	@Sql(
+		scripts = "delete-test-data.sql",
+		config = @SqlConfig(transactionMode = ISOLATED),
+		executionPhase = AFTER_TEST_METHOD
+	)
+	public void userTest {
+		// execute code that needs the test data to be committed
+		// to the database outside of the test's transaction
+	}
+----
+
+*Script configuration with `@SqlConfig`*
+
+Configuration for script parsing and error handling can be configured via the
+`@SqlConfig` annotation. When declared as a class-level annotation on an integration test
+class, `@SqlConfig` serves as _global_ configuration for all SQL scripts within the test
+class hierarchy. When declared directly via the `config` attribute of the `@Sql`
+annotation, `@SqlConfig` serves as _local_ configuration for the SQL scripts declared
+within the enclosing `@Sql` annotation. Every attribute in `@SqlConfig` has an implicit
+default value which is documented in the javadocs of the corresponding attribute. Due to
+the rules defined for annotation attributes in the Java Language Specification, it is
+unfortunately not possible to assign a value of `null` to an annotation attribute. Thus,
+in order to support overrides of inherited global configuration, `@SqlConfig` attributes
+have an explicit default value of either `""` for Strings or `DEFAULT` for Enums. This
+approach allows local declarations of `@SqlConfig` to selectively override individual
+attributes from global declarations of `@SqlConfig` by providing a value other than `""`
+or `DEFAULT`. Global `@SqlConfig` attributes are inherited whenever local `@SqlConfig`
+attributes do not supply an explicit value other than `""` or `DEFAULT`. Explicit _local_
+configuration therefore overrides _global_ configuration.
+
+The configuration options provided by `@Sql` and `@SqlConfig` are equivalent to those
+supported by `ScriptUtils` and `ResourceDatabasePopulator` but are a superset of those
+provided by the `<jdbc:initialize-database/>` XML namespace element. Consult the javadocs
+of individual attributes in `@Sql` and `@SqlConfig` for details.
+
+[[testcontext-executing-sql-declaratively-tx]]
+*Transaction management for `@Sql`*
+
+By default, the `SqlScriptsTestExecutionListener` will infer the desired transaction
+semantics for scripts configured via `@Sql`. Specifically, SQL scripts will be executed
+without a transaction, within an existing Spring-managed transaction -- for example, a
+transaction managed by the `TransactionalTestExecutionListener` for a test annotated with
+`@Transactional` -- or within an isolated transaction, depending on the configured value
+of the `transactionMode` attribute in `@SqlConfig` and the presence of a
+`PlatformTransactionManager` in the test's `ApplicationContext`. As a bare minimum
+however, a `javax.sql.DataSource` must be present in the test's `ApplicationContext`.
+
+If the algorithms used by `SqlScriptsTestExecutionListener` to detect a `DataSource` and
+`PlatformTransactionManager` and infer the transaction semantics do not suit your needs,
+you may specify explicit names via the `dataSource` and `transactionManager` attributes
+of `@SqlConfig`. Furthermore, the transaction propagation behavior can be controlled via
+the `transactionMode` attribute of `@SqlConfig` -- for example, if scripts should be
+executed in an isolated transaction. Although a thorough discussion of all supported
+options for transaction management with `@Sql` is beyond the scope of this reference
+manual, the javadocs for `@SqlConfig` and `SqlScriptsTestExecutionListener` provide
+detailed information, and the following example demonstrates a typical testing scenario
+using JUnit and transactional tests with `@Sql`. Note that there is no need to clean up
+the database after the `usersTest()` method is executed since any changes made to the
+database (either within the the test method or within the `/test-data.sql` script) will
+be automatically rolled back by the `TransactionalTestExecutionListener` (see
+<<testcontext-tx>> for details).
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@RunWith(SpringJUnit4ClassRunner.class)
+	@ContextConfiguration(classes = TestDatabaseConfig.class)
+	@Transactional
+	public class TransactionalSqlScriptsTests {
+
+		protected JdbcTemplate jdbcTemplate;
+
+		@Autowired
+		public void setDataSource(DataSource dataSource) {
+			this.jdbcTemplate = new JdbcTemplate(dataSource);
+		}
+
+		@Test
+		@Sql("/test-data.sql")
+		public void usersTest() {
+			// verify state in test database:
+			assertNumUsers(2);
+			// execute code that uses the test data...
+		}
+
+		protected int countRowsInTable(String tableName) {
+			return JdbcTestUtils.countRowsInTable(this.jdbcTemplate, tableName);
+		}
+
+		protected void assertNumUsers(int expected) {
+			assertEquals("Number of rows in the 'user' table.", expected, countRowsInTable("user"));
+		}
+	}
+----
+
+
 [[testcontext-support-classes]]
 ===== TestContext Framework support classes
 
 [[testcontext-support-classes-junit4]]
 ====== JUnit support classes
-The `org.springframework.test.context.junit4` package provides support classes for
-JUnit-based test cases.
+The `org.springframework.test.context.junit4` package provides the following support
+classes for JUnit-based test cases.
 
-* `AbstractJUnit4SpringContextTests`: Abstract base test class that integrates the
-  __Spring TestContext Framework__ with explicit `ApplicationContext` testing support in
-  a JUnit 4.9+ environment.
-  When you extend `AbstractJUnit4SpringContextTests`, you can access the following
-  `protected` instance variable:
-** `applicationContext`: Use this variable to perform explicit bean lookups or to test
-  the state of the context as a whole.
-* `AbstractTransactionalJUnit4SpringContextTests`: Abstract __transactional__ extension
-  of `AbstractJUnit4SpringContextTests` that also adds some convenience functionality
-  for JDBC access. Expects a `javax.sql.DataSource` bean and a
-  `PlatformTransactionManager` bean to be defined in the `ApplicationContext`.
-  When you extend `AbstractTransactionalJUnit4SpringContextTests` you can access the
-  following `protected` instance variables:
-** `applicationContext`: Inherited from the `AbstractJUnit4SpringContextTests`
-  superclass. Use this variable to perform explicit bean lookups or to test the state of
-  the context as a whole.
-** `jdbcTemplate`: Use this variable to execute SQL statements to query the database.
-  Such queries can be used to confirm database state both __prior to__ and __after__
-  execution of database-related application code, and Spring ensures that such queries run
-  in the scope of the same transaction as the application code. When used in conjunction
-  with an ORM tool, be sure to avoid <<testcontext-tx-false-positives,false positives>>.
+* `AbstractJUnit4SpringContextTests`
+* `AbstractTransactionalJUnit4SpringContextTests`
 
+`AbstractJUnit4SpringContextTests` is an abstract base test class that integrates the
+__Spring TestContext Framework__ with explicit `ApplicationContext` testing support in
+a JUnit 4.9+ environment. When you extend `AbstractJUnit4SpringContextTests`, you can
+access a `protected` `applicationContext` instance variable that can be used to perform
+explicit bean lookups or to test the state of the context as a whole.
+
+`AbstractTransactionalJUnit4SpringContextTests` is an abstract __transactional__ extension
+of `AbstractJUnit4SpringContextTests` that adds some convenience functionality for JDBC
+access. This class expects a `javax.sql.DataSource` bean and a `PlatformTransactionManager`
+bean to be defined in the `ApplicationContext`. When you extend
+`AbstractTransactionalJUnit4SpringContextTests` you can access a `protected` `jdbcTemplate`
+instance variable that can be used to execute SQL statements to query the database. Such
+queries can be used to confirm database state both __prior to__ and __after__ execution of
+database-related application code, and Spring ensures that such queries run in the scope of
+the same transaction as the application code. When used in conjunction with an ORM tool,
+be sure to avoid <<testcontext-tx-false-positives,false positives>>. As mentioned in
+<<integration-testing-support-jdbc>>, `AbstractTransactionalJUnit4SpringContextTests`
+also provides convenience methods which delegate to methods in `JdbcTestUtils` using the
+aforementioned `jdbcTemplate`. Furthermore, `AbstractTransactionalJUnit4SpringContextTests`
+provides an `executeSqlScript(..)` method for executing SQL scripts against the configured
+`DataSource`.
 
 [TIP]
 ====
-These classes are a convenience for extension. If you do not want your test classes to
-be tied to a Spring-specific class hierarchy -- for example, if you want to directly
-extend the class you are testing -- you can configure your own custom test classes by
-using `@RunWith(SpringJUnit4ClassRunner.class)`, `@ContextConfiguration`,
+These classes are a convenience for extension. If you do not want your test classes to be
+tied to a Spring-specific class hierarchy, you can configure your own custom test classes
+by using `@RunWith(SpringJUnit4ClassRunner.class)`, `@ContextConfiguration`,
 `@TestExecutionListeners`, and so on.
 ====
 
@@ -20709,39 +21073,40 @@ configured through `@ContextConfiguration`.
 
 [[testcontext-support-classes-testng]]
 ====== TestNG support classes
-The `org.springframework.test.context.testng` package provides support classes for
-TestNG based test cases.
+The `org.springframework.test.context.testng` package provides the following support
+classes for TestNG based test cases.
 
-* `AbstractTestNGSpringContextTests`: Abstract base test class that integrates the
-  __Spring TestContext Framework__ with explicit `ApplicationContext` testing support in
-  a TestNG environment.
-  When you extend `AbstractTestNGSpringContextTests`, you can access the following
-  `protected` instance variable:
-** `applicationContext`: Use this variable to perform explicit bean lookups or to test
-  the state of the context as a whole.
-* `AbstractTransactionalTestNGSpringContextTests`: Abstract __transactional__ extension
-  of `AbstractTestNGSpringContextTests` that adds some convenience functionality for JDBC
-  access. Expects a `javax.sql.DataSource` bean and a `PlatformTransactionManager` bean to
-  be defined in the `ApplicationContext`.
-  When you extend `AbstractTransactionalTestNGSpringContextTests`, you can access the following
-  `protected` instance variables:
-** `applicationContext`: Inherited from the `AbstractTestNGSpringContextTests`
-  superclass. Use this variable to perform explicit bean lookups or to test the state of
-  the context as a whole.
-** `jdbcTemplate`: Use this variable to execute SQL statements to query the database.
-  Such queries can be used to confirm database state both __prior to__ and __after__
-  execution of database-related application code, and Spring ensures that such queries run
-  in the scope of the same transaction as the application code. When used in conjunction
-  with an ORM tool, be sure to avoid <<testcontext-tx-false-positives,false positives>>.
+* `AbstractTestNGSpringContextTests`
+* `AbstractTransactionalTestNGSpringContextTests`
+
+`AbstractTestNGSpringContextTests` is an abstract base test class that integrates the
+__Spring TestContext Framework__ with explicit `ApplicationContext` testing support in
+a TestNG environment. When you extend `AbstractTestNGSpringContextTests`, you can
+access a `protected` `applicationContext` instance variable that can be used to perform
+explicit bean lookups or to test the state of the context as a whole.
+
+`AbstractTransactionalTestNGSpringContextTests` is an abstract __transactional__ extension
+of `AbstractTestNGSpringContextTests` that adds some convenience functionality for JDBC
+access. This class expects a `javax.sql.DataSource` bean and a `PlatformTransactionManager`
+bean to be defined in the `ApplicationContext`. When you extend
+`AbstractTransactionalTestNGSpringContextTests` you can access a `protected` `jdbcTemplate`
+instance variable that can be used to execute SQL statements to query the database. Such
+queries can be used to confirm database state both __prior to__ and __after__ execution of
+database-related application code, and Spring ensures that such queries run in the scope of
+the same transaction as the application code. When used in conjunction with an ORM tool,
+be sure to avoid <<testcontext-tx-false-positives,false positives>>. As mentioned in
+<<integration-testing-support-jdbc>>, `AbstractTransactionalTestNGSpringContextTests`
+also provides convenience methods which delegate to methods in `JdbcTestUtils` using the
+aforementioned `jdbcTemplate`. Furthermore, `AbstractTransactionalTestNGSpringContextTests`
+provides an `executeSqlScript(..)` method for executing SQL scripts against the configured
+`DataSource`.
 
 
 [TIP]
 ====
-
-These classes are a convenience for extension. If you do not want your test classes to
-be tied to a Spring-specific class hierarchy -- for example, if you want to directly
-extend the class you are testing -- you can configure your own custom test classes by
-using `@ContextConfiguration`, `@TestExecutionListeners`, and so on, and by manually
+These classes are a convenience for extension. If you do not want your test classes to be
+tied to a Spring-specific class hierarchy, you can configure your own custom test classes
+by using `@ContextConfiguration`, `@TestExecutionListeners`, and so on, and by manually
 instrumenting your test class with a `TestContextManager`. See the source code of
 `AbstractTestNGSpringContextTests` for an example of how to instrument your test class.
 ====
