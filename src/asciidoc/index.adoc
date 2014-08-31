@@ -20901,36 +20901,158 @@ configured theme.
 	}
 ----
 
-
 [[testcontext-tx]]
 ===== Transaction management
+
 In the TestContext framework, transactions are managed by the
-`TransactionalTestExecutionListener`. Note that `TransactionalTestExecutionListener` is
-configured by default, even if you do not explicitly declare `@TestExecutionListeners`
-on your test class. To enable support for transactions, however, you must provide a
-`PlatformTransactionManager` bean in the application context loaded by
-`@ContextConfiguration` semantics. In addition, you must declare `@Transactional` either
-at the class or method level for your tests.
+`TransactionalTestExecutionListener` which is configured by default, even if you do not
+explicitly declare `@TestExecutionListeners` on your test class. To enable support for
+transactions, however, you must configure a `PlatformTransactionManager` bean in the
+`ApplicationContext` that is loaded via `@ContextConfiguration` semantics (further
+details are provided below). In addition, you must declare Spring's `@Transactional`
+annotation either at the class or method level for your tests.
 
-For class-level transaction configuration (i.e., setting an explicit bean name for the
-transaction manager and the default rollback flag), see the `@TransactionConfiguration`
-entry in the <<integration-testing-annotations,annotation support>> section.
+[[testcontext-tx-test-managed-transactions]]
+====== Test-managed transactions
 
-If transactions are not enabled for the entire test class, you can annotate methods
-explicitly with `@Transactional`. To control whether a transaction should commit for a
-particular test method, you can use the `@Rollback` annotation to override the
-class-level default rollback setting.
+_Test-managed transactions_ are transactions that are managed _declaratively_ via the
+`TransactionalTestExecutionListener` or _programmatically_ via `TestTransaction` (see
+below). Such transactions should not be confused with _Spring-managed transactions_
+(i.e., those managed directly by Spring within the `ApplicationContext` loaded for tests)
+or _application-managed transactions_ (i.e., those managed programmatically within
+application code that is invoked via tests). Spring-managed and application-managed
+transactions will typically participate in test-managed transactions; however, caution
+should be taken if Spring-managed or application-managed transactions are configured with
+any _propagation_ type other than `REQUIRED` or `SUPPORTS` (see <<tx-propagation>> for
+details).
 
-__<<testcontext-support-classes-junit4,
+[[testcontext-tx-enabling-transactions]]
+====== Enabling and disabling transactions
+
+Annotating a test method with `@Transactional` causes the test to be run within a
+transaction that will, by default, be automatically rolled back after completion of the
+test. If a test class is annotated with `@Transactional`, each test method within that
+class hierarchy will be run within a transaction. Test methods that are not annotated
+with `@Transactional` (at the class or method level) will not be run within a
+transaction. Furthermore, tests that are annotated with `@Transactional` but have the
+`propagation` type set to `NOT_SUPPORTED` will not be run within a transaction.
+
+__Note that <<testcontext-support-classes-junit4,
 `AbstractTransactionalJUnit4SpringContextTests`>> and
 <<testcontext-support-classes-testng, `AbstractTransactionalTestNGSpringContextTests`>>
 are preconfigured for transactional support at the class level.__
 
-Occasionally you need to execute certain code before or after a transactional test
-method but outside the transactional context, for example, to verify the initial
-database state prior to execution of your test or to verify expected transactional
-commit behavior after test execution (if the test was configured not to roll back the
-transaction). `TransactionalTestExecutionListener` supports the `@BeforeTransaction` and
+The following example demonstrates a common scenario for writing an integration test for
+a Hibernate-based `UserRepository`. As explained in
+<<testcontext-tx-rollback-and-commit-behavior>>, there is no need to clean up the
+database after the `createUser()` method is executed since any changes made to the
+database will be automatically rolled back by the `TransactionalTestExecutionListener`.
+See the <<testing-examples-petclinic>> section for an additional example.
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@RunWith(SpringJUnit4ClassRunner.class)
+	@ContextConfiguration(classes = TestConfig.class)
+	@Transactional
+	public class HibernateUserRepositoryTests {
+
+		@Autowired
+		HibernateUserRepository repository;
+
+		@Autowired
+		SessionFactory sessionFactory;
+
+		JdbcTemplate jdbcTemplate;
+
+		@Autowired
+		public void setDataSource(DataSource dataSource) {
+			this.jdbcTemplate = new JdbcTemplate(dataSource);
+		}
+
+		@Test
+		public void createUser() {
+			// track initial state in test database:
+			final int count = countRowsInTable("user");
+
+			User user = new User(...);
+			repository.save(user);
+
+			// Manual flush is required to avoid false positive in test
+			sessionFactory.getCurrentSession().flush();
+			assertNumUsers(count + 1);
+		}
+
+		protected int countRowsInTable(String tableName) {
+			return JdbcTestUtils.countRowsInTable(this.jdbcTemplate, tableName);
+		}
+
+		protected void assertNumUsers(int expected) {
+			assertEquals("Number of rows in the 'user' table.", expected, countRowsInTable("user"));
+		}
+	}
+----
+
+[[testcontext-tx-rollback-and-commit-behavior]]
+====== Transaction rollback and commit behavior
+
+By default, test transactions will be automatically rolled back after completion of the
+test; however, transactional commit and rollback behavior can be configured declaratively
+via the class-level `@TransactionConfiguration` and method-level `@Rollback` annotations.
+See the corresponding entries in the <<integration-testing-annotations,annotation
+support>> section for further details.
+
+[[testcontext-tx-programmatic-tx-mgt]]
+====== Programmatic transaction management
+As of Spring Framework 4.1, it is possible to interact with test-managed transactions
+_programmatically_ via the static methods in `TestTransaction`. For example,
+`TestTransaction` may be used within _test_ methods, _before_ methods, and _after_
+methods to start or end the current test-managed transaction or to configure the current
+test-managed transaction for rollback or commit. Support for `TestTransaction` is
+automatically available whenever the `TransactionalTestExecutionListener` is enabled.
+
+The following example demonstrates some of the features of `TestTransaction`. Consult the
+javadocs for `TestTransaction` for further details.
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@ContextConfiguration(classes = TestConfig.class)
+	public class ProgrammaticTransactionManagementTests extends
+			AbstractTransactionalJUnit4SpringContextTests {
+	
+		@Test
+		public void transactionalTest() {
+			// assert initial state in test database:
+			assertNumUsers(2);
+
+			deleteFromTables("user");
+
+			// changes to the database will be committed!
+			TestTransaction.flagForCommit();
+			TestTransaction.end();
+			assertFalse(TestTransaction.isActive());
+			assertNumUsers(0);
+
+			TestTransaction.start();
+			// perform other actions against the database that will
+			// be automatically rolled back after the test completes...
+		}
+
+		protected void assertNumUsers(int expected) {
+			assertEquals("Number of rows in the 'user' table.", expected, countRowsInTable("user"));
+		}
+	}
+----
+
+[[testcontext-tx-before-and-after-tx]]
+====== Executing code outside of a transaction
+
+Occasionally you need to execute certain code before or after a transactional test method
+but outside the transactional context -- for example, to verify the initial database state
+prior to execution of your test or to verify expected transactional commit behavior after
+test execution (if the test was configured not to roll back the transaction).
+`TransactionalTestExecutionListener` supports the `@BeforeTransaction` and
 `@AfterTransaction` annotations exactly for such scenarios. Simply annotate any `public
 void` method in your test class with one of these annotations, and the
 `TransactionalTestExecutionListener` ensures that your __before transaction method__ or
@@ -20938,17 +21060,35 @@ __after transaction method__ is executed at the appropriate time.
 
 [TIP]
 ====
-Any __before methods__ (such as methods annotated with JUnit's `@Before`) and any
-__after methods__ (such as methods annotated with JUnit's `@After`) are executed
-__within__ a transaction. In addition, methods annotated with `@BeforeTransaction` or
+Any __before methods__ (such as methods annotated with JUnit's `@Before`) and any __after
+methods__ (such as methods annotated with JUnit's `@After`) are executed __within__ a
+transaction. In addition, methods annotated with `@BeforeTransaction` or
 `@AfterTransaction` are naturally not executed for test methods that are not configured
 to run within a transaction.
 ====
 
+[[testcontext-tx-mgr-config]]
+====== Configuring a transaction manager
+
+`TransactionalTestExecutionListener` expects a `PlatformTransactionManager` bean to be
+defined in the Spring `ApplicationContext` for the test. In case there are multiple
+instances of `PlatformTransactionManager` within the test's `ApplicationContext`,
+`@TransactionConfiguration` supports configuring the bean name of the
+`PlatformTransactionManager` that should be used to drive transactions. Alternatively, a
+_qualifier_ may be declared via `@Transactional("myQualifier")`, or
+`TransactionManagementConfigurer` can be implemented by an `@Configuration` class.
+Consult the javadocs for `TestContextTransactionUtils.retrieveTransactionManager()` for
+details on the algorithm used to look up a transaction manager in the test's
+`ApplicationContext`.
+
+[[testcontext-tx-annotation-demo]]
+====== Demonstration of all transaction-related annotations
+
 The following JUnit-based example displays a fictitious integration testing scenario
-highlighting several transaction-related annotations. Consult the
-<<integration-testing-annotations,annotation support>> section for further information
-and configuration examples. <<testcontext-executing-sql-declaratively-tx,
+highlighting all transaction-related annotations. The example is **not** intended to
+demonstrate best practices but rather to demonstrate how these annotations can be used.
+Consult the <<integration-testing-annotations,annotation support>> section for further
+information and configuration examples. <<testcontext-executing-sql-declaratively-tx,
 Transaction management for `@Sql`>> contains an additional example using `@Sql` for
 declarative SQL script execution with default transaction rollback semantics.
 
@@ -20990,7 +21130,6 @@ declarative SQL script execution with default transaction rollback semantics.
 
 	}
 ----
-
 
 [[testcontext-tx-false-positives]]
 .Avoid false positives when testing ORM code
@@ -21892,11 +22031,11 @@ tests] of client-side REST tests.
 
 [[testing-examples-petclinic]]
 ==== PetClinic Example
+
 The PetClinic application, available on
-https://github.com/spring-projects/spring-petclinic[Github], illustrates several features
-of the __Spring TestContext Framework__ in a JUnit environment. Most test
-functionality is included in the `AbstractClinicTests`, for which a partial listing
-is shown below:
+https://github.com/spring-projects/spring-petclinic[GitHub], illustrates several features
+of the __Spring TestContext Framework__ in a JUnit environment. Most test functionality
+is included in the `AbstractClinicTests`, for which a partial listing is shown below:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -21934,16 +22073,16 @@ Notes:
   `TransactionalTestExecutionListener`).
 * The `clinic` instance variable -- the application object being tested -- is set by
   Dependency Injection through `@Autowired` semantics.
-* The `getVets()` method illustrates how you can use the inherited
-  `countRowsInTable()` method to easily verify the number of rows in a given table, thus
-  verifying correct behavior of the application code being tested. This allows for
-  stronger tests and lessens dependency on the exact test data. For example, you can add
-  additional rows in the database without breaking tests.
+* The `getVets()` method illustrates how you can use the inherited `countRowsInTable()`
+  method to easily verify the number of rows in a given table, thus verifying correct
+  behavior of the application code being tested. This allows for stronger tests and
+  lessens dependency on the exact test data. For example, you can add additional rows in
+  the database without breaking tests.
 * Like many integration tests that use a database, most of the tests in
-  `AbstractClinicTests` depend on a minimum amount of data already in the database
-  before the test cases run. Alternatively, you might choose to populate the database
-  within the test fixture set up of your test cases -- again, within the same
-  transaction as the tests.
+  `AbstractClinicTests` depend on a minimum amount of data already in the database before
+  the test cases run. Alternatively, you might choose to populate the database within the
+  test fixture set up of your test cases -- again, within the same transaction as the
+  tests.
 
 The PetClinic application supports three data access technologies: JDBC, Hibernate, and
 JPA. By declaring `@ContextConfiguration` without any specific resource locations, the
