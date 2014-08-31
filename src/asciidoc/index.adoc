@@ -19428,10 +19428,11 @@ a default location based on the name of the test class. If your class is named
 ====== Context configuration with Groovy scripts
 
 To load an `ApplicationContext` for your tests using Groovy scripts that utilize the
-<<groovy-bean-definition-dsl>>, annotate your test class with `@ContextConfiguration` and
-configure the `locations` or `value` attribute with an array that contains the resource
-locations of Groovy scripts. Resource lookup semantics for Groovy scripts are the same as
-those described for <<testcontext-ctx-management-xml,XML configuration files>>.
+<<groovy-bean-definition-dsl,Groovy Bean Definition DSL>>, annotate your test class with
+`@ContextConfiguration` and configure the `locations` or `value` attribute with an array
+that contains the resource locations of Groovy scripts. Resource lookup semantics for
+Groovy scripts are the same as those described for <<testcontext-ctx-management-xml,XML
+configuration files>>.
 
 
 .Enabling Groovy script support
@@ -20606,7 +20607,8 @@ application context for `ExtendedTests` will be loaded only from
 If `@DirtiesContext` is used in a test whose context is configured as part of a context
 hierarchy, the `hierarchyMode` flag can be used to control how the context cache is
 cleared. For further details consult the discussion of `@DirtiesContext` in
-<<integration-testing-annotations-spring>> and the `@DirtiesContext` javadocs.
+<<integration-testing-annotations-spring,Spring Testing Annotations>> and the
+`@DirtiesContext` javadocs.
 ====
 --
 
@@ -20923,8 +20925,8 @@ or _application-managed transactions_ (i.e., those managed programmatically with
 application code that is invoked via tests). Spring-managed and application-managed
 transactions will typically participate in test-managed transactions; however, caution
 should be taken if Spring-managed or application-managed transactions are configured with
-any _propagation_ type other than `REQUIRED` or `SUPPORTS` (see <<tx-propagation>> for
-details).
+any _propagation_ type other than `REQUIRED` or `SUPPORTS` (see the discussion on
+<<tx-propagation,transaction propagation>> for details).
 
 [[testcontext-tx-enabling-transactions]]
 ====== Enabling and disabling transactions
@@ -20947,7 +20949,7 @@ a Hibernate-based `UserRepository`. As explained in
 <<testcontext-tx-rollback-and-commit-behavior>>, there is no need to clean up the
 database after the `createUser()` method is executed since any changes made to the
 database will be automatically rolled back by the `TransactionalTestExecutionListener`.
-See the <<testing-examples-petclinic>> section for an additional example.
+See <<testing-examples-petclinic>> for an additional example.
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -21411,7 +21413,7 @@ using JUnit and transactional tests with `@Sql`. Note that there is no need to c
 the database after the `usersTest()` method is executed since any changes made to the
 database (either within the the test method or within the `/test-data.sql` script) will
 be automatically rolled back by the `TransactionalTestExecutionListener` (see
-<<testcontext-tx>> for details).
+<<testcontext-tx,transaction management>> for details).
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
