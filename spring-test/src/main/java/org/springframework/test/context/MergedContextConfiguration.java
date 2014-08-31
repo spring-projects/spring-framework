@@ -57,7 +57,9 @@ import org.springframework.util.StringUtils;
  * @author Sam Brannen
  * @since 3.1
  * @see ContextConfiguration
+ * @see ContextHierarchy
  * @see ActiveProfiles
+ * @see TestPropertySource
  * @see ContextConfigurationAttributes
  * @see SmartContextLoader#loadContext(MergedContextConfiguration)
  */
