@@ -37,7 +37,7 @@ a cross-platform, self-contained bootstrap mechanism for the build.
 
 ### Prerequisites
 
-[Git][] and [OpenJDK 8 early access build 100 or later][JDK8 build]
+[Git][] and [JDK 8 update 20 or later][JDK8 build]
 
 Be sure that your `JAVA_HOME` environment variable points to the `jdk1.8.0` folder
 extracted from the JDK download.
@@ -89,7 +89,7 @@ The Spring Framework is released under version 2.0 of the [Apache License][].
 [Gradle]: http://gradle.org
 [`./gradlew`]: http://vimeo.com/34436402
 [Git]: http://help.github.com/set-up-git-redirect
-[JDK8 build]: http://jdk8.java.net/download.html
+[JDK8 build]: http://www.oracle.com/technetwork/java/javase/downloads
 [Gradle build and release FAQ]: https://github.com/spring-projects/spring-framework/wiki/Gradle-build-and-release-FAQ
 [Pull requests]: http://help.github.com/send-pull-requests
 [contributor guidelines]: https://github.com/spring-projects/spring-framework/blob/master/CONTRIBUTING.md
