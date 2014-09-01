@@ -56,6 +56,9 @@ public abstract class AbstractJmsAnnotationDrivenTests {
 	public abstract void fullConfiguration();
 
 	@Test
+	public abstract void fullConfigurableConfiguration();
+
+	@Test
 	public abstract void customConfiguration();
 
 	@Test
@@ -107,13 +110,25 @@ public abstract class AbstractJmsAnnotationDrivenTests {
 		assertEquals("queueIn", endpoint.getDestination());
 		assertEquals("mySelector", endpoint.getSelector());
 		assertEquals("mySubscription", endpoint.getSubscription());
+		assertEquals("1-10", endpoint.getConcurrency());
 	}
 
 	@Component
 	static class FullBean {
 
 		@JmsListener(id = "listener1", containerFactory = "simpleFactory", destination = "queueIn",
-				selector = "mySelector", subscription = "mySubscription")
+				selector = "mySelector", subscription = "mySubscription", concurrency = "1-10")
+		public String fullHandle(String msg) {
+			return "reply";
+		}
+	}
+
+	@Component
+	static class FullConfigurableBean {
+
+		@JmsListener(id = "${jms.listener.id}", containerFactory = "${jms.listener.containerFactory}",
+				destination = "${jms.listener.destination}", selector = "${jms.listener.selector}",
+				subscription = "${jms.listener.subscription}", concurrency = "${jms.listener.concurrency}")
 		public String fullHandle(String msg) {
 			return "reply";
 		}

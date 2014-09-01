@@ -29,6 +29,7 @@ import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.SmartInitializingSingleton;
 import org.springframework.beans.factory.config.BeanPostProcessor;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.jms.config.JmsListenerConfigUtils;
@@ -218,19 +219,19 @@ public class JmsListenerAnnotationBeanPostProcessor
 		endpoint.setMethod(method);
 		endpoint.setMessageHandlerMethodFactory(this.messageHandlerMethodFactory);
 		endpoint.setId(getEndpointId(jmsListener));
-		endpoint.setDestination(jmsListener.destination());
+		endpoint.setDestination(resolve(jmsListener.destination()));
 		if (StringUtils.hasText(jmsListener.selector())) {
-			endpoint.setSelector(jmsListener.selector());
+			endpoint.setSelector(resolve(jmsListener.selector()));
 		}
 		if (StringUtils.hasText(jmsListener.subscription())) {
-			endpoint.setSubscription(jmsListener.subscription());
+			endpoint.setSubscription(resolve(jmsListener.subscription()));
 		}
 		if (StringUtils.hasText(jmsListener.concurrency())) {
-			endpoint.setConcurrency(jmsListener.concurrency());
+			endpoint.setConcurrency(resolve(jmsListener.concurrency()));
 		}
 
 		JmsListenerContainerFactory<?> factory = null;
-		String containerFactoryBeanName = jmsListener.containerFactory();
+		String containerFactoryBeanName = resolve(jmsListener.containerFactory());
 		if (StringUtils.hasText(containerFactoryBeanName)) {
 			Assert.state(this.beanFactory != null, "BeanFactory must be set to obtain container factory by bean name");
 			try {
@@ -248,11 +249,23 @@ public class JmsListenerAnnotationBeanPostProcessor
 
 	private String getEndpointId(JmsListener jmsListener) {
 		if (StringUtils.hasText(jmsListener.id())) {
-			return jmsListener.id();
+			return resolve(jmsListener.id());
 		}
 		else {
 			return "org.springframework.jms.JmsListenerEndpointContainer#" + counter.getAndIncrement();
 		}
+	}
+
+	/**
+	 * Resolve the specified value if possible.
+	 *
+	 * @see ConfigurableBeanFactory#resolveEmbeddedValue
+	 */
+	private String resolve(String value) {
+		if (this.beanFactory != null && this.beanFactory instanceof ConfigurableBeanFactory) {
+			return ((ConfigurableBeanFactory) this.beanFactory).resolveEmbeddedValue(value);
+		}
+		return value;
 	}
 
 

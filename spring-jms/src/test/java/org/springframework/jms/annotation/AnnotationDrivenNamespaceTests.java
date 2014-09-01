@@ -52,6 +52,13 @@ public class AnnotationDrivenNamespaceTests extends AbstractJmsAnnotationDrivenT
 	}
 
 	@Override
+	public void fullConfigurableConfiguration() {
+		ApplicationContext context = new ClassPathXmlApplicationContext(
+				"annotation-driven-full-configurable-config.xml", getClass());
+		testFullConfiguration(context);
+	}
+
+	@Override
 	@Test
 	public void customConfiguration() {
 		ApplicationContext context = new ClassPathXmlApplicationContext(

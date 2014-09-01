@@ -29,6 +29,8 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.PropertySource;
+import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.messaging.handler.annotation.support.DefaultMessageHandlerMethodFactory;
 import org.springframework.messaging.handler.annotation.support.MessageHandlerMethodFactory;
 import org.springframework.jms.config.JmsListenerContainerTestFactory;
@@ -60,6 +62,13 @@ public class EnableJmsTests extends AbstractJmsAnnotationDrivenTests {
 	public void fullConfiguration() {
 		ConfigurableApplicationContext context = new AnnotationConfigApplicationContext(
 				EnableJmsFullConfig.class, FullBean.class);
+		testFullConfiguration(context);
+	}
+
+	@Override
+	public void fullConfigurableConfiguration() {
+		ConfigurableApplicationContext context = new AnnotationConfigApplicationContext(
+				EnableJmsFullConfigurableConfig.class, FullConfigurableBean.class);
 		testFullConfiguration(context);
 	}
 
@@ -128,6 +137,22 @@ public class EnableJmsTests extends AbstractJmsAnnotationDrivenTests {
 		@Bean
 		public JmsListenerContainerTestFactory simpleFactory() {
 			return new JmsListenerContainerTestFactory();
+		}
+	}
+
+	@EnableJms
+	@Configuration
+	@PropertySource("classpath:/org/springframework/jms/annotation/jms-listener.properties")
+	static class EnableJmsFullConfigurableConfig {
+
+		@Bean
+		public JmsListenerContainerTestFactory simpleFactory() {
+			return new JmsListenerContainerTestFactory();
+		}
+
+		@Bean
+		public PropertySourcesPlaceholderConfigurer propertySourcesPlaceholderConfigurer() {
+			return new PropertySourcesPlaceholderConfigurer();
 		}
 	}
 
