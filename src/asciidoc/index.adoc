@@ -987,6 +987,55 @@ Framework 4.0 introduces several new features for use in unit and integration te
 [[new-in-4.1]]
 == New Features and Enhancements in Spring Framework 4.1
 
+=== JMS Improvements
+Spring 4.1 introduces a much simpler infrastructure <<jms-annotated,to register JMS
+listener endpoints>> by annotating bean methods with
+{javadoc-baseurl}/org/springframework/jms/annotation/JmsListener.html[`@JmsListener`].
+The XML namespace has been enhanced to support this new style (`jms:annotation-driven`)
+and it is also possible to fully configure the infrastructure using Java config (
+{javadoc-baseurl}/org/springframework/jms/annotation/EnableJms.html[`@EnableJms`],
+`JmsListenerContainerFactory`). It is also possible to register listener endpoints
+programmatically using
+{javadoc-baseurl}/org/springframework/jms/annotation/JmsListenerConfigurer.html[`JmsListenerConfigurer`].
+
+Spring 4.1 also aligns its JMS support to allow you to benefit from the `spring-messaging`
+abstraction introduced in 4.0, that is:
+
+* Message listener endpoints can have a more flexible signature and benefit from
+  standard messaging annotations such as `@Payload`, `@Header`, `@Headers` and `@SendTo`. It
+  is also possible to use a standard `Message` in lieu of `javax.jms.Message` as method
+  argument
+* A new {javadoc-baseurl}/org/springframework/jms/core/JmsMessageOperations.html[`JmsMessageOperations`]
+  interface is available and permits `JmsTemplate` like operations using the `Message`
+  abstraction
+
+Finally, Spring 4.1 provides additional miscellaneous improvements:
+
+* Synchronous request-reply operations support in `JmsTemplate`
+* Listener priority can be specified per `<jms:listener/>` element
+* Recovery options for the message listener container is configurable using a
+  {javadoc-baseurl}/org/springframework/util/backoff/BackOff.html[`BackOff`] implementation
+* JMS 2.0 shared consumers are supported
+
+=== Caching Improvements
+
+Spring 4.1 supports <<cache-jsr-107,JCache (JSR-107) annotations>> using Spring's
+existing cache configuration and infrastructure abstraction; no changes are required
+to use the standard annotations.
+
+Spring 4.1 also improves its own abstraction significantly:
+
+* Caches can be resolved at runtime using a
+  <<cache-annotations-cacheable-cache-resolver,`CacheResolver`>>. As a result the
+  `value` argument defining the cache name(s) to use is no longer mandatory
+* More operation-level customizations: cache resolver, cache manager, key
+  generator
+* A new <<cache-annotations-config,`@CacheConfig` class-level annotation>> allows
+  to share common settings at class level **without** enabling any cache operation
+* Better exception handling of cached methods using `CacheErrorHandler`
+
+Spring 4.1 also has a breaking change in the `CacheInterface` as a new
+`putIfAbsent` method has been added.
 
 === Testing Improvements
 
