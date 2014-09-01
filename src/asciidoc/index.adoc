@@ -984,6 +984,39 @@ Framework 4.0 introduces several new features for use in unit and integration te
 
 
 
+[[new-in-4.1]]
+== New Features and Enhancements in Spring Framework 4.1
+
+
+=== Testing Improvements
+
+* Groovy scripts can now be used to configure the `ApplicationContext` loaded for
+  integration tests in the TestContext framework.
+** See <<testcontext-ctx-management-groovy>> for details.
+* Test-managed transactions can now be programmatically started and ended within
+  transactional test methods via the new `TestTransaction` API.
+** See <<testcontext-tx-programmatic-tx-mgt>> for details.
+* SQL script execution can now be configured declaratively via the new `@Sql` and
+  `@SqlConfig` annotations on a per-class or per-method basis.
+** See <<testcontext-executing-sql>> for details.
+* Test property sources which automatically override system and application property
+  sources can be configured via the new `@TestPropertySource` annotation.
+** See <<testcontext-ctx-management-property-sources>> for details.
+* Default ++TestExecutionListener++s can now be automatically discovered.
+** See <<testcontext-tel-config-automatic-discovery>> for details.
+* Custom ++TestExecutionListener++s can now be automatically merged with the default
+  listeners.
+** See <<testcontext-tel-config-merging>> for details.
+* The documentation for transactional testing support in the TestContext framework has
+  been improved with more thorough explanations and additional examples.
+** See <<testcontext-tx>> for details.
+* Various improvements to `MockServletContext`, `MockHttpServletRequest`, and other
+  Servlet API mocks.
+* `AssertThrows` has been refactored to support `Throwable` instead of `Exception`.
+
+
+
+
 
 [[spring-core]]
 = Core Technologies
