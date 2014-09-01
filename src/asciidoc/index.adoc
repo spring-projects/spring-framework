@@ -19228,17 +19228,8 @@ Spring test suite for further information and examples of various implementation
 ** after any __after methods__ of a particular testing framework
 ** after any __after class methods__ of a particular testing framework
 * `TestExecutionListener`: Defines a __listener__ API for reacting to test execution
-  events published by the `TestContextManager` with which the listener is registered.
-+
-
-Spring provides five `TestExecutionListener` implementations that are configured by
-default: `ServletTestExecutionListener`, `DependencyInjectionTestExecutionListener`,
-`DirtiesContextTestExecutionListener`, `TransactionalTestExecutionListener`, and
-`SqlScriptsTestExecutionListener`. Respectively, they support Servlet API mocks for
-a `WebApplicationContext`, dependency injection of the test instance, handling of
-the `@DirtiesContext` annotation, transactional test execution with default rollback
-semantics, and execution of SQL scripts configured via the `@Sql` annotation.
-
+  events published by the `TestContextManager` with which the listener is registered. See
+  <<testcontext-tel-config>>.
 * `ContextLoader`: Strategy interface introduced in Spring 2.5 for loading an
   `ApplicationContext` for an integration test managed by the Spring TestContext
   Framework.
@@ -19297,20 +19288,47 @@ annotations and provide working examples of how to write unit and integration te
 the framework.
 
 [[testcontext-tel-config]]
-===== TestExecutionListener registration and ordering
+===== TestExecutionListener configuration
+
+Spring provides the following `TestExecutionListener` implementations that are registered
+by default, exactly in this order.
+
+* `ServletTestExecutionListener`: configures Servlet API mocks for a
+  `WebApplicationContext`
+* `DependencyInjectionTestExecutionListener`: provides dependency injection for the test
+  instance
+* `DirtiesContextTestExecutionListener`: handles the `@DirtiesContext` annotation
+* `TransactionalTestExecutionListener`: provides transactional test execution with
+  default rollback semantics
+* `SqlScriptsTestExecutionListener`: executes SQL scripts configured via the `@Sql`
+  annotation
+
+[[testcontext-tel-config-registering-tels]]
+====== Registering custom TestExecutionListeners
 
 Custom ++TestExecutionListener++s can be registered for a test class and its subclasses
-via the `@TestExecutionListeners` annotation (see
-<<integration-testing-annotations,annotation support>> for details). This mechanism is
-suitable for custom listeners that are used in limited testing scenarios; however, it can
-become cumbersome if a custom listener needs to be used across a test suite. To address
-this issue, Spring Framework 4.1 supports discovery of _default_ `TestExecutionListener`
-implementations via the `SpringFactoriesLoader` mechanism. Specifically, the
-`spring-test` module declares all core default ++TestExecutionListener++s under the
+via the `@TestExecutionListeners` annotation. See
+<<integration-testing-annotations,annotation support>> and the javadocs for
+`@TestExecutionListeners` for details and examples.
+
+[[testcontext-tel-config-automatic-discovery]]
+====== Automatic discovery of default TestExecutionListeners
+
+Registering custom ++TestExecutionListener++s via `@TestExecutionListeners` is suitable
+for custom listeners that are used in limited testing scenarios; however, it can become
+cumbersome if a custom listener needs to be used across a test suite. To address this
+issue, Spring Framework 4.1 supports automatic discovery of _default_
+`TestExecutionListener` implementations via the `SpringFactoriesLoader` mechanism.
+
+Specifically, the `spring-test` module declares all core default
+++TestExecutionListener++s under the
 `org.springframework.test.context.TestExecutionListener` key in its
-`META-INF/spring.factories` properties file, and third-party frameworks and developers
-can contribute to the list of default ++TestExecutionListener++s in the same manner via
-their own `META-INF/spring.factories` properties file.
+`META-INF/spring.factories` properties file. Third-party frameworks and developers can
+contribute their own ++TestExecutionListener++s to the list of default listeners in the
+same manner via their own `META-INF/spring.factories` properties file.
+
+[[testcontext-tel-config-ordering]]
+====== Ordering TestExecutionListeners
 
 When the TestContext framework discovers default ++TestExecutionListeners++ via the
 aforementioned `SpringFactoriesLoader` mechanism, the instantiated listeners are sorted
@@ -19322,6 +19340,69 @@ _default_ ++TestExecutionListener++s are registered in the proper order by imple
 `Ordered` or declaring `@Order`. Consult the javadocs for the `getOrder()` methods of the
 core default ++TestExecutionListener++s for details on what values are assigned to each
 core listener.
+
+[[testcontext-tel-config-merging]]
+====== Merging TestExecutionListeners
+
+If a custom `TestExecutionListener` is registered via `@TestExecutionListeners`, the
+_default_ listeners will not be registered. In most common testing scenarios, this
+effectively forces the developer to manually declare all default listeners in addition to
+any custom listeners. The following listing demonstrates this style of configuration.
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@ContextConfiguration
+	@TestExecutionListeners({
+		MyCustomTestExecutionListener.class,
+		ServletTestExecutionListener.class,
+		DependencyInjectionTestExecutionListener.class,
+		DirtiesContextTestExecutionListener.class,
+		TransactionalTestExecutionListener.class,
+		SqlScriptsTestExecutionListener.class
+	})
+	public class MyTest {
+		// class body...
+	}
+----
+
+The challenge with this approach is that it requires that the developer know exactly
+which listeners are registered by default. Moreover, the set of default listeners can
+change from release to release -- for example, `SqlScriptsTestExecutionListener` was
+introduced in Spring Framework 4.1. Furthermore, third-party frameworks like Spring
+Security register their own default ++TestExecutionListener++s via the aforementioned
+<<testcontext-tel-config-automatic-discovery, automatic discovery mechanism>>.
+
+To avoid having to be aware of and re-declare **all** _default_ listeners, the
+`mergeMode` attribute of `@TestExecutionListeners` can be set to
+`MergeMode.MERGE_WITH_DEFAULTS`. `MERGE_WITH_DEFAULTS` indicates that locally declared
+listeners should be merged with the default listeners. The merging algorithm ensures that
+duplicates are removed from the list and that the resulting set of merged listeners is
+sorted according to the semantics of `AnnotationAwareOrderComparator` as described in
+<<testcontext-tel-config-ordering>>. If a listener implements `Ordered` or is annotated
+with `@Order` it can influence the position in which it is merged with the defaults;
+otherwise, locally declared listeners will simply be appended to the list of default
+listeners when merged.
+
+For example, if the `MyCustomTestExecutionListener` class in the previous example
+configures its `order` value (for example, `500`) to be less than the order of the
+`ServletTestExecutionListener` (which happens to be `1000`), the
+`MyCustomTestExecutionListener` can then be automatically merged with the list of
+defaults _in front of_ the `ServletTestExecutionListener`, and the previous example could
+be replaced with the following.
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@ContextConfiguration
+	@TestExecutionListeners(
+		listeners = MyCustomTestExecutionListener.class,
+		mergeMode = MERGE_WITH_DEFAULTS,
+	)
+	public class MyTest {
+		// class body...
+	}
+----
 
 
 [[testcontext-ctx-management]]
