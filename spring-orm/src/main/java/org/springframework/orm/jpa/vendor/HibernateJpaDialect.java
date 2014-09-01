@@ -137,12 +137,15 @@ public class HibernateJpaDialect extends DefaultJpaDialect {
 			session.getTransaction().setTimeout(definition.getTimeout());
 		}
 
-		Integer previousIsolationLevel = null;
 		boolean isolationLevelNeeded = (definition.getIsolationLevel() != TransactionDefinition.ISOLATION_DEFAULT);
+		Integer previousIsolationLevel = null;
+		boolean resetConnection = false;
+
 		if (isolationLevelNeeded || definition.isReadOnly()) {
 			if (this.prepareConnection) {
 				Connection con = HibernateConnectionHandle.doGetConnection(session);
 				previousIsolationLevel = DataSourceUtils.prepareConnectionForTransaction(con, definition);
+				resetConnection = true;
 			}
 			else if (isolationLevelNeeded) {
 				throw new InvalidIsolationLevelException(getClass().getSimpleName() +
@@ -156,36 +159,37 @@ public class HibernateJpaDialect extends DefaultJpaDialect {
 		entityManager.getTransaction().begin();
 
 		// Adapt flush mode and store previous isolation level, if any.
-		return doPrepareTransaction(session, definition.isReadOnly(), previousIsolationLevel);
+		FlushMode previousFlushMode = prepareFlushMode(session, definition.isReadOnly());
+		return new SessionTransactionData(session, previousFlushMode, resetConnection, previousIsolationLevel);
 	}
 
 	@Override
 	public Object prepareTransaction(EntityManager entityManager, boolean readOnly, String name)
 			throws PersistenceException {
 
-		return doPrepareTransaction(getSession(entityManager), readOnly, null);
+		Session session = getSession(entityManager);
+		FlushMode previousFlushMode = prepareFlushMode(session, readOnly);
+		return new SessionTransactionData(session, previousFlushMode, false, null);
 	}
 
-	protected Object doPrepareTransaction(Session session, boolean readOnly, Integer previousIsolationLevel)
-			throws PersistenceException {
-
+	protected FlushMode prepareFlushMode(Session session, boolean readOnly) throws PersistenceException {
 		FlushMode flushMode = session.getFlushMode();
-		FlushMode previousFlushMode = null;
 		if (readOnly) {
 			// We should suppress flushing for a read-only transaction.
-			session.setFlushMode(FlushMode.MANUAL);
-			previousFlushMode = flushMode;
+			if (!flushMode.equals(FlushMode.MANUAL)) {
+				session.setFlushMode(FlushMode.MANUAL);
+				return flushMode;
+			}
 		}
 		else {
 			// We need AUTO or COMMIT for a non-read-only transaction.
 			if (flushMode.lessThan(FlushMode.COMMIT)) {
 				session.setFlushMode(FlushMode.AUTO);
-				previousFlushMode = flushMode;
+				return flushMode;
 			}
 		}
-
-		boolean resetConnection = (previousIsolationLevel != null || readOnly);
-		return new SessionTransactionData(session, previousFlushMode, resetConnection, previousIsolationLevel);
+		// No FlushMode change needed...
+		return null;
 	}
 
 	@Override
@@ -299,8 +303,8 @@ public class HibernateJpaDialect extends DefaultJpaDialect {
 		return new JpaSystemException(ex);
 	}
 
-	protected Session getSession(EntityManager em) {
-		return em.unwrap(Session.class);
+	protected Session getSession(EntityManager entityManager) {
+		return entityManager.unwrap(Session.class);
 	}
 
 
@@ -310,7 +314,7 @@ public class HibernateJpaDialect extends DefaultJpaDialect {
 
 		private final FlushMode previousFlushMode;
 
-		private final boolean connectionReset;
+		private final boolean resetConnection;
 
 		private final Integer previousIsolationLevel;
 
@@ -318,7 +322,7 @@ public class HibernateJpaDialect extends DefaultJpaDialect {
 				Session session, FlushMode previousFlushMode, boolean resetConnection, Integer previousIsolationLevel) {
 			this.session = session;
 			this.previousFlushMode = previousFlushMode;
-			this.connectionReset = resetConnection;
+			this.resetConnection = resetConnection;
 			this.previousIsolationLevel = previousIsolationLevel;
 		}
 
@@ -326,7 +330,7 @@ public class HibernateJpaDialect extends DefaultJpaDialect {
 			if (this.previousFlushMode != null) {
 				this.session.setFlushMode(this.previousFlushMode);
 			}
-			if (this.connectionReset && this.session.isConnected()) {
+			if (this.resetConnection && this.session.isConnected()) {
 				Connection con = HibernateConnectionHandle.doGetConnection(this.session);
 				DataSourceUtils.resetConnectionAfterTransaction(con, this.previousIsolationLevel);
 			}
