@@ -28,13 +28,16 @@ import org.springframework.messaging.core.MessageRequestReplyOperations;
 import org.springframework.messaging.core.MessageSendingOperations;
 
 /**
- * A specialization of {@link MessageSendingOperations} and {@link MessageReceivingOperations}
- * for JMS related operations that allow to specify a destination name rather than the
- * actual {@link javax.jms.Destination}
+ * A specialization of {@link MessageSendingOperations}, {@link MessageReceivingOperations}
+ * and {@link MessageRequestReplyOperations} for JMS related operations that allow to specify
+ * a destination name rather than the actual {@link javax.jms.Destination}
  *
  * @author Stephane Nicoll
  * @since 4.1
  * @see org.springframework.jms.core.JmsTemplate
+ * @see org.springframework.messaging.core.MessageSendingOperations
+ * @see org.springframework.messaging.core.MessageReceivingOperations
+ * @see org.springframework.messaging.core.MessageRequestReplyOperations
  */
 public interface JmsMessageOperations extends MessageSendingOperations<Destination>,
 		MessageReceivingOperations<Destination>, MessageRequestReplyOperations<Destination> {
