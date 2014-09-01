@@ -58,7 +58,7 @@ import org.springframework.util.StringUtils;
  * applications spec</a>
  * @since 4.1
  */
-public class AppCacheManifestTransformer implements ResourceTransformer {
+public class AppCacheManifestTransformer extends ResourceTransformerSupport {
 
 	private static final String MANIFEST_HEADER = "CACHE MANIFEST";
 
@@ -129,7 +129,7 @@ public class AppCacheManifestTransformer implements ResourceTransformer {
 				hashBuilder.appendString(line);
 			}
 			else {
-				contentWriter.write(currentTransformer.transform(line, hashBuilder, resource, transformerChain)  + "\n");
+				contentWriter.write(currentTransformer.transform(line, hashBuilder, resource, transformerChain, request)  + "\n");
 			}
 		}
 
@@ -151,14 +151,14 @@ public class AppCacheManifestTransformer implements ResourceTransformer {
 		 * for the current manifest section (CACHE, NETWORK, FALLBACK, etc).
 		 */
 		String transform(String line, HashBuilder builder, Resource resource,
-				ResourceTransformerChain transformerChain) throws IOException;
+				ResourceTransformerChain transformerChain, HttpServletRequest request) throws IOException;
 	}
 
 
 	private static class NoOpSection implements SectionTransformer {
 
-		public String transform(String line, HashBuilder builder, Resource resource, ResourceTransformerChain transformerChain)
-				throws IOException {
+		public String transform(String line, HashBuilder builder, Resource resource,
+				ResourceTransformerChain transformerChain, HttpServletRequest request) throws IOException {
 
 			builder.appendString(line);
 			return line;
@@ -166,17 +166,18 @@ public class AppCacheManifestTransformer implements ResourceTransformer {
 	}
 
 
-	private static class CacheSection implements SectionTransformer {
+	private class CacheSection implements SectionTransformer {
 
 		private final String COMMENT_DIRECTIVE = "#";
 
 		@Override
-		public String transform(String line, HashBuilder builder,
-				Resource resource, ResourceTransformerChain transformerChain) throws IOException {
+		public String transform(String line, HashBuilder builder, Resource resource,
+				ResourceTransformerChain transformerChain, HttpServletRequest request) throws IOException {
 
 			if (isLink(line) && !hasScheme(line)) {
-				Resource appCacheResource = transformerChain.getResolverChain().resolveResource(null, line, Arrays.asList(resource));
-				String path = transformerChain.getResolverChain().resolveUrlPath(line, Arrays.asList(resource));
+				ResourceResolverChain resolverChain = transformerChain.getResolverChain();
+				Resource appCacheResource = resolverChain.resolveResource(null, line, Arrays.asList(resource));
+				String path = resolveUrlPath(line, request, resource, transformerChain);
 				builder.appendResource(appCacheResource);
 				if (logger.isTraceEnabled()) {
 					logger.trace("Link modified: " + path + " (original: " + line + ")");

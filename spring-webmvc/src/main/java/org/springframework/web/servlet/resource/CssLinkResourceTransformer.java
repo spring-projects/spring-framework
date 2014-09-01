@@ -27,7 +27,6 @@ import java.io.IOException;
 import java.io.StringWriter;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -47,7 +46,7 @@ import java.util.Set;
  * @author Rossen Stoyanchev
  * @since 4.1
  */
-public class CssLinkResourceTransformer implements ResourceTransformer {
+public class CssLinkResourceTransformer extends ResourceTransformerSupport {
 
 	private static final Log logger = LogFactory.getLog(CssLinkResourceTransformer.class);
 
@@ -103,7 +102,7 @@ public class CssLinkResourceTransformer implements ResourceTransformer {
 			String link = content.substring(info.getStart(), info.getEnd());
 			String newLink = null;
 			if (!hasScheme(link)) {
-				newLink = transformerChain.getResolverChain().resolveUrlPath(link, Arrays.asList(resource));
+				newLink = resolveUrlPath(link, request, resource, transformerChain);
 			}
 			if (logger.isTraceEnabled()) {
 				if (newLink != null && !link.equals(newLink)) {
