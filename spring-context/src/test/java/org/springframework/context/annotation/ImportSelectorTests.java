@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ import org.hamcrest.Matcher;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.mockito.InOrder;
+
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.beans.factory.BeanFactory;
@@ -45,7 +46,8 @@ import org.springframework.core.type.AnnotationMetadata;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
-import static org.mockito.Matchers.*;
+import static org.mockito.Matchers.anyObject;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.*;
 
 /**
@@ -57,16 +59,17 @@ public class ImportSelectorTests {
 
 	static Map<Class<?>, String> importFrom = new HashMap<Class<?>, String>();
 
+
 	@BeforeClass
 	public static void clearImportFrom() {
 		ImportSelectorTests.importFrom.clear();
 	}
 
+
 	@Test
 	public void importSelectors() {
 		DefaultListableBeanFactory beanFactory = spy(new DefaultListableBeanFactory());
-		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(
-				beanFactory);
+		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(beanFactory);
 		context.register(Config.class);
 		context.refresh();
 		context.getBean(Config.class);
@@ -91,18 +94,18 @@ public class ImportSelectorTests {
 	public void correctMetaDataOnIndirectImports() throws Exception {
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(IndirectConfig.class);
 		Matcher<String> isFromIndirect = equalTo(IndirectImport.class.getName());
-		System.out.println(importFrom);
 		assertThat(importFrom.get(ImportSelector1.class), isFromIndirect);
 		assertThat(importFrom.get(ImportSelector2.class), isFromIndirect);
 		assertThat(importFrom.get(DeferredImportSelector1.class), isFromIndirect);
 		assertThat(importFrom.get(DeferredImportSelector2.class), isFromIndirect);
 	}
 
+
 	@Configuration
 	@Import(SampleImportSelector.class)
 	static class AwareConfig {
-
 	}
+
 
 	static class SampleImportSelector implements ImportSelector, BeanClassLoaderAware, ResourceLoaderAware,
 			BeanFactoryAware, EnvironmentAware {
@@ -138,10 +141,12 @@ public class ImportSelectorTests {
 		}
 	}
 
+
 	@Sample
 	@Configuration
 	static class Config {
 	}
+
 
 	@Target(ElementType.TYPE)
 	@Retention(RetentionPolicy.RUNTIME)
@@ -149,6 +154,7 @@ public class ImportSelectorTests {
 		ImportSelector1.class, ImportSelector2.class })
 	public static @interface Sample {
 	}
+
 
 	public static class ImportSelector1 implements ImportSelector {
 
@@ -159,6 +165,7 @@ public class ImportSelectorTests {
 		}
 	}
 
+
 	public static class ImportSelector2 implements ImportSelector {
 
 		@Override
@@ -167,6 +174,7 @@ public class ImportSelectorTests {
 			return new String[] { ImportedSelector2.class.getName() };
 		}
 	}
+
 
 	public static class DeferredImportSelector1 implements DeferredImportSelector, Ordered {
 
@@ -182,6 +190,7 @@ public class ImportSelectorTests {
 		}
 	}
 
+
 	@Order(Ordered.HIGHEST_PRECEDENCE)
 	public static class DeferredImportSelector2 implements DeferredImportSelector {
 
@@ -190,8 +199,8 @@ public class ImportSelectorTests {
 			ImportSelectorTests.importFrom.put(getClass(), importingClassMetadata.getClassName());
 			return new String[] { DeferredImportedSelector2.class.getName() };
 		}
-
 	}
+
 
 	@Configuration
 	public static class ImportedSelector1 {
@@ -202,6 +211,7 @@ public class ImportSelectorTests {
 		}
 	}
 
+
 	@Configuration
 	public static class ImportedSelector2 {
 
@@ -210,6 +220,7 @@ public class ImportSelectorTests {
 			return "b";
 		}
 	}
+
 
 	@Configuration
 	public static class DeferredImportedSelector1 {
@@ -220,6 +231,7 @@ public class ImportSelectorTests {
 		}
 	}
 
+
 	@Configuration
 	public static class DeferredImportedSelector2 {
 
@@ -229,22 +241,24 @@ public class ImportSelectorTests {
 		}
 	}
 
+
 	@Configuration
 	@Import(IndirectImportSelector.class)
 	public static class IndirectConfig {
-
 	}
 
+
 	public static class IndirectImportSelector implements ImportSelector {
+
 		@Override
 		public String[] selectImports(AnnotationMetadata importingClassMetadata) {
-			return new String[] { IndirectImport.class.getName()};
+			return new String[] {IndirectImport.class.getName()};
 		}
 	}
 
+
 	@Sample
 	public static class IndirectImport {
-
 	}
 
 }
