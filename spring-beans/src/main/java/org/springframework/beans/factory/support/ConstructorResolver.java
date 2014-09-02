@@ -372,6 +372,10 @@ class ConstructorResolver {
 				throw new BeanCreationException(mbd.getResourceDescription(), beanName,
 						"factory-bean '" + factoryBeanName + "' (or a BeanPostProcessor involved) returned null");
 			}
+			if (mbd.isSingleton() && this.beanFactory.containsSingleton(beanName)) {
+				throw new IllegalStateException("About-to-be-created singleton instance implicitly appeared " +
+						"through the creation of the factory bean that its bean definition points to");
+			}
 			factoryClass = factoryBean.getClass();
 			isStatic = false;
 		}
@@ -904,4 +908,5 @@ class ConstructorResolver {
 			}
 		}
 	}
+
 }

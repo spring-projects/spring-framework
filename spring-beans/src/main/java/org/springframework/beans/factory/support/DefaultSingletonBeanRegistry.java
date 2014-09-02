@@ -220,12 +220,22 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 					logger.debug("Creating shared instance of singleton bean '" + beanName + "'");
 				}
 				beforeSingletonCreation(beanName);
+				boolean newSingleton = false;
 				boolean recordSuppressedExceptions = (this.suppressedExceptions == null);
 				if (recordSuppressedExceptions) {
 					this.suppressedExceptions = new LinkedHashSet<Exception>();
 				}
 				try {
 					singletonObject = singletonFactory.getObject();
+					newSingleton = true;
+				}
+				catch (IllegalStateException ex) {
+					// Has the singleton object implicitly appeared in the meantime ->
+					// if yes, proceed with it since the exception indicates that state.
+					singletonObject = this.singletonObjects.get(beanName);
+					if (singletonObject == null) {
+						throw ex;
+					}
 				}
 				catch (BeanCreationException ex) {
 					if (recordSuppressedExceptions) {
@@ -241,7 +251,9 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 					}
 					afterSingletonCreation(beanName);
 				}
-				addSingleton(beanName, singletonObject);
+				if (newSingleton) {
+					addSingleton(beanName, singletonObject);
+				}
 			}
 			return (singletonObject != NULL_OBJECT ? singletonObject : null);
 		}
