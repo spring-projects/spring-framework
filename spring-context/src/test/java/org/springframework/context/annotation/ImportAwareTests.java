@@ -29,7 +29,9 @@ import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.GenericBeanDefinition;
 import org.springframework.core.annotation.AnnotationAttributes;
+import org.springframework.core.type.AnnotatedTypeMetadata;
 import org.springframework.core.type.AnnotationMetadata;
+import org.springframework.core.type.StandardAnnotationMetadata;
 import org.springframework.scheduling.annotation.AsyncAnnotationBeanPostProcessor;
 import org.springframework.util.Assert;
 
@@ -100,11 +102,30 @@ public class ImportAwareTests {
 		assertNotNull(ctx.getBean(ImportedConfig.class));
 	}
 
+	@Test
+	public void metadataFromImportsOneThenTwo() {
+		AnnotationMetadata importMetadata = new AnnotationConfigApplicationContext(
+				ConfigurationOne.class, ConfigurationTwo.class)
+				.getBean(MetadataHolder.class).importMetadata;
+		assertEquals(ConfigurationOne.class,
+				((StandardAnnotationMetadata) importMetadata).getIntrospectedClass());
+	}
+
+	@Test
+	public void metadataFromImportsTwoThenOne() {
+		AnnotationMetadata importMetadata = new AnnotationConfigApplicationContext(
+				ConfigurationTwo.class, ConfigurationOne.class)
+				.getBean(MetadataHolder.class).importMetadata;
+		assertEquals(ConfigurationOne.class,
+				((StandardAnnotationMetadata) importMetadata).getIntrospectedClass());
+	}
+
 
 	@Configuration
 	@Import(ImportedConfig.class)
 	static class ImportingConfig {
 	}
+
 
 	@Configuration
 	@EnableImportedConfig(foo="xyz")
@@ -152,7 +173,11 @@ public class ImportAwareTests {
 	}
 
 
-	static class BPP implements BeanFactoryAware, BeanPostProcessor {
+	static class BPP implements BeanPostProcessor, BeanFactoryAware {
+
+		@Override
+		public void setBeanFactory(BeanFactory beanFactory) {
+		}
 
 		@Override
 		public Object postProcessBeforeInitialization(Object bean, String beanName) {
@@ -162,10 +187,6 @@ public class ImportAwareTests {
 		@Override
 		public Object postProcessAfterInitialization(Object bean, String beanName) {
 			return bean;
-		}
-
-		@Override
-		public void setBeanFactory(BeanFactory beanFactory) {
 		}
 	}
 
@@ -203,6 +224,69 @@ public class ImportAwareTests {
 			registry.registerBeanDefinition("registrarImportedConfig", beanDefinition2);
 			Assert.state(!called, "ImportedRegistrar called twice");
 			called = true;
+		}
+	}
+
+
+	@EnableSomeConfiguration("bar")
+	@Configuration
+	public static class ConfigurationOne {
+	}
+
+
+	@Conditional(NeverMatchingCondition.class)
+	@EnableSomeConfiguration("foo")
+	@Configuration
+	public static class ConfigurationTwo {
+	}
+
+
+	@Import(SomeConfiguration.class)
+	@Target(ElementType.TYPE)
+	@Retention(RetentionPolicy.RUNTIME)
+	public @interface EnableSomeConfiguration {
+
+		String value() default "";
+	}
+
+
+	@Configuration
+	public static class SomeConfiguration implements ImportAware {
+
+		private AnnotationMetadata importMetadata;
+
+		@Override
+		public void setImportMetadata(AnnotationMetadata importMetadata) {
+			this.importMetadata = importMetadata;
+		}
+
+		@Bean
+		public MetadataHolder holder() {
+			return new MetadataHolder(this.importMetadata);
+		}
+	}
+
+
+	public static class MetadataHolder {
+
+		private final AnnotationMetadata importMetadata;
+
+		public MetadataHolder(AnnotationMetadata importMetadata) {
+			this.importMetadata = importMetadata;
+		}
+	}
+
+
+	private static final class NeverMatchingCondition implements ConfigurationCondition {
+
+		@Override
+		public boolean matches(ConditionContext context, AnnotatedTypeMetadata metadata) {
+			return false;
+		}
+
+		@Override
+		public ConfigurationPhase getConfigurationPhase() {
+			return ConfigurationPhase.REGISTER_BEAN;
 		}
 	}
 
