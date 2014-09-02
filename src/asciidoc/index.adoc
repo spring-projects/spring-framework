@@ -1039,6 +1039,59 @@ Spring 4.1 also improves its own abstraction significantly:
 Spring 4.1 also has a breaking change in the `CacheInterface` as a new
 `putIfAbsent` method has been added.
 
+=== Web Improvements
+
+* The JDK 1.8 `java.util.Optional` is now supported for `@RequestParam`, `@RequestHeader`
+  and `@MatrixVariable` controller method arguments while `ListenableFuture` is supported as
+  a return value alternative to `DeferredResult` where an underlying service (or perhaps a
+  call to `AsyncRestTemplate`) already returns `ListenableFuture`.
+* Jackson's `@JsonView` is supported directly on `@ResponseBody` and `ResponseEntity`
+  controller methods for serializing different amounts of detail for the same POJO,
+  e.g. summary vs detail page. This is also supported with View-based rendering by
+  adding the serialization view type as a model attribute under a special key.
+  See <<mvc-ann-jsonview>> for details.
+* Jackson based XML serialization is now supported using
+  https://github.com/FasterXML/jackson-dataformat-xml[jackson-dataformat-xml] extension.
+  When using `@EnableWebMvc` or `<mvc:annotation-driven/>`, Jackson will be used by default
+  instead of JAXB2 if jackson-dataformat-xml classes are found in the classpath.
+* JSONP is now supported with Jackson.
+* A `@ControllerAdvice` can now also implement `ResponseBodyAdvice` in which case it will be
+  called after the controller method returns but before the response is written and
+  therefore committed. This has a number of useful applications with `@JsonView` and
+  JSONP already serving as two examples built on it.
+* Two new `HttpMessageConverter` types:
+** Gson -- lighter footprint than Jackson; has already been in use in Spring Android.
+** Google Protocol Buffers -- efficient and effective as an inter-service communication
+   data protocol within an enterprise but can also be exposed as JSON and XML for browsers.
+   This comes through a contribution from
+   http://www.slideshare.net/mokeefe/javaone-2009-ts5276-restful-protocol-buffers[Alex Antonov].
+* `MvcUriComponentsBuilder` was introduced in 4.0 as a way of building links to controller
+   methods through controller method invocation (similar to mock testing). In 4.1 views such
+   as JSPs can also build links to controllers by referring to their mappings by name.
+   A default name is assigned to every `@RequestMapping`. For example `FooController` with method
+   `handleFoo` is assigned "FC#handleFoo" by default but the naming strategy is customizable
+   and can be also be set explicitly through the new name attribute on `@RequestMapping`.
+   A new mvcUrl Spring JSP tag makes this easy to use in JSP pages.
+   The same can be done for any other view technology.
+* The familiar `ResponseEntity` now has a builder-style API that guides controller methods
+  towards the preparation of server-side responses, e.g. `ResponseEntity.ok()`.
+  For the client side there is a new RequestEntity also offering a builder-style API that
+  guides towards the preparation of client-side HTTP requests.
+* MVC Java config and XML namespace:
+** View resolver configuration -- if you've had to configure view resolution with content
+   negotiation you'll likely appreciate this one. See <<mvc-config-view-resolvers>> for
+   details.
+** Enhanced "view controllers" -- in addition to mapping URLs directly to view names
+   without the need for controller logic, view controllers now have built-in support for
+   redirecting and setting the response status. An application can use this to configure
+   redirect URLs, render 404 responses with a view, send "no content" responses, etc.
+   Some use cases https://jira.spring.io/browse/SPR-11543?focusedCommentId=100308&page=com.atlassian.jira.plugin.system.issuetabpanels:comment-tabpanel#comment-100308[listed here].
+** Path matching -- these frequently used customizations are now built-in and have also been
+   backported to 4.0. See <<mvc-config-path-matching>> for details.
+* http://groovy-lang.org/docs/groovy-2.3.6/html/documentation/markup-template-engine.html[Groovy markup template]
+  support (available in Groovy 2.3) -- If you've been waiting for DRY markup, along the
+  lines of HAML (Ruby on Rails), this one is for you.
+
 === Testing Improvements
 
 * Groovy scripts can now be used to configure the `ApplicationContext` loaded for
@@ -1064,7 +1117,13 @@ Spring 4.1 also has a breaking change in the `CacheInterface` as a new
 * Various improvements to `MockServletContext`, `MockHttpServletRequest`, and other
   Servlet API mocks.
 * `AssertThrows` has been refactored to support `Throwable` instead of `Exception`.
-
+* JSON responses can be asserted with https://github.com/skyscreamer/JSONassert[JSON Assert]
+  as an extra option to using JSONPath much like it has been possible to do for XML with
+  XMLUnit.
+* `MockMvcBuilder` "recipies" can now be created with the help of `MockMvcConfigurer`. This
+  was added to make it easy to apply Spring Security setup but can be used to encapsulate
+  common setup for any 3rd party framework or within a project.
+* `MockRestServiceServer` now supports the `AsyncRestTemplate` for client-side testing.
 
 
 
