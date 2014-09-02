@@ -16,9 +16,6 @@
 
 package org.springframework.cache.interceptor;
 
-import static org.junit.Assert.*;
-import static org.springframework.cache.CacheTestUtils.*;
-
 import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.Collections;
@@ -26,6 +23,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import org.junit.Before;
 import org.junit.Test;
+
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
@@ -40,12 +38,16 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.util.ReflectionUtils;
 
+import static org.junit.Assert.*;
+import static org.springframework.cache.CacheTestUtils.*;
+
 /**
  * Provides various {@link CacheResolver} customisations scenario
  *
  * @author Stephane Nicoll
+ * @since 4.1
  */
-public class CacheResolverCustomisationTests {
+public class CacheResolverCustomizationTests {
 
 	private CacheManager cacheManager;
 
@@ -127,13 +129,13 @@ public class CacheResolverCustomisationTests {
 
 	@Test
 	public void noCacheResolved() {
-		Method m = ReflectionUtils.findMethod(SimpleService.class, "noCacheResolved", Object.class);
+		Method method = ReflectionUtils.findMethod(SimpleService.class, "noCacheResolved", Object.class);
 		try {
 			simpleService.noCacheResolved(new Object());
 			fail("Should have failed, no cache resolved");
-		} catch (IllegalStateException e) {
-			String msg = e.getMessage();
-			assertTrue("Reference to the method must be contained in the message", msg.contains(m.toString()));
+		}
+		catch (IllegalStateException ex) {
+			assertTrue("Reference to the method must be contained in the message", ex.getMessage().contains(method.toString()));
 		}
 	}
 
@@ -142,11 +144,11 @@ public class CacheResolverCustomisationTests {
 		try {
 			simpleService.unknownCacheResolver(new Object());
 			fail("Should have failed, no cache resolver with that name");
-		} catch (NoSuchBeanDefinitionException e) {
-			assertEquals("Wrong bean name in exception", "unknownCacheResolver", e.getBeanName());
+		}
+		catch (NoSuchBeanDefinitionException ex) {
+			assertEquals("Wrong bean name in exception", "unknownCacheResolver", ex.getBeanName());
 		}
 	}
-
 
 
 	@Configuration
@@ -204,6 +206,7 @@ public class CacheResolverCustomisationTests {
 		}
 	}
 
+
 	@CacheConfig(cacheNames = "default")
 	static class SimpleService {
 
@@ -245,6 +248,7 @@ public class CacheResolverCustomisationTests {
 		}
 	}
 
+
 	/**
 	 * Example of {@link CacheResolver} that resolve the caches at
 	 * runtime (i.e. based on method invocation parameters).
@@ -262,6 +266,7 @@ public class CacheResolverCustomisationTests {
 			return Collections.singleton(cacheName);
 		}
 	}
+
 
 	private static class NullCacheResolver extends AbstractCacheResolver {
 
