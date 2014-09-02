@@ -121,122 +121,127 @@ robust, __maintainable__ applications.
 === Modules
 The Spring Framework consists of features organized into about 20 modules. These modules
 are grouped into Core Container, Data Access/Integration, Web, AOP (Aspect Oriented
-Programming), Instrumentation, and Test, as shown in the following diagram.
+Programming), Instrumentation, Messaging, and Test, as shown in the following diagram.
 
 .Overview of the Spring Framework
 image::images/spring-overview.png[width=400]
 
-The next parts will list, for each feature, the available modules with their artifact name and their goal.
-Artifacts names are the reference names to use in <<dependency-management,Dependency Management tools>>.
+The following sections list the available modules for each feature along with their
+artifact name and the topics they cover. Artifact names correlate to _artifact IDs_ used
+in <<dependency-management,Dependency Management tools>>.
 
 
 [[overview-core-container]]
 ==== Core Container
-The <<beans-introduction,__Core Container__>> consists of the `spring-core`, `spring-beans`, `spring-context`, and
-`spring-expression` (Spring Expression Language) modules.
+The <<beans-introduction,__Core Container__>> consists of the `spring-core`,
+`spring-beans`, `spring-context`, and `spring-expression` (Spring Expression Language)
+modules.
 
-The `spring-core` and `spring-beans` modules <<beans-introduction,provide the fundamental parts of the framework>>,
-including the IoC and Dependency Injection features. The `BeanFactory` is
-a sophisticated implementation of the factory pattern. It removes the need for
-programmatic singletons and allows you to decouple the configuration and specification
-of dependencies from your actual program logic.
+The `spring-core` and `spring-beans` modules <<beans-introduction,provide the fundamental
+parts of the framework>>, including the IoC and Dependency Injection features. The
+`BeanFactory` is a sophisticated implementation of the factory pattern. It removes the
+need for programmatic singletons and allows you to decouple the configuration and
+specification of dependencies from your actual program logic.
 
-The <<context-introduction,__Context__>> (`spring-context`) module builds on the solid base provided by the
-<<beans-introduction,__Core and Beans__>> modules: it is a means to access objects in a
-framework-style manner that is similar to a JNDI registry. The Context module inherits
-its features from the Beans module and adds support for internationalization (using, for
-example, resource bundles), event-propagation, resource-loading, and the transparent
-creation of contexts by, for example, a servlet container. The Context module also
-supports Java EE features such as EJB, JMX ,and basic remoting. The `ApplicationContext`
-interface is the focal point of the Context module.
+The <<context-introduction,__Context__>> (`spring-context`) module builds on the solid
+base provided by the <<beans-introduction,__Core and Beans__>> modules: it is a means to
+access objects in a framework-style manner that is similar to a JNDI registry. The
+Context module inherits its features from the Beans module and adds support for
+internationalization (using, for example, resource bundles), event propagation, resource
+loading, and the transparent creation of contexts by, for example, a Servlet container.
+The Context module also supports Java EE features such as EJB, JMX, and basic remoting.
+The `ApplicationContext` interface is the focal point of the Context module.
 
-The `spring-expression` module provides a powerful <<expressions,__Expression Language__>>
-for querying and manipulating an object graph at runtime. It is an extension of
-the unified expression language (unified EL) as specified in the JSP 2.1 specification.
-The language supports setting and getting property values, property assignment, method
-invocation, accessing the context of arrays, collections and indexers, logical and
-arithmetic operators, named variables, and retrieval of objects by name from Spring's
-IoC container. It also supports list projection and selection as well as common list
-aggregations.
+The `spring-expression` module provides a powerful <<expressions,__Expression
+Language__>> for querying and manipulating an object graph at runtime. It is an extension
+of the unified expression language (unified EL) as specified in the JSP 2.1
+specification. The language supports setting and getting property values, property
+assignment, method invocation, accessing the content of arrays, collections and indexers,
+logical and arithmetic operators, named variables, and retrieval of objects by name from
+Spring's IoC container. It also supports list projection and selection as well as common
+list aggregations.
+
 
 [[overview-aop-instrumentation]]
 ==== AOP and Instrumentation
 The `spring-aop` module provides an <<aop-introduction,__AOP__>> Alliance-compliant
 aspect-oriented programming implementation allowing you to define, for example,
-method-interceptors and pointcuts to cleanly decouple code that implements functionality
+method interceptors and pointcuts to cleanly decouple code that implements functionality
 that should be separated. Using source-level metadata functionality, you can also
 incorporate behavioral information into your code, in a manner similar to that of .NET
 attributes.
 
-The separate `spring-aspets` module provides integration with AspectJ.
+The separate `spring-aspects` module provides integration with AspectJ.
 
 The `spring-instrument` module provides class instrumentation support and classloader
 implementations to be used in certain application servers.
 
+
 [[overview-messaging]]
 ==== Messaging
-Spring Framework 4 includes a new `spring-messaging` module with key abstractions from
-the _Spring Integration_ project such as `Message`, `MessageChannel`,
-`MessageHandler` and others to serve as a foundation for messaging-based applications. The
-module also includes a set of annotations for mapping messages to methods, similar to the
-Spring MVC annotation based programming model.
+Spring Framework 4 includes a `spring-messaging` module with key abstractions from the
+_Spring Integration_ project such as `Message`, `MessageChannel`, `MessageHandler`, and
+others to serve as a foundation for messaging-based applications. The module also
+includes a set of annotations for mapping messages to methods, similar to the Spring MVC
+annotation based programming model.
+
 
 [[overview-data-access]]
 ==== Data Access/Integration
-The __Data Access/Integration__ layer consists of the JDBC, ORM, OXM, JMS and
+The __Data Access/Integration__ layer consists of the JDBC, ORM, OXM, JMS, and
 Transaction modules.
 
-The `spring-jdbc` module provides a <<jdbc-introduction,JDBC>>-abstraction layer that removes the
-need to do tedious JDBC coding and parsing of database-vendor specific error codes.
+The `spring-jdbc` module provides a <<jdbc-introduction,JDBC>>-abstraction layer that
+removes the need to do tedious JDBC coding and parsing of database-vendor specific error
+codes.
 
 The `spring-orm` module provides integration layers for popular
-<<orm-introduction,object-relational mapping>> APIs, including <<orm-jpa,JPA>>, <<orm-jdo,JDO>>, and
-<<orm-hibernate,Hibernate>> (see also `spring-orm-hibernate4` for Hibernate 4 support).
-Using the ORM package you can use all of these O/R-mapping frameworks in combination with all of the
-other features Spring offers, such as the simple declarative transaction management feature mentioned previously.
+<<orm-introduction,object-relational mapping>> APIs, including <<orm-jpa,JPA>>,
+<<orm-jdo,JDO>>, and <<orm-hibernate,Hibernate>>. Using the `spring-orm` module you can
+use all of these O/R-mapping frameworks in combination with all of the other features
+Spring offers, such as the simple declarative transaction management feature mentioned
+previously.
 
-The `spring-oxm` module provides an abstraction layer that supports <<oxm,Object/XML mapping>>
-implementations for JAXB, Castor, XMLBeans, JiBX and XStream.
+The `spring-oxm` module provides an abstraction layer that supports <<oxm,Object/XML
+mapping>> implementations such as JAXB, Castor, XMLBeans, JiBX and XStream.
 
 The `spring-jms` module (<<jms,Java Messaging Service>>) contains features for producing and
-consuming messages. Since Spring Framework 4.1, it provides an integration with the
+consuming messages. Since Spring Framework 4.1, it provides integration with the
 `spring-messaging` module.
 
 The `spring-tx` module supports <<transaction,programmatic and declarative transaction>>
-management for classes that implement special interfaces and for __all your POJOs (plain
-old Java objects)__.
-
+management for classes that implement special interfaces and for __all your POJOs (Plain
+Old Java Objects)__.
 
 
 [[overview-web]]
 ==== Web
-The __Web__ layer consists of the `spring-web`, `spring-webmvc`, `spring-websocket` and `spring-webmvc-portlet` modules.
+The __Web__ layer consists of the `spring-web`, `spring-webmvc`, `spring-websocket`, and
+`spring-webmvc-portlet` modules.
 
 The `spring-web` module provides basic web-oriented integration features such as
-multipart file-upload functionality and the initialization of the IoC container using
-servlet listeners and a web-oriented application context. It also contains the
+multipart file upload functionality and the initialization of the IoC container using
+Servlet listeners and a web-oriented application context. It also contains the
 web-related parts of Spring's remoting support.
 
-The `spring-webmvc` module (also known as `__Web-Servlet__) contains Spring's model-view-controller
-(<<mvc-introduction,__MVC__>>) implementation for web applications. Spring's MVC
-framework provides a clean separation between domain model code and web forms, and
-integrates with all the other features of the Spring Framework.
+The `spring-webmvc` module (also known as the __Web-Servlet__ module) contains Spring's
+model-view-controller (<<mvc-introduction,__MVC__>>) implementation for web applications.
+Spring's MVC framework provides a clean separation between domain model code and web
+forms and integrates with all of the other features of the Spring Framework.
 
-The `spring-webmvc-portlet` module (also __Web-Portlet__ module) provides the MVC implementation to be used in a portlet
-environment and mirrors the functionality of Web-Servlet module.
-
-
-
-
-
+The `spring-webmvc-portlet` module (also known as the __Web-Portlet__ module) provides
+the MVC implementation to be used in a Portlet environment and mirrors the functionality
+of the `spring-webmvc` module.
 
 
 [[overview-testing]]
 ==== Test
-The `spring-test` module supports the testing of Spring components with JUnit or TestNG. It
-provides consistent loading of Spring ApplicationContexts and caching of those contexts.
-It also provides mock objects that you can use to test your code in isolation.
-
+The `spring-test` module supports the <<unit-testing,unit testing>> and
+<<integration-testing,integration testing>> of Spring components with JUnit or TestNG. It
+provides consistent <<testcontext-ctx-management,loading>> of Spring
+++ApplicationContext++s and <<testcontext-ctx-management-caching,caching>> of those
+contexts. It also provides <<mock-objects,mock objects>> that you can use to test your
+code in isolation.
 
 
 
@@ -993,9 +998,9 @@ Framework 4.0 introduces several new features for use in unit and integration te
 Spring 4.1 introduces a much simpler infrastructure <<jms-annotated,to register JMS
 listener endpoints>> by annotating bean methods with
 {javadoc-baseurl}/org/springframework/jms/annotation/JmsListener.html[`@JmsListener`].
-The XML namespace has been enhanced to support this new style (`jms:annotation-driven`)
-and it is also possible to fully configure the infrastructure using Java config (
-{javadoc-baseurl}/org/springframework/jms/annotation/EnableJms.html[`@EnableJms`],
+The XML namespace has been enhanced to support this new style (`jms:annotation-driven`),
+and it is also possible to fully configure the infrastructure using Java config
+({javadoc-baseurl}/org/springframework/jms/annotation/EnableJms.html[`@EnableJms`],
 `JmsListenerContainerFactory`). It is also possible to register listener endpoints
 programmatically using
 {javadoc-baseurl}/org/springframework/jms/annotation/JmsListenerConfigurer.html[`JmsListenerConfigurer`].
@@ -1004,18 +1009,18 @@ Spring 4.1 also aligns its JMS support to allow you to benefit from the `spring-
 abstraction introduced in 4.0, that is:
 
 * Message listener endpoints can have a more flexible signature and benefit from
-  standard messaging annotations such as `@Payload`, `@Header`, `@Headers` and `@SendTo`. It
+  standard messaging annotations such as `@Payload`, `@Header`, `@Headers`, and `@SendTo`. It
   is also possible to use a standard `Message` in lieu of `javax.jms.Message` as method
-  argument
+  argument.
 * A new {javadoc-baseurl}/org/springframework/jms/core/JmsMessageOperations.html[`JmsMessageOperations`]
   interface is available and permits `JmsTemplate` like operations using the `Message`
-  abstraction
+  abstraction.
 
 Finally, Spring 4.1 provides additional miscellaneous improvements:
 
 * Synchronous request-reply operations support in `JmsTemplate`
 * Listener priority can be specified per `<jms:listener/>` element
-* Recovery options for the message listener container is configurable using a
+* Recovery options for the message listener container are configurable using a
   {javadoc-baseurl}/org/springframework/util/backoff/BackOff.html[`BackOff`] implementation
 * JMS 2.0 shared consumers are supported
 
@@ -1025,35 +1030,35 @@ Spring 4.1 supports <<cache-jsr-107,JCache (JSR-107) annotations>> using Spring'
 existing cache configuration and infrastructure abstraction; no changes are required
 to use the standard annotations.
 
-Spring 4.1 also improves its own abstraction significantly:
+Spring 4.1 also improves its own caching abstraction significantly:
 
 * Caches can be resolved at runtime using a
   <<cache-annotations-cacheable-cache-resolver,`CacheResolver`>>. As a result the
-  `value` argument defining the cache name(s) to use is no longer mandatory
+  `value` argument defining the cache name(s) to use is no longer mandatory.
 * More operation-level customizations: cache resolver, cache manager, key
   generator
 * A new <<cache-annotations-config,`@CacheConfig` class-level annotation>> allows
-  to share common settings at class level **without** enabling any cache operation
+  common settings to be shared at the class level **without** enabling any cache operation.
 * Better exception handling of cached methods using `CacheErrorHandler`
 
-Spring 4.1 also has a breaking change in the `CacheInterface` as a new
-`putIfAbsent` method has been added.
+Spring 4.1 also has a breaking change in the `CacheInterface` as a new `putIfAbsent`
+method has been added.
 
 === Web Improvements
 
-* The JDK 1.8 `java.util.Optional` is now supported for `@RequestParam`, `@RequestHeader`
-  and `@MatrixVariable` controller method arguments while `ListenableFuture` is supported as
+* JDK 1.8's `java.util.Optional` is now supported for `@RequestParam`, `@RequestHeader`,
+  and `@MatrixVariable` controller method arguments, while `ListenableFuture` is supported as
   a return value alternative to `DeferredResult` where an underlying service (or perhaps a
   call to `AsyncRestTemplate`) already returns `ListenableFuture`.
 * Jackson's `@JsonView` is supported directly on `@ResponseBody` and `ResponseEntity`
-  controller methods for serializing different amounts of detail for the same POJO,
-  e.g. summary vs detail page. This is also supported with View-based rendering by
+  controller methods for serializing different amounts of detail for the same POJO -- for
+  example, summary vs. detail page. This is also supported with View-based rendering by
   adding the serialization view type as a model attribute under a special key.
   See <<mvc-ann-jsonview>> for details.
 * Jackson based XML serialization is now supported using
   https://github.com/FasterXML/jackson-dataformat-xml[jackson-dataformat-xml] extension.
   When using `@EnableWebMvc` or `<mvc:annotation-driven/>`, Jackson will be used by default
-  instead of JAXB2 if jackson-dataformat-xml classes are found in the classpath.
+  instead of JAXB2 if `jackson-dataformat-xml` classes are found in the classpath.
 * JSONP is now supported with Jackson.
 * A `@ControllerAdvice` can now also implement `ResponseBodyAdvice` in which case it will be
   called after the controller method returns but before the response is written and
@@ -1070,12 +1075,12 @@ Spring 4.1 also has a breaking change in the `CacheInterface` as a new
    as JSPs can also build links to controllers by referring to their mappings by name.
    A default name is assigned to every `@RequestMapping`. For example `FooController` with method
    `handleFoo` is assigned "FC#handleFoo" by default but the naming strategy is customizable
-   and can be also be set explicitly through the new name attribute on `@RequestMapping`.
-   A new mvcUrl Spring JSP tag makes this easy to use in JSP pages.
+   and can be also be set explicitly through the new `name` attribute on `@RequestMapping`.
+   A new `mvcUrl` Spring JSP tag makes this easy to use in JSP pages.
    The same can be done for any other view technology.
 * The familiar `ResponseEntity` now has a builder-style API that guides controller methods
   towards the preparation of server-side responses, e.g. `ResponseEntity.ok()`.
-  For the client side there is a new RequestEntity also offering a builder-style API that
+  For the client side there is a new `RequestEntity` also offering a builder-style API that
   guides towards the preparation of client-side HTTP requests.
 * MVC Java config and XML namespace:
 ** View resolver configuration -- if you've had to configure view resolution with content
@@ -1085,7 +1090,7 @@ Spring 4.1 also has a breaking change in the `CacheInterface` as a new
    without the need for controller logic, view controllers now have built-in support for
    redirecting and setting the response status. An application can use this to configure
    redirect URLs, render 404 responses with a view, send "no content" responses, etc.
-   Some use cases https://jira.spring.io/browse/SPR-11543?focusedCommentId=100308&page=com.atlassian.jira.plugin.system.issuetabpanels:comment-tabpanel#comment-100308[listed here].
+   Some use cases are https://jira.spring.io/browse/SPR-11543?focusedCommentId=100308&page=com.atlassian.jira.plugin.system.issuetabpanels:comment-tabpanel#comment-100308[listed here].
 ** Path matching -- these frequently used customizations are now built-in and have also been
    backported to 4.0. See <<mvc-config-path-matching>> for details.
 * http://groovy-lang.org/docs/groovy-2.3.6/html/documentation/markup-template-engine.html[Groovy markup template]
@@ -1120,7 +1125,7 @@ Spring 4.1 also has a breaking change in the `CacheInterface` as a new
 * JSON responses can be asserted with https://github.com/skyscreamer/JSONassert[JSON Assert]
   as an extra option to using JSONPath much like it has been possible to do for XML with
   XMLUnit.
-* `MockMvcBuilder` "recipies" can now be created with the help of `MockMvcConfigurer`. This
+* `MockMvcBuilder` _recipes_ can now be created with the help of `MockMvcConfigurer`. This
   was added to make it easy to apply Spring Security setup but can be used to encapsulate
   common setup for any 3rd party framework or within a project.
 * `MockRestServiceServer` now supports the `AsyncRestTemplate` for client-side testing.
