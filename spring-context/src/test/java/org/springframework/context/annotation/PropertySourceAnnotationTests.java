@@ -25,6 +25,7 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
 import org.springframework.beans.factory.BeanDefinitionStoreException;
+import org.springframework.beans.factory.FactoryBean;
 import org.springframework.core.env.Environment;
 import org.springframework.core.env.MutablePropertySources;
 import org.springframework.tests.sample.beans.TestBean;
@@ -99,7 +100,7 @@ public class PropertySourceAnnotationTests {
 		}
 	}
 
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void withUnresolvablePlaceholder() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 		ctx.register(ConfigWithUnresolvablePlaceholder.class);
@@ -118,6 +119,16 @@ public class PropertySourceAnnotationTests {
 	public void withResolvablePlaceholder() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 		ctx.register(ConfigWithResolvablePlaceholder.class);
+		System.setProperty("path.to.properties", "org/springframework/context/annotation");
+		ctx.refresh();
+		assertThat(ctx.getBean(TestBean.class).getName(), equalTo("p1TestBean"));
+		System.clearProperty("path.to.properties");
+	}
+
+	@Test
+	public void withResolvablePlaceholderAndFactoryBean() {
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
+		ctx.register(ConfigWithResolvablePlaceholderAndFactoryBean.class);
 		System.setProperty("path.to.properties", "org/springframework/context/annotation");
 		ctx.refresh();
 		assertThat(ctx.getBean(TestBean.class).getName(), equalTo("p1TestBean"));
@@ -201,6 +212,7 @@ public class PropertySourceAnnotationTests {
 	@Configuration
 	@PropertySource(value="classpath:${unresolvable:org/springframework/context/annotation}/p1.properties")
 	static class ConfigWithUnresolvablePlaceholderAndDefault {
+
 		@Inject Environment env;
 
 		@Bean
@@ -213,6 +225,7 @@ public class PropertySourceAnnotationTests {
 	@Configuration
 	@PropertySource(value="classpath:${path.to.properties}/p1.properties")
 	static class ConfigWithResolvablePlaceholder {
+
 		@Inject Environment env;
 
 		@Bean
@@ -222,10 +235,37 @@ public class PropertySourceAnnotationTests {
 	}
 
 
+	@Configuration
+	@PropertySource(value="classpath:${path.to.properties}/p1.properties")
+	static class ConfigWithResolvablePlaceholderAndFactoryBean {
+
+		@Inject Environment env;
+
+		@Bean
+		public FactoryBean testBean() {
+			final String name = env.getProperty("testbean.name");
+			return new FactoryBean() {
+				@Override
+				public Object getObject() {
+					return new TestBean(name);
+				}
+				@Override
+				public Class<?> getObjectType() {
+					return TestBean.class;
+				}
+				@Override
+				public boolean isSingleton() {
+					return false;
+				}
+			};
+		}
+	}
+
 
 	@Configuration
 	@PropertySource(name="p1", value="classpath:org/springframework/context/annotation/p1.properties")
 	static class ConfigWithExplicitName {
+
 		@Inject Environment env;
 
 		@Bean
@@ -238,6 +278,7 @@ public class PropertySourceAnnotationTests {
 	@Configuration
 	@PropertySource("classpath:org/springframework/context/annotation/p1.properties")
 	static class ConfigWithImplicitName {
+
 		@Inject Environment env;
 
 		@Bean

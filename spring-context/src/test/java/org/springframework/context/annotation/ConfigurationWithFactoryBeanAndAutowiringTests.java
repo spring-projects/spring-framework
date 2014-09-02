@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,12 +17,9 @@
 package org.springframework.context.annotation;
 
 import org.junit.Test;
-import org.springframework.beans.factory.BeanCreationException;
+
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.AnnotationConfigApplicationContext;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.util.Assert;
 
 /**
@@ -35,8 +32,7 @@ public class ConfigurationWithFactoryBeanAndAutowiringTests {
 
 	@Test
 	public void withConcreteFactoryBeanImplementationAsReturnType() {
-		AnnotationConfigApplicationContext ctx =
-			new AnnotationConfigApplicationContext();
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 		ctx.register(AppConfig.class);
 		ctx.register(ConcreteFactoryBeanImplementationConfig.class);
 		ctx.refresh();
@@ -44,8 +40,7 @@ public class ConfigurationWithFactoryBeanAndAutowiringTests {
 
 	@Test
 	public void withParameterizedFactoryBeanImplementationAsReturnType() {
-		AnnotationConfigApplicationContext ctx =
-			new AnnotationConfigApplicationContext();
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 		ctx.register(AppConfig.class);
 		ctx.register(ParameterizedFactoryBeanImplementationConfig.class);
 		ctx.refresh();
@@ -53,8 +48,7 @@ public class ConfigurationWithFactoryBeanAndAutowiringTests {
 
 	@Test
 	public void withParameterizedFactoryBeanInterfaceAsReturnType() {
-		AnnotationConfigApplicationContext ctx =
-			new AnnotationConfigApplicationContext();
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 		ctx.register(AppConfig.class);
 		ctx.register(ParameterizedFactoryBeanInterfaceConfig.class);
 		ctx.refresh();
@@ -62,31 +56,27 @@ public class ConfigurationWithFactoryBeanAndAutowiringTests {
 
 	@Test
 	public void withNonPublicParameterizedFactoryBeanInterfaceAsReturnType() {
-		AnnotationConfigApplicationContext ctx =
-			new AnnotationConfigApplicationContext();
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 		ctx.register(AppConfig.class);
 		ctx.register(NonPublicParameterizedFactoryBeanInterfaceConfig.class);
 		ctx.refresh();
 	}
 
-	@Test(expected=BeanCreationException.class)
+	@Test
 	public void withRawFactoryBeanInterfaceAsReturnType() {
-		AnnotationConfigApplicationContext ctx =
-			new AnnotationConfigApplicationContext();
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 		ctx.register(AppConfig.class);
 		ctx.register(RawFactoryBeanInterfaceConfig.class);
 		ctx.refresh();
 	}
 
-	@Test(expected=BeanCreationException.class)
+	@Test
 	public void withWildcardParameterizedFactoryBeanInterfaceAsReturnType() {
-		AnnotationConfigApplicationContext ctx =
-			new AnnotationConfigApplicationContext();
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 		ctx.register(AppConfig.class);
 		ctx.register(WildcardParameterizedFactoryBeanInterfaceConfig.class);
 		ctx.refresh();
 	}
-
 }
 
 
