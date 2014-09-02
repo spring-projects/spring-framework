@@ -25,6 +25,7 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
 import org.springframework.beans.factory.BeanDefinitionStoreException;
+import org.springframework.beans.factory.FactoryBean;
 import org.springframework.core.env.Environment;
 import org.springframework.core.env.MutablePropertySources;
 import org.springframework.tests.sample.beans.TestBean;
@@ -132,6 +133,16 @@ public class PropertySourceAnnotationTests {
 	public void withResolvablePlaceholder() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 		ctx.register(ConfigWithResolvablePlaceholder.class);
+		System.setProperty("path.to.properties", "org/springframework/context/annotation");
+		ctx.refresh();
+		assertThat(ctx.getBean(TestBean.class).getName(), equalTo("p1TestBean"));
+		System.clearProperty("path.to.properties");
+	}
+
+	@Test
+	public void withResolvablePlaceholderAndFactoryBean() {
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
+		ctx.register(ConfigWithResolvablePlaceholderAndFactoryBean.class);
 		System.setProperty("path.to.properties", "org/springframework/context/annotation");
 		ctx.refresh();
 		assertThat(ctx.getBean(TestBean.class).getName(), equalTo("p1TestBean"));
@@ -247,6 +258,33 @@ public class PropertySourceAnnotationTests {
 		@Bean
 		public TestBean testBean() {
 			return new TestBean(env.getProperty("testbean.name"));
+		}
+	}
+
+
+	@Configuration
+	@PropertySource(value="classpath:${path.to.properties}/p1.properties")
+	static class ConfigWithResolvablePlaceholderAndFactoryBean {
+
+		@Inject Environment env;
+
+		@Bean
+		public FactoryBean testBean() {
+			final String name = env.getProperty("testbean.name");
+			return new FactoryBean() {
+				@Override
+				public Object getObject() {
+					return new TestBean(name);
+				}
+				@Override
+				public Class<?> getObjectType() {
+					return TestBean.class;
+				}
+				@Override
+				public boolean isSingleton() {
+					return false;
+				}
+			};
 		}
 	}
 
