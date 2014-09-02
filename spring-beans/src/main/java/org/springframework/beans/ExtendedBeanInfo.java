@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,6 +34,8 @@ import java.util.Enumeration;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
+
+import org.springframework.util.ObjectUtils;
 
 import static org.springframework.beans.PropertyDescriptorUtils.*;
 
@@ -115,7 +117,7 @@ class ExtendedBeanInfo implements BeanInfo {
 				matches.add(method);
 			}
 		}
-		// sort non-void returning write methods to guard against the ill effects of
+		// Sort non-void returning write methods to guard against the ill effects of
 		// non-deterministic sorting of methods returned from Class#getDeclaredMethods
 		// under JDK 7. See http://bugs.sun.com/view_bug.do?bug_id=7023180
 		Collections.sort(matches, new Comparator<Method>() {
@@ -310,8 +312,14 @@ class SimplePropertyDescriptor extends PropertyDescriptor {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
-		return PropertyDescriptorUtils.equals(this, obj);
+	public boolean equals(Object other) {
+		return (this == other || (other instanceof PropertyDescriptor &&
+				PropertyDescriptorUtils.equals(this, (PropertyDescriptor) other)));
+	}
+
+	@Override
+	public int hashCode() {
+		return (ObjectUtils.nullSafeHashCode(getReadMethod()) * 29 + ObjectUtils.nullSafeHashCode(getWriteMethod()));
 	}
 
 	@Override
@@ -437,24 +445,27 @@ class SimpleIndexedPropertyDescriptor extends IndexedPropertyDescriptor {
 	 * See java.beans.IndexedPropertyDescriptor#equals(java.lang.Object)
 	 */
 	@Override
-	public boolean equals(Object obj) {
-		if (this == obj) {
+	public boolean equals(Object other) {
+		if (this == other) {
 			return true;
 		}
-		if (obj != null && obj instanceof IndexedPropertyDescriptor) {
-			IndexedPropertyDescriptor other = (IndexedPropertyDescriptor) obj;
-			if (!compareMethods(getIndexedReadMethod(), other.getIndexedReadMethod())) {
-				return false;
-			}
-			if (!compareMethods(getIndexedWriteMethod(), other.getIndexedWriteMethod())) {
-				return false;
-			}
-			if (getIndexedPropertyType() != other.getIndexedPropertyType()) {
-				return false;
-			}
-			return PropertyDescriptorUtils.equals(this, obj);
+		if (!(other instanceof IndexedPropertyDescriptor)) {
+			return false;
 		}
-		return false;
+		IndexedPropertyDescriptor otherPd = (IndexedPropertyDescriptor) other;
+		return (ObjectUtils.nullSafeEquals(getIndexedReadMethod(), otherPd.getIndexedReadMethod()) &&
+				ObjectUtils.nullSafeEquals(getIndexedWriteMethod(), otherPd.getIndexedWriteMethod()) &&
+				ObjectUtils.nullSafeEquals(getIndexedPropertyType(), otherPd.getIndexedPropertyType()) &&
+				PropertyDescriptorUtils.equals(this, otherPd));
+	}
+
+	@Override
+	public int hashCode() {
+		int hashCode = ObjectUtils.nullSafeHashCode(getReadMethod());
+		hashCode = 29 * hashCode + ObjectUtils.nullSafeHashCode(getWriteMethod());
+		hashCode = 29 * hashCode + ObjectUtils.nullSafeHashCode(getIndexedReadMethod());
+		hashCode = 29 * hashCode + ObjectUtils.nullSafeHashCode(getIndexedWriteMethod());
+		return hashCode;
 	}
 
 	@Override
@@ -595,40 +606,12 @@ class PropertyDescriptorUtils {
 	 * editor and flags are equivalent.
 	 * @see PropertyDescriptor#equals(Object)
 	 */
-	public static boolean equals(PropertyDescriptor pd1, Object obj) {
-		if (pd1 == obj) {
-			return true;
-		}
-		if (obj != null && obj instanceof PropertyDescriptor) {
-			PropertyDescriptor pd2 = (PropertyDescriptor) obj;
-			if (!compareMethods(pd1.getReadMethod(), pd2.getReadMethod())) {
-				return false;
-			}
-			if (!compareMethods(pd1.getWriteMethod(), pd2.getWriteMethod())) {
-				return false;
-			}
-			if (pd1.getPropertyType() == pd2.getPropertyType() &&
-					pd1.getPropertyEditorClass() == pd2.getPropertyEditorClass() &&
-					pd1.isBound() == pd2.isBound() && pd1.isConstrained() == pd2.isConstrained()) {
-				return true;
-			}
-		}
-		return false;
-	}
-
-	/*
-	 * See PropertyDescriptor#compareMethods
-	 */
-	public static boolean compareMethods(Method a, Method b) {
-		if ((a == null) != (b == null)) {
-			return false;
-		}
-		if (a != null) {
-			if (!a.equals(b)) {
-				return false;
-			}
-		}
-		return true;
+	public static boolean equals(PropertyDescriptor pd, PropertyDescriptor otherPd) {
+		return (ObjectUtils.nullSafeEquals(pd.getReadMethod(), otherPd.getReadMethod()) &&
+				ObjectUtils.nullSafeEquals(pd.getWriteMethod(), otherPd.getWriteMethod()) &&
+				ObjectUtils.nullSafeEquals(pd.getPropertyType(), otherPd.getPropertyType()) &&
+				ObjectUtils.nullSafeEquals(pd.getPropertyEditorClass(), otherPd.getPropertyEditorClass()) &&
+				pd.isBound() == otherPd.isBound() && pd.isConstrained() == otherPd.isConstrained());
 	}
 }
 
