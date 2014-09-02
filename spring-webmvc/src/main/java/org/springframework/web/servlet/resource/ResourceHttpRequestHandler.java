@@ -104,7 +104,7 @@ public class ResourceHttpRequestHandler extends WebContentGenerator implements H
 	 * for serving static resources.
 	 */
 	public void setLocations(List<Resource> locations) {
-		Assert.notEmpty(locations, "Locations list must not be empty");
+		Assert.notNull(locations, "Locations list must not be null");
 		this.locations.clear();
 		this.locations.addAll(locations);
 	}
