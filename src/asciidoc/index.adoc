@@ -126,20 +126,22 @@ Programming), Instrumentation, and Test, as shown in the following diagram.
 .Overview of the Spring Framework
 image::images/spring-overview.png[width=400]
 
+The next parts will list, for each feature, the available modules with their artifact name and their goal.
+Artifacts names are the reference names to use in <<dependency-management,Dependency Management tools>>.
 
 
 [[overview-core-container]]
 ==== Core Container
-The <<beans-introduction,__Core Container__>> consists of the Core, Beans, Context, and
-Expression Language modules.
+The <<beans-introduction,__Core Container__>> consists of the `spring-core`, `spring-beans`, `spring-context`, and
+`spring-expression` (Spring Expression Language) modules.
 
-The <<beans-introduction,__Core and Beans__>> modules provide the fundamental parts of
-the framework, including the IoC and Dependency Injection features. The `BeanFactory` is
+The `spring-core` and `spring-beans` modules <<beans-introduction,provide the fundamental parts of the framework>>,
+including the IoC and Dependency Injection features. The `BeanFactory` is
 a sophisticated implementation of the factory pattern. It removes the need for
 programmatic singletons and allows you to decouple the configuration and specification
 of dependencies from your actual program logic.
 
-The <<context-introduction,__Context__>> module builds on the solid base provided by the
+The <<context-introduction,__Context__>> (`spring-context`) module builds on the solid base provided by the
 <<beans-introduction,__Core and Beans__>> modules: it is a means to access objects in a
 framework-style manner that is similar to a JNDI registry. The Context module inherits
 its features from the Beans module and adds support for internationalization (using, for
@@ -148,8 +150,8 @@ creation of contexts by, for example, a servlet container. The Context module al
 supports Java EE features such as EJB, JMX ,and basic remoting. The `ApplicationContext`
 interface is the focal point of the Context module.
 
-The <<expressions,__Expression Language__>> module provides a powerful expression
-language for querying and manipulating an object graph at runtime. It is an extension of
+The `spring-expression` module provides a powerful <<expressions,__Expression Language__>>
+for querying and manipulating an object graph at runtime. It is an extension of
 the unified expression language (unified EL) as specified in the JSP 2.1 specification.
 The language supports setting and getting property values, property assignment, method
 invocation, accessing the context of arrays, collections and indexers, logical and
@@ -159,16 +161,16 @@ aggregations.
 
 [[overview-aop-instrumentation]]
 ==== AOP and Instrumentation
-Spring's <<aop-introduction,__AOP__>> module provides an __AOP Alliance__-compliant
+The `spring-aop` module provides an <<aop-introduction,__AOP__>> Alliance-compliant
 aspect-oriented programming implementation allowing you to define, for example,
 method-interceptors and pointcuts to cleanly decouple code that implements functionality
 that should be separated. Using source-level metadata functionality, you can also
 incorporate behavioral information into your code, in a manner similar to that of .NET
 attributes.
 
-The separate __Aspects__ module provides integration with AspectJ.
+The separate `spring-aspets` module provides integration with AspectJ.
 
-The __Instrumentation__ module provides class instrumentation support and classloader
+The `spring-instrument` module provides class instrumentation support and classloader
 implementations to be used in certain application servers.
 
 [[overview-messaging]]
@@ -184,23 +186,23 @@ Spring MVC annotation based programming model.
 The __Data Access/Integration__ layer consists of the JDBC, ORM, OXM, JMS and
 Transaction modules.
 
-The <<jdbc-introduction,JDBC>> module provides a JDBC-abstraction layer that removes the
+The `spring-jdbc` module provides a <<jdbc-introduction,JDBC>>-abstraction layer that removes the
 need to do tedious JDBC coding and parsing of database-vendor specific error codes.
 
-The <<orm-introduction,__ORM__>> module provides integration layers for popular
-object-relational mapping APIs, including <<orm-jpa,JPA>>, <<orm-jdo,JDO>>, and
-<<orm-hibernate,Hibernate>>. Using the ORM package you can use all of these O/R-mapping
-frameworks in combination with all of the other features Spring offers, such as the simple
-declarative transaction management feature mentioned previously.
+The `spring-orm` module provides integration layers for popular
+<<orm-introduction,object-relational mapping>> APIs, including <<orm-jpa,JPA>>, <<orm-jdo,JDO>>, and
+<<orm-hibernate,Hibernate>> (see also `spring-orm-hibernate4` for Hibernate 4 support).
+Using the ORM package you can use all of these O/R-mapping frameworks in combination with all of the
+other features Spring offers, such as the simple declarative transaction management feature mentioned previously.
 
-The <<oxm,OXM>> module provides an abstraction layer that supports Object/XML mapping
+The `spring-oxm` module provides an abstraction layer that supports <<oxm,Object/XML mapping>>
 implementations for JAXB, Castor, XMLBeans, JiBX and XStream.
 
-The Java Messaging Service (<<jms,JMS>>) module contains features for producing and
+The `spring-jms` module (<<jms,Java Messaging Service>>) contains features for producing and
 consuming messages. Since Spring Framework 4.1, it provides an integration with the
 `spring-messaging` module.
 
-The <<transaction,Transaction>> module supports programmatic and declarative transaction
+The `spring-tx` module supports <<transaction,programmatic and declarative transaction>>
 management for classes that implement special interfaces and for __all your POJOs (plain
 old Java objects)__.
 
@@ -208,19 +210,19 @@ old Java objects)__.
 
 [[overview-web]]
 ==== Web
-The __Web__ layer consists of the Web, Web-Servlet, WebSocket and Web-Portlet modules.
+The __Web__ layer consists of the `spring-web`, `spring-webmvc`, `spring-websocket` and `spring-webmvc-portlet` modules.
 
-Spring's __Web__ module provides basic web-oriented integration features such as
+The `spring-web` module provides basic web-oriented integration features such as
 multipart file-upload functionality and the initialization of the IoC container using
 servlet listeners and a web-oriented application context. It also contains the
 web-related parts of Spring's remoting support.
 
-The __Web-Servlet__ module contains Spring's model-view-controller
+The `spring-webmvc` module (also known as `__Web-Servlet__) contains Spring's model-view-controller
 (<<mvc-introduction,__MVC__>>) implementation for web applications. Spring's MVC
 framework provides a clean separation between domain model code and web forms, and
 integrates with all the other features of the Spring Framework.
 
-The __Web-Portlet__ module provides the MVC implementation to be used in a portlet
+The `spring-webmvc-portlet` module (also __Web-Portlet__ module) provides the MVC implementation to be used in a portlet
 environment and mirrors the functionality of Web-Servlet module.
 
 
@@ -231,7 +233,7 @@ environment and mirrors the functionality of Web-Servlet module.
 
 [[overview-testing]]
 ==== Test
-The __Test__ module supports the testing of Spring components with JUnit or TestNG. It
+The `spring-test` module supports the testing of Spring components with JUnit or TestNG. It
 provides consistent loading of Spring ApplicationContexts and caching of those contexts.
 It also provides mock objects that you can use to test your code in isolation.
 
