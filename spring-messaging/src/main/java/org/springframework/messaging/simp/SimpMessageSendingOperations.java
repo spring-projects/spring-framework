@@ -27,7 +27,17 @@ import org.springframework.messaging.core.MessageSendingOperations;
  * the Spring Framework support for Simple Messaging Protocols (like STOMP).
  *
  * <p>For more on user destinations see
- * {@link org.springframework.messaging.simp.user.UserDestinationResolver}.
+ * {@link org.springframework.messaging.simp.user.UserDestinationResolver
+ * UserDestinationResolver}.
+ *
+ * <p>Generally it is expected the user is the one authenticated with the
+ * WebSocket session (or by extension the user authenticated with the
+ * handshake request that started the session). However if the session is
+ * not authenticated, it is also possible to pass the session id (if known)
+ * in place of the user name. Keep in mind though that in that scenario,
+ * you must use one of the overloaded methods that accept headers making sure the
+ * {@link org.springframework.messaging.simp.SimpMessageHeaderAccessor#setSessionId
+ * sessionId} header has been set accordingly.
  *
  * @author Rossen Stoyanchev
  * @since 4.0
