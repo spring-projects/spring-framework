@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -88,8 +88,7 @@ public class AsyncRestTemplate extends AsyncHttpAccessor implements AsyncRestOpe
 	 */
 	public AsyncRestTemplate(AsyncListenableTaskExecutor taskExecutor) {
 		Assert.notNull(taskExecutor, "AsyncTaskExecutor must not be null");
-		SimpleClientHttpRequestFactory requestFactory =
-				new SimpleClientHttpRequestFactory();
+		SimpleClientHttpRequestFactory requestFactory = new SimpleClientHttpRequestFactory();
 		requestFactory.setTaskExecutor(taskExecutor);
 		this.syncTemplate = new RestTemplate(requestFactory);
 		setAsyncRequestFactory(requestFactory);
@@ -114,8 +113,7 @@ public class AsyncRestTemplate extends AsyncHttpAccessor implements AsyncRestOpe
 	 * @param asyncRequestFactory the asynchronous request factory
 	 * @param syncRequestFactory the synchronous request factory
 	 */
-	public AsyncRestTemplate(AsyncClientHttpRequestFactory asyncRequestFactory,
-			ClientHttpRequestFactory syncRequestFactory) {
+	public AsyncRestTemplate(AsyncClientHttpRequestFactory asyncRequestFactory, ClientHttpRequestFactory syncRequestFactory) {
 		this(asyncRequestFactory, new RestTemplate(syncRequestFactory));
 	}
 
@@ -125,8 +123,7 @@ public class AsyncRestTemplate extends AsyncHttpAccessor implements AsyncRestOpe
 	 * @param requestFactory the asynchronous request factory to use
 	 * @param restTemplate the synchronous template to use
 	 */
-	public AsyncRestTemplate(AsyncClientHttpRequestFactory requestFactory,
-			RestTemplate restTemplate) {
+	public AsyncRestTemplate(AsyncClientHttpRequestFactory requestFactory, RestTemplate restTemplate) {
 		Assert.notNull(restTemplate, "'restTemplate' must not be null");
 		this.syncTemplate = restTemplate;
 		setAsyncRequestFactory(requestFactory);
@@ -195,6 +192,7 @@ public class AsyncRestTemplate extends AsyncHttpAccessor implements AsyncRestOpe
 		return execute(url, HttpMethod.GET, requestCallback, responseExtractor);
 	}
 
+
 	// HEAD
 
 	@Override
@@ -218,30 +216,29 @@ public class AsyncRestTemplate extends AsyncHttpAccessor implements AsyncRestOpe
 	// POST
 
 	@Override
-	public ListenableFuture<URI> postForLocation(String url, HttpEntity<?> request,
-			Object... uriVariables) throws RestClientException {
-		AsyncRequestCallback requestCallback = httpEntityCallback(request);
-		ResponseExtractor<HttpHeaders> headersExtractor = headersExtractor();
-		ListenableFuture<HttpHeaders> headersFuture =
-				execute(url, HttpMethod.POST, requestCallback, headersExtractor,
-						uriVariables);
-		return extractLocationHeader(headersFuture);
-	}
-
-	@Override
-	public ListenableFuture<URI> postForLocation(String url, HttpEntity<?> request,
-			Map<String, ?> uriVariables) throws RestClientException {
-		AsyncRequestCallback requestCallback = httpEntityCallback(request);
-		ResponseExtractor<HttpHeaders> headersExtractor = headersExtractor();
-		ListenableFuture<HttpHeaders> headersFuture =
-				execute(url, HttpMethod.POST, requestCallback, headersExtractor,
-						uriVariables);
-		return extractLocationHeader(headersFuture);
-	}
-
-	@Override
-	public ListenableFuture<URI> postForLocation(URI url, HttpEntity<?> request)
+	public ListenableFuture<URI> postForLocation(String url, HttpEntity<?> request, Object... uriVariables)
 			throws RestClientException {
+
+		AsyncRequestCallback requestCallback = httpEntityCallback(request);
+		ResponseExtractor<HttpHeaders> headersExtractor = headersExtractor();
+		ListenableFuture<HttpHeaders> headersFuture =
+				execute(url, HttpMethod.POST, requestCallback, headersExtractor, uriVariables);
+		return extractLocationHeader(headersFuture);
+	}
+
+	@Override
+	public ListenableFuture<URI> postForLocation(String url, HttpEntity<?> request, Map<String, ?> uriVariables)
+			throws RestClientException {
+
+		AsyncRequestCallback requestCallback = httpEntityCallback(request);
+		ResponseExtractor<HttpHeaders> headersExtractor = headersExtractor();
+		ListenableFuture<HttpHeaders> headersFuture =
+				execute(url, HttpMethod.POST, requestCallback, headersExtractor, uriVariables);
+		return extractLocationHeader(headersFuture);
+	}
+
+	@Override
+	public ListenableFuture<URI> postForLocation(URI url, HttpEntity<?> request) throws RestClientException {
 		AsyncRequestCallback requestCallback = httpEntityCallback(request);
 		ResponseExtractor<HttpHeaders> headersExtractor = headersExtractor();
 		ListenableFuture<HttpHeaders> headersFuture =
@@ -251,7 +248,6 @@ public class AsyncRestTemplate extends AsyncHttpAccessor implements AsyncRestOpe
 
 	private static ListenableFuture<URI> extractLocationHeader(final ListenableFuture<HttpHeaders> headersFuture) {
 		return new ListenableFuture<URI>() {
-
 			@Override
 			public void addCallback(final ListenableFutureCallback<? super URI> callback) {
 				headersFuture.addCallback(new ListenableFutureCallback<HttpHeaders>() {
@@ -259,14 +255,12 @@ public class AsyncRestTemplate extends AsyncHttpAccessor implements AsyncRestOpe
 					public void onSuccess(HttpHeaders result) {
 						callback.onSuccess(result.getLocation());
 					}
-
 					@Override
-					public void onFailure(Throwable t) {
-						callback.onFailure(t);
+					public void onFailure(Throwable ex) {
+						callback.onFailure(ex);
 					}
 				});
 			}
-
 			@Override
 			public boolean cancel(boolean mayInterruptIfRunning) {
 				return headersFuture.cancel(mayInterruptIfRunning);
@@ -285,8 +279,7 @@ public class AsyncRestTemplate extends AsyncHttpAccessor implements AsyncRestOpe
 				return headers.getLocation();
 			}
 			@Override
-			public URI get(long timeout, TimeUnit unit)
-					throws InterruptedException, ExecutionException, TimeoutException {
+			public URI get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
 				HttpHeaders headers = headersFuture.get(timeout, unit);
 				return headers.getLocation();
 			}
@@ -296,45 +289,41 @@ public class AsyncRestTemplate extends AsyncHttpAccessor implements AsyncRestOpe
 	@Override
 	public <T> ListenableFuture<ResponseEntity<T>> postForEntity(String url, HttpEntity<?> request,
 			Class<T> responseType, Object... uriVariables) throws RestClientException {
+
 		AsyncRequestCallback requestCallback = httpEntityCallback(request, responseType);
-		ResponseExtractor<ResponseEntity<T>> responseExtractor =
-				responseEntityExtractor(responseType);
-		return execute(url, HttpMethod.POST, requestCallback, responseExtractor,
-				uriVariables);
+		ResponseExtractor<ResponseEntity<T>> responseExtractor = responseEntityExtractor(responseType);
+		return execute(url, HttpMethod.POST, requestCallback, responseExtractor, uriVariables);
 	}
 
 	@Override
 	public <T> ListenableFuture<ResponseEntity<T>> postForEntity(String url, HttpEntity<?> request,
-			Class<T> responseType, Map<String, ?> uriVariables)
-			throws RestClientException {
+			Class<T> responseType, Map<String, ?> uriVariables) throws RestClientException {
+
 		AsyncRequestCallback requestCallback = httpEntityCallback(request, responseType);
-		ResponseExtractor<ResponseEntity<T>> responseExtractor =
-				responseEntityExtractor(responseType);
-		return execute(url, HttpMethod.POST, requestCallback, responseExtractor,
-				uriVariables);
+		ResponseExtractor<ResponseEntity<T>> responseExtractor = responseEntityExtractor(responseType);
+		return execute(url, HttpMethod.POST, requestCallback, responseExtractor, uriVariables);
 	}
 
 	@Override
-	public <T> ListenableFuture<ResponseEntity<T>> postForEntity(URI url, HttpEntity<?> request,
-			Class<T> responseType) throws RestClientException {
+	public <T> ListenableFuture<ResponseEntity<T>> postForEntity(URI url, HttpEntity<?> request, Class<T> responseType)
+			throws RestClientException {
+
 		AsyncRequestCallback requestCallback = httpEntityCallback(request, responseType);
-		ResponseExtractor<ResponseEntity<T>> responseExtractor =
-				responseEntityExtractor(responseType);
+		ResponseExtractor<ResponseEntity<T>> responseExtractor = responseEntityExtractor(responseType);
 		return execute(url, HttpMethod.POST, requestCallback, responseExtractor);
 	}
+
 
 	// PUT
 
 	@Override
-	public ListenableFuture<?> put(String url, HttpEntity<?> request, Object... uriVariables)
-			throws RestClientException {
+	public ListenableFuture<?> put(String url, HttpEntity<?> request, Object... uriVariables) throws RestClientException {
 		AsyncRequestCallback requestCallback = httpEntityCallback(request);
 		return execute(url, HttpMethod.PUT, requestCallback, null, uriVariables);
 	}
 
 	@Override
-	public ListenableFuture<?> put(String url, HttpEntity<?> request,
-			Map<String, ?> uriVariables) throws RestClientException {
+	public ListenableFuture<?> put(String url, HttpEntity<?> request, Map<String, ?> uriVariables) throws RestClientException {
 		AsyncRequestCallback requestCallback = httpEntityCallback(request);
 		return execute(url, HttpMethod.PUT, requestCallback, null, uriVariables);
 	}
@@ -345,17 +334,16 @@ public class AsyncRestTemplate extends AsyncHttpAccessor implements AsyncRestOpe
 		return execute(url, HttpMethod.PUT, requestCallback, null);
 	}
 
+
 	// DELETE
 
 	@Override
-	public ListenableFuture<?> delete(String url, Object... urlVariables)
-			throws RestClientException {
+	public ListenableFuture<?> delete(String url, Object... urlVariables) throws RestClientException {
 		return execute(url, HttpMethod.DELETE, null, null, urlVariables);
 	}
 
 	@Override
-	public ListenableFuture<?> delete(String url, Map<String, ?> urlVariables)
-			throws RestClientException {
+	public ListenableFuture<?> delete(String url, Map<String, ?> urlVariables) throws RestClientException {
 		return execute(url, HttpMethod.DELETE, null, null, urlVariables);
 	}
 
@@ -363,6 +351,7 @@ public class AsyncRestTemplate extends AsyncHttpAccessor implements AsyncRestOpe
 	public ListenableFuture<?> delete(URI url) throws RestClientException {
 		return execute(url, HttpMethod.DELETE, null, null);
 	}
+
 
 	// OPTIONS
 
@@ -389,23 +378,19 @@ public class AsyncRestTemplate extends AsyncHttpAccessor implements AsyncRestOpe
 
 	private static ListenableFuture<Set<HttpMethod>> extractAllowHeader(final ListenableFuture<HttpHeaders> headersFuture) {
 		return new ListenableFuture<Set<HttpMethod>>() {
-
 			@Override
-			public void addCallback(
-					final ListenableFutureCallback<? super Set<HttpMethod>> callback) {
+			public void addCallback(final ListenableFutureCallback<? super Set<HttpMethod>> callback) {
 				headersFuture.addCallback(new ListenableFutureCallback<HttpHeaders>() {
 					@Override
 					public void onSuccess(HttpHeaders result) {
 						callback.onSuccess(result.getAllow());
 					}
-
 					@Override
-					public void onFailure(Throwable t) {
-						callback.onFailure(t);
+					public void onFailure(Throwable ex) {
+						callback.onFailure(ex);
 					}
 				});
 			}
-
 			@Override
 			public boolean cancel(boolean mayInterruptIfRunning) {
 				return headersFuture.cancel(mayInterruptIfRunning);
@@ -424,8 +409,7 @@ public class AsyncRestTemplate extends AsyncHttpAccessor implements AsyncRestOpe
 				return headers.getAllow();
 			}
 			@Override
-			public Set<HttpMethod> get(long timeout, TimeUnit unit)
-					throws InterruptedException, ExecutionException, TimeoutException {
+			public Set<HttpMethod> get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
 				HttpHeaders headers = headersFuture.get(timeout, unit);
 				return headers.getAllow();
 			}
@@ -436,68 +420,59 @@ public class AsyncRestTemplate extends AsyncHttpAccessor implements AsyncRestOpe
 	// exchange
 
 	@Override
-	public <T> ListenableFuture<ResponseEntity<T>> exchange(String url, HttpMethod method,
-			HttpEntity<?> requestEntity, Class<T> responseType, Object... uriVariables)
-			throws RestClientException {
-		AsyncRequestCallback requestCallback =
-				httpEntityCallback(requestEntity, responseType);
-		ResponseExtractor<ResponseEntity<T>> responseExtractor =
-				responseEntityExtractor(responseType);
+	public <T> ListenableFuture<ResponseEntity<T>> exchange(String url, HttpMethod method, HttpEntity<?> requestEntity,
+			Class<T> responseType, Object... uriVariables) throws RestClientException {
+
+		AsyncRequestCallback requestCallback = httpEntityCallback(requestEntity, responseType);
+		ResponseExtractor<ResponseEntity<T>> responseExtractor = responseEntityExtractor(responseType);
 		return execute(url, method, requestCallback, responseExtractor, uriVariables);
 	}
 
 	@Override
-	public <T> ListenableFuture<ResponseEntity<T>> exchange(String url, HttpMethod method,
-			HttpEntity<?> requestEntity, Class<T> responseType,
-			Map<String, ?> uriVariables) throws RestClientException {
-		AsyncRequestCallback requestCallback =
-				httpEntityCallback(requestEntity, responseType);
-		ResponseExtractor<ResponseEntity<T>> responseExtractor =
-				responseEntityExtractor(responseType);
+	public <T> ListenableFuture<ResponseEntity<T>> exchange(String url, HttpMethod method, HttpEntity<?> requestEntity,
+			Class<T> responseType, Map<String, ?> uriVariables) throws RestClientException {
+
+		AsyncRequestCallback requestCallback = httpEntityCallback(requestEntity, responseType);
+		ResponseExtractor<ResponseEntity<T>> responseExtractor = responseEntityExtractor(responseType);
 		return execute(url, method, requestCallback, responseExtractor, uriVariables);
 	}
 
 	@Override
-	public <T> ListenableFuture<ResponseEntity<T>> exchange(URI url, HttpMethod method,
-			HttpEntity<?> requestEntity, Class<T> responseType)
-			throws RestClientException {
-		AsyncRequestCallback requestCallback =
-				httpEntityCallback(requestEntity, responseType);
-		ResponseExtractor<ResponseEntity<T>> responseExtractor =
-				responseEntityExtractor(responseType);
+	public <T> ListenableFuture<ResponseEntity<T>> exchange(URI url, HttpMethod method, HttpEntity<?> requestEntity,
+			Class<T> responseType) throws RestClientException {
+
+		AsyncRequestCallback requestCallback = httpEntityCallback(requestEntity, responseType);
+		ResponseExtractor<ResponseEntity<T>> responseExtractor = responseEntityExtractor(responseType);
 		return execute(url, method, requestCallback, responseExtractor);
 	}
 
 	@Override
-	public <T> ListenableFuture<ResponseEntity<T>> exchange(String url, HttpMethod method,
-			HttpEntity<?> requestEntity, ParameterizedTypeReference<T> responseType,
-			Object... uriVariables) throws RestClientException {
+	public <T> ListenableFuture<ResponseEntity<T>> exchange(String url, HttpMethod method, HttpEntity<?> requestEntity,
+			ParameterizedTypeReference<T> responseType, Object... uriVariables) throws RestClientException {
+
 		Type type = responseType.getType();
 		AsyncRequestCallback requestCallback = httpEntityCallback(requestEntity, type);
-		ResponseExtractor<ResponseEntity<T>> responseExtractor =
-				responseEntityExtractor(type);
+		ResponseExtractor<ResponseEntity<T>> responseExtractor = responseEntityExtractor(type);
 		return execute(url, method, requestCallback, responseExtractor, uriVariables);
 	}
 
 	@Override
-	public <T> ListenableFuture<ResponseEntity<T>> exchange(String url, HttpMethod method,
-			HttpEntity<?> requestEntity, ParameterizedTypeReference<T> responseType,
-			Map<String, ?> uriVariables) throws RestClientException {
+	public <T> ListenableFuture<ResponseEntity<T>> exchange(String url, HttpMethod method, HttpEntity<?> requestEntity,
+			ParameterizedTypeReference<T> responseType, Map<String, ?> uriVariables) throws RestClientException {
+
 		Type type = responseType.getType();
 		AsyncRequestCallback requestCallback = httpEntityCallback(requestEntity, type);
-		ResponseExtractor<ResponseEntity<T>> responseExtractor =
-				responseEntityExtractor(type);
+		ResponseExtractor<ResponseEntity<T>> responseExtractor = responseEntityExtractor(type);
 		return execute(url, method, requestCallback, responseExtractor, uriVariables);
 	}
 
 	@Override
-	public <T> ListenableFuture<ResponseEntity<T>> exchange(URI url, HttpMethod method,
-			HttpEntity<?> requestEntity, ParameterizedTypeReference<T> responseType)
-			throws RestClientException {
+	public <T> ListenableFuture<ResponseEntity<T>> exchange(URI url, HttpMethod method, HttpEntity<?> requestEntity,
+			ParameterizedTypeReference<T> responseType) throws RestClientException {
+
 		Type type = responseType.getType();
 		AsyncRequestCallback requestCallback = httpEntityCallback(requestEntity, type);
-		ResponseExtractor<ResponseEntity<T>> responseExtractor =
-				responseEntityExtractor(type);
+		ResponseExtractor<ResponseEntity<T>> responseExtractor = responseEntityExtractor(type);
 		return execute(url, method, requestCallback, responseExtractor);
 	}
 
@@ -505,27 +480,24 @@ public class AsyncRestTemplate extends AsyncHttpAccessor implements AsyncRestOpe
 	// general execution
 
 	@Override
-	public <T> ListenableFuture<T> execute(String url, HttpMethod method,
-			AsyncRequestCallback requestCallback, ResponseExtractor<T> responseExtractor,
-			Object... urlVariables) throws RestClientException {
+	public <T> ListenableFuture<T> execute(String url, HttpMethod method, AsyncRequestCallback requestCallback,
+			ResponseExtractor<T> responseExtractor, Object... urlVariables) throws RestClientException {
 
 		URI expanded = new UriTemplate(url).expand(urlVariables);
 		return doExecute(expanded, method, requestCallback, responseExtractor);
 	}
 
 	@Override
-	public <T> ListenableFuture<T> execute(String url, HttpMethod method,
-			AsyncRequestCallback requestCallback, ResponseExtractor<T> responseExtractor,
-			Map<String, ?> urlVariables) throws RestClientException {
+	public <T> ListenableFuture<T> execute(String url, HttpMethod method, AsyncRequestCallback requestCallback,
+			ResponseExtractor<T> responseExtractor, Map<String, ?> urlVariables) throws RestClientException {
 
 		URI expanded = new UriTemplate(url).expand(urlVariables);
 		return doExecute(expanded, method, requestCallback, responseExtractor);
 	}
 
 	@Override
-	public <T> ListenableFuture<T> execute(URI url, HttpMethod method,
-			AsyncRequestCallback requestCallback, ResponseExtractor<T> responseExtractor)
-			throws RestClientException {
+	public <T> ListenableFuture<T> execute(URI url, HttpMethod method, AsyncRequestCallback requestCallback,
+			ResponseExtractor<T> responseExtractor) throws RestClientException {
 
 		return doExecute(url, method, requestCallback, responseExtractor);
 	}
@@ -553,8 +525,7 @@ public class AsyncRestTemplate extends AsyncHttpAccessor implements AsyncRestOpe
 				requestCallback.doWithRequest(request);
 			}
 			ListenableFuture<ClientHttpResponse> responseFuture = request.executeAsync();
-			return new ResponseExtractorFuture<T>(method, url, responseFuture,
-					responseExtractor);
+			return new ResponseExtractorFuture<T>(method, url, responseFuture, responseExtractor);
 		}
 		catch (IOException ex) {
 			throw new ResourceAccessException("I/O error on " + method.name() +
@@ -565,9 +536,8 @@ public class AsyncRestTemplate extends AsyncHttpAccessor implements AsyncRestOpe
 	private void logResponseStatus(HttpMethod method, URI url, ClientHttpResponse response) {
 		if (logger.isDebugEnabled()) {
 			try {
-				logger.debug("Async " + method.name() + " request for \"" + url +
-						"\" resulted in " + response.getStatusCode() + " (" +
-						response.getStatusText() + ")");
+				logger.debug("Async " + method.name() + " request for \"" + url + "\" resulted in " +
+						response.getStatusCode() + " (" + response.getStatusText() + ")");
 			}
 			catch (IOException ex) {
 				// ignore
@@ -578,9 +548,8 @@ public class AsyncRestTemplate extends AsyncHttpAccessor implements AsyncRestOpe
 	private void handleResponseError(HttpMethod method, URI url, ClientHttpResponse response) throws IOException {
 		if (logger.isWarnEnabled()) {
 			try {
-				logger.warn("Async " + method.name() + " request for \"" + url +
-						"\" resulted in " + response.getStatusCode() + " (" +
-						response.getStatusText() + "); invoking error handler");
+				logger.warn("Async " + method.name() + " request for \"" + url + "\" resulted in " +
+						response.getStatusCode() + " (" + response.getStatusText() + "); invoking error handler");
 			}
 			catch (IOException ex) {
 				// ignore
@@ -628,12 +597,12 @@ public class AsyncRestTemplate extends AsyncHttpAccessor implements AsyncRestOpe
 		return this.syncTemplate.headersExtractor();
 	}
 
+
 	/**
 	 * Future returned from
 	 * {@link #doExecute(URI, HttpMethod, AsyncRequestCallback, ResponseExtractor)}
 	 */
-	private class ResponseExtractorFuture<T>
-			extends ListenableFutureAdapter<T, ClientHttpResponse> {
+	private class ResponseExtractorFuture<T> extends ListenableFutureAdapter<T, ClientHttpResponse> {
 
 		private final HttpMethod method;
 
@@ -642,8 +611,7 @@ public class AsyncRestTemplate extends AsyncHttpAccessor implements AsyncRestOpe
 		private final ResponseExtractor<T> responseExtractor;
 
 		public ResponseExtractorFuture(HttpMethod method, URI url,
-				ListenableFuture<ClientHttpResponse> clientHttpResponseFuture,
-				ResponseExtractor<T> responseExtractor) {
+				ListenableFuture<ClientHttpResponse> clientHttpResponseFuture, ResponseExtractor<T> responseExtractor) {
 			super(clientHttpResponseFuture);
 			this.method = method;
 			this.url = url;
@@ -672,11 +640,10 @@ public class AsyncRestTemplate extends AsyncHttpAccessor implements AsyncRestOpe
 		}
 
 		protected T convertResponse(ClientHttpResponse response) throws IOException {
-			return responseExtractor != null ? responseExtractor.extractData(response) :
-					null;
+			return (this.responseExtractor != null ? this.responseExtractor.extractData(response) : null);
 		}
-
 	}
+
 
 	/**
 	 * Adapts a {@link RequestCallback} to the {@link AsyncRequestCallback} interface.

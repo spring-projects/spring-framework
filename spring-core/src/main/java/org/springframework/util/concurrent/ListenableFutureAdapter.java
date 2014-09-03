@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,17 +30,15 @@ import java.util.concurrent.ExecutionException;
  * @author Arjen Poutsma
  * @since 4.0
  */
-public abstract class ListenableFutureAdapter<T, S> extends FutureAdapter<T, S>
-		implements ListenableFuture<T> {
+public abstract class ListenableFutureAdapter<T, S> extends FutureAdapter<T, S> implements ListenableFuture<T> {
 
 	/**
-	 * Constructs a new {@code ListenableFutureAdapter} with the given adaptee.
+	 * Construct a new {@code ListenableFutureAdapter} with the given adaptee.
 	 * @param adaptee the future to adaptee to
 	 */
 	protected ListenableFutureAdapter(ListenableFuture<S> adaptee) {
 		super(adaptee);
 	}
-
 
 	@Override
 	public void addCallback(final ListenableFutureCallback<? super T> callback) {
@@ -59,11 +57,11 @@ public abstract class ListenableFutureAdapter<T, S> extends FutureAdapter<T, S>
 					onFailure(t);
 				}
 			}
-
 			@Override
-			public void onFailure(Throwable t) {
-				callback.onFailure(t);
+			public void onFailure(Throwable ex) {
+				callback.onFailure(ex);
 			}
 		});
 	}
+
 }

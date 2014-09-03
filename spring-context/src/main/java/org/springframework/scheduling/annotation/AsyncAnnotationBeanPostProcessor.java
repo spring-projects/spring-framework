@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,8 +49,7 @@ import org.springframework.util.Assert;
  * @see #setBeforeExistingAdvisors
  */
 @SuppressWarnings("serial")
-public class AsyncAnnotationBeanPostProcessor extends AbstractAdvisingBeanPostProcessor
-		implements BeanFactoryAware {
+public class AsyncAnnotationBeanPostProcessor extends AbstractAdvisingBeanPostProcessor implements BeanFactoryAware {
 
 	private Class<? extends Annotation> asyncAnnotationType;
 
@@ -60,6 +59,7 @@ public class AsyncAnnotationBeanPostProcessor extends AbstractAdvisingBeanPostPr
 	public AsyncAnnotationBeanPostProcessor() {
 		setBeforeExistingAdvisors(true);
 	}
+
 
 	/**
 	 * Set the 'async' annotation type to be detected at either class or method

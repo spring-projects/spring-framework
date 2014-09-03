@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,9 +23,9 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.util.concurrent.ListenableFutureCallback;
 import org.springframework.web.socket.WebSocketHandler;
+import org.springframework.web.socket.WebSocketHttpHeaders;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.LoggingWebSocketHandlerDecorator;
-import org.springframework.web.socket.WebSocketHttpHeaders;
 
 /**
  * A WebSocket connection manager that is given a URI, a {@link WebSocketClient}, and a
@@ -55,7 +55,7 @@ public class WebSocketConnectionManager extends ConnectionManagerSupport {
 		super(uriTemplate, uriVariables);
 		this.client = client;
 		this.webSocketHandler = decorateWebSocketHandler(webSocketHandler);
-		this.syncClientLifecycle = ((client instanceof SmartLifecycle) && !((SmartLifecycle) client).isRunning());
+		this.syncClientLifecycle = (client instanceof SmartLifecycle && !((SmartLifecycle) client).isRunning());
 	}
 
 
@@ -132,8 +132,9 @@ public class WebSocketConnectionManager extends ConnectionManagerSupport {
 
 	@Override
 	protected void openConnection() {
-
-		logger.info("Connecting to WebSocket at " + getUri());
+		if (logger.isInfoEnabled()) {
+			logger.info("Connecting to WebSocket at " + getUri());
+		}
 
 		ListenableFuture<WebSocketSession> future =
 				this.client.doHandshake(this.webSocketHandler, this.headers, getUri());
@@ -145,8 +146,8 @@ public class WebSocketConnectionManager extends ConnectionManagerSupport {
 				logger.info("Successfully connected");
 			}
 			@Override
-			public void onFailure(Throwable t) {
-				logger.error("Failed to connect", t);
+			public void onFailure(Throwable ex) {
+				logger.error("Failed to connect", ex);
 			}
 		});
 	}
@@ -158,7 +159,7 @@ public class WebSocketConnectionManager extends ConnectionManagerSupport {
 
 	@Override
 	protected boolean isConnected() {
-		return ((this.webSocketSession != null) && (this.webSocketSession.isOpen()));
+		return (this.webSocketSession != null && this.webSocketSession.isOpen());
 	}
 
 }
