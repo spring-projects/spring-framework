@@ -588,14 +588,6 @@ class ConfigurationClassParser {
 	}
 
 
-	interface ImportRegistry {
-
-		AnnotationMetadata getImportingClassFor(String importedClass);
-
-		void removeImportingClassFor(String importedClass);
-	}
-
-
 	@SuppressWarnings("serial")
 	private static class ImportStack extends Stack<ConfigurationClass> implements ImportRegistry {
 

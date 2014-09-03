@@ -44,7 +44,6 @@ import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanNameGenerator;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
-import org.springframework.context.annotation.ConfigurationClassParser.ImportRegistry;
 import org.springframework.context.annotation.ConfigurationCondition.ConfigurationPhase;
 import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.env.Environment;
@@ -96,7 +95,7 @@ class ConfigurationClassBeanDefinitionReader {
 	 * Create a new {@link ConfigurationClassBeanDefinitionReader} instance that will be used
 	 * to populate the given {@link BeanDefinitionRegistry}.
 	 */
-	public ConfigurationClassBeanDefinitionReader(BeanDefinitionRegistry registry, SourceExtractor sourceExtractor,
+	ConfigurationClassBeanDefinitionReader(BeanDefinitionRegistry registry, SourceExtractor sourceExtractor,
 			ProblemReporter problemReporter, MetadataReaderFactory metadataReaderFactory,
 			ResourceLoader resourceLoader, Environment environment, BeanNameGenerator importBeanNameGenerator,
 			ImportRegistry importRegistry) {
@@ -132,8 +131,11 @@ class ConfigurationClassBeanDefinitionReader {
 			TrackedConditionEvaluator trackedConditionEvaluator) {
 
 		if (trackedConditionEvaluator.shouldSkip(configClass)) {
-			removeBeanDefinition(configClass);
-			importRegistry.removeImportingClassFor(configClass.getMetadata().getClassName());
+			String beanName = configClass.getBeanName();
+			if (StringUtils.hasLength(beanName) && this.registry.containsBeanDefinition(beanName)) {
+				this.registry.removeBeanDefinition(beanName);
+			}
+			this.importRegistry.removeImportingClassFor(configClass.getMetadata().getClassName());
 			return;
 		}
 
@@ -145,13 +147,6 @@ class ConfigurationClassBeanDefinitionReader {
 		}
 		loadBeanDefinitionsFromImportedResources(configClass.getImportedResources());
 		loadBeanDefinitionsFromRegistrars(configClass.getImportBeanDefinitionRegistrars());
-	}
-
-	private void removeBeanDefinition(ConfigurationClass configClass) {
-		String beanName = configClass.getBeanName();
-		if (StringUtils.hasLength(beanName) && this.registry.containsBeanDefinition(beanName)) {
-			this.registry.removeBeanDefinition(beanName);
-		}
 	}
 
 	/**
