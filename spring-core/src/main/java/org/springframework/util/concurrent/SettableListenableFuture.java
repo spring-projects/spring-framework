@@ -155,7 +155,6 @@ public class SettableListenableFuture<T> implements ListenableFuture<T> {
 
 		private volatile boolean cancelled = false;
 
-
 		public boolean setValue(T value) {
 			if (this.cancelled) {
 				return false;

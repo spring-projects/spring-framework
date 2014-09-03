@@ -16,8 +16,14 @@
 
 package org.springframework.web.socket.sockjs.client;
 
+import java.net.URI;
+import java.util.Arrays;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.context.Lifecycle;
 import org.springframework.util.Assert;
 import org.springframework.util.concurrent.ListenableFuture;
@@ -31,11 +37,6 @@ import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.client.WebSocketClient;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 import org.springframework.web.socket.sockjs.transport.TransportType;
-
-import java.net.URI;
-import java.util.Arrays;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * A SockJS {@link Transport} that uses a
@@ -59,17 +60,44 @@ public class WebSocketTransport implements Transport, Lifecycle {
 	}
 
 
-	@Override
-	public List<TransportType> getTransportTypes() {
-		return Arrays.asList(TransportType.WEBSOCKET);
-	}
-
 	/**
 	 * Return the configured {@code WebSocketClient}.
 	 */
 	public WebSocketClient getWebSocketClient() {
 		return this.webSocketClient;
 	}
+
+	@Override
+	public List<TransportType> getTransportTypes() {
+		return Arrays.asList(TransportType.WEBSOCKET);
+	}
+
+	@Override
+	public ListenableFuture<WebSocketSession> connect(TransportRequest request, WebSocketHandler handler) {
+		final SettableListenableFuture<WebSocketSession> future = new SettableListenableFuture<WebSocketSession>();
+		WebSocketClientSockJsSession session = new WebSocketClientSockJsSession(request, handler, future);
+		handler = new ClientSockJsWebSocketHandler(session);
+		request.addTimeoutTask(session.getTimeoutTask());
+
+		URI url = request.getTransportUrl();
+		WebSocketHttpHeaders headers = new WebSocketHttpHeaders(request.getHandshakeHeaders());
+		if (logger.isDebugEnabled()) {
+			logger.debug("Starting WebSocket session url=" + url);
+		}
+		this.webSocketClient.doHandshake(handler, headers, url).addCallback(
+				new ListenableFutureCallback<WebSocketSession>() {
+					@Override
+					public void onSuccess(WebSocketSession webSocketSession) {
+						// WebSocket session ready, SockJS Session not yet
+					}
+					@Override
+					public void onFailure(Throwable ex) {
+						future.setException(ex);
+					}
+				});
+		return future;
+	}
+
 
 	@Override
 	public void start() {
@@ -107,32 +135,6 @@ public class WebSocketTransport implements Transport, Lifecycle {
 
 
 	@Override
-	public ListenableFuture<WebSocketSession> connect(TransportRequest request, WebSocketHandler handler) {
-		final SettableListenableFuture<WebSocketSession> future = new SettableListenableFuture<WebSocketSession>();
-		WebSocketClientSockJsSession session = new WebSocketClientSockJsSession(request, handler, future);
-		handler = new ClientSockJsWebSocketHandler(session);
-		request.addTimeoutTask(session.getTimeoutTask());
-
-		URI url = request.getTransportUrl();
-		WebSocketHttpHeaders headers = new WebSocketHttpHeaders(request.getHandshakeHeaders());
-		if (logger.isDebugEnabled()) {
-			logger.debug("Starting WebSocket session url=" + url);
-		}
-		this.webSocketClient.doHandshake(handler, headers, url).addCallback(
-				new ListenableFutureCallback<WebSocketSession>() {
-					@Override
-					public void onSuccess(WebSocketSession webSocketSession) {
-						// WebSocket session ready, SockJS Session not yet
-					}
-					@Override
-					public void onFailure(Throwable t) {
-						future.setException(t);
-					}
-				});
-		return future;
-	}
-
-	@Override
 	public String toString() {
 		return "WebSocketTransport[client=" + this.webSocketClient + "]";
 	}
@@ -143,7 +145,6 @@ public class WebSocketTransport implements Transport, Lifecycle {
 		private final WebSocketClientSockJsSession sockJsSession;
 
 		private final AtomicInteger connectCount = new AtomicInteger(0);
-
 
 		private ClientSockJsWebSocketHandler(WebSocketClientSockJsSession session) {
 			Assert.notNull(session);

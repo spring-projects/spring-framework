@@ -50,4 +50,5 @@ public class CachingConfigurerSupport implements CachingConfigurer {
 	public CacheErrorHandler errorHandler() {
 		return null;
 	}
+
 }

@@ -96,8 +96,7 @@ public class SimpleApplicationEventMulticaster extends AbstractApplicationEventM
 	 * and logs exceptions (a la
 	 * {@link org.springframework.scheduling.support.TaskUtils#LOG_AND_SUPPRESS_ERROR_HANDLER})
 	 * or an implementation that logs exceptions while nevertheless propagating them
-	 * (e.g.,
-	 * {@link org.springframework.scheduling.support.TaskUtils#LOG_AND_PROPAGATE_ERROR_HANDLER}).
+	 * (e.g. {@link org.springframework.scheduling.support.TaskUtils#LOG_AND_PROPAGATE_ERROR_HANDLER}).
 	 * @since 4.1
 	 */
 	public void setErrorHandler(ErrorHandler errorHandler) {

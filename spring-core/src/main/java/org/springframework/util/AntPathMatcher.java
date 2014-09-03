@@ -75,7 +75,6 @@ public class AntPathMatcher implements PathMatcher {
 	 * Create a new instance with the {@link #DEFAULT_PATH_SEPARATOR}.
 	 */
 	public AntPathMatcher() {
-
 	}
 
 	/**

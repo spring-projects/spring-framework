@@ -86,7 +86,7 @@ public class SettableListenableFutureTests {
 			}
 
 			@Override
-			public void onFailure(Throwable t) {
+			public void onFailure(Throwable ex) {
 				fail("Expected onSuccess() to be called");
 			}
 		});
@@ -105,7 +105,7 @@ public class SettableListenableFutureTests {
 			}
 
 			@Override
-			public void onFailure(Throwable t) {
+			public void onFailure(Throwable ex) {
 				fail("Expected onSuccess() to be called");
 			}
 		});
@@ -125,8 +125,8 @@ public class SettableListenableFutureTests {
 			}
 
 			@Override
-			public void onFailure(Throwable t) {
-				callbackHolder[0] = t;
+			public void onFailure(Throwable ex) {
+				callbackHolder[0] = ex;
 			}
 		});
 		settableListenableFuture.setException(exception);
@@ -144,8 +144,8 @@ public class SettableListenableFutureTests {
 			}
 
 			@Override
-			public void onFailure(Throwable t) {
-				callbackHolder[0] = t;
+			public void onFailure(Throwable ex) {
+				callbackHolder[0] = ex;
 			}
 		});
 		settableListenableFuture.setException(exception);

@@ -51,8 +51,8 @@ public class ListenableFutureTaskTests {
 			}
 
 			@Override
-			public void onFailure(Throwable t) {
-				fail(t.getMessage());
+			public void onFailure(Throwable ex) {
+				fail(ex.getMessage());
 			}
 		});
 		task.run();
@@ -75,8 +75,8 @@ public class ListenableFutureTaskTests {
 			}
 
 			@Override
-			public void onFailure(Throwable t) {
-				assertEquals(s, t.getMessage());
+			public void onFailure(Throwable ex) {
+				assertEquals(s, ex.getMessage());
 			}
 		});
 		task.run();

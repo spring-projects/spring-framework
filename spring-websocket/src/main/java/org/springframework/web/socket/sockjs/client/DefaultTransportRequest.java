@@ -16,8 +16,16 @@
 
 package org.springframework.web.socket.sockjs.client;
 
+import java.net.URI;
+import java.security.Principal;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.http.HttpHeaders;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.util.Assert;
@@ -29,17 +37,8 @@ import org.springframework.web.socket.sockjs.SockJsTransportFailureException;
 import org.springframework.web.socket.sockjs.frame.SockJsMessageCodec;
 import org.springframework.web.socket.sockjs.transport.TransportType;
 
-import java.net.URI;
-import java.security.Principal;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
-
 /**
- * A default implementation of
- * {@link org.springframework.web.socket.sockjs.client.TransportRequest
- * TransportRequest}.
+ * A default implementation of {@link TransportRequest}.
  *
  * @author Rossen Stoyanchev
  * @since 4.1
@@ -176,26 +175,24 @@ class DefaultTransportRequest implements TransportRequest {
 
 		private final AtomicBoolean handled = new AtomicBoolean(false);
 
-
 		public ConnectCallback(WebSocketHandler handler, SettableListenableFuture<WebSocketSession> future) {
 			this.handler = handler;
 			this.future = future;
 		}
-
 
 		@Override
 		public void onSuccess(WebSocketSession session) {
 			if (this.handled.compareAndSet(false, true)) {
 				this.future.set(session);
 			}
-			else {
+			else if (logger.isErrorEnabled()) {
 				logger.error("Connect success/failure already handled for " + DefaultTransportRequest.this);
 			}
 		}
 
 		@Override
-		public void onFailure(Throwable failure) {
-			handleFailure(failure, false);
+		public void onFailure(Throwable ex) {
+			handleFailure(ex, false);
 		}
 
 		@Override
@@ -203,20 +200,20 @@ class DefaultTransportRequest implements TransportRequest {
 			handleFailure(null, true);
 		}
 
-		private void handleFailure(Throwable failure, boolean isTimeoutFailure) {
+		private void handleFailure(Throwable ex, boolean isTimeoutFailure) {
 			if (this.handled.compareAndSet(false, true)) {
 				if (isTimeoutFailure) {
 					String message = "Connect timed out for " + DefaultTransportRequest.this;
 					logger.error(message);
-					failure = new SockJsTransportFailureException(message, getSockJsUrlInfo().getSessionId(), null);
+					ex = new SockJsTransportFailureException(message, getSockJsUrlInfo().getSessionId(), null);
 				}
 				if (fallbackRequest != null) {
-					logger.error(DefaultTransportRequest.this + " failed. Falling back on next transport.", failure);
+					logger.error(DefaultTransportRequest.this + " failed. Falling back on next transport.", ex);
 					fallbackRequest.connect(this.handler, this.future);
 				}
 				else {
-					logger.error("No more fallback transports after " + DefaultTransportRequest.this, failure);
-					this.future.setException(failure);
+					logger.error("No more fallback transports after " + DefaultTransportRequest.this, ex);
+					this.future.setException(ex);
 				}
 				if (isTimeoutFailure) {
 					try {
@@ -224,15 +221,16 @@ class DefaultTransportRequest implements TransportRequest {
 							runnable.run();
 						}
 					}
-					catch (Throwable ex) {
-						logger.error("Transport failed to run timeout tasks for " + DefaultTransportRequest.this, ex);
+					catch (Throwable ex2) {
+						logger.error("Transport failed to run timeout tasks for " + DefaultTransportRequest.this, ex2);
 					}
 				}
 			}
 			else {
 				logger.error("Connect success/failure events already took place for " +
-						DefaultTransportRequest.this + ". Ignoring this additional failure event.", failure);
+						DefaultTransportRequest.this + ". Ignoring this additional failure event.", ex);
 			}
 		}
 	}
+
 }

@@ -314,11 +314,8 @@ public class EnvironmentIntegrationTests {
 
 	@Test
 	public void webApplicationContext() {
-		GenericWebApplicationContext ctx =
-			new GenericWebApplicationContext(newBeanFactoryWithEnvironmentAwareBean());
-
+		GenericWebApplicationContext ctx = new GenericWebApplicationContext(newBeanFactoryWithEnvironmentAwareBean());
 		assertHasStandardServletEnvironment(ctx);
-
 		ctx.setEnvironment(prodWebEnv);
 		ctx.refresh();
 

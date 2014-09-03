@@ -17,7 +17,6 @@
 package org.springframework.http.client;
 
 import java.io.IOException;
-import java.io.OutputStream;
 import java.net.URI;
 import java.util.Arrays;
 import java.util.Locale;
@@ -37,10 +36,10 @@ import org.springframework.util.concurrent.ListenableFutureCallback;
 
 import static org.junit.Assert.*;
 
-public abstract class AbstractAsyncHttpRequestFactoryTestCase extends
-		AbstractJettyServerTestCase {
+public abstract class AbstractAsyncHttpRequestFactoryTestCase extends AbstractJettyServerTestCase {
 
 	protected AsyncClientHttpRequestFactory factory;
+
 
 	@Before
 	public final void createFactory() throws Exception {
@@ -52,6 +51,7 @@ public abstract class AbstractAsyncHttpRequestFactoryTestCase extends
 
 	protected abstract AsyncClientHttpRequestFactory createRequestFactory();
 
+
 	@Test
 	public void status() throws Exception {
 		URI uri = new URI(baseUrl + "/status/notfound");
@@ -60,8 +60,7 @@ public abstract class AbstractAsyncHttpRequestFactoryTestCase extends
 		assertEquals("Invalid HTTP URI", uri, request.getURI());
 		Future<ClientHttpResponse> futureResponse = request.executeAsync();
 		ClientHttpResponse response = futureResponse.get();
-		assertEquals("Invalid status code", HttpStatus.NOT_FOUND,
-				response.getStatusCode());
+		assertEquals("Invalid status code", HttpStatus.NOT_FOUND, response.getStatusCode());
 	}
 
 	@Test
@@ -70,46 +69,34 @@ public abstract class AbstractAsyncHttpRequestFactoryTestCase extends
 		AsyncClientHttpRequest request = factory.createAsyncRequest(uri, HttpMethod.GET);
 		assertEquals("Invalid HTTP method", HttpMethod.GET, request.getMethod());
 		assertEquals("Invalid HTTP URI", uri, request.getURI());
-		Future<ClientHttpResponse> futureResponse = request.executeAsync();
-		if (futureResponse instanceof ListenableFuture) {
-			ListenableFuture<ClientHttpResponse> listenableFuture =
-					(ListenableFuture<ClientHttpResponse>) futureResponse;
-
-
-			listenableFuture.addCallback(new ListenableFutureCallback<ClientHttpResponse>() {
-				@Override
-				public void onSuccess(ClientHttpResponse result) {
-					try {
-						System.out.println("SUCCESS! " + result.getStatusCode());
-						System.out.println("Callback: " + System.currentTimeMillis());
-						System.out.println(Thread.currentThread().getId());
-						assertEquals("Invalid status code", HttpStatus.NOT_FOUND,
-								result.getStatusCode());
-					}
-					catch (IOException e) {
-						e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
-					}
+		ListenableFuture<ClientHttpResponse> listenableFuture = request.executeAsync();
+		listenableFuture.addCallback(new ListenableFutureCallback<ClientHttpResponse>() {
+			@Override
+			public void onSuccess(ClientHttpResponse result) {
+				try {
+					System.out.println("SUCCESS! " + result.getStatusCode());
+					System.out.println("Callback: " + System.currentTimeMillis());
+					System.out.println(Thread.currentThread().getId());
+					assertEquals("Invalid status code", HttpStatus.NOT_FOUND, result.getStatusCode());
 				}
-
-				@Override
-				public void onFailure(Throwable t) {
-					System.out.println("FAILURE: " + t);
+				catch (IOException ex) {
+					ex.printStackTrace();
 				}
-			});
-
-		}
-		ClientHttpResponse response = futureResponse.get();
+			}
+			@Override
+			public void onFailure(Throwable ex) {
+				System.out.println("FAILURE: " + ex);
+			}
+		});
+		ClientHttpResponse response = listenableFuture.get();
 		System.out.println("Main thread: " + System.currentTimeMillis());
-		assertEquals("Invalid status code", HttpStatus.NOT_FOUND,
-				response.getStatusCode());
+		assertEquals("Invalid status code", HttpStatus.NOT_FOUND, response.getStatusCode());
 		System.out.println(Thread.currentThread().getId());
 	}
 
 	@Test
 	public void echo() throws Exception {
-		AsyncClientHttpRequest
-				request = factory.createAsyncRequest(new URI(baseUrl + "/echo"),
-				HttpMethod.PUT);
+		AsyncClientHttpRequest request = factory.createAsyncRequest(new URI(baseUrl + "/echo"), HttpMethod.PUT);
 		assertEquals("Invalid HTTP method", HttpMethod.PUT, request.getMethod());
 		String headerName = "MyHeader";
 		String headerValue1 = "value1";
@@ -118,19 +105,15 @@ public abstract class AbstractAsyncHttpRequestFactoryTestCase extends
 		request.getHeaders().add(headerName, headerValue2);
 		final byte[] body = "Hello World".getBytes("UTF-8");
 		request.getHeaders().setContentLength(body.length);
+
 		if (request instanceof StreamingHttpOutputMessage) {
-			StreamingHttpOutputMessage streamingRequest =
-					(StreamingHttpOutputMessage) request;
-			streamingRequest.setBody(new StreamingHttpOutputMessage.Body() {
-				@Override
-				public void writeTo(OutputStream outputStream) throws IOException {
-					StreamUtils.copy(body, outputStream);
-				}
-			});
+			StreamingHttpOutputMessage streamingRequest = (StreamingHttpOutputMessage) request;
+			streamingRequest.setBody(outputStream -> StreamUtils.copy(body, outputStream));
 		}
 		else {
 			StreamUtils.copy(body, request.getBody());
 		}
+
 		Future<ClientHttpResponse> futureResponse = request.executeAsync();
 		ClientHttpResponse response = futureResponse.get();
 		try {
@@ -148,19 +131,12 @@ public abstract class AbstractAsyncHttpRequestFactoryTestCase extends
 
 	@Test(expected = IllegalStateException.class)
 	public void multipleWrites() throws Exception {
-		AsyncClientHttpRequest
-				request = factory.createAsyncRequest(new URI(baseUrl + "/echo"),
-				HttpMethod.POST);
+		AsyncClientHttpRequest request = factory.createAsyncRequest(new URI(baseUrl + "/echo"), HttpMethod.POST);
 		final byte[] body = "Hello World".getBytes("UTF-8");
+
 		if (request instanceof StreamingHttpOutputMessage) {
-			StreamingHttpOutputMessage streamingRequest =
-					(StreamingHttpOutputMessage) request;
-			streamingRequest.setBody(new StreamingHttpOutputMessage.Body() {
-				@Override
-				public void writeTo(OutputStream outputStream) throws IOException {
-					StreamUtils.copy(body, outputStream);
-				}
-			});
+			StreamingHttpOutputMessage streamingRequest = (StreamingHttpOutputMessage) request;
+			streamingRequest.setBody(outputStream -> StreamUtils.copy(body, outputStream));
 		}
 		else {
 			StreamUtils.copy(body, request.getBody());
@@ -178,9 +154,7 @@ public abstract class AbstractAsyncHttpRequestFactoryTestCase extends
 
 	@Test(expected = UnsupportedOperationException.class)
 	public void headersAfterExecute() throws Exception {
-		AsyncClientHttpRequest
-				request = factory.createAsyncRequest(new URI(baseUrl + "/echo"),
-				HttpMethod.POST);
+		AsyncClientHttpRequest request = factory.createAsyncRequest(new URI(baseUrl + "/echo"), HttpMethod.POST);
 		request.getHeaders().add("MyHeader", "value");
 		byte[] body = "Hello World".getBytes("UTF-8");
 		FileCopyUtils.copy(body, request.getBody());
@@ -208,9 +182,7 @@ public abstract class AbstractAsyncHttpRequestFactoryTestCase extends
 	protected void assertHttpMethod(String path, HttpMethod method) throws Exception {
 		ClientHttpResponse response = null;
 		try {
-			AsyncClientHttpRequest request = factory.createAsyncRequest(
-					new URI(baseUrl + "/methods/" + path), method);
-
+			AsyncClientHttpRequest request = factory.createAsyncRequest(new URI(baseUrl + "/methods/" + path), method);
 			Future<ClientHttpResponse> futureResponse = request.executeAsync();
 			response = futureResponse.get();
 			assertEquals("Invalid response status", HttpStatus.OK, response.getStatusCode());

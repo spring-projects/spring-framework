@@ -30,11 +30,10 @@ import java.util.concurrent.ExecutionException;
  * @author Arjen Poutsma
  * @since 4.0
  */
-public abstract class ListenableFutureAdapter<T, S> extends FutureAdapter<T, S>
-		implements ListenableFuture<T> {
+public abstract class ListenableFutureAdapter<T, S> extends FutureAdapter<T, S> implements ListenableFuture<T> {
 
 	/**
-	 * Constructs a new {@code ListenableFutureAdapter} with the given adaptee.
+	 * Construct a new {@code ListenableFutureAdapter} with the given adaptee.
 	 * @param adaptee the future to adaptee to
 	 */
 	protected ListenableFutureAdapter(ListenableFuture<S> adaptee) {
@@ -48,8 +47,7 @@ public abstract class ListenableFutureAdapter<T, S> extends FutureAdapter<T, S>
 	}
 
 	@Override
-	public void addCallback(final SuccessCallback<? super T> successCallback,
-							final FailureCallback failureCallback) {
+	public void addCallback(final SuccessCallback<? super T> successCallback, final FailureCallback failureCallback) {
 		ListenableFuture<S> listenableAdaptee = (ListenableFuture<S>) getAdaptee();
 		listenableAdaptee.addCallback(new ListenableFutureCallback<S>() {
 			@Override
@@ -65,10 +63,9 @@ public abstract class ListenableFutureAdapter<T, S> extends FutureAdapter<T, S>
 					onFailure(t);
 				}
 			}
-
 			@Override
-			public void onFailure(Throwable t) {
-				failureCallback.onFailure(t);
+			public void onFailure(Throwable ex) {
+				failureCallback.onFailure(ex);
 			}
 		});
 	}

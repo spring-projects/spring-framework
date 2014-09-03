@@ -28,6 +28,7 @@ import java.util.concurrent.LinkedBlockingDeque;
 
 import org.junit.Before;
 import org.junit.Test;
+
 import org.springframework.core.task.SyncTaskExecutor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -136,8 +137,8 @@ public class RestTemplateXhrTransportTests {
 					public void onSuccess(WebSocketSession result) {
 					}
 					@Override
-					public void onFailure(Throwable actual) {
-						if (actual == expected) {
+					public void onFailure(Throwable ex) {
+						if (ex == expected) {
 							latch.countDown();
 						}
 					}

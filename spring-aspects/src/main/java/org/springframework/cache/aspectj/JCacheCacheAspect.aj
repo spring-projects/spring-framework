@@ -63,7 +63,6 @@ public aspect JCacheCacheAspect extends JCacheAspectSupport {
 
 		};
 
-
 		try {
 			return execute(aspectJInvoker, thisJoinPoint.getTarget(), method, thisJoinPoint.getArgs());
 		}

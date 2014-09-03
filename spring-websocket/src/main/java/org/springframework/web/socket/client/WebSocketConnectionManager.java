@@ -129,8 +129,9 @@ public class WebSocketConnectionManager extends ConnectionManagerSupport {
 
 	@Override
 	protected void openConnection() {
-
-		logger.info("Connecting to WebSocket at " + getUri());
+		if (logger.isInfoEnabled()) {
+			logger.info("Connecting to WebSocket at " + getUri());
+		}
 
 		ListenableFuture<WebSocketSession> future =
 				this.client.doHandshake(this.webSocketHandler, this.headers, getUri());
@@ -142,8 +143,8 @@ public class WebSocketConnectionManager extends ConnectionManagerSupport {
 				logger.info("Successfully connected");
 			}
 			@Override
-			public void onFailure(Throwable t) {
-				logger.error("Failed to connect", t);
+			public void onFailure(Throwable ex) {
+				logger.error("Failed to connect", ex);
 			}
 		});
 	}
@@ -155,7 +156,7 @@ public class WebSocketConnectionManager extends ConnectionManagerSupport {
 
 	@Override
 	protected boolean isConnected() {
-		return ((this.webSocketSession != null) && (this.webSocketSession.isOpen()));
+		return (this.webSocketSession != null && this.webSocketSession.isOpen());
 	}
 
 }

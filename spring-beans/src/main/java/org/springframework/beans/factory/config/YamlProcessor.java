@@ -17,7 +17,6 @@
 package org.springframework.beans.factory.config;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -83,8 +82,7 @@ public abstract class YamlProcessor {
 	 * @param matchers a map of keys to value patterns (regular expressions)
 	 */
 	public void setDocumentMatchers(DocumentMatcher... matchers) {
-		this.documentMatchers = Collections
-				.unmodifiableList(new ArrayList<DocumentMatcher>(Arrays.asList(matchers)));
+		this.documentMatchers = Arrays.asList(matchers);
 	}
 
 	/**
@@ -114,7 +112,7 @@ public abstract class YamlProcessor {
 	 * @see ResolutionMethod
 	 */
 	public void setResources(Resource... resources) {
-		this.resources = (resources == null ? null : resources.clone());
+		this.resources = resources;
 	}
 
 
@@ -152,8 +150,8 @@ public abstract class YamlProcessor {
 				}
 			}
 			if (this.logger.isDebugEnabled()) {
-				this.logger.debug("Loaded " + count + " document"
-						+ (count > 1 ? "s" : "") + " from YAML resource: " + resource);
+				this.logger.debug("Loaded " + count + " document" + (count > 1 ? "s" : "") +
+						" from YAML resource: " + resource);
 			}
 		}
 		catch (IOException ex) {
@@ -218,8 +216,7 @@ public abstract class YamlProcessor {
 			result = MatchStatus.getMostSpecific(match, result);
 			if (match == MatchStatus.FOUND) {
 				if (this.logger.isDebugEnabled()) {
-					this.logger.debug("Matched document with document matcher: "
-							+ properties);
+					this.logger.debug("Matched document with document matcher: " + properties);
 				}
 				callback.process(properties, map);
 				return true;
@@ -328,7 +325,7 @@ public abstract class YamlProcessor {
 		 * Compare two {@link MatchStatus} items, returning the most specific status.
 		 */
 		public static MatchStatus getMostSpecific(MatchStatus a, MatchStatus b) {
-			return a.ordinal() < b.ordinal() ? a : b;
+			return (a.ordinal() < b.ordinal() ? a : b);
 		}
 	}
 

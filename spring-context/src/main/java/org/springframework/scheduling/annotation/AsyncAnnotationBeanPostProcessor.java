@@ -56,8 +56,7 @@ import org.springframework.util.Assert;
  * @see #setBeforeExistingAdvisors
  */
 @SuppressWarnings("serial")
-public class AsyncAnnotationBeanPostProcessor extends AbstractAdvisingBeanPostProcessor
-		implements BeanFactoryAware {
+public class AsyncAnnotationBeanPostProcessor extends AbstractAdvisingBeanPostProcessor implements BeanFactoryAware {
 
 	private Class<? extends Annotation> asyncAnnotationType;
 
@@ -69,6 +68,7 @@ public class AsyncAnnotationBeanPostProcessor extends AbstractAdvisingBeanPostPr
 	public AsyncAnnotationBeanPostProcessor() {
 		setBeforeExistingAdvisors(true);
 	}
+
 
 	/**
 	 * Set the 'async' annotation type to be detected at either class or method

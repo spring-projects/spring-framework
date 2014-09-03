@@ -27,8 +27,8 @@ public interface FailureCallback {
 
 	/**
 	 * Called when the {@link ListenableFuture} fails to complete.
-	 * @param t the exception that triggered the failure
+	 * @param ex the exception that triggered the failure
 	 */
-	void onFailure(Throwable t);
+	void onFailure(Throwable ex);
 
 }

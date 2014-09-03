@@ -150,8 +150,7 @@ public class ImportSelectorTests {
 
 	@Target(ElementType.TYPE)
 	@Retention(RetentionPolicy.RUNTIME)
-	@Import({ DeferredImportSelector1.class, DeferredImportSelector2.class,
-		ImportSelector1.class, ImportSelector2.class })
+	@Import({DeferredImportSelector1.class, DeferredImportSelector2.class, ImportSelector1.class, ImportSelector2.class})
 	public static @interface Sample {
 	}
 

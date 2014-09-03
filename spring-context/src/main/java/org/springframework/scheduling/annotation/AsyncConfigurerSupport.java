@@ -39,4 +39,5 @@ public class AsyncConfigurerSupport implements AsyncConfigurer {
 	public AsyncUncaughtExceptionHandler getAsyncUncaughtExceptionHandler() {
 		return null;
 	}
+
 }
