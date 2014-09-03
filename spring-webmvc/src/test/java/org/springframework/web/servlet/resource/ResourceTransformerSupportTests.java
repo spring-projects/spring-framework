@@ -32,16 +32,16 @@ import org.springframework.web.servlet.HandlerMapping;
 import javax.servlet.http.HttpServletRequest;
 
 /**
- * Unit tests for {@code LinkRewriteTransformer}
+ * Unit tests for {@code ResourceTransformerSupport}.
  *
  * @author Brian Clozel
  * @author Rossen Stoyanchev
  */
-public class LinkRewriteTransformerTests {
+public class ResourceTransformerSupportTests {
 
 	private ResourceTransformerChain transformerChain;
 
-	private TestTransformer transformer;
+	private TestResourceTransformerSupport transformer;
 
 	private MockHttpServletRequest request;
 
@@ -66,7 +66,7 @@ public class LinkRewriteTransformerTests {
 		ResourceUrlProvider urlProvider = new ResourceUrlProvider();
 		urlProvider.setHandlerMap(Collections.singletonMap("/resources/**", handler));
 
-		this.transformer = new TestTransformer();
+		this.transformer = new TestResourceTransformerSupport();
 		this.transformer.setResourceUrlProvider(urlProvider);
 
 		this.request = new MockHttpServletRequest();
@@ -116,7 +116,7 @@ public class LinkRewriteTransformerTests {
 	}
 
 
-	private static class TestTransformer extends ResourceTransformerSupport {
+	private static class TestResourceTransformerSupport extends ResourceTransformerSupport {
 
 		@Override
 		public Resource transform(HttpServletRequest request, Resource resource, ResourceTransformerChain chain) {
