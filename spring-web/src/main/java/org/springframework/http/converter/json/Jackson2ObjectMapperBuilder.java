@@ -60,6 +60,7 @@ import org.springframework.util.ClassUtils;
  *
  * @author Sebastien Deleuze
  * @author Juergen Hoeller
+ * @author Tadaya Tsuyukubo
  * @since 4.1.1
  * @see #build()
  * @see #configure(ObjectMapper)
@@ -80,6 +81,8 @@ public class Jackson2ObjectMapperBuilder {
 	private final Map<Class<?>, JsonSerializer<?>> serializers = new LinkedHashMap<Class<?>, JsonSerializer<?>>();
 
 	private final Map<Class<?>, JsonDeserializer<?>> deserializers = new LinkedHashMap<Class<?>, JsonDeserializer<?>>();
+
+	private final Map<Class<?>, Class<?>> mixIns = new HashMap<Class<?>, Class<?>>();
 
 	private final Map<Object, Boolean> features = new HashMap<Object, Boolean>();
 
@@ -186,6 +189,21 @@ public class Jackson2ObjectMapperBuilder {
 	public Jackson2ObjectMapperBuilder deserializersByType(Map<Class<?>, JsonDeserializer<?>> deserializers) {
 		if (deserializers != null) {
 			this.deserializers.putAll(deserializers);
+		}
+		return this;
+	}
+
+	/**
+	 * Add mix-in annotations to use for augmenting specified class or interface.
+	 * @param mixIns Map of entries with target classes (or interface) whose annotations
+	 * to effectively override as key and mix-in classes (or interface) whose
+	 * annotations are to be "added" to target's annotations as value.
+	 * @since 4.1.2
+	 * @see com.fasterxml.jackson.databind.ObjectMapper#addMixInAnnotations(Class, Class)
+	 */
+	public Jackson2ObjectMapperBuilder mixIns(Map<Class<?>, Class<?>> mixIns) {
+		if (mixIns != null) {
+			this.mixIns.putAll(mixIns);
 		}
 		return this;
 	}
@@ -413,6 +431,9 @@ public class Jackson2ObjectMapperBuilder {
 
 		if (this.propertyNamingStrategy != null) {
 			objectMapper.setPropertyNamingStrategy(this.propertyNamingStrategy);
+		}
+		for (Class<?> target : this.mixIns.keySet()) {
+			objectMapper.addMixInAnnotations(target, this.mixIns.get(target));
 		}
 	}
 

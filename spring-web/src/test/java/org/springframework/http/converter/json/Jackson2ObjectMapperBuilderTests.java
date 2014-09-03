@@ -191,6 +191,19 @@ public class Jackson2ObjectMapperBuilderTests {
 	}
 
 	@Test
+	public void mixIns() {
+		Class<?> target = String.class;
+		Class<?> mixinSource = Object.class;
+		Map<Class<?>, Class<?>> mixIns = new HashMap<Class<?>, Class<?>>();
+		mixIns.put(target, mixinSource);
+
+		ObjectMapper objectMapper = Jackson2ObjectMapperBuilder.json().mixIns(mixIns).build();
+
+		assertEquals(1, objectMapper.mixInCount());
+		assertSame(mixinSource, objectMapper.findMixInClassFor(target));
+	}
+
+	@Test
 	public void completeSetup() {
 		NopAnnotationIntrospector annotationIntrospector = NopAnnotationIntrospector.instance;
 

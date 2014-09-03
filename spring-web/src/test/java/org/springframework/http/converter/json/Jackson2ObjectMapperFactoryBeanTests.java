@@ -208,6 +208,21 @@ public class Jackson2ObjectMapperFactoryBeanTests {
 	}
 
 	@Test
+	public void setMixIns() {
+		Class<?> target = String.class;
+		Class<?> mixinSource = Object.class;
+		Map<Class<?>, Class<?>> mixIns = new HashMap<Class<?>, Class<?>>();
+		mixIns.put(target, mixinSource);
+
+		this.factory.setMixIns(mixIns);
+		this.factory.afterPropertiesSet();
+		ObjectMapper objectMapper = this.factory.getObject();
+
+		assertEquals(1, objectMapper.mixInCount());
+		assertSame(mixinSource, objectMapper.findMixInClassFor(target));
+	}
+
+	@Test
 	public void completeSetup() {
 		NopAnnotationIntrospector annotationIntrospector = NopAnnotationIntrospector.instance;
 		ObjectMapper objectMapper = new ObjectMapper();

@@ -118,6 +118,7 @@ import org.springframework.beans.factory.InitializingBean;
  * @author Rossen Stoyanchev
  * @author Brian Clozel
  * @author Juergen Hoeller
+ * @author Tadaya Tsuyukubo
  * @since 3.2
  */
 public class Jackson2ObjectMapperFactoryBean implements FactoryBean<ObjectMapper>, BeanClassLoaderAware, InitializingBean {
@@ -211,6 +212,18 @@ public class Jackson2ObjectMapperFactoryBean implements FactoryBean<ObjectMapper
 	 */
 	public void setDeserializersByType(Map<Class<?>, JsonDeserializer<?>> deserializers) {
 		this.builder.deserializersByType(deserializers);
+	}
+
+	/**
+	 * Add mix-in annotations to use for augmenting specified class or interface.
+	 * @param mixIns Map of entries with target classes (or interface) whose annotations
+	 * to effectively override as key and mix-in classes (or interface) whose
+	 * annotations are to be "added" to target's annotations as value.
+	 * @since 4.1.2
+	 * @see com.fasterxml.jackson.databind.ObjectMapper#addMixInAnnotations(Class, Class)
+	 */
+	public void setMixIns(Map<Class<?>, Class<?>> mixIns) {
+		this.builder.mixIns(mixIns);
 	}
 
 	/**
