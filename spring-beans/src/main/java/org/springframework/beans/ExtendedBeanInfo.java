@@ -115,7 +115,7 @@ class ExtendedBeanInfo implements BeanInfo {
 				matches.add(method);
 			}
 		}
-		// sort non-void returning write methods to guard against the ill effects of
+		// Sort non-void returning write methods to guard against the ill effects of
 		// non-deterministic sorting of methods returned from Class#getDeclaredMethods
 		// under JDK 7. See http://bugs.sun.com/view_bug.do?bug_id=7023180
 		Collections.sort(matches, new Comparator<Method>() {
@@ -428,24 +428,24 @@ class SimpleIndexedPropertyDescriptor extends IndexedPropertyDescriptor {
 	 * See java.beans.IndexedPropertyDescriptor#equals(java.lang.Object)
 	 */
 	@Override
-	public boolean equals(Object obj) {
-		if (this == obj) {
+	public boolean equals(Object other) {
+		if (this == other) {
 			return true;
 		}
-		if (obj != null && obj instanceof IndexedPropertyDescriptor) {
-			IndexedPropertyDescriptor other = (IndexedPropertyDescriptor) obj;
-			if (!compareMethods(getIndexedReadMethod(), other.getIndexedReadMethod())) {
-				return false;
-			}
-			if (!compareMethods(getIndexedWriteMethod(), other.getIndexedWriteMethod())) {
-				return false;
-			}
-			if (getIndexedPropertyType() != other.getIndexedPropertyType()) {
-				return false;
-			}
-			return PropertyDescriptorUtils.equals(this, obj);
+		if (!(other instanceof IndexedPropertyDescriptor)) {
+			return false;
 		}
-		return false;
+		IndexedPropertyDescriptor otherPd = (IndexedPropertyDescriptor) other;
+		if (!compareMethods(getIndexedReadMethod(), otherPd.getIndexedReadMethod())) {
+			return false;
+		}
+		if (!compareMethods(getIndexedWriteMethod(), otherPd.getIndexedWriteMethod())) {
+			return false;
+		}
+		if (getIndexedPropertyType() != otherPd.getIndexedPropertyType()) {
+			return false;
+		}
+		return PropertyDescriptorUtils.equals(this, other);
 	}
 
 	@Override
@@ -586,25 +586,23 @@ class PropertyDescriptorUtils {
 	 * editor and flags are equivalent.
 	 * @see PropertyDescriptor#equals(Object)
 	 */
-	public static boolean equals(PropertyDescriptor pd1, Object obj) {
-		if (pd1 == obj) {
+	public static boolean equals(PropertyDescriptor pd, Object other) {
+		if (pd == other) {
 			return true;
 		}
-		if (obj != null && obj instanceof PropertyDescriptor) {
-			PropertyDescriptor pd2 = (PropertyDescriptor) obj;
-			if (!compareMethods(pd1.getReadMethod(), pd2.getReadMethod())) {
-				return false;
-			}
-			if (!compareMethods(pd1.getWriteMethod(), pd2.getWriteMethod())) {
-				return false;
-			}
-			if (pd1.getPropertyType() == pd2.getPropertyType() &&
-					pd1.getPropertyEditorClass() == pd2.getPropertyEditorClass() &&
-					pd1.isBound() == pd2.isBound() && pd1.isConstrained() == pd2.isConstrained()) {
-				return true;
-			}
+		if (!(other instanceof PropertyDescriptor)) {
+			return false;
 		}
-		return false;
+		PropertyDescriptor otherPd = (PropertyDescriptor) other;
+		if (!compareMethods(pd.getReadMethod(), otherPd.getReadMethod())) {
+			return false;
+		}
+		if (!compareMethods(pd.getWriteMethod(), otherPd.getWriteMethod())) {
+			return false;
+		}
+		return (pd.getPropertyType() == otherPd.getPropertyType() &&
+				pd.getPropertyEditorClass() == otherPd.getPropertyEditorClass() &&
+				pd.isBound() == otherPd.isBound() && pd.isConstrained() == otherPd.isConstrained());
 	}
 
 	/*

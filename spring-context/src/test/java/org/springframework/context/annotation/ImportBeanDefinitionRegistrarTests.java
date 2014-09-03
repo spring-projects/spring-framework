@@ -46,7 +46,6 @@ public class ImportBeanDefinitionRegistrarTests {
 
 	@Test
 	public void shouldInvokeAwareMethodsInImportBeanDefinitionRegistrar() {
-
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(Config.class);
 		context.getBean(MessageSource.class);
 
@@ -55,18 +54,19 @@ public class ImportBeanDefinitionRegistrarTests {
 		assertThat(SampleRegistrar.resourceLoader, is(notNullValue()));
 	}
 
+
 	@Sample
 	@Configuration
 	static class Config {
-
 	}
+
 
 	@Target(ElementType.TYPE)
 	@Retention(RetentionPolicy.RUNTIME)
 	@Import(SampleRegistrar.class)
 	public static @interface Sample {
-
 	}
+
 
 	static class SampleRegistrar implements ImportBeanDefinitionRegistrar, BeanClassLoaderAware, ResourceLoaderAware,
 			BeanFactoryAware {
@@ -94,4 +94,5 @@ public class ImportBeanDefinitionRegistrarTests {
 		public void registerBeanDefinitions(AnnotationMetadata importingClassMetadata, BeanDefinitionRegistry registry) {
 		}
 	}
+
 }
