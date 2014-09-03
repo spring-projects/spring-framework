@@ -27,6 +27,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.core.env.Environment;
 import org.springframework.remoting.support.RemoteInvocation;
 import org.springframework.remoting.support.RemoteInvocationResult;
 import org.springframework.scheduling.annotation.Async;
@@ -53,6 +54,17 @@ public class HttpInvokerFactoryBeanIntegrationTests {
 	public void testNonLoadedConfigClass() {
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
 		context.registerBeanDefinition("config", new RootBeanDefinition(InvokerAutowiringConfig.class.getName()));
+		context.refresh();
+		MyBean myBean = context.getBean("myBean", MyBean.class);
+		assertSame(context.getBean("myService"), myBean.myService);
+		myBean.myService.handle();
+		myBean.myService.handleAsync();
+	}
+
+	@Test
+	public void withConfigurationClassWithPlainFactoryBean() {
+		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
+		context.register(ConfigWithPlainFactoryBean.class);
 		context.refresh();
 		MyBean myBean = context.getBean("myBean", MyBean.class);
 		assertSame(context.getBean("myService"), myBean.myService);
@@ -93,7 +105,6 @@ public class HttpInvokerFactoryBeanIntegrationTests {
 			HttpInvokerProxyFactoryBean factory = new HttpInvokerProxyFactoryBean();
 			factory.setServiceUrl("/svc/dummy");
 			factory.setServiceInterface(MyService.class);
-			Thread thread = Thread.currentThread();
 			factory.setHttpInvokerRequestExecutor(new HttpInvokerRequestExecutor() {
 				@Override
 				public RemoteInvocationResult executeRequest(HttpInvokerClientConfiguration config, RemoteInvocation invocation) {
@@ -106,6 +117,34 @@ public class HttpInvokerFactoryBeanIntegrationTests {
 		@Bean
 		public FactoryBean<String> myOtherService() {
 			throw new IllegalStateException("Don't ever call me");
+		}
+	}
+
+
+	@Configuration
+	static class ConfigWithPlainFactoryBean {
+
+		@Autowired
+		Environment env;
+
+		@Bean
+		public MyBean myBean() {
+			return new MyBean();
+		}
+
+		@Bean
+		public FactoryBean myService() {
+			String name = env.getProperty("testbean.name");
+			HttpInvokerProxyFactoryBean factory = new HttpInvokerProxyFactoryBean();
+			factory.setServiceUrl("/svc/" + name);
+			factory.setServiceInterface(MyService.class);
+			factory.setHttpInvokerRequestExecutor(new HttpInvokerRequestExecutor() {
+				@Override
+				public RemoteInvocationResult executeRequest(HttpInvokerClientConfiguration config, RemoteInvocation invocation) {
+					return new RemoteInvocationResult(null);
+				}
+			});
+			return factory;
 		}
 	}
 
