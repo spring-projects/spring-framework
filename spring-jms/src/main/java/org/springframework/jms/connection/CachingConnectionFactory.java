@@ -305,9 +305,15 @@ public class CachingConnectionFactory extends SingleConnectionFactory {
 				if (active) {
 					synchronized (this.sessionList) {
 						if (this.sessionList.size() < getSessionCacheSize()) {
-							logicalClose((Session) proxy);
-							// Remain open in the session list.
-							return null;
+							try {
+								logicalClose((Session) proxy);
+								// Remain open in the session list.
+								return null;
+							}
+							catch (JMSException ex) {
+								logger.trace("Logical close of cached JMS Session failed - discarding it", ex);
+								// Proceed to physical close from here...
+							}
 						}
 					}
 				}
