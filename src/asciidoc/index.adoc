@@ -11866,8 +11866,147 @@ being placed in it. A simple example:
 	Boolean b = simple.booleanList.get(0);
 ----
 
+[[expressions-parser-configuration]]
+==== Parser configuration
+It is possible to configure the SpEL expression parser using a parser configuration object 
+(`org.springframework.expression.spel.SpelParserConfiguration`). The configuration
+object controls the behaviour of some of the expression components. For example, if
+indexing into an array or collection and the element at the specified index is `null`
+it is possible to automatically create the element. This is useful when using expressions made up of a
+chain of property references. If indexing into an array or list
+and specifying an index that is beyond the end of the current size of the array or
+list it is possible to automatically grow the array or list to accommodate that index.
 
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	class Demo {
+		public List<String> list;
+	}
+	
+	// Turn on:
+	// - auto null reference initialization
+	// - auto collection growing
+	SpelParserConfiguration config = new SpelParserConfiguration(true,true);
 
+	ExpressionParser parser = new SpelExpressionParser(config);
+
+	Expression expression = parser.parseExpression("list[3]");
+
+	Demo demo = new Demo();
+
+	Object o = expression.getValue(demo);
+
+	// demo.list will now be a real collection of 4 entries
+	// Each entry is a new empty String
+----
+
+It is also possible to configure the behaviour of the SpEL expression compiler.
+
+[[expressions-spel-compilation]]
+==== SpEL compilation
+
+Spring Framework 4.1 includes a basic expression compiler. Expressions are usually
+interpreted which provides a lot of dynamic flexibility during evaluation but
+does not provide the optimum performance. For occasional expression usage
+this is fine, but when used by other components like Spring Integration, 
+performance can be very important and there is no real need for the dynamism.
+
+The new SpEL compiler is intended to address this need. The 
+compiler will generate a real Java class on the fly during evaluation that embodies the
+expression behaviour and use that to achieve much faster expression
+evaluation. Due to the lack of typing around expressions the compiler
+uses information gathered during the interpreted evaluations of an
+expression when performing compilation. For example, it does not know the type
+of a property reference purely from the expression but during the first
+interpreted evaluation it will find out what it is. Of course, basing the 
+compilation on this information could cause trouble later if the types of
+the various expression elements change over time. For this reason compilation
+is best suited to expressions whose type information is not going to change
+on repeated evaluations.
+
+For a basic expression like this:
+
+`someArray[0].someProperty.someOtherProperty < 0.1`
+
+which involves array access, some property derefencing and numeric operations, the performance
+gain can be very noticeable. In an example microbenchmark run of 50000 iterations, it was
+taking 75ms to evaluate using only the interpreter and just 3ms using the compiled version
+of the expression.
+
+[[expressions-compiler-configuration]]
+===== Compiler configuration
+
+The compiler is not turned on by default, there are two ways to turn
+it on. It can be turned on using the parser configuration process discussed earlier or
+via a system property when SpEL usage is embedded inside another component. This section
+discussed both of these options.
+
+Is is important to understand that there are a few modes the compiler can operate in, captured
+in an enum (`org.springframework.expression.spel.SpelCompilerMode`). The modes are as follows:
+
+- `OFF` - the compiler is switched off, this is the default.
+- `IMMEDIATE` - In immediate mode the expressions are compiled as soon as possible. This
+is typically after the first interpreted evaluation. If the compiled expression fails
+(typically due to a type changing, as described above) then the caller of the expression
+evaluation will receive an exception.
+- `MIXED` - In mixed mode the expressions silently switch between interpreted and compiled
+mode over time.  After some number of interpreted runs they will switch to compiled
+form and if something goes wrong with the compiled form (like a type changing, as
+described above) then the expression will automatically switch back to interpreted form
+again. Sometime later it may generate another compiled form and switch to it. Basically
+the exception that the user gets in `IMMEDIATE` mode is instead handled internally.
+
+`IMMEDIATE` mode exists because `MIXED` mode could cause issues for expressions that
+have side effects. If a compiled expression blows up after partially succeeding it
+may have already done something that has affected the state of the system. If this
+has happened the caller may not want it to silently re-run in interpreted mode
+since part of the expression may be running twice.
+
+After selecting a mode, use the `SpelParserConfiguration` to configure the parser:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	SpelParserConfiguration config = new SpelParserConfiguration(SpelCompilerMode.IMMEDIATE,
+		this.getClass().getClassLoader());
+
+	SpelExpressionParser parser = new SpelExpressionParser(config);
+
+	Expression expr = parser.parseExpression("payload");
+
+	MyMessage message = new MyMessage();
+
+	Object payload = expr.getValue(message);
+----
+
+When specifying the compiler mode it is also possible to specify a classloader (passing null is allowed).
+Compiled expressions will be defined in a child classloader created under any that is supplied.
+It is important to ensure if a classloader is specified it can see all the types involved in
+the expression evaluation process.
+If none is specified then a default classloader will be used (typically the context classloader for
+the thread that is running during expression evaluation).
+
+The second way to configure the compiler is for use when SpEL is embedded inside some other
+component and it may not be possible to configure via a configuration object.
+In these cases it is possible to use a system property. The property 
+`spring.expression.compiler.mode` can be set to one of the `SpelCompilerMode` 
+enum values (`off`, `immediate` or `mixed`).
+
+[[expressions-compiler-limitations]]
+===== Compiler limitations
+
+With Spring Framework 4.1 the basic compilation framework is in place. However, the framework does not
+yet support compiling every kind of expression. The initial focus has been on the common expressions that are
+likely to be used in performance critical contexts.  These kinds of expression cannot be compiled
+at the moment:
+
+- expressions involving assignment 
+- expressions relying on the conversion service
+- expressions using custom resolvers or accessors
+- expressions using selection or projection
+
+More and more types of expression will be compilable in the future.
 
 [[expressions-beandef]]
 === Expression support for defining bean definitions
