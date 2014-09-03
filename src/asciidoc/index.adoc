@@ -1063,8 +1063,7 @@ method has been added.
   summary vs. detail page). This is also supported with View-based rendering by
   adding the serialization view type as a model attribute under a special key.
   See <<mvc-ann-jsonview>> for details.
-* JSONP is now supported with Jackson, both for <<mvc-ann-jsonp,response body methods>> and
-  <<view-json-mapping,`View`-based rendering>>.
+* JSONP is now supported with Jackson. See <<mvc-ann-jsonp>>.
 * A new lifecycle option is available for intercepting `@ResponseBody` and `ResponseEntity`
   methods just after the controller method returns and before the response is written.
   To take advantage declare an `@ControllerAdvice` bean that implements `ResponseBodyAdvice`.
@@ -31716,8 +31715,10 @@ to the model:
 [[mvc-ann-jsonp]]
 ===== Jackson JSONP Support
 
-In order to enable http://en.wikipedia.org/wiki/JSONP[JSONP] support for your response
-body methods, declare an `@ControllerAdvice` as shown below:
+In order to enable http://en.wikipedia.org/wiki/JSONP[JSONP] support for `@ResponseBody`
+and `ResponseEntity` methods, declare an `@ControllerAdvice` bean that extends
+`AbstractJsonpResponseBodyAdvice` as shown below where the constructor argument indicates
+the JSONP query parameter name(s):
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -31730,6 +31731,10 @@ body methods, declare an `@ControllerAdvice` as shown below:
 		}
 	}
 ----
+
+For controllers relying on view resolution, JSONP is automatically enabled when the
+request has a query parameter named `jsonp` or `callback`. Those names can be
+customized through `jsonpParameterNames` property.
 
 
 [[mvc-ann-async]]
@@ -37025,7 +37030,7 @@ serializers/deserializers need to be provided for specific types.
 
 http://en.wikipedia.org/wiki/JSONP[JSONP] is supported and automatically enabled when
 the request has a query parameter named `jsonp` or `callback`. The JSONP query parameter
-name(s) could be customized thanks to the `JsonpParameterNames` property.
+name(s) could be customized through the `jsonpParameterNames` property.
 
 
 
