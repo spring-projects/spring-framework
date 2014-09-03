@@ -44,6 +44,7 @@ import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanNameGenerator;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
+import org.springframework.context.annotation.ConfigurationClassParser.ImportRegistry;
 import org.springframework.context.annotation.ConfigurationCondition.ConfigurationPhase;
 import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.env.Environment;
@@ -86,6 +87,8 @@ class ConfigurationClassBeanDefinitionReader {
 
 	private final BeanNameGenerator importBeanNameGenerator;
 
+	private final ImportRegistry importRegistry;
+
 	private final ConditionEvaluator conditionEvaluator;
 
 
@@ -95,7 +98,8 @@ class ConfigurationClassBeanDefinitionReader {
 	 */
 	public ConfigurationClassBeanDefinitionReader(BeanDefinitionRegistry registry, SourceExtractor sourceExtractor,
 			ProblemReporter problemReporter, MetadataReaderFactory metadataReaderFactory,
-			ResourceLoader resourceLoader, Environment environment, BeanNameGenerator importBeanNameGenerator) {
+			ResourceLoader resourceLoader, Environment environment, BeanNameGenerator importBeanNameGenerator,
+			ImportRegistry importRegistry) {
 
 		this.registry = registry;
 		this.sourceExtractor = sourceExtractor;
@@ -104,6 +108,7 @@ class ConfigurationClassBeanDefinitionReader {
 		this.resourceLoader = resourceLoader;
 		this.environment = environment;
 		this.importBeanNameGenerator = importBeanNameGenerator;
+		this.importRegistry = importRegistry;
 		this.conditionEvaluator = new ConditionEvaluator(registry, environment, resourceLoader);
 	}
 
@@ -128,6 +133,7 @@ class ConfigurationClassBeanDefinitionReader {
 
 		if (trackedConditionEvaluator.shouldSkip(configClass)) {
 			removeBeanDefinition(configClass);
+			importRegistry.removeImportingClassFor(configClass.getMetadata().getClassName());
 			return;
 		}
 

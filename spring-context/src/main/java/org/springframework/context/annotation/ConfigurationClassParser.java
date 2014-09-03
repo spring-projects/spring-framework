@@ -72,6 +72,8 @@ import org.springframework.core.type.classreading.MetadataReader;
 import org.springframework.core.type.classreading.MetadataReaderFactory;
 import org.springframework.core.type.filter.AssignableTypeFilter;
 import org.springframework.util.Assert;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
 
 /**
@@ -470,10 +472,8 @@ class ConfigurationClassParser {
 					}
 					else {
 						// Candidate class not an ImportSelector or ImportBeanDefinitionRegistrar -> process it as a @Configuration class
-						if (!this.conditionEvaluator.shouldSkip(configClass.getMetadata(), ConfigurationPhase.REGISTER_BEAN)) {
-							this.importStack.registerImport(currentSourceClass.getMetadata(), candidate.getMetadata().getClassName());
-							processConfigurationClass(candidate.asConfigClass(configClass));
-						}
+						this.importStack.registerImport(currentSourceClass.getMetadata(), candidate.getMetadata().getClassName());
+						processConfigurationClass(candidate.asConfigClass(configClass));
 					}
 				}
 			}
@@ -591,21 +591,35 @@ class ConfigurationClassParser {
 	interface ImportRegistry {
 
 		AnnotationMetadata getImportingClassFor(String importedClass);
+
+		void removeImportingClassFor(String importedClass);
 	}
 
 
 	@SuppressWarnings("serial")
 	private static class ImportStack extends Stack<ConfigurationClass> implements ImportRegistry {
 
-		private final Map<String, AnnotationMetadata> imports = new HashMap<String, AnnotationMetadata>();
+		private final MultiValueMap<String, AnnotationMetadata> imports = new LinkedMultiValueMap<String, AnnotationMetadata>();
 
 		public void registerImport(AnnotationMetadata importingClass, String importedClass) {
-			this.imports.put(importedClass, importingClass);
+			this.imports.add(importedClass, importingClass);
+		}
+
+		@Override
+		public void removeImportingClassFor(String importedClass) {
+			for (List<AnnotationMetadata> list : this.imports.values()) {
+				for (Iterator<AnnotationMetadata> iterator = list.iterator(); iterator.hasNext();) {
+					if (iterator.next().getClassName().equals(importedClass)) {
+						iterator.remove();
+					}
+				}
+			}
 		}
 
 		@Override
 		public AnnotationMetadata getImportingClassFor(String importedClass) {
-			return this.imports.get(importedClass);
+			List<AnnotationMetadata> list = this.imports.get(importedClass);
+			return (list == null || list.isEmpty() ? null : list.get(list.size() - 1));
 		}
 
 		/**

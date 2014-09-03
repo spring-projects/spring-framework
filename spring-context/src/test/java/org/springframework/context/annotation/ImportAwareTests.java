@@ -234,7 +234,7 @@ public class ImportAwareTests {
 	}
 
 
-	@Conditional(NeverMatchingCondition.class)
+	@Conditional(OnMissingBeanCondition.class)
 	@EnableSomeConfiguration("foo")
 	@Configuration
 	public static class ConfigurationTwo {
@@ -277,11 +277,12 @@ public class ImportAwareTests {
 	}
 
 
-	private static final class NeverMatchingCondition implements ConfigurationCondition {
+	private static final class OnMissingBeanCondition implements ConfigurationCondition {
 
 		@Override
 		public boolean matches(ConditionContext context, AnnotatedTypeMetadata metadata) {
-			return false;
+			return context.getBeanFactory().getBeanNamesForType(MetadataHolder.class,
+					true, false).length == 0;
 		}
 
 		@Override
