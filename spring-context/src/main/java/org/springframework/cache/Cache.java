@@ -66,6 +66,8 @@ public interface Cache {
 	 * @return the value to which this cache maps the specified key
 	 * (which may be {@code null} itself), or also {@code null} if
 	 * the cache contains no mapping for this key
+	 * @throws IllegalStateException if a cache entry has been found
+	 * but failed to match the specified type
 	 * @see #get(Object)
 	 * @since 4.0
 	 */
