@@ -1082,6 +1082,7 @@ method has been added.
   with method `handleFoo` is named "FC#handleFoo". The naming strategy is pluggable.
   It is also possible to name an `@RequestMapping` explicitly through its name attribute.
   A new `mvcUrl` function in the Spring JSP tag library makes this easy to use in JSP pages.
+  See <<mvc-links-to-controllers-from-views>>.
 * `ResponseEntity` provides a builder-style API to guide controller methods
   towards the preparation of server-side responses, e.g. `ResponseEntity.ok()`.
 * `RequestEntity` is a new type that provides a builder-style API to guide client-side REST
@@ -32574,7 +32575,7 @@ Therefore the use of flash attributes is recommended mainly for redirect scenari
 
 
 
-[[mvc-construct-encode-uri]]
+[[mvc-uri-building]]
 === Building URIs
 
 Spring MVC provides a mechanism for building and encoding a URI using
@@ -32649,8 +32650,8 @@ also have the literal part of the servlet mapping included:
 			.path("/accounts").build()
 ----
 
-[[mvc-construct-uri-controllers]]
-=== Building URIs to Controllers and methods
+[[mvc-links-to-controllers]]
+==== Building URIs to Controllers and methods
 
 Spring MVC provides another mechanism for building and encoding URIs that link to
 Controllers and methods defined within an application.
@@ -32696,6 +32697,54 @@ URIs by coding against the actual Controller's API:
 
 	URI uri = uriComponents.encode().toUri();
 ----
+
+[[mvc-links-to-controllers-from-views]]
+==== Building URIs to Controllers and methods from views
+
+It is also useful to build links to annotated controllers from views (e.g. JSP).
+This can be done through a method on `MvcUriComponentsBuilder` which refers to mappings
+by name called `fromMappingName`.
+
+As of 4.1 every `@RequestMapping` is assigned a default name based on the
+capital letters of the class and the full method name. For example, the method `getFoo` in class
+`FooController` is assigned the name "FC#getFoo". This naming strategy is pluggable
+by implementing `HandlerMethodMappingNamingStrategy` and configuring it on your
+`RequestMappingHandlerMapping`. Furthermore the `@RequestMapping` annotation includes
+a name attribute that can be used to override the default strategy.
+
+[NOTE]
+====
+The assigned request mapping names are logged at TRACE level on startup.
+====
+
+The Spring JSP tag library provides a function called `mvcUrl` that can be used to
+prepare links to controller methods based on this mechanism.
+
+For example given:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+    @RequestMapping("/people/{id}/addresses")
+    public class MyController {
+
+        @RequestMapping("/{country}")
+        public HttpEntity getAddress(@PathVariable String country) { ... }
+    }
+----
+
+The following JSP code can prepare a link:
+
+[source,jsp,indent=0]
+[subs="verbatim,quotes"]
+----
+<%@ taglib uri="http://www.springframework.org/tags" prefix="s" %>
+...
+<a href="${s:mvcUrl('PC#getPerson').arg(0,'123').build()}">Get Person</a>
+----
+
+
+
 
 
 [[mvc-localeresolver]]
