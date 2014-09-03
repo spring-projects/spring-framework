@@ -87,26 +87,11 @@ import static org.springframework.core.env.EnvironmentIntegrationTests.Constants
 public class EnvironmentIntegrationTests {
 
 	private ConfigurableEnvironment prodEnv;
+
 	private ConfigurableEnvironment devEnv;
+
 	private ConfigurableEnvironment prodWebEnv;
 
-	/**
-	 * Constants used both locally and in scan* sub-packages
-	 */
-	public static class Constants {
-		public static final String XML_PATH = "org/springframework/core/env/EnvironmentIntegrationTests-context.xml";
-
-		public static final String ENVIRONMENT_AWARE_BEAN_NAME = "envAwareBean";
-
-		public static final String PROD_BEAN_NAME = "prodBean";
-		public static final String DEV_BEAN_NAME = "devBean";
-		public static final String DERIVED_DEV_BEAN_NAME = "derivedDevBean";
-		public static final String TRANSITIVE_BEAN_NAME = "transitiveBean";
-
-		public static final String PROD_ENV_NAME = "prod";
-		public static final String DEV_ENV_NAME = "dev";
-		public static final String DERIVED_DEV_ENV_NAME = "derivedDev";
-	}
 
 	@Before
 	public void setUp() {
@@ -122,9 +107,7 @@ public class EnvironmentIntegrationTests {
 
 	@Test
 	public void genericApplicationContext_standardEnv() {
-		ConfigurableApplicationContext ctx =
-			new GenericApplicationContext(newBeanFactoryWithEnvironmentAwareBean());
-
+		ConfigurableApplicationContext ctx = new GenericApplicationContext(newBeanFactoryWithEnvironmentAwareBean());
 		ctx.refresh();
 
 		assertHasStandardEnvironment(ctx);
@@ -134,8 +117,7 @@ public class EnvironmentIntegrationTests {
 
 	@Test
 	public void genericApplicationContext_customEnv() {
-		GenericApplicationContext ctx =
-			new GenericApplicationContext(newBeanFactoryWithEnvironmentAwareBean());
+		GenericApplicationContext ctx = new GenericApplicationContext(newBeanFactoryWithEnvironmentAwareBean());
 		ctx.setEnvironment(prodEnv);
 		ctx.refresh();
 
@@ -191,11 +173,8 @@ public class EnvironmentIntegrationTests {
 	@Test
 	public void genericXmlApplicationContext() {
 		GenericXmlApplicationContext ctx = new GenericXmlApplicationContext();
-
 		assertHasStandardEnvironment(ctx);
-
 		ctx.setEnvironment(prodEnv);
-
 		ctx.load(XML_PATH);
 		ctx.refresh();
 
@@ -208,8 +187,7 @@ public class EnvironmentIntegrationTests {
 
 	@Test
 	public void classPathXmlApplicationContext() {
-		ConfigurableApplicationContext ctx =
-			new ClassPathXmlApplicationContext(new String[] { XML_PATH });
+		ConfigurableApplicationContext ctx = new ClassPathXmlApplicationContext(XML_PATH);
 		ctx.setEnvironment(prodEnv);
 		ctx.refresh();
 
@@ -228,7 +206,7 @@ public class EnvironmentIntegrationTests {
 
 		// strange - FSXAC strips leading '/' unless prefixed with 'file:'
 		ConfigurableApplicationContext ctx =
-			new FileSystemXmlApplicationContext(new String[] { "file:"+tmpFile.getPath() }, false);
+				new FileSystemXmlApplicationContext(new String[] {"file:" + tmpFile.getPath()}, false);
 		ctx.setEnvironment(prodEnv);
 		ctx.refresh();
 		assertEnvironmentBeanRegistered(ctx);
@@ -336,11 +314,8 @@ public class EnvironmentIntegrationTests {
 
 	@Test
 	public void webApplicationContext() {
-		GenericWebApplicationContext ctx =
-			new GenericWebApplicationContext(newBeanFactoryWithEnvironmentAwareBean());
-
+		GenericWebApplicationContext ctx = new GenericWebApplicationContext(newBeanFactoryWithEnvironmentAwareBean());
 		assertHasStandardServletEnvironment(ctx);
-
 		ctx.setEnvironment(prodWebEnv);
 		ctx.refresh();
 
@@ -588,7 +563,8 @@ public class EnvironmentIntegrationTests {
 			try {
 				ctx.refresh();
 				fail("expected missing property exception");
-			} catch (MissingRequiredPropertiesException ex) {
+			}
+			catch (MissingRequiredPropertiesException ex) {
 			}
 		}
 
@@ -598,7 +574,6 @@ public class EnvironmentIntegrationTests {
 			ctx.setEnvironment(new MockEnvironment().withProperty("foo", "fooValue"));
 			ctx.refresh(); // should succeed
 		}
-
 	}
 
 
@@ -652,6 +627,7 @@ public class EnvironmentIntegrationTests {
 		assertThat(ctx.getBean(EnvironmentAwareBean.class).environment, is(expectedEnv));
 	}
 
+
 	private static class EnvironmentAwareBean implements EnvironmentAware {
 
 		public Environment environment;
@@ -660,8 +636,8 @@ public class EnvironmentIntegrationTests {
 		public void setEnvironment(Environment environment) {
 			this.environment = environment;
 		}
-
 	}
+
 
 	/**
 	 * Mirrors the structure of beans and environment-specific config files
@@ -711,4 +687,25 @@ public class EnvironmentIntegrationTests {
 			return new Object();
 		}
 	}
+
+
+	/**
+	 * Constants used both locally and in scan* sub-packages
+	 */
+	public static class Constants {
+
+		public static final String XML_PATH = "org/springframework/core/env/EnvironmentIntegrationTests-context.xml";
+
+		public static final String ENVIRONMENT_AWARE_BEAN_NAME = "envAwareBean";
+
+		public static final String PROD_BEAN_NAME = "prodBean";
+		public static final String DEV_BEAN_NAME = "devBean";
+		public static final String DERIVED_DEV_BEAN_NAME = "derivedDevBean";
+		public static final String TRANSITIVE_BEAN_NAME = "transitiveBean";
+
+		public static final String PROD_ENV_NAME = "prod";
+		public static final String DEV_ENV_NAME = "dev";
+		public static final String DERIVED_DEV_ENV_NAME = "derivedDev";
+	}
+
 }
