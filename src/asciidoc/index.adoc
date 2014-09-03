@@ -1068,6 +1068,7 @@ method has been added.
   methods just after the controller method returns and before the response is written.
   To take advantage declare an `@ControllerAdvice` bean that implements `ResponseBodyAdvice`.
   The built-in support for `@JsonView` and JSONP take advantage of this.
+  See <<mvc-handlermapping-interceptor>>.
 * There are three new `HttpMessageConverter` options:
 ** Gson -- lighter footprint than Jackson; has already been in use in Spring Android.
 ** Google Protocol Buffers -- efficient and effective as an inter-service communication
@@ -32093,6 +32094,17 @@ annotated controller methods. If you want to narrow down the URL paths to which 
 interceptor applies, you can use the MVC namespace or the MVC Java config, or declare
 bean instances of type `MappedInterceptor` to do that. See <<mvc-config-enable>>.
 ====
+
+Note that the `postHandle` method of `HandlerInterceptor` is not always ideally suited for
+use with `@ResponseBody` and `ResponseEntity` methods. In such cases an `HttpMessageConverter`
+writes to and commits the response before `postHandle` is called which makes it impossible
+to change the response, for example to add a header. Instead an application can implement
+`ResponseBodyAdvice` and either declare it as an `@ControllerAdvice` bean or configure it
+directly on `RequestMappingHandlerAdapter`.
+
+
+
+
 
 
 
