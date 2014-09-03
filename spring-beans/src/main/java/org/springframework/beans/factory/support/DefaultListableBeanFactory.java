@@ -24,6 +24,7 @@ import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.lang.ref.Reference;
 import java.lang.ref.WeakReference;
+import java.lang.reflect.Method;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.ArrayList;
@@ -62,9 +63,8 @@ import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.config.DependencyDescriptor;
+import org.springframework.core.OrderComparator;
 import org.springframework.core.annotation.AnnotationUtils;
-import org.springframework.core.annotation.OrderProviderComparator;
-import org.springframework.core.annotation.OrderUtils;
 import org.springframework.lang.UsesJava8;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
@@ -941,7 +941,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			TypeConverter converter = (typeConverter != null ? typeConverter : getTypeConverter());
 			Object result = converter.convertIfNecessary(matchingBeans.values(), type);
 			if (this.dependencyComparator != null && result instanceof Object[]) {
-				sortArray((Object[]) result, matchingBeans);
+				Arrays.sort((Object[]) result, adaptDependencyComparator(matchingBeans));
 			}
 			return result;
 		}
@@ -968,7 +968,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			TypeConverter converter = (typeConverter != null ? typeConverter : getTypeConverter());
 			Object result = converter.convertIfNecessary(matchingBeans.values(), type);
 			if (this.dependencyComparator != null && result instanceof List) {
-				sortList((List<?>) result, matchingBeans);
+				Collections.sort((List<?>) result, adaptDependencyComparator(matchingBeans));
 			}
 			return result;
 		}
@@ -1029,32 +1029,22 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		}
 	}
 
-	private void sortArray(Object[] items, Map<String, Object> matchingBeans) {
-		if (this.dependencyComparator instanceof OrderProviderComparator) {
-			((OrderProviderComparator) this.dependencyComparator)
-					.sortArray(items, createFactoryAwareOrderProvider(matchingBeans));
+	private Comparator<Object> adaptDependencyComparator(Map<String, Object> matchingBeans) {
+		if (this.dependencyComparator instanceof OrderComparator) {
+			return ((OrderComparator) this.dependencyComparator).withSourceProvider(
+					createFactoryAwareOrderSourceProvider(matchingBeans));
 		}
 		else {
-			Arrays.sort(items, this.dependencyComparator);
+			return this.dependencyComparator;
 		}
 	}
 
-	private void sortList(List<?> items, Map<String, Object> matchingBeans) {
-		if (this.dependencyComparator instanceof OrderProviderComparator) {
-			((OrderProviderComparator) this.dependencyComparator)
-					.sortList(items, createFactoryAwareOrderProvider(matchingBeans));
-		}
-		else {
-			Collections.sort(items, this.dependencyComparator);
-		}
-	}
-
-	private FactoryAwareOrderProvider createFactoryAwareOrderProvider(Map<String, Object> beans) {
+	private FactoryAwareOrderSourceProvider createFactoryAwareOrderSourceProvider(Map<String, Object> beans) {
 		IdentityHashMap<Object, String> instancesToBeanNames = new IdentityHashMap<Object, String>();
 		for (Map.Entry<String, Object> entry : beans.entrySet()) {
 			instancesToBeanNames.put(entry.getValue(), entry.getKey());
 		}
-		return new FactoryAwareOrderProvider(instancesToBeanNames, this);
+		return new FactoryAwareOrderSourceProvider(instancesToBeanNames);
 	}
 
 	/**
@@ -1223,13 +1213,18 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	/**
 	 * Return the priority assigned for the given bean instance by
 	 * the {@code javax.annotation.Priority} annotation.
-	 * <p>If the annotation is not present, returns {@code null}.
-	 * @param beanInstance the bean instance to check (can be null)
+	 * <p>The default implementation delegates to the specified
+	 * {@link #setDependencyComparator dependency comparator}, checking its
+	 * {@link OrderComparator#getPriority method} if it is an extension of
+	 * Spring's common {@link OrderComparator} - typically, an
+	 * {@link org.springframework.core.annotation.AnnotationAwareOrderComparator}.
+	 * If no such comparator is present, this implementation returns {@code null}.
+	 * @param beanInstance the bean instance to check (can be {@code null})
 	 * @return the priority assigned to that bean or {@code null} if none is set
 	 */
 	protected Integer getPriority(Object beanInstance) {
-		if (beanInstance != null) {
-			return OrderUtils.getPriorityValue(beanInstance.getClass());
+		if (this.dependencyComparator instanceof OrderComparator) {
+			return ((OrderComparator) this.dependencyComparator).getPriority(beanInstance);
 		}
 		return null;
 	}
@@ -1403,6 +1398,38 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 
 		public Object createDependencyProvider(DependencyDescriptor descriptor, String beanName) {
 			return new DependencyProvider(descriptor, beanName);
+		}
+	}
+
+
+	/**
+	 * An {@link org.springframework.core.OrderComparator.OrderSourceProvider} implementation
+	 * that is aware of the bean metadata of the instances to sort.
+	 * <p>Lookup for the method factory of an instance to sort, if any, and let the
+	 * comparator retrieve the {@link org.springframework.core.annotation.Order}
+	 * value defined on it. This essentially allows for the following construct:
+	 */
+	private class FactoryAwareOrderSourceProvider implements OrderComparator.OrderSourceProvider {
+
+		private final Map<Object, String> instancesToBeanNames;
+
+		public FactoryAwareOrderSourceProvider(Map<Object, String> instancesToBeanNames) {
+			this.instancesToBeanNames = instancesToBeanNames;
+		}
+
+		@Override
+		public Object getOrderSource(Object obj) {
+			return getFactoryMethod(this.instancesToBeanNames.get(obj));
+		}
+
+		private Method getFactoryMethod(String beanName) {
+			if (beanName != null && containsBeanDefinition(beanName)) {
+				BeanDefinition bd = getMergedBeanDefinition(beanName);
+				if (bd instanceof RootBeanDefinition) {
+					return ((RootBeanDefinition) bd).getResolvedFactoryMethod();
+				}
+			}
+			return null;
 		}
 	}
 

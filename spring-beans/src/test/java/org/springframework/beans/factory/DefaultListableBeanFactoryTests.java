@@ -69,6 +69,7 @@ import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.factory.xml.ConstructorDependenciesBean;
 import org.springframework.beans.propertyeditors.CustomNumberEditor;
 import org.springframework.core.MethodParameter;
+import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.core.convert.support.GenericConversionService;
@@ -1392,6 +1393,7 @@ public class DefaultListableBeanFactoryTests {
 	@Test
 	public void testGetBeanByTypeWithPriority() throws Exception {
 		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
+		lbf.setDependencyComparator(AnnotationAwareOrderComparator.INSTANCE);
 		RootBeanDefinition bd1 = new RootBeanDefinition(HighPriorityTestBean.class);
 		RootBeanDefinition bd2 = new RootBeanDefinition(LowPriorityTestBean.class);
 		lbf.registerBeanDefinition("bd1", bd1);
@@ -1403,6 +1405,7 @@ public class DefaultListableBeanFactoryTests {
 	@Test
 	public void testGetBeanByTypeWithMultiplePriority() throws Exception {
 		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
+		lbf.setDependencyComparator(AnnotationAwareOrderComparator.INSTANCE);
 		RootBeanDefinition bd1 = new RootBeanDefinition(HighPriorityTestBean.class);
 		RootBeanDefinition bd2 = new RootBeanDefinition(HighPriorityTestBean.class);
 		lbf.registerBeanDefinition("bd1", bd1);
@@ -1416,6 +1419,7 @@ public class DefaultListableBeanFactoryTests {
 	@Test
 	public void testGetBeanByTypeWithPriorityAndNullInstance() throws Exception {
 		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
+		lbf.setDependencyComparator(AnnotationAwareOrderComparator.INSTANCE);
 		RootBeanDefinition bd1 = new RootBeanDefinition(HighPriorityTestBean.class);
 		RootBeanDefinition bd2 = new RootBeanDefinition(NullTestBeanFactoryBean.class);
 		lbf.registerBeanDefinition("bd1", bd1);
@@ -1427,6 +1431,7 @@ public class DefaultListableBeanFactoryTests {
 	@Test
 	public void testGetBeanByTypePrimaryHasPrecedenceOverPriority() throws Exception {
 		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
+		lbf.setDependencyComparator(AnnotationAwareOrderComparator.INSTANCE);
 		RootBeanDefinition bd1 = new RootBeanDefinition(HighPriorityTestBean.class);
 		RootBeanDefinition bd2 = new RootBeanDefinition(TestBean.class);
 		bd2.setPrimary(true);
@@ -1697,6 +1702,7 @@ public class DefaultListableBeanFactoryTests {
 	@Test
 	public void testAutowireBeanByTypeWithTwoMatchesAndPriority() {
 		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
+		lbf.setDependencyComparator(AnnotationAwareOrderComparator.INSTANCE);
 		RootBeanDefinition bd = new RootBeanDefinition(HighPriorityTestBean.class);
 		RootBeanDefinition bd2 = new RootBeanDefinition(LowPriorityTestBean.class);
 		lbf.registerBeanDefinition("test", bd);
@@ -1710,6 +1716,7 @@ public class DefaultListableBeanFactoryTests {
 	@Test
 	public void testAutowireBeanByTypeWithIdenticalPriorityCandidates() {
 		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
+		lbf.setDependencyComparator(AnnotationAwareOrderComparator.INSTANCE);
 		RootBeanDefinition bd = new RootBeanDefinition(HighPriorityTestBean.class);
 		RootBeanDefinition bd2 = new RootBeanDefinition(HighPriorityTestBean.class);
 		lbf.registerBeanDefinition("test", bd);
@@ -1730,6 +1737,7 @@ public class DefaultListableBeanFactoryTests {
 	@Test
 	public void testAutowireBeanByTypePrimaryTakesPrecedenceOverPriority() {
 		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
+		lbf.setDependencyComparator(AnnotationAwareOrderComparator.INSTANCE);
 		RootBeanDefinition bd = new RootBeanDefinition(HighPriorityTestBean.class);
 		RootBeanDefinition bd2 = new RootBeanDefinition(TestBean.class);
 		bd2.setPrimary(true);

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.context.annotation.spr11310;
+package org.springframework.context.annotation;
 
 import static org.junit.Assert.*;
 
@@ -30,7 +30,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 
 /**
- *
  * @author Stephane Nicoll
  */
 public class Spr11310Tests {

@@ -38,7 +38,17 @@ public abstract class OrderUtils {
 
 
 	/**
-	 * Return the order on the specified {@code type} or the specified
+	 * Return the order on the specified {@code type}.
+	 * <p>Take care of {@link Order @Order} and {@code @javax.annotation.Priority}.
+	 * @param type the type to handle
+	 * @return the order value, or {@code null} if none can be found
+	 */
+	public static Integer getOrder(Class<?> type) {
+		return getOrder(type, null);
+	}
+
+	/**
+	 * Return the order on the specified {@code type}, or the specified
 	 * default value if none can be found.
 	 * <p>Take care of {@link Order @Order} and {@code @javax.annotation.Priority}.
 	 * @param type the type to handle
@@ -49,7 +59,7 @@ public abstract class OrderUtils {
 		if (order != null) {
 			return order.value();
 		}
-		Integer priorityOrder = getPriorityValue(type);
+		Integer priorityOrder = getPriority(type);
 		if (priorityOrder != null) {
 			return priorityOrder;
 		}
@@ -62,7 +72,7 @@ public abstract class OrderUtils {
 	 * @param type the type to handle
 	 * @return the priority value if the annotation is set, {@code null} otherwise
 	 */
-	public static Integer getPriorityValue(Class<?> type) {
+	public static Integer getPriority(Class<?> type) {
 		if (priorityPresent) {
 			for (Annotation annotation : type.getAnnotations()) {
 				if (PRIORITY_ANNOTATION_CLASS_NAME.equals(annotation.annotationType().getName())) {

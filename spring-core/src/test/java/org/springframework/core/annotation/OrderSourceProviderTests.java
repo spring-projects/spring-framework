@@ -16,22 +16,36 @@
 
 package org.springframework.core.annotation;
 
-import static org.junit.Assert.*;
-
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import org.junit.Test;
 
 import org.springframework.core.Ordered;
 
-/**
- *
- * @author Stephane Nicoll
- */
-public class DefaultOrderProviderComparatorTests {
+import static org.junit.Assert.*;
 
-	private final DefaultOrderProviderComparator comparator = new DefaultOrderProviderComparator();
+/**
+ * @author Stephane Nicoll
+ * @author Juergen Hoeller
+ */
+public class OrderSourceProviderTests {
+
+	private final AnnotationAwareOrderComparator comparator = AnnotationAwareOrderComparator.INSTANCE;
+
+
+	@Test
+	public void plainComparator() {
+		List<Object> items = new ArrayList<Object>();
+		C c = new C(5);
+		C c2 = new C(-5);
+		items.add(c);
+		items.add(c2);
+		Collections.sort(items, comparator);
+		assertOrder(items, c2, c);
+	}
 
 	@Test
 	public void listNoFactoryMethod() {
@@ -40,12 +54,7 @@ public class DefaultOrderProviderComparatorTests {
 		B b = new B();
 
 		List<?> items = Arrays.asList(a, c, b);
-		comparator.sortList(items, new OrderProvider() {
-			@Override
-			public Integer getOrder(Object obj) {
-				return null;
-			}
-		});
+		Collections.sort(items, comparator.withSourceProvider(obj -> null));
 		assertOrder(items, c, a, b);
 	}
 
@@ -56,18 +65,15 @@ public class DefaultOrderProviderComparatorTests {
 		B b = new B();
 
 		List<?> items = Arrays.asList(a, c, b);
-		comparator.sortList(items, new OrderProvider() {
-			@Override
-			public Integer getOrder(Object obj) {
-				if (obj == a) {
-					return 4;
-				}
-				if (obj == b) {
-					return 2;
-				}
-				return null;
+		Collections.sort(items, comparator.withSourceProvider(obj -> {
+			if (obj == a) {
+				return new C(4);
 			}
-		});
+			if (obj == b) {
+				return new C(2);
+			}
+			return null;
+		}));
 		assertOrder(items, b, c, a);
 	}
 
@@ -77,20 +83,16 @@ public class DefaultOrderProviderComparatorTests {
 		C c = new C(5);
 		C c2 = new C(-5);
 
-
 		List<?> items = Arrays.asList(a, c, c2);
-		comparator.sortList(items, new OrderProvider() {
-			@Override
-			public Integer getOrder(Object obj) {
-				if (obj == a) {
-					return 4;
-				}
-				if (obj == c2) {
-					return 2;
-				}
-				return null;
+		Collections.sort(items, comparator.withSourceProvider(obj -> {
+			if (obj == a) {
+				return 4;
 			}
-		});
+			if (obj == c2) {
+				return 2;
+			}
+			return null;
+		}));
 		assertOrder(items, c2, a, c);
 	}
 
@@ -101,12 +103,7 @@ public class DefaultOrderProviderComparatorTests {
 		B b = new B();
 
 		Object[] items = new Object[] {a, c, b};
-		comparator.sortArray(items, new OrderProvider() {
-			@Override
-			public Integer getOrder(Object obj) {
-				return null;
-			}
-		});
+		Arrays.sort(items, comparator.withSourceProvider(obj -> null));
 		assertOrder(items, c, a, b);
 	}
 
@@ -117,18 +114,15 @@ public class DefaultOrderProviderComparatorTests {
 		B b = new B();
 
 		Object[] items = new Object[] {a, c, b};
-		comparator.sortArray(items, new OrderProvider() {
-			@Override
-			public Integer getOrder(Object obj) {
-				if (obj == a) {
-					return 4;
-				}
-				if (obj == b) {
-					return 2;
-				}
-				return null;
+		Arrays.sort(items, comparator.withSourceProvider(obj -> {
+			if (obj == a) {
+				return new C(4);
 			}
-		});
+			if (obj == b) {
+				return new C(2);
+			}
+			return null;
+		}));
 		assertOrder(items, b, c, a);
 	}
 
@@ -139,20 +133,18 @@ public class DefaultOrderProviderComparatorTests {
 		C c2 = new C(-5);
 
 		Object[] items = new Object[] {a, c, c2};
-		comparator.sortArray(items, new OrderProvider() {
-			@Override
-			public Integer getOrder(Object obj) {
-				if (obj == a) {
-					return 4;
-				}
-				if (obj == c2) {
-					return 2;
-				}
-				return null;
+		Arrays.sort(items, comparator.withSourceProvider(obj -> {
+			if (obj == a) {
+				return 4;
 			}
-		});
+			if (obj == c2) {
+				return 2;
+			}
+			return null;
+		}));
 		assertOrder(items, c2, a, c);
 	}
+
 
 	private void assertOrder(List<?> actual, Object... expected) {
 		for (int i = 0; i < actual.size(); i++) {
@@ -173,11 +165,14 @@ public class DefaultOrderProviderComparatorTests {
 	private static class A {
 	}
 
+
 	@Order(2)
 	private static class B {
 	}
 
+
 	private static class C implements Ordered {
+
 		private final int order;
 
 		private C(int order) {
