@@ -19,6 +19,9 @@ package org.springframework.web.servlet.config;
 import java.util.Arrays;
 import java.util.Map;
 
+import org.springframework.web.servlet.handler.MappedInterceptor;
+import org.springframework.web.servlet.resource.ResourceUrlProvider;
+import org.springframework.web.servlet.resource.ResourceUrlProviderExposingInterceptor;
 import org.w3c.dom.Element;
 
 import org.springframework.beans.factory.config.BeanDefinition;
@@ -71,10 +74,14 @@ class ResourcesBeanDefinitionParser implements BeanDefinitionParser {
 
 	private static final String CONTENT_VERSION_STRATEGY_ELEMENT = "content-version-strategy";
 
+	private static final String RESOURCE_URL_PROVIDER = "mvcResourceUrlProvider";
+
 
 	@Override
 	public BeanDefinition parse(Element element, ParserContext parserContext) {
 		Object source = parserContext.extractSource(element);
+
+		registerUrlProvider(parserContext, source);
 
 		String resourceHandlerName = registerResourceHandler(parserContext, element, source);
 		if (resourceHandlerName == null) {
@@ -111,6 +118,28 @@ class ResourcesBeanDefinitionParser implements BeanDefinitionParser {
 		MvcNamespaceUtils.registerDefaultComponents(parserContext, source);
 
 		return null;
+	}
+
+	private void registerUrlProvider(ParserContext parserContext, Object source) {
+		if (!parserContext.getRegistry().containsBeanDefinition(RESOURCE_URL_PROVIDER)) {
+			RootBeanDefinition urlProvider = new RootBeanDefinition(ResourceUrlProvider.class);
+			urlProvider.setSource(source);
+			urlProvider.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
+			parserContext.getRegistry().registerBeanDefinition(RESOURCE_URL_PROVIDER, urlProvider);
+			parserContext.registerComponent(new BeanComponentDefinition(urlProvider, RESOURCE_URL_PROVIDER));
+
+			RootBeanDefinition interceptor = new RootBeanDefinition(ResourceUrlProviderExposingInterceptor.class);
+			interceptor.setSource(source);
+			interceptor.getConstructorArgumentValues().addIndexedArgumentValue(0, urlProvider);
+
+			RootBeanDefinition mappedInterceptor = new RootBeanDefinition(MappedInterceptor.class);
+			mappedInterceptor.setSource(source);
+			mappedInterceptor.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
+			mappedInterceptor.getConstructorArgumentValues().addIndexedArgumentValue(0, (Object) null);
+			mappedInterceptor.getConstructorArgumentValues().addIndexedArgumentValue(1, interceptor);
+			String mappedInterceptorName = parserContext.getReaderContext().registerWithGeneratedName(mappedInterceptor);
+			parserContext.registerComponent(new BeanComponentDefinition(mappedInterceptor, mappedInterceptorName));
+		}
 	}
 
 	private String registerResourceHandler(ParserContext parserContext, Element element, Object source) {

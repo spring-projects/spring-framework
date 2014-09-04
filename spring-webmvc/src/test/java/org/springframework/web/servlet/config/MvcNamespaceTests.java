@@ -93,6 +93,8 @@ import org.springframework.web.servlet.resource.PathResourceResolver;
 import org.springframework.web.servlet.resource.ResourceHttpRequestHandler;
 import org.springframework.web.servlet.resource.ResourceResolver;
 import org.springframework.web.servlet.resource.ResourceTransformer;
+import org.springframework.web.servlet.resource.ResourceUrlProvider;
+import org.springframework.web.servlet.resource.ResourceUrlProviderExposingInterceptor;
 import org.springframework.web.servlet.resource.VersionResourceResolver;
 import org.springframework.web.servlet.theme.ThemeChangeInterceptor;
 import org.springframework.web.servlet.view.groovy.GroovyMarkupConfigurer;
@@ -288,7 +290,7 @@ public class MvcNamespaceTests {
 
 	@Test
 	public void testResources() throws Exception {
-		loadBeanDefinitions("mvc-config-resources.xml", 7);
+		loadBeanDefinitions("mvc-config-resources.xml", 9);
 
 		HttpRequestHandlerAdapter adapter = appContext.getBean(HttpRequestHandlerAdapter.class);
 		assertNotNull(adapter);
@@ -303,6 +305,13 @@ public class MvcNamespaceTests {
 		BeanNameUrlHandlerMapping beanNameMapping = appContext.getBean(BeanNameUrlHandlerMapping.class);
 		assertNotNull(beanNameMapping);
 		assertEquals(2, beanNameMapping.getOrder());
+
+		ResourceUrlProvider urlProvider = appContext.getBean(ResourceUrlProvider.class);
+		assertNotNull(urlProvider);
+
+		MappedInterceptor mappedInterceptor = appContext.getBean(MappedInterceptor.class);
+		assertNotNull(urlProvider);
+		assertEquals(ResourceUrlProviderExposingInterceptor.class, mappedInterceptor.getInterceptor().getClass());
 
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		request.setRequestURI("/resources/foo.css");
@@ -321,7 +330,7 @@ public class MvcNamespaceTests {
 
 	@Test
 	public void testResourcesWithOptionalAttributes() throws Exception {
-		loadBeanDefinitions("mvc-config-resources-optional-attrs.xml", 7);
+		loadBeanDefinitions("mvc-config-resources-optional-attrs.xml", 9);
 
 		SimpleUrlHandlerMapping mapping = appContext.getBean(SimpleUrlHandlerMapping.class);
 		assertNotNull(mapping);
@@ -336,7 +345,7 @@ public class MvcNamespaceTests {
 
 	@Test
 	public void testResourcesWithResolversTransformers() throws Exception {
-		loadBeanDefinitions("mvc-config-resources-chain.xml", 8);
+		loadBeanDefinitions("mvc-config-resources-chain.xml", 10);
 
 		SimpleUrlHandlerMapping mapping = appContext.getBean(SimpleUrlHandlerMapping.class);
 		assertNotNull(mapping);
@@ -374,7 +383,7 @@ public class MvcNamespaceTests {
 
 	@Test
 	public void testResourcesWithResolversTransformersCustom() throws Exception {
-		loadBeanDefinitions("mvc-config-resources-chain-no-auto.xml", 9);
+		loadBeanDefinitions("mvc-config-resources-chain-no-auto.xml", 11);
 
 		SimpleUrlHandlerMapping mapping = appContext.getBean(SimpleUrlHandlerMapping.class);
 		assertNotNull(mapping);
@@ -743,7 +752,7 @@ public class MvcNamespaceTests {
 
 	@Test
 	public void testPathMatchingHandlerMappings() throws Exception {
-		loadBeanDefinitions("mvc-config-path-matching-mappings.xml", 20);
+		loadBeanDefinitions("mvc-config-path-matching-mappings.xml", 22);
 
 		RequestMappingHandlerMapping requestMapping = appContext.getBean(RequestMappingHandlerMapping.class);
 		assertNotNull(requestMapping);

@@ -269,7 +269,7 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 			InterceptorRegistry registry = new InterceptorRegistry();
 			addInterceptors(registry);
 			registry.addInterceptor(new ConversionServiceExposingInterceptor(mvcConversionService()));
-			registry.addInterceptor(new ResourceUrlProviderExposingInterceptor(resourceUrlPathTranslator()));
+			registry.addInterceptor(new ResourceUrlProviderExposingInterceptor(mvcResourceUrlProvider()));
 			this.interceptors = registry.getInterceptors();
 		}
 		return this.interceptors.toArray();
@@ -387,17 +387,17 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	}
 
 	@Bean
-	public ResourceUrlProvider resourceUrlPathTranslator() {
-		ResourceUrlProvider translator = new ResourceUrlProvider();
+	public ResourceUrlProvider mvcResourceUrlProvider() {
+		ResourceUrlProvider urlProvider = new ResourceUrlProvider();
 		UrlPathHelper pathHelper = getPathMatchConfigurer().getUrlPathHelper();
 		if (pathHelper != null) {
-			translator.setUrlPathHelper(pathHelper);
+			urlProvider.setUrlPathHelper(pathHelper);
 		}
 		PathMatcher pathMatcher = getPathMatchConfigurer().getPathMatcher();
 		if (pathMatcher != null) {
-			translator.setPathMatcher(pathMatcher);
+			urlProvider.setPathMatcher(pathMatcher);
 		}
-		return translator;
+		return urlProvider;
 	}
 
 	/**
