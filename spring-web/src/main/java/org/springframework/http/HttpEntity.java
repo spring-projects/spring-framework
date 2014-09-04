@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -138,20 +138,20 @@ public class HttpEntity<T> {
 
 	@Override
 	public int hashCode() {
-		return ObjectUtils.nullSafeHashCode(this.headers) * 29 + ObjectUtils.nullSafeHashCode(this.body);
+		return (ObjectUtils.nullSafeHashCode(this.headers) * 29 + ObjectUtils.nullSafeHashCode(this.body));
 	}
 
 	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder("<");
-		if (body != null) {
-			builder.append(body);
-			if (headers != null) {
+		if (this.body != null) {
+			builder.append(this.body);
+			if (this.headers != null) {
 				builder.append(',');
 			}
 		}
-		if (headers != null) {
-			builder.append(headers);
+		if (this.headers != null) {
+			builder.append(this.headers);
 		}
 		builder.append('>');
 		return builder.toString();

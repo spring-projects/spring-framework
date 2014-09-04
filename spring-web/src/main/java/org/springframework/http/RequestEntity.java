@@ -128,20 +128,20 @@ public class RequestEntity<T> extends HttpEntity<T> {
 		if (this == other) {
 			return true;
 		}
-		if (!(other instanceof RequestEntity)) {
+		if (!(other instanceof RequestEntity) || !super.equals(other)) {
 			return false;
 		}
 		RequestEntity<?> otherEntity = (RequestEntity<?>) other;
 		return (ObjectUtils.nullSafeEquals(this.method, otherEntity.method) &&
-				ObjectUtils.nullSafeEquals(this.url, otherEntity.url) &&
-				super.equals(other));
+				ObjectUtils.nullSafeEquals(this.url, otherEntity.url));
 	}
 
 	@Override
 	public int hashCode() {
-		return 29 * super.hashCode() +
-				29 * ObjectUtils.nullSafeHashCode(this.method) +
-				ObjectUtils.nullSafeHashCode(this.url);
+		int hashCode = super.hashCode();
+		hashCode = 29 * hashCode + ObjectUtils.nullSafeHashCode(this.method);
+		hashCode = 29 * hashCode + ObjectUtils.nullSafeHashCode(this.url);
+		return hashCode;
 	}
 
 	@Override
@@ -165,6 +165,7 @@ public class RequestEntity<T> extends HttpEntity<T> {
 		builder.append('>');
 		return builder.toString();
 	}
+
 
 	// Static builder methods
 
@@ -422,6 +423,7 @@ public class RequestEntity<T> extends HttpEntity<T> {
 		return method(HttpMethod.OPTIONS, url);
 	}
 
+
 	/**
 	 * Defines a builder that adds headers to the request entity.
 	 * @param <B> the builder subclass
@@ -471,8 +473,8 @@ public class RequestEntity<T> extends HttpEntity<T> {
 		 * @see BodyBuilder#body(Object)
 		 */
 		RequestEntity<Void> build();
-
 	}
+
 
 	/**
 	 * Defines a builder that adds a body to the response entity.
@@ -504,8 +506,8 @@ public class RequestEntity<T> extends HttpEntity<T> {
 		 * @return the built request entity
 		 */
 		<T> RequestEntity<T> body(T body);
-
 	}
+
 
 	private static class DefaultBodyBuilder implements BodyBuilder {
 
@@ -514,7 +516,6 @@ public class RequestEntity<T> extends HttpEntity<T> {
 		private final URI url;
 
 		private final HttpHeaders headers = new HttpHeaders();
-
 
 		public DefaultBodyBuilder(HttpMethod method, URI url) {
 			this.method = method;

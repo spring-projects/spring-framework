@@ -148,8 +148,9 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 
 	public static final String CONTENT_NEGOTIATION_MANAGER_BEAN_NAME = "mvcContentNegotiationManager";
 
-	private static final boolean javaxValidationPresent = ClassUtils.isPresent(
-			"javax.validation.Validator", AnnotationDrivenBeanDefinitionParser.class.getClassLoader());
+	private static final boolean javaxValidationPresent =
+			ClassUtils.isPresent("javax.validation.Validator", AnnotationDrivenBeanDefinitionParser.class.getClassLoader());
+
 	private static boolean romePresent =
 			ClassUtils.isPresent("com.rometools.rome.feed.WireFeed", AnnotationDrivenBeanDefinitionParser.class.getClassLoader());
 
@@ -532,12 +533,14 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 				messageConverters.add(createConverterDefinition(AtomFeedHttpMessageConverter.class, source));
 				messageConverters.add(createConverterDefinition(RssChannelHttpMessageConverter.class, source));
 			}
-			if(jackson2XmlPresent) {
+
+			if (jackson2XmlPresent) {
 				messageConverters.add(createConverterDefinition(MappingJackson2XmlHttpMessageConverter.class, source));
 			}
 			else if (jaxb2Present) {
 				messageConverters.add(createConverterDefinition(Jaxb2RootElementHttpMessageConverter.class, source));
 			}
+
 			if (jackson2Present) {
 				messageConverters.add(createConverterDefinition(MappingJackson2HttpMessageConverter.class, source));
 			}

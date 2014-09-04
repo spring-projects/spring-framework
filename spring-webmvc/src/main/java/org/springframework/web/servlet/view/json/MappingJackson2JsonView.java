@@ -82,6 +82,7 @@ public class MappingJackson2JsonView extends AbstractJackson2View {
 		super(new ObjectMapper(), DEFAULT_CONTENT_TYPE);
 	}
 
+
 	/**
 	 * Specify a custom prefix to use for this view's JSON output.
 	 * Default is none.
@@ -207,9 +208,10 @@ public class MappingJackson2JsonView extends AbstractJackson2View {
 		Object value = super.filterAndWrapModel(model, request);
 		String jsonpParameterValue = getJsonpParameterValue(request);
 		if (jsonpParameterValue != null) {
-			if(value instanceof MappingJacksonValue) {
+			if (value instanceof MappingJacksonValue) {
 				((MappingJacksonValue) value).setJsonpFunction(jsonpParameterValue);
-			} else {
+			}
+			else {
 				MappingJacksonValue container = new MappingJacksonValue(value);
 				container.setJsonpFunction(jsonpParameterValue);
 				value = container;

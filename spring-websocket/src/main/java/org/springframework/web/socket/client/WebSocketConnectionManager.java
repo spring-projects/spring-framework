@@ -23,9 +23,9 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.util.concurrent.ListenableFutureCallback;
 import org.springframework.web.socket.WebSocketHandler;
+import org.springframework.web.socket.WebSocketHttpHeaders;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.LoggingWebSocketHandlerDecorator;
-import org.springframework.web.socket.WebSocketHttpHeaders;
 
 /**
  * A WebSocket connection manager that is given a URI, a {@link WebSocketClient}, and a

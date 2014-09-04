@@ -28,7 +28,6 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -382,10 +381,8 @@ public class RedirectView extends AbstractUrlBasedView implements SmartView {
 	 * @since 4.1
 	 */
 	protected void appendCurrentQueryParams(StringBuilder targetUrl, HttpServletRequest request) {
-
 		String query = request.getQueryString();
 		if (StringUtils.hasText(query)) {
-
 			// Extract anchor fragment, if any.
 			String fragment = null;
 			int anchorIndex = targetUrl.indexOf("#");
@@ -400,7 +397,6 @@ public class RedirectView extends AbstractUrlBasedView implements SmartView {
 			else {
 				targetUrl.append('&').append(query);
 			}
-
 			// Append anchor fragment, if any, to end of URL.
 			if (fragment != null) {
 				targetUrl.append(fragment);

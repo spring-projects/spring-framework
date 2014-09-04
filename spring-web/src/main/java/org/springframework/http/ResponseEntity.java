@@ -121,16 +121,16 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 		if (this == other) {
 			return true;
 		}
-		if (!(other instanceof ResponseEntity)) {
+		if (!(other instanceof ResponseEntity) || !super.equals(other)) {
 			return false;
 		}
 		ResponseEntity<?> otherEntity = (ResponseEntity<?>) other;
-		return (ObjectUtils.nullSafeEquals(this.statusCode, otherEntity.statusCode) && super.equals(other));
+		return ObjectUtils.nullSafeEquals(this.statusCode, otherEntity.statusCode);
 	}
 
 	@Override
 	public int hashCode() {
-		return super.hashCode() * 29 + ObjectUtils.nullSafeHashCode(this.statusCode);
+		return (super.hashCode() * 29 + ObjectUtils.nullSafeHashCode(this.statusCode));
 	}
 
 	@Override

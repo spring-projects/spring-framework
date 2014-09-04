@@ -51,8 +51,8 @@ import org.springframework.web.servlet.resource.VersionResourceResolver;
  * {@link org.springframework.beans.factory.xml.BeanDefinitionParser} that parses a
  * {@code resources} element to register a {@link ResourceHttpRequestHandler} and
  * register a {@link SimpleUrlHandlerMapping} for mapping resource requests,
- * and a {@link HttpRequestHandlerAdapter}.
- * Will also create a resource handling chain with {@link ResourceResolver}s and {@link ResourceTransformer}s.
+ * and a {@link HttpRequestHandlerAdapter}. Will also create a resource handling
+ * chain with {@link ResourceResolver}s and {@link ResourceTransformer}s.
  *
  * @author Keith Donald
  * @author Jeremy Grelle
@@ -62,10 +62,15 @@ import org.springframework.web.servlet.resource.VersionResourceResolver;
 class ResourcesBeanDefinitionParser implements BeanDefinitionParser {
 
 	private static final String RESOURCE_CHAIN_CACHE = "spring-resource-chain-cache";
+
 	private static final String VERSION_RESOLVER_ELEMENT = "version-resolver";
+
 	private static final String VERSION_STRATEGY_ELEMENT = "version-strategy";
+
 	private static final String FIXED_VERSION_STRATEGY_ELEMENT = "fixed-version-strategy";
+
 	private static final String CONTENT_VERSION_STRATEGY_ELEMENT = "content-version-strategy";
+
 
 	@Override
 	public BeanDefinition parse(Element element, ParserContext parserContext) {
@@ -129,7 +134,7 @@ class ResourcesBeanDefinitionParser implements BeanDefinitionParser {
 		}
 
 		Element resourceChainElement = DomUtils.getChildElementByTagName(element, "resource-chain");
-		if(resourceChainElement != null) {
+		if (resourceChainElement != null) {
 			parseResourceChain(resourceHandlerDef, parserContext, resourceChainElement, source);
 		}
 
@@ -152,8 +157,8 @@ class ResourcesBeanDefinitionParser implements BeanDefinitionParser {
 		resourceTransformers.setSource(source);
 
 		parseResourceCache(resourceResolvers, resourceTransformers, element, source);
-		parseResourceResolversTransformers(isAutoRegistration, resourceResolvers
-				, resourceTransformers, parserContext, element, source);
+		parseResourceResolversTransformers(isAutoRegistration, resourceResolvers, resourceTransformers,
+				parserContext, element, source);
 
 		if (!resourceResolvers.isEmpty()) {
 			resourceHandlerDef.getPropertyValues().add("resourceResolvers", resourceResolvers);
@@ -164,11 +169,10 @@ class ResourcesBeanDefinitionParser implements BeanDefinitionParser {
 	}
 
 	private void parseResourceCache(ManagedList<? super Object> resourceResolvers,
-			ManagedList<? super Object> resourceTransformers,
-			Element element, Object source) {
+			ManagedList<? super Object> resourceTransformers, Element element, Object source) {
 
 		Element resourceCacheElement = DomUtils.getChildElementByTagName(element, "resource-cache");
-		if(resourceCacheElement != null) {
+		if (resourceCacheElement != null) {
 			ConstructorArgumentValues cavs = new ConstructorArgumentValues();
 
 			RootBeanDefinition cachingResolverDef = new RootBeanDefinition(CachingResourceResolver.class);
@@ -191,7 +195,6 @@ class ResourcesBeanDefinitionParser implements BeanDefinitionParser {
 			else {
 				ConstructorArgumentValues cacheCavs = new ConstructorArgumentValues();
 				cacheCavs.addIndexedArgumentValue(0, RESOURCE_CHAIN_CACHE);
-
 				RootBeanDefinition cacheDef = new RootBeanDefinition(ConcurrentMapCache.class);
 				cacheDef.setSource(source);
 				cacheDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
@@ -211,25 +214,25 @@ class ResourcesBeanDefinitionParser implements BeanDefinitionParser {
 		Element resolversElement = DomUtils.getChildElementByTagName(element, "resolvers");
 		if (resolversElement != null) {
 			for (Element beanElement : DomUtils.getChildElements(resolversElement)) {
-				if(VERSION_RESOLVER_ELEMENT.equals(beanElement.getLocalName())) {
+				if (VERSION_RESOLVER_ELEMENT.equals(beanElement.getLocalName())) {
 					RootBeanDefinition versionResolverDef = parseVersionResolver(parserContext, beanElement, source);
 					versionResolverDef.setSource(source);
 					resourceResolvers.add(versionResolverDef);
-
-					if(isAutoRegistration) {
+					if (isAutoRegistration) {
 						RootBeanDefinition cssLinkTransformerDef = new RootBeanDefinition(CssLinkResourceTransformer.class);
 						cssLinkTransformerDef.setSource(source);
 						cssLinkTransformerDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
 						resourceTransformers.add(cssLinkTransformerDef);
 					}
-				} else {
+				}
+				else {
 					Object object = parserContext.getDelegate().parsePropertySubElement(beanElement, null);
 					resourceResolvers.add(object);
 				}
 			}
 		}
 
-		if(isAutoRegistration) {
+		if (isAutoRegistration) {
 			RootBeanDefinition pathResolverDef = new RootBeanDefinition(PathResourceResolver.class);
 			pathResolverDef.setSource(source);
 			pathResolverDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
@@ -256,7 +259,7 @@ class ResourcesBeanDefinitionParser implements BeanDefinitionParser {
 		for (Element beanElement : DomUtils.getChildElements(element)) {
 			String[] patterns = StringUtils.commaDelimitedListToStringArray(beanElement.getAttribute("patterns"));
 			Object strategy = null;
-			if(FIXED_VERSION_STRATEGY_ELEMENT.equals(beanElement.getLocalName())) {
+			if (FIXED_VERSION_STRATEGY_ELEMENT.equals(beanElement.getLocalName())) {
 				ConstructorArgumentValues cavs = new ConstructorArgumentValues();
 				cavs.addIndexedArgumentValue(0, beanElement.getAttribute("version"));
 				RootBeanDefinition strategyDef = new RootBeanDefinition(FixedVersionStrategy.class);
@@ -282,4 +285,5 @@ class ResourcesBeanDefinitionParser implements BeanDefinitionParser {
 
 		return versionResolverDef;
 	}
+
 }

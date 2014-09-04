@@ -269,6 +269,7 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 		return execute(url, HttpMethod.GET, requestCallback, responseExtractor);
 	}
 
+
 	// HEAD
 
 	@Override
@@ -285,6 +286,7 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 	public HttpHeaders headForHeaders(URI url) throws RestClientException {
 		return execute(url, HttpMethod.HEAD, null, headersExtractor());
 	}
+
 
 	// POST
 
@@ -362,6 +364,7 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 		return execute(url, HttpMethod.POST, requestCallback, responseExtractor);
 	}
 
+
 	// PUT
 
 	@Override
@@ -382,6 +385,7 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 		execute(url, HttpMethod.PUT, requestCallback, null);
 	}
 
+
 	// DELETE
 
 	@Override
@@ -398,6 +402,7 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 	public void delete(URI url) throws RestClientException {
 		execute(url, HttpMethod.DELETE, null, null);
 	}
+
 
 	// OPTIONS
 
@@ -421,6 +426,7 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 		HttpHeaders headers = execute(url, HttpMethod.OPTIONS, null, headersExtractor);
 		return headers.getAllow();
 	}
+
 
 	// exchange
 

@@ -18,15 +18,11 @@ package org.springframework.util.concurrent;
 
 import java.io.IOException;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
 import org.junit.Test;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.*;
 
 /**
  * @author Arjen Poutsma
@@ -35,7 +31,7 @@ import static org.mockito.Mockito.verifyZeroInteractions;
 public class ListenableFutureTaskTests {
 
 	@Test
-	public void success() throws ExecutionException, InterruptedException {
+	public void success() throws Exception {
 		final String s = "Hello World";
 		Callable<String> callable = new Callable<String>() {
 			@Override
@@ -49,7 +45,6 @@ public class ListenableFutureTaskTests {
 			public void onSuccess(String result) {
 				assertEquals(s, result);
 			}
-
 			@Override
 			public void onFailure(Throwable ex) {
 				fail(ex.getMessage());
@@ -59,7 +54,7 @@ public class ListenableFutureTaskTests {
 	}
 
 	@Test
-	public void failure() throws ExecutionException, InterruptedException {
+	public void failure() throws Exception {
 		final String s = "Hello World";
 		Callable<String> callable = new Callable<String>() {
 			@Override
@@ -73,7 +68,6 @@ public class ListenableFutureTaskTests {
 			public void onSuccess(String result) {
 				fail("onSuccess not expected");
 			}
-
 			@Override
 			public void onFailure(Throwable ex) {
 				assertEquals(s, ex.getMessage());
@@ -83,7 +77,7 @@ public class ListenableFutureTaskTests {
 	}
 
 	@Test
-	public void successWithLambdas() throws ExecutionException, InterruptedException {
+	public void successWithLambdas() throws Exception {
 		final String s = "Hello World";
 		Callable<String> callable = () -> s;
 		SuccessCallback<String> successCallback = mock(SuccessCallback.class);
@@ -96,7 +90,7 @@ public class ListenableFutureTaskTests {
 	}
 
 	@Test
-	public void failureWithLambdas() throws ExecutionException, InterruptedException {
+	public void failureWithLambdas() throws Exception {
 		final String s = "Hello World";
 		IOException ex = new IOException(s);
 		Callable<String> callable = () -> {

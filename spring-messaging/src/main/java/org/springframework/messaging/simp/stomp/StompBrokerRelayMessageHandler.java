@@ -158,7 +158,7 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 	}
 
 	/**
-	 * @return the STOMP message broker host.
+	 * Return the STOMP message broker host.
 	 */
 	public String getRelayHost() {
 		return this.relayHost;
@@ -172,7 +172,7 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 	}
 
 	/**
-	 * @return the STOMP message broker port.
+	 * Return the STOMP message broker port.
 	 */
 	public int getRelayPort() {
 		return this.relayPort;
@@ -190,7 +190,7 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 	}
 
 	/**
-	 * @return The interval, in milliseconds, at which the "system" connection will
+	 * Return the interval, in milliseconds, at which the "system" connection will
 	 * send heartbeats to the STOMP broker.
 	 */
 	public long getSystemHeartbeatSendInterval() {
@@ -210,7 +210,7 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 	}
 
 	/**
-	 * @return The interval, in milliseconds, at which the "system" connection expects
+	 * Return the interval, in milliseconds, at which the "system" connection expects
 	 * to receive heartbeats from the STOMP broker.
 	 */
 	public long getSystemHeartbeatReceiveInterval() {
@@ -238,9 +238,9 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 	}
 
 	/**
-	 * Set the clientPasscode to use to create connections to the STOMP broker on
+	 * Set the client passcode to use to create connections to the STOMP broker on
 	 * behalf of connected clients.
-	 * <p> By default this is set to "guest".
+	 * <p>By default this is set to "guest".
 	 * @see #setSystemPasscode
 	 */
 	public void setClientPasscode(String clientPasscode) {
@@ -249,7 +249,7 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 	}
 
 	/**
-	 * Return the configured passocde to use for connections to the STOMP broker on
+	 * Return the configured passcode to use for connections to the STOMP broker on
 	 * behalf of connected clients.
 	 * @see #getSystemPasscode()
 	 */
@@ -269,7 +269,7 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 	}
 
 	/**
-	 * Return the login used for the shared "system" connection to the STOMP broker
+	 * Return the login used for the shared "system" connection to the STOMP broker.
 	 */
 	public String getSystemLogin() {
 		return this.systemLogin;
@@ -286,7 +286,7 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 	}
 
 	/**
-	 * @return the passcode used for the shared "system" connection to the STOMP broker
+	 * Return the passcode used for the shared "system" connection to the STOMP broker.
 	 */
 	public String getSystemPasscode() {
 		return this.systemPasscode;
@@ -305,7 +305,7 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 	}
 
 	/**
-	 * @return the configured virtual host value.
+	 * Return the configured virtual host value.
 	 */
 	public String getVirtualHost() {
 		return this.virtualHost;
@@ -419,7 +419,7 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 						"receive BrokerAvailabilityEvent's from an ApplicationListener Spring bean.");
 			}
 			SimpMessageType messageType = SimpMessageHeaderAccessor.getMessageType(message.getHeaders());
-			if (logger.isErrorEnabled() && messageType.equals(SimpMessageType.CONNECT)) {
+			if (logger.isErrorEnabled() && SimpMessageType.CONNECT.equals(messageType)) {
 				logger.error("Broker not active. Ignoring " + message);
 			}
 			else if (logger.isDebugEnabled()) {
@@ -464,7 +464,7 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 		}
 
 		String destination = stompAccessor.getDestination();
-		if ((command != null) && command.requiresDestination() && !checkDestinationPrefix(destination)) {
+		if (command != null && command.requiresDestination() && !checkDestinationPrefix(destination)) {
 			return;
 		}
 
@@ -673,12 +673,12 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 		}
 
 		@Override
-		public void handleFailure(Throwable failure) {
+		public void handleFailure(Throwable ex) {
 			if (this.tcpConnection != null) {
-				handleTcpConnectionFailure("transport failure.", failure);
+				handleTcpConnectionFailure("transport failure.", ex);
 			}
 			else if (logger.isErrorEnabled()) {
-				logger.error("Transport failure: " + failure);
+				logger.error("Transport failure: " + ex);
 			}
 		}
 
@@ -699,7 +699,7 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 					this.tcpConnection = null;
 					clearConnection();
 				}
-				catch (Throwable t) {
+				catch (Throwable ex) {
 					// Shouldn't happen with connection reset beforehand
 				}
 			}
@@ -742,7 +742,7 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 							(conn != null ? "before STOMP CONNECTED. " : "while inactive. ") +
 							"Consider subscribing to receive BrokerAvailabilityEvent's from " +
 							"an ApplicationListener Spring bean. Dropped " +
-							accessor.getShortLogMessage((byte[]) message.getPayload()));
+							accessor.getShortLogMessage(message.getPayload()));
 				}
 			}
 
@@ -842,8 +842,8 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 		}
 
 		@Override
-		protected void handleTcpConnectionFailure(String error, Throwable t) {
-			super.handleTcpConnectionFailure(error, t);
+		protected void handleTcpConnectionFailure(String errorMessage, Throwable ex) {
+			super.handleTcpConnectionFailure(errorMessage, ex);
 			publishBrokerUnavailableEvent();
 		}
 

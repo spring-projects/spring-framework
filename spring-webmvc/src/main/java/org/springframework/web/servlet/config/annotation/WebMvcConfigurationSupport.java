@@ -66,7 +66,10 @@ import org.springframework.web.context.ServletContextAware;
 import org.springframework.web.method.support.CompositeUriComponentsContributor;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.HandlerMethodReturnValueHandler;
-import org.springframework.web.servlet.*;
+import org.springframework.web.servlet.HandlerAdapter;
+import org.springframework.web.servlet.HandlerExceptionResolver;
+import org.springframework.web.servlet.HandlerMapping;
+import org.springframework.web.servlet.ViewResolver;
 import org.springframework.web.servlet.handler.AbstractHandlerMapping;
 import org.springframework.web.servlet.handler.BeanNameUrlHandlerMapping;
 import org.springframework.web.servlet.handler.ConversionServiceExposingInterceptor;
@@ -657,12 +660,14 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 			messageConverters.add(new AtomFeedHttpMessageConverter());
 			messageConverters.add(new RssChannelHttpMessageConverter());
 		}
-		if(jackson2XmlPresent) {
+
+		if (jackson2XmlPresent) {
 			messageConverters.add(new MappingJackson2XmlHttpMessageConverter());
 		}
 		else if (jaxb2Present) {
 			messageConverters.add(new Jaxb2RootElementHttpMessageConverter());
 		}
+
 		if (jackson2Present) {
 			messageConverters.add(new MappingJackson2HttpMessageConverter());
 		}

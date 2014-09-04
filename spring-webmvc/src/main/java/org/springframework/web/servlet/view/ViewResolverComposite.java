@@ -16,6 +16,12 @@
 
 package org.springframework.web.servlet.view;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Locale;
+import javax.servlet.ServletContext;
+
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
@@ -25,12 +31,6 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.web.context.ServletContextAware;
 import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.ViewResolver;
-
-import javax.servlet.ServletContext;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Locale;
 
 /**
  * A {@link org.springframework.web.servlet.ViewResolver} that delegates to others.

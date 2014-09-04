@@ -81,15 +81,12 @@ public class ParameterizableViewController extends AbstractController {
 	/**
 	 * Configure the HTTP status code that this controller should set on the
 	 * response.
-	 *
 	 * <p>When a "redirect:" prefixed view name is configured, there is no need
 	 * to set this property since RedirectView will do that. However this property
 	 * may still be used to override the 3xx status code of {@code RedirectView}.
 	 * For full control over redirecting provide a {@code RedirectView} instance.
-	 *
 	 * <p>If the status code is 204 and no view is configured, the request is
 	 * fully handled within the controller.
-	 *
 	 * @since 4.1
 	 */
 	public void setStatusCode(HttpStatus statusCode) {
@@ -123,12 +120,11 @@ public class ParameterizableViewController extends AbstractController {
 		return this.statusOnly;
 	}
 
+
 	/**
 	 * Return a ModelAndView object with the specified view name.
-	 *
 	 * <p>The content of the {@link RequestContextUtils#getInputFlashMap
 	 * "input" FlashMap} is also added to the model.
-	 *
 	 * @see #getViewName()
 	 */
 	@Override

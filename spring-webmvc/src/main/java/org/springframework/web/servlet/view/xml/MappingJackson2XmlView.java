@@ -50,6 +50,7 @@ public class MappingJackson2XmlView extends AbstractJackson2View {
 		super(new XmlMapper(), DEFAULT_CONTENT_TYPE);
 	}
 
+
 	/**
 	 * {@inheritDoc}
 	 */
@@ -73,11 +74,11 @@ public class MappingJackson2XmlView extends AbstractJackson2View {
 				throw new IllegalStateException(
 						"Model contains no object with key [" + this.modelKey + "]");
 			}
-		} else {
+		}
+		else {
 			for (Map.Entry<String, Object> entry : model.entrySet()) {
-				if (!(entry.getValue() instanceof BindingResult) &&
-						!entry.getKey().equals(JsonView.class.getName())) {
-					if(value != null) {
+				if (!(entry.getValue() instanceof BindingResult) && !entry.getKey().equals(JsonView.class.getName())) {
+					if (value != null) {
 						throw new IllegalStateException("Model contains more than one object to render, only one is supported");
 					}
 					value = entry.getValue();
