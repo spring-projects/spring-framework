@@ -143,8 +143,8 @@ public class ResourceUrlProvider implements ApplicationListener<ContextRefreshed
 		Collections.sort(handlerMappings, new OrderComparator());
 
 		for (SimpleUrlHandlerMapping hm : handlerMappings) {
-			for (String pattern : hm.getUrlMap().keySet()) {
-				Object handler = hm.getUrlMap().get(pattern);
+			for (String pattern : hm.getHandlerMap().keySet()) {
+				Object handler = hm.getHandlerMap().get(pattern);
 				if (handler instanceof ResourceHttpRequestHandler) {
 					ResourceHttpRequestHandler resourceHandler = (ResourceHttpRequestHandler) handler;
 					if (logger.isDebugEnabled()) {
