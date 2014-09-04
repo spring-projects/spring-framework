@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,8 @@
 
 package org.springframework.web.bind.support;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.Map;
-
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.Part;
 
@@ -73,7 +70,6 @@ import org.springframework.web.multipart.MultipartRequest;
  */
 public class WebRequestDataBinder extends WebDataBinder {
 
-
 	/**
 	 * Create a new WebRequestDataBinder instance, with default object name.
 	 * @param target the target object to bind onto (or {@code null}
@@ -115,8 +111,7 @@ public class WebRequestDataBinder extends WebDataBinder {
 	 */
 	public void bind(WebRequest request) {
 		MutablePropertyValues mpvs = new MutablePropertyValues(request.getParameterMap());
-
-		if (isMultipartRequest(request) && (request instanceof NativeWebRequest)) {
+		if (isMultipartRequest(request) && request instanceof NativeWebRequest) {
 			MultipartRequest multipartRequest = ((NativeWebRequest) request).getNativeRequest(MultipartRequest.class);
 			if (multipartRequest != null) {
 				bindMultipart(multipartRequest.getMultiFileMap(), mpvs);
@@ -127,6 +122,15 @@ public class WebRequestDataBinder extends WebDataBinder {
 			}
 		}
 		doBind(mpvs);
+	}
+
+	/**
+	 * Check if the request is a multipart request (by checking its Content-Type header).
+	 * @param request request with parameters to bind
+	 */
+	private boolean isMultipartRequest(WebRequest request) {
+		String contentType = request.getHeader("Content-Type");
+		return (contentType != null && StringUtils.startsWithIgnoreCase(contentType, "multipart"));
 	}
 
 	/**
@@ -141,16 +145,6 @@ public class WebRequestDataBinder extends WebDataBinder {
 		}
 	}
 
-	/**
-	 * Check if the request is a multipart request (by checking its Content-Type header).
-	 *
-	 * @param request request with parameters to bind
-	 */
-	private boolean isMultipartRequest(WebRequest request) {
-		String contentType = request.getHeader("Content-Type");
-		return ((contentType != null) && StringUtils.startsWithIgnoreCase(contentType, "multipart"));
-	}
-
 
 	/**
 	 * Encapsulate Part binding code for Servlet 3.0+ only containers.
@@ -160,11 +154,9 @@ public class WebRequestDataBinder extends WebDataBinder {
 
 		private final boolean bindEmptyMultipartFiles;
 
-
 		public Servlet3MultipartHelper(boolean bindEmptyMultipartFiles) {
 			this.bindEmptyMultipartFiles = bindEmptyMultipartFiles;
 		}
-
 
 		public void bindParts(HttpServletRequest request, MutablePropertyValues mpvs) {
 			try {
@@ -184,14 +176,10 @@ public class WebRequestDataBinder extends WebDataBinder {
 					}
 				}
 			}
-			catch (IOException ex) {
-				throw new MultipartException("Failed to get request parts", ex);
-			}
-			catch(ServletException ex) {
+			catch (Exception ex) {
 				throw new MultipartException("Failed to get request parts", ex);
 			}
 		}
-
 	}
 
 }

@@ -42,7 +42,7 @@ public class ListenableFutureCallbackRegistry<T> {
 
 
 	/**
-	 * Adds the given callback to this registry.
+	 * Add the given callback to this registry.
 	 * @param callback the callback to add
 	 */
 	@SuppressWarnings("unchecked")
@@ -64,7 +64,7 @@ public class ListenableFutureCallbackRegistry<T> {
 	}
 
 	/**
-	 * Triggers a {@link ListenableFutureCallback#onSuccess(Object)} call on all
+	 * Trigger a {@link ListenableFutureCallback#onSuccess(Object)} call on all
 	 * added callbacks with the given result.
 	 * @param result the result to trigger the callbacks with
 	 */
@@ -79,7 +79,7 @@ public class ListenableFutureCallbackRegistry<T> {
 	}
 
 	/**
-	 * Triggers a {@link ListenableFutureCallback#onFailure(Throwable)} call on all
+	 * Trigger a {@link ListenableFutureCallback#onFailure(Throwable)} call on all
 	 * added callbacks with the given {@code Throwable}.
 	 * @param ex the exception to trigger the callbacks with
 	 */

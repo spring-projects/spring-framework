@@ -18,7 +18,6 @@ package org.springframework.util.concurrent;
 
 import java.io.IOException;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
 
 import org.junit.Test;
 
@@ -30,7 +29,7 @@ import static org.junit.Assert.*;
 public class ListenableFutureTaskTests {
 
 	@Test
-	public void success() throws ExecutionException, InterruptedException {
+	public void success() throws Exception {
 		final String s = "Hello World";
 		Callable<String> callable = new Callable<String>() {
 			@Override
@@ -53,7 +52,7 @@ public class ListenableFutureTaskTests {
 	}
 
 	@Test
-	public void failure() throws ExecutionException, InterruptedException {
+	public void failure() throws Exception {
 		final String s = "Hello World";
 		Callable<String> callable = new Callable<String>() {
 			@Override
