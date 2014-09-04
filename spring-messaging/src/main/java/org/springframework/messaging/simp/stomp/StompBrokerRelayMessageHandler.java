@@ -328,7 +328,6 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 
 	@Override
 	protected void startInternal() {
-
 		this.clientInboundChannel.subscribe(this);
 		this.brokerChannel.subscribe(this);
 
@@ -382,7 +381,7 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 		String sessionId = headers.getSessionId();
 
 		if (!isBrokerAvailable()) {
-			if (sessionId == null || sessionId.equals(SystemStompConnectionHandler.SESSION_ID)) {
+			if (sessionId == null || SystemStompConnectionHandler.SESSION_ID.equals(sessionId)) {
 				throw new MessageDeliveryException("Message broker is not active.");
 			}
 			if (SimpMessageType.CONNECT.equals(headers.getMessageType()) && logger.isErrorEnabled()) {
@@ -574,7 +573,6 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 		}
 
 		private void initHeartbeats(StompHeaderAccessor connectedHeaders) {
-			// Remote clients do their own heartbeat management
 			if (this.isRemoteClientSession) {
 				return;
 			}
