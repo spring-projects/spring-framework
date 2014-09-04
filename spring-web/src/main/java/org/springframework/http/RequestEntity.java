@@ -19,12 +19,10 @@ package org.springframework.http;
 import java.net.URI;
 import java.nio.charset.Charset;
 import java.util.Arrays;
-import java.util.Map;
 
 import org.springframework.util.Assert;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.ObjectUtils;
-import org.springframework.web.util.UriTemplate;
 
 /**
  * Extension of {@link HttpEntity} that adds a {@linkplain HttpMethod method} and
@@ -35,8 +33,15 @@ import org.springframework.web.util.UriTemplate;
  * {@link org.springframework.web.client.RestTemplate#exchange(RequestEntity, Class) exchange()}:
  * <pre class="code">
  * MyRequest body = ...
- * RequestEntity&lt;MyRequest&gt; request = RequestEntity.post(&quot;http://example.com/{foo}&quot;, &quot;bar&quot;).accept(MediaType.APPLICATION_JSON).body(body);
+ * RequestEntity&lt;MyRequest&gt; request = RequestEntity.post(new URI(&quot;http://example.com/bar&quot;).accept(MediaType.APPLICATION_JSON).body(body);
  * ResponseEntity&lt;MyResponse&gt; response = template.exchange(request, MyResponse.class);
+ * </pre>
+ *
+ * <p>If you would like to provide a URI template with variables, consider using
+ * {@link org.springframework.web.util.UriTemplate}:
+ * <pre class="code">
+ * URI uri = new UriTemplate(&quot;http://example.com/{foo}&quot;").expand(&quot;bar&quot;);
+ * RequestEntity&lt;MyRequest&gt; request = RequestEntity.post(uri).accept(MediaType.APPLICATION_JSON).body(body);
  * </pre>
  *
  * <p>Can also be used in Spring MVC, as a parameter in a @Controller method:
@@ -170,32 +175,6 @@ public class RequestEntity<T> extends HttpEntity<T> {
 	// Static builder methods
 
 	/**
-	 * Create a builder with the given method, url, and uri variables.
-	 * <p>URI Template variables are expanded using the given URI variables, if any.
-	 * @param method the HTTP method (GET, POST, etc)
-	 * @param url the URL
-	 * @param uriVariables the variables to expand in the template
-	 * @return the created builder
-	 */
-	public static BodyBuilder method(HttpMethod method, String url, Object... uriVariables) {
-		URI expanded = new UriTemplate(url).expand(uriVariables);
-		return new DefaultBodyBuilder(method, expanded);
-	}
-
-	/**
-	 * Create a builder with the given method, url, and uri variables.
-	 * <p>URI Template variables are expanded using the given URI variables, if any.
-	 * @param method the HTTP method (GET, POST, etc)
-	 * @param url the URL
-	 * @param uriVariables the variables to expand in the template
-	 * @return the created builder
-	 */
-	public static BodyBuilder method(HttpMethod method, String url, Map<String, ?> uriVariables) {
-		URI expanded = new UriTemplate(url).expand(uriVariables);
-		return new DefaultBodyBuilder(method, expanded);
-	}
-
-	/**
 	 * Create a builder with the given method and url.
 	 * @param method the HTTP method (GET, POST, etc)
 	 * @param url the URL
@@ -206,57 +185,12 @@ public class RequestEntity<T> extends HttpEntity<T> {
 	}
 
 	/**
-	 * Create a GET builder with the given url and uri variables.
-	 * <p>URI Template variables are expanded using the given URI variables, if any.
-	 * @param url the URL
-	 * @param uriVariables the variables to expand in the template
-	 * @return the created builder
-	 */
-	public static HeadersBuilder<?> get(String url, Object... uriVariables) {
-		return method(HttpMethod.GET, url, uriVariables);
-	}
-
-	/**
-	 * Create an HTTP GET builder with the given url and uri variables.
-	 * <p>URI Template variables are expanded using the given URI variables, if any.
-	 * @param url the URL
-	 * @param uriVariables the variables to expand in the template
-	 * @return the created builder
-	 */
-	public static HeadersBuilder<?> get(String url, Map<String, ?> uriVariables) {
-		return method(HttpMethod.GET, url, uriVariables);
-	}
-
-	/**
 	 * Create an HTTP GET builder with the given url.
-	 * <p>URI Template variables are expanded using the given URI variables, if any.
 	 * @param url the URL
 	 * @return the created builder
 	 */
 	public static HeadersBuilder<?> get(URI url) {
 		return method(HttpMethod.GET, url);
-	}
-
-	/**
-	 * Create an HTTP HEAD builder with the given url and uri variables.
-	 * <p>URI Template variables are expanded using the given URI variables, if any.
-	 * @param url the URL
-	 * @param uriVariables the variables to expand in the template
-	 * @return the created builder
-	 */
-	public static HeadersBuilder<?> head(String url, Object... uriVariables) {
-		return method(HttpMethod.HEAD, url, uriVariables);
-	}
-
-	/**
-	 * Create an HTTP HEAD builder with the given url and uri variables.
-	 * <p>URI Template variables are expanded using the given URI variables, if any.
-	 * @param url the URL
-	 * @param uriVariables the variables to expand in the template
-	 * @return the created builder
-	 */
-	public static HeadersBuilder<?> head(String url, Map<String, ?> uriVariables) {
-		return method(HttpMethod.HEAD, url, uriVariables);
 	}
 
 	/**
@@ -269,56 +203,12 @@ public class RequestEntity<T> extends HttpEntity<T> {
 	}
 
 	/**
-	 * Create an HTTP POST builder with the given url and uri variables.
-	 * <p>URI Template variables are expanded using the given URI variables, if any.
-	 * @param url the URL
-	 * @param uriVariables the variables to expand in the template
-	 * @return the created builder
-	 */
-	public static BodyBuilder post(String url, Object... uriVariables) {
-		return method(HttpMethod.POST, url, uriVariables);
-	}
-
-	/**
-	 * Create an HTTP POST builder with the given url and uri variables.
-	 * <p>URI Template variables are expanded using the given URI variables, if any.
-	 * @param url the URL
-	 * @param uriVariables the variables to expand in the template
-	 * @return the created builder
-	 */
-	public static BodyBuilder post(String url, Map<String, ?> uriVariables) {
-		return method(HttpMethod.POST, url, uriVariables);
-	}
-
-	/**
 	 * Create an HTTP POST builder with the given url.
 	 * @param url the URL
 	 * @return the created builder
 	 */
 	public static BodyBuilder post(URI url) {
 		return method(HttpMethod.POST, url);
-	}
-
-	/**
-	 * Create an HTTP PUT builder with the given url and uri variables.
-	 * <p>URI Template variables are expanded using the given URI variables, if any.
-	 * @param url the URL
-	 * @param uriVariables the variables to expand in the template
-	 * @return the created builder
-	 */
-	public static BodyBuilder put(String url, Object... uriVariables) {
-		return method(HttpMethod.PUT, url, uriVariables);
-	}
-
-	/**
-	 * Create an HTTP PUT builder with the given url and uri variables.
-	 * <p>URI Template variables are expanded using the given URI variables, if any.
-	 * @param url the URL
-	 * @param uriVariables the variables to expand in the template
-	 * @return the created builder
-	 */
-	public static BodyBuilder put(String url, Map<String, ?> uriVariables) {
-		return method(HttpMethod.PUT, url, uriVariables);
 	}
 
 	/**
@@ -331,28 +221,6 @@ public class RequestEntity<T> extends HttpEntity<T> {
 	}
 
 	/**
-	 * Create an HTTP PATCH builder with the given url and uri variables.
-	 * <p>URI Template variables are expanded using the given URI variables, if any.
-	 * @param url the URL
-	 * @param uriVariables the variables to expand in the template
-	 * @return the created builder
-	 */
-	public static BodyBuilder patch(String url, Object... uriVariables) {
-		return method(HttpMethod.PATCH, url, uriVariables);
-	}
-
-	/**
-	 * Create an HTTP PATCH builder with the given url and uri variables.
-	 * <p>URI Template variables are expanded using the given URI variables, if any.
-	 * @param url the URL
-	 * @param uriVariables the variables to expand in the template
-	 * @return the created builder
-	 */
-	public static BodyBuilder patch(String url, Map<String, ?> uriVariables) {
-		return method(HttpMethod.PATCH, url, uriVariables);
-	}
-
-	/**
 	 * Create an HTTP PATCH builder with the given url.
 	 * @param url the URL
 	 * @return the created builder
@@ -362,56 +230,12 @@ public class RequestEntity<T> extends HttpEntity<T> {
 	}
 
 	/**
-	 * Create an HTTP DELETE builder with the given url and uri variables.
-	 * <p>URI Template variables are expanded using the given URI variables, if any.
-	 * @param url the URL
-	 * @param uriVariables the variables to expand in the template
-	 * @return the created builder
-	 */
-	public static HeadersBuilder<?> delete(String url, Object... uriVariables) {
-		return method(HttpMethod.DELETE, url, uriVariables);
-	}
-
-	/**
-	 * Create an HTTP DELETE builder with the given url and uri variables.
-	 * <p>URI Template variables are expanded using the given URI variables, if any.
-	 * @param url the URL
-	 * @param uriVariables the variables to expand in the template
-	 * @return the created builder
-	 */
-	public static HeadersBuilder<?> delete(String url, Map<String, ?> uriVariables) {
-		return method(HttpMethod.DELETE, url, uriVariables);
-	}
-
-	/**
 	 * Create an HTTP DELETE builder with the given url.
 	 * @param url the URL
 	 * @return the created builder
 	 */
 	public static HeadersBuilder<?> delete(URI url) {
 		return method(HttpMethod.DELETE, url);
-	}
-
-	/**
-	 * Create an HTTP OPTIONS builder with the given url and uri variables.
-	 * <p>URI Template variables are expanded using the given URI variables, if any.
-	 * @param url the URL
-	 * @param uriVariables the variables to expand in the template
-	 * @return the created builder
-	 */
-	public static HeadersBuilder<?> options(String url, Object... uriVariables) {
-		return method(HttpMethod.OPTIONS, url, uriVariables);
-	}
-
-	/**
-	 * Creates an HTTP OPTIONS builder with the given url and uri variables.
-	 * <p>URI Template variables are expanded using the given URI variables, if any.
-	 * @param url the URL
-	 * @param uriVariables the variables to expand in the template
-	 * @return the created builder
-	 */
-	public static HeadersBuilder<?> options(String url, Map<String, ?> uriVariables) {
-		return method(HttpMethod.OPTIONS, url, uriVariables);
 	}
 
 	/**

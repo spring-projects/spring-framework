@@ -22,17 +22,18 @@ import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.junit.Assert.*;
-
 import org.junit.Test;
 
+import org.springframework.web.util.UriTemplate;
+
+import static org.junit.Assert.*;
 
 /**
  * Unit tests for {@link org.springframework.http.RequestEntity}.
+ *
  * @author Arjen Poutsma
  */
 public class RequestEntityTests {
-
 
 	@Test
 	public void normal() throws URISyntaxException {
@@ -54,22 +55,24 @@ public class RequestEntityTests {
 
 	@Test
 	public void uriVariablesExpansion() throws URISyntaxException {
-		RequestEntity.get("http://example.com/{foo}", "bar").accept(MediaType.TEXT_PLAIN).build();
+		URI uri = new UriTemplate("http://example.com/{foo}").expand("bar");
+		RequestEntity.get(uri).accept(MediaType.TEXT_PLAIN).build();
 
 		String url = "http://www.{host}.com/{path}";
 		String host = "example";
 		String path = "foo/bar";
-
 		URI expected = new URI("http://www.example.com/foo/bar");
 
-		RequestEntity<?> entity = RequestEntity.method(HttpMethod.GET, url, host, path).build();
+		uri = new UriTemplate(url).expand(host, path);
+		RequestEntity<?> entity = RequestEntity.get(uri).build();
 		assertEquals(expected, entity.getUrl());
 
 		Map<String, String> uriVariables = new HashMap<>(2);
 		uriVariables.put("host", host);
 		uriVariables.put("path", path);
 
-		entity = RequestEntity.method(HttpMethod.GET, url, uriVariables).build();
+		uri = new UriTemplate(url).expand(uriVariables);
+		entity = RequestEntity.get(uri).build();
 		assertEquals(expected, entity.getUrl());
 	}
 
@@ -94,7 +97,7 @@ public class RequestEntityTests {
 		long contentLength = 67890;
 		MediaType contentType = MediaType.TEXT_PLAIN;
 
-		RequestEntity<Void> responseEntity = RequestEntity.post("http://example.com").
+		RequestEntity<Void> responseEntity = RequestEntity.post(new URI("http://example.com")).
 				accept(accept).
 				acceptCharset(charset).
 				ifModifiedSince(ifModifiedSince).
