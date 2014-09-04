@@ -1050,7 +1050,7 @@ method has been added.
   has been expanded with new abstractions `ResourceResolver`, `ResourceTransformer`,
   and `ResourceUrlProvider`. A number of built-in implementations provide support
   for versioned resource URLs (for effective HTTP caching), locating gzipped resources,
-  generating an HTML 5 AppCache manifests, and more.
+  generating an HTML 5 AppCache manifests, and more. See <<mvc-config-static-resources>>.
 * JDK 1.8's `java.util.Optional` is now supported for `@RequestParam`, `@RequestHeader`,
   and `@MatrixVariable` controller method arguments.
 * `ListenableFuture` is supported as a return value alternative to `DeferredResult`
@@ -34345,82 +34345,71 @@ And in XML:
 ----
 
 When serving resources that may change when a new version of the application is
-deployed, it is recommended that you incorporate a version string into the mapping
-pattern used to request the resources, so that you may force clients to request the
-newly deployed version of your application's resources. Such a version string can be
-parameterized and accessed using SpEL so that it may be easily managed in a single place
-when deploying new versions.
+deployed it is recommended that you incorporate a version string into the mapping
+pattern used to request the resources so that you may force clients to request the
+newly deployed version of your application's resources. Support for versioned URLs is
+built into the framework and can be enabled by configuring a resource chain
+on the resource handler. The chain consists of one more `ResourceResolver`
+instances followed by one or more `ResourceTransformer` instances. Together they
+can provide arbitrary resolution and transformation of resources.
 
-As an example, let's consider an application that uses a performance-optimized custom
-build (as recommended) of the Dojo JavaScript library in production, and that the build
-is generally deployed within the web application at a path of
-`/public-resources/dojo/dojo.js`. Since different parts of Dojo may be incorporated into
-the custom build for each new version of the application, the client web browsers need
-to be forced to re-download that custom-built `dojo.js` resource any time a new version
-of the application is deployed. A simple way to achieve this would be to manage the
-version of the application in a properties file, such as:
+The built-in `VersionResourceResolver` can be configured with different strategies.
+For example a `FixedVersionStrategy` can use a property, a date, or other as the version.
+A `ContentVersionStrategy` uses an MD5 hash computed from the content of the resource
+(known as "fingerprinting" URLs).
 
-[literal]
-[subs="verbatim,quotes"]
-----
-application.version=1.0.0
-----
+`ContentVersionStrategy` is a good default choice to use except in cases where
+it cannot be used (e.g. with JavaScript module loaders). You can configure
+different version strategies against different patterns as shown below. Keep in mind
+also that computing content-based versions is expensive and therefore resource chain
+caching should be enabled in production.
 
-and then to make the properties file's values accessible to SpEL as a bean using the
-`util:properties` tag:
-
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
-----
-	<util:properties id="applicationProps" location="/WEB-INF/spring/application.properties"/>
-----
-
-With the application version now accessible via SpEL, we can incorporate this into the
-use of the `resources` tag:
-
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
-----
-	<mvc:resources mapping="/resources-#{applicationProps['application.version']}/**" location="/public-resources/"/>
-----
-
-In Java, you can use the `@PropertySouce` annotation and then inject the `Environment`
-abstraction for access to all defined properties:
+Java config example;
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
 	@Configuration
 	@EnableWebMvc
-	@PropertySource("/WEB-INF/spring/application.properties")
 	public class WebConfig extends WebMvcConfigurerAdapter {
-
-		@Inject Environment env;
 
 		@Override
 		public void addResourceHandlers(ResourceHandlerRegistry registry) {
-			registry.addResourceHandler(
-					"/resources-" + env.getProperty("application.version") + "/**")
-					.addResourceLocations("/public-resources/");
+			registry.addResourceHandler("/resources/**")
+					.addResourceLocations("/public-resources/")
+					.resourceChain(true).addResolver(
+						new VersionResourceResolver().addContentVersionStrategy("/**"));
 		}
 
 	}
 ----
 
-and finally, to request the resource with the proper URL, we can take advantage of the
-Spring JSP tags:
+XML example:
 
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
-	<spring:eval expression="@applicationProps['application.version']" var="applicationVersion"/>
-
-	<spring:url value="/resources-{applicationVersion}" var="resourceUrl">
-		<spring:param name="applicationVersion" value="${applicationVersion}"/>
-	</spring:url>
-
-	<script src="${resourceUrl}/dojo/dojo.js" type="text/javascript"> </script>
+<mvc:resources mapping="/resources/**" location="/public-resources/">
+	<mvc:resource-chain>
+		<mvc:resource-cache />
+		<mvc:resolvers>
+			<mvc:version-resolver>
+				<mvc:content-version-strategy patterns="/**"/>
+			</mvc:version-resolver>
+		</mvc:resolvers>
+	</mvc:resource-chain>
+</mvc:resources>
 ----
+
+In order for the above to work the application must also
+render URLs with versions. The easiest way to do that is to configure the
+`ResourceUrlEncodingFilter` which wraps the response and overrides its `encodeURL` method.
+This will work in JSPs, FreeMarker, Velocity, and any other view technology that calls
+the response `encodeURL` method. Alternatively, an application can also inject and
+use directly the `ResourceUrlProvider` bean, which is automatically declared with the MVC
+Java config and the MVC namespace.
+
+
 
 
 [[mvc-default-servlet-handler]]
