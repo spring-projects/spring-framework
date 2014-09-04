@@ -82,9 +82,9 @@ public abstract class AbstractSockJsSession implements SockJsSession {
 	private static final Set<String> disconnectedClientExceptions;
 
 	static {
-
 		Set<String> set = new HashSet<String>(2);
 		set.add("ClientAbortException"); // Tomcat
+		set.add("EOFException"); // Tomcat
 		set.add("EofException"); // Jetty
 		// java.io.IOException "Broken pipe" on WildFly, Glassfish (already covered)
 		disconnectedClientExceptions = Collections.unmodifiableSet(set);
@@ -340,7 +340,7 @@ public abstract class AbstractSockJsSession implements SockJsSession {
 				disconnect(CloseStatus.SERVER_ERROR);
 			}
 			catch (Throwable disconnectFailure) {
-				logger.error("Failure while closing " + this, disconnectFailure);
+				// Ignore
 			}
 			try {
 				close(CloseStatus.SERVER_ERROR);
