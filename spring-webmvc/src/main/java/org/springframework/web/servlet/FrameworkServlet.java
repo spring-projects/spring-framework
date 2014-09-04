@@ -161,6 +161,11 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 	private static final String INIT_PARAM_DELIMITERS = ",; \t\n";
 
 
+	/** Checking for Servlet 3.0+ HttpServletResponse.getStatus() */
+	private static final boolean responseGetStatusAvailable =
+			ClassUtils.hasMethod(HttpServletResponse.class, "getStatus");
+
+
 	/** ServletContext attribute to find the WebApplicationContext in */
 	private String contextAttribute;
 
@@ -1054,16 +1059,19 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 		}
 	}
 
-	private void publishRequestHandledEvent(HttpServletRequest request, HttpServletResponse response, long startTime, Throwable failureCause) {
+	private void publishRequestHandledEvent(
+			HttpServletRequest request, HttpServletResponse response, long startTime, Throwable failureCause) {
+
 		if (this.publishEvents) {
 			// Whether or not we succeeded, publish an event.
 			long processingTime = System.currentTimeMillis() - startTime;
+			int statusCode = (responseGetStatusAvailable ? response.getStatus() : -1);
 			this.webApplicationContext.publishEvent(
 					new ServletRequestHandledEvent(this,
 							request.getRequestURI(), request.getRemoteAddr(),
 							request.getMethod(), getServletConfig().getServletName(),
 							WebUtils.getSessionId(request), getUsernameForRequest(request),
-							processingTime, failureCause, response.getStatus()));
+							processingTime, failureCause, statusCode));
 		}
 	}
 
