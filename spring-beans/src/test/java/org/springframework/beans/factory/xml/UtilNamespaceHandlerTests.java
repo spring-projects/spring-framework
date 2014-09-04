@@ -190,7 +190,8 @@ public class UtilNamespaceHandlerTests {
 		assertFalse(map == bean2.getSomeMap());
 	}
 
-	public void testNestedShortcutCollections() throws Exception {
+	@Test
+	public void testNestedShortcutCollections() {
 		TestBean bean = (TestBean) this.beanFactory.getBean("nestedShortcutCollections");
 
 		assertEquals(1, bean.getStringArray().length);
@@ -213,7 +214,8 @@ public class UtilNamespaceHandlerTests {
 		assertFalse(set == bean2.getSomeSet());
 	}
 
-	public void testNestedInCollections() throws Exception {
+	@Test
+	public void testNestedInCollections() {
 		TestBean bean = (TestBean) this.beanFactory.getBean("nestedCustomTagBean");
 
 		List list = bean.getSomeList();
@@ -238,7 +240,8 @@ public class UtilNamespaceHandlerTests {
 		assertFalse(map == bean2.getSomeMap());
 	}
 
-	public void testCircularCollections() throws Exception {
+	@Test
+	public void testCircularCollections() {
 		TestBean bean = (TestBean) this.beanFactory.getBean("circularCollectionsBean");
 
 		List list = bean.getSomeList();
@@ -254,7 +257,8 @@ public class UtilNamespaceHandlerTests {
 		assertEquals(bean, map.get("foo"));
 	}
 
-	public void testCircularCollectionBeansStartingWithList() throws Exception {
+	@Test
+	public void testCircularCollectionBeansStartingWithList() {
 		this.beanFactory.getBean("circularList");
 		TestBean bean = (TestBean) this.beanFactory.getBean("circularCollectionBeansBean");
 
@@ -331,7 +335,7 @@ public class UtilNamespaceHandlerTests {
 		assertTrue(props == props2);
 	}
 
-@Test
+    @Test
     public void testLoadFilteredProperties() {
         Properties props = (Properties) this.beanFactory.getBean("filteredProperties");
         assertEquals("Incorrect property value", null, props.get("foo"));
