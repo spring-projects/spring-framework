@@ -99,7 +99,7 @@ public class ResourceHandlerRegistration {
 	 *
 	 * @param cacheResources whether to cache the result of resource resolution;
 	 * 		setting this to "true" is recommended for production (and "false" for
-	 * 	    development, especially when applying a version strategy.
+	 * 	    development, especially when applying a version strategy).
 	 * @return the same {@link ResourceHandlerRegistration} instance for chained method invocation
 	 * @since 4.1
 	 */

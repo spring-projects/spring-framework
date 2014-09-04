@@ -22,8 +22,7 @@
 		http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc.xsd">
 
 	<mvc:resources mapping="/resources/**" location="/, classpath:/META-INF/">
-		<mvc:resource-chain>
-			<mvc:resource-cache cache-manager="resourceCache" cache-name="test-resource-cache"/>
+		<mvc:resource-chain resource-cache="true" cache-manager="resourceCache" cache-name="test-resource-cache">
 			<mvc:resolvers>
 				<mvc:version-resolver>
 					<mvc:fixed-version-strategy version="abc" patterns="/**/*.js"/>

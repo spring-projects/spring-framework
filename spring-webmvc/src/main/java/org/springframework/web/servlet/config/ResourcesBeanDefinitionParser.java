@@ -200,8 +200,8 @@ class ResourcesBeanDefinitionParser implements BeanDefinitionParser {
 	private void parseResourceCache(ManagedList<? super Object> resourceResolvers,
 			ManagedList<? super Object> resourceTransformers, Element element, Object source) {
 
-		Element resourceCacheElement = DomUtils.getChildElementByTagName(element, "resource-cache");
-		if (resourceCacheElement != null) {
+		String resourceCache = element.getAttribute("resource-cache");
+		if ("true".equals(resourceCache)) {
 			ConstructorArgumentValues cavs = new ConstructorArgumentValues();
 
 			RootBeanDefinition cachingResolverDef = new RootBeanDefinition(CachingResourceResolver.class);
@@ -214,8 +214,8 @@ class ResourcesBeanDefinitionParser implements BeanDefinitionParser {
 			cachingTransformerDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
 			cachingTransformerDef.setConstructorArgumentValues(cavs);
 
-			String cacheManagerName = resourceCacheElement.getAttribute("cache-manager");
-			String cacheName = resourceCacheElement.getAttribute("cache-name");
+			String cacheManagerName = element.getAttribute("cache-manager");
+			String cacheName = element.getAttribute("cache-name");
 			if (StringUtils.hasText(cacheManagerName) && StringUtils.hasText(cacheName)) {
 				RuntimeBeanReference cacheManagerRef = new RuntimeBeanReference(cacheManagerName);
 				cavs.addIndexedArgumentValue(0, cacheManagerRef);

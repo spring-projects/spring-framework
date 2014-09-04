@@ -338,18 +338,6 @@
 		</xsd:complexType>
 	</xsd:element>
 
-	<xsd:complexType name="resource-cache">
-		<xsd:annotation>
-			<xsd:documentation source="org.springframework.web.servlet.resource.CachingResourceResolver"><![CDATA[
-	A ResourceResolver that resolves resources from a Cache or otherwise delegates to the resolver chain
-	and saves the result in the cache. Can use a custom Cache if a CacheManager is provided as a bean reference
-	in the "cache-manager" attribute, and the cache name provided in the "cache-name" attribute.
-			]]></xsd:documentation>
-		</xsd:annotation>
-		<xsd:attribute name="cache-manager" type="xsd:string" use="optional"/>
-		<xsd:attribute name="cache-name" type="xsd:string" use="optional"/>
-	</xsd:complexType>
-
 	<xsd:complexType name="content-version-strategy">
 		<xsd:annotation>
 			<xsd:documentation source="org.springframework.web.servlet.resource.ContentVersionStrategy"><![CDATA[
@@ -471,16 +459,22 @@
 		<xsd:annotation>
 			<xsd:documentation source="org.springframework.web.servlet.config.annotation.ResourceChainRegistration"><![CDATA[
 	Assists with the registration of resource resolvers and transformers.
-	Unless set to "false", the auto-registration add default Resolvers (a PathResourceResolver) and Transformers
+	Unless set to "false", the auto-registration adds default Resolvers (a PathResourceResolver) and Transformers
 	(CssLinkResourceTransformer, if a VersionResourceResolver has been manually registered).
+	The resource-cache attribute sets whether to cache the result of resource resolution/transformation;
+	setting this to "true" is recommended for production (and "false" for development).
+	A custom Cache can be configured if a CacheManager is provided as a bean reference
+	in the "cache-manager" attribute, and the cache name provided in the "cache-name" attribute.
 			]]></xsd:documentation>
 		</xsd:annotation>
 		<xsd:sequence>
-			<xsd:element name="resource-cache" type="resource-cache" minOccurs="0" maxOccurs="1"/>
 			<xsd:element name="resolvers" type="resource-resolvers" minOccurs="0" maxOccurs="1"/>
 			<xsd:element name="transformers" type="resource-transformers" minOccurs="0" maxOccurs="1"/>
 		</xsd:sequence>
+		<xsd:attribute name="resource-cache" type="xsd:boolean" use="required"/>
 		<xsd:attribute name="auto-registration" type="xsd:boolean" default="true" use="optional"/>
+		<xsd:attribute name="cache-manager" type="xsd:string" use="optional"/>
+		<xsd:attribute name="cache-name" type="xsd:string" use="optional"/>
 	</xsd:complexType>
 
 	<xsd:element name="resources">
