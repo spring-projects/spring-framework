@@ -488,8 +488,9 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 	}
 
 	@Override
-	public <T> ResponseEntity<T> exchange(RequestEntity<?> requestEntity,
-			Class<T> responseType) throws RestClientException {
+	public <T> ResponseEntity<T> exchange(RequestEntity<?> requestEntity, Class<T> responseType)
+			throws RestClientException {
+
 		Assert.notNull(requestEntity, "'requestEntity' must not be null");
 
 		RequestCallback requestCallback = httpEntityCallback(requestEntity, responseType);
@@ -498,8 +499,9 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 	}
 
 	@Override
-	public <T> ResponseEntity<T> exchange(RequestEntity<?> requestEntity,
-			ParameterizedTypeReference<T> responseType) throws RestClientException {
+	public <T> ResponseEntity<T> exchange(RequestEntity<?> requestEntity, ParameterizedTypeReference<T> responseType)
+			throws RestClientException {
+
 		Assert.notNull(requestEntity, "'requestEntity' must not be null");
 
 		Type type = responseType.getType();

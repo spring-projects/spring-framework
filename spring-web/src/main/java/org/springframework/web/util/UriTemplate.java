@@ -96,7 +96,7 @@ public class UriTemplate implements Serializable {
 	 * or if it does not contain values for all the variable names
 	 */
 	public URI expand(Map<String, ?> uriVariables) {
-		UriComponents expandedComponents = uriComponents.expand(uriVariables);
+		UriComponents expandedComponents = this.uriComponents.expand(uriVariables);
 		UriComponents encodedComponents = expandedComponents.encode();
 		return encodedComponents.toUri();
 	}
@@ -116,7 +116,7 @@ public class UriTemplate implements Serializable {
      * or if it does not contain sufficient variables
      */
 	public URI expand(Object... uriVariableValues) {
-		UriComponents expandedComponents = uriComponents.expand(uriVariableValues);
+		UriComponents expandedComponents = this.uriComponents.expand(uriVariableValues);
 		UriComponents encodedComponents = expandedComponents.encode();
 		return encodedComponents.toUri();
 	}
@@ -177,11 +177,11 @@ public class UriTemplate implements Serializable {
 
 		private Parser(String uriTemplate) {
 			Assert.hasText(uriTemplate, "'uriTemplate' must not be null");
-			Matcher m = NAMES_PATTERN.matcher(uriTemplate);
+			Matcher matcher = NAMES_PATTERN.matcher(uriTemplate);
 			int end = 0;
-			while (m.find()) {
-				this.patternBuilder.append(quote(uriTemplate, end, m.start()));
-				String match = m.group(1);
+			while (matcher.find()) {
+				this.patternBuilder.append(quote(uriTemplate, end, matcher.start()));
+				String match = matcher.group(1);
 				int colonIdx = match.indexOf(':');
 				if (colonIdx == -1) {
 					this.patternBuilder.append(DEFAULT_VARIABLE_PATTERN);
@@ -199,7 +199,7 @@ public class UriTemplate implements Serializable {
 					String variableName = match.substring(0, colonIdx);
 					this.variableNames.add(variableName);
 				}
-				end = m.end();
+				end = matcher.end();
 			}
 			this.patternBuilder.append(quote(uriTemplate, end, uriTemplate.length()));
 			int lastIdx = this.patternBuilder.length() - 1;

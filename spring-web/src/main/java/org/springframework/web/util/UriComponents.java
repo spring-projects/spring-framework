@@ -252,7 +252,6 @@ public abstract class UriComponents implements Serializable {
 		 * Get the value for the given URI variable name.
 		 * If the value is {@code null}, an empty String is expanded.
 		 * If the value is {@link #SKIP_VALUE}, the URI variable is not expanded.
-		 *
 		 * @param name the variable name
 		 * @return the variable value, possibly {@code null} or {@link #SKIP_VALUE}
 		 */
@@ -295,8 +294,7 @@ public abstract class UriComponents implements Serializable {
 		@Override
 		public Object getValue(String name) {
 			if (!this.valueIterator.hasNext()) {
-				throw new IllegalArgumentException(
-						"Not enough variable values available to expand '" + name + "'");
+				throw new IllegalArgumentException("Not enough variable values available to expand '" + name + "'");
 			}
 			return this.valueIterator.next();
 		}

@@ -163,20 +163,20 @@ public class UriComponentsBuilder {
 	 */
 	public static UriComponentsBuilder fromUriString(String uri) {
 		Assert.hasLength(uri, "'uri' must not be empty");
-		Matcher m = URI_PATTERN.matcher(uri);
-		if (m.matches()) {
+		Matcher matcher = URI_PATTERN.matcher(uri);
+		if (matcher.matches()) {
 			UriComponentsBuilder builder = new UriComponentsBuilder();
-			String scheme = m.group(2);
-			String userInfo = m.group(5);
-			String host = m.group(6);
-			String port = m.group(8);
-			String path = m.group(9);
-			String query = m.group(11);
-			String fragment = m.group(13);
+			String scheme = matcher.group(2);
+			String userInfo = matcher.group(5);
+			String host = matcher.group(6);
+			String port = matcher.group(8);
+			String path = matcher.group(9);
+			String query = matcher.group(11);
+			String fragment = matcher.group(13);
 			boolean opaque = false;
 			if (StringUtils.hasLength(scheme)) {
-				String s = uri.substring(scheme.length());
-				if (!s.startsWith(":/")) {
+				String rest = uri.substring(scheme.length());
+				if (!rest.startsWith(":/")) {
 					opaque = true;
 				}
 			}
@@ -223,25 +223,23 @@ public class UriComponentsBuilder {
 	 */
 	public static UriComponentsBuilder fromHttpUrl(String httpUrl) {
 		Assert.notNull(httpUrl, "'httpUrl' must not be null");
-		Matcher m = HTTP_URL_PATTERN.matcher(httpUrl);
-		if (m.matches()) {
+		Matcher matcher = HTTP_URL_PATTERN.matcher(httpUrl);
+		if (matcher.matches()) {
 			UriComponentsBuilder builder = new UriComponentsBuilder();
-
-			String scheme = m.group(1);
-			builder.scheme((scheme != null) ? scheme.toLowerCase() : scheme);
-			builder.userInfo(m.group(4));
-			String host = m.group(5);
+			String scheme = matcher.group(1);
+			builder.scheme(scheme != null ? scheme.toLowerCase() : null);
+			builder.userInfo(matcher.group(4));
+			String host = matcher.group(5);
 			if (StringUtils.hasLength(scheme) && !StringUtils.hasLength(host)) {
 				throw new IllegalArgumentException("[" + httpUrl + "] is not a valid HTTP URL");
 			}
 			builder.host(host);
-			String port = m.group(7);
+			String port = matcher.group(7);
 			if (StringUtils.hasLength(port)) {
 				builder.port(port);
 			}
-			builder.path(m.group(8));
-			builder.query(m.group(10));
-
+			builder.path(matcher.group(8));
+			builder.query(matcher.group(10));
 			return builder;
 		}
 		else {
@@ -264,7 +262,7 @@ public class UriComponentsBuilder {
 	 * Build a {@code UriComponents} instance from the various components
 	 * contained in this builder.
 	 * @param encoded whether all the components set in this builder are
-	 * encoded ({@code true}) or not ({@code false}).
+	 * encoded ({@code true}) or not ({@code false})
 	 * @return the URI components
 	 */
 	public UriComponents build(boolean encoded) {
@@ -533,13 +531,12 @@ public class UriComponentsBuilder {
 	 */
 	public UriComponentsBuilder query(String query) {
 		if (query != null) {
-			Matcher m = QUERY_PARAM_PATTERN.matcher(query);
-			while (m.find()) {
-				String name = m.group(1);
-				String eq = m.group(2);
-				String value = m.group(3);
-				queryParam(name, (value != null ? value :
-					(StringUtils.hasLength(eq) ? "" : null)));
+			Matcher matcher = QUERY_PARAM_PATTERN.matcher(query);
+			while (matcher.find()) {
+				String name = matcher.group(1);
+				String eq = matcher.group(2);
+				String value = matcher.group(3);
+				queryParam(name, (value != null ? value : (StringUtils.hasLength(eq) ? "" : null)));
 			}
 		}
 		else {
@@ -574,7 +571,7 @@ public class UriComponentsBuilder {
 		Assert.notNull(name, "'name' must not be null");
 		if (!ObjectUtils.isEmpty(values)) {
 			for (Object value : values) {
-				String valueAsString = value != null ? value.toString() : null;
+				String valueAsString = (value != null ? value.toString() : null);
 				this.queryParams.add(name, valueAsString);
 			}
 		}

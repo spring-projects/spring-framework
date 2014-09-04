@@ -348,7 +348,6 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 
 		private final HttpHeaders headers = new HttpHeaders();
 
-
 		public DefaultBuilder(HttpStatus status) {
 			this.status = status;
 		}
@@ -396,7 +395,6 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 			this.headers.setLocation(location);
 			return this;
 		}
-
 
 		@Override
 		public ResponseEntity<Void> build() {
