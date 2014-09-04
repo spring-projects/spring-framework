@@ -2,6 +2,62 @@ SPRING FRAMEWORK CHANGELOG
 ===========================
 http://www.spring.io
 
+Changes in version 3.2.11 (2014-09-04)
+-------------------------------------
+
+CachingConnectionFactory should catch exceptions on logical close (SPR-12148)
+Cache.get(Object key, Class<T> type) should be more explicit about what to do
+in case of a type mismatch (SPR-12145)
+Plain FactoryBean declaration on @Bean method leads to early call (pre
+injection) (SPR-12141)
+Performance issue on ResolvableType cache (SPR-12122)
+GuavaCacheManager ignores cache specification due to eager initialization of
+internal cache map with static cache names (SPR-12120)
+MockMvc security filters causes FileUploadException: the request was rejected
+because no multipart boundary was found (SPR-12114)
+ServerEndpointExporter causes application context refresh to fail with an NPE
+when used in a Spring Boot app (SPR-12109)
+Update Apache HttpComponents to 4.3.5 - CVE-2014-3577: Apache HttpComponents
+client: Hostname verification susceptible to MITM attack (SPR-12100)
+ShallowEtagHeaderFilter doesn't support Servlet 3.1 setContentLengthLong
+(SPR-12097)
+Exclude spring-framework-bom artifacts from release distributions (SPR-12087)
+Include all source artifacts in published sources jars (SPR-12085)
+BeanNameViewResolver should not try to use non-View beans (SPR-12079)
+Tiles 3 TilesViewResolver should allow for custom TilesView subclasses
+(SPR-12075)
+includeFilters and excludeFilters of @ComponentScan cause failures when used
+in meta-annotations (SPR-12065)
+AbstractTypeHierarchyTraversingFilter should be more lenient when loading
+types (SPR-12042)
+Incorrect documentation for
+AbstractAnnotationConfigDispatcherServletInitializer.getServletConfigClasses()
+(SPR-12028)
+ConcurrentMapCacheManager has interdependent setters (SPR-12026)
+Documentation typo (SPR-12020)
+Spring may invoke @Bean methods too early in case of a circular reference
+(SPR-12018)
+RestTemplate with InputStreamResource does not work if Content-Length is not
+set (SPR-12017)
+AbstractMessageListenerContainer#doExecuteListener can cause a dropped message
+if using CLIENT_ACKNOWLEDGE and the container is stopped and subsequently
+started again. (SPR-12015)
+Exceptions thrown during AbstractApplicationContext.refresh() not being logged
+right when they are caught (SPR-12010)
+Changes to AbstractApplicationEventMulticaster in 3.2.9 break
+HttpSessionEventPublisher in Google AppEngine Runtime (SPR-12002)
+NPE in SelectedValueComparator with null bound value (SPR-12001)
+StaxStreamXMLReader ignores significant whitespace (SPR-12000)
+user destinations docs are missing the brokerPrefix (SPR-11992)
+Revert (SPR-11973) when bugfix verified in JDK 1.8.0_20 (SPR-11974)
+UriComponentsBuilder.fromUriString may not parse correctly when there is no
+path (SPR-11970)
+getBean(Object.class) fails when introspecting Environment bean (SPR-10542)
+Injecting EXTENDED @PersistenceContext into JUnit 4 test class causes
+NoSuchBeanDefinitionException (SPR-8834)
+XmlBeanDefinitionReader runs 10x slower due to resetBeanDefinition check
+(SPR-8318)
+Remove outdated IDE, JIRA and Tomcat references (SPR-7521)
 
 Changes in version 3.2.10 (2014-07-15)
 -------------------------------------
