@@ -19,6 +19,7 @@ package org.springframework.web.servlet.mvc.method.annotation;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.http.converter.json.AbstractJackson2HttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.http.converter.json.MappingJacksonValue;
 import org.springframework.http.server.ServerHttpRequest;
@@ -36,7 +37,7 @@ public abstract class AbstractMappingJacksonResponseBodyAdvice implements Respon
 
 	@Override
 	public boolean supports(MethodParameter returnType, Class<? extends HttpMessageConverter<?>> converterType) {
-		return MappingJackson2HttpMessageConverter.class.equals(converterType);
+		return AbstractJackson2HttpMessageConverter.class.isAssignableFrom(converterType);
 	}
 
 	@Override
