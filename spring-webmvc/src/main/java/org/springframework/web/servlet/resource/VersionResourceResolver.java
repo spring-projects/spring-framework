@@ -15,8 +15,12 @@
  */
 package org.springframework.web.servlet.resource;
 
-import java.util.*;
-
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.core.io.Resource;
@@ -56,12 +60,9 @@ public class VersionResourceResolver extends AbstractResourceResolver {
 
 
 	/**
-	 * Set a Map with URL paths as keys and {@code VersionStrategy}
-	 * as values.
-	 *
+	 * Set a Map with URL paths as keys and {@code VersionStrategy} as values.
 	 * <p>Supports direct URL matches and Ant-style pattern matches. For syntax
 	 * details, see the {@link org.springframework.util.AntPathMatcher} javadoc.
-	 *
 	 * @param map map with URLs as keys and version strategies as values
 	 */
 	public void setStrategyMap(Map<String, VersionStrategy> map) {
@@ -118,7 +119,7 @@ public class VersionResourceResolver extends AbstractResourceResolver {
 	 * @see VersionStrategy
 	 */
 	public VersionResourceResolver addVersionStrategy(VersionStrategy strategy, String... pathPatterns) {
-		for(String pattern : pathPatterns) {
+		for (String pattern : pathPatterns) {
 			getStrategyMap().put(pattern, strategy);
 		}
 		return this;
@@ -148,7 +149,6 @@ public class VersionResourceResolver extends AbstractResourceResolver {
 		}
 
 		String simplePath = versionStrategy.removeVersion(requestPath, candidateVersion);
-
 		if (logger.isTraceEnabled()) {
 			logger.trace("Extracted version from path, re-resolving without version, path=\"" + simplePath + "\"");
 		}
@@ -166,8 +166,10 @@ public class VersionResourceResolver extends AbstractResourceResolver {
 			return baseResource;
 		}
 		else {
-			logger.trace("Potential resource found for [" + requestPath + "], but version ["
-					+ candidateVersion + "] doesn't match.");
+			if (logger.isTraceEnabled()) {
+				logger.trace("Potential resource found for [" + requestPath + "], but version [" +
+						candidateVersion + "] doesn't match.");
+			}
 			return null;
 		}
 	}
@@ -194,7 +196,7 @@ public class VersionResourceResolver extends AbstractResourceResolver {
 	}
 
 	/**
-	 * Finds a {@code VersionStrategy} for the request path of the requested resource.
+	 * Find a {@code VersionStrategy} for the request path of the requested resource.
 	 * @return an instance of a {@code VersionStrategy} or null if none matches that request path
 	 */
 	protected VersionStrategy getStrategyForPath(String requestPath) {
@@ -210,7 +212,6 @@ public class VersionResourceResolver extends AbstractResourceResolver {
             Collections.sort(matchingPatterns, comparator);
             return this.versionStrategyMap.get(matchingPatterns.get(0));
         }
-
 		return null;
 	}
 

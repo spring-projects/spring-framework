@@ -99,7 +99,7 @@ class ResourcesBeanDefinitionParser implements BeanDefinitionParser {
 		handlerMappingDef.getPropertyValues().add("pathMatcher", pathMatcherRef).add("urlPathHelper", pathHelperRef);
 
 		String order = element.getAttribute("order");
-		// use a default of near-lowest precedence, still allowing for even lower precedence in other mappings
+		// Use a default of near-lowest precedence, still allowing for even lower precedence in other mappings
 		handlerMappingDef.getPropertyValues().add("order", StringUtils.hasText(order) ? order : Ordered.LOWEST_PRECEDENCE - 1);
 
 		String beanName = parserContext.getReaderContext().generateBeanName(handlerMappingDef);
@@ -278,7 +278,7 @@ class ResourcesBeanDefinitionParser implements BeanDefinitionParser {
 				Element childElement = DomUtils.getChildElementsByTagName(beanElement, "bean", "ref").get(0);
 				strategy = parserContext.getDelegate().parsePropertySubElement(childElement, null);
 			}
-			for(String pattern : patterns) {
+			for (String pattern : patterns) {
 				strategyMap.put(pattern, strategy);
 			}
 		}

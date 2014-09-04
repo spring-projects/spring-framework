@@ -204,7 +204,7 @@ public class GsonHttpMessageConverter extends AbstractHttpMessageConverter<Objec
 			this.gson.toJson(o, writer);
 			writer.close();
 		}
-		catch(JsonIOException  ex) {
+		catch (JsonIOException ex) {
 			throw new HttpMessageNotWritableException("Could not write JSON: " + ex.getMessage(), ex);
 		}
 	}
