@@ -38,6 +38,7 @@ import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.http.converter.support.AllEncompassingFormHttpMessageConverter;
+import org.springframework.http.converter.xml.MappingJackson2XmlHttpMessageConverter;
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockHttpServletResponse;
 import org.springframework.util.MultiValueMap;
@@ -64,6 +65,7 @@ import static org.junit.Assert.*;
  * <p>Also see {@link RequestResponseBodyMethodProcessorMockTests}.
  *
  * @author Rossen Stoyanchev
+ * @author Sebastien Deleuze
  */
 public class RequestResponseBodyMethodProcessorTests {
 
@@ -303,7 +305,7 @@ public class RequestResponseBodyMethodProcessorTests {
 	}
 
 	@Test
-	public void jacksonJsonViewWithResponseBody() throws Exception {
+	public void jacksonJsonViewWithResponseBodyAndJsonMessageConverter() throws Exception {
 		Method method = JacksonViewController.class.getMethod("handleResponseBody");
 		HandlerMethod handlerMethod = new HandlerMethod(new JacksonViewController(), method);
 		MethodParameter methodReturnType = handlerMethod.getReturnType();
@@ -324,7 +326,7 @@ public class RequestResponseBodyMethodProcessorTests {
 	}
 
 	@Test
-	public void jacksonJsonViewWithResponseEntity() throws Exception {
+	public void jacksonJsonViewWithResponseEntityAndJsonMessageConverter() throws Exception {
 		Method method = JacksonViewController.class.getMethod("handleResponseEntity");
 		HandlerMethod handlerMethod = new HandlerMethod(new JacksonViewController(), method);
 		MethodParameter methodReturnType = handlerMethod.getReturnType();
@@ -342,6 +344,52 @@ public class RequestResponseBodyMethodProcessorTests {
 		assertFalse(content.contains("\"withView1\":\"with\""));
 		assertTrue(content.contains("\"withView2\":\"with\""));
 		assertTrue(content.contains("\"withoutView\":\"without\""));
+	}
+
+	// SPR-12149
+
+	@Test
+	public void jacksonJsonViewWithResponseBodyAndXmlMessageConverter() throws Exception {
+		Method method = JacksonViewController.class.getMethod("handleResponseBody");
+		HandlerMethod handlerMethod = new HandlerMethod(new JacksonViewController(), method);
+		MethodParameter methodReturnType = handlerMethod.getReturnType();
+
+		List<HttpMessageConverter<?>> converters = new ArrayList<HttpMessageConverter<?>>();
+		converters.add(new MappingJackson2XmlHttpMessageConverter());
+
+		RequestResponseBodyMethodProcessor processor = new RequestResponseBodyMethodProcessor(
+				converters, null, Arrays.asList(new JsonViewResponseBodyAdvice()));
+
+		Object returnValue = new JacksonViewController().handleResponseBody();
+		processor.handleReturnValue(returnValue, methodReturnType, this.mavContainer, this.webRequest);
+
+		String content = this.servletResponse.getContentAsString();
+		assertFalse(content.contains("<withView1>with</withView1>"));
+		assertTrue(content.contains("<withView2>with</withView2>"));
+		assertTrue(content.contains("<withoutView>without</withoutView>"));
+	}
+
+	// SPR-12149
+
+	@Test
+	public void jacksonJsonViewWithResponseEntityAndXmlMessageConverter() throws Exception {
+		Method method = JacksonViewController.class.getMethod("handleResponseEntity");
+		HandlerMethod handlerMethod = new HandlerMethod(new JacksonViewController(), method);
+		MethodParameter methodReturnType = handlerMethod.getReturnType();
+
+		List<HttpMessageConverter<?>> converters = new ArrayList<HttpMessageConverter<?>>();
+		converters.add(new MappingJackson2XmlHttpMessageConverter());
+
+		HttpEntityMethodProcessor processor = new HttpEntityMethodProcessor(
+				converters, null, Arrays.asList(new JsonViewResponseBodyAdvice()));
+
+		Object returnValue = new JacksonViewController().handleResponseEntity();
+		processor.handleReturnValue(returnValue, methodReturnType, this.mavContainer, this.webRequest);
+
+		String content = this.servletResponse.getContentAsString();
+		assertFalse(content.contains("<withView1>with</withView1>"));
+		assertTrue(content.contains("<withView2>with</withView2>"));
+		assertTrue(content.contains("<withoutView>without</withoutView>"));
 	}
 
 

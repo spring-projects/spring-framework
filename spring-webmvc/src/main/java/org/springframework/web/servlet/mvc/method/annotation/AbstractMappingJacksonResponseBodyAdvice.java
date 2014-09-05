@@ -20,7 +20,6 @@ import org.springframework.core.MethodParameter;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.AbstractJackson2HttpMessageConverter;
-import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.http.converter.json.MappingJacksonValue;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
@@ -28,9 +27,10 @@ import org.springframework.http.server.ServerHttpResponse;
 /**
  * A convenient base class for {@code ResponseBodyAdvice} implementations
  * that customize the response before JSON serialization with
- * {@link MappingJackson2HttpMessageConverter}.
+ * {@link AbstractJackson2HttpMessageConverter}'s concrete subclasses.
  *
  * @author Rossen Stoyanchev
+ * @author Sebastien Deleuze
  * @since 4.1
  */
 public abstract class AbstractMappingJacksonResponseBodyAdvice implements ResponseBodyAdvice<Object> {
