@@ -180,7 +180,7 @@ public class ResourceUrlProvider implements ApplicationListener<ContextRefreshed
 		}
 
 		int index = getPathHelper().getRequestUri(request).indexOf(pathWithinMapping);
-		Assert.state(index > 0 && index < requestUrl.length(), "Failed to determine lookup path: " + requestUrl);
+		Assert.state(index != -1, "Failed to determine lookup path: " + requestUrl);
 
 		String prefix = requestUrl.substring(0, index);
 		String lookupPath = requestUrl.substring(index);

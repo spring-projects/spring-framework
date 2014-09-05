@@ -73,7 +73,7 @@ public class ResourceTransformerSupportTests {
 	}
 
 	@Test
-	public void rewriteAbsolutePath() throws Exception {
+	public void rewriteAbsolutePathWithContext() throws Exception {
 		this.request.setRequestURI("/servlet/context/resources/main.css");
 		this.request.setMethod("GET");
 		this.request.setServletPath("/servlet");
@@ -84,6 +84,18 @@ public class ResourceTransformerSupportTests {
 		Resource mainCss = new ClassPathResource("test/main.css", getClass());
 		String actual = this.transformer.resolveUrlPath(resourcePath, this.request, mainCss, this.transformerChain);
 		assertEquals("/servlet/context/resources/bar-11e16cf79faee7ac698c805cf28248d2.css", actual);
+	}
+
+	@Test
+	public void rewriteAbsolutePath() throws Exception {
+		this.request.setRequestURI("/resources/main.css");
+		this.request.setMethod("GET");
+		this.request.setAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, "/resources/main.css");
+
+		String resourcePath = "/resources/bar.css";
+		Resource mainCss = new ClassPathResource("test/main.css", getClass());
+		String actual = this.transformer.resolveUrlPath(resourcePath, this.request, mainCss, this.transformerChain);
+		assertEquals("/resources/bar-11e16cf79faee7ac698c805cf28248d2.css", actual);
 
 		actual = this.transformer.resolveUrlPath("bar.css", this.request, mainCss, this.transformerChain);
 		assertEquals("bar-11e16cf79faee7ac698c805cf28248d2.css", actual);
@@ -100,6 +112,19 @@ public class ResourceTransformerSupportTests {
 		Resource mainCss = new ClassPathResource("test/main.css", getClass());
 		String actual = this.transformer.resolveUrlPath("bar.css", this.request, mainCss, this.transformerChain);
 		assertEquals("bar-11e16cf79faee7ac698c805cf28248d2.css", actual);
+	}
+
+	@Test(expected = IllegalStateException.class)
+	public void rewriteAbsolutePathWrongPath() throws Exception {
+		this.request.setRequestURI("/servlet/context/resources/main.css");
+		this.request.setMethod("GET");
+		this.request.setServletPath("/servlet");
+		this.request.setContextPath("/context");
+		this.request.setAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, "/wrong/main.css");
+
+		String resourcePath = "/servlet/context/resources/bar.css";
+		Resource mainCss = new ClassPathResource("test/main.css", getClass());
+		this.transformer.resolveUrlPath(resourcePath, this.request, mainCss, this.transformerChain);
 	}
 
 	@Test
