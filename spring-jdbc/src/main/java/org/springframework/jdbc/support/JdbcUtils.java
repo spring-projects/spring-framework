@@ -25,6 +25,7 @@ import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
+import java.sql.SQLDataException;
 import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
 import java.sql.Statement;
@@ -195,6 +196,9 @@ public abstract class JdbcUtils {
 			if (getObjectWithTypeAvailable) {
 				try {
 					return rs.getObject(index, requiredType);
+				}
+				catch (SQLDataException ex) {
+					logger.debug("JDBC driver has limited support for JDBC 4.1 'getObject(int, Class)' method", ex);
 				}
 				catch (SQLFeatureNotSupportedException ex) {
 					logger.debug("JDBC driver does not support JDBC 4.1 'getObject(int, Class)' method", ex);
