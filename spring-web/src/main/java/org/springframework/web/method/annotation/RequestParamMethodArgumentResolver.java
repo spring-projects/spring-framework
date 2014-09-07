@@ -153,9 +153,7 @@ public class RequestParamMethodArgumentResolver extends AbstractNamedValueMethod
 	@Override
 	protected NamedValueInfo createNamedValueInfo(MethodParameter parameter) {
 		RequestParam annotation = parameter.getParameterAnnotation(RequestParam.class);
-		return (annotation != null) ?
-				new RequestParamNamedValueInfo(annotation) :
-				new RequestParamNamedValueInfo();
+		return (annotation != null) ? new RequestParamNamedValueInfo(annotation) : new RequestParamNamedValueInfo();
 	}
 
 	@Override
@@ -179,7 +177,8 @@ public class RequestParamMethodArgumentResolver extends AbstractNamedValueMethod
 		else if (isMultipartFileArray(parameter)) {
 			assertIsMultipartRequest(servletRequest);
 			Assert.notNull(multipartRequest, "Expected MultipartHttpServletRequest: is a MultipartResolver configured?");
-			arg = multipartRequest.getFiles(name).toArray(new MultipartFile[0]);
+			List<MultipartFile> multipartFiles = multipartRequest.getFiles(name);
+			arg = multipartFiles.toArray(new MultipartFile[multipartFiles.size()]);
 		}
 		else if ("javax.servlet.http.Part".equals(parameter.getParameterType().getName())) {
 			assertIsMultipartRequest(servletRequest);
@@ -310,6 +309,7 @@ public class RequestParamMethodArgumentResolver extends AbstractNamedValueMethod
 			super(annotation.value(), annotation.required(), annotation.defaultValue());
 		}
 	}
+
 
 	private static class RequestPartResolver {
 

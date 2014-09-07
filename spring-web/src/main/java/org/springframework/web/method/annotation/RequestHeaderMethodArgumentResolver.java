@@ -54,8 +54,8 @@ public class RequestHeaderMethodArgumentResolver extends AbstractNamedValueMetho
 
 	@Override
 	public boolean supportsParameter(MethodParameter parameter) {
-		return parameter.hasParameterAnnotation(RequestHeader.class)
-				&& !Map.class.isAssignableFrom(parameter.getParameterType());
+		return parameter.hasParameterAnnotation(RequestHeader.class) &&
+				!Map.class.isAssignableFrom(parameter.getParameterType());
 	}
 
 	@Override

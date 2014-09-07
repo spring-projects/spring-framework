@@ -96,7 +96,7 @@ public abstract class AbstractNamedValueMethodArgumentResolver implements Handle
 			}
 			arg = handleNullValue(namedValueInfo.name, arg, paramType);
 		}
-		else if ("".equals(arg) && (namedValueInfo.defaultValue != null)) {
+		else if ("".equals(arg) && namedValueInfo.defaultValue != null) {
 			arg = resolveDefaultValue(namedValueInfo.defaultValue);
 		}
 
