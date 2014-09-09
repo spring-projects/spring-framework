@@ -37,7 +37,7 @@ import javax.net.ServerSocketFactory;
  * @author Gunnar Hillert
  * @since 4.0
  */
-public abstract class SocketUtils {
+public class SocketUtils {
 
 	/**
 	 * The default minimum value for port ranges used when finding an available
