@@ -101,10 +101,9 @@ public class PathVariableMethodArgumentResolver extends AbstractNamedValueMethod
 	}
 
 	@Override
-	protected void handleMissingValue(String name, MethodParameter param) throws ServletRequestBindingException {
-		String paramType = param.getParameterType().getName();
-		throw new ServletRequestBindingException(
-				"Missing URI template variable '" + name + "' for method parameter type [" + paramType + "]");
+	protected void handleMissingValue(String name, MethodParameter parameter) throws ServletRequestBindingException {
+		throw new ServletRequestBindingException("Missing URI template variable '" + name +
+				"' for method parameter type " + parameter.getParameterType().getSimpleName());
 	}
 
 	@Override

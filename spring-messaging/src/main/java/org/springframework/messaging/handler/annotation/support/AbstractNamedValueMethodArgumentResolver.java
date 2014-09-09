@@ -30,7 +30,6 @@ import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.handler.annotation.ValueConstants;
 import org.springframework.messaging.handler.invocation.HandlerMethodArgumentResolver;
-import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
 /**
@@ -88,28 +87,28 @@ public abstract class AbstractNamedValueMethodArgumentResolver implements Handle
 		Class<?> paramType = parameter.getParameterType();
 		NamedValueInfo namedValueInfo = getNamedValueInfo(parameter);
 
-		Object value = resolveArgumentInternal(parameter, message, namedValueInfo.name);
-		if (value == null) {
+		Object arg = resolveArgumentInternal(parameter, message, namedValueInfo.name);
+		if (arg == null) {
 			if (namedValueInfo.defaultValue != null) {
-				value = resolveDefaultValue(namedValueInfo.defaultValue);
+				arg = resolveDefaultValue(namedValueInfo.defaultValue);
 			}
-			else if (namedValueInfo.required) {
+			else if (namedValueInfo.required && !parameter.getParameterType().getName().equals("java.util.Optional")) {
 				handleMissingValue(namedValueInfo.name, parameter, message);
 			}
-			value = handleNullValue(namedValueInfo.name, value, paramType);
+			arg = handleNullValue(namedValueInfo.name, arg, paramType);
 		}
-		else if ("".equals(value) && namedValueInfo.defaultValue != null) {
-			value = resolveDefaultValue(namedValueInfo.defaultValue);
-		}
-
-		if (!ClassUtils.isAssignableValue(paramType, value)) {
-			value = this.conversionService.convert(value,
-					TypeDescriptor.valueOf(value.getClass()), new TypeDescriptor(parameter));
+		else if ("".equals(arg) && namedValueInfo.defaultValue != null) {
+			arg = resolveDefaultValue(namedValueInfo.defaultValue);
 		}
 
-		handleResolvedValue(value, namedValueInfo.name, parameter, message);
+		if (!ClassUtils.isAssignableValue(paramType, arg)) {
+			arg = this.conversionService.convert(
+					arg, TypeDescriptor.valueOf(arg.getClass()), new TypeDescriptor(parameter));
+		}
 
-		return value;
+		handleResolvedValue(arg, namedValueInfo.name, parameter, message);
+
+		return arg;
 	}
 
 	/**
@@ -140,10 +139,12 @@ public abstract class AbstractNamedValueMethodArgumentResolver implements Handle
 		String name = info.name;
 		if (info.name.length() == 0) {
 			name = parameter.getParameterName();
-			Assert.notNull(name, "Name for argument type [" + parameter.getParameterType().getName()
-						+ "] not available, and parameter name information not found in class file either.");
+			if (name == null) {
+				throw new IllegalArgumentException("Name for argument type [" + parameter.getParameterType().getName() +
+						"] not available, and parameter name information not found in class file either.");
+			}
 		}
-		String defaultValue = ValueConstants.DEFAULT_NONE.equals(info.defaultValue) ? null : info.defaultValue;
+		String defaultValue = (ValueConstants.DEFAULT_NONE.equals(info.defaultValue) ? null : info.defaultValue);
 		return new NamedValueInfo(name, info.required, defaultValue);
 	}
 

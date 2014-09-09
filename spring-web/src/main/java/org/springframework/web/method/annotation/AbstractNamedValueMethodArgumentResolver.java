@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -91,7 +91,7 @@ public abstract class AbstractNamedValueMethodArgumentResolver implements Handle
 			if (namedValueInfo.defaultValue != null) {
 				arg = resolveDefaultValue(namedValueInfo.defaultValue);
 			}
-			else if (namedValueInfo.required) {
+			else if (namedValueInfo.required && !parameter.getParameterType().getName().equals("java.util.Optional")) {
 				handleMissingValue(namedValueInfo.name, parameter);
 			}
 			arg = handleNullValue(namedValueInfo.name, arg, paramType);
@@ -138,8 +138,10 @@ public abstract class AbstractNamedValueMethodArgumentResolver implements Handle
 		String name = info.name;
 		if (info.name.length() == 0) {
 			name = parameter.getParameterName();
-			Assert.notNull(name, "Name for argument type [" + parameter.getParameterType().getName()
-						+ "] not available, and parameter name information not found in class file either.");
+			if (name == null) {
+				throw new IllegalArgumentException("Name for argument type [" + parameter.getParameterType().getName() +
+						"] not available, and parameter name information not found in class file either.");
+			}
 		}
 		String defaultValue = (ValueConstants.DEFAULT_NONE.equals(info.defaultValue) ? null : info.defaultValue);
 		return new NamedValueInfo(name, info.required, defaultValue);
