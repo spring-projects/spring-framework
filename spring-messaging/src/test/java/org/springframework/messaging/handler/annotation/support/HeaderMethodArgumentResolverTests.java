@@ -90,7 +90,6 @@ public class HeaderMethodArgumentResolverTests {
 
 	@Test
 	public void resolveArgumentNativeHeader() throws Exception {
-
 		TestMessageHeaderAccessor headers = new TestMessageHeaderAccessor();
 		headers.setNativeHeader("param1", "foo");
 		Message<byte[]> message = MessageBuilder.withPayload(new byte[0]).setHeaders(headers).build();
@@ -100,7 +99,6 @@ public class HeaderMethodArgumentResolverTests {
 
 	@Test
 	public void resolveArgumentNativeHeaderAmbiguity() throws Exception {
-
 		TestMessageHeaderAccessor headers = new TestMessageHeaderAccessor();
 		headers.setHeader("param1", "foo");
 		headers.setNativeHeader("param1", "native-foo");
