@@ -17,6 +17,7 @@
 package org.springframework.core.env;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -73,6 +74,14 @@ public class CompositePropertySource extends PropertySource<Object> {
 		this.propertySources.clear();
 		this.propertySources.add(propertySource);
 		this.propertySources.addAll(existing);
+	}
+
+	/**
+	 * Return all property sources that this composite source holds.
+	 * @since 4.1.1
+	 */
+	public Collection<PropertySource<?>> getPropertySources() {
+		return this.propertySources;
 	}
 
 	@Override
