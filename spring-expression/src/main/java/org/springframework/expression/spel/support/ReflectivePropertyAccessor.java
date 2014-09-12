@@ -77,6 +77,7 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 
 	private InvokerPair lastReadInvokerPair;
 
+
 	/**
 	 * Returns {@code null} which means this is a general purpose accessor.
 	 */
@@ -662,7 +663,8 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 		@Override
 		public boolean isCompilable() {
 			// If non public must continue to use reflection
-			if (!Modifier.isPublic(member.getModifiers()) || !Modifier.isPublic(member.getDeclaringClass().getModifiers())) {
+			if (!Modifier.isPublic(this.member.getModifiers()) ||
+					!Modifier.isPublic(this.member.getDeclaringClass().getModifiers())) {
 				return false;
 			}
 			return true;
@@ -670,19 +672,19 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 
 		@Override
 		public Class<?> getPropertyType() {
-			if (member instanceof Field) {
-				return ((Field) member).getType();
+			if (this.member instanceof Field) {
+				return ((Field) this.member).getType();
 			}
 			else {
-				return ((Method) member).getReturnType();
+				return ((Method) this.member).getReturnType();
 			}
 		}
 
 		@Override
 		public void generateCode(String propertyName, MethodVisitor mv, CodeFlow codeflow) {
-			boolean isStatic = Modifier.isStatic(member.getModifiers());
+			boolean isStatic = Modifier.isStatic(this.member.getModifiers());
 			String descriptor = codeflow.lastDescriptor();
-			String memberDeclaringClassSlashedDescriptor = member.getDeclaringClass().getName().replace('.','/');
+			String memberDeclaringClassSlashedDescriptor = this.member.getDeclaringClass().getName().replace('.', '/');
 			if (!isStatic) {
 				if (descriptor == null) {
 					codeflow.loadTarget(mv);
@@ -691,16 +693,15 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 					mv.visitTypeInsn(CHECKCAST, memberDeclaringClassSlashedDescriptor);
 				}
 			}
-			if (member instanceof Field) {
+			if (this.member instanceof Field) {
 				mv.visitFieldInsn(isStatic ? GETSTATIC : GETFIELD, memberDeclaringClassSlashedDescriptor,
-						member.getName(), CodeFlow.toJVMDescriptor(((Field) member).getType()));
+						this.member.getName(), CodeFlow.toJVMDescriptor(((Field) this.member).getType()));
 			}
 			else {
 				mv.visitMethodInsn(isStatic ? INVOKESTATIC : INVOKEVIRTUAL, memberDeclaringClassSlashedDescriptor,
-						member.getName(), CodeFlow.createSignatureDescriptor((Method) member),false);
+						this.member.getName(), CodeFlow.createSignatureDescriptor((Method) this.member),false);
 			}
 		}
-
 	}
 
 }

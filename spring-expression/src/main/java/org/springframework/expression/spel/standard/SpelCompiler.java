@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.expression.spel.standard;
 
 import java.io.File;
@@ -77,7 +78,7 @@ public class SpelCompiler implements Opcodes {
 	// The child ClassLoader used to load the compiled expression classes
 	private final ChildClassLoader ccl;
 
-	// counter suffix for generated classes within this SpelCompiler instance
+	// Counter suffix for generated classes within this SpelCompiler instance
 	private final AtomicInteger suffixId = new AtomicInteger(1);
 
 
@@ -131,8 +132,7 @@ public class SpelCompiler implements Opcodes {
 		// Create class outline 'spel/ExNNN extends org.springframework.expression.spel.CompiledExpression'
 		String clazzName = "spel/Ex" + getNextSuffix();
 		ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_MAXS|ClassWriter.COMPUTE_FRAMES);
-		cw.visit(V1_5, ACC_PUBLIC, clazzName, null,
-				"org/springframework/expression/spel/CompiledExpression", null);
+		cw.visit(V1_5, ACC_PUBLIC, clazzName, null, "org/springframework/expression/spel/CompiledExpression", null);
 
 		// Create default constructor
 		MethodVisitor mv = cw.visitMethod(ACC_PUBLIC, "<init>", "()V", null, null);
@@ -199,8 +199,8 @@ public class SpelCompiler implements Opcodes {
 	}
 
 	/**
-	 * Request to revert to the interpreter for expression evaluation. Any compiled form
-	 * is discarded but can be recreated by later recompiling again.
+	 * Request to revert to the interpreter for expression evaluation.
+	 * Any compiled form is discarded but can be recreated by later recompiling again.
 	 * @param expression the expression
 	 */
 	public static void revertToInterpreted(Expression expression) {
