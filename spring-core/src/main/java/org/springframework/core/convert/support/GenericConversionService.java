@@ -568,14 +568,14 @@ public class GenericConversionService implements ConfigurableConversionService {
 				Class<?> candidate = hierarchy.get(i);
 				candidate = (array ? candidate.getComponentType() : ClassUtils.resolvePrimitiveIfNecessary(candidate));
 				Class<?> superclass = candidate.getSuperclass();
-				if (candidate.getSuperclass() != null && superclass != Object.class && superclass != Enum.class) {
+				if (superclass != null && superclass != Object.class && superclass != Enum.class) {
 					addToClassHierarchy(i + 1, candidate.getSuperclass(), array, hierarchy, visited);
 				}
 				addInterfacesToClassHierarchy(candidate, array, hierarchy, visited);
 				i++;
 			}
 
-			if (type.isEnum()) {
+			if (Enum.class.isAssignableFrom(type)) {
 				addToClassHierarchy(hierarchy.size(), Enum.class, array, hierarchy, visited);
 				addToClassHierarchy(hierarchy.size(), Enum.class, false, hierarchy, visited);
 				addInterfacesToClassHierarchy(Enum.class, array, hierarchy, visited);
