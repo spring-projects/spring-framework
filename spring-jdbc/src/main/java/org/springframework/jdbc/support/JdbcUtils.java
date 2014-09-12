@@ -25,7 +25,6 @@ import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
-import java.sql.SQLDataException;
 import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
 import java.sql.Statement;
@@ -197,14 +196,14 @@ public abstract class JdbcUtils {
 				try {
 					return rs.getObject(index, requiredType);
 				}
-				catch (SQLDataException ex) {
-					logger.debug("JDBC driver has limited support for JDBC 4.1 'getObject(int, Class)' method", ex);
+				catch (AbstractMethodError err) {
+					logger.debug("JDBC driver does not implement JDBC 4.1 'getObject(int, Class)' method", err);
 				}
 				catch (SQLFeatureNotSupportedException ex) {
 					logger.debug("JDBC driver does not support JDBC 4.1 'getObject(int, Class)' method", ex);
 				}
-				catch (AbstractMethodError err) {
-					logger.debug("JDBC driver does not implement JDBC 4.1 'getObject(int, Class)' method", err);
+				catch (SQLException ex) {
+					logger.debug("JDBC driver has limited support for JDBC 4.1 'getObject(int, Class)' method", ex);
 				}
 			}
 			// Fall back to getObject without type specification...
@@ -219,7 +218,7 @@ public abstract class JdbcUtils {
 	 * Retrieve a JDBC column value from a ResultSet, using the most appropriate
 	 * value type. The returned value should be a detached value object, not having
 	 * any ties to the active ResultSet: in particular, it should not be a Blob or
-	 * Clob object but rather a byte array respectively String representation.
+	 * Clob object but rather a byte array or String representation, respectively.
 	 * <p>Uses the {@code getObject(index)} method, but includes additional "hacks"
 	 * to get around Oracle 10g returning a non-standard object for its TIMESTAMP
 	 * datatype and a {@code java.sql.Date} for DATE columns leaving out the
