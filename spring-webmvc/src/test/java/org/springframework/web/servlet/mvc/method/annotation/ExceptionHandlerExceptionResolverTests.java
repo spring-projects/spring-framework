@@ -46,6 +46,7 @@ import org.springframework.web.method.annotation.ModelMethodProcessor;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.HandlerMethodReturnValueHandler;
 import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.handler.WrappedException;
 
 /**
  * Test fixture with {@link ExceptionHandlerExceptionResolver}.
@@ -233,6 +234,28 @@ public class ExceptionHandlerExceptionResolverTests {
 		assertEquals("DefaultTestExceptionResolver: IllegalStateException", this.response.getContentAsString());
 	}
 
+	@Test(expected = CaughtHandlerRuntimeException.class)
+	public void resolveExceptionWithHandlerThatProducesRuntimeException() throws Exception {
+		AnnotationConfigApplicationContext cxt = new AnnotationConfigApplicationContext(MyConfig.class);
+		this.resolver.setApplicationContext(cxt);
+		this.resolver.afterPropertiesSet();
+
+		CaughtHandlerRuntimeException ex =
+				new CaughtHandlerRuntimeException("This runtime exception should be rethrown.");
+		this.resolver.resolveException(this.request, this.response, null, ex);
+	}
+
+	@Test(expected = WrappedException.class)
+	public void resolveExceptionWithHandlerThatProducesException() throws Exception {
+		AnnotationConfigApplicationContext cxt = new AnnotationConfigApplicationContext(MyConfig.class);
+		this.resolver.setApplicationContext(cxt);
+		this.resolver.afterPropertiesSet();
+
+		CaughtHandlerException ex =
+				new CaughtHandlerException("This exception should be rethrown.");
+		this.resolver.resolveException(this.request, this.response, null, ex);
+	}
+
 
 	private void assertMethodProcessorCount(int resolverCount, int handlerCount) {
 		assertEquals(resolverCount, this.resolver.getArgumentResolvers().getResolvers().size());
@@ -305,6 +328,35 @@ public class ExceptionHandlerExceptionResolverTests {
 		}
 	}
 
+	@ControllerAdvice
+	@Order(3)
+	static class ThrowingTestExceptionResolver {
+
+		@ExceptionHandler
+		public void handleException(CaughtHandlerRuntimeException ex) {
+			throw ex;
+		}
+
+		@ExceptionHandler
+		public void handleException(CaughtHandlerException ex) throws CaughtHandlerException {
+			throw ex;
+		}
+	}
+
+	@SuppressWarnings("serial")
+	static class CaughtHandlerRuntimeException extends RuntimeException {
+		CaughtHandlerRuntimeException(String message) {
+			super(message);
+		}
+	}
+
+	@SuppressWarnings("serial")
+	static class CaughtHandlerException extends Exception {
+		CaughtHandlerException(String message) {
+			super(message);
+		}
+	}
+
 	@Configuration
 	static class MyConfig {
 
@@ -314,6 +366,10 @@ public class ExceptionHandlerExceptionResolverTests {
 
 		@Bean public AnotherTestExceptionResolver anotherTestExceptionResolver() {
 			return new AnotherTestExceptionResolver();
+		}
+
+		@Bean public ThrowingTestExceptionResolver throwingTestExceptionResolver() {
+			return new ThrowingTestExceptionResolver();
 		}
 	}
 

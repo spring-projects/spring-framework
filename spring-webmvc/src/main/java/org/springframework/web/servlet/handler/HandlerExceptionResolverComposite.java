@@ -71,14 +71,29 @@ public class HandlerExceptionResolverComposite implements HandlerExceptionResolv
 										 Object handler,
 										 Exception ex) {
 		if (resolvers != null) {
-			for (HandlerExceptionResolver handlerExceptionResolver : resolvers) {
-				ModelAndView mav = handlerExceptionResolver.resolveException(request, response, handler, ex);
-				if (mav != null) {
-					return mav;
-				}
+			try {
+				return handleException(request, response, handler, ex);
+			}
+			catch (WrappedException wrapped) {
+				return handleException(request, response, handler, (Exception) wrapped.getCause());
+			}
+			catch (RuntimeException e) {
+				return handleException(request, response, handler, e);
 			}
 		}
 		return null;
 	}
 
+	private ModelAndView handleException(HttpServletRequest request,
+			HttpServletResponse response,
+			Object handler,
+			Exception ex) {
+		for (HandlerExceptionResolver handlerExceptionResolver : resolvers) {
+			ModelAndView mav = handlerExceptionResolver.resolveException(request, response, handler, ex);
+			if (mav != null) {
+				return mav;
+			}
+		}
+		return null;
+	}
 }
