@@ -253,8 +253,8 @@ public class MappingJackson2HttpMessageConverterTests {
 
 		String result = outputMessage.getBodyAsString(Charset.forName("UTF-8"));
 		assertThat(result, containsString("\"withView1\":\"with\""));
-		assertThat(result, containsString("\"withoutView\":\"without\""));
 		assertThat(result, not(containsString("\"withView2\":\"with\"")));
+		assertThat(result, containsString("\"withoutView\":\"without\""));
 	}
 
 	@Test
@@ -286,8 +286,8 @@ public class MappingJackson2HttpMessageConverterTests {
 		assertThat(result, startsWith("callback("));
 		assertThat(result, endsWith(");"));
 		assertThat(result, containsString("\"withView1\":\"with\""));
-		assertThat(result, containsString("\"withoutView\":\"without\""));
 		assertThat(result, not(containsString("\"withView2\":\"with\"")));
+		assertThat(result, containsString("\"withoutView\":\"without\""));
 	}
 
 

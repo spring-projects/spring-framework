@@ -16,14 +16,15 @@
 
 package org.springframework.web.servlet.config.annotation;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 
 import java.util.Arrays;
 import java.util.List;
+
 import org.junit.Before;
 import org.junit.Test;
+import com.fasterxml.jackson.databind.MapperFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.DirectFieldAccessor;
 import org.springframework.core.Ordered;
 import org.springframework.http.HttpStatus;
@@ -71,6 +72,8 @@ import org.springframework.web.util.UrlPathHelper;
 import org.springframework.web.servlet.view.ContentNegotiatingViewResolver;
 import org.springframework.web.servlet.view.InternalResourceViewResolver;
 import org.springframework.web.servlet.view.json.MappingJackson2JsonView;
+
+import static org.junit.Assert.*;
 
 /**
  * A test fixture with a sub-class of {@link WebMvcConfigurationSupport} that also
@@ -157,6 +160,14 @@ public class WebMvcConfigurationSupportExtensionTests {
 
 		// Message converters
 		assertEquals(1, adapter.getMessageConverters().size());
+		assertEquals(MappingJackson2HttpMessageConverter.class, adapter.getMessageConverters().get(0).getClass());
+		ObjectMapper objectMapper = ((MappingJackson2HttpMessageConverter)adapter.getMessageConverters().get(0)).getObjectMapper();
+		assertTrue(objectMapper.getDeserializationConfig()
+				.isEnabled(MapperFeature.DEFAULT_VIEW_INCLUSION));
+		assertTrue(objectMapper.getSerializationConfig()
+				.isEnabled(MapperFeature.DEFAULT_VIEW_INCLUSION));
+		assertTrue(objectMapper.getDeserializationConfig()
+				.isEnabled(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES));
 
 		DirectFieldAccessor fieldAccessor = new DirectFieldAccessor(adapter);
 

@@ -22,6 +22,7 @@ import java.lang.reflect.Method;
 import java.nio.charset.Charset;
 
 import com.fasterxml.jackson.annotation.JsonView;
+import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
 import static org.junit.Assert.assertEquals;
@@ -123,8 +124,14 @@ public class MappingJackson2XmlHttpMessageConverterTests {
 
 		String result = outputMessage.getBodyAsString(Charset.forName("UTF-8"));
 		assertThat(result, containsString("<withView1>with</withView1>"));
-		assertThat(result, containsString("<withoutView>without</withoutView>"));
 		assertThat(result, not(containsString("<withView2>with</withView2>")));
+		assertThat(result, containsString("<withoutView>without</withoutView>"));
+	}
+
+	@Test
+	public void customXmlMapper() {
+		new MappingJackson2XmlHttpMessageConverter(new MyXmlMapper());
+		// Assert no exception is thrown
 	}
 
 	private void writeInternal(Object object, HttpOutputMessage outputMessage)
@@ -236,6 +243,10 @@ public class MappingJackson2XmlHttpMessageConverterTests {
 		public void setWithoutView(String withoutView) {
 			this.withoutView = withoutView;
 		}
+	}
+
+	private static class MyXmlMapper extends XmlMapper {
+
 	}
 
 }

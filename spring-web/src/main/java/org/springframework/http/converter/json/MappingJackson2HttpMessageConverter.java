@@ -32,6 +32,8 @@ import org.springframework.http.MediaType;
  * <p>By default, this converter supports {@code application/json}. This can be overridden by setting the
  * {@link #setSupportedMediaTypes supportedMediaTypes} property.
  *
+ * <p>The default constructor uses the default configuration provided by {@link Jackson2ObjectMapperBuilder}.
+ *
  * <p>Compatible with Jackson 2.1 and higher.
  *
  * @author Arjen Poutsma
@@ -47,13 +49,22 @@ public class MappingJackson2HttpMessageConverter extends AbstractJackson2HttpMes
 
 
 	/**
-	 * Construct a new {@code MappingJackson2HttpMessageConverter}.
+	 * Construct a new {@link MappingJackson2HttpMessageConverter} using default configuration
+	 * provided by {@link Jackson2ObjectMapperBuilder}.
 	 */
 	public MappingJackson2HttpMessageConverter() {
-		super(new ObjectMapper(), new MediaType("application", "json", DEFAULT_CHARSET),
-				new MediaType("application", "*+json", DEFAULT_CHARSET));
+		this(Jackson2ObjectMapperBuilder.json().build());
 	}
 
+	/**
+	 * Construct a new {@link MappingJackson2HttpMessageConverter} with a custom {@link ObjectMapper}.
+	 * You can use {@link Jackson2ObjectMapperBuilder} to build it easily.
+	 * @see Jackson2ObjectMapperBuilder#json()
+	 */
+	public MappingJackson2HttpMessageConverter(ObjectMapper objectMapper) {
+		super(objectMapper, new MediaType("application", "json", DEFAULT_CHARSET),
+				new MediaType("application", "*+json", DEFAULT_CHARSET));
+	}
 
 	/**
 	 * Specify a custom prefix to use for this view's JSON output.

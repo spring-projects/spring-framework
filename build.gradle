@@ -182,6 +182,7 @@ configure(allprojects) { project ->
 		"http://quartz-scheduler.org/api/2.2.0/",
 		"http://fasterxml.github.com/jackson-core/javadoc/2.3.0/",
 		"http://fasterxml.github.com/jackson-databind/javadoc/2.3.0/",
+		"http://fasterxml.github.io/jackson-dataformat-xml/javadoc/2.3.0/",
 		"http://hc.apache.org/httpcomponents-client-ga/httpclient/apidocs/"
 	] as String[]
 }
