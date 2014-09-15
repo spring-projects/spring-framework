@@ -327,6 +327,11 @@ public class SimpAnnotationMethodMessageHandler extends AbstractMethodMessageHan
 		SubscriptionMethodReturnValueHandler sh = new SubscriptionMethodReturnValueHandler(this.clientMessagingTemplate);
 		sh.setHeaderInitializer(this.headerInitializer);
 		handlers.add(sh);
+		
+		// ResponseMessage return type
+		ResponseMessageMethodReturnValueHandler rmh = new ResponseMessageMethodReturnValueHandler(this.brokerTemplate);
+		rmh.setHeaderInitializer(this.headerInitializer);
+		handlers.add(rmh);
 
 		// custom return value types
 		handlers.addAll(getCustomReturnValueHandlers());

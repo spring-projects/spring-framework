@@ -49,79 +49,14 @@ import java.security.Principal;
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public class SendToMethodReturnValueHandler implements HandlerMethodReturnValueHandler {
-
-	private final SimpMessageSendingOperations messagingTemplate;
+public class SendToMethodReturnValueHandler extends AbstractMethodReturnValueHandler {
 
 	private final boolean annotationRequired;
 
-	private String defaultDestinationPrefix = "/topic";
-
-	private String defaultUserDestinationPrefix = "/queue";
-
-	private MessageHeaderInitializer headerInitializer;
-
-
 	public SendToMethodReturnValueHandler(SimpMessageSendingOperations messagingTemplate, boolean annotationRequired) {
-		Assert.notNull(messagingTemplate, "messagingTemplate must not be null");
-		this.messagingTemplate = messagingTemplate;
+		super(messagingTemplate);
 		this.annotationRequired = annotationRequired;
 	}
-
-
-	/**
-	 * Configure a default prefix to add to message destinations in cases where a method
-	 * is not annotated with {@link SendTo @SendTo} or does not specify any destinations
-	 * through the annotation's value attribute.
-	 * <p>By default, the prefix is set to "/topic".
-	 */
-	public void setDefaultDestinationPrefix(String defaultDestinationPrefix) {
-		this.defaultDestinationPrefix = defaultDestinationPrefix;
-	}
-
-	/**
-	 * Return the configured default destination prefix.
-	 * @see #setDefaultDestinationPrefix(String)
-	 */
-	public String getDefaultDestinationPrefix() {
-		return this.defaultDestinationPrefix;
-	}
-
-	/**
-	 * Configure a default prefix to add to message destinations in cases where a
-	 * method is annotated with {@link SendToUser @SendToUser} but does not specify
-	 * any destinations through the annotation's value attribute.
-	 * <p>By default, the prefix is set to "/queue".
-	 */
-	public void setDefaultUserDestinationPrefix(String prefix) {
-		this.defaultUserDestinationPrefix = prefix;
-	}
-
-	/**
-	 * Return the configured default user destination prefix.
-	 * @see #setDefaultUserDestinationPrefix(String)
-	 */
-	public String getDefaultUserDestinationPrefix() {
-		return this.defaultUserDestinationPrefix;
-	}
-
-	/**
-	 * Configure a {@link MessageHeaderInitializer} to apply to the headers of all
-	 * messages sent to the client outbound channel.
-	 *
-	 * <p>By default this property is not set.
-	 */
-	public void setHeaderInitializer(MessageHeaderInitializer headerInitializer) {
-		this.headerInitializer = headerInitializer;
-	}
-
-	/**
-	 * @return the configured header initializer.
-	 */
-	public MessageHeaderInitializer getHeaderInitializer() {
-		return this.headerInitializer;
-	}
-
 
 	@Override
 	public boolean supportsReturnType(MethodParameter returnType) {
@@ -133,10 +68,7 @@ public class SendToMethodReturnValueHandler implements HandlerMethodReturnValueH
 	}
 
 	@Override
-	public void handleReturnValue(Object returnValue, MethodParameter returnType, Message<?> message) throws Exception {
-		if (returnValue == null) {
-			return;
-		}
+	public void handleReturnValueInternal(Object returnValue, MethodParameter returnType, Message<?> message) throws Exception {
 		MessageHeaders headers = message.getHeaders();
 		String sessionId = SimpMessageHeaderAccessor.getSessionId(headers);
 
@@ -170,15 +102,6 @@ public class SendToMethodReturnValueHandler implements HandlerMethodReturnValueH
 		}
 	}
 
-	protected String getUserName(Message<?> message, MessageHeaders headers) {
-		Principal principal = SimpMessageHeaderAccessor.getUser(headers);
-		if (principal != null) {
-			return (principal instanceof DestinationUserNameProvider ?
-					((DestinationUserNameProvider) principal).getDestinationUserName() : principal.getName());
-		}
-		return null;
-	}
-
 	protected String[] getTargetDestinations(Annotation annotation, Message<?> message, String defaultPrefix) {
 		if (annotation != null) {
 			String[] value = (String[]) AnnotationUtils.getValue(annotation);
@@ -186,24 +109,9 @@ public class SendToMethodReturnValueHandler implements HandlerMethodReturnValueH
 				return value;
 			}
 		}
-		String name = DestinationPatternsMessageCondition.LOOKUP_DESTINATION_HEADER;
-		String destination = (String) message.getHeaders().get(name);
-		Assert.hasText(destination, "No lookup destination header in " + message);
 
-		return (destination.startsWith("/") ?
-				new String[] {defaultPrefix + destination} : new String[] {defaultPrefix + "/" + destination});
+		return super.getTargetDestinations(message, defaultPrefix);
 	}
-
-	private MessageHeaders createHeaders(String sessionId) {
-		SimpMessageHeaderAccessor headerAccessor = SimpMessageHeaderAccessor.create(SimpMessageType.MESSAGE);
-		if (getHeaderInitializer() != null) {
-			getHeaderInitializer().initHeaders(headerAccessor);
-		}
-		headerAccessor.setSessionId(sessionId);
-		headerAccessor.setLeaveMutable(true);
-		return headerAccessor.getMessageHeaders();
-	}
-
 
 	@Override
 	public String toString() {
