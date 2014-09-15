@@ -32764,7 +32764,7 @@ The following JSP code can prepare a link:
 ----
 <%@ taglib uri="http://www.springframework.org/tags" prefix="s" %>
 ...
-<a href="${s:mvcUrl('PC#getPerson').arg(0,'123').build()}">Get Person</a>
+<a href="${s:mvcUrl(''PC#getPerson'').arg(0,''US'').buildAndExpand(''123'')}">Get Person</a>
 ----
 
 
