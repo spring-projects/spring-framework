@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ import org.springframework.core.BridgeMethodResolver;
 import org.springframework.core.GenericTypeResolver;
 import org.springframework.core.MethodParameter;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -38,7 +39,7 @@ import org.springframework.util.StringUtils;
  * @author Juergen Hoeller
  * @since 2.5.2
  */
-class GenericTypeAwarePropertyDescriptor extends PropertyDescriptor {
+final class GenericTypeAwarePropertyDescriptor extends PropertyDescriptor {
 
 	private final Class<?> beanClass;
 
@@ -46,13 +47,13 @@ class GenericTypeAwarePropertyDescriptor extends PropertyDescriptor {
 
 	private final Method writeMethod;
 
-	private final Class<?> propertyEditorClass;
-
 	private volatile Set<Method> ambiguousWriteMethods;
+
+	private MethodParameter writeMethodParameter;
 
 	private Class<?> propertyType;
 
-	private MethodParameter writeMethodParameter;
+	private final Class<?> propertyEditorClass;
 
 
 	public GenericTypeAwarePropertyDescriptor(Class<?> beanClass, String propertyName,
@@ -60,8 +61,11 @@ class GenericTypeAwarePropertyDescriptor extends PropertyDescriptor {
 			throws IntrospectionException {
 
 		super(propertyName, null, null);
+
+		if (beanClass == null)  {
+			throw new IntrospectionException("Bean class must not be null");
+		}
 		this.beanClass = beanClass;
-		this.propertyEditorClass = propertyEditorClass;
 
 		Method readMethodToUse = BridgeMethodResolver.findBridgedMethod(readMethod);
 		Method writeMethodToUse = BridgeMethodResolver.findBridgedMethod(writeMethod);
@@ -93,7 +97,10 @@ class GenericTypeAwarePropertyDescriptor extends PropertyDescriptor {
 				this.ambiguousWriteMethods = ambiguousCandidates;
 			}
 		}
+
+		this.propertyEditorClass = propertyEditorClass;
 	}
+
 
 	public Class<?> getBeanClass() {
 		return this.beanClass;
@@ -120,9 +127,15 @@ class GenericTypeAwarePropertyDescriptor extends PropertyDescriptor {
 		return this.writeMethod;
 	}
 
-	@Override
-	public Class<?> getPropertyEditorClass() {
-		return this.propertyEditorClass;
+	public synchronized MethodParameter getWriteMethodParameter() {
+		if (this.writeMethod == null) {
+			return null;
+		}
+		if (this.writeMethodParameter == null) {
+			this.writeMethodParameter = new MethodParameter(this.writeMethod, 0);
+			GenericTypeResolver.resolveParameterType(this.writeMethodParameter, this.beanClass);
+		}
+		return this.writeMethodParameter;
 	}
 
 	@Override
@@ -144,15 +157,34 @@ class GenericTypeAwarePropertyDescriptor extends PropertyDescriptor {
 		return this.propertyType;
 	}
 
-	public synchronized MethodParameter getWriteMethodParameter() {
-		if (this.writeMethod == null) {
-			return null;
+	@Override
+	public Class<?> getPropertyEditorClass() {
+		return this.propertyEditorClass;
+	}
+
+
+	@Override
+	public boolean equals(Object other) {
+		if (this == other) {
+			return true;
 		}
-		if (this.writeMethodParameter == null) {
-			this.writeMethodParameter = new MethodParameter(this.writeMethod, 0);
-			GenericTypeResolver.resolveParameterType(this.writeMethodParameter, this.beanClass);
+		if (!(other instanceof GenericTypeAwarePropertyDescriptor)) {
+			return false;
 		}
-		return this.writeMethodParameter;
+		GenericTypeAwarePropertyDescriptor otherPd = (GenericTypeAwarePropertyDescriptor) other;
+		return (getBeanClass().equals(otherPd.getBeanClass()) &&
+				ObjectUtils.nullSafeEquals(getReadMethod(), otherPd.getReadMethod()) &&
+				ObjectUtils.nullSafeEquals(getWriteMethod(), otherPd.getWriteMethod()) &&
+				ObjectUtils.nullSafeEquals(getPropertyEditorClass(), otherPd.getPropertyEditorClass()) &&
+				isBound() == otherPd.isBound() && isConstrained() == otherPd.isConstrained());
+	}
+
+	@Override
+	public int hashCode() {
+		int hashCode = getBeanClass().hashCode();
+		hashCode = 29 * hashCode + ObjectUtils.nullSafeHashCode(getReadMethod());
+		hashCode = 29 * hashCode + ObjectUtils.nullSafeHashCode(getWriteMethod());
+		return hashCode;
 	}
 
 }
