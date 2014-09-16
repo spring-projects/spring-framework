@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -101,10 +101,9 @@ public class PathVariableMethodArgumentResolver extends AbstractNamedValueMethod
 	}
 
 	@Override
-	protected void handleMissingValue(String name, MethodParameter param) throws ServletRequestBindingException {
-		String paramType = param.getParameterType().getName();
-		throw new ServletRequestBindingException(
-				"Missing URI template variable '" + name + "' for method parameter type [" + paramType + "]");
+	protected void handleMissingValue(String name, MethodParameter parameter) throws ServletRequestBindingException {
+		throw new ServletRequestBindingException("Missing URI template variable '" + name +
+				"' for method parameter of type " + parameter.getParameterType().getSimpleName());
 	}
 
 	@Override
@@ -130,8 +129,8 @@ public class PathVariableMethodArgumentResolver extends AbstractNamedValueMethod
 			return;
 		}
 
-		PathVariable annot = parameter.getParameterAnnotation(PathVariable.class);
-		String name = StringUtils.isEmpty(annot.value()) ? parameter.getParameterName() : annot.value();
+		PathVariable ann = parameter.getParameterAnnotation(PathVariable.class);
+		String name = (ann == null || StringUtils.isEmpty(ann.value()) ? parameter.getParameterName() : ann.value());
 
 		if (conversionService != null) {
 			value = conversionService.convert(value, new TypeDescriptor(parameter), STRING_TYPE_DESCRIPTOR);

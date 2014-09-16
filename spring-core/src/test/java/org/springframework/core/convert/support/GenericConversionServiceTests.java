@@ -57,10 +57,12 @@ import static org.junit.Assert.*;
  * @author Keith Donald
  * @author Juergen Hoeller
  * @author Phillip Webb
+ * @author David Haraburda
  */
 public class GenericConversionServiceTests {
 
 	private GenericConversionService conversionService = new GenericConversionService();
+
 
 	@Test
 	public void canConvert() {
@@ -750,6 +752,13 @@ public class GenericConversionServiceTests {
 	}
 
 	@Test
+	public void testSubclassOfEnumToString() throws Exception {
+		conversionService.addConverter(new EnumToStringConverter(conversionService));
+		String result = conversionService.convert(EnumWithSubclass.FIRST, String.class);
+		assertEquals("FIRST", result);
+	}
+
+	@Test
 	public void testEnumWithInterfaceToStringConversion() {
 		// SPR-9692
 		conversionService.addConverter(new EnumToStringConverter(conversionService));
@@ -850,6 +859,7 @@ public class GenericConversionServiceTests {
 	@ExampleAnnotation
 	public String annotatedString;
 
+
 	@Retention(RetentionPolicy.RUNTIME)
 	public static @interface ExampleAnnotation {
 	}
@@ -892,8 +902,7 @@ public class GenericConversionServiceTests {
 		}
 
 		@Override
-		public Object convert(Object source, TypeDescriptor sourceType,
-				TypeDescriptor targetType) {
+		public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
 			return null;
 		}
 
@@ -936,12 +945,24 @@ public class GenericConversionServiceTests {
 		String getCode();
 	}
 
+
 	public static enum MyEnum implements MyEnumInterface {
 
 		A {
 			@Override
 			public String getCode() {
 				return "1";
+			}
+		}
+	}
+
+
+	public enum EnumWithSubclass {
+
+		FIRST {
+			@Override
+			public String toString() {
+				return "1st";
 			}
 		}
 	}
@@ -955,6 +976,7 @@ public class GenericConversionServiceTests {
 		}
 	}
 
+
 	public static class MyStringToGenericCollectionConverter implements Converter<String, Collection<?>> {
 
 		@Override
@@ -962,6 +984,7 @@ public class GenericConversionServiceTests {
 			return Collections.singleton(source + "X");
 		}
 	}
+
 
 	private static class MyEnumInterfaceToStringConverter<T extends MyEnumInterface> implements Converter<T, String> {
 
@@ -971,6 +994,7 @@ public class GenericConversionServiceTests {
 		}
 	}
 
+
 	public static class MyStringToStringCollectionConverter implements Converter<String, Collection<String>> {
 
 		@Override
@@ -978,6 +1002,7 @@ public class GenericConversionServiceTests {
 			return Collections.singleton(source + "X");
 		}
 	}
+
 
 	public static class MyStringToIntegerCollectionConverter implements Converter<String, Collection<Integer>> {
 

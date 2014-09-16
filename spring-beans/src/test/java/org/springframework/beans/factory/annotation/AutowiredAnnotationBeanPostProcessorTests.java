@@ -2610,7 +2610,7 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 	}
 
 
-	public static class GenericInterface1Impl<T> implements GenericInterface1<T>{
+	public static class GenericInterface1Impl<T> implements GenericInterface1<T> {
 
 		@Autowired
 		private GenericInterface2<T> gi2;

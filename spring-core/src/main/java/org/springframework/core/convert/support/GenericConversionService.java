@@ -200,7 +200,7 @@ public class GenericConversionService implements ConfigurableConversionService {
 	}
 
 
-	// subclassing hooks
+	// Protected template methods
 
 	/**
 	 * Template method to convert a null source.
@@ -548,7 +548,7 @@ public class GenericConversionService implements ConfigurableConversionService {
 				Class<?> candidate = hierarchy.get(i);
 				candidate = (array ? candidate.getComponentType() : ClassUtils.resolvePrimitiveIfNecessary(candidate));
 				Class<?> superclass = candidate.getSuperclass();
-				if (candidate.getSuperclass() != null && superclass != Object.class) {
+				if (superclass != null && superclass != Object.class) {
 					addToClassHierarchy(i + 1, candidate.getSuperclass(), array, hierarchy, visited);
 				}
 				for (Class<?> implementedInterface : candidate.getInterfaces()) {
@@ -563,6 +563,7 @@ public class GenericConversionService implements ConfigurableConversionService {
 
 		private void addToClassHierarchy(int index, Class<?> type, boolean asArray,
 				List<Class<?>> hierarchy, Set<Class<?>> visited) {
+
 			if (asArray) {
 				type = Array.newInstance(type, 0).getClass();
 			}

@@ -194,7 +194,6 @@ public class SocketUtils {
 	private static enum SocketType {
 
 		TCP {
-
 			@Override
 			protected boolean isPortAvailable(int port) {
 				try {
@@ -209,7 +208,6 @@ public class SocketUtils {
 		},
 
 		UDP {
-
 			@Override
 			protected boolean isPortAvailable(int port) {
 				try {

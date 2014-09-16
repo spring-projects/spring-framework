@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,8 +40,7 @@ public @interface Header {
 
 	/**
 	 * Whether the header is required.
-	 * <p>
-	 * Default is {@code true}, leading to an exception if the header missing. Switch this
+	 * <p>Default is {@code true}, leading to an exception if the header missing. Switch this
 	 * to {@code false} if you prefer a {@code null} in case of the header missing.
 	 */
 	boolean required() default true;
