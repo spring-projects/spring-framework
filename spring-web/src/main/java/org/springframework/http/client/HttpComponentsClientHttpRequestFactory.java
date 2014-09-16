@@ -84,7 +84,7 @@ public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequest
 	public HttpComponentsClientHttpRequestFactory(HttpClient httpClient) {
 		Assert.notNull(httpClient, "'httpClient' must not be null");
 		Assert.isInstanceOf(CloseableHttpClient.class, httpClient, "'httpClient' is not of type CloseableHttpClient");
-        this.httpClient = (CloseableHttpClient) httpClient;
+        	this.httpClient = (CloseableHttpClient) httpClient;
 	}
 
 
@@ -185,32 +185,12 @@ public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequest
         if (context == null) {
             context = HttpClientContext.create();
         }
-        // Request configuration not set in the context
-        if (context.getAttribute(HttpClientContext.REQUEST_CONFIG) == null) {
-            // Use request configuration given by the user, when available
-            RequestConfig config = null;
-            if (httpRequest instanceof Configurable) {
-                config = ((Configurable) httpRequest).getConfig();
-            }
-            if (config == null) {
-                if (this.socketTimeout > 0 || this.connectTimeout > 0) {
-                    config = RequestConfig.custom()
-                            .setConnectTimeout(this.connectTimeout)
-                            .setSocketTimeout(this.socketTimeout)
-                            .build();
-                }
-				else {
-                    config = RequestConfig.DEFAULT;
-                }
-            }
-            context.setAttribute(HttpClientContext.REQUEST_CONFIG, config);
-        }
-		if (this.bufferRequestBody) {
-			return new HttpComponentsClientHttpRequest(client, httpRequest, context);
-		}
-		else {
-			return new HttpComponentsStreamingClientHttpRequest(client, httpRequest, context);
-		}
+	if (this.bufferRequestBody) {
+		return new HttpComponentsClientHttpRequest(client, httpRequest, context);
+	}
+	else {
+		return new HttpComponentsStreamingClientHttpRequest(client, httpRequest, context);
+	}
 	}
 
 	/**
