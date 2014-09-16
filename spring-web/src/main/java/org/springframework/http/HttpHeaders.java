@@ -301,7 +301,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 */
 	public MediaType getContentType() {
 		String value = getFirst(CONTENT_TYPE);
-		return (value != null ? MediaType.parseMediaType(value) : null);
+		return (StringUtils.hasLength(value) ? MediaType.parseMediaType(value) : null);
 	}
 
 	/**
