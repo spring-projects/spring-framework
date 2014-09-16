@@ -21,16 +21,14 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.List;
-import java.util.Map;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.util.StreamUtils;
 
 /**
- * {@link ClientHttpRequest} implementation that uses standard J2SE facilities to execute streaming requests.
- * Created via the {@link SimpleClientHttpRequestFactory}.
+ * {@link ClientHttpRequest} implementation that uses standard JDK facilities to
+ * execute streaming requests. Created via the {@link SimpleClientHttpRequestFactory}.
  *
  * @author Arjen Poutsma
  * @since 3.0
@@ -80,20 +78,11 @@ final class SimpleStreamingClientHttpRequest extends AbstractClientHttpRequest {
 					this.connection.setChunkedStreamingMode(this.chunkSize);
 				}
 			}
-			writeHeaders(headers);
+			SimpleBufferingClientHttpRequest.addHeaders(this.connection, headers);
 			this.connection.connect();
 			this.body = this.connection.getOutputStream();
 		}
 		return StreamUtils.nonClosing(this.body);
-	}
-
-	private void writeHeaders(HttpHeaders headers) {
-		for (Map.Entry<String, List<String>> entry : headers.entrySet()) {
-			String headerName = entry.getKey();
-			for (String headerValue : entry.getValue()) {
-				this.connection.addRequestProperty(headerName, headerValue);
-			}
-		}
 	}
 
 	@Override
@@ -103,7 +92,7 @@ final class SimpleStreamingClientHttpRequest extends AbstractClientHttpRequest {
 				this.body.close();
 			}
 			else {
-				writeHeaders(headers);
+				SimpleBufferingClientHttpRequest.addHeaders(this.connection, headers);
 				this.connection.connect();
 			}
 		}

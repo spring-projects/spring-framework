@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,12 +26,14 @@ import java.util.Map;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.util.FileCopyUtils;
+import org.springframework.util.StringUtils;
 
 /**
- * {@link ClientHttpRequest} implementation that uses standard J2SE facilities to execute buffered requests.
- * Created via the {@link SimpleClientHttpRequestFactory}.
+ * {@link ClientHttpRequest} implementation that uses standard JDK facilities to
+ * execute buffered requests. Created via the {@link SimpleClientHttpRequestFactory}.
  *
  * @author Arjen Poutsma
+ * @author Juergen Hoeller
  * @since 3.0
  * @see SimpleClientHttpRequestFactory#createRequest(java.net.URI, HttpMethod)
  */
@@ -65,12 +67,7 @@ final class SimpleBufferingClientHttpRequest extends AbstractBufferingClientHttp
 
 	@Override
 	protected ClientHttpResponse executeInternal(HttpHeaders headers, byte[] bufferedOutput) throws IOException {
-		for (Map.Entry<String, List<String>> entry : headers.entrySet()) {
-			String headerName = entry.getKey();
-			for (String headerValue : entry.getValue()) {
-				this.connection.addRequestProperty(headerName, headerValue);
-			}
-		}
+		addHeaders(this.connection, headers);
 
 		if (this.connection.getDoOutput() && this.outputStreaming) {
 			this.connection.setFixedLengthStreamingMode(bufferedOutput.length);
@@ -81,6 +78,27 @@ final class SimpleBufferingClientHttpRequest extends AbstractBufferingClientHttp
 		}
 
 		return new SimpleClientHttpResponse(this.connection);
+	}
+
+
+	/**
+	 * Add the given headers to the given HTTP connection.
+	 * @param connection the connection to add the headers to
+	 * @param headers the headers to add
+	 */
+	static void addHeaders(HttpURLConnection connection, HttpHeaders headers) {
+		for (Map.Entry<String, List<String>> entry : headers.entrySet()) {
+			String headerName = entry.getKey();
+			if ("Cookie".equalsIgnoreCase(headerName)) {  // RFC 6265
+				String headerValue = StringUtils.collectionToDelimitedString(entry.getValue(), "; ");
+				connection.setRequestProperty(headerName, headerValue);
+			}
+			else {
+				for (String headerValue : entry.getValue()) {
+					connection.addRequestProperty(headerName, headerValue);
+				}
+			}
+		}
 	}
 
 }
