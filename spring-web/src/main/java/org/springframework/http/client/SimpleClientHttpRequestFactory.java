@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.util.Assert;
 
 /**
- * {@link ClientHttpRequestFactory} implementation that uses standard J2SE facilities.
+ * {@link ClientHttpRequestFactory} implementation that uses standard JDK facilities.
  *
  * @author Arjen Poutsma
  * @author Juergen Hoeller
@@ -36,8 +36,7 @@ import org.springframework.util.Assert;
  * @see java.net.HttpURLConnection
  * @see HttpComponentsClientHttpRequestFactory
  */
-public class SimpleClientHttpRequestFactory
-		implements ClientHttpRequestFactory, AsyncClientHttpRequestFactory {
+public class SimpleClientHttpRequestFactory implements ClientHttpRequestFactory, AsyncClientHttpRequestFactory {
 
 	private static final int DEFAULT_CHUNK_SIZE = 4096;
 
@@ -111,14 +110,12 @@ public class SimpleClientHttpRequestFactory
 	}
 
 	/**
-	 * Set if the underlying URLConnection can be set to 'output streaming' mode. When
-	 * output streaming is enabled, authentication and redirection cannot be handled
-	 * automatically. If output streaming is disabled the
-	 * {@link HttpURLConnection#setFixedLengthStreamingMode(int)
-	 * setFixedLengthStreamingMode} and
-	 * {@link HttpURLConnection#setChunkedStreamingMode(int) setChunkedStreamingMode}
-	 * methods of the underlying connection will never be called.
-	 * <p>Default is {@code true}.
+	 * Set if the underlying URLConnection can be set to 'output streaming' mode.
+	 * Default is {@code true}.
+	 * <p>When output streaming is enabled, authentication and redirection cannot be handled automatically.
+	 * If output streaming is disabled, the {@link HttpURLConnection#setFixedLengthStreamingMode} and
+	 * {@link HttpURLConnection#setChunkedStreamingMode} methods of the underlying connection will never
+	 * be called.
 	 * @param outputStreaming if output streaming is enabled
 	 */
 	public void setOutputStreaming(boolean outputStreaming) {
@@ -126,14 +123,14 @@ public class SimpleClientHttpRequestFactory
 	}
 
 	/**
-	 * Sets the task executor for this request factory. Setting this property is required
-	 * for {@linkplain #createAsyncRequest(URI, HttpMethod) creating asynchronous
-	 * request}.
+	 * Set the task executor for this request factory. Setting this property is required
+	 * for {@linkplain #createAsyncRequest(URI, HttpMethod) creating asynchronous requests}.
 	 * @param taskExecutor the task executor
 	 */
 	public void setTaskExecutor(AsyncListenableTaskExecutor taskExecutor) {
 		this.taskExecutor = taskExecutor;
 	}
+
 
 	@Override
 	public ClientHttpRequest createRequest(URI uri, HttpMethod httpMethod) throws IOException {
@@ -153,10 +150,8 @@ public class SimpleClientHttpRequestFactory
 	 * is required before calling this method.
 	 */
 	@Override
-	public AsyncClientHttpRequest createAsyncRequest(URI uri, HttpMethod httpMethod)
-			throws IOException {
-		Assert.state(this.taskExecutor != null, "Asynchronous execution requires an " +
-				"AsyncTaskExecutor to be set");
+	public AsyncClientHttpRequest createAsyncRequest(URI uri, HttpMethod httpMethod) throws IOException {
+		Assert.state(this.taskExecutor != null, "Asynchronous execution requires an AsyncTaskExecutor to be set");
 		HttpURLConnection connection = openConnection(uri.toURL(), this.proxy);
 		prepareConnection(connection, httpMethod.name());
 		if (this.bufferRequestBody) {
