@@ -311,7 +311,8 @@ class ConfigurationClassParser {
 	 */
 	private void processMemberClasses(ConfigurationClass configClass, SourceClass sourceClass) throws IOException {
 		for (SourceClass memberClass : sourceClass.getMemberClasses()) {
-			if (ConfigurationClassUtils.isConfigurationCandidate(memberClass.getMetadata())) {
+			if (ConfigurationClassUtils.isConfigurationCandidate(memberClass.getMetadata()) &&
+					!memberClass.getMetadata().getClassName().equals(configClass.getMetadata().getClassName())) {
 				processConfigurationClass(memberClass.asConfigClass(configClass));
 			}
 		}
