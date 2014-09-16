@@ -38,7 +38,6 @@ import static org.junit.Assert.*;
  *
  * @author Chris Beams
  * @author Phillip Webb
- * @author Martin Becker
  * @since 3.1
  */
 public class PropertySourceAnnotationTests {
@@ -173,10 +172,10 @@ public class PropertySourceAnnotationTests {
 	}
 	
 	@Test
-	public void orderingWithAndWithoutNameAndThreeResourceLocations() {
+	public void orderingWithAndWithoutNameAndFourResourceLocations() {
 		// p2 should 'win' as it was registered last
-		AnnotationConfigApplicationContext ctxWithoutName = new AnnotationConfigApplicationContext(ConfigWithThreeResourceLocations.class);
-		assertThat(ctxWithoutName.getEnvironment().getProperty("testbean.name"), equalTo("p3TestBean"));
+		AnnotationConfigApplicationContext ctxWithoutName = new AnnotationConfigApplicationContext(ConfigWithFourResourceLocations.class);
+		assertThat(ctxWithoutName.getEnvironment().getProperty("testbean.name"), equalTo("p4TestBean"));
 	}
 
 	@Test
@@ -368,9 +367,10 @@ public class PropertySourceAnnotationTests {
 			value = {
 					"classpath:org/springframework/context/annotation/p1.properties",
 					"classpath:org/springframework/context/annotation/p2.properties",
-					"classpath:org/springframework/context/annotation/p3.properties"
+					"classpath:org/springframework/context/annotation/p3.properties",
+					"classpath:org/springframework/context/annotation/p4.properties"
 			})
-	static class ConfigWithThreeResourceLocations {
+	static class ConfigWithFourResourceLocations {
 	}
 
 	@Configuration
