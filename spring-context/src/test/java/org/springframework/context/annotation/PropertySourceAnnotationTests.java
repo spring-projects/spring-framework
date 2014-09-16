@@ -18,12 +18,12 @@ package org.springframework.context.annotation;
 
 import java.io.FileNotFoundException;
 import java.util.Iterator;
-
 import javax.inject.Inject;
 
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.core.env.Environment;
@@ -169,13 +169,6 @@ public class PropertySourceAnnotationTests {
 		AnnotationConfigApplicationContext ctxWithoutName = new AnnotationConfigApplicationContext(ConfigWithMultipleResourceLocations.class);
 		assertThat(ctxWithoutName.getEnvironment().getProperty("testbean.name"), equalTo("p2TestBean"));
 		assertThat(ctxWithName.getEnvironment().getProperty("testbean.name"), equalTo("p2TestBean"));
-	}
-	
-	@Test
-	public void orderingWithAndWithoutNameAndFourResourceLocations() {
-		// p2 should 'win' as it was registered last
-		AnnotationConfigApplicationContext ctxWithoutName = new AnnotationConfigApplicationContext(ConfigWithFourResourceLocations.class);
-		assertThat(ctxWithoutName.getEnvironment().getProperty("testbean.name"), equalTo("p4TestBean"));
 	}
 
 	@Test
@@ -361,17 +354,7 @@ public class PropertySourceAnnotationTests {
 			})
 	static class ConfigWithMultipleResourceLocations {
 	}
-	
-	@Configuration
-	@PropertySource(
-			value = {
-					"classpath:org/springframework/context/annotation/p1.properties",
-					"classpath:org/springframework/context/annotation/p2.properties",
-					"classpath:org/springframework/context/annotation/p3.properties",
-					"classpath:org/springframework/context/annotation/p4.properties"
-			})
-	static class ConfigWithFourResourceLocations {
-	}
+
 
 	@Configuration
 	@PropertySources({
