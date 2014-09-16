@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -776,7 +776,7 @@ public class ExtendedBeanInfoTests {
 
 	@Test
 	public void propertyDescriptorComparator() throws IntrospectionException {
-		PropertyDescriptorComparator c = new PropertyDescriptorComparator();
+		ExtendedBeanInfo.PropertyDescriptorComparator c = new ExtendedBeanInfo.PropertyDescriptorComparator();
 
 		assertThat(c.compare(new PropertyDescriptor("a", null, null), new PropertyDescriptor("a", null, null)), equalTo(0));
 		assertThat(c.compare(new PropertyDescriptor("abc", null, null), new PropertyDescriptor("abc", null, null)), equalTo(0));
@@ -792,53 +792,6 @@ public class ExtendedBeanInfoTests {
 		assertThat(c.compare(new PropertyDescriptor("1", null, null), new PropertyDescriptor("a", null, null)), lessThan(0));
 		assertThat(c.compare(new PropertyDescriptor("a", null, null), new PropertyDescriptor("A", null, null)), greaterThan(0));
 	}
-
-	private boolean hasWriteMethodForProperty(BeanInfo beanInfo, String propertyName) {
-		for (PropertyDescriptor pd : beanInfo.getPropertyDescriptors()) {
-			if (pd.getName().equals(propertyName)) {
-				return pd.getWriteMethod() != null;
-			}
-		}
-		return false;
-	}
-
-	private boolean hasReadMethodForProperty(BeanInfo beanInfo, String propertyName) {
-		for (PropertyDescriptor pd : beanInfo.getPropertyDescriptors()) {
-			if (pd.getName().equals(propertyName)) {
-				return pd.getReadMethod() != null;
-			}
-		}
-		return false;
-	}
-
-	private boolean hasIndexedWriteMethodForProperty(BeanInfo beanInfo, String propertyName) {
-		for (PropertyDescriptor pd : beanInfo.getPropertyDescriptors()) {
-			if (pd.getName().equals(propertyName)) {
-				if (!(pd instanceof IndexedPropertyDescriptor)) {
-					return false;
-				}
-				return ((IndexedPropertyDescriptor)pd).getIndexedWriteMethod() != null;
-			}
-		}
-		return false;
-	}
-
-	private boolean hasIndexedReadMethodForProperty(BeanInfo beanInfo, String propertyName) {
-		for (PropertyDescriptor pd : beanInfo.getPropertyDescriptors()) {
-			if (pd.getName().equals(propertyName)) {
-				if (!(pd instanceof IndexedPropertyDescriptor)) {
-					return false;
-				}
-				return ((IndexedPropertyDescriptor)pd).getIndexedReadMethod() != null;
-			}
-		}
-		return false;
-	}
-
-	private boolean trueUntilJdk17() {
-		return JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_17;
-	}
-
 
 	@Test
 	public void reproSpr8806() throws IntrospectionException {
@@ -923,19 +876,70 @@ public class ExtendedBeanInfoTests {
 	}
 
 
+	private boolean hasWriteMethodForProperty(BeanInfo beanInfo, String propertyName) {
+		for (PropertyDescriptor pd : beanInfo.getPropertyDescriptors()) {
+			if (pd.getName().equals(propertyName)) {
+				return pd.getWriteMethod() != null;
+			}
+		}
+		return false;
+	}
+
+	private boolean hasReadMethodForProperty(BeanInfo beanInfo, String propertyName) {
+		for (PropertyDescriptor pd : beanInfo.getPropertyDescriptors()) {
+			if (pd.getName().equals(propertyName)) {
+				return pd.getReadMethod() != null;
+			}
+		}
+		return false;
+	}
+
+	private boolean hasIndexedWriteMethodForProperty(BeanInfo beanInfo, String propertyName) {
+		for (PropertyDescriptor pd : beanInfo.getPropertyDescriptors()) {
+			if (pd.getName().equals(propertyName)) {
+				if (!(pd instanceof IndexedPropertyDescriptor)) {
+					return false;
+				}
+				return ((IndexedPropertyDescriptor)pd).getIndexedWriteMethod() != null;
+			}
+		}
+		return false;
+	}
+
+	private boolean hasIndexedReadMethodForProperty(BeanInfo beanInfo, String propertyName) {
+		for (PropertyDescriptor pd : beanInfo.getPropertyDescriptors()) {
+			if (pd.getName().equals(propertyName)) {
+				if (!(pd instanceof IndexedPropertyDescriptor)) {
+					return false;
+				}
+				return ((IndexedPropertyDescriptor)pd).getIndexedReadMethod() != null;
+			}
+		}
+		return false;
+	}
+
+	private boolean trueUntilJdk17() {
+		return JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_17;
+	}
+
+
 	interface Spr9453<T> {
 
 		T getProp();
 	}
 
+
 	interface Book {
 	}
+
 
 	interface TextBook extends Book {
 	}
 
+
 	interface LawBook extends TextBook {
 	}
+
 
 	interface BookOperations {
 
@@ -944,11 +948,13 @@ public class ExtendedBeanInfoTests {
 		void setBook(Book book);
 	}
 
+
 	interface TextBookOperations extends BookOperations {
 
 		@Override
 		TextBook getBook();
 	}
+
 
 	abstract class Library {
 
@@ -960,6 +966,7 @@ public class ExtendedBeanInfoTests {
 		}
 	}
 
+
 	class LawLibrary extends Library implements TextBookOperations {
 
 		@Override
@@ -967,6 +974,7 @@ public class ExtendedBeanInfoTests {
 			return null;
 		}
 	}
+
 
 	static class WithStaticWriteMethod {
 
