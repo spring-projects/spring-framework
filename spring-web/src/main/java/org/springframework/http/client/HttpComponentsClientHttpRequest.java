@@ -32,6 +32,7 @@ import org.apache.http.protocol.HttpContext;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.util.StringUtils;
 
 /**
  * {@link org.springframework.http.client.ClientHttpRequest} implementation that uses
@@ -41,6 +42,7 @@ import org.springframework.http.HttpMethod;
  *
  * @author Oleg Kalnichevski
  * @author Arjen Poutsma
+ * @author Juergen Hoeller
  * @since 3.1
  * @see HttpComponentsClientHttpRequestFactory#createRequest(URI, HttpMethod)
  */
@@ -97,8 +99,12 @@ final class HttpComponentsClientHttpRequest extends AbstractBufferingClientHttpR
 	static void addHeaders(HttpUriRequest httpRequest, HttpHeaders headers) {
 		for (Map.Entry<String, List<String>> entry : headers.entrySet()) {
 			String headerName = entry.getKey();
-			if (!headerName.equalsIgnoreCase(HTTP.CONTENT_LEN) &&
-					!headerName.equalsIgnoreCase(HTTP.TRANSFER_ENCODING)) {
+			if (HttpHeaders.COOKIE.equalsIgnoreCase(headerName)) {  // RFC 6265
+				String headerValue = StringUtils.collectionToDelimitedString(entry.getValue(), "; ");
+				httpRequest.addHeader(headerName, headerValue);
+			}
+			else if (!HTTP.CONTENT_LEN.equalsIgnoreCase(headerName) &&
+					!HTTP.TRANSFER_ENCODING.equalsIgnoreCase(headerName)) {
 				for (String headerValue : entry.getValue()) {
 					httpRequest.addHeader(headerName, headerValue);
 				}
