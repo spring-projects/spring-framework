@@ -26,7 +26,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.xml.transform.Source;
 
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanInitializationException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
@@ -208,9 +207,10 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	 * Set the Spring {@link ApplicationContext}, e.g. for resource loading.
 	 */
 	@Override
-	public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+	public void setApplicationContext(ApplicationContext applicationContext) {
 		this.applicationContext = applicationContext;
 	}
+
 
 	/**
 	 * Return a {@link RequestMappingHandlerMapping} ordered at 0 for mapping
@@ -218,7 +218,6 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	 */
 	@Bean
 	public RequestMappingHandlerMapping requestMappingHandlerMapping() {
-
 		RequestMappingHandlerMapping handlerMapping = new RequestMappingHandlerMapping();
 		handlerMapping.setOrder(0);
 		handlerMapping.setInterceptors(getInterceptors());
@@ -265,7 +264,7 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	 * use {@link #addInterceptors(InterceptorRegistry)} instead.
 	 */
 	protected final Object[] getInterceptors() {
-		if (interceptors == null) {
+		if (this.interceptors == null) {
 			InterceptorRegistry registry = new InterceptorRegistry();
 			addInterceptors(registry);
 			registry.addInterceptor(new ConversionServiceExposingInterceptor(mvcConversionService()));
@@ -336,7 +335,7 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 		addViewControllers(registry);
 
 		AbstractHandlerMapping handlerMapping = registry.getHandlerMapping();
-		handlerMapping = handlerMapping != null ? handlerMapping : new EmptyHandlerMapping();
+		handlerMapping = (handlerMapping != null ? handlerMapping : new EmptyHandlerMapping());
 		handlerMapping.setPathMatcher(mvcPathMatcher());
 		handlerMapping.setUrlPathHelper(mvcUrlPathHelper());
 		handlerMapping.setInterceptors(getInterceptors());
@@ -369,11 +368,11 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	 */
 	@Bean
 	public HandlerMapping resourceHandlerMapping() {
-		ResourceHandlerRegistry registry = new ResourceHandlerRegistry(
-				this.applicationContext, this.servletContext);
+		ResourceHandlerRegistry registry = new ResourceHandlerRegistry(this.applicationContext, this.servletContext);
 		addResourceHandlers(registry);
+
 		AbstractHandlerMapping handlerMapping = registry.getHandlerMapping();
-		handlerMapping = handlerMapping != null ? handlerMapping : new EmptyHandlerMapping();
+		handlerMapping = (handlerMapping != null ? handlerMapping : new EmptyHandlerMapping());
 		handlerMapping.setPathMatcher(mvcPathMatcher());
 		handlerMapping.setUrlPathHelper(mvcUrlPathHelper());
 		return handlerMapping;
@@ -509,24 +508,16 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 					String className = "org.springframework.validation.beanvalidation.OptionalValidatorFactoryBean";
 					clazz = ClassUtils.forName(className, WebMvcConfigurationSupport.class.getClassLoader());
 				}
-				catch (ClassNotFoundException e) {
-					throw new BeanInitializationException("Could not find default validator", e);
+				catch (ClassNotFoundException ex) {
+					throw new BeanInitializationException("Could not find default validator class", ex);
 				}
-				catch (LinkageError e) {
-					throw new BeanInitializationException("Could not find default validator", e);
+				catch (LinkageError ex) {
+					throw new BeanInitializationException("Could not load default validator class", ex);
 				}
 				validator = (Validator) BeanUtils.instantiate(clazz);
 			}
 			else {
-				validator = new Validator() {
-					@Override
-					public boolean supports(Class<?> clazz) {
-						return false;
-					}
-					@Override
-					public void validate(Object target, Errors errors) {
-					}
-				};
+				validator = new NoOpValidator();
 			}
 		}
 		return validator;
@@ -618,14 +609,14 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	 * used to add default message converters.
 	 */
 	protected final List<HttpMessageConverter<?>> getMessageConverters() {
-		if (messageConverters == null) {
-			messageConverters = new ArrayList<HttpMessageConverter<?>>();
-			configureMessageConverters(messageConverters);
-			if (messageConverters.isEmpty()) {
-				addDefaultHttpMessageConverters(messageConverters);
+		if (this.messageConverters == null) {
+			this.messageConverters = new ArrayList<HttpMessageConverter<?>>();
+			configureMessageConverters(this.messageConverters);
+			if (this.messageConverters.isEmpty()) {
+				addDefaultHttpMessageConverters(this.messageConverters);
 			}
 		}
-		return messageConverters;
+		return this.messageConverters;
 	}
 
 	/**
@@ -791,11 +782,9 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	 * resolution is used in which case the order is raised to
 	 * {@link org.springframework.core.Ordered#HIGHEST_PRECEDENCE
 	 * Ordered.HIGHEST_PRECEDENCE}.
-	 *
 	 * <p>If no other resolvers are configured,
 	 * {@link ViewResolverComposite#resolveViewName(String, Locale)} returns null in order
 	 * to allow other potential {@link ViewResolver} beans to resolve views.
-	 *
 	 * @since 4.1
 	 */
 	@Bean
@@ -821,11 +810,24 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	}
 
 
-	private final static class EmptyHandlerMapping extends AbstractHandlerMapping {
+	private static final class EmptyHandlerMapping extends AbstractHandlerMapping {
 
 		@Override
-		protected Object getHandlerInternal(HttpServletRequest request) throws Exception {
+		protected Object getHandlerInternal(HttpServletRequest request) {
 			return null;
+		}
+	}
+
+
+	private static final class NoOpValidator implements Validator {
+
+		@Override
+		public boolean supports(Class<?> clazz) {
+			return false;
+		}
+
+		@Override
+		public void validate(Object target, Errors errors) {
 		}
 	}
 
