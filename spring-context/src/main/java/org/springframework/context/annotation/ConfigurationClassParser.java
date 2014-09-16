@@ -93,6 +93,7 @@ import org.springframework.util.StringUtils;
  * @author Chris Beams
  * @author Juergen Hoeller
  * @author Phillip Webb
+ * @author Martin Becker
  * @since 3.0
  * @see ConfigurationClassBeanDefinitionReader
  */
@@ -374,8 +375,7 @@ class ConfigurationClassParser {
 				propertySources.addLast(propertySource);
 			}
 			else {
-				String firstProcessed = this.propertySourceNames.iterator().next();
-				propertySources.addBefore(firstProcessed, propertySource);
+				propertySources.addFirst(propertySource);
 			}
 		}
 		this.propertySourceNames.add(name);
