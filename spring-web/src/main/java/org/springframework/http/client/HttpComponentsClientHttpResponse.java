@@ -32,6 +32,8 @@ import org.springframework.http.HttpHeaders;
  *
  * <p>Created via the {@link HttpComponentsClientHttpRequest}.
  *
+ * <p><b>NOTE:</b> Requires Apache HttpComponents 4.3 or higher, as of Spring 4.0.
+ *
  * @author Oleg Kalnichevski
  * @author Arjen Poutsma
  * @since 3.1

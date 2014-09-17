@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,6 +33,7 @@ import org.springframework.scheduling.Trigger;
 import org.springframework.scheduling.concurrent.ConcurrentTaskScheduler;
 import org.springframework.scheduling.support.CronTrigger;
 import org.springframework.util.Assert;
+import org.springframework.util.CollectionUtils;
 
 /**
  * Helper bean for registering tasks with a {@link TaskScheduler}, typically using cron
@@ -268,10 +269,10 @@ public class ScheduledTaskRegistrar implements InitializingBean, DisposableBean 
 	 * @since 3.2
 	 */
 	public boolean hasTasks() {
-		return (this.fixedRateTasks != null && !this.fixedRateTasks.isEmpty()) ||
-				(this.fixedDelayTasks != null && !this.fixedDelayTasks.isEmpty()) ||
-				(this.cronTasks != null && !this.cronTasks.isEmpty()) ||
-				(this.triggerTasks != null && !this.triggerTasks.isEmpty());
+		return (!CollectionUtils.isEmpty(this.triggerTasks) ||
+				!CollectionUtils.isEmpty(this.cronTasks) ||
+				!CollectionUtils.isEmpty(this.fixedRateTasks) ||
+				!CollectionUtils.isEmpty(this.fixedDelayTasks));
 	}
 
 
@@ -295,19 +296,19 @@ public class ScheduledTaskRegistrar implements InitializingBean, DisposableBean 
 			this.taskScheduler = new ConcurrentTaskScheduler(this.localExecutor);
 		}
 		if (this.triggerTasks != null) {
-			for (TriggerTask task : triggerTasks) {
+			for (TriggerTask task : this.triggerTasks) {
 				this.scheduledFutures.add(this.taskScheduler.schedule(
 						task.getRunnable(), task.getTrigger()));
 			}
 		}
 		if (this.cronTasks != null) {
-			for (CronTask task : cronTasks) {
+			for (CronTask task : this.cronTasks) {
 				this.scheduledFutures.add(this.taskScheduler.schedule(
 						task.getRunnable(), task.getTrigger()));
 			}
 		}
 		if (this.fixedRateTasks != null) {
-			for (IntervalTask task : fixedRateTasks) {
+			for (IntervalTask task : this.fixedRateTasks) {
 				if (task.getInitialDelay() > 0) {
 					Date startTime = new Date(now + task.getInitialDelay());
 					this.scheduledFutures.add(this.taskScheduler.scheduleAtFixedRate(
@@ -320,7 +321,7 @@ public class ScheduledTaskRegistrar implements InitializingBean, DisposableBean 
 			}
 		}
 		if (this.fixedDelayTasks != null) {
-			for (IntervalTask task : fixedDelayTasks) {
+			for (IntervalTask task : this.fixedDelayTasks) {
 				if (task.getInitialDelay() > 0) {
 					Date startTime = new Date(now + task.getInitialDelay());
 					this.scheduledFutures.add(this.taskScheduler.scheduleWithFixedDelay(
