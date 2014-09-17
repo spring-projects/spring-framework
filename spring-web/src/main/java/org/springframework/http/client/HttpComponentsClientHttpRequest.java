@@ -40,6 +40,8 @@ import org.springframework.util.StringUtils;
  *
  * <p>Created via the {@link HttpComponentsClientHttpRequestFactory}.
  *
+ * <p><b>NOTE:</b> Requires Apache HttpComponents 4.3 or higher, as of Spring 4.0.
+ *
  * @author Oleg Kalnichevski
  * @author Arjen Poutsma
  * @author Juergen Hoeller
@@ -73,16 +75,16 @@ final class HttpComponentsClientHttpRequest extends AbstractBufferingClientHttpR
 	}
 
 	HttpContext getHttpContext() {
-		return httpContext;
+		return this.httpContext;
 	}
+
 
 	@Override
 	protected ClientHttpResponse executeInternal(HttpHeaders headers, byte[] bufferedOutput) throws IOException {
 		addHeaders(this.httpRequest, headers);
 
 		if (this.httpRequest instanceof HttpEntityEnclosingRequest) {
-			HttpEntityEnclosingRequest entityEnclosingRequest =
-					(HttpEntityEnclosingRequest) this.httpRequest;
+			HttpEntityEnclosingRequest entityEnclosingRequest = (HttpEntityEnclosingRequest) this.httpRequest;
 			HttpEntity requestEntity = new ByteArrayEntity(bufferedOutput);
 			entityEnclosingRequest.setEntity(requestEntity);
 		}
