@@ -194,7 +194,7 @@ public class GenericConversionService implements ConfigurableConversionService {
 	}
 
 
-	// subclassing hooks
+	// Protected template methods
 
 	/**
 	 * Template method to convert a null source.

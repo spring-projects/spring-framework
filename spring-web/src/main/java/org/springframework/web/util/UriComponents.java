@@ -269,8 +269,7 @@ public abstract class UriComponents implements Serializable {
 
 		public Object getValue(String name) {
 			if (!this.valueIterator.hasNext()) {
-				throw new IllegalArgumentException(
-						"Not enough variable values available to expand '" + name + "'");
+				throw new IllegalArgumentException("Not enough variable values available to expand '" + name + "'");
 			}
 			return this.valueIterator.next();
 		}

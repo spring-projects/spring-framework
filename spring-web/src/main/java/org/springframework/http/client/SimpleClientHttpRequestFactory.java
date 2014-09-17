@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,13 +27,13 @@ import org.springframework.http.HttpMethod;
 import org.springframework.util.Assert;
 
 /**
- * {@link ClientHttpRequestFactory} implementation that uses standard J2SE facilities.
+ * {@link ClientHttpRequestFactory} implementation that uses standard JDK facilities.
  *
  * @author Arjen Poutsma
  * @author Juergen Hoeller
  * @since 3.0
  * @see java.net.HttpURLConnection
- * @see CommonsClientHttpRequestFactory
+ * @see HttpComponentsClientHttpRequestFactory
  */
 public class SimpleClientHttpRequestFactory implements ClientHttpRequestFactory {
 
@@ -107,14 +107,12 @@ public class SimpleClientHttpRequestFactory implements ClientHttpRequestFactory 
 	}
 
 	/**
-	 * Set if the underlying URLConnection can be set to 'output streaming' mode. When
-	 * output streaming is enabled, authentication and redirection cannot be handled
-	 * automatically. If output streaming is disabled the
-	 * {@link HttpURLConnection#setFixedLengthStreamingMode(int)
-	 * setFixedLengthStreamingMode} and
-	 * {@link HttpURLConnection#setChunkedStreamingMode(int) setChunkedStreamingMode}
-	 * methods of the underlying connection will never be called.
-	 * <p>Default is {@code true}.
+	 * Set if the underlying URLConnection can be set to 'output streaming' mode.
+	 * Default is {@code true}.
+	 * <p>When output streaming is enabled, authentication and redirection cannot be handled automatically.
+	 * If output streaming is disabled, the {@link HttpURLConnection#setFixedLengthStreamingMode} and
+	 * {@link HttpURLConnection#setChunkedStreamingMode} methods of the underlying connection will never
+	 * be called.
 	 * @param outputStreaming if output streaming is enabled
 	 */
 	public void setOutputStreaming(boolean outputStreaming) {
@@ -129,8 +127,7 @@ public class SimpleClientHttpRequestFactory implements ClientHttpRequestFactory 
 			return new SimpleBufferingClientHttpRequest(connection, this.outputStreaming);
 		}
 		else {
-			return new SimpleStreamingClientHttpRequest(connection, this.chunkSize,
-					this.outputStreaming);
+			return new SimpleStreamingClientHttpRequest(connection, this.chunkSize, this.outputStreaming);
 		}
 	}
 
