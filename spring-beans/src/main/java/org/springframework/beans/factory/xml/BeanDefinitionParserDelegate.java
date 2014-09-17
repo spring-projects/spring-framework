@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -137,6 +137,8 @@ public class BeanDefinitionParserDelegate {
 
 	public static final String SCOPE_ATTRIBUTE = "scope";
 
+	private static final String SINGLETON_ATTRIBUTE = "singleton";
+
 	public static final String LAZY_INIT_ATTRIBUTE = "lazy-init";
 
 	public static final String AUTOWIRE_ATTRIBUTE = "autowire";
@@ -244,11 +246,11 @@ public class BeanDefinitionParserDelegate {
 
 	private final XmlReaderContext readerContext;
 
+	private final Environment environment;
+
 	private final DocumentDefaultsDefinition defaults = new DocumentDefaultsDefinition();
 
 	private final ParseState parseState = new ParseState();
-
-	private Environment environment;
 
 	/**
 	 * Stores all used bean names so we can enforce uniqueness on a per
@@ -264,7 +266,7 @@ public class BeanDefinitionParserDelegate {
 	 */
 	public BeanDefinitionParserDelegate(XmlReaderContext readerContext, Environment environment) {
 		Assert.notNull(readerContext, "XmlReaderContext must not be null");
-		Assert.notNull(readerContext, "Environment must not be null");
+		Assert.notNull(environment, "Environment must not be null");
 		this.readerContext = readerContext;
 		this.environment = environment;
 	}
@@ -279,6 +281,7 @@ public class BeanDefinitionParserDelegate {
 	public BeanDefinitionParserDelegate(XmlReaderContext readerContext) {
 		this(readerContext, new StandardEnvironment());
 	}
+
 
 	/**
 	 * Get the {@link XmlReaderContext} associated with this helper instance.
@@ -592,7 +595,10 @@ public class BeanDefinitionParserDelegate {
 	public AbstractBeanDefinition parseBeanDefinitionAttributes(Element ele, String beanName,
 			BeanDefinition containingBean, AbstractBeanDefinition bd) {
 
-		if (ele.hasAttribute(SCOPE_ATTRIBUTE)) {
+		if (ele.hasAttribute(SINGLETON_ATTRIBUTE)) {
+			error("Old 1.x 'singleton' attribute in use - upgrade to 'scope' declaration", ele);
+		}
+		else if (ele.hasAttribute(SCOPE_ATTRIBUTE)) {
 			bd.setScope(ele.getAttribute(SCOPE_ATTRIBUTE));
 		}
 		else if (containingBean != null) {
