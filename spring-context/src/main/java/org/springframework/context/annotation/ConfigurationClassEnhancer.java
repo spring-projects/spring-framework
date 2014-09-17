@@ -306,7 +306,7 @@ class ConfigurationClassEnhancer {
 							"result in a failure to process annotations such as @Autowired, " +
 							"@Resource and @PostConstruct within the method's declaring " +
 							"@Configuration class. Add the 'static' modifier to this method to avoid " +
-							"these container lifecycle issues; see @Bean Javadoc for complete details",
+							"these container lifecycle issues; see @Bean javadoc for complete details",
 							beanMethod.getDeclaringClass().getSimpleName(), beanMethod.getName()));
 				}
 				return cglibMethodProxy.invokeSuper(enhancedConfigInstance, beanMethodArgs);
