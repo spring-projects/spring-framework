@@ -17,10 +17,17 @@
 package org.springframework.scheduling.annotation;
 
 import java.lang.reflect.Method;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.TimeZone;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledExecutorService;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.factory.BeanFactory;
@@ -74,6 +81,8 @@ public class ScheduledAnnotationBeanPostProcessor
 		implements BeanPostProcessor, Ordered, EmbeddedValueResolverAware, BeanFactoryAware,
 		SmartInitializingSingleton, DisposableBean {
 
+	protected final Log logger = LogFactory.getLog(getClass());
+
 	private Object scheduler;
 
 	private StringValueResolver embeddedValueResolver;
@@ -81,6 +90,9 @@ public class ScheduledAnnotationBeanPostProcessor
 	private ListableBeanFactory beanFactory;
 
 	private final ScheduledTaskRegistrar registrar = new ScheduledTaskRegistrar();
+
+	private final Set<Class<?>> nonAnnotatedClasses =
+			Collections.newSetFromMap(new ConcurrentHashMap<Class<?>, Boolean>(64));
 
 
 	@Override
@@ -117,7 +129,9 @@ public class ScheduledAnnotationBeanPostProcessor
 	 */
 	@Deprecated
 	public void setApplicationContext(ApplicationContext applicationContext) {
-		this.beanFactory = applicationContext;
+		if (this.beanFactory == null) {
+			this.beanFactory = applicationContext;
+		}
 	}
 
 
@@ -146,12 +160,11 @@ public class ScheduledAnnotationBeanPostProcessor
 				this.registrar.setScheduler(schedulers.values().iterator().next());
 			}
 			else if (schedulers.size() >= 2){
-				throw new IllegalStateException(
-						"More than one TaskScheduler and/or ScheduledExecutorService  " +
-								"exist within the context. Remove all but one of the beans; or " +
-								"implement the SchedulingConfigurer interface and call " +
-								"ScheduledTaskRegistrar#setScheduler explicitly within the " +
-								"configureTasks() callback. Found the following beans: " + schedulers.keySet());
+				throw new IllegalStateException("More than one TaskScheduler and/or ScheduledExecutorService  " +
+						"exist within the context. Remove all but one of the beans; or implement the " +
+						"SchedulingConfigurer interface and call ScheduledTaskRegistrar#setScheduler " +
+						"explicitly within the configureTasks() callback. Found the following beans: " +
+						schedulers.keySet());
 			}
 		}
 
@@ -166,15 +179,33 @@ public class ScheduledAnnotationBeanPostProcessor
 
 	@Override
 	public Object postProcessAfterInitialization(final Object bean, String beanName) {
-		Class<?> targetClass = AopUtils.getTargetClass(bean);
-		ReflectionUtils.doWithMethods(targetClass, new MethodCallback() {
-			@Override
-			public void doWith(Method method) throws IllegalArgumentException, IllegalAccessException {
-				for (Scheduled scheduled : AnnotationUtils.getRepeatableAnnotation(method, Schedules.class, Scheduled.class)) {
-					processScheduled(scheduled, method, bean);
+		if (!this.nonAnnotatedClasses.contains(bean.getClass())) {
+			final Set<Method> annotatedMethods = new LinkedHashSet<Method>(1);
+			Class<?> targetClass = AopUtils.getTargetClass(bean);
+			ReflectionUtils.doWithMethods(targetClass, new MethodCallback() {
+				@Override
+				public void doWith(Method method) throws IllegalArgumentException, IllegalAccessException {
+					for (Scheduled scheduled :
+							AnnotationUtils.getRepeatableAnnotation(method, Schedules.class, Scheduled.class)) {
+						processScheduled(scheduled, method, bean);
+						annotatedMethods.add(method);
+					}
+				}
+			});
+			if (annotatedMethods.isEmpty()) {
+				this.nonAnnotatedClasses.add(bean.getClass());
+				if (logger.isDebugEnabled()) {
+					logger.debug("No @Scheduled annotations found on bean class: " + bean.getClass());
 				}
 			}
-		});
+			else {
+				// Non-empty set of methods
+				if (logger.isDebugEnabled()) {
+					logger.debug(annotatedMethods.size() + " @Scheduled methods processed on bean '" + beanName +
+							"': " + annotatedMethods);
+				}
+			}
+		}
 		return bean;
 	}
 
