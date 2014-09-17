@@ -299,8 +299,16 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 					}
 					if (!candidates.isEmpty()) {
 						// Add default constructor to list of optional constructors, as fallback.
-						if (requiredConstructor == null && defaultConstructor != null) {
-							candidates.add(defaultConstructor);
+						if (requiredConstructor == null) {
+							if (defaultConstructor != null) {
+								candidates.add(defaultConstructor);
+							}
+							else if (candidates.size() == 1 && logger.isWarnEnabled()) {
+								logger.warn("Inconsistent constructor declaration on bean with name '" + beanName +
+										"': single autowire-marked constructor flagged as optional - this constructor " +
+										"is effectively required since there is no default constructor to fall back to: " +
+										candidates.get(0));
+							}
 						}
 						candidateConstructors = candidates.toArray(new Constructor<?>[candidates.size()]);
 					}

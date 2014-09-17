@@ -35,6 +35,7 @@ import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.ObjectFactory;
+import org.springframework.beans.factory.UnsatisfiedDependencyException;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.config.TypedStringValue;
@@ -52,7 +53,6 @@ import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.util.SerializationTestUtils;
 
 import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
 
 /**
  * @author Juergen Hoeller
@@ -550,6 +550,23 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 		assertSame(ntb1, bean.getNestedTestBeans()[0]);
 		assertSame(ntb2, bean.getNestedTestBeans()[1]);
 		bf.destroySingletons();
+	}
+
+	@Test
+	public void testConstructorResourceInjectionWithNoCandidatesAndNoFallback() {
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
+		bpp.setBeanFactory(bf);
+		bf.addBeanPostProcessor(bpp);
+		bf.registerBeanDefinition("annotatedBean", new RootBeanDefinition(ConstructorWithoutFallbackBean.class));
+
+		try {
+			bf.getBean("annotatedBean");
+			fail("Should have thrown UnsatisfiedDependencyException");
+		}
+		catch (UnsatisfiedDependencyException ex) {
+			// expected
+		}
 	}
 
 	@Test
@@ -2048,6 +2065,21 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 	}
 
 
+	public static class ConstructorWithoutFallbackBean {
+
+		protected ITestBean testBean3;
+
+		@Autowired(required = false)
+		public ConstructorWithoutFallbackBean(ITestBean testBean3) {
+			this.testBean3 = testBean3;
+		}
+
+		public ITestBean getTestBean3() {
+			return this.testBean3;
+		}
+	}
+
+
 	public static class ConstructorsCollectionResourceInjectionBean {
 
 		protected ITestBean testBean3;
@@ -2112,7 +2144,6 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 
 		@Autowired
 		private Map<String, TestBean> testBeanMap;
-
 
 		public Map<String, TestBean> getTestBeanMap() {
 			return this.testBeanMap;
