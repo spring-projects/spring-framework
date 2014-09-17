@@ -48,6 +48,7 @@ public abstract class AbstractCookieValueMethodArgumentResolver extends Abstract
 		super(beanFactory);
 	}
 
+
 	@Override
 	public boolean supportsParameter(MethodParameter parameter) {
 		return parameter.hasParameterAnnotation(CookieValue.class);
@@ -60,10 +61,11 @@ public abstract class AbstractCookieValueMethodArgumentResolver extends Abstract
 	}
 
 	@Override
-	protected void handleMissingValue(String cookieName, MethodParameter parameter) throws ServletRequestBindingException {
-		throw new ServletRequestBindingException(
-				"Missing cookie named '" + cookieName + "' for method parameter type " + parameter.getParameterType().getSimpleName());
+	protected void handleMissingValue(String name, MethodParameter parameter) throws ServletRequestBindingException {
+		throw new ServletRequestBindingException("Missing cookie '" + name +
+				"' for method parameter of type " + parameter.getParameterType().getSimpleName());
 	}
+
 
 	private static class CookieValueNamedValueInfo extends NamedValueInfo {
 
@@ -71,4 +73,5 @@ public abstract class AbstractCookieValueMethodArgumentResolver extends Abstract
 			super(annotation.value(), annotation.required(), annotation.defaultValue());
 		}
 	}
+
 }

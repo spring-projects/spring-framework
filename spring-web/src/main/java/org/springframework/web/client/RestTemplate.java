@@ -125,6 +125,7 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 	private static final boolean gsonPresent =
 			ClassUtils.isPresent("com.google.gson.Gson", RestTemplate.class.getClassLoader());
 
+
 	private final List<HttpMessageConverter<?>> messageConverters = new ArrayList<HttpMessageConverter<?>>();
 
 	private ResponseErrorHandler errorHandler = new DefaultResponseErrorHandler();

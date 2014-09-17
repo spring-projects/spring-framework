@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,6 +52,7 @@ public class RequestHeaderMethodArgumentResolver extends AbstractNamedValueMetho
 		super(beanFactory);
 	}
 
+
 	@Override
 	public boolean supportsParameter(MethodParameter parameter) {
 		return parameter.hasParameterAnnotation(RequestHeader.class) &&
@@ -77,9 +78,10 @@ public class RequestHeaderMethodArgumentResolver extends AbstractNamedValueMetho
 
 	@Override
 	protected void handleMissingValue(String name, MethodParameter parameter) throws ServletRequestBindingException {
-		throw new ServletRequestBindingException("Missing header '" + name +
-				"' for method parameter type " + parameter.getParameterType().getSimpleName());
+		throw new ServletRequestBindingException("Missing request header '" + name +
+				"' for method parameter of type " + parameter.getParameterType().getSimpleName());
 	}
+
 
 	private static class RequestHeaderNamedValueInfo extends NamedValueInfo {
 
@@ -87,4 +89,5 @@ public class RequestHeaderMethodArgumentResolver extends AbstractNamedValueMetho
 			super(annotation.value(), annotation.required(), annotation.defaultValue());
 		}
 	}
+
 }

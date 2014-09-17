@@ -48,6 +48,7 @@ public class ExpressionValueMethodArgumentResolver extends AbstractNamedValueMet
 		super(beanFactory);
 	}
 
+
 	@Override
 	public boolean supportsParameter(MethodParameter parameter) {
 		return parameter.hasParameterAnnotation(Value.class);
@@ -70,10 +71,12 @@ public class ExpressionValueMethodArgumentResolver extends AbstractNamedValueMet
 		throw new UnsupportedOperationException("@Value is never required: " + parameter.getMethod());
 	}
 
+
 	private static class ExpressionValueNamedValueInfo extends NamedValueInfo {
 
 		private ExpressionValueNamedValueInfo(Value annotation) {
 			super("@Value", false, annotation.value());
 		}
 	}
+
 }

@@ -152,17 +152,16 @@ public class RequestParamMethodArgumentResolver extends AbstractNamedValueMethod
 
 	@Override
 	protected NamedValueInfo createNamedValueInfo(MethodParameter parameter) {
-		RequestParam annotation = parameter.getParameterAnnotation(RequestParam.class);
-		return (annotation != null) ? new RequestParamNamedValueInfo(annotation) : new RequestParamNamedValueInfo();
+		RequestParam ann = parameter.getParameterAnnotation(RequestParam.class);
+		return (ann != null ? new RequestParamNamedValueInfo(ann) : new RequestParamNamedValueInfo());
 	}
 
 	@Override
 	protected Object resolveName(String name, MethodParameter parameter, NativeWebRequest webRequest) throws Exception {
-		Object arg;
-
 		HttpServletRequest servletRequest = webRequest.getNativeRequest(HttpServletRequest.class);
 		MultipartHttpServletRequest multipartRequest =
-			WebUtils.getNativeRequest(servletRequest, MultipartHttpServletRequest.class);
+				WebUtils.getNativeRequest(servletRequest, MultipartHttpServletRequest.class);
+		Object arg;
 
 		if (MultipartFile.class.equals(parameter.getParameterType())) {
 			assertIsMultipartRequest(servletRequest);
@@ -255,29 +254,29 @@ public class RequestParamMethodArgumentResolver extends AbstractNamedValueMethod
 	}
 
 	@Override
-	public void contributeMethodArgument(MethodParameter param, Object value,
+	public void contributeMethodArgument(MethodParameter parameter, Object value,
 			UriComponentsBuilder builder, Map<String, Object> uriVariables, ConversionService conversionService) {
 
-		Class<?> paramType = param.getParameterType();
+		Class<?> paramType = parameter.getParameterType();
 		if (Map.class.isAssignableFrom(paramType) || MultipartFile.class.equals(paramType) ||
 				"javax.servlet.http.Part".equals(paramType.getName())) {
 			return;
 		}
 
-		RequestParam annot = param.getParameterAnnotation(RequestParam.class);
-		String name = (annot == null || StringUtils.isEmpty(annot.value()) ? param.getParameterName() : annot.value());
+		RequestParam ann = parameter.getParameterAnnotation(RequestParam.class);
+		String name = (ann == null || StringUtils.isEmpty(ann.value()) ? parameter.getParameterName() : ann.value());
 
 		if (value == null) {
 			builder.queryParam(name);
 		}
 		else if (value instanceof Collection) {
 			for (Object element : (Collection<?>) value) {
-				element = formatUriValue(conversionService, TypeDescriptor.nested(param, 1), element);
+				element = formatUriValue(conversionService, TypeDescriptor.nested(parameter, 1), element);
 				builder.queryParam(name, element);
 			}
 		}
 		else {
-			builder.queryParam(name, formatUriValue(conversionService, new TypeDescriptor(param), value));
+			builder.queryParam(name, formatUriValue(conversionService, new TypeDescriptor(parameter), value));
 		}
 	}
 

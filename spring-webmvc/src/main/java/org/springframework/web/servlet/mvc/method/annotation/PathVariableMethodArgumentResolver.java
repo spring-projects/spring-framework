@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -103,7 +103,7 @@ public class PathVariableMethodArgumentResolver extends AbstractNamedValueMethod
 	@Override
 	protected void handleMissingValue(String name, MethodParameter parameter) throws ServletRequestBindingException {
 		throw new ServletRequestBindingException("Missing URI template variable '" + name +
-				"' for method parameter type " + parameter.getParameterType().getSimpleName());
+				"' for method parameter of type " + parameter.getParameterType().getSimpleName());
 	}
 
 	@Override
@@ -122,16 +122,16 @@ public class PathVariableMethodArgumentResolver extends AbstractNamedValueMethod
 	}
 
 	@Override
-	public void contributeMethodArgument(MethodParameter param, Object value,
-			UriComponentsBuilder builder, Map<String, Object> uriVariables, ConversionService cs) {
+	public void contributeMethodArgument(MethodParameter parameter, Object value,
+			UriComponentsBuilder builder, Map<String, Object> uriVariables, ConversionService conversionService) {
 
-		if (Map.class.isAssignableFrom(param.getParameterType())) {
+		if (Map.class.isAssignableFrom(parameter.getParameterType())) {
 			return;
 		}
 
-		PathVariable annot = param.getParameterAnnotation(PathVariable.class);
-		String name = (StringUtils.isEmpty(annot.value()) ? param.getParameterName() : annot.value());
-		value = formatUriValue(cs, new TypeDescriptor(param), value);
+		PathVariable ann = parameter.getParameterAnnotation(PathVariable.class);
+		String name = (ann == null || StringUtils.isEmpty(ann.value()) ? parameter.getParameterName() : ann.value());
+		value = formatUriValue(conversionService, new TypeDescriptor(parameter), value);
 		uriVariables.put(name, value);
 	}
 

@@ -215,7 +215,7 @@ public class GenericConversionService implements ConfigurableConversionService {
 	}
 
 
-	// subclassing hooks
+	// Protected template methods
 
 	/**
 	 * Template method to convert a null source.
@@ -588,6 +588,7 @@ public class GenericConversionService implements ConfigurableConversionService {
 
 		private void addInterfacesToClassHierarchy(Class<?> type, boolean asArray,
 				List<Class<?>> hierarchy, Set<Class<?>> visited) {
+
 			for (Class<?> implementedInterface : type.getInterfaces()) {
 				addToClassHierarchy(hierarchy.size(), implementedInterface, asArray, hierarchy, visited);
 			}
@@ -595,6 +596,7 @@ public class GenericConversionService implements ConfigurableConversionService {
 
 		private void addToClassHierarchy(int index, Class<?> type, boolean asArray,
 				List<Class<?>> hierarchy, Set<Class<?>> visited) {
+
 			if (asArray) {
 				type = Array.newInstance(type, 0).getClass();
 			}
