@@ -153,14 +153,13 @@ import org.springframework.web.util.UrlPathHelper;
  * 	libraries available on the classpath.
  * </ul>
  *
- * @see EnableWebMvc
- * @see WebMvcConfigurer
- * @see WebMvcConfigurerAdapter
- *
  * @author Rossen Stoyanchev
  * @author Brian Clozel
  * @author Sebastien Deleuze
  * @since 3.1
+ * @see EnableWebMvc
+ * @see WebMvcConfigurer
+ * @see WebMvcConfigurerAdapter
  */
 public class WebMvcConfigurationSupport implements ApplicationContextAware, ServletContextAware {
 
@@ -181,18 +180,26 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 			ClassUtils.isPresent("com.google.gson.Gson", WebMvcConfigurationSupport.class.getClassLoader());
 
 
-	private ServletContext servletContext;
-
 	private ApplicationContext applicationContext;
 
+	private ServletContext servletContext;
+
 	private List<Object> interceptors;
+
+	private PathMatchConfigurer pathMatchConfigurer;
 
 	private ContentNegotiationManager contentNegotiationManager;
 
 	private List<HttpMessageConverter<?>> messageConverters;
 
-	private PathMatchConfigurer pathMatchConfigurer;
 
+	/**
+	 * Set the Spring {@link ApplicationContext}, e.g. for resource loading.
+	 */
+	@Override
+	public void setApplicationContext(ApplicationContext applicationContext) {
+		this.applicationContext = applicationContext;
+	}
 
 	/**
 	 * Set the {@link javax.servlet.ServletContext}, e.g. for resource handling,
@@ -201,14 +208,6 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	@Override
 	public void setServletContext(ServletContext servletContext) {
 		this.servletContext = servletContext;
-	}
-
-	/**
-	 * Set the Spring {@link ApplicationContext}, e.g. for resource loading.
-	 */
-	@Override
-	public void setApplicationContext(ApplicationContext applicationContext) {
-		this.applicationContext = applicationContext;
 	}
 
 
@@ -239,23 +238,8 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 		if (configurer.getUrlPathHelper() != null) {
 			handlerMapping.setUrlPathHelper(configurer.getUrlPathHelper());
 		}
+
 		return handlerMapping;
-	}
-
-	protected PathMatchConfigurer getPathMatchConfigurer() {
-		if (this.pathMatchConfigurer == null) {
-			this.pathMatchConfigurer = new PathMatchConfigurer();
-			configurePathMatch(this.pathMatchConfigurer);
-		}
-		return this.pathMatchConfigurer;
-	}
-
-	/**
-	 * Override this method to configure path matching options.
-	 * @see PathMatchConfigurer
-	 * @since 4.0.3
-	 */
-	public void configurePathMatch(PathMatchConfigurer configurer) {
 	}
 
 	/**
@@ -283,6 +267,27 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	}
 
 	/**
+	 * Callback for building the {@link PathMatchConfigurer}.
+	 * Delegates to {@link #configurePathMatch}.
+	 * @since 4.1
+	 */
+	protected PathMatchConfigurer getPathMatchConfigurer() {
+		if (this.pathMatchConfigurer == null) {
+			this.pathMatchConfigurer = new PathMatchConfigurer();
+			configurePathMatch(this.pathMatchConfigurer);
+		}
+		return this.pathMatchConfigurer;
+	}
+
+	/**
+	 * Override this method to configure path matching options.
+	 * @see PathMatchConfigurer
+	 * @since 4.0.3
+	 */
+	public void configurePathMatch(PathMatchConfigurer configurer) {
+	}
+
+	/**
 	 * Return a {@link ContentNegotiationManager} instance to use to determine
 	 * requested {@linkplain MediaType media types} in a given request.
 	 */
@@ -295,8 +300,8 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 			try {
 				this.contentNegotiationManager = configurer.getContentNegotiationManager();
 			}
-			catch (Exception e) {
-				throw new BeanInitializationException("Could not create ContentNegotiationManager", e);
+			catch (Exception ex) {
+				throw new BeanInitializationException("Could not create ContentNegotiationManager", ex);
 			}
 		}
 		return this.contentNegotiationManager;
@@ -679,7 +684,6 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	 */
 	public void configureAsyncSupport(AsyncSupportConfigurer configurer) {
 	}
-
 
 	/**
 	 * Return an instance of {@link CompositeUriComponentsContributor} for use with
