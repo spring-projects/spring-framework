@@ -228,24 +228,26 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 				headerAccessor.setUser(session.getPrincipal());
 				headerAccessor.setImmutable();
 
-				if (this.eventPublisher != null) {
-					if (StompCommand.CONNECT.equals(headerAccessor.getCommand())) {
-						this.stats.incrementConnectCount();
-						publishEvent(new SessionConnectEvent(this, message));
-					}
-					else if (StompCommand.DISCONNECT.equals(headerAccessor.getCommand())) {
-						this.stats.incrementDisconnectCount();
-					}
-					else if (StompCommand.SUBSCRIBE.equals(headerAccessor.getCommand())) {
-						publishEvent(new SessionSubscribeEvent(this, message));
-					}
-					else if (StompCommand.UNSUBSCRIBE.equals(headerAccessor.getCommand())) {
-						publishEvent(new SessionUnsubscribeEvent(this, message));
-					}
+				if (StompCommand.CONNECT.equals(headerAccessor.getCommand())) {
+					this.stats.incrementConnectCount();
+				}
+				else if (StompCommand.DISCONNECT.equals(headerAccessor.getCommand())) {
+					this.stats.incrementDisconnectCount();
 				}
 
 				try {
 					SimpAttributesContextHolder.setAttributesFromMessage(message);
+					if (this.eventPublisher != null) {
+						if (StompCommand.CONNECT.equals(headerAccessor.getCommand())) {
+							publishEvent(new SessionConnectEvent(this, message));
+						}
+						else if (StompCommand.SUBSCRIBE.equals(headerAccessor.getCommand())) {
+							publishEvent(new SessionSubscribeEvent(this, message));
+						}
+						else if (StompCommand.UNSUBSCRIBE.equals(headerAccessor.getCommand())) {
+							publishEvent(new SessionUnsubscribeEvent(this, message));
+						}
+					}
 					outputChannel.send(message);
 				}
 				finally {
@@ -309,7 +311,14 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 			this.stats.incrementConnectedCount();
 			stompAccessor = afterStompSessionConnected(message, stompAccessor, session);
 			if (this.eventPublisher != null && StompCommand.CONNECTED.equals(command)) {
-				publishEvent(new SessionConnectedEvent(this, (Message<byte[]>) message));
+				try {
+					SimpAttributes simpAttributes = new SimpAttributes(session.getId(), session.getAttributes());
+					SimpAttributesContextHolder.setAttributes(simpAttributes);
+					publishEvent(new SessionConnectedEvent(this, (Message<byte[]>) message));
+				}
+				finally {
+					SimpAttributesContextHolder.resetAttributes();
+				}
 			}
 		}
 		try {
@@ -448,12 +457,12 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 			this.userSessionRegistry.unregisterSessionId(userName, session.getId());
 		}
 		Message<byte[]> message = createDisconnectMessage(session);
-		if (this.eventPublisher != null) {
-			publishEvent(new SessionDisconnectEvent(this, message, session.getId(), closeStatus));
-		}
 		SimpAttributes simpAttributes = SimpAttributes.fromMessage(message);
 		try {
 			SimpAttributesContextHolder.setAttributes(simpAttributes);
+			if (this.eventPublisher != null) {
+				publishEvent(new SessionDisconnectEvent(this, message, session.getId(), closeStatus));
+			}
 			outputChannel.send(message);
 		}
 		finally {
