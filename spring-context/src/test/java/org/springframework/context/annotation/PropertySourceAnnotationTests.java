@@ -142,16 +142,6 @@ public class PropertySourceAnnotationTests {
 		ctx.refresh();
 	}
 
-	// SPR-10820
-	@Test
-	public void orderingWithAndWithoutNameAndMultipleResourceLocations() {
-		// p2 should 'win' as it was registered last
-		AnnotationConfigApplicationContext ctxWithName = new AnnotationConfigApplicationContext(ConfigWithNameAndMultipleResourceLocations.class);
-		AnnotationConfigApplicationContext ctxWithoutName = new AnnotationConfigApplicationContext(ConfigWithMultipleResourceLocations.class);
-		assertThat(ctxWithoutName.getEnvironment().getProperty("testbean.name"), equalTo("p2TestBean"));
-		assertThat(ctxWithName.getEnvironment().getProperty("testbean.name"), equalTo("p2TestBean"));
-	}
-
 	@Test
 	public void withNameAndMultipleResourceLocations() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(ConfigWithNameAndMultipleResourceLocations.class);
@@ -200,6 +190,30 @@ public class PropertySourceAnnotationTests {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(ConfigWithIgnoredPropertySource.class);
 		assertThat(ctx.getEnvironment().containsProperty("from.p1"), is(true));
 		assertThat(ctx.getEnvironment().containsProperty("from.p2"), is(true));
+	}
+
+	@Test
+	public void withSameSourceImportedInDifferentOrder() {
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(ConfigWithSameSourceImportedInDifferentOrder.class);
+		assertThat(ctx.getEnvironment().containsProperty("from.p1"), is(true));
+		assertThat(ctx.getEnvironment().containsProperty("from.p2"), is(true));
+		assertThat(ctx.getEnvironment().getProperty("testbean.name"), equalTo("p2TestBean"));
+	}
+
+	@Test
+	public void orderingWithAndWithoutNameAndMultipleResourceLocations() {
+		// SPR-10820: p2 should 'win' as it was registered last
+		AnnotationConfigApplicationContext ctxWithName = new AnnotationConfigApplicationContext(ConfigWithNameAndMultipleResourceLocations.class);
+		AnnotationConfigApplicationContext ctxWithoutName = new AnnotationConfigApplicationContext(ConfigWithMultipleResourceLocations.class);
+		assertThat(ctxWithoutName.getEnvironment().getProperty("testbean.name"), equalTo("p2TestBean"));
+		assertThat(ctxWithName.getEnvironment().getProperty("testbean.name"), equalTo("p2TestBean"));
+	}
+
+	@Test
+	public void orderingWithAndWithoutNameAndFourResourceLocations() {
+		// SPR-12198: p4 should 'win' as it was registered last
+		AnnotationConfigApplicationContext ctxWithoutName = new AnnotationConfigApplicationContext(ConfigWithFourResourceLocations.class);
+		assertThat(ctxWithoutName.getEnvironment().getProperty("testbean.name"), equalTo("p4TestBean"));
 	}
 
 
@@ -326,8 +340,8 @@ public class PropertySourceAnnotationTests {
 
 	@Configuration
 	@PropertySources({
-			@PropertySource(name = "psName", value = "classpath:org/springframework/context/annotation/p1.properties"),
-			@PropertySource(name = "psName", value = "classpath:org/springframework/context/annotation/p2.properties"),
+		@PropertySource(name = "psName", value = "classpath:org/springframework/context/annotation/p1.properties"),
+		@PropertySource(name = "psName", value = "classpath:org/springframework/context/annotation/p2.properties"),
 	})
 	static class ConfigWithNamedPropertySources {
 	}
@@ -357,6 +371,38 @@ public class PropertySourceAnnotationTests {
 	@Configuration
 	@PropertySource(value = {})
 	static class ConfigWithEmptyResourceLocations {
+	}
+
+
+	@Import(ConfigImportedWithSameSourceImportedInDifferentOrder.class)
+	@PropertySources({
+		@PropertySource("classpath:org/springframework/context/annotation/p1.properties"),
+		@PropertySource("classpath:org/springframework/context/annotation/p2.properties")
+	})
+	@Configuration
+	public static class ConfigWithSameSourceImportedInDifferentOrder {
+
+	}
+
+
+	@Configuration
+	@PropertySources({
+		@PropertySource("classpath:org/springframework/context/annotation/p2.properties"),
+		@PropertySource("classpath:org/springframework/context/annotation/p1.properties")
+	})
+	public static class ConfigImportedWithSameSourceImportedInDifferentOrder {
+	}
+
+
+	@Configuration
+	@PropertySource(
+			value = {
+					"classpath:org/springframework/context/annotation/p1.properties",
+					"classpath:org/springframework/context/annotation/p2.properties",
+					"classpath:org/springframework/context/annotation/p3.properties",
+					"classpath:org/springframework/context/annotation/p4.properties"
+			})
+	static class ConfigWithFourResourceLocations {
 	}
 
 }
