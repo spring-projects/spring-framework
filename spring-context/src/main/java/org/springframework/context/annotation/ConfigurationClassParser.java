@@ -93,6 +93,7 @@ import org.springframework.util.StringUtils;
  * @author Chris Beams
  * @author Juergen Hoeller
  * @author Phillip Webb
+ * @author Martin Becker
  * @since 3.0
  * @see ConfigurationClassBeanDefinitionReader
  */
