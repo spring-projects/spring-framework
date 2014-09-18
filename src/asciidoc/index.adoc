@@ -8883,14 +8883,6 @@ You can register an `ApplicationContext` using the `ContextLoaderListener` as fo
 	<listener>
 		<listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
 	</listener>
-
-	<!-- or use the ContextLoaderServlet instead of the above listener
-	__<servlet>
-		<servlet-name>context</servlet-name>
-		<servlet-class>org.springframework.web.context.ContextLoaderServlet</servlet-class>
-		<load-on-startup>1</load-on-startup>
-	</servlet>__
-	-->
 ----
 
 The listener inspects the `contextConfigLocation` parameter. If the parameter does not
@@ -8901,9 +8893,6 @@ application contexts will be searched. Ant-style path patterns are supported as 
 Examples are `/WEB-INF/*Context.xml` for all files with names ending with "Context.xml",
 residing in the "WEB-INF" directory, and `/WEB-INF/**/*Context.xml`, for all such files
 in any subdirectory of "WEB-INF".
-
-You can use `ContextLoaderServlet` instead of `ContextLoaderListener`. The Servlet uses
-the `contextConfigLocation` parameter just as the listener does.
 
 
 
