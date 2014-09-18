@@ -16,6 +16,7 @@
 
 package org.springframework.context.annotation;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -24,6 +25,7 @@ import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.ConfigurationCondition.ConfigurationPhase;
+import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.core.env.Environment;
 import org.springframework.core.env.EnvironmentCapable;
 import org.springframework.core.io.ResourceLoader;
@@ -81,17 +83,24 @@ class ConditionEvaluator {
 			return shouldSkip(metadata, ConfigurationPhase.REGISTER_BEAN);
 		}
 
+		List<Condition> conditions = new ArrayList<Condition>();
 		for (String[] conditionClasses : getConditionClasses(metadata)) {
 			for (String conditionClass : conditionClasses) {
 				Condition condition = getCondition(conditionClass, this.context.getClassLoader());
-				ConfigurationPhase requiredPhase = null;
-				if (condition instanceof ConfigurationCondition) {
-					requiredPhase = ((ConfigurationCondition) condition).getConfigurationPhase();
-				}
-				if (requiredPhase == null || requiredPhase == phase) {
-					if (!condition.matches(this.context, metadata)) {
-						return true;
-					}
+				conditions.add(condition);
+			}
+		}
+
+		Collections.sort(conditions, AnnotationAwareOrderComparator.INSTANCE);
+
+		for (Condition condition : conditions) {
+			ConfigurationPhase requiredPhase = null;
+			if (condition instanceof ConfigurationCondition) {
+				requiredPhase = ((ConfigurationCondition) condition).getConfigurationPhase();
+			}
+			if (requiredPhase == null || requiredPhase == phase) {
+				if (!condition.matches(this.context, metadata)) {
+					return true;
 				}
 			}
 		}
