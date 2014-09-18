@@ -19,10 +19,10 @@ package org.springframework.orm.hibernate4;
 import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
-import java.util.LinkedHashSet;
 import java.util.Properties;
 import java.util.Set;
 import java.util.TreeSet;
+import javax.persistence.AttributeConverter;
 import javax.persistence.Embeddable;
 import javax.persistence.Entity;
 import javax.persistence.MappedSuperclass;
@@ -83,19 +83,20 @@ public class LocalSessionFactoryBuilder extends Configuration {
 
 	private static final String PACKAGE_INFO_SUFFIX = ".package-info";
 
+	private static final TypeFilter[] DEFAULT_ENTITY_TYPE_FILTERS = new TypeFilter[] {
+			new AnnotationTypeFilter(Entity.class, false),
+			new AnnotationTypeFilter(Embeddable.class, false),
+			new AnnotationTypeFilter(MappedSuperclass.class, false)};
 
-	private static final Set<TypeFilter> defaultTypeFilters;
+
+	private static TypeFilter converterTypeFilter;
 
 	static {
-		defaultTypeFilters = new LinkedHashSet<TypeFilter>(4);
-		defaultTypeFilters.add(new AnnotationTypeFilter(Entity.class, false));
-		defaultTypeFilters.add(new AnnotationTypeFilter(Embeddable.class, false));
-		defaultTypeFilters.add(new AnnotationTypeFilter(MappedSuperclass.class, false));
 		try {
 			@SuppressWarnings("unchecked")
 			Class<? extends Annotation> converterAnnotation = (Class<? extends Annotation>)
 					ClassUtils.forName("javax.persistence.Converter", LocalSessionFactoryBuilder.class.getClassLoader());
-			defaultTypeFilters.add(new AnnotationTypeFilter(converterAnnotation, false));
+			converterTypeFilter = new AnnotationTypeFilter(converterAnnotation, false);
 		}
 		catch (ClassNotFoundException ex) {
 			// JPA 2.1 API not available - Hibernate <4.3
@@ -103,11 +104,11 @@ public class LocalSessionFactoryBuilder extends Configuration {
 	}
 
 
-	private TypeFilter[] entityTypeFilters = defaultTypeFilters.toArray(new TypeFilter[defaultTypeFilters.size()]);
-
 	private final ResourcePatternResolver resourcePatternResolver;
 
 	private RegionFactory cacheRegionFactory;
+
+	private TypeFilter[] entityTypeFilters = DEFAULT_ENTITY_TYPE_FILTERS;
 
 
 	/**
@@ -272,7 +273,8 @@ public class LocalSessionFactoryBuilder extends Configuration {
 	 * @throws HibernateException if scanning fails for any reason
 	 */
 	public LocalSessionFactoryBuilder scanPackages(String... packagesToScan) throws HibernateException {
-		Set<String> classNames = new TreeSet<String>();
+		Set<String> entityClassNames = new TreeSet<String>();
+		Set<String> converterClassNames = new TreeSet<String>();
 		Set<String> packageNames = new TreeSet<String>();
 		try {
 			for (String pkg : packagesToScan) {
@@ -285,7 +287,10 @@ public class LocalSessionFactoryBuilder extends Configuration {
 						MetadataReader reader = readerFactory.getMetadataReader(resource);
 						String className = reader.getClassMetadata().getClassName();
 						if (matchesEntityTypeFilter(reader, readerFactory)) {
-							classNames.add(className);
+							entityClassNames.add(className);
+						}
+						else if (converterTypeFilter != null && converterTypeFilter.match(reader, readerFactory)) {
+							converterClassNames.add(className);
 						}
 						else if (className.endsWith(PACKAGE_INFO_SUFFIX)) {
 							packageNames.add(className.substring(0, className.length() - PACKAGE_INFO_SUFFIX.length()));
@@ -298,8 +303,12 @@ public class LocalSessionFactoryBuilder extends Configuration {
 			throw new MappingException("Failed to scan classpath for unlisted classes", ex);
 		}
 		try {
-			for (String className : classNames) {
-				addAnnotatedClass(this.resourcePatternResolver.getClassLoader().loadClass(className));
+			ClassLoader cl = this.resourcePatternResolver.getClassLoader();
+			for (String className : entityClassNames) {
+				addAnnotatedClass(cl.loadClass(className));
+			}
+			for (String className : converterClassNames) {
+				ConverterRegistrationDelegate.registerConverter(this, cl.loadClass(className));
 			}
 			for (String packageName : packageNames) {
 				addPackage(packageName);
@@ -366,6 +375,18 @@ public class LocalSessionFactoryBuilder extends Configuration {
 			if (overrideClassLoader) {
 				currentThread.setContextClassLoader(threadContextClassLoader);
 			}
+		}
+	}
+
+
+	/**
+	 * Inner class to avoid hard dependency on JPA 2.1 / Hibernate 4.3.
+	 */
+	private static class ConverterRegistrationDelegate {
+
+		@SuppressWarnings("unchecked")
+		public static void registerConverter(Configuration config, Class<?> converterClass) {
+			config.addAttributeConverter((Class<? extends AttributeConverter<?, ?>>) converterClass);
 		}
 	}
 
