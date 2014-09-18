@@ -207,13 +207,7 @@ public class StompSubProtocolHandlerTests {
 	@Test
 	public void eventPublicationWithExceptions() {
 
-		ApplicationEventPublisher publisher = new ApplicationEventPublisher() {
-
-			@Override
-			public void publishEvent(ApplicationEvent event) {
-				throw new IllegalStateException();
-			}
-		};
+		ApplicationEventPublisher publisher = mock(ApplicationEventPublisher.class);
 
 		UserSessionRegistry registry = new DefaultUserSessionRegistry();
 		this.protocolHandler.setUserSessionRegistry(registry);
@@ -244,7 +238,10 @@ public class StompSubProtocolHandlerTests {
 		verify(this.channel).send(this.messageCaptor.capture());
 		actual = this.messageCaptor.getValue();
 		assertNotNull(actual);
-		assertEquals(StompCommand.DISCONNECT, StompHeaderAccessor.wrap(actual).getCommand());
+		StompHeaderAccessor accessor = StompHeaderAccessor.wrap(actual);
+		assertEquals(StompCommand.DISCONNECT, accessor.getCommand());
+		assertEquals("s1", accessor.getSessionId());
+		assertEquals("joe", accessor.getUser().getName());
 	}
 
 	@Test

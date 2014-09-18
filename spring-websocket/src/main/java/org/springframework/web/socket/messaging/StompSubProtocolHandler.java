@@ -469,6 +469,7 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 		}
 		headerAccessor.setSessionId(session.getId());
 		headerAccessor.setSessionAttributes(session.getAttributes());
+		headerAccessor.setUser(session.getPrincipal());
 		return MessageBuilder.createMessage(EMPTY_PAYLOAD, headerAccessor.getMessageHeaders());
 	}
 
