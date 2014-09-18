@@ -35,6 +35,7 @@ import java.util.jar.JarFile;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
@@ -293,6 +294,7 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 
 	/**
 	 * Find all class location resources with the given location via the ClassLoader.
+	 * Delegates to {@link #doFindAllClassPathResources(String)}.
 	 * @param location the absolute path within the classpath
 	 * @return the result as Resource array
 	 * @throws IOException in case of I/O errors
@@ -304,9 +306,20 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 		if (path.startsWith("/")) {
 			path = path.substring(1);
 		}
+		Set<Resource> result = doFindAllClassPathResources(path);
+		return result.toArray(new Resource[result.size()]);
+	}
+
+	/**
+	 * Find all class location resources with the given path via the ClassLoader.
+	 * Called by {@link #findAllClassPathResources(String)}.
+	 * @param path the absolute path within the classpath (never a leading slash)
+	 * @return a mutable Set of matching Resource instances
+	 */
+	protected Set<Resource> doFindAllClassPathResources(String path) throws IOException {
+		Set<Resource> result = new LinkedHashSet<Resource>(16);
 		ClassLoader cl = getClassLoader();
 		Enumeration<URL> resourceUrls = (cl != null ? cl.getResources(path) : ClassLoader.getSystemResources(path));
-		Set<Resource> result = new LinkedHashSet<Resource>(16);
 		while (resourceUrls.hasMoreElements()) {
 			URL url = resourceUrls.nextElement();
 			result.add(convertClassLoaderURL(url));
@@ -316,17 +329,7 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 			// We need to have pointers to each of the jar files on the classpath as well...
 			addAllClassLoaderJarRoots(cl, result);
 		}
-		postProcessFindAllClassPathResourcesResult(location, result);
-		return result.toArray(new Resource[result.size()]);
-	}
-
-	/**
-	 * Subclass hook allowing for post processing of a
-	 * {@link #findAllClassPathResources(String) findAllClassPathResources} result.
-	 * @param location the absolute path within the classpath
-	 * @param result a mutable set of the results which can be post processed
-	 */
-	protected void postProcessFindAllClassPathResourcesResult(String location, Set<Resource> result) {
+		return result;
 	}
 
 	/**
@@ -485,7 +488,7 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 	 * via the Ant-style PathMatcher.
 	 * @param rootDirResource the root directory as Resource
 	 * @param subPattern the sub pattern to match (below the root directory)
-	 * @return the Set of matching Resource instances
+	 * @return a mutable Set of matching Resource instances
 	 * @throws IOException in case of I/O errors
 	 * @see java.net.JarURLConnection
 	 * @see org.springframework.util.PathMatcher
@@ -582,7 +585,7 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 	 * via the Ant-style PathMatcher.
 	 * @param rootDirResource the root directory as Resource
 	 * @param subPattern the sub pattern to match (below the root directory)
-	 * @return the Set of matching Resource instances
+	 * @return a mutable Set of matching Resource instances
 	 * @throws IOException in case of I/O errors
 	 * @see #retrieveMatchingFiles
 	 * @see org.springframework.util.PathMatcher
@@ -609,7 +612,7 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 	 * via the Ant-style PathMatcher.
 	 * @param rootDir the root directory in the file system
 	 * @param subPattern the sub pattern to match (below the root directory)
-	 * @return the Set of matching Resource instances
+	 * @return a mutable Set of matching Resource instances
 	 * @throws IOException in case of I/O errors
 	 * @see #retrieveMatchingFiles
 	 * @see org.springframework.util.PathMatcher
@@ -632,7 +635,7 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 	 * @param rootDir the directory to start from
 	 * @param pattern the pattern to match against,
 	 * relative to the root directory
-	 * @return the Set of matching File instances
+	 * @return a mutable Set of matching Resource instances
 	 * @throws IOException if directory contents could not be retrieved
 	 */
 	protected Set<File> retrieveMatchingFiles(File rootDir, String pattern) throws IOException {
@@ -791,10 +794,7 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 
 		@Override
 		public String toString() {
-			StringBuilder sb = new StringBuilder();
-			sb.append("sub-pattern: ").append(this.subPattern);
-			sb.append(", resources: ").append(this.resources);
-			return sb.toString();
+			return "sub-pattern: " + this.subPattern + ", resources: " + this.resources;
 		}
 	}
 
