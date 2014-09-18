@@ -161,16 +161,6 @@ public class PropertySourceAnnotationTests {
 		}
 	}
 
-	// SPR-10820
-	@Test
-	public void orderingWithAndWithoutNameAndMultipleResourceLocations() {
-		// p2 should 'win' as it was registered last
-		AnnotationConfigApplicationContext ctxWithName = new AnnotationConfigApplicationContext(ConfigWithNameAndMultipleResourceLocations.class);
-		AnnotationConfigApplicationContext ctxWithoutName = new AnnotationConfigApplicationContext(ConfigWithMultipleResourceLocations.class);
-		assertThat(ctxWithoutName.getEnvironment().getProperty("testbean.name"), equalTo("p2TestBean"));
-		assertThat(ctxWithName.getEnvironment().getProperty("testbean.name"), equalTo("p2TestBean"));
-	}
-
 	@Test
 	public void withNameAndMultipleResourceLocations() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(ConfigWithNameAndMultipleResourceLocations.class);
@@ -222,11 +212,20 @@ public class PropertySourceAnnotationTests {
 	}
 
 	@Test
-	public void withSameSourceImportedInDifferentOrder() throws Exception {
-		AnnotationConfigApplicationContext ctx =new AnnotationConfigApplicationContext(ConfigWithSameSourceImportedInDifferentOrder.class);
+	public void withSameSourceImportedInDifferentOrder() {
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(ConfigWithSameSourceImportedInDifferentOrder.class);
 		assertThat(ctx.getEnvironment().containsProperty("from.p1"), is(true));
 		assertThat(ctx.getEnvironment().containsProperty("from.p2"), is(true));
 		assertThat(ctx.getEnvironment().getProperty("testbean.name"), equalTo("p2TestBean"));
+	}
+
+	@Test
+	public void orderingWithAndWithoutNameAndMultipleResourceLocations() {
+		// SPR-10820: p2 should 'win' as it was registered last
+		AnnotationConfigApplicationContext ctxWithName = new AnnotationConfigApplicationContext(ConfigWithNameAndMultipleResourceLocations.class);
+		AnnotationConfigApplicationContext ctxWithoutName = new AnnotationConfigApplicationContext(ConfigWithMultipleResourceLocations.class);
+		assertThat(ctxWithoutName.getEnvironment().getProperty("testbean.name"), equalTo("p2TestBean"));
+		assertThat(ctxWithName.getEnvironment().getProperty("testbean.name"), equalTo("p2TestBean"));
 	}
 
 	@Test
