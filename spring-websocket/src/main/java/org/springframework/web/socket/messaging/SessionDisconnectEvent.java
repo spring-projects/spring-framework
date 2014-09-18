@@ -17,7 +17,7 @@
 package org.springframework.web.socket.messaging;
 
 
-import org.springframework.context.ApplicationEvent;
+import org.springframework.messaging.Message;
 import org.springframework.util.Assert;
 import org.springframework.web.socket.CloseStatus;
 
@@ -32,21 +32,18 @@ import org.springframework.web.socket.CloseStatus;
  * @since 4.0.3
  */
 @SuppressWarnings("serial")
-public class SessionDisconnectEvent extends ApplicationEvent {
+public class SessionDisconnectEvent extends AbstractSubProtocolEvent {
 
 	private final String sessionId;
 
 	private final CloseStatus status;
 
+
 	/**
 	 * Create a new event.
-	 *
-	 * @param source the component that published the event (never {@code null})
-	 * @param sessionId the disconnect message
-	 * @param closeStatus
 	 */
-	public SessionDisconnectEvent(Object source, String sessionId, CloseStatus closeStatus) {
-		super(source);
+	public SessionDisconnectEvent(Object source, Message<byte[]> message, String sessionId, CloseStatus closeStatus) {
+		super(source, message);
 		Assert.notNull(sessionId, "'sessionId' must not be null");
 		this.sessionId = sessionId;
 		this.status = closeStatus;

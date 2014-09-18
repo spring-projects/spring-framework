@@ -447,10 +447,10 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 			String userName = getSessionRegistryUserName(principal);
 			this.userSessionRegistry.unregisterSessionId(userName, session.getId());
 		}
+		Message<byte[]> message = createDisconnectMessage(session);
 		if (this.eventPublisher != null) {
-			publishEvent(new SessionDisconnectEvent(this, session.getId(), closeStatus));
+			publishEvent(new SessionDisconnectEvent(this, message, session.getId(), closeStatus));
 		}
-		Message<?> message = createDisconnectMessage(session);
 		SimpAttributes simpAttributes = SimpAttributes.fromMessage(message);
 		try {
 			SimpAttributesContextHolder.setAttributes(simpAttributes);
@@ -462,7 +462,7 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 		}
 	}
 
-	private Message<?> createDisconnectMessage(WebSocketSession session) {
+	private Message<byte[]> createDisconnectMessage(WebSocketSession session) {
 		StompHeaderAccessor headerAccessor = StompHeaderAccessor.create(StompCommand.DISCONNECT);
 		if (getHeaderInitializer() != null) {
 			getHeaderInitializer().initHeaders(headerAccessor);
