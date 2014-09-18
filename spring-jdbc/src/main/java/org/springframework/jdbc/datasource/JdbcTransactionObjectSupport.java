@@ -120,11 +120,18 @@ public abstract class JdbcTransactionObjectSupport implements SavepointManager, 
 	 */
 	@Override
 	public void rollbackToSavepoint(Object savepoint) throws TransactionException {
+		ConnectionHolder conHolder = getConnectionHolderForSavepoint();
 		try {
-			getConnectionHolderForSavepoint().getConnection().rollback((Savepoint) savepoint);
+			conHolder.getConnection().rollback((Savepoint) savepoint);
 		}
 		catch (Throwable ex) {
 			throw new TransactionSystemException("Could not roll back to JDBC savepoint", ex);
+		}
+		try {
+			conHolder.getConnection().releaseSavepoint((Savepoint) savepoint);
+		}
+		catch (Throwable ex) {
+			logger.debug("Could not explicitly release JDBC savepoint after rollback", ex);
 		}
 	}
 
@@ -134,8 +141,9 @@ public abstract class JdbcTransactionObjectSupport implements SavepointManager, 
 	 */
 	@Override
 	public void releaseSavepoint(Object savepoint) throws TransactionException {
+		ConnectionHolder conHolder = getConnectionHolderForSavepoint();
 		try {
-			getConnectionHolderForSavepoint().getConnection().releaseSavepoint((Savepoint) savepoint);
+			conHolder.getConnection().releaseSavepoint((Savepoint) savepoint);
 		}
 		catch (Throwable ex) {
 			logger.debug("Could not explicitly release JDBC savepoint", ex);
