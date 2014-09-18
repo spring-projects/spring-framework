@@ -229,6 +229,13 @@ public class PropertySourceAnnotationTests {
 		assertThat(ctx.getEnvironment().getProperty("testbean.name"), equalTo("p2TestBean"));
 	}
 
+	@Test
+	public void orderingWithAndWithoutNameAndFourResourceLocations() {
+		// SPR-12198: p4 should 'win' as it was registered last
+		AnnotationConfigApplicationContext ctxWithoutName = new AnnotationConfigApplicationContext(ConfigWithFourResourceLocations.class);
+		assertThat(ctxWithoutName.getEnvironment().getProperty("testbean.name"), equalTo("p4TestBean"));
+	}
+
 
 	@Configuration
 	@PropertySource(value="classpath:${unresolvable}/p1.properties")
@@ -367,8 +374,8 @@ public class PropertySourceAnnotationTests {
 
 	@Configuration
 	@PropertySources({
-			@PropertySource(name = "psName", value = "classpath:org/springframework/context/annotation/p1.properties"),
-			@PropertySource(name = "psName", value = "classpath:org/springframework/context/annotation/p2.properties"),
+		@PropertySource(name = "psName", value = "classpath:org/springframework/context/annotation/p1.properties"),
+		@PropertySource(name = "psName", value = "classpath:org/springframework/context/annotation/p2.properties"),
 	})
 	static class ConfigWithNamedPropertySources {
 	}
@@ -401,7 +408,7 @@ public class PropertySourceAnnotationTests {
 	}
 
 
-	@Import({ ConfigImportedWithSameSourceImportedInDifferentOrder.class })
+	@Import(ConfigImportedWithSameSourceImportedInDifferentOrder.class)
 	@PropertySources({
 		@PropertySource("classpath:org/springframework/context/annotation/p1.properties"),
 		@PropertySource("classpath:org/springframework/context/annotation/p2.properties")
@@ -418,6 +425,18 @@ public class PropertySourceAnnotationTests {
 		@PropertySource("classpath:org/springframework/context/annotation/p1.properties")
 	})
 	public static class ConfigImportedWithSameSourceImportedInDifferentOrder {
+	}
+
+
+	@Configuration
+	@PropertySource(
+			value = {
+					"classpath:org/springframework/context/annotation/p1.properties",
+					"classpath:org/springframework/context/annotation/p2.properties",
+					"classpath:org/springframework/context/annotation/p3.properties",
+					"classpath:org/springframework/context/annotation/p4.properties"
+			})
+	static class ConfigWithFourResourceLocations {
 	}
 
 }
