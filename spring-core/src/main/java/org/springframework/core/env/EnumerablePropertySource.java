@@ -16,10 +16,7 @@
 
 package org.springframework.core.env;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
-import org.springframework.util.Assert;
+import org.springframework.util.ObjectUtils;
 
 /**
  * A {@link PropertySource} implementation capable of interrogating its
@@ -41,23 +38,15 @@ import org.springframework.util.Assert;
  * or not.
  *
  * @author Chris Beams
+ * @author Juergen Hoeller
  * @since 3.1
  */
 public abstract class EnumerablePropertySource<T> extends PropertySource<T> {
-
-	protected final Log logger = LogFactory.getLog(getClass());
-
 
 	public EnumerablePropertySource(String name, T source) {
 		super(name, source);
 	}
 
-
-	/**
-	 * Return the names of all properties contained by the
-	 * {@linkplain #getSource() source} object (never {@code null}).
-	 */
-	public abstract String[] getPropertyNames();
 
 	/**
 	 * Return whether this {@code PropertySource} contains a property with the given name.
@@ -67,19 +56,13 @@ public abstract class EnumerablePropertySource<T> extends PropertySource<T> {
 	 */
 	@Override
 	public boolean containsProperty(String name) {
-		Assert.notNull(name, "Property name must not be null");
-		for (String candidate : getPropertyNames()) {
-			if (candidate.equals(name)) {
-				if (logger.isDebugEnabled()) {
-					logger.debug(String.format("PropertySource [%s] contains '%s'", getName(), name));
-				}
-				return true;
-			}
-		}
-		if (logger.isTraceEnabled()) {
-			logger.trace(String.format("PropertySource [%s] does not contain '%s'", getName(), name));
-		}
-		return false;
+		return ObjectUtils.containsElement(getPropertyNames(), name);
 	}
+
+	/**
+	 * Return the names of all properties contained by the
+	 * {@linkplain #getSource() source} object (never {@code null}).
+	 */
+	public abstract String[] getPropertyNames();
 
 }

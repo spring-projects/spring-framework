@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.core.env;
 import java.util.Map;
 
 import org.springframework.util.Assert;
+import org.springframework.util.ObjectUtils;
 
 /**
  * Specialization of {@link MapPropertySource} designed for use with
@@ -70,8 +71,9 @@ public class SystemEnvironmentPropertySource extends MapPropertySource {
 		super(name, source);
 	}
 
+
 	/**
-	 * Return true if a property with the given name or any underscore/uppercase variant
+	 * Return {@link true} if a property with the given name or any underscore/uppercase variant
 	 * thereof exists in this property source.
 	 */
 	@Override
@@ -80,13 +82,11 @@ public class SystemEnvironmentPropertySource extends MapPropertySource {
 	}
 
 	/**
-	 * {@inheritDoc}
-	 * <p>This implementation returns {@code true} if a property with the given name or
+	 * This implementation returns {@code true} if a property with the given name or
 	 * any underscore/uppercase variant thereof exists in this property source.
 	 */
 	@Override
 	public Object getProperty(String name) {
-		Assert.notNull(name, "property name must not be null");
 		String actualName = resolvePropertyName(name);
 		if (logger.isDebugEnabled() && !name.equals(actualName)) {
 			logger.debug(String.format("PropertySource [%s] does not contain '%s', but found equivalent '%s'",
@@ -101,23 +101,24 @@ public class SystemEnvironmentPropertySource extends MapPropertySource {
 	 * found or otherwise the original name. Never returns {@code null}.
 	 */
 	private String resolvePropertyName(String name) {
-		if (super.containsProperty(name)) {
+		Assert.notNull(name, "Property name must not be null");
+		if (ObjectUtils.containsElement(getPropertyNames(), name)) {
 			return name;
 		}
 
 		String usName = name.replace('.', '_');
-		if (!name.equals(usName) && super.containsProperty(usName)) {
+		if (!name.equals(usName) && ObjectUtils.containsElement(getPropertyNames(), usName)) {
 			return usName;
 		}
 
 		String ucName = name.toUpperCase();
 		if (!name.equals(ucName)) {
-			if (super.containsProperty(ucName)) {
+			if (ObjectUtils.containsElement(getPropertyNames(), ucName)) {
 				return ucName;
 			}
 			else {
 				String usUcName = ucName.replace('.', '_');
-				if (!ucName.equals(usUcName) && super.containsProperty(usUcName)) {
+				if (!ucName.equals(usUcName) && ObjectUtils.containsElement(getPropertyNames(), usUcName)) {
 					return usUcName;
 				}
 			}
@@ -125,4 +126,5 @@ public class SystemEnvironmentPropertySource extends MapPropertySource {
 
 		return name;
 	}
+
 }

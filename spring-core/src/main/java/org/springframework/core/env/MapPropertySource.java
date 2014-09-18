@@ -18,13 +18,13 @@ package org.springframework.core.env;
 
 import java.util.Map;
 
-import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 /**
  * {@link PropertySource} that reads keys and values from a {@code Map} object.
  *
  * @author Chris Beams
+ * @author Juergen Hoeller
  * @since 3.1
  * @see PropertiesPropertySource
  */
@@ -34,25 +34,20 @@ public class MapPropertySource extends EnumerablePropertySource<Map<String, Obje
 		super(name, source);
 	}
 
+
 	@Override
 	public Object getProperty(String name) {
 		return this.source.get(name);
 	}
 
 	@Override
-	public String[] getPropertyNames() {
-		return StringUtils.toStringArray(this.source.keySet());
+	public boolean containsProperty(String name) {
+		return this.source.containsKey(name);
 	}
 
 	@Override
-	public boolean containsProperty(String name) {
-		Assert.notNull(name, "Property name must not be null");
-		boolean containsProperty = this.source.containsKey(name);
-		if (logger.isDebugEnabled()) {
-			logger.debug(String.format("PropertySource [%s] %s '%s'", getName(),
-					(containsProperty ? "contains" : "does not contain"), name));
-		}
-		return containsProperty;
+	public String[] getPropertyNames() {
+		return StringUtils.toStringArray(this.source.keySet());
 	}
 
 }
