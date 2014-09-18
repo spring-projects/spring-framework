@@ -41,11 +41,11 @@ import org.springframework.util.ObjectUtils;
  * {@code true} if any of the above properties are present, otherwise {@code false}.
  *
  * <p>This feature is particularly useful when specifying active or default profiles as
- * environment variables. The following is not allowable under Bash
+ * environment variables. The following is not allowable under Bash:
  *
  * <pre class="code">spring.profiles.active=p1 java -classpath ... MyApp</pre>
  *
- * However, the following syntax is permitted and is also more conventional.
+ * However, the following syntax is permitted and is also more conventional:
  *
  * <pre class="code">SPRING_PROFILES_ACTIVE=p1 java -classpath ... MyApp</pre>
  *
@@ -73,7 +73,7 @@ public class SystemEnvironmentPropertySource extends MapPropertySource {
 
 
 	/**
-	 * Return {@link true} if a property with the given name or any underscore/uppercase variant
+	 * Return {@code true} if a property with the given name or any underscore/uppercase variant
 	 * thereof exists in this property source.
 	 */
 	@Override
