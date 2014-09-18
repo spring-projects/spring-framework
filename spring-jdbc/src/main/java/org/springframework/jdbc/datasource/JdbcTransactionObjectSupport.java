@@ -127,12 +127,6 @@ public abstract class JdbcTransactionObjectSupport implements SavepointManager, 
 		catch (Throwable ex) {
 			throw new TransactionSystemException("Could not roll back to JDBC savepoint", ex);
 		}
-		try {
-			conHolder.getConnection().releaseSavepoint((Savepoint) savepoint);
-		}
-		catch (Throwable ex) {
-			logger.debug("Could not explicitly release JDBC savepoint after rollback", ex);
-		}
 	}
 
 	/**

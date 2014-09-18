@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import java.sql.SQLException;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceException;
 
+import org.apache.commons.logging.LogFactory;
 import org.apache.openjpa.persistence.OpenJPAEntityManager;
 import org.apache.openjpa.persistence.OpenJPAPersistence;
 
@@ -103,7 +104,13 @@ public class OpenJpaDialect extends DefaultJpaDialect {
 
 		@Override
 		public void releaseSavepoint(Object savepoint) throws TransactionException {
-			this.entityManager.releaseSavepoint((String) savepoint);
+			try {
+				this.entityManager.releaseSavepoint((String) savepoint);
+			}
+			catch (Throwable ex) {
+				LogFactory.getLog(OpenJpaTransactionData.class).debug(
+						"Could not explicitly release OpenJPA savepoint", ex);
+			}
 		}
 	}
 
