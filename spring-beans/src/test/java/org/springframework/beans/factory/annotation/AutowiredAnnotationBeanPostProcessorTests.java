@@ -26,6 +26,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Callable;
 
 import org.junit.Ignore;
 import org.junit.Test;
@@ -1756,6 +1757,18 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 		assertSame(bf.getBean(StockMovementDaoImpl.class), service.stockMovementDao);
 	}
 
+	@Test
+	public void testBridgeMethodHandling() {
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
+		bpp.setBeanFactory(bf);
+		bf.addBeanPostProcessor(bpp);
+		bf.registerBeanDefinition("bean1", new RootBeanDefinition(MyCallable.class));
+		bf.registerBeanDefinition("bean2", new RootBeanDefinition(SecondCallable.class));
+		bf.registerBeanDefinition("bean3", new RootBeanDefinition(FooBar.class));
+		assertNotNull(bf.getBean(FooBar.class));
+	}
+
 
 	public static class ResourceInjectionBean {
 
@@ -2753,6 +2766,47 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 
 		@Autowired
 		private StockMovementDao<StockMovement> stockMovementDao;
+	}
+
+
+	public static class MyCallable implements Callable<Thread> {
+
+		@Override
+		public Thread call() throws Exception {
+			return null;
+		}
+	}
+
+
+	public static class SecondCallable implements Callable<Thread>{
+
+		@Override
+		public Thread call() throws Exception {
+			return null;
+		}
+	}
+
+
+	public static abstract class Foo<T extends Runnable, RT extends Callable<T>> {
+
+		private RT obj;
+
+		protected void setObj(RT obj) {
+			if (this.obj != null) {
+				throw new IllegalStateException("Already called");
+			}
+			this.obj = obj;
+		}
+	}
+
+
+	public static class FooBar extends Foo<Thread, MyCallable> {
+
+		@Override
+		@Autowired
+		public void setObj(MyCallable obj) {
+			super.setObj(obj);
+		}
 	}
 
 }

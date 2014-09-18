@@ -58,7 +58,6 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.beans.factory.config.DependencyDescriptor;
 import org.springframework.beans.factory.config.InstantiationAwareBeanPostProcessor;
 import org.springframework.beans.factory.support.RootBeanDefinition;
-import org.springframework.core.BridgeMethodResolver;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.Ordered;
 import org.springframework.jndi.support.SimpleJndiBeanFactory;
@@ -348,9 +347,7 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 							}
 						}
 						for (Method method : targetClass.getDeclaredMethods()) {
-							method = BridgeMethodResolver.findBridgedMethod(method);
-							Method mostSpecificMethod = BridgeMethodResolver.findBridgedMethod(ClassUtils.getMostSpecificMethod(method, clazz));
-							if (method.equals(mostSpecificMethod)) {
+							if (!method.isBridge() && method.equals(ClassUtils.getMostSpecificMethod(method, clazz))) {
 								if (webServiceRefClass != null && method.isAnnotationPresent(webServiceRefClass)) {
 									if (Modifier.isStatic(method.getModifiers())) {
 										throw new IllegalStateException("@WebServiceRef annotation is not supported on static methods");

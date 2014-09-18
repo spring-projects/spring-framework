@@ -392,9 +392,9 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 			}
 			for (Method method : targetClass.getDeclaredMethods()) {
 				Method bridgedMethod = BridgeMethodResolver.findBridgedMethod(method);
-				AnnotationAttributes annotation = BridgeMethodResolver.isVisibilityBridgeMethodPair(method, bridgedMethod) ?
+				AnnotationAttributes ann = BridgeMethodResolver.isVisibilityBridgeMethodPair(method, bridgedMethod) ?
 						findAutowiredAnnotation(bridgedMethod) : findAutowiredAnnotation(method);
-				if (annotation != null && method.equals(ClassUtils.getMostSpecificMethod(method, clazz))) {
+				if (ann != null && !method.isBridge() && method.equals(ClassUtils.getMostSpecificMethod(method, clazz))) {
 					if (Modifier.isStatic(method.getModifiers())) {
 						if (logger.isWarnEnabled()) {
 							logger.warn("Autowired annotation is not supported on static methods: " + method);
@@ -406,7 +406,7 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 							logger.warn("Autowired annotation should be used on methods with actual parameters: " + method);
 						}
 					}
-					boolean required = determineRequiredStatus(annotation);
+					boolean required = determineRequiredStatus(ann);
 					PropertyDescriptor pd = BeanUtils.findPropertyForMethod(method);
 					currElements.add(new AutowiredMethodElement(method, required, pd));
 				}

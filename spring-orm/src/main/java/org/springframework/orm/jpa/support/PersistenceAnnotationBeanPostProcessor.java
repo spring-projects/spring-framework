@@ -402,7 +402,7 @@ public class PersistenceAnnotationBeanPostProcessor
 						for (Method method : targetClass.getDeclaredMethods()) {
 							PersistenceContext pc = method.getAnnotation(PersistenceContext.class);
 							PersistenceUnit pu = method.getAnnotation(PersistenceUnit.class);
-							if ((pc != null || pu != null) &&
+							if ((pc != null || pu != null) && !method.isBridge() &&
 									method.equals(ClassUtils.getMostSpecificMethod(method, clazz))) {
 								if (Modifier.isStatic(method.getModifiers())) {
 									throw new IllegalStateException("Persistence annotations are not supported on static methods");
