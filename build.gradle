@@ -29,7 +29,7 @@ configure(allprojects) { project ->
 
 	ext.aspectjVersion       = "1.8.2"
 	ext.eclipseLinkVersion   = "2.4.2"
-	ext.ehcacheVersion       = "2.8.3"
+	ext.ehcacheVersion       = "2.8.4"
 	ext.ehcacheJCacheVersion = "1.0.0"
 	ext.groovyVersion        = "2.3.6"
 	ext.hibernate3Version    = "3.6.10.Final"
@@ -39,8 +39,8 @@ configure(allprojects) { project ->
 	ext.hsqldbVersion        = "2.3.2"
 	ext.jackson2Version      = "2.4.2"
 	ext.gsonVersion          = "2.3"
-	ext.jasperReportsVersion = "5.6.0"
-	ext.jettyVersion         = "9.2.2.v20140723"
+	ext.jasperReportsVersion = "5.6.1"
+	ext.jettyVersion         = "9.2.3.v20140905"
 	ext.jodaVersion          = "2.4"
 	ext.junitVersion         = "4.11"
 	ext.openJpaVersion       = "2.2.2"  // 2.3.0 not Java 8 compatible (based on ASM 4)
