@@ -75,6 +75,10 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 	}
 
 
+	protected ResponseBodyAdviceChain getAdviceChain() {
+		return this.adviceChain;
+	}
+
 	/**
 	 * Creates a new {@link HttpOutputMessage} from the given {@link NativeWebRequest}.
 	 * @param webRequest the web request to create an output message from
@@ -112,7 +116,7 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 			ServletServerHttpRequest inputMessage, ServletServerHttpResponse outputMessage)
 			throws IOException, HttpMediaTypeNotAcceptableException {
 
-		Class<?> returnValueClass = returnValue.getClass();
+		Class<?> returnValueClass = getReturnValueType(returnValue, returnType);
 		HttpServletRequest servletRequest = inputMessage.getServletRequest();
 		List<MediaType> requestedMediaTypes = getAcceptableMediaTypes(servletRequest);
 		List<MediaType> producibleMediaTypes = getProducibleMediaTypes(servletRequest, returnValueClass);
@@ -150,16 +154,28 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 				if (messageConverter.canWrite(returnValueClass, selectedMediaType)) {
 					returnValue = this.adviceChain.invoke(returnValue, returnType, selectedMediaType,
 							(Class<HttpMessageConverter<?>>) messageConverter.getClass(), inputMessage, outputMessage);
-					((HttpMessageConverter<T>) messageConverter).write(returnValue, selectedMediaType, outputMessage);
-					if (logger.isDebugEnabled()) {
-						logger.debug("Written [" + returnValue + "] as \"" + selectedMediaType + "\" using [" +
-								messageConverter + "]");
+					if (returnValue != null) {
+						((HttpMessageConverter<T>) messageConverter).write(returnValue, selectedMediaType, outputMessage);
+						if (logger.isDebugEnabled()) {
+							logger.debug("Written [" + returnValue + "] as \"" + selectedMediaType + "\" using [" +
+									messageConverter + "]");
+						}
 					}
 					return;
 				}
 			}
 		}
 		throw new HttpMediaTypeNotAcceptableException(this.allSupportedMediaTypes);
+	}
+
+	/**
+	 * Return the type of the value to be written to the response. Typically this
+	 * is a simple check via getClass on the returnValue but if the returnValue is
+	 * null, then the returnType needs to be examined possibly including generic
+	 * type determination (e.g. {@code ResponseEntity<T>}).
+	 */
+	protected Class<?> getReturnValueType(Object returnValue, MethodParameter returnType) {
+		return (returnValue != null ? returnValue.getClass() : returnType.getParameterType());
 	}
 
 	/**

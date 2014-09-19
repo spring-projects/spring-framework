@@ -20,6 +20,7 @@ import java.lang.reflect.Method;
 import java.net.URI;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -40,11 +41,13 @@ import org.springframework.mock.web.test.MockHttpServletResponse;
 import org.springframework.web.HttpMediaTypeNotAcceptableException;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.method.support.ModelAndViewContainer;
 
 import static org.junit.Assert.*;
 import static org.mockito.BDDMockito.*;
+import static org.mockito.Matchers.eq;
 import static org.springframework.web.servlet.HandlerMapping.*;
 
 /**
@@ -217,6 +220,29 @@ public class HttpEntityMethodProcessorMockTests {
 
 		assertTrue(mavContainer.isRequestHandled());
 		verify(messageConverter).write(eq(body), eq(MediaType.TEXT_HTML), isA(HttpOutputMessage.class));
+	}
+
+	@Test
+	public void handleReturnValueWithResponseBodyAdvice() throws Exception {
+		ResponseEntity<String> returnValue = new ResponseEntity<>(HttpStatus.OK);
+
+		servletRequest.addHeader("Accept", "text/*");
+		servletRequest.setAttribute(PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE, Collections.singleton(MediaType.TEXT_HTML));
+
+		ResponseBodyAdvice<String> advice = mock(ResponseBodyAdvice.class);
+		given(advice.supports(any(), any())).willReturn(true);
+		given(advice.beforeBodyWrite(any(), any(), any(), any(), any(), any())).willReturn("Foo");
+
+		HttpEntityMethodProcessor processor = new HttpEntityMethodProcessor(
+				Collections.singletonList(messageConverter), null, Collections.singletonList(advice));
+
+		reset(messageConverter);
+		given(messageConverter.canWrite(String.class, MediaType.TEXT_HTML)).willReturn(true);
+
+		processor.handleReturnValue(returnValue, returnTypeResponseEntity, mavContainer, webRequest);
+
+		assertTrue(mavContainer.isRequestHandled());
+		verify(messageConverter).write(eq("Foo"), eq(MediaType.TEXT_HTML), isA(HttpOutputMessage.class));
 	}
 
 	@Test(expected = HttpMediaTypeNotAcceptableException.class)

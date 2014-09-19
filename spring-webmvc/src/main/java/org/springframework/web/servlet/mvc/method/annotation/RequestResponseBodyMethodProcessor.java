@@ -198,7 +198,7 @@ public class RequestResponseBodyMethodProcessor extends AbstractMessageConverter
 			throws IOException, HttpMediaTypeNotAcceptableException {
 
 		mavContainer.setRequestHandled(true);
-		if (returnValue != null) {
+		if (returnValue != null || getAdviceChain().hasAdvice()) {
 			writeWithMessageConverters(returnValue, returnType, webRequest);
 		}
 	}

@@ -22,6 +22,7 @@ import java.lang.reflect.Type;
 import java.util.List;
 
 import org.springframework.core.MethodParameter;
+import org.springframework.core.ResolvableType;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.RequestEntity;
@@ -134,13 +135,21 @@ public class HttpEntityMethodProcessor extends AbstractMessageConverterMethodPro
 		}
 
 		Object body = responseEntity.getBody();
-		if (body != null) {
+		if (body != null || getAdviceChain().hasAdvice()) {
 			writeWithMessageConverters(body, returnType, inputMessage, outputMessage);
 		}
-		else {
-			// Flush headers to the HttpServletResponse
-			outputMessage.getBody();
-		}
+		// Ensure headers are flushed even if no body was written
+		outputMessage.getBody();
 	}
 
+	@Override
+	protected Class<?> getReturnValueType(Object returnValue, MethodParameter returnType) {
+		if (returnValue != null) {
+			return returnValue.getClass();
+		}
+		else {
+			Type type = getHttpEntityType(returnType);
+			return ResolvableType.forMethodParameter(returnType, type).resolve(Object.class);
+		}
+	}
 }

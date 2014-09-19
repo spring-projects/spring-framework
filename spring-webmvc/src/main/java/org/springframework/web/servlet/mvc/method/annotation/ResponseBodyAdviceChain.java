@@ -23,8 +23,10 @@ import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.method.ControllerAdviceBean;
 
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -44,6 +46,10 @@ class ResponseBodyAdviceChain {
 		this.advice = advice;
 	}
 
+
+	public boolean hasAdvice() {
+		return !CollectionUtils.isEmpty(this.advice);
+	}
 
 	@SuppressWarnings("unchecked")
 	public <T> T invoke(T body, MethodParameter returnType,
