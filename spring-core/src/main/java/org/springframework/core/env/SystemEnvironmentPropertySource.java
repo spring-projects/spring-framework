@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,11 +40,11 @@ import org.springframework.util.Assert;
  * {@code true} if any of the above properties are present, otherwise {@code false}.
  *
  * <p>This feature is particularly useful when specifying active or default profiles as
- * environment variables. The following is not allowable under Bash
+ * environment variables. The following is not allowable under Bash:
  *
  * <pre class="code">spring.profiles.active=p1 java -classpath ... MyApp</pre>
  *
- * However, the following syntax is permitted and is also more conventional.
+ * However, the following syntax is permitted and is also more conventional:
  *
  * <pre class="code">SPRING_PROFILES_ACTIVE=p1 java -classpath ... MyApp</pre>
  *
@@ -70,8 +70,9 @@ public class SystemEnvironmentPropertySource extends MapPropertySource {
 		super(name, source);
 	}
 
+
 	/**
-	 * Return true if a property with the given name or any underscore/uppercase variant
+	 * Return {@code true} if a property with the given name or any underscore/uppercase variant
 	 * thereof exists in this property source.
 	 */
 	@Override
@@ -80,13 +81,11 @@ public class SystemEnvironmentPropertySource extends MapPropertySource {
 	}
 
 	/**
-	 * {@inheritDoc}
-	 * <p>This implementation returns {@code true} if a property with the given name or
+	 * This implementation returns {@code true} if a property with the given name or
 	 * any underscore/uppercase variant thereof exists in this property source.
 	 */
 	@Override
 	public Object getProperty(String name) {
-		Assert.notNull(name, "property name must not be null");
 		String actualName = resolvePropertyName(name);
 		if (logger.isDebugEnabled() && !name.equals(actualName)) {
 			logger.debug(String.format("PropertySource [%s] does not contain '%s', but found equivalent '%s'",
@@ -101,6 +100,7 @@ public class SystemEnvironmentPropertySource extends MapPropertySource {
 	 * found or otherwise the original name. Never returns {@code null}.
 	 */
 	private String resolvePropertyName(String name) {
+		Assert.notNull(name, "Property name must not be null");
 		if (super.containsProperty(name)) {
 			return name;
 		}
@@ -125,4 +125,5 @@ public class SystemEnvironmentPropertySource extends MapPropertySource {
 
 		return name;
 	}
+
 }
