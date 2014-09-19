@@ -615,6 +615,70 @@
 					<xsd:element name="simple-broker" type="simple-broker"/>
 					<xsd:element name="stomp-broker-relay" type="stomp-broker-relay"/>
 				</xsd:choice>
+				<xsd:element name="argument-resolvers" minOccurs="0">
+					<xsd:annotation>
+						<xsd:documentation><![CDATA[
+	Configures HandlerMethodArgumentResolver types to support custom controller method argument types.
+	Using this option does not override the built-in support for resolving handler method arguments.
+	To customize the built-in support for argument resolution configure SimpAnnotationMethodMessageHandler directly.
+						]]></xsd:documentation>
+					</xsd:annotation>
+					<xsd:complexType>
+						<xsd:choice minOccurs="1" maxOccurs="unbounded">
+							<xsd:element ref="beans:bean" minOccurs="0" maxOccurs="unbounded">
+								<xsd:annotation>
+									<xsd:documentation><![CDATA[
+	The HandlerMethodArgumentResolver (or WebArgumentResolver for backwards compatibility) bean definition.
+									]]></xsd:documentation>
+								</xsd:annotation>
+							</xsd:element>
+							<xsd:element ref="beans:ref" minOccurs="0" maxOccurs="unbounded">
+								<xsd:annotation>
+									<xsd:documentation><![CDATA[
+	A reference to a HandlerMethodArgumentResolver bean definition.
+									]]></xsd:documentation>
+									<xsd:appinfo>
+										<tool:annotation kind="ref">
+											<tool:expected-type type="java:org.springframework.messaging.handler.invocation.HandlerMethodArgumentResolver" />
+										</tool:annotation>
+									</xsd:appinfo>
+								</xsd:annotation>
+							</xsd:element>
+						</xsd:choice>
+					</xsd:complexType>
+				</xsd:element>
+				<xsd:element name="return-value-handlers" minOccurs="0">
+					<xsd:annotation>
+						<xsd:documentation><![CDATA[
+	Configures HandlerMethodReturnValueHandler types to support custom controller method return value handling.
+	Using this option does not override the built-in support for handling return values.
+	To customize the built-in support for handling return values configure SimpAnnotationMethodMessageHandler directly.
+						]]></xsd:documentation>
+					</xsd:annotation>
+					<xsd:complexType>
+						<xsd:choice minOccurs="1" maxOccurs="unbounded">
+							<xsd:element ref="beans:bean" minOccurs="0" maxOccurs="unbounded">
+								<xsd:annotation>
+									<xsd:documentation><![CDATA[
+	The HandlerMethodReturnValueHandler bean definition.
+									]]></xsd:documentation>
+								</xsd:annotation>
+							</xsd:element>
+							<xsd:element ref="beans:ref" minOccurs="0" maxOccurs="unbounded">
+								<xsd:annotation>
+									<xsd:documentation><![CDATA[
+	A reference to a HandlerMethodReturnValueHandler bean definition.
+									]]></xsd:documentation>
+									<xsd:appinfo>
+										<tool:annotation kind="ref">
+											<tool:expected-type type="java:org.springframework.messaging.handler.invocation.HandlerMethodReturnValueHandler" />
+										</tool:annotation>
+									</xsd:appinfo>
+								</xsd:annotation>
+							</xsd:element>
+						</xsd:choice>
+					</xsd:complexType>
+				</xsd:element>
 				<xsd:element name="message-converters" minOccurs="0">
 					<xsd:annotation>
 						<xsd:documentation><![CDATA[

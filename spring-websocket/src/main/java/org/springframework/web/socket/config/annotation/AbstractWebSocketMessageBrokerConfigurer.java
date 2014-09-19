@@ -17,6 +17,8 @@
 package org.springframework.web.socket.config.annotation;
 
 import org.springframework.messaging.converter.MessageConverter;
+import org.springframework.messaging.handler.invocation.HandlerMethodArgumentResolver;
+import org.springframework.messaging.handler.invocation.HandlerMethodReturnValueHandler;
 import org.springframework.messaging.simp.config.ChannelRegistration;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;
 
@@ -47,6 +49,14 @@ public abstract class AbstractWebSocketMessageBrokerConfigurer implements WebSoc
 	@Override
 	public boolean configureMessageConverters(List<MessageConverter> messageConverters) {
 		return true;
+	}
+
+	@Override
+	public void addArgumentResolvers(List<HandlerMethodArgumentResolver> argumentResolvers) {
+	}
+
+	@Override
+	public void addReturnValueHandlers(List<HandlerMethodReturnValueHandler> returnValueHandlers) {
 	}
 
 	@Override

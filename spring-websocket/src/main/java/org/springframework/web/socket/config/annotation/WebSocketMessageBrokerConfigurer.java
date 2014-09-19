@@ -18,6 +18,8 @@ package org.springframework.web.socket.config.annotation;
 
 
 import org.springframework.messaging.converter.MessageConverter;
+import org.springframework.messaging.handler.invocation.HandlerMethodArgumentResolver;
+import org.springframework.messaging.handler.invocation.HandlerMethodReturnValueHandler;
 import org.springframework.messaging.simp.config.ChannelRegistration;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;
 
@@ -61,6 +63,26 @@ public interface WebSocketMessageBrokerConfigurer {
 	 * settings for production use.
 	 */
 	void configureClientOutboundChannel(ChannelRegistration registration);
+
+	/**
+	 * Add resolvers to support custom controller method argument types.
+	 * <p>This does not override the built-in support for resolving handler
+	 * method arguments. To customize the built-in support for argument
+	 * resolution, configure {@code SimpAnnotationMethodMessageHandler} directly.
+	 * @param argumentResolvers initially an empty list
+	 * @since 4.1.1
+	 */
+	void addArgumentResolvers(List<HandlerMethodArgumentResolver> argumentResolvers);
+
+	/**
+	 * Add handlers to support custom controller method return value types.
+	 * <p>Using this option does not override the built-in support for handling
+	 * return values. To customize the built-in support for handling return
+	 * values, configure  {@code SimpAnnotationMethodMessageHandler} directly.
+	 * @param returnValueHandlers initially an empty list
+	 * @since 4.1.1
+	 */
+	void addReturnValueHandlers(List<HandlerMethodReturnValueHandler> returnValueHandlers);
 
 	/**
 	 * Configure the message converters to use when extracting the payload of

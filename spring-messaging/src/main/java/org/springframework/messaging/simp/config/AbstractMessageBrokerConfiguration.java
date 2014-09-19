@@ -27,6 +27,8 @@ import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.Bean;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.converter.*;
+import org.springframework.messaging.handler.invocation.HandlerMethodArgumentResolver;
+import org.springframework.messaging.handler.invocation.HandlerMethodReturnValueHandler;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.messaging.simp.annotation.support.SimpAnnotationMethodMessageHandler;
 import org.springframework.messaging.simp.broker.AbstractBrokerMessageHandler;
@@ -40,6 +42,7 @@ import org.springframework.messaging.support.AbstractSubscribableChannel;
 import org.springframework.messaging.support.ExecutorSubscribableChannel;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.MimeTypeUtils;
 import org.springframework.util.PathMatcher;
 import org.springframework.validation.Errors;
@@ -213,11 +216,25 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 		handler.setMessageConverter(brokerMessageConverter());
 		handler.setValidator(simpValidator());
 
+		List<HandlerMethodArgumentResolver> argumentResolvers = new ArrayList<HandlerMethodArgumentResolver>();
+		addArgumentResolvers(argumentResolvers);
+		handler.setCustomArgumentResolvers(argumentResolvers);
+
+		List<HandlerMethodReturnValueHandler> returnValueHandlers = new ArrayList<HandlerMethodReturnValueHandler>();
+		addReturnValueHandlers(returnValueHandlers);
+		handler.setCustomReturnValueHandlers(returnValueHandlers);
+
 		PathMatcher pathMatcher = this.getBrokerRegistry().getPathMatcher();
 		if (pathMatcher != null) {
 			handler.setPathMatcher(pathMatcher);
 		}
 		return handler;
+	}
+
+	protected void addArgumentResolvers(List<HandlerMethodArgumentResolver> argumentResolvers) {
+	}
+
+	protected void addReturnValueHandlers(List<HandlerMethodReturnValueHandler> returnValueHandlers) {
 	}
 
 	@Bean

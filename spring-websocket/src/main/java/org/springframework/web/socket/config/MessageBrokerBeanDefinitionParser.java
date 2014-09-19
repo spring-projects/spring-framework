@@ -401,7 +401,28 @@ class MessageBrokerBeanDefinitionParser implements BeanDefinitionParser {
 			String pathMatcherRef = messageBrokerElement.getAttribute("path-matcher");
 			beanDef.getPropertyValues().add("pathMatcher", new RuntimeBeanReference(pathMatcherRef));
 		}
+
+		Element resolversElement = DomUtils.getChildElementByTagName(messageBrokerElement, "argument-resolvers");
+		if (resolversElement != null) {
+			values.add("customArgumentResolvers", extractBeanSubElements(resolversElement, context));
+		}
+
+		Element handlersElement = DomUtils.getChildElementByTagName(messageBrokerElement, "return-value-handlers");
+		if (handlersElement != null) {
+			values.add("customReturnValueHandlers", extractBeanSubElements(handlersElement, context));
+		}
+
 		registerBeanDef(beanDef, context, source);
+	}
+
+	private ManagedList<Object> extractBeanSubElements(Element parentElement, ParserContext parserContext) {
+		ManagedList<Object> list = new ManagedList<Object>();
+		list.setSource(parserContext.extractSource(parentElement));
+		for (Element beanElement : DomUtils.getChildElementsByTagName(parentElement, "bean", "ref")) {
+			Object object = parserContext.getDelegate().parsePropertySubElement(beanElement, null);
+			list.add(object);
+		}
+		return list;
 	}
 
 	private RuntimeBeanReference registerUserDestinationResolver(Element brokerElem,

@@ -32,7 +32,9 @@ import org.springframework.beans.DirectFieldAccessor;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.config.CustomScopeConfigurer;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
+import org.springframework.core.MethodParameter;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.converter.ByteArrayMessageConverter;
 import org.springframework.messaging.converter.CompositeMessageConverter;
@@ -41,6 +43,8 @@ import org.springframework.messaging.converter.DefaultContentTypeResolver;
 import org.springframework.messaging.converter.MappingJackson2MessageConverter;
 import org.springframework.messaging.converter.MessageConverter;
 import org.springframework.messaging.converter.StringMessageConverter;
+import org.springframework.messaging.handler.invocation.HandlerMethodArgumentResolver;
+import org.springframework.messaging.handler.invocation.HandlerMethodReturnValueHandler;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.messaging.simp.annotation.support.SimpAnnotationMethodMessageHandler;
 import org.springframework.messaging.simp.broker.SimpleBrokerMessageHandler;
@@ -337,6 +341,23 @@ public class MessageBrokerBeanDefinitionParserTests {
 	}
 
 	@Test
+	public void customArgumentAndReturnValueTypes() {
+		loadBeanDefinitions("websocket-config-broker-custom-argument-and-return-value-types.xml");
+
+		SimpAnnotationMethodMessageHandler handler = this.appContext.getBean(SimpAnnotationMethodMessageHandler.class);
+
+		List<HandlerMethodArgumentResolver> customResolvers = handler.getCustomArgumentResolvers();
+		assertEquals(2, customResolvers.size());
+		assertTrue(handler.getArgumentResolvers().contains(customResolvers.get(0)));
+		assertTrue(handler.getArgumentResolvers().contains(customResolvers.get(1)));
+
+		List<HandlerMethodReturnValueHandler> customHandlers = handler.getCustomReturnValueHandlers();
+		assertEquals(2, customHandlers.size());
+		assertTrue(handler.getReturnValueHandlers().contains(customHandlers.get(0)));
+		assertTrue(handler.getReturnValueHandlers().contains(customHandlers.get(1)));
+	}
+
+	@Test
 	public void messageConverters() {
 		loadBeanDefinitions("websocket-config-broker-converters.xml");
 
@@ -395,4 +416,31 @@ public class MessageBrokerBeanDefinitionParserTests {
 				((WebSocketHandlerDecorator) handler).getLastHandler() : handler;
 	}
 
+}
+
+class CustomArgumentResolver implements HandlerMethodArgumentResolver {
+
+	@Override
+	public boolean supportsParameter(MethodParameter parameter) {
+		return false;
+	}
+
+	@Override
+	public Object resolveArgument(MethodParameter parameter, Message<?> message) throws Exception {
+		return null;
+	}
+
+}
+
+class CustomReturnValueHandler implements HandlerMethodReturnValueHandler {
+
+	@Override
+	public boolean supportsReturnType(MethodParameter returnType) {
+		return false;
+	}
+
+	@Override
+	public void handleReturnValue(Object returnValue, MethodParameter returnType, Message<?> message) throws Exception {
+
+	}
 }

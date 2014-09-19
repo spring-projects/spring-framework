@@ -22,6 +22,8 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.converter.MessageConverter;
+import org.springframework.messaging.handler.invocation.HandlerMethodArgumentResolver;
+import org.springframework.messaging.handler.invocation.HandlerMethodReturnValueHandler;
 import org.springframework.messaging.simp.config.ChannelRegistration;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;
 import org.springframework.util.CollectionUtils;
@@ -76,6 +78,20 @@ public class DelegatingWebSocketMessageBrokerConfiguration extends WebSocketMess
 	protected void configureClientOutboundChannel(ChannelRegistration registration) {
 		for (WebSocketMessageBrokerConfigurer c : this.configurers) {
 			c.configureClientOutboundChannel(registration);
+		}
+	}
+
+	@Override
+	protected void addArgumentResolvers(List<HandlerMethodArgumentResolver> argumentResolvers) {
+		for (WebSocketMessageBrokerConfigurer c : this.configurers) {
+			c.addArgumentResolvers(argumentResolvers);
+		}
+	}
+
+	@Override
+	protected void addReturnValueHandlers(List<HandlerMethodReturnValueHandler> returnValueHandlers) {
+		for (WebSocketMessageBrokerConfigurer c : this.configurers) {
+			c.addReturnValueHandlers(returnValueHandlers);
 		}
 	}
 
