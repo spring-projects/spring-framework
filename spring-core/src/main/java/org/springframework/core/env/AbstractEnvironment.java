@@ -295,7 +295,8 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 	}
 
 	/**
-	 * {@inheritDoc}
+	 * Specify the set of profiles to be made active by default if no other profiles
+	 * are explicitly made active through {@link #setActiveProfiles}.
 	 * <p>Calling this method removes overrides any reserved default profiles
 	 * that may have been added during construction of the environment.
 	 * @see #AbstractEnvironment()
@@ -456,6 +457,51 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 	//---------------------------------------------------------------------
 
 	@Override
+	public ConfigurableConversionService getConversionService() {
+		return this.propertyResolver.getConversionService();
+	}
+
+	@Override
+	public void setConversionService(ConfigurableConversionService conversionService) {
+		this.propertyResolver.setConversionService(conversionService);
+	}
+
+	@Override
+	public void setPlaceholderPrefix(String placeholderPrefix) {
+		this.propertyResolver.setPlaceholderPrefix(placeholderPrefix);
+	}
+
+	@Override
+	public void setPlaceholderSuffix(String placeholderSuffix) {
+		this.propertyResolver.setPlaceholderSuffix(placeholderSuffix);
+	}
+
+	@Override
+	public void setValueSeparator(String valueSeparator) {
+		this.propertyResolver.setValueSeparator(valueSeparator);
+	}
+
+	@Override
+	public void setIgnoreUnresolvableNestedPlaceholders(boolean ignoreUnresolvableNestedPlaceholders) {
+		this.propertyResolver.setIgnoreUnresolvableNestedPlaceholders(ignoreUnresolvableNestedPlaceholders);
+	}
+
+	@Override
+	public void setRequiredProperties(String... requiredProperties) {
+		this.propertyResolver.setRequiredProperties(requiredProperties);
+	}
+
+	@Override
+	public void validateRequiredProperties() throws MissingRequiredPropertiesException {
+		this.propertyResolver.validateRequiredProperties();
+	}
+
+
+	//---------------------------------------------------------------------
+	// Implementation of PropertyResolver interface
+	//---------------------------------------------------------------------
+
+	@Override
 	public boolean containsProperty(String key) {
 		return this.propertyResolver.containsProperty(key);
 	}
@@ -496,16 +542,6 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 	}
 
 	@Override
-	public void setRequiredProperties(String... requiredProperties) {
-		this.propertyResolver.setRequiredProperties(requiredProperties);
-	}
-
-	@Override
-	public void validateRequiredProperties() throws MissingRequiredPropertiesException {
-		this.propertyResolver.validateRequiredProperties();
-	}
-
-	@Override
 	public String resolvePlaceholders(String text) {
 		return this.propertyResolver.resolvePlaceholders(text);
 	}
@@ -513,36 +549,6 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 	@Override
 	public String resolveRequiredPlaceholders(String text) throws IllegalArgumentException {
 		return this.propertyResolver.resolveRequiredPlaceholders(text);
-	}
-
-	@Override
-	public void setIgnoreUnresolvableNestedPlaceholders(boolean ignoreUnresolvableNestedPlaceholders) {
-		this.propertyResolver.setIgnoreUnresolvableNestedPlaceholders(ignoreUnresolvableNestedPlaceholders);
-	}
-
-	@Override
-	public void setConversionService(ConfigurableConversionService conversionService) {
-		this.propertyResolver.setConversionService(conversionService);
-	}
-
-	@Override
-	public ConfigurableConversionService getConversionService() {
-		return this.propertyResolver.getConversionService();
-	}
-
-	@Override
-	public void setPlaceholderPrefix(String placeholderPrefix) {
-		this.propertyResolver.setPlaceholderPrefix(placeholderPrefix);
-	}
-
-	@Override
-	public void setPlaceholderSuffix(String placeholderSuffix) {
-		this.propertyResolver.setPlaceholderSuffix(placeholderSuffix);
-	}
-
-	@Override
-	public void setValueSeparator(String valueSeparator) {
-		this.propertyResolver.setValueSeparator(valueSeparator);
 	}
 
 

@@ -375,7 +375,7 @@ class ConfigurationClassParser {
 				propertySources.addLast(propertySource);
 			}
 			else {
-				String firstProcessed = this.propertySourceNames.get(this.propertySourceNames.size()-1);
+				String firstProcessed = this.propertySourceNames.get(this.propertySourceNames.size() - 1);
 				propertySources.addBefore(firstProcessed, propertySource);
 			}
 		}

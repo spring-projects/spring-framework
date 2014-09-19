@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -74,6 +74,19 @@ public interface ConfigurablePropertyResolver extends PropertyResolver {
 	void setValueSeparator(String valueSeparator);
 
 	/**
+	 * Set whether to throw an exception when encountering an unresolvable placeholder
+	 * nested within the value of a given property. A {@code false} value indicates strict
+	 * resolution, i.e. that an exception will be thrown. A {@code true} value indicates
+	 * that unresolvable nested placeholders should be passed through in their unresolved
+	 * ${...} form.
+	 * <p>Implementations of {@link #getProperty(String)} and its variants must inspect
+	 * the value set here to determine correct behavior when property values contain
+	 * unresolvable placeholders.
+	 * @since 3.2
+	 */
+	void setIgnoreUnresolvableNestedPlaceholders(boolean ignoreUnresolvableNestedPlaceholders);
+
+	/**
 	 * Specify which properties must be present, to be verified by
 	 * {@link #validateRequiredProperties()}.
 	 */
@@ -88,16 +101,4 @@ public interface ConfigurablePropertyResolver extends PropertyResolver {
 	 */
 	void validateRequiredProperties() throws MissingRequiredPropertiesException;
 
-	/**
-	 * Set whether to throw an exception when encountering an unresolvable placeholder
-	 * nested within the value of a given property. A {@code false} value indicates strict
-	 * resolution, i.e. that an exception will be thrown. A {@code true} value indicates
-	 * that unresolvable nested placeholders should be passed through in their unresolved
-	 * ${...} form.
-	 * <p>Implementations of {@link #getProperty(String)} and its variants must inspect
-	 * the value set here to determine correct behavior when property values contain
-	 * unresolvable placeholders.
-	 * @since 3.2
-	 */
-	void setIgnoreUnresolvableNestedPlaceholders(boolean ignoreUnresolvableNestedPlaceholders);
 }
