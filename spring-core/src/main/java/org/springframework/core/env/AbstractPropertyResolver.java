@@ -63,14 +63,46 @@ public abstract class AbstractPropertyResolver implements ConfigurablePropertyRe
 		this.conversionService = conversionService;
 	}
 
-	public String getProperty(String key, String defaultValue) {
-		String value = getProperty(key);
-		return (value != null ? value : defaultValue);
+	/**
+	 * Set the prefix that placeholders replaced by this resolver must begin with.
+	 * <p>The default is "${".
+	 * @see org.springframework.util.SystemPropertyUtils#PLACEHOLDER_PREFIX
+	 */
+	public void setPlaceholderPrefix(String placeholderPrefix) {
+		this.placeholderPrefix = placeholderPrefix;
 	}
 
-	public <T> T getProperty(String key, Class<T> targetType, T defaultValue) {
-		T value = getProperty(key, targetType);
-		return (value != null ? value : defaultValue);
+	/**
+	 * Set the suffix that placeholders replaced by this resolver must end with.
+	 * <p>The default is "}".
+	 * @see org.springframework.util.SystemPropertyUtils#PLACEHOLDER_SUFFIX
+	 */
+	public void setPlaceholderSuffix(String placeholderSuffix) {
+		this.placeholderSuffix = placeholderSuffix;
+	}
+
+	/**
+	 * Specify the separating character between the placeholders replaced by this
+	 * resolver and their associated default value, or {@code null} if no such
+	 * special character should be processed as a value separator.
+	 * <p>The default is ":".
+	 * @see org.springframework.util.SystemPropertyUtils#VALUE_SEPARATOR
+	 */
+	public void setValueSeparator(String valueSeparator) {
+		this.valueSeparator = valueSeparator;
+	}
+
+	/**
+	 * Set whether to throw an exception when encountering an unresolvable placeholder
+	 * nested within the value of a given property. A {@code false} value indicates strict
+	 * resolution, i.e. that an exception will be thrown. A {@code true} value indicates
+	 * that unresolvable nested placeholders should be passed through in their unresolved
+	 * ${...} form.
+	 * <p>The default is {@code false}.
+	 * @since 3.2
+	 */
+	public void setIgnoreUnresolvableNestedPlaceholders(boolean ignoreUnresolvableNestedPlaceholders) {
+		this.ignoreUnresolvableNestedPlaceholders = ignoreUnresolvableNestedPlaceholders;
 	}
 
 	public void setRequiredProperties(String... requiredProperties) {
@@ -91,6 +123,17 @@ public abstract class AbstractPropertyResolver implements ConfigurablePropertyRe
 		}
 	}
 
+
+	public String getProperty(String key, String defaultValue) {
+		String value = getProperty(key);
+		return (value != null ? value : defaultValue);
+	}
+
+	public <T> T getProperty(String key, Class<T> targetType, T defaultValue) {
+		T value = getProperty(key, targetType);
+		return (value != null ? value : defaultValue);
+	}
+
 	public String getRequiredProperty(String key) throws IllegalStateException {
 		String value = getProperty(key);
 		if (value == null) {
@@ -107,30 +150,6 @@ public abstract class AbstractPropertyResolver implements ConfigurablePropertyRe
 		return value;
 	}
 
-	/**
-	 * {@inheritDoc} The default is "${".
-	 * @see org.springframework.util.SystemPropertyUtils#PLACEHOLDER_PREFIX
-	 */
-	public void setPlaceholderPrefix(String placeholderPrefix) {
-		this.placeholderPrefix = placeholderPrefix;
-	}
-
-	/**
-	 * {@inheritDoc} The default is "}".
-	 * @see org.springframework.util.SystemPropertyUtils#PLACEHOLDER_SUFFIX
-	 */
-	public void setPlaceholderSuffix(String placeholderSuffix) {
-		this.placeholderSuffix = placeholderSuffix;
-	}
-
-	/**
-	 * {@inheritDoc} The default is ":".
-	 * @see org.springframework.util.SystemPropertyUtils#VALUE_SEPARATOR
-	 */
-	public void setValueSeparator(String valueSeparator) {
-		this.valueSeparator = valueSeparator;
-	}
-
 	public String resolvePlaceholders(String text) {
 		if (this.nonStrictHelper == null) {
 			this.nonStrictHelper = createPlaceholderHelper(true);
@@ -143,15 +162,6 @@ public abstract class AbstractPropertyResolver implements ConfigurablePropertyRe
 			this.strictHelper = createPlaceholderHelper(false);
 		}
 		return doResolvePlaceholders(text, this.strictHelper);
-	}
-
-	/**
-	 * {@inheritDoc}
-	 * <p>The default value for this implementation is {@code false}.
-	 * @since 3.2
-	 */
-	public void setIgnoreUnresolvableNestedPlaceholders(boolean ignoreUnresolvableNestedPlaceholders) {
-		this.ignoreUnresolvableNestedPlaceholders = ignoreUnresolvableNestedPlaceholders;
 	}
 
 	/**
@@ -183,6 +193,7 @@ public abstract class AbstractPropertyResolver implements ConfigurablePropertyRe
 			}
 		});
 	}
+
 
 	/**
 	 * Retrieve the specified property as a raw String,

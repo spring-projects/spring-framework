@@ -41,6 +41,7 @@ import org.springframework.util.Assert;
  * or not.
  *
  * @author Chris Beams
+ * @author Juergen Hoeller
  * @since 3.1
  */
 public abstract class EnumerablePropertySource<T> extends PropertySource<T> {
@@ -55,12 +56,6 @@ public abstract class EnumerablePropertySource<T> extends PropertySource<T> {
 		super(name, source);
 	}
 
-
-	/**
-	 * Return the names of all properties contained by the
-	 * {@linkplain #getSource() source} object (never {@code null}).
-	 */
-	public abstract String[] getPropertyNames();
 
 	/**
 	 * Return whether this {@code PropertySource} contains a property with the given name.
@@ -83,5 +78,11 @@ public abstract class EnumerablePropertySource<T> extends PropertySource<T> {
 		}
 		return false;
 	}
+
+	/**
+	 * Return the names of all properties contained by the
+	 * {@linkplain #getSource() source} object (never {@code null}).
+	 */
+	public abstract String[] getPropertyNames();
 
 }

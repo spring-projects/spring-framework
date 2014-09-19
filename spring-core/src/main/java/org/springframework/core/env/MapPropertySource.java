@@ -33,6 +33,7 @@ public class MapPropertySource extends EnumerablePropertySource<Map<String, Obje
 		super(name, source);
 	}
 
+
 	@Override
 	public Object getProperty(String name) {
 		return this.source.get(name);
