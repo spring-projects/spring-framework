@@ -140,7 +140,6 @@ public abstract class AbstractSockJsIntegrationTests {
 
 	// Temporarily @Ignore failures caused by suspected Jetty bug
 
-	@Ignore
 	@Test
 	public void echoWebSocket() throws Exception {
 		testEcho(100, createWebSocketTransport());
@@ -158,7 +157,6 @@ public abstract class AbstractSockJsIntegrationTests {
 		testEcho(100, xhrTransport);
 	}
 
-	@Ignore
 	@Test
 	public void receiveOneMessageWebSocket() throws Exception {
 		testReceiveOneMessage(createWebSocketTransport());
