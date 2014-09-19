@@ -17,16 +17,18 @@
 package org.springframework.context.annotation;
 
 import java.io.FileNotFoundException;
+import java.util.Collections;
 import java.util.Iterator;
+
 import javax.inject.Inject;
 
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.core.env.Environment;
+import org.springframework.core.env.MapPropertySource;
 import org.springframework.core.env.MutablePropertySources;
 import org.springframework.tests.sample.beans.TestBean;
 
@@ -235,6 +237,17 @@ public class PropertySourceAnnotationTests {
 		assertThat(ctxWithoutName.getEnvironment().getProperty("testbean.name"), equalTo("p4TestBean"));
 	}
 
+	@Test
+	public void orderingDoesntReplaceExisting() throws Exception {
+		// SPR-12198: mySource should 'win' as it was registered manually
+		AnnotationConfigApplicationContext ctxWithoutName = new AnnotationConfigApplicationContext();
+		MapPropertySource mySource = new MapPropertySource("mine", Collections.singletonMap("testbean.name", "myTestBean"));
+		ctxWithoutName.getEnvironment().getPropertySources().addLast(mySource);
+		ctxWithoutName.register(ConfigWithFourResourceLocations.class);
+		ctxWithoutName.refresh();
+		assertThat(ctxWithoutName.getEnvironment().getProperty("testbean.name"), equalTo("myTestBean"));
+
+	}
 
 	@Configuration
 	@PropertySource(value="classpath:${unresolvable}/p1.properties")

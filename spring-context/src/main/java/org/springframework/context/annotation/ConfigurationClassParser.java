@@ -128,7 +128,7 @@ class ConfigurationClassParser {
 
 	private final Map<String, ConfigurationClass> knownSuperclasses = new HashMap<String, ConfigurationClass>();
 
-	private final Set<String> propertySourceNames = new LinkedHashSet<String>();
+	private final List<String> propertySourceNames = new ArrayList<String>();
 
 	private final ImportStack importStack = new ImportStack();
 
@@ -375,7 +375,8 @@ class ConfigurationClassParser {
 				propertySources.addLast(propertySource);
 			}
 			else {
-				propertySources.addFirst(propertySource);
+				String firstProcessed = this.propertySourceNames.get(this.propertySourceNames.size()-1);
+				propertySources.addBefore(firstProcessed, propertySource);
 			}
 		}
 		this.propertySourceNames.add(name);
