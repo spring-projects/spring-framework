@@ -18,6 +18,7 @@ package org.springframework.core.env;
 
 import java.util.Map;
 
+import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 /**
@@ -41,6 +42,17 @@ public class MapPropertySource extends EnumerablePropertySource<Map<String, Obje
 	@Override
 	public String[] getPropertyNames() {
 		return StringUtils.toStringArray(this.source.keySet());
+	}
+
+	@Override
+	public boolean containsProperty(String name) {
+		Assert.notNull(name, "Property name must not be null");
+		boolean containsProperty = this.source.containsKey(name);
+		if (logger.isDebugEnabled()) {
+			logger.debug(String.format("PropertySource [%s] %s '%s'", getName(),
+					(containsProperty ? "contains" : "does not contain"), name));
+		}
+		return containsProperty;
 	}
 
 }
