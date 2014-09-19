@@ -58,7 +58,7 @@ public class JndiLocatorDelegate extends JndiLocatorSupport {
 	 */
 	public static boolean isDefaultJndiEnvironmentAvailable() {
 		try {
-			new InitialContext();
+			new InitialContext().getEnvironment();
 			return true;
 		}
 		catch (Throwable ex) {
