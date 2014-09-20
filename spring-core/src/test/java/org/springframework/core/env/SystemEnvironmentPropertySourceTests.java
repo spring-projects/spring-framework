@@ -16,14 +16,14 @@
 
 package org.springframework.core.env;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.junit.Assert.assertThat;
-
 import java.util.HashMap;
 import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
+
+import static org.hamcrest.CoreMatchers.*;
+import static org.junit.Assert.*;
 
 /**
  * Unit tests for {@link SystemEnvironmentPropertySource}.
@@ -99,6 +99,20 @@ public class SystemEnvironmentPropertySourceTests {
 		assertThat(ps.getProperty("A.KEY"), equalTo((Object)"a_value"));
 		assertThat(ps.getProperty("a_key"), equalTo((Object)"a_value"));
 		assertThat(ps.getProperty("a.key"), equalTo((Object)"a_value"));
+	}
+
+	@Test
+	public void withSecurityConstraints() throws Exception {
+		envMap = new HashMap<String, Object>() {
+			@Override
+			public boolean containsKey(Object key) {
+				throw new UnsupportedOperationException();
+			}
+		};
+		ps = new SystemEnvironmentPropertySource("sysEnv", envMap);
+		envMap.put("A_KEY", "a_value");
+		assertThat(ps.containsProperty("A_KEY"), equalTo(true));
+		assertThat(ps.getProperty("A_KEY"), equalTo((Object)"a_value"));
 	}
 
 }

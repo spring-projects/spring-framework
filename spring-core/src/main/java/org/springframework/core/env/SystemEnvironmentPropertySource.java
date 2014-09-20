@@ -63,6 +63,9 @@ import org.springframework.util.ObjectUtils;
  */
 public class SystemEnvironmentPropertySource extends MapPropertySource {
 
+	/** if SecurityManager scenarios mean that property access should be via getPropertyNames() */
+	private boolean usePropertyNames;
+
 	/**
 	 * Create a new {@code SystemEnvironmentPropertySource} with the given name and
 	 * delegating to the given {@code MapPropertySource}.
@@ -102,29 +105,48 @@ public class SystemEnvironmentPropertySource extends MapPropertySource {
 	 */
 	private String resolvePropertyName(String name) {
 		Assert.notNull(name, "Property name must not be null");
-		if (ObjectUtils.containsElement(getPropertyNames(), name)) {
-			return name;
-		}
-
-		String usName = name.replace('.', '_');
-		if (!name.equals(usName) && ObjectUtils.containsElement(getPropertyNames(), usName)) {
-			return usName;
-		}
-
-		String ucName = name.toUpperCase();
-		if (!name.equals(ucName)) {
-			if (ObjectUtils.containsElement(getPropertyNames(), ucName)) {
-				return ucName;
+		try {
+			String[] propertyNames = (this.usePropertyNames ? getPropertyNames() : null);
+			if (containsProperty(propertyNames, name)) {
+				return name;
 			}
-			else {
-				String usUcName = ucName.replace('.', '_');
-				if (!ucName.equals(usUcName) && ObjectUtils.containsElement(getPropertyNames(), usUcName)) {
-					return usUcName;
+
+			String usName = name.replace('.', '_');
+			if (!name.equals(usName) && containsProperty(propertyNames, usName)) {
+				return usName;
+			}
+
+			String ucName = name.toUpperCase();
+			if (!name.equals(ucName)) {
+				if (containsProperty(propertyNames, ucName)) {
+					return ucName;
+				}
+				else {
+					String usUcName = ucName.replace('.', '_');
+					if (!ucName.equals(usUcName) && containsProperty(propertyNames, usUcName)) {
+						return usUcName;
+					}
 				}
 			}
-		}
 
-		return name;
+			return name;
+		}
+		catch (RuntimeException ex) {
+			if (this.usePropertyNames) {
+				throw ex;
+			}
+			else {
+				this.usePropertyNames = true;
+				return resolvePropertyName(name);
+			}
+		}
+	}
+
+	private boolean containsProperty(String[] propertyNames, String name) {
+		if (propertyNames == null) {
+			return super.containsProperty(name);
+		}
+		return ObjectUtils.containsElement(propertyNames, name);
 	}
 
 }
