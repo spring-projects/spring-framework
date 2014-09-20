@@ -27,7 +27,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Pattern;
 
 /**
  * Simple utility class for working with the reflection API and handling
@@ -50,12 +49,6 @@ public abstract class ReflectionUtils {
 	 * @see #isCglibRenamedMethod
 	 */
 	private static final String CGLIB_RENAMED_METHOD_PREFIX = "CGLIB$";
-
-	/**
-	 * Pattern for detecting CGLIB-renamed methods.
-	 * @see #isCglibRenamedMethod
-	 */
-	private static final Pattern CGLIB_RENAMED_METHOD_PATTERN = Pattern.compile("(.+)\\$\\d+");
 
 	/**
 	 * Cache for {@link Class#getDeclaredMethods()}, allowing for fast resolution.
@@ -411,8 +404,16 @@ public abstract class ReflectionUtils {
 	 */
 	public static boolean isCglibRenamedMethod(Method renamedMethod) {
 		String name = renamedMethod.getName();
-		return (name.startsWith(CGLIB_RENAMED_METHOD_PREFIX) &&
-				CGLIB_RENAMED_METHOD_PATTERN.matcher(name.substring(CGLIB_RENAMED_METHOD_PREFIX.length())).matches());
+		if (name.startsWith(CGLIB_RENAMED_METHOD_PREFIX)) {
+			int i = name.length() - 1;
+			while (i >= 0 && Character.isDigit(name.charAt(i))) {
+				i--;
+			}
+			return ((i > CGLIB_RENAMED_METHOD_PREFIX.length()) &&
+						(i < name.length() - 1) &&
+						(name.charAt(i) == '$'));
+		}
+		return false;
 	}
 
 	/**
