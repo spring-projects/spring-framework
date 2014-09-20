@@ -6365,7 +6365,7 @@ support for autowiring of `@Bean` methods:
 				@Qualifier("public") TestBean spouse,
 				@Value("#{privateInstance.age}") String country) {
 			TestBean tb = new TestBean("protectedInstance", 1);
-			tb.setSpouse(tb);
+			tb.setSpouse(spouse);
 			tb.setCountry(country);
 			return tb;
 		}
