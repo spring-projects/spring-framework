@@ -35,7 +35,6 @@ import java.util.jar.JarFile;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
@@ -317,7 +316,17 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 			// We need to have pointers to each of the jar files on the classpath as well...
 			addAllClassLoaderJarRoots(cl, result);
 		}
+		postProcessFindAllClassPathResourcesResult(location, result);
 		return result.toArray(new Resource[result.size()]);
+	}
+
+	/**
+	 * Subclass hook allowing for post processing of a
+	 * {@link #findAllClassPathResources(String) findAllClassPathResources} result.
+	 * @param location the absolute path within the classpath
+	 * @param result a mutable set of the results which can be post processed
+	 */
+	protected void postProcessFindAllClassPathResourcesResult(String location, Set<Resource> result) {
 	}
 
 	/**
@@ -338,7 +347,7 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 	 * @param classLoader the ClassLoader to search (including its ancestors)
 	 * @param result the set of resources to add jar roots to
 	 */
-	private void addAllClassLoaderJarRoots(ClassLoader classLoader, Set<Resource> result) {
+	protected void addAllClassLoaderJarRoots(ClassLoader classLoader, Set<Resource> result) {
 		if (classLoader instanceof URLClassLoader) {
 			try {
 				for (URL url : ((URLClassLoader) classLoader).getURLs()) {
