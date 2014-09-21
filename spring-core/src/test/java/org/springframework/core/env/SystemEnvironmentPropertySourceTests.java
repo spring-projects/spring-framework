@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,8 +44,6 @@ public class SystemEnvironmentPropertySourceTests {
 
 	@Test
 	public void none() {
-		//envMap.put("a.key", "a_value");
-
 		assertThat(ps.containsProperty("a.key"), equalTo(false));
 		assertThat(ps.getProperty("a.key"), equalTo(null));
 	}
@@ -102,6 +100,7 @@ public class SystemEnvironmentPropertySourceTests {
 	}
 
 	@Test
+	@SuppressWarnings("serial")
 	public void withSecurityConstraints() throws Exception {
 		envMap = new HashMap<String, Object>() {
 			@Override
