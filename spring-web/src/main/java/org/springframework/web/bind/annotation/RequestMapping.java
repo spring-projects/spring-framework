@@ -288,6 +288,7 @@ public @interface RequestMapping {
 	 * <p><b>Supported at the type level as well as at the method level!</b>
 	 * When used at the type level, all method-level mappings inherit
 	 * this primary mapping, narrowing it for a specific handler method.
+	 * @see org.springframework.web.bind.annotation.ValueConstants.DEFAULT_NONE
 	 */
 	String[] value() default {};
 
