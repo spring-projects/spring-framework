@@ -9325,7 +9325,7 @@ Similarly, one can force a `UrlResource` to be used by specifying any of the sta
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	Resource template = ctx.getResource("file:/some/resource/path/myTemplate.txt");
+	Resource template = ctx.getResource("file:///some/resource/path/myTemplate.txt");
 ----
 
 [source,java,indent=0]
@@ -9346,7 +9346,7 @@ The following table summarizes the strategy for converting ++String++s to ++Reso
 | Loaded from the classpath.
 
 | file:
-| `file:/data/config.xml`
+| `file:///data/config.xml`
 | Loaded as a `URL`, from the filesystem. footnote:[But see also
   pass:specialcharacters,macros[<<resources-filesystemresource-caveats>>].]
 
@@ -9446,7 +9446,7 @@ used. The following two examples show how to force a `ClassPathResource` and a
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
-	<property name="template" value="file:/some/resource/path/myTemplate.txt"/>
+	<property name="template" value="file:///some/resource/path/myTemplate.txt"/>
 ----
 
 
@@ -9734,7 +9734,7 @@ just force the use of a `UrlResource`, by using the `file:` URL prefix.
 [subs="verbatim,quotes"]
 ----
 	// actual context type doesn't matter, the Resource will always be UrlResource
-	ctx.getResource("file:/some/resource/path/myTemplate.txt");
+	ctx.getResource("file:///some/resource/path/myTemplate.txt");
 ----
 
 [source,java,indent=0]
@@ -9742,7 +9742,7 @@ just force the use of a `UrlResource`, by using the `file:` URL prefix.
 ----
 	// force this FileSystemXmlApplicationContext to load its definition via a UrlResource
 	ApplicationContext ctx =
-		new FileSystemXmlApplicationContext("file:/conf/context.xml");
+		new FileSystemXmlApplicationContext("file:///conf/context.xml");
 ----
 
 
@@ -20505,7 +20505,7 @@ Test properties files can be configured via the `locations` or `value` attribute
 `@TestPropertySource` as shown in the following example.
 
 Both traditional and XML-based properties file formats are supported -- for example,
-`"classpath:/com/example/test.properties"` or `"file:/path/to/file.xml"`.
+`"classpath:/com/example/test.properties"` or `"file:///path/to/file.xml"`.
 
 Each path will be interpreted as a Spring `Resource`. A plain path -- for example,
 `"test.properties"` -- will be treated as a classpath resource that is _relative_ to the
