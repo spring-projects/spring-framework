@@ -195,6 +195,10 @@ The `spring-jdbc` module provides a <<jdbc-introduction,JDBC>>-abstraction layer
 removes the need to do tedious JDBC coding and parsing of database-vendor specific error
 codes.
 
+The `spring-tx` module supports <<transaction,programmatic and declarative transaction>>
+management for classes that implement special interfaces and for __all your POJOs (Plain
+Old Java Objects)__.
+
 The `spring-orm` module provides integration layers for popular
 <<orm-introduction,object-relational mapping>> APIs, including <<orm-jpa,JPA>>,
 <<orm-jdo,JDO>>, and <<orm-hibernate,Hibernate>>. Using the `spring-orm` module you can
@@ -208,10 +212,6 @@ mapping>> implementations such as JAXB, Castor, XMLBeans, JiBX and XStream.
 The `spring-jms` module (<<jms,Java Messaging Service>>) contains features for producing and
 consuming messages. Since Spring Framework 4.1, it provides integration with the
 `spring-messaging` module.
-
-The `spring-tx` module supports <<transaction,programmatic and declarative transaction>>
-management for classes that implement special interfaces and for __all your POJOs (Plain
-Old Java Objects)__.
 
 
 [[overview-web]]
