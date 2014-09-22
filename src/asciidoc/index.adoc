@@ -30263,7 +30263,7 @@ In the example, the `@RequestMapping` is used in a number of places. The first u
 on the type (class) level, which indicates that all handling methods on this controller
 are relative to the `/appointments` path. The `get()` method has a further
 `@RequestMapping` refinement: it only accepts GET requests, meaning that an HTTP GET for
-`/appointments` invokes this method. The `post()` has a similar refinement, and the
+`/appointments` invokes this method. The `add()` has a similar refinement, and the
 `getNewForm()` combines the definition of HTTP method and path into one, so that GET
 requests for `appointments/new` are handled by that method.
 
