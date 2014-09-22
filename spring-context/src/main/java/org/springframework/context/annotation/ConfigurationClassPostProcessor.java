@@ -322,10 +322,15 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 			if (registry.getBeanDefinitionCount() > candidateNames.length) {
 				String[] newCandidateNames = registry.getBeanDefinitionNames();
 				Set<String> oldCandidateNames = new HashSet<String>(Arrays.asList(candidateNames));
+				Set<String> alreadyParsedClasses = new HashSet<String>();
+				for (ConfigurationClass configurationClass : alreadyParsed) {
+					alreadyParsedClasses.add(configurationClass.getMetadata().getClassName());
+				}
 				for (String candidateName : newCandidateNames) {
 					if (!oldCandidateNames.contains(candidateName)) {
 						BeanDefinition beanDef = registry.getBeanDefinition(candidateName);
-						if (ConfigurationClassUtils.checkConfigurationClassCandidate(beanDef, this.metadataReaderFactory)) {
+						if (ConfigurationClassUtils.checkConfigurationClassCandidate(beanDef, this.metadataReaderFactory)
+								&& !alreadyParsedClasses.contains(beanDef.getBeanClassName())) {
 							configCandidates.add(new BeanDefinitionHolder(beanDef, candidateName));
 						}
 					}
