@@ -57,6 +57,7 @@ import reactor.tuple.Tuple2;
  */
 public class Reactor11TcpClient<P> implements TcpOperations<P> {
 
+	@SuppressWarnings("rawtypes")
 	public static final Class<NettyTcpClient> REACTOR_TCP_CLIENT_TYPE = NettyTcpClient.class;
 
 

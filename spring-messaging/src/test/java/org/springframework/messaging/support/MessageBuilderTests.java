@@ -215,7 +215,7 @@ public class MessageBuilderTests {
 	@Test
 	public void testBuildMultipleMessages() {
 		MessageHeaderAccessor headerAccessor = new MessageHeaderAccessor();
-		MessageBuilder messageBuilder = MessageBuilder.withPayload("payload").setHeaders(headerAccessor);
+		MessageBuilder<?> messageBuilder = MessageBuilder.withPayload("payload").setHeaders(headerAccessor);
 
 		headerAccessor.setHeader("foo", "bar1");
 		Message<?> message1 = messageBuilder.build();

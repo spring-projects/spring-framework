@@ -39,6 +39,7 @@ public class SimpSessionScopeTests {
 
 	private SimpSessionScope scope;
 
+	@SuppressWarnings("rawtypes")
 	private ObjectFactory objectFactory;
 
 	private SimpAttributes simpAttributes;

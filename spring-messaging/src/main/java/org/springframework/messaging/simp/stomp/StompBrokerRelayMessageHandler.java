@@ -733,7 +733,7 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 				if (this.isRemoteClientSession) {
 					if (logger.isDebugEnabled()) {
 						logger.debug("TCP connection closed already, ignoring " +
-								accessor.getShortLogMessage((byte[]) message.getPayload()));
+								accessor.getShortLogMessage(message.getPayload()));
 					}
 					return EMPTY_TASK;
 				}

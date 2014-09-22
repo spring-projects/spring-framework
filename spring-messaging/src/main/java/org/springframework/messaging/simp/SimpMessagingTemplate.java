@@ -144,7 +144,6 @@ public class SimpMessagingTemplate extends AbstractMessageSendingTemplate<String
 		doSend(getRequiredDefaultDestination(), message);
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	protected void doSend(String destination, Message<?> message) {
 		Assert.notNull(destination, "Destination must not be null");

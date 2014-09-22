@@ -43,7 +43,6 @@ import org.springframework.messaging.handler.HandlerMethod;
 import org.springframework.messaging.handler.HandlerMethodSelector;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.messaging.support.MessageHeaderAccessor;
-import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedMultiValueMap;

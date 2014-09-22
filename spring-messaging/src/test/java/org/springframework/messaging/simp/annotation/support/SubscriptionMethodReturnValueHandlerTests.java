@@ -124,8 +124,8 @@ public class SubscriptionMethodReturnValueHandlerTests {
 		assertEquals(MIME_TYPE, headerAccessor.getContentType());
 	}
 
-	@SuppressWarnings("unchecked")
 	@Test
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void testHeadersPassedToMessagingTemplate() throws Exception {
 
 		String sessionId = "sess1";

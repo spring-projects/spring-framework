@@ -85,7 +85,6 @@ public class NativeMessageHeaderAccessorTests {
 		Map<String, Object> actual = headerAccessor.toMap();
 		assertEquals(0, actual.size());
 
-		@SuppressWarnings("unchecked")
 		Map<String, List<String>> actualNativeHeaders = headerAccessor.toNativeHeaderMap();
 		assertEquals(Collections.emptyMap(), actualNativeHeaders);
 	}

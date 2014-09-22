@@ -22,7 +22,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.junit.Before;
 import org.junit.Test;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
@@ -42,13 +41,7 @@ import static org.junit.Assert.*;
  */
 public class MessageConverterTests {
 
-	private TestMessageConverter converter;
-
-
-	@Before
-	public void setup() {
-		this.converter = new TestMessageConverter();
-	}
+	private TestMessageConverter converter = new TestMessageConverter();
 
 	@Test
 	public void supportsTargetClass() {
@@ -105,7 +98,6 @@ public class MessageConverterTests {
 
 	@Test(expected = IllegalArgumentException.class)
 	public void setStrictContentTypeMatchWithNoSupportedMimeTypes() {
-		Message<String> message = MessageBuilder.withPayload("ABC").build();
 		this.converter = new TestMessageConverter(Collections.<MimeType>emptyList());
 		this.converter.setStrictContentTypeMatch(true);
 	}

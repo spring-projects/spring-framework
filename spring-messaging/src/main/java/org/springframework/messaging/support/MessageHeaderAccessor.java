@@ -555,7 +555,6 @@ public class MessageHeaderAccessor {
 	 * @return an accessor instance of the specified type, or {@code null} if none
 	 * @since 4.1
 	 */
-	@SuppressWarnings("unchecked")
 	public static <T extends MessageHeaderAccessor> T getAccessor(Message<?> message, Class<T> requiredType) {
 		return getAccessor(message.getHeaders(), requiredType);
 	}

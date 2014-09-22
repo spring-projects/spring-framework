@@ -130,6 +130,7 @@ public class MethodMessageHandlerTests {
 	}
 
 
+	@SuppressWarnings("unused")
 	private static class TestController {
 
 		public String method;
@@ -140,6 +141,7 @@ public class MethodMessageHandlerTests {
 			this.method = "pathMatchWildcard";
 		}
 
+		@SuppressWarnings("rawtypes")
 		public void handlerArgumentResolver(Message message) {
 			this.method = "handlerArgumentResolver";
 			this.arguments.put("message", message);
@@ -164,6 +166,7 @@ public class MethodMessageHandlerTests {
 
 	}
 
+	@SuppressWarnings("unused")
 	private static class DuplicateMappingsController {
 
 		public void handlerFoo() { }

@@ -189,7 +189,7 @@ public class SimpMessageHeaderAccessor extends NativeMessageHeaderAccessor {
 			sb.append(" attributes=").append(getSessionAttributes());
 		}
 		if (!CollectionUtils.isEmpty((Map<String, List<String>>) getHeader(NATIVE_HEADERS))) {
-			sb.append(" nativeHeaders=").append((Map<String, List<String>>) getHeader(NATIVE_HEADERS));
+			sb.append(" nativeHeaders=").append(getHeader(NATIVE_HEADERS));
 		}
 		sb.append(getDetailedPayloadLogMessage(payload));
 		return sb.toString();

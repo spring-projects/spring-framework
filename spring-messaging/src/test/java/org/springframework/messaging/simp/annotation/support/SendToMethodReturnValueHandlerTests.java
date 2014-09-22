@@ -78,7 +78,6 @@ public class SendToMethodReturnValueHandlerTests {
 
 
 	@Before
-	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void setup() throws Exception {
 
 		MockitoAnnotations.initMocks(this);

@@ -87,6 +87,7 @@ public class SimpAnnotationMethodMessageHandlerTests {
 
 
 	@Test
+	@SuppressWarnings("unchecked")
 	public void headerArgumentResolution() {
 		SimpMessageHeaderAccessor headers = SimpMessageHeaderAccessor.create();
 		headers.setSessionId("session1");
