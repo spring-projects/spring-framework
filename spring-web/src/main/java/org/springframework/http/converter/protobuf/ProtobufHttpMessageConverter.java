@@ -164,19 +164,18 @@ public class ProtobufHttpMessageConverter extends AbstractHttpMessageConverter<M
 
 		MediaType contentType = outputMessage.getHeaders().getContentType();
 		Charset charset = getCharset(contentType);
-		OutputStreamWriter writer = new OutputStreamWriter(outputMessage.getBody(), charset);
 
 		if (MediaType.TEXT_HTML.isCompatibleWith(contentType)) {
-			HtmlFormat.print(message, writer);
+			HtmlFormat.print(message, new OutputStreamWriter(outputMessage.getBody(), charset));
 		}
 		else if (MediaType.APPLICATION_JSON.isCompatibleWith(contentType)) {
-			JsonFormat.print(message, writer);
+			JsonFormat.print(message, new OutputStreamWriter(outputMessage.getBody(), charset));
 		}
 		else if (MediaType.TEXT_PLAIN.isCompatibleWith(contentType)) {
-			TextFormat.print(message, writer);
+			TextFormat.print(message, new OutputStreamWriter(outputMessage.getBody(), charset));
 		}
 		else if (MediaType.APPLICATION_XML.isCompatibleWith(contentType)) {
-			XmlFormat.print(message, writer);
+			XmlFormat.print(message, new OutputStreamWriter(outputMessage.getBody(), charset));
 		}
 		else if (PROTOBUF.isCompatibleWith(contentType)) {
 			setProtoHeader(outputMessage, message);
@@ -191,6 +190,8 @@ public class ProtobufHttpMessageConverter extends AbstractHttpMessageConverter<M
 	/**
 	 * Set the "X-Protobuf-*" HTTP headers when responding with a message of
 	 * content type "application/x-protobuf"
+	 * <p><b>Note:</b> <code>outputMessage.getBody()</code> should not have been called
+	 * before because it writes HTTP headers (making them read only).</p>
 	 */
 	private void setProtoHeader(HttpOutputMessage response, Message message) {
 		response.getHeaders().set(X_PROTOBUF_SCHEMA_HEADER, message.getDescriptorForType().getFile().getName());
