@@ -178,7 +178,7 @@ public class TransportHandlingSockJsService extends AbstractSockJsService implem
 		catch (Throwable ex) {
 			failure = new HandshakeFailureException("Uncaught failure for request " + request.getURI(), ex);
 		}
-		finally {
+			finally {
 			if (failure != null) {
 				chain.applyAfterHandshake(request, response, failure);
 				throw failure;
@@ -303,7 +303,8 @@ public class TransportHandlingSockJsService extends AbstractSockJsService implem
 							}
 						}
 						catch (Throwable ex) {
-							logger.error("Failed to close " + session, ex);
+							// Could be part of normal workflow (e.g. browser tab closed)
+							logger.debug("Failed to close " + session, ex);
 						}
 					}
 					if (logger.isDebugEnabled() && !removedSessionIds.isEmpty()) {

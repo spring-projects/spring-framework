@@ -57,8 +57,8 @@ public class LoggingWebSocketHandlerDecorator extends WebSocketHandlerDecorator 
 
 	@Override
 	public void handleTransportError(WebSocketSession session, Throwable exception) throws Exception {
-		if (logger.isErrorEnabled()) {
-			logger.error("Transport error in " + session, exception);
+		if (logger.isDebugEnabled()) {
+			logger.debug("Transport error in " + session, exception);
 		}
 		super.handleTransportError(session, exception);
 	}

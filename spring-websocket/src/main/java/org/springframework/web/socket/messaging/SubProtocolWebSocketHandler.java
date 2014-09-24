@@ -333,17 +333,20 @@ public class SubProtocolWebSocketHandler implements WebSocketHandler,
 		}
 		catch (SessionLimitExceededException ex) {
 			try {
-				logger.error("Terminating '" + session + "'", ex);
+				if (logger.isDebugEnabled()) {
+					logger.debug("Terminating '" + session + "'", ex);
+				}
 				this.stats.incrementLimitExceededCount();
 				clearSession(session, ex.getStatus()); // clear first, session may be unresponsive
 				session.close(ex.getStatus());
 			}
 			catch (Exception secondException) {
-				logger.error("Failure while closing session " + sessionId + ".", secondException);
+				logger.debug("Failure while closing session " + sessionId + ".", secondException);
 			}
 		}
 		catch (Exception e) {
-			logger.error("Failed to send message to client in " + session + ": " + message, e);
+			// Could be part of normal workflow (e.g. browser tab closed)
+			logger.debug("Failed to send message to client in " + session + ": " + message, e);
 		}
 	}
 

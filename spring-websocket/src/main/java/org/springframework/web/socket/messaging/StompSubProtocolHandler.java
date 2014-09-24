@@ -255,7 +255,7 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 				}
 			}
 			catch (Throwable ex) {
-				logger.error("Failed to send STOMP message from client to application MessageChannel" +
+				logger.error("Failed to send client message to application via MessageChannel" +
 						" in session " + session.getId() + ". Sending STOMP ERROR to client.", ex);
 				sendErrorMessage(session, ex);
 
@@ -280,7 +280,8 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 			session.sendMessage(new TextMessage(bytes));
 		}
 		catch (Throwable ex) {
-			logger.error("Failed to send STOMP ERROR to client.", ex);
+			// Could be part of normal workflow (e.g. browser tab closed)
+			logger.debug("Failed to send STOMP ERROR to client.", ex);
 		}
 	}
 
@@ -330,7 +331,8 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 			throw ex;
 		}
 		catch (Throwable ex) {
-			logger.error("Failed to send WebSocket message to client in session " + session.getId() + ".", ex);
+			// Could be part of normal workflow (e.g. browser tab closed)
+			logger.debug("Failed to send WebSocket message to client in session " + session.getId() + ".", ex);
 			command = StompCommand.ERROR;
 		}
 		finally {

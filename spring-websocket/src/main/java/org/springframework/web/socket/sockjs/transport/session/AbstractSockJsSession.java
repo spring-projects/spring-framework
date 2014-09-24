@@ -291,7 +291,7 @@ public abstract class AbstractSockJsSession implements SockJsSession {
 					this.handler.afterConnectionClosed(this, status);
 				}
 				catch (Throwable ex) {
-					logger.error("Error from WebSocketHandler.afterConnectionClosed in " + this, ex);
+					logger.debug("Error from WebSocketHandler.afterConnectionClosed in " + this, ex);
 				}
 			}
 		}
@@ -307,7 +307,9 @@ public abstract class AbstractSockJsSession implements SockJsSession {
 	 * Close due to error arising from SockJS transport handling.
 	 */
 	public void tryCloseWithSockJsTransportError(Throwable error, CloseStatus closeStatus) {
-		logger.error("Closing due to transport error for " + this);
+		if (logger.isDebugEnabled()) {
+			logger.debug("Closing due to transport error for " + this);
+		}
 		try {
 			delegateError(error);
 		}
@@ -318,7 +320,7 @@ public abstract class AbstractSockJsSession implements SockJsSession {
 			close(closeStatus);
 		}
 		catch (Throwable closeException) {
-			logger.error("Failure while closing " + this, closeException);
+			logger.debug("Failure while closing " + this, closeException);
 		}
 	}
 
@@ -370,7 +372,7 @@ public abstract class AbstractSockJsSession implements SockJsSession {
 			}
 		}
 		else {
-			logger.error("Terminating connection after failure to send message to client.", failure);
+			logger.debug("Terminating connection after failure to send message to client.", failure);
 		}
 	}
 
@@ -421,7 +423,7 @@ public abstract class AbstractSockJsSession implements SockJsSession {
 			}
 		}
 		catch (Throwable ex) {
-			logger.error("Failure while cancelling heartbeat in session " + getId(), ex);
+			logger.debug("Failure while cancelling heartbeat in session " + getId(), ex);
 		}
 	}
 
