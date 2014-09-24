@@ -67,7 +67,7 @@ public class HttpEntityMethodProcessor extends AbstractMessageConverterMethodPro
 	}
 
 
-		@Override
+	@Override
 	public boolean supportsParameter(MethodParameter parameter) {
 		return HttpEntity.class.equals(parameter.getParameterType()) ||
 				RequestEntity.class.equals(parameter.getParameterType());
@@ -75,8 +75,8 @@ public class HttpEntityMethodProcessor extends AbstractMessageConverterMethodPro
 
 	@Override
 	public boolean supportsReturnType(MethodParameter returnType) {
-		return HttpEntity.class.equals(returnType.getParameterType()) ||
-				ResponseEntity.class.equals(returnType.getParameterType());
+		return HttpEntity.class.isAssignableFrom(returnType.getParameterType()) &&
+				!RequestEntity.class.isAssignableFrom(returnType.getParameterType());
 	}
 
 	@Override
@@ -94,7 +94,6 @@ public class HttpEntityMethodProcessor extends AbstractMessageConverterMethodPro
 		}
 		else {
 			return new HttpEntity<Object>(body, inputMessage.getHeaders());
-
 		}
 	}
 
@@ -152,4 +151,5 @@ public class HttpEntityMethodProcessor extends AbstractMessageConverterMethodPro
 			return ResolvableType.forMethodParameter(returnType, type).resolve(Object.class);
 		}
 	}
+
 }

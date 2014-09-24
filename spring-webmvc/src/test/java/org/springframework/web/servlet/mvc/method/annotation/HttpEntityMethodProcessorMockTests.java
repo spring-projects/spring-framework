@@ -20,11 +20,11 @@ import java.lang.reflect.Method;
 import java.net.URI;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
+
 import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -41,7 +41,6 @@ import org.springframework.mock.web.test.MockHttpServletResponse;
 import org.springframework.web.HttpMediaTypeNotAcceptableException;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.method.support.ModelAndViewContainer;
 
@@ -66,21 +65,22 @@ public class HttpEntityMethodProcessorMockTests {
 	private HttpMessageConverter<String> messageConverter;
 
 	private MethodParameter paramHttpEntity;
+	private MethodParameter paramRequestEntity;
 	private MethodParameter paramResponseEntity;
 	private MethodParameter paramInt;
 	private MethodParameter returnTypeResponseEntity;
-	private MethodParameter returnTypeHttpEntity;
-	private MethodParameter returnTypeInt;
-	private MethodParameter paramRequestEntity;
 	private MethodParameter returnTypeResponseEntityProduces;
+	private MethodParameter returnTypeHttpEntity;
+	private MethodParameter returnTypeHttpEntitySubclass;
+	private MethodParameter returnTypeInt;
 
 	private ModelAndViewContainer mavContainer;
 
-	private ServletWebRequest webRequest;
+	private MockHttpServletRequest servletRequest;
 
 	private MockHttpServletResponse servletResponse;
 
-	private MockHttpServletRequest servletRequest;
+	private ServletWebRequest webRequest;
 
 
 	@SuppressWarnings("unchecked")
@@ -92,26 +92,23 @@ public class HttpEntityMethodProcessorMockTests {
 		processor = new HttpEntityMethodProcessor(Collections.<HttpMessageConverter<?>>singletonList(messageConverter));
 		reset(messageConverter);
 
-
 		Method handle1 = getClass().getMethod("handle1", HttpEntity.class, ResponseEntity.class, Integer.TYPE, RequestEntity.class);
 		paramHttpEntity = new MethodParameter(handle1, 0);
+		paramRequestEntity = new MethodParameter(handle1, 3);
 		paramResponseEntity = new MethodParameter(handle1, 1);
 		paramInt = new MethodParameter(handle1, 2);
-		paramRequestEntity = new MethodParameter(handle1, 3);
 		returnTypeResponseEntity = new MethodParameter(handle1, -1);
-
+		returnTypeResponseEntityProduces = new MethodParameter(getClass().getMethod("handle4"), -1);
 		returnTypeHttpEntity = new MethodParameter(getClass().getMethod("handle2", HttpEntity.class), -1);
-
+		returnTypeHttpEntitySubclass = new MethodParameter(getClass().getMethod("handle2x", HttpEntity.class), -1);
 		returnTypeInt = new MethodParameter(getClass().getMethod("handle3"), -1);
 
-		returnTypeResponseEntityProduces = new MethodParameter(getClass().getMethod("handle4"), -1);
-
 		mavContainer = new ModelAndViewContainer();
-
 		servletRequest = new MockHttpServletRequest();
 		servletResponse = new MockHttpServletResponse();
 		webRequest = new ServletWebRequest(servletRequest, servletResponse);
 	}
+
 
 	@Test
 	public void supportsParameter() {
@@ -125,6 +122,7 @@ public class HttpEntityMethodProcessorMockTests {
 	public void supportsReturnType() {
 		assertTrue("ResponseEntity return type not supported", processor.supportsReturnType(returnTypeResponseEntity));
 		assertTrue("HttpEntity return type not supported", processor.supportsReturnType(returnTypeHttpEntity));
+		assertTrue("Custom HttpEntity subclass not supported", processor.supportsReturnType(returnTypeHttpEntitySubclass));
 		assertFalse("RequestEntity parameter supported",
 				processor.supportsReturnType(paramRequestEntity));
 		assertFalse("non-ResponseBody return type supported", processor.supportsReturnType(returnTypeInt));
@@ -328,6 +326,10 @@ public class HttpEntityMethodProcessorMockTests {
 		return entity;
 	}
 
+	public CustomHttpEntity handle2x(HttpEntity<?> entity) {
+		return new CustomHttpEntity();
+	}
+
 	public int handle3() {
 		return 42;
 	}
@@ -337,5 +339,8 @@ public class HttpEntityMethodProcessorMockTests {
 		return null;
 	}
 
+
+	public static class CustomHttpEntity extends HttpEntity<Object> {
+	}
 
 }
