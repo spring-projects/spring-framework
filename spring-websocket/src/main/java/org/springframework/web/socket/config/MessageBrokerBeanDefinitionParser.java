@@ -23,10 +23,10 @@ import java.util.Map;
 
 import org.w3c.dom.Element;
 
-import org.springframework.beans.factory.config.CustomScopeConfigurer;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.ConstructorArgumentValues;
+import org.springframework.beans.factory.config.CustomScopeConfigurer;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.parsing.BeanComponentDefinition;
 import org.springframework.beans.factory.parsing.CompositeComponentDefinition;
@@ -43,11 +43,11 @@ import org.springframework.messaging.converter.StringMessageConverter;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.messaging.simp.SimpSessionScope;
 import org.springframework.messaging.simp.annotation.support.SimpAnnotationMethodMessageHandler;
+import org.springframework.messaging.simp.broker.SimpleBrokerMessageHandler;
+import org.springframework.messaging.simp.stomp.StompBrokerRelayMessageHandler;
 import org.springframework.messaging.simp.user.DefaultUserDestinationResolver;
 import org.springframework.messaging.simp.user.DefaultUserSessionRegistry;
-import org.springframework.messaging.simp.broker.SimpleBrokerMessageHandler;
 import org.springframework.messaging.simp.user.UserDestinationMessageHandler;
-import org.springframework.messaging.simp.stomp.StompBrokerRelayMessageHandler;
 import org.springframework.messaging.support.ExecutorSubscribableChannel;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.util.Assert;
@@ -61,29 +61,27 @@ import org.springframework.web.socket.messaging.SubProtocolWebSocketHandler;
 import org.springframework.web.socket.server.support.WebSocketHttpRequestHandler;
 import org.springframework.web.socket.sockjs.support.SockJsHttpRequestHandler;
 
-
 /**
- * A {@link org.springframework.beans.factory.xml.BeanDefinitionParser}
- * that provides the configuration for the
- * {@code <websocket:message-broker/>} XML namespace element.
- * <p>
- * Registers a Spring MVC {@link org.springframework.web.servlet.handler.SimpleUrlHandlerMapping}
- * with order=1 to map HTTP WebSocket handshake requests from STOMP/WebSocket clients.
- * <p>
- * Registers the following {@link org.springframework.messaging.MessageChannel}s:
+ * A {@link org.springframework.beans.factory.xml.BeanDefinitionParser} that provides
+ * the configuration for the {@code <websocket:message-broker/>} XML namespace element.
+ *
+ * <p>Registers a Spring MVC {@link org.springframework.web.servlet.handler.SimpleUrlHandlerMapping}
+ * with order 1 to map HTTP WebSocket handshake requests from STOMP/WebSocket clients.
+ *
+ * <p>Registers the following {@link org.springframework.messaging.MessageChannel}s:
  * <ul>
- * 	<li>"clientInboundChannel" for receiving messages from clients (e.g. WebSocket clients)
- * 	<li>"clientOutboundChannel" for sending messages to clients (e.g. WebSocket clients)
- * 	<li>"brokerChannel" for sending messages from within the application to the message broker
+ * <li>"clientInboundChannel" for receiving messages from clients (e.g. WebSocket clients)
+ * <li>"clientOutboundChannel" for sending messages to clients (e.g. WebSocket clients)
+ * <li>"brokerChannel" for sending messages from within the application to the message broker
  * </ul>
- * <p>
- * Registers one of the following based on the selected message broker options:
+ *
+ * <p>Registers one of the following based on the selected message broker options:
  * <ul>
- *     <li> a {@link SimpleBrokerMessageHandler} if the <simple-broker/> is used
- *     <li> a {@link StompBrokerRelayMessageHandler} if the <stomp-broker-relay/> is used
+ * <li>a {@link SimpleBrokerMessageHandler} if the <simple-broker/> is used
+ * <li>a {@link StompBrokerRelayMessageHandler} if the <stomp-broker-relay/> is used
  * </ul>
- * <p>
- * Registers a {@link UserDestinationMessageHandler} for handling user destinations.
+ *
+ * <p>Registers a {@link UserDestinationMessageHandler} for handling user destinations.
  *
  * @author Brian Clozel
  * @author Rossen Stoyanchev
@@ -95,7 +93,7 @@ class MessageBrokerBeanDefinitionParser implements BeanDefinitionParser {
 
 	private static final int DEFAULT_MAPPING_ORDER = 1;
 
-	private static final boolean jackson2Present= ClassUtils.isPresent(
+	private static final boolean jackson2Present = ClassUtils.isPresent(
 			"com.fasterxml.jackson.databind.ObjectMapper", MessageBrokerBeanDefinitionParser.class.getClassLoader());
 
 
@@ -215,6 +213,7 @@ class MessageBrokerBeanDefinitionParser implements BeanDefinitionParser {
 		executorDef.getPropertyValues().add("corePoolSize", Runtime.getRuntime().availableProcessors() * 2);
 		executorDef.getPropertyValues().add("maxPoolSize", Integer.MAX_VALUE);
 		executorDef.getPropertyValues().add("queueCapacity", Integer.MAX_VALUE);
+		executorDef.getPropertyValues().add("allowCoreThreadTimeOut", true);
 		return executorDef;
 	}
 
