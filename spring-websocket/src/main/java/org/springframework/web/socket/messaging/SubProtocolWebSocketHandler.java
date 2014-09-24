@@ -324,7 +324,10 @@ public class SubProtocolWebSocketHandler implements WebSocketHandler,
 		}
 		WebSocketSessionHolder holder = this.sessions.get(sessionId);
 		if (holder == null) {
-			logger.error("No session for " + message);
+			if (logger.isDebugEnabled()) {
+				// The broker may not have removed the session yet
+				logger.debug("No session for " + message);
+			}
 			return;
 		}
 		WebSocketSession session = holder.getSession();
