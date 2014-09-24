@@ -115,6 +115,7 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
 		if (useDefaultFilters) {
 			registerDefaultFilters();
 		}
+		Assert.notNull(environment, "Environment must not be null");
 		this.environment = environment;
 	}
 
@@ -161,10 +162,11 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
 	/**
 	 * Set the Environment to use when resolving placeholders and evaluating
 	 * {@link Conditional @Conditional}-annotated component classes.
-	 * <p>The default is a {@link StandardEnvironment}
+	 * <p>The default is a {@link StandardEnvironment}.
 	 * @param environment the Environment to use
 	 */
 	public void setEnvironment(Environment environment) {
+		Assert.notNull(environment, "Environment must not be null");
 		this.environment = environment;
 		this.conditionEvaluator = null;
 	}

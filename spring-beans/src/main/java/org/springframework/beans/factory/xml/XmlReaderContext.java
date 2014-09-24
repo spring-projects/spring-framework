@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ import org.springframework.beans.factory.parsing.ReaderContext;
 import org.springframework.beans.factory.parsing.ReaderEventListener;
 import org.springframework.beans.factory.parsing.SourceExtractor;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
+import org.springframework.core.env.Environment;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 
@@ -72,6 +73,10 @@ public class XmlReaderContext extends ReaderContext {
 
 	public final ClassLoader getBeanClassLoader() {
 		return this.reader.getBeanClassLoader();
+	}
+
+	public final Environment getEnvironment() {
+		return this.reader.getEnvironment();
 	}
 
 	public final NamespaceHandlerResolver getNamespaceHandlerResolver() {

@@ -59,7 +59,6 @@ import org.springframework.beans.factory.support.ManagedSet;
 import org.springframework.beans.factory.support.MethodOverrides;
 import org.springframework.beans.factory.support.ReplaceOverride;
 import org.springframework.core.env.Environment;
-import org.springframework.core.env.StandardEnvironment;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
@@ -246,8 +245,6 @@ public class BeanDefinitionParserDelegate {
 
 	private final XmlReaderContext readerContext;
 
-	private final Environment environment;
-
 	private final DocumentDefaultsDefinition defaults = new DocumentDefaultsDefinition();
 
 	private final ParseState parseState = new ParseState();
@@ -261,25 +258,23 @@ public class BeanDefinitionParserDelegate {
 
 
 	/**
-	 * Create a new BeanDefinitionParserDelegate associated with the
-	 * supplied {@link XmlReaderContext} and {@link Environment}.
+	 * Create a new BeanDefinitionParserDelegate associated with the supplied
+	 * {@link XmlReaderContext}.
 	 */
-	public BeanDefinitionParserDelegate(XmlReaderContext readerContext, Environment environment) {
+	public BeanDefinitionParserDelegate(XmlReaderContext readerContext) {
 		Assert.notNull(readerContext, "XmlReaderContext must not be null");
-		Assert.notNull(environment, "Environment must not be null");
 		this.readerContext = readerContext;
-		this.environment = environment;
 	}
 
 	/**
-	 * Create a new BeanDefinitionParserDelegate associated with the
-	 * supplied {@link XmlReaderContext} and a new {@link StandardEnvironment}.
-	 * @deprecated since Spring 3.1 in favor of
-	 * {@link #BeanDefinitionParserDelegate(XmlReaderContext, Environment)}
+	 * Create a new BeanDefinitionParserDelegate associated with the supplied
+	 * {@link XmlReaderContext}.
+	 * @deprecated since the given {@link Environment} parameter is effectively
+	 * ignored in favor of {@link XmlReaderContext#getEnvironment()}
 	 */
 	@Deprecated
-	public BeanDefinitionParserDelegate(XmlReaderContext readerContext) {
-		this(readerContext, new StandardEnvironment());
+	public BeanDefinitionParserDelegate(XmlReaderContext readerContext, Environment environment) {
+		this(readerContext);
 	}
 
 
@@ -292,9 +287,11 @@ public class BeanDefinitionParserDelegate {
 
 	/**
 	 * Get the {@link Environment} associated with this helper instance.
+	 * @deprecated in favor of {@link XmlReaderContext#getEnvironment()}
 	 */
+	@Deprecated
 	public final Environment getEnvironment() {
-		return this.environment;
+		return this.readerContext.getEnvironment();
 	}
 
 	/**
