@@ -1057,7 +1057,7 @@ method has been added.
   where an underlying service (or perhaps a call to `AsyncRestTemplate`) already
   returns `ListenableFuture`.
 * `@ModelAttribute` methods are now invoked in an order that respects inter-dependencies.
-  See jira.springsource.org/browse/SPR-6299[SPR-6299].
+  See https://jira.spring.io/browse/SPR-6299[SPR-6299].
 * Jackson's `@JsonView` is supported directly on `@ResponseBody` and `ResponseEntity`
   controller methods for serializing different amounts of detail for the same POJO (e.g.
   summary vs. detail page). This is also supported with View-based rendering by
@@ -1117,7 +1117,7 @@ method has been added.
   and avoiding automatic message id and timestamp creation. See Javadoc of
   `MessageHeaderAccessor`.
 * STOMP/WebSocket connections that have not activity 60 seconds after the WebSocket
-  session is established. See jira.springsource.org/browse/SPR-11884[SPR-11884].
+  session is established. See https://jira.spring.io/browse/SPR-11884[SPR-11884].
 
 === Testing Improvements
 
