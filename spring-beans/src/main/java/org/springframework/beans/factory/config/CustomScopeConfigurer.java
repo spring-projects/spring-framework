@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.beans.factory.config;
 
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.springframework.beans.BeanUtils;
@@ -60,6 +61,20 @@ public class CustomScopeConfigurer implements BeanFactoryPostProcessor, BeanClas
 	public void setScopes(Map<String, Object> scopes) {
 		this.scopes = scopes;
 	}
+
+	/**
+	 * Add the given scope to this configurer's map of scopes.
+	 * @param scopeName the name of the scope
+	 * @param scope the scope implementation
+	 * @since 4.1.1
+	 */
+	public void addScope(String scopeName, Scope scope) {
+		if (this.scopes == null) {
+			this.scopes = new LinkedHashMap<String, Object>(1);
+		}
+		this.scopes.put(scopeName, scope);
+	}
+
 
 	public void setOrder(int order) {
 		this.order = order;

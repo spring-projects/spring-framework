@@ -16,11 +16,10 @@
 
 package org.springframework.web.socket.config.annotation;
 
-import java.util.Collections;
-
 import org.springframework.beans.factory.config.CustomScopeConfigurer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.messaging.simp.SimpSessionScope;
+import org.springframework.messaging.simp.broker.AbstractBrokerMessageHandler;
 import org.springframework.messaging.simp.config.AbstractMessageBrokerConfiguration;
 import org.springframework.messaging.simp.stomp.StompBrokerRelayMessageHandler;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
@@ -32,8 +31,8 @@ import org.springframework.web.socket.messaging.SubProtocolWebSocketHandler;
 /**
  * Extends {@link AbstractMessageBrokerConfiguration} and adds configuration for
  * receiving and responding to STOMP messages from WebSocket clients.
- * <p>
- * Typically used in conjunction with
+ *
+ * <p>Typically used in conjunction with
  * {@link EnableWebSocketMessageBroker @EnableWebSocketMessageBroker} but can
  * also be extended directly.
  *
@@ -46,16 +45,10 @@ public abstract class WebSocketMessageBrokerConfigurationSupport extends Abstrac
 	private WebSocketTransportRegistration transportRegistration;
 
 
-	protected WebSocketMessageBrokerConfigurationSupport() {
-	}
-
-
 	@Bean
 	public HandlerMapping stompWebSocketHandlerMapping() {
-
 		WebMvcStompEndpointRegistry registry = new WebMvcStompEndpointRegistry(subProtocolWebSocketHandler(),
 				getTransportRegistration(), userSessionRegistry(), messageBrokerSockJsTaskScheduler());
-
 		registry.setApplicationContext(getApplicationContext());
 		registerStompEndpoints(registry);
 		return registry.getHandlerMapping();
@@ -92,7 +85,6 @@ public abstract class WebSocketMessageBrokerConfigurationSupport extends Abstrac
 	 *   }
 	 *
 	 *   // ...
-	 *
 	 * }
 	 * </pre>
 	 */
@@ -108,15 +100,15 @@ public abstract class WebSocketMessageBrokerConfigurationSupport extends Abstrac
 	@Bean
 	public static CustomScopeConfigurer webSocketScopeConfigurer() {
 		CustomScopeConfigurer configurer = new CustomScopeConfigurer();
-		configurer.setScopes(Collections.<String, Object>singletonMap("websocket", new SimpSessionScope()));
+		configurer.addScope("websocket", new SimpSessionScope());
 		return configurer;
 	}
 
 	@Bean
 	public WebSocketMessageBrokerStats webSocketMessageBrokerStats() {
-		StompBrokerRelayMessageHandler brokerRelay =
-				stompBrokerRelayMessageHandler() instanceof StompBrokerRelayMessageHandler ?
-						(StompBrokerRelayMessageHandler) stompBrokerRelayMessageHandler() : null;
+		AbstractBrokerMessageHandler relayBean = stompBrokerRelayMessageHandler();
+		StompBrokerRelayMessageHandler brokerRelay = (relayBean instanceof StompBrokerRelayMessageHandler ?
+				(StompBrokerRelayMessageHandler) relayBean : null);
 
 		// Ensure STOMP endpoints are registered
 		stompWebSocketHandlerMapping();
