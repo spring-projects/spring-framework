@@ -21450,7 +21450,7 @@ javadocs for `TestTransaction` for further details.
 		}
 
 		protected void assertNumUsers(int expected) {
-			assertEquals("Number of rows in the 'user' table.", expected, countRowsInTable("user"));
+			assertEquals("Number of rows in the user table.", expected, countRowsInTable("user"));
 		}
 	}
 ----
