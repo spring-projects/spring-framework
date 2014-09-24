@@ -31639,8 +31639,8 @@ It can sometimes be useful to filter contextually the object that will be serial
 HTTP response body. In order to provide such capability, Spring MVC has built-in support for
 rendering with http://wiki.fasterxml.com/JacksonJsonViews[Jackson's Serialization Views].
 
-To use it with `@ResponseBody` controller method or methods return `ResponseEntity`, simply
-add the `@JsonView` annotation:
+To use it with an `@ResponseBody` controller method or controller methods that return
+`ResponseEntity`, simply add the `@JsonView` annotation:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
