@@ -4790,7 +4790,7 @@ Find below the custom `BeanPostProcessor` implementation class definition:
 
 		public Object postProcessAfterInitialization(Object bean,
 				String beanName) throws BeansException {
-			System.out.println("Bean '" + beanName + "' created : " + bean.toString());
+			System.out.println("Bean ''" + beanName + "'' created : " + bean.toString());
 			return bean;
 		}
 
@@ -8240,7 +8240,7 @@ hierarchy of property sources. To explain fully, consider the following:
 ApplicationContext ctx = new GenericApplicationContext();
 Environment env = ctx.getEnvironment();
 boolean containsFoo = env.containsProperty("foo");
-System.out.println("Does my environment contain the 'foo' property? " + containsFoo);
+System.out.println("Does my environment contain the ''foo'' property? " + containsFoo);
 ----
 
 In the snippet above, we see a high-level way of asking Spring whether the `foo` property is
@@ -11668,7 +11668,7 @@ The following code introduces the SpEL API to evaluate the literal string expres
 [subs="verbatim,quotes"]
 ----
 	ExpressionParser parser = new SpelExpressionParser();
-	Expression exp = parser.parseExpression("**\'Hello World'**");
+	Expression exp = parser.parseExpression("**''Hello World''**");
 	String message = (String) exp.getValue();
 ----
 
@@ -11681,7 +11681,7 @@ The interface `ExpressionParser` is responsible for parsing an expression string
 this example the expression string is a string literal denoted by the surrounding single
 quotes. The interface `Expression` is responsible for evaluating the previously defined
 expression string. There are two exceptions that can be thrown, `ParseException` and
-`EvaluationException` when calling ' `parser.parseExpression`' and ' `exp.getValue`'
+`EvaluationException` when calling '`parser.parseExpression`' and '`exp.getValue`'
 respectively.
 
 SpEL supports a wide range of features, such as calling methods, accessing properties,
@@ -11693,7 +11693,7 @@ As an example of method invocation, we call the 'concat' method on the string li
 [subs="verbatim,quotes"]
 ----
 	ExpressionParser parser = new SpelExpressionParser();
-	Expression exp = parser.parseExpression("**\'Hello World'.concat(\'!')**");
+	Expression exp = parser.parseExpression("**''Hello World''.concat(''!'')**");
 	String message = (String) exp.getValue();
 ----
 
@@ -11708,7 +11708,7 @@ as shown below.
 	ExpressionParser parser = new SpelExpressionParser();
 
 	// invokes 'getBytes()'
-	Expression exp = parser.parseExpression("**\'Hello World'.bytes**");
+	Expression exp = parser.parseExpression("**''Hello World''.bytes**");
 	byte[] bytes = (byte[]) exp.getValue();
 ----
 
@@ -11723,7 +11723,7 @@ Public fields may also be accessed.
 	ExpressionParser parser = new SpelExpressionParser();
 
 	// invokes 'getBytes().length'
-	Expression exp = parser.parseExpression("**\'Hello World'.bytes.length**");
+	Expression exp = parser.parseExpression("**''Hello World''.bytes.length**");
 	int length = (Integer) exp.getValue();
 ----
 
@@ -11733,7 +11733,7 @@ The String's constructor can be called instead of using a string literal.
 [subs="verbatim,quotes"]
 ----
 	ExpressionParser parser = new SpelExpressionParser();
-	Expression exp = parser.parseExpression("**new String(\'hello world').toUpperCase()**");
+	Expression exp = parser.parseExpression("**new String(''hello world'').toUpperCase()**");
 	String message = exp.getValue(String.class);
 ----
 
@@ -11816,7 +11816,7 @@ Inventor object in the previous example.
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	Expression exp = parser.parseExpression("name == 'Nikola Tesla'");
+	Expression exp = parser.parseExpression("name == ''Nikola Tesla''");
 	boolean result = exp.getValue(context, Boolean.class); // evaluates to true
 ----
 
@@ -12049,7 +12049,7 @@ symbol in this context.
 [subs="verbatim,quotes"]
 ----
 	<bean id="taxCalculator" class="org.spring.samples.TaxCalculator">
-		<property name="defaultLocale" value="#{ systemProperties['user.region'] }"/>
+		<property name="defaultLocale" value="#{ systemProperties[''user.region''] }"/>
 
 		<!-- other properties -->
 	</bean>
@@ -12087,7 +12087,7 @@ Here is an example to set the default value of a field variable.
 ----
 	public static class FieldValueTestBean
 
-		@Value("#{ systemProperties['user.region'] }")
+		@Value("#{ systemProperties[''user.region''] }")
 		private String defaultLocale;
 
 		public void setDefaultLocale(String defaultLocale) {
@@ -12110,7 +12110,7 @@ The equivalent but on a property setter method is shown below.
 
 		private String defaultLocale;
 
-		@Value("#{ systemProperties['user.region'] }")
+		@Value("#{ systemProperties[''user.region''] }")
 		public void setDefaultLocale(String defaultLocale) {
 			this.defaultLocale = defaultLocale;
 		}
@@ -12134,7 +12134,7 @@ Autowired methods and constructors can also use the `@Value` annotation.
 
 		@Autowired
 		public void configure(MovieFinder movieFinder,
-				@Value("#{ systemProperties['user.region'] }") String defaultLocale) {
+				@Value("#{ systemProperties[''user.region''] }") String defaultLocale) {
 			this.movieFinder = movieFinder;
 			this.defaultLocale = defaultLocale;
 		}
@@ -12154,7 +12154,7 @@ Autowired methods and constructors can also use the `@Value` annotation.
 
 		@Autowired
 		public MovieRecommender(CustomerPreferenceDao customerPreferenceDao,
-				@Value("#{systemProperties['user.country']}") String defaultLocale) {
+				@Value("#{systemProperties[''user.country'']}") String defaultLocale) {
 			this.customerPreferenceDao = customerPreferenceDao;
 			this.defaultLocale = defaultLocale;
 		}
@@ -12186,7 +12186,7 @@ logical comparison operator.
 	ExpressionParser parser = new SpelExpressionParser();
 
 	// evals to "Hello World"
-	String helloWorld = (String) parser.parseExpression("'Hello World'").getValue();
+	String helloWorld = (String) parser.parseExpression("''Hello World''").getValue();
 
 	double avogadrosNumber = (Double) parser.parseExpression("6.0221415E+23").getValue();
 
@@ -12257,15 +12257,15 @@ string literals.
 ----
 	// Officer's Dictionary
 
-	Inventor pupin = parser.parseExpression("Officers['president']").getValue(
+	Inventor pupin = parser.parseExpression("Officers[''president'']").getValue(
 			societyContext, Inventor.class);
 
 	// evaluates to "Idvor"
-	String city = parser.parseExpression("Officers['president'].PlaceOfBirth.City").getValue(
+	String city = parser.parseExpression("Officers[''president''].PlaceOfBirth.City").getValue(
 			societyContext, String.class);
 
 	// setting values
-	parser.parseExpression("Officers['advisors'][0].PlaceOfBirth.Country").setValue(
+	parser.parseExpression("Officers[''advisors''][0].PlaceOfBirth.Country").setValue(
 			societyContext, "Croatia");
 ----
 
@@ -12281,7 +12281,7 @@ Lists can be expressed directly in an expression using `{}` notation.
 	// evaluates to a Java list containing the four numbers
 	List numbers = (List) parser.parseExpression("{1,2,3,4}").getValue(context);
 
-	List listOfLists = (List) parser.parseExpression("{{'a','b'},{'x','y'}}").getValue(context);
+	List listOfLists = (List) parser.parseExpression("{{''a'',''b''},{''x'',''y''}}").getValue(context);
 ----
 
 `{}` by itself means an empty list. For performance reasons, if the list is itself
@@ -12296,9 +12296,9 @@ Maps can also be expressed directly in an expression using `{key:value}` notatio
 [subs="verbatim,quotes"]
 ----
 	// evaluates to a Java map containing the two entries
-	Map inventorInfo = (Map) parser.parseExpression("{name:'Nikola',dob:'10-July-1856'}").getValue(context);
+	Map inventorInfo = (Map) parser.parseExpression("{name:''Nikola'',dob:''10-July-1856''}").getValue(context);
 
-	Map mapOfMaps = (Map) parser.parseExpression("{name:{first:'Nikola',last:'Tesla'},dob:{day:10,month:'July',year:1856}}").getValue(context);
+	Map mapOfMaps = (Map) parser.parseExpression("{name:{first:''Nikola'',last:''Tesla''},dob:{day:10,month:''July'',year:1856}}").getValue(context);
 ----
 `{:}` by itself means an empty map. For performance reasons, if the map is itself composed
 of fixed literals or other nested constant structures (lists or maps) then a constant map is created
@@ -12336,10 +12336,10 @@ on literals. Varargs are also supported.
 [subs="verbatim,quotes"]
 ----
 	// string literal, evaluates to "bc"
-	String c = parser.parseExpression("'abc'.substring(2, 3)").getValue(String.class);
+	String c = parser.parseExpression("''abc''.substring(2, 3)").getValue(String.class);
 
 	// evaluates to true
-	boolean isMember = parser.parseExpression("isMember('Mihajlo Pupin')").getValue(
+	boolean isMember = parser.parseExpression("isMember(''Mihajlo Pupin'')").getValue(
 			societyContext, Boolean.class);
 ----
 
@@ -12364,26 +12364,26 @@ and greater than or equal are supported using standard operator notation.
 	boolean falseValue = parser.parseExpression("2 < -5.0").getValue(Boolean.class);
 
 	// evaluates to true
-	boolean trueValue = parser.parseExpression("'black' < 'block'").getValue(Boolean.class);
+	boolean trueValue = parser.parseExpression("''black'' < ''block''").getValue(Boolean.class);
 ----
 
 In addition to standard relational operators SpEL supports the `instanceof` and regular
 expression based `matches` operator.
 
 [source,java,indent=0]
-[subs="none"]
+[subs="verbatim,quotes"]
 ----
 	// evaluates to false
 	boolean falseValue = parser.parseExpression(
-			"'xyz' instanceof T(int)").getValue(Boolean.class);
+			"''xyz'' instanceof T(int)").getValue(Boolean.class);
 
 	// evaluates to true
 	boolean trueValue = parser.parseExpression(
-			"'5.00' matches '^-?\\d+(\\.\\d{2})?$'").getValue(Boolean.class);
+			"''5.00'' matches ''\^-?\\d+(\\.\\d{2})?$''").getValue(Boolean.class);
 
 	//evaluates to false
 	boolean falseValue = parser.parseExpression(
-			"'5.0067' matches '^-?\\d+(\\.\\d{2})?$'").getValue(Boolean.class);
+			"''5.0067'' matches ''\^-?\\d+(\\.\\d{2})?$''").getValue(Boolean.class);
 ----
 
 Each symbolic operator can also be specified as a purely alphabetic equivalent. This
@@ -12407,7 +12407,7 @@ below.
 	boolean falseValue = parser.parseExpression("true and false").getValue(Boolean.class);
 
 	// evaluates to true
-	String expression = "isMember('Nikola Tesla') and isMember('Mihajlo Pupin')";
+	String expression = "isMember(''Nikola Tesla'') and isMember(''Mihajlo Pupin'')";
 	boolean trueValue = parser.parseExpression(expression).getValue(societyContext, Boolean.class);
 
 	// -- OR --
@@ -12416,7 +12416,7 @@ below.
 	boolean trueValue = parser.parseExpression("true or false").getValue(Boolean.class);
 
 	// evaluates to true
-	String expression = "isMember('Nikola Tesla') or isMember('Albert Einstein')";
+	String expression = "isMember(''Nikola Tesla'') or isMember(''Albert Einstein'')";
 	boolean trueValue = parser.parseExpression(expression).getValue(societyContext, Boolean.class);
 
 	// -- NOT --
@@ -12425,7 +12425,7 @@ below.
 	boolean falseValue = parser.parseExpression("!true").getValue(Boolean.class);
 
 	// -- AND and NOT --
-	String expression = "isMember('Nikola Tesla') and !isMember('Mihajlo Pupin')";
+	String expression = "isMember(''Nikola Tesla'') and !isMember(''Mihajlo Pupin'')";
 	boolean falseValue = parser.parseExpression(expression).getValue(societyContext, Boolean.class);
 ----
 
@@ -12444,7 +12444,7 @@ operators are demonstrated below.
 	int two = parser.parseExpression("1 + 1").getValue(Integer.class); // 2
 
 	String testString = parser.parseExpression(
-			"'test' + ' ' + 'string'").getValue(String.class); // 'test string'
+			"''test'' + '' '' + ''string''").getValue(String.class); // 'test string'
 
 	// Subtraction
 	int four = parser.parseExpression("1 - -3").getValue(Integer.class); // 4
@@ -12488,7 +12488,7 @@ done within a call to `setValue` but can also be done inside a call to `getValue
 	// alternatively
 
 	String aleks = parser.parseExpression(
-			"Name = 'Alexandar Seovic'").getValue(inventorContext, String.class);
+			"Name = ''Alexandar Seovic''").getValue(inventorContext, String.class);
 ----
 
 
@@ -12526,13 +12526,13 @@ used).
 [subs="verbatim,quotes"]
 ----
 	Inventor einstein = p.parseExpression(
-			"new org.spring.samples.spel.inventor.Inventor('Albert Einstein', 'German')")
+			"new org.spring.samples.spel.inventor.Inventor(''Albert Einstein'', ''German'')")
 			.getValue(Inventor.class);
 
 	//create new inventor instance within add method of List
 	p.parseExpression(
 			"Members.add(new org.spring.samples.spel.inventor.Inventor(
-				'Albert Einstein', 'German'))").getValue(societyContext);
+				''Albert Einstein'', ''German''))").getValue(societyContext);
 ----
 
 
@@ -12625,7 +12625,7 @@ expression string.
 		StringUtils.class.getDeclaredMethod("reverseString", new Class[] { String.class }));
 
 	String helloWorldReversed = parser.parseExpression(
-		"#reverseString('hello')").getValue(context, String.class);
+		"#reverseString(''hello'')").getValue(context, String.class);
 ----
 
 
@@ -12657,7 +12657,7 @@ the expression. A minimal example is:
 [subs="verbatim,quotes"]
 ----
 	String falseString = parser.parseExpression(
-			"false ? 'trueExp' : 'falseExp'").getValue(String.class);
+			"false ? ''trueExp'' : ''falseExp''").getValue(String.class);
 ----
 
 In this case, the boolean false results in returning the string value 'falseExp'. A more
@@ -12669,8 +12669,8 @@ realistic example is shown below.
 	parser.parseExpression("Name").setValue(societyContext, "IEEE");
 	societyContext.setVariable("queryName", "Nikola Tesla");
 
-	expression = "isMember(#queryName)? #queryName + ' is a member of the ' " +
-			"+ Name + ' Society' : #queryName + ' is not a member of the ' + Name + ' Society'";
+	expression = "isMember(#queryName)? #queryName + '' is a member of the '' " +
+			"+ Name + '' Society'' : #queryName + '' is not a member of the '' + Name + '' Society''";
 
 	String queryResultString = parser.parseExpression(expression)
 			.getValue(societyContext, String.class);
@@ -12703,7 +12703,7 @@ Instead you can use the Elvis operator, named for the resemblance to Elvis' hair
 ----
 	ExpressionParser parser = new SpelExpressionParser();
 
-	String name = parser.parseExpression("null?:'Unknown'").getValue(String.class);
+	String name = parser.parseExpression("null?:''Unknown''").getValue(String.class);
 
 	System.out.println(name); // 'Unknown'
 ----
@@ -12718,13 +12718,13 @@ Here is a more complex example.
 	Inventor tesla = new Inventor("Nikola Tesla", "Serbian");
 	StandardEvaluationContext context = new StandardEvaluationContext(tesla);
 
-	String name = parser.parseExpression("Name?:'Elvis Presley'").getValue(context, String.class);
+	String name = parser.parseExpression("Name?:''Elvis Presley''").getValue(context, String.class);
 
 	System.out.println(name); // Nikola Tesla
 
 	tesla.setName(null);
 
-	name = parser.parseExpression("Name?:'Elvis Presley'").getValue(context, String.class);
+	name = parser.parseExpression("Name?:''Elvis Presley''").getValue(context, String.class);
 
 	System.out.println(name); // Elvis Presley
 ----
@@ -12767,7 +12767,7 @@ The Elvis operator can be used to apply default values in expressions, e.g. in a
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	@Value("#{systemProperties['pop3.port'] ?: 25}")
+	@Value("#{systemProperties[''pop3.port''] ?: 25}")
 ----
 
 This will inject a system property `pop3.port` if it is defined or 25 if not.
@@ -12788,7 +12788,7 @@ selection would allow us to easily get a list of Serbian inventors:
 [subs="verbatim,quotes"]
 ----
 	List<Inventor> list = (List<Inventor>) parser.parseExpression(
-			"Members.?[Nationality == 'Serbian']").getValue(societyContext);
+			"Members.?[Nationality == ''Serbian'']").getValue(societyContext);
 ----
 
 Selection is possible upon both lists and maps. In the former case the selection
@@ -15041,7 +15041,7 @@ proceed with the method call: the presence of this parameter is an indication th
 	public class SimpleProfiler {
 
 		public Object profile(ProceedingJoinPoint call, String name, int age) throws Throwable {
-			StopWatch clock = new StopWatch("Profiling for '" + name + "' and '" + age + "'");
+			StopWatch clock = new StopWatch("Profiling for ''" + name + "'' and ''" + age + "''");
 			try {
 				clock.start(call.toShortString());
 				return call.proceed();
@@ -21209,8 +21209,8 @@ framework.
 				c:loginAction-ref="loginAction" />
 
 		<bean id="loginAction" class="com.example.LoginAction"
-				c:username="#{request.getParameter('user')}"
-				c:password="#{request.getParameter('pswd')}"
+				c:username="#{request.getParameter(''user'')}"
+				c:password="#{request.getParameter(''pswd'')}"
 				scope="request">
 			<aop:scoped-proxy />
 		</bean>
@@ -21271,7 +21271,7 @@ framework.
 
 		<bean id="userPreferences"
 				class="com.example.UserPreferences"
-				c:theme="#{session.getAttribute('theme')}"
+				c:theme="#{session.getAttribute(''theme'')}"
 				scope="session">
 			<aop:scoped-proxy />
 		</bean>
@@ -21398,7 +21398,7 @@ See <<testing-examples-petclinic>> for an additional example.
 		}
 
 		protected void assertNumUsers(int expected) {
-			assertEquals("Number of rows in the 'user' table.", expected, countRowsInTable("user"));
+			assertEquals("Number of rows in the ''user'' table.", expected, countRowsInTable("user"));
 		}
 	}
 ----
@@ -21450,7 +21450,7 @@ javadocs for `TestTransaction` for further details.
 		}
 
 		protected void assertNumUsers(int expected) {
-			assertEquals("Number of rows in the user table.", expected, countRowsInTable("user"));
+			assertEquals("Number of rows in the ''user'' table.", expected, countRowsInTable("user"));
 		}
 	}
 ----
@@ -21851,7 +21851,7 @@ be automatically rolled back by the `TransactionalTestExecutionListener` (see
 		}
 
 		protected void assertNumUsers(int expected) {
-			assertEquals("Number of rows in the 'user' table.", expected, countRowsInTable("user"));
+			assertEquals("Number of rows in the ''user'' table.", expected, countRowsInTable("user"));
 		}
 	}
 ----
@@ -22354,7 +22354,7 @@ be verified:
 [subs="verbatim,quotes"]
 ----
 	mockMvc.perform(get("/people").accept(MediaType.APPLICATION_JSON))
-		.andExpect(jsonPath("$.links[?(@.rel == 'self')].href").value("http://localhost:8080/people"));
+		.andExpect(jsonPath("$.links[?(@.rel == ''self'')].href").value("http://localhost:8080/people"));
 ----
 
 When XML response content contains hypermedia links created with
@@ -22366,7 +22366,7 @@ be verified:
 ----
 	Map<String, String> ns = Collections.singletonMap("ns", "http://www.w3.org/2005/Atom");
 	mockMvc.perform(get("/handle").accept(MediaType.APPLICATION_XML))
-		.andExpect(xpath("/person/ns:link[@rel='self']/@href", ns).string("http://localhost:8080/people"));
+		.andExpect(xpath("/person/ns:link[@rel=''self'']/@href", ns).string("http://localhost:8080/people"));
 ----
 
 [[spring-mvc-test-server-filters]]
@@ -24342,7 +24342,7 @@ a transaction. You then pass an instance of your custom `TransactionCallback` to
 
 		// use constructor-injection to supply the PlatformTransactionManager
 		public SimpleService(PlatformTransactionManager transactionManager) {
-			Assert.notNull(transactionManager, "The 'transactionManager' argument must not be null.");
+			Assert.notNull(transactionManager, "The ''transactionManager'' argument must not be null.");
 			this.transactionTemplate = new TransactionTemplate(transactionManager);
 		}
 
@@ -24409,7 +24409,7 @@ a specific `TransactionTemplate:`
 		private final TransactionTemplate transactionTemplate;
 
 		public SimpleService(PlatformTransactionManager transactionManager) {
-			Assert.notNull(transactionManager, "The 'transactionManager' argument must not be null.");
+			Assert.notNull(transactionManager, "The ''transactionManager'' argument must not be null.");
 			this.transactionTemplate = new TransactionTemplate(transactionManager);
 
 			// the transaction settings can be set here explicitly if so desired
@@ -32942,9 +32942,9 @@ defined in the previous example to customize the look and feel:
 	<%@ taglib prefix="spring" uri="http://www.springframework.org/tags"%>
 	<html>
 		<head>
-			<link rel="stylesheet" href="<spring:theme code='styleSheet'/>" type="text/css"/>
+			<link rel="stylesheet" href="<spring:theme code=''styleSheet''/>" type="text/css"/>
 		</head>
-		<body style="background=<spring:theme code='background'/>">
+		<body style="background=<spring:theme code=''background''/>">
 			...
 		</body>
 	</html>
@@ -44841,7 +44841,7 @@ simpler syntax is supported by the `@EnableMBeanExport` `@Configuration` annotat
 	}
 ----
 
-If you prefer XML based configuration the ' `context:mbean-export'` element serves the
+If you prefer XML based configuration the `'context:mbean-export'` element serves the
 same purpose.
 
 [source,xml,indent=0]
@@ -46824,7 +46824,7 @@ along with an inline image.
 	helper.setTo("test@host.com");
 
 	// use the true flag to indicate the text included is HTML
-	helper.setText("<html><body><img src='cid:identifier1234'></body></html>", true);
+	helper.setText("<html><body><img src=''cid:identifier1234''></body></html>", true);
 
 	// let's include the infamous windows Sample file (this time copied to c:/)
 	FileSystemResource res = new FileSystemResource(new File("c:/Sample.jpg"));
@@ -48177,7 +48177,7 @@ message is surrounded by quotes. Below are the changes that I (the author) make 
 
 		public String getMessage() {
 			// change the implementation to surround the message in quotes
-			return "'" + this.message + "'"
+			return "''" + this.message + "''"
 		}
 
 		public void setMessage(String message) {
@@ -48584,7 +48584,7 @@ will want to do with this callback, and you can see an example of doing that bel
 			DelegatingMetaClass metaClass = new DelegatingMetaClass(goo.getMetaClass()) {
 
 				public Object invokeMethod(Object object, String methodName, Object[] arguments) {
-					System.out.println("Invoking '" + methodName + "'.");
+					System.out.println("Invoking ''" + methodName + "''.");
 					return super.invokeMethod(object, methodName, arguments);
 				}
 			};
@@ -49297,9 +49297,9 @@ conditional computations:
 
 | result
 | evaluation context
-| The result of the method call (the value to be cached). Only available in `unless`'
-  expressions, `cache put` expression (to compute the `key`) or `cache evict`
-  expression (when `beforeInvocation` is `false`).
+| The result of the method call (the value to be cached). Only available in `unless`
+  expressions, `cache put` expressions (to compute the `key`), or `cache evict`
+  expressions (when `beforeInvocation` is `false`).
 | `#result`
 |===
 

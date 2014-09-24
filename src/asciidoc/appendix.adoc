@@ -144,8 +144,8 @@ code in a callback, while still respecting and participating in Spring's generic
 `DataAccessException` hierarchy. The `HibernateDaoSupport` base class offers methods to
 access the current transactional `Session` and to convert exceptions in such a scenario;
 similar methods are also available as static helpers on the `SessionFactoryUtils` class.
-Note that such code will usually pass ' `false`' as the value of the `getSession(..)`
-methods ' `allowCreate`' argument, to enforce running within a transaction (which avoids
+Note that such code will usually pass `false` as the value of the `getSession(..)`
+methods `allowCreate` argument, to enforce running within a transaction (which avoids
 the need to close the returned `Session`, as its lifecycle is managed by the
 transaction).
 
@@ -2368,8 +2368,8 @@ Before...
 ----
 
 The above configuration uses a Spring `FactoryBean` implementation, the
-`FieldRetrievingFactoryBean`, to set the value of the `'isolation'` property on a bean
-to the value of the `'java.sql.Connection.TRANSACTION_SERIALIZABLE'` constant. This is
+`FieldRetrievingFactoryBean`, to set the value of the `isolation` property on a bean
+to the value of the `java.sql.Connection.TRANSACTION_SERIALIZABLE` constant. This is
 all well and good, but it is a tad verbose and (unnecessarily) exposes Spring's internal
 plumbing to the end user.
 
@@ -2512,8 +2512,8 @@ Before...
 ----
 
 The above configuration uses a Spring `FactoryBean` implementation, the
-`PropertyPathFactoryBean`, to create a bean (of type `int`) called `'testBean.age'` that
-has a value equal to the `'age'` property of the `'testBean'` bean.
+`PropertyPathFactoryBean`, to create a bean (of type `int`) called `testBean.age` that
+has a value equal to the `age` property of the `testBean` bean.
 
 After...
 
@@ -2534,8 +2534,8 @@ After...
 	<util:property-path id="name" path="testBean.age"/>
 ----
 
-The value of the `'path'` attribute of the `<property-path/>` tag follows the form
-`'beanName.beanProperty'`.
+The value of the `path` attribute of the `<property-path/>` tag follows the form
+`beanName.beanProperty`.
 
 [[xsd-config-body-schemas-util-property-path-dependency]]
 ====== Using <util:property-path/> to set a bean property or constructor-argument
@@ -2666,7 +2666,7 @@ Before...
 
 The above configuration uses a Spring `FactoryBean` implementation, the
 `ListFactoryBean`, to create a `java.util.List` instance initialized with values taken
-from the supplied `'sourceList'`.
+from the supplied `sourceList`.
 
 After...
 
@@ -2683,7 +2683,7 @@ After...
 ----
 
 You can also explicitly control the exact type of `List` that will be instantiated and
-populated via the use of the `'list-class'` attribute on the `<util:list/>` element. For
+populated via the use of the `list-class` attribute on the `<util:list/>` element. For
 example, if we really need a `java.util.LinkedList` to be instantiated, we could use the
 following configuration:
 
@@ -2698,7 +2698,7 @@ following configuration:
 	</util:list>
 ----
 
-If no `'list-class'` attribute is supplied, a `List` implementation will be chosen by
+If no `list-class` attribute is supplied, a `List` implementation will be chosen by
 the container.
 
 
