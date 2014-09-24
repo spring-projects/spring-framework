@@ -19,7 +19,6 @@ package org.springframework.core.env;
 import java.util.Map;
 
 import org.springframework.util.Assert;
-import org.springframework.util.ObjectUtils;
 
 /**
  * Specialization of {@link MapPropertySource} designed for use with
@@ -56,15 +55,13 @@ import org.springframework.util.ObjectUtils;
  * and all its subclasses.
  *
  * @author Chris Beams
+ * @author Juergen Hoeller
  * @since 3.1
  * @see StandardEnvironment
  * @see AbstractEnvironment#getSystemEnvironment()
  * @see AbstractEnvironment#ACTIVE_PROFILES_PROPERTY_NAME
  */
 public class SystemEnvironmentPropertySource extends MapPropertySource {
-
-	/** if SecurityManager scenarios mean that property access should be via getPropertyNames() */
-	private boolean usePropertyNames;
 
 	/**
 	 * Create a new {@code SystemEnvironmentPropertySource} with the given name and
@@ -105,48 +102,37 @@ public class SystemEnvironmentPropertySource extends MapPropertySource {
 	 */
 	private String resolvePropertyName(String name) {
 		Assert.notNull(name, "Property name must not be null");
-		try {
-			String[] propertyNames = (this.usePropertyNames ? getPropertyNames() : null);
-			if (containsProperty(propertyNames, name)) {
-				return name;
-			}
-
-			String usName = name.replace('.', '_');
-			if (!name.equals(usName) && containsProperty(propertyNames, usName)) {
-				return usName;
-			}
-
-			String ucName = name.toUpperCase();
-			if (!name.equals(ucName)) {
-				if (containsProperty(propertyNames, ucName)) {
-					return ucName;
-				}
-				else {
-					String usUcName = ucName.replace('.', '_');
-					if (!ucName.equals(usUcName) && containsProperty(propertyNames, usUcName)) {
-						return usUcName;
-					}
-				}
-			}
-
+		if (containsKey(name)) {
 			return name;
 		}
-		catch (RuntimeException ex) {
-			if (this.usePropertyNames) {
-				throw ex;
+
+		String usName = name.replace('.', '_');
+		if (!name.equals(usName) && containsKey(usName)) {
+			return usName;
+		}
+
+		String ucName = name.toUpperCase();
+		if (!name.equals(ucName)) {
+			if (containsKey(ucName)) {
+				return ucName;
 			}
 			else {
-				this.usePropertyNames = true;
-				return resolvePropertyName(name);
+				String usUcName = ucName.replace('.', '_');
+				if (!ucName.equals(usUcName) && containsKey(usUcName)) {
+					return usUcName;
+				}
 			}
 		}
+
+		return name;
 	}
 
-	private boolean containsProperty(String[] propertyNames, String name) {
-		if (propertyNames == null) {
-			return super.containsProperty(name);
-		}
-		return ObjectUtils.containsElement(propertyNames, name);
+	private boolean containsKey(String name) {
+		return (isSecurityManagerPresent() ? this.source.keySet().contains(name) : this.source.containsKey(name));
+	}
+
+	protected boolean isSecurityManagerPresent() {
+		return (System.getSecurityManager() != null);
 	}
 
 }
