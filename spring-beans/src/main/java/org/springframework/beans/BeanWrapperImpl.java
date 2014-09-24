@@ -33,6 +33,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import org.apache.commons.logging.Log;
@@ -44,7 +45,9 @@ import org.springframework.core.convert.ConversionException;
 import org.springframework.core.convert.ConverterNotFoundException;
 import org.springframework.core.convert.Property;
 import org.springframework.core.convert.TypeDescriptor;
+import org.springframework.lang.UsesJava8;
 import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
@@ -90,6 +93,18 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 	 * We'll create a lot of these objects, so we don't want a new logger every time.
 	 */
 	private static final Log logger = LogFactory.getLog(BeanWrapperImpl.class);
+
+	private static Class<?> javaUtilOptionalClass = null;
+
+	static {
+		try {
+			javaUtilOptionalClass =
+					ClassUtils.forName("java.util.Optional", BeanWrapperImpl.class.getClassLoader());
+		}
+		catch (ClassNotFoundException ex) {
+			// Java 8 not available - Optional references simply not supported then.
+		}
+	}
 
 
 	/** The wrapped object */
@@ -209,12 +224,17 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 	 */
 	public void setWrappedInstance(Object object, String nestedPath, Object rootObject) {
 		Assert.notNull(object, "Bean object must not be null");
-		this.object = object;
+		if (object.getClass().equals(javaUtilOptionalClass)) {
+			this.object = OptionalUnwrapper.unwrap(object);
+		}
+		else {
+			this.object = object;
+		}
 		this.nestedPath = (nestedPath != null ? nestedPath : "");
-		this.rootObject = (!"".equals(this.nestedPath) ? rootObject : object);
+		this.rootObject = (!"".equals(this.nestedPath) ? rootObject : this.object);
 		this.nestedBeanWrappers = null;
-		this.typeConverterDelegate = new TypeConverterDelegate(this, object);
-		setIntrospectionClass(object.getClass());
+		this.typeConverterDelegate = new TypeConverterDelegate(this, this.object);
+		setIntrospectionClass(this.object.getClass());
 	}
 
 	@Override
@@ -549,7 +569,8 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 		PropertyTokenHolder tokens = getPropertyNameTokens(nestedProperty);
 		String canonicalName = tokens.canonicalName;
 		Object propertyValue = getPropertyValue(tokens);
-		if (propertyValue == null) {
+		if (propertyValue == null ||
+				(propertyValue.getClass().equals(javaUtilOptionalClass) && OptionalUnwrapper.isEmpty(propertyValue))) {
 			if (isAutoGrowNestedPaths()) {
 				propertyValue = setDefaultValue(tokens);
 			}
@@ -1172,10 +1193,6 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 	}
 
 
-	//---------------------------------------------------------------------
-	// Inner class for internal use
-	//---------------------------------------------------------------------
-
 	private static class PropertyTokenHolder {
 
 		public String canonicalName;
@@ -1183,6 +1200,24 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 		public String actualName;
 
 		public String[] keys;
+	}
+
+
+	/**
+	 * Inner class to avoid a hard dependency on Java 8.
+	 */
+	@UsesJava8
+	private static class OptionalUnwrapper {
+
+		public static Object unwrap(Object optionalObject) {
+			Optional<?> optional = (Optional<?>) optionalObject;
+			Assert.isTrue(optional.isPresent(), "Optional value must be present");
+			return optional.get();
+		}
+
+		public static boolean isEmpty(Object optionalObject) {
+			return !((Optional<?>) optionalObject).isPresent();
+		}
 	}
 
 }
