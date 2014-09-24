@@ -77,7 +77,9 @@ public class ComponentScanBeanDefinitionParser implements BeanDefinitionParser {
 
 	@Override
 	public BeanDefinition parse(Element element, ParserContext parserContext) {
-		String[] basePackages = StringUtils.tokenizeToStringArray(element.getAttribute(BASE_PACKAGE_ATTRIBUTE),
+		String basePackage = element.getAttribute(BASE_PACKAGE_ATTRIBUTE);
+		basePackage = parserContext.getReaderContext().getEnvironment().resolvePlaceholders(basePackage);
+		String[] basePackages = StringUtils.tokenizeToStringArray(basePackage,
 				ConfigurableApplicationContext.CONFIG_LOCATION_DELIMITERS);
 
 		// Actually scan for bean definitions and register them.
@@ -89,17 +91,15 @@ public class ComponentScanBeanDefinitionParser implements BeanDefinitionParser {
 	}
 
 	protected ClassPathBeanDefinitionScanner configureScanner(ParserContext parserContext, Element element) {
-		XmlReaderContext readerContext = parserContext.getReaderContext();
-
 		boolean useDefaultFilters = true;
 		if (element.hasAttribute(USE_DEFAULT_FILTERS_ATTRIBUTE)) {
 			useDefaultFilters = Boolean.valueOf(element.getAttribute(USE_DEFAULT_FILTERS_ATTRIBUTE));
 		}
 
 		// Delegate bean definition registration to scanner class.
-		ClassPathBeanDefinitionScanner scanner = createScanner(readerContext, useDefaultFilters);
-		scanner.setResourceLoader(readerContext.getResourceLoader());
-		scanner.setEnvironment(parserContext.getDelegate().getEnvironment());
+		ClassPathBeanDefinitionScanner scanner = createScanner(parserContext.getReaderContext(), useDefaultFilters);
+		scanner.setResourceLoader(parserContext.getReaderContext().getResourceLoader());
+		scanner.setEnvironment(parserContext.getReaderContext().getEnvironment());
 		scanner.setBeanDefinitionDefaults(parserContext.getDelegate().getBeanDefinitionDefaults());
 		scanner.setAutowireCandidatePatterns(parserContext.getDelegate().getAutowireCandidatePatterns());
 
@@ -111,17 +111,17 @@ public class ComponentScanBeanDefinitionParser implements BeanDefinitionParser {
 			parseBeanNameGenerator(element, scanner);
 		}
 		catch (Exception ex) {
-			readerContext.error(ex.getMessage(), readerContext.extractSource(element), ex.getCause());
+			parserContext.getReaderContext().error(ex.getMessage(), parserContext.extractSource(element), ex.getCause());
 		}
 
 		try {
 			parseScope(element, scanner);
 		}
 		catch (Exception ex) {
-			readerContext.error(ex.getMessage(), readerContext.extractSource(element), ex.getCause());
+			parserContext.getReaderContext().error(ex.getMessage(), parserContext.extractSource(element), ex.getCause());
 		}
 
-		parseTypeFilters(element, scanner, readerContext, parserContext);
+		parseTypeFilters(element, scanner, parserContext);
 
 		return scanner;
 	}
@@ -195,9 +195,7 @@ public class ComponentScanBeanDefinitionParser implements BeanDefinitionParser {
 		}
 	}
 
-	protected void parseTypeFilters(
-			Element element, ClassPathBeanDefinitionScanner scanner, XmlReaderContext readerContext, ParserContext parserContext) {
-
+	protected void parseTypeFilters(Element element, ClassPathBeanDefinitionScanner scanner, ParserContext parserContext) {
 		// Parse exclude and include filter elements.
 		ClassLoader classLoader = scanner.getResourceLoader().getClassLoader();
 		NodeList nodeList = element.getChildNodes();
@@ -207,25 +205,27 @@ public class ComponentScanBeanDefinitionParser implements BeanDefinitionParser {
 				String localName = parserContext.getDelegate().getLocalName(node);
 				try {
 					if (INCLUDE_FILTER_ELEMENT.equals(localName)) {
-						TypeFilter typeFilter = createTypeFilter((Element) node, classLoader);
+						TypeFilter typeFilter = createTypeFilter((Element) node, classLoader, parserContext);
 						scanner.addIncludeFilter(typeFilter);
 					}
 					else if (EXCLUDE_FILTER_ELEMENT.equals(localName)) {
-						TypeFilter typeFilter = createTypeFilter((Element) node, classLoader);
+						TypeFilter typeFilter = createTypeFilter((Element) node, classLoader, parserContext);
 						scanner.addExcludeFilter(typeFilter);
 					}
 				}
 				catch (Exception ex) {
-					readerContext.error(ex.getMessage(), readerContext.extractSource(element), ex.getCause());
+					parserContext.getReaderContext().error(
+							ex.getMessage(), parserContext.extractSource(element), ex.getCause());
 				}
 			}
 		}
 	}
 
 	@SuppressWarnings("unchecked")
-	protected TypeFilter createTypeFilter(Element element, ClassLoader classLoader) {
+	protected TypeFilter createTypeFilter(Element element, ClassLoader classLoader, ParserContext parserContext) {
 		String filterType = element.getAttribute(FILTER_TYPE_ATTRIBUTE);
 		String expression = element.getAttribute(FILTER_EXPRESSION_ATTRIBUTE);
+		expression = parserContext.getReaderContext().getEnvironment().resolvePlaceholders(expression);
 		try {
 			if ("annotation".equals(filterType)) {
 				return new AnnotationTypeFilter((Class<Annotation>) classLoader.loadClass(expression));
