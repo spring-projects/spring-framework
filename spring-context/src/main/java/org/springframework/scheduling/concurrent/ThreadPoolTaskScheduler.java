@@ -37,6 +37,7 @@ import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.Trigger;
 import org.springframework.scheduling.support.TaskUtils;
 import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.ErrorHandler;
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.util.concurrent.ListenableFutureTask;
@@ -57,9 +58,14 @@ import org.springframework.util.concurrent.ListenableFutureTask;
 public class ThreadPoolTaskScheduler extends ExecutorConfigurationSupport
 		implements AsyncListenableTaskExecutor, SchedulingTaskExecutor, TaskScheduler {
 
+	// ScheduledThreadPoolExecutor.setRemoveOnCancelPolicy(boolean) only available on JDK 1.7+
+	private static final boolean setRemoveOnCancelPolicyAvailable =
+			ClassUtils.hasMethod(ScheduledThreadPoolExecutor.class, "setRemoveOnCancelPolicy", boolean.class);
+
+
 	private volatile int poolSize = 1;
 
-	private volatile Boolean removeOnCancelPolicy;
+	private volatile boolean removeOnCancelPolicy;
 
 	private volatile ScheduledExecutorService scheduledExecutor;
 
@@ -87,8 +93,11 @@ public class ThreadPoolTaskScheduler extends ExecutorConfigurationSupport
 	@UsesJava7
 	public void setRemoveOnCancelPolicy(boolean removeOnCancelPolicy) {
 		this.removeOnCancelPolicy = removeOnCancelPolicy;
-		if (this.scheduledExecutor instanceof ScheduledThreadPoolExecutor) {
+		if (setRemoveOnCancelPolicyAvailable && this.scheduledExecutor instanceof ScheduledThreadPoolExecutor) {
 			((ScheduledThreadPoolExecutor) this.scheduledExecutor).setRemoveOnCancelPolicy(removeOnCancelPolicy);
+		}
+		else if (removeOnCancelPolicy && this.scheduledExecutor != null) {
+			logger.info("Could not apply remove-on-cancel policy - not a Java 7+ ScheduledThreadPoolExecutor");
 		}
 	}
 
@@ -96,9 +105,9 @@ public class ThreadPoolTaskScheduler extends ExecutorConfigurationSupport
 	 * Set a custom {@link ErrorHandler} strategy.
 	 */
 	public void setErrorHandler(ErrorHandler errorHandler) {
-		Assert.notNull(errorHandler, "'errorHandler' must not be null");
 		this.errorHandler = errorHandler;
 	}
+
 
 	@UsesJava7
 	@Override
@@ -107,8 +116,13 @@ public class ThreadPoolTaskScheduler extends ExecutorConfigurationSupport
 
 		this.scheduledExecutor = createExecutor(this.poolSize, threadFactory, rejectedExecutionHandler);
 
-		if (this.scheduledExecutor instanceof ScheduledThreadPoolExecutor && this.removeOnCancelPolicy != null) {
-			((ScheduledThreadPoolExecutor) this.scheduledExecutor).setRemoveOnCancelPolicy(this.removeOnCancelPolicy);
+		if (this.removeOnCancelPolicy) {
+			if (setRemoveOnCancelPolicyAvailable && this.scheduledExecutor instanceof ScheduledThreadPoolExecutor) {
+				((ScheduledThreadPoolExecutor) this.scheduledExecutor).setRemoveOnCancelPolicy(true);
+			}
+			else {
+				logger.info("Could not apply remove-on-cancel policy - not a Java 7+ ScheduledThreadPoolExecutor");
+			}
 		}
 
 		return this.scheduledExecutor;
@@ -175,8 +189,8 @@ public class ThreadPoolTaskScheduler extends ExecutorConfigurationSupport
 	@UsesJava7
 	public boolean isRemoveOnCancelPolicy() {
 		if (this.scheduledExecutor == null) {
-			// Not initialized yet: return false (the default of the executor)
-			return false;
+			// Not initialized yet: return our setting for the time being.
+			return (setRemoveOnCancelPolicyAvailable && this.removeOnCancelPolicy);
 		}
 		return getScheduledThreadPoolExecutor().getRemoveOnCancelPolicy();
 	}

@@ -28,6 +28,7 @@ import org.springframework.lang.UsesJava7;
 import org.springframework.scheduling.support.DelegatingErrorHandlingRunnable;
 import org.springframework.scheduling.support.TaskUtils;
 import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
 
 /**
@@ -67,9 +68,14 @@ import org.springframework.util.ObjectUtils;
 public class ScheduledExecutorFactoryBean extends ExecutorConfigurationSupport
 		implements FactoryBean<ScheduledExecutorService> {
 
+	// ScheduledThreadPoolExecutor.setRemoveOnCancelPolicy(boolean) only available on JDK 1.7+
+	private static final boolean setRemoveOnCancelPolicyAvailable =
+			ClassUtils.hasMethod(ScheduledThreadPoolExecutor.class, "setRemoveOnCancelPolicy", boolean.class);
+
+
 	private int poolSize = 1;
 
-	private Boolean removeOnCancelPolicy;
+	private boolean removeOnCancelPolicy;
 
 	private ScheduledExecutorTask[] scheduledExecutorTasks;
 
@@ -143,8 +149,13 @@ public class ScheduledExecutorFactoryBean extends ExecutorConfigurationSupport
 		ScheduledExecutorService executor =
 				createExecutor(this.poolSize, threadFactory, rejectedExecutionHandler);
 
-		if (executor instanceof ScheduledThreadPoolExecutor && this.removeOnCancelPolicy != null) {
-			((ScheduledThreadPoolExecutor) executor).setRemoveOnCancelPolicy(this.removeOnCancelPolicy);
+		if (this.removeOnCancelPolicy) {
+			if (setRemoveOnCancelPolicyAvailable && executor instanceof ScheduledThreadPoolExecutor) {
+				((ScheduledThreadPoolExecutor) executor).setRemoveOnCancelPolicy(true);
+			}
+			else {
+				logger.info("Could not apply remove-on-cancel policy - not a Java 7+ ScheduledThreadPoolExecutor");
+			}
 		}
 
 		// Register specified ScheduledExecutorTasks, if necessary.
@@ -215,6 +226,7 @@ public class ScheduledExecutorFactoryBean extends ExecutorConfigurationSupport
 				new DelegatingErrorHandlingRunnable(task.getRunnable(), TaskUtils.LOG_AND_SUPPRESS_ERROR_HANDLER) :
 				new DelegatingErrorHandlingRunnable(task.getRunnable(), TaskUtils.LOG_AND_PROPAGATE_ERROR_HANDLER));
 	}
+
 
 	@Override
 	public ScheduledExecutorService getObject() {
