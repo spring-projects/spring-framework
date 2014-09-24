@@ -11948,15 +11948,15 @@ of the expression.
 [[expressions-compiler-configuration]]
 ===== Compiler configuration
 
-The compiler is not turned on by default, there are two ways to turn
+The compiler is not turned on by default, but there are two ways to turn
 it on. It can be turned on using the parser configuration process discussed earlier or
 via a system property when SpEL usage is embedded inside another component. This section
-discussed both of these options.
+discusses both of these options.
 
 Is is important to understand that there are a few modes the compiler can operate in, captured
 in an enum (`org.springframework.expression.spel.SpelCompilerMode`). The modes are as follows:
 
-- `OFF` - the compiler is switched off, this is the default.
+- `OFF` - The compiler is switched off; this is the default.
 - `IMMEDIATE` - In immediate mode the expressions are compiled as soon as possible. This
 is typically after the first interpreted evaluation. If the compiled expression fails
 (typically due to a type changing, as described above) then the caller of the expression
