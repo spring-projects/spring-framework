@@ -61,7 +61,7 @@ public interface SimpleJdbcInsertOperations {
 	SimpleJdbcInsertOperations usingColumns(String... columnNames);
 
 	/**
-	 * Specify the name sof any columns that have auto generated keys.
+	 * Specify the names of any columns that have auto generated keys.
 	 * @param columnNames one or more column names
 	 * @return the instance of this SimpleJdbcInsert
 	 */
