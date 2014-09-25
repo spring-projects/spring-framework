@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ package org.springframework.web.servlet.mvc.method.annotation;
 
 import java.util.Collections;
 import java.util.Map;
-
 import javax.servlet.ServletRequest;
 
 import org.springframework.core.MethodParameter;
@@ -36,7 +35,7 @@ import org.springframework.web.method.annotation.ModelAttributeMethodProcessor;
 import org.springframework.web.servlet.HandlerMapping;
 
 /**
- * A Servlet-specific {@link org.springframework.web.method.annotation.ModelAttributeMethodProcessor} that applies data
+ * A Servlet-specific {@link ModelAttributeMethodProcessor} that applies data
  * binding through a WebDataBinder of type {@link ServletRequestDataBinder}.
  *
  * <p>Also adds a fall-back strategy to instantiate the model attribute from a
@@ -57,6 +56,7 @@ public class ServletModelAttributeMethodProcessor extends ModelAttributeMethodPr
 		super(annotationNotRequired);
 	}
 
+
 	/**
 	 * Instantiate the model attribute from a URI template variable or from a
 	 * request parameter if the name matches to the model attribute name and
@@ -65,10 +65,8 @@ public class ServletModelAttributeMethodProcessor extends ModelAttributeMethodPr
 	 * @see #createAttributeFromRequestValue(String, String, MethodParameter, WebDataBinderFactory, NativeWebRequest)
 	 */
 	@Override
-	protected final Object createAttribute(String attributeName,
-										   MethodParameter parameter,
-										   WebDataBinderFactory binderFactory,
-										   NativeWebRequest request) throws Exception {
+	protected final Object createAttribute(String attributeName, MethodParameter parameter,
+			WebDataBinderFactory binderFactory, NativeWebRequest request) throws Exception {
 
 		String value = getRequestValueForAttribute(attributeName, request);
 		if (value != null) {
@@ -106,9 +104,9 @@ public class ServletModelAttributeMethodProcessor extends ModelAttributeMethodPr
 	@SuppressWarnings("unchecked")
 	protected final Map<String, String> getUriTemplateVariables(NativeWebRequest request) {
 		Map<String, String> variables =
-			(Map<String, String>) request.getAttribute(
-					HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE, RequestAttributes.SCOPE_REQUEST);
-		return (variables != null) ? variables : Collections.<String, String>emptyMap();
+				(Map<String, String>) request.getAttribute(
+						HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE, RequestAttributes.SCOPE_REQUEST);
+		return (variables != null ? variables : Collections.<String, String>emptyMap());
 	}
 
 	/**
@@ -124,11 +122,10 @@ public class ServletModelAttributeMethodProcessor extends ModelAttributeMethodPr
 	 * @return the created model attribute, or {@code null}
 	 * @throws Exception
 	 */
-	protected Object createAttributeFromRequestValue(String sourceValue,
-												 String attributeName,
-												 MethodParameter parameter,
-												 WebDataBinderFactory binderFactory,
-												 NativeWebRequest request) throws Exception {
+	protected Object createAttributeFromRequestValue(String sourceValue, String attributeName,
+			MethodParameter parameter, WebDataBinderFactory binderFactory, NativeWebRequest request)
+			throws Exception {
+
 		DataBinder binder = binderFactory.createBinder(request, null, attributeName);
 		ConversionService conversionService = binder.getConversionService();
 		if (conversionService != null) {
@@ -142,8 +139,8 @@ public class ServletModelAttributeMethodProcessor extends ModelAttributeMethodPr
 	}
 
 	/**
-	 * {@inheritDoc}
-	 * <p>Downcast {@link WebDataBinder} to {@link ServletRequestDataBinder} before binding.
+	 * This implementation downcasts {@link WebDataBinder} to
+	 * {@link ServletRequestDataBinder} before binding.
 	 * @see ServletRequestDataBinderFactory
 	 */
 	@Override

@@ -48,11 +48,9 @@ public class ViewNameMethodReturnValueHandler implements HandlerMethodReturnValu
 	 * Configure one more simple patterns (as described in
 	 * {@link PatternMatchUtils#simpleMatch}) to use in order to recognize
 	 * custom redirect prefixes in addition to "redirect:".
-	 *
 	 * <p>Note that simply configuring this property will not make a custom
 	 * redirect prefix work. There must be a custom View that recognizes the
 	 * prefix as well.
-	 *
 	 * @since 4.1
 	 */
 	public void setRedirectPatterns(String... redirectPatterns) {
@@ -66,6 +64,7 @@ public class ViewNameMethodReturnValueHandler implements HandlerMethodReturnValu
 		return this.redirectPatterns;
 	}
 
+
 	@Override
 	public boolean supportsReturnType(MethodParameter returnType) {
 		Class<?> paramType = returnType.getParameterType();
@@ -73,10 +72,8 @@ public class ViewNameMethodReturnValueHandler implements HandlerMethodReturnValu
 	}
 
 	@Override
-	public void handleReturnValue(
-			Object returnValue, MethodParameter returnType,
-			ModelAndViewContainer mavContainer, NativeWebRequest webRequest)
-			throws Exception {
+	public void handleReturnValue(Object returnValue, MethodParameter returnType,
+			ModelAndViewContainer mavContainer, NativeWebRequest webRequest) throws Exception {
 
 		if (returnValue == null) {
 			return;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,12 +57,14 @@ public class ModelAndViewResolverMethodReturnValueHandler implements HandlerMeth
 
 	private final ModelAttributeMethodProcessor modelAttributeProcessor = new ModelAttributeMethodProcessor(true);
 
+
 	/**
 	 * Create a new instance.
 	 */
 	public ModelAndViewResolverMethodReturnValueHandler(List<ModelAndViewResolver> mavResolvers) {
 		this.mavResolvers = mavResolvers;
 	}
+
 
 	/**
 	 * Always returns {@code true}. See class-level note.
@@ -73,17 +75,15 @@ public class ModelAndViewResolverMethodReturnValueHandler implements HandlerMeth
 	}
 
 	@Override
-	public void handleReturnValue(
-			Object returnValue, MethodParameter returnType,
-			ModelAndViewContainer mavContainer, NativeWebRequest request)
-			throws Exception {
+	public void handleReturnValue(Object returnValue, MethodParameter returnType,
+			ModelAndViewContainer mavContainer, NativeWebRequest webRequest) throws Exception {
 
 		if (this.mavResolvers != null) {
 			for (ModelAndViewResolver mavResolver : this.mavResolvers) {
 				Class<?> handlerType = returnType.getContainingClass();
 				Method method = returnType.getMethod();
 				ExtendedModelMap model = (ExtendedModelMap) mavContainer.getModel();
-				ModelAndView mav = mavResolver.resolveModelAndView(method, handlerType, returnValue, model, request);
+				ModelAndView mav = mavResolver.resolveModelAndView(method, handlerType, returnValue, model, webRequest);
 				if (mav != ModelAndViewResolver.UNRESOLVED) {
 					mavContainer.addAllAttributes(mav.getModel());
 					mavContainer.setViewName(mav.getViewName());
@@ -97,7 +97,7 @@ public class ModelAndViewResolverMethodReturnValueHandler implements HandlerMeth
 
 		// No suitable ModelAndViewResolver...
 		if (this.modelAttributeProcessor.supportsReturnType(returnType)) {
-			this.modelAttributeProcessor.handleReturnValue(returnValue, returnType, mavContainer, request);
+			this.modelAttributeProcessor.handleReturnValue(returnValue, returnType, mavContainer, webRequest);
 		}
 		else {
 			throw new UnsupportedOperationException("Unexpected return type: " +

@@ -69,11 +69,13 @@ public class RequestResponseBodyMethodProcessor extends AbstractMessageConverter
 
 	public RequestResponseBodyMethodProcessor(List<HttpMessageConverter<?>> messageConverters,
 			ContentNegotiationManager contentNegotiationManager) {
+
 		super(messageConverters, contentNegotiationManager);
 	}
 
 	public RequestResponseBodyMethodProcessor(List<HttpMessageConverter<?>> messageConverters,
 			ContentNegotiationManager contentNegotiationManager, List<Object> responseBodyAdvice) {
+
 		super(messageConverters, contentNegotiationManager, responseBodyAdvice);
 	}
 
@@ -85,12 +87,11 @@ public class RequestResponseBodyMethodProcessor extends AbstractMessageConverter
 
 	@Override
 	public boolean supportsReturnType(MethodParameter returnType) {
-		return ((AnnotationUtils.findAnnotation(returnType.getContainingClass(), ResponseBody.class) != null) ||
-				(returnType.getMethodAnnotation(ResponseBody.class) != null));
+		return (AnnotationUtils.findAnnotation(returnType.getContainingClass(), ResponseBody.class) != null ||
+				returnType.getMethodAnnotation(ResponseBody.class) != null);
 	}
 
 	/**
-	 * {@inheritDoc}
 	 * @throws MethodArgumentNotValidException if validation fails
 	 * @throws HttpMessageNotReadableException if {@link RequestBody#required()}
 	 * is {@code true} and there is no body content or if there is no suitable
@@ -101,25 +102,20 @@ public class RequestResponseBodyMethodProcessor extends AbstractMessageConverter
 			NativeWebRequest webRequest, WebDataBinderFactory binderFactory) throws Exception {
 
 		Object argument = readWithMessageConverters(webRequest, parameter, parameter.getGenericParameterType());
-
 		String name = Conventions.getVariableNameForParameter(parameter);
 		WebDataBinder binder = binderFactory.createBinder(webRequest, argument, name);
-
 		if (argument != null) {
 			validate(binder, parameter);
 		}
-
 		mavContainer.addAttribute(BindingResult.MODEL_KEY_PREFIX + name, binder.getBindingResult());
-
 		return argument;
 	}
 
-	private void validate(WebDataBinder binder, MethodParameter parameter) throws Exception, MethodArgumentNotValidException {
-
+	private void validate(WebDataBinder binder, MethodParameter parameter) throws Exception {
 		Annotation[] annotations = parameter.getParameterAnnotations();
-		for (Annotation annot : annotations) {
-			if (annot.annotationType().getSimpleName().startsWith("Valid")) {
-				Object hints = AnnotationUtils.getValue(annot);
+		for (Annotation ann : annotations) {
+			if (ann.annotationType().getSimpleName().startsWith("Valid")) {
+				Object hints = AnnotationUtils.getValue(ann);
 				binder.validate(hints instanceof Object[] ? (Object[]) hints : new Object[] {hints});
 				BindingResult bindingResult = binder.getBindingResult();
 				if (bindingResult.hasErrors()) {

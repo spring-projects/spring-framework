@@ -43,6 +43,7 @@ final class ObjectToOptionalConverter implements ConditionalGenericConverter {
 		this.conversionService = conversionService;
 	}
 
+
 	@Override
 	public Set<ConvertiblePair> getConvertibleTypes() {
 		return Collections.singleton(new ConvertiblePair(Object.class, Optional.class));

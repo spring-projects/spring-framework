@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ import org.springframework.web.context.request.NativeWebRequest;
  *
  * @author Arjen Poutsma
  * @since 3.1
+ * @see HandlerMethodReturnValueHandler
  */
 public interface HandlerMethodArgumentResolver {
 
@@ -46,13 +47,12 @@ public interface HandlerMethodArgumentResolver {
 	 * a {@link WebDataBinder} instance when needed for data binding and
 	 * type conversion purposes.
 	 * @param parameter the method parameter to resolve. This parameter must
-	 * have previously been passed to
-	 * {@link #supportsParameter(org.springframework.core.MethodParameter)}
-	 * and it must have returned {@code true}
+	 * have previously been passed to {@link #supportsParameter} which must
+	 * have returned {@code true}.
 	 * @param mavContainer the ModelAndViewContainer for the current request
 	 * @param webRequest the current request
 	 * @param binderFactory a factory for creating {@link WebDataBinder} instances
-	 * @return the resolved argument value, or {@code null}.
+	 * @return the resolved argument value, or {@code null}
 	 * @throws Exception in case of errors with the preparation of argument values
 	 */
 	Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer,

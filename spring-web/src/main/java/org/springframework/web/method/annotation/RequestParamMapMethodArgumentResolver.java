@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,13 +30,15 @@ import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
 
 /**
- * Resolves {@link Map} method arguments annotated with an @{@link RequestParam} where the annotation does not
- * specify a request parameter name. See {@link RequestParamMethodArgumentResolver} for resolving {@link Map}
+ * Resolves {@link Map} method arguments annotated with an @{@link RequestParam}
+ * where the annotation does not specify a request parameter name.
+ * See {@link RequestParamMethodArgumentResolver} for resolving {@link Map}
  * method arguments with a request parameter name.
  *
- * <p>The created {@link Map} contains all request parameter name/value pairs. If the method parameter type
- * is {@link MultiValueMap} instead, the created map contains all request parameters and all there values for
- * cases where request parameters have multiple values.
+ * <p>The created {@link Map} contains all request parameter name/value pairs.
+ * If the method parameter type is {@link MultiValueMap} instead, the created
+ * map contains all request parameters and all there values for cases where
+ * request parameters have multiple values.
  *
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
@@ -47,20 +49,18 @@ public class RequestParamMapMethodArgumentResolver implements HandlerMethodArgum
 
 	@Override
 	public boolean supportsParameter(MethodParameter parameter) {
-		RequestParam requestParamAnnot = parameter.getParameterAnnotation(RequestParam.class);
-		if (requestParamAnnot != null) {
+		RequestParam ann = parameter.getParameterAnnotation(RequestParam.class);
+		if (ann != null) {
 			if (Map.class.isAssignableFrom(parameter.getParameterType())) {
-				return !StringUtils.hasText(requestParamAnnot.value());
+				return !StringUtils.hasText(ann.value());
 			}
 		}
 		return false;
 	}
 
 	@Override
-	public Object resolveArgument(
-			MethodParameter parameter, ModelAndViewContainer mavContainer,
-			NativeWebRequest webRequest, WebDataBinderFactory binderFactory)
-			throws Exception {
+	public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer,
+			NativeWebRequest webRequest, WebDataBinderFactory binderFactory) throws Exception {
 
 		Class<?> paramType = parameter.getParameterType();
 
