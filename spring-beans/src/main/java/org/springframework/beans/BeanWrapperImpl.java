@@ -568,11 +568,10 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 		// Get value of bean property.
 		PropertyTokenHolder tokens = getPropertyNameTokens(nestedProperty);
 		String canonicalName = tokens.canonicalName;
-		Object propertyValue = getPropertyValue(tokens);
-		if (propertyValue == null ||
-				(propertyValue.getClass().equals(javaUtilOptionalClass) && OptionalUnwrapper.isEmpty(propertyValue))) {
+		Object value = getPropertyValue(tokens);
+		if (value == null || (value.getClass().equals(javaUtilOptionalClass) && OptionalUnwrapper.isEmpty(value))) {
 			if (isAutoGrowNestedPaths()) {
-				propertyValue = setDefaultValue(tokens);
+				value = setDefaultValue(tokens);
 			}
 			else {
 				throw new NullValueInNestedPathException(getRootClass(), this.nestedPath + canonicalName);
@@ -581,11 +580,12 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 
 		// Lookup cached sub-BeanWrapper, create new one if not found.
 		BeanWrapperImpl nestedBw = this.nestedBeanWrappers.get(canonicalName);
-		if (nestedBw == null || nestedBw.getWrappedInstance() != propertyValue) {
+		if (nestedBw == null || nestedBw.getWrappedInstance() !=
+				(value.getClass().equals(javaUtilOptionalClass) ? OptionalUnwrapper.unwrap(value) : value)) {
 			if (logger.isTraceEnabled()) {
 				logger.trace("Creating new nested BeanWrapper for property '" + canonicalName + "'");
 			}
-			nestedBw = newNestedBeanWrapper(propertyValue, this.nestedPath + canonicalName + NESTED_PROPERTY_SEPARATOR);
+			nestedBw = newNestedBeanWrapper(value, this.nestedPath + canonicalName + NESTED_PROPERTY_SEPARATOR);
 			// Inherit all type-specific PropertyEditors.
 			copyDefaultEditorsTo(nestedBw);
 			copyCustomEditorsTo(nestedBw, canonicalName);
@@ -1212,7 +1212,9 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 		public static Object unwrap(Object optionalObject) {
 			Optional<?> optional = (Optional<?>) optionalObject;
 			Assert.isTrue(optional.isPresent(), "Optional value must be present");
-			return optional.get();
+			Object result = optional.get();
+			Assert.isTrue(!(result instanceof Optional), "Multi-level Optional usage not supported");
+			return result;
 		}
 
 		public static boolean isEmpty(Object optionalObject) {
