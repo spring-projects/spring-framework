@@ -41,6 +41,8 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.util.StreamUtils;
 import org.springframework.util.StringUtils;
 
+import javax.mail.internet.MimeUtility;
+
 /**
  * Implementation of {@link HttpMessageConverter} to read and write 'normal' HTML
  * forms and also to write (but not read) multipart data (e.g. file uploads).
@@ -92,6 +94,8 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 
 	private Charset charset = Charset.forName("UTF-8");
 
+	private Charset multipartCharset;
+
 	private List<MediaType> supportedMediaTypes = new ArrayList<MediaType>();
 
 	private List<HttpMessageConverter<?>> partConverters = new ArrayList<HttpMessageConverter<?>>();
@@ -116,6 +120,18 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 	 */
 	public void setCharset(Charset charset) {
 		this.charset = charset;
+	}
+
+	/**
+	 * Set the character set to use when writing multipart data to encode file
+	 * names. Encoding is based on the encoded-word syntax defined in RFC 2047
+	 * and relies on the MimeUtility class from "javax.mail-api".
+	 * <p>If not set file names will be encoded as US-ASCII.
+	 * @param multipartCharset the charset to use
+	 * @see <a href="http://en.wikipedia.org/wiki/MIME#Encoded-Word">Encoded-Word</a>
+	 */
+	public void setMultipartCharset(Charset multipartCharset) {
+		this.multipartCharset = multipartCharset;
 	}
 
 	/**
@@ -374,7 +390,17 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 	protected String getFilename(Object part) {
 		if (part instanceof Resource) {
 			Resource resource = (Resource) part;
-			return resource.getFilename();
+			String filename = resource.getFilename();
+			if (multipartCharset != null) {
+				try {
+					filename = MimeUtility.encodeText(filename, multipartCharset.name(), null);
+				}
+				catch (UnsupportedEncodingException e) {
+					// should not happen
+					throw new IllegalStateException(e);
+				}
+			}
+			return filename;
 		}
 		else {
 			return null;

@@ -116,6 +116,17 @@ public class FormHttpMessageConverterTests {
 
 		Resource logo = new ClassPathResource("/org/springframework/http/converter/logo.jpg");
 		parts.add("logo", logo);
+
+		// SPR-12108
+
+		Resource utf8 = new ClassPathResource("/org/springframework/http/converter/logo.jpg") {
+			@Override
+			public String getFilename() {
+				return "Hall\u00F6le.jpg";
+			}
+		};
+		parts.add("utf8", utf8);
+
 		Source xml = new StreamSource(new StringReader("<root><child/></root>"));
 		HttpHeaders entityHeaders = new HttpHeaders();
 		entityHeaders.setContentType(MediaType.TEXT_XML);
@@ -123,6 +134,7 @@ public class FormHttpMessageConverterTests {
 		parts.add("xml", entity);
 
 		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
+		converter.setMultipartCharset(Charset.forName("UTF-8"));
 		converter.write(parts, MediaType.MULTIPART_FORM_DATA, outputMessage);
 
 		final MediaType contentType = outputMessage.getHeaders().getContentType();
@@ -132,7 +144,7 @@ public class FormHttpMessageConverterTests {
 		FileItemFactory fileItemFactory = new DiskFileItemFactory();
 		FileUpload fileUpload = new FileUpload(fileItemFactory);
 		List<FileItem> items = fileUpload.parseRequest(new MockHttpOutputMessageRequestContext(outputMessage));
-		assertEquals(5, items.size());
+		assertEquals(6, items.size());
 		FileItem item = items.get(0);
 		assertTrue(item.isFormField());
 		assertEquals("name 1", item.getFieldName());
@@ -156,6 +168,13 @@ public class FormHttpMessageConverterTests {
 		assertEquals(logo.getFile().length(), item.getSize());
 
 		item = items.get(4);
+		assertFalse(item.isFormField());
+		assertEquals("utf8", item.getFieldName());
+		assertEquals("Hall\u00F6le.jpg", item.getName());
+		assertEquals("image/jpeg", item.getContentType());
+		assertEquals(logo.getFile().length(), item.getSize());
+
+		item = items.get(5);
 		assertEquals("xml", item.getFieldName());
 		assertEquals("text/xml", item.getContentType());
 		verify(outputMessage.getBody(), never()).close();
