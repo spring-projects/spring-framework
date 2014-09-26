@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,6 +35,13 @@ import org.apache.commons.logging.LogFactory;
  * Default implementation of the {@link LobHandler} interface.
  * Invokes the direct accessor methods that {@code java.sql.ResultSet}
  * and {@code java.sql.PreparedStatement} offer.
+ *
+ * <p>By default, incoming streams are going to be passed to the appropriate
+ * {@code setBinary/Ascii/CharacterStream} method on the JDBC driver's
+ * {@link PreparedStatement}. If the specified content length is negative,
+ * this handler will use the JDBC 4.0 variants of the set-stream methods
+ * without a length parameter; otherwise, it will pass the specified length
+ * on to the driver.
  *
  * <p>This LobHandler should work for any JDBC driver that is JDBC compliant
  * in terms of the spec's suggestions regarding simple BLOB and CLOB handling.
@@ -262,8 +269,11 @@ public class DefaultLobHandler extends AbstractLobHandler {
 					ps.setBlob(paramIndex, (Blob) null);
 				}
 			}
-			else {
+			else if (contentLength >= 0) {
 				ps.setBinaryStream(paramIndex, binaryStream, contentLength);
+			}
+			else {
+				ps.setBinaryStream(paramIndex, binaryStream);
 			}
 			if (logger.isDebugEnabled()) {
 				logger.debug(binaryStream != null ? "Set binary stream for BLOB with length " + contentLength :
@@ -326,8 +336,11 @@ public class DefaultLobHandler extends AbstractLobHandler {
 					ps.setClob(paramIndex, (Clob) null);
 				}
 			}
-			else {
+			else if (contentLength >= 0) {
 				ps.setAsciiStream(paramIndex, asciiStream, contentLength);
+			}
+			else {
+				ps.setAsciiStream(paramIndex, asciiStream);
 			}
 			if (logger.isDebugEnabled()) {
 				logger.debug(asciiStream != null ? "Set ASCII stream for CLOB with length " + contentLength :
@@ -356,8 +369,11 @@ public class DefaultLobHandler extends AbstractLobHandler {
 					ps.setClob(paramIndex, (Clob) null);
 				}
 			}
-			else {
+			else if (contentLength >= 0) {
 				ps.setCharacterStream(paramIndex, characterStream, contentLength);
+			}
+			else {
+				ps.setCharacterStream(paramIndex, characterStream);
 			}
 			if (logger.isDebugEnabled()) {
 				logger.debug(characterStream != null ? "Set character stream for CLOB with length " + contentLength :
