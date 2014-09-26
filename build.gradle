@@ -691,6 +691,7 @@ project("spring-web") {
 		testCompile("org.apache.taglibs:taglibs-standard-jstlel:1.2.1") {
 			exclude group: "org.apache.taglibs", module: "taglibs-standard-spec"
 		}
+		testRuntime("com.sun.mail:javax.mail:1.5.2")
 	}
 
 	// pick up ContextLoader.properties in src/main
