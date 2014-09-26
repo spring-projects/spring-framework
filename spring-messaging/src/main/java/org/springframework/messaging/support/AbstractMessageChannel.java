@@ -82,10 +82,24 @@ public abstract class AbstractMessageChannel implements MessageChannel, BeanName
 	}
 
 	/**
+	 * Add a channel interceptor at the specified index.
+	 */
+	public void addInterceptor(int index, ChannelInterceptor interceptor) {
+		this.interceptors.add(index, interceptor);
+	}
+
+	/**
 	 * Return a read-only list of the configured interceptors.
 	 */
 	public List<ChannelInterceptor> getInterceptors() {
 		return Collections.unmodifiableList(this.interceptors);
+	}
+
+	/**
+	 * Remove the given interceptor.
+	 */
+	public boolean removeInterceptor(ChannelInterceptor interceptor) {
+		return this.interceptors.remove(interceptor);
 	}
 
 
