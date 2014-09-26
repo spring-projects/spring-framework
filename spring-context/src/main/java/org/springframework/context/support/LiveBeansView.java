@@ -175,8 +175,7 @@ public class LiveBeansView implements LiveBeansViewMBean, ApplicationContextAwar
 					else {
 						result.append("\"type\": null,\n");
 					}
-					String resource = StringUtils.replace(bd.getResourceDescription(), "\\", "/");
-					result.append("\"resource\": \"").append(resource).append("\",\n");
+					result.append("\"resource\": \"").append(getEscapedResourceDescription(bd)).append("\",\n");
 					result.append("\"dependencies\": [");
 					String[] dependencies = bf.getDependenciesForBean(beanName);
 					if (dependencies.length > 0) {
@@ -201,7 +200,7 @@ public class LiveBeansView implements LiveBeansViewMBean, ApplicationContextAwar
 	}
 
 	/**
-	 * Determine whether the specified bean  is eligible for inclusion in the
+	 * Determine whether the specified bean is eligible for inclusion in the
 	 * LiveBeansView JSON snapshot.
 	 * @param beanName the name of the bean
 	 * @param bd the corresponding bean definition
@@ -211,6 +210,30 @@ public class LiveBeansView implements LiveBeansViewMBean, ApplicationContextAwar
 	protected boolean isBeanEligible(String beanName, BeanDefinition bd, ConfigurableBeanFactory bf) {
 		return (bd.getRole() != BeanDefinition.ROLE_INFRASTRUCTURE &&
 				(!bd.isLazyInit() || bf.containsSingleton(beanName)));
+	}
+
+	/**
+	 * Determine a resource description for the given bean definition and
+	 * apply basic JSON escaping (backslashes, double quotes) to it.
+	 * @param bd the bean definition to build the resource description for
+	 * @return the JSON-escaped resource description
+	 */
+	protected String getEscapedResourceDescription(BeanDefinition bd) {
+		String resourceDescription = bd.getResourceDescription();
+		StringBuilder result = new StringBuilder(resourceDescription.length() + 16);
+		for (int i = 0; i < resourceDescription.length(); i++) {
+			char character = resourceDescription.charAt(i);
+			if (character == '\\') {
+				result.append('/');
+			}
+			else if (character == '"') {
+				result.append("\\").append('"');
+			}
+			else {
+				result.append(character);
+			}
+		}
+		return result.toString();
 	}
 
 }
