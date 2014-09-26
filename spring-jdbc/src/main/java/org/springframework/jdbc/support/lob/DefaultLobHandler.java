@@ -255,7 +255,12 @@ public class DefaultLobHandler extends AbstractLobHandler {
 
 			if (streamAsLob) {
 				if (binaryStream != null) {
-					ps.setBlob(paramIndex, binaryStream, contentLength);
+					if (contentLength >= 0) {
+						ps.setBlob(paramIndex, binaryStream, contentLength);
+					}
+					else {
+						ps.setBlob(paramIndex, binaryStream);
+					}
 				}
 				else {
 					ps.setBlob(paramIndex, (Blob) null);
@@ -318,7 +323,13 @@ public class DefaultLobHandler extends AbstractLobHandler {
 			if (streamAsLob) {
 				if (asciiStream != null) {
 					try {
-						ps.setClob(paramIndex, new InputStreamReader(asciiStream, "US-ASCII"), contentLength);
+						Reader reader = new InputStreamReader(asciiStream, "US-ASCII");
+						if (contentLength >= 0) {
+							ps.setClob(paramIndex, reader, contentLength);
+						}
+						else {
+							ps.setClob(paramIndex, reader);
+						}
 					}
 					catch (UnsupportedEncodingException ex) {
 						throw new SQLException("US-ASCII encoding not supported: " + ex);
@@ -355,7 +366,12 @@ public class DefaultLobHandler extends AbstractLobHandler {
 
 			if (streamAsLob) {
 				if (characterStream != null) {
-					ps.setClob(paramIndex, characterStream, contentLength);
+					if (contentLength >= 0) {
+						ps.setClob(paramIndex, characterStream, contentLength);
+					}
+					else {
+						ps.setClob(paramIndex, characterStream);
+					}
 				}
 				else {
 					ps.setClob(paramIndex, (Clob) null);
