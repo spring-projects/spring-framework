@@ -552,9 +552,8 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 					clearConnection();
 				}
 				catch (Throwable ex2) {
-					if (logger.isErrorEnabled()) {
-						logger.error("Failure while cleaning up state for TCP connection in session " +
-								this.sessionId, ex2);
+					if (logger.isDebugEnabled()) {
+						logger.debug("Failure while clearing TCP connection state in session " + this.sessionId, ex2);
 					}
 				}
 			}
@@ -771,7 +770,14 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 		 */
 		private void afterDisconnectSent(StompHeaderAccessor accessor) {
 			if (accessor.getReceipt() == null) {
-				clearConnection();
+				try {
+					clearConnection();
+				}
+				catch (Throwable ex) {
+					if (logger.isDebugEnabled()) {
+						logger.debug("Failure while clearing TCP connection state in session " + this.sessionId, ex);
+					}
+				}
 			}
 		}
 
