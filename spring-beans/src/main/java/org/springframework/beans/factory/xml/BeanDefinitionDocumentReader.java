@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,7 +41,9 @@ public interface BeanDefinitionDocumentReader {
 	 * Set the Environment to use when reading bean definitions.
 	 * <p>Used for evaluating profile information to determine whether a
 	 * {@code <beans/>} document/element should be included or ignored.
+	 * @deprecated in favor of Environment access via XmlReaderContext
 	 */
+	@Deprecated
 	void setEnvironment(Environment environment);
 
 	/**

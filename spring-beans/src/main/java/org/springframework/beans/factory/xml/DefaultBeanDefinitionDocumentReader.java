@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,7 +35,6 @@ import org.springframework.beans.factory.support.BeanDefinitionReaderUtils;
 import org.springframework.core.env.Environment;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.ResourcePatternUtils;
-import org.springframework.util.Assert;
 import org.springframework.util.ResourceUtils;
 import org.springframework.util.StringUtils;
 
@@ -84,20 +83,14 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
 	private BeanDefinitionParserDelegate delegate;
 
 
-	/**
-	 * {@inheritDoc}
-	 * <p>Default value is {@code null}; property is required for parsing any
-	 * {@code <beans/>} element with a {@code profile} attribute present.
-	 * @see #doRegisterBeanDefinitions
-	 */
+	@Deprecated
 	@Override
 	public void setEnvironment(Environment environment) {
 		this.environment = environment;
 	}
 
 	/**
-	 * {@inheritDoc}
-	 * <p>This implementation parses bean definitions according to the "spring-beans" XSD
+	 * This implementation parses bean definitions according to the "spring-beans" XSD
 	 * (or DTD, historically).
 	 * <p>Opens a DOM Document; then initializes the default settings
 	 * specified at the {@code <beans/>} level; then parses the contained bean definitions.
@@ -110,20 +103,35 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
 		doRegisterBeanDefinitions(root);
 	}
 
+	/**
+	 * Return the descriptor for the XML resource that this parser works on.
+	 */
+	protected final XmlReaderContext getReaderContext() {
+		return this.readerContext;
+	}
+
+	/**
+	 * Invoke the {@link org.springframework.beans.factory.parsing.SourceExtractor} to pull the
+	 * source metadata from the supplied {@link Element}.
+	 */
+	protected Object extractSource(Element ele) {
+		return getReaderContext().extractSource(ele);
+	}
+
+	private Environment getEnvironment() {
+		return (this.environment != null ? this.environment : getReaderContext().getReader().getEnvironment());
+	}
+
 
 	/**
 	 * Register each bean definition within the given root {@code <beans/>} element.
-	 * @throws IllegalStateException if {@code <beans profile="..."} attribute is present
-	 * and Environment property has not been set
-	 * @see #setEnvironment
 	 */
 	protected void doRegisterBeanDefinitions(Element root) {
 		String profileSpec = root.getAttribute(PROFILE_ATTRIBUTE);
 		if (StringUtils.hasText(profileSpec)) {
-			Assert.state(this.environment != null, "Environment must be set for evaluating profiles");
 			String[] specifiedProfiles = StringUtils.tokenizeToStringArray(
 					profileSpec, BeanDefinitionParserDelegate.MULTI_VALUE_ATTRIBUTE_DELIMITERS);
-			if (!this.environment.acceptsProfiles(specifiedProfiles)) {
+			if (!getEnvironment().acceptsProfiles(specifiedProfiles)) {
 				return;
 			}
 		}
@@ -147,26 +155,10 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
 	protected BeanDefinitionParserDelegate createDelegate(
 			XmlReaderContext readerContext, Element root, BeanDefinitionParserDelegate parentDelegate) {
 
-		BeanDefinitionParserDelegate delegate = new BeanDefinitionParserDelegate(readerContext, this.environment);
+		BeanDefinitionParserDelegate delegate = new BeanDefinitionParserDelegate(readerContext, getEnvironment());
 		delegate.initDefaults(root, parentDelegate);
 		return delegate;
 	}
-
-	/**
-	 * Return the descriptor for the XML resource that this parser works on.
-	 */
-	protected final XmlReaderContext getReaderContext() {
-		return this.readerContext;
-	}
-
-	/**
-	 * Invoke the {@link org.springframework.beans.factory.parsing.SourceExtractor} to pull the
-	 * source metadata from the supplied {@link Element}.
-	 */
-	protected Object extractSource(Element ele) {
-		return this.readerContext.extractSource(ele);
-	}
-
 
 	/**
 	 * Parse the elements at the root level in the document:
@@ -222,7 +214,7 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
 		}
 
 		// Resolve system properties: e.g. "${user.dir}"
-		location = environment.resolveRequiredPlaceholders(location);
+		location = getEnvironment().resolveRequiredPlaceholders(location);
 
 		Set<Resource> actualResources = new LinkedHashSet<Resource>(4);
 
