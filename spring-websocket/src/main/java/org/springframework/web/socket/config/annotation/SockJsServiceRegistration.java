@@ -81,11 +81,9 @@ public class SockJsServiceRegistration {
 	 * iframe so that code in the iframe can run from  a domain local to the SockJS
 	 * server. Since the iframe needs to load the SockJS javascript client library,
 	 * this property allows specifying where to load it from.
-	 *
 	 * <p>By default this is set to point to
 	 * "https://cdn.jsdelivr.net/sockjs/0.3.4/sockjs.min.js". However it can
 	 * also be set to point to a URL served by the application.
-	 *
 	 * <p>Note that it's possible to specify a relative URL in which case the URL
 	 * must be relative to the iframe URL. For example assuming a SockJS endpoint
 	 * mapped to "/sockjs", and resulting iframe URL "/sockjs/iframe.html", then the

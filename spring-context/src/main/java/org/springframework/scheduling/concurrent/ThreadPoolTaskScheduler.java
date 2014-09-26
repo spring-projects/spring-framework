@@ -58,14 +58,14 @@ import org.springframework.util.concurrent.ListenableFutureTask;
 public class ThreadPoolTaskScheduler extends ExecutorConfigurationSupport
 		implements AsyncListenableTaskExecutor, SchedulingTaskExecutor, TaskScheduler {
 
-	// ScheduledThreadPoolExecutor.setRemoveOnCancelPolicy(boolean) only available on JDK 1.7+
+	// ScheduledThreadPoolExecutor.setRemoveOnCancelPolicy(boolean) only available on JDK 7+
 	private static final boolean setRemoveOnCancelPolicyAvailable =
 			ClassUtils.hasMethod(ScheduledThreadPoolExecutor.class, "setRemoveOnCancelPolicy", boolean.class);
 
 
 	private volatile int poolSize = 1;
 
-	private volatile boolean removeOnCancelPolicy;
+	private volatile boolean removeOnCancelPolicy = false;
 
 	private volatile ScheduledExecutorService scheduledExecutor;
 
@@ -86,8 +86,9 @@ public class ThreadPoolTaskScheduler extends ExecutorConfigurationSupport
 	}
 
 	/**
-	 * Set the same property on ScheduledExecutorService (JDK 1.7+).
-	 * There is no default. If not set, the executor property is not set.
+	 * Set the remove-on-cancel mode on {@link ScheduledThreadPoolExecutor} (JDK 7+).
+	 * <p>Default is {@code false}. If set to {@code true}, the target executor will be
+	 * switched into remove-on-cancel mode (if possible, with a soft fallback otherwise).
 	 * <p><b>This setting can be modified at runtime, for example through JMX.</b>
 	 */
 	@UsesJava7
@@ -183,14 +184,17 @@ public class ThreadPoolTaskScheduler extends ExecutorConfigurationSupport
 	}
 
 	/**
-	 * Return the current setting of removeOnCancelPolicy.
-	 * <p>Requires an underlying {@link ScheduledThreadPoolExecutor} and JDK 1.7+.
+	 * Return the current setting for the remove-on-cancel mode.
+	 * <p>Requires an underlying {@link ScheduledThreadPoolExecutor}.
 	 */
 	@UsesJava7
 	public boolean isRemoveOnCancelPolicy() {
+		if (!setRemoveOnCancelPolicyAvailable) {
+			return false;
+		}
 		if (this.scheduledExecutor == null) {
 			// Not initialized yet: return our setting for the time being.
-			return (setRemoveOnCancelPolicyAvailable && this.removeOnCancelPolicy);
+			return this.removeOnCancelPolicy;
 		}
 		return getScheduledThreadPoolExecutor().getRemoveOnCancelPolicy();
 	}
