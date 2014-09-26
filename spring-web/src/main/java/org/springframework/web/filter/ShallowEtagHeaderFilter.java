@@ -96,9 +96,7 @@ public class ShallowEtagHeaderFilter extends OncePerRequestFilter {
 		byte[] body = responseWrapper.getContentAsByteArray();
 
 		if (rawResponse.isCommitted()) {
-			if (body.length > 0) {
-				StreamUtils.copy(body, rawResponse.getOutputStream());
-			}
+			responseWrapper.copyBodyToResponse();
 		}
 		else if (isEligibleForEtag(request, responseWrapper, statusCode, body)) {
 			String responseETag = generateETagHeaderValue(body);
@@ -115,20 +113,14 @@ public class ShallowEtagHeaderFilter extends OncePerRequestFilter {
 					logger.trace("ETag [" + responseETag + "] not equal to If-None-Match [" + requestETag +
 							"], sending normal response");
 				}
-				if (body.length > 0) {
-					rawResponse.setContentLength(body.length);
-					StreamUtils.copy(body, rawResponse.getOutputStream());
-				}
+				responseWrapper.copyBodyToResponse();
 			}
 		}
 		else {
 			if (logger.isTraceEnabled()) {
 				logger.trace("Response with status code [" + statusCode + "] not eligible for ETag");
 			}
-			if (body.length > 0) {
-				rawResponse.setContentLength(body.length);
-				StreamUtils.copy(body, rawResponse.getOutputStream());
-			}
+			responseWrapper.copyBodyToResponse();
 		}
 	}
 
