@@ -32,9 +32,9 @@ import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.SubscribableChannel;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessageType;
-import org.springframework.messaging.support.AbstractMessageChannel;
 import org.springframework.messaging.support.ChannelInterceptor;
 import org.springframework.messaging.support.ChannelInterceptorAdapter;
+import org.springframework.messaging.support.InterceptableChannel;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 
@@ -172,8 +172,8 @@ public abstract class AbstractBrokerMessageHandler
 			}
 			this.clientInboundChannel.subscribe(this);
 			this.brokerChannel.subscribe(this);
-			if (this.clientInboundChannel instanceof AbstractMessageChannel) {
-				((AbstractMessageChannel) this.clientInboundChannel).addInterceptor(0, this.unsentDisconnectInterceptor);
+			if (this.clientInboundChannel instanceof InterceptableChannel) {
+				((InterceptableChannel) this.clientInboundChannel).addInterceptor(0, this.unsentDisconnectInterceptor);
 			}
 			startInternal();
 			this.running = true;
@@ -195,8 +195,8 @@ public abstract class AbstractBrokerMessageHandler
 			stopInternal();
 			this.clientInboundChannel.unsubscribe(this);
 			this.brokerChannel.unsubscribe(this);
-			if (this.clientInboundChannel instanceof AbstractMessageChannel) {
-				((AbstractMessageChannel) this.clientInboundChannel).removeInterceptor(this.unsentDisconnectInterceptor);
+			if (this.clientInboundChannel instanceof InterceptableChannel) {
+				((InterceptableChannel) this.clientInboundChannel).removeInterceptor(this.unsentDisconnectInterceptor);
 			}
 			this.running = false;
 			if (logger.isDebugEnabled()) {
