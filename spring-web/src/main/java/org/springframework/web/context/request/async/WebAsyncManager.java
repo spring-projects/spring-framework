@@ -344,11 +344,11 @@ public final class WebAsyncManager {
 			logger.error("Could not complete async processing due to timeout or network error");
 			return;
 		}
-
-		logger.debug("Concurrent result value [" + concurrentResult + "]");
-		logger.debug("Dispatching request to resume processing");
-
-		asyncWebRequest.dispatch();
+        if (logger.isDebugEnabled()) {
+            logger.debug("Concurrent result value [" + concurrentResult + "]");
+            logger.debug("Dispatching request to resume processing");
+        }
+        asyncWebRequest.dispatch();
 	}
 
 	/**
