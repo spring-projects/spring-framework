@@ -26,6 +26,8 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.Bean;
 import org.springframework.messaging.Message;
+import org.springframework.messaging.MessageChannel;
+import org.springframework.messaging.SubscribableChannel;
 import org.springframework.messaging.converter.*;
 import org.springframework.messaging.handler.invocation.HandlerMethodArgumentResolver;
 import org.springframework.messaging.handler.invocation.HandlerMethodReturnValueHandler;
@@ -239,13 +241,13 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 	@Bean
 	public AbstractBrokerMessageHandler simpleBrokerMessageHandler() {
 		SimpleBrokerMessageHandler handler = getBrokerRegistry().getSimpleBroker(brokerChannel());
-		return (handler != null) ? handler : noopBroker;
+		return (handler != null) ? handler : new NoOpBrokerMessageHandler();
 	}
 
 	@Bean
 	public AbstractBrokerMessageHandler stompBrokerRelayMessageHandler() {
 		AbstractBrokerMessageHandler handler = getBrokerRegistry().getStompBrokerRelay(brokerChannel());
-		return (handler != null) ? handler : noopBroker;
+		return (handler != null) ? handler : new NoOpBrokerMessageHandler();
 	}
 
 	@Bean
@@ -373,7 +375,11 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 	}
 
 
-	private static final AbstractBrokerMessageHandler noopBroker = new AbstractBrokerMessageHandler() {
+	private class NoOpBrokerMessageHandler extends AbstractBrokerMessageHandler {
+
+		public NoOpBrokerMessageHandler() {
+			super(clientInboundChannel(), clientOutboundChannel(), brokerChannel());
+		}
 
 		@Override
 		public void start() {

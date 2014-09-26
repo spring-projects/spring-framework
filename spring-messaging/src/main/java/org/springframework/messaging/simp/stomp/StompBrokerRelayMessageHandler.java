@@ -93,12 +93,6 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 	}
 
 
-	private final SubscribableChannel clientInboundChannel;
-
-	private final MessageChannel clientOutboundChannel;
-
-	private final SubscribableChannel brokerChannel;
-
 	private String relayHost = "127.0.0.1";
 
 	private int relayPort = 61613;
@@ -130,22 +124,16 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 	/**
 	 * Create a StompBrokerRelayMessageHandler instance with the given message channels
 	 * and destination prefixes.
-	 * @param clientInChannel the channel for receiving messages from clients (e.g. WebSocket clients)
-	 * @param clientOutChannel the channel for sending messages to clients (e.g. WebSocket clients)
+	 * @param inboundChannel the channel for receiving messages from clients (e.g. WebSocket clients)
+	 * @param outboundChannel the channel for sending messages to clients (e.g. WebSocket clients)
 	 * @param brokerChannel the channel for the application to send messages to the broker
 	 * @param destinationPrefixes the broker supported destination prefixes; destinations
 	 * that do not match the given prefix are ignored.
 	 */
-	public StompBrokerRelayMessageHandler(SubscribableChannel clientInChannel, MessageChannel clientOutChannel,
+	public StompBrokerRelayMessageHandler(SubscribableChannel inboundChannel, MessageChannel outboundChannel,
 			SubscribableChannel brokerChannel, Collection<String> destinationPrefixes) {
 
-		super(destinationPrefixes);
-		Assert.notNull(clientInChannel, "'clientInChannel' must not be null");
-		Assert.notNull(clientOutChannel, "'clientOutChannel' must not be null");
-		Assert.notNull(brokerChannel, "'brokerChannel' must not be null");
-		this.clientInboundChannel = clientInChannel;
-		this.clientOutboundChannel = clientOutChannel;
-		this.brokerChannel = brokerChannel;
+		super(inboundChannel, outboundChannel, brokerChannel, destinationPrefixes);
 	}
 
 
@@ -362,9 +350,6 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 
 	@Override
 	protected void startInternal() {
-		this.clientInboundChannel.subscribe(this);
-		this.brokerChannel.subscribe(this);
-
 		if (this.tcpClient == null) {
 			StompDecoder decoder = new StompDecoder();
 			decoder.setHeaderInitializer(getHeaderInitializer());
@@ -397,10 +382,6 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 	@Override
 	protected void stopInternal() {
 		publishBrokerUnavailableEvent();
-
-		this.clientInboundChannel.unsubscribe(this);
-		this.brokerChannel.unsubscribe(this);
-
 		try {
 			this.tcpClient.shutdown().get(5000, TimeUnit.MILLISECONDS);
 		}
@@ -594,7 +575,7 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 
 		protected void sendMessageToClient(Message<?> message) {
 			if (this.isRemoteClientSession) {
-				StompBrokerRelayMessageHandler.this.clientOutboundChannel.send(message);
+				StompBrokerRelayMessageHandler.this.getClientOutboundChannel().send(message);
 			}
 		}
 

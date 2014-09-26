@@ -22,6 +22,8 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.messaging.Message;
+import org.springframework.messaging.MessageChannel;
+import org.springframework.messaging.SubscribableChannel;
 import org.springframework.messaging.support.GenericMessage;
 
 import java.util.ArrayList;
@@ -32,6 +34,7 @@ import java.util.List;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
 
 /**
  * Unit tests for {@link org.springframework.messaging.simp.broker.AbstractBrokerMessageHandler}.
@@ -133,6 +136,7 @@ public class BrokerMessageHandlerTests {
 
 
 		private TestBrokerMesageHandler() {
+			super(mock(SubscribableChannel.class), mock(MessageChannel.class), mock(SubscribableChannel.class));
 			setApplicationEventPublisher(this);
 		}
 

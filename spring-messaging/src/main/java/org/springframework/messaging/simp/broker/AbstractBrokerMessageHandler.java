@@ -27,7 +27,10 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.context.SmartLifecycle;
 import org.springframework.messaging.Message;
+import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageHandler;
+import org.springframework.messaging.SubscribableChannel;
+import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 
 
@@ -43,6 +46,12 @@ public abstract class AbstractBrokerMessageHandler
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
+
+	private final SubscribableChannel clientInboundChannel;
+
+	private final MessageChannel clientOutboundChannel;
+
+	private final SubscribableChannel brokerChannel;
 
 	private final Collection<String> destinationPrefixes;
 
@@ -61,15 +70,52 @@ public abstract class AbstractBrokerMessageHandler
 	private final Object lifecycleMonitor = new Object();
 
 
-	public AbstractBrokerMessageHandler() {
-		this(Collections.<String>emptyList());
+	/**
+	 * Constructor with no destination prefixes (matches all destinations).
+	 * @param inboundChannel the channel for receiving messages from clients (e.g. WebSocket clients)
+	 * @param outboundChannel the channel for sending messages to clients (e.g. WebSocket clients)
+	 * @param brokerChannel the channel for the application to send messages to the broker
+	 */
+	public AbstractBrokerMessageHandler(SubscribableChannel inboundChannel, MessageChannel outboundChannel,
+			SubscribableChannel brokerChannel) {
+
+		this(inboundChannel, outboundChannel, brokerChannel, Collections.<String>emptyList());
 	}
 
-	public AbstractBrokerMessageHandler(Collection<String> destinationPrefixes) {
+	/**
+	 * Constructor with destination prefixes to match to destinations of messages.
+	 * @param inboundChannel the channel for receiving messages from clients (e.g. WebSocket clients)
+	 * @param outboundChannel the channel for sending messages to clients (e.g. WebSocket clients)
+	 * @param brokerChannel the channel for the application to send messages to the broker
+	 * @param destinationPrefixes prefixes to use to filter out messages
+	 */
+	public AbstractBrokerMessageHandler(SubscribableChannel inboundChannel, MessageChannel outboundChannel,
+			SubscribableChannel brokerChannel, Collection<String> destinationPrefixes) {
+
+		Assert.notNull(inboundChannel, "'inboundChannel' must not be null");
+		Assert.notNull(outboundChannel, "'outboundChannel' must not be null");
+		Assert.notNull(brokerChannel, "'brokerChannel' must not be null");
+
+		this.clientInboundChannel = inboundChannel;
+		this.clientOutboundChannel = outboundChannel;
+		this.brokerChannel = brokerChannel;
+
 		destinationPrefixes = (destinationPrefixes != null) ? destinationPrefixes : Collections.<String>emptyList();
 		this.destinationPrefixes = Collections.unmodifiableCollection(destinationPrefixes);
 	}
 
+
+	public SubscribableChannel getClientInboundChannel() {
+		return this.clientInboundChannel;
+	}
+
+	public MessageChannel getClientOutboundChannel() {
+		return this.clientOutboundChannel;
+	}
+
+	public SubscribableChannel getBrokerChannel() {
+		return this.brokerChannel;
+	}
 
 	public Collection<String> getDestinationPrefixes() {
 		return this.destinationPrefixes;
@@ -117,6 +163,8 @@ public abstract class AbstractBrokerMessageHandler
 			if (logger.isInfoEnabled()) {
 				logger.info("Starting...");
 			}
+			this.clientInboundChannel.subscribe(this);
+			this.brokerChannel.subscribe(this);
 			startInternal();
 			this.running = true;
 			if (logger.isInfoEnabled()) {
@@ -135,6 +183,8 @@ public abstract class AbstractBrokerMessageHandler
 				logger.info("Stopping...");
 			}
 			stopInternal();
+			this.clientInboundChannel.unsubscribe(this);
+			this.brokerChannel.unsubscribe(this);
 			this.running = false;
 			if (logger.isDebugEnabled()) {
 				logger.info("Stopped.");
