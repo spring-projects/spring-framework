@@ -83,7 +83,7 @@ public class SockJsServiceRegistration {
 	 * this property allows specifying where to load it from.
 	 *
 	 * <p>By default this is set to point to
-	 * "https://d1fxtkz8shb9d2.cloudfront.net/sockjs-0.3.4.min.js". However it can
+	 * "https://cdn.jsdelivr.net/sockjs/0.3.4/sockjs.min.js". However it can
 	 * also be set to point to a URL served by the application.
 	 *
 	 * <p>Note that it's possible to specify a relative URL in which case the URL
