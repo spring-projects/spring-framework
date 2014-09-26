@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -73,16 +73,20 @@ public class SockJsServiceRegistration {
 	}
 
 	/**
-	 * Transports which don't support cross-domain communication natively (e.g.
-	 * "eventsource", "htmlfile") rely on serving a simple page (using the
-	 * "foreign" domain) from an invisible iframe. Code run from this iframe
-	 * doesn't need to worry about cross-domain issues since it is running from
-	 * a domain local to the SockJS server. The iframe does need to load the
-	 * SockJS javascript client library and this option allows configuring its url.
-	 * See the reference documentation for more details on this.
-	 *
+	 * Transports with no native cross-domain communication (e.g. "eventsource",
+	 * "htmlfile") must get a simple page from the "foreign" domain in an invisible
+	 * iframe so that code in the iframe can run from  a domain local to the SockJS
+	 * server. Since the iframe needs to load the SockJS javascript client library,
+	 * this property allows specifying where to load it from.
 	 * <p>By default this is set to point to
-	 * "https://d1fxtkz8shb9d2.cloudfront.net/sockjs-0.3.4.min.js".
+	 * "https://cdn.jsdelivr.net/sockjs/0.3.4/sockjs.min.js". However it can
+	 * also be set to point to a URL served by the application.
+	 * <p>Note that it's possible to specify a relative URL in which case the URL
+	 * must be relative to the iframe URL. For example assuming a SockJS endpoint
+	 * mapped to "/sockjs", and resulting iframe URL "/sockjs/iframe.html", then the
+	 * the relative URL must start with "../../" to traverse up to the location
+	 * above the SockJS mapping. In case of a prefix-based Servlet mapping one more
+	 * traversal may be needed.
 	 */
 	public SockJsServiceRegistration setClientLibraryUrl(String clientLibraryUrl) {
 		this.clientLibraryUrl = clientLibraryUrl;

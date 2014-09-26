@@ -17,9 +17,12 @@
 package org.springframework.web.socket.sockjs.support;
 
 import java.io.IOException;
+import javax.servlet.ServletOutputStream;
+import javax.servlet.http.HttpServletResponse;
 
 import org.junit.Before;
 import org.junit.Test;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
@@ -32,9 +35,6 @@ import org.springframework.web.socket.sockjs.SockJsException;
 
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
-
-import javax.servlet.ServletOutputStream;
-import javax.servlet.http.HttpServletResponse;
 
 /**
  * Test fixture for {@link AbstractSockJsService}.
@@ -55,9 +55,9 @@ public class SockJsServiceTests extends AbstractHttpRequestTests {
 		this.service = new TestSockJsService(new ThreadPoolTaskScheduler());
 	}
 
+
 	@Test
 	public void validateRequest() throws Exception {
-
 		this.service.setWebSocketEnabled(false);
 		resetResponseAndHandleRequest("GET", "/echo/server/session/websocket", HttpStatus.NOT_FOUND);
 
@@ -76,7 +76,6 @@ public class SockJsServiceTests extends AbstractHttpRequestTests {
 
 	@Test
 	public void handleInfoGet() throws Exception {
-
 		resetResponseAndHandleRequest("GET", "/echo/info", HttpStatus.OK);
 
 		assertEquals("application/json;charset=UTF-8", this.servletResponse.getContentType());
@@ -98,9 +97,7 @@ public class SockJsServiceTests extends AbstractHttpRequestTests {
 				body.substring(body.indexOf(',')));
 	}
 
-	// SPR-11443
-
-	@Test
+	@Test  // SPR-11443
 	public void handleInfoGetCorsFilter() throws Exception {
 
 		// Simulate scenario where Filter would have already set CORS headers
@@ -111,9 +108,7 @@ public class SockJsServiceTests extends AbstractHttpRequestTests {
 		assertEquals("foobar:123", this.servletResponse.getHeader("Access-Control-Allow-Origin"));
 	}
 
-	// SPR-11919
-
-	@Test
+	@Test  // SPR-11919
 	public void handleInfoGetWildflyNPE() throws Exception {
 		HttpServletResponse mockResponse = mock(HttpServletResponse.class);
 		ServletOutputStream ous = mock(ServletOutputStream.class);
@@ -128,9 +123,7 @@ public class SockJsServiceTests extends AbstractHttpRequestTests {
 
 	@Test
 	public void handleInfoOptions() throws Exception {
-
 		this.servletRequest.addHeader("Access-Control-Request-Headers", "Last-Modified");
-
 		resetResponseAndHandleRequest("OPTIONS", "/echo/info", HttpStatus.NO_CONTENT);
 		this.response.flush();
 
@@ -143,27 +136,23 @@ public class SockJsServiceTests extends AbstractHttpRequestTests {
 
 	@Test
 	public void handleIframeRequest() throws Exception {
-
 		resetResponseAndHandleRequest("GET", "/echo/iframe.html", HttpStatus.OK);
 
 		assertEquals("text/html;charset=UTF-8", this.servletResponse.getContentType());
 		assertTrue(this.servletResponse.getContentAsString().startsWith("<!DOCTYPE html>\n"));
-		assertEquals(496, this.servletResponse.getContentLength());
+		assertEquals(490, this.servletResponse.getContentLength());
 		assertEquals("public, max-age=31536000", this.response.getHeaders().getCacheControl());
-		assertEquals("\"0da1ed070012f304e47b83c81c48ad620\"", this.response.getHeaders().getETag());
+		assertEquals("\"06b486b3208b085d9e3220f456a6caca4\"", this.response.getHeaders().getETag());
 	}
 
 	@Test
 	public void handleIframeRequestNotModified() throws Exception {
-
-		this.servletRequest.addHeader("If-None-Match", "\"0da1ed070012f304e47b83c81c48ad620\"");
-
+		this.servletRequest.addHeader("If-None-Match", "\"06b486b3208b085d9e3220f456a6caca4\"");
 		resetResponseAndHandleRequest("GET", "/echo/iframe.html", HttpStatus.NOT_MODIFIED);
 	}
 
 	@Test
 	public void handleRawWebSocketRequest() throws Exception {
-
 		resetResponseAndHandleRequest("GET", "/echo", HttpStatus.OK);
 		assertEquals("Welcome to SockJS!\n", this.servletResponse.getContentAsString());
 
@@ -174,12 +163,12 @@ public class SockJsServiceTests extends AbstractHttpRequestTests {
 
 	@Test
 	public void handleEmptyContentType() throws Exception {
-
-		servletRequest.setContentType("");
+		this.servletRequest.setContentType("");
 		resetResponseAndHandleRequest("GET", "/echo/info", HttpStatus.OK);
 
 		assertEquals("Invalid/empty content should have been ignored", 200, this.servletResponse.getStatus());
 	}
+
 
 	private void resetResponseAndHandleRequest(String httpMethod, String uri, HttpStatus httpStatus) throws IOException {
 		resetResponse();
@@ -211,14 +200,12 @@ public class SockJsServiceTests extends AbstractHttpRequestTests {
 		@Override
 		protected void handleRawWebSocketRequest(ServerHttpRequest req, ServerHttpResponse res,
 				WebSocketHandler handler) throws IOException {
-
 			this.handler = handler;
 		}
 
 		@Override
 		protected void handleTransportRequest(ServerHttpRequest req, ServerHttpResponse res, WebSocketHandler handler,
 				String sessionId, String transport) throws SockJsException {
-
 			this.sessionId = sessionId;
 			this.transport = transport;
 			this.handler = handler;

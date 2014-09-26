@@ -68,7 +68,7 @@ public abstract class AbstractSockJsService implements SockJsService {
 
 	private String name = "SockJSService@" + ObjectUtils.getIdentityHexString(this);
 
-	private String clientLibraryUrl = "https://d1fxtkz8shb9d2.cloudfront.net/sockjs-0.3.4.min.js";
+	private String clientLibraryUrl = "https://cdn.jsdelivr.net/sockjs/0.3.4/sockjs.min.js";
 
 	private int streamBytesLimit = 128 * 1024;
 
