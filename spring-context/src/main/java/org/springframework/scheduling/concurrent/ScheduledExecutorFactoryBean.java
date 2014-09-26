@@ -27,6 +27,7 @@ import org.springframework.beans.factory.FactoryBean;
 import org.springframework.scheduling.support.DelegatingErrorHandlingRunnable;
 import org.springframework.scheduling.support.TaskUtils;
 import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
 
 /**
@@ -66,11 +67,16 @@ import org.springframework.util.ObjectUtils;
 public class ScheduledExecutorFactoryBean extends ExecutorConfigurationSupport
 		implements FactoryBean<ScheduledExecutorService> {
 
+	// ScheduledThreadPoolExecutor.setRemoveOnCancelPolicy(boolean) only available on JDK 7+
+	private static final boolean setRemoveOnCancelPolicyAvailable =
+			ClassUtils.hasMethod(ScheduledThreadPoolExecutor.class, "setRemoveOnCancelPolicy", boolean.class);
+
+
 	private int poolSize = 1;
 
-	private Boolean removeOnCancelPolicy;
-
 	private ScheduledExecutorTask[] scheduledExecutorTasks;
+
+	private boolean removeOnCancelPolicy = false;
 
 	private boolean continueScheduledExecutionAfterException = false;
 
@@ -89,14 +95,6 @@ public class ScheduledExecutorFactoryBean extends ExecutorConfigurationSupport
 	}
 
 	/**
-	 * Set the same property on ScheduledExecutorService (JDK 1.7+).
-	 * There is no default. If not set, the executor property is not set.
-	 */
-	public void setRemoveOnCancelPolicy(boolean removeOnCancelPolicy) {
-		this.removeOnCancelPolicy = removeOnCancelPolicy;
-	}
-
-	/**
 	 * Register a list of ScheduledExecutorTask objects with the ScheduledExecutorService
 	 * that this FactoryBean creates. Depending on each ScheduledExecutorTask's settings,
 	 * it will be registered via one of ScheduledExecutorService's schedule methods.
@@ -106,6 +104,15 @@ public class ScheduledExecutorFactoryBean extends ExecutorConfigurationSupport
 	 */
 	public void setScheduledExecutorTasks(ScheduledExecutorTask... scheduledExecutorTasks) {
 		this.scheduledExecutorTasks = scheduledExecutorTasks;
+	}
+
+	/**
+	 * Set the remove-on-cancel mode on {@link ScheduledThreadPoolExecutor} (JDK 7+).
+	 * <p>Default is {@code false}. If set to {@code true}, the target executor will be
+	 * switched into remove-on-cancel mode (if possible, with a soft fallback otherwise).
+	 */
+	public void setRemoveOnCancelPolicy(boolean removeOnCancelPolicy) {
+		this.removeOnCancelPolicy = removeOnCancelPolicy;
 	}
 
 	/**
@@ -141,8 +148,13 @@ public class ScheduledExecutorFactoryBean extends ExecutorConfigurationSupport
 		ScheduledExecutorService executor =
 				createExecutor(this.poolSize, threadFactory, rejectedExecutionHandler);
 
-		if (executor instanceof ScheduledThreadPoolExecutor && this.removeOnCancelPolicy != null) {
-			((ScheduledThreadPoolExecutor) executor).setRemoveOnCancelPolicy(this.removeOnCancelPolicy);
+		if (this.removeOnCancelPolicy) {
+			if (setRemoveOnCancelPolicyAvailable && executor instanceof ScheduledThreadPoolExecutor) {
+				((ScheduledThreadPoolExecutor) executor).setRemoveOnCancelPolicy(true);
+			}
+			else {
+				logger.info("Could not apply remove-on-cancel policy - not a Java 7+ ScheduledThreadPoolExecutor");
+			}
 		}
 
 		// Register specified ScheduledExecutorTasks, if necessary.
