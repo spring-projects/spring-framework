@@ -37,7 +37,7 @@ import org.springframework.util.ObjectUtils;
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public abstract class AbstractMessageChannel implements MessageChannel, BeanNameAware  {
+public abstract class AbstractMessageChannel implements MessageChannel, BeanNameAware, InterceptableChannel  {
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
@@ -66,42 +66,40 @@ public abstract class AbstractMessageChannel implements MessageChannel, BeanName
 		return this.beanName;
 	}
 
-	/**
-	 * Set the list of channel interceptors. This will clear any existing interceptors.
-	 */
+	@Override
 	public void setInterceptors(List<ChannelInterceptor> interceptors) {
 		this.interceptors.clear();
 		this.interceptors.addAll(interceptors);
 	}
 
-	/**
-	 * Add a channel interceptor to the end of the list.
-	 */
+	@Override
 	public void addInterceptor(ChannelInterceptor interceptor) {
 		this.interceptors.add(interceptor);
 	}
 
-	/**
-	 * Add a channel interceptor at the specified index.
-	 */
+	@Override
 	public void addInterceptor(int index, ChannelInterceptor interceptor) {
 		this.interceptors.add(index, interceptor);
 	}
 
 	/**
-	 * Return a read-only list of the configured interceptors.
+	 * {@inheritDoc}
+	 * <p>The returned list is read-only.
 	 */
+	@Override
 	public List<ChannelInterceptor> getInterceptors() {
 		return Collections.unmodifiableList(this.interceptors);
 	}
 
-	/**
-	 * Remove the given interceptor.
-	 */
+	@Override
 	public boolean removeInterceptor(ChannelInterceptor interceptor) {
 		return this.interceptors.remove(interceptor);
 	}
 
+	@Override
+	public ChannelInterceptor removeInterceptor(int index) {
+		return this.interceptors.remove(index);
+	}
 
 	@Override
 	public final boolean send(Message<?> message) {
