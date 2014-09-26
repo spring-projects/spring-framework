@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -1568,7 +1568,6 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 
 	@Test
 	public void restController() throws Exception {
-
 		initServletWithControllers(ThisWillActuallyRun.class);
 
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/");
@@ -3039,7 +3038,7 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 	}
 
 
-// Test cases deleted from the original SevletAnnotationControllerTests:
+// Test cases deleted from the original ServletAnnotationControllerTests:
 
 //	@Ignore("Controller interface => no method-level @RequestMapping annotation")
 //	public void standardHandleMethod() throws Exception {

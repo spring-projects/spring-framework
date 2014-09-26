@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -78,9 +78,9 @@ public class ThreadPoolTaskExecutor extends ExecutorConfigurationSupport
 
 	private int keepAliveSeconds = 60;
 
-	private boolean allowCoreThreadTimeOut = false;
-
 	private int queueCapacity = Integer.MAX_VALUE;
+
+	private boolean allowCoreThreadTimeOut = false;
 
 	private ThreadPoolExecutor threadPoolExecutor;
 
@@ -155,17 +155,6 @@ public class ThreadPoolTaskExecutor extends ExecutorConfigurationSupport
 	}
 
 	/**
-	 * Specify whether to allow core threads to time out. This enables dynamic
-	 * growing and shrinking even in combination with a non-zero queue (since
-	 * the max pool size will only grow once the queue is full).
-	 * <p>Default is "false".
-	 * @see java.util.concurrent.ThreadPoolExecutor#allowCoreThreadTimeOut(boolean)
-	 */
-	public void setAllowCoreThreadTimeOut(boolean allowCoreThreadTimeOut) {
-		this.allowCoreThreadTimeOut = allowCoreThreadTimeOut;
-	}
-
-	/**
 	 * Set the capacity for the ThreadPoolExecutor's BlockingQueue.
 	 * Default is {@code Integer.MAX_VALUE}.
 	 * <p>Any positive value will lead to a LinkedBlockingQueue instance;
@@ -175,6 +164,17 @@ public class ThreadPoolTaskExecutor extends ExecutorConfigurationSupport
 	 */
 	public void setQueueCapacity(int queueCapacity) {
 		this.queueCapacity = queueCapacity;
+	}
+
+	/**
+	 * Specify whether to allow core threads to time out. This enables dynamic
+	 * growing and shrinking even in combination with a non-zero queue (since
+	 * the max pool size will only grow once the queue is full).
+	 * <p>Default is "false".
+	 * @see java.util.concurrent.ThreadPoolExecutor#allowCoreThreadTimeOut(boolean)
+	 */
+	public void setAllowCoreThreadTimeOut(boolean allowCoreThreadTimeOut) {
+		this.allowCoreThreadTimeOut = allowCoreThreadTimeOut;
 	}
 
 

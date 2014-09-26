@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.core.MethodParameter;
 import org.springframework.util.Assert;
 import org.springframework.web.context.request.NativeWebRequest;
@@ -39,6 +40,7 @@ public class HandlerMethodReturnValueHandlerComposite implements HandlerMethodRe
 
 	private final List<HandlerMethodReturnValueHandler> returnValueHandlers =
 		new ArrayList<HandlerMethodReturnValueHandler>();
+
 
 	/**
 	 * Return a read-only list with the registered handlers, or an empty list.
@@ -58,13 +60,11 @@ public class HandlerMethodReturnValueHandlerComposite implements HandlerMethodRe
 
 	/**
 	 * Iterate over registered {@link HandlerMethodReturnValueHandler}s and invoke the one that supports it.
-	 * @exception IllegalStateException if no suitable {@link HandlerMethodReturnValueHandler} is found.
+	 * @throws IllegalStateException if no suitable {@link HandlerMethodReturnValueHandler} is found.
 	 */
 	@Override
-	public void handleReturnValue(
-			Object returnValue, MethodParameter returnType,
-			ModelAndViewContainer mavContainer, NativeWebRequest webRequest)
-			throws Exception {
+	public void handleReturnValue(Object returnValue, MethodParameter returnType,
+			ModelAndViewContainer mavContainer, NativeWebRequest webRequest) throws Exception {
 
 		HandlerMethodReturnValueHandler handler = getReturnValueHandler(returnType);
 		Assert.notNull(handler, "Unknown return value type [" + returnType.getParameterType().getName() + "]");
@@ -90,18 +90,17 @@ public class HandlerMethodReturnValueHandlerComposite implements HandlerMethodRe
 	/**
 	 * Add the given {@link HandlerMethodReturnValueHandler}.
 	 */
-	public HandlerMethodReturnValueHandlerComposite addHandler(HandlerMethodReturnValueHandler returnValuehandler) {
-		returnValueHandlers.add(returnValuehandler);
+	public HandlerMethodReturnValueHandlerComposite addHandler(HandlerMethodReturnValueHandler handler) {
+		returnValueHandlers.add(handler);
 		return this;
 	}
 
 	/**
 	 * Add the given {@link HandlerMethodReturnValueHandler}s.
 	 */
-	public HandlerMethodReturnValueHandlerComposite addHandlers(
-			List<? extends HandlerMethodReturnValueHandler> returnValueHandlers) {
-		if (returnValueHandlers != null) {
-			for (HandlerMethodReturnValueHandler handler : returnValueHandlers) {
+	public HandlerMethodReturnValueHandlerComposite addHandlers(List<? extends HandlerMethodReturnValueHandler> handlers) {
+		if (handlers != null) {
+			for (HandlerMethodReturnValueHandler handler : handlers) {
 				this.returnValueHandlers.add(handler);
 			}
 		}

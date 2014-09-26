@@ -18,7 +18,6 @@ package org.springframework.messaging.simp.config;
 
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
-
 /**
  * A registration class for customizing the properties of {@link ThreadPoolTaskExecutor}.
  *
@@ -38,13 +37,11 @@ public class TaskExecutorRegistration {
 
 	/**
 	 * Set the core pool size of the ThreadPoolExecutor.
-	 *
-	 * <p><strong>NOTE:</strong> the core pool size is effectively the max pool size
+	 * <p><strong>NOTE:</strong> The core pool size is effectively the max pool size
 	 * when an unbounded {@link #queueCapacity(int) queueCapacity} is configured
 	 * (the default). This is essentially the "Unbounded queues" strategy as explained
 	 * in {@link java.util.concurrent.ThreadPoolExecutor ThreadPoolExecutor}. When
 	 * this strategy is used, the {@link #maxPoolSize(int) maxPoolSize} is ignored.
-	 *
 	 * <p>By default this is set to twice the value of
 	 * {@link Runtime#availableProcessors()}. In an an application where tasks do not
 	 * block frequently, the number should be closer to or equal to the number of
@@ -57,13 +54,11 @@ public class TaskExecutorRegistration {
 
 	/**
 	 * Set the max pool size of the ThreadPoolExecutor.
-	 *
-	 * <p><strong>NOTE:</strong> when an unbounded
+	 * <p><strong>NOTE:</strong> When an unbounded
 	 * {@link #queueCapacity(int) queueCapacity} is configured (the default), the
 	 * max pool size is effectively ignored. See the "Unbounded queues" strategy
 	 * in {@link java.util.concurrent.ThreadPoolExecutor ThreadPoolExecutor} for
 	 * more details.
-	 *
 	 * <p>By default this is set to {@code Integer.MAX_VALUE}.
 	 */
 	public TaskExecutorRegistration maxPoolSize(int maxPoolSize) {
@@ -73,14 +68,11 @@ public class TaskExecutorRegistration {
 
 	/**
 	 * Set the queue capacity for the ThreadPoolExecutor.
-	 *
-	 * <p><strong>NOTE:</strong> when an unbounded
-	 * {@link #queueCapacity(int) queueCapacity} is configured (the default) the
-	 * core pool size is effectively the max pool size. This is essentially the
-	 * "Unbounded queues" strategy as explained in
+	 * <p><strong>NOTE:</strong> when an unbounded {@code queueCapacity} is configured
+	 * (the default), the core pool size is effectively the max pool size. This is
+	 * essentially the "Unbounded queues" strategy as explained in
 	 * {@link java.util.concurrent.ThreadPoolExecutor ThreadPoolExecutor}. When
 	 * this strategy is used, the {@link #maxPoolSize(int) maxPoolSize} is ignored.
-	 *
 	 * <p>By default this is set to {@code Integer.MAX_VALUE}.
 	 */
 	public TaskExecutorRegistration queueCapacity(int queueCapacity) {
@@ -92,8 +84,7 @@ public class TaskExecutorRegistration {
 	 * Set the time limit for which threads may remain idle before being terminated.
 	 * If there are more than the core number of threads currently in the pool,
 	 * after waiting this amount of time without processing a task, excess threads
-	 * will be terminated.  This overrides any value set in the constructor.
-	 *
+	 * will be terminated. This overrides any value set in the constructor.
 	 * <p>By default this is set to 60.
 	 */
 	public TaskExecutorRegistration keepAliveSeconds(int keepAliveSeconds) {

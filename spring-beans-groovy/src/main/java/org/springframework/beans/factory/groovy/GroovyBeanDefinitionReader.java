@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -213,7 +213,7 @@ public class GroovyBeanDefinitionReader extends AbstractBeanDefinitionReader imp
 		Binding binding = new Binding() {
 			@Override
 			public void setVariable(String name, Object value) {
-				if (currentBeanDefinition !=null) {
+				if (currentBeanDefinition != null) {
 					applyPropertyToBeanDefinition(name, value);
 				}
 				else {
@@ -410,7 +410,7 @@ public class GroovyBeanDefinitionReader extends AbstractBeanDefinitionReader imp
 			}
 			dp.apply();
 		}
-		deferredProperties.clear();
+		this.deferredProperties.clear();
 	}
 
 	/**
