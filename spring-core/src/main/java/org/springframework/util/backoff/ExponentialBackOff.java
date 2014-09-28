@@ -22,9 +22,9 @@ package org.springframework.util.backoff;
  * max interval}, it is no longer increased. Stops retrying once the
  * {@link #setMaxElapsedTime(long) max elapsed time} has been reached.
  *
- * <p>Example: The default interval is {@value #DEFAULT_INITIAL_INTERVAL}ms, default
- * multiplier is {@value #DEFAULT_MULTIPLIER} and the default max interval is
- * {@value #DEFAULT_MAX_INTERVAL}. For 10 attempts the sequence will be
+ * <p>Example: The default interval is {@value #DEFAULT_INITIAL_INTERVAL} ms,
+ * the default multiplier is {@value #DEFAULT_MULTIPLIER}, and the default max
+ * interval is {@value #DEFAULT_MAX_INTERVAL}. For 10 attempts the sequence will be
  * as follows:
  *
  * <pre>
@@ -42,8 +42,8 @@ package org.springframework.util.backoff;
  * 10             30000
  * </pre>
  *
- * Note that the default max elapsed time is {@link Long#MAX_VALUE}. Use
- * {@link #setMaxElapsedTime(long)} to limit the maximum number of time
+ * <p>Note that the default max elapsed time is {@link Long#MAX_VALUE}. Use
+ * {@link #setMaxElapsedTime(long)} to limit the maximum length of time
  * that an instance should accumulate before returning
  * {@link BackOffExecution#STOP}.
  *
@@ -93,9 +93,9 @@ public class ExponentialBackOff implements BackOff {
 	}
 
 	/**
-	 * Create an instance.
+	 * Create an instance with the supplied settings.
 	 * @param initialInterval the initial interval in milliseconds
-	 * @param multiplier the multiplier (should be equal or higher to 1)
+	 * @param multiplier the multiplier (should be greater than or equal to 1)
 	 */
 	public ExponentialBackOff(long initialInterval, double multiplier) {
 		checkMultiplier(multiplier);
@@ -118,7 +118,7 @@ public class ExponentialBackOff implements BackOff {
 	}
 
 	/**
-	 * The value to multiply the current interval with for each retry attempt.
+	 * The value to multiply the current interval by for each retry attempt.
 	 */
 	public void setMultiplier(double multiplier) {
 		checkMultiplier(multiplier);
@@ -126,7 +126,7 @@ public class ExponentialBackOff implements BackOff {
 	}
 
 	/**
-	 * Return the value to multiply the current interval with for each retry attempt.
+	 * Return the value to multiply the current interval by for each retry attempt.
 	 */
 	public double getMultiplier() {
 		return multiplier;

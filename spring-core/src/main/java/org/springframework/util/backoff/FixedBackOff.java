@@ -50,7 +50,7 @@ public class FixedBackOff implements BackOff {
 	/**
 	 * Create an instance.
 	 * @param interval the interval between two attempts
-	 * @param maxAttempts the maximal number of attempts
+	 * @param maxAttempts the maximum number of attempts
 	 */
 	public FixedBackOff(long interval, long maxAttempts) {
 		this.interval = interval;
@@ -72,14 +72,14 @@ public class FixedBackOff implements BackOff {
 	}
 
 	/**
-	 * Set the maximal number of attempts in milliseconds.
+	 * Set the maximum number of attempts in milliseconds.
 	 */
 	public void setMaxAttempts(long maxAttempts) {
 		this.maxAttempts = maxAttempts;
 	}
 
 	/**
-	 * Return the maximal number of attempts in milliseconds.
+	 * Return the maximum number of attempts in milliseconds.
 	 */
 	public long getMaxAttempts() {
 		return maxAttempts;
