@@ -276,4 +276,19 @@ public class Jackson2ObjectMapperFactoryBeanTests {
 		assertEquals(XmlMapper.class, this.factory.getObjectType());
 	}
 
+	@Test
+	public void setMixIns() {
+		Class<?> target = String.class;
+		Class<?> mixinSource = Object.class;
+		Map<Class<?>, Class<?>> mixIns = new HashMap<Class<?>, Class<?>>();
+		mixIns.put(target, mixinSource);
+
+		this.factory.setMixIns(mixIns);
+		this.factory.afterPropertiesSet();
+		ObjectMapper objectMapper = this.factory.getObject();
+
+		assertEquals(1, objectMapper.mixInCount());
+		assertSame(mixinSource, objectMapper.findMixInClassFor(target));
+	}
+
 }

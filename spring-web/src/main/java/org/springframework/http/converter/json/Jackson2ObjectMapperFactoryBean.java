@@ -120,6 +120,7 @@ import org.springframework.util.ClassUtils;
  * @author Rossen Stoyanchev
  * @author Brian Clozel
  * @author Juergen Hoeller
+ * @author Tadaya Tsuyukubo
  * @since 3.2
  */
 public class Jackson2ObjectMapperFactoryBean implements FactoryBean<ObjectMapper>, BeanClassLoaderAware, InitializingBean {
@@ -147,6 +148,8 @@ public class Jackson2ObjectMapperFactoryBean implements FactoryBean<ObjectMapper
 	private PropertyNamingStrategy propertyNamingStrategy;
 
 	private ClassLoader beanClassLoader;
+
+	private final Map<Class<?>, Class<?>> mixIns = new HashMap<Class<?>, Class<?>>();
 
 
 	/**
@@ -352,6 +355,15 @@ public class Jackson2ObjectMapperFactoryBean implements FactoryBean<ObjectMapper
 		this.beanClassLoader = beanClassLoader;
 	}
 
+	/**
+	 * Add mixins to {@link ObjectMapper}.
+	 * @since 4.1
+	 */
+	public void setMixIns(Map<Class<?>, Class<?>> mixIns) {
+		if (mixIns != null) {
+			this.mixIns.putAll(mixIns);
+		}
+	}
 
 	@Override
 	public void afterPropertiesSet() {
@@ -407,6 +419,10 @@ public class Jackson2ObjectMapperFactoryBean implements FactoryBean<ObjectMapper
 
 		if (this.propertyNamingStrategy != null) {
 			this.objectMapper.setPropertyNamingStrategy(this.propertyNamingStrategy);
+		}
+
+		for (Map.Entry<Class<?>, Class<?>> entry : this.mixIns.entrySet()) {
+			this.objectMapper.addMixInAnnotations(entry.getKey(), entry.getValue());
 		}
 	}
 
