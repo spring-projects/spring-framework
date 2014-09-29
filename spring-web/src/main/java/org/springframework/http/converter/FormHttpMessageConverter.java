@@ -28,6 +28,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import javax.mail.internet.MimeUtility;
 
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpEntity;
@@ -40,8 +41,6 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.StreamUtils;
 import org.springframework.util.StringUtils;
-
-import javax.mail.internet.MimeUtility;
 
 /**
  * Implementation of {@link HttpMessageConverter} to read and write 'normal' HTML
@@ -79,8 +78,9 @@ import javax.mail.internet.MimeUtility;
  * <p>Some methods in this class were inspired by {@code org.apache.commons.httpclient.methods.multipart.MultipartRequestEntity}.
  *
  * @author Arjen Poutsma
- * @see MultiValueMap
+ * @author Rossen Stoyanchev
  * @since 3.0
+ * @see MultiValueMap
  */
 public class FormHttpMessageConverter implements HttpMessageConverter<MultiValueMap<String, ?>> {
 
@@ -128,6 +128,7 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 	 * and relies on {@code MimeUtility} from "javax.mail".
 	 * <p>If not set file names will be encoded as US-ASCII.
 	 * @param multipartCharset the charset to use
+	 * @since 4.1.1
 	 * @see <a href="http://en.wikipedia.org/wiki/MIME#Encoded-Word">Encoded-Word</a>
 	 */
 	public void setMultipartCharset(Charset multipartCharset) {
@@ -150,7 +151,7 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 	 * Set the message body converters to use. These converters are used to
 	 * convert objects to MIME parts.
 	 */
-	public final void setPartConverters(List<HttpMessageConverter<?>> partConverters) {
+	public void setPartConverters(List<HttpMessageConverter<?>> partConverters) {
 		Assert.notEmpty(partConverters, "'partConverters' must not be empty");
 		this.partConverters = partConverters;
 	}
@@ -159,8 +160,8 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 	 * Add a message body converter. Such a converters is used to convert objects
 	 * to MIME parts.
 	 */
-	public final void addPartConverter(HttpMessageConverter<?> partConverter) {
-		Assert.notNull(partConverter, "'partConverter' must not be NULL");
+	public void addPartConverter(HttpMessageConverter<?> partConverter) {
+		Assert.notNull(partConverter, "'partConverter' must not be null");
 		this.partConverters.add(partConverter);
 	}
 
@@ -174,9 +175,8 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 			return true;
 		}
 		for (MediaType supportedMediaType : getSupportedMediaTypes()) {
-			// we can't read multipart
-			if (!supportedMediaType.equals(MediaType.MULTIPART_FORM_DATA) &&
-				supportedMediaType.includes(mediaType)) {
+			// We can't read multipart....
+			if (!supportedMediaType.equals(MediaType.MULTIPART_FORM_DATA) && supportedMediaType.includes(mediaType)) {
 				return true;
 			}
 		}
@@ -204,13 +204,11 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 			HttpInputMessage inputMessage) throws IOException, HttpMessageNotReadableException {
 
 		MediaType contentType = inputMessage.getHeaders().getContentType();
-		Charset charset = contentType.getCharSet() != null ? contentType.getCharSet() : this.charset;
+		Charset charset = (contentType.getCharSet() != null ? contentType.getCharSet() : this.charset);
 		String body = StreamUtils.copyToString(inputMessage.getBody(), charset);
 
 		String[] pairs = StringUtils.tokenizeToStringArray(body, "&");
-
 		MultiValueMap<String, String> result = new LinkedMultiValueMap<String, String>(pairs.length);
-
 		for (String pair : pairs) {
 			int idx = pair.indexOf('=');
 			if (idx == -1) {
@@ -391,14 +389,8 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 		if (part instanceof Resource) {
 			Resource resource = (Resource) part;
 			String filename = resource.getFilename();
-			if (multipartCharset != null) {
-				try {
-					filename = MimeUtility.encodeText(filename, multipartCharset.name(), null);
-				}
-				catch (UnsupportedEncodingException e) {
-					// should not happen
-					throw new IllegalStateException(e);
-				}
+			if (this.multipartCharset != null) {
+				filename = MimeDelegate.encode(filename, this.multipartCharset.name());
 			}
 			return filename;
 		}
@@ -414,25 +406,25 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 	 */
 	private class MultipartHttpOutputMessage implements HttpOutputMessage {
 
-		private final HttpHeaders headers = new HttpHeaders();
+		private final OutputStream outputStream;
 
-		private final OutputStream os;
+		private final HttpHeaders headers = new HttpHeaders();
 
 		private boolean headersWritten = false;
 
-		public MultipartHttpOutputMessage(OutputStream os) {
-			this.os = os;
+		public MultipartHttpOutputMessage(OutputStream outputStream) {
+			this.outputStream = outputStream;
 		}
 
 		@Override
 		public HttpHeaders getHeaders() {
-			return headersWritten ? HttpHeaders.readOnlyHttpHeaders(headers) : this.headers;
+			return (this.headersWritten ? HttpHeaders.readOnlyHttpHeaders(this.headers) : this.headers);
 		}
 
 		@Override
 		public OutputStream getBody() throws IOException {
 			writeHeaders();
-			return this.os;
+			return this.outputStream;
 		}
 
 		private void writeHeaders() throws IOException {
@@ -441,14 +433,14 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 					byte[] headerName = getAsciiBytes(entry.getKey());
 					for (String headerValueString : entry.getValue()) {
 						byte[] headerValue = getAsciiBytes(headerValueString);
-						os.write(headerName);
-						os.write(':');
-						os.write(' ');
-						os.write(headerValue);
-						writeNewLine(os);
+						this.outputStream.write(headerName);
+						this.outputStream.write(':');
+						this.outputStream.write(' ');
+						this.outputStream.write(headerValue);
+						writeNewLine(this.outputStream);
 					}
 				}
-				writeNewLine(os);
+				writeNewLine(this.outputStream);
 				this.headersWritten = true;
 			}
 		}
@@ -458,7 +450,23 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 				return name.getBytes("US-ASCII");
 			}
 			catch (UnsupportedEncodingException ex) {
-				// should not happen, US-ASCII is always supported
+				// Should not happen - US-ASCII is always supported.
+				throw new IllegalStateException(ex);
+			}
+		}
+	}
+
+
+	/**
+	 * Inner class to avoid a hard dependency on the JavaMail API.
+	 */
+	private static class MimeDelegate {
+
+		public static String encode(String value, String charset) {
+			try {
+				return MimeUtility.encodeText(value, charset, null);
+			}
+			catch (UnsupportedEncodingException ex) {
 				throw new IllegalStateException(ex);
 			}
 		}
