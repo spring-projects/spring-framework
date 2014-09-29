@@ -17,21 +17,26 @@
 package org.springframework.web.servlet.mvc.method.annotation;
 
 import com.fasterxml.jackson.annotation.JsonView;
+
 import org.springframework.core.MethodParameter;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.MappingJacksonValue;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
-import org.springframework.util.Assert;
 
 /**
  * A {@code ResponseBodyAdvice} implementation that adds support for
  * Jackson's {@code @JsonView} annotation declared on a Spring MVC
- * {@code @RequestMapping} or {@code @ExceptionHandler} method. The serialization
- * view specified in the annotation will be passed in to the
- * {@code MappingJackson2HttpMessageConverter} which will then use it to
+ * {@code @RequestMapping} or {@code @ExceptionHandler} method.
+ *
+ * <p>The serialization view specified in the annotation will be passed in to
+ * the {@code MappingJackson2HttpMessageConverter} which will then use it to
  * serialize the response body with.
+ *
+ * <p>Note that despite {@code @JsonView} allowing for more than one class to
+ * be specified, the use for a response body advice is only supported with
+ * exactly one class argument. Consider the use of a composite interface.
  *
  * @author Rossen Stoyanchev
  * @since 4.1
@@ -49,8 +54,12 @@ public class JsonViewResponseBodyAdvice extends AbstractMappingJacksonResponseBo
 			MethodParameter returnType, ServerHttpRequest request, ServerHttpResponse response) {
 
 		JsonView annotation = returnType.getMethodAnnotation(JsonView.class);
-		Assert.isTrue(annotation.value().length != 0, "No view class in JsonView annotation on " + returnType);
-		bodyContainer.setSerializationView(annotation.value()[0]);
+		Class<?>[] classes = annotation.value();
+		if (classes.length != 1) {
+			throw new IllegalArgumentException(
+					"@JsonView only supported for response body advice with exactly 1 class argument: " + returnType);
+		}
+		bodyContainer.setSerializationView(classes[0]);
 	}
 
 }
