@@ -801,9 +801,9 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 		configureViewResolvers(registry);
 
 		if (registry.getViewResolvers().isEmpty()) {
-			Map<String, ViewResolver> map = BeanFactoryUtils.beansOfTypeIncludingAncestors(
+			String[] names = BeanFactoryUtils.beanNamesForTypeIncludingAncestors(
 					this.applicationContext, ViewResolver.class, true, false);
-			if (map.isEmpty()) {
+			if (names.length == 1) {
 				registry.getViewResolvers().add(new InternalResourceViewResolver());
 			}
 		}
