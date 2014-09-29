@@ -103,17 +103,18 @@ public class SpelCompiler implements Opcodes {
 				logger.debug("SpEL: compiling " + expression.toStringAST());
 			}
 			Class<? extends CompiledExpression> clazz = createExpressionClass(expression);
-			try {
-				return clazz.newInstance();
-			}
-			catch (Exception ex) {
-				throw new IllegalStateException("Failed to instantiate CompiledExpression", ex);
+			if (clazz != null) {
+				try {
+					return clazz.newInstance();
+				}
+				catch (Throwable ex) {
+					throw new IllegalStateException("Failed to instantiate CompiledExpression", ex);
+				}
 			}
 		}
-		else {
-			if (logger.isDebugEnabled()) {
-				logger.debug("SpEL: unable to compile " + expression.toStringAST());
-			}
+
+		if (logger.isDebugEnabled()) {
+			logger.debug("SpEL: unable to compile " + expression.toStringAST());
 		}
 		return null;
 	}
@@ -123,9 +124,11 @@ public class SpelCompiler implements Opcodes {
 	}
 
 	/**
-	 * Generate the class that encapsulates the compiled expression and define it. The
-	 * generated class will be a subtype of CompiledExpression.
+	 * Generate the class that encapsulates the compiled expression and define it.
+	 * The  generated class will be a subtype of CompiledExpression.
 	 * @param expressionToCompile the expression to be compiled
+	 * @return the expression call, or {@code null} if the decision was to opt out of
+	 * compilation during code generation
 	 */
 	@SuppressWarnings("unchecked")
 	private Class<? extends CompiledExpression> createExpressionClass(SpelNodeImpl expressionToCompile) {
@@ -150,10 +153,19 @@ public class SpelCompiler implements Opcodes {
 
 		CodeFlow codeflow = new CodeFlow();
 
-		// Ask the expression Ast to generate the body of the method
-		expressionToCompile.generateCode(mv,codeflow);
+		// Ask the expression AST to generate the body of the method
+		try {
+			expressionToCompile.generateCode(mv, codeflow);
+		}
+		catch (IllegalStateException ex) {
+			if (logger.isDebugEnabled()) {
+				logger.debug(expressionToCompile.getClass().getSimpleName() +
+						".generateCode opted out of compilation: " + ex.getMessage());
+			}
+			return null;
+		}
 
-		CodeFlow.insertBoxIfNecessary(mv,codeflow.lastDescriptor());
+		CodeFlow.insertBoxIfNecessary(mv, codeflow.lastDescriptor());
 		if ("V".equals(codeflow.lastDescriptor())) {
 			mv.visitInsn(ACONST_NULL);
 		}

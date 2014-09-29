@@ -83,11 +83,7 @@ public class MethodReference extends SpelNodeImpl {
 		TypeDescriptor targetType = state.getActiveContextObject().getTypeDescriptor();
 		Object[] arguments = getArguments(state);
 		TypedValue result = getValueInternal(evaluationContext, value, targetType, arguments);
-		if (cachedExecutor.get() instanceof ReflectiveMethodExecutor) {
-			ReflectiveMethodExecutor executor = (ReflectiveMethodExecutor) cachedExecutor.get();
-			Method method = executor.getMethod();
-			exitTypeDescriptor = CodeFlow.toDescriptor(method.getReturnType());
-		}
+		updateExitTypeDescriptor();
 		return result;
 	}
 
@@ -172,7 +168,9 @@ public class MethodReference extends SpelNodeImpl {
 		return Collections.unmodifiableList(descriptors);
 	}
 
-	private MethodExecutor getCachedExecutor(EvaluationContext evaluationContext, Object value, TypeDescriptor target, List<TypeDescriptor> argumentTypes) {
+	private MethodExecutor getCachedExecutor(EvaluationContext evaluationContext, Object value,
+			TypeDescriptor target, List<TypeDescriptor> argumentTypes) {
+
 		List<MethodResolver> methodResolvers = evaluationContext.getMethodResolvers();
 		if (methodResolvers == null || methodResolvers.size() != 1 ||
 				!(methodResolvers.get(0) instanceof ReflectiveMethodResolver)) {
@@ -230,6 +228,14 @@ public class MethodReference extends SpelNodeImpl {
 		}
 	}
 
+	private void updateExitTypeDescriptor() {
+		CachedMethodExecutor executorToCheck = this.cachedExecutor;
+		if (executorToCheck.get() instanceof ReflectiveMethodExecutor) {
+			Method method = ((ReflectiveMethodExecutor) executorToCheck.get()).getMethod();
+			this.exitTypeDescriptor = CodeFlow.toDescriptor(method.getReturnType());
+		}
+	}
+
 	@Override
 	public String toStringAST() {
 		StringBuilder sb = new StringBuilder();
@@ -242,6 +248,80 @@ public class MethodReference extends SpelNodeImpl {
 		}
 		sb.append(")");
 		return sb.toString();
+	}
+
+	/**
+	 * A method reference is compilable if it has been resolved to a reflectively accessible method
+	 * and the child nodes (arguments to the method) are also compilable.
+	 */
+	@Override
+	public boolean isCompilable() {
+		CachedMethodExecutor executorToCheck = this.cachedExecutor;
+		if (executorToCheck == null || !(executorToCheck.get() instanceof ReflectiveMethodExecutor)) {
+			return false;
+		}
+
+		for (SpelNodeImpl child : this.children) {
+			if (!child.isCompilable()) {
+				return false;
+			}
+		}
+
+		ReflectiveMethodExecutor executor = (ReflectiveMethodExecutor) executorToCheck.get();
+		Method method = executor.getMethod();
+		if (!Modifier.isPublic(method.getModifiers()) || !Modifier.isPublic(method.getDeclaringClass().getModifiers())) {
+			return false;
+		}
+		if (method.isVarArgs()) {
+			return false;
+		}
+		if (executor.didArgumentConversionOccur()) {
+			return false;
+		}
+
+		return true;
+	}
+
+	@Override
+	public void generateCode(MethodVisitor mv, CodeFlow codeflow) {
+		CachedMethodExecutor executorToCheck = this.cachedExecutor;
+		if (executorToCheck == null || !(executorToCheck.get() instanceof ReflectiveMethodExecutor)) {
+			throw new IllegalStateException("No applicable cached executor found: " + executorToCheck);
+		}
+
+		Method method = ((ReflectiveMethodExecutor) executorToCheck.get()).getMethod();
+		boolean isStaticMethod = Modifier.isStatic(method.getModifiers());
+		String descriptor = codeflow.lastDescriptor();
+
+		if (descriptor == null && !isStaticMethod) {
+			codeflow.loadTarget(mv);
+		}
+
+		boolean itf = method.getDeclaringClass().isInterface();
+		String methodDeclaringClassSlashedDescriptor = method.getDeclaringClass().getName().replace('.', '/');
+		if (!isStaticMethod) {
+			if (descriptor == null || !descriptor.equals(methodDeclaringClassSlashedDescriptor)) {
+				mv.visitTypeInsn(CHECKCAST, methodDeclaringClassSlashedDescriptor);
+			}
+		}
+		String[] paramDescriptors = CodeFlow.toParamDescriptors(method);
+		for (int i = 0; i < this.children.length;i++) {
+			SpelNodeImpl child = this.children[i];
+			codeflow.enterCompilationScope();
+			child.generateCode(mv, codeflow);
+			// Check if need to box it for the method reference?
+			if (CodeFlow.isPrimitive(codeflow.lastDescriptor()) && paramDescriptors[i].charAt(0) == 'L') {
+				CodeFlow.insertBoxIfNecessary(mv, codeflow.lastDescriptor().charAt(0));
+			}
+			else if (!codeflow.lastDescriptor().equals(paramDescriptors[i])) {
+				// This would be unnecessary in the case of subtyping (e.g. method takes Number but Integer passed in)
+				CodeFlow.insertCheckCast(mv, paramDescriptors[i]);
+			}
+			codeflow.exitCompilationScope();
+		}
+		mv.visitMethodInsn(isStaticMethod ? INVOKESTATIC : INVOKEVIRTUAL,
+				methodDeclaringClassSlashedDescriptor, method.getName(), CodeFlow.createSignatureDescriptor(method), itf);
+		codeflow.pushDescriptor(this.exitTypeDescriptor);
 	}
 
 
@@ -264,12 +344,9 @@ public class MethodReference extends SpelNodeImpl {
 
 		@Override
 		public TypedValue getValue() {
-			TypedValue result = MethodReference.this.getValueInternal(this.evaluationContext, this.value, this.targetType, this.arguments);
-			if (MethodReference.this.cachedExecutor.get() instanceof ReflectiveMethodExecutor) {
-				ReflectiveMethodExecutor executor = (ReflectiveMethodExecutor) MethodReference.this.cachedExecutor.get();
-				Method method = executor.getMethod();
-				MethodReference.this.exitTypeDescriptor = CodeFlow.toDescriptor(method.getReturnType());
-			}
+			TypedValue result = MethodReference.this.getValueInternal(
+					this.evaluationContext, this.value, this.targetType, this.arguments);
+			updateExitTypeDescriptor();
 			return result;
 		}
 
@@ -311,72 +388,6 @@ public class MethodReference extends SpelNodeImpl {
 		public MethodExecutor get() {
 			return this.methodExecutor;
 		}
-	}
-
-	/**
-	 * A method reference is compilable if it has been resolved to a reflectively accessible method
-	 * and the child nodes (arguments to the method) are also compilable.
-	 */
-	@Override
-	public boolean isCompilable() {
-		if (this.cachedExecutor == null || !(this.cachedExecutor.get() instanceof ReflectiveMethodExecutor)) {
-			return false;
-		}
-		for (SpelNodeImpl child: children) {
-			if (!child.isCompilable()) {
-				return false;
-			}
-		}
-		ReflectiveMethodExecutor executor = (ReflectiveMethodExecutor) this.cachedExecutor.get();
-		Method method = executor.getMethod();
-		if (!Modifier.isPublic(method.getModifiers()) || !Modifier.isPublic(method.getDeclaringClass().getModifiers())) {
-			return false;
-		}
-		if (method.isVarArgs()) {
-			return false;
-		}
-		if (executor.didArgumentConversionOccur()) {
-			return false;
-		}
-		return true;
-	}
-
-	@Override
-	public void generateCode(MethodVisitor mv,CodeFlow codeflow) {
-		ReflectiveMethodExecutor executor = (ReflectiveMethodExecutor) this.cachedExecutor.get();
-		Method method = executor.getMethod();
-		boolean isStaticMethod = Modifier.isStatic(method.getModifiers());
-		String descriptor = codeflow.lastDescriptor();
-
-		if (descriptor == null && !isStaticMethod) {
-			codeflow.loadTarget(mv);
-		}
-
-		boolean itf = method.getDeclaringClass().isInterface();
-		String methodDeclaringClassSlashedDescriptor = method.getDeclaringClass().getName().replace('.','/');
-		if (!isStaticMethod) {
-			if (descriptor == null || !descriptor.equals(methodDeclaringClassSlashedDescriptor)) {
-				mv.visitTypeInsn(CHECKCAST, methodDeclaringClassSlashedDescriptor);
-			}
-		}
-		String[] paramDescriptors = CodeFlow.toParamDescriptors(method);
-		for (int c = 0; c < this.children.length;c++) {
-			SpelNodeImpl child = this.children[c];
-			codeflow.enterCompilationScope();
-			child.generateCode(mv, codeflow);
-			// Check if need to box it for the method reference?
-			if (CodeFlow.isPrimitive(codeflow.lastDescriptor()) && (paramDescriptors[c].charAt(0)=='L')) {
-				CodeFlow.insertBoxIfNecessary(mv, codeflow.lastDescriptor().charAt(0));
-			}
-			else if (!codeflow.lastDescriptor().equals(paramDescriptors[c])) {
-				// This would be unnecessary in the case of subtyping (e.g. method takes a Number but passed in is an Integer)
-				CodeFlow.insertCheckCast(mv, paramDescriptors[c]);
-			}
-			codeflow.exitCompilationScope();
-		}
-		mv.visitMethodInsn(isStaticMethod ? INVOKESTATIC : INVOKEVIRTUAL,
-				methodDeclaringClassSlashedDescriptor, method.getName(), CodeFlow.createSignatureDescriptor(method), itf);
-		codeflow.pushDescriptor(this.exitTypeDescriptor);
 	}
 
 }
