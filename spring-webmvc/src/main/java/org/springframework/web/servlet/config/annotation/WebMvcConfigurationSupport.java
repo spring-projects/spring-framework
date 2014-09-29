@@ -26,6 +26,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.xml.transform.Source;
 
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.BeanInitializationException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
@@ -85,6 +86,7 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice;
 import org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolver;
 import org.springframework.web.servlet.resource.ResourceUrlProvider;
 import org.springframework.web.servlet.resource.ResourceUrlProviderExposingInterceptor;
+import org.springframework.web.servlet.view.InternalResourceViewResolver;
 import org.springframework.web.servlet.view.ViewResolverComposite;
 import org.springframework.web.util.UrlPathHelper;
 
@@ -797,6 +799,14 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 		registry.setContentNegotiationManager(mvcContentNegotiationManager());
 		registry.setApplicationContext(this.applicationContext);
 		configureViewResolvers(registry);
+
+		if (registry.getViewResolvers().isEmpty()) {
+			Map<String, ViewResolver> map = BeanFactoryUtils.beansOfTypeIncludingAncestors(
+					this.applicationContext, ViewResolver.class, true, false);
+			if (map.isEmpty()) {
+				registry.getViewResolvers().add(new InternalResourceViewResolver());
+			}
+		}
 
 		ViewResolverComposite composite = new ViewResolverComposite();
 		composite.setOrder(registry.getOrder());
