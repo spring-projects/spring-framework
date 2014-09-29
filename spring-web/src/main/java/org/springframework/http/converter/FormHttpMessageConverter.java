@@ -46,23 +46,24 @@ import org.springframework.util.StringUtils;
  * Implementation of {@link HttpMessageConverter} to read and write 'normal' HTML
  * forms and also to write (but not read) multipart data (e.g. file uploads).
  *
- * <p>In other words this converter can read and write the
+ * <p>In other words, this converter can read and write the
  * {@code "application/x-www-form-urlencoded"} media type as
  * {@link MultiValueMap MultiValueMap&lt;String, String&gt;} and it can also
  * write (but not read) the {@code "multipart/form-data"} media type as
  * {@link MultiValueMap MultiValueMap&lt;String, Object&gt;}.
  *
- * <p>When writing multipart data this converter uses other
+ * <p>When writing multipart data, this converter uses other
  * {@link HttpMessageConverter HttpMessageConverters} to write the respective
- * MIME parts. By default basic converters are registered (for {@code Strings}
+ * MIME parts. By default, basic converters are registered (for {@code Strings}
  * and {@code Resources}). These can be overridden through the
- * {@link #setPartConverters(java.util.List) partConverters} property.
+ * {@link #setPartConverters partConverters} property.
  *
- * <p>For example the following snippet shows how to submit an HTML form:
+ * <p>For example, the following snippet shows how to submit an HTML form:
  * <pre class="code">
- * RestTemplate template = new RestTemplate(); // FormHttpMessageConverter is configured by default
+ * RestTemplate template = new RestTemplate();  // FormHttpMessageConverter is configured by default
  * MultiValueMap&lt;String, String&gt; form = new LinkedMultiValueMap&lt;String, String&gt;();
- * form.add("field 1", "value 1"); form.add("field 2", "value 2");
+ * form.add("field 1", "value 1");
+ * form.add("field 2", "value 2");
  * form.add("field 2", "value 3");
  * template.postForLocation("http://example.com/myForm", form);
  * </pre>
@@ -75,7 +76,8 @@ import org.springframework.util.StringUtils;
  * template.postForLocation("http://example.com/myFileUpload", parts);
  * </pre>
  *
- * <p>Some methods in this class were inspired by {@code org.apache.commons.httpclient.methods.multipart.MultipartRequestEntity}.
+ * <p>Some methods in this class were inspired by
+ * {@code org.apache.commons.httpclient.methods.multipart.MultipartRequestEntity}.
  *
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
@@ -85,12 +87,11 @@ import org.springframework.util.StringUtils;
 public class FormHttpMessageConverter implements HttpMessageConverter<MultiValueMap<String, ?>> {
 
 	private static final byte[] BOUNDARY_CHARS =
-			new byte[]{'-', '_', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', 'a', 'b', 'c', 'd', 'e', 'f', 'g',
+			new byte[] {'-', '_', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', 'a', 'b', 'c', 'd', 'e', 'f', 'g',
 					'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', 'A',
 					'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U',
 					'V', 'W', 'X', 'Y', 'Z'};
 
-	private final Random random = new Random();
 
 	private Charset charset = Charset.forName("UTF-8");
 
@@ -99,6 +100,8 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 	private List<MediaType> supportedMediaTypes = new ArrayList<MediaType>();
 
 	private List<HttpMessageConverter<?>> partConverters = new ArrayList<HttpMessageConverter<?>>();
+
+	private final Random random = new Random();
 
 
 	public FormHttpMessageConverter() {
@@ -157,7 +160,7 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 	}
 
 	/**
-	 * Add a message body converter. Such a converters is used to convert objects
+	 * Add a message body converter. Such a converter is used to convert objects
 	 * to MIME parts.
 	 */
 	public void addPartConverter(HttpMessageConverter<?> partConverter) {
@@ -236,6 +239,7 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 		}
 	}
 
+
 	private boolean isMultipart(MultiValueMap<String, ?> map, MediaType contentType) {
 		if (contentType != null) {
 			return MediaType.MULTIPART_FORM_DATA.equals(contentType);
@@ -285,17 +289,15 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 		StreamUtils.copy(bytes, outputMessage.getBody());
 	}
 
-	private void writeMultipart(MultiValueMap<String, Object> parts, HttpOutputMessage outputMessage)
-			throws IOException {
-
+	private void writeMultipart(MultiValueMap<String, Object> parts, HttpOutputMessage outputMessage) throws IOException {
 		byte[] boundary = generateMultipartBoundary();
-
 		Map<String, String> parameters = Collections.singletonMap("boundary", new String(boundary, "US-ASCII"));
+
 		MediaType contentType = new MediaType(MediaType.MULTIPART_FORM_DATA, parameters);
 		outputMessage.getHeaders().setContentType(contentType);
 
 		writeParts(outputMessage.getBody(), parts, boundary);
-		writeEnd(boundary, outputMessage.getBody());
+		writeEnd(outputMessage.getBody(), boundary);
 	}
 
 	private void writeParts(OutputStream os, MultiValueMap<String, Object> parts, byte[] boundary) throws IOException {
@@ -303,28 +305,11 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 			String name = entry.getKey();
 			for (Object part : entry.getValue()) {
 				if (part != null) {
-					writeBoundary(boundary, os);
-					HttpEntity<?> entity = getEntity(part);
-					writePart(name, entity, os);
+					writeBoundary(os, boundary);
+					writePart(name, getHttpEntity(part), os);
 					writeNewLine(os);
 				}
 			}
-		}
-	}
-
-	private void writeBoundary(byte[] boundary, OutputStream os) throws IOException {
-		os.write('-');
-		os.write('-');
-		os.write(boundary);
-		writeNewLine(os);
-	}
-
-	private HttpEntity<?> getEntity(Object part) {
-		if (part instanceof HttpEntity) {
-			return (HttpEntity<?>) part;
-		}
-		else {
-			return new HttpEntity<Object>(part);
 		}
 	}
 
@@ -334,7 +319,7 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 		Class<?> partType = partBody.getClass();
 		HttpHeaders partHeaders = partEntity.getHeaders();
 		MediaType partContentType = partHeaders.getContentType();
-		for (HttpMessageConverter<?> messageConverter : partConverters) {
+		for (HttpMessageConverter<?> messageConverter : this.partConverters) {
 			if (messageConverter.canWrite(partType, partContentType)) {
 				HttpOutputMessage multipartMessage = new MultipartHttpOutputMessage(os);
 				multipartMessage.getHeaders().setContentDispositionFormData(name, getFilename(partBody));
@@ -345,24 +330,10 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 				return;
 			}
 		}
-		throw new HttpMessageNotWritableException(
-				"Could not write request: no suitable HttpMessageConverter found for request type [" +
-						partType.getName() + "]");
+		throw new HttpMessageNotWritableException("Could not write request: no suitable HttpMessageConverter " +
+				"found for request type [" + partType.getName() + "]");
 	}
 
-	private void writeEnd(byte[] boundary, OutputStream os) throws IOException {
-		os.write('-');
-		os.write('-');
-		os.write(boundary);
-		os.write('-');
-		os.write('-');
-		writeNewLine(os);
-	}
-
-	private void writeNewLine(OutputStream os) throws IOException {
-		os.write('\r');
-		os.write('\n');
-	}
 
 	/**
 	 * Generate a multipart boundary.
@@ -370,11 +341,26 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 	 * Can be overridden in subclasses.
 	 */
 	protected byte[] generateMultipartBoundary() {
-		byte[] boundary = new byte[random.nextInt(11) + 30];
+		byte[] boundary = new byte[this.random.nextInt(11) + 30];
 		for (int i = 0; i < boundary.length; i++) {
-			boundary[i] = BOUNDARY_CHARS[random.nextInt(BOUNDARY_CHARS.length)];
+			boundary[i] = BOUNDARY_CHARS[this.random.nextInt(BOUNDARY_CHARS.length)];
 		}
 		return boundary;
+	}
+
+	/**
+	 * Return an {@link HttpEntity} for the given part Object.
+	 * @param part the part to return an {@link HttpEntity} for
+	 * @return the part Object itself it is an {@link HttpEntity},
+	 * or a newly built {@link HttpEntity} wrapper for that part
+	 */
+	protected HttpEntity<?> getHttpEntity(Object part) {
+		if (part instanceof HttpEntity) {
+			return (HttpEntity<?>) part;
+		}
+		else {
+			return new HttpEntity<Object>(part);
+		}
 	}
 
 	/**
@@ -400,11 +386,33 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 	}
 
 
+	private void writeBoundary(OutputStream os, byte[] boundary) throws IOException {
+		os.write('-');
+		os.write('-');
+		os.write(boundary);
+		writeNewLine(os);
+	}
+
+	private static void writeEnd(OutputStream os, byte[] boundary) throws IOException {
+		os.write('-');
+		os.write('-');
+		os.write(boundary);
+		os.write('-');
+		os.write('-');
+		writeNewLine(os);
+	}
+
+	private static void writeNewLine(OutputStream os) throws IOException {
+		os.write('\r');
+		os.write('\n');
+	}
+
+
 	/**
 	 * Implementation of {@link org.springframework.http.HttpOutputMessage} used
 	 * to write a MIME multipart.
 	 */
-	private class MultipartHttpOutputMessage implements HttpOutputMessage {
+	private static class MultipartHttpOutputMessage implements HttpOutputMessage {
 
 		private final OutputStream outputStream;
 
