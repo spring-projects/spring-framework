@@ -48,13 +48,13 @@ public abstract class SpelNodeImpl implements SpelNode, Opcodes {
 	private SpelNodeImpl parent;
 
 	/**
-	 * Indicates the type descriptor for the result of this expression node. This is
-	 * set as soon as it is known. For a literal node it is known immediately. For
-	 * a property access or method invocation it is known after one evaluation of
+	 * Indicates the type descriptor for the result of this expression node.
+	 * This is set as soon as it is known. For a literal node it is known immediately.
+	 * For a property access or method invocation it is known after one evaluation of
 	 * that node.
-	 * The descriptor is like the bytecode form but is slightly easier to work with. It
-	 * does not include the trailing semicolon (for non array reference types). Some examples:
-	 * Ljava/lang/String, I, [I
+	 * <p>The descriptor is like the bytecode form but is slightly easier to work with.
+	 * It does not include the trailing semicolon (for non array reference types).
+	 * Some examples: Ljava/lang/String, I, [I
      */
 	protected volatile String exitTypeDescriptor;
 
@@ -183,7 +183,7 @@ public abstract class SpelNodeImpl implements SpelNode, Opcodes {
 	 * Check whether a node can be compiled to bytecode. The reasoning in each node may
 	 * be different but will typically involve checking whether the exit type descriptor
 	 * of the node is known and any relevant child nodes are compilable.
-	 * @return true if this node can be compiled to bytecode
+	 * @return {@code true} if this node can be compiled to bytecode
 	 */
 	public boolean isCompilable() {
 		return false;
