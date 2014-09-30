@@ -23,16 +23,23 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.hamcrest.Matchers;
-import org.junit.Before;
+
 import org.junit.Test;
 
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.support.StaticApplicationContext;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHandler;
-import org.springframework.messaging.converter.*;
+import org.springframework.messaging.converter.ByteArrayMessageConverter;
+import org.springframework.messaging.converter.CompositeMessageConverter;
+import org.springframework.messaging.converter.ContentTypeResolver;
+import org.springframework.messaging.converter.DefaultContentTypeResolver;
+import org.springframework.messaging.converter.MappingJackson2MessageConverter;
+import org.springframework.messaging.converter.MessageConverter;
+import org.springframework.messaging.converter.StringMessageConverter;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.handler.invocation.HandlerMethodArgumentResolver;
@@ -42,11 +49,11 @@ import org.springframework.messaging.simp.annotation.SubscribeMapping;
 import org.springframework.messaging.simp.annotation.support.SimpAnnotationMethodMessageHandler;
 import org.springframework.messaging.simp.broker.DefaultSubscriptionRegistry;
 import org.springframework.messaging.simp.broker.SimpleBrokerMessageHandler;
-import org.springframework.messaging.simp.user.UserDestinationMessageHandler;
-import org.springframework.messaging.simp.user.UserSessionRegistry;
 import org.springframework.messaging.simp.stomp.StompBrokerRelayMessageHandler;
 import org.springframework.messaging.simp.stomp.StompCommand;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
+import org.springframework.messaging.simp.user.UserDestinationMessageHandler;
+import org.springframework.messaging.simp.user.UserSessionRegistry;
 import org.springframework.messaging.support.AbstractSubscribableChannel;
 import org.springframework.messaging.support.ChannelInterceptor;
 import org.springframework.messaging.support.ChannelInterceptorAdapter;
@@ -61,7 +68,7 @@ import org.springframework.validation.Validator;
 import org.springframework.validation.beanvalidation.OptionalValidatorFactoryBean;
 
 import static org.junit.Assert.*;
-import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.*;
 
 /**
  * Test fixture for {@link AbstractMessageBrokerConfiguration}.
@@ -72,39 +79,14 @@ import static org.mockito.Mockito.mock;
  */
 public class MessageBrokerConfigurationTests {
 
-	private AnnotationConfigApplicationContext simpleBrokerContext;
-
-	private AnnotationConfigApplicationContext brokerRelayContext;
-
-	private AnnotationConfigApplicationContext defaultContext;
-
-	private AnnotationConfigApplicationContext customContext;
-
-
-	@Before
-	public void setupOnce() {
-
-		this.simpleBrokerContext = new AnnotationConfigApplicationContext();
-		this.simpleBrokerContext.register(SimpleBrokerConfig.class);
-		this.simpleBrokerContext.refresh();
-
-		this.brokerRelayContext = new AnnotationConfigApplicationContext();
-		this.brokerRelayContext.register(BrokerRelayConfig.class);
-		this.brokerRelayContext.refresh();
-
-		this.defaultContext = new AnnotationConfigApplicationContext();
-		this.defaultContext.register(DefaultConfig.class);
-		this.defaultContext.refresh();
-
-		this.customContext = new AnnotationConfigApplicationContext();
-		this.customContext.register(CustomConfig.class);
-		this.customContext.refresh();
-	}
+	private ApplicationContext defaultContext = new AnnotationConfigApplicationContext(DefaultConfig.class);
+	private ApplicationContext simpleBrokerContext = new AnnotationConfigApplicationContext(SimpleBrokerConfig.class);
+	private ApplicationContext brokerRelayContext = new AnnotationConfigApplicationContext(BrokerRelayConfig.class);
+	private ApplicationContext customContext = new AnnotationConfigApplicationContext(CustomConfig.class);
 
 
 	@Test
 	public void clientInboundChannel() {
-
 		TestChannel channel = this.simpleBrokerContext.getBean("clientInboundChannel", TestChannel.class);
 		Set<MessageHandler> handlers = channel.getSubscribers();
 
@@ -194,7 +176,6 @@ public class MessageBrokerConfigurationTests {
 
 	@Test
 	public void clientOutboundChannelCustomized() {
-
 		AbstractSubscribableChannel channel = this.customContext.getBean(
 				"clientOutboundChannel", AbstractSubscribableChannel.class);
 
@@ -274,7 +255,6 @@ public class MessageBrokerConfigurationTests {
 
 	@Test
 	public void brokerChannelCustomized() {
-
 		AbstractSubscribableChannel channel = this.customContext.getBean(
 				"brokerChannel", AbstractSubscribableChannel.class);
 
@@ -305,7 +285,6 @@ public class MessageBrokerConfigurationTests {
 
 	@Test
 	public void threadPoolSizeDefault() {
-
 		String name = "clientInboundChannelExecutor";
 		ThreadPoolTaskExecutor executor = this.defaultContext.getBean(name, ThreadPoolTaskExecutor.class);
 		assertEquals(Runtime.getRuntime().availableProcessors() * 2, executor.getCorePoolSize());
@@ -340,7 +319,6 @@ public class MessageBrokerConfigurationTests {
 
 	@Test
 	public void configureMessageConvertersCustomAndDefault() {
-
 		final MessageConverter testConverter = mock(MessageConverter.class);
 
 		AbstractMessageBrokerConfiguration config = new AbstractMessageBrokerConfiguration() {
@@ -541,6 +519,7 @@ public class MessageBrokerConfigurationTests {
 		}
 	}
 
+	@SuppressWarnings("serial")
 	private static class CustomThreadPoolTaskExecutor extends ThreadPoolTaskExecutor {
 	}
 
