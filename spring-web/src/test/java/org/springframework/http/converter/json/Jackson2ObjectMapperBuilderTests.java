@@ -80,7 +80,7 @@ public class Jackson2ObjectMapperBuilderTests {
 	public void defaultProperties() {
 		ObjectMapper objectMapper = Jackson2ObjectMapperBuilder.json().build();
 		assertNotNull(objectMapper);
-		assertTrue(objectMapper.isEnabled(MapperFeature.DEFAULT_VIEW_INCLUSION));
+		assertFalse(objectMapper.isEnabled(MapperFeature.DEFAULT_VIEW_INCLUSION));
 		assertFalse(objectMapper.isEnabled(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES));
 		assertTrue(objectMapper.isEnabled(MapperFeature.AUTO_DETECT_FIELDS));
 		assertTrue(objectMapper.isEnabled(MapperFeature.AUTO_DETECT_GETTERS));
@@ -240,7 +240,7 @@ public class Jackson2ObjectMapperBuilderTests {
 		assertTrue(objectMapper.getFactory().isEnabled(JsonGenerator.Feature.WRITE_NUMBERS_AS_STRINGS));
 
 		assertFalse(objectMapper.getSerializationConfig().isEnabled(MapperFeature.AUTO_DETECT_GETTERS));
-		assertTrue(objectMapper.getDeserializationConfig().isEnabled(MapperFeature.DEFAULT_VIEW_INCLUSION));
+		assertFalse(objectMapper.getDeserializationConfig().isEnabled(MapperFeature.DEFAULT_VIEW_INCLUSION));
 		assertFalse(objectMapper.getDeserializationConfig().isEnabled(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES));
 		assertFalse(objectMapper.getDeserializationConfig().isEnabled(MapperFeature.AUTO_DETECT_FIELDS));
 		assertFalse(objectMapper.getFactory().isEnabled(JsonParser.Feature.AUTO_CLOSE_SOURCE));

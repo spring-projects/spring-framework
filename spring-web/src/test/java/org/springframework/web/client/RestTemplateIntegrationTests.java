@@ -226,7 +226,7 @@ public class RestTemplateIntegrationTests extends AbstractJettyServerTestCase {
 		String s = template.postForObject(baseUrl + "/jsonpost", entity, String.class, "post");
 		assertTrue(s.contains("\"with1\":\"with\""));
 		assertFalse(s.contains("\"with2\":\"with\""));
-		assertTrue(s.contains("\"without\":\"without\""));
+		assertFalse(s.contains("\"without\":\"without\""));
 	}
 
 	// SPR-12123

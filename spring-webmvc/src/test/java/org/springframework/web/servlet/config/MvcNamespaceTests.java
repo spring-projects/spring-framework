@@ -173,8 +173,8 @@ public class MvcNamespaceTests {
 		for(HttpMessageConverter<?> converter : converters) {
 			if(converter instanceof AbstractJackson2HttpMessageConverter) {
 				ObjectMapper objectMapper = ((AbstractJackson2HttpMessageConverter)converter).getObjectMapper();
-				assertTrue(objectMapper.getDeserializationConfig().isEnabled(MapperFeature.DEFAULT_VIEW_INCLUSION));
-				assertTrue(objectMapper.getSerializationConfig().isEnabled(MapperFeature.DEFAULT_VIEW_INCLUSION));
+				assertFalse(objectMapper.getDeserializationConfig().isEnabled(MapperFeature.DEFAULT_VIEW_INCLUSION));
+				assertFalse(objectMapper.getSerializationConfig().isEnabled(MapperFeature.DEFAULT_VIEW_INCLUSION));
 				assertFalse(objectMapper.getDeserializationConfig().isEnabled(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES));
 				if(converter instanceof MappingJackson2XmlHttpMessageConverter) {
 					assertEquals(XmlMapper.class, objectMapper.getClass());

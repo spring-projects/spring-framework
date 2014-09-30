@@ -47,6 +47,12 @@ import org.springframework.util.ClassUtils;
 /**
  * A builder used to create {@link ObjectMapper} instances with a fluent API.
  *
+ * <p>It customizes Jackson defaults properties with the following ones:
+ * <ul>
+ *  <li>{@link MapperFeature#DEFAULT_VIEW_INCLUSION} is disabled</li>
+ *  <li>{@link DeserializationFeature#FAIL_ON_UNKNOWN_PROPERTIES} is disabled</li>
+ * </ul>
+ *
  * <p>Note that Jackson's JSR-310 and Joda-Time support modules will be registered automatically
  * when available (and when Java 8 and Joda-Time themselves are available, respectively).
  *
@@ -384,6 +390,9 @@ public class Jackson2ObjectMapperBuilder {
 			this.objectMapper.registerModule(module);
 		}
 
+		if(!features.containsKey(MapperFeature.DEFAULT_VIEW_INCLUSION)) {
+			configureFeature(MapperFeature.DEFAULT_VIEW_INCLUSION, false);
+		}
 		if(!features.containsKey(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)) {
 			configureFeature(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 		}

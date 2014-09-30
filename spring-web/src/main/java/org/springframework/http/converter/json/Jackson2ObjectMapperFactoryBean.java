@@ -52,6 +52,12 @@ import org.springframework.util.ClassUtils;
  * {@link XmlMapper} ({@code createXmlMapper} property set to true) with setters
  * to enable or disable Jackson features from within XML configuration.
  *
+ * <p>It customizes Jackson defaults properties with the following ones:
+ * <ul>
+ *  <li>{@link MapperFeature#DEFAULT_VIEW_INCLUSION} is disabled</li>
+ *  <li>{@link DeserializationFeature#FAIL_ON_UNKNOWN_PROPERTIES} is disabled</li>
+ * </ul>
+ *
  * <p>Example usage with
  * {@link MappingJackson2HttpMessageConverter}:
  *
@@ -413,6 +419,9 @@ public class Jackson2ObjectMapperFactoryBean implements FactoryBean<ObjectMapper
 			this.objectMapper.registerModule(module);
 		}
 
+		if(!features.containsKey(MapperFeature.DEFAULT_VIEW_INCLUSION)) {
+			configureFeature(MapperFeature.DEFAULT_VIEW_INCLUSION, false);
+		}
 		if(!features.containsKey(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)) {
 			configureFeature(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 		}
