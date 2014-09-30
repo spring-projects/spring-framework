@@ -57,6 +57,7 @@ public class LiveBeansView implements LiveBeansViewMBean, ApplicationContextAwar
 	private static final Set<ConfigurableApplicationContext> applicationContexts =
 			new LinkedHashSet<ConfigurableApplicationContext>();
 
+
 	static void registerApplicationContext(ConfigurableApplicationContext applicationContext) {
 		String mbeanDomain = applicationContext.getEnvironment().getProperty(MBEAN_DOMAIN_PROPERTY_NAME);
 		if (mbeanDomain != null) {
@@ -93,6 +94,7 @@ public class LiveBeansView implements LiveBeansViewMBean, ApplicationContextAwar
 
 
 	private ConfigurableApplicationContext applicationContext;
+
 
 	@Override
 	public void setApplicationContext(ApplicationContext applicationContext) {

@@ -128,9 +128,11 @@ public class Jackson2ObjectMapperFactoryBean implements FactoryBean<ObjectMapper
 
 	private DateFormat dateFormat;
 
-	private JsonInclude.Include serializationInclusion;
-
 	private AnnotationIntrospector annotationIntrospector;
+
+	private PropertyNamingStrategy propertyNamingStrategy;
+
+	private JsonInclude.Include serializationInclusion;
 
 	private final Map<Class<?>, JsonSerializer<?>> serializers = new LinkedHashMap<Class<?>, JsonSerializer<?>>();
 
@@ -143,8 +145,6 @@ public class Jackson2ObjectMapperFactoryBean implements FactoryBean<ObjectMapper
 	private Class<? extends Module>[] modulesToInstall;
 
 	private boolean findModulesViaServiceLoader;
-
-	private PropertyNamingStrategy propertyNamingStrategy;
 
 	private ClassLoader beanClassLoader;
 
@@ -182,6 +182,15 @@ public class Jackson2ObjectMapperFactoryBean implements FactoryBean<ObjectMapper
 	 */
 	public void setAnnotationIntrospector(AnnotationIntrospector annotationIntrospector) {
 		this.annotationIntrospector = annotationIntrospector;
+	}
+
+	/**
+	 * Specify a {@link com.fasterxml.jackson.databind.PropertyNamingStrategy} to
+	 * configure the {@link ObjectMapper} with.
+	 * @since 4.0.2
+	 */
+	public void setPropertyNamingStrategy(PropertyNamingStrategy propertyNamingStrategy) {
+		this.propertyNamingStrategy = propertyNamingStrategy;
 	}
 
 	/**
@@ -329,15 +338,6 @@ public class Jackson2ObjectMapperFactoryBean implements FactoryBean<ObjectMapper
 	 */
 	public void setFindModulesViaServiceLoader(boolean findModules) {
 		this.findModulesViaServiceLoader = findModules;
-	}
-
-	/**
-	 * Specify a {@link com.fasterxml.jackson.databind.PropertyNamingStrategy} to
-	 * configure the {@link ObjectMapper} with.
-	 * @since 4.0.2
-	 */
-	public void setPropertyNamingStrategy(PropertyNamingStrategy propertyNamingStrategy) {
-		this.propertyNamingStrategy = propertyNamingStrategy;
 	}
 
 	@Override

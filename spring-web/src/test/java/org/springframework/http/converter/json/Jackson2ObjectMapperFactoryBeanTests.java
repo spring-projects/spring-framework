@@ -23,11 +23,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.junit.Before;
-import org.junit.Test;
-
-import org.springframework.beans.FatalBeanException;
-
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
@@ -50,6 +45,10 @@ import com.fasterxml.jackson.databind.ser.Serializers;
 import com.fasterxml.jackson.databind.ser.std.ClassSerializer;
 import com.fasterxml.jackson.databind.ser.std.NumberSerializers.NumberSerializer;
 import com.fasterxml.jackson.databind.type.SimpleType;
+import org.junit.Before;
+import org.junit.Test;
+
+import org.springframework.beans.FatalBeanException;
 
 import static org.junit.Assert.*;
 
@@ -65,10 +64,12 @@ public class Jackson2ObjectMapperFactoryBeanTests {
 
 	private Jackson2ObjectMapperFactoryBean factory;
 
+
 	@Before
 	public void setUp() {
 		factory = new Jackson2ObjectMapperFactoryBean();
 	}
+
 
 	@Test
 	public void testSettersWithNullValues() {
