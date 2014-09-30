@@ -21,20 +21,21 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.nio.charset.Charset;
 
-import com.fasterxml.jackson.annotation.JsonView;
-import com.fasterxml.jackson.dataformat.xml.XmlMapper;
-import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
-import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 
 import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.MediaType;
 import org.springframework.http.MockHttpInputMessage;
 import org.springframework.http.MockHttpOutputMessage;
-import org.springframework.http.converter.json.AbstractJackson2HttpMessageConverter;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.http.converter.json.AbstractJackson2HttpMessageConverter;
 import org.springframework.http.converter.json.MappingJacksonValue;
+
+import com.fasterxml.jackson.annotation.JsonView;
+import com.fasterxml.jackson.dataformat.xml.XmlMapper;
+
+import static org.hamcrest.CoreMatchers.*;
+import static org.junit.Assert.*;
 
 /**
  * Jackson 2.x XML converter tests.
@@ -211,6 +212,7 @@ public class MappingJackson2XmlHttpMessageConverterTests {
 	private interface MyJacksonView1 {};
 	private interface MyJacksonView2 {};
 
+	@SuppressWarnings("unused")
 	private static class JacksonViewBean {
 
 		@JsonView(MyJacksonView1.class)
@@ -246,8 +248,8 @@ public class MappingJackson2XmlHttpMessageConverterTests {
 		}
 	}
 
+	@SuppressWarnings("serial")
 	private static class MyXmlMapper extends XmlMapper {
-
 	}
 
 }
