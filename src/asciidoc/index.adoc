@@ -31640,7 +31640,8 @@ HTTP response body. In order to provide such capability, Spring MVC has built-in
 rendering with http://wiki.fasterxml.com/JacksonJsonViews[Jackson's Serialization Views].
 
 To use it with an `@ResponseBody` controller method or controller methods that return
-`ResponseEntity`, simply add the `@JsonView` annotation:
+`ResponseEntity`, simply add the `@JsonView` annotation with a class argument specifying
+the view class or interface to be used:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -31682,6 +31683,14 @@ To use it with an `@ResponseBody` controller method or controller methods that r
 		}
 	}
 ----
+
+[NOTE]
+====
+Note that despite `@JsonView` allowing for more than one class to
+be specified, the use on a controller method is only supported with
+exactly one class argument. Consider the use of a composite interface
+if you need to enable multiple views.
+====
 
 For controllers relying on view resolution, simply add the serialization view class
 to the model:
