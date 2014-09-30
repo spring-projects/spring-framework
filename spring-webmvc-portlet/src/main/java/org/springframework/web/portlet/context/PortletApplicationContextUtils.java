@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -56,8 +56,8 @@ import org.springframework.web.context.support.WebApplicationContextUtils;
 public abstract class PortletApplicationContextUtils {
 
 	/**
-	 * Find the root WebApplicationContext for this portlet application, which is
-	 * typically loaded via ContextLoaderListener or ContextLoaderServlet.
+	 * Find the root {@link WebApplicationContext} for this web app, typically
+	 * loaded via {@link org.springframework.web.context.ContextLoaderListener}.
 	 * <p>Will rethrow an exception that happened on root context startup,
 	 * to differentiate between a failed context startup and no context at all.
 	 * @param pc PortletContext to find the web application context for
@@ -85,8 +85,8 @@ public abstract class PortletApplicationContextUtils {
 	}
 
 	/**
-	 * Find the root WebApplicationContext for this portlet application, which is
-	 * typically loaded via ContextLoaderListener or ContextLoaderServlet.
+	 * Find the root {@link WebApplicationContext} for this web app, typically
+	 * loaded via {@link org.springframework.web.context.ContextLoaderListener}.
 	 * <p>Will rethrow an exception that happened on root context startup,
 	 * to differentiate between a failed context startup and no context at all.
 	 * @param pc PortletContext to find the web application context for
@@ -96,9 +96,7 @@ public abstract class PortletApplicationContextUtils {
 	 * @throws IllegalStateException if the root WebApplicationContext could not be found
 	 * @see org.springframework.web.context.WebApplicationContext#ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE
 	 */
-	public static ApplicationContext getRequiredWebApplicationContext(PortletContext pc)
-			throws IllegalStateException {
-
+	public static ApplicationContext getRequiredWebApplicationContext(PortletContext pc) throws IllegalStateException {
 		ApplicationContext wac = getWebApplicationContext(pc);
 		if (wac == null) {
 			throw new IllegalStateException("No WebApplicationContext found: no ContextLoaderListener registered?");
@@ -110,62 +108,62 @@ public abstract class PortletApplicationContextUtils {
 	/**
 	 * Register web-specific scopes ("request", "session", "globalSession")
 	 * with the given BeanFactory, as used by the Portlet ApplicationContext.
-	 * @param beanFactory the BeanFactory to configure
+	 * @param bf the BeanFactory to configure
 	 * @param pc the PortletContext that we're running within
 	 */
-	static void registerPortletApplicationScopes(ConfigurableListableBeanFactory beanFactory, PortletContext pc) {
-		beanFactory.registerScope(WebApplicationContext.SCOPE_REQUEST, new RequestScope());
-		beanFactory.registerScope(WebApplicationContext.SCOPE_SESSION, new SessionScope(false));
-		beanFactory.registerScope(WebApplicationContext.SCOPE_GLOBAL_SESSION, new SessionScope(true));
+	static void registerPortletApplicationScopes(ConfigurableListableBeanFactory bf, PortletContext pc) {
+		bf.registerScope(WebApplicationContext.SCOPE_REQUEST, new RequestScope());
+		bf.registerScope(WebApplicationContext.SCOPE_SESSION, new SessionScope(false));
+		bf.registerScope(WebApplicationContext.SCOPE_GLOBAL_SESSION, new SessionScope(true));
 		if (pc != null) {
 			PortletContextScope appScope = new PortletContextScope(pc);
-			beanFactory.registerScope(WebApplicationContext.SCOPE_APPLICATION, appScope);
+			bf.registerScope(WebApplicationContext.SCOPE_APPLICATION, appScope);
 			// Register as PortletContext attribute, for ContextCleanupListener to detect it.
 			pc.setAttribute(PortletContextScope.class.getName(), appScope);
 		}
 
-		beanFactory.registerResolvableDependency(PortletRequest.class, new RequestObjectFactory());
-		beanFactory.registerResolvableDependency(PortletSession.class, new SessionObjectFactory());
-		beanFactory.registerResolvableDependency(WebRequest.class, new WebRequestObjectFactory());
+		bf.registerResolvableDependency(PortletRequest.class, new RequestObjectFactory());
+		bf.registerResolvableDependency(PortletSession.class, new SessionObjectFactory());
+		bf.registerResolvableDependency(WebRequest.class, new WebRequestObjectFactory());
 	}
 
 	/**
 	 * Register web-specific environment beans ("contextParameters", "contextAttributes")
 	 * with the given BeanFactory, as used by the Portlet ApplicationContext.
 	 * @param bf the BeanFactory to configure
-	 * @param sc the ServletContext that we're running within
-	 * @param pc the PortletContext that we're running within
-	 * @param config the PortletConfig of the containing Portlet
+	 * @param servletContext the ServletContext that we're running within
+	 * @param portletContext the PortletContext that we're running within
+	 * @param portletConfig the PortletConfig of the containing Portlet
 	 */
-	static void registerEnvironmentBeans(
-			ConfigurableListableBeanFactory bf, ServletContext sc, PortletContext pc, PortletConfig config) {
+	static void registerEnvironmentBeans(ConfigurableListableBeanFactory bf, ServletContext servletContext,
+			PortletContext portletContext, PortletConfig portletConfig) {
 
-		if (sc != null && !bf.containsBean(WebApplicationContext.SERVLET_CONTEXT_BEAN_NAME)) {
-			bf.registerSingleton(WebApplicationContext.SERVLET_CONTEXT_BEAN_NAME, sc);
+		if (servletContext != null && !bf.containsBean(WebApplicationContext.SERVLET_CONTEXT_BEAN_NAME)) {
+			bf.registerSingleton(WebApplicationContext.SERVLET_CONTEXT_BEAN_NAME, servletContext);
 		}
 
-		if (pc != null && !bf.containsBean(ConfigurablePortletApplicationContext.PORTLET_CONTEXT_BEAN_NAME)) {
-			bf.registerSingleton(ConfigurablePortletApplicationContext.PORTLET_CONTEXT_BEAN_NAME, pc);
+		if (portletContext != null && !bf.containsBean(ConfigurablePortletApplicationContext.PORTLET_CONTEXT_BEAN_NAME)) {
+			bf.registerSingleton(ConfigurablePortletApplicationContext.PORTLET_CONTEXT_BEAN_NAME, portletContext);
 		}
 
-		if (config != null && !bf.containsBean(ConfigurablePortletApplicationContext.PORTLET_CONFIG_BEAN_NAME)) {
-			bf.registerSingleton(ConfigurablePortletApplicationContext.PORTLET_CONFIG_BEAN_NAME, config);
+		if (portletConfig != null && !bf.containsBean(ConfigurablePortletApplicationContext.PORTLET_CONFIG_BEAN_NAME)) {
+			bf.registerSingleton(ConfigurablePortletApplicationContext.PORTLET_CONFIG_BEAN_NAME, portletConfig);
 		}
 
 		if (!bf.containsBean(WebApplicationContext.CONTEXT_PARAMETERS_BEAN_NAME)) {
 			Map<String, String> parameterMap = new HashMap<String, String>();
-			if (pc != null) {
-				Enumeration<String> paramNameEnum = pc.getInitParameterNames();
+			if (portletContext != null) {
+				Enumeration<String> paramNameEnum = portletContext.getInitParameterNames();
 				while (paramNameEnum.hasMoreElements()) {
 					String paramName = paramNameEnum.nextElement();
-					parameterMap.put(paramName, pc.getInitParameter(paramName));
+					parameterMap.put(paramName, portletContext.getInitParameter(paramName));
 				}
 			}
-			if (config != null) {
-				Enumeration<String> paramNameEnum = config.getInitParameterNames();
+			if (portletConfig != null) {
+				Enumeration<String> paramNameEnum = portletConfig.getInitParameterNames();
 				while (paramNameEnum.hasMoreElements()) {
 					String paramName = paramNameEnum.nextElement();
-					parameterMap.put(paramName, config.getInitParameter(paramName));
+					parameterMap.put(paramName, portletConfig.getInitParameter(paramName));
 				}
 			}
 			bf.registerSingleton(WebApplicationContext.CONTEXT_PARAMETERS_BEAN_NAME,
@@ -174,11 +172,11 @@ public abstract class PortletApplicationContextUtils {
 
 		if (!bf.containsBean(WebApplicationContext.CONTEXT_ATTRIBUTES_BEAN_NAME)) {
 			Map<String, Object> attributeMap = new HashMap<String, Object>();
-			if (pc != null) {
-				Enumeration<String> attrNameEnum = pc.getAttributeNames();
+			if (portletContext != null) {
+				Enumeration<String> attrNameEnum = portletContext.getAttributeNames();
 				while (attrNameEnum.hasMoreElements()) {
 					String attrName = attrNameEnum.nextElement();
-					attributeMap.put(attrName, pc.getAttribute(attrName));
+					attributeMap.put(attrName, portletContext.getAttribute(attrName));
 				}
 			}
 			bf.registerSingleton(WebApplicationContext.CONTEXT_ATTRIBUTES_BEAN_NAME,

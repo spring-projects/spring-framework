@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,8 +38,8 @@ import org.springframework.web.util.WebUtils;
 public abstract class FacesContextUtils {
 
 	/**
-	 * Find the root {@link WebApplicationContext} for this web app,
-	 * typically loaded via ContextLoaderListener.
+	 * Find the root {@link WebApplicationContext} for this web app, typically
+	 * loaded via {@link org.springframework.web.context.ContextLoaderListener}.
 	 * <p>Will rethrow an exception that happened on root context startup,
 	 * to differentiate between a failed context startup and no context at all.
 	 * @param fc the FacesContext to find the web application context for
@@ -66,8 +66,8 @@ public abstract class FacesContextUtils {
 	}
 
 	/**
-	 * Find the root {@link WebApplicationContext} for this web app,
-	 * typically loaded via ContextLoaderListener.
+	 * Find the root {@link WebApplicationContext} for this web app, typically
+	 * loaded via {@link org.springframework.web.context.ContextLoaderListener}.
 	 * <p>Will rethrow an exception that happened on root context startup,
 	 * to differentiate between a failed context startup and no context at all.
 	 * @param fc the FacesContext to find the web application context for
@@ -75,9 +75,7 @@ public abstract class FacesContextUtils {
 	 * @throws IllegalStateException if the root WebApplicationContext could not be found
 	 * @see org.springframework.web.context.WebApplicationContext#ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE
 	 */
-	public static WebApplicationContext getRequiredWebApplicationContext(FacesContext fc)
-			throws IllegalStateException {
-
+	public static WebApplicationContext getRequiredWebApplicationContext(FacesContext fc) throws IllegalStateException {
 		WebApplicationContext wac = getWebApplicationContext(fc);
 		if (wac == null) {
 			throw new IllegalStateException("No WebApplicationContext found: no ContextLoaderListener registered?");
