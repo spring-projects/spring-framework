@@ -1194,6 +1194,10 @@ public final class ResolvableType implements Serializable {
 		}
 		// Check the cache, we may have a ResolvableType that may have already been resolved
 		cache.purgeUnreferencedEntries();
+
+		if (type instanceof Class<?>) {
+			return new ResolvableType(type, typeProvider, variableResolver, null);
+		}
 		ResolvableType key = new ResolvableType(type, typeProvider, variableResolver);
 		ResolvableType resolvableType = cache.get(key);
 		if (resolvableType == null) {
