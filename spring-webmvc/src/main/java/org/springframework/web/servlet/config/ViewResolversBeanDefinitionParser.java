@@ -70,10 +70,6 @@ public class ViewResolversBeanDefinitionParser implements BeanDefinitionParser {
 		Object source = context.extractSource(element);
 		context.pushContainingComponent(new CompositeComponentDefinition(element.getTagName(), source));
 
-		RootBeanDefinition compositeResolverBeanDef = new RootBeanDefinition(ViewResolverComposite.class);
-		compositeResolverBeanDef.setSource(source);
-		compositeResolverBeanDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
-
 		ManagedList<Object> resolvers = new ManagedList<Object>(4);
 		resolvers.setSource(context.extractSource(element));
 		String[] names = new String[] {"jsp", "tiles", "bean-name", "freemarker", "velocity", "groovy", "bean", "ref"};
@@ -122,13 +118,19 @@ public class ViewResolversBeanDefinitionParser implements BeanDefinitionParser {
 			resolvers.add(resolverBeanDef);
 		}
 
-		List<Element> elementList = DomUtils.getChildElementsByTagName(element, new String[] {"content-negotiation"});
-		if (elementList.isEmpty()) {
+		String beanName = VIEW_RESOLVER_BEAN_NAME;
+		RootBeanDefinition compositeResolverBeanDef = new RootBeanDefinition(ViewResolverComposite.class);
+		compositeResolverBeanDef.setSource(source);
+		compositeResolverBeanDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
+
+		names = new String[] {"content-negotiation"};
+		List<Element> contentnNegotiationElements = DomUtils.getChildElementsByTagName(element, names);
+		if (contentnNegotiationElements.isEmpty()) {
 			compositeResolverBeanDef.getPropertyValues().add("order", 0);
 			compositeResolverBeanDef.getPropertyValues().add("viewResolvers", resolvers);
 		}
-		else if (elementList.size() == 1) {
-			BeanDefinition beanDef = createContentNegotiatingViewResolver(elementList.get(0), context);
+		else if (contentnNegotiationElements.size() == 1) {
+			BeanDefinition beanDef = createContentNegotiatingViewResolver(contentnNegotiationElements.get(0), context);
 			beanDef.getPropertyValues().add("viewResolvers", resolvers);
 			ManagedList<Object> list = new ManagedList<Object>(1);
 			list.add(beanDef);
@@ -136,14 +138,12 @@ public class ViewResolversBeanDefinitionParser implements BeanDefinitionParser {
 			compositeResolverBeanDef.getPropertyValues().add("order", Ordered.HIGHEST_PRECEDENCE);
 			compositeResolverBeanDef.getPropertyValues().add("viewResolvers", list);
 		}
-		else if (elementList.size() > 1) {
+		else if (contentnNegotiationElements.size() > 1) {
 			throw new IllegalArgumentException("Only one <content-negotiation> element is allowed.");
 		}
 
-		String beanName = VIEW_RESOLVER_BEAN_NAME;
 		context.getReaderContext().getRegistry().registerBeanDefinition(beanName, compositeResolverBeanDef);
 		context.registerComponent(new BeanComponentDefinition(compositeResolverBeanDef, beanName));
-
 		context.popAndRegisterContainingComponent();
 		return null;
 	}
