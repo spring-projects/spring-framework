@@ -132,8 +132,8 @@ public class MessageBrokerConfigurationTests {
 
 		assertEquals(2, channel.getInterceptors().size());
 
-		ThreadPoolTaskExecutor taskExecutor = this.customContext.getBean(
-				"clientInboundChannelExecutor", ThreadPoolTaskExecutor.class);
+		CustomThreadPoolTaskExecutor taskExecutor = this.customContext.getBean(
+				"clientInboundChannelExecutor", CustomThreadPoolTaskExecutor.class);
 
 		assertEquals(11, taskExecutor.getCorePoolSize());
 		assertEquals(12, taskExecutor.getMaxPoolSize());
@@ -489,7 +489,8 @@ public class MessageBrokerConfigurationTests {
 		@Override
 		protected void configureClientInboundChannel(ChannelRegistration registration) {
 			registration.setInterceptors(this.interceptor);
-			registration.taskExecutor().corePoolSize(11).maxPoolSize(12).keepAliveSeconds(13).queueCapacity(14);
+			registration.taskExecutor(new CustomThreadPoolTaskExecutor())
+					.corePoolSize(11).maxPoolSize(12).keepAliveSeconds(13).queueCapacity(14);
 		}
 
 		@Override
@@ -538,6 +539,9 @@ public class MessageBrokerConfigurationTests {
 		@Override
 		public void validate(Object target, Errors errors) {
 		}
+	}
+
+	private static class CustomThreadPoolTaskExecutor extends ThreadPoolTaskExecutor {
 	}
 
 }

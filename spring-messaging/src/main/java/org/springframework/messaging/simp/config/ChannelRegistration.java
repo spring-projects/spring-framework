@@ -21,6 +21,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.springframework.messaging.support.ChannelInterceptor;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 /**
  * A registration class for customizing the configuration for a
@@ -42,6 +43,17 @@ public class ChannelRegistration {
 	public TaskExecutorRegistration taskExecutor() {
 		if (this.registration == null) {
 			this.registration = new TaskExecutorRegistration();
+		}
+		return this.registration;
+	}
+
+	/**
+	 * Configure the thread pool backing this message channel using a custom
+	 * ThreadPoolTaskExecutor.
+	 */
+	public TaskExecutorRegistration taskExecutor(ThreadPoolTaskExecutor taskExecutor) {
+		if (this.registration == null) {
+			this.registration = new TaskExecutorRegistration(taskExecutor);
 		}
 		return this.registration;
 	}

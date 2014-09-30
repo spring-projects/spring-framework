@@ -26,6 +26,8 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
  */
 public class TaskExecutorRegistration {
 
+	private ThreadPoolTaskExecutor taskExecutor;
+
 	private int corePoolSize = Runtime.getRuntime().availableProcessors() * 2;
 
 	private int maxPoolSize = Integer.MAX_VALUE;
@@ -34,6 +36,13 @@ public class TaskExecutorRegistration {
 
 	private int keepAliveSeconds = 60;
 
+
+	public TaskExecutorRegistration() {
+	}
+
+	public TaskExecutorRegistration(ThreadPoolTaskExecutor taskExecutor) {
+		this.taskExecutor = taskExecutor;
+	}
 
 	/**
 	 * Set the core pool size of the ThreadPoolExecutor.
@@ -93,7 +102,7 @@ public class TaskExecutorRegistration {
 	}
 
 	protected ThreadPoolTaskExecutor getTaskExecutor() {
-		ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+		ThreadPoolTaskExecutor executor = (this.taskExecutor != null ? this.taskExecutor : new ThreadPoolTaskExecutor());
 		executor.setCorePoolSize(this.corePoolSize);
 		executor.setMaxPoolSize(this.maxPoolSize);
 		executor.setKeepAliveSeconds(this.keepAliveSeconds);
