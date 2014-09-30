@@ -58,7 +58,7 @@ public class JtaTransactionManagerFactoryBean implements FactoryBean<JtaTransact
 		String className = resolveJtaTransactionManagerClassName();
 		try {
 			Class<? extends JtaTransactionManager> clazz = (Class<? extends JtaTransactionManager>)
-					JtaTransactionManagerFactoryBean.class.getClassLoader().loadClass(className);
+					ClassUtils.forName(className, JtaTransactionManagerFactoryBean.class.getClassLoader());
 			this.transactionManager = BeanUtils.instantiate(clazz);
 		}
 		catch (ClassNotFoundException ex) {
