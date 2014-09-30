@@ -65,10 +65,12 @@ public class Jackson2ObjectMapperFactoryBeanTests {
 
 	private Jackson2ObjectMapperFactoryBean factory;
 
+
 	@Before
 	public void setUp() {
 		factory = new Jackson2ObjectMapperFactoryBean();
 	}
+
 
 	@Test
 	public void settersWithNullValues() {

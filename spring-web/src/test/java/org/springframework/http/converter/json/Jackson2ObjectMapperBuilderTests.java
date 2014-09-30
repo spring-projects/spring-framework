@@ -51,7 +51,6 @@ import org.junit.Test;
 import org.springframework.beans.FatalBeanException;
 
 import static org.junit.Assert.*;
-import static org.junit.Assert.assertEquals;
 
 /**
  * Test class for {@link Jackson2ObjectMapperBuilder}.
@@ -195,18 +194,16 @@ public class Jackson2ObjectMapperBuilderTests {
 	public void completeSetup() {
 		NopAnnotationIntrospector annotationIntrospector = NopAnnotationIntrospector.instance;
 
-		Jackson2ObjectMapperBuilder builder = Jackson2ObjectMapperBuilder.instance(new ObjectMapper());
-
-		Map<Class<?>, JsonDeserializer<?>>
-				deserializers = new HashMap<Class<?>, JsonDeserializer<?>>();
+		Map<Class<?>, JsonDeserializer<?>> deserializers = new HashMap<Class<?>, JsonDeserializer<?>>();
 		deserializers.put(Date.class, new DateDeserializers.DateDeserializer());
 
 		JsonSerializer<Class<?>> serializer1 = new ClassSerializer();
 		JsonSerializer<Number> serializer2 = new NumberSerializer();
 
+		Jackson2ObjectMapperBuilder builder = Jackson2ObjectMapperBuilder.json();
+
 		builder.serializers(serializer1);
-		builder.serializersByType(Collections
-				.<Class<?>, JsonSerializer<?>>singletonMap(Boolean.class, serializer2));
+		builder.serializersByType(Collections.<Class<?>, JsonSerializer<?>>singletonMap(Boolean.class, serializer2));
 		builder.deserializersByType(deserializers);
 		builder.annotationIntrospector(annotationIntrospector);
 
@@ -221,7 +218,8 @@ public class Jackson2ObjectMapperBuilderTests {
 
 		builder.serializationInclusion(JsonInclude.Include.NON_NULL);
 
-		ObjectMapper objectMapper = builder.build();
+		ObjectMapper objectMapper = new ObjectMapper();
+		builder.configure(objectMapper);
 
 		assertTrue(getSerializerFactoryConfig(objectMapper).hasSerializers());
 		assertTrue(getDeserializerFactoryConfig(objectMapper).hasDeserializers());
