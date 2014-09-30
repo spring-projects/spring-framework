@@ -49227,7 +49227,7 @@ result in an exception as a custom `CacheManager` will be ignored by the
 ===== Conditional caching
 Sometimes, a method might not be suitable for caching all the time (for example, it
 might depend on the given arguments). The cache annotations support such functionality
-through the `conditional` parameter which takes a `SpEL` expression that is evaluated to
+through the `condition` parameter which takes a `SpEL` expression that is evaluated to
 either `true` or `false`. If `true`, the method is cached - if not, it behaves as if the
 method is not cached, that is executed every since time no matter what values are in the
 cache or what arguments are used. A quick example - the following method will be cached
@@ -49240,8 +49240,8 @@ only if the argument `name` has a length shorter than 32:
 	public Book findBook(String name)
 ----
 
-In addition the `conditional` parameter, the `unless` parameter can be used to veto the
-adding of a value to the cache. Unlike `conditional`, `unless` expressions are evaluated
+In addition the `condition` parameter, the `unless` parameter can be used to veto the
+adding of a value to the cache. Unlike `condition`, `unless` expressions are evaluated
 __after__ the method has been called. Expanding on the previous example - perhaps we
 only want to cache paperback books:
 
