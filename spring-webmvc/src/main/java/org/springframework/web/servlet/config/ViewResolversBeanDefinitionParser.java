@@ -126,7 +126,6 @@ public class ViewResolversBeanDefinitionParser implements BeanDefinitionParser {
 		names = new String[] {"content-negotiation"};
 		List<Element> contentnNegotiationElements = DomUtils.getChildElementsByTagName(element, names);
 		if (contentnNegotiationElements.isEmpty()) {
-			compositeResolverBeanDef.getPropertyValues().add("order", 0);
 			compositeResolverBeanDef.getPropertyValues().add("viewResolvers", resolvers);
 		}
 		else if (contentnNegotiationElements.size() == 1) {

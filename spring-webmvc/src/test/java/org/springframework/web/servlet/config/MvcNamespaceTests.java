@@ -679,7 +679,7 @@ public class MvcNamespaceTests {
 		ViewResolverComposite compositeResolver = this.appContext.getBean(ViewResolverComposite.class);
 		assertNotNull(compositeResolver);
 		assertEquals("Actual: " + compositeResolver.getViewResolvers(), 8, compositeResolver.getViewResolvers().size());
-		assertEquals(0, compositeResolver.getOrder());
+		assertEquals(Ordered.LOWEST_PRECEDENCE, compositeResolver.getOrder());
 
 		List<ViewResolver> resolvers = compositeResolver.getViewResolvers();
 		assertEquals(BeanNameViewResolver.class, resolvers.get(0).getClass());
