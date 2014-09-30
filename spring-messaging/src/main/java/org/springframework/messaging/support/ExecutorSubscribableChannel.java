@@ -105,16 +105,14 @@ public class ExecutorSubscribableChannel extends AbstractSubscribableChannel {
 
 		private final Message<?> inputMessage;
 
-		private final MessageHandler handler;
+		private final MessageHandler messageHandler;
 
 		private int interceptorIndex = -1;
 
-
-		public SendTask(Message<?> message, MessageHandler handler) {
+		public SendTask(Message<?> message, MessageHandler messageHandler) {
 			this.inputMessage = message;
-			this.handler = handler;
+			this.messageHandler = messageHandler;
 		}
-
 
 		@Override
 		public Message<?> getMessage() {
@@ -123,7 +121,7 @@ public class ExecutorSubscribableChannel extends AbstractSubscribableChannel {
 
 		@Override
 		public MessageHandler getMessageHandler() {
-			return this.getMessageHandler();
+			return this.messageHandler;
 		}
 
 		@Override
@@ -134,7 +132,7 @@ public class ExecutorSubscribableChannel extends AbstractSubscribableChannel {
 				if (message == null) {
 					return;
 				}
-				this.handler.handleMessage(message);
+				this.messageHandler.handleMessage(message);
 				triggerAfterMessageHandled(message, null);
 			}
 			catch (Exception ex) {
@@ -142,11 +140,11 @@ public class ExecutorSubscribableChannel extends AbstractSubscribableChannel {
 				if (ex instanceof MessagingException) {
 					throw (MessagingException) ex;
 				}
-				String description = "Failed to handle " + message + " to " + this + " in " + this.handler;
+				String description = "Failed to handle " + message + " to " + this + " in " + this.messageHandler;
 				throw new MessageDeliveryException(message, description, ex);
 			}
 			catch (Error ex) {
-				String description = "Failed to handle " + message + " to " + this + " in " + this.handler;
+				String description = "Failed to handle " + message + " to " + this + " in " + this.messageHandler;
 				triggerAfterMessageHandled(message, new MessageDeliveryException(message, description, ex));
 				throw ex;
 			}
@@ -154,7 +152,7 @@ public class ExecutorSubscribableChannel extends AbstractSubscribableChannel {
 
 		private Message<?> applyBeforeHandle(Message<?> message) {
 			for (ExecutorChannelInterceptor interceptor : executorInterceptors) {
-				message = interceptor.beforeHandle(message, ExecutorSubscribableChannel.this, this.handler);
+				message = interceptor.beforeHandle(message, ExecutorSubscribableChannel.this, this.messageHandler);
 				if (message == null) {
 					String name = interceptor.getClass().getSimpleName();
 					if (logger.isDebugEnabled()) {
@@ -172,7 +170,7 @@ public class ExecutorSubscribableChannel extends AbstractSubscribableChannel {
 			for (int i = this.interceptorIndex; i >= 0; i--) {
 				ExecutorChannelInterceptor interceptor = executorInterceptors.get(i);
 				try {
-					interceptor.afterMessageHandled(message, ExecutorSubscribableChannel.this, this.handler, ex);
+					interceptor.afterMessageHandled(message, ExecutorSubscribableChannel.this, this.messageHandler, ex);
 				}
 				catch (Throwable ex2) {
 					logger.error("Exception from afterMessageHandled in " + interceptor, ex2);
