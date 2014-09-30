@@ -230,7 +230,7 @@ public class MethodReference extends SpelNodeImpl {
 
 	private void updateExitTypeDescriptor() {
 		CachedMethodExecutor executorToCheck = this.cachedExecutor;
-		if (executorToCheck.get() instanceof ReflectiveMethodExecutor) {
+		if (executorToCheck != null && executorToCheck.get() instanceof ReflectiveMethodExecutor) {
 			Method method = ((ReflectiveMethodExecutor) executorToCheck.get()).getMethod();
 			this.exitTypeDescriptor = CodeFlow.toDescriptor(method.getReturnType());
 		}
