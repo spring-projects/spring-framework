@@ -1192,12 +1192,17 @@ public final class ResolvableType implements Serializable {
 		if (type == null) {
 			return NONE;
 		}
-		// Check the cache, we may have a ResolvableType that may have already been resolved
+
+		// Purge empty entries on access since we don't have a clean-up thread or the like.
 		cache.purgeUnreferencedEntries();
 
+		// For simple Class references, build the wrapper right away -
+		// no expensive resolution necessary, so not worth caching...
 		if (type instanceof Class<?>) {
 			return new ResolvableType(type, typeProvider, variableResolver, null);
 		}
+
+		// Check the cache - we may have a ResolvableType which has been resolved before...
 		ResolvableType key = new ResolvableType(type, typeProvider, variableResolver);
 		ResolvableType resolvableType = cache.get(key);
 		if (resolvableType == null) {

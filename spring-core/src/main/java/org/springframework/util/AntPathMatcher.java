@@ -58,7 +58,9 @@ public class AntPathMatcher implements PathMatcher {
 	private static final Pattern VARIABLE_PATTERN = Pattern.compile("\\{[^/]+?\\}");
 
 
-	private String pathSeparator = DEFAULT_PATH_SEPARATOR;
+	private String pathSeparator;
+
+	private PathSeparatorPatternCache pathSeparatorPatternCache;
 
 	private boolean trimTokens = true;
 
@@ -68,13 +70,13 @@ public class AntPathMatcher implements PathMatcher {
 
 	final Map<String, AntPathStringMatcher> stringMatcherCache = new ConcurrentHashMap<String, AntPathStringMatcher>(256);
 
-	private PathSeparatorPatternCache pathSeparatorPatternCache = new PathSeparatorPatternCache(DEFAULT_PATH_SEPARATOR);
-
 
 	/**
 	 * Create a new instance with the {@link #DEFAULT_PATH_SEPARATOR}.
 	 */
 	public AntPathMatcher() {
+		this.pathSeparator = DEFAULT_PATH_SEPARATOR;
+		this.pathSeparatorPatternCache = new PathSeparatorPatternCache(DEFAULT_PATH_SEPARATOR);
 	}
 
 	/**
@@ -580,14 +582,13 @@ public class AntPathMatcher implements PathMatcher {
 	 * {@link #getPatternComparator(String)}.
 	 * <p>In order, the most "generic" pattern is determined by the following:
 	 * <ul>
-	 *     <li>if it's null or a capture all pattern (i.e. it is equal to "/**")</li>
-	 *     <li>if the other pattern is an actual match</li>
-	 *     <li>if it's a catch-all pattern (i.e. it ends with "**"</li>
-	 *     <li>if it's got more "*" than the other pattern</li>
-	 *     <li>if it's got more "{foo}" than the other pattern</li>
-	 *     <li>if it's shorter than the other pattern</li>
+	 * <li>if it's null or a capture all pattern (i.e. it is equal to "/**")</li>
+	 * <li>if the other pattern is an actual match</li>
+	 * <li>if it's a catch-all pattern (i.e. it ends with "**"</li>
+	 * <li>if it's got more "*" than the other pattern</li>
+	 * <li>if it's got more "{foo}" than the other pattern</li>
+	 * <li>if it's shorter than the other pattern</li>
 	 * </ul>
-	 * </p>
 	 */
 	protected static class AntPatternComparator implements Comparator<String> {
 
@@ -598,15 +599,13 @@ public class AntPathMatcher implements PathMatcher {
 		}
 
 		/**
-		 * Compare two patterns to determine which should match first, i.e. which is the most specific
-		 * regarding the current path.
-		 *
+		 * Compare two patterns to determine which should match first, i.e. which
+		 * is the most specific regarding the current path.
 		 * @return a negative integer, zero, or a positive integer as pattern1 is
 		 * more specific, equally specific, or less specific than pattern2.
 		 */
 		@Override
 		public int compare(String pattern1, String pattern2) {
-
 			PatternInfo info1 = new PatternInfo(pattern1);
 			PatternInfo info2 = new PatternInfo(pattern2);
 
@@ -664,6 +663,7 @@ public class AntPathMatcher implements PathMatcher {
 			return 0;
 		}
 
+
 		/**
 		 * Value class that holds information about the pattern, e.g. number of
 		 * occurrences of "*", "**", and "{" pattern elements.
@@ -683,7 +683,6 @@ public class AntPathMatcher implements PathMatcher {
 			private boolean prefixPattern;
 
 			private Integer length;
-
 
 			public PatternInfo(String pattern) {
 				this.pattern = pattern;
@@ -769,8 +768,7 @@ public class AntPathMatcher implements PathMatcher {
 
 		private final String endsOnDoubleWildCard;
 
-
-		private PathSeparatorPatternCache(String pathSeparator) {
+		public PathSeparatorPatternCache(String pathSeparator) {
 			this.endsOnWildCard = pathSeparator + "*";
 			this.endsOnDoubleWildCard = pathSeparator + "**";
 		}
