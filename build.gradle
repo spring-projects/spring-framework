@@ -404,7 +404,7 @@ project("spring-aop") {
 		compile("aopalliance:aopalliance:1.0")
 		optional("org.aspectj:aspectjweaver:${aspectjVersion}")
 		optional("commons-pool:commons-pool:1.6")
-		optional("com.jamonapi:jamon:2.78")
+		optional("com.jamonapi:jamon:2.79")
 	}
 }
 
@@ -459,7 +459,7 @@ project("spring-context") {
 		optional("org.aspectj:aspectjweaver:${aspectjVersion}")
 		optional("org.codehaus.groovy:groovy-all:${groovyVersion}")
 		optional("org.beanshell:bsh:2.0b4")
-		optional("org.jruby:jruby:1.7.12")
+		optional("org.jruby:jruby:1.7.16")
 		testCompile("javax.inject:javax.inject-tck:1")
 		testCompile("commons-dbcp:commons-dbcp:1.4")
 		testCompile("org.slf4j:slf4j-api:${slf4jVersion}")
@@ -591,9 +591,9 @@ project("spring-jdbc") {
 		optional("javax.transaction:javax.transaction-api:1.2")
 		optional("com.mchange:c3p0:0.9.2.1")
 		optional("org.hsqldb:hsqldb:${hsqldbVersion}")
-		optional("com.h2database:h2:1.4.180")
-		optional("org.apache.derby:derby:10.10.2.0")
-		optional("org.apache.derby:derbyclient:10.10.2.0")
+		optional("com.h2database:h2:1.4.181")
+		optional("org.apache.derby:derby:10.11.1.1")
+		optional("org.apache.derby:derbyclient:10.11.1.1")
 	}
 }
 
@@ -608,7 +608,7 @@ project("spring-context-support") {
 		optional(project(":spring-tx")) // for Quartz support
 		optional("javax.mail:javax.mail-api:1.5.2")
 		optional("javax.cache:cache-api:1.0.0")
-		optional("com.google.guava:guava:17.0")
+		optional("com.google.guava:guava:18.0")
 		optional("net.sf.ehcache:ehcache:${ehcacheVersion}")
 		optional("org.quartz-scheduler:quartz:2.2.1")
 		optional("org.codehaus.fabric3.api:commonj:1.1.0")
@@ -623,7 +623,7 @@ project("spring-context-support") {
 			exclude group: "xml-apis", module: "xml-apis"
 		}
 		testCompile(project(":spring-context"))
-		testCompile("org.apache.poi:poi:3.10-FINAL")
+		testCompile("org.apache.poi:poi:3.10.1")
 		testCompile("commons-beanutils:commons-beanutils:1.8.0") // for Velocity/JasperReports
 		testCompile("commons-digester:commons-digester:1.8.1") // for Velocity/JasperReports
 		testCompile("org.hsqldb:hsqldb:${hsqldbVersion}")
@@ -821,7 +821,7 @@ project("spring-webmvc") {
 		optional("javax.servlet.jsp:javax.servlet.jsp-api:2.2.1")
 		optional("javax.servlet.jsp.jstl:javax.servlet.jsp.jstl-api:1.2.1")
 		optional("net.sourceforge.jexcelapi:jxl:2.6.12")
-		optional("org.apache.poi:poi:3.10-FINAL")
+		optional("org.apache.poi:poi:3.10.1")
 		optional("org.apache.velocity:velocity:1.7")
 		optional("velocity-tools:velocity-tools-view:1.4")
 		optional("org.freemarker:freemarker:2.3.20")
