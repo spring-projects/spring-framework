@@ -101,7 +101,7 @@ public class ExecutorSubscribableChannel extends AbstractSubscribableChannel {
 	/**
 	 * Invoke a MessageHandler with ExecutorChannelInterceptor's.
 	 */
-	private class SendTask implements Runnable {
+	private class SendTask implements MessageHandlingRunnable {
 
 		private final Message<?> inputMessage;
 
@@ -113,6 +113,17 @@ public class ExecutorSubscribableChannel extends AbstractSubscribableChannel {
 		public SendTask(Message<?> message, MessageHandler handler) {
 			this.inputMessage = message;
 			this.handler = handler;
+		}
+
+
+		@Override
+		public Message<?> getMessage() {
+			return this.inputMessage;
+		}
+
+		@Override
+		public MessageHandler getMessageHandler() {
+			return this.getMessageHandler();
 		}
 
 		@Override
