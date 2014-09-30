@@ -280,7 +280,7 @@ public class ViewResolverRegistry {
 
 
 	protected int getOrder() {
-		return this.order;
+		return (this.order != null ? this.order : Ordered.LOWEST_PRECEDENCE);
 	}
 
 	protected List<ViewResolver> getViewResolvers() {
