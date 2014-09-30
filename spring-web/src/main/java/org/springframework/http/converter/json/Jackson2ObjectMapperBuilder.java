@@ -384,6 +384,9 @@ public class Jackson2ObjectMapperBuilder {
 			this.objectMapper.registerModule(module);
 		}
 
+		if(!features.containsKey(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)) {
+			configureFeature(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+		}
 		for (Object feature : this.features.keySet()) {
 			configureFeature(feature, this.features.get(feature));
 		}

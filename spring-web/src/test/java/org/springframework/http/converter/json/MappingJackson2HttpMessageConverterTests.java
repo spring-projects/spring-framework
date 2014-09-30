@@ -146,12 +146,13 @@ public class MappingJackson2HttpMessageConverterTests {
 		converter.read(MyBean.class, inputMessage);
 	}
 
-	@Test(expected = HttpMessageNotReadableException.class)
+	@Test
 	public void readValidJsonWithUnknownProperty() throws IOException {
 		String body = "{\"string\":\"string\",\"unknownProperty\":\"value\"}";
 		MockHttpInputMessage inputMessage = new MockHttpInputMessage(body.getBytes("UTF-8"));
 		inputMessage.getHeaders().setContentType(new MediaType("application", "json"));
 		converter.read(MyBean.class, inputMessage);
+		// Assert no HttpMessageNotReadableException is thrown
 	}
 
 	@Test

@@ -162,12 +162,9 @@ public class WebMvcConfigurationSupportExtensionTests {
 		assertEquals(1, adapter.getMessageConverters().size());
 		assertEquals(MappingJackson2HttpMessageConverter.class, adapter.getMessageConverters().get(0).getClass());
 		ObjectMapper objectMapper = ((MappingJackson2HttpMessageConverter)adapter.getMessageConverters().get(0)).getObjectMapper();
-		assertTrue(objectMapper.getDeserializationConfig()
-				.isEnabled(MapperFeature.DEFAULT_VIEW_INCLUSION));
-		assertTrue(objectMapper.getSerializationConfig()
-				.isEnabled(MapperFeature.DEFAULT_VIEW_INCLUSION));
-		assertTrue(objectMapper.getDeserializationConfig()
-				.isEnabled(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES));
+		assertTrue(objectMapper.getDeserializationConfig().isEnabled(MapperFeature.DEFAULT_VIEW_INCLUSION));
+		assertTrue(objectMapper.getSerializationConfig().isEnabled(MapperFeature.DEFAULT_VIEW_INCLUSION));
+		assertFalse(objectMapper.getDeserializationConfig().isEnabled(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES));
 
 		DirectFieldAccessor fieldAccessor = new DirectFieldAccessor(adapter);
 

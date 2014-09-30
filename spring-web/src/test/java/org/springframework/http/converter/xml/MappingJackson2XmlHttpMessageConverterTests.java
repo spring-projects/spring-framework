@@ -102,12 +102,13 @@ public class MappingJackson2XmlHttpMessageConverterTests {
 		converter.read(MyBean.class, inputMessage);
 	}
 
-	@Test(expected = HttpMessageNotReadableException.class)
+	@Test
 	public void readValidXmlWithUnknownProperty() throws IOException {
 		String body = "<MyBean><string>string</string><unknownProperty>value</unknownProperty></MyBean>";
 		MockHttpInputMessage inputMessage = new MockHttpInputMessage(body.getBytes("UTF-8"));
 		inputMessage.getHeaders().setContentType(new MediaType("application", "xml"));
 		converter.read(MyBean.class, inputMessage);
+		// Assert no HttpMessageNotReadableException is thrown
 	}
 
 	@Test
