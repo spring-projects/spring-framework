@@ -376,28 +376,20 @@ public class AntPathMatcher implements PathMatcher {
 	public String extractPathWithinPattern(String pattern, String path) {
 		String[] patternParts = StringUtils.tokenizeToStringArray(pattern, this.pathSeparator, this.trimTokens, true);
 		String[] pathParts = StringUtils.tokenizeToStringArray(path, this.pathSeparator, this.trimTokens, true);
-
 		StringBuilder builder = new StringBuilder();
+		boolean pathStarted = false;
 
-		// Add any path parts that have a wildcarded pattern part.
-		int puts = 0;
-		for (int i = 0; i < patternParts.length; i++) {
-			String patternPart = patternParts[i];
-			if ((patternPart.indexOf('*') > -1 || patternPart.indexOf('?') > -1) && pathParts.length >= i + 1) {
-				if (puts > 0 || (i == 0 && !pattern.startsWith(this.pathSeparator))) {
-					builder.append(this.pathSeparator);
+		for (int segment = 0; segment < patternParts.length; segment++) {
+			String patternPart = patternParts[segment];
+			if (patternPart.indexOf('*') > -1 || patternPart.indexOf('?') > -1) {
+				for (; segment < pathParts.length; segment++) {
+					if (pathStarted || (segment == 0 && !pattern.startsWith(this.pathSeparator))) {
+						builder.append(this.pathSeparator);
+					}
+					builder.append(pathParts[segment]);
+					pathStarted = true;
 				}
-				builder.append(pathParts[i]);
-				puts++;
 			}
-		}
-
-		// Append any trailing path parts.
-		for (int i = patternParts.length; i < pathParts.length; i++) {
-			if (puts > 0 || i > 0) {
-				builder.append(this.pathSeparator);
-			}
-			builder.append(pathParts[i]);
 		}
 
 		return builder.toString();
