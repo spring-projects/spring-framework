@@ -768,6 +768,16 @@ public class MvcNamespaceTests {
 	}
 
 	@Test
+	public void testViewResolutionWithOrderSet() throws Exception {
+		loadBeanDefinitions("mvc-config-view-resolution-custom-order.xml", 1);
+
+		ViewResolverComposite compositeResolver = this.appContext.getBean(ViewResolverComposite.class);
+		assertNotNull(compositeResolver);
+		assertEquals("Actual: " + compositeResolver.getViewResolvers(), 1, compositeResolver.getViewResolvers().size());
+		assertEquals(123, compositeResolver.getOrder());
+	}
+
+	@Test
 	public void testPathMatchingHandlerMappings() throws Exception {
 		loadBeanDefinitions("mvc-config-path-matching-mappings.xml", 22);
 

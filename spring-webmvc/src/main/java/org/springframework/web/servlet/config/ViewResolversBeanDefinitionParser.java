@@ -133,12 +133,15 @@ public class ViewResolversBeanDefinitionParser implements BeanDefinitionParser {
 			beanDef.getPropertyValues().add("viewResolvers", resolvers);
 			ManagedList<Object> list = new ManagedList<Object>(1);
 			list.add(beanDef);
-
 			compositeResolverBeanDef.getPropertyValues().add("order", Ordered.HIGHEST_PRECEDENCE);
 			compositeResolverBeanDef.getPropertyValues().add("viewResolvers", list);
 		}
 		else if (contentnNegotiationElements.size() > 1) {
 			throw new IllegalArgumentException("Only one <content-negotiation> element is allowed.");
+		}
+
+		if (element.hasAttribute("order")) {
+			compositeResolverBeanDef.getPropertyValues().add("order", element.getAttribute("order"));
 		}
 
 		context.getReaderContext().getRegistry().registerBeanDefinition(beanName, compositeResolverBeanDef);

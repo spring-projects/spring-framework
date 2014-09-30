@@ -949,6 +949,20 @@
 						</xsd:annotation>
 					</xsd:element>
 			</xsd:choice>
+			<xsd:attribute name="order" type="xsd:int">
+				<xsd:annotation>
+					<xsd:documentation><![CDATA[
+	ViewResolver's registered through this element are encapsulated in an
+	instance of org.springframework.web.servlet.view.ViewResolverComposite and
+	follow the order of registration. This attribute determines the order of the
+	ViewResolverComposite itself relative to any additional ViewResolver's
+	(not registered through this element) present in the Spring configuration
+	By default this property is not set, which means the resolver is ordered at
+	Ordered.LOWEST_PRECEDENCE unless content negotiation is enabled in which case
+	the order (if not set explicitly) is changed to Ordered.HIGHEST_PRECEDENCE.
+					]]></xsd:documentation>
+				</xsd:annotation>
+			</xsd:attribute>
 		</xsd:complexType>
 	</xsd:element>
 

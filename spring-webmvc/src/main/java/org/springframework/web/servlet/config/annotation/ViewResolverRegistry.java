@@ -57,7 +57,7 @@ public class ViewResolverRegistry {
 
 	private final List<ViewResolver> viewResolvers = new ArrayList<ViewResolver>(4);
 
-	private int order = Ordered.LOWEST_PRECEDENCE;
+	private Integer order;
 
 	private ContentNegotiationManager contentNegotiationManager;
 
@@ -112,7 +112,7 @@ public class ViewResolverRegistry {
 	private void initContentNegotiatingViewResolver(View[] defaultViews) {
 
 		// ContentNegotiatingResolver in the registry: elevate its precedence!
-		this.order = Ordered.HIGHEST_PRECEDENCE;
+		this.order = (this.order == null ? Ordered.HIGHEST_PRECEDENCE : this.order);
 
 		if (this.contentNegotiatingResolver != null) {
 			if (!ObjectUtils.isEmpty(defaultViews)) {
@@ -255,6 +255,22 @@ public class ViewResolverRegistry {
 					"Please use the method enableContentNegotiation instead.");
 		}
 		this.viewResolvers.add(viewResolver);
+	}
+
+	/**
+	 * ViewResolver's registered through this registry are encapsulated in an
+	 * instance of {@link org.springframework.web.servlet.view.ViewResolverComposite
+	 * ViewResolverComposite} and follow the order of registration.
+	 * This property determines the order of the ViewResolverComposite itself
+	 * relative to any additional ViewResolver's (not registered here) present in
+	 * the Spring configuration
+	 * <p>By default this property is not set, which means the resolver is ordered
+	 * at {@link Ordered#LOWEST_PRECEDENCE} unless content negotiation is enabled
+	 * in which case the order (if not set explicitly) is changed to
+	 * {@link Ordered#HIGHEST_PRECEDENCE}.
+	 */
+	public void order(int order) {
+		this.order = order;
 	}
 
 	protected boolean hasBeanOfType(Class<?> beanType) {

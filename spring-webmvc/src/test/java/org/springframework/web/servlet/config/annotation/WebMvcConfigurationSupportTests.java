@@ -247,6 +247,20 @@ public class WebMvcConfigurationSupportTests {
 	}
 
 	@Test
+	public void mvcViewResolverWithOrderSet() {
+		ApplicationContext context = initContext(CustomViewResolverOrderConfig.class);
+		ViewResolverComposite resolver = context.getBean("mvcViewResolver", ViewResolverComposite.class);
+
+		Map<String, ViewResolver> map = BeanFactoryUtils.beansOfTypeIncludingAncestors(
+				context, ViewResolver.class, true, false);
+
+		assertNotNull(resolver);
+		assertEquals(1, resolver.getViewResolvers().size());
+		assertEquals(InternalResourceViewResolver.class, resolver.getViewResolvers().get(0).getClass());
+		assertEquals(123, resolver.getOrder());
+	}
+
+	@Test
 	public void defaultPathMatchConfiguration() throws Exception {
 		ApplicationContext context = initContext(WebConfig.class);
 		UrlPathHelper urlPathHelper = context.getBean(UrlPathHelper.class);
@@ -286,6 +300,16 @@ public class WebMvcConfigurationSupportTests {
 		}
 	}
 
+	@EnableWebMvc
+	@Configuration
+	public static class CustomViewResolverOrderConfig extends WebMvcConfigurerAdapter {
+
+		@Override
+		public void configureViewResolvers(ViewResolverRegistry registry) {
+			registry.jsp();
+			registry.order(123);
+		}
+	}
 
 	@Controller
 	public static class TestController {
