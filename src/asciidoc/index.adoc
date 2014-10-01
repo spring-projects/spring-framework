@@ -43045,7 +43045,7 @@ the receiver should wait before giving up waiting for a message.
 [NOTE]
 ====
 Spring also supports annotated-listener endpoints through the use of the `@JmsListener`
-and provides an open infrastructure to register endpoints programmatically. This
+annotation and provides an open infrastructure to register endpoints programmatically. This
 is by far the most convenient way to setup an asynchronous receiver, see
 <<jms-annotated-support>> for more details.
 ====
@@ -43582,7 +43582,7 @@ These are the main elements you can inject in JMS listener endpoints:
 * A non-annotated element that is not one of the supported types (i.e. `Message` and
   `Session`) is considered to be the payload. You can make that explicit by annotating
   the parameter with `@Payload`. You can also turn on validation by adding an extra
-  `@Validated`.
+  `@Valid`.
 
 The ability to inject Spring's `Message` abstraction is particularly useful to benefit
 from all the information stored in the transport-specific message without relying on
@@ -43595,7 +43595,7 @@ transport-specific API.
 	public void processOrder(Message<Order> order) { ... }
 ----
 
-Handling of method arguments is provided by `DefaultJmsHandlerMethodFactory` which can be
+Handling of method arguments is provided by `DefaultMessageHandlerMethodFactory` which can be
 further customized to support additional method arguments. The conversion and validation
 support can be customized there as well.
 
@@ -43611,12 +43611,12 @@ annotate the payload with `@Valid` and configure the necessary validator as foll
 
     	@Override
     	public void configureJmsListeners(JmsListenerEndpointRegistrar registrar) {
-        	registrar.setJmsHandlerMethodFactory(myJmsHandlerMethodFactory());
+        	registrar.setMessageHandlerMethodFactory(myJmsHandlerMethodFactory());
     	}
 
     	@Bean
-    	public DefaultJmsHandlerMethodFactory myJmsHandlerMethodFactory() {
-        	DefaultJmsHandlerMethodFactory factory = new DefaultJmsHandlerMethodFactory();
+    	public DefaultMessageHandlerMethodFactory myHandlerMethodFactory() {
+        	DefaultMessageHandlerMethodFactory factory = new DefaultMessageHandlerMethodFactory();
         	factory.setValidator(myValidator());
         	return factory;
     	}
