@@ -56,7 +56,7 @@ import org.springframework.util.ClassUtils;
  * <p>Note that Jackson's JSR-310 and Joda-Time support modules will be registered automatically
  * when available (and when Java 8 and Joda-Time themselves are available, respectively).
  *
- * <p>Tested against Jackson 2.2 and 2.3; compatible with Jackson 2.0 and higher.
+ * <p>Tested against Jackson 2.2, 2.3 and 2.4; compatible with Jackson 2.0 and higher.
  *
  * @author Sebastien Deleuze
  * @author Juergen Hoeller
@@ -90,28 +90,6 @@ public class Jackson2ObjectMapperBuilder {
 	private boolean findModulesViaServiceLoader;
 
 	private ClassLoader moduleClassLoader = getClass().getClassLoader();
-
-
-	private Jackson2ObjectMapperBuilder() {
-	}
-
-
-	/**
-	 * Obtain a {@link Jackson2ObjectMapperBuilder} instance in order to
-	 * build an {@link ObjectMapper} instance.
-	 */
-	public static Jackson2ObjectMapperBuilder json() {
-		return new Jackson2ObjectMapperBuilder();
-	}
-
-	/**
-	 * Obtain a {@link Jackson2ObjectMapperBuilder} instance in order to
-	 * build a {@link XmlMapper} instance.
-	 */
-	@SuppressWarnings("unchecked")
-	public static Jackson2ObjectMapperBuilder xml() {
-		return new Jackson2ObjectMapperBuilder().createXmlMapper(true);
-	}
 
 
 	/**
@@ -497,6 +475,26 @@ public class Jackson2ObjectMapperBuilder {
 				// jackson-datatype-joda not available
 			}
 		}
+	}
+
+
+	// Convenience factory methods
+
+	/**
+	 * Obtain a {@link Jackson2ObjectMapperBuilder} instance in order to
+	 * build a regular JSON {@link ObjectMapper} instance.
+	 */
+	public static Jackson2ObjectMapperBuilder json() {
+		return new Jackson2ObjectMapperBuilder();
+	}
+
+	/**
+	 * Obtain a {@link Jackson2ObjectMapperBuilder} instance in order to
+	 * build an {@link XmlMapper} instance.
+	 */
+	@SuppressWarnings("unchecked")
+	public static Jackson2ObjectMapperBuilder xml() {
+		return new Jackson2ObjectMapperBuilder().createXmlMapper(true);
 	}
 
 }
