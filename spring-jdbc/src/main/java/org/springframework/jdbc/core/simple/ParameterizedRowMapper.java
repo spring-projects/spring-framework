@@ -28,7 +28,7 @@ import org.springframework.jdbc.core.RowMapper;
  * @since 2.0
  * @see org.springframework.jdbc.core.simple.SimpleJdbcOperations
  * @deprecated along with {@link SimpleJdbcTemplate}, in favor of the regular
- * {@link org.springframework.jdbc.core.SingleColumnRowMapper}
+ * {@link RowMapper}
  */
 @Deprecated
 public interface ParameterizedRowMapper<T> extends RowMapper<T> {
