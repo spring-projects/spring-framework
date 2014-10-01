@@ -109,6 +109,9 @@ public class Ternary extends SpelNodeImpl {
 		computeExitTypeDescriptor();
 		codeflow.enterCompilationScope();
 		this.children[0].generateCode(mv, codeflow);
+		if (!CodeFlow.isPrimitive(codeflow.lastDescriptor())) {
+			CodeFlow.insertUnboxInsns(mv, 'Z', codeflow.lastDescriptor());
+		}
 		codeflow.exitCompilationScope();
 		Label elseTarget = new Label();
 		Label endOfIf = new Label();

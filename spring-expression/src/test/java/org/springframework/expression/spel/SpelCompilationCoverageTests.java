@@ -25,7 +25,6 @@ import java.util.Map;
 import java.util.StringTokenizer;
 
 import org.junit.Test;
-
 import org.springframework.asm.MethodVisitor;
 import org.springframework.expression.AccessException;
 import org.springframework.expression.EvaluationContext;
@@ -520,6 +519,19 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		assertEquals(3L,expression.getValue(root));
 		root = true;
 		assertEquals(1,expression.getValue(root));		
+	}
+	
+	@Test
+	public void ternaryWithBooleanReturn() { // SPR-12271
+		expression = parser.parseExpression("T(Boolean).TRUE?'abc':'def'");
+		assertEquals("abc",expression.getValue());
+		assertCanCompile(expression);
+		assertEquals("abc",expression.getValue());
+
+		expression = parser.parseExpression("T(Boolean).FALSE?'abc':'def'");
+		assertEquals("def",expression.getValue());
+		assertCanCompile(expression);
+		assertEquals("def",expression.getValue());
 	}
 	
 	@Test
@@ -1830,7 +1842,6 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		assertEquals('c',resultC);
 	}
 
-
 	@Test
 	public void compoundExpression() throws Exception {
 		Payload payload = new Payload();
@@ -1914,7 +1925,18 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		assertCanCompile(expression);
 		assertEquals("value4",expression.getValue(tc));
 	}
-	
+
+	@Test
+	public void propertyReferenceVisibility() { // SPR-12771
+		StandardEvaluationContext ctx = new StandardEvaluationContext();
+		ctx.setVariable("httpServletRequest", HttpServlet3RequestFactory.getOne());
+		// Without a fix compilation was inserting a checkcast to a private type
+		expression = parser.parseExpression("#httpServletRequest.servletPath");
+		assertEquals("wibble",expression.getValue(ctx));
+		assertCanCompile(expression);
+		assertEquals("wibble",expression.getValue(ctx));
+	}
+		
 	@SuppressWarnings("unchecked")
 	@Test
 	public void indexer() throws Exception {
@@ -2954,4 +2976,28 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		public TestClass9(int i) {}
 	}
 	
+	// These test classes simulate a pattern of public/private classes seen in Spring Security
+	
+	// final class HttpServlet3RequestFactory implements HttpServletRequestFactory 
+	static class HttpServlet3RequestFactory {
+	
+	  static Servlet3SecurityContextHolderAwareRequestWrapper getOne() {
+		  HttpServlet3RequestFactory outer = new HttpServlet3RequestFactory();
+		  return outer.new Servlet3SecurityContextHolderAwareRequestWrapper();
+	  }
+	  // private class Servlet3SecurityContextHolderAwareRequestWrapper extends SecurityContextHolderAwareRequestWrapper
+	  private class Servlet3SecurityContextHolderAwareRequestWrapper extends SecurityContextHolderAwareRequestWrapper {
+	  }
+	}
+	
+	// public class SecurityContextHolderAwareRequestWrapper extends HttpServletRequestWrapper 
+	static class SecurityContextHolderAwareRequestWrapper extends HttpServletRequestWrapper {
+	}
+	
+	public static class HttpServletRequestWrapper {
+		public String getServletPath() {
+			return "wibble";
+		}
+	}
+		
 }

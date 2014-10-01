@@ -16,6 +16,8 @@
 
 package org.springframework.expression.spel.ast;
 
+import java.lang.reflect.Modifier;
+
 import org.springframework.asm.MethodVisitor;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.TypedValue;
@@ -71,7 +73,17 @@ public class VariableReference extends SpelNodeImpl {
 			return result;
 		}
 		TypedValue result = state.lookupVariable(this.name);
-		this.exitTypeDescriptor = CodeFlow.toDescriptorFromObject(result.getValue());
+		Object value = result.getValue();
+		if (value == null || !Modifier.isPublic(value.getClass().getModifiers())) {
+			// If the type is not public then when generateCode produces a checkcast to it
+			// then an IllegalAccessError will occur.
+			// If resorting to Object isn't sufficient, the hierarchy could be traversed for 
+			// the first public type.
+			this.exitTypeDescriptor ="Ljava/lang/Object";
+		}
+		else {
+			this.exitTypeDescriptor = CodeFlow.toDescriptorFromObject(value);
+		}
 		// a null value will mean either the value was null or the variable was not found
 		return result;
 	}

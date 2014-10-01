@@ -446,8 +446,10 @@ public class CodeFlow implements Opcodes {
 				}
 			}
 			else {
-				// This is chopping off the 'L' to leave us with "java/lang/String"
-				mv.visitTypeInsn(CHECKCAST, descriptor.substring(1));
+				if (!descriptor.equals("Ljava/lang/Object")) {
+					// This is chopping off the 'L' to leave us with "java/lang/String"
+					mv.visitTypeInsn(CHECKCAST, descriptor.substring(1));
+				}
 			}
 		}
 	}
