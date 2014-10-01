@@ -19,6 +19,7 @@ package org.springframework.mock.staticmock;
 import java.util.Arrays;
 import java.util.LinkedList;
 
+import org.aspectj.lang.annotation.SuppressAjWarnings;
 import org.springframework.util.ObjectUtils;
 
 /**
@@ -227,6 +228,7 @@ public abstract aspect AbstractMethodMockingControl percflow(mockStaticsTestMeth
 	 */
 	protected abstract pointcut methodToMock();
 
+	@SuppressAjWarnings("adviceDidNotMatch")
 	after() returning : mockStaticsTestMethod() {
 		if (recording && (expectations.hasCalls())) {
 			throw new IllegalStateException(
@@ -236,6 +238,7 @@ public abstract aspect AbstractMethodMockingControl percflow(mockStaticsTestMeth
 		verifyInternal();
 	}
 
+	@SuppressAjWarnings("adviceDidNotMatch")
 	Object around() : methodToMock() && cflowbelow(mockStaticsTestMethod()) {
 		if (recording) {
 			expectations.expectCall(thisJoinPointStaticPart.toLongString(), thisJoinPoint.getArgs());
