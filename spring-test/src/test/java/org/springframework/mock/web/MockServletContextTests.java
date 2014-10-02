@@ -16,16 +16,18 @@
 
 package org.springframework.mock.web;
 
+import java.util.Map;
 import java.util.Set;
 
 import javax.activation.FileTypeMap;
 import javax.activation.MimetypesFileTypeMap;
+import javax.servlet.FilterRegistration;
 import javax.servlet.RequestDispatcher;
+import javax.servlet.ServletRegistration;
 
 import org.junit.Test;
 
 import static org.hamcrest.CoreMatchers.*;
-
 import static org.junit.Assert.*;
 
 /**
@@ -145,6 +147,42 @@ public class MockServletContextTests {
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		namedDispatcher.forward(new MockHttpServletRequest(sc), response);
 		assertEquals(newDefault, response.getForwardedUrl());
+	}
+
+	/**
+	 * @since 4.1.2
+	 */
+	@Test
+	public void getServletRegistration() {
+		assertNull(sc.getServletRegistration("servlet"));
+	}
+
+	/**
+	 * @since 4.1.2
+	 */
+	@Test
+	public void getServletRegistrations() {
+		Map<String, ? extends ServletRegistration> servletRegistrations = sc.getServletRegistrations();
+		assertNotNull(servletRegistrations);
+		assertEquals(0, servletRegistrations.size());
+	}
+
+	/**
+	 * @since 4.1.2
+	 */
+	@Test
+	public void getFilterRegistration() {
+		assertNull(sc.getFilterRegistration("filter"));
+	}
+
+	/**
+	 * @since 4.1.2
+	 */
+	@Test
+	public void getFilterRegistrations() {
+		Map<String, ? extends FilterRegistration> filterRegistrations = sc.getFilterRegistrations();
+		assertNotNull(filterRegistrations);
+		assertEquals(0, filterRegistrations.size());
 	}
 
 }

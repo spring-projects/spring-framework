@@ -63,7 +63,7 @@ import org.springframework.web.util.WebUtils;
  * through {@link #setMajorVersion}/{@link #setMinorVersion}; default is 3.0.
  * Note that Servlet 3.0 support is limited: servlet, filter and listener
  * registration methods are not supported; neither is JSP configuration.
- * We generally do not recommend to unit-test your ServletContainerInitializers and
+ * We generally do not recommend to unit test your ServletContainerInitializers and
  * WebApplicationInitializers which is where those registration methods would be used.
  *
  * <p>Used for testing the Spring web framework; only rarely necessary for testing
@@ -605,14 +605,22 @@ public class MockServletContext implements ServletContext {
 		throw new UnsupportedOperationException();
 	}
 
+	/**
+	 * This method always returns {@code null}.
+	 * @see javax.servlet.ServletContext#getServletRegistration(java.lang.String)
+	 */
 	@Override
 	public ServletRegistration getServletRegistration(String servletName) {
-		throw new UnsupportedOperationException();
+		return null;
 	}
 
+	/**
+	 * This method always returns an {@linkplain Collections#emptyMap empty map}.
+	 * @see javax.servlet.ServletContext#getServletRegistrations()
+	 */
 	@Override
 	public Map<String, ? extends ServletRegistration> getServletRegistrations() {
-		throw new UnsupportedOperationException();
+		return Collections.emptyMap();
 	}
 
 	@Override
@@ -635,14 +643,22 @@ public class MockServletContext implements ServletContext {
 		throw new UnsupportedOperationException();
 	}
 
+	/**
+	 * This method always returns {@code null}.
+	 * @see javax.servlet.ServletContext#getFilterRegistration(java.lang.String)
+	 */
 	@Override
 	public FilterRegistration getFilterRegistration(String filterName) {
-		throw new UnsupportedOperationException();
+		return null;
 	}
 
+	/**
+	 * This method always returns an {@linkplain Collections#emptyMap empty map}.
+	 * @see javax.servlet.ServletContext#getFilterRegistrations()
+	 */
 	@Override
 	public Map<String, ? extends FilterRegistration> getFilterRegistrations() {
-		throw new UnsupportedOperationException();
+		return Collections.emptyMap();
 	}
 
 	@Override
