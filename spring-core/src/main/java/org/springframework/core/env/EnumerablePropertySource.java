@@ -47,6 +47,11 @@ public abstract class EnumerablePropertySource<T> extends PropertySource<T> {
 		super(name, source);
 	}
 
+	@SuppressWarnings("unchecked")
+	protected EnumerablePropertySource(String name) {
+		super(name);
+	}
+
 
 	/**
 	 * Return whether this {@code PropertySource} contains a property with the given name.
