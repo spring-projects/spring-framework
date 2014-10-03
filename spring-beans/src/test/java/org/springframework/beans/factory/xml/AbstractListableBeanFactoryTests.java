@@ -21,6 +21,10 @@ import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.tests.sample.beans.TestBean;
 
+import static org.hamcrest.Matchers.*;
+
+import static org.junit.Assert.*;
+
 /**
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -50,6 +54,7 @@ public abstract class AbstractListableBeanFactoryTests extends AbstractBeanFacto
 
 	public void assertTestBeanCount(int count) {
 		String[] defNames = getListableBeanFactory().getBeanNamesForType(TestBean.class, true, false);
+		assertThat(getListableBeanFactory().hasBeanOfType(TestBean.class, true, true), equalTo(count > 0));
 		assertTrue("We should have " + count + " beans for class org.springframework.tests.sample.beans.TestBean, not " +
 				defNames.length, defNames.length == count);
 

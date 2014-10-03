@@ -227,6 +227,12 @@ class StubWebApplicationContext implements WebApplicationContext {
 	}
 
 	@Override
+	public boolean hasBeanOfType(Class<?> type, boolean includeNonSingletons,
+			boolean allowEagerInit) {
+		return this.beanFactory.hasBeanOfType(type, includeNonSingletons, allowEagerInit);
+	}
+
+	@Override
 	public String[] getBeanNamesForType(Class<?> type, boolean includeNonSingletons, boolean allowEagerInit) {
 		return this.beanFactory.getBeanNamesForType(type, includeNonSingletons, allowEagerInit);
 	}
@@ -241,6 +247,12 @@ class StubWebApplicationContext implements WebApplicationContext {
 			throws BeansException {
 
 		return this.beanFactory.getBeansOfType(type, includeNonSingletons, allowEagerInit);
+	}
+
+	@Override
+	public boolean hasBeanWithAnnotation(Class<? extends Annotation> annotationType)
+			throws BeansException {
+		return this.beanFactory.hasBeanWithAnnotation(annotationType);
 	}
 
 	@Override
