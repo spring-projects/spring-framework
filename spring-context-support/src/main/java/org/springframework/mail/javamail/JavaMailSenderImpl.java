@@ -16,7 +16,6 @@
 
 package org.springframework.mail.javamail;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Date;
@@ -294,11 +293,11 @@ public class JavaMailSenderImpl implements JavaMailSender {
 
 	@Override
 	public void send(SimpleMailMessage simpleMessage) throws MailException {
-		send(new SimpleMailMessage[] { simpleMessage });
+		send(new SimpleMailMessage[] {simpleMessage});
 	}
 
 	@Override
-	public void send(SimpleMailMessage[] simpleMessages) throws MailException {
+	public void send(SimpleMailMessage... simpleMessages) throws MailException {
 		List<MimeMessage> mimeMessages = new ArrayList<MimeMessage>(simpleMessages.length);
 		for (SimpleMailMessage simpleMessage : simpleMessages) {
 			MimeMailMessage message = new MimeMailMessage(createMimeMessage());
@@ -342,17 +341,17 @@ public class JavaMailSenderImpl implements JavaMailSender {
 	}
 
 	@Override
-	public void send(MimeMessage[] mimeMessages) throws MailException {
+	public void send(MimeMessage... mimeMessages) throws MailException {
 		doSend(mimeMessages, null);
 	}
 
 	@Override
 	public void send(MimeMessagePreparator mimeMessagePreparator) throws MailException {
-		send(new MimeMessagePreparator[] { mimeMessagePreparator });
+		send(new MimeMessagePreparator[] {mimeMessagePreparator});
 	}
 
 	@Override
-	public void send(MimeMessagePreparator[] mimeMessagePreparators) throws MailException {
+	public void send(MimeMessagePreparator... mimeMessagePreparators) throws MailException {
 		try {
 			List<MimeMessage> mimeMessages = new ArrayList<MimeMessage>(mimeMessagePreparators.length);
 			for (MimeMessagePreparator preparator : mimeMessagePreparators) {
@@ -367,9 +366,6 @@ public class JavaMailSenderImpl implements JavaMailSender {
 		}
 		catch (MessagingException ex) {
 			throw new MailParseException(ex);
-		}
-		catch (IOException ex) {
-			throw new MailPreparationException(ex);
 		}
 		catch (Exception ex) {
 			throw new MailPreparationException(ex);
@@ -389,12 +385,20 @@ public class JavaMailSenderImpl implements JavaMailSender {
 	 * in case of failure when sending a message
 	 */
 	protected void doSend(MimeMessage[] mimeMessages, Object[] originalMessages) throws MailException {
-		Map<Object, Exception> failedMessages = new LinkedHashMap<Object, Exception>();
+		String username = getUsername();
+		String password = getPassword();
+		if ("".equals(username)) {  // probably from a placeholder
+			username = null;
+			if ("".equals(password)) {  // in conjunction with "" username, this means no password to use
+				password = null;
+			}
+		}
 
+		Map<Object, Exception> failedMessages = new LinkedHashMap<Object, Exception>();
 		Transport transport;
 		try {
 			transport = getTransport(getSession());
-			transport.connect(getHost(), getPort(), getUsername(), getPassword());
+			transport.connect(getHost(), getPort(), username, password);
 		}
 		catch (AuthenticationFailedException ex) {
 			throw new MailAuthenticationException(ex);
