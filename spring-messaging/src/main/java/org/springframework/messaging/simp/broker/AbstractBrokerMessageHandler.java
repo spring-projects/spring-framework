@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -38,7 +38,6 @@ import org.springframework.messaging.support.InterceptableChannel;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 
-
 /**
  * Abstract base class for a {@link MessageHandler} that broker messages to
  * registered subscribers.
@@ -50,7 +49,6 @@ public abstract class AbstractBrokerMessageHandler
 		implements MessageHandler, ApplicationEventPublisherAware, SmartLifecycle {
 
 	protected final Log logger = LogFactory.getLog(getClass());
-
 
 	private final SubscribableChannel clientInboundChannel;
 
@@ -74,7 +72,7 @@ public abstract class AbstractBrokerMessageHandler
 
 	private final Object lifecycleMonitor = new Object();
 
-	private ChannelInterceptor unsentDisconnectInterceptor = new UnsentDisconnectChannelInterceptor();
+	private final ChannelInterceptor unsentDisconnectInterceptor = new UnsentDisconnectChannelInterceptor();
 
 
 	/**
@@ -151,18 +149,6 @@ public abstract class AbstractBrokerMessageHandler
 		return Integer.MAX_VALUE;
 	}
 
-	/**
-	 * Check whether this message handler is currently running.
-	 * <p>Note that even when this message handler is running the
-	 * {@link #isBrokerAvailable()} flag may still independently alternate between
-	 * being on and off depending on the concrete sub-class implementation.
-	 */
-	@Override
-	public final boolean isRunning() {
-		synchronized (this.lifecycleMonitor) {
-			return this.running;
-		}
-	}
 
 	@Override
 	public void start() {
@@ -177,9 +163,7 @@ public abstract class AbstractBrokerMessageHandler
 			}
 			startInternal();
 			this.running = true;
-			if (logger.isInfoEnabled()) {
-				logger.info("Started.");
-			}
+			logger.info("Started.");
 		}
 	}
 
@@ -199,9 +183,7 @@ public abstract class AbstractBrokerMessageHandler
 				((InterceptableChannel) this.clientInboundChannel).removeInterceptor(this.unsentDisconnectInterceptor);
 			}
 			this.running = false;
-			if (logger.isDebugEnabled()) {
-				logger.info("Stopped.");
-			}
+			logger.info("Stopped.");
 		}
 	}
 
@@ -213,6 +195,19 @@ public abstract class AbstractBrokerMessageHandler
 		synchronized (this.lifecycleMonitor) {
 			stop();
 			callback.run();
+		}
+	}
+
+	/**
+	 * Check whether this message handler is currently running.
+	 * <p>Note that even when this message handler is running the
+	 * {@link #isBrokerAvailable()} flag may still independently alternate between
+	 * being on and off depending on the concrete sub-class implementation.
+	 */
+	@Override
+	public final boolean isRunning() {
+		synchronized (this.lifecycleMonitor) {
+			return this.running;
 		}
 	}
 
@@ -244,6 +239,7 @@ public abstract class AbstractBrokerMessageHandler
 	}
 
 	protected abstract void handleMessageInternal(Message<?> message);
+
 
 	protected boolean checkDestinationPrefix(String destination) {
 		if ((destination == null) || CollectionUtils.isEmpty(this.destinationPrefixes)) {
@@ -294,4 +290,5 @@ public abstract class AbstractBrokerMessageHandler
 			}
 		}
 	}
+
 }

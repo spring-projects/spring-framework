@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -33,6 +33,7 @@ import static org.mockito.Mockito.mock;
 
 /**
  * Test fixture for the use of {@link ChannelInterceptor}s.
+ *
  * @author Rossen Stoyanchev
  */
 public class ChannelInterceptorTests {
@@ -184,8 +185,7 @@ public class ChannelInterceptorTests {
 
 	private static class TestMessageHandler implements MessageHandler {
 
-		private List<Message<?>> messages = new ArrayList<Message<?>>();
-
+		private final List<Message<?>> messages = new ArrayList<Message<?>>();
 
 		public List<Message<?>> getMessages() {
 			return this.messages;
@@ -193,16 +193,16 @@ public class ChannelInterceptorTests {
 
 		@Override
 		public void handleMessage(Message<?> message) throws MessagingException {
-			this.getMessages().add(message);
+			this.messages.add(message);
 		}
 	}
+
 
 	private abstract static class AbstractTestInterceptor extends ChannelInterceptorAdapter {
 
 		private AtomicInteger counter = new AtomicInteger();
 
 		private volatile boolean afterCompletionInvoked;
-
 
 		public AtomicInteger getCounter() {
 			return this.counter;
@@ -225,12 +225,12 @@ public class ChannelInterceptorTests {
 		}
 	}
 
+
 	private static class PreSendInterceptor extends AbstractTestInterceptor {
 
 		private Message<?> messageToReturn;
 
 		private RuntimeException exceptionToRaise;
-
 
 		public void setMessageToReturn(Message<?> messageToReturn) {
 			this.messageToReturn = messageToReturn;
@@ -249,6 +249,7 @@ public class ChannelInterceptorTests {
 			return (this.messageToReturn != null ? this.messageToReturn : message);
 		}
 	}
+
 
 	private static class NullReturningPreSendInterceptor extends AbstractTestInterceptor {
 
