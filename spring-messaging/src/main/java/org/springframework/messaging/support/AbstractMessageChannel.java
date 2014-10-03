@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -37,7 +37,7 @@ import org.springframework.util.ObjectUtils;
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public abstract class AbstractMessageChannel implements MessageChannel, BeanNameAware, InterceptableChannel  {
+public abstract class AbstractMessageChannel implements MessageChannel, InterceptableChannel, BeanNameAware {
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
@@ -50,9 +50,9 @@ public abstract class AbstractMessageChannel implements MessageChannel, BeanName
 		this.beanName = getClass().getSimpleName() + "@" + ObjectUtils.getIdentityHexString(this);
 	}
 
+
 	/**
-	 * {@inheritDoc}
-	 * <p>Used primarily for logging purposes.
+	 * A message channel uses the bean name primarily for logging purposes.
 	 */
 	@Override
 	public void setBeanName(String name) {
@@ -60,11 +60,12 @@ public abstract class AbstractMessageChannel implements MessageChannel, BeanName
 	}
 
 	/**
-	 * @return the name for this channel.
+	 * Return the bean name for this message channel.
 	 */
 	public String getBeanName() {
 		return this.beanName;
 	}
+
 
 	@Override
 	public void setInterceptors(List<ChannelInterceptor> interceptors) {
@@ -82,10 +83,6 @@ public abstract class AbstractMessageChannel implements MessageChannel, BeanName
 		this.interceptors.add(index, interceptor);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 * <p>The returned list is read-only.
-	 */
 	@Override
 	public List<ChannelInterceptor> getInterceptors() {
 		return Collections.unmodifiableList(this.interceptors);
@@ -100,6 +97,7 @@ public abstract class AbstractMessageChannel implements MessageChannel, BeanName
 	public ChannelInterceptor removeInterceptor(int index) {
 		return this.interceptors.remove(index);
 	}
+
 
 	@Override
 	public final boolean send(Message<?> message) {
@@ -129,7 +127,8 @@ public abstract class AbstractMessageChannel implements MessageChannel, BeanName
 			throw new MessageDeliveryException(message,"Failed to send message to " + this, ex);
 		}
 		catch (Error ex) {
-			MessageDeliveryException ex2 = new MessageDeliveryException(message, "Failed to send message to " + this, ex);
+			MessageDeliveryException ex2 =
+					new MessageDeliveryException(message, "Failed to send message to " + this, ex);
 			chain.triggerAfterSendCompletion(message, this, sent, ex2);
 			throw ex2;
 		}
@@ -153,21 +152,22 @@ public abstract class AbstractMessageChannel implements MessageChannel, BeanName
 
 		private int receiveInterceptorIndex = -1;
 
-
 		public Message<?> applyPreSend(Message<?> message, MessageChannel channel) {
+			Message<?> messageToUse = message;
 			for (ChannelInterceptor interceptor : interceptors) {
-				message = interceptor.preSend(message, channel);
-				if (message == null) {
+				Message<?> resolvedMessage = interceptor.preSend(messageToUse, channel);
+				if (resolvedMessage == null) {
 					String name = interceptor.getClass().getSimpleName();
 					if (logger.isDebugEnabled()) {
 						logger.debug(name + " returned null from preSend, i.e. precluding the send.");
 					}
-					triggerAfterSendCompletion(message, channel, false, null);
+					triggerAfterSendCompletion(messageToUse, channel, false, null);
 					return null;
 				}
+				messageToUse = resolvedMessage;
 				this.sendInterceptorIndex++;
 			}
-			return message;
+			return messageToUse;
 		}
 
 		public void applyPostSend(Message<?> message, MessageChannel channel, boolean sent) {
@@ -216,11 +216,12 @@ public abstract class AbstractMessageChannel implements MessageChannel, BeanName
 					interceptor.afterReceiveCompletion(message, channel, ex);
 				}
 				catch (Throwable ex2) {
-					logger.error("Exception from afterReceiveCompletion in " + interceptor, ex2);
+					if (logger.isErrorEnabled()) {
+						logger.error("Exception from afterReceiveCompletion in " + interceptor, ex2);
+					}
 				}
 			}
 		}
-
 	}
 
 }
