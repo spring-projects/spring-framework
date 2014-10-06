@@ -74,9 +74,6 @@ public class TypeDescriptor implements Serializable {
 	 */
 	public TypeDescriptor(MethodParameter methodParameter) {
 		Assert.notNull(methodParameter, "MethodParameter must not be null");
-		if (methodParameter.getNestingLevel() != 1) {
-			throw new IllegalArgumentException("MethodParameter argument must have its nestingLevel set to 1");
-		}
 		this.resolvableType = ResolvableType.forMethodParameter(methodParameter);
 		this.type = this.resolvableType.resolve(methodParameter.getParameterType());
 		this.annotations = (methodParameter.getParameterIndex() == -1 ?
