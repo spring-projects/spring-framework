@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,12 +40,12 @@ import org.springframework.transaction.support.ResourceTransactionManager;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 /**
- * {@link org.springframework.transaction.PlatformTransactionManager} implementation
- * for a single JDO {@link javax.jdo.PersistenceManagerFactory}. Binds a JDO
- * PersistenceManager from the specified factory to the thread, potentially allowing
- * for one thread-bound PersistenceManager per factory.
- * {@link PersistenceManagerFactoryUtils} and {@link JdoTemplate} are aware of
- * thread-bound persistence managers and participate in such transactions automatically.
+ * {@link org.springframework.transaction.PlatformTransactionManager} implementation for a
+ * single JDO {@link javax.jdo.PersistenceManagerFactory}. Binds a JDO PersistenceManager
+ * from the specified factory to the thread, potentially allowing for one thread-bound
+ * PersistenceManager per factory. {@link PersistenceManagerFactoryUtils} and
+ * {@link org.springframework.orm.jdo.support.SpringPersistenceManagerProxyBean} are aware
+ * of thread-bound persistence managers and participate in such transactions automatically.
  * Using either of those (or going through a {@link TransactionAwarePersistenceManagerFactoryProxy}
  * is required for JDO access code supporting this transaction management mechanism.
  *
@@ -73,10 +73,10 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * that acts as "connectionFactory" of the PersistenceManagerFactory, so you usually
  * don't need to explicitly specify the "dataSource" property.
  *
- * <p>On JDBC 3.0, this transaction manager supports nested transactions via JDBC 3.0
- * Savepoints. The {@link #setNestedTransactionAllowed} "nestedTransactionAllowed"}
- * flag defaults to "false", though, as nested transactions will just apply to the
- * JDBC Connection, not to the JDO PersistenceManager and its cached objects.
+ * <p>This transaction manager supports nested transactions via JDBC 3.0 Savepoints.
+ * The {@link #setNestedTransactionAllowed} "nestedTransactionAllowed"} flag defaults
+ * to "false", though, as nested transactions will just apply to the JDBC Connection,
+ * not to the JDO PersistenceManager and its cached entity objects and related context.
  * You can manually set the flag to "true" if you want to use nested transactions
  * for JDBC access code which participates in JDO transactions (provided that your
  * JDBC driver supports Savepoints). <i>Note that JDO itself does not support
@@ -91,7 +91,6 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * @see LocalPersistenceManagerFactoryBean
  * @see PersistenceManagerFactoryUtils#getPersistenceManager
  * @see PersistenceManagerFactoryUtils#releasePersistenceManager
- * @see JdoTemplate
  * @see TransactionAwarePersistenceManagerFactoryProxy
  * @see org.springframework.jdbc.datasource.DataSourceUtils#getConnection
  * @see org.springframework.jdbc.datasource.DataSourceUtils#releaseConnection
@@ -155,7 +154,7 @@ public class JdoTransactionManager extends AbstractPlatformTransactionManager
    * The DataSource should match the one used by the JDO PersistenceManagerFactory:
 	 * for example, you could specify the same JNDI DataSource for both.
 	 * <p>If the PersistenceManagerFactory uses a DataSource as connection factory,
-	 * the DataSource will be autodetected: You can still explictly specify the
+	 * the DataSource will be autodetected: You can still explicitly specify the
 	 * DataSource, but you don't need to in this case.
 	 * <p>A transactional JDBC Connection for this DataSource will be provided to
 	 * application code accessing this DataSource directly via DataSourceUtils
@@ -340,15 +339,16 @@ public class JdoTransactionManager extends AbstractPlatformTransactionManager
 						conHolder.setTimeoutInSeconds(timeoutToUse);
 					}
 					if (logger.isDebugEnabled()) {
-						logger.debug("Exposing JDO transaction as JDBC transaction [" + conHolder.getConnectionHandle() + "]");
+						logger.debug("Exposing JDO transaction as JDBC transaction [" +
+								conHolder.getConnectionHandle() + "]");
 					}
 					TransactionSynchronizationManager.bindResource(getDataSource(), conHolder);
 					txObject.setConnectionHolder(conHolder);
 				}
 				else {
 					if (logger.isDebugEnabled()) {
-						logger.debug("Not exposing JDO transaction [" + pm + "] as JDBC transaction because JdoDialect [" +
-								getJdoDialect() + "] does not support JDBC Connection retrieval");
+						logger.debug("Not exposing JDO transaction [" + pm + "] as JDBC transaction because " +
+								"JdoDialect [" + getJdoDialect() + "] does not support JDBC Connection retrieval");
 					}
 				}
 			}
@@ -390,6 +390,7 @@ public class JdoTransactionManager extends AbstractPlatformTransactionManager
 			finally {
 				PersistenceManagerFactoryUtils.releasePersistenceManager(pm, getPersistenceManagerFactory());
 			}
+			txObject.setPersistenceManagerHolder(null, false);
 		}
 	}
 
@@ -418,7 +419,7 @@ public class JdoTransactionManager extends AbstractPlatformTransactionManager
 	}
 
 	/**
-	 * This implementation returns "true": a JDO2 commit will properly handle
+	 * This implementation returns "true": a JDO commit will properly handle
 	 * transactions that have been marked rollback-only at a global level.
 	 */
 	@Override
