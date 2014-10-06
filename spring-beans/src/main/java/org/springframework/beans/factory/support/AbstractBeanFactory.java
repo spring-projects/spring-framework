@@ -959,7 +959,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 
 	@Override
 	public boolean isActuallyInCreation(String beanName) {
-		return isSingletonCurrentlyInCreation(beanName) || isPrototypeCurrentlyInCreation(beanName);
+		return (isSingletonCurrentlyInCreation(beanName) || isPrototypeCurrentlyInCreation(beanName));
 	}
 
 	/**
@@ -1435,7 +1435,9 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	 * @param beanName the name of the bean
 	 */
 	protected void markBeanAsCreated(String beanName) {
-		this.alreadyCreated.add(beanName);
+		if (!this.alreadyCreated.contains(beanName)) {
+			this.alreadyCreated.add(beanName);
+		}
 	}
 
 	/**
