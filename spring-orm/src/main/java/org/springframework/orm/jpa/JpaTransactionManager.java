@@ -331,8 +331,8 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager
 				TransactionSynchronizationManager.getResource(getEntityManagerFactory());
 		if (emHolder != null) {
 			if (logger.isDebugEnabled()) {
-				logger.debug("Found thread-bound EntityManager [" +
-						emHolder.getEntityManager() + "] for JPA transaction");
+				logger.debug("Found thread-bound EntityManager [" + emHolder.getEntityManager() +
+						"] for JPA transaction");
 			}
 			txObject.setEntityManagerHolder(emHolder, false);
 		}
@@ -400,15 +400,16 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager
 						conHolder.setTimeoutInSeconds(timeoutToUse);
 					}
 					if (logger.isDebugEnabled()) {
-						logger.debug("Exposing JPA transaction as JDBC transaction [" + conHolder.getConnectionHandle() + "]");
+						logger.debug("Exposing JPA transaction as JDBC transaction [" +
+								conHolder.getConnectionHandle() + "]");
 					}
 					TransactionSynchronizationManager.bindResource(getDataSource(), conHolder);
 					txObject.setConnectionHolder(conHolder);
 				}
 				else {
 					if (logger.isDebugEnabled()) {
-						logger.debug("Not exposing JPA transaction [" + em + "] as JDBC transaction because JpaDialect [" +
-								getJpaDialect() + "] does not support JDBC Connection retrieval");
+						logger.debug("Not exposing JPA transaction [" + em + "] as JDBC transaction because " +
+								"JpaDialect [" + getJpaDialect() + "] does not support JDBC Connection retrieval");
 					}
 				}
 			}
@@ -467,6 +468,7 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager
 			finally {
 				EntityManagerFactoryUtils.closeEntityManager(em);
 			}
+			txObject.setEntityManagerHolder(null, false);
 		}
 	}
 

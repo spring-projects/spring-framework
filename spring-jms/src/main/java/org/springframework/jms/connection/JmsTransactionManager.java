@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -178,6 +178,7 @@ public class JmsTransactionManager extends AbstractPlatformTransactionManager
 		if (definition.getIsolationLevel() != TransactionDefinition.ISOLATION_DEFAULT) {
 			throw new InvalidIsolationLevelException("JMS does not support an isolation level concept");
 		}
+
 		JmsTransactionObject txObject = (JmsTransactionObject) transaction;
 		Connection con = null;
 		Session session = null;
@@ -193,10 +194,17 @@ public class JmsTransactionManager extends AbstractPlatformTransactionManager
 			if (timeout != TransactionDefinition.TIMEOUT_DEFAULT) {
 				txObject.getResourceHolder().setTimeoutInSeconds(timeout);
 			}
-			TransactionSynchronizationManager.bindResource(
-					getConnectionFactory(), txObject.getResourceHolder());
+			TransactionSynchronizationManager.bindResource(getConnectionFactory(), txObject.getResourceHolder());
 		}
 		catch (Throwable ex) {
+			if (session != null) {
+				try {
+					session.close();
+				}
+				catch (Throwable ex2) {
+					// ignore
+				}
+			}
 			if (con != null) {
 				try {
 					con.close();

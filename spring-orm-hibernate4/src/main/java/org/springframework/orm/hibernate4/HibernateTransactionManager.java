@@ -513,6 +513,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 				}
 				finally {
 					SessionFactoryUtils.closeSession(session);
+					txObject.setSessionHolder(null);
 				}
 			}
 			throw new CannotCreateTransactionException("Could not open Hibernate Session for transaction", ex);
