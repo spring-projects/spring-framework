@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -341,15 +341,16 @@ public class JdoTransactionManager extends AbstractPlatformTransactionManager
 						conHolder.setTimeoutInSeconds(timeoutToUse);
 					}
 					if (logger.isDebugEnabled()) {
-						logger.debug("Exposing JDO transaction as JDBC transaction [" + conHolder.getConnectionHandle() + "]");
+						logger.debug("Exposing JDO transaction as JDBC transaction [" +
+								conHolder.getConnectionHandle() + "]");
 					}
 					TransactionSynchronizationManager.bindResource(getDataSource(), conHolder);
 					txObject.setConnectionHolder(conHolder);
 				}
 				else {
 					if (logger.isDebugEnabled()) {
-						logger.debug("Not exposing JDO transaction [" + pm + "] as JDBC transaction because JdoDialect [" +
-								getJdoDialect() + "] does not support JDBC Connection retrieval");
+						logger.debug("Not exposing JDO transaction [" + pm + "] as JDBC transaction because " +
+								"JdoDialect [" + getJdoDialect() + "] does not support JDBC Connection retrieval");
 					}
 				}
 			}
@@ -391,6 +392,7 @@ public class JdoTransactionManager extends AbstractPlatformTransactionManager
 			finally {
 				PersistenceManagerFactoryUtils.releasePersistenceManager(pm, getPersistenceManagerFactory());
 			}
+			txObject.setPersistenceManagerHolder(null, false);
 		}
 	}
 
