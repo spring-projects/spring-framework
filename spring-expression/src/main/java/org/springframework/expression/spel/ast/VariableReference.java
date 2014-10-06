@@ -79,7 +79,7 @@ public class VariableReference extends SpelNodeImpl {
 			// then an IllegalAccessError will occur.
 			// If resorting to Object isn't sufficient, the hierarchy could be traversed for 
 			// the first public type.
-			this.exitTypeDescriptor ="Ljava/lang/Object";
+			this.exitTypeDescriptor = "Ljava/lang/Object";
 		}
 		else {
 			this.exitTypeDescriptor = CodeFlow.toDescriptorFromObject(value);
@@ -139,11 +139,11 @@ public class VariableReference extends SpelNodeImpl {
 
 	@Override
 	public boolean isCompilable() {
-		return getExitDescriptor()!=null;
+		return this.exitTypeDescriptor!=null;
 	}
 	
 	@Override
-	public void generateCode(MethodVisitor mv, CodeFlow codeflow) {
+	public void generateCode(MethodVisitor mv, CodeFlow cf) {
 		if (this.name.equals(ROOT)) {
 			mv.visitVarInsn(ALOAD,1);
 		}
@@ -152,8 +152,8 @@ public class VariableReference extends SpelNodeImpl {
 			mv.visitLdcInsn(name);
 			mv.visitMethodInsn(INVOKEINTERFACE, "org/springframework/expression/EvaluationContext", "lookupVariable", "(Ljava/lang/String;)Ljava/lang/Object;",true);
 		}
-		CodeFlow.insertCheckCast(mv,getExitDescriptor());
-		codeflow.pushDescriptor(getExitDescriptor());
+		CodeFlow.insertCheckCast(mv,this.exitTypeDescriptor);
+		cf.pushDescriptor(this.exitTypeDescriptor);
 	}
 
 

@@ -50,9 +50,9 @@ public class NullLiteral extends Literal {
 	}
 	
 	@Override
-	public void generateCode(MethodVisitor mv, CodeFlow codeflow) {
+	public void generateCode(MethodVisitor mv, CodeFlow cf) {
 		mv.visitInsn(ACONST_NULL);
-		codeflow.pushDescriptor(getExitDescriptor());
+		cf.pushDescriptor(this.exitTypeDescriptor);
 	}
 
 }

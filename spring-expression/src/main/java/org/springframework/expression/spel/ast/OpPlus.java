@@ -17,6 +17,7 @@
 package org.springframework.expression.spel.ast;
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
 
 import org.springframework.asm.MethodVisitor;
 import org.springframework.core.convert.TypeDescriptor;
@@ -32,23 +33,21 @@ import org.springframework.util.NumberUtils;
 /**
  * The plus operator will:
  * <ul>
- * <li>add {@code BigDecimal}
- * <li>add doubles (floats are represented as doubles)
- * <li>add longs
- * <li>add integers
+ * <li>add numbers
  * <li>concatenate strings
  * </ul>
- * It can be used as a unary operator for numbers ({@code BigDecimal}/double/long/int).
+ *
+ * <p>It can be used as a unary operator for numbers.
  * The standard promotions are performed when the operand types vary (double+int=double).
  * For other options it defers to the registered overloader.
  *
  * @author Andy Clement
+ * @author Juergen Hoeller
  * @author Ivo Smid
  * @author Giovanni Dall'Oglio Risso
  * @since 3.0
  */
 public class OpPlus extends Operator {
-
 
 	public OpPlus(int pos, SpelNodeImpl... operands) {
 		super("+", pos, operands);
@@ -61,30 +60,30 @@ public class OpPlus extends Operator {
 		SpelNodeImpl leftOp = getLeftOperand();
 		SpelNodeImpl rightOp = getRightOperand();
 
-		if (rightOp == null) { // If only one operand, then this is unary plus
+		if (rightOp == null) {  // if only one operand, then this is unary plus
 			Object operandOne = leftOp.getValueInternal(state).getValue();
 			if (operandOne instanceof Number) {
-				if (operandOne instanceof Double || operandOne instanceof Long || operandOne instanceof BigDecimal) {
-					if (operandOne instanceof Double || operandOne instanceof Long) {
-						this.exitTypeDescriptor = (operandOne instanceof Double)?"D":"J";
-					}
-					return new TypedValue(operandOne);
+				if (operandOne instanceof Double) {
+					this.exitTypeDescriptor = "D";
 				}
-				if (operandOne instanceof Float) {
+				else if (operandOne instanceof Float) {
 					this.exitTypeDescriptor = "F";
-					return new TypedValue(((Number) operandOne).floatValue());
 				}
-				this.exitTypeDescriptor = "I";
-				return new TypedValue(((Number) operandOne).intValue());
+				else if (operandOne instanceof Long) {
+					this.exitTypeDescriptor = "J";
+				}
+				else if (operandOne instanceof Integer) {
+					this.exitTypeDescriptor = "I";
+				}
+				return new TypedValue(operandOne);
 			}
 			return state.operate(Operation.ADD, operandOne, null);
 		}
 
-		final TypedValue operandOneValue = leftOp.getValueInternal(state);
-		final Object leftOperand = operandOneValue.getValue();
-
-		final TypedValue operandTwoValue = rightOp.getValueInternal(state);
-		final Object rightOperand = operandTwoValue.getValue();
+		TypedValue operandOneValue = leftOp.getValueInternal(state);
+		Object leftOperand = operandOneValue.getValue();
+		TypedValue operandTwoValue = rightOp.getValueInternal(state);
+		Object rightOperand = operandTwoValue.getValue();
 
 		if (leftOperand instanceof Number && rightOperand instanceof Number) {
 			Number leftNumber = (Number) leftOperand;
@@ -95,47 +94,53 @@ public class OpPlus extends Operator {
 				BigDecimal rightBigDecimal = NumberUtils.convertNumberToTargetClass(rightNumber, BigDecimal.class);
 				return new TypedValue(leftBigDecimal.add(rightBigDecimal));
 			}
-			if (leftNumber instanceof Double || rightNumber instanceof Double) {
-				if (leftNumber instanceof Double && rightNumber instanceof Double) {
+			else if (leftNumber instanceof Double || rightNumber instanceof Double) {
+				if (leftNumber.getClass() == rightNumber.getClass()) {
 					this.exitTypeDescriptor = "D";
 				}
 				return new TypedValue(leftNumber.doubleValue() + rightNumber.doubleValue());
 			}
-			if (leftNumber instanceof Float || rightNumber instanceof Float) {
-				if (leftNumber instanceof Float && rightNumber instanceof Float) {
+			else if (leftNumber instanceof Float || rightNumber instanceof Float) {
+				if (leftNumber.getClass() == rightNumber.getClass()) {
 					this.exitTypeDescriptor = "F";
 				}
 				return new TypedValue(leftNumber.floatValue() + rightNumber.floatValue());
 			}
-			if (leftNumber instanceof Long || rightNumber instanceof Long) {
-				if (leftNumber instanceof Long && rightNumber instanceof Long) {
+			else if (leftNumber instanceof BigInteger || rightNumber instanceof BigInteger) {
+				BigInteger leftBigInteger = NumberUtils.convertNumberToTargetClass(leftNumber, BigInteger.class);
+				BigInteger rightBigInteger = NumberUtils.convertNumberToTargetClass(rightNumber, BigInteger.class);
+				return new TypedValue(leftBigInteger.add(rightBigInteger));
+			}
+			else if (leftNumber instanceof Long || rightNumber instanceof Long) {
+				if (leftNumber.getClass() == rightNumber.getClass()) {
 					this.exitTypeDescriptor = "J";
 				}
 				return new TypedValue(leftNumber.longValue() + rightNumber.longValue());
 			}
-
-			// TODO what about overflow?
-			this.exitTypeDescriptor = "I";
-			return new TypedValue(leftNumber.intValue() + rightNumber.intValue());
+			else if (CodeFlow.isIntegerForNumericOp(leftNumber) || CodeFlow.isIntegerForNumericOp(rightNumber)) {
+				if (leftNumber instanceof Integer && rightNumber instanceof Integer) {
+					this.exitTypeDescriptor = "I";
+				}
+				return new TypedValue(leftNumber.intValue() + rightNumber.intValue());
+			}
+			else {
+				// Unknown Number subtypes -> best guess is double addition
+				return new TypedValue(leftNumber.doubleValue() + rightNumber.doubleValue());
+			}
 		}
 
 		if (leftOperand instanceof String && rightOperand instanceof String) {
-			return new TypedValue(new StringBuilder((String) leftOperand).append(
-					(String) rightOperand).toString());
+			return new TypedValue((String) leftOperand + rightOperand);
 		}
 
 		if (leftOperand instanceof String) {
-			StringBuilder result = new StringBuilder((String) leftOperand);
-			result.append((rightOperand == null ? "null" : convertTypedValueToString(
-					operandTwoValue, state)));
-			return new TypedValue(result.toString());
+			return new TypedValue(
+					leftOperand + (rightOperand == null ? "null" : convertTypedValueToString(operandTwoValue, state)));
 		}
 
 		if (rightOperand instanceof String) {
-			StringBuilder result = new StringBuilder((leftOperand == null ? "null"
-					: convertTypedValueToString(operandOneValue, state)));
-			result.append((String) rightOperand);
-			return new TypedValue(result.toString());
+			return new TypedValue(
+					(leftOperand == null ? "null" : convertTypedValueToString(operandOneValue, state)) + rightOperand);
 		}
 
 		return state.operate(Operation.ADD, leftOperand, rightOperand);
@@ -143,8 +148,8 @@ public class OpPlus extends Operator {
 
 	@Override
 	public String toStringAST() {
-		if (this.children.length<2) {  // unary plus
-			return new StringBuilder().append("+").append(getLeftOperand().toStringAST()).toString();
+		if (this.children.length < 2) {  // unary plus
+			return "+" + getLeftOperand().toStringAST();
 		}
 		return super.toStringAST();
 	}
@@ -160,21 +165,17 @@ public class OpPlus extends Operator {
 	/**
 	 * Convert operand value to string using registered converter or using
 	 * {@code toString} method.
-	 *
 	 * @param value typed value to be converted
 	 * @param state expression state
 	 * @return {@code TypedValue} instance converted to {@code String}
 	 */
 	private static String convertTypedValueToString(TypedValue value, ExpressionState state) {
-		final TypeConverter typeConverter = state.getEvaluationContext().getTypeConverter();
-		final TypeDescriptor typeDescriptor = TypeDescriptor.valueOf(String.class);
-
+		TypeConverter typeConverter = state.getEvaluationContext().getTypeConverter();
+		TypeDescriptor typeDescriptor = TypeDescriptor.valueOf(String.class);
 		if (typeConverter.canConvert(value.getTypeDescriptor(), typeDescriptor)) {
-			final Object obj = typeConverter.convertValue(value.getValue(),
-					value.getTypeDescriptor(), typeDescriptor);
-			return String.valueOf(obj);
+			return String.valueOf(typeConverter.convertValue(value.getValue(),
+					value.getTypeDescriptor(), typeDescriptor));
 		}
-
 		return String.valueOf(value.getValue());
 	}
 
@@ -183,28 +184,28 @@ public class OpPlus extends Operator {
 		if (!getLeftOperand().isCompilable()) {
 			return false;
 		}
-		if (this.children.length>1) {
+		if (this.children.length > 1) {
 			 if (!getRightOperand().isCompilable()) {
 				 return false;
 			 }
 		}
-		return this.exitTypeDescriptor!=null;
+		return (this.exitTypeDescriptor != null);
 	}
 
 	@Override
-	public void generateCode(MethodVisitor mv, CodeFlow codeflow) {
-		getLeftOperand().generateCode(mv, codeflow);
-		String leftdesc = getLeftOperand().getExitDescriptor();
-		if (!CodeFlow.isPrimitive(leftdesc)) {
-			CodeFlow.insertUnboxInsns(mv, this.exitTypeDescriptor.charAt(0), leftdesc);
+	public void generateCode(MethodVisitor mv, CodeFlow cf) {
+		getLeftOperand().generateCode(mv, cf);
+		String leftDesc = getLeftOperand().exitTypeDescriptor;
+		if (!CodeFlow.isPrimitive(leftDesc)) {
+			CodeFlow.insertUnboxInsns(mv, this.exitTypeDescriptor.charAt(0), leftDesc);
 		}
-		if (this.children.length>1) {
-			codeflow.enterCompilationScope();
-			getRightOperand().generateCode(mv, codeflow);
-			String rightdesc = getRightOperand().getExitDescriptor();
-			codeflow.exitCompilationScope();
-			if (!CodeFlow.isPrimitive(rightdesc)) {
-				CodeFlow.insertUnboxInsns(mv, this.exitTypeDescriptor.charAt(0), rightdesc);
+		if (this.children.length > 1) {
+			cf.enterCompilationScope();
+			getRightOperand().generateCode(mv, cf);
+			String rightDesc = getRightOperand().exitTypeDescriptor;
+			cf.exitCompilationScope();
+			if (!CodeFlow.isPrimitive(rightDesc)) {
+				CodeFlow.insertUnboxInsns(mv, this.exitTypeDescriptor.charAt(0), rightDesc);
 			}
 			switch (this.exitTypeDescriptor.charAt(0)) {
 				case 'I':
@@ -220,10 +221,11 @@ public class OpPlus extends Operator {
 					mv.visitInsn(DADD);
 					break;				
 				default:
-					throw new IllegalStateException("Unrecognized exit descriptor: '"+this.exitTypeDescriptor+"'");			
+					throw new IllegalStateException(
+							"Unrecognized exit type descriptor: '" + this.exitTypeDescriptor + "'");
 			}
 		}
-		codeflow.pushDescriptor(this.exitTypeDescriptor);
+		cf.pushDescriptor(this.exitTypeDescriptor);
 	}
 
 }

@@ -48,9 +48,9 @@ public class LongLiteral extends Literal {
 	}
 	
 	@Override
-	public void generateCode(MethodVisitor mv, CodeFlow codeflow) {
+	public void generateCode(MethodVisitor mv, CodeFlow cf) {
 		mv.visitLdcInsn(this.value.getValue());
-		codeflow.pushDescriptor(getExitDescriptor());
+		cf.pushDescriptor(this.exitTypeDescriptor);
 	}
 
 }

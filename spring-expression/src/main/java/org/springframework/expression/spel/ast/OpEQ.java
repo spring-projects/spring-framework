@@ -36,12 +36,13 @@ public class OpEQ extends Operator {
 		this.exitTypeDescriptor = "Z";
 	}
 
+
 	@Override
 	public BooleanTypedValue getValueInternal(ExpressionState state) throws EvaluationException {
 		Object left = getLeftOperand().getValueInternal(state).getValue();
 		Object right = getRightOperand().getValueInternal(state).getValue();
-		leftActualDescriptor = CodeFlow.toDescriptorFromObject(left);
-		rightActualDescriptor = CodeFlow.toDescriptorFromObject(right);
+		this.leftActualDescriptor = CodeFlow.toDescriptorFromObject(left);
+		this.rightActualDescriptor = CodeFlow.toDescriptorFromObject(right);
 		return BooleanTypedValue.forValue(equalityCheck(state, left, right));
 	}
 	
@@ -54,38 +55,38 @@ public class OpEQ extends Operator {
 		if (!left.isCompilable() || !right.isCompilable()) {
 			return false;
 		}
-		String leftdesc = left.getExitDescriptor();
-		String rightdesc = right.getExitDescriptor();
-		DescriptorComparison dc = DescriptorComparison.checkNumericCompatibility(leftdesc, rightdesc, leftActualDescriptor, rightActualDescriptor);
-		if (dc.areNumbers) {
-			return dc.areCompatible;
-		}
-		return true;
+
+		String leftDesc = left.exitTypeDescriptor;
+		String rightDesc = right.exitTypeDescriptor;
+		DescriptorComparison dc = DescriptorComparison.checkNumericCompatibility(leftDesc, rightDesc,
+				this.leftActualDescriptor, this.rightActualDescriptor);
+		return (!dc.areNumbers || dc.areCompatible);
 	}
 	
 	
 	@Override
-	public void generateCode(MethodVisitor mv, CodeFlow codeflow) {
-		String leftDesc = getLeftOperand().getExitDescriptor();
-		String rightDesc = getRightOperand().getExitDescriptor();
+	public void generateCode(MethodVisitor mv, CodeFlow cf) {
+		String leftDesc = getLeftOperand().exitTypeDescriptor;
+		String rightDesc = getRightOperand().exitTypeDescriptor;
 		Label elseTarget = new Label();
 		Label endOfIf = new Label();
 		boolean leftPrim = CodeFlow.isPrimitive(leftDesc);
 		boolean rightPrim = CodeFlow.isPrimitive(rightDesc);
 
-		DescriptorComparison dc = DescriptorComparison.checkNumericCompatibility(leftDesc, rightDesc, leftActualDescriptor, rightActualDescriptor);
+		DescriptorComparison dc = DescriptorComparison.checkNumericCompatibility(leftDesc, rightDesc,
+				this.leftActualDescriptor, this.rightActualDescriptor);
 		
 		if (dc.areNumbers && dc.areCompatible) {
 			char targetType = dc.compatibleType;
 			
-			getLeftOperand().generateCode(mv, codeflow);
+			getLeftOperand().generateCode(mv, cf);
 			if (!leftPrim) {
 				CodeFlow.insertUnboxInsns(mv, targetType, leftDesc);
 			}
 		
-			codeflow.enterCompilationScope();
-			getRightOperand().generateCode(mv, codeflow);
-			codeflow.exitCompilationScope();
+			cf.enterCompilationScope();
+			getRightOperand().generateCode(mv, cf);
+			cf.exitCompilationScope();
 			if (!rightPrim) {
 				CodeFlow.insertUnboxInsns(mv, targetType, rightDesc);
 			}
@@ -110,28 +111,26 @@ public class OpEQ extends Operator {
 			}
 		}
 		else {
-			getLeftOperand().generateCode(mv, codeflow);
-			getRightOperand().generateCode(mv, codeflow);
+			getLeftOperand().generateCode(mv, cf);
+			getRightOperand().generateCode(mv, cf);
 			Label leftNotNull = new Label();
 			mv.visitInsn(DUP_X1); // Dup right on the top of the stack
 			mv.visitJumpInsn(IFNONNULL,leftNotNull);
-				// Right is null!
-				mv.visitInsn(SWAP);
-				mv.visitInsn(POP); // remove it
-				Label rightNotNull = new Label();
-				mv.visitJumpInsn(IFNONNULL, rightNotNull);
-					// Left is null too
-					mv.visitInsn(ICONST_1);
-				mv.visitJumpInsn(GOTO, endOfIf);
-					mv.visitLabel(rightNotNull);
-					mv.visitInsn(ICONST_0);
-				mv.visitJumpInsn(GOTO,endOfIf);
-			
-			
+			// Right is null!
+			mv.visitInsn(SWAP);
+			mv.visitInsn(POP); // remove it
+			Label rightNotNull = new Label();
+			mv.visitJumpInsn(IFNONNULL, rightNotNull);
+			// Left is null too
+			mv.visitInsn(ICONST_1);
+			mv.visitJumpInsn(GOTO, endOfIf);
+			mv.visitLabel(rightNotNull);
+			mv.visitInsn(ICONST_0);
+			mv.visitJumpInsn(GOTO,endOfIf);
 			mv.visitLabel(leftNotNull);
-			mv.visitMethodInsn(INVOKEVIRTUAL,"java/lang/Object","equals","(Ljava/lang/Object;)Z",false);
+			mv.visitMethodInsn(INVOKEVIRTUAL, "java/lang/Object", "equals", "(Ljava/lang/Object;)Z", false);
 			mv.visitLabel(endOfIf);
-			codeflow.pushDescriptor("Z");
+			cf.pushDescriptor("Z");
 			return;
 		}
 		mv.visitInsn(ICONST_1);
@@ -139,7 +138,7 @@ public class OpEQ extends Operator {
 		mv.visitLabel(elseTarget);
 		mv.visitInsn(ICONST_0);
 		mv.visitLabel(endOfIf);
-		codeflow.pushDescriptor("Z");
+		cf.pushDescriptor("Z");
 	}
 
 }

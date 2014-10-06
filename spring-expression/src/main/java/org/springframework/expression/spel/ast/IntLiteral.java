@@ -47,19 +47,19 @@ public class IntLiteral extends Literal {
 	}
 	
 	@Override
-	public void generateCode(MethodVisitor mv, CodeFlow codeflow) {
-		int intValue = ((Integer)this.value.getValue()).intValue();
-		if (intValue==-1) {
+	public void generateCode(MethodVisitor mv, CodeFlow cf) {
+		int intValue = (Integer) this.value.getValue();
+		if (intValue == -1) {
 			// Not sure we can get here because -1 is OpMinus
 			mv.visitInsn(ICONST_M1);
 		}
 		else if (intValue >= 0 && intValue < 6) {
-			mv.visitInsn(ICONST_0+intValue);			
+			mv.visitInsn(ICONST_0 + intValue);
 		}
 		else {
 			mv.visitLdcInsn(intValue);
 		}
-		codeflow.pushDescriptor(getExitDescriptor());
+		cf.pushDescriptor(this.exitTypeDescriptor);
 	}
 
 }

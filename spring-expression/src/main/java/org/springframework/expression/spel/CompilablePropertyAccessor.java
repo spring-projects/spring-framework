@@ -45,8 +45,8 @@ public interface CompilablePropertyAccessor extends PropertyAccessor, Opcodes {
 	 * using context information from the codeflow where necessary.
 	 * @param propertyName the name of the property
 	 * @param mv the Asm method visitor into which code should be generated
-	 * @param codeflow the current state of the expression compiler
+	 * @param cf the current state of the expression compiler
 	 */
-	void generateCode(String propertyName, MethodVisitor mv, CodeFlow codeflow);
+	void generateCode(String propertyName, MethodVisitor mv, CodeFlow cf);
 
 }

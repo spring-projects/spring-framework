@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,10 +44,10 @@ public class OperatorMatches extends Operator {
 	/**
 	 * Check the first operand matches the regex specified as the second operand.
 	 * @param state the expression state
-	 * @return true if the first operand matches the regex specified as the second
-	 *         operand, otherwise false
-	 * @throws EvaluationException if there is a problem evaluating the expression (e.g.
-	 *         the regex is invalid)
+	 * @return {@code true} if the first operand matches the regex specified as the
+	 * second operand, otherwise {@code false}
+	 * @throws EvaluationException if there is a problem evaluating the expression
+	 * (e.g. the regex is invalid)
 	 */
 	@Override
 	public BooleanTypedValue getValueInternal(ExpressionState state) throws EvaluationException {
@@ -55,21 +55,23 @@ public class OperatorMatches extends Operator {
 		SpelNodeImpl rightOp = getRightOperand();
 		Object left = leftOp.getValue(state, String.class);
 		Object right = getRightOperand().getValueInternal(state).getValue();
+
+		if (!(left instanceof String)) {
+			throw new SpelEvaluationException(leftOp.getStartPosition(),
+					SpelMessage.INVALID_FIRST_OPERAND_FOR_MATCHES_OPERATOR, left);
+		}
+		if (!(right instanceof String)) {
+			throw new SpelEvaluationException(rightOp.getStartPosition(),
+					SpelMessage.INVALID_SECOND_OPERAND_FOR_MATCHES_OPERATOR, right);
+		}
+
 		try {
-			if (!(left instanceof String)) {
-				throw new SpelEvaluationException(leftOp.getStartPosition(),
-						SpelMessage.INVALID_FIRST_OPERAND_FOR_MATCHES_OPERATOR, left);
-			}
-			if (!(right instanceof String)) {
-				throw new SpelEvaluationException(rightOp.getStartPosition(),
-						SpelMessage.INVALID_SECOND_OPERAND_FOR_MATCHES_OPERATOR, right);
-			}
 			Pattern pattern = Pattern.compile((String) right);
 			Matcher matcher = pattern.matcher((String) left);
 			return BooleanTypedValue.forValue(matcher.matches());
 		}
-		catch (PatternSyntaxException pse) {
-			throw new SpelEvaluationException(rightOp.getStartPosition(), pse, SpelMessage.INVALID_PATTERN, right);
+		catch (PatternSyntaxException ex) {
+			throw new SpelEvaluationException(rightOp.getStartPosition(), ex, SpelMessage.INVALID_PATTERN, right);
 		}
 	}
 

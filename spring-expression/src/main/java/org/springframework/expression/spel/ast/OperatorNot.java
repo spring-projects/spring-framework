@@ -33,7 +33,7 @@ import org.springframework.expression.spel.support.BooleanTypedValue;
  * @author Oliver Becker
  * @since 3.0
  */
-public class OperatorNot extends SpelNodeImpl { // Not is a unary operator so do not extend BinaryOperator
+public class OperatorNot extends SpelNodeImpl {  // Not is a unary operator so does not extend BinaryOperator
 
 	public OperatorNot(int pos, SpelNodeImpl operand) {
 		super(pos, operand);
@@ -58,21 +58,19 @@ public class OperatorNot extends SpelNodeImpl { // Not is a unary operator so do
 
 	@Override
 	public String toStringAST() {
-		StringBuilder sb = new StringBuilder();
-		sb.append("!").append(getChild(0).toStringAST());
-		return sb.toString();
+		return "!" + getChild(0).toStringAST();
 	}
 	
 	@Override
 	public boolean isCompilable() {
 		SpelNodeImpl child = this.children[0];
-		return child.isCompilable() && CodeFlow.isBooleanCompatible(child.getExitDescriptor());
+		return (child.isCompilable() && CodeFlow.isBooleanCompatible(child.exitTypeDescriptor));
 	}
 	
 	@Override
-	public void generateCode(MethodVisitor mv, CodeFlow codeflow) {
-		this.children[0].generateCode(mv, codeflow);
-		codeflow.unboxBooleanIfNecessary(mv);
+	public void generateCode(MethodVisitor mv, CodeFlow cf) {
+		this.children[0].generateCode(mv, cf);
+		cf.unboxBooleanIfNecessary(mv);
 		Label elseTarget = new Label();
 		Label endOfIf = new Label();
 		mv.visitJumpInsn(IFNE,elseTarget);		
@@ -81,7 +79,7 @@ public class OperatorNot extends SpelNodeImpl { // Not is a unary operator so do
 		mv.visitLabel(elseTarget);
 		mv.visitInsn(ICONST_0); // FALSE
 		mv.visitLabel(endOfIf);
-		codeflow.pushDescriptor(getExitDescriptor());
+		cf.pushDescriptor(this.exitTypeDescriptor);
 	}
 
 }

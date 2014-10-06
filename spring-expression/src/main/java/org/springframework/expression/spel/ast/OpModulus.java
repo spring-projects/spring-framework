@@ -17,6 +17,7 @@
 package org.springframework.expression.spel.ast;
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
 
 import org.springframework.asm.MethodVisitor;
 import org.springframework.expression.EvaluationException;
@@ -30,11 +31,11 @@ import org.springframework.util.NumberUtils;
  * Implements the modulus operator.
  *
  * @author Andy Clement
+ * @author Juergen Hoeller
  * @author Giovanni Dall'Oglio Risso
  * @since 3.0
  */
 public class OpModulus extends Operator {
-
 
 	public OpModulus(int pos, SpelNodeImpl... operands) {
 		super("%", pos, operands);
@@ -45,6 +46,7 @@ public class OpModulus extends Operator {
 	public TypedValue getValueInternal(ExpressionState state) throws EvaluationException {
 		Object leftOperand = getLeftOperand().getValueInternal(state).getValue();
 		Object rightOperand = getRightOperand().getValueInternal(state).getValue();
+
 		if (leftOperand instanceof Number && rightOperand instanceof Number) {
 			Number leftNumber = (Number) leftOperand;
 			Number rightNumber = (Number) rightOperand;
@@ -54,37 +56,44 @@ public class OpModulus extends Operator {
 				BigDecimal rightBigDecimal = NumberUtils.convertNumberToTargetClass(rightNumber, BigDecimal.class);
 				return new TypedValue(leftBigDecimal.remainder(rightBigDecimal));
 			}
-
-			if (leftNumber instanceof Double || rightNumber instanceof Double) {
-				if (leftNumber instanceof Double && rightNumber instanceof Double) {
+			else if (leftNumber instanceof Double || rightNumber instanceof Double) {
+				if (leftNumber.getClass() == rightNumber.getClass()) {
 					this.exitTypeDescriptor = "D";
 				}
 				return new TypedValue(leftNumber.doubleValue() % rightNumber.doubleValue());
 			}
-
-			if (leftNumber instanceof Float || rightNumber instanceof Float) {
-				if (leftNumber instanceof Float && rightNumber instanceof Float) {
+			else if (leftNumber instanceof Float || rightNumber instanceof Float) {
+				if (leftNumber.getClass() == rightNumber.getClass()) {
 					this.exitTypeDescriptor = "F";
 				}
 				return new TypedValue(leftNumber.floatValue() % rightNumber.floatValue());
 			}
-
-			if (leftNumber instanceof Long || rightNumber instanceof Long) {
-				if (leftNumber instanceof Long && rightNumber instanceof Long) {
+			else if (leftNumber instanceof BigInteger || rightNumber instanceof BigInteger) {
+				BigInteger leftBigInteger = NumberUtils.convertNumberToTargetClass(leftNumber, BigInteger.class);
+				BigInteger rightBigInteger = NumberUtils.convertNumberToTargetClass(rightNumber, BigInteger.class);
+				return new TypedValue(leftBigInteger.remainder(rightBigInteger));
+			}
+			else if (leftNumber instanceof Long || rightNumber instanceof Long) {
+				if (leftNumber.getClass() == rightNumber.getClass()) {
 					this.exitTypeDescriptor = "J";
 				}
 				return new TypedValue(leftNumber.longValue() % rightNumber.longValue());
 			}
-
-			if (leftNumber instanceof Integer && rightNumber instanceof Integer) {
-				this.exitTypeDescriptor = "I";
+			else if (CodeFlow.isIntegerForNumericOp(leftNumber) || CodeFlow.isIntegerForNumericOp(rightNumber)) {
+				if (leftNumber instanceof Integer && rightNumber instanceof Integer) {
+					this.exitTypeDescriptor = "I";
+				}
+				return new TypedValue(leftNumber.intValue() % rightNumber.intValue());
 			}
-			return new TypedValue(leftNumber.intValue() % rightNumber.intValue());
+			else {
+				// Unknown Number subtypes -> best guess is double division
+				return new TypedValue(leftNumber.doubleValue() % rightNumber.doubleValue());
+			}
 		}
 
 		return state.operate(Operation.MODULUS, leftOperand, rightOperand);
 	}
-	
+
 	@Override
 	public boolean isCompilable() {
 		if (!getLeftOperand().isCompilable()) {
@@ -97,21 +106,21 @@ public class OpModulus extends Operator {
 		}
 		return this.exitTypeDescriptor!=null;
 	}
-	
+
 	@Override
-	public void generateCode(MethodVisitor mv, CodeFlow codeflow) {
-		getLeftOperand().generateCode(mv, codeflow);
-		String leftdesc = getLeftOperand().getExitDescriptor();
-		if (!CodeFlow.isPrimitive(leftdesc)) {
-			CodeFlow.insertUnboxInsns(mv, this.exitTypeDescriptor.charAt(0), leftdesc);
+	public void generateCode(MethodVisitor mv, CodeFlow cf) {
+		getLeftOperand().generateCode(mv, cf);
+		String leftDesc = getLeftOperand().exitTypeDescriptor;
+		if (!CodeFlow.isPrimitive(leftDesc)) {
+			CodeFlow.insertUnboxInsns(mv, this.exitTypeDescriptor.charAt(0), leftDesc);
 		}
 		if (this.children.length > 1) {
-			codeflow.enterCompilationScope();
-			getRightOperand().generateCode(mv, codeflow);
-			String rightdesc = getRightOperand().getExitDescriptor();
-			codeflow.exitCompilationScope();
-			if (!CodeFlow.isPrimitive(rightdesc)) {
-				CodeFlow.insertUnboxInsns(mv, this.exitTypeDescriptor.charAt(0), rightdesc);
+			cf.enterCompilationScope();
+			getRightOperand().generateCode(mv, cf);
+			String rightDesc = getRightOperand().exitTypeDescriptor;
+			cf.exitCompilationScope();
+			if (!CodeFlow.isPrimitive(rightDesc)) {
+				CodeFlow.insertUnboxInsns(mv, this.exitTypeDescriptor.charAt(0), rightDesc);
 			}
 			switch (this.exitTypeDescriptor.charAt(0)) {
 				case 'I':
@@ -127,10 +136,11 @@ public class OpModulus extends Operator {
 					mv.visitInsn(DREM);
 					break;				
 				default:
-					throw new IllegalStateException("Unrecognized exit descriptor: '"+this.exitTypeDescriptor+"'");			
+					throw new IllegalStateException(
+							"Unrecognized exit type descriptor: '" + this.exitTypeDescriptor + "'");
 			}
 		}
-		codeflow.pushDescriptor(this.exitTypeDescriptor);
+		cf.pushDescriptor(this.exitTypeDescriptor);
 	}
 
 }

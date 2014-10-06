@@ -28,10 +28,11 @@ import org.springframework.expression.spel.SpelMessage;
 import org.springframework.expression.spel.SpelNode;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.util.Assert;
+import org.springframework.util.ObjectUtils;
 
 /**
- * The common supertype of all AST nodes in a parsed Spring Expression Language format
- * expression.
+ * The common supertype of all AST nodes in a parsed Spring Expression Language
+ * format expression.
  *
  * @author Andy Clement
  * @since 3.0
@@ -62,11 +63,11 @@ public abstract class SpelNodeImpl implements SpelNode, Opcodes {
 	public SpelNodeImpl(int pos, SpelNodeImpl... operands) {
 		this.pos = pos;
 		// pos combines start and end so can never be zero because tokens cannot be zero length
-		Assert.isTrue(pos != 0);
-		if (operands != null && operands.length > 0) {
+		Assert.isTrue(pos != 0, "Pos must not be 0");
+		if (!ObjectUtils.isEmpty(operands)) {
 			this.children = operands;
-			for (SpelNodeImpl childnode : operands) {
-				childnode.parent = this;
+			for (SpelNodeImpl childNode : operands) {
+				childNode.parent = this;
 			}
 		}
 	}
@@ -195,10 +196,10 @@ public abstract class SpelNodeImpl implements SpelNode, Opcodes {
 	 * example it will include information about the type of the object currently
 	 * on the stack.
 	 * @param mv the ASM MethodVisitor into which code should be generated
-	 * @param codeflow a context object with info about what is on the stack
+	 * @param cf a context object with info about what is on the stack
 	 */
-	public void generateCode(MethodVisitor mv, CodeFlow codeflow) {
-		throw new IllegalStateException(this.getClass().getName()+" has no generateCode(..) method");
+	public void generateCode(MethodVisitor mv, CodeFlow cf) {
+		throw new IllegalStateException(getClass().getName() +" has no generateCode(..) method");
 	}
 
 	public String getExitDescriptor() {

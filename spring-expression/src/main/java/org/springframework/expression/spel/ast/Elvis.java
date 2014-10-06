@@ -69,14 +69,14 @@ public class Elvis extends SpelNodeImpl {
 		SpelNodeImpl condition = this.children[0];
 		SpelNodeImpl ifNullValue = this.children[1];
 		return (condition.isCompilable() && ifNullValue.isCompilable() &&
-				condition.getExitDescriptor() != null && ifNullValue.getExitDescriptor() != null);
+				condition.exitTypeDescriptor != null && ifNullValue.exitTypeDescriptor != null);
 	}
 
 	@Override
-	public void generateCode(MethodVisitor mv, CodeFlow codeflow) {
+	public void generateCode(MethodVisitor mv, CodeFlow cf) {
 		// exit type descriptor can be null if both components are literal expressions
 		computeExitTypeDescriptor();
-		this.children[0].generateCode(mv, codeflow);
+		this.children[0].generateCode(mv, cf);
 		Label elseTarget = new Label();
 		Label endOfIf = new Label();
 		mv.visitInsn(DUP);
@@ -84,17 +84,17 @@ public class Elvis extends SpelNodeImpl {
 		mv.visitJumpInsn(GOTO, endOfIf);
 		mv.visitLabel(elseTarget);
 		mv.visitInsn(POP);
-		this.children[1].generateCode(mv, codeflow);
-		if (!CodeFlow.isPrimitive(getExitDescriptor())) {
-			CodeFlow.insertBoxIfNecessary(mv, codeflow.lastDescriptor().charAt(0));
+		this.children[1].generateCode(mv, cf);
+		if (!CodeFlow.isPrimitive(this.exitTypeDescriptor)) {
+			CodeFlow.insertBoxIfNecessary(mv, cf.lastDescriptor().charAt(0));
 		}
 		mv.visitLabel(endOfIf);
-		codeflow.pushDescriptor(getExitDescriptor());
+		cf.pushDescriptor(this.exitTypeDescriptor);
 	}
 
 	private void computeExitTypeDescriptor() {
-		if (this.exitTypeDescriptor == null && this.children[0].getExitDescriptor() != null &&
-				this.children[1].getExitDescriptor() != null) {
+		if (this.exitTypeDescriptor == null && this.children[0].exitTypeDescriptor != null &&
+				this.children[1].exitTypeDescriptor != null) {
 			String conditionDescriptor = this.children[0].exitTypeDescriptor;
 			String ifNullValueDescriptor = this.children[1].exitTypeDescriptor;
 			if (conditionDescriptor.equals(ifNullValueDescriptor)) {

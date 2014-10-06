@@ -141,21 +141,23 @@ public class SpelCompiler implements Opcodes {
 		MethodVisitor mv = cw.visitMethod(ACC_PUBLIC, "<init>", "()V", null, null);
 		mv.visitCode();
 		mv.visitVarInsn(ALOAD, 0);
-		mv.visitMethodInsn(INVOKESPECIAL, "org/springframework/expression/spel/CompiledExpression", "<init>", "()V",false);
+		mv.visitMethodInsn(INVOKESPECIAL, "org/springframework/expression/spel/CompiledExpression",
+				"<init>", "()V", false);
 		mv.visitInsn(RETURN);
 		mv.visitMaxs(1, 1);
 		mv.visitEnd();
 
 		// Create getValue() method
-		mv = cw.visitMethod(ACC_PUBLIC, "getValue", "(Ljava/lang/Object;Lorg/springframework/expression/EvaluationContext;)Ljava/lang/Object;", null,
-				new String[]{"org/springframework/expression/EvaluationException"});
+		mv = cw.visitMethod(ACC_PUBLIC, "getValue",
+				"(Ljava/lang/Object;Lorg/springframework/expression/EvaluationContext;)Ljava/lang/Object;", null,
+				new String[ ]{"org/springframework/expression/EvaluationException"});
 		mv.visitCode();
 
-		CodeFlow codeflow = new CodeFlow();
+		CodeFlow cf = new CodeFlow();
 
 		// Ask the expression AST to generate the body of the method
 		try {
-			expressionToCompile.generateCode(mv, codeflow);
+			expressionToCompile.generateCode(mv, cf);
 		}
 		catch (IllegalStateException ex) {
 			if (logger.isDebugEnabled()) {
@@ -165,19 +167,19 @@ public class SpelCompiler implements Opcodes {
 			return null;
 		}
 
-		CodeFlow.insertBoxIfNecessary(mv, codeflow.lastDescriptor());
-		if ("V".equals(codeflow.lastDescriptor())) {
+		CodeFlow.insertBoxIfNecessary(mv, cf.lastDescriptor());
+		if ("V".equals(cf.lastDescriptor())) {
 			mv.visitInsn(ACONST_NULL);
 		}
 		mv.visitInsn(ARETURN);
 
-		mv.visitMaxs(0,0); // not supplied due to COMPUTE_MAXS
+		mv.visitMaxs(0, 0);  // not supplied due to COMPUTE_MAXS
 		mv.visitEnd();
 		cw.visitEnd();
 		byte[] data = cw.toByteArray();
 		// TODO need to make this conditionally occur based on a debug flag
 		// dump(expressionToCompile.toStringAST(), clazzName, data);
-		return (Class<? extends CompiledExpression>) ccl.defineClass(clazzName.replaceAll("/","."),data);
+		return (Class<? extends CompiledExpression>) this.ccl.defineClass(clazzName.replaceAll("/", "."), data);
 	}
 
 
@@ -249,7 +251,8 @@ public class SpelCompiler implements Opcodes {
 			fos.close();
 		}
 		catch (IOException ex) {
-			throw new IllegalStateException("Unexpected problem dumping class " + nameToUse + " into " + dumpLocation, ex);
+			throw new IllegalStateException(
+					"Unexpected problem dumping class " + nameToUse + " into " + dumpLocation, ex);
 		}
 	}
 
@@ -259,7 +262,7 @@ public class SpelCompiler implements Opcodes {
 	 */
 	public static class ChildClassLoader extends URLClassLoader {
 
-		private static URL[] NO_URLS = new URL[0];
+		private static final URL[] NO_URLS = new URL[0];
 
 		public ChildClassLoader(ClassLoader classloader) {
 			super(NO_URLS, classloader);

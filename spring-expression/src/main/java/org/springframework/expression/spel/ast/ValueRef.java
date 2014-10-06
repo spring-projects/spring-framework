@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,7 +59,7 @@ public interface ValueRef {
 	 */
 	static class NullValueRef implements ValueRef {
 
-		static NullValueRef instance = new NullValueRef();
+		static final NullValueRef INSTANCE = new NullValueRef();
 
 		@Override
 		public TypedValue getValue() {
@@ -71,14 +71,13 @@ public interface ValueRef {
 			// The exception position '0' isn't right but the overhead of creating
 			// instances of this per node (where the node is solely for error reporting)
 			// would be unfortunate.
-			throw new SpelEvaluationException(0,SpelMessage.NOT_ASSIGNABLE,"null");
+			throw new SpelEvaluationException(0, SpelMessage.NOT_ASSIGNABLE, "null");
 		}
 
 		@Override
 		public boolean isWritable() {
 			return false;
 		}
-
 	}
 
 
@@ -88,7 +87,8 @@ public interface ValueRef {
 	static class TypedValueHolderValueRef implements ValueRef {
 
 		private final TypedValue typedValue;
-		private final SpelNodeImpl node; // used only for error reporting
+
+		private final SpelNodeImpl node;  // used only for error reporting
 
 		public TypedValueHolderValueRef(TypedValue typedValue,SpelNodeImpl node) {
 			this.typedValue = typedValue;
@@ -97,20 +97,18 @@ public interface ValueRef {
 
 		@Override
 		public TypedValue getValue() {
-			return typedValue;
+			return this.typedValue;
 		}
 
 		@Override
 		public void setValue(Object newValue) {
-			throw new SpelEvaluationException(
-					node.pos, SpelMessage.NOT_ASSIGNABLE, node.toStringAST());
+			throw new SpelEvaluationException(this.node.pos, SpelMessage.NOT_ASSIGNABLE, this.node.toStringAST());
 		}
 
 		@Override
 		public boolean isWritable() {
 			return false;
 		}
-
 	}
 
 }

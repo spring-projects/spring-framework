@@ -17,6 +17,7 @@
 package org.springframework.expression.spel.ast;
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
 
 import org.springframework.asm.MethodVisitor;
 import org.springframework.expression.EvaluationException;
@@ -29,23 +30,21 @@ import org.springframework.util.NumberUtils;
 /**
  * The minus operator supports:
  * <ul>
- * <li>subtraction of {@code BigDecimal}
- * <li>subtraction of doubles (floats are represented as doubles)
- * <li>subtraction of longs
- * <li>subtraction of integers
- * <li>subtraction of an int from a string of one character (effectively decreasing that
- * character), so 'd'-3='a'
+ * <li>subtraction of numbers
+ * <li>subtraction of an int from a string of one character
+ * (effectively decreasing that character), so 'd'-3='a'
  * </ul>
- * It can be used as a unary operator for numbers ({@code BigDecimal}/double/long/int).
+ *
+ * <p>It can be used as a unary operator for numbers.
  * The standard promotions are performed when the operand types vary (double-int=double).
  * For other options it defers to the registered overloader.
  *
  * @author Andy Clement
+ * @author Juergen Hoeller
  * @author Giovanni Dall'Oglio Risso
  * @since 3.0
  */
 public class OpMinus extends Operator {
-
 
 	public OpMinus(int pos, SpelNodeImpl... operands) {
 		super("-", pos, operands);
@@ -54,38 +53,45 @@ public class OpMinus extends Operator {
 
 	@Override
 	public TypedValue getValueInternal(ExpressionState state) throws EvaluationException {
-
 		SpelNodeImpl leftOp = getLeftOperand();
 		SpelNodeImpl rightOp = getRightOperand();
 
-		if (rightOp == null) {// If only one operand, then this is unary minus
+		if (rightOp == null) {  // if only one operand, then this is unary minus
 			Object operand = leftOp.getValueInternal(state).getValue();
 			if (operand instanceof Number) {
-				Number n = (Number) operand;
-
 				if (operand instanceof BigDecimal) {
-					BigDecimal bdn = (BigDecimal) n;
-					return new TypedValue(bdn.negate());
+					return new TypedValue(((BigDecimal) operand).negate());
 				}
-
-				if (operand instanceof Double) {
+				else if (operand instanceof Double) {
 					this.exitTypeDescriptor = "D";
-					return new TypedValue(0 - n.doubleValue());
+					return new TypedValue(0 - ((Number) operand).doubleValue());
 				}
-
-				if (operand instanceof Float) {
+				else if (operand instanceof Float) {
 					this.exitTypeDescriptor = "F";
-					return new TypedValue(0 - n.floatValue());
+					return new TypedValue(0 - ((Number) operand).floatValue());
 				}
-
-				if (operand instanceof Long) {
+				else if (operand instanceof BigInteger) {
+					return new TypedValue(((BigInteger) operand).negate());
+				}
+				else if (operand instanceof Long) {
 					this.exitTypeDescriptor = "J";
-					return new TypedValue(0 - n.longValue());
+					return new TypedValue(0 - ((Number) operand).longValue());
 				}
-				this.exitTypeDescriptor = "I";
-				return new TypedValue(0 - n.intValue());
+				else if (operand instanceof Integer) {
+					this.exitTypeDescriptor = "I";
+					return new TypedValue(0 - ((Number) operand).intValue());
+				}
+				else if (operand instanceof Short) {
+					return new TypedValue(0 - ((Number) operand).shortValue());
+				}
+				else if (operand instanceof Byte) {
+					return new TypedValue(0 - ((Number) operand).byteValue());
+				}
+				else {
+					// Unknown Number subtypes -> best guess is double subtraction
+					return new TypedValue(0 - ((Number) operand).doubleValue());
+				}
 			}
-
 			return state.operate(Operation.SUBTRACT, operand, null);
 		}
 
@@ -101,37 +107,46 @@ public class OpMinus extends Operator {
 				BigDecimal rightBigDecimal = NumberUtils.convertNumberToTargetClass(rightNumber, BigDecimal.class);
 				return new TypedValue(leftBigDecimal.subtract(rightBigDecimal));
 			}
-			
-			if (leftNumber instanceof Double || rightNumber instanceof Double) {
-				if (leftNumber instanceof Double && rightNumber instanceof Double) {
+			else if (leftNumber instanceof Double || rightNumber instanceof Double) {
+				if (leftNumber.getClass() == rightNumber.getClass()) {
 					this.exitTypeDescriptor = "D";
 				}
 				return new TypedValue(leftNumber.doubleValue() - rightNumber.doubleValue());
 			}
-
-			if (leftNumber instanceof Float || rightNumber instanceof Float) {
-				if (leftNumber instanceof Float && rightNumber instanceof Float) {
+			else if (leftNumber instanceof Float || rightNumber instanceof Float) {
+				if (leftNumber.getClass() == rightNumber.getClass()) {
 					this.exitTypeDescriptor = "F";
 				}
 				return new TypedValue(leftNumber.floatValue() - rightNumber.floatValue());
 			}
-
-			if (leftNumber instanceof Long || rightNumber instanceof Long) {
-				if (leftNumber instanceof Long && rightNumber instanceof Long) {
+			else if (leftNumber instanceof BigInteger || rightNumber instanceof BigInteger) {
+				BigInteger leftBigInteger = NumberUtils.convertNumberToTargetClass(leftNumber, BigInteger.class);
+				BigInteger rightBigInteger = NumberUtils.convertNumberToTargetClass(rightNumber, BigInteger.class);
+				return new TypedValue(leftBigInteger.subtract(rightBigInteger));
+			}
+			else if (leftNumber instanceof Long || rightNumber instanceof Long) {
+				if (leftNumber.getClass() == rightNumber.getClass()) {
 					this.exitTypeDescriptor = "J";
 				}
 				return new TypedValue(leftNumber.longValue() - rightNumber.longValue());
 			}
-			this.exitTypeDescriptor = "I";
-			return new TypedValue(leftNumber.intValue() - rightNumber.intValue());
+			else if (CodeFlow.isIntegerForNumericOp(leftNumber) || CodeFlow.isIntegerForNumericOp(rightNumber)) {
+				if (leftNumber instanceof Integer && rightNumber instanceof Integer) {
+					this.exitTypeDescriptor = "I";
+				}
+				return new TypedValue(leftNumber.intValue() - rightNumber.intValue());
+			}
+			else {
+				// Unknown Number subtypes -> best guess is double subtraction
+				return new TypedValue(leftNumber.doubleValue() - rightNumber.doubleValue());
+			}
 		}
-		else if (left instanceof String && right instanceof Integer
-				&& ((String) left).length() == 1) {
+
+		if (left instanceof String && right instanceof Integer && ((String) left).length() == 1) {
 			String theString = (String) left;
 			Integer theInteger = (Integer) right;
-			// implements character - int (ie. b - 1 = a)
-			return new TypedValue(Character.toString((char)
-					(theString.charAt(0) - theInteger)));
+			// Implements character - int (ie. b - 1 = a)
+			return new TypedValue(Character.toString((char) (theString.charAt(0) - theInteger)));
 		}
 
 		return state.operate(Operation.SUBTRACT, left, right);
@@ -139,45 +154,47 @@ public class OpMinus extends Operator {
 
 	@Override
 	public String toStringAST() {
-		if (getRightOperand() == null) { // unary minus
-			return new StringBuilder().append("-").append(getLeftOperand().toStringAST()).toString();
+		if (getRightOperand() == null) {  // unary minus
+			return "-" + getLeftOperand().toStringAST();
 		}
 		return super.toStringAST();
 	}
 
 	@Override
 	public SpelNodeImpl getRightOperand() {
-		if (this.children.length<2) {return null;}
+		if (this.children.length < 2) {
+			return null;
+		}
 		return this.children[1];
 	}
-	
+
 	@Override
 	public boolean isCompilable() {
 		if (!getLeftOperand().isCompilable()) {
 			return false;
 		}
-		if (this.children.length>1) {
-			 if (!getRightOperand().isCompilable()) {
-				 return false;
-			 }
+		if (this.children.length > 1) {
+			if (!getRightOperand().isCompilable()) {
+				return false;
+			}
 		}
-		return this.exitTypeDescriptor!=null;
+		return (this.exitTypeDescriptor != null);
 	}
-	
+
 	@Override
-	public void generateCode(MethodVisitor mv, CodeFlow codeflow) {
-		getLeftOperand().generateCode(mv, codeflow);
-		String leftdesc = getLeftOperand().getExitDescriptor();
-		if (!CodeFlow.isPrimitive(leftdesc)) {
-			CodeFlow.insertUnboxInsns(mv, this.exitTypeDescriptor.charAt(0), leftdesc);
-		}	
-		if (this.children.length>1) {
-			codeflow.enterCompilationScope();
-			getRightOperand().generateCode(mv, codeflow);
-			String rightdesc = getRightOperand().getExitDescriptor();
-			codeflow.exitCompilationScope();
-			if (!CodeFlow.isPrimitive(rightdesc)) {
-				CodeFlow.insertUnboxInsns(mv, this.exitTypeDescriptor.charAt(0), rightdesc);
+	public void generateCode(MethodVisitor mv, CodeFlow cf) {
+		getLeftOperand().generateCode(mv, cf);
+		String leftDesc = getLeftOperand().exitTypeDescriptor;
+		if (!CodeFlow.isPrimitive(leftDesc)) {
+			CodeFlow.insertUnboxInsns(mv, this.exitTypeDescriptor.charAt(0), leftDesc);
+		}
+		if (this.children.length > 1) {
+			cf.enterCompilationScope();
+			getRightOperand().generateCode(mv, cf);
+			String rightDesc = getRightOperand().exitTypeDescriptor;
+			cf.exitCompilationScope();
+			if (!CodeFlow.isPrimitive(rightDesc)) {
+				CodeFlow.insertUnboxInsns(mv, this.exitTypeDescriptor.charAt(0), rightDesc);
 			}
 			switch (this.exitTypeDescriptor.charAt(0)) {
 				case 'I':
@@ -186,14 +203,15 @@ public class OpMinus extends Operator {
 				case 'J':
 					mv.visitInsn(LSUB);
 					break;
-				case 'F': 
+				case 'F':
 					mv.visitInsn(FSUB);
 					break;
 				case 'D':
 					mv.visitInsn(DSUB);
-					break;				
+					break;
 				default:
-					throw new IllegalStateException("Unrecognized exit descriptor: '"+this.exitTypeDescriptor+"'");
+					throw new IllegalStateException(
+							"Unrecognized exit type descriptor: '" + this.exitTypeDescriptor + "'");
 			}
 		}
 		else {
@@ -204,17 +222,18 @@ public class OpMinus extends Operator {
 				case 'J':
 					mv.visitInsn(LNEG);
 					break;
-				case 'F': 
+				case 'F':
 					mv.visitInsn(FNEG);
 					break;
 				case 'D':
 					mv.visitInsn(DNEG);
-					break;				
+					break;
 				default:
-					throw new IllegalStateException("Unrecognized exit descriptor: '"+this.exitTypeDescriptor+"'");
-			}			
+					throw new IllegalStateException(
+							"Unrecognized exit type descriptor: '" + this.exitTypeDescriptor + "'");
+			}
 		}
-		codeflow.pushDescriptor(this.exitTypeDescriptor);
+		cf.pushDescriptor(this.exitTypeDescriptor);
 	}
 
 }

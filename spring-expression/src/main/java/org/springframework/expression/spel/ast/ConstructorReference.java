@@ -44,8 +44,7 @@ import org.springframework.expression.spel.support.ReflectiveConstructorExecutor
  * Represents the invocation of a constructor. Either a constructor on a regular type or
  * construction of an array. When an array is constructed, an initializer can be specified.
  *
- * <p>
- * Examples:<br>
+ * <p>Examples:<br>
  * new String('hello world')<br>
  * new int[]{1,2,3,4}<br>
  * new int[3] new int[3]{1,2,3}
@@ -121,7 +120,7 @@ public class ConstructorReference extends SpelNodeImpl {
 			try {
 				return executorToUse.execute(state.getEvaluationContext(), arguments);
 			}
-			catch (AccessException ae) {
+			catch (AccessException ex) {
 				// Two reasons this can occur:
 				// 1. the method invoked actually threw a real exception
 				// 2. the method invoked was not passed the arguments it expected and has become 'stale'
@@ -132,83 +131,81 @@ public class ConstructorReference extends SpelNodeImpl {
 				// To determine which situation it is, the AccessException will contain a cause.
 				// If the cause is an InvocationTargetException, a user exception was thrown inside the constructor.
 				// Otherwise the constructor could not be invoked.
-				if (ae.getCause() instanceof InvocationTargetException) {
+				if (ex.getCause() instanceof InvocationTargetException) {
 					// User exception was the root cause - exit now
-					Throwable rootCause = ae.getCause().getCause();
+					Throwable rootCause = ex.getCause().getCause();
 					if (rootCause instanceof RuntimeException) {
 						throw (RuntimeException) rootCause;
 					}
 					else {
-						String typename = (String) this.children[0].getValueInternal(state).getValue();
+						String typeName = (String) this.children[0].getValueInternal(state).getValue();
 						throw new SpelEvaluationException(getStartPosition(), rootCause,
-								SpelMessage.CONSTRUCTOR_INVOCATION_PROBLEM, typename, FormatHelper
-										.formatMethodForMessage("", argumentTypes));
+								SpelMessage.CONSTRUCTOR_INVOCATION_PROBLEM, typeName,
+								FormatHelper.formatMethodForMessage("", argumentTypes));
 					}
 				}
 
-				// at this point we know it wasn't a user problem so worth a retry if a better candidate can be found
+				// At this point we know it wasn't a user problem so worth a retry if a better candidate can be found
 				this.cachedExecutor = null;
 			}
 		}
 
-		// either there was no accessor or it no longer exists
-		String typename = (String) this.children[0].getValueInternal(state).getValue();
-		executorToUse = findExecutorForConstructor(typename, argumentTypes, state);
+		// Either there was no accessor or it no longer exists
+		String typeName = (String) this.children[0].getValueInternal(state).getValue();
+		executorToUse = findExecutorForConstructor(typeName, argumentTypes, state);
 		try {
 			this.cachedExecutor = executorToUse;
 			if (this.cachedExecutor instanceof ReflectiveConstructorExecutor) {
-				this.exitTypeDescriptor = CodeFlow.toDescriptor(((ReflectiveConstructorExecutor)this.cachedExecutor).getConstructor().getDeclaringClass());
+				this.exitTypeDescriptor = CodeFlow.toDescriptor(
+						((ReflectiveConstructorExecutor) this.cachedExecutor).getConstructor().getDeclaringClass());
 				
 			}
 			return executorToUse.execute(state.getEvaluationContext(), arguments);
 		}
-		catch (AccessException ae) {
-			throw new SpelEvaluationException(getStartPosition(), ae,
-					SpelMessage.CONSTRUCTOR_INVOCATION_PROBLEM, typename,
+		catch (AccessException ex) {
+			throw new SpelEvaluationException(getStartPosition(), ex,
+					SpelMessage.CONSTRUCTOR_INVOCATION_PROBLEM, typeName,
 					FormatHelper.formatMethodForMessage("", argumentTypes));
 		}
 	}
 
 	/**
-	 * Go through the list of registered constructor resolvers and see if any can find a constructor that takes the
-	 * specified set of arguments.
-	 * @param typename the type trying to be constructed
+	 * Go through the list of registered constructor resolvers and see if any can find a
+	 * constructor that takes the specified set of arguments.
+	 * @param typeName the type trying to be constructed
 	 * @param argumentTypes the types of the arguments supplied that the constructor must take
 	 * @param state the current state of the expression
 	 * @return a reusable ConstructorExecutor that can be invoked to run the constructor or null
 	 * @throws SpelEvaluationException if there is a problem locating the constructor
 	 */
-	private ConstructorExecutor findExecutorForConstructor(String typename,
+	private ConstructorExecutor findExecutorForConstructor(String typeName,
 			List<TypeDescriptor> argumentTypes, ExpressionState state)
 			throws SpelEvaluationException {
 
-		EvaluationContext eContext = state.getEvaluationContext();
-		List<ConstructorResolver> cResolvers = eContext.getConstructorResolvers();
-		if (cResolvers != null) {
-			for (ConstructorResolver ctorResolver : cResolvers) {
+		EvaluationContext evalContext = state.getEvaluationContext();
+		List<ConstructorResolver> ctorResolvers = evalContext.getConstructorResolvers();
+		if (ctorResolvers != null) {
+			for (ConstructorResolver ctorResolver : ctorResolvers) {
 				try {
-					ConstructorExecutor cEx = ctorResolver.resolve(state.getEvaluationContext(), typename,
-							argumentTypes);
-					if (cEx != null) {
-						return cEx;
+					ConstructorExecutor ce = ctorResolver.resolve(state.getEvaluationContext(), typeName, argumentTypes);
+					if (ce != null) {
+						return ce;
 					}
 				}
 				catch (AccessException ex) {
 					throw new SpelEvaluationException(getStartPosition(), ex,
-							SpelMessage.CONSTRUCTOR_INVOCATION_PROBLEM, typename,
+							SpelMessage.CONSTRUCTOR_INVOCATION_PROBLEM, typeName,
 							FormatHelper.formatMethodForMessage("", argumentTypes));
 				}
 			}
 		}
-		throw new SpelEvaluationException(getStartPosition(), SpelMessage.CONSTRUCTOR_NOT_FOUND, typename, FormatHelper
-				.formatMethodForMessage("", argumentTypes));
+		throw new SpelEvaluationException(getStartPosition(), SpelMessage.CONSTRUCTOR_NOT_FOUND, typeName,
+				FormatHelper.formatMethodForMessage("", argumentTypes));
 	}
 
 	@Override
 	public String toStringAST() {
-		StringBuilder sb = new StringBuilder();
-		sb.append("new ");
-
+		StringBuilder sb = new StringBuilder("new ");
 		int index = 0;
 		sb.append(getChild(index++).toStringAST());
 		sb.append("(");
@@ -328,17 +325,20 @@ public class ConstructorReference extends SpelNodeImpl {
 
 	private void populateReferenceTypeArray(ExpressionState state, Object newArray, TypeConverter typeConverter,
 			InlineList initializer, Class<?> componentType) {
+
 		TypeDescriptor toTypeDescriptor = TypeDescriptor.valueOf(componentType);
 		Object[] newObjectArray = (Object[]) newArray;
 		for (int i = 0; i < newObjectArray.length; i++) {
 			SpelNode elementNode = initializer.getChild(i);
 			Object arrayEntry = elementNode.getValue(state);
-			newObjectArray[i] = typeConverter.convertValue(arrayEntry, TypeDescriptor.forObject(arrayEntry), toTypeDescriptor);
+			newObjectArray[i] = typeConverter.convertValue(arrayEntry,
+					TypeDescriptor.forObject(arrayEntry), toTypeDescriptor);
 		}
 	}
 
 	private void populateByteArray(ExpressionState state, Object newArray, TypeConverter typeConverter,
 			InlineList initializer) {
+
 		byte[] newByteArray = (byte[]) newArray;
 		for (int i = 0; i < newByteArray.length; i++) {
 			TypedValue typedValue = initializer.getChild(i).getTypedValue(state);
@@ -348,6 +348,7 @@ public class ConstructorReference extends SpelNodeImpl {
 
 	private void populateFloatArray(ExpressionState state, Object newArray, TypeConverter typeConverter,
 			InlineList initializer) {
+
 		float[] newFloatArray = (float[]) newArray;
 		for (int i = 0; i < newFloatArray.length; i++) {
 			TypedValue typedValue = initializer.getChild(i).getTypedValue(state);
@@ -357,6 +358,7 @@ public class ConstructorReference extends SpelNodeImpl {
 
 	private void populateDoubleArray(ExpressionState state, Object newArray, TypeConverter typeConverter,
 			InlineList initializer) {
+
 		double[] newDoubleArray = (double[]) newArray;
 		for (int i = 0; i < newDoubleArray.length; i++) {
 			TypedValue typedValue = initializer.getChild(i).getTypedValue(state);
@@ -364,8 +366,9 @@ public class ConstructorReference extends SpelNodeImpl {
 		}
 	}
 
-	private void populateShortArray(ExpressionState state, Object newArray,
-			TypeConverter typeConverter, InlineList initializer) {
+	private void populateShortArray(ExpressionState state, Object newArray, TypeConverter typeConverter,
+			InlineList initializer) {
+
 		short[] newShortArray = (short[]) newArray;
 		for (int i = 0; i < newShortArray.length; i++) {
 			TypedValue typedValue = initializer.getChild(i).getTypedValue(state);
@@ -375,6 +378,7 @@ public class ConstructorReference extends SpelNodeImpl {
 
 	private void populateLongArray(ExpressionState state, Object newArray, TypeConverter typeConverter,
 			InlineList initializer) {
+
 		long[] newLongArray = (long[]) newArray;
 		for (int i = 0; i < newLongArray.length; i++) {
 			TypedValue typedValue = initializer.getChild(i).getTypedValue(state);
@@ -384,6 +388,7 @@ public class ConstructorReference extends SpelNodeImpl {
 
 	private void populateCharArray(ExpressionState state, Object newArray, TypeConverter typeConverter,
 			InlineList initializer) {
+
 		char[] newCharArray = (char[]) newArray;
 		for (int i = 0; i < newCharArray.length; i++) {
 			TypedValue typedValue = initializer.getChild(i).getTypedValue(state);
@@ -393,6 +398,7 @@ public class ConstructorReference extends SpelNodeImpl {
 
 	private void populateBooleanArray(ExpressionState state, Object newArray, TypeConverter typeConverter,
 			InlineList initializer) {
+
 		boolean[] newBooleanArray = (boolean[]) newArray;
 		for (int i = 0; i < newBooleanArray.length; i++) {
 			TypedValue typedValue = initializer.getChild(i).getTypedValue(state);
@@ -402,6 +408,7 @@ public class ConstructorReference extends SpelNodeImpl {
 
 	private void populateIntArray(ExpressionState state, Object newArray, TypeConverter typeConverter,
 			InlineList initializer) {
+
 		int[] newIntArray = (int[]) newArray;
 		for (int i = 0; i < newIntArray.length; i++) {
 			TypedValue typedValue = initializer.getChild(i).getTypedValue(state);
@@ -410,7 +417,7 @@ public class ConstructorReference extends SpelNodeImpl {
 	}
 
 	private boolean hasInitializer() {
-		return getChildCount() > 1;
+		return (getChildCount() > 1);
 	}
 	
 	@Override
@@ -419,46 +426,43 @@ public class ConstructorReference extends SpelNodeImpl {
 			this.exitTypeDescriptor == null) {
 			return false;
 		}
+
 		if (getChildCount() > 1) {
 			for (int c = 1, max = getChildCount();c < max; c++) {
-				if (!children[c].isCompilable()) {
+				if (!this.children[c].isCompilable()) {
 					return false;
 				}
 			}
 		}
-		ReflectiveConstructorExecutor executor = (ReflectiveConstructorExecutor)this.cachedExecutor;
+
+		ReflectiveConstructorExecutor executor = (ReflectiveConstructorExecutor) this.cachedExecutor;
 		Constructor<?> constructor = executor.getConstructor();
-		if (!Modifier.isPublic(constructor.getModifiers()) || 
-			!Modifier.isPublic(constructor.getDeclaringClass().getModifiers())) {
-			return false;
-		}
-		if (constructor.isVarArgs()) {
-			return false;
-		}
-		return true;
+		return (!constructor.isVarArgs() && Modifier.isPublic(constructor.getModifiers()) &&
+				Modifier.isPublic(constructor.getDeclaringClass().getModifiers()));
 	}
 	
 	@Override
-	public void generateCode(MethodVisitor mv, CodeFlow codeflow) {
+	public void generateCode(MethodVisitor mv, CodeFlow cf) {
 		ReflectiveConstructorExecutor executor = ((ReflectiveConstructorExecutor) this.cachedExecutor);
 		Constructor<?> constructor = executor.getConstructor();
 		
-		String classSlashedDescriptor = constructor.getDeclaringClass().getName().replace('.','/');
+		String classSlashedDescriptor = constructor.getDeclaringClass().getName().replace('.', '/');
 		String[] paramDescriptors = CodeFlow.toParamDescriptors(constructor);
-		mv.visitTypeInsn(NEW,classSlashedDescriptor);
+		mv.visitTypeInsn(NEW, classSlashedDescriptor);
 		mv.visitInsn(DUP);
-		for (int c = 1; c < children.length; c++) { // children[0] is the type of the constructor
-			SpelNodeImpl child = children[c];
-			codeflow.enterCompilationScope();
-			child.generateCode(mv, codeflow);
+		for (int c = 1; c < this.children.length; c++) { // children[0] is the type of the constructor
+			SpelNodeImpl child = this.children[c];
+			cf.enterCompilationScope();
+			child.generateCode(mv, cf);
 			// Check if need to box it for the method reference?
-			if (CodeFlow.isPrimitive(codeflow.lastDescriptor()) && (paramDescriptors[c-1].charAt(0)=='L')) {
-				CodeFlow.insertBoxIfNecessary(mv, codeflow.lastDescriptor().charAt(0));
+			if (CodeFlow.isPrimitive(cf.lastDescriptor()) && paramDescriptors[c-1].charAt(0) == 'L') {
+				CodeFlow.insertBoxIfNecessary(mv, cf.lastDescriptor().charAt(0));
 			}
-			codeflow.exitCompilationScope();
+			cf.exitCompilationScope();
 		}
-		mv.visitMethodInsn(INVOKESPECIAL,classSlashedDescriptor,"<init>",CodeFlow.createSignatureDescriptor(constructor),false);
-		codeflow.pushDescriptor(exitTypeDescriptor);
+		mv.visitMethodInsn(INVOKESPECIAL, classSlashedDescriptor, "<init>",
+				CodeFlow.createSignatureDescriptor(constructor), false);
+		cf.pushDescriptor(this.exitTypeDescriptor);
 	}
 
 }

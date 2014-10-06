@@ -33,8 +33,8 @@ import org.springframework.expression.spel.SpelNode;
  */
 public class InlineList extends SpelNodeImpl {
 
-	// if the list is purely literals, it is a constant value and can be computed and cached
-	TypedValue constant = null; // TODO must be immutable list
+	// If the list is purely literals, it is a constant value and can be computed and cached
+	private TypedValue constant = null;  // TODO must be immutable list
 
 
 	public InlineList(int pos, SpelNodeImpl... args) {
@@ -87,8 +87,8 @@ public class InlineList extends SpelNodeImpl {
 		}
 		else {
 			List<Object> returnValue = new ArrayList<Object>();
-			int childcount = getChildCount();
-			for (int c = 0; c < childcount; c++) {
+			int childCount = getChildCount();
+			for (int c = 0; c < childCount; c++) {
 				returnValue.add(getChild(c).getValue(expressionState));
 			}
 			return new TypedValue(returnValue);
@@ -97,25 +97,24 @@ public class InlineList extends SpelNodeImpl {
 
 	@Override
 	public String toStringAST() {
-		StringBuilder s = new StringBuilder();
-		// string ast matches input string, not the 'toString()' of the resultant collection, which would use []
-		s.append('{');
+		StringBuilder sb = new StringBuilder("{");
+		// String ast matches input string, not the 'toString()' of the resultant collection, which would use []
 		int count = getChildCount();
 		for (int c = 0; c < count; c++) {
 			if (c > 0) {
-				s.append(',');
+				sb.append(",");
 			}
-			s.append(getChild(c).toStringAST());
+			sb.append(getChild(c).toStringAST());
 		}
-		s.append('}');
-		return s.toString();
+		sb.append("}");
+		return sb.toString();
 	}
 
 	/**
-	 * @return whether this list is a constant value
+	 * Return whether this list is a constant value.
 	 */
 	public boolean isConstant() {
-		return this.constant != null;
+		return (this.constant != null);
 	}
 
 	@SuppressWarnings("unchecked")

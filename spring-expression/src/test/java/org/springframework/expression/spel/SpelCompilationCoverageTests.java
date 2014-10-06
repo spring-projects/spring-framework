@@ -256,6 +256,7 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		Object resultC = expression.getValue(new TestClass1(),Object.class);
 		assertEquals(null,resultI);
 		assertEquals(null,resultC);
+		assertEquals(null,resultC);
 	}
 	
 	@Test
@@ -2616,7 +2617,7 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		}
 
 		@Override
-		public void generateCode(String propertyName, MethodVisitor mv,CodeFlow codeflow) {
+		public void generateCode(String propertyName, MethodVisitor mv,CodeFlow cf) {
 			if (method == null) {
 				try {
 					method = Payload2.class.getDeclaredMethod("getField", String.class);
@@ -2624,10 +2625,10 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 				catch (Exception e) {
 				}
 			}
-			String descriptor = codeflow.lastDescriptor();
+			String descriptor = cf.lastDescriptor();
 			String memberDeclaringClassSlashedDescriptor = method.getDeclaringClass().getName().replace('.','/');
 			if (descriptor == null) {
-				codeflow.loadTarget(mv);
+				cf.loadTarget(mv);
 			}
 			if (descriptor == null || !memberDeclaringClassSlashedDescriptor.equals(descriptor.substring(1))) {
 				mv.visitTypeInsn(CHECKCAST, memberDeclaringClassSlashedDescriptor);
@@ -2684,10 +2685,10 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		}
 
 		@Override
-		public void generateCode(String propertyName, MethodVisitor mv, CodeFlow codeflow) {
-			String descriptor = codeflow.lastDescriptor();
+		public void generateCode(String propertyName, MethodVisitor mv, CodeFlow cf) {
+			String descriptor = cf.lastDescriptor();
 			if (descriptor == null) {
-				codeflow.loadTarget(mv);
+				cf.loadTarget(mv);
 			}
 			mv.visitLdcInsn(propertyName);
 			mv.visitMethodInsn(INVOKEINTERFACE, "java/util/Map", "get","(Ljava/lang/Object;)Ljava/lang/Object;",true);

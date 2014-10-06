@@ -71,7 +71,7 @@ public class MethodReference extends SpelNodeImpl {
 		Object[] arguments = getArguments(state);
 		if (state.getActiveContextObject().getValue() == null) {
 			throwIfNotNullSafe(getArgumentTypes(arguments));
-			return ValueRef.NullValueRef.instance;
+			return ValueRef.NullValueRef.INSTANCE;
 		}
 		return new MethodValueRef(state, arguments);
 	}
@@ -101,7 +101,7 @@ public class MethodReference extends SpelNodeImpl {
 			try {
 				return executorToUse.execute(evaluationContext, value, arguments);
 			}
-			catch (AccessException ae) {
+			catch (AccessException ex) {
 				// Two reasons this can occur:
 				// 1. the method invoked actually threw a real exception
 				// 2. the method invoked was not passed the arguments it expected and
@@ -113,7 +113,7 @@ public class MethodReference extends SpelNodeImpl {
 				// To determine the situation, the AccessException will contain a cause.
 				// If the cause is an InvocationTargetException, a user exception was
 				// thrown inside the method. Otherwise the method could not be invoked.
-				throwSimpleExceptionIfPossible(value, ae);
+				throwSimpleExceptionIfPossible(value, ex);
 
 				// At this point we know it wasn't a user problem so worth a retry if a
 				// better candidate can be found.
@@ -216,9 +216,9 @@ public class MethodReference extends SpelNodeImpl {
 	 * Decode the AccessException, throwing a lightweight evaluation exception or, if the
 	 * cause was a RuntimeException, throw the RuntimeException directly.
 	 */
-	private void throwSimpleExceptionIfPossible(Object value, AccessException ae) {
-		if (ae.getCause() instanceof InvocationTargetException) {
-			Throwable rootCause = ae.getCause().getCause();
+	private void throwSimpleExceptionIfPossible(Object value, AccessException ex) {
+		if (ex.getCause() instanceof InvocationTargetException) {
+			Throwable rootCause = ex.getCause().getCause();
 			if (rootCause instanceof RuntimeException) {
 				throw (RuntimeException) rootCause;
 			}
@@ -238,8 +238,8 @@ public class MethodReference extends SpelNodeImpl {
 
 	@Override
 	public String toStringAST() {
-		StringBuilder sb = new StringBuilder();
-		sb.append(this.name).append("(");
+		StringBuilder sb = new StringBuilder(this.name);
+		sb.append("(");
 		for (int i = 0; i < getChildCount(); i++) {
 			if (i > 0) {
 				sb.append(",");
@@ -283,7 +283,7 @@ public class MethodReference extends SpelNodeImpl {
 	}
 
 	@Override
-	public void generateCode(MethodVisitor mv, CodeFlow codeflow) {
+	public void generateCode(MethodVisitor mv, CodeFlow cf) {
 		CachedMethodExecutor executorToCheck = this.cachedExecutor;
 		if (executorToCheck == null || !(executorToCheck.get() instanceof ReflectiveMethodExecutor)) {
 			throw new IllegalStateException("No applicable cached executor found: " + executorToCheck);
@@ -291,10 +291,10 @@ public class MethodReference extends SpelNodeImpl {
 
 		Method method = ((ReflectiveMethodExecutor) executorToCheck.get()).getMethod();
 		boolean isStaticMethod = Modifier.isStatic(method.getModifiers());
-		String descriptor = codeflow.lastDescriptor();
+		String descriptor = cf.lastDescriptor();
 
 		if (descriptor == null && !isStaticMethod) {
-			codeflow.loadTarget(mv);
+			cf.loadTarget(mv);
 		}
 
 		boolean itf = method.getDeclaringClass().isInterface();
@@ -307,21 +307,21 @@ public class MethodReference extends SpelNodeImpl {
 		String[] paramDescriptors = CodeFlow.toParamDescriptors(method);
 		for (int i = 0; i < this.children.length;i++) {
 			SpelNodeImpl child = this.children[i];
-			codeflow.enterCompilationScope();
-			child.generateCode(mv, codeflow);
+			cf.enterCompilationScope();
+			child.generateCode(mv, cf);
 			// Check if need to box it for the method reference?
-			if (CodeFlow.isPrimitive(codeflow.lastDescriptor()) && paramDescriptors[i].charAt(0) == 'L') {
-				CodeFlow.insertBoxIfNecessary(mv, codeflow.lastDescriptor().charAt(0));
+			if (CodeFlow.isPrimitive(cf.lastDescriptor()) && paramDescriptors[i].charAt(0) == 'L') {
+				CodeFlow.insertBoxIfNecessary(mv, cf.lastDescriptor().charAt(0));
 			}
-			else if (!codeflow.lastDescriptor().equals(paramDescriptors[i])) {
+			else if (!cf.lastDescriptor().equals(paramDescriptors[i])) {
 				// This would be unnecessary in the case of subtyping (e.g. method takes Number but Integer passed in)
 				CodeFlow.insertCheckCast(mv, paramDescriptors[i]);
 			}
-			codeflow.exitCompilationScope();
+			cf.exitCompilationScope();
 		}
 		mv.visitMethodInsn(isStaticMethod ? INVOKESTATIC : INVOKEVIRTUAL,
 				methodDeclaringClassSlashedDescriptor, method.getName(), CodeFlow.createSignatureDescriptor(method), itf);
-		codeflow.pushDescriptor(this.exitTypeDescriptor);
+		cf.pushDescriptor(this.exitTypeDescriptor);
 	}
 
 

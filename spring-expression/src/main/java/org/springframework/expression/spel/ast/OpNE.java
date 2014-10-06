@@ -54,19 +54,17 @@ public class OpNE extends Operator {
 		if (!left.isCompilable() || !right.isCompilable()) {
 			return false;
 		}
-		String leftdesc = left.getExitDescriptor();
-		String rightdesc = right.getExitDescriptor();
-		DescriptorComparison dc =  DescriptorComparison.checkNumericCompatibility(leftdesc, rightdesc, leftActualDescriptor, rightActualDescriptor);
-		if (dc.areNumbers) {
-			return dc.areCompatible;
-		}
-		return true;
+
+		String leftDesc = left.exitTypeDescriptor;
+		String rightDesc = right.exitTypeDescriptor;
+		DescriptorComparison dc =  DescriptorComparison.checkNumericCompatibility(leftDesc, rightDesc, leftActualDescriptor, rightActualDescriptor);
+		return (!dc.areNumbers || dc.areCompatible);
 	}
 	
 	@Override
-	public void generateCode(MethodVisitor mv, CodeFlow codeflow) {
-		String leftDesc = getLeftOperand().getExitDescriptor();
-		String rightDesc = getRightOperand().getExitDescriptor();
+	public void generateCode(MethodVisitor mv, CodeFlow cf) {
+		String leftDesc = getLeftOperand().exitTypeDescriptor;
+		String rightDesc = getRightOperand().exitTypeDescriptor;
 		Label elseTarget = new Label();
 		Label endOfIf = new Label();
 		boolean leftPrim = CodeFlow.isPrimitive(leftDesc);
@@ -77,14 +75,14 @@ public class OpNE extends Operator {
 		if (dc.areNumbers && dc.areCompatible) {
 			char targetType = dc.compatibleType;
 			
-			getLeftOperand().generateCode(mv, codeflow);
+			getLeftOperand().generateCode(mv, cf);
 			if (!leftPrim) {
 				CodeFlow.insertUnboxInsns(mv, targetType, leftDesc);
 			}
 		
-			codeflow.enterCompilationScope();
-			getRightOperand().generateCode(mv, codeflow);
-			codeflow.exitCompilationScope();
+			cf.enterCompilationScope();
+			getRightOperand().generateCode(mv, cf);
+			cf.exitCompilationScope();
 			if (!rightPrim) {
 				CodeFlow.insertUnboxInsns(mv, targetType, rightDesc);
 			}
@@ -109,8 +107,8 @@ public class OpNE extends Operator {
 			}
 		}
 		else {
-			getLeftOperand().generateCode(mv, codeflow);
-			getRightOperand().generateCode(mv, codeflow);
+			getLeftOperand().generateCode(mv, cf);
+			getRightOperand().generateCode(mv, cf);
 			mv.visitJumpInsn(IF_ACMPEQ, elseTarget);
 		}
 		mv.visitInsn(ICONST_1);
@@ -118,7 +116,7 @@ public class OpNE extends Operator {
 		mv.visitLabel(elseTarget);
 		mv.visitInsn(ICONST_0);
 		mv.visitLabel(endOfIf);
-		codeflow.pushDescriptor("Z");
+		cf.pushDescriptor("Z");
 	}
 
 }

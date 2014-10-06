@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,6 +44,7 @@ public class Projection extends SpelNodeImpl {
 
 	private final boolean nullSafe;
 
+
 	public Projection(boolean nullSafe, int pos, SpelNodeImpl expression) {
 		super(pos, expression);
 		this.nullSafe = nullSafe;
@@ -80,7 +81,7 @@ public class Projection extends SpelNodeImpl {
 					state.popActiveContextObject();
 				}
 			}
-			return new ValueRef.TypedValueHolderValueRef(new TypedValue(result),this); // TODO unable to build correct type descriptor
+			return new ValueRef.TypedValueHolderValueRef(new TypedValue(result), this);  // TODO unable to build correct type descriptor
 		}
 
 		if (operand instanceof Collection || operandIsArray) {
@@ -118,20 +119,18 @@ public class Projection extends SpelNodeImpl {
 
 		if (operand==null) {
 			if (this.nullSafe) {
-				return ValueRef.NullValueRef.instance;
+				return ValueRef.NullValueRef.INSTANCE;
 			}
-			throw new SpelEvaluationException(getStartPosition(),
-					SpelMessage.PROJECTION_NOT_SUPPORTED_ON_TYPE, "null");
+			throw new SpelEvaluationException(getStartPosition(), SpelMessage.PROJECTION_NOT_SUPPORTED_ON_TYPE, "null");
 		}
 
-		throw new SpelEvaluationException(getStartPosition(),
-				SpelMessage.PROJECTION_NOT_SUPPORTED_ON_TYPE, operand.getClass().getName());
+		throw new SpelEvaluationException(getStartPosition(), SpelMessage.PROJECTION_NOT_SUPPORTED_ON_TYPE,
+				operand.getClass().getName());
 	}
 
 	@Override
 	public String toStringAST() {
-		StringBuilder sb = new StringBuilder();
-		return sb.append("![").append(getChild(0).toStringAST()).append("]").toString();
+		return "![" + getChild(0).toStringAST() + "]";
 	}
 
 	private Class<?> determineCommonType(Class<?> oldType, Class<?> newType) {

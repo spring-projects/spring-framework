@@ -455,7 +455,7 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 	 * This method will just return the ReflectivePropertyAccessor instance if it is unable to build
 	 * something more optimal.
 	 */
-	public PropertyAccessor createOptimalAccessor(EvaluationContext eContext, Object target, String name) {
+	public PropertyAccessor createOptimalAccessor(EvaluationContext evalContext, Object target, String name) {
 		// Don't be clever for arrays or null target
 		if (target == null) {
 			return this;
@@ -484,7 +484,7 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 		}
 
 		if (invocationTarget == null || invocationTarget.member instanceof Field) {
-			Field field = (Field) (invocationTarget==null?null:invocationTarget.member);
+			Field field = (invocationTarget != null ? (Field) invocationTarget.member : null);
 			if (field == null) {
 				field = findField(name, type, target instanceof Class);
 				if (field != null) {
@@ -541,16 +541,13 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 				return false;
 			}
 			CacheKey otherKey = (CacheKey) other;
-			boolean rtn = true;
-			rtn &= this.clazz.equals(otherKey.clazz);
-			rtn &= this.name.equals(otherKey.name);
-			rtn &= this.targetIsClass == otherKey.targetIsClass;
-			return rtn;
+			return (this.clazz.equals(otherKey.clazz) && this.name.equals(otherKey.name) &&
+					this.targetIsClass == otherKey.targetIsClass);
 		}
 
 		@Override
 		public int hashCode() {
-			return this.clazz.hashCode() * 29 + this.name.hashCode();
+			return (this.clazz.hashCode() * 29 + this.name.hashCode());
 		}
 
 		@Override
@@ -662,12 +659,8 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 		
 		@Override
 		public boolean isCompilable() {
-			// If non public must continue to use reflection
-			if (!Modifier.isPublic(this.member.getModifiers()) ||
-					!Modifier.isPublic(this.member.getDeclaringClass().getModifiers())) {
-				return false;
-			}
-			return true;
+			return (Modifier.isPublic(this.member.getModifiers()) &&
+					Modifier.isPublic(this.member.getDeclaringClass().getModifiers()));
 		}
 
 		@Override
@@ -681,13 +674,13 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 		}
 
 		@Override
-		public void generateCode(String propertyName, MethodVisitor mv, CodeFlow codeflow) {
+		public void generateCode(String propertyName, MethodVisitor mv, CodeFlow cf) {
 			boolean isStatic = Modifier.isStatic(this.member.getModifiers());
-			String descriptor = codeflow.lastDescriptor();
+			String descriptor = cf.lastDescriptor();
 			String memberDeclaringClassSlashedDescriptor = this.member.getDeclaringClass().getName().replace('.', '/');
 			if (!isStatic) {
 				if (descriptor == null) {
-					codeflow.loadTarget(mv);
+					cf.loadTarget(mv);
 				}
 				if (descriptor == null || !memberDeclaringClassSlashedDescriptor.equals(descriptor.substring(1))) {
 					mv.visitTypeInsn(CHECKCAST, memberDeclaringClassSlashedDescriptor);
@@ -695,7 +688,7 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 			}
 			if (this.member instanceof Field) {
 				mv.visitFieldInsn(isStatic ? GETSTATIC : GETFIELD, memberDeclaringClassSlashedDescriptor,
-						this.member.getName(), CodeFlow.toJVMDescriptor(((Field) this.member).getType()));
+						this.member.getName(), CodeFlow.toJvmDescriptor(((Field) this.member).getType()));
 			}
 			else {
 				mv.visitMethodInsn(isStatic ? INVOKESTATIC : INVOKEVIRTUAL, memberDeclaringClassSlashedDescriptor,
