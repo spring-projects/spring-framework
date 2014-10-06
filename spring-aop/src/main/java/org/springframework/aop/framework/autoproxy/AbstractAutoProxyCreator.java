@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -262,7 +262,9 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
 
 	public Object getEarlyBeanReference(Object bean, String beanName) throws BeansException {
 		Object cacheKey = getCacheKey(bean.getClass(), beanName);
-		this.earlyProxyReferences.put(cacheKey, Boolean.TRUE);
+		if (!this.earlyProxyReferences.containsKey(cacheKey)) {
+			this.earlyProxyReferences.put(cacheKey, Boolean.TRUE);
+		}
 		return wrapIfNecessary(bean, beanName, cacheKey);
 	}
 

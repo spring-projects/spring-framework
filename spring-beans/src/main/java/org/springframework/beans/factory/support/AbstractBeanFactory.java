@@ -1388,7 +1388,9 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	 * @param beanName the name of the bean
 	 */
 	protected void markBeanAsCreated(String beanName) {
-		this.alreadyCreated.put(beanName, Boolean.TRUE);
+		if (!this.alreadyCreated.containsKey(beanName)) {
+			this.alreadyCreated.put(beanName, Boolean.TRUE);
+		}
 	}
 
 	/**
