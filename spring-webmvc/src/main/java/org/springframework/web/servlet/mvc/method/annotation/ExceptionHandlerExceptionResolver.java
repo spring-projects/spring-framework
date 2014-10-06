@@ -54,6 +54,7 @@ import org.springframework.web.method.support.ModelAndViewContainer;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.handler.AbstractHandlerMethodExceptionResolver;
+import org.springframework.web.servlet.handler.WrappedException;
 
 /**
  * An {@link AbstractHandlerMethodExceptionResolver} that resolves exceptions
@@ -111,7 +112,7 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 	 * resolution use {@link #setArgumentResolvers} instead.
 	 */
 	public void setCustomArgumentResolvers(List<HandlerMethodArgumentResolver> argumentResolvers) {
-		this.customArgumentResolvers= argumentResolvers;
+		this.customArgumentResolvers = argumentResolvers;
 	}
 
 	/**
@@ -361,11 +362,15 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 			}
 			exceptionHandlerMethod.invokeAndHandle(webRequest, mavContainer, exception);
 		}
+		catch (RuntimeException invocationEx) {
+			logFailedInvocation(exceptionHandlerMethod, invocationEx);
+
+			throw invocationEx;
+		}
 		catch (Exception invocationEx) {
-			if (logger.isErrorEnabled()) {
-				logger.error("Failed to invoke @ExceptionHandler method: " + exceptionHandlerMethod, invocationEx);
-			}
-			return null;
+			logFailedInvocation(exceptionHandlerMethod, invocationEx);
+
+			throw new WrappedException(invocationEx);
 		}
 
 		if (mavContainer.isRequestHandled()) {
@@ -378,6 +383,12 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 				mav.setView((View) mavContainer.getView());
 			}
 			return mav;
+		}
+	}
+
+	private void logFailedInvocation(ServletInvocableHandlerMethod exceptionHandlerMethod, Exception invocationEx) {
+		if (logger.isErrorEnabled()) {
+			logger.error("Failed to invoke @ExceptionHandler method: " + exceptionHandlerMethod, invocationEx);
 		}
 	}
 

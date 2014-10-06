@@ -16,17 +16,23 @@
 
 package org.springframework.test.web.servlet.samples.standalone;
 
+import static java.util.Collections.singletonMap;
+import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.forwardedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.standaloneSetup;
 
 import org.junit.Test;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import java.util.Map;
 
 /**
  * Exception handling via {@code @ExceptionHandler} method.
@@ -38,19 +44,29 @@ public class ExceptionHandlerTests {
 	@Test
 	public void testExceptionHandlerMethod() throws Exception {
 		standaloneSetup(new PersonController()).build()
-			.perform(get("/person/Clyde"))
+				.perform(get("/person/Clyde"))
 				.andExpect(status().isOk())
 				.andExpect(forwardedUrl("errorView"));
+	}
+
+	@Test
+	public void testExceptionHandlerMethodWithUnacceptableMimeType() throws Exception {
+		standaloneSetup(new PersonController()).build()
+				.perform(get("/person/Hyde").accept("un/supported"))
+				.andExpect(status().isNotAcceptable());
 	}
 
 
 	@Controller
 	private static class PersonController {
 
-		@RequestMapping(value="/person/{name}", method=RequestMethod.GET)
+		@RequestMapping(value = "/person/{name}", method = RequestMethod.GET)
 		public String show(@PathVariable String name) {
 			if (name.equals("Clyde")) {
 				throw new IllegalArgumentException("Black listed");
+			}
+			if (name.equals("Hyde")) {
+				throw new IllegalStateException("Really black listed");
 			}
 			return "person/show";
 		}
@@ -58,6 +74,12 @@ public class ExceptionHandlerTests {
 		@ExceptionHandler
 		public String handleException(IllegalArgumentException exception) {
 			return "errorView";
+		}
+
+		@ExceptionHandler
+		@ResponseBody
+		public ResponseEntity<Map<String, String>> handleException(IllegalStateException exception) {
+			return new ResponseEntity<Map<String, String>>(singletonMap("error", "map"), OK);
 		}
 	}
 }
