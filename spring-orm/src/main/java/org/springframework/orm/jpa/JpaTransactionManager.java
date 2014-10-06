@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -85,10 +85,10 @@ import org.springframework.util.CollectionUtils;
  * used as known connection factory of the EntityManagerFactory, so you usually
  * don't need to explicitly specify the "dataSource" property.
  *
- * <p>On JDBC 3.0, this transaction manager supports nested transactions via JDBC 3.0
- * Savepoints. The {@link #setNestedTransactionAllowed} "nestedTransactionAllowed"}
- * flag defaults to "false", though, as nested transactions will just apply to the
- * JDBC Connection, not to the JPA EntityManager and its cached objects.
+ * <p>This transaction manager supports nested transactions via JDBC 3.0 Savepoints.
+ * The {@link #setNestedTransactionAllowed} "nestedTransactionAllowed"} flag defaults
+ * to "false", though, as nested transactions will just apply to the JDBC Connection,
+ * not to the JPA EntityManager and its cached entity objects and related context.
  * You can manually set the flag to "true" if you want to use nested transactions
  * for JDBC access code which participates in JPA transactions (provided that your
  * JDBC driver supports Savepoints). <i>Note that JPA itself does not support
