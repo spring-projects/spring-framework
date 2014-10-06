@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,10 +23,8 @@ import java.util.Properties;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import static org.junit.Assert.*;
 import org.junit.Test;
 
-import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -38,12 +36,15 @@ import org.springframework.beans.factory.support.AutowireCandidateQualifier;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.GenericBeanDefinition;
 import org.springframework.beans.factory.support.RootBeanDefinition;
-import org.springframework.tests.Assume;
-import org.springframework.tests.TestGroup;
 import org.springframework.context.annotation.AnnotationConfigUtils;
 import org.springframework.context.support.GenericApplicationContext;
+import org.springframework.tests.Assume;
+import org.springframework.tests.TestGroup;
+import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.util.SerializationTestUtils;
 import org.springframework.util.StopWatch;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Juergen Hoeller
@@ -150,6 +151,7 @@ public class ApplicationContextExpressionTests {
 			ValueTestBean tb3 = ac.getBean("tb3", ValueTestBean.class);
 			assertEquals("XXXmyNameYYY42ZZZ", tb3.name);
 			assertEquals(42, tb3.age);
+			assertEquals(42, tb3.ageFactory.getObject().intValue());
 			assertEquals("123 UK", tb3.country);
 			assertEquals("123 UK", tb3.countryFactory.getObject());
 			System.getProperties().put("country", "US");
@@ -309,6 +311,9 @@ public class ApplicationContextExpressionTests {
 
 		@Autowired @Value("#{mySpecialAttr}")
 		public int age;
+
+		@Value("#{mySpecialAttr}")
+		public ObjectFactory<Integer> ageFactory;
 
 		@Value("${code} #{systemProperties.country}")
 		public String country;

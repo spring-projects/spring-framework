@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,9 +32,6 @@ class ParameterDescriptor extends AbstractDescriptor {
 
 	public ParameterDescriptor(MethodParameter methodParameter) {
 		super(methodParameter.getParameterType());
-		if (methodParameter.getNestingLevel() != 1) {
-			throw new IllegalArgumentException("MethodParameter argument must have its nestingLevel set to 1");
-		}
 		this.methodParameter = methodParameter;
 	}
 
