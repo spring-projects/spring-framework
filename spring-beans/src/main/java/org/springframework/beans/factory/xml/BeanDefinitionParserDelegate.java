@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,7 +59,6 @@ import org.springframework.beans.factory.support.ManagedSet;
 import org.springframework.beans.factory.support.MethodOverrides;
 import org.springframework.beans.factory.support.ReplaceOverride;
 import org.springframework.core.env.Environment;
-import org.springframework.core.env.StandardEnvironment;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
@@ -246,11 +245,11 @@ public class BeanDefinitionParserDelegate {
 
 	private final XmlReaderContext readerContext;
 
+	private final Environment environment;
+
 	private final DocumentDefaultsDefinition defaults = new DocumentDefaultsDefinition();
 
 	private final ParseState parseState = new ParseState();
-
-	private Environment environment;
 
 	/**
 	 * Stores all used bean names so we can enforce uniqueness on a per
@@ -261,26 +260,24 @@ public class BeanDefinitionParserDelegate {
 
 
 	/**
-	 * Create a new BeanDefinitionParserDelegate associated with the
-	 * supplied {@link XmlReaderContext} and {@link Environment}.
+	 * Create a new BeanDefinitionParserDelegate associated with the supplied
+	 * {@link XmlReaderContext}.
+	 */
+	public BeanDefinitionParserDelegate(XmlReaderContext readerContext) {
+		this(readerContext, readerContext.getReader().getEnvironment());
+	}
+
+	/**
+	 * Create a new BeanDefinitionParserDelegate associated with the supplied
+	 * {@link XmlReaderContext}.
 	 */
 	public BeanDefinitionParserDelegate(XmlReaderContext readerContext, Environment environment) {
 		Assert.notNull(readerContext, "XmlReaderContext must not be null");
-		Assert.notNull(readerContext, "Environment must not be null");
+		Assert.notNull(environment, "Environment must not be null");
 		this.readerContext = readerContext;
 		this.environment = environment;
 	}
 
-	/**
-	 * Create a new BeanDefinitionParserDelegate associated with the
-	 * supplied {@link XmlReaderContext} and a new {@link StandardEnvironment}.
-	 * @deprecated since Spring 3.1 in favor of
-	 * {@link #BeanDefinitionParserDelegate(XmlReaderContext, Environment)}
-	 */
-	@Deprecated
-	public BeanDefinitionParserDelegate(XmlReaderContext readerContext) {
-		this(readerContext, new StandardEnvironment());
-	}
 
 	/**
 	 * Get the {@link XmlReaderContext} associated with this helper instance.
@@ -327,6 +324,13 @@ public class BeanDefinitionParserDelegate {
 
 
 	/**
+	 * Initialize the default settings assuming a {@code null} parent delegate.
+	 */
+	public void initDefaults(Element root) {
+		initDefaults(root, null);
+	}
+
+	/**
 	 * Initialize the default lazy-init, autowire, dependency check settings,
 	 * init-method, destroy-method and merge settings. Support nested 'beans'
 	 * element use cases by falling back to the given parent in case the
@@ -337,16 +341,6 @@ public class BeanDefinitionParserDelegate {
 	public void initDefaults(Element root, BeanDefinitionParserDelegate parent) {
 		populateDefaults(this.defaults, (parent != null ? parent.defaults : null), root);
 		this.readerContext.fireDefaultsRegistered(this.defaults);
-	}
-
-	/**
-	 * Initialize the default settings assuming a {@code null} parent delegate.
-	 * @deprecated in Spring 3.1 in favor of
-	 * {@link #initDefaults(Element, BeanDefinitionParserDelegate)}
-	 */
-	@Deprecated
-	public void initDefaults(Element root) {
-		initDefaults(root, null);
 	}
 
 	/**
