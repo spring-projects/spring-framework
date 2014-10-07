@@ -47690,30 +47690,30 @@ classes that simplify the usage of Quartz within Spring-based applications.
 
 
 [[scheduling-quartz-jobdetail]]
-==== Using the JobDetailBean
-`JobDetail` objects contain all information needed to run a job. The Spring Framework
-provides a `JobDetailBean` that makes the `JobDetail` more of an actual JavaBean with
-sensible defaults. Let's have a look at an example:
+==== Using the JobDetailFactoryBean
+Quartz `JobDetail` objects contain all information needed to run a job. Spring provides a
+`JobDetailFactoryBean` which provides bean-style properties for XML configuration purposes.
+Let's have a look at an example:
 
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
-	<bean name="exampleJob" class="org.springframework.scheduling.quartz.JobDetailBean">
-		<property name="jobClass" value="example.ExampleJob" />
+	<bean name="exampleJob" class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
+		<property name="jobClass" value="example.ExampleJob"/>
 		<property name="jobDataAsMap">
 			<map>
-				<entry key="timeout" value="5" />
+				<entry key="timeout" value="5"/>
 			</map>
 		</property>
 	</bean>
 ----
 
-The job detail bean has all information it needs to run the job ( `ExampleJob`). The
-timeout is specified in the job data map. The job data map is available through the
-`JobExecutionContext` (passed to you at execution time), but the `JobDetailBean` also
-maps the properties from the job data map to properties of the actual job. So in this
-case, if the `ExampleJob` contains a property named `timeout`, the `JobDetailBean` will
-automatically apply it:
+The job detail configuration has all information it needs to run the job (`ExampleJob`).
+The timeout is specified in the job data map. The job data map is available through the
+`JobExecutionContext` (passed to you at execution time), but the `JobDetail` also gets
+its properties from the job data mapped to properties of the job instance. So in this
+case, if the `ExampleJob` contains a bean property named `timeout`, the `JobDetail`
+will have it applied automatically:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -47726,7 +47726,7 @@ automatically apply it:
 
 		/**
 		 * Setter called after the ExampleJob is instantiated
-		 * with the value from the JobDetailBean (5)
+		 * with the value from the JobDetailFactoryBean (5)
 		 */
 		public void setTimeout(int timeout) {
 			this.timeout = timeout;
@@ -47739,13 +47739,13 @@ automatically apply it:
 	}
 ----
 
-All additional settings from the job detail bean are of course available to you as well.
+All additional properties from the job data map are of course available to you as well.
 
 [NOTE]
 ====
 Using the `name` and `group` properties, you can modify the name and the group
-of the job, respectively. By default, the name of the job matches the bean name of the
-job detail bean (in the example above, this is `exampleJob`).
+of the job, respectively. By default, the name of the job matches the bean name
+of the `JobDetailFactoryBean` (in the example above, this is `exampleJob`).
 ====
 
 
@@ -47760,8 +47760,8 @@ Often you just need to invoke a method on a specific object. Using the
 [subs="verbatim,quotes"]
 ----
 	<bean id="jobDetail" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
-		<property name="targetObject" ref="exampleBusinessObject" />
-		<property name="targetMethod" value="doIt" />
+		<property name="targetObject" ref="exampleBusinessObject"/>
+		<property name="targetMethod" value="doIt"/>
 	</bean>
 ----
 
@@ -47803,9 +47803,9 @@ job will not start before the first one has finished. To make jobs resulting fro
 [subs="verbatim,quotes"]
 ----
 	<bean id="jobDetail" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
-		<property name="targetObject" ref="exampleBusinessObject" />
-		<property name="targetMethod" value="doIt" />
-		<property name="concurrent" value="false" />
+		<property name="targetObject" ref="exampleBusinessObject"/>
+		<property name="targetMethod" value="doIt"/>
+		<property name="concurrent" value="false"/>
 	</bean>
 ----
 
@@ -47837,17 +47837,17 @@ Find below a couple of examples:
 ----
 	<bean id="simpleTrigger" class="org.springframework.scheduling.quartz.SimpleTriggerFactoryBean">
 		<!-- see the example of method invoking job above -->
-		<property name="jobDetail" ref="jobDetail" />
+		<property name="jobDetail" ref="jobDetail"/>
 		<!-- 10 seconds -->
-		<property name="startDelay" value="10000" />
+		<property name="startDelay" value="10000"/>
 		<!-- repeat every 50 seconds -->
-		<property name="repeatInterval" value="50000" />
+		<property name="repeatInterval" value="50000"/>
 	</bean>
 
 	<bean id="cronTrigger" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
-		<property name="jobDetail" ref="exampleJob" />
+		<property name="jobDetail" ref="exampleJob"/>
 		<!-- run every morning at 6 AM -->
-		<property name="cronExpression" value="0 0 6 * * ?" />
+		<property name="cronExpression" value="0 0 6 * * ?"/>
 	</bean>
 ----
 
@@ -47861,8 +47861,8 @@ seconds and one every morning at 6 AM. To finalize everything, we need to set up
 	<bean class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
 		<property name="triggers">
 			<list>
-				<ref bean="cronTrigger" />
-				<ref bean="simpleTrigger" />
+				<ref bean="cronTrigger"/>
+				<ref bean="simpleTrigger"/>
 			</list>
 		</property>
 	</bean>
