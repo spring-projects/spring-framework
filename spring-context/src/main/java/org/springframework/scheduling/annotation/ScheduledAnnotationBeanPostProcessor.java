@@ -17,6 +17,7 @@
 package org.springframework.scheduling.annotation;
 
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
@@ -77,9 +78,8 @@ import org.springframework.util.StringValueResolver;
  * @see org.springframework.scheduling.TaskScheduler
  * @see org.springframework.scheduling.config.ScheduledTaskRegistrar
  */
-public class ScheduledAnnotationBeanPostProcessor
-		implements BeanPostProcessor, Ordered, EmbeddedValueResolverAware, BeanFactoryAware,
-		SmartInitializingSingleton, DisposableBean {
+public class ScheduledAnnotationBeanPostProcessor implements BeanPostProcessor, Ordered,
+		EmbeddedValueResolverAware, BeanFactoryAware, SmartInitializingSingleton, DisposableBean {
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
@@ -227,17 +227,27 @@ public class ScheduledAnnotationBeanPostProcessor
 				}
 				catch (NoSuchMethodException ex) {
 					throw new IllegalStateException(String.format(
-							"@Scheduled method '%s' found on bean target class '%s', " +
-							"but not found in any interface(s) for bean JDK proxy. Either " +
-							"pull the method up to an interface or switch to subclass (CGLIB) " +
-							"proxies by setting proxy-target-class/proxyTargetClass " +
-							"attribute to 'true'", method.getName(), method.getDeclaringClass().getSimpleName()));
+							"@Scheduled method '%s' found on bean target class '%s' but not " +
+							"found in any interface(s) for a dynamic proxy. Either pull the " +
+							"method up to a declared interface or switch to subclass (CGLIB) " +
+							"proxies by setting proxy-target-class/proxyTargetClass to 'true'",
+							method.getName(), method.getDeclaringClass().getSimpleName()));
+				}
+			}
+			else if (AopUtils.isCglibProxy(bean)) {
+				// Common problem: private methods end up in the proxy instance, not getting delegated.
+				if (Modifier.isPrivate(method.getModifiers())) {
+					throw new IllegalStateException(String.format(
+							"@Scheduled method '%s' found on CGLIB proxy for target class '%s' but cannot " +
+							"be delegated to target bean. Switch its visibility to package or protected.",
+							method.getName(), method.getDeclaringClass().getSimpleName()));
 				}
 			}
 
 			Runnable runnable = new ScheduledMethodRunnable(bean, method);
 			boolean processedSchedule = false;
-			String errorMessage = "Exactly one of the 'cron', 'fixedDelay(String)', or 'fixedRate(String)' attributes is required";
+			String errorMessage =
+					"Exactly one of the 'cron', 'fixedDelay(String)', or 'fixedRate(String)' attributes is required";
 
 			// Determine initial delay
 			long initialDelay = scheduled.initialDelay();
