@@ -76,7 +76,7 @@ public final class TextMessage extends AbstractWebSocketMessage<String> {
 
 	@Override
 	protected String toStringPayload() {
-		return (getPayloadLength() > 10) ? getPayload().substring(0, 10) + ".." : getPayload();
+		return (getPayload().length() > 10) ? getPayload().substring(0, 10) + ".." : getPayload();
 	}
 
 }
