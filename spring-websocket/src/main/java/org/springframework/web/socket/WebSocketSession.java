@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.web.socket;
 
+import java.io.Closeable;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.URI;
@@ -32,7 +33,7 @@ import org.springframework.http.HttpHeaders;
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public interface WebSocketSession {
+public interface WebSocketSession extends Closeable {
 
 	/**
 	 * Return a unique session identifier.
@@ -51,12 +52,10 @@ public interface WebSocketSession {
 
 	/**
 	 * Return the map with attributes associated with the WebSocket session.
-	 *
 	 * <p>When the WebSocketSession is created, on the server side, the map can be
 	 * through a {@link org.springframework.web.socket.server.HandshakeInterceptor}.
 	 * On the client side, the map can be populated by passing attributes to the
-	 * {@link org.springframework.web.socket.client.WebSocketClient} handshake
-	 * methods.
+	 * {@link org.springframework.web.socket.client.WebSocketClient} handshake methods.
 	 */
 	Map<String, Object> getAttributes();
 
@@ -110,15 +109,14 @@ public interface WebSocketSession {
 	List<WebSocketExtension> getExtensions();
 
 	/**
+	 * Send a WebSocket message: either {@link TextMessage} or {@link BinaryMessage}.
+	 */
+	void sendMessage(WebSocketMessage<?> message) throws IOException;
+
+	/**
 	 * Return whether the connection is still open.
 	 */
 	boolean isOpen();
-
-	/**
-	 * Send a WebSocket message either {@link TextMessage} or
-	 * {@link BinaryMessage}.
-	 */
-	void sendMessage(WebSocketMessage<?> message) throws IOException;
 
 	/**
 	 * Close the WebSocket connection with status 1000, i.e. equivalent to:
@@ -126,6 +124,7 @@ public interface WebSocketSession {
 	 * session.close(CloseStatus.NORMAL);
 	 * </pre>
 	 */
+	@Override
 	void close() throws IOException;
 
 	/**
