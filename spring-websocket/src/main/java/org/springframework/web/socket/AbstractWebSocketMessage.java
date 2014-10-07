@@ -69,10 +69,6 @@ public abstract class AbstractWebSocketMessage<T> implements WebSocketMessage<T>
 		return this.last;
 	}
 
-	@Override
-	public int hashCode() {
-		return AbstractWebSocketMessage.class.hashCode() * 13 + ObjectUtils.nullSafeHashCode(this.payload);
-	}
 
 	@Override
 	public boolean equals(Object other) {
@@ -87,9 +83,14 @@ public abstract class AbstractWebSocketMessage<T> implements WebSocketMessage<T>
 	}
 
 	@Override
+	public int hashCode() {
+		return ObjectUtils.nullSafeHashCode(this.payload);
+	}
+
+	@Override
 	public String toString() {
-		return getClass().getSimpleName() + " payload= " + toStringPayload()
-				+ ", byteCount=" + getPayloadLength() + ", last=" + isLast() + "]";
+		return getClass().getSimpleName() + " payload=[" + toStringPayload() +
+				"], byteCount=" + getPayloadLength() + ", last=" + isLast() + "]";
 	}
 
 	protected abstract String toStringPayload();
