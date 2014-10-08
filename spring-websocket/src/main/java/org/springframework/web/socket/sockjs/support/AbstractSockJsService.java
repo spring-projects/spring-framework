@@ -117,7 +117,7 @@ public abstract class AbstractSockJsService implements SockJsService {
 	 * server. Since the iframe needs to load the SockJS javascript client library,
 	 * this property allows specifying where to load it from.
 	 * <p>By default this is set to point to
-	 * "https://d1fxtkz8shb9d2.cloudfront.net/sockjs-0.3.4.min.js".
+	 * "https://cdn.jsdelivr.net/sockjs/0.3.4/sockjs.min.js".
 	 * However, it can also be set to point to a URL served by the application.
 	 * <p>Note that it's possible to specify a relative URL in which case the URL
 	 * must be relative to the iframe URL. For example assuming a SockJS endpoint
@@ -390,11 +390,13 @@ public abstract class AbstractSockJsService implements SockJsService {
 			responseHeaders.add("Access-Control-Allow-Methods", StringUtils.arrayToDelimitedString(httpMethods, ", "));
 			responseHeaders.add("Access-Control-Max-Age", String.valueOf(ONE_YEAR));
 		}
+		responseHeaders.add(HttpHeaders.VARY, HttpHeaders.ORIGIN);
 	}
 
 	protected void addCacheHeaders(ServerHttpResponse response) {
 		response.getHeaders().setCacheControl("public, max-age=" + ONE_YEAR);
 		response.getHeaders().setExpires(new Date().getTime() + ONE_YEAR * 1000);
+		response.getHeaders().add(HttpHeaders.VARY, HttpHeaders.ORIGIN);
 	}
 
 	protected void addNoCacheHeaders(ServerHttpResponse response) {

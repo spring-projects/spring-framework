@@ -83,6 +83,7 @@ public class SockJsServiceTests extends AbstractHttpRequestTests {
 		assertEquals("*", this.servletResponse.getHeader("Access-Control-Allow-Origin"));
 		assertEquals("true", this.servletResponse.getHeader("Access-Control-Allow-Credentials"));
 		assertEquals("no-store, no-cache, must-revalidate, max-age=0", this.servletResponse.getHeader("Cache-Control"));
+		assertEquals("Origin", this.servletResponse.getHeader("Vary"));
 
 		String body = this.servletResponse.getContentAsString();
 		assertEquals("{\"entropy\"", body.substring(0, body.indexOf(':')));
@@ -133,6 +134,7 @@ public class SockJsServiceTests extends AbstractHttpRequestTests {
 		assertEquals("Last-Modified", this.servletResponse.getHeader("Access-Control-Allow-Headers"));
 		assertEquals("OPTIONS, GET", this.servletResponse.getHeader("Access-Control-Allow-Methods"));
 		assertEquals("31536000", this.servletResponse.getHeader("Access-Control-Max-Age"));
+		assertEquals("Origin", this.servletResponse.getHeader("Vary"));
 	}
 
 	@Test
