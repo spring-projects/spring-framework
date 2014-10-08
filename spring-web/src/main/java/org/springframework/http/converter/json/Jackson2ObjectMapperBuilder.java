@@ -173,6 +173,18 @@ public class Jackson2ObjectMapperBuilder {
 	}
 
 	/**
+	 * Configure a custom serializer for the given type.
+	 * @see #serializers(JsonSerializer...)
+	 * @since 4.1.2
+	 */
+	public Jackson2ObjectMapperBuilder serializerByType(Class<?> type, JsonSerializer<?> serializer) {
+		if (serializers != null) {
+			this.serializers.put(type, serializer);
+		}
+		return this;
+	}
+
+	/**
 	 * Configure custom serializers for the given types.
 	 * @see #serializers(JsonSerializer...)
 	 */
@@ -184,11 +196,37 @@ public class Jackson2ObjectMapperBuilder {
 	}
 
 	/**
+	 * Configure a custom deserializer for the given type.
+	 * @since 4.1.2
+	 */
+	public Jackson2ObjectMapperBuilder deserializerByType(Class<?> type, JsonDeserializer<?> deserializer) {
+		if (deserializers != null) {
+			this.deserializers.put(type, deserializer);
+		}
+		return this;
+	}
+
+	/**
 	 * Configure custom deserializers for the given types.
 	 */
 	public Jackson2ObjectMapperBuilder deserializersByType(Map<Class<?>, JsonDeserializer<?>> deserializers) {
 		if (deserializers != null) {
 			this.deserializers.putAll(deserializers);
+		}
+		return this;
+	}
+
+	/**
+	 * Add mix-in annotations to use for augmenting specified class or interface.
+	 * @param target class (or interface) whose annotations to effectively override
+	 * @param mixinSource class (or interface) whose annotations are to be "added"
+	 * to target's annotations as value
+	 * @since 4.1.2
+	 * @see com.fasterxml.jackson.databind.ObjectMapper#addMixInAnnotations(Class, Class)
+	 */
+	public Jackson2ObjectMapperBuilder mixIn(Class<?> target, Class<?> mixinSource) {
+		if (mixIns != null) {
+			this.mixIns.put(target, mixinSource);
 		}
 		return this;
 	}
