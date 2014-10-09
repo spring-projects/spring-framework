@@ -24,18 +24,9 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.UnsupportedEncodingException;
 import java.security.Principal;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Date;
-import java.util.Enumeration;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Set;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 import javax.servlet.AsyncContext;
 import javax.servlet.DispatcherType;
@@ -118,6 +109,17 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	private static final ServletInputStream EMPTY_SERVLET_INPUT_STREAM =
 			new DelegatingServletInputStream(new ByteArrayInputStream(new byte[0]));
 
+    /**
+     * The dates formats as described in:
+     * http://www.w3.org/Protocols/rfc2616/rfc2616-sec3.html#sec3.3.1
+     */
+    private static final String[] DATE_FORMATS = new String[] {
+            "EEE, dd MMM yyyy HH:mm:ss zzz",
+            "EEE, dd-MMM-yy HH:mm:ss zzz",
+            "EEE MMM dd HH:mm:ss yyyy"
+    };
+
+    private static TimeZone GMT = TimeZone.getTimeZone("GMT");
 
 	private boolean active = true;
 
@@ -905,6 +907,10 @@ public class MockHttpServletRequest implements HttpServletRequest {
 		else if (value instanceof Number) {
 			return ((Number) value).longValue();
 		}
+        else if (value instanceof String) {
+
+            return parseDateHeader(name, (String) value);
+        }
 		else if (value != null) {
 			throw new IllegalArgumentException(
 					"Value for header '" + name + "' is neither a Date nor a Number: " + value);
@@ -914,7 +920,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 		}
 	}
 
-	@Override
+    @Override
 	public String getHeader(String name) {
 		HeaderValueHolder header = HeaderValueHolder.getByName(this.headers, name);
 		return (header != null ? header.getStringValue() : null);
@@ -1166,4 +1172,27 @@ public class MockHttpServletRequest implements HttpServletRequest {
 		return this.parts.values();
 	}
 
+
+    /**
+     * Parses the date header value, by trying to match it with one of the expected date formats.
+     *
+     * @param name  the header name
+     * @param value the header value
+     * @return the parsed date
+     * @throws java.lang.IllegalArgumentException if the date hasn't been correctly formatted
+     */
+    private long parseDateHeader(String name, String value) {
+        for (String dateFormat : DATE_FORMATS) {
+            SimpleDateFormat simpleDateFormat = new SimpleDateFormat(dateFormat, Locale.US);
+            simpleDateFormat.setTimeZone(GMT);
+            try {
+                return simpleDateFormat.parse(value).getTime();
+            }
+            catch (ParseException e) {
+                // ignore
+            }
+        }
+        throw new IllegalArgumentException("Cannot parse date value \"" + value +
+                "\" for \"" + name + "\" header");
+    }
 }

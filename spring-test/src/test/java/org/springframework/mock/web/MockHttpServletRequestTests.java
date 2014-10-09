@@ -18,14 +18,8 @@ package org.springframework.mock.web;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 import org.junit.Test;
 import org.springframework.util.StreamUtils;
@@ -123,8 +117,40 @@ public class MockHttpServletRequestTests {
 		request.addHeader(headerName, "value1");
 		Enumeration<String> requestHeaders = request.getHeaderNames();
 		assertNotNull(requestHeaders);
-		assertEquals("HTTP header casing not being preserved", headerName, requestHeaders.nextElement());
+		assertEquals("HTTP header casing not being preserved",
+                headerName, requestHeaders.nextElement());
 	}
+
+    @Test
+    public void httpHeaderDate() throws Exception {
+        String headerName = "if-modified-since";
+        Date date = Calendar.getInstance().getTime();
+        request.addHeader(headerName, date);
+        assertEquals("The HTTP header didn't contain valid value.",
+                date.getTime(), request.getDateHeader(headerName));
+    }
+
+    @Test
+    public void httpHeaderTimestamp() throws Exception {
+        String headerName = "if-modified-since";
+        long timestamp = Calendar.getInstance().getTime().getTime();
+        request.addHeader(headerName, timestamp);
+        assertEquals("The HTTP header didn't contain valid value.", timestamp,
+                request.getDateHeader(headerName));
+    }
+
+    @Test
+    public void httpHeaderRfcFormatedDate() throws Exception {
+        String headerName = "if-modified-since";
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(Calendar.MILLISECOND, 0);
+        Date date = calendar.getTime();
+        SimpleDateFormat rfcFormat = new SimpleDateFormat(
+                "EEE, dd MMM yyyy HH:mm:ss zzz", Locale.US);
+        request.addHeader(headerName, rfcFormat.format(date));
+        assertEquals("The HTTP header didn't contain valid value.",
+                date.getTime(), request.getDateHeader(headerName));
+    }
 
 	@Test
 	public void nullParameterName() {
