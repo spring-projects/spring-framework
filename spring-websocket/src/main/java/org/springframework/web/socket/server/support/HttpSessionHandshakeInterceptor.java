@@ -38,7 +38,15 @@ import org.springframework.web.socket.server.HandshakeInterceptor;
  */
 public class HttpSessionHandshakeInterceptor implements HandshakeInterceptor {
 
-	private Collection<String> attributeNames;
+	/**
+	 * The name of the attribute under which the HTTP session id is exposed when
+	 * {@link #setCopyHttpSessionId(boolean) copyHttpSessionId} is "true".
+	 */
+	public static final String HTTP_SESSION_ID_ATTR_NAME = "HTTP.SESSION.ID";
+
+	private final Collection<String> attributeNames;
+
+	private boolean copyHttpSessionId;
 
 
 	/**
@@ -56,6 +64,25 @@ public class HttpSessionHandshakeInterceptor implements HandshakeInterceptor {
 		this.attributeNames = attributeNames;
 	}
 
+	/**
+	 * When set to "true", the HTTP session id is copied to the WebSocket
+	 * handshake attributes, and is subsequently available via
+	 * {@link org.springframework.web.socket.WebSocketSession#getAttributes()}
+	 * under the key {@link #HTTP_SESSION_ID_ATTR_NAME}.
+	 * <p>By default this is "false".
+	 * @param copyHttpSessionId whether to copy the HTTP session id.
+	 */
+	public void setCopyHttpSessionId(boolean copyHttpSessionId) {
+		this.copyHttpSessionId = copyHttpSessionId;
+	}
+
+	/**
+	 * Whether to copy the HTTP session id to the handshake attributes.
+	 */
+	public boolean isCopyHttpSessionId() {
+		return this.copyHttpSessionId;
+	}
+
 
 	@Override
 	public boolean beforeHandshake(ServerHttpRequest request, ServerHttpResponse response,
@@ -71,6 +98,9 @@ public class HttpSessionHandshakeInterceptor implements HandshakeInterceptor {
 					if (CollectionUtils.isEmpty(this.attributeNames) || this.attributeNames.contains(name)) {
 						attributes.put(name, session.getAttribute(name));
 					}
+				}
+				if (isCopyHttpSessionId()) {
+					attributes.put(HTTP_SESSION_ID_ATTR_NAME, session.getId());
 				}
 			}
 		}

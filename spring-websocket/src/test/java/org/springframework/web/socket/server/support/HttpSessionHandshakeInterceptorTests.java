@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import java.util.Set;
 
 import org.junit.Test;
 import org.mockito.Mockito;
+import org.springframework.mock.web.test.MockHttpSession;
 import org.springframework.web.socket.AbstractHttpRequestTests;
 import org.springframework.web.socket.WebSocketHandler;
 
@@ -46,7 +47,7 @@ public class HttpSessionHandshakeInterceptorTests extends AbstractHttpRequestTes
 		this.servletRequest.getSession().setAttribute("bar", "baz");
 
 		HttpSessionHandshakeInterceptor interceptor = new HttpSessionHandshakeInterceptor();
-		interceptor.beforeHandshake(request, response, wsHandler, attributes);
+		interceptor.beforeHandshake(this.request, this.response, wsHandler, attributes);
 
 		assertEquals(2, attributes.size());
 		assertEquals("bar", attributes.get("foo"));
@@ -64,10 +65,26 @@ public class HttpSessionHandshakeInterceptorTests extends AbstractHttpRequestTes
 
 		Set<String> names = Collections.singleton("foo");
 		HttpSessionHandshakeInterceptor interceptor = new HttpSessionHandshakeInterceptor(names);
-		interceptor.beforeHandshake(request, response, wsHandler, attributes);
+		interceptor.beforeHandshake(this.request, this.response, wsHandler, attributes);
 
 		assertEquals(1, attributes.size());
 		assertEquals("bar", attributes.get("foo"));
+	}
+
+	@Test
+	public void copyHttpSessionId() throws Exception {
+
+		Map<String, Object> attributes = new HashMap<String, Object>();
+		WebSocketHandler wsHandler = Mockito.mock(WebSocketHandler.class);
+
+		this.servletRequest.setSession(new MockHttpSession(null, "foo"));
+
+		HttpSessionHandshakeInterceptor interceptor = new HttpSessionHandshakeInterceptor();
+		interceptor.setCopyHttpSessionId(true);
+		interceptor.beforeHandshake(this.request, this.response, wsHandler, attributes);
+
+		assertEquals(1, attributes.size());
+		assertEquals("foo", attributes.get(HttpSessionHandshakeInterceptor.HTTP_SESSION_ID_ATTR_NAME));
 	}
 
 	@Test
@@ -77,7 +94,7 @@ public class HttpSessionHandshakeInterceptorTests extends AbstractHttpRequestTes
 		WebSocketHandler wsHandler = Mockito.mock(WebSocketHandler.class);
 
 		HttpSessionHandshakeInterceptor interceptor = new HttpSessionHandshakeInterceptor();
-		interceptor.beforeHandshake(request, response, wsHandler, attributes);
+		interceptor.beforeHandshake(this.request, this.response, wsHandler, attributes);
 
 		assertNull(this.servletRequest.getSession(false));
 	}
