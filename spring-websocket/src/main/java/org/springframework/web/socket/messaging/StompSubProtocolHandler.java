@@ -49,6 +49,7 @@ import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.messaging.support.MessageHeaderAccessor;
 import org.springframework.messaging.support.MessageHeaderInitializer;
 import org.springframework.util.Assert;
+import org.springframework.web.socket.BinaryMessage;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketMessage;
@@ -186,9 +187,16 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 
 		List<Message<byte[]>> messages;
 		try {
-			Assert.isInstanceOf(TextMessage.class,  webSocketMessage);
-			TextMessage textMessage = (TextMessage) webSocketMessage;
-			ByteBuffer byteBuffer = ByteBuffer.wrap(textMessage.asBytes());
+			ByteBuffer byteBuffer;
+			if (webSocketMessage instanceof TextMessage) {
+				byteBuffer = ByteBuffer.wrap(((TextMessage) webSocketMessage).asBytes());
+			}
+			else if (webSocketMessage instanceof BinaryMessage) {
+				byteBuffer = ((BinaryMessage) webSocketMessage).getPayload();
+			}
+			else {
+				throw new IllegalArgumentException("Unexpected WebSocket message type: " + webSocketMessage);
+			}
 
 			BufferingStompDecoder decoder = this.decoders.get(session.getId());
 			if (decoder == null) {
