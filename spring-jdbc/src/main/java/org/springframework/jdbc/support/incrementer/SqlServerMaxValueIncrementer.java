@@ -117,8 +117,8 @@ public class SqlServerMaxValueIncrementer extends AbstractColumnMaxValueIncremen
 						JdbcUtils.closeResultSet(rs);
 					}
 				}
-				long maxValue = this.valueCache[(this.valueCache.length - 1)];
-				stmt.executeUpdate("delete from " + getIncrementerName() + " where " + getColumnName() + " < " + maxValue);
+				stmt.executeUpdate("delete from " + getIncrementerName() + " where " + getColumnName() +
+                        " in (" + Arrays.toString(valueCache).replaceAll("\\[|\\]", "") + ")");
 			}
 			catch (SQLException ex) {
 				throw new DataAccessResourceFailureException("Could not increment identity", ex);
