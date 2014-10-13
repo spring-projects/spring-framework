@@ -1282,7 +1282,7 @@ public class DispatcherServlet extends FrameworkServlet {
 	}
 
 	private void triggerAfterCompletionWithError(HttpServletRequest request, HttpServletResponse response,
-			HandlerExecutionChain mappedHandler, Error error) throws Exception, ServletException {
+			HandlerExecutionChain mappedHandler, Error error) throws Exception {
 
 		ServletException ex = new NestedServletException("Handler processing failed", error);
 		if (mappedHandler != null) {

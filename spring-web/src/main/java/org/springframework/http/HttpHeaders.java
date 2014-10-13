@@ -43,7 +43,8 @@ import org.springframework.util.StringUtils;
 /**
  * Represents HTTP request and response headers, mapping string header names to list of string values.
  *
- * <p>In addition to the normal methods defined by {@link Map}, this class offers the following convenience methods:
+ * <p>In addition to the normal methods defined by {@link Map}, this class offers the following
+ * convenience methods:
  * <ul>
  * <li>{@link #getFirst(String)} returns the first value associated with a given header name</li>
  * <li>{@link #add(String, String)} adds a header value to the list of values for a header name</li>
@@ -329,8 +330,16 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 
 	private static TimeZone GMT = TimeZone.getTimeZone("GMT");
 
+
 	private final Map<String, List<String>> headers;
 
+
+	/**
+	 * Constructs a new, empty instance of the {@code HttpHeaders} object.
+	 */
+	public HttpHeaders() {
+		this(new LinkedCaseInsensitiveMap<List<String>>(8, Locale.ENGLISH), false);
+	}
 
 	/**
 	 * Private constructor that can create read-only {@code HttpHeader} instances.
@@ -351,19 +360,6 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 		}
 	}
 
-	/**
-	 * Constructs a new, empty instance of the {@code HttpHeaders} object.
-	 */
-	public HttpHeaders() {
-		this(new LinkedCaseInsensitiveMap<List<String>>(8, Locale.ENGLISH), false);
-	}
-
-	/**
-	 * Returns {@code HttpHeaders} object that can only be read, not written to.
-	 */
-	public static HttpHeaders readOnlyHttpHeaders(HttpHeaders headers) {
-		return new HttpHeaders(headers, true);
-	}
 
 	/**
 	 * Set the list of acceptable {@linkplain MediaType media types}, as specified by the {@code Accept} header.
@@ -612,7 +608,6 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 * the {@code Expires} header.
 	 * <p>The date is returned as the number of milliseconds since January 1, 1970 GMT.
 	 * Returns -1 when the date is unknown.
-	 *
 	 * @return the expires value
 	 */
 	public long getExpires() {
@@ -786,8 +781,6 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 		return getFirst(UPGRADE);
 	}
 
-	// Date methods
-
 	/**
 	 * Parse the first header value for the given header name as a date, return -1 if
 	 * there is no value, or raise {@link IllegalArgumentException} if the value cannot be
@@ -822,8 +815,6 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 		dateFormat.setTimeZone(GMT);
 		set(headerName, dateFormat.format(new Date(date)));
 	}
-
-	// Single string methods
 
 	/**
 	 * Return the first header value for the given header name, if any.
@@ -884,6 +875,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 		}
 		return singleValueMap;
 	}
+
 
 	// Map implementation
 
@@ -968,6 +960,14 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	@Override
 	public String toString() {
 		return this.headers.toString();
+	}
+
+
+	/**
+	 * Return a {@code HttpHeaders} object that can only be read, not written to.
+	 */
+	public static HttpHeaders readOnlyHttpHeaders(HttpHeaders headers) {
+		return new HttpHeaders(headers, true);
 	}
 
 }
