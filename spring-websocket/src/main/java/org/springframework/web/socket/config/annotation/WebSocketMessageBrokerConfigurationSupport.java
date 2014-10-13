@@ -23,9 +23,12 @@ import org.springframework.messaging.simp.broker.AbstractBrokerMessageHandler;
 import org.springframework.messaging.simp.config.AbstractMessageBrokerConfiguration;
 import org.springframework.messaging.simp.stomp.StompBrokerRelayMessageHandler;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
+import org.springframework.util.Assert;
 import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.config.WebSocketMessageBrokerStats;
+import org.springframework.web.socket.handler.WebSocketHandlerDecorator;
+import org.springframework.web.socket.handler.WebSocketHandlerDecoratorFactory;
 import org.springframework.web.socket.messaging.SubProtocolWebSocketHandler;
 
 /**
@@ -47,7 +50,9 @@ public abstract class WebSocketMessageBrokerConfigurationSupport extends Abstrac
 
 	@Bean
 	public HandlerMapping stompWebSocketHandlerMapping() {
-		WebMvcStompEndpointRegistry registry = new WebMvcStompEndpointRegistry(subProtocolWebSocketHandler(),
+		WebSocketHandler handler = subProtocolWebSocketHandler();
+		handler = decorateWebSocketHandler(handler);
+		WebMvcStompEndpointRegistry registry = new WebMvcStompEndpointRegistry(handler,
 				getTransportRegistration(), userSessionRegistry(), messageBrokerSockJsTaskScheduler());
 		registry.setApplicationContext(getApplicationContext());
 		registerStompEndpoints(registry);
@@ -57,6 +62,13 @@ public abstract class WebSocketMessageBrokerConfigurationSupport extends Abstrac
 	@Bean
 	public WebSocketHandler subProtocolWebSocketHandler() {
 		return new SubProtocolWebSocketHandler(clientInboundChannel(), clientOutboundChannel());
+	}
+
+	protected WebSocketHandler decorateWebSocketHandler(WebSocketHandler handler) {
+		for (WebSocketHandlerDecoratorFactory factory : getTransportRegistration().getDecoratorFactories()) {
+			handler = factory.decorate(handler);
+		}
+		return handler;
 	}
 
 	protected final WebSocketTransportRegistration getTransportRegistration() {

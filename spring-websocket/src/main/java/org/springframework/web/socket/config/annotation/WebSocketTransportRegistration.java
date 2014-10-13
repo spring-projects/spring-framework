@@ -16,6 +16,12 @@
 package org.springframework.web.socket.config.annotation;
 
 
+import org.springframework.web.socket.handler.WebSocketHandlerDecoratorFactory;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 /**
  * Configure the processing of messages received from and sent to WebSocket clients.
  *
@@ -29,6 +35,9 @@ public class WebSocketTransportRegistration {
 	private Integer sendTimeLimit;
 
 	private Integer sendBufferSizeLimit;
+
+	private final List<WebSocketHandlerDecoratorFactory> decoratorFactories =
+			new ArrayList<WebSocketHandlerDecoratorFactory>(2);
 
 
 	/**
@@ -147,4 +156,35 @@ public class WebSocketTransportRegistration {
 	protected Integer getSendBufferSizeLimit() {
 		return this.sendBufferSizeLimit;
 	}
+
+	/**
+	 * Configure one or more factories to decorate the handler used to process
+	 * WebSocket messages. This may be useful in some advanced use cases, for
+	 * example to allow Spring Security to forcibly close the WebSocket session
+	 * when the corresponding HTTP session expires.
+	 * @since 4.1.2
+	 */
+	public WebSocketTransportRegistration setDecoratorFactories(WebSocketHandlerDecoratorFactory... factories) {
+		if (factories != null) {
+			this.decoratorFactories.addAll(Arrays.asList(factories));
+		}
+		return this;
+	}
+
+	/**
+	 * Add a factory that to decorate the handler used to process WebSocket
+	 * messages. This may be useful for some advanced use cases, for example
+	 * to allow Spring Security to forcibly close the WebSocket session when
+	 * the corresponding HTTP session expires.
+	 * @since 4.1.2
+	 */
+	public WebSocketTransportRegistration addDecoratorFactory(WebSocketHandlerDecoratorFactory factory) {
+		this.decoratorFactories.add(factory);
+		return this;
+	}
+
+	protected List<WebSocketHandlerDecoratorFactory> getDecoratorFactories() {
+		return this.decoratorFactories;
+	}
+
 }

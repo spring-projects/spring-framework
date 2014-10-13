@@ -21,6 +21,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.beans.factory.FactoryBean;
+import org.springframework.web.socket.WebSocketHandler;
+import org.springframework.web.socket.handler.WebSocketHandlerDecoratorFactory;
 import org.w3c.dom.Element;
 
 import org.springframework.beans.MutablePropertyValues;
@@ -89,7 +92,9 @@ import org.springframework.web.socket.sockjs.support.SockJsHttpRequestHandler;
  */
 class MessageBrokerBeanDefinitionParser implements BeanDefinitionParser {
 
-	private static final String SOCKJS_SCHEDULER_BEAN_NAME = "messageBrokerSockJsScheduler";
+	public static final String WEB_SOCKET_HANDLER_BEAN_NAME = "subProtocolWebSocketHandler";
+
+	public static final String SOCKJS_SCHEDULER_BEAN_NAME = "messageBrokerSockJsScheduler";
 
 	private static final int DEFAULT_MAPPING_ORDER = 1;
 
@@ -156,7 +161,7 @@ class MessageBrokerBeanDefinitionParser implements BeanDefinitionParser {
 		scopeConfigurer.getPropertyValues().add("scopes", scopeMap);
 		registerBeanDefByName("webSocketScopeConfigurer", scopeConfigurer, context, source);
 
-		registerWebSocketMessageBrokerStats(subProtoHandler, broker, inChannel, outChannel, context, source);
+		registerWebSocketMessageBrokerStats(broker, inChannel, outChannel, context, source);
 
 		context.popAndRegisterContainingComponent();
 		return null;
@@ -228,8 +233,10 @@ class MessageBrokerBeanDefinitionParser implements BeanDefinitionParser {
 		cavs.addIndexedArgumentValue(0, inChannel);
 		cavs.addIndexedArgumentValue(1, outChannel);
 
-		RootBeanDefinition beanDef = new RootBeanDefinition(SubProtocolWebSocketHandler.class, cavs, null);
-		beanDef.getPropertyValues().addPropertyValue("protocolHandlers", stompHandlerDef);
+		RootBeanDefinition handlerDef = new RootBeanDefinition(SubProtocolWebSocketHandler.class, cavs, null);
+		handlerDef.getPropertyValues().addPropertyValue("protocolHandlers", stompHandlerDef);
+		registerBeanDefByName(WEB_SOCKET_HANDLER_BEAN_NAME, handlerDef, context, source);
+		RuntimeBeanReference result = new RuntimeBeanReference(WEB_SOCKET_HANDLER_BEAN_NAME);
 
 		Element transportElem = DomUtils.getChildElementByTagName(element, "transport");
 		if (transportElem != null) {
@@ -237,13 +244,21 @@ class MessageBrokerBeanDefinitionParser implements BeanDefinitionParser {
 				stompHandlerDef.getPropertyValues().add("messageSizeLimit", transportElem.getAttribute("message-size"));
 			}
 			if (transportElem.hasAttribute("send-timeout")) {
-				beanDef.getPropertyValues().add("sendTimeLimit", transportElem.getAttribute("send-timeout"));
+				handlerDef.getPropertyValues().add("sendTimeLimit", transportElem.getAttribute("send-timeout"));
 			}
 			if (transportElem.hasAttribute("send-buffer-size")) {
-				beanDef.getPropertyValues().add("sendBufferSizeLimit", transportElem.getAttribute("send-buffer-size"));
+				handlerDef.getPropertyValues().add("sendBufferSizeLimit", transportElem.getAttribute("send-buffer-size"));
+			}
+			Element factoriesElement = DomUtils.getChildElementByTagName(transportElem, "decorator-factories");
+			if (factoriesElement != null) {
+				ManagedList<Object> factories = extractBeanSubElements(factoriesElement, context);
+				RootBeanDefinition factoryBean = new RootBeanDefinition(DecoratingFactoryBean.class);
+				factoryBean.getConstructorArgumentValues().addIndexedArgumentValue(0, handlerDef);
+				factoryBean.getConstructorArgumentValues().addIndexedArgumentValue(1, factories);
+				result = new RuntimeBeanReference(registerBeanDef(factoryBean, context, source));
 			}
 		}
-		return new RuntimeBeanReference(registerBeanDef(beanDef, context, source));
+		return result;
 	}
 
 	private RuntimeBeanReference registerRequestHandler(Element element, RuntimeBeanReference subProtoHandler,
@@ -448,14 +463,15 @@ class MessageBrokerBeanDefinitionParser implements BeanDefinitionParser {
 		return new RuntimeBeanReference(registerBeanDef(beanDef, context, source));
 	}
 
-	private void registerWebSocketMessageBrokerStats(RuntimeBeanReference subProtoHandler,
-			RootBeanDefinition broker, RuntimeBeanReference inChannel, RuntimeBeanReference outChannel,
-			ParserContext context, Object source) {
+	private void registerWebSocketMessageBrokerStats(RootBeanDefinition broker, RuntimeBeanReference inChannel,
+			RuntimeBeanReference outChannel, ParserContext context, Object source) {
 
 		RootBeanDefinition beanDef = new RootBeanDefinition(WebSocketMessageBrokerStats.class);
-		beanDef.getPropertyValues().add("subProtocolWebSocketHandler", subProtoHandler);
 
-			if (StompBrokerRelayMessageHandler.class.equals(broker.getBeanClass())) {
+		RuntimeBeanReference webSocketHandler = new RuntimeBeanReference(WEB_SOCKET_HANDLER_BEAN_NAME);
+		beanDef.getPropertyValues().add("subProtocolWebSocketHandler", webSocketHandler);
+
+		if (StompBrokerRelayMessageHandler.class.equals(broker.getBeanClass())) {
 			beanDef.getPropertyValues().add("stompBrokerRelay", broker);
 		}
 		String name = inChannel.getBeanName() + "Executor";
@@ -484,6 +500,39 @@ class MessageBrokerBeanDefinitionParser implements BeanDefinitionParser {
 		beanDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
 		context.getRegistry().registerBeanDefinition(name, beanDef);
 		context.registerComponent(new BeanComponentDefinition(beanDef, name));
+	}
+
+
+	private static class DecoratingFactoryBean implements FactoryBean<WebSocketHandler> {
+
+		private final WebSocketHandler handler;
+
+		private final List<WebSocketHandlerDecoratorFactory> factories;
+
+
+		private DecoratingFactoryBean(WebSocketHandler handler, List<WebSocketHandlerDecoratorFactory> factories) {
+			this.handler = handler;
+			this.factories = factories;
+		}
+
+		@Override
+		public WebSocketHandler getObject() throws Exception {
+			WebSocketHandler result = this.handler;
+			for (WebSocketHandlerDecoratorFactory factory : this.factories) {
+				result = factory.decorate(result);
+			}
+			return result;
+		}
+
+		@Override
+		public Class<?> getObjectType() {
+			return WebSocketHandler.class;
+		}
+
+		@Override
+		public boolean isSingleton() {
+			return true;
+		}
 	}
 
 }

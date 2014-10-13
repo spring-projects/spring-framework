@@ -62,7 +62,10 @@ import org.springframework.web.context.support.GenericWebApplicationContext;
 import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.servlet.handler.SimpleUrlHandlerMapping;
 import org.springframework.web.socket.WebSocketHandler;
+import org.springframework.web.socket.WebSocketSession;
+import org.springframework.web.socket.handler.TestWebSocketSession;
 import org.springframework.web.socket.handler.WebSocketHandlerDecorator;
+import org.springframework.web.socket.handler.WebSocketHandlerDecoratorFactory;
 import org.springframework.web.socket.messaging.StompSubProtocolHandler;
 import org.springframework.web.socket.messaging.SubProtocolWebSocketHandler;
 import org.springframework.web.socket.server.HandshakeHandler;
@@ -93,7 +96,7 @@ public class MessageBrokerBeanDefinitionParserTests {
 
 
 	@Test
-	public void simpleBroker() {
+	public void simpleBroker() throws Exception {
 		loadBeanDefinitions("websocket-config-broker-simple.xml");
 
 		HandlerMapping hm = this.appContext.getBean(HandlerMapping.class);
@@ -112,6 +115,10 @@ public class MessageBrokerBeanDefinitionParserTests {
 		assertTrue(handshakeHandler instanceof TestHandshakeHandler);
 		List<HandshakeInterceptor> interceptors = wsHttpRequestHandler.getHandshakeInterceptors();
 		assertThat(interceptors, contains(instanceOf(FooTestInterceptor.class), instanceOf(BarTestInterceptor.class)));
+
+		WebSocketSession session = new TestWebSocketSession("id");
+		wsHttpRequestHandler.getWebSocketHandler().afterConnectionEstablished(session);
+		assertEquals(true, session.getAttributes().get("decorated"));
 
 		WebSocketHandler wsHandler = unwrapWebSocketHandler(wsHttpRequestHandler.getWebSocketHandler());
 		assertNotNull(wsHandler);
@@ -429,7 +436,6 @@ class CustomArgumentResolver implements HandlerMethodArgumentResolver {
 	public Object resolveArgument(MethodParameter parameter, Message<?> message) throws Exception {
 		return null;
 	}
-
 }
 
 class CustomReturnValueHandler implements HandlerMethodReturnValueHandler {
@@ -442,5 +448,19 @@ class CustomReturnValueHandler implements HandlerMethodReturnValueHandler {
 	@Override
 	public void handleReturnValue(Object returnValue, MethodParameter returnType, Message<?> message) throws Exception {
 
+	}
+}
+
+class TestWebSocketHandlerDecoratorFactory implements WebSocketHandlerDecoratorFactory {
+
+	@Override
+	public WebSocketHandler decorate(WebSocketHandler handler) {
+		return new WebSocketHandlerDecorator(handler) {
+			@Override
+			public void afterConnectionEstablished(WebSocketSession session) throws Exception {
+				session.getAttributes().put("decorated", true);
+				super.afterConnectionEstablished(session);
+			}
+		};
 	}
 }

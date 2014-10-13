@@ -9,7 +9,11 @@
 							  path-matcher="pathMatcher">
 
 		<!-- message-size=128*1024, send-buffer-size=1024*1024 -->
-		<websocket:transport message-size="131072" send-timeout="25000" send-buffer-size="1048576" />
+		<websocket:transport message-size="131072" send-timeout="25000" send-buffer-size="1048576">
+			<websocket:decorator-factories>
+				<bean class="org.springframework.web.socket.config.TestWebSocketHandlerDecoratorFactory" />
+			</websocket:decorator-factories>
+		</websocket:transport>
 
 		<websocket:stomp-endpoint path=" /foo,/bar">
 			<websocket:handshake-handler ref="myHandler"/>
