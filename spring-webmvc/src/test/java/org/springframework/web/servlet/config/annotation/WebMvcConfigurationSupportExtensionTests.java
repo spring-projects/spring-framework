@@ -140,6 +140,9 @@ public class WebMvcConfigurationSupportExtensionTests {
 		assertEquals(TestPathMatcher.class, handlerMapping.getPathMatcher().getClass());
 		chain = handlerMapping.getHandler(new MockHttpServletRequest("GET", "/resources/foo.gif"));
 		assertNotNull(chain.getHandler());
+		assertEquals(Arrays.toString(chain.getInterceptors()), 2, chain.getInterceptors().length);
+		// PathExposingHandlerInterceptor at chain.getInterceptors()[0]
+		assertEquals(ResourceUrlProviderExposingInterceptor.class, chain.getInterceptors()[1].getClass());
 
 		handlerMapping = (AbstractHandlerMapping) this.config.defaultServletHandlerMapping();
 		handlerMapping.setApplicationContext(this.context);

@@ -68,6 +68,7 @@ import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.HandlerMethodReturnValueHandler;
 import org.springframework.web.servlet.HandlerAdapter;
 import org.springframework.web.servlet.HandlerExceptionResolver;
+import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.servlet.ViewResolver;
 import org.springframework.web.servlet.handler.AbstractHandlerMapping;
@@ -379,9 +380,15 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 		addResourceHandlers(registry);
 
 		AbstractHandlerMapping handlerMapping = registry.getHandlerMapping();
-		handlerMapping = (handlerMapping != null ? handlerMapping : new EmptyHandlerMapping());
-		handlerMapping.setPathMatcher(mvcPathMatcher());
-		handlerMapping.setUrlPathHelper(mvcUrlPathHelper());
+		if (handlerMapping != null) {
+			handlerMapping.setPathMatcher(mvcPathMatcher());
+			handlerMapping.setUrlPathHelper(mvcUrlPathHelper());
+			handlerMapping.setInterceptors(new HandlerInterceptor[] {
+					new ResourceUrlProviderExposingInterceptor(mvcResourceUrlProvider())});
+		}
+		else {
+			handlerMapping = new EmptyHandlerMapping();
+		}
 		return handlerMapping;
 	}
 
