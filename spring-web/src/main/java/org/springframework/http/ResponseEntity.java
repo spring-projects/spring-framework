@@ -256,12 +256,21 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 
 		/**
 		 * Add the given, single header value under the given name.
-		 * @param headerName  the header name
+		 * @param headerName the header name
 		 * @param headerValues the header value(s)
 		 * @return this builder
 		 * @see HttpHeaders#add(String, String)
 		 */
 		B header(String headerName, String... headerValues);
+
+		/**
+		 * Copy the given headers into the entity's headers map.
+		 * @param headers the existing HttpHeaders to copy from
+		 * @return this builder
+		 * @since 4.1.2
+		 * @see HttpHeaders#add(String, String)
+		 */
+		B headers(HttpHeaders headers);
 
 		/**
 		 * Set the set of allowed {@link HttpMethod HTTP methods}, as specified
@@ -357,6 +366,12 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 			for (String headerValue : headerValues) {
 				this.headers.add(headerName, headerValue);
 			}
+			return this;
+		}
+
+		@Override
+		public BodyBuilder headers(HttpHeaders headers) {
+			this.headers.putAll(headers);
 			return this;
 		}
 
