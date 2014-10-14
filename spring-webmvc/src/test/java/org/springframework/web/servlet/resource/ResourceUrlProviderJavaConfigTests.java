@@ -28,6 +28,7 @@ import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockHttpServletResponse;
 import org.springframework.mock.web.test.MockServletContext;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
+import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.servlet.config.annotation.*;
 
 import static org.junit.Assert.*;
@@ -68,7 +69,6 @@ public class ResourceUrlProviderJavaConfigTests {
 		this.request.setAttribute(ResourceUrlProviderExposingInterceptor.RESOURCE_URL_PROVIDER_ATTR, urlProvider);
 	}
 
-
 	@Test
 	public void resolvePathWithRootServletMapping() throws Exception {
 		this.request.setRequestURI("/myapp/index");
@@ -93,6 +93,19 @@ public class ResourceUrlProviderJavaConfigTests {
 	public void resolvePathWithExtensionServletMapping() throws Exception {
 		this.request.setRequestURI("/myapp/index.html");
 		this.request.setServletPath("/index.html");
+		this.filterChain.doFilter(this.request, this.response);
+
+		assertEquals("/myapp/resources/foo-e36d2e05253c6c7085a91522ce43a0b4.css",
+				resolvePublicResourceUrlPath("/myapp/resources/foo.css"));
+	}
+
+	// SPR-12281
+
+	@Test
+	public void resolvePathWithHandlerMappingAttribute() throws Exception {
+		this.request.setRequestURI("/myapp/index");
+		this.request.setServletPath("/index");
+		this.request.setAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, "index");
 		this.filterChain.doFilter(this.request, this.response);
 
 		assertEquals("/myapp/resources/foo-e36d2e05253c6c7085a91522ce43a0b4.css",

@@ -69,7 +69,7 @@ public class ResourceHttpRequestHandlerTests {
 
 	@Test
 	public void getResource() throws Exception {
-		this.request.setAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, "/foo.css");
+		this.request.setAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, "foo.css");
 		this.handler.handleRequest(this.request, this.response);
 
 		assertEquals("text/css", this.response.getContentType());
@@ -83,7 +83,7 @@ public class ResourceHttpRequestHandlerTests {
 
 	@Test
 	public void getResourceWithHtmlMediaType() throws Exception {
-		this.request.setAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, "/foo.html");
+		this.request.setAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, "foo.html");
 		this.handler.handleRequest(this.request, this.response);
 
 		assertEquals("text/html", this.response.getContentType());
@@ -95,7 +95,7 @@ public class ResourceHttpRequestHandlerTests {
 
 	@Test
 	public void getResourceFromAlternatePath() throws Exception {
-		this.request.setAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, "/baz.css");
+		this.request.setAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, "baz.css");
 		this.handler.handleRequest(this.request, this.response);
 
 		assertEquals("text/css", this.response.getContentType());
@@ -109,7 +109,7 @@ public class ResourceHttpRequestHandlerTests {
 
 	@Test
 	public void getResourceFromSubDirectory() throws Exception {
-		this.request.setAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, "/js/foo.js");
+		this.request.setAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, "js/foo.js");
 		this.handler.handleRequest(this.request, this.response);
 
 		assertEquals("text/javascript", this.response.getContentType());
@@ -118,7 +118,7 @@ public class ResourceHttpRequestHandlerTests {
 
 	@Test
 	public void getResourceFromSubDirectoryOfAlternatePath() throws Exception {
-		this.request.setAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, "/js/baz.js");
+		this.request.setAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, "js/baz.js");
 		this.handler.handleRequest(this.request, this.response);
 
 		assertEquals("text/javascript", this.response.getContentType());
@@ -147,7 +147,7 @@ public class ResourceHttpRequestHandlerTests {
 
 	@Test
 	public void notModified() throws Exception {
-		this.request.setAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, "/foo.css");
+		this.request.setAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, "foo.css");
 		this.request.addHeader("If-Modified-Since", resourceLastModified("test/foo.css"));
 		this.handler.handleRequest(this.request, this.response);
 		assertEquals(HttpServletResponse.SC_NOT_MODIFIED, this.response.getStatus());
@@ -155,7 +155,7 @@ public class ResourceHttpRequestHandlerTests {
 
 	@Test
 	public void modified() throws Exception {
-		this.request.setAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, "/foo.css");
+		this.request.setAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, "foo.css");
 		this.request.addHeader("If-Modified-Since", resourceLastModified("test/foo.css") / 1000 * 1000 - 1);
 		this.handler.handleRequest(this.request, this.response);
 		assertEquals(HttpServletResponse.SC_OK, this.response.getStatus());
@@ -164,7 +164,7 @@ public class ResourceHttpRequestHandlerTests {
 
 	@Test
 	public void directory() throws Exception {
-		this.request.setAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, "/js/");
+		this.request.setAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, "js/");
 		this.handler.handleRequest(this.request, this.response);
 		assertEquals(404, this.response.getStatus());
 	}
@@ -183,14 +183,14 @@ public class ResourceHttpRequestHandlerTests {
 
 	@Test(expected=HttpRequestMethodNotSupportedException.class)
 	public void unsupportedHttpMethod() throws Exception {
-		this.request.setAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, "/foo.css");
+		this.request.setAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, "foo.css");
 		this.request.setMethod("POST");
 		this.handler.handleRequest(this.request, this.response);
 	}
 
 	@Test
 	public void resourceNotFound() throws Exception {
-		this.request.setAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, "/not-there.css");
+		this.request.setAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, "not-there.css");
 		this.handler.handleRequest(this.request, this.response);
 		assertEquals(404, this.response.getStatus());
 	}

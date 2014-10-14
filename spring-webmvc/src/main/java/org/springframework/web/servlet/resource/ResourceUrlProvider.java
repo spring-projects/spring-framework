@@ -179,6 +179,9 @@ public class ResourceUrlProvider implements ApplicationListener<ContextRefreshed
 			pathWithinMapping = getPathHelper().getLookupPathForRequest(request);
 		}
 
+		// When extracted with PathMatcher, pathWithinMapping won't have leading slash
+		pathWithinMapping = (pathWithinMapping.charAt(0) == '/' ? pathWithinMapping : "/" + pathWithinMapping);
+
 		int index = getPathHelper().getRequestUri(request).indexOf(pathWithinMapping);
 		Assert.state(index != -1, "Failed to determine lookup path: " + requestUrl);
 
