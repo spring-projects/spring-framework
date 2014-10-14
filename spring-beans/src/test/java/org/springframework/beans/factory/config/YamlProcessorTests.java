@@ -28,7 +28,6 @@ import org.yaml.snakeyaml.parser.ParserException;
 import org.yaml.snakeyaml.scanner.ScannerException;
 
 import org.springframework.core.io.ByteArrayResource;
-import org.springframework.core.io.Resource;
 
 /**
  * Tests for {@link YamlProcessor}.
@@ -45,8 +44,8 @@ public class YamlProcessorTests {
 
 	@Test
 	public void arrayConvertedToIndexedBeanReference() {
-		this.processor.setResources(new Resource[] {new ByteArrayResource(
-				"foo: bar\nbar: [1,2,3]".getBytes())});
+		this.processor.setResources(new ByteArrayResource(
+				"foo: bar\nbar: [1,2,3]".getBytes()));
 		this.processor.process(new MatchCallback() {
 			@Override
 			public void process(Properties properties, Map<String, Object> map) {
@@ -60,8 +59,8 @@ public class YamlProcessorTests {
 
 	@Test
 	public void testStringResource() throws Exception {
-		this.processor.setResources(new Resource[] {new ByteArrayResource(
-				"foo # a document that is a literal".getBytes())});
+		this.processor.setResources(new ByteArrayResource(
+				"foo # a document that is a literal".getBytes()));
 		this.processor.process(new MatchCallback() {
 			@Override
 			public void process(Properties properties, Map<String, Object> map) {
@@ -72,8 +71,8 @@ public class YamlProcessorTests {
 
 	@Test
 	public void testBadDocumentStart() throws Exception {
-		this.processor.setResources(new Resource[] {new ByteArrayResource(
-				"foo # a document\nbar: baz".getBytes())});
+		this.processor.setResources(new ByteArrayResource(
+				"foo # a document\nbar: baz".getBytes()));
 		this.exception.expect(ParserException.class);
 		this.exception.expectMessage("line 2, column 1");
 		this.processor.process(new MatchCallback() {
@@ -85,8 +84,8 @@ public class YamlProcessorTests {
 
 	@Test
 	public void testBadResource() throws Exception {
-		this.processor.setResources(new Resource[] {new ByteArrayResource(
-				"foo: bar\ncd\nspam:\n  foo: baz".getBytes())});
+		this.processor.setResources(new ByteArrayResource(
+				"foo: bar\ncd\nspam:\n  foo: baz".getBytes()));
 		this.exception.expect(ScannerException.class);
 		this.exception.expectMessage("line 3, column 1");
 		this.processor.process(new MatchCallback() {
@@ -98,8 +97,8 @@ public class YamlProcessorTests {
 
 	@Test
 	public void mapConvertedToIndexedBeanReference() {
-		this.processor.setResources(new Resource[] {new ByteArrayResource(
-				"foo: bar\nbar:\n spam: bucket".getBytes())});
+		this.processor.setResources(new ByteArrayResource(
+				"foo: bar\nbar:\n spam: bucket".getBytes()));
 		this.processor.process(new MatchCallback() {
 			@Override
 			public void process(Properties properties, Map<String, Object> map) {
@@ -112,8 +111,8 @@ public class YamlProcessorTests {
 
 	@Test
 	public void integerKeyBehaves() {
-		this.processor.setResources(new Resource[] {new ByteArrayResource(
-				"foo: bar\n1: bar".getBytes())});
+		this.processor.setResources(new ByteArrayResource(
+				"foo: bar\n1: bar".getBytes()));
 		this.processor.process(new MatchCallback() {
 			@Override
 			public void process(Properties properties, Map<String, Object> map) {
@@ -125,8 +124,8 @@ public class YamlProcessorTests {
 
 	@Test
 	public void integerDeepKeyBehaves() {
-		this.processor.setResources(new Resource[] {new ByteArrayResource(
-				"foo:\n  1: bar".getBytes())});
+		this.processor.setResources(new ByteArrayResource(
+				"foo:\n  1: bar".getBytes()));
 		this.processor.process(new MatchCallback() {
 
 			@Override

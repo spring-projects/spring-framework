@@ -28,11 +28,11 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.yaml.snakeyaml.Yaml;
+import org.yaml.snakeyaml.parser.ParserException;
 import org.yaml.snakeyaml.scanner.ScannerException;
 
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.core.io.Resource;
 
 /**
  * Tests for {@link YamlPropertiesFactoryBean}.
@@ -47,8 +47,8 @@ public class YamlPropertiesFactoryBeanTests {
 	@Test
 	public void testLoadResource() throws Exception {
 		YamlPropertiesFactoryBean factory = new YamlPropertiesFactoryBean();
-		factory.setResources(new Resource[] {new ByteArrayResource(
-				"foo: bar\nspam:\n  foo: baz".getBytes())});
+		factory.setResources(new ByteArrayResource(
+				"foo: bar\nspam:\n  foo: baz".getBytes()));
 		Properties properties = factory.getObject();
 		assertThat(properties.getProperty("foo"), equalTo("bar"));
 		assertThat(properties.getProperty("spam.foo"), equalTo("baz"));
@@ -57,8 +57,8 @@ public class YamlPropertiesFactoryBeanTests {
 	@Test
 	public void testBadResource() throws Exception {
 		YamlPropertiesFactoryBean factory = new YamlPropertiesFactoryBean();
-		factory.setResources(new Resource[] {new ByteArrayResource(
-				"foo: bar\ncd\nspam:\n  foo: baz".getBytes())});
+		factory.setResources(new ByteArrayResource(
+				"foo: bar\ncd\nspam:\n  foo: baz".getBytes()));
 		this.exception.expect(ScannerException.class);
 		this.exception.expectMessage("line 3, column 1");
 		factory.getObject();
@@ -67,9 +67,9 @@ public class YamlPropertiesFactoryBeanTests {
 	@Test
 	public void testLoadResourcesWithOverride() throws Exception {
 		YamlPropertiesFactoryBean factory = new YamlPropertiesFactoryBean();
-		factory.setResources(new Resource[] {
+		factory.setResources(
 				new ByteArrayResource("foo: bar\nspam:\n  foo: baz".getBytes()),
-				new ByteArrayResource("foo:\n  bar: spam".getBytes())});
+				new ByteArrayResource("foo:\n  bar: spam".getBytes()));
 		Properties properties = factory.getObject();
 		assertThat(properties.getProperty("foo"), equalTo("bar"));
 		assertThat(properties.getProperty("spam.foo"), equalTo("baz"));
@@ -77,21 +77,20 @@ public class YamlPropertiesFactoryBeanTests {
 	}
 
 	@Test
-	@Ignore("We can't fail on duplicate keys because the Map is created by the YAML library")
 	public void testLoadResourcesWithInternalOverride() throws Exception {
 		YamlPropertiesFactoryBean factory = new YamlPropertiesFactoryBean();
-		factory.setResources(new Resource[] {new ByteArrayResource(
-				"foo: bar\nspam:\n  foo: baz\nfoo: bucket".getBytes())});
-		Properties properties = factory.getObject();
-		assertThat(properties.getProperty("foo"), equalTo("bar"));
+		factory.setResources(new ByteArrayResource(
+				"foo: bar\nspam:\n  foo: baz\nfoo: bucket".getBytes()));
+		exception.expect(ParserException.class);
+		factory.getObject();
 	}
 
 	@Test
 	@Ignore("We can't fail on duplicate keys because the Map is created by the YAML library")
 	public void testLoadResourcesWithNestedInternalOverride() throws Exception {
 		YamlPropertiesFactoryBean factory = new YamlPropertiesFactoryBean();
-		factory.setResources(new Resource[] {new ByteArrayResource(
-				"foo:\n  bar: spam\n  foo: baz\nbreak: it\nfoo: bucket".getBytes())});
+		factory.setResources(new ByteArrayResource(
+				"foo:\n  bar: spam\n  foo: baz\nbreak: it\nfoo: bucket".getBytes()));
 		Properties properties = factory.getObject();
 		assertThat(properties.getProperty("foo.bar"), equalTo("spam"));
 	}
@@ -99,8 +98,8 @@ public class YamlPropertiesFactoryBeanTests {
 	@Test
 	public void testLoadResourceWithMultipleDocuments() throws Exception {
 		YamlPropertiesFactoryBean factory = new YamlPropertiesFactoryBean();
-		factory.setResources(new Resource[] {new ByteArrayResource(
-				"foo: bar\nspam: baz\n---\nfoo: bag".getBytes())});
+		factory.setResources(new ByteArrayResource(
+				"foo: bar\nspam: baz\n---\nfoo: bag".getBytes()));
 		Properties properties = factory.getObject();
 		assertThat(properties.getProperty("foo"), equalTo("bag"));
 		assertThat(properties.getProperty("spam"), equalTo("baz"));
@@ -109,8 +108,8 @@ public class YamlPropertiesFactoryBeanTests {
 	@Test
 	public void testLoadResourceWithSelectedDocuments() throws Exception {
 		YamlPropertiesFactoryBean factory = new YamlPropertiesFactoryBean();
-		factory.setResources(new Resource[] {new ByteArrayResource(
-				"foo: bar\nspam: baz\n---\nfoo: bag\nspam: bad".getBytes())});
+		factory.setResources(new ByteArrayResource(
+				"foo: bar\nspam: baz\n---\nfoo: bag\nspam: bad".getBytes()));
 		factory.setDocumentMatchers(new DocumentMatcher() {
 			@Override
 			public MatchStatus matches(Properties properties) {
@@ -127,8 +126,8 @@ public class YamlPropertiesFactoryBeanTests {
 	public void testLoadResourceWithDefaultMatch() throws Exception {
 		YamlPropertiesFactoryBean factory = new YamlPropertiesFactoryBean();
 		factory.setMatchDefault(true);
-		factory.setResources(new Resource[] {new ByteArrayResource(
-				"one: two\n---\nfoo: bar\nspam: baz\n---\nfoo: bag\nspam: bad".getBytes())});
+		factory.setResources(new ByteArrayResource(
+				"one: two\n---\nfoo: bar\nspam: baz\n---\nfoo: bag\nspam: bad".getBytes()));
 		factory.setDocumentMatchers(new DocumentMatcher() {
 			@Override
 			public MatchStatus matches(Properties properties) {
@@ -149,8 +148,8 @@ public class YamlPropertiesFactoryBeanTests {
 	public void testLoadResourceWithoutDefaultMatch() throws Exception {
 		YamlPropertiesFactoryBean factory = new YamlPropertiesFactoryBean();
 		factory.setMatchDefault(false);
-		factory.setResources(new Resource[] {new ByteArrayResource(
-				"one: two\n---\nfoo: bar\nspam: baz\n---\nfoo: bag\nspam: bad".getBytes())});
+		factory.setResources(new ByteArrayResource(
+				"one: two\n---\nfoo: bar\nspam: baz\n---\nfoo: bag\nspam: bad".getBytes()));
 		factory.setDocumentMatchers(new DocumentMatcher() {
 			@Override
 			public MatchStatus matches(Properties properties) {
@@ -171,8 +170,8 @@ public class YamlPropertiesFactoryBeanTests {
 	public void testLoadResourceWithDefaultMatchSkippingMissedMatch() throws Exception {
 		YamlPropertiesFactoryBean factory = new YamlPropertiesFactoryBean();
 		factory.setMatchDefault(true);
-		factory.setResources(new Resource[] {new ByteArrayResource(
-				"one: two\n---\nfoo: bag\nspam: bad\n---\nfoo: bar\nspam: baz".getBytes())});
+		factory.setResources(new ByteArrayResource(
+				"one: two\n---\nfoo: bag\nspam: bad\n---\nfoo: bar\nspam: baz".getBytes()));
 		factory.setDocumentMatchers(new DocumentMatcher() {
 			@Override
 			public MatchStatus matches(Properties properties) {
@@ -193,7 +192,7 @@ public class YamlPropertiesFactoryBeanTests {
 	public void testLoadNonExistentResource() throws Exception {
 		YamlPropertiesFactoryBean factory = new YamlPropertiesFactoryBean();
 		factory.setResolutionMethod(ResolutionMethod.OVERRIDE_AND_IGNORE);
-		factory.setResources(new Resource[] {new ClassPathResource("no-such-file.yml")});
+		factory.setResources(new ClassPathResource("no-such-file.yml"));
 		Properties properties = factory.getObject();
 		assertThat(properties.size(), equalTo(0));
 	}
@@ -201,8 +200,8 @@ public class YamlPropertiesFactoryBeanTests {
 	@Test
 	public void testLoadNull() throws Exception {
 		YamlPropertiesFactoryBean factory = new YamlPropertiesFactoryBean();
-		factory.setResources(new Resource[] {new ByteArrayResource("foo: bar\nspam:"
-				.getBytes())});
+		factory.setResources(new ByteArrayResource("foo: bar\nspam:"
+				.getBytes()));
 		Properties properties = factory.getObject();
 		assertThat(properties.getProperty("foo"), equalTo("bar"));
 		assertThat(properties.getProperty("spam"), equalTo(""));
@@ -211,8 +210,8 @@ public class YamlPropertiesFactoryBeanTests {
 	@Test
 	public void testLoadArrayOfString() throws Exception {
 		YamlPropertiesFactoryBean factory = new YamlPropertiesFactoryBean();
-		factory.setResources(new Resource[] {new ByteArrayResource("foo:\n- bar\n- baz"
-				.getBytes())});
+		factory.setResources(new ByteArrayResource("foo:\n- bar\n- baz"
+				.getBytes()));
 		Properties properties = factory.getObject();
 		assertThat(properties.getProperty("foo[0]"), equalTo("bar"));
 		assertThat(properties.getProperty("foo[1]"), equalTo("baz"));
@@ -221,10 +220,10 @@ public class YamlPropertiesFactoryBeanTests {
 	@Test
 	public void testLoadArrayOfObject() throws Exception {
 		YamlPropertiesFactoryBean factory = new YamlPropertiesFactoryBean();
-		factory.setResources(new Resource[] {new ByteArrayResource(
+		factory.setResources(new ByteArrayResource(
 				"foo:\n- bar:\n    spam: crap\n- baz\n- one: two\n  three: four"
 						.getBytes()
-		)});
+		));
 		Properties properties = factory.getObject();
 		assertThat(properties.getProperty("foo[0].bar.spam"), equalTo("crap"));
 		assertThat(properties.getProperty("foo[1]"), equalTo("baz"));

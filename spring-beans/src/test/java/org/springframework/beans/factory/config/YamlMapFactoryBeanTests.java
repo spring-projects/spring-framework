@@ -24,11 +24,11 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.junit.Test;
+import org.yaml.snakeyaml.parser.ParserException;
 
 import org.springframework.core.io.AbstractResource;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.FileSystemResource;
-import org.springframework.core.io.Resource;
 
 /**
  * Tests for {@link YamlMapFactoryBean}.
@@ -76,7 +76,7 @@ public class YamlMapFactoryBeanTests {
 	@Test
 	public void testFirstFound() throws Exception {
 		this.factory.setResolutionMethod(YamlProcessor.ResolutionMethod.FIRST_FOUND);
-		this.factory.setResources(new Resource[] {new AbstractResource() {
+		this.factory.setResources(new AbstractResource() {
 			@Override
 			public String getDescription() {
 				return "non-existent";
@@ -86,7 +86,7 @@ public class YamlMapFactoryBeanTests {
 			public InputStream getInputStream() throws IOException {
 				throw new IOException("planned");
 			}
-		}, new ByteArrayResource("foo:\n  spam: bar".getBytes())});
+		}, new ByteArrayResource("foo:\n  spam: bar".getBytes()));
 		assertEquals(1, this.factory.getObject().size());
 	}
 
@@ -103,6 +103,13 @@ public class YamlMapFactoryBeanTests {
 		Map<String, Object> sub = (Map<String, Object>) object;
 		assertTrue(sub.containsKey("key1.key2"));
 		assertEquals("value", sub.get("key1.key2"));
+	}
+
+	@Test(expected = ParserException.class)
+	public void testDuplicateKey() throws Exception {
+		this.factory.setResources(new ByteArrayResource[] {new ByteArrayResource(
+				"mymap:\n  foo: bar\nmymap:\n  bar: foo".getBytes())});
+		this.factory.getObject().get("mymap");
 	}
 
 }
