@@ -18,7 +18,7 @@ package org.springframework.http;
 
 import java.net.URI;
 import java.util.Arrays;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Set;
 
 import org.springframework.util.MultiValueMap;
@@ -377,7 +377,7 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 
 		@Override
 		public BodyBuilder allow(HttpMethod... allowedMethods) {
-			this.headers.setAllow(new HashSet<HttpMethod>(Arrays.asList(allowedMethods)));
+			this.headers.setAllow(new LinkedHashSet<HttpMethod>(Arrays.asList(allowedMethods)));
 			return this;
 		}
 

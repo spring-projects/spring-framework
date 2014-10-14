@@ -362,17 +362,17 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 
 
 	/**
-	 * Set the list of acceptable {@linkplain MediaType media types}, as specified by the {@code Accept} header.
-	 * @param acceptableMediaTypes the acceptable media types
+	 * Set the list of acceptable {@linkplain MediaType media types},
+	 * as specified by the {@code Accept} header.
 	 */
 	public void setAccept(List<MediaType> acceptableMediaTypes) {
 		set(ACCEPT, MediaType.toString(acceptableMediaTypes));
 	}
 
 	/**
-	 * Return the list of acceptable {@linkplain MediaType media types}, as specified by the {@code Accept} header.
+	 * Return the list of acceptable {@linkplain MediaType media types},
+	 * as specified by the {@code Accept} header.
 	 * <p>Returns an empty list when the acceptable media types are unspecified.
-	 * @return the acceptable media types
 	 */
 	public List<MediaType> getAccept() {
 		String value = getFirst(ACCEPT);
@@ -391,8 +391,8 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	}
 
 	/**
-	 * Set the list of acceptable {@linkplain Charset charsets}, as specified by the {@code Accept-Charset} header.
-	 * @param acceptableCharsets the acceptable charsets
+	 * Set the list of acceptable {@linkplain Charset charsets},
+	 * as specified by the {@code Accept-Charset} header.
 	 */
 	public void setAcceptCharset(List<Charset> acceptableCharsets) {
 		StringBuilder builder = new StringBuilder();
@@ -407,9 +407,8 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	}
 
 	/**
-	 * Return the list of acceptable {@linkplain Charset charsets}, as specified by the {@code Accept-Charset}
-	 * header.
-	 * @return the acceptable charsets
+	 * Return the list of acceptable {@linkplain Charset charsets},
+	 * as specified by the {@code Accept-Charset} header.
 	 */
 	public List<Charset> getAcceptCharset() {
 		List<Charset> result = new ArrayList<Charset>();
@@ -434,17 +433,17 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	}
 
 	/**
-	 * Set the set of allowed {@link HttpMethod HTTP methods}, as specified by the {@code Allow} header.
-	 * @param allowedMethods the allowed methods
+	 * Set the set of allowed {@link HttpMethod HTTP methods},
+	 * as specified by the {@code Allow} header.
 	 */
 	public void setAllow(Set<HttpMethod> allowedMethods) {
 		set(ALLOW, StringUtils.collectionToCommaDelimitedString(allowedMethods));
 	}
 
 	/**
-	 * Return the set of allowed {@link HttpMethod HTTP methods}, as specified by the {@code Allow} header.
+	 * Return the set of allowed {@link HttpMethod HTTP methods},
+	 * as specified by the {@code Allow} header.
 	 * <p>Returns an empty set when the allowed methods are unspecified.
-	 * @return the allowed methods
 	 */
 	public Set<HttpMethod> getAllow() {
 		String value = getFirst(ALLOW);
@@ -462,8 +461,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	}
 
 	/**
-	 * Sets the (new) value of the {@code Cache-Control} header.
-	 * @param cacheControl the value of the header
+	 * Set the (new) value of the {@code Cache-Control} header.
 	 */
 	public void setCacheControl(String cacheControl) {
 		set(CACHE_CONTROL, cacheControl);
@@ -471,23 +469,20 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 
 	/**
 	 * Returns the value of the {@code Cache-Control} header.
-	 * @return the value of the header
 	 */
 	public String getCacheControl() {
 		return getFirst(CACHE_CONTROL);
 	}
 
 	/**
-	 * Sets the (new) value of the {@code Connection} header.
-	 * @param connection the value of the header
+	 * Set the (new) value of the {@code Connection} header.
 	 */
 	public void setConnection(String connection) {
 		set(CONNECTION, connection);
 	}
 
 	/**
-	 * Sets the (new) value of the {@code Connection} header.
-	 * @param connection the value of the header
+	 * Set the (new) value of the {@code Connection} header.
 	 */
 	public void setConnection(List<String> connection) {
 		set(CONNECTION, toCommaDelimitedString(connection));
@@ -495,16 +490,15 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 
 	/**
 	 * Returns the value of the {@code Connection} header.
-	 * @return the value of the header
 	 */
 	public List<String> getConnection() {
 		return getFirstValueAsList(CONNECTION);
 	}
 
 	/**
-	 * Sets the (new) value of the {@code Content-Disposition} header for {@code form-data}.
+	 * Set the (new) value of the {@code Content-Disposition} header for {@code form-data}.
 	 * @param name the control name
-	 * @param filename the filename, may be {@code null}
+	 * @param filename the filename (may be {@code null})
 	 */
 	public void setContentDispositionFormData(String name, String filename) {
 		Assert.notNull(name, "'name' must not be null");
@@ -518,17 +512,17 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	}
 
 	/**
-	 * Set the length of the body in bytes, as specified by the {@code Content-Length} header.
-	 * @param contentLength the content length
+	 * Set the length of the body in bytes,
+	 * as specified by the {@code Content-Length} header.
 	 */
 	public void setContentLength(long contentLength) {
 		set(CONTENT_LENGTH, Long.toString(contentLength));
 	}
 
 	/**
-	 * Return the length of the body in bytes, as specified by the {@code Content-Length} header.
+	 * Return the length of the body in bytes,
+	 * as specified by the {@code Content-Length} header.
 	 * <p>Returns -1 when the content-length is unknown.
-	 * @return the content length
 	 */
 	public long getContentLength() {
 		String value = getFirst(CONTENT_LENGTH);
@@ -536,8 +530,8 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	}
 
 	/**
-	 * Set the {@linkplain MediaType media type} of the body, as specified by the {@code Content-Type} header.
-	 * @param mediaType the media type
+	 * Set the {@linkplain MediaType media type} of the body,
+	 * as specified by the {@code Content-Type} header.
 	 */
 	public void setContentType(MediaType mediaType) {
 		Assert.isTrue(!mediaType.isWildcardType(), "'Content-Type' cannot contain wildcard type '*'");
@@ -548,7 +542,6 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	/**
 	 * Return the {@linkplain MediaType media type} of the body, as specified by the {@code Content-Type} header.
 	 * <p>Returns {@code null} when the content-type is unknown.
-	 * @return the content type
 	 */
 	public MediaType getContentType() {
 		String value = getFirst(CONTENT_TYPE);
@@ -556,18 +549,20 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	}
 
 	/**
-	 * Sets the date and time at which the message was created, as specified by the {@code Date} header.
-	 * <p>The date should be specified as the number of milliseconds since January 1, 1970 GMT.
-	 * @param date the date
+	 * Set the date and time at which the message was created,
+	 * as specified by the {@code Date} header.
+	 * <p>The date should be specified as the number of milliseconds
+	 * since January 1, 1970 GMT.
 	 */
 	public void setDate(long date) {
 		setDate(DATE, date);
 	}
 
 	/**
-	 * Returns the date and time at which the message was created, as specified by the {@code Date} header.
-	 * <p>The date is returned as the number of milliseconds since January 1, 1970 GMT. Returns -1 when the date is unknown.
-	 * @return the creation date/time
+	 * Returns the date and time at which the message was created,
+	 * as specified by the {@code Date} header.
+	 * <p>The date is returned as the number of milliseconds
+	 * since January 1, 1970 GMT. Returns -1 when the date is unknown.
 	 * @throws IllegalArgumentException if the value can't be converted to a date
 	 */
 	public long getDate() {
@@ -575,12 +570,12 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	}
 
 	/**
-	 * Sets the (new) entity tag of the body, as specified by the {@code ETag} header.
-	 * @param eTag the new entity tag
+	 * Set the (new) entity tag of the body, as specified by the {@code ETag} header.
 	 */
 	public void setETag(String eTag) {
 		if (eTag != null) {
-			Assert.isTrue(eTag.startsWith("\"") || eTag.startsWith("W/"), "Invalid eTag, does not start with W/ or \"");
+			Assert.isTrue(eTag.startsWith("\"") || eTag.startsWith("W/"),
+					"Invalid eTag, does not start with W/ or \"");
 			Assert.isTrue(eTag.endsWith("\""), "Invalid eTag, does not end with \"");
 		}
 		set(ETAG, eTag);
@@ -588,27 +583,27 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 
 	/**
 	 * Returns the entity tag of the body, as specified by the {@code ETag} header.
-	 * @return the entity tag
 	 */
 	public String getETag() {
 		return getFirst(ETAG);
 	}
 
 	/**
-	 * Sets the date and time at which the message is no longer valid, as specified by the {@code Expires} header.
-	 * <p>The date should be specified as the number of milliseconds since January 1, 1970 GMT.
-	 * @param expires the new expires header value
+	 * Set the date and time at which the message is no longer valid,
+	 * as specified by the {@code Expires} header.
+	 * <p>The date should be specified as the number of milliseconds
+	 * since January 1, 1970 GMT.
 	 */
 	public void setExpires(long expires) {
 		setDate(EXPIRES, expires);
 	}
 
 	/**
-	 * Returns the date and time at which the message is no longer valid, as specified by
-	 * the {@code Expires} header.
-	 * <p>The date is returned as the number of milliseconds since January 1, 1970 GMT.
+	 * Returns the date and time at which the message is no longer valid,
+	 * as specified by the {@code Expires} header.
+	 * <p>The date is returned as the number of milliseconds
+	 * since January 1, 1970 GMT.
 	 * Returns -1 when the date is unknown.
-	 * @return the expires value
 	 */
 	public long getExpires() {
 		try {
@@ -620,9 +615,9 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	}
 
 	/**
-	 * Sets the (new) value of the {@code If-Modified-Since} header.
-	 * <p>The date should be specified as the number of milliseconds since January 1, 1970 GMT.
-	 * @param ifModifiedSince the new value of the header
+	 * Set the (new) value of the {@code If-Modified-Since} header.
+	 * <p>The date should be specified as the number of milliseconds
+	 * since January 1, 1970 GMT.
 	 */
 	public void setIfModifiedSince(long ifModifiedSince) {
 		setDate(IF_MODIFIED_SINCE, ifModifiedSince);
@@ -630,8 +625,8 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 
 	/**
 	 * Returns the value of the {@code IfModifiedSince} header.
-	 * <p>The date is returned as the number of milliseconds since January 1, 1970 GMT. Returns -1 when the date is unknown.
-	 * @return the header value
+	 * <p>The date is returned as the number of milliseconds
+	 * since January 1, 1970 GMT. Returns -1 when the date is unknown.
 	 * @deprecated use {@link #getIfModifiedSince()}
 	 */
 	@Deprecated
@@ -641,24 +636,22 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 
 	/**
 	 * Returns the value of the {@code If-Modified-Since} header.
-	 * <p>The date is returned as the number of milliseconds since January 1, 1970 GMT. Returns -1 when the date is unknown.
-	 * @return the header value
+	 * <p>The date is returned as the number of milliseconds
+	 * since January 1, 1970 GMT. Returns -1 when the date is unknown.
 	 */
 	public long getIfModifiedSince() {
 		return getFirstDate(IF_MODIFIED_SINCE);
 	}
 
 	/**
-	 * Sets the (new) value of the {@code If-None-Match} header.
-	 * @param ifNoneMatch the new value of the header
+	 * Set the (new) value of the {@code If-None-Match} header.
 	 */
 	public void setIfNoneMatch(String ifNoneMatch) {
 		set(IF_NONE_MATCH, ifNoneMatch);
 	}
 
 	/**
-	 * Sets the (new) values of the {@code If-None-Match} header.
-	 * @param ifNoneMatchList the new value of the header
+	 * Set the (new) values of the {@code If-None-Match} header.
 	 */
 	public void setIfNoneMatch(List<String> ifNoneMatchList) {
 		set(IF_NONE_MATCH, toCommaDelimitedString(ifNoneMatchList));
@@ -677,8 +670,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	}
 
 	/**
-	 * Returns the value of the {@code If-None-Match} header.
-	 * @return the header value
+	 * Return the value of the {@code If-None-Match} header.
 	 */
 	public List<String> getIfNoneMatch() {
 		return getFirstValueAsList(IF_NONE_MATCH);
@@ -686,7 +678,6 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 
 	protected List<String> getFirstValueAsList(String header) {
 		List<String> result = new ArrayList<String>();
-
 		String value = getFirst(header);
 		if (value != null) {
 			String[] tokens = value.split(",\\s*");
@@ -698,35 +689,37 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	}
 
 	/**
-	 * Sets the time the resource was last changed, as specified by the {@code Last-Modified} header.
-	 * <p>The date should be specified as the number of milliseconds since January 1, 1970 GMT.
-	 * @param lastModified the last modified date
+	 * Set the time the resource was last changed,
+	 * as specified by the {@code Last-Modified} header.
+	 * <p>The date should be specified as the number of milliseconds
+	 * since January 1, 1970 GMT.
 	 */
 	public void setLastModified(long lastModified) {
 		setDate(LAST_MODIFIED, lastModified);
 	}
 
 	/**
-	 * Returns the time the resource was last changed, as specified by the {@code Last-Modified} header.
-	 * <p>The date is returned as the number of milliseconds since January 1, 1970 GMT. Returns -1 when the date is unknown.
-	 * @return the last modified date
+	 * Return the time the resource was last changed,
+	 * as specified by the {@code Last-Modified} header.
+	 * <p>The date is returned as the number of milliseconds
+	 * since January 1, 1970 GMT. Returns -1 when the date is unknown.
 	 */
 	public long getLastModified() {
 		return getFirstDate(LAST_MODIFIED);
 	}
 
 	/**
-	 * Set the (new) location of a resource, as specified by the {@code Location} header.
-	 * @param location the location
+	 * Set the (new) location of a resource,
+	 * as specified by the {@code Location} header.
 	 */
 	public void setLocation(URI location) {
 		set(LOCATION, location.toASCIIString());
 	}
 
 	/**
-	 * Return the (new) location of a resource, as specified by the {@code Location} header.
+	 * Return the (new) location of a resource
+	 * as specified by the {@code Location} header.
 	 * <p>Returns {@code null} when the location is unknown.
-	 * @return the location
 	 */
 	public URI getLocation() {
 		String value = getFirst(LOCATION);
@@ -734,40 +727,35 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	}
 
 	/**
-	 * Sets the (new) value of the {@code Origin} header.
-	 * @param origin the value of the header
+	 * Set the (new) value of the {@code Origin} header.
 	 */
 	public void setOrigin(String origin) {
 		set(ORIGIN, origin);
 	}
 
 	/**
-	 * Returns the value of the {@code Origin} header.
-	 * @return the value of the header
+	 * Return the value of the {@code Origin} header.
 	 */
 	public String getOrigin() {
 		return getFirst(ORIGIN);
 	}
 
 	/**
-	 * Sets the (new) value of the {@code Pragma} header.
-	 * @param pragma the value of the header
+	 * Set the (new) value of the {@code Pragma} header.
 	 */
 	public void setPragma(String pragma) {
 		set(PRAGMA, pragma);
 	}
 
 	/**
-	 * Returns the value of the {@code Pragma} header.
-	 * @return the value of the header
+	 * Return the value of the {@code Pragma} header.
 	 */
 	public String getPragma() {
 		return getFirst(PRAGMA);
 	}
 
 	/**
-	 * Sets the (new) value of the {@code Upgrade} header.
-	 * @param upgrade the value of the header
+	 * Set the (new) value of the {@code Upgrade} header.
 	 */
 	public void setUpgrade(String upgrade) {
 		set(UPGRADE, upgrade);
@@ -775,7 +763,6 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 
 	/**
 	 * Returns the value of the {@code Upgrade} header.
-	 * @return the value of the header
 	 */
 	public String getUpgrade() {
 		return getFirst(UPGRADE);
@@ -819,7 +806,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	/**
 	 * Return the first header value for the given header name, if any.
 	 * @param headerName the header name
-	 * @return the first header value; or {@code null}
+	 * @return the first header value, or {@code null} if none
 	 */
 	@Override
 	public String getFirst(String headerName) {
@@ -829,7 +816,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 
 	/**
 	 * Add the given, single header value under the given name.
-	 * @param headerName  the header name
+	 * @param headerName the header name
 	 * @param headerValue the header value
 	 * @throws UnsupportedOperationException if adding headers is not supported
 	 * @see #put(String, List)
@@ -847,7 +834,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 
 	/**
 	 * Set the given, single header value under the given name.
-	 * @param headerName  the header name
+	 * @param headerName the header name
 	 * @param headerValue the header value
 	 * @throws UnsupportedOperationException if adding headers is not supported
 	 * @see #put(String, List)
@@ -915,8 +902,8 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	}
 
 	@Override
-	public void putAll(Map<? extends String, ? extends List<String>> m) {
-		this.headers.putAll(m);
+	public void putAll(Map<? extends String, ? extends List<String>> map) {
+		this.headers.putAll(map);
 	}
 
 	@Override
