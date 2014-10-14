@@ -16,11 +16,9 @@
 
 package org.springframework.web.servlet.resource;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -49,18 +47,13 @@ public class CssLinkResourceTransformerTests {
 
 	@Before
 	public void setUp() {
-		Map<String, VersionStrategy> versionStrategyMap = new HashMap<>();
-		versionStrategyMap.put("/**", new ContentVersionStrategy());
-		VersionResourceResolver versionResolver = new VersionResourceResolver();
-		versionResolver.setStrategyMap(versionStrategyMap);
+		VersionResourceResolver resolver = new VersionResourceResolver();
+		resolver.setStrategyMap(Collections.singletonMap("/**", new ContentVersionStrategy()));
 
-		List<ResourceResolver> resolvers = new ArrayList<ResourceResolver>();
-		resolvers.add(versionResolver);
-		resolvers.add(new PathResourceResolver());
+		List<ResourceResolver> resolvers = Arrays.asList(resolver, new PathResourceResolver());
+		List<ResourceTransformer> transformers = Arrays.asList(new CssLinkResourceTransformer());
+
 		ResourceResolverChain resolverChain = new DefaultResourceResolverChain(resolvers);
-
-		List<ResourceTransformer> transformers = new ArrayList<>();
-		transformers.add(new CssLinkResourceTransformer());
 		this.transformerChain = new DefaultResourceTransformerChain(resolverChain, transformers);
 
 		this.request = new MockHttpServletRequest();
@@ -68,17 +61,9 @@ public class CssLinkResourceTransformerTests {
 
 
 	@Test
-	public void transformNotCss() throws Exception {
-		Resource expected = new ClassPathResource("test/images/image.png", getClass());
-		Resource actual = this.transformerChain.transform(this.request, expected);
-		assertSame(expected, actual);
-	}
-
-	@Test
 	public void transform() throws Exception {
-		Resource mainCss = new ClassPathResource("test/main.css", getClass());
-		Resource resource = this.transformerChain.transform(this.request, mainCss);
-		TransformedResource transformedResource = (TransformedResource) resource;
+		Resource css = new ClassPathResource("test/main.css", getClass());
+		TransformedResource actual = (TransformedResource) this.transformerChain.transform(this.request, css);
 
 		String expected = "\n" +
 				"@import url(\"bar-11e16cf79faee7ac698c805cf28248d2.css\");\n" +
@@ -88,7 +73,7 @@ public class CssLinkResourceTransformerTests {
 				"@import 'foo-e36d2e05253c6c7085a91522ce43a0b4.css';\n\n" +
 				"body { background: url(\"images/image-f448cd1d5dba82b774f3202c878230b3.png\") }\n";
 
-		String result = new String(transformedResource.getByteArray(), "UTF-8");
+		String result = new String(actual.getByteArray(), "UTF-8");
 		result = StringUtils.deleteAny(result, "\r");
 		assertEquals(expected, result);
 	}
@@ -120,6 +105,13 @@ public class CssLinkResourceTransformerTests {
 				.resolveUrlPath("http://example.org/fonts/css", Arrays.asList(externalCss));
 		Mockito.verify(resolverChain, Mockito.never())
 				.resolveUrlPath("file:///home/spring/image.png", Arrays.asList(externalCss));
+	}
+
+	@Test
+	public void transformWithNonCssResource() throws Exception {
+		Resource expected = new ClassPathResource("test/images/image.png", getClass());
+		Resource actual = this.transformerChain.transform(this.request, expected);
+		assertSame(expected, actual);
 	}
 
 }

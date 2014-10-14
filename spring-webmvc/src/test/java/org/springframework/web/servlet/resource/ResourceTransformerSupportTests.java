@@ -17,7 +17,7 @@ package org.springframework.web.servlet.resource;
 
 import static org.junit.Assert.assertEquals;
 
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -48,93 +48,61 @@ public class ResourceTransformerSupportTests {
 
 	@Before
 	public void setUp() {
-		VersionResourceResolver versionResolver = new VersionResourceResolver();
-		versionResolver.setStrategyMap(Collections.singletonMap("/**", new ContentVersionStrategy()));
-
-		List<ResourceResolver> resolvers = new ArrayList<>();
-		resolvers.add(versionResolver);
-		resolvers.add(new PathResourceResolver());
+		VersionResourceResolver resolver = new VersionResourceResolver();
+		resolver.setStrategyMap(Collections.singletonMap("/**", new ContentVersionStrategy()));
+		List<ResourceResolver> resolvers = Arrays.asList(resolver, new PathResourceResolver());
 		this.transformerChain = new DefaultResourceTransformerChain(new DefaultResourceResolverChain(resolvers), null);
 
-		List<Resource> locations = new ArrayList<>();
-		locations.add(new ClassPathResource("test/", getClass()));
+		this.transformer = new TestResourceTransformerSupport();
+		this.transformer.setResourceUrlProvider(createResourceUrlProvider(resolvers));
 
+		this.request = new MockHttpServletRequest("GET", "");
+	}
+
+	protected ResourceUrlProvider createResourceUrlProvider(List<ResourceResolver> resolvers) {
 		ResourceHttpRequestHandler handler = new ResourceHttpRequestHandler();
-		handler.setLocations(locations);
+		handler.setLocations(Arrays.asList(new ClassPathResource("test/", getClass())));
 		handler.setResourceResolvers(resolvers);
-
 		ResourceUrlProvider urlProvider = new ResourceUrlProvider();
 		urlProvider.setHandlerMap(Collections.singletonMap("/resources/**", handler));
+		return urlProvider;
+	}
 
-		this.transformer = new TestResourceTransformerSupport();
-		this.transformer.setResourceUrlProvider(urlProvider);
 
-		this.request = new MockHttpServletRequest();
+	@Test
+	public void resolveUrlPath() throws Exception {
+		this.request.setRequestURI("/context/servlet/resources/main.css");
+		this.request.setAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, "/resources/main.css");
+
+		String resourcePath = "/context/servlet/resources/bar.css";
+		Resource css = new ClassPathResource("test/main.css", getClass());
+		String actual = this.transformer.resolveUrlPath(resourcePath, this.request, css, this.transformerChain);
+		assertEquals("/context/servlet/resources/bar-11e16cf79faee7ac698c805cf28248d2.css", actual);
 	}
 
 	@Test
-	public void rewriteAbsolutePathWithContext() throws Exception {
-		this.request.setRequestURI("/servlet/context/resources/main.css");
-		this.request.setMethod("GET");
-		this.request.setServletPath("/servlet");
+	public void resolveUrlPathWithoutHandlerMappingAttribute() throws Exception {
+		this.request.setRequestURI("/context/servlet/resources/main.css");
 		this.request.setContextPath("/context");
-		this.request.setAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, "/resources/main.css");
+		this.request.setServletPath("/servlet");
 
-		String resourcePath = "/servlet/context/resources/bar.css";
-		Resource mainCss = new ClassPathResource("test/main.css", getClass());
-		String actual = this.transformer.resolveUrlPath(resourcePath, this.request, mainCss, this.transformerChain);
-		assertEquals("/servlet/context/resources/bar-11e16cf79faee7ac698c805cf28248d2.css", actual);
+		String resourcePath = "/context/servlet/resources/bar.css";
+		Resource css = new ClassPathResource("test/main.css", getClass());
+		String actual = this.transformer.resolveUrlPath(resourcePath, this.request, css, this.transformerChain);
+		assertEquals("/context/servlet/resources/bar-11e16cf79faee7ac698c805cf28248d2.css", actual);
 	}
 
 	@Test
-	public void rewriteAbsolutePath() throws Exception {
-		this.request.setRequestURI("/resources/main.css");
-		this.request.setMethod("GET");
-		this.request.setAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, "/resources/main.css");
-
-		String resourcePath = "/resources/bar.css";
-		Resource mainCss = new ClassPathResource("test/main.css", getClass());
-		String actual = this.transformer.resolveUrlPath(resourcePath, this.request, mainCss, this.transformerChain);
-		assertEquals("/resources/bar-11e16cf79faee7ac698c805cf28248d2.css", actual);
-
-		actual = this.transformer.resolveUrlPath("bar.css", this.request, mainCss, this.transformerChain);
+	public void resolveUrlPathWithRelativePath() throws Exception {
+		this.request.setRequestURI("/context/servlet/resources/main.css");
+		Resource css = new ClassPathResource("test/main.css", getClass());
+		String actual = this.transformer.resolveUrlPath("bar.css", this.request, css, this.transformerChain);
 		assertEquals("bar-11e16cf79faee7ac698c805cf28248d2.css", actual);
 	}
 
 	@Test
-	public void rewriteRelativePath() throws Exception {
-		this.request.setRequestURI("/servlet/context/resources/main.css");
-		this.request.setMethod("GET");
-		this.request.setServletPath("/servlet");
-		this.request.setContextPath("/context");
-		this.request.setAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, "/resources/main.css");
-
-		Resource mainCss = new ClassPathResource("test/main.css", getClass());
-		String actual = this.transformer.resolveUrlPath("bar.css", this.request, mainCss, this.transformerChain);
-		assertEquals("bar-11e16cf79faee7ac698c805cf28248d2.css", actual);
-	}
-
-	@Test(expected = IllegalStateException.class)
-	public void rewriteAbsolutePathWrongPath() throws Exception {
-		this.request.setRequestURI("/servlet/context/resources/main.css");
-		this.request.setMethod("GET");
-		this.request.setServletPath("/servlet");
-		this.request.setContextPath("/context");
-		this.request.setAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, "/wrong/main.css");
-
-		String resourcePath = "/servlet/context/resources/bar.css";
-		Resource mainCss = new ClassPathResource("test/main.css", getClass());
-		this.transformer.resolveUrlPath(resourcePath, this.request, mainCss, this.transformerChain);
-	}
-
-	@Test
-	public void rewriteRelativePathUpperLevel() throws Exception {
-		this.request.setRequestURI("/servlet/context/resources/images/image.png");
-		this.request.setMethod("GET");
-		this.request.setServletPath("/servlet");
-		this.request.setContextPath("/context");
-		this.request.setAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, "/resources/images/image.png");
-
+	public void resolveUrlPathWithRelativePathInParentDirectory() throws Exception {
+		this.request.setRequestURI("/context/servlet/resources/images/image.png");
 		Resource imagePng = new ClassPathResource("test/images/image.png", getClass());
 		String actual = this.transformer.resolveUrlPath("../bar.css", this.request, imagePng, this.transformerChain);
 		assertEquals("../bar-11e16cf79faee7ac698c805cf28248d2.css", actual);
