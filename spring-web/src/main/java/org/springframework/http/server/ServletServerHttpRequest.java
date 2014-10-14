@@ -30,7 +30,6 @@ import java.nio.charset.Charset;
 import java.security.Principal;
 import java.util.Arrays;
 import java.util.Enumeration;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -40,6 +39,8 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
+import org.springframework.util.LinkedCaseInsensitiveMap;
+import org.springframework.util.StringUtils;
 
 /**
  * {@link ServerHttpRequest} implementation that is based on a {@link HttpServletRequest}.
@@ -111,21 +112,30 @@ public class ServletServerHttpRequest implements ServerHttpRequest {
 				}
 			}
 			// HttpServletRequest exposes some headers as properties: we should include those if not already present
-			if (this.headers.getContentType() == null && this.servletRequest.getContentType() != null) {
-				MediaType contentType = MediaType.parseMediaType(this.servletRequest.getContentType());
-				this.headers.setContentType(contentType);
+			MediaType contentType = this.headers.getContentType();
+			if (contentType == null) {
+				String requestContentType = this.servletRequest.getContentType();
+				if (StringUtils.hasLength(requestContentType)) {
+					contentType = MediaType.parseMediaType(requestContentType);
+					this.headers.setContentType(contentType);
+				}
 			}
-			if (this.headers.getContentType() != null && this.headers.getContentType().getCharSet() == null &&
-					this.servletRequest.getCharacterEncoding() != null) {
-				MediaType oldContentType = this.headers.getContentType();
-				Charset charSet = Charset.forName(this.servletRequest.getCharacterEncoding());
-				Map<String, String> params = new HashMap<String, String>(oldContentType.getParameters());
-				params.put("charset", charSet.toString());
-				MediaType newContentType = new MediaType(oldContentType.getType(), oldContentType.getSubtype(), params);
-				this.headers.setContentType(newContentType);
+			if (contentType != null && contentType.getCharSet() == null) {
+				String requestEncoding = this.servletRequest.getCharacterEncoding();
+				if (StringUtils.hasLength(requestEncoding)) {
+					Charset charSet = Charset.forName(requestEncoding);
+					Map<String, String> params = new LinkedCaseInsensitiveMap<String>();
+					params.putAll(contentType.getParameters());
+					params.put("charset", charSet.toString());
+					MediaType newContentType = new MediaType(contentType.getType(), contentType.getSubtype(), params);
+					this.headers.setContentType(newContentType);
+				}
 			}
-			if (this.headers.getContentLength() == -1 && this.servletRequest.getContentLength() != -1) {
-				this.headers.setContentLength(this.servletRequest.getContentLength());
+			if (this.headers.getContentLength() == -1) {
+				int requestContentLength = this.servletRequest.getContentLength();
+				if (requestContentLength != -1) {
+					this.headers.setContentLength(requestContentLength);
+				}
 			}
 		}
 		return this.headers;
