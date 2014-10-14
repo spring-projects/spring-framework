@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -74,12 +74,21 @@ public class EclipseLinkJpaDialect extends DefaultJpaDialect {
 	public Object beginTransaction(EntityManager entityManager, TransactionDefinition definition)
 			throws PersistenceException, SQLException, TransactionException {
 
-		super.beginTransaction(entityManager, definition);
+		UnitOfWork uow = entityManager.unwrap(UnitOfWork.class);
+
+		if (definition.getIsolationLevel() != TransactionDefinition.ISOLATION_DEFAULT) {
+			// Pass custom isolation level on to EclipseLink's DatabaseLogin configuration
+			uow.getLogin().setTransactionIsolation(definition.getIsolationLevel());
+		}
+
+		entityManager.getTransaction().begin();
+
 		if (!definition.isReadOnly() && !this.lazyDatabaseTransaction) {
 			// Begin an early transaction to force EclipseLink to get a JDBC Connection
 			// so that Spring can manage transactions with JDBC as well as EclipseLink.
-			entityManager.unwrap(UnitOfWork.class).beginEarlyTransaction();
+			uow.beginEarlyTransaction();
 		}
+
 		return null;
 	}
 
