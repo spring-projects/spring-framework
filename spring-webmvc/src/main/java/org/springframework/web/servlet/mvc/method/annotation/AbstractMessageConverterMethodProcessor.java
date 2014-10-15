@@ -117,6 +117,10 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 			throws IOException, HttpMediaTypeNotAcceptableException {
 
 		Class<?> returnValueClass = getReturnValueType(returnValue, returnType);
+		if (returnValue == null && Void.class.equals(returnValueClass)) {
+			return;
+		}
+
 		HttpServletRequest servletRequest = inputMessage.getServletRequest();
 		List<MediaType> requestedMediaTypes = getAcceptableMediaTypes(servletRequest);
 		List<MediaType> producibleMediaTypes = getProducibleMediaTypes(servletRequest, returnValueClass);
