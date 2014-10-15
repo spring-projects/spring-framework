@@ -53,61 +53,28 @@ public abstract class AbstractCachingConfiguration<C extends CachingConfigurer> 
 
 	protected CacheErrorHandler errorHandler;
 
-	@Autowired(required=false)
-	private Collection<CacheManager> cacheManagerBeans;
-
-	@Autowired(required=false)
-	private Collection<C> cachingConfigurers;
-
-
 	@Override
 	public void setImportMetadata(AnnotationMetadata importMetadata) {
 		this.enableCaching = AnnotationAttributes.fromMap(
 				importMetadata.getAnnotationAttributes(EnableCaching.class.getName(), false));
 		Assert.notNull(this.enableCaching,
 				"@EnableCaching is not present on importing class " +
-				importMetadata.getClassName());
+						importMetadata.getClassName());
 	}
 
-
-	/**
-	 * Determine which {@code CacheManager} bean to use. Prefer the result of
-	 * {@link CachingConfigurer#cacheManager()} over any by-type matching. If none, fall
-	 * back to by-type matching on {@code CacheManager}.
-	 * @throws IllegalArgumentException if no CacheManager can be found; if more than one
-	 * CachingConfigurer implementation exists; if multiple CacheManager beans and no
-	 * CachingConfigurer exists to disambiguate.
-	 */
-	@PostConstruct
-	protected void reconcileCacheManager() {
-		if (!CollectionUtils.isEmpty(cachingConfigurers)) {
-			int nConfigurers = cachingConfigurers.size();
-			if (nConfigurers > 1) {
-				throw new IllegalStateException(nConfigurers + " implementations of " +
-						"CachingConfigurer were found when only 1 was expected. " +
-						"Refactor the configuration such that CachingConfigurer is " +
-						"implemented only once or not at all.");
-			}
-			C cachingConfigurer = cachingConfigurers.iterator().next();
-			useCachingConfigurer(cachingConfigurer);
+	@Autowired(required = false)
+	void setConfigurers(Collection<C> configurers) {
+		if (CollectionUtils.isEmpty(configurers)) {
+			return;
 		}
-		if (this.cacheManager == null && !CollectionUtils.isEmpty(cacheManagerBeans)) {
-			int nManagers = cacheManagerBeans.size();
-			if (nManagers > 1) {
-				throw new IllegalStateException(nManagers + " beans of type CacheManager " +
-						"were found when only 1 was expected. Remove all but one of the " +
-						"CacheManager bean definitions, or implement CachingConfigurer " +
-						"to make explicit which CacheManager should be used for " +
-						"annotation-driven cache management.");
-			}
-			this.cacheManager = cacheManagerBeans.iterator().next();
-			// keyGenerator remains null; will fall back to default within CacheInterceptor
+		if (configurers.size() > 1) {
+			throw new IllegalStateException(configurers.size() + " implementations of " +
+					"CachingConfigurer were found when only 1 was expected. " +
+					"Refactor the configuration such that CachingConfigurer is " +
+					"implemented only once or not at all.");
 		}
-		if (this.cacheManager == null) {
-			throw new IllegalStateException("No bean of type CacheManager could be found. " +
-					"Register a CacheManager bean or remove the @EnableCaching annotation " +
-					"from your configuration.");
-		}
+		C configurer = configurers.iterator().next();
+		useCachingConfigurer(configurer);
 	}
 
 	/**

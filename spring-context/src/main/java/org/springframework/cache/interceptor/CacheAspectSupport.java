@@ -30,6 +30,7 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.aop.framework.AopProxyUtils;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.SmartInitializingSingleton;
 import org.springframework.beans.factory.annotation.BeanFactoryAnnotationUtils;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
@@ -72,7 +73,7 @@ import org.springframework.util.StringUtils;
  * @since 3.1
  */
 public abstract class CacheAspectSupport extends AbstractCacheInvoker
-		implements InitializingBean, ApplicationContextAware {
+		implements InitializingBean, SmartInitializingSingleton, ApplicationContextAware {
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
@@ -167,15 +168,26 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 	}
 
 	public void afterPropertiesSet() {
-		Assert.state(this.cacheResolver != null, "'cacheResolver' is required. Either set the cache resolver " +
-				"to use or set the cache manager to create a default cache resolver based on it.");
 		Assert.state(this.cacheOperationSource != null, "The 'cacheOperationSources' property is required: " +
 				"If there are no cacheable methods, then don't use a cache aspect.");
 		Assert.state(this.getErrorHandler() != null, "The 'errorHandler' is required.");
-		Assert.state(this.applicationContext != null, "The application context was not injected as it should.");
-		this.initialized = true;
 	}
 
+	@Override
+	public void afterSingletonsInstantiated() {
+		if (getCacheResolver() == null) { // lazy initialize cache resolver
+			CacheManager cacheManager = this.applicationContext.getBean(CacheManager.class);
+			if (cacheManager == null) {
+				throw new IllegalStateException("No bean of type CacheManager could be found. " +
+						"Register a CacheManager bean or remove the @EnableCaching annotation " +
+						"from your configuration.");
+			}
+			setCacheManager(cacheManager);
+		}
+		Assert.state(this.cacheResolver != null, "'cacheResolver' is required. Either set the cache resolver " +
+				"to use or set the cache manager to create a default cache resolver based on it.");
+		this.initialized = true;
+	}
 
 	/**
 	 * Convenience method to return a String representation of this Method

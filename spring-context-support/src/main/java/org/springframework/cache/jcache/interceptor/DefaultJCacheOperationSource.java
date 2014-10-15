@@ -21,6 +21,7 @@ import java.util.Map;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.SmartInitializingSingleton;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.interceptor.CacheResolver;
 import org.springframework.cache.interceptor.KeyGenerator;
@@ -39,7 +40,7 @@ import org.springframework.util.Assert;
  * @since 4.1
  */
 public class DefaultJCacheOperationSource extends AnnotationJCacheOperationSource
-		implements InitializingBean, ApplicationContextAware {
+		implements InitializingBean, SmartInitializingSingleton, ApplicationContextAware {
 
 	private CacheManager cacheManager;
 
@@ -83,7 +84,7 @@ public class DefaultJCacheOperationSource extends AnnotationJCacheOperationSourc
 	}
 
 	public CacheResolver getCacheResolver() {
-		return this.cacheResolver;
+		return getDefaultCacheResolver();
 	}
 
 	/**
@@ -95,7 +96,7 @@ public class DefaultJCacheOperationSource extends AnnotationJCacheOperationSourc
 	}
 
 	public CacheResolver getExceptionCacheResolver() {
-		return this.exceptionCacheResolver;
+		return getDefaultExceptionCacheResolver();
 	}
 
 	@Override
@@ -105,17 +106,13 @@ public class DefaultJCacheOperationSource extends AnnotationJCacheOperationSourc
 
 	@Override
 	public void afterPropertiesSet() {
-		Assert.state((this.cacheResolver != null && this.exceptionCacheResolver != null)
-				|| this.cacheManager != null, "'cacheManager' is required if cache resolvers are not set.");
-		Assert.state(this.applicationContext != null, "The application context was not injected as it should.");
-
 		this.adaptedKeyGenerator = new KeyGeneratorAdapter(this, this.keyGenerator);
-		if (this.cacheResolver == null) {
-			this.cacheResolver = new SimpleCacheResolver(this.cacheManager);
-		}
-		if (this.exceptionCacheResolver == null) {
-			this.exceptionCacheResolver = new SimpleExceptionCacheResolver(this.cacheManager);
-		}
+	}
+
+	@Override
+	public void afterSingletonsInstantiated() { // Make sure those are initialized on startup
+		Assert.notNull(getDefaultCacheResolver(), "Cache resolver should have been initialized.");
+		Assert.notNull(getDefaultExceptionCacheResolver(), "Exception cache resolver should have been initialized.");
 	}
 
 	@Override
@@ -131,17 +128,35 @@ public class DefaultJCacheOperationSource extends AnnotationJCacheOperationSourc
 
 	@Override
 	protected CacheResolver getDefaultCacheResolver() {
+		if (this.cacheResolver == null) {
+			this.cacheResolver = new SimpleCacheResolver(getCacheManager());
+		}
 		return this.cacheResolver;
 	}
 
 	@Override
 	protected CacheResolver getDefaultExceptionCacheResolver() {
+		if (this.exceptionCacheResolver == null) {
+			this.exceptionCacheResolver = new SimpleExceptionCacheResolver(getCacheManager());
+		}
 		return this.exceptionCacheResolver;
 	}
 
 	@Override
 	protected KeyGenerator getDefaultKeyGenerator() {
 		return this.adaptedKeyGenerator;
+	}
+
+	private CacheManager getCacheManager() {
+		if (this.cacheManager == null) {
+			this.cacheManager = this.applicationContext.getBean(CacheManager.class);
+			if (this.cacheManager == null) {
+				throw new IllegalStateException("No bean of type CacheManager could be found. " +
+						"Register a CacheManager bean or remove the @EnableCaching annotation " +
+						"from your configuration.");
+			}
+		}
+		return this.cacheManager;
 	}
 
 }

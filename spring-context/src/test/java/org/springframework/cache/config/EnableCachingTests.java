@@ -19,6 +19,8 @@ package org.springframework.cache.config;
 import org.junit.Test;
 
 import org.springframework.beans.factory.BeanCreationException;
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
+import org.springframework.beans.factory.NoUniqueBeanDefinitionException;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.CacheTestUtils;
 import org.springframework.cache.annotation.CachingConfigurerSupport;
@@ -73,7 +75,7 @@ public class EnableCachingTests extends AbstractAnnotationTests {
 		ctx.refresh();
 	}
 
-	@Test(expected=IllegalStateException.class)
+	@Test(expected=NoUniqueBeanDefinitionException.class)
 	public void multipleCacheManagerBeans() throws Throwable {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 		ctx.register(MultiCacheManagerConfig.class);
@@ -106,7 +108,7 @@ public class EnableCachingTests extends AbstractAnnotationTests {
 		}
 	}
 
-	@Test(expected=IllegalStateException.class)
+	@Test(expected=NoSuchBeanDefinitionException.class)
 	public void noCacheManagerBeans() throws Throwable {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 		ctx.register(EmptyConfig.class);

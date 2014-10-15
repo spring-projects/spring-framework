@@ -20,6 +20,7 @@ import java.lang.reflect.Method;
 
 import org.junit.Test;
 
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.interceptor.CacheOperationInvoker;
 import org.springframework.cache.interceptor.CacheResolver;
@@ -80,8 +81,7 @@ public class JCacheInterceptorTests extends AbstractJCacheTests {
 
 	@Test
 	public void cacheManagerMandatoryIfCacheResolverNotSetSet() {
-		thrown.expect(IllegalStateException.class);
-		thrown.expectMessage("'cacheManager' is required");
+		thrown.expect(NoSuchBeanDefinitionException.class);
 		createOperationSource(null, null, null, defaultKeyGenerator);
 	}
 
@@ -117,6 +117,7 @@ public class JCacheInterceptorTests extends AbstractJCacheTests {
 		source.setExceptionCacheResolver(exceptionCacheResolver);
 		source.setKeyGenerator(keyGenerator);
 		source.afterPropertiesSet();
+		source.afterSingletonsInstantiated();
 		return source;
 	}
 
