@@ -17,6 +17,7 @@
 package org.springframework.web.servlet.mvc.method.annotation;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.servlet.http.HttpServletResponse;
@@ -45,6 +46,8 @@ import org.springframework.web.method.support.ModelAndViewContainer;
 import org.springframework.web.servlet.view.RedirectView;
 
 import static org.junit.Assert.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 /**
  * Test fixture with {@link ServletInvocableHandlerMethod}.
@@ -183,6 +186,37 @@ public class ServletInvocableHandlerMethodTests {
 		assertEquals("bar", response.getContentAsString());
 	}
 
+	// SPR-12287
+
+	@Test
+	public void wrapConcurrentResult_ResponseEntityNullBody() throws Exception {
+		List<HttpMessageConverter<?>> converters = new ArrayList<HttpMessageConverter<?>>();
+		converters.add(new StringHttpMessageConverter());
+		List<Object> advice = Arrays.asList(mock(ResponseBodyAdvice.class));
+		HttpEntityMethodProcessor processor = new HttpEntityMethodProcessor(converters, null, advice);
+		returnValueHandlers.addHandler(processor);
+		ServletInvocableHandlerMethod handlerMethod = getHandlerMethod(new ResponseEntityHandler(), "handle");
+		handlerMethod = handlerMethod.wrapConcurrentResult(new ResponseEntity<>(HttpStatus.OK));
+		handlerMethod.invokeAndHandle(webRequest, mavContainer);
+
+		assertEquals(200, response.getStatus());
+		assertEquals("", response.getContentAsString());
+	}
+
+	@Test
+	public void wrapConcurrentResult_ResponseEntityNullReturnValue() throws Exception {
+		List<HttpMessageConverter<?>> converters = new ArrayList<HttpMessageConverter<?>>();
+		converters.add(new StringHttpMessageConverter());
+		List<Object> advice = Arrays.asList(mock(ResponseBodyAdvice.class));
+		HttpEntityMethodProcessor processor = new HttpEntityMethodProcessor(converters, null, advice);
+		returnValueHandlers.addHandler(processor);
+		ServletInvocableHandlerMethod handlerMethod = getHandlerMethod(new ResponseEntityHandler(), "handle");
+		handlerMethod = handlerMethod.wrapConcurrentResult(null);
+		handlerMethod.invokeAndHandle(webRequest, mavContainer);
+
+		assertEquals(200, response.getStatus());
+		assertEquals("", response.getContentAsString());
+	}
 
 	private ServletInvocableHandlerMethod getHandlerMethod(Object controller,
 			String methodName, Class<?>... argTypes) throws NoSuchMethodException {

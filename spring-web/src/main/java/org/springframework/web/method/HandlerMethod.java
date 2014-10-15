@@ -247,7 +247,7 @@ public class HandlerMethod {
 	/**
 	 * A MethodParameter with HandlerMethod-specific behavior.
 	 */
-	private class HandlerMethodParameter extends MethodParameter {
+	protected class HandlerMethodParameter extends MethodParameter {
 
 		public HandlerMethodParameter(int index) {
 			super(HandlerMethod.this.bridgedMethod, index);

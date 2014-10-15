@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +19,11 @@ package org.springframework.web.servlet.mvc.method.annotation;
 import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
+import java.lang.reflect.Type;
 import java.util.concurrent.Callable;
 
+import org.springframework.core.MethodParameter;
+import org.springframework.core.ResolvableType;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
@@ -50,6 +53,9 @@ import org.springframework.web.util.NestedServletException;
  * @since 3.1
  */
 public class ServletInvocableHandlerMethod extends InvocableHandlerMethod {
+
+	private static final Method CALLABLE_METHOD = ClassUtils.getMethod(Callable.class, "call");
+
 
 	private HttpStatus responseStatus;
 
@@ -174,46 +180,46 @@ public class ServletInvocableHandlerMethod extends InvocableHandlerMethod {
 	}
 
 	/**
-	 * Create a ServletInvocableHandlerMethod that will return the given value from an
-	 * async operation instead of invoking the controller method again. The async result
-	 * value is then either processed as if the controller method returned it or an
-	 * exception is raised if the async result value itself is an Exception.
+	 * Create a nested ServletInvocableHandlerMethod sub-class that returns the
+	 * the given value (or raises an Exception if the value is one) rather than
+	 * actually invoking the controller method. This is useful when processing
+	 * async return values (e.g. Callable, DeferredResult, ListenableFuture).
 	 */
-	ServletInvocableHandlerMethod wrapConcurrentResult(final Object result) {
-
-		return new CallableHandlerMethod(new Callable<Object>() {
-
-			@Override
-			public Object call() throws Exception {
-				if (result instanceof Exception) {
-					throw (Exception) result;
-				}
-				else if (result instanceof Throwable) {
-					throw new NestedServletException("Async processing failed", (Throwable) result);
-				}
-				return result;
-			}
-		});
+	ServletInvocableHandlerMethod wrapConcurrentResult(Object result) {
+		return new ConcurrentResultHandlerMethod(result, new ConcurrentResultMethodParameter(result));
 	}
 
 
 	/**
-	 * A sub-class of {@link HandlerMethod} that invokes the given {@link Callable}
-	 * instead of the target controller method. This is useful for resuming processing
-	 * with the result of an async operation. The goal is to process the value returned
-	 * from the Callable as if it was returned by the target controller method, i.e.
-	 * taking into consideration both method and type-level controller annotations (e.g.
-	 * {@code @ResponseBody}, {@code @ResponseStatus}, etc).
+	 * A nested sub-class of {@code ServletInvocableHandlerMethod} that uses a
+	 * simple {@link Callable} instead of the original controller as the handler in
+	 * order to return the fixed (concurrent) result value given to it. Effectively
+	 * "resumes" processing with the asynchronously produced return value.
 	 */
-	private class CallableHandlerMethod extends ServletInvocableHandlerMethod {
+	private class ConcurrentResultHandlerMethod extends ServletInvocableHandlerMethod {
 
-		public CallableHandlerMethod(Callable<?> callable) {
-			super(callable, ClassUtils.getMethod(callable.getClass(), "call"));
-			this.setHandlerMethodReturnValueHandlers(ServletInvocableHandlerMethod.this.returnValueHandlers);
+		private final MethodParameter returnType;
+
+
+		public ConcurrentResultHandlerMethod(final Object result, ConcurrentResultMethodParameter returnType) {
+			super(new Callable<Object>() {
+				@Override
+				public Object call() throws Exception {
+					if (result instanceof Exception) {
+						throw (Exception) result;
+					}
+					else if (result instanceof Throwable) {
+						throw new NestedServletException("Async processing failed", (Throwable) result);
+					}
+					return result;
+				}
+			}, CALLABLE_METHOD);
+			setHandlerMethodReturnValueHandlers(ServletInvocableHandlerMethod.this.returnValueHandlers);
+			this.returnType = returnType;
 		}
 
 		/**
-		 * Bridge to type-level annotations of the target controller method.
+		 * Bridge to actual controller type-level annotations.
 		 */
 		@Override
 		public Class<?> getBeanType() {
@@ -221,11 +227,49 @@ public class ServletInvocableHandlerMethod extends InvocableHandlerMethod {
 		}
 
 		/**
-		 * Bridge to method-level annotations of the target controller method.
+		 * Bridge to actual return value or generic type within the declared
+		 * async return type, e.g. Foo instead of {@code DeferredResult<Foo>}.
+		 */
+		@Override
+		public MethodParameter getReturnValueType(Object returnValue) {
+			return this.returnType;
+		}
+
+		/**
+		 * Bridge to controller method-level annotations.
 		 */
 		@Override
 		public <A extends Annotation> A getMethodAnnotation(Class<A> annotationType) {
 			return ServletInvocableHandlerMethod.this.getMethodAnnotation(annotationType);
+		}
+	}
+
+	/**
+	 * MethodParameter sub-class based on the actual return value type or if
+	 * that's null falling back on the generic type within the declared async
+	 * return type, e.g. Foo instead of {@code DeferredResult<Foo>}.
+	 */
+	private class ConcurrentResultMethodParameter extends HandlerMethodParameter {
+
+		private final Object returnValue;
+
+		private final ResolvableType returnType;
+
+
+		public ConcurrentResultMethodParameter(Object returnValue) {
+			super(-1);
+			this.returnValue = returnValue;
+			this.returnType = ResolvableType.forType(super.getGenericParameterType()).getGeneric(0);
+		}
+
+		@Override
+		public Class<?> getParameterType() {
+			return (returnValue != null ? returnValue.getClass() : this.returnType.getRawClass());
+		}
+
+		@Override
+		public Type getGenericParameterType() {
+			return this.returnType.getType();
 		}
 	}
 
