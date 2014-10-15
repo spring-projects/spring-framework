@@ -81,10 +81,10 @@ public class ServletInvocableHandlerMethod extends InvocableHandlerMethod {
 	}
 
 	private void initResponseStatus() {
-		ResponseStatus annot = getMethodAnnotation(ResponseStatus.class);
-		if (annot != null) {
-			this.responseStatus = annot.value();
-			this.responseReason = annot.reason();
+		ResponseStatus annotation = getMethodAnnotation(ResponseStatus.class);
+		if (annotation != null) {
+			this.responseStatus = annotation.value();
+			this.responseReason = annotation.reason();
 		}
 	}
 
@@ -97,8 +97,8 @@ public class ServletInvocableHandlerMethod extends InvocableHandlerMethod {
 	}
 
 	/**
-	 * Invokes the method and handles the return value through a registered
-	 * {@link HandlerMethodReturnValueHandler}.
+	 * Invokes the method and handles the return value through one of the
+	 * configured {@link HandlerMethodReturnValueHandler}s.
 	 *
 	 * @param webRequest the current request
 	 * @param mavContainer the ModelAndViewContainer for this request
@@ -142,14 +142,12 @@ public class ServletInvocableHandlerMethod extends InvocableHandlerMethod {
 		if (this.responseStatus == null) {
 			return;
 		}
-
 		if (StringUtils.hasText(this.responseReason)) {
 			webRequest.getResponse().sendError(this.responseStatus.value(), this.responseReason);
 		}
 		else {
 			webRequest.getResponse().setStatus(this.responseStatus.value());
 		}
-
 		// to be picked up by the RedirectView
 		webRequest.getRequest().setAttribute(View.RESPONSE_STATUS_ATTRIBUTE, this.responseStatus);
 	}
@@ -167,7 +165,7 @@ public class ServletInvocableHandlerMethod extends InvocableHandlerMethod {
 	 * Does this method have the response status instruction?
 	 */
 	private boolean hasResponseStatus() {
-		return responseStatus != null;
+		return this.responseStatus != null;
 	}
 
 	private String getReturnValueHandlingErrorMessage(String message, Object returnValue) {
