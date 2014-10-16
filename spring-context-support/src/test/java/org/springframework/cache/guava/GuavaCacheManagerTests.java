@@ -18,10 +18,14 @@ package org.springframework.cache.guava;
 
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 import org.junit.Test;
 
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
+
+import java.util.HashSet;
+import java.util.Set;
 
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.mock;
@@ -29,126 +33,57 @@ import static org.mockito.Mockito.mock;
 /**
  * @author Juergen Hoeller
  * @author Stephane Nicoll
+ * @author Biju Kunjummen
  */
 public class GuavaCacheManagerTests {
 
-	@Test
-	public void testDynamicMode() {
-		CacheManager cm = new GuavaCacheManager();
-		Cache cache1 = cm.getCache("c1");
-		assertTrue(cache1 instanceof GuavaCache);
-		Cache cache1again = cm.getCache("c1");
-		assertSame(cache1again, cache1);
-		Cache cache2 = cm.getCache("c2");
-		assertTrue(cache2 instanceof GuavaCache);
-		Cache cache2again = cm.getCache("c2");
-		assertSame(cache2again, cache2);
-		Cache cache3 = cm.getCache("c3");
-		assertTrue(cache3 instanceof GuavaCache);
-		Cache cache3again = cm.getCache("c3");
-		assertSame(cache3again, cache3);
 
-		cache1.put("key1", "value1");
-		assertEquals("value1", cache1.get("key1").get());
-		cache1.put("key2", 2);
-		assertEquals(2, cache1.get("key2").get());
-		cache1.put("key3", null);
-		assertNull(cache1.get("key3").get());
-		cache1.evict("key3");
-		assertNull(cache1.get("key3"));
+	@Test
+	public void testCreateCachesAndRetrieveKnownCache() {
+		GuavaCacheManager cm = new GuavaCacheManager();
+		Set<GuavaCache> setOfCaches = new HashSet<GuavaCache>();
+		GuavaCacheFactoryBean cf1 = new GuavaCacheFactoryBean("c1");
+		CacheBuilder<Object, Object> cb1 = CacheBuilder.newBuilder().maximumSize(10);
+		cf1.setCacheBuilder(cb1);
+		GuavaCache cache = cf1.getObject();
+		setOfCaches.add(cache);
+		cm.setCaches(setOfCaches);
+
+		assertTrue(cm.getCache("c1") ==  cache);
 	}
 
 	@Test
-	public void testStaticMode() {
-		GuavaCacheManager cm = new GuavaCacheManager("c1", "c2");
-		Cache cache1 = cm.getCache("c1");
-		assertTrue(cache1 instanceof GuavaCache);
-		Cache cache1again = cm.getCache("c1");
-		assertSame(cache1again, cache1);
-		Cache cache2 = cm.getCache("c2");
-		assertTrue(cache2 instanceof GuavaCache);
-		Cache cache2again = cm.getCache("c2");
-		assertSame(cache2again, cache2);
-		Cache cache3 = cm.getCache("c3");
-		assertNull(cache3);
+	public void testCreateCachesAndRetrieveNewCache() {
+		GuavaCacheManager cm = new GuavaCacheManager();
+		Set<GuavaCache> setOfCaches = new HashSet<GuavaCache>();
+		GuavaCacheFactoryBean cf1 = new GuavaCacheFactoryBean("c1");
+		CacheBuilder<Object, Object> cb1 = CacheBuilder.newBuilder().maximumSize(10);
+		cf1.setCacheBuilder(cb1);
+		GuavaCache cache = cf1.getObject();
+		setOfCaches.add(cache);
+		cm.setCaches(setOfCaches);
 
-		cache1.put("key1", "value1");
-		assertEquals("value1", cache1.get("key1").get());
-		cache1.put("key2", 2);
-		assertEquals(2, cache1.get("key2").get());
-		cache1.put("key3", null);
-		assertNull(cache1.get("key3").get());
-		cache1.evict("key3");
-		assertNull(cache1.get("key3"));
+		Cache c2 = cm.getCache("c2");
 
-		cm.setAllowNullValues(false);
-		Cache cache1x = cm.getCache("c1");
-		assertTrue(cache1x instanceof GuavaCache);
-		assertTrue(cache1x != cache1);
-		Cache cache2x = cm.getCache("c2");
-		assertTrue(cache2x instanceof GuavaCache);
-		assertTrue(cache2x != cache2);
-		Cache cache3x = cm.getCache("c3");
-		assertNull(cache3x);
-
-		cache1x.put("key1", "value1");
-		assertEquals("value1", cache1x.get("key1").get());
-		cache1x.put("key2", 2);
-		assertEquals(2, cache1x.get("key2").get());
-		try {
-			cache1x.put("key3", null);
-			fail("Should have thrown NullPointerException");
-		}
-		catch (NullPointerException ex) {
-			// expected
-		}
-
-		cm.setAllowNullValues(true);
-		Cache cache1y = cm.getCache("c1");
-
-		cache1y.put("key3", null);
-		assertNull(cache1y.get("key3").get());
-		cache1y.evict("key3");
-		assertNull(cache1y.get("key3"));
+		assertEquals(c2.getName(), "c2");
 	}
 
-	@Test
-	public void changeCacheSpecificationRecreateCache() {
-		GuavaCacheManager cm = new GuavaCacheManager("c1");
-		Cache cache1 = cm.getCache("c1");
 
-		CacheBuilder<Object, Object> cacheBuilder = CacheBuilder.newBuilder().maximumSize(10);
-		cm.setCacheBuilder(cacheBuilder);
-		Cache cache1x = cm.getCache("c1");
-		assertTrue(cache1x != cache1);
-
-		cm.setCacheBuilder(cacheBuilder); // Set same instance
-		Cache cache1xx = cm.getCache("c1");
-		assertSame(cache1x, cache1xx);
-	}
 
 	@Test
-	public void changeCacheLoaderRecreateCache() {
-		GuavaCacheManager cm = new GuavaCacheManager("c1");
-		Cache cache1 = cm.getCache("c1");
-
+	public void testWithCacheLoaderShouldReturnALoadingCache() {
+		GuavaCacheFactoryBean cf1 = new GuavaCacheFactoryBean("c1");
+		CacheBuilder<Object, Object> cb1 = CacheBuilder.newBuilder().maximumSize(10);
+		cf1.setCacheBuilder(cb1);
 		CacheLoader<Object,Object> loader = mockCacheLoader();
-		cm.setCacheLoader(loader);
-		Cache cache1x = cm.getCache("c1");
-		assertTrue(cache1x != cache1);
+		cf1.setCacheLoader(loader);
+		GuavaCache cache = cf1.getObject();
 
-		cm.setCacheLoader(loader); // Set same instance
-		Cache cache1xx = cm.getCache("c1");
-		assertSame(cache1x, cache1xx);
+		assertTrue(cache.getNativeCache() instanceof LoadingCache);
 	}
 
-	@Test
-	public void setCacheNameNullRestoreDynamicMode() {
-		GuavaCacheManager cm = new GuavaCacheManager("c1");
-		assertNull(cm.getCache("someCache"));
-		cm.setCacheNames(null);
-		assertNotNull(cm.getCache("someCache"));
-	}
+
+
 
 	@SuppressWarnings("unchecked")
 	private CacheLoader<Object, Object> mockCacheLoader() {
