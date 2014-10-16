@@ -31,7 +31,7 @@ import javax.sql.DataSource;
  *
  * <p>Example:
  *
- * <pre class="code"> create table tab (id int not null primary key, text varchar(100))
+ * <pre class="code">create table tab (id int not null primary key, text varchar(100))
  * create table tab_sequence (id bigint identity)
  * insert into tab_sequence values(DEFAULT)</pre>
  *
@@ -72,6 +72,7 @@ public class SybaseAnywhereMaxValueIncrementer extends SybaseMaxValueIncrementer
 	public SybaseAnywhereMaxValueIncrementer(DataSource dataSource, String incrementerName, String columnName) {
 		super(dataSource, incrementerName, columnName);
 	}
+
 
 	@Override
 	protected String getIncrementStatement() {
