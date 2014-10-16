@@ -22,8 +22,11 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceException;
 
 import org.apache.commons.logging.LogFactory;
+import org.apache.openjpa.persistence.FetchPlan;
 import org.apache.openjpa.persistence.OpenJPAEntityManager;
 import org.apache.openjpa.persistence.OpenJPAPersistence;
+import org.apache.openjpa.persistence.jdbc.IsolationLevel;
+import org.apache.openjpa.persistence.jdbc.JDBCFetchPlan;
 
 import org.springframework.jdbc.datasource.ConnectionHandle;
 import org.springframework.jdbc.datasource.ConnectionHolder;
@@ -37,8 +40,8 @@ import org.springframework.transaction.TransactionException;
  * {@link org.springframework.orm.jpa.JpaDialect} implementation for Apache OpenJPA.
  * Developed and tested against OpenJPA 2.2.
  *
- * @author Costin Leau
  * @author Juergen Hoeller
+ * @author Costin Leau
  * @since 2.0
  */
 @SuppressWarnings("serial")
@@ -48,14 +51,27 @@ public class OpenJpaDialect extends DefaultJpaDialect {
 	public Object beginTransaction(EntityManager entityManager, TransactionDefinition definition)
 			throws PersistenceException, SQLException, TransactionException {
 
-		super.beginTransaction(entityManager, definition);
-		OpenJPAEntityManager em = getOpenJPAEntityManager(entityManager);
+		OpenJPAEntityManager openJpaEntityManager = getOpenJPAEntityManager(entityManager);
+
+		if (definition.getIsolationLevel() != TransactionDefinition.ISOLATION_DEFAULT) {
+			// Pass custom isolation level on to OpenJPA's JDBCFetchPlan configuration
+			FetchPlan fetchPlan = openJpaEntityManager.getFetchPlan();
+			if (fetchPlan instanceof JDBCFetchPlan) {
+				IsolationLevel isolation = IsolationLevel.fromConnectionConstant(definition.getIsolationLevel());
+				((JDBCFetchPlan) fetchPlan).setIsolation(isolation);
+			}
+		}
+
+		entityManager.getTransaction().begin();
+
 		if (!definition.isReadOnly()) {
 			// Like with EclipseLink, make sure to start the logic transaction early so that other
 			// participants using the connection (such as JdbcTemplate) run in a transaction.
-			em.beginStore();
+			openJpaEntityManager.beginStore();
 		}
-		return new OpenJpaTransactionData(em);
+
+		// Custom implementation for OpenJPA savepoint handling
+		return new OpenJpaTransactionData(openJpaEntityManager);
 	}
 
 	@Override
