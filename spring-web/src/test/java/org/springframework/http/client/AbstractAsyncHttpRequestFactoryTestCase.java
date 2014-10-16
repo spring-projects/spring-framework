@@ -22,9 +22,12 @@ import java.util.Arrays;
 import java.util.Locale;
 import java.util.concurrent.Future;
 
+import org.junit.After;
+import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
 
+import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -33,8 +36,6 @@ import org.springframework.util.FileCopyUtils;
 import org.springframework.util.StreamUtils;
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.util.concurrent.ListenableFutureCallback;
-
-import static org.junit.Assert.*;
 
 public abstract class AbstractAsyncHttpRequestFactoryTestCase extends AbstractJettyServerTestCase {
 
@@ -49,6 +50,13 @@ public abstract class AbstractAsyncHttpRequestFactoryTestCase extends AbstractJe
 		}
 	}
 
+	@After
+	public final void destroyFactory() throws Exception {
+		if (factory instanceof DisposableBean) {
+			((DisposableBean) factory).destroy();
+		}
+	}
+
 	protected abstract AsyncClientHttpRequestFactory createRequestFactory();
 
 
@@ -60,7 +68,11 @@ public abstract class AbstractAsyncHttpRequestFactoryTestCase extends AbstractJe
 		assertEquals("Invalid HTTP URI", uri, request.getURI());
 		Future<ClientHttpResponse> futureResponse = request.executeAsync();
 		ClientHttpResponse response = futureResponse.get();
-		assertEquals("Invalid status code", HttpStatus.NOT_FOUND, response.getStatusCode());
+		try {
+			assertEquals("Invalid status code", HttpStatus.NOT_FOUND, response.getStatusCode());
+		} finally {
+			response.close();
+		}
 	}
 
 	@Test
@@ -74,24 +86,24 @@ public abstract class AbstractAsyncHttpRequestFactoryTestCase extends AbstractJe
 			@Override
 			public void onSuccess(ClientHttpResponse result) {
 				try {
-					System.out.println("SUCCESS! " + result.getStatusCode());
-					System.out.println("Callback: " + System.currentTimeMillis());
-					System.out.println(Thread.currentThread().getId());
 					assertEquals("Invalid status code", HttpStatus.NOT_FOUND, result.getStatusCode());
 				}
 				catch (IOException ex) {
-					ex.printStackTrace();
+					fail(ex.getMessage());
 				}
 			}
 			@Override
 			public void onFailure(Throwable ex) {
-				System.out.println("FAILURE: " + ex);
+				fail(ex.getMessage());
 			}
 		});
 		ClientHttpResponse response = listenableFuture.get();
-		System.out.println("Main thread: " + System.currentTimeMillis());
-		assertEquals("Invalid status code", HttpStatus.NOT_FOUND, response.getStatusCode());
-		System.out.println(Thread.currentThread().getId());
+		try {
+			assertEquals("Invalid status code", HttpStatus.NOT_FOUND, response.getStatusCode());
+		}
+		finally {
+			response.close();
+		}
 	}
 
 	@Test
@@ -129,7 +141,7 @@ public abstract class AbstractAsyncHttpRequestFactoryTestCase extends AbstractJe
 		}
 	}
 
-	@Test(expected = IllegalStateException.class)
+	@Test
 	public void multipleWrites() throws Exception {
 		AsyncClientHttpRequest request = factory.createAsyncRequest(new URI(baseUrl + "/echo"), HttpMethod.POST);
 		final byte[] body = "Hello World".getBytes("UTF-8");
@@ -146,13 +158,17 @@ public abstract class AbstractAsyncHttpRequestFactoryTestCase extends AbstractJe
 		ClientHttpResponse response = futureResponse.get();
 		try {
 			FileCopyUtils.copy(body, request.getBody());
+			fail("IllegalStateException expected");
+		}
+		catch (IllegalStateException ex) {
+			// expected
 		}
 		finally {
 			response.close();
 		}
 	}
 
-	@Test(expected = UnsupportedOperationException.class)
+	@Test
 	public void headersAfterExecute() throws Exception {
 		AsyncClientHttpRequest request = factory.createAsyncRequest(new URI(baseUrl + "/echo"), HttpMethod.POST);
 		request.getHeaders().add("MyHeader", "value");
@@ -163,6 +179,10 @@ public abstract class AbstractAsyncHttpRequestFactoryTestCase extends AbstractJe
 		ClientHttpResponse response = futureResponse.get();
 		try {
 			request.getHeaders().add("MyHeader", "value");
+			fail("UnsupportedOperationException expected");
+		}
+		catch (UnsupportedOperationException ex) {
+			// expected
 		}
 		finally {
 			response.close();
