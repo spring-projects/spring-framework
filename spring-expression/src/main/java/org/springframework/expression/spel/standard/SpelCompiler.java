@@ -153,7 +153,7 @@ public class SpelCompiler implements Opcodes {
 				new String[ ]{"org/springframework/expression/EvaluationException"});
 		mv.visitCode();
 
-		CodeFlow cf = new CodeFlow();
+		CodeFlow cf = new CodeFlow(clazzName, cw);
 
 		// Ask the expression AST to generate the body of the method
 		try {
@@ -176,6 +176,9 @@ public class SpelCompiler implements Opcodes {
 		mv.visitMaxs(0, 0);  // not supplied due to COMPUTE_MAXS
 		mv.visitEnd();
 		cw.visitEnd();
+		
+		cf.finish();
+		
 		byte[] data = cw.toByteArray();
 		// TODO need to make this conditionally occur based on a debug flag
 		// dump(expressionToCompile.toStringAST(), clazzName, data);
@@ -241,6 +244,7 @@ public class SpelCompiler implements Opcodes {
 			tempFile.delete();
 			File f = new File(tempFile, dir);
 			f.mkdirs();
+			// System.out.println("Expression '" + expressionText + "' compiled code dumped to " + dumpLocation);
 			if (logger.isDebugEnabled()) {
 				logger.debug("Expression '" + expressionText + "' compiled code dumped to " + dumpLocation);
 			}

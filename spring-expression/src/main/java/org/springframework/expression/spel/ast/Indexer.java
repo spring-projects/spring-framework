@@ -254,7 +254,6 @@ public class Indexer extends SpelNodeImpl {
 			this.children[0].generateCode(mv, cf);
 			cf.exitCompilationScope();
 			mv.visitMethodInsn(INVOKEINTERFACE, "java/util/List", "get", "(I)Ljava/lang/Object;", true);
-			CodeFlow.insertCheckCast(mv, this.exitTypeDescriptor);
 		}
 		else if (this.indexedType == IndexedType.MAP) {
 			mv.visitTypeInsn(CHECKCAST, "java/util/Map");
@@ -271,7 +270,6 @@ public class Indexer extends SpelNodeImpl {
 				cf.exitCompilationScope();
 			}
 			mv.visitMethodInsn(INVOKEINTERFACE, "java/util/Map", "get", "(Ljava/lang/Object;)Ljava/lang/Object;", true);
-			CodeFlow.insertCheckCast(mv, this.exitTypeDescriptor);
 		} 
 		else if (this.indexedType == IndexedType.OBJECT) {
 			ReflectivePropertyAccessor.OptimalPropertyAccessor accessor =
@@ -493,7 +491,7 @@ public class Indexer extends SpelNodeImpl {
 		@Override
 		public TypedValue getValue() {
 			Object value = this.map.get(this.key);
-			exitTypeDescriptor = CodeFlow.toDescriptorFromObject(value);
+			exitTypeDescriptor = CodeFlow.toDescriptor(Object.class);
 			return new TypedValue(value, this.mapEntryDescriptor.getMapValueTypeDescriptor(value));
 		}
 
@@ -645,7 +643,7 @@ public class Indexer extends SpelNodeImpl {
 			growCollectionIfNecessary();
 			if (this.collection instanceof List) {
 				Object o = ((List) this.collection).get(this.index);
-				exitTypeDescriptor = CodeFlow.toDescriptorFromObject(o);
+				exitTypeDescriptor = CodeFlow.toDescriptor(Object.class);
 				return new TypedValue(o, this.collectionEntryDescriptor.elementTypeDescriptor(o));
 			}
 			int pos = 0;

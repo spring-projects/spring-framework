@@ -130,6 +130,7 @@ public class OpPlus extends Operator {
 		}
 
 		if (leftOperand instanceof String && rightOperand instanceof String) {
+			this.exitTypeDescriptor = "Ljava/lang/String";
 			return new TypedValue((String) leftOperand + rightOperand);
 		}
 
@@ -192,37 +193,65 @@ public class OpPlus extends Operator {
 		return (this.exitTypeDescriptor != null);
 	}
 
+	/**
+	 * Walk through a possible tree of nodes that combine strings and append
+	 * them all to the same (on stack) StringBuilder.
+	 */
+	private void walk(MethodVisitor mv, CodeFlow cf, SpelNodeImpl operand) {
+		if (operand instanceof OpPlus) {
+			OpPlus plus = (OpPlus)operand;
+			walk(mv,cf,plus.getLeftOperand());
+			walk(mv,cf,plus.getRightOperand());
+		}
+		else {
+			cf.enterCompilationScope();
+			operand.generateCode(mv,cf);
+			cf.exitCompilationScope();
+			mv.visitMethodInsn(INVOKEVIRTUAL, "java/lang/StringBuilder", "append", "(Ljava/lang/String;)Ljava/lang/StringBuilder;", false);
+		}
+	}
+	
 	@Override
 	public void generateCode(MethodVisitor mv, CodeFlow cf) {
-		getLeftOperand().generateCode(mv, cf);
-		String leftDesc = getLeftOperand().exitTypeDescriptor;
-		if (!CodeFlow.isPrimitive(leftDesc)) {
-			CodeFlow.insertUnboxInsns(mv, this.exitTypeDescriptor.charAt(0), leftDesc);
+		if (this.exitTypeDescriptor == "Ljava/lang/String") {
+			mv.visitTypeInsn(NEW, "java/lang/StringBuilder");
+			mv.visitInsn(DUP);
+			mv.visitMethodInsn(INVOKESPECIAL, "java/lang/StringBuilder", "<init>", "()V", false);
+			walk(mv,cf,getLeftOperand());
+			walk(mv,cf,getRightOperand());
+			mv.visitMethodInsn(INVOKEVIRTUAL, "java/lang/StringBuilder", "toString", "()Ljava/lang/String;", false);
 		}
-		if (this.children.length > 1) {
-			cf.enterCompilationScope();
-			getRightOperand().generateCode(mv, cf);
-			String rightDesc = getRightOperand().exitTypeDescriptor;
-			cf.exitCompilationScope();
-			if (!CodeFlow.isPrimitive(rightDesc)) {
-				CodeFlow.insertUnboxInsns(mv, this.exitTypeDescriptor.charAt(0), rightDesc);
+		else {
+			getLeftOperand().generateCode(mv, cf);
+			String leftDesc = getLeftOperand().exitTypeDescriptor;
+			if (!CodeFlow.isPrimitive(leftDesc)) {
+				CodeFlow.insertUnboxInsns(mv, this.exitTypeDescriptor.charAt(0), leftDesc);
 			}
-			switch (this.exitTypeDescriptor.charAt(0)) {
-				case 'I':
-					mv.visitInsn(IADD);
-					break;
-				case 'J':
-					mv.visitInsn(LADD);
-					break;
-				case 'F': 
-					mv.visitInsn(FADD);
-					break;
-				case 'D':
-					mv.visitInsn(DADD);
-					break;				
-				default:
-					throw new IllegalStateException(
-							"Unrecognized exit type descriptor: '" + this.exitTypeDescriptor + "'");
+			if (this.children.length > 1) {
+				cf.enterCompilationScope();
+				getRightOperand().generateCode(mv, cf);
+				String rightDesc = getRightOperand().exitTypeDescriptor;
+				cf.exitCompilationScope();
+				if (!CodeFlow.isPrimitive(rightDesc)) {
+					CodeFlow.insertUnboxInsns(mv, this.exitTypeDescriptor.charAt(0), rightDesc);
+				}
+				switch (this.exitTypeDescriptor.charAt(0)) {
+					case 'I':
+						mv.visitInsn(IADD);
+						break;
+					case 'J':
+						mv.visitInsn(LADD);
+						break;
+					case 'F': 
+						mv.visitInsn(FADD);
+						break;
+					case 'D':
+						mv.visitInsn(DADD);
+						break;				
+					default:
+						throw new IllegalStateException(
+								"Unrecognized exit type descriptor: '" + this.exitTypeDescriptor + "'");
+				}
 			}
 		}
 		cf.pushDescriptor(this.exitTypeDescriptor);

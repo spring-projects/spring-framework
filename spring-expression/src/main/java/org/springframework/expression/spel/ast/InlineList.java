@@ -17,11 +17,14 @@
 package org.springframework.expression.spel.ast;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
+import java.util.Collections;
 
+import org.springframework.asm.ClassWriter;
+import org.springframework.asm.MethodVisitor;
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.TypedValue;
+import org.springframework.expression.spel.CodeFlow;
 import org.springframework.expression.spel.ExpressionState;
 import org.springframework.expression.spel.SpelNode;
 
@@ -120,6 +123,64 @@ public class InlineList extends SpelNodeImpl {
 	@SuppressWarnings("unchecked")
 	public List<Object> getConstantValue() {
 		return (List<Object>) this.constant.getValue();
+	}
+	
+	@Override
+	public boolean isCompilable() {
+		return isConstant();
+	}
+	
+	@Override
+	public void generateCode(MethodVisitor mv, CodeFlow codeflow) {
+		final String constantFieldName = "inlineList$"+codeflow.nextFieldId();
+		final String clazzname = codeflow.getClassname();
+
+		codeflow.registerNewField(new CodeFlow.FieldAdder() {
+			public void generateField(ClassWriter cw, CodeFlow codeflow) {
+				cw.visitField(ACC_PRIVATE|ACC_STATIC|ACC_FINAL, constantFieldName, "Ljava/util/List;", null, null);
+			}
+		});
+		
+		codeflow.registerNewClinit(new CodeFlow.ClinitAdder() {
+			public void generateCode(MethodVisitor mv, CodeFlow codeflow) {
+				generateClinitCode(clazzname,constantFieldName, mv,codeflow,false);
+			}
+		});
+		
+		mv.visitFieldInsn(GETSTATIC, clazzname, constantFieldName, "Ljava/util/List;");
+		codeflow.pushDescriptor("Ljava/util/List");
+	}
+	
+	void generateClinitCode(String clazzname, String constantFieldName, MethodVisitor mv, CodeFlow codeflow, boolean nested) {
+		mv.visitTypeInsn(NEW, "java/util/ArrayList");
+		mv.visitInsn(DUP);
+		mv.visitMethodInsn(INVOKESPECIAL, "java/util/ArrayList", "<init>", "()V", false);
+		if (!nested) {
+			mv.visitFieldInsn(PUTSTATIC, clazzname, constantFieldName, "Ljava/util/List;");
+		}
+		int childcount = getChildCount();		
+		for (int c=0; c < childcount; c++) {
+			if (!nested) {
+				mv.visitFieldInsn(GETSTATIC, clazzname, constantFieldName, "Ljava/util/List;");
+			}
+			else {
+				mv.visitInsn(DUP);
+			}
+			// The children might be further lists if they are not constants. In this
+			// situation do not call back into generateCode() because it will register another clinit adder.
+			// Instead, directly build the list here:
+			if (children[c] instanceof InlineList) {
+				((InlineList)children[c]).generateClinitCode(clazzname, constantFieldName, mv, codeflow, true);
+			}
+			else {
+				children[c].generateCode(mv, codeflow);
+				if (CodeFlow.isPrimitive(codeflow.lastDescriptor())) {
+					CodeFlow.insertBoxIfNecessary(mv, codeflow.lastDescriptor().charAt(0));
+				}
+			}
+			mv.visitMethodInsn(INVOKEINTERFACE, "java/util/List", "add", "(Ljava/lang/Object;)Z", true);
+			mv.visitInsn(POP);
+		}
 	}
 
 }

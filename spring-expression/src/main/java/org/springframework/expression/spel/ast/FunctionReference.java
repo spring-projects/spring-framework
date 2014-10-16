@@ -165,23 +165,9 @@ public class FunctionReference extends SpelNodeImpl {
 	@Override 
 	public void generateCode(MethodVisitor mv,CodeFlow cf) {
 		String methodDeclaringClassSlashedDescriptor = this.method.getDeclaringClass().getName().replace('.', '/');
-		String[] paramDescriptors = CodeFlow.toParamDescriptors(this.method);
-		for (int c = 0; c < this.children.length; c++) {
-			SpelNodeImpl child = this.children[c];
-			cf.enterCompilationScope();
-			child.generateCode(mv, cf);
-			// Check if need to box it for the method reference?
-			if (CodeFlow.isPrimitive(cf.lastDescriptor()) && paramDescriptors[c].charAt(0) == 'L') {
-				CodeFlow.insertBoxIfNecessary(mv, cf.lastDescriptor().charAt(0));
-			}
-			else if (!cf.lastDescriptor().equals(paramDescriptors[c])) {
-				// This would be unnecessary in the case of subtyping (e.g. method takes a Number but passed in is an Integer)
-				CodeFlow.insertCheckCast(mv, paramDescriptors[c]);
-			}
-			cf.exitCompilationScope();
-		}
+		CodeFlow.generateCodeForArguments(mv, cf, method, this.children);
 		mv.visitMethodInsn(INVOKESTATIC, methodDeclaringClassSlashedDescriptor, this.method.getName(),
-				CodeFlow.createSignatureDescriptor(this.method),false);
+				CodeFlow.createSignatureDescriptor(this.method), false);
 		cf.pushDescriptor(this.exitTypeDescriptor);
 	}
 

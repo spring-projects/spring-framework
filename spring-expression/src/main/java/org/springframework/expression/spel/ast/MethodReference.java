@@ -268,20 +268,18 @@ public class MethodReference extends SpelNodeImpl {
 		}
 
 		ReflectiveMethodExecutor executor = (ReflectiveMethodExecutor) executorToCheck.get();
-		Method method = executor.getMethod();
-		if (!Modifier.isPublic(method.getModifiers()) || !Modifier.isPublic(method.getDeclaringClass().getModifiers())) {
-			return false;
-		}
-		if (method.isVarArgs()) {
-			return false;
-		}
 		if (executor.didArgumentConversionOccur()) {
+			return false;
+		}
+		Method method = executor.getMethod();
+		Class<?> clazz = method.getDeclaringClass();
+		if (!Modifier.isPublic(clazz.getModifiers()) && executor.getPublicDeclaringClass() == null) {
 			return false;
 		}
 
 		return true;
 	}
-
+	
 	@Override
 	public void generateCode(MethodVisitor mv, CodeFlow cf) {
 		CachedMethodExecutor executorToCheck = this.cachedExecutor;
@@ -289,7 +287,8 @@ public class MethodReference extends SpelNodeImpl {
 			throw new IllegalStateException("No applicable cached executor found: " + executorToCheck);
 		}
 
-		Method method = ((ReflectiveMethodExecutor) executorToCheck.get()).getMethod();
+		ReflectiveMethodExecutor methodExecutor = (ReflectiveMethodExecutor)executorToCheck.get();
+		Method method = methodExecutor.getMethod();
 		boolean isStaticMethod = Modifier.isStatic(method.getModifiers());
 		String descriptor = cf.lastDescriptor();
 
@@ -298,27 +297,19 @@ public class MethodReference extends SpelNodeImpl {
 		}
 
 		boolean itf = method.getDeclaringClass().isInterface();
-		String methodDeclaringClassSlashedDescriptor = method.getDeclaringClass().getName().replace('.', '/');
+		String methodDeclaringClassSlashedDescriptor = null;
+		if (Modifier.isPublic(method.getDeclaringClass().getModifiers())) {
+			methodDeclaringClassSlashedDescriptor = method.getDeclaringClass().getName().replace('.', '/');
+		}
+		else {
+			methodDeclaringClassSlashedDescriptor = methodExecutor.getPublicDeclaringClass().getName().replace('.', '/');			
+		}
 		if (!isStaticMethod) {
-			if (descriptor == null || !descriptor.equals(methodDeclaringClassSlashedDescriptor)) {
-				mv.visitTypeInsn(CHECKCAST, methodDeclaringClassSlashedDescriptor);
+			if (descriptor == null || !descriptor.substring(1).equals(methodDeclaringClassSlashedDescriptor)) {
+				CodeFlow.insertCheckCast(mv, "L"+ methodDeclaringClassSlashedDescriptor);
 			}
 		}
-		String[] paramDescriptors = CodeFlow.toParamDescriptors(method);
-		for (int i = 0; i < this.children.length;i++) {
-			SpelNodeImpl child = this.children[i];
-			cf.enterCompilationScope();
-			child.generateCode(mv, cf);
-			// Check if need to box it for the method reference?
-			if (CodeFlow.isPrimitive(cf.lastDescriptor()) && paramDescriptors[i].charAt(0) == 'L') {
-				CodeFlow.insertBoxIfNecessary(mv, cf.lastDescriptor().charAt(0));
-			}
-			else if (!cf.lastDescriptor().equals(paramDescriptors[i])) {
-				// This would be unnecessary in the case of subtyping (e.g. method takes Number but Integer passed in)
-				CodeFlow.insertCheckCast(mv, paramDescriptors[i]);
-			}
-			cf.exitCompilationScope();
-		}
+		CodeFlow.generateCodeForArguments(mv, cf, method, children);		
 		mv.visitMethodInsn(isStaticMethod ? INVOKESTATIC : INVOKEVIRTUAL,
 				methodDeclaringClassSlashedDescriptor, method.getName(), CodeFlow.createSignatureDescriptor(method), itf);
 		cf.pushDescriptor(this.exitTypeDescriptor);

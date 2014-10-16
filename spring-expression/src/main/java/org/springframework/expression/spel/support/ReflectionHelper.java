@@ -287,7 +287,6 @@ public class ReflectionHelper {
 		if (method.isVarArgs()) {
 			Class<?>[] paramTypes = method.getParameterTypes();
 			varargsPosition = paramTypes.length - 1;
-			conversionOccurred = true;
 		}
 		for (int argPos = 0; argPos < arguments.length; argPos++) {
 			TypeDescriptor targetType;
