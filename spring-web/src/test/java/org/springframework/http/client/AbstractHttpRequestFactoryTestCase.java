@@ -22,16 +22,19 @@ import java.net.URI;
 import java.util.Arrays;
 import java.util.Locale;
 
+import org.junit.After;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import org.junit.Before;
 import org.junit.Test;
 
+import org.springframework.beans.factory.DisposableBean;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.StreamingHttpOutputMessage;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.util.StreamUtils;
-
-import static org.junit.Assert.*;
 
 /** @author Arjen Poutsma */
 public abstract class AbstractHttpRequestFactoryTestCase extends
@@ -40,9 +43,20 @@ public abstract class AbstractHttpRequestFactoryTestCase extends
 	protected ClientHttpRequestFactory factory;
 
 	@Before
-	public final void createFactory() {
+	public final void createFactory() throws Exception {
 		factory = createRequestFactory();
+		if (factory instanceof InitializingBean) {
+			((InitializingBean) factory).afterPropertiesSet();
+		}
 	}
+
+	@After
+	public final void destroyFactory() throws Exception {
+		if (factory instanceof DisposableBean) {
+			((DisposableBean) factory).destroy();
+		}
+	}
+
 
 	protected abstract ClientHttpRequestFactory createRequestFactory();
 
@@ -53,7 +67,11 @@ public abstract class AbstractHttpRequestFactoryTestCase extends
 		assertEquals("Invalid HTTP method", HttpMethod.GET, request.getMethod());
 		assertEquals("Invalid HTTP URI", uri, request.getURI());
 		ClientHttpResponse response = request.execute();
-		assertEquals("Invalid status code", HttpStatus.NOT_FOUND, response.getStatusCode());
+		try {
+			assertEquals("Invalid status code", HttpStatus.NOT_FOUND, response.getStatusCode());
+		} finally {
+			response.close();
+		}
 	}
 
 	@Test
