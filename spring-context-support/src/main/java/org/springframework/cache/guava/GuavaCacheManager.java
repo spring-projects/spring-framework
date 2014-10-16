@@ -16,10 +16,7 @@
 
 package org.springframework.cache.guava;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -29,141 +26,43 @@ import com.google.common.cache.CacheLoader;
 
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
+import org.springframework.cache.support.AbstractCacheManager;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 
 /**
- * {@link CacheManager} implementation that lazily builds {@link GuavaCache}
- * instances for each {@link #getCache} request. Also supports a 'static' mode
- * where the set of cache names is pre-defined through {@link #setCacheNames},
- * with no dynamic creation of further cache regions at runtime.
+ * {@link CacheManager} implementation that can be assigned a set of custom
+ * {@link GuavaCache} instances. Each {@link #getCache} request will retrieve
+ * the named {@link GuavaCache} instance. If a named instance is not found, then a
+ * new {@link GuavaCache} will be created based on a default Guava {@link CacheBuilder}.
  *
- * <p>The configuration of the underlying cache can be fine-tuned through a
- * Guava {@link CacheBuilder} or {@link CacheBuilderSpec}, passed into this
- * CacheManager through {@link #setCacheBuilder}/{@link #setCacheBuilderSpec}.
- * A {@link CacheBuilderSpec}-compliant expression value can also be applied
- * via the {@link #setCacheSpecification "cacheSpecification"} bean property.
+ * <p> The caches are set through a set of {@link GuavaCacheFactoryBean}. Each
+ * factory bean can be customized with a Guava {@link CacheBuilder} or {@link CacheBuilderSpec},
+ * passed into this CacheManager through
+ * {@link GuavaCacheFactoryBean#setCacheBuilder}/{@link GuavaCacheFactoryBean#setCacheBuilderSpec}.
+ </p>
  *
  * <p>Requires Google Guava 12.0 or higher.
  *
  * @author Juergen Hoeller
  * @author Stephane Nicoll
+ * @author Biju Kunjummen
  * @since 4.0
  * @see GuavaCache
  */
 public class GuavaCacheManager implements CacheManager {
 
-	private final ConcurrentMap<String, Cache> cacheMap = new ConcurrentHashMap<String, Cache>(16);
+	private ConcurrentMap<String, GuavaCache> cacheMap = new ConcurrentHashMap<String, GuavaCache>(16);
 
-	private boolean dynamic = true;
+	private CacheBuilder<Object, Object> defaultCacheBuilder = CacheBuilder.newBuilder();
 
-	private CacheBuilder<Object, Object> cacheBuilder = CacheBuilder.newBuilder();
-
-	private CacheLoader<Object, Object> cacheLoader;
-
-	private boolean allowNullValues = true;
-
-
-	/**
-	 * Construct a dynamic GuavaCacheManager,
-	 * lazily creating cache instances as they are being requested.
-	 */
 	public GuavaCacheManager() {
 	}
 
-	/**
-	 * Construct a static GuavaCacheManager,
-	 * managing caches for the specified cache names only.
-	 */
-	public GuavaCacheManager(String... cacheNames) {
-		setCacheNames(Arrays.asList(cacheNames));
-	}
-
-
-	/**
-	 * Specify the set of cache names for this CacheManager's 'static' mode.
-	 * <p>The number of caches and their names will be fixed after a call to this method,
-	 * with no creation of further cache regions at runtime.
-	 * <p>Calling this with a {@code null} collection argument resets the
-	 * mode to 'dynamic', allowing for further creation of caches again.
-	 */
-	public void setCacheNames(Collection<String> cacheNames) {
-		if (cacheNames != null) {
-			for (String name : cacheNames) {
-				this.cacheMap.put(name, createGuavaCache(name));
-			}
-			this.dynamic = false;
+	public void setCaches(Set<GuavaCache> caches) {
+		for (GuavaCache cache: caches) {
+			this.cacheMap.put(cache.getName(), cache);
 		}
-		else {
-			this.dynamic = true;
-		}
-	}
-
-	/**
-	 * Set the Guava CacheBuilder to use for building each individual
-	 * {@link GuavaCache} instance.
-	 * @see #createNativeGuavaCache
-	 * @see com.google.common.cache.CacheBuilder#build()
-	 */
-	public void setCacheBuilder(CacheBuilder<Object, Object> cacheBuilder) {
-		Assert.notNull(cacheBuilder, "CacheBuilder must not be null");
-		doSetCacheBuilder(cacheBuilder);
-	}
-
-	/**
-	 * Set the Guava CacheBuilderSpec to use for building each individual
-	 * {@link GuavaCache} instance.
-	 * @see #createNativeGuavaCache
-	 * @see com.google.common.cache.CacheBuilder#from(CacheBuilderSpec)
-	 */
-	public void setCacheBuilderSpec(CacheBuilderSpec cacheBuilderSpec) {
-		doSetCacheBuilder(CacheBuilder.from(cacheBuilderSpec));
-	}
-
-	/**
-	 * Set the Guava cache specification String to use for building each
-	 * individual {@link GuavaCache} instance. The given value needs to
-	 * comply with Guava's {@link CacheBuilderSpec} (see its javadoc).
-	 * @see #createNativeGuavaCache
-	 * @see com.google.common.cache.CacheBuilder#from(String)
-	 */
-	public void setCacheSpecification(String cacheSpecification) {
-		doSetCacheBuilder(CacheBuilder.from(cacheSpecification));
-	}
-
-	/**
-	 * Set the Guava CacheLoader to use for building each individual
-	 * {@link GuavaCache} instance, turning it into a LoadingCache.
-	 * @see #createNativeGuavaCache
-	 * @see com.google.common.cache.CacheBuilder#build(CacheLoader)
-	 * @see com.google.common.cache.LoadingCache
-	 */
-	public void setCacheLoader(CacheLoader<Object, Object> cacheLoader) {
-		if (!ObjectUtils.nullSafeEquals(this.cacheLoader, cacheLoader)) {
-			this.cacheLoader = cacheLoader;
-			refreshKnownCaches();
-		}
-	}
-
-	/**
-	 * Specify whether to accept and convert {@code null} values for all caches
-	 * in this cache manager.
-	 * <p>Default is "true", despite Guava itself not supporting {@code null} values.
-	 * An internal holder object will be used to store user-level {@code null}s.
-	 */
-	public void setAllowNullValues(boolean allowNullValues) {
-		if (this.allowNullValues != allowNullValues) {
-			this.allowNullValues = allowNullValues;
-			refreshKnownCaches();
-		}
-	}
-
-	/**
-	 * Return whether this cache manager accepts and converts {@code null} values
-	 * for all of its caches.
-	 */
-	public boolean isAllowNullValues() {
-		return this.allowNullValues;
 	}
 
 
@@ -174,12 +73,12 @@ public class GuavaCacheManager implements CacheManager {
 
 	@Override
 	public Cache getCache(String name) {
-		Cache cache = this.cacheMap.get(name);
-		if (cache == null && this.dynamic) {
+		GuavaCache cache = this.cacheMap.get(name);
+		if (cache == null) {
 			synchronized (this.cacheMap) {
 				cache = this.cacheMap.get(name);
 				if (cache == null) {
-					cache = createGuavaCache(name);
+					cache = createDefaultGuavaCache(name);
 					this.cacheMap.put(name, cache);
 				}
 			}
@@ -187,43 +86,7 @@ public class GuavaCacheManager implements CacheManager {
 		return cache;
 	}
 
-	/**
-	 * Create a new GuavaCache instance for the specified cache name.
-	 * @param name the name of the cache
-	 * @return the Spring GuavaCache adapter (or a decorator thereof)
-	 */
-	protected Cache createGuavaCache(String name) {
-		return new GuavaCache(name, createNativeGuavaCache(name), isAllowNullValues());
+	private GuavaCache createDefaultGuavaCache(String name) {
+		return new GuavaCache(name, this.defaultCacheBuilder.build());
 	}
-
-	/**
-	 * Create a native Guava Cache instance for the specified cache name.
-	 * @param name the name of the cache
-	 * @return the native Guava Cache instance
-	 */
-	protected com.google.common.cache.Cache<Object, Object> createNativeGuavaCache(String name) {
-		if (this.cacheLoader != null) {
-			return this.cacheBuilder.build(this.cacheLoader);
-		}
-		else {
-			return this.cacheBuilder.build();
-		}
-	}
-
-	private void doSetCacheBuilder(CacheBuilder<Object, Object> cacheBuilder) {
-		if (!ObjectUtils.nullSafeEquals(this.cacheBuilder, cacheBuilder)) {
-			this.cacheBuilder = cacheBuilder;
-			refreshKnownCaches();
-		}
-	}
-
-	/**
-	 * Create the known caches again with the current state of this manager.
-	 */
-	private void refreshKnownCaches() {
-		for (Map.Entry<String, Cache> entry : this.cacheMap.entrySet()) {
-			entry.setValue(createGuavaCache(entry.getKey()));
-		}
-	}
-
 }
