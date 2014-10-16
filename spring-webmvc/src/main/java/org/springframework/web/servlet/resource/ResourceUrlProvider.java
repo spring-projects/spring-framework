@@ -172,24 +172,17 @@ public class ResourceUrlProvider implements ApplicationListener<ContextRefreshed
 		if (logger.isTraceEnabled()) {
 			logger.trace("Getting resource URL for requestURL=" + requestUrl);
 		}
-
-		String pathWithinMapping = (String) request.getAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE);
-		if (pathWithinMapping == null) {
-			logger.trace("Request attribute with lookup path not found, calculating instead.");
-			pathWithinMapping = getPathHelper().getLookupPathForRequest(request);
-		}
-
-		// When extracted with PathMatcher, pathWithinMapping won't have leading slash
-		pathWithinMapping = (pathWithinMapping.charAt(0) == '/' ? pathWithinMapping : "/" + pathWithinMapping);
-
-		int index = getPathHelper().getRequestUri(request).indexOf(pathWithinMapping);
-		Assert.state(index != -1, "Failed to determine lookup path: " + requestUrl);
-
+		int index = getLookupPathIndex(request);
 		String prefix = requestUrl.substring(0, index);
 		String lookupPath = requestUrl.substring(index);
-		String resolvedPath = getForLookupPath(lookupPath);
+		String resolvedLookupPath = getForLookupPath(lookupPath);
+		return (resolvedLookupPath != null) ? prefix + resolvedLookupPath : null;
+	}
 
-		return (resolvedPath != null) ? prefix + resolvedPath : null;
+	private int getLookupPathIndex(HttpServletRequest request) {
+		String requestUri = getPathHelper().getRequestUri(request);
+		String lookupPath = getPathHelper().getLookupPathForRequest(request);
+		return requestUri.indexOf(lookupPath);
 	}
 
 	/**

@@ -72,8 +72,8 @@ public class ResourceTransformerSupportTests {
 	@Test
 	public void resolveUrlPath() throws Exception {
 		this.request.setRequestURI("/context/servlet/resources/main.css");
-		this.request.setAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, "resources/main.css");
-
+		this.request.setContextPath("/context");
+		this.request.setServletPath("/servlet");
 		String resourcePath = "/context/servlet/resources/bar.css";
 		Resource css = new ClassPathResource("test/main.css", getClass());
 		String actual = this.transformer.resolveUrlPath(resourcePath, this.request, css, this.transformerChain);
@@ -85,7 +85,6 @@ public class ResourceTransformerSupportTests {
 		this.request.setRequestURI("/context/servlet/resources/main.css");
 		this.request.setContextPath("/context");
 		this.request.setServletPath("/servlet");
-
 		String resourcePath = "/context/servlet/resources/bar.css";
 		Resource css = new ClassPathResource("test/main.css", getClass());
 		String actual = this.transformer.resolveUrlPath(resourcePath, this.request, css, this.transformerChain);
