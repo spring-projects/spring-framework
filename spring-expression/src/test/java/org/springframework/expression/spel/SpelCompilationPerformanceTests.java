@@ -156,7 +156,7 @@ public class SpelCompilationPerformanceTests extends AbstractExpressionTests {
 		Object o = expression.getValue(g);
 		assertEquals("helloworld spring", o);
 
-		System.out.println("Performance check for SpEL expression: '{'abcde','ijklm'}[0].substring({1,3,4}[0],{1,3,4}[1])'");
+		System.out.println("Performance check for SpEL expression: 'hello' + getWorld() + ' spring'");
 		long stime = System.currentTimeMillis();
 		for (int i=0;i<1000000;i++) {
 			o = expression.getValue(g);

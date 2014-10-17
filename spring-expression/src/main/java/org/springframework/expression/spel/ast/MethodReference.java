@@ -295,6 +295,10 @@ public class MethodReference extends SpelNodeImpl {
 		if (descriptor == null && !isStaticMethod) {
 			cf.loadTarget(mv);
 		}
+		
+		if (CodeFlow.isPrimitive(descriptor)) {
+			CodeFlow.insertBoxIfNecessary(mv, descriptor.charAt(0));
+		}
 
 		boolean itf = method.getDeclaringClass().isInterface();
 		String methodDeclaringClassSlashedDescriptor = null;

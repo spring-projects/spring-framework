@@ -17,6 +17,7 @@
 package org.springframework.expression.spel;
 
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
@@ -837,12 +838,23 @@ public class CodeFlow implements Opcodes {
 	 * packaged into an array.
 	 * @param mv the method visitor where code should be generated
 	 * @param cf the current codeflow
-	 * @param method the method for which arguments are being setup
+	 * @param member the method or constructor for which arguments are being setup
 	 * @param arguments the expression nodes for the expression supplied argument values
 	 */
-	public static void generateCodeForArguments(MethodVisitor mv, CodeFlow cf, Method method, SpelNodeImpl[] arguments) {
-		String[] paramDescriptors = CodeFlow.toParamDescriptors(method);
-		if (method.isVarArgs()) {
+	public static void generateCodeForArguments(MethodVisitor mv, CodeFlow cf, Member member, SpelNodeImpl[] arguments) {
+		String[] paramDescriptors = null;
+		boolean isVarargs = false;
+		if (member instanceof Constructor) {
+			Constructor<?> ctor = (Constructor<?>)member;
+			paramDescriptors = toDescriptors(ctor.getParameterTypes());
+			isVarargs = ctor.isVarArgs();
+		}
+		else { // Method
+			Method method = (Method)member;
+			paramDescriptors = toDescriptors(method.getParameterTypes());
+			isVarargs = method.isVarArgs();
+		}
+		if (isVarargs) {
 			// The final parameter may or may not need packaging into an array, or nothing may
 			// have been passed to satisfy the varargs and so something needs to be built.
 			int p = 0; // Current supplied argument being processed

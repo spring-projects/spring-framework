@@ -437,29 +437,21 @@ public class ConstructorReference extends SpelNodeImpl {
 
 		ReflectiveConstructorExecutor executor = (ReflectiveConstructorExecutor) this.cachedExecutor;
 		Constructor<?> constructor = executor.getConstructor();
-		return (!constructor.isVarArgs() && Modifier.isPublic(constructor.getModifiers()) &&
+		return (Modifier.isPublic(constructor.getModifiers()) &&
 				Modifier.isPublic(constructor.getDeclaringClass().getModifiers()));
 	}
 	
 	@Override
 	public void generateCode(MethodVisitor mv, CodeFlow cf) {
 		ReflectiveConstructorExecutor executor = ((ReflectiveConstructorExecutor) this.cachedExecutor);
-		Constructor<?> constructor = executor.getConstructor();
-		
+		Constructor<?> constructor = executor.getConstructor();		
 		String classSlashedDescriptor = constructor.getDeclaringClass().getName().replace('.', '/');
-		String[] paramDescriptors = CodeFlow.toParamDescriptors(constructor);
 		mv.visitTypeInsn(NEW, classSlashedDescriptor);
 		mv.visitInsn(DUP);
-		for (int c = 1; c < this.children.length; c++) { // children[0] is the type of the constructor
-			SpelNodeImpl child = this.children[c];
-			cf.enterCompilationScope();
-			child.generateCode(mv, cf);
-			// Check if need to box it for the method reference?
-			if (CodeFlow.isPrimitive(cf.lastDescriptor()) && paramDescriptors[c-1].charAt(0) == 'L') {
-				CodeFlow.insertBoxIfNecessary(mv, cf.lastDescriptor().charAt(0));
-			}
-			cf.exitCompilationScope();
-		}
+		// children[0] is the type of the constructor, don't want to include that in argument processing
+		SpelNodeImpl[] arguments = new SpelNodeImpl[children.length-1];
+		System.arraycopy(children, 1, arguments, 0, children.length-1);
+		CodeFlow.generateCodeForArguments(mv, cf, constructor, arguments);	
 		mv.visitMethodInsn(INVOKESPECIAL, classSlashedDescriptor, "<init>",
 				CodeFlow.createSignatureDescriptor(constructor), false);
 		cf.pushDescriptor(this.exitTypeDescriptor);

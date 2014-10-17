@@ -221,7 +221,8 @@ public class SpelExpression implements Expression {
 		Assert.notNull(context, "The EvaluationContext is required");
 		if (compiledAst!= null) {
 			try {
-				Object result = this.compiledAst.getValue(null,context);
+				TypedValue contextRoot = context == null ? null : context.getRootObject();
+				Object result = this.compiledAst.getValue(contextRoot==null?null:contextRoot.getValue(),context);
 				return result;
 			}
 			catch (Throwable ex) {
@@ -272,7 +273,8 @@ public class SpelExpression implements Expression {
 	public <T> T getValue(EvaluationContext context, Class<T> expectedResultType) throws EvaluationException {
 		if (this.compiledAst != null) {
 			try {
-				Object result = this.compiledAst.getValue(null,context);
+				TypedValue contextRoot = context == null ? null : context.getRootObject();
+				Object result = this.compiledAst.getValue(contextRoot==null?null:contextRoot.getValue(),context);
 				if (expectedResultType != null) {
 					return ExpressionUtils.convertTypedValue(context, new TypedValue(result), expectedResultType);
 				}
