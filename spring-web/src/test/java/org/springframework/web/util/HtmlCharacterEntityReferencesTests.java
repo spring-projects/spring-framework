@@ -76,6 +76,20 @@ public class HtmlCharacterEntityReferencesTests {
 				(char) -1, entityReferences.convertToCharacter("invalid"));
 	}
 
+	// SPR-9293
+	@Test
+	public void testConvertToReferenceUTF8() {
+		HtmlCharacterEntityReferences entityReferences = new HtmlCharacterEntityReferences();
+		String utf8 = "UTF-8";
+		assertEquals("&lt;", entityReferences.convertToReference('<', utf8));
+		assertEquals("&gt;", entityReferences.convertToReference('>', utf8));
+		assertEquals("&amp;", entityReferences.convertToReference('&', utf8));
+		assertEquals("&quot;", entityReferences.convertToReference('"', utf8));
+		assertEquals("&#39;", entityReferences.convertToReference('\'', utf8));
+		assertNull(entityReferences.convertToReference((char) 233, utf8));
+		assertNull(entityReferences.convertToReference((char) 934, utf8));
+	}
+
 	private Map<Integer, String> getReferenceCharacterMap() {
 		CharacterEntityResourceIterator entityIterator = new CharacterEntityResourceIterator();
 		Map<Integer, String> referencedCharactersMap = new HashMap<Integer, String>();

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -107,14 +107,42 @@ class HtmlCharacterEntityReferences {
 	 * Return true if the given character is mapped to a supported entity reference.
 	 */
 	public boolean isMappedToReference(char character) {
-		return (convertToReference(character) != null);
+		return isMappedToReference(character, WebUtils.DEFAULT_CHARACTER_ENCODING);
+	}
+
+	/**
+	 * Return true if the given character is mapped to a supported entity reference.
+	 */
+	public boolean isMappedToReference(char character, String encoding) {
+		return (convertToReference(character, encoding) != null);
 	}
 
 	/**
 	 * Return the reference mapped to the given character or {@code null}.
 	 */
 	public String convertToReference(char character) {
-		if (character < 1000 || (character >= 8000 && character < 10000)) {
+	   return convertToReference(character, WebUtils.DEFAULT_CHARACTER_ENCODING);
+	}
+
+	/**
+	 * Return the reference mapped to the given character or {@code null}.
+	 */
+	public String convertToReference(char character, String encoding) {
+		if(encoding.startsWith("UTF-")){
+			switch(character){
+				case '<':
+					return "&lt;";
+				case '>':
+					return "&gt;";
+				case '"':
+					return "&quot;";
+				case '&':
+					return "&amp;";
+				case '\'':
+					return "&#39;";
+			}
+		}
+		else if (character < 1000 || (character >= 8000 && character < 10000)) {
 			int index = (character < 1000 ? character : character - 7000);
 			String entityReference = this.characterToEntityReferenceMap[index];
 			if (entityReference != null) {
