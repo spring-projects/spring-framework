@@ -65,19 +65,20 @@ public class ResourceUrlEncodingFilter extends OncePerRequestFilter {
 
 		@Override
 		public String encodeURL(String url) {
-			String name = ResourceUrlProviderExposingInterceptor.RESOURCE_URL_PROVIDER_ATTR;
-			ResourceUrlProvider urlProvider = (ResourceUrlProvider) this.request.getAttribute(name);
-			if (urlProvider != null) {
-				String translatedUrl = urlProvider.getForRequestUrl(this.request, url);
-				if (translatedUrl != null) {
-					return super.encodeURL(translatedUrl);
-				}
+			ResourceUrlProvider resourceUrlProvider = getResourceUrlProvider();
+			if (resourceUrlProvider == null) {
+				logger.debug("Request attribute exposing ResourceUrlProvider not found.");
+				return super.encodeURL(url);
 			}
-			else {
-				logger.debug("Request attribute exposing ResourceUrlProvider not found under name: " + name);
-			}
-			return super.encodeURL(url);
+			String resolvedUrl = resourceUrlProvider.getForRequestUrl(this.request, url);
+			return (resolvedUrl != null ? super.encodeURL(resolvedUrl) : super.encodeURL(url));
 		}
+
+		private ResourceUrlProvider getResourceUrlProvider() {
+			String name = ResourceUrlProviderExposingInterceptor.RESOURCE_URL_PROVIDER_ATTR;
+			return (ResourceUrlProvider) this.request.getAttribute(name);
+		}
+
 	}
 
 }
