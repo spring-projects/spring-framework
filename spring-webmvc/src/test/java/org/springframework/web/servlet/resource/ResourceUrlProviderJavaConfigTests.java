@@ -79,7 +79,7 @@ public class ResourceUrlProviderJavaConfigTests {
 	}
 
 	@Test
-	public void resolvePathWithServletMappingByPrefix() throws Exception {
+	public void resolvePathWithServletMappedByPrefix() throws Exception {
 		this.request.setRequestURI("/myapp/myservlet/index");
 		this.request.setServletPath("/myservlet");
 		this.filterChain.doFilter(this.request, this.response);
@@ -87,6 +87,16 @@ public class ResourceUrlProviderJavaConfigTests {
 		assertEquals("/myapp/myservlet/resources/foo-e36d2e05253c6c7085a91522ce43a0b4.css",
 				resolvePublicResourceUrlPath("/myapp/myservlet/resources/foo.css"));
 	}
+
+	@Test
+	public void resolvePathNoMatch() throws Exception {
+		this.request.setRequestURI("/myapp/myservlet/index");
+		this.request.setServletPath("/myservlet");
+		this.filterChain.doFilter(this.request, this.response);
+
+		assertEquals("/myapp/myservlet/index", resolvePublicResourceUrlPath("/myapp/myservlet/index"));
+	}
+
 
 	private String resolvePublicResourceUrlPath(String path) {
 		return this.servlet.wrappedResponse.encodeURL(path);

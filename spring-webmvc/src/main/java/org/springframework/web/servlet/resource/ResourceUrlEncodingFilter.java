@@ -57,6 +57,9 @@ public class ResourceUrlEncodingFilter extends OncePerRequestFilter {
 
 		private HttpServletRequest request;
 
+		/* Cache the index of the path within the DispatcherServlet mapping. */
+		private Integer indexLookupPath;
+
 
 		private ResourceUrlEncodingResponseWrapper(HttpServletRequest request, HttpServletResponse wrapped) {
 			super(wrapped);
@@ -70,8 +73,11 @@ public class ResourceUrlEncodingFilter extends OncePerRequestFilter {
 				logger.debug("Request attribute exposing ResourceUrlProvider not found.");
 				return super.encodeURL(url);
 			}
-			String resolvedUrl = resourceUrlProvider.getForRequestUrl(this.request, url);
-			return (resolvedUrl != null ? super.encodeURL(resolvedUrl) : super.encodeURL(url));
+			initIndexLookupPath(resourceUrlProvider);
+			String prefix = url.substring(0, this.indexLookupPath);
+			String lookupPath = url.substring(this.indexLookupPath);
+			lookupPath = resourceUrlProvider.getForLookupPath(lookupPath);
+			return (lookupPath != null ? super.encodeURL(prefix + lookupPath) : super.encodeURL(url));
 		}
 
 		private ResourceUrlProvider getResourceUrlProvider() {
@@ -79,6 +85,13 @@ public class ResourceUrlEncodingFilter extends OncePerRequestFilter {
 			return (ResourceUrlProvider) this.request.getAttribute(name);
 		}
 
+		private void initIndexLookupPath(ResourceUrlProvider urlProvider) {
+			if (this.indexLookupPath == null) {
+				String requestUri = urlProvider.getPathHelper().getRequestUri(this.request);
+				String lookupPath = urlProvider.getPathHelper().getLookupPathForRequest(this.request);
+				this.indexLookupPath = requestUri.indexOf(lookupPath);
+			}
+		}
 	}
 
 }
