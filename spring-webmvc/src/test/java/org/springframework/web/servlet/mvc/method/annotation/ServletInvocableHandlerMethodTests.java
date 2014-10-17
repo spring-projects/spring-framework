@@ -180,7 +180,7 @@ public class ServletInvocableHandlerMethodTests {
 		List<HttpMessageConverter<?>> converters = new ArrayList<HttpMessageConverter<?>>();
 		converters.add(new StringHttpMessageConverter());
 		this.returnValueHandlers.addHandler(new HttpEntityMethodProcessor(converters));
-		ServletInvocableHandlerMethod handlerMethod = getHandlerMethod(new ResponseEntityHandler(), "handle");
+		ServletInvocableHandlerMethod handlerMethod = getHandlerMethod(new ResponseEntityHandler(), "handleDeferred");
 		handlerMethod = handlerMethod.wrapConcurrentResult(new ResponseEntity<>("bar", HttpStatus.OK));
 		handlerMethod.invokeAndHandle(this.webRequest, this.mavContainer);
 
@@ -196,7 +196,7 @@ public class ServletInvocableHandlerMethodTests {
 		List<Object> advice = Arrays.asList(mock(ResponseBodyAdvice.class));
 		HttpEntityMethodProcessor processor = new HttpEntityMethodProcessor(converters, null, advice);
 		this.returnValueHandlers.addHandler(processor);
-		ServletInvocableHandlerMethod handlerMethod = getHandlerMethod(new ResponseEntityHandler(), "handle");
+		ServletInvocableHandlerMethod handlerMethod = getHandlerMethod(new ResponseEntityHandler(), "handleDeferred");
 		handlerMethod = handlerMethod.wrapConcurrentResult(new ResponseEntity<>(HttpStatus.OK));
 		handlerMethod.invokeAndHandle(this.webRequest, this.mavContainer);
 
@@ -211,8 +211,23 @@ public class ServletInvocableHandlerMethodTests {
 		List<Object> advice = Arrays.asList(mock(ResponseBodyAdvice.class));
 		HttpEntityMethodProcessor processor = new HttpEntityMethodProcessor(converters, null, advice);
 		this.returnValueHandlers.addHandler(processor);
-		ServletInvocableHandlerMethod handlerMethod = getHandlerMethod(new ResponseEntityHandler(), "handle");
+		ServletInvocableHandlerMethod handlerMethod = getHandlerMethod(new ResponseEntityHandler(), "handleDeferred");
 		handlerMethod = handlerMethod.wrapConcurrentResult(null);
+		handlerMethod.invokeAndHandle(this.webRequest, this.mavContainer);
+
+		assertEquals(200, this.response.getStatus());
+		assertEquals("", this.response.getContentAsString());
+	}
+
+	// SPR-12287 (16/Oct/14 comments)
+
+	@Test
+	public void responseEntityRawTypeWithNullBody() throws Exception {
+		List<HttpMessageConverter<?>> converters = Arrays.asList(new StringHttpMessageConverter());
+		List<Object> advice = Arrays.asList(mock(ResponseBodyAdvice.class));
+		HttpEntityMethodProcessor processor = new HttpEntityMethodProcessor(converters, null, advice);
+		this.returnValueHandlers.addHandler(processor);
+		ServletInvocableHandlerMethod handlerMethod = getHandlerMethod(new ResponseEntityHandler(), "handleRawType");
 		handlerMethod.invokeAndHandle(this.webRequest, this.mavContainer);
 
 		assertEquals(200, this.response.getStatus());
@@ -224,8 +239,8 @@ public class ServletInvocableHandlerMethodTests {
 
 		Method method = controller.getClass().getDeclaredMethod(methodName, argTypes);
 		ServletInvocableHandlerMethod handlerMethod = new ServletInvocableHandlerMethod(controller, method);
-		handlerMethod.setHandlerMethodArgumentResolvers(argumentResolvers);
-		handlerMethod.setHandlerMethodReturnValueHandlers(returnValueHandlers);
+		handlerMethod.setHandlerMethodArgumentResolvers(this.argumentResolvers);
+		handlerMethod.setHandlerMethodReturnValueHandlers(this.returnValueHandlers);
 		return handlerMethod;
 	}
 
@@ -277,8 +292,13 @@ public class ServletInvocableHandlerMethodTests {
 	private static class ResponseEntityHandler {
 
 		@SuppressWarnings("unused")
-		public DeferredResult<ResponseEntity<String>> handle() {
+		public DeferredResult<ResponseEntity<String>> handleDeferred() {
 			return new DeferredResult<>();
+		}
+
+		@SuppressWarnings("unused")
+		public ResponseEntity handleRawType() {
+			return ResponseEntity.ok().build();
 		}
 	}
 

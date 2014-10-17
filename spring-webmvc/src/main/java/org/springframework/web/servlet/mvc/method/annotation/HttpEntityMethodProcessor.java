@@ -102,12 +102,17 @@ public class HttpEntityMethodProcessor extends AbstractMessageConverterMethodPro
 		Type parameterType = parameter.getGenericParameterType();
 		if (parameterType instanceof ParameterizedType) {
 			ParameterizedType type = (ParameterizedType) parameterType;
-			if (type.getActualTypeArguments().length == 1) {
-				return type.getActualTypeArguments()[0];
+			if (type.getActualTypeArguments().length != 1) {
+				throw new IllegalArgumentException("Expected single generic parameter on '" +
+						parameter.getParameterName() + "' in method " + parameter.getMethod());
 			}
+			return type.getActualTypeArguments()[0];
+		}
+		else if (parameterType instanceof Class) {
+			return Object.class;
 		}
 		throw new IllegalArgumentException("HttpEntity parameter '" + parameter.getParameterName() +
-				"' in method " + parameter.getMethod() + " is not parameterized or has more than one parameter");
+				"' in method " + parameter.getMethod() + " is not parameterized");
 	}
 
 	@Override
@@ -134,9 +139,10 @@ public class HttpEntityMethodProcessor extends AbstractMessageConverterMethodPro
 		}
 
 		Object body = responseEntity.getBody();
-		if (body != null || getAdviceChain().hasAdvice()) {
-			writeWithMessageConverters(body, returnType, inputMessage, outputMessage);
-		}
+
+		// Try even with null body. ResponseBodyAdvice could get involved.
+		writeWithMessageConverters(body, returnType, inputMessage, outputMessage);
+
 		// Ensure headers are flushed even if no body was written
 		outputMessage.getBody();
 	}

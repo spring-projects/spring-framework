@@ -117,10 +117,6 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 			throws IOException, HttpMediaTypeNotAcceptableException {
 
 		Class<?> returnValueClass = getReturnValueType(returnValue, returnType);
-		if (returnValue == null && Void.class.equals(returnValueClass)) {
-			return;
-		}
-
 		HttpServletRequest servletRequest = inputMessage.getServletRequest();
 		List<MediaType> requestedMediaTypes = getAcceptableMediaTypes(servletRequest);
 		List<MediaType> producibleMediaTypes = getProducibleMediaTypes(servletRequest, returnValueClass);
@@ -134,7 +130,10 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 			}
 		}
 		if (compatibleMediaTypes.isEmpty()) {
-			throw new HttpMediaTypeNotAcceptableException(producibleMediaTypes);
+			if (returnValue != null) {
+				throw new HttpMediaTypeNotAcceptableException(producibleMediaTypes);
+			}
+			return;
 		}
 
 		List<MediaType> mediaTypes = new ArrayList<MediaType>(compatibleMediaTypes);
@@ -169,7 +168,10 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 				}
 			}
 		}
-		throw new HttpMediaTypeNotAcceptableException(this.allSupportedMediaTypes);
+
+		if (returnValue != null) {
+			throw new HttpMediaTypeNotAcceptableException(this.allSupportedMediaTypes);
+		}
 	}
 
 	/**
