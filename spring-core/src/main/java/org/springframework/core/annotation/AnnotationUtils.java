@@ -57,6 +57,7 @@ import org.springframework.util.ReflectionUtils;
  * @author Mark Fisher
  * @author Chris Beams
  * @author Phillip Webb
+ * @author Andy Wilkinson
  * @since 2.0
  * @see java.lang.reflect.Method#getAnnotations()
  * @see java.lang.reflect.Method#getAnnotation(Class)
@@ -368,13 +369,23 @@ public abstract class AnnotationUtils {
 				return annotation;
 			}
 		}
-		for (Annotation ann : clazz.getDeclaredAnnotations()) {
-			if (!isInJavaLangAnnotationPackage(ann) && visited.add(ann)) {
-				A annotation = findAnnotation(ann.annotationType(), annotationType, visited);
-				if (annotation != null) {
-					return annotation;
+		try {
+			for (Annotation ann : clazz.getDeclaredAnnotations()) {
+				if (!isInJavaLangAnnotationPackage(ann) && visited.add(ann)) {
+					A annotation = findAnnotation(ann.annotationType(), annotationType, visited);
+					if (annotation != null) {
+						return annotation;
+					}
 				}
 			}
+		}
+		catch (Exception ex) {
+			// Assuming nested Class values not resolvable within annotation attributes...
+			// We're probably hitting a non-present optional arrangement - let's back out.
+			if (logger.isInfoEnabled()) {
+				logger.info("Failed to introspect annotations on [" + clazz + "]: " + ex);
+			}
+			return null;
 		}
 		Class<?> superclass = clazz.getSuperclass();
 		if (superclass == null || superclass.equals(Object.class)) {
