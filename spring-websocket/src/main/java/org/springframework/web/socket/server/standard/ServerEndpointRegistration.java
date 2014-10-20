@@ -73,7 +73,7 @@ public class ServerEndpointRegistration extends ServerEndpointConfig.Configurato
 
 	/**
 	 * Create a new {@link ServerEndpointRegistration} instance from an
-	 * {@code javax.webscoket.Endpoint} class.
+	 * {@code javax.websocket.Endpoint} class.
 	 * @param path the endpoint path
 	 * @param endpointClass the endpoint class
 	 */
@@ -202,4 +202,9 @@ public class ServerEndpointRegistration extends ServerEndpointConfig.Configurato
 		return super.getNegotiatedExtensions(installed, requested);
 	}
 
+
+	@Override
+	public String toString() {
+		return "ServerEndpointRegistration for path '" + getPath() + "': " + getEndpointClass();
+	}
 }

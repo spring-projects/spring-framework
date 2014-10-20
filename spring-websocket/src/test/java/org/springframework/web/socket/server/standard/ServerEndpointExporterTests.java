@@ -67,30 +67,33 @@ public class ServerEndpointExporterTests {
 
 
 	@Test
-	public void addAnnotatedEndpointBeans() throws Exception {
+	public void addAnnotatedEndpointClasses() throws Exception {
 		this.exporter.setAnnotatedEndpointClasses(AnnotatedDummyEndpoint.class);
 		this.exporter.setApplicationContext(this.webAppContext);
 		this.exporter.afterPropertiesSet();
+		this.exporter.afterSingletonsInstantiated();
 
 		verify(this.serverContainer).addEndpoint(AnnotatedDummyEndpoint.class);
 		verify(this.serverContainer).addEndpoint(AnnotatedDummyEndpointBean.class);
 	}
 
 	@Test
-	public void addAnnotatedEndpointBeansWithServletContextOnly() throws Exception {
+	public void addAnnotatedEndpointClassesWithServletContextOnly() throws Exception {
 		this.exporter.setAnnotatedEndpointClasses(AnnotatedDummyEndpoint.class, AnnotatedDummyEndpointBean.class);
 		this.exporter.setServletContext(this.servletContext);
 		this.exporter.afterPropertiesSet();
+		this.exporter.afterSingletonsInstantiated();
 
 		verify(this.serverContainer).addEndpoint(AnnotatedDummyEndpoint.class);
 		verify(this.serverContainer).addEndpoint(AnnotatedDummyEndpointBean.class);
 	}
 
 	@Test
-	public void addAnnotatedEndpointBeansWithServerContainerOnly() throws Exception {
+	public void addAnnotatedEndpointClassesWithExplicitServerContainerOnly() throws Exception {
 		this.exporter.setAnnotatedEndpointClasses(AnnotatedDummyEndpoint.class, AnnotatedDummyEndpointBean.class);
 		this.exporter.setServerContainer(this.serverContainer);
 		this.exporter.afterPropertiesSet();
+		this.exporter.afterSingletonsInstantiated();
 
 		verify(this.serverContainer).addEndpoint(AnnotatedDummyEndpoint.class);
 		verify(this.serverContainer).addEndpoint(AnnotatedDummyEndpointBean.class);
@@ -98,31 +101,40 @@ public class ServerEndpointExporterTests {
 
 	@Test
 	public void addServerEndpointConfigBean() throws Exception {
+		ServerEndpointRegistration endpointRegistration = new ServerEndpointRegistration("/dummy", new DummyEndpoint());
+		this.webAppContext.getBeanFactory().registerSingleton("dummyEndpoint", endpointRegistration);
+
 		this.exporter.setApplicationContext(this.webAppContext);
 		this.exporter.afterPropertiesSet();
+		this.exporter.afterSingletonsInstantiated();
 
-		ServerEndpointRegistration endpointRegistration = new ServerEndpointRegistration("/dummy", new DummyEndpoint());
-		this.exporter.postProcessAfterInitialization(endpointRegistration, "dummyEndpoint");
 		verify(this.serverContainer).addEndpoint(endpointRegistration);
 	}
 
 	@Test
-	public void addServerEndpointConfigBeanWithServletContextOnly() throws Exception {
+	public void addServerEndpointConfigBeanWithExplicitServletContext() throws Exception {
+		ServerEndpointRegistration endpointRegistration = new ServerEndpointRegistration("/dummy", new DummyEndpoint());
+		this.webAppContext.getBeanFactory().registerSingleton("dummyEndpoint", endpointRegistration);
+
 		this.exporter.setServletContext(this.servletContext);
+		this.exporter.setApplicationContext(this.webAppContext);
 		this.exporter.afterPropertiesSet();
+		this.exporter.afterSingletonsInstantiated();
 
-		ServerEndpointRegistration endpointRegistration = new ServerEndpointRegistration("/dummy", new DummyEndpoint());
-		this.exporter.postProcessAfterInitialization(endpointRegistration, "dummyEndpoint");
 		verify(this.serverContainer).addEndpoint(endpointRegistration);
 	}
 
 	@Test
-	public void addServerEndpointConfigBeanWithServerContainerOnly() throws Exception {
-		this.exporter.setServerContainer(this.serverContainer);
-		this.exporter.afterPropertiesSet();
-
+	public void addServerEndpointConfigBeanWithExplicitServerContainer() throws Exception {
 		ServerEndpointRegistration endpointRegistration = new ServerEndpointRegistration("/dummy", new DummyEndpoint());
-		this.exporter.postProcessAfterInitialization(endpointRegistration, "dummyEndpoint");
+		this.webAppContext.getBeanFactory().registerSingleton("dummyEndpoint", endpointRegistration);
+		this.servletContext.removeAttribute("javax.websocket.server.ServerContainer");
+
+		this.exporter.setServerContainer(this.serverContainer);
+		this.exporter.setApplicationContext(this.webAppContext);
+		this.exporter.afterPropertiesSet();
+		this.exporter.afterSingletonsInstantiated();
+
 		verify(this.serverContainer).addEndpoint(endpointRegistration);
 	}
 
