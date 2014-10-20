@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -15,6 +15,23 @@
  */
 
 package org.springframework.web.socket.server.standard;
+
+import java.io.IOException;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Method;
+import java.net.URI;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Random;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.websocket.DeploymentException;
+import javax.websocket.Endpoint;
+import javax.websocket.EndpointConfig;
+import javax.websocket.Extension;
+import javax.websocket.WebSocketContainer;
 
 import org.glassfish.tyrus.core.ComponentProviderService;
 import org.glassfish.tyrus.core.RequestContext;
@@ -26,6 +43,7 @@ import org.glassfish.tyrus.core.Version;
 import org.glassfish.tyrus.core.WebSocketApplication;
 import org.glassfish.tyrus.server.TyrusServerContainer;
 import org.glassfish.tyrus.spi.WebSocketEngine.UpgradeInfo;
+
 import org.springframework.beans.DirectFieldAccessor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.server.ServerHttpRequest;
@@ -34,23 +52,6 @@ import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.socket.WebSocketExtension;
 import org.springframework.web.socket.server.HandshakeFailureException;
-
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.websocket.DeploymentException;
-import javax.websocket.Endpoint;
-import javax.websocket.EndpointConfig;
-import javax.websocket.Extension;
-import javax.websocket.WebSocketContainer;
-import java.io.IOException;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Method;
-import java.net.URI;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Random;
 
 /**
  * An base class for WebSocket servers using Tyrus.
@@ -65,7 +66,6 @@ public abstract class AbstractTyrusRequestUpgradeStrategy extends AbstractStanda
 
 	private static final Random random = new Random();
 
-
 	private final ComponentProviderService componentProvider = ComponentProviderService.create();
 
 
@@ -78,17 +78,15 @@ public abstract class AbstractTyrusRequestUpgradeStrategy extends AbstractStanda
 		try {
 			return super.getInstalledExtensions(container);
 		}
-		catch (UnsupportedOperationException e) {
-			return new ArrayList<WebSocketExtension>();
+		catch (UnsupportedOperationException ex) {
+			return new ArrayList<WebSocketExtension>(0);
 		}
 	}
 
-	protected abstract TyrusEndpointHelper getEndpointHelper();
-
-
 	@Override
 	public void upgradeInternal(ServerHttpRequest request, ServerHttpResponse response,
-			String subProtocol, List<Extension> extensions, Endpoint endpoint) throws HandshakeFailureException {
+			String selectedProtocol, List<Extension> extensions, Endpoint endpoint)
+			throws HandshakeFailureException {
 
 		HttpServletRequest servletRequest = getHttpServletRequest(request);
 		HttpServletResponse servletResponse = getHttpServletResponse(response);
@@ -100,7 +98,7 @@ public abstract class AbstractTyrusRequestUpgradeStrategy extends AbstractStanda
 		try {
 			// Shouldn't matter for processing but must be unique
 			String path = "/" + random.nextLong();
-			tyrusEndpoint = createTyrusEndpoint(endpoint, path, subProtocol, extensions, serverContainer, engine);
+			tyrusEndpoint = createTyrusEndpoint(endpoint, path, selectedProtocol, extensions, serverContainer, engine);
 			getEndpointHelper().register(engine, tyrusEndpoint);
 
 			HttpHeaders headers = request.getHeaders();
@@ -133,9 +131,6 @@ public abstract class AbstractTyrusRequestUpgradeStrategy extends AbstractStanda
 		}
 	}
 
-	protected abstract void handleSuccess(HttpServletRequest request, HttpServletResponse response,
-			UpgradeInfo upgradeInfo, TyrusUpgradeResponse upgradeResponse) throws IOException, ServletException;
-
 	private Object createTyrusEndpoint(Endpoint endpoint, String endpointPath, String protocol,
 			List<Extension> extensions, WebSocketContainer container, TyrusWebSocketEngine engine)
 			throws DeploymentException {
@@ -161,6 +156,12 @@ public abstract class AbstractTyrusRequestUpgradeStrategy extends AbstractStanda
 	}
 
 
+	protected abstract TyrusEndpointHelper getEndpointHelper();
+
+	protected abstract void handleSuccess(HttpServletRequest request, HttpServletResponse response,
+			UpgradeInfo upgradeInfo, TyrusUpgradeResponse upgradeResponse) throws IOException, ServletException;
+
+
 	/**
 	 * Helps with the creation, registration, and un-registration of endpoints.
 	 */
@@ -172,8 +173,8 @@ public abstract class AbstractTyrusRequestUpgradeStrategy extends AbstractStanda
 		void register(TyrusWebSocketEngine engine, Object endpoint);
 
 		void unregister(TyrusWebSocketEngine engine, Object endpoint);
-
 	}
+
 
 	protected static class Tyrus17EndpointHelper implements TyrusEndpointHelper {
 
@@ -242,6 +243,7 @@ public abstract class AbstractTyrusRequestUpgradeStrategy extends AbstractStanda
 			}
 		}
 	}
+
 
 	protected static class Tyrus135EndpointHelper implements TyrusEndpointHelper {
 

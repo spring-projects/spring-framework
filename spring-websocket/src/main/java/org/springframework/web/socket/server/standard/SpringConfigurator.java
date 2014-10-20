@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,6 +16,7 @@
 
 package org.springframework.web.socket.server.standard;
 
+import java.util.Arrays;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import javax.websocket.server.ServerEndpoint;
@@ -114,7 +115,7 @@ public class SpringConfigurator extends Configurator {
 				beanNamesByType.put(endpointClass, NO_VALUE);
 				if (names.length > 1) {
 					throw new IllegalStateException("Found multiple @ServerEndpoint's of type [" +
-							endpointClass.getName() + "]: bean names " + names);
+							endpointClass.getName() + "]: bean names " + Arrays.asList(names));
 				}
 			}
 		}

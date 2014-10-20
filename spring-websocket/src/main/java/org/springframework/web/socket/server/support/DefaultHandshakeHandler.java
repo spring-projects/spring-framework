@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -60,8 +60,6 @@ import org.springframework.web.socket.server.RequestUpgradeStrategy;
  */
 public class DefaultHandshakeHandler implements HandshakeHandler {
 
-	protected Log logger = LogFactory.getLog(getClass());
-
 	private static final boolean jettyWsPresent = ClassUtils.isPresent(
 			"org.eclipse.jetty.websocket.server.WebSocketServerFactory", DefaultHandshakeHandler.class.getClassLoader());
 
@@ -78,6 +76,8 @@ public class DefaultHandshakeHandler implements HandshakeHandler {
 			"weblogic.websocket.tyrus.TyrusServletWriter", DefaultHandshakeHandler.class.getClassLoader());
 
 
+	protected final Log logger = LogFactory.getLog(getClass());
+
 	private final RequestUpgradeStrategy requestUpgradeStrategy;
 
 	private final List<String> supportedProtocols = new ArrayList<String>();
@@ -91,6 +91,16 @@ public class DefaultHandshakeHandler implements HandshakeHandler {
 	public DefaultHandshakeHandler() {
 		this(initRequestUpgradeStrategy());
 	}
+
+	/**
+	 * A constructor that accepts a runtime-specific {@link RequestUpgradeStrategy}.
+	 * @param requestUpgradeStrategy the upgrade strategy to use
+	 */
+	public DefaultHandshakeHandler(RequestUpgradeStrategy requestUpgradeStrategy) {
+		Assert.notNull(requestUpgradeStrategy, "RequestUpgradeStrategy must not be null");
+		this.requestUpgradeStrategy = requestUpgradeStrategy;
+	}
+
 
 	private static RequestUpgradeStrategy initRequestUpgradeStrategy() {
 		String className;
@@ -119,15 +129,6 @@ public class DefaultHandshakeHandler implements HandshakeHandler {
 		catch (Throwable ex) {
 			throw new IllegalStateException("Failed to instantiate RequestUpgradeStrategy: " + className, ex);
 		}
-	}
-
-	/**
-	 * A constructor that accepts a runtime-specific {@link RequestUpgradeStrategy}.
-	 * @param requestUpgradeStrategy the upgrade strategy to use
-	 */
-	public DefaultHandshakeHandler(RequestUpgradeStrategy requestUpgradeStrategy) {
-		Assert.notNull(requestUpgradeStrategy, "RequestUpgradeStrategy must not be null");
-		this.requestUpgradeStrategy = requestUpgradeStrategy;
 	}
 
 
@@ -290,18 +291,18 @@ public class DefaultHandshakeHandler implements HandshakeHandler {
 	}
 
 	/**
-	 * Determine the sub-protocols supported by the given WebSocketHandler by checking
-	 * whether it is an instance of {@link SubProtocolCapable}.
+	 * Determine the sub-protocols supported by the given WebSocketHandler by
+	 * checking whether it is an instance of {@link SubProtocolCapable}.
 	 * @param handler the handler to check
-	 * @return a list of supported protocols or an empty list
+	 * @return a list of supported protocols, or an empty list if none available
 	 */
 	protected final List<String> determineHandlerSupportedProtocols(WebSocketHandler handler) {
-		handler = WebSocketHandlerDecorator.unwrap(handler);
+		WebSocketHandler handlerToCheck = WebSocketHandlerDecorator.unwrap(handler);
 		List<String> subProtocols = null;
-		if (handler instanceof SubProtocolCapable) {
-			subProtocols = ((SubProtocolCapable) handler).getSubProtocols();
+		if (handlerToCheck instanceof SubProtocolCapable) {
+			subProtocols = ((SubProtocolCapable) handlerToCheck).getSubProtocols();
 		}
-		return (subProtocols != null) ? subProtocols : Collections.<String>emptyList();
+		return (subProtocols != null ? subProtocols : Collections.<String>emptyList());
 	}
 
 	/**
@@ -329,16 +330,13 @@ public class DefaultHandshakeHandler implements HandshakeHandler {
 	 * A method that can be used to associate a user with the WebSocket session
 	 * in the process of being established. The default implementation calls
 	 * {@link org.springframework.http.server.ServerHttpRequest#getPrincipal()}
-	 * <p>
-	 * Sub-classes can provide custom logic for associating a user with a session,
+	 * <p>Subclasses can provide custom logic for associating a user with a session,
 	 * for example for assigning a name to anonymous users (i.e. not fully
 	 * authenticated).
-	 *
 	 * @param request the handshake request
 	 * @param wsHandler the WebSocket handler that will handle messages
 	 * @param attributes handshake attributes to pass to the WebSocket session
-	 *
-	 * @return the user for the WebSocket session or {@code null}
+	 * @return the user for the WebSocket session, or {@code null} if not available
 	 */
 	protected Principal determineUser(ServerHttpRequest request, WebSocketHandler wsHandler,
 			Map<String, Object> attributes) {

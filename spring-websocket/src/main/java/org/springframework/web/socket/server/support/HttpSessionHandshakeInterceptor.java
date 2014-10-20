@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -25,7 +25,6 @@ import javax.servlet.http.HttpSession;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.http.server.ServletServerHttpRequest;
-import org.springframework.util.CollectionUtils;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.server.HandshakeInterceptor;
@@ -88,8 +87,8 @@ public class HttpSessionHandshakeInterceptor implements HandshakeInterceptor {
 	}
 
 	/**
-	 * Whether to copy all attributes from the HTTP session. If set to "true" any
-	 * explicitly configured attribute names are ignored.
+	 * Whether to copy all attributes from the HTTP session. If set to "true",
+	 * any explicitly configured attribute names are ignored.
 	 * <p>By default this is set to either "true" or "false" depending on which
 	 * constructor was used (default or with attribute names respectively).
 	 * @param copyAllAttributes whether to copy all attributes
@@ -145,8 +144,8 @@ public class HttpSessionHandshakeInterceptor implements HandshakeInterceptor {
 
 	private HttpSession getSession(ServerHttpRequest request) {
 		if (request instanceof ServletServerHttpRequest) {
-			ServletServerHttpRequest servletRequest = (ServletServerHttpRequest) request;
-			return servletRequest.getServletRequest().getSession(false);
+			ServletServerHttpRequest serverRequest = (ServletServerHttpRequest) request;
+			return serverRequest.getServletRequest().getSession(false);
 		}
 		return null;
 	}

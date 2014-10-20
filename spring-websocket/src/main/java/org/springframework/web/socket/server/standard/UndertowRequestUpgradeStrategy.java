@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -45,11 +45,11 @@ import io.undertow.websockets.jsr.handshake.HandshakeUtil;
 import io.undertow.websockets.jsr.handshake.JsrHybi07Handshake;
 import io.undertow.websockets.jsr.handshake.JsrHybi08Handshake;
 import io.undertow.websockets.jsr.handshake.JsrHybi13Handshake;
-import org.springframework.util.ClassUtils;
 import org.xnio.StreamConnection;
 
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
+import org.springframework.util.ClassUtils;
 import org.springframework.web.socket.server.HandshakeFailureException;
 
 
@@ -87,7 +87,7 @@ public class UndertowRequestUpgradeStrategy extends AbstractStandardUpgradeStrat
 	};
 
 
-	private Set<WebSocketChannel> peerConnections;
+	private final Set<WebSocketChannel> peerConnections;
 
 
 	public UndertowRequestUpgradeStrategy() {
@@ -106,8 +106,9 @@ public class UndertowRequestUpgradeStrategy extends AbstractStandardUpgradeStrat
 	}
 
 	@Override
-	protected void upgradeInternal(ServerHttpRequest request, ServerHttpResponse response, String selectedProtocol,
-			List<Extension> selectedExtensions, final Endpoint endpoint) throws HandshakeFailureException {
+	protected void upgradeInternal(ServerHttpRequest request, ServerHttpResponse response,
+			String selectedProtocol, List<Extension> selectedExtensions, final Endpoint endpoint)
+			throws HandshakeFailureException {
 
 		HttpServletRequest servletRequest = getHttpServletRequest(request);
 		HttpServletResponse servletResponse = getHttpServletResponse(response);
@@ -168,7 +169,7 @@ public class UndertowRequestUpgradeStrategy extends AbstractStandardUpgradeStrat
 	private ConfiguredServerEndpoint createConfiguredServerEndpoint(String selectedProtocol,
 			List<Extension> selectedExtensions, Endpoint endpoint, HttpServletRequest servletRequest) {
 
-		String path = servletRequest.getRequestURI(); // shouldn't matter
+		String path = servletRequest.getRequestURI();  // shouldn't matter
 		ServerEndpointRegistration endpointRegistration = new ServerEndpointRegistration(path, endpoint);
 		endpointRegistration.setSubprotocols(Arrays.asList(selectedProtocol));
 		endpointRegistration.setExtensions(selectedExtensions);
