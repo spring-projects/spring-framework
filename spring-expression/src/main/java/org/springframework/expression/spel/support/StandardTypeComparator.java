@@ -87,7 +87,7 @@ public class StandardTypeComparator implements TypeComparator {
 
 		try {
 			if (left instanceof Comparable) {
-				return ((Comparable) left).compareTo(right);
+				return ((Comparable<Object>) left).compareTo(right);
 			}
 		}
 		catch (ClassCastException ex) {
