@@ -17,7 +17,6 @@
 package org.springframework.cache.aspectj;
 
 import java.lang.reflect.Method;
-
 import javax.cache.annotation.CachePut;
 import javax.cache.annotation.CacheRemove;
 import javax.cache.annotation.CacheRemoveAll;

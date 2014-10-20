@@ -18,7 +18,6 @@ package org.springframework.jdbc.object;
 
 import java.util.List;
 import java.util.Map;
-
 import javax.sql.DataSource;
 
 import org.springframework.dao.DataAccessException;

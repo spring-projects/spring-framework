@@ -27,6 +27,7 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.orm.jpa.EntityManagerFactoryUtils;
 
 public aspect JpaExceptionTranslatorAspect {
+
 	pointcut entityManagerCall():
 		call(* EntityManager.*(..)) || call(* EntityManagerFactory.*(..)) ||
 		call(* EntityTransaction.*(..)) || call(* Query.*(..));
@@ -41,4 +42,5 @@ public aspect JpaExceptionTranslatorAspect {
 			throw re;
 		}
 	}
+
 }

@@ -19,12 +19,12 @@ package org.springframework.context.annotation;
 import java.io.FileNotFoundException;
 import java.util.Collections;
 import java.util.Iterator;
-
 import javax.inject.Inject;
 
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.core.env.Environment;

@@ -16,9 +16,8 @@
 
 package org.springframework.web.context.support;
 
-import javax.naming.NamingException;
-
 import org.junit.Test;
+
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.MutablePropertySources;
 import org.springframework.core.env.PropertySource;

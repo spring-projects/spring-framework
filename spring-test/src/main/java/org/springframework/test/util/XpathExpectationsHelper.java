@@ -19,7 +19,6 @@ package org.springframework.test.util;
 import java.io.StringReader;
 import java.util.Collections;
 import java.util.Map;
-
 import javax.xml.namespace.QName;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -30,12 +29,13 @@ import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 
 import org.hamcrest.Matcher;
-import org.springframework.util.CollectionUtils;
-import org.springframework.util.xml.SimpleNamespaceContext;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
+
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.xml.SimpleNamespaceContext;
 
 import static org.springframework.test.util.AssertionErrors.*;
 import static org.springframework.test.util.MatcherAssertionErrors.*;

@@ -18,7 +18,6 @@ package org.springframework.orm.hibernate3;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import javax.transaction.RollbackException;
 import javax.transaction.Status;
 import javax.transaction.Synchronization;
@@ -36,6 +35,7 @@ import org.hibernate.engine.SessionImplementor;
 import org.junit.After;
 import org.junit.Test;
 import org.mockito.InOrder;
+
 import org.springframework.dao.DataAccessException;
 import org.springframework.tests.transaction.MockJtaTransaction;
 import org.springframework.transaction.TransactionDefinition;

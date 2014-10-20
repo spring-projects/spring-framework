@@ -16,9 +16,9 @@
 
 package org.springframework.web.servlet.config.annotation;
 
-import org.springframework.web.servlet.view.UrlBasedViewResolver;
-
 import java.util.Map;
+
+import org.springframework.web.servlet.view.UrlBasedViewResolver;
 
 /**
  * Assist with configuring a {@link org.springframework.web.servlet.view.UrlBasedViewResolver}.

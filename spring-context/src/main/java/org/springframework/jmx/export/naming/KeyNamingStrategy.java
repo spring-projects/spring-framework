@@ -18,7 +18,6 @@ package org.springframework.jmx.export.naming;
 
 import java.io.IOException;
 import java.util.Properties;
-
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 

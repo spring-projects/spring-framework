@@ -18,7 +18,6 @@ package org.springframework.test.web.servlet.result;
 
 import java.util.Enumeration;
 import java.util.Map;
-
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.http.HttpHeaders;

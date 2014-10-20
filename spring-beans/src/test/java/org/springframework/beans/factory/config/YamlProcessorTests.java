@@ -15,9 +15,6 @@
  */
 package org.springframework.beans.factory.config;
 
-import static org.junit.Assert.*;
-import static org.springframework.beans.factory.config.YamlProcessor.*;
-
 import java.util.Map;
 import java.util.Properties;
 
@@ -28,6 +25,9 @@ import org.yaml.snakeyaml.parser.ParserException;
 import org.yaml.snakeyaml.scanner.ScannerException;
 
 import org.springframework.core.io.ByteArrayResource;
+
+import static org.junit.Assert.*;
+import static org.springframework.beans.factory.config.YamlProcessor.*;
 
 /**
  * Tests for {@link YamlProcessor}.

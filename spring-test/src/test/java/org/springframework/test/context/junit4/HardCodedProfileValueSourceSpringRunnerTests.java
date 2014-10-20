@@ -17,6 +17,7 @@
 package org.springframework.test.context.junit4;
 
 import org.junit.BeforeClass;
+
 import org.springframework.test.annotation.ProfileValueSource;
 import org.springframework.test.annotation.ProfileValueSourceConfiguration;
 

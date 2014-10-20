@@ -17,6 +17,7 @@
 package org.springframework.beans.factory.support;
 
 import junit.framework.TestCase;
+
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.tests.sample.beans.TestBean;
 

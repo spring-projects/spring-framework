@@ -1,10 +1,10 @@
 package org.springframework.web.socket.sockjs.client;
 
-import org.springframework.http.HttpHeaders;
-import org.springframework.web.socket.sockjs.frame.SockJsMessageCodec;
-
 import java.net.URI;
 import java.security.Principal;
+
+import org.springframework.http.HttpHeaders;
+import org.springframework.web.socket.sockjs.frame.SockJsMessageCodec;
 
 /**
  * Represents a request to connect to a SockJS service using a specific

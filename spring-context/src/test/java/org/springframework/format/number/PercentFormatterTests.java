@@ -16,14 +16,13 @@
 
 package org.springframework.format.number;
 
-import static org.junit.Assert.assertEquals;
-
 import java.math.BigDecimal;
 import java.text.ParseException;
 import java.util.Locale;
 
 import org.junit.Test;
-import org.springframework.format.number.PercentFormatter;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Keith Donald

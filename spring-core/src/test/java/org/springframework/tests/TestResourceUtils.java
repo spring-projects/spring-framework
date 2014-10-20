@@ -16,9 +16,9 @@
 
 package org.springframework.tests;
 
-import static java.lang.String.format;
-
 import org.springframework.core.io.ClassPathResource;
+
+import static java.lang.String.*;
 
 /**
  * Convenience utilities for common operations with test resources.

@@ -19,6 +19,7 @@ package org.springframework.http.client;
 import java.net.ProtocolException;
 
 import org.junit.Test;
+
 import org.springframework.http.HttpMethod;
 
 public class BufferedSimpleHttpRequestFactoryTests extends AbstractHttpRequestFactoryTestCase {

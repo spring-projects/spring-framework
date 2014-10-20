@@ -19,8 +19,9 @@ package org.springframework.oxm.xmlbeans;
 import java.util.Collections;
 
 import org.apache.xmlbeans.XmlOptions;
-import static org.junit.Assert.*;
 import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Arjen Poutsma

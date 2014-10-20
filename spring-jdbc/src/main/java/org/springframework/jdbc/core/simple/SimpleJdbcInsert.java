@@ -18,7 +18,6 @@ package org.springframework.jdbc.core.simple;
 
 import java.util.Arrays;
 import java.util.Map;
-
 import javax.sql.DataSource;
 
 import org.springframework.jdbc.core.JdbcTemplate;

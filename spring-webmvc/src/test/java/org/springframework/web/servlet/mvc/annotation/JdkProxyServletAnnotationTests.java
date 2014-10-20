@@ -20,7 +20,6 @@ import java.io.IOException;
 import java.io.Writer;
 import javax.servlet.ServletException;
 
-import static org.junit.Assert.*;
 import org.junit.Test;
 
 import org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator;
@@ -36,6 +35,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.GenericWebApplicationContext;
 import org.springframework.web.servlet.DispatcherServlet;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Arjen Poutsma

@@ -17,7 +17,6 @@
 package org.springframework.web.servlet.mvc.multiaction;
 
 import java.util.Properties;
-
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.logging.Log;

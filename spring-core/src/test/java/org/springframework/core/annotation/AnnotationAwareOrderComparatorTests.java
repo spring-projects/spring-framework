@@ -18,13 +18,12 @@ package org.springframework.core.annotation;
 
 import java.util.ArrayList;
 import java.util.List;
+import javax.annotation.Priority;
 
 import org.junit.Test;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
-
-import javax.annotation.Priority;
 
 /**
  * @author Juergen Hoeller

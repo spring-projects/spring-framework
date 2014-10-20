@@ -15,16 +15,17 @@
  */
 package org.springframework.web.servlet.handler;
 
-import static org.junit.Assert.*;
+import java.util.Comparator;
+import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
+
 import org.springframework.util.AntPathMatcher;
 import org.springframework.util.PathMatcher;
 import org.springframework.web.servlet.i18n.LocaleChangeInterceptor;
 
-import java.util.Comparator;
-import java.util.Map;
+import static org.junit.Assert.*;
 
 /**
  * Test fixture for {@link MappedInterceptor} tests.

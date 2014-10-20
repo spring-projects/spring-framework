@@ -16,8 +16,6 @@
 
 package org.springframework.messaging.handler.annotation.support;
 
-import static org.junit.Assert.*;
-
 import java.lang.reflect.Method;
 import java.util.Locale;
 
@@ -31,6 +29,8 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.support.ErrorMessage;
 import org.springframework.messaging.support.GenericMessage;
 import org.springframework.messaging.support.MessageBuilder;
+
+import static org.junit.Assert.*;
 
 /**
  * Unit tests for

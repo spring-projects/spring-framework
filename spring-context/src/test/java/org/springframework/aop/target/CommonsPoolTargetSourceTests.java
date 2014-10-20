@@ -16,27 +16,24 @@
 
 package org.springframework.aop.target;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-
 import java.util.NoSuchElementException;
 
 import org.apache.commons.pool.impl.GenericObjectPool;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+
 import org.springframework.aop.framework.Advised;
-import org.springframework.tests.sample.beans.Person;
-import org.springframework.tests.sample.beans.SerializablePerson;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.context.support.StaticApplicationContext;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.tests.sample.beans.Person;
+import org.springframework.tests.sample.beans.SerializablePerson;
+import org.springframework.tests.sample.beans.SideEffectBean;
 import org.springframework.util.SerializationTestUtils;
 
-import org.springframework.tests.sample.beans.SideEffectBean;
+import static org.junit.Assert.*;
 
 /**
  * Tests for pooling invoker interceptor.

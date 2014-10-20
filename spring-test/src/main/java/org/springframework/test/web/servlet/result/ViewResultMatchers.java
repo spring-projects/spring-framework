@@ -16,13 +16,14 @@
 
 package org.springframework.test.web.servlet.result;
 
-import static org.springframework.test.util.MatcherAssertionErrors.assertThat;
-import static org.springframework.test.util.AssertionErrors.*;
-
 import org.hamcrest.Matcher;
+
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultMatcher;
 import org.springframework.web.servlet.ModelAndView;
+
+import static org.springframework.test.util.AssertionErrors.*;
+import static org.springframework.test.util.MatcherAssertionErrors.*;
 
 /**
  * Factory for assertions on the selected view. An instance of this class is

@@ -16,15 +16,16 @@
 
 package org.springframework.aop.aspectj.generic;
 
-import static org.junit.Assert.assertEquals;
-
 import java.util.Collection;
 
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.aspectj.lang.annotation.Pointcut;
 import org.junit.Test;
+
 import org.springframework.context.support.ClassPathXmlApplicationContext;
+
+import static org.junit.Assert.*;
 
 /**
  * Tests that poitncut matching is correct with generic method parameter.

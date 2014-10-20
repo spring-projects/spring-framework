@@ -16,10 +16,10 @@
 
 package org.springframework.beans;
 
-import static org.junit.Assert.assertTrue;
-
 import java.util.HashMap;
 import java.util.Map;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Rod Johnson

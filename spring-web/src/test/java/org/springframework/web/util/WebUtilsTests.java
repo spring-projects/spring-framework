@@ -20,10 +20,11 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
 import org.junit.Test;
+
 import org.springframework.util.MultiValueMap;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Juergen Hoeller

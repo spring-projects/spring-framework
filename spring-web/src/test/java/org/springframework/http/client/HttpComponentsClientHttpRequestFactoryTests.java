@@ -16,8 +16,6 @@
 
 package org.springframework.http.client;
 
-import static org.junit.Assert.*;
-
 import java.net.URI;
 
 import org.apache.http.client.HttpClient;
@@ -27,7 +25,10 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.params.CoreConnectionPNames;
 import org.junit.Test;
+
 import org.springframework.http.HttpMethod;
+
+import static org.junit.Assert.*;
 
 public class HttpComponentsClientHttpRequestFactoryTests extends AbstractHttpRequestFactoryTestCase {
 

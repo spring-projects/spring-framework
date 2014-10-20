@@ -16,8 +16,6 @@
 
 package org.springframework.aop.framework;
 
-import static org.junit.Assert.assertTrue;
-
 import java.lang.reflect.Method;
 import java.util.LinkedList;
 import java.util.List;
@@ -27,6 +25,8 @@ import org.aopalliance.intercept.MethodInvocation;
 import org.junit.Test;
 
 import org.springframework.tests.sample.beans.TestBean;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Rod Johnson

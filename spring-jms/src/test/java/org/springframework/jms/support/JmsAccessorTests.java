@@ -16,11 +16,11 @@
 
 package org.springframework.jms.support;
 
-import static org.junit.Assert.*;
-
 import javax.jms.Session;
 
 import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  * Unit tests for the {@link JmsAccessor} class.

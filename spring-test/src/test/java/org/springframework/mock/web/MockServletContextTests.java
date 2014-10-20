@@ -18,7 +18,6 @@ package org.springframework.mock.web;
 
 import java.util.Map;
 import java.util.Set;
-
 import javax.activation.FileTypeMap;
 import javax.activation.MimetypesFileTypeMap;
 import javax.servlet.FilterRegistration;

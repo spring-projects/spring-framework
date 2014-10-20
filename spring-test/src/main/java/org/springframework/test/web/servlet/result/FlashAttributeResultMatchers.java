@@ -16,12 +16,13 @@
 
 package org.springframework.test.web.servlet.result;
 
-import static org.springframework.test.util.AssertionErrors.*;
-import static org.springframework.test.util.MatcherAssertionErrors.assertThat;
-
 import org.hamcrest.Matcher;
+
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultMatcher;
+
+import static org.springframework.test.util.AssertionErrors.*;
+import static org.springframework.test.util.MatcherAssertionErrors.*;
 
 /**
  * Factory for "output" flash attribute assertions. An instance of this class is

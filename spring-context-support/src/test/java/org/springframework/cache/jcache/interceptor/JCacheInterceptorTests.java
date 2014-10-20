@@ -16,8 +16,6 @@
 
 package org.springframework.cache.jcache.interceptor;
 
-import static org.junit.Assert.*;
-
 import java.lang.reflect.Method;
 
 import org.junit.Test;
@@ -30,6 +28,8 @@ import org.springframework.cache.interceptor.NamedCacheResolver;
 import org.springframework.cache.jcache.AbstractJCacheTests;
 import org.springframework.context.support.StaticApplicationContext;
 import org.springframework.util.ReflectionUtils;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Stephane Nicoll

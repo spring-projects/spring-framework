@@ -16,10 +16,10 @@
 
 package org.springframework.tests;
 
-import static org.hamcrest.Matchers.startsWith;
-import static org.junit.Assert.*;
-
 import org.junit.Test;
+
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
 
 /**
  * Tests for {@link JavaVersion}.

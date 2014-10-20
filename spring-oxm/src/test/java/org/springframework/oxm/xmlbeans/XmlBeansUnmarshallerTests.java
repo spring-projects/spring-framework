@@ -23,7 +23,6 @@ import javax.xml.stream.XMLStreamReader;
 import javax.xml.transform.Source;
 import javax.xml.transform.stream.StreamSource;
 
-import static org.junit.Assert.*;
 import org.junit.Test;
 
 import org.springframework.oxm.AbstractUnmarshallerTests;
@@ -33,6 +32,8 @@ import org.springframework.samples.flight.FlightDocument;
 import org.springframework.samples.flight.FlightType;
 import org.springframework.samples.flight.FlightsDocument;
 import org.springframework.util.xml.StaxUtils;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Arjen Poutsma

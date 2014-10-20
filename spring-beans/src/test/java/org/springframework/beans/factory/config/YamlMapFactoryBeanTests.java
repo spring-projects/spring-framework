@@ -16,8 +16,6 @@
 
 package org.springframework.beans.factory.config;
 
-import static org.junit.Assert.*;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.LinkedHashMap;
@@ -29,6 +27,8 @@ import org.yaml.snakeyaml.parser.ParserException;
 import org.springframework.core.io.AbstractResource;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.FileSystemResource;
+
+import static org.junit.Assert.*;
 
 /**
  * Tests for {@link YamlMapFactoryBean}.

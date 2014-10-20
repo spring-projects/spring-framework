@@ -21,6 +21,7 @@ import java.util.Arrays;
 
 import org.junit.Before;
 import org.junit.Test;
+
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;

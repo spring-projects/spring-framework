@@ -1,7 +1,6 @@
 package org.springframework.cache.jcache.support;
 
 import java.lang.annotation.Annotation;
-
 import javax.cache.annotation.CacheKeyGenerator;
 import javax.cache.annotation.CacheKeyInvocationContext;
 import javax.cache.annotation.GeneratedCacheKey;

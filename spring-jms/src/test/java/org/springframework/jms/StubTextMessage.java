@@ -18,7 +18,6 @@ package org.springframework.jms;
 
 import java.util.Enumeration;
 import java.util.concurrent.ConcurrentHashMap;
-
 import javax.jms.Destination;
 import javax.jms.JMSException;
 import javax.jms.TextMessage;

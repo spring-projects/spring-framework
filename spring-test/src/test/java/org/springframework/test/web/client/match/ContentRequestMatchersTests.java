@@ -15,14 +15,13 @@
  */
 package org.springframework.test.web.client.match;
 
-import static org.hamcrest.Matchers.hasXPath;
-
 import org.junit.Before;
 import org.junit.Test;
+
 import org.springframework.http.MediaType;
 import org.springframework.mock.http.client.MockClientHttpRequest;
-import org.springframework.test.web.client.match.ContentRequestMatchers;
-import org.springframework.test.web.client.match.MockRestRequestMatchers;
+
+import static org.hamcrest.Matchers.*;
 
 /**
  * Tests for {@link ContentRequestMatchers}.

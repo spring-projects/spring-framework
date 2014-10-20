@@ -16,26 +16,24 @@
 
 package org.springframework.web.portlet.mvc.annotation;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.BindException;
 import java.net.SocketException;
-
 import javax.portlet.PortletRequest;
 import javax.portlet.PortletResponse;
 
 import org.junit.Before;
 import org.junit.Test;
+
 import org.springframework.mock.web.portlet.MockRenderRequest;
 import org.springframework.mock.web.portlet.MockRenderResponse;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.ClassUtils;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.portlet.ModelAndView;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Arjen Poutsma

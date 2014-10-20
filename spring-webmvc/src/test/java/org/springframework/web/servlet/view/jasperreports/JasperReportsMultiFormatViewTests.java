@@ -19,12 +19,11 @@ package org.springframework.web.servlet.view.jasperreports;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
-
 import javax.servlet.http.HttpServletResponse;
 
 import net.sf.jasperreports.engine.JasperPrint;
-
 import org.junit.Test;
+
 import org.springframework.tests.Assume;
 import org.springframework.tests.TestGroup;
 

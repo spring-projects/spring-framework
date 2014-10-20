@@ -20,7 +20,6 @@ import java.rmi.NoSuchObjectException;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.util.Properties;
-
 import javax.naming.NamingException;
 import javax.rmi.PortableRemoteObject;
 

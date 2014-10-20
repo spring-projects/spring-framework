@@ -15,20 +15,16 @@
  */
 package org.springframework.test.web.client.response;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-
 import java.net.URI;
 
 import org.junit.Test;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.mock.http.client.MockClientHttpResponse;
-import org.springframework.test.web.client.response.DefaultResponseCreator;
-import org.springframework.test.web.client.response.MockRestResponseCreators;
 import org.springframework.util.FileCopyUtils;
+
+import static org.junit.Assert.*;
 
 /**
  * Tests for the {@link MockRestResponseCreators} static factory methods.

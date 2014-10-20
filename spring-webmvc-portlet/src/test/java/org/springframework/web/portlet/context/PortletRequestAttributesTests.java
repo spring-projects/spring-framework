@@ -17,10 +17,10 @@
 package org.springframework.web.portlet.context;
 
 import java.io.Serializable;
-
 import javax.portlet.PortletRequest;
 
 import org.junit.Test;
+
 import org.springframework.mock.web.portlet.MockPortletRequest;
 import org.springframework.mock.web.portlet.MockPortletSession;
 import org.springframework.web.context.request.RequestAttributes;

@@ -16,14 +16,14 @@
 
 package org.springframework.transaction.interceptor;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.junit.Assert.assertThat;
-
 import java.io.IOException;
 
 import junit.framework.TestCase;
 
 import org.springframework.beans.FatalBeanException;
+
+import static org.hamcrest.CoreMatchers.*;
+import static org.junit.Assert.*;
 
 /**
  * Unit tests for the {@link RollbackRuleAttribute} class.

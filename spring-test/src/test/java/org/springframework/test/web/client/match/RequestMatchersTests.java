@@ -15,16 +15,16 @@
  */
 package org.springframework.test.web.client.match;
 
-import static org.hamcrest.Matchers.containsString;
-
 import java.net.URI;
 import java.util.Arrays;
 
 import org.junit.Before;
 import org.junit.Test;
+
 import org.springframework.http.HttpMethod;
 import org.springframework.mock.http.client.MockClientHttpRequest;
-import org.springframework.test.web.client.match.MockRestRequestMatchers;
+
+import static org.hamcrest.Matchers.*;
 
 /**
  * Tests for {@link MockRestRequestMatchers}.

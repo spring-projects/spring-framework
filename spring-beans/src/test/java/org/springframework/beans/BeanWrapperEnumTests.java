@@ -17,6 +17,7 @@
 package org.springframework.beans;
 
 import org.junit.Test;
+
 import org.springframework.tests.sample.beans.CustomEnum;
 import org.springframework.tests.sample.beans.GenericBean;
 

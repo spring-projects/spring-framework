@@ -18,12 +18,12 @@ package org.springframework.web.portlet;
 
 import javax.portlet.ActionRequest;
 import javax.portlet.ActionResponse;
+import javax.portlet.EventRequest;
+import javax.portlet.EventResponse;
 import javax.portlet.RenderRequest;
 import javax.portlet.RenderResponse;
-import javax.portlet.EventResponse;
-import javax.portlet.EventRequest;
-import javax.portlet.ResourceResponse;
 import javax.portlet.ResourceRequest;
+import javax.portlet.ResourceResponse;
 
 /**
  * Workflow interface that allows for customized handler execution chains.

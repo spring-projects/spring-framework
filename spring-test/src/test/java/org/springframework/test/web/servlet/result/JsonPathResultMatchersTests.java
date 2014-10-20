@@ -18,9 +18,9 @@ package org.springframework.test.web.servlet.result;
 
 import org.hamcrest.Matchers;
 import org.junit.Test;
+
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.web.servlet.StubMvcResult;
-import org.springframework.test.web.servlet.result.JsonPathResultMatchers;
 
 /**
  * Tests for {@link JsonPathResultMatchers}.

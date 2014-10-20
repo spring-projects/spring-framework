@@ -17,7 +17,6 @@
 package org.springframework.orm.hibernate3;
 
 import java.util.Properties;
-
 import javax.transaction.Transaction;
 import javax.transaction.TransactionManager;
 

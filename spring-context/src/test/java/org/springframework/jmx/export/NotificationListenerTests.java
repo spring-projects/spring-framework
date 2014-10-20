@@ -27,6 +27,7 @@ import javax.management.NotificationListener;
 import javax.management.ObjectName;
 
 import org.junit.Test;
+
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.jmx.AbstractMBeanServerTests;
 import org.springframework.jmx.JmxTestBean;

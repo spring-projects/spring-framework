@@ -17,7 +17,6 @@
 package org.springframework.jmx.support;
 
 import java.net.MalformedURLException;
-
 import javax.management.MBeanServerConnection;
 import javax.management.remote.JMXConnectorServer;
 import javax.management.remote.JMXConnectorServerFactory;
@@ -25,6 +24,7 @@ import javax.management.remote.JMXServiceURL;
 
 import org.junit.Before;
 import org.junit.Test;
+
 import org.springframework.aop.support.AopUtils;
 import org.springframework.jmx.AbstractMBeanServerTests;
 import org.springframework.tests.Assume;

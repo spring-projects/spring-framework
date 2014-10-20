@@ -18,21 +18,21 @@ package org.springframework.web.portlet.context;
 
 import java.util.Locale;
 import java.util.Map;
-
 import javax.portlet.PortletRequest;
+import javax.portlet.PortletResponse;
 import javax.portlet.RenderRequest;
 import javax.portlet.RenderResponse;
-import javax.portlet.PortletResponse;
 import javax.portlet.filter.PortletRequestWrapper;
 import javax.portlet.filter.PortletResponseWrapper;
 
-import static org.junit.Assert.*;
 import org.junit.Test;
 
 import org.springframework.mock.web.portlet.MockPortletRequest;
 import org.springframework.mock.web.portlet.MockRenderRequest;
 import org.springframework.mock.web.portlet.MockRenderResponse;
 import org.springframework.web.multipart.MultipartRequest;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Juergen Hoeller

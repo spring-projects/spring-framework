@@ -16,8 +16,6 @@
 
 package org.springframework.test.context;
 
-import static org.junit.Assert.*;
-
 import java.util.HashSet;
 import java.util.Set;
 
@@ -28,6 +26,8 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.test.context.support.AnnotationConfigContextLoader;
 import org.springframework.test.context.support.GenericXmlContextLoader;
+
+import static org.junit.Assert.*;
 
 /**
  * Unit tests for {@link MergedContextConfiguration}.

@@ -23,10 +23,10 @@ import java.util.concurrent.Callable;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.util.Assert;
-import org.springframework.web.context.request.async.WebAsyncTask;
 import org.springframework.web.context.request.async.CallableProcessingInterceptor;
 import org.springframework.web.context.request.async.DeferredResult;
 import org.springframework.web.context.request.async.DeferredResultProcessingInterceptor;
+import org.springframework.web.context.request.async.WebAsyncTask;
 
 /**
  * Helps with configuring options for asynchronous request processing.

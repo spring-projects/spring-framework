@@ -16,11 +16,12 @@
 
 package org.springframework.http;
 
-import static org.junit.Assert.*;
 import org.junit.Test;
 
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Arjen Poutsma

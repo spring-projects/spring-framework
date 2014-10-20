@@ -16,14 +16,14 @@
 
 package org.springframework.cache.config;
 
-import static org.junit.Assert.*;
-
 import org.junit.Test;
 
 import org.springframework.cache.interceptor.CacheErrorHandler;
 import org.springframework.cache.interceptor.CacheInterceptor;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.support.GenericXmlApplicationContext;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Costin Leau

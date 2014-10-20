@@ -16,9 +16,6 @@
 
 package org.springframework.jms.annotation;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
-
 import javax.jms.JMSException;
 import javax.jms.Session;
 
@@ -39,6 +36,9 @@ import org.springframework.stereotype.Component;
 import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
 import org.springframework.validation.annotation.Validated;
+
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.*;
 
 /**
  *

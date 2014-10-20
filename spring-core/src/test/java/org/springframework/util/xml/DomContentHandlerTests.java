@@ -20,7 +20,6 @@ import java.io.StringReader;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
-import static org.custommonkey.xmlunit.XMLAssert.assertXMLEqual;
 import org.junit.Before;
 import org.junit.Test;
 import org.w3c.dom.Document;
@@ -28,6 +27,8 @@ import org.w3c.dom.Element;
 import org.xml.sax.InputSource;
 import org.xml.sax.XMLReader;
 import org.xml.sax.helpers.XMLReaderFactory;
+
+import static org.custommonkey.xmlunit.XMLAssert.*;
 
 /**
  * Unit tests for {@link DomContentHandler}.

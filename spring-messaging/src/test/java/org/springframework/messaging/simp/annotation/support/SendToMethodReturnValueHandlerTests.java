@@ -19,7 +19,6 @@ package org.springframework.messaging.simp.annotation.support;
 import java.lang.reflect.Method;
 import java.nio.charset.Charset;
 import java.security.Principal;
-
 import javax.security.auth.Subject;
 
 import org.junit.Before;
@@ -29,6 +28,7 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+
 import org.springframework.core.MethodParameter;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;

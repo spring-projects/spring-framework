@@ -32,9 +32,9 @@ import org.springframework.transaction.annotation.Transactional;
  *
  * <p>An @Transactional annotation on a method within the class overrides the
  * default transaction semantics given by the class annotation (if present).
- * Any method may be annotated (regardless of visibility).
- * Annotating non-public methods directly is the only way
- * to get transaction demarcation for the execution of such operations.
+ * Any method may be annotated (regardless of visibility). Annotating
+ * non-public methods directly is the only way to get transaction demarcation
+ * for the execution of such operations.
  *
  * @author Rod Johnson
  * @author Ramnivas Laddad

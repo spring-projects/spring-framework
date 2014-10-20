@@ -16,17 +16,18 @@
 
 package org.springframework.jdbc.core.simple;
 
-import static org.junit.Assert.assertEquals;
-
 import java.util.List;
 
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.jdbc.core.AbstractRowMapperTests;
 import org.springframework.jdbc.core.test.ConcretePerson;
 import org.springframework.jdbc.core.test.Person;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Thomas Risberg

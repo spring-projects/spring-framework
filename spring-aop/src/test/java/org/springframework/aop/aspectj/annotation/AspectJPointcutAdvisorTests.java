@@ -16,16 +16,16 @@
 
 package org.springframework.aop.aspectj.annotation;
 
-import static org.junit.Assert.*;
-
 import org.junit.Test;
+import test.aop.PerTargetAspect;
+
 import org.springframework.aop.Pointcut;
 import org.springframework.aop.aspectj.AspectJExpressionPointcut;
 import org.springframework.aop.aspectj.AspectJExpressionPointcutTests;
 import org.springframework.aop.framework.AopConfigException;
-
-import test.aop.PerTargetAspect;
 import org.springframework.tests.sample.beans.TestBean;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Rod Johnson

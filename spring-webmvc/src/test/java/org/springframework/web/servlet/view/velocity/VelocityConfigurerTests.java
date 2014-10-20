@@ -16,9 +16,6 @@
 
 package org.springframework.web.servlet.view.velocity;
 
-import static org.hamcrest.Matchers.instanceOf;
-import static org.junit.Assert.assertThat;
-
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -28,9 +25,9 @@ import java.util.Properties;
 import java.util.Vector;
 
 import junit.framework.TestCase;
-
 import org.apache.velocity.app.VelocityEngine;
 import org.apache.velocity.exception.VelocityException;
+
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.DescriptiveResource;
 import org.springframework.core.io.FileSystemResource;
@@ -39,6 +36,9 @@ import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.UrlResource;
 import org.springframework.ui.velocity.VelocityEngineFactoryBean;
 import org.springframework.ui.velocity.VelocityEngineUtils;
+
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
 
 /**
  * @author Rod Johnson

@@ -16,8 +16,6 @@
 
 package org.springframework.transaction.interceptor;
 
-import static org.junit.Assert.*;
-
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -25,7 +23,10 @@ import java.util.Properties;
 
 import org.junit.Ignore;
 import org.junit.Test;
+
 import org.springframework.transaction.TransactionDefinition;
+
+import static org.junit.Assert.*;
 
 /**
  * Unit tests for the various {@link TransactionAttributeSource} implementations.

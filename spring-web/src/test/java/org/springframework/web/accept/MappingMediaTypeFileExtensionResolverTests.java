@@ -15,15 +15,15 @@
  */
 package org.springframework.web.accept;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
 import org.junit.Test;
+
 import org.springframework.http.MediaType;
+
+import static org.junit.Assert.*;
 
 /**
  * Test fixture for {@link MappingMediaTypeFileExtensionResolver}.

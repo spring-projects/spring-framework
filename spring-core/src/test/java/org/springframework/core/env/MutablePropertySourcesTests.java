@@ -17,9 +17,10 @@
 package org.springframework.core.env;
 
 import org.junit.Test;
+
 import org.springframework.mock.env.MockPropertySource;
 
-import static java.lang.String.*;
+import static java.lang.String.format;
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
 import static org.springframework.core.env.MutablePropertySources.*;

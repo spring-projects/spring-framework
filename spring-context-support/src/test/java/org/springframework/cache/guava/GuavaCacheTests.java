@@ -16,14 +16,14 @@
 
 package org.springframework.cache.guava;
 
-import static org.junit.Assert.*;
-
 import com.google.common.cache.CacheBuilder;
 import org.junit.Before;
 import org.junit.Test;
 
 import org.springframework.cache.AbstractCacheTests;
 import org.springframework.cache.Cache;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Stephane Nicoll

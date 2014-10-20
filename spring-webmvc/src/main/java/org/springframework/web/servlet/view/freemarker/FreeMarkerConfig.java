@@ -16,8 +16,8 @@
 
 package org.springframework.web.servlet.view.freemarker;
 
-import freemarker.template.Configuration;
 import freemarker.ext.jsp.TaglibFactory;
+import freemarker.template.Configuration;
 
 /**
  * Interface to be implemented by objects that configure and manage a

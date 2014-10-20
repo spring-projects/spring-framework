@@ -16,8 +16,6 @@
 
 package org.springframework.transaction.interceptor;
 
-import static org.junit.Assert.*;
-
 import java.io.IOException;
 import java.rmi.RemoteException;
 import java.util.Collections;
@@ -25,7 +23,10 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.junit.Test;
+
 import org.springframework.transaction.TransactionDefinition;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Rod Johnson

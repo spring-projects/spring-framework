@@ -1,4 +1,3 @@
-
 /**
  * Spring's repackaging of
  * <a href="http://asm.ow2.org">org.objectweb.asm 5.0</a>
@@ -12,7 +11,5 @@
  * and javadocs are not available here. See the original ObjectWeb
  * <a href="http://asm.ow2.org/asm50/javadoc/user">ASM 5.0 javadocs</a>
  * for details when working with these classes.
- *
- * @since 3.2
  */
 package org.springframework.asm;

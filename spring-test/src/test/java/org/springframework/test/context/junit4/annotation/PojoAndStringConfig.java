@@ -16,10 +16,10 @@
 
 package org.springframework.test.context.junit4.annotation;
 
-import org.springframework.tests.sample.beans.Employee;
-import org.springframework.tests.sample.beans.Pet;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.tests.sample.beans.Employee;
+import org.springframework.tests.sample.beans.Pet;
 
 /**
  * ApplicationContext configuration class for various integration tests.

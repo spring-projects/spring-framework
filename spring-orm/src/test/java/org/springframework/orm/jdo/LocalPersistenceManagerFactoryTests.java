@@ -19,11 +19,11 @@ package org.springframework.orm.jdo;
 import java.io.IOException;
 import java.util.Map;
 import java.util.Properties;
-
 import javax.jdo.JDOFatalUserException;
 import javax.jdo.PersistenceManagerFactory;
 
 import org.junit.Test;
+
 import org.springframework.core.io.ClassPathResource;
 
 import static org.junit.Assert.*;

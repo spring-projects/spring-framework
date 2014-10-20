@@ -16,15 +16,14 @@
 
 package org.springframework.cache.jcache.interceptor;
 
-import static java.util.Arrays.*;
-
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Set;
-
 import javax.cache.annotation.CacheMethodDetails;
+
+import static java.util.Arrays.*;
 
 /**
  * The default {@link CacheMethodDetails} implementation.

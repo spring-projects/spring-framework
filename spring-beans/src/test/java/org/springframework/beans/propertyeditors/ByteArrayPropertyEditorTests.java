@@ -16,9 +16,9 @@
 
 package org.springframework.beans.propertyeditors;
 
-import junit.framework.TestCase;
-
 import java.beans.PropertyEditor;
+
+import junit.framework.TestCase;
 
 /**
  * Unit tests for the {@link ByteArrayPropertyEditor} class.

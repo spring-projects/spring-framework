@@ -16,7 +16,9 @@
 
 package org.springframework.web.servlet.config.annotation;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;

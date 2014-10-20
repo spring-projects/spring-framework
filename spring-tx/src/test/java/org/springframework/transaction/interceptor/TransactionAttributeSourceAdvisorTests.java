@@ -18,9 +18,9 @@ package org.springframework.transaction.interceptor;
 
 import java.util.Properties;
 
-import org.springframework.util.SerializationTestUtils;
-
 import junit.framework.TestCase;
+
+import org.springframework.util.SerializationTestUtils;
 
 /**
  *

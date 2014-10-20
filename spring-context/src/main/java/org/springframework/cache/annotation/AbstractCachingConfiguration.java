@@ -17,7 +17,6 @@
 package org.springframework.cache.annotation;
 
 import java.util.Collection;
-
 import javax.annotation.PostConstruct;
 
 import org.springframework.beans.factory.annotation.Autowired;

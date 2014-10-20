@@ -15,17 +15,14 @@
  */
 package org.springframework.test.web.client.match;
 
-import static org.springframework.test.util.MatcherAssertionErrors.assertThat;
-import static org.springframework.test.util.AssertionErrors.*;
-
 import java.io.IOException;
 import java.net.URI;
 import java.util.List;
 import java.util.Map;
-
 import javax.xml.xpath.XPathExpressionException;
 
 import org.hamcrest.Matcher;
+
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.client.ClientHttpRequest;
@@ -33,6 +30,9 @@ import org.springframework.test.util.AssertionErrors;
 import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.test.web.client.RequestMatcher;
 import org.springframework.util.Assert;
+
+import static org.springframework.test.util.AssertionErrors.*;
+import static org.springframework.test.util.MatcherAssertionErrors.*;
 
 /**
  * Static, factory methods for {@link RequestMatcher} classes. Typically used to

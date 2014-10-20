@@ -16,9 +16,9 @@
 
 package org.springframework.web.servlet.tags.form;
 
-import junit.framework.TestCase;
-
 import javax.servlet.jsp.PageContext;
+
+import junit.framework.TestCase;
 
 import org.springframework.mock.web.test.MockPageContext;
 

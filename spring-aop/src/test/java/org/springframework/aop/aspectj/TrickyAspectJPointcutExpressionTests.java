@@ -1,8 +1,5 @@
 package org.springframework.aop.aspectj;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
-
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Inherited;
@@ -12,12 +9,15 @@ import java.lang.annotation.Target;
 import java.lang.reflect.Method;
 
 import org.junit.Test;
+
 import org.springframework.aop.Advisor;
 import org.springframework.aop.MethodBeforeAdvice;
 import org.springframework.aop.ThrowsAdvice;
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.aop.support.DefaultPointcutAdvisor;
 import org.springframework.core.OverridingClassLoader;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Dave Syer

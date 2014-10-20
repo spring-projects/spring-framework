@@ -16,14 +16,14 @@
 
 package org.springframework.aop.support;
 
-import static org.junit.Assert.*;
-
 import org.junit.Test;
+
 import org.springframework.aop.ClassFilter;
 import org.springframework.core.NestedRuntimeException;
-
 import org.springframework.tests.sample.beans.ITestBean;
 import org.springframework.tests.sample.beans.TestBean;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Rod Johnson

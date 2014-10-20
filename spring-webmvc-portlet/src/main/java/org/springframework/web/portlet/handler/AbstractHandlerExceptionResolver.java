@@ -17,20 +17,20 @@
 package org.springframework.web.portlet.handler;
 
 import java.util.Set;
+import javax.portlet.MimeResponse;
 import javax.portlet.PortletRequest;
-import javax.portlet.WindowState;
 import javax.portlet.RenderRequest;
 import javax.portlet.RenderResponse;
 import javax.portlet.ResourceRequest;
 import javax.portlet.ResourceResponse;
-import javax.portlet.MimeResponse;
+import javax.portlet.WindowState;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.core.Ordered;
 import org.springframework.web.portlet.HandlerExceptionResolver;
 import org.springframework.web.portlet.ModelAndView;
-import org.springframework.core.Ordered;
 
 /**
  * Abstract base class for {@link HandlerExceptionResolver} implementations.

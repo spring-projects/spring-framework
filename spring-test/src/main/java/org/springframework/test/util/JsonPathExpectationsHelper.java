@@ -16,18 +16,15 @@
 
 package org.springframework.test.util;
 
-import static org.springframework.test.util.AssertionErrors.assertEquals;
-import static org.springframework.test.util.AssertionErrors.assertTrue;
-import static org.springframework.test.util.AssertionErrors.fail;
-import static org.springframework.test.util.MatcherAssertionErrors.assertThat;
-
 import java.text.ParseException;
 import java.util.List;
 
-import org.hamcrest.Matcher;
-
 import com.jayway.jsonpath.InvalidPathException;
 import com.jayway.jsonpath.JsonPath;
+import org.hamcrest.Matcher;
+
+import static org.springframework.test.util.AssertionErrors.*;
+import static org.springframework.test.util.MatcherAssertionErrors.*;
 
 /**
  * A helper class for applying assertions via JSONPath expressions.

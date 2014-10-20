@@ -15,20 +15,18 @@
  */
 package org.springframework.test.web.client;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
-import static org.springframework.test.web.client.match.MockRestRequestMatchers.anything;
-
 import java.net.URI;
 
 import org.junit.Before;
 import org.junit.Test;
+
 import org.springframework.http.HttpMethod;
 import org.springframework.http.client.ClientHttpRequest;
 import org.springframework.http.client.ClientHttpRequestFactory;
-import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.web.client.RestTemplate;
+
+import static org.junit.Assert.*;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.*;
 
 /**
  * Tests for {@link MockClientHttpRequestFactory}.

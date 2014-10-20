@@ -18,10 +18,10 @@ package org.springframework.web.servlet.config;
 
 import java.util.List;
 
-import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.w3c.dom.Element;
 
 import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.parsing.BeanComponentDefinition;
 import org.springframework.beans.factory.parsing.CompositeComponentDefinition;
 import org.springframework.beans.factory.support.ManagedList;

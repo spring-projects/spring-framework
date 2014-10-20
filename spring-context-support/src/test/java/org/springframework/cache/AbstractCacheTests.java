@@ -16,9 +16,9 @@
 
 package org.springframework.cache;
 
-import static org.junit.Assert.*;
-
 import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Stephane Nicoll

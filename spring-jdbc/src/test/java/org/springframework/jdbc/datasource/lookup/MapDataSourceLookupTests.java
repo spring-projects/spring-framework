@@ -16,14 +16,13 @@
 
 package org.springframework.jdbc.datasource.lookup;
 
-import static org.junit.Assert.*;
-
 import java.util.HashMap;
 import java.util.Map;
-
 import javax.sql.DataSource;
 
 import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Rick Evans

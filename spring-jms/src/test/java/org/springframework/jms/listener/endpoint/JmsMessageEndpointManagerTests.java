@@ -16,11 +16,11 @@
 
 package org.springframework.jms.listener.endpoint;
 
-import static org.junit.Assert.*;
-
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Stephane Nicoll

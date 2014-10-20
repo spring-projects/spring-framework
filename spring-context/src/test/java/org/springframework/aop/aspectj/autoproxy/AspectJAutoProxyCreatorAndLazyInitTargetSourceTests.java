@@ -16,12 +16,13 @@
 
 package org.springframework.aop.aspectj.autoproxy;
 
-import static org.junit.Assert.*;
-
 import org.junit.Test;
+
+import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.tests.sample.beans.ITestBean;
 import org.springframework.tests.sample.beans.TestBean;
-import org.springframework.context.support.ClassPathXmlApplicationContext;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Rod Johnson

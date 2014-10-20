@@ -17,7 +17,6 @@
 package org.springframework.jdbc.core.support;
 
 import java.sql.Connection;
-
 import javax.sql.DataSource;
 
 import org.springframework.dao.support.DaoSupport;

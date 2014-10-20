@@ -16,10 +16,6 @@
 
 package org.springframework.beans.factory.config;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
-import static org.springframework.beans.factory.config.YamlProcessor.*;
-
 import java.util.Map;
 import java.util.Properties;
 
@@ -33,6 +29,10 @@ import org.yaml.snakeyaml.scanner.ScannerException;
 
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.ClassPathResource;
+
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
+import static org.springframework.beans.factory.config.YamlProcessor.*;
 
 /**
  * Tests for {@link YamlPropertiesFactoryBean}.

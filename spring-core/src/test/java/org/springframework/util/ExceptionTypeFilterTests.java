@@ -16,12 +16,10 @@
 
 package org.springframework.util;
 
-import static java.util.Arrays.*;
-import static org.junit.Assert.*;
-
 import org.junit.Test;
 
-import org.springframework.util.ExceptionTypeFilter;
+import static java.util.Arrays.*;
+import static org.junit.Assert.*;
 
 /**
  * @author Stephane Nicoll

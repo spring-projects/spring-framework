@@ -16,9 +16,9 @@
 
 package org.springframework.aop.aspectj.autoproxy;
 
-import org.springframework.context.support.ClassPathXmlApplicationContext;
-
 import junit.framework.TestCase;
+
+import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 /**
  * @author Adrian Colyer

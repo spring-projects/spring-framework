@@ -16,8 +16,6 @@
 
 package org.springframework.beans;
 
-import static org.junit.Assert.*;
-
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Collections;
@@ -29,6 +27,8 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Guillaume Poirier

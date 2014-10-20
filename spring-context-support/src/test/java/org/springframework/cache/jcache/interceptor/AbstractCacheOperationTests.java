@@ -16,11 +16,8 @@
 
 package org.springframework.cache.jcache.interceptor;
 
-import static org.junit.Assert.*;
-
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
-
 import javax.cache.annotation.CacheInvocationParameter;
 import javax.cache.annotation.CacheMethodDetails;
 
@@ -30,6 +27,8 @@ import org.springframework.cache.jcache.AbstractJCacheTests;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.util.Assert;
 import org.springframework.util.ReflectionUtils;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Stephane Nicoll

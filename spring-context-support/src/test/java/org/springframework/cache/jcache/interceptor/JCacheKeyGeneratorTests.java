@@ -16,12 +16,9 @@
 
 package org.springframework.cache.jcache.interceptor;
 
-import static org.junit.Assert.*;
-
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicLong;
-
 import javax.cache.annotation.CacheDefaults;
 import javax.cache.annotation.CacheKey;
 import javax.cache.annotation.CacheResult;
@@ -40,6 +37,8 @@ import org.springframework.cache.jcache.config.JCacheConfigurerSupport;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import static org.junit.Assert.*;
 
 /**
  *

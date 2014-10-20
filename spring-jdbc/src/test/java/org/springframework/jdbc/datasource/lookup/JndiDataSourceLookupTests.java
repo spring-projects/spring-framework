@@ -16,12 +16,12 @@
 
 package org.springframework.jdbc.datasource.lookup;
 
-import static org.junit.Assert.*;
-
 import javax.naming.NamingException;
 import javax.sql.DataSource;
 
 import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Rick Evans

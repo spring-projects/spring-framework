@@ -17,6 +17,7 @@
 package org.springframework.jdbc.datasource.embedded;
 
 import org.junit.Test;
+
 import org.springframework.core.io.ClassRelativeResourceLoader;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.init.CannotReadScriptException;

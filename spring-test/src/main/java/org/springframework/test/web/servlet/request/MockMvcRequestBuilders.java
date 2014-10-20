@@ -15,14 +15,13 @@
  */
 package org.springframework.test.web.servlet.request;
 
+import java.net.URI;
 import javax.servlet.ServletContext;
 
 import org.springframework.http.HttpMethod;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.RequestBuilder;
-
-import java.net.URI;
 
 /**
  * Static factory methods for {@link RequestBuilder}s.

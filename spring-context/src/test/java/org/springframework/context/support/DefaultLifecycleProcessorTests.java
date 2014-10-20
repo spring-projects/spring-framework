@@ -19,6 +19,7 @@ package org.springframework.context.support;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.junit.Test;
+
 import org.springframework.beans.DirectFieldAccessor;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.config.BeanDefinition;

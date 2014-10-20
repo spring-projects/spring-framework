@@ -21,7 +21,6 @@ import java.io.Serializable;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-
 import javax.transaction.TransactionManager;
 
 import org.apache.commons.logging.Log;
@@ -31,8 +30,8 @@ import org.hibernate.usertype.UserType;
 import org.hibernate.util.EqualsHelper;
 
 import org.springframework.jdbc.support.lob.LobCreator;
-import org.springframework.jdbc.support.lob.LobHandler;
 import org.springframework.jdbc.support.lob.LobCreatorUtils;
+import org.springframework.jdbc.support.lob.LobHandler;
 import org.springframework.orm.hibernate3.LocalSessionFactoryBean;
 
 /**

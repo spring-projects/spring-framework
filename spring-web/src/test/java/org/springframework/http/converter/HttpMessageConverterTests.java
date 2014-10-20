@@ -17,12 +17,14 @@
 package org.springframework.http.converter;
 
 import java.io.IOException;
-import static org.junit.Assert.*;
+
 import org.junit.Test;
 
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.MediaType;
+
+import static org.junit.Assert.*;
 
 /**
  * Test-case for AbstractHttpMessageConverter.

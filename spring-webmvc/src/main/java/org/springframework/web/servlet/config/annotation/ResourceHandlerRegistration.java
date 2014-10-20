@@ -16,16 +16,15 @@
 
 package org.springframework.web.servlet.config.annotation;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.springframework.cache.Cache;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.util.Assert;
-import org.springframework.util.CollectionUtils;
 import org.springframework.web.servlet.resource.PathResourceResolver;
 import org.springframework.web.servlet.resource.ResourceHttpRequestHandler;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Encapsulates information required to create a resource handlers.

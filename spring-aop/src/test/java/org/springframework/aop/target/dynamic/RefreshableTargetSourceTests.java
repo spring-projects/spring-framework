@@ -16,11 +16,12 @@
 
 package org.springframework.aop.target.dynamic;
 
-import static org.junit.Assert.*;
-
 import org.junit.Test;
+
 import org.springframework.tests.Assume;
 import org.springframework.tests.TestGroup;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Rob Harrop

@@ -20,6 +20,7 @@ import java.util.Arrays;
 
 import org.junit.After;
 import org.junit.Test;
+
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.EncodedResource;

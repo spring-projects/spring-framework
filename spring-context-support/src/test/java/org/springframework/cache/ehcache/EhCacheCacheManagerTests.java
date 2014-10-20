@@ -21,6 +21,7 @@ import net.sf.ehcache.config.CacheConfiguration;
 import net.sf.ehcache.config.Configuration;
 import org.junit.After;
 import org.junit.Before;
+
 import org.springframework.cache.transaction.AbstractTransactionSupportingCacheManagerTests;
 
 /**

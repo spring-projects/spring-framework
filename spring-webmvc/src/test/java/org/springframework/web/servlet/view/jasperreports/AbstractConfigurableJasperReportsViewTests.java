@@ -17,6 +17,7 @@
 package org.springframework.web.servlet.view.jasperreports;
 
 import org.junit.Test;
+
 import org.springframework.context.support.StaticApplicationContext;
 
 import static org.junit.Assert.*;

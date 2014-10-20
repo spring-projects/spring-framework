@@ -16,15 +16,16 @@
 
 package org.springframework.test.context.junit4;
 
-import static org.springframework.test.transaction.TransactionTestUtils.assertInTransaction;
-
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
 import org.springframework.test.annotation.Repeat;
 import org.springframework.test.annotation.Timed;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+
+import static org.springframework.test.transaction.TransactionTestUtils.*;
 
 /**
  * JUnit 4 based integration test which verifies support of Spring's

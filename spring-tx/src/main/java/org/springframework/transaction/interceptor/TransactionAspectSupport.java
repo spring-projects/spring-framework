@@ -16,8 +16,13 @@
 
 package org.springframework.transaction.interceptor;
 
+import java.lang.reflect.Method;
+import java.util.Properties;
+import java.util.concurrent.ConcurrentHashMap;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.InitializingBean;
@@ -30,10 +35,6 @@ import org.springframework.transaction.TransactionSystemException;
 import org.springframework.transaction.support.CallbackPreferringPlatformTransactionManager;
 import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.util.StringUtils;
-
-import java.lang.reflect.Method;
-import java.util.Properties;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Base class for transactional aspects, such as the {@link TransactionInterceptor}

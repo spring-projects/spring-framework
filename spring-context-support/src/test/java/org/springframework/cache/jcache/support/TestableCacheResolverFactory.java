@@ -17,7 +17,6 @@
 package org.springframework.cache.jcache.support;
 
 import java.lang.annotation.Annotation;
-
 import javax.cache.annotation.CacheMethodDetails;
 import javax.cache.annotation.CacheResolver;
 import javax.cache.annotation.CacheResolverFactory;

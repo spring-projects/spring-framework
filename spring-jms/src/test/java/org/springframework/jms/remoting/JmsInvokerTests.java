@@ -19,7 +19,6 @@ package org.springframework.jms.remoting;
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Enumeration;
-
 import javax.jms.Destination;
 import javax.jms.JMSException;
 import javax.jms.Message;
@@ -33,6 +32,7 @@ import javax.jms.Session;
 
 import org.junit.Before;
 import org.junit.Test;
+
 import org.springframework.jms.support.converter.MessageConversionException;
 import org.springframework.jms.support.converter.SimpleMessageConverter;
 import org.springframework.tests.sample.beans.ITestBean;

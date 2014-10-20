@@ -1,4 +1,3 @@
-
 /**
  * Spring's repackaging of
  * <a href="http://cglib.sourceforge.net">net.sf.cglib 3.1</a>
@@ -12,7 +11,5 @@
  * and javadocs are not available here. See the original
  * <a href="http://cglib.sourceforge.net/apidocs">CGLIB 3.1 javadocs</a>
  * for details when working with these classes.
- *
- * @since 3.2
  */
 package org.springframework.cglib;

@@ -17,8 +17,8 @@
 package org.springframework.expression.spel.ast;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Collections;
+import java.util.List;
 
 import org.springframework.asm.ClassWriter;
 import org.springframework.asm.MethodVisitor;

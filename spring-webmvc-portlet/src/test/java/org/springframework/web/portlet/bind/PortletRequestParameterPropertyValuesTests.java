@@ -16,9 +16,9 @@
 
 package org.springframework.web.portlet.bind;
 
-import org.springframework.mock.web.portlet.MockPortletRequest;
-
 import junit.framework.TestCase;
+
+import org.springframework.mock.web.portlet.MockPortletRequest;
 
 /**
  * @author Mark Fisher

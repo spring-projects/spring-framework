@@ -18,6 +18,7 @@ package org.springframework.test.util;
 
 import org.junit.Ignore;
 import org.junit.Test;
+
 import org.springframework.test.util.subpackage.Component;
 import org.springframework.test.util.subpackage.LegacyEntity;
 import org.springframework.test.util.subpackage.Person;

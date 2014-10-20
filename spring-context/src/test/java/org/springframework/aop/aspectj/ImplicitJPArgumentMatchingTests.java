@@ -17,6 +17,7 @@ package org.springframework.aop.aspectj;
 
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.junit.Test;
+
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 /**

@@ -1,5 +1,4 @@
 /**
- *
  * Package providing integration of
  * <a href="http://www.hibernate.org">Hibernate 4.x</a>
  * with Spring concepts.
@@ -13,7 +12,5 @@
  * See the {@code org.springframework.orm.hibernate3} package for Hibernate 3.x support.
  * <b>Note:</b> Do not use HibernateTemplate or other classes from the hibernate3 package
  * with Hibernate 4; this will lead to class definition exceptions at runtime.
- *
  */
 package org.springframework.orm.hibernate4;
-

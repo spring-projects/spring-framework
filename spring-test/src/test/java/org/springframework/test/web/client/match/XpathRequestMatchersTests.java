@@ -20,8 +20,8 @@ import java.io.IOException;
 import org.hamcrest.Matchers;
 import org.junit.Before;
 import org.junit.Test;
+
 import org.springframework.mock.http.client.MockClientHttpRequest;
-import org.springframework.test.web.client.match.XpathRequestMatchers;
 
 /**
  * Tests for {@link XpathRequestMatchers}.

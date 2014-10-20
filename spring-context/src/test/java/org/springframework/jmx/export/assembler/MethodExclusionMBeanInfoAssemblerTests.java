@@ -18,11 +18,11 @@ package org.springframework.jmx.export.assembler;
 
 import java.lang.reflect.Method;
 import java.util.Properties;
-
 import javax.management.modelmbean.ModelMBeanAttributeInfo;
 import javax.management.modelmbean.ModelMBeanInfo;
 
 import org.junit.Test;
+
 import org.springframework.jmx.JmxTestBean;
 
 import static org.junit.Assert.*;

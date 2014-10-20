@@ -20,6 +20,8 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Properties;
 
+import freemarker.template.Configuration;
+import freemarker.template.Template;
 import org.junit.Test;
 
 import org.springframework.core.io.ByteArrayResource;
@@ -29,9 +31,6 @@ import org.springframework.core.io.ResourceLoader;
 import org.springframework.ui.freemarker.FreeMarkerConfigurationFactoryBean;
 import org.springframework.ui.freemarker.FreeMarkerTemplateUtils;
 import org.springframework.ui.freemarker.SpringTemplateLoader;
-
-import freemarker.template.Configuration;
-import freemarker.template.Template;
 
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;

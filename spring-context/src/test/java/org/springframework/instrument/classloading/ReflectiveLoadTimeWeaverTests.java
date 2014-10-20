@@ -16,12 +16,12 @@
 
 package org.springframework.instrument.classloading;
 
-import static org.junit.Assert.*;
-
 import java.lang.instrument.ClassFileTransformer;
 import java.security.ProtectionDomain;
 
 import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  * Unit tests for the {@link ReflectiveLoadTimeWeaver} class.

@@ -16,9 +16,9 @@
 
 package org.springframework.core;
 
-import junit.framework.TestCase;
-
 import java.util.Comparator;
+
+import junit.framework.TestCase;
 
 /**
  * Unit tests for the {@link OrderComparator} class.

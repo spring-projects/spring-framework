@@ -17,14 +17,14 @@
 package org.springframework.test.web.servlet.result;
 
 import java.util.Map;
-
 import javax.xml.xpath.XPathExpressionException;
 
 import org.hamcrest.Matcher;
+import org.w3c.dom.Node;
+
 import org.springframework.test.util.XpathExpectationsHelper;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultMatcher;
-import org.w3c.dom.Node;
 
 /**
  * Factory for response content {@code ResultMatcher}'s using an XPath
