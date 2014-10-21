@@ -30829,6 +30829,7 @@ multiple requests are allowed to access a session concurrently.
   <<mvc-ann-requestparam>>.
 * `@RequestHeader` annotated parameters for access to specific Servlet request HTTP
   headers. Parameter values are converted to the declared method argument type.
+  See <<mvc-ann-requestheader>>.
 * `@RequestBody` annotated parameters for access to the HTTP request body. Parameter
   values are converted to the declared method argument type using
   ++HttpMessageConverter++s. See <<mvc-ann-requestbody>>.
@@ -30967,6 +30968,10 @@ parameter is optional by setting ++@RequestParam++'s `required` attribute to `fa
 
 Type conversion is applied automatically if the target method parameter type is not
 `String`. See <<mvc-ann-typeconversion>>.
+
+When an `@RequestParam` annotation is used on a `Map<String, String>` or
+`MultiValueMap<String, String>` argument, the map is populated with all request
+parameters.
 
 
 [[mvc-ann-requestbody]]
@@ -31470,6 +31475,11 @@ The following code sample demonstrates how to get the value of the `Accept-Encod
 
 Type conversion is applied automatically if the method parameter is not `String`. See
 <<mvc-ann-typeconversion>>.
+
+When an `@RequestHeader` annotation is used on a `Map<String, String>`,
+`MultiValueMap<String, String>`, or `HttpHeaders` argument, the map is populated
+with all header values.
+
 
 [TIP]
 ====
