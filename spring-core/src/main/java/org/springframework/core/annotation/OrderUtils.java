@@ -25,16 +25,25 @@ import org.springframework.util.ClassUtils;
  * Handles Spring's {@link Order} annotation as well as {@link javax.annotation.Priority}.
  *
  * @author Stephane Nicoll
+ * @author Juergen Hoeller
  * @since 4.1
  * @see Order
  * @see javax.annotation.Priority
  */
+@SuppressWarnings("unchecked")
 public abstract class OrderUtils {
 
-	private static final String PRIORITY_ANNOTATION_CLASS_NAME = "javax.annotation.Priority";
+	private static Class<? extends Annotation> priorityAnnotationType = null;
 
-	private static final boolean priorityPresent =
-			ClassUtils.isPresent(PRIORITY_ANNOTATION_CLASS_NAME, OrderUtils.class.getClassLoader());
+	static {
+		try {
+			priorityAnnotationType = (Class<? extends Annotation>)
+					ClassUtils.forName("javax.annotation.Priority", OrderUtils.class.getClassLoader());
+		}
+		catch (ClassNotFoundException ex) {
+			// javax.annotation.Priority not available
+		}
+	}
 
 
 	/**
@@ -52,7 +61,7 @@ public abstract class OrderUtils {
 	 * default value if none can be found.
 	 * <p>Take care of {@link Order @Order} and {@code @javax.annotation.Priority}.
 	 * @param type the type to handle
-	 * @return the priority value of the default if none can be found
+	 * @return the priority value, or the specified default order if none can be found
 	 */
 	public static Integer getOrder(Class<?> type, Integer defaultOrder) {
 		Order order = AnnotationUtils.findAnnotation(type, Order.class);
@@ -67,17 +76,16 @@ public abstract class OrderUtils {
 	}
 
 	/**
-	 * Return the value of the {@code javax.annotation.Priority} annotation set
-	 * on the specified type or {@code null} if none is set.
+	 * Return the value of the {@code javax.annotation.Priority} annotation
+	 * declared on the specified type, or {@code null} if none.
 	 * @param type the type to handle
-	 * @return the priority value if the annotation is set, {@code null} otherwise
+	 * @return the priority value if the annotation is declared, or {@code null} if none
 	 */
 	public static Integer getPriority(Class<?> type) {
-		if (priorityPresent) {
-			for (Annotation annotation : type.getAnnotations()) {
-				if (PRIORITY_ANNOTATION_CLASS_NAME.equals(annotation.annotationType().getName())) {
-					return (Integer) AnnotationUtils.getValue(annotation);
-				}
+		if (priorityAnnotationType != null) {
+			Annotation priority = AnnotationUtils.findAnnotation(type, priorityAnnotationType);
+			if (priority != null) {
+				return (Integer) AnnotationUtils.getValue(priority);
 			}
 		}
 		return null;
