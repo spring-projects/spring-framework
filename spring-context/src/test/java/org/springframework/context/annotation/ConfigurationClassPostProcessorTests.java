@@ -27,6 +27,7 @@ import org.junit.Test;
 
 import org.springframework.aop.scope.ScopedObject;
 import org.springframework.aop.scope.ScopedProxyUtils;
+import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -427,6 +428,34 @@ public class ConfigurationClassPostProcessorTests {
 		beanFactory.registerBeanDefinition("serviceBeanProvider", new RootBeanDefinition(ServiceBeanProvider.class));
 		new ConfigurationClassPostProcessor().postProcessBeanFactory(beanFactory);
 		beanFactory.preInstantiateSingletons();
+	}
+
+	@Test
+	public void testCircularDependency() {
+		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
+		bpp.setBeanFactory(beanFactory);
+		beanFactory.addBeanPostProcessor(bpp);
+		beanFactory.registerBeanDefinition("configClass1", new RootBeanDefinition(A.class));
+		beanFactory.registerBeanDefinition("configClass2", new RootBeanDefinition(AStrich.class));
+		new ConfigurationClassPostProcessor().postProcessBeanFactory(beanFactory);
+		try {
+			beanFactory.preInstantiateSingletons();
+			fail("Should have thrown BeanCreationException");
+		}
+		catch (BeanCreationException ex) {
+			assertTrue(ex.getMessage().contains("Circular reference"));
+		}
+	}
+
+	@Test
+	public void testCircularDependencyWithApplicationContext() {
+		try {
+			new AnnotationConfigApplicationContext(A.class, AStrich.class);
+			fail("Should have thrown BeanCreationException");
+		}
+		catch (BeanCreationException ex) {
+			assertTrue(ex.getMessage().contains("Circular reference"));
+		}
 	}
 
 
@@ -849,5 +878,41 @@ public class ConfigurationClassPostProcessorTests {
 			return new ServiceBean("message");
 		}
 	}
-}
 
+	@Configuration
+	public static class A {
+
+		@Autowired(required=true)
+		Z z;
+
+		@Bean
+		public B b() {
+			if (z == null) {
+				throw new NullPointerException("z is null");
+			}
+			return new B(z);
+		}
+	}
+
+	@Configuration
+	public static class AStrich {
+
+		@Autowired
+		B b;
+
+		@Bean
+		public Z z() {
+			return new Z();
+		}
+	}
+
+	public static class B {
+
+		public B(Z z) {
+		}
+	}
+
+	public static class Z {
+	}
+
+}
