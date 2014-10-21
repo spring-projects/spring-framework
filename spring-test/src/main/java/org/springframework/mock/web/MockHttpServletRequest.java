@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,7 +36,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
-
 import javax.servlet.AsyncContext;
 import javax.servlet.DispatcherType;
 import javax.servlet.RequestDispatcher;
@@ -58,7 +57,7 @@ import org.springframework.util.StringUtils;
 /**
  * Mock implementation of the {@link javax.servlet.http.HttpServletRequest} interface.
  *
- * <p>As of Spring 4.0, this set of mocks is designed on a Servlet 3.0 baseline.
+ * <p>As of Spring Framework 4.0, this set of mocks is designed on a Servlet 3.0 baseline.
  *
  * @author Juergen Hoeller
  * @author Rod Johnson
@@ -70,10 +69,14 @@ import org.springframework.util.StringUtils;
  */
 public class MockHttpServletRequest implements HttpServletRequest {
 
+	private static final String HTTP = "http";
+
+	private static final String HTTPS = "https";
+
 	/**
 	 * The default protocol: 'http'.
 	 */
-	public static final String DEFAULT_PROTOCOL = "http";
+	public static final String DEFAULT_PROTOCOL = HTTP;
 
 	/**
 	 * The default server address: '127.0.0.1'.
@@ -330,9 +333,10 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	}
 
 	private void updateContentTypeHeader() {
-		if (this.contentType != null) {
+		if (StringUtils.hasLength(this.contentType)) {
 			StringBuilder sb = new StringBuilder(this.contentType);
-			if (!this.contentType.toLowerCase().contains(CHARSET_PREFIX) && this.characterEncoding != null) {
+			if (!this.contentType.toLowerCase().contains(CHARSET_PREFIX) &&
+					StringUtils.hasLength(this.characterEncoding)) {
 				sb.append(";").append(CHARSET_PREFIX).append(this.characterEncoding);
 			}
 			doAddHeaderValue(CONTENT_TYPE_HEADER, sb.toString(), true);
@@ -357,8 +361,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 		if (contentType != null) {
 			int charsetIndex = contentType.toLowerCase().indexOf(CHARSET_PREFIX);
 			if (charsetIndex != -1) {
-				String encoding = contentType.substring(charsetIndex + CHARSET_PREFIX.length());
-				this.characterEncoding = encoding;
+				this.characterEncoding = contentType.substring(charsetIndex + CHARSET_PREFIX.length());
 			}
 			updateContentTypeHeader();
 		}
@@ -955,8 +958,8 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	public StringBuffer getRequestURL() {
 		StringBuffer url = new StringBuffer(this.scheme).append("://").append(this.serverName);
 
-		if (this.serverPort > 0
-				&& (("http".equalsIgnoreCase(scheme) && this.serverPort != 80) || ("https".equalsIgnoreCase(scheme) && this.serverPort != 443))) {
+		if (this.serverPort > 0 && ((HTTP.equalsIgnoreCase(this.scheme) && this.serverPort != 80) ||
+				(HTTPS.equalsIgnoreCase(this.scheme) && this.serverPort != 443))) {
 			url.append(':').append(this.serverPort);
 		}
 
