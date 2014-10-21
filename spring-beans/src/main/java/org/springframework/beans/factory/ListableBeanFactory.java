@@ -113,6 +113,36 @@ public interface ListableBeanFactory extends BeanFactory {
 	String[] getBeanNamesForType(Class<?> type);
 
 	/**
+	 * Return {@code true} if the factory contains a bean matching the given type
+	 * (including subclasses), judging from either bean definitions or the value of
+	 * {@code getObjectType} in the case of FactoryBeans.
+	 * <p><b>NOTE: This method introspects top-level beans only.</b> It does <i>not</i>
+	 * check nested beans which might match the specified type as well.
+	 * <p>Does consider objects created by FactoryBeans if the "allowEagerInit" flag is set,
+	 * which means that FactoryBeans will get initialized. If the object created by the
+	 * FactoryBean doesn't match, the raw FactoryBean itself will be matched against the
+	 * type. If "allowEagerInit" is not set, only raw FactoryBeans will be checked
+	 * (which doesn't require initialization of each FactoryBean).
+	 * <p>Does not consider any hierarchy this factory may participate in.
+	 * <p>Note: Does <i>not</i> ignore singleton beans that have been registered
+	 * by other means than bean definitions.
+	 * @param type the class or interface to match
+	 * @param includeNonSingletons whether to include prototype or scoped beans too
+	 * or just singletons (also applies to FactoryBeans)
+	 * @param allowEagerInit whether to initialize <i>lazy-init singletons</i> and
+	 * <i>objects created by FactoryBeans</i> (or by factory methods with a
+	 * "factory-bean" reference) for the type check. Note that FactoryBeans need to be
+	 * eagerly initialized to determine their type: So be aware that passing in "true"
+	 * for this flag will initialize FactoryBeans and "factory-bean" references.
+	 * @return {@code true} if the BeanFactory contains a bean (or objects created by
+	 * FactoryBeans) matching the given object type (including subclasses)
+	 * @see FactoryBean#getObjectType
+	 * @see #getBeanNamesForType(Class, boolean, boolean)
+	 * @since 4.1
+	 */
+	boolean hasBeanOfType(Class<?> type, boolean includeNonSingletons, boolean allowEagerInit);
+
+	/**
 	 * Return the names of beans matching the given type (including subclasses),
 	 * judging from either bean definitions or the value of {@code getObjectType}
 	 * in the case of FactoryBeans.
@@ -210,6 +240,15 @@ public interface ListableBeanFactory extends BeanFactory {
 	 */
 	<T> Map<String, T> getBeansOfType(Class<T> type, boolean includeNonSingletons, boolean allowEagerInit)
 			throws BeansException;
+
+	/**
+	 * Return {@code true} if the factory contains a bean whose {@code Class} has the
+	 * supplied {@link Annotation} type, without creating any bean instances yet.
+	 * @param annotationType the type of annotation to look for
+	 * @return {@code true} if the factory contains a bean with the supplied annotation
+	 * @since 4.1
+	 */
+	boolean hasBeanWithAnnotation(Class<? extends Annotation> annotationType) throws BeansException;
 
 	/**
 	 * Find all names of beans whose {@code Class} has the supplied {@link Annotation}

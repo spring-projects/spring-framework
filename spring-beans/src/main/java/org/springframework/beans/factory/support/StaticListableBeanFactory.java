@@ -221,6 +221,12 @@ public class StaticListableBeanFactory implements ListableBeanFactory {
 	}
 
 	@Override
+	public boolean hasBeanOfType(Class<?> type, boolean includeNonSingletons,
+			boolean allowEagerInit) {
+		return (getBeanNamesForType(type, includeNonSingletons, allowEagerInit).length > 0);
+	}
+
+	@Override
 	public String[] getBeanNamesForType(Class<?> type, boolean includeNonSingletons, boolean includeFactoryBeans) {
 		boolean isFactoryType = (type != null && FactoryBean.class.isAssignableFrom(type));
 		List<String> matches = new ArrayList<String>();
@@ -283,6 +289,12 @@ public class StaticListableBeanFactory implements ListableBeanFactory {
 			}
 		}
 		return matches;
+	}
+
+	@Override
+	public boolean hasBeanWithAnnotation(Class<? extends Annotation> annotationType)
+			throws BeansException {
+		return getBeanNamesForAnnotation(annotationType).length > 0;
 	}
 
 	@Override

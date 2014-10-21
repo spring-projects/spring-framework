@@ -1041,6 +1041,13 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	}
 
 	@Override
+	public boolean hasBeanOfType(Class<?> type, boolean includeNonSingletons,
+			boolean allowEagerInit) {
+		assertBeanFactoryActive();
+		return getBeanFactory().hasBeanOfType(type, includeNonSingletons, allowEagerInit);
+	}
+
+	@Override
 	public String[] getBeanNamesForType(Class<?> type, boolean includeNonSingletons, boolean allowEagerInit) {
 		assertBeanFactoryActive();
 		return getBeanFactory().getBeanNamesForType(type, includeNonSingletons, allowEagerInit);
@@ -1058,6 +1065,13 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 
 		assertBeanFactoryActive();
 		return getBeanFactory().getBeansOfType(type, includeNonSingletons, allowEagerInit);
+	}
+
+	@Override
+	public boolean hasBeanWithAnnotation(Class<? extends Annotation> annotationType)
+			throws BeansException {
+		assertBeanFactoryActive();
+		return getBeanFactory().hasBeanWithAnnotation(annotationType);
 	}
 
 	@Override

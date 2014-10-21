@@ -35,6 +35,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.IdentityHashMap;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -368,6 +369,18 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	}
 
 	@Override
+	public boolean hasBeanOfType(Class<?> type, boolean includeNonSingletons,
+			boolean allowEagerInit) {
+		return !doWithBeanNamesForType(type, includeNonSingletons, allowEagerInit,
+				new BeanNameCallback() {
+					@Override
+					public boolean doWithBean(String beanName) {
+						return false;
+					}
+				});
+	}
+
+	@Override
 	public String[] getBeanNamesForType(Class<?> type, boolean includeNonSingletons, boolean allowEagerInit) {
 		if (!isConfigurationFrozen() || type == null || !allowEagerInit) {
 			return doGetBeanNamesForType(type, includeNonSingletons, allowEagerInit);
@@ -386,58 +399,97 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	}
 
 	private String[] doGetBeanNamesForType(Class<?> type, boolean includeNonSingletons, boolean allowEagerInit) {
-		List<String> result = new ArrayList<String>();
+		final List<String> result = new ArrayList<String>();
+		doWithBeanNamesForType(type, includeNonSingletons, allowEagerInit, new BeanNameCallback() {
+			@Override
+			public boolean doWithBean(String beanName) {
+				result.add(beanName);
+				return true;
+			}
+		});
+		return StringUtils.toStringArray(result);
+	}
 
+	private boolean doWithBeanNamesForType(Class<?> type, boolean includeNonSingletons,
+			boolean allowEagerInit, BeanNameCallback callback) {
 		// Check all bean definitions.
+		boolean result = doWithBeanNamesForTypeFromDefinitions(type, includeNonSingletons,
+				allowEagerInit, callback);
+		// Check singletons too, to catch manually registered singletons.
+		result = result && doGetBeanNamesForTypeFromSingletons(type, includeNonSingletons, allowEagerInit, callback);
+		return result;
+	}
+
+	private boolean doWithBeanNamesForTypeFromDefinitions(Class<?> type,
+			boolean includeNonSingletons, boolean allowEagerInit,
+			BeanNameCallback callback) {
 		String[] beanDefinitionNames = getBeanDefinitionNames();
 		for (String beanName : beanDefinitionNames) {
 			// Only consider bean as eligible if the bean name
 			// is not defined as alias for some other bean.
 			if (!isAlias(beanName)) {
-				try {
-					RootBeanDefinition mbd = getMergedLocalBeanDefinition(beanName);
-					// Only check bean definition if it is complete.
-					if (!mbd.isAbstract() && (allowEagerInit ||
-							((mbd.hasBeanClass() || !mbd.isLazyInit() || this.allowEagerClassLoading)) &&
-									!requiresEagerInitForType(mbd.getFactoryBeanName()))) {
-						// In case of FactoryBean, match object created by FactoryBean.
-						boolean isFactoryBean = isFactoryBean(beanName, mbd);
-						boolean matchFound = (allowEagerInit || !isFactoryBean || containsSingleton(beanName)) &&
-								(includeNonSingletons || isSingleton(beanName)) && isTypeMatch(beanName, type);
-						if (!matchFound && isFactoryBean) {
-							// In case of FactoryBean, try to match FactoryBean instance itself next.
-							beanName = FACTORY_BEAN_PREFIX + beanName;
-							matchFound = (includeNonSingletons || mbd.isSingleton()) && isTypeMatch(beanName, type);
-						}
-						if (matchFound) {
-							result.add(beanName);
-						}
-					}
-				}
-				catch (CannotLoadBeanClassException ex) {
-					if (allowEagerInit) {
-						throw ex;
-					}
-					// Probably contains a placeholder: let's ignore it for type matching purposes.
-					if (this.logger.isDebugEnabled()) {
-						this.logger.debug("Ignoring bean class loading failure for bean '" + beanName + "'", ex);
-					}
-					onSuppressedException(ex);
-				}
-				catch (BeanDefinitionStoreException ex) {
-					if (allowEagerInit) {
-						throw ex;
-					}
-					// Probably contains a placeholder: let's ignore it for type matching purposes.
-					if (this.logger.isDebugEnabled()) {
-						this.logger.debug("Ignoring unresolvable metadata in bean definition '" + beanName + "'", ex);
-					}
-					onSuppressedException(ex);
+				if (!doWithBeanNameForTypeFromDefinition(type, includeNonSingletons,
+						allowEagerInit, callback, beanName)) {
+					return false;
 				}
 			}
 		}
+		return true;
+	}
 
-		// Check singletons too, to catch manually registered singletons.
+	private boolean doWithBeanNameForTypeFromDefinition(Class<?> type,
+			boolean includeNonSingletons, boolean allowEagerInit,
+			BeanNameCallback callback, String beanName) {
+		try {
+			RootBeanDefinition mbd = getMergedLocalBeanDefinition(beanName);
+			// Only check bean definition if it is complete.
+			if (!mbd.isAbstract()
+					&& (allowEagerInit || ((mbd.hasBeanClass() || !mbd.isLazyInit() || this.allowEagerClassLoading))
+					&& !requiresEagerInitForType(mbd.getFactoryBeanName()))) {
+
+				// In case of FactoryBean, match object created by FactoryBean.
+				boolean isFactoryBean = isFactoryBean(beanName, mbd);
+				boolean matchFound = (allowEagerInit || !isFactoryBean || containsSingleton(beanName)) &&
+						(includeNonSingletons || isSingleton(beanName)) && isTypeMatch(beanName, type);
+				if (!matchFound && isFactoryBean) {
+					// In case of FactoryBean, try to match FactoryBean instance itself next.
+					beanName = FACTORY_BEAN_PREFIX + beanName;
+					matchFound = (includeNonSingletons || mbd.isSingleton()) && isTypeMatch(beanName, type);
+				}
+				if (matchFound) {
+					if(!callback.doWithBean(beanName)) {
+						return false;
+					}
+				}
+			}
+		}
+		catch (CannotLoadBeanClassException ex) {
+			handleBeanNameForTypeFromDefinitionException(
+					"Ignoring bean class loading failure for bean", allowEagerInit,
+					beanName, ex);
+		}
+		catch (BeanDefinitionStoreException ex) {
+			handleBeanNameForTypeFromDefinitionException(
+					"Ignoring unresolvable metadata in bean definition", allowEagerInit,
+					beanName, ex);
+		}
+		return true;
+	}
+
+	private void handleBeanNameForTypeFromDefinitionException(String message,
+			boolean allowEagerInit, String beanName, RuntimeException ex) {
+		if (allowEagerInit) {
+			throw ex;
+		}
+		// Probably contains a placeholder: let's ignore it for type matching purposes.
+		if (this.logger.isDebugEnabled()) {
+			this.logger.debug(message + " '" + beanName + "'", ex);
+		}
+		onSuppressedException(ex);
+	}
+
+	private boolean doGetBeanNamesForTypeFromSingletons(Class<?> type, boolean includeNonSingletons,
+			boolean allowEagerInit, BeanNameCallback callback) {
 		String[] singletonNames = getSingletonNames();
 		for (String beanName : singletonNames) {
 			// Only check if manually registered.
@@ -445,7 +497,9 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 				// In case of FactoryBean, match object created by FactoryBean.
 				if (isFactoryBean(beanName)) {
 					if ((includeNonSingletons || isSingleton(beanName)) && isTypeMatch(beanName, type)) {
-						result.add(beanName);
+						if(!callback.doWithBean(beanName)) {
+							return false;
+						}
 						// Match found for this bean: do not match FactoryBean itself anymore.
 						continue;
 					}
@@ -454,12 +508,13 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 				}
 				// Match raw bean instance (might be raw FactoryBean).
 				if (isTypeMatch(beanName, type)) {
-					result.add(beanName);
+					if(!callback.doWithBean(beanName)) {
+						return false;
+					}
 				}
 			}
 		}
-
-		return StringUtils.toStringArray(result);
+		return true;
 	}
 
 	/**
@@ -510,20 +565,46 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	}
 
 	@Override
+	public boolean hasBeanWithAnnotation(Class<? extends Annotation> annotationType)
+			throws BeansException {
+		return !doWithBeanNamesForAnnotation(annotationType, new BeanNameCallback() {
+			@Override
+			public boolean doWithBean(String beanName) {
+				return false;
+			}
+		});
+	}
+
+	@Override
 	public String[] getBeanNamesForAnnotation(Class<? extends Annotation> annotationType) {
-		List<String> results = new ArrayList<String>();
+		final Set<String> results = new LinkedHashSet<String>();
+		doWithBeanNamesForAnnotation(annotationType, new BeanNameCallback() {
+			@Override
+			public boolean doWithBean(String beanName) {
+				results.add(beanName);
+				return true;
+			}
+		});
+		return results.toArray(new String[results.size()]);
+	}
+
+	private boolean doWithBeanNamesForAnnotation(Class<? extends Annotation> annotationType, BeanNameCallback callback) {
 		for (String beanName : getBeanDefinitionNames()) {
 			BeanDefinition beanDefinition = getBeanDefinition(beanName);
 			if (!beanDefinition.isAbstract() && findAnnotationOnBean(beanName, annotationType) != null) {
-				results.add(beanName);
+				if(!callback.doWithBean(beanName)) {
+					return false;
+				}
 			}
 		}
 		for (String beanName : getSingletonNames()) {
-			if (!results.contains(beanName) && findAnnotationOnBean(beanName, annotationType) != null) {
-				results.add(beanName);
+			if (findAnnotationOnBean(beanName, annotationType) != null) {
+				if(!callback.doWithBean(beanName)) {
+					return false;
+				}
 			}
 		}
-		return results.toArray(new String[results.size()]);
+		return true;
 	}
 
 	@Override
@@ -1431,6 +1512,20 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			}
 			return null;
 		}
+	}
+
+
+	/**
+	 * Callback used to process a bean name.
+	 */
+	private static interface BeanNameCallback {
+
+		/**
+		 * Handle a bean name
+		 * @param beanName the bean name
+		 * @return {@code true} if processing should continue or {@code false} to exit early.
+		 */
+		boolean doWithBean(String beanName);
 	}
 
 }
