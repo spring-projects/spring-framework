@@ -23,7 +23,7 @@ configure(allprojects) { project ->
 	ext.eclipseLinkVersion   = "2.4.2"
 	ext.groovyVersion        = "1.8.9"
 	ext.hibernate3Version    = "3.6.10.Final"
-	ext.hibernate4Version    = "4.2.14.Final"
+	ext.hibernate4Version    = "4.2.15.Final"
 	ext.hibVal4Version       = "4.3.2.Final"
 	ext.hsqldbVersion        = "2.3.2"
 	ext.jackson1Version      = "1.9.13"
@@ -35,7 +35,7 @@ configure(allprojects) { project ->
 	ext.openJpaVersion       = "2.2.2"
 	ext.slf4jVersion         = "1.7.7"
 	ext.tiles2Version        = "2.2.2"
-	ext.tiles3Version        = "3.0.4"
+	ext.tiles3Version        = "3.0.5"
 	ext.tomcatVersion        = "8.0.9"
 	ext.xstreamVersion       = "1.4.7"
 
