@@ -355,7 +355,7 @@ public abstract class AnnotationUtils {
 		}
 		catch (Exception ex) {
 			// Assuming nested Class values not resolvable within annotation attributes...
-			// We're probably hitting a non-present optional arrangement - let's back out.
+			logIntrospectionFailure(clazz, ex);
 			return null;
 		}
 
