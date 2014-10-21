@@ -24,7 +24,6 @@ import javax.persistence.PersistenceException;
 import org.eclipse.persistence.sessions.UnitOfWork;
 
 import org.springframework.jdbc.datasource.ConnectionHandle;
-import org.springframework.jdbc.datasource.SimpleConnectionHandle;
 import org.springframework.orm.jpa.DefaultJpaDialect;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionException;
@@ -33,14 +32,13 @@ import org.springframework.transaction.TransactionException;
  * {@link org.springframework.orm.jpa.JpaDialect} implementation for Eclipse
  * Persistence Services (EclipseLink). Developed and tested against EclipseLink 2.4.
  *
- * <p>By default, this class acquires a EclipseLink transaction to get the JDBC Connection
- * early. This allows mixing JDBC and JPA/EclipseLink operations in the same transaction.
- * In some cases, this eager acquisition of a transaction/connection may impact
- * scalability. In that case, set the "lazyDatabaseTransaction" flag to true if you
- * do not require mixing JDBC and JPA operations in the same transaction. Otherwise,
- * use a {@link org.springframework.jdbc.datasource.LazyConnectionDataSourceProxy}
- * to ensure that the cost of connection acquisition is near zero until code actually
- * needs a JDBC Connection.
+ * <p>By default, this class acquires an early EclipseLink transaction with an early
+ * JDBC Connection for non-read-only transactions. This allows for mixing JDBC and
+ * JPA/EclipseLink operations in the same transaction, with cross visibility of
+ * their impact. If this is not needed, set the "lazyDatabaseTransaction" flag to
+ * {@code true} or consistently declare all affected transactions as read-only.
+ * As of Spring 4.1.2, this will reliably avoid early JDBC Connection retrieval
+ * and therefore keep EclipseLink in shared cache mode.
  *
  * @author Juergen Hoeller
  * @since 2.5.2
@@ -78,6 +76,7 @@ public class EclipseLinkJpaDialect extends DefaultJpaDialect {
 
 		if (definition.getIsolationLevel() != TransactionDefinition.ISOLATION_DEFAULT) {
 			// Pass custom isolation level on to EclipseLink's DatabaseLogin configuration
+			// (since Spring 4.1.2)
 			uow.getLogin().setTransactionIsolation(definition.getIsolationLevel());
 		}
 
@@ -96,8 +95,41 @@ public class EclipseLinkJpaDialect extends DefaultJpaDialect {
 	public ConnectionHandle getJdbcConnection(EntityManager entityManager, boolean readOnly)
 			throws PersistenceException, SQLException {
 
-		Connection con = entityManager.unwrap(Connection.class);
-		return (con != null ? new SimpleConnectionHandle(con) : null);
+		// As of Spring 4.1.2, we're using a custom ConnectionHandle for lazy retrieval
+		// of the underlying Connection (allowing for deferred internal transaction begin
+		// within the EclipseLink EntityManager)
+		return new EclipseLinkConnectionHandle(entityManager);
+	}
+
+
+	/**
+	 * {@link ConnectionHandle} implementation that lazily fetches an
+	 * EclipseLink-provided Connection on the first {@code getConnection} call -
+	 * which may never come if no application code requests a JDBC Connection.
+	 * This is useful to defer the early transaction begin that obtaining a
+	 * JDBC Connection implies within an EclipseLink EntityManager.
+	 */
+	private static class EclipseLinkConnectionHandle implements ConnectionHandle {
+
+		private final EntityManager entityManager;
+
+		private Connection connection;
+
+		public EclipseLinkConnectionHandle(EntityManager entityManager) {
+			this.entityManager = entityManager;
+		}
+
+		@Override
+		public Connection getConnection() {
+			if (this.connection == null) {
+				this.connection = this.entityManager.unwrap(Connection.class);
+			}
+			return this.connection;
+		}
+
+		@Override
+		public void releaseConnection(Connection con) {
+		}
 	}
 
 }
