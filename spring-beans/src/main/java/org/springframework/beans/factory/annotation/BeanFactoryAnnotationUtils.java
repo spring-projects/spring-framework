@@ -79,13 +79,14 @@ public class BeanFactoryAnnotationUtils {
 	private static <T> T qualifiedBeanOfType(ConfigurableListableBeanFactory bf, Class<T> beanType, String qualifier) {
 		Map<String, T> candidateBeans = BeanFactoryUtils.beansOfTypeIncludingAncestors(bf, beanType);
 		T matchingBean = null;
-		for (String beanName : candidateBeans.keySet()) {
+		for (Map.Entry<String, T> entry : candidateBeans.entrySet()) {
+			String beanName = entry.getKey();
 			if (isQualifierMatch(qualifier, beanName, bf)) {
 				if (matchingBean != null) {
 					throw new NoSuchBeanDefinitionException(qualifier, "No unique " + beanType.getSimpleName() +
 							" bean found for qualifier '" + qualifier + "'");
 				}
-				matchingBean = candidateBeans.get(beanName);
+				matchingBean = entry.getValue();
 			}
 		}
 		if (matchingBean != null) {
