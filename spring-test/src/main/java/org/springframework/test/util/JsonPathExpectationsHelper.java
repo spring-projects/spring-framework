@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,8 @@
 
 package org.springframework.test.util;
 
+import java.lang.reflect.Array;
+import java.lang.reflect.Method;
 import java.text.ParseException;
 import java.util.List;
 
@@ -23,16 +25,43 @@ import com.jayway.jsonpath.InvalidPathException;
 import com.jayway.jsonpath.JsonPath;
 import org.hamcrest.Matcher;
 
+import org.springframework.util.Assert;
+import org.springframework.util.ReflectionUtils;
+
 import static org.springframework.test.util.AssertionErrors.*;
 import static org.springframework.test.util.MatcherAssertionErrors.*;
 
 /**
- * A helper class for applying assertions via JSONPath expressions.
+ * A helper class for applying assertions via JSON path expressions.
+ *
+ * <p>Based on the <a href="https://github.com/jayway/JsonPath">JsonPath</a>
+ * project: requiring version 0.9+, with 1.1+ strongly recommended.
  *
  * @author Rossen Stoyanchev
+ * @author Juergen Hoeller
  * @since 3.2
  */
 public class JsonPathExpectationsHelper {
+
+	private static Method compileMethod;
+
+	private static Object emptyFilters;
+
+	static {
+		// Reflective bridging between JsonPath 0.9.x and 1.x
+		for (Method candidate : JsonPath.class.getMethods()) {
+			if (candidate.getName().equals("compile")) {
+				Class<?>[] paramTypes = candidate.getParameterTypes();
+				if (paramTypes.length == 2 && paramTypes[0].equals(String.class) && paramTypes[1].isArray()) {
+					compileMethod = candidate;
+					emptyFilters = Array.newInstance(paramTypes[1].getComponentType(), 0);
+					break;
+				}
+			}
+		}
+		Assert.state(compileMethod != null, "Unexpected JsonPath API - no compile(String, ...) method found");
+	}
+
 
 	private final String expression;
 
@@ -40,19 +69,20 @@ public class JsonPathExpectationsHelper {
 
 
 	/**
-	 * Class constructor.
-	 *
-	 * @param expression the JSONPath expression
-	 * @param args arguments to parameterize the JSONPath expression with using the
+	 * Construct a new JsonPathExpectationsHelper.
+	 * @param expression the JsonPath expression
+	 * @param args arguments to parameterize the JSON path expression with
 	 * formatting specifiers defined in {@link String#format(String, Object...)}
 	 */
-	public JsonPathExpectationsHelper(String expression, Object ... args) {
+	public JsonPathExpectationsHelper(String expression, Object... args) {
 		this.expression = String.format(expression, args);
-		this.jsonPath = JsonPath.compile(this.expression);
+		this.jsonPath = (JsonPath) ReflectionUtils.invokeMethod(
+				compileMethod, null, this.expression, emptyFilters);
 	}
 
+
 	/**
-	 * Evaluate the JSONPath and assert the resulting value with the given {@code Matcher}.
+	 * Evaluate the JSON path and assert the resulting value with the given {@code Matcher}.
 	 * @param content the response content
 	 * @param matcher the matcher to assert on the resulting json path
 	 */
@@ -79,14 +109,14 @@ public class JsonPathExpectationsHelper {
 	}
 
 	/**
-	 * Apply the JSONPath and assert the resulting value.
+	 * Apply the JSON path and assert the resulting value.
 	 */
 	public void assertValue(String responseContent, Object expectedValue) throws ParseException {
 		Object actualValue = evaluateJsonPath(responseContent);
 		if ((actualValue instanceof List) && !(expectedValue instanceof List)) {
 			@SuppressWarnings("rawtypes")
 			List actualValueList = (List) actualValue;
-			if (actualValueList.size() == 0) {
+			if (actualValueList.isEmpty()) {
 				fail("No matching value for JSON path \"" + this.expression + "\"");
 			}
 			if (actualValueList.size() != 1) {
@@ -102,7 +132,7 @@ public class JsonPathExpectationsHelper {
 	}
 
 	/**
-	 * Apply the JSONPath and assert the resulting value is an array.
+	 * Apply the JSON path and assert the resulting value is an array.
 	 */
 	public void assertValueIsArray(String responseContent) throws ParseException {
 		Object actualValue = evaluateJsonPath(responseContent);
@@ -142,4 +172,5 @@ public class JsonPathExpectationsHelper {
 			assertTrue(reason, value == null);
 		}
 	}
+
 }
