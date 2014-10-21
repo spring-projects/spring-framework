@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,6 +52,7 @@ import javax.servlet.http.Part;
 
 import org.springframework.util.Assert;
 import org.springframework.util.LinkedCaseInsensitiveMap;
+import org.springframework.util.StringUtils;
 
 /**
  * Mock implementation of the {@link javax.servlet.http.HttpServletRequest}
@@ -331,9 +332,10 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	}
 
 	private void updateContentTypeHeader() {
-		if (this.contentType != null) {
+		if (StringUtils.hasLength(this.contentType)) {
 			StringBuilder sb = new StringBuilder(this.contentType);
-			if (!this.contentType.toLowerCase().contains(CHARSET_PREFIX) && this.characterEncoding != null) {
+			if (!this.contentType.toLowerCase().contains(CHARSET_PREFIX) &&
+					StringUtils.hasLength(this.characterEncoding)) {
 				sb.append(";").append(CHARSET_PREFIX).append(this.characterEncoding);
 			}
 			doAddHeaderValue(CONTENT_TYPE_HEADER, sb.toString(), true);
@@ -354,8 +356,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 		if (contentType != null) {
 			int charsetIndex = contentType.toLowerCase().indexOf(CHARSET_PREFIX);
 			if (charsetIndex != -1) {
-				String encoding = contentType.substring(charsetIndex + CHARSET_PREFIX.length());
-				this.characterEncoding = encoding;
+				this.characterEncoding = contentType.substring(charsetIndex + CHARSET_PREFIX.length());
 			}
 			updateContentTypeHeader();
 		}
