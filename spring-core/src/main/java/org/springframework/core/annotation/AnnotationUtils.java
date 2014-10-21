@@ -66,9 +66,10 @@ public abstract class AnnotationUtils {
 	/** The attribute name for annotations with a single element */
 	public static final String VALUE = "value";
 
-	private static final Log logger = LogFactory.getLog(AnnotationUtils.class);
 
 	private static final Map<Class<?>, Boolean> annotatedInterfaceCache = new WeakHashMap<Class<?>, Boolean>();
+
+	private static transient Log logger;
 
 
 	/**
@@ -89,10 +90,7 @@ public abstract class AnnotationUtils {
 		}
 		catch (Exception ex) {
 			// Assuming nested Class values not resolvable within annotation attributes...
-			// We're probably hitting a non-present optional arrangement - let's back out.
-			if (logger.isInfoEnabled()) {
-				logger.info("Failed to introspect annotations on [" + ann.annotationType() + "]: " + ex);
-			}
+			logIntrospectionFailure(ann.annotationType(), ex);
 			return null;
 		}
 	}
@@ -121,10 +119,7 @@ public abstract class AnnotationUtils {
 		}
 		catch (Exception ex) {
 			// Assuming nested Class values not resolvable within annotation attributes...
-			// We're probably hitting a non-present optional arrangement - let's back out.
-			if (logger.isInfoEnabled()) {
-				logger.info("Failed to introspect annotations on [" + annotatedElement + "]: " + ex);
-			}
+			logIntrospectionFailure(annotatedElement, ex);
 			return null;
 		}
 	}
@@ -142,10 +137,7 @@ public abstract class AnnotationUtils {
 		}
 		catch (Exception ex) {
 			// Assuming nested Class values not resolvable within annotation attributes...
-			// We're probably hitting a non-present optional arrangement - let's back out.
-			if (logger.isInfoEnabled()) {
-				logger.info("Failed to introspect annotations on [" + method + "]: " + ex);
-			}
+			logIntrospectionFailure(method, ex);
 			return null;
 		}
 	}
@@ -204,10 +196,7 @@ public abstract class AnnotationUtils {
 		}
 		catch (Exception ex) {
 			// Assuming nested Class values not resolvable within annotation attributes...
-			// We're probably hitting a non-present optional arrangement - let's back out.
-			if (logger.isInfoEnabled()) {
-				logger.info("Failed to introspect annotations on [" + annotatedElement + "]: " + ex);
-			}
+			logIntrospectionFailure(annotatedElement, ex);
 		}
 		return Collections.emptySet();
 	}
@@ -282,10 +271,7 @@ public abstract class AnnotationUtils {
 				}
 				catch (Exception ex) {
 					// Assuming nested Class values not resolvable within annotation attributes...
-					// We're probably hitting a non-present optional arrangement - let's back out.
-					if (logger.isInfoEnabled()) {
-						logger.info("Failed to introspect annotations on [" + ifcMethod + "]: " + ex);
-					}
+					logIntrospectionFailure(ifcMethod, ex);
 				}
 			}
 			annotatedInterfaceCache.put(iface, found);
@@ -330,33 +316,41 @@ public abstract class AnnotationUtils {
 	 */
 	private static <A extends Annotation> A findAnnotation(Class<?> clazz, Class<A> annotationType, Set<Annotation> visited) {
 		Assert.notNull(clazz, "Class must not be null");
+
 		if (isAnnotationDeclaredLocally(annotationType, clazz)) {
 			try {
 				return clazz.getAnnotation(annotationType);
 			}
 			catch (Exception ex) {
 				// Assuming nested Class values not resolvable within annotation attributes...
-				// We're probably hitting a non-present optional arrangement - let's back out.
-				if (logger.isInfoEnabled()) {
-					logger.info("Failed to introspect annotations on [" + clazz + "]: " + ex);
-				}
+				logIntrospectionFailure(clazz, ex);
 				return null;
 			}
 		}
+
 		for (Class<?> ifc : clazz.getInterfaces()) {
 			A annotation = findAnnotation(ifc, annotationType, visited);
 			if (annotation != null) {
 				return annotation;
 			}
 		}
-		for (Annotation ann : clazz.getDeclaredAnnotations()) {
-			if (!isInJavaLangAnnotationPackage(ann) && visited.add(ann)) {
-				A annotation = findAnnotation(ann.annotationType(), annotationType, visited);
-				if (annotation != null) {
-					return annotation;
+
+		try {
+			for (Annotation ann : clazz.getDeclaredAnnotations()) {
+				if (!isInJavaLangAnnotationPackage(ann) && visited.add(ann)) {
+					A annotation = findAnnotation(ann.annotationType(), annotationType, visited);
+					if (annotation != null) {
+						return annotation;
+					}
 				}
 			}
 		}
+		catch (Exception ex) {
+			// Assuming nested Class values not resolvable within annotation attributes...
+			logIntrospectionFailure(clazz, ex);
+			return null;
+		}
+
 		Class<?> superclass = clazz.getSuperclass();
 		if (superclass == null || superclass.equals(Object.class)) {
 			return null;
@@ -454,8 +448,8 @@ public abstract class AnnotationUtils {
 		Assert.notNull(clazz, "Class must not be null");
 		boolean declaredLocally = false;
 		try {
-			for (Annotation annotation : clazz.getDeclaredAnnotations()) {
-				if (annotation.annotationType().equals(annotationType)) {
+			for (Annotation ann : clazz.getDeclaredAnnotations()) {
+				if (ann.annotationType().equals(annotationType)) {
 					declaredLocally = true;
 					break;
 				}
@@ -463,10 +457,7 @@ public abstract class AnnotationUtils {
 		}
 		catch (Exception ex) {
 			// Assuming nested Class values not resolvable within annotation attributes...
-			// We're probably hitting a non-present optional arrangement - let's back out.
-			if (logger.isInfoEnabled()) {
-				logger.info("Failed to introspect annotations on [" + clazz + "]: " + ex);
-			}
+			logIntrospectionFailure(clazz, ex);
 		}
 		return declaredLocally;
 	}
@@ -691,6 +682,18 @@ public abstract class AnnotationUtils {
 	}
 
 
+	private static void logIntrospectionFailure(AnnotatedElement annotatedElement, Exception ex) {
+		Log loggerToUse = logger;
+		if (loggerToUse == null) {
+			loggerToUse = LogFactory.getLog(AnnotationUtils.class);
+			logger = loggerToUse;
+		}
+		if (loggerToUse.isInfoEnabled()) {
+			loggerToUse.info("Failed to introspect annotations on [" + annotatedElement + "]: " + ex);
+		}
+	}
+
+
 	private static class AnnotationCollector<A extends Annotation> {
 
 		private final Class<? extends Annotation> containerAnnotationType;
@@ -714,15 +717,15 @@ public abstract class AnnotationUtils {
 		@SuppressWarnings("unchecked")
 		private void process(AnnotatedElement annotatedElement) {
 			if (this.visited.add(annotatedElement)) {
-				for (Annotation annotation : annotatedElement.getAnnotations()) {
-					if (ObjectUtils.nullSafeEquals(this.annotationType, annotation.annotationType())) {
-						this.result.add((A) annotation);
+				for (Annotation ann : annotatedElement.getAnnotations()) {
+					if (ObjectUtils.nullSafeEquals(this.annotationType, ann.annotationType())) {
+						this.result.add((A) ann);
 					}
-					else if (ObjectUtils.nullSafeEquals(this.containerAnnotationType, annotation.annotationType())) {
-						this.result.addAll(getValue(annotation));
+					else if (ObjectUtils.nullSafeEquals(this.containerAnnotationType, ann.annotationType())) {
+						this.result.addAll(getValue(ann));
 					}
-					else if (!isInJavaLangAnnotationPackage(annotation)) {
-						process(annotation.annotationType());
+					else if (!isInJavaLangAnnotationPackage(ann)) {
+						process(ann.annotationType());
 					}
 				}
 			}
