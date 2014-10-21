@@ -1686,6 +1686,21 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 	}
 
 	@Test
+	public void failsWhenSettingContextForExpression_SPR12326() {
+	    SpelExpressionParser parser = new SpelExpressionParser(new SpelParserConfiguration(SpelCompilerMode.IMMEDIATE, this
+	            .getClass().getClassLoader()));
+	    Person3 person = new Person3("foo", 1);
+	    SpelExpression expression = parser.parseRaw("#it?.age?.equals([0])");
+	    StandardEvaluationContext context = new StandardEvaluationContext(new Object[] { 1 });
+	    context.setVariable("it", person);
+	    expression.setEvaluationContext(context);
+	    assertTrue(expression.getValue(Boolean.class));
+	    assertTrue(expression.getValue(Boolean.class));	     
+	    assertCanCompile(expression);
+	    assertTrue(expression.getValue(Boolean.class));
+	}
+	
+	@Test
 	public void constructorReference_SPR12326() {
 		String type = this.getClass().getName();
 		String prefix = "new "+type+".Obj";
@@ -1806,6 +1821,23 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 	        this.age = age;
 	    }
 	}
+	
+	public class Person3 {
+		 
+	    private int age;
+	 
+	    public Person3(String name, int age) {
+	        this.age = age;
+	    }
+	 
+	    public int getAge() {
+	        return age;
+	    }
+	 
+	    public void setAge(int age) {
+	        this.age = age;
+	    }
+	}
 
 	@Test
 	public void constructorReference() throws Exception {
@@ -1852,6 +1884,57 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 	}
 	
 	@Test
+	public void methodReferenceReflectiveMethodSelectionWithVarargs() throws Exception {
+		TestClass10 tc = new TestClass10();
+		
+		// Should call the non varargs version of concat
+		// (which causes the '::' prefix in test output)
+		expression = parser.parseExpression("concat('test')");
+		assertCantCompile(expression);
+		expression.getValue(tc);
+		assertEquals("::test",tc.s);
+		assertCanCompile(expression);
+		tc.reset();
+		expression.getValue(tc);
+		assertEquals("::test",tc.s);
+		tc.reset();		
+
+		// This will call the varargs concat with an empty array
+		expression = parser.parseExpression("concat()");
+		assertCantCompile(expression);
+		expression.getValue(tc);
+		assertEquals("",tc.s);
+		assertCanCompile(expression);
+		tc.reset();
+		expression.getValue(tc);
+		assertEquals("",tc.s);
+		tc.reset();		
+		
+		// Should call the non varargs version of concat
+		// (which causes the '::' prefix in test output)
+		expression = parser.parseExpression("concat2('test')");
+		assertCantCompile(expression);
+		expression.getValue(tc);
+		assertEquals("::test",tc.s);
+		assertCanCompile(expression);
+		tc.reset();
+		expression.getValue(tc);
+		assertEquals("::test",tc.s);
+		tc.reset();		
+
+		// This will call the varargs concat with an empty array
+		expression = parser.parseExpression("concat2()");
+		assertCantCompile(expression);
+		expression.getValue(tc);
+		assertEquals("",tc.s);
+		assertCanCompile(expression);
+		tc.reset();
+		expression.getValue(tc);
+		assertEquals("",tc.s);
+		tc.reset();		
+	}
+
+	@Test
 	public void methodReferenceVarargs() throws Exception {
 		TestClass5 tc = new TestClass5();
 		
@@ -1864,6 +1947,17 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		tc.reset();
 		expression.getValue(tc);
 		assertEquals("",tc.s);
+		tc.reset();
+		
+		// varargs string
+		expression = parser.parseExpression("eleven('aaa')");
+		assertCantCompile(expression);
+		expression.getValue(tc);
+		assertEquals("aaa",tc.s);
+		assertCanCompile(expression);
+		tc.reset();
+		expression.getValue(tc);
+		assertEquals("aaa",tc.s);
 		tc.reset();
 		
 		// varargs string
@@ -1897,6 +1991,16 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		tc.reset();
 		expression.getValue(tc);
 		assertEquals(6,tc.i);
+		tc.reset();
+		
+		expression = parser.parseExpression("twelve(1)");
+		assertCantCompile(expression);
+		expression.getValue(tc);
+		assertEquals(1,tc.i);
+		assertCanCompile(expression);
+		tc.reset();
+		expression.getValue(tc);
+		assertEquals(1,tc.i);
 		tc.reset();
 
 		// one string then varargs string
@@ -1954,6 +2058,16 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		assertEquals("truetruefalse",tc.s);
 		tc.reset();
 		
+		expression = parser.parseExpression("arrayz(true)");
+		assertCantCompile(expression);
+		expression.getValue(tc);
+		assertEquals("true",tc.s);
+		assertCanCompile(expression);
+		tc.reset();
+		expression.getValue(tc);
+		assertEquals("true",tc.s);
+		tc.reset();
+		
 		// varargs short
 		expression = parser.parseExpression("arrays(s1,s2,s3)");
 		assertCantCompile(expression);
@@ -1963,6 +2077,16 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		tc.reset();
 		expression.getValue(tc);
 		assertEquals("123",tc.s);
+		tc.reset();
+		
+		expression = parser.parseExpression("arrays(s1)");
+		assertCantCompile(expression);
+		expression.getValue(tc);
+		assertEquals("1",tc.s);
+		assertCanCompile(expression);
+		tc.reset();
+		expression.getValue(tc);
+		assertEquals("1",tc.s);
 		tc.reset();
 		
 		// varargs double
@@ -1976,6 +2100,16 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		assertEquals("1.02.03.0",tc.s);
 		tc.reset();
 
+		expression = parser.parseExpression("arrayd(1.0d)");
+		assertCantCompile(expression);
+		expression.getValue(tc);
+		assertEquals("1.0",tc.s);
+		assertCanCompile(expression);
+		tc.reset();
+		expression.getValue(tc);
+		assertEquals("1.0",tc.s);
+		tc.reset();
+		
 		// varargs long
 		expression = parser.parseExpression("arrayj(l1,l2,l3)");
 		assertCantCompile(expression);
@@ -1986,7 +2120,17 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		expression.getValue(tc);
 		assertEquals("123",tc.s);
 		tc.reset();
-		
+
+		expression = parser.parseExpression("arrayj(l1)");
+		assertCantCompile(expression);
+		expression.getValue(tc);
+		assertEquals("1",tc.s);
+		assertCanCompile(expression);
+		tc.reset();
+		expression.getValue(tc);
+		assertEquals("1",tc.s);
+		tc.reset();
+
 		// varargs char
 		expression = parser.parseExpression("arrayc(c1,c2,c3)");
 		assertCantCompile(expression);
@@ -1997,7 +2141,17 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		expression.getValue(tc);
 		assertEquals("abc",tc.s);
 		tc.reset();
-		
+
+		expression = parser.parseExpression("arrayc(c1)");
+		assertCantCompile(expression);
+		expression.getValue(tc);
+		assertEquals("a",tc.s);
+		assertCanCompile(expression);
+		tc.reset();
+		expression.getValue(tc);
+		assertEquals("a",tc.s);
+		tc.reset();
+
 		// varargs byte
 		expression = parser.parseExpression("arrayb(b1,b2,b3)");
 		assertCantCompile(expression);
@@ -2007,6 +2161,16 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		tc.reset();
 		expression.getValue(tc);
 		assertEquals("656667",tc.s);
+		tc.reset();
+		
+		expression = parser.parseExpression("arrayb(b1)");
+		assertCantCompile(expression);
+		expression.getValue(tc);
+		assertEquals("65",tc.s);
+		assertCanCompile(expression);
+		tc.reset();
+		expression.getValue(tc);
+		assertEquals("65",tc.s);
 		tc.reset();
 
 		// varargs float
@@ -2018,6 +2182,16 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		tc.reset();
 		expression.getValue(tc);
 		assertEquals("1.02.03.0",tc.s);
+		tc.reset();
+		
+		expression = parser.parseExpression("arrayf(f1)");
+		assertCantCompile(expression);
+		expression.getValue(tc);
+		assertEquals("1.0",tc.s);
+		assertCanCompile(expression);
+		tc.reset();
+		expression.getValue(tc);
+		assertEquals("1.0",tc.s);
 		tc.reset();
 	}
 	
@@ -3305,6 +3479,46 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		public boolean getfalse() { return false; }
 		public boolean getA() { return a; }
 		public boolean getB() { return b; }
+	}
+	
+	public static class TestClass10 {
+		public String s = null;
+		
+		public void reset() {
+			s = null;
+		}
+		
+		public void concat(String arg) {
+			s = "::"+arg;
+		}
+
+		public void concat(String... vargs) { 
+			if (vargs==null) {
+				s = "";
+			}
+			else {
+				s = "";
+				for (String varg: vargs) {
+					s+=varg;
+				}
+			}
+		}
+		
+		public void concat2(Object arg) {
+			s = "::"+arg;
+		}
+
+		public void concat2(Object... vargs) { 
+			if (vargs==null) {
+				s = "";
+			}
+			else {
+				s = "";
+				for (Object varg: vargs) {
+					s+=varg;
+				}
+			}
+		}
 	}
 	
 	public static class TestClass5 {

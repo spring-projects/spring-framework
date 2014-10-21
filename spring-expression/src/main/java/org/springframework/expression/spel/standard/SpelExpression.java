@@ -109,7 +109,8 @@ public class SpelExpression implements Expression {
 		Object result;
 		if (this.compiledAst != null) {
 			try {
-				return this.compiledAst.getValue(null,null);
+				TypedValue contextRoot = evaluationContext == null ? null : evaluationContext.getRootObject();
+				return this.compiledAst.getValue(contextRoot == null ? null : contextRoot.getValue(), evaluationContext);
 			}
 			catch (Throwable ex) {
 				// If running in mixed mode, revert to interpreted
@@ -134,7 +135,7 @@ public class SpelExpression implements Expression {
 		Object result;
 		if (this.compiledAst != null) {
 			try {
-				return this.compiledAst.getValue(rootObject,null);
+				return this.compiledAst.getValue(rootObject, evaluationContext);
 			}
 			catch (Throwable ex) {
 				// If running in mixed mode, revert to interpreted
@@ -159,7 +160,8 @@ public class SpelExpression implements Expression {
 	public <T> T getValue(Class<T> expectedResultType) throws EvaluationException {
 		if (this.compiledAst != null) {
 			try {
-				Object result = this.compiledAst.getValue(null,null);
+				TypedValue contextRoot = evaluationContext == null ? null : evaluationContext.getRootObject();
+				Object result = this.compiledAst.getValue(contextRoot == null ? null : contextRoot.getValue(), evaluationContext);
 				if (expectedResultType == null) {
 					return (T)result;
 				}

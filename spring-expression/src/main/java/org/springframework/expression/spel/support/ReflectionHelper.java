@@ -253,8 +253,11 @@ public class ReflectionHelper {
 			if (varargsPosition == arguments.length - 1) {
 				TypeDescriptor targetType = new TypeDescriptor(methodParam);
 				Object argument = arguments[varargsPosition];
-				arguments[varargsPosition] = converter.convertValue(argument, TypeDescriptor.forObject(argument), targetType);
-				conversionOccurred |= (argument != arguments[varargsPosition]);
+				TypeDescriptor sourceType = TypeDescriptor.forObject(argument);
+				arguments[varargsPosition] = converter.convertValue(argument, sourceType, targetType);
+				if (!looksLikeSimpleArrayPackaging(sourceType, targetType)) {
+					conversionOccurred |= (argument != arguments[varargsPosition]);
+				}
 			}
 			else {
 				TypeDescriptor targetType = new TypeDescriptor(methodParam).getElementTypeDescriptor();
@@ -266,6 +269,80 @@ public class ReflectionHelper {
 			}
 		}
 		return conversionOccurred;
+	}
+
+	/**
+	 * Check if the target type simply represents the array (possibly boxed/unboxed) form of sourceType.
+	 * @param sourceType the type of the original argument
+	 * @param actualType the type of the converted argument
+	 * @return
+	 */
+	private static boolean looksLikeSimpleArrayPackaging(TypeDescriptor sourceType, TypeDescriptor targetType) {
+		TypeDescriptor td = targetType.getElementTypeDescriptor();
+		if (td != null) {
+			if (td.equals(sourceType)) {
+				return true;
+			}
+			else { // check for boxing
+				if (td.isPrimitive() || sourceType.isPrimitive()) {
+					Class<?> targetElementClass = td.getType();
+					Class<?> sourceElementClass = sourceType.getType();
+					if (targetElementClass.isPrimitive()) {
+						if (targetElementClass == Boolean.TYPE) {
+							return sourceElementClass == Boolean.class;
+						}
+						else if (targetElementClass == Double.TYPE) {
+							return sourceElementClass == Double.class;
+						}
+						else if (targetElementClass == Float.TYPE) {
+							return sourceElementClass == Float.class;
+						}
+						else if (targetElementClass == Integer.TYPE) {
+							return sourceElementClass == Integer.class;
+						}
+						else if (targetElementClass == Long.TYPE) {
+							return sourceElementClass == Long.class;
+						}
+						else if (targetElementClass == Short.TYPE) {
+							return sourceElementClass == Short.class;
+						}
+						else if (targetElementClass == Character.TYPE) {
+							return sourceElementClass == Character.class;
+						}
+						else if (targetElementClass == Byte.TYPE) {
+							return sourceElementClass == Byte.class;
+						}
+					}
+					else if (sourceElementClass.isPrimitive()) {
+						if (sourceElementClass == Boolean.TYPE) {
+							return targetElementClass == Boolean.class;
+						}
+						else if (sourceElementClass == Double.TYPE) {
+							return targetElementClass == Double.class;
+						}
+						else if (sourceElementClass == Float.TYPE) {
+							return targetElementClass == Float.class;
+						}
+						else if (sourceElementClass == Integer.TYPE) {
+							return targetElementClass == Integer.class;
+						}
+						else if (sourceElementClass == Long.TYPE) {
+							return targetElementClass == Long.class;
+						}
+						else if (sourceElementClass == Character.TYPE) {
+							return targetElementClass == Character.class;
+						}
+						else if (sourceElementClass == Short.TYPE) {
+							return targetElementClass == Short.class;
+						}
+						else if (sourceElementClass == Byte.TYPE) {
+							return targetElementClass == Byte.class;
+						}
+					}
+				}
+			}
+		}
+		return false;
 	}
 
 	/**
