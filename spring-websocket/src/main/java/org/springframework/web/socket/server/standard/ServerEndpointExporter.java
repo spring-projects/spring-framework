@@ -119,10 +119,9 @@ public class ServerEndpointExporter extends WebApplicationObjectSupport
 
 		ApplicationContext context = getApplicationContext();
 		if (context != null) {
-			String[] endpointNames = context.getBeanNamesForAnnotation(ServerEndpoint.class);
-			for (String beanName : endpointNames) {
-				Class<?> beanType = context.getType(beanName);
-				endpointClasses.add(beanType);
+			String[] endpointBeanNames = context.getBeanNamesForAnnotation(ServerEndpoint.class);
+			for (String beanName : endpointBeanNames) {
+				endpointClasses.add(context.getType(beanName));
 			}
 		}
 
@@ -132,9 +131,7 @@ public class ServerEndpointExporter extends WebApplicationObjectSupport
 
 		if (context != null) {
 			Map<String, ServerEndpointConfig> endpointConfigMap = context.getBeansOfType(ServerEndpointConfig.class);
-			for (Map.Entry<String, ServerEndpointConfig> configEntry : endpointConfigMap.entrySet()) {
-				String beanName = configEntry.getKey();
-				ServerEndpointConfig endpointConfig = configEntry.getValue();
+			for (ServerEndpointConfig endpointConfig : endpointConfigMap.values()) {
 				registerEndpoint(endpointConfig);
 			}
 		}

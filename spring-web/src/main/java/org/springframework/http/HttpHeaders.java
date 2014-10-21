@@ -496,7 +496,8 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	}
 
 	/**
-	 * Set the (new) value of the {@code Content-Disposition} header for {@code form-data}.
+	 * Set the (new) value of the {@code Content-Disposition} header
+	 * for {@code form-data}.
 	 * @param name the control name
 	 * @param filename the filename (may be {@code null})
 	 */
@@ -512,16 +513,16 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	}
 
 	/**
-	 * Set the length of the body in bytes,
-	 * as specified by the {@code Content-Length} header.
+	 * Set the length of the body in bytes, as specified by the
+	 * {@code Content-Length} header.
 	 */
 	public void setContentLength(long contentLength) {
 		set(CONTENT_LENGTH, Long.toString(contentLength));
 	}
 
 	/**
-	 * Return the length of the body in bytes,
-	 * as specified by the {@code Content-Length} header.
+	 * Return the length of the body in bytes, as specified by the
+	 * {@code Content-Length} header.
 	 * <p>Returns -1 when the content-length is unknown.
 	 */
 	public long getContentLength() {
@@ -540,7 +541,8 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	}
 
 	/**
-	 * Return the {@linkplain MediaType media type} of the body, as specified by the {@code Content-Type} header.
+	 * Return the {@linkplain MediaType media type} of the body, as specified
+	 * by the {@code Content-Type} header.
 	 * <p>Returns {@code null} when the content-type is unknown.
 	 */
 	public MediaType getContentType() {
@@ -549,20 +551,20 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	}
 
 	/**
-	 * Set the date and time at which the message was created,
-	 * as specified by the {@code Date} header.
-	 * <p>The date should be specified as the number of milliseconds
-	 * since January 1, 1970 GMT.
+	 * Set the date and time at which the message was created, as specified
+	 * by the {@code Date} header.
+	 * <p>The date should be specified as the number of milliseconds since
+	 * January 1, 1970 GMT.
 	 */
 	public void setDate(long date) {
 		setDate(DATE, date);
 	}
 
 	/**
-	 * Returns the date and time at which the message was created,
-	 * as specified by the {@code Date} header.
-	 * <p>The date is returned as the number of milliseconds
-	 * since January 1, 1970 GMT. Returns -1 when the date is unknown.
+	 * Return the date and time at which the message was created, as specified
+	 * by the {@code Date} header.
+	 * <p>The date is returned as the number of milliseconds since
+	 * January 1, 1970 GMT. Returns -1 when the date is unknown.
 	 * @throws IllegalArgumentException if the value can't be converted to a date
 	 */
 	public long getDate() {
@@ -582,7 +584,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	}
 
 	/**
-	 * Returns the entity tag of the body, as specified by the {@code ETag} header.
+	 * Return the entity tag of the body, as specified by the {@code ETag} header.
 	 */
 	public String getETag() {
 		return getFirst(ETAG);
@@ -591,19 +593,18 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	/**
 	 * Set the date and time at which the message is no longer valid,
 	 * as specified by the {@code Expires} header.
-	 * <p>The date should be specified as the number of milliseconds
-	 * since January 1, 1970 GMT.
+	 * <p>The date should be specified as the number of milliseconds since
+	 * January 1, 1970 GMT.
 	 */
 	public void setExpires(long expires) {
 		setDate(EXPIRES, expires);
 	}
 
 	/**
-	 * Returns the date and time at which the message is no longer valid,
+	 * Return the date and time at which the message is no longer valid,
 	 * as specified by the {@code Expires} header.
-	 * <p>The date is returned as the number of milliseconds
-	 * since January 1, 1970 GMT.
-	 * Returns -1 when the date is unknown.
+	 * <p>The date is returned as the number of milliseconds since
+	 * January 1, 1970 GMT. Returns -1 when the date is unknown.
 	 */
 	public long getExpires() {
 		try {
@@ -616,17 +617,17 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 
 	/**
 	 * Set the (new) value of the {@code If-Modified-Since} header.
-	 * <p>The date should be specified as the number of milliseconds
-	 * since January 1, 1970 GMT.
+	 * <p>The date should be specified as the number of milliseconds since
+	 * January 1, 1970 GMT.
 	 */
 	public void setIfModifiedSince(long ifModifiedSince) {
 		setDate(IF_MODIFIED_SINCE, ifModifiedSince);
 	}
 
 	/**
-	 * Returns the value of the {@code IfModifiedSince} header.
-	 * <p>The date is returned as the number of milliseconds
-	 * since January 1, 1970 GMT. Returns -1 when the date is unknown.
+	 * Return the value of the {@code IfModifiedSince} header.
+	 * <p>The date is returned as the number of milliseconds since
+	 * January 1, 1970 GMT. Returns -1 when the date is unknown.
 	 * @deprecated use {@link #getIfModifiedSince()}
 	 */
 	@Deprecated
@@ -635,9 +636,9 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	}
 
 	/**
-	 * Returns the value of the {@code If-Modified-Since} header.
-	 * <p>The date is returned as the number of milliseconds
-	 * since January 1, 1970 GMT. Returns -1 when the date is unknown.
+	 * Return the value of the {@code If-Modified-Since} header.
+	 * <p>The date is returned as the number of milliseconds since
+	 * January 1, 1970 GMT. Returns -1 when the date is unknown.
 	 */
 	public long getIfModifiedSince() {
 		return getFirstDate(IF_MODIFIED_SINCE);
@@ -689,20 +690,20 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	}
 
 	/**
-	 * Set the time the resource was last changed,
-	 * as specified by the {@code Last-Modified} header.
-	 * <p>The date should be specified as the number of milliseconds
-	 * since January 1, 1970 GMT.
+	 * Set the time the resource was last changed, as specified by the
+	 * {@code Last-Modified} header.
+	 * <p>The date should be specified as the number of milliseconds since
+	 * January 1, 1970 GMT.
 	 */
 	public void setLastModified(long lastModified) {
 		setDate(LAST_MODIFIED, lastModified);
 	}
 
 	/**
-	 * Return the time the resource was last changed,
-	 * as specified by the {@code Last-Modified} header.
-	 * <p>The date is returned as the number of milliseconds
-	 * since January 1, 1970 GMT. Returns -1 when the date is unknown.
+	 * Return the time the resource was last changed, as specified by the
+	 * {@code Last-Modified} header.
+	 * <p>The date is returned as the number of milliseconds since
+	 * January 1, 1970 GMT. Returns -1 when the date is unknown.
 	 */
 	public long getLastModified() {
 		return getFirstDate(LAST_MODIFIED);
@@ -769,9 +770,9 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	}
 
 	/**
-	 * Parse the first header value for the given header name as a date, return -1 if
-	 * there is no value, or raise {@link IllegalArgumentException} if the value cannot be
-	 * parsed as a date.
+	 * Parse the first header value for the given header name as a date,
+	 * return -1 if there is no value, or raise {@link IllegalArgumentException}
+	 * if the value cannot be parsed as a date.
 	 */
 	public long getFirstDate(String headerName) {
 		String headerValue = getFirst(headerName);
