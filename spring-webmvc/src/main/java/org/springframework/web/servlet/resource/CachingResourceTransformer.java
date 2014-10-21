@@ -28,10 +28,10 @@ import org.springframework.core.io.Resource;
 import org.springframework.util.Assert;
 
 /**
- * A {@link org.springframework.web.servlet.resource.ResourceTransformer} that
- * checks a {@link org.springframework.cache.Cache} to see if a previously
- * transformed or otherwise
- * delegates to the resolver chain and saves the result in the cache.
+ * A {@link org.springframework.web.servlet.resource.ResourceTransformer} that checks a
+ * {@link org.springframework.cache.Cache} to see if a previously transformed resource
+ * exists in the cache and returns it if found, and otherwise delegates to the resolver
+ * chain and saves the result in the cache.
  *
  * @author Rossen Stoyanchev
  * @since 4.1
