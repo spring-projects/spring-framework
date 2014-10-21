@@ -23,6 +23,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Map;
@@ -99,6 +100,8 @@ class ConfigurationClassParser {
 	private final Stack<PropertySource<?>> propertySources = new Stack<PropertySource<?>>();
 
 	private final ImportStack importStack = new ImportStack();
+
+	private final Set<Class<?>> importBeanDefinitionRegistrars = new HashSet<Class<?>>();
 
 
 	/**
@@ -370,25 +373,32 @@ class ConfigurationClassParser {
 					Object candidateToCheck = (candidate instanceof Class ? (Class) candidate :
 							this.metadataReaderFactory.getMetadataReader((String) candidate));
 					if (checkAssignability(ImportSelector.class, candidateToCheck)) {
-						// the candidate class is an ImportSelector -> delegate to it to determine imports
+						// Candidate class is an ImportSelector -> delegate to it to determine imports
 						Class<?> candidateClass = (candidate instanceof Class ? (Class) candidate :
 								this.resourceLoader.getClassLoader().loadClass((String) candidate));
 						ImportSelector selector = BeanUtils.instantiateClass(candidateClass, ImportSelector.class);
 						processImport(configClass, metadata, Arrays.asList(selector.selectImports(metadata)), false);
 					}
 					else if (checkAssignability(ImportBeanDefinitionRegistrar.class, candidateToCheck)) {
-						// the candidate class is an ImportBeanDefinitionRegistrar -> delegate to it to register additional bean definitions
+						// Candidate class is an ImportBeanDefinitionRegistrar ->
+						// delegate to it to register additional bean definitions
 						Class<?> candidateClass = (candidate instanceof Class ? (Class) candidate :
 								this.resourceLoader.getClassLoader().loadClass((String) candidate));
-						ImportBeanDefinitionRegistrar registrar = BeanUtils.instantiateClass(candidateClass, ImportBeanDefinitionRegistrar.class);
-						invokeAwareMethods(registrar);
-						registrar.registerBeanDefinitions(metadata, this.registry);
+						if (!this.importBeanDefinitionRegistrars.contains(candidateClass)) {
+							ImportBeanDefinitionRegistrar registrar =
+									BeanUtils.instantiateClass(candidateClass, ImportBeanDefinitionRegistrar.class);
+							invokeAwareMethods(registrar);
+							registrar.registerBeanDefinitions(metadata, this.registry);
+							this.importBeanDefinitionRegistrars.add(candidateClass);
+						}
 					}
 					else {
-						// candidate class not an ImportSelector or ImportBeanDefinitionRegistrar -> process it as a @Configuration class
+						// Candidate class not an ImportSelector or ImportBeanDefinitionRegistrar ->
+						// process it as a @Configuration class
 						this.importStack.registerImport(metadata,
 								(candidate instanceof Class ? ((Class) candidate).getName() : (String) candidate));
-						processConfigurationClass(candidateToCheck instanceof Class ? new ConfigurationClass((Class) candidateToCheck, true) :
+						processConfigurationClass(candidateToCheck instanceof Class ?
+								new ConfigurationClass((Class) candidateToCheck, true) :
 								new ConfigurationClass((MetadataReader) candidateToCheck, true));
 					}
 				}
