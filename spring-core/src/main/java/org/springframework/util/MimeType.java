@@ -64,7 +64,7 @@ public class MimeType implements Comparable<MimeType>, Serializable {
 	static {
 		// variable names refer to RFC 2616, section 2.2
 		BitSet ctl = new BitSet(128);
-		for (int i=0; i <= 31; i++) {
+		for (int i = 0; i <= 31; i++) {
 			ctl.set(i);
 		}
 		ctl.set(127);
@@ -155,14 +155,14 @@ public class MimeType implements Comparable<MimeType>, Serializable {
 		this.type = type.toLowerCase(Locale.ENGLISH);
 		this.subtype = subtype.toLowerCase(Locale.ENGLISH);
 		if (!CollectionUtils.isEmpty(parameters)) {
-			Map<String, String> m = new LinkedCaseInsensitiveMap<String>(parameters.size(), Locale.ENGLISH);
+			Map<String, String> map = new LinkedCaseInsensitiveMap<String>(parameters.size(), Locale.ENGLISH);
 			for (Map.Entry<String, String> entry : parameters.entrySet()) {
 				String attribute = entry.getKey();
 				String value = entry.getValue();
 				checkParameters(attribute, value);
-				m.put(attribute, value);
+				map.put(attribute, value);
 			}
-			this.parameters = Collections.unmodifiableMap(m);
+			this.parameters = Collections.unmodifiableMap(map);
 		}
 		else {
 			this.parameters = Collections.emptyMap();
@@ -256,7 +256,7 @@ public class MimeType implements Comparable<MimeType>, Serializable {
 
 	/**
 	 * Return the character set, as indicated by a {@code charset} parameter, if any.
-	 * @return the character set; or {@code null} if not available
+	 * @return the character set, or {@code null} if not available
 	 */
 	public Charset getCharSet() {
 		String charSet = getParameter(PARAM_CHARSET);
@@ -266,7 +266,7 @@ public class MimeType implements Comparable<MimeType>, Serializable {
 	/**
 	 * Return a generic parameter value, given a parameter name.
 	 * @param name the parameter name
-	 * @return the parameter value; or {@code null} if not present
+	 * @return the parameter value, or {@code null} if not present
 	 */
 	public String getParameter(String name) {
 		return this.parameters.get(name);
@@ -274,10 +274,10 @@ public class MimeType implements Comparable<MimeType>, Serializable {
 
 	/**
 	 * Return all generic parameter values.
-	 * @return a read-only map, possibly empty, never {@code null}
+	 * @return a read-only map (possibly empty, never {@code null})
 	 */
 	public Map<String, String> getParameters() {
-			return parameters;
+		return this.parameters;
 	}
 
 	/**

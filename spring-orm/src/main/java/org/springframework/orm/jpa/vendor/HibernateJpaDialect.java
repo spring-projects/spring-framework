@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -244,8 +244,8 @@ public class HibernateJpaDialect extends DefaultJpaDialect {
 		return new JpaSystemException(ex);
 	}
 
-	protected Session getSession(EntityManager em) {
-		return em.unwrap(Session.class);
+	protected Session getSession(EntityManager entityManager) {
+		return entityManager.unwrap(Session.class);
 	}
 
 
@@ -270,13 +270,13 @@ public class HibernateJpaDialect extends DefaultJpaDialect {
 
 	private static class HibernateConnectionHandle implements ConnectionHandle {
 
-		private final Session session;
-
 		// This will find a corresponding method on Hibernate 3.x but not on 4.x
 		private static final Method sessionConnectionMethod =
 				ClassUtils.getMethodIfAvailable(Session.class, "connection");
 
 		private static volatile Method connectionMethodToUse = sessionConnectionMethod;
+
+		private final Session session;
 
 		public HibernateConnectionHandle(Session session) {
 			this.session = session;
@@ -286,7 +286,7 @@ public class HibernateJpaDialect extends DefaultJpaDialect {
 		public Connection getConnection() {
 			try {
 				if (connectionMethodToUse == null) {
-					// Reflective lookup trying to find SessionImpl's connection() on Hibernate 4.x
+					// Reflective lookup to find SessionImpl's connection() method on Hibernate 4.x
 					connectionMethodToUse = this.session.getClass().getMethod("connection");
 				}
 				return (Connection) ReflectionUtils.invokeMethod(connectionMethodToUse, this.session);

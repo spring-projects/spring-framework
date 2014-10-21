@@ -399,8 +399,7 @@ public class MBeanExporter extends MBeanRegistrationSupport implements MBeanExpo
 	//---------------------------------------------------------------------
 
 	/**
-	 * Kick off bean registration automatically when deployed in an
-	 * {@code ApplicationContext}.
+	 * Kick off bean registration automatically when deployed in an {@code ApplicationContext}.
 	 * @see #registerBeans()
 	 */
 	@Override
