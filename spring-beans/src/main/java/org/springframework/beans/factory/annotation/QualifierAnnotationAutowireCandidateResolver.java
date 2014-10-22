@@ -26,6 +26,7 @@ import org.springframework.beans.SimpleTypeConverter;
 import org.springframework.beans.TypeConverter;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
@@ -72,8 +73,8 @@ public class QualifierAnnotationAutowireCandidateResolver implements AutowireCan
 	public QualifierAnnotationAutowireCandidateResolver() {
 		this.qualifierTypes.add(Qualifier.class);
 		try {
-			this.qualifierTypes.add((Class<? extends Annotation>)
-					ClassUtils.forName("javax.inject.Qualifier", QualifierAnnotationAutowireCandidateResolver.class.getClassLoader()));
+			this.qualifierTypes.add((Class<? extends Annotation>) ClassUtils.forName("javax.inject.Qualifier",
+							QualifierAnnotationAutowireCandidateResolver.class.getClassLoader()));
 		}
 		catch (ClassNotFoundException ex) {
 			// JSR-330 API not available - simply skip.
@@ -246,9 +247,14 @@ public class QualifierAnnotationAutowireCandidateResolver implements AutowireCan
 			if (targetAnnotation == null) {
 				// Look for matching annotation on the target class
 				if (this.beanFactory != null) {
-					Class<?> beanType = this.beanFactory.getType(bdHolder.getBeanName());
-					if (beanType != null) {
-						targetAnnotation = AnnotationUtils.getAnnotation(ClassUtils.getUserClass(beanType), type);
+					try {
+						Class<?> beanType = this.beanFactory.getType(bdHolder.getBeanName());
+						if (beanType != null) {
+							targetAnnotation = AnnotationUtils.getAnnotation(ClassUtils.getUserClass(beanType), type);
+						}
+					}
+					catch (NoSuchBeanDefinitionException ex) {
+						// Not the usual case - simply forget about the type check...
 					}
 				}
 				if (targetAnnotation == null && bd.hasBeanClass()) {
