@@ -171,7 +171,7 @@ public class ContentNegotiationManagerFactoryBeanTests {
 	// SPR-12286
 	@Test
 	public void setDefaultContentTypeWithStrategy() throws Exception {
-		this.factoryBean.setDefaultContentType(new FixedContentNegotiationStrategy(MediaType.APPLICATION_JSON));
+		this.factoryBean.setDefaultContentTypeStrategy(new FixedContentNegotiationStrategy(MediaType.APPLICATION_JSON));
 		this.factoryBean.afterPropertiesSet();
 		ContentNegotiationManager manager = this.factoryBean.getObject();
 

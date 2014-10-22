@@ -113,8 +113,8 @@ public class ContentNegotiationConfigurerTests {
 	}
 
 	@Test
-	public void setDefaultContentTypeWithStrategy() throws Exception {
-		this.configurer.defaultContentType(new FixedContentNegotiationStrategy(MediaType.APPLICATION_JSON));
+	public void setDefaultContentTypeStrategy() throws Exception {
+		this.configurer.defaultContentTypeStrategy(new FixedContentNegotiationStrategy(MediaType.APPLICATION_JSON));
 		ContentNegotiationManager manager = this.configurer.getContentNegotiationManager();
 
 		assertEquals(Arrays.asList(MediaType.APPLICATION_JSON), manager.resolveMediaTypes(this.webRequest));

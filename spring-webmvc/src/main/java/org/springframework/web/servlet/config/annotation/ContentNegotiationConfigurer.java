@@ -162,6 +162,9 @@ public class ContentNegotiationConfigurer {
 	 * <p>This content type will be used when neither the request path extension,
 	 * nor a request parameter, nor the {@code Accept} header could help determine
 	 * the requested content type.
+	 * <p>Note that this method achieves the same goal as {@code defaultContentTypeStrategy}, so both
+	 * shouldn't be used at the same time.
+	 * @see #defaultContentTypeStrategy(org.springframework.web.accept.ContentNegotiationStrategy)
 	 */
 	public ContentNegotiationConfigurer defaultContentType(MediaType defaultContentType) {
 		this.factoryBean.setDefaultContentType(defaultContentType);
@@ -173,10 +176,13 @@ public class ContentNegotiationConfigurer {
 	 * <p>This content type will be used when neither the request path extension,
 	 * nor a request parameter, nor the {@code Accept} header could help determine
 	 * the requested content type.
+	 * <p>Note that this method achieves the same goal as {@code defaultContentType}, so both
+	 * shouldn't be used at the same time.
 	 * @since 4.1.2
+	 * @see #defaultContentType(org.springframework.http.MediaType)
 	 */
-	public ContentNegotiationConfigurer defaultContentType(ContentNegotiationStrategy defaultStrategy) {
-		this.factoryBean.setDefaultContentType(defaultStrategy);
+	public ContentNegotiationConfigurer defaultContentTypeStrategy(ContentNegotiationStrategy defaultStrategy) {
+		this.factoryBean.setDefaultContentTypeStrategy(defaultStrategy);
 		return this;
 	}
 

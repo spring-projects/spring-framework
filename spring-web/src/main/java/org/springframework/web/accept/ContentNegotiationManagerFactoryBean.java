@@ -61,8 +61,6 @@ public class ContentNegotiationManagerFactoryBean
 
 	private String parameterName = "format";
 
-	private MediaType defaultContentType;
-
 	private ContentNegotiationStrategy defaultNegotiationStrategy;
 
 	private ContentNegotiationManager contentNegotiationManager;
@@ -186,7 +184,7 @@ public class ContentNegotiationManagerFactoryBean
 	 * determine the requested content type.
 	 */
 	public void setDefaultContentType(MediaType defaultContentType) {
-		this.defaultContentType = defaultContentType;
+		this.defaultNegotiationStrategy = new FixedContentNegotiationStrategy(defaultContentType);
 	}
 
 	/**
@@ -196,7 +194,7 @@ public class ContentNegotiationManagerFactoryBean
 	 * the requested content type.
 	 * @since 4.1.2
 	 */
-	public void setDefaultContentType(ContentNegotiationStrategy defaultStrategy) {
+	public void setDefaultContentTypeStrategy(ContentNegotiationStrategy defaultStrategy) {
 		this.defaultNegotiationStrategy = defaultStrategy;
 	}
 
@@ -233,10 +231,6 @@ public class ContentNegotiationManagerFactoryBean
 
 		if (!this.ignoreAcceptHeader) {
 			strategies.add(new HeaderContentNegotiationStrategy());
-		}
-
-		if (this.defaultContentType != null) {
-			strategies.add(new FixedContentNegotiationStrategy(this.defaultContentType));
 		}
 
 		if(this.defaultNegotiationStrategy != null) {
