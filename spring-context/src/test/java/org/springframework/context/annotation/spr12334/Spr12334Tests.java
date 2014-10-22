@@ -33,6 +33,8 @@ public class Spr12334Tests {
 
 	@Test
 	public void shouldNotScanTwice() {
+		TestImport.scanned = false;
+
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
 		context.scan(TestImport.class.getPackage().getName());
 		context.refresh();
@@ -53,14 +55,14 @@ public class Spr12334Tests {
 
 	public static class TestImport implements ImportBeanDefinitionRegistrar {
 
-		private boolean scanned = false;
+		private static boolean scanned = false;
 
 		@Override
 		public void registerBeanDefinitions(AnnotationMetadata metadata, BeanDefinitionRegistry registry)  {
-			if (this.scanned) {
+			if (scanned) {
 				throw new IllegalStateException("Already scanned");
 			}
-			this.scanned = true;
+			scanned = true;
 		}
 	}
 
