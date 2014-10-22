@@ -49,8 +49,8 @@ import org.springframework.util.StringUtils;
  * All files that have the ".manifest" file extension, or the extension given in the constructor, will be transformed
  * by this class.
  *
- * This hash is computed using the content of the appcache manifest and the content of the linked resources; so
- * changing a resource linked in the manifest or the manifest itself should invalidate browser cache.
+ * <p>This hash is computed using the content of the appcache manifest and the content of the linked resources; so
+ * changing a resource linked in the manifest or the manifest itself should invalidate the browser cache.
  *
  * @author Brian Clozel
  * @see <a href="http://www.whatwg.org/specs/web-apps/current-work/multipage/offline.html#offline">HTML5 offline
@@ -71,7 +71,7 @@ public class AppCacheManifestTransformer extends ResourceTransformerSupport {
 
 
 	/**
-	 * Create an AppCacheResourceTransformer that transforms files with extension ".manifest"
+	 * Create an AppCacheResourceTransformer that transforms files with extension ".manifest".
 	 */
 	public AppCacheManifestTransformer() {
 		this("manifest");
@@ -145,8 +145,8 @@ public class AppCacheManifestTransformer extends ResourceTransformerSupport {
 	private static interface SectionTransformer {
 
 		/**
-		 * Transforms a line in a section of the manifest
-		 * <p>The actual transformation depends on the chose transformation strategy
+		 * Transforms a line in a section of the manifest.
+		 * <p>The actual transformation depends on the chosen transformation strategy
 		 * for the current manifest section (CACHE, NETWORK, FALLBACK, etc).
 		 */
 		String transform(String line, HashBuilder builder, Resource resource,

@@ -51,14 +51,14 @@ public class SpelParserConfiguration {
 
 
 	/**
-	 * Create a new {@link SpelParserConfiguration} instance with default settings.
+	 * Create a new {@code SpelParserConfiguration} instance with default settings.
 	 */
 	public SpelParserConfiguration() {
 		this(null, null, false, false, Integer.MAX_VALUE);
 	}
 
 	/**
-	 * Create a new {@link SpelParserConfiguration} instance.
+	 * Create a new {@code SpelParserConfiguration} instance.
 	 * @param compilerMode the compiler mode for the parser
 	 * @param compilerClassLoader the ClassLoader to use as the basis for expression compilation
 	 */
@@ -67,7 +67,7 @@ public class SpelParserConfiguration {
 	}
 
 	/**
-	 * Create a new {@link SpelParserConfiguration} instance.
+	 * Create a new {@code SpelParserConfiguration} instance.
 	 * @param autoGrowNullReferences if null references should automatically grow
 	 * @param autoGrowCollections if collections should automatically grow
 	 * @see #SpelParserConfiguration(boolean, boolean, int)
@@ -77,7 +77,7 @@ public class SpelParserConfiguration {
 	}
 
 	/**
-	 * Create a new {@link SpelParserConfiguration} instance.
+	 * Create a new {@code SpelParserConfiguration} instance.
 	 * @param autoGrowNullReferences if null references should automatically grow
 	 * @param autoGrowCollections if collections should automatically grow
 	 * @param maximumAutoGrowSize the maximum size that the collection can auto grow
@@ -87,7 +87,7 @@ public class SpelParserConfiguration {
 	}
 
 	/**
-	 * Create a new {@link SpelParserConfiguration} instance.
+	 * Create a new {@code SpelParserConfiguration} instance.
 	 * @param compilerMode the compiler mode that parsers using this configuration object should use
 	 * @param compilerClassLoader the ClassLoader to use as the basis for expression compilation
 	 * @param autoGrowNullReferences if null references should automatically grow

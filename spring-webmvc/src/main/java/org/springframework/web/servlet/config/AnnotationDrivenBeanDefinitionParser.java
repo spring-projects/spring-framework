@@ -122,7 +122,6 @@ import org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolv
  *  <li>and the {@link HandlerMapping} for serving resources
  * </ul>
  * Note that those beans can be configured by using the {@code path-matching} MVC namespace element.
-
  *
  * <p>Both the {@link RequestMappingHandlerAdapter} and the
  * {@link ExceptionHandlerExceptionResolver} are configured with instances of

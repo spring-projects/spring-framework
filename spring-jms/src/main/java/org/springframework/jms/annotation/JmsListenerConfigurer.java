@@ -19,10 +19,10 @@ package org.springframework.jms.annotation;
 import org.springframework.jms.config.JmsListenerEndpointRegistrar;
 
 /**
- * Optional interface to be implemented by Spring managed bean willing
+ * Optional interface to be implemented by a Spring managed bean willing
  * to customize how JMS listener endpoints are configured. Typically
- * used to defined the default {@link org.springframework.jms.config.JmsListenerContainerFactory
- * JmsListenerContainerFactory} to use or for registering jms endpoints
+ * used to define the default {@link org.springframework.jms.config.JmsListenerContainerFactory
+ * JmsListenerContainerFactory} to use or for registering JMS endpoints
  * in a <em>programmatic</em> fashion as opposed to the <em>declarative</em>
  * approach of using the @{@link JmsListener} annotation.
  *
