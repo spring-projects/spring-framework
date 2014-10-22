@@ -456,7 +456,8 @@ class ConfigurationClassParser {
 						ImportSelector selector = BeanUtils.instantiateClass(candidateClass, ImportSelector.class);
 						invokeAwareMethods(selector);
 						if (!deferred && selector instanceof DeferredImportSelector) {
-							this.deferredImportSelectors.add(new DeferredImportSelectorHolder(configClass, (DeferredImportSelector) selector));
+							this.deferredImportSelectors.add(
+									new DeferredImportSelectorHolder(configClass, (DeferredImportSelector) selector));
 						}
 						else {
 							String[] importClassNames = selector.selectImports(currentSourceClass.getMetadata());
@@ -465,15 +466,19 @@ class ConfigurationClassParser {
 						}
 					}
 					else if (candidate.isAssignable(ImportBeanDefinitionRegistrar.class)) {
-						// Candidate class is an ImportBeanDefinitionRegistrar -> delegate to it to register additional bean definitions
+						// Candidate class is an ImportBeanDefinitionRegistrar ->
+						// delegate to it to register additional bean definitions
 						Class<?> candidateClass = candidate.loadClass();
-						ImportBeanDefinitionRegistrar registrar = BeanUtils.instantiateClass(candidateClass, ImportBeanDefinitionRegistrar.class);
+						ImportBeanDefinitionRegistrar registrar =
+								BeanUtils.instantiateClass(candidateClass, ImportBeanDefinitionRegistrar.class);
 						invokeAwareMethods(registrar);
 						configClass.addImportBeanDefinitionRegistrar(registrar, currentSourceClass.getMetadata());
 					}
 					else {
-						// Candidate class not an ImportSelector or ImportBeanDefinitionRegistrar -> process it as a @Configuration class
-						this.importStack.registerImport(currentSourceClass.getMetadata(), candidate.getMetadata().getClassName());
+						// Candidate class not an ImportSelector or ImportBeanDefinitionRegistrar ->
+						// process it as a @Configuration class
+						this.importStack.registerImport(
+								currentSourceClass.getMetadata(), candidate.getMetadata().getClassName());
 						processConfigurationClass(candidate.asConfigClass(configClass));
 					}
 				}
@@ -678,12 +683,12 @@ class ConfigurationClassParser {
 
 
 	/**
-	 * Simple wrapper that allows annotated source classes to be dealt with in a uniform
-	 * manor, regardless of how they are loaded.
+	 * Simple wrapper that allows annotated source classes to be dealt with
+	 * in a uniform manner, regardless of how they are loaded.
 	 */
 	private class SourceClass {
 
-		private final Object source;  // Class or MetaDataReader
+		private final Object source;  // Class or MetadataReader
 
 		private final AnnotationMetadata metadata;
 
