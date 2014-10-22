@@ -84,8 +84,8 @@ public class AsyncResult<V> implements ListenableFuture<V> {
 		try {
 			successCallback.onSuccess(this.value);
 		}
-		catch (Throwable t) {
-			failureCallback.onFailure(t);
+		catch (Throwable ex) {
+			failureCallback.onFailure(ex);
 		}
 	}
 
