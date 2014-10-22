@@ -22,6 +22,7 @@ import javax.servlet.ServletContext;
 import org.springframework.http.MediaType;
 import org.springframework.web.accept.ContentNegotiationManager;
 import org.springframework.web.accept.ContentNegotiationManagerFactoryBean;
+import org.springframework.web.accept.ContentNegotiationStrategy;
 
 /**
  * Helps with configuring a {@link ContentNegotiationManager}.
@@ -164,6 +165,18 @@ public class ContentNegotiationConfigurer {
 	 */
 	public ContentNegotiationConfigurer defaultContentType(MediaType defaultContentType) {
 		this.factoryBean.setDefaultContentType(defaultContentType);
+		return this;
+	}
+
+	/**
+	 * Set the {@link ContentNegotiationStrategy} to be used to resolving the default content type.
+	 * <p>This content type will be used when neither the request path extension,
+	 * nor a request parameter, nor the {@code Accept} header could help determine
+	 * the requested content type.
+	 * @since 4.1.2
+	 */
+	public ContentNegotiationConfigurer defaultContentType(ContentNegotiationStrategy defaultStrategy) {
+		this.factoryBean.setDefaultContentType(defaultStrategy);
 		return this;
 	}
 

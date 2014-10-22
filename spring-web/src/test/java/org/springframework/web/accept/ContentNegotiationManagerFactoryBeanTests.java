@@ -168,4 +168,17 @@ public class ContentNegotiationManagerFactoryBeanTests {
 		assertEquals(Arrays.asList(MediaType.APPLICATION_JSON), manager.resolveMediaTypes(this.webRequest));
 	}
 
+	// SPR-12286
+	@Test
+	public void setDefaultContentTypeWithStrategy() throws Exception {
+		this.factoryBean.setDefaultContentType(new FixedContentNegotiationStrategy(MediaType.APPLICATION_JSON));
+		this.factoryBean.afterPropertiesSet();
+		ContentNegotiationManager manager = this.factoryBean.getObject();
+
+		assertEquals(Arrays.asList(MediaType.APPLICATION_JSON), manager.resolveMediaTypes(this.webRequest));
+
+		this.servletRequest.addHeader("Accept", MediaType.ALL_VALUE);
+		assertEquals(Arrays.asList(MediaType.APPLICATION_JSON), manager.resolveMediaTypes(this.webRequest));
+	}
+
 }

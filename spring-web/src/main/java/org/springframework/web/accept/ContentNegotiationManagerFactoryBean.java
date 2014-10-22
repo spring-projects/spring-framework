@@ -63,6 +63,8 @@ public class ContentNegotiationManagerFactoryBean
 
 	private MediaType defaultContentType;
 
+	private ContentNegotiationStrategy defaultNegotiationStrategy;
+
 	private ContentNegotiationManager contentNegotiationManager;
 
 	private ServletContext servletContext;
@@ -187,6 +189,17 @@ public class ContentNegotiationManagerFactoryBean
 		this.defaultContentType = defaultContentType;
 	}
 
+	/**
+	 * Set the {@link ContentNegotiationStrategy} to be used to resolving the default content type.
+	 * <p>This content type will be used when neither the request path extension,
+	 * nor a request parameter, nor the {@code Accept} header could help determine
+	 * the requested content type.
+	 * @since 4.1.2
+	 */
+	public void setDefaultContentType(ContentNegotiationStrategy defaultStrategy) {
+		this.defaultNegotiationStrategy = defaultStrategy;
+	}
+
 	@Override
 	public void setServletContext(ServletContext servletContext) {
 		this.servletContext = servletContext;
@@ -224,6 +237,10 @@ public class ContentNegotiationManagerFactoryBean
 
 		if (this.defaultContentType != null) {
 			strategies.add(new FixedContentNegotiationStrategy(this.defaultContentType));
+		}
+
+		if(this.defaultNegotiationStrategy != null) {
+			strategies.add(defaultNegotiationStrategy);
 		}
 
 		this.contentNegotiationManager = new ContentNegotiationManager(strategies);
