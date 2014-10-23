@@ -158,13 +158,11 @@ public class ContentNegotiationConfigurer {
 	}
 
 	/**
-	 * Set the default content type.
-	 * <p>This content type will be used when neither the request path extension,
-	 * nor a request parameter, nor the {@code Accept} header could help determine
-	 * the requested content type.
-	 * <p>Note that this method achieves the same goal as {@code defaultContentTypeStrategy}, so both
-	 * shouldn't be used at the same time.
-	 * @see #defaultContentTypeStrategy(org.springframework.web.accept.ContentNegotiationStrategy)
+	 * Set the default content type to use when no content type was requested.
+	 * <p>Note that internally this method creates and adds a
+	 * {@link org.springframework.web.accept.FixedContentNegotiationStrategy
+	 * FixedContentNegotiationStrategy}. Alternatively you can also provide a
+	 * custom strategy via {@link #defaultContentTypeStrategy}.
 	 */
 	public ContentNegotiationConfigurer defaultContentType(MediaType defaultContentType) {
 		this.factoryBean.setDefaultContentType(defaultContentType);
@@ -172,14 +170,11 @@ public class ContentNegotiationConfigurer {
 	}
 
 	/**
-	 * Set the {@link ContentNegotiationStrategy} to be used to resolving the default content type.
-	 * <p>This content type will be used when neither the request path extension,
-	 * nor a request parameter, nor the {@code Accept} header could help determine
-	 * the requested content type.
-	 * <p>Note that this method achieves the same goal as {@code defaultContentType}, so both
-	 * shouldn't be used at the same time.
+	 * Configure a custom {@link ContentNegotiationStrategy} to use to determine
+	 * the default content type to use when no content type was requested.
+	 * <p>However also consider using {@link #defaultContentType} which provides
+	 * a simpler alternative to doing the same.
 	 * @since 4.1.2
-	 * @see #defaultContentType(org.springframework.http.MediaType)
 	 */
 	public ContentNegotiationConfigurer defaultContentTypeStrategy(ContentNegotiationStrategy defaultStrategy) {
 		this.factoryBean.setDefaultContentTypeStrategy(defaultStrategy);

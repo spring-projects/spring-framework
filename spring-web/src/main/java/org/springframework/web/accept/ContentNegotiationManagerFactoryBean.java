@@ -178,20 +178,21 @@ public class ContentNegotiationManagerFactoryBean
 	}
 
 	/**
-	 * Set the default content type.
-	 * <p>This content type will be used when neither the request path extension,
-	 * nor a request parameter, nor the {@code Accept} header could help
-	 * determine the requested content type.
+	 * Set the default content type to use when no content type was requested.
+	 * <p>Note that internally this method creates and adds a
+	 * {@link org.springframework.web.accept.FixedContentNegotiationStrategy
+	 * FixedContentNegotiationStrategy}. Alternatively you can also provide a
+	 * custom strategy via {@link #setDefaultContentTypeStrategy}.
 	 */
 	public void setDefaultContentType(MediaType defaultContentType) {
 		this.defaultNegotiationStrategy = new FixedContentNegotiationStrategy(defaultContentType);
 	}
 
 	/**
-	 * Set the {@link ContentNegotiationStrategy} to be used to resolving the default content type.
-	 * <p>This content type will be used when neither the request path extension,
-	 * nor a request parameter, nor the {@code Accept} header could help determine
-	 * the requested content type.
+	 * Configure a custom {@link ContentNegotiationStrategy} to use to determine
+	 * the default content type to use when no content type was requested.
+	 * <p>However also consider using {@link #setDefaultContentType} which
+	 * provides a simpler alternative to doing the same.
 	 * @since 4.1.2
 	 */
 	public void setDefaultContentTypeStrategy(ContentNegotiationStrategy defaultStrategy) {
