@@ -34,6 +34,7 @@ import org.springframework.util.Assert;
  *
  * @author Juergen Hoeller
  * @author Martin Kersten
+ * @author Craig Andrews
  * @since 01.03.2003
  * @see org.apache.commons.lang.StringEscapeUtils
  */

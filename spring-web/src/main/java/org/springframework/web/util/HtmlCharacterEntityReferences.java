@@ -34,6 +34,7 @@ import org.springframework.util.Assert;
  *
  * @author Juergen Hoeller
  * @author Martin Kersten
+ * @author Craig Andrews
  * @since 1.2.1
  */
 class HtmlCharacterEntityReferences {
