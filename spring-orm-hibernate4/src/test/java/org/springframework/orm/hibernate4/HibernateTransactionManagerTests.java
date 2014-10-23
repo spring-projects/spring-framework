@@ -18,6 +18,7 @@ package org.springframework.orm.hibernate4;
 
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Savepoint;
 import java.util.ArrayList;
@@ -624,6 +625,7 @@ public class HibernateTransactionManagerTests {
 
 		HibernateTransactionManager tm = new HibernateTransactionManager(sf);
 		tm.setEntityInterceptor(entityInterceptor);
+		tm.setAllowResultAccessAfterCompletion(true);
 		TransactionTemplate tt = new TransactionTemplate(tm);
 		tt.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
 		assertTrue("Hasn't thread session", !TransactionSynchronizationManager.hasResource(sf));
@@ -841,6 +843,66 @@ public class HibernateTransactionManagerTests {
 		ordered.verify(session).setFlushMode(FlushMode.MANUAL);
 		verify(tx).commit();
 		verify(session).disconnect();
+	}
+
+	@Test
+	public void testTransactionCommitWithPreBoundAndResultAccessAfterCommit() throws Exception {
+		final DataSource ds = mock(DataSource.class);
+		Connection con = mock(Connection.class);
+		final SessionFactory sf = mock(SessionFactory.class);
+		final ImplementingSession session = mock(ImplementingSession.class);
+		Transaction tx = mock(Transaction.class);
+
+		given(session.beginTransaction()).willReturn(tx);
+		given(session.isOpen()).willReturn(true);
+		given(session.getFlushMode()).willReturn(FlushMode.MANUAL);
+		given(session.connection()).willReturn(con);
+		given(con.getTransactionIsolation()).willReturn(Connection.TRANSACTION_READ_COMMITTED);
+		given(con.getHoldability()).willReturn(ResultSet.CLOSE_CURSORS_AT_COMMIT);
+		given(session.isConnected()).willReturn(true);
+
+		HibernateTransactionManager tm = new HibernateTransactionManager();
+		tm.setSessionFactory(sf);
+		tm.setDataSource(ds);
+		tm.setAllowResultAccessAfterCompletion(true);
+		TransactionTemplate tt = new TransactionTemplate(tm);
+		tt.setIsolationLevel(TransactionDefinition.ISOLATION_SERIALIZABLE);
+		final List l = new ArrayList();
+		l.add("test");
+		assertTrue("Hasn't thread connection", !TransactionSynchronizationManager.hasResource(ds));
+		assertTrue("JTA synchronizations not active", !TransactionSynchronizationManager.isSynchronizationActive());
+		TransactionSynchronizationManager.bindResource(sf, new SessionHolder(session));
+		assertTrue("Has thread session", TransactionSynchronizationManager.hasResource(sf));
+
+		Object result = tt.execute(new TransactionCallback() {
+			@Override
+			public Object doInTransaction(TransactionStatus status) {
+				assertTrue("Has thread session", TransactionSynchronizationManager.hasResource(sf));
+				assertTrue("Has thread connection", TransactionSynchronizationManager.hasResource(ds));
+				SessionHolder sessionHolder = (SessionHolder) TransactionSynchronizationManager.getResource(sf);
+				assertTrue("Has thread transaction", sessionHolder.getTransaction() != null);
+				Session sess = ((SessionHolder) TransactionSynchronizationManager.getResource(sf)).getSession();
+				assertEquals(session, sess);
+				return l;
+			}
+		});
+		assertTrue("Correct result list", result == l);
+
+		assertTrue("Has thread session", TransactionSynchronizationManager.hasResource(sf));
+		SessionHolder sessionHolder = (SessionHolder) TransactionSynchronizationManager.getResource(sf);
+		assertTrue("Hasn't thread transaction", sessionHolder.getTransaction() == null);
+		TransactionSynchronizationManager.unbindResource(sf);
+		assertTrue("Hasn't thread connection", !TransactionSynchronizationManager.hasResource(ds));
+		assertTrue("JTA synchronizations not active", !TransactionSynchronizationManager.isSynchronizationActive());
+
+		InOrder ordered = inOrder(session, con);
+		ordered.verify(con).setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
+		ordered.verify(con).setHoldability(ResultSet.HOLD_CURSORS_OVER_COMMIT);
+		ordered.verify(session).setFlushMode(FlushMode.AUTO);
+		ordered.verify(con).setHoldability(ResultSet.CLOSE_CURSORS_AT_COMMIT);
+		ordered.verify(con).setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
+		ordered.verify(session).setFlushMode(FlushMode.MANUAL);
+		verify(tx).commit();
 	}
 
 	@Test
