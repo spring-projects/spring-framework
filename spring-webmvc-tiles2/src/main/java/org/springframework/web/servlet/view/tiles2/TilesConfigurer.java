@@ -23,6 +23,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import javax.servlet.ServletContext;
 import javax.servlet.jsp.JspFactory;
 
@@ -307,7 +308,10 @@ public class TilesConfigurer implements ServletContextAware, InitializingBean, D
 				try {
 					List<URL> result = new LinkedList<URL>();
 					for (String definition : definitions) {
-						result.addAll(applicationContext.getResources(definition));
+						Set<URL> resources = applicationContext.getResources(definition);
+						if (resources != null) {
+							result.addAll(resources);
+						}
 					}
 					return result;
 				}

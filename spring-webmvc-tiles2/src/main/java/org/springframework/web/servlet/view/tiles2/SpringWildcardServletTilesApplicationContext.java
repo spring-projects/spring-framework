@@ -18,7 +18,7 @@ package org.springframework.web.servlet.view.tiles2;
 
 import java.io.IOException;
 import java.net.URL;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Set;
 import javax.servlet.ServletContext;
 
@@ -26,6 +26,7 @@ import org.apache.tiles.servlet.context.ServletTilesApplicationContext;
 
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.ResourcePatternResolver;
+import org.springframework.util.ObjectUtils;
 import org.springframework.web.context.support.ServletContextResourcePatternResolver;
 
 /**
@@ -59,8 +60,8 @@ public class SpringWildcardServletTilesApplicationContext extends ServletTilesAp
 	public Set<URL> getResources(String path) throws IOException {
 		Set<URL> urlSet = null;
 		Resource[] resources = this.resolver.getResources(path);
-		if (resources != null && resources.length > 0) {
-			urlSet = new HashSet<URL>();
+		if (!ObjectUtils.isEmpty(resources)) {
+			urlSet = new LinkedHashSet<URL>(resources.length);
 			for (Resource resource : resources) {
 				urlSet.add(resource.getURL());
 			}
