@@ -39,8 +39,11 @@ import org.springframework.scheduling.support.TaskUtils;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ErrorHandler;
+import org.springframework.util.concurrent.FailureCallback;
 import org.springframework.util.concurrent.ListenableFuture;
+import org.springframework.util.concurrent.ListenableFutureCallback;
 import org.springframework.util.concurrent.ListenableFutureTask;
+import org.springframework.util.concurrent.SuccessCallback;
 
 /**
  * Implementation of Spring's {@link TaskScheduler} interface, wrapping
@@ -283,6 +286,35 @@ public class ThreadPoolTaskScheduler extends ExecutorConfigurationSupport
 			throw new TaskRejectedException("Executor [" + executor + "] did not accept task: " + task, ex);
 		}
 	}
+	
+	@Override
+	public <T> ListenableFuture<T> submitListenable(Callable<T> task, ListenableFutureCallback<T> callback) {
+		ExecutorService executor = getScheduledExecutor();
+		try {
+			ListenableFutureTask<T> future = new ListenableFutureTask<T>(task);
+			future.addCallback(callback);
+			executor.execute(errorHandlingTask(future, false));
+			return future;
+		}
+		catch (RejectedExecutionException ex) {
+			throw new TaskRejectedException("Executor [" + executor + "] did not accept task: " + task, ex);
+		}
+	}	
+	
+	@Override
+	public <T> ListenableFuture<T> submitListenable(Callable<T> task,
+			SuccessCallback<T> successCallback, FailureCallback failureCallback) {
+		ExecutorService executor = getScheduledExecutor();
+		try {
+			ListenableFutureTask<T> future = new ListenableFutureTask<T>(task);
+			future.addCallback(successCallback, failureCallback);
+			executor.execute(errorHandlingTask(future, false));
+			return future;
+		}
+		catch (RejectedExecutionException ex) {
+			throw new TaskRejectedException("Executor [" + executor + "] did not accept task: " + task, ex);
+		}
+	}	
 
 	@Override
 	public boolean prefersShortLivedTasks() {

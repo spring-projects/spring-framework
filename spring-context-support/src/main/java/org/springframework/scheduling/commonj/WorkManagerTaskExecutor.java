@@ -20,6 +20,7 @@ import java.util.Collection;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
+
 import javax.naming.NamingException;
 
 import commonj.work.Work;
@@ -36,8 +37,11 @@ import org.springframework.jndi.JndiLocatorSupport;
 import org.springframework.scheduling.SchedulingException;
 import org.springframework.scheduling.SchedulingTaskExecutor;
 import org.springframework.util.Assert;
+import org.springframework.util.concurrent.FailureCallback;
 import org.springframework.util.concurrent.ListenableFuture;
+import org.springframework.util.concurrent.ListenableFutureCallback;
 import org.springframework.util.concurrent.ListenableFutureTask;
+import org.springframework.util.concurrent.SuccessCallback;
 
 /**
  * TaskExecutor implementation that delegates to a CommonJ WorkManager,
@@ -168,6 +172,23 @@ public class WorkManagerTaskExecutor extends JndiLocatorSupport
 		execute(future);
 		return future;
 	}
+	
+	@Override
+	public <T> ListenableFuture<T> submitListenable(Callable<T> task, ListenableFutureCallback<T> callback) {
+		ListenableFutureTask<T> future = new ListenableFutureTask<T>(task);
+		future.addCallback(callback);
+		execute(future);
+		return future;
+	}	
+	
+	@Override
+	public <T> ListenableFuture<T> submitListenable(Callable<T> task,
+			SuccessCallback<T> successCallback, FailureCallback failureCallback) {
+		ListenableFutureTask<T> future = new ListenableFutureTask<T>(task);
+		future.addCallback(successCallback, failureCallback);
+		execute(future);
+		return future;
+	}	
 
 	/**
 	 * This task executor prefers short-lived work units.

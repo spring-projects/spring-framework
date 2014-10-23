@@ -26,8 +26,11 @@ import java.util.concurrent.RejectedExecutionException;
 import org.springframework.core.task.AsyncListenableTaskExecutor;
 import org.springframework.core.task.TaskRejectedException;
 import org.springframework.util.Assert;
+import org.springframework.util.concurrent.FailureCallback;
 import org.springframework.util.concurrent.ListenableFuture;
+import org.springframework.util.concurrent.ListenableFutureCallback;
 import org.springframework.util.concurrent.ListenableFutureTask;
+import org.springframework.util.concurrent.SuccessCallback;
 
 /**
  * Adapter that takes a JDK {@code java.util.concurrent.Executor} and
@@ -138,5 +141,34 @@ public class TaskExecutorAdapter implements AsyncListenableTaskExecutor {
 					"Executor [" + this.concurrentExecutor + "] did not accept task: " + task, ex);
 		}
 	}
+	
+	@Override
+	public <T> ListenableFuture<T> submitListenable(Callable<T> task, ListenableFutureCallback<T> callback) {
+		try {
+			ListenableFutureTask<T> future = new ListenableFutureTask<T>(task);
+			future.addCallback(callback);			
+			this.concurrentExecutor.execute(future);
+			return future;
+		}
+		catch (RejectedExecutionException ex) {
+			throw new TaskRejectedException(
+					"Executor [" + this.concurrentExecutor + "] did not accept task: " + task, ex);
+		}
+	}	
+	
+	@Override
+	public <T> ListenableFuture<T> submitListenable(Callable<T> task,
+			SuccessCallback<T> successCallback, FailureCallback failureCallback) {
+		try {
+			ListenableFutureTask<T> future = new ListenableFutureTask<T>(task);
+			future.addCallback(successCallback, failureCallback);			
+			this.concurrentExecutor.execute(future);
+			return future;
+		}
+		catch (RejectedExecutionException ex) {
+			throw new TaskRejectedException(
+					"Executor [" + this.concurrentExecutor + "] did not accept task: " + task, ex);
+		}
+	}	
 
 }

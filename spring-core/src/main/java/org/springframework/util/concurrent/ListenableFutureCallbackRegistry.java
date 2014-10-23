@@ -48,7 +48,7 @@ public class ListenableFutureCallbackRegistry<T> {
 	 * @param callback the callback to add
 	 */
 	@SuppressWarnings("unchecked")
-	public void addCallback(ListenableFutureCallback<? super T> callback) {
+	public void addCallback(final ListenableFutureCallback<? super T> callback) {
 		Assert.notNull(callback, "'callback' must not be null");
 		synchronized (this.mutex) {
 			switch (this.state) {
@@ -57,10 +57,20 @@ public class ListenableFutureCallbackRegistry<T> {
 					this.failureCallbacks.add(callback);
 					break;
 				case SUCCESS:
-					callback.onSuccess((T) this.result);
+					final T finalResult = (T)this.result;
+					new Thread(new Runnable() {
+						public void run() {
+							callback.onSuccess(finalResult);
+						}
+					}).start();					
 					break;
 				case FAILURE:
-					callback.onFailure((Throwable) this.result);
+					final Throwable finalThrowable = (Throwable)this.result;
+					new Thread(new Runnable() {
+						public void run() {
+							callback.onFailure(finalThrowable);
+						}
+					}).start();					
 					break;
 			}
 		}
@@ -72,7 +82,7 @@ public class ListenableFutureCallbackRegistry<T> {
 	 * @since 4.1
 	 */
 	@SuppressWarnings("unchecked")
-	public void addSuccessCallback(SuccessCallback<? super T> callback) {
+	public void addSuccessCallback(final SuccessCallback<? super T> callback) {
 		Assert.notNull(callback, "'callback' must not be null");
 		synchronized (this.mutex) {
 			switch (this.state) {
@@ -80,7 +90,12 @@ public class ListenableFutureCallbackRegistry<T> {
 					this.successCallbacks.add(callback);
 					break;
 				case SUCCESS:
-					callback.onSuccess((T) this.result);
+					final T finalResult = (T)this.result;
+					new Thread(new Runnable() {
+						public void run() {
+							callback.onSuccess(finalResult);
+						}
+					}).start();
 					break;
 			}
 		}
@@ -91,8 +106,7 @@ public class ListenableFutureCallbackRegistry<T> {
 	 * @param callback the failure callback to add
 	 * @since 4.1
 	 */
-	@SuppressWarnings("unchecked")
-	public void addFailureCallback(FailureCallback callback) {
+	public void addFailureCallback(final FailureCallback callback) {
 		Assert.notNull(callback, "'callback' must not be null");
 		synchronized (this.mutex) {
 			switch (this.state) {
@@ -100,7 +114,12 @@ public class ListenableFutureCallbackRegistry<T> {
 					this.failureCallbacks.add(callback);
 					break;
 				case FAILURE:
-					callback.onFailure((Throwable) this.result);
+					final Throwable finalThrowable = (Throwable)this.result;
+					new Thread(new Runnable() {
+						public void run() {
+							callback.onFailure(finalThrowable);
+						}
+					}).start();
 					break;
 			}
 		}

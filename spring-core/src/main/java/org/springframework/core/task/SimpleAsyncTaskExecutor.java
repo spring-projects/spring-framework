@@ -25,8 +25,11 @@ import java.util.concurrent.ThreadFactory;
 import org.springframework.util.Assert;
 import org.springframework.util.ConcurrencyThrottleSupport;
 import org.springframework.util.CustomizableThreadCreator;
+import org.springframework.util.concurrent.FailureCallback;
 import org.springframework.util.concurrent.ListenableFuture;
+import org.springframework.util.concurrent.ListenableFutureCallback;
 import org.springframework.util.concurrent.ListenableFutureTask;
+import org.springframework.util.concurrent.SuccessCallback;
 
 /**
  * {@link TaskExecutor} implementation that fires up a new Thread for each task,
@@ -199,6 +202,23 @@ public class SimpleAsyncTaskExecutor extends CustomizableThreadCreator implement
 		execute(future, TIMEOUT_INDEFINITE);
 		return future;
 	}
+	
+	@Override
+	public <T> ListenableFuture<T> submitListenable(Callable<T> task, ListenableFutureCallback<T> callback) {
+		ListenableFutureTask<T> future = new ListenableFutureTask<T>(task);
+		future.addCallback(callback);		
+		execute(future, TIMEOUT_INDEFINITE);
+		return future;
+	}	
+	
+	@Override
+	public <T> ListenableFuture<T> submitListenable(Callable<T> task,
+			SuccessCallback<T> successCallback, FailureCallback failureCallback) {
+		ListenableFutureTask<T> future = new ListenableFutureTask<T>(task);
+		future.addCallback(successCallback, failureCallback);
+		execute(future, TIMEOUT_INDEFINITE);
+		return future;
+	}	
 
 	/**
 	 * Template method for the actual execution of a task.

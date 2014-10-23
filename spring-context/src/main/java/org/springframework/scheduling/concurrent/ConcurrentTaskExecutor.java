@@ -22,6 +22,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+
 import javax.enterprise.concurrent.ManagedExecutors;
 import javax.enterprise.concurrent.ManagedTask;
 
@@ -30,7 +31,10 @@ import org.springframework.core.task.support.TaskExecutorAdapter;
 import org.springframework.scheduling.SchedulingAwareRunnable;
 import org.springframework.scheduling.SchedulingTaskExecutor;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.concurrent.FailureCallback;
 import org.springframework.util.concurrent.ListenableFuture;
+import org.springframework.util.concurrent.ListenableFutureCallback;
+import org.springframework.util.concurrent.SuccessCallback;
 
 /**
  * Adapter that takes a {@code java.util.concurrent.Executor} and exposes
@@ -157,6 +161,17 @@ public class ConcurrentTaskExecutor implements AsyncListenableTaskExecutor, Sche
 	public <T> ListenableFuture<T> submitListenable(Callable<T> task) {
 		return this.adaptedExecutor.submitListenable(task);
 	}
+	
+	@Override
+	public <T> ListenableFuture<T> submitListenable(Callable<T> task, ListenableFutureCallback<T> callback) {
+		return this.adaptedExecutor.submitListenable(task, callback);
+	}	
+	
+	@Override
+	public <T> ListenableFuture<T> submitListenable(Callable<T> task,
+			SuccessCallback<T> successCallback, FailureCallback failureCallback) {
+		return this.adaptedExecutor.submitListenable(task, successCallback, failureCallback);	
+	}	
 
 	/**
 	 * This task executor prefers short-lived work units.
@@ -203,6 +218,12 @@ public class ConcurrentTaskExecutor implements AsyncListenableTaskExecutor, Sche
 		public <T> ListenableFuture<T> submitListenable(Callable<T> task) {
 			return super.submitListenable(ManagedTaskBuilder.buildManagedTask(task, task.toString()));
 		}
+		
+		@Override
+		public <T> ListenableFuture<T> submitListenable(Callable<T> task,
+				SuccessCallback<T> success, FailureCallback failure) {
+			return super.submitListenable(ManagedTaskBuilder.buildManagedTask(task, task.toString()), success, failure);
+		}		
 	}
 
 

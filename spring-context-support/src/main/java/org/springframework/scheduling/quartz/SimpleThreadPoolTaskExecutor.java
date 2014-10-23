@@ -22,15 +22,17 @@ import java.util.concurrent.FutureTask;
 
 import org.quartz.SchedulerConfigException;
 import org.quartz.simpl.SimpleThreadPool;
-
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.core.task.AsyncListenableTaskExecutor;
 import org.springframework.scheduling.SchedulingException;
 import org.springframework.scheduling.SchedulingTaskExecutor;
 import org.springframework.util.Assert;
+import org.springframework.util.concurrent.FailureCallback;
 import org.springframework.util.concurrent.ListenableFuture;
+import org.springframework.util.concurrent.ListenableFutureCallback;
 import org.springframework.util.concurrent.ListenableFutureTask;
+import org.springframework.util.concurrent.SuccessCallback;
 
 /**
  * Subclass of Quartz's SimpleThreadPool that implements Spring's
@@ -108,6 +110,23 @@ public class SimpleThreadPoolTaskExecutor extends SimpleThreadPool
 		execute(future);
 		return future;
 	}
+	
+	@Override
+	public <T> ListenableFuture<T> submitListenable(Callable<T> task, ListenableFutureCallback<T> callback) {
+		ListenableFutureTask<T> future = new ListenableFutureTask<T>(task);
+		future.addCallback(callback);		
+		execute(future);
+		return future;
+	}	
+	
+	@Override
+	public <T> ListenableFuture<T> submitListenable(Callable<T> task,
+			SuccessCallback<T> successCallback, FailureCallback failureCallback) {
+		ListenableFutureTask<T> future = new ListenableFutureTask<T>(task);
+		future.addCallback(successCallback, failureCallback);
+		execute(future);
+		return future;
+	}	
 
 	/**
 	 * This task executor prefers short-lived work units.

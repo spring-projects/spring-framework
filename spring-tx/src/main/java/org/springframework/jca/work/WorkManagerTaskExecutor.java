@@ -19,6 +19,7 @@ package org.springframework.jca.work;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
+
 import javax.naming.NamingException;
 import javax.resource.spi.BootstrapContext;
 import javax.resource.spi.work.ExecutionContext;
@@ -37,8 +38,11 @@ import org.springframework.jndi.JndiLocatorSupport;
 import org.springframework.scheduling.SchedulingException;
 import org.springframework.scheduling.SchedulingTaskExecutor;
 import org.springframework.util.Assert;
+import org.springframework.util.concurrent.FailureCallback;
 import org.springframework.util.concurrent.ListenableFuture;
+import org.springframework.util.concurrent.ListenableFutureCallback;
 import org.springframework.util.concurrent.ListenableFutureTask;
+import org.springframework.util.concurrent.SuccessCallback;
 
 /**
  * {@link org.springframework.core.task.TaskExecutor} implementation
@@ -266,6 +270,23 @@ public class WorkManagerTaskExecutor extends JndiLocatorSupport
 		execute(future, TIMEOUT_INDEFINITE);
 		return future;
 	}
+	
+	@Override
+	public <T> ListenableFuture<T> submitListenable(Callable<T> task, ListenableFutureCallback<T> callback) {
+		ListenableFutureTask<T> future = new ListenableFutureTask<T>(task);
+		future.addCallback(callback);
+		execute(future, TIMEOUT_INDEFINITE);
+		return future;
+	}	
+	
+	@Override
+	public <T> ListenableFuture<T> submitListenable(Callable<T> task,
+			SuccessCallback<T> successCallback, FailureCallback failureCallback) {
+		ListenableFutureTask<T> future = new ListenableFutureTask<T>(task);
+		future.addCallback(successCallback, failureCallback);
+		execute(future, TIMEOUT_INDEFINITE);
+		return future;
+	}	
 
 	/**
 	 * This task executor prefers short-lived work units.

@@ -18,7 +18,10 @@ package org.springframework.core.task;
 
 import java.util.concurrent.Callable;
 
+import org.springframework.util.concurrent.FailureCallback;
 import org.springframework.util.concurrent.ListenableFuture;
+import org.springframework.util.concurrent.ListenableFutureCallback;
+import org.springframework.util.concurrent.SuccessCallback;
 
 /**
  * Extension of the {@link AsyncTaskExecutor} interface, adding the capability to submit
@@ -38,15 +41,43 @@ public interface AsyncListenableTaskExecutor extends AsyncTaskExecutor {
 	 * @throws TaskRejectedException if the given task was not accepted
 	 */
 	ListenableFuture<?> submitListenable(Runnable task);
-
+	
 	/**
 	 * Submit a {@code Callable} task for execution, receiving a {@code ListenableFuture}
 	 * representing that task. The Future will return the Callable's result upon
 	 * completion.
+	 * @param <T>
 	 * @param task the {@code Callable} to execute (never {@code null})
 	 * @return a {@code ListenableFuture} representing pending completion of the task
 	 * @throws TaskRejectedException if the given task was not accepted
 	 */
 	<T> ListenableFuture<T> submitListenable(Callable<T> task);
+	
+	/**
+	 * Add a callback to be executed after task completion and
+	 * Submit a {@code Callable} task for execution, receiving a {@code ListenableFuture}
+	 * representing that task. The Future will return the Callable's result upon
+	 * completion.
+	 * @param <T>
+	 * @param task the {@code Callable} to execute (never {@code null})
+	 * @param callback the {@code ListenableFutureCallback} to be executed after task completion
+	 * @return a {@code ListenableFuture} representing pending completion of the task
+	 * @throws TaskRejectedException if the given task was not accepted
+	 */
+	<T> ListenableFuture<T> submitListenable(Callable<T> task, ListenableFutureCallback<T> callback);
+	
+	/**
+	 * Add a successCallback and a failureCallback to be executed after task completion and
+	 * Submit a {@code Callable} task for execution, receiving a {@code ListenableFuture}
+	 * representing that task. The Future will return the Callable's result upon
+	 * completion.
+	 * @param <T>
+	 * @param task the {@code Callable} to execute (never {@code null})
+	 * @param successCallback the {@code SuccessCallback} to be executed after task success
+	 * @param failureCallback the {@code FailureCallback} to be executed after task failure
+	 * @return a {@code ListenableFuture} representing pending completion of the task
+	 * @throws TaskRejectedException if the given task was not accepted
+	 */	
+	<T> ListenableFuture<T> submitListenable(Callable<T> task, SuccessCallback<T> successCallback, FailureCallback failureCallback);	
 
 }
