@@ -76,9 +76,10 @@ public abstract class HtmlUtils {
 	 * @param input the (unescaped) input string
 	 * @param encoding The name of a supported {@link java.nio.charset.Charset charset}
 	 * @return the escaped string
+	 * @since 4.1.2
 	 */
 	public static String htmlEscape(String input, String encoding) {
-		Assert.notNull(encoding, "encoding is required");
+		Assert.notNull(encoding, "Encoding is required");
 		if (input == null) {
 			return null;
 		}
@@ -126,9 +127,10 @@ public abstract class HtmlUtils {
 	 * @param input the (unescaped) input string
 	 * @param encoding The name of a supported {@link java.nio.charset.Charset charset}
 	 * @return the escaped string
+	 * @since 4.1.2
 	 */
 	public static String htmlEscapeDecimal(String input, String encoding) {
-		Assert.notNull(encoding, "encoding is required");
+		Assert.notNull(encoding, "Encoding is required");
 		if (input == null) {
 			return null;
 		}
@@ -177,9 +179,10 @@ public abstract class HtmlUtils {
 	 * @param input the (unescaped) input string
 	 * @param encoding The name of a supported {@link java.nio.charset.Charset charset}
 	 * @return the escaped string
+	 * @since 4.1.2
 	 */
 	public static String htmlEscapeHex(String input, String encoding) {
-		Assert.notNull(encoding, "encoding is required");
+		Assert.notNull(encoding, "Encoding is required");
 		if (input == null) {
 			return null;
 		}

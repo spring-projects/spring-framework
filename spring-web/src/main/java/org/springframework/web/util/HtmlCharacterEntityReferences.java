@@ -91,7 +91,7 @@ class HtmlCharacterEntityReferences {
 			int index = (referredChar < 1000 ? referredChar : referredChar - 7000);
 			String reference = entityReferences.getProperty(key);
 			this.characterToEntityReferenceMap[index] = REFERENCE_START + reference + REFERENCE_END;
-			this.entityReferenceToCharacterMap.put(reference, new Character((char) referredChar));
+			this.entityReferenceToCharacterMap.put(reference, (char) referredChar);
 		}
 	}
 
@@ -126,10 +126,11 @@ class HtmlCharacterEntityReferences {
 
 	/**
 	 * Return the reference mapped to the given character or {@code null}.
+	 * @since 4.1.2
 	 */
 	public String convertToReference(char character, String encoding) {
-		if(encoding.startsWith("UTF-")){
-			switch(character){
+		if (encoding.startsWith("UTF-")){
+			switch (character){
 				case '<':
 					return "&lt;";
 				case '>':
@@ -158,7 +159,7 @@ class HtmlCharacterEntityReferences {
 	public char convertToCharacter(String entityReference) {
 		Character referredCharacter = this.entityReferenceToCharacterMap.get(entityReference);
 		if (referredCharacter != null) {
-			return referredCharacter.charValue();
+			return referredCharacter;
 		}
 		return CHAR_NULL;
 	}
