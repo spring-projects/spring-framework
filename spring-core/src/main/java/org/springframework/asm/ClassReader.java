@@ -53,7 +53,7 @@ public class ClassReader {
      */
     static final boolean ANNOTATIONS = true;
 
-    /**aaa
+    /**
      * True to enable stack map frames support.
      */
     static final boolean FRAMES = true;
@@ -1831,8 +1831,7 @@ public class ClassReader {
             break;
         case 'B': // pointer to CONSTANT_Byte
         	av.visit(name,
-            		Byte.valueOf(
-            		(byte) readInt(items[readUnsignedShort(v)])) );
+            		Byte.valueOf((byte) readInt(items[readUnsignedShort(v)])) );
            v += 2;
             break;
         case 'Z': // pointer to CONSTANT_Boolean
