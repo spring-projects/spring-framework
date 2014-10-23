@@ -49,11 +49,15 @@ public class MappingJackson2XmlHttpMessageConverterTests {
 	@Test
 	public void canRead() {
 		assertTrue(converter.canRead(MyBean.class, new MediaType("application", "xml")));
+		assertTrue(converter.canRead(MyBean.class, new MediaType("text", "xml")));
+		assertTrue(converter.canRead(MyBean.class, new MediaType("application", "soap+xml")));
 	}
 
 	@Test
 	public void canWrite() {
 		assertTrue(converter.canWrite(MyBean.class, new MediaType("application", "xml")));
+		assertTrue(converter.canWrite(MyBean.class, new MediaType("text", "xml")));
+		assertTrue(converter.canWrite(MyBean.class, new MediaType("application", "soap+xml")));
 	}
 
 	@Test
