@@ -30887,6 +30887,13 @@ this working you have to reorder the parameters as follows:
 	public String processSubmit(**@ModelAttribute("pet") Pet pet**, **BindingResult result**, Model model) { ... }
 ----
 
+[NOTE]
+====
+JDK 1.8's `java.util.Optional` is supported as a method parameter type with annotations
+that have a `required` attribute (e.g. `@RequestParam`, `@RequestHeader`, etc. The use
+of `java.util.Optional` in those cases is equivalent to having `required=false`.
+====
+
 
 [[mvc-ann-return-types]]
 ===== Supported method return types
