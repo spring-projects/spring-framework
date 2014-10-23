@@ -50,6 +50,8 @@ import org.springframework.messaging.simp.user.UserDestinationMessageHandler;
 import org.springframework.messaging.simp.user.UserDestinationResolver;
 import org.springframework.messaging.simp.user.UserSessionRegistry;
 import org.springframework.messaging.support.AbstractSubscribableChannel;
+import org.springframework.messaging.support.ChannelInterceptor;
+import org.springframework.messaging.support.ImmutableMessageChannelInterceptor;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.util.MimeTypeUtils;
@@ -179,15 +181,15 @@ public class MessageBrokerBeanDefinitionParserTests {
 		List<Class<? extends MessageHandler>> subscriberTypes =
 				Arrays.<Class<? extends MessageHandler>>asList(SimpAnnotationMethodMessageHandler.class,
 						UserDestinationMessageHandler.class, SimpleBrokerMessageHandler.class);
-		testChannel("clientInboundChannel", subscriberTypes, 1);
+		testChannel("clientInboundChannel", subscriberTypes, 2);
 		testExecutor("clientInboundChannel", Runtime.getRuntime().availableProcessors() * 2, Integer.MAX_VALUE, 60);
 
 		subscriberTypes = Arrays.<Class<? extends MessageHandler>>asList(SubProtocolWebSocketHandler.class);
-		testChannel("clientOutboundChannel", subscriberTypes, 0);
+		testChannel("clientOutboundChannel", subscriberTypes, 1);
 		testExecutor("clientOutboundChannel", Runtime.getRuntime().availableProcessors() * 2, Integer.MAX_VALUE, 60);
 
 		subscriberTypes = Arrays.<Class<? extends MessageHandler>>asList(SimpleBrokerMessageHandler.class, UserDestinationMessageHandler.class);
-		testChannel("brokerChannel", subscriberTypes, 0);
+		testChannel("brokerChannel", subscriberTypes, 1);
 		try {
 			this.appContext.getBean("brokerChannelExecutor", ThreadPoolTaskExecutor.class);
 			fail("expected exception");
@@ -247,16 +249,16 @@ public class MessageBrokerBeanDefinitionParserTests {
 		List<Class<? extends MessageHandler>> subscriberTypes =
 				Arrays.<Class<? extends MessageHandler>>asList(SimpAnnotationMethodMessageHandler.class,
 						UserDestinationMessageHandler.class, StompBrokerRelayMessageHandler.class);
-		testChannel("clientInboundChannel", subscriberTypes, 1);
+		testChannel("clientInboundChannel", subscriberTypes, 2);
 		testExecutor("clientInboundChannel", Runtime.getRuntime().availableProcessors() * 2, Integer.MAX_VALUE, 60);
 
 		subscriberTypes = Arrays.<Class<? extends MessageHandler>>asList(SubProtocolWebSocketHandler.class);
-		testChannel("clientOutboundChannel", subscriberTypes, 0);
+		testChannel("clientOutboundChannel", subscriberTypes, 1);
 		testExecutor("clientOutboundChannel", Runtime.getRuntime().availableProcessors() * 2, Integer.MAX_VALUE, 60);
 
 		subscriberTypes = Arrays.<Class<? extends MessageHandler>>asList(
 				StompBrokerRelayMessageHandler.class, UserDestinationMessageHandler.class);
-		testChannel("brokerChannel", subscriberTypes, 0);
+		testChannel("brokerChannel", subscriberTypes, 1);
 		try {
 			this.appContext.getBean("brokerChannelExecutor", ThreadPoolTaskExecutor.class);
 			fail("expected exception");
@@ -320,18 +322,18 @@ public class MessageBrokerBeanDefinitionParserTests {
 				Arrays.<Class<? extends MessageHandler>>asList(SimpAnnotationMethodMessageHandler.class,
 						UserDestinationMessageHandler.class, SimpleBrokerMessageHandler.class);
 
-		testChannel("clientInboundChannel", subscriberTypes, 2);
+		testChannel("clientInboundChannel", subscriberTypes, 3);
 		testExecutor("clientInboundChannel", 100, 200, 600);
 
 		subscriberTypes = Arrays.<Class<? extends MessageHandler>>asList(SubProtocolWebSocketHandler.class);
 
-		testChannel("clientOutboundChannel", subscriberTypes, 2);
+		testChannel("clientOutboundChannel", subscriberTypes, 3);
 		testExecutor("clientOutboundChannel", 101, 201, 601);
 
 		subscriberTypes = Arrays.<Class<? extends MessageHandler>>asList(SimpleBrokerMessageHandler.class,
 				UserDestinationMessageHandler.class);
 
-		testChannel("brokerChannel", subscriberTypes, 0);
+		testChannel("brokerChannel", subscriberTypes, 1);
 		testExecutor("brokerChannel", 102, 202, 602);
 	}
 
@@ -397,7 +399,9 @@ public class MessageBrokerBeanDefinitionParserTests {
 			assertTrue(channel.hasSubscription(subscriber));
 		}
 
-		assertEquals(interceptorCount, channel.getInterceptors().size());
+		List<ChannelInterceptor> interceptors = channel.getInterceptors();
+		assertEquals(interceptorCount, interceptors.size());
+		assertEquals(ImmutableMessageChannelInterceptor.class, interceptors.get(interceptors.size()-1).getClass());
 	}
 
 	private void testExecutor(String channelName, int corePoolSize, int maxPoolSize, int keepAliveSeconds) {

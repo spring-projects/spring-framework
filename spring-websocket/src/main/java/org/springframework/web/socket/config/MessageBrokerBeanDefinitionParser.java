@@ -21,6 +21,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.messaging.support.ImmutableMessageChannelInterceptor;
 import org.w3c.dom.Element;
 
 import org.springframework.beans.MutablePropertyValues;
@@ -201,11 +202,14 @@ class MessageBrokerBeanDefinitionParser implements BeanDefinitionParser {
 			argValues.addIndexedArgumentValue(0, new RuntimeBeanReference(executorName));
 		}
 		RootBeanDefinition channelDef = new RootBeanDefinition(ExecutorSubscribableChannel.class, argValues, null);
+		ManagedList<? super Object> interceptors = new ManagedList<Object>();
 		if (element != null) {
 			Element interceptorsElement = DomUtils.getChildElementByTagName(element, "interceptors");
-			ManagedList<?> interceptors = WebSocketNamespaceUtils.parseBeanSubElements(interceptorsElement, context);
-			channelDef.getPropertyValues().add("interceptors", interceptors);
+			interceptors.addAll(WebSocketNamespaceUtils.parseBeanSubElements(interceptorsElement, context));
 		}
+		interceptors.add(new ImmutableMessageChannelInterceptor());
+		channelDef.getPropertyValues().add("interceptors", interceptors);
+
 		registerBeanDefByName(name, channelDef, context, source);
 		return new RuntimeBeanReference(name);
 	}

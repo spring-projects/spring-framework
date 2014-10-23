@@ -111,7 +111,7 @@ public class MessageBrokerConfigurationTests {
 		AbstractSubscribableChannel channel = this.customContext.getBean(
 				"clientInboundChannel", AbstractSubscribableChannel.class);
 
-		assertEquals(2, channel.getInterceptors().size());
+		assertEquals(3, channel.getInterceptors().size());
 
 		CustomThreadPoolTaskExecutor taskExecutor = this.customContext.getBean(
 				"clientInboundChannelExecutor", CustomThreadPoolTaskExecutor.class);
@@ -178,7 +178,7 @@ public class MessageBrokerConfigurationTests {
 		AbstractSubscribableChannel channel = this.customContext.getBean(
 				"clientOutboundChannel", AbstractSubscribableChannel.class);
 
-		assertEquals(2, channel.getInterceptors().size());
+		assertEquals(3, channel.getInterceptors().size());
 
 		ThreadPoolTaskExecutor taskExecutor = this.customContext.getBean(
 				"clientOutboundChannelExecutor", ThreadPoolTaskExecutor.class);
@@ -257,7 +257,7 @@ public class MessageBrokerConfigurationTests {
 		AbstractSubscribableChannel channel = this.customContext.getBean(
 				"brokerChannel", AbstractSubscribableChannel.class);
 
-		assertEquals(3, channel.getInterceptors().size());
+		assertEquals(4, channel.getInterceptors().size());
 
 		ThreadPoolTaskExecutor taskExecutor = this.customContext.getBean(
 				"brokerChannelExecutor", ThreadPoolTaskExecutor.class);

@@ -22,6 +22,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -32,6 +33,9 @@ import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
+import org.springframework.messaging.MessageHandler;
+import org.springframework.messaging.MessagingException;
+import org.springframework.messaging.SubscribableChannel;
 import org.springframework.messaging.simp.SimpAttributes;
 import org.springframework.messaging.simp.SimpAttributesContextHolder;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
@@ -44,7 +48,12 @@ import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.messaging.simp.user.DefaultUserSessionRegistry;
 import org.springframework.messaging.simp.user.DestinationUserNameProvider;
 import org.springframework.messaging.simp.user.UserSessionRegistry;
+import org.springframework.messaging.support.AbstractMessageChannel;
+import org.springframework.messaging.support.ChannelInterceptorAdapter;
+import org.springframework.messaging.support.ExecutorSubscribableChannel;
+import org.springframework.messaging.support.ImmutableMessageChannelInterceptor;
 import org.springframework.messaging.support.MessageBuilder;
+import org.springframework.messaging.support.MessageHeaderAccessor;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketMessage;
@@ -288,6 +297,48 @@ public class StompSubProtocolHandlerTests {
 		assertEquals(0, this.session.getSentMessages().size());
 	}
 
+	@Test
+	public void handleMessageFromClientWithImmutableMessageInterceptor() {
+		AtomicReference<Boolean> mutable = new AtomicReference<>();
+		ExecutorSubscribableChannel channel = new ExecutorSubscribableChannel();
+		channel.addInterceptor(new ChannelInterceptorAdapter() {
+			@Override
+			public Message<?> preSend(Message<?> message, MessageChannel channel) {
+				mutable.set(MessageHeaderAccessor.getAccessor(message, MessageHeaderAccessor.class).isMutable());
+				return message;
+			}
+		});
+		channel.addInterceptor(new ImmutableMessageChannelInterceptor());
+
+		StompSubProtocolHandler handler = new StompSubProtocolHandler();
+		handler.afterSessionStarted(this.session, channel);
+
+		TextMessage message = StompTextMessageBuilder.create(StompCommand.CONNECT).build();
+		handler.handleMessageFromClient(this.session, message, channel);
+		assertNotNull(mutable.get());
+		assertTrue(mutable.get());
+	}
+
+	@Test
+	public void handleMessageFromClientWithoutImmutableMessageInterceptor() {
+		AtomicReference<Boolean> mutable = new AtomicReference<>();
+		ExecutorSubscribableChannel channel = new ExecutorSubscribableChannel();
+		channel.addInterceptor(new ChannelInterceptorAdapter() {
+			@Override
+			public Message<?> preSend(Message<?> message, MessageChannel channel) {
+				mutable.set(MessageHeaderAccessor.getAccessor(message, MessageHeaderAccessor.class).isMutable());
+				return message;
+			}
+		});
+
+		StompSubProtocolHandler handler = new StompSubProtocolHandler();
+		handler.afterSessionStarted(this.session, channel);
+
+		TextMessage message = StompTextMessageBuilder.create(StompCommand.CONNECT).build();
+		handler.handleMessageFromClient(this.session, message, channel);
+		assertNotNull(mutable.get());
+		assertFalse(mutable.get());
+	}
 	@Test
 	public void handleMessageFromClientInvalidStompCommand() {
 

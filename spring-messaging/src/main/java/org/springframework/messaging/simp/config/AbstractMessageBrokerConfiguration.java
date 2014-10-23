@@ -45,6 +45,7 @@ import org.springframework.messaging.simp.user.UserDestinationResolver;
 import org.springframework.messaging.simp.user.UserSessionRegistry;
 import org.springframework.messaging.support.AbstractSubscribableChannel;
 import org.springframework.messaging.support.ExecutorSubscribableChannel;
+import org.springframework.messaging.support.ImmutableMessageChannelInterceptor;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.MimeTypeUtils;
@@ -118,6 +119,7 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 		if (this.clientInboundChannelRegistration == null) {
 			ChannelRegistration registration = new ChannelRegistration();
 			configureClientInboundChannel(registration);
+			registration.setInterceptors(new ImmutableMessageChannelInterceptor());
 			this.clientInboundChannelRegistration = registration;
 		}
 		return this.clientInboundChannelRegistration;
@@ -152,6 +154,7 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 		if (this.clientOutboundChannelRegistration == null) {
 			ChannelRegistration registration = new ChannelRegistration();
 			configureClientOutboundChannel(registration);
+			registration.setInterceptors(new ImmutableMessageChannelInterceptor());
 			this.clientOutboundChannelRegistration = registration;
 		}
 		return this.clientOutboundChannelRegistration;
@@ -169,6 +172,7 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 		ChannelRegistration reg = getBrokerRegistry().getBrokerChannelRegistration();
 		ExecutorSubscribableChannel channel = reg.hasTaskExecutor() ?
 				new ExecutorSubscribableChannel(brokerChannelExecutor()) : new ExecutorSubscribableChannel();
+		reg.setInterceptors(new ImmutableMessageChannelInterceptor());
 		channel.setInterceptors(reg.getInterceptors());
 		return channel;
 	}

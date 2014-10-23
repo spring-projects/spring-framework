@@ -45,6 +45,9 @@ import org.springframework.messaging.simp.stomp.StompEncoder;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.messaging.simp.user.DestinationUserNameProvider;
 import org.springframework.messaging.simp.user.UserSessionRegistry;
+import org.springframework.messaging.support.AbstractMessageChannel;
+import org.springframework.messaging.support.ChannelInterceptor;
+import org.springframework.messaging.support.ImmutableMessageChannelInterceptor;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.messaging.support.MessageHeaderAccessor;
 import org.springframework.messaging.support.MessageHeaderInitializer;
@@ -98,6 +101,8 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 	private final Map<String, BufferingStompDecoder> decoders = new ConcurrentHashMap<String, BufferingStompDecoder>();
 
 	private MessageHeaderInitializer headerInitializer;
+
+	private Boolean immutableMessageInterceptorPresent;
 
 	private ApplicationEventPublisher eventPublisher;
 
@@ -234,7 +239,9 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 				headerAccessor.setSessionId(session.getId());
 				headerAccessor.setSessionAttributes(session.getAttributes());
 				headerAccessor.setUser(session.getPrincipal());
-				headerAccessor.setImmutable();
+				if (!detectImmutableMessageInterceptor(outputChannel)) {
+					headerAccessor.setImmutable();
+				}
 
 				if (StompCommand.CONNECT.equals(headerAccessor.getCommand())) {
 					this.stats.incrementConnectCount();
@@ -269,6 +276,22 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 
 			}
 		}
+	}
+
+	private boolean detectImmutableMessageInterceptor(MessageChannel channel) {
+		if (this.immutableMessageInterceptorPresent != null) {
+			return this.immutableMessageInterceptorPresent;
+		}
+		if (channel instanceof AbstractMessageChannel) {
+			for (ChannelInterceptor interceptor : ((AbstractMessageChannel) channel).getInterceptors()) {
+				if (interceptor instanceof ImmutableMessageChannelInterceptor) {
+					this.immutableMessageInterceptorPresent = true;
+					return true;
+				}
+			}
+		}
+		this.immutableMessageInterceptorPresent = false;
+		return false;
 	}
 
 	private void publishEvent(ApplicationEvent event) {

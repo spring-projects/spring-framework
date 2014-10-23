@@ -16,14 +16,19 @@
 
 package org.springframework.web.socket.config.annotation;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 
 import org.junit.Test;
-
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -34,10 +39,14 @@ import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.SimpMessageType;
 import org.springframework.messaging.simp.annotation.SubscribeMapping;
+import org.springframework.messaging.simp.broker.SimpleBrokerMessageHandler;
 import org.springframework.messaging.simp.stomp.StompCommand;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
+import org.springframework.messaging.simp.user.UserDestinationMessageHandler;
 import org.springframework.messaging.support.AbstractSubscribableChannel;
+import org.springframework.messaging.support.ChannelInterceptor;
 import org.springframework.messaging.support.ExecutorSubscribableChannel;
+import org.springframework.messaging.support.ImmutableMessageChannelInterceptor;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.servlet.HandlerMapping;
@@ -54,8 +63,6 @@ import org.springframework.web.socket.messaging.StompTextMessageBuilder;
 import org.springframework.web.socket.messaging.SubProtocolHandler;
 import org.springframework.web.socket.messaging.SubProtocolWebSocketHandler;
 import org.springframework.web.socket.server.support.WebSocketHttpRequestHandler;
-
-import static org.junit.Assert.*;
 
 /**
  * Test fixture for
@@ -83,6 +90,9 @@ public class WebSocketMessageBrokerConfigurationSupportTests {
 		TestChannel channel = config.getBean("clientInboundChannel", TestChannel.class);
 		SubProtocolWebSocketHandler webSocketHandler = config.getBean(SubProtocolWebSocketHandler.class);
 
+		List<ChannelInterceptor> interceptors = channel.getInterceptors();
+		assertEquals(ImmutableMessageChannelInterceptor.class, interceptors.get(interceptors.size()-1).getClass());
+
 		WebSocketSession session = new TestWebSocketSession("s1");
 		webSocketHandler.afterConnectionEstablished(session);
 
@@ -90,20 +100,38 @@ public class WebSocketMessageBrokerConfigurationSupportTests {
 		webSocketHandler.handleMessage(session, textMessage);
 
 		Message<?> message = channel.messages.get(0);
-		StompHeaderAccessor headers = StompHeaderAccessor.wrap(message);
-
-		assertEquals(SimpMessageType.MESSAGE, headers.getMessageType());
-		assertEquals("/foo", headers.getDestination());
+		StompHeaderAccessor accessor = StompHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
+		assertNotNull(accessor);
+		assertFalse(accessor.isMutable());
+		assertEquals(SimpMessageType.MESSAGE, accessor.getMessageType());
+		assertEquals("/foo", accessor.getDestination());
 	}
 
 	@Test
-	public void clientOutboundChannelChannel() {
+	public void clientOutboundChannel() {
 		ApplicationContext config = createConfig(TestChannelConfig.class, TestConfigurer.class);
 		TestChannel channel = config.getBean("clientOutboundChannel", TestChannel.class);
 		Set<MessageHandler> handlers = channel.getSubscribers();
 
+		List<ChannelInterceptor> interceptors = channel.getInterceptors();
+		assertEquals(ImmutableMessageChannelInterceptor.class, interceptors.get(interceptors.size()-1).getClass());
+
 		assertEquals(1, handlers.size());
 		assertTrue(handlers.iterator().next() instanceof SubProtocolWebSocketHandler);
+	}
+
+	@Test
+	public void brokerChannel() {
+		ApplicationContext config = createConfig(TestChannelConfig.class, TestConfigurer.class);
+		TestChannel channel = config.getBean("brokerChannel", TestChannel.class);
+		Iterator<MessageHandler> handlers = channel.getSubscribers().iterator();
+
+		List<ChannelInterceptor> interceptors = channel.getInterceptors();
+		assertEquals(ImmutableMessageChannelInterceptor.class, interceptors.get(interceptors.size()-1).getClass());
+
+		assertEquals(SimpleBrokerMessageHandler.class, handlers.next().getClass());
+		assertEquals(UserDestinationMessageHandler.class, handlers.next().getClass());
+		assertFalse(handlers.hasNext());
 	}
 
 	@Test
@@ -216,18 +244,24 @@ public class WebSocketMessageBrokerConfigurationSupportTests {
 		@Override
 		@Bean
 		public AbstractSubscribableChannel clientInboundChannel() {
-			return new TestChannel();
+			TestChannel channel = new TestChannel();
+			channel.setInterceptors(super.clientInboundChannel().getInterceptors());
+			return channel;
 		}
 
 		@Override
 		@Bean
 		public AbstractSubscribableChannel clientOutboundChannel() {
-			return new TestChannel();
+			TestChannel channel = new TestChannel();
+			channel.setInterceptors(super.clientOutboundChannel().getInterceptors());
+			return channel;
 		}
 
 		@Override
 		public AbstractSubscribableChannel brokerChannel() {
-			return new TestChannel();
+			TestChannel channel = new TestChannel();
+			channel.setInterceptors(super.brokerChannel().getInterceptors());
+			return channel;
 		}
 	}
 
