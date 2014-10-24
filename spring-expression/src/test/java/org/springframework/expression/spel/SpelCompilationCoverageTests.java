@@ -707,6 +707,49 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 	}
 	
 	@Test
+	public void compiledExpressionShouldWorkWhenUsingCustomFunctionWithVarargs() throws Exception {
+		StandardEvaluationContext context = null;
+
+		// Here the target method takes Object... and we are passing a string
+		expression = parser.parseExpression("#doFormat('hey %s', 'there')");
+		context = new StandardEvaluationContext();
+		context.registerFunction("doFormat",
+				DelegatingStringFormat.class.getDeclaredMethod("format", String.class,
+						Object[].class));
+		((SpelExpression) expression).setEvaluationContext(context);
+
+		assertEquals("hey there", expression.getValue(String.class));
+		assertTrue(((SpelNodeImpl) ((SpelExpression) expression).getAST()).isCompilable());
+		assertCanCompile(expression);
+		assertEquals("hey there", expression.getValue(String.class));
+
+		expression = parser.parseExpression("#doFormat([0], 'there')");
+		context = new StandardEvaluationContext(new Object[] { "hey %s" });
+		context.registerFunction("doFormat",
+				DelegatingStringFormat.class.getDeclaredMethod("format", String.class,
+						Object[].class));
+		((SpelExpression) expression).setEvaluationContext(context);
+
+		assertEquals("hey there", expression.getValue(String.class));
+		assertTrue(((SpelNodeImpl) ((SpelExpression) expression).getAST()).isCompilable());
+		assertCanCompile(expression);
+		assertEquals("hey there", expression.getValue(String.class));
+
+		expression = parser.parseExpression("#doFormat([0], #arg)");
+		context = new StandardEvaluationContext(new Object[] { "hey %s" });
+		context.registerFunction("doFormat",
+				DelegatingStringFormat.class.getDeclaredMethod("format", String.class,
+						Object[].class));
+		context.setVariable("arg", "there");
+		((SpelExpression) expression).setEvaluationContext(context);
+
+		assertEquals("hey there", expression.getValue(String.class));
+		assertTrue(((SpelNodeImpl) ((SpelExpression) expression).getAST()).isCompilable());
+		assertCanCompile(expression);
+		assertEquals("hey there", expression.getValue(String.class));
+	}
+	 
+	@Test
 	public void functionReference() throws Exception {
 		EvaluationContext ctx = new StandardEvaluationContext();
 		Method m = this.getClass().getDeclaredMethod("concat",String.class,String.class);
@@ -737,6 +780,240 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		assertEquals("4.0",expression.getValue(ctx).toString());
 		assertCanCompile(expression);
 		assertEquals("4.0",expression.getValue(ctx).toString());
+	}
+
+	// Confirms visibility of what is being called.
+	@Test
+	public void functionReferenceVisibility_SPR12359() throws Exception {
+		StandardEvaluationContext context = new StandardEvaluationContext(new  Object[] { "1" });
+		context.registerFunction("doCompare", SomeCompareMethod.class.getDeclaredMethod(
+				"compare", Object.class, Object.class));
+		context.setVariable("arg", "2");
+		// type nor method are public
+		expression = parser.parseExpression("#doCompare([0],#arg)");
+		assertEquals("-1",expression.getValue(context, Integer.class).toString());
+		assertCantCompile(expression);
+		
+		// type not public but method is
+		context = new StandardEvaluationContext(new  Object[] { "1" });
+		context.registerFunction("doCompare", SomeCompareMethod.class.getDeclaredMethod(
+				"compare2", Object.class, Object.class));
+		context.setVariable("arg", "2");
+		expression = parser.parseExpression("#doCompare([0],#arg)");
+		assertEquals("-1",expression.getValue(context, Integer.class).toString());
+		assertCantCompile(expression);
+	}
+	
+	@Test
+	public void functionReferenceNonCompilableArguments_SPR12359() throws Exception {
+		StandardEvaluationContext context = new StandardEvaluationContext(new  Object[] { "1" });
+		context.registerFunction("negate", SomeCompareMethod2.class.getDeclaredMethod(
+				"negate", Integer.TYPE));
+		context.setVariable("arg", "2");
+		int[] ints = new int[]{1,2,3};
+		context.setVariable("ints",ints);
+
+		expression = parser.parseExpression("#negate(#ints.?[#this<2][0])");
+		assertEquals("-1",expression.getValue(context, Integer.class).toString());
+		// Selection isn't compilable.
+		assertFalse(((SpelNodeImpl)((SpelExpression)expression).getAST()).isCompilable());
+	}
+	
+	@Test	
+	public void functionReferenceVarargs_SPR12359() throws Exception {
+		StandardEvaluationContext context = new StandardEvaluationContext();
+		context.registerFunction("append",
+				SomeCompareMethod2.class.getDeclaredMethod("append", String[].class));
+		context.registerFunction("append2",
+				SomeCompareMethod2.class.getDeclaredMethod("append2", Object[].class));
+		context.registerFunction("append3",
+				SomeCompareMethod2.class.getDeclaredMethod("append3", String[].class));
+		context.registerFunction("append4",
+				SomeCompareMethod2.class.getDeclaredMethod("append4", String.class, String[].class));
+		context.registerFunction("appendChar",
+				SomeCompareMethod2.class.getDeclaredMethod("appendChar", char[].class));
+		context.registerFunction("sum",
+				SomeCompareMethod2.class.getDeclaredMethod("sum", int[].class));
+		context.registerFunction("sumDouble",
+				SomeCompareMethod2.class.getDeclaredMethod("sumDouble", double[].class));
+		context.registerFunction("sumFloat",
+				SomeCompareMethod2.class.getDeclaredMethod("sumFloat", float[].class));
+		context.setVariable("stringArray", new String[]{"x","y","z"});
+		context.setVariable("intArray", new int[]{5,6,9});
+		context.setVariable("doubleArray", new double[]{5.0d,6.0d,9.0d});
+		context.setVariable("floatArray", new float[]{5.0f,6.0f,9.0f});
+
+		expression = parser.parseExpression("#append('a','b','c')");
+		assertEquals("abc",expression.getValue(context).toString());
+		assertTrue(((SpelNodeImpl)((SpelExpression)expression).getAST()).isCompilable());
+		assertCanCompile(expression);
+		assertEquals("abc",expression.getValue(context).toString());
+
+		expression = parser.parseExpression("#append('a')");
+		assertEquals("a",expression.getValue(context).toString());
+		assertTrue(((SpelNodeImpl)((SpelExpression)expression).getAST()).isCompilable());
+		assertCanCompile(expression);
+		assertEquals("a",expression.getValue(context).toString());
+
+		expression = parser.parseExpression("#append()");
+		assertEquals("",expression.getValue(context).toString());
+		assertTrue(((SpelNodeImpl)((SpelExpression)expression).getAST()).isCompilable());
+		assertCanCompile(expression);
+		assertEquals("",expression.getValue(context).toString());
+		
+		expression = parser.parseExpression("#append(#stringArray)");
+		assertEquals("xyz",expression.getValue(context).toString());
+		assertTrue(((SpelNodeImpl)((SpelExpression)expression).getAST()).isCompilable());
+		assertCanCompile(expression);
+		assertEquals("xyz",expression.getValue(context).toString());
+		
+		// This is a methodreference invocation, to compare with functionreference
+		expression = parser.parseExpression("append(#stringArray)");
+		assertEquals("xyz",expression.getValue(context,new SomeCompareMethod2()).toString());
+		assertTrue(((SpelNodeImpl)((SpelExpression)expression).getAST()).isCompilable());
+		assertCanCompile(expression);
+		assertEquals("xyz",expression.getValue(context,new SomeCompareMethod2()).toString());
+		
+		expression = parser.parseExpression("#append2('a','b','c')");
+		assertEquals("abc",expression.getValue(context).toString());
+		assertTrue(((SpelNodeImpl)((SpelExpression)expression).getAST()).isCompilable());
+		assertCanCompile(expression);
+		assertEquals("abc",expression.getValue(context).toString());
+
+		expression = parser.parseExpression("append2('a','b')");
+		assertEquals("ab",expression.getValue(context, new SomeCompareMethod2()).toString());
+		assertTrue(((SpelNodeImpl)((SpelExpression)expression).getAST()).isCompilable());
+		assertCanCompile(expression);
+		assertEquals("ab",expression.getValue(context, new SomeCompareMethod2()).toString());
+
+		expression = parser.parseExpression("#append2('a','b')");
+		assertEquals("ab",expression.getValue(context).toString());
+		assertTrue(((SpelNodeImpl)((SpelExpression)expression).getAST()).isCompilable());
+		assertCanCompile(expression);
+		assertEquals("ab",expression.getValue(context).toString());
+
+		expression = parser.parseExpression("#append2()");
+		assertEquals("",expression.getValue(context).toString());
+		assertTrue(((SpelNodeImpl)((SpelExpression)expression).getAST()).isCompilable());
+		assertCanCompile(expression);
+		assertEquals("",expression.getValue(context).toString());
+		
+		expression = parser.parseExpression("#append3(#stringArray)");
+		assertEquals("xyz",expression.getValue(context, new SomeCompareMethod2()).toString());
+		assertTrue(((SpelNodeImpl)((SpelExpression)expression).getAST()).isCompilable());
+		assertCanCompile(expression);
+		assertEquals("xyz",expression.getValue(context, new SomeCompareMethod2()).toString());
+
+		// TODO fails due to conversionservice handling of String[] to Object...
+//		expression = parser.parseExpression("#append2(#stringArray)");
+//		assertEquals("xyz",expression.getValue(context).toString());
+//		assertTrue(((SpelNodeImpl)((SpelExpression)expression).getAST()).isCompilable());
+//		assertCanCompile(expression);
+//		assertEquals("xyz",expression.getValue(context).toString());
+		
+		expression = parser.parseExpression("#sum(1,2,3)");
+		assertEquals(6,expression.getValue(context));
+		assertTrue(((SpelNodeImpl)((SpelExpression)expression).getAST()).isCompilable());
+		assertCanCompile(expression);
+		assertEquals(6,expression.getValue(context));
+
+		expression = parser.parseExpression("#sum(2)");
+		assertEquals(2,expression.getValue(context));
+		assertTrue(((SpelNodeImpl)((SpelExpression)expression).getAST()).isCompilable());
+		assertCanCompile(expression);
+		assertEquals(2,expression.getValue(context));
+
+		expression = parser.parseExpression("#sum()");
+		assertEquals(0,expression.getValue(context));
+		assertTrue(((SpelNodeImpl)((SpelExpression)expression).getAST()).isCompilable());
+		assertCanCompile(expression);
+		assertEquals(0,expression.getValue(context));
+		
+		expression = parser.parseExpression("#sum(#intArray)");
+		assertEquals(20,expression.getValue(context));
+		assertTrue(((SpelNodeImpl)((SpelExpression)expression).getAST()).isCompilable());
+		assertCanCompile(expression);
+		assertEquals(20,expression.getValue(context));
+		
+		expression = parser.parseExpression("#sumDouble(1.0d,2.0d,3.0d)");
+		assertEquals(6,expression.getValue(context));
+		assertTrue(((SpelNodeImpl)((SpelExpression)expression).getAST()).isCompilable());
+		assertCanCompile(expression);
+		assertEquals(6,expression.getValue(context));
+
+		expression = parser.parseExpression("#sumDouble(2.0d)");
+		assertEquals(2,expression.getValue(context));
+		assertTrue(((SpelNodeImpl)((SpelExpression)expression).getAST()).isCompilable());
+		assertCanCompile(expression);
+		assertEquals(2,expression.getValue(context));
+
+		expression = parser.parseExpression("#sumDouble()");
+		assertEquals(0,expression.getValue(context));
+		assertTrue(((SpelNodeImpl)((SpelExpression)expression).getAST()).isCompilable());
+		assertCanCompile(expression);
+		assertEquals(0,expression.getValue(context));
+		
+		expression = parser.parseExpression("#sumDouble(#doubleArray)");
+		assertEquals(20,expression.getValue(context));
+		assertTrue(((SpelNodeImpl)((SpelExpression)expression).getAST()).isCompilable());
+		assertCanCompile(expression);
+		assertEquals(20,expression.getValue(context));
+
+		expression = parser.parseExpression("#sumFloat(1.0f,2.0f,3.0f)");
+		assertEquals(6,expression.getValue(context));
+		assertTrue(((SpelNodeImpl)((SpelExpression)expression).getAST()).isCompilable());
+		assertCanCompile(expression);
+		assertEquals(6,expression.getValue(context));
+
+		expression = parser.parseExpression("#sumFloat(2.0f)");
+		assertEquals(2,expression.getValue(context));
+		assertTrue(((SpelNodeImpl)((SpelExpression)expression).getAST()).isCompilable());
+		assertCanCompile(expression);
+		assertEquals(2,expression.getValue(context));
+
+		expression = parser.parseExpression("#sumFloat()");
+		assertEquals(0,expression.getValue(context));
+		assertTrue(((SpelNodeImpl)((SpelExpression)expression).getAST()).isCompilable());
+		assertCanCompile(expression);
+		assertEquals(0,expression.getValue(context));
+		
+		expression = parser.parseExpression("#sumFloat(#floatArray)");
+		assertEquals(20,expression.getValue(context));
+		assertTrue(((SpelNodeImpl)((SpelExpression)expression).getAST()).isCompilable());
+		assertCanCompile(expression);
+		assertEquals(20,expression.getValue(context));
+		
+		
+		expression = parser.parseExpression("#appendChar('abc'.charAt(0),'abc'.charAt(1))");
+		assertEquals("ab",expression.getValue(context));
+		assertTrue(((SpelNodeImpl)((SpelExpression)expression).getAST()).isCompilable());
+		assertCanCompile(expression);
+		assertEquals("ab",expression.getValue(context));
+		
+		
+		expression = parser.parseExpression("#append4('a','b','c')");
+		assertEquals("a::bc",expression.getValue(context).toString());
+		assertTrue(((SpelNodeImpl)((SpelExpression)expression).getAST()).isCompilable());
+		assertCanCompile(expression);
+		assertEquals("a::bc",expression.getValue(context).toString());
+
+		expression = parser.parseExpression("#append4('a','b')");
+		assertEquals("a::b",expression.getValue(context).toString());
+		assertTrue(((SpelNodeImpl)((SpelExpression)expression).getAST()).isCompilable());
+		assertCanCompile(expression);
+		assertEquals("a::b",expression.getValue(context).toString());
+
+		expression = parser.parseExpression("#append4('a')");
+		assertEquals("a::",expression.getValue(context).toString());
+		assertTrue(((SpelNodeImpl)((SpelExpression)expression).getAST()).isCompilable());
+		assertCanCompile(expression);
+		assertEquals("a::",expression.getValue(context).toString());
+		
+		expression = parser.parseExpression("#append4('a',#stringArray)");
+		assertEquals("a::xyz",expression.getValue(context).toString());
+		assertTrue(((SpelNodeImpl)((SpelExpression)expression).getAST()).isCompilable());
+		assertCanCompile(expression);
+		assertEquals("a::xyz",expression.getValue(context).toString());
 	}
 	
 	@Test
@@ -1981,6 +2258,27 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		expression.getValue(tc);
 		assertEquals("aaabbbccc",tc.s);
 		tc.reset();
+		
+		expression = parser.parseExpression("sixteen('aaa','bbb','ccc')");
+		assertCantCompile(expression);
+		expression.getValue(tc);
+		assertEquals("aaabbbccc",tc.s);
+		assertCanCompile(expression);
+		tc.reset();
+		expression.getValue(tc);
+		assertEquals("aaabbbccc",tc.s);
+		tc.reset();
+		
+		// TODO Fails related to conversion service converting a String[] to satisfy Object...
+//		expression = parser.parseExpression("sixteen(stringArray)");
+//		assertCantCompile(expression);
+//		expression.getValue(tc);
+//		assertEquals("aaabbbccc",tc.s);
+//		assertCanCompile(expression);
+//		tc.reset();
+//		expression.getValue(tc);
+//		assertEquals("aaabbbccc",tc.s);
+//		tc.reset();
 
 		// varargs int
 		expression = parser.parseExpression("twelve(1,2,3)");
@@ -3719,6 +4017,19 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 				}
 			}
 		}
+		
+		public void sixteen(Object... vargs) { 
+			if (vargs==null) {
+				s = "";
+			}
+			else {
+				s = "";
+				for (Object varg: vargs) {
+					s+=varg;
+				}
+			}
+		}
+		
 	}
 	
 	public static class TestClass6 {
@@ -3865,6 +4176,98 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 	public static class HttpServletRequestWrapper {
 		public String getServletPath() {
 			return "wibble";
+		}
+	}
+	
+	// Here the declaring class is not public
+	static class SomeCompareMethod {
+
+		// method not public
+		static int compare(Object o1, Object o2) {
+			return -1;
+		}
+
+		// public
+		public static int compare2(Object o1, Object o2) {
+			return -1;
+		}
+	}
+	
+	public static class SomeCompareMethod2 {
+		public static int negate(int i1) {
+			return -i1;
+		}
+
+		public static String append(String... strings) {
+			StringBuilder b = new StringBuilder();
+			for (String string: strings) {
+				b.append(string);
+			}
+			return b.toString();
+		}
+		
+		public static String append2(Object... objects) {
+			StringBuilder b = new StringBuilder();
+			for (Object object: objects) {
+				b.append(object.toString());
+			}
+			return b.toString();
+		}
+		
+		public static String append3(String[] strings) {
+			StringBuilder b = new StringBuilder();
+			for (String string: strings) {
+				b.append(string);
+			}
+			return b.toString();
+		}
+		
+		public static String append4(String s, String... strings) {
+			StringBuilder b = new StringBuilder();
+			b.append(s).append("::");
+			for (String string: strings) {
+				b.append(string);
+			}
+			return b.toString();
+		}
+
+		public static String appendChar(char... values) {
+			StringBuilder b = new StringBuilder();
+			for (char ch: values) {
+				b.append(ch);
+			}
+			return b.toString();
+		}
+		
+		public static int sum(int... ints) {
+			int total = 0;
+			for (int i: ints) {
+				total+=i;
+			}
+			return total;
+		}
+
+		public static int sumDouble(double... values) {
+			int total = 0;
+			for (double i: values) {
+				total+=i;
+			}
+			return total;
+		}
+
+		public static int sumFloat(float... values) {
+			int total = 0;
+			for (float i: values) {
+				total+=i;
+			}
+			return total;
+		}
+
+	}
+	
+	public static class DelegatingStringFormat {
+		public static String format(String s, Object... args) {
+			return String.format(s, args);
 		}
 	}
 		

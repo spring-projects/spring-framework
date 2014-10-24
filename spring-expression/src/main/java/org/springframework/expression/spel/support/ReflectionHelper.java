@@ -25,7 +25,6 @@ import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.TypeConverter;
 import org.springframework.expression.spel.SpelEvaluationException;
-import org.springframework.expression.spel.SpelMessage;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.MethodInvoker;
@@ -221,13 +220,33 @@ public class ReflectionHelper {
 		return (match != null ? new ArgumentsMatchInfo(match) : null);
 	}
 
+
+	// TODO could do with more refactoring around argument handling and varargs
+	/**
+	 * Convert a supplied set of arguments into the requested types. If the parameterTypes are related to
+	 * a varargs method then the final entry in the parameterTypes array is going to be an array itself whose
+	 * component type should be used as the conversion target for extraneous arguments. (For example, if the
+	 * parameterTypes are {Integer, String[]} and the input arguments are {Integer, boolean, float} then both
+	 * the boolean and float must be converted to strings). This method does *not* repackage the arguments
+	 * into a form suitable for the varargs invocation - a subsequent call to setupArgumentsForVarargsInvocation handles that.
+	 * @param converter the converter to use for type conversions
+	 * @param arguments the arguments to convert to the requested parameter types
+	 * @param method the target Method
+	 * @return true if some kind of conversion occurred on the argument
+	 * @throws SpelEvaluationException if there is a problem with conversion
+	 */
+	public static boolean convertAllArguments(TypeConverter converter, Object[] arguments, Method method) throws SpelEvaluationException {
+		Integer varargsPosition = method.isVarArgs() ? method.getParameterTypes().length-1:null;
+		return convertArguments(converter, arguments, method, varargsPosition);
+	}
+	
 	/**
 	 * Takes an input set of argument values and converts them to the types specified as the
 	 * required parameter types. The arguments are converted 'in-place' in the input array.
 	 * @param converter the type converter to use for attempting conversions
 	 * @param arguments the actual arguments that need conversion
 	 * @param methodOrCtor the target Method or Constructor
-	 * @param varargsPosition the known position of the varargs argument, if any
+	 * @param varargsPosition the known position of the varargs argument, if any (null if not varargs)
 	 * @return true if some kind of conversion occurred on an argument
 	 * @throws EvaluationException if a problem occurs during conversion
 	 */
@@ -243,6 +262,7 @@ public class ReflectionHelper {
 			}
 		}
 		else {
+			// Convert everything up to the varargs position
 			for (int i = 0; i < varargsPosition; i++) {
 				TypeDescriptor targetType = new TypeDescriptor(MethodParameter.forMethodOrConstructor(methodOrCtor, i));
 				Object argument = arguments[i];
@@ -251,15 +271,23 @@ public class ReflectionHelper {
 			}
 			MethodParameter methodParam = MethodParameter.forMethodOrConstructor(methodOrCtor, varargsPosition);
 			if (varargsPosition == arguments.length - 1) {
+				// If the target is varargs and there is just one more argument
+				// then convert it here
 				TypeDescriptor targetType = new TypeDescriptor(methodParam);
 				Object argument = arguments[varargsPosition];
 				TypeDescriptor sourceType = TypeDescriptor.forObject(argument);
 				arguments[varargsPosition] = converter.convertValue(argument, sourceType, targetType);
-				if (!looksLikeSimpleArrayPackaging(sourceType, targetType)) {
-					conversionOccurred |= (argument != arguments[varargsPosition]);
+				// Three outcomes of that previous line:
+				// 1) the input argument was already compatible (ie. array of valid type) and nothing was done
+				// 2) the input argument was correct type but not in an array so it was made into an array
+				// 3) the input argument was the wrong type and got converted and put into an array
+				if (argument != arguments[varargsPosition] && 
+					!isFirstEntryInArray(argument, arguments[varargsPosition])) {
+					conversionOccurred = true; // case 3
 				}
 			}
 			else {
+				// Convert remaining arguments to the varargs element type
 				TypeDescriptor targetType = new TypeDescriptor(methodParam).getElementTypeDescriptor();
 				for (int i = varargsPosition; i < arguments.length; i++) {
 					Object argument = arguments[i];
@@ -272,131 +300,57 @@ public class ReflectionHelper {
 	}
 
 	/**
-	 * Check if the target type simply represents the array (possibly boxed/unboxed) form of sourceType.
-	 * @param sourceType the type of the original argument
-	 * @param actualType the type of the converted argument
-	 * @return
+	 * Check if the supplied value is the first entry in the array represented by the possibleArray value.
+	 * @param value the value to check for in the array
+	 * @param possibleArray an array object that may have the supplied value as the first element
+	 * @return true if the supplied value is the first entry in the array
 	 */
-	private static boolean looksLikeSimpleArrayPackaging(TypeDescriptor sourceType, TypeDescriptor targetType) {
-		TypeDescriptor td = targetType.getElementTypeDescriptor();
-		if (td != null) {
-			if (td.equals(sourceType)) {
-				return true;
+	private static boolean isFirstEntryInArray(Object value, Object possibleArray) {
+		if (possibleArray == null) {
+			return false;
+		}
+		Class<?> type = possibleArray.getClass();
+		if (type.isArray()) {
+			Class<?> componentType = type.getComponentType();
+			if (componentType.isPrimitive()) {
+				if (componentType == Boolean.TYPE) {
+					return value instanceof Boolean && 
+							((boolean[])possibleArray)[0] == (Boolean)value;
+				} 
+				else if (componentType == Double.TYPE) {
+					return value instanceof Double && 
+							((double[])possibleArray)[0] == (Double)value;
+				} 
+				else if (componentType == Float.TYPE) {
+					return value instanceof Float && 
+							((float[])possibleArray)[0] == (Float)value;
+				} 
+				else if (componentType == Integer.TYPE) {
+					return value instanceof Integer && 
+							((int[])possibleArray)[0] == (Integer)value;
+				} 
+				else if (componentType == Long.TYPE) {
+					return value instanceof Long && 
+							((long[])possibleArray)[0] == (Long)value;
+				} 
+				else if (componentType == Short.TYPE) {
+					return value instanceof Short && 
+							((short[])possibleArray)[0] == (Short)value;
+				} 
+				else if (componentType == Character.TYPE) {
+					return value instanceof Character && 
+							((char[])possibleArray)[0] == (Character)value;
+				} 
+				else if (componentType == Byte.TYPE) {
+					return value instanceof Byte && 
+							((byte[])possibleArray)[0] == (Byte)value;
+				} 
 			}
-			else { // check for boxing
-				if (td.isPrimitive() || sourceType.isPrimitive()) {
-					Class<?> targetElementClass = td.getType();
-					Class<?> sourceElementClass = sourceType.getType();
-					if (targetElementClass.isPrimitive()) {
-						if (targetElementClass == Boolean.TYPE) {
-							return sourceElementClass == Boolean.class;
-						}
-						else if (targetElementClass == Double.TYPE) {
-							return sourceElementClass == Double.class;
-						}
-						else if (targetElementClass == Float.TYPE) {
-							return sourceElementClass == Float.class;
-						}
-						else if (targetElementClass == Integer.TYPE) {
-							return sourceElementClass == Integer.class;
-						}
-						else if (targetElementClass == Long.TYPE) {
-							return sourceElementClass == Long.class;
-						}
-						else if (targetElementClass == Short.TYPE) {
-							return sourceElementClass == Short.class;
-						}
-						else if (targetElementClass == Character.TYPE) {
-							return sourceElementClass == Character.class;
-						}
-						else if (targetElementClass == Byte.TYPE) {
-							return sourceElementClass == Byte.class;
-						}
-					}
-					else if (sourceElementClass.isPrimitive()) {
-						if (sourceElementClass == Boolean.TYPE) {
-							return targetElementClass == Boolean.class;
-						}
-						else if (sourceElementClass == Double.TYPE) {
-							return targetElementClass == Double.class;
-						}
-						else if (sourceElementClass == Float.TYPE) {
-							return targetElementClass == Float.class;
-						}
-						else if (sourceElementClass == Integer.TYPE) {
-							return targetElementClass == Integer.class;
-						}
-						else if (sourceElementClass == Long.TYPE) {
-							return targetElementClass == Long.class;
-						}
-						else if (sourceElementClass == Character.TYPE) {
-							return targetElementClass == Character.class;
-						}
-						else if (sourceElementClass == Short.TYPE) {
-							return targetElementClass == Short.class;
-						}
-						else if (sourceElementClass == Byte.TYPE) {
-							return targetElementClass == Byte.class;
-						}
-					}
-				}
+			else {
+				return ((Object[])possibleArray)[0] == value;
 			}
 		}
 		return false;
-	}
-
-	/**
-	 * Convert a supplied set of arguments into the requested types. If the parameterTypes are related to
-	 * a varargs method then the final entry in the parameterTypes array is going to be an array itself whose
-	 * component type should be used as the conversion target for extraneous arguments. (For example, if the
-	 * parameterTypes are {Integer, String[]} and the input arguments are {Integer, boolean, float} then both
-	 * the boolean and float must be converted to strings). This method does not repackage the arguments
-	 * into a form suitable for the varargs invocation
-	 * @param converter the converter to use for type conversions
-	 * @param arguments the arguments to convert to the requested parameter types
-	 * @param method the target Method
-	 * @return true if some kind of conversion occurred on the argument
-	 * @throws SpelEvaluationException if there is a problem with conversion
-	 */
-	public static boolean convertAllArguments(TypeConverter converter, Object[] arguments, Method method) throws SpelEvaluationException {
-		Integer varargsPosition = null;
-		boolean conversionOccurred = false;
-		if (method.isVarArgs()) {
-			Class<?>[] paramTypes = method.getParameterTypes();
-			varargsPosition = paramTypes.length - 1;
-		}
-		for (int argPos = 0; argPos < arguments.length; argPos++) {
-			TypeDescriptor targetType;
-			if (varargsPosition != null && argPos >= varargsPosition) {
-				MethodParameter methodParam = new MethodParameter(method, varargsPosition);
-				targetType = TypeDescriptor.nested(methodParam, 1);
-			}
-			else {
-				targetType = new TypeDescriptor(new MethodParameter(method, argPos));
-			}
-			try {
-				Object argument = arguments[argPos];
-				if (argument != null && !targetType.getObjectType().isInstance(argument)) {
-					if (converter == null) {
-						throw new SpelEvaluationException(
-								SpelMessage.TYPE_CONVERSION_ERROR, argument.getClass().getName(), targetType);
-					}
-					arguments[argPos] = converter.convertValue(argument, TypeDescriptor.forObject(argument), targetType);
-					conversionOccurred |= (argument != arguments[argPos]);
-				}
-			}
-			catch (EvaluationException ex) {
-				// allows for another type converter throwing a different kind of EvaluationException
-				if (ex instanceof SpelEvaluationException) {
-					throw (SpelEvaluationException)ex;
-				}
-				else {
-					throw new SpelEvaluationException(ex,
-							SpelMessage.TYPE_CONVERSION_ERROR,arguments[argPos].getClass().getName(), targetType);
-				}
-			}
-		}
-		return conversionOccurred;
 	}
 
 	/**
@@ -412,9 +366,11 @@ public class ReflectionHelper {
 		// Check if array already built for final argument
 		int parameterCount = requiredParameterTypes.length;
 		int argumentCount = args.length;
-
-		// Check if repackaging is needed:
-		if (parameterCount != args.length ||
+		
+		if (parameterCount == args.length) {
+			
+		}
+		else if (parameterCount != args.length ||
 				requiredParameterTypes[parameterCount - 1] !=
 						(args[argumentCount - 1] != null ? args[argumentCount - 1].getClass() : null)) {
 

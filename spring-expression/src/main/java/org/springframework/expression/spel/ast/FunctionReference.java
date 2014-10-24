@@ -53,6 +53,8 @@ public class FunctionReference extends SpelNodeImpl {
 	// Captures the most recently used method for the function invocation *if* the method
 	// can safely be used for compilation (i.e. no argument conversion is going on)
 	private Method method;
+	
+	private boolean argumentConversionOccurred;
 
 
 	public FunctionReference(String functionName, int pos, SpelNodeImpl... arguments) {
@@ -104,7 +106,7 @@ public class FunctionReference extends SpelNodeImpl {
 					method.getDeclaringClass().getName() + "." + method.getName(), this.name);
 		}
 
-		boolean argumentConversionOccurred = false;
+		argumentConversionOccurred = false;
 		// Convert arguments if necessary and remap them for varargs if required
 		if (functionArgs != null) {
 			TypeConverter converter = state.getEvaluationContext().getTypeConverter();
@@ -158,8 +160,21 @@ public class FunctionReference extends SpelNodeImpl {
 	
 	@Override
 	public boolean isCompilable() {
-		// Don't yet support non-static method compilation.
-		return (this.method != null && Modifier.isStatic(this.method.getModifiers()));
+		if (this.method == null || argumentConversionOccurred) {
+			return false;
+		}
+		int methodModifiers = this.method.getModifiers();
+		if (!Modifier.isStatic(methodModifiers) || 
+			!Modifier.isPublic(methodModifiers) ||
+			!Modifier.isPublic(method.getDeclaringClass().getModifiers())) {
+			return false;
+		}
+		for (SpelNodeImpl child : this.children) {
+			if (!child.isCompilable()) {
+				return false;
+			}
+		}
+		return true;
 	}
 	
 	@Override 
