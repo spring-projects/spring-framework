@@ -16,6 +16,8 @@
 
 package org.springframework.mock.staticmock;
 
+import org.aspectj.lang.annotation.RequiredTypes;
+
 /**
  * Annotation-based aspect to use in test builds to enable mocking of static methods
  * on JPA-annotated {@code @Entity} classes, as used by Spring Roo for so-called
@@ -57,6 +59,7 @@ package org.springframework.mock.staticmock;
  * @author Sam Brannen
  * @see MockStaticEntityMethods
  */
+@RequiredTypes("javax.persistence.Entity")
 public aspect AnnotationDrivenStaticEntityMockingControl extends AbstractMethodMockingControl {
 
 	/**
