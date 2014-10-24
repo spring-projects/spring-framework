@@ -160,9 +160,9 @@ import java.util.concurrent.Callable;
  * context path, and the literal part of the servlet mapping.
  * </ul>
  *
- * <p><strong>Note: </strong> JDK 1.8's {@code java.util.Optional} is supported
+ * <p><strong>Note:</strong> JDK 1.8's {@code java.util.Optional} is supported
  * as a method parameter type with annotations that provide a {@code required}
- * attribute (e.g. {@code @RequestParam}, {@code @RequestHeader}, etc.) The use
+ * attribute (e.g. {@code @RequestParam}, {@code @RequestHeader}, etc.). The use
  * of {@code java.util.Optional} in those cases is equivalent to having
  * {@code required=false}.
  *
