@@ -105,7 +105,7 @@ public class TransformTag extends HtmlEscapingAwareTag {
 				// Else, just do a toString.
 				result = this.value.toString();
 			}
-			result = isHtmlEscape() ? HtmlUtils.htmlEscape(result) : result;
+			result = htmlEscape(result);
 			if (this.var != null) {
 				pageContext.setAttribute(this.var, result, TagUtils.getScope(this.scope));
 			}

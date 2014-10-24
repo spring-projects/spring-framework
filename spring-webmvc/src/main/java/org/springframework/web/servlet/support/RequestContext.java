@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -114,6 +114,8 @@ public class RequestContext {
 	private Theme theme;
 
 	private Boolean defaultHtmlEscape;
+
+	private Boolean responseEncodedHtmlEscape;
 
 	private UrlPathHelper urlPathHelper;
 
@@ -262,6 +264,8 @@ public class RequestContext {
 		// Determine default HTML escape setting from the "defaultHtmlEscape"
 		// context-param in web.xml, if any.
 		this.defaultHtmlEscape = WebUtils.getDefaultHtmlEscape(this.webApplicationContext.getServletContext());
+
+		this.responseEncodedHtmlEscape = WebUtils.getResponseEncodedHtmlEscape(this.webApplicationContext.getServletContext());
 
 		this.urlPathHelper = new UrlPathHelper();
 
@@ -483,6 +487,27 @@ public class RequestContext {
 	public Boolean getDefaultHtmlEscape() {
 		return this.defaultHtmlEscape;
 	}
+
+	/**
+	 * Is HTML escaping using the response encoding by default?
+	 * If enabled, only XML markup significant characters will be escaped with UTF-* encodings.
+	 * <p>Falls back to {@code false} in case of no explicit default given.
+	 * @since 4.1.2
+	 */
+	public boolean isResponseEncodedHtmlEscape() {
+		return (this.responseEncodedHtmlEscape != null && this.responseEncodedHtmlEscape.booleanValue());
+	}
+
+	/**
+	 * Return the default setting about use of response encoding for HTML escape setting,
+	 * differentiating between no default specified and an explicit value.
+	 * @return whether default use of response encoding HTML escaping is enabled (null = no explicit default)
+	 * @since 4.1.2
+	 */
+	public Boolean getResponseEncodedHtmlEscape() {
+		return this.responseEncodedHtmlEscape;
+	}
+
 
 	/**
 	 * Set the UrlPathHelper to use for context path and request URI decoding.

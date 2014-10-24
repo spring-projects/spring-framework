@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,8 @@ package org.springframework.web.servlet.tags;
 
 import javax.servlet.jsp.JspException;
 
+import org.springframework.web.util.HtmlUtils;
+
 /**
  * Superclass for tags that output content that might get HTML-escaped.
  *
@@ -31,7 +33,8 @@ import javax.servlet.jsp.JspException;
  * @see #setHtmlEscape
  * @see HtmlEscapeTag
  * @see org.springframework.web.servlet.support.RequestContext#isDefaultHtmlEscape
- * @see org.springframework.web.util.WebUtils#isDefaultHtmlEscape
+ * @see org.springframework.web.util.WebUtils#getDefaultHtmlEscape
+ * @see org.springframework.web.util.WebUtils#getResponseEncodedHtmlEscape
  */
 @SuppressWarnings("serial")
 public abstract class HtmlEscapingAwareTag extends RequestContextAwareTag {
@@ -70,6 +73,39 @@ public abstract class HtmlEscapingAwareTag extends RequestContextAwareTag {
 	 */
 	protected boolean isDefaultHtmlEscape() {
 		return getRequestContext().isDefaultHtmlEscape();
+	}
+
+	/**
+	 * Return the applicable default for the use of response encoding with HTML escape for this tag.
+	 * <p>The default implementation checks the RequestContext's setting,
+	 * falling back to {@code false} in case of no explicit default given.
+	 * @see #getRequestContext()
+	 * @since 4.1.2
+	 */
+	protected boolean isResponseEncodedHtmlEscape() {
+		return getRequestContext().isResponseEncodedHtmlEscape();
+	}
+
+	/**
+	 * HTML encodes the given string, only if the htmlEscape setting is enabled.
+	 * The response encoding will be taken into account if the responseEncodedHtmlEscape setting is enabled.
+	 * @param content
+	 * @return
+	 * @see #isHtmlEscape()
+	 * @see #isResponseEncodedHtmlEscape()
+	 * @since 4.1.2
+	 */
+	protected String htmlEscape(String content) {
+		String out = content;
+		if(isHtmlEscape()) {
+			if(isResponseEncodedHtmlEscape()) {
+				out = HtmlUtils.htmlEscape(content, this.pageContext.getResponse().getCharacterEncoding());
+			}
+			else {
+				out = HtmlUtils.htmlEscape(content);
+			}
+		}
+		return out;
 	}
 
 }
