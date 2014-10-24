@@ -16,6 +16,10 @@
 
 package org.springframework.messaging.simp.broker;
 
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+
 import java.util.Collections;
 
 import org.junit.Before;
@@ -24,16 +28,12 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.SubscribableChannel;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessageType;
 import org.springframework.messaging.support.MessageBuilder;
-
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
 
 /**
  * Unit tests for SimpleBrokerMessageHandler.
@@ -115,7 +115,12 @@ public class SimpleBrokerMessageHandlerTests {
 		this.messageHandler.handleMessage(createMessage("/foo", "message1"));
 		this.messageHandler.handleMessage(createMessage("/bar", "message2"));
 
-		verify(this.clientOutboundChannel, times(3)).send(this.messageCaptor.capture());
+		verify(this.clientOutboundChannel, times(4)).send(this.messageCaptor.capture());
+
+		Message<?> captured = this.messageCaptor.getAllValues().get(0);
+		assertEquals(SimpMessageType.DISCONNECT_ACK, SimpMessageHeaderAccessor.getMessageType(captured.getHeaders()));
+		assertEquals(sess1, SimpMessageHeaderAccessor.getSessionId(captured.getHeaders()));
+
 		assertCapturedMessage(sess2, "sub1", "/foo");
 		assertCapturedMessage(sess2, "sub2", "/foo");
 		assertCapturedMessage(sess2, "sub3", "/bar");

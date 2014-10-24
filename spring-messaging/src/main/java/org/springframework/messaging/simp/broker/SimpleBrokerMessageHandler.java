@@ -169,6 +169,11 @@ public class SimpleBrokerMessageHandler extends AbstractBrokerMessageHandler {
 				logger.debug("Processing " + accessor.getShortLogMessage(EMPTY_PAYLOAD));
 			}
 			this.subscriptionRegistry.unregisterAllSubscriptions(sessionId);
+			SimpMessageHeaderAccessor disconnectAck = SimpMessageHeaderAccessor.create(SimpMessageType.DISCONNECT_ACK);
+			initHeaders(disconnectAck);
+			disconnectAck.setSessionId(sessionId);
+			Message<byte[]> messageOut = MessageBuilder.createMessage(EMPTY_PAYLOAD, disconnectAck.getMessageHeaders());
+			getClientOutboundChannel().send(messageOut);
 		}
 		else if (SimpMessageType.SUBSCRIBE.equals(messageType)) {
 			if (logger.isDebugEnabled()) {

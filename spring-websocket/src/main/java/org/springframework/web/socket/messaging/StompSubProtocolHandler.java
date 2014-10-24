@@ -393,6 +393,10 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 			if (SimpMessageType.CONNECT_ACK.equals(stompAccessor.getMessageType())) {
 				stompAccessor = convertConnectAcktoStompConnected(stompAccessor);
 			}
+			else if (SimpMessageType.DISCONNECT_ACK.equals(stompAccessor.getMessageType())) {
+				stompAccessor = StompHeaderAccessor.create(StompCommand.ERROR);
+				stompAccessor.setMessage("Session closed.");
+			}
 			else if (stompAccessor.getCommand() == null || StompCommand.SEND.equals(stompAccessor.getCommand())) {
 				stompAccessor.updateStompCommandAsServerMessage();
 			}
