@@ -127,9 +127,11 @@ public class ModelMap extends LinkedHashMap<String, Object> {
 	 */
 	public ModelMap mergeAttributes(Map<String, ?> attributes) {
 		if (attributes != null) {
-			for (String key : attributes.keySet()) {
-				if (!containsKey(key)) {
-					put(key, attributes.get(key));
+			for (Map.Entry<String, ?> attributeEntry : attributes.entrySet()) {
+				String attributeKey = attributeEntry.getKey();
+				
+				if (!containsKey(attributeKey)) {
+					put(attributeKey, attributeEntry.getValue());
 				}
 			}
 		}
