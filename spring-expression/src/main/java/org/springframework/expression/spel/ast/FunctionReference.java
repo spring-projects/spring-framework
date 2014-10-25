@@ -180,7 +180,7 @@ public class FunctionReference extends SpelNodeImpl {
 	@Override 
 	public void generateCode(MethodVisitor mv,CodeFlow cf) {
 		String methodDeclaringClassSlashedDescriptor = this.method.getDeclaringClass().getName().replace('.', '/');
-		CodeFlow.generateCodeForArguments(mv, cf, method, this.children);
+		generateCodeForArguments(mv, cf, method, this.children);
 		mv.visitMethodInsn(INVOKESTATIC, methodDeclaringClassSlashedDescriptor, this.method.getName(),
 				CodeFlow.createSignatureDescriptor(this.method), false);
 		cf.pushDescriptor(this.exitTypeDescriptor);

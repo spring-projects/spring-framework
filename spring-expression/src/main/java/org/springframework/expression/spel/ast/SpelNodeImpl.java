@@ -16,6 +16,10 @@
 
 package org.springframework.expression.spel.ast;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Member;
+import java.lang.reflect.Method;
+
 import org.springframework.asm.MethodVisitor;
 import org.springframework.asm.Opcodes;
 import org.springframework.expression.EvaluationException;
@@ -208,4 +212,89 @@ public abstract class SpelNodeImpl implements SpelNode, Opcodes {
 
 	public abstract TypedValue getValueInternal(ExpressionState expressionState) throws EvaluationException;
 
+	
+	/**
+	 * Generate code that handles building the argument values for the specified method. This method will take account
+	 * of whether the invoked method is a varargs method and if it is then the argument values will be appropriately
+	 * packaged into an array.
+	 * @param mv the method visitor where code should be generated
+	 * @param cf the current codeflow
+	 * @param member the method or constructor for which arguments are being setup
+	 * @param arguments the expression nodes for the expression supplied argument values
+	 */
+	protected static void generateCodeForArguments(MethodVisitor mv, CodeFlow cf, Member member, SpelNodeImpl[] arguments) {
+		String[] paramDescriptors = null;
+		boolean isVarargs = false;
+		if (member instanceof Constructor) {
+			Constructor<?> ctor = (Constructor<?>)member;
+			paramDescriptors = CodeFlow.toDescriptors(ctor.getParameterTypes());
+			isVarargs = ctor.isVarArgs();
+		}
+		else { // Method
+			Method method = (Method)member;
+			paramDescriptors = CodeFlow.toDescriptors(method.getParameterTypes());
+			isVarargs = method.isVarArgs();
+		}
+		if (isVarargs) {
+			// The final parameter may or may not need packaging into an array, or nothing may
+			// have been passed to satisfy the varargs and so something needs to be built.
+			int p = 0; // Current supplied argument being processed
+			int childcount = arguments.length;
+						
+			// Fulfill all the parameter requirements except the last one
+			for (p = 0; p < paramDescriptors.length-1;p++) {
+				generateCodeForArgument(mv, cf, arguments[p], paramDescriptors[p]);
+			}
+			
+			SpelNodeImpl lastchild = (childcount == 0 ? null : arguments[childcount-1]);			
+			String arraytype = paramDescriptors[paramDescriptors.length-1];
+			// Determine if the final passed argument is already suitably packaged in array
+			// form to be passed to the method
+			if (lastchild != null && lastchild.getExitDescriptor().equals(arraytype)) {
+				generateCodeForArgument(mv, cf, lastchild, paramDescriptors[p]);
+			}
+			else {
+				arraytype = arraytype.substring(1); // trim the leading '[', may leave other '['		
+				// build array big enough to hold remaining arguments
+				CodeFlow.insertNewArrayCode(mv, childcount-p, arraytype);
+				// Package up the remaining arguments into the array
+				int arrayindex = 0;
+				while (p < childcount) {
+					SpelNodeImpl child = arguments[p];
+					mv.visitInsn(DUP);
+					CodeFlow.insertOptimalLoad(mv, arrayindex++);
+					generateCodeForArgument(mv, cf, child, arraytype);
+					CodeFlow.insertArrayStore(mv, arraytype);
+					p++;
+				}
+			}
+		}
+		else {
+			for (int i = 0; i < paramDescriptors.length;i++) {
+				generateCodeForArgument(mv, cf, arguments[i], paramDescriptors[i]);
+			}
+		}
+	}
+
+	/**
+	 * Ask an argument to generate its bytecode and then follow it up
+	 * with any boxing/unboxing/checkcasting to ensure it matches the expected parameter descriptor.
+	 */
+	protected static void generateCodeForArgument(MethodVisitor mv, CodeFlow cf, SpelNodeImpl argument, String paramDescriptor) {
+		cf.enterCompilationScope();
+		argument.generateCode(mv, cf);
+		boolean primitiveOnStack = CodeFlow.isPrimitive(cf.lastDescriptor());
+		// Check if need to box it for the method reference?
+		if (primitiveOnStack && paramDescriptor.charAt(0) == 'L') {
+			CodeFlow.insertBoxIfNecessary(mv, cf.lastDescriptor().charAt(0));
+		}
+		else if (paramDescriptor.length() == 1 && !primitiveOnStack) {
+			CodeFlow.insertUnboxInsns(mv, paramDescriptor.charAt(0), cf.lastDescriptor());
+		}
+		else if (!cf.lastDescriptor().equals(paramDescriptor)) {
+			// This would be unnecessary in the case of subtyping (e.g. method takes Number but Integer passed in)
+			CodeFlow.insertCheckCast(mv, paramDescriptor);
+		}
+		cf.exitCompilationScope();
+	}
 }

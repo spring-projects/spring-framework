@@ -313,7 +313,7 @@ public class MethodReference extends SpelNodeImpl {
 				CodeFlow.insertCheckCast(mv, "L"+ methodDeclaringClassSlashedDescriptor);
 			}
 		}
-		CodeFlow.generateCodeForArguments(mv, cf, method, children);		
+		generateCodeForArguments(mv, cf, method, children);		
 		mv.visitMethodInsn(isStaticMethod ? INVOKESTATIC : INVOKEVIRTUAL,
 				methodDeclaringClassSlashedDescriptor, method.getName(), CodeFlow.createSignatureDescriptor(method), itf);
 		cf.pushDescriptor(this.exitTypeDescriptor);

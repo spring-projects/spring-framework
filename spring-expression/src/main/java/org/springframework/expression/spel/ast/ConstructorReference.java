@@ -451,7 +451,7 @@ public class ConstructorReference extends SpelNodeImpl {
 		// children[0] is the type of the constructor, don't want to include that in argument processing
 		SpelNodeImpl[] arguments = new SpelNodeImpl[children.length-1];
 		System.arraycopy(children, 1, arguments, 0, children.length-1);
-		CodeFlow.generateCodeForArguments(mv, cf, constructor, arguments);	
+		generateCodeForArguments(mv, cf, constructor, arguments);	
 		mv.visitMethodInsn(INVOKESPECIAL, classSlashedDescriptor, "<init>",
 				CodeFlow.createSignatureDescriptor(constructor), false);
 		cf.pushDescriptor(this.exitTypeDescriptor);
