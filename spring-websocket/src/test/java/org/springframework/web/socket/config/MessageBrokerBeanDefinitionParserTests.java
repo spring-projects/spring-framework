@@ -68,6 +68,7 @@ import org.springframework.web.socket.messaging.StompSubProtocolHandler;
 import org.springframework.web.socket.messaging.SubProtocolWebSocketHandler;
 import org.springframework.web.socket.server.HandshakeHandler;
 import org.springframework.web.socket.server.HandshakeInterceptor;
+import org.springframework.web.socket.server.support.OriginHandshakeInterceptor;
 import org.springframework.web.socket.server.support.WebSocketHttpRequestHandler;
 import org.springframework.web.socket.sockjs.support.SockJsHttpRequestHandler;
 import org.springframework.web.socket.sockjs.transport.TransportType;
@@ -115,7 +116,8 @@ public class MessageBrokerBeanDefinitionParserTests {
 		assertNotNull(handshakeHandler);
 		assertTrue(handshakeHandler instanceof TestHandshakeHandler);
 		List<HandshakeInterceptor> interceptors = wsHttpRequestHandler.getHandshakeInterceptors();
-		assertThat(interceptors, contains(instanceOf(FooTestInterceptor.class), instanceOf(BarTestInterceptor.class)));
+		assertThat(interceptors, contains(instanceOf(FooTestInterceptor.class),
+				instanceOf(BarTestInterceptor.class), instanceOf(OriginHandshakeInterceptor.class)));
 
 		WebSocketSession session = new TestWebSocketSession("id");
 		wsHttpRequestHandler.getWebSocketHandler().afterConnectionEstablished(session);
@@ -158,7 +160,9 @@ public class MessageBrokerBeanDefinitionParserTests {
 		assertTrue(scheduler.getScheduledThreadPoolExecutor().getRemoveOnCancelPolicy());
 
 		interceptors = defaultSockJsService.getHandshakeInterceptors();
-		assertThat(interceptors, contains(instanceOf(FooTestInterceptor.class), instanceOf(BarTestInterceptor.class)));
+		assertThat(interceptors, contains(instanceOf(FooTestInterceptor.class),
+				instanceOf(BarTestInterceptor.class), instanceOf(OriginHandshakeInterceptor.class)));
+		assertEquals(Arrays.asList("http://mydomain3.com", "http://mydomain4.com"), defaultSockJsService.getAllowedOrigins());
 
 		UserSessionRegistry userSessionRegistry = this.appContext.getBean(UserSessionRegistry.class);
 		assertNotNull(userSessionRegistry);

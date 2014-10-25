@@ -37,7 +37,7 @@ import org.springframework.web.socket.sockjs.transport.session.StreamingSockJsSe
 import org.springframework.web.util.JavaScriptUtils;
 
 /**
- * An HTTP {@link TransportHandler} that uses a famous browsder document.domain technique:
+ * An HTTP {@link TransportHandler} that uses a famous browser document.domain technique:
  * <a href="http://stackoverflow.com/questions/1481251/what-does-document-domain-document-domain-do">
  * http://stackoverflow.com/questions/1481251/what-does-document-domain-document-domain-do</a>
  *

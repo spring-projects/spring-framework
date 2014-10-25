@@ -62,6 +62,8 @@ public class SockJsServiceRegistration {
 
 	private final List<HandshakeInterceptor> interceptors = new ArrayList<HandshakeInterceptor>();
 
+	private final List<String> allowedOrigins = new ArrayList<String>();
+
 	private SockJsMessageCodec messageCodec;
 
 
@@ -195,6 +197,7 @@ public class SockJsServiceRegistration {
 	}
 
 	public SockJsServiceRegistration setInterceptors(HandshakeInterceptor... interceptors) {
+		this.interceptors.clear();
 		if (!ObjectUtils.isEmpty(interceptors)) {
 			this.interceptors.addAll(Arrays.asList(interceptors));
 		}
@@ -210,6 +213,17 @@ public class SockJsServiceRegistration {
 	 */
 	public SockJsServiceRegistration setMessageCodec(SockJsMessageCodec codec) {
 		this.messageCodec = codec;
+		return this;
+	}
+
+	/**
+	 * @since 4.1.2
+	 */
+	protected SockJsServiceRegistration setAllowedOrigins(String... origins) {
+		this.allowedOrigins.clear();
+		if (!ObjectUtils.isEmpty(origins)) {
+			this.allowedOrigins.addAll(Arrays.asList(origins));
+		}
 		return this;
 	}
 
@@ -236,6 +250,9 @@ public class SockJsServiceRegistration {
 		}
 		if (this.webSocketEnabled != null) {
 			service.setWebSocketEnabled(this.webSocketEnabled);
+		}
+		if (!this.allowedOrigins.isEmpty()) {
+			service.setAllowedOrigins(this.allowedOrigins);
 		}
 		if (this.messageCodec != null) {
 			service.setMessageCodec(this.messageCodec);

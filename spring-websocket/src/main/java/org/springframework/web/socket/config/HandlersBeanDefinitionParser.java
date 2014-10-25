@@ -34,6 +34,7 @@ import org.springframework.beans.factory.xml.ParserContext;
 import org.springframework.util.StringUtils;
 import org.springframework.util.xml.DomUtils;
 import org.springframework.web.servlet.handler.SimpleUrlHandlerMapping;
+import org.springframework.web.socket.server.support.OriginHandshakeInterceptor;
 import org.springframework.web.socket.server.support.WebSocketHttpRequestHandler;
 import org.springframework.web.socket.sockjs.support.SockJsHttpRequestHandler;
 
@@ -79,7 +80,14 @@ class HandlersBeanDefinitionParser implements BeanDefinitionParser {
 		else {
 			RuntimeBeanReference handshakeHandler = WebSocketNamespaceUtils.registerHandshakeHandler(element, context, source);
 			Element interceptorsElement = DomUtils.getChildElementByTagName(element, "handshake-interceptors");
-			ManagedList<?> interceptors = WebSocketNamespaceUtils.parseBeanSubElements(interceptorsElement, context);
+			ManagedList<? super Object> interceptors = WebSocketNamespaceUtils.parseBeanSubElements(interceptorsElement, context);
+			String allowedOriginsAttribute = element.getAttribute("allowed-origins");
+			List<String> allowedOrigins = Arrays.asList(StringUtils.tokenizeToStringArray(allowedOriginsAttribute, ","));
+			if(!allowedOrigins.isEmpty()) {
+				OriginHandshakeInterceptor interceptor = new OriginHandshakeInterceptor();
+				interceptor.setAllowedOrigins(allowedOrigins);
+				interceptors.add(interceptor);
+			}
 			strategy = new WebSocketHandlerMappingStrategy(handshakeHandler, interceptors);
 		}
 

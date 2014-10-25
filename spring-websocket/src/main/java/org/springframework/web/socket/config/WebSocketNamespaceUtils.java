@@ -16,6 +16,9 @@
 
 package org.springframework.web.socket.config;
 
+import java.util.Arrays;
+import java.util.List;
+
 import org.w3c.dom.Element;
 
 import org.springframework.beans.factory.config.BeanDefinition;
@@ -25,8 +28,10 @@ import org.springframework.beans.factory.support.ManagedList;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.factory.xml.ParserContext;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
+import org.springframework.util.StringUtils;
 import org.springframework.util.xml.DomUtils;
 import org.springframework.web.socket.server.support.DefaultHandshakeHandler;
+import org.springframework.web.socket.server.support.OriginHandshakeInterceptor;
 import org.springframework.web.socket.sockjs.transport.TransportHandlingSockJsService;
 import org.springframework.web.socket.sockjs.transport.handler.DefaultSockJsService;
 import org.springframework.web.socket.sockjs.transport.handler.WebSocketTransportHandler;
@@ -97,7 +102,15 @@ class WebSocketNamespaceUtils {
 			}
 
 			Element interceptorsElement = DomUtils.getChildElementByTagName(element, "handshake-interceptors");
-			ManagedList<?> interceptors = WebSocketNamespaceUtils.parseBeanSubElements(interceptorsElement, context);
+			ManagedList<? super Object> interceptors = WebSocketNamespaceUtils.parseBeanSubElements(interceptorsElement, context);
+			String allowedOriginsAttribute = element.getAttribute("allowed-origins");
+			List<String> allowedOrigins = Arrays.asList(StringUtils.tokenizeToStringArray(allowedOriginsAttribute, ","));
+			if(!allowedOrigins.isEmpty()) {
+				sockJsServiceDef.getPropertyValues().add("allowedOrigins", allowedOrigins);
+				OriginHandshakeInterceptor interceptor = new OriginHandshakeInterceptor();
+				interceptor.setAllowedOrigins(allowedOrigins);
+				interceptors.add(interceptor);
+			}
 			sockJsServiceDef.getPropertyValues().add("handshakeInterceptors", interceptors);
 
 			String attrValue = sockJsElement.getAttribute("name");

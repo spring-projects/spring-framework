@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,5 +41,20 @@ public interface StompWebSocketEndpointRegistration {
 	 * Configure the HandshakeInterceptor's to use.
 	 */
 	StompWebSocketEndpointRegistration addInterceptors(HandshakeInterceptor... interceptors);
+
+	/**
+	 * Configure allowed {@code Origin} header values. This check is mostly designed for browser
+	 * clients. There is noting preventing other types of client to modify the Origin header value.
+	 *
+	 * <p>When SockJS is enabled and allowed origins are restricted, transport types that do not
+	 * use {@code Origin} headers for cross origin requests (jsonp-polling, iframe-xhr-polling,
+	 * iframe-eventsource and iframe-htmlfile) are disabled. As a consequence, IE6/IE7 won't be
+	 * supported anymore and IE8/IE9 will only be supported without cookies.
+	 *
+	 * <p>By default, all origins are allowed.
+	 * @since 4.1.2
+	 * @see <a href="https://github.com/sockjs/sockjs-client#supported-transports-by-browser-html-served-from-http-or-https">SockJS supported transports by browser</a>
+	 */
+	StompWebSocketEndpointRegistration setAllowedOrigins(String... origins);
 
 }

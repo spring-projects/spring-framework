@@ -474,6 +474,24 @@
                 ]]></xsd:documentation>
 				</xsd:annotation>
 			</xsd:attribute>
+			<xsd:attribute name="allowed-origins" type="xsd:string">
+				<xsd:annotation>
+					<xsd:documentation><![CDATA[
+		Configure allowed {@code Origin} header values. Multiple origins may be specified
+		as a comma-separated list.
+
+		This check is mostly designed for browser clients. There is noting preventing other
+		types of client to modify the Origin header value.
+
+		When SockJS is enabled and allowed origins are restricted, transport types that do not
+		use {@code Origin} headers for cross origin requests (jsonp-polling, iframe-xhr-polling,
+		iframe-eventsource and iframe-htmlfile) are disabled. As a consequence, IE6/IE7 won't be
+		supported anymore and IE8/IE9 will only be supported without cookies.
+
+		By default, all origins are allowed.
+					]]></xsd:documentation>
+				</xsd:annotation>
+			</xsd:attribute>
 		</xsd:complexType>
 	</xsd:element>
 
@@ -639,6 +657,24 @@
 	A path that maps a particular message destination to a handler method.
 	Exact path mapping URIs (such as "/myPath") are supported as well as Ant-stype path patterns (such as /myPath/**).
                 				]]></xsd:documentation>
+							</xsd:annotation>
+						</xsd:attribute>
+						<xsd:attribute name="allowed-origins" type="xsd:string">
+							<xsd:annotation>
+								<xsd:documentation><![CDATA[
+		Configure allowed {@code Origin} header values. Multiple origins may be specified
+		as a comma-separated list.
+
+		This check is mostly designed for browser clients. There is noting preventing other
+		types of client to modify the Origin header value.
+
+		When SockJS is enabled and allowed origins are restricted, transport types that do not
+		use {@code Origin} headers for cross origin requests (jsonp-polling, iframe-xhr-polling,
+		iframe-eventsource and iframe-htmlfile) are disabled. As a consequence, IE6/IE7 won't be
+		supported anymore and IE8/IE9 will only be supported without cookies.
+
+		By default, all origins are allowed.
+								]]></xsd:documentation>
 							</xsd:annotation>
 						</xsd:attribute>
 					</xsd:complexType>

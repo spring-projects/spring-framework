@@ -18,11 +18,13 @@ package org.springframework.web.socket.config;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ScheduledFuture;
 
+import static org.junit.Assert.assertEquals;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -45,6 +47,7 @@ import org.springframework.web.socket.handler.WebSocketHandlerDecorator;
 import org.springframework.web.socket.server.HandshakeHandler;
 import org.springframework.web.socket.server.HandshakeInterceptor;
 import org.springframework.web.socket.server.support.DefaultHandshakeHandler;
+import org.springframework.web.socket.server.support.OriginHandshakeInterceptor;
 import org.springframework.web.socket.server.support.WebSocketHttpRequestHandler;
 import org.springframework.web.socket.sockjs.SockJsService;
 import org.springframework.web.socket.sockjs.frame.SockJsMessageCodec;
@@ -103,6 +106,7 @@ public class HandlersBeanDefinitionParserTests {
 				HandshakeHandler handshakeHandler = handler.getHandshakeHandler();
 				assertNotNull(handshakeHandler);
 				assertTrue(handshakeHandler instanceof DefaultHandshakeHandler);
+				assertTrue(handler.getHandshakeInterceptors().isEmpty());
 			}
 			else {
 				assertThat(shm.getUrlMap().keySet(), contains("/test"));
@@ -112,6 +116,7 @@ public class HandlersBeanDefinitionParserTests {
 				HandshakeHandler handshakeHandler = handler.getHandshakeHandler();
 				assertNotNull(handshakeHandler);
 				assertTrue(handshakeHandler instanceof DefaultHandshakeHandler);
+				assertTrue(handler.getHandshakeInterceptors().isEmpty());
 			}
 		}
 	}
@@ -135,7 +140,8 @@ public class HandlersBeanDefinitionParserTests {
 		assertNotNull(handshakeHandler);
 		assertTrue(handshakeHandler instanceof TestHandshakeHandler);
 		List<HandshakeInterceptor> interceptors = handler.getHandshakeInterceptors();
-		assertThat(interceptors, contains(instanceOf(FooTestInterceptor.class), instanceOf(BarTestInterceptor.class)));
+		assertThat(interceptors, contains(instanceOf(FooTestInterceptor.class),
+				instanceOf(BarTestInterceptor.class), instanceOf(OriginHandshakeInterceptor.class)));
 
 		handler = (WebSocketHttpRequestHandler) urlHandlerMapping.getUrlMap().get("/test");
 		assertNotNull(handler);
@@ -144,8 +150,8 @@ public class HandlersBeanDefinitionParserTests {
 		assertNotNull(handshakeHandler);
 		assertTrue(handshakeHandler instanceof TestHandshakeHandler);
 		interceptors = handler.getHandshakeInterceptors();
-		assertThat(interceptors, contains(instanceOf(FooTestInterceptor.class), instanceOf(BarTestInterceptor.class)));
-
+		assertThat(interceptors, contains(instanceOf(FooTestInterceptor.class),
+				instanceOf(BarTestInterceptor.class), instanceOf(OriginHandshakeInterceptor.class)));
 	}
 
 	@Test
@@ -222,6 +228,10 @@ public class HandlersBeanDefinitionParserTests {
 		assertEquals(1024, transportService.getHttpMessageCacheSize());
 		assertEquals(20, transportService.getHeartbeatTime());
 		assertEquals(TestMessageCodec.class, transportService.getMessageCodec().getClass());
+
+		List<HandshakeInterceptor> interceptors = transportService.getHandshakeInterceptors();
+		assertThat(interceptors, contains(instanceOf(OriginHandshakeInterceptor.class)));
+		assertEquals(Arrays.asList("http://mydomain1.com", "http://mydomain2.com"), transportService.getAllowedOrigins());
 	}
 
 	private void loadBeanDefinitions(String fileName) {

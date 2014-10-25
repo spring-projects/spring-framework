@@ -260,6 +260,11 @@ public class DefaultHandshakeHandler implements HandshakeHandler {
 				Arrays.asList(StringUtils.arrayToCommaDelimitedString(getSupportedVersions())));
 	}
 
+	/**
+	 * Return whether the request {@code Origin} header value is valid or not.
+	 * By default, all origins as considered as valid. Consider using an
+	 * {@link OriginHandshakeInterceptor} for filtering origins if needed.
+	 */
 	protected boolean isValidOrigin(ServerHttpRequest request) {
 		return true;
 	}

@@ -207,9 +207,10 @@ public class TransportHandlingSockJsService extends AbstractSockJsService implem
 		HttpMethod supportedMethod = transportType.getHttpMethod();
 		if (!supportedMethod.equals(request.getMethod())) {
 			if (HttpMethod.OPTIONS.equals(request.getMethod()) && transportType.supportsCors()) {
-				response.setStatusCode(HttpStatus.NO_CONTENT);
-				addCorsHeaders(request, response, HttpMethod.OPTIONS, supportedMethod);
-				addCacheHeaders(response);
+				if(checkAndAddCorsHeaders(request, response, HttpMethod.OPTIONS, supportedMethod)) {
+					response.setStatusCode(HttpStatus.NO_CONTENT);
+					addCacheHeaders(response);
+				}
 			}
 			else if (transportType.supportsCors()) {
 				sendMethodNotAllowed(response, supportedMethod, HttpMethod.OPTIONS);
@@ -250,7 +251,9 @@ public class TransportHandlingSockJsService extends AbstractSockJsService implem
 			}
 
 			if (transportType.supportsCors()) {
-				addCorsHeaders(request, response);
+				if(!checkAndAddCorsHeaders(request, response)) {
+					return;
+				}
 			}
 
 			transportHandler.handleRequest(request, response, handler, session);
