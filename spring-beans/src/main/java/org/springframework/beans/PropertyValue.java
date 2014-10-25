@@ -61,7 +61,7 @@ public class PropertyValue extends BeanMetadataAttributeAccessor implements Seri
 	volatile Object resolvedTokens;
 
 	/** Package-visible field for caching the resolved PropertyDescriptor */
-	volatile PropertyDescriptor resolvedDescriptor;
+	transient volatile PropertyDescriptor resolvedDescriptor;
 
 
 	/**
