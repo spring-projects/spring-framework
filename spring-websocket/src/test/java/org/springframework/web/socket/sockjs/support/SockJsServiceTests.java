@@ -237,6 +237,42 @@ public class SockJsServiceTests extends AbstractHttpRequestTests {
 		assertEquals("Origin", this.servletResponse.getHeader("Vary"));
 	}
 
+	@Test  // SPR-12283
+	public void handleInfoOptionsWithOriginAndCorsDisabled() throws Exception {
+		setOrigin("http://mydomain2.com");
+		this.service.setSuppressCors(true);
+
+		this.servletRequest.addHeader("Access-Control-Request-Headers", "Last-Modified");
+		resetResponseAndHandleRequest("OPTIONS", "/echo/info", HttpStatus.NO_CONTENT);
+		this.response.flush();
+		assertNull(this.servletResponse.getHeader("Access-Control-Allow-Origin"));
+		assertNull(this.servletResponse.getHeader("Access-Control-Allow-Credentials"));
+		assertNull(this.servletResponse.getHeader("Access-Control-Allow-Headers"));
+		assertNull(this.servletResponse.getHeader("Access-Control-Allow-Methods"));
+		assertNull(this.servletResponse.getHeader("Access-Control-Max-Age"));
+		assertEquals("Origin", this.servletResponse.getHeader("Vary"));
+
+		this.service.setAllowedOrigins(Arrays.asList("http://mydomain1.com"));
+		resetResponseAndHandleRequest("OPTIONS", "/echo/info", HttpStatus.FORBIDDEN);
+		this.response.flush();
+		assertNull(this.servletResponse.getHeader("Access-Control-Allow-Origin"));
+		assertNull(this.servletResponse.getHeader("Access-Control-Allow-Credentials"));
+		assertNull(this.servletResponse.getHeader("Access-Control-Allow-Headers"));
+		assertNull(this.servletResponse.getHeader("Access-Control-Allow-Methods"));
+		assertNull(this.servletResponse.getHeader("Access-Control-Max-Age"));
+		assertNull(this.servletResponse.getHeader("Vary"));
+
+		this.service.setAllowedOrigins(Arrays.asList("http://mydomain1.com", "http://mydomain2.com", "http://mydomain3.com"));
+		resetResponseAndHandleRequest("OPTIONS", "/echo/info", HttpStatus.NO_CONTENT);
+		this.response.flush();
+		assertNull(this.servletResponse.getHeader("Access-Control-Allow-Origin"));
+		assertNull(this.servletResponse.getHeader("Access-Control-Allow-Credentials"));
+		assertNull(this.servletResponse.getHeader("Access-Control-Allow-Headers"));
+		assertNull(this.servletResponse.getHeader("Access-Control-Allow-Methods"));
+		assertNull(this.servletResponse.getHeader("Access-Control-Max-Age"));
+		assertEquals("Origin", this.servletResponse.getHeader("Vary"));
+	}
+
 	@Test
 	public void handleIframeRequest() throws Exception {
 		resetResponseAndHandleRequest("GET", "/echo/iframe.html", HttpStatus.OK);

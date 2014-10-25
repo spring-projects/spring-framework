@@ -88,6 +88,8 @@ public abstract class AbstractSockJsService implements SockJsService {
 
 	private final List<String> allowedOrigins = new ArrayList<String>(Arrays.asList("*"));
 
+	private boolean suppressCors = false;
+
 
 	public AbstractSockJsService(TaskScheduler scheduler) {
 		Assert.notNull(scheduler, "TaskScheduler must not be null");
@@ -294,6 +296,24 @@ public abstract class AbstractSockJsService implements SockJsService {
 	}
 
 	/**
+	 * This option can be used to disable automatic addition of CORS headers for
+	 * SockJS requests.
+	 * <p>The default value is "false".
+	 * @since 4.1.2
+	 */
+	public void setSuppressCors(boolean suppressCors) {
+		this.suppressCors = suppressCors;
+	}
+
+	/**
+	 * @since 4.1.2
+	 * @see #setSuppressCors(boolean)
+	 */
+	public boolean shouldSuppressCors() {
+		return this.suppressCors;
+	}
+
+	/**
 	 * This method determines the SockJS path and handles SockJS static URLs.
 	 * Session URLs and raw WebSocket requests are delegated to abstract methods.
 	 */
@@ -426,7 +446,7 @@ public abstract class AbstractSockJsService implements SockJsService {
 			// See SPR-11919 and https://issues.jboss.org/browse/WFLY-3474
 		}
 
-		if(origin != null && !hasCorsResponseHeaders) {
+		if(!this.suppressCors && origin != null && !hasCorsResponseHeaders) {
 			addCorsHeaders(request, response, httpMethods);
 		}
 		return true;

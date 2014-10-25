@@ -39606,9 +39606,12 @@ presence of CORS headers in the response is detected. So if an application is
 already configured to provide CORS support, e.g. through a Servlet Filter,
 Spring's SockJsService will skip this part.
 
+It is also possible to disable the addition of these CORS headers thanks to the
+`suppressCors` property in Spring's SockJsService.
+
 The following is the list of headers and values expected by SockJS:
 
-* `"Access-Control-Allow-Origin"` - intitialized from the value of the "origin" request header or "*".
+* `"Access-Control-Allow-Origin"` - initialized from the value of the "Origin" request header.
 * `"Access-Control-Allow-Credentials"` - always set to `true`.
 * `"Access-Control-Request-Headers"` - initialized from values from the equivalent request header.
 * `"Access-Control-Allow-Methods"` - the HTTP methods a transport supports (see `TransportType` enum).

@@ -154,6 +154,7 @@ public class MessageBrokerBeanDefinitionParserTests {
 				.getTransportHandlers().get(TransportType.WEBSOCKET);
 		assertNotNull(wsTransportHandler.getHandshakeHandler());
 		assertThat(wsTransportHandler.getHandshakeHandler(), Matchers.instanceOf(TestHandshakeHandler.class));
+		assertFalse(defaultSockJsService.shouldSuppressCors());
 
 		ThreadPoolTaskScheduler scheduler = (ThreadPoolTaskScheduler) defaultSockJsService.getTaskScheduler();
 		assertEquals(Runtime.getRuntime().availableProcessors(), scheduler.getScheduledThreadPoolExecutor().getCorePoolSize());

@@ -232,6 +232,14 @@
                 ]]></xsd:documentation>
 			</xsd:annotation>
 		</xsd:attribute>
+		<xsd:attribute name="suppress-cors" type="xsd:string">
+			<xsd:annotation>
+				<xsd:documentation source="java:org.springframework.web.socket.sockjs.support.AbstractSockJsService"><![CDATA[
+	This option can be used to disable automatic addition of CORS headers for SockJS requests.
+	The default value is "false".
+                ]]></xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
 	</xsd:complexType>
 
 	<xsd:complexType name="stomp-broker-relay">

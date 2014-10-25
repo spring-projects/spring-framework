@@ -145,6 +145,10 @@ class WebSocketNamespaceUtils {
 			if (!attrValue.isEmpty()) {
 				sockJsServiceDef.getPropertyValues().add("messageCodec", new RuntimeBeanReference(attrValue));
 			}
+			attrValue = sockJsElement.getAttribute("suppress-cors");
+			if (!attrValue.isEmpty()) {
+				sockJsServiceDef.getPropertyValues().add("suppressCors", Boolean.valueOf(attrValue));
+			}
 			sockJsServiceDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
 			String sockJsServiceName = context.getReaderContext().registerWithGeneratedName(sockJsServiceDef);
 			return new RuntimeBeanReference(sockJsServiceName);

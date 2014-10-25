@@ -64,6 +64,8 @@ public class SockJsServiceRegistration {
 
 	private final List<String> allowedOrigins = new ArrayList<String>();
 
+	private Boolean suppressCors;
+
 	private SockJsMessageCodec messageCodec;
 
 
@@ -205,6 +207,17 @@ public class SockJsServiceRegistration {
 	}
 
 	/**
+	 * This option can be used to disable automatic addition of CORS headers for
+	 * SockJS requests.
+	 * <p>The default value is "false".
+	 * @since 4.1.2
+	 */
+	public SockJsServiceRegistration setSupressCors(boolean suppressCors) {
+		this.suppressCors = suppressCors;
+		return this;
+	}
+
+	/**
 	 * The codec to use for encoding and decoding SockJS messages.
 	 * <p>By default {@code Jackson2SockJsMessageCodec} is used requiring the
 	 * Jackson library to be present on the classpath.
@@ -250,6 +263,9 @@ public class SockJsServiceRegistration {
 		}
 		if (this.webSocketEnabled != null) {
 			service.setWebSocketEnabled(this.webSocketEnabled);
+		}
+		if (this.suppressCors != null) {
+			service.setSuppressCors(this.suppressCors);
 		}
 		if (!this.allowedOrigins.isEmpty()) {
 			service.setAllowedOrigins(this.allowedOrigins);

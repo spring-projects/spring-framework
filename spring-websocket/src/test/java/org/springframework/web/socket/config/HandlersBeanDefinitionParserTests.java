@@ -178,6 +178,7 @@ public class HandlersBeanDefinitionParserTests {
 		assertThat(sockJsService, instanceOf(DefaultSockJsService.class));
 		DefaultSockJsService defaultSockJsService = (DefaultSockJsService) sockJsService;
 		assertThat(defaultSockJsService.getTaskScheduler(), instanceOf(ThreadPoolTaskScheduler.class));
+		assertFalse(defaultSockJsService.shouldSuppressCors());
 
 		Map<TransportType, TransportHandler> transportHandlers = defaultSockJsService.getTransportHandlers();
 		assertThat(transportHandlers.values(),
@@ -232,6 +233,7 @@ public class HandlersBeanDefinitionParserTests {
 		List<HandshakeInterceptor> interceptors = transportService.getHandshakeInterceptors();
 		assertThat(interceptors, contains(instanceOf(OriginHandshakeInterceptor.class)));
 		assertEquals(Arrays.asList("http://mydomain1.com", "http://mydomain2.com"), transportService.getAllowedOrigins());
+		assertTrue(transportService.shouldSuppressCors());
 	}
 
 	private void loadBeanDefinitions(String fileName) {
