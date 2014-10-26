@@ -814,8 +814,7 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 						Class<?> mapKeyType = GenericCollectionTypeResolver.getMapKeyReturnType(pd.getReadMethod(), i + 1);
 						// IMPORTANT: Do not pass full property name in here - property editors
 						// must not kick in for map keys but rather only for map values.
-						TypeDescriptor typeDescriptor = (mapKeyType != null ?
-								TypeDescriptor.valueOf(mapKeyType) : TypeDescriptor.valueOf(Object.class));
+						TypeDescriptor typeDescriptor = TypeDescriptor.valueOf(mapKeyType);
 						Object convertedMapKey = convertIfNecessary(null, null, key, mapKeyType, typeDescriptor);
 						value = map.get(convertedMapKey);
 					}
@@ -1028,8 +1027,7 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 				Map<Object, Object> map = (Map<Object, Object>) propValue;
 				// IMPORTANT: Do not pass full property name in here - property editors
 				// must not kick in for map keys but rather only for map values.
-				TypeDescriptor typeDescriptor = (mapKeyType != null ?
-						TypeDescriptor.valueOf(mapKeyType) : TypeDescriptor.valueOf(Object.class));
+				TypeDescriptor typeDescriptor = TypeDescriptor.valueOf(mapKeyType);
 				Object convertedMapKey = convertIfNecessary(null, null, key, mapKeyType, typeDescriptor);
 				Object oldValue = null;
 				if (isExtractOldValueForEditor()) {
