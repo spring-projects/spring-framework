@@ -69,7 +69,8 @@ public abstract class AbstractHttpRequestFactoryTestCase extends
 		ClientHttpResponse response = request.execute();
 		try {
 			assertEquals("Invalid status code", HttpStatus.NOT_FOUND, response.getStatusCode());
-		} finally {
+		}
+		finally {
 			response.close();
 		}
 	}

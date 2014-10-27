@@ -60,12 +60,14 @@ class Netty4ClientHttpRequest extends AbstractAsyncClientHttpRequest implements 
 
 	private final ByteBufOutputStream body;
 
+
 	Netty4ClientHttpRequest(Bootstrap bootstrap, URI uri, HttpMethod method, int maxRequestSize) {
 		this.bootstrap = bootstrap;
 		this.uri = uri;
 		this.method = method;
 		this.body = new ByteBufOutputStream(Unpooled.buffer(maxRequestSize));
 	}
+
 
 	@Override
 	public HttpMethod getMethod() {
@@ -83,8 +85,7 @@ class Netty4ClientHttpRequest extends AbstractAsyncClientHttpRequest implements 
 	}
 
 	@Override
-	protected ListenableFuture<ClientHttpResponse> executeInternal(final HttpHeaders headers)
-			throws IOException {
+	protected ListenableFuture<ClientHttpResponse> executeInternal(final HttpHeaders headers) throws IOException {
 		final SettableListenableFuture<ClientHttpResponse> responseFuture =
 				new SettableListenableFuture<ClientHttpResponse>();
 
@@ -93,42 +94,19 @@ class Netty4ClientHttpRequest extends AbstractAsyncClientHttpRequest implements 
 			public void operationComplete(ChannelFuture future) throws Exception {
 				if (future.isSuccess()) {
 					Channel channel = future.channel();
-					channel.pipeline()
-							.addLast(new SimpleChannelInboundHandler<FullHttpResponse>() {
-
-										@Override
-										protected void channelRead0(
-												ChannelHandlerContext ctx,
-												FullHttpResponse msg) throws Exception {
-											responseFuture
-													.set(new Netty4ClientHttpResponse(ctx,
-															msg));
-										}
-
-										@Override
-										public void exceptionCaught(
-												ChannelHandlerContext ctx,
-												Throwable cause) throws Exception {
-											responseFuture.setException(cause);
-										}
-									});
-
-					FullHttpRequest nettyRequest =
-							createFullHttpRequest(headers);
-
+					channel.pipeline().addLast(new RequestExecuteHandler(responseFuture));
+					FullHttpRequest nettyRequest = createFullHttpRequest(headers);
 					channel.writeAndFlush(nettyRequest);
 				}
 				else {
 					responseFuture.setException(future.cause());
 				}
-
 			}
 		};
 
-		bootstrap.connect(uri.getHost(), getPort(uri)).addListener(connectionListener);
+		this.bootstrap.connect(this.uri.getHost(), getPort(this.uri)).addListener(connectionListener);
 
 		return responseFuture;
-
 	}
 
 	@Override
@@ -142,7 +120,8 @@ class Netty4ClientHttpRequest extends AbstractAsyncClientHttpRequest implements 
 		catch (ExecutionException ex) {
 			if (ex.getCause() instanceof IOException) {
 				throw (IOException) ex.getCause();
-			} else {
+			}
+			else {
 				throw new IOException(ex.getMessage(), ex);
 			}
 		}
@@ -163,17 +142,13 @@ class Netty4ClientHttpRequest extends AbstractAsyncClientHttpRequest implements 
 
 	private FullHttpRequest createFullHttpRequest(HttpHeaders headers) {
 		io.netty.handler.codec.http.HttpMethod nettyMethod =
-				io.netty.handler.codec.http.HttpMethod.valueOf(method.name());
+				io.netty.handler.codec.http.HttpMethod.valueOf(this.method.name());
 
 		FullHttpRequest nettyRequest = new DefaultFullHttpRequest(HttpVersion.HTTP_1_1,
-				nettyMethod, this.uri.getRawPath(),
-				this.body.buffer());
+				nettyMethod, this.uri.getRawPath(), this.body.buffer());
 
-		nettyRequest.headers()
-				.set(io.netty.handler.codec.http.HttpHeaders.Names.HOST, uri.getHost());
-		nettyRequest.headers()
-				.set(io.netty.handler.codec.http.HttpHeaders.Names.CONNECTION,
-						io.netty.handler.codec.http.HttpHeaders.Values.CLOSE);
+		nettyRequest.headers().set(HttpHeaders.HOST, uri.getHost());
+		nettyRequest.headers().set(HttpHeaders.CONNECTION, io.netty.handler.codec.http.HttpHeaders.Values.CLOSE);
 
 		for (Map.Entry<String, List<String>> entry : headers.entrySet()) {
 			nettyRequest.headers().add(entry.getKey(), entry.getValue());
@@ -182,5 +157,27 @@ class Netty4ClientHttpRequest extends AbstractAsyncClientHttpRequest implements 
 		return nettyRequest;
 	}
 
+
+	/**
+	 * A SimpleChannelInboundHandler to update the given SettableListenableFuture.
+	 */
+	private static class RequestExecuteHandler extends SimpleChannelInboundHandler<FullHttpResponse> {
+
+		private final SettableListenableFuture<ClientHttpResponse> responseFuture;
+
+		public RequestExecuteHandler(SettableListenableFuture<ClientHttpResponse> responseFuture) {
+			this.responseFuture = responseFuture;
+		}
+
+		@Override
+		protected void channelRead0(ChannelHandlerContext context, FullHttpResponse response) throws Exception {
+			this.responseFuture.set(new Netty4ClientHttpResponse(context, response));
+		}
+
+		@Override
+		public void exceptionCaught(ChannelHandlerContext context, Throwable cause) throws Exception {
+			this.responseFuture.setException(cause);
+		}
+	}
 
 }

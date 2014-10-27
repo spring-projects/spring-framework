@@ -45,15 +45,15 @@ import org.springframework.util.Assert;
  * @author Arjen Poutsma
  * @since 4.2
  */
-public class Netty4ClientHttpRequestFactory
-		implements ClientHttpRequestFactory, AsyncClientHttpRequestFactory,
-		InitializingBean, DisposableBean {
+public class Netty4ClientHttpRequestFactory implements ClientHttpRequestFactory,
+		AsyncClientHttpRequestFactory, InitializingBean, DisposableBean {
 
 	/**
 	 * The default maximum request size.
 	 * @see #setMaxRequestSize(int)
 	 */
 	public static final int DEFAULT_MAX_REQUEST_SIZE = 1024 * 1024 * 10;
+
 
 	private final EventLoopGroup eventLoopGroup;
 
@@ -65,18 +65,19 @@ public class Netty4ClientHttpRequestFactory
 
 	private Bootstrap bootstrap;
 
+
 	/**
-	 * Creates a new {@code Netty4ClientHttpRequestFactory} with a default
+	 * Create a new {@code Netty4ClientHttpRequestFactory} with a default
 	 * {@link NioEventLoopGroup}.
 	 */
 	public Netty4ClientHttpRequestFactory() {
 		int ioWorkerCount = Runtime.getRuntime().availableProcessors() * 2;
-		eventLoopGroup = new NioEventLoopGroup(ioWorkerCount);
-		defaultEventLoopGroup = true;
+		this.eventLoopGroup = new NioEventLoopGroup(ioWorkerCount);
+		this.defaultEventLoopGroup = true;
 	}
 
 	/**
-	 * Creates a new {@code Netty4ClientHttpRequestFactory} with the given
+	 * Create a new {@code Netty4ClientHttpRequestFactory} with the given
 	 * {@link EventLoopGroup}.
 	 *
 	 * <p><b>NOTE:</b> the given group will <strong>not</strong> be
@@ -89,9 +90,10 @@ public class Netty4ClientHttpRequestFactory
 		this.defaultEventLoopGroup = false;
 	}
 
+
 	/**
-	 * Sets the default maximum request size. The default is
-	 * {@link #DEFAULT_MAX_REQUEST_SIZE}.
+	 * Set the default maximum request size.
+	 * <p>By default this is set to {@link #DEFAULT_MAX_REQUEST_SIZE}.
 	 * @see HttpObjectAggregator#HttpObjectAggregator(int)
 	 */
 	public void setMaxRequestSize(int maxRequestSize) {
@@ -99,7 +101,9 @@ public class Netty4ClientHttpRequestFactory
 	}
 
 	/**
-	 * Sets the SSL context.
+	 * Set the SSL context. When configured it is used to create and insert an
+	 * {@link io.netty.handler.ssl.SslHandler} in the channel pipeline.
+	 * <p>By default this is not set.
 	 */
 	public void setSslContext(SslContext sslContext) {
 		this.sslContext = sslContext;
@@ -108,14 +112,14 @@ public class Netty4ClientHttpRequestFactory
 	private Bootstrap getBootstrap() {
 		if (this.bootstrap == null) {
 			Bootstrap bootstrap = new Bootstrap();
-			bootstrap.group(eventLoopGroup).channel(NioSocketChannel.class)
+			bootstrap.group(this.eventLoopGroup).channel(NioSocketChannel.class)
 					.handler(new ChannelInitializer<SocketChannel>() {
 						@Override
-						protected void initChannel(SocketChannel ch) throws Exception {
-							ChannelPipeline pipeline = ch.pipeline();
+						protected void initChannel(SocketChannel channel) throws Exception {
+							ChannelPipeline pipeline = channel.pipeline();
 
 							if (sslContext != null) {
-								pipeline.addLast(sslContext.newHandler(ch.alloc()));
+								pipeline.addLast(sslContext.newHandler(channel.alloc()));
 							}
 							pipeline.addLast(new HttpClientCodec());
 							pipeline.addLast(new HttpObjectAggregator(maxRequestSize));
@@ -131,29 +135,26 @@ public class Netty4ClientHttpRequestFactory
 		getBootstrap();
 	}
 
+	@Override
+	public ClientHttpRequest createRequest(URI uri, HttpMethod httpMethod) throws IOException {
+		return createRequestInternal(uri, httpMethod);
+	}
+
+	@Override
+	public AsyncClientHttpRequest createAsyncRequest(URI uri, HttpMethod httpMethod) throws IOException {
+		return createRequestInternal(uri, httpMethod);
+	}
+
 	private Netty4ClientHttpRequest createRequestInternal(URI uri, HttpMethod httpMethod) {
-		return new Netty4ClientHttpRequest(getBootstrap(), uri, httpMethod, maxRequestSize);
-	}
-
-	@Override
-	public ClientHttpRequest createRequest(URI uri, HttpMethod httpMethod)
-			throws IOException {
-		return createRequestInternal(uri, httpMethod);
-	}
-
-	@Override
-	public AsyncClientHttpRequest createAsyncRequest(URI uri, HttpMethod httpMethod)
-			throws IOException {
-		return createRequestInternal(uri, httpMethod);
+		return new Netty4ClientHttpRequest(getBootstrap(), uri, httpMethod, this.maxRequestSize);
 	}
 
 	@Override
 	public void destroy() throws InterruptedException {
-		if (defaultEventLoopGroup) {
+		if (this.defaultEventLoopGroup) {
 			// clean up the EventLoopGroup if we created it in the constructor
-			eventLoopGroup.shutdownGracefully().sync();
+			this.eventLoopGroup.shutdownGracefully().sync();
 		}
 	}
-
 
 }

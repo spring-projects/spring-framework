@@ -45,8 +45,7 @@ class Netty4ClientHttpResponse extends AbstractClientHttpResponse {
 	private HttpHeaders headers;
 
 
-	Netty4ClientHttpResponse(ChannelHandlerContext context,
-			FullHttpResponse nettyResponse) {
+	Netty4ClientHttpResponse(ChannelHandlerContext context, FullHttpResponse nettyResponse) {
 		Assert.notNull(context, "'context' must not be null");
 		Assert.notNull(nettyResponse, "'nettyResponse' must not be null");
 		this.context = context;
@@ -54,6 +53,7 @@ class Netty4ClientHttpResponse extends AbstractClientHttpResponse {
 		this.body = new ByteBufInputStream(this.nettyResponse.content());
 		this.nettyResponse.retain();
 	}
+
 
 	@Override
 	public int getRawStatusCode() throws IOException {

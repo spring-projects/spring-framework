@@ -27,10 +27,10 @@ import org.springframework.http.HttpMethod;
 /**
  * @author Arjen Poutsma
  */
-public class Netty4ClientHttpRequestFactoryTests
-		extends AbstractHttpRequestFactoryTestCase {
+public class Netty4ClientHttpRequestFactoryTests extends AbstractHttpRequestFactoryTestCase {
 
 	private static EventLoopGroup eventLoopGroup;
+
 
 	@BeforeClass
 	public static void createEventLoopGroup() {
