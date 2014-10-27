@@ -28578,13 +28578,12 @@ The following example shows a typical `persistence.xml` file:
 
 [NOTE]
 ====
-The `exclude-unlisted-classes` element always indicates that __no__ scanning for
-annotated entity classes is supposed to occur, in order to support the
-`<exclude-unlisted-classes/>` shortcut. This is in line with the JPA specification,
-which suggests that shortcut, but unfortunately is in conflict with the JPA XSD, which
-implies `false` for that shortcut. Consequently, `<exclude-unlisted-classes> false
-</exclude-unlisted-classes/>` is not supported. Simply omit the
-`exclude-unlisted-classes` element if you want entity class scanning to occur.
+The `<exclude-unlisted-classes/>` shortcut indicates that __no__ scanning for
+annotated entity classes is supposed to occur. An explicit 'true' value specified -
+`<exclude-unlisted-classes>true</exclude-unlisted-classes/>` - also means no scan.
+`<exclude-unlisted-classes>false</exclude-unlisted-classes/>` does trigger a scan;
+however, it is recommended to simply omit the `exclude-unlisted-classes` element
+if you want entity class scanning to occur.
 ====
 
 Using the `LocalContainerEntityManagerFactoryBean` is the most powerful JPA setup
