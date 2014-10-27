@@ -65,7 +65,7 @@ public class OriginHandshakeInterceptor implements HandshakeInterceptor {
 	@Override
 	public boolean beforeHandshake(ServerHttpRequest request, ServerHttpResponse response,
 			WebSocketHandler wsHandler, Map<String, Object> attributes) throws Exception {
-		if(!isValidOrigin(request)) {
+		if (!isValidOrigin(request)) {
 			response.setStatusCode(HttpStatus.FORBIDDEN);
 			if (logger.isDebugEnabled()) {
 				logger.debug("Handshake request rejected, Origin header value "

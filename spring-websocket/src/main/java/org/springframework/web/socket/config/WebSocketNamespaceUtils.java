@@ -105,7 +105,7 @@ class WebSocketNamespaceUtils {
 			ManagedList<? super Object> interceptors = WebSocketNamespaceUtils.parseBeanSubElements(interceptorsElement, context);
 			String allowedOriginsAttribute = element.getAttribute("allowed-origins");
 			List<String> allowedOrigins = Arrays.asList(StringUtils.tokenizeToStringArray(allowedOriginsAttribute, ","));
-			if(!allowedOrigins.isEmpty()) {
+			if (!allowedOrigins.isEmpty()) {
 				sockJsServiceDef.getPropertyValues().add("allowedOrigins", allowedOrigins);
 				OriginHandshakeInterceptor interceptor = new OriginHandshakeInterceptor();
 				interceptor.setAllowedOrigins(allowedOrigins);

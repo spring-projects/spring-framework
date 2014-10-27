@@ -160,12 +160,12 @@ public class WebMvcConfigurationSupportTests {
 		List<HttpMessageConverter<?>> converters = adapter.getMessageConverters();
 		assertEquals(9, converters.size());
 		for(HttpMessageConverter<?> converter : converters) {
-			if(converter instanceof AbstractJackson2HttpMessageConverter) {
+			if (converter instanceof AbstractJackson2HttpMessageConverter) {
 				ObjectMapper objectMapper = ((AbstractJackson2HttpMessageConverter)converter).getObjectMapper();
 				assertFalse(objectMapper.getDeserializationConfig().isEnabled(MapperFeature.DEFAULT_VIEW_INCLUSION));
 				assertFalse(objectMapper.getSerializationConfig().isEnabled(MapperFeature.DEFAULT_VIEW_INCLUSION));
 				assertFalse(objectMapper.getDeserializationConfig().isEnabled(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES));
-				if(converter instanceof MappingJackson2XmlHttpMessageConverter) {
+				if (converter instanceof MappingJackson2XmlHttpMessageConverter) {
 					assertEquals(XmlMapper.class, objectMapper.getClass());
 				}
 			}

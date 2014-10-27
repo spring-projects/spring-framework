@@ -216,7 +216,7 @@ public class MethodMessageHandlerTests {
 		@Override
 		protected String getMappingForMethod(Method method, Class<?> handlerType) {
 			String methodName = method.getName();
-			if(methodName.startsWith("handler")) {
+			if (methodName.startsWith("handler")) {
 				return "/" + methodName;
 			}
 			return null;
@@ -240,7 +240,7 @@ public class MethodMessageHandlerTests {
 		protected String getMatchingMapping(String mapping, Message<?> message) {
 
 			String destination = getLookupDestination(getDestination(message));
-			if(mapping.equals(destination) || this.pathMatcher.match(mapping, destination)) {
+			if (mapping.equals(destination) || this.pathMatcher.match(mapping, destination)) {
 				return mapping;
 			}
 			return null;

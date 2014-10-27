@@ -83,7 +83,7 @@ class HandlersBeanDefinitionParser implements BeanDefinitionParser {
 			ManagedList<? super Object> interceptors = WebSocketNamespaceUtils.parseBeanSubElements(interceptorsElement, context);
 			String allowedOriginsAttribute = element.getAttribute("allowed-origins");
 			List<String> allowedOrigins = Arrays.asList(StringUtils.tokenizeToStringArray(allowedOriginsAttribute, ","));
-			if(!allowedOrigins.isEmpty()) {
+			if (!allowedOrigins.isEmpty()) {
 				OriginHandshakeInterceptor interceptor = new OriginHandshakeInterceptor();
 				interceptor.setAllowedOrigins(allowedOrigins);
 				interceptors.add(interceptor);

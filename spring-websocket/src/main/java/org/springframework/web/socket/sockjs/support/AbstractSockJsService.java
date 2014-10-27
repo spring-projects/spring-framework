@@ -424,7 +424,7 @@ public abstract class AbstractSockJsService implements SockJsService {
 		HttpHeaders responseHeaders = response.getHeaders();
 		String origin = requestHeaders.getOrigin();
 
-		if(!this.allowedOrigins.contains("*") && (origin == null || !this.allowedOrigins.contains(origin))) {
+		if (!this.allowedOrigins.contains("*") && (origin == null || !this.allowedOrigins.contains(origin))) {
 			logger.debug("Request rejected, Origin header value " + origin + " not allowed");
 			response.setStatusCode(HttpStatus.FORBIDDEN);
 			return false;
@@ -439,7 +439,7 @@ public abstract class AbstractSockJsService implements SockJsService {
 			// See SPR-11919 and https://issues.jboss.org/browse/WFLY-3474
 		}
 
-		if(!this.suppressCors && origin != null && !hasCorsResponseHeaders) {
+		if (!this.suppressCors && origin != null && !hasCorsResponseHeaders) {
 			addCorsHeaders(request, response, httpMethods);
 		}
 		return true;
@@ -498,14 +498,14 @@ public abstract class AbstractSockJsService implements SockJsService {
 		public void handle(ServerHttpRequest request, ServerHttpResponse response) throws IOException {
 			if (HttpMethod.GET.equals(request.getMethod())) {
 				addNoCacheHeaders(response);
-				if(checkAndAddCorsHeaders(request, response)) {
+				if (checkAndAddCorsHeaders(request, response)) {
 					response.getHeaders().setContentType(new MediaType("application", "json", UTF8_CHARSET));
 					String content = String.format(INFO_CONTENT, random.nextInt(), isSessionCookieNeeded(), isWebSocketEnabled());
 					response.getBody().write(content.getBytes());
 				}
 			}
 			else if (HttpMethod.OPTIONS.equals(request.getMethod())) {
-				if(checkAndAddCorsHeaders(request, response, HttpMethod.OPTIONS,
+				if (checkAndAddCorsHeaders(request, response, HttpMethod.OPTIONS,
 						HttpMethod.GET)) {
 					addCacheHeaders(response);
 					response.setStatusCode(HttpStatus.NO_CONTENT);

@@ -207,7 +207,7 @@ public class TransportHandlingSockJsService extends AbstractSockJsService implem
 		HttpMethod supportedMethod = transportType.getHttpMethod();
 		if (!supportedMethod.equals(request.getMethod())) {
 			if (HttpMethod.OPTIONS.equals(request.getMethod()) && transportType.supportsCors()) {
-				if(checkAndAddCorsHeaders(request, response, HttpMethod.OPTIONS, supportedMethod)) {
+				if (checkAndAddCorsHeaders(request, response, HttpMethod.OPTIONS, supportedMethod)) {
 					response.setStatusCode(HttpStatus.NO_CONTENT);
 					addCacheHeaders(response);
 				}
@@ -251,7 +251,7 @@ public class TransportHandlingSockJsService extends AbstractSockJsService implem
 			}
 
 			if (transportType.supportsCors()) {
-				if(!checkAndAddCorsHeaders(request, response)) {
+				if (!checkAndAddCorsHeaders(request, response)) {
 					return;
 				}
 			}
@@ -275,7 +275,7 @@ public class TransportHandlingSockJsService extends AbstractSockJsService implem
 
 	@Override
 	protected boolean validateRequest(String serverId, String sessionId, String transport) {
-		if(!this.getAllowedOrigins().contains("*") && !TransportType.fromValue(transport).supportsOrigin()) {
+		if (!this.getAllowedOrigins().contains("*") && !TransportType.fromValue(transport).supportsOrigin()) {
 			logger.error("Origin check has been enabled, but this transport does not support it");
 			return false;
 		}

@@ -165,7 +165,7 @@ public class UndertowXhrTransport extends AbstractXhrTransport implements XhrTra
 			try {
 				final ClientRequest request = new ClientRequest().setMethod(method).setPath(url.getPath());
 				request.getRequestHeaders().add(HttpString.tryFromString(HttpHeaders.HOST), url.getHost());
-				if(body !=null && !body.isEmpty()) {
+				if (body !=null && !body.isEmpty()) {
 					request.getRequestHeaders().add(HttpString.tryFromString(HttpHeaders.CONTENT_LENGTH), body.length());
 				}
 				addHttpHeaders(request, headers);
@@ -224,11 +224,11 @@ public class UndertowXhrTransport extends AbstractXhrTransport implements XhrTra
 					}
 				});
 				try {
-					if(body != null) {
+					if (body != null) {
 						result.getRequestChannel().write(ByteBuffer.wrap(body.getBytes()));
 					}
 					result.getRequestChannel().shutdownWrites();
-					if(!result.getRequestChannel().flush()) {
+					if (!result.getRequestChannel().flush()) {
 						result.getRequestChannel().getWriteSetter()
 								.set(ChannelListeners.<StreamSinkChannel>flushingChannelListener(null, null));
 						result.getRequestChannel().resumeWrites();
@@ -295,7 +295,7 @@ public class UndertowXhrTransport extends AbstractXhrTransport implements XhrTra
 					public void completed(final ClientExchange result) {
 
 						ClientResponse response = result.getResponse();
-						if(response.getResponseCode() != 200) {
+						if (response.getResponseCode() != 200) {
 							HttpStatus status = HttpStatus.valueOf(response.getResponseCode());
 							IoUtils.safeClose(result.getConnection());
 							onFailure(new HttpServerErrorException(status, "Unexpected XHR receive status"));
@@ -310,7 +310,7 @@ public class UndertowXhrTransport extends AbstractXhrTransport implements XhrTra
 						}
 						try {
 							result.getRequestChannel().shutdownWrites();
-							if(!result.getRequestChannel().flush()) {
+							if (!result.getRequestChannel().flush()) {
 								result.getRequestChannel().getWriteSetter()
 										.set(ChannelListeners.<StreamSinkChannel>flushingChannelListener(null, null));
 								result.getRequestChannel().resumeWrites();
