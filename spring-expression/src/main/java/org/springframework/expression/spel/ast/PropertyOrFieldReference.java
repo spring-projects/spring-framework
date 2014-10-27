@@ -384,7 +384,7 @@ public class PropertyOrFieldReference extends SpelNodeImpl {
 
 		@Override
 		public boolean isWritable() {
-			return true;
+			return this.ref.isWritableProperty(this.ref.name, this.contextObject, this.evalContext);
 		}
 	}
 
