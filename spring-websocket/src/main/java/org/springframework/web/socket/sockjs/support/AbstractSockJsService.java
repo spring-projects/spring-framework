@@ -46,7 +46,6 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.sockjs.SockJsException;
 import org.springframework.web.socket.sockjs.SockJsService;
-import org.springframework.web.socket.sockjs.transport.TransportType;
 
 /**
  * An abstract base class for {@link SockJsService} implementations that provides SockJS
@@ -376,12 +375,6 @@ public abstract class AbstractSockJsService implements SockJsService {
 				}
 				else if (!validateRequest(serverId, sessionId, transport)) {
 					logger.error("Ignoring transport request " + requestInfo);
-					response.setStatusCode(HttpStatus.NOT_FOUND);
-					return;
-				}
-				else if(!this.allowedOrigins.contains("*") && !TransportType.fromValue(transport).supportsOrigin()) {
-					logger.debug("Origin check has been enabled, but this transport does not support it, ignoring "
-							+ requestInfo);
 					response.setStatusCode(HttpStatus.NOT_FOUND);
 					return;
 				}

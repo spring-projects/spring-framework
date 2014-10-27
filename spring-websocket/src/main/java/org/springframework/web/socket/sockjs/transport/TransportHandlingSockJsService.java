@@ -273,6 +273,15 @@ public class TransportHandlingSockJsService extends AbstractSockJsService implem
 		}
 	}
 
+	@Override
+	protected boolean validateRequest(String serverId, String sessionId, String transport) {
+		if(!this.getAllowedOrigins().contains("*") && !TransportType.fromValue(transport).supportsOrigin()) {
+			logger.error("Origin check has been enabled, but this transport does not support it");
+			return false;
+		}
+		return super.validateRequest(serverId, sessionId, transport);
+	}
+
 	private SockJsSession createSockJsSession(String sessionId, SockJsSessionFactory sessionFactory,
 			WebSocketHandler handler, Map<String, Object> attributes) {
 
