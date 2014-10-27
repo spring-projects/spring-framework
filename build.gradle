@@ -43,6 +43,7 @@ configure(allprojects) { project ->
 	ext.jettyVersion         = "9.2.3.v20140905"
 	ext.jodaVersion          = "2.5"
 	ext.junitVersion         = "4.11"
+	ext.nettyVersion         = "4.0.23.Final"
 	ext.openJpaVersion       = "2.2.2"  // 2.3.0 not Java 8 compatible (based on ASM 4)
 	ext.protobufVersion      = "2.6.0"
 	ext.reactorVersion       = "1.1.5.RELEASE"
@@ -477,7 +478,9 @@ project("spring-messaging") {
 		compile(project(":spring-core"))
 		compile(project(":spring-context"))
 		optional("org.projectreactor:reactor-core:${reactorVersion}")
-		optional("org.projectreactor:reactor-net:${reactorVersion}")
+		optional("org.projectreactor:reactor-net:${reactorVersion}") {
+			exclude group: "io.netty", module: "netty-all"
+		}
 		optional("org.eclipse.jetty.websocket:websocket-server:${jettyVersion}") {
 			exclude group: "javax.servlet", module: "javax.servlet-api"
 		}
@@ -499,6 +502,7 @@ project("spring-messaging") {
 		testCompile("org.apache.tomcat.embed:tomcat-embed-core:${tomcatVersion}")
 		testCompile("org.apache.tomcat.embed:tomcat-embed-websocket:${tomcatVersion}")
 		testCompile("org.apache.tomcat.embed:tomcat-embed-logging-juli:${tomcatVersion}")
+		testCompile("io.netty:netty-all:${nettyVersion}")
 		testCompile("commons-dbcp:commons-dbcp:1.4")
 		testCompile("log4j:log4j:1.2.17")
 		testCompile("org.slf4j:slf4j-jcl:${slf4jVersion}")
@@ -672,7 +676,7 @@ project("spring-web") {
 		optional("commons-fileupload:commons-fileupload:1.3.1")
 		optional("org.apache.httpcomponents:httpclient:4.3.5")
 		optional("org.apache.httpcomponents:httpasyncclient:4.0.2")
-		optional("io.netty:netty-all:4.0.23.Final")
+		optional("io.netty:netty-all:${nettyVersion}")
 		optional("com.fasterxml.jackson.core:jackson-databind:${jackson2Version}")
 		optional("com.fasterxml.jackson.dataformat:jackson-dataformat-xml:${jackson2Version}")
 		optional("com.google.code.gson:gson:${gsonVersion}")
