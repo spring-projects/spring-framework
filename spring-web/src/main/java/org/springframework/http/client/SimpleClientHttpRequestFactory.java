@@ -199,7 +199,8 @@ public class SimpleClientHttpRequestFactory implements ClientHttpRequestFactory,
 		else {
 			connection.setInstanceFollowRedirects(false);
 		}
-		if ("PUT".equals(httpMethod) || "POST".equals(httpMethod) || "PATCH".equals(httpMethod)) {
+		if ("PUT".equals(httpMethod) || "POST".equals(httpMethod) ||
+				"PATCH".equals(httpMethod) || "DELETE".equals(httpMethod)) {
 			connection.setDoOutput(true);
 		}
 		else {

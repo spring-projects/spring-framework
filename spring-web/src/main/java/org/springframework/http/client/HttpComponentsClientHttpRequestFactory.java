@@ -22,7 +22,7 @@ import java.net.URI;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.Configurable;
-import org.apache.http.client.methods.HttpDelete;
+import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpHead;
 import org.apache.http.client.methods.HttpOptions;
@@ -273,4 +273,25 @@ public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequest
 		this.httpClient.close();
 	}
 
+
+	/**
+	 * An alternative to {@link org.apache.http.client.methods.HttpDelete} that
+	 * extends {@link org.apache.http.client.methods.HttpEntityEnclosingRequestBase}
+	 * rather than {@link org.apache.http.client.methods.HttpRequestBase} and
+	 * hence allows HTTP delete with a request body. For use with the RestTemplate
+	 * exchange methods which allow the combination of HTTP DELETE with entity.
+	 * @since 4.1.2
+	 */
+	private static class HttpDelete extends HttpEntityEnclosingRequestBase {
+
+		public HttpDelete(URI uri) {
+			super();
+			setURI(uri);
+		}
+
+		@Override
+		public String getMethod() {
+			return "DELETE";
+		}
+	}
 }
