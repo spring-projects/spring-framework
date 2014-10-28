@@ -52,15 +52,17 @@ public class EclipseLinkJpaDialect extends DefaultJpaDialect {
 
 
 	/**
-	 * Set whether to lazily start a database transaction within an
-	 * EclipseLink transaction.
-	 * <p>By default, database transactions are started early. This allows
-	 * for reusing the same JDBC Connection throughout an entire transaction,
-	 * including read operations, and also for exposing EclipseLink transactions
-	 * to JDBC access code (working on the same DataSource).
-	 * <p>It is only recommended to switch this flag to "true" when no JDBC access
-	 * code is involved in any of the transactions, and when it is acceptable to
-	 * perform read operations outside of the transactional JDBC Connection.
+	 * Set whether to lazily start a database resource transaction within a
+	 * Spring-managed EclipseLink transaction.
+	 * <p>By default, read-only transactions are started lazily but regular
+	 * non-read-only transactions are started early. This allows for reusing the
+	 * same JDBC Connection throughout an entire EclipseLink transaction, for
+	 * enforced isolation and consistent visibility with JDBC access code working
+	 * on the same DataSource.
+	 * <p>Switch this flag to "true" to enforce a lazy database transaction begin
+	 * even for non-read-only transactions, allowing access to EclipseLink's
+	 * shared cache and following EclipseLink's connection mode configuration,
+	 * assuming that isolation and visibility at the JDBC level are less important.
 	 * @see org.eclipse.persistence.sessions.UnitOfWork#beginEarlyTransaction()
 	 */
 	public void setLazyDatabaseTransaction(boolean lazyDatabaseTransaction) {
@@ -72,11 +74,10 @@ public class EclipseLinkJpaDialect extends DefaultJpaDialect {
 	public Object beginTransaction(EntityManager entityManager, TransactionDefinition definition)
 			throws PersistenceException, SQLException, TransactionException {
 
-		UnitOfWork uow = entityManager.unwrap(UnitOfWork.class);
-
 		if (definition.getIsolationLevel() != TransactionDefinition.ISOLATION_DEFAULT) {
 			// Pass custom isolation level on to EclipseLink's DatabaseLogin configuration
 			// (since Spring 4.1.2)
+			UnitOfWork uow = entityManager.unwrap(UnitOfWork.class);
 			uow.getLogin().setTransactionIsolation(definition.getIsolationLevel());
 		}
 
@@ -85,7 +86,7 @@ public class EclipseLinkJpaDialect extends DefaultJpaDialect {
 		if (!definition.isReadOnly() && !this.lazyDatabaseTransaction) {
 			// Begin an early transaction to force EclipseLink to get a JDBC Connection
 			// so that Spring can manage transactions with JDBC as well as EclipseLink.
-			uow.beginEarlyTransaction();
+			entityManager.unwrap(UnitOfWork.class).beginEarlyTransaction();
 		}
 
 		return null;
