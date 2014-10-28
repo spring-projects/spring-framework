@@ -239,10 +239,12 @@ public abstract class JdbcUtils {
 			className = obj.getClass().getName();
 		}
 		if (obj instanceof Blob) {
-			obj = rs.getBytes(index);
+			Blob blob = (Blob) obj;
+			obj = blob.getBytes(1, (int) blob.length());
 		}
 		else if (obj instanceof Clob) {
-			obj = rs.getString(index);
+			Clob clob = (Clob) obj;
+			obj = clob.getSubString(1, (int) clob.length());
 		}
 		else if ("oracle.sql.TIMESTAMP".equals(className) || "oracle.sql.TIMESTAMPTZ".equals(className)) {
 			obj = rs.getTimestamp(index);
