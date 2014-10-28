@@ -90,7 +90,7 @@ abstract class AutowireUtils {
 				}
 				int c1pl = fm1.getParameterTypes().length;
 				int c2pl = fm2.getParameterTypes().length;
-				return (new Integer(c1pl)).compareTo(c2pl) * -1;
+				return (Integer.valueOf(c1pl)).compareTo(c2pl) * -1;
 			}
 		});
 	}
