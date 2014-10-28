@@ -1831,7 +1831,7 @@ public class ClassReader {
             break;
         case 'B': // pointer to CONSTANT_Byte
             av.visit(name,
-            	     Byte.valueOf((byte) readInt(items[readUnsignedShort(v)])));
+            	    (byte) readInt(items[readUnsignedShort(v)]));
            v += 2;
             break;
         case 'Z': // pointer to CONSTANT_Boolean
@@ -1842,12 +1842,12 @@ public class ClassReader {
             break;
         case 'S': // pointer to CONSTANT_Short
             av.visit(name, 
-        	     Short.valueOf((short) readInt(items[readUnsignedShort(v)])));
+        	    (short) readInt(items[readUnsignedShort(v)]));
             v += 2;
             break;
         case 'C': // pointer to CONSTANT_Char
             av.visit(name, 
-            	     Character.valueOf((char) readInt(items[readUnsignedShort(v)])));
+            	    (char) readInt(items[readUnsignedShort(v)]));
             v += 2;
             break;
         case 's': // pointer to CONSTANT_Utf8
