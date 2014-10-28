@@ -175,7 +175,7 @@ public class SockJsClient implements WebSocketClient, Lifecycle {
 
 	@Override
 	public void stop() {
-		if (!isRunning()) {
+		if (isRunning()) {
 			this.running = false;
 			for (Transport transport : this.transports) {
 				if (transport instanceof Lifecycle) {
