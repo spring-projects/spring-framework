@@ -291,6 +291,10 @@ abstract class AutowireUtils {
 
 		@Override
 		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+			Assert.notNull(proxy, "proxy must not be null");
+			Assert.notNull(method, "method must not be null");
+			Assert.notNull(args, "Argument array must not be null");
+			
 			String methodName = method.getName();
 			if (methodName.equals("equals")) {
 				// Only consider equal when proxies are identical.
