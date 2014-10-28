@@ -51,8 +51,9 @@ public class XmlOptionsFactoryBean implements FactoryBean<XmlOptions> {
 	public void setOptions(Map<String, ?> optionsMap) {
 		this.xmlOptions = new XmlOptions();
 		if (optionsMap != null) {
-			for (String option : optionsMap.keySet()) {
-				this.xmlOptions.put(option, optionsMap.get(option));
+			for (Map.Entry<String, ?> optionEntry : optionsMap.entrySet()) {
+				String optionKey = optionEntry.getKey();
+				this.xmlOptions.put(optionKey, optionEntry.getValue());
 			}
 		}
 	}
