@@ -781,11 +781,14 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 			interceptors.add(new JsonViewResponseBodyAdvice());
 			exceptionHandlerExceptionResolver.setResponseBodyAdvice(interceptors);
 		}
-		exceptionHandlerExceptionResolver.afterPropertiesSet();
+		ResponseStatusExceptionResolver responseStatusExceptionResolver = new ResponseStatusExceptionResolver();
+		responseStatusExceptionResolver.setMessageSource(this.applicationContext);
 
 		exceptionResolvers.add(exceptionHandlerExceptionResolver);
-		exceptionResolvers.add(new ResponseStatusExceptionResolver());
+		exceptionResolvers.add(responseStatusExceptionResolver);
 		exceptionResolvers.add(new DefaultHandlerExceptionResolver());
+
+		exceptionHandlerExceptionResolver.afterPropertiesSet();
 	}
 
 	/**

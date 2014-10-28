@@ -31,20 +31,25 @@ import org.junit.Test;
 import org.springframework.beans.DirectFieldAccessor;
 import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
+import org.springframework.context.i18n.LocaleContextHolder;
+import org.springframework.context.support.StaticMessageSource;
 import org.springframework.core.Ordered;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.format.annotation.DateTimeFormat.ISO;
 import org.springframework.format.support.FormattingConversionService;
 import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.AbstractJackson2HttpMessageConverter;
 import org.springframework.http.converter.xml.MappingJackson2XmlHttpMessageConverter;
 import org.springframework.mock.web.test.MockHttpServletRequest;
+import org.springframework.mock.web.test.MockHttpServletResponse;
 import org.springframework.mock.web.test.MockServletContext;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.AntPathMatcher;
@@ -53,6 +58,7 @@ import org.springframework.validation.Validator;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.support.ConfigurableWebBindingInitializer;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
 import org.springframework.web.method.support.CompositeUriComponentsContributor;
@@ -219,6 +225,19 @@ public class WebMvcConfigurationSupportTests {
 		List<Object> interceptors = (List<Object>) fieldAccessor.getPropertyValue("responseBodyAdvice");
 		assertEquals(1, interceptors.size());
 		assertEquals(JsonViewResponseBodyAdvice.class, interceptors.get(0).getClass());
+
+		LocaleContextHolder.setLocale(Locale.ENGLISH);
+		try {
+			ResponseStatusExceptionResolver rser = (ResponseStatusExceptionResolver) expectedResolvers.get(1);
+			MockHttpServletRequest request = new MockHttpServletRequest("GET", "/");
+			MockHttpServletResponse response = new MockHttpServletResponse();
+			rser.resolveException(request, response, context.getBean(TestController.class), new UserAlreadyExistsException());
+			assertEquals("User already exists!", response.getErrorMessage());
+		}
+		finally {
+			LocaleContextHolder.resetLocaleContext();
+		}
+
 	}
 
 	@Test
@@ -289,6 +308,13 @@ public class WebMvcConfigurationSupportTests {
 		public TestController testController() {
 			return new TestController();
 		}
+
+		@Bean
+		public MessageSource messageSource() {
+			StaticMessageSource messageSource = new StaticMessageSource();
+			messageSource.addMessage("exception.user.exists", Locale.ENGLISH, "User already exists!");
+			return messageSource;
+		}
 	}
 
 	@Configuration
@@ -343,6 +369,10 @@ public class WebMvcConfigurationSupportTests {
 		@RequestMapping("/scopedProxy")
 		public void handle() {
 		}
+	}
+
+	@ResponseStatus(value = HttpStatus.BAD_REQUEST,  reason = "exception.user.exists")
+	public static class UserAlreadyExistsException extends RuntimeException {
 	}
 
 }
