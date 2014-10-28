@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -135,7 +135,7 @@ public class ReflectiveMethodResolver implements MethodResolver {
 						    	return 0;
 						    }
 						}
-						return (new Integer(m1pl)).compareTo(m2pl);
+						return (m1pl < m2pl ? -1 : (m1pl > m2pl ? 1 : 0));
 					}
 				});
 			}
