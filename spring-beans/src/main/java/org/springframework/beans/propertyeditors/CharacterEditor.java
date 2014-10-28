@@ -86,7 +86,7 @@ public class CharacterEditor extends PropertyEditorSupport {
 					text.length() + " cannot be converted to char type");
 		}
 		else {
-			setValue(new Character(text.charAt(0)));
+			setValue(Character.valueOf(text.charAt(0)));
 		}
 	}
 
@@ -103,7 +103,7 @@ public class CharacterEditor extends PropertyEditorSupport {
 
 	private void setAsUnicode(String text) {
 		int code = Integer.parseInt(text.substring(UNICODE_PREFIX.length()), 16);
-		setValue(new Character((char) code));
+		setValue(Character.valueOf((char) code));
 	}
 
 }
