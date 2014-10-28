@@ -129,8 +129,8 @@ public abstract class ResourceUtils {
 			URL url = (cl != null ? cl.getResource(path) : ClassLoader.getSystemResource(path));
 			if (url == null) {
 				String description = "class path resource [" + path + "]";
-				throw new FileNotFoundException(
-						description + " cannot be resolved to URL because it does not exist");
+				throw new FileNotFoundException(description +
+						" cannot be resolved to URL because it does not exist");
 			}
 			return url;
 		}
@@ -169,9 +169,8 @@ public abstract class ResourceUtils {
 			ClassLoader cl = ClassUtils.getDefaultClassLoader();
 			URL url = (cl != null ? cl.getResource(path) : ClassLoader.getSystemResource(path));
 			if (url == null) {
-				throw new FileNotFoundException(
-						description + " cannot be resolved to absolute file path " +
-						"because it does not reside in the file system");
+				throw new FileNotFoundException(description +
+						" cannot be resolved to absolute file path because it does not exist");
 			}
 			return getFile(url, description);
 		}
