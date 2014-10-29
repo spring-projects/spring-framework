@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -74,7 +74,23 @@ public class SimpleMetadataReaderFactory implements MetadataReaderFactory {
 	public MetadataReader getMetadataReader(String className) throws IOException {
 		String resourcePath = ResourceLoader.CLASSPATH_URL_PREFIX +
 				ClassUtils.convertClassNameToResourcePath(className) + ClassUtils.CLASS_FILE_SUFFIX;
-		return getMetadataReader(this.resourceLoader.getResource(resourcePath));
+		Resource resource = this.resourceLoader.getResource(resourcePath);
+		if (!resource.exists()) {
+			// Maybe an inner class name using the dot name syntax? Need to use the dollar syntax here...
+			// ClassUtils.forName has an equivalent check for resolution into Class references later on.
+			int lastDotIndex = className.lastIndexOf('.');
+			if (lastDotIndex != -1) {
+				String innerClassName =
+						className.substring(0, lastDotIndex) + '$' + className.substring(lastDotIndex + 1);
+				String innerClassResourcePath = ResourceLoader.CLASSPATH_URL_PREFIX +
+						ClassUtils.convertClassNameToResourcePath(innerClassName) + ClassUtils.CLASS_FILE_SUFFIX;
+				Resource innerClassResource = this.resourceLoader.getResource(innerClassResourcePath);
+				if (innerClassResource.exists()) {
+					resource = innerClassResource;
+				}
+			}
+		}
+		return getMetadataReader(resource);
 	}
 
 	@Override

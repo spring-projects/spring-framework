@@ -86,6 +86,16 @@ public class ConfigurationClassPostProcessorTests {
 		assertSame(foo, bar.foo);
 	}
 
+	@Test
+	public void configurationIntrospectionOfInnerClassesWorksWithDotNameSyntax() {
+		beanFactory.registerBeanDefinition("config", new RootBeanDefinition(getClass().getName() + ".SingletonBeanConfig"));
+		ConfigurationClassPostProcessor pp = new ConfigurationClassPostProcessor();
+		pp.postProcessBeanFactory(beanFactory);
+		Foo foo = beanFactory.getBean("foo", Foo.class);
+		Bar bar = beanFactory.getBean("bar", Bar.class);
+		assertSame(foo, bar.foo);
+	}
+
 	/**
 	 * Tests the fix for SPR-5655, a special workaround that prefers reflection
 	 * over ASM if a bean class is already loaded.
