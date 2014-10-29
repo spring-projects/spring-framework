@@ -47095,11 +47095,6 @@ Spring distribution. In all likelihood, you shouldn't ever need to implement you
   configuring a java.util.concurrent.ThreadPoolExecutor` and wraps it in a `TaskExecutor`.
   If you need to adapt to a different kind of `java.util.concurrent.Executor`, it is
   recommended that you use a <<concurrentTaskExecutor, `ConcurrentTaskExecutor`>> instead.
-* `TimerTaskExecutor`
-  This implementation uses a single `TimerTask` as its backing implementation.
-  It's different from the <<syncTaskExecutor, `SyncTaskExecutor`>> in that the method
-  invocations are executed in a separate thread, although they are effectively
-  synchronously batched in that thread.
 * `WorkManagerTaskExecutor`
 
 +
