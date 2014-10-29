@@ -22,7 +22,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -117,21 +116,21 @@ public class WebSocketMessageBrokerConfigurationSupportTests {
 		assertEquals(ImmutableMessageChannelInterceptor.class, interceptors.get(interceptors.size()-1).getClass());
 
 		assertEquals(1, handlers.size());
-		assertTrue(handlers.iterator().next() instanceof SubProtocolWebSocketHandler);
+		assertTrue(handlers.contains(config.getBean(SubProtocolWebSocketHandler.class)));
 	}
 
 	@Test
 	public void brokerChannel() {
 		ApplicationContext config = createConfig(TestChannelConfig.class, TestConfigurer.class);
 		TestChannel channel = config.getBean("brokerChannel", TestChannel.class);
-		Iterator<MessageHandler> handlers = channel.getSubscribers().iterator();
+		Set<MessageHandler> handlers = channel.getSubscribers();
 
 		List<ChannelInterceptor> interceptors = channel.getInterceptors();
 		assertEquals(ImmutableMessageChannelInterceptor.class, interceptors.get(interceptors.size()-1).getClass());
 
-		assertEquals(SimpleBrokerMessageHandler.class, handlers.next().getClass());
-		assertEquals(UserDestinationMessageHandler.class, handlers.next().getClass());
-		assertFalse(handlers.hasNext());
+		assertEquals(2, handlers.size());
+		assertTrue(handlers.contains(config.getBean(SimpleBrokerMessageHandler.class)));
+		assertTrue(handlers.contains(config.getBean(UserDestinationMessageHandler.class)));
 	}
 
 	@Test
@@ -212,6 +211,7 @@ public class WebSocketMessageBrokerConfigurationSupportTests {
 
 		@MessageMapping("/foo")
 		@SendTo("/bar")
+		@SuppressWarnings("unused")
 		public String handleMessage() {
 			return "bar";
 		}
