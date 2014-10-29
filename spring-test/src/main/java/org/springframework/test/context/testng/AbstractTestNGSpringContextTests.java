@@ -63,9 +63,9 @@ import org.springframework.test.context.web.ServletTestExecutionListener;
  * TestExecutionListeners} are configured by default:
  *
  * <ul>
- *   <li>{@link org.springframework.test.context.web.ServletTestExecutionListener}
- *   <li>{@link org.springframework.test.context.support.DependencyInjectionTestExecutionListener}
- *   <li>{@link org.springframework.test.context.support.DirtiesContextTestExecutionListener}
+ * <li>{@link org.springframework.test.context.web.ServletTestExecutionListener}
+ * <li>{@link org.springframework.test.context.support.DependencyInjectionTestExecutionListener}
+ * <li>{@link org.springframework.test.context.support.DirtiesContextTestExecutionListener}
  * </ul>
  *
  * @author Sam Brannen
@@ -81,8 +81,8 @@ import org.springframework.test.context.web.ServletTestExecutionListener;
  * @see AbstractTransactionalTestNGSpringContextTests
  * @see org.springframework.test.context.junit4.AbstractJUnit4SpringContextTests
  */
-@TestExecutionListeners({ ServletTestExecutionListener.class, DependencyInjectionTestExecutionListener.class,
-	DirtiesContextTestExecutionListener.class })
+@TestExecutionListeners({ServletTestExecutionListener.class, DependencyInjectionTestExecutionListener.class,
+		DirtiesContextTestExecutionListener.class})
 public abstract class AbstractTestNGSpringContextTests implements IHookable, ApplicationContextAware {
 
 	/** Logger available to subclasses */

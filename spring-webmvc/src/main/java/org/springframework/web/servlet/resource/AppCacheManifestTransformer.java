@@ -40,22 +40,21 @@ import org.springframework.util.StringUtils;
  *
  * <p>This transformer:
  * <ul>
- *     <li>modifies links to match the public URL paths that should be exposed to clients, using
- *     configured {@code ResourceResolver} strategies
- *     <li>appends a comment in the manifest, containing a Hash (e.g. "# Hash: 9de0f09ed7caf84e885f1f0f11c7e326"),
- *     thus changing the content of the manifest in order to trigger an appcache reload in the browser.
+ * <li>modifies links to match the public URL paths that should be exposed to clients,
+ * using configured {@code ResourceResolver} strategies
+ * <li>appends a comment in the manifest, containing a Hash (e.g. "# Hash: 9de0f09ed7caf84e885f1f0f11c7e326"),
+ * thus changing the content of the manifest in order to trigger an appcache reload in the browser.
  * </ul>
  *
- * All files that have the ".manifest" file extension, or the extension given in the constructor, will be transformed
- * by this class.
+ * All files that have the ".manifest" file extension, or the extension given in the constructor,
+ * will be transformed by this class.
  *
- * <p>This hash is computed using the content of the appcache manifest and the content of the linked resources; so
- * changing a resource linked in the manifest or the manifest itself should invalidate the browser cache.
+ * <p>This hash is computed using the content of the appcache manifest and the content of the linked resources;
+ * so changing a resource linked in the manifest or the manifest itself should invalidate the browser cache.
  *
  * @author Brian Clozel
- * @see <a href="http://www.whatwg.org/specs/web-apps/current-work/multipage/offline.html#offline">HTML5 offline
- * applications spec</a>
  * @since 4.1
+ * @see <a href="http://www.whatwg.org/specs/web-apps/current-work/multipage/offline.html#offline">HTML5 offline applications spec</a>
  */
 public class AppCacheManifestTransformer extends ResourceTransformerSupport {
 
@@ -64,6 +63,7 @@ public class AppCacheManifestTransformer extends ResourceTransformerSupport {
 	private static final Charset DEFAULT_CHARSET = Charset.forName("UTF-8");
 
 	private static final Log logger = LogFactory.getLog(AppCacheManifestTransformer.class);
+
 
 	private final Map<String, SectionTransformer> sectionTransformers = new HashMap<String, SectionTransformer>();
 
@@ -93,7 +93,9 @@ public class AppCacheManifestTransformer extends ResourceTransformerSupport {
 
 
 	@Override
-	public Resource transform(HttpServletRequest request, Resource resource, ResourceTransformerChain transformerChain) throws IOException {
+	public Resource transform(HttpServletRequest request, Resource resource, ResourceTransformerChain transformerChain)
+			throws IOException {
+
 		resource = transformerChain.transform(request, resource);
 
 		String filename = resource.getFilename();
@@ -128,7 +130,8 @@ public class AppCacheManifestTransformer extends ResourceTransformerSupport {
 				hashBuilder.appendString(line);
 			}
 			else {
-				contentWriter.write(currentTransformer.transform(line, hashBuilder, resource, transformerChain, request)  + "\n");
+				contentWriter.write(
+						currentTransformer.transform(line, hashBuilder, resource, transformerChain, request)  + "\n");
 			}
 		}
 

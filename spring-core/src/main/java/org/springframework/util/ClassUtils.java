@@ -58,6 +58,9 @@ public abstract class ClassUtils {
 	/** The package separator character '.' */
 	private static final char PACKAGE_SEPARATOR = '.';
 
+	/** The path separator character '/' */
+	private static final char PATH_SEPARATOR = '/';
+
 	/** The inner class separator character '$' */
 	private static final char INNER_CLASS_SEPARATOR = '$';
 
@@ -246,14 +249,15 @@ public abstract class ClassUtils {
 			return (clToUse != null ? clToUse.loadClass(name) : Class.forName(name));
 		}
 		catch (ClassNotFoundException ex) {
-			int lastDotIndex = name.lastIndexOf('.');
+			int lastDotIndex = name.lastIndexOf(PACKAGE_SEPARATOR);
 			if (lastDotIndex != -1) {
-				String innerClassName = name.substring(0, lastDotIndex) + '$' + name.substring(lastDotIndex + 1);
+				String innerClassName =
+						name.substring(0, lastDotIndex) + INNER_CLASS_SEPARATOR + name.substring(lastDotIndex + 1);
 				try {
 					return (clToUse != null ? clToUse.loadClass(innerClassName) : Class.forName(innerClassName));
 				}
 				catch (ClassNotFoundException ex2) {
-					// swallow - let original exception get through
+					// Swallow - let original exception get through
 				}
 			}
 			throw ex;
@@ -424,7 +428,7 @@ public abstract class ClassUtils {
 	 */
 	public static String getShortNameAsProperty(Class<?> clazz) {
 		String shortName = ClassUtils.getShortName(clazz);
-		int dotIndex = shortName.lastIndexOf('.');
+		int dotIndex = shortName.lastIndexOf(PACKAGE_SEPARATOR);
 		shortName = (dotIndex != -1 ? shortName.substring(dotIndex + 1) : shortName);
 		return Introspector.decapitalize(shortName);
 	}
@@ -943,7 +947,7 @@ public abstract class ClassUtils {
 	 */
 	public static String convertResourcePathToClassName(String resourcePath) {
 		Assert.notNull(resourcePath, "Resource path must not be null");
-		return resourcePath.replace('/', '.');
+		return resourcePath.replace(PATH_SEPARATOR, PACKAGE_SEPARATOR);
 	}
 
 	/**
@@ -953,7 +957,7 @@ public abstract class ClassUtils {
 	 */
 	public static String convertClassNameToResourcePath(String className) {
 		Assert.notNull(className, "Class name must not be null");
-		return className.replace('.', '/');
+		return className.replace(PACKAGE_SEPARATOR, PATH_SEPARATOR);
 	}
 
 	/**
@@ -966,7 +970,7 @@ public abstract class ClassUtils {
 	 * loading a resource file that is in the same package as a class file,
 	 * although {@link org.springframework.core.io.ClassPathResource} is usually
 	 * even more convenient.
-	 * @param clazz    the Class whose package will be used as the base
+	 * @param clazz the Class whose package will be used as the base
 	 * @param resourceName the resource name to append. A leading slash is optional.
 	 * @return the built-up resource path
 	 * @see ClassLoader#getResource
@@ -999,12 +1003,12 @@ public abstract class ClassUtils {
 			return "";
 		}
 		String className = clazz.getName();
-		int packageEndIndex = className.lastIndexOf('.');
+		int packageEndIndex = className.lastIndexOf(PACKAGE_SEPARATOR);
 		if (packageEndIndex == -1) {
 			return "";
 		}
 		String packageName = className.substring(0, packageEndIndex);
-		return packageName.replace('.', '/');
+		return packageName.replace(PACKAGE_SEPARATOR, PATH_SEPARATOR);
 	}
 
 	/**

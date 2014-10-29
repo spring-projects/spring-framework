@@ -72,13 +72,19 @@ import static org.mockito.BDDMockito.*;
 public class JmsTemplateTests {
 
 	private Context jndiContext;
+
 	private ConnectionFactory connectionFactory;
+
 	protected Connection connection;
+
 	private Session session;
+
 	private Destination queue;
 
 	private int deliveryMode = DeliveryMode.PERSISTENT;
+
 	private int priority = 9;
+
 	private int timeToLive = 10000;
 
 
@@ -94,8 +100,7 @@ public class JmsTemplateTests {
 		queue = mock(Queue.class);
 
 		given(connectionFactory.createConnection()).willReturn(connection);
-		given(connection.createSession(useTransactedTemplate(),
-				Session.AUTO_ACKNOWLEDGE)).willReturn(session);
+		given(connection.createSession(useTransactedTemplate(), Session.AUTO_ACKNOWLEDGE)).willReturn(session);
 		given(session.getTransacted()).willReturn(useTransactedSession());
 		given(jndiContext.lookup("testDestination")).willReturn(queue);
 	}
@@ -125,6 +130,7 @@ public class JmsTemplateTests {
 	protected Session getLocalSession() {
 		return session;
 	}
+
 
 	@Test
 	public void testExceptionStackTrace() {

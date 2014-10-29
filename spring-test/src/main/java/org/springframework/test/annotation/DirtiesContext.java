@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,12 +29,12 @@ import java.lang.annotation.Target;
  * associated with a test is <em>dirty</em> and should be closed:
  *
  * <ul>
- *   <li>after the current test, when declared at the method level</li>
- *   <li>after each test method in the current test class, when declared at the
- *   class level with class mode set to {@link ClassMode#AFTER_EACH_TEST_METHOD
- *   AFTER_EACH_TEST_METHOD}</li>
- *   <li>after the current test class, when declared at the class level with class
- *   mode set to {@link ClassMode#AFTER_CLASS AFTER_CLASS}</li>
+ * <li>after the current test, when declared at the method level</li>
+ * <li>after each test method in the current test class, when declared at the
+ * class level with class mode set to {@link ClassMode#AFTER_EACH_TEST_METHOD
+ * AFTER_EACH_TEST_METHOD}</li>
+ * <li>after the current test class, when declared at the class level with class
+ * mode set to {@link ClassMode#AFTER_CLASS AFTER_CLASS}</li>
  * </ul>
  *
  * <p>Use this annotation if a test has modified the context &mdash; for example,

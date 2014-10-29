@@ -20,7 +20,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanInitializationException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
@@ -56,20 +55,20 @@ import org.springframework.validation.Validator;
 /**
  * Provides essential configuration for handling messages with simple messaging
  * protocols such as STOMP.
- * <p>
- * {@link #clientInboundChannel()} and {@link #clientOutboundChannel()} deliver messages
- * to and from remote clients to several message handlers such as
+ *
+ * <p>{@link #clientInboundChannel()} and {@link #clientOutboundChannel()} deliver
+ * messages to and from remote clients to several message handlers such as
  * <ul>
- *	<li>{@link #simpAnnotationMethodMessageHandler()}</li>
- * 	<li>{@link #simpleBrokerMessageHandler()}</li>
- *	<li>{@link #stompBrokerRelayMessageHandler()}</li>
- *	<li>{@link #userDestinationMessageHandler()}</li>
+ * <li>{@link #simpAnnotationMethodMessageHandler()}</li>
+ * <li>{@link #simpleBrokerMessageHandler()}</li>
+ * <li>{@link #stompBrokerRelayMessageHandler()}</li>
+ * <li>{@link #userDestinationMessageHandler()}</li>
  * </ul>
  * while {@link #brokerChannel()} delivers messages from within the application to the
  * the respective message handlers. {@link #brokerMessagingTemplate()} can be injected
  * into any application component to send messages.
- * <p>
- * Sub-classes are responsible for the part of the configuration that feed messages
+ *
+ * <p>Subclasses are responsible for the part of the configuration that feed messages
  * to and from the client inbound/outbound channels (e.g. STOMP over WebSocket).
  *
  * @author Rossen Stoyanchev
@@ -78,10 +77,11 @@ import org.springframework.validation.Validator;
  */
 public abstract class AbstractMessageBrokerConfiguration implements ApplicationContextAware {
 
+	private static final String MVC_VALIDATOR_NAME = "mvcValidator";
+
 	private static final boolean jackson2Present= ClassUtils.isPresent(
 			"com.fasterxml.jackson.databind.ObjectMapper", AbstractMessageBrokerConfiguration.class.getClassLoader());
 
-	private static final String MVC_VALIDATOR_NAME = "mvcValidator";
 
 	private ChannelRegistration clientInboundChannelRegistration;
 
@@ -96,6 +96,16 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 	 * Protected constructor.
 	 */
 	protected AbstractMessageBrokerConfiguration() {
+	}
+
+
+	@Override
+	public void setApplicationContext(ApplicationContext applicationContext) {
+		this.applicationContext = applicationContext;
+	}
+
+	public ApplicationContext getApplicationContext() {
+		return this.applicationContext;
 	}
 
 
@@ -125,14 +135,12 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 		return this.clientInboundChannelRegistration;
 	}
 
-
 	/**
 	 * A hook for sub-classes to customize the message channel for inbound messages
 	 * from WebSocket clients.
 	 */
 	protected void configureClientInboundChannel(ChannelRegistration registration) {
 	}
-
 
 	@Bean
 	public AbstractSubscribableChannel clientOutboundChannel() {
@@ -248,13 +256,13 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 	@Bean
 	public AbstractBrokerMessageHandler simpleBrokerMessageHandler() {
 		SimpleBrokerMessageHandler handler = getBrokerRegistry().getSimpleBroker(brokerChannel());
-		return (handler != null) ? handler : new NoOpBrokerMessageHandler();
+		return (handler != null ? handler : new NoOpBrokerMessageHandler());
 	}
 
 	@Bean
 	public AbstractBrokerMessageHandler stompBrokerRelayMessageHandler() {
 		AbstractBrokerMessageHandler handler = getBrokerRegistry().getStompBrokerRelay(brokerChannel());
-		return (handler != null) ? handler : new NoOpBrokerMessageHandler();
+		return (handler != null ? handler : new NoOpBrokerMessageHandler());
 	}
 
 	@Bean
@@ -294,9 +302,8 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 	/**
 	 * Override this method to add custom message converters.
 	 * @param messageConverters the list to add converters to, initially empty
-	 *
 	 * @return {@code true} if default message converters should be added to list,
-	 * 	{@code false} if no more converters should be added.
+	 * {@code false} if no more converters should be added.
 	 */
 	protected boolean configureMessageConverters(List<MessageConverter> messageConverters) {
 		return true;
@@ -317,25 +324,17 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 		return new DefaultUserSessionRegistry();
 	}
 
-	@Override
-	public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-		this.applicationContext = applicationContext;
-	}
-
-	public ApplicationContext getApplicationContext() {
-		return applicationContext;
-	}
-
 	/**
 	 * Return a {@link org.springframework.validation.Validator}s instance for validating
 	 * {@code @Payload} method arguments.
-	 * In order, this method tries to get a Validator instance:
+	 * <p>In order, this method tries to get a Validator instance:
 	 * <ul>
-	 *   <li>delegating to getValidator() first</li>
-	 *   <li>if none returned, getting an existing instance with its well-known name "mvcValidator", created by an MVC configuration</li>
-	 *   <li>if none returned, checking the classpath for the presence of a JSR-303 implementation before creating a
-	 *   {@code OptionalValidatorFactoryBean}</li>
-	 *   <li>returning a no-op Validator instance</li>
+	 * <li>delegating to getValidator() first</li>
+	 * <li>if none returned, getting an existing instance with its well-known name "mvcValidator",
+	 * created by an MVC configuration</li>
+	 * <li>if none returned, checking the classpath for the presence of a JSR-303 implementation
+	 * before creating a {@code OptionalValidatorFactoryBean}</li>
+	 * <li>returning a no-op Validator instance</li>
 	 * </ul>
 	 */
 	protected Validator simpValidator() {
@@ -350,11 +349,8 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 					String className = "org.springframework.validation.beanvalidation.OptionalValidatorFactoryBean";
 					clazz = ClassUtils.forName(className, AbstractMessageBrokerConfiguration.class.getClassLoader());
 				}
-				catch (ClassNotFoundException e) {
-					throw new BeanInitializationException("Could not find default validator", e);
-				}
-				catch (LinkageError e) {
-					throw new BeanInitializationException("Could not find default validator", e);
+				catch (Throwable ex) {
+					throw new BeanInitializationException("Could not find default validator class", ex);
 				}
 				validator = (Validator) BeanUtils.instantiate(clazz);
 			}
@@ -403,6 +399,6 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 		@Override
 		protected void handleMessageInternal(Message<?> message) {
 		}
-	};
+	}
 
 }

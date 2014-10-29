@@ -84,9 +84,9 @@ public interface WebMvcConfigurer {
 	 * suffix registration, path matcher and path helper.
 	 * Configured path matcher and path helper instances are shared for:
 	 * <ul>
-	 *     <li>RequestMappings</li>
-	 *     <li>ViewControllerMappings</li>
-	 *     <li>ResourcesMappings</li>
+	 * <li>RequestMappings</li>
+	 * <li>ViewControllerMappings</li>
+	 * <li>ResourcesMappings</li>
 	 * </ul>
 	 * @since 4.0.3
 	 */

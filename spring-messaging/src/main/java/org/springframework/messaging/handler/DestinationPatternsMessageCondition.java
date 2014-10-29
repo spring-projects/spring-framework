@@ -38,8 +38,7 @@ import org.springframework.util.StringUtils;
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public final class DestinationPatternsMessageCondition
-		extends AbstractMessageCondition<DestinationPatternsMessageCondition> {
+public class DestinationPatternsMessageCondition extends AbstractMessageCondition<DestinationPatternsMessageCondition> {
 
 	public static final String LOOKUP_DESTINATION_HEADER = "lookupDestination";
 
@@ -68,12 +67,13 @@ public final class DestinationPatternsMessageCondition
 	}
 
 	private DestinationPatternsMessageCondition(Collection<String> patterns, PathMatcher pathMatcher) {
-		this.pathMatcher = (pathMatcher != null) ? pathMatcher : new AntPathMatcher();
+		this.pathMatcher = (pathMatcher != null ? pathMatcher : new AntPathMatcher());
 		this.patterns = Collections.unmodifiableSet(prependLeadingSlash(patterns, this.pathMatcher));
 	}
 
+
 	private static List<String> asList(String... patterns) {
-		return patterns != null ? Arrays.asList(patterns) : Collections.<String>emptyList();
+		return (patterns != null ? Arrays.asList(patterns) : Collections.<String>emptyList());
 	}
 
 	private static Set<String> prependLeadingSlash(Collection<String> patterns, PathMatcher pathMatcher) {
@@ -93,6 +93,7 @@ public final class DestinationPatternsMessageCondition
 		return result;
 	}
 
+
 	public Set<String> getPatterns() {
 		return this.patterns;
 	}
@@ -107,14 +108,15 @@ public final class DestinationPatternsMessageCondition
 		return " || ";
 	}
 
+
 	/**
 	 * Returns a new instance with URL patterns from the current instance ("this") and
 	 * the "other" instance as follows:
 	 * <ul>
-	 * 	<li>If there are patterns in both instances, combine the patterns in "this" with
-	 * 		the patterns in "other" using {@link org.springframework.util.PathMatcher#combine(String, String)}.
-	 * 	<li>If only one instance has patterns, use them.
-	 *  <li>If neither instance has patterns, use an empty String (i.e. "").
+	 * <li>If there are patterns in both instances, combine the patterns in "this" with
+	 * the patterns in "other" using {@link org.springframework.util.PathMatcher#combine(String, String)}.
+	 * <li>If only one instance has patterns, use them.
+	 * <li>If neither instance has patterns, use an empty String (i.e. "").
 	 * </ul>
 	 */
 	@Override

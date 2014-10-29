@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -305,11 +305,11 @@ import org.springframework.stereotype.Component;
  *
  * <h2>Constraints when authoring {@code @Configuration} classes</h2>
  * <ul>
- *    <li>&#064;Configuration classes must be non-final
- *    <li>&#064;Configuration classes must be non-local (may not be declared within a method)
- *    <li>&#064;Configuration classes must have a default/no-arg constructor and may not
- *        use {@link Autowired @Autowired} constructor parameters. Any nested configuration classes
- *        must be {@code static}
+ * <li>&#064;Configuration classes must be non-final
+ * <li>&#064;Configuration classes must be non-local (may not be declared within a method)
+ * <li>&#064;Configuration classes must have a default/no-arg constructor and may not use
+ * {@link Autowired @Autowired} constructor parameters. Any nested configuration classes
+ * must be {@code static}.
  * </ul>
  *
  * @author Rod Johnson
@@ -337,12 +337,10 @@ public @interface Configuration {
 	 * Explicitly specify the name of the Spring bean definition associated
 	 * with this Configuration class.  If left unspecified (the common case),
 	 * a bean name will be automatically generated.
-	 *
 	 * <p>The custom name applies only if the Configuration class is picked up via
 	 * component scanning or supplied directly to a {@link AnnotationConfigApplicationContext}.
 	 * If the Configuration class is registered as a traditional XML bean definition,
 	 * the name/id of the bean element will take precedence.
-	 *
 	 * @return the specified bean name, if any
 	 * @see org.springframework.beans.factory.support.DefaultBeanNameGenerator
 	 */

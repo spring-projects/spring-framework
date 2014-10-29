@@ -30,12 +30,12 @@ public class JmsTemplateTransactedTests extends JmsTemplateTests {
 
 	private Session localSession;
 
+
 	@Override
 	public void setupMocks() throws Exception {
 		super.setupMocks();
 		this.localSession = mock(Session.class);
-		given(this.connection.createSession(false,
-				Session.AUTO_ACKNOWLEDGE)).willReturn(this.localSession);
+		given(this.connection.createSession(false, Session.AUTO_ACKNOWLEDGE)).willReturn(this.localSession);
 	}
 
 	@Override

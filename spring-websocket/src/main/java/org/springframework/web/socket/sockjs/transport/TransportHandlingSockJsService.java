@@ -275,7 +275,7 @@ public class TransportHandlingSockJsService extends AbstractSockJsService implem
 
 	@Override
 	protected boolean validateRequest(String serverId, String sessionId, String transport) {
-		if (!this.getAllowedOrigins().contains("*") && !TransportType.fromValue(transport).supportsOrigin()) {
+		if (!getAllowedOrigins().contains("*") && !TransportType.fromValue(transport).supportsOrigin()) {
 			logger.error("Origin check has been enabled, but this transport does not support it");
 			return false;
 		}
@@ -298,7 +298,6 @@ public class TransportHandlingSockJsService extends AbstractSockJsService implem
 	}
 
 	private void scheduleSessionTask() {
-
 		synchronized (this.sessions) {
 			if (this.sessionCleanupTask != null) {
 				return;

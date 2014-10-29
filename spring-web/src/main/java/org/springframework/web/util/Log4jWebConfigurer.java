@@ -127,8 +127,7 @@ public abstract class Log4jWebConfigurer {
 
 				// Leave a URL (e.g. "classpath:" or "file:") as-is.
 				if (!ResourceUtils.isUrl(location)) {
-					// Consider a plain file path as relative to the web
-					// application root directory.
+					// Consider a plain file path as relative to the web application root directory.
 					location = WebUtils.getRealPath(servletContext, location);
 				}
 

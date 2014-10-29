@@ -32,7 +32,6 @@ import org.springframework.messaging.MessageChannel;
  */
 public class ImmutableMessageChannelInterceptor extends ChannelInterceptorAdapter {
 
-
 	@Override
 	public Message<?> preSend(Message<?> message, MessageChannel channel) {
 		MessageHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(message, MessageHeaderAccessor.class);

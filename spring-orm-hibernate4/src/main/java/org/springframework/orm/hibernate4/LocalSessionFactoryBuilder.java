@@ -260,7 +260,7 @@ public class LocalSessionFactoryBuilder extends Configuration {
 	 * @see #scanPackages
 	 */
 	public LocalSessionFactoryBuilder addPackages(String... annotatedPackages) {
-		for (String annotatedPackage :annotatedPackages) {
+		for (String annotatedPackage : annotatedPackages) {
 			addPackage(annotatedPackage);
 		}
 		return this;

@@ -49,9 +49,9 @@ import org.springframework.test.context.web.ServletTestExecutionListener;
  * TestExecutionListeners} are configured by default:
  *
  * <ul>
- *   <li>{@link org.springframework.test.context.web.ServletTestExecutionListener}
- *   <li>{@link org.springframework.test.context.support.DependencyInjectionTestExecutionListener}
- *   <li>{@link org.springframework.test.context.support.DirtiesContextTestExecutionListener}
+ * <li>{@link org.springframework.test.context.web.ServletTestExecutionListener}
+ * <li>{@link org.springframework.test.context.support.DependencyInjectionTestExecutionListener}
+ * <li>{@link org.springframework.test.context.support.DirtiesContextTestExecutionListener}
  * </ul>
  *
  * <p>Note: this class serves only as a convenience for extension. If you do not
@@ -76,8 +76,8 @@ import org.springframework.test.context.web.ServletTestExecutionListener;
  * @see org.springframework.test.context.testng.AbstractTestNGSpringContextTests
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@TestExecutionListeners({ ServletTestExecutionListener.class, DependencyInjectionTestExecutionListener.class,
-	DirtiesContextTestExecutionListener.class })
+@TestExecutionListeners({ServletTestExecutionListener.class, DependencyInjectionTestExecutionListener.class,
+		DirtiesContextTestExecutionListener.class})
 public abstract class AbstractJUnit4SpringContextTests implements ApplicationContextAware {
 
 	/**
