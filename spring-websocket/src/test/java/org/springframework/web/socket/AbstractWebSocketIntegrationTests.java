@@ -113,6 +113,12 @@ public abstract class AbstractWebSocketIntegrationTests {
 		catch (Throwable t) {
 			logger.error("Failed to stop server", t);
 		}
+		try {
+			this.wac.close();
+		}
+		catch (Throwable t) {
+			logger.error("Failed to close WebApplicationContext", t);
+		}
 	}
 
 	protected String getWsBaseUrl() {
