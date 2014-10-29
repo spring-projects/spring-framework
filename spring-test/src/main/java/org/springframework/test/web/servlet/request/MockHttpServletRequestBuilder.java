@@ -60,7 +60,7 @@ import org.springframework.web.util.UriUtils;
  * requests in {@link MockMvc}.
  *
  * <p>Application tests will typically access this builder through the static factory
- * methods in {@link org.springframework.test.web.servlet.setup.MockMvcBuilders}.
+ * methods in {@link MockMvcRequestBuilders}.
  *
  * @author Rossen Stoyanchev
  * @author Arjen Poutsma
