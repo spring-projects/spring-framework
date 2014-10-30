@@ -41,6 +41,7 @@ import javax.management.modelmbean.RequiredModelMBean;
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.aop.target.LazyInitTargetSource;
+import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
@@ -1095,6 +1096,18 @@ public class MBeanExporter extends MBeanRegistrationSupport implements MBeanExpo
 
 		public void setObjectName(ObjectName objectName) {
 			this.objectName = objectName;
+		}
+
+		@Override
+		public Object getTarget() throws BeansException {
+			try {
+				return super.getTarget();
+			} catch (BeansException e) {
+				if (logger.isErrorEnabled()) {
+					logger.error("Cannot retrieve target for published JMX target bean " + objectName, e);
+				}
+				throw e;
+			}
 		}
 
 		@Override
