@@ -169,7 +169,7 @@ public class PersistenceAnnotationBeanPostProcessor
 
 	/* Check JPA 2.1 PersistenceContext.synchronizationType attribute */
 	private static final Method synchronizationTypeAttribute =
-			ClassUtils.getMethodIfAvailable(PersistenceContext.class, "synchronizationType");
+			ClassUtils.getMethodIfAvailable(PersistenceContext.class, "synchronization");
 
 
 	private Object jndiEnvironment;
