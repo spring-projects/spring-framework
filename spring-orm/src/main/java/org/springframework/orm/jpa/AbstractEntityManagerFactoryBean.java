@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,15 +55,15 @@ import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
 
 /**
- * Abstract {@link org.springframework.beans.factory.FactoryBean} that
- * creates a local JPA {@link javax.persistence.EntityManagerFactory}
- * instance within a Spring application context.
+ * Abstract {@link org.springframework.beans.factory.FactoryBean} that creates
+ * a local JPA {@link javax.persistence.EntityManagerFactory} instance within
+ * a Spring application context.
  *
- * <p>Encapsulates the common functionality between the different JPA
- * bootstrap contracts (standalone as well as container).
+ * <p>Encapsulates the common functionality between the different JPA bootstrap
+ * contracts (standalone as well as container).
  *
- * <p>Implements support for standard JPA configuration as well as
- * Spring's {@link JpaVendorAdapter} abstraction, and controls the
+ * <p>Implements support for standard JPA configuration conventions as well as
+ * Spring's customizable {@link JpaVendorAdapter} mechanism, and controls the
  * EntityManagerFactory's lifecycle.
  *
  * <p>This class also implements the

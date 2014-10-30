@@ -120,15 +120,13 @@ public class ApplicationManagedEntityManagerIntegrationTests extends AbstractEnt
 		doInstantiateAndSave(em);
 		setComplete();
 		endTransaction();	// Should rollback
-		assertEquals("Tx must have committed back",
-				1, countRowsInTable(em, "person"));
+		assertEquals("Tx must have committed back", 1, countRowsInTable(em, "person"));
 
 		// Now clean up the database
 		startNewTransaction();
 		em.joinTransaction();
 		deleteAllPeopleUsingEntityManager(em);
-		assertEquals("People have been killed",
-				0, countRowsInTable(em, "person"));
+		assertEquals("People have been killed", 0, countRowsInTable(em, "person"));
 		setComplete();
 	}
 
@@ -141,8 +139,7 @@ public class ApplicationManagedEntityManagerIntegrationTests extends AbstractEnt
 		em.joinTransaction();
 		doInstantiateAndSave(em);
 		endTransaction();	// Should rollback
-		assertEquals("Tx must have been rolled back",
-				0, countRowsInTable(em, "person"));
+		assertEquals("Tx must have been rolled back", 0, countRowsInTable(em, "person"));
 	}
 
 	public void testCommitOccurs() {
@@ -152,11 +149,10 @@ public class ApplicationManagedEntityManagerIntegrationTests extends AbstractEnt
 
 		setComplete();
 		endTransaction();	// Should rollback
-		assertEquals("Tx must have committed back",
-				1, countRowsInTable(em, "person"));
+		assertEquals("Tx must have committed back", 1, countRowsInTable(em, "person"));
 
 		// Now clean up the database
-		deleteFromTables(new String[] { "person" });
+		deleteFromTables("person");
 	}
 
 }

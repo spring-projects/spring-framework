@@ -95,6 +95,7 @@ public abstract class ExtendedEntityManagerCreator {
 	 * transactions (according to the JPA 2.1 SynchronizationType rules)
 	 * @return an application-managed EntityManager that can join transactions
 	 * but does not participate in them automatically
+	 * @since 4.0
 	 */
 	public static EntityManager createApplicationManagedEntityManager(
 			EntityManager rawEntityManager, EntityManagerFactoryInfo emfInfo, boolean synchronizedWithTransaction) {
@@ -156,6 +157,7 @@ public abstract class ExtendedEntityManagerCreator {
 	 * @return a container-managed EntityManager that expects container-driven lifecycle
 	 * management but may opt out of automatic transaction synchronization
 	 * @see javax.persistence.EntityManagerFactory#createEntityManager(java.util.Map)
+	 * @since 4.0
 	 */
 	public static EntityManager createContainerManagedEntityManager(
 			EntityManagerFactory emf, Map<?, ?> properties, boolean synchronizedWithTransaction) {

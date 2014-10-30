@@ -132,7 +132,7 @@ public abstract class AbstractContainerEntityManagerFactoryIntegrationTests exte
 			newTony.getDriversLicense().getSerialNumber();
 		}
 		finally {
-			deleteFromTables(new String[] { "person", "drivers_license" });
+			deleteFromTables("person", "drivers_license");
 		}
 	}
 
