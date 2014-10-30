@@ -1420,8 +1420,8 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 		}
 		catch (BeanCreationException ex) {
 			// Can only happen when getting a FactoryBean.
-			if (logger.isDebugEnabled()) {
-				logger.debug("Ignoring bean creation exception on FactoryBean type check: " + ex);
+			if (logger.isWarnEnabled()) {
+				logger.warn("Bean creation exception on FactoryBean type check: " + ex);
 			}
 			onSuppressedException(ex);
 			return null;
