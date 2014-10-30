@@ -1098,6 +1098,19 @@ public class MBeanExporter extends MBeanRegistrationSupport implements MBeanExpo
 		}
 
 		@Override
+		public Object getTarget() {
+			try {
+				return super.getTarget();
+			}
+			catch (RuntimeException ex) {
+				if (logger.isWarnEnabled()) {
+					logger.warn("Failed to retrieve target for JMX-exposed bean [" + this.objectName + "]: " + ex);
+				}
+				throw ex;
+			}
+		}
+
+		@Override
 		protected void postProcessTargetObject(Object targetObject) {
 			injectNotificationPublisherIfNecessary(targetObject, this.modelMBean, this.objectName);
 		}
