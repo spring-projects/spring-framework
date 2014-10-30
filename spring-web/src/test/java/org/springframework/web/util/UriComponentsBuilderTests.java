@@ -291,6 +291,14 @@ public class UriComponentsBuilderTests {
 		assertEquals(Arrays.asList("foo", "bar"), result.getPathSegments());
 	}
 
+	// SPR-12398
+
+	@Test
+	public void pathWithDuplicateSlashes() throws URISyntaxException {
+		UriComponents uriComponents = UriComponentsBuilder.fromPath("/foo/////////bar").build();
+		assertEquals("/foo/bar", uriComponents.getPath());
+	}
+
 	@Test
 	public void replacePath() {
 		UriComponentsBuilder builder = UriComponentsBuilder.fromUriString("http://www.ietf.org/rfc/rfc2396.txt");
