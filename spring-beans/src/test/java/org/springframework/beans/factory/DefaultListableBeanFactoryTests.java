@@ -41,6 +41,7 @@ import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+import org.mockito.Matchers;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.MutablePropertyValues;
@@ -52,10 +53,13 @@ import org.springframework.beans.TypeConverter;
 import org.springframework.beans.TypeMismatchException;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.config.BeanExpressionContext;
+import org.springframework.beans.factory.config.BeanExpressionResolver;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.beans.factory.config.ConstructorArgumentValues;
 import org.springframework.beans.factory.config.InstantiationAwareBeanPostProcessorAdapter;
+import org.springframework.beans.factory.config.PropertiesFactoryBean;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.config.TypedStringValue;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
@@ -1163,6 +1167,23 @@ public class DefaultListableBeanFactoryTests {
 
 		assertNull(ab.getIntegerArray());
 		assertNull(ab.getResourceArray());
+	}
+
+	@Test
+	public void testExpressionInStringArray() {
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		BeanExpressionResolver beanExpressionResolver = mock(BeanExpressionResolver.class);
+		when(beanExpressionResolver.evaluate(eq("#{foo}"), Matchers.any(BeanExpressionContext.class)))
+				.thenReturn("classpath:/org/springframework/beans/factory/xml/util.properties");
+		bf.setBeanExpressionResolver(beanExpressionResolver);
+
+		RootBeanDefinition rbd = new RootBeanDefinition(PropertiesFactoryBean.class);
+		MutablePropertyValues pvs = new MutablePropertyValues();
+		pvs.add("locations", new String[]{"#{foo}"});
+		rbd.setPropertyValues(pvs);
+		bf.registerBeanDefinition("myProperties", rbd);
+		Properties properties = (Properties) bf.getBean("myProperties");
+		assertEquals("bar", properties.getProperty("foo"));
 	}
 
 	@Test

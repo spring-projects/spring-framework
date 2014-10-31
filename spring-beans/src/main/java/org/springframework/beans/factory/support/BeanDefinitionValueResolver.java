@@ -200,6 +200,14 @@ class BeanDefinitionValueResolver {
 						"Error converting typed String value for " + argName, ex);
 			}
 		}
+		else if (value instanceof String[]) {
+			String[] values = (String[]) value;
+			Object[] resolvedValues = new Object[values.length];
+			for (int i = 0; i < values.length; i++) {
+				resolvedValues[i] = evaluate(values[i]);
+			}
+			return resolvedValues;
+		}
 		else {
 			return evaluate(value);
 		}
