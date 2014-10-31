@@ -109,7 +109,7 @@ class BeanDefinitionValueResolver {
 		}
 		else if (value instanceof RuntimeBeanNameReference) {
 			String refName = ((RuntimeBeanNameReference) value).getBeanName();
-			refName = String.valueOf(evaluate(refName));
+			refName = String.valueOf(doEvaluate(refName));
 			if (!this.beanFactory.containsBean(refName)) {
 				throw new BeanDefinitionStoreException(
 						"Invalid bean name '" + refName + "' in bean reference for " + argName);
@@ -200,14 +200,6 @@ class BeanDefinitionValueResolver {
 						"Error converting typed String value for " + argName, ex);
 			}
 		}
-		else if (value instanceof String[]) {
-			String[] values = (String[]) value;
-			Object[] resolvedValues = new Object[values.length];
-			for (int i = 0; i < values.length; i++) {
-				resolvedValues[i] = evaluate(values[i]);
-			}
-			return resolvedValues;
-		}
 		else {
 			return evaluate(value);
 		}
@@ -219,7 +211,7 @@ class BeanDefinitionValueResolver {
 	 * @return the resolved value
 	 */
 	protected Object evaluate(TypedStringValue value) {
-		Object result = this.beanFactory.evaluateBeanDefinitionString(value.getValue(), this.beanDefinition);
+		Object result = doEvaluate(value.getValue());
 		if (!ObjectUtils.nullSafeEquals(result, value.getValue())) {
 			value.setDynamic();
 		}
@@ -228,16 +220,39 @@ class BeanDefinitionValueResolver {
 
 	/**
 	 * Evaluate the given value as an expression, if necessary.
-	 * @param value the candidate value (may be an expression)
-	 * @return the resolved value
+	 * @param value the original value (may be an expression)
+	 * @return the resolved value if necessary, or the original value
 	 */
 	protected Object evaluate(Object value) {
 		if (value instanceof String) {
-			return this.beanFactory.evaluateBeanDefinitionString((String) value, this.beanDefinition);
+			return doEvaluate((String) value);
+		}
+		else if (value instanceof String[]) {
+			String[] values = (String[]) value;
+			boolean actuallyResolved = false;
+			Object[] resolvedValues = new Object[values.length];
+			for (int i = 0; i < values.length; i++) {
+				String originalValue = values[i];
+				Object resolvedValue = doEvaluate(originalValue);
+				if (resolvedValue != originalValue) {
+					actuallyResolved = true;
+				}
+				resolvedValues[i] = resolvedValue;
+			}
+			return (actuallyResolved ? resolvedValues : values);
 		}
 		else {
 			return value;
 		}
+	}
+
+	/**
+	 * Evaluate the given String value as an expression, if necessary.
+	 * @param value the original value (may be an expression)
+	 * @return the resolved value if necessary, or the original String value
+	 */
+	private Object doEvaluate(String value) {
+		return this.beanFactory.evaluateBeanDefinitionString(value, this.beanDefinition);
 	}
 
 	/**
@@ -322,7 +337,7 @@ class BeanDefinitionValueResolver {
 	private Object resolveReference(Object argName, RuntimeBeanReference ref) {
 		try {
 			String refName = ref.getBeanName();
-			refName = String.valueOf(evaluate(refName));
+			refName = String.valueOf(doEvaluate(refName));
 			if (ref.isToParent()) {
 				if (this.beanFactory.getParentBeanFactory() == null) {
 					throw new BeanCreationException(
