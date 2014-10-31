@@ -16,6 +16,8 @@
 
 package org.springframework.context.annotation.configuration;
 
+import java.util.List;
+import java.util.Optional;
 import javax.inject.Provider;
 
 import org.junit.Test;
@@ -56,6 +58,33 @@ public class AutowiredConfigurationTests {
 
 		assertThat(factory.getBean("colour", Colour.class), equalTo(Colour.RED));
 		assertThat(factory.getBean("testBean", TestBean.class).getName(), equalTo(Colour.RED.toString()));
+	}
+
+	@Test
+	public void testAutowiredConfigurationMethodDependencies() {
+		AnnotationConfigApplicationContext factory = new AnnotationConfigApplicationContext(
+				AutowiredMethodConfig.class, ColorConfig.class);
+
+		assertThat(factory.getBean(Colour.class), equalTo(Colour.RED));
+		assertThat(factory.getBean(TestBean.class).getName(), equalTo("RED-RED"));
+	}
+
+	@Test
+	public void testAutowiredConfigurationMethodDependenciesWithOptionalAndAvailable() {
+		AnnotationConfigApplicationContext factory = new AnnotationConfigApplicationContext(
+				OptionalAutowiredMethodConfig.class, ColorConfig.class);
+
+		assertThat(factory.getBean(Colour.class), equalTo(Colour.RED));
+		assertThat(factory.getBean(TestBean.class).getName(), equalTo("RED-RED"));
+	}
+
+	@Test
+	public void testAutowiredConfigurationMethodDependenciesWithOptionalAndNotAvailable() {
+		AnnotationConfigApplicationContext factory = new AnnotationConfigApplicationContext(
+				OptionalAutowiredMethodConfig.class);
+
+		assertTrue(factory.getBeansOfType(Colour.class).isEmpty());
+		assertThat(factory.getBean(TestBean.class).getName(), equalTo(""));
 	}
 
 	/**
@@ -151,11 +180,26 @@ public class AutowiredConfigurationTests {
 
 
 	@Configuration
-	static class ColorConfig {
+	static class AutowiredMethodConfig {
 
 		@Bean
-		public Colour colour() {
-			return Colour.RED;
+		public TestBean testBean(Colour colour, List<Colour> colours) {
+			return new TestBean(colour.toString() + "-" + colours.get(0).toString());
+		}
+	}
+
+
+	@Configuration
+	static class OptionalAutowiredMethodConfig {
+
+		@Bean
+		public TestBean testBean(Optional<Colour> colour, Optional<List<Colour>> colours) {
+			if (!colour.isPresent() && !colours.isPresent()) {
+				return new TestBean("");
+			}
+			else {
+				return new TestBean(colour.get().toString() + "-" + colours.get().get(0).toString());
+			}
 		}
 	}
 
@@ -168,6 +212,16 @@ public class AutowiredConfigurationTests {
 		@Autowired
 		AutowiredConstructorConfig(Colour colour) {
 			this.colour = colour;
+		}
+	}
+
+
+	@Configuration
+	static class ColorConfig {
+
+		@Bean
+		public Colour colour() {
+			return Colour.RED;
 		}
 	}
 
