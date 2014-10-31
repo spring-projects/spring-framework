@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.tiles.TilesContainer;
 import org.apache.tiles.access.TilesAccess;
 import org.apache.tiles.renderer.DefinitionRenderer;
+import org.apache.tiles.request.AbstractRequest;
 import org.apache.tiles.request.ApplicationContext;
 import org.apache.tiles.request.Request;
 import org.apache.tiles.request.render.Renderer;
@@ -46,6 +47,7 @@ import org.springframework.web.servlet.view.AbstractUrlBasedView;
  * @author Nicolas Le Bas
  * @author mick semb wever
  * @author Rossen Stoyanchev
+ * @author Sebastien Deleuze
  * @since 3.2
  */
 public class TilesView extends AbstractUrlBasedView {
@@ -53,6 +55,8 @@ public class TilesView extends AbstractUrlBasedView {
 	private Renderer renderer;
 
 	private boolean exposeJstlAttributes = true;
+
+	private boolean alwaysInclude = false;
 
 	private ApplicationContext applicationContext;
 
@@ -73,6 +77,17 @@ public class TilesView extends AbstractUrlBasedView {
 		this.exposeJstlAttributes = exposeJstlAttributes;
 	}
 
+	/**
+	 * Specify whether to always include the view rather than forward to it.
+	 * <p>Default is "false". Switch this flag on to enforce the use of a
+	 * Servlet include, even if a forward would be possible.
+	 * @see TilesViewResolver#setAlwaysInclude(Boolean)
+	 * @since 4.1.2
+	 */
+	public void setAlwaysInclude(boolean alwaysInclude) {
+		this.alwaysInclude = alwaysInclude;
+	}
+
 	@Override
 	public void afterPropertiesSet() throws Exception {
 		super.afterPropertiesSet();
@@ -83,7 +98,6 @@ public class TilesView extends AbstractUrlBasedView {
 			this.renderer = new DefinitionRenderer(container);
 		}
 	}
-
 
 	@Override
 	public boolean checkResource(final Locale locale) throws Exception {
@@ -108,6 +122,9 @@ public class TilesView extends AbstractUrlBasedView {
 		exposeModelAsRequestAttributes(model, request);
 		if (this.exposeJstlAttributes) {
 			JstlUtils.exposeLocalizationContext(new RequestContext(request, getServletContext()));
+		}
+		if (this.alwaysInclude) {
+			request.setAttribute(AbstractRequest.FORCE_INCLUDE_ATTRIBUTE_NAME, true);
 		}
 
 		Request tilesRequest = createTilesRequest(request, response);

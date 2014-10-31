@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.web.servlet.view.tiles3;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.tiles.request.AbstractRequest;
 import org.apache.tiles.request.Request;
 import org.apache.tiles.request.render.Renderer;
 import org.junit.Before;
@@ -36,6 +37,7 @@ import static org.mockito.BDDMockito.*;
  * Test fixture for {@link TilesView}.
  *
  * @author mick semb wever
+ * @author Sebastien Deleuze
  */
 public class TilesViewTests {
 
@@ -72,12 +74,25 @@ public class TilesViewTests {
 	}
 
 	@Test
-	public void testRender() throws Exception {
+	public void render() throws Exception {
 		Map<String, Object> model = new HashMap<String, Object>();
 		model.put("modelAttribute", "modelValue");
 		view.render(model, request, response);
 		assertEquals("modelValue", request.getAttribute("modelAttribute"));
 		verify(renderer).render(eq(VIEW_PATH), isA(Request.class));
+	}
+
+	@Test
+	public void alwaysIncludeDefaults() throws Exception {
+		view.render(new HashMap<String, Object>(), request, response);
+		assertNull(request.getAttribute(AbstractRequest.FORCE_INCLUDE_ATTRIBUTE_NAME));
+	}
+
+	@Test
+	public void alwaysIncludeEnabled() throws Exception {
+		view.setAlwaysInclude(true);
+		view.render(new HashMap<String, Object>(), request, response);
+		assertTrue((Boolean)request.getAttribute(AbstractRequest.FORCE_INCLUDE_ATTRIBUTE_NAME));
 	}
 
 }

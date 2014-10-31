@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,11 +48,26 @@ import org.springframework.web.servlet.view.AbstractUrlBasedView;
  * {@link TilesConfigurer} bean definition in the application context.
  *
  * @author Juergen Hoeller
+ * @author Sebastien Deleuze
  * @since 2.5
  * @see #setUrl
  * @see TilesConfigurer
  */
 public class TilesView extends AbstractUrlBasedView {
+
+	private boolean alwaysInclude = false;
+
+
+	/**
+	 * Specify whether to always include the view rather than forward to it.
+	 * <p>Default is "false". Switch this flag on to enforce the use of a
+	 * Servlet include, even if a forward would be possible.
+	 * @see TilesViewResolver#setAlwaysInclude(Boolean)
+	 * @since 4.1.2
+	 */
+	public void setAlwaysInclude(boolean alwaysInclude) {
+		this.alwaysInclude = alwaysInclude;
+	}
 
 	@Override
 	public boolean checkResource(final Locale locale) throws Exception {
@@ -85,6 +100,9 @@ public class TilesView extends AbstractUrlBasedView {
 
 		exposeModelAsRequestAttributes(model, request);
 		JstlUtils.exposeLocalizationContext(new RequestContext(request, servletContext));
+		if (this.alwaysInclude) {
+			ServletUtil.setForceInclude(request, true);
+		}
 		container.render(getUrl(), request, response);
 	}
 
