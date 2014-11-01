@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +19,8 @@ package org.springframework.web.servlet.view.tiles2;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Enumeration;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 import javax.servlet.ServletContext;
@@ -32,6 +32,8 @@ import org.apache.tiles.servlet.context.ServletTilesApplicationContext;
 
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.ResourcePatternResolver;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.ObjectUtils;
 import org.springframework.web.context.support.ServletContextResourcePatternResolver;
 
 /**
@@ -89,7 +91,7 @@ public class SpringTilesApplicationContextFactory extends AbstractTilesApplicati
 		public URL getResource(String path) throws IOException {
 			URL retValue = null;
 			Set<URL> urlSet = getResources(path);
-			if (urlSet != null && !urlSet.isEmpty()) {
+			if (!CollectionUtils.isEmpty(urlSet)) {
 				retValue = urlSet.iterator().next();
 			}
 			return retValue;
@@ -99,8 +101,8 @@ public class SpringTilesApplicationContextFactory extends AbstractTilesApplicati
 		public Set<URL> getResources(String path) throws IOException {
 			Set<URL> urlSet = null;
 			Resource[] resources = this.resolver.getResources(path);
-			if (resources != null && resources.length > 0) {
-				urlSet = new HashSet<URL>();
+			if (!ObjectUtils.isEmpty(resources)) {
+				urlSet = new LinkedHashSet<URL>(resources.length);
 				for (Resource resource : resources) {
 					urlSet.add(resource.getURL());
 				}
