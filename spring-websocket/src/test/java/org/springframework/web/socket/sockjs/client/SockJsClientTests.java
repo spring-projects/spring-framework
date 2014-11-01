@@ -119,7 +119,6 @@ public class SockJsClientTests {
 	}
 
 	@Test
-	@SuppressWarnings("unchecked")
 	public void connectInfoRequestFailure() throws URISyntaxException {
 		HttpServerErrorException exception = new HttpServerErrorException(HttpStatus.SERVICE_UNAVAILABLE);
 		given(this.infoReceiver.executeInfoRequest(any())).willThrow(exception);

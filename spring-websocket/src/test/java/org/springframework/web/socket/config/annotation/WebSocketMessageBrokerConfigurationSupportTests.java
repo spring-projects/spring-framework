@@ -211,7 +211,6 @@ public class WebSocketMessageBrokerConfigurationSupportTests {
 
 		@MessageMapping("/foo")
 		@SendTo("/bar")
-		@SuppressWarnings("unused")
 		public String handleMessage() {
 			return "bar";
 		}

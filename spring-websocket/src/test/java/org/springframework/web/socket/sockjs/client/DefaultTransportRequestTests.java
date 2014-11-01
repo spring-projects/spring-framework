@@ -74,7 +74,6 @@ public class DefaultTransportRequestTests {
 
 
 	@Test
-	@SuppressWarnings("unchecked")
 	public void connect() throws Exception {
 		DefaultTransportRequest request = createTransportRequest(this.webSocketTransport, TransportType.WEBSOCKET);
 		request.connect(null, this.connectFuture);

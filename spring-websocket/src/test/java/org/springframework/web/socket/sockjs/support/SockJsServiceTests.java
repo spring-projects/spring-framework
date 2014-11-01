@@ -47,8 +47,6 @@ import static org.mockito.BDDMockito.*;
  */
 public class SockJsServiceTests extends AbstractHttpRequestTests {
 
-	private static final List<String> origins = Arrays.asList("http://mydomain1.com", "http://mydomain2.com");
-
 	private TestSockJsService service;
 
 	private WebSocketHandler handler;
