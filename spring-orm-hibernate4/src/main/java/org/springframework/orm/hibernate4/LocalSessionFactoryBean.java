@@ -25,7 +25,6 @@ import org.hibernate.Interceptor;
 import org.hibernate.SessionFactory;
 import org.hibernate.cache.spi.RegionFactory;
 import org.hibernate.cfg.Configuration;
-import org.hibernate.cfg.NamingStrategy;
 
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.FactoryBean;
@@ -85,7 +84,8 @@ public class LocalSessionFactoryBean extends HibernateExceptionTranslator
 
 	private Interceptor entityInterceptor;
 
-	private NamingStrategy namingStrategy;
+	@SuppressWarnings("deprecation")
+	private org.hibernate.cfg.NamingStrategy namingStrategy;
 
 	private Object jtaTransactionManager;
 
@@ -219,7 +219,8 @@ public class LocalSessionFactoryBean extends HibernateExceptionTranslator
 	 * physical column and table names given the info in the mapping document.
 	 * @see org.hibernate.cfg.Configuration#setNamingStrategy
 	 */
-	public void setNamingStrategy(NamingStrategy namingStrategy) {
+	@SuppressWarnings("deprecation")
+	public void setNamingStrategy(org.hibernate.cfg.NamingStrategy namingStrategy) {
 		this.namingStrategy = namingStrategy;
 	}
 
