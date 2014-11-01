@@ -60,7 +60,7 @@ public class DestinationPatternsMessageCondition extends AbstractMessageConditio
 	/**
 	 * Alternative constructor accepting a custom PathMatcher.
 	 * @param patterns the URL patterns to use; if 0, the condition will match to every request.
-	 * @param pathMatcher the PathMatcher to use.
+	 * @param pathMatcher the PathMatcher to use
 	 */
 	public DestinationPatternsMessageCondition(String[] patterns, PathMatcher pathMatcher) {
 		this(asList(patterns), pathMatcher);

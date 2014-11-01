@@ -93,7 +93,6 @@ import static org.junit.Assert.*;
  */
 public class WebMvcConfigurationSupportTests {
 
-
 	@Test
 	public void requestMappingHandlerMapping() throws Exception {
 		ApplicationContext context = initContext(WebConfig.class, ScopedController.class, ScopedProxyController.class);
@@ -208,10 +207,9 @@ public class WebMvcConfigurationSupportTests {
 	public void handlerExceptionResolver() throws Exception {
 		ApplicationContext context = initContext(WebConfig.class);
 		HandlerExceptionResolverComposite compositeResolver =
-			context.getBean("handlerExceptionResolver", HandlerExceptionResolverComposite.class);
+				context.getBean("handlerExceptionResolver", HandlerExceptionResolverComposite.class);
 
 		assertEquals(0, compositeResolver.getOrder());
-
 		List<HandlerExceptionResolver> expectedResolvers = compositeResolver.getExceptionResolvers();
 
 		assertEquals(ExceptionHandlerExceptionResolver.class, expectedResolvers.get(0).getClass());
@@ -237,16 +235,12 @@ public class WebMvcConfigurationSupportTests {
 		finally {
 			LocaleContextHolder.resetLocaleContext();
 		}
-
 	}
 
 	@Test
 	public void mvcViewResolver() {
 		ApplicationContext context = initContext(WebConfig.class);
 		ViewResolverComposite resolver = context.getBean("mvcViewResolver", ViewResolverComposite.class);
-
-		Map<String, ViewResolver> map = BeanFactoryUtils.beansOfTypeIncludingAncestors(
-				context, ViewResolver.class, true, false);
 
 		assertNotNull(resolver);
 		assertEquals(1, resolver.getViewResolvers().size());
@@ -317,6 +311,7 @@ public class WebMvcConfigurationSupportTests {
 		}
 	}
 
+
 	@Configuration
 	public static class ViewResolverConfig {
 
@@ -325,6 +320,7 @@ public class WebMvcConfigurationSupportTests {
 			return new BeanNameViewResolver();
 		}
 	}
+
 
 	@EnableWebMvc
 	@Configuration
@@ -336,6 +332,7 @@ public class WebMvcConfigurationSupportTests {
 			registry.order(123);
 		}
 	}
+
 
 	@Controller
 	public static class TestController {
@@ -370,6 +367,7 @@ public class WebMvcConfigurationSupportTests {
 		public void handle() {
 		}
 	}
+
 
 	@ResponseStatus(value = HttpStatus.BAD_REQUEST,  reason = "exception.user.exists")
 	public static class UserAlreadyExistsException extends RuntimeException {
