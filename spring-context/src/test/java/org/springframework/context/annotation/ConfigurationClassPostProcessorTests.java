@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import org.springframework.beans.factory.support.RootBeanDefinition;
 
 /**
  * @author Chris Beams
+ * @author Juergen Hoeller
  */
 public class ConfigurationClassPostProcessorTests {
 
@@ -42,6 +43,17 @@ public class ConfigurationClassPostProcessorTests {
 	public void testEnhancementIsPresentBecauseSingletonSemanticsAreRespected() {
 		DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
 		beanFactory.registerBeanDefinition("config", new RootBeanDefinition(SingletonBeanConfig.class));
+		ConfigurationClassPostProcessor pp = new ConfigurationClassPostProcessor();
+		pp.postProcessBeanFactory(beanFactory);
+		Foo foo = beanFactory.getBean("foo", Foo.class);
+		Bar bar = beanFactory.getBean("bar", Bar.class);
+		assertSame(foo, bar.foo);
+	}
+
+	@Test
+	public void configurationIntrospectionOfInnerClassesWorksWithDotNameSyntax() {
+		DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
+		beanFactory.registerBeanDefinition("config", new RootBeanDefinition(getClass().getName() + ".SingletonBeanConfig"));
 		ConfigurationClassPostProcessor pp = new ConfigurationClassPostProcessor();
 		pp.postProcessBeanFactory(beanFactory);
 		Foo foo = beanFactory.getBean("foo", Foo.class);
