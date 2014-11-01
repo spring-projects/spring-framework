@@ -1000,6 +1000,16 @@ public class DefaultListableBeanFactoryTests {
 
 		beansOfType = lbf.getBeansOfType(null, false, true);
 		assertEquals(2, beansOfType.size());
+
+		Iterator<String> beanNames = lbf.getBeanNamesIterator();
+		assertEquals("test", beanNames.next());
+		assertEquals("singletonObject", beanNames.next());
+		assertFalse(beanNames.hasNext());
+
+		assertTrue(lbf.containsSingleton("test"));
+		assertTrue(lbf.containsSingleton("singletonObject"));
+		assertTrue(lbf.containsBeanDefinition("test"));
+		assertFalse(lbf.containsBeanDefinition("singletonObject"));
 	}
 
 	@Test
@@ -1010,8 +1020,8 @@ public class DefaultListableBeanFactoryTests {
 		p.setProperty("test.name", "Tony");
 		p.setProperty("test.age", "48");
 		p.setProperty("test.spouse(ref)", "singletonObject");
-		p.setProperty("singletonObject.(class)", org.springframework.beans.factory.config.PropertiesFactoryBean.class.getName());
 		(new PropertiesBeanDefinitionReader(lbf)).registerBeanDefinitions(p);
+		lbf.registerBeanDefinition("singletonObject", new RootBeanDefinition(PropertiesFactoryBean.class));
 		Object singletonObject = new TestBean();
 		lbf.registerSingleton("singletonObject", singletonObject);
 		lbf.preInstantiateSingletons();
@@ -1028,7 +1038,17 @@ public class DefaultListableBeanFactoryTests {
 		assertTrue(beansOfType.containsValue(singletonObject));
 
 		beansOfType = lbf.getBeansOfType(null, false, true);
+
+		Iterator<String> beanNames = lbf.getBeanNamesIterator();
+		assertEquals("test", beanNames.next());
+		assertEquals("singletonObject", beanNames.next());
+		assertFalse(beanNames.hasNext());
 		assertEquals(2, beansOfType.size());
+
+		assertTrue(lbf.containsSingleton("test"));
+		assertTrue(lbf.containsSingleton("singletonObject"));
+		assertTrue(lbf.containsBeanDefinition("test"));
+		assertTrue(lbf.containsBeanDefinition("singletonObject"));
 	}
 
 	@Test

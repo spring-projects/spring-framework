@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,6 @@
 
 package org.springframework.beans.factory;
 
-import java.util.Arrays;
-
 import org.junit.Test;
 
 import org.springframework.beans.BeansException;
@@ -32,7 +30,7 @@ import static org.junit.Assert.*;
  * @author Chris Beams
  * @since 04.07.2006
  */
-public final class SharedBeanRegistryTests {
+public class DefaultSingletonBeanRegistryTests {
 
 	@Test
 	public void testSingletons() {
@@ -53,9 +51,10 @@ public final class SharedBeanRegistryTests {
 		assertSame(tb, beanRegistry.getSingleton("tb"));
 		assertSame(tb2, beanRegistry.getSingleton("tb2"));
 		assertEquals(2, beanRegistry.getSingletonCount());
-		assertEquals(2, beanRegistry.getSingletonNames().length);
-		assertTrue(Arrays.asList(beanRegistry.getSingletonNames()).contains("tb"));
-		assertTrue(Arrays.asList(beanRegistry.getSingletonNames()).contains("tb2"));
+		String[] names = beanRegistry.getSingletonNames();
+		assertEquals(2, names.length);
+		assertEquals("tb", names[0]);
+		assertEquals("tb2", names[1]);
 
 		beanRegistry.destroySingletons();
 		assertEquals(0, beanRegistry.getSingletonCount());
@@ -73,8 +72,9 @@ public final class SharedBeanRegistryTests {
 
 		assertSame(tb, beanRegistry.getSingleton("tb"));
 		assertEquals(1, beanRegistry.getSingletonCount());
-		assertEquals(1, beanRegistry.getSingletonNames().length);
-		assertTrue(Arrays.asList(beanRegistry.getSingletonNames()).contains("tb"));
+		String[] names = beanRegistry.getSingletonNames();
+		assertEquals(1, names.length);
+		assertEquals("tb", names[0]);
 		assertFalse(tb.wasDestroyed());
 
 		beanRegistry.destroySingletons();
