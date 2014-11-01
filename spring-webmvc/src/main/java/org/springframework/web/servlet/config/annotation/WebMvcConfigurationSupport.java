@@ -51,7 +51,6 @@ import org.springframework.util.ClassUtils;
 import org.springframework.validation.Errors;
 import org.springframework.validation.MessageCodesResolver;
 import org.springframework.validation.Validator;
-import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 import org.springframework.web.HttpRequestHandler;
 import org.springframework.web.accept.ContentNegotiationManager;
 import org.springframework.web.bind.WebDataBinder;
@@ -88,49 +87,49 @@ import org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolv
  *
  * <p>This class registers the following {@link HandlerMapping}s:</p>
  * <ul>
- * 	<li>{@link RequestMappingHandlerMapping}
- * 	ordered at 0 for mapping requests to annotated controller methods.
- * 	<li>{@link HandlerMapping}
- * 	ordered at 1 to map URL paths directly to view names.
- * 	<li>{@link BeanNameUrlHandlerMapping}
- * 	ordered at 2 to map URL paths to controller bean names.
- * 	<li>{@link HandlerMapping}
- * 	ordered at {@code Integer.MAX_VALUE-1} to serve static resource requests.
- * 	<li>{@link HandlerMapping}
- * 	ordered at {@code Integer.MAX_VALUE} to forward requests to the default servlet.
+ * <li>{@link RequestMappingHandlerMapping}
+ * ordered at 0 for mapping requests to annotated controller methods.
+ * <li>{@link HandlerMapping}
+ * ordered at 1 to map URL paths directly to view names.
+ * <li>{@link BeanNameUrlHandlerMapping}
+ * ordered at 2 to map URL paths to controller bean names.
+ * <li>{@link HandlerMapping}
+ * ordered at {@code Integer.MAX_VALUE-1} to serve static resource requests.
+ * <li>{@link HandlerMapping}
+ * ordered at {@code Integer.MAX_VALUE} to forward requests to the default servlet.
  * </ul>
  *
  * <p>Registers these {@link HandlerAdapter}s:
  * <ul>
- * 	<li>{@link RequestMappingHandlerAdapter}
- * 	for processing requests with annotated controller methods.
- * 	<li>{@link HttpRequestHandlerAdapter}
- * 	for processing requests with {@link HttpRequestHandler}s.
- * 	<li>{@link SimpleControllerHandlerAdapter}
- * 	for processing requests with interface-based {@link Controller}s.
+ * <li>{@link RequestMappingHandlerAdapter}
+ * for processing requests with annotated controller methods.
+ * <li>{@link HttpRequestHandlerAdapter}
+ * for processing requests with {@link HttpRequestHandler}s.
+ * <li>{@link SimpleControllerHandlerAdapter}
+ * for processing requests with interface-based {@link Controller}s.
  * </ul>
  *
  * <p>Registers a {@link HandlerExceptionResolverComposite} with this chain of
  * exception resolvers:
  * <ul>
- * 	<li>{@link ExceptionHandlerExceptionResolver} for handling exceptions
- * 	through @{@link ExceptionHandler} methods.
- * 	<li>{@link ResponseStatusExceptionResolver} for exceptions annotated
- * 	with @{@link ResponseStatus}.
- * 	<li>{@link DefaultHandlerExceptionResolver} for resolving known Spring
- * 	exception types
+ * <li>{@link ExceptionHandlerExceptionResolver} for handling exceptions
+ * through @{@link ExceptionHandler} methods.
+ * <li>{@link ResponseStatusExceptionResolver} for exceptions annotated
+ * with @{@link ResponseStatus}.
+ * <li>{@link DefaultHandlerExceptionResolver} for resolving known Spring
+ * exception types
  * </ul>
  *
  * <p>Both the {@link RequestMappingHandlerAdapter} and the
  * {@link ExceptionHandlerExceptionResolver} are configured with default
  * instances of the following by default:
  * <ul>
- * 	<li>A {@link ContentNegotiationManager}
- * 	<li>A {@link DefaultFormattingConversionService}
- * 	<li>A {@link LocalValidatorFactoryBean} if a JSR-303 implementation is
- * 	available on the classpath
- * 	<li>A range of {@link HttpMessageConverter}s depending on the 3rd party
- * 	libraries available on the classpath.
+ * <li>a {@link ContentNegotiationManager}
+ * <li>a {@link DefaultFormattingConversionService}
+ * <li>a {@link org.springframework.validation.beanvalidation.LocalValidatorFactoryBean}
+ * if a JSR-303 implementation is available on the classpath
+ * <li>a range of {@link HttpMessageConverter}s depending on the third-party
+ * libraries available on the classpath.
  * </ul>
  *
  * @author Rossen Stoyanchev
@@ -343,9 +342,9 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	 * through annotated controller methods. Consider overriding one of these
 	 * other more fine-grained methods:
 	 * <ul>
-	 *  <li>{@link #addArgumentResolvers} for adding custom argument resolvers.
-	 * 	<li>{@link #addReturnValueHandlers} for adding custom return value handlers.
-	 * 	<li>{@link #configureMessageConverters} for adding custom message converters.
+	 * <li>{@link #addArgumentResolvers} for adding custom argument resolvers.
+	 * <li>{@link #addReturnValueHandlers} for adding custom return value handlers.
+	 * <li>{@link #configureMessageConverters} for adding custom message converters.
 	 * </ul>
 	 */
 	@Bean
@@ -612,23 +611,26 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	 * A method available to subclasses for adding default {@link HandlerExceptionResolver}s.
 	 * <p>Adds the following exception resolvers:
 	 * <ul>
-	 * 	<li>{@link ExceptionHandlerExceptionResolver}
-	 * 	for handling exceptions through @{@link ExceptionHandler} methods.
-	 * 	<li>{@link ResponseStatusExceptionResolver}
-	 * 	for exceptions annotated with @{@link ResponseStatus}.
-	 * 	<li>{@link DefaultHandlerExceptionResolver}
-	 * 	for resolving known Spring exception types
+	 * <li>{@link ExceptionHandlerExceptionResolver}
+	 * for handling exceptions through @{@link ExceptionHandler} methods.
+	 * <li>{@link ResponseStatusExceptionResolver}
+	 * for exceptions annotated with @{@link ResponseStatus}.
+	 * <li>{@link DefaultHandlerExceptionResolver}
+	 * for resolving known Spring exception types
 	 * </ul>
 	 */
 	protected final void addDefaultHandlerExceptionResolvers(List<HandlerExceptionResolver> exceptionResolvers) {
 		ExceptionHandlerExceptionResolver exceptionHandlerExceptionResolver = new ExceptionHandlerExceptionResolver();
-		exceptionHandlerExceptionResolver.setApplicationContext(this.applicationContext);
 		exceptionHandlerExceptionResolver.setContentNegotiationManager(mvcContentNegotiationManager());
 		exceptionHandlerExceptionResolver.setMessageConverters(getMessageConverters());
+		exceptionHandlerExceptionResolver.setApplicationContext(this.applicationContext);
 		exceptionHandlerExceptionResolver.afterPropertiesSet();
-
 		exceptionResolvers.add(exceptionHandlerExceptionResolver);
-		exceptionResolvers.add(new ResponseStatusExceptionResolver());
+
+		ResponseStatusExceptionResolver responseStatusExceptionResolver = new ResponseStatusExceptionResolver();
+		responseStatusExceptionResolver.setMessageSource(this.applicationContext);
+		exceptionResolvers.add(responseStatusExceptionResolver);
+
 		exceptionResolvers.add(new DefaultHandlerExceptionResolver());
 	}
 
