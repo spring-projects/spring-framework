@@ -17,28 +17,35 @@
 package org.springframework.web.servlet.config.annotation;
 
 import java.util.List;
+import java.util.Locale;
 import javax.servlet.http.HttpServletRequest;
 
 import org.joda.time.DateTime;
 import org.junit.Before;
 import org.junit.Test;
 
+import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
+import org.springframework.context.i18n.LocaleContextHolder;
+import org.springframework.context.support.StaticMessageSource;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.format.annotation.DateTimeFormat.ISO;
 import org.springframework.format.support.FormattingConversionService;
 import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpStatus;
 import org.springframework.mock.web.test.MockHttpServletRequest;
+import org.springframework.mock.web.test.MockHttpServletResponse;
 import org.springframework.mock.web.test.MockServletContext;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.Validator;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.support.ConfigurableWebBindingInitializer;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
@@ -63,6 +70,7 @@ import static org.junit.Assert.*;
  *
  * @author Rossen Stoyanchev
  * @author Juergen Hoeller
+ * @author Sebastien Deleuze
  */
 public class WebMvcConfigurationSupportTests {
 
@@ -169,10 +177,9 @@ public class WebMvcConfigurationSupportTests {
 	@Test
 	public void handlerExceptionResolver() throws Exception {
 		HandlerExceptionResolverComposite compositeResolver =
-			this.wac.getBean("handlerExceptionResolver", HandlerExceptionResolverComposite.class);
+				this.wac.getBean("handlerExceptionResolver", HandlerExceptionResolverComposite.class);
 
 		assertEquals(0, compositeResolver.getOrder());
-
 		List<HandlerExceptionResolver> expectedResolvers = compositeResolver.getExceptionResolvers();
 
 		assertEquals(ExceptionHandlerExceptionResolver.class, expectedResolvers.get(0).getClass());
@@ -181,6 +188,18 @@ public class WebMvcConfigurationSupportTests {
 
 		ExceptionHandlerExceptionResolver eher = (ExceptionHandlerExceptionResolver) expectedResolvers.get(0);
 		assertNotNull(eher.getApplicationContext());
+
+		LocaleContextHolder.setLocale(Locale.ENGLISH);
+		try {
+			ResponseStatusExceptionResolver rser = (ResponseStatusExceptionResolver) expectedResolvers.get(1);
+			MockHttpServletRequest request = new MockHttpServletRequest("GET", "/");
+			MockHttpServletResponse response = new MockHttpServletResponse();
+			rser.resolveException(request, response, this.wac.getBean(TestController.class), new UserAlreadyExistsException());
+			assertEquals("User already exists!", response.getErrorMessage());
+		}
+		finally {
+			LocaleContextHolder.resetLocaleContext();
+		}
 	}
 
 
@@ -191,6 +210,13 @@ public class WebMvcConfigurationSupportTests {
 		@Bean(name="/testController")
 		public TestController testController() {
 			return new TestController();
+		}
+
+		@Bean
+		public MessageSource messageSource() {
+			StaticMessageSource messageSource = new StaticMessageSource();
+			messageSource.addMessage("exception.user.exists", Locale.ENGLISH, "User already exists!");
+			return messageSource;
 		}
 	}
 
@@ -227,6 +253,11 @@ public class WebMvcConfigurationSupportTests {
 		@RequestMapping("/scopedProxy")
 		public void handle() {
 		}
+	}
+
+
+	@ResponseStatus(value = HttpStatus.BAD_REQUEST,  reason = "exception.user.exists")
+	public static class UserAlreadyExistsException extends RuntimeException {
 	}
 
 }
