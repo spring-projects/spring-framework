@@ -375,7 +375,6 @@ public class JmsMessagingTemplate extends AbstractMessagingTemplate<Destination>
 		}
 	}
 
-	@SuppressWarnings("ThrowableResultOfMethodCallIgnored")
 	protected MessagingException convertJmsException(JmsException ex) {
 		if (ex instanceof org.springframework.jms.support.destination.DestinationResolutionException ||
 				ex instanceof InvalidDestinationException) {

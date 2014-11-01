@@ -87,7 +87,6 @@ public class DefaultMessageListenerContainerTests {
 		verify(execution, times(1)).nextBackOff(); // only on attempt as the second one lead to a recovery
 	}
 
-	@SuppressWarnings("unchecked")
 	private DefaultMessageListenerContainer createContainer(BackOff backOff, ConnectionFactory connectionFactory) {
 
 		Destination destination = new Destination() {};

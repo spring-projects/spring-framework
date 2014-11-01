@@ -72,7 +72,6 @@ public class MessagingMessageListenerAdapter extends AbstractAdaptableMessageLis
 		}
 	}
 
-	@SuppressWarnings("unchecked")
 	protected Message<?> toMessagingMessage(javax.jms.Message jmsMessage) {
 		try {
 			return (Message<?>) getMessagingMessageConverter().fromMessage(jmsMessage);

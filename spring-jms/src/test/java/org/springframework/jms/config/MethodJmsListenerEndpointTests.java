@@ -63,8 +63,6 @@ import org.springframework.validation.annotation.Validated;
 
 import static org.junit.Assert.*;
 import static org.mockito.BDDMockito.*;
-import static org.mockito.BDDMockito.verify;
-import static org.mockito.Mockito.mock;
 
 /**
  * @author Stephane Nicoll

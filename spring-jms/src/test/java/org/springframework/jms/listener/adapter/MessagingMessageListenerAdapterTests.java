@@ -128,6 +128,7 @@ public class MessagingMessageListenerAdapterTests {
 	}
 
 
+	@SuppressWarnings("unused")
 	private static class SampleBean {
 
 		public Message<String> echo(Message<String> input) {
