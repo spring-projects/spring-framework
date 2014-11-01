@@ -29,7 +29,7 @@ This document is a reference guide to Spring Framework features. If you have any
 requests, comments, or questions on this document, please post them on the
 https://groups.google.com/forum/#!forum/spring-framework-contrib[user mailing
 list]. Questions on the Framework itself should be asked on StackOverflow
-(see http://spring.io/questions[]).
+(see https://spring.io/questions[]).
 --
 
 
@@ -45,7 +45,7 @@ embraced.
 
 If you are just getting started with Spring, you may want to begin with the lighter
 https://spring.io/guides["Getting Started"] guides that are available from
-http://spring.io. As well as being easier to digest, these guide are very
+https://spring.io. As well as being easier to digest, these guide are very
 __task focused__. They also cover other projects from the Spring portfolio that you might
  want to consider when solving a particular problem.
 
@@ -26817,13 +26817,12 @@ The following example shows a typical `persistence.xml` file:
 
 [NOTE]
 ====
-The `exclude-unlisted-classes` element always indicates that __no__ scanning for
-annotated entity classes is supposed to occur, in order to support the
-`<exclude-unlisted-classes/>` shortcut. This is in line with the JPA specification,
-which suggests that shortcut, but unfortunately is in conflict with the JPA XSD, which
-implies `false` for that shortcut. Consequently, `<exclude-unlisted-classes> false
-</exclude-unlisted-classes/>` is not supported. Simply omit the
-`exclude-unlisted-classes` element if you want entity class scanning to occur.
+The `<exclude-unlisted-classes/>` shortcut indicates that __no__ scanning for
+annotated entity classes is supposed to occur. An explicit 'true' value specified -
+`<exclude-unlisted-classes>true</exclude-unlisted-classes/>` - also means no scan.
+`<exclude-unlisted-classes>false</exclude-unlisted-classes/>` does trigger a scan;
+however, it is recommended to simply omit the `exclude-unlisted-classes` element
+if you want entity class scanning to occur.
 ====
 
 Using the `LocalContainerEntityManagerFactoryBean` is the most powerful JPA setup
@@ -28502,7 +28501,7 @@ In the example, the `@RequestMapping` is used in a number of places. The first u
 on the type (class) level, which indicates that all handling methods on this controller
 are relative to the `/appointments` path. The `get()` method has a further
 `@RequestMapping` refinement: it only accepts GET requests, meaning that an HTTP GET for
-`/appointments` invokes this method. The `post()` has a similar refinement, and the
+`/appointments` invokes this method. The `add()` has a similar refinement, and the
 `getNewForm()` combines the definition of HTTP method and path into one, so that GET
 requests for `appointments/new` are handled by that method.
 
@@ -28718,8 +28717,8 @@ name and the second - the regular expression.For example:
 [[mvc-ann-requestmapping-patterns]]
 ===== Path Patterns
 In addition to URI templates, the `@RequestMapping` annotation also supports Ant-style
-path patterns (for example, `/myPath/*.do`). A combination of URI templates and
-Ant-style globs is also supported (for example, `/owners/*/pets/{petId}`).
+path patterns (for example, `/myPath/*.do`). A combination of URI template variables and
+Ant-style globs is also supported (e.g. `/owners/*/pets/{petId}`).
 
 
 [[mvc-ann-requestmapping-placeholders]]
@@ -44253,11 +44252,6 @@ Spring distribution. In all likelihood, you shouldn't ever need to implement you
   configuring a java.util.concurrent.ThreadPoolExecutor` and wraps it in a `TaskExecutor`.
   If you need to adapt to a different kind of `java.util.concurrent.Executor`, it is
   recommended that you use a <<concurrentTaskExecutor, `ConcurrentTaskExecutor`>> instead.
-* `TimerTaskExecutor`
-  This implementation uses a single `TimerTask` as its backing implementation.
-  It's different from the <<syncTaskExecutor, `SyncTaskExecutor`>> in that the method
-  invocations are executed in a separate thread, although they are effectively
-  synchronously batched in that thread.
 * `WorkManagerTaskExecutor`
 
 +
