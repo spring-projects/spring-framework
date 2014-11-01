@@ -48,24 +48,26 @@ public class TilesViewResolver extends UrlBasedViewResolver {
 		setViewClass(requiredViewClass());
 	}
 
-	/**
-	 * Specify whether to always include the view rather than forward to it.
-	 * <p>Default is "false". Switch this flag on to enforce the use of a
-	 * Servlet include, even if a forward would be possible.
-	 * @see TilesView#setAlwaysInclude
-	 * @since 4.1.2
-	 */
-	public void setAlwaysInclude(Boolean alwaysInclude) {
-		this.alwaysInclude = alwaysInclude;
-	}
 
 	/**
-	 * Requires {@link TilesView}.
+	 * This resolver requires {@link TilesView}.
 	 */
 	@Override
 	protected Class<?> requiredViewClass() {
 		return TilesView.class;
 	}
+
+	/**
+	 * Specify whether to always include the view rather than forward to it.
+	 * <p>Default is "false". Switch this flag on to enforce the use of a
+	 * Servlet include, even if a forward would be possible.
+	 * @since 4.1.2
+	 * @see TilesView#setAlwaysInclude
+	 */
+	public void setAlwaysInclude(Boolean alwaysInclude) {
+		this.alwaysInclude = alwaysInclude;
+	}
+
 
 	@Override
 	protected AbstractUrlBasedView buildView(String viewName) throws Exception {

@@ -70,7 +70,7 @@ public class ResourceUrlProvider implements ApplicationListener<ContextRefreshed
 	}
 
 	/**
-	 * @return the configured {@code UrlPathHelper}.
+	 * Return the configured {@code UrlPathHelper}.
 	 */
 	public UrlPathHelper getPathHelper() {
 		return this.pathHelper;
@@ -85,7 +85,7 @@ public class ResourceUrlProvider implements ApplicationListener<ContextRefreshed
 	}
 
 	/**
-	 * @return the configured {@code PathMatcher}.
+	 * Return the configured {@code PathMatcher}.
 	 */
 	public PathMatcher getPathMatcher() {
 		return this.pathMatcher;
@@ -93,7 +93,6 @@ public class ResourceUrlProvider implements ApplicationListener<ContextRefreshed
 
 	/**
 	 * Manually configure the resource mappings.
-	 *
 	 * <p><strong>Note:</strong> by default resource mappings are auto-detected
 	 * from the Spring {@code ApplicationContext}. However if this property is
 	 * used, the auto-detection is turned off.
@@ -107,7 +106,7 @@ public class ResourceUrlProvider implements ApplicationListener<ContextRefreshed
 	}
 
 	/**
-	 * @return the resource mappings, either manually configured or auto-detected
+	 * Return the resource mappings, either manually configured or auto-detected
 	 * when the Spring {@code ApplicationContext} is refreshed.
 	 */
 	public Map<String, ResourceHttpRequestHandler> getHandlerMap() {
@@ -115,7 +114,7 @@ public class ResourceUrlProvider implements ApplicationListener<ContextRefreshed
 	}
 
 	/**
-	 * @return {@code false} if resource mappings were manually configured,
+	 * Return {@code false} if resource mappings were manually configured,
 	 * {@code true} otherwise.
 	 */
 	public boolean isAutodetect() {
@@ -134,7 +133,6 @@ public class ResourceUrlProvider implements ApplicationListener<ContextRefreshed
 	}
 
 	protected void detectResourceHandlers(ApplicationContext appContext) {
-
 		logger.debug("Looking for resource handler mappings");
 
 		Map<String, SimpleUrlHandlerMapping> map = appContext.getBeansOfType(SimpleUrlHandlerMapping.class);
@@ -162,7 +160,6 @@ public class ResourceUrlProvider implements ApplicationListener<ContextRefreshed
 	 * A variation on {@link #getForLookupPath(String)} that accepts a full request
 	 * URL path (i.e. including context and servlet path) and returns the full request
 	 * URL path to expose for public use.
-	 *
 	 * @param request the current request
 	 * @param requestUrl the request URL path to resolve
 	 * @return the resolved public URL path or {@code null} if unresolved
@@ -189,12 +186,10 @@ public class ResourceUrlProvider implements ApplicationListener<ContextRefreshed
 	 * if a match is found use the {@code ResourceResolver} chain of the matched
 	 * {@code ResourceHttpRequestHandler} to resolve the URL path to expose for
 	 * public use.
-	 *
-	 * <p>It is expected the given path is what Spring MVC would use for request
-	 * mapping purposes, i.e. excluding context and servlet path portions.
-	 *
+	 * <p>It is expected that the given path is what Spring MVC would use for
+	 * request mapping purposes, i.e. excluding context and servlet path portions.
 	 * @param lookupPath the lookup path to check
-	 * @return the resolved public URL path or {@code null} if unresolved
+	 * @return the resolved public URL path, or {@code null} if unresolved
 	 */
 	public final String getForLookupPath(String lookupPath) {
 		if (logger.isTraceEnabled()) {

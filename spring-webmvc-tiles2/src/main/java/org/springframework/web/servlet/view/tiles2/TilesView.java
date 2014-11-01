@@ -62,12 +62,13 @@ public class TilesView extends AbstractUrlBasedView {
 	 * Specify whether to always include the view rather than forward to it.
 	 * <p>Default is "false". Switch this flag on to enforce the use of a
 	 * Servlet include, even if a forward would be possible.
-	 * @see TilesViewResolver#setAlwaysInclude(Boolean)
 	 * @since 4.1.2
+	 * @see TilesViewResolver#setAlwaysInclude
 	 */
 	public void setAlwaysInclude(boolean alwaysInclude) {
 		this.alwaysInclude = alwaysInclude;
 	}
+
 
 	@Override
 	public boolean checkResource(final Locale locale) throws Exception {
