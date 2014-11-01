@@ -49,6 +49,11 @@
 		<entry key="bean" value-ref="testBean"/>
 	</util:map>
 
+	<util:map id="mapWithTypes" map-class="org.springframework.util.LinkedCaseInsensitiveMap"
+			  key-type="java.lang.String" value-type="org.springframework.tests.sample.beans.TestBean">
+		<entry key="bean" value-ref="testBean"/>
+	</util:map>
+
 	<util:list id="simpleList">
 		<value>Rob Harrop</value>
 	</util:list>
