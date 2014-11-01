@@ -20,7 +20,6 @@ import java.lang.reflect.Method;
 
 import org.junit.Test;
 
-import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.interceptor.CacheOperationInvoker;
 import org.springframework.cache.interceptor.CacheResolver;
@@ -51,11 +50,11 @@ public class JCacheInterceptorTests extends AbstractJCacheTests {
 		try {
 			interceptor.execute(dummyInvoker, service, m, new Object[] {"myId"});
 		}
-		catch (IllegalStateException e) {
-			assertTrue(e.getMessage().contains("JSR-107 only supports a single cache."));
+		catch (IllegalStateException ex) {
+			assertTrue(ex.getMessage().contains("JSR-107 only supports a single cache"));
 		}
-		catch (Throwable t) {
-			fail("Unexpected: " + t);
+		catch (Throwable ex) {
+			fail("Unexpected: " + ex);
 		}
 	}
 
@@ -71,17 +70,17 @@ public class JCacheInterceptorTests extends AbstractJCacheTests {
 		try {
 			interceptor.execute(dummyInvoker, service, m, new Object[] {"myId"});
 		}
-		catch (IllegalStateException e) {
-			assertTrue(e.getMessage().contains("Cache could not have been resolved for"));
+		catch (IllegalStateException ex) {
+			assertTrue(ex.getMessage().contains("Cache could not have been resolved for"));
 		}
-		catch (Throwable t) {
-			fail("Unexpected: " + t);
+		catch (Throwable ex) {
+			fail("Unexpected: " + ex);
 		}
 	}
 
 	@Test
-	public void cacheManagerMandatoryIfCacheResolverNotSetSet() {
-		thrown.expect(NoSuchBeanDefinitionException.class);
+	public void cacheManagerMandatoryIfCacheResolverNotSet() {
+		thrown.expect(IllegalStateException.class);
 		createOperationSource(null, null, null, defaultKeyGenerator);
 	}
 
@@ -93,23 +92,21 @@ public class JCacheInterceptorTests extends AbstractJCacheTests {
 	@Test
 	public void cacheResultReturnsProperType() throws Throwable {
 		JCacheInterceptor interceptor = createInterceptor(createOperationSource(
-				cacheManager, defaultCacheResolver,
-				defaultExceptionCacheResolver, defaultKeyGenerator));
+				cacheManager, defaultCacheResolver, defaultExceptionCacheResolver, defaultKeyGenerator));
 
 		AnnotatedJCacheableService service = new AnnotatedJCacheableService(cacheManager.getCache("default"));
-		Method m = ReflectionUtils.findMethod(AnnotatedJCacheableService.class, "cache", String.class);
+		Method method = ReflectionUtils.findMethod(AnnotatedJCacheableService.class, "cache", String.class);
 
 		CacheOperationInvoker invoker = new DummyInvoker(0L);
-		Object execute = interceptor.execute(invoker, service, m, new Object[] {"myId"});
+		Object execute = interceptor.execute(invoker, service, method, new Object[] {"myId"});
 		assertNotNull("result cannot be null.", execute);
 		assertEquals("Wrong result type", Long.class, execute.getClass());
 		assertEquals("Wrong result", 0L, execute);
 	}
 
 	protected JCacheOperationSource createOperationSource(CacheManager cacheManager,
-			CacheResolver cacheResolver,
-			CacheResolver exceptionCacheResolver,
-			KeyGenerator keyGenerator) {
+			CacheResolver cacheResolver, CacheResolver exceptionCacheResolver, KeyGenerator keyGenerator) {
+
 		DefaultJCacheOperationSource source = new DefaultJCacheOperationSource();
 		source.setApplicationContext(new StaticApplicationContext());
 		source.setCacheManager(cacheManager);
@@ -128,6 +125,7 @@ public class JCacheInterceptorTests extends AbstractJCacheTests {
 		interceptor.afterPropertiesSet();
 		return interceptor;
 	}
+
 
 	private static class DummyInvoker implements CacheOperationInvoker {
 

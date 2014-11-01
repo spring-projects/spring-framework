@@ -30,6 +30,8 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.aop.framework.AopProxyUtils;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
+import org.springframework.beans.factory.NoUniqueBeanDefinitionException;
 import org.springframework.beans.factory.SmartInitializingSingleton;
 import org.springframework.beans.factory.annotation.BeanFactoryAnnotationUtils;
 import org.springframework.cache.Cache;
@@ -98,9 +100,8 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 
 	/**
 	 * Set one or more cache operation sources which are used to find the cache
-	 * attributes. If more than one source is provided, they will be aggregated using a
-	 * {@link CompositeCacheOperationSource}.
-	 * @param cacheOperationSources must not be {@code null}
+	 * attributes. If more than one source is provided, they will be aggregated
+	 * using a {@link CompositeCacheOperationSource}.
 	 */
 	public void setCacheOperationSources(CacheOperationSource... cacheOperationSources) {
 		Assert.notEmpty(cacheOperationSources, "At least 1 CacheOperationSource needs to be specified");
@@ -132,9 +133,8 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 	}
 
 	/**
-	 * Set the {@link CacheManager} to use to create a default {@link CacheResolver}. Replace
-	 * the current {@link CacheResolver}, if any.
-	 *
+	 * Set the {@link CacheManager} to use to create a default {@link CacheResolver}.
+	 * Replace the current {@link CacheResolver}, if any.
 	 * @see #setCacheResolver(CacheResolver)
 	 * @see SimpleCacheResolver
 	 */
@@ -151,7 +151,7 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 	 * @see SimpleCacheResolver
 	 */
 	public void setCacheResolver(CacheResolver cacheResolver) {
-		Assert.notNull(cacheResolver);
+		Assert.notNull(cacheResolver, "CacheResolver must not be null");
 		this.cacheResolver = cacheResolver;
 	}
 
@@ -159,7 +159,7 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 	 * Return the default {@link CacheResolver} that this cache aspect delegates to.
 	 */
 	public CacheResolver getCacheResolver() {
-		return cacheResolver;
+		return this.cacheResolver;
 	}
 
 	@Override
@@ -167,27 +167,32 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 		this.applicationContext = applicationContext;
 	}
 
+
 	public void afterPropertiesSet() {
-		Assert.state(this.cacheOperationSource != null, "The 'cacheOperationSources' property is required: " +
+		Assert.state(getCacheOperationSource() != null, "The 'cacheOperationSources' property is required: " +
 				"If there are no cacheable methods, then don't use a cache aspect.");
-		Assert.state(this.getErrorHandler() != null, "The 'errorHandler' is required.");
+		Assert.state(getErrorHandler() != null, "The 'errorHandler' property is required");
 	}
 
 	@Override
 	public void afterSingletonsInstantiated() {
-		if (getCacheResolver() == null) { // lazy initialize cache resolver
-			CacheManager cacheManager = this.applicationContext.getBean(CacheManager.class);
-			if (cacheManager == null) {
-				throw new IllegalStateException("No bean of type CacheManager could be found. " +
-						"Register a CacheManager bean or remove the @EnableCaching annotation " +
-						"from your configuration.");
+		if (getCacheResolver() == null) {
+			// Lazily initialize cache resolver via default cache manager...
+			try {
+				setCacheManager(this.applicationContext.getBean(CacheManager.class));
 			}
-			setCacheManager(cacheManager);
+			catch (NoUniqueBeanDefinitionException ex) {
+				throw new IllegalStateException("No CacheResolver specified, and no unique bean of type " +
+						"CacheManager found. Mark one as primary or declare a specific CacheManager to use.");
+			}
+			catch (NoSuchBeanDefinitionException ex) {
+				throw new IllegalStateException("No CacheResolver specified, and no bean of type CacheManager found. " +
+						"Register a CacheManager bean or remove the @EnableCaching annotation from your configuration.");
+			}
 		}
-		Assert.state(this.cacheResolver != null, "'cacheResolver' is required. Either set the cache resolver " +
-				"to use or set the cache manager to create a default cache resolver based on it.");
 		this.initialized = true;
 	}
+
 
 	/**
 	 * Convenience method to return a String representation of this Method
@@ -203,19 +208,20 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 		return ClassUtils.getQualifiedMethodName(specificMethod);
 	}
 
-	protected Collection<? extends Cache> getCaches(CacheOperationInvocationContext<CacheOperation> context,
-													CacheResolver cacheResolver) {
+	protected Collection<? extends Cache> getCaches(
+			CacheOperationInvocationContext<CacheOperation> context, CacheResolver cacheResolver) {
+
 		Collection<? extends Cache> caches = cacheResolver.resolveCaches(context);
 		if (caches.isEmpty()) {
-			throw new IllegalStateException("No cache could be resolved for '" + context.getOperation()
-					+ "' using  resolver '" + cacheResolver
-					+ "'. At least one cache should be provided per cache operation.");
+			throw new IllegalStateException("No cache could be resolved for '" +
+					context.getOperation() + "' using resolver '" + cacheResolver +
+					"'. At least one cache should be provided per cache operation.");
 		}
 		return caches;
 	}
 
-	protected CacheOperationContext getOperationContext(CacheOperation operation, Method method, Object[] args,
-														Object target, Class<?> targetClass) {
+	protected CacheOperationContext getOperationContext(
+			CacheOperation operation, Method method, Object[] args, Object target, Class<?> targetClass) {
 
 		CacheOperationMetadata metadata = getCacheOperationMetadata(operation, method, targetClass);
 		return new CacheOperationContext(metadata, args, target);
@@ -230,10 +236,11 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 	 * @param targetClass the target type
 	 * @return the resolved metadata for the operation
 	 */
-	protected CacheOperationMetadata getCacheOperationMetadata(CacheOperation operation,
-															   Method method, Class<?> targetClass) {
-		final CacheOperationCacheKey cacheKey = new CacheOperationCacheKey(operation, method, targetClass);
-		CacheOperationMetadata metadata = metadataCache.get(cacheKey);
+	protected CacheOperationMetadata getCacheOperationMetadata(
+			CacheOperation operation, Method method, Class<?> targetClass) {
+
+		CacheOperationCacheKey cacheKey = new CacheOperationCacheKey(operation, method, targetClass);
+		CacheOperationMetadata metadata = this.metadataCache.get(cacheKey);
 		if (metadata == null) {
 			KeyGenerator operationKeyGenerator;
 			if (StringUtils.hasText(operation.getKeyGenerator())) {
@@ -255,7 +262,7 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 			}
 			metadata = new CacheOperationMetadata(operation, method, targetClass,
 					operationKeyGenerator, operationCacheResolver);
-			metadataCache.put(cacheKey, metadata);
+			this.metadataCache.put(cacheKey, metadata);
 		}
 		return metadata;
 	}
@@ -263,7 +270,6 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 	/**
 	 * Return a bean with the specified name and type. Used to resolve services that
 	 * are referenced by name in a {@link CacheOperation}.
-	 *
 	 * @param beanName the name of the bean, as defined by the operation
 	 * @param expectedType type type for the bean
 	 * @return the bean matching that name
@@ -273,15 +279,14 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 	 * @see CacheOperation#cacheResolver
 	 */
 	protected <T> T getBean(String beanName, Class<T> expectedType) {
-		return BeanFactoryAnnotationUtils.qualifiedBeanOfType(
-				applicationContext, expectedType, beanName);
+		return BeanFactoryAnnotationUtils.qualifiedBeanOfType(this.applicationContext, expectedType, beanName);
 	}
 
 	/**
 	 * Clear the cached metadata.
 	 */
 	protected void clearMetadataCache() {
-		metadataCache.clear();
+		this.metadataCache.clear();
 	}
 
 	protected Object execute(CacheOperationInvoker invoker, Object target, Method method, Object[] args) {
@@ -486,8 +491,8 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 		private final MultiValueMap<Class<? extends CacheOperation>, CacheOperationContext> contexts =
 				new LinkedMultiValueMap<Class<? extends CacheOperation>, CacheOperationContext>();
 
-		public CacheOperationContexts(Collection<? extends CacheOperation> operations,
-									  Method method, Object[] args, Object target, Class<?> targetClass) {
+		public CacheOperationContexts(Collection<? extends CacheOperation> operations, Method method,
+				Object[] args, Object target, Class<?> targetClass) {
 
 			for (CacheOperation operation : operations) {
 				this.contexts.add(operation.getClass(), getOperationContext(operation, method, args, target, targetClass));
@@ -508,14 +513,18 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 	protected static class CacheOperationMetadata {
 
 		private final CacheOperation operation;
+
 		private final Method method;
+
 		private final Class<?> targetClass;
+
 		private final KeyGenerator keyGenerator;
+
 		private final CacheResolver cacheResolver;
 
-		public CacheOperationMetadata(CacheOperation operation, Method method,
-									  Class<?> targetClass, KeyGenerator keyGenerator,
-									  CacheResolver cacheResolver) {
+		public CacheOperationMetadata(CacheOperation operation, Method method, Class<?> targetClass,
+				KeyGenerator keyGenerator, CacheResolver cacheResolver) {
+
 			this.operation = operation;
 			this.method = method;
 			this.targetClass = targetClass;
@@ -523,6 +532,7 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 			this.cacheResolver = cacheResolver;
 		}
 	}
+
 
 	protected class CacheOperationContext implements CacheOperationInvocationContext<CacheOperation> {
 
@@ -536,8 +546,7 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 
 		private final MethodCacheKey methodCacheKey;
 
-		public CacheOperationContext(CacheOperationMetadata metadata,
-									 Object[] args, Object target) {
+		public CacheOperationContext(CacheOperationMetadata metadata, Object[] args, Object target) {
 			this.metadata = metadata;
 			this.args = extractArgs(metadata.method, args);
 			this.target = target;
@@ -547,22 +556,22 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 
 		@Override
 		public CacheOperation getOperation() {
-			return metadata.operation;
+			return this.metadata.operation;
 		}
 
 		@Override
 		public Object getTarget() {
-			return target;
+			return this.target;
 		}
 
 		@Override
 		public Method getMethod() {
-			return metadata.method;
+			return this.metadata.method;
 		}
 
 		@Override
 		public Object[] getArgs() {
-			return args;
+			return this.args;
 		}
 
 		private Object[] extractArgs(Method method, Object[] args) {
@@ -579,7 +588,8 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 		protected boolean isConditionPassing(Object result) {
 			if (StringUtils.hasText(this.metadata.operation.getCondition())) {
 				EvaluationContext evaluationContext = createEvaluationContext(result);
-				return evaluator.condition(this.metadata.operation.getCondition(), this.methodCacheKey, evaluationContext);
+				return evaluator.condition(this.metadata.operation.getCondition(),
+						this.methodCacheKey, evaluationContext);
 			}
 			return true;
 		}
@@ -600,15 +610,15 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 		}
 
 		/**
-		 * Computes the key for the given caching operation.
-		 * @return generated key (null if none can be generated)
+		 * Compute the key for the given caching operation.
+		 * @return the generated key, or {@code null} if none can be generated
 		 */
 		protected Object generateKey(Object result) {
 			if (StringUtils.hasText(this.metadata.operation.getKey())) {
 				EvaluationContext evaluationContext = createEvaluationContext(result);
 				return evaluator.key(this.metadata.operation.getKey(), this.methodCacheKey, evaluationContext);
 			}
-			return metadata.keyGenerator.generate(this.target, this.metadata.method, this.args);
+			return this.metadata.keyGenerator.generate(this.target, this.metadata.method, this.args);
 		}
 
 		private EvaluationContext createEvaluationContext(Object result) {
@@ -642,9 +652,11 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 		}
 	}
 
+
 	private static class CacheOperationCacheKey {
 
 		private final CacheOperation cacheOperation;
+
 		private final MethodCacheKey methodCacheKey;
 
 		private CacheOperationCacheKey(CacheOperation cacheOperation, Method method, Class<?> targetClass) {
@@ -653,20 +665,21 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 		}
 
 		@Override
-		public boolean equals(Object o) {
-			if (this == o) return true;
-			if (o == null || getClass() != o.getClass()) return false;
-
-			CacheOperationCacheKey that = (CacheOperationCacheKey) o;
-			return cacheOperation.equals(that.cacheOperation)
-					&& methodCacheKey.equals(that.methodCacheKey);
+		public boolean equals(Object other) {
+			if (this == other) {
+				return true;
+			}
+			if (!(other instanceof CacheOperationCacheKey)) {
+				return false;
+			}
+			CacheOperationCacheKey otherKey = (CacheOperationCacheKey) other;
+			return (this.cacheOperation.equals(otherKey.cacheOperation) &&
+					this.methodCacheKey.equals(otherKey.methodCacheKey));
 		}
 
 		@Override
 		public int hashCode() {
-			int result = cacheOperation.hashCode();
-			result = 31 * result + methodCacheKey.hashCode();
-			return result;
+			return (this.cacheOperation.hashCode() * 31 + this.methodCacheKey.hashCode());
 		}
 	}
 }

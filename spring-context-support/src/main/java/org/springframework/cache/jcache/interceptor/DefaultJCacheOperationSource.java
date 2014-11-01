@@ -16,11 +16,10 @@
 
 package org.springframework.cache.jcache.interceptor;
 
-import java.util.Map;
-
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
+import org.springframework.beans.factory.NoUniqueBeanDefinitionException;
 import org.springframework.beans.factory.SmartInitializingSingleton;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.interceptor.CacheResolver;
@@ -40,7 +39,7 @@ import org.springframework.util.Assert;
  * @since 4.1
  */
 public class DefaultJCacheOperationSource extends AnnotationJCacheOperationSource
-		implements InitializingBean, SmartInitializingSingleton, ApplicationContextAware {
+		implements ApplicationContextAware, InitializingBean, SmartInitializingSingleton {
 
 	private CacheManager cacheManager;
 
@@ -53,6 +52,7 @@ public class DefaultJCacheOperationSource extends AnnotationJCacheOperationSourc
 	private CacheResolver exceptionCacheResolver;
 
 	private ApplicationContext applicationContext;
+
 
 	/**
 	 * Set the default {@link CacheManager} to use to lookup cache by name. Only mandatory
@@ -104,24 +104,33 @@ public class DefaultJCacheOperationSource extends AnnotationJCacheOperationSourc
 		this.applicationContext = applicationContext;
 	}
 
+
 	@Override
 	public void afterPropertiesSet() {
 		this.adaptedKeyGenerator = new KeyGeneratorAdapter(this, this.keyGenerator);
 	}
 
 	@Override
-	public void afterSingletonsInstantiated() { // Make sure those are initialized on startup
-		Assert.notNull(getDefaultCacheResolver(), "Cache resolver should have been initialized.");
-		Assert.notNull(getDefaultExceptionCacheResolver(), "Exception cache resolver should have been initialized.");
+	public void afterSingletonsInstantiated() {
+		// Make sure those are initialized on startup...
+		Assert.notNull(getDefaultCacheResolver(), "Cache resolver should have been initialized");
+		Assert.notNull(getDefaultExceptionCacheResolver(), "Exception cache resolver should have been initialized");
 	}
+
 
 	@Override
 	protected <T> T getBean(Class<T> type) {
-		Map<String, T> map = BeanFactoryUtils.beansOfTypeIncludingAncestors(this.applicationContext, type);
-		if (map.size() == 1) {
-			return map.values().iterator().next();
+		try {
+			return this.applicationContext.getBean(type);
 		}
-		else {
+		catch (NoUniqueBeanDefinitionException ex) {
+			throw new IllegalStateException("No unique [" + type.getName() + "] bean found in application context - " +
+					"mark one as primary, or declare a more specific implementation type for your cache", ex);
+		}
+		catch (NoSuchBeanDefinitionException ex) {
+			if (logger.isDebugEnabled()) {
+				logger.debug("No bean of type [" + type.getName() + "] found in application context", ex);
+			}
 			return BeanUtils.instantiateClass(type);
 		}
 	}
@@ -149,11 +158,16 @@ public class DefaultJCacheOperationSource extends AnnotationJCacheOperationSourc
 
 	private CacheManager getCacheManager() {
 		if (this.cacheManager == null) {
-			this.cacheManager = this.applicationContext.getBean(CacheManager.class);
-			if (this.cacheManager == null) {
-				throw new IllegalStateException("No bean of type CacheManager could be found. " +
-						"Register a CacheManager bean or remove the @EnableCaching annotation " +
-						"from your configuration.");
+			try {
+				this.cacheManager = this.applicationContext.getBean(CacheManager.class);
+			}
+			catch (NoUniqueBeanDefinitionException ex) {
+				throw new IllegalStateException("No unique bean of type CacheManager found. "+
+						"Mark one as primary or declare a specific CacheManager to use.");
+			}
+			catch (NoSuchBeanDefinitionException ex) {
+				throw new IllegalStateException("No bean of type CacheManager found. Register a CacheManager "+
+						"bean or remove the @EnableCaching annotation from your configuration.");
 			}
 		}
 		return this.cacheManager;
