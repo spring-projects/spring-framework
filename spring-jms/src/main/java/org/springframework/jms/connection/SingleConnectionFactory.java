@@ -73,9 +73,8 @@ import org.springframework.util.Assert;
  * @see org.springframework.jms.listener.SimpleMessageListenerContainer
  * @see org.springframework.jms.listener.DefaultMessageListenerContainer#setCacheLevel
  */
-public class SingleConnectionFactory
-		implements ConnectionFactory, QueueConnectionFactory, TopicConnectionFactory, ExceptionListener,
-		InitializingBean, DisposableBean {
+public class SingleConnectionFactory implements ConnectionFactory, QueueConnectionFactory,
+		TopicConnectionFactory, ExceptionListener, InitializingBean, DisposableBean {
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
@@ -171,7 +170,7 @@ public class SingleConnectionFactory
 
 	/**
 	 * Specify an JMS ExceptionListener implementation that should be
-	 * registered with with the single Connection created by this factory.
+	 * registered with the single Connection created by this factory.
 	 * @see #setReconnectOnException
 	 */
 	public void setExceptionListener(ExceptionListener exceptionListener) {
@@ -180,7 +179,7 @@ public class SingleConnectionFactory
 
 	/**
 	 * Return the JMS ExceptionListener implementation that should be registered
-	 * with with the single Connection created by this factory, if any.
+	 * with the single Connection created by this factory, if any.
 	 */
 	protected ExceptionListener getExceptionListener() {
 		return this.exceptionListener;
@@ -315,6 +314,7 @@ public class SingleConnectionFactory
 	 * The provider of this ConnectionFactory needs to care for proper shutdown.
 	 * <p>As this bean implements DisposableBean, a bean factory will
 	 * automatically invoke this on destruction of its cached singletons.
+	 * @see #resetConnection()
 	 */
 	@Override
 	public void destroy() {
@@ -323,6 +323,7 @@ public class SingleConnectionFactory
 
 	/**
 	 * Reset the underlying shared Connection, to be reinitialized on next access.
+	 * @see #closeConnection
 	 */
 	public void resetConnection() {
 		synchronized (this.connectionMonitor) {

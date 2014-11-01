@@ -48,8 +48,7 @@ import org.springframework.test.jdbc.JdbcTestUtils;
  * ({@link org.springframework.test.context.junit38.AbstractJUnit38SpringContextTests})
  */
 @Deprecated
-public abstract class AbstractTransactionalDataSourceSpringContextTests
-	extends AbstractTransactionalSpringContextTests {
+public abstract class AbstractTransactionalDataSourceSpringContextTests extends AbstractTransactionalSpringContextTests {
 
 	protected JdbcTemplate jdbcTemplate;
 
@@ -105,11 +104,11 @@ public abstract class AbstractTransactionalDataSourceSpringContextTests
 	 * {@code setComplete()} impossible.
 	 * @see #setComplete
 	 */
-	protected void deleteFromTables(String[] names) {
-		for (int i = 0; i < names.length; i++) {
-			int rowCount = this.jdbcTemplate.update("DELETE FROM " + names[i]);
+	protected void deleteFromTables(String... names) {
+		for (String name : names) {
+			int rowCount = this.jdbcTemplate.update("DELETE FROM " + name);
 			if (logger.isInfoEnabled()) {
-				logger.info("Deleted " + rowCount + " rows from table " + names[i]);
+				logger.info("Deleted " + rowCount + " rows from table " + name);
 			}
 		}
 		this.zappedTables = true;

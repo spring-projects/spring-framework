@@ -110,6 +110,7 @@ public abstract class SharedEntityManagerCreator {
 	 * @param synchronizedWithTransaction whether to automatically join ongoing
 	 * transactions (according to the JPA 2.1 SynchronizationType rules)
 	 * @return a shareable transaction EntityManager proxy
+	 * @since 4.0
 	 */
 	public static EntityManager createSharedEntityManager(
 			EntityManagerFactory emf, Map<?, ?> properties, boolean synchronizedWithTransaction) {
@@ -145,6 +146,7 @@ public abstract class SharedEntityManagerCreator {
 	 * @param entityManagerInterfaces the interfaces to be implemented by the
 	 * EntityManager. Allows the addition or specification of proprietary interfaces.
 	 * @return a shareable transactional EntityManager proxy
+	 * @since 4.0
 	 */
 	public static EntityManager createSharedEntityManager(EntityManagerFactory emf, Map<?, ?> properties,
 			boolean synchronizedWithTransaction, Class<?>... entityManagerInterfaces) {

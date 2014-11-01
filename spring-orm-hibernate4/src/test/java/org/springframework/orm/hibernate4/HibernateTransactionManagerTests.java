@@ -70,7 +70,7 @@ import static org.mockito.BDDMockito.*;
  * @author Juergen Hoeller
  * @since 3.2
  */
-@SuppressWarnings({ "rawtypes", "unchecked" })
+@SuppressWarnings({"rawtypes", "unchecked"})
 public class HibernateTransactionManagerTests {
 
 	@After

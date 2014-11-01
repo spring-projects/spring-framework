@@ -68,7 +68,9 @@ import org.springframework.util.ClassUtils;
  * metadata as assembled by this FactoryBean.
  *
  * <p><b>NOTE: Spring's JPA support requires JPA 2.0 or higher, as of Spring 4.0.</b>
- * Spring's persistence unit bootstrapping automatically detects JPA 2.1 at runtime.
+ * JPA 1.0 based applications are still supported; however, a JPA 2.0/2.1 compliant
+ * persistence provider is needed at runtime. Spring's persistence unit bootstrapping
+ * automatically detects JPA 2.0 vs 2.1 through checking the JPA API on the classpath.
  *
  * @author Juergen Hoeller
  * @author Rod Johnson
