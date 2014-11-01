@@ -469,8 +469,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 
 		// Check manually registered singletons too.
 		for (String beanName : this.manualSingletonNames) {
-			// Only check if manually registered.
-			if (!containsBeanDefinition(beanName)) {
+			try {
 				// In case of FactoryBean, match object created by FactoryBean.
 				if (isFactoryBean(beanName)) {
 					if ((includeNonSingletons || isSingleton(beanName)) && isTypeMatch(beanName, type)) {
@@ -484,6 +483,12 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 				// Match raw bean instance (might be raw FactoryBean).
 				if (isTypeMatch(beanName, type)) {
 					result.add(beanName);
+				}
+			}
+			catch (NoSuchBeanDefinitionException ex) {
+				// Shouldn't happen - probably a result of circular reference resolution...
+				if (logger.isDebugEnabled()) {
+					logger.debug("Failed to check manually registered singleton with name '" + beanName + "'", ex);
 				}
 			}
 		}
