@@ -20,13 +20,13 @@ import java.lang.reflect.Method;
 
 import org.junit.Test;
 
+import org.springframework.beans.factory.support.StaticListableBeanFactory;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.interceptor.CacheOperationInvoker;
 import org.springframework.cache.interceptor.CacheResolver;
 import org.springframework.cache.interceptor.KeyGenerator;
 import org.springframework.cache.interceptor.NamedCacheResolver;
 import org.springframework.cache.jcache.AbstractJCacheTests;
-import org.springframework.context.support.StaticApplicationContext;
 import org.springframework.util.ReflectionUtils;
 
 import static org.junit.Assert.*;
@@ -108,11 +108,11 @@ public class JCacheInterceptorTests extends AbstractJCacheTests {
 			CacheResolver cacheResolver, CacheResolver exceptionCacheResolver, KeyGenerator keyGenerator) {
 
 		DefaultJCacheOperationSource source = new DefaultJCacheOperationSource();
-		source.setApplicationContext(new StaticApplicationContext());
 		source.setCacheManager(cacheManager);
 		source.setCacheResolver(cacheResolver);
 		source.setExceptionCacheResolver(exceptionCacheResolver);
 		source.setKeyGenerator(keyGenerator);
+		source.setBeanFactory(new StaticListableBeanFactory());
 		source.afterPropertiesSet();
 		source.afterSingletonsInstantiated();
 		return source;
