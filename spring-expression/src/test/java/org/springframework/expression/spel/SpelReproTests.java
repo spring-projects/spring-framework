@@ -1847,20 +1847,20 @@ public class SpelReproTests extends ExpressionTestCase {
 
 		private boolean primitiveProperty = true;
 
-		public Boolean isSimpleProperty() {
-			return simpleProperty;
-		}
-
 		public void setSimpleProperty(Boolean simpleProperty) {
 			this.simpleProperty = simpleProperty;
 		}
 
-		public boolean isPrimitiveProperty() {
-			return primitiveProperty;
+		public Boolean isSimpleProperty() {
+			return this.simpleProperty;
 		}
 
 		public void setPrimitiveProperty(boolean primitiveProperty) {
 			this.primitiveProperty = primitiveProperty;
+		}
+
+		public boolean isPrimitiveProperty() {
+			return this.primitiveProperty;
 		}
 	}
 
@@ -1914,12 +1914,12 @@ public class SpelReproTests extends ExpressionTestCase {
 
 		private String name = "name";
 
-		public String getName() {
-			return name;
-		}
-
 		public void setName(String name) {
 			this.name = name;
+		}
+
+		public String getName() {
+			return this.name;
 		}
 	}
 
@@ -1932,25 +1932,22 @@ public class SpelReproTests extends ExpressionTestCase {
 	}
 
 
-	static class TestClass2 { // SPR-9194
+	static class TestClass2 {  // SPR-9194
 
 		String string;
-
 
 		public TestClass2(String string) {
 			this.string = string;
 		}
 
-		@Override
-		public int hashCode() {
-			return 0;
+		public boolean equals(Object other) {
+			return (this == other || (other instanceof TestClass2 &&
+					this.string.equals(((TestClass2) other).string)));
 		}
 
-		public boolean equals(Object o) {
-			if (o instanceof TestClass2) {
-				return string.equals(((TestClass2) o).string);
-			}
-			return false;
+		@Override
+		public int hashCode() {
+			return this.string.hashCode();
 		}
 	}
 
@@ -1964,12 +1961,12 @@ public class SpelReproTests extends ExpressionTestCase {
 		}
 
 		public int parameter() {
-			return counter.incrementAndGet();
+			return this.counter.incrementAndGet();
 		}
 
 		@Override
 		public Object resolve(EvaluationContext context, String beanName) throws AccessException {
-			return beanName.equals("bean") ? this : null;
+			return (beanName.equals("bean") ? this : null);
 		}
 	}
 

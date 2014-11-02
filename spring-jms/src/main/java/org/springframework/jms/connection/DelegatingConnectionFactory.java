@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -76,7 +76,7 @@ public class DelegatingConnectionFactory
 	/**
 	 * Indicate whether Connections obtained from the target factory are supposed
 	 * to be stopped before closed ("true") or simply closed ("false").
-	 * The latter may be necessary for some connection pools that simply return
+	 * An extra stop call may be necessary for some connection pools that simply return
 	 * released connections to the pool, not stopping them while they sit in the pool.
 	 * <p>Default is "false", simply closing Connections.
 	 * @see ConnectionFactoryUtils#releaseConnection

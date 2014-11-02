@@ -49,6 +49,7 @@ public class SpringTilesApplicationContextFactory extends AbstractTilesApplicati
 
 	private Map<String, String> params;
 
+
 	public void init(Map<String, String> params) {
 		this.params = params;
 	}
@@ -89,12 +90,11 @@ public class SpringTilesApplicationContextFactory extends AbstractTilesApplicati
 
 		@Override
 		public URL getResource(String path) throws IOException {
-			URL retValue = null;
 			Set<URL> urlSet = getResources(path);
 			if (!CollectionUtils.isEmpty(urlSet)) {
-				retValue = urlSet.iterator().next();
+				return urlSet.iterator().next();
 			}
-			return retValue;
+			return null;
 		}
 
 		@Override
