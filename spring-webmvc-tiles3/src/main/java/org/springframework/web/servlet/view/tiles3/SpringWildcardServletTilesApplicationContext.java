@@ -30,6 +30,7 @@ import org.apache.tiles.request.servlet.ServletApplicationContext;
 
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.ResourcePatternResolver;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.context.support.ServletContextResourcePatternResolver;
 
@@ -53,22 +54,20 @@ public class SpringWildcardServletTilesApplicationContext extends ServletApplica
 
 	@Override
 	public ApplicationResource getResource(String localePath) {
-		ApplicationResource retValue = null;
 		Collection<ApplicationResource> urlSet = getResources(localePath);
-		if (urlSet != null && !urlSet.isEmpty()) {
-			retValue = urlSet.iterator().next();
+		if (!CollectionUtils.isEmpty(urlSet)) {
+			return urlSet.iterator().next();
 		}
-		return retValue;
+		return null;
 	}
 
 	@Override
 	public ApplicationResource getResource(ApplicationResource base, Locale locale) {
-		ApplicationResource retValue = null;
 		Collection<ApplicationResource> urlSet = getResources(base.getLocalePath(locale));
-		if (urlSet != null && !urlSet.isEmpty()) {
-			retValue = urlSet.iterator().next();
+		if (!CollectionUtils.isEmpty(urlSet)) {
+			return urlSet.iterator().next();
 		}
-		return retValue;
+		return null;
 	}
 
 	@Override

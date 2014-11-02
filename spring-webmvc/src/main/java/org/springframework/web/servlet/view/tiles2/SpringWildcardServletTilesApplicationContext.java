@@ -26,6 +26,7 @@ import org.apache.tiles.servlet.context.ServletTilesApplicationContext;
 
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.ResourcePatternResolver;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.context.support.ServletContextResourcePatternResolver;
 
@@ -48,12 +49,11 @@ public class SpringWildcardServletTilesApplicationContext extends ServletTilesAp
 
 	@Override
 	public URL getResource(String path) throws IOException {
-		URL retValue = null;
 		Set<URL> urlSet = getResources(path);
-		if (urlSet != null && !urlSet.isEmpty()) {
-			retValue = urlSet.iterator().next();
+		if (!CollectionUtils.isEmpty(urlSet)) {
+			return urlSet.iterator().next();
 		}
-		return retValue;
+		return null;
 	}
 
 	@Override
