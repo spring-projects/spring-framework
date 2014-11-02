@@ -24,9 +24,11 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -1854,6 +1856,28 @@ public class SpelReproTests extends AbstractExpressionTests {
 		assertEquals(1, exp.getValue(sec));
 	}
 
+	@Test
+	public void SPR9735() {
+		Item item = new Item();
+		item.setName("parent");
+
+		Item item1 = new Item();
+		item1.setName("child1");
+
+		Item item2 = new Item();
+		item2.setName("child2");
+
+		item.add(item1);
+		item.add(item2);
+
+		ExpressionParser parser = new SpelExpressionParser();
+		EvaluationContext context = new StandardEvaluationContext();
+		Expression exp = parser.parseExpression("#item[0].name");
+		context.setVariable("item", item);
+
+		assertEquals("child1", exp.getValue(context));
+	}
+
 
 	private static enum ABC { A, B, C }
 
@@ -1866,20 +1890,20 @@ public class SpelReproTests extends AbstractExpressionTests {
 
 		private boolean primitiveProperty = true;
 
-		public Boolean isSimpleProperty() {
-			return simpleProperty;
-		}
-
 		public void setSimpleProperty(Boolean simpleProperty) {
 			this.simpleProperty = simpleProperty;
 		}
 
-		public boolean isPrimitiveProperty() {
-			return primitiveProperty;
+		public Boolean isSimpleProperty() {
+			return this.simpleProperty;
 		}
 
 		public void setPrimitiveProperty(boolean primitiveProperty) {
 			this.primitiveProperty = primitiveProperty;
+		}
+
+		public boolean isPrimitiveProperty() {
+			return this.primitiveProperty;
 		}
 	}
 
@@ -1933,12 +1957,12 @@ public class SpelReproTests extends AbstractExpressionTests {
 
 		private String name = "name";
 
-		public String getName() {
-			return name;
-		}
-
 		public void setName(String name) {
 			this.name = name;
+		}
+
+		public String getName() {
+			return this.name;
 		}
 	}
 
@@ -1951,25 +1975,22 @@ public class SpelReproTests extends AbstractExpressionTests {
 	}
 
 
-	static class TestClass2 { // SPR-9194
+	static class TestClass2 {  // SPR-9194
 
 		String string;
-
 
 		public TestClass2(String string) {
 			this.string = string;
 		}
 
-		@Override
-		public int hashCode() {
-			return 0;
+		public boolean equals(Object other) {
+			return (this == other || (other instanceof TestClass2 &&
+					this.string.equals(((TestClass2) other).string)));
 		}
 
-		public boolean equals(Object o) {
-			if (o instanceof TestClass2) {
-				return string.equals(((TestClass2) o).string);
-			}
-			return false;
+		@Override
+		public int hashCode() {
+			return this.string.hashCode();
 		}
 	}
 
@@ -1983,12 +2004,12 @@ public class SpelReproTests extends AbstractExpressionTests {
 		}
 
 		public int parameter() {
-			return counter.incrementAndGet();
+			return this.counter.incrementAndGet();
 		}
 
 		@Override
 		public Object resolve(EvaluationContext context, String beanName) throws AccessException {
-			return beanName.equals("bean") ? this : null;
+			return (beanName.equals("bean") ? this : null);
 		}
 	}
 
@@ -1997,6 +2018,137 @@ public class SpelReproTests extends AbstractExpressionTests {
 	public static class MapWithConstant extends HashMap {
 
 		public static final int X = 1;
+	}
+
+
+	public class Item implements List<Item> {
+
+		private String name;
+
+		private List<Item> children = new ArrayList<Item>();
+
+		public void setName(String name) {
+			this.name = name;
+		}
+
+		public String getName() {
+			return this.name;
+		}
+
+		@Override
+		public int size() {
+			return this.children.size();
+		}
+
+		@Override
+		public boolean isEmpty() {
+			return this.children.isEmpty();
+		}
+
+		@Override
+		public boolean contains(Object o) {
+			return this.children.contains(o);
+		}
+
+		@Override
+		public Iterator<Item> iterator() {
+			return this.children.iterator();
+		}
+
+		@Override
+		public Object[] toArray() {
+			return this.children.toArray();
+		}
+
+		@Override
+		public <T> T[] toArray(T[] a) {
+			return this.children.toArray(a);
+		}
+
+		@Override
+		public boolean add(Item e) {
+			return this.children.add(e);
+		}
+
+		@Override
+		public boolean remove(Object o) {
+			return this.children.remove(o);
+		}
+
+		@Override
+		public boolean containsAll(Collection<?> c) {
+			return this.children.containsAll(c);
+		}
+
+		@Override
+		public boolean addAll(Collection<? extends Item> c) {
+			return this.children.addAll(c);
+		}
+
+		@Override
+		public boolean addAll(int index, Collection<? extends Item> c) {
+			return this.children.addAll(index, c);
+		}
+
+		@Override
+		public boolean removeAll(Collection<?> c) {
+			return this.children.removeAll(c);
+		}
+
+		@Override
+		public boolean retainAll(Collection<?> c) {
+			return this.children.retainAll(c);
+		}
+
+		@Override
+		public void clear() {
+			this.children.clear();
+		}
+
+		@Override
+		public Item get(int index) {
+			return this.children.get(index);
+		}
+
+		@Override
+		public Item set(int index, Item element) {
+			return this.children.set(index, element);
+		}
+
+		@Override
+		public void add(int index, Item element) {
+			this.children.add(index, element);
+		}
+
+		@Override
+		public Item remove(int index) {
+			return this.children.remove(index);
+		}
+
+		@Override
+		public int indexOf(Object o) {
+			return this.children.indexOf(o);
+		}
+
+		@Override
+		public int lastIndexOf(Object o) {
+			return this.children.lastIndexOf(o);
+		}
+
+		@Override
+		public ListIterator<Item> listIterator() {
+			return this.children.listIterator();
+		}
+
+		@Override
+		public ListIterator<Item> listIterator(int index) {
+			return this.children.listIterator(index);
+		}
+
+		@Override
+		public List<Item> subList(int fromIndex, int toIndex) {
+			return this.children.subList(fromIndex, toIndex);
+		}
 	}
 
 }
