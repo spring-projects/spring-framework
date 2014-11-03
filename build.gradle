@@ -992,6 +992,7 @@ project("spring-test") {
 	}
 
 	task testNG(type: Test) {
+		description = 'Runs TestNG tests.'
 		useTestNG()
 		scanForTestClasses = false
 		include(["**/testng/**/*Tests.class", "**/testng/**/*Test.class"])
@@ -1001,12 +1002,14 @@ project("spring-test") {
 	}
 
 	test {
+		description = 'Runs JUnit tests.'
 		dependsOn testNG
 		useJUnit()
 		exclude "**/testng/**/*.*"
 	}
 
 	task aggregateTestReports(type: TestReport) {
+		description = 'Aggregates JUnit and TestNG test reports.'
 		destinationDir = test.reports.html.destination
 		reportOn test, testNG
 	}
