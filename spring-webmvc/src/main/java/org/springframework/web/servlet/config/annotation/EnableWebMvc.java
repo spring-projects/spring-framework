@@ -59,7 +59,8 @@ import org.springframework.context.annotation.Import;
  *
  * <p>If {@link WebMvcConfigurer} does not expose some advanced setting that
  * needs to be configured, consider removing the {@code @EnableWebMvc}
- * annotation and extending directly from {@link WebMvcConfigurationSupport}, e.g.:
+ * annotation and extending directly from {@link WebMvcConfigurationSupport}
+ * or {@link DelegatingWebMvcConfiguration}, e.g.:
  *
  * <pre class="code">
  * &#064;Configuration
@@ -84,10 +85,12 @@ import org.springframework.context.annotation.Import;
  * @since 3.1
  * @see org.springframework.web.servlet.config.annotation.WebMvcConfigurer
  * @see org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter
+ * @see org.springframework.web.servlet.config.annotation.WebMvcConfigurationSupport
+ * @see org.springframework.web.servlet.config.annotation.DelegatingWebMvcConfiguration
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
 @Documented
-@Import({DelegatingWebMvcConfiguration.class})
+@Import(DelegatingWebMvcConfiguration.class)
 public @interface EnableWebMvc {
 }
