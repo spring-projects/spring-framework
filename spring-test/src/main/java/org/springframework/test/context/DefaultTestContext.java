@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -78,8 +78,7 @@ class DefaultTestContext extends AttributeAccessorSupport implements TestContext
 	 * @param testClass the test class for which the test context should be
 	 * constructed (must not be {@code null})
 	 * @param contextCache the context cache from which the constructed test
-	 * context should retrieve application contexts (must not be
-	 * {@code null})
+	 * context should retrieve application contexts (must not be {@code null})
 	 * @param defaultContextLoaderClassName the name of the default
 	 * {@code ContextLoader} class to use (may be {@code null})
 	 */
@@ -90,73 +89,56 @@ class DefaultTestContext extends AttributeAccessorSupport implements TestContext
 		this.testClass = testClass;
 		this.contextCache = contextCache;
 		this.cacheAwareContextLoaderDelegate = new CacheAwareContextLoaderDelegate(contextCache);
-		this.mergedContextConfiguration = ContextLoaderUtils.buildMergedContextConfiguration(testClass,
-			defaultContextLoaderClassName, cacheAwareContextLoaderDelegate);
+		this.mergedContextConfiguration = ContextLoaderUtils.buildMergedContextConfiguration(
+				testClass, defaultContextLoaderClassName, this.cacheAwareContextLoaderDelegate);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+
 	public ApplicationContext getApplicationContext() {
-		return cacheAwareContextLoaderDelegate.loadContext(mergedContextConfiguration);
+		return this.cacheAwareContextLoaderDelegate.loadContext(this.mergedContextConfiguration);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	public final Class<?> getTestClass() {
-		return testClass;
+		return this.testClass;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	public final Object getTestInstance() {
-		return testInstance;
+		return this.testInstance;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	public final Method getTestMethod() {
-		return testMethod;
+		return this.testMethod;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	public final Throwable getTestException() {
-		return testException;
+		return this.testException;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	public void markApplicationContextDirty(HierarchyMode hierarchyMode) {
-		contextCache.remove(mergedContextConfiguration, hierarchyMode);
+		synchronized (this.contextCache) {
+			this.contextCache.remove(this.mergedContextConfiguration, hierarchyMode);
+		}
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	public void updateState(Object testInstance, Method testMethod, Throwable testException) {
 		this.testInstance = testInstance;
 		this.testMethod = testMethod;
 		this.testException = testException;
 	}
 
+
 	/**
 	 * Provide a String representation of this test context's state.
 	 */
 	@Override
 	public String toString() {
-		return new ToStringCreator(this)//
-		.append("testClass", testClass)//
-		.append("testInstance", testInstance)//
-		.append("testMethod", testMethod)//
-		.append("testException", testException)//
-		.append("mergedContextConfiguration", mergedContextConfiguration)//
-		.toString();
+		return new ToStringCreator(this)
+				.append("testClass", this.testClass)
+				.append("testInstance", this.testInstance)
+				.append("testMethod", this.testMethod)
+				.append("testException", this.testException)
+				.append("mergedContextConfiguration", this.mergedContextConfiguration)
+				.toString();
 	}
 
 }
