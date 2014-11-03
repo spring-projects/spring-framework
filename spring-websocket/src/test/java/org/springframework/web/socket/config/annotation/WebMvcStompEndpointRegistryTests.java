@@ -84,6 +84,9 @@ public class WebMvcStompEndpointRegistryTests {
 		this.endpointRegistry.addEndpoint("/stompOverWebSocket");
 		this.endpointRegistry.addEndpoint("/stompOverSockJS").withSockJS();
 
+		//SPR-12403
+		assertEquals(1, this.webSocketHandler.getProtocolHandlers().size());
+
 		hm = (SimpleUrlHandlerMapping) this.endpointRegistry.getHandlerMapping();
 		assertEquals(2, hm.getUrlMap().size());
 		assertNotNull(hm.getUrlMap().get("/stompOverWebSocket"));

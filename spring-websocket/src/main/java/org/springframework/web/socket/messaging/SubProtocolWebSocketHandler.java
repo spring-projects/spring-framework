@@ -19,8 +19,10 @@ package org.springframework.web.socket.messaging;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -86,7 +88,7 @@ public class SubProtocolWebSocketHandler implements WebSocketHandler,
 	private final Map<String, SubProtocolHandler> protocolHandlerLookup =
 			new TreeMap<String, SubProtocolHandler>(String.CASE_INSENSITIVE_ORDER);
 
-	private final List<SubProtocolHandler> protocolHandlers = new ArrayList<SubProtocolHandler>();
+	private final Set<SubProtocolHandler> protocolHandlers = new HashSet<SubProtocolHandler>();
 
 	private SubProtocolHandler defaultProtocolHandler;
 
@@ -129,7 +131,7 @@ public class SubProtocolWebSocketHandler implements WebSocketHandler,
 	}
 
 	public List<SubProtocolHandler> getProtocolHandlers() {
-		return new ArrayList<SubProtocolHandler>(this.protocolHandlerLookup.values());
+		return new ArrayList<SubProtocolHandler>(this.protocolHandlers);
 	}
 
 
@@ -288,7 +290,7 @@ public class SubProtocolWebSocketHandler implements WebSocketHandler,
 				handler = this.defaultProtocolHandler;
 			}
 			else if (this.protocolHandlers.size() == 1) {
-					handler = this.protocolHandlers.get(0);
+				handler = this.protocolHandlers.iterator().next();
 			}
 			else {
 				throw new IllegalStateException("Multiple protocol handlers configured and " +
