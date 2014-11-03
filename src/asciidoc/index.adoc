@@ -39046,7 +39046,7 @@ XML configuration equivalent:
 			http://www.springframework.org/schema/beans
 			http://www.springframework.org/schema/beans/spring-beans.xsd
 			http://www.springframework.org/schema/websocket
-			http://www.springframework.org/schema/websocket/spring-websocket-4.0.xsd">
+			http://www.springframework.org/schema/websocket/spring-websocket.xsd">
 
 		<websocket:handlers>
 			<websocket:mapping path="/myHandler" handler="myHandler"/>
@@ -39101,7 +39101,7 @@ And the XML configuration equivalent:
 			http://www.springframework.org/schema/beans
 			http://www.springframework.org/schema/beans/spring-beans.xsd
 			http://www.springframework.org/schema/websocket
-			http://www.springframework.org/schema/websocket/spring-websocket-4.0.xsd">
+			http://www.springframework.org/schema/websocket/spring-websocket.xsd">
 
 		<websocket:handlers>
 			<websocket:mapping path="/myHandler" handler="myHandler"/>
@@ -39445,7 +39445,7 @@ and the XML configuration equivalent:
 			http://www.springframework.org/schema/beans
 			http://www.springframework.org/schema/beans/spring-beans.xsd
 			http://www.springframework.org/schema/websocket
-			http://www.springframework.org/schema/websocket/spring-websocket-4.0.xsd">
+			http://www.springframework.org/schema/websocket/spring-websocket.xsd">
 
 		<websocket:handlers>
 			<websocket:mapping path="/myHandler" handler="myHandler"/>
@@ -39858,7 +39858,7 @@ XML configuration equivalent:
 			http://www.springframework.org/schema/beans
 			http://www.springframework.org/schema/beans/spring-beans.xsd
 			http://www.springframework.org/schema/websocket
-			http://www.springframework.org/schema/websocket/spring-websocket-4.0.xsd">
+			http://www.springframework.org/schema/websocket/spring-websocket.xsd">
 
 		<websocket:message-broker application-destination-prefix="/app">
 			<websocket:stomp-endpoint path="/portfolio">
@@ -40167,7 +40167,7 @@ XML configuration equivalent:
 			http://www.springframework.org/schema/beans
 			http://www.springframework.org/schema/beans/spring-beans.xsd
 			http://www.springframework.org/schema/websocket
-			http://www.springframework.org/schema/websocket/spring-websocket-4.0.xsd">
+			http://www.springframework.org/schema/websocket/spring-websocket.xsd">
 
 		<websocket:message-broker application-destination-prefix="/app">
 			<websocket:stomp-endpoint path="/portfolio" />
@@ -40712,7 +40712,7 @@ Here is example configuration:
 			http://www.springframework.org/schema/beans
 			http://www.springframework.org/schema/beans/spring-beans.xsd
 			http://www.springframework.org/schema/websocket
-			http://www.springframework.org/schema/websocket/spring-websocket-4.0.xsd">
+			http://www.springframework.org/schema/websocket/spring-websocket.xsd">
 
 		<websocket:message-broker>
 			<websocket:transport send-timeout="15000" send-buffer-size="524288" />
@@ -40764,7 +40764,7 @@ Here is example configuration:
 			http://www.springframework.org/schema/beans
 			http://www.springframework.org/schema/beans/spring-beans.xsd
 			http://www.springframework.org/schema/websocket
-			http://www.springframework.org/schema/websocket/spring-websocket-4.0.xsd">
+			http://www.springframework.org/schema/websocket/spring-websocket.xsd">
 
 		<websocket:message-broker>
 			<websocket:transport message-size="131072" />
