@@ -101,7 +101,7 @@ public class DefaultJCacheOperationSource extends AnnotationJCacheOperationSourc
 
 	/**
 	 * Set the default {@link KeyGenerator}. If none is set, a {@link SimpleKeyGenerator}
-	 * honoringKe the JSR-107 {@link javax.cache.annotation.CacheKey} and
+	 * honoring the JSR-107 {@link javax.cache.annotation.CacheKey} and
 	 * {@link javax.cache.annotation.CacheValue} will be used.
 	 */
 	public void setKeyGenerator(KeyGenerator keyGenerator) {
