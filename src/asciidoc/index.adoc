@@ -20851,6 +20851,12 @@ framework will not be able to cache application contexts between test classes an
 build process will run significantly slower as a result.
 ====
 
+Since having a large number of application contexts loaded within a given test suite can
+cause the suite to take an unnecessarily long time to execute, it is often beneficial to
+know exactly how many contexts have been loaded and cached. To view the statistics for
+the underlying context cache, simply set the log level for the
+`org.springframework.test.context.cache` logging category to `DEBUG`.
+
 In the unlikely case that a test corrupts the application context and requires reloading
 -- for example, by modifying a bean definition or the state of an application object --
 you can annotate your test class or test method with `@DirtiesContext` (see the
@@ -20859,6 +20865,7 @@ instructs Spring to remove the context from the cache and rebuild the applicatio
 context before executing the next test. Note that support for the `@DirtiesContext`
 annotation is provided by the `DirtiesContextTestExecutionListener` which is enabled by
 default.
+
 
 [[testcontext-ctx-management-ctx-hierarchies]]
 ====== Context hierarchies

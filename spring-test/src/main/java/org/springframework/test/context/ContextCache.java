@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -64,9 +65,9 @@ class ContextCache {
 	private final Map<MergedContextConfiguration, Set<MergedContextConfiguration>> hierarchyMap = new ConcurrentHashMap<MergedContextConfiguration, Set<MergedContextConfiguration>>(
 		64);
 
-	private int hitCount;
+	private final AtomicInteger hitCount = new AtomicInteger();
 
-	private int missCount;
+	private final AtomicInteger missCount = new AtomicInteger();
 
 
 	/**
@@ -84,8 +85,8 @@ class ContextCache {
 	 * Clears hit and miss count statistics for the cache (i.e., resets counters to zero).
 	 */
 	void clearStatistics() {
-		this.hitCount = 0;
-		this.missCount = 0;
+		this.hitCount.set(0);
+		this.missCount.set(0);
 	}
 
 	/**
@@ -116,45 +117,31 @@ class ContextCache {
 		synchronized (monitor) {
 			ApplicationContext context = this.contextMap.get(key);
 			if (context == null) {
-				incrementMissCount();
+				this.missCount.incrementAndGet();
 			}
 			else {
-				incrementHitCount();
+				this.hitCount.incrementAndGet();
 			}
 			return context;
 		}
 	}
 
 	/**
-	 * Increment the hit count by one. A <em>hit</em> is an access to the cache, which
-	 * returned a non-null context for a queried key.
-	 */
-	private void incrementHitCount() {
-		this.hitCount++;
-	}
-
-	/**
-	 * Increment the miss count by one. A <em>miss</em> is an access to the cache, which
-	 * returned a {@code null} context for a queried key.
-	 */
-	private void incrementMissCount() {
-		this.missCount++;
-	}
-
-	/**
-	 * Get the overall hit count for this cache. A <em>hit</em> is an access to the cache,
-	 * which returned a non-null context for a queried key.
+	 * Get the overall hit count for this cache.
+	 * <p>A <em>hit</em> is an access to the cache, which returned a non-null context for
+	 * a queried key.
 	 */
 	int getHitCount() {
-		return this.hitCount;
+		return this.hitCount.get();
 	}
 
 	/**
-	 * Get the overall miss count for this cache. A <em>miss</em> is an access to the
-	 * cache, which returned a {@code null} context for a queried key.
+	 * Get the overall miss count for this cache.
+	 * <p>A <em>miss</em> is an access to the cache, which returned a {@code null} context
+	 * for a queried key.
 	 */
 	int getMissCount() {
-		return this.missCount;
+		return this.missCount.get();
 	}
 
 	/**

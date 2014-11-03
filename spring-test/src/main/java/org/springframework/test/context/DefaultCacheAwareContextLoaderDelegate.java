@@ -38,6 +38,8 @@ class DefaultCacheAwareContextLoaderDelegate implements CacheAwareContextLoaderD
 
 	private static final Log logger = LogFactory.getLog(DefaultCacheAwareContextLoaderDelegate.class);
 
+	private static final Log statsLogger = LogFactory.getLog("org.springframework.test.context.cache");
+
 	private final ContextCache contextCache;
 
 
@@ -98,6 +100,11 @@ class DefaultCacheAwareContextLoaderDelegate implements CacheAwareContextLoaderD
 						mergedContextConfiguration));
 				}
 			}
+
+			if (statsLogger.isDebugEnabled()) {
+				statsLogger.debug(String.format("Spring test ApplicationContext cache statistics: %s", contextCache));
+			}
+
 			return context;
 		}
 	}
