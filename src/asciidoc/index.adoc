@@ -47654,6 +47654,20 @@ element.
 ----
 
 
+Finally, the `keep-alive` setting determines the time limit (in seconds) for which threads
+may remain idle before being terminated. If there are more than the core number of threads
+currently in the pool, after waiting this amount of time without processing a task, excess
+threads will be terminated. A time value of zero will cause excess threads to terminate
+immediately after executing tasks.
+
+[source,xml,indent=0]
+[subs="verbatim,quotes"]
+----
+	<task:executor
+			id="executorWithKeepAlive"
+			pool-size="5-25"
+			keep-alive="120"/>
+----
 
 [[scheduling-task-namespace-scheduled-tasks]]
 ==== The 'scheduled-tasks' element
