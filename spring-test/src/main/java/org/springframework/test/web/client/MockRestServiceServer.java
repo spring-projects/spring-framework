@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.test.web.client;
 
 import java.io.IOException;
@@ -95,28 +96,24 @@ public class MockRestServiceServer {
 	private MockRestServiceServer() {
 	}
 
+
 	/**
 	 * Create a {@code MockRestServiceServer} and set up the given
 	 * {@code RestTemplate} with a mock {@link ClientHttpRequestFactory}.
-	 *
 	 * @param restTemplate the RestTemplate to set up for mock testing
 	 * @return the created mock server
 	 */
 	public static MockRestServiceServer createServer(RestTemplate restTemplate) {
 		Assert.notNull(restTemplate, "'restTemplate' must not be null");
-
 		MockRestServiceServer mockServer = new MockRestServiceServer();
 		RequestMatcherClientHttpRequestFactory factory = mockServer.new RequestMatcherClientHttpRequestFactory();
-
 		restTemplate.setRequestFactory(factory);
-
 		return mockServer;
 	}
 
 	/**
 	 * Create a {@code MockRestServiceServer} and set up the given
 	 * {@code RestGatewaySupport} with a mock {@link ClientHttpRequestFactory}.
-	 *
 	 * @param restGateway the REST gateway to set up for mock testing
 	 * @return the created mock server
 	 */
@@ -125,14 +122,12 @@ public class MockRestServiceServer {
 		return createServer(restGateway.getRestTemplate());
 	}
 
+
 	/**
 	 * Set up a new HTTP request expectation. The returned {@link ResponseActions}
 	 * is used to set up further expectations and to define the response.
-	 *
-	 * <p>This method may be invoked multiple times before starting the test, i.e.
-	 * before using the {@code RestTemplate}, to set up expectations for multiple
-	 * requests.
-	 *
+	 * <p>This method may be invoked multiple times before starting the test, i.e. before
+	 * using the {@code RestTemplate}, to set up expectations for multiple requests.
 	 * @param requestMatcher a request expectation, see {@link MockRestRequestMatchers}
 	 * @return used to set up further expectations or to define a response
 	 */
@@ -146,7 +141,6 @@ public class MockRestServiceServer {
 	/**
 	 * Verify that all expected requests set up via
 	 * {@link #expect(RequestMatcher)} were indeed performed.
-	 *
 	 * @throws AssertionError when some expectations were not met
 	 */
 	public void verify() {
@@ -158,7 +152,6 @@ public class MockRestServiceServer {
 
 	private String getVerifyMessage() {
 		StringBuilder sb = new StringBuilder("Further request(s) expected\n");
-
 		if (this.actualRequests.size() > 0) {
 			sb.append("The following ");
 		}
@@ -171,7 +164,6 @@ public class MockRestServiceServer {
 				sb.append(request.toString()).append("\n");
 			}
 		}
-
 		return sb.toString();
 	}
 
@@ -193,7 +185,7 @@ public class MockRestServiceServer {
 				this.requestIterator = MockRestServiceServer.this.expectedRequests.iterator();
 			}
 			if (!this.requestIterator.hasNext()) {
-				throw new AssertionError("No further requests expected");
+				throw new AssertionError("No further requests expected: HTTP " + httpMethod + " " + uri);
 			}
 
 			RequestMatcherClientHttpRequest request = this.requestIterator.next();
@@ -201,7 +193,6 @@ public class MockRestServiceServer {
 			request.setMethod(httpMethod);
 
 			MockRestServiceServer.this.actualRequests.add(request);
-
 			return request;
 		}
 	}
