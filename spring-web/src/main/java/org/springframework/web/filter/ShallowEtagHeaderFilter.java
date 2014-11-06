@@ -29,6 +29,7 @@ import javax.servlet.http.HttpServletResponseWrapper;
 
 import org.springframework.http.HttpMethod;
 import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.DigestUtils;
 import org.springframework.util.ResizableByteArrayOutputStream;
 import org.springframework.util.StreamUtils;
@@ -58,6 +59,11 @@ public class ShallowEtagHeaderFilter extends OncePerRequestFilter {
 	private static final String HEADER_CACHE_CONTROL = "Cache-Control";
 
 	private static final String DIRECTIVE_NO_STORE = "no-store";
+
+
+	/** Checking for Servlet 3.0+ HttpServletResponse.getHeader(String) */
+	private static final boolean responseGetHeaderAvailable =
+			ClassUtils.hasMethod(HttpServletResponse.class, "getHeader", String.class);
 
 
 	/**
@@ -150,7 +156,7 @@ public class ShallowEtagHeaderFilter extends OncePerRequestFilter {
 
 		if (responseStatusCode >= 200 && responseStatusCode < 300 &&
 				HttpMethod.GET.name().equals(request.getMethod())) {
-			String cacheControl = response.getHeader(HEADER_CACHE_CONTROL);
+			String cacheControl = (responseGetHeaderAvailable ? response.getHeader(HEADER_CACHE_CONTROL) : null);
 			if (cacheControl == null || !cacheControl.contains(DIRECTIVE_NO_STORE)) {
 				return true;
 			}
