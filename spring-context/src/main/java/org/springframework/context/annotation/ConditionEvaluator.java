@@ -91,7 +91,7 @@ class ConditionEvaluator {
 			}
 		}
 
-		Collections.sort(conditions, AnnotationAwareOrderComparator.INSTANCE);
+		AnnotationAwareOrderComparator.sort(conditions);
 
 		for (Condition condition : conditions) {
 			ConfigurationPhase requiredPhase = null;
