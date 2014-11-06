@@ -24,21 +24,15 @@ package org.springframework.test.context;
  */
 public abstract class TestContextTestUtils {
 
-	private TestContextTestUtils() {
-		/* no-op */
-	}
-
 	public static TestContext buildTestContext(Class<?> testClass, ContextCache contextCache) {
-		CacheAwareContextLoaderDelegate cacheAwareContextLoaderDelegate = new DefaultCacheAwareContextLoaderDelegate(
-			contextCache);
-		return buildTestContext(testClass, null, cacheAwareContextLoaderDelegate);
+		return buildTestContext(testClass, new DefaultCacheAwareContextLoaderDelegate(contextCache));
 	}
 
-	public static TestContext buildTestContext(Class<?> testClass, String customDefaultContextLoaderClassName,
-			CacheAwareContextLoaderDelegate cacheAwareContextLoaderDelegate) {
+	public static TestContext buildTestContext(
+			Class<?> testClass, CacheAwareContextLoaderDelegate cacheAwareContextLoaderDelegate) {
+
 		BootstrapContext bootstrapContext = new DefaultBootstrapContext(testClass, cacheAwareContextLoaderDelegate);
 		TestContextBootstrapper testContextBootstrapper = BootstrapUtils.resolveTestContextBootstrapper(bootstrapContext);
-
 		return new DefaultTestContext(testContextBootstrapper);
 	}
 

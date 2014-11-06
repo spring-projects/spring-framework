@@ -48,13 +48,11 @@ import org.springframework.util.Assert;
  */
 class ContextCache {
 
-	private final Object monitor = new Object();
-
 	/**
 	 * Map of context keys to Spring {@code ApplicationContext} instances.
 	 */
-	private final Map<MergedContextConfiguration, ApplicationContext> contextMap = new ConcurrentHashMap<MergedContextConfiguration, ApplicationContext>(
-		64);
+	private final Map<MergedContextConfiguration, ApplicationContext> contextMap =
+			new ConcurrentHashMap<MergedContextConfiguration, ApplicationContext>(64);
 
 	/**
 	 * Map of parent keys to sets of children keys, representing a top-down <em>tree</em>
@@ -62,8 +60,8 @@ class ContextCache {
 	 * need to be recursively removed and closed when removing a context that is a parent
 	 * of other contexts.
 	 */
-	private final Map<MergedContextConfiguration, Set<MergedContextConfiguration>> hierarchyMap = new ConcurrentHashMap<MergedContextConfiguration, Set<MergedContextConfiguration>>(
-		64);
+	private final Map<MergedContextConfiguration, Set<MergedContextConfiguration>> hierarchyMap =
+			new ConcurrentHashMap<MergedContextConfiguration, Set<MergedContextConfiguration>>(64);
 
 	private final AtomicInteger hitCount = new AtomicInteger();
 
@@ -71,67 +69,57 @@ class ContextCache {
 
 
 	/**
-	 * Clears all contexts from the cache and clears context hierarchy information as
-	 * well.
+	 * Clear all contexts from the cache and clears context hierarchy information as well.
 	 */
-	void clear() {
-		synchronized (monitor) {
-			this.contextMap.clear();
-			this.hierarchyMap.clear();
-		}
+	public void clear() {
+		this.contextMap.clear();
+		this.hierarchyMap.clear();
 	}
 
 	/**
-	 * Clears hit and miss count statistics for the cache (i.e., resets counters to zero).
+	 * Clear hit and miss count statistics for the cache (i.e., resets counters to zero).
 	 */
-	void clearStatistics() {
+	public void clearStatistics() {
 		this.hitCount.set(0);
 		this.missCount.set(0);
 	}
 
 	/**
 	 * Return whether there is a cached context for the given key.
-	 *
 	 * @param key the context key (never {@code null})
 	 */
-	boolean contains(MergedContextConfiguration key) {
+	public boolean contains(MergedContextConfiguration key) {
 		Assert.notNull(key, "Key must not be null");
-		synchronized (monitor) {
-			return this.contextMap.containsKey(key);
-		}
+		return this.contextMap.containsKey(key);
 	}
 
 	/**
 	 * Obtain a cached {@code ApplicationContext} for the given key.
-	 *
-	 * <p>The {@link #getHitCount() hit} and {@link #getMissCount() miss} counts will be
-	 * updated accordingly.
-	 *
+	 * <p>The {@link #getHitCount() hit} and {@link #getMissCount() miss} counts will
+	 * be updated accordingly.
 	 * @param key the context key (never {@code null})
-	 * @return the corresponding {@code ApplicationContext} instance, or {@code null} if
-	 * not found in the cache.
+	 * @return the corresponding {@code ApplicationContext} instance, or {@code null}
+	 * if not found in the cache
 	 * @see #remove
 	 */
-	ApplicationContext get(MergedContextConfiguration key) {
+	public ApplicationContext get(MergedContextConfiguration key) {
 		Assert.notNull(key, "Key must not be null");
-		synchronized (monitor) {
-			ApplicationContext context = this.contextMap.get(key);
-			if (context == null) {
-				this.missCount.incrementAndGet();
-			}
-			else {
-				this.hitCount.incrementAndGet();
-			}
-			return context;
+		ApplicationContext context = this.contextMap.get(key);
+		if (context == null) {
+			this.missCount.incrementAndGet();
 		}
+		else {
+			this.hitCount.incrementAndGet();
+		}
+		return context;
 	}
 
 	/**
 	 * Get the overall hit count for this cache.
-	 * <p>A <em>hit</em> is an access to the cache, which returned a non-null context for
-	 * a queried key.
+	 * <p>A <em>hit</em> is an access to the cache, which returned a non-null context
+	 * for a queried key.
 	 */
-	int getHitCount() {
+	public int getHitCount() {
 		return this.hitCount.get();
 	}
 
@@ -140,36 +128,31 @@ class ContextCache {
 	 * <p>A <em>miss</em> is an access to the cache, which returned a {@code null} context
 	 * for a queried key.
 	 */
-	int getMissCount() {
+	public int getMissCount() {
 		return this.missCount.get();
 	}
 
 	/**
-	 * Explicitly add an {@code ApplicationContext} instance to the cache under the given
-	 * key.
-	 *
+	 * Explicitly add an {@code ApplicationContext} instance to the cache under the given key.
 	 * @param key the context key (never {@code null})
 	 * @param context the {@code ApplicationContext} instance (never {@code null})
 	 */
-	void put(MergedContextConfiguration key, ApplicationContext context) {
+	public void put(MergedContextConfiguration key, ApplicationContext context) {
 		Assert.notNull(key, "Key must not be null");
 		Assert.notNull(context, "ApplicationContext must not be null");
 
-		synchronized (monitor) {
-			this.contextMap.put(key, context);
-
-			MergedContextConfiguration child = key;
-			MergedContextConfiguration parent = child.getParent();
-			while (parent != null) {
-				Set<MergedContextConfiguration> list = hierarchyMap.get(parent);
-				if (list == null) {
-					list = new HashSet<MergedContextConfiguration>();
-					hierarchyMap.put(parent, list);
-				}
-				list.add(child);
-				child = parent;
-				parent = child.getParent();
+		this.contextMap.put(key, context);
+		MergedContextConfiguration child = key;
+		MergedContextConfiguration parent = child.getParent();
+		while (parent != null) {
+			Set<MergedContextConfiguration> list = this.hierarchyMap.get(parent);
+			if (list == null) {
+				list = new HashSet<MergedContextConfiguration>();
+				this.hierarchyMap.put(parent, list);
 			}
+			list.add(child);
+			child = parent;
+			parent = child.getParent();
 		}
 	}
 
@@ -177,19 +160,16 @@ class ContextCache {
 	 * Remove the context with the given key from the cache and explicitly
 	 * {@linkplain ConfigurableApplicationContext#close() close} it if it is an
 	 * instance of {@link ConfigurableApplicationContext}.
-	 *
 	 * <p>Generally speaking, you would only call this method if you change the
 	 * state of a singleton bean, potentially affecting future interaction with
 	 * the context.
-	 *
 	 * <p>In addition, the semantics of the supplied {@code HierarchyMode} will
 	 * be honored. See the Javadoc for {@link HierarchyMode} for details.
-	 *
 	 * @param key the context key; never {@code null}
 	 * @param hierarchyMode the hierarchy mode; may be {@code null} if the context
 	 * is not part of a hierarchy
 	 */
-	void remove(MergedContextConfiguration key, HierarchyMode hierarchyMode) {
+	public void remove(MergedContextConfiguration key, HierarchyMode hierarchyMode) {
 		Assert.notNull(key, "Key must not be null");
 
 		// startKey is the level at which to begin clearing the cache, depending
@@ -201,24 +181,21 @@ class ContextCache {
 			}
 		}
 
-		synchronized (monitor) {
-			final List<MergedContextConfiguration> removedContexts = new ArrayList<MergedContextConfiguration>();
+		List<MergedContextConfiguration> removedContexts = new ArrayList<MergedContextConfiguration>();
+		remove(removedContexts, startKey);
 
-			remove(removedContexts, startKey);
-
-			// Remove all remaining references to any removed contexts from the
-			// hierarchy map.
-			for (MergedContextConfiguration currentKey : removedContexts) {
-				for (Set<MergedContextConfiguration> children : hierarchyMap.values()) {
-					children.remove(currentKey);
-				}
+		// Remove all remaining references to any removed contexts from the
+		// hierarchy map.
+		for (MergedContextConfiguration currentKey : removedContexts) {
+			for (Set<MergedContextConfiguration> children : this.hierarchyMap.values()) {
+				children.remove(currentKey);
 			}
+		}
 
-			// Remove empty entries from the hierarchy map.
-			for (MergedContextConfiguration currentKey : hierarchyMap.keySet()) {
-				if (hierarchyMap.get(currentKey).isEmpty()) {
-					hierarchyMap.remove(currentKey);
-				}
+		// Remove empty entries from the hierarchy map.
+		for (MergedContextConfiguration currentKey : this.hierarchyMap.keySet()) {
+			if (this.hierarchyMap.get(currentKey).isEmpty()) {
+				this.hierarchyMap.remove(currentKey);
 			}
 		}
 	}
@@ -226,26 +203,23 @@ class ContextCache {
 	private void remove(List<MergedContextConfiguration> removedContexts, MergedContextConfiguration key) {
 		Assert.notNull(key, "Key must not be null");
 
-		synchronized (monitor) {
-			Set<MergedContextConfiguration> children = hierarchyMap.get(key);
-			if (children != null) {
-				for (MergedContextConfiguration child : children) {
-					// Recurse through lower levels
-					remove(removedContexts, child);
-				}
-				// Remove the set of children for the current context from the
-				// hierarchy map.
-				hierarchyMap.remove(key);
+		Set<MergedContextConfiguration> children = this.hierarchyMap.get(key);
+		if (children != null) {
+			for (MergedContextConfiguration child : children) {
+				// Recurse through lower levels
+				remove(removedContexts, child);
 			}
-
-			// Physically remove and close leaf nodes first (i.e., on the way back up the
-			// stack as opposed to prior to the recursive call).
-			ApplicationContext context = contextMap.remove(key);
-			if (context instanceof ConfigurableApplicationContext) {
-				((ConfigurableApplicationContext) context).close();
-			}
-			removedContexts.add(key);
+			// Remove the set of children for the current context from the hierarchy map.
+			this.hierarchyMap.remove(key);
 		}
+
+		// Physically remove and close leaf nodes first (i.e., on the way back up the
+		// stack as opposed to prior to the recursive call).
+		ApplicationContext context = this.contextMap.remove(key);
+		if (context instanceof ConfigurableApplicationContext) {
+			((ConfigurableApplicationContext) context).close();
+		}
+		removedContexts.add(key);
 	}
 
 	/**
@@ -253,34 +227,30 @@ class ContextCache {
 	 * contains more than <tt>Integer.MAX_VALUE</tt> elements, returns
 	 * <tt>Integer.MAX_VALUE</tt>.
 	 */
-	int size() {
-		synchronized (monitor) {
-			return this.contextMap.size();
-		}
+	public int size() {
+		return this.contextMap.size();
 	}
 
 	/**
 	 * Determine the number of parent contexts currently tracked within the cache.
 	 */
-	int getParentContextCount() {
-		synchronized (monitor) {
-			return this.hierarchyMap.size();
-		}
+	public int getParentContextCount() {
+		return this.hierarchyMap.size();
 	}
 
 	/**
 	 * Generates a text string, which contains the {@linkplain #size() size} as well
-	 * as the {@linkplain #getHitCount() hit}, {@linkplain #getMissCount() miss}, and
-	 * {@linkplain #getParentContextCount() parent context} counts.
+	 * as the {@linkplain #getHitCount() hit}, {@linkplain #getMissCount() miss},
+	 * and {@linkplain #getParentContextCount() parent context} counts.
 	 */
 	@Override
 	public String toString() {
-		return new ToStringCreator(this)//
-		.append("size", size())//
-		.append("hitCount", getHitCount())//
-		.append("missCount", getMissCount())//
-		.append("parentContextCount", getParentContextCount())//
-		.toString();
+		return new ToStringCreator(this)
+				.append("size", size())
+				.append("hitCount", getHitCount())
+				.append("missCount", getMissCount())
+				.append("parentContextCount", getParentContextCount())
+				.toString();
 	}
 
 }

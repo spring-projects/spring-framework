@@ -67,69 +67,50 @@ class DefaultTestContext extends AttributeAccessorSupport implements TestContext
 		this.mergedContextConfiguration = testContextBootstrapper.buildMergedContextConfiguration();
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+
 	public ApplicationContext getApplicationContext() {
-		return cacheAwareContextLoaderDelegate.loadContext(mergedContextConfiguration);
+		return this.cacheAwareContextLoaderDelegate.loadContext(this.mergedContextConfiguration);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	public void markApplicationContextDirty(HierarchyMode hierarchyMode) {
-		cacheAwareContextLoaderDelegate.closeContext(mergedContextConfiguration, hierarchyMode);
+		this.cacheAwareContextLoaderDelegate.closeContext(this.mergedContextConfiguration, hierarchyMode);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	public final Class<?> getTestClass() {
-		return testClass;
+		return this.testClass;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	public final Object getTestInstance() {
-		return testInstance;
+		return this.testInstance;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	public final Method getTestMethod() {
-		return testMethod;
+		return this.testMethod;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	public final Throwable getTestException() {
-		return testException;
+		return this.testException;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	public void updateState(Object testInstance, Method testMethod, Throwable testException) {
 		this.testInstance = testInstance;
 		this.testMethod = testMethod;
 		this.testException = testException;
 	}
 
+
 	/**
 	 * Provide a String representation of this test context's state.
 	 */
 	@Override
 	public String toString() {
-		return new ToStringCreator(this)//
-		.append("testClass", testClass)//
-		.append("testInstance", testInstance)//
-		.append("testMethod", testMethod)//
-		.append("testException", testException)//
-		.append("mergedContextConfiguration", mergedContextConfiguration)//
-		.toString();
+		return new ToStringCreator(this)
+				.append("testClass", this.testClass)
+				.append("testInstance", this.testInstance)
+				.append("testMethod", this.testMethod)
+				.append("testException", this.testException)
+				.append("mergedContextConfiguration", this.mergedContextConfiguration)
+				.toString();
 	}
 
 }

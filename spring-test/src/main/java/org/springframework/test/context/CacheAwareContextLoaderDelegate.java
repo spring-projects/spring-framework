@@ -38,15 +38,13 @@ public interface CacheAwareContextLoaderDelegate {
 	 * Load the {@linkplain ApplicationContext application context} for the supplied
 	 * {@link MergedContextConfiguration} by delegating to the {@link ContextLoader}
 	 * configured in the given {@code MergedContextConfiguration}.
-	 *
 	 * <p>If the context is present in the <em>context cache</em> it will simply
 	 * be returned; otherwise, it will be loaded, stored in the cache, and returned.
-	 *
 	 * @param mergedContextConfiguration the merged context configuration to use
 	 * to load the application context; never {@code null}
 	 * @return the application context
-	 * @throws IllegalStateException if an error occurs while retrieving or
-	 * loading the application context
+	 * @throws IllegalStateException if an error occurs while retrieving or loading
+	 * the application context
 	 */
 	ApplicationContext loadContext(MergedContextConfiguration mergedContextConfiguration);
 
@@ -55,16 +53,13 @@ public interface CacheAwareContextLoaderDelegate {
 	 * supplied {@link MergedContextConfiguration} from the <em>context cache</em>
 	 * and {@linkplain ConfigurableApplicationContext#close() close} it if it is
 	 * an instance of {@link ConfigurableApplicationContext}.
-	 *
 	 * <p>The semantics of the supplied {@code HierarchyMode} must be honored when
 	 * removing the context from the cache. See the Javadoc for {@link HierarchyMode}
 	 * for details.
-	 *
 	 * <p>Generally speaking, this method should only be called if the state of
 	 * a singleton bean has been changed (potentially affecting future interaction
 	 * with the context) or if the context needs to be prematurely removed from
 	 * the cache.
-	 *
 	 * @param mergedContextConfiguration the merged context configuration for the
 	 * application context to close; never {@code null}
 	 * @param hierarchyMode the hierarchy mode; may be {@code null} if the context
