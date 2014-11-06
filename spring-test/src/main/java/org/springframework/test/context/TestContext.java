@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -79,8 +79,7 @@ public class TestContext extends AttributeAccessorSupport {
 	 * @param testClass the test class for which the test context should be
 	 * constructed (must not be {@code null})
 	 * @param contextCache the context cache from which the constructed test
-	 * context should retrieve application contexts (must not be
-	 * {@code null})
+	 * context should retrieve application contexts (must not be {@code null})
 	 * @param defaultContextLoaderClassName the name of the default
 	 * {@code ContextLoader} class to use (may be {@code null})
 	 */
@@ -94,8 +93,8 @@ public class TestContext extends AttributeAccessorSupport {
 
 		MergedContextConfiguration mergedContextConfiguration;
 
-		if (testClass.isAnnotationPresent(ContextConfiguration.class)
-				|| testClass.isAnnotationPresent(ContextHierarchy.class)) {
+		if (testClass.isAnnotationPresent(ContextConfiguration.class) ||
+				testClass.isAnnotationPresent(ContextHierarchy.class)) {
 			mergedContextConfiguration = ContextLoaderUtils.buildMergedContextConfiguration(testClass,
 				defaultContextLoaderClassName, cacheAwareContextLoaderDelegate);
 		}
@@ -111,6 +110,7 @@ public class TestContext extends AttributeAccessorSupport {
 		this.mergedContextConfiguration = mergedContextConfiguration;
 	}
 
+
 	/**
 	 * Get the {@link ApplicationContext application context} for this test
 	 * context, possibly cached.
@@ -119,7 +119,7 @@ public class TestContext extends AttributeAccessorSupport {
 	 * application context
 	 */
 	public ApplicationContext getApplicationContext() {
-		return cacheAwareContextLoaderDelegate.loadContext(mergedContextConfiguration);
+		return this.cacheAwareContextLoaderDelegate.loadContext(this.mergedContextConfiguration);
 	}
 
 	/**
@@ -127,7 +127,7 @@ public class TestContext extends AttributeAccessorSupport {
 	 * @return the test class (never {@code null})
 	 */
 	public Class<?> getTestClass() {
-		return testClass;
+		return this.testClass;
 	}
 
 	/**
@@ -137,7 +137,7 @@ public class TestContext extends AttributeAccessorSupport {
 	 * @see #updateState(Object, Method, Throwable)
 	 */
 	public Object getTestInstance() {
-		return testInstance;
+		return this.testInstance;
 	}
 
 	/**
@@ -147,7 +147,7 @@ public class TestContext extends AttributeAccessorSupport {
 	 * @see #updateState(Object, Method, Throwable)
 	 */
 	public Method getTestMethod() {
-		return testMethod;
+		return this.testMethod;
 	}
 
 	/**
@@ -159,7 +159,7 @@ public class TestContext extends AttributeAccessorSupport {
 	 * @see #updateState(Object, Method, Throwable)
 	 */
 	public Throwable getTestException() {
-		return testException;
+		return this.testException;
 	}
 
 	/**
@@ -184,12 +184,13 @@ public class TestContext extends AttributeAccessorSupport {
 	 * context is part of a hierarchy (may be {@code null})
 	 */
 	public void markApplicationContextDirty(HierarchyMode hierarchyMode) {
-		contextCache.remove(mergedContextConfiguration, hierarchyMode);
+		synchronized (this.contextCache) {
+			this.contextCache.remove(this.mergedContextConfiguration, hierarchyMode);
+		}
 	}
 
 	/**
-	 * Update this test context to reflect the state of the currently executing
-	 * test.
+	 * Update this test context to reflect the state of the currently executing test.
 	 * @param testInstance the current test instance (may be {@code null})
 	 * @param testMethod the current test method (may be {@code null})
 	 * @param testException the exception that was thrown in the test method, or
@@ -201,18 +202,19 @@ public class TestContext extends AttributeAccessorSupport {
 		this.testException = testException;
 	}
 
+
 	/**
 	 * Provide a String representation of this test context's state.
 	 */
 	@Override
 	public String toString() {
-		return new ToStringCreator(this)//
-		.append("testClass", testClass)//
-		.append("testInstance", testInstance)//
-		.append("testMethod", testMethod)//
-		.append("testException", testException)//
-		.append("mergedContextConfiguration", mergedContextConfiguration)//
-		.toString();
+		return new ToStringCreator(this)
+				.append("testClass", this.testClass)
+				.append("testInstance", this.testInstance)
+				.append("testMethod", this.testMethod)
+				.append("testException", this.testException)
+				.append("mergedContextConfiguration", this.mergedContextConfiguration)
+				.toString();
 	}
 
 }
