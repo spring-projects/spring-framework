@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,8 @@ import static org.junit.Assert.*;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.*;
 
 /**
- * Tests for {@link MockClientHttpRequestFactory}.
+ * Tests for
+ * {@link org.springframework.test.web.client.MockMvcClientHttpRequestFactory}.
  *
  * @author Rossen Stoyanchev
  */
@@ -64,7 +65,7 @@ public class MockClientHttpRequestFactoryTests {
 			this.factory.createRequest(new URI("/foo"), HttpMethod.GET);
 		}
 		catch (AssertionError error) {
-			assertEquals("No further requests expected", error.getMessage());
+			assertEquals("No further requests expected: HTTP GET /foo", error.getMessage());
 		}
 	}
 
