@@ -36,7 +36,6 @@ import org.springframework.core.io.Resource;
  */
 public class PathResourceResolver extends AbstractResourceResolver {
 
-
 	@Override
 	protected Resource resolveResourceInternal(HttpServletRequest request, String requestPath,
 			List<? extends Resource> locations, ResourceResolverChain chain) {
@@ -55,21 +54,21 @@ public class PathResourceResolver extends AbstractResourceResolver {
 		for (Resource location : locations) {
 			try {
 				if (logger.isTraceEnabled()) {
-					logger.trace("Checking location=[" + location + "]");
+					logger.trace("Checking location: " + location);
 				}
 				Resource resource = getResource(resourcePath, location);
 				if (resource != null) {
 					if (logger.isTraceEnabled()) {
-						logger.trace("Found match");
+						logger.trace("Found match: " + resource);
 					}
 					return resource;
 				}
 				else if (logger.isTraceEnabled()) {
-					logger.trace("No match");
+					logger.trace("No match for location: " + location);
 				}
 			}
 			catch (IOException ex) {
-				logger.trace("Failure checking for relative resource. Trying next location.", ex);
+				logger.trace("Failure checking for relative resource - trying next location", ex);
 			}
 		}
 		return null;
@@ -81,7 +80,7 @@ public class PathResourceResolver extends AbstractResourceResolver {
 	 * {@code Resource} for the given path relative to the location.
 	 * @param resourcePath the path to the resource
 	 * @param location the location to check
-	 * @return the resource or {@code null}
+	 * @return the resource, or {@code null} if none found
 	 */
 	protected Resource getResource(String resourcePath, Resource location) throws IOException {
 		Resource resource = location.createRelative(resourcePath);

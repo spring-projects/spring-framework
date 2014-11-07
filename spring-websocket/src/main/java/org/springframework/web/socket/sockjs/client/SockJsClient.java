@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +19,10 @@ package org.springframework.web.socket.sockjs.client;
 import java.net.URI;
 import java.security.Principal;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.logging.Log;
@@ -31,6 +33,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.util.concurrent.SettableListenableFuture;
 import org.springframework.web.socket.WebSocketHandler;
@@ -53,7 +56,6 @@ import org.springframework.web.util.UriComponentsBuilder;
  *
  * @author Rossen Stoyanchev
  * @since 4.1
- *
  * @see <a href="http://sockjs.org">http://sockjs.org</a>
  * @see org.springframework.web.socket.sockjs.client.Transport
  */
@@ -64,34 +66,41 @@ public class SockJsClient implements WebSocketClient, Lifecycle {
 
 	private static final Log logger = LogFactory.getLog(SockJsClient.class);
 
+	private static final Set<String> supportedProtocols = new HashSet<String>(4);
 
-	private InfoReceiver infoReceiver;
+	static {
+		supportedProtocols.add("ws");
+		supportedProtocols.add("wss");
+		supportedProtocols.add("http");
+		supportedProtocols.add("https");
+	}
+
 
 	private final List<Transport> transports;
+
+	private InfoReceiver infoReceiver;
 
 	private SockJsMessageCodec messageCodec;
 
 	private TaskScheduler connectTimeoutScheduler;
 
-	private final Map<URI, ServerInfo> serverInfoCache = new ConcurrentHashMap<URI, ServerInfo>();
-
 	private volatile boolean running = false;
+
+	private final Map<URI, ServerInfo> serverInfoCache = new ConcurrentHashMap<URI, ServerInfo>();
 
 
 	/**
 	 * Create a {@code SockJsClient} with the given transports.
-	 *
 	 * <p>If the list includes an {@link XhrTransport} (or more specifically an
 	 * implementation of {@link InfoReceiver}) the instance is used to initialize
 	 * the {@link #setInfoReceiver(InfoReceiver) infoReceiver} property, or
 	 * otherwise is defaulted to {@link RestTemplateXhrTransport}.
-	 *
 	 * @param transports the (non-empty) list of transports to use
 	 */
 	public SockJsClient(List<Transport> transports) {
 		Assert.notEmpty(transports, "No transports provided");
-		this.infoReceiver = initInfoReceiver(transports);
 		this.transports = new ArrayList<Transport>(transports);
+		this.infoReceiver = initInfoReceiver(transports);
 		if (jackson2Present) {
 			this.messageCodec = new Jackson2SockJsMessageCodec();
 		}
@@ -110,21 +119,19 @@ public class SockJsClient implements WebSocketClient, Lifecycle {
 	/**
 	 * Configure the {@code InfoReceiver} to use to perform the SockJS "Info"
 	 * request before the SockJS session starts.
-	 *
 	 * <p>If the list of transports provided to the constructor contained an
 	 * {@link XhrTransport} or an implementation of {@link InfoReceiver} that
 	 * instance would have been used to initialize this property, or otherwise
 	 * it defaults to {@link RestTemplateXhrTransport}.
-	 *
 	 * @param infoReceiver the transport to use for the SockJS "Info" request
 	 */
 	public void setInfoReceiver(InfoReceiver infoReceiver) {
-		Assert.notNull(infoReceiver, "'infoReceiver' is required");
+		Assert.notNull(infoReceiver, "InfoReceiver is required");
 		this.infoReceiver = infoReceiver;
 	}
 
 	/**
-	 * Return the configured {@code InfoReceiver}, never {@code null}.
+	 * Return the configured {@code InfoReceiver} (never {@code null}).
 	 */
 	public InfoReceiver getInfoReceiver() {
 		return this.infoReceiver;
@@ -132,17 +139,17 @@ public class SockJsClient implements WebSocketClient, Lifecycle {
 
 	/**
 	 * Set the SockJsMessageCodec to use.
-	 *
 	 * <p>By default {@link org.springframework.web.socket.sockjs.frame.Jackson2SockJsMessageCodec
 	 * Jackson2SockJsMessageCodec} is used if Jackson is on the classpath.
-	 *
-	 * @param messageCodec the message messageCodec to use
 	 */
 	public void setMessageCodec(SockJsMessageCodec messageCodec) {
 		Assert.notNull(messageCodec, "'messageCodec' is required");
 		this.messageCodec = messageCodec;
 	}
 
+	/**
+	 * Return the SockJsMessageCodec to use.
+	 */
 	public SockJsMessageCodec getMessageCodec() {
 		return this.messageCodec;
 	}
@@ -158,6 +165,7 @@ public class SockJsClient implements WebSocketClient, Lifecycle {
 	public void setConnectTimeoutScheduler(TaskScheduler connectTimeoutScheduler) {
 		this.connectTimeoutScheduler = connectTimeoutScheduler;
 	}
+
 
 	@Override
 	public void start() {
@@ -192,19 +200,10 @@ public class SockJsClient implements WebSocketClient, Lifecycle {
 		return this.running;
 	}
 
-	/**
-	 * By default the result of a SockJS "Info" request, including whether the
-	 * server has WebSocket disabled and how long the request took (used for
-	 * calculating transport timeout time) is cached. This method can be used to
-	 * clear that cache hence causing it to re-populate.
-	 */
-	public void clearServerInfoCache() {
-		this.serverInfoCache.clear();
-	}
 
 	@Override
-	public ListenableFuture<WebSocketSession> doHandshake(WebSocketHandler handler,
-			String uriTemplate, Object... uriVars) {
+	public ListenableFuture<WebSocketSession> doHandshake(
+			WebSocketHandler handler, String uriTemplate, Object... uriVars) {
 
 		Assert.notNull(uriTemplate, "uriTemplate must not be null");
 		URI uri = UriComponentsBuilder.fromUriString(uriTemplate).buildAndExpand(uriVars).encode().toUri();
@@ -212,15 +211,16 @@ public class SockJsClient implements WebSocketClient, Lifecycle {
 	}
 
 	@Override
-	public final ListenableFuture<WebSocketSession> doHandshake(WebSocketHandler handler,
-			WebSocketHttpHeaders headers, URI url) {
+	public final ListenableFuture<WebSocketSession> doHandshake(
+			WebSocketHandler handler, WebSocketHttpHeaders headers, URI url) {
 
-		Assert.notNull(handler, "'webSocketHandler' is required");
-		Assert.notNull(url, "'url' is required");
+		Assert.notNull(handler, "WebSocketHandler is required");
+		Assert.notNull(url, "URL is required");
 
 		String scheme = url.getScheme();
-		Assert.isTrue(scheme != null && ("ws".equals(scheme) || "wss".equals(scheme) ||
-				"http".equals(scheme) || "https".equals(scheme)), "Invalid scheme: " + scheme);
+		if (!supportedProtocols.contains(scheme)) {
+			throw new IllegalArgumentException("Invalid scheme: '" + scheme + "'");
+		}
 
 		SettableListenableFuture<WebSocketSession> connectFuture = new SettableListenableFuture<WebSocketSession>();
 		try {
@@ -259,7 +259,10 @@ public class SockJsClient implements WebSocketClient, Lifecycle {
 				}
 			}
 		}
-		Assert.notEmpty(requests, "No transports, " + urlInfo + ", wsEnabled=" + serverInfo.isWebSocketEnabled());
+		if (CollectionUtils.isEmpty(requests)) {
+			throw new IllegalStateException(
+					"No transports: " + urlInfo + ", webSocketEnabled=" + serverInfo.isWebSocketEnabled());
+		}
 		for (int i = 0; i < requests.size() - 1; i++) {
 			DefaultTransportRequest request = requests.get(i);
 			request.setUser(getUser());
@@ -274,13 +277,22 @@ public class SockJsClient implements WebSocketClient, Lifecycle {
 
 	/**
 	 * Return the user to associate with the SockJS session and make available via
-	 * {@link org.springframework.web.socket.WebSocketSession#getPrincipal()
-	 * WebSocketSession#getPrincipal()}.
+	 * {@link org.springframework.web.socket.WebSocketSession#getPrincipal()}.
 	 * <p>By default this method returns {@code null}.
-	 * @return the user to associate with the session, possibly {@code null}
+	 * @return the user to associate with the session (possibly {@code null})
 	 */
 	protected Principal getUser() {
 		return null;
+	}
+
+	/**
+	 * By default the result of a SockJS "Info" request, including whether the
+	 * server has WebSocket disabled and how long the request took (used for
+	 * calculating transport timeout time) is cached. This method can be used to
+	 * clear that cache hence causing it to re-populate.
+	 */
+	public void clearServerInfoCache() {
+		this.serverInfoCache.clear();
 	}
 
 
@@ -293,8 +305,7 @@ public class SockJsClient implements WebSocketClient, Lifecycle {
 
 		private final long responseTime;
 
-
-		private ServerInfo(String response, long responseTime) {
+		public ServerInfo(String response, long responseTime) {
 			this.responseTime = responseTime;
 			this.webSocketEnabled = !response.matches(".*[\"']websocket[\"']\\s*:\\s*false.*");
 		}

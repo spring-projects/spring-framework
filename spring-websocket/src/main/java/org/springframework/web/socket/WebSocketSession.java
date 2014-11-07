@@ -61,8 +61,8 @@ public interface WebSocketSession extends Closeable {
 
 	/**
 	 * Return a {@link java.security.Principal} instance containing the name of the
-	 * authenticated user. If the user has not been authenticated, the method returns
-	 * <code>null</code>.
+	 * authenticated user.
+	 * <p>If the user has not been authenticated, the method returns <code>null</code>.
 	 */
 	Principal getPrincipal();
 
