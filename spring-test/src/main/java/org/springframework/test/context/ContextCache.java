@@ -69,7 +69,7 @@ class ContextCache {
 
 
 	/**
-	 * Clear all contexts from the cache and clears context hierarchy information as well.
+	 * Clear all contexts from the cache and clear context hierarchy information as well.
 	 */
 	public void clear() {
 		this.contextMap.clear();
@@ -77,7 +77,7 @@ class ContextCache {
 	}
 
 	/**
-	 * Clear hit and miss count statistics for the cache (i.e., resets counters to zero).
+	 * Clear hit and miss count statistics for the cache (i.e., reset counters to zero).
 	 */
 	public void clearStatistics() {
 		this.hitCount.set(0);
@@ -85,8 +85,9 @@ class ContextCache {
 	}
 
 	/**
-	 * Return whether there is a cached context for the given key.
+	 * Determine whether there is a cached context for the given key.
 	 * @param key the context key (never {@code null})
+	 * @return {@code true} if the cache contains a context with the given key
 	 */
 	public boolean contains(MergedContextConfiguration key) {
 		Assert.notNull(key, "Key must not be null");
@@ -223,9 +224,9 @@ class ContextCache {
 	}
 
 	/**
-	 * Determine the number of contexts currently stored in the cache. If the cache
-	 * contains more than <tt>Integer.MAX_VALUE</tt> elements, returns
-	 * <tt>Integer.MAX_VALUE</tt>.
+	 * Determine the number of contexts currently stored in the cache.
+	 * <p>If the cache contains more than {@code Integer.MAX_VALUE} elements,
+	 * this method returns {@code Integer.MAX_VALUE}.
 	 */
 	public int size() {
 		return this.contextMap.size();
@@ -239,7 +240,7 @@ class ContextCache {
 	}
 
 	/**
-	 * Generates a text string, which contains the {@linkplain #size() size} as well
+	 * Generate a text string, which contains the {@linkplain #size} as well
 	 * as the {@linkplain #getHitCount() hit}, {@linkplain #getMissCount() miss},
 	 * and {@linkplain #getParentContextCount() parent context} counts.
 	 */
