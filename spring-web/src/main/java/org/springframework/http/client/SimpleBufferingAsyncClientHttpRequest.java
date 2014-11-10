@@ -78,6 +78,10 @@ final class SimpleBufferingAsyncClientHttpRequest extends AbstractBufferingAsync
 			@Override
 			public ClientHttpResponse call() throws Exception {
 				SimpleBufferingClientHttpRequest.addHeaders(connection, headers);
+				// JDK < 1.8 doesn't support getOutputStream with HTTP DELETE
+				if (HttpMethod.DELETE.equals(getMethod()) && bufferedOutput.length == 0) {
+					connection.setDoOutput(false);
+				}
 				if (connection.getDoOutput() && outputStreaming) {
 					connection.setFixedLengthStreamingMode(bufferedOutput.length);
 				}

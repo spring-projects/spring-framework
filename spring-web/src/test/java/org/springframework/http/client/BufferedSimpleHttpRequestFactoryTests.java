@@ -18,9 +18,12 @@ package org.springframework.http.client;
 
 import static org.junit.Assert.assertEquals;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.ProtocolException;
+import java.net.URI;
 import java.net.URL;
 
 import org.junit.Test;
@@ -54,6 +57,14 @@ public class BufferedSimpleHttpRequestFactoryTests extends AbstractHttpRequestFa
 		testRequestBodyAllowed(uri, "PUT", true);
 		testRequestBodyAllowed(uri, "POST", true);
 		testRequestBodyAllowed(uri, "DELETE", true);
+	}
+
+	@Test
+	public void deleteWithoutBodyDoesNotRaiseException() throws Exception {
+		HttpURLConnection connection = new TestHttpURLConnection(new URL("http://example.com"));
+		((SimpleClientHttpRequestFactory) this.factory).prepareConnection(connection, "DELETE");
+		SimpleBufferingClientHttpRequest request = new SimpleBufferingClientHttpRequest(connection, false);
+		request.execute();
 	}
 
 	private void testRequestBodyAllowed(URL uri, String httpMethod, boolean allowed) throws IOException {

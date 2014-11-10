@@ -26,6 +26,7 @@ import java.util.Map;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.util.FileCopyUtils;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -68,6 +69,11 @@ final class SimpleBufferingClientHttpRequest extends AbstractBufferingClientHttp
 	@Override
 	protected ClientHttpResponse executeInternal(HttpHeaders headers, byte[] bufferedOutput) throws IOException {
 		addHeaders(this.connection, headers);
+
+		// JDK < 1.8 doesn't support getOutputStream with HTTP DELETE
+		if (HttpMethod.DELETE.equals(getMethod()) && bufferedOutput.length == 0) {
+			this.connection.setDoOutput(false);
+		}
 
 		if (this.connection.getDoOutput() && this.outputStreaming) {
 			this.connection.setFixedLengthStreamingMode(bufferedOutput.length);
