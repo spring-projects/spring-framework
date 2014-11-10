@@ -185,6 +185,13 @@ public class BufferingStompDecoderTests {
 		assertEquals(0, messages.size());
 	}
 
+	@Test(expected = StompConversionException.class) // SPR-12418
+	public void endingBackslashHeaderValueCheck() throws InterruptedException {
+		BufferingStompDecoder stompDecoder = new BufferingStompDecoder(STOMP_DECODER, 128);
+		String payload = "SEND\na:alpha\\\n\nMessage body\0";
+		stompDecoder.decode(toByteBuffer(payload));
+	}
+
 
 	private ByteBuffer toByteBuffer(String chunk) {
 		return ByteBuffer.wrap(chunk.getBytes(Charset.forName("UTF-8")));

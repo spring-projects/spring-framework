@@ -260,6 +260,9 @@ public class StompDecoder {
 
 		while (index >= 0) {
 			sb.append(inString.substring(pos, index));
+			if((index + 1) >= inString.length()) {
+				throw new StompConversionException("Illegal escape sequence at index " + index + ": " + inString);
+			}
 			Character c = inString.charAt(index + 1);
 			if (c == 'r') {
 				sb.append('\r');
