@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -56,13 +56,12 @@ public class StompDecoder {
 
 	/**
 	 * Decodes one or more STOMP frames from the given {@code ByteBuffer} into a
-	 * list of {@link Message}s. If the input buffer contains any incplcontains partial STOMP frame content, or additional
-	 * content with a partial STOMP frame, the buffer is reset and {@code null} is
-	 * returned.
-	 *
-	 * @param buffer The buffer to decode the STOMP frame from
-	 *
-	 * @return the decoded messages or an empty list
+	 * list of {@link Message}s. If the input buffer contains partial STOMP frame
+	 * content, or additional content with a partial STOMP frame, the buffer is
+	 * reset and {@code null} is returned.
+	 * @param buffer the buffer to decode the STOMP frame from
+	 * @return the decoded messages, or an empty list if none
+	 * @throws StompConversionException raised in case of decoding issues
 	 */
 	public List<Message<byte[]>> decode(ByteBuffer buffer) {
 		return decode(buffer, new LinkedMultiValueMap<String, String>());
@@ -71,35 +70,29 @@ public class StompDecoder {
 	/**
 	 * Decodes one or more STOMP frames from the given {@code buffer} and returns
 	 * a list of {@link Message}s.
-	 *
 	 * <p>If the given ByteBuffer contains only partial STOMP frame content and no
 	 * complete STOMP frames, an empty list is returned, and the buffer is reset to
 	 * to where it was.
-	 *
 	 * <p>If the buffer contains one ore more STOMP frames, those are returned and
 	 * the buffer reset to point to the beginning of the unused partial content.
-	 *
 	 * <p>The input headers map is used to store successfully parsed headers and
 	 * is cleared after ever successfully read message. So when partial content is
 	 * read the caller can check if a "content-length" header was read, which helps
 	 * to determine how much more content is needed before the next STOMP frame
 	 * can be decoded.
-	 *
-	 * @param buffer The buffer to decode the STOMP frame from
+	 * @param buffer the buffer to decode the STOMP frame from
 	 * @param headers an empty map that will contain successfully parsed headers
 	 * in cases where the partial buffer ended with a partial STOMP frame
-	 *
-	 * @return decoded messages or an empty list
+	 * @return the decoded messages, or an empty list if none
 	 * @throws StompConversionException raised in case of decoding issues
 	 */
 	public List<Message<byte[]>> decode(ByteBuffer buffer, MultiValueMap<String, String> headers) {
 		Assert.notNull(headers, "headers is required");
 		List<Message<byte[]>> messages = new ArrayList<Message<byte[]>>();
 		while (buffer.hasRemaining()) {
-			Message<byte[]> m = decodeMessage(buffer, headers);
-			if (m != null) {
-				messages.add(m);
-				headers.clear();
+			Message<byte[]> message = decodeMessage(buffer, headers);
+			if (message != null) {
+				messages.add(message);
 			}
 			else {
 				break;
@@ -112,20 +105,17 @@ public class StompDecoder {
 	 * Decode a single STOMP frame from the given {@code buffer} into a {@link Message}.
 	 */
 	private Message<byte[]> decodeMessage(ByteBuffer buffer, MultiValueMap<String, String> headers) {
-
 		Message<byte[]> decodedMessage = null;
 		skipLeadingEol(buffer);
 		buffer.mark();
 
 		String command = readCommand(buffer);
 		if (command.length() > 0) {
-
 			readHeaders(buffer, headers);
 			byte[] payload = readPayload(buffer, headers);
-
 			if (payload != null) {
 				StompCommand stompCommand = StompCommand.valueOf(command);
-				if ((payload.length > 0) && (!stompCommand.isBodyAllowed())) {
+				if (payload.length > 0 && !stompCommand.isBodyAllowed()) {
 					throw new StompConversionException(stompCommand + " shouldn't have but " +
 							"has a payload with length=" + payload.length + ", headers=" + headers);
 				}
@@ -137,7 +127,7 @@ public class StompDecoder {
 			}
 			else {
 				if (logger.isTraceEnabled()) {
-					logger.trace("Received incomplete frame. Resetting buffer.");
+					logger.trace("Incomplete frame, resetting input buffer...");
 				}
 				buffer.reset();
 			}
@@ -182,10 +172,10 @@ public class StompDecoder {
 			if (headerStream.size() > 0) {
 				String header = new String(headerStream.toByteArray(), UTF8_CHARSET);
 				int colonIndex = header.indexOf(':');
-				if ((colonIndex <= 0) || (colonIndex == header.length() - 1)) {
+				if (colonIndex <= 0 || colonIndex == header.length() - 1) {
 					if (buffer.remaining() > 0) {
-						throw new StompConversionException(
-								"Illegal header: '" + header + "'. A header must be of the form <name>:<value>");
+						throw new StompConversionException("Illegal header: '" + header +
+								"'. A header must be of the form <name>:<value>.");
 					}
 				}
 				else {
@@ -205,13 +195,15 @@ public class StompDecoder {
 	 * <a href="http://stomp.github.io/stomp-specification-1.2.html#Value_Encoding">"Value Encoding"</a>.
 	 */
 	private String unescape(String inString) {
-
-		StringBuilder sb = new StringBuilder();
-		int pos = 0; // position in the old string
+		StringBuilder sb = new StringBuilder(inString.length());
+		int pos = 0;  // position in the old string
 		int index = inString.indexOf("\\");
 
 		while (index >= 0) {
 			sb.append(inString.substring(pos, index));
+			if (index + 1 >= inString.length()) {
+				throw new StompConversionException("Illegal escape sequence at index " + index + ": " + inString);
+			}
 			Character c = inString.charAt(index + 1);
 			if (c == 'r') {
 				sb.append('\r');
@@ -282,7 +274,6 @@ public class StompDecoder {
 
 	/**
 	 * Try to read an EOL incrementing the buffer position if successful.
-	 *
 	 * @return whether an EOL was consumed
 	 */
 	private boolean tryConsumeEndOfLine(ByteBuffer buffer) {

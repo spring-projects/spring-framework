@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -74,8 +74,8 @@ public final class StompEncoder  {
 
 			return baos.toByteArray();
 		}
-		catch (IOException e) {
-			throw new StompConversionException("Failed to encode STOMP frame",  e);
+		catch (IOException ex) {
+			throw new StompConversionException("Failed to encode STOMP frame",  ex);
 		}
 	}
 
@@ -108,8 +108,8 @@ public final class StompEncoder  {
 	}
 
 	private byte[] encodeHeaderString(String input, boolean escape) {
-		input = escape ? escape(input) : input;
-		return input.getBytes(UTF8_CHARSET);
+		String inputToUse = (escape ? escape(input) : input);
+		return inputToUse.getBytes(UTF8_CHARSET);
 	}
 
 	/**
