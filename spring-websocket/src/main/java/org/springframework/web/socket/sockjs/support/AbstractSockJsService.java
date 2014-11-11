@@ -337,8 +337,8 @@ public abstract class AbstractSockJsService implements SockJsService {
 		try {
 			if (sockJsPath.equals("") || sockJsPath.equals("/")) {
 				logger.debug(requestInfo);
-				response.getHeaders().setContentType(new MediaType("text", "plain", Charset.forName("UTF-8")));
-				response.getBody().write("Welcome to SockJS!\n".getBytes("UTF-8"));
+				response.getHeaders().setContentType(new MediaType("text", "plain", UTF8_CHARSET));
+				response.getBody().write("Welcome to SockJS!\n".getBytes(UTF8_CHARSET));
 			}
 			else if (sockJsPath.equals("/info")) {
 				logger.debug(requestInfo);

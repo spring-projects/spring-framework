@@ -51,7 +51,6 @@ public final class StompEncoder  {
 
 	/**
 	 * Encodes the given STOMP {@code message} into a {@code byte[]}
-	 *
 	 * @param message the message to encode
 	 * @return the encoded message
 	 */
@@ -61,7 +60,6 @@ public final class StompEncoder  {
 
 	/**
 	 * Encodes the given payload and headers into a {@code byte[]}.
-	 *
 	 * @param headers the headers
 	 * @param payload the payload
 	 * @return the encoded message
@@ -69,6 +67,7 @@ public final class StompEncoder  {
 	public byte[] encode(Map<String, Object> headers, byte[] payload) {
 		Assert.notNull(headers, "'headers' is required");
 		Assert.notNull(payload, "'payload' is required");
+
 		try {
 			ByteArrayOutputStream baos = new ByteArrayOutputStream(128 + payload.length);
 			DataOutputStream output = new DataOutputStream(baos);
@@ -89,8 +88,8 @@ public final class StompEncoder  {
 
 			return baos.toByteArray();
 		}
-		catch (IOException e) {
-			throw new StompConversionException("Failed to encode STOMP frame, headers=" + headers + ".",  e);
+		catch (IOException ex) {
+			throw new StompConversionException("Failed to encode STOMP frame, headers=" + headers,  ex);
 		}
 	}
 
@@ -102,7 +101,7 @@ public final class StompEncoder  {
 				(Map<String, List<String>>) headers.get(NativeMessageHeaderAccessor.NATIVE_HEADERS);
 
 		if (logger.isTraceEnabled()) {
-			logger.trace("Encoding STOMP " + command + ", headers=" + nativeHeaders + ".");
+			logger.trace("Encoding STOMP " + command + ", headers=" + nativeHeaders);
 		}
 
 		if (nativeHeaders == null) {
@@ -137,8 +136,8 @@ public final class StompEncoder  {
 	}
 
 	private byte[] encodeHeaderString(String input, boolean escape) {
-		input = escape ? escape(input) : input;
-		return input.getBytes(StompDecoder.UTF8_CHARSET);
+		String inputToUse = (escape ? escape(input) : input);
+		return inputToUse.getBytes(StompDecoder.UTF8_CHARSET);
 	}
 
 	/**

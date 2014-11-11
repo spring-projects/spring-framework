@@ -49,7 +49,7 @@ public abstract class AbstractHttpSendingTransportHandler extends AbstractTransp
 
 		AbstractHttpSockJsSession sockJsSession = (AbstractHttpSockJsSession) wsSession;
 
-		String protocol = null; // https://github.com/sockjs/sockjs-client/issues/130
+		String protocol = null;  // https://github.com/sockjs/sockjs-client/issues/130
 		sockJsSession.setAcceptedProtocol(protocol);
 
 		// Set content type before writing
@@ -99,20 +99,22 @@ public abstract class AbstractHttpSendingTransportHandler extends AbstractTransp
 		}
 	}
 
+
 	protected abstract MediaType getContentType();
 
 	protected abstract SockJsFrameFormat getFrameFormat(ServerHttpRequest request);
+
 
 	protected final String getCallbackParam(ServerHttpRequest request) {
 		String query = request.getURI().getQuery();
 		MultiValueMap<String, String> params = UriComponentsBuilder.newInstance().query(query).build().getQueryParams();
 		String value = params.getFirst("c");
 		try {
-			return StringUtils.isEmpty(value) ? null : UriUtils.decode(value, "UTF-8");
+			return (!StringUtils.isEmpty(value) ? UriUtils.decode(value, "UTF-8") : null);
 		}
-		catch (UnsupportedEncodingException e) {
+		catch (UnsupportedEncodingException ex) {
 			// should never happen
-			throw new SockJsException("Unable to decode callback query parameter", null, e);
+			throw new SockJsException("Unable to decode callback query parameter", null, ex);
 		}
 	}
 

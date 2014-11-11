@@ -86,6 +86,8 @@ import org.springframework.util.StringUtils;
  */
 public class FormHttpMessageConverter implements HttpMessageConverter<MultiValueMap<String, ?>> {
 
+	public static final Charset DEFAULT_CHARSET = Charset.forName("UTF-8");
+
 	private static final byte[] BOUNDARY_CHARS =
 			new byte[] {'-', '_', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', 'a', 'b', 'c', 'd', 'e', 'f', 'g',
 					'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', 'A',
@@ -93,7 +95,7 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 					'V', 'W', 'X', 'Y', 'Z'};
 
 
-	private Charset charset = Charset.forName("UTF-8");
+	private Charset charset = DEFAULT_CHARSET;
 
 	private Charset multipartCharset;
 

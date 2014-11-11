@@ -26,6 +26,7 @@ import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.util.StringUtils;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.WebSocketHandler;
+import org.springframework.web.socket.sockjs.SockJsException;
 import org.springframework.web.socket.sockjs.SockJsTransportFailureException;
 import org.springframework.web.socket.sockjs.frame.DefaultSockJsFrameFormat;
 import org.springframework.web.socket.sockjs.frame.SockJsFrameFormat;
@@ -52,6 +53,7 @@ public class HtmlFileTransportHandler extends AbstractHttpSendingTransportHandle
 	// http://code.google.com/p/browsersec/wiki/Part2#Survey_of_content_sniffing_behaviors
 	private static final int MINIMUM_PARTIAL_HTML_CONTENT_LENGTH = 1024;
 
+
 	static {
 		StringBuilder sb = new StringBuilder(
 				"<!doctype html>\n" +
@@ -71,7 +73,6 @@ public class HtmlFileTransportHandler extends AbstractHttpSendingTransportHandle
 		while (sb.length() < MINIMUM_PARTIAL_HTML_CONTENT_LENGTH) {
 			sb.append(" ");
 		}
-
 		PARTIAL_HTML_CONTENT = sb.toString();
 	}
 
@@ -87,25 +88,25 @@ public class HtmlFileTransportHandler extends AbstractHttpSendingTransportHandle
 	}
 
 	@Override
-	public StreamingSockJsSession createSession(String sessionId, WebSocketHandler handler,
-			Map<String, Object> attributes) {
+	public StreamingSockJsSession createSession(
+			String sessionId, WebSocketHandler handler, Map<String, Object> attributes) {
 
 		return new HtmlFileStreamingSockJsSession(sessionId, getServiceConfig(), handler, attributes);
 	}
 
 	@Override
 	public void handleRequestInternal(ServerHttpRequest request, ServerHttpResponse response,
-			AbstractHttpSockJsSession sockJsSession) {
+			AbstractHttpSockJsSession sockJsSession) throws SockJsException {
 
 		String callback = getCallbackParam(request);
-		if (! StringUtils.hasText(callback)) {
+		if (!StringUtils.hasText(callback)) {
 			response.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR);
 			try {
-				response.getBody().write("\"callback\" parameter required".getBytes("UTF-8"));
+				response.getBody().write("\"callback\" parameter required".getBytes(UTF8_CHARSET));
 			}
-			catch (IOException t) {
-				sockJsSession.tryCloseWithSockJsTransportError(t, CloseStatus.SERVER_ERROR);
-				throw new SockJsTransportFailureException("Failed to write to response", sockJsSession.getId(), t);
+			catch (IOException ex) {
+				sockJsSession.tryCloseWithSockJsTransportError(ex, CloseStatus.SERVER_ERROR);
+				throw new SockJsTransportFailureException("Failed to write to response", sockJsSession.getId(), ex);
 			}
 			return;
 		}
@@ -124,9 +125,9 @@ public class HtmlFileTransportHandler extends AbstractHttpSendingTransportHandle
 	}
 
 
-	private final class HtmlFileStreamingSockJsSession extends StreamingSockJsSession {
+	private class HtmlFileStreamingSockJsSession extends StreamingSockJsSession {
 
-		private HtmlFileStreamingSockJsSession(String sessionId, SockJsServiceConfig config,
+		public HtmlFileStreamingSockJsSession(String sessionId, SockJsServiceConfig config,
 				WebSocketHandler wsHandler, Map<String, Object> attributes) {
 
 			super(sessionId, config, wsHandler, attributes);
@@ -134,18 +135,16 @@ public class HtmlFileTransportHandler extends AbstractHttpSendingTransportHandle
 
 		@Override
 		protected void writePrelude(ServerHttpRequest request, ServerHttpResponse response) {
-			// we already validated the parameter above..
+			// We already validated the parameter above...
 			String callback = getCallbackParam(request);
-
 			String html = String.format(PARTIAL_HTML_CONTENT, callback);
-
 			try {
-				response.getBody().write(html.getBytes("UTF-8"));
+				response.getBody().write(html.getBytes(UTF8_CHARSET));
 				response.flush();
 			}
-			catch (IOException e) {
-				tryCloseWithSockJsTransportError(e, CloseStatus.SERVER_ERROR);
-				throw new SockJsTransportFailureException("Failed to write HTML content", getId(), e);
+			catch (IOException ex) {
+				tryCloseWithSockJsTransportError(ex, CloseStatus.SERVER_ERROR);
+				throw new SockJsTransportFailureException("Failed to write HTML content", getId(), ex);
 			}
 		}
 	}

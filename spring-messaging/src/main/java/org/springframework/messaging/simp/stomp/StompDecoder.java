@@ -67,21 +67,20 @@ public class StompDecoder {
 	}
 
 	/**
-	 * @return the configured {@code MessageHeaderInitializer} if any.
+	 * Return the configured {@code MessageHeaderInitializer}, if any.
 	 */
 	public MessageHeaderInitializer getHeaderInitializer() {
 		return this.headerInitializer;
 	}
 
+
 	/**
 	 * Decodes one or more STOMP frames from the given {@code ByteBuffer} into a
-	 * list of {@link Message}s. If the input buffer contains any incplcontains partial STOMP frame content, or additional
-	 * content with a partial STOMP frame, the buffer is reset and {@code null} is
-	 * returned.
-	 *
+	 * list of {@link Message}s. If the input buffer contains partial STOMP frame
+	 * content, or additional content with a partial STOMP frame, the buffer is
+	 * reset and {@code null} is returned.
 	 * @param buffer The buffer to decode the STOMP frame from
-	 *
-	 * @return the decoded messages or an empty list
+	 * @return the decoded messages, or an empty list if none
 	 */
 	public List<Message<byte[]>> decode(ByteBuffer buffer) {
 		return decode(buffer, null);
@@ -90,33 +89,28 @@ public class StompDecoder {
 	/**
 	 * Decodes one or more STOMP frames from the given {@code buffer} and returns
 	 * a list of {@link Message}s.
-	 *
 	 * <p>If the given ByteBuffer contains only partial STOMP frame content and no
 	 * complete STOMP frames, an empty list is returned, and the buffer is reset to
 	 * to where it was.
-	 *
 	 * <p>If the buffer contains one ore more STOMP frames, those are returned and
 	 * the buffer reset to point to the beginning of the unused partial content.
-	 *
 	 * <p>The output partialMessageHeaders map is used to store successfully parsed
 	 * headers in case of partial content. The caller can then check if a
 	 * "content-length" header was read, which helps to determine how much more
 	 * content is needed before the next attempt to decode.
-	 *
 	 * @param buffer The buffer to decode the STOMP frame from
 	 * @param partialMessageHeaders an empty output map that will store the last
 	 * successfully parsed partialMessageHeaders in case of partial message content
 	 * in cases where the partial buffer ended with a partial STOMP frame
-	 *
 	 * @return decoded messages or an empty list
 	 * @throws StompConversionException raised in case of decoding issues
 	 */
 	public List<Message<byte[]>> decode(ByteBuffer buffer, MultiValueMap<String, String> partialMessageHeaders) {
 		List<Message<byte[]>> messages = new ArrayList<Message<byte[]>>();
 		while (buffer.hasRemaining()) {
-			Message<byte[]> m = decodeMessage(buffer, partialMessageHeaders);
-			if (m != null) {
-				messages.add(m);
+			Message<byte[]> message = decodeMessage(buffer, partialMessageHeaders);
+			if (message != null) {
+				messages.add(message);
 			}
 			else {
 				break;
@@ -129,28 +123,23 @@ public class StompDecoder {
 	 * Decode a single STOMP frame from the given {@code buffer} into a {@link Message}.
 	 */
 	private Message<byte[]> decodeMessage(ByteBuffer buffer, MultiValueMap<String, String> headers) {
-
 		Message<byte[]> decodedMessage = null;
 		skipLeadingEol(buffer);
 		buffer.mark();
 
 		String command = readCommand(buffer);
 		if (command.length() > 0) {
-
 			StompHeaderAccessor headerAccessor = null;
 			byte[] payload = null;
-
 			if (buffer.remaining() > 0) {
 				StompCommand stompCommand = StompCommand.valueOf(command);
 				headerAccessor = StompHeaderAccessor.create(stompCommand);
 				initHeaders(headerAccessor);
-
 				readHeaders(buffer, headerAccessor);
 				payload = readPayload(buffer, headerAccessor);
 			}
-
 			if (payload != null) {
-				if ((payload.length > 0) && (!headerAccessor.getCommand().isBodyAllowed())) {
+				if (payload.length > 0 && !headerAccessor.getCommand().isBodyAllowed()) {
 					throw new StompConversionException(headerAccessor.getCommand() +
 							" shouldn't have a payload: length=" + payload.length + ", headers=" + headers);
 				}
@@ -185,12 +174,14 @@ public class StompDecoder {
 				logger.trace("Decoded " + headerAccessor.getDetailedLogMessage(null));
 			}
 		}
+
 		return decodedMessage;
 	}
 
 	private void initHeaders(StompHeaderAccessor headerAccessor) {
-		if (getHeaderInitializer() != null) {
-			getHeaderInitializer().initHeaders(headerAccessor);
+		MessageHeaderInitializer initializer = getHeaderInitializer();
+		if (initializer != null) {
+			initializer.initHeaders(headerAccessor);
 		}
 	}
 
@@ -253,14 +244,13 @@ public class StompDecoder {
 	 * <a href="http://stomp.github.io/stomp-specification-1.2.html#Value_Encoding">"Value Encoding"</a>.
 	 */
 	private String unescape(String inString) {
-
-		StringBuilder sb = new StringBuilder();
-		int pos = 0; // position in the old string
+		StringBuilder sb = new StringBuilder(inString.length());
+		int pos = 0;  // position in the old string
 		int index = inString.indexOf("\\");
 
 		while (index >= 0) {
 			sb.append(inString.substring(pos, index));
-			if((index + 1) >= inString.length()) {
+			if (index + 1 >= inString.length()) {
 				throw new StompConversionException("Illegal escape sequence at index " + index + ": " + inString);
 			}
 			Character c = inString.charAt(index + 1);
@@ -289,7 +279,6 @@ public class StompDecoder {
 	}
 
 	private byte[] readPayload(ByteBuffer buffer, StompHeaderAccessor headerAccessor) {
-
 		Integer contentLength;
 		try {
 			contentLength = headerAccessor.getContentLength();
@@ -329,7 +318,6 @@ public class StompDecoder {
 
 	/**
 	 * Try to read an EOL incrementing the buffer position if successful.
-	 *
 	 * @return whether an EOL was consumed
 	 */
 	private boolean tryConsumeEndOfLine(ByteBuffer buffer) {

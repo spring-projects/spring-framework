@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,8 +53,8 @@ public class JsonpPollingTransportHandler extends AbstractHttpSendingTransportHa
 	}
 
 	@Override
-	public PollingSockJsSession createSession(String sessionId, WebSocketHandler handler,
-			Map<String, Object> attributes) {
+	public PollingSockJsSession createSession(
+			String sessionId, WebSocketHandler handler, Map<String, Object> attributes) {
 
 		return new PollingSockJsSession(sessionId, getServiceConfig(), handler, attributes);
 	}
@@ -65,9 +65,9 @@ public class JsonpPollingTransportHandler extends AbstractHttpSendingTransportHa
 
 		try {
 			String callback = getCallbackParam(request);
-			if (! StringUtils.hasText(callback)) {
+			if (!StringUtils.hasText(callback)) {
 				response.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR);
-				response.getBody().write("\"callback\" parameter required".getBytes("UTF-8"));
+				response.getBody().write("\"callback\" parameter required".getBytes(UTF8_CHARSET));
 				return;
 			}
 		}
@@ -81,7 +81,7 @@ public class JsonpPollingTransportHandler extends AbstractHttpSendingTransportHa
 
 	@Override
 	protected SockJsFrameFormat getFrameFormat(ServerHttpRequest request) {
-		// we already validated the parameter above...
+		// We already validated the parameter above...
 		String callback = getCallbackParam(request);
 
 		return new DefaultSockJsFrameFormat(callback + "(\"%s\");\r\n") {

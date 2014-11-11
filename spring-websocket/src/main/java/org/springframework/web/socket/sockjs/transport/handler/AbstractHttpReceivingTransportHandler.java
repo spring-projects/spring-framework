@@ -87,7 +87,7 @@ public abstract class AbstractHttpReceivingTransportHandler extends AbstractTran
 	private void handleReadError(ServerHttpResponse response, String error, String sessionId) {
 		try {
 			response.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR);
-			response.getBody().write(error.getBytes("UTF-8"));
+			response.getBody().write(error.getBytes(UTF8_CHARSET));
 		}
 		catch (IOException ex) {
 			throw new SockJsException("Failed to send error: " + error, sessionId, ex);

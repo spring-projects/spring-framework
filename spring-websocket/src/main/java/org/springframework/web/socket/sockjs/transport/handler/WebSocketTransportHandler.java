@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -67,8 +67,8 @@ public class WebSocketTransportHandler extends AbstractTransportHandler
 	}
 
 	@Override
-	public AbstractSockJsSession createSession(String sessionId, WebSocketHandler handler,
-			Map<String, Object> attributes) {
+	public AbstractSockJsSession createSession(
+			String sessionId, WebSocketHandler handler, Map<String, Object> attributes) {
 
 		return new WebSocketServerSockJsSession(sessionId, getServiceConfig(), handler, attributes);
 	}
@@ -87,8 +87,6 @@ public class WebSocketTransportHandler extends AbstractTransportHandler
 			throw new SockJsTransportFailureException("WebSocket handshake failure", wsSession.getId(), ex);
 		}
 	}
-
-	// HandshakeHandler methods
 
 	@Override
 	public boolean doHandshake(ServerHttpRequest request, ServerHttpResponse response,

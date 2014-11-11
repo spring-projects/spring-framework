@@ -53,7 +53,7 @@ public class JsonpReceivingTransportHandler extends AbstractHttpReceivingTranspo
 
 		super.handleRequestInternal(request, response, wsHandler, sockJsSession);
 		try {
-			response.getBody().write("ok".getBytes("UTF-8"));
+			response.getBody().write("ok".getBytes(UTF8_CHARSET));
 		}
 		catch (IOException ex) {
 			throw new SockJsException("Failed to write to the response body", sockJsSession.getId(), ex);
