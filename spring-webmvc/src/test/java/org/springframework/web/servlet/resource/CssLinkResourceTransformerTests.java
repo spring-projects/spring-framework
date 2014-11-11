@@ -47,10 +47,13 @@ public class CssLinkResourceTransformerTests {
 
 	@Before
 	public void setUp() {
-		VersionResourceResolver resolver = new VersionResourceResolver();
-		resolver.setStrategyMap(Collections.singletonMap("/**", new ContentVersionStrategy()));
+		VersionResourceResolver versionResolver = new VersionResourceResolver();
+		versionResolver.setStrategyMap(Collections.singletonMap("/**", new ContentVersionStrategy()));
 
-		List<ResourceResolver> resolvers = Arrays.asList(resolver, new PathResourceResolver());
+		PathResourceResolver pathResolver = new PathResourceResolver();
+		pathResolver.setAllowedLocations(new ClassPathResource("test/", getClass()));
+
+		List<ResourceResolver> resolvers = Arrays.asList(versionResolver, pathResolver);
 		List<ResourceTransformer> transformers = Arrays.asList(new CssLinkResourceTransformer());
 
 		ResourceResolverChain resolverChain = new DefaultResourceResolverChain(resolvers);

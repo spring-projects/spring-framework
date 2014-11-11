@@ -16,24 +16,27 @@
 
 package org.springframework.web.servlet.resource;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
 import javax.servlet.http.HttpServletResponse;
 
 import org.junit.Before;
 import org.junit.Test;
-
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockHttpServletResponse;
 import org.springframework.mock.web.test.MockServletContext;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.servlet.HandlerMapping;
-
-import static org.junit.Assert.*;
 
 /**
  * Unit tests for ResourceHttpRequestHandler.
@@ -126,23 +129,94 @@ public class ResourceHttpRequestHandlerTests {
 	}
 
 	@Test
-	public void getResourceViaDirectoryTraversal() throws Exception {
-		this.request.setAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, "../testsecret/secret.txt");
-		this.handler.handleRequest(this.request, this.response);
-		assertEquals(404, this.response.getStatus());
+	public void invalidPath() throws Exception {
 
-		this.request.setAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, "test/../../testsecret/secret.txt");
+		Resource location = new ClassPathResource("test/", getClass());
+		this.handler.setLocations(Arrays.asList(location));
+
+		testInvalidPath(location, "../testsecret/secret.txt");
+		testInvalidPath(location, "test/../../testsecret/secret.txt");
+		testInvalidPath(location, ":/../../testsecret/secret.txt");
+
+		location = new UrlResource(getClass().getResource("./test/"));
+		this.handler.setLocations(Arrays.asList(location));
+		Resource secretResource = new UrlResource(getClass().getResource("testsecret/secret.txt"));
+		String secretPath = secretResource.getURL().getPath();
+
+		testInvalidPath(location, "file:" + secretPath);
+		testInvalidPath(location, "/file:" + secretPath);
+		testInvalidPath(location, "url:" + secretPath);
+		testInvalidPath(location, "/url:" + secretPath);
+		testInvalidPath(location, "/" + secretPath);
+		testInvalidPath(location, "////../.." + secretPath);
+		testInvalidPath(location, "/%2E%2E/testsecret/secret.txt");
+		testInvalidPath(location, "/  " + secretPath);
+		testInvalidPath(location, "url:" + secretPath);
+	}
+
+	@Test
+	public void ignoreInvalidEscapeSequence() throws Exception {
+		this.request.setAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, "/%foo%/bar.txt");
 		this.response = new MockHttpServletResponse();
 		this.handler.handleRequest(this.request, this.response);
 		assertEquals(404, this.response.getStatus());
+	}
 
-		this.handler.setLocations(Arrays.<Resource>asList(new ClassPathResource("testsecret/", getClass())));
-		this.request.setAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, "secret.txt");
-		this.response = new MockHttpServletResponse();
-		this.handler.handleRequest(this.request, this.response);
-		assertEquals(200, this.response.getStatus());
-		assertEquals("text/plain", this.response.getContentType());
-		assertEquals("big secret", this.response.getContentAsString());
+	@Test
+	public void processPath() throws Exception {
+		assertSame("/foo/bar", this.handler.processPath("/foo/bar"));
+		assertSame("foo/bar", this.handler.processPath("foo/bar"));
+
+		// leading whitespace control characters (00-1F)
+		assertEquals("/foo/bar", this.handler.processPath("  /foo/bar"));
+		assertEquals("/foo/bar", this.handler.processPath((char) 1 + "/foo/bar"));
+		assertEquals("/foo/bar", this.handler.processPath((char) 31 + "/foo/bar"));
+		assertEquals("foo/bar", this.handler.processPath("  foo/bar"));
+		assertEquals("foo/bar", this.handler.processPath((char) 31 + "foo/bar"));
+
+		// leading control character 0x7F (DEL)
+		assertEquals("/foo/bar", this.handler.processPath((char) 127 + "/foo/bar"));
+		assertEquals("/foo/bar", this.handler.processPath((char) 127 + "/foo/bar"));
+
+		// leading control and '/' characters
+		assertEquals("/foo/bar", this.handler.processPath("  /  foo/bar"));
+		assertEquals("/foo/bar", this.handler.processPath("  /  /  foo/bar"));
+		assertEquals("/foo/bar", this.handler.processPath("  // /// ////  foo/bar"));
+		assertEquals("/foo/bar", this.handler.processPath((char) 1 + " / " + (char) 127 + " // foo/bar"));
+
+		// root or empty path
+		assertEquals("", this.handler.processPath("   "));
+		assertEquals("/", this.handler.processPath("/"));
+		assertEquals("/", this.handler.processPath("///"));
+		assertEquals("/", this.handler.processPath("/ /   / "));
+	}
+
+	@Test
+	public void initAllowedLocations() throws Exception {
+		PathResourceResolver resolver = (PathResourceResolver) this.handler.getResourceResolvers().get(0);
+		Resource[] locations = resolver.getAllowedLocations();
+
+		assertEquals(2, locations.length);
+		assertEquals("test/", ((ClassPathResource) locations[0]).getPath());
+		assertEquals("testalternatepath/", ((ClassPathResource) locations[1]).getPath());
+	}
+
+	@Test
+	public void initAllowedLocationsWithExplicitConfiguration() throws Exception {
+		ClassPathResource location1 = new ClassPathResource("test/", getClass());
+		ClassPathResource location2 = new ClassPathResource("testalternatepath/", getClass());
+
+		PathResourceResolver pathResolver = new PathResourceResolver();
+		pathResolver.setAllowedLocations(location1);
+
+		ResourceHttpRequestHandler handler = new ResourceHttpRequestHandler();
+		handler.setResourceResolvers(Arrays.asList(pathResolver));
+		handler.setLocations(Arrays.asList(location1, location2));
+		handler.afterPropertiesSet();
+
+		Resource[] locations = pathResolver.getAllowedLocations();
+		assertEquals(1, locations.length);
+		assertEquals("test/", ((ClassPathResource) locations[0]).getPath());
 	}
 
 	@Test
@@ -201,6 +275,14 @@ public class ResourceHttpRequestHandlerTests {
 
 	private long resourceLastModified(String resourceName) throws IOException {
 		return new ClassPathResource(resourceName, getClass()).getFile().lastModified();
+	}
+
+	private void testInvalidPath(Resource location, String requestPath) throws Exception {
+		this.request.setAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, requestPath);
+		this.response = new MockHttpServletResponse();
+		this.handler.handleRequest(this.request, this.response);
+		assertTrue(location.createRelative(requestPath).exists());
+		assertEquals(404, this.response.getStatus());
 	}
 
 
