@@ -2,6 +2,31 @@ SPRING FRAMEWORK CHANGELOG
 ===========================
 http://www.spring.io
 
+
+Changes in version 3.2.12 (2014-11-11)
+-------------------------------------
+
+fixed directory traversal with static resource handling (CVE-2014-3625) (SPR-12354)
+log context cache statistics in the TestContext framework (SPR-12409)
+fixed ConfigurationClassUtils fails to introspect inner classes with dot name syntax (SPR-12390)
+fixed ResponseStatusExceptionResolver does not get a MessageSource injected in the MVC Java config (SPR-12380)
+fixed NPE inTilesConfigurer when no definitions found (SPR-12363)
+fixed @Import in another annotation results in double scan (SPR-12334)
+fixed private @Scheduled methods end up on 'empty' proxy instance in case of CGLIB auto-proxying (SPR-12308)
+fixed Provider<...> declaration for @Value method argument fails with TypeMismatchException (SPR-12297)
+fixed DataSourceTransactionManager closes JDBC connection on doBegin failure but leaves it attached to transaction object (SPR-12280)
+fixed web Async responses force concurrentResult.toString() call (SPR-12253)
+fixed LiveBeansView.generateJson generates invalid JSON when resources already double-quoted (SPR-12252)
+allow for further locking optimizations for the retrieval of non-singleton beans (SPR-12250)
+improved error messages for MockRestServiceServer (SPR-12230)
+allow spring HTTP clients to enforce RFC 6265 (cookies in a single header) (SPR-12196)
+fixed @Qualifier resolution with Spring Batch parent/child context arrangement (SPR-12191)
+improved Scheduled/JmsListenerAnnotationBeanPostProcessor to not scan every scoped instance (SPR-12189)
+fixed HttpHeaders should accept empty Content-Type header (SPR-12173)
+add log warning for single optional constructor when no default constructor to fall back to (SPR-12161)
+fixed util:map does not recognize the attribute of value-type (SPR-10994)
+removed outdated ContextLoaderServlet from the documentation reference (SPR-7725)
+
 Changes in version 3.2.11 (2014-09-04)
 -------------------------------------
 
