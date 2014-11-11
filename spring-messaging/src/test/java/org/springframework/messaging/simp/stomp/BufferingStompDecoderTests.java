@@ -27,9 +27,8 @@ import org.springframework.messaging.Message;
 
 import static org.junit.Assert.*;
 
-
 /**
- * Unit tests for {@link BufferingStompDecoder}..
+ * Unit tests for {@link BufferingStompDecoder}.
  *
  * @author Rossen Stoyanchev
  * @since 4.0.3
@@ -38,9 +37,9 @@ public class BufferingStompDecoderTests {
 
 	private final StompDecoder STOMP_DECODER = new StompDecoder();
 
+
 	@Test
 	public void basic() throws InterruptedException {
-
 		BufferingStompDecoder stompDecoder = new BufferingStompDecoder(STOMP_DECODER, 128);
 		String chunk = "SEND\na:alpha\n\nMessage body\0";
 
@@ -54,7 +53,6 @@ public class BufferingStompDecoderTests {
 
 	@Test
 	public void oneMessageInTwoChunks() throws InterruptedException {
-
 		BufferingStompDecoder stompDecoder = new BufferingStompDecoder(STOMP_DECODER, 128);
 		String chunk1 = "SEND\na:alpha\n\nMessage";
 		String chunk2 = " body\0";
@@ -72,7 +70,6 @@ public class BufferingStompDecoderTests {
 
 	@Test
 	public void twoMessagesInOneChunk() throws InterruptedException {
-
 		BufferingStompDecoder stompDecoder = new BufferingStompDecoder(STOMP_DECODER, 128);
 		String chunk = "SEND\na:alpha\n\nPayload1\0" + "SEND\na:alpha\n\nPayload2\0";
 		List<Message<byte[]>> messages = stompDecoder.decode(toByteBuffer(chunk));
@@ -87,10 +84,8 @@ public class BufferingStompDecoderTests {
 
 	@Test
 	public void oneFullAndOneSplitMessageContentLength() throws InterruptedException {
-
-		int contentLength = "Payload2a-Payload2b".getBytes().length;
-
 		BufferingStompDecoder stompDecoder = new BufferingStompDecoder(STOMP_DECODER, 128);
+		int contentLength = "Payload2a-Payload2b".getBytes().length;
 		String chunk1 = "SEND\na:alpha\n\nPayload1\0SEND\ncontent-length:" + contentLength + "\n";
 		List<Message<byte[]>> messages = stompDecoder.decode(toByteBuffer(chunk1));
 
@@ -118,7 +113,6 @@ public class BufferingStompDecoderTests {
 
 	@Test
 	public void oneFullAndOneSplitMessageNoContentLength() throws InterruptedException {
-
 		BufferingStompDecoder stompDecoder = new BufferingStompDecoder(STOMP_DECODER, 128);
 		String chunk1 = "SEND\na:alpha\n\nPayload1\0SEND\na:alpha\n";
 		List<Message<byte[]>> messages = stompDecoder.decode(toByteBuffer(chunk1));
@@ -147,7 +141,6 @@ public class BufferingStompDecoderTests {
 
 	@Test
 	public void oneFullAndOneSplitWithContentLengthExceedingBufferSize() throws InterruptedException {
-
 		BufferingStompDecoder stompDecoder = new BufferingStompDecoder(STOMP_DECODER, 128);
 		String chunk1 = "SEND\na:alpha\n\nPayload1\0SEND\ncontent-length:129\n";
 		List<Message<byte[]>> messages = stompDecoder.decode(toByteBuffer(chunk1));
@@ -169,15 +162,14 @@ public class BufferingStompDecoderTests {
 	}
 
 	@Test(expected = StompConversionException.class)
-	public void bufferSizeLimit() throws InterruptedException {
+	public void bufferSizeLimit() {
 		BufferingStompDecoder stompDecoder = new BufferingStompDecoder(STOMP_DECODER, 10);
 		String payload = "SEND\na:alpha\n\nMessage body";
 		stompDecoder.decode(toByteBuffer(payload));
 	}
 
 	@Test
-	public void incompleteCommand() throws InterruptedException {
-
+	public void incompleteCommand() {
 		BufferingStompDecoder stompDecoder = new BufferingStompDecoder(STOMP_DECODER, 128);
 		String chunk = "MESSAG";
 
@@ -185,8 +177,8 @@ public class BufferingStompDecoderTests {
 		assertEquals(0, messages.size());
 	}
 
-	@Test(expected = StompConversionException.class) // SPR-12418
-	public void endingBackslashHeaderValueCheck() throws InterruptedException {
+	@Test(expected = StompConversionException.class)  // SPR-12418
+	public void endingBackslashHeaderValueCheck() {
 		BufferingStompDecoder stompDecoder = new BufferingStompDecoder(STOMP_DECODER, 128);
 		String payload = "SEND\na:alpha\\\n\nMessage body\0";
 		stompDecoder.decode(toByteBuffer(payload));

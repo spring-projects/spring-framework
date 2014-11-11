@@ -79,8 +79,9 @@ public class StompDecoder {
 	 * list of {@link Message}s. If the input buffer contains partial STOMP frame
 	 * content, or additional content with a partial STOMP frame, the buffer is
 	 * reset and {@code null} is returned.
-	 * @param buffer The buffer to decode the STOMP frame from
+	 * @param buffer the buffer to decode the STOMP frame from
 	 * @return the decoded messages, or an empty list if none
+	 * @throws StompConversionException raised in case of decoding issues
 	 */
 	public List<Message<byte[]>> decode(ByteBuffer buffer) {
 		return decode(buffer, null);
@@ -98,11 +99,11 @@ public class StompDecoder {
 	 * headers in case of partial content. The caller can then check if a
 	 * "content-length" header was read, which helps to determine how much more
 	 * content is needed before the next attempt to decode.
-	 * @param buffer The buffer to decode the STOMP frame from
+	 * @param buffer the buffer to decode the STOMP frame from
 	 * @param partialMessageHeaders an empty output map that will store the last
 	 * successfully parsed partialMessageHeaders in case of partial message content
 	 * in cases where the partial buffer ended with a partial STOMP frame
-	 * @return decoded messages or an empty list
+	 * @return the decoded messages, or an empty list if none
 	 * @throws StompConversionException raised in case of decoding issues
 	 */
 	public List<Message<byte[]>> decode(ByteBuffer buffer, MultiValueMap<String, String> partialMessageHeaders) {
@@ -152,7 +153,7 @@ public class StompDecoder {
 			}
 			else {
 				if (logger.isTraceEnabled()) {
-					logger.trace("Incomplete frame, resetting input buffer.");
+					logger.trace("Incomplete frame, resetting input buffer...");
 				}
 				if (headers != null && headerAccessor != null) {
 					String name = NativeMessageHeaderAccessor.NATIVE_HEADERS;
@@ -214,7 +215,7 @@ public class StompDecoder {
 			if (headerStream.size() > 0) {
 				String header = new String(headerStream.toByteArray(), UTF8_CHARSET);
 				int colonIndex = header.indexOf(':');
-				if ((colonIndex <= 0) || (colonIndex == header.length() - 1)) {
+				if (colonIndex <= 0 || colonIndex == header.length() - 1) {
 					if (buffer.remaining() > 0) {
 						throw new StompConversionException("Illegal header: '" + header +
 								"'. A header must be of the form <name>:<value>.");
