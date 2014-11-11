@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,10 @@
 
 package org.springframework.web.servlet.resource;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -26,13 +30,12 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockHttpServletResponse;
 import org.springframework.mock.web.test.MockServletContext;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.servlet.HandlerMapping;
-
-import static org.junit.Assert.*;
 
 /**
  * @author Keith Donald
@@ -124,28 +127,76 @@ public class ResourceHttpRequestHandlerTests {
 		assertEquals("function foo() { console.log(\"hello world\"); }", response.getContentAsString());
 	}
 
+
 	@Test
-	public void getResourceViaDirectoryTraversal() throws Exception {
+	public void invalidPath() throws Exception {
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		request.setMethod("GET");
-
-		request.setAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, "../testsecret/secret.txt");
 		MockHttpServletResponse response = new MockHttpServletResponse();
-		handler.handleRequest(request, response);
-		assertEquals(404, response.getStatus());
 
-		request.setAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, "test/../../testsecret/secret.txt");
-		response = new MockHttpServletResponse();
-		handler.handleRequest(request, response);
-		assertEquals(404, response.getStatus());
+		Resource location = new ClassPathResource("test/", getClass());
+		this.handler.setLocations(Arrays.asList(location));
 
-		handler.setLocations(Arrays.<Resource>asList(new ClassPathResource("testsecret/", getClass())));
-		request.setAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, "secret.txt");
+		testInvalidPath(location, "../testsecret/secret.txt", request, response);
+		testInvalidPath(location, "test/../../testsecret/secret.txt", request, response);
+		testInvalidPath(location, ":/../../testsecret/secret.txt", request, response);
+
+		location = new UrlResource(getClass().getResource("./test/"));
+		this.handler.setLocations(Arrays.asList(location));
+		Resource secretResource = new UrlResource(getClass().getResource("testsecret/secret.txt"));
+		String secretPath = secretResource.getURL().getPath();
+
+		testInvalidPath(location, "file:" + secretPath, request, response);
+		testInvalidPath(location, "/file:" + secretPath, request, response);
+		testInvalidPath(location, "url:" + secretPath, request, response);
+		testInvalidPath(location, "/url:" + secretPath, request, response);
+		testInvalidPath(location, "/" + secretPath, request, response);
+		testInvalidPath(location, "////../.." + secretPath, request, response);
+		testInvalidPath(location, "/%2E%2E/testsecret/secret.txt", request, response);
+		testInvalidPath(location, "/%2e%2e/testsecret/secret.txt", request, response);
+		testInvalidPath(location, " " + secretPath, request, response);
+		testInvalidPath(location, "/  " + secretPath, request, response);
+		testInvalidPath(location, "url:" + secretPath, request, response);
+	}
+
+	@Test
+	public void ignoreInvalidEscapeSequence() throws Exception {
+		MockHttpServletRequest request = new MockHttpServletRequest();
+		request.setMethod("GET");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		request.setAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, "/%foo%/bar.txt");
 		response = new MockHttpServletResponse();
-		handler.handleRequest(request, response);
-		assertEquals(200, response.getStatus());
-		assertEquals("text/plain", response.getContentType());
-		assertEquals("big secret", response.getContentAsString());
+		this.handler.handleRequest(request, response);
+		assertEquals(404, response.getStatus());
+	}
+
+	@Test
+	public void processPath() throws Exception {
+		assertSame("/foo/bar", this.handler.processPath("/foo/bar"));
+		assertSame("foo/bar", this.handler.processPath("foo/bar"));
+
+		// leading whitespace control characters (00-1F)
+		assertEquals("/foo/bar", this.handler.processPath("  /foo/bar"));
+		assertEquals("/foo/bar", this.handler.processPath((char) 1 + "/foo/bar"));
+		assertEquals("/foo/bar", this.handler.processPath((char) 31 + "/foo/bar"));
+		assertEquals("foo/bar", this.handler.processPath("  foo/bar"));
+		assertEquals("foo/bar", this.handler.processPath((char) 31 + "foo/bar"));
+
+		// leading control character 0x7F (DEL)
+		assertEquals("/foo/bar", this.handler.processPath((char) 127 + "/foo/bar"));
+		assertEquals("/foo/bar", this.handler.processPath((char) 127 + "/foo/bar"));
+
+		// leading control and '/' characters
+		assertEquals("/foo/bar", this.handler.processPath("  /  foo/bar"));
+		assertEquals("/foo/bar", this.handler.processPath("  /  /  foo/bar"));
+		assertEquals("/foo/bar", this.handler.processPath("  // /// ////  foo/bar"));
+		assertEquals("/foo/bar", this.handler.processPath((char) 1 + " / " + (char) 127 + " // foo/bar"));
+
+		// root ot empty path
+		assertEquals("", this.handler.processPath("   "));
+		assertEquals("/", this.handler.processPath("/"));
+		assertEquals("/", this.handler.processPath("///"));
+		assertEquals("/", this.handler.processPath("/ /   / "));
 	}
 
 	@Test
@@ -216,6 +267,16 @@ public class ResourceHttpRequestHandlerTests {
 		request.setMethod("GET");
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		handler.handleRequest(request, response);
+		assertEquals(404, response.getStatus());
+	}
+
+	private void testInvalidPath(Resource location, String requestPath,
+			MockHttpServletRequest request, MockHttpServletResponse response) throws Exception {
+
+		request.setAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, requestPath);
+		response = new MockHttpServletResponse();
+		this.handler.handleRequest(request, response);
+		assertTrue(location.createRelative(requestPath).exists());
 		assertEquals(404, response.getStatus());
 	}
 
