@@ -18,7 +18,10 @@ package org.springframework.web.servlet.resource;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.util.List;
+
 import javax.activation.FileTypeMap;
 import javax.activation.MimetypesFileTypeMap;
 import javax.servlet.ServletException;
@@ -27,14 +30,15 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.ResourceUtils;
 import org.springframework.util.StreamUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.HttpRequestHandler;
@@ -161,14 +165,30 @@ public class ResourceHttpRequestHandler extends WebContentGenerator implements H
 			throw new IllegalStateException("Required request attribute '" +
 					HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE + "' is not set");
 		}
-
+		path = processPath(path);
 		if (!StringUtils.hasText(path) || isInvalidPath(path)) {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Ignoring invalid resource path [" + path + "]");
 			}
 			return null;
 		}
-
+		if (path.contains("%")) {
+			try {
+				// Use URLDecoder (vs UriUtils) to preserve potentially decoded UTF-8 chars
+				if (isInvalidPath(URLDecoder.decode(path, "UTF-8"))) {
+					if (logger.isTraceEnabled()) {
+						logger.trace("Ignoring invalid resource path with escape sequences [" + path + "].");
+					}
+					return null;
+				}
+			}
+			catch (UnsupportedEncodingException e) {
+				// ignore: shouldn't happen
+			}
+			catch (IllegalArgumentException ex) {
+				// ignore
+			}
+		}
 		for (Resource location : this.locations) {
 			try {
 				if (logger.isDebugEnabled()) {
@@ -176,10 +196,19 @@ public class ResourceHttpRequestHandler extends WebContentGenerator implements H
 				}
 				Resource resource = location.createRelative(path);
 				if (resource.exists() && resource.isReadable()) {
-					if (logger.isDebugEnabled()) {
-						logger.debug("Found matching resource: " + resource);
+					if (isResourceUnderLocation(resource, location)) {
+						if (logger.isDebugEnabled()) {
+							logger.debug("Found matching resource: " + resource);
+						}
+						return resource;
 					}
-					return resource;
+					else {
+						if (logger.isTraceEnabled()) {
+							logger.trace("resource=\"" + resource + "\" was successfully resolved " +
+									"but is not under the location=\"" + location);
+						}
+						return null;
+					}
 				}
 				else if (logger.isTraceEnabled()) {
 					logger.trace("Relative resource doesn't exist or isn't readable: " + resource);
@@ -193,14 +222,110 @@ public class ResourceHttpRequestHandler extends WebContentGenerator implements H
 	}
 
 	/**
-	 * Validates the given path: returns {@code true} if the given path is not a valid resource path.
-	 * <p>The default implementation rejects paths containing "WEB-INF" or "META-INF" as well as paths
-	 * with relative paths ("../") that result in access of a parent directory.
+	 * Process the given resource path to be used.
+	 * <p>The default implementation replaces any combination of leading '/' and
+	 * control characters (00-1F and 7F) with a single "/" or "". For example
+	 * {@code "  // /// ////  foo/bar"} becomes {@code "/foo/bar"}.
+	 * @since 3.2.12
+	 */
+	protected String processPath(String path) {
+		boolean slash = false;
+		for (int i = 0; i < path.length(); i++) {
+			if (path.charAt(i) == '/') {
+				slash = true;
+			}
+			else if (path.charAt(i) > ' ' && path.charAt(i) != 127) {
+				if (i == 0 || (i == 1 && slash)) {
+					return path;
+				}
+				path = slash ? "/" + path.substring(i) : path.substring(i);
+				if (logger.isTraceEnabled()) {
+					logger.trace("Path trimmed for leading '/' and control characters: " + path);
+				}
+				return path;
+			}
+		}
+		return (slash ? "/" : "");
+	}
+
+	/**
+	 * Identifies invalid resource paths. By default rejects:
+	 * <ul>
+	 * <li>Paths that contain "WEB-INF" or "META-INF"
+	 * <li>Paths that contain "../" after a call to
+	 * {@link org.springframework.util.StringUtils#cleanPath}.
+	 * <li>Paths that represent a {@link org.springframework.util.ResourceUtils#isUrl
+	 * valid URL} or would represent one after the leading slash is removed.
+	 * </ul>
+	 * <p><strong>Note:</strong> this method assumes that leading, duplicate '/'
+	 * or control characters (e.g. white space) have been trimmed so that the
+	 * path starts predictably with a single '/' or does not have one.
 	 * @param path the path to validate
-	 * @return {@code true} if the path has been recognized as invalid, {@code false} otherwise
+	 * @return {@code true} if the path is invalid, {@code false} otherwise
 	 */
 	protected boolean isInvalidPath(String path) {
-		return (path.contains("WEB-INF") || path.contains("META-INF") || StringUtils.cleanPath(path).startsWith(".."));
+		if (logger.isTraceEnabled()) {
+			logger.trace("Applying \"invalid path\" checks to path: " + path);
+		}
+		if (path.contains("WEB-INF") || path.contains("META-INF")) {
+			if (logger.isTraceEnabled()) {
+				logger.trace("Path contains \"WEB-INF\" or \"META-INF\".");
+			}
+			return true;
+		}
+		if (path.contains(":/")) {
+			String relativePath = (path.charAt(0) == '/' ? path.substring(1) : path);
+			if (ResourceUtils.isUrl(relativePath) || relativePath.startsWith("url:")) {
+				if (logger.isTraceEnabled()) {
+					logger.trace("Path represents URL or has \"url:\" prefix.");
+				}
+				return true;
+			}
+		}
+		if (path.contains("../")) {
+			path = StringUtils.cleanPath(path);
+			if (path.contains("../")) {
+				if (logger.isTraceEnabled()) {
+					logger.trace("Path contains \"../\" after call to StringUtils#cleanPath.");
+				}
+				return true;
+			}
+		}
+		return false;
+	}
+
+	private boolean isResourceUnderLocation(Resource resource, Resource location) throws IOException {
+		if (!resource.getClass().equals(location.getClass())) {
+			return false;
+		}
+		String resourcePath;
+		String locationPath;
+		if (resource instanceof ClassPathResource) {
+			resourcePath = ((ClassPathResource) resource).getPath();
+			locationPath = ((ClassPathResource) location).getPath();
+		}
+		else if (resource instanceof UrlResource) {
+			resourcePath = resource.getURL().toExternalForm();
+			locationPath = location.getURL().toExternalForm();
+		}
+		else {
+			resourcePath = resource.getURL().getPath();
+			locationPath = location.getURL().getPath();
+		}
+		locationPath = (locationPath.endsWith("/") || locationPath.isEmpty() ? locationPath : locationPath + "/");
+		if (!resourcePath.startsWith(locationPath)) {
+			return false;
+		}
+		if (resourcePath.contains("%")) {
+			// Use URLDecoder (vs UriUtils) to preserve potentially decoded UTF-8 chars
+			if (URLDecoder.decode(resourcePath, "UTF-8").contains("../")) {
+				if (logger.isTraceEnabled()) {
+					logger.trace("Resolved resource path contains \"../\" after decoding: " + resourcePath);
+				}
+				return false;
+			}
+		}
+		return true;
 	}
 
 	/**
