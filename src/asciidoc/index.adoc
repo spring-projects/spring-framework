@@ -43561,6 +43561,7 @@ programmatically in addition to the ones that are detected by the `JmsListener` 
 		@Override
 		public void configureJmsListeners(JmsListenerEndpointRegistrar registrar) {
 			SimpleJmsListenerEndpoint endpoint = new SimpleJmsListenerEndpoint();
+			endpoint.setId("myJmsEndpoint");
 			endpoint.setDestination("anotherQueue");
 			endpoint.setMessageListener(message -> {
 				// processing
