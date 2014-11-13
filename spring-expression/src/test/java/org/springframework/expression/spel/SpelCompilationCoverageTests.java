@@ -1683,11 +1683,40 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		expression = parse("'hello' + 3 + ' spring'");
 		assertEquals("hello3 spring",expression.getValue(new Greeter()));
 		assertCantCompile(expression);
+		
+		expression = parse("object + 'a'");
+		assertEquals("objecta",expression.getValue(new Greeter()));
+		assertCanCompile(expression);
+		assertEquals("objecta",expression.getValue(new Greeter()));
+		
+		expression = parse("'a'+object");
+		assertEquals("aobject",expression.getValue(new Greeter()));
+		assertCanCompile(expression);
+		assertEquals("aobject",expression.getValue(new Greeter()));
+
+		expression = parse("'a'+object+'a'");
+		assertEquals("aobjecta",expression.getValue(new Greeter()));
+		assertCanCompile(expression);
+		assertEquals("aobjecta",expression.getValue(new Greeter()));
+
+		expression = parse("object+'a'+object");
+		assertEquals("objectaobject",expression.getValue(new Greeter()));
+		assertCanCompile(expression);
+		assertEquals("objectaobject",expression.getValue(new Greeter()));
+
+		expression = parse("object+object");
+		assertEquals("objectobject",expression.getValue(new Greeter()));
+		assertCanCompile(expression);
+		assertEquals("objectobject",expression.getValue(new Greeter()));
 	}
 	
 	public static class Greeter {
 		public String getWorld() {
 			return "world"; 
+		}
+		
+		public Object getObject() {
+			return "object";
 		}
 	}
 

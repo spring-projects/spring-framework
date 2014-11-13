@@ -206,6 +206,9 @@ public class OpPlus extends Operator {
 		else {
 			cf.enterCompilationScope();
 			operand.generateCode(mv,cf);
+			if (cf.lastDescriptor() != "Ljava/lang/String") {
+				mv.visitTypeInsn(CHECKCAST, "java/lang/String");
+			}
 			cf.exitCompilationScope();
 			mv.visitMethodInsn(INVOKEVIRTUAL, "java/lang/StringBuilder", "append", "(Ljava/lang/String;)Ljava/lang/StringBuilder;", false);
 		}
