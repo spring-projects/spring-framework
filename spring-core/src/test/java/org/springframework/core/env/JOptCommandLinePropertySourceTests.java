@@ -159,4 +159,18 @@ public class JOptCommandLinePropertySourceTests {
 		String nonOptionArgs = ps.getProperty("NOA");
 		assertThat(nonOptionArgs, equalTo("noa1,noa2"));
 	}
+
+	@Test
+	public void withRequiredArg_ofTypeEnum() {
+		OptionParser parser = new OptionParser();
+		parser.accepts("o1").withRequiredArg().ofType(OptionEnum.class);
+		OptionSet options = parser.parse("--o1=VAL_1");
+
+		PropertySource<?> ps = new JOptCommandLinePropertySource(options);
+		assertThat(ps.getProperty("o1"), equalTo("VAL_1"));
+	}
+
+	public static enum OptionEnum {
+		VAL_1;
+	}
 }
