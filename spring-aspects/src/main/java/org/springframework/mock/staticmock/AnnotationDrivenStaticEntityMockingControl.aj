@@ -17,6 +17,7 @@
 package org.springframework.mock.staticmock;
 
 import org.aspectj.lang.annotation.RequiredTypes;
+import org.aspectj.lang.annotation.SuppressAjWarnings;
 
 /**
  * Annotation-based aspect to use in test builds to enable mocking of static methods
@@ -112,8 +113,10 @@ public aspect AnnotationDrivenStaticEntityMockingControl extends AbstractMethodM
 	// @MockStaticEntityMethods classes to invoke each other without creating a
 	// new mocking environment); however, this is no longer the case. The current
 	// pointcut applies to all public methods in @MockStaticEntityMethods classes.
+	@SuppressAjWarnings("adviceDidNotMatch")
 	protected pointcut mockStaticsTestMethod() : execution(public * (@MockStaticEntityMethods *).*(..));
 
+	@SuppressAjWarnings("adviceDidNotMatch")
 	protected pointcut methodToMock() : execution(public static * (@javax.persistence.Entity *).*(..));
 
 }
