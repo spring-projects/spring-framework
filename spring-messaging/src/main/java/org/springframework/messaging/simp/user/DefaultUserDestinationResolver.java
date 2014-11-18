@@ -150,9 +150,17 @@ public class DefaultUserDestinationResolver implements UserDestinationResolver {
 			subscribeDestination = this.destinationPrefix.substring(0, startIndex-1) + destinationWithoutPrefix;
 			user = destination.substring(startIndex, endIndex);
 			user = StringUtils.replace(user, "%2F", "/");
-			user = user.equals(sessionId) ? null : user;
-			sessionIds = (sessionId != null ?
-					Collections.singleton(sessionId) : this.userSessionRegistry.getSessionIds(user));
+
+			if(user.equals(sessionId)) {
+				user = null;
+				sessionIds = Collections.singleton(sessionId);
+			}
+			else if (this.userSessionRegistry.getSessionIds(user).contains(sessionId)) {
+				sessionIds = Collections.singleton(sessionId);
+			}
+			else {
+				sessionIds = this.userSessionRegistry.getSessionIds(user);
+			}
 		}
 		else {
 			return null;
