@@ -25,6 +25,7 @@ import javax.servlet.http.HttpServletRequest;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
+import org.springframework.web.context.support.ServletContextResource;
 
 /**
  * A simple {@code ResourceResolver} that tries to find a resource under the given
@@ -171,6 +172,10 @@ public class PathResourceResolver extends AbstractResourceResolver {
 		else if (resource instanceof UrlResource) {
 			resourcePath = resource.getURL().toExternalForm();
 			locationPath = location.getURL().toExternalForm();
+		}
+		else if(resource instanceof ServletContextResource) {
+			resourcePath = ((ServletContextResource) resource).getPath();
+			locationPath = ((ServletContextResource) location).getPath();
 		}
 		else {
 			resourcePath = resource.getURL().getPath();

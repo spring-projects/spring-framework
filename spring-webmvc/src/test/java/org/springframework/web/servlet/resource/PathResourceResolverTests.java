@@ -15,10 +15,7 @@
  */
 package org.springframework.web.servlet.resource;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -28,6 +25,8 @@ import org.junit.Test;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
+import org.springframework.mock.web.test.MockServletContext;
+import org.springframework.web.context.support.ServletContextResource;
 
 /**
  * Unit tests for
@@ -91,6 +90,19 @@ public class PathResourceResolverTests {
 		Resource location = new ClassPathResource("test/main.css", PathResourceResolver.class);
 		String actual = this.resolver.resolveUrlPath("../testalternatepath/bar.css", Arrays.asList(location), null);
 		assertEquals("../testalternatepath/bar.css", actual);
+	}
+
+	// SPR-12432
+	@Test
+	public void checkServletContextResource() throws Exception {
+		Resource classpathLocation = new ClassPathResource("test/", PathResourceResolver.class);
+		MockServletContext context = new MockServletContext();
+
+		ServletContextResource servletContextLocation = new ServletContextResource(context, "/webjars/");
+		ServletContextResource resource = new ServletContextResource(context, "/webjars/webjar-foo/1.0/foo.js");
+
+		assertFalse(this.resolver.checkResource(resource, classpathLocation));
+		assertTrue(this.resolver.checkResource(resource, servletContextLocation));
 	}
 
 	private void testCheckResource(Resource location, String requestPath) throws IOException {
