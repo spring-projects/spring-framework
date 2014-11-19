@@ -28,12 +28,14 @@ import javax.websocket.Decoder;
 import javax.websocket.Encoder;
 import javax.websocket.Endpoint;
 import javax.websocket.Extension;
+import javax.websocket.server.ServerEndpointConfig;
 
 import io.undertow.server.HttpServerExchange;
 import io.undertow.server.HttpUpgradeListener;
 import io.undertow.servlet.api.InstanceFactory;
 import io.undertow.servlet.api.InstanceHandle;
 import io.undertow.servlet.websockets.ServletWebSocketHttpExchange;
+import io.undertow.util.PathTemplate;
 import io.undertow.websockets.core.WebSocketChannel;
 import io.undertow.websockets.core.WebSocketVersion;
 import io.undertow.websockets.core.protocol.Handshake;
@@ -41,6 +43,7 @@ import io.undertow.websockets.jsr.ConfiguredServerEndpoint;
 import io.undertow.websockets.jsr.EncodingFactory;
 import io.undertow.websockets.jsr.EndpointSessionHandler;
 import io.undertow.websockets.jsr.ServerWebSocketContainer;
+import io.undertow.websockets.jsr.annotated.AnnotatedEndpointFactory;
 import io.undertow.websockets.jsr.handshake.HandshakeUtil;
 import io.undertow.websockets.jsr.handshake.JsrHybi07Handshake;
 import io.undertow.websockets.jsr.handshake.JsrHybi08Handshake;
@@ -64,19 +67,37 @@ public class UndertowRequestUpgradeStrategy extends AbstractStandardUpgradeStrat
 
 	private static final Constructor<ServletWebSocketHttpExchange> exchangeConstructor;
 
+	private static final Constructor<ConfiguredServerEndpoint> endpointConstructor;
+
 	private static final boolean undertow10Present;
 
+	private static final boolean undertow11Present;
+
 	static {
-		Class<ServletWebSocketHttpExchange> type = ServletWebSocketHttpExchange.class;
-		Class<?>[] paramTypes = new Class<?>[] {HttpServletRequest.class, HttpServletResponse.class, Set.class};
-		if (ClassUtils.hasConstructor(type, paramTypes)) {
-			exchangeConstructor = ClassUtils.getConstructorIfAvailable(type, paramTypes);
+		Class<ServletWebSocketHttpExchange> exchangeType = ServletWebSocketHttpExchange.class;
+		Class<?>[] exchangeParamTypes = new Class<?>[] {HttpServletRequest.class, HttpServletResponse.class, Set.class};
+		if (ClassUtils.hasConstructor(exchangeType, exchangeParamTypes)) {
+			exchangeConstructor = ClassUtils.getConstructorIfAvailable(exchangeType, exchangeParamTypes);
 			undertow10Present = false;
 		}
 		else {
-			paramTypes = new Class<?>[] {HttpServletRequest.class, HttpServletResponse.class};
-			exchangeConstructor = ClassUtils.getConstructorIfAvailable(type, paramTypes);
+			exchangeParamTypes = new Class<?>[] {HttpServletRequest.class, HttpServletResponse.class};
+			exchangeConstructor = ClassUtils.getConstructorIfAvailable(exchangeType, exchangeParamTypes);
 			undertow10Present = true;
+		}
+
+		Class<ConfiguredServerEndpoint> endpointType = ConfiguredServerEndpoint.class;
+		Class<?>[] endpointParamTypes = new Class<?>[] {ServerEndpointConfig.class, InstanceFactory.class,
+				PathTemplate.class, EncodingFactory.class, AnnotatedEndpointFactory.class};
+		if (ClassUtils.hasConstructor(endpointType, endpointParamTypes)) {
+			endpointConstructor = ClassUtils.getConstructorIfAvailable(endpointType, endpointParamTypes);
+			undertow11Present = true;
+		}
+		else {
+			endpointParamTypes = new Class<?>[] {ServerEndpointConfig.class, InstanceFactory.class,
+					PathTemplate.class, EncodingFactory.class};
+			endpointConstructor = ClassUtils.getConstructorIfAvailable(endpointType, endpointParamTypes);
+			undertow11Present = false;
 		}
 	}
 
@@ -174,12 +195,21 @@ public class UndertowRequestUpgradeStrategy extends AbstractStandardUpgradeStrat
 		endpointRegistration.setSubprotocols(Arrays.asList(selectedProtocol));
 		endpointRegistration.setExtensions(selectedExtensions);
 
-		return new ConfiguredServerEndpoint(endpointRegistration, new EndpointInstanceFactory(endpoint), null,
-				new EncodingFactory(
-						Collections.<Class<?>, List<InstanceFactory<? extends Encoder>>>emptyMap(),
-						Collections.<Class<?>, List<InstanceFactory<? extends Decoder>>>emptyMap(),
-						Collections.<Class<?>, List<InstanceFactory<? extends Encoder>>>emptyMap(),
-						Collections.<Class<?>, List<InstanceFactory<? extends Decoder>>>emptyMap()));
+		EncodingFactory encodingFactory = new EncodingFactory(
+				Collections.<Class<?>, List<InstanceFactory<? extends Encoder>>>emptyMap(),
+				Collections.<Class<?>, List<InstanceFactory<? extends Decoder>>>emptyMap(),
+				Collections.<Class<?>, List<InstanceFactory<? extends Encoder>>>emptyMap(),
+				Collections.<Class<?>, List<InstanceFactory<? extends Decoder>>>emptyMap());
+		try {
+			return undertow11Present ?
+					endpointConstructor.newInstance(endpointRegistration,
+						new EndpointInstanceFactory(endpoint), null, encodingFactory, null) :
+					endpointConstructor.newInstance(endpointRegistration,
+						new EndpointInstanceFactory(endpoint), null, encodingFactory);
+		}
+		catch (Exception ex) {
+			throw new HandshakeFailureException("Failed to instantiate ConfiguredServerEndpoint", ex);
+		}
 	}
 
 
