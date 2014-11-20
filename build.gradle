@@ -1,6 +1,6 @@
 buildscript {
 	repositories {
-		maven { url "http://repo.springsource.org/plugins-release" }
+		maven { url "https://repo.spring.io/plugins-release" }
 	}
 	dependencies {
 		classpath("org.springframework.build.gradle:propdeps-plugin:0.0.7")
@@ -19,7 +19,7 @@ configure(allprojects) { project ->
 	group = "org.springframework"
 	version = qualifyVersionIfNecessary(version)
 
-	ext.aspectjVersion       = "1.8.3"
+	ext.aspectjVersion       = "1.8.4"
 	ext.eclipseLinkVersion   = "2.4.2"
 	ext.groovyVersion        = "1.8.9"
 	ext.hibernate3Version    = "3.6.10.Final"
@@ -85,7 +85,7 @@ configure(allprojects) { project ->
 	}
 
 	repositories {
-		maven { url "http://repo.spring.io/libs-release" }
+		maven { url "https://repo.spring.io/libs-release" }
 	}
 
 	dependencies {
