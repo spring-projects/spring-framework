@@ -418,10 +418,11 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	}
 
 	/**
-	 * Register fields that should be allowed for binding. Default is all
-	 * fields. Restrict this for example to avoid unwanted modifications
-	 * by malicious users when binding HTTP request parameters.
-	 * <p>Supports "xxx*", "*xxx" and "*xxx*" patterns. More sophisticated matching
+	 * Register fields that should be allowed for binding. Default is all fields.
+	 * Restrict this for example to avoid unwanted modifications by malicious users
+	 * when binding HTTP request parameters.
+	 * <p>Supports "xxx*", "*xxx", "*xxx*" and "xxx*yyy" matches (with an arbitrary
+	 * number of pattern parts), as well as direct equality. More sophisticated matching
 	 * can be implemented by overriding the {@code isAllowed} method.
 	 * <p>Alternatively, specify a list of <i>disallowed</i> fields.
 	 * @param allowedFields array of field names
@@ -445,7 +446,8 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	 * Register fields that should <i>not</i> be allowed for binding. Default is none.
 	 * Mark fields as disallowed for example to avoid unwanted modifications
 	 * by malicious users when binding HTTP request parameters.
-	 * <p>Supports "xxx*", "*xxx" and "*xxx*" patterns. More sophisticated matching
+	 * <p>Supports "xxx*", "*xxx", "*xxx*" and "xxx*yyy" matches (with an arbitrary
+	 * number of pattern parts), as well as direct equality. More sophisticated matching
 	 * can be implemented by overriding the {@code isAllowed} method.
 	 * <p>Alternatively, specify a list of <i>allowed</i> fields.
 	 * @param disallowedFields array of field names
@@ -772,10 +774,11 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	/**
 	 * Return if the given field is allowed for binding.
 	 * Invoked for each passed-in property value.
-	 * <p>The default implementation checks for "xxx*", "*xxx" and "*xxx*" matches,
-	 * as well as direct equality, in the specified lists of allowed fields and
-	 * disallowed fields. A field matching a disallowed pattern will not be accepted
-	 * even if it also happens to match a pattern in the allowed list.
+	 * <p>The default implementation checks for "xxx*", "*xxx", "*xxx*" and "xxx*yyy"
+	 * matches (with an arbitrary number of pattern parts), as well as direct equality,
+	 * in the specified lists of allowed fields and disallowed fields. A field matching
+	 * a disallowed pattern will not be accepted even if it also happens to match a
+	 * pattern in the allowed list.
 	 * <p>Can be overridden in subclasses.
 	 * @param field the field to check
 	 * @return if the field is allowed
