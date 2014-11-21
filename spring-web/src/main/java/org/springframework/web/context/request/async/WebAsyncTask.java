@@ -69,7 +69,7 @@ public class WebAsyncTask<V> {
 	 */
 	public WebAsyncTask(Long timeout, String executorName, Callable<V> callable) {
 		this(timeout, null, executorName, callable);
-		Assert.notNull(executor, "Executor name must not be null");
+		Assert.notNull(executorName, "Executor name must not be null");
 	}
 
 	/**
