@@ -45,6 +45,7 @@ import org.springframework.cglib.transform.ClassEmitterTransformer;
 import org.springframework.cglib.transform.TransformingClassGenerator;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.util.Assert;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.ReflectionUtils;
 
 /**
@@ -321,7 +322,8 @@ class ConfigurationClassEnhancer {
 					if (alreadyInCreation) {
 						beanFactory.setCurrentlyInCreation(beanName, false);
 					}
-					return beanFactory.getBean(beanName);
+					return (!ObjectUtils.isEmpty(beanMethodArgs) ?
+							beanFactory.getBean(beanName, beanMethodArgs) : beanFactory.getBean(beanName));
 				}
 				finally {
 					if (alreadyInCreation) {

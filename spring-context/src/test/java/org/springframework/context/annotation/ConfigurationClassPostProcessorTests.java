@@ -468,6 +468,12 @@ public class ConfigurationClassPostProcessorTests {
 		}
 	}
 
+	@Test
+	public void testPrototypeArgumentsThroughBeanMethodCall() {
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(BeanArgumentConfig.class);
+		ctx.getBean(FooFactory.class).createFoo(new BarArgument());
+	}
+
 
 	// -------------------------------------------------------------------------
 
@@ -923,6 +929,40 @@ public class ConfigurationClassPostProcessorTests {
 	}
 
 	public static class Z {
+	}
+
+	@Configuration
+	static class BeanArgumentConfig {
+
+		@Bean
+		@Scope("prototype")
+		public DependingFoo foo(final BarArgument bar) {
+			return new DependingFoo(bar);
+		}
+
+		@Bean
+		public FooFactory fooFactory() {
+			return new FooFactory() {
+				@Override
+				public DependingFoo createFoo(final BarArgument bar) {
+					return foo(bar);
+				}
+			};
+		}
+	}
+
+	static class BarArgument {
+	}
+
+	static class DependingFoo {
+
+		DependingFoo(BarArgument bar) {
+		}
+	}
+
+	static abstract class FooFactory {
+
+		abstract DependingFoo createFoo(BarArgument bar);
 	}
 
 }
