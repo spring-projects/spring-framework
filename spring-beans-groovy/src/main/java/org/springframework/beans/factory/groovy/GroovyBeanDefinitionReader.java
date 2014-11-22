@@ -54,6 +54,7 @@ import org.springframework.core.io.DescriptiveResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.EncodedResource;
 import org.springframework.core.io.support.ResourcePatternUtils;
+import org.springframework.util.ObjectUtils;
 
 /**
  * A Groovy-based reader for Spring bean definitions: like a Groovy builder,
@@ -269,10 +270,9 @@ public class GroovyBeanDefinitionReader extends AbstractBeanDefinitionReader imp
 		try {
 			Closure callable = null;
 			Collection constructorArgs = null;
-			if (args != null && args.length > 0) {
+			if (!ObjectUtils.isEmpty(args)) {
 				int index = args.length;
 				Object lastArg = args[index-1];
-
 				if (lastArg instanceof Closure) {
 					callable = (Closure) lastArg;
 					index--;

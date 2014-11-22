@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,32 +16,33 @@
 
 package org.springframework.messaging.simp.user;
 
+import java.security.Principal;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.messaging.Message;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessageType;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
-import java.security.Principal;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
-
 /**
  * A default implementation of {@link UserDestinationResolver} that relies
  * on the {@link org.springframework.messaging.simp.user.UserSessionRegistry}
  * provided to the constructor to find the sessionIds associated with a user
  * and then uses the sessionId to make the target destination unique.
- * <p>
- * When a user attempts to subscribe to "/user/queue/position-updates", the
+ *
+ * <p>When a user attempts to subscribe to "/user/queue/position-updates", the
  * "/user" prefix is removed and a unique suffix added, resulting in something
  * like "/queue/position-updates-useri9oqdfzo" where the suffix is based on the
  * user's session and ensures it does not collide with any other users attempting
  * to subscribe to "/user/queue/position-updates".
- * <p>
- * When a message is sent to a user with a destination such as
+ *
+ * <p>When a message is sent to a user with a destination such as
  * "/user/{username}/queue/position-updates", the "/user/{username}" prefix is
  * removed and the suffix added, resulting in something like
  * "/queue/position-updates-useri9oqdfzo".
@@ -68,6 +69,7 @@ public class DefaultUserDestinationResolver implements UserDestinationResolver {
 		Assert.notNull(userSessionRegistry, "'userSessionRegistry' must not be null");
 		this.userSessionRegistry = userSessionRegistry;
 	}
+
 
 	/**
 	 * The prefix used to identify user destinations. Any destinations that do not
@@ -99,34 +101,29 @@ public class DefaultUserDestinationResolver implements UserDestinationResolver {
 
 	@Override
 	public UserDestinationResult resolveDestination(Message<?> message) {
-
 		SimpMessageHeaderAccessor headers = SimpMessageHeaderAccessor.wrap(message);
 		DestinationInfo info = parseUserDestination(headers);
 		if (info == null) {
 			return null;
 		}
-
 		Set<String> targetDestinations = new HashSet<String>();
 		for (String sessionId : info.getSessionIds()) {
 			targetDestinations.add(getTargetDestination(
 					headers.getDestination(), info.getDestinationWithoutPrefix(), sessionId, info.getUser()));
 		}
-
 		return new UserDestinationResult(headers.getDestination(),
 				targetDestinations, info.getSubscribeDestination(), info.getUser());
 	}
 
 	private DestinationInfo parseUserDestination(SimpMessageHeaderAccessor headers) {
-
 		String destination = headers.getDestination();
+		Principal principal = headers.getUser();
+		SimpMessageType messageType = headers.getMessageType();
 
 		String destinationWithoutPrefix;
 		String subscribeDestination;
 		String user;
 		Set<String> sessionIds;
-
-		Principal principal = headers.getUser();
-		SimpMessageType messageType = headers.getMessageType();
 
 		if (SimpMessageType.SUBSCRIBE.equals(messageType) || SimpMessageType.UNSUBSCRIBE.equals(messageType)) {
 			if (!checkDestination(destination, this.destinationPrefix)) {
@@ -185,7 +182,6 @@ public class DefaultUserDestinationResolver implements UserDestinationResolver {
 	/**
 	 * Return the target destination to use. Provided as input are the original source
 	 * destination, as well as the same destination with the target prefix removed.
-	 *
 	 * @param sourceDestination the source destination from the input message
 	 * @param sourceDestinationWithoutPrefix the source destination with the target prefix removed
 	 * @param sessionId an active user session id
@@ -209,8 +205,7 @@ public class DefaultUserDestinationResolver implements UserDestinationResolver {
 
 		private final Set<String> sessionIds;
 
-
-		private DestinationInfo(String destinationWithoutPrefix, String subscribeDestination, String user,
+		public DestinationInfo(String destinationWithoutPrefix, String subscribeDestination, String user,
 				Set<String> sessionIds) {
 
 			this.user = user;
