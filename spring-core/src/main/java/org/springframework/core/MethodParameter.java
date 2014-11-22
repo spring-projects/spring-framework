@@ -48,15 +48,15 @@ public class MethodParameter {
 
 	private final int parameterIndex;
 
-	private Class<?> parameterType;
+	private volatile Class<?> parameterType;
 
-	private Type genericParameterType;
+	private volatile Type genericParameterType;
 
-	private Annotation[] parameterAnnotations;
+	private volatile Annotation[] parameterAnnotations;
 
-	private ParameterNameDiscoverer parameterNameDiscoverer;
+	private volatile ParameterNameDiscoverer parameterNameDiscoverer;
 
-	private String parameterName;
+	private volatile String parameterName;
 
 	private int nestingLevel = 1;
 
@@ -335,10 +335,10 @@ public class MethodParameter {
 	 * has been set to begin with)
 	 */
 	public String getParameterName() {
-		if (this.parameterNameDiscoverer != null) {
+		ParameterNameDiscoverer discoverer = this.parameterNameDiscoverer;
+		if (discoverer != null) {
 			String[] parameterNames = (this.method != null ?
-					this.parameterNameDiscoverer.getParameterNames(this.method) :
-					this.parameterNameDiscoverer.getParameterNames(this.constructor));
+					discoverer.getParameterNames(this.method) : discoverer.getParameterNames(this.constructor));
 			if (parameterNames != null) {
 				this.parameterName = parameterNames[this.parameterIndex];
 			}
@@ -414,15 +414,15 @@ public class MethodParameter {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
-		if (this == obj) {
+	public boolean equals(Object other) {
+		if (this == other) {
 			return true;
 		}
-		if (obj != null && obj instanceof MethodParameter) {
-			MethodParameter other = (MethodParameter) obj;
-			return (this.parameterIndex == other.parameterIndex && getMember().equals(other.getMember()));
+		if (!(other instanceof MethodParameter)) {
+			return false;
 		}
-		return false;
+		MethodParameter otherParam = (MethodParameter) other;
+		return (this.parameterIndex == otherParam.parameterIndex && getMember().equals(otherParam.getMember()));
 	}
 
 	@Override
