@@ -23,7 +23,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Map;
@@ -100,8 +99,6 @@ class ConfigurationClassParser {
 	private final Stack<PropertySource<?>> propertySources = new Stack<PropertySource<?>>();
 
 	private final ImportStack importStack = new ImportStack();
-
-	private final Set<Class<?>> importBeanDefinitionRegistrars = new HashSet<Class<?>>();
 
 
 	/**
@@ -202,7 +199,7 @@ class ConfigurationClassParser {
 
 		// Process any @Import annotations
 		Set<Object> imports = new LinkedHashSet<Object>();
-		Set<Object> visited = new LinkedHashSet<Object>();
+		Set<String> visited = new LinkedHashSet<String>();
 		collectImports(metadata, imports, visited);
 		if (!imports.isEmpty()) {
 			processImport(configClass, metadata, imports, true);
@@ -318,7 +315,7 @@ class ConfigurationClassParser {
 	 * @param visited used to track visited classes to prevent infinite recursion
 	 * @throws IOException if there is any problem reading metadata from the named class
 	 */
-	private void collectImports(AnnotationMetadata metadata, Set<Object> imports, Set<Object> visited) throws IOException {
+	private void collectImports(AnnotationMetadata metadata, Set<Object> imports, Set<String> visited) throws IOException {
 		String className = metadata.getClassName();
 		if (visited.add(className)) {
 			if (metadata instanceof StandardAnnotationMetadata) {
@@ -330,9 +327,13 @@ class ConfigurationClassParser {
 				}
 				Map<String, Object> attributes = stdMetadata.getAnnotationAttributes(Import.class.getName(), false);
 				if (attributes != null) {
-					Class[] value = (Class[]) attributes.get("value");
+					Class<?>[] value = (Class<?>[]) attributes.get("value");
 					if (!ObjectUtils.isEmpty(value)) {
-						imports.addAll(Arrays.asList(value));
+						for (Class<?> importedClass : value) {
+							// Catch duplicate from ASM-based parsing...
+							imports.remove(importedClass.getName());
+							imports.add(importedClass);
+						}
 					}
 				}
 			}
@@ -345,7 +346,7 @@ class ConfigurationClassParser {
 									imports, visited);
 						}
 						catch (ClassNotFoundException ex) {
-							//
+							// Silently ignore...
 						}
 					}
 				}
@@ -353,7 +354,19 @@ class ConfigurationClassParser {
 				if (attributes != null) {
 					String[] value = (String[]) attributes.get("value");
 					if (!ObjectUtils.isEmpty(value)) {
-						imports.addAll(Arrays.asList(value));
+						for (String importedClassName : value) {
+							// Catch duplicate from reflection-based parsing...
+							boolean alreadyThereAsClass = false;
+							for (Object existingImport : imports) {
+								if (existingImport instanceof Class &&
+										((Class<?>) existingImport).getName().equals(importedClassName)) {
+									alreadyThereAsClass = true;
+								}
+							}
+							if (!alreadyThereAsClass) {
+								imports.add(importedClassName);
+							}
+						}
 					}
 				}
 			}
@@ -384,13 +397,10 @@ class ConfigurationClassParser {
 						// delegate to it to register additional bean definitions
 						Class<?> candidateClass = (candidate instanceof Class ? (Class) candidate :
 								this.resourceLoader.getClassLoader().loadClass((String) candidate));
-						if (!this.importBeanDefinitionRegistrars.contains(candidateClass)) {
-							ImportBeanDefinitionRegistrar registrar =
-									BeanUtils.instantiateClass(candidateClass, ImportBeanDefinitionRegistrar.class);
-							invokeAwareMethods(registrar);
-							registrar.registerBeanDefinitions(metadata, this.registry);
-							this.importBeanDefinitionRegistrars.add(candidateClass);
-						}
+						ImportBeanDefinitionRegistrar registrar =
+								BeanUtils.instantiateClass(candidateClass, ImportBeanDefinitionRegistrar.class);
+						invokeAwareMethods(registrar);
+						registrar.registerBeanDefinitions(metadata, this.registry);
 					}
 					else {
 						// Candidate class not an ImportSelector or ImportBeanDefinitionRegistrar ->
