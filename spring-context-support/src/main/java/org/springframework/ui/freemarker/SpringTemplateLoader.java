@@ -28,9 +28,9 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 
 /**
- * FreeMarker TemplateLoader adapter that loads via a Spring ResourceLoader.
- * Used by FreeMarkerConfigurationFactory for any resource loader path that
- * cannot be resolved to a java.io.File.
+ * FreeMarker {@link TemplateLoader} adapter that loads via a Spring {@link ResourceLoader}.
+ * Used by {@link FreeMarkerConfigurationFactory} for any resource loader path that cannot
+ * be resolved to a {@link java.io.File}.
  *
  * @author Juergen Hoeller
  * @since 14.03.2004

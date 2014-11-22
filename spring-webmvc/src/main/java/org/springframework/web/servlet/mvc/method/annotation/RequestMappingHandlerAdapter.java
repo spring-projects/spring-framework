@@ -136,7 +136,6 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 
 	private WebBindingInitializer webBindingInitializer;
 
-
 	private AsyncTaskExecutor taskExecutor = new SimpleAsyncTaskExecutor("MvcAsync");
 
 	private Long asyncRequestTimeout;

@@ -127,14 +127,14 @@ public class MethodParameter {
 		this.method = original.method;
 		this.constructor = original.constructor;
 		this.parameterIndex = original.parameterIndex;
+		this.nestingLevel = original.nestingLevel;
+		this.typeIndexesPerLevel = original.typeIndexesPerLevel;
 		this.containingClass = original.containingClass;
 		this.parameterType = original.parameterType;
 		this.genericParameterType = original.genericParameterType;
 		this.parameterAnnotations = original.parameterAnnotations;
 		this.parameterNameDiscoverer = original.parameterNameDiscoverer;
 		this.parameterName = original.parameterName;
-		this.nestingLevel = original.nestingLevel;
-		this.typeIndexesPerLevel = original.typeIndexesPerLevel;
 	}
 
 
