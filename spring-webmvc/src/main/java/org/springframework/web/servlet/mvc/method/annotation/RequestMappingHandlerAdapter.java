@@ -138,9 +138,9 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 
 	private Long asyncRequestTimeout;
 
-	private CallableProcessingInterceptor[] callableInterceptors = new CallableProcessingInterceptor[] {};
+	private CallableProcessingInterceptor[] callableInterceptors = new CallableProcessingInterceptor[0];
 
-	private DeferredResultProcessingInterceptor[] deferredResultInterceptors = new DeferredResultProcessingInterceptor[] {};
+	private DeferredResultProcessingInterceptor[] deferredResultInterceptors = new DeferredResultProcessingInterceptor[0];
 
 	private boolean ignoreDefaultModelOnRedirect = false;
 
@@ -169,20 +169,17 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 			new LinkedHashMap<ControllerAdviceBean, Set<Method>>();
 
 
-	/**
-	 * Default constructor.
-	 */
 	public RequestMappingHandlerAdapter() {
-
 		StringHttpMessageConverter stringHttpMessageConverter = new StringHttpMessageConverter();
-		stringHttpMessageConverter.setWriteAcceptCharset(false); // See SPR-7316
+		stringHttpMessageConverter.setWriteAcceptCharset(false);  // see SPR-7316
 
-		this.messageConverters = new ArrayList<HttpMessageConverter<?>>();
+		this.messageConverters = new ArrayList<HttpMessageConverter<?>>(4);
 		this.messageConverters.add(new ByteArrayHttpMessageConverter());
 		this.messageConverters.add(stringHttpMessageConverter);
 		this.messageConverters.add(new SourceHttpMessageConverter<Source>());
 		this.messageConverters.add(new AllEncompassingFormHttpMessageConverter());
 	}
+
 
 	/**
 	 * Provide resolvers for custom argument types. Custom resolvers are ordered
@@ -307,6 +304,14 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 	}
 
 	/**
+	 * Set the {@link ContentNegotiationManager} to use to determine requested media types.
+	 * If not set, the default constructor is used.
+	 */
+	public void setContentNegotiationManager(ContentNegotiationManager contentNegotiationManager) {
+		this.contentNegotiationManager = contentNegotiationManager;
+	}
+
+	/**
 	 * Provide the converters to use in argument resolvers and return value
 	 * handlers that support reading and/or writing to the body of the
 	 * request and response.
@@ -316,18 +321,10 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 	}
 
 	/**
-	 * Set the {@link ContentNegotiationManager} to use to determine requested media types.
-	 * If not set, the default constructor is used.
-	 */
-	public void setContentNegotiationManager(ContentNegotiationManager contentNegotiationManager) {
-		this.contentNegotiationManager = contentNegotiationManager;
-	}
-
-	/**
 	 * Return the configured message body converters.
 	 */
 	public List<HttpMessageConverter<?>> getMessageConverters() {
-		return messageConverters;
+		return this.messageConverters;
 	}
 
 	/**
@@ -339,10 +336,10 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 	}
 
 	/**
-	 * Return the configured WebBindingInitializer, or {@code null}.
+	 * Return the configured WebBindingInitializer, or {@code null} if none.
 	 */
 	public WebBindingInitializer getWebBindingInitializer() {
-		return webBindingInitializer;
+		return this.webBindingInitializer;
 	}
 
 	/**
@@ -461,9 +458,8 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 	}
 
 	/**
-	 * {@inheritDoc}
-	 * <p>A {@link ConfigurableBeanFactory} is expected for resolving
-	 * expressions in method argument default values.
+	 * A {@link ConfigurableBeanFactory} is expected for resolving expressions
+	 * in method argument default values.
 	 */
 	@Override
 	public void setBeanFactory(BeanFactory beanFactory) {
@@ -473,11 +469,12 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 	}
 
 	/**
-	 * Return the owning factory of this bean instance, or {@code null}.
+	 * Return the owning factory of this bean instance, or {@code null} if none.
 	 */
 	protected ConfigurableBeanFactory getBeanFactory() {
 		return this.beanFactory;
 	}
+
 
 	@Override
 	public void afterPropertiesSet() {
@@ -638,6 +635,7 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 		}
 	}
 
+
 	/**
 	 * Always return {@code true} since any method argument and return value
 	 * type will be processed in some way. A method argument not recognized
@@ -651,19 +649,8 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 		return true;
 	}
 
-	/**
-	 * This implementation always returns -1. An {@code @RequestMapping}
-	 * method can calculate the lastModified value, call
-	 * {@link WebRequest#checkNotModified(long)}, and return {@code null}
-	 * if the result of that call is {@code true}.
-	 */
 	@Override
-	protected long getLastModifiedInternal(HttpServletRequest request, HandlerMethod handlerMethod) {
-		return -1;
-	}
-
-	@Override
-	protected final ModelAndView handleInternal(HttpServletRequest request,
+	protected ModelAndView handleInternal(HttpServletRequest request,
 			HttpServletResponse response, HandlerMethod handlerMethod) throws Exception {
 
 		if (getSessionAttributesHandler(handlerMethod).hasSessionAttributes()) {
@@ -690,8 +677,19 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 	}
 
 	/**
-	 * Return the {@link SessionAttributesHandler} instance for the given
-	 * handler type, never {@code null}.
+	 * This implementation always returns -1. An {@code @RequestMapping} method can
+	 * calculate the lastModified value, call {@link WebRequest#checkNotModified(long)},
+	 * and return {@code null} if the result of that call is {@code true}.
+	 */
+	@Override
+	protected long getLastModifiedInternal(HttpServletRequest request, HandlerMethod handlerMethod) {
+		return -1;
+	}
+
+
+	/**
+	 * Return the {@link SessionAttributesHandler} instance for the given handler type
+	 * (never {@code null}).
 	 */
 	private SessionAttributesHandler getSessionAttributesHandler(HandlerMethod handlerMethod) {
 		Class<?> handlerType = handlerMethod.getBeanType();
