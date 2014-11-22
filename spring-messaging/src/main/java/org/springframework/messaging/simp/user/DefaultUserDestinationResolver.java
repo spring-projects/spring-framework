@@ -36,19 +36,20 @@ import org.springframework.util.StringUtils;
  * on the {@link org.springframework.messaging.simp.user.UserSessionRegistry}
  * provided to the constructor to find the sessionIds associated with a user
  * and then uses the sessionId to make the target destination unique.
- * <p>
- * When a user attempts to subscribe to "/user/queue/position-updates", the
+ *
+ * <p>When a user attempts to subscribe to "/user/queue/position-updates", the
  * "/user" prefix is removed and a unique suffix added, resulting in something
  * like "/queue/position-updates-useri9oqdfzo" where the suffix is based on the
  * user's session and ensures it does not collide with any other users attempting
  * to subscribe to "/user/queue/position-updates".
- * <p>
- * When a message is sent to a user with a destination such as
+ *
+ * <p>When a message is sent to a user with a destination such as
  * "/user/{username}/queue/position-updates", the "/user/{username}" prefix is
  * removed and the suffix added, resulting in something like
  * "/queue/position-updates-useri9oqdfzo".
  *
  * @author Rossen Stoyanchev
+ * @author Brian Clozel
  * @since 4.0
  */
 public class DefaultUserDestinationResolver implements UserDestinationResolver {
@@ -70,6 +71,7 @@ public class DefaultUserDestinationResolver implements UserDestinationResolver {
 		Assert.notNull(userSessionRegistry, "'userSessionRegistry' must not be null");
 		this.userSessionRegistry = userSessionRegistry;
 	}
+
 
 	/**
 	 * The prefix used to identify user destinations. Any destinations that do not
@@ -108,9 +110,10 @@ public class DefaultUserDestinationResolver implements UserDestinationResolver {
 		}
 		Set<String> resolved = new HashSet<String>();
 		for (String sessionId : info.getSessionIds()) {
-			String d = getTargetDestination(destination, info.getDestinationWithoutPrefix(), sessionId, info.getUser());
-			if (d != null) {
-				resolved.add(d);
+			String targetDestination = getTargetDestination(
+					destination, info.getDestinationWithoutPrefix(), sessionId, info.getUser());
+			if (targetDestination != null) {
+				resolved.add(targetDestination);
 			}
 		}
 		return new UserDestinationResult(destination, resolved, info.getSubscribeDestination(), info.getUser());
@@ -150,8 +153,7 @@ public class DefaultUserDestinationResolver implements UserDestinationResolver {
 			subscribeDestination = this.destinationPrefix.substring(0, startIndex-1) + destinationWithoutPrefix;
 			user = destination.substring(startIndex, endIndex);
 			user = StringUtils.replace(user, "%2F", "/");
-
-			if(user.equals(sessionId)) {
+			if (user.equals(sessionId)) {
 				user = null;
 				sessionIds = Collections.singleton(sessionId);
 			}
@@ -176,13 +178,11 @@ public class DefaultUserDestinationResolver implements UserDestinationResolver {
 	 * This methods determines the translated destination to use based on the source
 	 * destination, the source destination with the user prefix removed, a session
 	 * id, and the user for the session (if known).
-	 *
 	 * @param sourceDestination the source destination of the input message
 	 * @param sourceDestinationWithoutPrefix the source destination without the user prefix
 	 * @param sessionId the id of the session for the target message
 	 * @param user the user associated with the session, or {@code null}
-	 *
-	 * @return a target destination, or {@code null}
+	 * @return a target destination, or {@code null} if none
 	 */
 	protected String getTargetDestination(String sourceDestination,
 			String sourceDestinationWithoutPrefix, String sessionId, String user) {
@@ -195,6 +195,7 @@ public class DefaultUserDestinationResolver implements UserDestinationResolver {
 		return "DefaultUserDestinationResolver[prefix=" + this.destinationPrefix + "]";
 	}
 
+
 	private static class DestinationInfo {
 
 		private final String destinationWithoutPrefix;
@@ -205,8 +206,7 @@ public class DefaultUserDestinationResolver implements UserDestinationResolver {
 
 		private final Set<String> sessionIds;
 
-
-		private DestinationInfo(String destinationWithoutPrefix, String subscribeDestination, String user,
+		public DestinationInfo(String destinationWithoutPrefix, String subscribeDestination, String user,
 				Set<String> sessionIds) {
 
 			this.user = user;
