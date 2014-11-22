@@ -53,6 +53,7 @@ import org.springframework.beans.factory.xml.XmlReaderContext;
 import org.springframework.core.io.DescriptiveResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.EncodedResource;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -239,7 +240,7 @@ public class GroovyBeanDefinitionReader extends AbstractBeanDefinitionReader imp
 		int countBefore = getRegistry().getBeanDefinitionCount();
 		try {
 			GroovyShell shell = new GroovyShell(getResourceLoader().getClassLoader(), binding);
-			shell.evaluate(encodedResource.getReader(), encodedResource.getResource().getFilename());
+			shell.evaluate(encodedResource.getReader(), "beans");
 		}
 		catch (Throwable ex) {
 			throw new BeanDefinitionParsingException(new Problem("Error evaluating Groovy script: " + ex.getMessage(),
@@ -282,10 +283,9 @@ public class GroovyBeanDefinitionReader extends AbstractBeanDefinitionReader imp
 		try {
 			Closure callable = null;
 			Collection constructorArgs = null;
-			if (args != null && args.length > 0) {
+			if (!ObjectUtils.isEmpty(args)) {
 				int index = args.length;
 				Object lastArg = args[index-1];
-
 				if (lastArg instanceof Closure) {
 					callable = (Closure) lastArg;
 					index--;
