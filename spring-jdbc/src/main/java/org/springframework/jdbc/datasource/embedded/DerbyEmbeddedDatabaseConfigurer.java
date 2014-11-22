@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,11 +43,6 @@ final class DerbyEmbeddedDatabaseConfigurer implements EmbeddedDatabaseConfigure
 	// Error code that indicates successful shutdown
 	private static final String SHUTDOWN_CODE = "08006";
 
-	private static final boolean IS_AT_LEAST_DOT_SIX = new EmbeddedDriver().getMinorVersion() >= 6;
-
-	private static final String SHUTDOWN_COMMAND =
-			String.format("%s=true", IS_AT_LEAST_DOT_SIX ? "drop" : "shutdown");
-
 	private static DerbyEmbeddedDatabaseConfigurer INSTANCE;
 
 
@@ -77,16 +72,19 @@ final class DerbyEmbeddedDatabaseConfigurer implements EmbeddedDatabaseConfigure
 	}
 
 	public void shutdown(DataSource dataSource, String databaseName) {
+		EmbeddedDriver embeddedDriver = new EmbeddedDriver();
+		boolean isAtLeastDotSix = (embeddedDriver.getMinorVersion() >= 6);
+		String shutdownCommand = String.format("%s=true", isAtLeastDotSix ? "drop" : "shutdown");
 		try {
-			new EmbeddedDriver().connect(
-					String.format(URL_TEMPLATE, databaseName, SHUTDOWN_COMMAND), new Properties());
+			embeddedDriver.connect(
+					String.format(URL_TEMPLATE, databaseName, shutdownCommand), new Properties());
 		}
 		catch (SQLException ex) {
 			if (!SHUTDOWN_CODE.equals(ex.getSQLState())) {
 				logger.warn("Could not shutdown in-memory Derby database", ex);
 				return;
 			}
-			if (!IS_AT_LEAST_DOT_SIX) {
+			if (!isAtLeastDotSix) {
 				// Explicitly purge the in-memory database, to prevent it
 				// from hanging around after being shut down.
 				try {
