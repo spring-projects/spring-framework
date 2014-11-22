@@ -311,89 +311,99 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 
 
 	private InjectionMetadata findResourceMetadata(String beanName, final Class<?> clazz) {
-		// Quick check on the concurrent map first, with minimal locking.
 		// Fall back to class name as cache key, for backwards compatibility with custom callers.
 		String cacheKey = (StringUtils.hasLength(beanName) ? beanName : clazz.getName());
+		// Quick check on the concurrent map first, with minimal locking.
 		InjectionMetadata metadata = this.injectionMetadataCache.get(cacheKey);
 		if (InjectionMetadata.needsRefresh(metadata, clazz)) {
 			synchronized (this.injectionMetadataCache) {
 				metadata = this.injectionMetadataCache.get(cacheKey);
 				if (InjectionMetadata.needsRefresh(metadata, clazz)) {
-					LinkedList<InjectionMetadata.InjectedElement> elements = new LinkedList<InjectionMetadata.InjectedElement>();
-					Class<?> targetClass = clazz;
-
-					do {
-						LinkedList<InjectionMetadata.InjectedElement> currElements = new LinkedList<InjectionMetadata.InjectedElement>();
-						for (Field field : targetClass.getDeclaredFields()) {
-							if (webServiceRefClass != null && field.isAnnotationPresent(webServiceRefClass)) {
-								if (Modifier.isStatic(field.getModifiers())) {
-									throw new IllegalStateException("@WebServiceRef annotation is not supported on static fields");
-								}
-								currElements.add(new WebServiceRefElement(field, null));
-							}
-							else if (ejbRefClass != null && field.isAnnotationPresent(ejbRefClass)) {
-								if (Modifier.isStatic(field.getModifiers())) {
-									throw new IllegalStateException("@EJB annotation is not supported on static fields");
-								}
-								currElements.add(new EjbRefElement(field, null));
-							}
-							else if (field.isAnnotationPresent(Resource.class)) {
-								if (Modifier.isStatic(field.getModifiers())) {
-									throw new IllegalStateException("@Resource annotation is not supported on static fields");
-								}
-								if (!ignoredResourceTypes.contains(field.getType().getName())) {
-									currElements.add(new ResourceElement(field, null));
-								}
-							}
-						}
-						for (Method method : targetClass.getDeclaredMethods()) {
-							if (!method.isBridge() && method.equals(ClassUtils.getMostSpecificMethod(method, clazz))) {
-								if (webServiceRefClass != null && method.isAnnotationPresent(webServiceRefClass)) {
-									if (Modifier.isStatic(method.getModifiers())) {
-										throw new IllegalStateException("@WebServiceRef annotation is not supported on static methods");
-									}
-									if (method.getParameterTypes().length != 1) {
-										throw new IllegalStateException("@WebServiceRef annotation requires a single-arg method: " + method);
-									}
-									PropertyDescriptor pd = BeanUtils.findPropertyForMethod(method);
-									currElements.add(new WebServiceRefElement(method, pd));
-								}
-								else if (ejbRefClass != null && method.isAnnotationPresent(ejbRefClass)) {
-									if (Modifier.isStatic(method.getModifiers())) {
-										throw new IllegalStateException("@EJB annotation is not supported on static methods");
-									}
-									if (method.getParameterTypes().length != 1) {
-										throw new IllegalStateException("@EJB annotation requires a single-arg method: " + method);
-									}
-									PropertyDescriptor pd = BeanUtils.findPropertyForMethod(method);
-									currElements.add(new EjbRefElement(method, pd));
-								}
-								else if (method.isAnnotationPresent(Resource.class)) {
-									if (Modifier.isStatic(method.getModifiers())) {
-										throw new IllegalStateException("@Resource annotation is not supported on static methods");
-									}
-									Class<?>[] paramTypes = method.getParameterTypes();
-									if (paramTypes.length != 1) {
-										throw new IllegalStateException("@Resource annotation requires a single-arg method: " + method);
-									}
-									if (!ignoredResourceTypes.contains(paramTypes[0].getName())) {
-										PropertyDescriptor pd = BeanUtils.findPropertyForMethod(method);
-										currElements.add(new ResourceElement(method, pd));
-									}
-								}
-							}
-						}
-						elements.addAll(0, currElements);
-						targetClass = targetClass.getSuperclass();
+					try {
+						metadata = buildResourceMetadata(clazz);
+						this.injectionMetadataCache.put(cacheKey, metadata);
 					}
-					while (targetClass != null && targetClass != Object.class);
-
-					metadata = new InjectionMetadata(clazz, elements);
-					this.injectionMetadataCache.put(cacheKey, metadata);
+					catch (NoClassDefFoundError err) {
+						throw new IllegalStateException("Failed to introspect bean class [" + clazz.getName() +
+								"] for resource metadata: could not find class that it depends on", err);
+					}
 				}
 			}
 		}
 		return metadata;
+	}
+
+	private InjectionMetadata buildResourceMetadata(Class<?> clazz) {
+		LinkedList<InjectionMetadata.InjectedElement> elements = new LinkedList<InjectionMetadata.InjectedElement>();
+		Class<?> targetClass = clazz;
+
+		do {
+			LinkedList<InjectionMetadata.InjectedElement> currElements = new LinkedList<InjectionMetadata.InjectedElement>();
+			for (Field field : targetClass.getDeclaredFields()) {
+				if (webServiceRefClass != null && field.isAnnotationPresent(webServiceRefClass)) {
+					if (Modifier.isStatic(field.getModifiers())) {
+						throw new IllegalStateException("@WebServiceRef annotation is not supported on static fields");
+					}
+					currElements.add(new WebServiceRefElement(field, null));
+				}
+				else if (ejbRefClass != null && field.isAnnotationPresent(ejbRefClass)) {
+					if (Modifier.isStatic(field.getModifiers())) {
+						throw new IllegalStateException("@EJB annotation is not supported on static fields");
+					}
+					currElements.add(new EjbRefElement(field, null));
+				}
+				else if (field.isAnnotationPresent(Resource.class)) {
+					if (Modifier.isStatic(field.getModifiers())) {
+						throw new IllegalStateException("@Resource annotation is not supported on static fields");
+					}
+					if (!ignoredResourceTypes.contains(field.getType().getName())) {
+						currElements.add(new ResourceElement(field, null));
+					}
+				}
+			}
+			for (Method method : targetClass.getDeclaredMethods()) {
+				if (!method.isBridge() && method.equals(ClassUtils.getMostSpecificMethod(method, clazz))) {
+					if (webServiceRefClass != null && method.isAnnotationPresent(webServiceRefClass)) {
+						if (Modifier.isStatic(method.getModifiers())) {
+							throw new IllegalStateException("@WebServiceRef annotation is not supported on static methods");
+						}
+						if (method.getParameterTypes().length != 1) {
+							throw new IllegalStateException("@WebServiceRef annotation requires a single-arg method: " + method);
+						}
+						PropertyDescriptor pd = BeanUtils.findPropertyForMethod(method);
+						currElements.add(new WebServiceRefElement(method, pd));
+					}
+					else if (ejbRefClass != null && method.isAnnotationPresent(ejbRefClass)) {
+						if (Modifier.isStatic(method.getModifiers())) {
+							throw new IllegalStateException("@EJB annotation is not supported on static methods");
+						}
+						if (method.getParameterTypes().length != 1) {
+							throw new IllegalStateException("@EJB annotation requires a single-arg method: " + method);
+						}
+						PropertyDescriptor pd = BeanUtils.findPropertyForMethod(method);
+						currElements.add(new EjbRefElement(method, pd));
+					}
+					else if (method.isAnnotationPresent(Resource.class)) {
+						if (Modifier.isStatic(method.getModifiers())) {
+							throw new IllegalStateException("@Resource annotation is not supported on static methods");
+						}
+						Class<?>[] paramTypes = method.getParameterTypes();
+						if (paramTypes.length != 1) {
+							throw new IllegalStateException("@Resource annotation requires a single-arg method: " + method);
+						}
+						if (!ignoredResourceTypes.contains(paramTypes[0].getName())) {
+							PropertyDescriptor pd = BeanUtils.findPropertyForMethod(method);
+							currElements.add(new ResourceElement(method, pd));
+						}
+					}
+				}
+			}
+			elements.addAll(0, currElements);
+			targetClass = targetClass.getSuperclass();
+		}
+		while (targetClass != null && targetClass != Object.class);
+
+		return new InjectionMetadata(clazz, elements);
 	}
 
 	/**
