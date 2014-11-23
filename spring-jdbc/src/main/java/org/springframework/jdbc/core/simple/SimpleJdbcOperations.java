@@ -338,7 +338,7 @@ public interface SimpleJdbcOperations {
 	/**
 	 * Execute the supplied query with the supplied arguments.
 	 * <p>The query is expected to be a single row query; the result row will be
-	 * mapped to a Map<String, Object> (one entry for each column, using the column name as the key).
+	 * mapped to a Map<String, ?> (one entry for each column, using the column name as the key).
 	 * Uses sql with the named parameter support provided by the
 	 * {@link org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate}
 	 * @param sql the SQL query to run

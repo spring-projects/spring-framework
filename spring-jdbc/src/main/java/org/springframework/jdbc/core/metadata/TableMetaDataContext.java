@@ -274,7 +274,7 @@ public class TableMetaDataContext {
 	 * Match the provided column names and values with the list of columns used.
 	 * @param inParameters the parameter names and values
 	 */
-	public List<Object> matchInParameterValuesWithInsertColumns(Map<String, Object> inParameters) {
+	public List<Object> matchInParameterValuesWithInsertColumns(Map<String, ?> inParameters) {
 		List<Object> values = new ArrayList<Object>();
 		Map<String, Object> source = new HashMap<String, Object>();
 		for (String key : inParameters.keySet()) {

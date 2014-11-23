@@ -158,20 +158,20 @@ public interface SimpleJdbcCallOperations {
 	 * be provided in the same order as the parameters are defined for the stored procedure.
 	 * @return map of output params.
 	 */
-	Map<String, Object> execute(Object... args);
+	Map<String, ?> execute(Object... args);
 
 	/**
 	 * Execute the stored procedure and return a map of output params, keyed by name as in parameter declarations..
 	 * @param args Map containing the parameter values to be used in the call.
 	 * @return map of output params.
 	 */
-	Map<String, Object> execute(Map<String, ?> args);
+	Map<String, ?> execute(Map<String, ?> args);
 
 	/**
 	 * Execute the stored procedure and return a map of output params, keyed by name as in parameter declarations..
 	 * @param args SqlParameterSource containing the parameter values to be used in the call.
 	 * @return map of output params.
 	 */
-	Map<String, Object> execute(SqlParameterSource args);
+	Map<String, ?> execute(SqlParameterSource args);
 
 }

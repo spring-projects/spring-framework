@@ -336,9 +336,9 @@ public abstract class AbstractJdbcCall {
 	 * @param parameterSource parameter names and values to be used in call
 	 * @return Map of out parameters
 	 */
-	protected Map<String, Object> doExecute(SqlParameterSource parameterSource) {
+	protected Map<String, ?> doExecute(SqlParameterSource parameterSource) {
 		checkCompiled();
-		Map<String, Object> params = matchInParameterValuesWithCallParameters(parameterSource);
+		Map<String, ?> params = matchInParameterValuesWithCallParameters(parameterSource);
 		return executeCallInternal(params);
 	}
 
@@ -347,7 +347,7 @@ public abstract class AbstractJdbcCall {
 	 * @param args array of parameter values; order must match the order declared for the stored procedure
 	 * @return Map of out parameters
 	 */
-	protected Map<String, Object> doExecute(Object[] args) {
+	protected Map<String, ?> doExecute(Object[] args) {
 		checkCompiled();
 		Map<String, ?> params = matchInParameterValuesWithCallParameters(args);
 		return executeCallInternal(params);
@@ -358,7 +358,7 @@ public abstract class AbstractJdbcCall {
 	 * @param args Map of parameter name and values
 	 * @return Map of out parameters
 	 */
-	protected Map<String, Object> doExecute(Map<String, ?> args) {
+	protected Map<String, ?> doExecute(Map<String, ?> args) {
 		checkCompiled();
 		Map<String, ?> params = matchInParameterValuesWithCallParameters(args);
 		return executeCallInternal(params);
@@ -367,7 +367,7 @@ public abstract class AbstractJdbcCall {
 	/**
 	 * Method to perform the actual call processing
 	 */
-	private Map<String, Object> executeCallInternal(Map<String, ?> args) {
+	private Map<String, ?> executeCallInternal(Map<String, ?> args) {
 		CallableStatementCreator csc = getCallableStatementFactory().newCallableStatementCreator(args);
 		if (logger.isDebugEnabled()) {
 			logger.debug("The following parameters are used for call " + getCallString() + " with " + args);
@@ -404,7 +404,7 @@ public abstract class AbstractJdbcCall {
 	 * @param parameterSource the parameter vakues provided as a {@link SqlParameterSource}
 	 * @return Map with parameter names and values
 	 */
-	protected Map<String, Object> matchInParameterValuesWithCallParameters(SqlParameterSource parameterSource) {
+	protected Map<String, ?> matchInParameterValuesWithCallParameters(SqlParameterSource parameterSource) {
 		return this.callMetaDataContext.matchInParameterValuesWithCallParameters(parameterSource);
 	}
 
