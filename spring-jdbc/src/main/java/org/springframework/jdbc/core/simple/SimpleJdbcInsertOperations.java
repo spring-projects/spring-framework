@@ -98,7 +98,7 @@ public interface SimpleJdbcInsertOperations {
 	 * @param args Map containing column names and corresponding value
 	 * @return the number of rows affected as returned by the JDBC driver
 	 */
-	int execute(Map<String, Object> args);
+	int execute(Map<String, ?> args);
 
 	/**
 	 * Execute the insert using the values passed in.
@@ -114,7 +114,7 @@ public interface SimpleJdbcInsertOperations {
 	 * @param args Map containing column names and corresponding value
 	 * @return the generated key value
 	 */
-	Number executeAndReturnKey(Map<String, Object> args);
+	Number executeAndReturnKey(Map<String, ?> args);
 
 	/**
 	 * Execute the insert using the values passed in and return the generated key.  This requires that
@@ -132,7 +132,7 @@ public interface SimpleJdbcInsertOperations {
 	 * @param args Map containing column names and corresponding value
 	 * @return the KeyHolder containing all generated keys
 	 */
-	KeyHolder executeAndReturnKeyHolder(Map<String, Object> args);
+	KeyHolder executeAndReturnKeyHolder(Map<String, ?> args);
 
 	/**
 	 * Execute the insert using the values passed in and return the generated keys.  This requires that
@@ -148,7 +148,7 @@ public interface SimpleJdbcInsertOperations {
 	 * @param batch an array of Maps containing a batch of column names and corresponding value
 	 * @return the array of number of rows affected as returned by the JDBC driver
 	 */
-	int[] executeBatch(Map<String, Object>[] batch);
+	int[] executeBatch(Map<String, ?>[] batch);
 
 	/**
 	 * Execute a batch insert using the batch of values passed in.

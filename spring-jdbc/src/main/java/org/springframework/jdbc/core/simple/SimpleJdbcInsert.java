@@ -118,7 +118,7 @@ public class SimpleJdbcInsert extends AbstractJdbcInsert implements SimpleJdbcIn
 	}
 
 	@Override
-	public int execute(Map<String, Object> args) {
+	public int execute(Map<String, ?> args) {
 		return doExecute(args);
 	}
 
@@ -128,7 +128,7 @@ public class SimpleJdbcInsert extends AbstractJdbcInsert implements SimpleJdbcIn
 	}
 
 	@Override
-	public Number executeAndReturnKey(Map<String, Object> args) {
+	public Number executeAndReturnKey(Map<String, ?> args) {
 		return doExecuteAndReturnKey(args);
 	}
 
@@ -138,7 +138,7 @@ public class SimpleJdbcInsert extends AbstractJdbcInsert implements SimpleJdbcIn
 	}
 
 	@Override
-	public KeyHolder executeAndReturnKeyHolder(Map<String, Object> args) {
+	public KeyHolder executeAndReturnKeyHolder(Map<String, ?> args) {
 		return doExecuteAndReturnKeyHolder(args);
 	}
 
@@ -148,7 +148,7 @@ public class SimpleJdbcInsert extends AbstractJdbcInsert implements SimpleJdbcIn
 	}
 
 	@Override
-	public int[] executeBatch(Map<String, Object>[] batch) {
+	public int[] executeBatch(Map<String, ?>[] batch) {
 		return doExecuteBatch(batch);
 	}
 

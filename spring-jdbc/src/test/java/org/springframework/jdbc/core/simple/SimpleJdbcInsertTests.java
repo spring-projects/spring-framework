@@ -18,8 +18,12 @@ package org.springframework.jdbc.core.simple;
 
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Map;
+
 import javax.sql.DataSource;
 
 import org.junit.After;
@@ -27,7 +31,6 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 
 import static org.mockito.BDDMockito.*;
@@ -57,7 +60,7 @@ public class SimpleJdbcInsertTests {
 
 	@After
 	public void verifyClosed() throws Exception {
-		verify(connection).close();
+		verify(connection, atLeastOnce()).close();
 	}
 
 	@Test
@@ -80,5 +83,27 @@ public class SimpleJdbcInsertTests {
 		finally {
 			verify(resultSet).close();
 		}
+	}
+	
+	@Test
+	public void testGenericWildcardsWork() throws Exception {
+		ResultSet resultSet = mock(ResultSet.class);
+		PreparedStatement ps = mock(PreparedStatement.class);
+		given(resultSet.next()).willReturn(false);
+		given(databaseMetaData.getDatabaseProductName()).willReturn("MyDB");
+		given(databaseMetaData.getDatabaseProductName()).willReturn("MyDB");
+		given(databaseMetaData.getDatabaseProductVersion()).willReturn("1.0");
+		given(databaseMetaData.getUserName()).willReturn("me");
+		given(databaseMetaData.storesLowerCaseIdentifiers()).willReturn(true);
+		given(databaseMetaData.getTables(null, null, "x", null)).willReturn(resultSet);
+		given(connection.prepareStatement(anyString())).willReturn(ps);
+
+		// try calling execute() with a Map<String, Number>
+		SimpleJdbcInsert insert = new SimpleJdbcInsert(dataSource).withTableName("x");
+		Map<String, Number> args = new HashMap<>();
+		args.put("one", 1);
+		args.put("two", 2);
+		insert.setColumnNames(Arrays.asList("one", "two"));
+		insert.execute(args );
 	}
 }
