@@ -7298,7 +7298,7 @@ annotation can be used:
 	public class AppConfig {
 
 		@Bean
-		**@Desciption("Provides a basic example of a bean")**
+		**@Description("Provides a basic example of a bean")**
 		public Foo foo() {
 			return new Foo();
 		}
