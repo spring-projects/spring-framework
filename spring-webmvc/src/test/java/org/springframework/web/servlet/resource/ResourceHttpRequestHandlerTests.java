@@ -16,19 +16,15 @@
 
 package org.springframework.web.servlet.resource;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
 import javax.servlet.http.HttpServletResponse;
 
 import org.junit.Before;
 import org.junit.Test;
+
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
@@ -37,6 +33,8 @@ import org.springframework.mock.web.test.MockHttpServletResponse;
 import org.springframework.mock.web.test.MockServletContext;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.servlet.HandlerMapping;
+
+import static org.junit.Assert.*;
 
 /**
  * Unit tests for ResourceHttpRequestHandler.
@@ -154,6 +152,16 @@ public class ResourceHttpRequestHandlerTests {
 		testInvalidPath(location, "url:" + secretPath);
 	}
 
+	private void testInvalidPath(Resource location, String requestPath) throws Exception {
+		this.request.setAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, requestPath);
+		this.response = new MockHttpServletResponse();
+		this.handler.handleRequest(this.request, this.response);
+		if (!location.createRelative(requestPath).exists() && !requestPath.contains(":")) {
+			fail(requestPath + " doesn't actually exist as a relative path");
+		}
+		assertEquals(404, this.response.getStatus());
+	}
+
 	@Test
 	public void ignoreInvalidEscapeSequence() throws Exception {
 		this.request.setAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, "/%foo%/bar.txt");
@@ -250,12 +258,12 @@ public class ResourceHttpRequestHandlerTests {
 		assertEquals(404, this.response.getStatus());
 	}
 
-	@Test(expected=IllegalStateException.class)
+	@Test(expected = IllegalStateException.class)
 	public void noPathWithinHandlerMappingAttribute() throws Exception {
 		this.handler.handleRequest(this.request, this.response);
 	}
 
-	@Test(expected=HttpRequestMethodNotSupportedException.class)
+	@Test(expected = HttpRequestMethodNotSupportedException.class)
 	public void unsupportedHttpMethod() throws Exception {
 		this.request.setAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, "foo.css");
 		this.request.setMethod("POST");
@@ -269,20 +277,13 @@ public class ResourceHttpRequestHandlerTests {
 		assertEquals(404, this.response.getStatus());
 	}
 
+
 	private long headerAsLong(String responseHeaderName) {
 		return Long.valueOf(this.response.getHeader(responseHeaderName));
 	}
 
 	private long resourceLastModified(String resourceName) throws IOException {
 		return new ClassPathResource(resourceName, getClass()).getFile().lastModified();
-	}
-
-	private void testInvalidPath(Resource location, String requestPath) throws Exception {
-		this.request.setAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, requestPath);
-		this.response = new MockHttpServletResponse();
-		this.handler.handleRequest(this.request, this.response);
-		assertTrue(location.createRelative(requestPath).exists());
-		assertEquals(404, this.response.getStatus());
 	}
 
 
