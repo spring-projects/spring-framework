@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -65,11 +65,8 @@ public class CallMetaDataContext {
 	/** List of SqlParameter objects to be used in call execution */
 	private List<SqlParameter> callParameters = new ArrayList<SqlParameter>();
 
-	/** Default name to use for the return value in the output map */
-	private String defaultFunctionReturnName = "return";
-
 	/** Actual name to use for the return value in the output map */
-	private String actualFunctionReturnName = null;
+	private String actualFunctionReturnName;
 
 	/** Set of in parameter names to exclude use for any not listed */
 	private Set<String> limitedInParameterNames = new HashSet<String>();
@@ -77,16 +74,16 @@ public class CallMetaDataContext {
 	/** List of SqlParameter names for out parameters */
 	private List<String> outParameterNames = new ArrayList<String>();
 
-	/** should we access call parameter meta data info or not */
+	/** Indicates whether this is a procedure or a function **/
+	private boolean function = false;
+
+	/** Indicates whether this procedure's return value should be included  **/
+	private boolean returnValueRequired = false;
+
+	/** Should we access call parameter meta data info or not */
 	private boolean accessCallParameterMetaData = true;
 
-	/** indicates whether this is a procedure or a function **/
-	private boolean function;
-
-	/** indicates whether this procedure's return value should be included  **/
-	private boolean returnValueRequired;
-
-	/** the provider of call meta data */
+	/** The provider of call meta data */
 	private CallMetaDataProvider metaDataProvider;
 
 
@@ -101,7 +98,7 @@ public class CallMetaDataContext {
 	 * Get the name used for the return value of the function.
 	 */
 	public String getFunctionReturnName() {
-		return this.actualFunctionReturnName != null ? this.actualFunctionReturnName : this.defaultFunctionReturnName;
+		return (this.actualFunctionReturnName != null ? this.actualFunctionReturnName : "return");
 	}
 
 	/**
@@ -571,15 +568,15 @@ public class CallMetaDataContext {
 		// and the catalog name since the cataog is used for the package name
 		if (this.metaDataProvider.isSupportsSchemasInProcedureCalls() &&
 				!this.metaDataProvider.isSupportsCatalogsInProcedureCalls()) {
-			schemaNameToUse = this.metaDataProvider.catalogNameToUse(this.getCatalogName());
-			catalogNameToUse = this.metaDataProvider.schemaNameToUse(this.getSchemaName());
+			schemaNameToUse = this.metaDataProvider.catalogNameToUse(getCatalogName());
+			catalogNameToUse = this.metaDataProvider.schemaNameToUse(getSchemaName());
 		}
 		else {
-			catalogNameToUse = this.metaDataProvider.catalogNameToUse(this.getCatalogName());
-			schemaNameToUse = this.metaDataProvider.schemaNameToUse(this.getSchemaName());
+			catalogNameToUse = this.metaDataProvider.catalogNameToUse(getCatalogName());
+			schemaNameToUse = this.metaDataProvider.schemaNameToUse(getSchemaName());
 		}
-		String procedureNameToUse = this.metaDataProvider.procedureNameToUse(this.getProcedureName());
-		if (this.isFunction() || this.isReturnValueRequired()) {
+		String procedureNameToUse = this.metaDataProvider.procedureNameToUse(getProcedureName());
+		if (isFunction() || isReturnValueRequired()) {
 			callString = "{? = call " +
 					(StringUtils.hasLength(catalogNameToUse) ? catalogNameToUse + "." : "") +
 					(StringUtils.hasLength(schemaNameToUse) ? schemaNameToUse + "." : "") +
