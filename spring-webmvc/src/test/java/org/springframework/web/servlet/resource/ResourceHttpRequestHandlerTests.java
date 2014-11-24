@@ -16,18 +16,14 @@
 
 package org.springframework.web.servlet.resource;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
 import javax.servlet.http.HttpServletResponse;
 
 import org.junit.Before;
 import org.junit.Test;
+
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
@@ -36,6 +32,8 @@ import org.springframework.mock.web.test.MockHttpServletResponse;
 import org.springframework.mock.web.test.MockServletContext;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.servlet.HandlerMapping;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Keith Donald
@@ -127,7 +125,6 @@ public class ResourceHttpRequestHandlerTests {
 		assertEquals("function foo() { console.log(\"hello world\"); }", response.getContentAsString());
 	}
 
-
 	@Test
 	public void invalidPath() throws Exception {
 		MockHttpServletRequest request = new MockHttpServletRequest();
@@ -157,6 +154,18 @@ public class ResourceHttpRequestHandlerTests {
 		testInvalidPath(location, " " + secretPath, request, response);
 		testInvalidPath(location, "/  " + secretPath, request, response);
 		testInvalidPath(location, "url:" + secretPath, request, response);
+	}
+
+	private void testInvalidPath(Resource location, String requestPath,
+			MockHttpServletRequest request, MockHttpServletResponse response) throws Exception {
+
+		request.setAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, requestPath);
+		response = new MockHttpServletResponse();
+		this.handler.handleRequest(request, response);
+		if (!location.createRelative(requestPath).exists() && !requestPath.contains(":")) {
+			fail(requestPath + " doesn't actually exist as a relative path");
+		}
+		assertEquals(404, response.getStatus());
 	}
 
 	@Test
@@ -192,7 +201,7 @@ public class ResourceHttpRequestHandlerTests {
 		assertEquals("/foo/bar", this.handler.processPath("  // /// ////  foo/bar"));
 		assertEquals("/foo/bar", this.handler.processPath((char) 1 + " / " + (char) 127 + " // foo/bar"));
 
-		// root ot empty path
+		// root or empty path
 		assertEquals("", this.handler.processPath("   "));
 		assertEquals("/", this.handler.processPath("/"));
 		assertEquals("/", this.handler.processPath("///"));
@@ -243,7 +252,7 @@ public class ResourceHttpRequestHandlerTests {
 		assertEquals(404, response.getStatus());
 	}
 
-	@Test(expected=IllegalStateException.class)
+	@Test(expected = IllegalStateException.class)
 	public void noPathWithinHandlerMappingAttribute() throws Exception {
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		request.setMethod("GET");
@@ -251,7 +260,7 @@ public class ResourceHttpRequestHandlerTests {
 		handler.handleRequest(request, response);
 	}
 
-	@Test(expected=HttpRequestMethodNotSupportedException.class)
+	@Test(expected = HttpRequestMethodNotSupportedException.class)
 	public void unsupportedHttpMethod() throws Exception {
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		request.setAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, "/foo.css");
@@ -267,16 +276,6 @@ public class ResourceHttpRequestHandlerTests {
 		request.setMethod("GET");
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		handler.handleRequest(request, response);
-		assertEquals(404, response.getStatus());
-	}
-
-	private void testInvalidPath(Resource location, String requestPath,
-			MockHttpServletRequest request, MockHttpServletResponse response) throws Exception {
-
-		request.setAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, requestPath);
-		response = new MockHttpServletResponse();
-		this.handler.handleRequest(request, response);
-		assertTrue(location.createRelative(requestPath).exists());
 		assertEquals(404, response.getStatus());
 	}
 
