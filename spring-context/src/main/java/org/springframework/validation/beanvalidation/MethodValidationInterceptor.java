@@ -141,8 +141,11 @@ public class MethodValidationInterceptor implements MethodInterceptor {
 	 * @return the applicable validation groups as a Class array
 	 */
 	protected Class<?>[] determineValidationGroups(MethodInvocation invocation) {
-		Validated valid = AnnotationUtils.findAnnotation(invocation.getThis().getClass(), Validated.class);
-		return (valid != null ? valid.value() : new Class<?>[0]);
+		Validated validatedAnn = AnnotationUtils.findAnnotation(invocation.getMethod(), Validated.class);
+		if (validatedAnn == null) {
+			validatedAnn = AnnotationUtils.findAnnotation(invocation.getThis().getClass(), Validated.class);
+		}
+		return (validatedAnn != null ? validatedAnn.value() : new Class<?>[0]);
 	}
 
 
