@@ -21,7 +21,6 @@ import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.List;
-
 import javax.activation.FileTypeMap;
 import javax.activation.MimetypesFileTypeMap;
 import javax.servlet.ServletException;
@@ -30,6 +29,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
@@ -43,6 +43,7 @@ import org.springframework.util.StreamUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.HttpRequestHandler;
 import org.springframework.web.context.request.ServletWebRequest;
+import org.springframework.web.context.support.ServletContextResource;
 import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.servlet.support.WebContentGenerator;
 
@@ -300,13 +301,17 @@ public class ResourceHttpRequestHandler extends WebContentGenerator implements H
 		}
 		String resourcePath;
 		String locationPath;
-		if (resource instanceof ClassPathResource) {
+		if (resource instanceof UrlResource) {
+			resourcePath = resource.getURL().toExternalForm();
+			locationPath = location.getURL().toExternalForm();
+		}
+		else if (resource instanceof ClassPathResource) {
 			resourcePath = ((ClassPathResource) resource).getPath();
 			locationPath = ((ClassPathResource) location).getPath();
 		}
-		else if (resource instanceof UrlResource) {
-			resourcePath = resource.getURL().toExternalForm();
-			locationPath = location.getURL().toExternalForm();
+		else if (resource instanceof ServletContextResource) {
+			resourcePath = ((ServletContextResource) resource).getPath();
+			locationPath = ((ServletContextResource) location).getPath();
 		}
 		else {
 			resourcePath = resource.getURL().getPath();
@@ -317,7 +322,7 @@ public class ResourceHttpRequestHandler extends WebContentGenerator implements H
 			return false;
 		}
 		if (resourcePath.contains("%")) {
-			// Use URLDecoder (vs UriUtils) to preserve potentially decoded UTF-8 chars
+			// Use URLDecoder (vs UriUtils) to preserve potentially decoded UTF-8 chars...
 			if (URLDecoder.decode(resourcePath, "UTF-8").contains("../")) {
 				if (logger.isTraceEnabled()) {
 					logger.trace("Resolved resource path contains \"../\" after decoding: " + resourcePath);
