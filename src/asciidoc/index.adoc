@@ -8871,7 +8871,7 @@ a resource points to just one resource at a time.
 When the path location contains an Ant-style pattern, for example:
 
 [literal]
-[subs="verbatim,quotes"]
+[subs="verbatim"]
 ----
 /WEB-INF/*-context.xml
   com/mycompany/**/applicationContext.xml
@@ -9139,7 +9139,7 @@ Implementing a `Validator` is fairly straightforward, especially when you know o
 `ValidationUtils` helper class that the Spring Framework also provides.
 
 [source,java,indent=0]
-[subs="verbatim,quotes"]
+[subs="verbatim"]
 ----
 	public class PersonValidator implements Validator {
 
@@ -12661,16 +12661,16 @@ execution is in the trading module), and `tradingOperation` (which matches if a 
 execution represents any public method in the trading module).
 
 [source,java,indent=0]
-[subs="verbatim,quotes"]
+[subs="verbatim"]
 ----
 	@Pointcut("execution(public * *(..))")
-		private void anyPublicOperation() {}
+	private void anyPublicOperation() {}
 
-		@Pointcut("within(com.xyz.someapp.trading..*)")
-		private void inTrading() {}
+	@Pointcut("within(com.xyz.someapp.trading..*)")
+	private void inTrading() {}
 
-		@Pointcut("anyPublicOperation() && inTrading()")
-		private void tradingOperation() {}
+	@Pointcut("anyPublicOperation() && inTrading()")
+	private void tradingOperation() {}
 ----
 
 It is a best practice to build more complex pointcut expressions out of smaller named
@@ -12688,7 +12688,7 @@ defining a "SystemArchitecture" aspect that captures common pointcut expressions
 this purpose. A typical such aspect would look as follows:
 
 [source,java,indent=0]
-[subs="verbatim,quotes"]
+[subs="verbatim"]
 ----
 	package com.xyz.someapp;
 
@@ -12805,7 +12805,7 @@ Some examples of common pointcut expressions are given below.
 * the execution of any public method:
 
 [source,java,indent=0]
-[subs="verbatim,quotes"]
+[subs="verbatim"]
 ----
 	execution(public * *(..))
 ----
@@ -12813,7 +12813,7 @@ Some examples of common pointcut expressions are given below.
 * the execution of any method with a name beginning with "set":
 
 [source,java,indent=0]
-[subs="verbatim,quotes"]
+[subs="verbatim"]
 ----
 	execution(* set*(..))
 ----
@@ -12821,7 +12821,7 @@ Some examples of common pointcut expressions are given below.
 * the execution of any method defined by the `AccountService` interface:
 
 [source,java,indent=0]
-[subs="verbatim,quotes"]
+[subs="verbatim"]
 ----
 	execution(* com.xyz.service.AccountService.*(..))
 ----
@@ -12829,7 +12829,7 @@ Some examples of common pointcut expressions are given below.
 * the execution of any method defined in the service package:
 
 [source,java,indent=0]
-[subs="verbatim,quotes"]
+[subs="verbatim"]
 ----
 	execution(* com.xyz.service.*.*(..))
 ----
@@ -12837,7 +12837,7 @@ Some examples of common pointcut expressions are given below.
 * the execution of any method defined in the service package or a sub-package:
 
 [source,java,indent=0]
-[subs="verbatim,quotes"]
+[subs="verbatim"]
 ----
 	execution(* com.xyz.service..*.*(..))
 ----
@@ -13056,7 +13056,7 @@ Before advice is declared in an aspect using the `@Before` annotation:
 If using an in-place pointcut expression we could rewrite the above example as:
 
 [source,java,indent=0]
-[subs="verbatim,quotes"]
+[subs="verbatim"]
 ----
 	import org.aspectj.lang.annotation.Aspect;
 	import org.aspectj.lang.annotation.Before;
@@ -13385,7 +13385,7 @@ You can restrict interception of method types to certain parameter types by simp
 typing the advice parameter to the parameter type you want to intercept the method for:
 
 [source,java,indent=0]
-[subs="verbatim,quotes"]
+[subs="verbatim"]
 ----
 	@Before("execution(* ..Sample+.sampleGenericMethod(*)) && args(param)")
 	public void beforeSampleMethod(MyType param) {
@@ -13398,7 +13398,7 @@ pointing out that this won't work for generic collections. So you cannot define 
 pointcut like this:
 
 [source,java,indent=0]
-[subs="verbatim,quotes"]
+[subs="verbatim"]
 ----
 	@Before("execution(* ..Sample+.sampleGenericCollectionMethod(*)) && args(param)")
 	public void beforeSampleMethod(Collection<MyType> param) {
@@ -13806,7 +13806,7 @@ A pointcut representing the execution of any business service in the service lay
 be defined as follows:
 
 [source,xml,indent=0]
-[subs="verbatim,quotes"]
+[subs="verbatim"]
 ----
 	<aop:config>
 
@@ -13838,7 +13838,7 @@ Assuming you have a `SystemArchitecture` aspect as described in <<aop-common-poi
 Declaring a pointcut inside an aspect is very similar to declaring a top-level pointcut:
 
 [source,xml,indent=0]
-[subs="verbatim,quotes"]
+[subs="verbatim"]
 ----
 	<aop:config>
 
@@ -13859,7 +13859,7 @@ definition style may collect join point context. For example, the following poin
 collects the 'this' object as the join point context and passes it to advice:
 
 [source,xml,indent=0]
-[subs="verbatim,quotes"]
+[subs="verbatim"]
 ----
 	<aop:config>
 
@@ -13893,7 +13893,7 @@ the keywords 'and', 'or' and 'not' can be used in place of '&&', '||' and '!'
 respectively. For example, the previous pointcut may be better written as:
 
 [source,xml,indent=0]
-[subs="verbatim,quotes"]
+[subs="verbatim"]
 ----
 	<aop:config>
 
@@ -13946,7 +13946,7 @@ level. To define the pointcut inline instead, replace the `pointcut-ref` attribu
 a `pointcut` attribute:
 
 [source,xml,indent=0]
-[subs="verbatim,quotes"]
+[subs="verbatim"]
 ----
 	<aop:aspect id="beforeExample" ref="aBean">
 
@@ -14356,7 +14356,7 @@ commonly see it used in conjunction with transactional advice, which also has it
 namespace support in Spring. Here's how it looks:
 
 [source,xml,indent=0]
-[subs="verbatim,quotes"]
+[subs="verbatim"]
 ----
 	<aop:config>
 
@@ -14458,7 +14458,7 @@ annotations removed.
 The corresponding Spring configuration is:
 
 [source,xml,indent=0]
-[subs="verbatim,quotes"]
+[subs="verbatim"]
 ----
 	<aop:config>
 
@@ -14500,7 +14500,7 @@ change to the aspect to retry only idempotent operations simply involves refinin
 pointcut expression so that only `@Idempotent` operations match:
 
 [source,xml,indent=0]
-[subs="verbatim,quotes"]
+[subs="verbatim"]
 ----
 	<aop:pointcut id="idempotentOperation"
 			expression="execution(* com.xyz.myapp.service.*.*(..)) and
@@ -14567,16 +14567,16 @@ named pointcuts declared in XML. For example, in the @AspectJ style you can writ
 something like:
 
 [source,java,indent=0]
-[subs="verbatim,quotes"]
+[subs="verbatim"]
 ----
 	@Pointcut(execution(* get*()))
-		public void propertyAccess() {}
+	public void propertyAccess() {}
 
-		@Pointcut(execution(org.xyz.Account+ *(..))
-		public void operationReturningAnAccount() {}
+	@Pointcut(execution(org.xyz.Account+ *(..))
+	public void operationReturningAnAccount() {}
 
-		@Pointcut(propertyAccess() && operationReturningAnAccount())
-		public void accountPropertyAccess() {}
+	@Pointcut(propertyAccess() && operationReturningAnAccount())
+	public void accountPropertyAccess() {}
 ----
 
 In the XML style I can declare the first two pointcuts:
@@ -15234,7 +15234,7 @@ Here is the profiling aspect. Nothing too fancy, just a quick-and-dirty time-bas
 profiler, using the @AspectJ-style of aspect declaration.
 
 [source,java,indent=0]
-[subs="verbatim,quotes"]
+[subs="verbatim"]
 ----
 	package foo;
 
@@ -15502,7 +15502,7 @@ Alternatively, if you prefer XML based configuration, use the
 '++context++' namespace.
 
 [source,xml,indent=0]
-[subs="verbatim,quotes"]
+[subs="verbatim"]
 ----
 	<?xml version="1.0" encoding="UTF-8"?>
 	<beans xmlns="http://www.springframework.org/schema/beans"
@@ -15901,7 +15901,7 @@ effectively the union of these pointcuts.)
 The usage is shown below:
 
 [source,xml,indent=0]
-[subs="verbatim,quotes"]
+[subs="verbatim"]
 ----
 	<bean id="settersAndAbsquatulatePointcut"
 			class="org.springframework.aop.support.JdkRegexpMethodPointcut">
@@ -15921,7 +15921,7 @@ Using `RegexpMethodPointcutAdvisor` simplifies wiring, as the one bean encapsula
 pointcut and advice, as shown below:
 
 [source,xml,indent=0]
-[subs="verbatim,quotes"]
+[subs="verbatim"]
 ----
 	<bean id="settersAndAbsquatulateAdvisor"
 			class="org.springframework.aop.support.RegexpMethodPointcutAdvisor">
@@ -23313,7 +23313,7 @@ the setter for the `DataSource`. This leads to DAOs that look in part like the f
 The corresponding configuration might look like this.
 
 [source,xml,indent=0]
-[subs="verbatim,quotes"]
+[subs="verbatim"]
 ----
 	<?xml version="1.0" encoding="UTF-8"?>
 	<beans xmlns="http://www.springframework.org/schema/beans"
@@ -23366,7 +23366,7 @@ method with `@Autowired`.
 The corresponding XML configuration file would look like the following:
 
 [source,xml,indent=0]
-[subs="verbatim,quotes"]
+[subs="verbatim"]
 ----
 	<?xml version="1.0" encoding="UTF-8"?>
 	<beans xmlns="http://www.springframework.org/schema/beans"
@@ -23484,7 +23484,7 @@ JavaBean conventions]), and uses the properties of the wrapped JavaBean as the s
 of named parameter values.
 
 [source,java,indent=0]
-[subs="verbatim,quotes"]
+[subs="verbatim"]
 ----
 	public class Actor {
 
@@ -23584,7 +23584,7 @@ name from the database metadata of the database in use.
 You can extend `SQLErrorCodeSQLExceptionTranslator:`
 
 [source,java,indent=0]
-[subs="verbatim,quotes"]
+[subs="verbatim"]
 ----
 	public class CustomSQLErrorCodesTranslator extends SQLErrorCodeSQLExceptionTranslator {
 
@@ -24130,7 +24130,7 @@ in the SQL statement.
 The same example using classic JDBC "?" placeholders:
 
 [source,java,indent=0]
-[subs="verbatim,quotes"]
+[subs="verbatim"]
 ----
 	public class JdbcActorDao implements ActorDao {
 
@@ -24243,7 +24243,7 @@ of the `SimpleJdbcInsert`, which allows you to chain all configuration methods. 
 example uses only one configuration method; you will see examples of multiple ones later.
 
 [source,java,indent=0]
-[subs="verbatim,quotes"]
+[subs="verbatim"]
 ----
 	public class JdbcActorDao implements ActorDao {
 
@@ -26974,7 +26974,7 @@ if a `PersistenceAnnotationBeanPostProcessor` is enabled. A plain JPA DAO implem
 using the `@PersistenceUnit` annotation might look like this:
 
 [source,java,indent=0]
-[subs="verbatim,quotes"]
+[subs="verbatim"]
 ----
 	public class ProductDaoImpl implements ProductDao {
 
@@ -28094,7 +28094,7 @@ the same `web.xml` file. This is standard Java EE Servlet configuration; the fol
 example shows such a `DispatcherServlet` declaration and mapping:
 
 [source,xml,indent=0]
-[subs="verbatim,quotes"]
+[subs="verbatim"]
 ----
 	<web-app>
 		<servlet>
@@ -28430,7 +28430,7 @@ your configuration. Use the __spring-context__ schema as shown in the following 
 snippet:
 
 [source,xml,indent=0]
-[subs="verbatim,quotes"]
+[subs="verbatim"]
 ----
 	<?xml version="1.0" encoding="UTF-8"?>
 	<beans xmlns="http://www.springframework.org/schema/beans"
@@ -28843,7 +28843,7 @@ In the MVC namespace, the `<mvc:annotation-driven>` element has an
 to `false`.
 
 [source,xml,indent=0]
-[subs="verbatim,quotes"]
+[subs="verbatim"]
 ----
 	<?xml version="1.0" encoding="UTF-8"?>
 	<beans xmlns="http://www.springframework.org/schema/beans"
@@ -29080,7 +29080,7 @@ Note, that there is a `Model` parameter in between `Pet` and `BindingResult`. To
 this working you have to reorder the parameters as follows:
 
 [source,java,indent=0]
-[subs="verbatim,quotes"]
+[subs="verbatim"]
 ----
 	@RequestMapping(method = RequestMethod.POST)
 	public String processSubmit(**@ModelAttribute("pet") Pet pet**, **BindingResult result**, Model model) { ... }
@@ -29138,7 +29138,7 @@ your controller.
 The following code snippet shows the usage:
 
 [source,java,indent=0]
-[subs="verbatim,quotes"]
+[subs="verbatim"]
 ----
 	@Controller
 	@RequestMapping("/pets")
@@ -29203,7 +29203,7 @@ to do that directly in your configuration but if your application is configured 
 the MVC namespace or the MVC Java config see <<mvc-config-enable>> instead.
 
 [source,xml,indent=0]
-[subs="verbatim,quotes"]
+[subs="verbatim"]
 ----
 	<bean class="org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter">
 		<property name="messageConverters">
@@ -29573,7 +29573,7 @@ To support HTTP PUT and PATCH requests, the `spring-web` module provides the fil
 `HttpPutFormContentFilter`, which can be configured in `web.xml`:
 
 [source,xml,indent=0]
-[subs="verbatim,quotes"]
+[subs="verbatim"]
 ----
 	<filter>
 		<filter-name>httpPutFormFilter</filter-name>
@@ -32467,7 +32467,7 @@ then the default Servlet's name must be explicitly provided as in the following 
 Or in XML:
 
 [source,xml,indent=0]
-[subs="verbatim,quotes"]
+[subs="verbatim"]
 ----
 	<mvc:default-servlet-handler default-servlet-name="myCustomDefaultServlet"/>
 ----
@@ -32938,7 +32938,7 @@ collection so it can hold multiple values selected by the user. Below is an exam
 the JSP using this tag:
 
 [source,xml,indent=0]
-[subs="verbatim,quotes"]
+[subs="verbatim"]
 ----
 	<form:form>
 		<table>
@@ -34062,7 +34062,7 @@ If your application expects to handle cities by internal codes for example, the 
 codes would be created with suitable keys like the example below.
 
 [source,java,indent=0]
-[subs="verbatim,quotes"]
+[subs="verbatim"]
 ----
 	protected Map referenceData(HttpServletRequest request) throws Exception {
 		Map cityMap = new LinkedHashMap();
@@ -34118,7 +34118,7 @@ this directive.
 In similar fashion, HTML escaping can be specified per field:
 
 [source,xml,indent=0]
-[subs="verbatim,quotes"]
+[subs="verbatim"]
 ----
 	<#-- until this point, default HTML escaping is used -->
 
@@ -34414,7 +34414,7 @@ Here's the complete listing for our POI Excel view which displays the word list 
 model map in consecutive rows of the first column of a new spreadsheet:
 
 [source,java,indent=0]
-[subs="verbatim,quotes"]
+[subs="verbatim"]
 ----
 	package excel;
 
@@ -34452,7 +34452,7 @@ model map in consecutive rows of the first column of a new spreadsheet:
 And the following is a view generating the same Excel file, now using JExcelApi:
 
 [source,java,indent=0]
-[subs="verbatim,quotes"]
+[subs="verbatim"]
 ----
 	package excel;
 
@@ -34492,7 +34492,7 @@ The PDF version of the word list is even simpler. This time, the class extends
 `buildPdfDocument()` method as follows:
 
 [source,java,indent=0]
-[subs="verbatim,quotes"]
+[subs="verbatim"]
 ----
 	package pdf;
 
@@ -34558,7 +34558,7 @@ Typically, you will use the `ResourceBundleViewResolver` to map view names to vi
 classes and files in a properties file.
 
 [source,xml,indent=0]
-[subs="verbatim,quotes"]
+[subs="verbatim"]
 ----
 	<bean id="viewResolver" class="org.springframework.web.servlet.view.ResourceBundleViewResolver">
 		<property name="basename" value="views"/>
@@ -34644,7 +34644,7 @@ mapping key. From a coding perspective you add an entry to your model with the f
 key as the key and the mapping key as the value, for example:
 
 [source,java,indent=0]
-[subs="verbatim,quotes"]
+[subs="verbatim"]
 ----
 	public ModelAndView handleSimpleReportMulti(HttpServletRequest request,
 	HttpServletResponse response) throws Exception {
@@ -34771,7 +34771,7 @@ report file must be configured to accept sub-reports from an external source. To
 you declare a parameter in your report file like so:
 
 [source,xml,indent=0]
-[subs="verbatim,quotes"]
+[subs="verbatim"]
 ----
 	<parameter name="ProductsSubReport" class="net.sf.jasperreports.engine.JasperReport"/>
 ----
@@ -34779,7 +34779,7 @@ you declare a parameter in your report file like so:
 Then, you define your sub-report to use this sub-report parameter:
 
 [source,xml,indent=0]
-[subs="verbatim,quotes"]
+[subs="verbatim"]
 ----
 	<subreport>
 		<reportElement isPrintRepeatedValues="false" x="5" y="25" width="325"
