@@ -16,8 +16,10 @@
 
 package org.springframework.web.servlet.config;
 
+import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Collection;
@@ -150,6 +152,7 @@ public class MvcNamespaceTests {
 
 	private HandlerMethod handlerMethod;
 
+
 	@Before
 	public void setUp() throws Exception {
 		TestMockServletContext servletContext = new TestMockServletContext();
@@ -187,7 +190,7 @@ public class MvcNamespaceTests {
 
 		List<HttpMessageConverter<?>> converters = adapter.getMessageConverters();
 		assertTrue(converters.size() > 0);
-		for(HttpMessageConverter<?> converter : converters) {
+		for (HttpMessageConverter<?> converter : converters) {
 			if (converter instanceof AbstractJackson2HttpMessageConverter) {
 				ObjectMapper objectMapper = ((AbstractJackson2HttpMessageConverter)converter).getObjectMapper();
 				assertFalse(objectMapper.getDeserializationConfig().isEnabled(MapperFeature.DEFAULT_VIEW_INCLUSION));
@@ -262,9 +265,6 @@ public class MvcNamespaceTests {
 		doTestCustomValidator("mvc-config-custom-validator-32.xml");
 	}
 
-	/**
-	 * @throws Exception
-	 */
 	private void doTestCustomValidator(String xml) throws Exception {
 		loadBeanDefinitions(xml, 13);
 
@@ -808,12 +808,11 @@ public class MvcNamespaceTests {
 		assertEquals(TestPathHelper.class, viewController.getUrlPathHelper().getClass());
 		assertEquals(TestPathMatcher.class, viewController.getPathMatcher().getClass());
 
-		for(SimpleUrlHandlerMapping handlerMapping : appContext.getBeansOfType(SimpleUrlHandlerMapping.class).values()) {
+		for (SimpleUrlHandlerMapping handlerMapping : appContext.getBeansOfType(SimpleUrlHandlerMapping.class).values()) {
 			assertNotNull(handlerMapping);
 			assertEquals(TestPathHelper.class, handlerMapping.getUrlPathHelper().getClass());
 			assertEquals(TestPathMatcher.class, handlerMapping.getPathMatcher().getClass());
 		}
-
 	}
 
 
@@ -827,13 +826,25 @@ public class MvcNamespaceTests {
 	}
 
 
+	@DateTimeFormat(iso=ISO.DATE)
+	@Target({ElementType.PARAMETER})
+	@Retention(RetentionPolicy.RUNTIME)
+	public @interface IsoDate {
+	}
+
+	@Validated(MyGroup.class)
+	@Target({ElementType.PARAMETER})
+	@Retention(RetentionPolicy.RUNTIME)
+	public @interface MyValid {
+	}
+
 	@Controller
 	public static class TestController {
 
 		private boolean recordedValidationError;
 
 		@RequestMapping
-		public void testBind(@RequestParam @DateTimeFormat(iso=ISO.DATE) Date date, @Validated(MyGroup.class) TestBean bean, BindingResult result) {
+		public void testBind(@RequestParam @IsoDate Date date, @MyValid TestBean bean, BindingResult result) {
 			this.recordedValidationError = (result.getErrorCount() == 1);
 		}
 	}
@@ -885,9 +896,11 @@ public class MvcNamespaceTests {
 		}
 	}
 
-	public static class TestCallableProcessingInterceptor extends CallableProcessingInterceptorAdapter { }
+	public static class TestCallableProcessingInterceptor extends CallableProcessingInterceptorAdapter {
+	}
 
-	public static class TestDeferredResultProcessingInterceptor extends DeferredResultProcessingInterceptorAdapter { }
+	public static class TestDeferredResultProcessingInterceptor extends DeferredResultProcessingInterceptorAdapter {
+	}
 
 	public static class TestPathMatcher implements PathMatcher {
 
@@ -927,9 +940,11 @@ public class MvcNamespaceTests {
 		}
 	}
 
-	public static class TestPathHelper extends UrlPathHelper { }
+	public static class TestPathHelper extends UrlPathHelper {
+	}
 
 	public static class TestCacheManager implements CacheManager {
+
 		@Override
 		public Cache getCache(String name) {
 			return new ConcurrentMapCache(name);

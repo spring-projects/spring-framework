@@ -31,6 +31,7 @@ import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.util.Assert;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.Errors;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -223,10 +224,12 @@ public class RequestPartMethodArgumentResolver extends AbstractMessageConverterM
 
 	private void validate(WebDataBinder binder, MethodParameter parameter) throws MethodArgumentNotValidException {
 		Annotation[] annotations = parameter.getParameterAnnotations();
-		for (Annotation annot : annotations) {
-			if (annot.annotationType().getSimpleName().startsWith("Valid")) {
-				Object hints = AnnotationUtils.getValue(annot);
-				binder.validate(hints instanceof Object[] ? (Object[]) hints : new Object[] {hints});
+		for (Annotation ann : annotations) {
+			Validated validatedAnn = AnnotationUtils.getAnnotation(ann, Validated.class);
+			if (validatedAnn != null || ann.annotationType().getSimpleName().startsWith("Valid")) {
+				Object hints = (validatedAnn != null ? validatedAnn.value() : AnnotationUtils.getValue(ann));
+				Object[] validationHints = (hints instanceof Object[] ? (Object[]) hints : new Object[] {hints});
+				binder.validate(validationHints);
 				BindingResult bindingResult = binder.getBindingResult();
 				if (bindingResult.hasErrors()) {
 					if (isBindingErrorFatal(parameter)) {

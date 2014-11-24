@@ -34,14 +34,15 @@ import org.springframework.validation.BindingResult;
 import org.springframework.validation.ObjectError;
 import org.springframework.validation.SmartValidator;
 import org.springframework.validation.Validator;
+import org.springframework.validation.annotation.Validated;
 
 /**
  * A resolver to extract and convert the payload of a message using a
  * {@link MessageConverter}. It also validates the payload using a
  * {@link Validator} if the argument is annotated with a Validation annotation.
  *
- * <p>This {@link HandlerMethodArgumentResolver} should be ordered last as it supports all
- * types and does not require the {@link Payload} annotation.
+ * <p>This {@link HandlerMethodArgumentResolver} should be ordered last as it
+ * supports all types and does not require the {@link Payload} annotation.
  *
  * @author Rossen Stoyanchev
  * @author Brian Clozel
@@ -70,14 +71,14 @@ public class PayloadArgumentResolver implements HandlerMethodArgumentResolver {
 
 	@Override
 	public Object resolveArgument(MethodParameter param, Message<?> message) throws Exception {
-		Payload annot = param.getParameterAnnotation(Payload.class);
-		if ((annot != null) && StringUtils.hasText(annot.value())) {
+		Payload ann = param.getParameterAnnotation(Payload.class);
+		if (ann != null && StringUtils.hasText(ann.value())) {
 			throw new IllegalStateException("@Payload SpEL expressions not supported by this resolver");
 		}
 
 		Object payload = message.getPayload();
 		if (isEmptyPayload(payload)) {
-			if (annot == null || annot.required()) {
+			if (ann == null || ann.required()) {
 				String paramName = getParameterName(param);
 				BindingResult bindingResult = new BeanPropertyBindingResult(payload, paramName);
 				bindingResult.addError(new ObjectError(paramName, "@Payload param is required"));
@@ -97,7 +98,7 @@ public class PayloadArgumentResolver implements HandlerMethodArgumentResolver {
 			payload = this.converter.fromMessage(message, targetClass);
 			if (payload == null) {
 				throw new MessageConversionException(message,
-						"No converter found to convert to " + targetClass + ", message=" + message, null);
+						"No converter found to convert to " + targetClass + ", message=" + message);
 			}
 			validate(message, param, payload);
 			return payload;
@@ -106,7 +107,7 @@ public class PayloadArgumentResolver implements HandlerMethodArgumentResolver {
 
 	private String getParameterName(MethodParameter param) {
 		String paramName = param.getParameterName();
-		return (paramName == null ? "Arg " + param.getParameterIndex() : paramName);
+		return (paramName != null ? paramName : "Arg " + param.getParameterIndex());
 	}
 
 	/**
@@ -132,26 +133,22 @@ public class PayloadArgumentResolver implements HandlerMethodArgumentResolver {
 		if (this.validator == null) {
 			return;
 		}
-
-		for (Annotation annot : parameter.getParameterAnnotations()) {
-			if (annot.annotationType().getSimpleName().startsWith("Valid")) {
+		for (Annotation ann : parameter.getParameterAnnotations()) {
+			Validated validatedAnn = AnnotationUtils.getAnnotation(ann, Validated.class);
+			if (validatedAnn != null || ann.annotationType().getSimpleName().startsWith("Valid")) {
+				Object hints = (validatedAnn != null ? validatedAnn.value() : AnnotationUtils.getValue(ann));
+				Object[] validationHints = (hints instanceof Object[] ? (Object[]) hints : new Object[] {hints});
 				BeanPropertyBindingResult bindingResult =
 						new BeanPropertyBindingResult(target, getParameterName(parameter));
-
-				Object hints = AnnotationUtils.getValue(annot);
-				Object[] validationHints = (hints instanceof Object[] ? (Object[]) hints : new Object[] {hints});
-
 				if (!ObjectUtils.isEmpty(validationHints) && this.validator instanceof SmartValidator) {
 					((SmartValidator) this.validator).validate(target, bindingResult, validationHints);
 				}
 				else {
 					this.validator.validate(target, bindingResult);
 				}
-
 				if (bindingResult.hasErrors()) {
 					throw new MethodArgumentNotValidException(message, parameter, bindingResult);
 				}
-
 				break;
 			}
 		}

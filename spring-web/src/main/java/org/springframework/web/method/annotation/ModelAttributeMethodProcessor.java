@@ -27,6 +27,7 @@ import org.springframework.core.MethodParameter;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.validation.BindException;
 import org.springframework.validation.Errors;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.support.WebDataBinderFactory;
@@ -157,9 +158,11 @@ public class ModelAttributeMethodProcessor implements HandlerMethodArgumentResol
 	protected void validateIfApplicable(WebDataBinder binder, MethodParameter parameter) {
 		Annotation[] annotations = parameter.getParameterAnnotations();
 		for (Annotation ann : annotations) {
-			if (ann.annotationType().getSimpleName().startsWith("Valid")) {
-				Object hints = AnnotationUtils.getValue(ann);
-				binder.validate(hints instanceof Object[] ? (Object[]) hints : new Object[] {hints});
+			Validated validatedAnn = AnnotationUtils.getAnnotation(ann, Validated.class);
+			if (validatedAnn != null || ann.annotationType().getSimpleName().startsWith("Valid")) {
+				Object hints = (validatedAnn != null ? validatedAnn.value() : AnnotationUtils.getValue(ann));
+				Object[] validationHints = (hints instanceof Object[] ? (Object[]) hints : new Object[] {hints});
+				binder.validate(validationHints);
 				break;
 			}
 		}

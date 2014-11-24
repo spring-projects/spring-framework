@@ -2388,7 +2388,12 @@ public class ServletAnnotationControllerTests {
 	@Controller
 	private static class MyTypedCommandProvidingFormController
 			extends MyCommandProvidingFormController<Integer, TestBean, ITestBean> {
+	}
 
+	@Validated(MyGroup.class)
+	@Target({ElementType.PARAMETER})
+	@Retention(RetentionPolicy.RUNTIME)
+	public @interface MyValid {
 	}
 
 	@Controller
@@ -2409,7 +2414,7 @@ public class ServletAnnotationControllerTests {
 
 		@Override
 		@RequestMapping("/myPath.do")
-		public String myHandle(@ModelAttribute("myCommand") @Validated(MyGroup.class) TestBean tb, BindingResult errors, ModelMap model) {
+		public String myHandle(@ModelAttribute("myCommand") @MyValid TestBean tb, BindingResult errors, ModelMap model) {
 			if (!errors.hasFieldErrors("sex")) {
 				throw new IllegalStateException("requiredFields not applied");
 			}
@@ -2712,11 +2717,10 @@ public class ServletAnnotationControllerTests {
 		}
 	}
 
+	@Controller
 	@Target({ElementType.TYPE})
 	@Retention(RetentionPolicy.RUNTIME)
-	@Controller
 	public @interface MyControllerAnnotation {
-
 	}
 
 	@MyControllerAnnotation

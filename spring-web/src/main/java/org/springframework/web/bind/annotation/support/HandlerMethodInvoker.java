@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,6 +59,7 @@ import org.springframework.util.ReflectionUtils;
 import org.springframework.validation.BindException;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.Errors;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.CookieValue;
@@ -82,11 +83,11 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartRequest;
 
 /**
- * Support class for invoking an annotated handler method. Operates on the introspection results of a {@link
- * HandlerMethodResolver} for a specific handler type.
+ * Support class for invoking an annotated handler method. Operates on the introspection
+ * results of a {@link HandlerMethodResolver} for a specific handler type.
  *
- * <p>Used by {@link org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter} and {@link
- * org.springframework.web.portlet.mvc.annotation.AnnotationMethodHandlerAdapter}.
+ * <p>Used by {@link org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter}
+ * and {@link org.springframework.web.portlet.mvc.annotation.AnnotationMethodHandlerAdapter}.
  *
  * @author Juergen Hoeller
  * @author Arjen Poutsma
@@ -295,10 +296,13 @@ public class HandlerMethodInvoker {
 				else if (Value.class.isInstance(paramAnn)) {
 					defaultValue = ((Value) paramAnn).value();
 				}
-				else if (paramAnn.annotationType().getSimpleName().startsWith("Valid")) {
-					validate = true;
-					Object value = AnnotationUtils.getValue(paramAnn);
-					validationHints = (value instanceof Object[] ? (Object[]) value : new Object[] {value});
+				else {
+					Validated validatedAnn = AnnotationUtils.getAnnotation(paramAnn, Validated.class);
+					if (validatedAnn != null || paramAnn.annotationType().getSimpleName().startsWith("Valid")) {
+						validate = true;
+						Object hints = (validatedAnn != null ? validatedAnn.value() : AnnotationUtils.getValue(paramAnn));
+						validationHints = (hints instanceof Object[] ? (Object[]) hints : new Object[]{hints});
+					}
 				}
 			}
 

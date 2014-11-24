@@ -33,6 +33,7 @@ import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.Errors;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.HttpMediaTypeNotAcceptableException;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.accept.ContentNegotiationManager;
@@ -114,9 +115,11 @@ public class RequestResponseBodyMethodProcessor extends AbstractMessageConverter
 	private void validate(WebDataBinder binder, MethodParameter parameter) throws Exception {
 		Annotation[] annotations = parameter.getParameterAnnotations();
 		for (Annotation ann : annotations) {
-			if (ann.annotationType().getSimpleName().startsWith("Valid")) {
-				Object hints = AnnotationUtils.getValue(ann);
-				binder.validate(hints instanceof Object[] ? (Object[]) hints : new Object[] {hints});
+			Validated validatedAnn = AnnotationUtils.getAnnotation(ann, Validated.class);
+			if (validatedAnn != null || ann.annotationType().getSimpleName().startsWith("Valid")) {
+				Object hints = (validatedAnn != null ? validatedAnn.value() : AnnotationUtils.getValue(ann));
+				Object[] validationHints = (hints instanceof Object[] ? (Object[]) hints : new Object[] {hints});
+				binder.validate(validationHints);
 				BindingResult bindingResult = binder.getBindingResult();
 				if (bindingResult.hasErrors()) {
 					if (isBindExceptionRequired(binder, parameter)) {
