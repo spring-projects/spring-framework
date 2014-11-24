@@ -33,6 +33,7 @@ import org.springframework.format.FormatterRegistry;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockServletContext;
@@ -165,9 +166,10 @@ public class WebMvcConfigurationSupportExtensionTests {
 		assertEquals("converted", actual);
 
 		// Message converters
-		assertEquals(1, adapter.getMessageConverters().size());
-		assertEquals(MappingJackson2HttpMessageConverter.class, adapter.getMessageConverters().get(0).getClass());
-		ObjectMapper objectMapper = ((MappingJackson2HttpMessageConverter)adapter.getMessageConverters().get(0)).getObjectMapper();
+		assertEquals(2, adapter.getMessageConverters().size());
+		assertEquals(StringHttpMessageConverter.class, adapter.getMessageConverters().get(0).getClass());
+		assertEquals(MappingJackson2HttpMessageConverter.class, adapter.getMessageConverters().get(1).getClass());
+		ObjectMapper objectMapper = ((MappingJackson2HttpMessageConverter)adapter.getMessageConverters().get(1)).getObjectMapper();
 		assertFalse(objectMapper.getDeserializationConfig().isEnabled(MapperFeature.DEFAULT_VIEW_INCLUSION));
 		assertFalse(objectMapper.getSerializationConfig().isEnabled(MapperFeature.DEFAULT_VIEW_INCLUSION));
 		assertFalse(objectMapper.getDeserializationConfig().isEnabled(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES));
@@ -299,6 +301,11 @@ public class WebMvcConfigurationSupportExtensionTests {
 		@Override
 		public void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
 			converters.add(new MappingJackson2HttpMessageConverter());
+		}
+
+		@Override
+		public void extendMessageConverters(List<HttpMessageConverter<?>> converters) {
+			converters.add(0, new StringHttpMessageConverter());
 		}
 
 		@Override

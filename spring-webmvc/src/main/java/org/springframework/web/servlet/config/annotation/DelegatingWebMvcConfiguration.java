@@ -106,6 +106,11 @@ public class DelegatingWebMvcConfiguration extends WebMvcConfigurationSupport {
 	}
 
 	@Override
+	protected void extendMessageConverters(List<HttpMessageConverter<?>> converters) {
+		this.configurers.extendMessageConverters(converters);
+	}
+
+	@Override
 	protected void addFormatters(FormatterRegistry registry) {
 		this.configurers.addFormatters(registry);
 	}

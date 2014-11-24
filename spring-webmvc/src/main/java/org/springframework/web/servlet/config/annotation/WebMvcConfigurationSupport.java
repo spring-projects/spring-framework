@@ -629,6 +629,7 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 			if (this.messageConverters.isEmpty()) {
 				addDefaultHttpMessageConverters(this.messageConverters);
 			}
+			extendMessageConverters(this.messageConverters);
 		}
 		return this.messageConverters;
 	}
@@ -644,6 +645,9 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	 * initially an empty list.
 	 */
 	protected void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
+	}
+
+	protected void extendMessageConverters(List<HttpMessageConverter<?>> converters) {
 	}
 
 	/**
