@@ -9565,7 +9565,7 @@ a resource points to just one resource at a time.
 When the path location contains an Ant-style pattern, for example:
 
 [literal]
-[subs="verbatim,quotes"]
+[subs="verbatim"]
 ----
 /WEB-INF/*-context.xml
   com/mycompany/**/applicationContext.xml
@@ -9833,7 +9833,7 @@ Implementing a `Validator` is fairly straightforward, especially when you know o
 `ValidationUtils` helper class that the Spring Framework also provides.
 
 [source,java,indent=0]
-[subs="verbatim,quotes"]
+[subs="verbatim"]
 ----
 	public class PersonValidator implements Validator {
 
@@ -13510,16 +13510,16 @@ execution is in the trading module), and `tradingOperation` (which matches if a 
 execution represents any public method in the trading module).
 
 [source,java,indent=0]
-[subs="verbatim,quotes"]
+[subs="verbatim"]
 ----
 	@Pointcut("execution(public * *(..))")
-		private void anyPublicOperation() {}
+	private void anyPublicOperation() {}
 
-		@Pointcut("within(com.xyz.someapp.trading..*)")
-		private void inTrading() {}
+	@Pointcut("within(com.xyz.someapp.trading..*)")
+	private void inTrading() {}
 
-		@Pointcut("anyPublicOperation() && inTrading()")
-		private void tradingOperation() {}
+	@Pointcut("anyPublicOperation() && inTrading()")
+	private void tradingOperation() {}
 ----
 
 It is a best practice to build more complex pointcut expressions out of smaller named
@@ -13537,7 +13537,7 @@ defining a "SystemArchitecture" aspect that captures common pointcut expressions
 this purpose. A typical such aspect would look as follows:
 
 [source,java,indent=0]
-[subs="verbatim,quotes"]
+[subs="verbatim"]
 ----
 	package com.xyz.someapp;
 
@@ -13654,7 +13654,7 @@ Some examples of common pointcut expressions are given below.
 * the execution of any public method:
 
 [source,java,indent=0]
-[subs="verbatim,quotes"]
+[subs="verbatim"]
 ----
 	execution(public * *(..))
 ----
@@ -13662,7 +13662,7 @@ Some examples of common pointcut expressions are given below.
 * the execution of any method with a name beginning with "set":
 
 [source,java,indent=0]
-[subs="verbatim,quotes"]
+[subs="verbatim"]
 ----
 	execution(* set*(..))
 ----
@@ -13670,7 +13670,7 @@ Some examples of common pointcut expressions are given below.
 * the execution of any method defined by the `AccountService` interface:
 
 [source,java,indent=0]
-[subs="verbatim,quotes"]
+[subs="verbatim"]
 ----
 	execution(* com.xyz.service.AccountService.*(..))
 ----
@@ -13678,7 +13678,7 @@ Some examples of common pointcut expressions are given below.
 * the execution of any method defined in the service package:
 
 [source,java,indent=0]
-[subs="verbatim,quotes"]
+[subs="verbatim"]
 ----
 	execution(* com.xyz.service.*.*(..))
 ----
@@ -13686,7 +13686,7 @@ Some examples of common pointcut expressions are given below.
 * the execution of any method defined in the service package or a sub-package:
 
 [source,java,indent=0]
-[subs="verbatim,quotes"]
+[subs="verbatim"]
 ----
 	execution(* com.xyz.service..*.*(..))
 ----
@@ -13905,7 +13905,7 @@ Before advice is declared in an aspect using the `@Before` annotation:
 If using an in-place pointcut expression we could rewrite the above example as:
 
 [source,java,indent=0]
-[subs="verbatim,quotes"]
+[subs="verbatim"]
 ----
 	import org.aspectj.lang.annotation.Aspect;
 	import org.aspectj.lang.annotation.Before;
@@ -14234,7 +14234,7 @@ You can restrict interception of method types to certain parameter types by simp
 typing the advice parameter to the parameter type you want to intercept the method for:
 
 [source,java,indent=0]
-[subs="verbatim,quotes"]
+[subs="verbatim"]
 ----
 	@Before("execution(* ..Sample+.sampleGenericMethod(*)) && args(param)")
 	public void beforeSampleMethod(MyType param) {
@@ -14247,7 +14247,7 @@ pointing out that this won't work for generic collections. So you cannot define 
 pointcut like this:
 
 [source,java,indent=0]
-[subs="verbatim,quotes"]
+[subs="verbatim"]
 ----
 	@Before("execution(* ..Sample+.sampleGenericCollectionMethod(*)) && args(param)")
 	public void beforeSampleMethod(Collection<MyType> param) {
@@ -14655,7 +14655,7 @@ A pointcut representing the execution of any business service in the service lay
 be defined as follows:
 
 [source,xml,indent=0]
-[subs="verbatim,quotes"]
+[subs="verbatim"]
 ----
 	<aop:config>
 
@@ -14687,7 +14687,7 @@ Assuming you have a `SystemArchitecture` aspect as described in <<aop-common-poi
 Declaring a pointcut inside an aspect is very similar to declaring a top-level pointcut:
 
 [source,xml,indent=0]
-[subs="verbatim,quotes"]
+[subs="verbatim"]
 ----
 	<aop:config>
 
@@ -14708,7 +14708,7 @@ definition style may collect join point context. For example, the following poin
 collects the 'this' object as the join point context and passes it to advice:
 
 [source,xml,indent=0]
-[subs="verbatim,quotes"]
+[subs="verbatim"]
 ----
 	<aop:config>
 
@@ -14742,7 +14742,7 @@ the keywords 'and', 'or' and 'not' can be used in place of '&&', '||' and '!'
 respectively. For example, the previous pointcut may be better written as:
 
 [source,xml,indent=0]
-[subs="verbatim,quotes"]
+[subs="verbatim"]
 ----
 	<aop:config>
 
@@ -14795,7 +14795,7 @@ level. To define the pointcut inline instead, replace the `pointcut-ref` attribu
 a `pointcut` attribute:
 
 [source,xml,indent=0]
-[subs="verbatim,quotes"]
+[subs="verbatim"]
 ----
 	<aop:aspect id="beforeExample" ref="aBean">
 
@@ -15205,7 +15205,7 @@ commonly see it used in conjunction with transactional advice, which also has it
 namespace support in Spring. Here's how it looks:
 
 [source,xml,indent=0]
-[subs="verbatim,quotes"]
+[subs="verbatim"]
 ----
 	<aop:config>
 
@@ -15307,7 +15307,7 @@ annotations removed.
 The corresponding Spring configuration is:
 
 [source,xml,indent=0]
-[subs="verbatim,quotes"]
+[subs="verbatim"]
 ----
 	<aop:config>
 
@@ -15349,7 +15349,7 @@ change to the aspect to retry only idempotent operations simply involves refinin
 pointcut expression so that only `@Idempotent` operations match:
 
 [source,xml,indent=0]
-[subs="verbatim,quotes"]
+[subs="verbatim"]
 ----
 	<aop:pointcut id="idempotentOperation"
 			expression="execution(* com.xyz.myapp.service.*.*(..)) and
@@ -15416,22 +15416,22 @@ named pointcuts declared in XML. For example, in the @AspectJ style you can writ
 something like:
 
 [source,java,indent=0]
-[subs="verbatim,quotes"]
+[subs="verbatim"]
 ----
 	@Pointcut(execution(* get*()))
-		public void propertyAccess() {}
+	public void propertyAccess() {}
 
-		@Pointcut(execution(org.xyz.Account+ *(..))
-		public void operationReturningAnAccount() {}
+	@Pointcut(execution(org.xyz.Account+ *(..))
+	public void operationReturningAnAccount() {}
 
-		@Pointcut(propertyAccess() && operationReturningAnAccount())
-		public void accountPropertyAccess() {}
+	@Pointcut(propertyAccess() && operationReturningAnAccount())
+	public void accountPropertyAccess() {}
 ----
 
 In the XML style I can declare the first two pointcuts:
 
 [source,xml,indent=0]
-[subs="verbatim,quotes"]
+[subs="verbatim"]
 ----
 	<aop:pointcut id="propertyAccess"
 			expression="execution(* get*())"/>
@@ -16083,7 +16083,7 @@ Here is the profiling aspect. Nothing too fancy, just a quick-and-dirty time-bas
 profiler, using the @AspectJ-style of aspect declaration.
 
 [source,java,indent=0]
-[subs="verbatim,quotes"]
+[subs="verbatim"]
 ----
 	package foo;
 
@@ -16750,7 +16750,7 @@ effectively the union of these pointcuts.)
 The usage is shown below:
 
 [source,xml,indent=0]
-[subs="verbatim,quotes"]
+[subs="verbatim"]
 ----
 	<bean id="settersAndAbsquatulatePointcut"
 			class="org.springframework.aop.support.JdkRegexpMethodPointcut">
@@ -16770,7 +16770,7 @@ Using `RegexpMethodPointcutAdvisor` simplifies wiring, as the one bean encapsula
 pointcut and advice, as shown below:
 
 [source,xml,indent=0]
-[subs="verbatim,quotes"]
+[subs="verbatim"]
 ----
 	<bean id="settersAndAbsquatulateAdvisor"
 			class="org.springframework.aop.support.RegexpMethodPointcutAdvisor">
@@ -23202,7 +23202,7 @@ execute in the context of a transaction with read-write semantics. The following
 configuration is explained in detail in the next few paragraphs.
 
 [source,xml,indent=0]
-[subs="verbatim,quotes"]
+[subs="verbatim"]
 ----
 	<!-- from the file 'context.xml' -->
 	<?xml version="1.0" encoding="UTF-8"?>
@@ -23291,7 +23291,7 @@ do this is simply to change the pointcut expression to match any operation in yo
 service layer. For example:
 
 [source,xml,indent=0]
-[subs="verbatim,quotes"]
+[subs="verbatim"]
 ----
 	<aop:config>
 		<aop:pointcut id="fooServiceMethods" expression="execution(* x.y.service.*.*(..))"/>
@@ -23468,7 +23468,7 @@ defined in that package (or in subpackages) and that have names ending in `Servi
 the default transactional configuration, you would write the following:
 
 [source,xml,indent=0]
-[subs="verbatim,quotes"]
+[subs="verbatim"]
 ----
 	<?xml version="1.0" encoding="UTF-8"?>
 	<beans xmlns="http://www.springframework.org/schema/beans"
@@ -23516,7 +23516,7 @@ The following example shows how to configure two distinct beans with totally dif
 transactional settings.
 
 [source,xml,indent=0]
-[subs="verbatim,quotes"]
+[subs="verbatim"]
 ----
 	<?xml version="1.0" encoding="UTF-8"?>
 	<beans xmlns="http://www.springframework.org/schema/beans"
@@ -24130,7 +24130,7 @@ is controlled through the `Ordered` interface. For full details on advice orderi
 ----
 
 [source,xml,indent=0]
-[subs="verbatim,quotes"]
+[subs="verbatim"]
 ----
 	<?xml version="1.0" encoding="UTF-8"?>
 	<beans xmlns="http://www.springframework.org/schema/beans"
@@ -24186,7 +24186,7 @@ The following example effects the same setup as above, but uses the purely XML
 declarative approach.
 
 [source,xml,indent=0]
-[subs="verbatim,quotes"]
+[subs="verbatim"]
 ----
 	<?xml version="1.0" encoding="UTF-8"?>
 	<beans xmlns="http://www.springframework.org/schema/beans"
@@ -26654,7 +26654,7 @@ where it's simply called `execute`. However, you don't have to subclass the `Sql
 class since it can easily be parameterized by setting SQL and declaring parameters.
 
 [source,java,indent=0]
-[subs="verbatim,quotes"]
+[subs="verbatim"]
 ----
 	import java.sql.Types;
 
@@ -27727,7 +27727,7 @@ The following example shows how you can configure an AOP transaction interceptor
 XML, for a simple service class:
 
 [source,xml,indent=0]
-[subs="verbatim,quotes"]
+[subs="verbatim"]
 ----
 	<?xml version="1.0" encoding="UTF-8"?>
 	<beans xmlns="http://www.springframework.org/schema/beans"
@@ -27949,7 +27949,7 @@ across any number of DAOs and any number of session factories without special re
 long as it is using `JtaTransactionManager` as the strategy.
 
 [source,xml,indent=0]
-[subs="verbatim,quotes"]
+[subs="verbatim"]
 ----
 	<beans>
 
@@ -28368,7 +28368,7 @@ To execute service operations within transactions, you can use Spring's common
 declarative transaction facilities. For example:
 
 [source,xml,indent=0]
-[subs="verbatim,quotes"]
+[subs="verbatim"]
 ----
 	<?xml version="1.0" encoding="UTF-8"?>
 	<beans xmlns="http://www.springframework.org/schema/beans"
@@ -28682,7 +28682,7 @@ parsed and later retrieved through the persistence unit name. (By default, the c
 is searched for `META-INF/persistence.xml` files.)
 
 [source,xml,indent=0]
-[subs="verbatim,quotes"]
+[subs="verbatim"]
 ----
 	<bean id="pum" class="org.springframework.orm.jpa.persistenceunit.DefaultPersistenceUnitManager">
 		<property name="persistenceXmlLocations">
@@ -28868,7 +28868,7 @@ To execute service operations within transactions, you can use Spring's common
 declarative transaction facilities. For example:
 
 [source,xml,indent=0]
-[subs="verbatim,quotes"]
+[subs="verbatim"]
 ----
 	<?xml version="1.0" encoding="UTF-8"?>
 	<beans xmlns="http://www.springframework.org/schema/beans"
@@ -29008,7 +29008,7 @@ Spring abstracts all marshalling operations behind the
 below.
 
 [source,java,indent=0]
-[subs="verbatim,quotes"]
+[subs="verbatim"]
 ----
 	public interface Marshaller {
 
@@ -29056,7 +29056,7 @@ Similar to the `Marshaller`, there is the `org.springframework.oxm.Unmarshaller`
 interface.
 
 [source,java,indent=0]
-[subs="verbatim,quotes"]
+[subs="verbatim"]
 ----
 	public interface Unmarshaller {
 
@@ -32463,7 +32463,7 @@ One issue with the `Accept` header is that it is impossible to set it in a web b
 within HTML. For example, in Firefox, it is fixed to:
 
 [literal]
-[subs="verbatim,quotes"]
+[subs="verbatim"]
 ----
 Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
 ----
@@ -32906,7 +32906,7 @@ a request for the following URL, `http://www.sf.net/home.view?siteLanguage=nl` w
 change the site language to Dutch.
 
 [source,xml,indent=0]
-[subs="verbatim,quotes"]
+[subs="verbatim"]
 ----
 	<bean id="localeChangeInterceptor"
 			class="org.springframework.web.servlet.i18n.LocaleChangeInterceptor">
@@ -34040,7 +34040,7 @@ incoming requests or restricted to specific URL path patterns.
 An example of registering interceptors in Java:
 
 [source,java,indent=0]
-[subs="verbatim,quotes"]
+[subs="verbatim"]
 ----
 	@Configuration
 	@EnableWebMvc
@@ -34059,7 +34059,7 @@ An example of registering interceptors in Java:
 And in XML use the `<mvc:interceptors>` element:
 
 [source,xml,indent=0]
-[subs="verbatim,quotes"]
+[subs="verbatim"]
 ----
 	<mvc:interceptors>
 		<bean class="org.springframework.web.servlet.i18n.LocaleChangeInterceptor" />
@@ -34290,7 +34290,7 @@ to serve resource requests with a URL pattern of `/resources/**` from a
 `public-resources` directory within the web application root you would use:
 
 [source,java,indent=0]
-[subs="verbatim,quotes"]
+[subs="verbatim"]
 ----
 	@Configuration
 	@EnableWebMvc
@@ -34307,7 +34307,7 @@ to serve resource requests with a URL pattern of `/resources/**` from a
 And the same in XML:
 
 [source,xml,indent=0]
-[subs="verbatim,quotes"]
+[subs="verbatim"]
 ----
 	<mvc:resources mapping="/resources/**" location="/public-resources/"/>
 ----
@@ -34316,7 +34316,7 @@ To serve these resources with a 1-year future expiration to ensure maximum use o
 browser cache and a reduction in HTTP requests made by the browser:
 
 [source,java,indent=0]
-[subs="verbatim,quotes"]
+[subs="verbatim"]
 ----
 	@Configuration
 	@EnableWebMvc
@@ -34333,7 +34333,7 @@ browser cache and a reduction in HTTP requests made by the browser:
 And in XML:
 
 [source,xml,indent=0]
-[subs="verbatim,quotes"]
+[subs="verbatim"]
 ----
 	<mvc:resources mapping="/resources/**" location="/public-resources/" cache-period="31556926"/>
 ----
@@ -34347,7 +34347,7 @@ serving of resources from both the web application root and from a known path of
 `/META-INF/public-web-resources/` in any jar on the classpath use:
 
 [source,java,indent=0]
-[subs="verbatim,quotes"]
+[subs="verbatim"]
 ----
 	@EnableWebMvc
 	@Configuration
@@ -34393,7 +34393,7 @@ caching should be enabled in production.
 Java config example;
 
 [source,java,indent=0]
-[subs="verbatim,quotes"]
+[subs="verbatim"]
 ----
 	@Configuration
 	@EnableWebMvc
@@ -34413,7 +34413,7 @@ Java config example;
 XML example:
 
 [source,xml,indent=0]
-[subs="verbatim,quotes"]
+[subs="verbatim"]
 ----
 <mvc:resources mapping="/resources/**" location="/public-resources/">
 	<mvc:resource-chain>
@@ -47274,7 +47274,7 @@ example the following task is being scheduled to run 15 minutes past each hour b
 during the 9-to-5 "business hours" on weekdays.
 
 [source,java,indent=0]
-[subs="verbatim,quotes"]
+[subs="verbatim"]
 ----
 	scheduler.schedule(task, new CronTrigger("* 15 9-17 * * MON-FRI"));
 ----
@@ -47401,7 +47401,7 @@ If simple periodic scheduling is not expressive enough, then a cron expression m
 provided. For example, the following will only execute on weekdays.
 
 [source,java,indent=0]
-[subs="verbatim,quotes"]
+[subs="verbatim"]
 ----
 	@Scheduled(cron="*/5 * * * * MON-FRI")
 	public void doSomething() {
@@ -47708,7 +47708,7 @@ before the first execution of the method. For more control, a "cron" attribute m
 provided instead. Here is an example demonstrating these other options.
 
 [source,xml,indent=0]
-[subs="verbatim,quotes"]
+[subs="verbatim"]
 ----
 	<task:scheduled-tasks scheduler="myScheduler">
 		<task:scheduled ref="beanA" method="methodA" fixed-delay="5000" initial-delay="1000"/>
@@ -47758,7 +47758,7 @@ case, if the `ExampleJob` contains a bean property named `timeout`, the `JobDeta
 will have it applied automatically:
 
 [source,java,indent=0]
-[subs="verbatim,quotes"]
+[subs="verbatim"]
 ----
 	package example;
 
@@ -47875,7 +47875,7 @@ those triggers.
 Find below a couple of examples:
 
 [source,xml,indent=0]
-[subs="verbatim,quotes"]
+[subs="verbatim"]
 ----
 	<bean id="simpleTrigger" class="org.springframework.scheduling.quartz.SimpleTriggerFactoryBean">
 		<!-- see the example of method invoking job above -->
@@ -49818,7 +49818,7 @@ declarative transaction management <<transaction-declarative-first-example,advic
 The previous example can be translated into:
 
 [source,xml,indent=0]
-[subs="verbatim,quotes"]
+[subs="verbatim"]
 ----
 	<!-- the service we want to make cacheable -->
 	<bean id="bookService" class="x.y.service.DefaultBookService"/>
