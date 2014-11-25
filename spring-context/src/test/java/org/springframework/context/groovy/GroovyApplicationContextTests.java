@@ -74,9 +74,4 @@ public class GroovyApplicationContextTests {
 		new GenericGroovyApplicationContext("org/springframework/context/groovy/applicationContext-error.groovy");
 	}
 
-	@Test(expected = BeanDefinitionParsingException.class)
-	public void testConfigFileParsingErrorWhenNamedBeans() {
-		new GenericGroovyApplicationContext("org/springframework/context/groovy/beans.groovy");
-	}
-
 }
