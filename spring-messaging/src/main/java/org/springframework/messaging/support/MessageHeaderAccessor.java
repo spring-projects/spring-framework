@@ -22,7 +22,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 
 import org.apache.commons.logging.Log;
@@ -373,9 +372,9 @@ public class MessageHeaderAccessor {
 	private List<String> getMatchingHeaderNames(String pattern, Map<String, Object> headers) {
 		List<String> matchingHeaderNames = new ArrayList<String>();
 		if (headers != null) {
-			for (Map.Entry<String, Object> header: headers.entrySet()) {
-				if (PatternMatchUtils.simpleMatch(pattern,  header.getKey())) {
-					matchingHeaderNames.add(header.getKey());
+			for (String key : headers.keySet()) {
+				if (PatternMatchUtils.simpleMatch(pattern, key)) {
+					matchingHeaderNames.add(key);
 				}
 			}
 		}
@@ -389,10 +388,9 @@ public class MessageHeaderAccessor {
 	 */
 	public void copyHeaders(Map<String, ?> headersToCopy) {
 		if (headersToCopy != null) {
-			Set<String> keys = headersToCopy.keySet();
-			for (String key : keys) {
-				if (!isReadOnly(key)) {
-					setHeader(key, headersToCopy.get(key));
+			for (Map.Entry<String, ?> entry : headersToCopy.entrySet()) {
+				if (!isReadOnly(entry.getKey())) {
+					setHeader(entry.getKey(), entry.getValue());
 				}
 			}
 		}
@@ -404,10 +402,9 @@ public class MessageHeaderAccessor {
 	 */
 	public void copyHeadersIfAbsent(Map<String, ?> headersToCopy) {
 		if (headersToCopy != null) {
-			Set<String> keys = headersToCopy.keySet();
-			for (String key : keys) {
-				if (!isReadOnly(key)) {
-					setHeaderIfAbsent(key, headersToCopy.get(key));
+			for (Map.Entry<String, ?> entry : headersToCopy.entrySet()) {
+				if (!isReadOnly(entry.getKey())) {
+					setHeaderIfAbsent(entry.getKey(), entry.getValue());
 				}
 			}
 		}
