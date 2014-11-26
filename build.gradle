@@ -38,9 +38,9 @@ configure(allprojects) { project ->
 	ext.hibVal4Version       = "4.3.2.Final"
 	ext.hibVal5Version       = "5.1.3.Final"
 	ext.hsqldbVersion        = "2.3.2"
-	ext.jackson2Version      = "2.4.3"
-	ext.jasperReportsVersion = "5.6.1"
-	ext.jettyVersion         = "9.2.4.v20141103"
+	ext.jackson2Version      = "2.4.4"
+	ext.jasperReportsVersion = "6.0.0"
+	ext.jettyVersion         = "9.2.5.v20141112"
 	ext.jodaVersion          = "2.5"
 	ext.junitVersion         = "4.11"
 	ext.nettyVersion         = "4.0.24.Final"
@@ -53,7 +53,7 @@ configure(allprojects) { project ->
 	ext.tiles2Version        = "2.2.2"
 	ext.tiles3Version        = "3.0.5"
 	ext.tomcatVersion        = "8.0.15"
-	ext.tyrusVersion         = "1.3.5"
+	ext.tyrusVersion         = "1.3.5"  // constrained by WebLogic 12.1.3 support
 	ext.undertowVersion      = "1.1.0.Final"
 	ext.woodstoxVersion      = "4.4.1"
 	ext.xstreamVersion       = "1.4.7"
@@ -460,7 +460,7 @@ project("spring-context") {
 		optional("org.aspectj:aspectjweaver:${aspectjVersion}")
 		optional("org.codehaus.groovy:groovy-all:${groovyVersion}")
 		optional("org.beanshell:bsh:2.0b4")
-		optional("org.jruby:jruby:1.7.16")
+		optional("org.jruby:jruby:1.7.16.1")
 		testCompile("javax.inject:javax.inject-tck:1")
 		testCompile("commons-dbcp:commons-dbcp:1.4")
 		testCompile("org.slf4j:slf4j-api:${slf4jVersion}")
