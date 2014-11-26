@@ -38,8 +38,8 @@ import org.springframework.util.MultiValueMap;
 public interface AnnotatedTypeMetadata {
 
 	/**
-	 * Determine whether the underlying type has an annotation or
-	 * meta-annotation of the given type defined.
+	 * Determine whether the underlying element has an annotation or meta-annotation
+	 * of the given type defined.
 	 * <p>If this method returns {@code true}, then
 	 * {@link #getAnnotationAttributes} will return a non-null Map.
 	 * @param annotationType the annotation type to look for
@@ -48,9 +48,9 @@ public interface AnnotatedTypeMetadata {
 	boolean isAnnotated(String annotationType);
 
 	/**
-	 * Retrieve the attributes of the annotation of the given type,
-	 * if any (i.e. if defined on the underlying class, as direct
-	 * annotation or as meta-annotation).
+	 * Retrieve the attributes of the annotation of the given type, if any (i.e. if
+	 * defined on the underlying element, as direct annotation or meta-annotation),
+	 * also taking attribute overrides on composed annotations into account.
 	 * @param annotationType the annotation type to look for
 	 * @return a Map of attributes, with the attribute name as key (e.g. "value")
 	 * and the defined attribute value as Map value. This return value will be
@@ -59,9 +59,9 @@ public interface AnnotatedTypeMetadata {
 	Map<String, Object> getAnnotationAttributes(String annotationType);
 
 	/**
-	 * Retrieve the attributes of the annotation of the given type,
-	 * if any (i.e. if defined on the underlying class, as direct
-	 * annotation or as meta-annotation).
+	 * Retrieve the attributes of the annotation of the given type, if any (i.e. if
+	 * defined on the underlying element, as direct annotation or meta-annotation),
+	 * also taking attribute overrides on composed annotations into account.
 	 * @param annotationType the annotation type to look for
 	 * @param classValuesAsString whether to convert class references to String
 	 * class names for exposure as values in the returned Map, instead of Class
@@ -74,8 +74,8 @@ public interface AnnotatedTypeMetadata {
 
 	/**
 	 * Retrieve all attributes of all annotations of the given type, if any (i.e. if
-	 * defined on the underlying type ({@link AnnotationMetadata class} or
-	 * {@link MethodMetadata method}), as direct annotation or as meta-annotation).
+	 * defined on the underlying element, as direct annotation or meta-annotation).
+	 * Note that this variant does <i>not</i> take attribute overrides into account.
 	 * @param annotationType the annotation type to look for
 	 * @return a MultiMap of attributes, with the attribute name as key (e.g. "value")
 	 * and a list of the defined attribute values as Map value. This return value will
@@ -86,8 +86,8 @@ public interface AnnotatedTypeMetadata {
 
 	/**
 	 * Retrieve all attributes of all annotations of the given type, if any (i.e. if
-	 * defined on the underlying type ({@link AnnotationMetadata class} or
-	 * {@link MethodMetadata method}), as direct annotation or as meta-annotation).
+	 * defined on the underlying element, as direct annotation or meta-annotation).
+	 * Note that this variant does <i>not</i> take attribute overrides into account.
 	 * @param annotationType the annotation type to look for
 	 * @param classValuesAsString  whether to convert class references to String
 	 * @return a MultiMap of attributes, with the attribute name as key (e.g. "value")
