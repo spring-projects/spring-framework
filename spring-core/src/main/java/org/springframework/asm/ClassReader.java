@@ -1172,7 +1172,14 @@ public class ClassReader {
                         if (labels[label] == null) {
                             readLabel(label, labels).status |= Label.DEBUG;
                         }
-                        labels[label].line = readUnsignedShort(v + 12);
+                        Label l = labels[label];
+                        while (l.line > 0) {
+                            if (l.next == null) {
+                                l.next = new Label();
+                            }
+                            l = l.next;
+                        }
+                        l.line = readUnsignedShort(v + 12);
                         v += 4;
                     }
                 }
@@ -1287,9 +1294,15 @@ public class ClassReader {
             // visits the label and line number for this offset, if any
             Label l = labels[offset];
             if (l != null) {
+                Label next = l.next;
+                l.next = null;
                 mv.visitLabel(l);
                 if ((context.flags & SKIP_DEBUG) == 0 && l.line > 0) {
                     mv.visitLineNumber(l.line, l);
+                    while (next != null) {
+                        mv.visitLineNumber(next.line, l);
+                        next = next.next;
+                    }
                 }
             }
 
