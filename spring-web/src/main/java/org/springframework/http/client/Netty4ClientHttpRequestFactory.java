@@ -43,7 +43,7 @@ import org.springframework.util.Assert;
  * across multiple clients.
  *
  * @author Arjen Poutsma
- * @since 4.2
+ * @since 4.1.2
  */
 public class Netty4ClientHttpRequestFactory implements ClientHttpRequestFactory,
 		AsyncClientHttpRequestFactory, InitializingBean, DisposableBean {
@@ -59,11 +59,11 @@ public class Netty4ClientHttpRequestFactory implements ClientHttpRequestFactory,
 
 	private final boolean defaultEventLoopGroup;
 
-	private SslContext sslContext;
-
 	private int maxRequestSize = DEFAULT_MAX_REQUEST_SIZE;
 
-	private Bootstrap bootstrap;
+	private SslContext sslContext;
+
+	private volatile Bootstrap bootstrap;
 
 
 	/**
@@ -79,13 +79,12 @@ public class Netty4ClientHttpRequestFactory implements ClientHttpRequestFactory,
 	/**
 	 * Create a new {@code Netty4ClientHttpRequestFactory} with the given
 	 * {@link EventLoopGroup}.
-	 *
 	 * <p><b>NOTE:</b> the given group will <strong>not</strong> be
-	 * {@linkplain EventLoopGroup#shutdownGracefully() shutdown} by this factory; doing
-	 * so becomes the responsibility of the caller.
+	 * {@linkplain EventLoopGroup#shutdownGracefully() shutdown} by this factory;
+	 * doing so becomes the responsibility of the caller.
 	 */
 	public Netty4ClientHttpRequestFactory(EventLoopGroup eventLoopGroup) {
-		Assert.notNull(eventLoopGroup, "'eventLoopGroup' must not be null");
+		Assert.notNull(eventLoopGroup, "EventLoopGroup must not be null");
 		this.eventLoopGroup = eventLoopGroup;
 		this.defaultEventLoopGroup = false;
 	}
@@ -117,7 +116,6 @@ public class Netty4ClientHttpRequestFactory implements ClientHttpRequestFactory,
 						@Override
 						protected void initChannel(SocketChannel channel) throws Exception {
 							ChannelPipeline pipeline = channel.pipeline();
-
 							if (sslContext != null) {
 								pipeline.addLast(sslContext.newHandler(channel.alloc()));
 							}
@@ -131,9 +129,10 @@ public class Netty4ClientHttpRequestFactory implements ClientHttpRequestFactory,
 	}
 
 	@Override
-	public void afterPropertiesSet() throws Exception {
+	public void afterPropertiesSet() {
 		getBootstrap();
 	}
+
 
 	@Override
 	public ClientHttpRequest createRequest(URI uri, HttpMethod httpMethod) throws IOException {
@@ -149,10 +148,11 @@ public class Netty4ClientHttpRequestFactory implements ClientHttpRequestFactory,
 		return new Netty4ClientHttpRequest(getBootstrap(), uri, httpMethod, this.maxRequestSize);
 	}
 
+
 	@Override
 	public void destroy() throws InterruptedException {
 		if (this.defaultEventLoopGroup) {
-			// clean up the EventLoopGroup if we created it in the constructor
+			// Clean up the EventLoopGroup if we created it in the constructor
 			this.eventLoopGroup.shutdownGracefully().sync();
 		}
 	}

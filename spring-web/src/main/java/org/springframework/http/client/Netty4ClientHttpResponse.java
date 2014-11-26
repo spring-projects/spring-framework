@@ -32,7 +32,7 @@ import org.springframework.util.Assert;
  * Netty 4 to execute requests.
  *
  * @author Arjen Poutsma
- * @since 4.2
+ * @since 4.1.2
  */
 class Netty4ClientHttpResponse extends AbstractClientHttpResponse {
 
@@ -42,12 +42,12 @@ class Netty4ClientHttpResponse extends AbstractClientHttpResponse {
 
 	private final ByteBufInputStream body;
 
-	private HttpHeaders headers;
+	private volatile HttpHeaders headers;
 
 
-	Netty4ClientHttpResponse(ChannelHandlerContext context, FullHttpResponse nettyResponse) {
-		Assert.notNull(context, "'context' must not be null");
-		Assert.notNull(nettyResponse, "'nettyResponse' must not be null");
+	public Netty4ClientHttpResponse(ChannelHandlerContext context, FullHttpResponse nettyResponse) {
+		Assert.notNull(context, "ChannelHandlerContext must not be null");
+		Assert.notNull(nettyResponse, "FullHttpResponse must not be null");
 		this.context = context;
 		this.nettyResponse = nettyResponse;
 		this.body = new ByteBufInputStream(this.nettyResponse.content());
@@ -87,4 +87,5 @@ class Netty4ClientHttpResponse extends AbstractClientHttpResponse {
 		this.nettyResponse.release();
 		this.context.close();
 	}
+
 }

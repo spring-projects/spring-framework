@@ -48,7 +48,7 @@ import org.springframework.util.concurrent.SettableListenableFuture;
  * <p>Created via the {@link Netty4ClientHttpRequestFactory}.
  *
  * @author Arjen Poutsma
- * @since 4.2
+ * @since 4.1.2
  */
 class Netty4ClientHttpRequest extends AbstractAsyncClientHttpRequest implements ClientHttpRequest {
 
@@ -61,7 +61,7 @@ class Netty4ClientHttpRequest extends AbstractAsyncClientHttpRequest implements 
 	private final ByteBufOutputStream body;
 
 
-	Netty4ClientHttpRequest(Bootstrap bootstrap, URI uri, HttpMethod method, int maxRequestSize) {
+	public Netty4ClientHttpRequest(Bootstrap bootstrap, URI uri, HttpMethod method, int maxRequestSize) {
 		this.bootstrap = bootstrap;
 		this.uri = uri;
 		this.method = method;
@@ -81,7 +81,7 @@ class Netty4ClientHttpRequest extends AbstractAsyncClientHttpRequest implements 
 
 	@Override
 	protected OutputStream getBodyInternal(HttpHeaders headers) throws IOException {
-		return body;
+		return this.body;
 	}
 
 	@Override
