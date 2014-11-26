@@ -36,7 +36,7 @@ configure(allprojects) { project ->
 	ext.slf4jVersion         = "1.7.7"
 	ext.tiles2Version        = "2.2.2"
 	ext.tiles3Version        = "3.0.5"
-	ext.tomcatVersion        = "8.0.9"
+	ext.tomcatVersion        = "8.0.15"
 	ext.xstreamVersion       = "1.4.7"
 
 	ext.gradleScriptDir = "${rootProject.projectDir}/gradle"
@@ -383,7 +383,7 @@ project("spring-context") {
 		optional("org.aspectj:aspectjweaver:${aspectjVersion}")
 		optional("org.codehaus.groovy:groovy-all:${groovyVersion}")
 		optional("org.beanshell:bsh:2.0b4")
-		optional("org.jruby:jruby:1.7.16")
+		optional("org.jruby:jruby:1.7.16.1")
 		testCompile("javax.inject:javax.inject-tck:1")
 		testCompile("commons-dbcp:commons-dbcp:1.4")
 		testCompile("org.slf4j:slf4j-api:${slf4jVersion}")
@@ -880,6 +880,7 @@ project("spring-test") {
 	}
 
 	task testNG(type: Test) {
+		description = 'Runs TestNG tests.'
 		useTestNG()
 		scanForTestClasses = false
 		include(["**/testng/**/*Tests.class", "**/testng/**/*Test.class"])
@@ -889,12 +890,14 @@ project("spring-test") {
 	}
 
 	test {
+		description = 'Runs JUnit tests.'
 		dependsOn testNG
 		useJUnit()
 		exclude "**/testng/**/*.*"
 	}
 
 	task aggregateTestReports(type: TestReport) {
+		description = 'Aggregates JUnit and TestNG test reports.'
 		destinationDir = test.reports.html.destination
 		reportOn test, testNG
 	}
