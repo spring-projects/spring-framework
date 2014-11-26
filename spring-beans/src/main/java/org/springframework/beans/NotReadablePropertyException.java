@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,6 +45,18 @@ public class NotReadablePropertyException extends InvalidPropertyException {
 	 */
 	public NotReadablePropertyException(Class<?> beanClass, String propertyName, String msg) {
 		super(beanClass, propertyName, msg);
+	}
+
+	/**
+	 * Create a new NotReadablePropertyException.
+	 * @param beanClass the offending bean class
+	 * @param propertyName the offending property
+	 * @param msg the detail message
+	 * @param cause the root cause
+	 * @since 4.0.9
+	 */
+	public NotReadablePropertyException(Class<?> beanClass, String propertyName, String msg, Throwable cause) {
+		super(beanClass, propertyName, msg, cause);
 	}
 
 }
