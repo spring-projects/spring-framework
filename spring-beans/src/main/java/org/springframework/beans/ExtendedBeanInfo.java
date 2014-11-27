@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,6 +34,9 @@ import java.util.Enumeration;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import static org.springframework.beans.PropertyDescriptorUtils.*;
 
@@ -73,6 +76,8 @@ import static org.springframework.beans.PropertyDescriptorUtils.*;
  */
 class ExtendedBeanInfo implements BeanInfo {
 
+	private static final Log logger = LogFactory.getLog(ExtendedBeanInfo.class);
+
 	private final BeanInfo delegate;
 
 	private final Set<PropertyDescriptor> propertyDescriptors =
@@ -94,14 +99,30 @@ class ExtendedBeanInfo implements BeanInfo {
 	public ExtendedBeanInfo(BeanInfo delegate) throws IntrospectionException {
 		this.delegate = delegate;
 		for (PropertyDescriptor pd : delegate.getPropertyDescriptors()) {
-			this.propertyDescriptors.add(pd instanceof IndexedPropertyDescriptor ?
-					new SimpleIndexedPropertyDescriptor((IndexedPropertyDescriptor) pd) :
-					new SimplePropertyDescriptor(pd));
+			try {
+				this.propertyDescriptors.add(pd instanceof IndexedPropertyDescriptor ?
+						new SimpleIndexedPropertyDescriptor((IndexedPropertyDescriptor) pd) :
+						new SimplePropertyDescriptor(pd));
+			}
+			catch (IntrospectionException ex) {
+				// Probably simply a method that wasn't meant to follow the JavaBeans pattern...
+				if (logger.isDebugEnabled()) {
+					logger.debug("Ignoring invalid bean property '" + pd.getName() + "': " + ex.getMessage());
+				}
+			}
 		}
 		MethodDescriptor[] methodDescriptors = delegate.getMethodDescriptors();
 		if (methodDescriptors != null) {
 			for (Method method : findCandidateWriteMethods(methodDescriptors)) {
-				handleCandidateWriteMethod(method);
+				try {
+					handleCandidateWriteMethod(method);
+				}
+				catch (IntrospectionException ex) {
+					// We're only trying to find candidates, can easily ignore extra ones here...
+					if (logger.isDebugEnabled()) {
+						logger.debug("Ignoring candidate write method [" + method + "]: " + ex.getMessage());
+					}
+				}
 			}
 		}
 	}
@@ -131,15 +152,15 @@ class ExtendedBeanInfo implements BeanInfo {
 		String methodName = method.getName();
 		Class<?>[] parameterTypes = method.getParameterTypes();
 		int nParams = parameterTypes.length;
-		return methodName.length() > 3 && methodName.startsWith("set") && Modifier.isPublic(method.getModifiers()) &&
+		return (methodName.length() > 3 && methodName.startsWith("set") && Modifier.isPublic(method.getModifiers()) &&
 				(!void.class.isAssignableFrom(method.getReturnType()) || Modifier.isStatic(method.getModifiers())) &&
-				(nParams == 1 || (nParams == 2 && parameterTypes[0].equals(int.class)));
+				(nParams == 1 || (nParams == 2 && parameterTypes[0].equals(int.class))));
 	}
 
 	private void handleCandidateWriteMethod(Method method) throws IntrospectionException {
 		int nParams = method.getParameterTypes().length;
 		String propertyName = propertyNameFor(method);
-		Class<?> propertyType = method.getParameterTypes()[nParams-1];
+		Class<?> propertyType = method.getParameterTypes()[nParams - 1];
 		PropertyDescriptor existingPd = findExistingPropertyDescriptor(propertyName, propertyType);
 		if (nParams == 1) {
 			if (existingPd == null) {
