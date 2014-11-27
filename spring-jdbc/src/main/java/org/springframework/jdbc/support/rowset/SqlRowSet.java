@@ -30,14 +30,14 @@ import org.springframework.jdbc.InvalidResultSetAccessException;
  * Mirror interface for {@link javax.sql.RowSet}, representing
  * disconnected {@link java.sql.ResultSet} data.
  *
- * <p>The main difference to the standard JDBC RowSet is that an SQLException
- * is never thrown here. This allows a SqlRowSet to be used without having
- * to deal with checked exceptions. A SqlRowSet will throw Spring's
- * {@code org.springframework.jdbc.InvalidResultSetAccessException}
+ * <p>The main difference to the standard JDBC RowSet is that a
+ * {@link java.sql.SQLException} is never thrown here. This allows a
+ * SqlRowSet to be used without having to deal with checked exceptions.
+ * A SqlRowSet will throw Spring's {@link InvalidResultSetAccessException}
  * instead (when appropriate).
  *
- * <p>Note: This interface extends the {@code java.io.Serializable}
- * marker interface. Implementations, which typically hold disconnected data,
+ * <p>Note: This interface extends the {@code java.io.Serializable} marker
+ * interface. Implementations, which typically hold disconnected data,
  * are encouraged to be actually serializable (as far as possible).
  *
  * @author Thomas Risberg
@@ -83,7 +83,7 @@ public interface SqlRowSet extends Serializable {
 	 * as a BigDecimal object.
 	 * @param columnLabel the column label
 	 * @return an BigDecimal object representing the column value
-	 * @see java.sql.ResultSet#getBigDecimal(java.lang.String)
+	 * @see java.sql.ResultSet#getBigDecimal(String)
 	 */
 	BigDecimal getBigDecimal(String columnLabel) throws InvalidResultSetAccessException;
 
@@ -101,7 +101,7 @@ public interface SqlRowSet extends Serializable {
 	 * as a boolean.
 	 * @param columnLabel the column label
 	 * @return a boolean representing the column value
-	 * @see java.sql.ResultSet#getBoolean(java.lang.String)
+	 * @see java.sql.ResultSet#getBoolean(String)
 	 */
 	boolean getBoolean(String columnLabel) throws InvalidResultSetAccessException;
 
@@ -119,19 +119,9 @@ public interface SqlRowSet extends Serializable {
 	 * as a byte.
 	 * @param columnLabel the column label
 	 * @return a byte representing the column value
-	 * @see java.sql.ResultSet#getByte(java.lang.String)
+	 * @see java.sql.ResultSet#getByte(String)
 	 */
 	byte getByte(String columnLabel) throws InvalidResultSetAccessException;
-
-	/**
-	 * Retrieve the value of the indicated column in the current row
-	 * as a Date object.
-	 * @param columnIndex the column index
-	 * @param cal the Calendar to use in constructing the Date
-	 * @return a Date object representing the column value
-	 * @see java.sql.ResultSet#getDate(int, java.util.Calendar)
-	 */
-	Date getDate(int columnIndex, Calendar cal) throws InvalidResultSetAccessException;
 
 	/**
 	 * Retrieve the value of the indicated column in the current row
@@ -146,20 +136,30 @@ public interface SqlRowSet extends Serializable {
 	 * Retrieve the value of the indicated column in the current row
 	 * as a Date object.
 	 * @param columnLabel the column label
+	 * @return a Date object representing the column value
+	 * @see java.sql.ResultSet#getDate(String)
+	 */
+	Date getDate(String columnLabel) throws InvalidResultSetAccessException;
+
+	/**
+	 * Retrieve the value of the indicated column in the current row
+	 * as a Date object.
+	 * @param columnIndex the column index
 	 * @param cal the Calendar to use in constructing the Date
 	 * @return a Date object representing the column value
-	 * @see java.sql.ResultSet#getDate(java.lang.String, java.util.Calendar)
+	 * @see java.sql.ResultSet#getDate(int, Calendar)
 	 */
-	Date getDate(String columnLabel, Calendar cal) throws InvalidResultSetAccessException;
+	Date getDate(int columnIndex, Calendar cal) throws InvalidResultSetAccessException;
 
 	/**
 	 * Retrieve the value of the indicated column in the current row
 	 * as a Date object.
 	 * @param columnLabel the column label
+	 * @param cal the Calendar to use in constructing the Date
 	 * @return a Date object representing the column value
-	 * @see java.sql.ResultSet#getDate(java.lang.String)
+	 * @see java.sql.ResultSet#getDate(String, Calendar)
 	 */
-	Date getDate(String columnLabel) throws InvalidResultSetAccessException;
+	Date getDate(String columnLabel, Calendar cal) throws InvalidResultSetAccessException;
 
 	/**
 	 * Retrieve the value of the indicated column in the current row
@@ -175,7 +175,7 @@ public interface SqlRowSet extends Serializable {
 	 * as a Double object.
 	 * @param columnLabel the column label
 	 * @return a Double object representing the column value
-	 * @see java.sql.ResultSet#getDouble(java.lang.String)
+	 * @see java.sql.ResultSet#getDouble(String)
 	 */
 	double getDouble(String columnLabel) throws InvalidResultSetAccessException;
 
@@ -193,7 +193,7 @@ public interface SqlRowSet extends Serializable {
 	 * as a float.
 	 * @param columnLabel the column label
 	 * @return a float representing the column value
-	 * @see java.sql.ResultSet#getFloat(java.lang.String)
+	 * @see java.sql.ResultSet#getFloat(String)
 	 */
 	float getFloat(String columnLabel) throws InvalidResultSetAccessException;
 
@@ -211,7 +211,7 @@ public interface SqlRowSet extends Serializable {
 	 * as an int.
 	 * @param columnLabel the column label
 	 * @return an int representing the column value
-	 * @see java.sql.ResultSet#getInt(java.lang.String)
+	 * @see java.sql.ResultSet#getInt(String)
 	 */
 	int getInt(String columnLabel) throws InvalidResultSetAccessException;
 
@@ -229,19 +229,9 @@ public interface SqlRowSet extends Serializable {
 	 * as a long.
 	 * @param columnLabel the column label
 	 * @return a long representing the column value
-	 * @see java.sql.ResultSet#getLong(java.lang.String)
+	 * @see java.sql.ResultSet#getLong(String)
 	 */
 	long getLong(String columnLabel) throws InvalidResultSetAccessException;
-
-	/**
-	 * Retrieve the value of the indicated column in the current row
-	 * as an Object.
-	 * @param columnIndex the column index
-	 * @param map a Map object containing the mapping from SQL types to Java types
-	 * @return a Object representing the column value
-	 * @see java.sql.ResultSet#getObject(int, java.util.Map)
-	 */
-	Object getObject(int columnIndex,  Map<String, Class<?>> map) throws InvalidResultSetAccessException;
 
 	/**
 	 * Retrieve the value of the indicated column in the current row
@@ -256,20 +246,30 @@ public interface SqlRowSet extends Serializable {
 	 * Retrieve the value of the indicated column in the current row
 	 * as an Object.
 	 * @param columnLabel the column label
+	 * @return a Object representing the column value
+	 * @see java.sql.ResultSet#getObject(String)
+	 */
+	Object getObject(String columnLabel) throws InvalidResultSetAccessException;
+
+	/**
+	 * Retrieve the value of the indicated column in the current row
+	 * as an Object.
+	 * @param columnIndex the column index
 	 * @param map a Map object containing the mapping from SQL types to Java types
 	 * @return a Object representing the column value
-	 * @see java.sql.ResultSet#getObject(java.lang.String, java.util.Map)
+	 * @see java.sql.ResultSet#getObject(int, Map)
 	 */
-	Object getObject(String columnLabel,  Map<String, Class<?>> map) throws InvalidResultSetAccessException;
+	Object getObject(int columnIndex,  Map<String, Class<?>> map) throws InvalidResultSetAccessException;
 
 	/**
 	 * Retrieve the value of the indicated column in the current row
 	 * as an Object.
 	 * @param columnLabel the column label
+	 * @param map a Map object containing the mapping from SQL types to Java types
 	 * @return a Object representing the column value
-	 * @see java.sql.ResultSet#getObject(java.lang.String)
+	 * @see java.sql.ResultSet#getObject(String, Map)
 	 */
-	Object getObject(String columnLabel) throws InvalidResultSetAccessException;
+	Object getObject(String columnLabel,  Map<String, Class<?>> map) throws InvalidResultSetAccessException;
 
 	/**
 	 * Retrieve the value of the indicated column in the current row
@@ -285,7 +285,7 @@ public interface SqlRowSet extends Serializable {
 	 * as a short.
 	 * @param columnLabel the column label
 	 * @return a short representing the column value
-	 * @see java.sql.ResultSet#getShort(java.lang.String)
+	 * @see java.sql.ResultSet#getShort(String)
 	 */
 	short getShort(String columnLabel) throws InvalidResultSetAccessException;
 
@@ -303,19 +303,9 @@ public interface SqlRowSet extends Serializable {
 	 * as a String.
 	 * @param columnLabel the column label
 	 * @return a String representing the column value
-	 * @see java.sql.ResultSet#getString(java.lang.String)
+	 * @see java.sql.ResultSet#getString(String)
 	 */
 	String getString(String columnLabel) throws InvalidResultSetAccessException;
-
-	/**
-	 * Retrieve the value of the indicated column in the current row
-	 * as a Time object.
-	 * @param columnIndex the column index
-	 * @param cal the Calendar to use in constructing the Date
-	 * @return a Time object representing the column value
-	 * @see java.sql.ResultSet#getTime(int, java.util.Calendar)
-	 */
-	Time getTime(int columnIndex, Calendar cal) throws InvalidResultSetAccessException;
 
 	/**
 	 * Retrieve the value of the indicated column in the current row
@@ -330,30 +320,30 @@ public interface SqlRowSet extends Serializable {
 	 * Retrieve the value of the indicated column in the current row
 	 * as a Time object.
 	 * @param columnLabel the column label
-	 * @param cal the Calendar to use in constructing the Date
 	 * @return a Time object representing the column value
-	 * @see java.sql.ResultSet#getTime(java.lang.String, java.util.Calendar)
-	 */
-	Time getTime(String columnLabel, Calendar cal) throws InvalidResultSetAccessException;
-
-	/**
-	 * Retrieve the value of the indicated column in the current row
-	 * as a Time object.
-	 * @param columnLabel the column label
-	 * @return a Time object representing the column value
-	 * @see java.sql.ResultSet#getTime(java.lang.String)
+	 * @see java.sql.ResultSet#getTime(String)
 	 */
 	Time getTime(String columnLabel) throws InvalidResultSetAccessException;
 
 	/**
 	 * Retrieve the value of the indicated column in the current row
-	 * as a Timestamp object.
+	 * as a Time object.
 	 * @param columnIndex the column index
 	 * @param cal the Calendar to use in constructing the Date
-	 * @return a Timestamp object representing the column value
-	 * @see java.sql.ResultSet#getTimestamp(int, java.util.Calendar)
+	 * @return a Time object representing the column value
+	 * @see java.sql.ResultSet#getTime(int, Calendar)
 	 */
-	Timestamp getTimestamp(int columnIndex, Calendar cal) throws InvalidResultSetAccessException;
+	Time getTime(int columnIndex, Calendar cal) throws InvalidResultSetAccessException;
+
+	/**
+	 * Retrieve the value of the indicated column in the current row
+	 * as a Time object.
+	 * @param columnLabel the column label
+	 * @param cal the Calendar to use in constructing the Date
+	 * @return a Time object representing the column value
+	 * @see java.sql.ResultSet#getTime(String, Calendar)
+	 */
+	Time getTime(String columnLabel, Calendar cal) throws InvalidResultSetAccessException;
 
 	/**
 	 * Retrieve the value of the indicated column in the current row
@@ -368,20 +358,30 @@ public interface SqlRowSet extends Serializable {
 	 * Retrieve the value of the indicated column in the current row
 	 * as a Timestamp object.
 	 * @param columnLabel the column label
+	 * @return a Timestamp object representing the column value
+	 * @see java.sql.ResultSet#getTimestamp(String)
+	 */
+	Timestamp getTimestamp(String columnLabel) throws InvalidResultSetAccessException;
+
+	/**
+	 * Retrieve the value of the indicated column in the current row
+	 * as a Timestamp object.
+	 * @param columnIndex the column index
 	 * @param cal the Calendar to use in constructing the Date
 	 * @return a Timestamp object representing the column value
-	 * @see java.sql.ResultSet#getTimestamp(java.lang.String, java.util.Calendar)
+	 * @see java.sql.ResultSet#getTimestamp(int, Calendar)
 	 */
-	Timestamp getTimestamp(String columnLabel, Calendar cal) throws InvalidResultSetAccessException;
+	Timestamp getTimestamp(int columnIndex, Calendar cal) throws InvalidResultSetAccessException;
 
 	/**
 	 * Retrieve the value of the indicated column in the current row
 	 * as a Timestamp object.
 	 * @param columnLabel the column label
+	 * @param cal the Calendar to use in constructing the Date
 	 * @return a Timestamp object representing the column value
-	 * @see java.sql.ResultSet#getTimestamp(java.lang.String)
+	 * @see java.sql.ResultSet#getTimestamp(String, Calendar)
 	 */
-	Timestamp getTimestamp(String columnLabel) throws InvalidResultSetAccessException;
+	Timestamp getTimestamp(String columnLabel, Calendar cal) throws InvalidResultSetAccessException;
 
 
 	// RowSet navigation methods
