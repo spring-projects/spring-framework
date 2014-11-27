@@ -16,9 +16,7 @@
 
 package org.springframework.web.socket.messaging;
 
-
 import org.springframework.context.ApplicationEvent;
-import org.springframework.messaging.Message;
 import org.springframework.util.Assert;
 import org.springframework.web.socket.CloseStatus;
 
@@ -27,7 +25,7 @@ import org.springframework.web.socket.CloseStatus;
  * Protocol (e.g. STOMP) as the WebSocket sub-protocol is closed.
  *
  * <p>Note that this event may be raised more than once for a single session and
- * therefore event consumers should be idempotent and ignore a duplicate event..
+ * therefore event consumers should be idempotent and ignore a duplicate event.
  *
  * @author Rossen Stoyanchev
  * @since 4.0.3
@@ -39,12 +37,12 @@ public class SessionDisconnectEvent extends ApplicationEvent {
 
 	private final CloseStatus status;
 
+
 	/**
-	 * Create a new event.
-	 *
+	 * Create a new SessionDisconnectEvent.
 	 * @param source the component that published the event (never {@code null})
 	 * @param sessionId the disconnect message
-	 * @param closeStatus
+	 * @param closeStatus the status object
 	 */
 	public SessionDisconnectEvent(Object source, String sessionId, CloseStatus closeStatus) {
 		super(source);
@@ -52,6 +50,7 @@ public class SessionDisconnectEvent extends ApplicationEvent {
 		this.sessionId = sessionId;
 		this.status = closeStatus;
 	}
+
 
 	/**
 	 * Return the session id.
@@ -71,4 +70,5 @@ public class SessionDisconnectEvent extends ApplicationEvent {
 	public String toString() {
 		return "SessionDisconnectEvent: sessionId=" + this.sessionId;
 	}
+
 }

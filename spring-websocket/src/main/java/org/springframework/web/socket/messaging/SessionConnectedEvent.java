@@ -16,7 +16,6 @@
 
 package org.springframework.web.socket.messaging;
 
-
 import org.springframework.context.ApplicationEvent;
 import org.springframework.messaging.Message;
 import org.springframework.util.Assert;
@@ -35,16 +34,16 @@ public class SessionConnectedEvent extends ApplicationEvent {
 
 
 	/**
-	 * Create a new event.
-	 *
+	 * Create a new SessionConnectedEvent.
 	 * @param source the component that published the event (never {@code null})
 	 * @param message the connected message
 	 */
 	public SessionConnectedEvent(Object source, Message<byte[]> message) {
 		super(source);
-		Assert.notNull(message, "'message' must not be null");
+		Assert.notNull(message, "Message must not be null");
 		this.message = message;
 	}
+
 
 	/**
 	 * Return the connected message.
@@ -53,9 +52,9 @@ public class SessionConnectedEvent extends ApplicationEvent {
 		return this.message;
 	}
 
-
 	@Override
 	public String toString() {
-		return "SessionConnectedEvent: message=" + message;
+		return "SessionConnectedEvent: message=" + this.message;
 	}
+
 }

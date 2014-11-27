@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,15 +16,14 @@
 
 package org.springframework.web.socket;
 
-import org.eclipse.jetty.websocket.api.StatusCode;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 
 /**
  * Represents a WebSocket close status code and reason. Status codes in the 1xxx range are
  * pre-defined by the protocol. Optionally, a status code may be sent with a reason.
- * <p>
- * See <a href="https://tools.ietf.org/html/rfc6455#section-7.4.1">RFC 6455, Section 7.4.1
+ *
+ * <p>See <a href="https://tools.ietf.org/html/rfc6455#section-7.4.1">RFC 6455, Section 7.4.1
  * "Defined Status Codes"</a>.
  *
  * @author Rossen Stoyanchev
@@ -133,16 +132,14 @@ public final class CloseStatus {
 	 */
 	public static final CloseStatus TLS_HANDSHAKE_FAILURE = new CloseStatus(1015);
 
-
 	/**
-	 * Indicates that a session has become unreliable (e.g. timed out while sending
-	 * a message) and extra care should be exercised while closing the session in
-	 * order to avoid locking additional threads.
-	 *
-	 * <p><strong>NOTE:</strong> Spring Framework specific status code.
+	 * A status code for use within the framework the indicate a session has
+	 * become unreliable (e.g. timed out while sending a message) and extra
+	 * care should be exercised, e.g. avoid sending any further data to the
+	 * client that may be done during normal shutdown.
+	 * @since 4.0.3
 	 */
 	public static final CloseStatus SESSION_NOT_RELIABLE = new CloseStatus(4500);
-
 
 
 	private final int code;
@@ -164,39 +161,39 @@ public final class CloseStatus {
 	 * @param reason the reason
 	 */
 	public CloseStatus(int code, String reason) {
-		Assert.isTrue((code >= 1000 && code < 5000), "Invalid code");
+		Assert.isTrue((code >= 1000 && code < 5000), "Invalid status code");
 		this.code = code;
 		this.reason = reason;
 	}
 
 
 	/**
-	 * Returns the status code.
+	 * Return the status code.
 	 */
 	public int getCode() {
 		return this.code;
 	}
 
 	/**
-	 * Returns the reason or {@code null}.
+	 * Return the reason, or {@code null} if none.
 	 */
 	public String getReason() {
 		return this.reason;
 	}
 
 	/**
-	 * Crate a new {@link CloseStatus} from this one with the specified reason.
+	 * Create a new {@link CloseStatus} from this one with the specified reason.
 	 * @param reason the reason
-	 * @return a new {@link StatusCode} instance
+	 * @return a new {@link CloseStatus} instance
 	 */
 	public CloseStatus withReason(String reason) {
 		Assert.hasText(reason, "Reason must not be empty");
 		return new CloseStatus(this.code, reason);
 	}
 
-	@Override
-	public int hashCode() {
-		return this.code * 29 + ObjectUtils.nullSafeHashCode(this.reason);
+
+	public boolean equalsCode(CloseStatus other) {
+		return (this.code == other.code);
 	}
 
 	@Override
@@ -211,13 +208,14 @@ public final class CloseStatus {
 		return (this.code == otherStatus.code && ObjectUtils.nullSafeEquals(this.reason, otherStatus.reason));
 	}
 
-	public boolean equalsCode(CloseStatus other) {
-		return this.code == other.code;
+	@Override
+	public int hashCode() {
+		return this.code * 29 + ObjectUtils.nullSafeHashCode(this.reason);
 	}
 
 	@Override
 	public String toString() {
-		return "CloseStatus [code=" + this.code + ", reason=" + this.reason + "]";
+		return "CloseStatus[code=" + this.code + ", reason=" + this.reason + "]";
 	}
 
 }
