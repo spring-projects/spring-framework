@@ -29,14 +29,14 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.jdbc.InvalidResultSetAccessException;
+import org.springframework.lang.UsesJava7;
 
 /**
- * Default implementation of Spring's {@link SqlRowSet} interface.
+ * The default implementation of Spring's {@link SqlRowSet} interface, wrapping a
+ * {@link java.sql.ResultSet}, catching any {@link SQLException}s and translating
+ * them to a corresponding Spring {@link InvalidResultSetAccessException}.
  *
- * <p>This implementation wraps a {@code javax.sql.ResultSet}, catching any SQLExceptions
- * and translating them to the appropriate Spring {@link InvalidResultSetAccessException}.
- *
- * <p>The passed-in ResultSets should already be disconnected if the SqlRowSet is supposed
+ * <p>The passed-in ResultSet should already be disconnected if the SqlRowSet is supposed
  * to be usable in a disconnected fashion. This means that you will usually pass in a
  * {@code javax.sql.rowset.CachedRowSet}, which implements the ResultSet interface.
  *
@@ -412,6 +412,7 @@ public class ResultSetWrappingSqlRowSet implements SqlRowSet {
 	/**
 	 * @see java.sql.ResultSet#getObject(int, Class)
 	 */
+	@UsesJava7
 	@Override
 	public <T> T getObject(int columnIndex, Class<T> type) throws InvalidResultSetAccessException {
 		try {

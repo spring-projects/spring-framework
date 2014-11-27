@@ -30,14 +30,14 @@ import org.springframework.jdbc.InvalidResultSetAccessException;
  * Mirror interface for {@link javax.sql.RowSet}, representing
  * disconnected {@link java.sql.ResultSet} data.
  *
- * <p>The main difference to the standard JDBC RowSet is that an SQLException
- * is never thrown here. This allows a SqlRowSet to be used without having
- * to deal with checked exceptions. A SqlRowSet will throw Spring's
- * {@code org.springframework.jdbc.InvalidResultSetAccessException}
+ * <p>The main difference to the standard JDBC RowSet is that a
+ * {@link java.sql.SQLException} is never thrown here. This allows a
+ * SqlRowSet to be used without having to deal with checked exceptions.
+ * A SqlRowSet will throw Spring's {@link InvalidResultSetAccessException}
  * instead (when appropriate).
  *
- * <p>Note: This interface extends the {@code java.io.Serializable}
- * marker interface. Implementations, which typically hold disconnected data,
+ * <p>Note: This interface extends the {@code java.io.Serializable} marker
+ * interface. Implementations, which typically hold disconnected data,
  * are encouraged to be actually serializable (as far as possible).
  *
  * @author Thomas Risberg
