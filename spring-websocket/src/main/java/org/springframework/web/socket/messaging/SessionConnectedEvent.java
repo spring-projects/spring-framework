@@ -16,13 +16,11 @@
 
 package org.springframework.web.socket.messaging;
 
-
 import org.springframework.messaging.Message;
 
 /**
  * A connected event represents the server response to a client's connect request.
- * See {@link org.springframework.web.socket.messaging.SessionConnectEvent
- * SessionConnectEvent}.
+ * See {@link org.springframework.web.socket.messaging.SessionConnectEvent}.
  *
  * @author Rossen Stoyanchev
  * @since 4.0.3
@@ -30,7 +28,11 @@ import org.springframework.messaging.Message;
 @SuppressWarnings("serial")
 public class SessionConnectedEvent extends AbstractSubProtocolEvent {
 
-
+	/**
+	 * Create a new SessionConnectedEvent.
+	 * @param source the component that published the event (never {@code null})
+	 * @param message the connected message
+	 */
 	public SessionConnectedEvent(Object source, Message<byte[]> message) {
 		super(source, message);
 	}
