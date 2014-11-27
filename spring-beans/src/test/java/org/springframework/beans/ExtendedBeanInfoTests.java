@@ -875,6 +875,15 @@ public class ExtendedBeanInfoTests {
 		}
 	}
 
+	@Test  // SPR-12434
+	public void shouldDetectValidPropertiesAndIgnoreInvalidProperties() throws IntrospectionException {
+		BeanInfo bi = new ExtendedBeanInfo(Introspector.getBeanInfo(java.awt.Window.class));
+		assertThat(hasReadMethodForProperty(bi, "locationByPlatform"), is(true));
+		assertThat(hasWriteMethodForProperty(bi, "locationByPlatform"), is(true));
+		assertThat(hasIndexedReadMethodForProperty(bi, "locationByPlatform"), is(false));
+		assertThat(hasIndexedWriteMethodForProperty(bi, "locationByPlatform"), is(false));
+	}
+
 
 	private boolean hasWriteMethodForProperty(BeanInfo beanInfo, String propertyName) {
 		for (PropertyDescriptor pd : beanInfo.getPropertyDescriptors()) {

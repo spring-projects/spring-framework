@@ -34,6 +34,9 @@ import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import org.springframework.util.ObjectUtils;
 
 /**
@@ -72,6 +75,8 @@ import org.springframework.util.ObjectUtils;
  */
 class ExtendedBeanInfo implements BeanInfo {
 
+	private static final Log logger = LogFactory.getLog(ExtendedBeanInfo.class);
+
 	private final BeanInfo delegate;
 
 	private final Set<PropertyDescriptor> propertyDescriptors =
@@ -93,14 +98,30 @@ class ExtendedBeanInfo implements BeanInfo {
 	public ExtendedBeanInfo(BeanInfo delegate) throws IntrospectionException {
 		this.delegate = delegate;
 		for (PropertyDescriptor pd : delegate.getPropertyDescriptors()) {
-			this.propertyDescriptors.add(pd instanceof IndexedPropertyDescriptor ?
-					new SimpleIndexedPropertyDescriptor((IndexedPropertyDescriptor) pd) :
-					new SimplePropertyDescriptor(pd));
+			try {
+				this.propertyDescriptors.add(pd instanceof IndexedPropertyDescriptor ?
+						new SimpleIndexedPropertyDescriptor((IndexedPropertyDescriptor) pd) :
+						new SimplePropertyDescriptor(pd));
+			}
+			catch (IntrospectionException ex) {
+				// Probably simply a method that wasn't meant to follow the JavaBeans pattern...
+				if (logger.isDebugEnabled()) {
+					logger.debug("Ignoring invalid bean property '" + pd.getName() + "': " + ex.getMessage());
+				}
+			}
 		}
 		MethodDescriptor[] methodDescriptors = delegate.getMethodDescriptors();
 		if (methodDescriptors != null) {
 			for (Method method : findCandidateWriteMethods(methodDescriptors)) {
-				handleCandidateWriteMethod(method);
+				try {
+					handleCandidateWriteMethod(method);
+				}
+				catch (IntrospectionException ex) {
+					// We're only trying to find candidates, can easily ignore extra ones here...
+					if (logger.isDebugEnabled()) {
+						logger.debug("Ignoring candidate write method [" + method + "]: " + ex.getMessage());
+					}
+				}
 			}
 		}
 	}
@@ -130,9 +151,9 @@ class ExtendedBeanInfo implements BeanInfo {
 		String methodName = method.getName();
 		Class<?>[] parameterTypes = method.getParameterTypes();
 		int nParams = parameterTypes.length;
-		return methodName.length() > 3 && methodName.startsWith("set") && Modifier.isPublic(method.getModifiers()) &&
+		return (methodName.length() > 3 && methodName.startsWith("set") && Modifier.isPublic(method.getModifiers()) &&
 				(!void.class.isAssignableFrom(method.getReturnType()) || Modifier.isStatic(method.getModifiers())) &&
-				(nParams == 1 || (nParams == 2 && parameterTypes[0].equals(int.class)));
+				(nParams == 1 || (nParams == 2 && parameterTypes[0].equals(int.class))));
 	}
 
 	private void handleCandidateWriteMethod(Method method) throws IntrospectionException {
