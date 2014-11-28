@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -445,8 +446,6 @@ public class GenericConversionServiceTests {
 		System.out.println(watch.prettyPrint());
 	}
 
-	public static List<Integer> list;
-
 	@Test
 	public void testPerformance3() throws Exception {
 		Assume.group(TestGroup.PERFORMANCE);
@@ -473,8 +472,6 @@ public class GenericConversionServiceTests {
 		System.out.println(watch.prettyPrint());
 	}
 
-	public static Map<String, Integer> map;
-
 	@Test
 	public void emptyListToArray() {
 		conversionService.addConverter(new CollectionToArrayConverter(conversionService));
@@ -483,7 +480,7 @@ public class GenericConversionServiceTests {
 		TypeDescriptor sourceType = TypeDescriptor.forObject(list);
 		TypeDescriptor targetType = TypeDescriptor.valueOf(String[].class);
 		assertTrue(conversionService.canConvert(sourceType, targetType));
-		assertEquals(0, ((String[])conversionService.convert(list, sourceType, targetType)).length);
+		assertEquals(0, ((String[]) conversionService.convert(list, sourceType, targetType)).length);
 	}
 
 	@Test
@@ -497,82 +494,6 @@ public class GenericConversionServiceTests {
 		assertNull(conversionService.convert(list, sourceType, targetType));
 	}
 
-	private interface MyBaseInterface {
-
-	}
-
-
-	private interface MyInterface extends MyBaseInterface {
-
-	}
-
-
-	private static class MyInterfaceImplementer implements MyInterface {
-
-	}
-
-
-	private static class MyBaseInterfaceConverter implements Converter<MyBaseInterface, String> {
-
-		@Override
-		public String convert(MyBaseInterface source) {
-			return "RESULT";
-		}
-	}
-
-
-	private static class MyStringArrayToResourceArrayConverter implements Converter<String[], Resource[]>	{
-
-		@Override
-		public Resource[] convert(String[] source) {
-			Resource[] result = new Resource[source.length];
-			for (int i = 0; i < source.length; i++) {
-				result[i] = new DescriptiveResource(source[i].substring(1));
-			}
-			return result;
-		}
-	}
-
-
-	private static class MyStringArrayToIntegerArrayConverter implements Converter<String[], Integer[]>	{
-
-		@Override
-		public Integer[] convert(String[] source) {
-			Integer[] result = new Integer[source.length];
-			for (int i = 0; i < source.length; i++) {
-				result[i] = Integer.parseInt(source[i].substring(1));
-			}
-			return result;
-		}
-	}
-
-
-	private static class MyStringToIntegerArrayConverter implements Converter<String, Integer[]>	{
-
-		@Override
-		public Integer[] convert(String source) {
-			String[] srcArray = StringUtils.commaDelimitedListToStringArray(source);
-			Integer[] result = new Integer[srcArray.length];
-			for (int i = 0; i < srcArray.length; i++) {
-				result[i] = Integer.parseInt(srcArray[i].substring(1));
-			}
-			return result;
-		}
-	}
-
-
-	public static class WithCopyConstructor {
-
-		public WithCopyConstructor() {
-		}
-
-		public WithCopyConstructor(WithCopyConstructor value) {
-		}
-	}
-
-
-	public static Map<String, ?> wildcardMap;
-
 	@Test
 	public void stringToArrayCanConvert() {
 		conversionService.addConverter(new StringToArrayConverter(conversionService));
@@ -585,13 +506,11 @@ public class GenericConversionServiceTests {
 	public void stringToCollectionCanConvert() throws Exception {
 		conversionService.addConverter(new StringToCollectionConverter(conversionService));
 		assertTrue(conversionService.canConvert(String.class, Collection.class));
-		TypeDescriptor targetType = new TypeDescriptor(getClass().getField("stringToCollection"));
+		TypeDescriptor targetType = new TypeDescriptor(getClass().getField("integerCollection"));
 		assertFalse(conversionService.canConvert(TypeDescriptor.valueOf(String.class), targetType));
 		conversionService.addConverterFactory(new StringToNumberConverterFactory());
 		assertTrue(conversionService.canConvert(TypeDescriptor.valueOf(String.class), targetType));
 	}
-
-	public Collection<Integer> stringToCollection;
 
 	@Test
 	public void testConvertiblePairsInSet() {
@@ -782,6 +701,13 @@ public class GenericConversionServiceTests {
 	}
 
 	@Test
+	public void testStringToEnumSet() throws Exception {
+		DefaultConversionService.addDefaultConverters(conversionService);
+		assertEquals(EnumSet.of(MyEnum.A),
+				conversionService.convert("A", TypeDescriptor.valueOf(String.class), new TypeDescriptor(getClass().getField("enumSet"))));
+	}
+
+	@Test
 	public void convertNullAnnotatedStringToString() throws Exception {
 		DefaultConversionService.addDefaultConverters(conversionService);
 		String source = null;
@@ -870,15 +796,80 @@ public class GenericConversionServiceTests {
 	}
 
 
-	@ExampleAnnotation
-	public String annotatedString;
-
-
 	@Retention(RetentionPolicy.RUNTIME)
 	public static @interface ExampleAnnotation {
 	}
 
 
+	private interface MyBaseInterface {
+	}
+
+
+	private interface MyInterface extends MyBaseInterface {
+	}
+
+
+	private static class MyInterfaceImplementer implements MyInterface {
+	}
+
+
+	private static class MyBaseInterfaceConverter implements Converter<MyBaseInterface, String> {
+
+		@Override
+		public String convert(MyBaseInterface source) {
+			return "RESULT";
+		}
+	}
+
+
+	private static class MyStringArrayToResourceArrayConverter implements Converter<String[], Resource[]>	{
+
+		@Override
+		public Resource[] convert(String[] source) {
+			Resource[] result = new Resource[source.length];
+			for (int i = 0; i < source.length; i++) {
+				result[i] = new DescriptiveResource(source[i].substring(1));
+			}
+			return result;
+		}
+	}
+
+
+	private static class MyStringArrayToIntegerArrayConverter implements Converter<String[], Integer[]>	{
+
+		@Override
+		public Integer[] convert(String[] source) {
+			Integer[] result = new Integer[source.length];
+			for (int i = 0; i < source.length; i++) {
+				result[i] = Integer.parseInt(source[i].substring(1));
+			}
+			return result;
+		}
+	}
+
+
+	private static class MyStringToIntegerArrayConverter implements Converter<String, Integer[]>	{
+
+		@Override
+		public Integer[] convert(String source) {
+			String[] srcArray = StringUtils.commaDelimitedListToStringArray(source);
+			Integer[] result = new Integer[srcArray.length];
+			for (int i = 0; i < srcArray.length; i++) {
+				result[i] = Integer.parseInt(srcArray[i].substring(1));
+			}
+			return result;
+		}
+	}
+
+
+	public static class WithCopyConstructor {
+
+		public WithCopyConstructor() {
+		}
+
+		public WithCopyConstructor(WithCopyConstructor value) {
+		}
+	}
 	private static class MyConditionalConverter implements Converter<String, Color>, ConditionalConverter {
 
 		private int matchAttempts = 0;
@@ -1062,6 +1053,7 @@ public class GenericConversionServiceTests {
 		}
 
 		private static class StringToMyEnumBaseInterfaceConverter<T extends Enum<?> & MyEnumBaseInterface> implements Converter<String, T> {
+
 			private final Class<T> enumType;
 
 			public StringToMyEnumBaseInterfaceConverter(Class<T> enumType) {
@@ -1097,6 +1089,17 @@ public class GenericConversionServiceTests {
 		}
 	}
 
+
+	@ExampleAnnotation
+	public String annotatedString;
+
+	public List<Integer> list;
+
+	public Map<String, Integer> map;
+
+	public Map<String, ?> wildcardMap;
+
+	public EnumSet<MyEnum> enumSet;
 
 	public Collection rawCollection;
 

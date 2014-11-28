@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.core.convert.support;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -39,10 +40,12 @@ public class MapToMapConverterTests {
 
 	private GenericConversionService conversionService = new GenericConversionService();
 
+
 	@Before
 	public void setUp() {
 		conversionService.addConverter(new MapToMapConverter(conversionService));
 	}
+
 
 	@Test
 	public void scalarMap() throws Exception {
@@ -65,8 +68,6 @@ public class MapToMapConverterTests {
 		assertEquals((Integer) 9, result.get(1));
 		assertEquals((Integer) 37, result.get(2));
 	}
-
-	public Map<Integer, Integer> scalarMapTarget;
 
 	@Test
 	public void scalarMapNotGenericTarget() throws Exception {
@@ -99,8 +100,6 @@ public class MapToMapConverterTests {
 		assertEquals((Integer) 37, result.get(2));
 	}
 
-	public Map notGenericMapSource;
-
 	@Test
 	public void collectionMap() throws Exception {
 		Map<String, List<String>> map = new HashMap<String, List<String>>();
@@ -124,8 +123,6 @@ public class MapToMapConverterTests {
 		assertEquals(Arrays.asList(37, 23), result.get(2));
 	}
 
-	public Map<Integer, List<Integer>> collectionMapTarget;
-
 	@Test
 	public void collectionMapSourceTarget() throws Exception {
 		Map<String, List<String>> map = new HashMap<String, List<String>>();
@@ -137,8 +134,9 @@ public class MapToMapConverterTests {
 		try {
 			conversionService.convert(map, sourceType, targetType);
 			fail("Should have failed");
-		} catch (ConverterNotFoundException e) {
-
+		}
+		catch (ConverterNotFoundException ex) {
+			// expected
 		}
 		conversionService.addConverter(new CollectionToCollectionConverter(conversionService));
 		conversionService.addConverterFactory(new StringToNumberConverterFactory());
@@ -149,8 +147,6 @@ public class MapToMapConverterTests {
 		assertEquals(Arrays.asList(9, 12), result.get(1));
 		assertEquals(Arrays.asList(37, 23), result.get(2));
 	}
-
-	public Map<String, List<String>> sourceCollectionMapTarget;
 
 	@Test
 	public void collectionMapNotGenericTarget() throws Exception {
@@ -181,8 +177,6 @@ public class MapToMapConverterTests {
 		assertSame(map, conversionService.convert(map, sourceType, targetType));
 	}
 
-	public Map<String, String> emptyMapTarget;
-
 	@Test
 	public void emptyMapNoTargetGenericInfo() throws Exception {
 		Map<String, String> map = new HashMap<String, String>();
@@ -202,8 +196,6 @@ public class MapToMapConverterTests {
 		assertEquals(LinkedHashMap.class, result.getClass());
 	}
 
-	public LinkedHashMap<String, String> emptyMapDifferentTarget;
-
 	@Test
 	public void noDefaultConstructorCopyNotRequired() throws Exception {
 		// SPR-9284
@@ -219,8 +211,6 @@ public class MapToMapConverterTests {
 		assertEquals(map, result);
 		assertEquals(NoDefaultConstructorMap.class, result.getClass());
 	}
-
-	public MultiValueMap<String, String> multiValueMapTarget;
 
 	@Test
 	@SuppressWarnings("unchecked")
@@ -250,11 +240,46 @@ public class MapToMapConverterTests {
 		assertThat(converted.get("b"), equalTo(Arrays.asList("2")));
 	}
 
+	@Test
+	public void testStringToEnumMap() throws Exception {
+		conversionService.addConverterFactory(new StringToEnumConverterFactory());
+		Map<String, Integer> source = new HashMap<String, Integer>();
+		source.put("A", 1);
+		source.put("C", 2);
+		EnumMap<MyEnum, Integer> result = new EnumMap<MyEnum, Integer>(MyEnum.class);
+		result.put(MyEnum.A, 1);
+		result.put(MyEnum.C, 2);
+		assertEquals(result,
+				conversionService.convert(source, TypeDescriptor.forObject(source), new TypeDescriptor(getClass().getField("enumMap"))));
+	}
+
+
 	@SuppressWarnings("serial")
 	public static class NoDefaultConstructorMap<K, V> extends HashMap<K, V> {
-		public NoDefaultConstructorMap(Map<? extends K, ? extends V> m) {
-			super(m);
+
+		public NoDefaultConstructorMap(Map<? extends K, ? extends V> map) {
+			super(map);
 		}
 	}
+
+
+	public static enum MyEnum {A, B, C}
+
+
+	public Map<Integer, Integer> scalarMapTarget;
+
+	public Map<Integer, List<Integer>> collectionMapTarget;
+
+	public Map<String, List<String>> sourceCollectionMapTarget;
+
+	public Map<String, String> emptyMapTarget;
+
+	public LinkedHashMap<String, String> emptyMapDifferentTarget;
+
+	public MultiValueMap<String, String> multiValueMapTarget;
+
+	public Map notGenericMapSource;
+
+	public EnumMap<MyEnum, Integer> enumMap;
 
 }

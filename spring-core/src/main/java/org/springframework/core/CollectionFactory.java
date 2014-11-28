@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,8 @@ package org.springframework.core;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.EnumMap;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -33,6 +35,7 @@ import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+import org.springframework.util.Assert;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
@@ -72,9 +75,11 @@ public abstract class CollectionFactory {
 		approximableCollectionTypes.add(HashSet.class);
 		approximableCollectionTypes.add(LinkedHashSet.class);
 		approximableCollectionTypes.add(TreeSet.class);
+		approximableCollectionTypes.add(EnumSet.class);
 		approximableMapTypes.add(HashMap.class);
 		approximableMapTypes.add(LinkedHashMap.class);
 		approximableMapTypes.add(TreeMap.class);
+		approximableMapTypes.add(EnumMap.class);
 	}
 
 
@@ -91,68 +96,87 @@ public abstract class CollectionFactory {
 
 	/**
 	 * Create the most approximate collection for the given collection.
-	 * <p>Creates an ArrayList, TreeSet or linked Set for a List, SortedSet
-	 * or Set, respectively.
 	 * @param collection the original Collection object
-	 * @param initialCapacity the initial capacity
+	 * @param capacity the initial capacity
 	 * @return the new Collection instance
-	 * @see java.util.ArrayList
-	 * @see java.util.TreeSet
 	 * @see java.util.LinkedHashSet
+	 * @see java.util.TreeSet
+	 * @see java.util.EnumSet
+	 * @see java.util.ArrayList
+	 * @see java.util.LinkedList
 	 */
 	@SuppressWarnings("unchecked")
-	public static <E> Collection<E> createApproximateCollection(Object collection, int initialCapacity) {
+	public static <E> Collection<E> createApproximateCollection(Object collection, int capacity) {
 		if (collection instanceof LinkedList) {
 			return new LinkedList<E>();
 		}
 		else if (collection instanceof List) {
-			return new ArrayList<E>(initialCapacity);
+			return new ArrayList<E>(capacity);
+		}
+		else if (collection instanceof EnumSet) {
+			return EnumSet.copyOf((Collection) collection);
 		}
 		else if (collection instanceof SortedSet) {
 			return new TreeSet<E>(((SortedSet<E>) collection).comparator());
 		}
 		else {
-			return new LinkedHashSet<E>(initialCapacity);
+			return new LinkedHashSet<E>(capacity);
 		}
 	}
 
 	/**
 	 * Create the most appropriate collection for the given collection type.
-	 * <p>Creates an ArrayList, TreeSet or linked Set for a List, SortedSet
-	 * or Set, respectively.
-	 * @param collectionType the desired type of the target Collection
-	 * @param initialCapacity the initial capacity
+	 * <p>Delegates to {@link #createCollection(Class, Class, int)} with a
+	 * {@code null} element type.
+	 * @param collectionClass the desired type of the target Collection
+	 * @param capacity the initial capacity
 	 * @return the new Collection instance
-	 * @see java.util.ArrayList
-	 * @see java.util.TreeSet
+	 */
+	public static <E> Collection<E> createCollection(Class<?> collectionClass, int capacity) {
+		return createCollection(collectionClass, null, capacity);
+	}
+
+	/**
+	 * Create the most appropriate collection for the given collection type.
+	 * @param collectionClass the desired type of the target Collection
+	 * @param elementType the collection's element type, or {@code null} if not known
+	 * @param capacity the initial capacity
+	 * @return the new Collection instance
 	 * @see java.util.LinkedHashSet
+	 * @see java.util.TreeSet
+	 * @see java.util.EnumSet
+	 * @see java.util.ArrayList
 	 */
 	@SuppressWarnings("unchecked")
-	public static <E> Collection<E> createCollection(Class<?> collectionType, int initialCapacity) {
-		if (collectionType.isInterface()) {
-			if (List.class.equals(collectionType)) {
-				return new ArrayList<E>(initialCapacity);
+	public static <E> Collection<E> createCollection(Class<?> collectionClass, Class<?> elementType, int capacity) {
+		if (collectionClass.isInterface()) {
+			if (Set.class.equals(collectionClass) || Collection.class.equals(collectionClass)) {
+				return new LinkedHashSet<E>(capacity);
 			}
-			else if (SortedSet.class.equals(collectionType) || NavigableSet.class.equals(collectionType)) {
+			else if (List.class.equals(collectionClass)) {
+				return new ArrayList<E>(capacity);
+			}
+			else if (SortedSet.class.equals(collectionClass) || NavigableSet.class.equals(collectionClass)) {
 				return new TreeSet<E>();
 			}
-			else if (Set.class.equals(collectionType) || Collection.class.equals(collectionType)) {
-				return new LinkedHashSet<E>(initialCapacity);
-			}
 			else {
-				throw new IllegalArgumentException("Unsupported Collection interface: " + collectionType.getName());
+				throw new IllegalArgumentException("Unsupported Collection interface: " + collectionClass.getName());
 			}
 		}
+		else if (EnumSet.class.equals(collectionClass)) {
+			Assert.notNull(elementType, "Cannot create EnumSet for unknown element type");
+			return EnumSet.noneOf((Class) elementType);
+		}
 		else {
-			if (!Collection.class.isAssignableFrom(collectionType)) {
-				throw new IllegalArgumentException("Unsupported Collection type: " + collectionType.getName());
+			if (!Collection.class.isAssignableFrom(collectionClass)) {
+				throw new IllegalArgumentException("Unsupported Collection type: " + collectionClass.getName());
 			}
 			try {
-				return (Collection<E>) collectionType.newInstance();
+				return (Collection<E>) collectionClass.newInstance();
 			}
 			catch (Exception ex) {
-				throw new IllegalArgumentException("Could not instantiate Collection type: " +
-						collectionType.getName(), ex);
+				throw new IllegalArgumentException(
+						"Could not instantiate Collection type: " + collectionClass.getName(), ex);
 			}
 		}
 	}
@@ -170,58 +194,78 @@ public abstract class CollectionFactory {
 
 	/**
 	 * Create the most approximate map for the given map.
-	 * <p>Creates a TreeMap or linked Map for a SortedMap or Map, respectively.
 	 * @param map the original Map object
-	 * @param initialCapacity the initial capacity
+	 * @param capacity the initial capacity
 	 * @return the new Map instance
 	 * @see java.util.TreeMap
 	 * @see java.util.LinkedHashMap
 	 */
-	@SuppressWarnings("unchecked")
-	public static <K, V> Map<K, V> createApproximateMap(Object map, int initialCapacity) {
-		if (map instanceof SortedMap) {
+	@SuppressWarnings({"unchecked", "rawtypes"})
+	public static <K, V> Map<K, V> createApproximateMap(Object map, int capacity) {
+		if (map instanceof EnumMap) {
+			return new EnumMap((Map) map);
+		}
+		else if (map instanceof SortedMap) {
 			return new TreeMap<K, V>(((SortedMap<K, V>) map).comparator());
 		}
 		else {
-			return new LinkedHashMap<K, V>(initialCapacity);
+			return new LinkedHashMap<K, V>(capacity);
 		}
 	}
 
 	/**
 	 * Create the most approximate map for the given map.
-	 * <p>Creates a TreeMap or linked Map for a SortedMap or Map, respectively.
-	 * @param mapType the desired type of the target Map
-	 * @param initialCapacity the initial capacity
+	 * <p>Delegates to {@link #createMap(Class, Class, int)} with a
+	 * {@code null} key type.
+	 * @param mapClass the desired type of the target Map
+	 * @param capacity the initial capacity
 	 * @return the new Map instance
-	 * @see java.util.TreeMap
-	 * @see java.util.LinkedHashMap
 	 */
-	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public static <K, V> Map<K, V> createMap(Class<?> mapType, int initialCapacity) {
-		if (mapType.isInterface()) {
-			if (Map.class.equals(mapType)) {
-				return new LinkedHashMap<K, V>(initialCapacity);
+	public static <K, V> Map<K, V> createMap(Class<?> mapClass, int capacity) {
+		return createMap(mapClass, null, capacity);
+	}
+
+	/**
+	 * Create the most approximate map for the given map.
+	 * @param mapClass the desired type of the target Map
+	 * @param keyType the map's key type, or {@code null} if not known
+	 * @param capacity the initial capacity
+	 * @return the new Map instance
+	 * @see java.util.LinkedHashMap
+	 * @see java.util.TreeMap
+	 * @see java.util.EnumMap
+	 * @see org.springframework.util.LinkedMultiValueMap
+	 */
+	@SuppressWarnings({"unchecked", "rawtypes"})
+	public static <K, V> Map<K, V> createMap(Class<?> mapClass, Class<?> keyType, int capacity) {
+		if (mapClass.isInterface()) {
+			if (Map.class.equals(mapClass)) {
+				return new LinkedHashMap<K, V>(capacity);
 			}
-			else if (SortedMap.class.equals(mapType) || NavigableMap.class.equals(mapType)) {
+			else if (SortedMap.class.equals(mapClass) || NavigableMap.class.equals(mapClass)) {
 				return new TreeMap<K, V>();
 			}
-			else if (MultiValueMap.class.equals(mapType)) {
+			else if (MultiValueMap.class.equals(mapClass)) {
 				return new LinkedMultiValueMap();
 			}
 			else {
-				throw new IllegalArgumentException("Unsupported Map interface: " + mapType.getName());
+				throw new IllegalArgumentException("Unsupported Map interface: " + mapClass.getName());
 			}
 		}
+		else if (EnumMap.class.equals(mapClass)) {
+			Assert.notNull(keyType, "Cannot create EnumMap for unknown key type");
+			return new EnumMap(keyType);
+		}
 		else {
-			if (!Map.class.isAssignableFrom(mapType)) {
-				throw new IllegalArgumentException("Unsupported Map type: " + mapType.getName());
+			if (!Map.class.isAssignableFrom(mapClass)) {
+				throw new IllegalArgumentException("Unsupported Map type: " + mapClass.getName());
 			}
 			try {
-				return (Map<K, V>) mapType.newInstance();
+				return (Map<K, V>) mapClass.newInstance();
 			}
 			catch (Exception ex) {
-				throw new IllegalArgumentException("Could not instantiate Map type: " +
-						mapType.getName(), ex);
+				throw new IllegalArgumentException(
+						"Could not instantiate Map type: " + mapClass.getName(), ex);
 			}
 		}
 	}
