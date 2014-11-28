@@ -111,8 +111,10 @@ public class DefaultListableBeanFactoryTests {
 
 	private static final Log factoryLog = LogFactory.getLog(DefaultListableBeanFactory.class);
 
+
 	@Rule
 	public ExpectedException thrown = ExpectedException.none();
+
 
 	@Test
 	public void testUnreferencedSingletonWasInstantiated() {
@@ -1199,7 +1201,7 @@ public class DefaultListableBeanFactoryTests {
 
 		RootBeanDefinition rbd = new RootBeanDefinition(PropertiesFactoryBean.class);
 		MutablePropertyValues pvs = new MutablePropertyValues();
-		pvs.add("locations", new String[]{"#{foo}"});
+		pvs.add("locations", new String[] {"#{foo}"});
 		rbd.setPropertyValues(pvs);
 		bf.registerBeanDefinition("myProperties", rbd);
 		Properties properties = (Properties) bf.getBean("myProperties");
