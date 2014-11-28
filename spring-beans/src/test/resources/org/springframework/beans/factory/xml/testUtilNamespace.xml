@@ -15,7 +15,7 @@
 	<util:property-path id="name" path="
 			configuredBean.
 			name
-  "/>
+	"/>
 
 	<bean id="testBean" class="org.springframework.tests.sample.beans.TestBean" scope="prototype">
 		<property name="name">

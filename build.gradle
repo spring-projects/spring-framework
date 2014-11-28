@@ -359,7 +359,7 @@ project("spring-tx") {
 		compile(project(":spring-beans"))
 		compile(project(":spring-core"))
 		optional(project(":spring-aop"))
-		optional(project(":spring-context")) // for JCA, @EnableTransactionManagement
+		optional(project(":spring-context"))  // for JCA, @EnableTransactionManagement
 		optional("aopalliance:aopalliance:1.0")
 		optional("org.apache.geronimo.specs:geronimo-jta_1.1_spec:1.1")
 		optional("javax.resource:connector-api:1.5")
@@ -434,7 +434,7 @@ project("spring-jdbc") {
 		compile(project(":spring-beans"))
 		compile(project(":spring-core"))
 		compile(project(":spring-tx"))
-		optional(project(":spring-context")) // for JndiDataSourceLookup
+		optional(project(":spring-context"))  // for JndiDataSourceLookup
 		optional("org.apache.geronimo.specs:geronimo-jta_1.1_spec:1.1")
 		optional("c3p0:c3p0:0.9.1.2")
 		optional("hsqldb:hsqldb:${hsqldbVersion}")
@@ -452,8 +452,8 @@ project("spring-context-support") {
 		compile(project(":spring-beans"))
 		compile(project(":spring-context"))
 		provided("javax.activation:activation:1.1")
-		optional(project(":spring-jdbc")) // for Quartz support
-		optional(project(":spring-tx")) // for Quartz support
+		optional(project(":spring-jdbc"))  // for Quartz support
+		optional(project(":spring-tx"))  // for Quartz support
 		optional("javax.mail:mail:1.4.7")
 		optional("javax.cache:cache-api:0.5")
 		optional("net.sf.ehcache:ehcache-core:2.0.1")
@@ -464,8 +464,8 @@ project("spring-context-support") {
 		optional("com.lowagie:itext:2.1.7")
 		optional("net.sf.jasperreports:jasperreports:3.7.6")
 		testCompile("org.apache.poi:poi:3.6")
-		testCompile("commons-beanutils:commons-beanutils:1.8.0") // for Velocity/JasperReports
-		testCompile("commons-digester:commons-digester:1.8.1") // for Velocity/JasperReports
+		testCompile("commons-beanutils:commons-beanutils:1.8.0")  // for Velocity/JasperReports
+		testCompile("commons-digester:commons-digester:1.8.1")  // for Velocity/JasperReports
 		testCompile("hsqldb:hsqldb:${hsqldbVersion}")
 		testCompile("org.slf4j:slf4j-api:${slf4jVersion}")
 	}
@@ -478,13 +478,13 @@ project("spring-web") {
 	description = "Spring Web"
 
 	dependencies {
-		compile(project(":spring-aop")) // for JaxWsPortProxyFactoryBean
-		compile(project(":spring-beans")) // for MultiPartFilter
+		compile(project(":spring-aop"))  // for JaxWsPortProxyFactoryBean
+		compile(project(":spring-beans"))  // for MultipartFilter
 		compile(project(":spring-context"))
 		compile(project(":spring-core"))
 		provided("javax.servlet:javax.servlet-api:3.0.1")
 		provided("javax.activation:activation:1.1")
-		optional(project(":spring-oxm")) // for MarshallingHttpMessageConverter
+		optional(project(":spring-oxm"))  // for MarshallingHttpMessageConverter
 		optional("javax.servlet.jsp:jsp-api:2.1")
 		optional("javax.portlet:portlet-api:2.0")
 		optional("javax.el:el-api:1.0")
@@ -578,8 +578,8 @@ project("spring-webmvc") {
 		compile(project(":spring-expression"))
 		compile(project(":spring-web"))
 		provided("javax.servlet:javax.servlet-api:3.0.1")
-		optional(project(":spring-context-support")) // for Velocity support
-		optional(project(":spring-oxm")) // for MarshallingView
+		optional(project(":spring-context-support"))  // for Velocity support
+		optional(project(":spring-oxm"))  // for MarshallingView
 		optional("javax.servlet.jsp:jsp-api:2.1")
 		optional("javax.servlet:jstl:1.2")
 		optional("net.sourceforge.jexcelapi:jxl:2.6.12")
@@ -786,13 +786,13 @@ project("spring-aspects") {
 		rt("org.aspectj:aspectjrt:${aspectjVersion}")
 		compile("org.aspectj:aspectjweaver:${aspectjVersion}")
 		provided("javax.persistence:persistence-api:1.0")
-		optional(project(":spring-aop")) // for @Async support
-		optional(project(":spring-beans")) // for @Configurable support
-		optional(project(":spring-context")) // for @Enable* support
-		optional(project(":spring-context-support")) // for JavaMail support
-		optional(project(":spring-orm")) // for JPA exception translation support
-		optional(project(":spring-tx")) // for JPA, @Transactional support
-		testCompile(project(":spring-core")) // for CodeStyleAspect
+		optional(project(":spring-aop"))  // for @Async support
+		optional(project(":spring-beans"))  // for @Configurable support
+		optional(project(":spring-context"))  // for @Enable* support
+		optional(project(":spring-context-support"))  // for JavaMail support
+		optional(project(":spring-orm"))  // for JPA exception translation support
+		optional(project(":spring-tx"))  // for JPA, @Transactional support
+		testCompile(project(":spring-core"))  // for CodeStyleAspect
 		testCompile(project(":spring-test"))
 		testCompile("javax.mail:mail:1.4.7")
 	}
