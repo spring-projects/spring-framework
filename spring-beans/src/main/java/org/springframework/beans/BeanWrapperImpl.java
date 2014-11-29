@@ -613,16 +613,17 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 	}
 
 	private PropertyValue createDefaultPropertyValue(PropertyTokenHolder tokens) {
-		Class<?> type = getPropertyTypeDescriptor(tokens.canonicalName).getType();
+		TypeDescriptor desc = getPropertyTypeDescriptor(tokens.canonicalName);
+		Class<?> type = desc.getType();
 		if (type == null) {
 			throw new NullValueInNestedPathException(getRootClass(), this.nestedPath + tokens.canonicalName,
 					"Could not determine property type for auto-growing a default value");
 		}
-		Object defaultValue = newValue(type, tokens.canonicalName);
+		Object defaultValue = newValue(type, desc, tokens.canonicalName);
 		return new PropertyValue(tokens.canonicalName, defaultValue);
 	}
 
-	private Object newValue(Class<?> type, String name) {
+	private Object newValue(Class<?> type, TypeDescriptor desc, String name) {
 		try {
 			if (type.isArray()) {
 				Class<?> componentType = type.getComponentType();
@@ -637,17 +638,20 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 				}
 			}
 			else if (Collection.class.isAssignableFrom(type)) {
-				return CollectionFactory.createCollection(type, 16);
+				TypeDescriptor elementDesc = (desc != null ? desc.getElementTypeDescriptor() : null);
+				return CollectionFactory.createCollection(type, (elementDesc != null ? elementDesc.getType() : null), 16);
 			}
 			else if (Map.class.isAssignableFrom(type)) {
-				return CollectionFactory.createMap(type, 16);
+				TypeDescriptor keyDesc = (desc != null ? desc.getMapKeyTypeDescriptor() : null);
+				return CollectionFactory.createMap(type, (keyDesc != null ? keyDesc.getType() : null), 16);
 			}
 			else {
 				return type.newInstance();
 			}
 		}
 		catch (Exception ex) {
-			// TODO Root cause exception context is lost here... should we throw another exception type that preserves context instead?
+			// TODO: Root cause exception context is lost here; just exception message preserved.
+			// Should we throw another exception type that preserves context instead?
 			throw new NullValueInNestedPathException(getRootClass(), this.nestedPath + name,
 					"Could not instantiate property type [" + type.getName() + "] to auto-grow nested property path: " + ex);
 		}
@@ -860,7 +864,7 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 			Object newArray = Array.newInstance(componentType, index + 1);
 			System.arraycopy(array, 0, newArray, 0, length);
 			for (int i = length; i < Array.getLength(newArray); i++) {
-				Array.set(newArray, i, newValue(componentType, name));
+				Array.set(newArray, i, newValue(componentType, null, name));
 			}
 			// TODO this is not efficient because conversion may create a copy ... set directly because we know it is assignable.
 			setPropertyValue(name, newArray);
@@ -882,7 +886,7 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 			Class<?> elementType = GenericCollectionTypeResolver.getCollectionReturnType(pd.getReadMethod(), nestingLevel);
 			if (elementType != null) {
 				for (int i = collection.size(); i < index + 1; i++) {
-					collection.add(newValue(elementType, name));
+					collection.add(newValue(elementType, null, name));
 				}
 			}
 		}

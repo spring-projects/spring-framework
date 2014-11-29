@@ -140,8 +140,10 @@ public abstract class CollectionFactory {
 	 * Create the most appropriate collection for the given collection type.
 	 * @param collectionClass the desired type of the target Collection
 	 * @param elementType the collection's element type, or {@code null} if not known
+	 * (note: only relevant for {@link EnumSet} creation)
 	 * @param capacity the initial capacity
 	 * @return the new Collection instance
+	 * @since 4.1.3
 	 * @see java.util.LinkedHashSet
 	 * @see java.util.TreeSet
 	 * @see java.util.EnumSet
@@ -229,8 +231,10 @@ public abstract class CollectionFactory {
 	 * Create the most approximate map for the given map.
 	 * @param mapClass the desired type of the target Map
 	 * @param keyType the map's key type, or {@code null} if not known
+	 * (note: only relevant for {@link EnumMap} creation)
 	 * @param capacity the initial capacity
 	 * @return the new Map instance
+	 * @since 4.1.3
 	 * @see java.util.LinkedHashMap
 	 * @see java.util.TreeMap
 	 * @see java.util.EnumMap
