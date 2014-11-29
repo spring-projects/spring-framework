@@ -141,7 +141,7 @@ public class TypeDescriptor implements Serializable {
 	 * <p>Returns primitive types as-is.
 	 * <p>See {@link #getObjectType()} for a variation of this operation that
 	 * resolves primitive types to their corresponding Object types if necessary.
-	 * @return the type, or {@code null}
+	 * @return the type, or {@code null} if it cannot be determined
 	 * @see #getObjectType()
 	 */
 	public Class<?> getType() {

@@ -61,7 +61,7 @@ public interface ConfigurablePropertyAccessor extends PropertyAccessor, Property
 	 * <p>If {@code true}, a {@code null} path location will be populated
 	 * with a default object value and traversed instead of resulting in a
 	 * {@link NullValueInNestedPathException}.
-	 * <p>Default is {@code false} on a plain instance.
+	 * <p>Default is {@code false} on a plain PropertyAccessor instance.
 	 */
 	void setAutoGrowNestedPaths(boolean autoGrowNestedPaths);
 
