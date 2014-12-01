@@ -40,8 +40,8 @@ public abstract class OrderUtils {
 			priorityAnnotationType = (Class<? extends Annotation>)
 					ClassUtils.forName("javax.annotation.Priority", OrderUtils.class.getClassLoader());
 		}
-		catch (ClassNotFoundException ex) {
-			// javax.annotation.Priority not available
+		catch (Throwable ex) {
+			// javax.annotation.Priority not available, or present but not loadable (on JDK 6)
 		}
 	}
 
