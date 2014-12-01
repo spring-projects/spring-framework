@@ -214,7 +214,7 @@ public class AnnotationConfigUtils {
 		if (metadata.isAnnotated(Lazy.class.getName())) {
 			abd.setLazyInit(attributesFor(metadata, Lazy.class).getBoolean("value"));
 		}
-		else if (abd.getMetadata().isAnnotated(Lazy.class.getName())) {
+		else if (abd.getMetadata() != metadata && abd.getMetadata().isAnnotated(Lazy.class.getName())) {
 			abd.setLazyInit(attributesFor(abd.getMetadata(), Lazy.class).getBoolean("value"));
 		}
 
