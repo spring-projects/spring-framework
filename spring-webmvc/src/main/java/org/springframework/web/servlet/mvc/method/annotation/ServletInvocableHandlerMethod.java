@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -75,12 +75,13 @@ public class ServletInvocableHandlerMethod extends InvocableHandlerMethod {
 	}
 
 	private void initResponseStatus() {
-		ResponseStatus annot = getMethodAnnotation(ResponseStatus.class);
-		if (annot != null) {
-			this.responseStatus = annot.value();
-			this.responseReason = annot.reason();
+		ResponseStatus annotation = getMethodAnnotation(ResponseStatus.class);
+		if (annotation != null) {
+			this.responseStatus = annotation.value();
+			this.responseReason = annotation.reason();
 		}
 	}
+
 
 	/**
 	 * Register {@link HandlerMethodReturnValueHandler} instances to use to
@@ -91,18 +92,16 @@ public class ServletInvocableHandlerMethod extends InvocableHandlerMethod {
 	}
 
 	/**
-	 * Invokes the method and handles the return value through a registered
-	 * {@link HandlerMethodReturnValueHandler}.
-	 *
+	 * Invokes the method and handles the return value through one of the
+	 * configured {@link HandlerMethodReturnValueHandler}s.
 	 * @param webRequest the current request
 	 * @param mavContainer the ModelAndViewContainer for this request
-	 * @param providedArgs "given" arguments matched by type, not resolved
+	 * @param providedArgs "given" arguments matched by type (not resolved)
 	 */
-	public final void invokeAndHandle(ServletWebRequest webRequest,
+	public void invokeAndHandle(ServletWebRequest webRequest,
 			ModelAndViewContainer mavContainer, Object... providedArgs) throws Exception {
 
 		Object returnValue = invokeForRequest(webRequest, mavContainer, providedArgs);
-
 		setResponseStatus(webRequest);
 
 		if (returnValue == null) {
@@ -117,9 +116,9 @@ public class ServletInvocableHandlerMethod extends InvocableHandlerMethod {
 		}
 
 		mavContainer.setRequestHandled(false);
-
 		try {
-			this.returnValueHandlers.handleReturnValue(returnValue, getReturnValueType(returnValue), mavContainer, webRequest);
+			this.returnValueHandlers.handleReturnValue(
+					returnValue, getReturnValueType(returnValue), mavContainer, webRequest);
 		}
 		catch (Exception ex) {
 			if (logger.isTraceEnabled()) {
@@ -136,14 +135,12 @@ public class ServletInvocableHandlerMethod extends InvocableHandlerMethod {
 		if (this.responseStatus == null) {
 			return;
 		}
-
 		if (StringUtils.hasText(this.responseReason)) {
 			webRequest.getResponse().sendError(this.responseStatus.value(), this.responseReason);
 		}
 		else {
 			webRequest.getResponse().setStatus(this.responseStatus.value());
 		}
-
 		// to be picked up by the RedirectView
 		webRequest.getRequest().setAttribute(View.RESPONSE_STATUS_ATTRIBUTE, this.responseStatus);
 	}
@@ -161,15 +158,15 @@ public class ServletInvocableHandlerMethod extends InvocableHandlerMethod {
 	 * Does this method have the response status instruction?
 	 */
 	private boolean hasResponseStatus() {
-		return responseStatus != null;
+		return (this.responseStatus != null);
 	}
 
 	private String getReturnValueHandlingErrorMessage(String message, Object returnValue) {
 		StringBuilder sb = new StringBuilder(message);
 		if (returnValue != null) {
-			sb.append(" [type=" + returnValue.getClass().getName() + "] ");
+			sb.append(" [type=").append(returnValue.getClass().getName()).append("]");
 		}
-		sb.append("[value=" + returnValue + "]");
+		sb.append(" [value=").append(returnValue).append("]");
 		return getDetailedErrorMessage(sb.toString());
 	}
 
@@ -180,9 +177,7 @@ public class ServletInvocableHandlerMethod extends InvocableHandlerMethod {
 	 * exception is raised if the async result value itself is an Exception.
 	 */
 	ServletInvocableHandlerMethod wrapConcurrentResult(final Object result) {
-
 		return new CallableHandlerMethod(new Callable<Object>() {
-
 			@Override
 			public Object call() throws Exception {
 				if (result instanceof Exception) {
@@ -209,7 +204,7 @@ public class ServletInvocableHandlerMethod extends InvocableHandlerMethod {
 
 		public CallableHandlerMethod(Callable<?> callable) {
 			super(callable, ClassUtils.getMethod(callable.getClass(), "call"));
-			this.setHandlerMethodReturnValueHandlers(ServletInvocableHandlerMethod.this.returnValueHandlers);
+			setHandlerMethodReturnValueHandlers(ServletInvocableHandlerMethod.this.returnValueHandlers);
 		}
 
 		/**

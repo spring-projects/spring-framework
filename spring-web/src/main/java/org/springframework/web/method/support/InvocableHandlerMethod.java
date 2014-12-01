@@ -32,17 +32,18 @@ import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.HandlerMethod;
 
 /**
- * Provides a method for invoking the handler method for a given request after resolving its method argument
- * values through registered {@link HandlerMethodArgumentResolver}s.
+ * Provides a method for invoking the handler method for a given request after resolving its
+ * method argument values through registered {@link HandlerMethodArgumentResolver}s.
  *
- * <p>Argument resolution often requires a {@link WebDataBinder} for data binding or for type conversion.
- * Use the {@link #setDataBinderFactory(WebDataBinderFactory)} property to supply a binder factory to pass to
- * argument resolvers.
+ * <p>Argument resolution often requires a {@link WebDataBinder} for data binding or for type
+ * conversion. Use the {@link #setDataBinderFactory(WebDataBinderFactory)} property to supply
+ * a binder factory to pass to argument resolvers.
  *
- * <p>Use {@link #setHandlerMethodArgumentResolvers(HandlerMethodArgumentResolverComposite)} to customize
- * the list of argument resolvers.
+ * <p>Use {@link #setHandlerMethodArgumentResolvers(HandlerMethodArgumentResolverComposite)}
+ * to customize the list of argument resolvers.
  *
  * @author Rossen Stoyanchev
+ * @author Juergen Hoeller
  * @since 3.1
  */
 public class InvocableHandlerMethod extends HandlerMethod {
@@ -75,7 +76,9 @@ public class InvocableHandlerMethod extends HandlerMethod {
 	 * @param parameterTypes the method parameter types
 	 * @throws NoSuchMethodException when the method cannot be found
 	 */
-	public InvocableHandlerMethod(Object bean, String methodName, Class<?>... parameterTypes) throws NoSuchMethodException {
+	public InvocableHandlerMethod(Object bean, String methodName, Class<?>... parameterTypes)
+			throws NoSuchMethodException {
+
 		super(bean, methodName, parameterTypes);
 	}
 
@@ -107,18 +110,20 @@ public class InvocableHandlerMethod extends HandlerMethod {
 
 
 	/**
-	 * Invoke the method after resolving its argument values in the context of the given request. <p>Argument
-	 * values are commonly resolved through {@link HandlerMethodArgumentResolver}s. The {@code provideArgs}
-	 * parameter however may supply argument values to be used directly, i.e. without argument resolution.
-	 * Examples of provided argument values include a {@link WebDataBinder}, a {@link SessionStatus}, or
-	 * a thrown exception instance. Provided argument values are checked before argument resolvers.
+	 * Invoke the method after resolving its argument values in the context of the given request.
+	 * <p>Argument values are commonly resolved through {@link HandlerMethodArgumentResolver}s.
+	 * The {@code provideArgs} parameter however may supply argument values to be used directly,
+	 * i.e. without argument resolution. Examples of provided argument values include a
+	 * {@link WebDataBinder}, a {@link SessionStatus}, or a thrown exception instance.
+	 * Provided argument values are checked before argument resolvers.
 	 * @param request the current request
 	 * @param mavContainer the ModelAndViewContainer for this request
 	 * @param providedArgs "given" arguments matched by type, not resolved
 	 * @return the raw value returned by the invoked method
-	 * @exception Exception raised if no suitable argument resolver can be found, or the method raised an exception
+	 * @exception Exception raised if no suitable argument resolver can be found,
+	 * or if the method raised an exception
 	 */
-	public final Object invokeForRequest(NativeWebRequest request, ModelAndViewContainer mavContainer,
+	public Object invokeForRequest(NativeWebRequest request, ModelAndViewContainer mavContainer,
 			Object... providedArgs) throws Exception {
 
 		Object[] args = getMethodArgumentValues(request, mavContainer, providedArgs);
@@ -129,7 +134,7 @@ public class InvocableHandlerMethod extends HandlerMethod {
 			sb.append(Arrays.asList(args));
 			logger.trace(sb.toString());
 		}
-		Object returnValue = invoke(args);
+		Object returnValue = doInvoke(args);
 		if (logger.isTraceEnabled()) {
 			logger.trace("Method [" + getMethod().getName() + "] returned [" + returnValue + "]");
 		}
@@ -206,10 +211,11 @@ public class InvocableHandlerMethod extends HandlerMethod {
 		return null;
 	}
 
+
 	/**
 	 * Invoke the handler method with the given argument values.
 	 */
-	private Object invoke(Object... args) throws Exception {
+	protected Object doInvoke(Object... args) throws Exception {
 		ReflectionUtils.makeAccessible(getBridgedMethod());
 		try {
 			return getBridgedMethod().invoke(getBean(), args);
