@@ -207,8 +207,8 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	 * Return an instance, which may be shared or independent, of the specified bean.
 	 * @param name the name of the bean to retrieve
 	 * @param requiredType the required type of the bean to retrieve
-	 * @param args arguments to use if creating a prototype using explicit arguments to a
-	 * static factory method. It is invalid to use a non-null args value in any other case.
+	 * @param args arguments to use when creating a bean instance using explicit arguments
+	 * (only applied when creating a new instance as opposed to retrieving an existing one)
 	 * @return an instance of the bean
 	 * @throws BeansException if the bean could not be created
 	 */
@@ -220,8 +220,8 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	 * Return an instance, which may be shared or independent, of the specified bean.
 	 * @param name the name of the bean to retrieve
 	 * @param requiredType the required type of the bean to retrieve
-	 * @param args arguments to use if creating a prototype using explicit arguments to a
-	 * static factory method. It is invalid to use a non-null args value in any other case.
+	 * @param args arguments to use when creating a bean instance using explicit arguments
+	 * (only applied when creating a new instance as opposed to retrieving an existing one)
 	 * @param typeCheckOnly whether the instance is obtained for a type check,
 	 * not for actual use
 	 * @return an instance of the bean
@@ -1266,16 +1266,8 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	protected void checkMergedBeanDefinition(RootBeanDefinition mbd, String beanName, Object[] args)
 			throws BeanDefinitionStoreException {
 
-		// check if bean definition is not abstract
 		if (mbd.isAbstract()) {
 			throw new BeanIsAbstractException(beanName);
-		}
-
-		// Check validity of the usage of the args parameter. This can
-		// only be used for prototypes constructed via a factory method.
-		if (args != null && !mbd.isPrototype()) {
-			throw new BeanDefinitionStoreException(mbd.getResourceDescription(), beanName,
-					"Can only specify arguments for the getBean method when referring to a prototype bean definition");
 		}
 	}
 
@@ -1619,15 +1611,13 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	protected abstract BeanDefinition getBeanDefinition(String beanName) throws BeansException;
 
 	/**
-	 * Create a bean instance for the given bean definition.
-	 * The bean definition will already have been merged with the parent
-	 * definition in case of a child definition.
-	 * <p>All the other methods in this class invoke this method, although
-	 * beans may be cached after being instantiated by this method. All bean
-	 * instantiation within this class is performed by this method.
+	 * Create a bean instance for the given merged bean definition (and arguments).
+	 * The bean definition will already have been merged with the parent definition
+	 * in case of a child definition.
+	 * <p>All bean retrieval methods delegate to this method for actual bean creation.
 	 * @param beanName the name of the bean
 	 * @param mbd the merged bean definition for the bean
-	 * @param args arguments to use if creating a prototype using explicit arguments
+	 * @param args explicit arguments to use for constructor or factory method invocation
 	 * @return a new instance of the bean
 	 * @throws BeanCreationException if the bean could not be created
 	 */
