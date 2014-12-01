@@ -17,6 +17,7 @@
 package org.springframework.beans.factory.config;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.AbstractMap;
 import java.util.Arrays;
 import java.util.Collection;
@@ -146,17 +147,23 @@ public abstract class YamlProcessor {
 			if (this.logger.isDebugEnabled()) {
 				this.logger.debug("Loading from YAML: " + resource);
 			}
-			for (Object object : yaml.loadAll(resource.getInputStream())) {
-				if (object != null && process(asMap(object), callback)) {
-					count++;
-					if (this.resolutionMethod == ResolutionMethod.FIRST_FOUND) {
-						break;
+			InputStream stream = resource.getInputStream();
+			try {
+				for (Object object : yaml.loadAll(stream)) {
+					if (object != null && process(asMap(object), callback)) {
+						count++;
+						if (this.resolutionMethod == ResolutionMethod.FIRST_FOUND) {
+							break;
+						}
 					}
 				}
+				if (this.logger.isDebugEnabled()) {
+					this.logger.debug("Loaded " + count + " document" + (count > 1 ? "s" : "") +
+							" from YAML resource: " + resource);
+				}
 			}
-			if (this.logger.isDebugEnabled()) {
-				this.logger.debug("Loaded " + count + " document" + (count > 1 ? "s" : "") +
-						" from YAML resource: " + resource);
+			finally {
+				stream.close();
 			}
 		}
 		catch (IOException ex) {
