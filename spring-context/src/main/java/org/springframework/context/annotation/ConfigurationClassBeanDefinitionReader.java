@@ -72,6 +72,8 @@ class ConfigurationClassBeanDefinitionReader {
 
 	private static final Log logger = LogFactory.getLog(ConfigurationClassBeanDefinitionReader.class);
 
+	private static final ScopeMetadataResolver scopeMetadataResolver = new AnnotationScopeMetadataResolver();
+
 	private final BeanDefinitionRegistry registry;
 
 	private final SourceExtractor sourceExtractor;
@@ -154,10 +156,16 @@ class ConfigurationClassBeanDefinitionReader {
 	 */
 	private void registerBeanDefinitionForImportedConfigurationClass(ConfigurationClass configClass) {
 		AnnotationMetadata metadata = configClass.getMetadata();
-		BeanDefinition configBeanDef = new AnnotatedGenericBeanDefinition(metadata);
+		AnnotatedGenericBeanDefinition configBeanDef = new AnnotatedGenericBeanDefinition(metadata);
+
 		if (ConfigurationClassUtils.checkConfigurationClassCandidate(configBeanDef, this.metadataReaderFactory)) {
+			ScopeMetadata scopeMetadata = scopeMetadataResolver.resolveScopeMetadata(configBeanDef);
+			configBeanDef.setScope(scopeMetadata.getScopeName());
 			String configBeanName = this.importBeanNameGenerator.generateBeanName(configBeanDef, this.registry);
-			this.registry.registerBeanDefinition(configBeanName, configBeanDef);
+			AnnotationConfigUtils.processCommonDefinitionAnnotations(configBeanDef, metadata);
+			BeanDefinitionHolder definitionHolder = new BeanDefinitionHolder(configBeanDef, configBeanName);
+			definitionHolder = AnnotationConfigUtils.applyScopedProxyMode(scopeMetadata, definitionHolder, this.registry);
+			this.registry.registerBeanDefinition(definitionHolder.getBeanName(), definitionHolder.getBeanDefinition());
 			configClass.setBeanName(configBeanName);
 			if (logger.isDebugEnabled()) {
 				logger.debug(String.format("Registered bean definition for imported @Configuration class %s", configBeanName));
