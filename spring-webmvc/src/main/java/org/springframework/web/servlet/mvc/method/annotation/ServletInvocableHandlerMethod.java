@@ -88,6 +88,7 @@ public class ServletInvocableHandlerMethod extends InvocableHandlerMethod {
 		}
 	}
 
+
 	/**
 	 * Register {@link HandlerMethodReturnValueHandler} instances to use to
 	 * handle return values.
@@ -99,16 +100,14 @@ public class ServletInvocableHandlerMethod extends InvocableHandlerMethod {
 	/**
 	 * Invokes the method and handles the return value through one of the
 	 * configured {@link HandlerMethodReturnValueHandler}s.
-	 *
 	 * @param webRequest the current request
 	 * @param mavContainer the ModelAndViewContainer for this request
-	 * @param providedArgs "given" arguments matched by type, not resolved
+	 * @param providedArgs "given" arguments matched by type (not resolved)
 	 */
-	public final void invokeAndHandle(ServletWebRequest webRequest,
+	public void invokeAndHandle(ServletWebRequest webRequest,
 			ModelAndViewContainer mavContainer, Object... providedArgs) throws Exception {
 
 		Object returnValue = invokeForRequest(webRequest, mavContainer, providedArgs);
-
 		setResponseStatus(webRequest);
 
 		if (returnValue == null) {
@@ -123,9 +122,9 @@ public class ServletInvocableHandlerMethod extends InvocableHandlerMethod {
 		}
 
 		mavContainer.setRequestHandled(false);
-
 		try {
-			this.returnValueHandlers.handleReturnValue(returnValue, getReturnValueType(returnValue), mavContainer, webRequest);
+			this.returnValueHandlers.handleReturnValue(
+					returnValue, getReturnValueType(returnValue), mavContainer, webRequest);
 		}
 		catch (Exception ex) {
 			if (logger.isTraceEnabled()) {
@@ -165,20 +164,20 @@ public class ServletInvocableHandlerMethod extends InvocableHandlerMethod {
 	 * Does this method have the response status instruction?
 	 */
 	private boolean hasResponseStatus() {
-		return this.responseStatus != null;
+		return (this.responseStatus != null);
 	}
 
 	private String getReturnValueHandlingErrorMessage(String message, Object returnValue) {
 		StringBuilder sb = new StringBuilder(message);
 		if (returnValue != null) {
-			sb.append(" [type=" + returnValue.getClass().getName() + "] ");
+			sb.append(" [type=").append(returnValue.getClass().getName()).append("]");
 		}
-		sb.append("[value=" + returnValue + "]");
+		sb.append(" [value=").append(returnValue).append("]");
 		return getDetailedErrorMessage(sb.toString());
 	}
 
 	/**
-	 * Create a nested ServletInvocableHandlerMethod sub-class that returns the
+	 * Create a nested ServletInvocableHandlerMethod subclass that returns the
 	 * the given value (or raises an Exception if the value is one) rather than
 	 * actually invoking the controller method. This is useful when processing
 	 * async return values (e.g. Callable, DeferredResult, ListenableFuture).
@@ -189,7 +188,7 @@ public class ServletInvocableHandlerMethod extends InvocableHandlerMethod {
 
 
 	/**
-	 * A nested sub-class of {@code ServletInvocableHandlerMethod} that uses a
+	 * A nested subclass of {@code ServletInvocableHandlerMethod} that uses a
 	 * simple {@link Callable} instead of the original controller as the handler in
 	 * order to return the fixed (concurrent) result value given to it. Effectively
 	 * "resumes" processing with the asynchronously produced return value.
@@ -197,7 +196,6 @@ public class ServletInvocableHandlerMethod extends InvocableHandlerMethod {
 	private class ConcurrentResultHandlerMethod extends ServletInvocableHandlerMethod {
 
 		private final MethodParameter returnType;
-
 
 		public ConcurrentResultHandlerMethod(final Object result, ConcurrentResultMethodParameter returnType) {
 			super(new Callable<Object>() {
@@ -242,8 +240,9 @@ public class ServletInvocableHandlerMethod extends InvocableHandlerMethod {
 		}
 	}
 
+
 	/**
-	 * MethodParameter sub-class based on the actual return value type or if
+	 * MethodParameter subclass based on the actual return value type or if
 	 * that's null falling back on the generic type within the declared async
 	 * return type, e.g. Foo instead of {@code DeferredResult<Foo>}.
 	 */
@@ -253,7 +252,6 @@ public class ServletInvocableHandlerMethod extends InvocableHandlerMethod {
 
 		private final ResolvableType returnType;
 
-
 		public ConcurrentResultMethodParameter(Object returnValue) {
 			super(-1);
 			this.returnValue = returnValue;
@@ -262,7 +260,7 @@ public class ServletInvocableHandlerMethod extends InvocableHandlerMethod {
 
 		@Override
 		public Class<?> getParameterType() {
-			return (returnValue != null ? returnValue.getClass() : this.returnType.getRawClass());
+			return (this.returnValue != null ? this.returnValue.getClass() : this.returnType.getRawClass());
 		}
 
 		@Override
