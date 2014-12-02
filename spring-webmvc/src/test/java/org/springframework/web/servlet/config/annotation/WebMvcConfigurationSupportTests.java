@@ -370,6 +370,7 @@ public class WebMvcConfigurationSupportTests {
 
 
 	@ResponseStatus(value = HttpStatus.BAD_REQUEST,  reason = "exception.user.exists")
+	@SuppressWarnings("serial")
 	public static class UserAlreadyExistsException extends RuntimeException {
 	}
 
