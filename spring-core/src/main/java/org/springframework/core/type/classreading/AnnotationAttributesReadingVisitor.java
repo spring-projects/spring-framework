@@ -26,6 +26,7 @@ import java.util.Set;
 import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.util.MultiValueMap;
+import org.springframework.util.ObjectUtils;
 
 /**
  * ASM visitor which looks for the annotations defined on a class or method, including
@@ -72,9 +73,12 @@ final class AnnotationAttributesReadingVisitor extends RecursiveAnnotationAttrib
 			attributes.add(0, this.attributes);
 		}
 		Set<String> metaAnnotationTypeNames = new LinkedHashSet<String>();
-		for (Annotation metaAnnotation : AnnotationUtils.getAnnotations(annotationClass)) {
-			if (!AnnotationUtils.isInJavaLangAnnotationPackage(metaAnnotation)) {
-				recursivelyCollectMetaAnnotations(metaAnnotationTypeNames, metaAnnotation);
+		Annotation[] metaAnnotations = AnnotationUtils.getAnnotations(annotationClass);
+		if (!ObjectUtils.isEmpty(metaAnnotations)) {
+			for (Annotation metaAnnotation : metaAnnotations) {
+				if (!AnnotationUtils.isInJavaLangAnnotationPackage(metaAnnotation)) {
+					recursivelyCollectMetaAnnotations(metaAnnotationTypeNames, metaAnnotation);
+				}
 			}
 		}
 		if (this.metaAnnotationMap != null) {
