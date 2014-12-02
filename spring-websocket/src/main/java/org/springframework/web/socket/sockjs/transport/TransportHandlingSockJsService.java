@@ -17,6 +17,8 @@
 package org.springframework.web.socket.sockjs.transport;
 
 import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.security.Principal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -243,6 +245,15 @@ public class TransportHandlingSockJsService extends AbstractSockJsService implem
 								"(e.g. missed heart-beat) while a message was coming in.");
 					}
 					return;
+				}
+			}
+			else {
+				if (session.getPrincipal() != null) {
+					if (!session.getPrincipal().equals(request.getPrincipal())) {
+						logger.debug("The user for the session does not match the user for the request.");
+						response.setStatusCode(HttpStatus.NOT_FOUND);
+						return;
+					}
 				}
 			}
 
