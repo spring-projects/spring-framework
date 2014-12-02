@@ -131,7 +131,8 @@ public abstract class AnnotationUtils {
 	/**
 	 * Get all {@link Annotation Annotations} from the supplied Method, Constructor or Field.
 	 * @param annotatedElement the Method, Constructor or Field to retrieve annotations from
-	 * @return the annotations found
+	 * @return the annotations found, or {@code null} if not resolvable (e.g. because nested
+	 * Class values in annotation attributes failed to resolve at runtime)
 	 * @since 4.0.8
 	 */
 	public static Annotation[] getAnnotations(AnnotatedElement annotatedElement) {
