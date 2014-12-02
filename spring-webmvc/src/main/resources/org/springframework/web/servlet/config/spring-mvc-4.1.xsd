@@ -563,7 +563,7 @@
 	Interceptors allow requests to be pre/post processed before/after handling.
 	Each inteceptor must implement the org.springframework.web.servlet.HandlerInterceptor or
 	org.springframework.web.context.request.WebRequestInterceptor interface.
-	The interceptors in this set are automatically configured on each registered HandlerMapping.
+	The interceptors in this set are automatically detected by every registered HandlerMapping.
 	The URI paths each interceptor applies to are configurable.
 			]]></xsd:documentation>
 		</xsd:annotation>
