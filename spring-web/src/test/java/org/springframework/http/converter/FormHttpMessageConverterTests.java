@@ -69,6 +69,7 @@ public class FormHttpMessageConverterTests {
 	public void canWrite() {
 		assertTrue(converter.canWrite(MultiValueMap.class, new MediaType("application", "x-www-form-urlencoded")));
 		assertTrue(converter.canWrite(MultiValueMap.class, new MediaType("multipart", "form-data")));
+		assertTrue(converter.canWrite(MultiValueMap.class, new MediaType("multipart", "form-data", Charset.forName("UTF-8"))));
 		assertTrue(converter.canWrite(MultiValueMap.class, MediaType.ALL));
 	}
 
@@ -135,7 +136,7 @@ public class FormHttpMessageConverterTests {
 
 		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
 		converter.setMultipartCharset(Charset.forName("UTF-8"));
-		converter.write(parts, MediaType.MULTIPART_FORM_DATA, outputMessage);
+		converter.write(parts, new MediaType("multipart", "form-data", Charset.forName("UTF-8")), outputMessage);
 
 		final MediaType contentType = outputMessage.getHeaders().getContentType();
 		assertNotNull("No boundary found", contentType.getParameter("boundary"));
