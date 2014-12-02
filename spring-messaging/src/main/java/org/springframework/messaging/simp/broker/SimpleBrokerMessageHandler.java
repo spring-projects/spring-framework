@@ -148,15 +148,11 @@ public class SimpleBrokerMessageHandler extends AbstractBrokerMessageHandler {
 		}
 
 		if (SimpMessageType.MESSAGE.equals(messageType)) {
-			if (logger.isDebugEnabled()) {
-				logger.debug("Processing " + accessor.getShortLogMessage(message.getPayload()));
-			}
+			logMessage(message);
 			sendMessageToSubscribers(destination, message);
 		}
 		else if (SimpMessageType.CONNECT.equals(messageType)) {
-			if (logger.isDebugEnabled()) {
-				logger.debug("Processing " + accessor.getShortLogMessage(EMPTY_PAYLOAD));
-			}
+			logMessage(message);
 			SimpMessageHeaderAccessor connectAck = SimpMessageHeaderAccessor.create(SimpMessageType.CONNECT_ACK);
 			initHeaders(connectAck);
 			connectAck.setSessionId(sessionId);
@@ -166,9 +162,7 @@ public class SimpleBrokerMessageHandler extends AbstractBrokerMessageHandler {
 			getClientOutboundChannel().send(messageOut);
 		}
 		else if (SimpMessageType.DISCONNECT.equals(messageType)) {
-			if (logger.isDebugEnabled()) {
-				logger.debug("Processing " + accessor.getShortLogMessage(EMPTY_PAYLOAD));
-			}
+			logMessage(message);
 			this.subscriptionRegistry.unregisterAllSubscriptions(sessionId);
 			SimpMessageHeaderAccessor disconnectAck = SimpMessageHeaderAccessor.create(SimpMessageType.DISCONNECT_ACK);
 			initHeaders(disconnectAck);
@@ -178,16 +172,20 @@ public class SimpleBrokerMessageHandler extends AbstractBrokerMessageHandler {
 			getClientOutboundChannel().send(messageOut);
 		}
 		else if (SimpMessageType.SUBSCRIBE.equals(messageType)) {
-			if (logger.isDebugEnabled()) {
-				logger.debug("Processing " + accessor.getShortLogMessage(EMPTY_PAYLOAD));
-			}
+			logMessage(message);
 			this.subscriptionRegistry.registerSubscription(message);
 		}
 		else if (SimpMessageType.UNSUBSCRIBE.equals(messageType)) {
-			if (logger.isDebugEnabled()) {
-				logger.debug("Processing " + accessor.getShortLogMessage(EMPTY_PAYLOAD));
-			}
+			logMessage(message);
 			this.subscriptionRegistry.unregisterSubscription(message);
+		}
+	}
+
+	private void logMessage(Message<?> message) {
+		if (logger.isDebugEnabled()) {
+			SimpMessageHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(message, SimpMessageHeaderAccessor.class);
+			accessor = (accessor != null ? accessor : SimpMessageHeaderAccessor.wrap(message));
+			logger.debug("Processing " + accessor.getShortLogMessage(message.getPayload()));
 		}
 	}
 
