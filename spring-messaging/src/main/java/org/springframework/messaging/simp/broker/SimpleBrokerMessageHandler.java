@@ -160,6 +160,7 @@ public class SimpleBrokerMessageHandler extends AbstractBrokerMessageHandler {
 			SimpMessageHeaderAccessor connectAck = SimpMessageHeaderAccessor.create(SimpMessageType.CONNECT_ACK);
 			initHeaders(connectAck);
 			connectAck.setSessionId(sessionId);
+			connectAck.setUser(SimpMessageHeaderAccessor.getUser(headers));
 			connectAck.setHeader(SimpMessageHeaderAccessor.CONNECT_MESSAGE_HEADER, message);
 			Message<byte[]> messageOut = MessageBuilder.createMessage(EMPTY_PAYLOAD, connectAck.getMessageHeaders());
 			getClientOutboundChannel().send(messageOut);
@@ -172,6 +173,7 @@ public class SimpleBrokerMessageHandler extends AbstractBrokerMessageHandler {
 			SimpMessageHeaderAccessor disconnectAck = SimpMessageHeaderAccessor.create(SimpMessageType.DISCONNECT_ACK);
 			initHeaders(disconnectAck);
 			disconnectAck.setSessionId(sessionId);
+			disconnectAck.setUser(SimpMessageHeaderAccessor.getUser(headers));
 			Message<byte[]> messageOut = MessageBuilder.createMessage(EMPTY_PAYLOAD, disconnectAck.getMessageHeaders());
 			getClientOutboundChannel().send(messageOut);
 		}

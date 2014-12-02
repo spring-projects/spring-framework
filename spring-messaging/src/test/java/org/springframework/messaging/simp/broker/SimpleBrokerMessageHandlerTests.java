@@ -33,6 +33,7 @@ import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.SubscribableChannel;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessageType;
+import org.springframework.messaging.simp.TestPrincipal;
 import org.springframework.messaging.support.MessageBuilder;
 
 /**
@@ -109,6 +110,7 @@ public class SimpleBrokerMessageHandlerTests {
 
 		SimpMessageHeaderAccessor headers = SimpMessageHeaderAccessor.create(SimpMessageType.DISCONNECT);
 		headers.setSessionId(sess1);
+		headers.setUser(new TestPrincipal("joe"));
 		Message<byte[]> message = MessageBuilder.createMessage(new byte[0], headers.getMessageHeaders());
 		this.messageHandler.handleMessage(message);
 
@@ -120,6 +122,7 @@ public class SimpleBrokerMessageHandlerTests {
 		Message<?> captured = this.messageCaptor.getAllValues().get(0);
 		assertEquals(SimpMessageType.DISCONNECT_ACK, SimpMessageHeaderAccessor.getMessageType(captured.getHeaders()));
 		assertEquals(sess1, SimpMessageHeaderAccessor.getSessionId(captured.getHeaders()));
+		assertEquals("joe", SimpMessageHeaderAccessor.getUser(captured.getHeaders()).getName());
 
 		assertCapturedMessage(sess2, "sub1", "/foo");
 		assertCapturedMessage(sess2, "sub2", "/foo");
@@ -142,6 +145,7 @@ public class SimpleBrokerMessageHandlerTests {
 		SimpMessageHeaderAccessor connectAckHeaders = SimpMessageHeaderAccessor.wrap(connectAckMessage);
 		assertEquals(connectMessage, connectAckHeaders.getHeader(SimpMessageHeaderAccessor.CONNECT_MESSAGE_HEADER));
 		assertEquals(sess1, connectAckHeaders.getSessionId());
+		assertEquals("joe", connectAckHeaders.getUser().getName());
 	}
 
 
@@ -156,6 +160,7 @@ public class SimpleBrokerMessageHandlerTests {
 	protected Message<String> createConnectMessage(String sessionId) {
 		SimpMessageHeaderAccessor headers = SimpMessageHeaderAccessor.create(SimpMessageType.CONNECT);
 		headers.setSessionId(sessionId);
+		headers.setUser(new TestPrincipal("joe"));
 		return MessageBuilder.createMessage("", headers.getMessageHeaders());
 	}
 

@@ -566,8 +566,10 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 					getHeaderInitializer().initHeaders(headerAccessor);
 				}
 				headerAccessor.setSessionId(this.sessionId);
+				headerAccessor.setUser(this.connectHeaders.getUser());
 				headerAccessor.setMessage(errorText);
 				Message<?> errorMessage = MessageBuilder.createMessage(EMPTY_PAYLOAD, headerAccessor.getMessageHeaders());
+				headerAccessor.setImmutable();
 				sendMessageToClient(errorMessage);
 			}
 		}
@@ -582,6 +584,7 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 		public void handleMessage(Message<byte[]> message) {
 			StompHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
 			accessor.setSessionId(this.sessionId);
+			accessor.setUser(this.connectHeaders.getUser());
 
 			StompCommand command = accessor.getCommand();
 			if (StompCommand.CONNECTED.equals(command)) {
