@@ -151,6 +151,24 @@ public class ServletUriComponentsBuilderTests {
 	}
 
 	@Test
+	public void fromRequestWithForwardedPrefix() {
+		this.request.setRequestURI("/bar");
+		this.request.addHeader("X-Forwarded-Prefix", "/foo");
+		UriComponents result = ServletUriComponentsBuilder.fromRequest(request).build();
+
+		assertEquals("http://localhost/foo/bar", result.toUriString());
+	}
+
+	@Test
+	public void fromRequestWithForwardedPrefixTrailingSlash() {
+		this.request.setRequestURI("/bar");
+		this.request.addHeader("X-Forwarded-Prefix", "/foo/");
+		UriComponents result = ServletUriComponentsBuilder.fromRequest(request).build();
+
+		assertEquals("http://localhost/foo/bar", result.toUriString());
+	}
+
+	@Test
 	public void fromContextPath() {
 		request.setRequestURI("/mvc-showcase/data/param");
 		request.setQueryString("foo=123");
