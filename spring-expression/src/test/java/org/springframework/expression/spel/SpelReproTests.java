@@ -1835,6 +1835,14 @@ public class SpelReproTests extends ExpressionTestCase {
 		assertEquals(1, exp.getValue(sec));
 	}
 
+	@Test
+	public void SPR12502() throws Exception {
+		SpelExpressionParser parser = new SpelExpressionParser();
+		Expression expression = parser.parseExpression("#root.getClass().getName()");
+		assertEquals(UnnamedUser.class.getName(), expression.getValue(new UnnamedUser()));
+		assertEquals(NamedUser.class.getName(), expression.getValue(new NamedUser()));
+	}
+
 
 	private static enum ABC { A, B, C }
 
@@ -1974,6 +1982,18 @@ public class SpelReproTests extends ExpressionTestCase {
 	public static class MapWithConstant extends HashMap {
 
 		public static final int X = 1;
+	}
+
+
+	public static class UnnamedUser {
+	}
+
+
+	public static class NamedUser {
+
+		public String getName() {
+			return "foo";
+		}
 	}
 
 }
