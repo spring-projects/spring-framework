@@ -434,12 +434,7 @@ public class Jackson2ObjectMapperBuilder {
 			objectMapper.registerModule(module);
 		}
 
-		if (!this.features.containsKey(MapperFeature.DEFAULT_VIEW_INCLUSION)) {
-			configureFeature(objectMapper, MapperFeature.DEFAULT_VIEW_INCLUSION, false);
-		}
-		if (!this.features.containsKey(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)) {
-			configureFeature(objectMapper, DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-		}
+		customizeDefaultFeatures(objectMapper);
 		for (Object feature : this.features.keySet()) {
 			configureFeature(objectMapper, feature, this.features.get(feature));
 		}
@@ -472,6 +467,17 @@ public class Jackson2ObjectMapperBuilder {
 		}
 		for (Class<?> target : this.mixIns.keySet()) {
 			objectMapper.addMixInAnnotations(target, this.mixIns.get(target));
+		}
+	}
+
+	// Any change to this method should be also applied to spring-jms and spring-messaging
+	// MappingJackson2MessageConverter default constructors
+	private void customizeDefaultFeatures(ObjectMapper objectMapper) {
+		if (!this.features.containsKey(MapperFeature.DEFAULT_VIEW_INCLUSION)) {
+			configureFeature(objectMapper, MapperFeature.DEFAULT_VIEW_INCLUSION, false);
+		}
+		if (!this.features.containsKey(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)) {
+			configureFeature(objectMapper, DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 		}
 	}
 

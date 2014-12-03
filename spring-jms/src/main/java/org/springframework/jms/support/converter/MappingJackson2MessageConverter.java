@@ -29,7 +29,9 @@ import javax.jms.Message;
 import javax.jms.Session;
 import javax.jms.TextMessage;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JavaType;
+import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.springframework.beans.factory.BeanClassLoaderAware;
@@ -41,6 +43,12 @@ import org.springframework.util.ClassUtils;
  * Maps an object to a {@link BytesMessage}, or to a {@link TextMessage} if the
  * {@link #setTargetType targetType} is set to {@link MessageType#TEXT}.
  * Converts from a {@link TextMessage} or {@link BytesMessage} to an object.
+ *
+ * <p>It customizes Jackson's default properties with the following ones:
+ * <ul>
+ * <li>{@link MapperFeature#DEFAULT_VIEW_INCLUSION} is disabled</li>
+ * <li>{@link DeserializationFeature#FAIL_ON_UNKNOWN_PROPERTIES} is disabled</li>
+ * </ul>
  *
  * <p>Tested against Jackson 2.2; compatible with Jackson 2.0 and higher.
  *
@@ -57,7 +65,7 @@ public class MappingJackson2MessageConverter implements MessageConverter, BeanCl
 	public static final String DEFAULT_ENCODING = "UTF-8";
 
 
-	private ObjectMapper objectMapper = new ObjectMapper();
+	private ObjectMapper objectMapper;
 
 	private MessageType targetType = MessageType.BYTES;
 
@@ -73,6 +81,12 @@ public class MappingJackson2MessageConverter implements MessageConverter, BeanCl
 
 	private ClassLoader beanClassLoader;
 
+
+	public MappingJackson2MessageConverter() {
+		this.objectMapper = new ObjectMapper();
+		this.objectMapper.configure(MapperFeature.DEFAULT_VIEW_INCLUSION, false);
+		this.objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+	}
 
 	/**
 	 * Specify the {@link ObjectMapper} to use instead of using the default.

@@ -289,14 +289,18 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 			converters.add(new StringMessageConverter());
 			converters.add(new ByteArrayMessageConverter());
 			if (jackson2Present) {
-				DefaultContentTypeResolver resolver = new DefaultContentTypeResolver();
-				resolver.setDefaultMimeType(MimeTypeUtils.APPLICATION_JSON);
-				MappingJackson2MessageConverter converter = new MappingJackson2MessageConverter();
-				converter.setContentTypeResolver(resolver);
-				converters.add(converter);
+				converters.add(createJacksonConverter());
 			}
 		}
 		return new CompositeMessageConverter(converters);
+	}
+
+	protected MappingJackson2MessageConverter createJacksonConverter() {
+		DefaultContentTypeResolver resolver = new DefaultContentTypeResolver();
+		resolver.setDefaultMimeType(MimeTypeUtils.APPLICATION_JSON);
+		MappingJackson2MessageConverter converter = new MappingJackson2MessageConverter();
+		converter.setContentTypeResolver(resolver);
+		return converter;
 	}
 
 	/**

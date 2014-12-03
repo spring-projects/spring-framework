@@ -18,6 +18,8 @@ package org.springframework.web.socket.config.annotation;
 
 import org.springframework.beans.factory.config.CustomScopeConfigurer;
 import org.springframework.context.annotation.Bean;
+import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
+import org.springframework.messaging.converter.MappingJackson2MessageConverter;
 import org.springframework.messaging.simp.SimpSessionScope;
 import org.springframework.messaging.simp.broker.AbstractBrokerMessageHandler;
 import org.springframework.messaging.simp.config.AbstractMessageBrokerConfiguration;
@@ -130,6 +132,14 @@ public abstract class WebSocketMessageBrokerConfigurationSupport extends Abstrac
 		stats.setOutboundChannelExecutor(clientOutboundChannelExecutor());
 		stats.setSockJsTaskScheduler(messageBrokerSockJsTaskScheduler());
 		return stats;
+	}
+
+	@Override
+	protected MappingJackson2MessageConverter createJacksonConverter() {
+		MappingJackson2MessageConverter messageConverter = super.createJacksonConverter();
+		// Use Jackson builder in order to have JSR-310 and Joda-Time modules registered automatically
+		messageConverter.setObjectMapper(Jackson2ObjectMapperBuilder.json().build());
+		return messageConverter;
 	}
 
 }

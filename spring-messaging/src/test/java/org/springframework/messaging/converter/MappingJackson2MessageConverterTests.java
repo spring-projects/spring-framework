@@ -87,11 +87,12 @@ public class MappingJackson2MessageConverterTests {
 		this.converter.fromMessage(message, MyBean.class);
 	}
 
-	@Test(expected = MessageConversionException.class)
+	@Test
 	public void fromMessageValidJsonWithUnknownProperty() throws IOException {
 		String payload = "{\"string\":\"string\",\"unknownProperty\":\"value\"}";
 		Message<?> message = MessageBuilder.withPayload(payload.getBytes(UTF_8)).build();
-		this.converter.fromMessage(message, MyBean.class);
+		MyBean myBean = (MyBean)this.converter.fromMessage(message, MyBean.class);
+		assertEquals("string", myBean.getString());
 	}
 
 	@Test

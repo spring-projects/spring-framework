@@ -20,12 +20,24 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import com.fasterxml.jackson.core.io.JsonStringEncoder;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.util.Assert;
 
 /**
  * A Jackson 2.x codec for encoding and decoding SockJS messages.
+ *
+ * <p>It customizes Jackson's default properties with the following ones:
+ * <ul>
+ * <li>{@link MapperFeature#DEFAULT_VIEW_INCLUSION} is disabled</li>
+ * <li>{@link DeserializationFeature#FAIL_ON_UNKNOWN_PROPERTIES} is disabled</li>
+ * </ul>
+ *
+ * <p>Note that Jackson's JSR-310 and Joda-Time support modules will be registered automatically
+ * when available (and when Java 8 and Joda-Time themselves are available, respectively).
  *
  * @author Rossen Stoyanchev
  * @since 4.0
@@ -36,7 +48,7 @@ public class Jackson2SockJsMessageCodec extends AbstractSockJsMessageCodec {
 
 
 	public Jackson2SockJsMessageCodec() {
-		this.objectMapper = new ObjectMapper();
+		this.objectMapper = Jackson2ObjectMapperBuilder.json().build();
 	}
 
 	public Jackson2SockJsMessageCodec(ObjectMapper objectMapper) {
