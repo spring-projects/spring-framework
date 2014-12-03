@@ -30,7 +30,6 @@ import java.util.concurrent.ScheduledFuture;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.core.NestedCheckedException;
 import org.springframework.util.Assert;
 import org.springframework.web.socket.CloseStatus;
@@ -158,9 +157,7 @@ public abstract class AbstractSockJsSession implements SockJsSession {
 
 	public final void sendMessage(WebSocketMessage<?> message) throws IOException {
 		Assert.state(!isClosed(), "Cannot send a message when session is closed");
-		if (!(message instanceof TextMessage)) {
-			throw new IllegalArgumentException("Expected text message: " + message);
-		}
+		Assert.isInstanceOf(TextMessage.class, message, "SockJS supports text messages only: " + message);
 		sendMessageInternal(((TextMessage) message).getPayload());
 	}
 
