@@ -59,6 +59,15 @@ public class ProtobufHttpMessageConverterTests {
 	}
 
 	@Test
+	public void extensionRegistryNull() {
+	     try {
+	     	new ProtobufHttpMessageConverter(null);
+	     } catch (Exception e) {
+	     	fail("Unable to create ProtobufHttpMessageConverter with null extensionRegistry");
+	     }
+	}
+
+	@Test
 	public void canRead() {
 		assertTrue(this.converter.canRead(Msg.class, null));
 		assertTrue(this.converter.canRead(Msg.class, ProtobufHttpMessageConverter.PROTOBUF));

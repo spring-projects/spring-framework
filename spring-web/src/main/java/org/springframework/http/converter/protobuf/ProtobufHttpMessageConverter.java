@@ -86,7 +86,7 @@ public class ProtobufHttpMessageConverter extends AbstractHttpMessageConverter<M
 	 */
 	public ProtobufHttpMessageConverter(ExtensionRegistryInitializer registryInitializer) {
 		super(PROTOBUF, MediaType.TEXT_PLAIN, MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON);
-		if (this.extensionRegistry != null) {
+		if (registryInitializer != null) {
 			registryInitializer.initializeExtensionRegistry(this.extensionRegistry);
 		}
 	}
