@@ -15,6 +15,7 @@
  */
 package org.springframework.beans.factory.config;
 
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Properties;
 
@@ -23,7 +24,6 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.yaml.snakeyaml.parser.ParserException;
 import org.yaml.snakeyaml.scanner.ScannerException;
-
 import org.springframework.core.io.ByteArrayResource;
 
 import static org.junit.Assert.*;
@@ -132,6 +132,26 @@ public class YamlProcessorTests {
 			public void process(Properties properties, Map<String, Object> map) {
 				assertEquals("bar", properties.get("foo[1]"));
 				assertEquals(1, properties.size());
+			}
+		});
+	}
+
+	@Test
+	@SuppressWarnings("unchecked")
+	public void flattenedMapIsSameAsPropertiesButOrdered() {
+		this.processor.setResources(new ByteArrayResource(
+				"foo: bar\nbar:\n spam: bucket".getBytes()));
+		this.processor.process(new MatchCallback() {
+			@Override
+			public void process(Properties properties, Map<String, Object> map) {
+				assertEquals("bucket", properties.get("bar.spam"));
+				assertEquals(2, properties.size());
+				Map<String, Object> flattenedMap = processor.getFlattenedMap(map);
+				assertEquals("bucket", flattenedMap.get("bar.spam"));
+				assertEquals(2, flattenedMap.size());
+				assertTrue(flattenedMap instanceof LinkedHashMap);
+				Map<String, Object> bar = (Map<String, Object>) map.get("bar");
+				assertEquals("bucket", bar.get("spam"));
 			}
 		});
 	}
