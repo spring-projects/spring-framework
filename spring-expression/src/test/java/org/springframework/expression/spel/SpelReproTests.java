@@ -1208,7 +1208,7 @@ public class SpelReproTests extends AbstractExpressionTests {
 
 		@Override
 		public Class<?>[] getSpecificTargetClasses() {
-			return new Class[] { ContextObject.class };
+			return new Class<?>[] {ContextObject.class};
 		}
 
 		@Override
@@ -1278,7 +1278,7 @@ public class SpelReproTests extends AbstractExpressionTests {
 			protected Method[] getMethods(Class<?> type) {
 				try {
 					return new Method[] {
-							Integer.class.getDeclaredMethod("parseInt", new Class[] { String.class, Integer.TYPE }) };
+							Integer.class.getDeclaredMethod("parseInt", new Class<?>[] {String.class, Integer.TYPE})};
 				}
 				catch (NoSuchMethodException ex) {
 					return new Method[0];
@@ -1878,6 +1878,14 @@ public class SpelReproTests extends AbstractExpressionTests {
 		assertEquals("child1", exp.getValue(context));
 	}
 
+	@Test
+	public void SPR12502() throws Exception {
+		SpelExpressionParser parser = new SpelExpressionParser();
+		Expression expression = parser.parseExpression("#root.getClass().getName()");
+		assertEquals(UnnamedUser.class.getName(), expression.getValue(new UnnamedUser()));
+		assertEquals(NamedUser.class.getName(), expression.getValue(new NamedUser()));
+	}
+
 
 	private static enum ABC { A, B, C }
 
@@ -2148,6 +2156,18 @@ public class SpelReproTests extends AbstractExpressionTests {
 		@Override
 		public List<Item> subList(int fromIndex, int toIndex) {
 			return this.children.subList(fromIndex, toIndex);
+		}
+	}
+
+
+	public static class UnnamedUser {
+	}
+
+
+	public static class NamedUser {
+
+		public String getName() {
+			return "foo";
 		}
 	}
 
