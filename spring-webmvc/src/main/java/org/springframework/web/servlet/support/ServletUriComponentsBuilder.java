@@ -52,22 +52,18 @@ public class ServletUriComponentsBuilder extends UriComponentsBuilder {
 	}
 
 	/**
-	 * Prepare a builder from the host, port, scheme, and context path of
-	 * an HttpServletRequest.
+	 * Prepare a builder from the host, port, scheme, and context path of the
+	 * given HttpServletRequest.
 	 */
 	public static ServletUriComponentsBuilder fromContextPath(HttpServletRequest request) {
-		String path = request.getContextPath();
-		path = prependForwardedPrefix(request, path);
-		ServletUriComponentsBuilder builder = fromRequest(request);
-		builder.replacePath(path);
-		builder.replaceQuery(null);
+		ServletUriComponentsBuilder builder = initFromRequest(request);
+		builder.replacePath(prependForwardedPrefix(request, request.getContextPath()));
 		return builder;
 	}
 
 	/**
 	 * Prepare a builder from the host, port, scheme, context path, and
-	 * servlet mapping of an HttpServletRequest. The results may vary depending
-	 * on the type of servlet mapping used.
+	 * servlet mapping of the given HttpServletRequest.
 	 *
 	 * <p>If the servlet is mapped by name, e.g. {@code "/main/*"}, the path
 	 * will end with "/main". If the servlet is mapped otherwise, e.g.
@@ -83,12 +79,12 @@ public class ServletUriComponentsBuilder extends UriComponentsBuilder {
 	}
 
 	/**
-	 * Prepare a builder from the host, port, scheme, and path of
-	 * an HttpServletRequest.
+	 * Prepare a builder from the host, port, scheme, and path (but not the query)
+	 * of the HttpServletRequest.
 	 */
 	public static ServletUriComponentsBuilder fromRequestUri(HttpServletRequest request) {
-		ServletUriComponentsBuilder builder = fromRequest(request);
-		builder.replaceQuery(null);
+		ServletUriComponentsBuilder builder = initFromRequest(request);
+		builder.initPath(prependForwardedPrefix(request, request.getRequestURI()));
 		return builder;
 	}
 
@@ -97,6 +93,16 @@ public class ServletUriComponentsBuilder extends UriComponentsBuilder {
 	 * query string of an HttpServletRequest.
 	 */
 	public static ServletUriComponentsBuilder fromRequest(HttpServletRequest request) {
+		ServletUriComponentsBuilder builder = initFromRequest(request);
+		builder.initPath(prependForwardedPrefix(request, request.getRequestURI()));
+		builder.query(request.getQueryString());
+		return builder;
+	}
+
+	/**
+	 * Initialize a builder with a scheme, host,and port (but not path and query).
+	 */
+	private static ServletUriComponentsBuilder initFromRequest(HttpServletRequest request) {
 		String scheme = request.getScheme();
 		String host = request.getServerName();
 		int port = request.getServerPort();
@@ -126,18 +132,18 @@ public class ServletUriComponentsBuilder extends UriComponentsBuilder {
 			scheme = protocolHeader;
 		}
 
-		String path = request.getRequestURI();
-		path = prependForwardedPrefix(request, path);
-
 		ServletUriComponentsBuilder builder = new ServletUriComponentsBuilder();
 		builder.scheme(scheme);
 		builder.host(host);
 		if (scheme.equals("http") && port != 80 || scheme.equals("https") && port != 443) {
 			builder.port(port);
 		}
-		builder.initPath(path);
-		builder.query(request.getQueryString());
 		return builder;
+	}
+
+	private void initPath(String path) {
+		this.originalPath = path;
+		replacePath(path);
 	}
 
 	private static String prependForwardedPrefix(HttpServletRequest request, String path) {
@@ -147,6 +153,9 @@ public class ServletUriComponentsBuilder extends UriComponentsBuilder {
 		}
 		return path;
 	}
+
+
+	// Alternative methods relying on RequestContextHolder to find the request
 
 	/**
 	 * Same as {@link #fromContextPath(HttpServletRequest)} except the
@@ -180,8 +189,9 @@ public class ServletUriComponentsBuilder extends UriComponentsBuilder {
 		return fromRequest(getCurrentRequest());
 	}
 
+
 	/**
-	 * Obtain the request through {@link RequestContextHolder}.
+	 * Get the request through {@link RequestContextHolder}.
 	 */
 	protected static HttpServletRequest getCurrentRequest() {
 		RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
@@ -192,13 +202,8 @@ public class ServletUriComponentsBuilder extends UriComponentsBuilder {
 		return servletRequest;
 	}
 
-	private void initPath(String path) {
-		this.originalPath = path;
-		replacePath(path);
-	}
-
 	/**
-	 * Removes any path extension from the {@link HttpServletRequest#getRequestURI()
+	 * Remove any path extension from the {@link HttpServletRequest#getRequestURI()
 	 * requestURI}. This method must be invoked before any calls to {@link #path(String)}
 	 * or {@link #pathSegment(String...)}.
 	 * <pre>
