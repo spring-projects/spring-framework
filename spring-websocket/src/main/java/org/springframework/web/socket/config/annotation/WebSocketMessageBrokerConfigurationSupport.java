@@ -138,7 +138,8 @@ public abstract class WebSocketMessageBrokerConfigurationSupport extends Abstrac
 	protected MappingJackson2MessageConverter createJacksonConverter() {
 		MappingJackson2MessageConverter messageConverter = super.createJacksonConverter();
 		// Use Jackson builder in order to have JSR-310 and Joda-Time modules registered automatically
-		messageConverter.setObjectMapper(Jackson2ObjectMapperBuilder.json().build());
+		messageConverter.setObjectMapper(Jackson2ObjectMapperBuilder.json()
+				.applicationContext(this.getApplicationContext()).build());
 		return messageConverter;
 	}
 

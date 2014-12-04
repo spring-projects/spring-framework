@@ -26,16 +26,20 @@ import com.fasterxml.jackson.databind.AnnotationIntrospector;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.JsonSerializer;
+import com.fasterxml.jackson.databind.KeyDeserializer;
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.Module;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.cfg.HandlerInstantiator;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 
 import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 
 /**
  * A {@link FactoryBean} for creating a Jackson 2.x {@link ObjectMapper} (default) or
@@ -119,9 +123,11 @@ import org.springframework.beans.factory.InitializingBean;
  * @author Brian Clozel
  * @author Juergen Hoeller
  * @author Tadaya Tsuyukubo
+ * @author Sebastien Deleuze
  * @since 3.2
  */
-public class Jackson2ObjectMapperFactoryBean implements FactoryBean<ObjectMapper>, BeanClassLoaderAware, InitializingBean {
+public class Jackson2ObjectMapperFactoryBean implements FactoryBean<ObjectMapper>, BeanClassLoaderAware,
+		ApplicationContextAware, InitializingBean {
 
 	private final Jackson2ObjectMapperBuilder builder = new Jackson2ObjectMapperBuilder();
 
@@ -336,6 +342,16 @@ public class Jackson2ObjectMapperFactoryBean implements FactoryBean<ObjectMapper
 		this.builder.findModulesViaServiceLoader(findModules);
 	}
 
+	/**
+	 * Customize the construction of Jackson handlers ({@link JsonSerializer}, {@link JsonDeserializer},
+	 * {@link KeyDeserializer}, {@code TypeResolverBuilder} and {@code TypeIdResolver}).
+	 * @since 4.1.3
+	 * @see Jackson2ObjectMapperFactoryBean#setApplicationContext(ApplicationContext)
+	 */
+	public void setHandlerInstantiator(HandlerInstantiator handlerInstantiator) {
+		this.builder.handlerInstantiator(handlerInstantiator);
+	}
+
 	@Override
 	public void setBeanClassLoader(ClassLoader beanClassLoader) {
 		this.builder.moduleClassLoader(beanClassLoader);
@@ -353,6 +369,17 @@ public class Jackson2ObjectMapperFactoryBean implements FactoryBean<ObjectMapper
 		}
 	}
 
+	/**
+	 * Set the builder {@link ApplicationContext} in order to autowire Jackson handlers ({@link JsonSerializer},
+	 * {@link JsonDeserializer}, {@link KeyDeserializer}, {@code TypeResolverBuilder} and {@code TypeIdResolver}).
+	 * @since 4.1.3
+	 * @see Jackson2ObjectMapperBuilder#applicationContext(ApplicationContext)
+	 * @see SpringHandlerInstantiator
+	 */
+	@Override
+	public void setApplicationContext(ApplicationContext applicationContext) {
+		this.builder.applicationContext(applicationContext);
+	}
 
 	/**
 	 * Return the singleton ObjectMapper.

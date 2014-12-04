@@ -21,7 +21,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
+import org.springframework.beans.factory.support.GenericBeanDefinition;
+import org.springframework.http.converter.json.Jackson2ObjectMapperFactoryBean;
 import org.springframework.messaging.support.ImmutableMessageChannelInterceptor;
 import org.w3c.dom.Element;
 
@@ -386,8 +387,12 @@ class MessageBrokerBeanDefinitionParser implements BeanDefinitionParser {
 				RootBeanDefinition resolverDef = new RootBeanDefinition(DefaultContentTypeResolver.class);
 				resolverDef.getPropertyValues().add("defaultMimeType", MimeTypeUtils.APPLICATION_JSON);
 				jacksonConverterDef.getPropertyValues().add("contentTypeResolver", resolverDef);
-				// Use Jackson builder in order to have JSR-310 and Joda-Time modules registered automatically
-				jacksonConverterDef.getPropertyValues().add("objectMapper", Jackson2ObjectMapperBuilder.json().build());
+				// Use Jackson factory in order to have JSR-310 and Joda-Time modules registered automatically
+				GenericBeanDefinition jacksonFactoryDef = new GenericBeanDefinition();
+				jacksonFactoryDef.setBeanClass(Jackson2ObjectMapperFactoryBean.class);
+				jacksonFactoryDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
+				jacksonFactoryDef.setSource(source);
+				jacksonConverterDef.getPropertyValues().add("objectMapper", jacksonFactoryDef);
 				converters.add(jacksonConverterDef);
 			}
 		}
