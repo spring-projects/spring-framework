@@ -177,12 +177,31 @@ public class ServletUriComponentsBuilderTests {
 	}
 
 	@Test
+	public void fromContextPathWithForwardedPrefix() {
+		request.addHeader("X-Forwarded-Prefix", "/prefix");
+		request.setContextPath("/mvc-showcase");
+		request.setRequestURI("/mvc-showcase/simple");
+		String result = ServletUriComponentsBuilder.fromContextPath(request).build().toUriString();
+		assertEquals("http://localhost/prefix/mvc-showcase", result);
+	}
+
+	@Test
 	public void fromServletMapping() {
 		request.setRequestURI("/mvc-showcase/app/simple");
 		request.setServletPath("/app");
 		request.setQueryString("foo=123");
 		String result = ServletUriComponentsBuilder.fromServletMapping(request).build().toUriString();
 		assertEquals("http://localhost/mvc-showcase/app", result);
+	}
+
+	@Test
+	public void fromServletMappingWithForwardedPrefix() {
+		request.addHeader("X-Forwarded-Prefix", "/prefix");
+		request.setContextPath("/mvc-showcase");
+		request.setServletPath("/app");
+		request.setRequestURI("/mvc-showcase/app/simple");
+		String result = ServletUriComponentsBuilder.fromServletMapping(request).build().toUriString();
+		assertEquals("http://localhost/prefix/mvc-showcase/app", result);
 	}
 
 	@Test

@@ -28,7 +28,7 @@ import org.springframework.web.util.UrlPathHelper;
 import org.springframework.web.util.WebUtils;
 
 /**
- * A UriComponentsBuilder that extracts information from an HttpServletRequest.
+ * A UriComponentsBuilder that extracts information from the HttpServletRequest.
  *
  * @author Rossen Stoyanchev
  * @since 3.1
@@ -56,8 +56,10 @@ public class ServletUriComponentsBuilder extends UriComponentsBuilder {
 	 * an HttpServletRequest.
 	 */
 	public static ServletUriComponentsBuilder fromContextPath(HttpServletRequest request) {
+		String path = request.getContextPath();
+		path = prependForwardedPrefix(request, path);
 		ServletUriComponentsBuilder builder = fromRequest(request);
-		builder.replacePath(request.getContextPath());
+		builder.replacePath(path);
 		builder.replaceQuery(null);
 		return builder;
 	}
@@ -98,7 +100,6 @@ public class ServletUriComponentsBuilder extends UriComponentsBuilder {
 		String scheme = request.getScheme();
 		String host = request.getServerName();
 		int port = request.getServerPort();
-		String path = request.getRequestURI();
 
 		String hostHeader = request.getHeader("X-Forwarded-Host");
 		if (StringUtils.hasText(hostHeader)) {
@@ -125,10 +126,8 @@ public class ServletUriComponentsBuilder extends UriComponentsBuilder {
 			scheme = protocolHeader;
 		}
 
-		String prefix = request.getHeader("X-Forwarded-Prefix");
-		if (StringUtils.hasText(prefix)) {
-			path = prefix + path;
-		}
+		String path = request.getRequestURI();
+		path = prependForwardedPrefix(request, path);
 
 		ServletUriComponentsBuilder builder = new ServletUriComponentsBuilder();
 		builder.scheme(scheme);
@@ -139,6 +138,14 @@ public class ServletUriComponentsBuilder extends UriComponentsBuilder {
 		builder.initPath(path);
 		builder.query(request.getQueryString());
 		return builder;
+	}
+
+	private static String prependForwardedPrefix(HttpServletRequest request, String path) {
+		String prefix = request.getHeader("X-Forwarded-Prefix");
+		if (StringUtils.hasText(prefix)) {
+			path = prefix + path;
+		}
+		return path;
 	}
 
 	/**
