@@ -47467,7 +47467,9 @@ a legitimate application of the `@Async` annotation.
 Even methods that return a value can be invoked asynchronously. However, such methods
 are required to have a `Future` typed return value. This still provides the benefit of
 asynchronous execution so that the caller can perform other tasks prior to calling
-`get()` on that Future.
+`get()` on that Future. 
+A stand-in `Future` can be returned by wrapping the result with a 
+{javadoc-baseurl}/org/springframework/scheduling/annotation/AsyncResult.html[`AsyncResult`] return type. 
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -47475,6 +47477,8 @@ asynchronous execution so that the caller can perform other tasks prior to calli
 	@Async
 	Future<String> returnSomething(int i) {
 		// this will be executed asynchronously
+		// ...
+		return new AsyncResult<String>(result);
 	}
 ----
 
