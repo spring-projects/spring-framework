@@ -108,7 +108,7 @@ public class HttpMessageConverterExtractorTests {
 		assertEquals(expected, result);
 	}
 
-	@Test
+	@Test(expected = RestClientException.class)
 	@SuppressWarnings("unchecked")
 	public void cannotRead() throws IOException {
 		HttpMessageConverter<String> converter = mock(HttpMessageConverter.class);
@@ -122,13 +122,22 @@ public class HttpMessageConverterExtractorTests {
 		given(response.getHeaders()).willReturn(responseHeaders);
 		given(converter.canRead(String.class, contentType)).willReturn(false);
 
-		try {
-			extractor.extractData(response);
-			fail("RestClientException expected");
-		}
-		catch (RestClientException expected) {
-			// expected
-		}
+		extractor.extractData(response);
+	}
+
+	@Test
+	public void connectionClose() throws IOException {
+		HttpMessageConverter<String> converter = mock(HttpMessageConverter.class);
+		List<HttpMessageConverter<?>> converters = new ArrayList<HttpMessageConverter<?>>();
+		converters.add(converter);
+		HttpHeaders responseHeaders = new HttpHeaders();
+		responseHeaders.setConnection("close");
+		extractor = new HttpMessageConverterExtractor<String>(String.class, createConverterList(converter));
+		given(response.getStatusCode()).willReturn(HttpStatus.OK);
+		given(response.getHeaders()).willReturn(responseHeaders);
+
+		Object result = extractor.extractData(response);
+		assertNull(result);
 	}
 
 	@Test
