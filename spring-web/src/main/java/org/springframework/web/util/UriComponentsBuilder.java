@@ -54,7 +54,7 @@ import org.springframework.web.util.HierarchicalUriComponents.PathComponent;
  * @see #fromPath(String)
  * @see #fromUri(URI)
  */
-public class UriComponentsBuilder {
+public class UriComponentsBuilder implements Cloneable {
 
 	private static final Pattern QUERY_PARAM_PATTERN = Pattern.compile("([^&=]+)(=?)([^&]+)?");
 
@@ -98,7 +98,7 @@ public class UriComponentsBuilder {
 
 	private String port;
 
-	private CompositePathComponentBuilder pathBuilder = new CompositePathComponentBuilder();
+	private CompositePathComponentBuilder pathBuilder;
 
 	private final MultiValueMap<String, String> queryParams = new LinkedMultiValueMap<String, String>();
 
@@ -112,6 +112,22 @@ public class UriComponentsBuilder {
 	 * @see #fromUri(URI)
 	 */
 	protected UriComponentsBuilder() {
+		this.pathBuilder = new CompositePathComponentBuilder();
+	}
+
+	/**
+	 * Create a deep copy of the given UriComponentsBuilder.
+	 * @param other the other builder to copy from
+	 */
+	protected UriComponentsBuilder(UriComponentsBuilder other) {
+		this.scheme = other.scheme;
+		this.ssp = other.ssp;
+		this.userInfo = other.userInfo;
+		this.host = other.host;
+		this.port = other.port;
+		this.pathBuilder = (CompositePathComponentBuilder) other.pathBuilder.clone();
+		this.queryParams.putAll(other.queryParams);
+		this.fragment = other.fragment;
 	}
 
 
@@ -627,16 +643,23 @@ public class UriComponentsBuilder {
 		return this;
 	}
 
+	@Override
+	protected Object clone() {
+		return new UriComponentsBuilder(this);
+	}
 
-	private interface PathComponentBuilder {
+
+	private interface PathComponentBuilder extends Cloneable {
 
 		PathComponent build();
+
+		Object clone();
 	}
 
 
 	private static class CompositePathComponentBuilder implements PathComponentBuilder {
 
-		private final LinkedList<PathComponentBuilder> componentBuilders = new LinkedList<PathComponentBuilder>();
+		private final LinkedList<PathComponentBuilder> builders = new LinkedList<PathComponentBuilder>();
 
 		public CompositePathComponentBuilder() {
 		}
@@ -651,7 +674,7 @@ public class UriComponentsBuilder {
 				FullPathComponentBuilder fpBuilder = getLastBuilder(FullPathComponentBuilder.class);
 				if (psBuilder == null) {
 					psBuilder = new PathSegmentComponentBuilder();
-					this.componentBuilders.add(psBuilder);
+					this.builders.add(psBuilder);
 					if (fpBuilder != null) {
 						fpBuilder.removeTrailingSlash();
 					}
@@ -669,7 +692,7 @@ public class UriComponentsBuilder {
 				}
 				if (fpBuilder == null) {
 					fpBuilder = new FullPathComponentBuilder();
-					this.componentBuilders.add(fpBuilder);
+					this.builders.add(fpBuilder);
 				}
 				fpBuilder.append(path);
 			}
@@ -677,8 +700,8 @@ public class UriComponentsBuilder {
 
 		@SuppressWarnings("unchecked")
 		private <T> T getLastBuilder(Class<T> builderClass) {
-			if (!this.componentBuilders.isEmpty()) {
-				PathComponentBuilder last = this.componentBuilders.getLast();
+			if (!this.builders.isEmpty()) {
+				PathComponentBuilder last = this.builders.getLast();
 				if (builderClass.isInstance(last)) {
 					return (T) last;
 				}
@@ -688,9 +711,9 @@ public class UriComponentsBuilder {
 
 		@Override
 		public PathComponent build() {
-			int size = this.componentBuilders.size();
+			int size = this.builders.size();
 			List<PathComponent> components = new ArrayList<PathComponent>(size);
-			for (PathComponentBuilder componentBuilder : this.componentBuilders) {
+			for (PathComponentBuilder componentBuilder : this.builders) {
 				PathComponent pathComponent = componentBuilder.build();
 				if (pathComponent != null) {
 					components.add(pathComponent);
@@ -703,6 +726,15 @@ public class UriComponentsBuilder {
 				return components.get(0);
 			}
 			return new HierarchicalUriComponents.PathComponentComposite(components);
+		}
+
+		@Override
+		public Object clone() {
+			CompositePathComponentBuilder compositeBuilder = new CompositePathComponentBuilder();
+			for (PathComponentBuilder builder : this.builders) {
+				compositeBuilder.builders.add((PathComponentBuilder) builder.clone());
+			}
+			return compositeBuilder;
 		}
 	}
 
@@ -737,6 +769,13 @@ public class UriComponentsBuilder {
 				this.path.deleteCharAt(index);
 			}
 		}
+
+		@Override
+		public Object clone() {
+			FullPathComponentBuilder builder = new FullPathComponentBuilder();
+			builder.append(this.path.toString());
+			return builder;
+		}
 	}
 
 
@@ -756,6 +795,13 @@ public class UriComponentsBuilder {
 		public PathComponent build() {
 			return (this.pathSegments.isEmpty() ? null :
 					new HierarchicalUriComponents.PathSegmentComponent(this.pathSegments));
+		}
+
+		@Override
+		public Object clone() {
+			PathSegmentComponentBuilder builder = new PathSegmentComponentBuilder();
+			builder.pathSegments.addAll(this.pathSegments);
+			return builder;
 		}
 	}
 

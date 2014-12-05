@@ -52,6 +52,15 @@ public class ServletUriComponentsBuilder extends UriComponentsBuilder {
 	}
 
 	/**
+	 * Create a deep copy of the given ServletUriComponentsBuilder.
+	 * @param other the other builder to copy from
+	 */
+	protected ServletUriComponentsBuilder(ServletUriComponentsBuilder other) {
+		super(other);
+		this.originalPath = other.originalPath;
+	}
+
+	/**
 	 * Prepare a builder from the host, port, scheme, and context path of the
 	 * given HttpServletRequest.
 	 */
@@ -230,6 +239,11 @@ public class ServletUriComponentsBuilder extends UriComponentsBuilder {
 			this.originalPath = null;
 		}
 		return extension;
+	}
+
+	@Override
+	protected Object clone() {
+		return new ServletUriComponentsBuilder(this);
 	}
 
 }

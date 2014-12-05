@@ -94,6 +94,26 @@ public class MvcUriComponentsBuilder extends UriComponentsBuilder {
 
 
 	/**
+	 * Default constructor. Protected to prevent direct instantiation.
+	 *
+	 * @see #fromController(Class)
+	 * @see #fromMethodName(Class, String, Object...)
+	 * @see #fromMethodCall(Object)
+	 * @see #fromMappingName(String)
+	 * @see #fromMethod(java.lang.reflect.Method, Object...)
+	 */
+	protected MvcUriComponentsBuilder() {
+	}
+
+	/**
+	 * Create a deep copy of the given MvcUriComponentsBuilder.
+	 * @param other the other builder to copy from
+	 */
+	protected MvcUriComponentsBuilder(MvcUriComponentsBuilder other) {
+		super(other);
+	}
+
+	/**
 	 * Create a {@link UriComponentsBuilder} from the mapping of a controller class
 	 * and current request information including Servlet mapping. If the controller
 	 * contains multiple mappings, only the first one is used.
@@ -429,6 +449,11 @@ public class MvcUriComponentsBuilder extends UriComponentsBuilder {
 			factory.setCallbacks(new Callback[] {interceptor});
 			return (T) factory;
 		}
+	}
+
+	@Override
+	protected Object clone() {
+		return new MvcUriComponentsBuilder(this);
 	}
 
 
