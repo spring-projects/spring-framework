@@ -42,7 +42,7 @@ configure(allprojects) { project ->
 	ext.jasperReportsVersion = "6.0.0"
 	ext.jettyVersion         = "9.2.5.v20141112"
 	ext.jodaVersion          = "2.6"
-	ext.junitVersion         = "4.11"
+	ext.junitVersion         = "4.12"
 	ext.nettyVersion         = "4.0.24.Final"
 	ext.openJpaVersion       = "2.2.2"  // 2.3.0 not Java 8 compatible (based on ASM 4)
 	ext.protobufVersion      = "2.6.1"
