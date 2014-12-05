@@ -38972,9 +38972,9 @@ WebSocket clients or to a specific user.
 [[websocket-server]]
 === WebSocket API
 The Spring Framework provides a WebSocket API designed to adapt to various WebSocket engines.
-For example, it runs on JSR-356 runtimes such as Tomcat (7.0.47+), GlassFish (4.0+) and
-WildFly (8.0+) but can also adapt to other WebSocket runtimes such as the Jetty (9.1+)
-native WebSocket support.
+For example, it runs on WebSocket runtimes such as Tomcat 7.0.47+, GlassFish 4.1+,
+Undertow 1.0+ (and WildFly 8.0+), WebLogic 12.1.3+ and Jetty 9.1+. Additional support will be
+added as more WebSocket runtimes become available.
 
 [NOTE]
 ====
@@ -39161,9 +39161,7 @@ requests -- such as Spring MVC's `DispatcherServlet`.
 
 This is a significant limitation of JSR-356 that Spring's WebSocket support
 addresses by providing a server-specific `RequestUpgradeStrategy` even when
-running in a JSR-356 runtime. At present such support is available on
-Tomcat 7.0.47+, Jetty 9.1+, GlassFish 4.0+, and WildFly 8.0+. Additional support will be
-added as more WebSocket runtimes become available.
+running in a JSR-356 runtime.
 
 [NOTE]
 ====
