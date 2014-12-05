@@ -114,7 +114,7 @@ public class ControllerAdviceBean implements Ordered {
 
 	/**
 	 * Returns the order value extracted from the {@link ControllerAdvice}
-	 * annotation or {@link Ordered#LOWEST_PRECEDENCE} otherwise.
+	 * annotation, or {@link Ordered#LOWEST_PRECEDENCE} otherwise.
 	 */
 	@Override
 	public int getOrder() {
@@ -122,8 +122,9 @@ public class ControllerAdviceBean implements Ordered {
 	}
 
 	/**
-	 * Returns the type of the contained bean.
-	 * If the bean type is a CGLIB-generated class, the original, user-defined class is returned.
+	 * Return the type of the contained bean.
+	 * <p>If the bean type is a CGLIB-generated class, the original
+	 * user-defined class is returned.
 	 */
 	public Class<?> getBeanType() {
 		Class<?> clazz = (this.bean instanceof String ?
@@ -139,7 +140,7 @@ public class ControllerAdviceBean implements Ordered {
 	}
 
 	/**
-	 * Checks whether the given bean type should be assisted by this
+	 * Check whether the given bean type should be assisted by this
 	 * {@code @ControllerAdvice} instance.
 	 * @param beanType the type of the bean to check
 	 * @see org.springframework.web.bind.annotation.ControllerAdvice
@@ -151,7 +152,7 @@ public class ControllerAdviceBean implements Ordered {
 		}
 		else if (beanType != null) {
 			for (String basePackage : this.basePackages) {
-				if (ClassUtils.getPackageName(beanType).startsWith(basePackage)) {
+				if (beanType.getName().startsWith(basePackage)) {
 					return true;
 				}
 			}
@@ -224,18 +225,22 @@ public class ControllerAdviceBean implements Ordered {
 		Set<String> basePackages = new LinkedHashSet<String>();
 		for (String basePackage : annotation.value()) {
 			if (StringUtils.hasText(basePackage)) {
-				basePackages.add(basePackage);
+				basePackages.add(adaptBasePackage(basePackage));
 			}
 		}
 		for (String basePackage : annotation.basePackages()) {
 			if (StringUtils.hasText(basePackage)) {
-				basePackages.add(basePackage);
+				basePackages.add(adaptBasePackage(basePackage));
 			}
 		}
 		for (Class<?> markerClass : annotation.basePackageClasses()) {
-			basePackages.add(ClassUtils.getPackageName(markerClass));
+			basePackages.add(adaptBasePackage(ClassUtils.getPackageName(markerClass)));
 		}
 		return basePackages;
+	}
+
+	private static String adaptBasePackage(String basePackage) {
+		return (basePackage.endsWith(".") ? basePackage : basePackage + ".");
 	}
 
 }
