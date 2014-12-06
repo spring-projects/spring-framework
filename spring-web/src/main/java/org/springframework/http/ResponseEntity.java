@@ -246,6 +246,14 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 		return status(HttpStatus.NOT_FOUND);
 	}
 
+	/**
+	 * Create a builder with a {@linkplain HttpStatus#UNPROCESSABLE_ENTITY UNPROCESSABLE_ENTITY} status.
+	 * @return the created builder
+	 * @since 4.1
+	 */
+	public static HeadersBuilder<?> unprocessableEntity() {
+		return status(HttpStatus.UNPROCESSABLE_ENTITY);
+	}
 
 	/**
 	 * Defines a builder that adds headers to the response entity.
