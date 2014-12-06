@@ -120,6 +120,15 @@ public class ResponseEntityTests {
 	}
 
 	@Test
+	public void unprocessableEntity() throws URISyntaxException {
+		ResponseEntity<Void> responseEntity = ResponseEntity.unprocessableEntity().build();
+
+		assertNotNull(responseEntity);
+		assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, responseEntity.getStatusCode());
+		assertNull(responseEntity.getBody());
+	}
+
+	@Test
 	public void headers() throws URISyntaxException {
 		String eTag = "\"foo\"";
 		URI location = new URI("location");
