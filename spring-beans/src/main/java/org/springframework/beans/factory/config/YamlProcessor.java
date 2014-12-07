@@ -254,7 +254,7 @@ public abstract class YamlProcessor {
 	 * contain the same values as the {@link MatchCallback} Properties.
 	 * @param source the source map
 	 * @return a flattened map
-	 * @since 4.2.3
+	 * @since 4.1.3
 	 */
 	protected final Map<String, Object> getFlattenedMap(Map<String, Object> source) {
 		Map<String, Object> result = new LinkedHashMap<String, Object>();

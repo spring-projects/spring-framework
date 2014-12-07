@@ -235,10 +235,10 @@ class ConfigurationClassEnhancer {
 
 		@Override
 		public boolean isMatch(Method candidateMethod) {
-			return candidateMethod.getName().equals("setBeanFactory") &&
+			return (candidateMethod.getName().equals("setBeanFactory") &&
 					candidateMethod.getParameterTypes().length == 1 &&
 					candidateMethod.getParameterTypes()[0].equals(BeanFactory.class) &&
-					BeanFactoryAware.class.isAssignableFrom(candidateMethod.getDeclaringClass());
+					BeanFactoryAware.class.isAssignableFrom(candidateMethod.getDeclaringClass()));
 		}
 	}
 
