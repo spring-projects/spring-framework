@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-package org.springframework.beans.factory;
+package org.springframework.beans.factory.support;
 
 import org.junit.Test;
 
 import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.support.DefaultSingletonBeanRegistry;
+import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.tests.sample.beans.DerivedTestBean;
 import org.springframework.tests.sample.beans.TestBean;
 
@@ -81,6 +81,24 @@ public class DefaultSingletonBeanRegistryTests {
 		assertEquals(0, beanRegistry.getSingletonCount());
 		assertEquals(0, beanRegistry.getSingletonNames().length);
 		assertTrue(tb.wasDestroyed());
+	}
+
+	@Test
+	public void testDependentRegistration() {
+		DefaultSingletonBeanRegistry beanRegistry = new DefaultSingletonBeanRegistry();
+
+		beanRegistry.registerDependentBean("a", "b");
+		beanRegistry.registerDependentBean("b", "c");
+		beanRegistry.registerDependentBean("c", "b");
+		assertTrue(beanRegistry.isDependent("a", "b"));
+		assertTrue(beanRegistry.isDependent("b", "c"));
+		assertTrue(beanRegistry.isDependent("c", "b"));
+		assertTrue(beanRegistry.isDependent("a", "c"));
+		assertFalse(beanRegistry.isDependent("c", "a"));
+		assertFalse(beanRegistry.isDependent("b", "a"));
+		assertFalse(beanRegistry.isDependent("a", "a"));
+		assertTrue(beanRegistry.isDependent("b", "b"));
+		assertTrue(beanRegistry.isDependent("c", "c"));
 	}
 
 }
