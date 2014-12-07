@@ -1795,7 +1795,7 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 	}
 
 
-	public static class ExtendedResourceInjectionBean<T> extends ResourceInjectionBean {
+	static class NonPublicResourceInjectionBean<T> extends ResourceInjectionBean {
 
 		@Autowired
 		public final ITestBean testBean3 = null;
@@ -1808,7 +1808,7 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 
 		public boolean baseInjected = false;
 
-		public ExtendedResourceInjectionBean() {
+		public NonPublicResourceInjectionBean() {
 		}
 
 		@Override
@@ -1851,12 +1851,11 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 	}
 
 
-	public static class TypedExtendedResourceInjectionBean extends ExtendedResourceInjectionBean<NestedTestBean> {
-
+	public static class TypedExtendedResourceInjectionBean extends NonPublicResourceInjectionBean<NestedTestBean> {
 	}
 
 
-	public static class OverriddenExtendedResourceInjectionBean extends ExtendedResourceInjectionBean<NestedTestBean> {
+	public static class OverriddenExtendedResourceInjectionBean extends NonPublicResourceInjectionBean<NestedTestBean> {
 
 		public boolean subInjected = false;
 
@@ -2250,7 +2249,6 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 	public static class CustomAnnotationOptionalMethodResourceInjectionBean extends ResourceInjectionBean {
 
 		private TestBean testBean3;
-
 
 		@MyAutowired(optional = true)
 		protected void setTestBean3(TestBean testBean3) {

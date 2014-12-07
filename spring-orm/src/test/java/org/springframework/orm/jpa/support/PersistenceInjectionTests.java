@@ -774,13 +774,18 @@ public class PersistenceInjectionTests extends AbstractEntityManagerFactoryBeanT
 
 
 	@SuppressWarnings("serial")
-	public static class SpecificPublicPersistenceContextSetter extends DefaultPublicPersistenceContextSetter {
+	static class PublicPersistenceContextSetterOnNonPublicClass extends DefaultPublicPersistenceContextSetter {
 
 		@Override
 		@PersistenceContext(unitName="unit2", type = PersistenceContextType.EXTENDED)
 		public void setEntityManager(EntityManager em) {
 			super.setEntityManager(em);
 		}
+	}
+
+
+	@SuppressWarnings("serial")
+	public static class SpecificPublicPersistenceContextSetter extends PublicPersistenceContextSetterOnNonPublicClass {
 	}
 
 
