@@ -363,9 +363,6 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 				if (BridgeMethodResolver.isVisibilityBridgeMethodPair(method, bridgedMethod)) {
 					ann = findAutowiredAnnotation(bridgedMethod);
 				}
-				else if (!method.isBridge()) {
-					ann = findAutowiredAnnotation(method);
-				}
 				if (ann != null && method.equals(ClassUtils.getMostSpecificMethod(method, clazz))) {
 					if (Modifier.isStatic(method.getModifiers())) {
 						if (logger.isWarnEnabled()) {
@@ -379,7 +376,7 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 						}
 					}
 					boolean required = determineRequiredStatus(ann);
-					PropertyDescriptor pd = BeanUtils.findPropertyForMethod(method);
+					PropertyDescriptor pd = BeanUtils.findPropertyForMethod(bridgedMethod, clazz);
 					currElements.add(new AutowiredMethodElement(method, required, pd));
 				}
 			}

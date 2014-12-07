@@ -50,6 +50,7 @@ import org.springframework.beans.factory.config.DestructionAwareBeanPostProcesso
 import org.springframework.beans.factory.config.InstantiationAwareBeanPostProcessor;
 import org.springframework.beans.factory.support.MergedBeanDefinitionPostProcessor;
 import org.springframework.beans.factory.support.RootBeanDefinition;
+import org.springframework.core.BridgeMethodResolver;
 import org.springframework.core.Ordered;
 import org.springframework.core.PriorityOrdered;
 import org.springframework.jndi.JndiLocatorDelegate;
@@ -376,9 +377,9 @@ public class PersistenceAnnotationBeanPostProcessor
 
 
 	private InjectionMetadata findPersistenceMetadata(String beanName, final Class<?> clazz) {
-		// Quick check on the concurrent map first, with minimal locking.
 		// Fall back to class name as cache key, for backwards compatibility with custom callers.
 		String cacheKey = (StringUtils.hasLength(beanName) ? beanName : clazz.getName());
+		// Quick check on the concurrent map first, with minimal locking.
 		InjectionMetadata metadata = this.injectionMetadataCache.get(cacheKey);
 		if (InjectionMetadata.needsRefresh(metadata, clazz)) {
 			synchronized (this.injectionMetadataCache) {
@@ -390,9 +391,8 @@ public class PersistenceAnnotationBeanPostProcessor
 					do {
 						LinkedList<InjectionMetadata.InjectedElement> currElements = new LinkedList<InjectionMetadata.InjectedElement>();
 						for (Field field : targetClass.getDeclaredFields()) {
-							PersistenceContext pc = field.getAnnotation(PersistenceContext.class);
-							PersistenceUnit pu = field.getAnnotation(PersistenceUnit.class);
-							if (pc != null || pu != null) {
+							if (field.isAnnotationPresent(PersistenceContext.class) ||
+									field.isAnnotationPresent(PersistenceUnit.class)) {
 								if (Modifier.isStatic(field.getModifiers())) {
 									throw new IllegalStateException("Persistence annotations are not supported on static fields");
 								}
@@ -400,17 +400,18 @@ public class PersistenceAnnotationBeanPostProcessor
 							}
 						}
 						for (Method method : targetClass.getDeclaredMethods()) {
-							PersistenceContext pc = method.getAnnotation(PersistenceContext.class);
-							PersistenceUnit pu = method.getAnnotation(PersistenceUnit.class);
-							if ((pc != null || pu != null) && !method.isBridge() &&
-									method.equals(ClassUtils.getMostSpecificMethod(method, clazz))) {
+							method = BridgeMethodResolver.findBridgedMethod(method);
+							Method mostSpecificMethod = BridgeMethodResolver.findBridgedMethod(ClassUtils.getMostSpecificMethod(method, clazz));
+							if ((method.isAnnotationPresent(PersistenceContext.class) ||
+									method.isAnnotationPresent(PersistenceUnit.class)) &&
+									method.equals(mostSpecificMethod)) {
 								if (Modifier.isStatic(method.getModifiers())) {
 									throw new IllegalStateException("Persistence annotations are not supported on static methods");
 								}
 								if (method.getParameterTypes().length != 1) {
 									throw new IllegalStateException("Persistence annotation requires a single-arg method: " + method);
 								}
-								PropertyDescriptor pd = BeanUtils.findPropertyForMethod(method);
+								PropertyDescriptor pd = BeanUtils.findPropertyForMethod(method, clazz);
 								currElements.add(new PersistenceElement(method, pd));
 							}
 						}

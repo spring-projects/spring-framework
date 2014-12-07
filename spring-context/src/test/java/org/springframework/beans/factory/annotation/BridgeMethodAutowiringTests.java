@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,47 +16,51 @@
 
 package org.springframework.beans.factory.annotation;
 
-import static org.junit.Assert.assertNotNull;
-
 import javax.inject.Inject;
 import javax.inject.Named;
 
 import org.junit.Test;
+
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.stereotype.Component;
+
+import static org.junit.Assert.*;
 
 public class BridgeMethodAutowiringTests {
 
 	@Test
-	public void SPR_8434() {
+	public void SPR8434() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 		ctx.register(UserServiceImpl.class, Foo.class);
 		ctx.refresh();
 		assertNotNull(ctx.getBean(UserServiceImpl.class).object);
 	}
 
-}
 
+	static abstract class GenericServiceImpl<D> {
 
-abstract class GenericServiceImpl<D extends Object> {
-
-	public abstract void setObject(D object);
-
-}
-
-
-class UserServiceImpl extends GenericServiceImpl<Foo> {
-
-	protected Foo object;
-
-	@Override
-	@Inject
-	@Named("userObject")
-	public void setObject(Foo object) {
-		this.object = object;
+		public abstract void setObject(D object);
 	}
+
+
+	public static class UserServiceImpl extends GenericServiceImpl<Foo> {
+
+		protected Foo object;
+
+		@Override
+		@Inject
+		@Named("userObject")
+		public void setObject(Foo object) {
+			if (this.object != null) {
+				throw new IllegalStateException("Already called");
+			}
+			this.object = object;
+		}
+	}
+
+
+	@Component("userObject")
+	public static class Foo {
+	}
+
 }
-
-@Component("userObject")
-class Foo { }
-
