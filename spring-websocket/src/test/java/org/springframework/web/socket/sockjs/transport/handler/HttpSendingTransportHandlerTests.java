@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -76,7 +76,7 @@ public class HttpSendingTransportHandlerTests  extends AbstractHttpRequestTests 
 		assertFalse("Polling request should complete after open frame", this.servletRequest.isAsyncStarted());
 		verify(this.webSocketHandler).afterConnectionEstablished(session);
 
-		resetResponse();
+		resetRequestAndResponse();
 		transportHandler.handleRequest(this.request, this.response, this.webSocketHandler, session);
 
 		assertTrue("Polling request should remain open", this.servletRequest.isAsyncStarted());

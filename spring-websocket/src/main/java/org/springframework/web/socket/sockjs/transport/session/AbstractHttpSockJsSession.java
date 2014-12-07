@@ -70,7 +70,7 @@ public abstract class AbstractHttpSockJsSession extends AbstractSockJsSession {
 
 	private final Object responseLock = new Object();
 
-	private volatile boolean requestInitialized;
+	private volatile boolean readyToSend;
 
 
 	private final Queue<String> messageCache;
@@ -195,18 +195,24 @@ public abstract class AbstractHttpSockJsSession extends AbstractSockJsSession {
 		this.localAddress = request.getLocalAddress();
 		this.remoteAddress = request.getRemoteAddress();
 
-		this.response = response;
-		this.frameFormat = frameFormat;
-		this.asyncRequestControl = request.getAsyncRequestControl(response);
-
 		synchronized (this.responseLock) {
 			try {
+				this.response = response;
+				this.frameFormat = frameFormat;
+				this.asyncRequestControl = request.getAsyncRequestControl(response);
+				this.asyncRequestControl.start(-1);
+
 				// Let "our" handler know before sending the open frame to the remote handler
 				delegateConnectionEstablished();
-				writePrelude(request, response);
-				writeFrame(SockJsFrame.openFrame());
-				if (isStreaming() && !isClosed()) {
-					startAsyncRequest();
+
+				if (isStreaming()) {
+					writePrelude(request, response);
+					writeFrame(SockJsFrame.openFrame());
+					flushCache();
+					this.readyToSend = true;
+				}
+				else {
+					writeFrame(SockJsFrame.openFrame());
 				}
 			}
 			catch (Throwable ex) {
@@ -217,17 +223,6 @@ public abstract class AbstractHttpSockJsSession extends AbstractSockJsSession {
 	}
 
 	protected void writePrelude(ServerHttpRequest request, ServerHttpResponse response) throws IOException {
-	}
-
-	private void startAsyncRequest() {
-		this.asyncRequestControl.start(-1);
-		if (this.messageCache.size() > 0) {
-			flushCache();
-		}
-		else {
-			scheduleHeartbeat();
-		}
-		this.requestInitialized = true;
 	}
 
 	/**
@@ -249,12 +244,27 @@ public abstract class AbstractHttpSockJsSession extends AbstractSockJsSession {
 			try {
 				if (isClosed()) {
 					response.getBody().write(SockJsFrame.closeFrameGoAway().getContentBytes());
+					return;
 				}
 				this.response = response;
 				this.frameFormat = frameFormat;
 				this.asyncRequestControl = request.getAsyncRequestControl(response);
-				writePrelude(request, response);
-				startAsyncRequest();
+				this.asyncRequestControl.start(-1);
+
+				if (isStreaming()) {
+					writePrelude(request, response);
+					flushCache();
+					this.readyToSend = true;
+				}
+				else {
+					if (this.messageCache.isEmpty()) {
+						scheduleHeartbeat();
+						this.readyToSend = true;
+					}
+					else {
+						flushCache();
+					}
+				}
 			}
 			catch (Throwable ex) {
 				tryCloseWithSockJsTransportError(ex, CloseStatus.SERVER_ERROR);
@@ -266,32 +276,24 @@ public abstract class AbstractHttpSockJsSession extends AbstractSockJsSession {
 
 	@Override
 	protected final void sendMessageInternal(String message) throws SockJsTransportFailureException {
-		this.messageCache.add(message);
-		tryFlushCache();
-	}
-
-	private boolean tryFlushCache() throws SockJsTransportFailureException {
 		synchronized (this.responseLock) {
-			if (this.messageCache.isEmpty()) {
-				logger.trace("Nothing to flush in session=" + this.getId());
-				return false;
-			}
+			this.messageCache.add(message);
 			if (logger.isTraceEnabled()) {
 				logger.trace(this.messageCache.size() + " message(s) to flush in session " + this.getId());
 			}
-			if (isActive() && this.requestInitialized) {
+			if (isActive() && this.readyToSend) {
 				if (logger.isTraceEnabled()) {
 					logger.trace("Session is active, ready to flush.");
 				}
 				cancelHeartbeat();
 				flushCache();
-				return true;
+				return;
 			}
 			else {
 				if (logger.isTraceEnabled()) {
 					logger.trace("Session is not active, not ready to flush.");
 				}
-				return false;
+				return;
 			}
 		}
 	}
@@ -312,7 +314,7 @@ public abstract class AbstractHttpSockJsSession extends AbstractSockJsSession {
 
 			ServerHttpAsyncRequestControl control = this.asyncRequestControl;
 			this.asyncRequestControl = null;
-			this.requestInitialized = false;
+			this.readyToSend = false;
 			this.response = null;
 
 			updateLastActiveTime();
