@@ -232,11 +232,11 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 		int registryId = System.identityHashCode(registry);
 		if (this.registriesPostProcessed.contains(registryId)) {
 			throw new IllegalStateException(
-					"postProcessBeanDefinitionRegistry already called for this post-processor against " + registry);
+					"postProcessBeanDefinitionRegistry already called on this post-processor against " + registry);
 		}
 		if (this.factoriesPostProcessed.contains(registryId)) {
 			throw new IllegalStateException(
-					"postProcessBeanFactory already called for this post-processor against " + registry);
+					"postProcessBeanFactory already called on this post-processor against " + registry);
 		}
 		this.registriesPostProcessed.add(registryId);
 
@@ -252,7 +252,7 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 		int factoryId = System.identityHashCode(beanFactory);
 		if (this.factoriesPostProcessed.contains(factoryId)) {
 			throw new IllegalStateException(
-					"postProcessBeanFactory already called for this post-processor against " + beanFactory);
+					"postProcessBeanFactory already called on this post-processor against " + beanFactory);
 		}
 		this.factoriesPostProcessed.add(factoryId);
 		if (!this.registriesPostProcessed.contains(factoryId)) {
