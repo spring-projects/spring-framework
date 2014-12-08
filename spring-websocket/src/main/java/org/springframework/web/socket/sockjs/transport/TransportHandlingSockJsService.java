@@ -242,6 +242,15 @@ public class TransportHandlingSockJsService extends AbstractSockJsService implem
 					return;
 				}
 			}
+			else {
+				if (session.getPrincipal() != null) {
+					if (!session.getPrincipal().equals(request.getPrincipal())) {
+						logger.debug("The user for the session does not match the user for the request.");
+						response.setStatusCode(HttpStatus.NOT_FOUND);
+						return;
+					}
+				}
+			}
 
 			if (transportType.sendsNoCacheInstruction()) {
 				addNoCacheHeaders(response);

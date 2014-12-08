@@ -27,6 +27,7 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.web.socket.AbstractHttpRequestTests;
 import org.springframework.web.socket.WebSocketHandler;
+import org.springframework.web.socket.handler.TestPrincipal;
 import org.springframework.web.socket.sockjs.transport.SockJsSessionFactory;
 import org.springframework.web.socket.sockjs.transport.TransportHandler;
 import org.springframework.web.socket.sockjs.transport.TransportHandlingSockJsService;
@@ -176,6 +177,28 @@ public class DefaultSockJsServiceTests extends AbstractHttpRequestTests {
 
 		assertEquals(200, this.servletResponse.getStatus()); // session exists
 		verify(this.xhrSendHandler).handleRequest(this.request, this.response, this.wsHandler, this.session);
+	}
+
+	@Test
+	public void handleTransportRequestXhrSendWithDifferentUser() throws Exception {
+		String sockJsPath = sessionUrlPrefix + "xhr";
+		setRequest("POST", sockJsPrefix + sockJsPath);
+		this.service.handleRequest(this.request, this.response, sockJsPath, this.wsHandler);
+
+		assertEquals(200, this.servletResponse.getStatus()); // session created
+		verify(this.xhrHandler).handleRequest(this.request, this.response, this.wsHandler, this.session);
+
+		this.session.setPrincipal(new TestPrincipal("little red riding hood"));
+		this.servletRequest.setUserPrincipal(new TestPrincipal("wolf"));
+
+		resetResponse();
+		reset(this.xhrSendHandler);
+		sockJsPath = sessionUrlPrefix + "xhr_send";
+		setRequest("POST", sockJsPrefix + sockJsPath);
+		this.service.handleRequest(this.request, this.response, sockJsPath, this.wsHandler);
+
+		assertEquals(404, this.servletResponse.getStatus());
+		verifyNoMoreInteractions(this.xhrSendHandler);
 	}
 
 
