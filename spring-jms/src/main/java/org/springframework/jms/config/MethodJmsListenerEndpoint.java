@@ -19,6 +19,8 @@ package org.springframework.jms.config;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 
+import org.springframework.aop.framework.AopProxyUtils;
+import org.springframework.aop.support.AopUtils;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.jms.listener.MessageListenerContainer;
 import org.springframework.jms.listener.adapter.MessagingMessageListenerAdapter;
@@ -109,16 +111,27 @@ public class MethodJmsListenerEndpoint extends AbstractJmsListenerEndpoint {
 	}
 
 	private String getDefaultResponseDestination() {
-		SendTo ann = AnnotationUtils.getAnnotation(getMethod(), SendTo.class);
+		Method specificMethod = getMostSpecificMethod();
+		SendTo ann = AnnotationUtils.getAnnotation(specificMethod, SendTo.class);
 		if (ann != null) {
 			Object[] destinations = ann.value();
 			if (destinations.length != 1) {
 				throw new IllegalStateException("Invalid @" + SendTo.class.getSimpleName() + " annotation on '"
-						+ getMethod() + "' one destination must be set (got " + Arrays.toString(destinations) + ")");
+						+ specificMethod + "' one destination must be set (got " + Arrays.toString(destinations) + ")");
 			}
 			return (String) destinations[0];
 		}
 		return null;
+	}
+
+	private Method getMostSpecificMethod() {
+		if (AopUtils.isAopProxy(this.bean)) {
+			Class<?> target = AopProxyUtils.ultimateTargetClass(this.bean);
+			return AopUtils.getMostSpecificMethod(getMethod(), target);
+		}
+		else {
+			return getMethod();
+		}
 	}
 
 	@Override
