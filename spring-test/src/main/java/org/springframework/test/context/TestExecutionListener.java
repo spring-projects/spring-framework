@@ -25,11 +25,11 @@ package org.springframework.test.context;
  * mechanisms.
  * <p>Implementations may optionally declare the position in which they should
  * be ordered among the chain of default listeners via the
- * {@link org.springframework.core.Ordered Order} interface or
+ * {@link org.springframework.core.Ordered Ordered} interface or
  * {@link org.springframework.core.annotation.Order @Order} annotation. See
  * {@link TestContextBootstrapper#getTestExecutionListeners()} for details.
  * <p>Spring provides the following out-of-the-box implementations (all of
- * which are annotated with {@code @Order}):
+ * which implement {@code Ordered}):
  * <ul>
  * <li>{@link org.springframework.test.context.web.ServletTestExecutionListener
  * ServletTestExecutionListener}</li>
