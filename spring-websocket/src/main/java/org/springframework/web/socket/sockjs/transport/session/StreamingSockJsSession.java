@@ -18,13 +18,9 @@ package org.springframework.web.socket.sockjs.transport.session;
 
 import java.util.Map;
 
-import org.springframework.http.server.ServerHttpRequest;
-import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.web.socket.WebSocketHandler;
-import org.springframework.web.socket.sockjs.SockJsException;
 import org.springframework.web.socket.sockjs.SockJsTransportFailureException;
 import org.springframework.web.socket.sockjs.frame.SockJsFrame;
-import org.springframework.web.socket.sockjs.frame.SockJsFrameFormat;
 import org.springframework.web.socket.sockjs.frame.SockJsMessageCodec;
 import org.springframework.web.socket.sockjs.transport.SockJsServiceConfig;
 
@@ -53,7 +49,7 @@ public class StreamingSockJsSession extends AbstractHttpSockJsSession {
 
 	@Override
 	protected void flushCache() throws SockJsTransportFailureException {
-		do {
+		while (!getMessageCache().isEmpty()) {
 			String message = getMessageCache().poll();
 			SockJsMessageCodec messageCodec = getSockJsServiceConfig().getMessageCodec();
 			SockJsFrame frame = SockJsFrame.messageFrame(messageCodec, message);
@@ -73,7 +69,6 @@ public class StreamingSockJsSession extends AbstractHttpSockJsSession {
 				break;
 			}
 		}
-		while (!getMessageCache().isEmpty());
 		scheduleHeartbeat();
 	}
 

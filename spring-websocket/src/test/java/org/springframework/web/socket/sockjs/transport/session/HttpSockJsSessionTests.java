@@ -82,7 +82,7 @@ public class HttpSockJsSessionTests extends AbstractSockJsSessionTests<TestAbstr
 		this.session.handleInitialRequest(this.request, this.response, this.frameFormat);
 
 		assertEquals("hhh\no", this.servletResponse.getContentAsString());
-		assertFalse(this.servletRequest.isAsyncStarted());
+		assertTrue(this.servletRequest.isAsyncStarted());
 
 		verify(this.webSocketHandler).afterConnectionEstablished(this.session);
 	}
@@ -119,7 +119,7 @@ public class HttpSockJsSessionTests extends AbstractSockJsSessionTests<TestAbstr
 
 		@Override
 		protected boolean isStreaming() {
-			return false;
+			return true;
 		}
 
 		@Override

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,24 +16,26 @@
 
 package org.springframework.web.socket.sockjs.transport.handler;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+
 import java.sql.Date;
 
 import org.junit.Before;
 import org.junit.Test;
-
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.web.socket.AbstractHttpRequestTests;
 import org.springframework.web.socket.WebSocketHandler;
-import org.springframework.web.socket.sockjs.frame.SockJsFrameFormat;
 import org.springframework.web.socket.sockjs.frame.SockJsFrame;
+import org.springframework.web.socket.sockjs.frame.SockJsFrameFormat;
 import org.springframework.web.socket.sockjs.transport.session.AbstractSockJsSession;
 import org.springframework.web.socket.sockjs.transport.session.PollingSockJsSession;
 import org.springframework.web.socket.sockjs.transport.session.StreamingSockJsSession;
 import org.springframework.web.socket.sockjs.transport.session.StubSockJsServiceConfig;
-
-import static org.junit.Assert.*;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.*;
 
 /**
  * Test fixture for {@link AbstractHttpSendingTransportHandler} and sub-classes.
@@ -75,7 +77,7 @@ public class HttpSendingTransportHandlerTests  extends AbstractHttpRequestTests 
 		assertFalse("Polling request should complete after open frame", this.servletRequest.isAsyncStarted());
 		verify(this.webSocketHandler).afterConnectionEstablished(session);
 
-		resetResponse();
+		resetRequestAndResponse();
 		transportHandler.handleRequest(this.request, this.response, this.webSocketHandler, session);
 
 		assertTrue("Polling request should remain open", this.servletRequest.isAsyncStarted());
