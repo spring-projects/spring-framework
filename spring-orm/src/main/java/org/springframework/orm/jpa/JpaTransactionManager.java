@@ -82,16 +82,16 @@ import org.springframework.util.CollectionUtils;
  * this instance needs to be aware of the DataSource ({@link #setDataSource}).
  * The given DataSource should obviously match the one used by the given
  * EntityManagerFactory. This transaction manager will autodetect the DataSource
- * used as known connection factory of the EntityManagerFactory, so you usually
+ * used as the connection factory of the EntityManagerFactory, so you usually
  * don't need to explicitly specify the "dataSource" property.
  *
  * <p>This transaction manager supports nested transactions via JDBC 3.0 Savepoints.
- * The {@link #setNestedTransactionAllowed} "nestedTransactionAllowed"} flag defaults
- * to "false", though, as nested transactions will just apply to the JDBC Connection,
- * not to the JPA EntityManager and its cached entity objects and related context.
- * You can manually set the flag to "true" if you want to use nested transactions
- * for JDBC access code which participates in JPA transactions (provided that your
- * JDBC driver supports Savepoints). <i>Note that JPA itself does not support
+ * The {@link #setNestedTransactionAllowed "nestedTransactionAllowed"} flag defaults
+ * to {@code false} though, since nested transactions will just apply to the JDBC
+ * Connection, not to the JPA EntityManager and its cached entity objects and related
+ * context. You can manually set the flag to {@code true} if you want to use nested
+ * transactions for JDBC access code which participates in JPA transactions (provided
+ * that your JDBC driver supports Savepoints). <i>Note that JPA itself does not support
  * nested transactions! Hence, do not expect JPA access code to semantically
  * participate in a nested transaction.</i>
  *
@@ -124,7 +124,7 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager
 
 	/**
 	 * Create a new JpaTransactionManager instance.
-	 * A EntityManagerFactory has to be set to be able to use it.
+	 * <p>An EntityManagerFactory has to be set to be able to use it.
 	 * @see #setEntityManagerFactory
 	 */
 	public JpaTransactionManager() {
@@ -145,7 +145,7 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager
 	/**
 	 * Set the EntityManagerFactory that this instance should manage transactions for.
 	 * <p>Alternatively, specify the persistence unit name of the target EntityManagerFactory.
-	 * By default, a default EntityManagerFactory will be retrieved through finding a
+	 * By default, a default EntityManagerFactory will be retrieved by finding a
 	 * single unique bean of type EntityManagerFactory in the containing BeanFactory.
 	 * @see #setPersistenceUnitName
 	 */
@@ -165,7 +165,7 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager
 	 * <p>This is an alternative to specifying the EntityManagerFactory by direct reference,
 	 * resolving it by its persistence unit name instead. If no EntityManagerFactory and
 	 * no persistence unit name have been specified, a default EntityManagerFactory will
-	 * be retrieved through finding a single unique bean of type EntityManagerFactory.
+	 * be retrieved by finding a single unique bean of type EntityManagerFactory.
 	 * @see #setEntityManagerFactory
 	 */
 	public void setPersistenceUnitName(String persistenceUnitName) {
@@ -215,7 +215,7 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager
 	 * Set the JDBC DataSource that this instance should manage transactions for.
 	 * The DataSource should match the one used by the JPA EntityManagerFactory:
 	 * for example, you could specify the same JNDI DataSource for both.
-	 * <p>If the EntityManagerFactory uses a known DataSource as connection factory,
+	 * <p>If the EntityManagerFactory uses a known DataSource as its connection factory,
 	 * the DataSource will be autodetected: You can still explicitly specify the
 	 * DataSource, but you don't need to in this case.
 	 * <p>A transactional JDBC Connection for this DataSource will be provided to
