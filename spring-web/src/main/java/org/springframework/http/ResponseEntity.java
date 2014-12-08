@@ -252,7 +252,7 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 	 * @return the created builder
 	 * @since 4.1.3
 	 */
-	public static HeadersBuilder<?> unprocessableEntity() {
+	public static BodyBuilder unprocessableEntity() {
 		return status(HttpStatus.UNPROCESSABLE_ENTITY);
 	}
 

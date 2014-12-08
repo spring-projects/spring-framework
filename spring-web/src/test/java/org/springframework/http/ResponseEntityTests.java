@@ -122,11 +122,11 @@ public class ResponseEntityTests {
 
 	@Test
 	public void unprocessableEntity() throws URISyntaxException {
-		ResponseEntity<Void> responseEntity = ResponseEntity.unprocessableEntity().build();
+		ResponseEntity<String> responseEntity = ResponseEntity.unprocessableEntity().body("error");
 
 		assertNotNull(responseEntity);
 		assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, responseEntity.getStatusCode());
-		assertNull(responseEntity.getBody());
+		assertEquals("error", responseEntity.getBody());
 	}
 
 	@Test
