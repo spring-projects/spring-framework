@@ -21,7 +21,7 @@ import java.lang.reflect.Method;
 import java.util.Set;
 
 import org.apache.commons.logging.Log;
-import org.junit.internal.AssumptionViolatedException;
+import org.junit.AssumptionViolatedException;
 
 import org.springframework.util.ClassUtils;
 
