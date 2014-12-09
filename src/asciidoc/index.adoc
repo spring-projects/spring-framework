@@ -48954,13 +48954,6 @@ this chapter.
 * The http://groovy.codehaus.org/[Groovy] homepage
 * The http://www.beanshell.org/[BeanShell] homepage
 
-Some of the more active members of the Spring community have also added support for a
-number of additional dynamic languages above and beyond the ones covered in this
-chapter. While it is possible that such third party contributions may be added to the
-list of languages supported by the main Spring distribution, your best bet for seeing if
-your favorite scripting language is supported is the
-https://springmodules.dev.java.net/[Spring Modules project].
-
 
 
 
