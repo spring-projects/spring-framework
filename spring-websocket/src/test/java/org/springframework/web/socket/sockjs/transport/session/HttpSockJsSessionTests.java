@@ -102,7 +102,7 @@ public class HttpSockJsSessionTests extends AbstractSockJsSessionTests<TestAbstr
 	}
 
 
-	static class TestAbstractHttpSockJsSession extends AbstractHttpSockJsSession {
+	static class TestAbstractHttpSockJsSession extends StreamingSockJsSession {
 
 		private IOException exceptionOnWriteFrame;
 

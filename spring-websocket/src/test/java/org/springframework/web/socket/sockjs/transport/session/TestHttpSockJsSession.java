@@ -21,6 +21,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.http.server.ServerHttpRequest;
+import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.sockjs.SockJsTransportFailureException;
@@ -30,7 +32,7 @@ import org.springframework.web.socket.sockjs.transport.SockJsServiceConfig;
 /**
  * @author Rossen Stoyanchev
  */
-public class TestHttpSockJsSession extends AbstractHttpSockJsSession {
+public class TestHttpSockJsSession extends StreamingSockJsSession {
 
 	private boolean active;
 

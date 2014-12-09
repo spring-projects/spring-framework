@@ -16,8 +16,11 @@
 
 package org.springframework.web.socket.sockjs.transport.session;
 
+import java.io.IOException;
 import java.util.Map;
 
+import org.springframework.http.server.ServerHttpRequest;
+import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.sockjs.SockJsTransportFailureException;
 import org.springframework.web.socket.sockjs.frame.SockJsFrame;
@@ -42,9 +45,24 @@ public class StreamingSockJsSession extends AbstractHttpSockJsSession {
 	}
 
 
+	/**
+	 * @deprecated as of 4.2 this method is no longer used for anything
+	 */
 	@Override
+	@Deprecated
 	protected boolean isStreaming() {
 		return true;
+	}
+
+	@Override
+	protected void handleRequestInternal(ServerHttpRequest request, ServerHttpResponse response,
+			boolean initialRequest) throws IOException {
+
+		writePrelude(request, response);
+		if (initialRequest) {
+			writeFrame(SockJsFrame.openFrame());
+		}
+		flushCache();
 	}
 
 	@Override

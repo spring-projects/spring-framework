@@ -14,6 +14,8 @@ import java.util.Set;
  */
 public interface UserSessionRegistry {
 
+
+
 	/**
 	 * Return the active session id's for the given user.
 	 * @param user the user
