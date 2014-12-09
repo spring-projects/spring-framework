@@ -43,16 +43,18 @@ It provides comprehensive documentation for all features, as well as some backgr
 about the underlying concepts (such as __"Dependency Injection"__) that Spring has
 embraced.
 
-If you are just getting started with Spring, you may want to begin with the lighter
-https://spring.io/guides["Getting Started"] guides that are available from
-https://spring.io. As well as being easier to digest, these guide are very
-__task focused__. They also cover other projects from the Spring portfolio that you might
- want to consider when solving a particular problem.
+If you are just getting started with Spring, you may want to begin using Spring Framework
+by creating a http://projects.spring.io/spring-boot/[Spring Boot] based application.
+Spring Boot provides a quick (and opinionated) way to create production-ready Spring based
+application. It is based on Spring Framework, favors convention over configuration and is
+designed to get you up and running as quickly as possible.
 
+You can use http://start.spring.io[start.spring.io] to generate a basic project, or follow
+one of the https://spring.io/guides["Getting Started" guides] like the
 https://spring.io/guides/gs/rest-service/[Getting Started Building a RESTful Web Service]
-would be an excellent first choice to get your feet wet.
-
-
+one. As well as being easier to digest, these guides are very __task focused__ and most of
+them are based on Spring Boot. They also cover other projects from the Spring portfolio
+that you might want to consider when solving a particular problem.
 
 
 
@@ -80,19 +82,7 @@ Examples of how you, as an application developer, can use the Spring platform ad
 [[overview-dependency-injection]]
 === Dependency Injection and Inversion of Control
 
-[[background-ioc]]
-.Background
-****
-"__The question is, what aspect of control are [they] inverting?__" Martin Fowler posed
-this question about Inversion of Control (IoC) on his site in 2004. Fowler suggested
-renaming the principle to make it more self-explanatory and came up with __Dependency
-Injection__.
-
-For insight into IoC and DI, refer to Fowler's article at
-http://martinfowler.com/articles/injection.html[http://martinfowler.com/articles/injection.html].
-****
-
-Java applications -- a loose term that runs the gamut from constrained applets to n-tier
+Java applications -- a loose term that runs the gamut from constrained embedded to n-tier
 server-side enterprise applications -- typically consist of objects that collaborate to
 form the application proper. Thus the objects in an application have __dependencies__ on
 each other.
@@ -114,6 +104,16 @@ first-class objects that you can integrate into your own application(s). Numerou
 organizations and institutions use the Spring Framework in this manner to engineer
 robust, __maintainable__ applications.
 
+[[background-ioc]]
+.Background
+****
+"__The question is, what aspect of control are [they] inverting?__" Martin Fowler posed
+this question about Inversion of Control (IoC)
+http://martinfowler.com/articles/injection.html[on his site] in 2004. Fowler suggested
+renaming the principle to make it more self-explanatory and came up with __Dependency
+Injection__.
+****
+
 
 
 
@@ -134,8 +134,8 @@ in <<dependency-management,Dependency Management tools>>.
 [[overview-core-container]]
 ==== Core Container
 The <<beans-introduction,__Core Container__>> consists of the `spring-core`,
-`spring-beans`, `spring-context`, and `spring-expression` (Spring Expression Language)
-modules.
+`spring-beans`, `spring-context`, `spring-context-support`, and `spring-expression`
+(Spring Expression Language) modules.
 
 The `spring-core` and `spring-beans` modules <<beans-introduction,provide the fundamental
 parts of the framework>>, including the IoC and Dependency Injection features. The
@@ -151,6 +151,11 @@ internationalization (using, for example, resource bundles), event propagation, 
 loading, and the transparent creation of contexts by, for example, a Servlet container.
 The Context module also supports Java EE features such as EJB, JMX, and basic remoting.
 The `ApplicationContext` interface is the focal point of the Context module.
+`spring-context-support` provides support for integrating common third-party libraries
+into a Spring application context for caching (EhCache, Guava, JCache), mailing
+(JavaMail), scheduling (CommonJ, Quartz) and template engines (FreeMarker, JasperReports,
+Velocity).
+
 
 The `spring-expression` module provides a powerful <<expressions,__Expression
 Language__>> for querying and manipulating an object graph at runtime. It is an extension
@@ -174,7 +179,8 @@ attributes.
 The separate `spring-aspects` module provides integration with AspectJ.
 
 The `spring-instrument` module provides class instrumentation support and classloader
-implementations to be used in certain application servers.
+implementations to be used in certain application servers. The `spring-instrument-tomcat`
+module contains the Spring's instrumentation agent for Tomcat.
 
 
 [[overview-messaging]]
@@ -221,13 +227,14 @@ The __Web__ layer consists of the `spring-web`, `spring-webmvc`, `spring-websock
 
 The `spring-web` module provides basic web-oriented integration features such as
 multipart file upload functionality and the initialization of the IoC container using
-Servlet listeners and a web-oriented application context. It also contains the
-web-related parts of Spring's remoting support.
+Servlet listeners and a web-oriented application context. It also contains an HTTP client
+and the web-related parts of Spring's remoting support.
 
 The `spring-webmvc` module (also known as the __Web-Servlet__ module) contains Spring's
-model-view-controller (<<mvc-introduction,__MVC__>>) implementation for web applications.
-Spring's MVC framework provides a clean separation between domain model code and web
-forms and integrates with all of the other features of the Spring Framework.
+model-view-controller (<<mvc-introduction,__MVC__>>) and REST Webservices implementation
+for web applications. Spring's MVC framework provides a clean separation between domain
+model code and web forms and integrates with all of the other features of the Spring
+Framework.
 
 The `spring-webmvc-portlet` module (also known as the __Web-Portlet__ module) provides
 the MVC implementation to be used in a Portlet environment and mirrors the functionality
@@ -248,8 +255,9 @@ code in isolation.
 [[overview-usagescenarios]]
 === Usage scenarios
 The building blocks described previously make Spring a logical choice in many scenarios,
-from applets to full-fledged enterprise applications that use Spring's transaction
-management functionality and web framework integration.
+from embedded applications that run on resource-constrained devices to full-fledged
+enterprise applications that use Spring's transaction management functionality and web
+framework integration.
 
 .Typical full-fledged Spring web application
 image::images/overview-full.png[width=400]
@@ -334,8 +342,9 @@ Each release of the Spring Framework will publish artifacts to the following pla
 
 So the first thing you need to decide is how to manage your dependencies: we generally
 recommend the use of an automated system like Maven, Gradle or Ivy, but you can also do
-it manually by downloading all the jars yourself. We provide detailed instructions later
-in this chapter.
+it manually by downloading all the jars yourself.
+
+
 
 
 [[overview-spring-dependencies]]
@@ -863,9 +872,9 @@ Spring Framework 4.0. The same applies to Hibernate Validator 5.0 as a Bean Vali
 
 [[groovy-bean-definition-dsl]]
 === Groovy Bean Definition DSL
-With Spring Framework 4.0 it is now possible to define external bean configuration using
-a Groovy DSL. This is similar in concept to using XML bean definitions, but allows for
-a more concise syntax. Using Groovy also allows you to easily embed bean definitions
+As from Spring Framework 4.0, it is now possible to define external bean configuration
+using a Groovy DSL. This is similar in concept to using XML bean definitions, but allows
+for a more concise syntax. Using Groovy also allows you to easily embed bean definitions
 directly in your bootstrap code. For example:
 
 [source,groovy,indent=0]
@@ -8963,15 +8972,15 @@ directly through a classic singleton lookup.
 Use an `ApplicationContext` unless you have a good reason for not doing so.
 
 Because the `ApplicationContext` includes all functionality of the `BeanFactory`, it is
-generally recommended over the `BeanFactory`, except for a few situations such as in an
-`Applet` where memory consumption might be critical and a few extra kilobytes might make
-a difference. However, for most typical enterprise applications and systems, the
-`ApplicationContext` is what you will want to use. Spring makes __heavy__
-use of the <<beans-factory-extension-bpp, `BeanPostProcessor` extension point>> (to
-effect proxying and so on). If you use only a plain `BeanFactory`, a fair amount of
-support such as transactions and AOP will not take effect, at least not without some
-extra steps on your part. This situation could be confusing because nothing is actually
-wrong with the configuration.
+generally recommended over the `BeanFactory`, except for a few situations such as in
+embedded applications running on resource-constrained devices where memory consumption
+might be critical and a few extra kilobytes might make a difference. However, for
+most typical enterprise applications and systems, the `ApplicationContext` is what you
+will want to use. Spring makes __heavy__ use of the <<beans-factory-extension-bpp,
+`BeanPostProcessor` extension point>> (to effect proxying and so on). If you use only a
+plain `BeanFactory`, a fair amount of support such as transactions and AOP will not take
+effect, at least not without some extra steps on your part. This situation could be
+confusing because nothing is actually wrong with the configuration.
 
 The following table lists features provided by the `BeanFactory` and
 `ApplicationContext` interfaces and implementations.
