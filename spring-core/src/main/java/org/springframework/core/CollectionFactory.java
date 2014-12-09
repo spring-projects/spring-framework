@@ -105,7 +105,7 @@ public abstract class CollectionFactory {
 	 * @see java.util.ArrayList
 	 * @see java.util.LinkedList
 	 */
-	@SuppressWarnings({ "unchecked", "cast" })
+	@SuppressWarnings({ "unchecked", "cast", "rawtypes" })
 	public static <E> Collection<E> createApproximateCollection(Object collection, int capacity) {
 		if (collection instanceof LinkedList) {
 			return new LinkedList<E>();
@@ -115,6 +115,7 @@ public abstract class CollectionFactory {
 		}
 		else if (collection instanceof EnumSet) {
 			// superfluous cast necessary for bug in Eclipse 4.4.1.
+			// see https://bugs.eclipse.org/bugs/show_bug.cgi?id=454644
 			return (Collection<E>) EnumSet.copyOf((EnumSet) collection);
 		}
 		else if (collection instanceof SortedSet) {
@@ -150,7 +151,7 @@ public abstract class CollectionFactory {
 	 * @see java.util.EnumSet
 	 * @see java.util.ArrayList
 	 */
-	@SuppressWarnings({ "unchecked", "cast" })
+	@SuppressWarnings({ "unchecked", "cast", "rawtypes" })
 	public static <E> Collection<E> createCollection(Class<?> collectionClass, Class<?> elementType, int capacity) {
 		if (collectionClass.isInterface()) {
 			if (Set.class.equals(collectionClass) || Collection.class.equals(collectionClass)) {
@@ -169,6 +170,7 @@ public abstract class CollectionFactory {
 		else if (EnumSet.class.equals(collectionClass)) {
 			Assert.notNull(elementType, "Cannot create EnumSet for unknown element type");
 			// superfluous cast necessary for bug in Eclipse 4.4.1.
+			// see https://bugs.eclipse.org/bugs/show_bug.cgi?id=454644
 			return (Collection<E>) EnumSet.noneOf((Class) elementType);
 		}
 		else {
