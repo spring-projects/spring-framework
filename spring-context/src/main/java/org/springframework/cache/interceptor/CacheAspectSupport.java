@@ -477,8 +477,10 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 
 	private Object generateKey(CacheOperationContext context, Object result) {
 		Object key = context.generateKey(result);
-		Assert.notNull(key, "Null key returned for cache operation (maybe you are using named params " +
-				"on classes without debug info?) " + context.metadata.operation);
+		if (key == null) {
+			throw new IllegalArgumentException("Null key returned for cache operation (maybe you are " +
+					"using named params on classes without debug info?) " + context.metadata.operation);
+		}
 		if (logger.isTraceEnabled()) {
 			logger.trace("Computed cache key " + key + " for operation " + context.metadata.operation);
 		}
