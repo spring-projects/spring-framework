@@ -348,7 +348,7 @@ You will find bellow the list of Spring artifacts. For a more complete descripti
 modules, see <<overview-modules>>.
 
 
-.Spring Framework artifacts
+.Spring Framework Artifacts
 |===
 |GroupId |ArtifactId |Description
 
@@ -362,7 +362,7 @@ modules, see <<overview-modules>>.
 
 |org.springframework
 |spring-beans
-|Beans support, including the Groovy one
+|Beans support, including Groovy
 
 |org.springframework
 |spring-context
@@ -390,11 +390,11 @@ modules, see <<overview-modules>>.
 
 |org.springframework
 |spring-jdbc
-|JDBC support package. Includes DataSource setup and JDBC access support
+|JDBC support package, including DataSource setup and JDBC access support
 
 |org.springframework
 |spring-jms
-|JMS support package, including helper classes to send a receive JMS messages
+|JMS support package, including helper classes to send and receive JMS messages
 
 |org.springframework
 |spring-messaging
@@ -402,15 +402,15 @@ modules, see <<overview-modules>>.
 
 |org.springframework
 |spring-orm
-|Object/Relational Mapping, including Hibernate support
+|Object/Relational Mapping, including JPA and Hibernate support
 
 |org.springframework
 |spring-oxm
-|Object/XML Marshalling
+|Object/XML Mapping
 
 |org.springframework
 |spring-test
-|Supports the unit testing and integration testing of Spring components
+|Support for unit testing and integration testing Spring components
 
 |org.springframework
 |spring-tx
@@ -422,7 +422,7 @@ modules, see <<overview-modules>>.
 
 |org.springframework
 |spring-webmvc
-|Webservices and model-view-controller implementation for web applications
+|REST Web Services and model-view-controller implementation for web applications
 
 |org.springframework
 |spring-webmvc-portlet
@@ -430,7 +430,7 @@ modules, see <<overview-modules>>.
 
 |org.springframework
 |spring-websocket
-|Websocket and SockJS implementation, including STOMP support
+|WebSocket and SockJS implementations, including STOMP support
 |===
 
 
