@@ -51,6 +51,61 @@ import static org.springframework.core.CollectionFactory.*;
  */
 public class CollectionFactoryTests {
 
+	/**
+	 * The test demonstrates that the generics-based API for
+	 * {@link CollectionFactory#createApproximateCollection(Object, int)}
+	 * is not type-safe.
+	 * <p>Specifically, the parameterized type {@code E} is not bound to
+	 * the type of elements contained in the {@code collection} argument
+	 * passed to {@code createApproximateCollection()}. Thus casting the
+	 * value returned by {@link EnumSet#copyOf(EnumSet)} to
+	 * {@code (Collection<E>)} cannot guarantee that the returned collection
+	 * actually contains elements of type {@code E}.
+	 */
+	@Test
+	public void createApproximateCollectionIsNotTypeSafe() {
+		Collection<Integer> ints = createApproximateCollection(EnumSet.of(Color.BLUE), 3);
+
+		// Use a try-catch block to ensure that the exception is thrown as a result of the
+		// next line and not as a result of the previous line.
+		try {
+			// Note that ints is of type Collection<Integer>, but the collection returned
+			// by createApproximateCollection() is of type Collection<Color>.
+			ints.iterator().next().intValue();
+			fail("Should have thrown a ClassCastException");
+		}
+		catch (ClassCastException e) {
+			/* expected */
+		}
+	}
+
+	/**
+	 * The test demonstrates that the generics-based API for
+	 * {@link CollectionFactory#createApproximateMap(Object, int)}
+	 * is not type-safe.
+	 * <p>The reasoning is similar that described in
+	 * {@link #createApproximateCollectionIsNotTypeSafe()}.
+	 */
+	@Test
+	public void createApproximateMapIsNotTypeSafe() {
+		EnumMap<Color, Integer> enumMap = new EnumMap<>(Color.class);
+		enumMap.put(Color.RED, 1);
+		enumMap.put(Color.BLUE, 2);
+		Map<String, Integer> map = createApproximateMap(enumMap, 3);
+
+		// Use a try-catch block to ensure that the exception is thrown as a result of the
+		// next line and not as a result of the previous line.
+		try {
+			// Note that the 'map' key is of type String, but the keys in the map returned
+			// by createApproximateMap() are of type Color.
+			map.keySet().iterator().next().split(",");
+			fail("Should have thrown a ClassCastException");
+		}
+		catch (ClassCastException e) {
+			/* expected */
+		}
+	}
+
 	@Test
 	public void createsCollectionsCorrectly() {
 		// interfaces
