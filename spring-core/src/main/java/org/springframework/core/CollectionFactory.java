@@ -40,15 +40,16 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
 /**
- * Factory for collections, being aware of Java 5 and Java 6 collections.
- * Mainly for internal use within the framework.
- *
+ * Factory for collections that is aware of Java 5 and Java 6 collection types.
+ * <p>Mainly for internal use within the framework.
  * <p>The goal of this class is to avoid runtime dependencies on a specific
  * Java version, while nevertheless using the best collection implementation
  * that is available at runtime.
  *
  * @author Juergen Hoeller
  * @author Arjen Poutsma
+ * @author Oliver Gierke
+ * @author Sam Brannen
  * @since 1.1.1
  */
 public abstract class CollectionFactory {
@@ -87,8 +88,7 @@ public abstract class CollectionFactory {
 	 * Determine whether the given collection type is an approximable type,
 	 * i.e. a type that {@link #createApproximateCollection} can approximate.
 	 * @param collectionType the collection type to check
-	 * @return {@code true} if the type is approximable,
-	 * {@code false} if it is not
+	 * @return {@code true} if the type is approximable
 	 */
 	public static boolean isApproximableCollectionType(Class<?> collectionType) {
 		return (collectionType != null && approximableCollectionTypes.contains(collectionType));
@@ -130,17 +130,17 @@ public abstract class CollectionFactory {
 	 * Create the most appropriate collection for the given collection type.
 	 * <p>Delegates to {@link #createCollection(Class, Class, int)} with a
 	 * {@code null} element type.
-	 * @param collectionClass the desired type of the target Collection
+	 * @param collectionType the desired type of the target Collection
 	 * @param capacity the initial capacity
 	 * @return the new Collection instance
 	 */
-	public static <E> Collection<E> createCollection(Class<?> collectionClass, int capacity) {
-		return createCollection(collectionClass, null, capacity);
+	public static <E> Collection<E> createCollection(Class<?> collectionType, int capacity) {
+		return createCollection(collectionType, null, capacity);
 	}
 
 	/**
 	 * Create the most appropriate collection for the given collection type.
-	 * @param collectionClass the desired type of the target Collection
+	 * @param collectionType the desired type of the target Collection; never {@code null}
 	 * @param elementType the collection's element type, or {@code null} if not known
 	 * (note: only relevant for {@link EnumSet} creation)
 	 * @param capacity the initial capacity
@@ -151,38 +151,39 @@ public abstract class CollectionFactory {
 	 * @see java.util.EnumSet
 	 * @see java.util.ArrayList
 	 */
-	@SuppressWarnings({ "unchecked", "cast", "rawtypes" })
-	public static <E> Collection<E> createCollection(Class<?> collectionClass, Class<?> elementType, int capacity) {
-		if (collectionClass.isInterface()) {
-			if (Set.class.equals(collectionClass) || Collection.class.equals(collectionClass)) {
+	@SuppressWarnings({ "unchecked", "cast" })
+	public static <E> Collection<E> createCollection(Class<?> collectionType, Class<?> elementType, int capacity) {
+		Assert.notNull(collectionType, "Collection type must not be null");
+		if (collectionType.isInterface()) {
+			if (Set.class.equals(collectionType) || Collection.class.equals(collectionType)) {
 				return new LinkedHashSet<E>(capacity);
 			}
-			else if (List.class.equals(collectionClass)) {
+			else if (List.class.equals(collectionType)) {
 				return new ArrayList<E>(capacity);
 			}
-			else if (SortedSet.class.equals(collectionClass) || NavigableSet.class.equals(collectionClass)) {
+			else if (SortedSet.class.equals(collectionType) || NavigableSet.class.equals(collectionType)) {
 				return new TreeSet<E>();
 			}
 			else {
-				throw new IllegalArgumentException("Unsupported Collection interface: " + collectionClass.getName());
+				throw new IllegalArgumentException("Unsupported Collection interface: " + collectionType.getName());
 			}
 		}
-		else if (EnumSet.class.equals(collectionClass)) {
+		else if (EnumSet.class.equals(collectionType)) {
 			Assert.notNull(elementType, "Cannot create EnumSet for unknown element type");
 			// superfluous cast necessary for bug in Eclipse 4.4.1.
 			// see https://bugs.eclipse.org/bugs/show_bug.cgi?id=454644
-			return (Collection<E>) EnumSet.noneOf((Class) elementType);
+			return (Collection<E>) EnumSet.noneOf(asEnumType(elementType));
 		}
 		else {
-			if (!Collection.class.isAssignableFrom(collectionClass)) {
-				throw new IllegalArgumentException("Unsupported Collection type: " + collectionClass.getName());
+			if (!Collection.class.isAssignableFrom(collectionType)) {
+				throw new IllegalArgumentException("Unsupported Collection type: " + collectionType.getName());
 			}
 			try {
-				return (Collection<E>) collectionClass.newInstance();
+				return (Collection<E>) collectionType.newInstance();
 			}
 			catch (Exception ex) {
 				throw new IllegalArgumentException(
-						"Could not instantiate Collection type: " + collectionClass.getName(), ex);
+					"Could not instantiate Collection type: " + collectionType.getName(), ex);
 			}
 		}
 	}
@@ -223,17 +224,17 @@ public abstract class CollectionFactory {
 	 * Create the most approximate map for the given map.
 	 * <p>Delegates to {@link #createMap(Class, Class, int)} with a
 	 * {@code null} key type.
-	 * @param mapClass the desired type of the target Map
+	 * @param mapType the desired type of the target Map
 	 * @param capacity the initial capacity
 	 * @return the new Map instance
 	 */
-	public static <K, V> Map<K, V> createMap(Class<?> mapClass, int capacity) {
-		return createMap(mapClass, null, capacity);
+	public static <K, V> Map<K, V> createMap(Class<?> mapType, int capacity) {
+		return createMap(mapType, null, capacity);
 	}
 
 	/**
 	 * Create the most approximate map for the given map.
-	 * @param mapClass the desired type of the target Map
+	 * @param mapType the desired type of the target Map
 	 * @param keyType the map's key type, or {@code null} if not known
 	 * (note: only relevant for {@link EnumMap} creation)
 	 * @param capacity the initial capacity
@@ -245,37 +246,52 @@ public abstract class CollectionFactory {
 	 * @see org.springframework.util.LinkedMultiValueMap
 	 */
 	@SuppressWarnings({"unchecked", "rawtypes"})
-	public static <K, V> Map<K, V> createMap(Class<?> mapClass, Class<?> keyType, int capacity) {
-		if (mapClass.isInterface()) {
-			if (Map.class.equals(mapClass)) {
+	public static <K, V> Map<K, V> createMap(Class<?> mapType, Class<?> keyType, int capacity) {
+		Assert.notNull(mapType, "Map type must not be null");
+		if (mapType.isInterface()) {
+			if (Map.class.equals(mapType)) {
 				return new LinkedHashMap<K, V>(capacity);
 			}
-			else if (SortedMap.class.equals(mapClass) || NavigableMap.class.equals(mapClass)) {
+			else if (SortedMap.class.equals(mapType) || NavigableMap.class.equals(mapType)) {
 				return new TreeMap<K, V>();
 			}
-			else if (MultiValueMap.class.equals(mapClass)) {
+			else if (MultiValueMap.class.equals(mapType)) {
 				return new LinkedMultiValueMap();
 			}
 			else {
-				throw new IllegalArgumentException("Unsupported Map interface: " + mapClass.getName());
+				throw new IllegalArgumentException("Unsupported Map interface: " + mapType.getName());
 			}
 		}
-		else if (EnumMap.class.equals(mapClass)) {
+		else if (EnumMap.class.equals(mapType)) {
 			Assert.notNull(keyType, "Cannot create EnumMap for unknown key type");
-			return new EnumMap(keyType);
+			return new EnumMap(asEnumType(keyType));
 		}
 		else {
-			if (!Map.class.isAssignableFrom(mapClass)) {
-				throw new IllegalArgumentException("Unsupported Map type: " + mapClass.getName());
+			if (!Map.class.isAssignableFrom(mapType)) {
+				throw new IllegalArgumentException("Unsupported Map type: " + mapType.getName());
 			}
 			try {
-				return (Map<K, V>) mapClass.newInstance();
+				return (Map<K, V>) mapType.newInstance();
 			}
 			catch (Exception ex) {
-				throw new IllegalArgumentException(
-						"Could not instantiate Map type: " + mapClass.getName(), ex);
+				throw new IllegalArgumentException("Could not instantiate Map type: " + mapType.getName(), ex);
 			}
 		}
+	}
+
+	/**
+	 * Cast the given type to a subtype of {@link Enum}.
+	 * @param enumType the enum type, never {@code null}
+	 * @return the given type as subtype of {@link Enum}
+	 * @throws IllegalArgumentException if the given type is not a subtype of {@link Enum}
+	 */
+	@SuppressWarnings("rawtypes")
+	private static Class<? extends Enum> asEnumType(Class<?> enumType) {
+		Assert.notNull(enumType, "Enum type must not be null");
+		if (!Enum.class.isAssignableFrom(enumType)) {
+			throw new IllegalArgumentException(String.format("The supplied type '%s' is not an enum.", enumType.getName()));
+		}
+		return enumType.asSubclass(Enum.class);
 	}
 
 }
