@@ -70,8 +70,9 @@ public class CollectionFactoryTests {
 		// next line and not as a result of the previous line.
 		try {
 			// Note that ints is of type Collection<Integer>, but the collection returned
-			// by createApproximateCollection() is of type Collection<Color>.
-			ints.iterator().next().intValue();
+			// by createApproximateCollection() is of type Collection<Color>. Thus, 42
+			// cannot be cast to a Color.
+			ints.add(42);
 			fail("Should have thrown a ClassCastException");
 		}
 		catch (ClassCastException e) {
@@ -97,13 +98,68 @@ public class CollectionFactoryTests {
 		// next line and not as a result of the previous line.
 		try {
 			// Note that the 'map' key is of type String, but the keys in the map returned
-			// by createApproximateMap() are of type Color.
-			map.keySet().iterator().next().split(",");
+			// by createApproximateMap() are of type Color. Thus "foo" cannot be cast to a
+			// Color.
+			map.put("foo", 1);
 			fail("Should have thrown a ClassCastException");
 		}
 		catch (ClassCastException e) {
 			/* expected */
 		}
+	}
+
+	@Test
+	public void createApproximateCollectionFromEmptyHashSet() {
+		Collection<String> set = createApproximateCollection(new HashSet<String>(), 2);
+		assertThat(set.size(), is(0));
+	}
+
+	@Test
+	public void createApproximateCollectionFromNonEmptyHashSet() {
+		HashSet<String> hashSet = new HashSet<String>();
+		hashSet.add("foo");
+		Collection<String> set = createApproximateCollection(hashSet, 2);
+		assertThat(set.size(), is(0));
+	}
+
+	@Test
+	public void createApproximateCollectionFromEmptyEnumSet() {
+		Collection<Color> colors = createApproximateCollection(EnumSet.noneOf(Color.class), 2);
+		assertThat(colors.size(), is(0));
+	}
+
+	@Test
+	public void createApproximateCollectionFromNonEmptyEnumSet() {
+		Collection<Color> colors = createApproximateCollection(EnumSet.of(Color.BLUE), 2);
+		assertThat(colors.size(), is(0));
+	}
+
+	@Test
+	public void createApproximateMapFromEmptyHashMap() {
+		Map<String, String> map = createApproximateMap(new HashMap<String, String>(), 2);
+		assertThat(map.size(), is(0));
+	}
+
+	@Test
+	public void createApproximateMapFromNonEmptyHashMap() {
+		Map<String, String> hashMap = new HashMap<String, String>();
+		hashMap.put("foo", "bar");
+		Map<String, String> map = createApproximateMap(hashMap, 2);
+		assertThat(map.size(), is(0));
+	}
+
+	@Test
+	public void createApproximateMapFromEmptyEnumMap() {
+		Map<Color, String> colors = createApproximateMap(new EnumMap<Color, String>(Color.class), 2);
+		assertThat(colors.size(), is(0));
+	}
+
+	@Test
+	public void createApproximateMapFromNonEmptyEnumMap() {
+		EnumMap<Color, String> enumMap = new EnumMap<Color, String>(Color.class);
+		enumMap.put(Color.BLUE, "blue");
+		Map<Color, String> colors = createApproximateMap(enumMap, 2);
+		assertThat(colors.size(), is(0));
 	}
 
 	@Test
