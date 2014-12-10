@@ -37,30 +37,30 @@ list]. Questions on the Framework itself should be asked on StackOverflow
 
 
 [[overview-getting-started-with-spring]]
-== Getting Started With Spring
+== Getting Started with Spring
 This reference guide provides detailed information about the Spring Framework.
 It provides comprehensive documentation for all features, as well as some background
 about the underlying concepts (such as __"Dependency Injection"__) that Spring has
 embraced.
 
-If you are just getting started with Spring, you may want to begin using Spring Framework
+If you are just getting started with Spring, you may want to begin using the Spring Framework
 by creating a http://projects.spring.io/spring-boot/[Spring Boot] based application.
-Spring Boot provides a quick (and opinionated) way to create production-ready Spring based
-application. It is based on Spring Framework, favors convention over configuration and is
+Spring Boot provides a quick (and opinionated) way to create a production-ready Spring based
+application. It is based on the Spring Framework, favors convention over configuration, and is
 designed to get you up and running as quickly as possible.
 
-You can use http://start.spring.io[start.spring.io] to generate a basic project, or follow
+You can use http://start.spring.io[start.spring.io] to generate a basic project or follow
 one of the https://spring.io/guides["Getting Started" guides] like the
 https://spring.io/guides/gs/rest-service/[Getting Started Building a RESTful Web Service]
-one. As well as being easier to digest, these guides are very __task focused__ and most of
+one. As well as being easier to digest, these guides are very __task focused__, and most of
 them are based on Spring Boot. They also cover other projects from the Spring portfolio
 that you might want to consider when solving a particular problem.
 
 
 
 [[overview]]
-== Introduction to Spring Framework
-Spring Framework is a Java platform that provides comprehensive infrastructure support
+== Introduction to the Spring Framework
+The Spring Framework is a Java platform that provides comprehensive infrastructure support
 for developing Java applications. Spring handles the infrastructure so you can focus on
 your application.
 
@@ -68,7 +68,7 @@ Spring enables you to build applications from "plain old Java objects" (POJOs) a
 apply enterprise services non-invasively to POJOs. This capability applies to the Java
 SE programming model and to full and partial Java EE.
 
-Examples of how you, as an application developer, can use the Spring platform advantage:
+Examples of how you, as an application developer, can benefit from the Spring platform:
 
 * Make a Java method execute in a database transaction without having to deal with
   transaction APIs.
@@ -82,17 +82,17 @@ Examples of how you, as an application developer, can use the Spring platform ad
 [[overview-dependency-injection]]
 === Dependency Injection and Inversion of Control
 
-Java applications -- a loose term that runs the gamut from constrained embedded to n-tier
-server-side enterprise applications -- typically consist of objects that collaborate to
-form the application proper. Thus the objects in an application have __dependencies__ on
-each other.
+A Java application -- a loose term that runs the gamut from constrained, embedded
+applications to n-tier, server-side enterprise applications -- typically consists of
+objects that collaborate to form the application proper. Thus the objects in an
+application have __dependencies__ on each other.
 
 Although the Java platform provides a wealth of application development functionality,
 it lacks the means to organize the basic building blocks into a coherent whole, leaving
-that task to architects and developers. True, you can use design patterns such
+that task to architects and developers. Although you can use design patterns such
 as __Factory__, __Abstract Factory__, __Builder__, __Decorator__, and __Service Locator__
-to compose the various classes and object instances that make up an application.
-However, these patterns are simply that: best practices given a name, with a description
+to compose the various classes and object instances that make up an application,
+these patterns are simply that: best practices given a name, with a description
 of what the pattern does, where to apply it, the problems it addresses, and so forth.
 Patterns are formalized best practices that __you must implement yourself__ in your
 application.
@@ -127,7 +127,7 @@ Programming), Instrumentation, Messaging, and Test, as shown in the following di
 image::images/spring-overview.png[width=400]
 
 The following sections list the available modules for each feature along with their
-artifact name and the topics they cover. Artifact names correlate to _artifact IDs_ used
+artifact names and the topics they cover. Artifact names correlate to _artifact IDs_ used
 in <<dependency-management,Dependency Management tools>>.
 
 
@@ -180,7 +180,7 @@ The separate `spring-aspects` module provides integration with AspectJ.
 
 The `spring-instrument` module provides class instrumentation support and classloader
 implementations to be used in certain application servers. The `spring-instrument-tomcat`
-module contains the Spring's instrumentation agent for Tomcat.
+module contains Spring's instrumentation agent for Tomcat.
 
 
 [[overview-messaging]]
@@ -231,7 +231,7 @@ Servlet listeners and a web-oriented application context. It also contains an HT
 and the web-related parts of Spring's remoting support.
 
 The `spring-webmvc` module (also known as the __Web-Servlet__ module) contains Spring's
-model-view-controller (<<mvc-introduction,__MVC__>>) and REST Webservices implementation
+model-view-controller (<<mvc-introduction,__MVC__>>) and REST Web Services implementation
 for web applications. Spring's MVC framework provides a clean separation between domain
 model code and web forms and integrates with all of the other features of the Spring
 Framework.
@@ -960,8 +960,8 @@ Spring Framework 4.0. The same applies to Hibernate Validator 5.0 as a Bean Vali
 
 [[groovy-bean-definition-dsl]]
 === Groovy Bean Definition DSL
-As from Spring Framework 4.0, it is now possible to define external bean configuration
-using a Groovy DSL. This is similar in concept to using XML bean definitions, but allows
+Beginning with Spring Framework 4.0, it is possible to define external bean configuration
+using a Groovy DSL. This is similar in concept to using XML bean definitions but allows
 for a more concise syntax. Using Groovy also allows you to easily embed bean definitions
 directly in your bootstrap code. For example:
 
