@@ -344,6 +344,94 @@ So the first thing you need to decide is how to manage your dependencies: we gen
 recommend the use of an automated system like Maven, Gradle or Ivy, but you can also do
 it manually by downloading all the jars yourself.
 
+You will find bellow the list of Spring artifacts. For a more complete description of each
+modules, see <<overview-modules>>.
+
+
+.Spring Framework artifacts
+|===
+|GroupId |ArtifactId |Description
+
+|org.springframework
+|spring-aop
+|Proxy-based AOP support
+
+|org.springframework
+|spring-aspects
+|AspectJ based aspects
+
+|org.springframework
+|spring-beans
+|Beans support, including the Groovy one
+
+|org.springframework
+|spring-context
+|Application context runtime, including scheduling and remoting abstractions
+
+|org.springframework
+|spring-context-support
+|Support classes for integrating common third-party libraries into a Spring application context
+
+|org.springframework
+|spring-core
+|Core utilities, used by many other Spring modules
+
+|org.springframework
+|spring-expression
+|Spring Expression Language (SpEL)
+
+|org.springframework
+|spring-instrument
+|Instrumentation agent for JVM bootstrapping
+
+|org.springframework
+|spring-instrument-tomcat
+|Instrumentation agent for Tomcat
+
+|org.springframework
+|spring-jdbc
+|JDBC support package. Includes DataSource setup and JDBC access support
+
+|org.springframework
+|spring-jms
+|JMS support package, including helper classes to send a receive JMS messages
+
+|org.springframework
+|spring-messaging
+|Support for messaging architectures and protocols
+
+|org.springframework
+|spring-orm
+|Object/Relational Mapping, including Hibernate support
+
+|org.springframework
+|spring-oxm
+|Object/XML Marshalling
+
+|org.springframework
+|spring-test
+|Supports the unit testing and integration testing of Spring components
+
+|org.springframework
+|spring-tx
+|Transaction infrastructure, including DAO support and JCA integration
+
+|org.springframework
+|spring-web
+|Web support packages, including client and web remoting
+
+|org.springframework
+|spring-webmvc
+|Webservices and model-view-controller implementation for web applications
+
+|org.springframework
+|spring-webmvc-portlet
+|MVC implementation to be used in a Portlet environment
+
+|org.springframework
+|spring-websocket
+|Websocket and SockJS implementation, including STOMP support
+|===
 
 
 
