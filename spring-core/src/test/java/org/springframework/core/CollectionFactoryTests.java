@@ -63,7 +63,7 @@ public class CollectionFactoryTests {
 	 * actually contains elements of type {@code E}.
 	 */
 	@Test
-	public void createApproximateCollectionIsNotTypeSafe() {
+	public void createApproximateCollectionIsNotTypeSafeForEnumSet() {
 		Collection<Integer> ints = createApproximateCollection(EnumSet.of(Color.BLUE), 3);
 
 		// Use a try-catch block to ensure that the exception is thrown as a result of the
@@ -80,6 +80,24 @@ public class CollectionFactoryTests {
 		}
 	}
 
+	@Test
+	public void createCollectionIsNotTypeSafeForEnumSet() {
+		Collection<Integer> ints = createCollection(EnumSet.class, Color.class, 3);
+
+		// Use a try-catch block to ensure that the exception is thrown as a result of the
+		// next line and not as a result of the previous line.
+		try {
+			// Note that ints is of type Collection<Integer>, but the collection returned
+			// by createCollection() is of type Collection<Color>. Thus, 42 cannot be cast
+			// to a Color.
+			ints.add(42);
+			fail("Should have thrown a ClassCastException");
+		}
+		catch (ClassCastException e) {
+			/* expected */
+		}
+	}
+
 	/**
 	 * The test demonstrates that the generics-based API for
 	 * {@link CollectionFactory#createApproximateMap(Object, int)}
@@ -88,7 +106,7 @@ public class CollectionFactoryTests {
 	 * {@link #createApproximateCollectionIsNotTypeSafe()}.
 	 */
 	@Test
-	public void createApproximateMapIsNotTypeSafe() {
+	public void createApproximateMapIsNotTypeSafeForEnumMap() {
 		EnumMap<Color, Integer> enumMap = new EnumMap<>(Color.class);
 		enumMap.put(Color.RED, 1);
 		enumMap.put(Color.BLUE, 2);
@@ -97,9 +115,45 @@ public class CollectionFactoryTests {
 		// Use a try-catch block to ensure that the exception is thrown as a result of the
 		// next line and not as a result of the previous line.
 		try {
-			// Note that the 'map' key is of type String, but the keys in the map returned
-			// by createApproximateMap() are of type Color. Thus "foo" cannot be cast to a
+			// Note that the 'map' key must be of type String, but the keys in the map
+			// returned by createApproximateMap() are of type Color. Thus "foo" cannot be
+			// cast to a Color.
+			map.put("foo", 1);
+			fail("Should have thrown a ClassCastException");
+		}
+		catch (ClassCastException e) {
+			/* expected */
+		}
+	}
+
+	@Test
+	public void createMapIsNotTypeSafeForEnumMap() {
+		Map<String, Integer> map = createMap(EnumMap.class, Color.class, 3);
+
+		// Use a try-catch block to ensure that the exception is thrown as a result of the
+		// next line and not as a result of the previous line.
+		try {
+			// Note that the 'map' key must be of type String, but the keys in the map
+			// returned by createMap() are of type Color. Thus "foo" cannot be cast to a
 			// Color.
+			map.put("foo", 1);
+			fail("Should have thrown a ClassCastException");
+		}
+		catch (ClassCastException e) {
+			/* expected */
+		}
+	}
+
+	@Test
+	public void createMapIsNotTypeSafeForLinkedMultiValueMap() {
+		Map<String, Integer> map = createMap(MultiValueMap.class, null, 3);
+
+		// Use a try-catch block to ensure that the exception is thrown as a result of the
+		// next line and not as a result of the previous line.
+		try {
+			// Note: 'map' values must be of type Integer, but the values in the map
+			// returned by createMap() are of type java.util.List. Thus 1 cannot be
+			// cast to a List.
 			map.put("foo", 1);
 			fail("Should have thrown a ClassCastException");
 		}
