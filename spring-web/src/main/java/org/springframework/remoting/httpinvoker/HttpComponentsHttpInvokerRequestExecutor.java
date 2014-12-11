@@ -68,17 +68,25 @@ public class HttpComponentsHttpInvokerRequestExecutor extends AbstractHttpInvoke
 	 * {@link HttpClient} that uses a default {@code org.apache.http.impl.conn.PoolingClientConnectionManager}.
 	 */
 	public HttpComponentsHttpInvokerRequestExecutor() {
-		org.apache.http.conn.scheme.SchemeRegistry schemeRegistry = new org.apache.http.conn.scheme.SchemeRegistry();
-		schemeRegistry.register(new org.apache.http.conn.scheme.Scheme("http", 80, org.apache.http.conn.scheme.PlainSocketFactory.getSocketFactory()));
-		schemeRegistry.register(new org.apache.http.conn.scheme.Scheme("https", 443, org.apache.http.conn.ssl.SSLSocketFactory.getSocketFactory()));
+		org.apache.http.config.RegistryBuilder<org.apache.http.conn.socket.ConnectionSocketFactory> registryBuilder =
+				org.apache.http.config.RegistryBuilder.<org.apache.http.conn.socket.ConnectionSocketFactory>create();
+		registryBuilder.register("http", org.apache.http.conn.socket.PlainConnectionSocketFactory.getSocketFactory());
+		registryBuilder.register("https", org.apache.http.conn.ssl.SSLConnectionSocketFactory.getSocketFactory());
 
-		org.apache.http.impl.conn.PoolingClientConnectionManager connectionManager =
-				new org.apache.http.impl.conn.PoolingClientConnectionManager(schemeRegistry);
-		connectionManager.setMaxTotal(DEFAULT_MAX_TOTAL_CONNECTIONS);
-		connectionManager.setDefaultMaxPerRoute(DEFAULT_MAX_CONNECTIONS_PER_ROUTE);
+		org.apache.http.impl.conn.PoolingHttpClientConnectionManager connectionManager =
+				new org.apache.http.impl.conn.PoolingHttpClientConnectionManager(registryBuilder.build());
 
-		this.httpClient = new org.apache.http.impl.client.DefaultHttpClient(connectionManager);
-		setReadTimeout(DEFAULT_READ_TIMEOUT_MILLISECONDS);
+		org.apache.http.impl.client.HttpClientBuilder clientBuilder = org.apache.http.impl.client.HttpClientBuilder.create();
+		clientBuilder.setConnectionManager(connectionManager);
+		clientBuilder.setMaxConnPerRoute(DEFAULT_MAX_CONNECTIONS_PER_ROUTE);
+		clientBuilder.setMaxConnTotal(DEFAULT_MAX_TOTAL_CONNECTIONS);
+
+		org.apache.http.client.config.RequestConfig defaultRequestConfig = org.apache.http.client.config.RequestConfig.custom()
+				.setSocketTimeout(DEFAULT_READ_TIMEOUT_MILLISECONDS)
+				.build();
+		clientBuilder.setDefaultRequestConfig(defaultRequestConfig);
+
+		this.httpClient = clientBuilder.build();
 	}
 
 	/**
@@ -104,28 +112,6 @@ public class HttpComponentsHttpInvokerRequestExecutor extends AbstractHttpInvoke
 	public HttpClient getHttpClient() {
 		return this.httpClient;
 	}
-
-	/**
-	 * Set the connection timeout for the underlying HttpClient.
-	 * A timeout value of 0 specifies an infinite timeout.
-	 * @param timeout the timeout value in milliseconds
-	 */
-	public void setConnectTimeout(int timeout) {
-		Assert.isTrue(timeout >= 0, "Timeout must be a non-negative value");
-		getHttpClient().getParams().setIntParameter(org.apache.http.params.CoreConnectionPNames.CONNECTION_TIMEOUT, timeout);
-	}
-
-	/**
-	 * Set the socket read timeout for the underlying HttpClient.
-	 * A timeout value of 0 specifies an infinite timeout.
-	 * @param timeout the timeout value in milliseconds
-	 * @see #DEFAULT_READ_TIMEOUT_MILLISECONDS
-	 */
-	public void setReadTimeout(int timeout) {
-		Assert.isTrue(timeout >= 0, "Timeout must be a non-negative value");
-		getHttpClient().getParams().setIntParameter(org.apache.http.params.CoreConnectionPNames.SO_TIMEOUT, timeout);
-	}
-
 
 	/**
 	 * Execute the given request through the HttpClient.
