@@ -58,6 +58,8 @@ import org.springframework.util.StringUtils;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
+ * @author Stéphane Nicoll
+ * @author Sam Brannen
  * @since 1.1
  * @see #setTransactionManager
  * @see #setTransactionAttributes
@@ -120,8 +122,14 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
+	/**
+	 * Default transaction manager bean name.
+	 */
 	private String transactionManagerBeanName;
 
+	/**
+	 * Default transaction manager.
+	 */
 	private PlatformTransactionManager transactionManager;
 
 	private TransactionAttributeSource transactionAttributeSource;
@@ -144,14 +152,18 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 	}
 
 	/**
-	 * Specify the target transaction manager.
+	 * Specify the <em>default</em> transaction manager to use to drive transactions.
+	 * <p>The default transaction manager will be used if a <em>qualifier</em>
+	 * has not been declared for a given transaction or if an explicit name for the
+	 * default transaction manager bean has not been specified.
+	 * @see #setTransactionManagerBeanName
 	 */
 	public void setTransactionManager(PlatformTransactionManager transactionManager) {
 		this.transactionManager = transactionManager;
 	}
 
 	/**
-	 * Return the transaction manager, if specified.
+	 * Return the default transaction manager, or {@code null} if unknown.
 	 */
 	public PlatformTransactionManager getTransactionManager() {
 		return this.transactionManager;
@@ -351,7 +363,7 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 			return txManager;
 		}
 		else {
-			// Lookup the default transaction manager and store it for next call
+			// Look up the default transaction manager and cache it for subsequent calls
 			this.transactionManager = this.beanFactory.getBean(PlatformTransactionManager.class);
 			return this.transactionManager;
 		}

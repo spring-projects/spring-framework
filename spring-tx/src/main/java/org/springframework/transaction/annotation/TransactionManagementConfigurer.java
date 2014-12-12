@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,8 +20,8 @@ import org.springframework.transaction.PlatformTransactionManager;
 
 /**
  * Interface to be implemented by @{@link org.springframework.context.annotation.Configuration
- * Configuration} classes annotated with @{@link EnableTransactionManagement} that wish
- * or need to specify explicitly the {@link PlatformTransactionManager} bean to be used
+ * Configuration} classes annotated with @{@link EnableTransactionManagement} that wish to
+ * or need to explicitly specify the default {@link PlatformTransactionManager} bean to be used
  * for annotation-driven transaction management, as opposed to the default approach of a
  * by-type lookup. One reason this might be necessary is if there are two
  * {@code PlatformTransactionManager} beans present in the container.
@@ -42,7 +42,7 @@ import org.springframework.transaction.PlatformTransactionManager;
 public interface TransactionManagementConfigurer {
 
 	/**
-	 * Return the transaction manager bean to use for annotation-driven database
+	 * Return the default transaction manager bean to use for annotation-driven database
 	 * transaction management, i.e. when processing {@code @Transactional} methods.
 	 *
 	 * <p>There are two basic approaches to implementing this method:
