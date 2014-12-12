@@ -344,7 +344,7 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 			return this.transactionManager;
 		}
 		String qualifier = txAttr.getQualifier();
-		if (StringUtils.hasLength(qualifier)) {
+		if (StringUtils.hasText(qualifier)) {
 			PlatformTransactionManager txManager = this.transactionManagerCache.get(qualifier);
 			if (txManager == null) {
 				txManager = BeanFactoryAnnotationUtils.qualifiedBeanOfType(
@@ -353,7 +353,7 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 			}
 			return txManager;
 		}
-		else if (this.transactionManagerBeanName != null) {
+		else if (StringUtils.hasText(this.transactionManagerBeanName)) {
 			PlatformTransactionManager txManager  = this.transactionManagerCache.get(this.transactionManagerBeanName);
 			if (txManager == null) {
 				txManager = this.beanFactory.getBean(
