@@ -16,17 +16,16 @@
 
 package org.springframework.cache.aspectj;
 
-import static org.junit.Assert.assertNotSame;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
-
 import org.junit.Assert;
 import org.junit.Test;
+
 import org.springframework.cache.Cache;
 import org.springframework.cache.config.AbstractAnnotationTests;
 import org.springframework.cache.config.CacheableService;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.support.GenericXmlApplicationContext;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Costin Leau

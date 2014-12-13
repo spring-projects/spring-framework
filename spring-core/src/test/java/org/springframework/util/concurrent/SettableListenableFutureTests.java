@@ -16,16 +16,17 @@
 
 package org.springframework.util.concurrent;
 
-import org.junit.Before;
-import org.junit.Test;
-
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import static org.hamcrest.Matchers.equalTo;
+import org.junit.Before;
+import org.junit.Test;
+
+import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
+import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.*;
 
 

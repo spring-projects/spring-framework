@@ -33,7 +33,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * @author Juergen Hoeller
  * @since 3.1
  */
-class SpringSessionSynchronization implements TransactionSynchronization, Ordered {
+public class SpringSessionSynchronization implements TransactionSynchronization, Ordered {
 
 	private final SessionHolder sessionHolder;
 
@@ -44,11 +44,16 @@ class SpringSessionSynchronization implements TransactionSynchronization, Ordere
 	private boolean holderActive = true;
 
 
+	public SpringSessionSynchronization(SessionHolder sessionHolder, SessionFactory sessionFactory) {
+		this(sessionHolder, sessionFactory, false);
+	}
+
 	public SpringSessionSynchronization(SessionHolder sessionHolder, SessionFactory sessionFactory, boolean newSession) {
 		this.sessionHolder = sessionHolder;
 		this.sessionFactory = sessionFactory;
 		this.newSession = newSession;
 	}
+
 
 	private Session getCurrentSession() {
 		return this.sessionHolder.getSession();

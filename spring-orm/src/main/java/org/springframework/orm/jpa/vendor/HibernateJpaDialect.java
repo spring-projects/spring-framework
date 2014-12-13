@@ -340,13 +340,13 @@ public class HibernateJpaDialect extends DefaultJpaDialect {
 
 	private static class HibernateConnectionHandle implements ConnectionHandle {
 
-		private final Session session;
-
 		// This will find a corresponding method on Hibernate 3.x but not on 4.x
 		private static final Method sessionConnectionMethod =
 				ClassUtils.getMethodIfAvailable(Session.class, "connection");
 
 		private static volatile Method connectionMethodToUse = sessionConnectionMethod;
+
+		private final Session session;
 
 		public HibernateConnectionHandle(Session session) {
 			this.session = session;
@@ -372,7 +372,7 @@ public class HibernateJpaDialect extends DefaultJpaDialect {
 		public static Connection doGetConnection(Session session) {
 			try {
 				if (connectionMethodToUse == null) {
-					// Reflective lookup trying to find SessionImpl's connection() on Hibernate 4.x
+					// Reflective lookup to find SessionImpl's connection() method on Hibernate 4.x
 					connectionMethodToUse = session.getClass().getMethod("connection");
 				}
 				return (Connection) ReflectionUtils.invokeMethod(connectionMethodToUse, session);

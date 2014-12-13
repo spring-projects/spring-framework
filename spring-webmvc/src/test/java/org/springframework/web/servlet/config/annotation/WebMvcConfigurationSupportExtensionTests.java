@@ -16,28 +16,30 @@
 
 package org.springframework.web.servlet.config.annotation;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-
 import java.util.Arrays;
 import java.util.List;
+
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.MapperFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
+
 import org.springframework.beans.DirectFieldAccessor;
 import org.springframework.core.Ordered;
-import org.springframework.http.HttpStatus;
-import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.core.io.FileSystemResourceLoader;
 import org.springframework.format.FormatterRegistry;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockServletContext;
 import org.springframework.scheduling.concurrent.ConcurrentTaskExecutor;
 import org.springframework.stereotype.Controller;
+import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.DefaultMessageCodesResolver;
@@ -57,7 +59,10 @@ import org.springframework.web.context.support.StaticWebApplicationContext;
 import org.springframework.web.method.annotation.ModelAttributeMethodProcessor;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.HandlerMethodReturnValueHandler;
-import org.springframework.web.servlet.*;
+import org.springframework.web.servlet.HandlerExceptionResolver;
+import org.springframework.web.servlet.HandlerExecutionChain;
+import org.springframework.web.servlet.View;
+import org.springframework.web.servlet.ViewResolver;
 import org.springframework.web.servlet.handler.AbstractHandlerMapping;
 import org.springframework.web.servlet.handler.ConversionServiceExposingInterceptor;
 import org.springframework.web.servlet.handler.HandlerExceptionResolverComposite;
@@ -66,11 +71,13 @@ import org.springframework.web.servlet.i18n.LocaleChangeInterceptor;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 import org.springframework.web.servlet.resource.ResourceUrlProviderExposingInterceptor;
-import org.springframework.web.servlet.view.ViewResolverComposite;
-import org.springframework.web.util.UrlPathHelper;
 import org.springframework.web.servlet.view.ContentNegotiatingViewResolver;
 import org.springframework.web.servlet.view.InternalResourceViewResolver;
+import org.springframework.web.servlet.view.ViewResolverComposite;
 import org.springframework.web.servlet.view.json.MappingJackson2JsonView;
+import org.springframework.web.util.UrlPathHelper;
+
+import static org.junit.Assert.*;
 
 /**
  * A test fixture with a sub-class of {@link WebMvcConfigurationSupport} that also
@@ -137,6 +144,9 @@ public class WebMvcConfigurationSupportExtensionTests {
 		assertEquals(TestPathMatcher.class, handlerMapping.getPathMatcher().getClass());
 		chain = handlerMapping.getHandler(new MockHttpServletRequest("GET", "/resources/foo.gif"));
 		assertNotNull(chain.getHandler());
+		assertEquals(Arrays.toString(chain.getInterceptors()), 2, chain.getInterceptors().length);
+		// PathExposingHandlerInterceptor at chain.getInterceptors()[0]
+		assertEquals(ResourceUrlProviderExposingInterceptor.class, chain.getInterceptors()[1].getClass());
 
 		handlerMapping = (AbstractHandlerMapping) this.config.defaultServletHandlerMapping();
 		handlerMapping.setApplicationContext(this.context);
@@ -156,7 +166,13 @@ public class WebMvcConfigurationSupportExtensionTests {
 		assertEquals("converted", actual);
 
 		// Message converters
-		assertEquals(1, adapter.getMessageConverters().size());
+		assertEquals(2, adapter.getMessageConverters().size());
+		assertEquals(StringHttpMessageConverter.class, adapter.getMessageConverters().get(0).getClass());
+		assertEquals(MappingJackson2HttpMessageConverter.class, adapter.getMessageConverters().get(1).getClass());
+		ObjectMapper objectMapper = ((MappingJackson2HttpMessageConverter)adapter.getMessageConverters().get(1)).getObjectMapper();
+		assertFalse(objectMapper.getDeserializationConfig().isEnabled(MapperFeature.DEFAULT_VIEW_INCLUSION));
+		assertFalse(objectMapper.getSerializationConfig().isEnabled(MapperFeature.DEFAULT_VIEW_INCLUSION));
+		assertFalse(objectMapper.getDeserializationConfig().isEnabled(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES));
 
 		DirectFieldAccessor fieldAccessor = new DirectFieldAccessor(adapter);
 
@@ -285,6 +301,11 @@ public class WebMvcConfigurationSupportExtensionTests {
 		@Override
 		public void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
 			converters.add(new MappingJackson2HttpMessageConverter());
+		}
+
+		@Override
+		public void extendMessageConverters(List<HttpMessageConverter<?>> converters) {
+			converters.add(0, new StringHttpMessageConverter());
 		}
 
 		@Override

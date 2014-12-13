@@ -16,13 +16,14 @@
 
 package org.springframework.beans.factory.access;
 
-import static org.junit.Assert.assertTrue;
-
 import java.util.List;
 
 import org.junit.Test;
+
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.util.ClassUtils;
+
+import static org.junit.Assert.*;
 
 /**
  * Unit tests for {@link SingletonBeanFactoryLocator}.

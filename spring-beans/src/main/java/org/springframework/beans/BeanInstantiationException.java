@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,15 +45,16 @@ public class BeanInstantiationException extends FatalBeanException {
 	 * @param cause the root cause
 	 */
 	public BeanInstantiationException(Class<?> beanClass, String msg, Throwable cause) {
-		super("Could not instantiate bean class [" + beanClass.getName() + "]: " + msg, cause);
+		super("Failed to instantiate [" + beanClass.getName() + "]: " + msg, cause);
 		this.beanClass = beanClass;
 	}
+
 
 	/**
 	 * Return the offending bean class.
 	 */
 	public Class<?> getBeanClass() {
-		return beanClass;
+		return this.beanClass;
 	}
 
 }

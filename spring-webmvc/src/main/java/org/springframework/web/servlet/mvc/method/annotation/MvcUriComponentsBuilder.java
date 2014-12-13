@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -92,6 +92,26 @@ public class MvcUriComponentsBuilder extends UriComponentsBuilder {
 				new PathVariableMethodArgumentResolver(), new RequestParamMethodArgumentResolver(false));
 	}
 
+
+	/**
+	 * Default constructor. Protected to prevent direct instantiation.
+	 *
+	 * @see #fromController(Class)
+	 * @see #fromMethodName(Class, String, Object...)
+	 * @see #fromMethodCall(Object)
+	 * @see #fromMappingName(String)
+	 * @see #fromMethod(java.lang.reflect.Method, Object...)
+	 */
+	protected MvcUriComponentsBuilder() {
+	}
+
+	/**
+	 * Create a deep copy of the given MvcUriComponentsBuilder.
+	 * @param other the other builder to copy from
+	 */
+	protected MvcUriComponentsBuilder(MvcUriComponentsBuilder other) {
+		super(other);
+	}
 
 	/**
 	 * Create a {@link UriComponentsBuilder} from the mapping of a controller class
@@ -429,6 +449,11 @@ public class MvcUriComponentsBuilder extends UriComponentsBuilder {
 			factory.setCallbacks(new Callback[] {interceptor});
 			return (T) factory;
 		}
+	}
+
+	@Override
+	protected Object clone() {
+		return new MvcUriComponentsBuilder(this);
 	}
 
 

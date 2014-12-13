@@ -322,7 +322,7 @@ public class RequestResponseBodyMethodProcessorTests {
 		String content = this.servletResponse.getContentAsString();
 		assertFalse(content.contains("\"withView1\":\"with\""));
 		assertTrue(content.contains("\"withView2\":\"with\""));
-		assertTrue(content.contains("\"withoutView\":\"without\""));
+		assertFalse(content.contains("\"withoutView\":\"without\""));
 	}
 
 	@Test
@@ -343,7 +343,7 @@ public class RequestResponseBodyMethodProcessorTests {
 		String content = this.servletResponse.getContentAsString();
 		assertFalse(content.contains("\"withView1\":\"with\""));
 		assertTrue(content.contains("\"withView2\":\"with\""));
-		assertTrue(content.contains("\"withoutView\":\"without\""));
+		assertFalse(content.contains("\"withoutView\":\"without\""));
 	}
 
 	// SPR-12149
@@ -366,7 +366,7 @@ public class RequestResponseBodyMethodProcessorTests {
 		String content = this.servletResponse.getContentAsString();
 		assertFalse(content.contains("<withView1>with</withView1>"));
 		assertTrue(content.contains("<withView2>with</withView2>"));
-		assertTrue(content.contains("<withoutView>without</withoutView>"));
+		assertFalse(content.contains("<withoutView>without</withoutView>"));
 	}
 
 	// SPR-12149
@@ -389,7 +389,7 @@ public class RequestResponseBodyMethodProcessorTests {
 		String content = this.servletResponse.getContentAsString();
 		assertFalse(content.contains("<withView1>with</withView1>"));
 		assertTrue(content.contains("<withView2>with</withView2>"));
-		assertTrue(content.contains("<withoutView>without</withoutView>"));
+		assertFalse(content.contains("<withoutView>without</withoutView>"));
 	}
 
 

@@ -22,18 +22,19 @@ import java.lang.reflect.Method;
 import java.nio.charset.Charset;
 
 import com.fasterxml.jackson.annotation.JsonView;
-import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
-import static org.junit.Assert.assertEquals;
+import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import org.junit.Test;
 
 import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.MediaType;
 import org.springframework.http.MockHttpInputMessage;
 import org.springframework.http.MockHttpOutputMessage;
-import org.springframework.http.converter.json.AbstractJackson2HttpMessageConverter;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.http.converter.json.AbstractJackson2HttpMessageConverter;
 import org.springframework.http.converter.json.MappingJacksonValue;
+
+import static org.hamcrest.CoreMatchers.*;
+import static org.junit.Assert.*;
 
 /**
  * Jackson 2.x XML converter tests.
@@ -48,11 +49,15 @@ public class MappingJackson2XmlHttpMessageConverterTests {
 	@Test
 	public void canRead() {
 		assertTrue(converter.canRead(MyBean.class, new MediaType("application", "xml")));
+		assertTrue(converter.canRead(MyBean.class, new MediaType("text", "xml")));
+		assertTrue(converter.canRead(MyBean.class, new MediaType("application", "soap+xml")));
 	}
 
 	@Test
 	public void canWrite() {
 		assertTrue(converter.canWrite(MyBean.class, new MediaType("application", "xml")));
+		assertTrue(converter.canWrite(MyBean.class, new MediaType("text", "xml")));
+		assertTrue(converter.canWrite(MyBean.class, new MediaType("application", "soap+xml")));
 	}
 
 	@Test
@@ -101,12 +106,13 @@ public class MappingJackson2XmlHttpMessageConverterTests {
 		converter.read(MyBean.class, inputMessage);
 	}
 
-	@Test(expected = HttpMessageNotReadableException.class)
+	@Test
 	public void readValidXmlWithUnknownProperty() throws IOException {
 		String body = "<MyBean><string>string</string><unknownProperty>value</unknownProperty></MyBean>";
 		MockHttpInputMessage inputMessage = new MockHttpInputMessage(body.getBytes("UTF-8"));
 		inputMessage.getHeaders().setContentType(new MediaType("application", "xml"));
 		converter.read(MyBean.class, inputMessage);
+		// Assert no HttpMessageNotReadableException is thrown
 	}
 
 	@Test
@@ -123,8 +129,14 @@ public class MappingJackson2XmlHttpMessageConverterTests {
 
 		String result = outputMessage.getBodyAsString(Charset.forName("UTF-8"));
 		assertThat(result, containsString("<withView1>with</withView1>"));
-		assertThat(result, containsString("<withoutView>without</withoutView>"));
 		assertThat(result, not(containsString("<withView2>with</withView2>")));
+		assertThat(result, not(containsString("<withoutView>without</withoutView>")));
+	}
+
+	@Test
+	public void customXmlMapper() {
+		new MappingJackson2XmlHttpMessageConverter(new MyXmlMapper());
+		// Assert no exception is thrown
 	}
 
 	private void writeInternal(Object object, HttpOutputMessage outputMessage)
@@ -203,6 +215,7 @@ public class MappingJackson2XmlHttpMessageConverterTests {
 	private interface MyJacksonView1 {};
 	private interface MyJacksonView2 {};
 
+	@SuppressWarnings("unused")
 	private static class JacksonViewBean {
 
 		@JsonView(MyJacksonView1.class)
@@ -236,6 +249,10 @@ public class MappingJackson2XmlHttpMessageConverterTests {
 		public void setWithoutView(String withoutView) {
 			this.withoutView = withoutView;
 		}
+	}
+
+	@SuppressWarnings("serial")
+	private static class MyXmlMapper extends XmlMapper {
 	}
 
 }

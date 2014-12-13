@@ -16,14 +16,13 @@
 
 package org.springframework.web.socket.adapter.standard;
 
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 import javax.websocket.Extension;
 
 import org.springframework.util.LinkedCaseInsensitiveMap;
 import org.springframework.web.socket.WebSocketExtension;
-
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
 
 /**
  * A sub-class of {@link org.springframework.web.socket.WebSocketExtension} that

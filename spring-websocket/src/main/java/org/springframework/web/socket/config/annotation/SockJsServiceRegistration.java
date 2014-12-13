@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -27,8 +27,8 @@ import org.springframework.web.socket.server.HandshakeInterceptor;
 import org.springframework.web.socket.sockjs.SockJsService;
 import org.springframework.web.socket.sockjs.frame.SockJsMessageCodec;
 import org.springframework.web.socket.sockjs.transport.TransportHandler;
-import org.springframework.web.socket.sockjs.transport.handler.DefaultSockJsService;
 import org.springframework.web.socket.sockjs.transport.TransportHandlingSockJsService;
+import org.springframework.web.socket.sockjs.transport.handler.DefaultSockJsService;
 
 /**
  * A helper class for configuring SockJS fallback options, typically used indirectly, in
@@ -62,6 +62,10 @@ public class SockJsServiceRegistration {
 
 	private final List<HandshakeInterceptor> interceptors = new ArrayList<HandshakeInterceptor>();
 
+	private final List<String> allowedOrigins = new ArrayList<String>();
+
+	private Boolean suppressCors;
+
 	private SockJsMessageCodec messageCodec;
 
 
@@ -81,11 +85,9 @@ public class SockJsServiceRegistration {
 	 * iframe so that code in the iframe can run from  a domain local to the SockJS
 	 * server. Since the iframe needs to load the SockJS javascript client library,
 	 * this property allows specifying where to load it from.
-	 *
 	 * <p>By default this is set to point to
-	 * "https://d1fxtkz8shb9d2.cloudfront.net/sockjs-0.3.4.min.js". However it can
+	 * "https://cdn.jsdelivr.net/sockjs/0.3.4/sockjs.min.js". However it can
 	 * also be set to point to a URL served by the application.
-	 *
 	 * <p>Note that it's possible to specify a relative URL in which case the URL
 	 * must be relative to the iframe URL. For example assuming a SockJS endpoint
 	 * mapped to "/sockjs", and resulting iframe URL "/sockjs/iframe.html", then the
@@ -197,9 +199,21 @@ public class SockJsServiceRegistration {
 	}
 
 	public SockJsServiceRegistration setInterceptors(HandshakeInterceptor... interceptors) {
+		this.interceptors.clear();
 		if (!ObjectUtils.isEmpty(interceptors)) {
 			this.interceptors.addAll(Arrays.asList(interceptors));
 		}
+		return this;
+	}
+
+	/**
+	 * This option can be used to disable automatic addition of CORS headers for
+	 * SockJS requests.
+	 * <p>The default value is "false".
+	 * @since 4.1.2
+	 */
+	public SockJsServiceRegistration setSupressCors(boolean suppressCors) {
+		this.suppressCors = suppressCors;
 		return this;
 	}
 
@@ -212,6 +226,17 @@ public class SockJsServiceRegistration {
 	 */
 	public SockJsServiceRegistration setMessageCodec(SockJsMessageCodec codec) {
 		this.messageCodec = codec;
+		return this;
+	}
+
+	/**
+	 * @since 4.1.2
+	 */
+	protected SockJsServiceRegistration setAllowedOrigins(String... origins) {
+		this.allowedOrigins.clear();
+		if (!ObjectUtils.isEmpty(origins)) {
+			this.allowedOrigins.addAll(Arrays.asList(origins));
+		}
 		return this;
 	}
 
@@ -238,6 +263,12 @@ public class SockJsServiceRegistration {
 		}
 		if (this.webSocketEnabled != null) {
 			service.setWebSocketEnabled(this.webSocketEnabled);
+		}
+		if (this.suppressCors != null) {
+			service.setSuppressCors(this.suppressCors);
+		}
+		if (!this.allowedOrigins.isEmpty()) {
+			service.setAllowedOrigins(this.allowedOrigins);
 		}
 		if (this.messageCodec != null) {
 			service.setMessageCodec(this.messageCodec);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -58,11 +58,6 @@ public class ModelAndViewContainer {
 
 	private final SessionStatus sessionStatus = new SimpleSessionStatus();
 
-	/**
-	 * Create a new instance.
-	 */
-	public ModelAndViewContainer() {
-	}
 
 	/**
 	 * Set a view name to be resolved by the DispatcherServlet via a ViewResolver.
@@ -145,7 +140,7 @@ public class ModelAndViewContainer {
 	 * Whether to use the default model or the redirect model.
 	 */
 	private boolean useDefaultModel() {
-		return !this.redirectModelScenario || ((this.redirectModel == null) && !this.ignoreDefaultModelOnRedirect);
+		return (!this.redirectModelScenario || (this.redirectModel == null && !this.ignoreDefaultModelOnRedirect));
 	}
 
 	/**
@@ -183,7 +178,7 @@ public class ModelAndViewContainer {
 	 * signal that session processing is complete.
 	 */
 	public SessionStatus getSessionStatus() {
-		return sessionStatus;
+		return this.sessionStatus;
 	}
 
 	/**
@@ -242,6 +237,7 @@ public class ModelAndViewContainer {
 	public boolean containsAttribute(String name) {
 		return getModel().containsAttribute(name);
 	}
+
 
 	/**
 	 * Return diagnostic information.

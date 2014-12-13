@@ -16,9 +16,6 @@
 
 package org.springframework.aop.aspectj;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.List;
@@ -26,10 +23,12 @@ import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
-
 import test.annotation.EmptySpringAnnotation;
 import test.annotation.transaction.Tx;
+
 import org.springframework.tests.sample.beans.TestBean;
+
+import static org.junit.Assert.*;
 
 /**
  * Java5-specific {@link AspectJExpressionPointcutTests}.

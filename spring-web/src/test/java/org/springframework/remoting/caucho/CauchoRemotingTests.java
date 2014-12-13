@@ -20,9 +20,9 @@ import com.caucho.burlap.client.BurlapProxyFactory;
 import com.caucho.hessian.client.HessianProxyFactory;
 import junit.framework.TestCase;
 
+import org.springframework.remoting.RemoteAccessException;
 import org.springframework.tests.sample.beans.ITestBean;
 import org.springframework.tests.sample.beans.TestBean;
-import org.springframework.remoting.RemoteAccessException;
 
 /**
  * @author Juergen Hoeller

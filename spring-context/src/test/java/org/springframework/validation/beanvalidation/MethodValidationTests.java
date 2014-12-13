@@ -124,7 +124,8 @@ public class MethodValidationTests {
 
 		@NotNull Object myValidMethod(@NotNull(groups = MyGroup.class) String arg1, @Max(10) int arg2);
 
-		@Async void myValidAsyncMethod(@NotNull(groups = MyGroup.class) String arg1, @Max(10) int arg2);
+		@MyValid
+		@Async void myValidAsyncMethod(@NotNull(groups = OtherGroup.class) String arg1, @Max(10) int arg2);
 	}
 
 
@@ -132,9 +133,19 @@ public class MethodValidationTests {
 	}
 
 
+	public interface OtherGroup {
+	}
+
+
 	@Validated({MyGroup.class, Default.class})
 	@Retention(RetentionPolicy.RUNTIME)
 	public @interface MyStereotype {
+	}
+
+
+	@Validated({OtherGroup.class, Default.class})
+	@Retention(RetentionPolicy.RUNTIME)
+	public @interface MyValid {
 	}
 
 }

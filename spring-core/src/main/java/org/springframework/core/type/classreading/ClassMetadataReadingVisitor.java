@@ -204,39 +204,38 @@ class ClassMetadataReadingVisitor extends ClassVisitor implements ClassMetadata 
 		return this.memberClassNames.toArray(new String[this.memberClassNames.size()]);
 	}
 
-}
 
+	private static class EmptyAnnotationVisitor extends AnnotationVisitor {
 
-class EmptyAnnotationVisitor extends AnnotationVisitor {
+		public EmptyAnnotationVisitor() {
+			super(SpringAsmInfo.ASM_VERSION);
+		}
 
-	public EmptyAnnotationVisitor() {
-		super(SpringAsmInfo.ASM_VERSION);
+		@Override
+		public AnnotationVisitor visitAnnotation(String name, String desc) {
+			return this;
+		}
+
+		@Override
+		public AnnotationVisitor visitArray(String name) {
+			return this;
+		}
 	}
 
-	@Override
-	public AnnotationVisitor visitAnnotation(String name, String desc) {
-		return this;
+
+	private static class EmptyMethodVisitor extends MethodVisitor {
+
+		public EmptyMethodVisitor() {
+			super(SpringAsmInfo.ASM_VERSION);
+		}
 	}
 
-	@Override
-	public AnnotationVisitor visitArray(String name) {
-		return this;
-	}
-}
 
+	private static class EmptyFieldVisitor extends FieldVisitor {
 
-class EmptyMethodVisitor extends MethodVisitor {
-
-	public EmptyMethodVisitor() {
-		super(SpringAsmInfo.ASM_VERSION);
-	}
-}
-
-
-class EmptyFieldVisitor extends FieldVisitor {
-
-	public EmptyFieldVisitor() {
-		super(SpringAsmInfo.ASM_VERSION);
+		public EmptyFieldVisitor() {
+			super(SpringAsmInfo.ASM_VERSION);
+		}
 	}
 
 }

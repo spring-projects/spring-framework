@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,11 +28,12 @@ import org.springframework.http.HttpMethod;
  * SockJS transport types.
  *
  * @author Rossen Stoyanchev
+ * @author Sebastien Deleuze
  * @since 4.0
  */
 public enum TransportType {
 
-	WEBSOCKET("websocket", HttpMethod.GET),
+	WEBSOCKET("websocket", HttpMethod.GET, "origin"),
 
 	XHR("xhr", HttpMethod.POST, "cors", "jsessionid", "no_cache"),
 
@@ -89,6 +90,10 @@ public enum TransportType {
 
 	public boolean supportsCors() {
 		return this.headerHints.contains("cors");
+	}
+
+	public boolean supportsOrigin() {
+		return this.headerHints.contains("cors") || this.headerHints.contains("origin");
 	}
 
 	public boolean sendsSessionCookie() {

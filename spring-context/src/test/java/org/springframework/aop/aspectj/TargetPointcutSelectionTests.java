@@ -16,13 +16,14 @@
 
 package org.springframework.aop.aspectj;
 
-import static org.junit.Assert.assertEquals;
-
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 import org.junit.Before;
 import org.junit.Test;
+
 import org.springframework.context.support.ClassPathXmlApplicationContext;
+
+import static org.junit.Assert.*;
 
 /**
  * Tests for target selection matching (see SPR-3783).

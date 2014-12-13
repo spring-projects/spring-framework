@@ -29,6 +29,7 @@ import org.springframework.beans.factory.config.BeanReference;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.parsing.BeanComponentDefinition;
 import org.springframework.beans.factory.parsing.CompositeComponentDefinition;
+import org.springframework.beans.factory.support.GenericBeanDefinition;
 import org.springframework.beans.factory.support.ManagedList;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.factory.xml.BeanDefinitionParser;
@@ -44,6 +45,7 @@ import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.http.converter.feed.AtomFeedHttpMessageConverter;
 import org.springframework.http.converter.feed.RssChannelHttpMessageConverter;
 import org.springframework.http.converter.json.GsonHttpMessageConverter;
+import org.springframework.http.converter.json.Jackson2ObjectMapperFactoryBean;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.http.converter.support.AllEncompassingFormHttpMessageConverter;
 import org.springframework.http.converter.xml.Jaxb2RootElementHttpMessageConverter;
@@ -84,10 +86,10 @@ import org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolv
  *
  * <p>This class registers the following {@link HandlerMapping}s:</p>
  * <ul>
- * 	<li>{@link RequestMappingHandlerMapping}
- * 	ordered at 0 for mapping requests to annotated controller methods.
- * 	<li>{@link BeanNameUrlHandlerMapping}
- * 	ordered at 2 to map URL paths to controller bean names.
+ * <li>{@link RequestMappingHandlerMapping}
+ * ordered at 0 for mapping requests to annotated controller methods.
+ * <li>{@link BeanNameUrlHandlerMapping}
+ * ordered at 2 to map URL paths to controller bean names.
  * </ul>
  *
  * <p><strong>Note:</strong> Additional HandlerMappings may be registered
@@ -96,44 +98,43 @@ import org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolv
  *
  * <p>This class registers the following {@link HandlerAdapter}s:
  * <ul>
- * 	<li>{@link RequestMappingHandlerAdapter}
- * 	for processing requests with annotated controller methods.
- * 	<li>{@link HttpRequestHandlerAdapter}
- * 	for processing requests with {@link HttpRequestHandler}s.
- * 	<li>{@link SimpleControllerHandlerAdapter}
- * 	for processing requests with interface-based {@link Controller}s.
+ * <li>{@link RequestMappingHandlerAdapter}
+ * for processing requests with annotated controller methods.
+ * <li>{@link HttpRequestHandlerAdapter}
+ * for processing requests with {@link HttpRequestHandler}s.
+ * <li>{@link SimpleControllerHandlerAdapter}
+ * for processing requests with interface-based {@link Controller}s.
  * </ul>
  *
  * <p>This class registers the following {@link HandlerExceptionResolver}s:
  * <ul>
- * 	<li>{@link ExceptionHandlerExceptionResolver} for handling exceptions
- * 	through @{@link ExceptionHandler} methods.
- * 	<li>{@link ResponseStatusExceptionResolver} for exceptions annotated
- * 	with @{@link ResponseStatus}.
- * 	<li>{@link DefaultHandlerExceptionResolver} for resolving known Spring
- * 	exception types
+ * <li>{@link ExceptionHandlerExceptionResolver} for handling exceptions
+ * through @{@link ExceptionHandler} methods.
+ * <li>{@link ResponseStatusExceptionResolver} for exceptions annotated
+ * with @{@link ResponseStatus}.
+ * <li>{@link DefaultHandlerExceptionResolver} for resolving known Spring
+ * exception types
  * </ul>
  *
  * <p>This class registers an {@link org.springframework.util.AntPathMatcher}
  * and a {@link org.springframework.web.util.UrlPathHelper} to be used by:
  * <ul>
- *  <li>the {@link RequestMappingHandlerMapping},
- *  <li>the {@link HandlerMapping} for ViewControllers
- *  <li>and the {@link HandlerMapping} for serving resources
+ * <li>the {@link RequestMappingHandlerMapping},
+ * <li>the {@link HandlerMapping} for ViewControllers
+ * <li>and the {@link HandlerMapping} for serving resources
  * </ul>
  * Note that those beans can be configured by using the {@code path-matching} MVC namespace element.
-
  *
  * <p>Both the {@link RequestMappingHandlerAdapter} and the
  * {@link ExceptionHandlerExceptionResolver} are configured with instances of
  * the following by default:
  * <ul>
- * 	<li>A {@link ContentNegotiationManager}
- * 	<li>A {@link DefaultFormattingConversionService}
- * 	<li>A {@link org.springframework.validation.beanvalidation.LocalValidatorFactoryBean}
- * 	if a JSR-303 implementation is available on the classpath
- * 	<li>A range of {@link HttpMessageConverter}s depending on what 3rd party
- * 	libraries are available on the classpath.
+ * <li>A {@link ContentNegotiationManager}
+ * <li>A {@link DefaultFormattingConversionService}
+ * <li>A {@link org.springframework.validation.beanvalidation.LocalValidatorFactoryBean}
+ * if a JSR-303 implementation is available on the classpath
+ * <li>A range of {@link HttpMessageConverter}s depending on what 3rd party
+ * libraries are available on the classpath.
  * </ul>
  *
  * @author Keith Donald
@@ -535,20 +536,35 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 			}
 
 			if (jackson2XmlPresent) {
-				messageConverters.add(createConverterDefinition(MappingJackson2XmlHttpMessageConverter.class, source));
+				RootBeanDefinition jacksonConverterDef = createConverterDefinition(MappingJackson2XmlHttpMessageConverter.class, source);
+				GenericBeanDefinition jacksonFactoryDef = createObjectMapperFactoryDefinition(source);
+				jacksonFactoryDef.getPropertyValues().add("createXmlMapper", true);
+				jacksonConverterDef.getConstructorArgumentValues().addIndexedArgumentValue(0, jacksonFactoryDef);
+				messageConverters.add(jacksonConverterDef);
 			}
 			else if (jaxb2Present) {
 				messageConverters.add(createConverterDefinition(Jaxb2RootElementHttpMessageConverter.class, source));
 			}
 
 			if (jackson2Present) {
-				messageConverters.add(createConverterDefinition(MappingJackson2HttpMessageConverter.class, source));
+				RootBeanDefinition jacksonConverterDef = createConverterDefinition(MappingJackson2HttpMessageConverter.class, source);
+				GenericBeanDefinition jacksonFactoryDef = createObjectMapperFactoryDefinition(source);
+				jacksonConverterDef.getConstructorArgumentValues().addIndexedArgumentValue(0, jacksonFactoryDef);
+				messageConverters.add(jacksonConverterDef);
 			}
 			else if (gsonPresent) {
 				messageConverters.add(createConverterDefinition(GsonHttpMessageConverter.class, source));
 			}
 		}
 		return messageConverters;
+	}
+
+	private GenericBeanDefinition createObjectMapperFactoryDefinition(Object source) {
+		GenericBeanDefinition beanDefinition = new GenericBeanDefinition();
+		beanDefinition.setBeanClass(Jackson2ObjectMapperFactoryBean.class);
+		beanDefinition.setSource(source);
+		beanDefinition.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
+		return beanDefinition;
 	}
 
 	private RootBeanDefinition createConverterDefinition(Class<?> converterClass, Object source) {
@@ -577,10 +593,12 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
             if (StringUtils.hasText("bean")) {
                 reference = new RuntimeBeanReference(refElement.getAttribute("bean"),false);
                 list.add(reference);
-            }else if (StringUtils.hasText("parent")){
+            }
+			else if (StringUtils.hasText("parent")){
                 reference = new RuntimeBeanReference(refElement.getAttribute("parent"),true);
                 list.add(reference);
-            }else{
+            }
+			else {
                 parserContext.getReaderContext().error("'bean' or 'parent' attribute is required for <ref> element",
                         parserContext.extractSource(parentElement));
             }

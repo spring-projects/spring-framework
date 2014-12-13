@@ -1,8 +1,4 @@
-
 /**
- *
- * Provides portlet-specific data binding functionality.
- *
+ * Provides Portlet-specific data binding functionality.
  */
 package org.springframework.web.portlet.bind;
-

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -64,15 +64,17 @@ public @interface ControllerAdvice {
 	 * {@code @ControllerAdvice("org.my.pkg")} is equivalent to
 	 * {@code @ControllerAdvice(basePackages="org.my.pkg")}.
 	 * @since 4.0
+	 * @see #basePackages()
 	 */
 	String[] value() default {};
 
 	/**
 	 * Array of base packages.
-	 * Controllers that belong to those base packages will be included, e.g.:
-	 * {@code @ControllerAdvice(basePackages="org.my.pkg")} or
-	 * {@code @ControllerAdvice(basePackages={"org.my.pkg","org.my.other.pkg"})}
-	 * <p>{@link #value()} is an alias for this attribute.
+	 * Controllers that belong to those base packages or sub-packages thereof
+	 * will be included, e.g.: {@code @ControllerAdvice(basePackages="org.my.pkg")}
+	 * or {@code @ControllerAdvice(basePackages={"org.my.pkg", "org.my.other.pkg"})}.
+	 * <p>{@link #value()} is an alias for this attribute, simply allowing for
+	 * more concise use of the annotation.
 	 * <p>Also consider using {@link #basePackageClasses()} as a type-safe
 	 * alternative to String-based package names.
 	 * @since 4.0

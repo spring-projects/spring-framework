@@ -53,6 +53,8 @@ public class FunctionReference extends SpelNodeImpl {
 	// Captures the most recently used method for the function invocation *if* the method
 	// can safely be used for compilation (i.e. no argument conversion is going on)
 	private Method method;
+	
+	private boolean argumentConversionOccurred;
 
 
 	public FunctionReference(String functionName, int pos, SpelNodeImpl... arguments) {
@@ -103,7 +105,8 @@ public class FunctionReference extends SpelNodeImpl {
 					SpelMessage.FUNCTION_MUST_BE_STATIC,
 					method.getDeclaringClass().getName() + "." + method.getName(), this.name);
 		}
-		boolean argumentConversionOccurred = false;
+
+		argumentConversionOccurred = false;
 		// Convert arguments if necessary and remap them for varargs if required
 		if (functionArgs != null) {
 			TypeConverter converter = state.getEvaluationContext().getTypeConverter();
@@ -120,7 +123,7 @@ public class FunctionReference extends SpelNodeImpl {
 				this.method = method;
 				this.exitTypeDescriptor = CodeFlow.toDescriptor(method.getReturnType());
 			}
-			return new TypedValue(result, new TypeDescriptor(new MethodParameter(method,-1)).narrow(result));
+			return new TypedValue(result, new TypeDescriptor(new MethodParameter(method, -1)).narrow(result));
 		}
 		catch (Exception ex) {
 			throw new SpelEvaluationException(getStartPosition(), ex, SpelMessage.EXCEPTION_DURING_FUNCTION_CALL,
@@ -142,8 +145,6 @@ public class FunctionReference extends SpelNodeImpl {
 		return sb.toString();
 	}
 
-	// to 'assign' to a function don't use the () suffix and so it is just a variable reference
-
 	/**
 	 * Compute the arguments to the function, they are the children of this expression node.
 	 * @return an array of argument values for the function call
@@ -159,31 +160,30 @@ public class FunctionReference extends SpelNodeImpl {
 	
 	@Override
 	public boolean isCompilable() {
-		// Don't yet support non-static method compilation.
-		return (this.method != null && Modifier.isStatic(this.method.getModifiers()));
+		if (this.method == null || argumentConversionOccurred) {
+			return false;
+		}
+		int methodModifiers = this.method.getModifiers();
+		if (!Modifier.isStatic(methodModifiers) || 
+			!Modifier.isPublic(methodModifiers) ||
+			!Modifier.isPublic(method.getDeclaringClass().getModifiers())) {
+			return false;
+		}
+		for (SpelNodeImpl child : this.children) {
+			if (!child.isCompilable()) {
+				return false;
+			}
+		}
+		return true;
 	}
 	
 	@Override 
-	public void generateCode(MethodVisitor mv,CodeFlow codeflow) {
-		String methodDeclaringClassSlashedDescriptor = this.method.getDeclaringClass().getName().replace('.','/');
-		String[] paramDescriptors = CodeFlow.toParamDescriptors(this.method);
-		for (int c = 0; c < this.children.length; c++) {
-			SpelNodeImpl child = this.children[c];
-			codeflow.enterCompilationScope();
-			child.generateCode(mv, codeflow);
-			// Check if need to box it for the method reference?
-			if (CodeFlow.isPrimitive(codeflow.lastDescriptor()) && paramDescriptors[c].charAt(0) == 'L') {
-				CodeFlow.insertBoxIfNecessary(mv, codeflow.lastDescriptor().charAt(0));
-			}
-			else if (!codeflow.lastDescriptor().equals(paramDescriptors[c])) {
-				// This would be unnecessary in the case of subtyping (e.g. method takes a Number but passed in is an Integer)
-				CodeFlow.insertCheckCast(mv, paramDescriptors[c]);
-			}
-			codeflow.exitCompilationScope();
-		}
+	public void generateCode(MethodVisitor mv,CodeFlow cf) {
+		String methodDeclaringClassSlashedDescriptor = this.method.getDeclaringClass().getName().replace('.', '/');
+		generateCodeForArguments(mv, cf, method, this.children);
 		mv.visitMethodInsn(INVOKESTATIC, methodDeclaringClassSlashedDescriptor, this.method.getName(),
-				CodeFlow.createSignatureDescriptor(this.method),false);
-		codeflow.pushDescriptor(this.exitTypeDescriptor);
+				CodeFlow.createSignatureDescriptor(this.method), false);
+		cf.pushDescriptor(this.exitTypeDescriptor);
 	}
 
 }

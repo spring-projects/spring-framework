@@ -16,15 +16,12 @@
 
 package org.springframework.web.portlet.context;
 
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
-
 import javax.portlet.PortletContext;
 import javax.portlet.PortletSession;
 import javax.servlet.ServletContextEvent;
 
 import org.junit.Test;
+
 import org.springframework.beans.factory.support.GenericBeanDefinition;
 import org.springframework.mock.web.portlet.MockRenderRequest;
 import org.springframework.mock.web.portlet.ServletWrappingPortletContext;
@@ -34,6 +31,8 @@ import org.springframework.web.context.ContextCleanupListener;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.support.GenericWebApplicationContext;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Juergen Hoeller

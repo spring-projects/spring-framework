@@ -16,6 +16,17 @@
 
 package org.springframework.messaging.handler.invocation;
 
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import org.hamcrest.Matchers;
 import org.junit.Before;
 import org.junit.Test;
@@ -31,12 +42,7 @@ import org.springframework.util.AntPathMatcher;
 import org.springframework.util.PathMatcher;
 import org.springframework.util.ReflectionUtils.MethodFilter;
 
-import java.lang.reflect.Method;
-import java.util.*;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThat;
+import static org.junit.Assert.*;
 
 /**
  * Test fixture for
@@ -130,6 +136,7 @@ public class MethodMessageHandlerTests {
 	}
 
 
+	@SuppressWarnings("unused")
 	private static class TestController {
 
 		public String method;
@@ -140,6 +147,7 @@ public class MethodMessageHandlerTests {
 			this.method = "pathMatchWildcard";
 		}
 
+		@SuppressWarnings("rawtypes")
 		public void handlerArgumentResolver(Message message) {
 			this.method = "handlerArgumentResolver";
 			this.arguments.put("message", message);
@@ -164,6 +172,7 @@ public class MethodMessageHandlerTests {
 
 	}
 
+	@SuppressWarnings("unused")
 	private static class DuplicateMappingsController {
 
 		public void handlerFoo() { }
@@ -207,7 +216,7 @@ public class MethodMessageHandlerTests {
 		@Override
 		protected String getMappingForMethod(Method method, Class<?> handlerType) {
 			String methodName = method.getName();
-			if(methodName.startsWith("handler")) {
+			if (methodName.startsWith("handler")) {
 				return "/" + methodName;
 			}
 			return null;
@@ -231,7 +240,7 @@ public class MethodMessageHandlerTests {
 		protected String getMatchingMapping(String mapping, Message<?> message) {
 
 			String destination = getLookupDestination(getDestination(message));
-			if(mapping.equals(destination) || this.pathMatcher.match(mapping, destination)) {
+			if (mapping.equals(destination) || this.pathMatcher.match(mapping, destination)) {
 				return mapping;
 			}
 			return null;

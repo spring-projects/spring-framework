@@ -28,6 +28,7 @@ import org.springframework.core.BridgeMethodResolver;
 import org.springframework.core.GenericTypeResolver;
 import org.springframework.core.MethodParameter;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -38,11 +39,9 @@ import org.springframework.util.StringUtils;
  * @author Juergen Hoeller
  * @since 2.5.2
  */
-class GenericTypeAwarePropertyDescriptor extends PropertyDescriptor {
+final class GenericTypeAwarePropertyDescriptor extends PropertyDescriptor {
 
 	private final Class<?> beanClass;
-
-	private final Class<?> propertyEditorClass;
 
 	private final Method readMethod;
 
@@ -54,14 +53,19 @@ class GenericTypeAwarePropertyDescriptor extends PropertyDescriptor {
 
 	private Class<?> propertyType;
 
+	private final Class<?> propertyEditorClass;
+
 
 	public GenericTypeAwarePropertyDescriptor(Class<?> beanClass, String propertyName,
 			Method readMethod, Method writeMethod, Class<?> propertyEditorClass)
 			throws IntrospectionException {
 
 		super(propertyName, null, null);
+
+		if (beanClass == null)  {
+			throw new IntrospectionException("Bean class must not be null");
+		}
 		this.beanClass = beanClass;
-		this.propertyEditorClass = propertyEditorClass;
 
 		Method readMethodToUse = BridgeMethodResolver.findBridgedMethod(readMethod);
 		Method writeMethodToUse = BridgeMethodResolver.findBridgedMethod(writeMethod);
@@ -104,16 +108,13 @@ class GenericTypeAwarePropertyDescriptor extends PropertyDescriptor {
 		else if (this.writeMethodParameter != null) {
 			this.propertyType = this.writeMethodParameter.getParameterType();
 		}
+
+		this.propertyEditorClass = propertyEditorClass;
 	}
 
 
 	public Class<?> getBeanClass() {
 		return this.beanClass;
-	}
-
-	@Override
-	public Class<?> getPropertyEditorClass() {
-		return this.propertyEditorClass;
 	}
 
 	@Override
@@ -144,6 +145,32 @@ class GenericTypeAwarePropertyDescriptor extends PropertyDescriptor {
 	@Override
 	public Class<?> getPropertyType() {
 		return this.propertyType;
+	}
+
+	@Override
+	public Class<?> getPropertyEditorClass() {
+		return this.propertyEditorClass;
+	}
+
+
+	@Override
+	public boolean equals(Object other) {
+		if (this == other) {
+			return true;
+		}
+		if (!(other instanceof GenericTypeAwarePropertyDescriptor)) {
+			return false;
+		}
+		GenericTypeAwarePropertyDescriptor otherPd = (GenericTypeAwarePropertyDescriptor) other;
+		return (getBeanClass().equals(otherPd.getBeanClass()) && PropertyDescriptorUtils.equals(this, otherPd));
+	}
+
+	@Override
+	public int hashCode() {
+		int hashCode = getBeanClass().hashCode();
+		hashCode = 29 * hashCode + ObjectUtils.nullSafeHashCode(getReadMethod());
+		hashCode = 29 * hashCode + ObjectUtils.nullSafeHashCode(getWriteMethod());
+		return hashCode;
 	}
 
 }

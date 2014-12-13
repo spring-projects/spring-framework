@@ -23,8 +23,8 @@ import java.lang.reflect.Method;
 import java.util.Date;
 
 import junit.framework.TestCase;
-
 import org.junit.Ignore;
+
 import org.springframework.tests.sample.objects.TestObject;
 
 /**

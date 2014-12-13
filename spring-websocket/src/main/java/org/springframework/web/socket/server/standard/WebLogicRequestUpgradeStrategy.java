@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,16 +16,11 @@
 
 package org.springframework.web.socket.server.standard;
 
-import org.glassfish.tyrus.core.TyrusUpgradeResponse;
-import org.glassfish.tyrus.core.Utils;
-import org.glassfish.tyrus.spi.Connection;
-import org.glassfish.tyrus.spi.WebSocketEngine.UpgradeInfo;
-import org.glassfish.tyrus.spi.Writer;
-import org.springframework.beans.BeanWrapper;
-import org.springframework.beans.BeanWrapperImpl;
-import org.springframework.util.ReflectionUtils;
-import org.springframework.web.socket.server.HandshakeFailureException;
-
+import java.io.IOException;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Method;
+import java.util.List;
+import java.util.Map;
 import javax.servlet.AsyncContext;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -34,11 +29,17 @@ import javax.servlet.ServletRequestWrapper;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.websocket.CloseReason;
-import java.io.IOException;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Method;
-import java.util.List;
-import java.util.Map;
+
+import org.glassfish.tyrus.core.TyrusUpgradeResponse;
+import org.glassfish.tyrus.core.Utils;
+import org.glassfish.tyrus.spi.Connection;
+import org.glassfish.tyrus.spi.WebSocketEngine.UpgradeInfo;
+import org.glassfish.tyrus.spi.Writer;
+
+import org.springframework.beans.BeanWrapper;
+import org.springframework.beans.BeanWrapperImpl;
+import org.springframework.util.ReflectionUtils;
+import org.springframework.web.socket.server.HandshakeFailureException;
 
 /**
  * A WebSocket {@code RequestUpgradeStrategy} for WebLogic 12.1.3.
@@ -59,7 +60,6 @@ public class WebLogicRequestUpgradeStrategy extends AbstractTyrusRequestUpgradeS
 	protected TyrusEndpointHelper getEndpointHelper() {
 		return endpointHelper;
 	}
-
 
 	@Override
 	protected void handleSuccess(HttpServletRequest request, HttpServletResponse response,
@@ -90,7 +90,7 @@ public class WebLogicRequestUpgradeStrategy extends AbstractTyrusRequestUpgradeS
 	}
 
 	private static Object getNativeRequest(ServletRequest request) {
-		while ((request instanceof ServletRequestWrapper)) {
+		while (request instanceof ServletRequestWrapper) {
 			request = ((ServletRequestWrapper) request).getRequest();
 		}
 		return request;
@@ -103,6 +103,7 @@ public class WebLogicRequestUpgradeStrategy extends AbstractTyrusRequestUpgradeS
 		public void close(CloseReason reason) {
 		}
 	};
+
 
 	/**
 	 * Helps to create and invoke {@code weblogic.servlet.internal.MuxableSocketHTTP}.
@@ -156,10 +157,11 @@ public class WebLogicRequestUpgradeStrategy extends AbstractTyrusRequestUpgradeS
 				webSocketReadEventMethod.invoke(webSocket);
 			}
 			catch (Exception ex) {
-				throw new HandshakeFailureException("Failed to register WebSocket for read event.", ex);
+				throw new HandshakeFailureException("Failed to register WebSocket for read event", ex);
 			}
 		}
 	}
+
 
 	/**
 	 * Helps to create and invoke {@code weblogic.websocket.tyrus.TyrusServletWriter}.
@@ -182,7 +184,6 @@ public class WebLogicRequestUpgradeStrategy extends AbstractTyrusRequestUpgradeS
 				throw new IllegalStateException("No compatible WebSocket version found", ex);
 			}
 		}
-
 
 		private Writer newInstance(HttpServletResponse response, Object webSocket, boolean isProtected) {
 			try {

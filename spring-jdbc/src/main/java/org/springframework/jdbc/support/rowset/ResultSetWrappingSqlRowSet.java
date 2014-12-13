@@ -29,14 +29,14 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.jdbc.InvalidResultSetAccessException;
+import org.springframework.lang.UsesJava7;
 
 /**
- * Default implementation of Spring's {@link SqlRowSet} interface.
+ * The default implementation of Spring's {@link SqlRowSet} interface, wrapping a
+ * {@link java.sql.ResultSet}, catching any {@link SQLException}s and translating
+ * them to a corresponding Spring {@link InvalidResultSetAccessException}.
  *
- * <p>This implementation wraps a {@code javax.sql.ResultSet}, catching any SQLExceptions
- * and translating them to the appropriate Spring {@link InvalidResultSetAccessException}.
- *
- * <p>The passed-in ResultSets should already be disconnected if the SqlRowSet is supposed
+ * <p>The passed-in ResultSet should already be disconnected if the SqlRowSet is supposed
  * to be usable in a disconnected fashion. This means that you will usually pass in a
  * {@code javax.sql.rowset.CachedRowSet}, which implements the ResultSet interface.
  *
@@ -221,7 +221,28 @@ public class ResultSetWrappingSqlRowSet implements SqlRowSet {
 	}
 
 	/**
-	 * @see java.sql.ResultSet#getDate(int, java.util.Calendar)
+	 * @see java.sql.ResultSet#getDate(int)
+	 */
+	@Override
+	public Date getDate(int columnIndex) throws InvalidResultSetAccessException {
+		try {
+			return this.resultSet.getDate(columnIndex);
+		}
+		catch (SQLException se) {
+			throw new InvalidResultSetAccessException(se);
+		}
+	}
+
+	/**
+	 * @see java.sql.ResultSet#getDate(String)
+	 */
+	@Override
+	public Date getDate(String columnLabel) throws InvalidResultSetAccessException {
+		return getDate(findColumn(columnLabel));
+	}
+
+	/**
+	 * @see java.sql.ResultSet#getDate(int, Calendar)
 	 */
 	@Override
 	public Date getDate(int columnIndex, Calendar cal) throws InvalidResultSetAccessException {
@@ -234,31 +255,11 @@ public class ResultSetWrappingSqlRowSet implements SqlRowSet {
 	}
 
 	/**
-	 * @see java.sql.ResultSet#getDate(int)
-	 */
-	@Override
-	public Date getDate(int columnIndex) throws InvalidResultSetAccessException {
-		try {
-			return this.resultSet.getDate(columnIndex);
-		}
-		catch (SQLException se) {
-			throw new InvalidResultSetAccessException(se);
-		}
-	}
-	/**
-	 * @see java.sql.ResultSet#getDate(String, java.util.Calendar)
+	 * @see java.sql.ResultSet#getDate(String, Calendar)
 	 */
 	@Override
 	public Date getDate(String columnLabel, Calendar cal) throws InvalidResultSetAccessException {
 		return getDate(findColumn(columnLabel), cal);
-	}
-
-	/**
-	 * @see java.sql.ResultSet#getDate(String)
-	 */
-	@Override
-	public Date getDate(String columnLabel) throws InvalidResultSetAccessException {
-		return getDate(findColumn(columnLabel));
 	}
 
 	/**
@@ -302,6 +303,7 @@ public class ResultSetWrappingSqlRowSet implements SqlRowSet {
 	public float getFloat(String columnLabel) throws InvalidResultSetAccessException {
 		return getFloat(findColumn(columnLabel));
 	}
+
 	/**
 	 * @see java.sql.ResultSet#getInt(int)
 	 */
@@ -345,16 +347,24 @@ public class ResultSetWrappingSqlRowSet implements SqlRowSet {
 	}
 
 	/**
-	 * @see java.sql.ResultSet#getObject(int, java.util.Map)
+	 * @see java.sql.ResultSet#getNString(int)
 	 */
 	@Override
-	public Object getObject(int i,  Map<String, Class<?>> map) throws InvalidResultSetAccessException {
+	public String getNString(int columnIndex) throws InvalidResultSetAccessException {
 		try {
-			return this.resultSet.getObject(i, map);
+			return this.resultSet.getNString(columnIndex);
 		}
 		catch (SQLException se) {
 			throw new InvalidResultSetAccessException(se);
 		}
+	}
+
+	/**
+	 * @see java.sql.ResultSet#getNString(String)
+	 */
+	@Override
+	public String getNString(String columnLabel) throws InvalidResultSetAccessException {
+		return getNString(findColumn(columnLabel));
 	}
 
 	/**
@@ -371,19 +381,54 @@ public class ResultSetWrappingSqlRowSet implements SqlRowSet {
 	}
 
 	/**
-	 * @see java.sql.ResultSet#getObject(String, java.util.Map)
-	 */
-	@Override
-	public Object getObject(String columnLabel,  Map<String, Class<?>> map) throws InvalidResultSetAccessException {
-		return getObject(findColumn(columnLabel), map);
-	}
-
-	/**
 	 * @see java.sql.ResultSet#getObject(String)
 	 */
 	@Override
 	public Object getObject(String columnLabel) throws InvalidResultSetAccessException {
 		return getObject(findColumn(columnLabel));
+	}
+
+	/**
+	 * @see java.sql.ResultSet#getObject(int, Map)
+	 */
+	@Override
+	public Object getObject(int columnIndex, Map<String, Class<?>> map) throws InvalidResultSetAccessException {
+		try {
+			return this.resultSet.getObject(columnIndex, map);
+		}
+		catch (SQLException se) {
+			throw new InvalidResultSetAccessException(se);
+		}
+	}
+
+	/**
+	 * @see java.sql.ResultSet#getObject(String, Map)
+	 */
+	@Override
+	public Object getObject(String columnLabel, Map<String, Class<?>> map) throws InvalidResultSetAccessException {
+		return getObject(findColumn(columnLabel), map);
+	}
+
+	/**
+	 * @see java.sql.ResultSet#getObject(int, Class)
+	 */
+	@UsesJava7
+	@Override
+	public <T> T getObject(int columnIndex, Class<T> type) throws InvalidResultSetAccessException {
+		try {
+			return this.resultSet.getObject(columnIndex, type);
+		}
+		catch (SQLException se) {
+			throw new InvalidResultSetAccessException(se);
+		}
+	}
+
+	/**
+	 * @see java.sql.ResultSet#getObject(String, Class)
+	 */
+	@Override
+	public <T> T getObject(String columnLabel, Class<T> type) throws InvalidResultSetAccessException {
+		return getObject(findColumn(columnLabel), type);
 	}
 
 	/**
@@ -429,19 +474,6 @@ public class ResultSetWrappingSqlRowSet implements SqlRowSet {
 	}
 
 	/**
-	 * @see java.sql.ResultSet#getTime(int, java.util.Calendar)
-	 */
-	@Override
-	public Time getTime(int columnIndex, Calendar cal) throws InvalidResultSetAccessException {
-		try {
-			return this.resultSet.getTime(columnIndex, cal);
-		}
-		catch (SQLException se) {
-			throw new InvalidResultSetAccessException(se);
-		}
-	}
-
-	/**
 	 * @see java.sql.ResultSet#getTime(int)
 	 */
 	@Override
@@ -455,14 +487,6 @@ public class ResultSetWrappingSqlRowSet implements SqlRowSet {
 	}
 
 	/**
-	 * @see java.sql.ResultSet#getTime(String, java.util.Calendar)
-	 */
-	@Override
-	public Time getTime(String columnLabel, Calendar cal) throws InvalidResultSetAccessException {
-		return getTime(findColumn(columnLabel), cal);
-	}
-
-	/**
 	 * @see java.sql.ResultSet#getTime(String)
 	 */
 	@Override
@@ -471,16 +495,24 @@ public class ResultSetWrappingSqlRowSet implements SqlRowSet {
 	}
 
 	/**
-	 * @see java.sql.ResultSet#getTimestamp(int, java.util.Calendar)
+	 * @see java.sql.ResultSet#getTime(int, Calendar)
 	 */
 	@Override
-	public Timestamp getTimestamp(int columnIndex, Calendar cal) throws InvalidResultSetAccessException {
+	public Time getTime(int columnIndex, Calendar cal) throws InvalidResultSetAccessException {
 		try {
-			return this.resultSet.getTimestamp(columnIndex, cal);
+			return this.resultSet.getTime(columnIndex, cal);
 		}
 		catch (SQLException se) {
 			throw new InvalidResultSetAccessException(se);
 		}
+	}
+
+	/**
+	 * @see java.sql.ResultSet#getTime(String, Calendar)
+	 */
+	@Override
+	public Time getTime(String columnLabel, Calendar cal) throws InvalidResultSetAccessException {
+		return getTime(findColumn(columnLabel), cal);
 	}
 
 	/**
@@ -497,19 +529,32 @@ public class ResultSetWrappingSqlRowSet implements SqlRowSet {
 	}
 
 	/**
-	 * @see java.sql.ResultSet#getTimestamp(String, java.util.Calendar)
-	 */
-	@Override
-	public Timestamp getTimestamp(String columnLabel, Calendar cal) throws InvalidResultSetAccessException {
-		return getTimestamp(findColumn(columnLabel), cal);
-	}
-
-	/**
 	 * @see java.sql.ResultSet#getTimestamp(String)
 	 */
 	@Override
 	public Timestamp getTimestamp(String columnLabel) throws InvalidResultSetAccessException {
 		return getTimestamp(findColumn(columnLabel));
+	}
+
+	/**
+	 * @see java.sql.ResultSet#getTimestamp(int, Calendar)
+	 */
+	@Override
+	public Timestamp getTimestamp(int columnIndex, Calendar cal) throws InvalidResultSetAccessException {
+		try {
+			return this.resultSet.getTimestamp(columnIndex, cal);
+		}
+		catch (SQLException se) {
+			throw new InvalidResultSetAccessException(se);
+		}
+	}
+
+	/**
+	 * @see java.sql.ResultSet#getTimestamp(String, Calendar)
+	 */
+	@Override
+	public Timestamp getTimestamp(String columnLabel, Calendar cal) throws InvalidResultSetAccessException {
+		return getTimestamp(findColumn(columnLabel), cal);
 	}
 
 

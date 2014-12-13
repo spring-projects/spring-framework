@@ -16,34 +16,32 @@
 
 package org.springframework.web.filter;
 
-import java.io.BufferedReader;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
-import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletRequestWrapper;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
-import org.springframework.web.util.WebUtils;
+import org.springframework.web.util.ContentCachingRequestWrapper;
 
 /**
- * Base class for {@code Filter}s that perform logging operations before and after a request is processed.
+ * Base class for {@code Filter}s that perform logging operations before and after a request
+ * is processed.
  *
  * <p>Subclasses should override the {@code beforeRequest(HttpServletRequest, String)} and
- * {@code afterRequest(HttpServletRequest, String)} methods to perform the actual logging around the request.
+ * {@code afterRequest(HttpServletRequest, String)} methods to perform the actual logging
+ * around the request.
  *
  * <p>Subclasses are passed the message to write to the log in the {@code beforeRequest} and
- * {@code afterRequest} methods. By default, only the URI of the request is logged. However, setting the
- * {@code includeQueryString} property to {@code true} will cause the query string of the request to be
- * included also. The payload (body) of the request can be logged via the {@code includePayload} flag. Note that
- * this will only log that which is read, which might not be the entire payload.
+ * {@code afterRequest} methods. By default, only the URI of the request is logged. However,
+ * setting the {@code includeQueryString} property to {@code true} will cause the query string
+ * of the request to be included also. The payload (body) of the request can be logged via the
+ * {@code includePayload} flag. Note that this will only log that which is read, which might
+ * not be the entire payload.
  *
  * <p>Prefixes and suffixes for the before and after messages can be configured using the
  * {@code beforeMessagePrefix}, {@code afterMessagePrefix}, {@code beforeMessageSuffix} and
@@ -87,41 +85,43 @@ public abstract class AbstractRequestLoggingFilter extends OncePerRequestFilter 
 
 
 	/**
-	 * Set whether or not the query string should be included in the log message. <p>Should be configured using an
-	 * {@code &lt;init-param&gt;} for parameter name "includeQueryString" in the filter definition in
-	 * {@code web.xml}.
+	 * Set whether the query string should be included in the log message.
+	 * <p>Should be configured using an {@code &lt;init-param&gt;} for parameter name
+	 * "includeQueryString" in the filter definition in {@code web.xml}.
 	 */
 	public void setIncludeQueryString(boolean includeQueryString) {
 		this.includeQueryString = includeQueryString;
 	}
 
 	/**
-	 * Return whether or not the query string should be included in the log message.
+	 * Return whether the query string should be included in the log message.
 	 */
 	protected boolean isIncludeQueryString() {
 		return this.includeQueryString;
 	}
 
 	/**
-	 * Set whether or not the client address and session id should be included in the log message. <p>Should be configured
-	 * using an {@code &lt;init-param&gt;} for parameter name "includeClientInfo" in the filter definition in
-	 * {@code web.xml}.
+	 * Set whether the client address and session id should be included in the
+	 * log message.
+	 * <p>Should be configured using an {@code &lt;init-param&gt;} for parameter name
+	 * "includeClientInfo" in the filter definition in {@code web.xml}.
 	 */
 	public void setIncludeClientInfo(boolean includeClientInfo) {
 		this.includeClientInfo = includeClientInfo;
 	}
 
 	/**
-	 * Return whether or not the client address and session id should be included in the log message.
+	 * Return whether the client address and session id should be included in the
+	 * log message.
 	 */
 	protected boolean isIncludeClientInfo() {
 		return this.includeClientInfo;
 	}
 
 	/**
-	 * Set whether or not the request payload (body) should be included in the log message. <p>Should be configured using
-	 * an {@code &lt;init-param&gt;} for parameter name "includePayload" in the filter definition in
-	 * {@code web.xml}.
+	 * Set whether the request payload (body) should be included in the log message.
+	 * <p>Should be configured using an {@code &lt;init-param&gt;} for parameter name
+	 * "includePayload" in the filter definition in {@code web.xml}.
 	 */
 
 	public void setIncludePayload(boolean includePayload) {
@@ -129,14 +129,15 @@ public abstract class AbstractRequestLoggingFilter extends OncePerRequestFilter 
 	}
 
 	/**
-	 * Return whether or not the request payload (body) should be included in the log message.
+	 * Return whether the request payload (body) should be included in the log message.
 	 */
 	protected boolean isIncludePayload() {
-		return includePayload;
+		return this.includePayload;
 	}
 
 	/**
-	 * Sets the maximum length of the payload body to be included in the log message. Default is 50 characters.
+	 * Sets the maximum length of the payload body to be included in the log message.
+	 * Default is 50 characters.
 	 */
 	public void setMaxPayloadLength(int maxPayloadLength) {
 		Assert.isTrue(maxPayloadLength >= 0, "'maxPayloadLength' should be larger than or equal to 0");
@@ -147,32 +148,36 @@ public abstract class AbstractRequestLoggingFilter extends OncePerRequestFilter 
 	 * Return the maximum length of the payload body to be included in the log message.
 	 */
 	protected int getMaxPayloadLength() {
-		return maxPayloadLength;
+		return this.maxPayloadLength;
 	}
 
 	/**
-	 * Set the value that should be prepended to the log message written <i>before</i> a request is processed.
+	 * Set the value that should be prepended to the log message written
+	 * <i>before</i> a request is processed.
 	 */
 	public void setBeforeMessagePrefix(String beforeMessagePrefix) {
 		this.beforeMessagePrefix = beforeMessagePrefix;
 	}
 
 	/**
-	 * Set the value that should be apppended to the log message written <i>before</i> a request is processed.
+	 * Set the value that should be appended to the log message written
+	 * <i>before</i> a request is processed.
 	 */
 	public void setBeforeMessageSuffix(String beforeMessageSuffix) {
 		this.beforeMessageSuffix = beforeMessageSuffix;
 	}
 
 	/**
-	 * Set the value that should be prepended to the log message written <i>after</i> a request is processed.
+	 * Set the value that should be prepended to the log message written
+	 * <i>after</i> a request is processed.
 	 */
 	public void setAfterMessagePrefix(String afterMessagePrefix) {
 		this.afterMessagePrefix = afterMessagePrefix;
 	}
 
 	/**
-	 * Set the value that should be appended to the log message written <i>after</i> a request is processed.
+	 * Set the value that should be appended to the log message written
+	 * <i>after</i> a request is processed.
 	 */
 	public void setAfterMessageSuffix(String afterMessageSuffix) {
 		this.afterMessageSuffix = afterMessageSuffix;
@@ -200,22 +205,21 @@ public abstract class AbstractRequestLoggingFilter extends OncePerRequestFilter 
 			throws ServletException, IOException {
 
 		boolean isFirstRequest = !isAsyncDispatch(request);
+		HttpServletRequest requestToUse = request;
 
-		if (isIncludePayload()) {
-			if (isFirstRequest) {
-				request = new RequestCachingRequestWrapper(request);
-			}
+		if (isIncludePayload() && isFirstRequest && !(request instanceof ContentCachingRequestWrapper)) {
+			requestToUse = new ContentCachingRequestWrapper(request);
 		}
 
 		if (isFirstRequest) {
-			beforeRequest(request, getBeforeMessage(request));
+			beforeRequest(requestToUse, getBeforeMessage(requestToUse));
 		}
 		try {
-			filterChain.doFilter(request, response);
+			filterChain.doFilter(requestToUse, response);
 		}
 		finally {
-			if (!isAsyncStarted(request)) {
-				afterRequest(request, getAfterMessage(request));
+			if (!isAsyncStarted(requestToUse)) {
+				afterRequest(requestToUse, getAfterMessage(requestToUse));
 			}
 		}
 	}
@@ -265,8 +269,8 @@ public abstract class AbstractRequestLoggingFilter extends OncePerRequestFilter 
 				msg.append(";user=").append(user);
 			}
 		}
-		if (isIncludePayload() && request instanceof RequestCachingRequestWrapper) {
-			RequestCachingRequestWrapper wrapper = (RequestCachingRequestWrapper) request;
+		if (isIncludePayload() && request instanceof ContentCachingRequestWrapper) {
+			ContentCachingRequestWrapper wrapper = (ContentCachingRequestWrapper) request;
 			byte[] buf = wrapper.getContentAsByteArray();
 			if (buf.length > 0) {
 				int length = Math.min(buf.length, getMaxPayloadLength());
@@ -300,64 +304,5 @@ public abstract class AbstractRequestLoggingFilter extends OncePerRequestFilter 
 	 * @param message the message to log
 	 */
 	protected abstract void afterRequest(HttpServletRequest request, String message);
-
-
-	private static class RequestCachingRequestWrapper extends HttpServletRequestWrapper {
-
-		private final ByteArrayOutputStream cachedContent = new ByteArrayOutputStream(1024);
-
-		private final ServletInputStream inputStream;
-
-		private BufferedReader reader;
-
-		private RequestCachingRequestWrapper(HttpServletRequest request) throws IOException {
-			super(request);
-			this.inputStream = new RequestCachingInputStream(request.getInputStream());
-		}
-
-		@Override
-		public ServletInputStream getInputStream() throws IOException {
-			return this.inputStream;
-		}
-
-		@Override
-		public String getCharacterEncoding() {
-			String enc = super.getCharacterEncoding();
-			return (enc != null ? enc : WebUtils.DEFAULT_CHARACTER_ENCODING);
-		}
-
-		@Override
-		public BufferedReader getReader() throws IOException {
-			if (this.reader == null) {
-				this.reader = new BufferedReader(new InputStreamReader(this.inputStream, getCharacterEncoding()));
-			}
-			return this.reader;
-		}
-
-		private byte[] getContentAsByteArray() {
-			return this.cachedContent.toByteArray();
-		}
-
-
-		private class RequestCachingInputStream extends ServletInputStream {
-
-			private final ServletInputStream is;
-
-			public RequestCachingInputStream(ServletInputStream is) {
-				this.is = is;
-			}
-
-			@Override
-			public int read() throws IOException {
-				int ch = this.is.read();
-				if (ch != -1) {
-					cachedContent.write(ch);
-				}
-				return ch;
-			}
-
-		}
-
-	}
 
 }

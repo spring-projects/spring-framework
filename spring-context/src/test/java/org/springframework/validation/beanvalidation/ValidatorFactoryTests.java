@@ -25,6 +25,7 @@ import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import javax.validation.Constraint;
 import javax.validation.ConstraintValidator;
@@ -211,6 +212,18 @@ public class ValidatorFactoryTests {
 		assertNull(rejected);
 	}
 
+	@Test
+	public void testValidationWithOptionalField() throws Exception {
+		LocalValidatorFactoryBean validator = new LocalValidatorFactoryBean();
+		validator.afterPropertiesSet();
+
+		MainBeanWithOptional mainBean = new MainBeanWithOptional();
+		Errors errors = new BeanPropertyBindingResult(mainBean, "mainBean");
+		validator.validate(mainBean, errors);
+		Object rejected = errors.getFieldValue("inner.value");
+		assertNull(rejected);
+	}
+
 
 	@NameAddressValid
 	public static class ValidPerson {
@@ -314,6 +327,17 @@ public class ValidatorFactoryTests {
 
 		public InnerBean getInner() {
 			return inner;
+		}
+	}
+
+
+	public static class MainBeanWithOptional {
+
+		@InnerValid
+		private InnerBean inner = new InnerBean();
+
+		public Optional<InnerBean> getInner() {
+			return Optional.ofNullable(inner);
 		}
 	}
 

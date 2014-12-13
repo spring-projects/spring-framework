@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -53,21 +53,18 @@ import org.springframework.web.socket.sockjs.transport.SockJsSession;
  */
 public abstract class AbstractSockJsSession implements SockJsSession {
 
-	protected final Log logger = LogFactory.getLog(getClass());
+	private static enum State {NEW, OPEN, CLOSED}
 
 
 	/**
 	 * Log category to use on network IO exceptions after a client has gone away.
-	 *
 	 * <p>The Servlet API does not provide notifications when a client disconnects;
 	 * see <a href="https://java.net/jira/browse/SERVLET_SPEC-44">SERVLET_SPEC-44</a>.
 	 * Therefore network IO failures may occur simply because a client has gone away,
 	 * and that can fill the logs with unnecessary stack traces.
-	 *
 	 * <p>We make a best effort to identify such network failures, on a per-server
 	 * basis, and log them under a separate log category. A simple one-line message
 	 * is logged at DEBUG level, while a full stack trace is shown at TRACE level.
-	 *
 	 * @see #disconnectedClientLogger
 	 */
 	public static final String DISCONNECTED_CLIENT_LOG_CATEGORY =
@@ -78,6 +75,7 @@ public abstract class AbstractSockJsSession implements SockJsSession {
 	 * @see #DISCONNECTED_CLIENT_LOG_CATEGORY
 	 */
 	protected static final Log disconnectedClientLogger = LogFactory.getLog(DISCONNECTED_CLIENT_LOG_CATEGORY);
+
 
 	private static final Set<String> disconnectedClientExceptions;
 
@@ -91,6 +89,8 @@ public abstract class AbstractSockJsSession implements SockJsSession {
 	}
 
 
+	protected final Log logger = LogFactory.getLog(getClass());
+
 	private final String id;
 
 	private final SockJsServiceConfig config;
@@ -99,14 +99,11 @@ public abstract class AbstractSockJsSession implements SockJsSession {
 
 	private final Map<String, Object> attributes = new ConcurrentHashMap<String, Object>();
 
-
 	private volatile State state = State.NEW;
-
 
 	private final long timeCreated = System.currentTimeMillis();
 
 	private volatile long timeLastActive = this.timeCreated;
-
 
 	private volatile ScheduledFuture<?> heartbeatTask;
 
@@ -115,7 +112,6 @@ public abstract class AbstractSockJsSession implements SockJsSession {
 
 	/**
 	 * Create a new instance.
-	 *
 	 * @param id the session ID
 	 * @param config SockJS service configuration options
 	 * @param handler the recipient of SockJS messages
@@ -157,6 +153,22 @@ public abstract class AbstractSockJsSession implements SockJsSession {
 		return this.attributes;
 	}
 
+
+	// Message sending
+
+	public final void sendMessage(WebSocketMessage<?> message) throws IOException {
+		Assert.state(!isClosed(), "Cannot send a message when session is closed");
+		if (!(message instanceof TextMessage)) {
+			throw new IllegalArgumentException("Expected text message: " + message);
+		}
+		sendMessageInternal(((TextMessage) message).getPayload());
+	}
+
+	protected abstract void sendMessageInternal(String message) throws IOException;
+
+
+	// Lifecycle related methods
+
 	public boolean isNew() {
 		return State.NEW.equals(this.state);
 	}
@@ -171,13 +183,46 @@ public abstract class AbstractSockJsSession implements SockJsSession {
 	}
 
 	/**
-	 * Polling and Streaming sessions periodically close the current HTTP request and
-	 * wait for the next request to come through. During this "downtime" the session is
-	 * still open but inactive and unable to send messages and therefore has to buffer
-	 * them temporarily. A WebSocket session by contrast is stateful and remain active
-	 * until closed.
+	 * Performs cleanup and notify the {@link WebSocketHandler}.
 	 */
-	public abstract boolean isActive();
+	@Override
+	public final void close() throws IOException {
+		close(new CloseStatus(3000, "Go away!"));
+	}
+
+	/**
+	 * Performs cleanup and notify the {@link WebSocketHandler}.
+	 */
+	@Override
+	public final void close(CloseStatus status) throws IOException {
+		if (isOpen()) {
+			if (logger.isDebugEnabled()) {
+				logger.debug("Closing SockJS session " + getId() + " with " + status);
+			}
+			this.state = State.CLOSED;
+			try {
+				if (isActive() && !CloseStatus.SESSION_NOT_RELIABLE.equals(status)) {
+					try {
+						writeFrameInternal(SockJsFrame.closeFrame(status.getCode(), status.getReason()));
+					}
+					catch (Throwable ex) {
+						logger.debug("Failure while send SockJS close frame", ex);
+					}
+				}
+				updateLastActiveTime();
+				cancelHeartbeat();
+				disconnect(status);
+			}
+			finally {
+				try {
+					this.handler.afterConnectionClosed(this, status);
+				}
+				catch (Throwable ex) {
+					logger.debug("Error from WebSocketHandler.afterConnectionClosed in " + this, ex);
+				}
+			}
+		}
+	}
 
 	@Override
 	public long getTimeSinceLastActive() {
@@ -185,7 +230,7 @@ public abstract class AbstractSockJsSession implements SockJsSession {
 			return (System.currentTimeMillis() - this.timeCreated);
 		}
 		else {
-			return isActive() ? 0 : System.currentTimeMillis() - this.timeLastActive;
+			return (isActive() ? 0 : System.currentTimeMillis() - this.timeLastActive);
 		}
 	}
 
@@ -202,12 +247,137 @@ public abstract class AbstractSockJsSession implements SockJsSession {
 		cancelHeartbeat();
 	}
 
+	public void sendHeartbeat() throws SockJsTransportFailureException {
+		if (isActive()) {
+			writeFrame(SockJsFrame.heartbeatFrame());
+			scheduleHeartbeat();
+		}
+	}
+
+	protected void scheduleHeartbeat() {
+		if (this.heartbeatDisabled) {
+			return;
+		}
+
+		Assert.state(this.config.getTaskScheduler() != null, "Expected SockJS TaskScheduler");
+		cancelHeartbeat();
+		if (!isActive()) {
+			return;
+		}
+
+		Date time = new Date(System.currentTimeMillis() + this.config.getHeartbeatTime());
+		this.heartbeatTask = this.config.getTaskScheduler().schedule(new Runnable() {
+			public void run() {
+				try {
+					sendHeartbeat();
+				}
+				catch (Throwable ex) {
+					// ignore
+				}
+			}
+		}, time);
+		if (logger.isTraceEnabled()) {
+			logger.trace("Scheduled heartbeat in session " + getId());
+		}
+	}
+
+	protected void cancelHeartbeat() {
+		try {
+			ScheduledFuture<?> task = this.heartbeatTask;
+			this.heartbeatTask = null;
+
+			if ((task != null) && !task.isDone()) {
+				if (logger.isTraceEnabled()) {
+					logger.trace("Cancelling heartbeat in session " + getId());
+				}
+				task.cancel(false);
+			}
+		}
+		catch (Throwable ex) {
+			logger.debug("Failure while cancelling heartbeat in session " + getId(), ex);
+		}
+	}
+
+	/**
+	 * Polling and Streaming sessions periodically close the current HTTP request and
+	 * wait for the next request to come through. During this "downtime" the session is
+	 * still open but inactive and unable to send messages and therefore has to buffer
+	 * them temporarily. A WebSocket session by contrast is stateful and remain active
+	 * until closed.
+	 */
+	public abstract boolean isActive();
+
+	/**
+	 * Actually close the underlying WebSocket session or in the case of HTTP
+	 * transports complete the underlying request.
+	 */
+	protected abstract void disconnect(CloseStatus status) throws IOException;
+
+
+	// Frame writing
+
+	/**
+	 * For internal use within a TransportHandler and the (TransportHandler-specific)
+	 * session class.
+	 */
+	protected void writeFrame(SockJsFrame frame) throws SockJsTransportFailureException {
+		if (logger.isTraceEnabled()) {
+			logger.trace("Preparing to write " + frame);
+		}
+		try {
+			writeFrameInternal(frame);
+		}
+		catch (Throwable ex) {
+			logWriteFrameFailure(ex);
+			try {
+				// Force disconnect (so we won't try to send close frame)
+				disconnect(CloseStatus.SERVER_ERROR);
+			}
+			catch (Throwable disconnectFailure) {
+				// Ignore
+			}
+			try {
+				close(CloseStatus.SERVER_ERROR);
+			}
+			catch (Throwable closeFailure) {
+				// Nothing of consequence, already forced disconnect
+			}
+			throw new SockJsTransportFailureException("Failed to write " + frame, this.getId(), ex);
+		}
+	}
+
+	private void logWriteFrameFailure(Throwable failure) {
+		@SuppressWarnings("serial")
+		NestedCheckedException nestedException = new NestedCheckedException("", failure) {};
+
+		if ("Broken pipe".equalsIgnoreCase(nestedException.getMostSpecificCause().getMessage()) ||
+				disconnectedClientExceptions.contains(failure.getClass().getSimpleName())) {
+
+			if (disconnectedClientLogger.isTraceEnabled()) {
+				disconnectedClientLogger.trace("Looks like the client has gone away", failure);
+			}
+			else if (disconnectedClientLogger.isDebugEnabled()) {
+				disconnectedClientLogger.debug("Looks like the client has gone away: " +
+						nestedException.getMessage() + " (For full stack trace, set the '" +
+						DISCONNECTED_CLIENT_LOG_CATEGORY + "' log category to TRACE level)");
+			}
+		}
+		else {
+			logger.debug("Terminating connection after failure to send message to client.", failure);
+		}
+	}
+
+	protected abstract void writeFrameInternal(SockJsFrame frame) throws IOException;
+
+
+	// Delegation methods
+
 	public void delegateConnectionEstablished() throws Exception {
 		this.state = State.OPEN;
 		this.handler.afterConnectionEstablished(this);
 	}
 
-	public void delegateMessages(String[] messages) throws SockJsMessageDeliveryException {
+	public void delegateMessages(String... messages) throws SockJsMessageDeliveryException {
 		List<String> undelivered = new ArrayList<String>(Arrays.asList(messages));
 		for (String message : messages) {
 			try {
@@ -241,73 +411,13 @@ public abstract class AbstractSockJsSession implements SockJsSession {
 		}
 	}
 
-	public void delegateError(Throwable ex) throws Exception {
-		this.handler.handleTransportError(this, ex);
-	}
-
-	public final void sendMessage(WebSocketMessage<?> message) throws IOException {
-		Assert.isTrue(!isClosed(), "Cannot send a message when session is closed");
-		Assert.isInstanceOf(TextMessage.class, message, "Expected text message: " + message);
-		sendMessageInternal(((TextMessage) message).getPayload());
-	}
-
-	protected abstract void sendMessageInternal(String message) throws IOException;
-
-	/**
-	 * {@inheritDoc}
-	 * <p>Perform cleanup and notify the {@link WebSocketHandler}.
-	 */
-	@Override
-	public final void close() throws IOException {
-		close(new CloseStatus(3000, "Go away!"));
-	}
-
-	/**
-	 * {@inheritDoc}
-	 * <p>Perform cleanup and notify the {@link WebSocketHandler}.
-	 */
-	@Override
-	public final void close(CloseStatus status) throws IOException {
-		if (isOpen()) {
-			if (logger.isDebugEnabled()) {
-				logger.debug("Closing SockJS session " + getId() + " with " + status);
-			}
-			this.state = State.CLOSED;
-			try {
-				if (isActive() && !CloseStatus.SESSION_NOT_RELIABLE.equals(status)) {
-					try {
-						writeFrameInternal(SockJsFrame.closeFrame(status.getCode(), status.getReason()));
-					}
-					catch (Throwable ex) {
-						logger.debug("Failure while send SockJS close frame", ex);
-					}
-				}
-				updateLastActiveTime();
-				cancelHeartbeat();
-				disconnect(status);
-			}
-			finally {
-				try {
-					this.handler.afterConnectionClosed(this, status);
-				}
-				catch (Throwable ex) {
-					logger.error("Error from WebSocketHandler.afterConnectionClosed in " + this, ex);
-				}
-			}
-		}
-	}
-
-	/**
-	 * Actually close the underlying WebSocket session or in the case of HTTP
-	 * transports complete the underlying request.
-	 */
-	protected abstract void disconnect(CloseStatus status) throws IOException;
-
 	/**
 	 * Close due to error arising from SockJS transport handling.
 	 */
 	public void tryCloseWithSockJsTransportError(Throwable error, CloseStatus closeStatus) {
-		logger.error("Closing due to transport error for " + this);
+		if (logger.isDebugEnabled()) {
+			logger.debug("Closing due to transport error for " + this);
+		}
 		try {
 			delegateError(error);
 		}
@@ -318,119 +428,20 @@ public abstract class AbstractSockJsSession implements SockJsSession {
 			close(closeStatus);
 		}
 		catch (Throwable closeException) {
-			logger.error("Failure while closing " + this, closeException);
+			logger.debug("Failure while closing " + this, closeException);
 		}
 	}
 
-	/**
-	 * For internal use within a TransportHandler and the (TransportHandler-specific)
-	 * session class.
-	 */
-	protected void writeFrame(SockJsFrame frame) throws SockJsTransportFailureException {
-		if (logger.isTraceEnabled()) {
-			logger.trace("Preparing to write " + frame);
-		}
-		try {
-			writeFrameInternal(frame);
-		}
-		catch (Throwable ex) {
-			logWriteFrameFailure(ex);
-			try {
-				// Force disconnect (so we won't try to send close frame)
-				disconnect(CloseStatus.SERVER_ERROR);
-			}
-			catch (Throwable disconnectFailure) {
-				// Ignore
-			}
-			try {
-				close(CloseStatus.SERVER_ERROR);
-			}
-			catch (Throwable t) {
-				// Nothing of consequence, already forced disconnect
-			}
-			throw new SockJsTransportFailureException("Failed to write " + frame, this.getId(), ex);
-		}
+	public void delegateError(Throwable ex) throws Exception {
+		this.handler.handleTransportError(this, ex);
 	}
 
-	private void logWriteFrameFailure(Throwable failure) {
 
-		@SuppressWarnings("serial")
-		NestedCheckedException nestedException = new NestedCheckedException("", failure) {};
-
-		if ("Broken pipe".equalsIgnoreCase(nestedException.getMostSpecificCause().getMessage()) ||
-				disconnectedClientExceptions.contains(failure.getClass().getSimpleName())) {
-
-			if (disconnectedClientLogger.isTraceEnabled()) {
-				disconnectedClientLogger.trace("Looks like the client has gone away", failure);
-			}
-			else if (disconnectedClientLogger.isDebugEnabled()) {
-				disconnectedClientLogger.debug("Looks like the client has gone away: " +
-						nestedException.getMessage() + " (For full stack trace, set the '" +
-						DISCONNECTED_CLIENT_LOG_CATEGORY + "' log category to TRACE level)");
-			}
-		}
-		else {
-			logger.error("Terminating connection after failure to send message to client.", failure);
-		}
-	}
-
-	protected abstract void writeFrameInternal(SockJsFrame frame) throws IOException;
-
-	public void sendHeartbeat() throws SockJsTransportFailureException {
-		if (isActive()) {
-			writeFrame(SockJsFrame.heartbeatFrame());
-			scheduleHeartbeat();
-		}
-	}
-
-	protected void scheduleHeartbeat() {
-		if (this.heartbeatDisabled) {
-			return;
-		}
-		Assert.state(this.config.getTaskScheduler() != null, "Expecteded SockJS TaskScheduler.");
-		cancelHeartbeat();
-		if (!isActive()) {
-			return;
-		}
-		Date time = new Date(System.currentTimeMillis() + this.config.getHeartbeatTime());
-		this.heartbeatTask = this.config.getTaskScheduler().schedule(new Runnable() {
-			public void run() {
-				try {
-					sendHeartbeat();
-				}
-				catch (Throwable ex) {
-					// ignore
-				}
-			}
-		}, time);
-		if (logger.isTraceEnabled()) {
-			logger.trace("Scheduled heartbeat in session " + getId());
-		}
-	}
-
-	protected void cancelHeartbeat() {
-		try {
-			ScheduledFuture<?> task = this.heartbeatTask;
-			this.heartbeatTask = null;
-
-			if ((task != null) && !task.isDone()) {
-				if (logger.isTraceEnabled()) {
-					logger.trace("Cancelling heartbeat in session " + getId());
-				}
-				task.cancel(false);
-			}
-		}
-		catch (Throwable ex) {
-			logger.error("Failure while cancelling heartbeat in session " + getId(), ex);
-		}
-	}
+	// Self description
 
 	@Override
 	public String toString() {
 		return getClass().getSimpleName() + "[id=" + getId() + "]";
 	}
-
-
-	private enum State { NEW, OPEN, CLOSED }
 
 }

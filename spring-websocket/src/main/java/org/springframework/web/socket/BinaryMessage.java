@@ -26,7 +26,6 @@ import java.nio.ByteBuffer;
  */
 public final class BinaryMessage extends AbstractWebSocketMessage<ByteBuffer> {
 
-
 	/**
 	 * Create a new binary WebSocket message with the given ByteBuffer payload.
 	 * @param payload the non-null payload
@@ -78,7 +77,7 @@ public final class BinaryMessage extends AbstractWebSocketMessage<ByteBuffer> {
 	 * @param isLast if the message is the last of a series of partial messages
 	 */
 	public BinaryMessage(byte[] payload, int offset, int length, boolean isLast) {
-		super((payload != null) ? ByteBuffer.wrap(payload, offset, length) : null, isLast);
+		super(payload != null ? ByteBuffer.wrap(payload, offset, length) : null, isLast);
 	}
 
 

@@ -28,6 +28,7 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Properties;
 import java.util.Set;
 import java.util.SortedMap;
@@ -1537,7 +1538,43 @@ public final class BeanWrapperTests extends AbstractConfigurablePropertyAccessor
 		BeanWrapperImpl bwi = new BeanWrapperImpl(foo);
 		bwi.setPropertyValue("object", "a String");
 		assertEquals("a String", foo.value);
+		assertTrue(foo.getObject() == 8);
 		assertEquals(8, bwi.getPropertyValue("object"));
+	}
+
+	@Test
+	public void testGetterWithOptional() {
+		GetterWithOptional foo = new GetterWithOptional();
+		TestBean tb = new TestBean("x");
+		BeanWrapperImpl bwi = new BeanWrapperImpl(foo);
+
+		bwi.setPropertyValue("object", tb);
+		assertSame(tb, foo.value);
+		assertSame(tb, foo.getObject().get());
+		assertSame(tb, ((Optional<String>) bwi.getPropertyValue("object")).get());
+		assertEquals("x", foo.value.getName());
+		assertEquals("x", foo.getObject().get().getName());
+		assertEquals("x", bwi.getPropertyValue("object.name"));
+
+		bwi.setPropertyValue("object.name", "y");
+		assertSame(tb, foo.value);
+		assertSame(tb, foo.getObject().get());
+		assertSame(tb, ((Optional<String>) bwi.getPropertyValue("object")).get());
+		assertEquals("y", foo.value.getName());
+		assertEquals("y", foo.getObject().get().getName());
+		assertEquals("y", bwi.getPropertyValue("object.name"));
+	}
+
+	@Test
+	public void testGetterWithOptionalAndAutoGrowing() {
+		GetterWithOptional foo = new GetterWithOptional();
+		BeanWrapperImpl bwi = new BeanWrapperImpl(foo);
+		bwi.setAutoGrowNestedPaths(true);
+
+		bwi.setPropertyValue("object.name", "x");
+		assertEquals("x", foo.value.getName());
+		assertEquals("x", foo.getObject().get().getName());
+		assertEquals("x", bwi.getPropertyValue("object.name"));
 	}
 
 	@Test
@@ -1963,6 +2000,20 @@ public final class BeanWrapperTests extends AbstractConfigurablePropertyAccessor
 
 		public Integer getObject() {
 			return (this.value != null ? this.value.length() : null);
+		}
+	}
+
+
+	public static class GetterWithOptional {
+
+		public TestBean value;
+
+		public void setObject(TestBean object) {
+			this.value = object;
+		}
+
+		public Optional<TestBean> getObject() {
+			return Optional.ofNullable(this.value);
 		}
 	}
 

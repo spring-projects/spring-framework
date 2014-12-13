@@ -16,13 +16,13 @@
 
 package org.springframework.cache;
 
-import static org.junit.Assert.*;
-
 import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.cache.concurrent.ConcurrentMapCache;
 import org.springframework.cache.support.SimpleCacheManager;
+
+import static org.junit.Assert.*;
 
 /**
  * General cache-related test utilities.

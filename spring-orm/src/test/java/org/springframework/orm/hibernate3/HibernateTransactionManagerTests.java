@@ -66,7 +66,7 @@ import static org.mockito.BDDMockito.*;
  * @author Phillip Webb
  * @since 05.03.2005
  */
-@SuppressWarnings({ "rawtypes", "unchecked", "deprecation" })
+@SuppressWarnings({"rawtypes", "unchecked", "deprecation"})
 public class HibernateTransactionManagerTests {
 
 	@After

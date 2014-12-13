@@ -41,6 +41,7 @@ import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.context.annotation.ComponentScan.Filter;
 import org.springframework.context.annotation.ComponentScanParserTests.KustomAnnotationAutowiredBean;
+import org.springframework.context.annotation.componentscan.simple.ClassWithNestedComponents;
 import org.springframework.context.annotation.componentscan.simple.SimpleComponent;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.tests.context.SimpleMapScope;
@@ -115,6 +116,8 @@ public class ComponentScanAnnotationIntegrationTests {
 		ctx.refresh();
 		ctx.getBean(ComposedAnnotationConfig.class);
 		ctx.getBean(SimpleComponent.class);
+		ctx.getBean(ClassWithNestedComponents.NestedComponent.class);
+		ctx.getBean(ClassWithNestedComponents.OtherNestedComponent.class);
 		assertThat("config class bean not found",
 				ctx.containsBeanDefinition("componentScanAnnotationIntegrationTests.ComposedAnnotationConfig"), is(true));
 		assertThat("@ComponentScan annotated @Configuration class registered directly against " +

@@ -27,6 +27,7 @@ import org.junit.Test;
 
 import org.springframework.aop.scope.ScopedObject;
 import org.springframework.aop.scope.ScopedProxyUtils;
+import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,6 +38,7 @@ import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.support.ChildBeanDefinition;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.componentscan.simple.SimpleComponent;
 import org.springframework.core.env.StandardEnvironment;
 import org.springframework.core.io.DescriptiveResource;
@@ -78,6 +80,16 @@ public class ConfigurationClassPostProcessorTests {
 	@Test
 	public void enhancementIsPresentBecauseSingletonSemanticsAreRespected() {
 		beanFactory.registerBeanDefinition("config", new RootBeanDefinition(SingletonBeanConfig.class));
+		ConfigurationClassPostProcessor pp = new ConfigurationClassPostProcessor();
+		pp.postProcessBeanFactory(beanFactory);
+		Foo foo = beanFactory.getBean("foo", Foo.class);
+		Bar bar = beanFactory.getBean("bar", Bar.class);
+		assertSame(foo, bar.foo);
+	}
+
+	@Test
+	public void configurationIntrospectionOfInnerClassesWorksWithDotNameSyntax() {
+		beanFactory.registerBeanDefinition("config", new RootBeanDefinition(getClass().getName() + ".SingletonBeanConfig"));
 		ConfigurationClassPostProcessor pp = new ConfigurationClassPostProcessor();
 		pp.postProcessBeanFactory(beanFactory);
 		Foo foo = beanFactory.getBean("foo", Foo.class);
@@ -427,6 +439,46 @@ public class ConfigurationClassPostProcessorTests {
 		beanFactory.registerBeanDefinition("serviceBeanProvider", new RootBeanDefinition(ServiceBeanProvider.class));
 		new ConfigurationClassPostProcessor().postProcessBeanFactory(beanFactory);
 		beanFactory.preInstantiateSingletons();
+	}
+
+	@Test
+	public void testCircularDependency() {
+		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
+		bpp.setBeanFactory(beanFactory);
+		beanFactory.addBeanPostProcessor(bpp);
+		beanFactory.registerBeanDefinition("configClass1", new RootBeanDefinition(A.class));
+		beanFactory.registerBeanDefinition("configClass2", new RootBeanDefinition(AStrich.class));
+		new ConfigurationClassPostProcessor().postProcessBeanFactory(beanFactory);
+		try {
+			beanFactory.preInstantiateSingletons();
+			fail("Should have thrown BeanCreationException");
+		}
+		catch (BeanCreationException ex) {
+			assertTrue(ex.getMessage().contains("Circular reference"));
+		}
+	}
+
+	@Test
+	public void testCircularDependencyWithApplicationContext() {
+		try {
+			new AnnotationConfigApplicationContext(A.class, AStrich.class);
+			fail("Should have thrown BeanCreationException");
+		}
+		catch (BeanCreationException ex) {
+			assertTrue(ex.getMessage().contains("Circular reference"));
+		}
+	}
+
+	@Test
+	public void testPrototypeArgumentsThroughBeanMethodCall() {
+		ApplicationContext ctx = new AnnotationConfigApplicationContext(BeanArgumentConfigWithPrototype.class);
+		ctx.getBean(FooFactory.class).createFoo(new BarArgument());
+	}
+
+	@Test
+	public void testSingletonArgumentsThroughBeanMethodCall() {
+		ApplicationContext ctx = new AnnotationConfigApplicationContext(BeanArgumentConfigWithSingleton.class);
+		ctx.getBean(FooFactory.class).createFoo(new BarArgument());
 	}
 
 
@@ -849,5 +901,94 @@ public class ConfigurationClassPostProcessorTests {
 			return new ServiceBean("message");
 		}
 	}
-}
 
+	@Configuration
+	public static class A {
+
+		@Autowired(required=true)
+		Z z;
+
+		@Bean
+		public B b() {
+			if (z == null) {
+				throw new NullPointerException("z is null");
+			}
+			return new B(z);
+		}
+	}
+
+	@Configuration
+	public static class AStrich {
+
+		@Autowired
+		B b;
+
+		@Bean
+		public Z z() {
+			return new Z();
+		}
+	}
+
+	public static class B {
+
+		public B(Z z) {
+		}
+	}
+
+	public static class Z {
+	}
+
+	@Configuration
+	static class BeanArgumentConfigWithPrototype {
+
+		@Bean
+		@Scope("prototype")
+		public DependingFoo foo(final BarArgument bar) {
+			return new DependingFoo(bar);
+		}
+
+		@Bean
+		public FooFactory fooFactory() {
+			return new FooFactory() {
+				@Override
+				public DependingFoo createFoo(final BarArgument bar) {
+					return foo(bar);
+				}
+			};
+		}
+	}
+
+	@Configuration
+	static class BeanArgumentConfigWithSingleton {
+
+		@Bean @Lazy
+		public DependingFoo foo(final BarArgument bar) {
+			return new DependingFoo(bar);
+		}
+
+		@Bean
+		public FooFactory fooFactory() {
+			return new FooFactory() {
+				@Override
+				public DependingFoo createFoo(final BarArgument bar) {
+					return foo(bar);
+				}
+			};
+		}
+	}
+
+	static class BarArgument {
+	}
+
+	static class DependingFoo {
+
+		DependingFoo(BarArgument bar) {
+		}
+	}
+
+	static abstract class FooFactory {
+
+		abstract DependingFoo createFoo(BarArgument bar);
+	}
+
+}

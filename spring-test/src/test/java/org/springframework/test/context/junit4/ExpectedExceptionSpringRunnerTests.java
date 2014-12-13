@@ -16,8 +16,6 @@
 
 package org.springframework.test.context.junit4;
 
-import static org.junit.Assert.*;
-
 import java.util.ArrayList;
 
 import org.junit.Ignore;
@@ -25,7 +23,10 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runner.notification.RunNotifier;
 import org.junit.runners.JUnit4;
+
 import org.springframework.test.context.TestExecutionListeners;
+
+import static org.junit.Assert.*;
 
 /**
  * Verifies proper handling of the following in conjunction with the

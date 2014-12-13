@@ -27,6 +27,7 @@ import java.util.Set;
 
 import org.junit.Before;
 import org.junit.Test;
+
 import org.springframework.core.io.Resource;
 import org.springframework.tests.sample.objects.GenericObject;
 

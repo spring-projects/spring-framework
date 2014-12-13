@@ -146,12 +146,13 @@ public class MappingJackson2HttpMessageConverterTests {
 		converter.read(MyBean.class, inputMessage);
 	}
 
-	@Test(expected = HttpMessageNotReadableException.class)
+	@Test
 	public void readValidJsonWithUnknownProperty() throws IOException {
 		String body = "{\"string\":\"string\",\"unknownProperty\":\"value\"}";
 		MockHttpInputMessage inputMessage = new MockHttpInputMessage(body.getBytes("UTF-8"));
 		inputMessage.getHeaders().setContentType(new MediaType("application", "json"));
 		converter.read(MyBean.class, inputMessage);
+		// Assert no HttpMessageNotReadableException is thrown
 	}
 
 	@Test
@@ -253,8 +254,8 @@ public class MappingJackson2HttpMessageConverterTests {
 
 		String result = outputMessage.getBodyAsString(Charset.forName("UTF-8"));
 		assertThat(result, containsString("\"withView1\":\"with\""));
-		assertThat(result, containsString("\"withoutView\":\"without\""));
 		assertThat(result, not(containsString("\"withView2\":\"with\"")));
+		assertThat(result, not(containsString("\"withoutView\":\"without\"")));
 	}
 
 	@Test
@@ -286,8 +287,8 @@ public class MappingJackson2HttpMessageConverterTests {
 		assertThat(result, startsWith("callback("));
 		assertThat(result, endsWith(");"));
 		assertThat(result, containsString("\"withView1\":\"with\""));
-		assertThat(result, containsString("\"withoutView\":\"without\""));
 		assertThat(result, not(containsString("\"withView2\":\"with\"")));
+		assertThat(result, not(containsString("\"withoutView\":\"without\"")));
 	}
 
 

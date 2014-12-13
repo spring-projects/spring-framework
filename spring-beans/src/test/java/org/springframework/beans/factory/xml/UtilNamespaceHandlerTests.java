@@ -36,6 +36,7 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.tests.beans.CollectingReaderEventListener;
 import org.springframework.tests.sample.beans.CustomEnum;
 import org.springframework.tests.sample.beans.TestBean;
+import org.springframework.util.LinkedCaseInsensitiveMap;
 
 import static org.junit.Assert.*;
 
@@ -159,6 +160,13 @@ public class UtilNamespaceHandlerTests {
 	public void testMapWithRef() {
 		Map map = (Map) this.beanFactory.getBean("mapWithRef");
 		assertTrue(map instanceof TreeMap);
+		assertEquals(this.beanFactory.getBean("testBean"), map.get("bean"));
+	}
+
+	@Test
+	public void testMapWithTypes() {
+		Map map = (Map) this.beanFactory.getBean("mapWithTypes");
+		assertTrue(map instanceof LinkedCaseInsensitiveMap);
 		assertEquals(this.beanFactory.getBean("testBean"), map.get("bean"));
 	}
 

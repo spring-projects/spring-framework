@@ -16,12 +16,16 @@
 
 package org.springframework.http.client;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import java.net.URI;
 
+import org.apache.http.HttpEntityEnclosingRequest;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.RequestConfig;
+import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.client.protocol.HttpClientContext;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
@@ -72,6 +76,25 @@ public class HttpComponentsClientHttpRequestFactoryTests extends AbstractHttpReq
 		RequestConfig requestConfig = (RequestConfig) config;
 		assertEquals("Wrong custom connection timeout", 1234, requestConfig.getConnectTimeout());
 		assertEquals("Wrong custom socket timeout", 4567, requestConfig.getSocketTimeout());
+	}
+
+	@Test
+	public void createHttpUriRequest() throws Exception {
+		URI uri = new URI("http://example.com");
+		testRequestBodyAllowed(uri, HttpMethod.GET, false);
+		testRequestBodyAllowed(uri, HttpMethod.HEAD, false);
+		testRequestBodyAllowed(uri, HttpMethod.OPTIONS, false);
+		testRequestBodyAllowed(uri, HttpMethod.TRACE, false);
+		testRequestBodyAllowed(uri, HttpMethod.PUT, true);
+		testRequestBodyAllowed(uri, HttpMethod.POST, true);
+		testRequestBodyAllowed(uri, HttpMethod.PATCH, true);
+		testRequestBodyAllowed(uri, HttpMethod.DELETE, true);
 
 	}
+
+	private void testRequestBodyAllowed(URI uri, HttpMethod method, boolean allowed) {
+		HttpUriRequest request = ((HttpComponentsClientHttpRequestFactory) this.factory).createHttpUriRequest(method, uri);
+		assertEquals(allowed, request instanceof HttpEntityEnclosingRequest);
+	}
+
 }

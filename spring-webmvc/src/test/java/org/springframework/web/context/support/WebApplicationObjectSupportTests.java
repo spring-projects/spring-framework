@@ -16,15 +16,16 @@
 
 package org.springframework.web.context.support;
 
-import static org.junit.Assert.*;
-
 import java.io.File;
 
 import org.junit.Test;
+
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.support.StaticApplicationContext;
 import org.springframework.mock.web.test.MockServletContext;
 import org.springframework.web.util.WebUtils;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Juergen Hoeller

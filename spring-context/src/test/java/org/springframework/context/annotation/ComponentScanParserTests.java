@@ -32,7 +32,6 @@ import org.springframework.context.support.GenericXmlApplicationContext;
 import org.springframework.core.type.classreading.MetadataReader;
 import org.springframework.core.type.classreading.MetadataReaderFactory;
 import org.springframework.core.type.filter.TypeFilter;
-import org.springframework.stereotype.Component;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
@@ -49,13 +48,33 @@ public class ComponentScanParserTests {
 		return new ClassPathXmlApplicationContext(path, getClass());
 	}
 
+
 	@Test
-	public void aspectJTypeFilter() {
+	public void aspectjTypeFilter() {
 		ClassPathXmlApplicationContext context = loadContext("aspectjTypeFilterTests.xml");
 		assertTrue(context.containsBean("fooServiceImpl"));
 		assertTrue(context.containsBean("stubFooDao"));
 		assertFalse(context.containsBean("scopedProxyTestBean"));
 		context.close();
+	}
+
+	@Test
+	public void aspectjTypeFilterWithPlaceholders() {
+		System.setProperty("basePackage", "example.scannable, test");
+		System.setProperty("scanInclude", "example.scannable.FooService+");
+		System.setProperty("scanExclude", "example..Scoped*Test*");
+		try {
+			ClassPathXmlApplicationContext context = loadContext("aspectjTypeFilterTestsWithPlaceholders.xml");
+			assertTrue(context.containsBean("fooServiceImpl"));
+			assertTrue(context.containsBean("stubFooDao"));
+			assertFalse(context.containsBean("scopedProxyTestBean"));
+			context.close();
+		}
+		finally {
+			System.clearProperty("basePackage");
+			System.clearProperty("scanInclude");
+			System.clearProperty("scanExclude");
+		}
 	}
 
 	@Test
@@ -131,6 +150,7 @@ public class ComponentScanParserTests {
 	public static @interface CustomAnnotation {
 	}
 
+
 	/**
 	 * Intentionally spelling "custom" with a "k" since there are numerous
 	 * classes in this package named *Custom*.
@@ -146,6 +166,7 @@ public class ComponentScanParserTests {
 		}
 	}
 
+
 	/**
 	 * Intentionally spelling "custom" with a "k" since there are numerous
 	 * classes in this package named *Custom*.
@@ -153,6 +174,7 @@ public class ComponentScanParserTests {
 	@CustomAnnotation
 	public static class KustomAnnotationDependencyBean {
 	}
+
 
 	public static class CustomTypeFilter implements TypeFilter {
 

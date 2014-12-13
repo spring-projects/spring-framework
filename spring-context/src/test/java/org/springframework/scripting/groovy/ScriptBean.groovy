@@ -1,7 +1,7 @@
-import org.springframework.tests.sample.beans.TestBean
 import org.springframework.context.ApplicationContext
 import org.springframework.context.ApplicationContextAware
 import org.springframework.scripting.ContextScriptBean
+import org.springframework.tests.sample.beans.TestBean
 
 class GroovyScriptBean implements ContextScriptBean, ApplicationContextAware {
 

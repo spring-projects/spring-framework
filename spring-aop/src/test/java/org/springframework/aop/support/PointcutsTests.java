@@ -16,15 +16,15 @@
 
 package org.springframework.aop.support;
 
-import static org.junit.Assert.*;
-
 import java.lang.reflect.Method;
 
 import org.junit.Test;
+
 import org.springframework.aop.ClassFilter;
 import org.springframework.aop.Pointcut;
-
 import org.springframework.tests.sample.beans.TestBean;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Rod Johnson

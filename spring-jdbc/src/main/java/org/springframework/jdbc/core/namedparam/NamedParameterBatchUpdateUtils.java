@@ -19,9 +19,9 @@ package org.springframework.jdbc.core.namedparam;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
+import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.BatchUpdateUtils;
 import org.springframework.jdbc.core.JdbcOperations;
-import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 
 /**
  * Generic utility methods for working with JDBC batch statements using named parameters. Mainly for internal use

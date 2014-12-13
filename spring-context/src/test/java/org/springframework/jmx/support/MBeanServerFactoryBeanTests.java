@@ -18,7 +18,6 @@ package org.springframework.jmx.support;
 
 import java.lang.management.ManagementFactory;
 import java.util.List;
-
 import javax.management.MBeanServer;
 import javax.management.MBeanServerFactory;
 

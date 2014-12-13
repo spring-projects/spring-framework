@@ -50,19 +50,18 @@ public class TypeReference extends SpelNodeImpl {
 	@Override
 	public TypedValue getValueInternal(ExpressionState state) throws EvaluationException {
 		// TODO possible optimization here if we cache the discovered type reference, but can we do that?
-		String typename = (String) this.children[0].getValueInternal(state).getValue();
-		if (typename.indexOf('.') == -1 && Character.isLowerCase(typename.charAt(0))) {
-			TypeCode tc = TypeCode.valueOf(typename.toUpperCase());
+		String typeName = (String) this.children[0].getValueInternal(state).getValue();
+		if (!typeName.contains(".") && Character.isLowerCase(typeName.charAt(0))) {
+			TypeCode tc = TypeCode.valueOf(typeName.toUpperCase());
 			if (tc != TypeCode.OBJECT) {
-				// it is a primitive type
-				Class<?> clazz = tc.getType();
-				clazz = makeArrayIfNecessary(clazz);
+				// It is a primitive type
+				Class<?> clazz = makeArrayIfNecessary(tc.getType());
 				this.exitTypeDescriptor = "Ljava/lang/Class";
 				this.type = clazz;
 				return new TypedValue(clazz);
 			}
 		}
-		Class<?> clazz = state.findType(typename);
+		Class<?> clazz = state.findType(typeName);
 		clazz = makeArrayIfNecessary(clazz);
 		this.exitTypeDescriptor = "Ljava/lang/Class";
 		this.type = clazz;
@@ -81,10 +80,9 @@ public class TypeReference extends SpelNodeImpl {
 
 	@Override
 	public String toStringAST() {
-		StringBuilder sb = new StringBuilder();
-		sb.append("T(");
+		StringBuilder sb = new StringBuilder("T(");
 		sb.append(getChild(0).toStringAST());
-		for (int d=0;d<this.dimensions;d++) {
+		for (int d = 0; d < this.dimensions; d++) {
 			sb.append("[]");
 		}
 		sb.append(")");
@@ -97,41 +95,41 @@ public class TypeReference extends SpelNodeImpl {
 	}
 	
 	@Override
-	public void generateCode(MethodVisitor mv, CodeFlow codeflow) {
+	public void generateCode(MethodVisitor mv, CodeFlow cf) {
 		// TODO Future optimization - if followed by a static method call, skip generating code here
-		if (type.isPrimitive()) {
-			if (type == Integer.TYPE) {
+		if (this.type.isPrimitive()) {
+			if (this.type == Integer.TYPE) {
 				mv.visitFieldInsn(GETSTATIC, "java/lang/Integer", "TYPE", "Ljava/lang/Class;");
 			}
-			else if (type == Boolean.TYPE) {
+			else if (this.type == Boolean.TYPE) {
 				mv.visitFieldInsn(GETSTATIC, "java/lang/Boolean", "TYPE", "Ljava/lang/Class;");
 			}
-			else if (type == Byte.TYPE) {
+			else if (this.type == Byte.TYPE) {
 				mv.visitFieldInsn(GETSTATIC, "java/lang/Byte", "TYPE", "Ljava/lang/Class;");
 			}
-			else if (type == Short.TYPE) {
+			else if (this.type == Short.TYPE) {
 				mv.visitFieldInsn(GETSTATIC, "java/lang/Short", "TYPE", "Ljava/lang/Class;");
 			}
-			else if (type == Double.TYPE) {
+			else if (this.type == Double.TYPE) {
 				mv.visitFieldInsn(GETSTATIC, "java/lang/Double", "TYPE", "Ljava/lang/Class;");
 			}
-			else if (type == Character.TYPE) {
+			else if (this.type == Character.TYPE) {
 				mv.visitFieldInsn(GETSTATIC, "java/lang/Character", "TYPE", "Ljava/lang/Class;");
 			}
-			else if (type == Float.TYPE) {
+			else if (this.type == Float.TYPE) {
 				mv.visitFieldInsn(GETSTATIC, "java/lang/Float", "TYPE", "Ljava/lang/Class;");
 			}
-			else if (type == Long.TYPE) {
+			else if (this.type == Long.TYPE) {
 				mv.visitFieldInsn(GETSTATIC, "java/lang/Long", "TYPE", "Ljava/lang/Class;");
 			}
-			else if (type == Boolean.TYPE) {
+			else if (this.type == Boolean.TYPE) {
 				mv.visitFieldInsn(GETSTATIC, "java/lang/Boolean", "TYPE", "Ljava/lang/Class;");
 	        }
 		}
 		else {
-			mv.visitLdcInsn(Type.getType(type));
+			mv.visitLdcInsn(Type.getType(this.type));
 		}
-		codeflow.pushDescriptor(getExitDescriptor());
+		cf.pushDescriptor(this.exitTypeDescriptor);
 	}
 
 }

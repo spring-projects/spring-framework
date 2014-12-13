@@ -50,6 +50,7 @@ import org.springframework.beans.factory.config.DestructionAwareBeanPostProcesso
 import org.springframework.beans.factory.config.InstantiationAwareBeanPostProcessor;
 import org.springframework.beans.factory.support.MergedBeanDefinitionPostProcessor;
 import org.springframework.beans.factory.support.RootBeanDefinition;
+import org.springframework.core.BridgeMethodResolver;
 import org.springframework.core.Ordered;
 import org.springframework.core.PriorityOrdered;
 import org.springframework.jndi.JndiLocatorDelegate;
@@ -82,7 +83,7 @@ import org.springframework.util.StringUtils;
  * with the "unitName" attribute, or no attribute at all (for the default unit).
  * If those annotations are present with the "name" attribute at the class level,
  * they will simply be ignored, since those only serve as deployment hint
- * (as per the Java EE 5 specification).
+ * (as per the Java EE specification).
  *
  * <p>This post-processor can either obtain EntityManagerFactory beans defined
  * in the Spring application context (the default), or obtain EntityManagerFactory
@@ -167,9 +168,9 @@ public class PersistenceAnnotationBeanPostProcessor
 		implements InstantiationAwareBeanPostProcessor, DestructionAwareBeanPostProcessor,
 		MergedBeanDefinitionPostProcessor, PriorityOrdered, BeanFactoryAware, Serializable {
 
-	/* Check JPA 2.1 PersistenceContext.synchronizationType attribute */
-	private static final Method synchronizationTypeAttribute =
-			ClassUtils.getMethodIfAvailable(PersistenceContext.class, "synchronizationType");
+	/* Check JPA 2.1 PersistenceContext.synchronization() attribute */
+	private static final Method synchronizationAttribute =
+			ClassUtils.getMethodIfAvailable(PersistenceContext.class, "synchronization");
 
 
 	private Object jndiEnvironment;
@@ -231,8 +232,8 @@ public class PersistenceAnnotationBeanPostProcessor
 	 * for the {@link #setDefaultPersistenceUnitName default persistence unit}
 	 * will be taken (by default, the value mapped to the empty String),
 	 * or simply the single persistence unit if there is only one.
-	 * <p>This is mainly intended for use in a Java EE 5 environment, with all
-	 * lookup driven by the standard JPA annotations, and all EntityManagerFactory
+	 * <p>This is mainly intended for use in a Java EE environment, with all lookup
+	 * driven by the standard JPA annotations, and all EntityManagerFactory
 	 * references obtained from JNDI. No separate EntityManagerFactory bean
 	 * definitions are necessary in such a scenario.
 	 * <p>If no corresponding "persistenceContexts"/"extendedPersistenceContexts"
@@ -240,7 +241,7 @@ public class PersistenceAnnotationBeanPostProcessor
 	 * EntityManagers built on top of the EntityManagerFactory defined here.
 	 * Note that those will be Spring-managed EntityManagers, which implement
 	 * transaction synchronization based on Spring's facilities.
-	 * If you prefer the Java EE 5 server's own EntityManager handling,
+	 * If you prefer the Java EE server's own EntityManager handling,
 	 * specify corresponding "persistenceContexts"/"extendedPersistenceContexts".
 	 */
 	public void setPersistenceUnits(Map<String, String> persistenceUnits) {
@@ -258,11 +259,11 @@ public class PersistenceAnnotationBeanPostProcessor
 	 * for the {@link #setDefaultPersistenceUnitName default persistence unit}
 	 * will be taken (by default, the value mapped to the empty String),
 	 * or simply the single persistence unit if there is only one.
-	 * <p>This is mainly intended for use in a Java EE 5 environment, with all
+	 * <p>This is mainly intended for use in a Java EE environment, with all
 	 * lookup driven by the standard JPA annotations, and all EntityManager
 	 * references obtained from JNDI. No separate EntityManagerFactory bean
 	 * definitions are necessary in such a scenario, and all EntityManager
-	 * handling is done by the Java EE 5 server itself.
+	 * handling is done by the Java EE server itself.
 	 */
 	public void setPersistenceContexts(Map<String, String> persistenceContexts) {
 		this.persistenceContexts = persistenceContexts;
@@ -279,11 +280,11 @@ public class PersistenceAnnotationBeanPostProcessor
 	 * for the {@link #setDefaultPersistenceUnitName default persistence unit}
 	 * will be taken (by default, the value mapped to the empty String),
 	 * or simply the single persistence unit if there is only one.
-	 * <p>This is mainly intended for use in a Java EE 5 environment, with all
+	 * <p>This is mainly intended for use in a Java EE environment, with all
 	 * lookup driven by the standard JPA annotations, and all EntityManager
 	 * references obtained from JNDI. No separate EntityManagerFactory bean
 	 * definitions are necessary in such a scenario, and all EntityManager
-	 * handling is done by the Java EE 5 server itself.
+	 * handling is done by the Java EE server itself.
 	 */
 	public void setExtendedPersistenceContexts(Map<String, String> extendedPersistenceContexts) {
 		this.extendedPersistenceContexts = extendedPersistenceContexts;
@@ -376,55 +377,67 @@ public class PersistenceAnnotationBeanPostProcessor
 
 
 	private InjectionMetadata findPersistenceMetadata(String beanName, final Class<?> clazz) {
-		// Quick check on the concurrent map first, with minimal locking.
 		// Fall back to class name as cache key, for backwards compatibility with custom callers.
 		String cacheKey = (StringUtils.hasLength(beanName) ? beanName : clazz.getName());
+		// Quick check on the concurrent map first, with minimal locking.
 		InjectionMetadata metadata = this.injectionMetadataCache.get(cacheKey);
 		if (InjectionMetadata.needsRefresh(metadata, clazz)) {
 			synchronized (this.injectionMetadataCache) {
 				metadata = this.injectionMetadataCache.get(cacheKey);
 				if (InjectionMetadata.needsRefresh(metadata, clazz)) {
-					LinkedList<InjectionMetadata.InjectedElement> elements = new LinkedList<InjectionMetadata.InjectedElement>();
-					Class<?> targetClass = clazz;
-
-					do {
-						LinkedList<InjectionMetadata.InjectedElement> currElements = new LinkedList<InjectionMetadata.InjectedElement>();
-						for (Field field : targetClass.getDeclaredFields()) {
-							PersistenceContext pc = field.getAnnotation(PersistenceContext.class);
-							PersistenceUnit pu = field.getAnnotation(PersistenceUnit.class);
-							if (pc != null || pu != null) {
-								if (Modifier.isStatic(field.getModifiers())) {
-									throw new IllegalStateException("Persistence annotations are not supported on static fields");
-								}
-								currElements.add(new PersistenceElement(field, null));
-							}
-						}
-						for (Method method : targetClass.getDeclaredMethods()) {
-							PersistenceContext pc = method.getAnnotation(PersistenceContext.class);
-							PersistenceUnit pu = method.getAnnotation(PersistenceUnit.class);
-							if ((pc != null || pu != null) &&
-									method.equals(ClassUtils.getMostSpecificMethod(method, clazz))) {
-								if (Modifier.isStatic(method.getModifiers())) {
-									throw new IllegalStateException("Persistence annotations are not supported on static methods");
-								}
-								if (method.getParameterTypes().length != 1) {
-									throw new IllegalStateException("Persistence annotation requires a single-arg method: " + method);
-								}
-								PropertyDescriptor pd = BeanUtils.findPropertyForMethod(method);
-								currElements.add(new PersistenceElement(method, pd));
-							}
-						}
-						elements.addAll(0, currElements);
-						targetClass = targetClass.getSuperclass();
+					try {
+						metadata = buildPersistenceMetadata(clazz);
+						this.injectionMetadataCache.put(cacheKey, metadata);
 					}
-					while (targetClass != null && targetClass != Object.class);
-
-					metadata = new InjectionMetadata(clazz, elements);
-					this.injectionMetadataCache.put(cacheKey, metadata);
+					catch (NoClassDefFoundError err) {
+						throw new IllegalStateException("Failed to introspect bean class [" + clazz.getName() +
+								"] for persistence metadata: could not find class that it depends on", err);
+					}
 				}
 			}
 		}
 		return metadata;
+	}
+
+	private InjectionMetadata buildPersistenceMetadata(Class<?> clazz) {
+		LinkedList<InjectionMetadata.InjectedElement> elements = new LinkedList<InjectionMetadata.InjectedElement>();
+		Class<?> targetClass = clazz;
+
+		do {
+			LinkedList<InjectionMetadata.InjectedElement> currElements = new LinkedList<InjectionMetadata.InjectedElement>();
+			for (Field field : targetClass.getDeclaredFields()) {
+				if (field.isAnnotationPresent(PersistenceContext.class) ||
+						field.isAnnotationPresent(PersistenceUnit.class)) {
+					if (Modifier.isStatic(field.getModifiers())) {
+						throw new IllegalStateException("Persistence annotations are not supported on static fields");
+					}
+					currElements.add(new PersistenceElement(field, field, null));
+				}
+			}
+			for (Method method : targetClass.getDeclaredMethods()) {
+				Method bridgedMethod = BridgeMethodResolver.findBridgedMethod(method);
+				if (!BridgeMethodResolver.isVisibilityBridgeMethodPair(method, bridgedMethod)) {
+					continue;
+				}
+				if ((bridgedMethod.isAnnotationPresent(PersistenceContext.class) ||
+						bridgedMethod.isAnnotationPresent(PersistenceUnit.class)) &&
+						method.equals(ClassUtils.getMostSpecificMethod(method, clazz))) {
+					if (Modifier.isStatic(method.getModifiers())) {
+						throw new IllegalStateException("Persistence annotations are not supported on static methods");
+					}
+					if (method.getParameterTypes().length != 1) {
+						throw new IllegalStateException("Persistence annotation requires a single-arg method: " + method);
+					}
+					PropertyDescriptor pd = BeanUtils.findPropertyForMethod(bridgedMethod, clazz);
+					currElements.add(new PersistenceElement(method, bridgedMethod, pd));
+				}
+			}
+			elements.addAll(0, currElements);
+			targetClass = targetClass.getSuperclass();
+		}
+		while (targetClass != null && targetClass != Object.class);
+
+		return new InjectionMetadata(clazz, elements);
 	}
 
 	/**
@@ -611,9 +624,8 @@ public class PersistenceAnnotationBeanPostProcessor
 
 		private Properties properties;
 
-		public PersistenceElement(Member member, PropertyDescriptor pd) {
+		public PersistenceElement(Member member, AnnotatedElement ae, PropertyDescriptor pd) {
 			super(member, pd);
-			AnnotatedElement ae = (AnnotatedElement) member;
 			PersistenceContext pc = ae.getAnnotation(PersistenceContext.class);
 			PersistenceUnit pu = ae.getAnnotation(PersistenceUnit.class);
 			Class<?> resourceType = EntityManager.class;
@@ -632,8 +644,8 @@ public class PersistenceAnnotationBeanPostProcessor
 				}
 				this.unitName = pc.unitName();
 				this.type = pc.type();
-				this.synchronizedWithTransaction = (synchronizationTypeAttribute == null ||
-						"SYNCHRONIZED".equals(ReflectionUtils.invokeMethod(synchronizationTypeAttribute, pc).toString()));
+				this.synchronizedWithTransaction = (synchronizationAttribute == null ||
+						"SYNCHRONIZED".equals(ReflectionUtils.invokeMethod(synchronizationAttribute, pc).toString()));
 				this.properties = properties;
 			}
 			else {

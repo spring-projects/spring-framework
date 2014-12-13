@@ -17,12 +17,15 @@
 package org.springframework.web.socket.sockjs.support;
 
 import java.io.IOException;
-
+import java.util.Arrays;
+import java.util.List;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 
+import static org.junit.Assert.assertEquals;
 import org.junit.Before;
 import org.junit.Test;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
@@ -40,6 +43,7 @@ import static org.mockito.BDDMockito.*;
  * Test fixture for {@link AbstractSockJsService}.
  *
  * @author Rossen Stoyanchev
+ * @author Sebastien Deleuze
  */
 public class SockJsServiceTests extends AbstractHttpRequestTests {
 
@@ -54,6 +58,7 @@ public class SockJsServiceTests extends AbstractHttpRequestTests {
 		super.setUp();
 		this.service = new TestSockJsService(new ThreadPoolTaskScheduler());
 	}
+
 
 	@Test
 	public void validateRequest() throws Exception {
@@ -76,13 +81,13 @@ public class SockJsServiceTests extends AbstractHttpRequestTests {
 
 	@Test
 	public void handleInfoGet() throws Exception {
-
 		resetResponseAndHandleRequest("GET", "/echo/info", HttpStatus.OK);
 
 		assertEquals("application/json;charset=UTF-8", this.servletResponse.getContentType());
-		assertEquals("*", this.servletResponse.getHeader("Access-Control-Allow-Origin"));
-		assertEquals("true", this.servletResponse.getHeader("Access-Control-Allow-Credentials"));
 		assertEquals("no-store, no-cache, must-revalidate, max-age=0", this.servletResponse.getHeader("Cache-Control"));
+		assertNull(this.servletResponse.getHeader("Access-Control-Allow-Origin"));
+		assertNull(this.servletResponse.getHeader("Access-Control-Allow-Credentials"));
+		assertNull(this.servletResponse.getHeader("Vary"));
 
 		String body = this.servletResponse.getContentAsString();
 		assertEquals("{\"entropy\"", body.substring(0, body.indexOf(':')));
@@ -96,11 +101,50 @@ public class SockJsServiceTests extends AbstractHttpRequestTests {
 		body = this.servletResponse.getContentAsString();
 		assertEquals(",\"origins\":[\"*:*\"],\"cookie_needed\":false,\"websocket\":false}",
 				body.substring(body.indexOf(',')));
+
+		this.service.setAllowedOrigins(Arrays.asList("http://mydomain1.com"));
+		resetResponseAndHandleRequest("GET", "/echo/info", HttpStatus.FORBIDDEN);
+		assertNull(this.servletResponse.getHeader("Access-Control-Allow-Origin"));
+		assertNull(this.servletResponse.getHeader("Access-Control-Allow-Credentials"));
+		assertNull(this.servletResponse.getHeader("Vary"));
 	}
 
-	// SPR-11443
+	@Test  // SPR-12226
+	public void handleInfoGetWithOrigin() throws Exception {
+		setOrigin("http://mydomain2.com");
+		resetResponseAndHandleRequest("GET", "/echo/info", HttpStatus.OK);
 
-	@Test
+		assertEquals("application/json;charset=UTF-8", this.servletResponse.getContentType());
+		assertEquals("no-store, no-cache, must-revalidate, max-age=0", this.servletResponse.getHeader("Cache-Control"));
+		assertEquals("http://mydomain2.com", this.servletResponse.getHeader("Access-Control-Allow-Origin"));
+		assertEquals("true", this.servletResponse.getHeader("Access-Control-Allow-Credentials"));
+		assertEquals("Origin", this.servletResponse.getHeader("Vary"));
+
+		String body = this.servletResponse.getContentAsString();
+		assertEquals("{\"entropy\"", body.substring(0, body.indexOf(':')));
+		assertEquals(",\"origins\":[\"*:*\"],\"cookie_needed\":true,\"websocket\":true}",
+				body.substring(body.indexOf(',')));
+
+		this.service.setAllowedOrigins(null);
+		resetResponseAndHandleRequest("GET", "/echo/info", HttpStatus.FORBIDDEN);
+		assertNull(this.servletResponse.getHeader("Access-Control-Allow-Origin"));
+		assertNull(this.servletResponse.getHeader("Access-Control-Allow-Credentials"));
+		assertNull(this.servletResponse.getHeader("Vary"));
+
+		this.service.setAllowedOrigins(Arrays.asList("http://mydomain1.com"));
+		resetResponseAndHandleRequest("GET", "/echo/info", HttpStatus.FORBIDDEN);
+		assertNull(this.servletResponse.getHeader("Access-Control-Allow-Origin"));
+		assertNull(this.servletResponse.getHeader("Access-Control-Allow-Credentials"));
+		assertNull(this.servletResponse.getHeader("Vary"));
+
+		this.service.setAllowedOrigins(Arrays.asList("http://mydomain1.com", "http://mydomain2.com", "http://mydomain3.com"));
+		resetResponseAndHandleRequest("GET", "/echo/info", HttpStatus.OK);
+		assertEquals("http://mydomain2.com", this.servletResponse.getHeader("Access-Control-Allow-Origin"));
+		assertEquals("true", this.servletResponse.getHeader("Access-Control-Allow-Credentials"));
+		assertEquals("Origin", this.servletResponse.getHeader("Vary"));
+	}
+
+	@Test  // SPR-11443
 	public void handleInfoGetCorsFilter() throws Exception {
 
 		// Simulate scenario where Filter would have already set CORS headers
@@ -111,9 +155,7 @@ public class SockJsServiceTests extends AbstractHttpRequestTests {
 		assertEquals("foobar:123", this.servletResponse.getHeader("Access-Control-Allow-Origin"));
 	}
 
-	// SPR-11919
-
-	@Test
+	@Test  // SPR-11919
 	public void handleInfoGetWildflyNPE() throws Exception {
 		HttpServletResponse mockResponse = mock(HttpServletResponse.class);
 		ServletOutputStream ous = mock(ServletOutputStream.class);
@@ -128,42 +170,126 @@ public class SockJsServiceTests extends AbstractHttpRequestTests {
 
 	@Test
 	public void handleInfoOptions() throws Exception {
-
 		this.servletRequest.addHeader("Access-Control-Request-Headers", "Last-Modified");
-
 		resetResponseAndHandleRequest("OPTIONS", "/echo/info", HttpStatus.NO_CONTENT);
 		this.response.flush();
 
-		assertEquals("*", this.servletResponse.getHeader("Access-Control-Allow-Origin"));
+		assertNull(this.servletResponse.getHeader("Access-Control-Allow-Origin"));
+		assertNull(this.servletResponse.getHeader("Access-Control-Allow-Credentials"));
+		assertNull(this.servletResponse.getHeader("Access-Control-Allow-Headers"));
+		assertNull(this.servletResponse.getHeader("Access-Control-Allow-Methods"));
+		assertNull(this.servletResponse.getHeader("Access-Control-Max-Age"));
+		assertEquals("Origin", this.servletResponse.getHeader("Vary"));
+
+		this.service.setAllowedOrigins(Arrays.asList("http://mydomain1.com"));
+		resetResponseAndHandleRequest("OPTIONS", "/echo/info", HttpStatus.FORBIDDEN);
+		assertNull(this.servletResponse.getHeader("Access-Control-Allow-Origin"));
+		assertNull(this.servletResponse.getHeader("Access-Control-Allow-Credentials"));
+		assertNull(this.servletResponse.getHeader("Access-Control-Allow-Headers"));
+		assertNull(this.servletResponse.getHeader("Access-Control-Allow-Methods"));
+		assertNull(this.servletResponse.getHeader("Access-Control-Max-Age"));
+		assertNull(this.servletResponse.getHeader("Vary"));
+	}
+
+	@Test  // SPR-12226
+	public void handleInfoOptionsWithOrigin() throws Exception {
+		setOrigin("http://mydomain2.com");
+		this.servletRequest.addHeader("Access-Control-Request-Headers", "Last-Modified");
+		resetResponseAndHandleRequest("OPTIONS", "/echo/info", HttpStatus.NO_CONTENT);
+		this.response.flush();
+		assertEquals("http://mydomain2.com", this.servletResponse.getHeader("Access-Control-Allow-Origin"));
 		assertEquals("true", this.servletResponse.getHeader("Access-Control-Allow-Credentials"));
 		assertEquals("Last-Modified", this.servletResponse.getHeader("Access-Control-Allow-Headers"));
 		assertEquals("OPTIONS, GET", this.servletResponse.getHeader("Access-Control-Allow-Methods"));
 		assertEquals("31536000", this.servletResponse.getHeader("Access-Control-Max-Age"));
+		assertEquals("Origin", this.servletResponse.getHeader("Vary"));
+
+		this.service.setAllowedOrigins(null);
+		resetResponseAndHandleRequest("OPTIONS", "/echo/info", HttpStatus.FORBIDDEN);
+		this.response.flush();
+		assertNull(this.servletResponse.getHeader("Access-Control-Allow-Origin"));
+		assertNull(this.servletResponse.getHeader("Access-Control-Allow-Credentials"));
+		assertNull(this.servletResponse.getHeader("Access-Control-Allow-Headers"));
+		assertNull(this.servletResponse.getHeader("Access-Control-Allow-Methods"));
+		assertNull(this.servletResponse.getHeader("Access-Control-Max-Age"));
+		assertNull(this.servletResponse.getHeader("Vary"));
+
+		this.service.setAllowedOrigins(Arrays.asList("http://mydomain1.com"));
+		resetResponseAndHandleRequest("OPTIONS", "/echo/info", HttpStatus.FORBIDDEN);
+		this.response.flush();
+		assertNull(this.servletResponse.getHeader("Access-Control-Allow-Origin"));
+		assertNull(this.servletResponse.getHeader("Access-Control-Allow-Credentials"));
+		assertNull(this.servletResponse.getHeader("Access-Control-Allow-Headers"));
+		assertNull(this.servletResponse.getHeader("Access-Control-Allow-Methods"));
+		assertNull(this.servletResponse.getHeader("Access-Control-Max-Age"));
+		assertNull(this.servletResponse.getHeader("Vary"));
+
+		this.service.setAllowedOrigins(Arrays.asList("http://mydomain1.com", "http://mydomain2.com", "http://mydomain3.com"));
+		resetResponseAndHandleRequest("OPTIONS", "/echo/info", HttpStatus.NO_CONTENT);
+		this.response.flush();
+		assertEquals("http://mydomain2.com", this.servletResponse.getHeader("Access-Control-Allow-Origin"));
+		assertEquals("true", this.servletResponse.getHeader("Access-Control-Allow-Credentials"));
+		assertEquals("Last-Modified", this.servletResponse.getHeader("Access-Control-Allow-Headers"));
+		assertEquals("OPTIONS, GET", this.servletResponse.getHeader("Access-Control-Allow-Methods"));
+		assertEquals("31536000", this.servletResponse.getHeader("Access-Control-Max-Age"));
+		assertEquals("Origin", this.servletResponse.getHeader("Vary"));
+	}
+
+	@Test  // SPR-12283
+	public void handleInfoOptionsWithOriginAndCorsDisabled() throws Exception {
+		setOrigin("http://mydomain2.com");
+		this.service.setSuppressCors(true);
+
+		this.servletRequest.addHeader("Access-Control-Request-Headers", "Last-Modified");
+		resetResponseAndHandleRequest("OPTIONS", "/echo/info", HttpStatus.NO_CONTENT);
+		this.response.flush();
+		assertNull(this.servletResponse.getHeader("Access-Control-Allow-Origin"));
+		assertNull(this.servletResponse.getHeader("Access-Control-Allow-Credentials"));
+		assertNull(this.servletResponse.getHeader("Access-Control-Allow-Headers"));
+		assertNull(this.servletResponse.getHeader("Access-Control-Allow-Methods"));
+		assertNull(this.servletResponse.getHeader("Access-Control-Max-Age"));
+		assertEquals("Origin", this.servletResponse.getHeader("Vary"));
+
+		this.service.setAllowedOrigins(Arrays.asList("http://mydomain1.com"));
+		resetResponseAndHandleRequest("OPTIONS", "/echo/info", HttpStatus.FORBIDDEN);
+		this.response.flush();
+		assertNull(this.servletResponse.getHeader("Access-Control-Allow-Origin"));
+		assertNull(this.servletResponse.getHeader("Access-Control-Allow-Credentials"));
+		assertNull(this.servletResponse.getHeader("Access-Control-Allow-Headers"));
+		assertNull(this.servletResponse.getHeader("Access-Control-Allow-Methods"));
+		assertNull(this.servletResponse.getHeader("Access-Control-Max-Age"));
+		assertNull(this.servletResponse.getHeader("Vary"));
+
+		this.service.setAllowedOrigins(Arrays.asList("http://mydomain1.com", "http://mydomain2.com", "http://mydomain3.com"));
+		resetResponseAndHandleRequest("OPTIONS", "/echo/info", HttpStatus.NO_CONTENT);
+		this.response.flush();
+		assertNull(this.servletResponse.getHeader("Access-Control-Allow-Origin"));
+		assertNull(this.servletResponse.getHeader("Access-Control-Allow-Credentials"));
+		assertNull(this.servletResponse.getHeader("Access-Control-Allow-Headers"));
+		assertNull(this.servletResponse.getHeader("Access-Control-Allow-Methods"));
+		assertNull(this.servletResponse.getHeader("Access-Control-Max-Age"));
+		assertEquals("Origin", this.servletResponse.getHeader("Vary"));
 	}
 
 	@Test
 	public void handleIframeRequest() throws Exception {
-
 		resetResponseAndHandleRequest("GET", "/echo/iframe.html", HttpStatus.OK);
 
 		assertEquals("text/html;charset=UTF-8", this.servletResponse.getContentType());
 		assertTrue(this.servletResponse.getContentAsString().startsWith("<!DOCTYPE html>\n"));
-		assertEquals(496, this.servletResponse.getContentLength());
+		assertEquals(490, this.servletResponse.getContentLength());
 		assertEquals("public, max-age=31536000", this.response.getHeaders().getCacheControl());
-		assertEquals("\"0da1ed070012f304e47b83c81c48ad620\"", this.response.getHeaders().getETag());
+		assertEquals("\"06b486b3208b085d9e3220f456a6caca4\"", this.response.getHeaders().getETag());
 	}
 
 	@Test
 	public void handleIframeRequestNotModified() throws Exception {
-
-		this.servletRequest.addHeader("If-None-Match", "\"0da1ed070012f304e47b83c81c48ad620\"");
-
+		this.servletRequest.addHeader("If-None-Match", "\"06b486b3208b085d9e3220f456a6caca4\"");
 		resetResponseAndHandleRequest("GET", "/echo/iframe.html", HttpStatus.NOT_MODIFIED);
 	}
 
 	@Test
 	public void handleRawWebSocketRequest() throws Exception {
-
 		resetResponseAndHandleRequest("GET", "/echo", HttpStatus.OK);
 		assertEquals("Welcome to SockJS!\n", this.servletResponse.getContentAsString());
 
@@ -174,12 +300,12 @@ public class SockJsServiceTests extends AbstractHttpRequestTests {
 
 	@Test
 	public void handleEmptyContentType() throws Exception {
-
-		servletRequest.setContentType("");
+		this.servletRequest.setContentType("");
 		resetResponseAndHandleRequest("GET", "/echo/info", HttpStatus.OK);
 
 		assertEquals("Invalid/empty content should have been ignored", 200, this.servletResponse.getStatus());
 	}
+
 
 	private void resetResponseAndHandleRequest(String httpMethod, String uri, HttpStatus httpStatus) throws IOException {
 		resetResponse();
@@ -211,14 +337,12 @@ public class SockJsServiceTests extends AbstractHttpRequestTests {
 		@Override
 		protected void handleRawWebSocketRequest(ServerHttpRequest req, ServerHttpResponse res,
 				WebSocketHandler handler) throws IOException {
-
 			this.handler = handler;
 		}
 
 		@Override
 		protected void handleTransportRequest(ServerHttpRequest req, ServerHttpResponse res, WebSocketHandler handler,
 				String sessionId, String transport) throws SockJsException {
-
 			this.sessionId = sessionId;
 			this.transport = transport;
 			this.handler = handler;

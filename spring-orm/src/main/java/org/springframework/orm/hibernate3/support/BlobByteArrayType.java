@@ -21,7 +21,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.Arrays;
-
 import javax.transaction.TransactionManager;
 
 import org.springframework.jdbc.support.lob.LobCreator;

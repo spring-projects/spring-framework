@@ -16,6 +16,8 @@
 
 package org.springframework.expression.spel.ast;
 
+import java.lang.reflect.Modifier;
+
 import org.springframework.asm.MethodVisitor;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.TypedValue;
@@ -71,7 +73,17 @@ public class VariableReference extends SpelNodeImpl {
 			return result;
 		}
 		TypedValue result = state.lookupVariable(this.name);
-		this.exitTypeDescriptor = CodeFlow.toDescriptorFromObject(result.getValue());
+		Object value = result.getValue();
+		if (value == null || !Modifier.isPublic(value.getClass().getModifiers())) {
+			// If the type is not public then when generateCode produces a checkcast to it
+			// then an IllegalAccessError will occur.
+			// If resorting to Object isn't sufficient, the hierarchy could be traversed for 
+			// the first public type.
+			this.exitTypeDescriptor = "Ljava/lang/Object";
+		}
+		else {
+			this.exitTypeDescriptor = CodeFlow.toDescriptorFromObject(value);
+		}
 		// a null value will mean either the value was null or the variable was not found
 		return result;
 	}
@@ -127,11 +139,11 @@ public class VariableReference extends SpelNodeImpl {
 
 	@Override
 	public boolean isCompilable() {
-		return getExitDescriptor()!=null;
+		return this.exitTypeDescriptor!=null;
 	}
 	
 	@Override
-	public void generateCode(MethodVisitor mv, CodeFlow codeflow) {
+	public void generateCode(MethodVisitor mv, CodeFlow cf) {
 		if (this.name.equals(ROOT)) {
 			mv.visitVarInsn(ALOAD,1);
 		}
@@ -140,8 +152,8 @@ public class VariableReference extends SpelNodeImpl {
 			mv.visitLdcInsn(name);
 			mv.visitMethodInsn(INVOKEINTERFACE, "org/springframework/expression/EvaluationContext", "lookupVariable", "(Ljava/lang/String;)Ljava/lang/Object;",true);
 		}
-		CodeFlow.insertCheckCast(mv,getExitDescriptor());
-		codeflow.pushDescriptor(getExitDescriptor());
+		CodeFlow.insertCheckCast(mv,this.exitTypeDescriptor);
+		cf.pushDescriptor(this.exitTypeDescriptor);
 	}
 
 

@@ -16,22 +16,15 @@
 
 package org.springframework.expression.spel;
 
-import static org.hamcrest.Matchers.equalTo;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 import org.junit.Test;
+
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.expression.AccessException;
 import org.springframework.expression.BeanResolver;
@@ -48,6 +41,9 @@ import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.expression.spel.support.StandardTypeLocator;
 import org.springframework.expression.spel.testresources.TestPerson;
+
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
 
 /**
  * Tests the evaluation of real expressions in a real context.
@@ -468,6 +464,35 @@ public class EvaluationTests extends AbstractExpressionTests {
 		// use cached QualifiedIdentifier:
 		assertEquals("T(java.lang.String)", expr.toStringAST());
 		assertEquals(String.class, expr.getValue(Class.class));
+	}
+	
+	@Test
+	public void operatorVariants() throws Exception {
+		SpelExpression expr = (SpelExpression)parser.parseExpression("#a < #b");
+		EvaluationContext ctx = new StandardEvaluationContext();
+		ctx.setVariable("a", (short)3);
+		ctx.setVariable("b", (short)6);
+		assertTrue(expr.getValue(ctx, Boolean.class));
+		ctx.setVariable("b", (byte)6);
+		assertTrue(expr.getValue(ctx, Boolean.class));
+		ctx.setVariable("a", (byte)9);
+		ctx.setVariable("b", (byte)6);
+		assertFalse(expr.getValue(ctx, Boolean.class));
+		ctx.setVariable("a", 10L);
+		ctx.setVariable("b", (short)30);
+		assertTrue(expr.getValue(ctx, Boolean.class));
+		ctx.setVariable("a", (byte)3);
+		ctx.setVariable("b", (short)30);
+		assertTrue(expr.getValue(ctx, Boolean.class));
+		ctx.setVariable("a", (byte)3);
+		ctx.setVariable("b", 30L);
+		assertTrue(expr.getValue(ctx, Boolean.class));
+		ctx.setVariable("a", (byte)3);
+		ctx.setVariable("b", 30f);
+		assertTrue(expr.getValue(ctx, Boolean.class));
+		ctx.setVariable("a", new BigInteger("10"));
+		ctx.setVariable("b", new BigInteger("20"));
+		assertTrue(expr.getValue(ctx, Boolean.class));
 	}
 
 	@Test

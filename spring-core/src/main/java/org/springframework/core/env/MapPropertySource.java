@@ -24,6 +24,7 @@ import org.springframework.util.StringUtils;
  * {@link PropertySource} that reads keys and values from a {@code Map} object.
  *
  * @author Chris Beams
+ * @author Juergen Hoeller
  * @since 3.1
  * @see PropertiesPropertySource
  */
@@ -33,9 +34,15 @@ public class MapPropertySource extends EnumerablePropertySource<Map<String, Obje
 		super(name, source);
 	}
 
+
 	@Override
 	public Object getProperty(String name) {
 		return this.source.get(name);
+	}
+
+	@Override
+	public boolean containsProperty(String name) {
+		return this.source.containsKey(name);
 	}
 
 	@Override

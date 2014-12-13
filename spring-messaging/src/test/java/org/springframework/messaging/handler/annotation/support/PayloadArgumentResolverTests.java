@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,8 +16,10 @@
 
 package org.springframework.messaging.handler.annotation.support;
 
-import static org.junit.Assert.*;
-
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 import java.lang.reflect.Method;
 import java.util.Locale;
 
@@ -37,6 +39,8 @@ import org.springframework.util.Assert;
 import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
 import org.springframework.validation.annotation.Validated;
+
+import static org.junit.Assert.*;
 
 /**
  * Test fixture for {@link PayloadArgumentResolver}.
@@ -72,10 +76,8 @@ public class PayloadArgumentResolverTests {
 
 	@Before
 	public void setup() throws Exception {
-
 		this.resolver = new PayloadArgumentResolver(new StringMessageConverter(), testValidator());
-
-		payloadMethod = PayloadArgumentResolverTests.class.getDeclaredMethod("handleMessage",
+		this.payloadMethod = PayloadArgumentResolverTests.class.getDeclaredMethod("handleMessage",
 				String.class, String.class, Locale.class, String.class, String.class, String.class, String.class);
 
 		this.paramAnnotated = getMethodParameter(this.payloadMethod, 0);
@@ -115,7 +117,6 @@ public class PayloadArgumentResolverTests {
 
 	@Test
 	public void resolveNotRequired() throws Exception {
-
 		Message<?> emptyByteArrayMessage = MessageBuilder.withPayload(new byte[0]).build();
 		assertNull(this.resolver.resolveArgument(this.paramAnnotatedNotRequired, emptyByteArrayMessage));
 
@@ -168,14 +169,12 @@ public class PayloadArgumentResolverTests {
 
 	@Test
 	public void resolveNonAnnotatedParameter() throws Exception {
-
 		Message<?> notEmptyMessage = MessageBuilder.withPayload("ABC".getBytes()).build();
 		assertEquals("ABC", this.resolver.resolveArgument(this.paramNotAnnotated, notEmptyMessage));
 
 		Message<?> emptyStringMessage = MessageBuilder.withPayload("").build();
 		thrown.expect(MethodArgumentNotValidException.class);
 		this.resolver.resolveArgument(this.paramValidated, emptyStringMessage);
-
 	}
 
 	@Test
@@ -188,8 +187,8 @@ public class PayloadArgumentResolverTests {
 		assertEquals("invalidValue", this.resolver.resolveArgument(this.paramValidatedNotAnnotated, message));
 	}
 
-	private Validator testValidator() {
 
+	private Validator testValidator() {
 		return new Validator() {
 			@Override
 			public boolean supports(Class<?> clazz) {
@@ -216,9 +215,16 @@ public class PayloadArgumentResolverTests {
 			@Payload(required=false) String paramNotRequired,
 			@Payload(required=true) Locale nonConvertibleRequiredParam,
 			@Payload("foo.bar") String paramWithSpelExpression,
-			@Validated @Payload String validParam,
+			@MyValid @Payload String validParam,
 			@Validated String validParamNotAnnotated,
 			String paramNotAnnotated) {
+	}
+
+
+	@Validated
+	@Target({ElementType.PARAMETER})
+	@Retention(RetentionPolicy.RUNTIME)
+	public @interface MyValid {
 	}
 
 }

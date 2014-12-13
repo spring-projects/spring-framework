@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -21,7 +21,6 @@ import java.net.ServerSocket;
 import java.util.Random;
 import java.util.SortedSet;
 import java.util.TreeSet;
-
 import javax.net.ServerSocketFactory;
 
 /**
@@ -37,7 +36,7 @@ import javax.net.ServerSocketFactory;
  * @author Gunnar Hillert
  * @since 4.0
  */
-public abstract class SocketUtils {
+public class SocketUtils {
 
 	/**
 	 * The default minimum value for port ranges used when finding an available
@@ -194,7 +193,6 @@ public abstract class SocketUtils {
 	private static enum SocketType {
 
 		TCP {
-
 			@Override
 			protected boolean isPortAvailable(int port) {
 				try {
@@ -209,7 +207,6 @@ public abstract class SocketUtils {
 		},
 
 		UDP {
-
 			@Override
 			protected boolean isPortAvailable(int port) {
 				try {

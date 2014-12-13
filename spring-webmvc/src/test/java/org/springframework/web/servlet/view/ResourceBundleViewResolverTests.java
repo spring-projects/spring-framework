@@ -19,7 +19,6 @@ package org.springframework.web.servlet.view;
 import java.util.Locale;
 import java.util.Map;
 import java.util.MissingResourceException;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 

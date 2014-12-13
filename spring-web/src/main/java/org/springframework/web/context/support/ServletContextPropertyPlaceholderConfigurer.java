@@ -17,7 +17,6 @@
 package org.springframework.web.context.support;
 
 import java.util.Properties;
-
 import javax.servlet.ServletContext;
 
 import org.springframework.beans.factory.config.PropertyPlaceholderConfigurer;

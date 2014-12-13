@@ -19,9 +19,9 @@ package org.springframework.mail;
 import java.io.Serializable;
 import java.util.Date;
 
+import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
-import org.springframework.util.Assert;
 
 /**
  * Models a simple mail message, including data such as the from, to, cc, subject, and text fields.

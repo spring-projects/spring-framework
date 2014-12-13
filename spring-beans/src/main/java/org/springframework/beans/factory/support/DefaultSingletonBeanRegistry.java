@@ -18,6 +18,7 @@ package org.springframework.beans.factory.support;
 
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -441,9 +442,17 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 	 * dependent on the given bean or on any of its transitive dependencies.
 	 * @param beanName the name of the bean to check
 	 * @param dependentBeanName the name of the dependent bean
+	 * @since 4.0
 	 */
 	protected boolean isDependent(String beanName, String dependentBeanName) {
+		return isDependent(beanName, dependentBeanName, null);
+	}
+
+	private boolean isDependent(String beanName, String dependentBeanName, Set<String> alreadySeen) {
 		String canonicalName = canonicalName(beanName);
+		if (alreadySeen != null && alreadySeen.contains(beanName)) {
+			return false;
+		}
 		Set<String> dependentBeans = this.dependentBeanMap.get(canonicalName);
 		if (dependentBeans == null) {
 			return false;
@@ -452,7 +461,11 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 			return true;
 		}
 		for (String transitiveDependency : dependentBeans) {
-			if (isDependent(transitiveDependency, dependentBeanName)) {
+			if (alreadySeen == null) {
+				alreadySeen = new HashSet<String>();
+			}
+			alreadySeen.add(beanName);
+			if (isDependent(transitiveDependency, dependentBeanName, alreadySeen)) {
 				return true;
 			}
 		}

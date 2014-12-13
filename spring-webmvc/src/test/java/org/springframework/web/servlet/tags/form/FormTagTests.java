@@ -17,7 +17,6 @@
 package org.springframework.web.servlet.tags.form;
 
 import java.util.Collections;
-
 import javax.servlet.jsp.PageContext;
 import javax.servlet.jsp.tagext.Tag;
 

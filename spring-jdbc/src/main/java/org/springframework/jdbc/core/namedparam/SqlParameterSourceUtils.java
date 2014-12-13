@@ -18,6 +18,7 @@ package org.springframework.jdbc.core.namedparam;
 
 import java.util.HashMap;
 import java.util.Map;
+
 import org.springframework.jdbc.core.SqlParameterValue;
 
 /**

@@ -18,7 +18,9 @@ package org.springframework.web.socket.sockjs.support;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -51,6 +53,7 @@ import org.springframework.web.socket.sockjs.SockJsService;
  * etc). Sub-classes must handle session URLs (i.e. transport-specific requests).
  *
  * @author Rossen Stoyanchev
+ * @author Sebastien Deleuze
  * @since 4.0
  */
 public abstract class AbstractSockJsService implements SockJsService {
@@ -68,7 +71,7 @@ public abstract class AbstractSockJsService implements SockJsService {
 
 	private String name = "SockJSService@" + ObjectUtils.getIdentityHexString(this);
 
-	private String clientLibraryUrl = "https://d1fxtkz8shb9d2.cloudfront.net/sockjs-0.3.4.min.js";
+	private String clientLibraryUrl = "https://cdn.jsdelivr.net/sockjs/0.3.4/sockjs.min.js";
 
 	private int streamBytesLimit = 128 * 1024;
 
@@ -81,6 +84,10 @@ public abstract class AbstractSockJsService implements SockJsService {
 	private int httpMessageCacheSize = 100;
 
 	private boolean webSocketEnabled = true;
+
+	private final List<String> allowedOrigins = new ArrayList<String>(Arrays.asList("*"));
+
+	private boolean suppressCors = false;
 
 
 	public AbstractSockJsService(TaskScheduler scheduler) {
@@ -117,7 +124,7 @@ public abstract class AbstractSockJsService implements SockJsService {
 	 * server. Since the iframe needs to load the SockJS javascript client library,
 	 * this property allows specifying where to load it from.
 	 * <p>By default this is set to point to
-	 * "https://d1fxtkz8shb9d2.cloudfront.net/sockjs-0.3.4.min.js".
+	 * "https://cdn.jsdelivr.net/sockjs/0.3.4/sockjs.min.js".
 	 * However, it can also be set to point to a URL served by the application.
 	 * <p>Note that it's possible to specify a relative URL in which case the URL
 	 * must be relative to the iframe URL. For example assuming a SockJS endpoint
@@ -258,6 +265,52 @@ public abstract class AbstractSockJsService implements SockJsService {
 		return this.webSocketEnabled;
 	}
 
+	/**
+	 * Configure allowed {@code Origin} header values. This check is mostly designed for browser
+	 * clients. There is noting preventing other types of client to modify the Origin header value.
+	 *
+	 * <p>When SockJS is enabled and allowed origins are restricted, transport types that do not
+	 * use {@code Origin} headers for cross origin requests (jsonp-polling, iframe-xhr-polling,
+	 * iframe-eventsource and iframe-htmlfile) are disabled. As a consequence, IE6/IE7 won't be
+	 * supported anymore and IE8/IE9 will only be supported without cookies.
+	 *
+	 * <p>By default, all origins are allowed.
+	 *
+	 * @since 4.1.2
+	 * @see <a href="https://github.com/sockjs/sockjs-client#supported-transports-by-browser-html-served-from-http-or-https">SockJS supported transports by browser</a>
+	 */
+	public void setAllowedOrigins(List<String> allowedOrigins) {
+		this.allowedOrigins.clear();
+		if (allowedOrigins != null) {
+			this.allowedOrigins.addAll(allowedOrigins);
+		}
+	}
+
+	/**
+	 * @since 4.1.2
+	 * @see #setAllowedOrigins(List)
+	 */
+	public List<String> getAllowedOrigins() {
+		return Collections.unmodifiableList(allowedOrigins);
+	}
+
+	/**
+	 * This option can be used to disable automatic addition of CORS headers for
+	 * SockJS requests.
+	 * <p>The default value is "false".
+	 * @since 4.1.2
+	 */
+	public void setSuppressCors(boolean suppressCors) {
+		this.suppressCors = suppressCors;
+	}
+
+	/**
+	 * @since 4.1.2
+	 * @see #setSuppressCors(boolean)
+	 */
+	public boolean shouldSuppressCors() {
+		return this.suppressCors;
+	}
 
 	/**
 	 * This method determines the SockJS path and handles SockJS static URLs.
@@ -284,8 +337,8 @@ public abstract class AbstractSockJsService implements SockJsService {
 		try {
 			if (sockJsPath.equals("") || sockJsPath.equals("/")) {
 				logger.debug(requestInfo);
-				response.getHeaders().setContentType(new MediaType("text", "plain", Charset.forName("UTF-8")));
-				response.getBody().write("Welcome to SockJS!\n".getBytes("UTF-8"));
+				response.getHeaders().setContentType(new MediaType("text", "plain", UTF8_CHARSET));
+				response.getBody().write("Welcome to SockJS!\n".getBytes(UTF8_CHARSET));
 			}
 			else if (sockJsPath.equals("/info")) {
 				logger.debug(requestInfo);
@@ -360,23 +413,43 @@ public abstract class AbstractSockJsService implements SockJsService {
 	protected abstract void handleTransportRequest(ServerHttpRequest request, ServerHttpResponse response,
 			WebSocketHandler webSocketHandler, String sessionId, String transport) throws SockJsException;
 
-
-	protected void addCorsHeaders(ServerHttpRequest request, ServerHttpResponse response, HttpMethod... httpMethods) {
+	/**
+	 * Check the {@code Origin} header value and eventually call {@link #addCorsHeaders(ServerHttpRequest, ServerHttpResponse, HttpMethod...)}.
+	 * If the request origin is not allowed, the request is rejected.
+	 * @return false if the request is rejected, else true
+	 * @since 4.1.2
+	 */
+	protected boolean checkAndAddCorsHeaders(ServerHttpRequest request, ServerHttpResponse response, HttpMethod... httpMethods) {
 		HttpHeaders requestHeaders = request.getHeaders();
 		HttpHeaders responseHeaders = response.getHeaders();
+		String origin = requestHeaders.getOrigin();
+
+		if (!this.allowedOrigins.contains("*") && (origin == null || !this.allowedOrigins.contains(origin))) {
+			logger.debug("Request rejected, Origin header value " + origin + " not allowed");
+			response.setStatusCode(HttpStatus.FORBIDDEN);
+			return false;
+		}
+
+		boolean hasCorsResponseHeaders = false;
 		try {
 			// Perhaps a CORS Filter has already added this?
-			if (!CollectionUtils.isEmpty(responseHeaders.get("Access-Control-Allow-Origin"))) {
-				return;
-			}
+			hasCorsResponseHeaders = !CollectionUtils.isEmpty(responseHeaders.get("Access-Control-Allow-Origin"));
 		}
 		catch (NullPointerException npe) {
 			// See SPR-11919 and https://issues.jboss.org/browse/WFLY-3474
 		}
 
-		String origin = requestHeaders.getFirst("origin");
-		origin = (origin == null || origin.equals("null") ? "*" : origin);
-		responseHeaders.add("Access-Control-Allow-Origin", origin);
+		if (!this.suppressCors && origin != null && !hasCorsResponseHeaders) {
+			addCorsHeaders(request, response, httpMethods);
+		}
+		return true;
+	}
+
+	protected void addCorsHeaders(ServerHttpRequest request, ServerHttpResponse response, HttpMethod... httpMethods) {
+		HttpHeaders requestHeaders = request.getHeaders();
+		HttpHeaders responseHeaders = response.getHeaders();
+
+		responseHeaders.add("Access-Control-Allow-Origin", requestHeaders.getFirst("Origin"));
 		responseHeaders.add("Access-Control-Allow-Credentials", "true");
 
 		List<String> accessControllerHeaders = requestHeaders.get("Access-Control-Request-Headers");
@@ -390,11 +463,13 @@ public abstract class AbstractSockJsService implements SockJsService {
 			responseHeaders.add("Access-Control-Allow-Methods", StringUtils.arrayToDelimitedString(httpMethods, ", "));
 			responseHeaders.add("Access-Control-Max-Age", String.valueOf(ONE_YEAR));
 		}
+		responseHeaders.add(HttpHeaders.VARY, HttpHeaders.ORIGIN);
 	}
 
 	protected void addCacheHeaders(ServerHttpResponse response) {
 		response.getHeaders().setCacheControl("public, max-age=" + ONE_YEAR);
 		response.getHeaders().setExpires(new Date().getTime() + ONE_YEAR * 1000);
+		response.getHeaders().add(HttpHeaders.VARY, HttpHeaders.ORIGIN);
 	}
 
 	protected void addNoCacheHeaders(ServerHttpResponse response) {
@@ -422,16 +497,19 @@ public abstract class AbstractSockJsService implements SockJsService {
 		@Override
 		public void handle(ServerHttpRequest request, ServerHttpResponse response) throws IOException {
 			if (HttpMethod.GET.equals(request.getMethod())) {
-				response.getHeaders().setContentType(new MediaType("application", "json", UTF8_CHARSET));
-				addCorsHeaders(request, response);
 				addNoCacheHeaders(response);
-				String content = String.format(INFO_CONTENT, random.nextInt(), isSessionCookieNeeded(), isWebSocketEnabled());
-				response.getBody().write(content.getBytes());
+				if (checkAndAddCorsHeaders(request, response)) {
+					response.getHeaders().setContentType(new MediaType("application", "json", UTF8_CHARSET));
+					String content = String.format(INFO_CONTENT, random.nextInt(), isSessionCookieNeeded(), isWebSocketEnabled());
+					response.getBody().write(content.getBytes());
+				}
 			}
 			else if (HttpMethod.OPTIONS.equals(request.getMethod())) {
-				response.setStatusCode(HttpStatus.NO_CONTENT);
-				addCorsHeaders(request, response, HttpMethod.OPTIONS, HttpMethod.GET);
-				addCacheHeaders(response);
+				if (checkAndAddCorsHeaders(request, response, HttpMethod.OPTIONS,
+						HttpMethod.GET)) {
+					addCacheHeaders(response);
+					response.setStatusCode(HttpStatus.NO_CONTENT);
+				}
 			}
 			else {
 				sendMethodNotAllowed(response, HttpMethod.OPTIONS, HttpMethod.GET);

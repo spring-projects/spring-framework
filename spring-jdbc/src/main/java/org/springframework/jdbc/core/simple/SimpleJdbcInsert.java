@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ package org.springframework.jdbc.core.simple;
 
 import java.util.Arrays;
 import java.util.Map;
-
 import javax.sql.DataSource;
 
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -119,7 +118,7 @@ public class SimpleJdbcInsert extends AbstractJdbcInsert implements SimpleJdbcIn
 	}
 
 	@Override
-	public int execute(Map<String, Object> args) {
+	public int execute(Map<String, ?> args) {
 		return doExecute(args);
 	}
 
@@ -129,7 +128,7 @@ public class SimpleJdbcInsert extends AbstractJdbcInsert implements SimpleJdbcIn
 	}
 
 	@Override
-	public Number executeAndReturnKey(Map<String, Object> args) {
+	public Number executeAndReturnKey(Map<String, ?> args) {
 		return doExecuteAndReturnKey(args);
 	}
 
@@ -139,7 +138,7 @@ public class SimpleJdbcInsert extends AbstractJdbcInsert implements SimpleJdbcIn
 	}
 
 	@Override
-	public KeyHolder executeAndReturnKeyHolder(Map<String, Object> args) {
+	public KeyHolder executeAndReturnKeyHolder(Map<String, ?> args) {
 		return doExecuteAndReturnKeyHolder(args);
 	}
 
@@ -149,12 +148,12 @@ public class SimpleJdbcInsert extends AbstractJdbcInsert implements SimpleJdbcIn
 	}
 
 	@Override
-	public int[] executeBatch(Map<String, Object>[] batch) {
+	public int[] executeBatch(Map<String, ?>... batch) {
 		return doExecuteBatch(batch);
 	}
 
 	@Override
-	public int[] executeBatch(SqlParameterSource[] batch) {
+	public int[] executeBatch(SqlParameterSource... batch) {
 		return doExecuteBatch(batch);
 	}
 

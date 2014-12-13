@@ -29,12 +29,12 @@ import org.springframework.beans.factory.annotation.Configurable;
 import org.springframework.beans.factory.wiring.BeanConfigurerSupport;
 
 /**
- * Concrete aspect that uses the {@link Configurable}
- * annotation to identify which classes need autowiring.
+ * Concrete aspect that uses the {@link Configurable} annotation to identify
+ * which classes need autowiring.
  *
- * <p>The bean name to look up will be taken from the
- * {@code &#64;Configurable} annotation if specified, otherwise the
- * default bean name to look up will be the FQN of the class being configured.
+ * <p>The bean name to look up will be taken from the {@code &#64;Configurable}
+ * annotation if specified, otherwise the default bean name to look up will be
+ * the fully qualified name of the class being configured.
  *
  * @author Rod Johnson
  * @author Ramnivas Laddad

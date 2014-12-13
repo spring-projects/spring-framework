@@ -49,7 +49,7 @@ public class StreamingSockJsSession extends AbstractHttpSockJsSession {
 
 	@Override
 	protected void flushCache() throws SockJsTransportFailureException {
-		do {
+		while (!getMessageCache().isEmpty()) {
 			String message = getMessageCache().poll();
 			SockJsMessageCodec messageCodec = getSockJsServiceConfig().getMessageCodec();
 			SockJsFrame frame = SockJsFrame.messageFrame(messageCodec, message);
@@ -69,7 +69,6 @@ public class StreamingSockJsSession extends AbstractHttpSockJsSession {
 				break;
 			}
 		}
-		while (!getMessageCache().isEmpty());
 		scheduleHeartbeat();
 	}
 

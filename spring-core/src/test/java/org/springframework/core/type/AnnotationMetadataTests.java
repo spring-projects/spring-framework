@@ -244,6 +244,7 @@ public class AnnotationMetadataTests {
 		assertMultipleAnnotationsWithIdenticalAttributeNames(metadata);
 	}
 
+
 	private void assertMultipleAnnotationsWithIdenticalAttributeNames(AnnotationMetadata metadata) {
 		AnnotationAttributes attributes1 = (AnnotationAttributes) metadata.getAnnotationAttributes(
 				NamedAnnotation1.class.getName(), false);
@@ -292,6 +293,8 @@ public class AnnotationMetadataTests {
 		assertEquals("direct", method.getAnnotationAttributes(DirectAnnotation.class.getName()).get("value"));
 		List<Object> allMeta = method.getAllAnnotationAttributes(DirectAnnotation.class.getName()).get("value");
 		assertThat(new HashSet<Object>(allMeta), is(equalTo(new HashSet<Object>(Arrays.asList("direct", "meta")))));
+		allMeta = method.getAllAnnotationAttributes(DirectAnnotation.class.getName()).get("additional");
+		assertThat(new HashSet<Object>(allMeta), is(equalTo(new HashSet<Object>(Arrays.asList("direct")))));
 
 		assertTrue(metadata.isAnnotated(IsAnnotatedAnnotation.class.getName()));
 
@@ -332,6 +335,8 @@ public class AnnotationMetadataTests {
 			assertEquals("direct", metadata.getAnnotationAttributes(DirectAnnotation.class.getName()).get("value"));
 			allMeta = metadata.getAllAnnotationAttributes(DirectAnnotation.class.getName()).get("value");
 			assertThat(new HashSet<Object>(allMeta), is(equalTo(new HashSet<Object>(Arrays.asList("direct", "meta")))));
+			allMeta = metadata.getAllAnnotationAttributes(DirectAnnotation.class.getName()).get("additional");
+			assertThat(new HashSet<Object>(allMeta), is(equalTo(new HashSet<Object>(Arrays.asList("direct")))));
 		}
 		{ // perform tests with classValuesAsString = true
 			AnnotationAttributes specialAttrs = (AnnotationAttributes) metadata.getAnnotationAttributes(
@@ -407,14 +412,16 @@ public class AnnotationMetadataTests {
 		NestedAnno[] optionalArray() default { @NestedAnno(value = "optional", anEnum = SomeEnum.DEFAULT, classArray = Void.class) };
 	}
 
-	@Target({ ElementType.TYPE, ElementType.METHOD })
+	@Target({ElementType.TYPE, ElementType.METHOD})
 	@Retention(RetentionPolicy.RUNTIME)
 	public @interface DirectAnnotation {
 
 		String value();
+
+		String additional() default "direct";
 	}
 
-	@Target({ ElementType.TYPE })
+	@Target(ElementType.TYPE)
 	@Retention(RetentionPolicy.RUNTIME)
 	public @interface IsAnnotatedAnnotation {
 	}
@@ -424,9 +431,11 @@ public class AnnotationMetadataTests {
 	@DirectAnnotation("meta")
 	@IsAnnotatedAnnotation
 	public @interface MetaAnnotation {
+
+		String additional() default "meta";
 	}
 
-	@Target({ ElementType.TYPE, ElementType.METHOD })
+	@Target({ElementType.TYPE, ElementType.METHOD})
 	@Retention(RetentionPolicy.RUNTIME)
 	@MetaAnnotation
 	public @interface MetaMetaAnnotation {
@@ -446,17 +455,18 @@ public class AnnotationMetadataTests {
 		},
 		BAR {
 		/* Do not delete! This subclassing is intentional. */
-		};
+		}
 	}
 
 	@Component("myName")
 	@Scope("myScope")
-	@SpecialAttr(clazz = String.class, state = Thread.State.NEW, nestedAnno = @NestedAnno(value = "na", anEnum = SomeEnum.LABEL1, classArray = { String.class }), nestedAnnoArray = {
-		@NestedAnno, @NestedAnno(value = "na1", anEnum = SomeEnum.LABEL2, classArray = { Number.class }) })
-	@SuppressWarnings({ "serial", "unused" })
+	@SpecialAttr(clazz = String.class, state = Thread.State.NEW,
+			nestedAnno = @NestedAnno(value = "na", anEnum = SomeEnum.LABEL1, classArray = {String.class}),
+			nestedAnnoArray = {@NestedAnno, @NestedAnno(value = "na1", anEnum = SomeEnum.LABEL2, classArray = {Number.class})})
+	@SuppressWarnings({"serial", "unused"})
 	@DirectAnnotation("direct")
 	@MetaMetaAnnotation
-	@EnumSubclasses({ SubclassEnum.FOO, SubclassEnum.BAR })
+	@EnumSubclasses({SubclassEnum.FOO, SubclassEnum.BAR})
 	private static class AnnotatedComponent implements Serializable {
 
 		@TestAutowired

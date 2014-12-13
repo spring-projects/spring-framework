@@ -9,9 +9,13 @@
 							  path-matcher="pathMatcher">
 
 		<!-- message-size=128*1024, send-buffer-size=1024*1024 -->
-		<websocket:transport message-size="131072" send-timeout="25000" send-buffer-size="1048576" />
+		<websocket:transport message-size="131072" send-timeout="25000" send-buffer-size="1048576">
+			<websocket:decorator-factories>
+				<bean class="org.springframework.web.socket.config.TestWebSocketHandlerDecoratorFactory" />
+			</websocket:decorator-factories>
+		</websocket:transport>
 
-		<websocket:stomp-endpoint path=" /foo,/bar">
+		<websocket:stomp-endpoint path=" /foo,/bar" allowed-origins="http://mydomain1.com,http://mydomain2.com">
 			<websocket:handshake-handler ref="myHandler"/>
 			<websocket:handshake-interceptors>
 				<bean class="org.springframework.web.socket.config.FooTestInterceptor"/>
@@ -19,7 +23,7 @@
 			</websocket:handshake-interceptors>
 		</websocket:stomp-endpoint>
 
-		<websocket:stomp-endpoint path="/test,/sockjs">
+		<websocket:stomp-endpoint path="/test,/sockjs" allowed-origins="http://mydomain3.com,http://mydomain4.com">
 			<websocket:handshake-handler ref="myHandler"/>
 			<websocket:handshake-interceptors>
 				<bean class="org.springframework.web.socket.config.FooTestInterceptor"/>

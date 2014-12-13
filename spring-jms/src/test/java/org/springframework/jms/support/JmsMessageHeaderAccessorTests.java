@@ -16,10 +16,7 @@
 
 package org.springframework.jms.support;
 
-import static org.junit.Assert.*;
-
 import java.util.Map;
-
 import javax.jms.Destination;
 import javax.jms.JMSException;
 
@@ -28,6 +25,8 @@ import org.junit.Test;
 import org.springframework.jms.StubTextMessage;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.support.MessageBuilder;
+
+import static org.junit.Assert.*;
 
 /**
  *

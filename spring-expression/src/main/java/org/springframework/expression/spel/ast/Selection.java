@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,12 +59,12 @@ public class Selection extends SpelNodeImpl {
 
 
 	public Selection(boolean nullSafe, int variant, int pos, SpelNodeImpl expression) {
-		super(pos, expression != null ? new SpelNodeImpl[] { expression }
-				: new SpelNodeImpl[] {});
+		super(pos, expression);
 		Assert.notNull(expression, "Expression must not be null");
 		this.nullSafe = nullSafe;
 		this.variant = variant;
 	}
+
 
 	@Override
 	public TypedValue getValueInternal(ExpressionState state) throws EvaluationException {
@@ -84,30 +84,30 @@ public class Selection extends SpelNodeImpl {
 			Object lastKey = null;
 			for (Map.Entry<?, ?> entry : mapdata.entrySet()) {
 				try {
-					TypedValue kvpair = new TypedValue(entry);
-					state.pushActiveContextObject(kvpair);
-					Object o = selectionCriteria.getValueInternal(state).getValue();
-					if (o instanceof Boolean) {
-						if (((Boolean) o).booleanValue() == true) {
+					TypedValue kvPair = new TypedValue(entry);
+					state.pushActiveContextObject(kvPair);
+					Object val = selectionCriteria.getValueInternal(state).getValue();
+					if (val instanceof Boolean) {
+						if ((Boolean) val) {
 							if (this.variant == FIRST) {
-								result.put(entry.getKey(),entry.getValue());
-								return new ValueRef.TypedValueHolderValueRef(new TypedValue(result),this);
+								result.put(entry.getKey(), entry.getValue());
+								return new ValueRef.TypedValueHolderValueRef(new TypedValue(result), this);
 							}
-							result.put(entry.getKey(),entry.getValue());
+							result.put(entry.getKey(), entry.getValue());
 							lastKey = entry.getKey();
 						}
 					}
 					else {
 						throw new SpelEvaluationException(selectionCriteria.getStartPosition(),
-								SpelMessage.RESULT_OF_SELECTION_CRITERIA_IS_NOT_BOOLEAN);// ,selectionCriteria.stringifyAST());
+								SpelMessage.RESULT_OF_SELECTION_CRITERIA_IS_NOT_BOOLEAN);
 					}
 				}
 				finally {
 					state.popActiveContextObject();
 				}
 			}
-			if ((this.variant == FIRST || this.variant == LAST) && result.size() == 0) {
-				return new ValueRef.TypedValueHolderValueRef(new TypedValue(null),this);
+			if ((this.variant == FIRST || this.variant == LAST) && result.isEmpty()) {
+				return new ValueRef.TypedValueHolderValueRef(new TypedValue(null), this);
 			}
 
 			if (this.variant == LAST) {
@@ -122,29 +122,29 @@ public class Selection extends SpelNodeImpl {
 
 		if ((operand instanceof Collection) || ObjectUtils.isArray(operand)) {
 			List<Object> data = new ArrayList<Object>();
-			Collection<?> c = (operand instanceof Collection) ?
-					(Collection<?>) operand : Arrays.asList(ObjectUtils.toObjectArray(operand));
-			data.addAll(c);
+			Collection<?> coll = (operand instanceof Collection ?
+					(Collection<?>) operand : Arrays.asList(ObjectUtils.toObjectArray(operand)));
+			data.addAll(coll);
 			List<Object> result = new ArrayList<Object>();
-			int idx = 0;
+			int index = 0;
 			for (Object element : data) {
 				try {
 					state.pushActiveContextObject(new TypedValue(element));
-					state.enterScope("index", idx);
-					Object o = selectionCriteria.getValueInternal(state).getValue();
-					if (o instanceof Boolean) {
-						if (((Boolean) o).booleanValue() == true) {
+					state.enterScope("index", index);
+					Object val = selectionCriteria.getValueInternal(state).getValue();
+					if (val instanceof Boolean) {
+						if ((Boolean) val) {
 							if (this.variant == FIRST) {
-								return new ValueRef.TypedValueHolderValueRef(new TypedValue(element),this);
+								return new ValueRef.TypedValueHolderValueRef(new TypedValue(element), this);
 							}
 							result.add(element);
 						}
 					}
 					else {
 						throw new SpelEvaluationException(selectionCriteria.getStartPosition(),
-								SpelMessage.RESULT_OF_SELECTION_CRITERIA_IS_NOT_BOOLEAN);// ,selectionCriteria.stringifyAST());
+								SpelMessage.RESULT_OF_SELECTION_CRITERIA_IS_NOT_BOOLEAN);
 					}
-					idx++;
+					index++;
 				}
 				finally {
 					state.exitScope();
@@ -153,7 +153,7 @@ public class Selection extends SpelNodeImpl {
 			}
 
 			if ((this.variant == FIRST || this.variant == LAST) && result.size() == 0) {
-				return ValueRef.NullValueRef.instance;
+				return ValueRef.NullValueRef.INSTANCE;
 			}
 
 			if (this.variant == LAST) {
@@ -163,20 +163,20 @@ public class Selection extends SpelNodeImpl {
 			if (operand instanceof Collection) {
 				return new ValueRef.TypedValueHolderValueRef(new TypedValue(result),this);
 			}
-			Class<?> elementType = ClassUtils.resolvePrimitiveIfNecessary(op.getTypeDescriptor().getElementTypeDescriptor().getType());
+			Class<?> elementType = ClassUtils.resolvePrimitiveIfNecessary(
+					op.getTypeDescriptor().getElementTypeDescriptor().getType());
 			Object resultArray = Array.newInstance(elementType, result.size());
 			System.arraycopy(result.toArray(), 0, resultArray, 0, result.size());
 			return new ValueRef.TypedValueHolderValueRef(new TypedValue(resultArray),this);
 		}
-		if (operand==null) {
+		if (operand == null) {
 			if (this.nullSafe) {
-				return ValueRef.NullValueRef.instance;
+				return ValueRef.NullValueRef.INSTANCE;
 			}
-			throw new SpelEvaluationException(getStartPosition(),
-					SpelMessage.INVALID_TYPE_FOR_SELECTION, "null");
+			throw new SpelEvaluationException(getStartPosition(), SpelMessage.INVALID_TYPE_FOR_SELECTION, "null");
 		}
-		throw new SpelEvaluationException(getStartPosition(),
-				SpelMessage.INVALID_TYPE_FOR_SELECTION, operand.getClass().getName());
+		throw new SpelEvaluationException(getStartPosition(), SpelMessage.INVALID_TYPE_FOR_SELECTION,
+				operand.getClass().getName());
 	}
 
 	@Override

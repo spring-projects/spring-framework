@@ -16,6 +16,7 @@
 
 package org.springframework.jdbc.core;
 
+import java.io.StringReader;
 import java.io.StringWriter;
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -24,6 +25,7 @@ import java.sql.Clob;
 import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.sql.SQLFeatureNotSupportedException;
 import java.sql.Types;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -319,9 +321,32 @@ public abstract class StatementCreatorUtils {
 			((SqlValue) inValue).setValue(ps, paramIndex);
 		}
 		else if (sqlType == Types.VARCHAR || sqlType == Types.NVARCHAR ||
-				sqlType == Types.LONGVARCHAR || sqlType == Types.LONGNVARCHAR ||
-				((sqlType == Types.CLOB || sqlType == Types.NCLOB) && isStringValue(inValue.getClass()))) {
+				sqlType == Types.LONGVARCHAR || sqlType == Types.LONGNVARCHAR) {
 			ps.setString(paramIndex, inValue.toString());
+		}
+		else if ((sqlType == Types.CLOB || sqlType == Types.NCLOB) && isStringValue(inValue.getClass())) {
+			String strVal = inValue.toString();
+			if (strVal.length() > 4000) {
+				// Necessary for older Oracle drivers, in particular when running against an Oracle 10 database.
+				// Should also work fine against other drivers/databases since it uses standard JDBC 4.0 API.
+				try {
+					if (sqlType == Types.NCLOB) {
+						ps.setNClob(paramIndex, new StringReader(strVal), strVal.length());
+					}
+					else {
+						ps.setClob(paramIndex, new StringReader(strVal), strVal.length());
+					}
+					return;
+				}
+				catch (AbstractMethodError err) {
+					logger.debug("JDBC driver does not implement JDBC 4.0 'setClob(int, Reader, long)' method", err);
+				}
+				catch (SQLFeatureNotSupportedException ex) {
+					logger.debug("JDBC driver does not support JDBC 4.0 'setClob(int, Reader, long)' method", ex);
+				}
+			}
+			// Fallback: regular setString binding
+			ps.setString(paramIndex, strVal);
 		}
 		else if (sqlType == Types.DECIMAL || sqlType == Types.NUMERIC) {
 			if (inValue instanceof BigDecimal) {

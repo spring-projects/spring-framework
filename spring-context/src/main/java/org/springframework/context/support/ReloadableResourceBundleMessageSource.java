@@ -451,11 +451,11 @@ public class ReloadableResourceBundleMessageSource extends AbstractMessageSource
 	 */
 	protected PropertiesHolder getProperties(String filename) {
 		PropertiesHolder propHolder = this.cachedProperties.get(filename);
-		long originalTimestamp = -1;
+		long originalTimestamp = -2;
 
 		if (propHolder != null) {
 			originalTimestamp = propHolder.getRefreshTimestamp();
-			if (originalTimestamp < 0 || originalTimestamp > System.currentTimeMillis() - this.cacheMillis) {
+			if (originalTimestamp == -1 || originalTimestamp > System.currentTimeMillis() - this.cacheMillis) {
 				// Up to date
 				return propHolder;
 			}

@@ -20,7 +20,6 @@ import java.io.ByteArrayInputStream;
 import java.io.StringReader;
 import java.util.HashMap;
 import java.util.Map;
-
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.stream.XMLInputFactory;
@@ -31,11 +30,10 @@ import javax.xml.transform.stream.StreamSource;
 
 import org.junit.Before;
 import org.junit.Test;
-
-import org.springframework.util.xml.StaxUtils;
-
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
+
+import org.springframework.util.xml.StaxUtils;
 
 import static org.junit.Assert.*;
 

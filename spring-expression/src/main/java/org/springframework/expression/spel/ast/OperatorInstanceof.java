@@ -81,10 +81,10 @@ public class OperatorInstanceof extends Operator {
 	}
 	
 	@Override
-	public void generateCode(MethodVisitor mv, CodeFlow codeflow) {
-		getLeftOperand().generateCode(mv, codeflow);
+	public void generateCode(MethodVisitor mv, CodeFlow cf) {
+		getLeftOperand().generateCode(mv, cf);
 		mv.visitTypeInsn(INSTANCEOF,Type.getInternalName(this.type));
-		codeflow.pushDescriptor(getExitDescriptor());
+		cf.pushDescriptor(this.exitTypeDescriptor);
 	}
 
 }

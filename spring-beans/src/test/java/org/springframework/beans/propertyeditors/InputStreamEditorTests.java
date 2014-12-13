@@ -16,12 +16,13 @@
 
 package org.springframework.beans.propertyeditors;
 
-import static org.junit.Assert.*;
-
 import java.io.InputStream;
 
 import org.junit.Test;
+
 import org.springframework.util.ClassUtils;
+
+import static org.junit.Assert.*;
 
 /**
  * Unit tests for the {@link InputStreamEditor} class.

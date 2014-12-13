@@ -32,7 +32,6 @@ import org.springframework.jmx.export.annotation.AnnotationMBeanExporter;
 import org.springframework.jmx.support.RegistrationPolicy;
 import org.springframework.jmx.support.WebSphereMBeanServerFactoryBean;
 import org.springframework.jndi.JndiLocatorDelegate;
-import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 
@@ -63,8 +62,10 @@ public class MBeanExportConfiguration implements ImportAware, EnvironmentAware, 
 	public void setImportMetadata(AnnotationMetadata importMetadata) {
 		Map<String, Object> map = importMetadata.getAnnotationAttributes(EnableMBeanExport.class.getName());
 		this.attributes = AnnotationAttributes.fromMap(map);
-		Assert.notNull(this.attributes,
-				"@EnableMBeanExport is not present on importing class " + importMetadata.getClassName());
+		if (this.attributes == null) {
+			throw new IllegalArgumentException(
+					"@EnableMBeanExport is not present on importing class " + importMetadata.getClassName());
+		}
 	}
 
 	@Override
@@ -78,7 +79,7 @@ public class MBeanExportConfiguration implements ImportAware, EnvironmentAware, 
 	}
 
 
-	@Bean(name=MBEAN_EXPORTER_BEAN_NAME)
+	@Bean(name = MBEAN_EXPORTER_BEAN_NAME)
 	@Role(BeanDefinition.ROLE_INFRASTRUCTURE)
 	public AnnotationMBeanExporter mbeanExporter() {
 		AnnotationMBeanExporter exporter = new AnnotationMBeanExporter();

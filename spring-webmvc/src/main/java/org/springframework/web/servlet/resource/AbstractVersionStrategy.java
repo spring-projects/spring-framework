@@ -1,3 +1,19 @@
+/*
+ * Copyright 2002-2014 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.springframework.web.servlet.resource;
 
 import java.util.regex.Matcher;
@@ -11,10 +27,11 @@ import org.springframework.util.StringUtils;
 
 /**
  * Abstract base class for {@link VersionStrategy} implementations.
- * Supports versions as:
+ *
+ * <p>Supports versions as:
  * <ul>
- *     <li>prefix in the request path, like "version/static/myresource.js"
- *     <li>file name suffix in the request path, like "static/myresource-version.js"
+ * <li>prefix in the request path, like "version/static/myresource.js"
+ * <li>file name suffix in the request path, like "static/myresource-version.js"
  * </ul>
  *
  * <p>Note: This base class does <i>not</i> provide support for generating the
@@ -32,7 +49,7 @@ public abstract class AbstractVersionStrategy implements VersionStrategy {
 
 
 	protected AbstractVersionStrategy(VersionPathStrategy pathStrategy) {
-		Assert.notNull(pathStrategy, "'pathStrategy' is required");
+		Assert.notNull(pathStrategy, "VersionPathStrategy is required");
 		this.pathStrategy = pathStrategy;
 	}
 
@@ -66,9 +83,8 @@ public abstract class AbstractVersionStrategy implements VersionStrategy {
 
 		private final String prefix;
 
-
 		public PrefixVersionPathStrategy(String version) {
-			Assert.hasText(version, "'version' is required and must not be empty");
+			Assert.hasText(version, "'version' must not be empty");
 			this.prefix = version;
 		}
 
@@ -86,8 +102,8 @@ public abstract class AbstractVersionStrategy implements VersionStrategy {
 		public String addVersion(String path, String version) {
 			return (this.prefix.endsWith("/") || path.startsWith("/") ? this.prefix + path : this.prefix + "/" + path);
 		}
-
 	}
+
 
 	/**
 	 * File name-based {@code VersionPathStrategy},
@@ -96,7 +112,6 @@ public abstract class AbstractVersionStrategy implements VersionStrategy {
 	protected static class FileNameVersionPathStrategy implements VersionPathStrategy {
 
 		private static final Pattern pattern = Pattern.compile("-(\\S*)\\.");
-
 
 		@Override
 		public String extractVersion(String requestPath) {

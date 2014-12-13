@@ -16,13 +16,13 @@
 
 package org.springframework.transaction.aspectj;
 
+import java.lang.reflect.Method;
+
 import org.springframework.test.AbstractDependencyInjectionSpringContextTests;
 import org.springframework.tests.transaction.CallCountingTransactionManager;
 import org.springframework.transaction.annotation.AnnotationTransactionAttributeSource;
 import org.springframework.transaction.interceptor.TransactionAspectSupport;
 import org.springframework.transaction.interceptor.TransactionAttribute;
-
-import java.lang.reflect.Method;
 
 /**
  * @author Rod Johnson

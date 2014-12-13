@@ -86,7 +86,7 @@ public class ProtobufHttpMessageConverter extends AbstractHttpMessageConverter<M
 	 */
 	public ProtobufHttpMessageConverter(ExtensionRegistryInitializer registryInitializer) {
 		super(PROTOBUF, MediaType.TEXT_PLAIN, MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON);
-		if (this.extensionRegistry != null) {
+		if (registryInitializer != null) {
 			registryInitializer.initializeExtensionRegistry(this.extensionRegistry);
 		}
 	}
@@ -164,19 +164,26 @@ public class ProtobufHttpMessageConverter extends AbstractHttpMessageConverter<M
 
 		MediaType contentType = outputMessage.getHeaders().getContentType();
 		Charset charset = getCharset(contentType);
-		OutputStreamWriter writer = new OutputStreamWriter(outputMessage.getBody(), charset);
 
 		if (MediaType.TEXT_HTML.isCompatibleWith(contentType)) {
-			HtmlFormat.print(message, writer);
+			final OutputStreamWriter outputStreamWriter = new OutputStreamWriter(outputMessage.getBody(), charset);
+			HtmlFormat.print(message, outputStreamWriter);
+			outputStreamWriter.flush();
 		}
 		else if (MediaType.APPLICATION_JSON.isCompatibleWith(contentType)) {
-			JsonFormat.print(message, writer);
+			final OutputStreamWriter outputStreamWriter = new OutputStreamWriter(outputMessage.getBody(), charset);
+			JsonFormat.print(message, outputStreamWriter);
+			outputStreamWriter.flush();
 		}
 		else if (MediaType.TEXT_PLAIN.isCompatibleWith(contentType)) {
-			TextFormat.print(message, writer);
+			final OutputStreamWriter outputStreamWriter = new OutputStreamWriter(outputMessage.getBody(), charset);
+			TextFormat.print(message, outputStreamWriter);
+			outputStreamWriter.flush();
 		}
 		else if (MediaType.APPLICATION_XML.isCompatibleWith(contentType)) {
-			XmlFormat.print(message, writer);
+			final OutputStreamWriter outputStreamWriter = new OutputStreamWriter(outputMessage.getBody(), charset);
+			XmlFormat.print(message, outputStreamWriter);
+			outputStreamWriter.flush();
 		}
 		else if (PROTOBUF.isCompatibleWith(contentType)) {
 			setProtoHeader(outputMessage, message);
@@ -191,6 +198,8 @@ public class ProtobufHttpMessageConverter extends AbstractHttpMessageConverter<M
 	/**
 	 * Set the "X-Protobuf-*" HTTP headers when responding with a message of
 	 * content type "application/x-protobuf"
+	 * <p><b>Note:</b> <code>outputMessage.getBody()</code> should not have been called
+	 * before because it writes HTTP headers (making them read only).</p>
 	 */
 	private void setProtoHeader(HttpOutputMessage response, Message message) {
 		response.getHeaders().set(X_PROTOBUF_SCHEMA_HEADER, message.getDescriptorForType().getFile().getName());

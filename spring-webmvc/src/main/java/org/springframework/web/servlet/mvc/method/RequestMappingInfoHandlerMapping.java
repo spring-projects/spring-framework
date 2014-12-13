@@ -55,10 +55,10 @@ import org.springframework.web.util.WebUtils;
  */
 public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMethodMapping<RequestMappingInfo> {
 
-
 	protected RequestMappingInfoHandlerMapping() {
 		setHandlerMethodMappingNamingStrategy(new RequestMappingInfoHandlerMethodMappingNamingStrategy());
 	}
+
 
 	/**
 	 * Get the URL path patterns associated with this {@link RequestMappingInfo}.

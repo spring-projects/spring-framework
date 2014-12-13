@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,18 +15,20 @@
  */
 package org.springframework.web.servlet.config.annotation;
 
-import static org.junit.Assert.assertEquals;
-
 import java.util.Arrays;
 import java.util.Collections;
 
 import org.junit.Before;
 import org.junit.Test;
+
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.web.accept.ContentNegotiationManager;
+import org.springframework.web.accept.FixedContentNegotiationStrategy;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.ServletWebRequest;
+
+import static org.junit.Assert.*;
 
 /**
  * Test fixture for {@link ContentNegotiationConfigurer} tests.
@@ -105,6 +107,14 @@ public class ContentNegotiationConfigurerTests {
 	@Test
 	public void setDefaultContentType() throws Exception {
 		this.configurer.defaultContentType(MediaType.APPLICATION_JSON);
+		ContentNegotiationManager manager = this.configurer.getContentNegotiationManager();
+
+		assertEquals(Arrays.asList(MediaType.APPLICATION_JSON), manager.resolveMediaTypes(this.webRequest));
+	}
+
+	@Test
+	public void setDefaultContentTypeStrategy() throws Exception {
+		this.configurer.defaultContentTypeStrategy(new FixedContentNegotiationStrategy(MediaType.APPLICATION_JSON));
 		ContentNegotiationManager manager = this.configurer.getContentNegotiationManager();
 
 		assertEquals(Arrays.asList(MediaType.APPLICATION_JSON), manager.resolveMediaTypes(this.webRequest));

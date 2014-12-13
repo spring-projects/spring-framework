@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@ import java.nio.charset.Charset;
  */
 public final class TextMessage extends AbstractWebSocketMessage<String> {
 
-	private static final Charset UTF_8 = Charset.forName("UTF-8");
+	private static final Charset UTF8_CHARSET = Charset.forName("UTF-8");
 
 	private final byte[] bytes;
 
@@ -41,13 +41,12 @@ public final class TextMessage extends AbstractWebSocketMessage<String> {
 	}
 
 	/**
-	 * Create a new text WebSocket message from the given byte[]. It is assumed the
-	 * byte array can be encoded into an UTF-8 String.
-	 *
+	 * Create a new text WebSocket message from the given byte[]. It is assumed
+	 * the byte array can be encoded into an UTF-8 String.
 	 * @param payload the non-null payload
 	 */
 	public TextMessage(byte[] payload) {
-		super(new String(payload, UTF_8));
+		super(new String(payload, UTF8_CHARSET));
 		this.bytes = payload;
 	}
 
@@ -71,12 +70,13 @@ public final class TextMessage extends AbstractWebSocketMessage<String> {
 	}
 
 	public byte[] asBytes() {
-		return (this.bytes != null ? this.bytes : getPayload().getBytes(UTF_8));
+		return (this.bytes != null ? this.bytes : getPayload().getBytes(UTF8_CHARSET));
 	}
 
 	@Override
 	protected String toStringPayload() {
-		return (getPayloadLength() > 10) ? getPayload().substring(0, 10) + ".." : getPayload();
+		String payload = getPayload();
+		return (payload.length() > 10 ? payload.substring(0, 10) + ".." : payload);
 	}
 
 }

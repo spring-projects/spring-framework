@@ -21,13 +21,13 @@ import java.util.Locale;
 import java.util.Map;
 
 import org.springframework.beans.MutablePropertyValues;
-import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.beans.factory.support.PropertiesBeanDefinitionReader;
 import org.springframework.context.ACATester;
 import org.springframework.context.AbstractApplicationContextTests;
 import org.springframework.context.BeanThatListens;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.tests.sample.beans.TestBean;
 
 /**
  * Tests for static application context.

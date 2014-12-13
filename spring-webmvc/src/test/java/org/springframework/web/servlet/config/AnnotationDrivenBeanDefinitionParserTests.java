@@ -20,6 +20,7 @@ import java.util.List;
 import org.hamcrest.Matchers;
 import org.junit.Before;
 import org.junit.Test;
+
 import org.springframework.beans.DirectFieldAccessor;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.core.MethodParameter;
@@ -78,13 +79,13 @@ public class AnnotationDrivenBeanDefinitionParserTests {
 
 	@Test
 	public void testPathMatchingConfiguration() {
-	    loadBeanDefinitions("mvc-config-path-matching.xml");
-	    RequestMappingHandlerMapping hm = appContext.getBean(RequestMappingHandlerMapping.class);
-	    assertNotNull(hm);
+		loadBeanDefinitions("mvc-config-path-matching.xml");
+		RequestMappingHandlerMapping hm = appContext.getBean(RequestMappingHandlerMapping.class);
+		assertNotNull(hm);
 		assertTrue(hm.useSuffixPatternMatch());
 		assertFalse(hm.useTrailingSlashMatch());
 		assertTrue(hm.useRegisteredSuffixPatternMatch());
-	    assertThat(hm.getUrlPathHelper(), Matchers.instanceOf(TestPathHelper.class));
+		assertThat(hm.getUrlPathHelper(), Matchers.instanceOf(TestPathHelper.class));
 		assertThat(hm.getPathMatcher(), Matchers.instanceOf(TestPathMatcher.class));
 		List<String> fileExtensions = hm.getContentNegotiationManager().getAllFileExtensions();
 		assertThat(fileExtensions, Matchers.contains("xml"));

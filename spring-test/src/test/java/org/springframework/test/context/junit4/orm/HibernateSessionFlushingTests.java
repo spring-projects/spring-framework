@@ -16,13 +16,8 @@
 
 package org.springframework.test.context.junit4.orm;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.springframework.test.transaction.TransactionTestUtils.assertInTransaction;
-
 import org.hibernate.SessionFactory;
 import org.hibernate.exception.ConstraintViolationException;
-
 import org.junit.Before;
 import org.junit.Test;
 
@@ -32,6 +27,9 @@ import org.springframework.test.context.junit4.AbstractTransactionalJUnit4Spring
 import org.springframework.test.context.junit4.orm.domain.DriversLicense;
 import org.springframework.test.context.junit4.orm.domain.Person;
 import org.springframework.test.context.junit4.orm.service.PersonService;
+
+import static org.junit.Assert.*;
+import static org.springframework.test.transaction.TransactionTestUtils.*;
 
 /**
  * Transactional integration tests regarding <i>manual</i> session flushing with

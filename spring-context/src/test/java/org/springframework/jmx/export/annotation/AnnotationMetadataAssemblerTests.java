@@ -16,11 +16,12 @@
 
 package org.springframework.jmx.export.annotation;
 
-import javax.management.modelmbean.ModelMBeanInfo;
 import javax.management.modelmbean.ModelMBeanAttributeInfo;
+import javax.management.modelmbean.ModelMBeanInfo;
 import javax.management.modelmbean.ModelMBeanOperationInfo;
 
 import org.junit.Test;
+
 import org.springframework.jmx.IJmxTestBean;
 import org.springframework.jmx.export.assembler.AbstractMetadataAssemblerTests;
 import org.springframework.jmx.export.metadata.JmxAttributeSource;

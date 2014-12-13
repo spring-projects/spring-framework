@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,15 @@
 
 package org.springframework.http.client;
 
+import static org.junit.Assert.assertEquals;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
 import java.net.ProtocolException;
+import java.net.URI;
+import java.net.URL;
 
 import org.junit.Test;
 import org.springframework.http.HttpMethod;
@@ -39,4 +47,50 @@ public class BufferedSimpleHttpRequestFactoryTests extends AbstractHttpRequestFa
 		}
 	}
 
+	@Test
+	public void prepareConnectionWithRequestBody() throws Exception {
+		URL uri = new URL("http://example.com");
+		testRequestBodyAllowed(uri, "GET", false);
+		testRequestBodyAllowed(uri, "HEAD", false);
+		testRequestBodyAllowed(uri, "OPTIONS", false);
+		testRequestBodyAllowed(uri, "TRACE", false);
+		testRequestBodyAllowed(uri, "PUT", true);
+		testRequestBodyAllowed(uri, "POST", true);
+		testRequestBodyAllowed(uri, "DELETE", true);
+	}
+
+	@Test
+	public void deleteWithoutBodyDoesNotRaiseException() throws Exception {
+		HttpURLConnection connection = new TestHttpURLConnection(new URL("http://example.com"));
+		((SimpleClientHttpRequestFactory) this.factory).prepareConnection(connection, "DELETE");
+		SimpleBufferingClientHttpRequest request = new SimpleBufferingClientHttpRequest(connection, false);
+		request.execute();
+	}
+
+	private void testRequestBodyAllowed(URL uri, String httpMethod, boolean allowed) throws IOException {
+		HttpURLConnection connection = new TestHttpURLConnection(uri);
+		((SimpleClientHttpRequestFactory) this.factory).prepareConnection(connection, httpMethod);
+		assertEquals(allowed, connection.getDoOutput());
+	}
+
+
+	private static class TestHttpURLConnection extends HttpURLConnection {
+
+		public TestHttpURLConnection(URL uri) {
+			super(uri);
+		}
+
+		@Override
+		public void connect() throws IOException {
+		}
+
+		@Override
+		public void disconnect() {
+		}
+
+		@Override
+		public boolean usingProxy() {
+			return false;
+		}
+	}
 }

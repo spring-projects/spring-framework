@@ -23,6 +23,7 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.ClientHttpResponse;
@@ -122,9 +123,14 @@ public class HttpMessageConverterExtractor<T> implements ResponseExtractor<T> {
 	}
 
 	/**
-	 * Indicates whether the given response has a message body. <p>Default implementation
-	 * returns {@code false} for a response status of {@code 204} or {@code 304}, or a {@code
-	 * Content-Length} of {@code 0}.
+	 * Indicates whether the given response has a message body.
+	 * <p>Default implementation returns {@code false} for:
+	 * <ul>
+	 *     <li>a response status of {@code 204} or {@code 304}</li>
+	 *     <li>a {@code Content-Length} of {@code 0}</li>
+	 *     <li>no indication of content (no {@code Content-Length} nor {@code Transfer-encoding: chunked}) and
+	 *     a ({@code Connection: closed}) header. See rfc7230 section 3.4</li>
+	 * </ul>
 	 *
 	 * @param response the response to check for a message body
 	 * @return {@code true} if the response has a body, {@code false} otherwise
@@ -136,8 +142,19 @@ public class HttpMessageConverterExtractor<T> implements ResponseExtractor<T> {
 				responseStatus == HttpStatus.NOT_MODIFIED) {
 			return false;
 		}
-		long contentLength = response.getHeaders().getContentLength();
-		return contentLength != 0;
+		HttpHeaders headers = response.getHeaders();
+		long contentLength = headers.getContentLength();
+		if(contentLength == 0) {
+			return false;
+		}
+		boolean chunked = headers.containsKey(HttpHeaders.TRANSFER_ENCODING)
+				&& headers.get(HttpHeaders.TRANSFER_ENCODING).contains("chunked");
+		boolean closed = headers.containsKey(HttpHeaders.CONNECTION)
+				&& headers.getConnection().contains("close");
+		if(!chunked && contentLength == -1 && closed) {
+			return false;
+		}
+		return true;
 	}
 
 }

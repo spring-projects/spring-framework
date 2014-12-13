@@ -16,19 +16,20 @@
 
 package org.springframework.jdbc.core;
 
-import static org.junit.Assert.assertEquals;
-
 import java.util.List;
 
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+
 import org.springframework.beans.TypeMismatchException;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.jdbc.core.test.ConcretePerson;
 import org.springframework.jdbc.core.test.ExtendedPerson;
 import org.springframework.jdbc.core.test.Person;
 import org.springframework.jdbc.core.test.SpacePerson;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Thomas Risberg

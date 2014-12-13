@@ -41,6 +41,7 @@ import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+import org.mockito.Matchers;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.MutablePropertyValues;
@@ -52,10 +53,13 @@ import org.springframework.beans.TypeConverter;
 import org.springframework.beans.TypeMismatchException;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.config.BeanExpressionContext;
+import org.springframework.beans.factory.config.BeanExpressionResolver;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.beans.factory.config.ConstructorArgumentValues;
 import org.springframework.beans.factory.config.InstantiationAwareBeanPostProcessorAdapter;
+import org.springframework.beans.factory.config.PropertiesFactoryBean;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.config.TypedStringValue;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
@@ -107,8 +111,10 @@ public class DefaultListableBeanFactoryTests {
 
 	private static final Log factoryLog = LogFactory.getLog(DefaultListableBeanFactory.class);
 
+
 	@Rule
 	public ExpectedException thrown = ExpectedException.none();
+
 
 	@Test
 	public void testUnreferencedSingletonWasInstantiated() {
@@ -996,6 +1002,16 @@ public class DefaultListableBeanFactoryTests {
 
 		beansOfType = lbf.getBeansOfType(null, false, true);
 		assertEquals(2, beansOfType.size());
+
+		Iterator<String> beanNames = lbf.getBeanNamesIterator();
+		assertEquals("test", beanNames.next());
+		assertEquals("singletonObject", beanNames.next());
+		assertFalse(beanNames.hasNext());
+
+		assertTrue(lbf.containsSingleton("test"));
+		assertTrue(lbf.containsSingleton("singletonObject"));
+		assertTrue(lbf.containsBeanDefinition("test"));
+		assertFalse(lbf.containsBeanDefinition("singletonObject"));
 	}
 
 	@Test
@@ -1006,8 +1022,8 @@ public class DefaultListableBeanFactoryTests {
 		p.setProperty("test.name", "Tony");
 		p.setProperty("test.age", "48");
 		p.setProperty("test.spouse(ref)", "singletonObject");
-		p.setProperty("singletonObject.(class)", org.springframework.beans.factory.config.PropertiesFactoryBean.class.getName());
 		(new PropertiesBeanDefinitionReader(lbf)).registerBeanDefinitions(p);
+		lbf.registerBeanDefinition("singletonObject", new RootBeanDefinition(PropertiesFactoryBean.class));
 		Object singletonObject = new TestBean();
 		lbf.registerSingleton("singletonObject", singletonObject);
 		lbf.preInstantiateSingletons();
@@ -1024,7 +1040,17 @@ public class DefaultListableBeanFactoryTests {
 		assertTrue(beansOfType.containsValue(singletonObject));
 
 		beansOfType = lbf.getBeansOfType(null, false, true);
+
+		Iterator<String> beanNames = lbf.getBeanNamesIterator();
+		assertEquals("test", beanNames.next());
+		assertEquals("singletonObject", beanNames.next());
+		assertFalse(beanNames.hasNext());
 		assertEquals(2, beansOfType.size());
+
+		assertTrue(lbf.containsSingleton("test"));
+		assertTrue(lbf.containsSingleton("singletonObject"));
+		assertTrue(lbf.containsBeanDefinition("test"));
+		assertTrue(lbf.containsBeanDefinition("singletonObject"));
 	}
 
 	@Test
@@ -1163,6 +1189,23 @@ public class DefaultListableBeanFactoryTests {
 
 		assertNull(ab.getIntegerArray());
 		assertNull(ab.getResourceArray());
+	}
+
+	@Test
+	public void testExpressionInStringArray() {
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		BeanExpressionResolver beanExpressionResolver = mock(BeanExpressionResolver.class);
+		when(beanExpressionResolver.evaluate(eq("#{foo}"), Matchers.any(BeanExpressionContext.class)))
+				.thenReturn("classpath:/org/springframework/beans/factory/xml/util.properties");
+		bf.setBeanExpressionResolver(beanExpressionResolver);
+
+		RootBeanDefinition rbd = new RootBeanDefinition(PropertiesFactoryBean.class);
+		MutablePropertyValues pvs = new MutablePropertyValues();
+		pvs.add("locations", new String[] {"#{foo}"});
+		rbd.setPropertyValues(pvs);
+		bf.registerBeanDefinition("myProperties", rbd);
+		Properties properties = (Properties) bf.getBean("myProperties");
+		assertEquals("bar", properties.getProperty("foo"));
 	}
 
 	@Test

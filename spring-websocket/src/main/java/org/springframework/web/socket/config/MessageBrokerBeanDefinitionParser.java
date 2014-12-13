@@ -21,12 +21,16 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.beans.factory.support.GenericBeanDefinition;
+import org.springframework.http.converter.json.Jackson2ObjectMapperFactoryBean;
+import org.springframework.messaging.support.ImmutableMessageChannelInterceptor;
 import org.w3c.dom.Element;
 
-import org.springframework.beans.factory.config.CustomScopeConfigurer;
 import org.springframework.beans.MutablePropertyValues;
+import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.ConstructorArgumentValues;
+import org.springframework.beans.factory.config.CustomScopeConfigurer;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.parsing.BeanComponentDefinition;
 import org.springframework.beans.factory.parsing.CompositeComponentDefinition;
@@ -43,11 +47,11 @@ import org.springframework.messaging.converter.StringMessageConverter;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.messaging.simp.SimpSessionScope;
 import org.springframework.messaging.simp.annotation.support.SimpAnnotationMethodMessageHandler;
+import org.springframework.messaging.simp.broker.SimpleBrokerMessageHandler;
+import org.springframework.messaging.simp.stomp.StompBrokerRelayMessageHandler;
 import org.springframework.messaging.simp.user.DefaultUserDestinationResolver;
 import org.springframework.messaging.simp.user.DefaultUserSessionRegistry;
-import org.springframework.messaging.simp.broker.SimpleBrokerMessageHandler;
 import org.springframework.messaging.simp.user.UserDestinationMessageHandler;
-import org.springframework.messaging.simp.stomp.StompBrokerRelayMessageHandler;
 import org.springframework.messaging.support.ExecutorSubscribableChannel;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.util.Assert;
@@ -56,34 +60,35 @@ import org.springframework.util.MimeTypeUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.util.xml.DomUtils;
 import org.springframework.web.servlet.handler.SimpleUrlHandlerMapping;
+import org.springframework.web.socket.WebSocketHandler;
+import org.springframework.web.socket.handler.WebSocketHandlerDecoratorFactory;
 import org.springframework.web.socket.messaging.StompSubProtocolHandler;
 import org.springframework.web.socket.messaging.SubProtocolWebSocketHandler;
+import org.springframework.web.socket.server.support.OriginHandshakeInterceptor;
 import org.springframework.web.socket.server.support.WebSocketHttpRequestHandler;
 import org.springframework.web.socket.sockjs.support.SockJsHttpRequestHandler;
 
-
 /**
- * A {@link org.springframework.beans.factory.xml.BeanDefinitionParser}
- * that provides the configuration for the
- * {@code <websocket:message-broker/>} XML namespace element.
- * <p>
- * Registers a Spring MVC {@link org.springframework.web.servlet.handler.SimpleUrlHandlerMapping}
- * with order=1 to map HTTP WebSocket handshake requests from STOMP/WebSocket clients.
- * <p>
- * Registers the following {@link org.springframework.messaging.MessageChannel}s:
+ * A {@link org.springframework.beans.factory.xml.BeanDefinitionParser} that provides
+ * the configuration for the {@code <websocket:message-broker/>} XML namespace element.
+ *
+ * <p>Registers a Spring MVC {@link org.springframework.web.servlet.handler.SimpleUrlHandlerMapping}
+ * with order 1 to map HTTP WebSocket handshake requests from STOMP/WebSocket clients.
+ *
+ * <p>Registers the following {@link org.springframework.messaging.MessageChannel}s:
  * <ul>
- * 	<li>"clientInboundChannel" for receiving messages from clients (e.g. WebSocket clients)
- * 	<li>"clientOutboundChannel" for sending messages to clients (e.g. WebSocket clients)
- * 	<li>"brokerChannel" for sending messages from within the application to the message broker
+ * <li>"clientInboundChannel" for receiving messages from clients (e.g. WebSocket clients)
+ * <li>"clientOutboundChannel" for sending messages to clients (e.g. WebSocket clients)
+ * <li>"brokerChannel" for sending messages from within the application to the message broker
  * </ul>
- * <p>
- * Registers one of the following based on the selected message broker options:
+ *
+ * <p>Registers one of the following based on the selected message broker options:
  * <ul>
- *     <li> a {@link SimpleBrokerMessageHandler} if the <simple-broker/> is used
- *     <li> a {@link StompBrokerRelayMessageHandler} if the <stomp-broker-relay/> is used
+ * <li>a {@link SimpleBrokerMessageHandler} if the <simple-broker/> is used
+ * <li>a {@link StompBrokerRelayMessageHandler} if the <stomp-broker-relay/> is used
  * </ul>
- * <p>
- * Registers a {@link UserDestinationMessageHandler} for handling user destinations.
+ *
+ * <p>Registers a {@link UserDestinationMessageHandler} for handling user destinations.
  *
  * @author Brian Clozel
  * @author Rossen Stoyanchev
@@ -91,11 +96,13 @@ import org.springframework.web.socket.sockjs.support.SockJsHttpRequestHandler;
  */
 class MessageBrokerBeanDefinitionParser implements BeanDefinitionParser {
 
-	private static final String SOCKJS_SCHEDULER_BEAN_NAME = "messageBrokerSockJsScheduler";
+	public static final String WEB_SOCKET_HANDLER_BEAN_NAME = "subProtocolWebSocketHandler";
+
+	public static final String SOCKJS_SCHEDULER_BEAN_NAME = "messageBrokerSockJsScheduler";
 
 	private static final int DEFAULT_MAPPING_ORDER = 1;
 
-	private static final boolean jackson2Present= ClassUtils.isPresent(
+	private static final boolean jackson2Present = ClassUtils.isPresent(
 			"com.fasterxml.jackson.databind.ObjectMapper", MessageBrokerBeanDefinitionParser.class.getClassLoader());
 
 
@@ -158,7 +165,7 @@ class MessageBrokerBeanDefinitionParser implements BeanDefinitionParser {
 		scopeConfigurer.getPropertyValues().add("scopes", scopeMap);
 		registerBeanDefByName("webSocketScopeConfigurer", scopeConfigurer, context, source);
 
-		registerWebSocketMessageBrokerStats(subProtoHandler, broker, inChannel, outChannel, context, source);
+		registerWebSocketMessageBrokerStats(broker, inChannel, outChannel, context, source);
 
 		context.popAndRegisterContainingComponent();
 		return null;
@@ -198,11 +205,14 @@ class MessageBrokerBeanDefinitionParser implements BeanDefinitionParser {
 			argValues.addIndexedArgumentValue(0, new RuntimeBeanReference(executorName));
 		}
 		RootBeanDefinition channelDef = new RootBeanDefinition(ExecutorSubscribableChannel.class, argValues, null);
+		ManagedList<? super Object> interceptors = new ManagedList<Object>();
 		if (element != null) {
 			Element interceptorsElement = DomUtils.getChildElementByTagName(element, "interceptors");
-			ManagedList<?> interceptors = WebSocketNamespaceUtils.parseBeanSubElements(interceptorsElement, context);
-			channelDef.getPropertyValues().add("interceptors", interceptors);
+			interceptors.addAll(WebSocketNamespaceUtils.parseBeanSubElements(interceptorsElement, context));
 		}
+		interceptors.add(new ImmutableMessageChannelInterceptor());
+		channelDef.getPropertyValues().add("interceptors", interceptors);
+
 		registerBeanDefByName(name, channelDef, context, source);
 		return new RuntimeBeanReference(name);
 	}
@@ -215,6 +225,7 @@ class MessageBrokerBeanDefinitionParser implements BeanDefinitionParser {
 		executorDef.getPropertyValues().add("corePoolSize", Runtime.getRuntime().availableProcessors() * 2);
 		executorDef.getPropertyValues().add("maxPoolSize", Integer.MAX_VALUE);
 		executorDef.getPropertyValues().add("queueCapacity", Integer.MAX_VALUE);
+		executorDef.getPropertyValues().add("allowCoreThreadTimeOut", true);
 		return executorDef;
 	}
 
@@ -229,8 +240,10 @@ class MessageBrokerBeanDefinitionParser implements BeanDefinitionParser {
 		cavs.addIndexedArgumentValue(0, inChannel);
 		cavs.addIndexedArgumentValue(1, outChannel);
 
-		RootBeanDefinition beanDef = new RootBeanDefinition(SubProtocolWebSocketHandler.class, cavs, null);
-		beanDef.getPropertyValues().addPropertyValue("protocolHandlers", stompHandlerDef);
+		RootBeanDefinition handlerDef = new RootBeanDefinition(SubProtocolWebSocketHandler.class, cavs, null);
+		handlerDef.getPropertyValues().addPropertyValue("protocolHandlers", stompHandlerDef);
+		registerBeanDefByName(WEB_SOCKET_HANDLER_BEAN_NAME, handlerDef, context, source);
+		RuntimeBeanReference result = new RuntimeBeanReference(WEB_SOCKET_HANDLER_BEAN_NAME);
 
 		Element transportElem = DomUtils.getChildElementByTagName(element, "transport");
 		if (transportElem != null) {
@@ -238,13 +251,21 @@ class MessageBrokerBeanDefinitionParser implements BeanDefinitionParser {
 				stompHandlerDef.getPropertyValues().add("messageSizeLimit", transportElem.getAttribute("message-size"));
 			}
 			if (transportElem.hasAttribute("send-timeout")) {
-				beanDef.getPropertyValues().add("sendTimeLimit", transportElem.getAttribute("send-timeout"));
+				handlerDef.getPropertyValues().add("sendTimeLimit", transportElem.getAttribute("send-timeout"));
 			}
 			if (transportElem.hasAttribute("send-buffer-size")) {
-				beanDef.getPropertyValues().add("sendBufferSizeLimit", transportElem.getAttribute("send-buffer-size"));
+				handlerDef.getPropertyValues().add("sendBufferSizeLimit", transportElem.getAttribute("send-buffer-size"));
+			}
+			Element factoriesElement = DomUtils.getChildElementByTagName(transportElem, "decorator-factories");
+			if (factoriesElement != null) {
+				ManagedList<Object> factories = extractBeanSubElements(factoriesElement, context);
+				RootBeanDefinition factoryBean = new RootBeanDefinition(DecoratingFactoryBean.class);
+				factoryBean.getConstructorArgumentValues().addIndexedArgumentValue(0, handlerDef);
+				factoryBean.getConstructorArgumentValues().addIndexedArgumentValue(1, factories);
+				result = new RuntimeBeanReference(registerBeanDef(factoryBean, context, source));
 			}
 		}
-		return new RuntimeBeanReference(registerBeanDef(beanDef, context, source));
+		return result;
 	}
 
 	private RuntimeBeanReference registerRequestHandler(Element element, RuntimeBeanReference subProtoHandler,
@@ -264,7 +285,14 @@ class MessageBrokerBeanDefinitionParser implements BeanDefinitionParser {
 		else {
 			RuntimeBeanReference handshakeHandler = WebSocketNamespaceUtils.registerHandshakeHandler(element, context, source);
 			Element interceptorsElement = DomUtils.getChildElementByTagName(element, "handshake-interceptors");
-			ManagedList<?> interceptors = WebSocketNamespaceUtils.parseBeanSubElements(interceptorsElement, context);
+			ManagedList<? super Object> interceptors = WebSocketNamespaceUtils.parseBeanSubElements(interceptorsElement, context);
+			String allowedOriginsAttribute = element.getAttribute("allowed-origins");
+			List<String> allowedOrigins = Arrays.asList(StringUtils.tokenizeToStringArray(allowedOriginsAttribute, ","));
+			if (!allowedOrigins.isEmpty()) {
+				OriginHandshakeInterceptor interceptor = new OriginHandshakeInterceptor();
+				interceptor.setAllowedOrigins(allowedOrigins);
+				interceptors.add(interceptor);
+			}
 			ConstructorArgumentValues cavs = new ConstructorArgumentValues();
 			cavs.addIndexedArgumentValue(0, subProtoHandler);
 			if (handshakeHandler != null) {
@@ -359,6 +387,12 @@ class MessageBrokerBeanDefinitionParser implements BeanDefinitionParser {
 				RootBeanDefinition resolverDef = new RootBeanDefinition(DefaultContentTypeResolver.class);
 				resolverDef.getPropertyValues().add("defaultMimeType", MimeTypeUtils.APPLICATION_JSON);
 				jacksonConverterDef.getPropertyValues().add("contentTypeResolver", resolverDef);
+				// Use Jackson factory in order to have JSR-310 and Joda-Time modules registered automatically
+				GenericBeanDefinition jacksonFactoryDef = new GenericBeanDefinition();
+				jacksonFactoryDef.setBeanClass(Jackson2ObjectMapperFactoryBean.class);
+				jacksonFactoryDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
+				jacksonFactoryDef.setSource(source);
+				jacksonConverterDef.getPropertyValues().add("objectMapper", jacksonFactoryDef);
 				converters.add(jacksonConverterDef);
 			}
 		}
@@ -401,7 +435,28 @@ class MessageBrokerBeanDefinitionParser implements BeanDefinitionParser {
 			String pathMatcherRef = messageBrokerElement.getAttribute("path-matcher");
 			beanDef.getPropertyValues().add("pathMatcher", new RuntimeBeanReference(pathMatcherRef));
 		}
+
+		Element resolversElement = DomUtils.getChildElementByTagName(messageBrokerElement, "argument-resolvers");
+		if (resolversElement != null) {
+			values.add("customArgumentResolvers", extractBeanSubElements(resolversElement, context));
+		}
+
+		Element handlersElement = DomUtils.getChildElementByTagName(messageBrokerElement, "return-value-handlers");
+		if (handlersElement != null) {
+			values.add("customReturnValueHandlers", extractBeanSubElements(handlersElement, context));
+		}
+
 		registerBeanDef(beanDef, context, source);
+	}
+
+	private ManagedList<Object> extractBeanSubElements(Element parentElement, ParserContext parserContext) {
+		ManagedList<Object> list = new ManagedList<Object>();
+		list.setSource(parserContext.extractSource(parentElement));
+		for (Element beanElement : DomUtils.getChildElementsByTagName(parentElement, "bean", "ref")) {
+			Object object = parserContext.getDelegate().parsePropertySubElement(beanElement, null);
+			list.add(object);
+		}
+		return list;
 	}
 
 	private RuntimeBeanReference registerUserDestinationResolver(Element brokerElem,
@@ -428,14 +483,15 @@ class MessageBrokerBeanDefinitionParser implements BeanDefinitionParser {
 		return new RuntimeBeanReference(registerBeanDef(beanDef, context, source));
 	}
 
-	private void registerWebSocketMessageBrokerStats(RuntimeBeanReference subProtoHandler,
-			RootBeanDefinition broker, RuntimeBeanReference inChannel, RuntimeBeanReference outChannel,
-			ParserContext context, Object source) {
+	private void registerWebSocketMessageBrokerStats(RootBeanDefinition broker, RuntimeBeanReference inChannel,
+			RuntimeBeanReference outChannel, ParserContext context, Object source) {
 
 		RootBeanDefinition beanDef = new RootBeanDefinition(WebSocketMessageBrokerStats.class);
-		beanDef.getPropertyValues().add("subProtocolWebSocketHandler", subProtoHandler);
 
-			if (StompBrokerRelayMessageHandler.class.equals(broker.getBeanClass())) {
+		RuntimeBeanReference webSocketHandler = new RuntimeBeanReference(WEB_SOCKET_HANDLER_BEAN_NAME);
+		beanDef.getPropertyValues().add("subProtocolWebSocketHandler", webSocketHandler);
+
+		if (StompBrokerRelayMessageHandler.class.equals(broker.getBeanClass())) {
 			beanDef.getPropertyValues().add("stompBrokerRelay", broker);
 		}
 		String name = inChannel.getBeanName() + "Executor";
@@ -464,6 +520,39 @@ class MessageBrokerBeanDefinitionParser implements BeanDefinitionParser {
 		beanDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
 		context.getRegistry().registerBeanDefinition(name, beanDef);
 		context.registerComponent(new BeanComponentDefinition(beanDef, name));
+	}
+
+
+	private static class DecoratingFactoryBean implements FactoryBean<WebSocketHandler> {
+
+		private final WebSocketHandler handler;
+
+		private final List<WebSocketHandlerDecoratorFactory> factories;
+
+
+		private DecoratingFactoryBean(WebSocketHandler handler, List<WebSocketHandlerDecoratorFactory> factories) {
+			this.handler = handler;
+			this.factories = factories;
+		}
+
+		@Override
+		public WebSocketHandler getObject() throws Exception {
+			WebSocketHandler result = this.handler;
+			for (WebSocketHandlerDecoratorFactory factory : this.factories) {
+				result = factory.decorate(result);
+			}
+			return result;
+		}
+
+		@Override
+		public Class<?> getObjectType() {
+			return WebSocketHandler.class;
+		}
+
+		@Override
+		public boolean isSingleton() {
+			return true;
+		}
 	}
 
 }

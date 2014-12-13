@@ -17,8 +17,15 @@
 package org.springframework.jms.annotation;
 
 import java.lang.reflect.Method;
+import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.BeansException;
@@ -81,6 +88,8 @@ public class JmsListenerAnnotationBeanPostProcessor
 	static final String DEFAULT_JMS_LISTENER_CONTAINER_FACTORY_BEAN_NAME = "jmsListenerContainerFactory";
 
 
+	protected final Log logger = LogFactory.getLog(getClass());
+
 	private JmsListenerEndpointRegistry endpointRegistry;
 
 	private String containerFactoryBeanName = DEFAULT_JMS_LISTENER_CONTAINER_FACTORY_BEAN_NAME;
@@ -92,6 +101,9 @@ public class JmsListenerAnnotationBeanPostProcessor
 	private final JmsListenerEndpointRegistrar registrar = new JmsListenerEndpointRegistrar();
 
 	private final AtomicInteger counter = new AtomicInteger();
+
+	private final Set<Class<?>> nonAnnotatedClasses =
+			Collections.newSetFromMap(new ConcurrentHashMap<Class<?>, Boolean>(64));
 
 
 	@Override
@@ -181,16 +193,33 @@ public class JmsListenerAnnotationBeanPostProcessor
 
 	@Override
 	public Object postProcessAfterInitialization(final Object bean, String beanName) throws BeansException {
-		Class<?> targetClass = AopUtils.getTargetClass(bean);
-		ReflectionUtils.doWithMethods(targetClass, new ReflectionUtils.MethodCallback() {
-			@Override
-			public void doWith(Method method) throws IllegalArgumentException, IllegalAccessException {
-				JmsListener jmsListener = AnnotationUtils.getAnnotation(method, JmsListener.class);
-				if (jmsListener != null) {
-					processJmsListener(jmsListener, method, bean);
+		if (!this.nonAnnotatedClasses.contains(bean.getClass())) {
+			final Set<Method> annotatedMethods = new LinkedHashSet<Method>(1);
+			Class<?> targetClass = AopUtils.getTargetClass(bean);
+			ReflectionUtils.doWithMethods(targetClass, new ReflectionUtils.MethodCallback() {
+				@Override
+				public void doWith(Method method) throws IllegalArgumentException, IllegalAccessException {
+					JmsListener jmsListener = AnnotationUtils.getAnnotation(method, JmsListener.class);
+					if (jmsListener != null) {
+						processJmsListener(jmsListener, method, bean);
+						annotatedMethods.add(method);
+					}
+				}
+			});
+			if (annotatedMethods.isEmpty()) {
+				this.nonAnnotatedClasses.add(bean.getClass());
+				if (logger.isDebugEnabled()) {
+					logger.debug("No @JmsListener annotations found on bean class: " + bean.getClass());
 				}
 			}
-		});
+			else {
+				// Non-empty set of methods
+				if (logger.isDebugEnabled()) {
+					logger.debug(annotatedMethods.size() + " @JmsListener methods processed on bean '" + beanName +
+							"': " + annotatedMethods);
+				}
+			}
+		}
 		return bean;
 	}
 

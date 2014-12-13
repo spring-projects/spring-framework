@@ -47,22 +47,22 @@ public class MethodParameter {
 
 	private final int parameterIndex;
 
-	private Class<?> containingClass;
-
-	private Class<?> parameterType;
-
-	private Type genericParameterType;
-
-	private Annotation[] parameterAnnotations;
-
-	private ParameterNameDiscoverer parameterNameDiscoverer;
-
-	private String parameterName;
-
 	private int nestingLevel = 1;
 
 	/** Map from Integer level to Integer type index */
 	Map<Integer, Integer> typeIndexesPerLevel;
+
+	private volatile Class<?> containingClass;
+
+	private volatile Class<?> parameterType;
+
+	private volatile Type genericParameterType;
+
+	private volatile Annotation[] parameterAnnotations;
+
+	private volatile ParameterNameDiscoverer parameterNameDiscoverer;
+
+	private volatile String parameterName;
 
 
 	/**
@@ -127,14 +127,14 @@ public class MethodParameter {
 		this.method = original.method;
 		this.constructor = original.constructor;
 		this.parameterIndex = original.parameterIndex;
+		this.nestingLevel = original.nestingLevel;
+		this.typeIndexesPerLevel = original.typeIndexesPerLevel;
 		this.containingClass = original.containingClass;
 		this.parameterType = original.parameterType;
 		this.genericParameterType = original.genericParameterType;
 		this.parameterAnnotations = original.parameterAnnotations;
 		this.parameterNameDiscoverer = original.parameterNameDiscoverer;
 		this.parameterName = original.parameterName;
-		this.nestingLevel = original.nestingLevel;
-		this.typeIndexesPerLevel = original.typeIndexesPerLevel;
 	}
 
 
@@ -202,6 +202,73 @@ public class MethodParameter {
 	public int getParameterIndex() {
 		return this.parameterIndex;
 	}
+
+	/**
+	 * Increase this parameter's nesting level.
+	 * @see #getNestingLevel()
+	 */
+	public void increaseNestingLevel() {
+		this.nestingLevel++;
+	}
+
+	/**
+	 * Decrease this parameter's nesting level.
+	 * @see #getNestingLevel()
+	 */
+	public void decreaseNestingLevel() {
+		getTypeIndexesPerLevel().remove(this.nestingLevel);
+		this.nestingLevel--;
+	}
+
+	/**
+	 * Return the nesting level of the target type
+	 * (typically 1; e.g. in case of a List of Lists, 1 would indicate the
+	 * nested List, whereas 2 would indicate the element of the nested List).
+	 */
+	public int getNestingLevel() {
+		return this.nestingLevel;
+	}
+
+	/**
+	 * Set the type index for the current nesting level.
+	 * @param typeIndex the corresponding type index
+	 * (or {@code null} for the default type index)
+	 * @see #getNestingLevel()
+	 */
+	public void setTypeIndexForCurrentLevel(int typeIndex) {
+		getTypeIndexesPerLevel().put(this.nestingLevel, typeIndex);
+	}
+
+	/**
+	 * Return the type index for the current nesting level.
+	 * @return the corresponding type index, or {@code null}
+	 * if none specified (indicating the default type index)
+	 * @see #getNestingLevel()
+	 */
+	public Integer getTypeIndexForCurrentLevel() {
+		return getTypeIndexForLevel(this.nestingLevel);
+	}
+
+	/**
+	 * Return the type index for the specified nesting level.
+	 * @param nestingLevel the nesting level to check
+	 * @return the corresponding type index, or {@code null}
+	 * if none specified (indicating the default type index)
+	 */
+	public Integer getTypeIndexForLevel(int nestingLevel) {
+		return getTypeIndexesPerLevel().get(nestingLevel);
+	}
+
+	/**
+	 * Obtain the (lazily constructed) type-indexes-per-level Map.
+	 */
+	private Map<Integer, Integer> getTypeIndexesPerLevel() {
+		if (this.typeIndexesPerLevel == null) {
+			this.typeIndexesPerLevel = new HashMap<Integer, Integer>(4);
+		}
+		return this.typeIndexesPerLevel;
+	}
+
 
 	/**
 	 * Set a containing class to resolve the parameter type against.
@@ -364,10 +431,10 @@ public class MethodParameter {
 	 * has been set to begin with)
 	 */
 	public String getParameterName() {
-		if (this.parameterNameDiscoverer != null) {
+		ParameterNameDiscoverer discoverer = this.parameterNameDiscoverer;
+		if (discoverer != null) {
 			String[] parameterNames = (this.method != null ?
-					this.parameterNameDiscoverer.getParameterNames(this.method) :
-					this.parameterNameDiscoverer.getParameterNames(this.constructor));
+					discoverer.getParameterNames(this.method) : discoverer.getParameterNames(this.constructor));
 			if (parameterNames != null) {
 				this.parameterName = parameterNames[this.parameterIndex];
 			}
@@ -376,82 +443,17 @@ public class MethodParameter {
 		return this.parameterName;
 	}
 
-	/**
-	 * Increase this parameter's nesting level.
-	 * @see #getNestingLevel()
-	 */
-	public void increaseNestingLevel() {
-		this.nestingLevel++;
-	}
-
-	/**
-	 * Decrease this parameter's nesting level.
-	 * @see #getNestingLevel()
-	 */
-	public void decreaseNestingLevel() {
-		getTypeIndexesPerLevel().remove(this.nestingLevel);
-		this.nestingLevel--;
-	}
-
-	/**
-	 * Return the nesting level of the target type
-	 * (typically 1; e.g. in case of a List of Lists, 1 would indicate the
-	 * nested List, whereas 2 would indicate the element of the nested List).
-	 */
-	public int getNestingLevel() {
-		return this.nestingLevel;
-	}
-
-	/**
-	 * Set the type index for the current nesting level.
-	 * @param typeIndex the corresponding type index
-	 * (or {@code null} for the default type index)
-	 * @see #getNestingLevel()
-	 */
-	public void setTypeIndexForCurrentLevel(int typeIndex) {
-		getTypeIndexesPerLevel().put(this.nestingLevel, typeIndex);
-	}
-
-	/**
-	 * Return the type index for the current nesting level.
-	 * @return the corresponding type index, or {@code null}
-	 * if none specified (indicating the default type index)
-	 * @see #getNestingLevel()
-	 */
-	public Integer getTypeIndexForCurrentLevel() {
-		return getTypeIndexForLevel(this.nestingLevel);
-	}
-
-	/**
-	 * Return the type index for the specified nesting level.
-	 * @param nestingLevel the nesting level to check
-	 * @return the corresponding type index, or {@code null}
-	 * if none specified (indicating the default type index)
-	 */
-	public Integer getTypeIndexForLevel(int nestingLevel) {
-		return getTypeIndexesPerLevel().get(nestingLevel);
-	}
-
-	/**
-	 * Obtain the (lazily constructed) type-indexes-per-level Map.
-	 */
-	private Map<Integer, Integer> getTypeIndexesPerLevel() {
-		if (this.typeIndexesPerLevel == null) {
-			this.typeIndexesPerLevel = new HashMap<Integer, Integer>(4);
-		}
-		return this.typeIndexesPerLevel;
-	}
 
 	@Override
-	public boolean equals(Object obj) {
-		if (this == obj) {
+	public boolean equals(Object other) {
+		if (this == other) {
 			return true;
 		}
-		if (obj != null && obj instanceof MethodParameter) {
-			MethodParameter other = (MethodParameter) obj;
-			return (this.parameterIndex == other.parameterIndex && getMember().equals(other.getMember()));
+		if (!(other instanceof MethodParameter)) {
+			return false;
 		}
-		return false;
+		MethodParameter otherParam = (MethodParameter) other;
+		return (this.parameterIndex == otherParam.parameterIndex && getMember().equals(otherParam.getMember()));
 	}
 
 	@Override

@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,21 +16,22 @@
 
 package org.springframework.web.servlet.resource;
 
+import java.io.IOException;
+import javax.servlet.http.HttpServletRequest;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.core.io.Resource;
 import org.springframework.util.Assert;
 
-import javax.servlet.http.HttpServletRequest;
-import java.io.IOException;
-
 /**
- * A {@link org.springframework.web.servlet.resource.ResourceTransformer} that
- * checks a {@link org.springframework.cache.Cache} to see if a previously
- * transformed or otherwise
- * delegates to the resolver chain and saves the result in the cache.
+ * A {@link org.springframework.web.servlet.resource.ResourceTransformer} that checks a
+ * {@link org.springframework.cache.Cache} to see if a previously transformed resource
+ * exists in the cache and returns it if found, and otherwise delegates to the resolver
+ * chain and saves the result in the cache.
  *
  * @author Rossen Stoyanchev
  * @since 4.1

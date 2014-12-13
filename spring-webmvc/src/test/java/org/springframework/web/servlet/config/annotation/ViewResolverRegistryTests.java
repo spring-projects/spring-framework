@@ -16,8 +16,11 @@
 
 package org.springframework.web.servlet.config.annotation;
 
+import java.util.Arrays;
+
 import org.junit.Before;
 import org.junit.Test;
+
 import org.springframework.beans.DirectFieldAccessor;
 import org.springframework.core.Ordered;
 import org.springframework.web.accept.ContentNegotiationManager;
@@ -37,10 +40,7 @@ import org.springframework.web.servlet.view.velocity.VelocityConfigurer;
 import org.springframework.web.servlet.view.velocity.VelocityViewResolver;
 import org.springframework.web.servlet.view.xml.MarshallingView;
 
-import java.util.Arrays;
-
 import static org.junit.Assert.*;
-import static org.junit.Assert.assertEquals;
 
 /**
  * Test fixture with a {@link ViewResolverRegistry}.

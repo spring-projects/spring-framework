@@ -16,17 +16,13 @@
 
 package org.springframework.web.servlet.view;
 
-import java.util.Arrays;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.util.StringUtils;
-import org.springframework.web.context.support.ContextExposingHttpServletRequest;
 import org.springframework.web.util.WebUtils;
 
 /**

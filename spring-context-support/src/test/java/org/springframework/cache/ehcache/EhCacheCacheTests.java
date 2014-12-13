@@ -16,8 +16,6 @@
 
 package org.springframework.cache.ehcache;
 
-import static org.junit.Assert.*;
-
 import net.sf.ehcache.CacheManager;
 import net.sf.ehcache.Ehcache;
 import net.sf.ehcache.Element;
@@ -26,9 +24,12 @@ import net.sf.ehcache.config.Configuration;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+
 import org.springframework.cache.AbstractCacheTests;
 import org.springframework.tests.Assume;
 import org.springframework.tests.TestGroup;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Costin Leau

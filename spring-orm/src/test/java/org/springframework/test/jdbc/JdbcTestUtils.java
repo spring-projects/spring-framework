@@ -16,11 +16,11 @@
 
 package org.springframework.test.jdbc;
 
-import org.springframework.util.StringUtils;
-
-import java.util.List;
-import java.io.LineNumberReader;
 import java.io.IOException;
+import java.io.LineNumberReader;
+import java.util.List;
+
+import org.springframework.util.StringUtils;
 
 /**
  * JdbcTestUtils is a collection of JDBC related utility methods for

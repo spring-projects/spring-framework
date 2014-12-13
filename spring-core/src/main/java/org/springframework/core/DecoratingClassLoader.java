@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,9 @@ package org.springframework.core;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.springframework.lang.UsesJava7;
 import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
 
 /**
  * Base class for decorating ClassLoaders such as {@link OverridingClassLoader}
@@ -30,7 +32,22 @@ import org.springframework.util.Assert;
  * @author Rod Johnson
  * @since 2.5.2
  */
+@UsesJava7
 public abstract class DecoratingClassLoader extends ClassLoader {
+
+	/**
+	 * Java 7+ {@code ClassLoader.registerAsParallelCapable()} available?
+	 * @since 4.1.2
+	 */
+	protected static final boolean parallelCapableClassLoaderAvailable =
+			ClassUtils.hasMethod(ClassLoader.class, "registerAsParallelCapable");
+
+	static {
+		if (parallelCapableClassLoaderAvailable) {
+			ClassLoader.registerAsParallelCapable();
+		}
+	}
+
 
 	private final Set<String> excludedPackages = new HashSet<String>();
 

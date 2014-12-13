@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Vector;
@@ -199,7 +200,7 @@ public class CollectionToCollectionConverterTests {
 	public void listToCollectionNoCopyRequired() throws NoSuchFieldException {
 		List<?> input = new ArrayList<String>(Arrays.asList("foo", "bar"));
 		assertSame(input, conversionService.convert(input, TypeDescriptor.forObject(input),
-				new TypeDescriptor(getClass().getField("wildCardCollection"))));
+				new TypeDescriptor(getClass().getField("wildcardCollection"))));
 	}
 
 	@Test
@@ -232,7 +233,7 @@ public class CollectionToCollectionConverterTests {
 		assertSame(resources, conversionService.convert(resources, sourceType, new TypeDescriptor(getClass().getField("resources"))));
 	}
 
-	@Test(expected=ConverterNotFoundException.class)
+	@Test(expected = ConverterNotFoundException.class)
 	public void elementTypesNotConvertible() throws Exception {
 		List<String> resources = new ArrayList<String>();
 		resources.add(null);
@@ -241,7 +242,7 @@ public class CollectionToCollectionConverterTests {
 		assertEquals(resources, conversionService.convert(resources, sourceType, new TypeDescriptor(getClass().getField("resources"))));
 	}
 
-	@Test(expected=ConversionFailedException.class)
+	@Test(expected = ConversionFailedException.class)
 	public void nothingInCommon() throws Exception {
 		List<Object> resources = new ArrayList<Object>();
 		resources.add(new ClassPathResource("test"));
@@ -250,22 +251,15 @@ public class CollectionToCollectionConverterTests {
 		assertEquals(resources, conversionService.convert(resources, sourceType, new TypeDescriptor(getClass().getField("resources"))));
 	}
 
-
-	public ArrayList<Integer> scalarListTarget;
-
-	public List<Integer> emptyListTarget;
-
-	public LinkedList<Integer> emptyListDifferentTarget;
-
-	public List<List<List<Integer>>> objectToCollection;
-
-	public List<String> strings;
-
-	public List list = Collections.emptyList();
-
-	public Collection<?> wildCardCollection = Collections.emptyList();
-
-	public List<Resource> resources;
+	@Test
+	public void testStringToEnumSet() throws Exception {
+		conversionService.addConverterFactory(new StringToEnumConverterFactory());
+		List<String> list = new ArrayList<String>();
+		list.add("A");
+		list.add("C");
+		assertEquals(EnumSet.of(MyEnum.A, MyEnum.C),
+				conversionService.convert(list, TypeDescriptor.forObject(list), new TypeDescriptor(getClass().getField("enumSet"))));
+	}
 
 
 	public static abstract class BaseResource implements Resource {
@@ -334,5 +328,27 @@ public class CollectionToCollectionConverterTests {
 
 	public static class TestResource extends BaseResource {
 	}
+
+
+	public static enum MyEnum {A, B, C}
+
+
+	public ArrayList<Integer> scalarListTarget;
+
+	public List<Integer> emptyListTarget;
+
+	public LinkedList<Integer> emptyListDifferentTarget;
+
+	public List<List<List<Integer>>> objectToCollection;
+
+	public List<String> strings;
+
+	public List list = Collections.emptyList();
+
+	public Collection<?> wildcardCollection = Collections.emptyList();
+
+	public List<Resource> resources;
+
+	public EnumSet<MyEnum> enumSet;
 
 }

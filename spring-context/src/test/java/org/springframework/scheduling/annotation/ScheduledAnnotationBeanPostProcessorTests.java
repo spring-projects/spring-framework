@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.Properties;
 import java.util.TimeZone;
 
+import org.junit.After;
 import org.junit.Test;
 
 import org.springframework.beans.DirectFieldAccessor;
@@ -46,6 +47,8 @@ import org.springframework.scheduling.support.ScheduledMethodRunnable;
 import org.springframework.scheduling.support.SimpleTriggerContext;
 import org.springframework.tests.Assume;
 import org.springframework.tests.TestGroup;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.validation.beanvalidation.MethodValidationPostProcessor;
 
 import static org.junit.Assert.*;
 
@@ -59,6 +62,13 @@ import static org.junit.Assert.*;
 public class ScheduledAnnotationBeanPostProcessorTests {
 
 	private final StaticApplicationContext context = new StaticApplicationContext();
+
+
+	@After
+	public void closeContextAfterTest() {
+		context.close();
+	}
+
 
 	@Test
 	public void fixedDelayTask() {
@@ -140,7 +150,8 @@ public class ScheduledAnnotationBeanPostProcessorTests {
 	public void severalFixedRatesWithRepeatedScheduledAnnotation() {
 		BeanDefinition processorDefinition = new
 		RootBeanDefinition(ScheduledAnnotationBeanPostProcessor.class);
-		BeanDefinition targetDefinition = new RootBeanDefinition(SeveralFixedRatesWithRepeatedScheduledAnnotationTestBean.class);
+		BeanDefinition targetDefinition = new RootBeanDefinition(
+				SeveralFixedRatesWithRepeatedScheduledAnnotationTestBean.class);
 		severalFixedRates(context, processorDefinition, targetDefinition);
 	}
 
@@ -155,6 +166,7 @@ public class ScheduledAnnotationBeanPostProcessorTests {
 
 	private void severalFixedRates(StaticApplicationContext context,
 			BeanDefinition processorDefinition, BeanDefinition targetDefinition) {
+
 		context.registerBeanDefinition("postProcessor", processorDefinition);
 		context.registerBeanDefinition("target", targetDefinition);
 		context.refresh();
@@ -248,7 +260,8 @@ public class ScheduledAnnotationBeanPostProcessorTests {
 		Date lastActualExecutionTime = cal.getTime();
 		cal.add(Calendar.MINUTE, 30); // 4:30
 		Date lastCompletionTime = cal.getTime();
-		TriggerContext triggerContext = new SimpleTriggerContext(lastScheduledExecutionTime, lastActualExecutionTime, lastCompletionTime);
+		TriggerContext triggerContext = new SimpleTriggerContext(
+				lastScheduledExecutionTime, lastActualExecutionTime, lastCompletionTime);
 		cal.add(Calendar.MINUTE, 30);
 		cal.add(Calendar.HOUR_OF_DAY, 1); // 6:00
 		Date nextExecutionTime = cronTrigger.nextExecutionTime(triggerContext);
@@ -267,6 +280,18 @@ public class ScheduledAnnotationBeanPostProcessorTests {
 		context.registerBeanDefinition("target", targetDefinition);
 		context.refresh();
 		Thread.sleep(10000);
+	}
+
+	@Test(expected = BeanCreationException.class)
+	public void cronTaskWithMethodValidation() throws InterruptedException {
+		BeanDefinition validationDefinition = new RootBeanDefinition(MethodValidationPostProcessor.class);
+		BeanDefinition processorDefinition = new RootBeanDefinition(ScheduledAnnotationBeanPostProcessor.class);
+		BeanDefinition targetDefinition = new RootBeanDefinition(
+				ScheduledAnnotationBeanPostProcessorTests.CronTestBean.class);
+		context.registerBeanDefinition("methodValidation", validationDefinition);
+		context.registerBeanDefinition("postProcessor", processorDefinition);
+		context.registerBeanDefinition("target", targetDefinition);
+		context.refresh();
 	}
 
 	@Test
@@ -527,10 +552,11 @@ public class ScheduledAnnotationBeanPostProcessorTests {
 	}
 
 
+	@Validated
 	static class CronTestBean {
 
 		@Scheduled(cron="*/7 * * * * ?")
-		public void cron() throws IOException {
+		private void cron() throws IOException {
 			throw new IOException("no no no");
 		}
 	}
@@ -539,7 +565,7 @@ public class ScheduledAnnotationBeanPostProcessorTests {
 	static class CronWithTimezoneTestBean {
 
 		@Scheduled(cron="0 0 0-4,6-23 * * ?", zone = "GMT+10")
-		public void cron() throws IOException {
+		protected void cron() throws IOException {
 			throw new IOException("no no no");
 		}
 	}
@@ -642,7 +668,8 @@ public class ScheduledAnnotationBeanPostProcessorTests {
 	@Scheduled(cron="${schedules.businessHours}")
 	@Target(ElementType.METHOD)
 	@Retention(RetentionPolicy.RUNTIME)
-	private static @interface BusinessHours {}
+	private static @interface BusinessHours {
+	}
 
 
 	static class PropertyPlaceholderMetaAnnotationTestBean {

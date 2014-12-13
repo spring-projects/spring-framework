@@ -16,16 +16,16 @@
 
 package org.springframework.web.context.support;
 
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-
 import javax.servlet.ServletContextEvent;
 
 import org.junit.Test;
+
 import org.springframework.context.annotation.ClassPathBeanDefinitionScanner;
 import org.springframework.mock.web.test.MockServletContext;
 import org.springframework.web.context.ContextLoader;
 import org.springframework.web.context.ContextLoaderListener;
+
+import static org.junit.Assert.*;
 
 /**
  * Tests the interaction between a WebApplicationContext and ContextLoaderListener with

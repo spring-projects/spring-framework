@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,12 @@
 
 package org.springframework.beans;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
+
 import org.junit.Test;
+
+import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.tests.sample.beans.CustomEnum;
 import org.springframework.tests.sample.beans.GenericBean;
 
@@ -118,6 +123,54 @@ public final class BeanWrapperEnumTests {
 		assertEquals(2, gb.getCustomEnumSet().size());
 		assertTrue(gb.getCustomEnumSet().contains(CustomEnum.VALUE_1));
 		assertTrue(gb.getCustomEnumSet().contains(CustomEnum.VALUE_2));
+	}
+
+	@Test
+	public void testStandardEnumSetWithMultipleValues() {
+		GenericBean<?> gb = new GenericBean<Object>();
+		BeanWrapper bw = new BeanWrapperImpl(gb);
+		bw.setConversionService(new DefaultConversionService());
+		assertNull(gb.getStandardEnumSet());
+		bw.setPropertyValue("standardEnumSet", new String[] {"VALUE_1", "VALUE_2"});
+		assertEquals(2, gb.getStandardEnumSet().size());
+		assertTrue(gb.getStandardEnumSet().contains(CustomEnum.VALUE_1));
+		assertTrue(gb.getStandardEnumSet().contains(CustomEnum.VALUE_2));
+	}
+
+	@Test
+	public void testStandardEnumSetWithAutoGrowing() {
+		GenericBean<?> gb = new GenericBean<Object>();
+		BeanWrapper bw = new BeanWrapperImpl(gb);
+		bw.setAutoGrowNestedPaths(true);
+		assertNull(gb.getStandardEnumSet());
+		bw.getPropertyValue("standardEnumSet.class");
+		assertEquals(0, gb.getStandardEnumSet().size());
+	}
+
+	@Test
+	public void testStandardEnumMapWithMultipleValues() {
+		GenericBean<?> gb = new GenericBean<Object>();
+		BeanWrapper bw = new BeanWrapperImpl(gb);
+		bw.setConversionService(new DefaultConversionService());
+		assertNull(gb.getStandardEnumMap());
+		Map<String, Integer> map = new LinkedHashMap<String, Integer>();
+		map.put("VALUE_1", 1);
+		map.put("VALUE_2", 2);
+		bw.setPropertyValue("standardEnumMap", map);
+		assertEquals(2, gb.getStandardEnumMap().size());
+		assertEquals(new Integer(1), gb.getStandardEnumMap().get(CustomEnum.VALUE_1));
+		assertEquals(new Integer(2), gb.getStandardEnumMap().get(CustomEnum.VALUE_2));
+	}
+
+	@Test
+	public void testStandardEnumMapWithAutoGrowing() {
+		GenericBean<?> gb = new GenericBean<Object>();
+		BeanWrapper bw = new BeanWrapperImpl(gb);
+		bw.setAutoGrowNestedPaths(true);
+		assertNull(gb.getStandardEnumMap());
+		bw.setPropertyValue("standardEnumMap[VALUE_1]", 1);
+		assertEquals(1, gb.getStandardEnumMap().size());
+		assertEquals(new Integer(1), gb.getStandardEnumMap().get(CustomEnum.VALUE_1));
 	}
 
 }

@@ -20,9 +20,9 @@ import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.EvaluationException;
 
 /**
- * Base superclass for compiled expressions. Each generated compiled expression class will
- * extend this class and implement one of the getValue() methods. It is not intended
- * to subclassed by user code.
+ * Base superclass for compiled expressions. Each generated compiled expression class
+ * will extend this class and implement the {@link #getValue} method. It is not intended
+ * to be subclassed by user code.
  * 
  * @author Andy Clement
  * @since 4.1

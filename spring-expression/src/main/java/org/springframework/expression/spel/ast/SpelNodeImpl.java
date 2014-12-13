@@ -16,6 +16,10 @@
 
 package org.springframework.expression.spel.ast;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Member;
+import java.lang.reflect.Method;
+
 import org.springframework.asm.MethodVisitor;
 import org.springframework.asm.Opcodes;
 import org.springframework.expression.EvaluationException;
@@ -28,10 +32,11 @@ import org.springframework.expression.spel.SpelMessage;
 import org.springframework.expression.spel.SpelNode;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.util.Assert;
+import org.springframework.util.ObjectUtils;
 
 /**
- * The common supertype of all AST nodes in a parsed Spring Expression Language format
- * expression.
+ * The common supertype of all AST nodes in a parsed Spring Expression Language
+ * format expression.
  *
  * @author Andy Clement
  * @since 3.0
@@ -48,13 +53,13 @@ public abstract class SpelNodeImpl implements SpelNode, Opcodes {
 	private SpelNodeImpl parent;
 
 	/**
-	 * Indicates the type descriptor for the result of this expression node. This is
-	 * set as soon as it is known. For a literal node it is known immediately. For
-	 * a property access or method invocation it is known after one evaluation of
+	 * Indicates the type descriptor for the result of this expression node.
+	 * This is set as soon as it is known. For a literal node it is known immediately.
+	 * For a property access or method invocation it is known after one evaluation of
 	 * that node.
-	 * The descriptor is like the bytecode form but is slightly easier to work with. It
-	 * does not include the trailing semicolon (for non array reference types). Some examples:
-	 * Ljava/lang/String, I, [I
+	 * <p>The descriptor is like the bytecode form but is slightly easier to work with.
+	 * It does not include the trailing semicolon (for non array reference types).
+	 * Some examples: Ljava/lang/String, I, [I
      */
 	protected volatile String exitTypeDescriptor;
 
@@ -62,11 +67,11 @@ public abstract class SpelNodeImpl implements SpelNode, Opcodes {
 	public SpelNodeImpl(int pos, SpelNodeImpl... operands) {
 		this.pos = pos;
 		// pos combines start and end so can never be zero because tokens cannot be zero length
-		Assert.isTrue(pos != 0);
-		if (operands != null && operands.length > 0) {
+		Assert.isTrue(pos != 0, "Pos must not be 0");
+		if (!ObjectUtils.isEmpty(operands)) {
 			this.children = operands;
-			for (SpelNodeImpl childnode : operands) {
-				childnode.parent = this;
+			for (SpelNodeImpl childNode : operands) {
+				childNode.parent = this;
 			}
 		}
 	}
@@ -183,7 +188,7 @@ public abstract class SpelNodeImpl implements SpelNode, Opcodes {
 	 * Check whether a node can be compiled to bytecode. The reasoning in each node may
 	 * be different but will typically involve checking whether the exit type descriptor
 	 * of the node is known and any relevant child nodes are compilable.
-	 * @return true if this node can be compiled to bytecode
+	 * @return {@code true} if this node can be compiled to bytecode
 	 */
 	public boolean isCompilable() {
 		return false;
@@ -195,10 +200,10 @@ public abstract class SpelNodeImpl implements SpelNode, Opcodes {
 	 * example it will include information about the type of the object currently
 	 * on the stack.
 	 * @param mv the ASM MethodVisitor into which code should be generated
-	 * @param codeflow a context object with info about what is on the stack
+	 * @param cf a context object with info about what is on the stack
 	 */
-	public void generateCode(MethodVisitor mv, CodeFlow codeflow) {
-		throw new IllegalStateException(this.getClass().getName()+" has no generateCode(..) method");
+	public void generateCode(MethodVisitor mv, CodeFlow cf) {
+		throw new IllegalStateException(getClass().getName() +" has no generateCode(..) method");
 	}
 
 	public String getExitDescriptor() {
@@ -207,4 +212,89 @@ public abstract class SpelNodeImpl implements SpelNode, Opcodes {
 
 	public abstract TypedValue getValueInternal(ExpressionState expressionState) throws EvaluationException;
 
+	
+	/**
+	 * Generate code that handles building the argument values for the specified method. This method will take account
+	 * of whether the invoked method is a varargs method and if it is then the argument values will be appropriately
+	 * packaged into an array.
+	 * @param mv the method visitor where code should be generated
+	 * @param cf the current codeflow
+	 * @param member the method or constructor for which arguments are being setup
+	 * @param arguments the expression nodes for the expression supplied argument values
+	 */
+	protected static void generateCodeForArguments(MethodVisitor mv, CodeFlow cf, Member member, SpelNodeImpl[] arguments) {
+		String[] paramDescriptors = null;
+		boolean isVarargs = false;
+		if (member instanceof Constructor) {
+			Constructor<?> ctor = (Constructor<?>)member;
+			paramDescriptors = CodeFlow.toDescriptors(ctor.getParameterTypes());
+			isVarargs = ctor.isVarArgs();
+		}
+		else { // Method
+			Method method = (Method)member;
+			paramDescriptors = CodeFlow.toDescriptors(method.getParameterTypes());
+			isVarargs = method.isVarArgs();
+		}
+		if (isVarargs) {
+			// The final parameter may or may not need packaging into an array, or nothing may
+			// have been passed to satisfy the varargs and so something needs to be built.
+			int p = 0; // Current supplied argument being processed
+			int childcount = arguments.length;
+						
+			// Fulfill all the parameter requirements except the last one
+			for (p = 0; p < paramDescriptors.length-1;p++) {
+				generateCodeForArgument(mv, cf, arguments[p], paramDescriptors[p]);
+			}
+			
+			SpelNodeImpl lastchild = (childcount == 0 ? null : arguments[childcount-1]);			
+			String arraytype = paramDescriptors[paramDescriptors.length-1];
+			// Determine if the final passed argument is already suitably packaged in array
+			// form to be passed to the method
+			if (lastchild != null && lastchild.getExitDescriptor().equals(arraytype)) {
+				generateCodeForArgument(mv, cf, lastchild, paramDescriptors[p]);
+			}
+			else {
+				arraytype = arraytype.substring(1); // trim the leading '[', may leave other '['		
+				// build array big enough to hold remaining arguments
+				CodeFlow.insertNewArrayCode(mv, childcount-p, arraytype);
+				// Package up the remaining arguments into the array
+				int arrayindex = 0;
+				while (p < childcount) {
+					SpelNodeImpl child = arguments[p];
+					mv.visitInsn(DUP);
+					CodeFlow.insertOptimalLoad(mv, arrayindex++);
+					generateCodeForArgument(mv, cf, child, arraytype);
+					CodeFlow.insertArrayStore(mv, arraytype);
+					p++;
+				}
+			}
+		}
+		else {
+			for (int i = 0; i < paramDescriptors.length;i++) {
+				generateCodeForArgument(mv, cf, arguments[i], paramDescriptors[i]);
+			}
+		}
+	}
+
+	/**
+	 * Ask an argument to generate its bytecode and then follow it up
+	 * with any boxing/unboxing/checkcasting to ensure it matches the expected parameter descriptor.
+	 */
+	protected static void generateCodeForArgument(MethodVisitor mv, CodeFlow cf, SpelNodeImpl argument, String paramDescriptor) {
+		cf.enterCompilationScope();
+		argument.generateCode(mv, cf);
+		boolean primitiveOnStack = CodeFlow.isPrimitive(cf.lastDescriptor());
+		// Check if need to box it for the method reference?
+		if (primitiveOnStack && paramDescriptor.charAt(0) == 'L') {
+			CodeFlow.insertBoxIfNecessary(mv, cf.lastDescriptor().charAt(0));
+		}
+		else if (paramDescriptor.length() == 1 && !primitiveOnStack) {
+			CodeFlow.insertUnboxInsns(mv, paramDescriptor.charAt(0), cf.lastDescriptor());
+		}
+		else if (!cf.lastDescriptor().equals(paramDescriptor)) {
+			// This would be unnecessary in the case of subtyping (e.g. method takes Number but Integer passed in)
+			CodeFlow.insertCheckCast(mv, paramDescriptor);
+		}
+		cf.exitCompilationScope();
+	}
 }

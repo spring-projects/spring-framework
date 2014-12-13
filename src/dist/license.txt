@@ -269,7 +269,7 @@ sending a request, with your name and address to:
     San Francisco, CA 94103
     United States of America
 
-or email info@gopivotal.com.  All such requests should clearly specify:
+or email info@pivotal.io.  All such requests should clearly specify:
 
     OPEN SOURCE FILES REQUEST
     Attention General Counsel

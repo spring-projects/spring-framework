@@ -79,6 +79,13 @@ class WebMvcConfigurerComposite implements WebMvcConfigurer {
 	}
 
 	@Override
+	public void extendMessageConverters(List<HttpMessageConverter<?>> converters) {
+		for (WebMvcConfigurer delegate : this.delegates) {
+			delegate.extendMessageConverters(converters);
+		}
+	}
+
+	@Override
 	public void addArgumentResolvers(List<HandlerMethodArgumentResolver> argumentResolvers) {
 		for (WebMvcConfigurer delegate : this.delegates) {
 			delegate.addArgumentResolvers(argumentResolvers);

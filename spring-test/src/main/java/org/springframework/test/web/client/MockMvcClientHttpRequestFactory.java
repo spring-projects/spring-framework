@@ -15,8 +15,6 @@
  */
 package org.springframework.test.web.client;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.request;
-
 import java.io.IOException;
 import java.net.URI;
 import java.util.List;
@@ -33,6 +31,8 @@ import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
+
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 
 /**
  * A {@link ClientHttpRequestFactory} for requests executed via {@link MockMvc}.

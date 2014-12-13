@@ -78,9 +78,9 @@ public class JCacheAspectSupport extends AbstractCacheInvoker implements Initial
 	}
 
 	public void afterPropertiesSet() {
-		Assert.state(this.cacheOperationSource != null, "The 'cacheOperationSource' property is required: " +
+		Assert.state(getCacheOperationSource() != null, "The 'cacheOperationSource' property is required: " +
 				"If there are no cacheable methods, then don't use a cache aspect.");
-		Assert.state(this.getErrorHandler() != null, "The 'errorHandler' is required.");
+		Assert.state(getErrorHandler() != null, "The 'errorHandler' is required");
 
 		this.cacheResultInterceptor = new CacheResultInterceptor(getErrorHandler());
 		this.cachePutInterceptor = new CachePutInterceptor(getErrorHandler());
@@ -92,8 +92,7 @@ public class JCacheAspectSupport extends AbstractCacheInvoker implements Initial
 
 
 	protected Object execute(CacheOperationInvoker invoker, Object target, Method method, Object[] args) {
-		// check whether aspect is enabled
-		// to cope with cases where the AJ is pulled in automatically
+		// Check whether aspect is enabled to cope with cases where the AJ is pulled in automatically
 		if (this.initialized) {
 			Class<?> targetClass = getTargetClass(target);
 			JCacheOperation<?> operation = getCacheOperationSource().getCacheOperation(method, targetClass);
@@ -108,9 +107,9 @@ public class JCacheAspectSupport extends AbstractCacheInvoker implements Initial
 	}
 
 	@SuppressWarnings("unchecked")
-	private CacheOperationInvocationContext<?> createCacheOperationInvocationContext(Object target,
-			Object[] args,
-			JCacheOperation<?> operation) {
+	private CacheOperationInvocationContext<?> createCacheOperationInvocationContext(
+			Object target, Object[] args, JCacheOperation<?> operation) {
+
 		return new DefaultCacheInvocationContext<Annotation>(
 				(JCacheOperation<Annotation>) operation, target, args);
 	}
@@ -124,12 +123,10 @@ public class JCacheAspectSupport extends AbstractCacheInvoker implements Initial
 	}
 
 	@SuppressWarnings("unchecked")
-	private Object execute(CacheOperationInvocationContext<?> context,
-			CacheOperationInvoker invoker) {
-
+	private Object execute(CacheOperationInvocationContext<?> context, CacheOperationInvoker invoker) {
 		CacheOperationInvoker adapter = new CacheOperationInvokerAdapter(invoker);
-
 		BasicOperation operation = context.getOperation();
+
 		if (operation instanceof CacheResultOperation) {
 			return cacheResultInterceptor.invoke(
 					(CacheOperationInvocationContext<CacheResultOperation>) context, adapter);

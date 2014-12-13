@@ -19,7 +19,6 @@ package org.springframework.web.servlet.tags.form;
 import java.beans.PropertyEditorSupport;
 import java.io.StringReader;
 import java.util.Collections;
-
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.tagext.Tag;
 

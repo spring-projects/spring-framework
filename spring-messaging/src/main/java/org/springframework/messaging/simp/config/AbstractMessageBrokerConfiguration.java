@@ -20,24 +20,31 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanInitializationException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.Bean;
 import org.springframework.messaging.Message;
-import org.springframework.messaging.converter.*;
+import org.springframework.messaging.converter.ByteArrayMessageConverter;
+import org.springframework.messaging.converter.CompositeMessageConverter;
+import org.springframework.messaging.converter.DefaultContentTypeResolver;
+import org.springframework.messaging.converter.MappingJackson2MessageConverter;
+import org.springframework.messaging.converter.MessageConverter;
+import org.springframework.messaging.converter.StringMessageConverter;
+import org.springframework.messaging.handler.invocation.HandlerMethodArgumentResolver;
+import org.springframework.messaging.handler.invocation.HandlerMethodReturnValueHandler;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.messaging.simp.annotation.support.SimpAnnotationMethodMessageHandler;
 import org.springframework.messaging.simp.broker.AbstractBrokerMessageHandler;
+import org.springframework.messaging.simp.broker.SimpleBrokerMessageHandler;
 import org.springframework.messaging.simp.user.DefaultUserDestinationResolver;
 import org.springframework.messaging.simp.user.DefaultUserSessionRegistry;
-import org.springframework.messaging.simp.broker.SimpleBrokerMessageHandler;
 import org.springframework.messaging.simp.user.UserDestinationMessageHandler;
 import org.springframework.messaging.simp.user.UserDestinationResolver;
 import org.springframework.messaging.simp.user.UserSessionRegistry;
 import org.springframework.messaging.support.AbstractSubscribableChannel;
 import org.springframework.messaging.support.ExecutorSubscribableChannel;
+import org.springframework.messaging.support.ImmutableMessageChannelInterceptor;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.MimeTypeUtils;
@@ -48,20 +55,20 @@ import org.springframework.validation.Validator;
 /**
  * Provides essential configuration for handling messages with simple messaging
  * protocols such as STOMP.
- * <p>
- * {@link #clientInboundChannel()} and {@link #clientOutboundChannel()} deliver messages
- * to and from remote clients to several message handlers such as
+ *
+ * <p>{@link #clientInboundChannel()} and {@link #clientOutboundChannel()} deliver
+ * messages to and from remote clients to several message handlers such as
  * <ul>
- *	<li>{@link #simpAnnotationMethodMessageHandler()}</li>
- * 	<li>{@link #simpleBrokerMessageHandler()}</li>
- *	<li>{@link #stompBrokerRelayMessageHandler()}</li>
- *	<li>{@link #userDestinationMessageHandler()}</li>
+ * <li>{@link #simpAnnotationMethodMessageHandler()}</li>
+ * <li>{@link #simpleBrokerMessageHandler()}</li>
+ * <li>{@link #stompBrokerRelayMessageHandler()}</li>
+ * <li>{@link #userDestinationMessageHandler()}</li>
  * </ul>
  * while {@link #brokerChannel()} delivers messages from within the application to the
  * the respective message handlers. {@link #brokerMessagingTemplate()} can be injected
  * into any application component to send messages.
- * <p>
- * Sub-classes are responsible for the part of the configuration that feed messages
+ *
+ * <p>Subclasses are responsible for the part of the configuration that feed messages
  * to and from the client inbound/outbound channels (e.g. STOMP over WebSocket).
  *
  * @author Rossen Stoyanchev
@@ -70,10 +77,11 @@ import org.springframework.validation.Validator;
  */
 public abstract class AbstractMessageBrokerConfiguration implements ApplicationContextAware {
 
+	private static final String MVC_VALIDATOR_NAME = "mvcValidator";
+
 	private static final boolean jackson2Present= ClassUtils.isPresent(
 			"com.fasterxml.jackson.databind.ObjectMapper", AbstractMessageBrokerConfiguration.class.getClassLoader());
 
-	private static final String MVC_VALIDATOR_NAME = "mvcValidator";
 
 	private ChannelRegistration clientInboundChannelRegistration;
 
@@ -88,6 +96,16 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 	 * Protected constructor.
 	 */
 	protected AbstractMessageBrokerConfiguration() {
+	}
+
+
+	@Override
+	public void setApplicationContext(ApplicationContext applicationContext) {
+		this.applicationContext = applicationContext;
+	}
+
+	public ApplicationContext getApplicationContext() {
+		return this.applicationContext;
 	}
 
 
@@ -111,11 +129,11 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 		if (this.clientInboundChannelRegistration == null) {
 			ChannelRegistration registration = new ChannelRegistration();
 			configureClientInboundChannel(registration);
+			registration.setInterceptors(new ImmutableMessageChannelInterceptor());
 			this.clientInboundChannelRegistration = registration;
 		}
 		return this.clientInboundChannelRegistration;
 	}
-
 
 	/**
 	 * A hook for sub-classes to customize the message channel for inbound messages
@@ -123,7 +141,6 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 	 */
 	protected void configureClientInboundChannel(ChannelRegistration registration) {
 	}
-
 
 	@Bean
 	public AbstractSubscribableChannel clientOutboundChannel() {
@@ -145,6 +162,7 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 		if (this.clientOutboundChannelRegistration == null) {
 			ChannelRegistration registration = new ChannelRegistration();
 			configureClientOutboundChannel(registration);
+			registration.setInterceptors(new ImmutableMessageChannelInterceptor());
 			this.clientOutboundChannelRegistration = registration;
 		}
 		return this.clientOutboundChannelRegistration;
@@ -162,6 +180,7 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 		ChannelRegistration reg = getBrokerRegistry().getBrokerChannelRegistration();
 		ExecutorSubscribableChannel channel = reg.hasTaskExecutor() ?
 				new ExecutorSubscribableChannel(brokerChannelExecutor()) : new ExecutorSubscribableChannel();
+		reg.setInterceptors(new ImmutableMessageChannelInterceptor());
 		channel.setInterceptors(reg.getInterceptors());
 		return channel;
 	}
@@ -213,6 +232,14 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 		handler.setMessageConverter(brokerMessageConverter());
 		handler.setValidator(simpValidator());
 
+		List<HandlerMethodArgumentResolver> argumentResolvers = new ArrayList<HandlerMethodArgumentResolver>();
+		addArgumentResolvers(argumentResolvers);
+		handler.setCustomArgumentResolvers(argumentResolvers);
+
+		List<HandlerMethodReturnValueHandler> returnValueHandlers = new ArrayList<HandlerMethodReturnValueHandler>();
+		addReturnValueHandlers(returnValueHandlers);
+		handler.setCustomReturnValueHandlers(returnValueHandlers);
+
 		PathMatcher pathMatcher = this.getBrokerRegistry().getPathMatcher();
 		if (pathMatcher != null) {
 			handler.setPathMatcher(pathMatcher);
@@ -220,16 +247,22 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 		return handler;
 	}
 
+	protected void addArgumentResolvers(List<HandlerMethodArgumentResolver> argumentResolvers) {
+	}
+
+	protected void addReturnValueHandlers(List<HandlerMethodReturnValueHandler> returnValueHandlers) {
+	}
+
 	@Bean
 	public AbstractBrokerMessageHandler simpleBrokerMessageHandler() {
 		SimpleBrokerMessageHandler handler = getBrokerRegistry().getSimpleBroker(brokerChannel());
-		return (handler != null) ? handler : noopBroker;
+		return (handler != null ? handler : new NoOpBrokerMessageHandler());
 	}
 
 	@Bean
 	public AbstractBrokerMessageHandler stompBrokerRelayMessageHandler() {
 		AbstractBrokerMessageHandler handler = getBrokerRegistry().getStompBrokerRelay(brokerChannel());
-		return (handler != null) ? handler : noopBroker;
+		return (handler != null ? handler : new NoOpBrokerMessageHandler());
 	}
 
 	@Bean
@@ -256,22 +289,25 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 			converters.add(new StringMessageConverter());
 			converters.add(new ByteArrayMessageConverter());
 			if (jackson2Present) {
-				DefaultContentTypeResolver resolver = new DefaultContentTypeResolver();
-				resolver.setDefaultMimeType(MimeTypeUtils.APPLICATION_JSON);
-				MappingJackson2MessageConverter converter = new MappingJackson2MessageConverter();
-				converter.setContentTypeResolver(resolver);
-				converters.add(converter);
+				converters.add(createJacksonConverter());
 			}
 		}
 		return new CompositeMessageConverter(converters);
 	}
 
+	protected MappingJackson2MessageConverter createJacksonConverter() {
+		DefaultContentTypeResolver resolver = new DefaultContentTypeResolver();
+		resolver.setDefaultMimeType(MimeTypeUtils.APPLICATION_JSON);
+		MappingJackson2MessageConverter converter = new MappingJackson2MessageConverter();
+		converter.setContentTypeResolver(resolver);
+		return converter;
+	}
+
 	/**
 	 * Override this method to add custom message converters.
 	 * @param messageConverters the list to add converters to, initially empty
-	 *
 	 * @return {@code true} if default message converters should be added to list,
-	 * 	{@code false} if no more converters should be added.
+	 * {@code false} if no more converters should be added.
 	 */
 	protected boolean configureMessageConverters(List<MessageConverter> messageConverters) {
 		return true;
@@ -292,25 +328,17 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 		return new DefaultUserSessionRegistry();
 	}
 
-	@Override
-	public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-		this.applicationContext = applicationContext;
-	}
-
-	public ApplicationContext getApplicationContext() {
-		return applicationContext;
-	}
-
 	/**
 	 * Return a {@link org.springframework.validation.Validator}s instance for validating
 	 * {@code @Payload} method arguments.
-	 * In order, this method tries to get a Validator instance:
+	 * <p>In order, this method tries to get a Validator instance:
 	 * <ul>
-	 *   <li>delegating to getValidator() first</li>
-	 *   <li>if none returned, getting an existing instance with its well-known name "mvcValidator", created by an MVC configuration</li>
-	 *   <li>if none returned, checking the classpath for the presence of a JSR-303 implementation before creating a
-	 *   {@code OptionalValidatorFactoryBean}</li>
-	 *   <li>returning a no-op Validator instance</li>
+	 * <li>delegating to getValidator() first</li>
+	 * <li>if none returned, getting an existing instance with its well-known name "mvcValidator",
+	 * created by an MVC configuration</li>
+	 * <li>if none returned, checking the classpath for the presence of a JSR-303 implementation
+	 * before creating a {@code OptionalValidatorFactoryBean}</li>
+	 * <li>returning a no-op Validator instance</li>
 	 * </ul>
 	 */
 	protected Validator simpValidator() {
@@ -325,11 +353,8 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 					String className = "org.springframework.validation.beanvalidation.OptionalValidatorFactoryBean";
 					clazz = ClassUtils.forName(className, AbstractMessageBrokerConfiguration.class.getClassLoader());
 				}
-				catch (ClassNotFoundException e) {
-					throw new BeanInitializationException("Could not find default validator", e);
-				}
-				catch (LinkageError e) {
-					throw new BeanInitializationException("Could not find default validator", e);
+				catch (Throwable ex) {
+					throw new BeanInitializationException("Could not find default validator class", ex);
 				}
 				validator = (Validator) BeanUtils.instantiate(clazz);
 			}
@@ -357,7 +382,11 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 	}
 
 
-	private static final AbstractBrokerMessageHandler noopBroker = new AbstractBrokerMessageHandler() {
+	private class NoOpBrokerMessageHandler extends AbstractBrokerMessageHandler {
+
+		public NoOpBrokerMessageHandler() {
+			super(clientInboundChannel(), clientOutboundChannel(), brokerChannel());
+		}
 
 		@Override
 		public void start() {
@@ -374,6 +403,6 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 		@Override
 		protected void handleMessageInternal(Message<?> message) {
 		}
-	};
+	}
 
 }

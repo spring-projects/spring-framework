@@ -27,7 +27,6 @@ import org.springframework.aop.scope.ScopedProxyFactoryBean;
 import org.springframework.asm.Type;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
-import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.beans.factory.support.SimpleInstantiationStrategy;
@@ -45,6 +44,7 @@ import org.springframework.cglib.transform.ClassEmitterTransformer;
 import org.springframework.cglib.transform.TransformingClassGenerator;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.util.Assert;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.ReflectionUtils;
 
 /**
@@ -64,9 +64,9 @@ import org.springframework.util.ReflectionUtils;
  */
 class ConfigurationClassEnhancer {
 
+	// The callbacks to use. Note that these callbacks must be stateless.
 	private static final Callback[] CALLBACKS = new Callback[] {
 			new BeanMethodInterceptor(),
-			new DisposableBeanMethodInterceptor(),
 			new BeanFactoryAwareMethodInterceptor(),
 			NoOp.INSTANCE
 	};
@@ -138,15 +138,13 @@ class ConfigurationClassEnhancer {
 	 * Facilitates idempotent behavior for {@link ConfigurationClassEnhancer#enhance(Class)}
 	 * through checking to see if candidate classes are already assignable to it, e.g.
 	 * have already been enhanced.
-	 * <p>Also extends {@link DisposableBean} and {@link BeanFactoryAware}, as all
-	 * enhanced {@code @Configuration} classes require access to the {@link BeanFactory}
-	 * that created them and must de-register static CGLIB callbacks on destruction,
-	 * which is handled by the (private) {@code DisposableBeanMethodInterceptor}.
+	 * <p>Also extends {@link BeanFactoryAware}, as all enhanced {@code @Configuration}
+	 * classes require access to the {@link BeanFactory} that created them.
 	 * <p>Note that this interface is intended for framework-internal use only, however
 	 * must remain public in order to allow access to subclasses generated from other
 	 * packages (i.e. user code).
 	 */
-	public interface EnhancedConfiguration extends DisposableBean, BeanFactoryAware {
+	public interface EnhancedConfiguration extends BeanFactoryAware {
 	}
 
 
@@ -237,10 +235,10 @@ class ConfigurationClassEnhancer {
 
 		@Override
 		public boolean isMatch(Method candidateMethod) {
-			return candidateMethod.getName().equals("setBeanFactory") &&
+			return (candidateMethod.getName().equals("setBeanFactory") &&
 					candidateMethod.getParameterTypes().length == 1 &&
 					candidateMethod.getParameterTypes()[0].equals(BeanFactory.class) &&
-					BeanFactoryAware.class.isAssignableFrom(candidateMethod.getDeclaringClass());
+					BeanFactoryAware.class.isAssignableFrom(candidateMethod.getDeclaringClass()));
 		}
 	}
 
@@ -256,9 +254,8 @@ class ConfigurationClassEnhancer {
 		/**
 		 * Enhance a {@link Bean @Bean} method to check the supplied BeanFactory for the
 		 * existence of this bean object.
-		 * @throws Throwable as a catch-all for any exception that may be thrown when
-		 * invoking the super implementation of the proxied method i.e., the actual
-		 * {@code @Bean} method.
+		 * @throws Throwable as a catch-all for any exception that may be thrown when invoking the
+		 * super implementation of the proxied method i.e., the actual {@code @Bean} method
 		 */
 		@Override
 		public Object intercept(Object enhancedConfigInstance, Method beanMethod, Object[] beanMethodArgs,
@@ -321,7 +318,8 @@ class ConfigurationClassEnhancer {
 					if (alreadyInCreation) {
 						beanFactory.setCurrentlyInCreation(beanName, false);
 					}
-					return beanFactory.getBean(beanName);
+					return (!ObjectUtils.isEmpty(beanMethodArgs) ?
+							beanFactory.getBean(beanName, beanMethodArgs) : beanFactory.getBean(beanName));
 				}
 				finally {
 					if (alreadyInCreation) {
@@ -399,34 +397,6 @@ class ConfigurationClassEnhancer {
 		@Override
 		public boolean isMatch(Method candidateMethod) {
 			return BeanAnnotationHelper.isBeanAnnotated(candidateMethod);
-		}
-	}
-
-
-	/**
-	 * Intercepts the invocation of any {@link DisposableBean#destroy()} on @Configuration
-	 * class instances for the purpose of de-registering CGLIB callbacks. This helps avoid
-	 * garbage collection issues. See SPR-7901.
-	 * @see EnhancedConfiguration
-	 */
-	private static class DisposableBeanMethodInterceptor implements MethodInterceptor, ConditionalCallback {
-
-		@Override
-		public Object intercept(Object obj, Method method, Object[] args, MethodProxy proxy) throws Throwable {
-			Enhancer.registerStaticCallbacks(obj.getClass(), null);
-			// Does the actual (non-CGLIB) superclass actually implement DisposableBean?
-			// If so, call its dispose() method. If not, just exit.
-			if (DisposableBean.class.isAssignableFrom(obj.getClass().getSuperclass())) {
-				return proxy.invokeSuper(obj, args);
-			}
-			return null;
-		}
-
-		@Override
-		public boolean isMatch(Method candidateMethod) {
-			return candidateMethod.getName().equals("destroy") &&
-					candidateMethod.getParameterTypes().length == 0 &&
-					DisposableBean.class.isAssignableFrom(candidateMethod.getDeclaringClass());
 		}
 	}
 

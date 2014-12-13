@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,8 +35,7 @@ import org.apache.log4j.xml.DOMConfigurator;
  * <p>For web environments, the analogous Log4jWebConfigurer class can be found
  * in the web package, reading in its configuration from context-params in
  * {@code web.xml}. In a J2EE web application, log4j is usually set up
- * via Log4jConfigListener or Log4jConfigServlet, delegating to
- * Log4jWebConfigurer underneath.
+ * via Log4jConfigListener, delegating to Log4jWebConfigurer underneath.
  *
  * @author Juergen Hoeller
  * @since 13.03.2003
@@ -65,6 +64,10 @@ public abstract class Log4jConfigurer {
 	public static void initLogging(String location) throws FileNotFoundException {
 		String resolvedLocation = SystemPropertyUtils.resolvePlaceholders(location);
 		URL url = ResourceUtils.getURL(resolvedLocation);
+		if (ResourceUtils.URL_PROTOCOL_FILE.equals(url.getProtocol()) && !ResourceUtils.getFile(url).exists()) {
+			throw new FileNotFoundException("Log4j config file [" + resolvedLocation + "] not found");
+		}
+
 		if (resolvedLocation.toLowerCase().endsWith(XML_FILE_EXTENSION)) {
 			DOMConfigurator.configure(url);
 		}
@@ -98,6 +101,7 @@ public abstract class Log4jConfigurer {
 		if (!file.exists()) {
 			throw new FileNotFoundException("Log4j config file [" + resolvedLocation + "] not found");
 		}
+
 		if (resolvedLocation.toLowerCase().endsWith(XML_FILE_EXTENSION)) {
 			DOMConfigurator.configureAndWatch(file.getAbsolutePath(), refreshInterval);
 		}

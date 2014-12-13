@@ -19,6 +19,7 @@ package org.springframework.jmx.export;
 import javax.management.ObjectName;
 
 import org.junit.Test;
+
 import org.springframework.jmx.AbstractJmxTests;
 import org.springframework.jmx.IJmxTestBean;
 

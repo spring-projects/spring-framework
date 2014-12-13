@@ -21,6 +21,7 @@ import java.util.Map;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 
+import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.view.json.AbstractJackson2View;
@@ -32,6 +33,8 @@ import org.springframework.web.servlet.view.json.AbstractJackson2View;
  * <p>The Object to be serialized is supplied as a parameter in the model. The first serializable
  * entry is used. Users can either specify a specific entry in the model via the
  * {@link #setModelKey(String) sourceKey} property.
+ *
+ * <p>The default constructor uses the default configuration provided by {@link Jackson2ObjectMapperBuilder}.
  *
  * <p>Compatible with Jackson 2.1 and higher.
  *
@@ -46,8 +49,13 @@ public class MappingJackson2XmlView extends AbstractJackson2View {
 	private String modelKey;
 
 
+	/**
+	 * Construct a new {@code MappingJackson2XmlView} using default configuration
+	 * provided by {@link Jackson2ObjectMapperBuilder} and setting the content type
+	 * to {@code application/xml}.
+	 */
 	public MappingJackson2XmlView() {
-		super(new XmlMapper(), DEFAULT_CONTENT_TYPE);
+		super(Jackson2ObjectMapperBuilder.xml().build(), DEFAULT_CONTENT_TYPE);
 	}
 
 

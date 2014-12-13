@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,51 +16,24 @@
 
 package org.springframework.scheduling.config;
 
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
-import org.springframework.context.ApplicationListener;
-import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.beans.factory.SmartInitializingSingleton;
 
 /**
- * {@link ScheduledTaskRegistrar} subclass that redirects the actual scheduling
- * of tasks to the {@link ContextRefreshedEvent} callback. Falls back to regular
- * {@code ScheduledTaskRegistrar} behavior when not running within an ApplicationContext.
+ * {@link ScheduledTaskRegistrar} subclass which redirects the actual scheduling
+ * of tasks to the {@link #afterSingletonsInstantiated()} callback (as of 4.1.2).
  *
  * @author Juergen Hoeller
  * @since 3.2.1
  */
-public class ContextLifecycleScheduledTaskRegistrar extends ScheduledTaskRegistrar
-		implements ApplicationContextAware, ApplicationListener<ContextRefreshedEvent> {
+public class ContextLifecycleScheduledTaskRegistrar extends ScheduledTaskRegistrar implements SmartInitializingSingleton {
 
-	private ApplicationContext applicationContext;
-
-
-	@Override
-	public void setApplicationContext(ApplicationContext applicationContext) {
-		this.applicationContext = applicationContext;
-	}
-
-
-	/**
-	 * If we're running within an ApplicationContext, don't schedule the tasks
-	 * right here; wait for this context's ContextRefreshedEvent instead.
-	 */
 	@Override
 	public void afterPropertiesSet() {
-		if (this.applicationContext == null) {
-			scheduleTasks();
-		}
+		// no-op
 	}
 
-	/**
-	 * Actually schedule the tasks at the right time of the context lifecycle,
-	 * if we're running within an ApplicationContext.
-	 */
 	@Override
-	public void onApplicationEvent(ContextRefreshedEvent event) {
-		if (event.getApplicationContext() != this.applicationContext) {
-			return;
-		}
+	public void afterSingletonsInstantiated() {
 		scheduleTasks();
 	}
 

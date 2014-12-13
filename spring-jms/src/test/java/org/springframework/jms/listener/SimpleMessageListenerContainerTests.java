@@ -18,7 +18,6 @@ package org.springframework.jms.listener;
 
 import java.util.HashSet;
 import java.util.Set;
-
 import javax.jms.Connection;
 import javax.jms.ConnectionFactory;
 import javax.jms.ExceptionListener;
@@ -30,6 +29,7 @@ import javax.jms.Session;
 
 import org.junit.Before;
 import org.junit.Test;
+
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.jms.StubQueue;

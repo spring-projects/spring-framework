@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,11 @@ import java.lang.annotation.Target;
 /**
  * Annotation which indicates that a method parameter should be bound to a web request header.
  * Supported for annotated handler methods in Servlet and Portlet environments.
+ *
+ * <p>If the method parameter is {@link java.util.Map Map&lt;String, String&gt;} or
+ * {@link org.springframework.util.MultiValueMap MultiValueMap&lt;String, String&gt;},
+ * or {@link org.springframework.http.HttpHeaders HttpHeaders} then the map is
+ * populated with all header names and values.
  *
  * @author Juergen Hoeller
  * @since 3.0

@@ -16,12 +16,10 @@
 
 package org.springframework.aop.config;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.junit.Before;
 import org.junit.Test;
+
 import org.springframework.aop.Advisor;
 import org.springframework.aop.framework.Advised;
 import org.springframework.aop.support.AopUtils;
@@ -30,6 +28,8 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.tests.aop.advice.CountingBeforeAdvice;
 import org.springframework.tests.sample.beans.ITestBean;
 import org.springframework.tests.sample.beans.TestBean;
+
+import static org.junit.Assert.*;
 
 /**
  * Unit tests for aop namespace.

@@ -23,7 +23,6 @@ import org.junit.Test;
 
 import org.springframework.tests.Assume;
 import org.springframework.tests.TestGroup;
-
 import org.springframework.tests.sample.beans.TestBean;
 
 import static org.junit.Assert.*;

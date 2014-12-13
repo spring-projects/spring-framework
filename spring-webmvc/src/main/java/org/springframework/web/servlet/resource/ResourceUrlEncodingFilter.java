@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,7 +17,6 @@
 package org.springframework.web.servlet.resource;
 
 import java.io.IOException;
-
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -57,6 +56,9 @@ public class ResourceUrlEncodingFilter extends OncePerRequestFilter {
 
 		private HttpServletRequest request;
 
+		/* Cache the index of the path within the DispatcherServlet mapping. */
+		private Integer indexLookupPath;
+
 
 		private ResourceUrlEncodingResponseWrapper(HttpServletRequest request, HttpServletResponse wrapped) {
 			super(wrapped);
@@ -65,18 +67,29 @@ public class ResourceUrlEncodingFilter extends OncePerRequestFilter {
 
 		@Override
 		public String encodeURL(String url) {
+			ResourceUrlProvider resourceUrlProvider = getResourceUrlProvider();
+			if (resourceUrlProvider == null) {
+				logger.debug("Request attribute exposing ResourceUrlProvider not found.");
+				return super.encodeURL(url);
+			}
+			initIndexLookupPath(resourceUrlProvider);
+			String prefix = url.substring(0, this.indexLookupPath);
+			String lookupPath = url.substring(this.indexLookupPath);
+			lookupPath = resourceUrlProvider.getForLookupPath(lookupPath);
+			return (lookupPath != null ? super.encodeURL(prefix + lookupPath) : super.encodeURL(url));
+		}
+
+		private ResourceUrlProvider getResourceUrlProvider() {
 			String name = ResourceUrlProviderExposingInterceptor.RESOURCE_URL_PROVIDER_ATTR;
-			ResourceUrlProvider urlProvider = (ResourceUrlProvider) this.request.getAttribute(name);
-			if (urlProvider != null) {
-				String translatedUrl = urlProvider.getForRequestUrl(this.request, url);
-				if (translatedUrl != null) {
-					return super.encodeURL(translatedUrl);
-				}
+			return (ResourceUrlProvider) this.request.getAttribute(name);
+		}
+
+		private void initIndexLookupPath(ResourceUrlProvider urlProvider) {
+			if (this.indexLookupPath == null) {
+				String requestUri = urlProvider.getPathHelper().getRequestUri(this.request);
+				String lookupPath = urlProvider.getPathHelper().getLookupPathForRequest(this.request);
+				this.indexLookupPath = requestUri.lastIndexOf(lookupPath);
 			}
-			else {
-				logger.debug("Request attribute exposing ResourceUrlProvider not found under name: " + name);
-			}
-			return super.encodeURL(url);
 		}
 	}
 

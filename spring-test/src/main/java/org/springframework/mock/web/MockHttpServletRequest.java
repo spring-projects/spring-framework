@@ -36,7 +36,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
-
 import javax.servlet.AsyncContext;
 import javax.servlet.DispatcherType;
 import javax.servlet.RequestDispatcher;
@@ -58,12 +57,11 @@ import org.springframework.util.StringUtils;
 /**
  * Mock implementation of the {@link javax.servlet.http.HttpServletRequest} interface.
  *
- * <p>The default, preferred {@link Locale} for the <em>server</em> mocked
- * by this request is {@link Locale#ENGLISH}. This value can be changed
- * via {@link #addPreferredLocale} or {@link #setPreferredLocales}.
+ * <p>The default, preferred {@link Locale} for the <em>server</em> mocked by this request
+ * is {@link Locale#ENGLISH}. This value can be changed via {@link #addPreferredLocale}
+ * or {@link #setPreferredLocales}.
  *
- * <p>As of Spring Framework 4.0, this set of mocks is designed on a Servlet
- * 3.0 baseline.
+ * <p>As of Spring Framework 4.0, this set of mocks is designed on a Servlet 3.0 baseline.
  *
  * @author Juergen Hoeller
  * @author Rod Johnson
@@ -344,9 +342,10 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	}
 
 	private void updateContentTypeHeader() {
-		if (this.contentType != null) {
+		if (StringUtils.hasLength(this.contentType)) {
 			StringBuilder sb = new StringBuilder(this.contentType);
-			if (!this.contentType.toLowerCase().contains(CHARSET_PREFIX) && this.characterEncoding != null) {
+			if (!this.contentType.toLowerCase().contains(CHARSET_PREFIX) &&
+					StringUtils.hasLength(this.characterEncoding)) {
 				sb.append(";").append(CHARSET_PREFIX).append(this.characterEncoding);
 			}
 			doAddHeaderValue(CONTENT_TYPE_HEADER, sb.toString(), true);
@@ -371,8 +370,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 		if (contentType != null) {
 			int charsetIndex = contentType.toLowerCase().indexOf(CHARSET_PREFIX);
 			if (charsetIndex != -1) {
-				String encoding = contentType.substring(charsetIndex + CHARSET_PREFIX.length());
-				this.characterEncoding = encoding;
+				this.characterEncoding = contentType.substring(charsetIndex + CHARSET_PREFIX.length());
 			}
 			updateContentTypeHeader();
 		}
@@ -708,8 +706,6 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	/**
 	 * Set the boolean {@code secure} flag indicating whether the mock request
 	 * was made using a secure channel, such as HTTPS.
-	 * @param secure a boolean indicating if the mock request was made using a
-	 * secure channel
 	 * @see #isSecure()
 	 * @see #getScheme()
 	 * @see #setScheme(String)
@@ -721,13 +717,11 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	/**
 	 * Returns {@code true} if the {@link #setSecure secure} flag has been set
 	 * to {@code true} or if the {@link #getScheme scheme} is {@code https}.
-	 * <p>
-	 * {@inheritDoc}
 	 * @see javax.servlet.ServletRequest#isSecure()
 	 */
 	@Override
 	public boolean isSecure() {
-		return this.secure || HTTPS.equalsIgnoreCase(this.getScheme());
+		return (this.secure || HTTPS.equalsIgnoreCase(this.scheme));
 	}
 
 	@Override
@@ -1040,8 +1034,8 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	public StringBuffer getRequestURL() {
 		StringBuffer url = new StringBuffer(this.scheme).append("://").append(this.serverName);
 
-		if (this.serverPort > 0
-				&& ((HTTP.equalsIgnoreCase(scheme) && this.serverPort != 80) || (HTTPS.equalsIgnoreCase(scheme) && this.serverPort != 443))) {
+		if (this.serverPort > 0 && ((HTTP.equalsIgnoreCase(this.scheme) && this.serverPort != 80) ||
+				(HTTPS.equalsIgnoreCase(this.scheme) && this.serverPort != 443))) {
 			url.append(':').append(this.serverPort);
 		}
 

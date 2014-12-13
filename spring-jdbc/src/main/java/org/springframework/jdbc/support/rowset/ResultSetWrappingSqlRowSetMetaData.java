@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,17 +22,16 @@ import java.sql.SQLException;
 import org.springframework.jdbc.InvalidResultSetAccessException;
 
 /**
- * Default implementation of Spring's SqlRowSetMetaData interface.
- * Used by ResultSetWrappingSqlRowSet.
+ * The default implementation of Spring's {@link SqlRowSetMetaData} interface, wrapping
+ * a {@link java.sql.ResultSetMetaData} instance, catching any {@link SQLException}s
+ * and translating them to a corresponding Spring {@link InvalidResultSetAccessException}.
  *
- * <p>This implementation wraps a {@code javax.sql.ResultSetMetaData}
- * instance, catching any SQLExceptions and translating them to the
- * appropriate Spring DataAccessException.
+ * <p>Used by {@link ResultSetWrappingSqlRowSet}.
  *
  * @author Thomas Risberg
  * @author Juergen Hoeller
  * @since 1.2
- * @see ResultSetWrappingSqlRowSet#getMetaData
+ * @see ResultSetWrappingSqlRowSet#getMetaData()
  */
 public class ResultSetWrappingSqlRowSetMetaData implements SqlRowSetMetaData {
 

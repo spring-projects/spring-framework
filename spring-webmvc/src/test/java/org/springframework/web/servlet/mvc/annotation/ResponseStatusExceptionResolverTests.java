@@ -16,8 +16,6 @@
 
 package org.springframework.web.servlet.mvc.annotation;
 
-import static org.junit.Assert.*;
-
 import java.util.Locale;
 
 import org.junit.Before;
@@ -30,6 +28,8 @@ import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockHttpServletResponse;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.servlet.ModelAndView;
+
+import static org.junit.Assert.*;
 
 /** @author Arjen Poutsma */
 public class ResponseStatusExceptionResolverTests {

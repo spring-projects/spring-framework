@@ -23,7 +23,6 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Properties;
-
 import javax.activation.FileTypeMap;
 import javax.mail.Address;
 import javax.mail.Message;
@@ -41,6 +40,7 @@ import junit.framework.TestCase;
 import org.springframework.mail.MailParseException;
 import org.springframework.mail.MailSendException;
 import org.springframework.mail.SimpleMailMessage;
+import org.springframework.util.ObjectUtils;
 
 /**
  * @author Juergen Hoeller
@@ -106,7 +106,7 @@ public class JavaMailSenderTests extends TestCase {
 		simpleMessage1.setTo("he@mail.org");
 		SimpleMailMessage simpleMessage2 = new SimpleMailMessage();
 		simpleMessage2.setTo("she@mail.org");
-		sender.send(new SimpleMailMessage[] {simpleMessage1, simpleMessage2});
+		sender.send(simpleMessage1, simpleMessage2);
 
 		assertEquals("host", sender.transport.getConnectedHost());
 		assertEquals("username", sender.transport.getConnectedUsername());
@@ -152,7 +152,7 @@ public class JavaMailSenderTests extends TestCase {
 		mimeMessage1.setRecipient(Message.RecipientType.TO, new InternetAddress("he@mail.org"));
 		MimeMessage mimeMessage2 = sender.createMimeMessage();
 		mimeMessage2.setRecipient(Message.RecipientType.TO, new InternetAddress("she@mail.org"));
-		sender.send(new MimeMessage[] {mimeMessage1, mimeMessage2});
+		sender.send(mimeMessage1, mimeMessage2);
 
 		assertEquals("host", sender.transport.getConnectedHost());
 		assertEquals("username", sender.transport.getConnectedUsername());
@@ -210,7 +210,7 @@ public class JavaMailSenderTests extends TestCase {
 				messages.add(mimeMessage);
 			}
 		};
-		sender.send(new MimeMessagePreparator[] {preparator1, preparator2});
+		sender.send(preparator1, preparator2);
 
 		assertEquals("host", sender.transport.getConnectedHost());
 		assertEquals("username", sender.transport.getConnectedUsername());
@@ -425,7 +425,7 @@ public class JavaMailSenderTests extends TestCase {
 		simpleMessage2.setTo("she@mail.org");
 
 		try {
-			sender.send(new SimpleMailMessage[] {simpleMessage1, simpleMessage2});
+			sender.send(simpleMessage1, simpleMessage2);
 		}
 		catch (MailSendException ex) {
 			ex.printStackTrace();
@@ -456,7 +456,7 @@ public class JavaMailSenderTests extends TestCase {
 		mimeMessage2.setRecipient(Message.RecipientType.TO, new InternetAddress("she@mail.org"));
 
 		try {
-			sender.send(new MimeMessage[] {mimeMessage1, mimeMessage2});
+			sender.send(mimeMessage1, mimeMessage2);
 		}
 		catch (MailSendException ex) {
 			ex.printStackTrace();
@@ -537,6 +537,7 @@ public class JavaMailSenderTests extends TestCase {
 			this.connectedPort = port;
 			this.connectedUsername = username;
 			this.connectedPassword = password;
+			setConnected(true);
 		}
 
 		@Override
@@ -552,9 +553,7 @@ public class JavaMailSenderTests extends TestCase {
 			if ("fail".equals(message.getSubject())) {
 				throw new MessagingException("failed");
 			}
-			List<Address> addr1 = Arrays.asList(message.getAllRecipients());
-			List<Address> addr2 = Arrays.asList(addresses);
-			if (!addr1.equals(addr2)) {
+			if (!ObjectUtils.nullSafeEquals(addresses, message.getAllRecipients())) {
 				throw new MessagingException("addresses not correct");
 			}
 			if (message.getSentDate() == null) {

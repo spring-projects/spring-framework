@@ -21,7 +21,6 @@ import java.io.Writer;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.GregorianCalendar;
-
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletResponse;
 

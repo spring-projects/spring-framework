@@ -19,7 +19,6 @@ package org.springframework.web.filter;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Set;
-
 import javax.servlet.Filter;
 import javax.servlet.FilterConfig;
 import javax.servlet.ServletContext;
@@ -27,6 +26,7 @@ import javax.servlet.ServletException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.MutablePropertyValues;
@@ -44,8 +44,8 @@ import org.springframework.core.io.ResourceLoader;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.web.context.ServletContextAware;
-import org.springframework.web.context.support.StandardServletEnvironment;
 import org.springframework.web.context.support.ServletContextResourceLoader;
+import org.springframework.web.context.support.StandardServletEnvironment;
 import org.springframework.web.util.NestedServletException;
 
 /**

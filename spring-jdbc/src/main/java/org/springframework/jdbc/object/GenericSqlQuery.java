@@ -18,9 +18,9 @@ package org.springframework.jdbc.object;
 
 import java.util.Map;
 
+import org.springframework.dao.InvalidDataAccessResourceUsageException;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.util.Assert;
-import org.springframework.dao.InvalidDataAccessResourceUsageException;
 
 public class GenericSqlQuery<T> extends SqlQuery<T> {
 

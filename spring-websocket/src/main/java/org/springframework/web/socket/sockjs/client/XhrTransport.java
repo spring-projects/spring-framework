@@ -1,8 +1,8 @@
 package org.springframework.web.socket.sockjs.client;
 
-import org.springframework.web.socket.TextMessage;
-
 import java.net.URI;
+
+import org.springframework.web.socket.TextMessage;
 
 /**
  * A SockJS {@link Transport} that uses HTTP requests to simulate a WebSocket

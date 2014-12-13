@@ -223,8 +223,7 @@ public abstract class CommandLinePropertySource<T> extends EnumerablePropertySou
 	}
 
 	/**
-	 * Return whether this {@code PropertySource} contains a property with the given name.
-	 * <p>This implementation first checks to see if the name specified is the special
+	 * This implementation first checks to see if the name specified is the special
 	 * {@linkplain #setNonOptionArgsPropertyName(String) "non-option arguments" property},
 	 * and if so delegates to the abstract {@link #getNonOptionArgs()} method
 	 * checking to see whether it returns an empty collection. Otherwise delegates to and
@@ -239,8 +238,7 @@ public abstract class CommandLinePropertySource<T> extends EnumerablePropertySou
 	}
 
 	/**
-	 * {@inheritDoc}
-	 * <p>This implementation first checks to see if the name specified is the special
+	 * This implementation first checks to see if the name specified is the special
 	 * {@linkplain #setNonOptionArgsPropertyName(String) "non-option arguments" property},
 	 * and if so delegates to the abstract {@link #getNonOptionArgs()} method. If so
 	 * and the collection of non-option arguments is empty, this method returns {@code

@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,25 +16,24 @@
 
 package org.springframework.web.servlet.resource;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationListener;
-import org.springframework.context.event.ContextRefreshedEvent;
-import org.springframework.core.OrderComparator;
-import org.springframework.util.AntPathMatcher;
-import org.springframework.util.Assert;
-import org.springframework.util.PathMatcher;
-import org.springframework.web.servlet.HandlerMapping;
-import org.springframework.web.servlet.handler.SimpleUrlHandlerMapping;
-import org.springframework.web.util.UrlPathHelper;
-
-import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import javax.servlet.http.HttpServletRequest;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationListener;
+import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.core.OrderComparator;
+import org.springframework.util.AntPathMatcher;
+import org.springframework.util.PathMatcher;
+import org.springframework.web.servlet.handler.SimpleUrlHandlerMapping;
+import org.springframework.web.util.UrlPathHelper;
 
 
 /**
@@ -71,7 +70,7 @@ public class ResourceUrlProvider implements ApplicationListener<ContextRefreshed
 	}
 
 	/**
-	 * @return the configured {@code UrlPathHelper}.
+	 * Return the configured {@code UrlPathHelper}.
 	 */
 	public UrlPathHelper getPathHelper() {
 		return this.pathHelper;
@@ -86,7 +85,7 @@ public class ResourceUrlProvider implements ApplicationListener<ContextRefreshed
 	}
 
 	/**
-	 * @return the configured {@code PathMatcher}.
+	 * Return the configured {@code PathMatcher}.
 	 */
 	public PathMatcher getPathMatcher() {
 		return this.pathMatcher;
@@ -94,7 +93,6 @@ public class ResourceUrlProvider implements ApplicationListener<ContextRefreshed
 
 	/**
 	 * Manually configure the resource mappings.
-	 *
 	 * <p><strong>Note:</strong> by default resource mappings are auto-detected
 	 * from the Spring {@code ApplicationContext}. However if this property is
 	 * used, the auto-detection is turned off.
@@ -108,7 +106,7 @@ public class ResourceUrlProvider implements ApplicationListener<ContextRefreshed
 	}
 
 	/**
-	 * @return the resource mappings, either manually configured or auto-detected
+	 * Return the resource mappings, either manually configured or auto-detected
 	 * when the Spring {@code ApplicationContext} is refreshed.
 	 */
 	public Map<String, ResourceHttpRequestHandler> getHandlerMap() {
@@ -116,7 +114,7 @@ public class ResourceUrlProvider implements ApplicationListener<ContextRefreshed
 	}
 
 	/**
-	 * @return {@code false} if resource mappings were manually configured,
+	 * Return {@code false} if resource mappings were manually configured,
 	 * {@code true} otherwise.
 	 */
 	public boolean isAutodetect() {
@@ -135,7 +133,6 @@ public class ResourceUrlProvider implements ApplicationListener<ContextRefreshed
 	}
 
 	protected void detectResourceHandlers(ApplicationContext appContext) {
-
 		logger.debug("Looking for resource handler mappings");
 
 		Map<String, SimpleUrlHandlerMapping> map = appContext.getBeansOfType(SimpleUrlHandlerMapping.class);
@@ -163,7 +160,6 @@ public class ResourceUrlProvider implements ApplicationListener<ContextRefreshed
 	 * A variation on {@link #getForLookupPath(String)} that accepts a full request
 	 * URL path (i.e. including context and servlet path) and returns the full request
 	 * URL path to expose for public use.
-	 *
 	 * @param request the current request
 	 * @param requestUrl the request URL path to resolve
 	 * @return the resolved public URL path or {@code null} if unresolved
@@ -172,21 +168,17 @@ public class ResourceUrlProvider implements ApplicationListener<ContextRefreshed
 		if (logger.isTraceEnabled()) {
 			logger.trace("Getting resource URL for requestURL=" + requestUrl);
 		}
-
-		String pathWithinMapping = (String) request.getAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE);
-		if (pathWithinMapping == null) {
-			logger.trace("Request attribute with lookup path not found, calculating instead.");
-			pathWithinMapping = getPathHelper().getLookupPathForRequest(request);
-		}
-
-		int index = getPathHelper().getRequestUri(request).indexOf(pathWithinMapping);
-		Assert.state(index != -1, "Failed to determine lookup path: " + requestUrl);
-
+		int index = getLookupPathIndex(request);
 		String prefix = requestUrl.substring(0, index);
 		String lookupPath = requestUrl.substring(index);
-		String resolvedPath = getForLookupPath(lookupPath);
+		String resolvedLookupPath = getForLookupPath(lookupPath);
+		return (resolvedLookupPath != null) ? prefix + resolvedLookupPath : null;
+	}
 
-		return (resolvedPath != null) ? prefix + resolvedPath : null;
+	private int getLookupPathIndex(HttpServletRequest request) {
+		String requestUri = getPathHelper().getRequestUri(request);
+		String lookupPath = getPathHelper().getLookupPathForRequest(request);
+		return requestUri.indexOf(lookupPath);
 	}
 
 	/**
@@ -194,12 +186,10 @@ public class ResourceUrlProvider implements ApplicationListener<ContextRefreshed
 	 * if a match is found use the {@code ResourceResolver} chain of the matched
 	 * {@code ResourceHttpRequestHandler} to resolve the URL path to expose for
 	 * public use.
-	 *
-	 * <p>It is expected the given path is what Spring MVC would use for request
-	 * mapping purposes, i.e. excluding context and servlet path portions.
-	 *
+	 * <p>It is expected that the given path is what Spring MVC would use for
+	 * request mapping purposes, i.e. excluding context and servlet path portions.
 	 * @param lookupPath the lookup path to check
-	 * @return the resolved public URL path or {@code null} if unresolved
+	 * @return the resolved public URL path, or {@code null} if unresolved
 	 */
 	public final String getForLookupPath(String lookupPath) {
 		if (logger.isTraceEnabled()) {

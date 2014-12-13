@@ -16,9 +16,9 @@
 
 package org.springframework.messaging.simp.user;
 
-import org.springframework.util.Assert;
-
 import java.util.Set;
+
+import org.springframework.util.Assert;
 
 /**
  * A simple container for the result of parsing and translating a "user" destination

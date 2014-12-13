@@ -77,6 +77,7 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 
 	private InvokerPair lastReadInvokerPair;
 
+
 	/**
 	 * Returns {@code null} which means this is a general purpose accessor.
 	 */
@@ -454,7 +455,7 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 	 * This method will just return the ReflectivePropertyAccessor instance if it is unable to build
 	 * something more optimal.
 	 */
-	public PropertyAccessor createOptimalAccessor(EvaluationContext eContext, Object target, String name) {
+	public PropertyAccessor createOptimalAccessor(EvaluationContext evalContext, Object target, String name) {
 		// Don't be clever for arrays or null target
 		if (target == null) {
 			return this;
@@ -483,7 +484,7 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 		}
 
 		if (invocationTarget == null || invocationTarget.member instanceof Field) {
-			Field field = (Field) (invocationTarget==null?null:invocationTarget.member);
+			Field field = (invocationTarget != null ? (Field) invocationTarget.member : null);
 			if (field == null) {
 				field = findField(name, type, target instanceof Class);
 				if (field != null) {
@@ -540,16 +541,13 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 				return false;
 			}
 			CacheKey otherKey = (CacheKey) other;
-			boolean rtn = true;
-			rtn &= this.clazz.equals(otherKey.clazz);
-			rtn &= this.name.equals(otherKey.name);
-			rtn &= this.targetIsClass == otherKey.targetIsClass;
-			return rtn;
+			return (this.clazz.equals(otherKey.clazz) && this.name.equals(otherKey.name) &&
+					this.targetIsClass == otherKey.targetIsClass);
 		}
 
 		@Override
 		public int hashCode() {
-			return this.clazz.hashCode() * 29 + this.name.hashCode();
+			return (this.clazz.hashCode() * 29 + this.name.hashCode());
 		}
 
 		@Override
@@ -661,46 +659,42 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 		
 		@Override
 		public boolean isCompilable() {
-			// If non public must continue to use reflection
-			if (!Modifier.isPublic(member.getModifiers()) || !Modifier.isPublic(member.getDeclaringClass().getModifiers())) {
-				return false;
-			}
-			return true;
+			return (Modifier.isPublic(this.member.getModifiers()) &&
+					Modifier.isPublic(this.member.getDeclaringClass().getModifiers()));
 		}
 
 		@Override
 		public Class<?> getPropertyType() {
-			if (member instanceof Field) {
-				return ((Field) member).getType();
+			if (this.member instanceof Field) {
+				return ((Field) this.member).getType();
 			}
 			else {
-				return ((Method) member).getReturnType();
+				return ((Method) this.member).getReturnType();
 			}
 		}
 
 		@Override
-		public void generateCode(String propertyName, MethodVisitor mv, CodeFlow codeflow) {
-			boolean isStatic = Modifier.isStatic(member.getModifiers());
-			String descriptor = codeflow.lastDescriptor();
-			String memberDeclaringClassSlashedDescriptor = member.getDeclaringClass().getName().replace('.','/');
+		public void generateCode(String propertyName, MethodVisitor mv, CodeFlow cf) {
+			boolean isStatic = Modifier.isStatic(this.member.getModifiers());
+			String descriptor = cf.lastDescriptor();
+			String memberDeclaringClassSlashedDescriptor = this.member.getDeclaringClass().getName().replace('.', '/');
 			if (!isStatic) {
 				if (descriptor == null) {
-					codeflow.loadTarget(mv);
+					cf.loadTarget(mv);
 				}
 				if (descriptor == null || !memberDeclaringClassSlashedDescriptor.equals(descriptor.substring(1))) {
 					mv.visitTypeInsn(CHECKCAST, memberDeclaringClassSlashedDescriptor);
 				}
 			}
-			if (member instanceof Field) {
+			if (this.member instanceof Field) {
 				mv.visitFieldInsn(isStatic ? GETSTATIC : GETFIELD, memberDeclaringClassSlashedDescriptor,
-						member.getName(), CodeFlow.toJVMDescriptor(((Field) member).getType()));
+						this.member.getName(), CodeFlow.toJvmDescriptor(((Field) this.member).getType()));
 			}
 			else {
 				mv.visitMethodInsn(isStatic ? INVOKESTATIC : INVOKEVIRTUAL, memberDeclaringClassSlashedDescriptor,
-						member.getName(), CodeFlow.createSignatureDescriptor((Method) member),false);
+						this.member.getName(), CodeFlow.createSignatureDescriptor((Method) this.member),false);
 			}
 		}
-
 	}
 
 }

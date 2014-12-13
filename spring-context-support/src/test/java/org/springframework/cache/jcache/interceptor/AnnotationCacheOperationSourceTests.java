@@ -16,12 +16,8 @@
 
 package org.springframework.cache.jcache.interceptor;
 
-import static org.junit.Assert.*;
-import static org.mockito.BDDMockito.*;
-
 import java.lang.reflect.Method;
 import java.util.Comparator;
-
 import javax.cache.annotation.CacheDefaults;
 import javax.cache.annotation.CacheKeyGenerator;
 import javax.cache.annotation.CacheRemove;
@@ -31,15 +27,18 @@ import javax.cache.annotation.CacheResult;
 import org.junit.Before;
 import org.junit.Test;
 
+import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.cache.interceptor.CacheResolver;
 import org.springframework.cache.interceptor.KeyGenerator;
 import org.springframework.cache.jcache.AbstractJCacheTests;
 import org.springframework.cache.jcache.support.TestableCacheKeyGenerator;
 import org.springframework.cache.jcache.support.TestableCacheResolver;
 import org.springframework.cache.jcache.support.TestableCacheResolverFactory;
-import org.springframework.context.support.StaticApplicationContext;
 import org.springframework.util.Assert;
 import org.springframework.util.ReflectionUtils;
+
+import static org.junit.Assert.*;
+import static org.mockito.BDDMockito.*;
 
 /**
  * @author Stephane Nicoll
@@ -48,16 +47,18 @@ public class AnnotationCacheOperationSourceTests extends AbstractJCacheTests {
 
 	private final DefaultJCacheOperationSource source = new DefaultJCacheOperationSource();
 
-	private final StaticApplicationContext applicationContext =  new StaticApplicationContext();
+	private final DefaultListableBeanFactory beanFactory =  new DefaultListableBeanFactory();
+
 
 	@Before
 	public void setUp() {
-		source.setApplicationContext(applicationContext);
-		source.setKeyGenerator(defaultKeyGenerator);
 		source.setCacheResolver(defaultCacheResolver);
 		source.setExceptionCacheResolver(defaultExceptionCacheResolver);
+		source.setKeyGenerator(defaultKeyGenerator);
+		source.setBeanFactory(beanFactory);
 		source.afterPropertiesSet();
 	}
+
 
 	@Test
 	public void cache() {
@@ -105,29 +106,29 @@ public class AnnotationCacheOperationSourceTests extends AbstractJCacheTests {
 
 	@Test
 	public void defaultCacheNameWithCandidate() {
-		Method m = ReflectionUtils.findMethod(Object.class, "toString");
-		assertEquals("foo", source.determineCacheName(m, null, "foo"));
+		Method method = ReflectionUtils.findMethod(Object.class, "toString");
+		assertEquals("foo", source.determineCacheName(method, null, "foo"));
 	}
 
 	@Test
 	public void defaultCacheNameWithDefaults() {
-		Method m = ReflectionUtils.findMethod(Object.class, "toString");
+		Method method = ReflectionUtils.findMethod(Object.class, "toString");
 		CacheDefaults mock = mock(CacheDefaults.class);
 		given(mock.cacheName()).willReturn("");
-		assertEquals("java.lang.Object.toString()", source.determineCacheName(m, mock, ""));
+		assertEquals("java.lang.Object.toString()", source.determineCacheName(method, mock, ""));
 	}
 
 	@Test
 	public void defaultCacheNameNoDefaults() {
-		Method m = ReflectionUtils.findMethod(Object.class, "toString");
-		assertEquals("java.lang.Object.toString()", source.determineCacheName(m, null, ""));
+		Method method = ReflectionUtils.findMethod(Object.class, "toString");
+		assertEquals("java.lang.Object.toString()", source.determineCacheName(method, null, ""));
 	}
 
 	@Test
 	public void defaultCacheNameWithParameters() {
-		Method m = ReflectionUtils.findMethod(Comparator.class, "compare", Object.class, Object.class);
+		Method method = ReflectionUtils.findMethod(Comparator.class, "compare", Object.class, Object.class);
 		assertEquals("java.util.Comparator.compare(java.lang.Object,java.lang.Object)",
-				source.determineCacheName(m, null, ""));
+				source.determineCacheName(method, null, ""));
 	}
 
 	@Test
@@ -152,7 +153,7 @@ public class AnnotationCacheOperationSourceTests extends AbstractJCacheTests {
 	@Test
 	public void customKeyGeneratorSpringBean() {
 		TestableCacheKeyGenerator bean = new TestableCacheKeyGenerator();
-		applicationContext.getBeanFactory().registerSingleton("fooBar", bean);
+		beanFactory.registerSingleton("fooBar", bean);
 		CacheResultOperation operation =
 				getCacheOperation(CacheResultOperation.class, CustomService.class, name.getMethodName(), Long.class);
 		assertEquals(defaultCacheResolver, operation.getCacheResolver());
@@ -189,8 +190,9 @@ public class AnnotationCacheOperationSourceTests extends AbstractJCacheTests {
 		return getCacheOperation(operationType, AnnotatedJCacheableService.class, name.getMethodName(), parameterTypes);
 	}
 
-	protected <T extends JCacheOperation<?>> T getCacheOperation(Class<T> operationType, Class<?> targetType,
-			String methodName, Class<?>... parameterTypes) {
+	protected <T extends JCacheOperation<?>> T getCacheOperation(
+			Class<T> operationType, Class<?> targetType, String methodName, Class<?>... parameterTypes) {
+
 		JCacheOperation<?> result = getCacheOperation(targetType, methodName, parameterTypes);
 		assertNotNull(result);
 		assertEquals(operationType, result.getClass());
@@ -205,6 +207,7 @@ public class AnnotationCacheOperationSourceTests extends AbstractJCacheTests {
 
 	private void assertJCacheResolver(CacheResolver actual,
 			Class<? extends javax.cache.annotation.CacheResolver> expectedTargetType) {
+
 		if (expectedTargetType == null) {
 			assertNull(actual);
 		}
@@ -241,6 +244,7 @@ public class AnnotationCacheOperationSourceTests extends AbstractJCacheTests {
 		}
 	}
 
+
 	@CacheDefaults(cacheResolverFactory = TestableCacheResolverFactory.class,
 			cacheKeyGenerator = TestableCacheKeyGenerator.class)
 	static class CustomServiceWithDefaults {
@@ -255,6 +259,7 @@ public class AnnotationCacheOperationSourceTests extends AbstractJCacheTests {
 			return null;
 		}
 	}
+
 
 	static class InvalidCases {
 

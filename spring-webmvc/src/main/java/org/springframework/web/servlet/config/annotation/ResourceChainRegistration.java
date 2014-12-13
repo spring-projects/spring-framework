@@ -16,6 +16,9 @@
 
 package org.springframework.web.servlet.config.annotation;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.springframework.cache.Cache;
 import org.springframework.cache.concurrent.ConcurrentMapCache;
 import org.springframework.util.Assert;
@@ -26,9 +29,6 @@ import org.springframework.web.servlet.resource.PathResourceResolver;
 import org.springframework.web.servlet.resource.ResourceResolver;
 import org.springframework.web.servlet.resource.ResourceTransformer;
 import org.springframework.web.servlet.resource.VersionResourceResolver;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Assists with the registration of resource resolvers and transformers.

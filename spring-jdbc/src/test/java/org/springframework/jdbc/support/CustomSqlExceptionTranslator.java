@@ -16,10 +16,10 @@
 
 package org.springframework.jdbc.support;
 
+import java.sql.SQLException;
+
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.TransientDataAccessResourceException;
-
-import java.sql.SQLException;
 
 /**
  * Custom SQLException translation for testing.

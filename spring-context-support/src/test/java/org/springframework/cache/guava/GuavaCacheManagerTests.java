@@ -24,7 +24,7 @@ import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 
 import static org.junit.Assert.*;
-import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.*;
 
 /**
  * @author Juergen Hoeller

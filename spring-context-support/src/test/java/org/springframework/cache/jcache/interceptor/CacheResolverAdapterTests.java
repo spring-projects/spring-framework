@@ -16,13 +16,9 @@
 
 package org.springframework.cache.jcache.interceptor;
 
-import static org.junit.Assert.*;
-import static org.mockito.BDDMockito.*;
-
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.Collection;
-
 import javax.cache.annotation.CacheInvocationContext;
 import javax.cache.annotation.CacheMethodDetails;
 import javax.cache.annotation.CacheResolver;
@@ -36,6 +32,9 @@ import org.springframework.cache.Cache;
 import org.springframework.cache.jcache.AbstractJCacheTests;
 import org.springframework.util.Assert;
 import org.springframework.util.ReflectionUtils;
+
+import static org.junit.Assert.*;
+import static org.mockito.BDDMockito.*;
 
 /**
  * @author Stephane Nicoll

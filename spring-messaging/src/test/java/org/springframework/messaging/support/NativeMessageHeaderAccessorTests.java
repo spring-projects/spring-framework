@@ -25,6 +25,7 @@ import java.util.Map;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+
 import org.springframework.messaging.Message;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -85,7 +86,6 @@ public class NativeMessageHeaderAccessorTests {
 		Map<String, Object> actual = headerAccessor.toMap();
 		assertEquals(0, actual.size());
 
-		@SuppressWarnings("unchecked")
 		Map<String, List<String>> actualNativeHeaders = headerAccessor.toNativeHeaderMap();
 		assertEquals(Collections.emptyMap(), actualNativeHeaders);
 	}

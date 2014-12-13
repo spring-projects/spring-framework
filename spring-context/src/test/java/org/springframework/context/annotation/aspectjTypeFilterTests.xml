@@ -8,7 +8,7 @@
 	<context:component-scan base-package="example.scannable" use-default-filters="false" annotation-config="false">
         <context:include-filter type="aspectj" expression="example.scannable.Stub*"/>
         <context:include-filter type="aspectj" expression="example.scannable.FooService+"/>
-        <context:exclude-filter type="aspectj" expression="example..Scoped*Test*" />
+        <context:exclude-filter type="aspectj" expression="example..Scoped*Test*"/>
     </context:component-scan>
 
 </beans>

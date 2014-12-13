@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -22,7 +22,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 
 import org.apache.commons.logging.Log;
@@ -373,9 +372,9 @@ public class MessageHeaderAccessor {
 	private List<String> getMatchingHeaderNames(String pattern, Map<String, Object> headers) {
 		List<String> matchingHeaderNames = new ArrayList<String>();
 		if (headers != null) {
-			for (Map.Entry<String, Object> header: headers.entrySet()) {
-				if (PatternMatchUtils.simpleMatch(pattern,  header.getKey())) {
-					matchingHeaderNames.add(header.getKey());
+			for (String key : headers.keySet()) {
+				if (PatternMatchUtils.simpleMatch(pattern, key)) {
+					matchingHeaderNames.add(key);
 				}
 			}
 		}
@@ -389,10 +388,9 @@ public class MessageHeaderAccessor {
 	 */
 	public void copyHeaders(Map<String, ?> headersToCopy) {
 		if (headersToCopy != null) {
-			Set<String> keys = headersToCopy.keySet();
-			for (String key : keys) {
-				if (!isReadOnly(key)) {
-					setHeader(key, headersToCopy.get(key));
+			for (Map.Entry<String, ?> entry : headersToCopy.entrySet()) {
+				if (!isReadOnly(entry.getKey())) {
+					setHeader(entry.getKey(), entry.getValue());
 				}
 			}
 		}
@@ -404,10 +402,9 @@ public class MessageHeaderAccessor {
 	 */
 	public void copyHeadersIfAbsent(Map<String, ?> headersToCopy) {
 		if (headersToCopy != null) {
-			Set<String> keys = headersToCopy.keySet();
-			for (String key : keys) {
-				if (!isReadOnly(key)) {
-					setHeaderIfAbsent(key, headersToCopy.get(key));
+			for (Map.Entry<String, ?> entry : headersToCopy.entrySet()) {
+				if (!isReadOnly(entry.getKey())) {
+					setHeaderIfAbsent(entry.getKey(), entry.getValue());
 				}
 			}
 		}
@@ -555,7 +552,6 @@ public class MessageHeaderAccessor {
 	 * @return an accessor instance of the specified type, or {@code null} if none
 	 * @since 4.1
 	 */
-	@SuppressWarnings("unchecked")
 	public static <T extends MessageHeaderAccessor> T getAccessor(Message<?> message, Class<T> requiredType) {
 		return getAccessor(message.getHeaders(), requiredType);
 	}

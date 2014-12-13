@@ -16,6 +16,7 @@
 
 package org.springframework.web.servlet.view.tiles3;
 
+import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import javax.el.ArrayELResolver;
@@ -302,7 +303,10 @@ public class TilesConfigurer implements ServletContextAware, InitializingBean, D
 			if (definitions != null) {
 				List<ApplicationResource> result = new LinkedList<ApplicationResource>();
 				for (String definition : definitions) {
-					result.addAll(applicationContext.getResources(definition));
+					Collection<ApplicationResource> resources = applicationContext.getResources(definition);
+					if (resources != null) {
+						result.addAll(resources);
+					}
 				}
 				return result;
 			}

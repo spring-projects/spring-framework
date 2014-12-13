@@ -16,15 +16,16 @@
 
 package org.springframework.aop.framework;
 
-import static org.junit.Assert.assertEquals;
-import static org.springframework.tests.TestResourceUtils.qualifiedResource;
-
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 import org.junit.Test;
+
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.core.io.Resource;
+
+import static org.junit.Assert.*;
+import static org.springframework.tests.TestResourceUtils.*;
 
 /**
  * @author Juergen Hoeller

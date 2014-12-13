@@ -21,8 +21,16 @@ import org.springframework.web.context.request.WebRequestInterceptor;
 import org.springframework.web.servlet.HandlerInterceptor;
 
 /**
- * Holds information about a HandlerInterceptor mapped to a path into the application.
- * Provides a method to match a request path to the mapped path patterns.
+ * Contains a {@link HandlerInterceptor} along with include (and optionally
+ * exclude) path patterns to which the interceptor should apply. Also provides
+ * matching logic to test if the interceptor applies to a given request path.
+ *
+ * <p>A MappedInterceptor can be registered directly with any
+ * {@link org.springframework.web.servlet.handler.AbstractHandlerMethodMapping
+ * AbstractHandlerMethodMapping}. Furthermore, beans of type MappedInterceptor
+ * are automatically detected by {@code AbstractHandlerMethodMapping} (including
+ * ancestor ApplicationContext's) which effectively means the interceptor is
+ * registered "globally" with all handler mappings.
  *
  * @author Keith Donald
  * @author Rossen Stoyanchev

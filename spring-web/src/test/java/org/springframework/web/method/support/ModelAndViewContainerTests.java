@@ -16,11 +16,12 @@
 
 package org.springframework.web.method.support;
 
-import static org.junit.Assert.assertEquals;
-
 import org.junit.Before;
 import org.junit.Test;
+
 import org.springframework.ui.ModelMap;
+
+import static org.junit.Assert.*;
 
 /**
  * Test fixture for {@link ModelAndViewContainer}.

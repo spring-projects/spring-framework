@@ -43,22 +43,34 @@ import org.springframework.util.ClassUtils;
 public abstract class AbstractFallbackJCacheOperationSource
 		implements JCacheOperationSource {
 
+	/**
+	 * Canonical value held in cache to indicate no caching attribute was
+	 * found for this method and we don't need to look again.
+	 */
+	private final static Object NULL_CACHING_ATTRIBUTE = new Object();
+
 	protected final Log logger = LogFactory.getLog(getClass());
 
-	private final Map<Object, JCacheOperation<?>> cache =
-			new ConcurrentHashMap<Object, JCacheOperation<?>>(1024);
+	private final Map<Object, Object> cache =
+			new ConcurrentHashMap<Object, Object>(1024);
 
 	@Override
 	public JCacheOperation<?> getCacheOperation(Method method, Class<?> targetClass) {
 		// First, see if we have a cached value.
 		Object cacheKey = new MethodCacheKey(method, targetClass);
-		JCacheOperation<?> cached = this.cache.get(cacheKey);
+		Object cached = this.cache.get(cacheKey);
 		if (cached != null) {
-			return cached;
+			if (cached == NULL_CACHING_ATTRIBUTE) {
+				return null;
+			}
+			return (JCacheOperation<?>) cached;
 		}
 		else {
 			JCacheOperation<?> operation = computeCacheOperation(method, targetClass);
-			if (operation != null) {
+			if (operation == null) {
+				this.cache.put(cacheKey, NULL_CACHING_ATTRIBUTE);
+			}
+			else {
 				if (logger.isDebugEnabled()) {
 					logger.debug("Adding cacheable method '" + method.getName()
 							+ "' with operation: " + operation);

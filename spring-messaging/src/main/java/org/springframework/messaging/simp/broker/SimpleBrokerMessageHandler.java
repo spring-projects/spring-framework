@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -43,12 +43,6 @@ public class SimpleBrokerMessageHandler extends AbstractBrokerMessageHandler {
 
 	private static final byte[] EMPTY_PAYLOAD = new byte[0];
 
-	private final SubscribableChannel clientInboundChannel;
-
-	private final MessageChannel clientOutboundChannel;
-
-	private final SubscribableChannel brokerChannel;
-
 	private SubscriptionRegistry subscriptionRegistry;
 
 	private PathMatcher pathMatcher;
@@ -59,37 +53,18 @@ public class SimpleBrokerMessageHandler extends AbstractBrokerMessageHandler {
 	/**
 	 * Create a SimpleBrokerMessageHandler instance with the given message channels
 	 * and destination prefixes.
-	 *
-	 * @param inChannel the channel for receiving messages from clients (e.g. WebSocket clients)
-	 * @param outChannel the channel for sending messages to clients (e.g. WebSocket clients)
+	 * @param clientInboundChannel the channel for receiving messages from clients (e.g. WebSocket clients)
+	 * @param clientOutboundChannel the channel for sending messages to clients (e.g. WebSocket clients)
 	 * @param brokerChannel the channel for the application to send messages to the broker
+	 * @param destinationPrefixes prefixes to use to filter out messages
 	 */
-	public SimpleBrokerMessageHandler(SubscribableChannel inChannel, MessageChannel outChannel,
+	public SimpleBrokerMessageHandler(SubscribableChannel clientInboundChannel, MessageChannel clientOutboundChannel,
 			SubscribableChannel brokerChannel, Collection<String> destinationPrefixes) {
 
-		super(destinationPrefixes);
-		Assert.notNull(inChannel, "'clientInboundChannel' must not be null");
-		Assert.notNull(outChannel, "'clientOutboundChannel' must not be null");
-		Assert.notNull(brokerChannel, "'brokerChannel' must not be null");
-		this.clientInboundChannel = inChannel;
-		this.clientOutboundChannel = outChannel;
-		this.brokerChannel = brokerChannel;
-		DefaultSubscriptionRegistry subscriptionRegistry = new DefaultSubscriptionRegistry();
-		this.subscriptionRegistry = subscriptionRegistry;
+		super(clientInboundChannel, clientOutboundChannel, brokerChannel, destinationPrefixes);
+		this.subscriptionRegistry = new DefaultSubscriptionRegistry();
 	}
 
-
-	public SubscribableChannel getClientInboundChannel() {
-		return this.clientInboundChannel;
-	}
-
-	public MessageChannel getClientOutboundChannel() {
-		return this.clientOutboundChannel;
-	}
-
-	public SubscribableChannel getBrokerChannel() {
-		return this.brokerChannel;
-	}
 
 	/**
 	 * Configure a custom SubscriptionRegistry to use for storing subscriptions.
@@ -147,15 +122,11 @@ public class SimpleBrokerMessageHandler extends AbstractBrokerMessageHandler {
 	@Override
 	public void startInternal() {
 		publishBrokerAvailableEvent();
-		this.clientInboundChannel.subscribe(this);
-		this.brokerChannel.subscribe(this);
 	}
 
 	@Override
 	public void stopInternal() {
 		publishBrokerUnavailableEvent();
-		this.clientInboundChannel.unsubscribe(this);
-		this.brokerChannel.unsubscribe(this);
 	}
 
 	@Override
@@ -177,39 +148,44 @@ public class SimpleBrokerMessageHandler extends AbstractBrokerMessageHandler {
 		}
 
 		if (SimpMessageType.MESSAGE.equals(messageType)) {
-			if (logger.isDebugEnabled()) {
-				logger.debug("Processing " + accessor.getShortLogMessage(message.getPayload()));
-			}
+			logMessage(message);
 			sendMessageToSubscribers(destination, message);
 		}
 		else if (SimpMessageType.CONNECT.equals(messageType)) {
-			if (logger.isDebugEnabled()) {
-				logger.debug("Processing " + accessor.getShortLogMessage(EMPTY_PAYLOAD));
-			}
+			logMessage(message);
 			SimpMessageHeaderAccessor connectAck = SimpMessageHeaderAccessor.create(SimpMessageType.CONNECT_ACK);
 			initHeaders(connectAck);
 			connectAck.setSessionId(sessionId);
+			connectAck.setUser(SimpMessageHeaderAccessor.getUser(headers));
 			connectAck.setHeader(SimpMessageHeaderAccessor.CONNECT_MESSAGE_HEADER, message);
 			Message<byte[]> messageOut = MessageBuilder.createMessage(EMPTY_PAYLOAD, connectAck.getMessageHeaders());
-			this.clientOutboundChannel.send(messageOut);
+			getClientOutboundChannel().send(messageOut);
 		}
 		else if (SimpMessageType.DISCONNECT.equals(messageType)) {
-			if (logger.isDebugEnabled()) {
-				logger.debug("Processing " + accessor.getShortLogMessage(EMPTY_PAYLOAD));
-			}
+			logMessage(message);
 			this.subscriptionRegistry.unregisterAllSubscriptions(sessionId);
+			SimpMessageHeaderAccessor disconnectAck = SimpMessageHeaderAccessor.create(SimpMessageType.DISCONNECT_ACK);
+			initHeaders(disconnectAck);
+			disconnectAck.setSessionId(sessionId);
+			disconnectAck.setUser(SimpMessageHeaderAccessor.getUser(headers));
+			Message<byte[]> messageOut = MessageBuilder.createMessage(EMPTY_PAYLOAD, disconnectAck.getMessageHeaders());
+			getClientOutboundChannel().send(messageOut);
 		}
 		else if (SimpMessageType.SUBSCRIBE.equals(messageType)) {
-			if (logger.isDebugEnabled()) {
-				logger.debug("Processing " + accessor.getShortLogMessage(EMPTY_PAYLOAD));
-			}
+			logMessage(message);
 			this.subscriptionRegistry.registerSubscription(message);
 		}
 		else if (SimpMessageType.UNSUBSCRIBE.equals(messageType)) {
-			if (logger.isDebugEnabled()) {
-				logger.debug("Processing " + accessor.getShortLogMessage(EMPTY_PAYLOAD));
-			}
+			logMessage(message);
 			this.subscriptionRegistry.unregisterSubscription(message);
+		}
+	}
+
+	private void logMessage(Message<?> message) {
+		if (logger.isDebugEnabled()) {
+			SimpMessageHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(message, SimpMessageHeaderAccessor.class);
+			accessor = (accessor != null ? accessor : SimpMessageHeaderAccessor.wrap(message));
+			logger.debug("Processing " + accessor.getShortLogMessage(message.getPayload()));
 		}
 	}
 
@@ -234,7 +210,7 @@ public class SimpleBrokerMessageHandler extends AbstractBrokerMessageHandler {
 				Object payload = message.getPayload();
 				Message<?> reply = MessageBuilder.createMessage(payload, headerAccessor.getMessageHeaders());
 				try {
-					this.clientOutboundChannel.send(reply);
+					getClientOutboundChannel().send(reply);
 				}
 				catch (Throwable ex) {
 					logger.error("Failed to send " + message, ex);

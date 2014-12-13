@@ -17,7 +17,6 @@
 package org.springframework.orm.jpa.openjpa;
 
 import java.util.List;
-
 import javax.persistence.FlushModeType;
 import javax.persistence.Query;
 

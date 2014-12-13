@@ -30,6 +30,7 @@ import com.fasterxml.jackson.annotation.JsonView;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.http.converter.json.MappingJacksonValue;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
@@ -43,6 +44,8 @@ import org.springframework.web.servlet.View;
  * <p>By default, the entire contents of the model map (with the exception of framework-specific classes)
  * will be encoded as JSON. If the model contains only one key, you can have it extracted encoded as JSON
  * alone via  {@link #setExtractValueFromSingleKeyModel}.
+ *
+ * <p>The default constructor uses the default configuration provided by {@link Jackson2ObjectMapperBuilder}.
  *
  * <p>Compatible with Jackson 2.1 and higher.
  *
@@ -76,10 +79,12 @@ public class MappingJackson2JsonView extends AbstractJackson2View {
 
 
 	/**
-	 * Construct a new {@code MappingJackson2JsonView}, setting the content type to {@code application/json}.
+	 * Construct a new {@code MappingJackson2JsonView} using default configuration
+	 * provided by {@link Jackson2ObjectMapperBuilder} and setting the content type
+	 * to {@code application/json}.
 	 */
 	public MappingJackson2JsonView() {
-		super(new ObjectMapper(), DEFAULT_CONTENT_TYPE);
+		super(Jackson2ObjectMapperBuilder.json().build(), DEFAULT_CONTENT_TYPE);
 	}
 
 

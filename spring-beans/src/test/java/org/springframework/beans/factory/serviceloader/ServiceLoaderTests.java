@@ -16,17 +16,17 @@
 
 package org.springframework.beans.factory.serviceloader;
 
-import static org.junit.Assert.assertTrue;
-
 import java.util.List;
 import java.util.ServiceLoader;
-
 import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.junit.Test;
+
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.core.JdkVersion;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Juergen Hoeller

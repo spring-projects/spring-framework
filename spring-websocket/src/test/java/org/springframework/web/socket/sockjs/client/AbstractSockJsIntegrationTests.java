@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -39,7 +39,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestName;
@@ -123,6 +122,12 @@ public abstract class AbstractSockJsIntegrationTests {
 		catch (Throwable t) {
 			logger.error("Failed to stop server", t);
 		}
+		try {
+			this.wac.close();
+		}
+		catch (Throwable t) {
+			logger.error("Failed to close WebApplicationContext", t);
+		}
 	}
 
 	protected abstract Class<?> upgradeStrategyConfigClass();
@@ -140,7 +145,6 @@ public abstract class AbstractSockJsIntegrationTests {
 
 	// Temporarily @Ignore failures caused by suspected Jetty bug
 
-	@Ignore
 	@Test
 	public void echoWebSocket() throws Exception {
 		testEcho(100, createWebSocketTransport());
@@ -158,7 +162,6 @@ public abstract class AbstractSockJsIntegrationTests {
 		testEcho(100, xhrTransport);
 	}
 
-	@Ignore
 	@Test
 	public void receiveOneMessageWebSocket() throws Exception {
 		testReceiveOneMessage(createWebSocketTransport());

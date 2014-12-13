@@ -17,7 +17,6 @@
 package org.springframework.web.jsf;
 
 import java.util.Iterator;
-
 import javax.faces.application.Application;
 import javax.faces.application.FacesMessage;
 import javax.faces.application.FacesMessage.Severity;

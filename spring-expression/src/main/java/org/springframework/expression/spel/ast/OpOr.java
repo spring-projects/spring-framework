@@ -71,34 +71,31 @@ public class OpOr extends Operator {
 	@Override
 	public boolean isCompilable() {
 		SpelNodeImpl left = getLeftOperand();
-		SpelNodeImpl right= getRightOperand();
-		if (!left.isCompilable() || !right.isCompilable()) {
-			return false;
-		}
-		return
-				CodeFlow.isBooleanCompatible(left.getExitDescriptor()) &&
-				CodeFlow.isBooleanCompatible(right.getExitDescriptor());		
+		SpelNodeImpl right = getRightOperand();
+		return (left.isCompilable() && right.isCompilable() &&
+				CodeFlow.isBooleanCompatible(left.exitTypeDescriptor) &&
+				CodeFlow.isBooleanCompatible(right.exitTypeDescriptor));
 	}
 	
 	@Override
-	public void generateCode(MethodVisitor mv, CodeFlow codeflow) {
+	public void generateCode(MethodVisitor mv, CodeFlow cf) {
 		// pseudo: if (leftOperandValue) { result=true; } else { result=rightOperandValue; }
 		Label elseTarget = new Label();
 		Label endOfIf = new Label();
-		codeflow.enterCompilationScope();
-		getLeftOperand().generateCode(mv, codeflow);
-		codeflow.unboxBooleanIfNecessary(mv);
-		codeflow.exitCompilationScope();
+		cf.enterCompilationScope();
+		getLeftOperand().generateCode(mv, cf);
+		cf.unboxBooleanIfNecessary(mv);
+		cf.exitCompilationScope();
 		mv.visitJumpInsn(IFEQ, elseTarget);
 		mv.visitLdcInsn(1); // TRUE
 		mv.visitJumpInsn(GOTO,endOfIf);
 		mv.visitLabel(elseTarget);
-		codeflow.enterCompilationScope();
-		getRightOperand().generateCode(mv, codeflow);
-		codeflow.unboxBooleanIfNecessary(mv);
-		codeflow.exitCompilationScope();
+		cf.enterCompilationScope();
+		getRightOperand().generateCode(mv, cf);
+		cf.unboxBooleanIfNecessary(mv);
+		cf.exitCompilationScope();
 		mv.visitLabel(endOfIf);
-		codeflow.pushDescriptor(getExitDescriptor());
+		cf.pushDescriptor(this.exitTypeDescriptor);
 	}
 	
 }

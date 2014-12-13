@@ -226,7 +226,7 @@ public class UrlTag extends HtmlEscapingAwareTag implements ParamAware {
 		}
 
 		// HTML and/or JavaScript escape, if demanded.
-		urlStr = isHtmlEscape() ? HtmlUtils.htmlEscape(urlStr) : urlStr;
+		urlStr = htmlEscape(urlStr);
 		urlStr = this.javaScriptEscape ? JavaScriptUtils.javaScriptEscape(urlStr) : urlStr;
 
 		return urlStr;

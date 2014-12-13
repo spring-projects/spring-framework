@@ -16,11 +16,10 @@
 
 package org.springframework.cache.transaction;
 
-import static org.junit.Assert.*;
-
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+
 import org.springframework.cache.Cache;
 import org.springframework.cache.concurrent.ConcurrentMapCache;
 import org.springframework.tests.transaction.CallCountingTransactionManager;
@@ -28,6 +27,8 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.interceptor.DefaultTransactionAttribute;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Stephane Nicoll

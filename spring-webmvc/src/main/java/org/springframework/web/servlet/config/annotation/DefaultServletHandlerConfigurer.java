@@ -18,7 +18,6 @@ package org.springframework.web.servlet.config.annotation;
 
 import java.util.HashMap;
 import java.util.Map;
-
 import javax.servlet.ServletContext;
 
 import org.springframework.util.Assert;

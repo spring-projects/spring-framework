@@ -16,15 +16,20 @@
 
 package org.springframework.http.client;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
 import java.io.IOException;
 import java.net.URI;
 import java.util.Arrays;
 import java.util.Locale;
 import java.util.concurrent.Future;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-
+import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -34,8 +39,6 @@ import org.springframework.util.StreamUtils;
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.util.concurrent.ListenableFutureCallback;
 
-import static org.junit.Assert.*;
-
 public abstract class AbstractAsyncHttpRequestFactoryTestCase extends AbstractJettyServerTestCase {
 
 	protected AsyncClientHttpRequestFactory factory;
@@ -43,9 +46,16 @@ public abstract class AbstractAsyncHttpRequestFactoryTestCase extends AbstractJe
 
 	@Before
 	public final void createFactory() throws Exception {
-		factory = createRequestFactory();
-		if (factory instanceof InitializingBean) {
-			((InitializingBean) factory).afterPropertiesSet();
+		this.factory = createRequestFactory();
+		if (this.factory instanceof InitializingBean) {
+			((InitializingBean) this.factory).afterPropertiesSet();
+		}
+	}
+
+	@After
+	public final void destroyFactory() throws Exception {
+		if (this.factory instanceof DisposableBean) {
+			((DisposableBean) this.factory).destroy();
 		}
 	}
 
@@ -55,18 +65,23 @@ public abstract class AbstractAsyncHttpRequestFactoryTestCase extends AbstractJe
 	@Test
 	public void status() throws Exception {
 		URI uri = new URI(baseUrl + "/status/notfound");
-		AsyncClientHttpRequest request = factory.createAsyncRequest(uri, HttpMethod.GET);
+		AsyncClientHttpRequest request = this.factory.createAsyncRequest(uri, HttpMethod.GET);
 		assertEquals("Invalid HTTP method", HttpMethod.GET, request.getMethod());
 		assertEquals("Invalid HTTP URI", uri, request.getURI());
 		Future<ClientHttpResponse> futureResponse = request.executeAsync();
 		ClientHttpResponse response = futureResponse.get();
-		assertEquals("Invalid status code", HttpStatus.NOT_FOUND, response.getStatusCode());
+		try {
+			assertEquals("Invalid status code", HttpStatus.NOT_FOUND, response.getStatusCode());
+		}
+		finally {
+			response.close();
+		}
 	}
 
 	@Test
 	public void statusCallback() throws Exception {
 		URI uri = new URI(baseUrl + "/status/notfound");
-		AsyncClientHttpRequest request = factory.createAsyncRequest(uri, HttpMethod.GET);
+		AsyncClientHttpRequest request = this.factory.createAsyncRequest(uri, HttpMethod.GET);
 		assertEquals("Invalid HTTP method", HttpMethod.GET, request.getMethod());
 		assertEquals("Invalid HTTP URI", uri, request.getURI());
 		ListenableFuture<ClientHttpResponse> listenableFuture = request.executeAsync();
@@ -74,29 +89,29 @@ public abstract class AbstractAsyncHttpRequestFactoryTestCase extends AbstractJe
 			@Override
 			public void onSuccess(ClientHttpResponse result) {
 				try {
-					System.out.println("SUCCESS! " + result.getStatusCode());
-					System.out.println("Callback: " + System.currentTimeMillis());
-					System.out.println(Thread.currentThread().getId());
 					assertEquals("Invalid status code", HttpStatus.NOT_FOUND, result.getStatusCode());
 				}
 				catch (IOException ex) {
-					ex.printStackTrace();
+					fail(ex.getMessage());
 				}
 			}
 			@Override
 			public void onFailure(Throwable ex) {
-				System.out.println("FAILURE: " + ex);
+				fail(ex.getMessage());
 			}
 		});
 		ClientHttpResponse response = listenableFuture.get();
-		System.out.println("Main thread: " + System.currentTimeMillis());
-		assertEquals("Invalid status code", HttpStatus.NOT_FOUND, response.getStatusCode());
-		System.out.println(Thread.currentThread().getId());
+		try {
+			assertEquals("Invalid status code", HttpStatus.NOT_FOUND, response.getStatusCode());
+		}
+		finally {
+			response.close();
+		}
 	}
 
 	@Test
 	public void echo() throws Exception {
-		AsyncClientHttpRequest request = factory.createAsyncRequest(new URI(baseUrl + "/echo"), HttpMethod.PUT);
+		AsyncClientHttpRequest request = this.factory.createAsyncRequest(new URI(baseUrl + "/echo"), HttpMethod.PUT);
 		assertEquals("Invalid HTTP method", HttpMethod.PUT, request.getMethod());
 		String headerName = "MyHeader";
 		String headerValue1 = "value1";
@@ -129,9 +144,9 @@ public abstract class AbstractAsyncHttpRequestFactoryTestCase extends AbstractJe
 		}
 	}
 
-	@Test(expected = IllegalStateException.class)
+	@Test
 	public void multipleWrites() throws Exception {
-		AsyncClientHttpRequest request = factory.createAsyncRequest(new URI(baseUrl + "/echo"), HttpMethod.POST);
+		AsyncClientHttpRequest request = this.factory.createAsyncRequest(new URI(baseUrl + "/echo"), HttpMethod.POST);
 		final byte[] body = "Hello World".getBytes("UTF-8");
 
 		if (request instanceof StreamingHttpOutputMessage) {
@@ -146,15 +161,19 @@ public abstract class AbstractAsyncHttpRequestFactoryTestCase extends AbstractJe
 		ClientHttpResponse response = futureResponse.get();
 		try {
 			FileCopyUtils.copy(body, request.getBody());
+			fail("IllegalStateException expected");
+		}
+		catch (IllegalStateException ex) {
+			// expected
 		}
 		finally {
 			response.close();
 		}
 	}
 
-	@Test(expected = UnsupportedOperationException.class)
+	@Test
 	public void headersAfterExecute() throws Exception {
-		AsyncClientHttpRequest request = factory.createAsyncRequest(new URI(baseUrl + "/echo"), HttpMethod.POST);
+		AsyncClientHttpRequest request = this.factory.createAsyncRequest(new URI(baseUrl + "/echo"), HttpMethod.POST);
 		request.getHeaders().add("MyHeader", "value");
 		byte[] body = "Hello World".getBytes("UTF-8");
 		FileCopyUtils.copy(body, request.getBody());
@@ -163,6 +182,10 @@ public abstract class AbstractAsyncHttpRequestFactoryTestCase extends AbstractJe
 		ClientHttpResponse response = futureResponse.get();
 		try {
 			request.getHeaders().add("MyHeader", "value");
+			fail("UnsupportedOperationException expected");
+		}
+		catch (UnsupportedOperationException ex) {
+			// expected
 		}
 		finally {
 			response.close();
@@ -182,7 +205,7 @@ public abstract class AbstractAsyncHttpRequestFactoryTestCase extends AbstractJe
 	protected void assertHttpMethod(String path, HttpMethod method) throws Exception {
 		ClientHttpResponse response = null;
 		try {
-			AsyncClientHttpRequest request = factory.createAsyncRequest(new URI(baseUrl + "/methods/" + path), method);
+			AsyncClientHttpRequest request = this.factory.createAsyncRequest(new URI(baseUrl + "/methods/" + path), method);
 			Future<ClientHttpResponse> futureResponse = request.executeAsync();
 			response = futureResponse.get();
 			assertEquals("Invalid response status", HttpStatus.OK, response.getStatusCode());

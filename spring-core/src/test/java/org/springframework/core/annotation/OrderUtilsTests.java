@@ -16,11 +16,11 @@
 
 package org.springframework.core.annotation;
 
-import static org.junit.Assert.*;
-
 import javax.annotation.Priority;
 
 import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  *

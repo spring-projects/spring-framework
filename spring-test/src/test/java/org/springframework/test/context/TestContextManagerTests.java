@@ -16,9 +16,6 @@
 
 package org.springframework.test.context;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -31,8 +28,11 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+
 import org.springframework.core.style.ToStringCreator;
 import org.springframework.test.context.support.AbstractTestExecutionListener;
+
+import static org.junit.Assert.*;
 
 /**
  * JUnit 4 based unit test for {@link TestContextManager}, which verifies proper

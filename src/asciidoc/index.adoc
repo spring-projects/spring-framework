@@ -37,28 +37,30 @@ list]. Questions on the Framework itself should be asked on StackOverflow
 
 
 [[overview-getting-started-with-spring]]
-== Getting Started With Spring
+== Getting Started with Spring
 This reference guide provides detailed information about the Spring Framework.
 It provides comprehensive documentation for all features, as well as some background
 about the underlying concepts (such as __"Dependency Injection"__) that Spring has
 embraced.
 
-If you are just getting started with Spring, you may want to begin with the lighter
-https://spring.io/guides["Getting Started"] guides that are available from
-https://spring.io. As well as being easier to digest, these guide are very
-__task focused__. They also cover other projects from the Spring portfolio that you might
- want to consider when solving a particular problem.
+If you are just getting started with Spring, you may want to begin using the Spring Framework
+by creating a http://projects.spring.io/spring-boot/[Spring Boot] based application.
+Spring Boot provides a quick (and opinionated) way to create a production-ready Spring based
+application. It is based on the Spring Framework, favors convention over configuration, and is
+designed to get you up and running as quickly as possible.
 
+You can use http://start.spring.io[start.spring.io] to generate a basic project or follow
+one of the https://spring.io/guides["Getting Started" guides] like the
 https://spring.io/guides/gs/rest-service/[Getting Started Building a RESTful Web Service]
-would be an excellent first choice to get your feet wet.
-
-
+one. As well as being easier to digest, these guides are very __task focused__, and most of
+them are based on Spring Boot. They also cover other projects from the Spring portfolio
+that you might want to consider when solving a particular problem.
 
 
 
 [[overview]]
-== Introduction to Spring Framework
-Spring Framework is a Java platform that provides comprehensive infrastructure support
+== Introduction to the Spring Framework
+The Spring Framework is a Java platform that provides comprehensive infrastructure support
 for developing Java applications. Spring handles the infrastructure so you can focus on
 your application.
 
@@ -66,7 +68,7 @@ Spring enables you to build applications from "plain old Java objects" (POJOs) a
 apply enterprise services non-invasively to POJOs. This capability applies to the Java
 SE programming model and to full and partial Java EE.
 
-Examples of how you, as an application developer, can use the Spring platform advantage:
+Examples of how you, as an application developer, can benefit from the Spring platform:
 
 * Make a Java method execute in a database transaction without having to deal with
   transaction APIs.
@@ -80,29 +82,17 @@ Examples of how you, as an application developer, can use the Spring platform ad
 [[overview-dependency-injection]]
 === Dependency Injection and Inversion of Control
 
-[[background-ioc]]
-.Background
-****
-"__The question is, what aspect of control are [they] inverting?__" Martin Fowler posed
-this question about Inversion of Control (IoC) on his site in 2004. Fowler suggested
-renaming the principle to make it more self-explanatory and came up with __Dependency
-Injection__.
-
-For insight into IoC and DI, refer to Fowler's article at
-http://martinfowler.com/articles/injection.html[http://martinfowler.com/articles/injection.html].
-****
-
-Java applications -- a loose term that runs the gamut from constrained applets to n-tier
-server-side enterprise applications -- typically consist of objects that collaborate to
-form the application proper. Thus the objects in an application have __dependencies__ on
-each other.
+A Java application -- a loose term that runs the gamut from constrained, embedded
+applications to n-tier, server-side enterprise applications -- typically consists of
+objects that collaborate to form the application proper. Thus the objects in an
+application have __dependencies__ on each other.
 
 Although the Java platform provides a wealth of application development functionality,
 it lacks the means to organize the basic building blocks into a coherent whole, leaving
-that task to architects and developers. True, you can use design patterns such
+that task to architects and developers. Although you can use design patterns such
 as __Factory__, __Abstract Factory__, __Builder__, __Decorator__, and __Service Locator__
-to compose the various classes and object instances that make up an application.
-However, these patterns are simply that: best practices given a name, with a description
+to compose the various classes and object instances that make up an application,
+these patterns are simply that: best practices given a name, with a description
 of what the pattern does, where to apply it, the problems it addresses, and so forth.
 Patterns are formalized best practices that __you must implement yourself__ in your
 application.
@@ -113,6 +103,16 @@ application ready for use. The Spring Framework codifies formalized design patte
 first-class objects that you can integrate into your own application(s). Numerous
 organizations and institutions use the Spring Framework in this manner to engineer
 robust, __maintainable__ applications.
+
+[[background-ioc]]
+.Background
+****
+"__The question is, what aspect of control are [they] inverting?__" Martin Fowler posed
+this question about Inversion of Control (IoC)
+http://martinfowler.com/articles/injection.html[on his site] in 2004. Fowler suggested
+renaming the principle to make it more self-explanatory and came up with __Dependency
+Injection__.
+****
 
 
 
@@ -127,15 +127,15 @@ Programming), Instrumentation, Messaging, and Test, as shown in the following di
 image::images/spring-overview.png[width=400]
 
 The following sections list the available modules for each feature along with their
-artifact name and the topics they cover. Artifact names correlate to _artifact IDs_ used
+artifact names and the topics they cover. Artifact names correlate to _artifact IDs_ used
 in <<dependency-management,Dependency Management tools>>.
 
 
 [[overview-core-container]]
 ==== Core Container
 The <<beans-introduction,__Core Container__>> consists of the `spring-core`,
-`spring-beans`, `spring-context`, and `spring-expression` (Spring Expression Language)
-modules.
+`spring-beans`, `spring-context`, `spring-context-support`, and `spring-expression`
+(Spring Expression Language) modules.
 
 The `spring-core` and `spring-beans` modules <<beans-introduction,provide the fundamental
 parts of the framework>>, including the IoC and Dependency Injection features. The
@@ -151,6 +151,11 @@ internationalization (using, for example, resource bundles), event propagation, 
 loading, and the transparent creation of contexts by, for example, a Servlet container.
 The Context module also supports Java EE features such as EJB, JMX, and basic remoting.
 The `ApplicationContext` interface is the focal point of the Context module.
+`spring-context-support` provides support for integrating common third-party libraries
+into a Spring application context for caching (EhCache, Guava, JCache), mailing
+(JavaMail), scheduling (CommonJ, Quartz) and template engines (FreeMarker, JasperReports,
+Velocity).
+
 
 The `spring-expression` module provides a powerful <<expressions,__Expression
 Language__>> for querying and manipulating an object graph at runtime. It is an extension
@@ -174,7 +179,8 @@ attributes.
 The separate `spring-aspects` module provides integration with AspectJ.
 
 The `spring-instrument` module provides class instrumentation support and classloader
-implementations to be used in certain application servers.
+implementations to be used in certain application servers. The `spring-instrument-tomcat`
+module contains Spring's instrumentation agent for Tomcat.
 
 
 [[overview-messaging]]
@@ -195,6 +201,10 @@ The `spring-jdbc` module provides a <<jdbc-introduction,JDBC>>-abstraction layer
 removes the need to do tedious JDBC coding and parsing of database-vendor specific error
 codes.
 
+The `spring-tx` module supports <<transaction,programmatic and declarative transaction>>
+management for classes that implement special interfaces and for __all your POJOs (Plain
+Old Java Objects)__.
+
 The `spring-orm` module provides integration layers for popular
 <<orm-introduction,object-relational mapping>> APIs, including <<orm-jpa,JPA>>,
 <<orm-jdo,JDO>>, and <<orm-hibernate,Hibernate>>. Using the `spring-orm` module you can
@@ -209,10 +219,6 @@ The `spring-jms` module (<<jms,Java Messaging Service>>) contains features for p
 consuming messages. Since Spring Framework 4.1, it provides integration with the
 `spring-messaging` module.
 
-The `spring-tx` module supports <<transaction,programmatic and declarative transaction>>
-management for classes that implement special interfaces and for __all your POJOs (Plain
-Old Java Objects)__.
-
 
 [[overview-web]]
 ==== Web
@@ -221,13 +227,14 @@ The __Web__ layer consists of the `spring-web`, `spring-webmvc`, `spring-websock
 
 The `spring-web` module provides basic web-oriented integration features such as
 multipart file upload functionality and the initialization of the IoC container using
-Servlet listeners and a web-oriented application context. It also contains the
-web-related parts of Spring's remoting support.
+Servlet listeners and a web-oriented application context. It also contains an HTTP client
+and the web-related parts of Spring's remoting support.
 
 The `spring-webmvc` module (also known as the __Web-Servlet__ module) contains Spring's
-model-view-controller (<<mvc-introduction,__MVC__>>) implementation for web applications.
-Spring's MVC framework provides a clean separation between domain model code and web
-forms and integrates with all of the other features of the Spring Framework.
+model-view-controller (<<mvc-introduction,__MVC__>>) and REST Web Services implementation
+for web applications. Spring's MVC framework provides a clean separation between domain
+model code and web forms and integrates with all of the other features of the Spring
+Framework.
 
 The `spring-webmvc-portlet` module (also known as the __Web-Portlet__ module) provides
 the MVC implementation to be used in a Portlet environment and mirrors the functionality
@@ -248,8 +255,9 @@ code in isolation.
 [[overview-usagescenarios]]
 === Usage scenarios
 The building blocks described previously make Spring a logical choice in many scenarios,
-from applets to full-fledged enterprise applications that use Spring's transaction
-management functionality and web framework integration.
+from embedded applications that run on resource-constrained devices to full-fledged
+enterprise applications that use Spring's transaction management functionality and web
+framework integration.
 
 .Typical full-fledged Spring web application
 image::images/overview-full.png[width=400]
@@ -334,8 +342,97 @@ Each release of the Spring Framework will publish artifacts to the following pla
 
 So the first thing you need to decide is how to manage your dependencies: we generally
 recommend the use of an automated system like Maven, Gradle or Ivy, but you can also do
-it manually by downloading all the jars yourself. We provide detailed instructions later
-in this chapter.
+it manually by downloading all the jars yourself.
+
+You will find bellow the list of Spring artifacts. For a more complete description of each
+modules, see <<overview-modules>>.
+
+
+.Spring Framework Artifacts
+|===
+|GroupId |ArtifactId |Description
+
+|org.springframework
+|spring-aop
+|Proxy-based AOP support
+
+|org.springframework
+|spring-aspects
+|AspectJ based aspects
+
+|org.springframework
+|spring-beans
+|Beans support, including Groovy
+
+|org.springframework
+|spring-context
+|Application context runtime, including scheduling and remoting abstractions
+
+|org.springframework
+|spring-context-support
+|Support classes for integrating common third-party libraries into a Spring application context
+
+|org.springframework
+|spring-core
+|Core utilities, used by many other Spring modules
+
+|org.springframework
+|spring-expression
+|Spring Expression Language (SpEL)
+
+|org.springframework
+|spring-instrument
+|Instrumentation agent for JVM bootstrapping
+
+|org.springframework
+|spring-instrument-tomcat
+|Instrumentation agent for Tomcat
+
+|org.springframework
+|spring-jdbc
+|JDBC support package, including DataSource setup and JDBC access support
+
+|org.springframework
+|spring-jms
+|JMS support package, including helper classes to send and receive JMS messages
+
+|org.springframework
+|spring-messaging
+|Support for messaging architectures and protocols
+
+|org.springframework
+|spring-orm
+|Object/Relational Mapping, including JPA and Hibernate support
+
+|org.springframework
+|spring-oxm
+|Object/XML Mapping
+
+|org.springframework
+|spring-test
+|Support for unit testing and integration testing Spring components
+
+|org.springframework
+|spring-tx
+|Transaction infrastructure, including DAO support and JCA integration
+
+|org.springframework
+|spring-web
+|Web support packages, including client and web remoting
+
+|org.springframework
+|spring-webmvc
+|REST Web Services and model-view-controller implementation for web applications
+
+|org.springframework
+|spring-webmvc-portlet
+|MVC implementation to be used in a Portlet environment
+
+|org.springframework
+|spring-websocket
+|WebSocket and SockJS implementations, including STOMP support
+|===
+
 
 
 [[overview-spring-dependencies]]
@@ -863,9 +960,9 @@ Spring Framework 4.0. The same applies to Hibernate Validator 5.0 as a Bean Vali
 
 [[groovy-bean-definition-dsl]]
 === Groovy Bean Definition DSL
-With Spring Framework 4.0 it is now possible to define external bean configuration using
-a Groovy DSL. This is similar in concept to using XML bean definitions, but allows for
-a more concise syntax. Using Groovy also allows you to easily embed bean definitions
+Beginning with Spring Framework 4.0, it is possible to define external bean configuration
+using a Groovy DSL. This is similar in concept to using XML bean definitions but allows
+for a more concise syntax. Using Groovy also allows you to easily embed bean definitions
 directly in your bootstrap code. For example:
 
 [source,groovy,indent=0]
@@ -1057,7 +1154,7 @@ method has been added.
   where an underlying service (or perhaps a call to `AsyncRestTemplate`) already
   returns `ListenableFuture`.
 * `@ModelAttribute` methods are now invoked in an order that respects inter-dependencies.
-  See jira.springsource.org/browse/SPR-6299[SPR-6299].
+  See https://jira.spring.io/browse/SPR-6299[SPR-6299].
 * Jackson's `@JsonView` is supported directly on `@ResponseBody` and `ResponseEntity`
   controller methods for serializing different amounts of detail for the same POJO (e.g.
   summary vs. detail page). This is also supported with View-based rendering by
@@ -1117,7 +1214,7 @@ method has been added.
   and avoiding automatic message id and timestamp creation. See Javadoc of
   `MessageHeaderAccessor`.
 * STOMP/WebSocket connections that have not activity 60 seconds after the WebSocket
-  session is established. See jira.springsource.org/browse/SPR-11884[SPR-11884].
+  session is established. See https://jira.spring.io/browse/SPR-11884[SPR-11884].
 
 === Testing Improvements
 
@@ -4790,7 +4887,7 @@ Find below the custom `BeanPostProcessor` implementation class definition:
 
 		public Object postProcessAfterInitialization(Object bean,
 				String beanName) throws BeansException {
-			System.out.println("Bean '" + beanName + "' created : " + bean.toString());
+			System.out.println("Bean ''" + beanName + "'' created : " + bean.toString());
 			return bean;
 		}
 
@@ -6365,7 +6462,7 @@ support for autowiring of `@Bean` methods:
 				@Qualifier("public") TestBean spouse,
 				@Value("#{privateInstance.age}") String country) {
 			TestBean tb = new TestBean("protectedInstance", 1);
-			tb.setSpouse(tb);
+			tb.setSpouse(spouse);
 			tb.setCountry(country);
 			return tb;
 		}
@@ -7298,7 +7395,7 @@ annotation can be used:
 	public class AppConfig {
 
 		@Bean
-		**@Desciption("Provides a basic example of a bean")**
+		**@Description("Provides a basic example of a bean")**
 		public Foo foo() {
 			return new Foo();
 		}
@@ -8240,7 +8337,7 @@ hierarchy of property sources. To explain fully, consider the following:
 ApplicationContext ctx = new GenericApplicationContext();
 Environment env = ctx.getEnvironment();
 boolean containsFoo = env.containsProperty("foo");
-System.out.println("Does my environment contain the 'foo' property? " + containsFoo);
+System.out.println("Does my environment contain the ''foo'' property? " + containsFoo);
 ----
 
 In the snippet above, we see a high-level way of asking Spring whether the `foo` property is
@@ -8883,14 +8980,6 @@ You can register an `ApplicationContext` using the `ContextLoaderListener` as fo
 	<listener>
 		<listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
 	</listener>
-
-	<!-- or use the ContextLoaderServlet instead of the above listener
-	__<servlet>
-		<servlet-name>context</servlet-name>
-		<servlet-class>org.springframework.web.context.ContextLoaderServlet</servlet-class>
-		<load-on-startup>1</load-on-startup>
-	</servlet>__
-	-->
 ----
 
 The listener inspects the `contextConfigLocation` parameter. If the parameter does not
@@ -8901,9 +8990,6 @@ application contexts will be searched. Ant-style path patterns are supported as 
 Examples are `/WEB-INF/*Context.xml` for all files with names ending with "Context.xml",
 residing in the "WEB-INF" directory, and `/WEB-INF/**/*Context.xml`, for all such files
 in any subdirectory of "WEB-INF".
-
-You can use `ContextLoaderServlet` instead of `ContextLoaderListener`. The Servlet uses
-the `contextConfigLocation` parameter just as the listener does.
 
 
 
@@ -8974,15 +9060,15 @@ directly through a classic singleton lookup.
 Use an `ApplicationContext` unless you have a good reason for not doing so.
 
 Because the `ApplicationContext` includes all functionality of the `BeanFactory`, it is
-generally recommended over the `BeanFactory`, except for a few situations such as in an
-`Applet` where memory consumption might be critical and a few extra kilobytes might make
-a difference. However, for most typical enterprise applications and systems, the
-`ApplicationContext` is what you will want to use. Spring makes __heavy__
-use of the <<beans-factory-extension-bpp, `BeanPostProcessor` extension point>> (to
-effect proxying and so on). If you use only a plain `BeanFactory`, a fair amount of
-support such as transactions and AOP will not take effect, at least not without some
-extra steps on your part. This situation could be confusing because nothing is actually
-wrong with the configuration.
+generally recommended over the `BeanFactory`, except for a few situations such as in
+embedded applications running on resource-constrained devices where memory consumption
+might be critical and a few extra kilobytes might make a difference. However, for
+most typical enterprise applications and systems, the `ApplicationContext` is what you
+will want to use. Spring makes __heavy__ use of the <<beans-factory-extension-bpp,
+`BeanPostProcessor` extension point>> (to effect proxying and so on). If you use only a
+plain `BeanFactory`, a fair amount of support such as transactions and AOP will not take
+effect, at least not without some extra steps on your part. This situation could be
+confusing because nothing is actually wrong with the configuration.
 
 The following table lists features provided by the `BeanFactory` and
 `ApplicationContext` interfaces and implementations.
@@ -9336,7 +9422,7 @@ Similarly, one can force a `UrlResource` to be used by specifying any of the sta
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	Resource template = ctx.getResource("file:/some/resource/path/myTemplate.txt");
+	Resource template = ctx.getResource("file:///some/resource/path/myTemplate.txt");
 ----
 
 [source,java,indent=0]
@@ -9357,7 +9443,7 @@ The following table summarizes the strategy for converting ++String++s to ++Reso
 | Loaded from the classpath.
 
 | file:
-| `file:/data/config.xml`
+| `file:///data/config.xml`
 | Loaded as a `URL`, from the filesystem. footnote:[But see also
   pass:specialcharacters,macros[<<resources-filesystemresource-caveats>>].]
 
@@ -9457,7 +9543,7 @@ used. The following two examples show how to force a `ClassPathResource` and a
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
-	<property name="template" value="file:/some/resource/path/myTemplate.txt"/>
+	<property name="template" value="file:///some/resource/path/myTemplate.txt"/>
 ----
 
 
@@ -9576,7 +9662,7 @@ a resource points to just one resource at a time.
 When the path location contains an Ant-style pattern, for example:
 
 [literal]
-[subs="verbatim,quotes"]
+[subs="verbatim"]
 ----
 /WEB-INF/*-context.xml
   com/mycompany/**/applicationContext.xml
@@ -9745,7 +9831,7 @@ just force the use of a `UrlResource`, by using the `file:` URL prefix.
 [subs="verbatim,quotes"]
 ----
 	// actual context type doesn't matter, the Resource will always be UrlResource
-	ctx.getResource("file:/some/resource/path/myTemplate.txt");
+	ctx.getResource("file:///some/resource/path/myTemplate.txt");
 ----
 
 [source,java,indent=0]
@@ -9753,7 +9839,7 @@ just force the use of a `UrlResource`, by using the `file:` URL prefix.
 ----
 	// force this FileSystemXmlApplicationContext to load its definition via a UrlResource
 	ApplicationContext ctx =
-		new FileSystemXmlApplicationContext("file:/conf/context.xml");
+		new FileSystemXmlApplicationContext("file:///conf/context.xml");
 ----
 
 
@@ -9844,7 +9930,7 @@ Implementing a `Validator` is fairly straightforward, especially when you know o
 `ValidationUtils` helper class that the Spring Framework also provides.
 
 [source,java,indent=0]
-[subs="verbatim,quotes"]
+[subs="verbatim"]
 ----
 	public class PersonValidator implements Validator {
 
@@ -11679,7 +11765,7 @@ The following code introduces the SpEL API to evaluate the literal string expres
 [subs="verbatim,quotes"]
 ----
 	ExpressionParser parser = new SpelExpressionParser();
-	Expression exp = parser.parseExpression("**\'Hello World'**");
+	Expression exp = parser.parseExpression("**''Hello World''**");
 	String message = (String) exp.getValue();
 ----
 
@@ -11692,7 +11778,7 @@ The interface `ExpressionParser` is responsible for parsing an expression string
 this example the expression string is a string literal denoted by the surrounding single
 quotes. The interface `Expression` is responsible for evaluating the previously defined
 expression string. There are two exceptions that can be thrown, `ParseException` and
-`EvaluationException` when calling ' `parser.parseExpression`' and ' `exp.getValue`'
+`EvaluationException` when calling '`parser.parseExpression`' and '`exp.getValue`'
 respectively.
 
 SpEL supports a wide range of features, such as calling methods, accessing properties,
@@ -11704,7 +11790,7 @@ As an example of method invocation, we call the 'concat' method on the string li
 [subs="verbatim,quotes"]
 ----
 	ExpressionParser parser = new SpelExpressionParser();
-	Expression exp = parser.parseExpression("**\'Hello World'.concat(\'!')**");
+	Expression exp = parser.parseExpression("**''Hello World''.concat(''!'')**");
 	String message = (String) exp.getValue();
 ----
 
@@ -11719,7 +11805,7 @@ as shown below.
 	ExpressionParser parser = new SpelExpressionParser();
 
 	// invokes 'getBytes()'
-	Expression exp = parser.parseExpression("**\'Hello World'.bytes**");
+	Expression exp = parser.parseExpression("**''Hello World''.bytes**");
 	byte[] bytes = (byte[]) exp.getValue();
 ----
 
@@ -11734,7 +11820,7 @@ Public fields may also be accessed.
 	ExpressionParser parser = new SpelExpressionParser();
 
 	// invokes 'getBytes().length'
-	Expression exp = parser.parseExpression("**\'Hello World'.bytes.length**");
+	Expression exp = parser.parseExpression("**''Hello World''.bytes.length**");
 	int length = (Integer) exp.getValue();
 ----
 
@@ -11744,7 +11830,7 @@ The String's constructor can be called instead of using a string literal.
 [subs="verbatim,quotes"]
 ----
 	ExpressionParser parser = new SpelExpressionParser();
-	Expression exp = parser.parseExpression("**new String(\'hello world').toUpperCase()**");
+	Expression exp = parser.parseExpression("**new String(''hello world'').toUpperCase()**");
 	String message = exp.getValue(String.class);
 ----
 
@@ -11827,7 +11913,7 @@ Inventor object in the previous example.
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	Expression exp = parser.parseExpression("name == 'Nikola Tesla'");
+	Expression exp = parser.parseExpression("name == ''Nikola Tesla''");
 	boolean result = exp.getValue(context, Boolean.class); // evaluates to true
 ----
 
@@ -11959,15 +12045,15 @@ of the expression.
 [[expressions-compiler-configuration]]
 ===== Compiler configuration
 
-The compiler is not turned on by default, there are two ways to turn
+The compiler is not turned on by default, but there are two ways to turn
 it on. It can be turned on using the parser configuration process discussed earlier or
 via a system property when SpEL usage is embedded inside another component. This section
-discussed both of these options.
+discusses both of these options.
 
 Is is important to understand that there are a few modes the compiler can operate in, captured
 in an enum (`org.springframework.expression.spel.SpelCompilerMode`). The modes are as follows:
 
-- `OFF` - the compiler is switched off, this is the default.
+- `OFF` - The compiler is switched off; this is the default.
 - `IMMEDIATE` - In immediate mode the expressions are compiled as soon as possible. This
 is typically after the first interpreted evaluation. If the compiled expression fails
 (typically due to a type changing, as described above) then the caller of the expression
@@ -12060,7 +12146,7 @@ symbol in this context.
 [subs="verbatim,quotes"]
 ----
 	<bean id="taxCalculator" class="org.spring.samples.TaxCalculator">
-		<property name="defaultLocale" value="#{ systemProperties['user.region'] }"/>
+		<property name="defaultLocale" value="#{ systemProperties[''user.region''] }"/>
 
 		<!-- other properties -->
 	</bean>
@@ -12098,7 +12184,7 @@ Here is an example to set the default value of a field variable.
 ----
 	public static class FieldValueTestBean
 
-		@Value("#{ systemProperties['user.region'] }")
+		@Value("#{ systemProperties[''user.region''] }")
 		private String defaultLocale;
 
 		public void setDefaultLocale(String defaultLocale) {
@@ -12121,7 +12207,7 @@ The equivalent but on a property setter method is shown below.
 
 		private String defaultLocale;
 
-		@Value("#{ systemProperties['user.region'] }")
+		@Value("#{ systemProperties[''user.region''] }")
 		public void setDefaultLocale(String defaultLocale) {
 			this.defaultLocale = defaultLocale;
 		}
@@ -12145,7 +12231,7 @@ Autowired methods and constructors can also use the `@Value` annotation.
 
 		@Autowired
 		public void configure(MovieFinder movieFinder,
-				@Value("#{ systemProperties['user.region'] }") String defaultLocale) {
+				@Value("#{ systemProperties[''user.region''] }") String defaultLocale) {
 			this.movieFinder = movieFinder;
 			this.defaultLocale = defaultLocale;
 		}
@@ -12165,7 +12251,7 @@ Autowired methods and constructors can also use the `@Value` annotation.
 
 		@Autowired
 		public MovieRecommender(CustomerPreferenceDao customerPreferenceDao,
-				@Value("#{systemProperties['user.country']}") String defaultLocale) {
+				@Value("#{systemProperties[''user.country'']}") String defaultLocale) {
 			this.customerPreferenceDao = customerPreferenceDao;
 			this.defaultLocale = defaultLocale;
 		}
@@ -12197,7 +12283,7 @@ logical comparison operator.
 	ExpressionParser parser = new SpelExpressionParser();
 
 	// evals to "Hello World"
-	String helloWorld = (String) parser.parseExpression("'Hello World'").getValue();
+	String helloWorld = (String) parser.parseExpression("''Hello World''").getValue();
 
 	double avogadrosNumber = (Double) parser.parseExpression("6.0221415E+23").getValue();
 
@@ -12268,15 +12354,15 @@ string literals.
 ----
 	// Officer's Dictionary
 
-	Inventor pupin = parser.parseExpression("Officers['president']").getValue(
+	Inventor pupin = parser.parseExpression("Officers[''president'']").getValue(
 			societyContext, Inventor.class);
 
 	// evaluates to "Idvor"
-	String city = parser.parseExpression("Officers['president'].PlaceOfBirth.City").getValue(
+	String city = parser.parseExpression("Officers[''president''].PlaceOfBirth.City").getValue(
 			societyContext, String.class);
 
 	// setting values
-	parser.parseExpression("Officers['advisors'][0].PlaceOfBirth.Country").setValue(
+	parser.parseExpression("Officers[''advisors''][0].PlaceOfBirth.Country").setValue(
 			societyContext, "Croatia");
 ----
 
@@ -12292,7 +12378,7 @@ Lists can be expressed directly in an expression using `{}` notation.
 	// evaluates to a Java list containing the four numbers
 	List numbers = (List) parser.parseExpression("{1,2,3,4}").getValue(context);
 
-	List listOfLists = (List) parser.parseExpression("{{'a','b'},{'x','y'}}").getValue(context);
+	List listOfLists = (List) parser.parseExpression("{{''a'',''b''},{''x'',''y''}}").getValue(context);
 ----
 
 `{}` by itself means an empty list. For performance reasons, if the list is itself
@@ -12307,9 +12393,9 @@ Maps can also be expressed directly in an expression using `{key:value}` notatio
 [subs="verbatim,quotes"]
 ----
 	// evaluates to a Java map containing the two entries
-	Map inventorInfo = (Map) parser.parseExpression("{name:'Nikola',dob:'10-July-1856'}").getValue(context);
+	Map inventorInfo = (Map) parser.parseExpression("{name:''Nikola'',dob:''10-July-1856''}").getValue(context);
 
-	Map mapOfMaps = (Map) parser.parseExpression("{name:{first:'Nikola',last:'Tesla'},dob:{day:10,month:'July',year:1856}}").getValue(context);
+	Map mapOfMaps = (Map) parser.parseExpression("{name:{first:''Nikola'',last:''Tesla''},dob:{day:10,month:''July'',year:1856}}").getValue(context);
 ----
 `{:}` by itself means an empty map. For performance reasons, if the map is itself composed
 of fixed literals or other nested constant structures (lists or maps) then a constant map is created
@@ -12347,10 +12433,10 @@ on literals. Varargs are also supported.
 [subs="verbatim,quotes"]
 ----
 	// string literal, evaluates to "bc"
-	String c = parser.parseExpression("'abc'.substring(2, 3)").getValue(String.class);
+	String c = parser.parseExpression("''abc''.substring(2, 3)").getValue(String.class);
 
 	// evaluates to true
-	boolean isMember = parser.parseExpression("isMember('Mihajlo Pupin')").getValue(
+	boolean isMember = parser.parseExpression("isMember(''Mihajlo Pupin'')").getValue(
 			societyContext, Boolean.class);
 ----
 
@@ -12375,26 +12461,26 @@ and greater than or equal are supported using standard operator notation.
 	boolean falseValue = parser.parseExpression("2 < -5.0").getValue(Boolean.class);
 
 	// evaluates to true
-	boolean trueValue = parser.parseExpression("'black' < 'block'").getValue(Boolean.class);
+	boolean trueValue = parser.parseExpression("''black'' < ''block''").getValue(Boolean.class);
 ----
 
 In addition to standard relational operators SpEL supports the `instanceof` and regular
 expression based `matches` operator.
 
 [source,java,indent=0]
-[subs="none"]
+[subs="verbatim,quotes"]
 ----
 	// evaluates to false
 	boolean falseValue = parser.parseExpression(
-			"'xyz' instanceof T(int)").getValue(Boolean.class);
+			"''xyz'' instanceof T(int)").getValue(Boolean.class);
 
 	// evaluates to true
 	boolean trueValue = parser.parseExpression(
-			"'5.00' matches '^-?\\d+(\\.\\d{2})?$'").getValue(Boolean.class);
+			"''5.00'' matches ''\^-?\\d+(\\.\\d{2})?$''").getValue(Boolean.class);
 
 	//evaluates to false
 	boolean falseValue = parser.parseExpression(
-			"'5.0067' matches '^-?\\d+(\\.\\d{2})?$'").getValue(Boolean.class);
+			"''5.0067'' matches ''\^-?\\d+(\\.\\d{2})?$''").getValue(Boolean.class);
 ----
 
 Each symbolic operator can also be specified as a purely alphabetic equivalent. This
@@ -12418,7 +12504,7 @@ below.
 	boolean falseValue = parser.parseExpression("true and false").getValue(Boolean.class);
 
 	// evaluates to true
-	String expression = "isMember('Nikola Tesla') and isMember('Mihajlo Pupin')";
+	String expression = "isMember(''Nikola Tesla'') and isMember(''Mihajlo Pupin'')";
 	boolean trueValue = parser.parseExpression(expression).getValue(societyContext, Boolean.class);
 
 	// -- OR --
@@ -12427,7 +12513,7 @@ below.
 	boolean trueValue = parser.parseExpression("true or false").getValue(Boolean.class);
 
 	// evaluates to true
-	String expression = "isMember('Nikola Tesla') or isMember('Albert Einstein')";
+	String expression = "isMember(''Nikola Tesla'') or isMember(''Albert Einstein'')";
 	boolean trueValue = parser.parseExpression(expression).getValue(societyContext, Boolean.class);
 
 	// -- NOT --
@@ -12436,7 +12522,7 @@ below.
 	boolean falseValue = parser.parseExpression("!true").getValue(Boolean.class);
 
 	// -- AND and NOT --
-	String expression = "isMember('Nikola Tesla') and !isMember('Mihajlo Pupin')";
+	String expression = "isMember(''Nikola Tesla'') and !isMember(''Mihajlo Pupin'')";
 	boolean falseValue = parser.parseExpression(expression).getValue(societyContext, Boolean.class);
 ----
 
@@ -12455,7 +12541,7 @@ operators are demonstrated below.
 	int two = parser.parseExpression("1 + 1").getValue(Integer.class); // 2
 
 	String testString = parser.parseExpression(
-			"'test' + ' ' + 'string'").getValue(String.class); // 'test string'
+			"''test'' + '' '' + ''string''").getValue(String.class); // 'test string'
 
 	// Subtraction
 	int four = parser.parseExpression("1 - -3").getValue(Integer.class); // 4
@@ -12499,7 +12585,7 @@ done within a call to `setValue` but can also be done inside a call to `getValue
 	// alternatively
 
 	String aleks = parser.parseExpression(
-			"Name = 'Alexandar Seovic'").getValue(inventorContext, String.class);
+			"Name = ''Alexandar Seovic''").getValue(inventorContext, String.class);
 ----
 
 
@@ -12537,13 +12623,13 @@ used).
 [subs="verbatim,quotes"]
 ----
 	Inventor einstein = p.parseExpression(
-			"new org.spring.samples.spel.inventor.Inventor('Albert Einstein', 'German')")
+			"new org.spring.samples.spel.inventor.Inventor(''Albert Einstein'', ''German'')")
 			.getValue(Inventor.class);
 
 	//create new inventor instance within add method of List
 	p.parseExpression(
 			"Members.add(new org.spring.samples.spel.inventor.Inventor(
-				'Albert Einstein', 'German'))").getValue(societyContext);
+				''Albert Einstein'', ''German''))").getValue(societyContext);
 ----
 
 
@@ -12636,7 +12722,7 @@ expression string.
 		StringUtils.class.getDeclaredMethod("reverseString", new Class[] { String.class }));
 
 	String helloWorldReversed = parser.parseExpression(
-		"#reverseString('hello')").getValue(context, String.class);
+		"#reverseString(''hello'')").getValue(context, String.class);
 ----
 
 
@@ -12668,7 +12754,7 @@ the expression. A minimal example is:
 [subs="verbatim,quotes"]
 ----
 	String falseString = parser.parseExpression(
-			"false ? 'trueExp' : 'falseExp'").getValue(String.class);
+			"false ? ''trueExp'' : ''falseExp''").getValue(String.class);
 ----
 
 In this case, the boolean false results in returning the string value 'falseExp'. A more
@@ -12680,8 +12766,8 @@ realistic example is shown below.
 	parser.parseExpression("Name").setValue(societyContext, "IEEE");
 	societyContext.setVariable("queryName", "Nikola Tesla");
 
-	expression = "isMember(#queryName)? #queryName + ' is a member of the ' " +
-			"+ Name + ' Society' : #queryName + ' is not a member of the ' + Name + ' Society'";
+	expression = "isMember(#queryName)? #queryName + '' is a member of the '' " +
+			"+ Name + '' Society'' : #queryName + '' is not a member of the '' + Name + '' Society''";
 
 	String queryResultString = parser.parseExpression(expression)
 			.getValue(societyContext, String.class);
@@ -12714,7 +12800,7 @@ Instead you can use the Elvis operator, named for the resemblance to Elvis' hair
 ----
 	ExpressionParser parser = new SpelExpressionParser();
 
-	String name = parser.parseExpression("null?:'Unknown'").getValue(String.class);
+	String name = parser.parseExpression("null?:''Unknown''").getValue(String.class);
 
 	System.out.println(name); // 'Unknown'
 ----
@@ -12729,13 +12815,13 @@ Here is a more complex example.
 	Inventor tesla = new Inventor("Nikola Tesla", "Serbian");
 	StandardEvaluationContext context = new StandardEvaluationContext(tesla);
 
-	String name = parser.parseExpression("Name?:'Elvis Presley'").getValue(context, String.class);
+	String name = parser.parseExpression("Name?:''Elvis Presley''").getValue(context, String.class);
 
 	System.out.println(name); // Nikola Tesla
 
 	tesla.setName(null);
 
-	name = parser.parseExpression("Name?:'Elvis Presley'").getValue(context, String.class);
+	name = parser.parseExpression("Name?:''Elvis Presley''").getValue(context, String.class);
 
 	System.out.println(name); // Elvis Presley
 ----
@@ -12778,7 +12864,7 @@ The Elvis operator can be used to apply default values in expressions, e.g. in a
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	@Value("#{systemProperties['pop3.port'] ?: 25}")
+	@Value("#{systemProperties[''pop3.port''] ?: 25}")
 ----
 
 This will inject a system property `pop3.port` if it is defined or 25 if not.
@@ -12799,7 +12885,7 @@ selection would allow us to easily get a list of Serbian inventors:
 [subs="verbatim,quotes"]
 ----
 	List<Inventor> list = (List<Inventor>) parser.parseExpression(
-			"Members.?[Nationality == 'Serbian']").getValue(societyContext);
+			"Members.?[Nationality == ''Serbian'']").getValue(societyContext);
 ----
 
 Selection is possible upon both lists and maps. In the former case the selection
@@ -13521,16 +13607,16 @@ execution is in the trading module), and `tradingOperation` (which matches if a 
 execution represents any public method in the trading module).
 
 [source,java,indent=0]
-[subs="verbatim,quotes"]
+[subs="verbatim"]
 ----
 	@Pointcut("execution(public * *(..))")
-		private void anyPublicOperation() {}
+	private void anyPublicOperation() {}
 
-		@Pointcut("within(com.xyz.someapp.trading..*)")
-		private void inTrading() {}
+	@Pointcut("within(com.xyz.someapp.trading..*)")
+	private void inTrading() {}
 
-		@Pointcut("anyPublicOperation() && inTrading()")
-		private void tradingOperation() {}
+	@Pointcut("anyPublicOperation() && inTrading()")
+	private void tradingOperation() {}
 ----
 
 It is a best practice to build more complex pointcut expressions out of smaller named
@@ -13548,7 +13634,7 @@ defining a "SystemArchitecture" aspect that captures common pointcut expressions
 this purpose. A typical such aspect would look as follows:
 
 [source,java,indent=0]
-[subs="verbatim,quotes"]
+[subs="verbatim"]
 ----
 	package com.xyz.someapp;
 
@@ -13665,7 +13751,7 @@ Some examples of common pointcut expressions are given below.
 * the execution of any public method:
 
 [source,java,indent=0]
-[subs="verbatim,quotes"]
+[subs="verbatim"]
 ----
 	execution(public * *(..))
 ----
@@ -13673,7 +13759,7 @@ Some examples of common pointcut expressions are given below.
 * the execution of any method with a name beginning with "set":
 
 [source,java,indent=0]
-[subs="verbatim,quotes"]
+[subs="verbatim"]
 ----
 	execution(* set*(..))
 ----
@@ -13681,7 +13767,7 @@ Some examples of common pointcut expressions are given below.
 * the execution of any method defined by the `AccountService` interface:
 
 [source,java,indent=0]
-[subs="verbatim,quotes"]
+[subs="verbatim"]
 ----
 	execution(* com.xyz.service.AccountService.*(..))
 ----
@@ -13689,7 +13775,7 @@ Some examples of common pointcut expressions are given below.
 * the execution of any method defined in the service package:
 
 [source,java,indent=0]
-[subs="verbatim,quotes"]
+[subs="verbatim"]
 ----
 	execution(* com.xyz.service.*.*(..))
 ----
@@ -13697,7 +13783,7 @@ Some examples of common pointcut expressions are given below.
 * the execution of any method defined in the service package or a sub-package:
 
 [source,java,indent=0]
-[subs="verbatim,quotes"]
+[subs="verbatim"]
 ----
 	execution(* com.xyz.service..*.*(..))
 ----
@@ -13916,7 +14002,7 @@ Before advice is declared in an aspect using the `@Before` annotation:
 If using an in-place pointcut expression we could rewrite the above example as:
 
 [source,java,indent=0]
-[subs="verbatim,quotes"]
+[subs="verbatim"]
 ----
 	import org.aspectj.lang.annotation.Aspect;
 	import org.aspectj.lang.annotation.Before;
@@ -14245,7 +14331,7 @@ You can restrict interception of method types to certain parameter types by simp
 typing the advice parameter to the parameter type you want to intercept the method for:
 
 [source,java,indent=0]
-[subs="verbatim,quotes"]
+[subs="verbatim"]
 ----
 	@Before("execution(* ..Sample+.sampleGenericMethod(*)) && args(param)")
 	public void beforeSampleMethod(MyType param) {
@@ -14258,7 +14344,7 @@ pointing out that this won't work for generic collections. So you cannot define 
 pointcut like this:
 
 [source,java,indent=0]
-[subs="verbatim,quotes"]
+[subs="verbatim"]
 ----
 	@Before("execution(* ..Sample+.sampleGenericCollectionMethod(*)) && args(param)")
 	public void beforeSampleMethod(Collection<MyType> param) {
@@ -14666,7 +14752,7 @@ A pointcut representing the execution of any business service in the service lay
 be defined as follows:
 
 [source,xml,indent=0]
-[subs="verbatim,quotes"]
+[subs="verbatim"]
 ----
 	<aop:config>
 
@@ -14698,7 +14784,7 @@ Assuming you have a `SystemArchitecture` aspect as described in <<aop-common-poi
 Declaring a pointcut inside an aspect is very similar to declaring a top-level pointcut:
 
 [source,xml,indent=0]
-[subs="verbatim,quotes"]
+[subs="verbatim"]
 ----
 	<aop:config>
 
@@ -14719,7 +14805,7 @@ definition style may collect join point context. For example, the following poin
 collects the 'this' object as the join point context and passes it to advice:
 
 [source,xml,indent=0]
-[subs="verbatim,quotes"]
+[subs="verbatim"]
 ----
 	<aop:config>
 
@@ -14753,7 +14839,7 @@ the keywords 'and', 'or' and 'not' can be used in place of '&&', '||' and '!'
 respectively. For example, the previous pointcut may be better written as:
 
 [source,xml,indent=0]
-[subs="verbatim,quotes"]
+[subs="verbatim"]
 ----
 	<aop:config>
 
@@ -14806,7 +14892,7 @@ level. To define the pointcut inline instead, replace the `pointcut-ref` attribu
 a `pointcut` attribute:
 
 [source,xml,indent=0]
-[subs="verbatim,quotes"]
+[subs="verbatim"]
 ----
 	<aop:aspect id="beforeExample" ref="aBean">
 
@@ -15052,7 +15138,7 @@ proceed with the method call: the presence of this parameter is an indication th
 	public class SimpleProfiler {
 
 		public Object profile(ProceedingJoinPoint call, String name, int age) throws Throwable {
-			StopWatch clock = new StopWatch("Profiling for '" + name + "' and '" + age + "'");
+			StopWatch clock = new StopWatch("Profiling for ''" + name + "'' and ''" + age + "''");
 			try {
 				clock.start(call.toShortString());
 				return call.proceed();
@@ -15216,7 +15302,7 @@ commonly see it used in conjunction with transactional advice, which also has it
 namespace support in Spring. Here's how it looks:
 
 [source,xml,indent=0]
-[subs="verbatim,quotes"]
+[subs="verbatim"]
 ----
 	<aop:config>
 
@@ -15318,7 +15404,7 @@ annotations removed.
 The corresponding Spring configuration is:
 
 [source,xml,indent=0]
-[subs="verbatim,quotes"]
+[subs="verbatim"]
 ----
 	<aop:config>
 
@@ -15360,7 +15446,7 @@ change to the aspect to retry only idempotent operations simply involves refinin
 pointcut expression so that only `@Idempotent` operations match:
 
 [source,xml,indent=0]
-[subs="verbatim,quotes"]
+[subs="verbatim"]
 ----
 	<aop:pointcut id="idempotentOperation"
 			expression="execution(* com.xyz.myapp.service.*.*(..)) and
@@ -15427,22 +15513,22 @@ named pointcuts declared in XML. For example, in the @AspectJ style you can writ
 something like:
 
 [source,java,indent=0]
-[subs="verbatim,quotes"]
+[subs="verbatim"]
 ----
 	@Pointcut(execution(* get*()))
-		public void propertyAccess() {}
+	public void propertyAccess() {}
 
-		@Pointcut(execution(org.xyz.Account+ *(..))
-		public void operationReturningAnAccount() {}
+	@Pointcut(execution(org.xyz.Account+ *(..))
+	public void operationReturningAnAccount() {}
 
-		@Pointcut(propertyAccess() && operationReturningAnAccount())
-		public void accountPropertyAccess() {}
+	@Pointcut(propertyAccess() && operationReturningAnAccount())
+	public void accountPropertyAccess() {}
 ----
 
 In the XML style I can declare the first two pointcuts:
 
 [source,xml,indent=0]
-[subs="verbatim,quotes"]
+[subs="verbatim"]
 ----
 	<aop:pointcut id="propertyAccess"
 			expression="execution(* get*())"/>
@@ -16094,7 +16180,7 @@ Here is the profiling aspect. Nothing too fancy, just a quick-and-dirty time-bas
 profiler, using the @AspectJ-style of aspect declaration.
 
 [source,java,indent=0]
-[subs="verbatim,quotes"]
+[subs="verbatim"]
 ----
 	package foo;
 
@@ -16761,7 +16847,7 @@ effectively the union of these pointcuts.)
 The usage is shown below:
 
 [source,xml,indent=0]
-[subs="verbatim,quotes"]
+[subs="verbatim"]
 ----
 	<bean id="settersAndAbsquatulatePointcut"
 			class="org.springframework.aop.support.JdkRegexpMethodPointcut">
@@ -16781,7 +16867,7 @@ Using `RegexpMethodPointcutAdvisor` simplifies wiring, as the one bean encapsula
 pointcut and advice, as shown below:
 
 [source,xml,indent=0]
-[subs="verbatim,quotes"]
+[subs="verbatim"]
 ----
 	<bean id="settersAndAbsquatulateAdvisor"
 			class="org.springframework.aop.support.RegexpMethodPointcutAdvisor">
@@ -20516,7 +20602,7 @@ Test properties files can be configured via the `locations` or `value` attribute
 `@TestPropertySource` as shown in the following example.
 
 Both traditional and XML-based properties file formats are supported -- for example,
-`"classpath:/com/example/test.properties"` or `"file:/path/to/file.xml"`.
+`"classpath:/com/example/test.properties"` or `"file:///path/to/file.xml"`.
 
 Each path will be interpreted as a Spring `Resource`. A plain path -- for example,
 `"test.properties"` -- will be treated as a classpath resource that is _relative_ to the
@@ -20862,6 +20948,12 @@ framework will not be able to cache application contexts between test classes an
 build process will run significantly slower as a result.
 ====
 
+Since having a large number of application contexts loaded within a given test suite can
+cause the suite to take an unnecessarily long time to execute, it is often beneficial to
+know exactly how many contexts have been loaded and cached. To view the statistics for
+the underlying context cache, simply set the log level for the
+`org.springframework.test.context.cache` logging category to `DEBUG`.
+
 In the unlikely case that a test corrupts the application context and requires reloading
 -- for example, by modifying a bean definition or the state of an application object --
 you can annotate your test class or test method with `@DirtiesContext` (see the
@@ -20870,6 +20962,7 @@ instructs Spring to remove the context from the cache and rebuild the applicatio
 context before executing the next test. Note that support for the `@DirtiesContext`
 annotation is provided by the `DirtiesContextTestExecutionListener` which is enabled by
 default.
+
 
 [[testcontext-ctx-management-ctx-hierarchies]]
 ====== Context hierarchies
@@ -21220,8 +21313,8 @@ framework.
 				c:loginAction-ref="loginAction" />
 
 		<bean id="loginAction" class="com.example.LoginAction"
-				c:username="#{request.getParameter('user')}"
-				c:password="#{request.getParameter('pswd')}"
+				c:username="#{request.getParameter(''user'')}"
+				c:password="#{request.getParameter(''pswd'')}"
 				scope="request">
 			<aop:scoped-proxy />
 		</bean>
@@ -21282,7 +21375,7 @@ framework.
 
 		<bean id="userPreferences"
 				class="com.example.UserPreferences"
-				c:theme="#{session.getAttribute('theme')}"
+				c:theme="#{session.getAttribute(''theme'')}"
 				scope="session">
 			<aop:scoped-proxy />
 		</bean>
@@ -21409,7 +21502,7 @@ See <<testing-examples-petclinic>> for an additional example.
 		}
 
 		protected void assertNumUsers(int expected) {
-			assertEquals("Number of rows in the 'user' table.", expected, countRowsInTable("user"));
+			assertEquals("Number of rows in the ''user'' table.", expected, countRowsInTable("user"));
 		}
 	}
 ----
@@ -21461,7 +21554,7 @@ javadocs for `TestTransaction` for further details.
 		}
 
 		protected void assertNumUsers(int expected) {
-			assertEquals("Number of rows in the 'user' table.", expected, countRowsInTable("user"));
+			assertEquals("Number of rows in the ''user'' table.", expected, countRowsInTable("user"));
 		}
 	}
 ----
@@ -21862,7 +21955,7 @@ be automatically rolled back by the `TransactionalTestExecutionListener` (see
 		}
 
 		protected void assertNumUsers(int expected) {
-			assertEquals("Number of rows in the 'user' table.", expected, countRowsInTable("user"));
+			assertEquals("Number of rows in the ''user'' table.", expected, countRowsInTable("user"));
 		}
 	}
 ----
@@ -22365,7 +22458,7 @@ be verified:
 [subs="verbatim,quotes"]
 ----
 	mockMvc.perform(get("/people").accept(MediaType.APPLICATION_JSON))
-		.andExpect(jsonPath("$.links[?(@.rel == 'self')].href").value("http://localhost:8080/people"));
+		.andExpect(jsonPath("$.links[?(@.rel == ''self'')].href").value("http://localhost:8080/people"));
 ----
 
 When XML response content contains hypermedia links created with
@@ -22377,7 +22470,7 @@ be verified:
 ----
 	Map<String, String> ns = Collections.singletonMap("ns", "http://www.w3.org/2005/Atom");
 	mockMvc.perform(get("/handle").accept(MediaType.APPLICATION_XML))
-		.andExpect(xpath("/person/ns:link[@rel='self']/@href", ns).string("http://localhost:8080/people"));
+		.andExpect(xpath("/person/ns:link[@rel=''self'']/@href", ns).string("http://localhost:8080/people"));
 ----
 
 [[spring-mvc-test-server-filters]]
@@ -23206,7 +23299,7 @@ execute in the context of a transaction with read-write semantics. The following
 configuration is explained in detail in the next few paragraphs.
 
 [source,xml,indent=0]
-[subs="verbatim,quotes"]
+[subs="verbatim"]
 ----
 	<!-- from the file 'context.xml' -->
 	<?xml version="1.0" encoding="UTF-8"?>
@@ -23295,7 +23388,7 @@ do this is simply to change the pointcut expression to match any operation in yo
 service layer. For example:
 
 [source,xml,indent=0]
-[subs="verbatim,quotes"]
+[subs="verbatim"]
 ----
 	<aop:config>
 		<aop:pointcut id="fooServiceMethods" expression="execution(* x.y.service.*.*(..))"/>
@@ -23472,7 +23565,7 @@ defined in that package (or in subpackages) and that have names ending in `Servi
 the default transactional configuration, you would write the following:
 
 [source,xml,indent=0]
-[subs="verbatim,quotes"]
+[subs="verbatim"]
 ----
 	<?xml version="1.0" encoding="UTF-8"?>
 	<beans xmlns="http://www.springframework.org/schema/beans"
@@ -23520,7 +23613,7 @@ The following example shows how to configure two distinct beans with totally dif
 transactional settings.
 
 [source,xml,indent=0]
-[subs="verbatim,quotes"]
+[subs="verbatim"]
 ----
 	<?xml version="1.0" encoding="UTF-8"?>
 	<beans xmlns="http://www.springframework.org/schema/beans"
@@ -24134,7 +24227,7 @@ is controlled through the `Ordered` interface. For full details on advice orderi
 ----
 
 [source,xml,indent=0]
-[subs="verbatim,quotes"]
+[subs="verbatim"]
 ----
 	<?xml version="1.0" encoding="UTF-8"?>
 	<beans xmlns="http://www.springframework.org/schema/beans"
@@ -24190,7 +24283,7 @@ The following example effects the same setup as above, but uses the purely XML
 declarative approach.
 
 [source,xml,indent=0]
-[subs="verbatim,quotes"]
+[subs="verbatim"]
 ----
 	<?xml version="1.0" encoding="UTF-8"?>
 	<beans xmlns="http://www.springframework.org/schema/beans"
@@ -24353,7 +24446,7 @@ a transaction. You then pass an instance of your custom `TransactionCallback` to
 
 		// use constructor-injection to supply the PlatformTransactionManager
 		public SimpleService(PlatformTransactionManager transactionManager) {
-			Assert.notNull(transactionManager, "The 'transactionManager' argument must not be null.");
+			Assert.notNull(transactionManager, "The ''transactionManager'' argument must not be null.");
 			this.transactionTemplate = new TransactionTemplate(transactionManager);
 		}
 
@@ -24420,7 +24513,7 @@ a specific `TransactionTemplate:`
 		private final TransactionTemplate transactionTemplate;
 
 		public SimpleService(PlatformTransactionManager transactionManager) {
-			Assert.notNull(transactionManager, "The 'transactionManager' argument must not be null.");
+			Assert.notNull(transactionManager, "The ''transactionManager'' argument must not be null.");
 			this.transactionTemplate = new TransactionTemplate(transactionManager);
 
 			// the transaction settings can be set here explicitly if so desired
@@ -26658,7 +26751,7 @@ where it's simply called `execute`. However, you don't have to subclass the `Sql
 class since it can easily be parameterized by setting SQL and declaring parameters.
 
 [source,java,indent=0]
-[subs="verbatim,quotes"]
+[subs="verbatim"]
 ----
 	import java.sql.Types;
 
@@ -27731,7 +27824,7 @@ The following example shows how you can configure an AOP transaction interceptor
 XML, for a simple service class:
 
 [source,xml,indent=0]
-[subs="verbatim,quotes"]
+[subs="verbatim"]
 ----
 	<?xml version="1.0" encoding="UTF-8"?>
 	<beans xmlns="http://www.springframework.org/schema/beans"
@@ -27953,7 +28046,7 @@ across any number of DAOs and any number of session factories without special re
 long as it is using `JtaTransactionManager` as the strategy.
 
 [source,xml,indent=0]
-[subs="verbatim,quotes"]
+[subs="verbatim"]
 ----
 	<beans>
 
@@ -28372,7 +28465,7 @@ To execute service operations within transactions, you can use Spring's common
 declarative transaction facilities. For example:
 
 [source,xml,indent=0]
-[subs="verbatim,quotes"]
+[subs="verbatim"]
 ----
 	<?xml version="1.0" encoding="UTF-8"?>
 	<beans xmlns="http://www.springframework.org/schema/beans"
@@ -28589,13 +28682,12 @@ The following example shows a typical `persistence.xml` file:
 
 [NOTE]
 ====
-The `exclude-unlisted-classes` element always indicates that __no__ scanning for
-annotated entity classes is supposed to occur, in order to support the
-`<exclude-unlisted-classes/>` shortcut. This is in line with the JPA specification,
-which suggests that shortcut, but unfortunately is in conflict with the JPA XSD, which
-implies `false` for that shortcut. Consequently, `<exclude-unlisted-classes> false
-</exclude-unlisted-classes/>` is not supported. Simply omit the
-`exclude-unlisted-classes` element if you want entity class scanning to occur.
+The `<exclude-unlisted-classes/>` shortcut indicates that __no__ scanning for
+annotated entity classes is supposed to occur. An explicit 'true' value specified -
+`<exclude-unlisted-classes>true</exclude-unlisted-classes/>` - also means no scan.
+`<exclude-unlisted-classes>false</exclude-unlisted-classes/>` does trigger a scan;
+however, it is recommended to simply omit the `exclude-unlisted-classes` element
+if you want entity class scanning to occur.
 ====
 
 Using the `LocalContainerEntityManagerFactoryBean` is the most powerful JPA setup
@@ -28687,7 +28779,7 @@ parsed and later retrieved through the persistence unit name. (By default, the c
 is searched for `META-INF/persistence.xml` files.)
 
 [source,xml,indent=0]
-[subs="verbatim,quotes"]
+[subs="verbatim"]
 ----
 	<bean id="pum" class="org.springframework.orm.jpa.persistenceunit.DefaultPersistenceUnitManager">
 		<property name="persistenceXmlLocations">
@@ -28873,7 +28965,7 @@ To execute service operations within transactions, you can use Spring's common
 declarative transaction facilities. For example:
 
 [source,xml,indent=0]
-[subs="verbatim,quotes"]
+[subs="verbatim"]
 ----
 	<?xml version="1.0" encoding="UTF-8"?>
 	<beans xmlns="http://www.springframework.org/schema/beans"
@@ -29013,7 +29105,7 @@ Spring abstracts all marshalling operations behind the
 below.
 
 [source,java,indent=0]
-[subs="verbatim,quotes"]
+[subs="verbatim"]
 ----
 	public interface Marshaller {
 
@@ -29061,7 +29153,7 @@ Similar to the `Marshaller`, there is the `org.springframework.oxm.Unmarshaller`
 interface.
 
 [source,java,indent=0]
-[subs="verbatim,quotes"]
+[subs="verbatim"]
 ----
 	public interface Unmarshaller {
 
@@ -30274,7 +30366,7 @@ In the example, the `@RequestMapping` is used in a number of places. The first u
 on the type (class) level, which indicates that all handling methods on this controller
 are relative to the `/appointments` path. The `get()` method has a further
 `@RequestMapping` refinement: it only accepts GET requests, meaning that an HTTP GET for
-`/appointments` invokes this method. The `post()` has a similar refinement, and the
+`/appointments` invokes this method. The `add()` has a similar refinement, and the
 `getNewForm()` combines the definition of HTTP method and path into one, so that GET
 requests for `appointments/new` are handled by that method.
 
@@ -30309,6 +30401,11 @@ application shows a multi-action controller using `@RequestMapping`:
 
 	}
 ----
+
+The above example does not specify GET vs. PUT, POST, and so forth, because
+`@RequestMapping` maps all HTTP methods by default. Use `@RequestMapping(method=GET)`
+to narrow the mapping.
+
 
 [[mvc-ann-requestmapping-proxying]]
 ===== ++@Controller++'s and AOP Proxying
@@ -30840,6 +30937,7 @@ multiple requests are allowed to access a session concurrently.
   <<mvc-ann-requestparam>>.
 * `@RequestHeader` annotated parameters for access to specific Servlet request HTTP
   headers. Parameter values are converted to the declared method argument type.
+  See <<mvc-ann-requestheader>>.
 * `@RequestBody` annotated parameters for access to the HTTP request body. Parameter
   values are converted to the declared method argument type using
   ++HttpMessageConverter++s. See <<mvc-ann-requestbody>>.
@@ -30896,6 +30994,13 @@ this working you have to reorder the parameters as follows:
 	@RequestMapping(method = RequestMethod.POST)
 	public String processSubmit(**@ModelAttribute("pet") Pet pet**, **BindingResult result**, Model model) { ... }
 ----
+
+[NOTE]
+====
+JDK 1.8's `java.util.Optional` is supported as a method parameter type with annotations
+that have a `required` attribute (e.g. `@RequestParam`, `@RequestHeader`, etc. The use
+of `java.util.Optional` in those cases is equivalent to having `required=false`.
+====
 
 
 [[mvc-ann-return-types]]
@@ -30978,6 +31083,10 @@ parameter is optional by setting ++@RequestParam++'s `required` attribute to `fa
 
 Type conversion is applied automatically if the target method parameter type is not
 `String`. See <<mvc-ann-typeconversion>>.
+
+When an `@RequestParam` annotation is used on a `Map<String, String>` or
+`MultiValueMap<String, String>` argument, the map is populated with all request
+parameters.
 
 
 [[mvc-ann-requestbody]]
@@ -31482,6 +31591,11 @@ The following code sample demonstrates how to get the value of the `Accept-Encod
 Type conversion is applied automatically if the method parameter is not `String`. See
 <<mvc-ann-typeconversion>>.
 
+When an `@RequestHeader` annotation is used on a `Map<String, String>`,
+`MultiValueMap<String, String>`, or `HttpHeaders` argument, the map is populated
+with all header values.
+
+
 [TIP]
 ====
 Built-in support is available for converting a comma-separated string into an
@@ -31650,8 +31764,9 @@ It can sometimes be useful to filter contextually the object that will be serial
 HTTP response body. In order to provide such capability, Spring MVC has built-in support for
 rendering with http://wiki.fasterxml.com/JacksonJsonViews[Jackson's Serialization Views].
 
-To use it with `@ResponseBody` controller method or methods return `ResponseEntity`, simply
-add the `@JsonView` annotation:
+To use it with an `@ResponseBody` controller method or controller methods that return
+`ResponseEntity`, simply add the `@JsonView` annotation with a class argument specifying
+the view class or interface to be used:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -31693,6 +31808,14 @@ add the `@JsonView` annotation:
 		}
 	}
 ----
+
+[NOTE]
+====
+Note that despite `@JsonView` allowing for more than one class to
+be specified, the use on a controller method is only supported with
+exactly one class argument. Consider the use of a composite interface
+if you need to enable multiple views.
+====
 
 For controllers relying on view resolution, simply add the serialization view class
 to the model:
@@ -32437,7 +32560,7 @@ One issue with the `Accept` header is that it is impossible to set it in a web b
 within HTML. For example, in Firefox, it is fixed to:
 
 [literal]
-[subs="verbatim,quotes"]
+[subs="verbatim"]
 ----
 Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
 ----
@@ -32764,7 +32887,7 @@ The following JSP code can prepare a link:
 ----
 <%@ taglib uri="http://www.springframework.org/tags" prefix="s" %>
 ...
-<a href="${s:mvcUrl('PC#getPerson').arg(0,'123').build()}">Get Person</a>
+<a href="${s:mvcUrl(''PC#getPerson'').arg(0,''US'').buildAndExpand(''123'')}">Get Person</a>
 ----
 
 
@@ -32880,7 +33003,7 @@ a request for the following URL, `http://www.sf.net/home.view?siteLanguage=nl` w
 change the site language to Dutch.
 
 [source,xml,indent=0]
-[subs="verbatim,quotes"]
+[subs="verbatim"]
 ----
 	<bean id="localeChangeInterceptor"
 			class="org.springframework.web.servlet.i18n.LocaleChangeInterceptor">
@@ -32953,9 +33076,9 @@ defined in the previous example to customize the look and feel:
 	<%@ taglib prefix="spring" uri="http://www.springframework.org/tags"%>
 	<html>
 		<head>
-			<link rel="stylesheet" href="<spring:theme code='styleSheet'/>" type="text/css"/>
+			<link rel="stylesheet" href="<spring:theme code=''styleSheet''/>" type="text/css"/>
 		</head>
-		<body style="background=<spring:theme code='background'/>">
+		<body style="background=<spring:theme code=''background''/>">
 			...
 		</body>
 	</html>
@@ -34014,7 +34137,7 @@ incoming requests or restricted to specific URL path patterns.
 An example of registering interceptors in Java:
 
 [source,java,indent=0]
-[subs="verbatim,quotes"]
+[subs="verbatim"]
 ----
 	@Configuration
 	@EnableWebMvc
@@ -34033,7 +34156,7 @@ An example of registering interceptors in Java:
 And in XML use the `<mvc:interceptors>` element:
 
 [source,xml,indent=0]
-[subs="verbatim,quotes"]
+[subs="verbatim"]
 ----
 	<mvc:interceptors>
 		<bean class="org.springframework.web.servlet.i18n.LocaleChangeInterceptor" />
@@ -34264,7 +34387,7 @@ to serve resource requests with a URL pattern of `/resources/**` from a
 `public-resources` directory within the web application root you would use:
 
 [source,java,indent=0]
-[subs="verbatim,quotes"]
+[subs="verbatim"]
 ----
 	@Configuration
 	@EnableWebMvc
@@ -34281,7 +34404,7 @@ to serve resource requests with a URL pattern of `/resources/**` from a
 And the same in XML:
 
 [source,xml,indent=0]
-[subs="verbatim,quotes"]
+[subs="verbatim"]
 ----
 	<mvc:resources mapping="/resources/**" location="/public-resources/"/>
 ----
@@ -34290,7 +34413,7 @@ To serve these resources with a 1-year future expiration to ensure maximum use o
 browser cache and a reduction in HTTP requests made by the browser:
 
 [source,java,indent=0]
-[subs="verbatim,quotes"]
+[subs="verbatim"]
 ----
 	@Configuration
 	@EnableWebMvc
@@ -34307,7 +34430,7 @@ browser cache and a reduction in HTTP requests made by the browser:
 And in XML:
 
 [source,xml,indent=0]
-[subs="verbatim,quotes"]
+[subs="verbatim"]
 ----
 	<mvc:resources mapping="/resources/**" location="/public-resources/" cache-period="31556926"/>
 ----
@@ -34321,7 +34444,7 @@ serving of resources from both the web application root and from a known path of
 `/META-INF/public-web-resources/` in any jar on the classpath use:
 
 [source,java,indent=0]
-[subs="verbatim,quotes"]
+[subs="verbatim"]
 ----
 	@EnableWebMvc
 	@Configuration
@@ -34367,7 +34490,7 @@ caching should be enabled in production.
 Java config example;
 
 [source,java,indent=0]
-[subs="verbatim,quotes"]
+[subs="verbatim"]
 ----
 	@Configuration
 	@EnableWebMvc
@@ -34387,7 +34510,7 @@ Java config example;
 XML example:
 
 [source,xml,indent=0]
-[subs="verbatim,quotes"]
+[subs="verbatim"]
 ----
 <mvc:resources mapping="/resources/**" location="/public-resources/">
 	<mvc:resource-chain>
@@ -38946,9 +39069,9 @@ WebSocket clients or to a specific user.
 [[websocket-server]]
 === WebSocket API
 The Spring Framework provides a WebSocket API designed to adapt to various WebSocket engines.
-For example, it runs on JSR-356 runtimes such as Tomcat (7.0.47+), GlassFish (4.0+) and
-WildFly (8.0+) but can also adapt to other WebSocket runtimes such as the Jetty (9.1+)
-native WebSocket support.
+Currently the list includes WebSocket runtimes such as Tomcat 7.0.47+, Jetty 9.1+,
+GlassFish 4.1+, WebLogic 12.1.3+, and Undertow 1.0+ (and WildFly 8.0+). Additional support
+may be added as more WebSocket runtimes become available.
 
 [NOTE]
 ====
@@ -39027,7 +39150,7 @@ XML configuration equivalent:
 			http://www.springframework.org/schema/beans
 			http://www.springframework.org/schema/beans/spring-beans.xsd
 			http://www.springframework.org/schema/websocket
-			http://www.springframework.org/schema/websocket/spring-websocket-4.0.xsd">
+			http://www.springframework.org/schema/websocket/spring-websocket.xsd">
 
 		<websocket:handlers>
 			<websocket:mapping path="/myHandler" handler="myHandler"/>
@@ -39082,7 +39205,7 @@ And the XML configuration equivalent:
 			http://www.springframework.org/schema/beans
 			http://www.springframework.org/schema/beans/spring-beans.xsd
 			http://www.springframework.org/schema/websocket
-			http://www.springframework.org/schema/websocket/spring-websocket-4.0.xsd">
+			http://www.springframework.org/schema/websocket/spring-websocket.xsd">
 
 		<websocket:handlers>
 			<websocket:mapping path="/myHandler" handler="myHandler"/>
@@ -39135,9 +39258,7 @@ requests -- such as Spring MVC's `DispatcherServlet`.
 
 This is a significant limitation of JSR-356 that Spring's WebSocket support
 addresses by providing a server-specific `RequestUpgradeStrategy` even when
-running in a JSR-356 runtime. At present such support is available on
-Tomcat 7.0.47+, Jetty 9.1+, GlassFish 4.0+, and WildFly 8.0+. Additional support will be
-added as more WebSocket runtimes become available.
+running in a JSR-356 runtime.
 
 [NOTE]
 ====
@@ -39426,7 +39547,7 @@ and the XML configuration equivalent:
 			http://www.springframework.org/schema/beans
 			http://www.springframework.org/schema/beans/spring-beans.xsd
 			http://www.springframework.org/schema/websocket
-			http://www.springframework.org/schema/websocket/spring-websocket-4.0.xsd">
+			http://www.springframework.org/schema/websocket/spring-websocket.xsd">
 
 		<websocket:handlers>
 			<websocket:mapping path="/myHandler" handler="myHandler"/>
@@ -39591,9 +39712,12 @@ presence of CORS headers in the response is detected. So if an application is
 already configured to provide CORS support, e.g. through a Servlet Filter,
 Spring's SockJsService will skip this part.
 
+It is also possible to disable the addition of these CORS headers thanks to the
+`suppressCors` property in Spring's SockJsService.
+
 The following is the list of headers and values expected by SockJS:
 
-* `"Access-Control-Allow-Origin"` - intitialized from the value of the "origin" request header or "*".
+* `"Access-Control-Allow-Origin"` - initialized from the value of the "Origin" request header.
 * `"Access-Control-Allow-Credentials"` - always set to `true`.
 * `"Access-Control-Request-Headers"` - initialized from values from the equivalent request header.
 * `"Access-Control-Allow-Methods"` - the HTTP methods a transport supports (see `TransportType` enum).
@@ -39836,7 +39960,7 @@ XML configuration equivalent:
 			http://www.springframework.org/schema/beans
 			http://www.springframework.org/schema/beans/spring-beans.xsd
 			http://www.springframework.org/schema/websocket
-			http://www.springframework.org/schema/websocket/spring-websocket-4.0.xsd">
+			http://www.springframework.org/schema/websocket/spring-websocket.xsd">
 
 		<websocket:message-broker application-destination-prefix="/app">
 			<websocket:stomp-endpoint path="/portfolio">
@@ -40145,7 +40269,7 @@ XML configuration equivalent:
 			http://www.springframework.org/schema/beans
 			http://www.springframework.org/schema/beans/spring-beans.xsd
 			http://www.springframework.org/schema/websocket
-			http://www.springframework.org/schema/websocket/spring-websocket-4.0.xsd">
+			http://www.springframework.org/schema/websocket/spring-websocket.xsd">
 
 		<websocket:message-broker application-destination-prefix="/app">
 			<websocket:stomp-endpoint path="/portfolio" />
@@ -40690,7 +40814,7 @@ Here is example configuration:
 			http://www.springframework.org/schema/beans
 			http://www.springframework.org/schema/beans/spring-beans.xsd
 			http://www.springframework.org/schema/websocket
-			http://www.springframework.org/schema/websocket/spring-websocket-4.0.xsd">
+			http://www.springframework.org/schema/websocket/spring-websocket.xsd">
 
 		<websocket:message-broker>
 			<websocket:transport send-timeout="15000" send-buffer-size="524288" />
@@ -40742,7 +40866,7 @@ Here is example configuration:
 			http://www.springframework.org/schema/beans
 			http://www.springframework.org/schema/beans/spring-beans.xsd
 			http://www.springframework.org/schema/websocket
-			http://www.springframework.org/schema/websocket/spring-websocket-4.0.xsd">
+			http://www.springframework.org/schema/websocket/spring-websocket.xsd">
 
 		<websocket:message-broker>
 			<websocket:transport message-size="131072" />
@@ -43047,7 +43171,7 @@ the receiver should wait before giving up waiting for a message.
 [NOTE]
 ====
 Spring also supports annotated-listener endpoints through the use of the `@JmsListener`
-and provides an open infrastructure to register endpoints programmatically. This
+annotation and provides an open infrastructure to register endpoints programmatically. This
 is by far the most convenient way to setup an asynchronous receiver, see
 <<jms-annotated-support>> for more details.
 ====
@@ -43532,6 +43656,7 @@ programmatically in addition to the ones that are detected by the `JmsListener` 
 		@Override
 		public void configureJmsListeners(JmsListenerEndpointRegistrar registrar) {
 			SimpleJmsListenerEndpoint endpoint = new SimpleJmsListenerEndpoint();
+			endpoint.setId("myJmsEndpoint");
 			endpoint.setDestination("anotherQueue");
 			endpoint.setMessageListener(message -> {
 				// processing
@@ -43584,7 +43709,7 @@ These are the main elements you can inject in JMS listener endpoints:
 * A non-annotated element that is not one of the supported types (i.e. `Message` and
   `Session`) is considered to be the payload. You can make that explicit by annotating
   the parameter with `@Payload`. You can also turn on validation by adding an extra
-  `@Validated`.
+  `@Valid`.
 
 The ability to inject Spring's `Message` abstraction is particularly useful to benefit
 from all the information stored in the transport-specific message without relying on
@@ -43597,7 +43722,7 @@ transport-specific API.
 	public void processOrder(Message<Order> order) { ... }
 ----
 
-Handling of method arguments is provided by `DefaultJmsHandlerMethodFactory` which can be
+Handling of method arguments is provided by `DefaultMessageHandlerMethodFactory` which can be
 further customized to support additional method arguments. The conversion and validation
 support can be customized there as well.
 
@@ -43613,12 +43738,12 @@ annotate the payload with `@Valid` and configure the necessary validator as foll
 
     	@Override
     	public void configureJmsListeners(JmsListenerEndpointRegistrar registrar) {
-        	registrar.setJmsHandlerMethodFactory(myJmsHandlerMethodFactory());
+        	registrar.setMessageHandlerMethodFactory(myJmsHandlerMethodFactory());
     	}
 
     	@Bean
-    	public DefaultJmsHandlerMethodFactory myJmsHandlerMethodFactory() {
-        	DefaultJmsHandlerMethodFactory factory = new DefaultJmsHandlerMethodFactory();
+    	public DefaultMessageHandlerMethodFactory myHandlerMethodFactory() {
+        	DefaultMessageHandlerMethodFactory factory = new DefaultMessageHandlerMethodFactory();
         	factory.setValidator(myValidator());
         	return factory;
     	}
@@ -44852,7 +44977,7 @@ simpler syntax is supported by the `@EnableMBeanExport` `@Configuration` annotat
 	}
 ----
 
-If you prefer XML based configuration the ' `context:mbean-export'` element serves the
+If you prefer XML based configuration the `'context:mbean-export'` element serves the
 same purpose.
 
 [source,xml,indent=0]
@@ -46835,7 +46960,7 @@ along with an inline image.
 	helper.setTo("test@host.com");
 
 	// use the true flag to indicate the text included is HTML
-	helper.setText("<html><body><img src='cid:identifier1234'></body></html>", true);
+	helper.setText("<html><body><img src=''cid:identifier1234''></body></html>", true);
 
 	// let's include the infamous windows Sample file (this time copied to c:/)
 	FileSystemResource res = new FileSystemResource(new File("c:/Sample.jpg"));
@@ -47073,11 +47198,6 @@ Spring distribution. In all likelihood, you shouldn't ever need to implement you
   configuring a java.util.concurrent.ThreadPoolExecutor` and wraps it in a `TaskExecutor`.
   If you need to adapt to a different kind of `java.util.concurrent.Executor`, it is
   recommended that you use a <<concurrentTaskExecutor, `ConcurrentTaskExecutor`>> instead.
-* `TimerTaskExecutor`
-  This implementation uses a single `TimerTask` as its backing implementation.
-  It's different from the <<syncTaskExecutor, `SyncTaskExecutor`>> in that the method
-  invocations are executed in a separate thread, although they are effectively
-  synchronously batched in that thread.
 * `WorkManagerTaskExecutor`
 
 +
@@ -47249,7 +47369,7 @@ example the following task is being scheduled to run 15 minutes past each hour b
 during the 9-to-5 "business hours" on weekdays.
 
 [source,java,indent=0]
-[subs="verbatim,quotes"]
+[subs="verbatim"]
 ----
 	scheduler.schedule(task, new CronTrigger("* 15 9-17 * * MON-FRI"));
 ----
@@ -47376,7 +47496,7 @@ If simple periodic scheduling is not expressive enough, then a cron expression m
 provided. For example, the following will only execute on weekdays.
 
 [source,java,indent=0]
-[subs="verbatim,quotes"]
+[subs="verbatim"]
 ----
 	@Scheduled(cron="*/5 * * * * MON-FRI")
 	public void doSomething() {
@@ -47636,6 +47756,21 @@ element.
 			rejection-policy="CALLER_RUNS"/>
 ----
 
+Finally, the `keep-alive` setting determines the time limit (in seconds) for which threads
+may remain idle before being terminated. If there are more than the core number of threads
+currently in the pool, after waiting this amount of time without processing a task, excess
+threads will get terminated. A time value of zero will cause excess threads to terminate
+immediately after executing a task without remaining follow-up work in the task queue.
+
+[source,xml,indent=0]
+[subs="verbatim,quotes"]
+----
+	<task:executor
+			id="executorWithKeepAlive"
+			pool-size="5-25"
+			keep-alive="120"/>
+----
+
 
 
 [[scheduling-task-namespace-scheduled-tasks]]
@@ -47668,7 +47803,7 @@ before the first execution of the method. For more control, a "cron" attribute m
 provided instead. Here is an example demonstrating these other options.
 
 [source,xml,indent=0]
-[subs="verbatim,quotes"]
+[subs="verbatim"]
 ----
 	<task:scheduled-tasks scheduler="myScheduler">
 		<task:scheduled ref="beanA" method="methodA" fixed-delay="5000" initial-delay="1000"/>
@@ -47692,33 +47827,33 @@ classes that simplify the usage of Quartz within Spring-based applications.
 
 
 [[scheduling-quartz-jobdetail]]
-==== Using the JobDetailBean
-`JobDetail` objects contain all information needed to run a job. The Spring Framework
-provides a `JobDetailBean` that makes the `JobDetail` more of an actual JavaBean with
-sensible defaults. Let's have a look at an example:
+==== Using the JobDetailFactoryBean
+Quartz `JobDetail` objects contain all information needed to run a job. Spring provides a
+`JobDetailFactoryBean` which provides bean-style properties for XML configuration purposes.
+Let's have a look at an example:
 
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
-	<bean name="exampleJob" class="org.springframework.scheduling.quartz.JobDetailBean">
-		<property name="jobClass" value="example.ExampleJob" />
+	<bean name="exampleJob" class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
+		<property name="jobClass" value="example.ExampleJob"/>
 		<property name="jobDataAsMap">
 			<map>
-				<entry key="timeout" value="5" />
+				<entry key="timeout" value="5"/>
 			</map>
 		</property>
 	</bean>
 ----
 
-The job detail bean has all information it needs to run the job ( `ExampleJob`). The
-timeout is specified in the job data map. The job data map is available through the
-`JobExecutionContext` (passed to you at execution time), but the `JobDetailBean` also
-maps the properties from the job data map to properties of the actual job. So in this
-case, if the `ExampleJob` contains a property named `timeout`, the `JobDetailBean` will
-automatically apply it:
+The job detail configuration has all information it needs to run the job (`ExampleJob`).
+The timeout is specified in the job data map. The job data map is available through the
+`JobExecutionContext` (passed to you at execution time), but the `JobDetail` also gets
+its properties from the job data mapped to properties of the job instance. So in this
+case, if the `ExampleJob` contains a bean property named `timeout`, the `JobDetail`
+will have it applied automatically:
 
 [source,java,indent=0]
-[subs="verbatim,quotes"]
+[subs="verbatim"]
 ----
 	package example;
 
@@ -47728,7 +47863,7 @@ automatically apply it:
 
 		/**
 		 * Setter called after the ExampleJob is instantiated
-		 * with the value from the JobDetailBean (5)
+		 * with the value from the JobDetailFactoryBean (5)
 		 */
 		public void setTimeout(int timeout) {
 			this.timeout = timeout;
@@ -47741,13 +47876,13 @@ automatically apply it:
 	}
 ----
 
-All additional settings from the job detail bean are of course available to you as well.
+All additional properties from the job data map are of course available to you as well.
 
 [NOTE]
 ====
 Using the `name` and `group` properties, you can modify the name and the group
-of the job, respectively. By default, the name of the job matches the bean name of the
-job detail bean (in the example above, this is `exampleJob`).
+of the job, respectively. By default, the name of the job matches the bean name
+of the `JobDetailFactoryBean` (in the example above, this is `exampleJob`).
 ====
 
 
@@ -47762,8 +47897,8 @@ Often you just need to invoke a method on a specific object. Using the
 [subs="verbatim,quotes"]
 ----
 	<bean id="jobDetail" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
-		<property name="targetObject" ref="exampleBusinessObject" />
-		<property name="targetMethod" value="doIt" />
+		<property name="targetObject" ref="exampleBusinessObject"/>
+		<property name="targetMethod" value="doIt"/>
 	</bean>
 ----
 
@@ -47805,9 +47940,9 @@ job will not start before the first one has finished. To make jobs resulting fro
 [subs="verbatim,quotes"]
 ----
 	<bean id="jobDetail" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
-		<property name="targetObject" ref="exampleBusinessObject" />
-		<property name="targetMethod" value="doIt" />
-		<property name="concurrent" value="false" />
+		<property name="targetObject" ref="exampleBusinessObject"/>
+		<property name="targetMethod" value="doIt"/>
+		<property name="concurrent" value="false"/>
 	</bean>
 ----
 
@@ -47835,21 +47970,21 @@ those triggers.
 Find below a couple of examples:
 
 [source,xml,indent=0]
-[subs="verbatim,quotes"]
+[subs="verbatim"]
 ----
 	<bean id="simpleTrigger" class="org.springframework.scheduling.quartz.SimpleTriggerFactoryBean">
 		<!-- see the example of method invoking job above -->
-		<property name="jobDetail" ref="jobDetail" />
+		<property name="jobDetail" ref="jobDetail"/>
 		<!-- 10 seconds -->
-		<property name="startDelay" value="10000" />
+		<property name="startDelay" value="10000"/>
 		<!-- repeat every 50 seconds -->
-		<property name="repeatInterval" value="50000" />
+		<property name="repeatInterval" value="50000"/>
 	</bean>
 
 	<bean id="cronTrigger" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
-		<property name="jobDetail" ref="exampleJob" />
+		<property name="jobDetail" ref="exampleJob"/>
 		<!-- run every morning at 6 AM -->
-		<property name="cronExpression" value="0 0 6 * * ?" />
+		<property name="cronExpression" value="0 0 6 * * ?"/>
 	</bean>
 ----
 
@@ -47863,8 +47998,8 @@ seconds and one every morning at 6 AM. To finalize everything, we need to set up
 	<bean class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
 		<property name="triggers">
 			<list>
-				<ref bean="cronTrigger" />
-				<ref bean="simpleTrigger" />
+				<ref bean="cronTrigger"/>
+				<ref bean="simpleTrigger"/>
 			</list>
 		</property>
 	</bean>
@@ -48188,7 +48323,7 @@ message is surrounded by quotes. Below are the changes that I (the author) make 
 
 		public String getMessage() {
 			// change the implementation to surround the message in quotes
-			return "'" + this.message + "'"
+			return "''" + this.message + "''"
 		}
 
 		public void setMessage(String message) {
@@ -48595,7 +48730,7 @@ will want to do with this callback, and you can see an example of doing that bel
 			DelegatingMetaClass metaClass = new DelegatingMetaClass(goo.getMetaClass()) {
 
 				public Object invokeMethod(Object object, String methodName, Object[] arguments) {
-					System.out.println("Invoking '" + methodName + "'.");
+					System.out.println("Invoking ''" + methodName + "''.");
 					return super.invokeMethod(object, methodName, arguments);
 				}
 			};
@@ -48916,13 +49051,6 @@ this chapter.
 * The http://groovy.codehaus.org/[Groovy] homepage
 * The http://www.beanshell.org/[BeanShell] homepage
 
-Some of the more active members of the Spring community have also added support for a
-number of additional dynamic languages above and beyond the ones covered in this
-chapter. While it is possible that such third party contributions may be added to the
-list of languages supported by the main Spring distribution, your best bet for seeing if
-your favorite scripting language is supported is the
-https://springmodules.dev.java.net/[Spring Modules project].
-
 
 
 
@@ -49229,7 +49357,7 @@ result in an exception as a custom `CacheManager` will be ignored by the
 ===== Conditional caching
 Sometimes, a method might not be suitable for caching all the time (for example, it
 might depend on the given arguments). The cache annotations support such functionality
-through the `conditional` parameter which takes a `SpEL` expression that is evaluated to
+through the `condition` parameter which takes a `SpEL` expression that is evaluated to
 either `true` or `false`. If `true`, the method is cached - if not, it behaves as if the
 method is not cached, that is executed every since time no matter what values are in the
 cache or what arguments are used. A quick example - the following method will be cached
@@ -49242,8 +49370,8 @@ only if the argument `name` has a length shorter than 32:
 	public Book findBook(String name)
 ----
 
-In addition the `conditional` parameter, the `unless` parameter can be used to veto the
-adding of a value to the cache. Unlike `conditional`, `unless` expressions are evaluated
+In addition the `condition` parameter, the `unless` parameter can be used to veto the
+adding of a value to the cache. Unlike `condition`, `unless` expressions are evaluated
 __after__ the method has been called. Expanding on the previous example - perhaps we
 only want to cache paperback books:
 
@@ -49308,9 +49436,9 @@ conditional computations:
 
 | result
 | evaluation context
-| The result of the method call (the value to be cached). Only available in `unless`'
-  expressions, `cache put` expression (to compute the `key`) or `cache evict`
-  expression (when `beforeInvocation` is `false`).
+| The result of the method call (the value to be cached). Only available in `unless`
+  expressions, `cache put` expressions (to compute the `key`), or `cache evict`
+  expressions (when `beforeInvocation` is `false`).
 | `#result`
 |===
 
@@ -49778,7 +49906,7 @@ declarative transaction management <<transaction-declarative-first-example,advic
 The previous example can be translated into:
 
 [source,xml,indent=0]
-[subs="verbatim,quotes"]
+[subs="verbatim"]
 ----
 	<!-- the service we want to make cacheable -->
 	<bean id="bookService" class="x.y.service.DefaultBookService"/>

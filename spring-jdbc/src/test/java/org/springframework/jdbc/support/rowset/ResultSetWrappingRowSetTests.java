@@ -27,6 +27,7 @@ import java.sql.Timestamp;
 
 import org.junit.Before;
 import org.junit.Test;
+
 import org.springframework.jdbc.InvalidResultSetAccessException;
 
 import static org.junit.Assert.*;

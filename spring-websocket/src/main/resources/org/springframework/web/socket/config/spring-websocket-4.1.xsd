@@ -232,6 +232,14 @@
                 ]]></xsd:documentation>
 			</xsd:annotation>
 		</xsd:attribute>
+		<xsd:attribute name="suppress-cors" type="xsd:string">
+			<xsd:annotation>
+				<xsd:documentation source="java:org.springframework.web.socket.sockjs.support.AbstractSockJsService"><![CDATA[
+	This option can be used to disable automatic addition of CORS headers for SockJS requests.
+	The default value is "false".
+                ]]></xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
 	</xsd:complexType>
 
 	<xsd:complexType name="stomp-broker-relay">
@@ -474,6 +482,24 @@
                 ]]></xsd:documentation>
 				</xsd:annotation>
 			</xsd:attribute>
+			<xsd:attribute name="allowed-origins" type="xsd:string">
+				<xsd:annotation>
+					<xsd:documentation><![CDATA[
+		Configure allowed {@code Origin} header values. Multiple origins may be specified
+		as a comma-separated list.
+
+		This check is mostly designed for browser clients. There is noting preventing other
+		types of client to modify the Origin header value.
+
+		When SockJS is enabled and allowed origins are restricted, transport types that do not
+		use {@code Origin} headers for cross origin requests (jsonp-polling, iframe-xhr-polling,
+		iframe-eventsource and iframe-htmlfile) are disabled. As a consequence, IE6/IE7 won't be
+		supported anymore and IE8/IE9 will only be supported without cookies.
+
+		By default, all origins are allowed.
+					]]></xsd:documentation>
+				</xsd:annotation>
+			</xsd:attribute>
 		</xsd:complexType>
 	</xsd:element>
 
@@ -497,6 +523,38 @@
                         ]]></xsd:documentation>
 					</xsd:annotation>
 					<xsd:complexType>
+						<xsd:sequence>
+							<xsd:element name="decorator-factories" maxOccurs="1" minOccurs="0">
+								<xsd:complexType>
+									<xsd:annotation>
+										<xsd:documentation source="org.springframework.web.socket.handler.WebSocketHandlerDecoratorFactory"><![CDATA[
+	Configure one or more factories to decorate the handler used to process WebSocket
+	messages. This may be useful for some advanced use cases, for example to allow
+	Spring Security to forcibly close the WebSocket session when the corresponding
+	HTTP session expires.
+			]]></xsd:documentation>
+									</xsd:annotation>
+									<xsd:sequence>
+										<xsd:choice minOccurs="1" maxOccurs="unbounded">
+											<xsd:element ref="beans:bean">
+												<xsd:annotation>
+													<xsd:documentation source="org.springframework.web.socket.handler.WebSocketHandlerDecoratorFactory"><![CDATA[
+	A WebSocketHandlerDecoratorFactory bean definition.
+                        ]]></xsd:documentation>
+												</xsd:annotation>
+											</xsd:element>
+											<xsd:element ref="beans:ref">
+												<xsd:annotation>
+													<xsd:documentation source="org.springframework.web.socket.handler.WebSocketHandlerDecoratorFactory"><![CDATA[
+	A reference to a WebSocketHandlerDecoratorFactory bean.
+                    ]]></xsd:documentation>
+												</xsd:annotation>
+											</xsd:element>
+										</xsd:choice>
+									</xsd:sequence>
+								</xsd:complexType>
+							</xsd:element>
+						</xsd:sequence>
 						<xsd:attribute name="message-size" type="xsd:string">
 							<xsd:annotation>
 								<xsd:documentation><![CDATA[
@@ -609,12 +667,94 @@
                 				]]></xsd:documentation>
 							</xsd:annotation>
 						</xsd:attribute>
+						<xsd:attribute name="allowed-origins" type="xsd:string">
+							<xsd:annotation>
+								<xsd:documentation><![CDATA[
+		Configure allowed {@code Origin} header values. Multiple origins may be specified
+		as a comma-separated list.
+
+		This check is mostly designed for browser clients. There is noting preventing other
+		types of client to modify the Origin header value.
+
+		When SockJS is enabled and allowed origins are restricted, transport types that do not
+		use {@code Origin} headers for cross origin requests (jsonp-polling, iframe-xhr-polling,
+		iframe-eventsource and iframe-htmlfile) are disabled. As a consequence, IE6/IE7 won't be
+		supported anymore and IE8/IE9 will only be supported without cookies.
+
+		By default, all origins are allowed.
+								]]></xsd:documentation>
+							</xsd:annotation>
+						</xsd:attribute>
 					</xsd:complexType>
 				</xsd:element>
 				<xsd:choice>
 					<xsd:element name="simple-broker" type="simple-broker"/>
 					<xsd:element name="stomp-broker-relay" type="stomp-broker-relay"/>
 				</xsd:choice>
+				<xsd:element name="argument-resolvers" minOccurs="0">
+					<xsd:annotation>
+						<xsd:documentation><![CDATA[
+	Configures HandlerMethodArgumentResolver types to support custom controller method argument types.
+	Using this option does not override the built-in support for resolving handler method arguments.
+	To customize the built-in support for argument resolution configure SimpAnnotationMethodMessageHandler directly.
+						]]></xsd:documentation>
+					</xsd:annotation>
+					<xsd:complexType>
+						<xsd:choice minOccurs="1" maxOccurs="unbounded">
+							<xsd:element ref="beans:bean" minOccurs="0" maxOccurs="unbounded">
+								<xsd:annotation>
+									<xsd:documentation><![CDATA[
+	The HandlerMethodArgumentResolver (or WebArgumentResolver for backwards compatibility) bean definition.
+									]]></xsd:documentation>
+								</xsd:annotation>
+							</xsd:element>
+							<xsd:element ref="beans:ref" minOccurs="0" maxOccurs="unbounded">
+								<xsd:annotation>
+									<xsd:documentation><![CDATA[
+	A reference to a HandlerMethodArgumentResolver bean definition.
+									]]></xsd:documentation>
+									<xsd:appinfo>
+										<tool:annotation kind="ref">
+											<tool:expected-type type="java:org.springframework.messaging.handler.invocation.HandlerMethodArgumentResolver" />
+										</tool:annotation>
+									</xsd:appinfo>
+								</xsd:annotation>
+							</xsd:element>
+						</xsd:choice>
+					</xsd:complexType>
+				</xsd:element>
+				<xsd:element name="return-value-handlers" minOccurs="0">
+					<xsd:annotation>
+						<xsd:documentation><![CDATA[
+	Configures HandlerMethodReturnValueHandler types to support custom controller method return value handling.
+	Using this option does not override the built-in support for handling return values.
+	To customize the built-in support for handling return values configure SimpAnnotationMethodMessageHandler directly.
+						]]></xsd:documentation>
+					</xsd:annotation>
+					<xsd:complexType>
+						<xsd:choice minOccurs="1" maxOccurs="unbounded">
+							<xsd:element ref="beans:bean" minOccurs="0" maxOccurs="unbounded">
+								<xsd:annotation>
+									<xsd:documentation><![CDATA[
+	The HandlerMethodReturnValueHandler bean definition.
+									]]></xsd:documentation>
+								</xsd:annotation>
+							</xsd:element>
+							<xsd:element ref="beans:ref" minOccurs="0" maxOccurs="unbounded">
+								<xsd:annotation>
+									<xsd:documentation><![CDATA[
+	A reference to a HandlerMethodReturnValueHandler bean definition.
+									]]></xsd:documentation>
+									<xsd:appinfo>
+										<tool:annotation kind="ref">
+											<tool:expected-type type="java:org.springframework.messaging.handler.invocation.HandlerMethodReturnValueHandler" />
+										</tool:annotation>
+									</xsd:appinfo>
+								</xsd:annotation>
+							</xsd:element>
+						</xsd:choice>
+					</xsd:complexType>
+				</xsd:element>
 				<xsd:element name="message-converters" minOccurs="0">
 					<xsd:annotation>
 						<xsd:documentation><![CDATA[

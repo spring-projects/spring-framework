@@ -16,6 +16,14 @@
 
 package org.springframework.web.util;
 
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.nullValue;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Arrays;
@@ -23,13 +31,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.junit.Test;
-
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
-
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
 
 /**
  * @author Arjen Poutsma
@@ -291,6 +295,14 @@ public class UriComponentsBuilderTests {
 		assertEquals(Arrays.asList("foo", "bar"), result.getPathSegments());
 	}
 
+	// SPR-12398
+
+	@Test
+	public void pathWithDuplicateSlashes() throws URISyntaxException {
+		UriComponents uriComponents = UriComponentsBuilder.fromPath("/foo/////////bar").build();
+		assertEquals("/foo/bar", uriComponents.getPath());
+	}
+
 	@Test
 	public void replacePath() {
 		UriComponentsBuilder builder = UriComponentsBuilder.fromUriString("http://www.ietf.org/rfc/rfc2396.txt");
@@ -428,4 +440,28 @@ public class UriComponentsBuilderTests {
 		assertThat(components.getFragment(), is(nullValue()));
 		assertThat(components.toString(), equalTo("/example"));
 	}
+
+	@Test
+	public void testClone() throws URISyntaxException {
+		UriComponentsBuilder builder1 = UriComponentsBuilder.newInstance();
+		builder1.scheme("http").host("e1.com").path("/p1").pathSegment("ps1").queryParam("q1").fragment("f1");
+
+		UriComponentsBuilder builder2 = (UriComponentsBuilder) builder1.clone();
+		builder2.scheme("https").host("e2.com").path("p2").pathSegment("ps2").queryParam("q2").fragment("f2");
+
+		UriComponents result1 = builder1.build();
+		assertEquals("http", result1.getScheme());
+		assertEquals("e1.com", result1.getHost());
+		assertEquals("/p1/ps1", result1.getPath());
+		assertEquals("q1", result1.getQuery());
+		assertEquals("f1", result1.getFragment());
+
+		UriComponents result2 = builder2.build();
+		assertEquals("https", result2.getScheme());
+		assertEquals("e2.com", result2.getHost());
+		assertEquals("/p1/ps1/p2/ps2", result2.getPath());
+		assertEquals("q1&q2", result2.getQuery());
+		assertEquals("f2", result2.getFragment());
+	}
+
 }

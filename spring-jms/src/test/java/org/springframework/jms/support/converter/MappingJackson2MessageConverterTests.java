@@ -21,7 +21,6 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-
 import javax.jms.BytesMessage;
 import javax.jms.Session;
 import javax.jms.TextMessage;
@@ -117,6 +116,32 @@ public class MappingJackson2MessageConverterTests {
 	}
 
 	@Test
+	public void fromTextMessage() throws Exception {
+		TextMessage textMessageMock = mock(TextMessage.class);
+		MyBean unmarshalled = new MyBean("bar");
+
+		String text = "{\"foo\":\"bar\"}";
+		given(textMessageMock.getStringProperty("__typeid__")).willReturn(MyBean.class.getName());
+		given(textMessageMock.getText()).willReturn(text);
+
+		MyBean result = (MyBean)converter.fromMessage(textMessageMock);
+		assertEquals("Invalid result", result, unmarshalled);
+	}
+
+	@Test
+	public void fromTextMessageWithUnknownProperty() throws Exception {
+		TextMessage textMessageMock = mock(TextMessage.class);
+		MyBean unmarshalled = new MyBean("bar");
+
+		String text = "{\"foo\":\"bar\", \"unknownProperty\":\"value\"}";
+		given(textMessageMock.getStringProperty("__typeid__")).willReturn(MyBean.class.getName());
+		given(textMessageMock.getText()).willReturn(text);
+
+		MyBean result = (MyBean)converter.fromMessage(textMessageMock);
+		assertEquals("Invalid result", result, unmarshalled);
+	}
+
+	@Test
 	public void fromTextMessageAsObject() throws Exception {
 		TextMessage textMessageMock = mock(TextMessage.class);
 		Map<String, String> unmarshalled = Collections.singletonMap("foo", "bar");
@@ -140,6 +165,49 @@ public class MappingJackson2MessageConverterTests {
 
 		Object result = converter.fromMessage(textMessageMock);
 		assertEquals("Invalid result", result, unmarshalled);
+	}
+
+	public static class MyBean {
+
+		public MyBean() {
+		}
+
+		public MyBean(String foo) {
+			this.foo = foo;
+		}
+
+		private String foo;
+
+		public String getFoo() {
+			return foo;
+		}
+
+		public void setFoo(String foo) {
+			this.foo = foo;
+		}
+
+		@Override
+		public boolean equals(Object o) {
+			if (this == o) {
+				return true;
+			}
+			if (o == null || getClass() != o.getClass()) {
+				return false;
+			}
+
+			MyBean bean = (MyBean) o;
+
+			if (foo != null ? !foo.equals(bean.foo) : bean.foo != null) {
+				return false;
+			}
+
+			return true;
+		}
+
+		@Override
+		public int hashCode() {
+			return foo != null ? foo.hashCode() : 0;
+		}
 	}
 
 }

@@ -16,11 +16,12 @@
 
 package org.springframework.cache.config;
 
-import static org.junit.Assert.*;
-
 import org.junit.Test;
+
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.context.support.GenericXmlApplicationContext;
+
+import static org.junit.Assert.*;
 
 /**
  * AOP advice specific parsing tests.

@@ -20,7 +20,6 @@ import java.io.IOException;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
-
 import javax.portlet.PortletContext;
 
 import org.springframework.core.io.Resource;

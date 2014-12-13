@@ -18,23 +18,38 @@ package org.springframework.web.servlet.config.annotation;
 
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.MapperFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import org.joda.time.DateTime;
-import org.junit.Before;
 import org.junit.Test;
+
 import org.springframework.beans.DirectFieldAccessor;
+import org.springframework.beans.factory.BeanFactoryUtils;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Scope;
-import org.springframework.core.Ordered;
 import org.springframework.context.annotation.ScopedProxyMode;
+import org.springframework.context.i18n.LocaleContextHolder;
+import org.springframework.context.support.StaticMessageSource;
+import org.springframework.core.Ordered;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.format.annotation.DateTimeFormat.ISO;
 import org.springframework.format.support.FormattingConversionService;
 import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.http.converter.json.AbstractJackson2HttpMessageConverter;
+import org.springframework.http.converter.xml.MappingJackson2XmlHttpMessageConverter;
 import org.springframework.mock.web.test.MockHttpServletRequest;
+import org.springframework.mock.web.test.MockHttpServletResponse;
 import org.springframework.mock.web.test.MockServletContext;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.AntPathMatcher;
@@ -43,14 +58,13 @@ import org.springframework.validation.Validator;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.support.ConfigurableWebBindingInitializer;
-import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
 import org.springframework.web.method.support.CompositeUriComponentsContributor;
 import org.springframework.web.servlet.HandlerExceptionResolver;
 import org.springframework.web.servlet.HandlerExecutionChain;
 import org.springframework.web.servlet.ViewResolver;
-import org.springframework.web.servlet.view.ViewResolverComposite;
 import org.springframework.web.servlet.handler.AbstractHandlerMapping;
 import org.springframework.web.servlet.handler.BeanNameUrlHandlerMapping;
 import org.springframework.web.servlet.handler.ConversionServiceExposingInterceptor;
@@ -63,6 +77,9 @@ import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandl
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 import org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolver;
 import org.springframework.web.servlet.resource.ResourceUrlProviderExposingInterceptor;
+import org.springframework.web.servlet.view.BeanNameViewResolver;
+import org.springframework.web.servlet.view.InternalResourceViewResolver;
+import org.springframework.web.servlet.view.ViewResolverComposite;
 import org.springframework.web.util.UrlPathHelper;
 
 import static org.junit.Assert.*;
@@ -76,23 +93,10 @@ import static org.junit.Assert.*;
  */
 public class WebMvcConfigurationSupportTests {
 
-	private WebApplicationContext wac;
-
-
-	@Before
-	public void setUp() {
-		AnnotationConfigWebApplicationContext cxt = new AnnotationConfigWebApplicationContext();
-		cxt.setServletContext(new MockServletContext());
-		cxt.register(TestConfig.class, ScopedController.class, ScopedProxyController.class);
-		cxt.refresh();
-
-		this.wac = cxt;
-	}
-
-
 	@Test
 	public void requestMappingHandlerMapping() throws Exception {
-		RequestMappingHandlerMapping handlerMapping = this.wac.getBean(RequestMappingHandlerMapping.class);
+		ApplicationContext context = initContext(WebConfig.class, ScopedController.class, ScopedProxyController.class);
+		RequestMappingHandlerMapping handlerMapping = context.getBean(RequestMappingHandlerMapping.class);
 		assertEquals(0, handlerMapping.getOrder());
 
 		HandlerExecutionChain chain = handlerMapping.getHandler(new MockHttpServletRequest("GET", "/"));
@@ -109,8 +113,9 @@ public class WebMvcConfigurationSupportTests {
 
 	@Test
 	public void emptyViewControllerHandlerMapping() {
-		AbstractHandlerMapping handlerMapping = this.wac.getBean(
-				"viewControllerHandlerMapping", AbstractHandlerMapping.class);
+		ApplicationContext context = initContext(WebConfig.class);
+		String name = "viewControllerHandlerMapping";
+		AbstractHandlerMapping handlerMapping = context.getBean(name, AbstractHandlerMapping.class);
 
 		assertNotNull(handlerMapping);
 		assertEquals(Integer.MAX_VALUE, handlerMapping.getOrder());
@@ -119,7 +124,8 @@ public class WebMvcConfigurationSupportTests {
 
 	@Test
 	public void beanNameHandlerMapping() throws Exception {
-		BeanNameUrlHandlerMapping handlerMapping = this.wac.getBean(BeanNameUrlHandlerMapping.class);
+		ApplicationContext context = initContext(WebConfig.class);
+		BeanNameUrlHandlerMapping handlerMapping = context.getBean(BeanNameUrlHandlerMapping.class);
 		assertEquals(2, handlerMapping.getOrder());
 
 		HttpServletRequest request = new MockHttpServletRequest("GET", "/testController");
@@ -133,8 +139,8 @@ public class WebMvcConfigurationSupportTests {
 
 	@Test
 	public void emptyResourceHandlerMapping() {
-		AbstractHandlerMapping handlerMapping = this.wac.getBean(
-				"resourceHandlerMapping", AbstractHandlerMapping.class);
+		ApplicationContext context = initContext(WebConfig.class);
+		AbstractHandlerMapping handlerMapping = context.getBean("resourceHandlerMapping", AbstractHandlerMapping.class);
 
 		assertNotNull(handlerMapping);
 		assertEquals(Integer.MAX_VALUE, handlerMapping.getOrder());
@@ -143,8 +149,9 @@ public class WebMvcConfigurationSupportTests {
 
 	@Test
 	public void emptyDefaultServletHandlerMapping() {
-		AbstractHandlerMapping handlerMapping = this.wac.getBean(
-				"defaultServletHandlerMapping", AbstractHandlerMapping.class);
+		ApplicationContext context = initContext(WebConfig.class);
+		String name = "defaultServletHandlerMapping";
+		AbstractHandlerMapping handlerMapping = context.getBean(name, AbstractHandlerMapping.class);
 
 		assertNotNull(handlerMapping);
 		assertEquals(Integer.MAX_VALUE, handlerMapping.getOrder());
@@ -153,8 +160,21 @@ public class WebMvcConfigurationSupportTests {
 
 	@Test
 	public void requestMappingHandlerAdapter() throws Exception {
-		RequestMappingHandlerAdapter adapter = this.wac.getBean(RequestMappingHandlerAdapter.class);
-		assertEquals(9, adapter.getMessageConverters().size());
+		ApplicationContext context = initContext(WebConfig.class);
+		RequestMappingHandlerAdapter adapter = context.getBean(RequestMappingHandlerAdapter.class);
+		List<HttpMessageConverter<?>> converters = adapter.getMessageConverters();
+		assertEquals(9, converters.size());
+		for(HttpMessageConverter<?> converter : converters) {
+			if (converter instanceof AbstractJackson2HttpMessageConverter) {
+				ObjectMapper objectMapper = ((AbstractJackson2HttpMessageConverter)converter).getObjectMapper();
+				assertFalse(objectMapper.getDeserializationConfig().isEnabled(MapperFeature.DEFAULT_VIEW_INCLUSION));
+				assertFalse(objectMapper.getSerializationConfig().isEnabled(MapperFeature.DEFAULT_VIEW_INCLUSION));
+				assertFalse(objectMapper.getDeserializationConfig().isEnabled(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES));
+				if (converter instanceof MappingJackson2XmlHttpMessageConverter) {
+					assertEquals(XmlMapper.class, objectMapper.getClass());
+				}
+			}
+		}
 
 		ConfigurableWebBindingInitializer initializer = (ConfigurableWebBindingInitializer) adapter.getWebBindingInitializer();
 		assertNotNull(initializer);
@@ -175,7 +195,8 @@ public class WebMvcConfigurationSupportTests {
 
 	@Test
 	public void uriComponentsContributor() throws Exception {
-		CompositeUriComponentsContributor uriComponentsContributor = this.wac.getBean(
+		ApplicationContext context = initContext(WebConfig.class);
+		CompositeUriComponentsContributor uriComponentsContributor = context.getBean(
 				MvcUriComponentsBuilder.MVC_URI_COMPONENTS_CONTRIBUTOR_BEAN_NAME,
 				CompositeUriComponentsContributor.class);
 
@@ -184,11 +205,11 @@ public class WebMvcConfigurationSupportTests {
 
 	@Test
 	public void handlerExceptionResolver() throws Exception {
+		ApplicationContext context = initContext(WebConfig.class);
 		HandlerExceptionResolverComposite compositeResolver =
-			this.wac.getBean("handlerExceptionResolver", HandlerExceptionResolverComposite.class);
+				context.getBean("handlerExceptionResolver", HandlerExceptionResolverComposite.class);
 
 		assertEquals(0, compositeResolver.getOrder());
-
 		List<HandlerExceptionResolver> expectedResolvers = compositeResolver.getExceptionResolvers();
 
 		assertEquals(ExceptionHandlerExceptionResolver.class, expectedResolvers.get(0).getClass());
@@ -202,21 +223,61 @@ public class WebMvcConfigurationSupportTests {
 		List<Object> interceptors = (List<Object>) fieldAccessor.getPropertyValue("responseBodyAdvice");
 		assertEquals(1, interceptors.size());
 		assertEquals(JsonViewResponseBodyAdvice.class, interceptors.get(0).getClass());
+
+		LocaleContextHolder.setLocale(Locale.ENGLISH);
+		try {
+			ResponseStatusExceptionResolver rser = (ResponseStatusExceptionResolver) expectedResolvers.get(1);
+			MockHttpServletRequest request = new MockHttpServletRequest("GET", "/");
+			MockHttpServletResponse response = new MockHttpServletResponse();
+			rser.resolveException(request, response, context.getBean(TestController.class), new UserAlreadyExistsException());
+			assertEquals("User already exists!", response.getErrorMessage());
+		}
+		finally {
+			LocaleContextHolder.resetLocaleContext();
+		}
 	}
-	
+
 	@Test
-	public void emptyViewResolver() throws Exception {
-		ViewResolverComposite compositeResolver = this.wac.getBean(ViewResolverComposite.class);
-		assertEquals(Ordered.LOWEST_PRECEDENCE, compositeResolver.getOrder());
-		List<ViewResolver> resolvers = compositeResolver.getViewResolvers();
-		assertEquals(0, resolvers.size());
-		assertNull(compositeResolver.resolveViewName("anyViewName", Locale.ENGLISH));
+	public void mvcViewResolver() {
+		ApplicationContext context = initContext(WebConfig.class);
+		ViewResolverComposite resolver = context.getBean("mvcViewResolver", ViewResolverComposite.class);
+
+		assertNotNull(resolver);
+		assertEquals(1, resolver.getViewResolvers().size());
+		assertEquals(InternalResourceViewResolver.class, resolver.getViewResolvers().get(0).getClass());
+		assertEquals(Ordered.LOWEST_PRECEDENCE, resolver.getOrder());
+	}
+
+	@Test
+	public void mvcViewResolverWithExistingResolver() throws Exception {
+		ApplicationContext context = initContext(WebConfig.class, ViewResolverConfig.class);
+		ViewResolverComposite resolver = context.getBean("mvcViewResolver", ViewResolverComposite.class);
+
+		assertNotNull(resolver);
+		assertEquals(0, resolver.getViewResolvers().size());
+		assertEquals(Ordered.LOWEST_PRECEDENCE, resolver.getOrder());
+		assertNull(resolver.resolveViewName("anyViewName", Locale.ENGLISH));
+	}
+
+	@Test
+	public void mvcViewResolverWithOrderSet() {
+		ApplicationContext context = initContext(CustomViewResolverOrderConfig.class);
+		ViewResolverComposite resolver = context.getBean("mvcViewResolver", ViewResolverComposite.class);
+
+		Map<String, ViewResolver> map = BeanFactoryUtils.beansOfTypeIncludingAncestors(
+				context, ViewResolver.class, true, false);
+
+		assertNotNull(resolver);
+		assertEquals(1, resolver.getViewResolvers().size());
+		assertEquals(InternalResourceViewResolver.class, resolver.getViewResolvers().get(0).getClass());
+		assertEquals(123, resolver.getOrder());
 	}
 
 	@Test
 	public void defaultPathMatchConfiguration() throws Exception {
-		UrlPathHelper urlPathHelper = this.wac.getBean(UrlPathHelper.class);
-		PathMatcher pathMatcher = this.wac.getBean(PathMatcher.class);
+		ApplicationContext context = initContext(WebConfig.class);
+		UrlPathHelper urlPathHelper = context.getBean(UrlPathHelper.class);
+		PathMatcher pathMatcher = context.getBean(PathMatcher.class);
 
 		assertNotNull(urlPathHelper);
 		assertNotNull(pathMatcher);
@@ -224,13 +285,51 @@ public class WebMvcConfigurationSupportTests {
 	}
 
 
+	private ApplicationContext initContext(Class... configClasses) {
+		AnnotationConfigWebApplicationContext context = new AnnotationConfigWebApplicationContext();
+		context.setServletContext(new MockServletContext());
+		context.register(configClasses);
+		context.refresh();
+		return context;
+	}
+
+
 	@EnableWebMvc
 	@Configuration
-	public static class TestConfig {
+	public static class WebConfig {
 
 		@Bean(name="/testController")
 		public TestController testController() {
 			return new TestController();
+		}
+
+		@Bean
+		public MessageSource messageSource() {
+			StaticMessageSource messageSource = new StaticMessageSource();
+			messageSource.addMessage("exception.user.exists", Locale.ENGLISH, "User already exists!");
+			return messageSource;
+		}
+	}
+
+
+	@Configuration
+	public static class ViewResolverConfig {
+
+		@Bean
+		public ViewResolver beanNameViewResolver() {
+			return new BeanNameViewResolver();
+		}
+	}
+
+
+	@EnableWebMvc
+	@Configuration
+	public static class CustomViewResolverOrderConfig extends WebMvcConfigurerAdapter {
+
+		@Override
+		public void configureViewResolvers(ViewResolverRegistry registry) {
+			registry.jsp();
+			registry.order(123);
 		}
 	}
 
@@ -267,6 +366,12 @@ public class WebMvcConfigurationSupportTests {
 		@RequestMapping("/scopedProxy")
 		public void handle() {
 		}
+	}
+
+
+	@ResponseStatus(value = HttpStatus.BAD_REQUEST,  reason = "exception.user.exists")
+	@SuppressWarnings("serial")
+	public static class UserAlreadyExistsException extends RuntimeException {
 	}
 
 }

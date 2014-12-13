@@ -43,7 +43,6 @@ import org.springframework.messaging.handler.HandlerMethod;
 import org.springframework.messaging.handler.HandlerMethodSelector;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.messaging.support.MessageHeaderAccessor;
-import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedMultiValueMap;
@@ -71,9 +70,9 @@ public abstract class AbstractMethodMessageHandler<T>
 
 	private Collection<String> destinationPrefixes = new ArrayList<String>();
 
-	private List<HandlerMethodArgumentResolver> customArgumentResolvers = new ArrayList<HandlerMethodArgumentResolver>();
+	private final List<HandlerMethodArgumentResolver> customArgumentResolvers = new ArrayList<HandlerMethodArgumentResolver>(4);
 
-	private List<HandlerMethodReturnValueHandler> customReturnValueHandlers = new ArrayList<HandlerMethodReturnValueHandler>();
+	private final List<HandlerMethodReturnValueHandler> customReturnValueHandlers = new ArrayList<HandlerMethodReturnValueHandler>(4);
 
 	private HandlerMethodArgumentResolverComposite argumentResolvers = new HandlerMethodArgumentResolverComposite();
 
@@ -121,10 +120,15 @@ public abstract class AbstractMethodMessageHandler<T>
 	 * @param customArgumentResolvers the list of resolvers; never {@code null}.
 	 */
 	public void setCustomArgumentResolvers(List<HandlerMethodArgumentResolver> customArgumentResolvers) {
-		Assert.notNull(customArgumentResolvers, "The 'customArgumentResolvers' cannot be null.");
-		this.customArgumentResolvers = customArgumentResolvers;
+		this.customArgumentResolvers.clear();
+		if (customArgumentResolvers != null) {
+			this.customArgumentResolvers.addAll(customArgumentResolvers);
+		}
 	}
 
+	/**
+	 * Return the configured custom argument resolvers, if any.
+	 */
 	public List<HandlerMethodArgumentResolver> getCustomArgumentResolvers() {
 		return this.customArgumentResolvers;
 	}
@@ -135,10 +139,15 @@ public abstract class AbstractMethodMessageHandler<T>
 	 * @param customReturnValueHandlers the list of custom return value handlers, never {@code null}.
 	 */
 	public void setCustomReturnValueHandlers(List<HandlerMethodReturnValueHandler> customReturnValueHandlers) {
-		Assert.notNull(customReturnValueHandlers, "The 'customReturnValueHandlers' cannot be null.");
-		this.customReturnValueHandlers = customReturnValueHandlers;
+		this.customReturnValueHandlers.clear();
+		if (customReturnValueHandlers != null) {
+			this.customReturnValueHandlers.addAll(customReturnValueHandlers);
+		}
 	}
 
+	/**
+	 * Return the configured custom return value handlers, if any.
+	 */
 	public List<HandlerMethodReturnValueHandler> getCustomReturnValueHandlers() {
 		return this.customReturnValueHandlers;
 	}

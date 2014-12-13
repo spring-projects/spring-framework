@@ -16,6 +16,11 @@
 
 package org.springframework.web.servlet.config.annotation;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
 import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.BeanInitializationException;
 import org.springframework.context.ApplicationContext;
@@ -37,11 +42,6 @@ import org.springframework.web.servlet.view.tiles3.TilesViewResolver;
 import org.springframework.web.servlet.view.velocity.VelocityConfigurer;
 import org.springframework.web.servlet.view.velocity.VelocityViewResolver;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-
 /**
  * Assist with the configuration of a chain of
  * {@link org.springframework.web.servlet.ViewResolver ViewResolver} instances.
@@ -57,7 +57,7 @@ public class ViewResolverRegistry {
 
 	private final List<ViewResolver> viewResolvers = new ArrayList<ViewResolver>(4);
 
-	private int order = Ordered.LOWEST_PRECEDENCE;
+	private Integer order;
 
 	private ContentNegotiationManager contentNegotiationManager;
 
@@ -112,7 +112,7 @@ public class ViewResolverRegistry {
 	private void initContentNegotiatingViewResolver(View[] defaultViews) {
 
 		// ContentNegotiatingResolver in the registry: elevate its precedence!
-		this.order = Ordered.HIGHEST_PRECEDENCE;
+		this.order = (this.order == null ? Ordered.HIGHEST_PRECEDENCE : this.order);
 
 		if (this.contentNegotiatingResolver != null) {
 			if (!ObjectUtils.isEmpty(defaultViews)) {
@@ -257,6 +257,22 @@ public class ViewResolverRegistry {
 		this.viewResolvers.add(viewResolver);
 	}
 
+	/**
+	 * ViewResolver's registered through this registry are encapsulated in an
+	 * instance of {@link org.springframework.web.servlet.view.ViewResolverComposite
+	 * ViewResolverComposite} and follow the order of registration.
+	 * This property determines the order of the ViewResolverComposite itself
+	 * relative to any additional ViewResolver's (not registered here) present in
+	 * the Spring configuration
+	 * <p>By default this property is not set, which means the resolver is ordered
+	 * at {@link Ordered#LOWEST_PRECEDENCE} unless content negotiation is enabled
+	 * in which case the order (if not set explicitly) is changed to
+	 * {@link Ordered#HIGHEST_PRECEDENCE}.
+	 */
+	public void order(int order) {
+		this.order = order;
+	}
+
 	protected boolean hasBeanOfType(Class<?> beanType) {
 		return !ObjectUtils.isEmpty(BeanFactoryUtils.beanNamesForTypeIncludingAncestors(
 				this.applicationContext, beanType, false, false));
@@ -264,7 +280,7 @@ public class ViewResolverRegistry {
 
 
 	protected int getOrder() {
-		return this.order;
+		return (this.order != null ? this.order : Ordered.LOWEST_PRECEDENCE);
 	}
 
 	protected List<ViewResolver> getViewResolvers() {

@@ -20,6 +20,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Future;
 
+import org.aspectj.lang.annotation.SuppressAjWarnings;
 import org.aspectj.lang.reflect.MethodSignature;
 
 import org.springframework.aop.interceptor.AsyncExecutionAspectSupport;
@@ -58,6 +59,7 @@ public abstract aspect AbstractAsyncExecutionAspect extends AsyncExecutionAspect
 	 * @return {@link Future} if the original method returns {@code Future}; {@code null}
 	 * otherwise.
 	 */
+	@SuppressAjWarnings("adviceDidNotMatch")
 	Object around() : asyncMethod() {
 		final MethodSignature methodSignature = (MethodSignature) thisJoinPointStaticPart.getSignature();
 		AsyncTaskExecutor executor = determineAsyncExecutor(methodSignature.getMethod());

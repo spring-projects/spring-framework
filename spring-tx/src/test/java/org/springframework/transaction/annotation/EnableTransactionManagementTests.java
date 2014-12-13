@@ -17,6 +17,7 @@
 package org.springframework.transaction.annotation;
 
 import java.util.Map;
+import javax.annotation.PostConstruct;
 
 import org.junit.Test;
 
@@ -34,8 +35,6 @@ import org.springframework.transaction.annotation.AnnotationTransactionNamespace
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
-
-import javax.annotation.PostConstruct;
 
 /**
  * Tests demonstrating use of @EnableTransactionManagement @Configuration classes.

@@ -23,7 +23,6 @@ import java.util.Locale;
 import java.util.Map;
 
 import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
-
 import org.junit.Before;
 import org.junit.BeforeClass;
 

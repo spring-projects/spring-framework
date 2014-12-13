@@ -20,8 +20,6 @@ import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.List;
-import java.util.Map;
 import java.util.concurrent.Callable;
 
 import org.springframework.core.task.AsyncListenableTaskExecutor;
@@ -32,7 +30,7 @@ import org.springframework.util.concurrent.ListenableFuture;
 
 /**
  * {@link org.springframework.http.client.ClientHttpRequest} implementation that uses
- * standard J2SE facilities to execute buffered requests. Created via the
+ * standard JDK facilities to execute buffered requests. Created via the
  * {@link org.springframework.http.client.SimpleClientHttpRequestFactory}.
  *
  * @author Arjen Poutsma
@@ -79,11 +77,10 @@ final class SimpleBufferingAsyncClientHttpRequest extends AbstractBufferingAsync
 		return this.taskExecutor.submitListenable(new Callable<ClientHttpResponse>() {
 			@Override
 			public ClientHttpResponse call() throws Exception {
-				for (Map.Entry<String, List<String>> entry : headers.entrySet()) {
-					String headerName = entry.getKey();
-					for (String headerValue : entry.getValue()) {
-						connection.addRequestProperty(headerName, headerValue);
-					}
+				SimpleBufferingClientHttpRequest.addHeaders(connection, headers);
+				// JDK < 1.8 doesn't support getOutputStream with HTTP DELETE
+				if (HttpMethod.DELETE.equals(getMethod()) && bufferedOutput.length == 0) {
+					connection.setDoOutput(false);
 				}
 				if (connection.getDoOutput() && outputStreaming) {
 					connection.setFixedLengthStreamingMode(bufferedOutput.length);

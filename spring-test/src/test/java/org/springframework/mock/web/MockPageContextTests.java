@@ -16,9 +16,9 @@
 
 package org.springframework.mock.web;
 
-import junit.framework.TestCase;
-
 import javax.servlet.jsp.PageContext;
+
+import junit.framework.TestCase;
 
 /**
  * Unit tests for the {@code MockPageContext} class.

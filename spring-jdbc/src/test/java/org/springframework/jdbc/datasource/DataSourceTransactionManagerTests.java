@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,13 +21,13 @@ import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Savepoint;
-
 import javax.sql.DataSource;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InOrder;
+
 import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.jdbc.UncategorizedSQLException;
 import org.springframework.jdbc.support.nativejdbc.SimpleNativeJdbcExtractor;
@@ -57,8 +57,11 @@ import static org.mockito.BDDMockito.*;
 public class DataSourceTransactionManagerTests  {
 
 	private Connection con;
+
 	private DataSource ds;
+
 	private DataSourceTransactionManager tm;
+
 
 	@Before
 	public void setUp() throws Exception {
@@ -75,6 +78,7 @@ public class DataSourceTransactionManagerTests  {
 		assertFalse(TransactionSynchronizationManager.isCurrentTransactionReadOnly());
 		assertFalse(TransactionSynchronizationManager.isActualTransactionActive());
 	}
+
 
 	@Test
 	public void testTransactionCommitWithAutoCommitTrue() throws Exception {
@@ -1290,6 +1294,7 @@ public class DataSourceTransactionManagerTests  {
 
 		assertTrue("Hasn't thread connection", !TransactionSynchronizationManager.hasResource(ds));
 		verify(con).rollback(sp);
+		verify(con).releaseSavepoint(sp);
 		verify(con).commit();
 		verify(con).isReadOnly();
 		verify(con).close();
@@ -1395,14 +1400,19 @@ public class DataSourceTransactionManagerTests  {
 		verify(con).close();
 	}
 
+
 	private static class TestTransactionSynchronization implements TransactionSynchronization {
 
 		private DataSource dataSource;
+
 		private int status;
 
 		public boolean beforeCommitCalled;
+
 		public boolean beforeCompletionCalled;
+
 		public boolean afterCommitCalled;
+
 		public boolean afterCompletionCalled;
 
 		public TestTransactionSynchronization(DataSource dataSource, int status) {

@@ -16,18 +16,18 @@
 
 package org.springframework.web.util;
 
-import static org.junit.Assert.assertTrue;
-
 import java.net.URL;
-
 import javax.servlet.ServletContextEvent;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.junit.Ignore;
 import org.junit.Test;
+
 import org.springframework.core.io.FileSystemResourceLoader;
 import org.springframework.mock.web.test.MockServletContext;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Juergen Hoeller

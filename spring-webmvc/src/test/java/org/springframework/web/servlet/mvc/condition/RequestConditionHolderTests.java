@@ -16,15 +16,14 @@
 
 package org.springframework.web.servlet.mvc.condition;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
-
 import javax.servlet.http.HttpServletRequest;
 
 import org.junit.Test;
+
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.web.bind.annotation.RequestMethod;
+
+import static org.junit.Assert.*;
 
 /**
  * A test fixture for {@link RequestConditionHolder} tests.

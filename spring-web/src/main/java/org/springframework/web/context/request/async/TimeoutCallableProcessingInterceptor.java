@@ -16,7 +16,6 @@
 package org.springframework.web.context.request.async;
 
 import java.util.concurrent.Callable;
-
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.http.HttpStatus;

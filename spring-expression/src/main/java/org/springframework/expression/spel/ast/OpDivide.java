@@ -17,6 +17,7 @@
 package org.springframework.expression.spel.ast;
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.math.RoundingMode;
 
 import org.springframework.asm.MethodVisitor;
@@ -36,7 +37,6 @@ import org.springframework.util.NumberUtils;
  * @since 3.0
  */
 public class OpDivide extends Operator {
-
 
 	public OpDivide(int pos, SpelNodeImpl... operands) {
 		super("/", pos, operands);
@@ -58,64 +58,71 @@ public class OpDivide extends Operator {
 				int scale = Math.max(leftBigDecimal.scale(), rightBigDecimal.scale());
 				return new TypedValue(leftBigDecimal.divide(rightBigDecimal, scale, RoundingMode.HALF_EVEN));
 			}
-
-			if (leftNumber instanceof Double || rightNumber instanceof Double) {
-				if (leftNumber instanceof Double && rightNumber instanceof Double) {
+			else if (leftNumber instanceof Double || rightNumber instanceof Double) {
+				if (leftNumber.getClass() == rightNumber.getClass()) {
 					this.exitTypeDescriptor = "D";
 				}
 				return new TypedValue(leftNumber.doubleValue() / rightNumber.doubleValue());
 			}
 			else if (leftNumber instanceof Float || rightNumber instanceof Float) {
-				if (leftNumber instanceof Float && rightNumber instanceof Float) {
+				if (leftNumber.getClass() == rightNumber.getClass()) {
 					this.exitTypeDescriptor = "F";
 				}
 				return new TypedValue(leftNumber.floatValue() / rightNumber.floatValue());
 			}
+			else if (leftNumber instanceof BigInteger || rightNumber instanceof BigInteger) {
+				BigInteger leftBigInteger = NumberUtils.convertNumberToTargetClass(leftNumber, BigInteger.class);
+				BigInteger rightBigInteger = NumberUtils.convertNumberToTargetClass(rightNumber, BigInteger.class);
+				return new TypedValue(leftBigInteger.divide(rightBigInteger));
+			}
 			else if (leftNumber instanceof Long || rightNumber instanceof Long) {
-				if (leftNumber instanceof Long && rightNumber instanceof Long) {
+				if (leftNumber.getClass() == rightNumber.getClass()) {
 					this.exitTypeDescriptor = "J";
 				}
 				return new TypedValue(leftNumber.longValue() / rightNumber.longValue());
 			}
-			else {
+			else if (CodeFlow.isIntegerForNumericOp(leftNumber) || CodeFlow.isIntegerForNumericOp(rightNumber)) {
 				if (leftNumber instanceof Integer && rightNumber instanceof Integer) {
 					this.exitTypeDescriptor = "I";
 				}
-				// TODO what about non-int result of the division?
 				return new TypedValue(leftNumber.intValue() / rightNumber.intValue());
+			}
+			else {
+				// Unknown Number subtypes -> best guess is double division
+				return new TypedValue(leftNumber.doubleValue() / rightNumber.doubleValue());
 			}
 		}
 
 		return state.operate(Operation.DIVIDE, leftOperand, rightOperand);
 	}
-	
+
 	@Override
 	public boolean isCompilable() {
 		if (!getLeftOperand().isCompilable()) {
 			return false;
 		}
-		if (this.children.length>1) {
+		if (this.children.length > 1) {
 			 if (!getRightOperand().isCompilable()) {
 				 return false;
 			 }
 		}
-		return this.exitTypeDescriptor!=null;
+		return (this.exitTypeDescriptor != null);
 	}
 	
 	@Override
-	public void generateCode(MethodVisitor mv, CodeFlow codeflow) {
-		getLeftOperand().generateCode(mv, codeflow);
-		String leftdesc = getLeftOperand().getExitDescriptor();
-		if (!CodeFlow.isPrimitive(leftdesc)) {
-			CodeFlow.insertUnboxInsns(mv, this.exitTypeDescriptor.charAt(0), leftdesc);
+	public void generateCode(MethodVisitor mv, CodeFlow cf) {
+		getLeftOperand().generateCode(mv, cf);
+		String leftDesc = getLeftOperand().exitTypeDescriptor;
+		if (!CodeFlow.isPrimitive(leftDesc)) {
+			CodeFlow.insertUnboxInsns(mv, this.exitTypeDescriptor.charAt(0), leftDesc);
 		}
 		if (this.children.length > 1) {
-			codeflow.enterCompilationScope();
-			getRightOperand().generateCode(mv, codeflow);
-			String rightdesc = getRightOperand().getExitDescriptor();
-			codeflow.exitCompilationScope();
-			if (!CodeFlow.isPrimitive(rightdesc)) {
-				CodeFlow.insertUnboxInsns(mv, this.exitTypeDescriptor.charAt(0), rightdesc);
+			cf.enterCompilationScope();
+			getRightOperand().generateCode(mv, cf);
+			String rightDesc = getRightOperand().exitTypeDescriptor;
+			cf.exitCompilationScope();
+			if (!CodeFlow.isPrimitive(rightDesc)) {
+				CodeFlow.insertUnboxInsns(mv, this.exitTypeDescriptor.charAt(0), rightDesc);
 			}
 			switch (this.exitTypeDescriptor.charAt(0)) {
 				case 'I':
@@ -131,10 +138,11 @@ public class OpDivide extends Operator {
 					mv.visitInsn(DDIV);
 					break;				
 				default:
-					throw new IllegalStateException("Unrecognized exit descriptor: '"+this.exitTypeDescriptor+"'");			
+					throw new IllegalStateException(
+							"Unrecognized exit type descriptor: '" + this.exitTypeDescriptor + "'");
 			}
 		}
-		codeflow.pushDescriptor(this.exitTypeDescriptor);
+		cf.pushDescriptor(this.exitTypeDescriptor);
 	}
 
 }

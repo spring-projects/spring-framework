@@ -16,17 +16,18 @@
 
 package org.springframework.test.context.web;
 
-import static org.junit.Assert.*;
-
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.springframework.tests.sample.beans.TestBean;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpSession;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.web.context.WebApplicationContext;
+
+import static org.junit.Assert.*;
 
 /**
  * Integration tests that verify support for request and session scoped beans

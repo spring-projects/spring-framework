@@ -21,8 +21,6 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.List;
-import java.util.Map;
 import java.util.concurrent.Callable;
 
 import org.springframework.core.task.AsyncListenableTaskExecutor;
@@ -91,20 +89,11 @@ final class SimpleStreamingAsyncClientHttpRequest extends AbstractAsyncClientHtt
 					this.connection.setChunkedStreamingMode(this.chunkSize);
 				}
 			}
-			writeHeaders(headers);
+			SimpleBufferingClientHttpRequest.addHeaders(this.connection, headers);
 			this.connection.connect();
 			this.body = this.connection.getOutputStream();
 		}
 		return StreamUtils.nonClosing(this.body);
-	}
-
-	private void writeHeaders(HttpHeaders headers) {
-		for (Map.Entry<String, List<String>> entry : headers.entrySet()) {
-			String headerName = entry.getKey();
-			for (String headerValue : entry.getValue()) {
-				this.connection.addRequestProperty(headerName, headerValue);
-			}
-		}
 	}
 
 	@Override
@@ -117,7 +106,7 @@ final class SimpleStreamingAsyncClientHttpRequest extends AbstractAsyncClientHtt
 						body.close();
 					}
 					else {
-						writeHeaders(headers);
+						SimpleBufferingClientHttpRequest.addHeaders(connection, headers);
 						connection.connect();
 					}
 				}

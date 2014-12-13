@@ -16,8 +16,6 @@
 
 package org.springframework.cache.interceptor;
 
-import static org.junit.Assert.*;
-
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.junit.After;
@@ -36,6 +34,8 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import static org.junit.Assert.*;
 
 /**
  * Tests corner case of using {@link Cacheable} and  {@link CachePut} on the

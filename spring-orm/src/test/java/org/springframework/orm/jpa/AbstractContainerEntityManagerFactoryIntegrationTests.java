@@ -18,7 +18,6 @@ package org.springframework.orm.jpa;
 
 import java.lang.reflect.Proxy;
 import java.util.List;
-
 import javax.persistence.EntityManager;
 import javax.persistence.EntityNotFoundException;
 import javax.persistence.FlushModeType;
@@ -133,7 +132,7 @@ public abstract class AbstractContainerEntityManagerFactoryIntegrationTests exte
 			newTony.getDriversLicense().getSerialNumber();
 		}
 		finally {
-			deleteFromTables(new String[] { "person", "drivers_license" });
+			deleteFromTables("person", "drivers_license");
 		}
 	}
 

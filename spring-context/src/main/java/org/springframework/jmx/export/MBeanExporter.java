@@ -410,7 +410,7 @@ public class MBeanExporter extends MBeanRegistrationSupport implements MBeanExpo
 	}
 
 	/**
-	 * Kick off bean registration automatically when deployed in an {@code ApplicationContext}.
+	 * Kick off bean registration automatically after the regular singleton instantiation phase.
 	 * @see #registerBeans()
 	 */
 	@Override
@@ -1095,6 +1095,19 @@ public class MBeanExporter extends MBeanRegistrationSupport implements MBeanExpo
 
 		public void setObjectName(ObjectName objectName) {
 			this.objectName = objectName;
+		}
+
+		@Override
+		public Object getTarget() {
+			try {
+				return super.getTarget();
+			}
+			catch (RuntimeException ex) {
+				if (logger.isWarnEnabled()) {
+					logger.warn("Failed to retrieve target for JMX-exposed bean [" + this.objectName + "]: " + ex);
+				}
+				throw ex;
+			}
 		}
 
 		@Override

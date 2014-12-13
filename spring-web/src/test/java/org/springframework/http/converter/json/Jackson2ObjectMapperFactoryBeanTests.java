@@ -65,10 +65,12 @@ public class Jackson2ObjectMapperFactoryBeanTests {
 
 	private Jackson2ObjectMapperFactoryBean factory;
 
+
 	@Before
 	public void setUp() {
 		factory = new Jackson2ObjectMapperFactoryBean();
 	}
+
 
 	@Test
 	public void settersWithNullValues() {
@@ -206,6 +208,21 @@ public class Jackson2ObjectMapperFactoryBeanTests {
 	}
 
 	@Test
+	public void setMixIns() {
+		Class<?> target = String.class;
+		Class<?> mixinSource = Object.class;
+		Map<Class<?>, Class<?>> mixIns = new HashMap<Class<?>, Class<?>>();
+		mixIns.put(target, mixinSource);
+
+		this.factory.setMixIns(mixIns);
+		this.factory.afterPropertiesSet();
+		ObjectMapper objectMapper = this.factory.getObject();
+
+		assertEquals(1, objectMapper.mixInCount());
+		assertSame(mixinSource, objectMapper.findMixInClassFor(target));
+	}
+
+	@Test
 	public void completeSetup() {
 		NopAnnotationIntrospector annotationIntrospector = NopAnnotationIntrospector.instance;
 		ObjectMapper objectMapper = new ObjectMapper();
@@ -259,7 +276,8 @@ public class Jackson2ObjectMapperFactoryBeanTests {
 		assertTrue(objectMapper.getFactory().isEnabled(JsonGenerator.Feature.WRITE_NUMBERS_AS_STRINGS));
 
 		assertFalse(objectMapper.getSerializationConfig().isEnabled(MapperFeature.AUTO_DETECT_GETTERS));
-		assertTrue(objectMapper.getDeserializationConfig().isEnabled(MapperFeature.DEFAULT_VIEW_INCLUSION));
+		assertFalse(objectMapper.getDeserializationConfig().isEnabled(MapperFeature.DEFAULT_VIEW_INCLUSION));
+		assertFalse(objectMapper.getDeserializationConfig().isEnabled(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES));
 		assertFalse(objectMapper.getDeserializationConfig().isEnabled(MapperFeature.AUTO_DETECT_FIELDS));
 		assertFalse(objectMapper.getFactory().isEnabled(JsonParser.Feature.AUTO_CLOSE_SOURCE));
 		assertFalse(objectMapper.getFactory().isEnabled(JsonGenerator.Feature.QUOTE_FIELD_NAMES));
@@ -269,6 +287,16 @@ public class Jackson2ObjectMapperFactoryBeanTests {
 	@Test
 	public void xmlMapper() {
 		this.factory.setObjectMapper(new XmlMapper());
+		this.factory.afterPropertiesSet();
+
+		assertNotNull(this.factory.getObject());
+		assertTrue(this.factory.isSingleton());
+		assertEquals(XmlMapper.class, this.factory.getObjectType());
+	}
+
+	@Test
+	public void createXmlMapper() {
+		this.factory.setCreateXmlMapper(true);
 		this.factory.afterPropertiesSet();
 
 		assertNotNull(this.factory.getObject());

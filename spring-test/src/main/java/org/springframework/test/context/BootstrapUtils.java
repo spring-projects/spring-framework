@@ -18,6 +18,7 @@ package org.springframework.test.context;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.util.ClassUtils;
 
 import static org.springframework.beans.BeanUtils.*;

@@ -16,16 +16,16 @@
 
 package org.springframework.aop.aspectj.annotation;
 
-import static org.junit.Assert.assertEquals;
-
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.junit.Ignore;
 import org.junit.Test;
+import test.aop.PerThisAspect;
+
 import org.springframework.util.SerializationTestUtils;
 
-import test.aop.PerThisAspect;
+import static org.junit.Assert.*;
 
 /**
  * @author Rob Harrop

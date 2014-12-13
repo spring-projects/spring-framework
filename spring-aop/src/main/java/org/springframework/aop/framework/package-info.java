@@ -1,6 +1,4 @@
-
 /**
- *
  * Package containing Spring's basic AOP infrastructure, compliant with the
  * <a href="http://aopalliance.sourceforge.net">AOP Alliance</a> interfaces.
  *
@@ -13,7 +11,5 @@
  * <p>The ProxyFactoryBean is a convenient way to create AOP proxies in a BeanFactory
  * or ApplicationContext. However, proxies can be created programmatically using the
  * ProxyFactory class.
- *
  */
 package org.springframework.aop.framework;
-

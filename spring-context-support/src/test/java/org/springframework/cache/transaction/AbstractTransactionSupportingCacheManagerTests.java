@@ -16,14 +16,15 @@
 
 package org.springframework.cache.transaction;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
-
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestName;
+
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
+
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
 
 /**
  * Shared tests for {@link CacheManager} that inherit from

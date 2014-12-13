@@ -19,7 +19,6 @@ package org.springframework.http.client;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Enumeration;
-
 import javax.servlet.GenericServlet;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
@@ -31,14 +30,12 @@ import javax.servlet.http.HttpServletResponse;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
-
 import org.junit.AfterClass;
+import static org.junit.Assert.assertEquals;
 import org.junit.BeforeClass;
 
-import org.springframework.util.FileCopyUtils;
 import org.springframework.util.SocketUtils;
-
-import static org.junit.Assert.*;
+import org.springframework.util.StreamUtils;
 
 /** @author Arjen Poutsma */
 public class AbstractJettyServerTestCase {
@@ -149,6 +146,8 @@ public class AbstractJettyServerTestCase {
 
 		private void echo(HttpServletRequest request, HttpServletResponse response) throws IOException {
 			response.setStatus(HttpServletResponse.SC_OK);
+			response.setContentType(request.getContentType());
+			response.setContentLength(request.getContentLength());
 			for (Enumeration<String> e1 = request.getHeaderNames(); e1.hasMoreElements();) {
 				String headerName = e1.nextElement();
 				for (Enumeration<String> e2 = request.getHeaders(headerName); e2.hasMoreElements();) {
@@ -156,7 +155,7 @@ public class AbstractJettyServerTestCase {
 					response.addHeader(headerName, headerValue);
 				}
 			}
-			FileCopyUtils.copy(request.getInputStream(), response.getOutputStream());
+			StreamUtils.copy(request.getInputStream(), response.getOutputStream());
 		}
 	}
 }

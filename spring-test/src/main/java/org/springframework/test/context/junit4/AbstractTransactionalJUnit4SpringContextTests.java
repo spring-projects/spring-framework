@@ -53,11 +53,11 @@ import org.springframework.transaction.annotation.Transactional;
  * TestExecutionListeners} are configured by default:
  *
  * <ul>
- *   <li>{@link org.springframework.test.context.web.ServletTestExecutionListener}
- *   <li>{@link org.springframework.test.context.support.DependencyInjectionTestExecutionListener}
- *   <li>{@link org.springframework.test.context.support.DirtiesContextTestExecutionListener}
- *   <li>{@link org.springframework.test.context.transaction.TransactionalTestExecutionListener}
- *   <li>{@link org.springframework.test.context.jdbc.SqlScriptsTestExecutionListener}
+ * <li>{@link org.springframework.test.context.web.ServletTestExecutionListener}
+ * <li>{@link org.springframework.test.context.support.DependencyInjectionTestExecutionListener}
+ * <li>{@link org.springframework.test.context.support.DirtiesContextTestExecutionListener}
+ * <li>{@link org.springframework.test.context.transaction.TransactionalTestExecutionListener}
+ * <li>{@link org.springframework.test.context.jdbc.SqlScriptsTestExecutionListener}
  * </ul>
  *
  * <p>Note: this class serves only as a convenience for extension. If you do not
@@ -86,7 +86,7 @@ import org.springframework.transaction.annotation.Transactional;
  * @see org.springframework.test.jdbc.JdbcTestUtils
  * @see org.springframework.test.context.testng.AbstractTransactionalTestNGSpringContextTests
  */
-@TestExecutionListeners({ TransactionalTestExecutionListener.class, SqlScriptsTestExecutionListener.class })
+@TestExecutionListeners({TransactionalTestExecutionListener.class, SqlScriptsTestExecutionListener.class})
 @Transactional
 public abstract class AbstractTransactionalJUnit4SpringContextTests extends AbstractJUnit4SpringContextTests {
 

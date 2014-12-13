@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,6 +17,7 @@
 package org.springframework.web.socket;
 
 import org.junit.Before;
+
 import org.springframework.http.server.ServerHttpAsyncRequestControl;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
@@ -51,6 +52,10 @@ public abstract class AbstractHttpRequestTests {
 	protected void setRequest(String method, String requestUri) {
 		this.servletRequest.setMethod(method);
 		this.servletRequest.setRequestURI(requestUri);
+	}
+
+	protected void setOrigin(String origin) {
+		this.servletRequest.addHeader("Origin", origin);
 	}
 
 	protected void resetRequestAndResponse() {

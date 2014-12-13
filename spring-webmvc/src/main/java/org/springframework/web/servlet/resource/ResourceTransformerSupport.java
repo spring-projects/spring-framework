@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,7 +16,6 @@
 package org.springframework.web.servlet.resource;
 
 import java.util.Arrays;
-
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.core.io.Resource;
@@ -76,14 +75,14 @@ public abstract class ResourceTransformerSupport implements ResourceTransformer 
 	protected String resolveUrlPath(String resourcePath, HttpServletRequest request,
 			Resource resource, ResourceTransformerChain transformerChain) {
 
-		if (!resourcePath.startsWith("/")) {
-			// try resolving as relative path
-			return transformerChain.getResolverChain().resolveUrlPath(resourcePath, Arrays.asList(resource));
-		}
-		else {
+		if (resourcePath.startsWith("/")) {
 			// full resource path
 			ResourceUrlProvider urlProvider = findResourceUrlProvider(request);
 			return (urlProvider != null ? urlProvider.getForRequestUrl(request, resourcePath) : null);
+		}
+		else {
+			// try resolving as relative path
+			return transformerChain.getResolverChain().resolveUrlPath(resourcePath, Arrays.asList(resource));
 		}
 	}
 

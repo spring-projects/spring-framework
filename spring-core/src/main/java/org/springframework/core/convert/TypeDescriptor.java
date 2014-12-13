@@ -45,7 +45,7 @@ public class TypeDescriptor implements Serializable {
 
 	static final Annotation[] EMPTY_ANNOTATION_ARRAY = new Annotation[0];
 
-	private static final Map<Class<?>, TypeDescriptor> commonTypesCache = new HashMap<Class<?>, TypeDescriptor>();
+	private static final Map<Class<?>, TypeDescriptor> commonTypesCache = new HashMap<Class<?>, TypeDescriptor>(18);
 
 	private static final Class<?>[] CACHED_COMMON_TYPES = {
 			boolean.class, Boolean.class, byte.class, Byte.class, char.class, Character.class,
@@ -74,9 +74,6 @@ public class TypeDescriptor implements Serializable {
 	 */
 	public TypeDescriptor(MethodParameter methodParameter) {
 		Assert.notNull(methodParameter, "MethodParameter must not be null");
-		if (methodParameter.getNestingLevel() != 1) {
-			throw new IllegalArgumentException("MethodParameter argument must have its nestingLevel set to 1");
-		}
 		this.resolvableType = ResolvableType.forMethodParameter(methodParameter);
 		this.type = this.resolvableType.resolve(methodParameter.getParameterType());
 		this.annotations = (methodParameter.getParameterIndex() == -1 ?
@@ -144,7 +141,7 @@ public class TypeDescriptor implements Serializable {
 	 * <p>Returns primitive types as-is.
 	 * <p>See {@link #getObjectType()} for a variation of this operation that
 	 * resolves primitive types to their corresponding Object types if necessary.
-	 * @return the type, or {@code null}
+	 * @return the type, or {@code null} if it cannot be determined
 	 * @see #getObjectType()
 	 */
 	public Class<?> getType() {

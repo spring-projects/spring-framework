@@ -16,15 +16,6 @@
 
 package org.springframework.beans.factory.config;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-import static org.springframework.beans.factory.support.BeanDefinitionBuilder.genericBeanDefinition;
-import static org.springframework.tests.TestResourceUtils.qualifiedResource;
-
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -38,6 +29,7 @@ import java.util.prefs.PreferencesFactory;
 
 import org.junit.Before;
 import org.junit.Test;
+
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.BeanInitializationException;
@@ -51,6 +43,10 @@ import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.core.io.Resource;
 import org.springframework.tests.sample.beans.IndexedTestBean;
 import org.springframework.tests.sample.beans.TestBean;
+
+import static org.junit.Assert.*;
+import static org.springframework.beans.factory.support.BeanDefinitionBuilder.*;
+import static org.springframework.tests.TestResourceUtils.*;
 
 /**
  * Unit tests for various {@link PropertyResourceConfigurer} implementations including:

@@ -16,13 +16,13 @@
 
 package org.springframework.util.concurrent;
 
-import org.springframework.util.Assert;
-
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicReference;
+
+import org.springframework.util.Assert;
 
 /**
  * A {@link org.springframework.util.concurrent.ListenableFuture ListenableFuture}

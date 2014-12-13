@@ -26,6 +26,7 @@ import static org.junit.Assert.*;
 
 /**
  * @author Arjen Poutsma
+ * @author Marcel Overdijk
  */
 public class ResponseEntityTests {
 
@@ -117,6 +118,15 @@ public class ResponseEntityTests {
 		assertNotNull(responseEntity);
 		assertEquals(HttpStatus.NOT_FOUND, responseEntity.getStatusCode());
 		assertNull(responseEntity.getBody());
+	}
+
+	@Test
+	public void unprocessableEntity() throws URISyntaxException {
+		ResponseEntity<String> responseEntity = ResponseEntity.unprocessableEntity().body("error");
+
+		assertNotNull(responseEntity);
+		assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, responseEntity.getStatusCode());
+		assertEquals("error", responseEntity.getBody());
 	}
 
 	@Test

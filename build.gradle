@@ -1,6 +1,6 @@
 buildscript {
 	repositories {
-		maven { url "http://repo.springsource.org/plugins-release" }
+		maven { url "https://repo.spring.io/plugins-release" }
 	}
 	dependencies {
 		classpath("org.springframework.build.gradle:propdeps-plugin:0.0.7")
@@ -27,32 +27,36 @@ configure(allprojects) { project ->
 	group = "org.springframework"
 	version = qualifyVersionIfNecessary(version)
 
-	ext.aspectjVersion       = "1.8.2"
+	ext.aspectjVersion       = "1.8.4"
 	ext.eclipseLinkVersion   = "2.4.2"
-	ext.ehcacheVersion       = "2.8.3"
+	ext.ehcacheVersion       = "2.9.0"
 	ext.ehcacheJCacheVersion = "1.0.0"
-	ext.groovyVersion        = "2.3.6"
+	ext.groovyVersion        = "2.3.8"
+	ext.gsonVersion          = "2.3.1"
 	ext.hibernate3Version    = "3.6.10.Final"
-	ext.hibernate4Version    = "4.3.6.Final"
+	ext.hibernate4Version    = "4.3.7.Final"
 	ext.hibVal4Version       = "4.3.2.Final"
-	ext.hibVal5Version       = "5.1.2.Final"
+	ext.hibVal5Version       = "5.1.3.Final"
 	ext.hsqldbVersion        = "2.3.2"
-	ext.jackson2Version      = "2.4.2"
-	ext.gsonVersion          = "2.3"
-	ext.jasperReportsVersion = "5.6.0"
-	ext.jettyVersion         = "9.2.2.v20140723"
-	ext.jodaVersion          = "2.4"
-	ext.junitVersion         = "4.11"
+	ext.jackson2Version      = "2.4.4"
+	ext.jasperReportsVersion = "6.0.0"
+	ext.jettyVersion         = "9.2.6.v20141205"
+	ext.jodaVersion          = "2.6"
+	ext.junitVersion         = "4.12"
+	ext.nettyVersion         = "4.0.24.Final"
 	ext.openJpaVersion       = "2.2.2"  // 2.3.0 not Java 8 compatible (based on ASM 4)
+	ext.protobufVersion      = "2.6.1"
+	ext.reactorVersion       = "1.1.5.RELEASE"
 	ext.slf4jVersion         = "1.7.7"
-	ext.snakeYamlVersion     = "1.13"
+	ext.snakeYamlVersion     = "1.14"
 	ext.snifferVersion       = "1.11"
 	ext.tiles2Version        = "2.2.2"
-	ext.tiles3Version        = "3.0.4"
-	ext.tomcatVersion        = "8.0.9"
+	ext.tiles3Version        = "3.0.5"
+	ext.tomcatVersion        = "8.0.15"
+	ext.tyrusVersion         = "1.3.5"  // constrained by WebLogic 12.1.3 support
+	ext.undertowVersion      = "1.1.1.Final"
+	ext.woodstoxVersion      = "4.4.1"
 	ext.xstreamVersion       = "1.4.7"
-	ext.protobufVersion      = "2.5.0"
-	ext.woodstoxVersion      = "4.1.6"
 
 	ext.gradleScriptDir = "${rootProject.projectDir}/gradle"
 
@@ -106,7 +110,7 @@ configure(allprojects) { project ->
 	}
 
 	repositories {
-		maven { url "http://repo.spring.io/libs-release" }
+		maven { url "https://repo.spring.io/libs-release" }
 	}
 
 	dependencies {
@@ -179,6 +183,7 @@ configure(allprojects) { project ->
 		"http://quartz-scheduler.org/api/2.2.0/",
 		"http://fasterxml.github.com/jackson-core/javadoc/2.3.0/",
 		"http://fasterxml.github.com/jackson-databind/javadoc/2.3.0/",
+		"http://fasterxml.github.io/jackson-dataformat-xml/javadoc/2.3.0/",
 		"http://hc.apache.org/httpcomponents-client-ga/httpclient/apidocs/"
 	] as String[]
 }
@@ -323,10 +328,10 @@ project("spring-core") {
 		jarjar("com.googlecode.jarjar:jarjar:1.3")
 
 		compile(files(cglibRepackJar))
-		compile("commons-logging:commons-logging:1.1.3")
-		optional("commons-codec:commons-codec:1.9")
+		compile("commons-logging:commons-logging:1.2")
+		optional("commons-codec:commons-codec:1.10")
 		optional("org.aspectj:aspectjweaver:${aspectjVersion}")
-		optional("net.sf.jopt-simple:jopt-simple:4.6")
+		optional("net.sf.jopt-simple:jopt-simple:4.8")
 		optional("log4j:log4j:1.2.17")
 		testCompile("org.apache.tomcat.embed:tomcat-embed-core:${tomcatVersion}")
 		testCompile("xmlunit:xmlunit:1.5")
@@ -400,7 +405,7 @@ project("spring-aop") {
 		compile("aopalliance:aopalliance:1.0")
 		optional("org.aspectj:aspectjweaver:${aspectjVersion}")
 		optional("commons-pool:commons-pool:1.6")
-		optional("com.jamonapi:jamon:2.78")
+		optional("com.jamonapi:jamon:2.79")
 	}
 }
 
@@ -455,7 +460,7 @@ project("spring-context") {
 		optional("org.aspectj:aspectjweaver:${aspectjVersion}")
 		optional("org.codehaus.groovy:groovy-all:${groovyVersion}")
 		optional("org.beanshell:bsh:2.0b4")
-		optional("org.jruby:jruby:1.7.12")
+		optional("org.jruby:jruby:1.7.16.1")
 		testCompile("javax.inject:javax.inject-tck:1")
 		testCompile("commons-dbcp:commons-dbcp:1.4")
 		testCompile("org.slf4j:slf4j-api:${slf4jVersion}")
@@ -472,8 +477,10 @@ project("spring-messaging") {
 		compile(project(":spring-beans"))
 		compile(project(":spring-core"))
 		compile(project(":spring-context"))
-		optional("org.projectreactor:reactor-core:1.1.3.RELEASE")
-		optional("org.projectreactor:reactor-net:1.1.3.RELEASE")
+		optional("org.projectreactor:reactor-core:${reactorVersion}")
+		optional("org.projectreactor:reactor-net:${reactorVersion}") {
+			exclude group: "io.netty", module: "netty-all"
+		}
 		optional("org.eclipse.jetty.websocket:websocket-server:${jettyVersion}") {
 			exclude group: "javax.servlet", module: "javax.servlet-api"
 		}
@@ -495,6 +502,7 @@ project("spring-messaging") {
 		testCompile("org.apache.tomcat.embed:tomcat-embed-core:${tomcatVersion}")
 		testCompile("org.apache.tomcat.embed:tomcat-embed-websocket:${tomcatVersion}")
 		testCompile("org.apache.tomcat.embed:tomcat-embed-logging-juli:${tomcatVersion}")
+		testCompile("io.netty:netty-all:${nettyVersion}")
 		testCompile("commons-dbcp:commons-dbcp:1.4")
 		testCompile("log4j:log4j:1.2.17")
 		testCompile("org.slf4j:slf4j-jcl:${slf4jVersion}")
@@ -508,7 +516,7 @@ project("spring-tx") {
 		compile(project(":spring-beans"))
 		compile(project(":spring-core"))
 		optional(project(":spring-aop"))
-		optional(project(":spring-context")) // for JCA, @EnableTransactionManagement
+		optional(project(":spring-context"))  // for JCA, @EnableTransactionManagement
 		optional("aopalliance:aopalliance:1.0")
 		optional("javax.transaction:javax.transaction-api:1.2")
 		optional("javax.resource:connector-api:1.5")
@@ -547,8 +555,8 @@ project("spring-oxm") {
 		optional("org.jibx:jibx-run:1.2.5")
 		testCompile(project(":spring-context"))
 		testCompile("xmlunit:xmlunit:1.5")
-		testCompile("xpp3:xpp3:1.1.3.4.O")
-		testCompile("org.codehaus.jettison:jettison:1.0.1") {
+		testCompile("xpp3:xpp3:1.1.4c")
+		testCompile("org.codehaus.jettison:jettison:1.3.7") {
 			exclude group: 'stax', module: 'stax-api'
 		}
 		testCompile(files(genCastor.classesDir).builtBy(genCastor))
@@ -583,13 +591,13 @@ project("spring-jdbc") {
 		compile(project(":spring-beans"))
 		compile(project(":spring-core"))
 		compile(project(":spring-tx"))
-		optional(project(":spring-context")) // for JndiDataSourceLookup
+		optional(project(":spring-context"))  // for JndiDataSourceLookup
 		optional("javax.transaction:javax.transaction-api:1.2")
 		optional("com.mchange:c3p0:0.9.2.1")
 		optional("org.hsqldb:hsqldb:${hsqldbVersion}")
-		optional("com.h2database:h2:1.4.180")
-		optional("org.apache.derby:derby:10.10.2.0")
-		optional("org.apache.derby:derbyclient:10.10.2.0")
+		optional("com.h2database:h2:1.4.182")
+		optional("org.apache.derby:derby:10.11.1.1")
+		optional("org.apache.derby:derbyclient:10.11.1.1")
 	}
 }
 
@@ -600,16 +608,16 @@ project("spring-context-support") {
 		compile(project(":spring-core"))
 		compile(project(":spring-beans"))
 		compile(project(":spring-context"))
-		optional(project(":spring-jdbc")) // for Quartz support
-		optional(project(":spring-tx")) // for Quartz support
+		optional(project(":spring-jdbc"))  // for Quartz support
+		optional(project(":spring-tx"))  // for Quartz support
 		optional("javax.mail:javax.mail-api:1.5.2")
 		optional("javax.cache:cache-api:1.0.0")
-		optional("com.google.guava:guava:17.0")
+		optional("com.google.guava:guava:18.0")
 		optional("net.sf.ehcache:ehcache:${ehcacheVersion}")
 		optional("org.quartz-scheduler:quartz:2.2.1")
 		optional("org.codehaus.fabric3.api:commonj:1.1.0")
 		optional("org.apache.velocity:velocity:1.7")
-		optional("org.freemarker:freemarker:2.3.20")
+		optional("org.freemarker:freemarker:2.3.21")
 		optional("com.lowagie:itext:2.1.7")
 		optional("net.sf.jasperreports:jasperreports:$jasperReportsVersion") {
 			exclude group: "com.fasterxml.jackson.core", module: "jackson-annotations"
@@ -619,9 +627,9 @@ project("spring-context-support") {
 			exclude group: "xml-apis", module: "xml-apis"
 		}
 		testCompile(project(":spring-context"))
-		testCompile("org.apache.poi:poi:3.10-FINAL")
-		testCompile("commons-beanutils:commons-beanutils:1.8.0") // for Velocity/JasperReports
-		testCompile("commons-digester:commons-digester:1.8.1") // for Velocity/JasperReports
+		testCompile("org.apache.poi:poi:3.10.1")
+		testCompile("commons-beanutils:commons-beanutils:1.8.0")  // for Velocity/JasperReports
+		testCompile("commons-digester:commons-digester:1.8.1")  // for Velocity/JasperReports
 		testCompile("org.hsqldb:hsqldb:${hsqldbVersion}")
 		testCompile("org.slf4j:slf4j-api:${slf4jVersion}")
 		testCompile("org.ehcache:jcache:${ehcacheJCacheVersion}")
@@ -652,12 +660,12 @@ project("spring-web") {
 	}
 
 	dependencies {
-		compile(project(":spring-aop")) // for JaxWsPortProxyFactoryBean
-		compile(project(":spring-beans")) // for MultiPartFilter
+		compile(project(":spring-aop"))  // for JaxWsPortProxyFactoryBean
+		compile(project(":spring-beans"))  // for MultipartFilter
 		compile(project(":spring-context"))
 		compile(project(":spring-core"))
 		provided("javax.servlet:javax.servlet-api:3.0.1")
-		optional(project(":spring-oxm")) // for MarshallingHttpMessageConverter
+		optional(project(":spring-oxm"))  // for MarshallingHttpMessageConverter
 		optional("javax.servlet.jsp:javax.servlet.jsp-api:2.2.1")
 		optional("javax.portlet:portlet-api:2.0")
 		optional("javax.el:javax.el-api:2.2.5")
@@ -666,8 +674,9 @@ project("spring-web") {
 		optional("org.codehaus.groovy:groovy-all:${groovyVersion}")
 		optional("com.caucho:hessian:4.0.38")
 		optional("commons-fileupload:commons-fileupload:1.3.1")
-		optional("org.apache.httpcomponents:httpclient:4.3.5")
+		optional("org.apache.httpcomponents:httpclient:4.3.6")
 		optional("org.apache.httpcomponents:httpasyncclient:4.0.2")
+		optional("io.netty:netty-all:${nettyVersion}")
 		optional("com.fasterxml.jackson.core:jackson-databind:${jackson2Version}")
 		optional("com.fasterxml.jackson.dataformat:jackson-dataformat-xml:${jackson2Version}")
 		optional("com.google.code.gson:gson:${gsonVersion}")
@@ -681,12 +690,14 @@ project("spring-web") {
 		optional("log4j:log4j:1.2.17")
 		optional("com.googlecode.protobuf-java-format:protobuf-java-format:1.2")
 		optional("com.google.protobuf:protobuf-java:${protobufVersion}")
+		optional("javax.mail:javax.mail-api:1.5.2")
 		testCompile(project(":spring-context-support"))  // for JafMediaTypeFactory
 		testCompile("xmlunit:xmlunit:1.5")
 		testCompile("org.slf4j:slf4j-jcl:${slf4jVersion}")
 		testCompile("org.apache.taglibs:taglibs-standard-jstlel:1.2.1") {
 			exclude group: "org.apache.taglibs", module: "taglibs-standard-spec"
 		}
+		testRuntime("com.sun.mail:javax.mail:1.5.2")
 	}
 
 	// pick up ContextLoader.properties in src/main
@@ -708,10 +719,10 @@ project("spring-websocket") {
 			exclude group: "org.apache.tomcat", module: "tomcat-websocket-api"
 			exclude group: "org.apache.tomcat", module: "tomcat-servlet-api"
 		}
-		optional("org.glassfish.tyrus:tyrus-spi:1.3.5")
-		optional("org.glassfish.tyrus:tyrus-core:1.3.5")
-		optional("org.glassfish.tyrus:tyrus-server:1.3.5")
-		optional("org.glassfish.tyrus:tyrus-container-servlet:1.3.5")
+		optional("org.glassfish.tyrus:tyrus-spi:${tyrusVersion}")
+		optional("org.glassfish.tyrus:tyrus-core:${tyrusVersion}")
+		optional("org.glassfish.tyrus:tyrus-server:${tyrusVersion}")
+		optional("org.glassfish.tyrus:tyrus-container-servlet:${tyrusVersion}")
 		optional("org.eclipse.jetty:jetty-webapp:${jettyVersion}") {
 			exclude group: "javax.servlet", module: "javax.servlet"
 		}
@@ -720,20 +731,20 @@ project("spring-websocket") {
 		}
 		optional("org.eclipse.jetty.websocket:websocket-client:${jettyVersion}")
 		optional("org.eclipse.jetty:jetty-client:${jettyVersion}")
-		optional("io.undertow:undertow-core:1.0.15.Final")
-		optional("io.undertow:undertow-servlet:1.0.15.Final") {
+		optional("io.undertow:undertow-core:${undertowVersion}")
+		optional("io.undertow:undertow-servlet:${undertowVersion}") {
 			exclude group: "org.jboss.spec.javax.servlet", module: "jboss-servlet-api_3.1_spec"
 			exclude group: "org.jboss.spec.javax.annotation", module: "jboss-annotations-api_1.2_spec"
 		}
-		optional("io.undertow:undertow-websockets-jsr:1.0.15.Final") {
-			exclude group: "org.jboss.spec.javax.websocket", module: "jboss-websocket-api_1.0_spec"
+		optional("io.undertow:undertow-websockets-jsr:${undertowVersion}") {
+			exclude group: "org.jboss.spec.javax.websocket", module: "jboss-websocket-api_1.1_spec"
 		}
 		optional("com.fasterxml.jackson.core:jackson-databind:${jackson2Version}")
 		testCompile("org.apache.tomcat.embed:tomcat-embed-core:${tomcatVersion}")
 		testCompile("org.apache.tomcat.embed:tomcat-embed-websocket:${tomcatVersion}")
 		testCompile("org.apache.tomcat.embed:tomcat-embed-logging-juli:${tomcatVersion}")
-		testCompile("org.projectreactor:reactor-core:1.1.3.RELEASE")
-		testCompile("org.projectreactor:reactor-net:1.1.3.RELEASE")
+		testCompile("org.projectreactor:reactor-core:${reactorVersion}")
+		testCompile("org.projectreactor:reactor-net:${reactorVersion}")
 		testCompile("log4j:log4j:1.2.17")
 		testCompile("org.slf4j:slf4j-jcl:${slf4jVersion}")
 	}
@@ -810,12 +821,12 @@ project("spring-webmvc") {
 		compile(project(":spring-expression"))
 		compile(project(":spring-web"))
 		provided("javax.servlet:javax.servlet-api:3.0.1")
-		optional(project(":spring-context-support")) // for Velocity support
-		optional(project(":spring-oxm")) // for MarshallingView
+		optional(project(":spring-context-support"))  // for Velocity support
+		optional(project(":spring-oxm"))  // for MarshallingView
 		optional("javax.servlet.jsp:javax.servlet.jsp-api:2.2.1")
 		optional("javax.servlet.jsp.jstl:javax.servlet.jsp.jstl-api:1.2.1")
 		optional("net.sourceforge.jexcelapi:jxl:2.6.12")
-		optional("org.apache.poi:poi:3.10-FINAL")
+		optional("org.apache.poi:poi:3.10.1")
 		optional("org.apache.velocity:velocity:1.7")
 		optional("velocity-tools:velocity-tools-view:1.4")
 		optional("org.freemarker:freemarker:2.3.20")
@@ -868,7 +879,7 @@ project("spring-webmvc") {
 		}
 		testCompile("javax.validation:validation-api:1.0.0.GA")
 		testCompile("org.hibernate:hibernate-validator:${hibVal4Version}")
-		testCompile("org.apache.httpcomponents:httpclient:4.3.5")
+		testCompile("org.apache.httpcomponents:httpclient:4.3.6")
 		testCompile("commons-fileupload:commons-fileupload:1.3.1")
 		testCompile("commons-io:commons-io:1.3")
 		testCompile("joda-time:joda-time:${jodaVersion}")
@@ -956,7 +967,7 @@ project("spring-test") {
 		optional("org.aspectj:aspectjweaver:${aspectjVersion}")
 		optional("org.codehaus.groovy:groovy-all:${groovyVersion}")
 		optional("org.hamcrest:hamcrest-core:1.3")
-		optional("com.jayway.jsonpath:json-path:0.9.0")
+		optional("com.jayway.jsonpath:json-path:1.1.0")
 		optional("org.skyscreamer:jsonassert:1.2.3")
 		optional("xmlunit:xmlunit:1.5")
 		testCompile(project(":spring-context-support"))
@@ -981,6 +992,7 @@ project("spring-test") {
 	}
 
 	task testNG(type: Test) {
+		description = 'Runs TestNG tests.'
 		useTestNG()
 		scanForTestClasses = false
 		include(["**/testng/**/*Tests.class", "**/testng/**/*Test.class"])
@@ -990,12 +1002,14 @@ project("spring-test") {
 	}
 
 	test {
+		description = 'Runs JUnit tests.'
 		dependsOn testNG
 		useJUnit()
 		exclude "**/testng/**/*.*"
 	}
 
 	task aggregateTestReports(type: TestReport) {
+		description = 'Aggregates JUnit and TestNG test reports.'
 		destinationDir = test.reports.html.destination
 		reportOn test, testNG
 	}
@@ -1013,14 +1027,14 @@ project("spring-aspects") {
 		rt("org.aspectj:aspectjrt:${aspectjVersion}")
 		compile("org.aspectj:aspectjweaver:${aspectjVersion}")
 		provided("org.eclipse.persistence:javax.persistence:2.0.0")
-		optional(project(":spring-aop")) // for @Async support
-		optional(project(":spring-beans")) // for @Configurable support
-		optional(project(":spring-context")) // for @Enable* support
-		optional(project(":spring-context-support")) // for JavaMail and JSR-107 support
-		optional(project(":spring-orm")) // for JPA exception translation support
-		optional(project(":spring-tx")) // for JPA, @Transactional support
+		optional(project(":spring-aop"))  // for @Async support
+		optional(project(":spring-beans"))  // for @Configurable support
+		optional(project(":spring-context"))  // for @Enable* support
+		optional(project(":spring-context-support"))  // for JavaMail and JSR-107 support
+		optional(project(":spring-orm"))  // for JPA exception translation support
+		optional(project(":spring-tx"))  // for JPA, @Transactional support
 		optional("javax.cache:cache-api:1.0.0")
-		testCompile(project(":spring-core")) // for CodeStyleAspect
+		testCompile(project(":spring-core"))  // for CodeStyleAspect
 		testCompile(project(":spring-test"))
 		testCompile("javax.mail:javax.mail-api:1.5.2")
 	}

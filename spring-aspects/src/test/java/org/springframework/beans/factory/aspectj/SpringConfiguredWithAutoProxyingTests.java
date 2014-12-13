@@ -16,9 +16,9 @@
 
 package org.springframework.beans.factory.aspectj;
 
-import org.springframework.context.support.ClassPathXmlApplicationContext;
-
 import junit.framework.TestCase;
+
+import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 public class SpringConfiguredWithAutoProxyingTests extends TestCase {
 

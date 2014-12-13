@@ -18,7 +18,6 @@ package org.springframework.jms.listener.adapter;
 
 import java.io.Serializable;
 import java.util.Map;
-
 import javax.jms.BytesMessage;
 import javax.jms.MapMessage;
 import javax.jms.ObjectMessage;

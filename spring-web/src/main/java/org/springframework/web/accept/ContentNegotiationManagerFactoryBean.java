@@ -61,7 +61,7 @@ public class ContentNegotiationManagerFactoryBean
 
 	private String parameterName = "format";
 
-	private MediaType defaultContentType;
+	private ContentNegotiationStrategy defaultNegotiationStrategy;
 
 	private ContentNegotiationManager contentNegotiationManager;
 
@@ -178,13 +178,25 @@ public class ContentNegotiationManagerFactoryBean
 	}
 
 	/**
-	 * Set the default content type.
-	 * <p>This content type will be used when neither the request path extension,
-	 * nor a request parameter, nor the {@code Accept} header could help
-	 * determine the requested content type.
+	 * Set the default content type to use when no content type was requested.
+	 * <p>Note that internally this method creates and adds a
+	 * {@link org.springframework.web.accept.FixedContentNegotiationStrategy
+	 * FixedContentNegotiationStrategy}. Alternatively you can also provide a
+	 * custom strategy via {@link #setDefaultContentTypeStrategy}.
 	 */
 	public void setDefaultContentType(MediaType defaultContentType) {
-		this.defaultContentType = defaultContentType;
+		this.defaultNegotiationStrategy = new FixedContentNegotiationStrategy(defaultContentType);
+	}
+
+	/**
+	 * Configure a custom {@link ContentNegotiationStrategy} to use to determine
+	 * the default content type to use when no content type was requested.
+	 * <p>However also consider using {@link #setDefaultContentType} which
+	 * provides a simpler alternative to doing the same.
+	 * @since 4.1.2
+	 */
+	public void setDefaultContentTypeStrategy(ContentNegotiationStrategy defaultStrategy) {
+		this.defaultNegotiationStrategy = defaultStrategy;
 	}
 
 	@Override
@@ -222,8 +234,8 @@ public class ContentNegotiationManagerFactoryBean
 			strategies.add(new HeaderContentNegotiationStrategy());
 		}
 
-		if (this.defaultContentType != null) {
-			strategies.add(new FixedContentNegotiationStrategy(this.defaultContentType));
+		if(this.defaultNegotiationStrategy != null) {
+			strategies.add(defaultNegotiationStrategy);
 		}
 
 		this.contentNegotiationManager = new ContentNegotiationManager(strategies);

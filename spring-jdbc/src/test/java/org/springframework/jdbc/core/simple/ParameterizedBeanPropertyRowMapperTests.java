@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,21 +16,23 @@
 
 package org.springframework.jdbc.core.simple;
 
-import static org.junit.Assert.assertEquals;
-
 import java.util.List;
 
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.jdbc.core.AbstractRowMapperTests;
 import org.springframework.jdbc.core.test.ConcretePerson;
 import org.springframework.jdbc.core.test.Person;
 
+import static org.junit.Assert.*;
+
 /**
  * @author Thomas Risberg
  */
+@SuppressWarnings("deprecation")
 public class ParameterizedBeanPropertyRowMapperTests extends AbstractRowMapperTests {
 
 	@Rule

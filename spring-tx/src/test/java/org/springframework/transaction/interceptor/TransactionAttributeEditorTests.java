@@ -17,12 +17,13 @@
 package org.springframework.transaction.interceptor;
 
 
-import static org.junit.Assert.*;
-
 import java.io.IOException;
 
 import org.junit.Test;
+
 import org.springframework.transaction.TransactionDefinition;
+
+import static org.junit.Assert.*;
 
 /**
  * Tests to check conversion from String to TransactionAttribute.

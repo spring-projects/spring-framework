@@ -18,7 +18,7 @@ package org.springframework.http;
 
 import java.net.URI;
 import java.util.Arrays;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Set;
 
 import org.springframework.util.MultiValueMap;
@@ -246,6 +246,16 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 		return status(HttpStatus.NOT_FOUND);
 	}
 
+	/**
+	 * Create a builder with an
+	 * {@linkplain HttpStatus#UNPROCESSABLE_ENTITY UNPROCESSABLE_ENTITY} status.
+	 * @return the created builder
+	 * @since 4.1.3
+	 */
+	public static BodyBuilder unprocessableEntity() {
+		return status(HttpStatus.UNPROCESSABLE_ENTITY);
+	}
+
 
 	/**
 	 * Defines a builder that adds headers to the response entity.
@@ -256,12 +266,21 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 
 		/**
 		 * Add the given, single header value under the given name.
-		 * @param headerName  the header name
+		 * @param headerName the header name
 		 * @param headerValues the header value(s)
 		 * @return this builder
 		 * @see HttpHeaders#add(String, String)
 		 */
 		B header(String headerName, String... headerValues);
+
+		/**
+		 * Copy the given headers into the entity's headers map.
+		 * @param headers the existing HttpHeaders to copy from
+		 * @return this builder
+		 * @since 4.1.2
+		 * @see HttpHeaders#add(String, String)
+		 */
+		B headers(HttpHeaders headers);
 
 		/**
 		 * Set the set of allowed {@link HttpMethod HTTP methods}, as specified
@@ -361,8 +380,14 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 		}
 
 		@Override
+		public BodyBuilder headers(HttpHeaders headers) {
+			this.headers.putAll(headers);
+			return this;
+		}
+
+		@Override
 		public BodyBuilder allow(HttpMethod... allowedMethods) {
-			this.headers.setAllow(new HashSet<HttpMethod>(Arrays.asList(allowedMethods)));
+			this.headers.setAllow(new LinkedHashSet<HttpMethod>(Arrays.asList(allowedMethods)));
 			return this;
 		}
 

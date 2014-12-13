@@ -16,8 +16,6 @@
 
 package org.springframework.web.servlet.view.velocity;
 
-import static org.junit.Assert.assertEquals;
-
 import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
@@ -33,15 +31,18 @@ import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-import org.springframework.tests.sample.beans.TestBean;
+
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockHttpServletResponse;
 import org.springframework.mock.web.test.MockServletContext;
+import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.web.context.support.StaticWebApplicationContext;
 import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.servlet.i18n.AcceptHeaderLocaleResolver;
 import org.springframework.web.servlet.theme.FixedThemeResolver;
 import org.springframework.web.util.NestedServletException;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Dave Syer

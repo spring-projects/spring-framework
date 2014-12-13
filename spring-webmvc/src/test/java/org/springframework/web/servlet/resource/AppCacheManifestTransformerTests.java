@@ -17,14 +17,15 @@
 package org.springframework.web.servlet.resource;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-
 import javax.servlet.http.HttpServletRequest;
 
 import org.hamcrest.Matchers;
 import org.junit.Before;
 import org.junit.Test;
+
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.util.FileCopyUtils;
@@ -75,13 +76,13 @@ public class AppCacheManifestTransformerTests {
 	@Test
 	public void transformManifest() throws Exception {
 
-		VersionResourceResolver versionResourceResolver = new VersionResourceResolver();
-		versionResourceResolver
-				.setStrategyMap(Collections.singletonMap("/**", new ContentVersionStrategy()));
+		VersionResourceResolver versionResolver = new VersionResourceResolver();
+		versionResolver.setStrategyMap(Collections.singletonMap("/**", new ContentVersionStrategy()));
 
-		List<ResourceResolver> resolvers = new ArrayList<ResourceResolver>();
-		resolvers.add(versionResourceResolver);
-		resolvers.add(new PathResourceResolver());
+		PathResourceResolver pathResolver = new PathResourceResolver();
+		pathResolver.setAllowedLocations(new ClassPathResource("test/", getClass()));
+
+		List<ResourceResolver> resolvers = Arrays.asList(versionResolver, pathResolver);
 		ResourceResolverChain resolverChain = new DefaultResourceResolverChain(resolvers);
 
 		List<ResourceTransformer> transformers = new ArrayList<>();

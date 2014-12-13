@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,17 +32,21 @@ public class MockHttpOutputMessage implements HttpOutputMessage {
 
 	private final ByteArrayOutputStream body = spy(new ByteArrayOutputStream());
 
+	private boolean headersWritten = false;
+
 	@Override
 	public HttpHeaders getHeaders() {
-		return headers;
+		return (this.headersWritten ? HttpHeaders.readOnlyHttpHeaders(this.headers) : this.headers);
 	}
 
 	@Override
 	public OutputStream getBody() throws IOException {
+		this.headersWritten = true;
 		return body;
 	}
 
 	public byte[] getBodyAsBytes() {
+		this.headersWritten = true;
 		return body.toByteArray();
 	}
 

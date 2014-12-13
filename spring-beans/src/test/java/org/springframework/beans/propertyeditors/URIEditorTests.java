@@ -19,10 +19,11 @@ package org.springframework.beans.propertyeditors;
 import java.beans.PropertyEditor;
 import java.net.URI;
 
-import static org.junit.Assert.*;
 import org.junit.Test;
 
 import org.springframework.util.ClassUtils;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Juergen Hoeller

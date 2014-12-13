@@ -32,9 +32,9 @@ import org.mockito.ArgumentCaptor;
 
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.web.socket.WebSocketHandler;
+import org.springframework.web.socket.WebSocketHttpHeaders;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.AbstractWebSocketHandler;
-import org.springframework.web.socket.WebSocketHttpHeaders;
 
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;

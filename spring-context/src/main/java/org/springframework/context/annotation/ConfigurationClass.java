@@ -68,11 +68,10 @@ final class ConfigurationClass {
 	 * Create a new {@link ConfigurationClass} with the given name.
 	 * @param metadataReader reader used to parse the underlying {@link Class}
 	 * @param beanName must not be {@code null}
-	 * @throws IllegalArgumentException if beanName is null (as of Spring 3.1.1)
 	 * @see ConfigurationClass#ConfigurationClass(Class, ConfigurationClass)
 	 */
 	public ConfigurationClass(MetadataReader metadataReader, String beanName) {
-		Assert.hasText(beanName, "bean name must not be null");
+		Assert.hasText(beanName, "Bean name must not be null");
 		this.metadata = metadataReader.getAnnotationMetadata();
 		this.resource = metadataReader.getResource();
 		this.beanName = beanName;
@@ -96,7 +95,6 @@ final class ConfigurationClass {
 	 * Create a new {@link ConfigurationClass} with the given name.
 	 * @param clazz the underlying {@link Class} to represent
 	 * @param beanName name of the {@code @Configuration} class bean
-	 * @throws IllegalArgumentException if beanName is null (as of Spring 3.1.1)
 	 * @see ConfigurationClass#ConfigurationClass(Class, ConfigurationClass)
 	 */
 	public ConfigurationClass(Class<?> clazz, String beanName) {
@@ -118,6 +116,19 @@ final class ConfigurationClass {
 		this.metadata = new StandardAnnotationMetadata(clazz, true);
 		this.resource = new DescriptiveResource(clazz.toString());
 		this.importedBy.add(importedBy);
+	}
+
+	/**
+	 * Create a new {@link ConfigurationClass} with the given name.
+	 * @param metadata the metadata for the underlying class to represent
+	 * @param beanName name of the {@code @Configuration} class bean
+	 * @see ConfigurationClass#ConfigurationClass(Class, ConfigurationClass)
+	 */
+	public ConfigurationClass(AnnotationMetadata metadata, String beanName) {
+		Assert.hasText(beanName, "Bean name must not be null");
+		this.metadata = metadata;
+		this.resource = new DescriptiveResource(metadata.getClassName());
+		this.beanName = beanName;
 	}
 
 

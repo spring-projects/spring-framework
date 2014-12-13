@@ -17,7 +17,6 @@
 package org.springframework.web.portlet.context;
 
 import java.io.File;
-
 import javax.portlet.PortletContext;
 
 import org.springframework.context.support.ApplicationObjectSupport;

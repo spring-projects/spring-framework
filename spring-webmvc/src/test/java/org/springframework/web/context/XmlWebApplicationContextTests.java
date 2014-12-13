@@ -17,11 +17,9 @@
 package org.springframework.web.context;
 
 import java.util.Locale;
-
 import javax.servlet.ServletException;
 
 import org.springframework.beans.BeansException;
-import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
@@ -32,10 +30,10 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.NoSuchMessageException;
 import org.springframework.context.TestListener;
 import org.springframework.mock.web.test.MockServletContext;
+import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.web.context.support.XmlWebApplicationContext;
 
 import static org.hamcrest.CoreMatchers.*;
-
 import static org.junit.Assert.*;
 
 /**

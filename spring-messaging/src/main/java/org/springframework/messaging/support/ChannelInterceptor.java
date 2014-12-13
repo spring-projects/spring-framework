@@ -47,8 +47,8 @@ public interface ChannelInterceptor {
 	/**
 	 * Invoked after the completion of a send regardless of any exception that
 	 * have been raised thus allowing for proper resource cleanup.
-	 * <p>Note that this will be invoked only if preSend successfully completed
-	 * and returned a Message, i.e. it did not return {@code null}.
+	 * <p>Note that this will be invoked only if {@link #preSend} successfully
+	 * completed and returned a Message, i.e. it did not return {@code null}.
 	 * @since 4.1
 	 */
 	void afterSendCompletion(Message<?> message, MessageChannel channel, boolean sent, Exception ex);
@@ -70,7 +70,7 @@ public interface ChannelInterceptor {
 	/**
 	 * Invoked after the completion of a receive regardless of any exception that
 	 * have been raised thus allowing for proper resource cleanup.
-	 * <p>Note that this will be invoked only if preReceive successfully
+	 * <p>Note that this will be invoked only if {@link #preReceive} successfully
 	 * completed and returned {@code true}.
 	 * @since 4.1
 	 */

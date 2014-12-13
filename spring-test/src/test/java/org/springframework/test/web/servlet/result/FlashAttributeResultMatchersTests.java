@@ -17,8 +17,8 @@
 package org.springframework.test.web.servlet.result;
 
 import org.junit.Test;
+
 import org.springframework.test.web.servlet.StubMvcResult;
-import org.springframework.test.web.servlet.result.FlashAttributeResultMatchers;
 import org.springframework.web.servlet.FlashMap;
 
 /**

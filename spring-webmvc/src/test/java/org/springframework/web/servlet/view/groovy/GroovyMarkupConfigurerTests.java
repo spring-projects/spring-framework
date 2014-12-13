@@ -15,8 +15,6 @@
  */
 package org.springframework.web.servlet.view.groovy;
 
-import static org.junit.Assert.*;
-
 import java.io.IOException;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -33,6 +31,8 @@ import org.junit.Test;
 
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.context.support.StaticApplicationContext;
+
+import static org.junit.Assert.*;
 
 /**
  * Unit tests for

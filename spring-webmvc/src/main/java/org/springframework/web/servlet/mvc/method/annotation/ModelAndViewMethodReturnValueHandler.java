@@ -50,11 +50,9 @@ public class ModelAndViewMethodReturnValueHandler implements HandlerMethodReturn
 	 * Configure one more simple patterns (as described in
 	 * {@link org.springframework.util.PatternMatchUtils#simpleMatch}) to use in order to recognize
 	 * custom redirect prefixes in addition to "redirect:".
-	 *
 	 * <p>Note that simply configuring this property will not make a custom
 	 * redirect prefix work. There must be a custom View that recognizes the
 	 * prefix as well.
-	 *
 	 * @since 4.1
 	 */
 	public void setRedirectPatterns(String... redirectPatterns) {
@@ -75,10 +73,8 @@ public class ModelAndViewMethodReturnValueHandler implements HandlerMethodReturn
 	}
 
 	@Override
-	public void handleReturnValue(
-			Object returnValue, MethodParameter returnType,
-			ModelAndViewContainer mavContainer, NativeWebRequest webRequest)
-			throws Exception {
+	public void handleReturnValue(Object returnValue, MethodParameter returnType,
+			ModelAndViewContainer mavContainer, NativeWebRequest webRequest) throws Exception {
 
 		if (returnValue == null) {
 			mavContainer.setRequestHandled(true);

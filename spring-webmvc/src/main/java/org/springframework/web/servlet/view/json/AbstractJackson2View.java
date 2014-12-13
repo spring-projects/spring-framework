@@ -20,7 +20,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Map;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -103,7 +102,7 @@ public abstract class AbstractJackson2View extends AbstractView {
 	}
 
 	/**
-	 * Whether to use the default pretty printer when writing JSON.
+	 * Whether to use the default pretty printer when writing the output.
 	 * This is a shortcut for setting up an {@code ObjectMapper} as follows:
 	 * <pre class="code">
 	 * ObjectMapper mapper = new ObjectMapper();

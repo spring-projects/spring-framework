@@ -1,7 +1,5 @@
 package org.springframework.cache.config;
 
-import static org.springframework.cache.CacheTestUtils.*;
-
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.junit.Test;
@@ -19,6 +17,8 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+
+import static org.springframework.cache.CacheTestUtils.*;
 
 /**
  * Tests that represent real use cases with advanced configuration

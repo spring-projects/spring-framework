@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,6 +18,7 @@ package org.springframework.messaging.simp.user;
 
 import org.junit.Before;
 import org.junit.Test;
+
 import org.springframework.messaging.Message;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessageType;
@@ -25,8 +26,7 @@ import org.springframework.messaging.simp.TestPrincipal;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.util.StringUtils;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.junit.Assert.*;
 
 /**
  * Unit tests for
@@ -115,6 +115,25 @@ public class DefaultUserDestinationResolverTests {
 		assertEquals("/queue/foo-user123", actual.getTargetDestinations().iterator().next());
 		assertEquals("/user/queue/foo", actual.getSubscribeDestination());
 		assertEquals(this.user.getName(), actual.getUser());
+	}
+
+	// SPR-12444
+	@Test
+	public void handleMessageToOtherUser() {
+		final String OTHER_SESSION_ID = "456";
+		final String OTHER_USER_NAME = "anna";
+
+		String sourceDestination = "/user/"+OTHER_USER_NAME+"/queue/foo";
+		TestPrincipal otherUser = new TestPrincipal(OTHER_USER_NAME);
+		this.registry.registerSessionId(otherUser.getName(), OTHER_SESSION_ID);
+		Message<?> message = createMessage(SimpMessageType.MESSAGE, this.user, SESSION_ID, sourceDestination);
+		UserDestinationResult actual = this.resolver.resolveDestination(message);
+
+		assertEquals(sourceDestination, actual.getSourceDestination());
+		assertEquals(1, actual.getTargetDestinations().size());
+		assertEquals("/queue/foo-user" + OTHER_SESSION_ID, actual.getTargetDestinations().iterator().next());
+		assertEquals("/user/queue/foo", actual.getSubscribeDestination());
+		assertEquals(otherUser.getName(), actual.getUser());
 	}
 
 	@Test

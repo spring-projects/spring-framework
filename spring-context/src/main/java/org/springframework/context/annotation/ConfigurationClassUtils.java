@@ -23,6 +23,7 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.core.Conventions;
@@ -70,41 +71,47 @@ abstract class ConfigurationClassUtils {
 	 * @return whether the candidate qualifies as (any kind of) configuration class
 	 */
 	public static boolean checkConfigurationClassCandidate(BeanDefinition beanDef, MetadataReaderFactory metadataReaderFactory) {
-		AnnotationMetadata metadata = null;
+		String className = beanDef.getBeanClassName();
+		if (className == null) {
+			return false;
+		}
 
-		// Check already loaded Class if present...
-		// since we possibly can't even load the class file for this Class.
-		if (beanDef instanceof AbstractBeanDefinition && ((AbstractBeanDefinition) beanDef).hasBeanClass()) {
+		AnnotationMetadata metadata;
+		if (beanDef instanceof AnnotatedBeanDefinition &&
+				className.equals(((AnnotatedBeanDefinition) beanDef).getMetadata().getClassName())) {
+			// Can reuse the pre-parsed metadata from the given BeanDefinition...
+			metadata = ((AnnotatedBeanDefinition) beanDef).getMetadata();
+		}
+		else if (beanDef instanceof AbstractBeanDefinition && ((AbstractBeanDefinition) beanDef).hasBeanClass()) {
+			// Check already loaded Class if present...
+			// since we possibly can't even load the class file for this Class.
 			Class<?> beanClass = ((AbstractBeanDefinition) beanDef).getBeanClass();
 			metadata = new StandardAnnotationMetadata(beanClass, true);
 		}
 		else {
-			String className = beanDef.getBeanClassName();
-			if (className != null) {
-				try {
-					MetadataReader metadataReader = metadataReaderFactory.getMetadataReader(className);
-					metadata = metadataReader.getAnnotationMetadata();
+			try {
+				MetadataReader metadataReader = metadataReaderFactory.getMetadataReader(className);
+				metadata = metadataReader.getAnnotationMetadata();
+			}
+			catch (IOException ex) {
+				if (logger.isDebugEnabled()) {
+					logger.debug("Could not find class file for introspecting configuration annotations: " + className, ex);
 				}
-				catch (IOException ex) {
-					if (logger.isDebugEnabled()) {
-						logger.debug("Could not find class file for introspecting factory methods: " + className, ex);
-					}
-					return false;
-				}
+				return false;
 			}
 		}
 
-		if (metadata != null) {
-			if (isFullConfigurationCandidate(metadata)) {
-				beanDef.setAttribute(CONFIGURATION_CLASS_ATTRIBUTE, CONFIGURATION_CLASS_FULL);
-				return true;
-			}
-			else if (isLiteConfigurationCandidate(metadata)) {
-				beanDef.setAttribute(CONFIGURATION_CLASS_ATTRIBUTE, CONFIGURATION_CLASS_LITE);
-				return true;
-			}
+		if (isFullConfigurationCandidate(metadata)) {
+			beanDef.setAttribute(CONFIGURATION_CLASS_ATTRIBUTE, CONFIGURATION_CLASS_FULL);
+			return true;
 		}
-		return false;
+		else if (isLiteConfigurationCandidate(metadata)) {
+			beanDef.setAttribute(CONFIGURATION_CLASS_ATTRIBUTE, CONFIGURATION_CLASS_LITE);
+			return true;
+		}
+		else {
+			return false;
+		}
 	}
 
 	/**

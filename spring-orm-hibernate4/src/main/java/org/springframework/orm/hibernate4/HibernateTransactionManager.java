@@ -17,6 +17,7 @@
 package org.springframework.orm.hibernate4;
 
 import java.sql.Connection;
+import java.sql.ResultSet;
 import javax.sql.DataSource;
 
 import org.hibernate.ConnectionReleaseMode;
@@ -81,12 +82,12 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * transaction. The DataSource that Hibernate uses needs to be JTA-enabled in
  * such a scenario (see container setup).
  *
- * <p>On JDBC 3.0, this transaction manager supports nested transactions via JDBC 3.0
- * Savepoints. The {@link #setNestedTransactionAllowed} "nestedTransactionAllowed"}
- * flag defaults to "false", though, as nested transactions will just apply to the
- * JDBC Connection, not to the Hibernate Session and its cached objects. You can
- * manually set the flag to "true" if you want to use nested transactions for
- * JDBC access code which participates in Hibernate transactions (provided that
+ * <p>This transaction manager supports nested transactions via JDBC 3.0 Savepoints.
+ * The {@link #setNestedTransactionAllowed} "nestedTransactionAllowed"} flag defaults
+ * to "false", though, as nested transactions will just apply to the JDBC Connection,
+ * not to the Hibernate Session and its cached entity objects and related context.
+ * You can manually set the flag to "true" if you want to use nested transactions
+ * for JDBC access code which participates in Hibernate transactions (provided that
  * your JDBC driver supports Savepoints). <i>Note that Hibernate itself does not
  * support nested transactions! Hence, do not expect Hibernate access code to
  * semantically participate in a nested transaction.</i>
@@ -116,6 +117,8 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 	private boolean autodetectDataSource = true;
 
 	private boolean prepareConnection = true;
+
+	private boolean allowResultAccessAfterCompletion = false;
 
 	private boolean hibernateManagedSession = false;
 
@@ -227,6 +230,21 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 	 */
 	public void setPrepareConnection(boolean prepareConnection) {
 		this.prepareConnection = prepareConnection;
+	}
+
+	/**
+	 * Set whether to allow result access after completion, typically via Hibernate's
+	 * ScrollableResults mechanism.
+	 * <p>Default is "false". Turning this flag on enforces over-commit holdability on the
+	 * underlying JDBC Connection (if {@link #prepareConnection "prepareConnection"} is on)
+	 * and skips the disconnect-on-completion step.
+	 * @since 4.1.2
+	 * @see java.sql.Connection#setHoldability
+	 * @see ResultSet#HOLD_CURSORS_OVER_COMMIT
+	 * @see #disconnectOnCompletion(Session)
+	 */
+	public void setAllowResultAccessAfterCompletion(boolean allowResultAccessAfterCompletion) {
+		this.allowResultAccessAfterCompletion = allowResultAccessAfterCompletion;
 	}
 
 	/**
@@ -432,6 +450,13 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 				Connection con = ((SessionImplementor) session).connection();
 				Integer previousIsolationLevel = DataSourceUtils.prepareConnectionForTransaction(con, definition);
 				txObject.setPreviousIsolationLevel(previousIsolationLevel);
+				if (this.allowResultAccessAfterCompletion && !txObject.isNewSession()) {
+					int currentHoldability = con.getHoldability();
+					if (currentHoldability != ResultSet.HOLD_CURSORS_OVER_COMMIT) {
+						txObject.setPreviousHoldability(currentHoldability);
+						con.setHoldability(ResultSet.HOLD_CURSORS_OVER_COMMIT);
+					}
+				}
 			}
 			else {
 				// Not allowed to change the transaction settings of the JDBC Connection.
@@ -513,6 +538,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 				}
 				finally {
 					SessionFactoryUtils.closeSession(session);
+					txObject.setSessionHolder(null);
 				}
 			}
 			throw new CannotCreateTransactionException("Could not open Hibernate Session for transaction", ex);
@@ -624,10 +650,17 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 			// Else, we need to rely on the connection pool to perform proper cleanup.
 			try {
 				Connection con = ((SessionImplementor) session).connection();
+				Integer previousHoldability = txObject.getPreviousHoldability();
+				if (previousHoldability != null) {
+					con.setHoldability(previousHoldability);
+				}
 				DataSourceUtils.resetConnectionAfterTransaction(con, txObject.getPreviousIsolationLevel());
 			}
 			catch (HibernateException ex) {
 				logger.debug("Could not access JDBC Connection of Hibernate Session", ex);
+			}
+			catch (Throwable ex) {
+				logger.debug("Could not reset JDBC Connection after transaction", ex);
 			}
 		}
 
@@ -644,11 +677,24 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 			if (txObject.getSessionHolder().getPreviousFlushMode() != null) {
 				session.setFlushMode(txObject.getSessionHolder().getPreviousFlushMode());
 			}
-			if (!this.hibernateManagedSession) {
-				session.disconnect();
+			if (!this.allowResultAccessAfterCompletion && !this.hibernateManagedSession) {
+				disconnectOnCompletion(session);
 			}
 		}
 		txObject.getSessionHolder().clear();
+	}
+
+	/**
+	 * Disconnect a pre-existing Hibernate Session on transaction completion,
+	 * returning its database connection but preserving its entity state.
+	 * <p>The default implementation simply calls {@link Session#disconnect()}.
+	 * Subclasses may override this with a no-op or with fine-tuned disconnection logic.
+	 * @param session the Hibernate Session to disconnect
+	 * @since 4.1.2
+	 * @see org.hibernate.Session#disconnect()
+	 */
+	protected void disconnectOnCompletion(Session session) {
+		session.disconnect();
 	}
 
 	/**
@@ -697,6 +743,8 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 
 		private boolean newSession;
 
+		private Integer previousHoldability;
+
 		public void setSession(Session session) {
 			this.sessionHolder = new SessionHolder(session);
 			this.newSessionHolder = true;
@@ -725,6 +773,14 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 
 		public boolean isNewSession() {
 			return this.newSession;
+		}
+
+		public void setPreviousHoldability(Integer previousHoldability) {
+			this.previousHoldability = previousHoldability;
+		}
+
+		public Integer getPreviousHoldability() {
+			return this.previousHoldability;
 		}
 
 		public boolean hasSpringManagedTransaction() {

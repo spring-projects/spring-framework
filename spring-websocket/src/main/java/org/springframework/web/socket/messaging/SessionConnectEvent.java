@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -15,7 +15,6 @@
  */
 
 package org.springframework.web.socket.messaging;
-
 
 import org.springframework.messaging.Message;
 
@@ -33,7 +32,11 @@ import org.springframework.messaging.Message;
 @SuppressWarnings("serial")
 public class SessionConnectEvent extends AbstractSubProtocolEvent {
 
-
+	/**
+	 * Create a new SessionConnectEvent.
+	 * @param source the component that published the event (never {@code null})
+	 * @param message the connect message
+	 */
 	public SessionConnectEvent(Object source, Message<byte[]> message) {
 		super(source, message);
 	}

@@ -60,7 +60,7 @@ import org.springframework.web.util.UriUtils;
  * requests in {@link MockMvc}.
  *
  * <p>Application tests will typically access this builder through the static factory
- * methods in {@link org.springframework.test.web.servlet.setup.MockMvcBuilders}.
+ * methods in {@link MockMvcRequestBuilders}.
  *
  * @author Rossen Stoyanchev
  * @author Arjen Poutsma
@@ -186,11 +186,22 @@ public class MockHttpServletRequestBuilder
 
 	/**
 	 * Set the 'Content-Type' header of the request.
-	 * @param mediaType the content type
+	 * @param contentType the content type
 	 */
-	public MockHttpServletRequestBuilder contentType(MediaType mediaType) {
-		Assert.notNull(mediaType, "'contentType' must not be null");
-		this.contentType = mediaType.toString();
+	public MockHttpServletRequestBuilder contentType(MediaType contentType) {
+		Assert.notNull(contentType, "'contentType' must not be null");
+		this.contentType = contentType.toString();
+		this.headers.set("Content-Type", this.contentType);
+		return this;
+	}
+
+	/**
+	 * Set the 'Content-Type' header of the request.
+	 * @param contentType the content type
+	 * @since 4.1.2
+	 */
+	public MockHttpServletRequestBuilder contentType(String contentType) {
+		this.contentType = MediaType.parseMediaType(contentType).toString();
 		this.headers.set("Content-Type", this.contentType);
 		return this;
 	}

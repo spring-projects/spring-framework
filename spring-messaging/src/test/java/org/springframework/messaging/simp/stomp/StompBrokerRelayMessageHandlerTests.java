@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -22,10 +22,12 @@ import java.util.concurrent.Callable;
 
 import org.junit.Before;
 import org.junit.Test;
+
 import org.springframework.messaging.Message;
 import org.springframework.messaging.StubMessageChannel;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessageType;
+import org.springframework.messaging.simp.TestPrincipal;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.messaging.support.MessageHeaderAccessor;
 import org.springframework.messaging.tcp.ReconnectStrategy;
@@ -46,16 +48,18 @@ public class StompBrokerRelayMessageHandlerTests {
 
 	private StompBrokerRelayMessageHandler brokerRelay;
 
+	private StubMessageChannel outboundChannel;
+
 	private StubTcpOperations tcpClient;
 
 
 	@Before
 	public void setup() {
 
-		this.tcpClient = new StubTcpOperations();
+		this.outboundChannel = new StubMessageChannel();
 
 		this.brokerRelay = new StompBrokerRelayMessageHandler(new StubMessageChannel(),
-				new StubMessageChannel(), new StubMessageChannel(), Arrays.asList("/topic")) {
+				this.outboundChannel, new StubMessageChannel(), Arrays.asList("/topic")) {
 
 			@Override
 			protected void startInternal() {
@@ -64,6 +68,7 @@ public class StompBrokerRelayMessageHandlerTests {
 			}
 		};
 
+		this.tcpClient = new StubTcpOperations();
 		this.brokerRelay.setTcpClient(this.tcpClient);
 	}
 
@@ -140,6 +145,31 @@ public class StompBrokerRelayMessageHandlerTests {
 				MessageHeaderAccessor.getAccessor(sent.get(0), MessageHeaderAccessor.class));
 	}
 
+	@Test
+	public void testOutboundMessage() throws Exception {
+
+		this.brokerRelay.start();
+
+		String sessionId = "sess1";
+		StompHeaderAccessor headers = StompHeaderAccessor.create(StompCommand.CONNECT);
+		headers.setSessionId(sessionId);
+		headers.setUser(new TestPrincipal("joe"));
+		this.brokerRelay.handleMessage(MessageBuilder.createMessage(new byte[0], headers.getMessageHeaders()));
+
+		List<Message<byte[]>> sent = this.tcpClient.connection.messages;
+		assertEquals(2, sent.size());
+
+		StompHeaderAccessor responseHeaders = StompHeaderAccessor.create(StompCommand.MESSAGE);
+		responseHeaders.setLeaveMutable(true);
+		Message<byte[]> response = MessageBuilder.createMessage(new byte[0], responseHeaders.getMessageHeaders());
+		this.tcpClient.connectionHandler.handleMessage(response);
+
+		Message<byte[]> actual = this.outboundChannel.getMessages().get(0);
+		StompHeaderAccessor actualHeaders = StompHeaderAccessor.getAccessor(actual, StompHeaderAccessor.class);
+		assertEquals(sessionId, actualHeaders.getSessionId());
+		assertEquals("joe", actualHeaders.getUser().getName());
+	}
+
 
 	private static ListenableFutureTask<Void> getVoidFuture() {
 		ListenableFutureTask<Void> futureTask = new ListenableFutureTask<>(new Callable<Void>() {
@@ -168,15 +198,19 @@ public class StompBrokerRelayMessageHandlerTests {
 
 		private StubTcpConnection connection = new StubTcpConnection();
 
+		private TcpConnectionHandler<byte[]> connectionHandler;
+
 
 		@Override
 		public ListenableFuture<Void> connect(TcpConnectionHandler<byte[]> connectionHandler) {
+			this.connectionHandler = connectionHandler;
 			connectionHandler.afterConnected(this.connection);
 			return getVoidFuture();
 		}
 
 		@Override
 		public ListenableFuture<Void> connect(TcpConnectionHandler<byte[]> connectionHandler, ReconnectStrategy reconnectStrategy) {
+			this.connectionHandler = connectionHandler;
 			connectionHandler.afterConnected(this.connection);
 			return getVoidFuture();
 		}

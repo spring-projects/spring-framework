@@ -29,11 +29,11 @@ import org.springframework.util.StringUtils;
 
 /**
  * Resolves request paths containing a version string that can be used as part
- * of an HTTP caching strategy in which a resource is cached with a far future
- * date (e.g. 1 year) and cached until the version, and therefore the URL, is
- * changed.
+ * of an HTTP caching strategy in which a resource is cached with a date in the
+ * distant future (e.g. 1 year) and cached until the version, and therefore the
+ * URL, is changed.
  *
- * <p>Different versioning strategies exist and this resolver must be configured
+ * <p>Different versioning strategies exist, and this resolver must be configured
  * with one or more such strategies along with path mappings to indicate which
  * strategy applies to which resources.
  *
@@ -42,9 +42,10 @@ import org.springframework.util.StringUtils;
  * cannot be combined with JavaScript module loaders. For such cases the
  * {@code FixedVersionStrategy} is a better choice.
  *
- * <p>Note that using this resolver to serve CSS files means the
+ * <p>Note that using this resolver to serve CSS files means that the
  * {@link CssLinkResourceTransformer} should also be used in order to modify
- * links within CSS files to also contain versions.
+ * links within CSS files to also contain the appropriate versions generated
+ * by this resolver.
  *
  * @author Brian Clozel
  * @author Rossen Stoyanchev
@@ -95,11 +96,12 @@ public class VersionResourceResolver extends AbstractResourceResolver {
 
 	/**
 	 * Insert a fixed, prefix-based version in resource URLs that match the given
-	 * path patterns, e.g. {@code "{version}/js/main.js"}. This is useful (vs
+	 * path patterns, for example: <code>"{version}/js/main.js"</code>. This is useful (vs.
 	 * content-based versions) when using JavaScript module loaders.
-	 * <p>The version may be a random number, the current date, fetched from a
-	 * git commit sha, a property file, environment variable, and set with SpEL
-	 * expressions in the configuration (e.g. see {@code @Value} in Java config).
+	 * <p>The version may be a random number, the current date, or a value
+	 * fetched from a git commit sha, a property file, or environment variable
+	 * and set with SpEL expressions in the configuration (e.g. see {@code @Value}
+	 * in Java config).
 	 * @param version a version string
 	 * @param pathPatterns one or more resource URL path patterns
 	 * @return the current instance for chained method invocation

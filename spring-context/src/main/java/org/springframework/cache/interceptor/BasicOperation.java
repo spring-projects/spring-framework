@@ -27,7 +27,7 @@ import java.util.Set;
 public interface BasicOperation {
 
 	/**
-	 * Return the cache name(s) associated to the operation.
+	 * Return the cache name(s) associated with the operation.
 	 */
 	Set<String> getCacheNames();
 

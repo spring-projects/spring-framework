@@ -16,12 +16,11 @@
 
 package org.springframework.beans;
 
-import static org.junit.Assert.assertEquals;
-
-import javax.swing.JPanel;
-import javax.swing.JTextField;
-
 import org.junit.Test;
+
+import org.springframework.tests.sample.beans.TestBean;
+
+import static org.junit.Assert.*;
 
 /**
  * Unit tests for {@link DirectFieldAccessor}
@@ -39,13 +38,13 @@ public class DirectFieldAccessorTests extends AbstractConfigurablePropertyAccess
 	@Test
 	public void withShadowedField() throws Exception {
 		@SuppressWarnings("serial")
-		JPanel p = new JPanel() {
+		TestBean tb = new TestBean() {
 			@SuppressWarnings("unused")
-			JTextField name = new JTextField();
+			StringBuilder name = new StringBuilder();
 		};
 
-		DirectFieldAccessor dfa = new DirectFieldAccessor(p);
-		assertEquals(JTextField.class, dfa.getPropertyType("name"));
+		DirectFieldAccessor dfa = new DirectFieldAccessor(tb);
+		assertEquals(StringBuilder.class, dfa.getPropertyType("name"));
 	}
 
 }

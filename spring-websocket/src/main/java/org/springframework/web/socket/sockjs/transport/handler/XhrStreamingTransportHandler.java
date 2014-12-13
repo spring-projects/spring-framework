@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,8 +49,8 @@ public class XhrStreamingTransportHandler extends AbstractHttpSendingTransportHa
 	}
 
 	@Override
-	public StreamingSockJsSession createSession(String sessionId, WebSocketHandler handler,
-			Map<String, Object> attributes) {
+	public StreamingSockJsSession createSession(
+			String sessionId, WebSocketHandler handler, Map<String, Object> attributes) {
 
 		return new XhrStreamingSockJsSession(sessionId, getServiceConfig(), handler, attributes);
 	}
@@ -61,9 +61,9 @@ public class XhrStreamingTransportHandler extends AbstractHttpSendingTransportHa
 	}
 
 
-	private final class XhrStreamingSockJsSession extends StreamingSockJsSession {
+	private class XhrStreamingSockJsSession extends StreamingSockJsSession {
 
-		private XhrStreamingSockJsSession(String sessionId, SockJsServiceConfig config,
+		public XhrStreamingSockJsSession(String sessionId, SockJsServiceConfig config,
 				WebSocketHandler wsHandler, Map<String, Object> attributes) {
 
 			super(sessionId, config, wsHandler, attributes);
@@ -71,11 +71,12 @@ public class XhrStreamingTransportHandler extends AbstractHttpSendingTransportHa
 
 		@Override
 		protected void writePrelude(ServerHttpRequest request, ServerHttpResponse response) throws IOException {
-			for (int i=0; i < 2048; i++) {
+			for (int i = 0; i < 2048; i++) {
 				response.getBody().write('h');
 			}
 			response.getBody().write('\n');
 			response.flush();
 		}
 	}
+
 }

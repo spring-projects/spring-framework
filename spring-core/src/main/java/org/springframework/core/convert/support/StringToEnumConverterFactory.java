@@ -20,12 +20,12 @@ import org.springframework.core.convert.converter.Converter;
 import org.springframework.core.convert.converter.ConverterFactory;
 
 /**
- * Converts from a String to a java.lang.Enum by calling {@link Enum#valueOf(Class, String)}.
+ * Converts from a String to a {@link java.lang.Enum} by calling {@link Enum#valueOf(Class, String)}.
  *
  * @author Keith Donald
  * @since 3.0
  */
-@SuppressWarnings({ "unchecked", "rawtypes" })
+@SuppressWarnings({"unchecked", "rawtypes"})
 final class StringToEnumConverterFactory implements ConverterFactory<String, Enum> {
 
 	@Override
@@ -35,7 +35,8 @@ final class StringToEnumConverterFactory implements ConverterFactory<String, Enu
 			enumType = enumType.getSuperclass();
 		}
 		if (enumType == null) {
-			throw new IllegalArgumentException("The target type " + targetType.getName() + " does not refer to an enum");
+			throw new IllegalArgumentException(
+					"The target type " + targetType.getName() + " does not refer to an enum");
 		}
 		return new StringToEnum(enumType);
 	}

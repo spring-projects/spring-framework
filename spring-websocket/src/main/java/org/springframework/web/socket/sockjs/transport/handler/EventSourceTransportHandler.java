@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,8 +49,8 @@ public class EventSourceTransportHandler extends AbstractHttpSendingTransportHan
 	}
 
 	@Override
-	public StreamingSockJsSession createSession(String sessionId, WebSocketHandler handler,
-			Map<String, Object> attributes) {
+	public StreamingSockJsSession createSession(
+			String sessionId, WebSocketHandler handler, Map<String, Object> attributes) {
 
 		return new EventSourceStreamingSockJsSession(sessionId, getServiceConfig(), handler, attributes);
 	}
@@ -61,9 +61,9 @@ public class EventSourceTransportHandler extends AbstractHttpSendingTransportHan
 	}
 
 
-	private final class EventSourceStreamingSockJsSession extends StreamingSockJsSession {
+	private class EventSourceStreamingSockJsSession extends StreamingSockJsSession {
 
-		private EventSourceStreamingSockJsSession(String sessionId, SockJsServiceConfig config,
+		public EventSourceStreamingSockJsSession(String sessionId, SockJsServiceConfig config,
 				WebSocketHandler wsHandler, Map<String, Object> attributes) {
 
 			super(sessionId, config, wsHandler, attributes);

@@ -16,13 +16,14 @@
 
 package org.springframework.cache;
 
-import static org.junit.Assert.*;
-
 import java.util.UUID;
 
 import org.junit.Before;
 import org.junit.Test;
+
 import org.springframework.cache.support.NoOpCacheManager;
+
+import static org.junit.Assert.*;
 
 public class NoOpCacheManagerTests {
 

@@ -17,10 +17,10 @@ package org.springframework.jms.core.support;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import javax.jms.ConnectionFactory;
 
 import org.junit.Test;
+
 import org.springframework.jms.core.JmsTemplate;
 
 import static org.junit.Assert.*;

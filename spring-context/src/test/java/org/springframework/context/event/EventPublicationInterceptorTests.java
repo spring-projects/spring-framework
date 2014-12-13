@@ -18,6 +18,7 @@ package org.springframework.context.event;
 
 import org.junit.Before;
 import org.junit.Test;
+
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.MutablePropertyValues;

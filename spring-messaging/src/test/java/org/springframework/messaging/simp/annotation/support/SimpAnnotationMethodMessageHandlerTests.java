@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -20,16 +20,23 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
+
 import org.springframework.context.support.StaticApplicationContext;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.SubscribableChannel;
-import org.springframework.messaging.handler.annotation.*;
+import org.springframework.messaging.handler.annotation.DestinationVariable;
+import org.springframework.messaging.handler.annotation.Header;
+import org.springframework.messaging.handler.annotation.Headers;
+import org.springframework.messaging.handler.annotation.MessageExceptionHandler;
+import org.springframework.messaging.handler.annotation.MessageMapping;
+import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.handler.annotation.support.MethodArgumentNotValidException;
 import org.springframework.messaging.simp.SimpAttributes;
 import org.springframework.messaging.simp.SimpAttributesContextHolder;
@@ -45,7 +52,7 @@ import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
 import org.springframework.validation.annotation.Validated;
 
-import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
 /**
@@ -66,7 +73,6 @@ public class SimpAnnotationMethodMessageHandlerTests {
 
 	@Before
 	public void setup() {
-
 		SubscribableChannel channel = Mockito.mock(SubscribableChannel.class);
 		SimpMessageSendingOperations brokerTemplate = new SimpMessagingTemplate(channel);
 
@@ -80,8 +86,8 @@ public class SimpAnnotationMethodMessageHandlerTests {
 	}
 
 
-	@SuppressWarnings("unchecked")
 	@Test
+	@SuppressWarnings("unchecked")
 	public void headerArgumentResolution() {
 		SimpMessageHeaderAccessor headers = SimpMessageHeaderAccessor.create();
 		headers.setSessionId("session1");
@@ -94,6 +100,35 @@ public class SimpAnnotationMethodMessageHandlerTests {
 		assertEquals("headers", this.testController.method);
 		assertEquals("bar", this.testController.arguments.get("foo"));
 		assertEquals("bar", ((Map<String, Object>) this.testController.arguments.get("headers")).get("foo"));
+	}
+
+	@Test
+	public void optionalHeaderArgumentResolutionWhenPresent() {
+		SimpMessageHeaderAccessor headers = SimpMessageHeaderAccessor.create();
+		headers.setSessionId("session1");
+		headers.setSessionAttributes(new ConcurrentHashMap<>());
+		headers.setDestination("/pre/optionalHeaders");
+		headers.setHeader("foo", "bar");
+		Message<?> message = MessageBuilder.withPayload(new byte[0]).setHeaders(headers).build();
+		this.messageHandler.handleMessage(message);
+
+		assertEquals("optionalHeaders", this.testController.method);
+		assertEquals("bar", this.testController.arguments.get("foo1"));
+		assertEquals("bar", this.testController.arguments.get("foo2"));
+	}
+
+	@Test
+	public void optionalHeaderArgumentResolutionWhenNotPresent() {
+		SimpMessageHeaderAccessor headers = SimpMessageHeaderAccessor.create();
+		headers.setSessionId("session1");
+		headers.setSessionAttributes(new ConcurrentHashMap<>());
+		headers.setDestination("/pre/optionalHeaders");
+		Message<?> message = MessageBuilder.withPayload(new byte[0]).setHeaders(headers).build();
+		this.messageHandler.handleMessage(message);
+
+		assertEquals("optionalHeaders", this.testController.method);
+		assertNull(this.testController.arguments.get("foo1"));
+		assertNull(this.testController.arguments.get("foo2"));
 	}
 
 	@Test
@@ -213,12 +248,18 @@ public class SimpAnnotationMethodMessageHandlerTests {
 
 		private Map<String, Object> arguments = new LinkedHashMap<String, Object>();
 
-
 		@MessageMapping("/headers")
 		public void headers(@Header String foo, @Headers Map<String, Object> headers) {
 			this.method = "headers";
 			this.arguments.put("foo", foo);
 			this.arguments.put("headers", headers);
+		}
+
+		@MessageMapping("/optionalHeaders")
+		public void optionalHeaders(@Header(value="foo", required=false) String foo1, @Header(value="foo") Optional<String> foo2) {
+			this.method = "optionalHeaders";
+			this.arguments.put("foo1", foo1);
+			this.arguments.put("foo2", (foo2.isPresent() ? foo2.get() : null));
 		}
 
 		@MessageMapping("/message/{foo}/{name}")

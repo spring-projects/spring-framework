@@ -160,6 +160,12 @@ import java.util.concurrent.Callable;
  * context path, and the literal part of the servlet mapping.
  * </ul>
  *
+ * <p><strong>Note:</strong> JDK 1.8's {@code java.util.Optional} is supported
+ * as a method parameter type with annotations that provide a {@code required}
+ * attribute (e.g. {@code @RequestParam}, {@code @RequestHeader}, etc.). The use
+ * of {@code java.util.Optional} in those cases is equivalent to having
+ * {@code required=false}.
+ *
  * <p>The following return types are supported for handler methods:
  * <ul>
  * <li>A {@code ModelAndView} object (Servlet MVC or Portlet MVC),
@@ -288,6 +294,7 @@ public @interface RequestMapping {
 	 * <p><b>Supported at the type level as well as at the method level!</b>
 	 * When used at the type level, all method-level mappings inherit
 	 * this primary mapping, narrowing it for a specific handler method.
+	 * @see org.springframework.web.bind.annotation.ValueConstants#DEFAULT_NONE
 	 */
 	String[] value() default {};
 

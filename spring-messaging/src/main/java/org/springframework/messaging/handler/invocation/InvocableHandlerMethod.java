@@ -29,13 +29,14 @@ import org.springframework.messaging.handler.HandlerMethod;
 import org.springframework.util.ReflectionUtils;
 
 /**
- * Invokes the handler method for a given message after resolving
- * its method argument values through registered {@link HandlerMethodArgumentResolver}s.
+ * Invokes the handler method for a given message after resolving its method argument
+ * values through registered {@link HandlerMethodArgumentResolver}s.
  *
  * <p>Use {@link #setMessageMethodArgumentResolvers(HandlerMethodArgumentResolver)}
  * to customize the list of argument resolvers.
  *
  * @author Rossen Stoyanchev
+ * @author Juergen Hoeller
  * @since 4.0
  */
 public class InvocableHandlerMethod extends HandlerMethod {
@@ -66,7 +67,9 @@ public class InvocableHandlerMethod extends HandlerMethod {
 	 * @param parameterTypes the method parameter types
 	 * @throws NoSuchMethodException when the method cannot be found
 	 */
-	public InvocableHandlerMethod(Object bean, String methodName, Class<?>... parameterTypes) throws NoSuchMethodException {
+	public InvocableHandlerMethod(Object bean, String methodName, Class<?>... parameterTypes)
+			throws NoSuchMethodException {
+
 		super(bean, methodName, parameterTypes);
 	}
 
@@ -93,12 +96,12 @@ public class InvocableHandlerMethod extends HandlerMethod {
 	 * @throws Exception raised if no suitable argument resolver can be found,
 	 * or the method raised an exception
 	 */
-	public final Object invoke(Message<?> message, Object... providedArgs) throws Exception {
+	public Object invoke(Message<?> message, Object... providedArgs) throws Exception {
 		Object[] args = getMethodArgumentValues(message, providedArgs);
 		if (logger.isTraceEnabled()) {
 			logger.trace("Resolved arguments: " + Arrays.asList(args));
 		}
-		Object returnValue = invoke(args);
+		Object returnValue = doInvoke(args);
 		if (logger.isTraceEnabled()) {
 			logger.trace("Returned value: " + returnValue);
 		}
@@ -172,10 +175,11 @@ public class InvocableHandlerMethod extends HandlerMethod {
 		return null;
 	}
 
+
 	/**
 	 * Invoke the handler method with the given argument values.
 	 */
-	private Object invoke(Object... args) throws Exception {
+	protected Object doInvoke(Object... args) throws Exception {
 		ReflectionUtils.makeAccessible(getBridgedMethod());
 		try {
 			return getBridgedMethod().invoke(getBean(), args);

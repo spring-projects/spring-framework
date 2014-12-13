@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -27,6 +27,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.http.server.ServletServerHttpRequest;
@@ -34,38 +35,36 @@ import org.springframework.http.server.ServletServerHttpResponse;
 import org.springframework.util.Assert;
 import org.springframework.web.HttpRequestHandler;
 import org.springframework.web.socket.WebSocketHandler;
+import org.springframework.web.socket.handler.ExceptionWebSocketHandlerDecorator;
+import org.springframework.web.socket.handler.LoggingWebSocketHandlerDecorator;
 import org.springframework.web.socket.server.HandshakeFailureException;
 import org.springframework.web.socket.server.HandshakeHandler;
 import org.springframework.web.socket.server.HandshakeInterceptor;
-import org.springframework.web.socket.handler.ExceptionWebSocketHandlerDecorator;
-import org.springframework.web.socket.handler.LoggingWebSocketHandlerDecorator;
 
 /**
  * A {@link HttpRequestHandler} for processing WebSocket handshake requests.
  *
  * <p>This is the main class to use when configuring a server WebSocket at a specific URL.
- * It is a very thin wrapper around a {@link HandshakeHandler} and a
- * {@link WebSocketHandler} instance also adapting the {@link HttpServletRequest} and
- * {@link HttpServletResponse} to {@link ServerHttpRequest} and {@link ServerHttpResponse}
- * respectively.
+ * It is a very thin wrapper around a {@link WebSocketHandler} and a {@link HandshakeHandler},
+ * also adapting the {@link HttpServletRequest} and {@link HttpServletResponse} to
+ * {@link ServerHttpRequest} and {@link ServerHttpResponse}, respectively.
  *
  * @author Rossen Stoyanchev
  * @since 4.0
  */
 public class WebSocketHttpRequestHandler implements HttpRequestHandler {
 
-	private static final Log logger = LogFactory.getLog(WebSocketHttpRequestHandler.class);
-
-
-	private final HandshakeHandler handshakeHandler;
+	private final Log logger = LogFactory.getLog(WebSocketHttpRequestHandler.class);
 
 	private final WebSocketHandler wsHandler;
+
+	private final HandshakeHandler handshakeHandler;
 
 	private final List<HandshakeInterceptor> interceptors = new ArrayList<HandshakeInterceptor>();
 
 
-	public WebSocketHttpRequestHandler(WebSocketHandler webSocketHandler) {
-		this(webSocketHandler, new DefaultHandshakeHandler());
+	public WebSocketHttpRequestHandler(WebSocketHandler wsHandler) {
+		this(wsHandler, new DefaultHandshakeHandler());
 	}
 
 	public WebSocketHttpRequestHandler(WebSocketHandler wsHandler, HandshakeHandler handshakeHandler) {
@@ -132,8 +131,8 @@ public class WebSocketHttpRequestHandler implements HttpRequestHandler {
 		catch (HandshakeFailureException ex) {
 			failure = ex;
 		}
-		catch (Throwable t) {
-			failure = new HandshakeFailureException("Uncaught failure for request " + request.getURI(), t);
+		catch (Throwable ex) {
+			failure = new HandshakeFailureException("Uncaught failure for request " + request.getURI(), ex);
 		}
 		finally {
 			if (failure != null) {

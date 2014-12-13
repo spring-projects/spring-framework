@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,8 +19,10 @@ package org.springframework.web.socket.messaging;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -86,7 +88,7 @@ public class SubProtocolWebSocketHandler implements WebSocketHandler,
 	private final Map<String, SubProtocolHandler> protocolHandlerLookup =
 			new TreeMap<String, SubProtocolHandler>(String.CASE_INSENSITIVE_ORDER);
 
-	private final List<SubProtocolHandler> protocolHandlers = new ArrayList<SubProtocolHandler>();
+	private final Set<SubProtocolHandler> protocolHandlers = new HashSet<SubProtocolHandler>();
 
 	private SubProtocolHandler defaultProtocolHandler;
 
@@ -129,7 +131,7 @@ public class SubProtocolWebSocketHandler implements WebSocketHandler,
 	}
 
 	public List<SubProtocolHandler> getProtocolHandlers() {
-		return new ArrayList<SubProtocolHandler>(this.protocolHandlerLookup.values());
+		return new ArrayList<SubProtocolHandler>(this.protocolHandlers);
 	}
 
 
@@ -288,7 +290,7 @@ public class SubProtocolWebSocketHandler implements WebSocketHandler,
 				handler = this.defaultProtocolHandler;
 			}
 			else if (this.protocolHandlers.size() == 1) {
-					handler = this.protocolHandlers.get(0);
+				handler = this.protocolHandlers.iterator().next();
 			}
 			else {
 				throw new IllegalStateException("Multiple protocol handlers configured and " +
@@ -324,7 +326,10 @@ public class SubProtocolWebSocketHandler implements WebSocketHandler,
 		}
 		WebSocketSessionHolder holder = this.sessions.get(sessionId);
 		if (holder == null) {
-			logger.error("No session for " + message);
+			if (logger.isDebugEnabled()) {
+				// The broker may not have removed the session yet
+				logger.debug("No session for " + message);
+			}
 			return;
 		}
 		WebSocketSession session = holder.getSession();
@@ -333,17 +338,20 @@ public class SubProtocolWebSocketHandler implements WebSocketHandler,
 		}
 		catch (SessionLimitExceededException ex) {
 			try {
-				logger.error("Terminating '" + session + "'", ex);
+				if (logger.isDebugEnabled()) {
+					logger.debug("Terminating '" + session + "'", ex);
+				}
 				this.stats.incrementLimitExceededCount();
 				clearSession(session, ex.getStatus()); // clear first, session may be unresponsive
 				session.close(ex.getStatus());
 			}
 			catch (Exception secondException) {
-				logger.error("Failure while closing session " + sessionId + ".", secondException);
+				logger.debug("Failure while closing session " + sessionId + ".", secondException);
 			}
 		}
 		catch (Exception e) {
-			logger.error("Failed to send message to client in " + session + ": " + message, e);
+			// Could be part of normal workflow (e.g. browser tab closed)
+			logger.debug("Failed to send message to client in " + session + ": " + message, e);
 		}
 	}
 

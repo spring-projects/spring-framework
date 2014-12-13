@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,15 @@ import java.lang.annotation.Target;
  * Annotation which indicates that a method parameter should be bound to a
  * name-value pair within a path segment. Supported for {@link RequestMapping}
  * annotated handler methods in Servlet environments.
+ *
+ * <p>If the method parameter type is {@link java.util.Map} and a matrix variable
+ * name is specified, then the matrix variable value is converted to a
+ * {@link java.util.Map} assuming an appropriate conversion strategy is available.
+ *
+ * <p>If the method parameter is {@link java.util.Map Map&lt;String, String&gt;} or
+ * {@link org.springframework.util.MultiValueMap MultiValueMap&lt;String, String&gt;}
+ * and a variable name is not specified, then the map is populated with all
+ * matrix variable names and values.
  *
  * @author Rossen Stoyanchev
  * @since 3.2

@@ -16,13 +16,13 @@
 
 package org.springframework.cache.jcache.interceptor;
 
-import static org.junit.Assert.*;
-
 import javax.cache.annotation.CacheInvocationParameter;
 import javax.cache.annotation.CacheMethodDetails;
 import javax.cache.annotation.CacheRemoveAll;
 
 import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Stephane Nicoll

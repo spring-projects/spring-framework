@@ -27,11 +27,14 @@ import org.springframework.web.servlet.view.UrlBasedViewResolver;
  * @author Nicolas Le Bas
  * @author Rossen Stoyanchev
  * @author Juergen Hoeller
+ * @author Sebastien Deleuze
  * @since 3.2
  */
 public class TilesViewResolver extends UrlBasedViewResolver {
 
 	private Renderer renderer;
+
+	private Boolean alwaysInclude;
 
 
 	public TilesViewResolver() {
@@ -40,7 +43,7 @@ public class TilesViewResolver extends UrlBasedViewResolver {
 
 
 	/**
-	 * Requires {@link TilesView}.
+	 * This resolver requires {@link TilesView}.
 	 */
 	@Override
 	protected Class<?> requiredViewClass() {
@@ -56,12 +59,26 @@ public class TilesViewResolver extends UrlBasedViewResolver {
 		this.renderer = renderer;
 	}
 
+	/**
+	 * Specify whether to always include the view rather than forward to it.
+	 * <p>Default is "false". Switch this flag on to enforce the use of a
+	 * Servlet include, even if a forward would be possible.
+	 * @since 4.1.2
+	 * @see TilesView#setAlwaysInclude
+	 */
+	public void setAlwaysInclude(Boolean alwaysInclude) {
+		this.alwaysInclude = alwaysInclude;
+	}
+
 
 	@Override
 	protected TilesView buildView(String viewName) throws Exception {
 		TilesView view = (TilesView) super.buildView(viewName);
 		if (this.renderer != null) {
 			view.setRenderer(this.renderer);
+		}
+		if (this.alwaysInclude != null) {
+			view.setAlwaysInclude(this.alwaysInclude);
 		}
 		return view;
 	}

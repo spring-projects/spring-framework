@@ -16,10 +16,11 @@
 
 package org.springframework.aop.aspectj;
 
-import static org.junit.Assert.assertTrue;
-
 import org.junit.Test;
+
 import org.springframework.aop.support.AopUtils;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Juergen Hoeller

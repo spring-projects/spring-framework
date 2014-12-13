@@ -16,17 +16,15 @@
 
 package org.springframework.context.annotation;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-
+import example.scannable.FooService;
+import example.scannable.ServiceInvocationCounter;
 import org.junit.Test;
+
 import org.springframework.aop.support.AopUtils;
 import org.springframework.context.ApplicationContext;
 
-import example.scannable.FooService;
-import example.scannable.ServiceInvocationCounter;
+import static org.hamcrest.CoreMatchers.*;
+import static org.junit.Assert.*;
 
 /**
  * @author Juergen Hoeller

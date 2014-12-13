@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -93,12 +93,6 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 	}
 
 
-	private final SubscribableChannel clientInboundChannel;
-
-	private final MessageChannel clientOutboundChannel;
-
-	private final SubscribableChannel brokerChannel;
-
 	private String relayHost = "127.0.0.1";
 
 	private int relayPort = 61613;
@@ -130,22 +124,16 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 	/**
 	 * Create a StompBrokerRelayMessageHandler instance with the given message channels
 	 * and destination prefixes.
-	 * @param clientInChannel the channel for receiving messages from clients (e.g. WebSocket clients)
-	 * @param clientOutChannel the channel for sending messages to clients (e.g. WebSocket clients)
+	 * @param inboundChannel the channel for receiving messages from clients (e.g. WebSocket clients)
+	 * @param outboundChannel the channel for sending messages to clients (e.g. WebSocket clients)
 	 * @param brokerChannel the channel for the application to send messages to the broker
 	 * @param destinationPrefixes the broker supported destination prefixes; destinations
 	 * that do not match the given prefix are ignored.
 	 */
-	public StompBrokerRelayMessageHandler(SubscribableChannel clientInChannel, MessageChannel clientOutChannel,
+	public StompBrokerRelayMessageHandler(SubscribableChannel inboundChannel, MessageChannel outboundChannel,
 			SubscribableChannel brokerChannel, Collection<String> destinationPrefixes) {
 
-		super(destinationPrefixes);
-		Assert.notNull(clientInChannel, "'clientInChannel' must not be null");
-		Assert.notNull(clientOutChannel, "'clientOutChannel' must not be null");
-		Assert.notNull(brokerChannel, "'brokerChannel' must not be null");
-		this.clientInboundChannel = clientInChannel;
-		this.clientOutboundChannel = clientOutChannel;
-		this.brokerChannel = brokerChannel;
+		super(inboundChannel, outboundChannel, brokerChannel, destinationPrefixes);
 	}
 
 
@@ -362,9 +350,6 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 
 	@Override
 	protected void startInternal() {
-		this.clientInboundChannel.subscribe(this);
-		this.brokerChannel.subscribe(this);
-
 		if (this.tcpClient == null) {
 			StompDecoder decoder = new StompDecoder();
 			decoder.setHeaderInitializer(getHeaderInitializer());
@@ -397,10 +382,6 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 	@Override
 	protected void stopInternal() {
 		publishBrokerUnavailableEvent();
-
-		this.clientInboundChannel.unsubscribe(this);
-		this.brokerChannel.unsubscribe(this);
-
 		try {
 			this.tcpClient.shutdown().get(5000, TimeUnit.MILLISECONDS);
 		}
@@ -571,9 +552,8 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 					clearConnection();
 				}
 				catch (Throwable ex2) {
-					if (logger.isErrorEnabled()) {
-						logger.error("Failure while cleaning up state for TCP connection in session " +
-								this.sessionId, ex2);
+					if (logger.isDebugEnabled()) {
+						logger.debug("Failure while clearing TCP connection state in session " + this.sessionId, ex2);
 					}
 				}
 			}
@@ -586,15 +566,17 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 					getHeaderInitializer().initHeaders(headerAccessor);
 				}
 				headerAccessor.setSessionId(this.sessionId);
+				headerAccessor.setUser(this.connectHeaders.getUser());
 				headerAccessor.setMessage(errorText);
 				Message<?> errorMessage = MessageBuilder.createMessage(EMPTY_PAYLOAD, headerAccessor.getMessageHeaders());
+				headerAccessor.setImmutable();
 				sendMessageToClient(errorMessage);
 			}
 		}
 
 		protected void sendMessageToClient(Message<?> message) {
 			if (this.isRemoteClientSession) {
-				StompBrokerRelayMessageHandler.this.clientOutboundChannel.send(message);
+				StompBrokerRelayMessageHandler.this.getClientOutboundChannel().send(message);
 			}
 		}
 
@@ -602,6 +584,7 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 		public void handleMessage(Message<byte[]> message) {
 			StompHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
 			accessor.setSessionId(this.sessionId);
+			accessor.setUser(this.connectHeaders.getUser());
 
 			StompCommand command = accessor.getCommand();
 			if (StompCommand.CONNECTED.equals(command)) {
@@ -733,7 +716,7 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 				if (this.isRemoteClientSession) {
 					if (logger.isDebugEnabled()) {
 						logger.debug("TCP connection closed already, ignoring " +
-								accessor.getShortLogMessage((byte[]) message.getPayload()));
+								accessor.getShortLogMessage(message.getPayload()));
 					}
 					return EMPTY_TASK;
 				}
@@ -790,7 +773,14 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 		 */
 		private void afterDisconnectSent(StompHeaderAccessor accessor) {
 			if (accessor.getReceipt() == null) {
-				clearConnection();
+				try {
+					clearConnection();
+				}
+				catch (Throwable ex) {
+					if (logger.isDebugEnabled()) {
+						logger.debug("Failure while clearing TCP connection state in session " + this.sessionId, ex);
+					}
+				}
 			}
 		}
 

@@ -16,10 +16,11 @@
 
 package org.springframework.beans.support;
 
-import static org.junit.Assert.assertTrue;
-
 import org.junit.Test;
+
 import org.springframework.util.comparator.CompoundComparator;
+
+import static org.junit.Assert.*;
 
 /**
  * Unit tests for {@link PropertyComparator}

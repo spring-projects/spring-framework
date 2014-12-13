@@ -98,8 +98,7 @@ public class JOptCommandLinePropertySource extends CommandLinePropertySource<Opt
 		List<?> argValues = this.source.valuesOf(name);
 		List<String> stringArgValues = new ArrayList<String>();
 		for (Object argValue : argValues) {
-			Assert.isInstanceOf(String.class, argValue, "Argument values must be of type String");
-			stringArgValues.add((String) argValue);
+			stringArgValues.add(argValue instanceof String ? (String) argValue : argValue.toString());
 		}
 		if (stringArgValues.isEmpty()) {
 			return (this.source.has(name) ? Collections.<String>emptyList() : null);

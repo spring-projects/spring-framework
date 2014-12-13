@@ -22,6 +22,7 @@ import java.lang.reflect.Type;
 import java.util.List;
 
 import org.springframework.core.MethodParameter;
+import org.springframework.core.ResolvableType;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.RequestEntity;
@@ -66,7 +67,7 @@ public class HttpEntityMethodProcessor extends AbstractMessageConverterMethodPro
 	}
 
 
-		@Override
+	@Override
 	public boolean supportsParameter(MethodParameter parameter) {
 		return HttpEntity.class.equals(parameter.getParameterType()) ||
 				RequestEntity.class.equals(parameter.getParameterType());
@@ -74,8 +75,8 @@ public class HttpEntityMethodProcessor extends AbstractMessageConverterMethodPro
 
 	@Override
 	public boolean supportsReturnType(MethodParameter returnType) {
-		return HttpEntity.class.equals(returnType.getParameterType()) ||
-				ResponseEntity.class.equals(returnType.getParameterType());
+		return HttpEntity.class.isAssignableFrom(returnType.getParameterType()) &&
+				!RequestEntity.class.isAssignableFrom(returnType.getParameterType());
 	}
 
 	@Override
@@ -93,7 +94,6 @@ public class HttpEntityMethodProcessor extends AbstractMessageConverterMethodPro
 		}
 		else {
 			return new HttpEntity<Object>(body, inputMessage.getHeaders());
-
 		}
 	}
 
@@ -102,12 +102,17 @@ public class HttpEntityMethodProcessor extends AbstractMessageConverterMethodPro
 		Type parameterType = parameter.getGenericParameterType();
 		if (parameterType instanceof ParameterizedType) {
 			ParameterizedType type = (ParameterizedType) parameterType;
-			if (type.getActualTypeArguments().length == 1) {
-				return type.getActualTypeArguments()[0];
+			if (type.getActualTypeArguments().length != 1) {
+				throw new IllegalArgumentException("Expected single generic parameter on '" +
+						parameter.getParameterName() + "' in method " + parameter.getMethod());
 			}
+			return type.getActualTypeArguments()[0];
+		}
+		else if (parameterType instanceof Class) {
+			return Object.class;
 		}
 		throw new IllegalArgumentException("HttpEntity parameter '" + parameter.getParameterName() +
-				"' in method " + parameter.getMethod() + " is not parameterized or has more than one parameter");
+				"' in method " + parameter.getMethod() + " is not parameterized");
 	}
 
 	@Override
@@ -134,12 +139,22 @@ public class HttpEntityMethodProcessor extends AbstractMessageConverterMethodPro
 		}
 
 		Object body = responseEntity.getBody();
-		if (body != null) {
-			writeWithMessageConverters(body, returnType, inputMessage, outputMessage);
+
+		// Try even with null body. ResponseBodyAdvice could get involved.
+		writeWithMessageConverters(body, returnType, inputMessage, outputMessage);
+
+		// Ensure headers are flushed even if no body was written
+		outputMessage.getBody();
+	}
+
+	@Override
+	protected Class<?> getReturnValueType(Object returnValue, MethodParameter returnType) {
+		if (returnValue != null) {
+			return returnValue.getClass();
 		}
 		else {
-			// Flush headers to the HttpServletResponse
-			outputMessage.getBody();
+			Type type = getHttpEntityType(returnType);
+			return ResolvableType.forMethodParameter(returnType, type).resolve(Object.class);
 		}
 	}
 

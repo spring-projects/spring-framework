@@ -48,14 +48,14 @@ public class BooleanLiteral extends Literal {
 	}
 	
 	@Override
-	public void generateCode(MethodVisitor mv, CodeFlow codeflow) {
+	public void generateCode(MethodVisitor mv, CodeFlow cf) {
 		if (this.value == BooleanTypedValue.TRUE) {
 			mv.visitLdcInsn(1);		
 		}
 		else {
 			mv.visitLdcInsn(0);
 		}
-		codeflow.pushDescriptor(getExitDescriptor());
+		cf.pushDescriptor(this.exitTypeDescriptor);
 	}
 
 }

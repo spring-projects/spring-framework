@@ -56,7 +56,6 @@ public abstract class AbstractMessageReceivingTemplate<D> extends AbstractMessag
 		return receiveAndConvert(getRequiredDefaultDestination(), targetClass);
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public <T> T receiveAndConvert(D destination, Class<T> targetClass) {
 		Message<?> message = doReceive(destination);

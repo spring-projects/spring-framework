@@ -53,6 +53,14 @@ public abstract class WebMvcConfigurerAdapter implements WebMvcConfigurer {
 
 	/**
 	 * {@inheritDoc}
+	 * <p>This implementation is empty.
+	 */
+	@Override
+	public void extendMessageConverters(List<HttpMessageConverter<?>> converters) {
+	}
+
+	/**
+	 * {@inheritDoc}
 	 * <p>This implementation returns {@code null}
 	 */
 	@Override

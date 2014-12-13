@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,10 @@ import java.lang.annotation.Target;
  * Annotation which indicates that a method parameter should be bound to a URI template
  * variable. Supported for {@link RequestMapping} annotated handler methods in Servlet
  * environments.
+ *
+ * <p>If the method parameter is {@link java.util.Map Map&lt;String, String&gt;} or
+ * {@link org.springframework.util.MultiValueMap MultiValueMap&lt;String, String&gt;}
+ * then the map is populated with all path variable names and values.
  *
  * @author Arjen Poutsma
  * @since 3.0
