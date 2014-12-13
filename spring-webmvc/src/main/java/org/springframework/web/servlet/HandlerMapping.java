@@ -24,7 +24,7 @@ import javax.servlet.http.HttpServletRequest;
  *
  * <p>This class can be implemented by application developers, although this is not
  * necessary, as {@link org.springframework.web.servlet.handler.BeanNameUrlHandlerMapping}
- * and {@link org.springframework.web.servlet.handler.SimpleUrlHandlerMapping}
+ * and {@link org.springframework.web.servlet.mvc.annotation.DefaultAnnotationHandlerMapping}
  * are included in the framework. The former is the default if no
  * HandlerMapping bean is registered in the application context.
  *
@@ -49,7 +49,7 @@ import javax.servlet.http.HttpServletRequest;
  * @see org.springframework.core.Ordered
  * @see org.springframework.web.servlet.handler.AbstractHandlerMapping
  * @see org.springframework.web.servlet.handler.BeanNameUrlHandlerMapping
- * @see org.springframework.web.servlet.handler.SimpleUrlHandlerMapping
+ * @see org.springframework.web.servlet.mvc.annotation.DefaultAnnotationHandlerMapping
  */
 public interface HandlerMapping {
 
