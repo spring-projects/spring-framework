@@ -76,7 +76,8 @@ public class EclipseLinkJpaVendorAdapter extends AbstractJpaVendorAdapter {
 					PersistenceUnitProperties.DDL_DATABASE_GENERATION);
 		}
 		if (isShowSql()) {
-			jpaProperties.put(PersistenceUnitProperties.LOGGING_LEVEL, Level.FINE.toString());
+			jpaProperties.put(PersistenceUnitProperties.CATEGORY_LOGGING_LEVEL_ +
+					org.eclipse.persistence.logging.SessionLog.SQL, Level.FINE.toString());
 		}
 
 		return jpaProperties;
