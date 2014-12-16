@@ -67,6 +67,11 @@ import org.springframework.util.StringUtils;
  */
 public abstract class TransactionAspectSupport implements BeanFactoryAware, InitializingBean {
 
+	/**
+	 * Key to use to store the default transaction manager.
+	 */
+	private final Object DEFAULT_TRANSACTION_MANAGER_KEY = new Object();
+
 	// NOTE: This class must not implement Serializable because it serves as base
 	// class for AspectJ aspects (which are not allowed to implement Serializable)!
 
@@ -80,8 +85,8 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 			new NamedThreadLocal<TransactionInfo>("Current aspect-driven transaction");
 
 
-	private final ConcurrentHashMap<String, PlatformTransactionManager> transactionManagerCache =
-			new ConcurrentHashMap<String, PlatformTransactionManager>();
+	private final ConcurrentHashMap<Object, PlatformTransactionManager> transactionManagerCache =
+			new ConcurrentHashMap<Object, PlatformTransactionManager>();
 
 	/**
 	 * Subclasses can use this to return the current TransactionInfo.
@@ -127,11 +132,6 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 	 */
 	private String transactionManagerBeanName;
 
-	/**
-	 * Default transaction manager.
-	 */
-	private PlatformTransactionManager transactionManager;
-
 	private TransactionAttributeSource transactionAttributeSource;
 
 	private BeanFactory beanFactory;
@@ -159,14 +159,16 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 	 * @see #setTransactionManagerBeanName
 	 */
 	public void setTransactionManager(PlatformTransactionManager transactionManager) {
-		this.transactionManager = transactionManager;
+		if (transactionManager != null) {
+			this.transactionManagerCache.put(DEFAULT_TRANSACTION_MANAGER_KEY, transactionManager);
+		}
 	}
 
 	/**
 	 * Return the default transaction manager, or {@code null} if unknown.
 	 */
 	public PlatformTransactionManager getTransactionManager() {
-		return this.transactionManager;
+		return this.transactionManagerCache.get(DEFAULT_TRANSACTION_MANAGER_KEY);
 	}
 
 	/**
@@ -239,7 +241,7 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 	 */
 	@Override
 	public void afterPropertiesSet() {
-		if (this.transactionManager == null && this.beanFactory == null) {
+		if (getTransactionManager() == null && this.beanFactory == null) {
 			throw new IllegalStateException(
 					"Setting the property 'transactionManager' or running in a ListableBeanFactory is required");
 		}
@@ -340,33 +342,36 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 	 * Determine the specific transaction manager to use for the given transaction.
 	 */
 	protected PlatformTransactionManager determineTransactionManager(TransactionAttribute txAttr) {
-		if (this.transactionManager != null || this.beanFactory == null || txAttr == null) {
-			return this.transactionManager;
-		}
-		String qualifier = txAttr.getQualifier();
-		if (StringUtils.hasText(qualifier)) {
-			PlatformTransactionManager txManager = this.transactionManagerCache.get(qualifier);
-			if (txManager == null) {
-				txManager = BeanFactoryAnnotationUtils.qualifiedBeanOfType(
-						this.beanFactory, PlatformTransactionManager.class, qualifier);
-				this.transactionManagerCache.putIfAbsent(qualifier, txManager);
+		if (this.beanFactory != null) {
+			String qualifier = txAttr != null ? txAttr.getQualifier() : null;
+			if (StringUtils.hasText(qualifier)) {
+				PlatformTransactionManager txManager = this.transactionManagerCache.get(qualifier);
+				if (txManager == null) {
+					txManager = BeanFactoryAnnotationUtils.qualifiedBeanOfType(
+							this.beanFactory, PlatformTransactionManager.class, qualifier);
+					this.transactionManagerCache.putIfAbsent(qualifier, txManager);
+				}
+				return txManager;
 			}
-			return txManager;
-		}
-		else if (StringUtils.hasText(this.transactionManagerBeanName)) {
-			PlatformTransactionManager txManager  = this.transactionManagerCache.get(this.transactionManagerBeanName);
-			if (txManager == null) {
-				txManager = this.beanFactory.getBean(
-						this.transactionManagerBeanName, PlatformTransactionManager.class);
-				this.transactionManagerCache.putIfAbsent(this.transactionManagerBeanName, txManager);
+			else if (StringUtils.hasText(this.transactionManagerBeanName)) {
+				PlatformTransactionManager txManager = this.transactionManagerCache.get(this.transactionManagerBeanName);
+				if (txManager == null) {
+					txManager = this.beanFactory.getBean(
+							this.transactionManagerBeanName, PlatformTransactionManager.class);
+					this.transactionManagerCache.putIfAbsent(this.transactionManagerBeanName, txManager);
+				}
+				return txManager;
+			} else {
+				PlatformTransactionManager defaultTransactionManager = getTransactionManager();
+				if (defaultTransactionManager == null) {
+					defaultTransactionManager = this.beanFactory.getBean(PlatformTransactionManager.class);
+					this.transactionManagerCache.putIfAbsent(
+							DEFAULT_TRANSACTION_MANAGER_KEY, defaultTransactionManager);
+				}
+				return defaultTransactionManager;
 			}
-			return txManager;
 		}
-		else {
-			// Look up the default transaction manager and cache it for subsequent calls
-			this.transactionManager = this.beanFactory.getBean(PlatformTransactionManager.class);
-			return this.transactionManager;
-		}
+		return getTransactionManager();
 	}
 
 	/**
