@@ -39,6 +39,7 @@ import javax.management.modelmbean.ModelMBeanInfo;
 import javax.management.modelmbean.RequiredModelMBean;
 
 import org.springframework.aop.framework.ProxyFactory;
+import org.springframework.aop.scope.ScopedProxyUtils;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.aop.target.LazyInitTargetSource;
 import org.springframework.beans.factory.BeanClassLoaderAware;
@@ -891,8 +892,9 @@ public class MBeanExporter extends MBeanRegistrationSupport implements MBeanExpo
 					if (beanClass != null && callback.include(beanClass, beanName)) {
 						boolean lazyInit = isBeanDefinitionLazyInit(this.beanFactory, beanName);
 						Object beanInstance = (!lazyInit ? this.beanFactory.getBean(beanName) : null);
-						if (!this.beans.containsValue(beanName) && (beanInstance == null ||
-								!CollectionUtils.containsInstance(this.beans.values(), beanInstance))) {
+						if (!ScopedProxyUtils.isScopedTarget(beanName) && !this.beans.containsValue(beanName) &&
+								(beanInstance == null ||
+										!CollectionUtils.containsInstance(this.beans.values(), beanInstance))) {
 							// Not already registered for JMX exposure.
 							this.beans.put(beanName, (beanInstance != null ? beanInstance : beanName));
 							if (logger.isInfoEnabled()) {
