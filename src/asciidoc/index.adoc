@@ -4248,10 +4248,11 @@ but does not couple the code to Spring.
 
 [TIP]
 ====
-The `destroy-method` attribute of a `<bean/>` element can have a special `(inferred)`
-value to automatically detect either a `close` or `shutdown` public method on the
-specific bean class. This special value can also be set on the
-`default-destroy-method` to apply that behavior to a set of beans (see
+The `destroy-method` attribute of a `<bean>` element can be assigned a special
+`(inferred)` value which instructs Spring to automatically detect a public `close` or
+`shutdown` method on the specific bean class. This special `(inferred)` value can also be
+set on the `default-destroy-method` attribute of a `<beans>` element to apply this
+behavior to an entire set of beans (see
 <<beans-factory-lifecycle-default-init-destroy-methods>>). Note that this is the
 default behavior with Java config.
 ====
@@ -7263,11 +7264,11 @@ on the `bean` element:
 
 [NOTE]
 ====
-By default, beans defined using Java config having a `close` or `shutdown` public method
-are automatically enlisted with a destruction callback. If you have a `close` or `public`
-method and you do not wish it to be called when the container shuts down, simply add
-`@Bean(destroyMethod="")` to your bean definition to disable the default `(inferred)`
-mode.
+By default, beans defined using Java config that have a public `close` or `shutdown`
+method are automatically enlisted with a destruction callback. If you have a public
+`close` or `shutdown` method and you do not wish for it to be called when the container
+shuts down, simply add `@Bean(destroyMethod="")` to your bean definition to disable the
+default `(inferred)` mode.
 ====
 
 Of course, in the case of `Foo` above, it would be equally as valid to call the `init()`
