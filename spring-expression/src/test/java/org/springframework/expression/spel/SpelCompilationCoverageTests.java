@@ -1285,7 +1285,20 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 
 	@Test
 	public void opEq() throws Exception {
-		
+		String tvar = "35";
+		expression = parse("#root == 35");
+		Boolean bb = (Boolean)expression.getValue(tvar);
+		System.out.println(bb);
+		assertFalse((Boolean)expression.getValue(tvar));
+		assertCanCompile(expression);
+		assertFalse((Boolean)expression.getValue(tvar));
+
+		expression = parse("35 == #root");
+		expression.getValue(tvar);
+		assertFalse((Boolean)expression.getValue(tvar));
+		assertCanCompile(expression);
+		assertFalse((Boolean)expression.getValue(tvar));
+
 		TestClass7 tc7 = new TestClass7();
 		expression = parse("property == 'UK'");
 		assertTrue((Boolean)expression.getValue(tc7));
