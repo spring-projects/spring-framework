@@ -405,6 +405,7 @@ project("spring-aop") {
 		compile("aopalliance:aopalliance:1.0")
 		optional("org.aspectj:aspectjweaver:${aspectjVersion}")
 		optional("commons-pool:commons-pool:1.6")
+		optional("org.apache.commons:commons-pool2:2.2")
 		optional("com.jamonapi:jamon:2.79")
 	}
 }
@@ -463,6 +464,7 @@ project("spring-context") {
 		optional("org.jruby:jruby:1.7.17")
 		testCompile("javax.inject:javax.inject-tck:1")
 		testCompile("commons-dbcp:commons-dbcp:1.4")
+		testCompile("org.apache.commons:commons-pool2:2.2")
 		testCompile("org.slf4j:slf4j-api:${slf4jVersion}")
 	}
 

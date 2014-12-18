@@ -16,16 +16,16 @@
 
 package org.springframework.aop.target;
 
-import org.apache.commons.pool.ObjectPool;
-import org.apache.commons.pool.PoolableObjectFactory;
-import org.apache.commons.pool.impl.GenericObjectPool;
-
-import org.springframework.beans.BeansException;
-import org.springframework.core.Constants;
+import org.apache.commons.pool2.ObjectPool;
+import org.apache.commons.pool2.PooledObject;
+import org.apache.commons.pool2.PooledObjectFactory;
+import org.apache.commons.pool2.impl.DefaultPooledObject;
+import org.apache.commons.pool2.impl.GenericObjectPool;
+import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 
 /**
  * {@link org.springframework.aop.TargetSource} implementation that holds
- * objects in a configurable Apache Commons Pool.
+ * objects in a configurable Apache Commons2 Pool.
  *
  * <p>By default, an instance of {@code GenericObjectPool} is created.
  * Subclasses may change the type of {@code ObjectPool} used by
@@ -43,13 +43,20 @@ import org.springframework.core.Constants;
  * meaningful validation. All exposed Commons Pool properties use the
  * corresponding Commons Pool defaults.
  *
- * <p>Compatible with Apache Commons Pool 1.5.x and 1.6.
- * Note that this class doesn't declare Commons Pool 1.6's generic type
- * in order to remain compatible with Commons Pool 1.5.x at runtime.
+ * <p>Commons Pool 2.x uses object equality while Commons Pool 1.x used identity
+ * equality. This clearly means that Commons Pool 2 behaves differently if several
+ * instances having the same identity according to their {@link Object#equals(Object)}
+ * method are managed in the same pool. To provide a smooth upgrade, a
+ * backward-compatible pool is created by default; use {@link #setUseObjectEquality(boolean)}
+ * if you need the standard Commons Pool 2.x behavior.
+ *
+ * <p>Compatible with Apache Commons Pool 2.2
  *
  * @author Rod Johnson
  * @author Rob Harrop
  * @author Juergen Hoeller
+ * @author Stephane Nicoll
+ * @since 4.2
  * @see GenericObjectPool
  * @see #createObjectPool()
  * @see #setMaxSize
@@ -58,26 +65,23 @@ import org.springframework.core.Constants;
  * @see #setMaxWait
  * @see #setTimeBetweenEvictionRunsMillis
  * @see #setMinEvictableIdleTimeMillis
- * @deprecated as of Spring 4.2, in favor of {@link CommonsPool2TargetSource}
  */
 @SuppressWarnings({"rawtypes", "unchecked", "serial"})
-@Deprecated
-public class CommonsPoolTargetSource extends AbstractPoolingTargetSource implements PoolableObjectFactory {
+public class CommonsPool2TargetSource extends AbstractPoolingTargetSource implements PooledObjectFactory<Object> {
 
-	private static final Constants constants = new Constants(GenericObjectPool.class);
+	private int maxIdle = GenericObjectPoolConfig.DEFAULT_MAX_IDLE;
 
+	private int minIdle = GenericObjectPoolConfig.DEFAULT_MIN_IDLE;
 
-	private int maxIdle = GenericObjectPool.DEFAULT_MAX_IDLE;
+	private long maxWait = GenericObjectPoolConfig.DEFAULT_MAX_TOTAL;
 
-	private int minIdle = GenericObjectPool.DEFAULT_MIN_IDLE;
+	private long timeBetweenEvictionRunsMillis = GenericObjectPoolConfig.DEFAULT_TIME_BETWEEN_EVICTION_RUNS_MILLIS;
 
-	private long maxWait = GenericObjectPool.DEFAULT_MAX_WAIT;
+	private long minEvictableIdleTimeMillis = GenericObjectPoolConfig.DEFAULT_MIN_EVICTABLE_IDLE_TIME_MILLIS;
 
-	private long timeBetweenEvictionRunsMillis = GenericObjectPool.DEFAULT_TIME_BETWEEN_EVICTION_RUNS_MILLIS;
+	private boolean blockWhenExhausted = GenericObjectPoolConfig.DEFAULT_BLOCK_WHEN_EXHAUSTED;
 
-	private long minEvictableIdleTimeMillis = GenericObjectPool.DEFAULT_MIN_EVICTABLE_IDLE_TIME_MILLIS;
-
-	private byte whenExhaustedAction = GenericObjectPool.DEFAULT_WHEN_EXHAUSTED_ACTION;
+	private boolean useObjectEquality;
 
 	/**
 	 * The Jakarta Commons {@code ObjectPool} used to pool target objects
@@ -89,10 +93,10 @@ public class CommonsPoolTargetSource extends AbstractPoolingTargetSource impleme
 	 * Create a CommonsPoolTargetSource with default settings.
 	 * Default maximum size of the pool is 8.
 	 * @see #setMaxSize
-	 * @see GenericObjectPool#setMaxActive
+	 * @see GenericObjectPoolConfig#setMaxTotal
 	 */
-	public CommonsPoolTargetSource() {
-		setMaxSize(GenericObjectPool.DEFAULT_MAX_ACTIVE);
+	public CommonsPool2TargetSource() {
+		setMaxSize(GenericObjectPoolConfig.DEFAULT_MAX_TOTAL);
 	}
 
 	/**
@@ -130,7 +134,7 @@ public class CommonsPoolTargetSource extends AbstractPoolingTargetSource impleme
 	/**
 	 * Set the maximum waiting time for fetching an object from the pool.
 	 * Default is -1, waiting forever.
-	 * @see GenericObjectPool#setMaxWait
+	 * @see GenericObjectPool#setMaxTotal
 	 */
 	public void setMaxWait(long maxWait) {
 		this.maxWait = maxWait;
@@ -180,34 +184,36 @@ public class CommonsPoolTargetSource extends AbstractPoolingTargetSource impleme
 	}
 
 	/**
-	 * Set the action to take when the pool is exhausted. Uses the
-	 * constant names defined in Commons Pool's GenericObjectPool class:
-	 * "WHEN_EXHAUSTED_BLOCK", "WHEN_EXHAUSTED_FAIL", "WHEN_EXHAUSTED_GROW".
-	 * @see #setWhenExhaustedAction(byte)
+	 * Set whether the call should bock when the pool is exhausted.
 	 */
-	public void setWhenExhaustedActionName(String whenExhaustedActionName) {
-		setWhenExhaustedAction(constants.asNumber(whenExhaustedActionName).byteValue());
+	public void setBlockWhenExhausted(boolean blockWhenExhausted) {
+		this.blockWhenExhausted = blockWhenExhausted;
 	}
 
 	/**
-	 * Set the action to take when the pool is exhausted. Uses the
-	 * constant values defined in Commons Pool's GenericObjectPool class.
-	 * @see GenericObjectPool#setWhenExhaustedAction(byte)
-	 * @see GenericObjectPool#WHEN_EXHAUSTED_BLOCK
-	 * @see GenericObjectPool#WHEN_EXHAUSTED_FAIL
-	 * @see GenericObjectPool#WHEN_EXHAUSTED_GROW
+	 * Specify if the call should block when the pool is exhausted.
 	 */
-	public void setWhenExhaustedAction(byte whenExhaustedAction) {
-		this.whenExhaustedAction = whenExhaustedAction;
+	public boolean isBlockWhenExhausted() {
+		return blockWhenExhausted;
 	}
 
 	/**
-	 * Return the action to take when the pool is exhausted.
+	 * Set if the pool should use object equality. Commons Pool 1.x has no specific requirement in
+	 * that regard and allows two distinct instances being equal to be put in the same pool. However,
+	 * this behavior has changed with commons pool 2. To preserve backward compatibility, the pool
+	 * is configured to use reference equality ({@code false}.
 	 */
-	public byte getWhenExhaustedAction() {
-		return whenExhaustedAction;
+	public void setUseObjectEquality(boolean useObjectEquality) {
+		this.useObjectEquality = useObjectEquality;
 	}
 
+	/**
+	 * Specify if the pool should use object equality. Return {@code false} if it should use
+	 * reference equality (as it was the case for Commons Pool 1.x)
+	 */
+	public boolean isUseObjectEquality() {
+		return useObjectEquality;
+	}
 
 	/**
 	 * Creates and holds an ObjectPool instance.
@@ -224,19 +230,19 @@ public class CommonsPoolTargetSource extends AbstractPoolingTargetSource impleme
 	 * They should apply any configuration properties to the pool here.
 	 * <p>Default is a GenericObjectPool instance with the given pool size.
 	 * @return an empty Commons {@code ObjectPool}.
-	 * @see org.apache.commons.pool.impl.GenericObjectPool
+	 * @see GenericObjectPool
 	 * @see #setMaxSize
 	 */
 	protected ObjectPool createObjectPool() {
-		GenericObjectPool gop = new GenericObjectPool(this);
-		gop.setMaxActive(getMaxSize());
-		gop.setMaxIdle(getMaxIdle());
-		gop.setMinIdle(getMinIdle());
-		gop.setMaxWait(getMaxWait());
-		gop.setTimeBetweenEvictionRunsMillis(getTimeBetweenEvictionRunsMillis());
-		gop.setMinEvictableIdleTimeMillis(getMinEvictableIdleTimeMillis());
-		gop.setWhenExhaustedAction(getWhenExhaustedAction());
-		return gop;
+		GenericObjectPoolConfig config = new GenericObjectPoolConfig();
+		config.setMaxTotal(getMaxSize());
+		config.setMaxIdle(getMaxIdle());
+		config.setMinIdle(getMinIdle());
+		config.setMaxWaitMillis(getMaxWait());
+		config.setTimeBetweenEvictionRunsMillis(getTimeBetweenEvictionRunsMillis());
+		config.setMinEvictableIdleTimeMillis(getMinEvictableIdleTimeMillis());
+		config.setBlockWhenExhausted(isBlockWhenExhausted());
+		return new GenericObjectPool(this, config);
 	}
 
 
@@ -245,7 +251,8 @@ public class CommonsPoolTargetSource extends AbstractPoolingTargetSource impleme
 	 */
 	@Override
 	public Object getTarget() throws Exception {
-		return this.pool.borrowObject();
+		Object o = this.pool.borrowObject();
+		return (isUseObjectEquality() ? o : ((IdentityWrapper)o).target);
 	}
 
 	/**
@@ -253,7 +260,8 @@ public class CommonsPoolTargetSource extends AbstractPoolingTargetSource impleme
 	 */
 	@Override
 	public void releaseTarget(Object target) throws Exception {
-		this.pool.returnObject(target);
+		Object value = (isUseObjectEquality() ? target : new IdentityWrapper(target));
+		this.pool.returnObject(value);
 	}
 
 	@Override
@@ -278,30 +286,60 @@ public class CommonsPoolTargetSource extends AbstractPoolingTargetSource impleme
 
 
 	//----------------------------------------------------------------------------
-	// Implementation of org.apache.commons.pool.PoolableObjectFactory interface
+	// Implementation of org.apache.commons.pool2.PooledObjectFactory interface
 	//----------------------------------------------------------------------------
 
 	@Override
-	public Object makeObject() throws BeansException {
-		return newPrototypeInstance();
+	public PooledObject<Object> makeObject() throws Exception {
+		Object target = newPrototypeInstance();
+		Object poolValue = (isUseObjectEquality() ? target : new IdentityWrapper(target));
+		return new DefaultPooledObject<Object>(poolValue);
 	}
 
 	@Override
-	public void destroyObject(Object obj) throws Exception {
-		destroyPrototypeInstance(obj);
+	public void destroyObject(PooledObject<Object> p) throws Exception {
+		destroyPrototypeInstance(p.getObject());
 	}
 
 	@Override
-	public boolean validateObject(Object obj) {
+	public boolean validateObject(PooledObject<Object> p) {
 		return true;
 	}
 
 	@Override
-	public void activateObject(Object obj) {
+	public void activateObject(PooledObject<Object> p) throws Exception {
 	}
 
 	@Override
-	public void passivateObject(Object obj) {
+	public void passivateObject(PooledObject<Object> p) throws Exception {
+	}
+
+
+	/**
+	 * Wraps the target type in the pool to restore the behavior of commons-pool 1.x.
+	 */
+	private static class IdentityWrapper {
+		private final Object target;
+
+		public IdentityWrapper(Object target) {
+			this.target = target;
+		}
+
+		@Override
+		public int hashCode() {
+			return System.identityHashCode(this.target);
+		}
+
+		@Override
+		public boolean equals(Object o) {
+			if (this == o) return true;
+			if (o == null || getClass() != o.getClass()) return false;
+
+			IdentityWrapper that = (IdentityWrapper) o;
+
+			return !(target != null ? !(target == that.target) : that.target != null);
+		}
+
 	}
 
 }

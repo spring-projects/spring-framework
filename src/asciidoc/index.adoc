@@ -18305,11 +18305,17 @@ A crucial difference between Spring pooling and SLSB pooling is that Spring pool
 be applied to any POJO. As with Spring in general, this service can be applied in a
 non-invasive way.
 
-Spring provides out-of-the-box support for Jakarta Commons Pool 1.3, which provides a
+Spring provides out-of-the-box support for Commons Pool 2.2, which provides a
 fairly efficient pooling implementation. You'll need the commons-pool Jar on your
 application's classpath to use this feature. It's also possible to subclass
 `org.springframework.aop.target.AbstractPoolingTargetSource` to support any other
 pooling API.
+
+[NOTE]
+====
+Commons Pool 1.5+ is also supported but deprecated as of Spring Framework 4.2.
+====
+
 
 Sample configuration is shown below:
 
@@ -18321,7 +18327,7 @@ Sample configuration is shown below:
 		... properties omitted
 	</bean>
 
-	<bean id="poolTargetSource" class="org.springframework.aop.target.CommonsPoolTargetSource">
+	<bean id="poolTargetSource" class="org.springframework.aop.target.CommonsPool2TargetSource">
 		<property name="targetBeanName" value="businessObjectTarget"/>
 		<property name="maxSize" value="25"/>
 	</bean>

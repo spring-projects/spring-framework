@@ -7,7 +7,7 @@
 		<property name="count"><value>10</value></property>
 	</bean>
 	
-	<bean id="poolTargetSource" class="org.springframework.aop.target.CommonsPoolTargetSource">	
+	<bean id="poolTargetSource" class="org.springframework.aop.target.CommonsPool2TargetSource">
 		<property name="targetBeanName"><value>prototypeTest</value></property>
 		<property name="maxSize"><value>25</value></property>
 	</bean>
@@ -44,7 +44,7 @@
 	
 	<bean id="prototypePerson" class="org.springframework.tests.sample.beans.SerializablePerson" scope="prototype"/>
 
-	<bean id="personPoolTargetSource" class="org.springframework.aop.target.CommonsPoolTargetSource">	
+	<bean id="personPoolTargetSource" class="org.springframework.aop.target.CommonsPool2TargetSource">
 		<property name="targetBeanName"><value>prototypePerson</value></property>
 		<property name="maxSize"><value>10</value></property>
 	</bean>
@@ -57,7 +57,7 @@
 
 	<bean id="maxSizePooledPerson" class="org.springframework.aop.framework.ProxyFactoryBean">
 		<property name="targetSource">
-			<bean class="org.springframework.aop.target.CommonsPoolTargetSource">
+			<bean class="org.springframework.aop.target.CommonsPool2TargetSource">
 				<property name="targetBeanName" value="prototypePerson"/>
 				<property name="maxSize" value="10"/>
 				<property name="maxWait" value="1"/>
