@@ -4142,7 +4142,8 @@ unnecessarily couples the code to Spring. Alternatively, use
 the <<beans-postconstruct-and-predestroy-annotations, `@PostConstruct`>> annotation or
 specify a POJO initialization method. In the case of XML-based configuration metadata,
 you use the `init-method` attribute to specify the name of the method that has a void
-no-argument signature. For example, the following definition:
+no-argument signature. With Java config  you use the `initMethod` attribute of `@Bean`,
+see <<beans-java-lifecycle-callbacks>>. For example, the following:
 
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
@@ -4201,8 +4202,9 @@ It is recommended that you do not use the `DisposableBean` callback interface be
 unnecessarily couples the code to Spring. Alternatively, use
 the <<beans-postconstruct-and-predestroy-annotations, `@PreDestroy`>> annotation or
 specify a generic method that is supported by bean definitions. With XML-based
-configuration metadata, you use the `destroy-method` attribute on the `<bean/>`. For
-example, the following definition:
+configuration metadata, you use the `destroy-method` attribute on the `<bean/>`. With
+Java config  you use the `destroyMethod` attribute of `@Bean`, see
+<<beans-java-lifecycle-callbacks>>. For example, the following definition:
 
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
@@ -4244,6 +4246,15 @@ is exactly the same as:
 
 but does not couple the code to Spring.
 
+[TIP]
+====
+The `destroy-method` attribute of a `<bean/>` element can have a special `(inferred)`
+value to automatically detect either a `close` or `shutdown` public method on the
+specific bean class. This special value can also be set on the
+`default-destroy-method` to apply that behavior to a set of beans (see
+<<beans-factory-lifecycle-default-init-destroy-methods>>). Note that this is the
+default behavior with Java config.
+====
 
 [[beans-factory-lifecycle-default-init-destroy-methods]]
 ===== Default initialization and destroy methods
@@ -7250,6 +7261,15 @@ on the `bean` element:
 	}
 ----
 
+[NOTE]
+====
+By default, beans defined using Java config having a `close` or `shutdown` public method
+are automatically enlisted with a destruction callback. If you have a `close` or `public`
+method and you do not wish it to be called when the container shuts down, simply add
+`@Bean(destroyMethod="")` to your bean definition to disable the default `(inferred)`
+mode.
+====
+
 Of course, in the case of `Foo` above, it would be equally as valid to call the `init()`
 method directly during construction:
 
@@ -7262,7 +7282,7 @@ method directly during construction:
 		public Foo foo() {
 			Foo foo = new Foo();
 			foo.init();
-		return foo;
+		    return foo;
 		}
 
 		// ...
