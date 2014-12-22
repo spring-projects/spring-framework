@@ -16,6 +16,13 @@
 
 package org.springframework.test.web.servlet.setup;
 
+import java.io.IOException;
+import javax.servlet.Filter;
+import javax.servlet.FilterChain;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import org.junit.Test;
 
 import org.springframework.mock.web.test.MockHttpServletRequest;
@@ -23,6 +30,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.WebApplicationContextUtils;
+import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerExecutionChain;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
@@ -30,14 +38,15 @@ import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandl
 import static org.junit.Assert.*;
 
 /**
- * @author Rossen Stoyanchev
+ * Tests for {@link StandaloneMockMvcBuilder}
+ *
+ * @author Rossen
+ * @author Rob Winch
+ * @author Sebastien Deleuze
  */
 public class StandaloneMockMvcBuilderTests {
 
-
-	// SPR-10825
-
-	@Test
+	@Test // SPR-10825
 	public void placeHoldersInRequestMapping() throws Exception {
 
 		TestStandaloneMockMvcBuilder builder = new TestStandaloneMockMvcBuilder(new PlaceholderController());
@@ -63,6 +72,30 @@ public class StandaloneMockMvcBuilderTests {
 	}
 
 
+	@Test(expected = IllegalArgumentException.class)
+	public void addFiltersFiltersNull() {
+		StandaloneMockMvcBuilder builder = MockMvcBuilders.standaloneSetup(new PersonController());
+		builder.addFilters((Filter[]) null);
+	}
+
+	@Test(expected = IllegalArgumentException.class)
+	public void addFiltersFiltersContainsNull() {
+		StandaloneMockMvcBuilder builder = MockMvcBuilders.standaloneSetup(new PersonController());
+		builder.addFilters(new ContinueFilter(), (Filter) null);
+	}
+
+	@Test(expected = IllegalArgumentException.class)
+	public void addFilterPatternsNull() {
+		StandaloneMockMvcBuilder builder = MockMvcBuilders.standaloneSetup(new PersonController());
+		builder.addFilter(new ContinueFilter(), (String[]) null);
+	}
+
+	@Test(expected = IllegalArgumentException.class)
+	public void addFilterPatternContainsNull() {
+		StandaloneMockMvcBuilder builder = MockMvcBuilders.standaloneSetup(new PersonController());
+		builder.addFilter(new ContinueFilter(), (String) null);
+	}
+
 
 	@Controller
 	private static class PlaceholderController {
@@ -86,4 +119,21 @@ public class StandaloneMockMvcBuilderTests {
 			return this.wac;
 		}
 	}
+
+	@Controller
+	private static class PersonController {
+		@RequestMapping(value="/forward")
+		public String forward() {
+			return "forward:/persons";
+		}
+	}
+
+	private class ContinueFilter extends OncePerRequestFilter {
+		@Override
+		protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
+				FilterChain filterChain) throws ServletException, IOException {
+			filterChain.doFilter(request, response);
+		}
+	}
+
 }
