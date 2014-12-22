@@ -26,6 +26,7 @@ import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.ObjectCodec;
+import com.fasterxml.jackson.databind.DatabindContext;
 import com.fasterxml.jackson.databind.DeserializationConfig;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JavaType;
@@ -46,9 +47,6 @@ import com.fasterxml.jackson.databind.jsontype.TypeIdResolver;
 import com.fasterxml.jackson.databind.jsontype.TypeSerializer;
 import com.fasterxml.jackson.databind.jsontype.impl.StdTypeResolverBuilder;
 import com.fasterxml.jackson.databind.type.TypeFactory;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -56,6 +54,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
+
+import static org.junit.Assert.*;
 
 /**
  * Test class for {@link SpringHandlerInstantiatorTests}.
@@ -65,7 +65,9 @@ import org.springframework.beans.factory.support.RootBeanDefinition;
 public class SpringHandlerInstantiatorTests {
 
 	private SpringHandlerInstantiator instantiator;
+
 	private ObjectMapper objectMapper;
+
 
 	@Before
 	public void setup() {
@@ -77,6 +79,7 @@ public class SpringHandlerInstantiatorTests {
 		instantiator = new SpringHandlerInstantiator(bf);
 		objectMapper = Jackson2ObjectMapperBuilder.json().handlerInstantiator(instantiator).build();
 	}
+
 
 	@Test
 	public void autowiredSerializer() throws JsonProcessingException {
@@ -113,6 +116,7 @@ public class SpringHandlerInstantiatorTests {
 		assertTrue(CustomTypeIdResolver.isAutowiredFiledInitialized);
 	}
 
+
 	public static class UserDeserializer extends JsonDeserializer<User> {
 
 		@Autowired
@@ -124,8 +128,8 @@ public class SpringHandlerInstantiatorTests {
 			JsonNode node = oc.readTree(jsonParser);
 			return new User(this.capitalizer.capitalize(node.get("username").asText()));
 		}
-
 	}
+
 
 	public static class UserSerializer extends JsonSerializer<User> {
 
@@ -140,6 +144,7 @@ public class SpringHandlerInstantiatorTests {
 		}
 	}
 
+
 	public static class UpperCaseKeyDeserializer extends KeyDeserializer {
 
 		@Autowired
@@ -150,6 +155,7 @@ public class SpringHandlerInstantiatorTests {
 			return this.capitalizer.capitalize(key);
 		}
 	}
+
 
 	public static class CustomTypeResolverBuilder extends StdTypeResolverBuilder {
 
@@ -170,6 +176,7 @@ public class SpringHandlerInstantiatorTests {
 		}
 	}
 
+
 	public static class CustomTypeIdResolver implements TypeIdResolver {
 
 		@Autowired
@@ -178,7 +185,6 @@ public class SpringHandlerInstantiatorTests {
 		public static boolean isAutowiredFiledInitialized = false;
 
 		public CustomTypeIdResolver() {
-
 		}
 
 		@Override
@@ -204,14 +210,19 @@ public class SpringHandlerInstantiatorTests {
 
 		@Override
 		public void init(JavaType type) {
-
 		}
 
 		@Override
 		public String idFromBaseType() {
 			return null;
 		}
+
+		// New in Jackson 2.5
+		public JavaType typeFromId(DatabindContext context, String id) {
+			return null;
+		}
 	}
+
 
 	@JsonDeserialize(using = UserDeserializer.class)
 	@JsonSerialize(using = UserSerializer.class)
@@ -229,6 +240,7 @@ public class SpringHandlerInstantiatorTests {
 		public String getUsername() { return this.username; }
 	}
 
+
 	public static class SecurityRegistry {
 
 		@JsonDeserialize(keyUsing = UpperCaseKeyDeserializer.class)
@@ -243,6 +255,7 @@ public class SpringHandlerInstantiatorTests {
 		}
 	}
 
+
 	@JsonTypeInfo(use = JsonTypeInfo.Id.CUSTOM, property = "type")
 	@JsonTypeResolver(CustomTypeResolverBuilder.class)
 	@JsonTypeIdResolver(CustomTypeIdResolver.class)
@@ -255,7 +268,6 @@ public class SpringHandlerInstantiatorTests {
 		}
 
 		public Group() {
-
 		}
 
 		public String getType() {
@@ -263,10 +275,12 @@ public class SpringHandlerInstantiatorTests {
 		}
 	}
 
+
 	public static class Capitalizer {
 
 		public String capitalize(String text) {
 			return text.toUpperCase();
 		}
 	}
+
 }
