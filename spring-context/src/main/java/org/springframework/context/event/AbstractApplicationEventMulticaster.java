@@ -145,43 +145,73 @@ public abstract class AbstractApplicationEventMulticaster
 		Object source = event.getSource();
 		Class<?> sourceType = (source != null ? source.getClass() : null);
 		ListenerCacheKey cacheKey = new ListenerCacheKey(eventType, sourceType);
+
+		// Quick check for existing entry on ConcurrentHashMap...
 		ListenerRetriever retriever = this.retrieverCache.get(cacheKey);
 		if (retriever != null) {
 			return retriever.getApplicationListeners();
 		}
-		else {
-			retriever = new ListenerRetriever(true);
-			LinkedList<ApplicationListener> allListeners = new LinkedList<ApplicationListener>();
-			Set<ApplicationListener> listeners;
-			Set<String> listenerBeans;
+
+		if (this.beanClassLoader == null ||
+				(ClassUtils.isCacheSafe(eventType, this.beanClassLoader) &&
+						(sourceType == null || ClassUtils.isCacheSafe(sourceType, this.beanClassLoader)))) {
+			// Fully synchronized building and caching of a ListenerRetriever
 			synchronized (this.defaultRetriever) {
-				listeners = new LinkedHashSet<ApplicationListener>(this.defaultRetriever.applicationListeners);
-				listenerBeans = new LinkedHashSet<String>(this.defaultRetriever.applicationListenerBeans);
+				retriever = this.retrieverCache.get(cacheKey);
+				if (retriever != null) {
+					return retriever.getApplicationListeners();
+				}
+				retriever = new ListenerRetriever(true);
+				Collection<ApplicationListener> listeners = retrieveApplicationListeners(eventType, sourceType, retriever);
+				this.retrieverCache.put(cacheKey, retriever);
+				return listeners;
 			}
-			for (ApplicationListener listener : listeners) {
-				if (supportsEvent(listener, eventType, sourceType)) {
+		}
+		else {
+			// No ListenerRetriever caching -> no synchronization necessary
+			return retrieveApplicationListeners(eventType, sourceType, null);
+		}
+	}
+
+	/**
+	 * Actually retrieve the application listeners for the given event and source type.
+	 * @param eventType the application event type
+	 * @param sourceType the event source type
+	 * @param retriever the ListenerRetriever, if supposed to populate one (for caching purposes)
+	 * @return the pre-filtered list of application listeners for the given event and source type
+	 */
+	private Collection<ApplicationListener> retrieveApplicationListeners(
+			Class<? extends ApplicationEvent> eventType, Class<?> sourceType, ListenerRetriever retriever) {
+
+		LinkedList<ApplicationListener> allListeners = new LinkedList<ApplicationListener>();
+		Set<ApplicationListener> listeners;
+		Set<String> listenerBeans;
+		synchronized (this.defaultRetriever) {
+			listeners = new LinkedHashSet<ApplicationListener>(this.defaultRetriever.applicationListeners);
+			listenerBeans = new LinkedHashSet<String>(this.defaultRetriever.applicationListenerBeans);
+		}
+		for (ApplicationListener listener : listeners) {
+			if (supportsEvent(listener, eventType, sourceType)) {
+				if (retriever != null) {
 					retriever.applicationListeners.add(listener);
+				}
+				allListeners.add(listener);
+			}
+		}
+		if (!listenerBeans.isEmpty()) {
+			BeanFactory beanFactory = getBeanFactory();
+			for (String listenerBeanName : listenerBeans) {
+				ApplicationListener listener = beanFactory.getBean(listenerBeanName, ApplicationListener.class);
+				if (!allListeners.contains(listener) && supportsEvent(listener, eventType, sourceType)) {
+					if (retriever != null) {
+						retriever.applicationListenerBeans.add(listenerBeanName);
+					}
 					allListeners.add(listener);
 				}
 			}
-			if (!listenerBeans.isEmpty()) {
-				BeanFactory beanFactory = getBeanFactory();
-				for (String listenerBeanName : listenerBeans) {
-					ApplicationListener listener = beanFactory.getBean(listenerBeanName, ApplicationListener.class);
-					if (!allListeners.contains(listener) && supportsEvent(listener, eventType, sourceType)) {
-						retriever.applicationListenerBeans.add(listenerBeanName);
-						allListeners.add(listener);
-					}
-				}
-			}
-			OrderComparator.sort(allListeners);
-			if (this.beanClassLoader == null ||
-					(ClassUtils.isCacheSafe(eventType, this.beanClassLoader) &&
-							(sourceType == null || ClassUtils.isCacheSafe(sourceType, this.beanClassLoader)))) {
-				this.retrieverCache.put(cacheKey, retriever);
-			}
-			return allListeners;
 		}
+		OrderComparator.sort(allListeners);
+		return allListeners;
 	}
 
 	/**
