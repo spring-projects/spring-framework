@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -213,13 +213,14 @@ public abstract class AbstractFallbackCacheOperationSource implements CacheOpera
 				return false;
 			}
 			DefaultCacheKey otherKey = (DefaultCacheKey) other;
-			return (this.method.equals(otherKey.method) && ObjectUtils.nullSafeEquals(this.targetClass,
-					otherKey.targetClass));
+			return (this.method.equals(otherKey.method) &&
+					ObjectUtils.nullSafeEquals(this.targetClass, otherKey.targetClass));
 		}
 
 		@Override
 		public int hashCode() {
-			return this.method.hashCode() * 29 + (this.targetClass != null ? this.targetClass.hashCode() : 0);
+			return this.method.hashCode() + (this.targetClass != null ? this.targetClass.hashCode() * 29 : 0);
 		}
 	}
+
 }
