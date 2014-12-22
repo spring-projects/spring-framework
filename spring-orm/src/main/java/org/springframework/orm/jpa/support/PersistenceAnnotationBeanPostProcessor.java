@@ -401,10 +401,9 @@ public class PersistenceAnnotationBeanPostProcessor
 						}
 						for (Method method : targetClass.getDeclaredMethods()) {
 							method = BridgeMethodResolver.findBridgedMethod(method);
-							Method mostSpecificMethod = BridgeMethodResolver.findBridgedMethod(ClassUtils.getMostSpecificMethod(method, clazz));
 							if ((method.isAnnotationPresent(PersistenceContext.class) ||
 									method.isAnnotationPresent(PersistenceUnit.class)) &&
-									method.equals(mostSpecificMethod)) {
+									method.equals(BridgeMethodResolver.findBridgedMethod(ClassUtils.getMostSpecificMethod(method, clazz)))) {
 								if (Modifier.isStatic(method.getModifiers())) {
 									throw new IllegalStateException("Persistence annotations are not supported on static methods");
 								}
