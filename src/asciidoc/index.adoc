@@ -49628,6 +49628,13 @@ options to be specified that influence the way the caching behavior is added to 
 application through AOP. The configuration is intentionally similar with that of
 <<tx-annotation-driven-settings, `@Transactional`>>:
 
+[NOTE]
+====
+Advanced customizations using Java config require to implement `CachingConfigurer`, refer
+to {javadoc-baseurl}/org/springframework/cache/annotation/CachingConfigurer.html[the
+javadoc for more details].
+====
+
 [[cache-annotation-driven-settings]]
 .Cache annotation settings
 [cols="1,1,1,3"]
