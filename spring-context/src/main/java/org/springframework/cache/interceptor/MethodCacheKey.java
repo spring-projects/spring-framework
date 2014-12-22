@@ -23,6 +23,7 @@ import org.springframework.util.ObjectUtils;
 
 /**
  * Represent a method on a particular {@link Class} and  is suitable as a key.
+ *
  * <p>Mainly for internal use within the framework.
  *
  * @author Costin Leau
@@ -35,11 +36,13 @@ public final class MethodCacheKey {
 
 	private final Class<?> targetClass;
 
+
 	public MethodCacheKey(Method method, Class<?> targetClass) {
 		Assert.notNull(method, "method must be set.");
 		this.method = method;
 		this.targetClass = targetClass;
 	}
+
 
 	@Override
 	public boolean equals(Object other) {
@@ -50,13 +53,14 @@ public final class MethodCacheKey {
 			return false;
 		}
 		MethodCacheKey otherKey = (MethodCacheKey) other;
-		return (this.method.equals(otherKey.method) && ObjectUtils.nullSafeEquals(this.targetClass,
-				otherKey.targetClass));
+		return (this.method.equals(otherKey.method) &&
+				ObjectUtils.nullSafeEquals(this.targetClass, otherKey.targetClass));
 	}
+
 
 	@Override
 	public int hashCode() {
-		return this.method.hashCode() * 29 + (this.targetClass != null ? this.targetClass.hashCode() : 0);
+		return this.method.hashCode() + (this.targetClass != null ? this.targetClass.hashCode() * 29 : 0);
 	}
 
 }
