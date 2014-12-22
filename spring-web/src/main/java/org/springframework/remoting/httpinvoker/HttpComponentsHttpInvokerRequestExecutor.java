@@ -70,6 +70,7 @@ public class HttpComponentsHttpInvokerRequestExecutor extends AbstractHttpInvoke
 
 	private HttpClient httpClient;
 	private int connectionTimeout = 0;
+	private int connectionRequestTimeout = 0;
 	private int readTimeout = DEFAULT_READ_TIMEOUT_MILLISECONDS;
 
 
@@ -146,6 +147,16 @@ public class HttpComponentsHttpInvokerRequestExecutor extends AbstractHttpInvoke
 			client.getParams().setIntParameter(
 					org.apache.http.params.CoreConnectionPNames.CONNECTION_TIMEOUT, timeout);
 		}
+	}
+
+	/**
+	 * Set the timeout in milliseconds used when requesting a connection from the connection
+	 * manager using the underlying HttpClient.
+	 * A timeout value of 0 specifies an infinite timeout.
+	 * @param connectionRequestTimeout the timeout value to request a connection in milliseconds
+	 */
+	public void setConnectionRequestTimeout(int connectionRequestTimeout) {
+		this.connectionRequestTimeout = connectionRequestTimeout;
 	}
 
 	/**
@@ -240,9 +251,10 @@ public class HttpComponentsHttpInvokerRequestExecutor extends AbstractHttpInvoke
 	 * @return the RequestConfig to use
 	 */
 	protected RequestConfig createRequestConfig(HttpInvokerClientConfiguration config) {
-		if (this.connectionTimeout > 0 || this.readTimeout > 0) {
+		if (this.connectionTimeout > 0 || this.connectionRequestTimeout > 0 || this.readTimeout > 0) {
 			return RequestConfig.custom()
 					.setConnectTimeout(this.connectionTimeout)
+					.setConnectionRequestTimeout(this.connectionRequestTimeout)
 					.setSocketTimeout(this.readTimeout)
 					.build();
 		}

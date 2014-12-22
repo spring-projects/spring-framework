@@ -44,6 +44,16 @@ public class HttpComponentsHttpInvokerRequestExecutorTests {
 	}
 
 	@Test
+	public void customizeConnectionRequestTimeout() throws IOException {
+		HttpComponentsHttpInvokerRequestExecutor executor = new HttpComponentsHttpInvokerRequestExecutor();
+		executor.setConnectionRequestTimeout(7000);
+
+		HttpInvokerClientConfiguration config = mockHttpInvokerClientConfiguration("http://fake-service");
+		HttpPost httpPost = executor.createHttpPost(config);
+		assertEquals(7000, httpPost.getConfig().getConnectionRequestTimeout());
+	}
+
+	@Test
 	public void customizeReadTimeout() throws IOException {
 		HttpComponentsHttpInvokerRequestExecutor executor = new HttpComponentsHttpInvokerRequestExecutor();
 		executor.setReadTimeout(10000);
