@@ -56,6 +56,7 @@ import org.springframework.util.StringUtils;
  * <p>As of Spring 4.1, this request executor requires Apache HttpComponents 4.3 or higher.
  *
  * @author Juergen Hoeller
+ * @author Stephane Nicoll
  * @since 3.1
  * @see org.springframework.remoting.httpinvoker.SimpleHttpInvokerRequestExecutor
  */
@@ -213,7 +214,10 @@ public class HttpComponentsHttpInvokerRequestExecutor extends AbstractHttpInvoke
 	 */
 	protected HttpPost createHttpPost(HttpInvokerClientConfiguration config) throws IOException {
 		HttpPost httpPost = new HttpPost(config.getServiceUrl());
-		httpPost.setConfig(createRequestConfig(config, httpPost));
+		RequestConfig requestConfig = createRequestConfig(config);
+		if (requestConfig != null) {
+			httpPost.setConfig(requestConfig);
+		}
 		LocaleContext localeContext = LocaleContextHolder.getLocaleContext();
 		if (localeContext != null) {
 			Locale locale = localeContext.getLocale();
@@ -228,13 +232,14 @@ public class HttpComponentsHttpInvokerRequestExecutor extends AbstractHttpInvoke
 	}
 
 	/**
-	 * Create a {@link RequestConfig} for the given configuration and {@link HttpPost}.
+	 * Create a {@link RequestConfig} for the given configuration. Can return {@code null}
+	 * to indicate that no custom request config should be set and the defaults of the
+	 * {@link HttpClient} should be used.
 	 * @param config the HTTP invoker configuration that specifies the
 	 * target service
-	 * @param httpPost the HttpPost instance
-	 * @return the RequestConfig to use for that HttpPost
+	 * @return the RequestConfig to use
 	 */
-	protected RequestConfig createRequestConfig(HttpInvokerClientConfiguration config, HttpPost httpPost) {
+	protected RequestConfig createRequestConfig(HttpInvokerClientConfiguration config) {
 		if (this.connectionTimeout > 0 || this.readTimeout > 0) {
 			return RequestConfig.custom()
 					.setConnectTimeout(this.connectionTimeout)
