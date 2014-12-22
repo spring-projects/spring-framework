@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,11 +25,6 @@ import javax.ejb.EJB;
 import org.junit.Test;
 
 import org.springframework.beans.BeansException;
-import org.springframework.tests.mock.jndi.ExpectedLookupTemplate;
-import org.springframework.tests.sample.beans.INestedTestBean;
-import org.springframework.tests.sample.beans.ITestBean;
-import org.springframework.tests.sample.beans.NestedTestBean;
-import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
@@ -42,6 +37,11 @@ import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.jndi.support.SimpleJndiBeanFactory;
+import org.springframework.tests.mock.jndi.ExpectedLookupTemplate;
+import org.springframework.tests.sample.beans.INestedTestBean;
+import org.springframework.tests.sample.beans.ITestBean;
+import org.springframework.tests.sample.beans.NestedTestBean;
+import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.util.SerializationTestUtils;
 
 import static org.junit.Assert.*;
@@ -566,20 +566,20 @@ public class CommonAnnotationBeanPostProcessorTests {
 	}
 
 
-	public static class ExtendedResourceInjectionBean extends ResourceInjectionBean {
+	static class NonPublicResourceInjectionBean<B> extends ResourceInjectionBean {
 
 		@Resource(name="testBean4", type=TestBean.class)
 		protected ITestBean testBean3;
 
-		private ITestBean testBean4;
+		private B testBean4;
 
 		@Resource
-		private INestedTestBean testBean5;
+		INestedTestBean testBean5;
 
-		private INestedTestBean testBean6;
+		INestedTestBean testBean6;
 
 		@Resource
-		private BeanFactory beanFactory;
+		BeanFactory beanFactory;
 
 		@Override
 		@Resource
@@ -588,12 +588,18 @@ public class CommonAnnotationBeanPostProcessorTests {
 		}
 
 		@Resource(name="${tb}", type=ITestBean.class)
-		private void setTestBean4(ITestBean testBean4) {
+		private void setTestBean4(B testBean4) {
+			if (this.testBean4 != null) {
+				throw new IllegalStateException("Already called");
+			}
 			this.testBean4 = testBean4;
 		}
 
 		@Resource
 		public void setTestBean6(INestedTestBean testBean6) {
+			if (this.testBean6 != null) {
+				throw new IllegalStateException("Already called");
+			}
 			this.testBean6 = testBean6;
 		}
 
@@ -601,7 +607,7 @@ public class CommonAnnotationBeanPostProcessorTests {
 			return testBean3;
 		}
 
-		public ITestBean getTestBean4() {
+		public B getTestBean4() {
 			return testBean4;
 		}
 
@@ -630,6 +636,10 @@ public class CommonAnnotationBeanPostProcessorTests {
 	}
 
 
+	public static class ExtendedResourceInjectionBean extends NonPublicResourceInjectionBean<ITestBean> {
+	}
+
+
 	public static class ExtendedEjbInjectionBean extends ResourceInjectionBean {
 
 		@EJB(name="testBean4", beanInterface=TestBean.class)
@@ -653,11 +663,17 @@ public class CommonAnnotationBeanPostProcessorTests {
 
 		@EJB(beanName="testBean3", beanInterface=ITestBean.class)
 		private void setTestBean4(ITestBean testBean4) {
+			if (this.testBean4 != null) {
+				throw new IllegalStateException("Already called");
+			}
 			this.testBean4 = testBean4;
 		}
 
 		@EJB
 		public void setTestBean6(INestedTestBean testBean6) {
+			if (this.testBean6 != null) {
+				throw new IllegalStateException("Already called");
+			}
 			this.testBean6 = testBean6;
 		}
 

@@ -311,9 +311,9 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 
 
 	private InjectionMetadata findResourceMetadata(String beanName, final Class<?> clazz) {
-		// Quick check on the concurrent map first, with minimal locking.
 		// Fall back to class name as cache key, for backwards compatibility with custom callers.
 		String cacheKey = (StringUtils.hasLength(beanName) ? beanName : clazz.getName());
+		// Quick check on the concurrent map first, with minimal locking.
 		InjectionMetadata metadata = this.injectionMetadataCache.get(cacheKey);
 		if (InjectionMetadata.needsRefresh(metadata, clazz)) {
 			synchronized (this.injectionMetadataCache) {
@@ -357,7 +357,7 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 									if (method.getParameterTypes().length != 1) {
 										throw new IllegalStateException("@WebServiceRef annotation requires a single-arg method: " + method);
 									}
-									PropertyDescriptor pd = BeanUtils.findPropertyForMethod(method);
+									PropertyDescriptor pd = BeanUtils.findPropertyForMethod(method, clazz);
 									currElements.add(new WebServiceRefElement(method, pd));
 								}
 								else if (ejbRefClass != null && method.isAnnotationPresent(ejbRefClass)) {
@@ -367,7 +367,7 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 									if (method.getParameterTypes().length != 1) {
 										throw new IllegalStateException("@EJB annotation requires a single-arg method: " + method);
 									}
-									PropertyDescriptor pd = BeanUtils.findPropertyForMethod(method);
+									PropertyDescriptor pd = BeanUtils.findPropertyForMethod(method, clazz);
 									currElements.add(new EjbRefElement(method, pd));
 								}
 								else if (method.isAnnotationPresent(Resource.class)) {
@@ -379,7 +379,7 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 										throw new IllegalStateException("@Resource annotation requires a single-arg method: " + method);
 									}
 									if (!ignoredResourceTypes.contains(paramTypes[0].getName())) {
-										PropertyDescriptor pd = BeanUtils.findPropertyForMethod(method);
+										PropertyDescriptor pd = BeanUtils.findPropertyForMethod(method, clazz);
 										currElements.add(new ResourceElement(method, pd));
 									}
 								}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -379,13 +379,28 @@ public abstract class BeanUtils {
 	 * Find a JavaBeans {@code PropertyDescriptor} for the given method,
 	 * with the method either being the read method or the write method for
 	 * that bean property.
-	 * @param method the method to find a corresponding PropertyDescriptor for
+	 * @param method the method to find a corresponding PropertyDescriptor for,
+	 * introspecting its declaring class
 	 * @return the corresponding PropertyDescriptor, or {@code null} if none
 	 * @throws BeansException if PropertyDescriptor lookup fails
 	 */
 	public static PropertyDescriptor findPropertyForMethod(Method method) throws BeansException {
+		return findPropertyForMethod(method, method.getDeclaringClass());
+	}
+
+	/**
+	 * Find a JavaBeans {@code PropertyDescriptor} for the given method,
+	 * with the method either being the read method or the write method for
+	 * that bean property.
+	 * @param method the method to find a corresponding PropertyDescriptor for
+	 * @param clazz the (most specific) class to introspect for descriptors
+	 * @return the corresponding PropertyDescriptor, or {@code null} if none
+	 * @throws BeansException if PropertyDescriptor lookup fails
+	 * @since 3.2.13
+	 */
+	public static PropertyDescriptor findPropertyForMethod(Method method, Class<?> clazz) throws BeansException {
 		Assert.notNull(method, "Method must not be null");
-		PropertyDescriptor[] pds = getPropertyDescriptors(method.getDeclaringClass());
+		PropertyDescriptor[] pds = getPropertyDescriptors(clazz);
 		for (PropertyDescriptor pd : pds) {
 			if (method.equals(pd.getReadMethod()) || method.equals(pd.getWriteMethod())) {
 				return pd;
@@ -591,11 +606,11 @@ public abstract class BeanUtils {
 			actualEditable = editable;
 		}
 		PropertyDescriptor[] targetPds = getPropertyDescriptors(actualEditable);
-		List<String> ignoreList = (ignoreProperties != null) ? Arrays.asList(ignoreProperties) : null;
+		List<String> ignoreList = (ignoreProperties != null ? Arrays.asList(ignoreProperties) : null);
 
 		for (PropertyDescriptor targetPd : targetPds) {
 			Method writeMethod = targetPd.getWriteMethod();
-			if (writeMethod != null && (ignoreProperties == null || (!ignoreList.contains(targetPd.getName())))) {
+			if (writeMethod != null && (ignoreList == null || !ignoreList.contains(targetPd.getName()))) {
 				PropertyDescriptor sourcePd = getPropertyDescriptor(source.getClass(), targetPd.getName());
 				if (sourcePd != null) {
 					Method readMethod = sourcePd.getReadMethod();
