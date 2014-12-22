@@ -855,7 +855,13 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 		if (SCOPE_SINGLETON.equals(scopeName) || SCOPE_PROTOTYPE.equals(scopeName)) {
 			throw new IllegalArgumentException("Cannot replace existing scopes 'singleton' and 'prototype'");
 		}
-		this.scopes.put(scopeName, scope);
+		Scope previous = this.scopes.put(scopeName, scope);
+		if (previous != null && logger.isInfoEnabled()) {
+			logger.info("Replacing scope '" + scopeName + "' from '" + previous + "' to '" + scope);
+		}
+		else if (previous == null && logger.isDebugEnabled()) {
+			logger.debug("Registering scope '" + scopeName + "' with '" + scope + "'");
+		}
 	}
 
 	@Override
