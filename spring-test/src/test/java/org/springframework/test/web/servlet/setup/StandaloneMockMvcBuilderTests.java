@@ -22,6 +22,7 @@ import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.context.WebApplicationContext;
+import org.springframework.web.context.support.WebApplicationContextUtils;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerExecutionChain;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
@@ -51,6 +52,16 @@ public class StandaloneMockMvcBuilderTests {
 		assertNotNull(chain);
 		assertEquals("handleWithPlaceholders", ((HandlerMethod) chain.getHandler()).getMethod().getName());
 	}
+
+	@Test // SPR-12553
+	public void applicationContextAttribute() {
+		TestStandaloneMockMvcBuilder builder = new TestStandaloneMockMvcBuilder(new PlaceholderController());
+		builder.addPlaceHolderValue("sys.login.ajax", "/foo");
+		WebApplicationContext  wac = builder.initWebAppContext();
+		assertEquals(wac, WebApplicationContextUtils
+				.getRequiredWebApplicationContext(wac.getServletContext()));
+	}
+
 
 
 	@Controller

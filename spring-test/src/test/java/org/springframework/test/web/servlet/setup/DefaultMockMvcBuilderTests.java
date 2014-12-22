@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -19,17 +19,21 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import static org.junit.Assert.assertEquals;
 import org.junit.Before;
 import org.junit.Test;
 
+import org.springframework.mock.web.MockServletContext;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.context.support.WebApplicationContextUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 /**
  * Tests for {@link DefaultMockMvcBuilder}.
  *
  * @author Rob Winch
+ * @author Sebastien Deleuze
  */
 public class DefaultMockMvcBuilderTests {
 
@@ -58,6 +62,15 @@ public class DefaultMockMvcBuilderTests {
 	@Test(expected = IllegalArgumentException.class)
 	public void addFilterPatternContainsNull() {
 		builder.addFilter(new ContinueFilter(), (String) null);
+	}
+
+	@Test // SPR-12553
+	public void applicationContextAttribute() {
+		MockServletContext servletContext = new MockServletContext();
+		StubWebApplicationContext wac = new StubWebApplicationContext(servletContext);
+		DefaultMockMvcBuilder builder = MockMvcBuilders.webAppContextSetup(wac);
+		assertEquals(builder.initWebAppContext(), WebApplicationContextUtils
+				.getRequiredWebApplicationContext(servletContext));
 	}
 
 
