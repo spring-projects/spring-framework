@@ -36,7 +36,7 @@ import org.springframework.util.ObjectUtils;
 class BeanTypeNotPresentCondition implements ConfigurationCondition {
 
 	private static final Log logger =
-			LogFactory.getLog("org.springframework.web.servlet.config.annotation.ViewResolution");
+			LogFactory.getLog("org.springframework.web.servlet.config.annotation.BeanTypeNotPresentCondition");
 
 	private final Class<?> beanType;
 
