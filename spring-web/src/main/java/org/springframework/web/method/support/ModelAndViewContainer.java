@@ -44,9 +44,9 @@ import org.springframework.web.bind.support.SimpleSessionStatus;
  */
 public class ModelAndViewContainer {
 
-	private Object view;
+	private boolean ignoreDefaultModelOnRedirect = false;
 
-	private boolean requestHandled = false;
+	private Object view;
 
 	private final ModelMap defaultModel = new BindingAwareModelMap();
 
@@ -54,10 +54,26 @@ public class ModelAndViewContainer {
 
 	private boolean redirectModelScenario = false;
 
-	private boolean ignoreDefaultModelOnRedirect = false;
-
 	private final SessionStatus sessionStatus = new SimpleSessionStatus();
 
+	private boolean requestHandled = false;
+
+
+	/**
+	 * By default the content of the "default" model is used both during
+	 * rendering and redirect scenarios. Alternatively controller methods
+	 * can declare an argument of type {@code RedirectAttributes} and use
+	 * it to provide attributes to prepare the redirect URL.
+	 * <p>Setting this flag to {@code true} guarantees the "default" model is
+	 * never used in a redirect scenario even if a RedirectAttributes argument
+	 * is not declared. Setting it to {@code false} means the "default" model
+	 * may be used in a redirect if the controller method doesn't declare a
+	 * RedirectAttributes argument.
+	 * <p>The default setting is {@code false}.
+	 */
+	public void setIgnoreDefaultModelOnRedirect(boolean ignoreDefaultModelOnRedirect) {
+		this.ignoreDefaultModelOnRedirect = ignoreDefaultModelOnRedirect;
+	}
 
 	/**
 	 * Set a view name to be resolved by the DispatcherServlet via a ViewResolver.
@@ -100,32 +116,10 @@ public class ModelAndViewContainer {
 	}
 
 	/**
-	 * Signal a scenario where the request is handled directly.
-	 * <p>A {@link HandlerMethodReturnValueHandler} may use this flag to
-	 * indicate the response has been fully handled and view resolution
-	 * is not required (e.g. {@code @ResponseBody}).
-	 * <p>A {@link HandlerMethodArgumentResolver} may also use this flag
-	 * to indicate the presence of an argument (e.g.
-	 * {@code ServletResponse} or {@code OutputStream}) that may lead to
-	 * a complete response depending on the method return value.
-	 * <p>The default value is {@code true}.
-	 */
-	public void setRequestHandled(boolean requestHandled) {
-		this.requestHandled = requestHandled;
-	}
-
-	/**
-	 * Whether the request is handled directly.
-	 */
-	public boolean isRequestHandled() {
-		return this.requestHandled;
-	}
-
-	/**
-	 * Return the model to use: the "default" or the "redirect" model.
-	 * <p>The default model is used if {@code "redirectModelScenario=false"} or
-	 * if the redirect model is {@code null} (i.e. it wasn't declared as a
-	 * method argument) and {@code ignoreDefaultModelOnRedirect=false}.
+	 * Return the model to use -- either the "default" or the "redirect" model.
+	 * The default model is used if {@code redirectModelScenario=false} or
+	 * there is no redirect model (i.e. RedirectAttributes was not declared as
+	 * a method argument) and {@code ignoreDefaultModelOnRedirect=false}.
 	 */
 	public ModelMap getModel() {
 		if (useDefaultModel()) {
@@ -154,23 +148,11 @@ public class ModelAndViewContainer {
 	}
 
 	/**
-	 * Signal the conditions are in place for using a redirect model.
-	 * Typically that means the controller has returned a redirect instruction.
+	 * Whether the controller has returned a redirect instruction, e.g. a
+	 * "redirect:" prefixed view name, a RedirectView instance, etc.
 	 */
 	public void setRedirectModelScenario(boolean redirectModelScenario) {
 		this.redirectModelScenario = redirectModelScenario;
-	}
-
-	/**
-	 * When set to {@code true} the default model is never used in a redirect
-	 * scenario. So if a redirect model is not available, an empty model is
-	 * used instead.
-	 * <p>When set to {@code false} the default model can be used in a redirect
-	 * scenario if a redirect model is not available.
-	 * <p>The default setting is {@code false}.
-	 */
-	public void setIgnoreDefaultModelOnRedirect(boolean ignoreDefaultModelOnRedirect) {
-		this.ignoreDefaultModelOnRedirect = ignoreDefaultModelOnRedirect;
 	}
 
 	/**
@@ -179,6 +161,24 @@ public class ModelAndViewContainer {
 	 */
 	public SessionStatus getSessionStatus() {
 		return this.sessionStatus;
+	}
+
+	/**
+	 * Whether the request has been handled fully within the handler, e.g.
+	 * {@code @ResponseBody} method, and therefore view resolution is not
+	 * necessary. This flag can also be set when controller methods declare an
+	 * argument of type {@code ServletResponse} or {@code OutputStream}).
+	 * <p>The default value is {@code false}.
+	 */
+	public void setRequestHandled(boolean requestHandled) {
+		this.requestHandled = requestHandled;
+	}
+
+	/**
+	 * Whether the request has been handled fully within the handler.
+	 */
+	public boolean isRequestHandled() {
+		return this.requestHandled;
 	}
 
 	/**
