@@ -16,10 +16,6 @@
 
 package org.springframework.http.client;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-
 import java.net.URI;
 
 import org.apache.http.HttpEntityEnclosingRequest;
@@ -27,11 +23,12 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.client.protocol.HttpClientContext;
-import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.params.CoreConnectionPNames;
 import org.junit.Test;
 import org.springframework.http.HttpMethod;
+
+import static org.junit.Assert.*;
 
 public class HttpComponentsClientHttpRequestFactoryTests extends AbstractHttpRequestFactoryTestCase {
 
@@ -49,13 +46,15 @@ public class HttpComponentsClientHttpRequestFactoryTests extends AbstractHttpReq
 	@SuppressWarnings("deprecation")
 	@Test
 	public void assertLegacyCustomConfig() {
-		HttpClient httpClient = new DefaultHttpClient(); // Does not support RequestConfig
+		HttpClient httpClient = new org.apache.http.impl.client.DefaultHttpClient(); // Does not support RequestConfig
 		HttpComponentsClientHttpRequestFactory hrf = new HttpComponentsClientHttpRequestFactory(httpClient);
 		hrf.setConnectTimeout(1234);
-		assertEquals(1234, httpClient.getParams().getIntParameter(CoreConnectionPNames.CONNECTION_TIMEOUT, 0));
+		assertEquals(1234, httpClient.getParams().getIntParameter(
+				org.apache.http.params.CoreConnectionPNames.CONNECTION_TIMEOUT, 0));
 
 		hrf.setReadTimeout(4567);
-		assertEquals(4567, httpClient.getParams().getIntParameter(CoreConnectionPNames.SO_TIMEOUT, 0));
+		assertEquals(4567, httpClient.getParams().getIntParameter(
+				org.apache.http.params.CoreConnectionPNames.SO_TIMEOUT, 0));
 	}
 
 	@Test
@@ -78,6 +77,45 @@ public class HttpComponentsClientHttpRequestFactoryTests extends AbstractHttpReq
 		assertEquals("Wrong custom connection timeout", 1234, requestConfig.getConnectTimeout());
 		assertEquals("Wrong custom connection request timeout", 4321, requestConfig.getConnectionRequestTimeout());
 		assertEquals("Wrong custom socket timeout", 4567, requestConfig.getSocketTimeout());
+	}
+
+	@Test
+	public void customHttpClientUsesItsDefault() throws Exception {
+		HttpComponentsClientHttpRequestFactory hrf =
+				new HttpComponentsClientHttpRequestFactory(HttpClientBuilder.create().build());
+
+		URI uri = new URI(baseUrl + "/status/ok");
+		HttpComponentsClientHttpRequest request = (HttpComponentsClientHttpRequest)
+				hrf.createRequest(uri, HttpMethod.GET);
+
+		assertNull("No custom config should be set with a custom HttpClient",
+				request.getHttpContext().getAttribute(HttpClientContext.REQUEST_CONFIG));
+	}
+
+	@Test
+	public void defaultSettingsOfHttpClientLostOnExecutorCustomization() throws Exception {
+		CloseableHttpClient client = HttpClientBuilder.create()
+				.setDefaultRequestConfig(RequestConfig.custom().setConnectTimeout(1234).build())
+				.build();
+		HttpComponentsClientHttpRequestFactory hrf = new HttpComponentsClientHttpRequestFactory(client);
+
+		URI uri = new URI(baseUrl + "/status/ok");
+		HttpComponentsClientHttpRequest request = (HttpComponentsClientHttpRequest)
+				hrf.createRequest(uri, HttpMethod.GET);
+
+		assertNull("No custom config should be set with a custom HttpClient",
+				request.getHttpContext().getAttribute(HttpClientContext.REQUEST_CONFIG));
+
+		hrf.setConnectionRequestTimeout(4567);
+		HttpComponentsClientHttpRequest request2 = (HttpComponentsClientHttpRequest)
+				hrf.createRequest(uri, HttpMethod.GET);
+		Object requestConfigAttribute = request2.getHttpContext().getAttribute(HttpClientContext.REQUEST_CONFIG);
+		assertNotNull(requestConfigAttribute);
+		RequestConfig requestConfig = (RequestConfig) requestConfigAttribute;
+
+		assertEquals(4567, requestConfig.getConnectionRequestTimeout());
+		// No way to access the request config of the HTTP client so no way to "merge" our customizations
+		assertEquals(-1, requestConfig.getConnectTimeout());
 	}
 
 	@Test
