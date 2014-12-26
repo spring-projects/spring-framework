@@ -4142,7 +4142,8 @@ unnecessarily couples the code to Spring. Alternatively, use
 the <<beans-postconstruct-and-predestroy-annotations, `@PostConstruct`>> annotation or
 specify a POJO initialization method. In the case of XML-based configuration metadata,
 you use the `init-method` attribute to specify the name of the method that has a void
-no-argument signature. For example, the following definition:
+no-argument signature. With Java config  you use the `initMethod` attribute of `@Bean`,
+see <<beans-java-lifecycle-callbacks>>. For example, the following:
 
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
@@ -4201,8 +4202,9 @@ It is recommended that you do not use the `DisposableBean` callback interface be
 unnecessarily couples the code to Spring. Alternatively, use
 the <<beans-postconstruct-and-predestroy-annotations, `@PreDestroy`>> annotation or
 specify a generic method that is supported by bean definitions. With XML-based
-configuration metadata, you use the `destroy-method` attribute on the `<bean/>`. For
-example, the following definition:
+configuration metadata, you use the `destroy-method` attribute on the `<bean/>`. With
+Java config  you use the `destroyMethod` attribute of `@Bean`, see
+<<beans-java-lifecycle-callbacks>>. For example, the following definition:
 
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
@@ -4244,6 +4246,16 @@ is exactly the same as:
 
 but does not couple the code to Spring.
 
+[TIP]
+====
+The `destroy-method` attribute of a `<bean>` element can be assigned a special
+`(inferred)` value which instructs Spring to automatically detect a public `close` or
+`shutdown` method on the specific bean class. This special `(inferred)` value can also be
+set on the `default-destroy-method` attribute of a `<beans>` element to apply this
+behavior to an entire set of beans (see
+<<beans-factory-lifecycle-default-init-destroy-methods>>). Note that this is the
+default behavior with Java config.
+====
 
 [[beans-factory-lifecycle-default-init-destroy-methods]]
 ===== Default initialization and destroy methods
@@ -7250,6 +7262,15 @@ on the `bean` element:
 	}
 ----
 
+[NOTE]
+====
+By default, beans defined using Java config that have a public `close` or `shutdown`
+method are automatically enlisted with a destruction callback. If you have a public
+`close` or `shutdown` method and you do not wish for it to be called when the container
+shuts down, simply add `@Bean(destroyMethod="")` to your bean definition to disable the
+default `(inferred)` mode.
+====
+
 Of course, in the case of `Foo` above, it would be equally as valid to call the `init()`
 method directly during construction:
 
@@ -7262,7 +7283,7 @@ method directly during construction:
 		public Foo foo() {
 			Foo foo = new Foo();
 			foo.init();
-		return foo;
+		    return foo;
 		}
 
 		// ...
@@ -49606,6 +49627,13 @@ Both the `cache:annotation-driven` element and `@EnableCaching` annotation allow
 options to be specified that influence the way the caching behavior is added to the
 application through AOP. The configuration is intentionally similar with that of
 <<tx-annotation-driven-settings, `@Transactional`>>:
+
+[NOTE]
+====
+Advanced customizations using Java config require to implement `CachingConfigurer`, refer
+to {javadoc-baseurl}/org/springframework/cache/annotation/CachingConfigurer.html[the
+javadoc for more details].
+====
 
 [[cache-annotation-driven-settings]]
 .Cache annotation settings

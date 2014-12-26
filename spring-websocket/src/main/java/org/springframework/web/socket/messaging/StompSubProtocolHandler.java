@@ -52,6 +52,8 @@ import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.messaging.support.MessageHeaderAccessor;
 import org.springframework.messaging.support.MessageHeaderInitializer;
 import org.springframework.util.Assert;
+import org.springframework.util.MimeType;
+import org.springframework.util.MimeTypeUtils;
 import org.springframework.web.socket.BinaryMessage;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
@@ -355,7 +357,12 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 		}
 		try {
 			byte[] bytes = this.stompEncoder.encode(stompAccessor.getMessageHeaders(), (byte[]) message.getPayload());
-			session.sendMessage(new TextMessage(bytes));
+			if (MimeTypeUtils.APPLICATION_OCTET_STREAM.isCompatibleWith(stompAccessor.getContentType())) {
+				session.sendMessage(new BinaryMessage(bytes));
+			}
+			else {
+				session.sendMessage(new TextMessage(bytes));
+			}
 		}
 		catch (SessionLimitExceededException ex) {
 			// Bad session, just get out

@@ -112,7 +112,13 @@ public class OpEQ extends Operator {
 		}
 		else {
 			getLeftOperand().generateCode(mv, cf);
+			if (leftPrim) {
+				CodeFlow.insertBoxIfNecessary(mv, leftDesc.charAt(0));
+			}
 			getRightOperand().generateCode(mv, cf);
+			if (rightPrim) {
+				CodeFlow.insertBoxIfNecessary(mv, rightDesc.charAt(0));
+			}
 			Label leftNotNull = new Label();
 			mv.visitInsn(DUP_X1); // Dup right on the top of the stack
 			mv.visitJumpInsn(IFNONNULL,leftNotNull);

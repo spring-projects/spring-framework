@@ -31,7 +31,7 @@ configure(allprojects) { project ->
 	ext.eclipseLinkVersion   = "2.4.2"
 	ext.ehcacheVersion       = "2.9.0"
 	ext.ehcacheJCacheVersion = "1.0.0"
-	ext.groovyVersion        = "2.3.8"
+	ext.groovyVersion        = "2.3.9"
 	ext.gsonVersion          = "2.3.1"
 	ext.hibernate3Version    = "3.6.10.Final"
 	ext.hibernate4Version    = "4.3.7.Final"
@@ -47,7 +47,7 @@ configure(allprojects) { project ->
 	ext.openJpaVersion       = "2.2.2"  // 2.3.0 not Java 8 compatible (based on ASM 4)
 	ext.protobufVersion      = "2.6.1"
 	ext.reactorVersion       = "1.1.5.RELEASE"
-	ext.slf4jVersion         = "1.7.7"
+	ext.slf4jVersion         = "1.7.9"
 	ext.snakeYamlVersion     = "1.14"
 	ext.snifferVersion       = "1.11"
 	ext.tiles2Version        = "2.2.2"
@@ -460,7 +460,7 @@ project("spring-context") {
 		optional("org.aspectj:aspectjweaver:${aspectjVersion}")
 		optional("org.codehaus.groovy:groovy-all:${groovyVersion}")
 		optional("org.beanshell:bsh:2.0b4")
-		optional("org.jruby:jruby:1.7.16.1")
+		optional("org.jruby:jruby:1.7.17")
 		testCompile("javax.inject:javax.inject-tck:1")
 		testCompile("commons-dbcp:commons-dbcp:1.4")
 		testCompile("org.slf4j:slf4j-api:${slf4jVersion}")

@@ -61,6 +61,8 @@ public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequest
 
 	private int connectTimeout;
 
+	private int connectionRequestTimeout;
+
 	private int socketTimeout;
 
 	private boolean bufferRequestBody = true;
@@ -140,6 +142,16 @@ public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequest
 	}
 
 	/**
+	 * Set the timeout in milliseconds used when requesting a connection from the connection
+	 * manager using the underlying HttpClient.
+	 * A timeout value of 0 specifies an infinite timeout.
+	 * @param connectionRequestTimeout the timeout value to request a connection in milliseconds
+	 */
+	public void setConnectionRequestTimeout(int connectionRequestTimeout) {
+		this.connectionRequestTimeout = connectionRequestTimeout;
+	}
+
+	/**
 	 * Set the socket read timeout for the underlying HttpClient.
 	 * A timeout value of 0 specifies an infinite timeout.
 	 * @param timeout the timeout value in milliseconds
@@ -193,9 +205,10 @@ public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequest
 				config = ((Configurable) httpRequest).getConfig();
 			}
 			if (config == null) {
-				if (this.socketTimeout > 0 || this.connectTimeout > 0) {
+				if (this.connectTimeout > 0 || this.connectionRequestTimeout > 0 || this.socketTimeout > 0) {
 					config = RequestConfig.custom()
 							.setConnectTimeout(this.connectTimeout)
+							.setConnectionRequestTimeout(this.connectionRequestTimeout)
 							.setSocketTimeout(this.socketTimeout)
 							.build();
 				}

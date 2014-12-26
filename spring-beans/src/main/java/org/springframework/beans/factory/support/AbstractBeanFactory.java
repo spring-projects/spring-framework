@@ -27,6 +27,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -151,7 +152,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	private boolean hasDestructionAwareBeanPostProcessors;
 
 	/** Map from scope identifier String to corresponding Scope */
-	private final Map<String, Scope> scopes = new HashMap<String, Scope>(8);
+	private final Map<String, Scope> scopes = new LinkedHashMap<String, Scope>(8);
 
 	/** Security context used when running with a SecurityManager */
 	private SecurityContextProvider securityContextProvider;
@@ -855,7 +856,17 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 		if (SCOPE_SINGLETON.equals(scopeName) || SCOPE_PROTOTYPE.equals(scopeName)) {
 			throw new IllegalArgumentException("Cannot replace existing scopes 'singleton' and 'prototype'");
 		}
-		this.scopes.put(scopeName, scope);
+		Scope previous = this.scopes.put(scopeName, scope);
+		if (previous != null && previous != scope) {
+			if (logger.isInfoEnabled()) {
+				logger.info("Replacing scope '" + scopeName + "' from [" + previous + "] to [" + scope + "]");
+			}
+		}
+		else {
+			if (logger.isDebugEnabled()) {
+				logger.debug("Registering scope '" + scopeName + "' with implementation [" + scope + "]");
+			}
+		}
 	}
 
 	@Override

@@ -40,7 +40,6 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.cfg.HandlerInstantiator;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
-import javafx.application.Application;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.FatalBeanException;
@@ -441,6 +440,7 @@ public class Jackson2ObjectMapperBuilder {
 	 * settings. This can be applied to any number of {@code ObjectMappers}.
 	 * @param objectMapper the ObjectMapper to configure
 	 */
+	@SuppressWarnings("deprecation")
 	public void configure(ObjectMapper objectMapper) {
 		Assert.notNull(objectMapper, "ObjectMapper must not be null");
 
@@ -495,13 +495,15 @@ public class Jackson2ObjectMapperBuilder {
 			objectMapper.setPropertyNamingStrategy(this.propertyNamingStrategy);
 		}
 		for (Class<?> target : this.mixIns.keySet()) {
+			// Deprecated as of Jackson 2.5, but just in favor of a fluent variant.
 			objectMapper.addMixInAnnotations(target, this.mixIns.get(target));
 		}
 		if (this.handlerInstantiator != null) {
 			objectMapper.setHandlerInstantiator(this.handlerInstantiator);
 		}
 		else if (this.applicationContext != null) {
-			objectMapper.setHandlerInstantiator(new SpringHandlerInstantiator(this.applicationContext.getAutowireCapableBeanFactory()));
+			objectMapper.setHandlerInstantiator(
+					new SpringHandlerInstantiator(this.applicationContext.getAutowireCapableBeanFactory()));
 		}
 	}
 
