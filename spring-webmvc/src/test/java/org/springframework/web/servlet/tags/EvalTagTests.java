@@ -159,7 +159,17 @@ public class EvalTagTests extends AbstractTagTests {
 		assertEquals("value", ((MockHttpServletResponse) context.getResponse()).getContentAsString());
 	}
 
-
+	public void testVarAsString() throws Exception {
+		PercentFormatter formatter = new PercentFormatter();
+		tag.setVar("foo");
+		tag.setVarAsString(true);
+		tag.setExpression("bean.formattable");
+		int action = tag.doStartTag();
+		assertEquals(Tag.EVAL_BODY_INCLUDE, action);
+		action = tag.doEndTag();
+		assertEquals(Tag.EVAL_PAGE, action);
+		assertEquals(formatter.print(new BigDecimal(".25"), Locale.getDefault()), context.getAttribute("foo"));
+	}
 
 	public static class Bean {
 

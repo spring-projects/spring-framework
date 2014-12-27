@@ -450,6 +450,12 @@
 			<rtexprvalue>true</rtexprvalue>
 		</attribute>
 		<attribute>
+			<description>Enable conversion of 'var' variable to string using conversion service. Default is false.</description>
+			<name>varAsString</name>
+			<required>false</required>
+			<rtexprvalue>true</rtexprvalue>
+		</attribute>
+		<attribute>
 			<description>The scope for the var.  'application', 'session', 'request' and 
 			'page' scopes are supported.  Defaults to page scope.  This attribute has no 
 			effect unless the var attribute is also defined.</description>

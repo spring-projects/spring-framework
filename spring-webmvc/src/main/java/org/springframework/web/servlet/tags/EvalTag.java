@@ -66,6 +66,8 @@ public class EvalTag extends HtmlEscapingAwareTag {
 
 	private boolean javaScriptEscape = false;
 
+	private boolean varAsString = false;
+
 
 	/**
 	 * Set the expression to evaluate.
@@ -80,6 +82,14 @@ public class EvalTag extends HtmlEscapingAwareTag {
 	 */
 	public void setVar(String var) {
 		this.var = var;
+	}
+
+	/**
+	 * Enable conversion of 'var' variable to string using conversion service.
+	 * Default is "false".
+	 */
+	public void setVarAsString(boolean varAsString) {
+		this.varAsString = varAsString;
 	}
 
 	/**
@@ -113,22 +123,31 @@ public class EvalTag extends HtmlEscapingAwareTag {
 			this.pageContext.setAttribute(EVALUATION_CONTEXT_PAGE_ATTRIBUTE, evaluationContext);
 		}
 		if (this.var != null) {
-			Object result = this.expression.getValue(evaluationContext);
+			Object result;
+			if (varAsString) {
+				result = getExpressionValueAsString(evaluationContext);
+			} else {
+				result = this.expression.getValue(evaluationContext);
+			}
 			this.pageContext.setAttribute(this.var, result, this.scope);
 		}
 		else {
 			try {
-				String result = this.expression.getValue(evaluationContext, String.class);
-				result = ObjectUtils.getDisplayString(result);
-				result = htmlEscape(result);
-				result = (this.javaScriptEscape ? JavaScriptUtils.javaScriptEscape(result) : result);
-				this.pageContext.getOut().print(result);
+				this.pageContext.getOut().print(getExpressionValueAsString(evaluationContext));
 			}
 			catch (IOException ex) {
 				throw new JspException(ex);
 			}
 		}
 		return EVAL_PAGE;
+	}
+
+	private String getExpressionValueAsString(EvaluationContext evaluationContext) {
+		String result = this.expression.getValue(evaluationContext, String.class);
+		result = ObjectUtils.getDisplayString(result);
+		result = htmlEscape(result);
+		result = (this.javaScriptEscape ? JavaScriptUtils.javaScriptEscape(result) : result);
+		return result;
 	}
 
 	private EvaluationContext createEvaluationContext(PageContext pageContext) {
