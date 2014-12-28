@@ -140,6 +140,14 @@ public class TransactionInterceptorTests extends AbstractTransactionAspectTests 
 	}
 
 	@Test
+	public void determineTransactionManagerWithNoTransactionAttribute() {
+		BeanFactory beanFactory = mock(BeanFactory.class);
+		TransactionInterceptor ti = createTestTransactionInterceptor(beanFactory, null);
+
+		assertNull(ti.determineTransactionManager(null));
+	}
+
+	@Test
 	public void determineTransactionManagerWithQualifierUnknown() {
 		BeanFactory beanFactory = mock(BeanFactory.class);
 		TransactionInterceptor ti = createTestTransactionInterceptor(beanFactory);

@@ -352,23 +352,12 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 		if (this.beanFactory != null) {
 			String qualifier = txAttr != null ? txAttr.getQualifier() : null;
 			if (StringUtils.hasText(qualifier)) {
-				PlatformTransactionManager txManager = this.transactionManagerCache.get(qualifier);
-				if (txManager == null) {
-					txManager = BeanFactoryAnnotationUtils.qualifiedBeanOfType(
-							this.beanFactory, PlatformTransactionManager.class, qualifier);
-					this.transactionManagerCache.putIfAbsent(qualifier, txManager);
-				}
-				return txManager;
+				return determineQualifiedTransactionManager(qualifier);
 			}
 			else if (StringUtils.hasText(this.transactionManagerBeanName)) {
-				PlatformTransactionManager txManager = this.transactionManagerCache.get(this.transactionManagerBeanName);
-				if (txManager == null) {
-					txManager = this.beanFactory.getBean(
-							this.transactionManagerBeanName, PlatformTransactionManager.class);
-					this.transactionManagerCache.putIfAbsent(this.transactionManagerBeanName, txManager);
-				}
-				return txManager;
-			} else {
+				return determineQualifiedTransactionManager(this.transactionManagerBeanName);
+			}
+			else if (txAttr != null) { // Do not lookup default bean name if no tx attributes are set
 				PlatformTransactionManager defaultTransactionManager = getTransactionManager();
 				if (defaultTransactionManager == null) {
 					defaultTransactionManager = this.beanFactory.getBean(PlatformTransactionManager.class);
@@ -379,6 +368,16 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 			}
 		}
 		return getTransactionManager();
+	}
+
+	private PlatformTransactionManager determineQualifiedTransactionManager(String qualifier) {
+		PlatformTransactionManager txManager = this.transactionManagerCache.get(qualifier);
+		if (txManager == null) {
+			txManager = BeanFactoryAnnotationUtils.qualifiedBeanOfType(
+					this.beanFactory, PlatformTransactionManager.class, qualifier);
+			this.transactionManagerCache.putIfAbsent(qualifier, txManager);
+		}
+		return txManager;
 	}
 
 	/**
