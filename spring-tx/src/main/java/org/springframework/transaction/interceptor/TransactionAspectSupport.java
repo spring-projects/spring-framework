@@ -349,35 +349,30 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 	 * Determine the specific transaction manager to use for the given transaction.
 	 */
 	protected PlatformTransactionManager determineTransactionManager(TransactionAttribute txAttr) {
-		if (this.beanFactory != null) {
-			String qualifier = txAttr != null ? txAttr.getQualifier() : null;
-			if (StringUtils.hasText(qualifier)) {
-				return determineQualifiedTransactionManager(qualifier);
-			}
-			else if (StringUtils.hasText(this.transactionManagerBeanName)) {
-				return determineQualifiedTransactionManager(this.transactionManagerBeanName);
-			}
-			else if (txAttr != null) { // Do not lookup default bean name if no tx attributes are set
-				PlatformTransactionManager defaultTransactionManager = getTransactionManager();
-				if (defaultTransactionManager == null) {
-					defaultTransactionManager = this.beanFactory.getBean(PlatformTransactionManager.class);
-					this.transactionManagerCache.putIfAbsent(
-							DEFAULT_TRANSACTION_MANAGER_KEY, defaultTransactionManager);
-				}
-				return defaultTransactionManager;
-			}
+		// Do not attempt to lookup tx manager if no tx attributes are set
+		if (txAttr == null || this.beanFactory == null) {
+			return getTransactionManager();
 		}
-		return getTransactionManager();
-	}
-
-	private PlatformTransactionManager determineQualifiedTransactionManager(String qualifier) {
-		PlatformTransactionManager txManager = this.transactionManagerCache.get(qualifier);
-		if (txManager == null) {
-			txManager = BeanFactoryAnnotationUtils.qualifiedBeanOfType(
-					this.beanFactory, PlatformTransactionManager.class, qualifier);
-			this.transactionManagerCache.putIfAbsent(qualifier, txManager);
+		String qualifier = (txAttr.getQualifier() != null ?
+				txAttr.getQualifier() : this.transactionManagerBeanName);
+		if (StringUtils.hasText(qualifier)) {
+			PlatformTransactionManager txManager = this.transactionManagerCache.get(qualifier);
+			if (txManager == null) {
+				txManager = BeanFactoryAnnotationUtils.qualifiedBeanOfType(
+						this.beanFactory, PlatformTransactionManager.class, qualifier);
+				this.transactionManagerCache.putIfAbsent(qualifier, txManager);
+			}
+			return txManager;
 		}
-		return txManager;
+		else {
+			PlatformTransactionManager defaultTransactionManager = getTransactionManager();
+			if (defaultTransactionManager == null) {
+				defaultTransactionManager = this.beanFactory.getBean(PlatformTransactionManager.class);
+				this.transactionManagerCache.putIfAbsent(
+						DEFAULT_TRANSACTION_MANAGER_KEY, defaultTransactionManager);
+			}
+			return defaultTransactionManager;
+		}
 	}
 
 	/**
