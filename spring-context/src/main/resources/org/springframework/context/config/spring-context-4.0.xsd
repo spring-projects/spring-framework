@@ -235,7 +235,7 @@
 				use="required">
 				<xsd:annotation>
 					<xsd:documentation><![CDATA[
-	The comma-separated list of packages to scan for annotated components.
+	The comma/semicolon/space/tab/linefeed-separated list of packages to scan for annotated components.
 					]]></xsd:documentation>
 				</xsd:annotation>
 			</xsd:attribute>

@@ -6265,7 +6265,7 @@ are eligible for such autodetection:
 To autodetect these classes and register the corresponding beans, you need to add
 `@ComponentScan` to your `@Configuration` class, where the `basePackages` attribute
 is a common parent package for the two classes. (Alternatively, you can specify a
-comma-separated list that includes the parent package of each class.)
+comma/semicolon/space-separated list that includes the parent package of each class.)
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
