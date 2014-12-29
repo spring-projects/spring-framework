@@ -73,7 +73,7 @@ public class FreeMarkerMacroTests {
 
 		// final Template expectedTemplate = new Template();
 		fc = new FreeMarkerConfigurer();
-		fc.setTemplateLoaderPaths(new String[] { "classpath:/", "file://" + System.getProperty("java.io.tmpdir") });
+		fc.setTemplateLoaderPaths("classpath:/", "file://" + System.getProperty("java.io.tmpdir"));
 		fc.afterPropertiesSet();
 
 		wac.getDefaultListableBeanFactory().registerSingleton("freeMarkerConfigurer", fc);
@@ -85,6 +85,7 @@ public class FreeMarkerMacroTests {
 		request.setAttribute(DispatcherServlet.THEME_RESOLVER_ATTRIBUTE, new FixedThemeResolver());
 		response = new MockHttpServletResponse();
 	}
+
 
 	@Test
 	public void testExposeSpringMacroHelpers() throws Exception {
@@ -128,7 +129,8 @@ public class FreeMarkerMacroTests {
 
 		try {
 			fv.render(model, request, response);
-		} catch (Exception ex) {
+		}
+		catch (Exception ex) {
 			assertTrue(ex instanceof ServletException);
 			assertTrue(ex.getMessage().contains(FreeMarkerView.SPRING_MACRO_REQUEST_CONTEXT_ATTRIBUTE));
 		}

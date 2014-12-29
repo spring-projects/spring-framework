@@ -288,13 +288,12 @@ public abstract class CollectionFactory {
 	 * @param enumType the enum type, never {@code null}
 	 * @return the given type as subtype of {@link Enum}
 	 * @throws IllegalArgumentException if the given type is not a subtype of {@link Enum}
-	 * @since 4.1.4
 	 */
 	@SuppressWarnings("rawtypes")
 	private static Class<? extends Enum> asEnumType(Class<?> enumType) {
 		Assert.notNull(enumType, "Enum type must not be null");
 		if (!Enum.class.isAssignableFrom(enumType)) {
-			throw new IllegalArgumentException(String.format("The supplied type '%s' is not an enum.", enumType.getName()));
+			throw new IllegalArgumentException("Supplied type is not an enum: " + enumType.getName());
 		}
 		return enumType.asSubclass(Enum.class);
 	}
