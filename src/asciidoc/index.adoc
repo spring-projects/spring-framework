@@ -30937,25 +30937,27 @@ multiple requests are allowed to access a session concurrently.
 ====
 
 * `org.springframework.web.context.request.WebRequest` or
-  `org.springframework.web.context.request.NativeWebRequest`. Allows for generic request
-  parameter access as well as request/session attribute access, without ties to the
-  native Servlet/Portlet API.
+  `org.springframework.web.context.request.NativeWebRequest`. Allows for generic
+  request parameter access as well as request/session attribute access, without ties
+  to the native Servlet/Portlet API.
 * `java.util.Locale` for the current request locale, determined by the most specific
-  locale resolver available, in effect, the configured `LocaleResolver` in a Servlet
-  environment.
-* `java.io.InputStream` / `java.io.Reader` for access to the request's content. This
-  value is the raw InputStream/Reader as exposed by the Servlet API.
-* `java.io.OutputStream` / `java.io.Writer` for generating the response's content. This
-  value is the raw OutputStream/Writer as exposed by the Servlet API.
+  locale resolver available, in effect, the configured `LocaleResolver` /
+  `LocaleContextResolver` in an MVC environment.
+* `java.util.TimeZone` (Java 6+) / `java.time.ZoneId` (on Java 8) for the time zone
+  associated with the current request, as determined by a `LocaleContextResolver`.
+* `java.io.InputStream` / `java.io.Reader` for access to the request's content.
+  This value is the raw InputStream/Reader as exposed by the Servlet API.
+* `java.io.OutputStream` / `java.io.Writer` for generating the response's content.
+  This value is the raw OutputStream/Writer as exposed by the Servlet API.
 * `org.springframework.http.HttpMethod` for the HTTP request method.
 * `java.security.Principal` containing the currently authenticated user.
 * `@PathVariable` annotated parameters for access to URI template variables. See
   <<mvc-ann-requestmapping-uri-templates>>.
-* `@MatrixVariable` annotated parameters for access to name-value pairs located in URI
-  path segments. See <<mvc-ann-matrix-variables>>.
+* `@MatrixVariable` annotated parameters for access to name-value pairs located in
+  URI path segments. See <<mvc-ann-matrix-variables>>.
 * `@RequestParam` annotated parameters for access to specific Servlet request
-  parameters. Parameter values are converted to the declared method argument type. See
-  <<mvc-ann-requestparam>>.
+  parameters. Parameter values are converted to the declared method argument type.
+  See <<mvc-ann-requestparam>>.
 * `@RequestHeader` annotated parameters for access to specific Servlet request HTTP
   headers. Parameter values are converted to the declared method argument type.
   See <<mvc-ann-requestheader>>.
@@ -30975,8 +30977,8 @@ multiple requests are allowed to access a session concurrently.
   (attributes stored temporarily on the server-side to make them available to the
   request after the redirect). `RedirectAttributes` is used instead of the implicit
   model if the method returns a "redirect:" prefixed view name or `RedirectView`.
-* Command or form objects to bind request parameters to bean properties (via setters) or
-  directly to fields, with customizable type conversion, depending on `@InitBinder`
+* Command or form objects to bind request parameters to bean properties (via setters)
+  or directly to fields, with customizable type conversion, depending on `@InitBinder`
   methods and/or the HandlerAdapter configuration. See the `webBindingInitializer`
   property on `RequestMappingHandlerAdapter`. Such command objects along with their
   validation results will be exposed as model attributes by default, using the command
