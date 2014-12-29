@@ -5976,8 +5976,8 @@ are eligible for such autodetection:
 
 To autodetect these classes and register the corresponding beans, you need to include
 the following element in XML, where the base-package element is a common parent package
-for the two classes. (Alternatively, you can specify a comma-separated list that
-includes the parent package of each class.)
+for the two classes. (Alternatively, you can specify a comma/semicolon/space/tab/linefeed-
+separated list that includes the parent package of each class.)
 
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
