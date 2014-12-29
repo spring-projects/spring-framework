@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -64,7 +64,6 @@ import org.springframework.util.AntPathMatcher;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.PathMatcher;
-import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
 
 /**
@@ -181,7 +180,7 @@ public class SimpAnnotationMethodMessageHandler extends AbstractMethodMessageHan
 	 * The configured Validator instance
 	 */
 	public Validator getValidator() {
-		return validator;
+		return this.validator;
 	}
 
 	/**
@@ -253,8 +252,7 @@ public class SimpAnnotationMethodMessageHandler extends AbstractMethodMessageHan
 		resolvers.add(new MessageMethodArgumentResolver());
 
 		resolvers.addAll(getCustomArgumentResolvers());
-		resolvers.add(new PayloadArgumentResolver(this.messageConverter,
-				(this.validator != null ? this.validator : new NoOpValidator())));
+		resolvers.add(new PayloadArgumentResolver(this.messageConverter, this.validator));
 
 		return resolvers;
 	}
@@ -284,25 +282,23 @@ public class SimpAnnotationMethodMessageHandler extends AbstractMethodMessageHan
 
 	@Override
 	protected SimpMessageMappingInfo getMappingForMethod(Method method, Class<?> handlerType) {
-		MessageMapping typeAnnot = AnnotationUtils.findAnnotation(handlerType, MessageMapping.class);
+		MessageMapping typeAnnotation = AnnotationUtils.findAnnotation(handlerType, MessageMapping.class);
 		MessageMapping messageAnnot = AnnotationUtils.findAnnotation(method, MessageMapping.class);
 		if (messageAnnot != null) {
 			SimpMessageMappingInfo result = createMessageMappingCondition(messageAnnot);
-			if (typeAnnot != null) {
-				result = createMessageMappingCondition(typeAnnot).combine(result);
+			if (typeAnnotation != null) {
+				result = createMessageMappingCondition(typeAnnotation).combine(result);
 			}
 			return result;
 		}
-
-		SubscribeMapping subsribeAnnot = AnnotationUtils.findAnnotation(method, SubscribeMapping.class);
-		if (subsribeAnnot != null) {
-			SimpMessageMappingInfo result = createSubscribeCondition(subsribeAnnot);
-			if (typeAnnot != null) {
-				result = createMessageMappingCondition(typeAnnot).combine(result);
+		SubscribeMapping subsribeAnnotation = AnnotationUtils.findAnnotation(method, SubscribeMapping.class);
+		if (subsribeAnnotation != null) {
+			SimpMessageMappingInfo result = createSubscribeCondition(subsribeAnnotation);
+			if (typeAnnotation != null) {
+				result = createMessageMappingCondition(typeAnnotation).combine(result);
 			}
 			return result;
 		}
-
 		return null;
 	}
 
@@ -366,19 +362,6 @@ public class SimpAnnotationMethodMessageHandler extends AbstractMethodMessageHan
 	@Override
 	protected AbstractExceptionHandlerMethodResolver createExceptionHandlerMethodResolverFor(Class<?> beanType) {
 		return new AnnotationExceptionHandlerMethodResolver(beanType);
-	}
-
-
-	private static final class NoOpValidator implements Validator {
-
-		@Override
-		public boolean supports(Class<?> clazz) {
-			return false;
-		}
-
-		@Override
-		public void validate(Object target, Errors errors) {
-		}
 	}
 
 }
