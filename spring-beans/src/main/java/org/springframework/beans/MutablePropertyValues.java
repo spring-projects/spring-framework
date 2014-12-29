@@ -263,6 +263,7 @@ public class MutablePropertyValues implements PropertyValues, Serializable {
 	 * Get the raw property value, if any.
 	 * @param propertyName the name to search for
 	 * @return the raw property value, or {@code null}
+	 * @since 4.0
 	 * @see #getPropertyValue(String)
 	 * @see PropertyValue#getValue()
 	 */
