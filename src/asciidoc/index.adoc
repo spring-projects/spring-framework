@@ -4707,13 +4707,13 @@ A child bean definition uses the bean class from the parent definition if none i
 specified, but can also override it. In the latter case, the child bean class must be
 compatible with the parent, that is, it must accept the parent's property values.
 
-A child bean definition inherits constructor argument values, property values, and
-method overrides from the parent, with the option to add new values. Any initialization
+A child bean definition inherits scope, constructor argument values, property values, and
+method overrides from the parent, with the option to add new values. Any scope, initialization
 method, destroy method, and/or `static` factory method settings that you specify will
 override the corresponding parent settings.
 
 The remaining settings are __always__ taken from the child definition: __depends on__,
-__autowire mode__, __dependency check__, __singleton__, __scope__, __lazy init__.
+__autowire mode__, __dependency check__, __singleton__, __lazy init__.
 
 The preceding example explicitly marks the parent bean definition as abstract by using
 the `abstract` attribute. If the parent definition does not specify a class, explicitly
