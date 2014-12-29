@@ -885,17 +885,16 @@ List userList = service.getUsernameList();
       child bean class must be compatible with the parent, that is, it must
       accept the parent's property values.</para>
 
-    <para>A child bean definition inherits constructor argument values, property
-      values, and method overrides from the parent, with the option to add new
-      values. Any initialization method, destroy method, and/or
+    <para>A child bean definition inherits scope, constructor argument values,
+      property values, and method overrides from the parent, with the option to
+      add new values. Any scope, initialization method, destroy method, and/or
       <literal>static</literal> factory method settings that you specify will
       override the corresponding parent settings.</para>
 
     <para>The remaining settings are <emphasis>always</emphasis> taken from the
       child definition: <emphasis>depends on</emphasis>, <emphasis>autowire
       mode</emphasis>, <emphasis>dependency check</emphasis>,
-      <emphasis>singleton</emphasis>, <emphasis>scope</emphasis>, <emphasis>lazy
-      init</emphasis>.</para>
+      <emphasis>singleton</emphasis>, <emphasis>lazy init</emphasis>.</para>
 
     <para>The preceding example explicitly marks the parent bean definition as
       abstract by using the <literal>abstract</literal> attribute. If the parent
