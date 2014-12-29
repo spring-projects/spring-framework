@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -143,7 +143,7 @@ public abstract class BridgeMethodResolver {
 	 */
 	private static Method findGenericDeclaration(Method bridgeMethod) {
 		// Search parent types for method that has same signature as bridge.
-		Class superclass = bridgeMethod.getDeclaringClass().getSuperclass();
+		Class<?> superclass = bridgeMethod.getDeclaringClass().getSuperclass();
 		while (superclass != null && !Object.class.equals(superclass)) {
 			Method method = searchForMatch(superclass, bridgeMethod);
 			if (method != null && !method.isBridge()) {
@@ -153,8 +153,8 @@ public abstract class BridgeMethodResolver {
 		}
 
 		// Search interfaces.
-		Class[] interfaces = ClassUtils.getAllInterfacesForClass(bridgeMethod.getDeclaringClass());
-		for (Class ifc : interfaces) {
+		Class<?>[] interfaces = ClassUtils.getAllInterfacesForClass(bridgeMethod.getDeclaringClass());
+		for (Class<?> ifc : interfaces) {
 			Method method = searchForMatch(ifc, bridgeMethod);
 			if (method != null && !method.isBridge()) {
 				return method;
@@ -174,13 +174,13 @@ public abstract class BridgeMethodResolver {
 			Method genericMethod, Method candidateMethod, Map<TypeVariable, Type> typeVariableMap) {
 
 		Type[] genericParameters = genericMethod.getGenericParameterTypes();
-		Class[] candidateParameters = candidateMethod.getParameterTypes();
+		Class<?>[] candidateParameters = candidateMethod.getParameterTypes();
 		if (genericParameters.length != candidateParameters.length) {
 			return false;
 		}
 		for (int i = 0; i < genericParameters.length; i++) {
 			Type genericParameter = genericParameters[i];
-			Class candidateParameter = candidateParameters[i];
+			Class<?> candidateParameter = candidateParameters[i];
 			if (candidateParameter.isArray()) {
 				// An array type: compare the component type.
 				Type rawType = GenericTypeResolver.getRawType(genericParameter, typeVariableMap);
@@ -193,7 +193,7 @@ public abstract class BridgeMethodResolver {
 				}
 			}
 			// A non-array type: compare the type itself.
-			Class resolvedParameter = GenericTypeResolver.resolveType(genericParameter, typeVariableMap);
+			Class<?> resolvedParameter = GenericTypeResolver.resolveType(genericParameter, typeVariableMap);
 			if (!candidateParameter.equals(resolvedParameter)) {
 				return false;
 			}
@@ -206,7 +206,7 @@ public abstract class BridgeMethodResolver {
 	 * that of the supplied {@link Method}, then this matching {@link Method} is returned,
 	 * otherwise {@code null} is returned.
 	 */
-	private static Method searchForMatch(Class type, Method bridgeMethod) {
+	private static Method searchForMatch(Class<?> type, Method bridgeMethod) {
 		return ReflectionUtils.findMethod(type, bridgeMethod.getName(), bridgeMethod.getParameterTypes());
 	}
 
@@ -221,9 +221,8 @@ public abstract class BridgeMethodResolver {
 		if (bridgeMethod == bridgedMethod) {
 			return true;
 		}
-		return Arrays.equals(bridgeMethod.getParameterTypes(), bridgedMethod.getParameterTypes()) &&
-				bridgeMethod.getReturnType().equals(bridgedMethod.getReturnType());
+		return (Arrays.equals(bridgeMethod.getParameterTypes(), bridgedMethod.getParameterTypes()) &&
+				bridgeMethod.getReturnType().equals(bridgedMethod.getReturnType()));
 	}
-
 
 }

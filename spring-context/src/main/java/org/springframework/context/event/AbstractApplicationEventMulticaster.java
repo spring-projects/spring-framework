@@ -227,7 +227,7 @@ public abstract class AbstractApplicationEventMulticaster
 	 * for the given event type
 	 */
 	protected boolean supportsEvent(
-			ApplicationListener listener, Class<? extends ApplicationEvent> eventType, Class sourceType) {
+			ApplicationListener listener, Class<? extends ApplicationEvent> eventType, Class<?> sourceType) {
 
 		SmartApplicationListener smartListener = (listener instanceof SmartApplicationListener ?
 				(SmartApplicationListener) listener : new GenericApplicationListenerAdapter(listener));

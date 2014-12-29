@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,10 +23,14 @@ import java.io.Writer;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
-
 import javax.servlet.http.HttpServletResponse;
 
+import freemarker.ext.servlet.AllHttpScopesHashModel;
+import freemarker.template.Configuration;
+import freemarker.template.Template;
+import freemarker.template.TemplateException;
 import org.junit.Test;
+
 import org.springframework.context.ApplicationContextException;
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockHttpServletResponse;
@@ -39,11 +43,6 @@ import org.springframework.web.servlet.i18n.AcceptHeaderLocaleResolver;
 import org.springframework.web.servlet.view.AbstractView;
 import org.springframework.web.servlet.view.InternalResourceView;
 import org.springframework.web.servlet.view.RedirectView;
-
-import freemarker.ext.servlet.AllHttpScopesHashModel;
-import freemarker.template.Configuration;
-import freemarker.template.Template;
-import freemarker.template.TemplateException;
 
 import static org.junit.Assert.*;
 import static org.mockito.BDDMockito.*;
@@ -70,7 +69,7 @@ public class FreeMarkerViewTests {
 		}
 		catch (ApplicationContextException ex) {
 			// Check there's a helpful error message
-			assertTrue(ex.getMessage().indexOf("FreeMarkerConfig") != -1);
+			assertTrue(ex.getMessage().contains("FreeMarkerConfig"));
 		}
 	}
 
@@ -83,7 +82,7 @@ public class FreeMarkerViewTests {
 		}
 		catch (IllegalArgumentException ex) {
 			// Check there's a helpful error message
-			assertTrue(ex.getMessage().indexOf("url") != -1);
+			assertTrue(ex.getMessage().contains("url"));
 		}
 	}
 
@@ -94,7 +93,7 @@ public class FreeMarkerViewTests {
 		WebApplicationContext wac = mock(WebApplicationContext.class);
 		MockServletContext sc = new MockServletContext();
 
-		Map configs = new HashMap();
+		Map<String, FreeMarkerConfig> configs = new HashMap<String, FreeMarkerConfig>();
 		FreeMarkerConfigurer configurer = new FreeMarkerConfigurer();
 		configurer.setConfiguration(new TestConfiguration());
 		configs.put("configurer", configurer);
@@ -110,7 +109,7 @@ public class FreeMarkerViewTests {
 		request.setAttribute(DispatcherServlet.LOCALE_RESOLVER_ATTRIBUTE, new AcceptHeaderLocaleResolver());
 		HttpServletResponse response = new MockHttpServletResponse();
 
-		Map model = new HashMap();
+		Map<String, Object> model = new HashMap<String, Object>();
 		model.put("myattr", "myvalue");
 		fv.render(model, request, response);
 
@@ -124,7 +123,7 @@ public class FreeMarkerViewTests {
 		WebApplicationContext wac = mock(WebApplicationContext.class);
 		MockServletContext sc = new MockServletContext();
 
-		Map configs = new HashMap();
+		Map<String, FreeMarkerConfig> configs = new HashMap<String, FreeMarkerConfig>();
 		FreeMarkerConfigurer configurer = new FreeMarkerConfigurer();
 		configurer.setConfiguration(new TestConfiguration());
 		configs.put("configurer", configurer);
@@ -141,7 +140,7 @@ public class FreeMarkerViewTests {
 		HttpServletResponse response = new MockHttpServletResponse();
 		response.setContentType("myContentType");
 
-		Map model = new HashMap();
+		Map<String, Object> model = new HashMap<String, Object>();
 		model.put("myattr", "myvalue");
 		fv.render(model, request, response);
 
@@ -185,7 +184,7 @@ public class FreeMarkerViewTests {
 		@Override
 		public Template getTemplate(String name, final Locale locale) throws IOException {
 			if (name.equals("templateName") || name.equals("prefix_test_suffix")) {
-				return new Template(name, new StringReader("test")) {
+				return new Template(name, new StringReader("test"), this) {
 					@Override
 					public void process(Object model, Writer writer) throws TemplateException, IOException {
 						assertEquals(Locale.US, locale);
