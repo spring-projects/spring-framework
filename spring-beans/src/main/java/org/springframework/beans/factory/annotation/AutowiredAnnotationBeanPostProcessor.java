@@ -218,7 +218,7 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 	@Override
 	public void postProcessMergedBeanDefinition(RootBeanDefinition beanDefinition, Class<?> beanType, String beanName) {
 		if (beanType != null) {
-			InjectionMetadata metadata = findAutowiringMetadata(beanName, beanType);
+			InjectionMetadata metadata = findAutowiringMetadata(beanName, beanType, null);
 			metadata.checkConfigMembers(beanDefinition);
 		}
 	}
@@ -293,7 +293,7 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 	public PropertyValues postProcessPropertyValues(
 			PropertyValues pvs, PropertyDescriptor[] pds, Object bean, String beanName) throws BeansException {
 
-		InjectionMetadata metadata = findAutowiringMetadata(beanName, bean.getClass());
+		InjectionMetadata metadata = findAutowiringMetadata(beanName, bean.getClass(), pvs);
 		try {
 			metadata.inject(bean, beanName, pvs);
 		}
@@ -311,7 +311,7 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 	 */
 	public void processInjection(Object bean) throws BeansException {
 		Class<?> clazz = bean.getClass();
-		InjectionMetadata metadata = findAutowiringMetadata(clazz.getName(), clazz);
+		InjectionMetadata metadata = findAutowiringMetadata(clazz.getName(), clazz, null);
 		try {
 			metadata.inject(bean, null, null);
 		}
@@ -321,7 +321,7 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 	}
 
 
-	private InjectionMetadata findAutowiringMetadata(String beanName, Class<?> clazz) {
+	private InjectionMetadata findAutowiringMetadata(String beanName, Class<?> clazz, PropertyValues pvs) {
 		// Fall back to class name as cache key, for backwards compatibility with custom callers.
 		String cacheKey = (StringUtils.hasLength(beanName) ? beanName : clazz.getName());
 		// Quick check on the concurrent map first, with minimal locking.
@@ -330,6 +330,9 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 			synchronized (this.injectionMetadataCache) {
 				metadata = this.injectionMetadataCache.get(cacheKey);
 				if (InjectionMetadata.needsRefresh(metadata, clazz)) {
+					if (metadata != null) {
+						metadata.clear(pvs);
+					}
 					metadata = buildAutowiringMetadata(clazz);
 					this.injectionMetadataCache.put(cacheKey, metadata);
 				}
