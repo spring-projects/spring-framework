@@ -604,6 +604,7 @@ public class MBeanClientInterceptor
 		this.connector.close();
 	}
 
+
 	/**
 	 * Simple wrapper class around a method name and its signature.
 	 * Used as the key when caching methods.

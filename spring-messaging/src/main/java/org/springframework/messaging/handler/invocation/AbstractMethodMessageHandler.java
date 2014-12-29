@@ -93,8 +93,7 @@ public abstract class AbstractMethodMessageHandler<T>
 	 * one of the configured prefixes are eligible for handling. When there is a
 	 * match the prefix is removed and only the remaining part of the destination
 	 * is used for method-mapping purposes.
-	 *
-	 * <p>By default no prefixes are configured in which case all messages are
+	 * <p>By default, no prefixes are configured in which case all messages are
 	 * eligible for handling.
 	 */
 	public void setDestinationPrefixes(Collection<String> prefixes) {

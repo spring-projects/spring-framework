@@ -135,7 +135,6 @@ public class SimpAnnotationMethodMessageHandler extends AbstractMethodMessageHan
 	 * <p>Destination prefixes are expected to be slash-separated Strings and
 	 * therefore a slash is automatically appended where missing to ensure a
 	 * proper prefix-based match (i.e. matching complete segments).
-	 *
 	 * <p>Note however that the remaining portion of a destination after the
 	 * prefix may use a different separator (e.g. commonly "." in messaging)
 	 * depending on the configured {@code PathMatcher}.
@@ -160,10 +159,9 @@ public class SimpAnnotationMethodMessageHandler extends AbstractMethodMessageHan
 	}
 
 	/**
-	 * Configure a {@link MessageConverter} to use to convert the payload of a message
-	 * from serialize form with a specific MIME type to an Object matching the target
-	 * method parameter. The converter is also used when sending message to the message
-	 * broker.
+	 * Configure a {@link MessageConverter} to use to convert the payload of a message from
+	 * its serialized form with a specific MIME type to an Object matching the target method
+	 * parameter. The converter is also used when sending a message to the message broker.
 	 * @see CompositeMessageConverter
 	 */
 	public void setMessageConverter(MessageConverter converter) {
@@ -181,9 +179,9 @@ public class SimpAnnotationMethodMessageHandler extends AbstractMethodMessageHan
 	}
 
 	/**
-	 * Configure a {@link ConversionService} to use when resolving method arguments, for
-	 * example message header values.
-	 * <p>By default an instance of {@link DefaultFormattingConversionService} is used.
+	 * Configure a {@link ConversionService} to use when resolving method arguments,
+	 * for example message header values.
+	 * <p>By default, {@link DefaultFormattingConversionService} is used.
 	 */
 	public void setConversionService(ConversionService conversionService) {
 		this.conversionService = conversionService;
@@ -199,7 +197,7 @@ public class SimpAnnotationMethodMessageHandler extends AbstractMethodMessageHan
 	/**
 	 * Set the PathMatcher implementation to use for matching destinations
 	 * against configured destination patterns.
-	 * <p>By default AntPathMatcher is used
+	 * <p>By default, {@link AntPathMatcher} is used.
 	 */
 	public void setPathMatcher(PathMatcher pathMatcher) {
 		Assert.notNull(pathMatcher, "PathMatcher must not be null");
@@ -234,15 +232,14 @@ public class SimpAnnotationMethodMessageHandler extends AbstractMethodMessageHan
 	 * Configure a {@link MessageHeaderInitializer} to pass on to
 	 * {@link org.springframework.messaging.handler.invocation.HandlerMethodReturnValueHandler}s
 	 * that send messages from controller return values.
-	 *
-	 * <p>By default this property is not set.
+	 * <p>By default, this property is not set.
 	 */
 	public void setHeaderInitializer(MessageHeaderInitializer headerInitializer) {
 		this.headerInitializer = headerInitializer;
 	}
 
 	/**
-	 * @return the configured header initializer.
+	 * Return the configured header initializer.
 	 */
 	public MessageHeaderInitializer getHeaderInitializer() {
 		return this.headerInitializer;
