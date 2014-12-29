@@ -31,7 +31,6 @@ import org.springframework.messaging.converter.MessageConverter;
 import org.springframework.messaging.handler.invocation.HandlerMethodArgumentResolver;
 import org.springframework.messaging.handler.invocation.HandlerMethodArgumentResolverComposite;
 import org.springframework.messaging.handler.invocation.InvocableHandlerMethod;
-import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
 
 /**
@@ -62,7 +61,7 @@ public class DefaultMessageHandlerMethodFactory implements MessageHandlerMethodF
 
 	private MessageConverter messageConverter;
 
-	private Validator validator = new NoOpValidator();
+	private Validator validator;
 
 	private List<HandlerMethodArgumentResolver> customArgumentResolvers;
 
@@ -167,19 +166,6 @@ public class DefaultMessageHandlerMethodFactory implements MessageHandlerMethodF
 		resolvers.add(new PayloadArgumentResolver(this.messageConverter, this.validator));
 
 		return resolvers;
-	}
-
-
-	private static final class NoOpValidator implements Validator {
-
-		@Override
-		public boolean supports(Class<?> clazz) {
-			return false;
-		}
-
-		@Override
-		public void validate(Object target, Errors errors) {
-		}
 	}
 
 }

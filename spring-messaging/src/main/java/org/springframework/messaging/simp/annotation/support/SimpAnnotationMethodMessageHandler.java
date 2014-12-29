@@ -67,7 +67,6 @@ import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.PathMatcher;
-import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
 
 /**
@@ -309,8 +308,7 @@ public class SimpAnnotationMethodMessageHandler extends AbstractMethodMessageHan
 		resolvers.add(new MessageMethodArgumentResolver());
 
 		resolvers.addAll(getCustomArgumentResolvers());
-		resolvers.add(new PayloadArgumentResolver(this.messageConverter,
-				(this.validator != null ? this.validator : new NoOpValidator())));
+		resolvers.add(new PayloadArgumentResolver(this.messageConverter, this.validator));
 
 		return resolvers;
 	}
@@ -455,19 +453,6 @@ public class SimpAnnotationMethodMessageHandler extends AbstractMethodMessageHan
 	@Override
 	protected AbstractExceptionHandlerMethodResolver createExceptionHandlerMethodResolverFor(Class<?> beanType) {
 		return new AnnotationExceptionHandlerMethodResolver(beanType);
-	}
-
-
-	private static final class NoOpValidator implements Validator {
-
-		@Override
-		public boolean supports(Class<?> clazz) {
-			return false;
-		}
-
-		@Override
-		public void validate(Object target, Errors errors) {
-		}
 	}
 
 }
