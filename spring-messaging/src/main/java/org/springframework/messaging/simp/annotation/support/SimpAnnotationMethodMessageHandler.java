@@ -144,8 +144,8 @@ public class SimpAnnotationMethodMessageHandler extends AbstractMethodMessageHan
 	}
 
 	/**
-	 * Configure a {@link ConversionService} to use when resolving method arguments, for
-	 * example message header values.
+	 * Configure a {@link ConversionService} to use when resolving method arguments,
+	 * for example message header values.
 	 * <p>By default an instance of {@link DefaultFormattingConversionService} is used.
 	 */
 	public void setConversionService(ConversionService conversionService) {
@@ -153,7 +153,7 @@ public class SimpAnnotationMethodMessageHandler extends AbstractMethodMessageHan
 	}
 
 	/**
-	 * The configured {@link ConversionService}.
+	 * Return the configured {@link ConversionService}.
 	 */
 	public ConversionService getConversionService() {
 		return this.conversionService;
@@ -162,7 +162,7 @@ public class SimpAnnotationMethodMessageHandler extends AbstractMethodMessageHan
 	/**
 	 * Set the PathMatcher implementation to use for matching destinations
 	 * against configured destination patterns.
-	 * <p>By default AntPathMatcher is used
+	 * <p>By default, {@link AntPathMatcher} is used.
 	 */
 	public void setPathMatcher(PathMatcher pathMatcher) {
 		Assert.notNull(pathMatcher, "PathMatcher must not be null");
@@ -170,14 +170,14 @@ public class SimpAnnotationMethodMessageHandler extends AbstractMethodMessageHan
 	}
 
 	/**
-	 * Return the PathMatcher implementation to use for matching destinations
+	 * Return the PathMatcher implementation to use for matching destinations.
 	 */
 	public PathMatcher getPathMatcher() {
 		return this.pathMatcher;
 	}
 
 	/**
-	 * The configured Validator instance
+	 * Return the configured Validator instance.
 	 */
 	public Validator getValidator() {
 		return this.validator;
@@ -283,17 +283,17 @@ public class SimpAnnotationMethodMessageHandler extends AbstractMethodMessageHan
 	@Override
 	protected SimpMessageMappingInfo getMappingForMethod(Method method, Class<?> handlerType) {
 		MessageMapping typeAnnotation = AnnotationUtils.findAnnotation(handlerType, MessageMapping.class);
-		MessageMapping messageAnnot = AnnotationUtils.findAnnotation(method, MessageMapping.class);
-		if (messageAnnot != null) {
-			SimpMessageMappingInfo result = createMessageMappingCondition(messageAnnot);
+		MessageMapping messageAnnotation = AnnotationUtils.findAnnotation(method, MessageMapping.class);
+		if (messageAnnotation != null) {
+			SimpMessageMappingInfo result = createMessageMappingCondition(messageAnnotation);
 			if (typeAnnotation != null) {
 				result = createMessageMappingCondition(typeAnnotation).combine(result);
 			}
 			return result;
 		}
-		SubscribeMapping subsribeAnnotation = AnnotationUtils.findAnnotation(method, SubscribeMapping.class);
-		if (subsribeAnnotation != null) {
-			SimpMessageMappingInfo result = createSubscribeCondition(subsribeAnnotation);
+		SubscribeMapping subscribeAnnotation = AnnotationUtils.findAnnotation(method, SubscribeMapping.class);
+		if (subscribeAnnotation != null) {
+			SimpMessageMappingInfo result = createSubscribeCondition(subscribeAnnotation);
 			if (typeAnnotation != null) {
 				result = createMessageMappingCondition(typeAnnotation).combine(result);
 			}
@@ -348,11 +348,10 @@ public class SimpAnnotationMethodMessageHandler extends AbstractMethodMessageHan
 	protected void handleMatch(SimpMessageMappingInfo mapping, HandlerMethod handlerMethod,
 			String lookupDestination, Message<?> message) {
 
-		SimpMessageHeaderAccessor headers = SimpMessageHeaderAccessor.wrap(message);
-
 		String matchedPattern = mapping.getDestinationConditions().getPatterns().iterator().next();
 		Map<String, String> vars = getPathMatcher().extractUriTemplateVariables(matchedPattern, lookupDestination);
 
+		SimpMessageHeaderAccessor headers = SimpMessageHeaderAccessor.wrap(message);
 		headers.setHeader(DestinationVariableMethodArgumentResolver.DESTINATION_TEMPLATE_VARIABLES_HEADER, vars);
 		message = MessageBuilder.withPayload(message.getPayload()).setHeaders(headers).build();
 
