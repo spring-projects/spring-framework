@@ -79,10 +79,7 @@ public class WebMergedContextConfiguration extends MergedContextConfiguration {
 	 * instead.
 	 */
 	@Deprecated
-	public WebMergedContextConfiguration(
-			Class<?> testClass,
-			String[] locations,
-			Class<?>[] classes,
+	public WebMergedContextConfiguration(Class<?> testClass, String[] locations, Class<?>[] classes,
 			Set<Class<? extends ApplicationContextInitializer<? extends ConfigurableApplicationContext>>> contextInitializerClasses,
 			String[] activeProfiles, String resourceBasePath, ContextLoader contextLoader,
 			CacheAwareContextLoaderDelegate cacheAwareContextLoaderDelegate, MergedContextConfiguration parent) {
@@ -163,15 +160,15 @@ public class WebMergedContextConfiguration extends MergedContextConfiguration {
 	 * {@link #getContextLoader() ContextLoaders}.
 	 */
 	@Override
-	public boolean equals(Object obj) {
-		if (this == obj) {
+	public boolean equals(Object other) {
+		if (this == other) {
 			return true;
 		}
-		if (!(obj instanceof WebMergedContextConfiguration)) {
+		if (!(other instanceof WebMergedContextConfiguration)) {
 			return false;
 		}
-		WebMergedContextConfiguration that = (WebMergedContextConfiguration) obj;
-		return super.equals(that) && this.getResourceBasePath().equals(that.getResourceBasePath());
+		WebMergedContextConfiguration otherConfig = (WebMergedContextConfiguration) other;
+		return super.equals(otherConfig) && this.getResourceBasePath().equals(otherConfig.getResourceBasePath());
 	}
 
 	/**
@@ -181,7 +178,7 @@ public class WebMergedContextConfiguration extends MergedContextConfiguration {
 	 */
 	@Override
 	public int hashCode() {
-		return super.hashCode() * 31 + this.resourceBasePath.hashCode();
+		return 31 * super.hashCode() + this.resourceBasePath.hashCode();
 	}
 
 	/**

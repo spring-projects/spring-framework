@@ -68,35 +68,47 @@ public class MergedContextConfiguration implements Serializable {
 	private static final long serialVersionUID = -3290560718464957422L;
 
 	private static final String[] EMPTY_STRING_ARRAY = new String[0];
+
 	private static final Class<?>[] EMPTY_CLASS_ARRAY = new Class<?>[0];
-	private static final Set<Class<? extends ApplicationContextInitializer<? extends ConfigurableApplicationContext>>> EMPTY_INITIALIZER_CLASSES = //
-	Collections.<Class<? extends ApplicationContextInitializer<? extends ConfigurableApplicationContext>>> emptySet();
+
+	private static final Set<Class<? extends ApplicationContextInitializer<? extends ConfigurableApplicationContext>>> EMPTY_INITIALIZER_CLASSES =
+			Collections.<Class<? extends ApplicationContextInitializer<? extends ConfigurableApplicationContext>>> emptySet();
+
 
 	private final Class<?> testClass;
+
 	private final String[] locations;
+
 	private final Class<?>[] classes;
+
 	private final Set<Class<? extends ApplicationContextInitializer<? extends ConfigurableApplicationContext>>> contextInitializerClasses;
+
 	private final String[] activeProfiles;
+
 	private final String[] propertySourceLocations;
+
 	private final String[] propertySourceProperties;
+
 	private final ContextLoader contextLoader;
+
 	private final CacheAwareContextLoaderDelegate cacheAwareContextLoaderDelegate;
 
 	private final MergedContextConfiguration parent;
 
 
 	private static String[] processStrings(String[] array) {
-		return array == null ? EMPTY_STRING_ARRAY : array;
+		return (array != null ? array : EMPTY_STRING_ARRAY);
 	}
 
 	private static Class<?>[] processClasses(Class<?>[] classes) {
-		return classes == null ? EMPTY_CLASS_ARRAY : classes;
+		return (classes != null ? classes : EMPTY_CLASS_ARRAY);
 	}
 
 	private static Set<Class<? extends ApplicationContextInitializer<? extends ConfigurableApplicationContext>>> processContextInitializerClasses(
 			Set<Class<? extends ApplicationContextInitializer<? extends ConfigurableApplicationContext>>> contextInitializerClasses) {
-		return contextInitializerClasses == null ? EMPTY_INITIALIZER_CLASSES
-				: Collections.unmodifiableSet(contextInitializerClasses);
+
+		return (contextInitializerClasses != null ?
+				Collections.unmodifiableSet(contextInitializerClasses) : EMPTY_INITIALIZER_CLASSES);
 	}
 
 	private static String[] processActiveProfiles(String[] activeProfiles) {
@@ -117,15 +129,15 @@ public class MergedContextConfiguration implements Serializable {
 	 * loader or &quot;null&quot; if the supplied loaded is {@code null}.
 	 */
 	protected static String nullSafeToString(ContextLoader contextLoader) {
-		return contextLoader == null ? "null" : contextLoader.getClass().getName();
+		return (contextLoader != null ? contextLoader.getClass().getName() : "null");
 	}
+
 
 	/**
 	 * Create a new {@code MergedContextConfiguration} instance for the
 	 * supplied parameters.
 	 * <p>Delegates to
 	 * {@link #MergedContextConfiguration(Class, String[], Class[], Set, String[], String[], String[], ContextLoader, CacheAwareContextLoaderDelegate, MergedContextConfiguration)}.
-	 *
 	 * @param testClass the test class for which the configuration was merged
 	 * @param locations the merged context resource locations
 	 * @param classes the merged annotated classes
@@ -134,6 +146,7 @@ public class MergedContextConfiguration implements Serializable {
 	 */
 	public MergedContextConfiguration(Class<?> testClass, String[] locations, Class<?>[] classes,
 			String[] activeProfiles, ContextLoader contextLoader) {
+
 		this(testClass, locations, classes, null, activeProfiles, contextLoader);
 	}
 
@@ -142,7 +155,6 @@ public class MergedContextConfiguration implements Serializable {
 	 * supplied parameters.
 	 * <p>Delegates to
 	 * {@link #MergedContextConfiguration(Class, String[], Class[], Set, String[], String[], String[], ContextLoader, CacheAwareContextLoaderDelegate, MergedContextConfiguration)}.
-	 *
 	 * @param testClass the test class for which the configuration was merged
 	 * @param locations the merged context resource locations
 	 * @param classes the merged annotated classes
@@ -151,12 +163,10 @@ public class MergedContextConfiguration implements Serializable {
 	 * @param contextLoader the resolved {@code ContextLoader}
 	 * @see #MergedContextConfiguration(Class, String[], Class[], Set, String[], ContextLoader, CacheAwareContextLoaderDelegate, MergedContextConfiguration)
 	 */
-	public MergedContextConfiguration(
-			Class<?> testClass,
-			String[] locations,
-			Class<?>[] classes,
+	public MergedContextConfiguration(Class<?> testClass, String[] locations, Class<?>[] classes,
 			Set<Class<? extends ApplicationContextInitializer<? extends ConfigurableApplicationContext>>> contextInitializerClasses,
 			String[] activeProfiles, ContextLoader contextLoader) {
+
 		this(testClass, locations, classes, contextInitializerClasses, activeProfiles, contextLoader, null, null);
 	}
 
@@ -165,7 +175,6 @@ public class MergedContextConfiguration implements Serializable {
 	 * supplied parameters.
 	 * <p>Delegates to
 	 * {@link #MergedContextConfiguration(Class, String[], Class[], Set, String[], String[], String[], ContextLoader, CacheAwareContextLoaderDelegate, MergedContextConfiguration)}.
-	 *
 	 * @param testClass the test class for which the configuration was merged
 	 * @param locations the merged context resource locations
 	 * @param classes the merged annotated classes
@@ -177,13 +186,11 @@ public class MergedContextConfiguration implements Serializable {
 	 * @param parent the parent configuration or {@code null} if there is no parent
 	 * @since 3.2.2
 	 */
-	public MergedContextConfiguration(
-			Class<?> testClass,
-			String[] locations,
-			Class<?>[] classes,
+	public MergedContextConfiguration(Class<?> testClass, String[] locations, Class<?>[] classes,
 			Set<Class<? extends ApplicationContextInitializer<? extends ConfigurableApplicationContext>>> contextInitializerClasses,
 			String[] activeProfiles, ContextLoader contextLoader,
 			CacheAwareContextLoaderDelegate cacheAwareContextLoaderDelegate, MergedContextConfiguration parent) {
+
 		this(testClass, locations, classes, contextInitializerClasses, activeProfiles, null, null, contextLoader,
 			cacheAwareContextLoaderDelegate, parent);
 	}
@@ -203,7 +210,6 @@ public class MergedContextConfiguration implements Serializable {
 	/**
 	 * Create a new {@code MergedContextConfiguration} instance for the
 	 * supplied parameters.
-	 *
 	 * <p>If a {@code null} value is supplied for {@code locations},
 	 * {@code classes}, {@code activeProfiles}, {@code propertySourceLocations},
 	 * or {@code propertySourceProperties} an empty array will be stored instead.
@@ -211,7 +217,6 @@ public class MergedContextConfiguration implements Serializable {
 	 * {@code contextInitializerClasses} an empty set will be stored instead.
 	 * Furthermore, active profiles will be sorted, and duplicate profiles
 	 * will be removed.
-	 *
 	 * @param testClass the test class for which the configuration was merged
 	 * @param locations the merged context resource locations
 	 * @param classes the merged annotated classes
@@ -225,14 +230,12 @@ public class MergedContextConfiguration implements Serializable {
 	 * @param parent the parent configuration or {@code null} if there is no parent
 	 * @since 4.1
 	 */
-	public MergedContextConfiguration(
-			Class<?> testClass,
-			String[] locations,
-			Class<?>[] classes,
+	public MergedContextConfiguration(Class<?> testClass, String[] locations, Class<?>[] classes,
 			Set<Class<? extends ApplicationContextInitializer<? extends ConfigurableApplicationContext>>> contextInitializerClasses,
 			String[] activeProfiles, String[] propertySourceLocations, String[] propertySourceProperties,
 			ContextLoader contextLoader, CacheAwareContextLoaderDelegate cacheAwareContextLoaderDelegate,
 			MergedContextConfiguration parent) {
+
 		this.testClass = testClass;
 		this.locations = processStrings(locations);
 		this.classes = processClasses(classes);
@@ -245,11 +248,13 @@ public class MergedContextConfiguration implements Serializable {
 		this.parent = parent;
 	}
 
+
 	/**
-	 * Get the {@linkplain Class test class} associated with this {@code MergedContextConfiguration}.
+	 * Get the {@linkplain Class test class} associated with this
+	 * {@code MergedContextConfiguration}.
 	 */
 	public Class<?> getTestClass() {
-		return testClass;
+		return this.testClass;
 	}
 
 	/**
@@ -259,20 +264,19 @@ public class MergedContextConfiguration implements Serializable {
 	 * files or Groovy scripts.
 	 */
 	public String[] getLocations() {
-		return locations;
+		return this.locations;
 	}
 
 	/**
 	 * Get the merged annotated classes for the {@linkplain #getTestClass() test class}.
 	 */
 	public Class<?>[] getClasses() {
-		return classes;
+		return this.classes;
 	}
 
 	/**
 	 * Determine if this {@code MergedContextConfiguration} instance has
 	 * path-based context resource locations.
-	 *
 	 * @return {@code true} if the {@link #getLocations() locations} array is not empty
 	 * @since 4.0.4
 	 * @see #hasResources()
@@ -285,7 +289,6 @@ public class MergedContextConfiguration implements Serializable {
 	/**
 	 * Determine if this {@code MergedContextConfiguration} instance has
 	 * class-based resources.
-	 *
 	 * @return {@code true} if the {@link #getClasses() classes} array is not empty
 	 * @since 4.0.4
 	 * @see #hasResources()
@@ -298,7 +301,6 @@ public class MergedContextConfiguration implements Serializable {
 	/**
 	 * Determine if this {@code MergedContextConfiguration} instance has
 	 * either path-based context resource locations or class-based resources.
-	 *
 	 * @return {@code true} if either the {@link #getLocations() locations}
 	 * or the {@link #getClasses() classes} array is not empty
 	 * @since 4.0.4
@@ -306,7 +308,7 @@ public class MergedContextConfiguration implements Serializable {
 	 * @see #hasClasses()
 	 */
 	public boolean hasResources() {
-		return hasLocations() || hasClasses();
+		return (hasLocations() || hasClasses());
 	}
 
 	/**
@@ -314,7 +316,7 @@ public class MergedContextConfiguration implements Serializable {
 	 * {@linkplain #getTestClass() test class}.
 	 */
 	public Set<Class<? extends ApplicationContextInitializer<? extends ConfigurableApplicationContext>>> getContextInitializerClasses() {
-		return contextInitializerClasses;
+		return this.contextInitializerClasses;
 	}
 
 	/**
@@ -323,17 +325,17 @@ public class MergedContextConfiguration implements Serializable {
 	 * @see ActiveProfiles
 	 */
 	public String[] getActiveProfiles() {
-		return activeProfiles;
+		return this.activeProfiles;
 	}
 
 	/**
-	 * Get the merged resource locations for test {@code PropertySources} for the
-	 * {@linkplain #getTestClass() test class}.
+	 * Get the merged resource locations for test {@code PropertySources}
+	 * for the {@linkplain #getTestClass() test class}.
 	 * @see TestPropertySource#locations
 	 * @see java.util.Properties
 	 */
 	public String[] getPropertySourceLocations() {
-		return propertySourceLocations;
+		return this.propertySourceLocations;
 	}
 
 	/**
@@ -345,20 +347,19 @@ public class MergedContextConfiguration implements Serializable {
 	 * @see java.util.Properties
 	 */
 	public String[] getPropertySourceProperties() {
-		return propertySourceProperties;
+		return this.propertySourceProperties;
 	}
 
 	/**
 	 * Get the resolved {@link ContextLoader} for the {@linkplain #getTestClass() test class}.
 	 */
 	public ContextLoader getContextLoader() {
-		return contextLoader;
+		return this.contextLoader;
 	}
 
 	/**
-	 * Get the {@link MergedContextConfiguration} for the parent application context in a
-	 * context hierarchy.
-	 *
+	 * Get the {@link MergedContextConfiguration} for the parent application context
+	 * in a context hierarchy.
 	 * @return the parent configuration or {@code null} if there is no parent
 	 * @see #getParentApplicationContext()
 	 * @since 3.2.2
@@ -370,43 +371,21 @@ public class MergedContextConfiguration implements Serializable {
 	/**
 	 * Get the parent {@link ApplicationContext} for the context defined by this
 	 * {@code MergedContextConfiguration} from the context cache.
-	 * <p>
-	 * If the parent context has not yet been loaded, it will be loaded, stored in the
-	 * cache, and then returned.
-	 *
+	 * <p>If the parent context has not yet been loaded, it will be loaded, stored
+	 * in the cache, and then returned.
 	 * @return the parent {@code ApplicationContext} or {@code null} if there is no parent
 	 * @see #getParent()
 	 * @since 3.2.2
 	 */
 	public ApplicationContext getParentApplicationContext() {
-		if (parent == null) {
+		if (this.parent == null) {
 			return null;
 		}
-
-		Assert.state(cacheAwareContextLoaderDelegate != null,
-			"Cannot retrieve a parent application context without access to the CacheAwareContextLoaderDelegate.");
-		return cacheAwareContextLoaderDelegate.loadContext(parent);
+		Assert.state(this.cacheAwareContextLoaderDelegate != null,
+				"Cannot retrieve a parent application context without access to the CacheAwareContextLoaderDelegate");
+		return this.cacheAwareContextLoaderDelegate.loadContext(this.parent);
 	}
 
-	/**
-	 * Generate a unique hash code for all properties of this
-	 * {@code MergedContextConfiguration} excluding the
-	 * {@linkplain #getTestClass() test class}.
-	 */
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + Arrays.hashCode(locations);
-		result = prime * result + Arrays.hashCode(classes);
-		result = prime * result + contextInitializerClasses.hashCode();
-		result = prime * result + Arrays.hashCode(activeProfiles);
-		result = prime * result + Arrays.hashCode(propertySourceLocations);
-		result = prime * result + Arrays.hashCode(propertySourceProperties);
-		result = prime * result + (parent == null ? 0 : parent.hashCode());
-		result = prime * result + nullSafeToString(contextLoader).hashCode();
-		return result;
-	}
 
 	/**
 	 * Determine if the supplied object is equal to this {@code MergedContextConfiguration}
@@ -420,55 +399,66 @@ public class MergedContextConfiguration implements Serializable {
 	 * {@link #getContextLoader() ContextLoaders}.
 	 */
 	@Override
-	public boolean equals(Object obj) {
-
-		if (this == obj) {
+	public boolean equals(Object other) {
+		if (this == other) {
 			return true;
 		}
-		if (!(obj instanceof MergedContextConfiguration)) {
+		if (!(other instanceof MergedContextConfiguration)) {
 			return false;
 		}
 
-		final MergedContextConfiguration that = (MergedContextConfiguration) obj;
-
-		if (!Arrays.equals(this.locations, that.locations)) {
+		MergedContextConfiguration otherConfig = (MergedContextConfiguration) other;
+		if (!Arrays.equals(this.locations, otherConfig.locations)) {
 			return false;
 		}
-
-		if (!Arrays.equals(this.classes, that.classes)) {
+		if (!Arrays.equals(this.classes, otherConfig.classes)) {
 			return false;
 		}
-
-		if (!this.contextInitializerClasses.equals(that.contextInitializerClasses)) {
+		if (!this.contextInitializerClasses.equals(otherConfig.contextInitializerClasses)) {
 			return false;
 		}
-
-		if (!Arrays.equals(this.activeProfiles, that.activeProfiles)) {
+		if (!Arrays.equals(this.activeProfiles, otherConfig.activeProfiles)) {
 			return false;
 		}
-
-		if (!Arrays.equals(this.propertySourceLocations, that.propertySourceLocations)) {
+		if (!Arrays.equals(this.propertySourceLocations, otherConfig.propertySourceLocations)) {
 			return false;
 		}
-
-		if (!Arrays.equals(this.propertySourceProperties, that.propertySourceProperties)) {
+		if (!Arrays.equals(this.propertySourceProperties, otherConfig.propertySourceProperties)) {
 			return false;
 		}
 
 		if (this.parent == null) {
-			if (that.parent != null) {
+			if (otherConfig.parent != null) {
 				return false;
 			}
 		}
-		else if (!this.parent.equals(that.parent)) {
+		else if (!this.parent.equals(otherConfig.parent)) {
 			return false;
 		}
 
-		if (!nullSafeToString(this.contextLoader).equals(nullSafeToString(that.contextLoader))) {
+		if (!nullSafeToString(this.contextLoader).equals(nullSafeToString(otherConfig.contextLoader))) {
 			return false;
 		}
 
 		return true;
+	}
+
+	/**
+	 * Generate a unique hash code for all properties of this
+	 * {@code MergedContextConfiguration} excluding the
+	 * {@linkplain #getTestClass() test class}.
+	 */
+	@Override
+	public int hashCode() {
+		int result = Arrays.hashCode(this.locations);
+		result = 31 * result + Arrays.hashCode(this.classes);
+		result = 31 * result + this.contextInitializerClasses.hashCode();
+		result = 31 * result + Arrays.hashCode(this.activeProfiles);
+		result = 31 * result + Arrays.hashCode(this.propertySourceLocations);
+		result = 31 * result + Arrays.hashCode(this.propertySourceProperties);
+		result = 31 * result + (this.parent != null ? this.parent.hashCode() : 0);
+		result = 31 * result + nullSafeToString(this.contextLoader).hashCode();
+		return result;
 	}
 
 	/**
@@ -483,17 +473,17 @@ public class MergedContextConfiguration implements Serializable {
 	 */
 	@Override
 	public String toString() {
-		return new ToStringCreator(this)//
-		.append("testClass", testClass)//
-		.append("locations", ObjectUtils.nullSafeToString(locations))//
-		.append("classes", ObjectUtils.nullSafeToString(classes))//
-		.append("contextInitializerClasses", ObjectUtils.nullSafeToString(contextInitializerClasses))//
-		.append("activeProfiles", ObjectUtils.nullSafeToString(activeProfiles))//
-		.append("propertySourceLocations", ObjectUtils.nullSafeToString(propertySourceLocations))//
-		.append("propertySourceProperties", ObjectUtils.nullSafeToString(propertySourceProperties))//
-		.append("contextLoader", nullSafeToString(contextLoader))//
-		.append("parent", parent)//
-		.toString();
+		return new ToStringCreator(this)
+				.append("testClass", this.testClass)
+				.append("locations", ObjectUtils.nullSafeToString(this.locations))
+				.append("classes", ObjectUtils.nullSafeToString(this.classes))
+				.append("contextInitializerClasses", ObjectUtils.nullSafeToString(this.contextInitializerClasses))
+				.append("activeProfiles", ObjectUtils.nullSafeToString(this.activeProfiles))
+				.append("propertySourceLocations", ObjectUtils.nullSafeToString(this.propertySourceLocations))
+				.append("propertySourceProperties", ObjectUtils.nullSafeToString(this.propertySourceProperties))
+				.append("contextLoader", nullSafeToString(this.contextLoader))
+				.append("parent", this.parent)
+				.toString();
 	}
 
 }
