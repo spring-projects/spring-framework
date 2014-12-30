@@ -3,6 +3,25 @@ SPRING FRAMEWORK CHANGELOG
 http://www.spring.io
 
 
+Changes in version 3.2.13 (2014-12-30)
+-------------------------------------
+
+fixed Java 8 bridge method handling can lead to false positive detection of autowired annotations (SPR-12187)
+fixed webjar stops working (SPR-12432)
+fixed introspection with BeanUtils started failing against java.awt.Window (SPR-12434)
+fixed embedded derby database uses derby.log (SPR-12437)
+fixed use of the same configuration annotation of javaconfig (SPR-12442)
+fixed NPE in org.springframework.core.MethodParameter.getParameterName (SPR-12453)
+fixed unable to initialize WebAsyncTask with executorName (SPR-12457)
+fixed problem with static methods conflicting with instance methods (SPR-12502)
+fixed prototype with changing bean class does not get populated with dependencies after type switch (SPR-12526)
+fixed hashCode method of AbstractFallbackTransactionAttributeSource.DefaultCacheKey doesn't take targetClass into account (SPR-12536)
+fixed AbstractApplicationEventMulticaster "lost" application listener (SPR-12545)
+fixed duplicated interceptors in HandlerExecutionChain after intermediate getInterceptors() call (SPR-12566)
+update consistent bridge method handling in annotation post-processors (SPR-12495)
+improved misleading documentation for SqlRowSet (SPR-12476)
+improved documentation after SPR-3542 (SPR-12570)
+
 Changes in version 3.2.12 (2014-11-11)
 -------------------------------------
 
