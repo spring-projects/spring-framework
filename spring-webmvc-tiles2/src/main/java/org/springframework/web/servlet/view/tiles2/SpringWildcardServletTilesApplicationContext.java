@@ -35,7 +35,9 @@ import org.springframework.web.context.support.ServletContextResourcePatternReso
  *
  * @author Juergen Hoeller
  * @since 4.0.1
+ * @deprecated as of Spring 4.2, in favor of Tiles 3
  */
+@Deprecated
 public class SpringWildcardServletTilesApplicationContext extends ServletTilesApplicationContext {
 
 	private final ResourcePatternResolver resolver;

@@ -38,7 +38,9 @@ import org.springframework.web.servlet.view.UrlBasedViewResolver;
  * @see #setSuffix
  * @see #setRequestContextAttribute
  * @see TilesView
+ * @deprecated as of Spring 4.2, in favor of Tiles 3
  */
+@Deprecated
 public class TilesViewResolver extends UrlBasedViewResolver {
 
 	private Boolean alwaysInclude;

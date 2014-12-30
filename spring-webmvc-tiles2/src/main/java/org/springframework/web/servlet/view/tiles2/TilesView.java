@@ -52,7 +52,9 @@ import org.springframework.web.servlet.view.AbstractUrlBasedView;
  * @since 2.5
  * @see #setUrl
  * @see TilesConfigurer
+ * @deprecated as of Spring 4.2, in favor of Tiles 3
  */
+@Deprecated
 public class TilesView extends AbstractUrlBasedView {
 
 	private boolean alwaysInclude = false;
