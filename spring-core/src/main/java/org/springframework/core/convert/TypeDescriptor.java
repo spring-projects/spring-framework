@@ -427,39 +427,6 @@ public class TypeDescriptor implements Serializable {
 		return narrow(mapValue, getMapValueTypeDescriptor());
 	}
 
-	/**
-	 * Returns the value of {@link TypeDescriptor#getType() getType()} for the
-	 * {@link #getElementTypeDescriptor() elementTypeDescriptor}.
-	 * @deprecated in Spring 3.1 in favor of {@link #getElementTypeDescriptor()}
-	 * @throws IllegalStateException if this type is not a {@code java.util.Collection} or array type
-	 */
-	@Deprecated
-	public Class<?> getElementType() {
-		return getType(getElementTypeDescriptor());
-	}
-
-	/**
-	 * Returns the value of {@link TypeDescriptor#getType() getType()} for the
-	 * {@link #getMapKeyTypeDescriptor() getMapKeyTypeDescriptor}.
-	 * @deprecated in Spring 3.1 in favor of {@link #getMapKeyTypeDescriptor()}
-	 * @throws IllegalStateException if this type is not a {@code java.util.Map}
-	 */
-	@Deprecated
-	public Class<?> getMapKeyType() {
-		return getType(getMapKeyTypeDescriptor());
-	}
-
-	/**
-	 * Returns the value of {@link TypeDescriptor#getType() getType()} for the
-	 * {@link #getMapValueTypeDescriptor() getMapValueTypeDescriptor}.
-	 * @deprecated in Spring 3.1 in favor of {@link #getMapValueTypeDescriptor()}
-	 * @throws IllegalStateException if this type is not a {@code java.util.Map}
-	 */
-	@Deprecated
-	public Class<?> getMapValueType() {
-		return getType(getMapValueTypeDescriptor());
-	}
-
 	private Class<?> getType(TypeDescriptor typeDescriptor) {
 		return (typeDescriptor != null ? typeDescriptor.getType() : null);
 	}

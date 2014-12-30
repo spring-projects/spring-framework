@@ -100,29 +100,6 @@ public class ContextConfigurationAttributes {
 	 * @param locations the resource locations declared via {@code @ContextConfiguration}
 	 * @param classes the annotated classes declared via {@code @ContextConfiguration}
 	 * @param inheritLocations the {@code inheritLocations} flag declared via {@code @ContextConfiguration}
-	 * @param contextLoaderClass the {@code ContextLoader} class declared via {@code @ContextConfiguration}
-	 * @throws IllegalArgumentException if the {@code declaringClass} or {@code contextLoaderClass} is
-	 * {@code null}
-	 * @deprecated as of Spring 3.2, use
-	 * {@link #ContextConfigurationAttributes(Class, String[], Class[], boolean, Class[], boolean, String, Class)}
-	 * instead
-	 */
-	@Deprecated
-	public ContextConfigurationAttributes(Class<?> declaringClass, String[] locations, Class<?>[] classes,
-			boolean inheritLocations, Class<? extends ContextLoader> contextLoaderClass) {
-
-		this(declaringClass, locations, classes, inheritLocations, null, true, null, contextLoaderClass);
-	}
-
-	/**
-	 * Construct a new {@link ContextConfigurationAttributes} instance for the
-	 * {@linkplain Class test class} that declared the
-	 * {@link ContextConfiguration @ContextConfiguration} annotation and its
-	 * corresponding attributes.
-	 * @param declaringClass the test class that declared {@code @ContextConfiguration}
-	 * @param locations the resource locations declared via {@code @ContextConfiguration}
-	 * @param classes the annotated classes declared via {@code @ContextConfiguration}
-	 * @param inheritLocations the {@code inheritLocations} flag declared via {@code @ContextConfiguration}
 	 * @param initializers the context initializers declared via {@code @ContextConfiguration}
 	 * @param inheritInitializers the {@code inheritInitializers} flag declared via {@code @ContextConfiguration}
 	 * @param contextLoaderClass the {@code ContextLoader} class declared via {@code @ContextConfiguration}

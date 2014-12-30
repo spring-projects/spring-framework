@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,9 +23,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Properties;
 import java.util.Set;
-import javax.activation.FileTypeMap;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -55,29 +53,31 @@ import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.ViewResolver;
 
 /**
- * Implementation of {@link ViewResolver} that resolves a view based on the request file name or {@code Accept} header.
+ * Implementation of {@link ViewResolver} that resolves a view based on the request file name
+ * or {@code Accept} header.
  *
- * <p>The {@code ContentNegotiatingViewResolver} does not resolve views itself, but delegates to other {@link
- * ViewResolver}s. By default, these other view resolvers are picked up automatically from the application context,
- * though they can also be set explicitly by using the {@link #setViewResolvers(List) viewResolvers} property.
- * <strong>Note</strong> that in order for this view resolver to work properly, the {@link #setOrder(int) order}
- * property needs to be set to a higher precedence than the others (the default is {@link Ordered#HIGHEST_PRECEDENCE}.)
+ * <p>The {@code ContentNegotiatingViewResolver} does not resolve views itself, but delegates to
+ * other {@link ViewResolver}s. By default, these other view resolvers are picked up automatically
+ * from the application context, though they can also be set explicitly by using the
+ * {@link #setViewResolvers viewResolvers} property. <strong>Note</strong> that in order for this
+ * view resolver to work properly, the {@link #setOrder order} property needs to be set to a higher
+ * precedence than the others (the default is {@link Ordered#HIGHEST_PRECEDENCE}).
  *
- * <p>This view resolver uses the requested {@linkplain MediaType media type} to select a suitable {@link View} for a
- * request. The requested media type is determined through the configured {@link ContentNegotiationManager}.
- * Once the requested media type has been determined, this resolver queries each delegate view resolver for a
- * {@link View} and determines if the requested media type is {@linkplain MediaType#includes(MediaType) compatible}
- * with the view's {@linkplain View#getContentType() content type}). The most compatible view is returned.
+ * <p>This view resolver uses the requested {@linkplain MediaType media type} to select a suitable
+ * {@link View} for a request. The requested media type is determined through the configured
+ * {@link ContentNegotiationManager}. Once the requested media type has been determined, this resolver
+ * queries each delegate view resolver for a {@link View} and determines if the requested media type
+ * is {@linkplain MediaType#includes(MediaType) compatible} with the view's
+ * {@linkplain View#getContentType() content type}). The most compatible view is returned.
  *
- * <p>Additionally, this view resolver exposes the {@link #setDefaultViews(List) defaultViews} property, allowing you to
- * override the views provided by the view resolvers. Note that these default views are offered as candidates, and
- * still need have the content type requested (via file extension, parameter, or {@code Accept} header, described above).
- * You can also set the {@linkplain #setDefaultContentType(MediaType) default content type} directly, which will be
- * returned when the other mechanisms ({@code Accept} header, file extension or parameter) do not result in a match.
+ * <p>Additionally, this view resolver exposes the {@link #setDefaultViews(List) defaultViews} property,
+ * allowing you to override the views provided by the view resolvers. Note that these default views are
+ * offered as candidates, and still need have the content type requested (via file extension, parameter,
+ * or {@code Accept} header, described above).
  *
- * <p>For example, if the request path is {@code /view.html}, this view resolver will look for a view that has the
- * {@code text/html} content type (based on the {@code html} file extension). A request for {@code /view} with a {@code
- * text/html} request {@code Accept} header has the same result.
+ * <p>For example, if the request path is {@code /view.html}, this view resolver will look for a view
+ * that has the {@code text/html} content type (based on the {@code html} file extension). A request
+ * for {@code /view} with a {@code text/html} request {@code Accept} header has the same result.
  *
  * @author Arjen Poutsma
  * @author Juergen Hoeller
@@ -121,90 +121,6 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport 
 	 */
 	public void setContentNegotiationManager(ContentNegotiationManager contentNegotiationManager) {
 		this.contentNegotiationManager = contentNegotiationManager;
-	}
-
-	/**
-	 * Indicate whether the extension of the request path should be used to determine the requested media type,
-	 * in favor of looking at the {@code Accept} header. The default value is {@code true}.
-	 * <p>For instance, when this flag is {@code true} (the default), a request for {@code /hotels.pdf}
-	 * will result in an {@code AbstractPdfView} being resolved, while the {@code Accept} header can be the
-	 * browser-defined {@code text/html,application/xhtml+xml}.
-	 * @deprecated use {@link #setContentNegotiationManager(ContentNegotiationManager)}
-	 */
-	@Deprecated
-	public void setFavorPathExtension(boolean favorPathExtension) {
-		this.cnManagerFactoryBean.setFavorPathExtension(favorPathExtension);
-	}
-
-	/**
-	 * Indicate whether to use the Java Activation Framework to map from file extensions to media types.
-	 * <p>Default is {@code true}, i.e. the Java Activation Framework is used (if available).
-	 * @deprecated use {@link #setContentNegotiationManager(ContentNegotiationManager)}
-	 */
-	@Deprecated
-	public void setUseJaf(boolean useJaf) {
-		this.cnManagerFactoryBean.setUseJaf(useJaf);
-	}
-
-	/**
-	 * Indicate whether a request parameter should be used to determine the requested media type,
-	 * in favor of looking at the {@code Accept} header. The default value is {@code false}.
-	 * <p>For instance, when this flag is {@code true}, a request for {@code /hotels?format=pdf} will result
-	 * in an {@code AbstractPdfView} being resolved, while the {@code Accept} header can be the browser-defined
-	 * {@code text/html,application/xhtml+xml}.
-	 * @deprecated use {@link #setContentNegotiationManager(ContentNegotiationManager)}
-	 */
-	@Deprecated
-	public void setFavorParameter(boolean favorParameter) {
-		this.cnManagerFactoryBean.setFavorParameter(favorParameter);
-	}
-
-	/**
-	 * Set the parameter name that can be used to determine the requested media type if the {@link
-	 * #setFavorParameter} property is {@code true}. The default parameter name is {@code format}.
-	 * @deprecated use {@link #setContentNegotiationManager(ContentNegotiationManager)}
-	 */
-	@Deprecated
-	public void setParameterName(String parameterName) {
-		this.cnManagerFactoryBean.setParameterName(parameterName);
-	}
-
-	/**
-	 * Indicate whether the HTTP {@code Accept} header should be ignored. Default is {@code false}.
-	 * <p>If set to {@code true}, this view resolver will only refer to the file extension and/or
-	 * parameter, as indicated by the {@link #setFavorPathExtension favorPathExtension} and
-	 * {@link #setFavorParameter favorParameter} properties.
-	 * @deprecated use {@link #setContentNegotiationManager(ContentNegotiationManager)}
-	 */
-	@Deprecated
-	public void setIgnoreAcceptHeader(boolean ignoreAcceptHeader) {
-		this.cnManagerFactoryBean.setIgnoreAcceptHeader(ignoreAcceptHeader);
-	}
-
-	/**
-	 * Set the mapping from file extensions to media types.
-	 * <p>When this mapping is not set or when an extension is not present, this view resolver
-	 * will fall back to using a {@link FileTypeMap} when the Java Action Framework is available.
-	 * @deprecated use {@link #setContentNegotiationManager(ContentNegotiationManager)}
-	 */
-	@Deprecated
-	public void setMediaTypes(Map<String, String> mediaTypes) {
-		if (mediaTypes != null) {
-			Properties props = new Properties();
-			props.putAll(mediaTypes);
-			this.cnManagerFactoryBean.setMediaTypes(props);
-		}
-	}
-
-	/**
-	 * Set the default content type.
-	 * <p>This content type will be used when file extension, parameter, nor {@code Accept}
-	 * header define a content-type, either through being disabled or empty.
-	 * @deprecated use {@link #setContentNegotiationManager(ContentNegotiationManager)}
-	 */
-	@Deprecated
-	public void setDefaultContentType(MediaType defaultContentType) {
-		this.cnManagerFactoryBean.setDefaultContentType(defaultContentType);
 	}
 
 	/**

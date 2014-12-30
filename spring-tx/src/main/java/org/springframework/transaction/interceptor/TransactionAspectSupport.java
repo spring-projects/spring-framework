@@ -385,44 +385,7 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 	 * @see org.springframework.util.ClassUtils#getQualifiedMethodName
 	 */
 	protected String methodIdentification(Method method, Class<?> targetClass) {
-		String simpleMethodId = methodIdentification(method);
-		if (simpleMethodId != null) {
-			return simpleMethodId;
-		}
 		return (targetClass != null ? targetClass : method.getDeclaringClass()).getName() + "." + method.getName();
-	}
-
-	/**
-	 * Convenience method to return a String representation of this Method
-	 * for use in logging. Can be overridden in subclasses to provide a
-	 * different identifier for the given method.
-	 * @param method the method we're interested in
-	 * @return a String representation identifying this method
-	 * @deprecated in favor of {@link #methodIdentification(Method, Class)}
-	 */
-	@Deprecated
-	protected String methodIdentification(Method method) {
-		return null;
-	}
-
-	/**
-	 * Create a transaction if necessary, based on the given method and class.
-	 * <p>Performs a default TransactionAttribute lookup for the given method.
-	 * @param method the method about to execute
-	 * @param targetClass the class that the method is being invoked on
-	 * @return a TransactionInfo object, whether or not a transaction was created.
-	 * The {@code hasTransaction()} method on TransactionInfo can be used to
-	 * tell if there was a transaction created.
-	 * @see #getTransactionAttributeSource()
-	 * @deprecated in favor of
-	 * {@link #createTransactionIfNecessary(PlatformTransactionManager, TransactionAttribute, String)}
-	 */
-	@Deprecated
-	protected TransactionInfo createTransactionIfNecessary(Method method, Class<?> targetClass) {
-		// If the transaction attribute is null, the method is non-transactional.
-		TransactionAttribute txAttr = getTransactionAttributeSource().getTransactionAttribute(method, targetClass);
-		PlatformTransactionManager tm = determineTransactionManager(txAttr);
-		return createTransactionIfNecessary(tm, txAttr, methodIdentification(method, targetClass));
 	}
 
 	/**

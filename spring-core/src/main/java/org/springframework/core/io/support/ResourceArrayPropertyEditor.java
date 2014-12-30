@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -72,30 +72,6 @@ public class ResourceArrayPropertyEditor extends PropertyEditorSupport {
 	 */
 	public ResourceArrayPropertyEditor() {
 		this(new PathMatchingResourcePatternResolver(), null, true);
-	}
-
-	/**
-	 * Create a new ResourceArrayPropertyEditor with the given {@link ResourcePatternResolver}
-	 * and a {@link StandardEnvironment}.
-	 * @param resourcePatternResolver the ResourcePatternResolver to use
-	 * @deprecated as of 3.1 in favor of {@link #ResourceArrayPropertyEditor(ResourcePatternResolver, PropertyResolver)}
-	 */
-	@Deprecated
-	public ResourceArrayPropertyEditor(ResourcePatternResolver resourcePatternResolver) {
-		this(resourcePatternResolver, null, true);
-	}
-
-	/**
-	 * Create a new ResourceArrayPropertyEditor with the given {@link ResourcePatternResolver}
-	 * and a {@link StandardEnvironment}.
-	 * @param resourcePatternResolver the ResourcePatternResolver to use
-	 * @param ignoreUnresolvablePlaceholders whether to ignore unresolvable placeholders
-	 * if no corresponding system property could be found
-	 * @deprecated as of 3.1 in favor of {@link #ResourceArrayPropertyEditor(ResourcePatternResolver, PropertyResolver, boolean)}
-	 */
-	@Deprecated
-	public ResourceArrayPropertyEditor(ResourcePatternResolver resourcePatternResolver, boolean ignoreUnresolvablePlaceholders) {
-		this(resourcePatternResolver, null, ignoreUnresolvablePlaceholders);
 	}
 
 	/**
