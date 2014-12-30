@@ -265,6 +265,8 @@ public class RequestContext {
 		// context-param in web.xml, if any.
 		this.defaultHtmlEscape = WebUtils.getDefaultHtmlEscape(this.webApplicationContext.getServletContext());
 
+		// Determine response-encoded HTML escape setting from the "responseEncodedHtmlEscape"
+		// context-param in web.xml, if any.
 		this.responseEncodedHtmlEscape = WebUtils.getResponseEncodedHtmlEscape(this.webApplicationContext.getServletContext());
 
 		this.urlPathHelper = new UrlPathHelper();

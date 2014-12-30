@@ -109,6 +109,7 @@ public abstract class WebUtils {
 	/**
 	 * Use of response encoding for HTML escaping parameter at the servlet context level
 	 * (i.e. a context-param in {@code web.xml}): "responseEncodedHtmlEscape".
+	 * @since 4.1.2
 	 */
 	public static final String RESPONSE_ENCODED_HTML_ESCAPE_CONTEXT_PARAM = "responseEncodedHtmlEscape";
 
@@ -207,7 +208,7 @@ public abstract class WebUtils {
 			return null;
 		}
 		String param = servletContext.getInitParameter(HTML_ESCAPE_CONTEXT_PARAM);
-		return (StringUtils.hasText(param)? Boolean.valueOf(param) : null);
+		return (StringUtils.hasText(param) ? Boolean.valueOf(param) : null);
 	}
 
 	/**
@@ -221,13 +222,14 @@ public abstract class WebUtils {
 	 * default in case of no setting at the global level.
 	 * @param servletContext the servlet context of the web application
 	 * @return whether response encoding is used for HTML escaping (null = no explicit default)
+	 * @since 4.1.2
 	 */
 	public static Boolean getResponseEncodedHtmlEscape(ServletContext servletContext) {
 		if (servletContext == null) {
 			return null;
 		}
 		String param = servletContext.getInitParameter(RESPONSE_ENCODED_HTML_ESCAPE_CONTEXT_PARAM);
-		return (StringUtils.hasText(param)? Boolean.valueOf(param) : null);
+		return (StringUtils.hasText(param) ? Boolean.valueOf(param) : null);
 	}
 
 	/**
