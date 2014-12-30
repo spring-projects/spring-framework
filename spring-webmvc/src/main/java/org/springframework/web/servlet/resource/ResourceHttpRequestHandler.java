@@ -315,7 +315,8 @@ public class ResourceHttpRequestHandler extends WebContentGenerator implements H
 			resourcePath = resource.getURL().getPath();
 			locationPath = location.getURL().getPath();
 		}
-		locationPath = (locationPath.endsWith("/") || locationPath.isEmpty() ? locationPath : locationPath + "/");
+		locationPath = (locationPath.endsWith("/") ||
+				!StringUtils.hasText(locationPath) ? locationPath : locationPath + "/");
 		if (!resourcePath.startsWith(locationPath)) {
 			return false;
 		}
