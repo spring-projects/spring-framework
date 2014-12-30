@@ -33,7 +33,7 @@ configure(allprojects) { project ->
 	ext.jodaVersion          = "2.3"
 	ext.junitVersion         = "4.11"
 	ext.openJpaVersion       = "2.2.2"
-	ext.slf4jVersion         = "1.7.7"
+	ext.slf4jVersion         = "1.7.9"
 	ext.tiles2Version        = "2.2.2"
 	ext.tiles3Version        = "3.0.5"
 	ext.tomcatVersion        = "8.0.15"
@@ -383,7 +383,7 @@ project("spring-context") {
 		optional("org.aspectj:aspectjweaver:${aspectjVersion}")
 		optional("org.codehaus.groovy:groovy-all:${groovyVersion}")
 		optional("org.beanshell:bsh:2.0b4")
-		optional("org.jruby:jruby:1.7.16.1")
+		optional("org.jruby:jruby:1.7.17")
 		testCompile("javax.inject:javax.inject-tck:1")
 		testCompile("commons-dbcp:commons-dbcp:1.4")
 		testCompile("org.slf4j:slf4j-api:${slf4jVersion}")
@@ -404,8 +404,8 @@ project("spring-messaging") {
 		compile(project(":spring-beans"))
 		compile(project(":spring-core"))
 		compile(project(":spring-context"))
-		optional("org.projectreactor:reactor-core:1.1.4.RELEASE")
-		optional("org.projectreactor:reactor-net:1.1.4.RELEASE")
+		optional("org.projectreactor:reactor-core:1.1.5.RELEASE")
+		optional("org.projectreactor:reactor-net:1.1.5.RELEASE")
 		optional("org.projectreactor:reactor-tcp:1.0.1.RELEASE")
 		optional("org.eclipse.jetty.websocket:websocket-server:${jettyVersion}") {
 			exclude group: "javax.servlet", module: "javax.servlet-api"
