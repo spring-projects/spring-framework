@@ -199,7 +199,9 @@ public abstract class AbstractApplicationEventMulticaster
 		}
 		for (ApplicationListener<?> listener : listeners) {
 			if (supportsEvent(listener, event.getClass(), sourceType)) {
-				retriever.applicationListeners.add(listener);
+				if (retriever != null) {
+					retriever.applicationListeners.add(listener);
+				}
 				allListeners.add(listener);
 			}
 		}
@@ -212,7 +214,9 @@ public abstract class AbstractApplicationEventMulticaster
 						ApplicationListener<?> listener =
 								beanFactory.getBean(listenerBeanName, ApplicationListener.class);
 						if (!allListeners.contains(listener) && supportsEvent(listener, event.getClass(), sourceType)) {
-							retriever.applicationListenerBeans.add(listenerBeanName);
+							if (retriever != null) {
+								retriever.applicationListenerBeans.add(listenerBeanName);
+							}
 							allListeners.add(listener);
 						}
 					}
