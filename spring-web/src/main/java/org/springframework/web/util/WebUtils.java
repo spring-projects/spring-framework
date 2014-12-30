@@ -207,7 +207,7 @@ public abstract class WebUtils {
 			return null;
 		}
 		String param = servletContext.getInitParameter(HTML_ESCAPE_CONTEXT_PARAM);
-		return (StringUtils.hasText(param)? Boolean.valueOf(param) : null);
+		return (StringUtils.hasText(param) ? Boolean.valueOf(param) : null);
 	}
 
 	/**
@@ -227,7 +227,7 @@ public abstract class WebUtils {
 			return null;
 		}
 		String param = servletContext.getInitParameter(RESPONSE_ENCODED_HTML_ESCAPE_CONTEXT_PARAM);
-		return (StringUtils.hasText(param)? Boolean.valueOf(param) : null);
+		return (StringUtils.hasText(param) ? Boolean.valueOf(param) : null);
 	}
 
 	/**
