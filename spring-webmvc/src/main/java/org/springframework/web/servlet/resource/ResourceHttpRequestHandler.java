@@ -21,7 +21,6 @@ import java.io.InputStream;
 import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.List;
-
 import javax.activation.FileTypeMap;
 import javax.activation.MimetypesFileTypeMap;
 import javax.servlet.ServletException;
@@ -30,6 +29,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
@@ -51,29 +51,30 @@ import org.springframework.web.servlet.support.WebContentGenerator;
  * (according to the guidelines of Page Speed, YSlow, etc.) by allowing for flexible cache settings
  * ({@linkplain #setCacheSeconds "cacheSeconds" property}, last-modified support).
  *
- * <p>The {@linkplain #setLocations "locations" property} takes a list of Spring {@link Resource} locations
- * from which static resources are allowed  to be served by this handler. For a given request, the
- * list of locations will be consulted in order for the presence of the requested resource, and the
+ * <p>The {@linkplain #setLocations "locations" property} takes a list of Spring {@link Resource}
+ * locations from which static resources are allowed  to be served by this handler. For a given request,
+ * the list of locations will be consulted in order for the presence of the requested resource, and the
  * first found match will be written to the response, with {@code Expires} and {@code Cache-Control}
  * headers set as configured. The handler also properly evaluates the {@code Last-Modified} header
  * (if present) so that a {@code 304} status code will be returned as appropriate, avoiding unnecessary
  * overhead for resources that are already cached by the client. The use of {@code Resource} locations
- * allows resource requests to easily be mapped to locations other than the web application root. For
- * example, resources could be served from a classpath location such as "classpath:/META-INF/public-web-resources/",
- * allowing convenient packaging and serving of resources such as a JavaScript library from within jar files.
+ * allows resource requests to easily be mapped to locations other than the web application root.
+ * For example, resources could be served from a classpath location such as
+ * "classpath:/META-INF/public-web-resources/", allowing convenient packaging and serving of resources
+ * such as a JavaScript library from within jar files.
  *
  * <p>To ensure that users with a primed browser cache get the latest changes to application-specific
- * resources upon deployment of new versions of the application, it is recommended that a version string
- * is used in the URL  mapping pattern that selects this handler. Such patterns can be easily parameterized
- * using Spring EL. See the reference manual for further examples of this approach.
+ * resources upon deployment of new versions of the application, it is recommended that a version
+ * string is used in the URL  mapping pattern that selects this handler. Such patterns can be easily
+ * parameterized using Spring EL. See the reference manual for further examples of this approach.
  *
- * <p>For various front-end needs &mdash; such as ensuring that users with a primed browser cache get the
- * latest changes, or serving variations of resources (e.g., minified versions) &mdash;
+ * <p>For various front-end needs &mdash; such as ensuring that users with a primed browser cache
+ * get the latest changes, or serving variations of resources (e.g., minified versions) &mdash;
  * {@link org.springframework.web.servlet.resource.ResourceResolver}s can be configured.
  *
  * <p>This handler can be configured through use of a
- * {@link org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry} or the {@code <mvc:resources/>}
- * XML configuration element.
+ * {@link org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry}
+ * or the {@code <mvc:resources/>} XML configuration element.
  *
  * @author Keith Donald
  * @author Jeremy Grelle
@@ -118,9 +119,8 @@ public class ResourceHttpRequestHandler extends WebContentGenerator implements H
 
 	/**
 	 * Configure the list of {@link ResourceResolver}s to use.
-	 *
-	 * <p>By default {@link PathResourceResolver} is configured. If using this property, it
-	 * is recommended to add {@link PathResourceResolver} as the last resolver.
+	 * <p>By default {@link PathResourceResolver} is configured. If using this property,
+	 * it is recommended to add {@link PathResourceResolver} as the last resolver.
 	 */
 	public void setResourceResolvers(List<ResourceResolver> resourceResolvers) {
 		this.resourceResolvers.clear();
@@ -272,7 +272,8 @@ public class ResourceHttpRequestHandler extends WebContentGenerator implements H
 		if (resource == null || getResourceTransformers().isEmpty()) {
 			return resource;
 		}
-		ResourceTransformerChain transformChain = new DefaultResourceTransformerChain(resolveChain, getResourceTransformers());
+		ResourceTransformerChain transformChain =
+				new DefaultResourceTransformerChain(resolveChain, getResourceTransformers());
 		resource = transformChain.transform(request, resource);
 		return resource;
 	}
