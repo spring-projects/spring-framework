@@ -353,16 +353,12 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 		if (txAttr == null || this.beanFactory == null) {
 			return getTransactionManager();
 		}
-		String qualifier = (txAttr.getQualifier() != null ?
-				txAttr.getQualifier() : this.transactionManagerBeanName);
+		String qualifier = txAttr.getQualifier();
 		if (StringUtils.hasText(qualifier)) {
-			PlatformTransactionManager txManager = this.transactionManagerCache.get(qualifier);
-			if (txManager == null) {
-				txManager = BeanFactoryAnnotationUtils.qualifiedBeanOfType(
-						this.beanFactory, PlatformTransactionManager.class, qualifier);
-				this.transactionManagerCache.putIfAbsent(qualifier, txManager);
-			}
-			return txManager;
+			return determineQualifiedTransactionManager(qualifier);
+		}
+		else if (StringUtils.hasText(this.transactionManagerBeanName)) {
+			return determineQualifiedTransactionManager(this.transactionManagerBeanName);
 		}
 		else {
 			PlatformTransactionManager defaultTransactionManager = getTransactionManager();
@@ -373,6 +369,16 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 			}
 			return defaultTransactionManager;
 		}
+	}
+
+	private PlatformTransactionManager determineQualifiedTransactionManager(String qualifier) {
+		PlatformTransactionManager txManager = this.transactionManagerCache.get(qualifier);
+		if (txManager == null) {
+			txManager = BeanFactoryAnnotationUtils.qualifiedBeanOfType(
+					this.beanFactory, PlatformTransactionManager.class, qualifier);
+			this.transactionManagerCache.putIfAbsent(qualifier, txManager);
+		}
+		return txManager;
 	}
 
 	/**
