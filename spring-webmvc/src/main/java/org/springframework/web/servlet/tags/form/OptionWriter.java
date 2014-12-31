@@ -86,7 +86,7 @@ import org.springframework.web.servlet.support.BindStatus;
  * @author Scott Andrews
  * @since 2.0
  */
-class OptionWriter {
+public class OptionWriter {
 
 	private final Object optionSource;
 
