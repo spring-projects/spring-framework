@@ -126,6 +126,7 @@ public class HttpMessageConverterExtractorTests {
 	}
 
 	@Test
+	@SuppressWarnings("unchecked")
 	public void connectionClose() throws IOException {
 		HttpMessageConverter<String> converter = mock(HttpMessageConverter.class);
 		List<HttpMessageConverter<?>> converters = new ArrayList<HttpMessageConverter<?>>();

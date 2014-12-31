@@ -40,6 +40,7 @@ import static org.mockito.BDDMockito.*;
  * @author Juergen Hoeller
  * @since 4.1.2
  */
+@SuppressWarnings({ "rawtypes", "unchecked" })
 public class PersistenceContextTransactionTests {
 
 	private EntityManagerFactory factory;
@@ -67,6 +68,7 @@ public class PersistenceContextTransactionTests {
 		given(manager.isOpen()).willReturn(true);
 
 		bean = new EntityManagerHoldingBean();
+		@SuppressWarnings("serial")
 		PersistenceAnnotationBeanPostProcessor pabpp = new PersistenceAnnotationBeanPostProcessor() {
 			@Override
 			protected EntityManagerFactory findEntityManagerFactory(String unitName, String requestingBeanName) {
