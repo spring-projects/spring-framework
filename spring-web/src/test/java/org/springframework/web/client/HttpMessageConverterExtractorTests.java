@@ -16,6 +16,7 @@
 
 package org.springframework.web.client;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -26,6 +27,7 @@ import org.junit.Test;
 
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.ClientHttpResponse;
@@ -74,6 +76,17 @@ public class HttpMessageConverterExtractorTests {
 	}
 
 	@Test
+	public void informational() throws IOException {
+		HttpMessageConverter<?> converter = mock(HttpMessageConverter.class);
+		extractor = new HttpMessageConverterExtractor<String>(String.class, createConverterList(converter));
+		given(response.getStatusCode()).willReturn(HttpStatus.CONTINUE);
+
+		Object result = extractor.extractData(response);
+
+		assertNull(result);
+	}
+
+	@Test
 	public void zeroContentLength() throws IOException {
 		HttpMessageConverter<?> converter = mock(HttpMessageConverter.class);
 		HttpHeaders responseHeaders = new HttpHeaders();
@@ -84,6 +97,22 @@ public class HttpMessageConverterExtractorTests {
 
 		Object result = extractor.extractData(response);
 
+		assertNull(result);
+	}
+
+	@Test
+	@SuppressWarnings("unchecked")
+	public void emptyMessageBody() throws IOException {
+		HttpMessageConverter<String> converter = mock(HttpMessageConverter.class);
+		List<HttpMessageConverter<?>> converters = new ArrayList<HttpMessageConverter<?>>();
+		converters.add(converter);
+		HttpHeaders responseHeaders = new HttpHeaders();
+		extractor = new HttpMessageConverterExtractor<String>(String.class, createConverterList(converter));
+		given(response.getStatusCode()).willReturn(HttpStatus.OK);
+		given(response.getHeaders()).willReturn(responseHeaders);
+		given(response.getBody()).willReturn(new ByteArrayInputStream("".getBytes()));
+
+		Object result = extractor.extractData(response);
 		assertNull(result);
 	}
 
@@ -100,8 +129,9 @@ public class HttpMessageConverterExtractorTests {
 		extractor = new HttpMessageConverterExtractor<String>(String.class, converters);
 		given(response.getStatusCode()).willReturn(HttpStatus.OK);
 		given(response.getHeaders()).willReturn(responseHeaders);
+		given(response.getBody()).willReturn(new ByteArrayInputStream(expected.getBytes()));
 		given(converter.canRead(String.class, contentType)).willReturn(true);
-		given(converter.read(String.class, response)).willReturn(expected);
+		given(converter.read(eq(String.class), any(HttpInputMessage.class))).willReturn(expected);
 
 		Object result = extractor.extractData(response);
 
@@ -120,25 +150,10 @@ public class HttpMessageConverterExtractorTests {
 		extractor = new HttpMessageConverterExtractor<String>(String.class, converters);
 		given(response.getStatusCode()).willReturn(HttpStatus.OK);
 		given(response.getHeaders()).willReturn(responseHeaders);
+		given(response.getBody()).willReturn(new ByteArrayInputStream("Foobar".getBytes()));
 		given(converter.canRead(String.class, contentType)).willReturn(false);
 
 		extractor.extractData(response);
-	}
-
-	@Test
-	@SuppressWarnings("unchecked")
-	public void connectionClose() throws IOException {
-		HttpMessageConverter<String> converter = mock(HttpMessageConverter.class);
-		List<HttpMessageConverter<?>> converters = new ArrayList<HttpMessageConverter<?>>();
-		converters.add(converter);
-		HttpHeaders responseHeaders = new HttpHeaders();
-		responseHeaders.setConnection("close");
-		extractor = new HttpMessageConverterExtractor<String>(String.class, createConverterList(converter));
-		given(response.getStatusCode()).willReturn(HttpStatus.OK);
-		given(response.getHeaders()).willReturn(responseHeaders);
-
-		Object result = extractor.extractData(response);
-		assertNull(result);
 	}
 
 	@Test
@@ -155,8 +170,9 @@ public class HttpMessageConverterExtractorTests {
 		extractor = new HttpMessageConverterExtractor<List<String>>(type, converters);
 		given(response.getStatusCode()).willReturn(HttpStatus.OK);
 		given(response.getHeaders()).willReturn(responseHeaders);
+		given(response.getBody()).willReturn(new ByteArrayInputStream(expected.getBytes()));
 		given(converter.canRead(type, null, contentType)).willReturn(true);
-		given(converter.read(type, null, response)).willReturn(expected);
+		given(converter.read(eq(type), eq(null), any(HttpInputMessage.class))).willReturn(expected);
 
 		Object result = extractor.extractData(response);
 
