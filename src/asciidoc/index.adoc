@@ -39041,7 +39041,7 @@ framework-specific, or a standard messaging protocol.
 Spring Framework provides support for using
 http://stomp.github.io/stomp-specification-1.2.html#Abstract[STOMP] -- a simple, messaging protocol
 originally created for use in scripting languages with frames inspired
-by HTTP. STOMP is widely support and well suited for use over
+by HTTP. STOMP is widely supported and well suited for use over
 WebSocket and over the web.
 
 
