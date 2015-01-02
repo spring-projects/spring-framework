@@ -69,7 +69,7 @@ final class ObjectToOptionalConverter implements ConditionalGenericConverter {
 		}
 		else {
 			Object target = this.conversionService.convert(source, sourceType, new GenericTypeDescriptor(targetType));
-			return Optional.of(target);
+			return Optional.ofNullable(target);
 		}
 	}
 
