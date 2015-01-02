@@ -841,19 +841,24 @@ public class ExtendedBeanInfoTests {
 			public String getAddress(int index){ return null; }
 		}
 
-		{ // baseline. ExtendedBeanInfo needs to behave exactly like the following
+		// Baseline: ExtendedBeanInfo needs to behave exactly like the following...
+		boolean hasReadMethod;
+		boolean hasWriteMethod;
+		boolean hasIndexedReadMethod;
+		boolean hasIndexedWriteMethod;
+		{
 			BeanInfo bi = Introspector.getBeanInfo(A.class);
-			assertThat(hasReadMethodForProperty(bi, "address"), is(false));
-			assertThat(hasWriteMethodForProperty(bi, "address"), is(false));
-			assertThat(hasIndexedReadMethodForProperty(bi, "address"), is(true));
-			assertThat(hasIndexedWriteMethodForProperty(bi, "address"), is(true));
+			hasReadMethod = hasReadMethodForProperty(bi, "address");
+			hasWriteMethod = hasWriteMethodForProperty(bi, "address");
+			hasIndexedReadMethod = hasIndexedReadMethodForProperty(bi, "address");
+			hasIndexedWriteMethod = hasIndexedWriteMethodForProperty(bi, "address");
 		}
 		{
 			BeanInfo bi = new ExtendedBeanInfo(Introspector.getBeanInfo(A.class));
-			assertThat(hasReadMethodForProperty(bi, "address"), is(false));
-			assertThat(hasWriteMethodForProperty(bi, "address"), is(false));
-			assertThat(hasIndexedReadMethodForProperty(bi, "address"), is(true));
-			assertThat(hasIndexedWriteMethodForProperty(bi, "address"), is(true));
+			assertEquals(hasReadMethodForProperty(bi, "address"), hasReadMethod);
+			assertEquals(hasWriteMethodForProperty(bi, "address"), hasWriteMethod);
+			assertEquals(hasIndexedReadMethodForProperty(bi, "address"), hasIndexedReadMethod);
+			assertEquals(hasIndexedWriteMethodForProperty(bi, "address"), hasIndexedWriteMethod);
 		}
 	}
 
