@@ -35,6 +35,8 @@ import static org.junit.Assert.*;
 
 /**
  * @author Chris Beams
+ * @author Juergen Hoeller
+ * @author Sam Brannen
  * @since 3.1
  */
 public class ExtendedBeanInfoTests {
@@ -834,32 +836,26 @@ public class ExtendedBeanInfoTests {
 	}
 
 	@Test
-	public void cornerSpr8937() throws IntrospectionException {
+	public void cornerSpr8937AndSpr12582() throws IntrospectionException {
 		@SuppressWarnings("unused") class A {
 			public void setAddress(String addr){ }
 			public void setAddress(int index, String addr) { }
 			public String getAddress(int index){ return null; }
 		}
 
-		// Baseline: ExtendedBeanInfo needs to behave exactly like the following...
-		boolean hasReadMethod;
-		boolean hasWriteMethod;
-		boolean hasIndexedReadMethod;
-		boolean hasIndexedWriteMethod;
-		{
-			BeanInfo bi = Introspector.getBeanInfo(A.class);
-			hasReadMethod = hasReadMethodForProperty(bi, "address");
-			hasWriteMethod = hasWriteMethodForProperty(bi, "address");
-			hasIndexedReadMethod = hasIndexedReadMethodForProperty(bi, "address");
-			hasIndexedWriteMethod = hasIndexedWriteMethodForProperty(bi, "address");
-		}
-		{
-			BeanInfo bi = new ExtendedBeanInfo(Introspector.getBeanInfo(A.class));
-			assertEquals(hasReadMethodForProperty(bi, "address"), hasReadMethod);
-			assertEquals(hasWriteMethodForProperty(bi, "address"), hasWriteMethod);
-			assertEquals(hasIndexedReadMethodForProperty(bi, "address"), hasIndexedReadMethod);
-			assertEquals(hasIndexedWriteMethodForProperty(bi, "address"), hasIndexedWriteMethod);
-		}
+		// Baseline:
+		BeanInfo bi = Introspector.getBeanInfo(A.class);
+		boolean hasReadMethod = hasReadMethodForProperty(bi, "address");
+		boolean hasWriteMethod = hasWriteMethodForProperty(bi, "address");
+		boolean hasIndexedReadMethod = hasIndexedReadMethodForProperty(bi, "address");
+		boolean hasIndexedWriteMethod = hasIndexedWriteMethodForProperty(bi, "address");
+
+		// ExtendedBeanInfo needs to behave exactly like BeanInfo...
+		BeanInfo ebi = new ExtendedBeanInfo(bi);
+		assertEquals(hasReadMethod, hasReadMethodForProperty(ebi, "address"));
+		assertEquals(hasWriteMethod, hasWriteMethodForProperty(ebi, "address"));
+		assertEquals(hasIndexedReadMethod, hasIndexedReadMethodForProperty(ebi, "address"));
+		assertEquals(hasIndexedWriteMethod, hasIndexedWriteMethodForProperty(ebi, "address"));
 	}
 
 	@Test
