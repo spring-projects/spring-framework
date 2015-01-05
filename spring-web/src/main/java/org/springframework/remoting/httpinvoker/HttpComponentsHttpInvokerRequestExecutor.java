@@ -28,6 +28,7 @@ import org.apache.http.NoHttpResponseException;
 import org.apache.http.StatusLine;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.RequestConfig;
+import org.apache.http.client.methods.Configurable;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.config.Registry;
 import org.apache.http.config.RegistryBuilder;
@@ -269,12 +270,39 @@ public class HttpComponentsHttpInvokerRequestExecutor extends AbstractHttpInvoke
 	 * Create a {@link RequestConfig} for the given configuration. Can return {@code null}
 	 * to indicate that no custom request config should be set and the defaults of the
 	 * {@link HttpClient} should be used.
+	 * <p>The default implementation tries to merge the defaults of the client with the
+	 * local customizations of the instance, if any.
 	 * @param config the HTTP invoker configuration that specifies the
 	 * target service
 	 * @return the RequestConfig to use
 	 */
 	protected RequestConfig createRequestConfig(HttpInvokerClientConfiguration config) {
-		return (this.requestConfig != null ? this.requestConfig : null);
+		HttpClient client = getHttpClient();
+		if (client instanceof Configurable) {
+			RequestConfig clientRequestConfig = ((Configurable) client).getConfig();
+			return mergeRequestConfig(clientRequestConfig);
+		}
+		return this.requestConfig;
+	}
+
+	private RequestConfig mergeRequestConfig(RequestConfig defaultRequestConfig) {
+		if (this.requestConfig == null) { // nothing to merge
+			return defaultRequestConfig;
+		}
+		RequestConfig.Builder builder = RequestConfig.copy(defaultRequestConfig);
+		int connectTimeout = this.requestConfig.getConnectTimeout();
+		if (connectTimeout >= 0) {
+			builder.setConnectTimeout(connectTimeout);
+		}
+		int connectionRequestTimeout = this.requestConfig.getConnectionRequestTimeout();
+		if (connectionRequestTimeout >= 0) {
+			builder.setConnectionRequestTimeout(connectionRequestTimeout);
+		}
+		int socketTimeout = this.requestConfig.getSocketTimeout();
+		if (socketTimeout >= 0) {
+			builder.setSocketTimeout(socketTimeout);
+		}
+		return builder.build();
 	}
 
 	/**

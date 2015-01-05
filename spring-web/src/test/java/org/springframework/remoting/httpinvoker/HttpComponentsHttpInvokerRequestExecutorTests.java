@@ -20,6 +20,7 @@ import java.io.IOException;
 
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.RequestConfig;
+import org.apache.http.client.methods.Configurable;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
@@ -90,23 +91,82 @@ public class HttpComponentsHttpInvokerRequestExecutorTests {
 	}
 
 	@Test
-	public void defaultSettingsOfHttpClientLostOnExecutorCustomization() throws IOException {
-		CloseableHttpClient client = HttpClientBuilder.create()
-				.setDefaultRequestConfig(RequestConfig.custom().setConnectTimeout(1234).build())
-				.build();
+	public void defaultSettingsOfHttpClientMergedOnExecutorCustomization() throws IOException {
+		RequestConfig defaultConfig = RequestConfig.custom().setConnectTimeout(1234).build();
+		CloseableHttpClient client = mock(CloseableHttpClient.class,
+				withSettings().extraInterfaces(Configurable.class));
+		Configurable configurable = (Configurable) client;
+		when(configurable.getConfig()).thenReturn(defaultConfig);
+
 		HttpComponentsHttpInvokerRequestExecutor executor =
 				new HttpComponentsHttpInvokerRequestExecutor(client);
-
 		HttpInvokerClientConfiguration config = mockHttpInvokerClientConfiguration("http://fake-service");
 		HttpPost httpPost = executor.createHttpPost(config);
-		assertNull("No custom config should be set with a custom HttpClient", httpPost.getConfig());
+		assertSame("Default client configuration is expected", defaultConfig, httpPost.getConfig());
 
 		executor.setConnectionRequestTimeout(4567);
 		HttpPost httpPost2 = executor.createHttpPost(config);
 		assertNotNull(httpPost2.getConfig());
 		assertEquals(4567, httpPost2.getConfig().getConnectionRequestTimeout());
-		// No way to access the request config of the HTTP client so no way to "merge" our customizations
-		assertEquals(-1, httpPost2.getConfig().getConnectTimeout());
+		// Default connection timeout merged
+		assertEquals(1234, httpPost2.getConfig().getConnectTimeout());
+	}
+
+	@Test
+	public void localSettingsOverrideClientDefaultSettings() throws Exception {
+		RequestConfig defaultConfig = RequestConfig.custom()
+				.setConnectTimeout(1234).setConnectionRequestTimeout(6789).build();
+		CloseableHttpClient client = mock(CloseableHttpClient.class,
+				withSettings().extraInterfaces(Configurable.class));
+		Configurable configurable = (Configurable) client;
+		when(configurable.getConfig()).thenReturn(defaultConfig);
+
+		HttpComponentsHttpInvokerRequestExecutor executor =
+				new HttpComponentsHttpInvokerRequestExecutor(client);
+		executor.setConnectTimeout(5000);
+
+		HttpInvokerClientConfiguration config = mockHttpInvokerClientConfiguration("http://fake-service");
+		HttpPost httpPost = executor.createHttpPost(config);
+		RequestConfig requestConfig = httpPost.getConfig();
+		assertEquals(5000, requestConfig.getConnectTimeout());
+		assertEquals(6789, requestConfig.getConnectionRequestTimeout());
+		assertEquals(-1, requestConfig.getSocketTimeout());
+	}
+
+	@Test
+	public void mergeBasedOnCurrentHttpClient() throws Exception {
+		RequestConfig defaultConfig = RequestConfig.custom()
+				.setSocketTimeout(1234).build();
+		final CloseableHttpClient client = mock(CloseableHttpClient.class,
+				withSettings().extraInterfaces(Configurable.class));
+		Configurable configurable = (Configurable) client;
+		when(configurable.getConfig()).thenReturn(defaultConfig);
+
+		HttpComponentsHttpInvokerRequestExecutor executor =
+				new HttpComponentsHttpInvokerRequestExecutor() {
+					@Override
+					public HttpClient getHttpClient() {
+						return client;
+					}
+				};
+		executor.setReadTimeout(5000);
+		HttpInvokerClientConfiguration config = mockHttpInvokerClientConfiguration("http://fake-service");
+		HttpPost httpPost = executor.createHttpPost(config);
+		RequestConfig requestConfig = httpPost.getConfig();
+		assertEquals(-1, requestConfig.getConnectTimeout());
+		assertEquals(-1, requestConfig.getConnectionRequestTimeout());
+		assertEquals(5000, requestConfig.getSocketTimeout());
+
+		// Update the Http client so that it returns an updated  config
+		RequestConfig updatedDefaultConfig = RequestConfig.custom()
+				.setConnectTimeout(1234).build();
+		when(configurable.getConfig()).thenReturn(updatedDefaultConfig);
+		executor.setReadTimeout(7000);
+		HttpPost httpPost2 = executor.createHttpPost(config);
+		RequestConfig requestConfig2 = httpPost2.getConfig();
+		assertEquals(1234, requestConfig2.getConnectTimeout());
+		assertEquals(-1, requestConfig2.getConnectionRequestTimeout());
+		assertEquals(7000, requestConfig2.getSocketTimeout());
 	}
 
 	@Test
