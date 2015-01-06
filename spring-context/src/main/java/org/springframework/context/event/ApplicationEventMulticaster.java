@@ -22,7 +22,8 @@ import org.springframework.context.ApplicationListener;
 /**
  * Interface to be implemented by objects that can manage a number of
  * {@link ApplicationListener} objects, and publish events to them.
- *
+ *  中文：
+ *      管理ApplicationListener的发布
  * <p>An {@link org.springframework.context.ApplicationEventPublisher}, typically
  * a Spring {@link org.springframework.context.ApplicationContext}, can use an
  * ApplicationEventMulticaster as a delegate for actually publishing events.
@@ -34,6 +35,7 @@ public interface ApplicationEventMulticaster {
 
 	/**
 	 * Add a listener to be notified of all events.
+     * 增加listener
 	 * @param listener the listener to add
 	 */
 	void addApplicationListener(ApplicationListener<?> listener);
@@ -65,6 +67,7 @@ public interface ApplicationEventMulticaster {
 
 	/**
 	 * Multicast the given application event to appropriate listeners.
+     * 发布事件
 	 * @param event the event to multicast
 	 */
 	void multicastEvent(ApplicationEvent event);

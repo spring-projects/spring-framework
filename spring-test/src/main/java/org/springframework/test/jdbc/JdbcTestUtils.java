@@ -55,6 +55,7 @@ public class JdbcTestUtils {
 
 	/**
 	 * Count the rows in the given table.
+     *
 	 * @param jdbcTemplate the JdbcTemplate with which to perform JDBC operations
 	 * @param tableName name of the table to count rows in
 	 * @return the number of rows in the table
