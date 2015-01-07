@@ -44,7 +44,7 @@ public class OrderComparator implements Comparator<Object> {
 
 
 	/**
-	 * Build an adapted order comparator with the given soruce provider.
+	 * Build an adapted order comparator with the given source provider.
 	 * @param sourceProvider the order source provider to use
 	 * @return the adapted comparator
 	 * @since 4.1
