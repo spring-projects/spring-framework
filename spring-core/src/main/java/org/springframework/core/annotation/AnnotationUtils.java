@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -318,8 +318,8 @@ public abstract class AnnotationUtils {
 	 * <p>The algorithm operates as follows:
 	 * <ol>
 	 * <li>Search for the annotation on the given class and return it if found.
-	 * <li>Recursively search through all interfaces that the given class declares.
 	 * <li>Recursively search through all annotations that the given class declares.
+	 * <li>Recursively search through all interfaces that the given class declares.
 	 * <li>Recursively search through the superclass hierarchy of the given class.
 	 * </ol>
 	 * <p>Note: in this context, the term <em>recursively</em> means that the search
