@@ -85,8 +85,8 @@ task eclipseJdtPrepare(type: Copy) {
 }
 
 task cleanEclipseJdtUi(type: Delete) {
+	delete project.file(".settings/org.eclipse.jdt.core.prefs")
 	delete project.file(".settings/org.eclipse.jdt.ui.prefs")
-	delete project.file("org.eclipse.jdt.core.prefs")
 	delete project.file(".settings/org.eclipse.wst.common.component")
 	delete project.file(".settings/org.eclipse.wst.common.project.facet.core.xml")
 }
