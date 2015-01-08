@@ -16,6 +16,7 @@
 
 package org.springframework.web.filter;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -51,15 +52,15 @@ public class ShallowEtagHeaderFilterTests {
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/hotels");
 		MockHttpServletResponse response = new MockHttpServletResponse();
 
-		assertTrue(filter.isEligibleForEtag(request, response, 200, new byte[0]));
-		assertFalse(filter.isEligibleForEtag(request, response, 300, new byte[0]));
+		assertTrue(filter.isEligibleForEtag(request, response, 200, new ByteArrayInputStream(new byte[0])));
+		assertFalse(filter.isEligibleForEtag(request, response, 300, new ByteArrayInputStream(new byte[0])));
 
 		request = new MockHttpServletRequest("POST", "/hotels");
-		assertFalse(filter.isEligibleForEtag(request, response, 200, new byte[0]));
+		assertFalse(filter.isEligibleForEtag(request, response, 200, new ByteArrayInputStream(new byte[0])));
 
 		request = new MockHttpServletRequest("POST", "/hotels");
 		request.addHeader("Cache-Control","must-revalidate, no-store");
-		assertFalse(filter.isEligibleForEtag(request, response, 200, new byte[0]));
+		assertFalse(filter.isEligibleForEtag(request, response, 200, new ByteArrayInputStream(new byte[0])));
 	}
 
 	@Test

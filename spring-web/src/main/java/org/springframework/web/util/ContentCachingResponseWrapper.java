@@ -17,6 +17,8 @@
 package org.springframework.web.util;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
@@ -24,8 +26,7 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpServletResponseWrapper;
 
-import org.springframework.util.ResizableByteArrayOutputStream;
-import org.springframework.util.StreamUtils;
+import org.springframework.util.FastByteArrayOutputStream;
 
 /**
  * {@link javax.servlet.http-HttpServletResponse} wrapper that caches all content written to
@@ -39,7 +40,7 @@ import org.springframework.util.StreamUtils;
  */
 public class ContentCachingResponseWrapper extends HttpServletResponseWrapper {
 
-	private final ResizableByteArrayOutputStream content = new ResizableByteArrayOutputStream(1024);
+	private final FastByteArrayOutputStream content = new FastByteArrayOutputStream(1024);
 
 	private final ServletOutputStream outputStream = new ResponseServletOutputStream();
 
@@ -107,9 +108,7 @@ public class ContentCachingResponseWrapper extends HttpServletResponseWrapper {
 
 	@Override
 	public void setContentLength(int len) {
-		if (len > this.content.capacity()) {
-			this.content.resize(len);
-		}
+		this.content.resize(len);
 	}
 
 	// Overrides Servlet 3.1 setContentLengthLong(long) at runtime
@@ -118,16 +117,12 @@ public class ContentCachingResponseWrapper extends HttpServletResponseWrapper {
 			throw new IllegalArgumentException("Content-Length exceeds ShallowEtagHeaderFilter's maximum (" +
 					Integer.MAX_VALUE + "): " + len);
 		}
-		if (len > this.content.capacity()) {
-			this.content.resize((int) len);
-		}
+		this.content.resize((int) len);
 	}
 
 	@Override
 	public void setBufferSize(int size) {
-		if (size > this.content.capacity()) {
-			this.content.resize(size);
-		}
+		this.content.resize(size);
 	}
 
 	@Override
@@ -155,14 +150,24 @@ public class ContentCachingResponseWrapper extends HttpServletResponseWrapper {
 		return this.content.toByteArray();
 	}
 
-	private void copyBodyToResponse() throws IOException {
+	public void copyBodyToResponse() throws IOException {
 		if (this.content.size() > 0) {
-			getResponse().setContentLength(this.content.size());
-			StreamUtils.copy(this.content.toByteArray(), getResponse().getOutputStream());
+			HttpServletResponse rawResponse = (HttpServletResponse) getResponse();
+			if(! rawResponse.isCommitted()){
+				rawResponse.setContentLength(this.content.size());
+			}
+			this.content.writeTo(outputStream);
 			this.content.reset();
 		}
 	}
 
+	public int getContentSize(){
+		return this.content.size();
+	}
+
+	public InputStream getContentInputStream(){
+		return this.content.getInputStream();
+	}
 
 	private class ResponseServletOutputStream extends ServletOutputStream {
 
