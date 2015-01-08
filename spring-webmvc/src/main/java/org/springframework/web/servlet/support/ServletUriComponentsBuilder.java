@@ -79,7 +79,7 @@ public class ServletUriComponentsBuilder extends UriComponentsBuilder {
 	 * {@code "/"} or {@code "*.do"}, the result will be the same as
 	 * if calling {@link #fromContextPath(HttpServletRequest)}.
 	 */
-	public static ServletUriComponentsBuilder fromServletMapping(HttpServletRequest request) {
+		public static ServletUriComponentsBuilder fromServletMapping(HttpServletRequest request) {
 		ServletUriComponentsBuilder builder = fromContextPath(request);
 		if (StringUtils.hasText(new UrlPathHelper().getPathWithinServletMapping(request))) {
 			builder.path(request.getServletPath());

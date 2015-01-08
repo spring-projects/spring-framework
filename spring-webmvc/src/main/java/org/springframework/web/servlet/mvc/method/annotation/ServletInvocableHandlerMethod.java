@@ -25,6 +25,7 @@ import java.util.concurrent.Callable;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ResolvableType;
 import org.springframework.http.HttpStatus;
+import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -260,7 +261,16 @@ public class ServletInvocableHandlerMethod extends InvocableHandlerMethod {
 
 		@Override
 		public Class<?> getParameterType() {
-			return (this.returnValue != null ? this.returnValue.getClass() : this.returnType.getRawClass());
+			if (this.returnValue != null) {
+				return this.returnValue.getClass();
+			}
+			Class<?> parameterType = super.getParameterType();
+			if (ResponseBodyEmitter.class.isAssignableFrom(parameterType)) {
+				return parameterType;
+			}
+			Assert.isTrue(!ResolvableType.NONE.equals(this.returnType), "Expected one of" +
+					"Callable, DeferredResult, or ListenableFuture: " + super.getParameterType());
+			return this.returnType.getRawClass();
 		}
 
 		@Override

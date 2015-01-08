@@ -632,6 +632,7 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 		handlers.add(new ModelAndViewMethodReturnValueHandler());
 		handlers.add(new ModelMethodProcessor());
 		handlers.add(new ViewMethodReturnValueHandler());
+		handlers.add(new ResponseBodyEmitterReturnValueHandler(getMessageConverters()));
 		handlers.add(new HttpEntityMethodProcessor(
 				getMessageConverters(), this.contentNegotiationManager, this.responseBodyAdvice));
 		handlers.add(new HttpHeadersReturnValueHandler());
