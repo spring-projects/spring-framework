@@ -1,30 +1,29 @@
 ## Spring Framework
 The Spring Framework provides a comprehensive programming and configuration
-model for modern Java-based enterprise applications - on any kind of deployment
+model for modern Java-based enterprise applications -- on any kind of deployment
 platform. A key element of Spring is infrastructural support at the application
 level: Spring focuses on the "plumbing" of enterprise applications so that teams
 can focus on application-level business logic, without unnecessary ties to
 specific deployment environments.
 
-The framework also serves as the foundation for [Spring Integration][], [Spring
-Batch][] and the rest of the Spring [family of projects][]. Browse the repositories
-under the [Spring organization][] on GitHub for a full list.
+The framework also serves as the foundation for [Spring Integration][], [Spring Batch][]
+and the rest of the Spring [family of projects][]. Browse the repositories under
+the [Spring organization][] on GitHub for a full list.
 
 ## Downloading Artifacts
 See [downloading Spring artifacts][] for Maven repository information. Unable to
-use Maven or other transitive dependency management tools? See [building a
-distribution with dependencies][].
+use Maven or other transitive dependency management tools?
+See [building a distribution with dependencies][].
 
 ## Documentation
 See the current [Javadoc][] and [reference docs][].
 
 ## Getting Support
-Check out the [Spring forums][] and the [spring][spring tag] and
-[spring-mvc][spring-mvc tag] tags on [Stack Overflow][]. [Commercial support][]
+Check out the [spring][spring tags] tags on [Stack Overflow][]. [Commercial support][]
 is available too.
 
 ## Issue Tracking
-Report issues via the [Spring Framework JIRA]. Understand our issue management
+Report issues via the [Spring Framework JIRA][]. Understand our issue management
 process by reading about [the lifecycle of an issue][]. Think you've found a
 bug? Please consider submitting a reproduction project via the
 [spring-framework-issues][] GitHub repository. The [readme][] there provides
@@ -77,9 +76,7 @@ The Spring Framework is released under version 2.0 of the [Apache License][].
 [building a distribution with dependencies]: https://github.com/spring-projects/spring-framework/wiki/Building-a-distribution-with-dependencies
 [Javadoc]: http://docs.spring.io/spring-framework/docs/current/javadoc-api/
 [reference docs]: http://docs.spring.io/spring-framework/docs/current/spring-framework-reference/
-[Spring forums]: http://forum.spring.io/
-[spring tag]: http://stackoverflow.com/questions/tagged/spring
-[spring-mvc tag]: http://stackoverflow.com/questions/tagged/spring-mvc
+[spring tags]: http://spring.io/questions
 [Stack Overflow]: http://stackoverflow.com/faq
 [Commercial support]: http://spring.io/services
 [Spring Framework JIRA]: https://jira.spring.io/browse/SPR
