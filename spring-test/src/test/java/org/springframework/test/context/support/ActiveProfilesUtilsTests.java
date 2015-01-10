@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,14 +20,17 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.junit.Test;
 
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ActiveProfilesResolver;
+import org.springframework.util.StringUtils;
 
 import static org.junit.Assert.*;
 import static org.springframework.test.context.support.ActiveProfilesUtils.*;
@@ -211,13 +214,30 @@ public class ActiveProfilesUtilsTests extends AbstractContextConfigurationUtilsT
 	/**
 	 * This test verifies that the actual test class, not the composed annotation,
 	 * is passed to the resolver.
-	 *
 	 * @since 4.0.3
 	 */
 	@Test
 	public void resolveActiveProfilesWithMetaAnnotationAndTestClassVerifyingResolver() {
 		Class<TestClassVerifyingActiveProfilesResolverTestCase> testClass = TestClassVerifyingActiveProfilesResolverTestCase.class;
 		assertResolvedProfiles(testClass, testClass.getSimpleName());
+	}
+
+	/**
+	 * This test verifies that {@link DefaultActiveProfilesResolver} can be declared explicitly.
+	 * @since 4.1.5
+	 */
+	@Test
+	public void resolveActiveProfilesWithDefaultActiveProfilesResolver() {
+		assertResolvedProfiles(DefaultActiveProfilesResolverTestCase.class, "default");
+	}
+
+	/**
+	 * This test verifies that {@link DefaultActiveProfilesResolver} can be extended.
+	 * @since 4.1.5
+	 */
+	@Test
+	public void resolveActiveProfilesWithExtendedDefaultActiveProfilesResolver() {
+		assertResolvedProfiles(ExtendedDefaultActiveProfilesResolverTestCase.class, "default", "foo");
 	}
 
 
@@ -294,6 +314,14 @@ public class ActiveProfilesUtilsTests extends AbstractContextConfigurationUtilsT
 	private static class TestClassVerifyingActiveProfilesResolverTestCase {
 	}
 
+	@ActiveProfiles(profiles = "default", resolver = DefaultActiveProfilesResolver.class)
+	private static class DefaultActiveProfilesResolverTestCase {
+	}
+
+	@ActiveProfiles(profiles = "default", resolver = ExtendedDefaultActiveProfilesResolver.class)
+	private static class ExtendedDefaultActiveProfilesResolverTestCase {
+	}
+
 	@ActiveProfiles(profiles = "conflict 1", value = "conflict 2")
 	private static class ConflictingProfilesAndValueTestCase {
 	}
@@ -340,6 +368,16 @@ public class ActiveProfilesUtilsTests extends AbstractContextConfigurationUtilsT
 		public String[] resolve(Class<?> testClass) {
 			return testClass.isAnnotation() ? new String[] { "@" + testClass.getSimpleName() }
 					: new String[] { testClass.getSimpleName() };
+		}
+	}
+
+	private static class ExtendedDefaultActiveProfilesResolver extends DefaultActiveProfilesResolver {
+
+		@Override
+		public String[] resolve(Class<?> testClass) {
+			List<String> profiles = new ArrayList<String>(Arrays.asList(super.resolve(testClass)));
+			profiles.add("foo");
+			return StringUtils.toStringArray(profiles);
 		}
 	}
 
