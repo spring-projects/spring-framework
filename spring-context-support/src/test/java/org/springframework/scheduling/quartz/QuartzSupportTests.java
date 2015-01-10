@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -119,7 +119,7 @@ public class QuartzSupportTests {
 		bean.start();
 
 		Thread.sleep(500);
-		assertTrue(DummyJob.count > 0);
+		assertTrue("DummyJob should have been executed at least once.", DummyJob.count > 0);
 		assertEquals(DummyJob.count, taskExecutor.count);
 
 		bean.destroy();
@@ -197,7 +197,7 @@ public class QuartzSupportTests {
 
 		Thread.sleep(500);
 		assertEquals(10, DummyJob.param);
-		assertTrue(DummyJob.count > 0);
+		assertTrue("DummyJob should have been executed at least once.", DummyJob.count > 0);
 
 		bean.destroy();
 	}
@@ -287,7 +287,7 @@ public class QuartzSupportTests {
 
 		Thread.sleep(500);
 		assertEquals(10, DummyJob.param);
-		assertTrue(DummyJob.count > 0);
+		assertTrue("DummyJob should have been executed at least once.", DummyJob.count > 0);
 
 		bean.destroy();
 	}
@@ -394,7 +394,7 @@ public class QuartzSupportTests {
 		assertTrue("No triggers were persisted", jdbcTemplate.queryForList("SELECT * FROM qrtz_triggers").size()>0);
 		Thread.sleep(3000);
 		try {
-			assertTrue(DummyJob.count > 0);
+			assertTrue("DummyJob should have been executed at least once.", DummyJob.count > 0);
 		}
 		finally {
 			ctx.close();
