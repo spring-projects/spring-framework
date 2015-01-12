@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,6 @@ import javax.management.remote.JMXConnectorServer;
 import javax.management.remote.JMXConnectorServerFactory;
 import javax.management.remote.JMXServiceURL;
 
-import org.junit.Before;
 import org.junit.Test;
 
 import org.springframework.aop.support.AopUtils;
@@ -34,21 +33,21 @@ import org.springframework.util.SocketUtils;
 import static org.junit.Assert.*;
 
 /**
+ * To run the tests in the class, set the following Java system property:
+ * {@code -DtestGroups=jmxmp}.
+ *
  * @author Rob Harrop
  * @author Juergen Hoeller
+ * @author Sam Brannen
  */
 public class MBeanServerConnectionFactoryBeanTests extends AbstractMBeanServerTests {
 
+	private final String serviceUrl;
 
-	private String serviceUrl;
-
-
-	@Before
-	public void getUrl() {
+	{
 		int port = SocketUtils.findAvailableTcpPort(9800, 9900);
-		this.serviceUrl =  "service:jmx:jmxmp://localhost:" + port;
+		this.serviceUrl = "service:jmx:jmxmp://localhost:" + port;
 	}
-
 
 	private JMXServiceURL getJMXServiceUrl() throws MalformedURLException {
 		return new JMXServiceURL(serviceUrl);
@@ -57,7 +56,6 @@ public class MBeanServerConnectionFactoryBeanTests extends AbstractMBeanServerTe
 	private JMXConnectorServer getConnectorServer() throws Exception {
 		return JMXConnectorServerFactory.newJMXConnectorServer(getJMXServiceUrl(), null, getServer());
 	}
-
 
 	@Test
 	public void testTestValidConnection() throws Exception {
@@ -84,15 +82,10 @@ public class MBeanServerConnectionFactoryBeanTests extends AbstractMBeanServerTe
 		}
 	}
 
-	@Test
+	@Test(expected = IllegalArgumentException.class)
 	public void testWithNoServiceUrl() throws Exception {
 		MBeanServerConnectionFactoryBean bean = new MBeanServerConnectionFactoryBean();
-		try {
-			bean.afterPropertiesSet();
-			fail("IllegalArgumentException should be raised when no service url is provided");
-		} catch (IllegalArgumentException ex) {
-			// expected
-		}
+		bean.afterPropertiesSet();
 	}
 
 	@Test
