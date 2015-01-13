@@ -22,7 +22,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.http.server.ServerHttpRequest;
-import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.sockjs.SockJsTransportFailureException;
@@ -56,8 +55,8 @@ public class TestHttpSockJsSession extends StreamingSockJsSession {
 	}
 
 	@Override
-	protected boolean isStreaming() {
-		return true;
+	protected byte[] getPrelude(ServerHttpRequest request) {
+		return new byte[0];
 	}
 
 	@Override

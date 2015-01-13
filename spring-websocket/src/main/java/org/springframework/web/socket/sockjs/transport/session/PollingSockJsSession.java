@@ -44,7 +44,7 @@ public class PollingSockJsSession extends AbstractHttpSockJsSession {
 
 
 	/**
-	 * @deprecated as of 4.2 this method is no longer used for anything
+	 * @deprecated as of 4.2 this method is no longer used.
 	 */
 	@Override
 	@Deprecated

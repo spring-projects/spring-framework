@@ -118,13 +118,8 @@ public class HttpSockJsSessionTests extends AbstractSockJsSessionTests<TestAbstr
 		}
 
 		@Override
-		protected boolean isStreaming() {
-			return true;
-		}
-
-		@Override
-		protected void writePrelude(ServerHttpRequest request, ServerHttpResponse response) throws IOException {
-			response.getBody().write("hhh\n".getBytes());
+		protected byte[] getPrelude(ServerHttpRequest request) {
+			return "hhh\n".getBytes();
 		}
 
 		public boolean wasCacheFlushed() {
