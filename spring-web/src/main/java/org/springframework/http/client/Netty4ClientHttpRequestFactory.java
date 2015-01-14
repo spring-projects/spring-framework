@@ -168,7 +168,12 @@ public class Netty4ClientHttpRequestFactory implements ClientHttpRequestFactory,
 	 * @see ByteBufAllocator
 	 */
 	public void setByteBufAllocator(ByteBufAllocator byteBufAllocator) {
-		this.byteBufAllocator = byteBufAllocator;
+		if(byteBufAllocator==null) {
+			this.byteBufAllocator = DEFAULT_BYTE_BUF_ALLOCATOR;
+		}
+		else {
+			this.byteBufAllocator = byteBufAllocator;
+		}
 	}
 
 	/**
@@ -183,9 +188,7 @@ public class Netty4ClientHttpRequestFactory implements ClientHttpRequestFactory,
 	private Bootstrap getBootstrap() {
 		if (this.bootstrap == null) {
 			Bootstrap bootstrap = new Bootstrap();
-			if(byteBufAllocator!=null) {
-				bootstrap.option(ChannelOption.ALLOCATOR, byteBufAllocator);
-			}
+			bootstrap.option(ChannelOption.ALLOCATOR, byteBufAllocator);
 			bootstrap.group(this.eventLoopGroup).channel(NioSocketChannel.class)
 					.handler(new ChannelInitializer<SocketChannel>() {
 						@Override
