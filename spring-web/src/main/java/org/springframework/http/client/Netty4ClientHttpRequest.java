@@ -24,8 +24,8 @@ import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
 import io.netty.bootstrap.Bootstrap;
+import io.netty.buffer.ByteBufAllocator;
 import io.netty.buffer.ByteBufOutputStream;
-import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
@@ -51,9 +51,11 @@ import org.springframework.util.concurrent.SettableListenableFuture;
  * @since 4.1.2
  */
 class Netty4ClientHttpRequest extends AbstractAsyncClientHttpRequest implements ClientHttpRequest {
+	
+	public static final int INITIAL_REQUEST_BUFFER_SIZE = 512;
 
 	private final Bootstrap bootstrap;
-
+	
 	private final URI uri;
 
 	private final HttpMethod method;
@@ -61,11 +63,11 @@ class Netty4ClientHttpRequest extends AbstractAsyncClientHttpRequest implements 
 	private final ByteBufOutputStream body;
 
 
-	public Netty4ClientHttpRequest(Bootstrap bootstrap, URI uri, HttpMethod method, int maxRequestSize) {
+	public Netty4ClientHttpRequest(Bootstrap bootstrap, ByteBufAllocator byteBufAllocator, URI uri, HttpMethod method, int maxRequestSize) {
 		this.bootstrap = bootstrap;
 		this.uri = uri;
 		this.method = method;
-		this.body = new ByteBufOutputStream(Unpooled.buffer(maxRequestSize));
+		this.body = new ByteBufOutputStream(byteBufAllocator.buffer(INITIAL_REQUEST_BUFFER_SIZE, maxRequestSize));
 	}
 
 

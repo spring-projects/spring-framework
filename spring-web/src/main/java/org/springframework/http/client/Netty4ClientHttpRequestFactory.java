@@ -20,7 +20,10 @@ import java.io.IOException;
 import java.net.URI;
 
 import io.netty.bootstrap.Bootstrap;
+import io.netty.buffer.ByteBufAllocator;
+import io.netty.buffer.UnpooledByteBufAllocator;
 import io.netty.channel.ChannelInitializer;
+import io.netty.channel.ChannelOption;
 import io.netty.channel.ChannelPipeline;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
@@ -54,14 +57,48 @@ public class Netty4ClientHttpRequestFactory implements ClientHttpRequestFactory,
 	 */
 	public static final int DEFAULT_MAX_REQUEST_SIZE = 1024 * 1024 * 10;
 
+	/**
+	 * The default maximum header size
+	 * @see #setMaxHeaderSize(int)
+	 * @see HttpClientCodec#HttpClientCodec()
+	 */
+	public static final int DEFAULT_MAX_HEADER_SIZE = 8192;
+	
+	/**
+	 * The default initial line length.
+	 * @see #setInitialLineLength(int)
+	 * @see HttpClientCodec#HttpClientCodec()
+	 */
+	public static final int DEFAULT_INITIAL_LINE_LENGTH = 4096;
+
+	/**
+	 * The default max chunk size.
+	 * @see #setMaxChunkSize(int)
+	 * @see HttpClientCodec#HttpClientCodec()
+	 */
+	public static final int DEFAULT_MAX_CHUNK_SIZE = 8192;
+	
+	/**
+	 * The default byte-buf allocator.
+	 * @see UnpooledByteBufAllocator#DEFAULT
+	 */
+	public static final ByteBufAllocator DEFAULT_BYTE_BUF_ALLOCATOR = UnpooledByteBufAllocator.DEFAULT;
 
 	private final EventLoopGroup eventLoopGroup;
 
 	private final boolean defaultEventLoopGroup;
 
 	private int maxRequestSize = DEFAULT_MAX_REQUEST_SIZE;
+	
+	private int maxHeaderSize = DEFAULT_MAX_HEADER_SIZE;
+	
+	private int initialLineLength = DEFAULT_INITIAL_LINE_LENGTH;
+	
+	private int maxChunkSize = DEFAULT_MAX_CHUNK_SIZE;
 
 	private SslContext sslContext;
+	
+	private ByteBufAllocator byteBufAllocator = DEFAULT_BYTE_BUF_ALLOCATOR;
 
 	private volatile Bootstrap bootstrap;
 
@@ -91,12 +128,47 @@ public class Netty4ClientHttpRequestFactory implements ClientHttpRequestFactory,
 
 
 	/**
-	 * Set the default maximum request size.
+	 * Set the maximum request size.
 	 * <p>By default this is set to {@link #DEFAULT_MAX_REQUEST_SIZE}.
 	 * @see HttpObjectAggregator#HttpObjectAggregator(int)
 	 */
 	public void setMaxRequestSize(int maxRequestSize) {
 		this.maxRequestSize = maxRequestSize;
+	}
+	
+	/**
+	 * Set the maximum header size.
+	 * <p>By default this is set to {@link #DEFAULT_MAX_HEADER_SIZE}.
+	 * @see HttpClientCodec#HttpClientCodec(int, int, int)
+	 */
+	public void setMaxHeaderSize(int maxHeaderSize) {
+		this.maxHeaderSize = maxHeaderSize;
+	}
+	
+	/**
+	 * Set the initial line length.
+	 * <p>By default this is set to {@link #DEFAULT_INITIAL_LINE_LENGTH}.
+	 * @see HttpClientCodec#HttpClientCodec(int, int, int)
+	 */
+	public void setInitialLineLength(int initialLineLength) {
+		this.initialLineLength = initialLineLength;
+	}
+	
+	/**
+	 * Set the maximum chunk size.
+	 * <p>By default this is set to {@link #DEFAULT_MAX_CHUNK_SIZE}.
+	 * @see HttpClientCodec#HttpClientCodec(int, int, int)
+	 */
+	public void setMaxChunkSize(int maxChunkSize) {
+		this.maxChunkSize = maxChunkSize;
+	}
+	
+	/**
+	 * Set the ByteBuf allocator used by the requests.
+	 * @see ByteBufAllocator
+	 */
+	public void setByteBufAllocator(ByteBufAllocator byteBufAllocator) {
+		this.byteBufAllocator = byteBufAllocator;
 	}
 
 	/**
@@ -111,6 +183,9 @@ public class Netty4ClientHttpRequestFactory implements ClientHttpRequestFactory,
 	private Bootstrap getBootstrap() {
 		if (this.bootstrap == null) {
 			Bootstrap bootstrap = new Bootstrap();
+			if(byteBufAllocator!=null) {
+				bootstrap.option(ChannelOption.ALLOCATOR, byteBufAllocator);
+			}
 			bootstrap.group(this.eventLoopGroup).channel(NioSocketChannel.class)
 					.handler(new ChannelInitializer<SocketChannel>() {
 						@Override
@@ -119,7 +194,7 @@ public class Netty4ClientHttpRequestFactory implements ClientHttpRequestFactory,
 							if (sslContext != null) {
 								pipeline.addLast(sslContext.newHandler(channel.alloc()));
 							}
-							pipeline.addLast(new HttpClientCodec());
+							pipeline.addLast(new HttpClientCodec(initialLineLength, maxHeaderSize, maxChunkSize));
 							pipeline.addLast(new HttpObjectAggregator(maxRequestSize));
 						}
 					});
@@ -145,7 +220,7 @@ public class Netty4ClientHttpRequestFactory implements ClientHttpRequestFactory,
 	}
 
 	private Netty4ClientHttpRequest createRequestInternal(URI uri, HttpMethod httpMethod) {
-		return new Netty4ClientHttpRequest(getBootstrap(), uri, httpMethod, this.maxRequestSize);
+		return new Netty4ClientHttpRequest(getBootstrap(), byteBufAllocator, uri, httpMethod, this.maxRequestSize);
 	}
 
 
