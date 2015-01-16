@@ -95,6 +95,7 @@ import org.springframework.web.servlet.handler.UserRoleAuthorizationInterceptor;
 import org.springframework.web.servlet.handler.WebRequestHandlerInterceptorAdapter;
 import org.springframework.web.servlet.i18n.LocaleChangeInterceptor;
 import org.springframework.web.servlet.mvc.HttpRequestHandlerAdapter;
+import org.springframework.web.servlet.mvc.ParameterizableViewController;
 import org.springframework.web.servlet.mvc.SimpleControllerHandlerAdapter;
 import org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
@@ -648,9 +649,17 @@ public class MvcNamespaceTests {
 
 		SimpleUrlHandlerMapping hm = this.appContext.getBean(SimpleUrlHandlerMapping.class);
 		assertNotNull(hm);
-		assertNotNull(hm.getUrlMap().get("/path"));
-		assertNotNull(hm.getUrlMap().get("/old"));
-		assertNotNull(hm.getUrlMap().get("/bad"));
+		ParameterizableViewController viewController = (ParameterizableViewController) hm.getUrlMap().get("/path");
+		assertNotNull(viewController);
+		assertEquals("home", viewController.getViewName());
+
+		ParameterizableViewController redirectViewController = (ParameterizableViewController) hm.getUrlMap().get("/old");
+		assertNotNull(redirectViewController);
+		assertThat(redirectViewController.getView(), Matchers.instanceOf(RedirectView.class));
+
+		ParameterizableViewController statusViewController = (ParameterizableViewController) hm.getUrlMap().get("/bad");
+		assertNotNull(statusViewController);
+		assertEquals(404, statusViewController.getStatusCode().value());
 
 		BeanNameUrlHandlerMapping beanNameMapping = this.appContext.getBean(BeanNameUrlHandlerMapping.class);
 		assertNotNull(beanNameMapping);

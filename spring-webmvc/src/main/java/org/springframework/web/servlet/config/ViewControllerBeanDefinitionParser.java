@@ -140,6 +140,8 @@ class ViewControllerBeanDefinitionParser implements BeanDefinitionParser {
 		}
 		if (element.hasAttribute("context-relative")) {
 			redirectView.getPropertyValues().add("contextRelative", element.getAttribute("context-relative"));
+		} else {
+			redirectView.getPropertyValues().add("contextRelative", true);
 		}
 		if (element.hasAttribute("keep-query-params")) {
 			redirectView.getPropertyValues().add("propagateQueryParams", element.getAttribute("keep-query-params"));
