@@ -35,12 +35,12 @@ public interface ResultActions {
 	 * static imports: MockMvcRequestBuilders.*, MockMvcResultMatchers.*
 	 *
 	 * mockMvc.perform(get("/person/1"))
-	 *   .andExpect(status.isOk())
+	 *   .andExpect(status().isOk())
 	 *   .andExpect(content().contentType(MediaType.APPLICATION_JSON))
 	 *   .andExpect(jsonPath("$.person.name").value("Jason"));
 	 *
 	 * mockMvc.perform(post("/form"))
-	 *   .andExpect(status.isOk())
+	 *   .andExpect(status().isOk())
 	 *   .andExpect(redirectedUrl("/person/1"))
 	 *   .andExpect(model().size(1))
 	 *   .andExpect(model().attributeExists("person"))
