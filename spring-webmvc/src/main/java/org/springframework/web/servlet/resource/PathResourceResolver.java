@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import javax.servlet.http.HttpServletRequest;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
+import org.springframework.util.StringUtils;
 import org.springframework.web.context.support.ServletContextResource;
 
 /**
@@ -164,19 +165,19 @@ public class PathResourceResolver extends AbstractResourceResolver {
 		String locationPath;
 		if (resource instanceof UrlResource) {
 			resourcePath = resource.getURL().toExternalForm();
-			locationPath = location.getURL().toExternalForm();
+			locationPath = StringUtils.cleanPath(location.getURL().toString());
 		}
 		else if (resource instanceof ClassPathResource) {
 			resourcePath = ((ClassPathResource) resource).getPath();
-			locationPath = ((ClassPathResource) location).getPath();
+			locationPath = StringUtils.cleanPath(((ClassPathResource) location).getPath());
 		}
 		else if (resource instanceof ServletContextResource) {
 			resourcePath = ((ServletContextResource) resource).getPath();
-			locationPath = ((ServletContextResource) location).getPath();
+			locationPath = StringUtils.cleanPath(((ServletContextResource) location).getPath());
 		}
 		else {
 			resourcePath = resource.getURL().getPath();
-			locationPath = location.getURL().getPath();
+			locationPath = StringUtils.cleanPath(location.getURL().getPath());
 		}
 		locationPath = (locationPath.endsWith("/") || locationPath.isEmpty() ? locationPath : locationPath + "/");
 		if (!resourcePath.startsWith(locationPath)) {
