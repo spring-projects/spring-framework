@@ -18,11 +18,14 @@ package org.springframework.http.converter.json;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.time.ZoneId;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.TimeZone;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonGenerator;
@@ -74,6 +77,10 @@ public class Jackson2ObjectMapperBuilder {
 	private boolean createXmlMapper = false;
 
 	private DateFormat dateFormat;
+
+	private Locale locale;
+
+	private TimeZone timeZone;
 
 	private AnnotationIntrospector annotationIntrospector;
 
@@ -131,6 +138,37 @@ public class Jackson2ObjectMapperBuilder {
 	 */
 	public Jackson2ObjectMapperBuilder simpleDateFormat(String format) {
 		this.dateFormat = new SimpleDateFormat(format);
+		return this;
+	}
+
+	/**
+	 * Override the default {@link Locale} to use for formatting.
+	 * Default value used is {@link Locale#getDefault()}.
+	 * @since 4.1.5
+	 */
+	public Jackson2ObjectMapperBuilder locale(Locale locale) {
+		this.locale = locale;
+		return this;
+	}
+
+	/**
+	 * Override the default {@link TimeZone} to use for formatting.
+	 * Default value used is UTC (NOT local timezone).
+	 * @since 4.1.5
+	 */
+	public Jackson2ObjectMapperBuilder timeZone(TimeZone timeZone) {
+		this.timeZone = timeZone;
+		return this;
+	}
+
+	/**
+	 * Override the default {@link TimeZone} to use for formatting.
+	 * Default value used is UTC (NOT local timezone).
+	 * @param zoneId the time-zone ID
+	 * @since 4.1.5
+	 */
+	public Jackson2ObjectMapperBuilder timeZone(String zoneId) {
+		this.timeZone = TimeZone.getTimeZone(ZoneId.of(zoneId));
 		return this;
 	}
 
@@ -446,6 +484,12 @@ public class Jackson2ObjectMapperBuilder {
 
 		if (this.dateFormat != null) {
 			objectMapper.setDateFormat(this.dateFormat);
+		}
+		if (this.locale != null) {
+			objectMapper.setLocale(this.locale);
+		}
+		if (this.timeZone != null) {
+			objectMapper.setTimeZone(this.timeZone);
 		}
 
 		if (this.annotationIntrospector != null) {

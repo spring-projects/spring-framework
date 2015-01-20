@@ -19,7 +19,9 @@ package org.springframework.http.converter.json;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.TimeZone;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.AnnotationIntrospector;
@@ -169,6 +171,34 @@ public class Jackson2ObjectMapperFactoryBean implements FactoryBean<ObjectMapper
 	 */
 	public void setSimpleDateFormat(String format) {
 		this.builder.simpleDateFormat(format);
+	}
+
+	/**
+	 * Override the default {@link Locale} to use for formatting.
+	 * Default value used is {@link Locale#getDefault()}.
+	 * @since 4.1.5
+	 */
+	public void setLocale(Locale locale) {
+		this.builder.locale(locale);
+	}
+
+	/**
+	 * Override the default {@link TimeZone} to use for formatting.
+	 * Default value used is UTC (NOT local timezone).
+	 * @since 4.1.5
+	 */
+	public void setTimeZone(TimeZone timeZone) {
+		this.builder.timeZone(timeZone);
+	}
+
+	/**
+	 * Override the default {@link TimeZone} to use for formatting.
+	 * Default value used is UTC (NOT local timezone).
+	 * @param zoneId the time-zone ID
+	 * @since 4.1.5
+	 */
+	public void setTimeZone(String zoneId) {
+		this.builder.timeZone(zoneId);
 	}
 
 	/**

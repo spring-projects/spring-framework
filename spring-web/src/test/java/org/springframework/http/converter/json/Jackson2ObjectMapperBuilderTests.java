@@ -17,11 +17,15 @@
 package org.springframework.http.converter.json;
 
 import java.text.SimpleDateFormat;
+import java.time.ZoneId;
+import java.time.zone.ZoneRulesException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
+import java.util.TimeZone;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonGenerator;
@@ -164,6 +168,36 @@ public class Jackson2ObjectMapperBuilderTests {
 		ObjectMapper objectMapper = Jackson2ObjectMapperBuilder.json().simpleDateFormat(DATE_FORMAT).build();
 		assertEquals(dateFormat, objectMapper.getSerializationConfig().getDateFormat());
 		assertEquals(dateFormat, objectMapper.getDeserializationConfig().getDateFormat());
+	}
+
+	@Test
+	public void localeSetter() {
+		ObjectMapper objectMapper = Jackson2ObjectMapperBuilder.json().locale(Locale.FRENCH).build();
+		assertEquals(Locale.FRENCH, objectMapper.getSerializationConfig().getLocale());
+		assertEquals(Locale.FRENCH, objectMapper.getDeserializationConfig().getLocale());
+	}
+
+	@Test
+	public void timeZoneSetter() {
+		TimeZone timeZone = TimeZone.getTimeZone(ZoneId.of("Europe/Paris"));
+		ObjectMapper objectMapper = Jackson2ObjectMapperBuilder.json().timeZone(timeZone).build();
+		assertEquals(timeZone, objectMapper.getSerializationConfig().getTimeZone());
+		assertEquals(timeZone, objectMapper.getDeserializationConfig().getTimeZone());
+	}
+
+	@Test
+	public void timeZoneStringSetter() {
+		String zoneId = "Europe/Paris";
+		ObjectMapper objectMapper = Jackson2ObjectMapperBuilder.json().timeZone(zoneId).build();
+		TimeZone timeZone = TimeZone.getTimeZone(ZoneId.of(zoneId));
+		assertEquals(timeZone, objectMapper.getSerializationConfig().getTimeZone());
+		assertEquals(timeZone, objectMapper.getDeserializationConfig().getTimeZone());
+	}
+
+	@Test(expected = ZoneRulesException.class)
+	public void wrongTimeZoneStringSetter() {
+		String zoneId = "foo";
+		Jackson2ObjectMapperBuilder.json().timeZone(zoneId).build();
 	}
 
 	@Test

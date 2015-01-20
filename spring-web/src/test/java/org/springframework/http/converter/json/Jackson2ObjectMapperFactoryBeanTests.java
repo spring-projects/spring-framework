@@ -17,11 +17,15 @@
 package org.springframework.http.converter.json;
 
 import java.text.SimpleDateFormat;
+import java.time.ZoneId;
+import java.time.zone.ZoneRulesException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
+import java.util.TimeZone;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonGenerator;
@@ -159,6 +163,46 @@ public class Jackson2ObjectMapperFactoryBeanTests {
 
 		assertEquals(dateFormat, this.factory.getObject().getSerializationConfig().getDateFormat());
 		assertEquals(dateFormat, this.factory.getObject().getDeserializationConfig().getDateFormat());
+	}
+
+	@Test
+	public void localeSetter() {
+		this.factory.setLocale(Locale.FRENCH);
+		this.factory.afterPropertiesSet();
+
+		assertEquals(Locale.FRENCH, this.factory.getObject().getSerializationConfig().getLocale());
+		assertEquals(Locale.FRENCH, this.factory.getObject().getDeserializationConfig().getLocale());
+	}
+
+	@Test
+	public void timeZoneSetter() {
+		TimeZone timeZone = TimeZone.getTimeZone(ZoneId.of("Europe/Paris"));
+
+		this.factory.setTimeZone(timeZone);
+		this.factory.afterPropertiesSet();
+
+		assertEquals(timeZone, this.factory.getObject().getSerializationConfig().getTimeZone());
+		assertEquals(timeZone, this.factory.getObject().getDeserializationConfig().getTimeZone());
+	}
+
+	@Test
+	public void timeZoneStringSetter() {
+		String zoneId = "Europe/Paris";
+
+		this.factory.setTimeZone(zoneId);
+		this.factory.afterPropertiesSet();
+
+		TimeZone timeZone = TimeZone.getTimeZone(ZoneId.of(zoneId));
+		assertEquals(timeZone, this.factory.getObject().getSerializationConfig().getTimeZone());
+		assertEquals(timeZone, this.factory.getObject().getDeserializationConfig().getTimeZone());
+	}
+
+	@Test(expected = ZoneRulesException.class)
+	public void wrongTimeZoneStringSetter() {
+		String zoneId = "foo";
+
+		this.factory.setTimeZone(zoneId);
+		this.factory.afterPropertiesSet();
 	}
 
 	@Test
