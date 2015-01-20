@@ -35,6 +35,7 @@ import org.springframework.util.Assert;
 import org.springframework.util.ConcurrentReferenceHashMap;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.ReflectionUtils;
+import org.springframework.util.StringUtils;
 
 /**
  * General utility methods for working with annotations, handling bridge methods
@@ -654,6 +655,9 @@ public abstract class AnnotationUtils {
 	 * @see #getValue(Annotation)
 	 */
 	public static Object getValue(Annotation annotation, String attributeName) {
+		if (annotation == null || !StringUtils.hasLength(attributeName)) {
+			return null;
+		}
 		try {
 			Method method = annotation.annotationType().getDeclaredMethod(attributeName);
 			ReflectionUtils.makeAccessible(method);
@@ -683,6 +687,9 @@ public abstract class AnnotationUtils {
 	 * @see #getDefaultValue(Class, String)
 	 */
 	public static Object getDefaultValue(Annotation annotation, String attributeName) {
+		if (annotation == null) {
+			return null;
+		}
 		return getDefaultValue(annotation.annotationType(), attributeName);
 	}
 
@@ -706,6 +713,9 @@ public abstract class AnnotationUtils {
 	 * @see #getDefaultValue(Annotation, String)
 	 */
 	public static Object getDefaultValue(Class<? extends Annotation> annotationType, String attributeName) {
+		if (annotationType == null || !StringUtils.hasLength(attributeName)) {
+			return null;
+		}
 		try {
 			return annotationType.getDeclaredMethod(attributeName).getDefaultValue();
 		}
