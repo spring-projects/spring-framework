@@ -18,7 +18,6 @@ package org.springframework.http.converter.json;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.time.ZoneId;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
@@ -168,7 +167,7 @@ public class Jackson2ObjectMapperBuilder {
 	 * @since 4.1.5
 	 */
 	public Jackson2ObjectMapperBuilder timeZone(String zoneId) {
-		this.timeZone = TimeZone.getTimeZone(ZoneId.of(zoneId));
+		this.timeZone = TimeZone.getTimeZone(zoneId);
 		return this;
 	}
 

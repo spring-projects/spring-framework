@@ -17,8 +17,6 @@
 package org.springframework.http.converter.json;
 
 import java.text.SimpleDateFormat;
-import java.time.ZoneId;
-import java.time.zone.ZoneRulesException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
@@ -176,7 +174,7 @@ public class Jackson2ObjectMapperFactoryBeanTests {
 
 	@Test
 	public void timeZoneSetter() {
-		TimeZone timeZone = TimeZone.getTimeZone(ZoneId.of("Europe/Paris"));
+		TimeZone timeZone = TimeZone.getTimeZone("Europe/Paris");
 
 		this.factory.setTimeZone(timeZone);
 		this.factory.afterPropertiesSet();
@@ -192,17 +190,21 @@ public class Jackson2ObjectMapperFactoryBeanTests {
 		this.factory.setTimeZone(zoneId);
 		this.factory.afterPropertiesSet();
 
-		TimeZone timeZone = TimeZone.getTimeZone(ZoneId.of(zoneId));
+		TimeZone timeZone = TimeZone.getTimeZone(zoneId);
 		assertEquals(timeZone, this.factory.getObject().getSerializationConfig().getTimeZone());
 		assertEquals(timeZone, this.factory.getObject().getDeserializationConfig().getTimeZone());
 	}
 
-	@Test(expected = ZoneRulesException.class)
+	@Test
 	public void wrongTimeZoneStringSetter() {
 		String zoneId = "foo";
 
 		this.factory.setTimeZone(zoneId);
 		this.factory.afterPropertiesSet();
+
+		TimeZone timeZone = TimeZone.getTimeZone("GMT");
+		assertEquals(timeZone, this.factory.getObject().getSerializationConfig().getTimeZone());
+		assertEquals(timeZone, this.factory.getObject().getDeserializationConfig().getTimeZone());
 	}
 
 	@Test
