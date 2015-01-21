@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -128,6 +128,9 @@ public class ResourceUrlProvider implements ApplicationListener<ContextRefreshed
 			detectResourceHandlers(event.getApplicationContext());
 			if (this.handlerMap.isEmpty() && logger.isDebugEnabled()) {
 				logger.debug("No resource handling mappings found");
+			}
+			if(!this.handlerMap.isEmpty()) {
+				this.autodetect = false;
 			}
 		}
 	}
