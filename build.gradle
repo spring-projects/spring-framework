@@ -31,7 +31,7 @@ configure(allprojects) { project ->
 	ext.eclipseLinkVersion   = "2.4.2"
 	ext.ehcacheVersion       = "2.9.0"
 	ext.ehcacheJCacheVersion = "1.0.0"
-	ext.groovyVersion        = "2.3.9"
+	ext.groovyVersion        = "2.4.0"
 	ext.gsonVersion          = "2.3.1"
 	ext.hibernate3Version    = "3.6.10.Final"
 	ext.hibernate4Version    = "4.3.8.Final"
