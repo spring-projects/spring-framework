@@ -19,25 +19,24 @@ package org.springframework.context.event;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.core.Ordered;
+import org.springframework.core.ResolvableType;
 
 /**
  * Extended variant of the standard {@link ApplicationListener} interface,
  * exposing further metadata such as the supported event type.
  *
- * <p>Users are <bold>strongly advised</bold> to use the {@link GenericApplicationListener}
- * interface instead as it provides an improved detection of generics-based
- * event types.
+ * <p>As of Spring Framework 4.2, supersedes {@link SmartApplicationListener} with
+ * proper handling of generics-based event.
  *
- * @author Juergen Hoeller
- * @since 3.0
- * @see GenericApplicationListener
+ * @author Stephane Nicoll
+ * @since 4.2
  */
-public interface SmartApplicationListener extends ApplicationListener<ApplicationEvent>, Ordered {
+public interface GenericApplicationListener extends ApplicationListener<ApplicationEvent>, Ordered {
 
 	/**
 	 * Determine whether this listener actually supports the given event type.
 	 */
-	boolean supportsEventType(Class<? extends ApplicationEvent> eventType);
+	boolean supportsEventType(ResolvableType eventType);
 
 	/**
 	 * Determine whether this listener actually supports the given source type.

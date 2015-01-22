@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,9 +30,9 @@ package org.springframework.context;
 public interface ApplicationEventPublisher {
 
 	/**
-	 * Notify all listeners registered with this application of an application
-	 * event. Events may be framework events (such as RequestHandledEvent)
-	 * or application-specific events.
+	 * Notify all <strong>matching</strong> listeners registered with this
+	 * application of an application event. Events may be framework events
+	 * (such as RequestHandledEvent) or application-specific events.
 	 * @param event the event to publish
 	 * @see org.springframework.web.context.support.RequestHandledEvent
 	 */

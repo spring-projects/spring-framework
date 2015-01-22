@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,6 +34,7 @@ import org.springframework.context.BeanThatListens;
 import org.springframework.context.support.AbstractApplicationContext;
 import org.springframework.context.support.StaticApplicationContext;
 import org.springframework.core.Ordered;
+import org.springframework.core.ResolvableType;
 import org.springframework.scheduling.support.TaskUtils;
 import org.springframework.tests.sample.beans.TestBean;
 
@@ -45,20 +46,59 @@ import static org.mockito.BDDMockito.*;
  *
  * @author Alef Arendsen
  * @author Rick Evans
+ * @author Stephane Nicoll
  */
-public class ApplicationContextEventTests {
+public class ApplicationContextEventTests extends AbstractApplicationEventListenerTests {
 
 	@Test
-	public void simpleApplicationEventMulticaster() {
-		@SuppressWarnings("unchecked")
-		ApplicationListener<ApplicationEvent> listener = mock(ApplicationListener.class);
-		ApplicationEvent evt = new ContextClosedEvent(new StaticApplicationContext());
+	public void multicastSimpleEvent() {
+		multicastEvent(true, ApplicationListener.class,
+				new ContextClosedEvent(new StaticApplicationContext()), null);
+	}
 
+	@Test
+	public void multicastGenericEvent() {
+		multicastEvent(true, StringEventListener.class, createGenericEvent("test"),
+				getGenericApplicationEventType("stringEvent"));
+	}
+
+	@Test
+	public void multicastGenericEventWrongType() {
+		multicastEvent(false, StringEventListener.class, createGenericEvent(123L),
+				getGenericApplicationEventType("longEvent"));
+	}
+
+	@Test // Unfortunate - this should work as well
+	public void multicastGenericEventWildcardSubType() {
+		multicastEvent(false, StringEventListener.class, createGenericEvent("test"),
+				getGenericApplicationEventType("wildcardEvent"));
+	}
+
+	@Test
+	public void multicastConcreteTypeGenericListener() {
+		multicastEvent(true, StringEventListener.class, new StringEvent(this, "test"), null);
+	}
+
+	@Test
+	public void multicastConcreteWrongTypeGenericListener() {
+		multicastEvent(false, StringEventListener.class, new LongEvent(this, 123L), null);
+	}
+
+	private void multicastEvent(boolean match, Class<?> listenerType,
+			ApplicationEvent event, ResolvableType eventType) {
+		@SuppressWarnings("unchecked")
+		ApplicationListener<ApplicationEvent> listener =
+				(ApplicationListener<ApplicationEvent>) mock(listenerType);
 		SimpleApplicationEventMulticaster smc = new SimpleApplicationEventMulticaster();
 		smc.addApplicationListener(listener);
 
-		smc.multicastEvent(evt);
-		verify(listener).onApplicationEvent(evt);
+		if (eventType != null) {
+			smc.multicastEvent(event, eventType);
+		} else {
+			smc.multicastEvent(event);
+		}
+		int invocation = match ? 1 : 0;
+		verify(listener, times(invocation)).onApplicationEvent(event);
 	}
 
 	@Test
