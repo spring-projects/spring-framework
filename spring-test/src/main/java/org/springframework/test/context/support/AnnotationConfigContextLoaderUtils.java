@@ -24,6 +24,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.test.context.SmartContextLoader;
 import org.springframework.util.Assert;
 
@@ -95,13 +96,14 @@ public abstract class AnnotationConfigContextLoaderUtils {
 	 * <li>must not be {@code private}</li>
 	 * <li>must not be {@code final}</li>
 	 * <li>must be {@code static}</li>
-	 * <li>must be annotated with {@code @Configuration}</li>
+	 * <li>must be annotated or meta-annotated with {@code @Configuration}</li>
 	 * </ul>
 	 * @param clazz the class to check
 	 * @return {@code true} if the supplied class meets the candidate criteria
 	 */
 	private static boolean isDefaultConfigurationClassCandidate(Class<?> clazz) {
-		return (clazz != null && isStaticNonPrivateAndNonFinal(clazz) && clazz.isAnnotationPresent(Configuration.class));
+		return (clazz != null && isStaticNonPrivateAndNonFinal(clazz) &&
+				(AnnotationUtils.findAnnotation(clazz, Configuration.class) != null));
 	}
 
 	private static boolean isStaticNonPrivateAndNonFinal(Class<?> clazz) {
