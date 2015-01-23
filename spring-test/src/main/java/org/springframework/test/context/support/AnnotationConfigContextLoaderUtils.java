@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,7 +41,7 @@ public abstract class AnnotationConfigContextLoaderUtils {
 
 	/**
 	 * Detect the default configuration classes for the supplied test class.
-	 * <p>The returned class array will contain all static inner classes of
+	 * <p>The returned class array will contain all static nested classes of
 	 * the supplied class that meet the requirements for {@code @Configuration}
 	 * class implementations as specified in the documentation for
 	 * {@link Configuration @Configuration}.
@@ -78,7 +78,7 @@ public abstract class AnnotationConfigContextLoaderUtils {
 		if (configClasses.isEmpty()) {
 			if (logger.isInfoEnabled()) {
 				logger.info(String.format("Could not detect default configuration classes for test class [%s]: " +
-						"%s does not declare any static, non-private, non-final, inner classes " +
+						"%s does not declare any static, non-private, non-final, nested classes " +
 						"annotated with @Configuration.", declaringClass.getName(), declaringClass.getSimpleName()));
 			}
 		}
