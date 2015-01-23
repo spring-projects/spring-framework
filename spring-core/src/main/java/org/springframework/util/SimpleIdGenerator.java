@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,8 @@ import java.util.UUID;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
- * An simple IdGenerator that starts at 1 and increments by 1 with each call.
+ * A simple {@link org.springframework.util.IdGenerator IdGenerator} that
+ * starts at 1 and increments by 1 with each call.
  *
  * @author Rossen Stoyanchev
  * @since 4.2
