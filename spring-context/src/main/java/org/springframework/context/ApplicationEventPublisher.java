@@ -21,6 +21,7 @@ package org.springframework.context;
  * Serves as super-interface for ApplicationContext.
  *
  * @author Juergen Hoeller
+ * @author Stephane Nicoll
  * @since 1.1.1
  * @see ApplicationContext
  * @see ApplicationEventPublisherAware
@@ -37,5 +38,15 @@ public interface ApplicationEventPublisher {
 	 * @see org.springframework.web.context.support.RequestHandledEvent
 	 */
 	void publishEvent(ApplicationEvent event);
+
+	/**
+	 * Notify all <strong>matching</strong> listeners registered with this
+	 * application of an event.
+	 * <p>If the specified {@code event} is not an {@link ApplicationEvent}, it
+	 * is wrapped in a {@code GenericApplicationEvent}.
+	 * @param event the event to publish
+	 * @see PayloadApplicationEvent
+	 */
+	void publishEvent(Object event);
 
 }

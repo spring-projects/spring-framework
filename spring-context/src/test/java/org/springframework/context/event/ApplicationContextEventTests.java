@@ -58,19 +58,19 @@ public class ApplicationContextEventTests extends AbstractApplicationEventListen
 
 	@Test
 	public void multicastGenericEvent() {
-		multicastEvent(true, StringEventListener.class, createGenericEvent("test"),
+		multicastEvent(true, StringEventListener.class, createGenericTestEvent("test"),
 				getGenericApplicationEventType("stringEvent"));
 	}
 
 	@Test
 	public void multicastGenericEventWrongType() {
-		multicastEvent(false, StringEventListener.class, createGenericEvent(123L),
+		multicastEvent(false, StringEventListener.class, createGenericTestEvent(123L),
 				getGenericApplicationEventType("longEvent"));
 	}
 
 	@Test // Unfortunate - this should work as well
 	public void multicastGenericEventWildcardSubType() {
-		multicastEvent(false, StringEventListener.class, createGenericEvent("test"),
+		multicastEvent(false, StringEventListener.class, createGenericTestEvent("test"),
 				getGenericApplicationEventType("wildcardEvent"));
 	}
 

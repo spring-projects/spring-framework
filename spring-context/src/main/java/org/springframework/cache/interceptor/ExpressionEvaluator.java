@@ -21,6 +21,7 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.springframework.aop.support.AopUtils;
 import org.springframework.cache.Cache;
 import org.springframework.context.expression.AnnotatedElementKey;
 import org.springframework.context.expression.CachedExpressionEvaluator;
@@ -98,8 +99,9 @@ class ExpressionEvaluator extends CachedExpressionEvaluator {
 
 		CacheExpressionRootObject rootObject = new CacheExpressionRootObject(caches,
 				method, args, target, targetClass);
+		Method targetMethod = getTargetMethod(targetClass, method);
 		CacheEvaluationContext evaluationContext = new CacheEvaluationContext(rootObject,
-				this.paramNameDiscoverer, method, args, targetClass, this.targetMethodCache);
+				targetMethod, args, this.paramNameDiscoverer);
 		if (result == RESULT_UNAVAILABLE) {
 			evaluationContext.addUnavailableVariable(RESULT_VARIABLE);
 		}
@@ -119,6 +121,19 @@ class ExpressionEvaluator extends CachedExpressionEvaluator {
 
 	public boolean unless(String unlessExpression, AnnotatedElementKey methodKey, EvaluationContext evalContext) {
 		return getExpression(this.unlessCache, methodKey, unlessExpression).getValue(evalContext, boolean.class);
+	}
+
+	private Method getTargetMethod(Class<?> targetClass, Method method) {
+		AnnotatedElementKey methodKey = new AnnotatedElementKey(method, targetClass);
+		Method targetMethod = this.targetMethodCache.get(methodKey);
+		if (targetMethod == null) {
+			targetMethod = AopUtils.getMostSpecificMethod(method, targetClass);
+			if (targetMethod == null) {
+				targetMethod = method;
+			}
+			this.targetMethodCache.put(methodKey, targetMethod);
+		}
+		return targetMethod;
 	}
 
 
