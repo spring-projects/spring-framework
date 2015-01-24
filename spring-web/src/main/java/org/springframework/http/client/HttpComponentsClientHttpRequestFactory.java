@@ -59,9 +59,7 @@ public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequest
 
 	private CloseableHttpClient httpClient;
 
-	private int connectTimeout;
-
-	private int socketTimeout;
+	private RequestConfig requestConfig;
 
 	private boolean bufferRequestBody = true;
 
@@ -109,11 +107,15 @@ public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequest
 	/**
 	 * Set the connection timeout for the underlying HttpClient.
 	 * A timeout value of 0 specifies an infinite timeout.
+	 * <p>Additional properties can be configured by specifying a
+	 * {@link RequestConfig} instance on a custom {@link HttpClient}.
 	 * @param timeout the timeout value in milliseconds
+	 * @see RequestConfig#getConnectTimeout()
 	 */
 	public void setConnectTimeout(int timeout) {
 		Assert.isTrue(timeout >= 0, "Timeout must be a non-negative value");
-		this.connectTimeout = timeout;
+		this.requestConfig = cloneRequestConfig()
+				.setConnectTimeout(timeout).build();
 		setLegacyConnectionTimeout(getHttpClient(), timeout);
 	}
 
@@ -140,13 +142,31 @@ public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequest
 	}
 
 	/**
+	 * Set the timeout in milliseconds used when requesting a connection from the connection
+	 * manager using the underlying HttpClient.
+	 * A timeout value of 0 specifies an infinite timeout.
+	 * <p>Additional properties can be configured by specifying a
+	 * {@link RequestConfig} instance on a custom {@link HttpClient}.
+	 * @param connectionRequestTimeout the timeout value to request a connection in milliseconds
+	 * @see RequestConfig#getConnectionRequestTimeout()
+	 */
+	public void setConnectionRequestTimeout(int connectionRequestTimeout) {
+		this.requestConfig = cloneRequestConfig()
+				.setConnectionRequestTimeout(connectionRequestTimeout).build();
+	}
+
+	/**
 	 * Set the socket read timeout for the underlying HttpClient.
 	 * A timeout value of 0 specifies an infinite timeout.
+	 * <p>Additional properties can be configured by specifying a
+	 * {@link RequestConfig} instance on a custom {@link HttpClient}.
 	 * @param timeout the timeout value in milliseconds
+	 * @see RequestConfig#getSocketTimeout()
 	 */
 	public void setReadTimeout(int timeout) {
 		Assert.isTrue(timeout >= 0, "Timeout must be a non-negative value");
-		this.socketTimeout = timeout;
+		this.requestConfig = cloneRequestConfig()
+				.setSocketTimeout(timeout).build();
 		setLegacySocketTimeout(getHttpClient(), timeout);
 	}
 
@@ -163,6 +183,10 @@ public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequest
 			client.getParams().setIntParameter(
 					org.apache.http.params.CoreConnectionPNames.SO_TIMEOUT, timeout);
 		}
+	}
+
+	private RequestConfig.Builder cloneRequestConfig() {
+		return this.requestConfig != null ? RequestConfig.copy(this.requestConfig) : RequestConfig.custom();
 	}
 
 	/**
@@ -193,17 +217,11 @@ public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequest
 				config = ((Configurable) httpRequest).getConfig();
 			}
 			if (config == null) {
-				if (this.socketTimeout > 0 || this.connectTimeout > 0) {
-					config = RequestConfig.custom()
-							.setConnectTimeout(this.connectTimeout)
-							.setSocketTimeout(this.socketTimeout)
-							.build();
-				}
-				else {
-					config = RequestConfig.DEFAULT;
-				}
+				config = createRequestConfig(client);
 			}
-			context.setAttribute(HttpClientContext.REQUEST_CONFIG, config);
+			if (config != null) {
+				context.setAttribute(HttpClientContext.REQUEST_CONFIG, config);
+			}
 		}
 		if (this.bufferRequestBody) {
 			return new HttpComponentsClientHttpRequest(client, httpRequest, context);
@@ -211,6 +229,43 @@ public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequest
 		else {
 			return new HttpComponentsStreamingClientHttpRequest(client, httpRequest, context);
 		}
+	}
+
+	/**
+	 * Create a default {@link RequestConfig} to use with the given client. Can
+	 * return {@code null} to indicate that no custom request config should be set
+	 * and the defaults of the {@link HttpClient} should be used.
+	 * <p>The default implementation tries to merge the defaults of the client with the
+	 * local customizations of this instance, if any.
+	 * @param client the client
+	 * @return the RequestConfig to use
+	 */
+	protected RequestConfig createRequestConfig(CloseableHttpClient client) {
+		if (client instanceof Configurable) {
+			RequestConfig clientRequestConfig = ((Configurable) client).getConfig();
+			return mergeRequestConfig(clientRequestConfig);
+		}
+		return this.requestConfig;
+	}
+
+	private RequestConfig mergeRequestConfig(RequestConfig defaultRequestConfig) {
+		if (this.requestConfig == null) { // nothing to merge
+			return defaultRequestConfig;
+		}
+		RequestConfig.Builder builder = RequestConfig.copy(defaultRequestConfig);
+		int connectTimeout = this.requestConfig.getConnectTimeout();
+		if (connectTimeout >= 0) {
+			builder.setConnectTimeout(connectTimeout);
+		}
+		int connectionRequestTimeout = this.requestConfig.getConnectionRequestTimeout();
+		if (connectionRequestTimeout >= 0) {
+			builder.setConnectionRequestTimeout(connectionRequestTimeout);
+		}
+		int socketTimeout = this.requestConfig.getSocketTimeout();
+		if (socketTimeout >= 0) {
+			builder.setSocketTimeout(socketTimeout);
+		}
+		return builder.build();
 	}
 
 	/**

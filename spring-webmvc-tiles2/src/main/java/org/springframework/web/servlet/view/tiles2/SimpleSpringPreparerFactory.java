@@ -35,7 +35,9 @@ import org.springframework.web.context.WebApplicationContext;
  * @author Juergen Hoeller
  * @since 2.5
  * @see SpringBeanPreparerFactory
+ * @deprecated as of Spring 4.2, in favor of Tiles 3
  */
+@Deprecated
 public class SimpleSpringPreparerFactory extends AbstractSpringPreparerFactory {
 
 	/** Cache of shared ViewPreparer instances: bean name -> bean instance */

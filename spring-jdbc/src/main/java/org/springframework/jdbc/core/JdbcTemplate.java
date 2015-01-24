@@ -498,20 +498,6 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	}
 
 	@Override
-	@Deprecated
-	public long queryForLong(String sql) throws DataAccessException {
-		Number number = queryForObject(sql, Long.class);
-		return (number != null ? number.longValue() : 0);
-	}
-
-	@Override
-	@Deprecated
-	public int queryForInt(String sql) throws DataAccessException {
-		Number number = queryForObject(sql, Integer.class);
-		return (number != null ? number.intValue() : 0);
-	}
-
-	@Override
 	public <T> List<T> queryForList(String sql, Class<T> elementType) throws DataAccessException {
 		return query(sql, getSingleColumnRowMapper(elementType));
 	}
@@ -837,34 +823,6 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	@Override
 	public Map<String, Object> queryForMap(String sql, Object... args) throws DataAccessException {
 		return queryForObject(sql, args, getColumnMapRowMapper());
-	}
-
-	@Override
-	@Deprecated
-	public long queryForLong(String sql, Object[] args, int[] argTypes) throws DataAccessException {
-		Number number = queryForObject(sql, args, argTypes, Long.class);
-		return (number != null ? number.longValue() : 0);
-	}
-
-	@Override
-	@Deprecated
-	public long queryForLong(String sql, Object... args) throws DataAccessException {
-		Number number = queryForObject(sql, args, Long.class);
-		return (number != null ? number.longValue() : 0);
-	}
-
-	@Override
-	@Deprecated
-	public int queryForInt(String sql, Object[] args, int[] argTypes) throws DataAccessException {
-		Number number = queryForObject(sql, args, argTypes, Integer.class);
-		return (number != null ? number.intValue() : 0);
-	}
-
-	@Override
-	@Deprecated
-	public int queryForInt(String sql, Object... args) throws DataAccessException {
-		Number number = queryForObject(sql, args, Integer.class);
-		return (number != null ? number.intValue() : 0);
 	}
 
 	@Override

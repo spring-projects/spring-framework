@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -263,20 +263,13 @@ public class MBeanClientInterceptor
 			}
 			this.invocationHandler = null;
 			if (this.useStrictCasing) {
-				// Use the JDK's own MBeanServerInvocationHandler,
-				// in particular for native MXBean support on Java 6.
-				if (JmxUtils.isMXBeanSupportAvailable()) {
-					this.invocationHandler =
-							new MBeanServerInvocationHandler(this.serverToUse, this.objectName,
-									(this.managementInterface != null && JMX.isMXBeanInterface(this.managementInterface)));
-				}
-				else {
-					this.invocationHandler = new MBeanServerInvocationHandler(this.serverToUse, this.objectName);
-				}
+				// Use the JDK's own MBeanServerInvocationHandler, in particular for native MXBean support.
+				this.invocationHandler = new MBeanServerInvocationHandler(this.serverToUse, this.objectName,
+						(this.managementInterface != null && JMX.isMXBeanInterface(this.managementInterface)));
 			}
 			else {
-				// Non-strict casing can only be achieved through custom
-				// invocation handling. Only partial MXBean support available!
+				// Non-strict casing can only be achieved through custom invocation handling.
+				// Only partial MXBean support available!
 				retrieveMBeanInfo();
 			}
 		}
@@ -610,6 +603,7 @@ public class MBeanClientInterceptor
 	public void destroy() {
 		this.connector.close();
 	}
+
 
 	/**
 	 * Simple wrapper class around a method name and its signature.

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.web.filter;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -51,15 +52,15 @@ public class ShallowEtagHeaderFilterTests {
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/hotels");
 		MockHttpServletResponse response = new MockHttpServletResponse();
 
-		assertTrue(filter.isEligibleForEtag(request, response, 200, new byte[0]));
-		assertFalse(filter.isEligibleForEtag(request, response, 300, new byte[0]));
+		assertTrue(filter.isEligibleForEtag(request, response, 200, new ByteArrayInputStream(new byte[0])));
+		assertFalse(filter.isEligibleForEtag(request, response, 300, new ByteArrayInputStream(new byte[0])));
 
 		request = new MockHttpServletRequest("POST", "/hotels");
-		assertFalse(filter.isEligibleForEtag(request, response, 200, new byte[0]));
+		assertFalse(filter.isEligibleForEtag(request, response, 200, new ByteArrayInputStream(new byte[0])));
 
 		request = new MockHttpServletRequest("POST", "/hotels");
 		request.addHeader("Cache-Control","must-revalidate, no-store");
-		assertFalse(filter.isEligibleForEtag(request, response, 200, new byte[0]));
+		assertFalse(filter.isEligibleForEtag(request, response, 200, new ByteArrayInputStream(new byte[0])));
 	}
 
 	@Test

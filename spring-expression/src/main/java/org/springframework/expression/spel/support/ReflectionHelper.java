@@ -281,8 +281,8 @@ public class ReflectionHelper {
 				// 1) the input argument was already compatible (ie. array of valid type) and nothing was done
 				// 2) the input argument was correct type but not in an array so it was made into an array
 				// 3) the input argument was the wrong type and got converted and put into an array
-				if (argument != arguments[varargsPosition] && 
-					!isFirstEntryInArray(argument, arguments[varargsPosition])) {
+				if (argument != arguments[varargsPosition] &&
+						!isFirstEntryInArray(argument, arguments[varargsPosition])) {
 					conversionOccurred = true; // case 3
 				}
 			}
@@ -310,54 +310,19 @@ public class ReflectionHelper {
 			return false;
 		}
 		Class<?> type = possibleArray.getClass();
-		if (type.isArray()) {
-			Class<?> componentType = type.getComponentType();
-			if (componentType.isPrimitive()) {
-				if (componentType == Boolean.TYPE) {
-					return value instanceof Boolean && 
-							((boolean[])possibleArray)[0] == (Boolean)value;
-				} 
-				else if (componentType == Double.TYPE) {
-					return value instanceof Double && 
-							((double[])possibleArray)[0] == (Double)value;
-				} 
-				else if (componentType == Float.TYPE) {
-					return value instanceof Float && 
-							((float[])possibleArray)[0] == (Float)value;
-				} 
-				else if (componentType == Integer.TYPE) {
-					return value instanceof Integer && 
-							((int[])possibleArray)[0] == (Integer)value;
-				} 
-				else if (componentType == Long.TYPE) {
-					return value instanceof Long && 
-							((long[])possibleArray)[0] == (Long)value;
-				} 
-				else if (componentType == Short.TYPE) {
-					return value instanceof Short && 
-							((short[])possibleArray)[0] == (Short)value;
-				} 
-				else if (componentType == Character.TYPE) {
-					return value instanceof Character && 
-							((char[])possibleArray)[0] == (Character)value;
-				} 
-				else if (componentType == Byte.TYPE) {
-					return value instanceof Byte && 
-							((byte[])possibleArray)[0] == (Byte)value;
-				} 
-			}
-			else {
-				return ((Object[])possibleArray)[0] == value;
-			}
+		if (!type.isArray() || Array.getLength(possibleArray) == 0 ||
+				!ClassUtils.isAssignableValue(type.getComponentType(), value)) {
+			return false;
 		}
-		return false;
+		Object arrayValue = Array.get(possibleArray, 0);
+		return (type.getComponentType().isPrimitive() ? arrayValue.equals(value) : arrayValue == value);
 	}
 
 	/**
-	 * Package up the arguments so that they correctly match what is expected in parameterTypes. For example, if
-	 * parameterTypes is (int, String[]) because the second parameter was declared String... then if arguments is
-	 * [1,"a","b"] then it must be repackaged as [1,new String[]{"a","b"}] in order to match the expected
-	 * parameterTypes.
+	 * Package up the arguments so that they correctly match what is expected in parameterTypes.
+	 * For example, if parameterTypes is (int, String[]) because the second parameter was declared String...
+	 * then if arguments is [1,"a","b"] then it must be repackaged as [1,new String[]{"a","b"}] in order to
+	 * match the expected parameterTypes.
 	 * @param requiredParameterTypes the types of the parameters for the invocation
 	 * @param args the arguments to be setup ready for the invocation
 	 * @return a repackaged array of arguments where any varargs setup has been done
@@ -366,11 +331,9 @@ public class ReflectionHelper {
 		// Check if array already built for final argument
 		int parameterCount = requiredParameterTypes.length;
 		int argumentCount = args.length;
-		
-		if (parameterCount == args.length) {
-			
-		}
-		else if (parameterCount != args.length ||
+
+		// Check if repackaging is needed...
+		if (parameterCount != args.length ||
 				requiredParameterTypes[parameterCount - 1] !=
 						(args[argumentCount - 1] != null ? args[argumentCount - 1].getClass() : null)) {
 

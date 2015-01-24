@@ -31,23 +31,23 @@ configure(allprojects) { project ->
 	ext.eclipseLinkVersion   = "2.4.2"
 	ext.ehcacheVersion       = "2.9.0"
 	ext.ehcacheJCacheVersion = "1.0.0"
-	ext.groovyVersion        = "2.3.8"
+	ext.groovyVersion        = "2.4.0"
 	ext.gsonVersion          = "2.3.1"
 	ext.hibernate3Version    = "3.6.10.Final"
-	ext.hibernate4Version    = "4.3.7.Final"
+	ext.hibernate4Version    = "4.3.8.Final"
 	ext.hibVal4Version       = "4.3.2.Final"
 	ext.hibVal5Version       = "5.1.3.Final"
 	ext.hsqldbVersion        = "2.3.2"
-	ext.jackson2Version      = "2.4.4"
+	ext.jackson2Version      = "2.5.0"
 	ext.jasperReportsVersion = "6.0.0"
-	ext.jettyVersion         = "9.2.6.v20141205"
+	ext.jettyVersion         = "9.2.7.v20150116"
 	ext.jodaVersion          = "2.6"
 	ext.junitVersion         = "4.12"
-	ext.nettyVersion         = "4.0.24.Final"
+	ext.nettyVersion         = "4.0.25.Final"
 	ext.openJpaVersion       = "2.2.2"  // 2.3.0 not Java 8 compatible (based on ASM 4)
 	ext.protobufVersion      = "2.6.1"
 	ext.reactorVersion       = "1.1.5.RELEASE"
-	ext.slf4jVersion         = "1.7.7"
+	ext.slf4jVersion         = "1.7.9"
 	ext.snakeYamlVersion     = "1.14"
 	ext.snifferVersion       = "1.11"
 	ext.tiles2Version        = "2.2.2"
@@ -460,7 +460,7 @@ project("spring-context") {
 		optional("org.aspectj:aspectjweaver:${aspectjVersion}")
 		optional("org.codehaus.groovy:groovy-all:${groovyVersion}")
 		optional("org.beanshell:bsh:2.0b4")
-		optional("org.jruby:jruby:1.7.16.1")
+		optional("org.jruby:jruby:1.7.17")
 		testCompile("javax.inject:javax.inject-tck:1")
 		testCompile("commons-dbcp:commons-dbcp:1.4")
 		testCompile("org.slf4j:slf4j-api:${slf4jVersion}")
@@ -1327,7 +1327,7 @@ configure(rootProject) {
 
 	task wrapper(type: Wrapper) {
 		description = "Generates gradlew[.bat] scripts"
-		gradleVersion = "1.12"
+		gradleVersion = "2.2.1"
 
 		doLast() {
 			def gradleOpts = "-XX:MaxMetaspaceSize=1024m -Xmx1024m"

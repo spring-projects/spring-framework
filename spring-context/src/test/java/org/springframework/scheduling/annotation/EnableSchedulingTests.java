@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,6 +41,7 @@ import static org.junit.Assert.*;
  * Tests use of @EnableScheduling on @Configuration classes.
  *
  * @author Chris Beams
+ * @author Sam Brannen
  * @since 3.1
  */
 public class EnableSchedulingTests {
@@ -142,6 +143,9 @@ public class EnableSchedulingTests {
 			assertThat(ex.getMessage(), startsWith("More than one TaskScheduler"));
 			throw ex;
 		}
+		finally {
+			ctx.close();
+		}
 	}
 
 	@EnableScheduling @Configuration
@@ -236,6 +240,7 @@ public class EnableSchedulingTests {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 		ctx.register(SchedulingEnabled_withAmbiguousTaskSchedulers_butNoActualTasks.class);
 		ctx.refresh();
+		ctx.close();
 	}
 
 
@@ -266,8 +271,11 @@ public class EnableSchedulingTests {
 		try {
 			ctx.refresh();
 		} catch (IllegalStateException ex) {
-			assertThat(ex.getMessage(), startsWith("More than one TaskScheduler and/or"));
+			assertThat(ex.getMessage(), startsWith("More than one TaskScheduler exists within the context"));
 			throw ex;
+		}
+		finally {
+			ctx.close();
 		}
 	}
 

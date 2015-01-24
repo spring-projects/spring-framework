@@ -224,14 +224,15 @@ public final class ModelFactory {
 	 * @throws Exception if creating BindingResult attributes fails
 	 */
 	public void updateModel(NativeWebRequest request, ModelAndViewContainer mavContainer) throws Exception {
+		ModelMap defaultModel = mavContainer.getDefaultModel();
 		if (mavContainer.getSessionStatus().isComplete()){
 			this.sessionAttributesHandler.cleanupAttributes(request);
 		}
 		else {
-			this.sessionAttributesHandler.storeAttributes(request, mavContainer.getModel());
+			this.sessionAttributesHandler.storeAttributes(request, defaultModel);
 		}
-		if (!mavContainer.isRequestHandled()) {
-			updateBindingResult(request, mavContainer.getModel());
+		if (!mavContainer.isRequestHandled() && mavContainer.getModel() == defaultModel) {
+			updateBindingResult(request, defaultModel);
 		}
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -106,6 +106,15 @@ public class PathResourceResolverTests {
 
 		assertFalse(this.resolver.checkResource(resource, classpathLocation));
 		assertTrue(this.resolver.checkResource(resource, servletContextLocation));
+	}
+
+	// SPR-12624
+	@Test
+	public void checkRelativeLocation() throws Exception {
+		String locationUrl= new UrlResource(getClass().getResource("./test/")).getURL().toExternalForm();
+		Resource location = new UrlResource(locationUrl.replace("/springframework","/../org/springframework"));
+
+		assertNotNull(this.resolver.resolveResource(null, "main.css", Arrays.asList(location), null));
 	}
 
 }

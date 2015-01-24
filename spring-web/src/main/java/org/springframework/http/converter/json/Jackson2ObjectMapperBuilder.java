@@ -22,7 +22,9 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.TimeZone;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonGenerator;
@@ -40,7 +42,6 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.cfg.HandlerInstantiator;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
-import javafx.application.Application;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.FatalBeanException;
@@ -75,6 +76,10 @@ public class Jackson2ObjectMapperBuilder {
 	private boolean createXmlMapper = false;
 
 	private DateFormat dateFormat;
+
+	private Locale locale;
+
+	private TimeZone timeZone;
 
 	private AnnotationIntrospector annotationIntrospector;
 
@@ -132,6 +137,37 @@ public class Jackson2ObjectMapperBuilder {
 	 */
 	public Jackson2ObjectMapperBuilder simpleDateFormat(String format) {
 		this.dateFormat = new SimpleDateFormat(format);
+		return this;
+	}
+
+	/**
+	 * Override the default {@link Locale} to use for formatting.
+	 * Default value used is {@link Locale#getDefault()}.
+	 * @since 4.1.5
+	 */
+	public Jackson2ObjectMapperBuilder locale(Locale locale) {
+		this.locale = locale;
+		return this;
+	}
+
+	/**
+	 * Override the default {@link TimeZone} to use for formatting.
+	 * Default value used is UTC (NOT local timezone).
+	 * @since 4.1.5
+	 */
+	public Jackson2ObjectMapperBuilder timeZone(TimeZone timeZone) {
+		this.timeZone = timeZone;
+		return this;
+	}
+
+	/**
+	 * Override the default {@link TimeZone} to use for formatting.
+	 * Default value used is UTC (NOT local timezone).
+	 * @param zoneId the time-zone ID
+	 * @since 4.1.5
+	 */
+	public Jackson2ObjectMapperBuilder timeZone(String zoneId) {
+		this.timeZone = TimeZone.getTimeZone(zoneId);
 		return this;
 	}
 
@@ -441,11 +477,18 @@ public class Jackson2ObjectMapperBuilder {
 	 * settings. This can be applied to any number of {@code ObjectMappers}.
 	 * @param objectMapper the ObjectMapper to configure
 	 */
+	@SuppressWarnings("deprecation")
 	public void configure(ObjectMapper objectMapper) {
 		Assert.notNull(objectMapper, "ObjectMapper must not be null");
 
 		if (this.dateFormat != null) {
 			objectMapper.setDateFormat(this.dateFormat);
+		}
+		if (this.locale != null) {
+			objectMapper.setLocale(this.locale);
+		}
+		if (this.timeZone != null) {
+			objectMapper.setTimeZone(this.timeZone);
 		}
 
 		if (this.annotationIntrospector != null) {
@@ -495,13 +538,15 @@ public class Jackson2ObjectMapperBuilder {
 			objectMapper.setPropertyNamingStrategy(this.propertyNamingStrategy);
 		}
 		for (Class<?> target : this.mixIns.keySet()) {
+			// Deprecated as of Jackson 2.5, but just in favor of a fluent variant.
 			objectMapper.addMixInAnnotations(target, this.mixIns.get(target));
 		}
 		if (this.handlerInstantiator != null) {
 			objectMapper.setHandlerInstantiator(this.handlerInstantiator);
 		}
 		else if (this.applicationContext != null) {
-			objectMapper.setHandlerInstantiator(new SpringHandlerInstantiator(this.applicationContext.getAutowireCapableBeanFactory()));
+			objectMapper.setHandlerInstantiator(
+					new SpringHandlerInstantiator(this.applicationContext.getAutowireCapableBeanFactory()));
 		}
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,8 @@
 
 package org.springframework.util;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
@@ -46,6 +48,16 @@ public abstract class DigestUtils {
 	}
 
 	/**
+	 * Calculate the MD5 digest of the given InputStream.
+	 * @param inputStream the inputStream to calculate the digest over
+	 * @return the digest
+	 * @since 4.2
+	 */
+	public static byte[] md5Digest(InputStream inputStream) throws IOException{
+		return digest(MD5_ALGORITHM_NAME, inputStream);
+	}
+
+	/**
 	 * Return a hexadecimal string representation of the MD5 digest of the given
 	 * bytes.
 	 * @param bytes the bytes to calculate the digest over
@@ -53,6 +65,17 @@ public abstract class DigestUtils {
 	 */
 	public static String md5DigestAsHex(byte[] bytes) {
 		return digestAsHexString(MD5_ALGORITHM_NAME, bytes);
+	}
+
+	/**
+	 * Return a hexadecimal string representation of the MD5 digest of the given
+	 * inputStream.
+	 * @param inputStream the inputStream to calculate the digest over
+	 * @return a hexadecimal digest string
+	 * @since 4.2
+	 */
+	public static String md5DigestAsHex(InputStream inputStream) throws IOException{
+		return digestAsHexString(MD5_ALGORITHM_NAME, inputStream);
 	}
 
 	/**
@@ -64,6 +87,18 @@ public abstract class DigestUtils {
 	 */
 	public static StringBuilder appendMd5DigestAsHex(byte[] bytes, StringBuilder builder) {
 		return appendDigestAsHex(MD5_ALGORITHM_NAME, bytes, builder);
+	}
+
+	/**
+	 * Append a hexadecimal string representation of the MD5 digest of the given
+	 * inputStream to the given {@link StringBuilder}.
+	 * @param inputStream the inputStream to calculate the digest over
+	 * @param builder the string builder to append the digest to
+	 * @return the given string builder
+	 * @since 4.2
+	 */
+	public static StringBuilder appendMd5DigestAsHex(InputStream inputStream, StringBuilder builder) throws IOException{
+		return appendDigestAsHex(MD5_ALGORITHM_NAME, inputStream, builder);
 	}
 
 	/**
@@ -83,8 +118,23 @@ public abstract class DigestUtils {
 		return getDigest(algorithm).digest(bytes);
 	}
 
+	private static byte[] digest(String algorithm, InputStream inputStream) throws IOException{
+		MessageDigest messageDigest = getDigest(algorithm);
+		if(inputStream instanceof UpdateMessageDigestInputStream){
+			((UpdateMessageDigestInputStream) inputStream).updateMessageDigest(messageDigest);
+			return messageDigest.digest();
+		}else{
+			return messageDigest.digest(StreamUtils.copyToByteArray(inputStream));
+		}
+	}
+
 	private static String digestAsHexString(String algorithm, byte[] bytes) {
 		char[] hexDigest = digestAsHexChars(algorithm, bytes);
+		return new String(hexDigest);
+	}
+
+	private static String digestAsHexString(String algorithm, InputStream inputStream) throws IOException{
+		char[] hexDigest = digestAsHexChars(algorithm, inputStream);
 		return new String(hexDigest);
 	}
 
@@ -93,8 +143,18 @@ public abstract class DigestUtils {
 		return builder.append(hexDigest);
 	}
 
+	private static StringBuilder appendDigestAsHex(String algorithm, InputStream inputStream, StringBuilder builder) throws IOException{
+		char[] hexDigest = digestAsHexChars(algorithm, inputStream);
+		return builder.append(hexDigest);
+	}
+
 	private static char[] digestAsHexChars(String algorithm, byte[] bytes) {
 		byte[] digest = digest(algorithm, bytes);
+		return encodeHex(digest);
+	}
+
+	private static char[] digestAsHexChars(String algorithm, InputStream inputStream) throws IOException{
+		byte[] digest = digest(algorithm, inputStream);
 		return encodeHex(digest);
 	}
 

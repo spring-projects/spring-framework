@@ -1879,11 +1879,20 @@ public class SpelReproTests extends AbstractExpressionTests {
 	}
 
 	@Test
-	public void SPR12502() throws Exception {
+	public void SPR12502() {
 		SpelExpressionParser parser = new SpelExpressionParser();
 		Expression expression = parser.parseExpression("#root.getClass().getName()");
 		assertEquals(UnnamedUser.class.getName(), expression.getValue(new UnnamedUser()));
 		assertEquals(NamedUser.class.getName(), expression.getValue(new NamedUser()));
+	}
+
+	@Test
+	public void SPR12522() {
+		SpelExpressionParser parser = new SpelExpressionParser();
+		Expression expression = parser.parseExpression("T(java.util.Arrays).asList('')");
+		Object value = expression.getValue();
+		assertTrue(value instanceof List);
+		assertTrue(((List) value).isEmpty());
 	}
 
 

@@ -16,12 +16,10 @@
 
 package org.springframework.web.socket.sockjs.transport.handler;
 
-import java.io.IOException;
 import java.util.Map;
 
 import org.springframework.http.MediaType;
 import org.springframework.http.server.ServerHttpRequest;
-import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.sockjs.frame.DefaultSockJsFrameFormat;
 import org.springframework.web.socket.sockjs.frame.SockJsFrameFormat;
@@ -37,6 +35,16 @@ import org.springframework.web.socket.sockjs.transport.session.StreamingSockJsSe
  * @since 4.0
  */
 public class XhrStreamingTransportHandler extends AbstractHttpSendingTransportHandler {
+
+	private static final byte[] PRELUDE = new byte[2049];
+
+	static {
+		for (int i = 0; i < 2048; i++) {
+			PRELUDE[i] = 'h';
+		}
+		PRELUDE[2048] = '\n';
+	}
+
 
 	@Override
 	public TransportType getTransportType() {
@@ -70,12 +78,8 @@ public class XhrStreamingTransportHandler extends AbstractHttpSendingTransportHa
 		}
 
 		@Override
-		protected void writePrelude(ServerHttpRequest request, ServerHttpResponse response) throws IOException {
-			for (int i = 0; i < 2048; i++) {
-				response.getBody().write('h');
-			}
-			response.getBody().write('\n');
-			response.flush();
+		protected byte[] getPrelude(ServerHttpRequest request) {
+			return PRELUDE;
 		}
 	}
 

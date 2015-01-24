@@ -33,7 +33,6 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestName;
-
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.messaging.Message;
@@ -49,7 +48,9 @@ import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.util.Assert;
 import org.springframework.util.SocketUtils;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Integration tests for {@link StompBrokerRelayMessageHandler} running against ActiveMQ.
@@ -227,25 +228,6 @@ public class StompBrokerRelayMessageHandlerIntegrationTests {
 
 		startActiveMqBroker();
 		this.eventPublisher.expectBrokerAvailabilityEvent(true);
-	}
-
-	@Test
-	public void disconnectClosesRelaySessionCleanly() throws Exception {
-
-		logger.debug("Starting test disconnectClosesRelaySessionCleanly()");
-
-		MessageExchange connect = MessageExchangeBuilder.connect("sess1").build();
-		this.relay.handleMessage(connect.message);
-		this.responseHandler.expectMessages(connect);
-
-		StompHeaderAccessor headers = StompHeaderAccessor.create(StompCommand.DISCONNECT);
-		headers.setSessionId("sess1");
-		this.relay.handleMessage(MessageBuilder.createMessage(new byte[0], headers.getMessageHeaders()));
-
-		Thread.sleep(2000);
-
-		// Check that we have not received an ERROR as a result of the connection closing
-		assertTrue("Unexpected messages: " + this.responseHandler.queue, this.responseHandler.queue.isEmpty());
 	}
 
 	@Test

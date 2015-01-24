@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -73,22 +73,12 @@ public class DefaultActiveProfilesResolver implements ActiveProfilesResolver {
 			}
 		}
 		else {
-			Class<?> rootDeclaringClass = descriptor.getRootDeclaringClass();
 			Class<?> declaringClass = descriptor.getDeclaringClass();
 
 			AnnotationAttributes annAttrs = descriptor.getAnnotationAttributes();
 			if (logger.isTraceEnabled()) {
 				logger.trace(String.format("Retrieved @ActiveProfiles attributes [%s] for declaring class [%s].",
 					annAttrs, declaringClass.getName()));
-			}
-
-			Class<? extends ActiveProfilesResolver> resolverClass = annAttrs.getClass("resolver");
-			if (!ActiveProfilesResolver.class.equals(resolverClass)) {
-				String msg = String.format("Configuration error for test class [%s]: %s cannot be used "
-						+ "in conjunction with custom resolver [%s].", rootDeclaringClass.getName(),
-					getClass().getSimpleName(), resolverClass.getName());
-				logger.error(msg);
-				throw new IllegalStateException(msg);
 			}
 
 			String[] profiles = annAttrs.getStringArray("profiles");

@@ -1791,15 +1791,15 @@ You use the `Class` property in one of two ways:
 ****
 .Inner class names
 If you want to configure a bean definition for a `static` nested class, you have to use
-the __binary__ name of the inner class.
+the __binary__ name of the nested class.
 
 For example, if you have a class called `Foo` in the `com.example` package, and this
-`Foo` class has a `static` inner class called `Bar`, the value of the `'class'`
+`Foo` class has a `static` nested class called `Bar`, the value of the `'class'`
 attribute on a bean definition would be...
 
 `com.example.Foo$Bar`
 
-Notice the use of the `$` character in the name to separate the inner class name from
+Notice the use of the `$` character in the name to separate the nested class name from
 the outer class name.
 ****
 
@@ -4142,7 +4142,8 @@ unnecessarily couples the code to Spring. Alternatively, use
 the <<beans-postconstruct-and-predestroy-annotations, `@PostConstruct`>> annotation or
 specify a POJO initialization method. In the case of XML-based configuration metadata,
 you use the `init-method` attribute to specify the name of the method that has a void
-no-argument signature. For example, the following definition:
+no-argument signature. With Java config  you use the `initMethod` attribute of `@Bean`,
+see <<beans-java-lifecycle-callbacks>>. For example, the following:
 
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
@@ -4201,8 +4202,9 @@ It is recommended that you do not use the `DisposableBean` callback interface be
 unnecessarily couples the code to Spring. Alternatively, use
 the <<beans-postconstruct-and-predestroy-annotations, `@PreDestroy`>> annotation or
 specify a generic method that is supported by bean definitions. With XML-based
-configuration metadata, you use the `destroy-method` attribute on the `<bean/>`. For
-example, the following definition:
+configuration metadata, you use the `destroy-method` attribute on the `<bean/>`. With
+Java config  you use the `destroyMethod` attribute of `@Bean`, see
+<<beans-java-lifecycle-callbacks>>. For example, the following definition:
 
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
@@ -4244,6 +4246,16 @@ is exactly the same as:
 
 but does not couple the code to Spring.
 
+[TIP]
+====
+The `destroy-method` attribute of a `<bean>` element can be assigned a special
+`(inferred)` value which instructs Spring to automatically detect a public `close` or
+`shutdown` method on the specific bean class. This special `(inferred)` value can also be
+set on the `default-destroy-method` attribute of a `<beans>` element to apply this
+behavior to an entire set of beans (see
+<<beans-factory-lifecycle-default-init-destroy-methods>>). Note that this is the
+default behavior with Java config.
+====
 
 [[beans-factory-lifecycle-default-init-destroy-methods]]
 ===== Default initialization and destroy methods
@@ -4695,13 +4707,13 @@ A child bean definition uses the bean class from the parent definition if none i
 specified, but can also override it. In the latter case, the child bean class must be
 compatible with the parent, that is, it must accept the parent's property values.
 
-A child bean definition inherits constructor argument values, property values, and
-method overrides from the parent, with the option to add new values. Any initialization
+A child bean definition inherits scope, constructor argument values, property values, and
+method overrides from the parent, with the option to add new values. Any scope, initialization
 method, destroy method, and/or `static` factory method settings that you specify will
 override the corresponding parent settings.
 
 The remaining settings are __always__ taken from the child definition: __depends on__,
-__autowire mode__, __dependency check__, __singleton__, __scope__, __lazy init__.
+__autowire mode__, __dependency check__, __singleton__, __lazy init__.
 
 The preceding example explicitly marks the parent bean definition as abstract by using
 the `abstract` attribute. If the parent definition does not specify a class, explicitly
@@ -6253,7 +6265,7 @@ are eligible for such autodetection:
 To autodetect these classes and register the corresponding beans, you need to add
 `@ComponentScan` to your `@Configuration` class, where the `basePackages` attribute
 is a common parent package for the two classes. (Alternatively, you can specify a
-comma-separated list that includes the parent package of each class.)
+comma/semicolon/space-separated list that includes the parent package of each class.)
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -7250,6 +7262,15 @@ on the `bean` element:
 	}
 ----
 
+[NOTE]
+====
+By default, beans defined using Java config that have a public `close` or `shutdown`
+method are automatically enlisted with a destruction callback. If you have a public
+`close` or `shutdown` method and you do not wish for it to be called when the container
+shuts down, simply add `@Bean(destroyMethod="")` to your bean definition to disable the
+default `(inferred)` mode.
+====
+
 Of course, in the case of `Foo` above, it would be equally as valid to call the `init()`
 method directly during construction:
 
@@ -7262,7 +7283,7 @@ method directly during construction:
 		public Foo foo() {
 			Foo foo = new Foo();
 			foo.init();
-		return foo;
+		    return foo;
 		}
 
 		// ...
@@ -20039,20 +20060,20 @@ the discussion of __`@Bean` Lite Mode__.
 If you omit the `classes` attribute from the `@ContextConfiguration` annotation, the
 TestContext framework will attempt to detect the presence of default configuration
 classes. Specifically, `AnnotationConfigContextLoader` and
-`AnnotationConfigWebContextLoader` will detect all static inner classes of the test class
+`AnnotationConfigWebContextLoader` will detect all `static` nested classes of the test class
 that meet the requirements for configuration class implementations as specified in the
 `@Configuration` javadocs. In the following example, the `OrderServiceTest` class
-declares a static inner configuration class named `Config` that will be automatically
+declares a `static` nested configuration class named `Config` that will be automatically
 used to load the `ApplicationContext` for the test class. Note that the name of the
 configuration class is arbitrary. In addition, a test class can contain more than one
-static inner configuration class if desired.
+`static` nested configuration class if desired.
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
 	@RunWith(SpringJUnit4ClassRunner.class)
 	// ApplicationContext will be loaded from the
-	// static inner Config class
+	// static nested Config class
 	**@ContextConfiguration**
 	public class OrderServiceTest {
 
@@ -25071,7 +25092,7 @@ Querying and populating a number of domain objects:
 
 If the last two snippets of code actually existed in the same application, it would make
 sense to remove the duplication present in the two `RowMapper` anonymous inner classes,
-and extract them out into a single class (typically a `static` inner class) that can
+and extract them out into a single class (typically a `static` nested class) that can
 then be referenced by DAO methods as needed. For example, it may be better to write the
 last code snippet as follows:
 
@@ -26175,7 +26196,7 @@ of the generated key column with the `usingGeneratedKeyColumns` method.
 ----
 
 The main difference when executing the insert by this second approach is that you do not
-add the id to the Map and you call the `executeReturningKey` method. This returns a
+add the id to the Map and you call the `executeAndReturnKey` method. This returns a
 `java.lang.Number` object with which you can create an instance of the numerical type that
 is used in our domain class. You cannot rely on all databases to return a specific Java
 class here; `java.lang.Number` is the base class that you can rely on. If you have
@@ -30916,25 +30937,27 @@ multiple requests are allowed to access a session concurrently.
 ====
 
 * `org.springframework.web.context.request.WebRequest` or
-  `org.springframework.web.context.request.NativeWebRequest`. Allows for generic request
-  parameter access as well as request/session attribute access, without ties to the
-  native Servlet/Portlet API.
+  `org.springframework.web.context.request.NativeWebRequest`. Allows for generic
+  request parameter access as well as request/session attribute access, without ties
+  to the native Servlet/Portlet API.
 * `java.util.Locale` for the current request locale, determined by the most specific
-  locale resolver available, in effect, the configured `LocaleResolver` in a Servlet
-  environment.
-* `java.io.InputStream` / `java.io.Reader` for access to the request's content. This
-  value is the raw InputStream/Reader as exposed by the Servlet API.
-* `java.io.OutputStream` / `java.io.Writer` for generating the response's content. This
-  value is the raw OutputStream/Writer as exposed by the Servlet API.
+  locale resolver available, in effect, the configured `LocaleResolver` /
+  `LocaleContextResolver` in an MVC environment.
+* `java.util.TimeZone` (Java 6+) / `java.time.ZoneId` (on Java 8) for the time zone
+  associated with the current request, as determined by a `LocaleContextResolver`.
+* `java.io.InputStream` / `java.io.Reader` for access to the request's content.
+  This value is the raw InputStream/Reader as exposed by the Servlet API.
+* `java.io.OutputStream` / `java.io.Writer` for generating the response's content.
+  This value is the raw OutputStream/Writer as exposed by the Servlet API.
 * `org.springframework.http.HttpMethod` for the HTTP request method.
 * `java.security.Principal` containing the currently authenticated user.
 * `@PathVariable` annotated parameters for access to URI template variables. See
   <<mvc-ann-requestmapping-uri-templates>>.
-* `@MatrixVariable` annotated parameters for access to name-value pairs located in URI
-  path segments. See <<mvc-ann-matrix-variables>>.
+* `@MatrixVariable` annotated parameters for access to name-value pairs located in
+  URI path segments. See <<mvc-ann-matrix-variables>>.
 * `@RequestParam` annotated parameters for access to specific Servlet request
-  parameters. Parameter values are converted to the declared method argument type. See
-  <<mvc-ann-requestparam>>.
+  parameters. Parameter values are converted to the declared method argument type.
+  See <<mvc-ann-requestparam>>.
 * `@RequestHeader` annotated parameters for access to specific Servlet request HTTP
   headers. Parameter values are converted to the declared method argument type.
   See <<mvc-ann-requestheader>>.
@@ -30954,8 +30977,8 @@ multiple requests are allowed to access a session concurrently.
   (attributes stored temporarily on the server-side to make them available to the
   request after the redirect). `RedirectAttributes` is used instead of the implicit
   model if the method returns a "redirect:" prefixed view name or `RedirectView`.
-* Command or form objects to bind request parameters to bean properties (via setters) or
-  directly to fields, with customizable type conversion, depending on `@InitBinder`
+* Command or form objects to bind request parameters to bean properties (via setters)
+  or directly to fields, with customizable type conversion, depending on `@InitBinder`
   methods and/or the HandlerAdapter configuration. See the `webBindingInitializer`
   property on `RequestMappingHandlerAdapter`. Such command objects along with their
   validation results will be exposed as model attributes by default, using the command
@@ -39018,7 +39041,7 @@ framework-specific, or a standard messaging protocol.
 Spring Framework provides support for using
 http://stomp.github.io/stomp-specification-1.2.html#Abstract[STOMP] -- a simple, messaging protocol
 originally created for use in scripting languages with frames inspired
-by HTTP. STOMP is widely support and well suited for use over
+by HTTP. STOMP is widely supported and well suited for use over
 WebSocket and over the web.
 
 
@@ -39448,7 +39471,8 @@ or WebSocket XML namespace:
 As explained in the <<websocket-into-fallback-options,introduction>>, WebSocket is not
 supported in all browsers yet and may be precluded by restrictive network proxies.
 This is why Spring provides fallback options that emulate the WebSocket API as close
-as possible based on the https://github.com/sockjs/sockjs-protocol[SockJS protocol].
+as possible based on the https://github.com/sockjs/sockjs-protocol[SockJS protocol]
+(version 0.3.3).
 
 [[websocket-fallback-sockjs-overview]]
 ==== Overview of SockJS
@@ -39462,14 +39486,14 @@ SockJS consists of:
 * The https://github.com/sockjs/sockjs-protocol[SockJS protocol]
 defined in the form of executable
 http://sockjs.github.io/sockjs-protocol/sockjs-protocol-0.3.3.html[narrated tests].
-* The https://github.com/sockjs/sockjs-client[SockJS JavaScript client] - a client library for use in browsers.
+* The https://github.com/sockjs/sockjs-client/tree/v0.3.4[SockJS JavaScript client] - a client library for use in browsers.
 * SockJS server implementations including one in the Spring Framework `spring-websocket` module.
 * As of 4.1 `spring-websocket` also provides a SockJS Java client.
 
 SockJS is designed for use in browsers. It goes to great lengths
 to support a wide range of browser versions using a variety of techniques.
 For the full list of SockJS transport types and browsers see the
-https://github.com/sockjs/sockjs-client[SockJS client] page. Transports
+https://github.com/sockjs/sockjs-client/tree/v0.3.4[SockJS client] page. Transports
 fall in 3 general categories: WebSocket, HTTP Streaming, and HTTP Long Polling.
 For an overview of these categories see
 https://spring.io/blog/2012/05/08/spring-mvc-3-2-preview-techniques-for-real-time-updates/[this blog post].
@@ -39566,10 +39590,10 @@ integrate into other HTTP serving environments with the help of
 {javadoc-baseurl}/org/springframework/web/socket/sockjs/support/SockJsHttpRequestHandler.html[SockJsHttpRequestHandler].
 
 On the browser side, applications can use the
-https://github.com/sockjs/sockjs-client[sockjs-client] that emulates the W3C
-WebSocket API and communicates with the server to select the best
+https://github.com/sockjs/sockjs-client/tree/v0.3.4[sockjs-client] (version 0.3.x) that
+emulates the W3C WebSocket API and communicates with the server to select the best
 transport option depending on the browser it's running in. Review the
-https://github.com/sockjs/sockjs-client[sockjs-client] page and the list of
+https://github.com/sockjs/sockjs-client/tree/v0.3.4[sockjs-client] page and the list of
 transport types supported by browser. The client also provides several
 configuration options, for example, to specify which transports to include.
 
@@ -39651,7 +39675,7 @@ similar option on the `<websocket:sockjs>` element:
 During initial development, do enable the SockJS client `devel` mode that prevents
 the browser from caching SockJS requests (like the iframe) that would otherwise
 be cached. For details on how to enable it see the
-https://github.com/sockjs/sockjs-client[SockJS client] page.
+https://github.com/sockjs/sockjs-client/tree/v0.3.4[SockJS client] page.
 ====
 
 [[websocket-fallback-sockjs-heartbeat]]
@@ -49606,6 +49630,13 @@ Both the `cache:annotation-driven` element and `@EnableCaching` annotation allow
 options to be specified that influence the way the caching behavior is added to the
 application through AOP. The configuration is intentionally similar with that of
 <<tx-annotation-driven-settings, `@Transactional`>>:
+
+[NOTE]
+====
+Advanced customizations using Java config require to implement `CachingConfigurer`, refer
+to {javadoc-baseurl}/org/springframework/cache/annotation/CachingConfigurer.html[the
+javadoc for more details].
+====
 
 [[cache-annotation-driven-settings]]
 .Cache annotation settings

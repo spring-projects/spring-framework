@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -324,78 +324,6 @@ public interface NamedParameterJdbcOperations {
 	 * @see org.springframework.jdbc.core.ColumnMapRowMapper
 	 */
 	Map<String, Object> queryForMap(String sql, Map<String, ?> paramMap) throws DataAccessException;
-
-	/**
-	 * Query given SQL to create a prepared statement from SQL and a
-	 * list of arguments to bind to the query, resulting in a long value.
-	 * <p>The query is expected to be a single row/single column query that
-	 * results in a long value.
-	 * @param sql SQL query to execute
-	 * @param paramSource container of arguments to bind to the query
-	 * @return the long value, or 0 in case of SQL NULL
-	 * @throws org.springframework.dao.IncorrectResultSizeDataAccessException
-	 * if the query does not return exactly one row, or does not return exactly
-	 * one column in that row
-	 * @throws org.springframework.dao.DataAccessException if the query fails
-	 * @see org.springframework.jdbc.core.JdbcTemplate#queryForLong(String)
-	 * @deprecated in favor of {@link #queryForObject(String, SqlParameterSource, Class)}
-	 */
-	@Deprecated
-	long queryForLong(String sql, SqlParameterSource paramSource) throws DataAccessException;
-
-	/**
-	 * Query given SQL to create a prepared statement from SQL and a
-	 * list of arguments to bind to the query, resulting in a long value.
-	 * <p>The query is expected to be a single row/single column query that
-	 * results in a long value.
-	 * @param sql SQL query to execute
-	 * @param paramMap map of parameters to bind to the query
-	 * (leaving it to the PreparedStatement to guess the corresponding SQL type)
-	 * @return the long value, or 0 in case of SQL NULL
-	 * @throws org.springframework.dao.IncorrectResultSizeDataAccessException
-	 * if the query does not return exactly one row, or does not return exactly
-	 * one column in that row
-	 * @throws org.springframework.dao.DataAccessException if the query fails
-	 * @see org.springframework.jdbc.core.JdbcTemplate#queryForLong(String)
-	 * @deprecated in favor of {@link #queryForObject(String, Map, Class)}
-	 */
-	@Deprecated
-	long queryForLong(String sql, Map<String, ?> paramMap) throws DataAccessException;
-
-	/**
-	 * Query given SQL to create a prepared statement from SQL and a
-	 * list of arguments to bind to the query, resulting in an int value.
-	 * <p>The query is expected to be a single row/single column query that
-	 * results in an int value.
-	 * @param sql SQL query to execute
-	 * @param paramSource container of arguments to bind to the query
-	 * @return the int value, or 0 in case of SQL NULL
-	 * @throws org.springframework.dao.IncorrectResultSizeDataAccessException if the query does not return
-	 * exactly one row, or does not return exactly one column in that row
-	 * @throws org.springframework.dao.DataAccessException if the query fails
-	 * @see org.springframework.jdbc.core.JdbcTemplate#queryForInt(String)
-	 * @deprecated in favor of {@link #queryForObject(String, SqlParameterSource, Class)}
-	 */
-	@Deprecated
-	int queryForInt(String sql, SqlParameterSource paramSource) throws DataAccessException;
-
-	/**
-	 * Query given SQL to create a prepared statement from SQL and a
-	 * list of arguments to bind to the query, resulting in an int value.
-	 * <p>The query is expected to be a single row/single column query that
-	 * results in an int value.
-	 * @param sql SQL query to execute
-	 * @param paramMap map of parameters to bind to the query
-	 * (leaving it to the PreparedStatement to guess the corresponding SQL type)
-	 * @return the int value, or 0 in case of SQL NULL
-	 * @throws org.springframework.dao.IncorrectResultSizeDataAccessException if the query does not return
-	 * exactly one row, or does not return exactly one column in that row
-	 * @throws org.springframework.dao.DataAccessException if the query fails
-	 * @see org.springframework.jdbc.core.JdbcTemplate#queryForInt(String)
-	 * @deprecated in favor of {@link #queryForObject(String, Map, Class)}
-	 */
-	@Deprecated
-	int queryForInt(String sql, Map<String, ?> paramMap) throws DataAccessException;
 
 	/**
 	 * Query given SQL to create a prepared statement from SQL and a

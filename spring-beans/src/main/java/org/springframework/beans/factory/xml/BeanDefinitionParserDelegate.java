@@ -88,10 +88,6 @@ public class BeanDefinitionParserDelegate {
 
 	public static final String MULTI_VALUE_ATTRIBUTE_DELIMITERS = ",; ";
 
-	/** @deprecated as of Spring 3.1 in favor of {@link #MULTI_VALUE_ATTRIBUTE_DELIMITERS} */
-	@Deprecated
-	public static final String BEAN_NAME_DELIMITERS = MULTI_VALUE_ATTRIBUTE_DELIMITERS;
-
 	/**
 	 * Value of a T/F attribute that represents true.
 	 * Anything else represents false. Case seNsItive.
@@ -264,17 +260,6 @@ public class BeanDefinitionParserDelegate {
 	public BeanDefinitionParserDelegate(XmlReaderContext readerContext) {
 		Assert.notNull(readerContext, "XmlReaderContext must not be null");
 		this.readerContext = readerContext;
-	}
-
-	/**
-	 * Create a new BeanDefinitionParserDelegate associated with the supplied
-	 * {@link XmlReaderContext}.
-	 * @deprecated since the given {@link Environment} parameter is effectively
-	 * ignored in favor of {@link XmlReaderContext#getEnvironment()}
-	 */
-	@Deprecated
-	public BeanDefinitionParserDelegate(XmlReaderContext readerContext, Environment environment) {
-		this(readerContext);
 	}
 
 

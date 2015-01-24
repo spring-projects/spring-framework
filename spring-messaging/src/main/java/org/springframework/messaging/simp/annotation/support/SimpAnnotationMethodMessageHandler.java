@@ -67,7 +67,6 @@ import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.PathMatcher;
-import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
 
 /**
@@ -136,7 +135,6 @@ public class SimpAnnotationMethodMessageHandler extends AbstractMethodMessageHan
 	 * <p>Destination prefixes are expected to be slash-separated Strings and
 	 * therefore a slash is automatically appended where missing to ensure a
 	 * proper prefix-based match (i.e. matching complete segments).
-	 *
 	 * <p>Note however that the remaining portion of a destination after the
 	 * prefix may use a different separator (e.g. commonly "." in messaging)
 	 * depending on the configured {@code PathMatcher}.
@@ -161,10 +159,9 @@ public class SimpAnnotationMethodMessageHandler extends AbstractMethodMessageHan
 	}
 
 	/**
-	 * Configure a {@link MessageConverter} to use to convert the payload of a message
-	 * from serialize form with a specific MIME type to an Object matching the target
-	 * method parameter. The converter is also used when sending message to the message
-	 * broker.
+	 * Configure a {@link MessageConverter} to use to convert the payload of a message from
+	 * its serialized form with a specific MIME type to an Object matching the target method
+	 * parameter. The converter is also used when sending a message to the message broker.
 	 * @see CompositeMessageConverter
 	 */
 	public void setMessageConverter(MessageConverter converter) {
@@ -182,16 +179,16 @@ public class SimpAnnotationMethodMessageHandler extends AbstractMethodMessageHan
 	}
 
 	/**
-	 * Configure a {@link ConversionService} to use when resolving method arguments, for
-	 * example message header values.
-	 * <p>By default an instance of {@link DefaultFormattingConversionService} is used.
+	 * Configure a {@link ConversionService} to use when resolving method arguments,
+	 * for example message header values.
+	 * <p>By default, {@link DefaultFormattingConversionService} is used.
 	 */
 	public void setConversionService(ConversionService conversionService) {
 		this.conversionService = conversionService;
 	}
 
 	/**
-	 * The configured {@link ConversionService}.
+	 * Return the configured {@link ConversionService}.
 	 */
 	public ConversionService getConversionService() {
 		return this.conversionService;
@@ -200,7 +197,7 @@ public class SimpAnnotationMethodMessageHandler extends AbstractMethodMessageHan
 	/**
 	 * Set the PathMatcher implementation to use for matching destinations
 	 * against configured destination patterns.
-	 * <p>By default AntPathMatcher is used
+	 * <p>By default, {@link AntPathMatcher} is used.
 	 */
 	public void setPathMatcher(PathMatcher pathMatcher) {
 		Assert.notNull(pathMatcher, "PathMatcher must not be null");
@@ -209,14 +206,14 @@ public class SimpAnnotationMethodMessageHandler extends AbstractMethodMessageHan
 	}
 
 	/**
-	 * Return the PathMatcher implementation to use for matching destinations
+	 * Return the PathMatcher implementation to use for matching destinations.
 	 */
 	public PathMatcher getPathMatcher() {
 		return this.pathMatcher;
 	}
 
 	/**
-	 * The configured Validator instance
+	 * Return the configured Validator instance.
 	 */
 	public Validator getValidator() {
 		return this.validator;
@@ -235,15 +232,14 @@ public class SimpAnnotationMethodMessageHandler extends AbstractMethodMessageHan
 	 * Configure a {@link MessageHeaderInitializer} to pass on to
 	 * {@link org.springframework.messaging.handler.invocation.HandlerMethodReturnValueHandler}s
 	 * that send messages from controller return values.
-	 *
-	 * <p>By default this property is not set.
+	 * <p>By default, this property is not set.
 	 */
 	public void setHeaderInitializer(MessageHeaderInitializer headerInitializer) {
 		this.headerInitializer = headerInitializer;
 	}
 
 	/**
-	 * @return the configured header initializer.
+	 * Return the configured header initializer.
 	 */
 	public MessageHeaderInitializer getHeaderInitializer() {
 		return this.headerInitializer;
@@ -309,8 +305,7 @@ public class SimpAnnotationMethodMessageHandler extends AbstractMethodMessageHan
 		resolvers.add(new MessageMethodArgumentResolver());
 
 		resolvers.addAll(getCustomArgumentResolvers());
-		resolvers.add(new PayloadArgumentResolver(this.messageConverter,
-				(this.validator != null ? this.validator : new NoOpValidator())));
+		resolvers.add(new PayloadArgumentResolver(this.messageConverter, this.validator));
 
 		return resolvers;
 	}
@@ -348,17 +343,17 @@ public class SimpAnnotationMethodMessageHandler extends AbstractMethodMessageHan
 	@Override
 	protected SimpMessageMappingInfo getMappingForMethod(Method method, Class<?> handlerType) {
 		MessageMapping typeAnnotation = AnnotationUtils.findAnnotation(handlerType, MessageMapping.class);
-		MessageMapping messageAnnot = AnnotationUtils.findAnnotation(method, MessageMapping.class);
-		if (messageAnnot != null) {
-			SimpMessageMappingInfo result = createMessageMappingCondition(messageAnnot);
+		MessageMapping messageAnnotation = AnnotationUtils.findAnnotation(method, MessageMapping.class);
+		if (messageAnnotation != null) {
+			SimpMessageMappingInfo result = createMessageMappingCondition(messageAnnotation);
 			if (typeAnnotation != null) {
 				result = createMessageMappingCondition(typeAnnotation).combine(result);
 			}
 			return result;
 		}
-		SubscribeMapping subsribeAnnotation = AnnotationUtils.findAnnotation(method, SubscribeMapping.class);
-		if (subsribeAnnotation != null) {
-			SimpMessageMappingInfo result = createSubscribeCondition(subsribeAnnotation);
+		SubscribeMapping subscribeAnnotation = AnnotationUtils.findAnnotation(method, SubscribeMapping.class);
+		if (subscribeAnnotation != null) {
+			SimpMessageMappingInfo result = createSubscribeCondition(subscribeAnnotation);
 			if (typeAnnotation != null) {
 				result = createMessageMappingCondition(typeAnnotation).combine(result);
 			}
@@ -455,19 +450,6 @@ public class SimpAnnotationMethodMessageHandler extends AbstractMethodMessageHan
 	@Override
 	protected AbstractExceptionHandlerMethodResolver createExceptionHandlerMethodResolverFor(Class<?> beanType) {
 		return new AnnotationExceptionHandlerMethodResolver(beanType);
-	}
-
-
-	private static final class NoOpValidator implements Validator {
-
-		@Override
-		public boolean supports(Class<?> clazz) {
-			return false;
-		}
-
-		@Override
-		public void validate(Object target, Errors errors) {
-		}
 	}
 
 }

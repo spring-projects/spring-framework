@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -22,6 +22,7 @@ import java.lang.reflect.Method;
 import java.net.BindException;
 import java.util.HashMap;
 import java.util.Map;
+
 import javax.management.Descriptor;
 import javax.management.MBeanServerConnection;
 import javax.management.remote.JMXConnectorServer;
@@ -38,10 +39,15 @@ import org.springframework.jmx.export.MBeanExporter;
 import org.springframework.jmx.export.assembler.AbstractReflectiveMBeanInfoAssembler;
 import org.springframework.tests.Assume;
 import org.springframework.tests.TestGroup;
+import org.springframework.util.SocketUtils;
 
 import static org.junit.Assert.*;
+import static org.junit.Assume.*;
 
 /**
+ * To run the tests in the class, set the following Java system property:
+ * {@code -DtestGroups=jmxmp}.
+ *
  * @author Rob Harrop
  * @author Juergen Hoeller
  * @author Sam Brannen
@@ -85,16 +91,14 @@ public class MBeanClientInterceptorTests extends AbstractMBeanServerTests {
 
 	@Test
 	public void testProxyClassIsDifferent() throws Exception {
-		if (!runTests)
-			return;
+		assumeTrue(runTests);
 		IJmxTestBean proxy = getProxy();
 		assertTrue("The proxy class should be different than the base class", (proxy.getClass() != IJmxTestBean.class));
 	}
 
 	@Test
 	public void testDifferentProxiesSameClass() throws Exception {
-		if (!runTests)
-			return;
+		assumeTrue(runTests);
 		IJmxTestBean proxy1 = getProxy();
 		IJmxTestBean proxy2 = getProxy();
 
@@ -104,8 +108,7 @@ public class MBeanClientInterceptorTests extends AbstractMBeanServerTests {
 
 	@Test
 	public void testGetAttributeValue() throws Exception {
-		if (!runTests)
-			return;
+		assumeTrue(runTests);
 		IJmxTestBean proxy1 = getProxy();
 		int age = proxy1.getAge();
 		assertEquals("The age should be 100", 100, age);
@@ -113,69 +116,43 @@ public class MBeanClientInterceptorTests extends AbstractMBeanServerTests {
 
 	@Test
 	public void testSetAttributeValue() throws Exception {
-		if (!runTests)
-			return;
+		assumeTrue(runTests);
 		IJmxTestBean proxy = getProxy();
 		proxy.setName("Rob Harrop");
 		assertEquals("The name of the bean should have been updated", "Rob Harrop", target.getName());
 	}
 
-	@Test
+	@Test(expected = IllegalArgumentException.class)
 	public void testSetAttributeValueWithRuntimeException() throws Exception {
-		if (!runTests)
-			return;
+		assumeTrue(runTests);
 		IJmxTestBean proxy = getProxy();
-		try {
-			proxy.setName("Juergen");
-			fail("Should have thrown IllegalArgumentException");
-		} catch (IllegalArgumentException ex) {
-			// expected
-		}
+		proxy.setName("Juergen");
 	}
 
-	@Test
+	@Test(expected = ClassNotFoundException.class)
 	public void testSetAttributeValueWithCheckedException() throws Exception {
-		if (!runTests)
-			return;
+		assumeTrue(runTests);
 		IJmxTestBean proxy = getProxy();
-		try {
-			proxy.setName("Juergen Class");
-			fail("Should have thrown ClassNotFoundException");
-		} catch (ClassNotFoundException ex) {
-			// expected
-		}
+		proxy.setName("Juergen Class");
 	}
 
-	@Test
+	@Test(expected = IOException.class)
 	public void testSetAttributeValueWithIOException() throws Exception {
-		if (!runTests)
-			return;
+		assumeTrue(runTests);
 		IJmxTestBean proxy = getProxy();
-		try {
-			proxy.setName("Juergen IO");
-			fail("Should have thrown IOException");
-		} catch (IOException ex) {
-			// expected
-		}
+		proxy.setName("Juergen IO");
 	}
 
-	@Test
+	@Test(expected = InvalidInvocationException.class)
 	public void testSetReadOnlyAttribute() throws Exception {
-		if (!runTests)
-			return;
+		assumeTrue(runTests);
 		IJmxTestBean proxy = getProxy();
-		try {
-			proxy.setAge(900);
-			fail("Should not be able to write to a read only attribute");
-		} catch (InvalidInvocationException ex) {
-			// success
-		}
+		proxy.setAge(900);
 	}
 
 	@Test
 	public void testInvokeNoArgs() throws Exception {
-		if (!runTests)
-			return;
+		assumeTrue(runTests);
 		IJmxTestBean proxy = getProxy();
 		long result = proxy.myOperation();
 		assertEquals("The operation should return 1", 1, result);
@@ -183,34 +160,27 @@ public class MBeanClientInterceptorTests extends AbstractMBeanServerTests {
 
 	@Test
 	public void testInvokeArgs() throws Exception {
-		if (!runTests)
-			return;
+		assumeTrue(runTests);
 		IJmxTestBean proxy = getProxy();
 		int result = proxy.add(1, 2);
 		assertEquals("The operation should return 3", 3, result);
 	}
 
-	@Test
+	@Test(expected = InvalidInvocationException.class)
 	public void testInvokeUnexposedMethodWithException() throws Exception {
-		if (!runTests)
-			return;
+		assumeTrue(runTests);
 		IJmxTestBean bean = getProxy();
-		try {
-			bean.dontExposeMe();
-			fail("Method dontExposeMe should throw an exception");
-		} catch (InvalidInvocationException desired) {
-			// success
-		}
+		bean.dontExposeMe();
 	}
 
 	@Test
 	public void testTestLazyConnectionToRemote() throws Exception {
-		if (!runTests)
-			return;
-
+		assumeTrue(runTests);
 		Assume.group(TestGroup.JMXMP);
 
-		JMXServiceURL url = new JMXServiceURL("service:jmx:jmxmp://localhost:9876");
+		final int port = SocketUtils.findAvailableTcpPort();
+
+		JMXServiceURL url = new JMXServiceURL("service:jmx:jmxmp://localhost:" + port);
 		JMXConnectorServer connector = JMXConnectorServerFactory.newJMXConnectorServer(url, null, getServer());
 
 		MBeanProxyFactoryBean factory = new MBeanProxyFactoryBean();
@@ -227,9 +197,8 @@ public class MBeanClientInterceptorTests extends AbstractMBeanServerTests {
 		try {
 			connector.start();
 		} catch (BindException ex) {
-			// couldn't bind to local port 9876 - let's skip the remainder of this test
-			System.out.println("Skipping JMX LazyConnectionToRemote test because binding to local port 9876 failed: "
-					+ ex.getMessage());
+			System.out.println("Skipping remainder of JMX LazyConnectionToRemote test because binding to local port ["
+					+ port + "] failed: " + ex.getMessage());
 			return;
 		}
 

@@ -56,9 +56,24 @@ public class PayloadArgumentResolver implements HandlerMethodArgumentResolver {
 	private final Validator validator;
 
 
+	/**
+	 * Create a new {@code PayloadArgumentResolver} with the given
+	 * {@link MessageConverter}.
+	 * @param messageConverter the MessageConverter to use (required)
+	 * @since 4.0.9
+	 */
+	public PayloadArgumentResolver(MessageConverter messageConverter) {
+		this(messageConverter, null);
+	}
+
+	/**
+	 * Create a new {@code PayloadArgumentResolver} with the given
+	 * {@link MessageConverter} and {@link Validator}.
+	 * @param messageConverter the MessageConverter to use (required)
+	 * @param validator the Validator to use (optional)
+	 */
 	public PayloadArgumentResolver(MessageConverter messageConverter, Validator validator) {
-		Assert.notNull(messageConverter, "converter must not be null");
-		Assert.notNull(validator, "validator must not be null");
+		Assert.notNull(messageConverter, "MessageConverter must not be null");
 		this.converter = messageConverter;
 		this.validator = validator;
 	}

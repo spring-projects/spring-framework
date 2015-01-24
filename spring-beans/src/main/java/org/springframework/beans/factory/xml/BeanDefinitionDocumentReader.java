@@ -38,15 +38,6 @@ import org.springframework.core.env.Environment;
 public interface BeanDefinitionDocumentReader {
 
 	/**
-	 * Set the Environment to use when reading bean definitions.
-	 * <p>Used for evaluating profile information to determine whether a
-	 * {@code <beans/>} document/element should be included or ignored.
-	 * @deprecated in favor of {@link XmlReaderContext#getEnvironment()}
-	 */
-	@Deprecated
-	void setEnvironment(Environment environment);
-
-	/**
 	 * Read bean definitions from the given DOM document and
 	 * register them with the registry in the given reader context.
 	 * @param doc the DOM document

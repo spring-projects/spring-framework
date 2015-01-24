@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -107,7 +107,6 @@ public class ContextLoader {
 	/**
 	 * Config param for the root WebApplicationContext implementation class to use: {@value}
 	 * @see #determineContextClass(ServletContext)
-	 * @see #createWebApplicationContext(ServletContext, ApplicationContext)
 	 */
 	public static final String CONTEXT_CLASS_PARAM = "contextClass";
 
@@ -360,16 +359,6 @@ public class ContextLoader {
 		return (ConfigurableWebApplicationContext) BeanUtils.instantiateClass(contextClass);
 	}
 
-	/**
-	 * @deprecated as of Spring 3.1 in favor of
-	 * {@link #createWebApplicationContext(ServletContext)} and
-	 * {@link #configureAndRefreshWebApplicationContext(ConfigurableWebApplicationContext, ServletContext)}
-	 */
-	@Deprecated
-	protected WebApplicationContext createWebApplicationContext(ServletContext sc, ApplicationContext parent) {
-		return createWebApplicationContext(sc);
-	}
-
 	protected void configureAndRefreshWebApplicationContext(ConfigurableWebApplicationContext wac, ServletContext sc) {
 		if (ObjectUtils.identityToString(wac).equals(wac.getId())) {
 			// The application context id is still set to its original default value
@@ -417,7 +406,6 @@ public class ContextLoader {
 	 * org.springframework.core.annotation.Order Order} will be sorted appropriately.
 	 * @param sc the current servlet context
 	 * @param wac the newly created application context
-	 * @see #createWebApplicationContext(ServletContext, ApplicationContext)
 	 * @see #CONTEXT_INITIALIZER_CLASSES_PARAM
 	 * @see ApplicationContextInitializer#initialize(ConfigurableApplicationContext)
 	 */

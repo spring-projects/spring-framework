@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,9 +57,6 @@ class ResponseBodyAdviceChain {
 			ServerHttpRequest request, ServerHttpResponse response) {
 
 		if (this.advice != null) {
-			if (logger.isDebugEnabled()) {
-				logger.debug("Invoking ResponseBodyAdvice chain for body=" + body);
-			}
 			for (Object advice : this.advice) {
 				if (advice instanceof ControllerAdviceBean) {
 					ControllerAdviceBean adviceBean = (ControllerAdviceBean) advice;
@@ -78,9 +75,6 @@ class ResponseBodyAdviceChain {
 				else {
 					throw new IllegalStateException("Expected ResponseBodyAdvice: " + advice);
 				}
-			}
-			if (logger.isDebugEnabled()) {
-				logger.debug("After ResponseBodyAdvice chain body=" + body);
 			}
 		}
 		return body;

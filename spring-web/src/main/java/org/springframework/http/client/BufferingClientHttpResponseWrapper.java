@@ -25,7 +25,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.util.StreamUtils;
 
 /**
- * Simple implementation of {@link ClientHttpResponse} that reads the request's body into memory,
+ * Simple implementation of {@link ClientHttpResponse} that reads the response's body into memory,
  * thus allowing for multiple invocations of {@link #getBody()}.
  *
  * @author Arjen Poutsma

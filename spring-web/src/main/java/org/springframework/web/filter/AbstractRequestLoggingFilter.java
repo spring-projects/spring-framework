@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -211,14 +211,15 @@ public abstract class AbstractRequestLoggingFilter extends OncePerRequestFilter 
 			requestToUse = new ContentCachingRequestWrapper(request);
 		}
 
-		if (isFirstRequest) {
+		boolean shouldLog = shouldLog(requestToUse);
+		if (shouldLog && isFirstRequest) {
 			beforeRequest(requestToUse, getBeforeMessage(requestToUse));
 		}
 		try {
 			filterChain.doFilter(requestToUse, response);
 		}
 		finally {
-			if (!isAsyncStarted(requestToUse)) {
+			if (shouldLog && !isAsyncStarted(requestToUse)) {
 				afterRequest(requestToUse, getAfterMessage(requestToUse));
 			}
 		}
@@ -287,6 +288,22 @@ public abstract class AbstractRequestLoggingFilter extends OncePerRequestFilter 
 		}
 		msg.append(suffix);
 		return msg.toString();
+	}
+
+
+	/**
+	 * Determine whether to call the {@link #beforeRequest}/{@link #afterRequest}
+	 * methods for the current request, i.e. whether logging is currently active
+	 * (and the log message is worth building).
+	 * <p>The default implementation always returns {@code true}. Subclasses may
+	 * override this with a log level check.
+	 * @param request current HTTP request
+	 * @return {@code true} if the before/after method should get called;
+	 * {@code false} otherwise
+	 * @since 4.1.5
+	 */
+	protected boolean shouldLog(HttpServletRequest request) {
+		return true;
 	}
 
 	/**

@@ -42,10 +42,12 @@ public class HttpHeadersTests {
 
 	private HttpHeaders headers;
 
+
 	@Before
 	public void setUp() {
 		headers = new HttpHeaders();
 	}
+
 
 	@Test
 	public void accept() {
@@ -59,9 +61,7 @@ public class HttpHeadersTests {
 		assertEquals("Invalid Accept header", "text/html, text/plain", headers.getFirst("Accept"));
 	}
 
-	// SPR-9655
-
-	@Test
+	@Test  // SPR-9655
 	public void acceptiPlanet() {
 		headers.add("Accept", "text/html");
 		headers.add("Accept", "text/plain");
@@ -228,7 +228,7 @@ public class HttpHeadersTests {
 		calendar.setTimeZone(TimeZone.getTimeZone("CET"));
 		long date = calendar.getTimeInMillis();
 		headers.setIfModifiedSince(date);
-		assertEquals("Invalid If-Modified-Since header", date, headers.getIfNotModifiedSince());
+		assertEquals("Invalid If-Modified-Since header", date, headers.getIfModifiedSince());
 		assertEquals("Invalid If-Modified-Since header", "Thu, 18 Dec 2008 10:20:00 GMT",
 				headers.getFirst("if-modified-since"));
 	}
@@ -260,12 +260,9 @@ public class HttpHeadersTests {
 				headers.getFirst("Content-Disposition"));
 	}
 
-	// SPR-11917
-
-	@Test
+	@Test  // SPR-11917
 	public void getAllowEmptySet() {
 		headers.setAllow(Collections.<HttpMethod> emptySet());
-
 		assertThat(headers.getAllow(), Matchers.emptyCollectionOf(HttpMethod.class));
 	}
 

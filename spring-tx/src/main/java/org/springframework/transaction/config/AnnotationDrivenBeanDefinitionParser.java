@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,25 +47,6 @@ import org.springframework.transaction.interceptor.TransactionInterceptor;
  * @since 2.0
  */
 class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
-
-	/**
-	 * The bean name of the internally managed transaction advisor (mode="proxy").
-	 * @deprecated as of Spring 3.1 in favor of
-	 * {@link TransactionManagementConfigUtils#TRANSACTION_ADVISOR_BEAN_NAME}
-	 */
-	@Deprecated
-	public static final String TRANSACTION_ADVISOR_BEAN_NAME =
-			TransactionManagementConfigUtils.TRANSACTION_ADVISOR_BEAN_NAME;
-
-	/**
-	 * The bean name of the internally managed transaction aspect (mode="aspectj").
-	 * @deprecated as of Spring 3.1 in favor of
-	 * {@link TransactionManagementConfigUtils#TRANSACTION_ASPECT_BEAN_NAME}
-	 */
-	@Deprecated
-	public static final String TRANSACTION_ASPECT_BEAN_NAME =
-			TransactionManagementConfigUtils.TRANSACTION_ASPECT_BEAN_NAME;
-
 
 	/**
 	 * Parses the {@code <tx:annotation-driven/>} tag. Will

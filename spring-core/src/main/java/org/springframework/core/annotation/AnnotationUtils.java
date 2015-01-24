@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,6 +35,7 @@ import org.springframework.util.Assert;
 import org.springframework.util.ConcurrentReferenceHashMap;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.ReflectionUtils;
+import org.springframework.util.StringUtils;
 
 /**
  * General utility methods for working with annotations, handling bridge methods
@@ -318,8 +319,8 @@ public abstract class AnnotationUtils {
 	 * <p>The algorithm operates as follows:
 	 * <ol>
 	 * <li>Search for the annotation on the given class and return it if found.
-	 * <li>Recursively search through all interfaces that the given class declares.
 	 * <li>Recursively search through all annotations that the given class declares.
+	 * <li>Recursively search through all interfaces that the given class declares.
 	 * <li>Recursively search through the superclass hierarchy of the given class.
 	 * </ol>
 	 * <p>Note: in this context, the term <em>recursively</em> means that the search
@@ -654,6 +655,9 @@ public abstract class AnnotationUtils {
 	 * @see #getValue(Annotation)
 	 */
 	public static Object getValue(Annotation annotation, String attributeName) {
+		if (annotation == null || !StringUtils.hasLength(attributeName)) {
+			return null;
+		}
 		try {
 			Method method = annotation.annotationType().getDeclaredMethod(attributeName);
 			ReflectionUtils.makeAccessible(method);
@@ -683,6 +687,9 @@ public abstract class AnnotationUtils {
 	 * @see #getDefaultValue(Class, String)
 	 */
 	public static Object getDefaultValue(Annotation annotation, String attributeName) {
+		if (annotation == null) {
+			return null;
+		}
 		return getDefaultValue(annotation.annotationType(), attributeName);
 	}
 
@@ -706,6 +713,9 @@ public abstract class AnnotationUtils {
 	 * @see #getDefaultValue(Annotation, String)
 	 */
 	public static Object getDefaultValue(Class<? extends Annotation> annotationType, String attributeName) {
+		if (annotationType == null || !StringUtils.hasLength(attributeName)) {
+			return null;
+		}
 		try {
 			return annotationType.getDeclaredMethod(attributeName).getDefaultValue();
 		}

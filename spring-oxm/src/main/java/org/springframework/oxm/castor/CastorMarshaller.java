@@ -324,16 +324,6 @@ public class CastorMarshaller extends AbstractMarshaller implements Initializing
 	/**
 	 * Set the expected root object for the unmarshaller, into which the source will be unmarshalled.
 	 * @see org.exolab.castor.xml.Unmarshaller#setObject(Object)
-	 * @deprecated in favor of {@link #setRootObject}
-	 */
-	@Deprecated
-	public void setObject(Object root) {
-		this.rootObject = root;
-	}
-
-	/**
-	 * Set the expected root object for the unmarshaller, into which the source will be unmarshalled.
-	 * @see org.exolab.castor.xml.Unmarshaller#setObject(Object)
 	 */
 	public void setRootObject(Object root) {
 		this.rootObject = root;

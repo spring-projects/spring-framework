@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.messaging.simp.broker;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
@@ -84,12 +85,12 @@ public class SimpleBrokerMessageHandlerTests {
 		this.messageHandler.handleMessage(createMessage("/bar", "message2"));
 
 		verify(this.clientOutboundChannel, times(6)).send(this.messageCaptor.capture());
-		assertCapturedMessage("sess1", "sub1", "/foo");
-		assertCapturedMessage("sess1", "sub2", "/foo");
-		assertCapturedMessage("sess2", "sub1", "/foo");
-		assertCapturedMessage("sess2", "sub2", "/foo");
-		assertCapturedMessage("sess1", "sub3", "/bar");
-		assertCapturedMessage("sess2", "sub3", "/bar");
+		assertTrue(messageCaptured("sess1", "sub1", "/foo"));
+		assertTrue(messageCaptured("sess1", "sub2", "/foo"));
+		assertTrue(messageCaptured("sess2", "sub1", "/foo"));
+		assertTrue(messageCaptured("sess2", "sub2", "/foo"));
+		assertTrue(messageCaptured("sess1", "sub3", "/bar"));
+		assertTrue(messageCaptured("sess2", "sub3", "/bar"));
 	}
 
 	@Test
@@ -124,9 +125,9 @@ public class SimpleBrokerMessageHandlerTests {
 		assertEquals(sess1, SimpMessageHeaderAccessor.getSessionId(captured.getHeaders()));
 		assertEquals("joe", SimpMessageHeaderAccessor.getUser(captured.getHeaders()).getName());
 
-		assertCapturedMessage(sess2, "sub1", "/foo");
-		assertCapturedMessage(sess2, "sub2", "/foo");
-		assertCapturedMessage(sess2, "sub3", "/bar");
+		assertTrue(messageCaptured(sess2, "sub1", "/foo"));
+		assertTrue(messageCaptured(sess2, "sub2", "/foo"));
+		assertTrue(messageCaptured(sess2, "sub3", "/bar"));
 	}
 
 	@Test
@@ -149,7 +150,7 @@ public class SimpleBrokerMessageHandlerTests {
 	}
 
 
-	protected Message<String> createSubscriptionMessage(String sessionId, String subcriptionId, String destination) {
+	private Message<String> createSubscriptionMessage(String sessionId, String subcriptionId, String destination) {
 		SimpMessageHeaderAccessor headers = SimpMessageHeaderAccessor.create(SimpMessageType.SUBSCRIBE);
 		headers.setSubscriptionId(subcriptionId);
 		headers.setDestination(destination);
@@ -157,20 +158,20 @@ public class SimpleBrokerMessageHandlerTests {
 		return MessageBuilder.createMessage("", headers.getMessageHeaders());
 	}
 
-	protected Message<String> createConnectMessage(String sessionId) {
+	private Message<String> createConnectMessage(String sessionId) {
 		SimpMessageHeaderAccessor headers = SimpMessageHeaderAccessor.create(SimpMessageType.CONNECT);
 		headers.setSessionId(sessionId);
 		headers.setUser(new TestPrincipal("joe"));
 		return MessageBuilder.createMessage("", headers.getMessageHeaders());
 	}
 
-	protected Message<String> createMessage(String destination, String payload) {
+	private Message<String> createMessage(String destination, String payload) {
 		SimpMessageHeaderAccessor headers = SimpMessageHeaderAccessor.create(SimpMessageType.MESSAGE);
 		headers.setDestination(destination);
 		return MessageBuilder.createMessage("", headers.getMessageHeaders());
 	}
 
-	protected boolean assertCapturedMessage(String sessionId, String subcriptionId, String destination) {
+	private boolean messageCaptured(String sessionId, String subcriptionId, String destination) {
 		for (Message<?> message : this.messageCaptor.getAllValues()) {
 			SimpMessageHeaderAccessor headers = SimpMessageHeaderAccessor.wrap(message);
 			if (sessionId.equals(headers.getSessionId())) {

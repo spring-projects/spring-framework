@@ -266,7 +266,7 @@ public class DefaultSubscriptionRegistryTests {
 
 		MultiValueMap<String, String> actual = this.registry.findSubscriptions(message(dest));
 
-		assertEquals("Expected three elements " + actual, 2, actual.size());
+		assertEquals("Expected two elements: " + actual, 2, actual.size());
 		assertEquals(subscriptionIds, sort(actual.get(sessIds.get(1))));
 		assertEquals(subscriptionIds, sort(actual.get(sessIds.get(2))));
 	}
@@ -310,7 +310,7 @@ public class DefaultSubscriptionRegistryTests {
 
 		MultiValueMap<String, String> actual = this.registry.findSubscriptions(message(dest));
 
-		assertEquals("Expected three elements " + actual, 1, actual.size());
+		assertEquals("Expected one element: " + actual, 1, actual.size());
 		assertEquals(subscriptionIds, sort(actual.get(sessIds.get(2))));
 	}
 

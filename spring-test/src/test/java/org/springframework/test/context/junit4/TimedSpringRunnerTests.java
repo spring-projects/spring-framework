@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,7 +57,11 @@ public class TimedSpringRunnerTests {
 		new SpringJUnit4ClassRunner(testClass).run(notifier);
 		assertEquals("Verifying number of tests started for test class [" + testClass + "].", 7,
 			listener.getTestStartedCount());
-		assertEquals("Verifying number of failures for test class [" + testClass + "].", 5,
+		assertEquals("Verifying number of tests ignored for test class [" + testClass + "].", 0,
+			listener.getTestIgnoredCount());
+		assertEquals("Verifying number of assumption failures for test class [" + testClass + "].", 0,
+			listener.getTestAssumptionFailureCount());
+		assertEquals("Verifying number of test failures for test class [" + testClass + "].", 5,
 			listener.getTestFailureCount());
 		assertEquals("Verifying number of tests finished for test class [" + testClass + "].", 7,
 			listener.getTestFinishedCount());
@@ -125,7 +129,6 @@ public class TimedSpringRunnerTests {
 	@Timed(millis = 1000)
 	@Retention(RetentionPolicy.RUNTIME)
 	private static @interface MetaTimedWithOverride {
-
 		long millis() default 1000;
 	}
 

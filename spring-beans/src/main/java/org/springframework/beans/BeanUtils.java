@@ -395,7 +395,7 @@ public abstract class BeanUtils {
 	 * @param clazz the (most specific) class to introspect for descriptors
 	 * @return the corresponding PropertyDescriptor, or {@code null} if none
 	 * @throws BeansException if PropertyDescriptor lookup fails
-	 * @since 4.0.9
+	 * @since 3.2.13
 	 */
 	public static PropertyDescriptor findPropertyForMethod(Method method, Class<?> clazz) throws BeansException {
 		Assert.notNull(method, "Method must not be null");
@@ -609,7 +609,7 @@ public abstract class BeanUtils {
 
 		for (PropertyDescriptor targetPd : targetPds) {
 			Method writeMethod = targetPd.getWriteMethod();
-			if (writeMethod != null && (ignoreList == null || (!ignoreList.contains(targetPd.getName())))) {
+			if (writeMethod != null && (ignoreList == null || !ignoreList.contains(targetPd.getName()))) {
 				PropertyDescriptor sourcePd = getPropertyDescriptor(source.getClass(), targetPd.getName());
 				if (sourcePd != null) {
 					Method readMethod = sourcePd.getReadMethod();

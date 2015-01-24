@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,13 +45,6 @@ public class CookieGenerator {
 	 * Default path that cookies will be visible to: "/", i.e. the entire server.
 	 */
 	public static final String DEFAULT_COOKIE_PATH = "/";
-
-	/**
-	 * Default maximum age of cookies: maximum integer value, i.e. forever.
-	 * @deprecated in favor of setting no max age value at all in such a case
-	 */
-	@Deprecated
-	public static final int DEFAULT_COOKIE_MAX_AGE = Integer.MAX_VALUE;
 
 
 	protected final Log logger = LogFactory.getLog(getClass());

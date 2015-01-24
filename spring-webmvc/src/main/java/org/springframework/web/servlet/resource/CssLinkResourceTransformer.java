@@ -123,7 +123,8 @@ public class CssLinkResourceTransformer extends ResourceTransformerSupport {
 
 	private boolean hasScheme(String link) {
 		int schemeIndex = link.indexOf(":");
-		return schemeIndex > 0 && !link.substring(0, schemeIndex).contains("/");
+		return (schemeIndex > 0 && !link.substring(0, schemeIndex).contains("/"))
+				|| link.indexOf("//") == 0;
 	}
 
 

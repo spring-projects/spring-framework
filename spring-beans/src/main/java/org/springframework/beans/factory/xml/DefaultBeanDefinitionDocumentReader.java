@@ -81,11 +81,6 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
 	private BeanDefinitionParserDelegate delegate;
 
 
-	@Deprecated
-	@Override
-	public void setEnvironment(Environment environment) {
-	}
-
 	/**
 	 * This implementation parses bean definitions according to the "spring-beans" XSD
 	 * (or DTD, historically).

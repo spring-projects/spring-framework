@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,8 @@
 
 package org.springframework.expression.spel.ast;
 
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
@@ -27,14 +29,19 @@ import org.springframework.expression.spel.SpelMessage;
 import org.springframework.expression.spel.support.BooleanTypedValue;
 
 /**
- * Implements the matches operator. Matches takes two operands. The first is a string and
- * the second is a java regex. It will return true when getValue() is called if the first
- * operand matches the regex.
+ * Implements the matches operator. Matches takes two operands:
+ * The first is a String and the second is a Java regex.
+ * It will return {@code true} when {@link #getValue} is called
+ * if the first operand matches the regex.
  *
  * @author Andy Clement
+ * @author Juergen Hoeller
  * @since 3.0
  */
 public class OperatorMatches extends Operator {
+
+	private final ConcurrentMap<String, Pattern> patternCache = new ConcurrentHashMap<String, Pattern>();
+
 
 	public OperatorMatches(int pos, SpelNodeImpl... operands) {
 		super("matches", pos, operands);
@@ -66,8 +73,14 @@ public class OperatorMatches extends Operator {
 		}
 
 		try {
-			Pattern pattern = Pattern.compile((String) right);
-			Matcher matcher = pattern.matcher((String) left);
+			String leftString = (String) left;
+			String rightString = (String) right;
+			Pattern pattern = this.patternCache.get(rightString);
+			if (pattern == null) {
+				pattern = Pattern.compile(rightString);
+				this.patternCache.putIfAbsent(rightString, pattern);
+			}
+			Matcher matcher = pattern.matcher(leftString);
 			return BooleanTypedValue.forValue(matcher.matches());
 		}
 		catch (PatternSyntaxException ex) {

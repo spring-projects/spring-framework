@@ -16,12 +16,10 @@
 
 package org.springframework.web.socket.sockjs.transport.handler;
 
-import java.io.IOException;
 import java.util.Map;
 
 import org.springframework.http.MediaType;
 import org.springframework.http.server.ServerHttpRequest;
-import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.sockjs.frame.DefaultSockJsFrameFormat;
 import org.springframework.web.socket.sockjs.frame.SockJsFrameFormat;
@@ -70,10 +68,8 @@ public class EventSourceTransportHandler extends AbstractHttpSendingTransportHan
 		}
 
 		@Override
-		protected void writePrelude(ServerHttpRequest request, ServerHttpResponse response) throws IOException {
-			response.getBody().write('\r');
-			response.getBody().write('\n');
-			response.flush();
+		protected byte[] getPrelude(ServerHttpRequest request) {
+			return new byte[] { '\r', '\n' };
 		}
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -129,6 +129,9 @@ public class ResourceUrlProvider implements ApplicationListener<ContextRefreshed
 			if (this.handlerMap.isEmpty() && logger.isDebugEnabled()) {
 				logger.debug("No resource handling mappings found");
 			}
+			if(!this.handlerMap.isEmpty()) {
+				this.autodetect = false;
+			}
 		}
 	}
 
@@ -208,7 +211,7 @@ public class ResourceUrlProvider implements ApplicationListener<ContextRefreshed
 			ResourceResolverChain chain = new DefaultResourceResolverChain(handler.getResourceResolvers());
 			String resolved = chain.resolveUrlPath(pathWithinMapping, handler.getLocations());
 			if (resolved == null) {
-				throw new IllegalStateException("Failed to get public resource URL path for " + pathWithinMapping);
+				continue;
 			}
 			if (logger.isTraceEnabled()) {
 				logger.trace("Resolved public resource URL path=\"" + resolved + "\"");

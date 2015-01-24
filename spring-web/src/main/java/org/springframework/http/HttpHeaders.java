@@ -625,17 +625,6 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	}
 
 	/**
-	 * Return the value of the {@code IfModifiedSince} header.
-	 * <p>The date is returned as the number of milliseconds since
-	 * January 1, 1970 GMT. Returns -1 when the date is unknown.
-	 * @deprecated use {@link #getIfModifiedSince()}
-	 */
-	@Deprecated
-	public long getIfNotModifiedSince() {
-		return getIfModifiedSince();
-	}
-
-	/**
 	 * Return the value of the {@code If-Modified-Since} header.
 	 * <p>The date is returned as the number of milliseconds since
 	 * January 1, 1970 GMT. Returns -1 when the date is unknown.
