@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.aop.support.AopUtils;
+import org.springframework.context.expression.AnnotatedElementKey;
 import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.util.ObjectUtils;
@@ -53,7 +54,7 @@ class CacheEvaluationContext extends StandardEvaluationContext {
 
 	private final Class<?> targetClass;
 
-	private final Map<MethodCacheKey, Method> methodCache;
+	private final Map<AnnotatedElementKey, Method> methodCache;
 
 	private final List<String> unavailableVariables;
 
@@ -61,7 +62,7 @@ class CacheEvaluationContext extends StandardEvaluationContext {
 
 
 	CacheEvaluationContext(Object rootObject, ParameterNameDiscoverer paramDiscoverer, Method method,
-			Object[] args, Class<?> targetClass, Map<MethodCacheKey, Method> methodCache) {
+			Object[] args, Class<?> targetClass, Map<AnnotatedElementKey, Method> methodCache) {
 		super(rootObject);
 
 		this.paramDiscoverer = paramDiscoverer;
@@ -110,7 +111,7 @@ class CacheEvaluationContext extends StandardEvaluationContext {
 			return;
 		}
 
-		MethodCacheKey methodKey = new MethodCacheKey(this.method, this.targetClass);
+		AnnotatedElementKey methodKey = new AnnotatedElementKey(this.method, this.targetClass);
 		Method targetMethod = this.methodCache.get(methodKey);
 		if (targetMethod == null) {
 			targetMethod = AopUtils.getMostSpecificMethod(this.method, this.targetClass);

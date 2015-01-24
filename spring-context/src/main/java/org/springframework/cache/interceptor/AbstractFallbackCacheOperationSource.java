@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.context.expression.AnnotatedElementKey;
 import org.springframework.core.BridgeMethodResolver;
 import org.springframework.util.ClassUtils;
 
@@ -121,7 +122,7 @@ public abstract class AbstractFallbackCacheOperationSource implements CacheOpera
 	 * @return the cache key (never {@code null})
 	 */
 	protected Object getCacheKey(Method method, Class<?> targetClass) {
-		return new MethodCacheKey(method, targetClass);
+		return new AnnotatedElementKey(method, targetClass);
 	}
 
 	private Collection<CacheOperation> computeCacheOperations(Method method, Class<?> targetClass) {

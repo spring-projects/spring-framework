@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,6 +39,7 @@ import org.springframework.cache.CacheManager;
 import org.springframework.cache.support.SimpleValueWrapper;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
+import org.springframework.context.expression.AnnotatedElementKey;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
@@ -546,14 +547,14 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 
 		private final Collection<? extends Cache> caches;
 
-		private final MethodCacheKey methodCacheKey;
+		private final AnnotatedElementKey methodCacheKey;
 
 		public CacheOperationContext(CacheOperationMetadata metadata, Object[] args, Object target) {
 			this.metadata = metadata;
 			this.args = extractArgs(metadata.method, args);
 			this.target = target;
 			this.caches = CacheAspectSupport.this.getCaches(this, metadata.cacheResolver);
-			this.methodCacheKey = new MethodCacheKey(metadata.method, metadata.targetClass);
+			this.methodCacheKey = new AnnotatedElementKey(metadata.method, metadata.targetClass);
 		}
 
 		@Override
@@ -659,11 +660,11 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 
 		private final CacheOperation cacheOperation;
 
-		private final MethodCacheKey methodCacheKey;
+		private final AnnotatedElementKey methodCacheKey;
 
 		private CacheOperationCacheKey(CacheOperation cacheOperation, Method method, Class<?> targetClass) {
 			this.cacheOperation = cacheOperation;
-			this.methodCacheKey = new MethodCacheKey(method, targetClass);
+			this.methodCacheKey = new AnnotatedElementKey(method, targetClass);
 		}
 
 		@Override

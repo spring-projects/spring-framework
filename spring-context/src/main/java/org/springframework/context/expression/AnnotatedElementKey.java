@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,32 +14,35 @@
  * limitations under the License.
  */
 
-package org.springframework.cache.interceptor;
+package org.springframework.context.expression;
 
-import java.lang.reflect.Method;
+import java.lang.reflect.AnnotatedElement;
 
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 
 /**
- * Represent a method on a particular {@link Class} and  is suitable as a key.
- *
- * <p>Mainly for internal use within the framework.
+ * Represent an {@link AnnotatedElement} on a particular {@link Class}
+ * and is suitable as a key.
  *
  * @author Costin Leau
  * @author Stephane Nicoll
- * @since 4.0.4
+ * @since 4.2.0
+ * @see CachedExpressionEvaluator
  */
-public final class MethodCacheKey {
+public final class AnnotatedElementKey {
 
-	private final Method method;
+	private final AnnotatedElement element;
 
 	private final Class<?> targetClass;
 
-
-	public MethodCacheKey(Method method, Class<?> targetClass) {
-		Assert.notNull(method, "method must be set.");
-		this.method = method;
+	/**
+	 * Create a new instance with the specified {@link AnnotatedElement} and
+	 * optional target {@link Class}.
+	 */
+	public AnnotatedElementKey(AnnotatedElement element, Class<?> targetClass) {
+		Assert.notNull(element, "AnnotatedElement must be set.");
+		this.element = element;
 		this.targetClass = targetClass;
 	}
 
@@ -49,18 +52,17 @@ public final class MethodCacheKey {
 		if (this == other) {
 			return true;
 		}
-		if (!(other instanceof MethodCacheKey)) {
+		if (!(other instanceof AnnotatedElementKey)) {
 			return false;
 		}
-		MethodCacheKey otherKey = (MethodCacheKey) other;
-		return (this.method.equals(otherKey.method) &&
+		AnnotatedElementKey otherKey = (AnnotatedElementKey) other;
+		return (this.element.equals(otherKey.element) &&
 				ObjectUtils.nullSafeEquals(this.targetClass, otherKey.targetClass));
 	}
 
-
 	@Override
 	public int hashCode() {
-		return this.method.hashCode() + (this.targetClass != null ? this.targetClass.hashCode() * 29 : 0);
+		return this.element.hashCode() + (this.targetClass != null ? this.targetClass.hashCode() * 29 : 0);
 	}
 
 }

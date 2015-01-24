@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,19 +22,19 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.cache.Cache;
+import org.springframework.context.expression.AnnotatedElementKey;
+import org.springframework.context.expression.CachedExpressionEvaluator;
 import org.springframework.core.DefaultParameterNameDiscoverer;
 import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.Expression;
-import org.springframework.expression.spel.standard.SpelExpressionParser;
-import org.springframework.util.ObjectUtils;
 
 /**
  * Utility class handling the SpEL expression parsing.
  * Meant to be used as a reusable, thread-safe component.
  *
  * <p>Performs internal caching for performance reasons
- * using {@link MethodCacheKey}.
+ * using {@link AnnotatedElementKey}.
  *
  * @author Costin Leau
  * @author Phillip Webb
@@ -42,7 +42,7 @@ import org.springframework.util.ObjectUtils;
  * @author Stephane Nicoll
  * @since 3.1
  */
-class ExpressionEvaluator {
+class ExpressionEvaluator extends CachedExpressionEvaluator {
 
 	/**
 	 * Indicate that there is no result variable.
@@ -59,9 +59,6 @@ class ExpressionEvaluator {
 	 */
 	public static final String RESULT_VARIABLE = "result";
 
-
-	private final SpelExpressionParser parser = new SpelExpressionParser();
-
 	// shared param discoverer since it caches data internally
 	private final ParameterNameDiscoverer paramNameDiscoverer = new DefaultParameterNameDiscoverer();
 
@@ -71,7 +68,8 @@ class ExpressionEvaluator {
 
 	private final Map<ExpressionKey, Expression> unlessCache = new ConcurrentHashMap<ExpressionKey, Expression>(64);
 
-	private final Map<MethodCacheKey, Method> targetMethodCache = new ConcurrentHashMap<MethodCacheKey, Method>(64);
+	private final Map<AnnotatedElementKey, Method> targetMethodCache =
+			new ConcurrentHashMap<AnnotatedElementKey, Method>(64);
 
 
 	/**
@@ -111,61 +109,17 @@ class ExpressionEvaluator {
 		return evaluationContext;
 	}
 
-	public Object key(String keyExpression, MethodCacheKey methodKey, EvaluationContext evalContext) {
-		return getExpression(this.keyCache, keyExpression, methodKey).getValue(evalContext);
+	public Object key(String keyExpression, AnnotatedElementKey methodKey, EvaluationContext evalContext) {
+		return getExpression(this.keyCache, methodKey, keyExpression).getValue(evalContext);
 	}
 
-	public boolean condition(String conditionExpression, MethodCacheKey methodKey, EvaluationContext evalContext) {
-		return getExpression(this.conditionCache, conditionExpression, methodKey).getValue(evalContext, boolean.class);
+	public boolean condition(String conditionExpression, AnnotatedElementKey methodKey, EvaluationContext evalContext) {
+		return getExpression(this.conditionCache, methodKey, conditionExpression).getValue(evalContext, boolean.class);
 	}
 
-	public boolean unless(String unlessExpression, MethodCacheKey methodKey, EvaluationContext evalContext) {
-		return getExpression(this.unlessCache, unlessExpression, methodKey).getValue(evalContext, boolean.class);
+	public boolean unless(String unlessExpression, AnnotatedElementKey methodKey, EvaluationContext evalContext) {
+		return getExpression(this.unlessCache, methodKey, unlessExpression).getValue(evalContext, boolean.class);
 	}
 
-	private Expression getExpression(Map<ExpressionKey, Expression> cache, String expression, MethodCacheKey methodKey) {
-		ExpressionKey key = createKey(methodKey, expression);
-		Expression expr = cache.get(key);
-		if (expr == null) {
-			expr = this.parser.parseExpression(expression);
-			cache.put(key, expr);
-		}
-		return expr;
-	}
-
-	private ExpressionKey createKey(MethodCacheKey methodCacheKey, String expression) {
-		return new ExpressionKey(methodCacheKey, expression);
-	}
-
-
-	private static class ExpressionKey {
-
-		private final MethodCacheKey methodCacheKey;
-
-		private final String expression;
-
-		public ExpressionKey(MethodCacheKey methodCacheKey, String expression) {
-			this.methodCacheKey = methodCacheKey;
-			this.expression = expression;
-		}
-
-		@Override
-		public boolean equals(Object other) {
-			if (this == other) {
-				return true;
-			}
-			if (!(other instanceof ExpressionKey)) {
-				return false;
-			}
-			ExpressionKey otherKey = (ExpressionKey) other;
-			return (this.methodCacheKey.equals(otherKey.methodCacheKey) &&
-					ObjectUtils.nullSafeEquals(this.expression, otherKey.expression));
-		}
-
-		@Override
-		public int hashCode() {
-			return this.methodCacheKey.hashCode() * 29 + (this.expression != null ? this.expression.hashCode() : 0);
-		}
-	}
 
 }

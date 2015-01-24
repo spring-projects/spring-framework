@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.cache.interceptor;
+package org.springframework.context.expression;
 
 import java.lang.reflect.Method;
 
@@ -29,7 +29,7 @@ import static org.junit.Assert.*;
 /**
  * @author Stephane Nicoll
  */
-public class MethodCacheKeyTests {
+public class AnnotatedElementKeyTests {
 
 	@Rule
 	public final TestName name = new TestName();
@@ -37,15 +37,15 @@ public class MethodCacheKeyTests {
 	@Test
 	public void sameInstanceEquals() {
 		Method m = ReflectionUtils.findMethod(getClass(), name.getMethodName());
-		MethodCacheKey instance = new MethodCacheKey(m, getClass());
+		AnnotatedElementKey instance = new AnnotatedElementKey(m, getClass());
 		assertKeyEquals(instance, instance);
 	}
 
 	@Test
 	public void equals() {
 		Method m = ReflectionUtils.findMethod(getClass(), name.getMethodName());
-		MethodCacheKey first = new MethodCacheKey(m, getClass());
-		MethodCacheKey second = new MethodCacheKey(m, getClass());
+		AnnotatedElementKey first = new AnnotatedElementKey(m, getClass());
+		AnnotatedElementKey second = new AnnotatedElementKey(m, getClass());
 
 		assertKeyEquals(first, second);
 	}
@@ -53,8 +53,8 @@ public class MethodCacheKeyTests {
 	@Test
 	public void equalsNoTarget() {
 		Method m = ReflectionUtils.findMethod(getClass(), name.getMethodName());
-		MethodCacheKey first = new MethodCacheKey(m, null);
-		MethodCacheKey second = new MethodCacheKey(m, null);
+		AnnotatedElementKey first = new AnnotatedElementKey(m, null);
+		AnnotatedElementKey second = new AnnotatedElementKey(m, null);
 
 		assertKeyEquals(first, second);
 	}
@@ -62,13 +62,13 @@ public class MethodCacheKeyTests {
 	@Test
 	public void noTargetClassNotEquals() {
 		Method m = ReflectionUtils.findMethod(getClass(), name.getMethodName());
-		MethodCacheKey first = new MethodCacheKey(m, getClass());
-		MethodCacheKey second = new MethodCacheKey(m, null);
+		AnnotatedElementKey first = new AnnotatedElementKey(m, getClass());
+		AnnotatedElementKey second = new AnnotatedElementKey(m, null);
 
 		assertFalse(first.equals(second));
 	}
 
-	protected void assertKeyEquals(MethodCacheKey first, MethodCacheKey second) {
+	protected void assertKeyEquals(AnnotatedElementKey first, AnnotatedElementKey second) {
 		assertEquals(first, second);
 		assertEquals(first.hashCode(), second.hashCode());
 	}
