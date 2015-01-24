@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.dao.support;
 
 import java.util.Collection;
+import java.util.Optional;
 
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -100,6 +101,25 @@ public abstract class DataAccessUtils {
 			throw new IncorrectResultSizeDataAccessException(1, results.size());
 		}
 		return results.iterator().next();
+	}
+
+	/**
+	 * Return a single result optional from the given Collection.
+	 * <p>Throws an exception if more than 1 element found.
+	 * @param results the result Collection (can be {@code null})
+	 * @return the single result object
+	 * @throws IncorrectResultSizeDataAccessException if more than one
+	 * element has been found in the given Collection
+	 */
+	public static <T> Optional<T> optional(Collection<T> results) {
+		int size = (results != null ? results.size() : 0);
+		if (size == 0) {
+			return Optional.empty();
+		}
+		if (size > 1) {
+			throw new IncorrectResultSizeDataAccessException(1, size);
+		}
+		return Optional.ofNullable(results.iterator().next());
 	}
 
 	/**

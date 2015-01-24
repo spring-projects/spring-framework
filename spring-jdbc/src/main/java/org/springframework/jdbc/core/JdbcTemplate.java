@@ -34,6 +34,7 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Spliterator;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
@@ -903,6 +904,50 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	@Override
 	public <T> T queryForObject(String sql, Class<T> requiredType, @Nullable Object... args) throws DataAccessException {
 		return queryForObject(sql, args, getSingleColumnRowMapper(requiredType));
+	}
+
+	@Override
+	public <T> Optional<T> queryForOptional(String sql, RowMapper<T> rowMapper) throws DataAccessException {
+		List<T> results = query(sql, rowMapper);
+		return DataAccessUtils.optional(results);
+	}
+
+	@Override
+	public <T> Optional<T> queryForOptional(String sql, Class<T> requiredType) throws DataAccessException {
+		return queryForOptional(sql, getSingleColumnRowMapper(requiredType));
+	}
+
+	@Override
+	public <T> Optional<T> queryForOptional(String sql, Object[] args, int[] argTypes, RowMapper<T> rowMapper) throws DataAccessException {
+		List<T> results = query(sql, args, argTypes, new RowMapperResultSetExtractor<T>(rowMapper, 1));
+		return DataAccessUtils.optional(results);
+	}
+
+	@Override
+	public <T> Optional<T> queryForOptional(String sql, Object[] args, RowMapper<T> rowMapper) throws DataAccessException {
+		List<T> results = query(sql, args, new RowMapperResultSetExtractor<T>(rowMapper, 1));
+		return DataAccessUtils.optional(results);
+	}
+
+	@Override
+	public <T> Optional<T> queryForOptional(String sql, RowMapper<T> rowMapper, Object... args) throws DataAccessException {
+		List<T> results = query(sql, args, new RowMapperResultSetExtractor<T>(rowMapper, 1));
+		return DataAccessUtils.optional(results);
+	}
+
+	@Override
+	public <T> Optional<T> queryForOptional(String sql, Object[] args, int[] argTypes, Class<T> requiredType) throws DataAccessException {
+		return queryForOptional(sql, args, argTypes, getSingleColumnRowMapper(requiredType));
+	}
+
+	@Override
+	public <T> Optional<T> queryForOptional(String sql, Object[] args, Class<T> requiredType) throws DataAccessException {
+		return queryForOptional(sql, args, getSingleColumnRowMapper(requiredType));
+	}
+
+	@Override
+	public <T> Optional<T> queryForOptional(String sql, Class<T> requiredType, Object... args) throws DataAccessException {
+		return queryForOptional(sql, args, getSingleColumnRowMapper(requiredType));
 	}
 
 	@Override

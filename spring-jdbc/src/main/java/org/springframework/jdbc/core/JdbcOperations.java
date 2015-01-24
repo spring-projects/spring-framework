@@ -19,6 +19,7 @@ package org.springframework.jdbc.core;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import org.springframework.dao.DataAccessException;
@@ -717,8 +718,160 @@ public interface JdbcOperations {
 	<T> T queryForObject(String sql, Class<T> requiredType, @Nullable Object... args) throws DataAccessException;
 
 	/**
-	 * Query given SQL to create a prepared statement from SQL and a list of
-	 * arguments to bind to the query, expecting a result map.
+	 * Execute a query given static SQL, mapping a single result row to a Java
+	 * object via a RowMapper.
+	 * <p>Uses a JDBC Statement, not a PreparedStatement. If you want to
+	 * execute a static query with a PreparedStatement, use the overloaded
+	 * {@link #queryForObject(String, RowMapper, Object...)} method with
+	 * {@code null} as argument array.
+	 * @param sql the SQL query to execute
+	 * @param rowMapper object that will map one object per row
+	 * @return optional with the single mapped object, empty optional if
+	 * no row or {@code null} is returned
+	 * @throws IncorrectResultSizeDataAccessException if the query does
+	 * return more than one row
+	 * @throws DataAccessException if there is any problem executing the query
+	 * @see #queryForOptional(String, Object[], RowMapper)
+	 */
+	<T> Optional<T> queryForOptional(String sql, RowMapper<T> rowMapper) throws DataAccessException;
+
+	/**
+	 * Execute a query for a result object, given static SQL.
+	 * <p>Uses a JDBC Statement, not a PreparedStatement. If you want to
+	 * execute a static query with a PreparedStatement, use the overloaded
+	 * {@link #queryForOptional(String, Class, Object...)} method with
+	 * {@code null} as argument array.
+	 * <p>This method is useful for running static SQL with a known outcome.
+	 * The query is expected to be a single row/single column query; the returned
+	 * result will be directly mapped to the corresponding object type.
+	 * @param sql the SQL query to execute
+	 * @param requiredType the type that the result object is expected to match
+	 * @return optional with the result object of the required type, empty
+	 * optional if no row is returned or in case of SQL NULL
+	 * @throws IncorrectResultSizeDataAccessException if the query does return
+	 * more than one row, or does not return exactly one column in that row
+	 * @throws DataAccessException if there is any problem executing the query
+	 * @see #queryForOptional(String, Object[], Class)
+	 */
+	<T> Optional<T> queryForOptional(String sql, Class<T> requiredType) throws DataAccessException;
+
+	/**
+	 * Query given SQL to create a prepared statement from SQL and a list
+	 * of arguments to bind to the query, mapping a single result row to a
+	 * Java object via a RowMapper.
+	 * @param sql the SQL query to execute
+	 * @param args arguments to bind to the query
+	 * (leaving it to the PreparedStatement to guess the corresponding SQL type)
+	 * @param argTypes the SQL types of the arguments
+	 * (constants from {@code java.sql.Types})
+	 * @param rowMapper object that will map one object per row
+	 * @return optional with the single mapped object, empty optional if
+	 * no row or {@code null} is returned
+	 * @throws IncorrectResultSizeDataAccessException if the query does
+	 * return more than one row
+	 * @throws DataAccessException if the query fails
+	 */
+	<T> Optional<T> queryForOptional(String sql, Object[] args, int[] argTypes, RowMapper<T> rowMapper) throws DataAccessException;
+
+	/**
+	 * Query given SQL to create a prepared statement from SQL and a list
+	 * of arguments to bind to the query, mapping a single result row to a
+	 * Java object via a RowMapper.
+	 * @param sql the SQL query to execute
+	 * @param args arguments to bind to the query
+	 * (leaving it to the PreparedStatement to guess the corresponding SQL type);
+	 * may also contain {@link SqlParameterValue} objects which indicate not
+	 * only the argument value but also the SQL type and optionally the scale
+	 * @param rowMapper object that will map one object per row
+	 * @return optional with the single mapped object, empty optional if
+	 * no row or {@code null} is returned
+	 * @throws IncorrectResultSizeDataAccessException if the query does
+	 * return more than one row
+	 * @throws DataAccessException if the query fails
+	 */
+	<T> Optional<T> queryForOptional(String sql, Object[] args, RowMapper<T> rowMapper) throws DataAccessException;
+
+	/**
+	 * Query given SQL to create a prepared statement from SQL and a list
+	 * of arguments to bind to the query, mapping a single result row to a
+	 * Java object via a RowMapper.
+	 * @param sql the SQL query to execute
+	 * @param rowMapper object that will map one object per row
+	 * @param args arguments to bind to the query
+	 * (leaving it to the PreparedStatement to guess the corresponding SQL type);
+	 * may also contain {@link SqlParameterValue} objects which indicate not
+	 * only the argument value but also the SQL type and optionally the scale
+	 * @return optional with the single mapped object, empty optional if
+	 * no row or {@code null} is returned
+	 * @throws IncorrectResultSizeDataAccessException if the query does
+	 * return more than one row
+	 * @throws DataAccessException if the query fails
+	 */
+	<T> Optional<T> queryForOptional(String sql, RowMapper<T> rowMapper, Object... args) throws DataAccessException;
+
+	/**
+	 * Query given SQL to create a prepared statement from SQL and a
+	 * list of arguments to bind to the query, expecting a result object.
+	 * <p>The query is expected to be a single row/single column query; the returned
+	 * result will be directly mapped to the corresponding object type.
+	 * @param sql the SQL query to execute
+	 * @param args arguments to bind to the query
+	 * @param argTypes the SQL types of the arguments
+	 * (constants from {@code java.sql.Types})
+	 * @param requiredType the type that the result object is expected to match
+	 * @return optional with the result object of the required type, empty optional if
+	 * no row is returned or in case of SQL NULL
+	 * @throws IncorrectResultSizeDataAccessException if the query does return
+	 * more than one row, or does not return exactly one column in that row
+	 * @throws DataAccessException if the query fails
+	 * @see #queryForObject(String, Class)
+	 * @see java.sql.Types
+	 */
+	<T> Optional<T> queryForOptional(String sql, Object[] args, int[] argTypes, Class<T> requiredType) throws DataAccessException;
+
+	/**
+	 * Query given SQL to create a prepared statement from SQL and a
+	 * list of arguments to bind to the query, expecting a result object.
+	 * <p>The query is expected to be a single row/single column query; the returned
+	 * result will be directly mapped to the corresponding object type.
+	 * @param sql the SQL query to execute
+	 * @param args arguments to bind to the query
+	 * (leaving it to the PreparedStatement to guess the corresponding SQL type);
+	 * may also contain {@link SqlParameterValue} objects which indicate not
+	 * only the argument value but also the SQL type and optionally the scale
+	 * @param requiredType the type that the result object is expected to match
+	 * @return optional with the result object of the required type, empty optional if
+	 * no row is returned or in case of SQL NULL
+	 * @throws IncorrectResultSizeDataAccessException if the query does return
+	 * more than one row, or does not return exactly one column in that row
+	 * @throws DataAccessException if the query fails
+	 * @see #queryForObject(String, Class)
+	 */
+	<T> Optional<T> queryForOptional(String sql, Object[] args, Class<T> requiredType) throws DataAccessException;
+
+	/**
+	 * Query given SQL to create a prepared statement from SQL and a
+	 * list of arguments to bind to the query, expecting a result object.
+	 * <p>The query is expected to be a single row/single column query; the returned
+	 * result will be directly mapped to the corresponding object type.
+	 * @param sql the SQL query to execute
+	 * @param requiredType the type that the result object is expected to match
+	 * @param args arguments to bind to the query
+	 * (leaving it to the PreparedStatement to guess the corresponding SQL type);
+	 * may also contain {@link SqlParameterValue} objects which indicate not
+	 * only the argument value but also the SQL type and optionally the scale
+	 * @return optional with the result object of the required type, empty optional if
+	 * no row is returned or in case of SQL NULL
+	 * @throws IncorrectResultSizeDataAccessException if the query does return
+	 * more than one row, or does not return exactly one column in that row
+	 * @throws DataAccessException if the query fails
+	 * @see #queryForOptional(String, Class)
+	 */
+	<T> Optional<T> queryForOptional(String sql, Class<T> requiredType, Object... args) throws DataAccessException;
+
+	/**
+	 * Query given SQL to create a prepared statement from SQL and a
+	 * list of arguments to bind to the query, expecting a result Map.
 	 * <p>The query is expected to be a single row query; the result row will be
 	 * mapped to a Map (one entry for each column, using the column name as the key).
 	 * @param sql the SQL query to execute

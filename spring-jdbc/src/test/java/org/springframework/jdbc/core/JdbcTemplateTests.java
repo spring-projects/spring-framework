@@ -33,6 +33,7 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import javax.sql.DataSource;
 
@@ -40,6 +41,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.dao.DataAccessException;
+import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.jdbc.CannotGetJdbcConnectionException;
@@ -85,6 +87,8 @@ public class JdbcTemplateTests {
 
 	private ResultSet resultSet;
 
+	private ResultSetMetaData resultSetMetaData;
+
 	private JdbcTemplate template;
 
 	private CallableStatement callableStatement;
@@ -97,6 +101,7 @@ public class JdbcTemplateTests {
 		this.preparedStatement = mock(PreparedStatement.class);
 		this.statement = mock(Statement.class);
 		this.resultSet = mock(ResultSet.class);
+		this.resultSetMetaData = mock(ResultSetMetaData.class);
 		this.template = new JdbcTemplate(this.dataSource);
 		this.callableStatement = mock(CallableStatement.class);
 		given(this.dataSource.getConnection()).willReturn(this.connection);
@@ -108,6 +113,7 @@ public class JdbcTemplateTests {
 		given(this.statement.executeQuery(anyString())).willReturn(this.resultSet);
 		given(this.connection.prepareCall(anyString())).willReturn(this.callableStatement);
 		given(this.callableStatement.getResultSet()).willReturn(this.resultSet);
+		given(this.resultSet.getMetaData()).willReturn(this.resultSetMetaData);
 	}
 
 
@@ -246,6 +252,52 @@ public class JdbcTemplateTests {
 		verify(this.resultSet).close();
 		verify(this.preparedStatement).close();
 		verify(this.connection).close();
+	}
+
+	@Test
+	public void testQueryForOptionalNoRow() throws SQLException {
+		given(this.resultSet.next()).willReturn(false);
+		given(this.connection.createStatement()).willReturn(this.preparedStatement);
+		given(this.resultSetMetaData.getColumnCount()).willReturn(1);
+
+		Optional<String> optional = this.template.queryForOptional("SELECT * FROM dual", String.class);
+		assertThat(optional).isNotPresent();
+	}
+
+	@Test
+	public void testQueryForOptionalOneRow() throws SQLException {
+		String result = "X";
+		given(this.resultSet.next()).willReturn(true, false);
+		given(this.resultSet.getString(1)).willReturn(result);
+		given(this.connection.createStatement()).willReturn(this.preparedStatement);
+		given(this.resultSetMetaData.getColumnCount()).willReturn(1);
+
+		Optional<String> optional = this.template.queryForOptional("SELECT * FROM dual", String.class);
+		assertThat(optional).isPresent();
+		assertThat(optional).hasValue(result);
+	}
+
+	@Test
+	public void testQueryForOptionalNull() throws SQLException {
+		given(this.resultSet.next()).willReturn(true, false);
+		given(this.resultSet.getString(1)).willReturn(null);
+		given(this.connection.createStatement()).willReturn(this.preparedStatement);
+		given(this.resultSetMetaData.getColumnCount()).willReturn(1);
+
+		Optional<String> optional = this.template.queryForOptional("SELECT NULL FROM dual", String.class);
+		assertThat(optional).isNotPresent();
+	}
+
+	@Test
+	public void testQueryForOptionalTwoRows() throws SQLException {
+		String result = "X";
+		given(this.resultSet.next()).willReturn(true, true, false);
+		given(this.resultSet.getString(1)).willReturn(result);
+		given(this.connection.createStatement()).willReturn(this.preparedStatement);
+		given(this.resultSetMetaData.getColumnCount()).willReturn(1);
+
+		assertThatExceptionOfType(IncorrectResultSizeDataAccessException.class).isThrownBy(() ->
+				this.template.queryForOptional("SELECT * FROM dual UNION ALL SELECT * FROM dual", String.class));
 	}
 
 	@Test
