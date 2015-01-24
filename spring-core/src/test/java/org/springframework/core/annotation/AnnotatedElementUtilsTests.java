@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -105,7 +105,7 @@ public class AnnotatedElementUtilsTests {
 			Transactional.class.getName());
 		assertNotNull("AnnotationAttributes for @Transactional on SubSubClassWithInheritedAnnotation", attributes);
 
-		// TODO [SPR-11475] Set expected to true.
+		// TODO [SPR-11598] Set expected to true.
 		boolean expected = false;
 		assertEquals("readOnly flag for SubSubClassWithInheritedAnnotation.", expected, attributes.getBoolean("readOnly"));
 	}
@@ -117,7 +117,7 @@ public class AnnotatedElementUtilsTests {
 		assertNotNull("AnnotationAttributtes for @Transactional on SubSubClassWithInheritedComposedAnnotation.",
 			attributes);
 
-		// TODO [SPR-11475] Set expected to true.
+		// TODO [SPR-11598] Set expected to true.
 		boolean expected = false;
 		assertEquals("readOnly flag for SubSubClassWithInheritedComposedAnnotation.", expected,
 			attributes.getBoolean("readOnly"));
