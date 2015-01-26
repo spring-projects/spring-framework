@@ -56,6 +56,7 @@ import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import com.fasterxml.jackson.datatype.joda.cfg.JacksonJodaDateFormat;
 import com.fasterxml.jackson.datatype.joda.ser.DateTimeSerializer;
 import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 import org.joda.time.format.DateTimeFormat;
 import org.junit.Before;
 import org.junit.Test;
@@ -235,8 +236,9 @@ public class Jackson2ObjectMapperFactoryBeanTests {
 		this.factory.afterPropertiesSet();
 		ObjectMapper objectMapper = this.factory.getObject();
 
-		DateTime dateTime = DateTime.parse("2011-12-03T10:15:30");
-		assertEquals("1322903730000", new String(objectMapper.writeValueAsBytes(dateTime), "UTF-8"));
+		Long timestamp = 1322903730000L;
+		DateTime dateTime = new DateTime(timestamp, DateTimeZone.UTC);
+		assertEquals(timestamp.toString(), new String(objectMapper.writeValueAsBytes(dateTime), "UTF-8"));
 	}
 
 	@Test // SPR-12634
@@ -246,7 +248,7 @@ public class Jackson2ObjectMapperFactoryBeanTests {
 		this.factory.afterPropertiesSet();
 		ObjectMapper objectMapper = this.factory.getObject();
 
-		DateTime dateTime = DateTime.parse("2011-12-03T10:15:30");
+		DateTime dateTime = new DateTime(1322903730000L, DateTimeZone.UTC);
 		assertEquals("\"2011-12-03\"", new String(objectMapper.writeValueAsBytes(dateTime), "UTF-8"));
 	}
 
@@ -260,7 +262,7 @@ public class Jackson2ObjectMapperFactoryBeanTests {
 		this.factory.afterPropertiesSet();
 		ObjectMapper objectMapper = this.factory.getObject();
 
-		DateTime dateTime = DateTime.parse("2011-12-03T10:15:30");
+		DateTime dateTime = new DateTime(1322903730000L, DateTimeZone.UTC);
 		assertEquals("\"2011-12-03\"", new String(objectMapper.writeValueAsBytes(dateTime), "UTF-8"));
 	}
 
