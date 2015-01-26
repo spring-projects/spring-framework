@@ -389,11 +389,12 @@ public class Jackson2ObjectMapperBuilder {
 	}
 
 	/**
-	 * Specify one or more modules by class (or class name in XML),
-	 * to be registered with the {@link ObjectMapper}.
-	 * <p>Modules specified here will be registered in combination with
+	 * Specify one or more modules by class to be registered with
+	 * the {@link ObjectMapper}.
+	 * <p>Modules specified here will be registered after
 	 * Spring's autodetection of JSR-310 and Joda-Time, or Jackson's
-	 * finding of modules (see {@link #findModulesViaServiceLoader}).
+	 * finding of modules (see {@link #findModulesViaServiceLoader}),
+	 * allowing to eventually override their configuration.
 	 * <p>Specify either this or {@link #modules}, not both.
 	 * @see com.fasterxml.jackson.databind.Module
 	 */
@@ -481,6 +482,29 @@ public class Jackson2ObjectMapperBuilder {
 	public void configure(ObjectMapper objectMapper) {
 		Assert.notNull(objectMapper, "ObjectMapper must not be null");
 
+		if (this.modules != null) {
+			// Complete list of modules given
+			for (Module module : this.modules) {
+				// Using Jackson 2.0+ registerModule method, not Jackson 2.2+ registerModules
+				objectMapper.registerModule(module);
+			}
+		}
+		else {
+			// Combination of modules by class presence in the classpath and class names specified
+			if (this.findModulesViaServiceLoader) {
+				// Jackson 2.2+
+				objectMapper.registerModules(ObjectMapper.findModules(this.moduleClassLoader));
+			}
+			else {
+				registerWellKnownModulesIfAvailable(objectMapper);
+			}
+			if (this.modulesToInstall != null) {
+				for (Class<? extends Module> module : this.modulesToInstall) {
+					objectMapper.registerModule(BeanUtils.instantiate(module));
+				}
+			}
+		}
+
 		if (this.dateFormat != null) {
 			objectMapper.setDateFormat(this.dateFormat);
 		}
@@ -509,29 +533,6 @@ public class Jackson2ObjectMapperBuilder {
 		customizeDefaultFeatures(objectMapper);
 		for (Object feature : this.features.keySet()) {
 			configureFeature(objectMapper, feature, this.features.get(feature));
-		}
-
-		if (this.modules != null) {
-			// Complete list of modules given
-			for (Module module : this.modules) {
-				// Using Jackson 2.0+ registerModule method, not Jackson 2.2+ registerModules
-				objectMapper.registerModule(module);
-			}
-		}
-		else {
-			// Combination of modules by class names specified and class presence in the classpath
-			if (this.modulesToInstall != null) {
-				for (Class<? extends Module> module : this.modulesToInstall) {
-					objectMapper.registerModule(BeanUtils.instantiate(module));
-				}
-			}
-			if (this.findModulesViaServiceLoader) {
-				// Jackson 2.2+
-				objectMapper.registerModules(ObjectMapper.findModules(this.moduleClassLoader));
-			}
-			else {
-				registerWellKnownModulesIfAvailable(objectMapper);
-			}
 		}
 
 		if (this.propertyNamingStrategy != null) {

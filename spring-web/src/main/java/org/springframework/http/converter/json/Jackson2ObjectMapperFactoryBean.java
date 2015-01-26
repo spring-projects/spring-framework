@@ -346,11 +346,12 @@ public class Jackson2ObjectMapperFactoryBean implements FactoryBean<ObjectMapper
 	}
 
 	/**
-	 * Specify one or more modules by class (or class name in XML),
+	 * Specify one or more modules by class (or class name in XML)
 	 * to be registered with the {@link ObjectMapper}.
-	 * <p>Modules specified here will be registered in combination with
+	 * <p>Modules specified here will be registered after
 	 * Spring's autodetection of JSR-310 and Joda-Time, or Jackson's
-	 * finding of modules (see {@link #setFindModulesViaServiceLoader}).
+	 * finding of modules (see {@link #setFindModulesViaServiceLoader}),
+	 * allowing to eventually override their configuration.
 	 * <p>Specify either this or {@link #setModules}, not both.
 	 * @since 4.0.1
 	 * @see com.fasterxml.jackson.databind.Module

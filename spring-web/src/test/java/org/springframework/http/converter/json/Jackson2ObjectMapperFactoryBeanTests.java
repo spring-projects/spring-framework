@@ -16,7 +16,9 @@
 
 package org.springframework.http.converter.json;
 
+import java.io.UnsupportedEncodingException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
@@ -28,6 +30,8 @@ import java.util.TimeZone;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.Version;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.JsonSerializer;
@@ -42,12 +46,17 @@ import com.fasterxml.jackson.databind.deser.BasicDeserializerFactory;
 import com.fasterxml.jackson.databind.deser.std.DateDeserializers.DateDeserializer;
 import com.fasterxml.jackson.databind.introspect.NopAnnotationIntrospector;
 import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.fasterxml.jackson.databind.module.SimpleSerializers;
 import com.fasterxml.jackson.databind.ser.BasicSerializerFactory;
 import com.fasterxml.jackson.databind.ser.Serializers;
 import com.fasterxml.jackson.databind.ser.std.ClassSerializer;
 import com.fasterxml.jackson.databind.ser.std.NumberSerializer;
 import com.fasterxml.jackson.databind.type.SimpleType;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
+import com.fasterxml.jackson.datatype.joda.cfg.JacksonJodaDateFormat;
+import com.fasterxml.jackson.datatype.joda.ser.DateTimeSerializer;
+import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormat;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -222,6 +231,40 @@ public class Jackson2ObjectMapperFactoryBeanTests {
 	}
 
 	@Test
+	public void defaultModules() throws JsonProcessingException, UnsupportedEncodingException {
+		this.factory.afterPropertiesSet();
+		ObjectMapper objectMapper = this.factory.getObject();
+
+		DateTime dateTime = DateTime.parse("2011-12-03T10:15:30");
+		assertEquals("1322903730000", new String(objectMapper.writeValueAsBytes(dateTime), "UTF-8"));
+	}
+
+	@Test // SPR-12634
+	public void customizeDefaultModules() throws JsonProcessingException, UnsupportedEncodingException {
+		this.factory.setFeaturesToDisable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+		this.factory.setModulesToInstall(CustomModule.class);
+		this.factory.afterPropertiesSet();
+		ObjectMapper objectMapper = this.factory.getObject();
+
+		DateTime dateTime = DateTime.parse("2011-12-03T10:15:30");
+		assertEquals("\"2011-12-03\"", new String(objectMapper.writeValueAsBytes(dateTime), "UTF-8"));
+	}
+
+	@Test // SPR-12634
+	public void customizeDefaultModulesWithSerializer() throws JsonProcessingException, UnsupportedEncodingException {
+		Map<Class<?>, JsonSerializer<?>> serializers = new HashMap<>();
+		serializers.put(DateTime.class, new DateTimeSerializer(new JacksonJodaDateFormat(DateTimeFormat.forPattern("YYYY-MM-dd").withZoneUTC())));
+
+		this.factory.setSerializersByType(serializers);
+		this.factory.setFeaturesToDisable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+		this.factory.afterPropertiesSet();
+		ObjectMapper objectMapper = this.factory.getObject();
+
+		DateTime dateTime = DateTime.parse("2011-12-03T10:15:30");
+		assertEquals("\"2011-12-03\"", new String(objectMapper.writeValueAsBytes(dateTime), "UTF-8"));
+	}
+
+	@Test
 	public void simpleSetup() {
 		this.factory.afterPropertiesSet();
 
@@ -283,6 +326,7 @@ public class Jackson2ObjectMapperFactoryBeanTests {
 		JsonSerializer<Class<?>> serializer1 = new ClassSerializer();
 		JsonSerializer<Number> serializer2 = new NumberSerializer();
 
+		factory.setModules(new ArrayList<>()); // Disable well-known modules detection
 		factory.setSerializers(serializer1);
 		factory.setSerializersByType(Collections.<Class<?>, JsonSerializer<?>> singletonMap(Boolean.class, serializer2));
 		factory.setDeserializersByType(deserializers);
@@ -348,6 +392,27 @@ public class Jackson2ObjectMapperFactoryBeanTests {
 		assertNotNull(this.factory.getObject());
 		assertTrue(this.factory.isSingleton());
 		assertEquals(XmlMapper.class, this.factory.getObjectType());
+	}
+
+
+	public static class CustomModule extends Module {
+
+		@Override
+		public String getModuleName() {
+			return this.getClass().getSimpleName();
+		}
+
+		@Override
+		public Version version() {
+			return Version.unknownVersion();
+		}
+
+		@Override
+		public void setupModule(SetupContext context) {
+			SimpleSerializers serializers = new SimpleSerializers();
+			serializers.addSerializer(DateTime.class, new DateTimeSerializer(new JacksonJodaDateFormat(DateTimeFormat.forPattern("YYYY-MM-dd").withZoneUTC())));
+			context.addSerializers(serializers);
+		}
 	}
 
 }
