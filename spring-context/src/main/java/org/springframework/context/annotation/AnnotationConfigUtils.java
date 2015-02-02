@@ -30,6 +30,7 @@ import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
+import org.springframework.context.event.DefaultEventListenerFactory;
 import org.springframework.context.event.EventListenerMethodProcessor;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.annotation.AnnotationAttributes;
@@ -110,6 +111,12 @@ public class AnnotationConfigUtils {
 	 */
 	public static final String EVENT_LISTENER_PROCESSOR_BEAN_NAME =
 			"org.springframework.context.event.internalEventListenerProcessor";
+
+	/**
+	 * The bean name of the internally managed EventListenerFactory.
+	 */
+	public static final String EVENT_LISTENER_FACTORY_BEAN_NAME =
+			"org.springframework.context.event.internalEventListenerFactory";
 
 	private static final boolean jsr250Present =
 			ClassUtils.isPresent("javax.annotation.Resource", AnnotationConfigUtils.class.getClassLoader());
@@ -194,6 +201,11 @@ public class AnnotationConfigUtils {
 			RootBeanDefinition def = new RootBeanDefinition(EventListenerMethodProcessor.class);
 			def.setSource(source);
 			beanDefs.add(registerPostProcessor(registry, def, EVENT_LISTENER_PROCESSOR_BEAN_NAME));
+		}
+		if (!registry.containsBeanDefinition(EVENT_LISTENER_FACTORY_BEAN_NAME)) {
+			RootBeanDefinition def = new RootBeanDefinition(DefaultEventListenerFactory.class);
+			def.setSource(source);
+			beanDefs.add(registerPostProcessor(registry, def, EVENT_LISTENER_FACTORY_BEAN_NAME));
 		}
 
 		return beanDefs;

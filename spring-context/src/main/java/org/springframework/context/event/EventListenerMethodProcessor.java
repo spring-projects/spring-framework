@@ -17,8 +17,11 @@
 package org.springframework.context.event;
 
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -35,6 +38,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.util.Assert;
 import org.springframework.util.ReflectionUtils;
@@ -65,14 +69,27 @@ public class EventListenerMethodProcessor implements SmartInitializingSingleton,
 
 	}
 
+	/**
+	 * Return the {@link EventListenerFactory} instances to use to handle {@link EventListener}
+	 * annotated methods.
+	 */
+	protected List<EventListenerFactory> getEventListenerFactories() {
+		Map<String, EventListenerFactory> beans =
+				this.applicationContext.getBeansOfType(EventListenerFactory.class);
+		List<EventListenerFactory> allFactories = new ArrayList<EventListenerFactory>(beans.values());
+		AnnotationAwareOrderComparator.sort(allFactories);
+		return allFactories;
+	}
+
 	@Override
 	public void afterSingletonsInstantiated() {
+		List<EventListenerFactory> factories = getEventListenerFactories();
 		String[] allBeanNames = this.applicationContext.getBeanNamesForType(Object.class);
 		for (String beanName : allBeanNames) {
 			if (!ScopedProxyUtils.isScopedTarget(beanName)) {
 				Class<?> type = this.applicationContext.getType(beanName);
 				try {
-					processBean(beanName, type);
+					processBean(factories, beanName, type);
 				}
 				catch (RuntimeException e) {
 					throw new BeanInitializationException("Failed to process @EventListener " +
@@ -82,22 +99,31 @@ public class EventListenerMethodProcessor implements SmartInitializingSingleton,
 		}
 	}
 
-	protected void processBean(String beanName, final Class<?> type) {
+	protected void processBean(List<EventListenerFactory> factories, String beanName, final Class<?> type) {
 		Class<?> targetType = getTargetClass(beanName, type);
 		if (!this.nonAnnotatedClasses.contains(targetType)) {
 			final Set<Method> annotatedMethods = new LinkedHashSet<Method>(1);
 			Method[] methods = ReflectionUtils.getUniqueDeclaredMethods(targetType);
 			for (Method method : methods) {
 				EventListener eventListener = AnnotationUtils.findAnnotation(method, EventListener.class);
-				if (eventListener != null) {
-					if (!type.equals(targetType)) {
-						method = getProxyMethod(type, method);
+				if (eventListener == null) {
+					continue;
+				}
+				for (EventListenerFactory factory : factories) {
+					if (factory.supportsMethod(method)) {
+						if (!type.equals(targetType)) {
+							method = getProxyMethod(type, method);
+						}
+						ApplicationListener<?> applicationListener =
+								factory.createApplicationListener(beanName, type, method);
+						if (applicationListener instanceof ApplicationListenerMethodAdapter) {
+							((ApplicationListenerMethodAdapter)applicationListener)
+									.init(this.applicationContext, this.evaluator);
+						}
+						this.applicationContext.addApplicationListener(applicationListener);
+						annotatedMethods.add(method);
+						break;
 					}
-					ApplicationListenerMethodAdapter applicationListener =
-							new ApplicationListenerMethodAdapter(beanName, type, method);
-					applicationListener.init(this.applicationContext, this.evaluator);
-					this.applicationContext.addApplicationListener(applicationListener);
-					annotatedMethods.add(method);
 				}
 			}
 			if (annotatedMethods.isEmpty()) {
