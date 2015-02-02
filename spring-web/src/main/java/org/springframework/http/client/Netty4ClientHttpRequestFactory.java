@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,6 +35,7 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.http.HttpMethod;
 import org.springframework.util.Assert;
 
+
 /**
  * {@link org.springframework.http.client.ClientHttpRequestFactory} implementation that
  * uses <a href="http://netty.io/">Netty 4</a> to create requests.
@@ -43,23 +44,24 @@ import org.springframework.util.Assert;
  * across multiple clients.
  *
  * @author Arjen Poutsma
+ * @author Rossen Stoyanchev
  * @since 4.1.2
  */
 public class Netty4ClientHttpRequestFactory implements ClientHttpRequestFactory,
 		AsyncClientHttpRequestFactory, InitializingBean, DisposableBean {
 
 	/**
-	 * The default maximum request size.
-	 * @see #setMaxRequestSize(int)
+	 * The default maximum response size.
+	 * @see #setMaxResponseSize(int)
 	 */
-	public static final int DEFAULT_MAX_REQUEST_SIZE = 1024 * 1024 * 10;
+	public static final int DEFAULT_MAX_RESPONSE_SIZE = 1024 * 1024 * 10;
 
 
 	private final EventLoopGroup eventLoopGroup;
 
 	private final boolean defaultEventLoopGroup;
 
-	private int maxRequestSize = DEFAULT_MAX_REQUEST_SIZE;
+	private int maxResponseSize = DEFAULT_MAX_RESPONSE_SIZE;
 
 	private SslContext sslContext;
 
@@ -91,12 +93,13 @@ public class Netty4ClientHttpRequestFactory implements ClientHttpRequestFactory,
 
 
 	/**
-	 * Set the default maximum request size.
-	 * <p>By default this is set to {@link #DEFAULT_MAX_REQUEST_SIZE}.
+	 * Set the default maximum response size.
+	 * <p>By default this is set to {@link #DEFAULT_MAX_RESPONSE_SIZE}.
 	 * @see HttpObjectAggregator#HttpObjectAggregator(int)
+	 * @since 4.1.5
 	 */
-	public void setMaxRequestSize(int maxRequestSize) {
-		this.maxRequestSize = maxRequestSize;
+	public void setMaxResponseSize(int maxResponseSize) {
+		this.maxResponseSize = maxResponseSize;
 	}
 
 	/**
@@ -120,7 +123,7 @@ public class Netty4ClientHttpRequestFactory implements ClientHttpRequestFactory,
 								pipeline.addLast(sslContext.newHandler(channel.alloc()));
 							}
 							pipeline.addLast(new HttpClientCodec());
-							pipeline.addLast(new HttpObjectAggregator(maxRequestSize));
+							pipeline.addLast(new HttpObjectAggregator(maxResponseSize));
 						}
 					});
 			this.bootstrap = bootstrap;
@@ -145,7 +148,7 @@ public class Netty4ClientHttpRequestFactory implements ClientHttpRequestFactory,
 	}
 
 	private Netty4ClientHttpRequest createRequestInternal(URI uri, HttpMethod httpMethod) {
-		return new Netty4ClientHttpRequest(getBootstrap(), uri, httpMethod, this.maxRequestSize);
+		return new Netty4ClientHttpRequest(getBootstrap(), uri, httpMethod);
 	}
 
 
