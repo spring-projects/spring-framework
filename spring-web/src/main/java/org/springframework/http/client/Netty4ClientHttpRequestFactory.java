@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,6 +43,7 @@ import org.springframework.util.Assert;
  * across multiple clients.
  *
  * @author Arjen Poutsma
+ * @author Rossen Stoyanchev
  * @since 4.1.2
  */
 public class Netty4ClientHttpRequestFactory implements ClientHttpRequestFactory,
@@ -51,8 +52,15 @@ public class Netty4ClientHttpRequestFactory implements ClientHttpRequestFactory,
 	/**
 	 * The default maximum request size.
 	 * @see #setMaxRequestSize(int)
+	 * @deprecated
 	 */
 	public static final int DEFAULT_MAX_REQUEST_SIZE = 1024 * 1024 * 10;
+
+	/**
+	 * The default maximum response size.
+	 * @see #setMaxResponseSize(int)
+	 */
+	public static final int DEFAULT_MAX_RESPONSE_SIZE = 1024 * 1024 * 10;
 
 
 	private final EventLoopGroup eventLoopGroup;
@@ -60,6 +68,8 @@ public class Netty4ClientHttpRequestFactory implements ClientHttpRequestFactory,
 	private final boolean defaultEventLoopGroup;
 
 	private int maxRequestSize = DEFAULT_MAX_REQUEST_SIZE;
+
+	private int maxResponseSize = DEFAULT_MAX_REQUEST_SIZE;
 
 	private SslContext sslContext;
 
@@ -94,10 +104,23 @@ public class Netty4ClientHttpRequestFactory implements ClientHttpRequestFactory,
 	 * Set the default maximum request size.
 	 * <p>By default this is set to {@link #DEFAULT_MAX_REQUEST_SIZE}.
 	 * @see HttpObjectAggregator#HttpObjectAggregator(int)
+	 * @deprecated as of 4.1.5 this property is no longer supported;
+	 * 	effectively renamed to {@link #setMaxResponseSize(int)}.
 	 */
 	public void setMaxRequestSize(int maxRequestSize) {
 		this.maxRequestSize = maxRequestSize;
 	}
+
+	/**
+	 * Set the default maximum response size.
+	 * <p>By default this is set to {@link #DEFAULT_MAX_RESPONSE_SIZE}.
+	 * @see HttpObjectAggregator#HttpObjectAggregator(int)
+	 * @since 4.1.5
+	 */
+	public void setMaxResponseSize(int maxResponseSize) {
+		this.maxResponseSize = maxResponseSize;
+	}
+
 
 	/**
 	 * Set the SSL context. When configured it is used to create and insert an
@@ -120,7 +143,7 @@ public class Netty4ClientHttpRequestFactory implements ClientHttpRequestFactory,
 								pipeline.addLast(sslContext.newHandler(channel.alloc()));
 							}
 							pipeline.addLast(new HttpClientCodec());
-							pipeline.addLast(new HttpObjectAggregator(maxRequestSize));
+							pipeline.addLast(new HttpObjectAggregator(maxResponseSize));
 						}
 					});
 			this.bootstrap = bootstrap;
