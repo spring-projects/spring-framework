@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,7 @@ import org.springframework.util.Assert;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.PathMatcher;
+
 
 /**
  * A default, simple in-memory implementation of {@link SubscriptionRegistry}.
@@ -165,8 +166,8 @@ public class DefaultSubscriptionRegistry extends AbstractSubscriptionRegistry {
 
 		public void addSubscriptions(String destination, MultiValueMap<String, String> subscriptions) {
 			synchronized (this.updateCache) {
-				this.updateCache.put(destination, subscriptions);
-				this.accessCache.put(destination, new LinkedMultiValueMap<String, String>(subscriptions));
+				this.updateCache.put(destination, new LinkedMultiValueMap<String, String>(subscriptions));
+				this.accessCache.put(destination, subscriptions);
 			}
 		}
 
