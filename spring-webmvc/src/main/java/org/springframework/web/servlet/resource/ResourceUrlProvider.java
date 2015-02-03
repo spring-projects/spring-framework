@@ -18,6 +18,7 @@ package org.springframework.web.servlet.resource;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -191,6 +192,8 @@ public class ResourceUrlProvider implements ApplicationListener<ContextRefreshed
 	 * public use.
 	 * <p>It is expected that the given path is what Spring MVC would use for
 	 * request mapping purposes, i.e. excluding context and servlet path portions.
+	 * <p>If several handler mappings match, the handler used will be the one
+	 * configured with the most specific pattern.
 	 * @param lookupPath the lookup path to check
 	 * @return the resolved public URL path, or {@code null} if unresolved
 	 */
@@ -198,25 +201,32 @@ public class ResourceUrlProvider implements ApplicationListener<ContextRefreshed
 		if (logger.isTraceEnabled()) {
 			logger.trace("Getting resource URL for lookupPath=" + lookupPath);
 		}
+		List<String> matchingPatterns = new ArrayList<String>();
 		for (String pattern : this.handlerMap.keySet()) {
-			if (!getPathMatcher().match(pattern, lookupPath)) {
-				continue;
+			if (getPathMatcher().match(pattern, lookupPath)) {
+				matchingPatterns.add(pattern);
 			}
-			String pathWithinMapping = getPathMatcher().extractPathWithinPattern(pattern, lookupPath);
-			String pathMapping = lookupPath.substring(0, lookupPath.indexOf(pathWithinMapping));
-			if (logger.isTraceEnabled()) {
-				logger.trace("Invoking ResourceResolverChain for URL pattern=\"" + pattern + "\"");
+		}
+		if (!matchingPatterns.isEmpty()) {
+			Comparator<String> patternComparator = getPathMatcher().getPatternComparator(lookupPath);
+			Collections.sort(matchingPatterns, patternComparator);
+			for(String pattern : matchingPatterns) {
+				String pathWithinMapping = getPathMatcher().extractPathWithinPattern(pattern, lookupPath);
+				String pathMapping = lookupPath.substring(0, lookupPath.indexOf(pathWithinMapping));
+				if (logger.isTraceEnabled()) {
+					logger.trace("Invoking ResourceResolverChain for URL pattern=\"" + pattern + "\"");
+				}
+				ResourceHttpRequestHandler handler = this.handlerMap.get(pattern);
+				ResourceResolverChain chain = new DefaultResourceResolverChain(handler.getResourceResolvers());
+				String resolved = chain.resolveUrlPath(pathWithinMapping, handler.getLocations());
+				if (resolved == null) {
+					continue;
+				}
+				if (logger.isTraceEnabled()) {
+					logger.trace("Resolved public resource URL path=\"" + resolved + "\"");
+				}
+				return pathMapping + resolved;
 			}
-			ResourceHttpRequestHandler handler = this.handlerMap.get(pattern);
-			ResourceResolverChain chain = new DefaultResourceResolverChain(handler.getResourceResolvers());
-			String resolved = chain.resolveUrlPath(pathWithinMapping, handler.getLocations());
-			if (resolved == null) {
-				continue;
-			}
-			if (logger.isTraceEnabled()) {
-				logger.trace("Resolved public resource URL path=\"" + resolved + "\"");
-			}
-			return pathMapping + resolved;
 		}
 		logger.debug("No matching resource mapping");
 		return null;
