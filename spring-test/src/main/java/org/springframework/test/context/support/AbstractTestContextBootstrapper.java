@@ -391,7 +391,7 @@ public abstract class AbstractTestContextBootstrapper implements TestContextBoot
 	 * @return the resolved {@code ContextLoader} for the supplied {@code testClass}
 	 * (never {@code null})
 	 */
-	private ContextLoader resolveContextLoader(Class<?> testClass,
+	protected ContextLoader resolveContextLoader(Class<?> testClass,
 			List<ContextConfigurationAttributes> configAttributesList) {
 
 		Assert.notNull(testClass, "Class must not be null");
@@ -401,11 +401,17 @@ public abstract class AbstractTestContextBootstrapper implements TestContextBoot
 		if (contextLoaderClass == null) {
 			contextLoaderClass = getDefaultContextLoaderClass(testClass);
 		}
-		if (logger.isTraceEnabled()) {
-			logger.trace(String.format("Using ContextLoader class [%s] for test class [%s]",
-				contextLoaderClass.getName(), testClass.getName()));
+		if (contextLoaderClass != null) {
+			if (logger.isTraceEnabled()) {
+				logger.trace(String.format("Using ContextLoader class [%s] for test class [%s]",
+					contextLoaderClass.getName(), testClass.getName()));
+			}
+			return BeanUtils.instantiateClass(contextLoaderClass, ContextLoader.class);
+		} else {
+			// allow sub-class to call super.resolveContextLoader in overridden resolveContextLoader method
+			// and do custom handling when null is returned
+			return null;
 		}
-		return BeanUtils.instantiateClass(contextLoaderClass, ContextLoader.class);
 	}
 
 	/**
@@ -428,7 +434,7 @@ public abstract class AbstractTestContextBootstrapper implements TestContextBoot
 	 * @throws IllegalArgumentException if supplied configuration attributes are
 	 * {@code null} or <em>empty</em>
 	 */
-	private Class<? extends ContextLoader> resolveExplicitContextLoaderClass(
+	protected Class<? extends ContextLoader> resolveExplicitContextLoaderClass(
 			List<ContextConfigurationAttributes> configAttributesList) {
 
 		Assert.notEmpty(configAttributesList, "ContextConfigurationAttributes list must not be empty");
