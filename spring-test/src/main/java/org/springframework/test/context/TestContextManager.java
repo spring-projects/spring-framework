@@ -101,9 +101,27 @@ public class TestContextManager {
 		BootstrapContext bootstrapContext = new DefaultBootstrapContext(testClass, cacheAwareContextLoaderDelegate);
 		this.testContextBootstrapper = BootstrapUtils.resolveTestContextBootstrapper(bootstrapContext);
 		this.testContext = new DefaultTestContext(this.testContextBootstrapper);
-		registerTestExecutionListeners(this.testContextBootstrapper.getTestExecutionListeners());
+		initialize();
 	}
 
+	/**
+	 * Construct a new {@code TestContextManager} with given {@linkplain org.springframework.test.context.TestContextBootstrapper} and
+	 * {@linkplain org.springframework.test.context.TestContext} instances.
+	 *
+	 * Registers {@link TestExecutionListener TestExecutionListeners} returned by the test context bootstrapper instance.
+	 *
+	 * @param testContextBootstrapper the test context bootstrapper instance
+	 * @param testContext             the test context instance
+	 */
+	public TestContextManager(TestContextBootstrapper testContextBootstrapper, TestContext testContext) {
+		this.testContextBootstrapper = testContextBootstrapper;
+		this.testContext = testContext;
+		initialize();
+	}
+
+	protected void initialize() {
+		registerTestExecutionListeners(testContextBootstrapper.getTestExecutionListeners());
+	}
 
 	/**
 	 * Get the {@link TestContext} managed by this {@code TestContextManager}.
