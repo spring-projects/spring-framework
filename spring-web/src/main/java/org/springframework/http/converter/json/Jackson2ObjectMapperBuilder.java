@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.http.converter.json;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
@@ -73,7 +74,7 @@ import org.springframework.util.ClassUtils;
  */
 public class Jackson2ObjectMapperBuilder {
 
-	private boolean createXmlMapper = false;
+	private boolean createXmlMapper;
 
 	private DateFormat dateFormat;
 
@@ -97,9 +98,11 @@ public class Jackson2ObjectMapperBuilder {
 
 	private List<Module> modules;
 
-	private Class<? extends Module>[] modulesToInstall;
+	private Class<? extends Module>[] moduleClasses;
 
 	private boolean findModulesViaServiceLoader;
+
+	private boolean findWellKnownModules = true;
 
 	private ClassLoader moduleClassLoader = getClass().getClassLoader();
 
@@ -375,16 +378,50 @@ public class Jackson2ObjectMapperBuilder {
 	}
 
 	/**
+	 * Specify one or more modules to be registered with the {@link ObjectMapper}.
+	 * <p>Note: If this is set, no finding of modules is going to happen - not by
+	 * Jackson, and not by Spring either (see {@link #findModulesViaServiceLoader}).
+	 * As a consequence, specifying an empty list here will suppress any kind of
+	 * module detection.
+	 * <p>Specify either this or {@link #modulesToInstall}, not both.
+	 * @since 4.1.5
+	 * @see #modules(List)
+	 * @see com.fasterxml.jackson.databind.Module
+	 */
+	public Jackson2ObjectMapperBuilder modules(Module... modules) {
+		return modules(Arrays.asList(modules));
+	}
+
+	/**
 	 * Set a complete list of modules to be registered with the {@link ObjectMapper}.
 	 * <p>Note: If this is set, no finding of modules is going to happen - not by
 	 * Jackson, and not by Spring either (see {@link #findModulesViaServiceLoader}).
 	 * As a consequence, specifying an empty list here will suppress any kind of
 	 * module detection.
 	 * <p>Specify either this or {@link #modulesToInstall}, not both.
+	 * @see #modules(Module...)
 	 * @see com.fasterxml.jackson.databind.Module
 	 */
 	public Jackson2ObjectMapperBuilder modules(List<Module> modules) {
 		this.modules = new LinkedList<Module>(modules);
+		this.findModulesViaServiceLoader = false;
+		this.findWellKnownModules = false;
+		return this;
+	}
+
+	/**
+	 * Specify one or more modules to be registered with the {@link ObjectMapper}.
+	 * <p>Modules specified here will be registered after
+	 * Spring's autodetection of JSR-310 and Joda-Time, or Jackson's
+	 * finding of modules (see {@link #findModulesViaServiceLoader}),
+	 * allowing to eventually override their configuration.
+	 * <p>Specify either this or {@link #modules}, not both.
+	 * @since 4.1.5
+	 * @see com.fasterxml.jackson.databind.Module
+	 */
+	public Jackson2ObjectMapperBuilder modulesToInstall(Module... modules) {
+		this.modules = Arrays.asList(modules);
+		this.findWellKnownModules = true;
 		return this;
 	}
 
@@ -396,10 +433,12 @@ public class Jackson2ObjectMapperBuilder {
 	 * finding of modules (see {@link #findModulesViaServiceLoader}),
 	 * allowing to eventually override their configuration.
 	 * <p>Specify either this or {@link #modules}, not both.
+	 * @see #modulesToInstall(Module...)
 	 * @see com.fasterxml.jackson.databind.Module
 	 */
 	public Jackson2ObjectMapperBuilder modulesToInstall(Class<? extends Module>... modules) {
-		this.modulesToInstall = modules;
+		this.moduleClasses = modules;
+		this.findWellKnownModules = true;
 		return this;
 	}
 
@@ -482,6 +521,13 @@ public class Jackson2ObjectMapperBuilder {
 	public void configure(ObjectMapper objectMapper) {
 		Assert.notNull(objectMapper, "ObjectMapper must not be null");
 
+		if (this.findModulesViaServiceLoader) {
+			// Jackson 2.2+
+			objectMapper.registerModules(ObjectMapper.findModules(this.moduleClassLoader));
+		}
+		else if (this.findWellKnownModules) {
+			registerWellKnownModulesIfAvailable(objectMapper);
+		}
 		if (this.modules != null) {
 			// Complete list of modules given
 			for (Module module : this.modules) {
@@ -489,19 +535,9 @@ public class Jackson2ObjectMapperBuilder {
 				objectMapper.registerModule(module);
 			}
 		}
-		else {
-			// Combination of modules by class presence in the classpath and class names specified
-			if (this.findModulesViaServiceLoader) {
-				// Jackson 2.2+
-				objectMapper.registerModules(ObjectMapper.findModules(this.moduleClassLoader));
-			}
-			else {
-				registerWellKnownModulesIfAvailable(objectMapper);
-			}
-			if (this.modulesToInstall != null) {
-				for (Class<? extends Module> module : this.modulesToInstall) {
-					objectMapper.registerModule(BeanUtils.instantiate(module));
-				}
+		if (this.moduleClasses != null) {
+			for (Class<? extends Module> module : this.moduleClasses) {
+				objectMapper.registerModule(BeanUtils.instantiate(module));
 			}
 		}
 
