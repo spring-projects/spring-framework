@@ -44,6 +44,8 @@ import static org.junit.Assert.*;
  */
 public class ResourceUrlProviderTests {
 
+	private List<Resource> locations;
+
 	private ResourceUrlProvider translator;
 
 	private ResourceHttpRequestHandler handler;
@@ -53,9 +55,9 @@ public class ResourceUrlProviderTests {
 
 	@Before
 	public void setUp() {
-		List<Resource> locations = new ArrayList<Resource>();
-		locations.add(new ClassPathResource("test/", getClass()));
-		locations.add(new ClassPathResource("testalternatepath/", getClass()));
+		this.locations = new ArrayList<Resource>();
+		this.locations.add(new ClassPathResource("test/", getClass()));
+		this.locations.add(new ClassPathResource("testalternatepath/", getClass()));
 
 		this.handler = new ResourceHttpRequestHandler();
 		this.handler.setLocations(locations);
@@ -92,6 +94,28 @@ public class ResourceUrlProviderTests {
 	private void initTranslator() {
 		this.translator = new ResourceUrlProvider();
 		this.translator.setHandlerMap(this.handlerMap);
+	}
+
+	// SPR-12647
+	@Test
+	public void bestPatternMatch() throws Exception {
+		ResourceHttpRequestHandler otherHandler = new ResourceHttpRequestHandler();
+		otherHandler.setLocations(this.locations);
+		Map<String, VersionStrategy> versionStrategyMap = new HashMap<>();
+		versionStrategyMap.put("/**", new ContentVersionStrategy());
+		VersionResourceResolver versionResolver = new VersionResourceResolver();
+		versionResolver.setStrategyMap(versionStrategyMap);
+
+		List<ResourceResolver> resolvers = new ArrayList<ResourceResolver>();
+		resolvers.add(versionResolver);
+		resolvers.add(new PathResourceResolver());
+		otherHandler.setResourceResolvers(resolvers);
+
+		this.handlerMap.put("/resources/*.css", otherHandler);
+		initTranslator();
+
+		String url = this.translator.getForLookupPath("/resources/foo.css");
+		assertEquals("/resources/foo-e36d2e05253c6c7085a91522ce43a0b4.css", url);
 	}
 
 	// SPR-12592
