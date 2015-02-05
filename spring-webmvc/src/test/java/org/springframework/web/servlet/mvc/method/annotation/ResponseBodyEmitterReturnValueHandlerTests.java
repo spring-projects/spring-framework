@@ -18,6 +18,7 @@ package org.springframework.web.servlet.mvc.method.annotation;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -86,6 +87,7 @@ public class ResponseBodyEmitterReturnValueHandlerTests {
 		assertTrue(this.handler.supportsReturnType(returnType(TestController.class, "handleSse")));
 		assertTrue(this.handler.supportsReturnType(returnType(TestController.class, "handleResponseEntity")));
 		assertFalse(this.handler.supportsReturnType(returnType(TestController.class, "handleResponseEntityString")));
+		assertFalse(this.handler.supportsReturnType(returnType(TestController.class, "handleResponseEntityParameterized")));
 	}
 
 	@Test
@@ -204,6 +206,10 @@ public class ResponseBodyEmitterReturnValueHandlerTests {
 		}
 
 		private ResponseEntity<String> handleResponseEntityString() {
+			return null;
+		}
+
+		private ResponseEntity<AtomicReference<String>> handleResponseEntityParameterized() {
 			return null;
 		}
 

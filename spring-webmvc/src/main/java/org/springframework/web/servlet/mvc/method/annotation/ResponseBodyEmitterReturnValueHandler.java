@@ -26,6 +26,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.core.MethodParameter;
+import org.springframework.core.ResolvableType;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -66,14 +67,8 @@ public class ResponseBodyEmitterReturnValueHandler implements HandlerMethodRetur
 			return true;
 		}
 		else if (ResponseEntity.class.isAssignableFrom(returnType.getParameterType())) {
-			Type paramType = returnType.getGenericParameterType();
-			if (paramType instanceof ParameterizedType) {
-				ParameterizedType type = (ParameterizedType) paramType;
-				Type[] typeArguments = type.getActualTypeArguments();
-				if (typeArguments.length == 1) {
-					return ResponseBodyEmitter.class.isAssignableFrom((Class<?>) typeArguments[0]);
-				}
-			}
+			Class<?> bodyType = ResolvableType.forMethodParameter(returnType).getGeneric(0).resolve();
+			return (bodyType != null && ResponseBodyEmitter.class.isAssignableFrom(bodyType));
 		}
 		return false;
 	}
