@@ -54,6 +54,7 @@ public class Netty4ClientHttpRequestFactory implements ClientHttpRequestFactory,
 	 * @see #setMaxRequestSize(int)
 	 * @deprecated
 	 */
+	@Deprecated
 	public static final int DEFAULT_MAX_REQUEST_SIZE = 1024 * 1024 * 10;
 
 	/**
@@ -107,6 +108,7 @@ public class Netty4ClientHttpRequestFactory implements ClientHttpRequestFactory,
 	 * @deprecated as of 4.1.5 this property is no longer supported;
 	 * 	effectively renamed to {@link #setMaxResponseSize(int)}.
 	 */
+	@Deprecated
 	public void setMaxRequestSize(int maxRequestSize) {
 		this.maxRequestSize = maxRequestSize;
 	}
