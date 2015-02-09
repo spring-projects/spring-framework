@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ package org.springframework.web.socket.sockjs.support;
 
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.List;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 
@@ -103,13 +102,13 @@ public class SockJsServiceTests extends AbstractHttpRequestTests {
 				body.substring(body.indexOf(',')));
 
 		this.service.setAllowedOrigins(Arrays.asList("http://mydomain1.com"));
-		resetResponseAndHandleRequest("GET", "/echo/info", HttpStatus.FORBIDDEN);
+		resetResponseAndHandleRequest("GET", "/echo/info", HttpStatus.OK);
 		assertNull(this.servletResponse.getHeader("Access-Control-Allow-Origin"));
 		assertNull(this.servletResponse.getHeader("Access-Control-Allow-Credentials"));
 		assertNull(this.servletResponse.getHeader("Vary"));
 	}
 
-	@Test  // SPR-12226
+	@Test  // SPR-12226 and SPR-12660
 	public void handleInfoGetWithOrigin() throws Exception {
 		setOrigin("http://mydomain2.com");
 		resetResponseAndHandleRequest("GET", "/echo/info", HttpStatus.OK);
@@ -124,12 +123,6 @@ public class SockJsServiceTests extends AbstractHttpRequestTests {
 		assertEquals("{\"entropy\"", body.substring(0, body.indexOf(':')));
 		assertEquals(",\"origins\":[\"*:*\"],\"cookie_needed\":true,\"websocket\":true}",
 				body.substring(body.indexOf(',')));
-
-		this.service.setAllowedOrigins(null);
-		resetResponseAndHandleRequest("GET", "/echo/info", HttpStatus.FORBIDDEN);
-		assertNull(this.servletResponse.getHeader("Access-Control-Allow-Origin"));
-		assertNull(this.servletResponse.getHeader("Access-Control-Allow-Credentials"));
-		assertNull(this.servletResponse.getHeader("Vary"));
 
 		this.service.setAllowedOrigins(Arrays.asList("http://mydomain1.com"));
 		resetResponseAndHandleRequest("GET", "/echo/info", HttpStatus.FORBIDDEN);
@@ -168,7 +161,7 @@ public class SockJsServiceTests extends AbstractHttpRequestTests {
 		verify(mockResponse, times(1)).getOutputStream();
 	}
 
-	@Test
+	@Test  // SPR-12660
 	public void handleInfoOptions() throws Exception {
 		this.servletRequest.addHeader("Access-Control-Request-Headers", "Last-Modified");
 		resetResponseAndHandleRequest("OPTIONS", "/echo/info", HttpStatus.NO_CONTENT);
@@ -182,19 +175,19 @@ public class SockJsServiceTests extends AbstractHttpRequestTests {
 		assertEquals("Origin", this.servletResponse.getHeader("Vary"));
 
 		this.service.setAllowedOrigins(Arrays.asList("http://mydomain1.com"));
-		resetResponseAndHandleRequest("OPTIONS", "/echo/info", HttpStatus.FORBIDDEN);
+		resetResponseAndHandleRequest("OPTIONS", "/echo/info", HttpStatus.NO_CONTENT);
 		assertNull(this.servletResponse.getHeader("Access-Control-Allow-Origin"));
 		assertNull(this.servletResponse.getHeader("Access-Control-Allow-Credentials"));
 		assertNull(this.servletResponse.getHeader("Access-Control-Allow-Headers"));
 		assertNull(this.servletResponse.getHeader("Access-Control-Allow-Methods"));
 		assertNull(this.servletResponse.getHeader("Access-Control-Max-Age"));
-		assertNull(this.servletResponse.getHeader("Vary"));
+		assertEquals("Origin", this.servletResponse.getHeader("Vary"));
 	}
 
-	@Test  // SPR-12226
+	@Test  // SPR-12226 and SPR-12660
 	public void handleInfoOptionsWithOrigin() throws Exception {
 		setOrigin("http://mydomain2.com");
-		this.servletRequest.addHeader("Access-Control-Request-Headers", "Last-Modified");
+		this.request.getHeaders().add("Access-Control-Request-Headers", "Last-Modified");
 		resetResponseAndHandleRequest("OPTIONS", "/echo/info", HttpStatus.NO_CONTENT);
 		this.response.flush();
 		assertEquals("http://mydomain2.com", this.servletResponse.getHeader("Access-Control-Allow-Origin"));
@@ -203,16 +196,6 @@ public class SockJsServiceTests extends AbstractHttpRequestTests {
 		assertEquals("OPTIONS, GET", this.servletResponse.getHeader("Access-Control-Allow-Methods"));
 		assertEquals("31536000", this.servletResponse.getHeader("Access-Control-Max-Age"));
 		assertEquals("Origin", this.servletResponse.getHeader("Vary"));
-
-		this.service.setAllowedOrigins(null);
-		resetResponseAndHandleRequest("OPTIONS", "/echo/info", HttpStatus.FORBIDDEN);
-		this.response.flush();
-		assertNull(this.servletResponse.getHeader("Access-Control-Allow-Origin"));
-		assertNull(this.servletResponse.getHeader("Access-Control-Allow-Credentials"));
-		assertNull(this.servletResponse.getHeader("Access-Control-Allow-Headers"));
-		assertNull(this.servletResponse.getHeader("Access-Control-Allow-Methods"));
-		assertNull(this.servletResponse.getHeader("Access-Control-Max-Age"));
-		assertNull(this.servletResponse.getHeader("Vary"));
 
 		this.service.setAllowedOrigins(Arrays.asList("http://mydomain1.com"));
 		resetResponseAndHandleRequest("OPTIONS", "/echo/info", HttpStatus.FORBIDDEN);
@@ -236,8 +219,9 @@ public class SockJsServiceTests extends AbstractHttpRequestTests {
 	}
 
 	@Test  // SPR-12283
-	public void handleInfoOptionsWithOriginAndCorsDisabled() throws Exception {
+	public void handleInfoOptionsWithOriginAndCorsHeadersDisabled() throws Exception {
 		setOrigin("http://mydomain2.com");
+		this.service.setAllowedOrigins(Arrays.asList("*"));
 		this.service.setSuppressCors(true);
 
 		this.servletRequest.addHeader("Access-Control-Request-Headers", "Last-Modified");
@@ -278,7 +262,7 @@ public class SockJsServiceTests extends AbstractHttpRequestTests {
 		assertEquals("text/html;charset=UTF-8", this.servletResponse.getContentType());
 		assertTrue(this.servletResponse.getContentAsString().startsWith("<!DOCTYPE html>\n"));
 		assertEquals(490, this.servletResponse.getContentLength());
-		assertEquals("public, max-age=31536000", this.response.getHeaders().getCacheControl());
+		assertEquals("no-store, no-cache, must-revalidate, max-age=0", this.response.getHeaders().getCacheControl());
 		assertEquals("\"06b486b3208b085d9e3220f456a6caca4\"", this.response.getHeaders().getETag());
 	}
 
