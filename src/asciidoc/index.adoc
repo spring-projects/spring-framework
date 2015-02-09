@@ -23871,7 +23871,9 @@ transactional proxy, which would be decidedly __bad__.
 In proxy mode (which is the default), only external method calls coming in through the
 proxy are intercepted. This means that self-invocation, in effect, a method within the
 target object calling another method of the target object, will not lead to an actual
-transaction at runtime even if the invoked method is marked with `@Transactional`.
+transaction at runtime even if the invoked method is marked with `@Transactional`. Also,
+the proxy must be fully initialized to provide the expected behaviour so you should not
+rely on this feature in your initialization code, i.e. `@PostConstruct`.
 ====
 
 Consider the use of AspectJ mode (see mode attribute in table below) if you expect
@@ -49741,7 +49743,9 @@ In proxy mode (which is the default), only external method calls coming in throu
 proxy are intercepted. This means that self-invocation, in effect, a method within the
 target object calling another method of the target object, will not lead to an actual
 caching at runtime even if the invoked method is marked with `@Cacheable` - considering
-using the aspectj mode in this case.
+using the aspectj mode in this case. Also, the proxy must be fully initialized to provide
+the expected behaviour so you should not rely on this feature in your initialization
+code, i.e. `@PostConstruct`.
 ====
 
 
