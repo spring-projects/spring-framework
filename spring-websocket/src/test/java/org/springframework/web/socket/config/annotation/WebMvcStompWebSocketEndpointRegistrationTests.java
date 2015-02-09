@@ -90,6 +90,12 @@ public class WebMvcStompWebSocketEndpointRegistrationTests {
 		assertEquals(OriginHandshakeInterceptor.class, requestHandler.getHandshakeInterceptors().get(0).getClass());
 	}
 
+	@Test(expected = IllegalArgumentException.class)
+	public void noAllowedOrigin() {
+		WebMvcStompWebSocketEndpointRegistration registration = new WebMvcStompWebSocketEndpointRegistration(new String[] {"/foo"}, this.handler, this.scheduler);
+		registration.setAllowedOrigins();
+	}
+
 	@Test
 	public void allowedOriginsWithSockJsService() {
 		WebMvcStompWebSocketEndpointRegistration registration =

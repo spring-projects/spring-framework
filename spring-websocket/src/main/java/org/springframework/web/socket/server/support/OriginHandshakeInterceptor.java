@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.web.socket.server.support;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -27,6 +28,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
+import org.springframework.util.Assert;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.server.HandshakeInterceptor;
 
@@ -52,13 +54,32 @@ public class OriginHandshakeInterceptor implements HandshakeInterceptor {
 	}
 
 	/**
-	 * Use this property to define a collection of allowed origins.
+	 * Configure allowed {@code Origin} header values. This check is mostly designed for
+	 * browser clients. There is nothing preventing other types of client to modify the
+	 * {@code Origin} header value.
+	 *
+	 * <p>Each provided allowed origin must start by "http://", "https://" or be "*"
+	 * (means that all origins are allowed).
+	 *
+	 * @see <a href="https://tools.ietf.org/html/rfc6454">RFC 6454: The Web Origin Concept</a>
 	 */
 	public void setAllowedOrigins(Collection<String> allowedOrigins) {
-		this.allowedOrigins.clear();
-		if (allowedOrigins != null) {
-			this.allowedOrigins.addAll(allowedOrigins);
+		Assert.notNull(allowedOrigins, "Allowed origin Collection must not be null");
+		for (String allowedOrigin : allowedOrigins) {
+			Assert.isTrue(allowedOrigin.equals("*") || allowedOrigin.startsWith("http://") ||
+					allowedOrigin.startsWith("https://"), "Invalid allowed origin provided: \"" +
+					allowedOrigin + "\". It must start with \"http://\", \"https://\" or be \"*\"");
 		}
+		this.allowedOrigins.clear();
+		this.allowedOrigins.addAll(allowedOrigins);
+	}
+
+	/**
+	 * @see #setAllowedOrigins(Collection)
+	 * @since 4.1.5
+	 */
+	public Collection<String> getAllowedOrigins() {
+		return Collections.unmodifiableList(this.allowedOrigins);
 	}
 
 	@Override
@@ -76,7 +97,14 @@ public class OriginHandshakeInterceptor implements HandshakeInterceptor {
 	}
 
 	protected boolean isValidOrigin(ServerHttpRequest request) {
-		return this.allowedOrigins.contains(request.getHeaders().getOrigin());
+		String origin = request.getHeaders().getOrigin();
+		if (origin == null) {
+			return true;
+		}
+		if (this.allowedOrigins.contains("*")) {
+			return true;
+		}
+		return this.allowedOrigins.contains(origin);
 	}
 
 	@Override

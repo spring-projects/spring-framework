@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -266,24 +266,34 @@ public abstract class AbstractSockJsService implements SockJsService {
 	}
 
 	/**
-	 * Configure allowed {@code Origin} header values. This check is mostly designed for browser
-	 * clients. There is noting preventing other types of client to modify the Origin header value.
+	 * Configure allowed {@code Origin} header values. This check is mostly designed for
+	 * browser clients. There is nothing preventing other types of client to modify the
+	 * {@code Origin} header value.
 	 *
-	 * <p>When SockJS is enabled and allowed origins are restricted, transport types that do not
-	 * use {@code Origin} headers for cross origin requests (jsonp-polling, iframe-xhr-polling,
-	 * iframe-eventsource and iframe-htmlfile) are disabled. As a consequence, IE6/IE7 won't be
-	 * supported anymore and IE8/IE9 will only be supported without cookies.
+	 * <p>When SockJS is enabled and origins are restricted, transport types that do not
+	 * allow to check request origin (JSONP and Iframe based transports) are disabled.
+	 * As a consequence, IE 6 to 9 are not supported when origins are restricted.
 	 *
-	 * <p>By default, all origins are allowed.
+	 * <p>Each provided allowed origin must start by "http://", "https://" or be "*"
+	 * (means that all origins are allowed). Empty allowed origin list is not supported.
+	 * By default, all origins are allowed.
 	 *
 	 * @since 4.1.2
+	 * @see <a href="https://tools.ietf.org/html/rfc6454">RFC 6454: The Web Origin Concept</a>
 	 * @see <a href="https://github.com/sockjs/sockjs-client#supported-transports-by-browser-html-served-from-http-or-https">SockJS supported transports by browser</a>
 	 */
 	public void setAllowedOrigins(List<String> allowedOrigins) {
-		this.allowedOrigins.clear();
-		if (allowedOrigins != null) {
-			this.allowedOrigins.addAll(allowedOrigins);
+		Assert.notEmpty(allowedOrigins, "Allowed origin List must not be empty");
+		for (String allowedOrigin : allowedOrigins) {
+			Assert.isTrue(
+					allowedOrigin.equals("*") || allowedOrigin.startsWith("http://") ||
+							allowedOrigin.startsWith("https://"),
+					"Invalid allowed origin provided: \"" +
+							allowedOrigin +
+							"\". It must start with \"http://\", \"https://\" or be \"*\"");
 		}
+		this.allowedOrigins.clear();
+		this.allowedOrigins.addAll(allowedOrigins);
 	}
 
 	/**
@@ -291,7 +301,7 @@ public abstract class AbstractSockJsService implements SockJsService {
 	 * @see #setAllowedOrigins(List)
 	 */
 	public List<String> getAllowedOrigins() {
-		return Collections.unmodifiableList(allowedOrigins);
+		return Collections.unmodifiableList(this.allowedOrigins);
 	}
 
 	/**
@@ -345,6 +355,11 @@ public abstract class AbstractSockJsService implements SockJsService {
 				this.infoHandler.handle(request, response);
 			}
 			else if (sockJsPath.matches("/iframe[0-9-.a-z_]*.html")) {
+				if (!this.allowedOrigins.isEmpty() && !this.allowedOrigins.contains("*")) {
+					logger.debug("Iframe support is disabled when an origin check is required, ignoring " + requestInfo);
+					response.setStatusCode(HttpStatus.NOT_FOUND);
+					return;
+				}
 				logger.debug(requestInfo);
 				this.iframeHandler.handle(request, response);
 			}
@@ -423,8 +438,13 @@ public abstract class AbstractSockJsService implements SockJsService {
 		HttpHeaders requestHeaders = request.getHeaders();
 		HttpHeaders responseHeaders = response.getHeaders();
 		String origin = requestHeaders.getOrigin();
+		String host = requestHeaders.getFirst(HttpHeaders.HOST);
 
-		if (!this.allowedOrigins.contains("*") && (origin == null || !this.allowedOrigins.contains(origin))) {
+		if (origin == null) {
+			return true;
+		}
+
+		if (!this.allowedOrigins.contains("*") && !this.allowedOrigins.contains(origin)) {
 			logger.debug("Request rejected, Origin header value " + origin + " not allowed");
 			response.setStatusCode(HttpStatus.FORBIDDEN);
 			return false;
@@ -439,7 +459,7 @@ public abstract class AbstractSockJsService implements SockJsService {
 			// See SPR-11919 and https://issues.jboss.org/browse/WFLY-3474
 		}
 
-		if (!this.suppressCors && origin != null && !hasCorsResponseHeaders) {
+		if (!this.suppressCors && !hasCorsResponseHeaders) {
 			addCorsHeaders(request, response, httpMethods);
 		}
 		return true;
@@ -561,7 +581,8 @@ public abstract class AbstractSockJsService implements SockJsService {
 			response.getHeaders().setContentType(new MediaType("text", "html", UTF8_CHARSET));
 			response.getHeaders().setContentLength(contentBytes.length);
 
-			addCacheHeaders(response);
+			// No cache in order to check every time if IFrame are authorized
+			addNoCacheHeaders(response);
 			response.getHeaders().setETag(etagValue);
 			response.getBody().write(contentBytes);
 		}

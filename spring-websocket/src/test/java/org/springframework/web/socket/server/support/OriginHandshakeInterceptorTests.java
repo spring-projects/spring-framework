@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,7 +35,25 @@ import org.springframework.web.socket.WebSocketHandler;
  *
  * @author Sebastien Deleuze
  */
-public class AllowedOriginsInterceptorTests extends AbstractHttpRequestTests {
+public class OriginHandshakeInterceptorTests extends AbstractHttpRequestTests {
+
+	@Test(expected = IllegalArgumentException.class)
+	public void nullAllowedOriginList() {
+		OriginHandshakeInterceptor interceptor = new OriginHandshakeInterceptor();
+		interceptor.setAllowedOrigins(null);
+	}
+
+	@Test(expected = IllegalArgumentException.class)
+	public void invalidAllowedOrigin() {
+		OriginHandshakeInterceptor interceptor = new OriginHandshakeInterceptor();
+		interceptor.setAllowedOrigins(Arrays.asList("domain.com"));
+	}
+
+	@Test
+	public void validAllowedOrigins() {
+		OriginHandshakeInterceptor interceptor = new OriginHandshakeInterceptor();
+		interceptor.setAllowedOrigins(Arrays.asList("http://domain.com", "https://domain.com", "*"));
+	}
 
 	@Test
 	public void originValueMatch() throws Exception {
@@ -82,24 +100,27 @@ public class AllowedOriginsInterceptorTests extends AbstractHttpRequestTests {
 	}
 
 	@Test
-	public void noOriginNoMatchWithNullHostileCollection() throws Exception {
+	public void originNoMatchWithNullHostileCollection() throws Exception {
 		Map<String, Object> attributes = new HashMap<String, Object>();
 		WebSocketHandler wsHandler = Mockito.mock(WebSocketHandler.class);
+		setOrigin("http://mydomain4.com");
+		OriginHandshakeInterceptor interceptor = new OriginHandshakeInterceptor();
 		Set<String> allowedOrigins = new ConcurrentSkipListSet<String>();
 		allowedOrigins.add("http://mydomain1.com");
-		OriginHandshakeInterceptor interceptor = new OriginHandshakeInterceptor();
 		interceptor.setAllowedOrigins(allowedOrigins);
 		assertFalse(interceptor.beforeHandshake(request, response, wsHandler, attributes));
 		assertEquals(servletResponse.getStatus(), HttpStatus.FORBIDDEN.value());
 	}
 
 	@Test
-	 public void noOriginNoMatch() throws Exception {
+	public void originMatchAll() throws Exception {
 		Map<String, Object> attributes = new HashMap<String, Object>();
 		WebSocketHandler wsHandler = Mockito.mock(WebSocketHandler.class);
+		setOrigin("http://mydomain1.com");
 		OriginHandshakeInterceptor interceptor = new OriginHandshakeInterceptor();
-		assertFalse(interceptor.beforeHandshake(request, response, wsHandler, attributes));
-		assertEquals(servletResponse.getStatus(), HttpStatus.FORBIDDEN.value());
+		interceptor.setAllowedOrigins(Arrays.asList("*"));
+		assertTrue(interceptor.beforeHandshake(request, response, wsHandler, attributes));
+		assertNotEquals(servletResponse.getStatus(), HttpStatus.FORBIDDEN.value());
 	}
 
 }
