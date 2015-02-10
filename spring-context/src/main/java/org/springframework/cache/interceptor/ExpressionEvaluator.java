@@ -123,6 +123,16 @@ class ExpressionEvaluator extends CachedExpressionEvaluator {
 		return getExpression(this.unlessCache, methodKey, unlessExpression).getValue(evalContext, boolean.class);
 	}
 
+	/**
+	 * Clear all caches.
+	 */
+	void clear() {
+		this.keyCache.clear();
+		this.conditionCache.clear();
+		this.unlessCache.clear();
+		this.targetMethodCache.clear();
+	}
+
 	private Method getTargetMethod(Class<?> targetClass, Method method) {
 		AnnotatedElementKey methodKey = new AnnotatedElementKey(method, targetClass);
 		Method targetMethod = this.targetMethodCache.get(methodKey);

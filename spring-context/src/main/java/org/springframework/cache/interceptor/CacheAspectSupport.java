@@ -288,6 +288,7 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 	 */
 	protected void clearMetadataCache() {
 		this.metadataCache.clear();
+		this.evaluator.clear();
 	}
 
 	protected Object execute(CacheOperationInvoker invoker, Object target, Method method, Object[] args) {
