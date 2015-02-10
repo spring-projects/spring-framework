@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,14 +19,14 @@ package org.springframework.util;
 import java.util.UUID;
 
 /**
- * An IdGenerator that calls {@link java.util.UUID#randomUUID()}.
+ * An {@link IdGenerator} that calls {@link java.util.UUID#randomUUID()}.
  *
  * @author Rossen Stoyanchev
- * @since 4.2
+ * @since 4.1.5
  */
 public class JdkIdGenerator implements IdGenerator {
 
-
+	@Override
 	public UUID generateId() {
 		return UUID.randomUUID();
 	}

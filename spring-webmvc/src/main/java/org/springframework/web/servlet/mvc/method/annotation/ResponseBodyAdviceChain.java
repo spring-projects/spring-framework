@@ -18,9 +18,6 @@ package org.springframework.web.servlet.mvc.method.annotation;
 
 import java.util.List;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import org.springframework.core.MethodParameter;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;
@@ -36,8 +33,6 @@ import org.springframework.web.method.ControllerAdviceBean;
  * @since 4.1
  */
 class ResponseBodyAdviceChain {
-
-	private static final Log logger = LogFactory.getLog(ResponseBodyAdviceChain.class);
 
 	private final List<Object> advice;
 
