@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -222,7 +222,18 @@ public class RequestPartMethodArgumentResolver extends AbstractMessageConverterM
 		return null;
 	}
 
-	private void validate(WebDataBinder binder, MethodParameter parameter) throws MethodArgumentNotValidException {
+	/**
+	 * Validate the request part if applicable.
+	 * <p>The default implementation checks for {@code @javax.validation.Valid},
+	 * Spring's {@link org.springframework.validation.annotation.Validated},
+	 * and custom annotations whose name starts with "Valid".
+	 * @param binder the DataBinder to be used
+	 * @param parameter the method parameter
+	 * @throws MethodArgumentNotValidException in case of a binding error which
+	 * is meant to be fatal (i.e. without a declared {@link Errors} parameter)
+	 * @see #isBindingErrorFatal
+	 */
+	protected void validate(WebDataBinder binder, MethodParameter parameter) throws MethodArgumentNotValidException {
 		Annotation[] annotations = parameter.getParameterAnnotations();
 		for (Annotation ann : annotations) {
 			Validated validatedAnn = AnnotationUtils.getAnnotation(ann, Validated.class);
@@ -238,18 +249,6 @@ public class RequestPartMethodArgumentResolver extends AbstractMessageConverterM
 				}
 			}
 		}
-	}
-
-	/**
-	 * Whether to raise a {@link MethodArgumentNotValidException} on validation errors.
-	 * @param parameter the method argument
-	 * @return {@code true} if the next method argument is not of type {@link Errors}
-	 */
-	private boolean isBindingErrorFatal(MethodParameter parameter) {
-		int i = parameter.getParameterIndex();
-		Class<?>[] paramTypes = parameter.getMethod().getParameterTypes();
-		boolean hasBindingResult = (paramTypes.length > (i + 1) && Errors.class.isAssignableFrom(paramTypes[i + 1]));
-		return !hasBindingResult;
 	}
 
 

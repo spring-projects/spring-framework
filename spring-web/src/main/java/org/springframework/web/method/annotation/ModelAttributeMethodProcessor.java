@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -56,7 +56,7 @@ import org.springframework.web.method.support.ModelAndViewContainer;
  */
 public class ModelAttributeMethodProcessor implements HandlerMethodArgumentResolver, HandlerMethodReturnValueHandler {
 
-	protected Log logger = LogFactory.getLog(this.getClass());
+	protected final Log logger = LogFactory.getLog(getClass());
 
 	private final boolean annotationNotRequired;
 
@@ -72,8 +72,8 @@ public class ModelAttributeMethodProcessor implements HandlerMethodArgumentResol
 
 
 	/**
-	 * @return true if the parameter is annotated with {@link ModelAttribute}
-	 * or in default resolution mode also if it is not a simple type.
+	 * Returns {@code true} if the parameter is annotated with {@link ModelAttribute}
+	 * or in default resolution mode, and also if it is not a simple type.
 	 */
 	@Override
 	public boolean supportsParameter(MethodParameter parameter) {
@@ -151,7 +151,9 @@ public class ModelAttributeMethodProcessor implements HandlerMethodArgumentResol
 
 	/**
 	 * Validate the model attribute if applicable.
-	 * <p>The default implementation checks for {@code @javax.validation.Valid}.
+	 * <p>The default implementation checks for {@code @javax.validation.Valid},
+	 * Spring's {@link org.springframework.validation.annotation.Validated},
+	 * and custom annotations whose name starts with "Valid".
 	 * @param binder the DataBinder to be used
 	 * @param parameter the method parameter
 	 */

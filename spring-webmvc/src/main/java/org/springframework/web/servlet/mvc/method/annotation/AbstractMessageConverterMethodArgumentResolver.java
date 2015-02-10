@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,6 +37,7 @@ import org.springframework.http.converter.GenericHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.util.Assert;
+import org.springframework.validation.Errors;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
@@ -78,6 +79,7 @@ public abstract class AbstractMessageConverterMethodArgumentResolver implements 
 		MediaType.sortBySpecificity(result);
 		return Collections.unmodifiableList(result);
 	}
+
 
 	/**
 	 * Create the method argument value of the expected parameter type by
@@ -160,6 +162,19 @@ public abstract class AbstractMessageConverterMethodArgumentResolver implements 
 	protected ServletServerHttpRequest createInputMessage(NativeWebRequest webRequest) {
 		HttpServletRequest servletRequest = webRequest.getNativeRequest(HttpServletRequest.class);
 		return new ServletServerHttpRequest(servletRequest);
+	}
+
+	/**
+	 * Whether to raise a handler method invocation exception on validation errors.
+	 * @param parameter the method argument
+	 * @return {@code true} if the next method argument is not of type {@link Errors}
+	 * @since 4.1.5
+	 */
+	protected boolean isBindingErrorFatal(MethodParameter parameter) {
+		int i = parameter.getParameterIndex();
+		Class<?>[] paramTypes = parameter.getMethod().getParameterTypes();
+		boolean hasBindingResult = (paramTypes.length > (i + 1) && Errors.class.isAssignableFrom(paramTypes[i + 1]));
+		return !hasBindingResult;
 	}
 
 }
