@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -562,17 +562,10 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 
 	@Override
 	public Map<String, Object> getBeansWithAnnotation(Class<? extends Annotation> annotationType) {
-		Map<String, Object> results = new LinkedHashMap<String, Object>();
-		for (String beanName : this.beanDefinitionNames) {
-			BeanDefinition beanDefinition = getBeanDefinition(beanName);
-			if (!beanDefinition.isAbstract() && findAnnotationOnBean(beanName, annotationType) != null) {
-				results.put(beanName, getBean(beanName));
-			}
-		}
-		for (String beanName : this.manualSingletonNames) {
-			if (!results.containsKey(beanName) && findAnnotationOnBean(beanName, annotationType) != null) {
-				results.put(beanName, getBean(beanName));
-			}
+		String[] beanNames = getBeanNamesForAnnotation(annotationType);
+		Map<String, Object> results = new LinkedHashMap<String, Object>(beanNames.length);
+		for (String beanName : beanNames) {
+			results.put(beanName, getBean(beanName));
 		}
 		return results;
 	}
