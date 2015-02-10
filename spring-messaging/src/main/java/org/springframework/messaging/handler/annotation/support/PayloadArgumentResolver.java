@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -144,6 +144,16 @@ public class PayloadArgumentResolver implements HandlerMethodArgumentResolver {
 		}
 	}
 
+	/**
+	 * Validate the payload if applicable.
+	 * <p>The default implementation checks for {@code @javax.validation.Valid},
+	 * Spring's {@link org.springframework.validation.annotation.Validated},
+	 * and custom annotations whose name starts with "Valid".
+	 * @param message the currently processed message
+	 * @param parameter the method parameter
+	 * @param target the target payload object
+	 * @throws MethodArgumentNotValidException in case of binding errors
+	 */
 	protected void validate(Message<?> message, MethodParameter parameter, Object target) {
 		if (this.validator == null) {
 			return;

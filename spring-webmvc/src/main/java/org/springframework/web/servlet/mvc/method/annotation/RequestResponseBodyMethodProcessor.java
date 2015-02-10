@@ -112,7 +112,18 @@ public class RequestResponseBodyMethodProcessor extends AbstractMessageConverter
 		return argument;
 	}
 
-	private void validate(WebDataBinder binder, MethodParameter parameter) throws Exception {
+	/**
+	 * Validate the request part if applicable.
+	 * <p>The default implementation checks for {@code @javax.validation.Valid},
+	 * Spring's {@link org.springframework.validation.annotation.Validated},
+	 * and custom annotations whose name starts with "Valid".
+	 * @param binder the DataBinder to be used
+	 * @param parameter the method parameter
+	 * @throws MethodArgumentNotValidException in case of a binding error which
+	 * is meant to be fatal (i.e. without a declared {@link Errors} parameter)
+	 * @see #isBindingErrorFatal
+	 */
+	protected void validate(WebDataBinder binder, MethodParameter parameter) throws MethodArgumentNotValidException {
 		Annotation[] annotations = parameter.getParameterAnnotations();
 		for (Annotation ann : annotations) {
 			Validated validatedAnn = AnnotationUtils.getAnnotation(ann, Validated.class);
@@ -122,27 +133,13 @@ public class RequestResponseBodyMethodProcessor extends AbstractMessageConverter
 				binder.validate(validationHints);
 				BindingResult bindingResult = binder.getBindingResult();
 				if (bindingResult.hasErrors()) {
-					if (isBindExceptionRequired(binder, parameter)) {
+					if (isBindingErrorFatal(parameter)) {
 						throw new MethodArgumentNotValidException(parameter, bindingResult);
 					}
 				}
 				break;
 			}
 		}
-	}
-
-	/**
-	 * Whether to raise a {@link MethodArgumentNotValidException} on validation errors.
-	 * @param binder the data binder used to perform data binding
-	 * @param parameter the method argument
-	 * @return {@code true} if the next method argument is not of type {@link Errors}.
-	 */
-	private boolean isBindExceptionRequired(WebDataBinder binder, MethodParameter parameter) {
-		int i = parameter.getParameterIndex();
-		Class<?>[] paramTypes = parameter.getMethod().getParameterTypes();
-		boolean hasBindingResult = (paramTypes.length > (i + 1) && Errors.class.isAssignableFrom(paramTypes[i + 1]));
-
-		return !hasBindingResult;
 	}
 
 	@Override
