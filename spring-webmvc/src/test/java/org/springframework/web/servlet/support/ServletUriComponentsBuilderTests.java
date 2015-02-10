@@ -41,7 +41,7 @@ public class ServletUriComponentsBuilderTests {
 		this.request = new MockHttpServletRequest();
 		this.request.setScheme("http");
 		this.request.setServerName("localhost");
-		this.request.setServerPort(80);
+		this.request.setServerPort(-1);
 		this.request.setContextPath("/mvc-showcase");
 	}
 

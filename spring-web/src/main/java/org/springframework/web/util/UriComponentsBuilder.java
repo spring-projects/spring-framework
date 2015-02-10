@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.springframework.http.HttpRequest;
 import org.springframework.util.Assert;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -261,6 +262,55 @@ public class UriComponentsBuilder implements Cloneable {
 		else {
 			throw new IllegalArgumentException("[" + httpUrl + "] is not a valid HTTP URL");
 		}
+	}
+
+	/**
+	 * Create a new {@code UriComponents} object from the URI associated with
+	 * the given HttpRequest while also overlaying with values from the headers
+	 * "X-Forwarded-Host", "X-Forwarded-Port", and "X-Forwarded-Proto" if present.
+	 *
+	 * @param request the source request
+	 * @return the URI components of the UR
+	 */
+	public static UriComponentsBuilder fromHttpRequest(HttpRequest request) {
+		URI uri = request.getURI();
+		UriComponentsBuilder builder = UriComponentsBuilder.fromUri(uri);
+
+		String scheme = uri.getScheme();
+		String host = uri.getHost();
+		int port = uri.getPort();
+
+		String hostHeader = request.getHeaders().getFirst("X-Forwarded-Host");
+		if (StringUtils.hasText(hostHeader)) {
+			String[] hosts = StringUtils.commaDelimitedListToStringArray(hostHeader);
+			String hostToUse = hosts[0];
+			if (hostToUse.contains(":")) {
+				String[] hostAndPort = StringUtils.split(hostToUse, ":");
+				host  = hostAndPort[0];
+				port = Integer.parseInt(hostAndPort[1]);
+			}
+			else {
+				host = hostToUse;
+				port = -1;
+			}
+		}
+
+		String portHeader = request.getHeaders().getFirst("X-Forwarded-Port");
+		if (StringUtils.hasText(portHeader)) {
+			port = Integer.parseInt(portHeader);
+		}
+
+		String protocolHeader = request.getHeaders().getFirst("X-Forwarded-Proto");
+		if (StringUtils.hasText(protocolHeader)) {
+			scheme = protocolHeader;
+		}
+
+		builder.scheme(scheme);
+		builder.host(host);
+		if (scheme.equals("http") && port != 80 || scheme.equals("https") && port != 443) {
+			builder.port(port);
+		}
+		return builder;
 	}
 
 

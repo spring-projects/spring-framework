@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,11 +31,16 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.junit.Test;
+
+import org.springframework.http.server.ServletServerHttpRequest;
+import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
 
 /**
+ * Unit tests for {@link org.springframework.web.util.UriComponentsBuilder}.
+ *
  * @author Arjen Poutsma
  * @author Phillip Webb
  * @author Oliver Gierke
@@ -230,6 +235,25 @@ public class UriComponentsBuilderTests {
 		assertEquals("example.com", result.getHost());
 		assertTrue(result.getQueryParams().containsKey("foo"));
 		assertEquals("bar@baz", result.getQueryParams().getFirst("foo"));
+	}
+
+	// Also see X-Forwarded-* related tests in ServletUriComponentsBuilderTests
+
+	@Test
+	public void fromHttpRequest() throws URISyntaxException {
+		MockHttpServletRequest request = new MockHttpServletRequest();
+		request.setScheme("http");
+		request.setServerName("localhost");
+		request.setServerPort(-1);
+		request.setRequestURI("/path");
+		request.setQueryString("a=1");
+
+		UriComponents result = UriComponentsBuilder.fromHttpRequest(new ServletServerHttpRequest(request)).build();
+		assertEquals("http", result.getScheme());
+		assertEquals("localhost", result.getHost());
+		assertEquals(-1, result.getPort());
+		assertEquals("/path", result.getPath());
+		assertEquals("a=1", result.getQuery());
 	}
 
 	@Test
