@@ -288,8 +288,8 @@ public class ApplicationListenerMethodAdapter implements GenericApplicationListe
 
 
 	private ResolvableType resolveDeclaredEventType() {
-		Parameter[] parameters = this.method.getParameters();
-		if (parameters.length != 1) {
+		int count = this.method.getParameterTypes().length;
+		if (count != 1) {
 			throw new IllegalStateException("Only one parameter is allowed " +
 					"for event listener method: " + method);
 		}
