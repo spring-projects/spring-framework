@@ -20,11 +20,10 @@ import java.util.UUID;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
- * A simple {@link org.springframework.util.IdGenerator IdGenerator} that
- * starts at 1 and increments by 1 with each call.
+ * A simple {@link IdGenerator} that starts at 1 and increments by 1 with each call.
  *
  * @author Rossen Stoyanchev
- * @since 4.2
+ * @since 4.1.5
  */
 public class SimpleIdGenerator implements IdGenerator {
 
