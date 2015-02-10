@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -182,16 +182,37 @@ class ConfigurationClassBeanDefinitionReader {
 	 * with the BeanDefinitionRegistry based on its contents.
 	 */
 	private void loadBeanDefinitionsForBeanMethod(BeanMethod beanMethod) {
-		if (this.conditionEvaluator.shouldSkip(beanMethod.getMetadata(), ConfigurationPhase.REGISTER_BEAN)) {
+		ConfigurationClass configClass = beanMethod.getConfigurationClass();
+		MethodMetadata metadata = beanMethod.getMetadata();
+
+		// Consider name and any aliases
+		AnnotationAttributes bean = AnnotationConfigUtils.attributesFor(metadata, Bean.class);
+		List<String> names = new ArrayList<String>(Arrays.asList(bean.getStringArray("name")));
+		String beanName = (names.size() > 0 ? names.remove(0) : beanMethod.getMetadata().getMethodName());
+
+		// Do we need to mark the bean as skipped by its condition?
+		if (this.conditionEvaluator.shouldSkip(metadata, ConfigurationPhase.REGISTER_BEAN)) {
+			configClass.skippedBeans.add(beanName);
+			return;
+		}
+		if (configClass.skippedBeans.contains(beanName)) {
 			return;
 		}
 
-		ConfigurationClass configClass = beanMethod.getConfigurationClass();
-		MethodMetadata metadata = beanMethod.getMetadata();
+		// Register aliases even when overridden
+		for (String alias : names) {
+			this.registry.registerAlias(beanName, alias);
+		}
+
+		// Has this effectively been overridden before (e.g. via XML)?
+		if (isOverriddenByExistingDefinition(beanMethod, beanName)) {
+			return;
+		}
 
 		ConfigurationClassBeanDefinition beanDef = new ConfigurationClassBeanDefinition(configClass, metadata);
 		beanDef.setResource(configClass.getResource());
 		beanDef.setSource(this.sourceExtractor.extractSource(metadata, configClass.getResource()));
+
 		if (metadata.isStatic()) {
 			// static @Bean method
 			beanDef.setBeanClassName(configClass.getMetadata().getClassName());
@@ -204,19 +225,6 @@ class ConfigurationClassBeanDefinitionReader {
 		}
 		beanDef.setAutowireMode(RootBeanDefinition.AUTOWIRE_CONSTRUCTOR);
 		beanDef.setAttribute(RequiredAnnotationBeanPostProcessor.SKIP_REQUIRED_CHECK_ATTRIBUTE, Boolean.TRUE);
-
-		// Consider name and any aliases
-		AnnotationAttributes bean = AnnotationConfigUtils.attributesFor(metadata, Bean.class);
-		List<String> names = new ArrayList<String>(Arrays.asList(bean.getStringArray("name")));
-		String beanName = (names.size() > 0 ? names.remove(0) : beanMethod.getMetadata().getMethodName());
-		for (String alias : names) {
-			this.registry.registerAlias(beanName, alias);
-		}
-
-		// Has this effectively been overridden before (e.g. via XML)?
-		if (isOverriddenByExistingDefinition(beanMethod, beanName)) {
-			return;
-		}
 
 		AnnotationConfigUtils.processCommonDefinitionAnnotations(beanDef, metadata);
 
