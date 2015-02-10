@@ -45,8 +45,8 @@ public class AlternativeJdkIdGenerator implements IdGenerator {
 	}
 
 
+	@Override
 	public UUID generateId() {
-
 		byte[] randomBytes = new byte[16];
 		this.random.nextBytes(randomBytes);
 

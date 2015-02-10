@@ -272,7 +272,7 @@ public class Jackson2ObjectMapperBuilder {
 	 * @see com.fasterxml.jackson.databind.ObjectMapper#addMixInAnnotations(Class, Class)
 	 */
 	public Jackson2ObjectMapperBuilder mixIn(Class<?> target, Class<?> mixinSource) {
-		if (mixIns != null) {
+		if (mixinSource != null) {
 			this.mixIns.put(target, mixinSource);
 		}
 		return this;

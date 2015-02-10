@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -68,7 +68,6 @@ public class SimpleBrokerMessageHandler extends AbstractBrokerMessageHandler {
 
 	/**
 	 * Configure a custom SubscriptionRegistry to use for storing subscriptions.
-	 *
 	 * <p><strong>Note</strong> that when a custom PathMatcher is configured via
 	 * {@link #setPathMatcher}, if the custom registry is not an instance of
 	 * {@link DefaultSubscriptionRegistry}, the provided PathMatcher is not used
@@ -102,9 +101,8 @@ public class SimpleBrokerMessageHandler extends AbstractBrokerMessageHandler {
 	}
 
 	/**
-	 * Configure a {@link MessageHeaderInitializer} to apply to the headers of all
-	 * messages sent to the client outbound channel.
-	 *
+	 * Configure a {@link MessageHeaderInitializer} to apply to the headers
+	 * of all messages sent to the client outbound channel.
 	 * <p>By default this property is not set.
 	 */
 	public void setHeaderInitializer(MessageHeaderInitializer headerInitializer) {
@@ -112,7 +110,7 @@ public class SimpleBrokerMessageHandler extends AbstractBrokerMessageHandler {
 	}
 
 	/**
-	 * @return the configured header initializer.
+	 * Return the configured header initializer.
 	 */
 	public MessageHeaderInitializer getHeaderInitializer() {
 		return this.headerInitializer;
@@ -131,7 +129,6 @@ public class SimpleBrokerMessageHandler extends AbstractBrokerMessageHandler {
 
 	@Override
 	protected void handleMessageInternal(Message<?> message) {
-
 		MessageHeaders headers = message.getHeaders();
 		SimpMessageType messageType = SimpMessageHeaderAccessor.getMessageType(headers);
 		String destination = SimpMessageHeaderAccessor.getDestination(headers);
@@ -197,7 +194,7 @@ public class SimpleBrokerMessageHandler extends AbstractBrokerMessageHandler {
 
 	protected void sendMessageToSubscribers(String destination, Message<?> message) {
 		MultiValueMap<String,String> subscriptions = this.subscriptionRegistry.findSubscriptions(message);
-		if ((subscriptions.size() > 0) && logger.isDebugEnabled()) {
+		if (!subscriptions.isEmpty() && logger.isDebugEnabled()) {
 			logger.debug("Broadcasting to " + subscriptions.size() + " sessions.");
 		}
 		for (String sessionId : subscriptions.keySet()) {
