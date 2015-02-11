@@ -49,6 +49,7 @@ import org.springframework.beans.FatalBeanException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.StringUtils;
 
 /**
  * A builder used to create {@link ObjectMapper} instances with a fluent API.
@@ -74,7 +75,7 @@ import org.springframework.util.ClassUtils;
  */
 public class Jackson2ObjectMapperBuilder {
 
-	private boolean createXmlMapper;
+	private boolean createXmlMapper = false;
 
 	private DateFormat dateFormat;
 
@@ -100,7 +101,7 @@ public class Jackson2ObjectMapperBuilder {
 
 	private Class<? extends Module>[] moduleClasses;
 
-	private boolean findModulesViaServiceLoader;
+	private boolean findModulesViaServiceLoader = false;
 
 	private boolean findWellKnownModules = true;
 
@@ -154,6 +155,17 @@ public class Jackson2ObjectMapperBuilder {
 	}
 
 	/**
+	 * Override the default {@link Locale} to use for formatting.
+	 * Default value used is {@link Locale#getDefault()}.
+	 * @param localeString the locale ID as a String representation
+	 * @since 4.1.5
+	 */
+	public Jackson2ObjectMapperBuilder locale(String localeString) {
+		this.locale = StringUtils.parseLocaleString(localeString);
+		return this;
+	}
+
+	/**
 	 * Override the default {@link TimeZone} to use for formatting.
 	 * Default value used is UTC (NOT local timezone).
 	 * @since 4.1.5
@@ -166,11 +178,11 @@ public class Jackson2ObjectMapperBuilder {
 	/**
 	 * Override the default {@link TimeZone} to use for formatting.
 	 * Default value used is UTC (NOT local timezone).
-	 * @param zoneId the time-zone ID
+	 * @param timeZoneString the zone ID as a String representation
 	 * @since 4.1.5
 	 */
-	public Jackson2ObjectMapperBuilder timeZone(String zoneId) {
-		this.timeZone = TimeZone.getTimeZone(zoneId);
+	public Jackson2ObjectMapperBuilder timeZone(String timeZoneString) {
+		this.timeZone = StringUtils.parseTimeZoneString(timeZoneString);
 		return this;
 	}
 
@@ -528,8 +540,8 @@ public class Jackson2ObjectMapperBuilder {
 		else if (this.findWellKnownModules) {
 			registerWellKnownModulesIfAvailable(objectMapper);
 		}
+
 		if (this.modules != null) {
-			// Complete list of modules given
 			for (Module module : this.modules) {
 				// Using Jackson 2.0+ registerModule method, not Jackson 2.2+ registerModules
 				objectMapper.registerModule(module);

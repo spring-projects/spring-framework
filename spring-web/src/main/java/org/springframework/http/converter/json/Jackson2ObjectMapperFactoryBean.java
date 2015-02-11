@@ -192,16 +192,6 @@ public class Jackson2ObjectMapperFactoryBean implements FactoryBean<ObjectMapper
 	}
 
 	/**
-	 * Override the default {@link TimeZone} to use for formatting.
-	 * Default value used is UTC (NOT local timezone).
-	 * @param zoneId the time-zone ID
-	 * @since 4.1.5
-	 */
-	public void setTimeZone(String zoneId) {
-		this.builder.timeZone(zoneId);
-	}
-
-	/**
 	 * Set an {@link AnnotationIntrospector} for both serialization and deserialization.
 	 */
 	public void setAnnotationIntrospector(AnnotationIntrospector annotationIntrospector) {

@@ -55,7 +55,6 @@ import com.fasterxml.jackson.databind.ser.std.ClassSerializer;
 import com.fasterxml.jackson.databind.ser.std.NumberSerializer;
 import com.fasterxml.jackson.databind.type.SimpleType;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
-import static org.hamcrest.Matchers.containsString;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.junit.Before;
@@ -63,6 +62,7 @@ import org.junit.Test;
 
 import org.springframework.beans.FatalBeanException;
 
+import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
 /**
@@ -198,7 +198,7 @@ public class Jackson2ObjectMapperFactoryBeanTests {
 	public void timeZoneStringSetter() {
 		String zoneId = "Europe/Paris";
 
-		this.factory.setTimeZone(zoneId);
+		this.factory.setTimeZone(TimeZone.getTimeZone(zoneId));
 		this.factory.afterPropertiesSet();
 
 		TimeZone timeZone = TimeZone.getTimeZone(zoneId);
@@ -210,7 +210,7 @@ public class Jackson2ObjectMapperFactoryBeanTests {
 	public void wrongTimeZoneStringSetter() {
 		String zoneId = "foo";
 
-		this.factory.setTimeZone(zoneId);
+		this.factory.setTimeZone(TimeZone.getTimeZone(zoneId));
 		this.factory.afterPropertiesSet();
 
 		TimeZone timeZone = TimeZone.getTimeZone("GMT");
@@ -224,7 +224,7 @@ public class Jackson2ObjectMapperFactoryBeanTests {
 		SimpleModule module = new SimpleModule();
 		module.addSerializer(Integer.class, serializer1);
 
-		this.factory.setModules(Arrays.asList(new Module[] {module}));
+		this.factory.setModules(Arrays.asList(new Module[]{module}));
 		this.factory.afterPropertiesSet();
 		ObjectMapper objectMapper = this.factory.getObject();
 
@@ -397,6 +397,7 @@ public class Jackson2ObjectMapperFactoryBeanTests {
 		assertEquals(XmlMapper.class, this.factory.getObjectType());
 	}
 
+
 	public static class CustomIntegerModule extends Module {
 
 		@Override
@@ -417,10 +418,11 @@ public class Jackson2ObjectMapperFactoryBeanTests {
 		}
 	}
 
+
 	public static class CustomIntegerSerializer extends JsonSerializer<Integer> {
 
 		@Override
-		public void serialize(Integer value, JsonGenerator gen, SerializerProvider serializers) throws IOException, JsonProcessingException {
+		public void serialize(Integer value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
 			gen.writeStartObject();
 			gen.writeNumberField("customid", value);
 			gen.writeEndObject();
