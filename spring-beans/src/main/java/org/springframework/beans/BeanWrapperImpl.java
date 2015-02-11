@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -78,6 +78,7 @@ import org.springframework.util.StringUtils;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @author Rob Harrop
+ * @author Stephane Nicoll
  * @since 15 April 2001
  * @see #registerCustomEditor
  * @see #setPropertyValues
@@ -978,6 +979,14 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 					}
 					Object convertedValue = convertIfNecessary(propertyName, oldValue, pv.getValue(),
 							requiredType, TypeDescriptor.nested(property(pd), tokens.keys.length));
+					int length = Array.getLength(propValue);
+					if (arrayIndex >= length && arrayIndex < this.autoGrowCollectionLimit) {
+						Class<?> componentType = propValue.getClass().getComponentType();
+						Object newArray = Array.newInstance(componentType, arrayIndex + 1);
+						System.arraycopy(propValue, 0, newArray, 0, length);
+						setPropertyValue(actualName, newArray);
+						propValue = getPropertyValue(actualName);
+					}
 					Array.set(propValue, arrayIndex, convertedValue);
 				}
 				catch (IndexOutOfBoundsException ex) {
