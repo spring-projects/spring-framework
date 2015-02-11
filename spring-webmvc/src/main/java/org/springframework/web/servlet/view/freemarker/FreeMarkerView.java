@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -186,6 +186,7 @@ public class FreeMarkerView extends AbstractTemplateView {
 	 * {@link ObjectWrapper#DEFAULT_WRAPPER default wrapper} if none specified.
 	 * @see freemarker.template.Configuration#getObjectWrapper()
 	 */
+	@SuppressWarnings("deprecation")
 	protected ObjectWrapper getObjectWrapper() {
 		ObjectWrapper ow = getConfiguration().getObjectWrapper();
 		return (ow != null ? ow : ObjectWrapper.DEFAULT_WRAPPER);
