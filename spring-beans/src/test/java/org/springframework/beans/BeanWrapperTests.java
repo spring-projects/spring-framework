@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -516,6 +516,36 @@ public final class BeanWrapperTests extends AbstractConfigurablePropertyAccessor
 		bw.setPropertyValue("stringArray", "a1-b2");
 		assertTrue("stringArray length = 2", pt.stringArray.length == 2);
 		assertTrue("correct values", pt.stringArray[0].equals("a1") && pt.stringArray[1].equals("b2"));
+	}
+
+	@Test
+	public void testStringArrayAutoGrow() throws Exception {
+		StringArrayBean target = new StringArrayBean();
+		BeanWrapper bw = new BeanWrapperImpl(target);
+		bw.setAutoGrowNestedPaths(true);
+
+		bw.setPropertyValue("array[0]", "Test0");
+		assertEquals(1, target.getArray().length);
+
+		bw.setPropertyValue("array[2]", "Test2");
+		assertEquals(3, target.getArray().length);
+		assertTrue("correct values", target.getArray()[0].equals("Test0") && target.getArray()[1] == null &&
+				target.getArray()[2].equals("Test2"));
+	}
+
+	@Test
+	public void testPrimitiveArrayAutoGrow() throws Exception {
+		PrimitiveArrayBean target = new PrimitiveArrayBean();
+		BeanWrapper bw = new BeanWrapperImpl(target);
+		bw.setAutoGrowNestedPaths(true);
+
+		bw.setPropertyValue("array[0]", 1);
+		assertEquals(1, target.getArray().length);
+
+		bw.setPropertyValue("array[2]", 3);
+		assertEquals(3, target.getArray().length);
+		assertTrue("correct values", target.getArray()[0] == 1 && target.getArray()[1] == 0 &&
+				target.getArray()[2] == 3);
 	}
 
 	@Test
@@ -1719,6 +1749,20 @@ public final class BeanWrapperTests extends AbstractConfigurablePropertyAccessor
 		}
 
 		public void setArray(int[] array) {
+			this.array = array;
+		}
+	}
+
+	@SuppressWarnings("unused")
+	private static class StringArrayBean {
+
+		private String[] array;
+
+		public String[] getArray() {
+			return array;
+		}
+
+		public void setArray(String[] array) {
 			this.array = array;
 		}
 	}
