@@ -734,6 +734,17 @@ public class RequestContext {
 		String msg = this.webApplicationContext.getMessage(resolvable, this.locale);
 		return (htmlEscape ? HtmlUtils.htmlEscape(msg) : msg);
 	}
+	
+	/**
+	 * Return the user-agent of current browser, may be null.
+	 * Used by Freemarker (or other) to carry out different view to different device.
+	 * example ${springMacroRequestContext.userAgent!'NULL'}
+	 * @return the user-agent
+	 */
+	public String getUserAgent() {
+		String userAgent = this.request.getHeader("user-agent");
+		return userAgent;
+	}
 
 	/**
 	 * Retrieve the theme message for the given code.
