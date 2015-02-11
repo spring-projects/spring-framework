@@ -143,7 +143,6 @@ configure(allprojects) { project ->
 
 		inputs.dir sourceSets.main.output.classesDir
 		inputs.dir copyJavaApiSignature.to
-		outputs.upToDateWhen { true }
 
 		doLast {
 			ant.taskdef(
@@ -625,6 +624,7 @@ project("spring-context-support") {
 			exclude group: "com.fasterxml.jackson.core", module: "jackson-databind"
 			exclude group: "org.olap4j", module: "olap4j"
 			exclude group: "xml-apis", module: "xml-apis"
+			exclude group: "org.springframework", module: "spring-context"
 		}
 		testCompile(project(":spring-context"))
 		testCompile("org.apache.poi:poi:3.10.1")
@@ -839,6 +839,7 @@ project("spring-webmvc") {
 			exclude group: "com.fasterxml.jackson.core", module: "jackson-databind"
 			exclude group: "org.olap4j", module: "olap4j"
 			exclude group: "xml-apis", module: "xml-apis"
+			exclude group: "org.springframework", module: "spring-context"
 		}
 		optional("com.fasterxml.jackson.core:jackson-databind:${jackson2Version}")
 		optional("com.fasterxml.jackson.dataformat:jackson-dataformat-xml:${jackson2Version}")
