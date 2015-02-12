@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,7 +37,9 @@ import static org.junit.Assert.*;
  */
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration
-@TestPropertySource(properties = { "foo = bar", "enigma: 42" })
+@TestPropertySource(properties = { "foo = bar", "baz quux", "enigma: 42",
+	"x.y.z = a=b=c", "server.url = http://example.com", "key.value.1: key=value",
+	"key.value.2 key=value", "key.value.3 key:value" })
 public class InlinedPropertiesTestPropertySourceTests {
 
 	@Autowired
@@ -47,7 +49,13 @@ public class InlinedPropertiesTestPropertySourceTests {
 	@Test
 	public void verifyPropertiesAreAvailableInEnvironment() {
 		assertEquals("bar", env.getProperty("foo"));
+		assertEquals("quux", env.getProperty("baz"));
 		assertEquals(42, env.getProperty("enigma", Integer.class).intValue());
+		assertEquals("a=b=c", env.getProperty("x.y.z"));
+		assertEquals("http://example.com", env.getProperty("server.url"));
+		assertEquals("key=value", env.getProperty("key.value.1"));
+		assertEquals("key=value", env.getProperty("key.value.2"));
+		assertEquals("key:value", env.getProperty("key.value.3"));
 	}
 
 
