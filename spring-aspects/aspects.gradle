@@ -56,6 +56,7 @@ compileTestJava  {
 
 	ext.sourceCompatibility = project(":spring-core").compileTestJava.sourceCompatibility
 	ext.targetCompatibility = project(":spring-core").compileTestJava.targetCompatibility
+	ext.pathSeparator = System.getProperty('path.separator')
 
 	doLast{
 		ant.taskdef(resource: "org/aspectj/tools/ant/taskdefs/aspectjTaskdefs.properties",
@@ -66,8 +67,7 @@ compileTestJava  {
 				destDir: outputDir.absolutePath,
 				aspectPath: jar.archivePath,
 				inpath: configurations.ajInpath.asPath,
-				classpath: sourceSets.test.runtimeClasspath.asPath + jar.archivePath +
-				           System.getProperty("path.separator") + configurations.rt.asPath) {
+				classpath: sourceSets.test.runtimeClasspath.asPath + pathSeparator + jar.archivePath + pathSeparator + configurations.rt.asPath) {
 			sourceroots {
 				sourceSets.test.java.srcDirs.each {
 					pathelement(location:it.absolutePath)
