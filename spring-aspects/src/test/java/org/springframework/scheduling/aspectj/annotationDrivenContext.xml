@@ -7,12 +7,10 @@
 				http://www.springframework.org/schema/task
 				http://www.springframework.org/schema/task/spring-task.xsd">
 
-	<task:annotation-driven executor="testExecutor" scheduler="testScheduler"
+	<task:annotation-driven mode="aspectj" executor="testExecutor"
 							exception-handler="testExceptionHandler"/>
 
 	<task:executor id="testExecutor"/>
-
-	<task:scheduler id="testScheduler"/>
 
 	<bean id="testExceptionHandler"
 		  class="org.springframework.aop.interceptor.SimpleAsyncUncaughtExceptionHandler"/>
