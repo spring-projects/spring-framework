@@ -42,6 +42,7 @@ configure(allprojects) { project ->
 	ext.jasperReportsVersion = "6.0.3"
 	ext.jettyVersion         = "9.2.7.v20150116"
 	ext.jodaVersion          = "2.6"
+	ext.jtaVersion           = "1.2"
 	ext.junitVersion         = "4.12"
 	ext.nettyVersion         = "4.0.25.Final"
 	ext.openJpaVersion       = "2.2.2"  // 2.3.0 not Java 8 compatible (based on ASM 4)
@@ -517,7 +518,7 @@ project("spring-tx") {
 		optional(project(":spring-aop"))
 		optional(project(":spring-context"))  // for JCA, @EnableTransactionManagement
 		optional("aopalliance:aopalliance:1.0")
-		optional("javax.transaction:javax.transaction-api:1.2")
+		optional("javax.transaction:javax.transaction-api:${jtaVersion}")
 		optional("javax.resource:connector-api:1.5")
 		optional("javax.ejb:ejb-api:3.0")
 		optional("com.ibm.websphere:uow:6.0.2.17")
@@ -577,7 +578,7 @@ project("spring-jms") {
 		provided("javax.jms:jms-api:1.1-rev-1")
 		optional(project(":spring-oxm"))
 		optional("aopalliance:aopalliance:1.0")
-		optional("javax.transaction:javax.transaction-api:1.2")
+		optional("javax.transaction:javax.transaction-api:${jtaVersion}")
 		optional("javax.resource:connector-api:1.5")
 		optional("com.fasterxml.jackson.core:jackson-databind:${jackson2Version}")
 	}
@@ -591,7 +592,7 @@ project("spring-jdbc") {
 		compile(project(":spring-core"))
 		compile(project(":spring-tx"))
 		optional(project(":spring-context"))  // for JndiDataSourceLookup
-		optional("javax.transaction:javax.transaction-api:1.2")
+		optional("javax.transaction:javax.transaction-api:${jtaVersion}")
 		optional("com.mchange:c3p0:0.9.2.1")
 		optional("org.hsqldb:hsqldb:${hsqldbVersion}")
 		optional("com.h2database:h2:1.4.182")
@@ -1035,6 +1036,7 @@ project("spring-aspects") {
 		optional(project(":spring-context-support"))  // for JavaMail and JSR-107 support
 		optional(project(":spring-orm"))  // for JPA exception translation support
 		optional(project(":spring-tx"))  // for JPA, @Transactional support
+		optional("javax.transaction:javax.transaction-api:${jtaVersion}")  // for @javax.transaction.Transactional support
 		optional("javax.cache:cache-api:1.0.0")
 		testCompile(project(":spring-core"))  // for CodeStyleAspect
 		testCompile(project(":spring-test"))

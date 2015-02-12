@@ -16060,6 +16060,13 @@ transaction semantics given by the class annotation (if present). Methods with `
 default visibility methods directly is the only way to get transaction demarcation for
 the execution of such methods.
 
+[TIP]
+====
+Since Spring Framework 4.2, `spring-aspects` provides a similar aspect that offers the
+exact same features for the standard `javax.transaction.Transactional` annotation. Check
+`JtaAnnotationTransactionAspect` for more details.
+====
+
 For AspectJ programmers that want to use the Spring configuration and transaction
 management support but don't want to (or cannot) use annotations, `spring-aspects.jar`
 also contains `abstract` aspects you can extend to provide your own pointcut
@@ -23761,6 +23768,13 @@ use an annotation-based approach. Declaring transaction semantics directly in th
 source code puts the declarations much closer to the affected code. There is not much
 danger of undue coupling, because code that is meant to be used transactionally is
 almost always deployed that way anyway.
+
+[NOTE]
+====
+The standard `javax.transaction.Transactional` annotation is also supported as a drop-in
+replacement to Spring's own annotation. Please refer to JTA 1.2 documentation for more
+details.
+====
 
 The ease-of-use afforded by the use of the `@Transactional` annotation is best
 illustrated with an example, which is explained in the text that follows. Consider the
