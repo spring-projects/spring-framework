@@ -88,11 +88,10 @@ public abstract class AbstractWebSocketHandlerRegistration<M> implements WebSock
 	}
 
 	@Override
-	public WebSocketHandlerRegistration setAllowedOrigins(String... origins) {
-		Assert.notEmpty(origins, "No allowed origin specified");
+	public WebSocketHandlerRegistration setAllowedOrigins(String... allowedOrigins) {
 		this.allowedOrigins.clear();
-		if (!ObjectUtils.isEmpty(origins)) {
-			this.allowedOrigins.addAll(Arrays.asList(origins));
+		if (!ObjectUtils.isEmpty(allowedOrigins)) {
+			this.allowedOrigins.addAll(Arrays.asList(allowedOrigins));
 		}
 		return this;
 	}
@@ -117,11 +116,7 @@ public abstract class AbstractWebSocketHandlerRegistration<M> implements WebSock
 	protected HandshakeInterceptor[] getInterceptors() {
 		List<HandshakeInterceptor> interceptors = new ArrayList<HandshakeInterceptor>();
 		interceptors.addAll(this.interceptors);
-		if (!this.allowedOrigins.isEmpty()) {
-			OriginHandshakeInterceptor interceptor = new OriginHandshakeInterceptor();
-			interceptor.setAllowedOrigins(this.allowedOrigins);
-			interceptors.add(interceptor);
-		}
+		interceptors.add(new OriginHandshakeInterceptor(this.allowedOrigins));
 		return interceptors.toArray(new HandshakeInterceptor[interceptors.size()]);
 	}
 

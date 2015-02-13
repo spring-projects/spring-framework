@@ -85,10 +85,11 @@ public class WebMvcStompWebSocketEndpointRegistration implements StompWebSocketE
 	}
 
 	@Override
-	public StompWebSocketEndpointRegistration setAllowedOrigins(String... origins) {
-		Assert.notEmpty(origins, "No allowed origin specified");
+	public StompWebSocketEndpointRegistration setAllowedOrigins(String... allowedOrigins) {
 		this.allowedOrigins.clear();
-		this.allowedOrigins.addAll(Arrays.asList(origins));
+		if (!ObjectUtils.isEmpty(allowedOrigins)) {
+			this.allowedOrigins.addAll(Arrays.asList(allowedOrigins));
+		}
 		return this;
 	}
 
@@ -112,11 +113,7 @@ public class WebMvcStompWebSocketEndpointRegistration implements StompWebSocketE
 	protected HandshakeInterceptor[] getInterceptors() {
 		List<HandshakeInterceptor> interceptors = new ArrayList<HandshakeInterceptor>();
 		interceptors.addAll(this.interceptors);
-		if (!this.allowedOrigins.isEmpty()) {
-			OriginHandshakeInterceptor interceptor = new OriginHandshakeInterceptor();
-			interceptor.setAllowedOrigins(this.allowedOrigins);
-			interceptors.add(interceptor);
-		}
+		interceptors.add(new OriginHandshakeInterceptor(this.allowedOrigins));
 		return interceptors.toArray(new HandshakeInterceptor[interceptors.size()]);
 	}
 

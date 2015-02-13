@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,18 @@
 
 package org.springframework.web.util;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.junit.Test;
 
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.server.ServerHttpRequest;
+import org.springframework.http.server.ServletServerHttpRequest;
+import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.util.MultiValueMap;
 
 import static org.junit.Assert.*;
@@ -30,6 +36,7 @@ import static org.junit.Assert.*;
  * @author Juergen Hoeller
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
+ * @author Sebastien Deleuze
  */
 public class WebUtilsTests {
 
@@ -96,6 +103,59 @@ public class WebUtilsTests {
 		variables = WebUtils.parseMatrixVariables("colors=red;colors=blue;colors=green");
 		assertEquals(1, variables.size());
 		assertEquals(Arrays.asList("red", "blue", "green"), variables.get("colors"));
+	}
+
+	@Test
+	public void isValidOrigin() {
+		List<String> allowedOrigins = new ArrayList<>();
+		MockHttpServletRequest servletRequest = new MockHttpServletRequest();
+		ServerHttpRequest request = new ServletServerHttpRequest(servletRequest);
+
+		servletRequest.setServerName("mydomain1.com");
+		request.getHeaders().set(HttpHeaders.ORIGIN, "http://mydomain1.com");
+		assertTrue(WebUtils.isValidOrigin(request, allowedOrigins));
+
+		servletRequest.setServerName("mydomain1.com");
+		request.getHeaders().set(HttpHeaders.ORIGIN, "http://mydomain1.com:80");
+		assertTrue(WebUtils.isValidOrigin(request, allowedOrigins));
+
+		servletRequest.setServerName("mydomain1.com");
+		servletRequest.setServerPort(443);
+		request.getHeaders().set(HttpHeaders.ORIGIN, "https://mydomain1.com");
+		assertTrue(WebUtils.isValidOrigin(request, allowedOrigins));
+
+		servletRequest.setServerName("mydomain1.com");
+		servletRequest.setServerPort(443);
+		request.getHeaders().set(HttpHeaders.ORIGIN, "https://mydomain1.com:443");
+		assertTrue(WebUtils.isValidOrigin(request, allowedOrigins));
+
+		servletRequest.setServerName("mydomain1.com");
+		servletRequest.setServerPort(123);
+		request.getHeaders().set(HttpHeaders.ORIGIN, "http://mydomain1.com:123");
+		assertTrue(WebUtils.isValidOrigin(request, allowedOrigins));
+
+		servletRequest.setServerName("mydomain1.com");
+		request.getHeaders().set(HttpHeaders.ORIGIN, "http://mydomain2.com");
+		assertFalse(WebUtils.isValidOrigin(request, allowedOrigins));
+
+		servletRequest.setServerName("mydomain1.com");
+		request.getHeaders().set(HttpHeaders.ORIGIN, "https://mydomain1.com");
+		assertFalse(WebUtils.isValidOrigin(request, allowedOrigins));
+
+		allowedOrigins = Arrays.asList("*");
+		servletRequest.setServerName("mydomain1.com");
+		request.getHeaders().set(HttpHeaders.ORIGIN, "http://mydomain2.com");
+		assertTrue(WebUtils.isValidOrigin(request, allowedOrigins));
+
+		allowedOrigins = Arrays.asList("http://mydomain1.com");
+		servletRequest.setServerName("mydomain2.com");
+		request.getHeaders().set(HttpHeaders.ORIGIN, "http://mydomain1.com");
+		assertTrue(WebUtils.isValidOrigin(request, allowedOrigins));
+
+		allowedOrigins = Arrays.asList("http://mydomain1.com");
+		servletRequest.setServerName("mydomain2.com");
+		request.getHeaders().set(HttpHeaders.ORIGIN, "http://mydomain3.com");
+		assertFalse(WebUtils.isValidOrigin(request, allowedOrigins));
 	}
 
 }

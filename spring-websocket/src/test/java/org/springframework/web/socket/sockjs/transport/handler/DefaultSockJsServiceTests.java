@@ -122,19 +122,15 @@ public class DefaultSockJsServiceTests extends AbstractHttpRequestTests {
 		assertSame(xhrHandler, handlers.get(xhrHandler.getTransportType()));
 	}
 
-	@Test
-	public void defaultAllowedOrigin() {
-		assertThat(this.service.getAllowedOrigins(), Matchers.contains("*"));
-	}
-
 	@Test(expected = IllegalArgumentException.class)
 	public void nullAllowedOriginList() {
 		this.service.setAllowedOrigins(null);
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void emptyAllowedOriginList() {
 		this.service.setAllowedOrigins(Arrays.asList());
+		assertThat(this.service.getAllowedOrigins(), Matchers.empty());
 	}
 
 	@Test(expected = IllegalArgumentException.class)
@@ -271,13 +267,19 @@ public class DefaultSockJsServiceTests extends AbstractHttpRequestTests {
 		String sockJsPath = sessionUrlPrefix+ "jsonp";
 		setRequest("GET", sockJsPrefix + sockJsPath);
 		jsonpService.handleRequest(this.request, this.response, sockJsPath, this.wsHandler);
-		assertNotEquals(404, this.servletResponse.getStatus());
+		assertEquals(404, this.servletResponse.getStatus());
 
 		resetRequestAndResponse();
 		jsonpService.setAllowedOrigins(Arrays.asList("http://mydomain1.com"));
 		setRequest("GET", sockJsPrefix + sockJsPath);
 		jsonpService.handleRequest(this.request, this.response, sockJsPath, this.wsHandler);
 		assertEquals(404, this.servletResponse.getStatus());
+
+		resetRequestAndResponse();
+		jsonpService.setAllowedOrigins(Arrays.asList("*"));
+		setRequest("GET", sockJsPrefix + sockJsPath);
+		jsonpService.handleRequest(this.request, this.response, sockJsPath, this.wsHandler);
+		assertNotEquals(404, this.servletResponse.getStatus());
 	}
 
 	@Test
@@ -289,8 +291,7 @@ public class DefaultSockJsServiceTests extends AbstractHttpRequestTests {
 		assertNotEquals(403, this.servletResponse.getStatus());
 
 		resetRequestAndResponse();
-		OriginHandshakeInterceptor interceptor = new OriginHandshakeInterceptor();
-		interceptor.setAllowedOrigins(Arrays.asList("http://mydomain1.com"));
+		OriginHandshakeInterceptor interceptor = new OriginHandshakeInterceptor(Arrays.asList("http://mydomain1.com"));
 		wsService.setHandshakeInterceptors(Arrays.asList(interceptor));
 		setRequest("GET", sockJsPrefix + sockJsPath);
 		setOrigin("http://mydomain1.com");
@@ -310,13 +311,21 @@ public class DefaultSockJsServiceTests extends AbstractHttpRequestTests {
 		setRequest("GET", sockJsPrefix + sockJsPath);
 		this.service.handleRequest(this.request, this.response, sockJsPath, this.wsHandler);
 		assertNotEquals(404, this.servletResponse.getStatus());
-		assertNull(this.servletResponse.getHeader("X-Frame-Options"));
+		assertEquals("SAMEORIGIN", this.servletResponse.getHeader("X-Frame-Options"));
 
 		resetRequestAndResponse();
 		setRequest("GET", sockJsPrefix + sockJsPath);
 		this.service.setAllowedOrigins(Arrays.asList("http://mydomain1.com"));
 		this.service.handleRequest(this.request, this.response, sockJsPath, this.wsHandler);
 		assertEquals(404, this.servletResponse.getStatus());
+		assertNull(this.servletResponse.getHeader("X-Frame-Options"));
+
+		resetRequestAndResponse();
+		setRequest("GET", sockJsPrefix + sockJsPath);
+		this.service.setAllowedOrigins(Arrays.asList("*"));
+		this.service.handleRequest(this.request, this.response, sockJsPath, this.wsHandler);
+		assertNotEquals(404, this.servletResponse.getStatus());
+		assertNull(this.servletResponse.getHeader("X-Frame-Options"));
 	}
 
 

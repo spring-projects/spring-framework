@@ -52,8 +52,8 @@ public interface StompWebSocketEndpointRegistration {
 	 * As a consequence, IE 6 to 9 are not supported when origins are restricted.
 	 *
 	 * <p>Each provided allowed origin must start by "http://", "https://" or be "*"
-	 * (means that all origins are allowed). Empty allowed origin list is not supported.
-	 * By default, all origins are allowed.
+	 * (means that all origins are allowed). By default, only same origin requests are
+	 * allowed (empty list).
 	 *
 	 * @since 4.1.2
 	 * @see <a href="https://tools.ietf.org/html/rfc6454">RFC 6454: The Web Origin Concept</a>

@@ -31,6 +31,7 @@ import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.util.Assert;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.server.HandshakeInterceptor;
+import org.springframework.web.util.WebUtils;
 
 /**
  * An interceptor to check request {@code Origin} header value against a collection of
@@ -47,10 +48,20 @@ public class OriginHandshakeInterceptor implements HandshakeInterceptor {
 
 
 	/**
-	 * Default constructor with no origin allowed.
+	 * Default constructor with only same origin requests allowed.
 	 */
 	public OriginHandshakeInterceptor() {
 		this.allowedOrigins = new ArrayList<String>();
+	}
+
+	/**
+	 * Constructor using the specified allowed origin values.
+	 *
+	 * @see #setAllowedOrigins(Collection)
+	 */
+	public OriginHandshakeInterceptor(Collection<String> allowedOrigins) {
+		this();
+		setAllowedOrigins(allowedOrigins);
 	}
 
 	/**
@@ -85,7 +96,7 @@ public class OriginHandshakeInterceptor implements HandshakeInterceptor {
 	@Override
 	public boolean beforeHandshake(ServerHttpRequest request, ServerHttpResponse response,
 			WebSocketHandler wsHandler, Map<String, Object> attributes) throws Exception {
-		if (!isValidOrigin(request)) {
+		if (!WebUtils.isValidOrigin(request, this.allowedOrigins)) {
 			response.setStatusCode(HttpStatus.FORBIDDEN);
 			if (logger.isDebugEnabled()) {
 				logger.debug("Handshake request rejected, Origin header value "
@@ -94,17 +105,6 @@ public class OriginHandshakeInterceptor implements HandshakeInterceptor {
 			return false;
 		}
 		return true;
-	}
-
-	protected boolean isValidOrigin(ServerHttpRequest request) {
-		String origin = request.getHeaders().getOrigin();
-		if (origin == null) {
-			return true;
-		}
-		if (this.allowedOrigins.contains("*")) {
-			return true;
-		}
-		return this.allowedOrigins.contains(origin);
 	}
 
 	@Override
