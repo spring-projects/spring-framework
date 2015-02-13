@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.web.util;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.Enumeration;
+import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.TreeMap;
@@ -32,6 +33,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.util.Assert;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -43,6 +45,7 @@ import org.springframework.util.StringUtils;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
+ * @author Sebastien Deleuze
  */
 public abstract class WebUtils {
 
@@ -765,4 +768,47 @@ public abstract class WebUtils {
 		}
 		return result;
 	}
+
+	/**
+	 * Check the given request origin against a list of allowed origins.
+	 * A list containing "*" means that all origins are allowed.
+	 * An empty list means only same origin is allowed.
+	 *
+	 * @return true if the request origin is valid, false otherwise
+	 * @since 4.1.5
+	 * @see <a href="https://tools.ietf.org/html/rfc6454">RFC 6454: The Web Origin Concept</a>
+	 */
+	public static boolean isValidOrigin(ServerHttpRequest request, List<String> allowedOrigins) {
+		Assert.notNull(request, "Request must not be null");
+		Assert.notNull(allowedOrigins, "Allowed origins must not be null");
+
+		String origin = request.getHeaders().getOrigin();
+		if (origin == null || allowedOrigins.contains("*")) {
+			return true;
+		}
+		else if (allowedOrigins.isEmpty()) {
+			UriComponents originComponents = UriComponentsBuilder.fromHttpUrl(origin).build();
+			UriComponents requestComponents = UriComponentsBuilder.fromHttpRequest(request).build();
+			int originPort = getPort(originComponents);
+			int requestPort = getPort(requestComponents);
+			return originComponents.getHost().equals(requestComponents.getHost()) && (originPort == requestPort);
+		}
+		else {
+			return allowedOrigins.contains(origin);
+		}
+	}
+
+	private static int getPort(UriComponents component) {
+		int port = component.getPort();
+		if (port == -1) {
+			if ("http".equals(component.getScheme())) {
+				port = 80;
+			}
+			else if ("https".equals(component.getScheme())) {
+				port = 443;
+			}
+		}
+		return port;
+	}
+
 }

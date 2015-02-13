@@ -39,20 +39,22 @@ public class OriginHandshakeInterceptorTests extends AbstractHttpRequestTests {
 
 	@Test(expected = IllegalArgumentException.class)
 	public void nullAllowedOriginList() {
-		OriginHandshakeInterceptor interceptor = new OriginHandshakeInterceptor();
-		interceptor.setAllowedOrigins(null);
+		new OriginHandshakeInterceptor(null);
 	}
 
 	@Test(expected = IllegalArgumentException.class)
 	public void invalidAllowedOrigin() {
-		OriginHandshakeInterceptor interceptor = new OriginHandshakeInterceptor();
-		interceptor.setAllowedOrigins(Arrays.asList("domain.com"));
+		new OriginHandshakeInterceptor(Arrays.asList("domain.com"));
+	}
+
+	@Test
+	public void emtpyAllowedOriginList() {
+		new OriginHandshakeInterceptor(Arrays.asList());
 	}
 
 	@Test
 	public void validAllowedOrigins() {
-		OriginHandshakeInterceptor interceptor = new OriginHandshakeInterceptor();
-		interceptor.setAllowedOrigins(Arrays.asList("http://domain.com", "https://domain.com", "*"));
+		new OriginHandshakeInterceptor(Arrays.asList("http://domain.com", "https://domain.com", "*"));
 	}
 
 	@Test
@@ -60,8 +62,7 @@ public class OriginHandshakeInterceptorTests extends AbstractHttpRequestTests {
 		Map<String, Object> attributes = new HashMap<String, Object>();
 		WebSocketHandler wsHandler = Mockito.mock(WebSocketHandler.class);
 		setOrigin("http://mydomain1.com");
-		OriginHandshakeInterceptor interceptor = new OriginHandshakeInterceptor();
-		interceptor.setAllowedOrigins(Arrays.asList("http://mydomain1.com"));
+		OriginHandshakeInterceptor interceptor = new OriginHandshakeInterceptor(Arrays.asList("http://mydomain1.com"));
 		assertTrue(interceptor.beforeHandshake(request, response, wsHandler, attributes));
 		assertNotEquals(servletResponse.getStatus(), HttpStatus.FORBIDDEN.value());
 	}
@@ -71,8 +72,7 @@ public class OriginHandshakeInterceptorTests extends AbstractHttpRequestTests {
 		Map<String, Object> attributes = new HashMap<String, Object>();
 		WebSocketHandler wsHandler = Mockito.mock(WebSocketHandler.class);
 		setOrigin("http://mydomain1.com");
-		OriginHandshakeInterceptor interceptor = new OriginHandshakeInterceptor();
-		interceptor.setAllowedOrigins(Arrays.asList("http://mydomain2.com"));
+		OriginHandshakeInterceptor interceptor = new OriginHandshakeInterceptor(Arrays.asList("http://mydomain2.com"));
 		assertFalse(interceptor.beforeHandshake(request, response, wsHandler, attributes));
 		assertEquals(servletResponse.getStatus(), HttpStatus.FORBIDDEN.value());
 	}
@@ -82,8 +82,7 @@ public class OriginHandshakeInterceptorTests extends AbstractHttpRequestTests {
 		Map<String, Object> attributes = new HashMap<String, Object>();
 		WebSocketHandler wsHandler = Mockito.mock(WebSocketHandler.class);
 		setOrigin("http://mydomain2.com");
-		OriginHandshakeInterceptor interceptor = new OriginHandshakeInterceptor();
-		interceptor.setAllowedOrigins(Arrays.asList("http://mydomain1.com", "http://mydomain2.com", "http://mydomain3.com"));
+		OriginHandshakeInterceptor interceptor = new OriginHandshakeInterceptor(Arrays.asList("http://mydomain1.com", "http://mydomain2.com", "http://mydomain3.com"));
 		assertTrue(interceptor.beforeHandshake(request, response, wsHandler, attributes));
 		assertNotEquals(servletResponse.getStatus(), HttpStatus.FORBIDDEN.value());
 	}
@@ -93,8 +92,7 @@ public class OriginHandshakeInterceptorTests extends AbstractHttpRequestTests {
 		Map<String, Object> attributes = new HashMap<String, Object>();
 		WebSocketHandler wsHandler = Mockito.mock(WebSocketHandler.class);
 		setOrigin("http://mydomain4.com");
-		OriginHandshakeInterceptor interceptor = new OriginHandshakeInterceptor();
-		interceptor.setAllowedOrigins(Arrays.asList("http://mydomain1.com", "http://mydomain2.com", "http://mydomain3.com"));
+		OriginHandshakeInterceptor interceptor = new OriginHandshakeInterceptor(Arrays.asList("http://mydomain1.com", "http://mydomain2.com", "http://mydomain3.com"));
 		assertFalse(interceptor.beforeHandshake(request, response, wsHandler, attributes));
 		assertEquals(servletResponse.getStatus(), HttpStatus.FORBIDDEN.value());
 	}
@@ -121,6 +119,28 @@ public class OriginHandshakeInterceptorTests extends AbstractHttpRequestTests {
 		interceptor.setAllowedOrigins(Arrays.asList("*"));
 		assertTrue(interceptor.beforeHandshake(request, response, wsHandler, attributes));
 		assertNotEquals(servletResponse.getStatus(), HttpStatus.FORBIDDEN.value());
+	}
+
+	@Test
+	public void sameOriginMatch() throws Exception {
+		Map<String, Object> attributes = new HashMap<String, Object>();
+		WebSocketHandler wsHandler = Mockito.mock(WebSocketHandler.class);
+		setOrigin("http://mydomain2.com");
+		this.servletRequest.setServerName("mydomain2.com");
+		OriginHandshakeInterceptor interceptor = new OriginHandshakeInterceptor(Arrays.asList());
+		assertTrue(interceptor.beforeHandshake(request, response, wsHandler, attributes));
+		assertNotEquals(servletResponse.getStatus(), HttpStatus.FORBIDDEN.value());
+	}
+
+	@Test
+	public void sameOriginNoMatch() throws Exception {
+		Map<String, Object> attributes = new HashMap<String, Object>();
+		WebSocketHandler wsHandler = Mockito.mock(WebSocketHandler.class);
+		setOrigin("http://mydomain3.com");
+		this.servletRequest.setServerName("mydomain2.com");
+		OriginHandshakeInterceptor interceptor = new OriginHandshakeInterceptor(Arrays.asList());
+		assertFalse(interceptor.beforeHandshake(request, response, wsHandler, attributes));
+		assertEquals(servletResponse.getStatus(), HttpStatus.FORBIDDEN.value());
 	}
 
 }

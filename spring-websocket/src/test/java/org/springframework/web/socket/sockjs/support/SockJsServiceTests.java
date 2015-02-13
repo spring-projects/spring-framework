@@ -110,6 +110,7 @@ public class SockJsServiceTests extends AbstractHttpRequestTests {
 
 	@Test  // SPR-12226 and SPR-12660
 	public void handleInfoGetWithOrigin() throws Exception {
+		this.servletRequest.setServerName("mydomain2.com");
 		setOrigin("http://mydomain2.com");
 		resetResponseAndHandleRequest("GET", "/echo/info", HttpStatus.OK);
 
@@ -131,6 +132,12 @@ public class SockJsServiceTests extends AbstractHttpRequestTests {
 		assertNull(this.servletResponse.getHeader("Vary"));
 
 		this.service.setAllowedOrigins(Arrays.asList("http://mydomain1.com", "http://mydomain2.com", "http://mydomain3.com"));
+		resetResponseAndHandleRequest("GET", "/echo/info", HttpStatus.OK);
+		assertEquals("http://mydomain2.com", this.servletResponse.getHeader("Access-Control-Allow-Origin"));
+		assertEquals("true", this.servletResponse.getHeader("Access-Control-Allow-Credentials"));
+		assertEquals("Origin", this.servletResponse.getHeader("Vary"));
+
+		this.service.setAllowedOrigins(Arrays.asList("*"));
 		resetResponseAndHandleRequest("GET", "/echo/info", HttpStatus.OK);
 		assertEquals("http://mydomain2.com", this.servletResponse.getHeader("Access-Control-Allow-Origin"));
 		assertEquals("true", this.servletResponse.getHeader("Access-Control-Allow-Credentials"));
@@ -186,6 +193,7 @@ public class SockJsServiceTests extends AbstractHttpRequestTests {
 
 	@Test  // SPR-12226 and SPR-12660
 	public void handleInfoOptionsWithOrigin() throws Exception {
+		this.servletRequest.setServerName("mydomain2.com");
 		setOrigin("http://mydomain2.com");
 		this.request.getHeaders().add("Access-Control-Request-Headers", "Last-Modified");
 		resetResponseAndHandleRequest("OPTIONS", "/echo/info", HttpStatus.NO_CONTENT);
@@ -208,6 +216,16 @@ public class SockJsServiceTests extends AbstractHttpRequestTests {
 		assertNull(this.servletResponse.getHeader("Vary"));
 
 		this.service.setAllowedOrigins(Arrays.asList("http://mydomain1.com", "http://mydomain2.com", "http://mydomain3.com"));
+		resetResponseAndHandleRequest("OPTIONS", "/echo/info", HttpStatus.NO_CONTENT);
+		this.response.flush();
+		assertEquals("http://mydomain2.com", this.servletResponse.getHeader("Access-Control-Allow-Origin"));
+		assertEquals("true", this.servletResponse.getHeader("Access-Control-Allow-Credentials"));
+		assertEquals("Last-Modified", this.servletResponse.getHeader("Access-Control-Allow-Headers"));
+		assertEquals("OPTIONS, GET", this.servletResponse.getHeader("Access-Control-Allow-Methods"));
+		assertEquals("31536000", this.servletResponse.getHeader("Access-Control-Max-Age"));
+		assertEquals("Origin", this.servletResponse.getHeader("Vary"));
+
+		this.service.setAllowedOrigins(Arrays.asList("*"));
 		resetResponseAndHandleRequest("OPTIONS", "/echo/info", HttpStatus.NO_CONTENT);
 		this.response.flush();
 		assertEquals("http://mydomain2.com", this.servletResponse.getHeader("Access-Control-Allow-Origin"));

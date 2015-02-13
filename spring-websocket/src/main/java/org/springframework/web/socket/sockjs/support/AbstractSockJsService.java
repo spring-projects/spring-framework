@@ -46,11 +46,15 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.sockjs.SockJsException;
 import org.springframework.web.socket.sockjs.SockJsService;
+import org.springframework.web.util.WebUtils;
 
 /**
  * An abstract base class for {@link SockJsService} implementations that provides SockJS
  * path resolution and handling of static SockJS requests (e.g. "/info", "/iframe.html",
  * etc). Sub-classes must handle session URLs (i.e. transport-specific requests).
+ *
+ * By default, only same origin requests are allowed. Use {@link #setAllowedOrigins(List)}
+ * to specify a list of allowed origins (a list containing "*" will allow all origins).
  *
  * @author Rossen Stoyanchev
  * @author Sebastien Deleuze
@@ -63,6 +67,8 @@ public abstract class AbstractSockJsService implements SockJsService {
 	private static final long ONE_YEAR = TimeUnit.DAYS.toSeconds(365);
 
 	private static final Random random = new Random();
+
+	private static final String XFRAME_OPTIONS_HEADER = "X-Frame-Options";
 
 
 	protected final Log logger = LogFactory.getLog(getClass());
@@ -85,7 +91,7 @@ public abstract class AbstractSockJsService implements SockJsService {
 
 	private boolean webSocketEnabled = true;
 
-	private final List<String> allowedOrigins = new ArrayList<String>(Arrays.asList("*"));
+	private final List<String> allowedOrigins = new ArrayList<String>();
 
 	private boolean suppressCors = false;
 
@@ -275,15 +281,14 @@ public abstract class AbstractSockJsService implements SockJsService {
 	 * As a consequence, IE 6 to 9 are not supported when origins are restricted.
 	 *
 	 * <p>Each provided allowed origin must start by "http://", "https://" or be "*"
-	 * (means that all origins are allowed). Empty allowed origin list is not supported.
-	 * By default, all origins are allowed.
+	 * (means that all origins are allowed).
 	 *
 	 * @since 4.1.2
 	 * @see <a href="https://tools.ietf.org/html/rfc6454">RFC 6454: The Web Origin Concept</a>
 	 * @see <a href="https://github.com/sockjs/sockjs-client#supported-transports-by-browser-html-served-from-http-or-https">SockJS supported transports by browser</a>
 	 */
 	public void setAllowedOrigins(List<String> allowedOrigins) {
-		Assert.notEmpty(allowedOrigins, "Allowed origin List must not be empty");
+		Assert.notNull(allowedOrigins, "Allowed origin List must not be null");
 		for (String allowedOrigin : allowedOrigins) {
 			Assert.isTrue(
 					allowedOrigin.equals("*") || allowedOrigin.startsWith("http://") ||
@@ -359,6 +364,9 @@ public abstract class AbstractSockJsService implements SockJsService {
 					logger.debug("Iframe support is disabled when an origin check is required, ignoring " + requestInfo);
 					response.setStatusCode(HttpStatus.NOT_FOUND);
 					return;
+				}
+				if (this.allowedOrigins.isEmpty()) {
+					response.getHeaders().add(XFRAME_OPTIONS_HEADER, "SAMEORIGIN");
 				}
 				logger.debug(requestInfo);
 				this.iframeHandler.handle(request, response);
@@ -438,13 +446,12 @@ public abstract class AbstractSockJsService implements SockJsService {
 		HttpHeaders requestHeaders = request.getHeaders();
 		HttpHeaders responseHeaders = response.getHeaders();
 		String origin = requestHeaders.getOrigin();
-		String host = requestHeaders.getFirst(HttpHeaders.HOST);
 
 		if (origin == null) {
 			return true;
 		}
 
-		if (!this.allowedOrigins.contains("*") && !this.allowedOrigins.contains(origin)) {
+		if (!WebUtils.isValidOrigin(request, this.allowedOrigins)) {
 			logger.debug("Request rejected, Origin header value " + origin + " not allowed");
 			response.setStatusCode(HttpStatus.FORBIDDEN);
 			return false;

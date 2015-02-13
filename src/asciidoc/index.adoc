@@ -39483,7 +39483,76 @@ or WebSocket XML namespace:
 	</beans>
 ----
 
+[[websocket-server-allowed-origins]]
+==== Configuring allowed origins
 
+As of Spring Framework 4.1.5, Websocket and SockJS default behavior is to accept only same
+origin requests. It is also possible to allow all or a specified list of origins.
+This check is mostly designed for browser clients. There is nothing preventing other types
+of client to modify the `Origin` header value (see
+https://tools.ietf.org/html/rfc6454[RFC 6454: The Web Origin Concept] for more details).
+
+The 3 possible behaviors are:
+
+ * Allow only same origin requests (default): in this mode, when SockJS is enabled, the
+   Iframe HTTP response header `X-Frame-Options` is set to `SAMEORIGIN`, and JSONP
+   transport is disabled since it does not allow to check the origin of a request.
+   As a consequence, IE6 and IE7 are not supported when this mode is enabled.
+ * Allow a specified list of origins: each provided allowed origin must start by `http://`
+   or `https://`. In this mode, when SockJS is enabled, both IFrame and JSONP based
+   transports are disabled. As a consequence, IE6 up to IE9 are not supported when this
+   mode is enabled.
+ * Allow all origins: to enable this mode, you should provide `*` as allowed origin. In this
+   mode, all transports are available.
+
+Websocket and SockJS allowed origins can be configured as shown bellow:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	import org.springframework.web.socket.config.annotation.EnableWebSocket;
+	import org.springframework.web.socket.config.annotation.WebSocketConfigurer;
+	import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry;
+
+	@Configuration
+	@EnableWebSocket
+	public class WebSocketConfig implements WebSocketConfigurer {
+
+		@Override
+		public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
+			registry.addHandler(myHandler(), "/myHandler").setAllowedOrigins("http://mydomain.com");
+		}
+
+		@Bean
+		public WebSocketHandler myHandler() {
+			return new MyHandler();
+		}
+
+	}
+----
+
+XML configuration equivalent:
+
+[source,xml,indent=0]
+[subs="verbatim,quotes,attributes"]
+----
+	<beans xmlns="http://www.springframework.org/schema/beans"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xmlns:websocket="http://www.springframework.org/schema/websocket"
+		xsi:schemaLocation="
+			http://www.springframework.org/schema/beans
+			http://www.springframework.org/schema/beans/spring-beans.xsd
+			http://www.springframework.org/schema/websocket
+			http://www.springframework.org/schema/websocket/spring-websocket.xsd">
+
+		<websocket:handlers allowed-origins="http://mydomain.com">
+			<websocket:mapping path="/myHandler" handler="myHandler" />
+		</websocket:handlers>
+
+		<bean id="myHandler" class="org.springframework.samples.MyHandler"/>
+
+	</beans>
+----
 
 
 [[websocket-fallback]]
@@ -39750,11 +39819,11 @@ log category to TRACE.
 [[websocket-fallback-cors]]
 ==== CORS Headers for SockJS
 
-The SockJS protocol uses CORS for cross-domain support in the XHR streaming and
-polling transports. Therefore CORS headers are added automatically unless the
-presence of CORS headers in the response is detected. So if an application is
-already configured to provide CORS support, e.g. through a Servlet Filter,
-Spring's SockJsService will skip this part.
+If you allow cross-origin requests (see <<websocket-server-allowed-origins>>), the SockJS protocol
+uses CORS for cross-domain support in the XHR streaming and polling transports. Therefore
+CORS headers are added automatically unless the presence of CORS headers in the response
+is detected. So if an application is already configured to provide CORS support, e.g.
+through a Servlet Filter, Spring's SockJsService will skip this part.
 
 It is also possible to disable the addition of these CORS headers thanks to the
 `suppressCors` property in Spring's SockJsService.
