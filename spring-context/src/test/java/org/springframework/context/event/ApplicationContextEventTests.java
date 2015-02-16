@@ -35,6 +35,7 @@ import org.springframework.context.support.AbstractApplicationContext;
 import org.springframework.context.support.StaticApplicationContext;
 import org.springframework.core.Ordered;
 import org.springframework.core.ResolvableType;
+import org.springframework.core.annotation.Order;
 import org.springframework.scheduling.support.TaskUtils;
 import org.springframework.tests.sample.beans.TestBean;
 
@@ -159,6 +160,19 @@ public class ApplicationContextEventTests extends AbstractApplicationEventListen
 	public void orderedListeners() {
 		MyOrderedListener1 listener1 = new MyOrderedListener1();
 		MyOrderedListener2 listener2 = new MyOrderedListener2(listener1);
+
+		SimpleApplicationEventMulticaster smc = new SimpleApplicationEventMulticaster();
+		smc.addApplicationListener(listener2);
+		smc.addApplicationListener(listener1);
+
+		smc.multicastEvent(new MyEvent(this));
+		smc.multicastEvent(new MyOtherEvent(this));
+	}
+
+	@Test
+	public void orderedListenersWithAnnotation() {
+		MyOrderedListener3 listener1 = new MyOrderedListener3();
+		MyOrderedListener4 listener2 = new MyOrderedListener4(listener1);
 
 		SimpleApplicationEventMulticaster smc = new SimpleApplicationEventMulticaster();
 		smc.addApplicationListener(listener2);
@@ -393,6 +407,33 @@ public class ApplicationContextEventTests extends AbstractApplicationEventListen
 		@Override
 		public void onApplicationEvent(ApplicationEvent event) {
 			seenEvents.add(event);
+		}
+	}
+
+	@Order(5)
+	public static class MyOrderedListener3 implements ApplicationListener<ApplicationEvent> {
+
+		public final Set<ApplicationEvent> seenEvents = new HashSet<ApplicationEvent>();
+
+		@Override
+		public void onApplicationEvent(ApplicationEvent event) {
+			this.seenEvents.add(event);
+		}
+
+	}
+
+	@Order(50)
+	public static class MyOrderedListener4 implements ApplicationListener<MyEvent> {
+
+		private final MyOrderedListener3 otherListener;
+
+		public MyOrderedListener4(MyOrderedListener3 otherListener) {
+			this.otherListener = otherListener;
+		}
+
+		@Override
+		public void onApplicationEvent(MyEvent event) {
+			assertTrue(otherListener.seenEvents.contains(event));
 		}
 	}
 

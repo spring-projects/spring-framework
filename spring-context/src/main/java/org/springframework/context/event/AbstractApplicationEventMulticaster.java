@@ -30,8 +30,8 @@ import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationListener;
-import org.springframework.core.OrderComparator;
 import org.springframework.core.ResolvableType;
+import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
 
@@ -234,7 +234,7 @@ public abstract class AbstractApplicationEventMulticaster
 				}
 			}
 		}
-		OrderComparator.sort(allListeners);
+		AnnotationAwareOrderComparator.sort(allListeners);
 		return allListeners;
 	}
 
@@ -349,7 +349,7 @@ public abstract class AbstractApplicationEventMulticaster
 					}
 				}
 			}
-			OrderComparator.sort(allListeners);
+			AnnotationAwareOrderComparator.sort(allListeners);
 			return allListeners;
 		}
 	}
