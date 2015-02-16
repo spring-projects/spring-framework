@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,16 @@
 
 package org.springframework.test.context.support;
 
+import java.util.Map;
+
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
+import org.springframework.core.env.ConfigurableEnvironment;
+import org.springframework.core.env.MutablePropertySources;
+import org.springframework.mock.env.MockEnvironment;
+import org.springframework.mock.env.MockPropertySource;
 import org.springframework.test.context.TestPropertySource;
 
 import static org.hamcrest.CoreMatchers.*;
@@ -111,6 +117,41 @@ public class TestPropertySourceUtilsTests {
 	public void overriddenLocationsAndProperties() {
 		assertMergedTestPropertySources(OverriddenLocationsAndPropertiesPropertySources.class,
 			new String[] { "classpath:/baz.properties" }, new String[] { "key = value" });
+	}
+
+	/**
+	 * @since 4.1.5
+	 */
+	@Test
+	@SuppressWarnings("rawtypes")
+	public void emptyInlinedProperty() {
+		ConfigurableEnvironment environment = new MockEnvironment();
+		MutablePropertySources propertySources = environment.getPropertySources();
+		propertySources.remove(MockPropertySource.MOCK_PROPERTIES_PROPERTY_SOURCE_NAME);
+		assertEquals(0, propertySources.size());
+		addInlinedPropertiesToEnvironment(environment, new String[] { "  " });
+		assertEquals(1, propertySources.size());
+		assertEquals(0, ((Map) propertySources.iterator().next().getSource()).size());
+	}
+
+	/**
+	 * @since 4.1.5
+	 */
+	@Test
+	public void inlinedPropertyWithMalformedUnicodeInValue() {
+		expectedException.expect(IllegalStateException.class);
+		expectedException.expectMessage("Failed to load test environment property");
+		addInlinedPropertiesToEnvironment(new MockEnvironment(), new String[] { "key = \\uZZZZ" });
+	}
+
+	/**
+	 * @since 4.1.5
+	 */
+	@Test
+	public void inlinedPropertyWithMultipleKeyValuePairs() {
+		expectedException.expect(IllegalStateException.class);
+		expectedException.expectMessage("Failed to load exactly one test environment property");
+		addInlinedPropertiesToEnvironment(new MockEnvironment(), new String[] { "a=b\nx=y" });
 	}
 
 
