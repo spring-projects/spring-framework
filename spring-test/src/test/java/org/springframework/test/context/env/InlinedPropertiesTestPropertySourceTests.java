@@ -21,7 +21,10 @@ import org.junit.runner.RunWith;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.env.ConfigurableEnvironment;
+import org.springframework.core.env.EnumerablePropertySource;
 import org.springframework.core.env.Environment;
+import org.springframework.core.env.PropertySource;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
@@ -29,33 +32,58 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import static org.junit.Assert.*;
 
 /**
- * Integration tests for {@link TestPropertySource @TestPropertySource}
- * support with an inlined properties.
+ * Integration tests for {@link TestPropertySource @TestPropertySource} support with
+ * inlined properties.
  *
  * @author Sam Brannen
  * @since 4.1
  */
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration
-@TestPropertySource(properties = { "foo = bar", "baz quux", "enigma: 42",
-	"x.y.z = a=b=c", "server.url = http://example.com", "key.value.1: key=value",
-	"key.value.2 key=value", "key.value.3 key:value" })
+@TestPropertySource(properties = { "", "foo = bar", "baz quux", "enigma: 42", "x.y.z = a=b=c",
+	"server.url = http://example.com", "key.value.1: key=value", "key.value.2 key=value", "key.value.3 key:value" })
 public class InlinedPropertiesTestPropertySourceTests {
 
 	@Autowired
-	protected Environment env;
+	private Environment env;
 
 
 	@Test
-	public void verifyPropertiesAreAvailableInEnvironment() {
+	public void propertiesAreAvailableInEnvironment() {
+
+		// Simple key/value pairs
 		assertEquals("bar", env.getProperty("foo"));
 		assertEquals("quux", env.getProperty("baz"));
 		assertEquals(42, env.getProperty("enigma", Integer.class).intValue());
+
+		// Values containing key/value delimiters (":", "=", " ")
 		assertEquals("a=b=c", env.getProperty("x.y.z"));
 		assertEquals("http://example.com", env.getProperty("server.url"));
 		assertEquals("key=value", env.getProperty("key.value.1"));
 		assertEquals("key=value", env.getProperty("key.value.2"));
 		assertEquals("key:value", env.getProperty("key.value.3"));
+	}
+
+	@Test
+	@SuppressWarnings("rawtypes")
+	public void propertyNameOrderingIsPreservedInEnvironment() {
+		String[] propertyNames = null;
+
+		ConfigurableEnvironment configurableEnvironment = (ConfigurableEnvironment) env;
+		for (PropertySource<?> propertySource : configurableEnvironment.getPropertySources()) {
+			if (propertySource instanceof EnumerablePropertySource) {
+				EnumerablePropertySource eps = (EnumerablePropertySource) propertySource;
+				if (eps.getName().startsWith("test properties")) {
+					propertyNames = eps.getPropertyNames();
+					break;
+				}
+			}
+		}
+
+		final String[] expectedPropertyNames = new String[] { "foo", "baz", "enigma", "x.y.z", "server.url",
+			"key.value.1", "key.value.2", "key.value.3" };
+
+		assertArrayEquals(expectedPropertyNames, propertyNames);
 	}
 
 
