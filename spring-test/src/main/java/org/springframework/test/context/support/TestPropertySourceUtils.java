@@ -31,8 +31,10 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.env.ConfigurableEnvironment;
+import org.springframework.core.env.Environment;
 import org.springframework.core.env.MapPropertySource;
 import org.springframework.core.env.PropertySource;
+import org.springframework.core.env.PropertySources;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.ResourcePropertySource;
 import org.springframework.test.context.TestPropertySource;
@@ -54,7 +56,7 @@ import static org.springframework.test.util.MetaAnnotationUtils.*;
  * @since 4.1
  * @see TestPropertySource
  */
-abstract class TestPropertySourceUtils {
+public abstract class TestPropertySourceUtils {
 
 	private static final Log logger = LogFactory.getLog(TestPropertySourceUtils.class);
 
@@ -147,18 +149,27 @@ abstract class TestPropertySourceUtils {
 	}
 
 	/**
+	 * Add the {@link Properties} files from the given resource {@code locations}
+	 * to the {@link Environment} of the supplied {@code context}.
+	 * <p>Each properties file will be converted to a {@code ResourcePropertySource}
+	 * that will be added to the {@link PropertySources} of the environment with
+	 * highest precedence.
+	 * @param context the application context whose environment should be updated
+	 * @param locations the resource locations of {@link Properties} files to add
+	 * to the environment
 	 * @since 4.1.5
+	 * @see ResourcePropertySource
+	 * @see TestPropertySource#locations
+	 * @throws IllegalStateException if an error occurs while processing a properties file
 	 */
-	static void addResourcePropertySourcesToEnvironment(ConfigurableApplicationContext context,
-			String[] propertySourceLocations) {
+	public static void addPropertiesFilesToEnvironment(ConfigurableApplicationContext context,
+			String[] locations) {
 		try {
 			ConfigurableEnvironment environment = context.getEnvironment();
-			String[] locations = propertySourceLocations;
 			for (String location : locations) {
 				String resolvedLocation = environment.resolveRequiredPlaceholders(location);
 				Resource resource = context.getResource(resolvedLocation);
-				ResourcePropertySource ps = new ResourcePropertySource(resource);
-				environment.getPropertySources().addFirst(ps);
+				environment.getPropertySources().addFirst(new ResourcePropertySource(resource));
 			}
 		}
 		catch (IOException e) {
@@ -167,36 +178,61 @@ abstract class TestPropertySourceUtils {
 	}
 
 	/**
+	 * Add the given <em>inlined properties</em> (in the form of <em>key-value</em>
+	 * pairs) to the {@link Environment} of the supplied {@code context}.
+	 * <p>This method simply delegates to
+	 * {@link #addInlinedPropertiesToEnvironment(ConfigurableEnvironment, String[])}.
+	 * @param context the application context whose environment should be updated
+	 * @param inlinedProperties the inlined properties to add to the environment
 	 * @since 4.1.5
+	 * @see TestPropertySource#properties
+	 * @see #addInlinedPropertiesToEnvironment(ConfigurableEnvironment, String[])
 	 */
-	static void addInlinedPropertiesToEnvironment(ConfigurableApplicationContext context,
-			String[] propertySourceProperties) {
-		addInlinedPropertiesToEnvironment(context.getEnvironment(), propertySourceProperties);
+	public static void addInlinedPropertiesToEnvironment(ConfigurableApplicationContext context,
+			String[] inlinedProperties) {
+		addInlinedPropertiesToEnvironment(context.getEnvironment(), inlinedProperties);
 	}
 
 	/**
+	 * Add the given <em>inlined properties</em> (in the form of <em>key-value</em>
+	 * pairs) to the supplied {@link ConfigurableEnvironment environment}.
+	 * <p>All key-value pairs will be added to the {@code Environment} as a
+	 * single {@link MapPropertySource} with the highest precedence.
+	 * <p>For details on the parsing of <em>inlined properties</em>, consult the
+	 * Javadoc for {@link #convertInlinedPropertiesToMap}.
+	 * @param environment the environment to update
+	 * @param inlinedProperties the inlined properties to add to the environment
 	 * @since 4.1.5
+	 * @see MapPropertySource
+	 * @see TestPropertySource#properties
+	 * @see #convertInlinedPropertiesToMap
 	 */
-	static void addInlinedPropertiesToEnvironment(ConfigurableEnvironment environment, String[] propertySourceProperties) {
-		if (!ObjectUtils.isEmpty(propertySourceProperties)) {
-			String name = "test properties " + ObjectUtils.nullSafeToString(propertySourceProperties);
-			MapPropertySource ps = new MapPropertySource(name, extractEnvironmentProperties(propertySourceProperties));
+	public static void addInlinedPropertiesToEnvironment(ConfigurableEnvironment environment, String[] inlinedProperties) {
+		if (!ObjectUtils.isEmpty(inlinedProperties)) {
+			String name = "test properties " + ObjectUtils.nullSafeToString(inlinedProperties);
+			MapPropertySource ps = new MapPropertySource(name, convertInlinedPropertiesToMap(inlinedProperties));
 			environment.getPropertySources().addFirst(ps);
 		}
 	}
 
 	/**
-	 * Extract environment properties from the supplied key/value pairs,
-	 * preserving the ordering of property names in the returned map.
-	 * <p>Parsing of the key/value pairs is achieved by converting all pairs
+	 * Convert the supplied <em>inlined properties</em> (in the form of <em>key-value</em>
+	 * pairs) into a map keyed by property name, preserving the ordering of property names
+	 * in the returned map.
+	 * <p>Parsing of the key-value pairs is achieved by converting all pairs
 	 * into <em>virtual</em> properties files in memory and delegating to
 	 * {@link Properties#load(java.io.Reader)} to parse each virtual file.
+	 * <p>For a full discussion of <em>inlined properties</em>, consult the Javadoc
+	 * for {@link TestPropertySource#properties}.
+	 * @since 4.1.5
+	 * @throws IllegalStateException if a given key-value pair cannot be parsed, or if
+	 * a given inlined property contains multiple key-value pairs
 	 */
-	private static Map<String, Object> extractEnvironmentProperties(String[] keyValuePairs) {
+	public static Map<String, Object> convertInlinedPropertiesToMap(String[] inlinedProperties) {
 		Map<String, Object> map = new LinkedHashMap<String, Object>();
 
 		Properties props = new Properties();
-		for (String pair : keyValuePairs) {
+		for (String pair : inlinedProperties) {
 			if (!StringUtils.hasText(pair)) {
 				continue;
 			}
