@@ -23,13 +23,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.EnumerablePropertySource;
-import org.springframework.core.env.Environment;
-import org.springframework.core.env.PropertySource;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
+import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
+import static org.springframework.test.context.support.TestPropertySourceUtils.*;
 
 /**
  * Integration tests for {@link TestPropertySource @TestPropertySource} support with
@@ -45,45 +45,36 @@ import static org.junit.Assert.*;
 public class InlinedPropertiesTestPropertySourceTests {
 
 	@Autowired
-	private Environment env;
+	private ConfigurableEnvironment env;
 
+
+	private String property(String key) {
+		return env.getProperty(key);
+	}
 
 	@Test
 	public void propertiesAreAvailableInEnvironment() {
-
 		// Simple key/value pairs
-		assertEquals("bar", env.getProperty("foo"));
-		assertEquals("quux", env.getProperty("baz"));
-		assertEquals(42, env.getProperty("enigma", Integer.class).intValue());
+		assertThat(property("foo"), is("bar"));
+		assertThat(property("baz"), is("quux"));
+		assertThat(property("enigma"), is("42"));
 
 		// Values containing key/value delimiters (":", "=", " ")
-		assertEquals("a=b=c", env.getProperty("x.y.z"));
-		assertEquals("http://example.com", env.getProperty("server.url"));
-		assertEquals("key=value", env.getProperty("key.value.1"));
-		assertEquals("key=value", env.getProperty("key.value.2"));
-		assertEquals("key:value", env.getProperty("key.value.3"));
+		assertThat(property("x.y.z"), is("a=b=c"));
+		assertThat(property("server.url"), is("http://example.com"));
+		assertThat(property("key.value.1"), is("key=value"));
+		assertThat(property("key.value.2"), is("key=value"));
+		assertThat(property("key.value.3"), is("key:value"));
 	}
 
 	@Test
 	@SuppressWarnings("rawtypes")
 	public void propertyNameOrderingIsPreservedInEnvironment() {
-		String[] propertyNames = null;
-
-		ConfigurableEnvironment configurableEnvironment = (ConfigurableEnvironment) env;
-		for (PropertySource<?> propertySource : configurableEnvironment.getPropertySources()) {
-			if (propertySource instanceof EnumerablePropertySource) {
-				EnumerablePropertySource eps = (EnumerablePropertySource) propertySource;
-				if (eps.getName().startsWith("test properties")) {
-					propertyNames = eps.getPropertyNames();
-					break;
-				}
-			}
-		}
-
 		final String[] expectedPropertyNames = new String[] { "foo", "baz", "enigma", "x.y.z", "server.url",
 			"key.value.1", "key.value.2", "key.value.3" };
-
-		assertArrayEquals(expectedPropertyNames, propertyNames);
+		EnumerablePropertySource eps = (EnumerablePropertySource) env.getPropertySources().get(
+			INLINED_PROPERTIES_PROPERTY_SOURCE_NAME);
+		assertArrayEquals(expectedPropertyNames, eps.getPropertyNames());
 	}
 
 
