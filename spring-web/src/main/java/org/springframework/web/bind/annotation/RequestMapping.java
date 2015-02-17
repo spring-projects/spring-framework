@@ -57,8 +57,9 @@ import java.util.concurrent.Callable;
  * As a consequence, such an argument will never be {@code null}.
  * <i>Note that session access may not be thread-safe, in particular in a
  * Servlet environment: Consider switching the
- * {@link org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter#setSynchronizeOnSession "synchronizeOnSession"}
- * flag to "true" if multiple requests are allowed to access a session concurrently.</i>
+ * {@link org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter#setSynchronizeOnSession
+ * "synchronizeOnSession"} flag to "true" if multiple requests are allowed to
+ * access a session concurrently.</i>
  * <li>{@link org.springframework.web.context.request.WebRequest} or
  * {@link org.springframework.web.context.request.NativeWebRequest}.
  * Allows for generic request parameter access as well as request/session
@@ -297,19 +298,30 @@ public @interface RequestMapping {
 
 	/**
 	 * The primary mapping expressed by this annotation.
-	 * <p>In a Servlet environment: the path mapping URIs (e.g. "/myPath.do").
-	 * Ant-style path patterns are also supported (e.g. "/myPath/*.do").
-	 * At the method level, relative paths (e.g. "edit.do") are supported
-	 * within the primary mapping expressed at the type level.
-	 * Path mapping URIs may contain placeholders (e.g. "/${connect}")
-	 * <p>In a Portlet environment: the mapped portlet modes
+	 * <p>In a Servlet environment this is an alias for {@link #path()}.
+	 * For example {@code @RequestMapping("/foo")} is equivalent to
+	 * {@code @RequestMapping(path="/foo")}.
+	 * <p>In a Portlet environment this is the mapped portlet modes
 	 * (i.e. "EDIT", "VIEW", "HELP" or any custom modes).
 	 * <p><b>Supported at the type level as well as at the method level!</b>
 	 * When used at the type level, all method-level mappings inherit
 	 * this primary mapping, narrowing it for a specific handler method.
-	 * @see org.springframework.web.bind.annotation.ValueConstants#DEFAULT_NONE
 	 */
 	String[] value() default {};
+
+	/**
+	 * In a Servlet environment only: the path mapping URIs (e.g. "/myPath.do").
+	 * Ant-style path patterns are also supported (e.g. "/myPath/*.do").
+	 * At the method level, relative paths (e.g. "edit.do") are supported within
+	 * the primary mapping expressed at the type level. Path mapping URIs may
+	 * contain placeholders (e.g. "/${connect}")
+	 * <p><b>Supported at the type level as well as at the method level!</b>
+	 * When used at the type level, all method-level mappings inherit
+	 * this primary mapping, narrowing it for a specific handler method.
+	 * @see org.springframework.web.bind.annotation.ValueConstants#DEFAULT_NONE
+	 * @since 4.2
+	 */
+	String[] path() default {};
 
 	/**
 	 * The HTTP request methods to map to, narrowing the primary mapping:

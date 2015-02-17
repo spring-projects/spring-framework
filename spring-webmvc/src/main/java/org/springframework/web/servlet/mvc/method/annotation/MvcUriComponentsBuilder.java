@@ -40,7 +40,8 @@ import org.springframework.cglib.proxy.MethodProxy;
 import org.springframework.core.DefaultParameterNameDiscoverer;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ParameterNameDiscoverer;
-import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.core.annotation.AnnotatedElementUtils;
+import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.objenesis.Objenesis;
 import org.springframework.objenesis.SpringObjenesis;
 import org.springframework.util.AntPathMatcher;
@@ -377,15 +378,39 @@ public class MvcUriComponentsBuilder {
 
 	private static String getTypeRequestMapping(Class<?> controllerType) {
 		Assert.notNull(controllerType, "'controllerType' must not be null");
-		RequestMapping annot = AnnotationUtils.findAnnotation(controllerType, RequestMapping.class);
-		if (annot == null || ObjectUtils.isEmpty(annot.value()) || StringUtils.isEmpty(annot.value()[0])) {
+		String annotType = RequestMapping.class.getName();
+		AnnotationAttributes attrs = AnnotatedElementUtils.getAnnotationAttributes(controllerType, annotType);
+		if (attrs == null) {
 			return "/";
 		}
-		if (annot.value().length > 1 && logger.isWarnEnabled()) {
+		String[] paths = attrs.getStringArray("path");
+		paths = ObjectUtils.isEmpty(paths) ? attrs.getStringArray("value") : paths;
+		if (ObjectUtils.isEmpty(paths) || StringUtils.isEmpty(paths[0])) {
+			return "/";
+		}
+		if (paths.length > 1 && logger.isWarnEnabled()) {
 			logger.warn("Multiple paths on controller " + controllerType.getName() + ", using first one");
 		}
-		return annot.value()[0];
+		return paths[0];
 	}
+
+	private static String getMethodRequestMapping(Method method) {
+		String annotType = RequestMapping.class.getName();
+		AnnotationAttributes attrs = AnnotatedElementUtils.getAnnotationAttributes(method, annotType);
+		if (attrs == null) {
+			throw new IllegalArgumentException("No @RequestMapping on: " + method.toGenericString());
+		}
+		String[] paths = attrs.getStringArray("path");
+		paths = ObjectUtils.isEmpty(paths) ? attrs.getStringArray("value") : paths;
+		if (ObjectUtils.isEmpty(paths) || StringUtils.isEmpty(paths[0])) {
+			return "/";
+		}
+		if (paths.length > 1 && logger.isWarnEnabled()) {
+			logger.warn("Multiple paths on method " + method.toGenericString() + ", using first one");
+		}
+		return paths[0];
+	}
+
 
 	private static Method getMethod(Class<?> controllerType, String methodName, Object... args) {
 		Method match = null;
@@ -403,20 +428,6 @@ public class MvcUriComponentsBuilder {
 					" parameters found in " + controllerType.getName());
 		}
 		return match;
-	}
-
-	private static String getMethodRequestMapping(Method method) {
-		RequestMapping annot = AnnotationUtils.findAnnotation(method, RequestMapping.class);
-		if (annot == null) {
-			throw new IllegalArgumentException("No @RequestMapping on: " + method.toGenericString());
-		}
-		if (ObjectUtils.isEmpty(annot.value()) || StringUtils.isEmpty(annot.value()[0])) {
-			return "/";
-		}
-		if (annot.value().length > 1 && logger.isWarnEnabled()) {
-			logger.warn("Multiple paths on method " + method.toGenericString() + ", using first one");
-		}
-		return annot.value()[0];
 	}
 
 	private static UriComponents applyContributors(UriComponentsBuilder builder, Method method, Object... args) {

@@ -20,6 +20,11 @@ import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 import static org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder.*;
 
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 import java.util.Arrays;
 import java.util.List;
 
@@ -34,12 +39,15 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.format.annotation.DateTimeFormat.ISO;
 import org.springframework.http.HttpEntity;
+import org.springframework.http.MediaType;
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockServletContext;
+import org.springframework.stereotype.Controller;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
@@ -196,6 +204,12 @@ public class MvcUriComponentsBuilderTests {
 
 		assertEquals("http://example.org:9090/base/something/1/foo", uriComponents.toString());
 		assertEquals("http://example.org:9090/base", builder.toUriString());
+	}
+
+	@Test
+	public void testFromMethodNameWithMetaAnnotation() throws Exception {
+		UriComponents uriComponents = fromMethodName(MetaAnnotationController.class, "handleInput").build();
+		assertThat(uriComponents.toUriString(), is("http://localhost/input"));
 	}
 
 	@Test
@@ -408,6 +422,30 @@ public class MvcUriComponentsBuilderTests {
 		}
 	}
 
+	@SuppressWarnings("unused")
+	@Controller
+	static class MetaAnnotationController {
+
+		@RequestMapping
+		public void handle() {
+		}
+
+		@PostJson(path="/input")
+		public void handleInput() {
+		}
+
+	}
+
+	@RequestMapping(method = RequestMethod.POST,
+			produces = MediaType.APPLICATION_JSON_VALUE,
+			consumes = MediaType.APPLICATION_JSON_VALUE)
+	@Target({ElementType.METHOD, ElementType.TYPE})
+	@Retention(RetentionPolicy.RUNTIME)
+	@Documented
+	@interface PostJson {
+		String[] path() default {};
+	}
+
 	@EnableWebMvc
 	static class WebConfig extends WebMvcConfigurerAdapter {
 
@@ -415,7 +453,6 @@ public class MvcUriComponentsBuilderTests {
 		public PersonsAddressesController controller() {
 			return new PersonsAddressesController();
 		}
-
 	}
 
 }
