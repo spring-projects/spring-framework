@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,26 +16,26 @@
 
 package org.springframework.http.client;
 
+import com.squareup.okhttp.OkHttpClient;
 import org.junit.Test;
-
 import org.springframework.http.HttpMethod;
 
 /**
  * @author Arjen Poutsma
  */
-public class HttpComponentsAsyncClientHttpRequestFactoryTests extends AbstractAsyncHttpRequestFactoryTestCase {
+public class OkHttpAsyncClientHttpRequestFactoryTests extends AbstractAsyncHttpRequestFactoryTestCase {
 
-	@Override
-	protected AsyncClientHttpRequestFactory createRequestFactory() {
-		return new HttpComponentsAsyncClientHttpRequestFactory();
-	}
+    private final OkHttpClient client = new OkHttpClient();
 
+    @Override
+    protected AsyncClientHttpRequestFactory createRequestFactory() {
+        return new OkHttpClientHttpRequestFactory(client);
+    }
 
-	@Override
-	@Test
-	public void httpMethods() throws Exception {
-        super.httpMethods();
-		assertHttpMethod("patch", HttpMethod.PATCH);
-	}
+    @Override
+    @Test
+    public void httpMethods() throws Exception {
+        assertHttpMethod("patch", HttpMethod.PATCH);
+    }
 
 }

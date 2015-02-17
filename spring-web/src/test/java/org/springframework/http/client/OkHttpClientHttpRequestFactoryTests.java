@@ -16,41 +16,25 @@
 
 package org.springframework.http.client;
 
-import io.netty.channel.EventLoopGroup;
-import io.netty.channel.nio.NioEventLoopGroup;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
+import com.squareup.okhttp.OkHttpClient;
 import org.junit.Test;
-
 import org.springframework.http.HttpMethod;
 
 /**
  * @author Arjen Poutsma
  */
-public class Netty4AsyncClientHttpRequestFactoryTests extends AbstractAsyncHttpRequestFactoryTestCase {
+public class OkHttpClientHttpRequestFactoryTests extends AbstractHttpRequestFactoryTestCase {
 
-	private static EventLoopGroup eventLoopGroup;
-
-
-	@BeforeClass
-	public static void createEventLoopGroup() {
-		eventLoopGroup = new NioEventLoopGroup();
-	}
-
-	@AfterClass
-	public static void shutdownEventLoopGroup() throws InterruptedException {
-		eventLoopGroup.shutdownGracefully().sync();
-	}
+    private final OkHttpClient client = new OkHttpClient();
 
 	@Override
-	protected AsyncClientHttpRequestFactory createRequestFactory() {
-		return new Netty4ClientHttpRequestFactory(eventLoopGroup);
+	protected ClientHttpRequestFactory createRequestFactory() {
+		return new OkHttpClientHttpRequestFactory(client);
 	}
 
 	@Override
 	@Test
 	public void httpMethods() throws Exception {
-        super.httpMethods();
 		assertHttpMethod("patch", HttpMethod.PATCH);
 	}
 
