@@ -121,7 +121,10 @@ public @interface TestPropertySource {
 	 * {@code http:}, etc.) will be loaded using the specified resource protocol.
 	 * Resource location wildcards (e.g. <code>*&#42;/*.properties</code>)
 	 * are not permitted: each location must evaluate to exactly one
-	 * {@code .properties} or {@code .xml} resource.
+	 * {@code .properties} or {@code .xml} resource. Property placeholders
+	 * in paths (i.e., <code>${...}</code>) will be
+	 * {@linkplain org.springframework.core.env.Environment#resolveRequiredPlaceholders(String) resolved}
+	 * against the {@code Environment}.
 	 *
 	 * <h3>Default Properties File Detection</h3>
 	 * <p>See the class-level Javadoc for a discussion on detection of defaults.
