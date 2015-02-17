@@ -60,6 +60,13 @@ public abstract class TestPropertySourceUtils {
 
 	private static final Log logger = LogFactory.getLog(TestPropertySourceUtils.class);
 
+	/**
+	 * The name of the {@link MapPropertySource} created from <em>inlined properties</em>.
+	 * @since 4.1.5
+	 * @see {@link #addInlinedPropertiesToEnvironment(ConfigurableEnvironment, String[])}
+	 */
+	public static final String INLINED_PROPERTIES_PROPERTY_SOURCE_NAME = "Inlined Test Properties";
+
 
 	private TestPropertySourceUtils() {
 		/* no-op */
@@ -151,12 +158,16 @@ public abstract class TestPropertySourceUtils {
 	/**
 	 * Add the {@link Properties} files from the given resource {@code locations}
 	 * to the {@link Environment} of the supplied {@code context}.
-	 * <p>Each properties file will be converted to a {@code ResourcePropertySource}
+	 * <p>Property placeholders in resource locations (i.e., <code>${...}</code>)
+	 * will be {@linkplain Environment#resolveRequiredPlaceholders(String) resolved}
+	 * against the {@code Environment}.
+	 * <p>Each properties file will be converted to a {@link ResourcePropertySource}
 	 * that will be added to the {@link PropertySources} of the environment with
 	 * highest precedence.
-	 * @param context the application context whose environment should be updated
-	 * @param locations the resource locations of {@link Properties} files to add
-	 * to the environment
+	 * @param context the application context whose environment should be updated;
+	 * never {@code null}
+	 * @param locations the resource locations of {@code Properties} files to add
+	 * to the environment; potentially empty but never {@code null}
 	 * @since 4.1.5
 	 * @see ResourcePropertySource
 	 * @see TestPropertySource#locations
@@ -164,6 +175,8 @@ public abstract class TestPropertySourceUtils {
 	 */
 	public static void addPropertiesFilesToEnvironment(ConfigurableApplicationContext context,
 			String[] locations) {
+		Assert.notNull(context, "context must not be null");
+		Assert.notNull(locations, "locations must not be null");
 		try {
 			ConfigurableEnvironment environment = context.getEnvironment();
 			for (String location : locations) {
@@ -178,18 +191,22 @@ public abstract class TestPropertySourceUtils {
 	}
 
 	/**
-	 * Add the given <em>inlined properties</em> (in the form of <em>key-value</em>
-	 * pairs) to the {@link Environment} of the supplied {@code context}.
+	 * Add the given <em>inlined properties</em> to the {@link Environment} of the
+	 * supplied {@code context}.
 	 * <p>This method simply delegates to
 	 * {@link #addInlinedPropertiesToEnvironment(ConfigurableEnvironment, String[])}.
-	 * @param context the application context whose environment should be updated
-	 * @param inlinedProperties the inlined properties to add to the environment
+	 * @param context the application context whose environment should be updated;
+	 * never {@code null}
+	 * @param inlinedProperties the inlined properties to add to the environment;
+	 * potentially empty but never {@code null}
 	 * @since 4.1.5
 	 * @see TestPropertySource#properties
 	 * @see #addInlinedPropertiesToEnvironment(ConfigurableEnvironment, String[])
 	 */
 	public static void addInlinedPropertiesToEnvironment(ConfigurableApplicationContext context,
 			String[] inlinedProperties) {
+		Assert.notNull(context, "context must not be null");
+		Assert.notNull(inlinedProperties, "inlinedProperties must not be null");
 		addInlinedPropertiesToEnvironment(context.getEnvironment(), inlinedProperties);
 	}
 
@@ -200,17 +217,25 @@ public abstract class TestPropertySourceUtils {
 	 * single {@link MapPropertySource} with the highest precedence.
 	 * <p>For details on the parsing of <em>inlined properties</em>, consult the
 	 * Javadoc for {@link #convertInlinedPropertiesToMap}.
-	 * @param environment the environment to update
-	 * @param inlinedProperties the inlined properties to add to the environment
+	 * @param environment the environment to update; never {@code null}
+	 * @param inlinedProperties the inlined properties to add to the environment;
+	 * potentially empty but never {@code null}
 	 * @since 4.1.5
 	 * @see MapPropertySource
+	 * @see #INLINED_PROPERTIES_PROPERTY_SOURCE_NAME
 	 * @see TestPropertySource#properties
 	 * @see #convertInlinedPropertiesToMap
 	 */
 	public static void addInlinedPropertiesToEnvironment(ConfigurableEnvironment environment, String[] inlinedProperties) {
+		Assert.notNull(environment, "environment must not be null");
+		Assert.notNull(inlinedProperties, "inlinedProperties must not be null");
 		if (!ObjectUtils.isEmpty(inlinedProperties)) {
-			String name = "test properties " + ObjectUtils.nullSafeToString(inlinedProperties);
-			MapPropertySource ps = new MapPropertySource(name, convertInlinedPropertiesToMap(inlinedProperties));
+			if (logger.isDebugEnabled()) {
+				logger.debug("Adding inlined properties to environment: "
+						+ ObjectUtils.nullSafeToString(inlinedProperties));
+			}
+			MapPropertySource ps = new MapPropertySource(INLINED_PROPERTIES_PROPERTY_SOURCE_NAME,
+				convertInlinedPropertiesToMap(inlinedProperties));
 			environment.getPropertySources().addFirst(ps);
 		}
 	}
@@ -224,11 +249,16 @@ public abstract class TestPropertySourceUtils {
 	 * {@link Properties#load(java.io.Reader)} to parse each virtual file.
 	 * <p>For a full discussion of <em>inlined properties</em>, consult the Javadoc
 	 * for {@link TestPropertySource#properties}.
+	 * @param inlinedProperties the inlined properties to convert; potentially empty
+	 * but never {@code null}
+	 * @return a new, ordered map containing the converted properties
 	 * @since 4.1.5
 	 * @throws IllegalStateException if a given key-value pair cannot be parsed, or if
 	 * a given inlined property contains multiple key-value pairs
+	 * @see #addInlinedPropertiesToEnvironment(ConfigurableEnvironment, String[])
 	 */
 	public static Map<String, Object> convertInlinedPropertiesToMap(String[] inlinedProperties) {
+		Assert.notNull(inlinedProperties, "inlinedProperties must not be null");
 		Map<String, Object> map = new LinkedHashMap<String, Object>();
 
 		Properties props = new Properties();
