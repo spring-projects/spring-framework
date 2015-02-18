@@ -104,7 +104,7 @@ public abstract class AbstractMessageConverterMethodArgumentResolver implements 
 	 * from the given HttpInputMessage.
 	 * @param <T> the expected type of the argument value to be created
 	 * @param inputMessage the HTTP input message representing the current request
-	 * @param methodParam the method argument
+	 * @param methodParam the method parameter descriptor
 	 * @param targetType the type of object to create, not necessarily the same as
 	 * the method parameter type (e.g. for {@code HttpEntity<String>} method
 	 * parameter the target type is String)
@@ -113,8 +113,8 @@ public abstract class AbstractMessageConverterMethodArgumentResolver implements 
 	 * @throws HttpMediaTypeNotSupportedException if no suitable message converter is found
 	 */
 	@SuppressWarnings("unchecked")
-	protected <T> Object readWithMessageConverters(HttpInputMessage inputMessage,
-			MethodParameter methodParam, Type targetType) throws IOException, HttpMediaTypeNotSupportedException {
+	protected <T> Object readWithMessageConverters(HttpInputMessage inputMessage, MethodParameter methodParam,
+			Type targetType) throws IOException, HttpMediaTypeNotSupportedException {
 
 		MediaType contentType;
 		try {
@@ -128,6 +128,8 @@ public abstract class AbstractMessageConverterMethodArgumentResolver implements 
 		}
 
 		Class<?> contextClass = methodParam.getContainingClass();
+		Class<T> targetClass = (Class<T>)
+				ResolvableType.forMethodParameter(methodParam, targetType).resolve(Object.class);
 
 		for (HttpMessageConverter<?> converter : this.messageConverters) {
 			if (converter instanceof GenericHttpMessageConverter) {
@@ -140,8 +142,6 @@ public abstract class AbstractMessageConverterMethodArgumentResolver implements 
 					return genericConverter.read(targetType, contextClass, inputMessage);
 				}
 			}
-			Class<T> targetClass = (Class<T>)
-					ResolvableType.forMethodParameter(methodParam, targetType).resolve(Object.class);
 			if (converter.canRead(targetClass, contentType)) {
 				if (logger.isDebugEnabled()) {
 					logger.debug("Reading [" + targetClass.getName() + "] as \"" +

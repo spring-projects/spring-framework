@@ -18,8 +18,8 @@ package org.springframework.web.util;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.util.Collection;
 import java.util.Enumeration;
-import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.TreeMap;
@@ -33,7 +33,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import org.springframework.http.server.ServerHttpRequest;
+import org.springframework.http.HttpRequest;
 import org.springframework.util.Assert;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -742,9 +742,9 @@ public abstract class WebUtils {
 	 * like this {@code "q1=a;q1=b;q2=a,b,c"}. The resulting map would contain
 	 * keys {@code "q1"} and {@code "q2"} with values {@code ["a","b"]} and
 	 * {@code ["a","b","c"]} respectively.
-	 *
 	 * @param matrixVariables the unparsed matrix variables string
 	 * @return a map with matrix variable names and values, never {@code null}
+	 * @since 3.2
 	 */
 	public static MultiValueMap<String, String> parseMatrixVariables(String matrixVariables) {
 		MultiValueMap<String, String> result = new LinkedMultiValueMap<String, String>();
@@ -773,12 +773,11 @@ public abstract class WebUtils {
 	 * Check the given request origin against a list of allowed origins.
 	 * A list containing "*" means that all origins are allowed.
 	 * An empty list means only same origin is allowed.
-	 *
 	 * @return true if the request origin is valid, false otherwise
 	 * @since 4.1.5
 	 * @see <a href="https://tools.ietf.org/html/rfc6454">RFC 6454: The Web Origin Concept</a>
 	 */
-	public static boolean isValidOrigin(ServerHttpRequest request, List<String> allowedOrigins) {
+	public static boolean isValidOrigin(HttpRequest request, Collection<String> allowedOrigins) {
 		Assert.notNull(request, "Request must not be null");
 		Assert.notNull(allowedOrigins, "Allowed origins must not be null");
 
@@ -791,7 +790,7 @@ public abstract class WebUtils {
 			UriComponents requestComponents = UriComponentsBuilder.fromHttpRequest(request).build();
 			int originPort = getPort(originComponents);
 			int requestPort = getPort(requestComponents);
-			return originComponents.getHost().equals(requestComponents.getHost()) && (originPort == requestPort);
+			return (originComponents.getHost().equals(requestComponents.getHost()) && originPort == requestPort);
 		}
 		else {
 			return allowedOrigins.contains(origin);

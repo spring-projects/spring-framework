@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,6 @@ import org.springframework.http.MediaType;
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
  * @since 3.2
- *
  * @see org.springframework.core.ParameterizedTypeReference
  */
 public interface GenericHttpMessageConverter<T> extends HttpMessageConverter<T> {
@@ -38,7 +37,7 @@ public interface GenericHttpMessageConverter<T> extends HttpMessageConverter<T> 
 	 * Indicates whether the given type can be read by this converter.
 	 * @param type the type to test for readability
 	 * @param contextClass a context class for the target type, for example a class
-	 * in which the target type appears in a method signature, can be {@code null}
+	 * in which the target type appears in a method signature (can be {@code null})
 	 * @param mediaType the media type to read, can be {@code null} if not specified.
 	 * Typically the value of a {@code Content-Type} header.
 	 * @return {@code true} if readable; {@code false} otherwise
@@ -51,7 +50,7 @@ public interface GenericHttpMessageConverter<T> extends HttpMessageConverter<T> 
 	 * been passed to the {@link #canRead canRead} method of this interface,
 	 * which must have returned {@code true}.
 	 * @param contextClass a context class for the target type, for example a class
-	 * in which the target type appears in a method signature, can be {@code null}
+	 * in which the target type appears in a method signature (can be {@code null})
 	 * @param inputMessage the HTTP input message to read from
 	 * @return the converted object
 	 * @throws IOException in case of I/O errors

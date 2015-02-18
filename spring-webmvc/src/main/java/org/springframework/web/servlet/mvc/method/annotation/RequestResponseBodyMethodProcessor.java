@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -93,7 +93,7 @@ public class RequestResponseBodyMethodProcessor extends AbstractMessageConverter
 	}
 
 	/**
-	 * @throws MethodArgumentNotValidException if validation fails
+	 * Throws MethodArgumentNotValidException if validation fails.
 	 * @throws HttpMessageNotReadableException if {@link RequestBody#required()}
 	 * is {@code true} and there is no body content or if there is no suitable
 	 * converter to read the content with.
@@ -143,8 +143,8 @@ public class RequestResponseBodyMethodProcessor extends AbstractMessageConverter
 	}
 
 	@Override
-	protected <T> Object readWithMessageConverters(NativeWebRequest webRequest,
-			MethodParameter methodParam,  Type paramType) throws IOException, HttpMediaTypeNotSupportedException {
+	protected <T> Object readWithMessageConverters(NativeWebRequest webRequest, MethodParameter methodParam,
+			Type paramType) throws IOException, HttpMediaTypeNotSupportedException {
 
 		final HttpServletRequest servletRequest = webRequest.getNativeRequest(HttpServletRequest.class);
 		HttpInputMessage inputMessage = new ServletServerHttpRequest(servletRequest);

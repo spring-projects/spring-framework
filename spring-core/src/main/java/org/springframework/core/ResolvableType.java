@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -1092,9 +1092,8 @@ public final class ResolvableType implements Serializable {
 	public static ResolvableType forMethodParameter(MethodParameter methodParameter, Type targetType) {
 		Assert.notNull(methodParameter, "MethodParameter must not be null");
 		ResolvableType owner = forType(methodParameter.getContainingClass()).as(methodParameter.getDeclaringClass());
-		return forType(targetType, new MethodParameterTypeProvider(methodParameter),
-				owner.asVariableResolver()).getNested(methodParameter.getNestingLevel(),
-				methodParameter.typeIndexesPerLevel);
+		return forType(targetType, new MethodParameterTypeProvider(methodParameter), owner.asVariableResolver()).
+				getNested(methodParameter.getNestingLevel(), methodParameter.typeIndexesPerLevel);
 	}
 
 	/**
