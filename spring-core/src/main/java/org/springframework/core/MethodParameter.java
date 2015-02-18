@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -309,6 +309,7 @@ public class MethodParameter {
 	/**
 	 * Return the generic type of the method/constructor parameter.
 	 * @return the parameter type (never {@code null})
+	 * @since 3.0
 	 */
 	public Type getGenericParameterType() {
 		if (this.genericParameterType == null) {
@@ -324,6 +325,12 @@ public class MethodParameter {
 		return this.genericParameterType;
 	}
 
+	/**
+	 * Return the nested type of the method/constructor parameter.
+	 * @return the parameter type (never {@code null})
+	 * @see #getNestingLevel()
+	 * @since 3.1
+	 */
 	public Class<?> getNestedParameterType() {
 		if (this.nestingLevel > 1) {
 			Type type = getGenericParameterType();
@@ -347,6 +354,29 @@ public class MethodParameter {
 		}
 		else {
 			return getParameterType();
+		}
+	}
+
+	/**
+	 * Return the nested generic type of the method/constructor parameter.
+	 * @return the parameter type (never {@code null})
+	 * @see #getNestingLevel()
+	 * @since 4.2
+	 */
+	public Type getNestedGenericParameterType() {
+		if (this.nestingLevel > 1) {
+			Type type = getGenericParameterType();
+			for (int i = 2; i <= this.nestingLevel; i++) {
+				if (type instanceof ParameterizedType) {
+					Type[] args = ((ParameterizedType) type).getActualTypeArguments();
+					Integer index = getTypeIndexForLevel(i);
+					type = args[index != null ? index : args.length - 1];
+				}
+			}
+			return type;
+		}
+		else {
+			return getGenericParameterType();
 		}
 	}
 

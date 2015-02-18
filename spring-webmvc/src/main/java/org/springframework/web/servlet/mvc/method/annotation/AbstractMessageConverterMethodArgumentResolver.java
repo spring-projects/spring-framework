@@ -104,7 +104,7 @@ public abstract class AbstractMessageConverterMethodArgumentResolver implements 
 	 * from the given HttpInputMessage.
 	 * @param <T> the expected type of the argument value to be created
 	 * @param inputMessage the HTTP input message representing the current request
-	 * @param methodParam the method argument
+	 * @param methodParam the method parameter descriptor (may be {@code null})
 	 * @param targetType the type of object to create, not necessarily the same as
 	 * the method parameter type (e.g. for {@code HttpEntity<String>} method
 	 * parameter the target type is String)
@@ -113,8 +113,8 @@ public abstract class AbstractMessageConverterMethodArgumentResolver implements 
 	 * @throws HttpMediaTypeNotSupportedException if no suitable message converter is found
 	 */
 	@SuppressWarnings("unchecked")
-	protected <T> Object readWithMessageConverters(HttpInputMessage inputMessage,
-			MethodParameter methodParam, Type targetType) throws IOException, HttpMediaTypeNotSupportedException {
+	protected <T> Object readWithMessageConverters(HttpInputMessage inputMessage, MethodParameter methodParam,
+			Type targetType) throws IOException, HttpMediaTypeNotSupportedException {
 
 		MediaType contentType;
 		try {
@@ -127,7 +127,13 @@ public abstract class AbstractMessageConverterMethodArgumentResolver implements 
 			contentType = MediaType.APPLICATION_OCTET_STREAM;
 		}
 
-		Class<?> contextClass = methodParam.getContainingClass();
+		Class<?> contextClass = (methodParam != null ? methodParam.getContainingClass() : null);
+		Class<T> targetClass = (targetType instanceof Class<?> ? (Class<T>) targetType : null);
+		if (targetClass == null) {
+			ResolvableType resolvableType = (methodParam != null ?
+					ResolvableType.forMethodParameter(methodParam) : ResolvableType.forType(targetType));
+			targetClass = (Class<T>) resolvableType.resolve();
+		}
 
 		for (HttpMessageConverter<?> converter : this.messageConverters) {
 			if (converter instanceof GenericHttpMessageConverter) {
@@ -140,14 +146,14 @@ public abstract class AbstractMessageConverterMethodArgumentResolver implements 
 					return genericConverter.read(targetType, contextClass, inputMessage);
 				}
 			}
-			Class<T> targetClass = (Class<T>)
-					ResolvableType.forMethodParameter(methodParam, targetType).resolve(Object.class);
-			if (converter.canRead(targetClass, contentType)) {
-				if (logger.isDebugEnabled()) {
-					logger.debug("Reading [" + targetClass.getName() + "] as \"" +
-							contentType + "\" using [" + converter + "]");
+			else if (targetClass != null) {
+				if (converter.canRead(targetClass, contentType)) {
+					if (logger.isDebugEnabled()) {
+						logger.debug("Reading [" + targetClass.getName() + "] as \"" +
+								contentType + "\" using [" + converter + "]");
+					}
+					return ((HttpMessageConverter<T>) converter).read(targetClass, inputMessage);
 				}
-				return ((HttpMessageConverter<T>) converter).read(targetClass, inputMessage);
 			}
 		}
 
