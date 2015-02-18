@@ -64,12 +64,12 @@ import org.springframework.util.StringValueResolver;
  * to the "fixedRate", "fixedDelay", or "cron" expression provided via the annotation.
  *
  * <p>This post-processor is automatically registered by Spring's
- * {@code <task:annotation-driven>} XML element, and also by the @{@link EnableScheduling}
- * annotation.
+ * {@code <task:annotation-driven>} XML element, and also by the
+ * @{@link EnableScheduling} annotation.
  *
- * <p>Auto-detects any {@link SchedulingConfigurer} instances in the container,
- * allowing for customization of the scheduler to be used or for fine-grained control
- * over task registration (e.g. registration of {@link Trigger} tasks.
+ * <p>Autodetects any {@link SchedulingConfigurer} instances in the container,
+ * allowing for customization of the scheduler to be used or for fine-grained
+ * control over task registration (e.g. registration of {@link Trigger} tasks.
  * See the @{@link EnableScheduling} javadocs for complete usage details.
  *
  * @author Mark Fisher
@@ -216,9 +216,9 @@ public class ScheduledAnnotationBeanPostProcessor implements BeanPostProcessor, 
 
 	@Override
 	public Object postProcessAfterInitialization(final Object bean, String beanName) {
-		if (!this.nonAnnotatedClasses.contains(bean.getClass())) {
+		Class<?> targetClass = AopUtils.getTargetClass(bean);
+		if (!this.nonAnnotatedClasses.contains(targetClass)) {
 			final Set<Method> annotatedMethods = new LinkedHashSet<Method>(1);
-			Class<?> targetClass = AopUtils.getTargetClass(bean);
 			ReflectionUtils.doWithMethods(targetClass, new MethodCallback() {
 				@Override
 				public void doWith(Method method) throws IllegalArgumentException, IllegalAccessException {
@@ -230,7 +230,7 @@ public class ScheduledAnnotationBeanPostProcessor implements BeanPostProcessor, 
 				}
 			});
 			if (annotatedMethods.isEmpty()) {
-				this.nonAnnotatedClasses.add(bean.getClass());
+				this.nonAnnotatedClasses.add(targetClass);
 				if (logger.isDebugEnabled()) {
 					logger.debug("No @Scheduled annotations found on bean class: " + bean.getClass());
 				}
