@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
-import static org.hamcrest.Matchers.contains;
 import org.junit.Test;
 
 import org.springframework.messaging.Message;
@@ -31,16 +30,19 @@ import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.util.MimeType;
 
+import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
 /**
  * Test fixture for {@link org.springframework.messaging.converter.MappingJackson2MessageConverter}.
  *
  * @author Rossen Stoyanchev
+ * @author Sebastien Deleuze
  */
 public class MappingJackson2MessageConverterTests {
 
 	private static Charset UTF_8 = Charset.forName("UTF-8");
+
 
 	@Test
 	public void defaultConstructor() {
@@ -49,7 +51,7 @@ public class MappingJackson2MessageConverterTests {
 		assertFalse(converter.getObjectMapper().getDeserializationConfig().isEnabled(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES));
 	}
 
-	@Test // SPR-12724
+	@Test  // SPR-12724
 	public void mimetypeParametrizedConstructor() {
 		MimeType mimetype = new MimeType("application", "xml", UTF_8);
 		MappingJackson2MessageConverter converter = new MappingJackson2MessageConverter(mimetype);
@@ -57,11 +59,11 @@ public class MappingJackson2MessageConverterTests {
 		assertFalse(converter.getObjectMapper().getDeserializationConfig().isEnabled(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES));
 	}
 
-	@Test // SPR-12724
+	@Test  // SPR-12724
 	public void mimetypesParametrizedConstructor() {
 		MimeType jsonMimetype = new MimeType("application", "json", UTF_8);
 		MimeType xmlMimetype = new MimeType("application", "xml", UTF_8);
-		MappingJackson2MessageConverter converter = new MappingJackson2MessageConverter(Arrays.asList(jsonMimetype, xmlMimetype));
+		MappingJackson2MessageConverter converter = new MappingJackson2MessageConverter(jsonMimetype, xmlMimetype);
 		assertThat(converter.getSupportedMimeTypes(), contains(jsonMimetype, xmlMimetype));
 		assertFalse(converter.getObjectMapper().getDeserializationConfig().isEnabled(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES));
 	}
