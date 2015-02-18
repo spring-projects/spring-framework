@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.nio.charset.Charset;
+import java.util.Collection;
 import java.util.concurrent.atomic.AtomicReference;
 
 import com.fasterxml.jackson.core.JsonEncoding;
@@ -51,6 +52,7 @@ import org.springframework.util.MimeType;
  *
  * @author Rossen Stoyanchev
  * @author Juergen Hoeller
+ * @author Sebastien Deleuze
  * @since 4.0
  */
 public class MappingJackson2MessageConverter extends AbstractMessageConverter {
@@ -65,8 +67,34 @@ public class MappingJackson2MessageConverter extends AbstractMessageConverter {
 	private Boolean prettyPrint;
 
 
+	/**
+	 * Construct a {@code MappingJackson2MessageConverter} supporting {@code application/json} MIME type.
+	 */
 	public MappingJackson2MessageConverter() {
-		super(new MimeType("application", "json", Charset.forName("UTF-8")));
+		this(new MimeType("application", "json", Charset.forName("UTF-8")));
+	}
+
+	/**
+	 * Construct a {@code MappingJackson2MessageConverter} supporting a single MIME type.
+	 * @param supportedMimeType the supported MIME type
+	 * @since 4.1.5
+	 */
+	public MappingJackson2MessageConverter(MimeType supportedMimeType) {
+		super(supportedMimeType);
+		init();
+	}
+
+	/**
+	 * Construct a {@code MappingJackson2MessageConverter} supporting multiple MIME types.
+	 * @param supportedMimeTypes the supported MIME types
+	 * @since 4.1.5
+	 */
+	public MappingJackson2MessageConverter(Collection<MimeType> supportedMimeTypes) {
+		super(supportedMimeTypes);
+		init();
+	}
+
+	private void init() {
 		this.objectMapper = new ObjectMapper();
 		this.objectMapper.configure(MapperFeature.DEFAULT_VIEW_INCLUSION, false);
 		this.objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
