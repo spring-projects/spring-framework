@@ -268,9 +268,9 @@ public class UriComponentsBuilder implements Cloneable {
 	 * Create a new {@code UriComponents} object from the URI associated with
 	 * the given HttpRequest while also overlaying with values from the headers
 	 * "X-Forwarded-Host", "X-Forwarded-Port", and "X-Forwarded-Proto" if present.
-	 *
 	 * @param request the source request
-	 * @return the URI components of the UR
+	 * @return the URI components of the URI
+	 * @since 4.1.5
 	 */
 	public static UriComponentsBuilder fromHttpRequest(HttpRequest request) {
 		URI uri = request.getURI();
