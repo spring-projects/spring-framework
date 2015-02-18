@@ -63,6 +63,9 @@ public class ServletUriComponentsBuilder extends UriComponentsBuilder {
 		this.originalPath = other.originalPath;
 	}
 
+
+	// Factory methods based on a HttpServletRequest
+
 	/**
 	 * Prepare a builder from the host, port, scheme, and context path of the
 	 * given HttpServletRequest.
@@ -76,13 +79,12 @@ public class ServletUriComponentsBuilder extends UriComponentsBuilder {
 	/**
 	 * Prepare a builder from the host, port, scheme, context path, and
 	 * servlet mapping of the given HttpServletRequest.
-	 *
 	 * <p>If the servlet is mapped by name, e.g. {@code "/main/*"}, the path
 	 * will end with "/main". If the servlet is mapped otherwise, e.g.
 	 * {@code "/"} or {@code "*.do"}, the result will be the same as
 	 * if calling {@link #fromContextPath(HttpServletRequest)}.
 	 */
-		public static ServletUriComponentsBuilder fromServletMapping(HttpServletRequest request) {
+	public static ServletUriComponentsBuilder fromServletMapping(HttpServletRequest request) {
 		ServletUriComponentsBuilder builder = fromContextPath(request);
 		if (StringUtils.hasText(new UrlPathHelper().getPathWithinServletMapping(request))) {
 			builder.path(request.getServletPath());
@@ -124,15 +126,10 @@ public class ServletUriComponentsBuilder extends UriComponentsBuilder {
 		ServletUriComponentsBuilder builder = new ServletUriComponentsBuilder();
 		builder.scheme(scheme);
 		builder.host(host);
-		if (scheme.equals("http") && port != 80 || scheme.equals("https") && port != 443) {
+		if (("http".equals(scheme) && port != 80) || ("https".equals(scheme) && port != 443)) {
 			builder.port(port);
 		}
 		return builder;
-	}
-
-	private void initPath(String path) {
-		this.originalPath = path;
-		replacePath(path);
 	}
 
 	private static String prependForwardedPrefix(HttpServletRequest request, String path) {
@@ -178,9 +175,8 @@ public class ServletUriComponentsBuilder extends UriComponentsBuilder {
 		return fromRequest(getCurrentRequest());
 	}
 
-
 	/**
-	 * Get the request through {@link RequestContextHolder}.
+	 * Obtain current request through {@link RequestContextHolder}.
 	 */
 	protected static HttpServletRequest getCurrentRequest() {
 		RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
@@ -191,12 +187,17 @@ public class ServletUriComponentsBuilder extends UriComponentsBuilder {
 		return servletRequest;
 	}
 
+
+	private void initPath(String path) {
+		this.originalPath = path;
+		replacePath(path);
+	}
+
 	/**
 	 * Remove any path extension from the {@link HttpServletRequest#getRequestURI()
 	 * requestURI}. This method must be invoked before any calls to {@link #path(String)}
 	 * or {@link #pathSegment(String...)}.
 	 * <pre>
-	 *
 	 * GET http://foo.com/rest/books/6.json
 	 *
 	 * ServletUriComponentsBuilder builder = ServletUriComponentsBuilder.fromRequestUri(this.request);
