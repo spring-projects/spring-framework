@@ -27,7 +27,7 @@ configure(allprojects) { project ->
 	group = "org.springframework"
 	version = qualifyVersionIfNecessary(version)
 
-	ext.aspectjVersion       = "1.8.4"
+	ext.aspectjVersion       = "1.8.5"
 	ext.eclipseLinkVersion   = "2.4.2"
 	ext.ehcacheVersion       = "2.9.0"
 	ext.ehcacheJCacheVersion = "1.0.0"
@@ -41,7 +41,7 @@ configure(allprojects) { project ->
 	ext.jackson2Version      = "2.5.1"
 	ext.jasperReportsVersion = "6.0.3"
 	ext.jettyVersion         = "9.2.7.v20150116"
-	ext.jodaVersion          = "2.6"
+	ext.jodaVersion          = "2.7"
 	ext.jtaVersion           = "1.2"
 	ext.junitVersion         = "4.12"
 	ext.nettyVersion         = "4.0.25.Final"
@@ -595,7 +595,7 @@ project("spring-jdbc") {
 		optional("javax.transaction:javax.transaction-api:${jtaVersion}")
 		optional("com.mchange:c3p0:0.9.2.1")
 		optional("org.hsqldb:hsqldb:${hsqldbVersion}")
-		optional("com.h2database:h2:1.4.182")
+		optional("com.h2database:h2:1.4.185")
 		optional("org.apache.derby:derby:10.11.1.1")
 		optional("org.apache.derby:derbyclient:10.11.1.1")
 	}
