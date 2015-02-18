@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,6 +47,9 @@ public class ServletUriComponentsBuilder extends UriComponentsBuilder {
 	protected ServletUriComponentsBuilder() {
 	}
 
+
+	// Factory methods based on a HttpServletRequest
+
 	/**
 	 * Prepare a builder from the host, port, scheme, and context path of
 	 * an HttpServletRequest.
@@ -60,9 +63,7 @@ public class ServletUriComponentsBuilder extends UriComponentsBuilder {
 
 	/**
 	 * Prepare a builder from the host, port, scheme, context path, and
-	 * servlet mapping of an HttpServletRequest. The results may vary depending
-	 * on the type of servlet mapping used.
-	 *
+	 * servlet mapping of the given HttpServletRequest.
 	 * <p>If the servlet is mapped by name, e.g. {@code "/main/*"}, the path
 	 * will end with "/main". If the servlet is mapped otherwise, e.g.
 	 * {@code "/"} or {@code "*.do"}, the result will be the same as
@@ -114,13 +115,16 @@ public class ServletUriComponentsBuilder extends UriComponentsBuilder {
 		ServletUriComponentsBuilder builder = new ServletUriComponentsBuilder();
 		builder.scheme(scheme);
 		builder.host(host);
-		if ((scheme.equals("http") && port != 80) || (scheme.equals("https") && port != 443)) {
+		if (("http".equals(scheme) && port != 80) || ("https".equals(scheme) && port != 443)) {
 			builder.port(port);
 		}
 		builder.path(request.getRequestURI());
 		builder.query(request.getQueryString());
 		return builder;
 	}
+
+
+	// Alternative methods relying on RequestContextHolder to find the request
 
 	/**
 	 * Same as {@link #fromContextPath(HttpServletRequest)} except the
@@ -155,7 +159,7 @@ public class ServletUriComponentsBuilder extends UriComponentsBuilder {
 	}
 
 	/**
-	 * Obtain the request through {@link RequestContextHolder}.
+	 * Obtain current request through {@link RequestContextHolder}.
 	 */
 	protected static HttpServletRequest getCurrentRequest() {
 		RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
