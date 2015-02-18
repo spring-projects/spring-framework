@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,8 @@
  */
 
 package org.springframework.web.socket.adapter.jetty;
+
+import java.nio.ByteBuffer;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -36,6 +38,7 @@ import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.handler.ExceptionWebSocketHandlerDecorator;
 
+
 /**
  * Adapts {@link WebSocketHandler} to the Jetty 9 WebSocket API.
  *
@@ -45,7 +48,10 @@ import org.springframework.web.socket.handler.ExceptionWebSocketHandlerDecorator
 @WebSocket
 public class JettyWebSocketHandlerAdapter {
 
+	private static final ByteBuffer EMPTY_PAYLOAD = ByteBuffer.wrap(new byte[0]);
+
 	private static final Log logger = LogFactory.getLog(JettyWebSocketHandlerAdapter.class);
+
 
 	private final WebSocketHandler webSocketHandler;
 
@@ -96,7 +102,8 @@ public class JettyWebSocketHandlerAdapter {
 	@OnWebSocketFrame
 	public void onWebSocketFrame(Frame frame) {
 		if (OpCode.PONG == frame.getOpCode()) {
-			PongMessage message = new PongMessage(frame.getPayload());
+			ByteBuffer payload = frame.getPayload() != null ? frame.getPayload() : EMPTY_PAYLOAD;
+			PongMessage message = new PongMessage(payload);
 			try {
 				this.webSocketHandler.handleMessage(this.wsSession, message);
 			}
