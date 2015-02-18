@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,12 +55,12 @@ import org.springframework.util.StringValueResolver;
  * to the "fixedRate", "fixedDelay", or "cron" expression provided via the annotation.
  *
  * <p>This post-processor is automatically registered by Spring's
- * {@code <task:annotation-driven>} XML element, and also by the @{@link EnableScheduling}
- * annotation.
+ * {@code <task:annotation-driven>} XML element, and also by the
+ * @{@link EnableScheduling} annotation.
  *
- * <p>Auto-detects any {@link SchedulingConfigurer} instances in the container,
- * allowing for customization of the scheduler to be used or for fine-grained control
- * over task registration (e.g. registration of {@link Trigger} tasks.
+ * <p>Autodetects any {@link SchedulingConfigurer} instances in the container,
+ * allowing for customization of the scheduler to be used or for fine-grained
+ * control over task registration (e.g. registration of {@link Trigger} tasks.
  * See the @{@link EnableScheduling} javadocs for complete usage details.
  *
  * @author Mark Fisher
@@ -154,9 +154,9 @@ public class ScheduledAnnotationBeanPostProcessor
 	}
 
 	public Object postProcessAfterInitialization(final Object bean, String beanName) {
-		if (!this.nonAnnotatedClasses.containsKey(bean.getClass())) {
+		Class<?> targetClass = AopUtils.getTargetClass(bean);
+		if (!this.nonAnnotatedClasses.containsKey(targetClass)) {
 			final Set<Method> annotatedMethods = new LinkedHashSet<Method>(1);
-			Class<?> targetClass = AopUtils.getTargetClass(bean);
 			ReflectionUtils.doWithMethods(targetClass, new MethodCallback() {
 				public void doWith(Method method) throws IllegalArgumentException, IllegalAccessException {
 					Scheduled scheduled = AnnotationUtils.getAnnotation(method, Scheduled.class);
@@ -167,7 +167,7 @@ public class ScheduledAnnotationBeanPostProcessor
 				}
 			});
 			if (annotatedMethods.isEmpty()) {
-				this.nonAnnotatedClasses.put(bean.getClass(), Boolean.TRUE);
+				this.nonAnnotatedClasses.put(targetClass, Boolean.TRUE);
 			}
 		}
 		return bean;
