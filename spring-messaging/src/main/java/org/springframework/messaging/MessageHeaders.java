@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -70,15 +70,7 @@ import org.springframework.util.IdGenerator;
  */
 public class MessageHeaders implements Map<String, Object>, Serializable {
 
-	private static final long serialVersionUID = 7035068984263400920L;
-
-	private static final Log logger = LogFactory.getLog(MessageHeaders.class);
-
 	public static final UUID ID_VALUE_NONE = new UUID(0,0);
-
-	private static volatile IdGenerator idGenerator = null;
-
-	private static final IdGenerator defaultIdGenerator = new AlternativeJdkIdGenerator();
 
 	/**
 	 * The key for the Message ID. This is an automatically generated UUID and
@@ -90,11 +82,20 @@ public class MessageHeaders implements Map<String, Object>, Serializable {
 
 	public static final String TIMESTAMP = "timestamp";
 
+	public static final String CONTENT_TYPE = "contentType";
+
 	public static final String REPLY_CHANNEL = "replyChannel";
 
 	public static final String ERROR_CHANNEL = "errorChannel";
 
-	public static final String CONTENT_TYPE = "contentType";
+
+	private static final long serialVersionUID = 7035068984263400920L;
+
+	private static final Log logger = LogFactory.getLog(MessageHeaders.class);
+
+	private static final IdGenerator defaultIdGenerator = new AlternativeJdkIdGenerator();
+
+	private static volatile IdGenerator idGenerator = null;
 
 
 	private final Map<String, Object> headers;
