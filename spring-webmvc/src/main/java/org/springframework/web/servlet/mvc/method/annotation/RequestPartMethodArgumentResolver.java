@@ -16,7 +16,6 @@
 
 package org.springframework.web.servlet.mvc.method.annotation;
 
-import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -26,14 +25,11 @@ import javax.servlet.http.Part;
 
 import org.springframework.core.GenericCollectionTypeResolver;
 import org.springframework.core.MethodParameter;
-import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.lang.UsesJava8;
 import org.springframework.util.Assert;
 import org.springframework.validation.BindingResult;
-import org.springframework.validation.Errors;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -86,9 +82,9 @@ public class RequestPartMethodArgumentResolver extends AbstractMessageConverterM
 	/**
 	 * Supports the following:
 	 * <ul>
-	 * <li>Annotated with {@code @RequestPart}
-	 * <li>Of type {@link MultipartFile} unless annotated with {@code @RequestParam}.
-	 * <li>Of type {@code javax.servlet.http.Part} unless annotated with {@code @RequestParam}.
+	 * <li>annotated with {@code @RequestPart}
+	 * <li>of type {@link MultipartFile} unless annotated with {@code @RequestParam}
+	 * <li>of type {@code javax.servlet.http.Part} unless annotated with {@code @RequestParam}
 	 * </ul>
 	 */
 	@Override
@@ -164,7 +160,10 @@ public class RequestPartMethodArgumentResolver extends AbstractMessageConverterM
 				arg = readWithMessageConverters(inputMessage, parameter, parameter.getNestedGenericParameterType());
 				WebDataBinder binder = binderFactory.createBinder(request, arg, partName);
 				if (arg != null) {
-					validate(binder, parameter);
+					validateIfApplicable(binder, parameter);
+					if (binder.getBindingResult().hasErrors() && isBindExceptionRequired(binder, parameter)) {
+						throw new MethodArgumentNotValidException(parameter, binder.getBindingResult());
+					}
 				}
 				mavContainer.addAttribute(BindingResult.MODEL_KEY_PREFIX + partName, binder.getBindingResult());
 			}
@@ -174,8 +173,8 @@ public class RequestPartMethodArgumentResolver extends AbstractMessageConverterM
 			}
 		}
 
-		RequestPart annot = parameter.getParameterAnnotation(RequestPart.class);
-		boolean isRequired = ((annot == null || annot.required()) && !optional);
+		RequestPart ann = parameter.getParameterAnnotation(RequestPart.class);
+		boolean isRequired = ((ann == null || ann.required()) && !optional);
 
 		if (arg == null && isRequired) {
 			throw new MissingServletRequestPartException(partName);
@@ -194,78 +193,49 @@ public class RequestPartMethodArgumentResolver extends AbstractMessageConverterM
 		}
 	}
 
-	private String getPartName(MethodParameter param) {
-		RequestPart annot = param.getParameterAnnotation(RequestPart.class);
-		String partName = (annot != null ? annot.value() : "");
+	private String getPartName(MethodParameter methodParam) {
+		RequestPart ann = methodParam.getParameterAnnotation(RequestPart.class);
+		String partName = (ann != null ? ann.value() : "");
 		if (partName.length() == 0) {
-			partName = param.getParameterName();
+			partName = methodParam.getParameterName();
 			if (partName == null) {
 				throw new IllegalArgumentException("Request part name for argument type [" +
-						param.getNestedParameterType().getName() +
+						methodParam.getNestedParameterType().getName() +
 						"] not specified, and parameter name information not found in class file either.");
 			}
 		}
 		return partName;
 	}
 
-	private boolean isMultipartFileCollection(MethodParameter param) {
-		Class<?> collectionType = getCollectionParameterType(param);
-		return (collectionType != null && collectionType.equals(MultipartFile.class));
+	private boolean isMultipartFileCollection(MethodParameter methodParam) {
+		Class<?> collectionType = getCollectionParameterType(methodParam);
+		return MultipartFile.class.equals(collectionType);
 	}
 
-	private boolean isMultipartFileArray(MethodParameter param) {
-		Class<?> paramType = param.getNestedParameterType().getComponentType();
-		return (paramType != null && MultipartFile.class.equals(paramType));
+	private boolean isMultipartFileArray(MethodParameter methodParam) {
+		Class<?> paramType = methodParam.getNestedParameterType().getComponentType();
+		return MultipartFile.class.equals(paramType);
 	}
 
-	private boolean isPartCollection(MethodParameter param) {
-		Class<?> collectionType = getCollectionParameterType(param);
+	private boolean isPartCollection(MethodParameter methodParam) {
+		Class<?> collectionType = getCollectionParameterType(methodParam);
 		return (collectionType != null && "javax.servlet.http.Part".equals(collectionType.getName()));
 	}
 
-	private boolean isPartArray(MethodParameter param) {
-		Class<?> paramType = param.getNestedParameterType().getComponentType();
+	private boolean isPartArray(MethodParameter methodParam) {
+		Class<?> paramType = methodParam.getNestedParameterType().getComponentType();
 		return (paramType != null && "javax.servlet.http.Part".equals(paramType.getName()));
 	}
 
-	private Class<?> getCollectionParameterType(MethodParameter param) {
-		Class<?> paramType = param.getNestedParameterType();
+	private Class<?> getCollectionParameterType(MethodParameter methodParam) {
+		Class<?> paramType = methodParam.getNestedParameterType();
 		if (Collection.class.equals(paramType) || List.class.isAssignableFrom(paramType)){
-			Class<?> valueType = GenericCollectionTypeResolver.getCollectionParameterType(param);
+			Class<?> valueType = GenericCollectionTypeResolver.getCollectionParameterType(methodParam);
 			if (valueType != null) {
 				return valueType;
 			}
 		}
 		return null;
-	}
-
-	/**
-	 * Validate the request part if applicable.
-	 * <p>The default implementation checks for {@code @javax.validation.Valid},
-	 * Spring's {@link org.springframework.validation.annotation.Validated},
-	 * and custom annotations whose name starts with "Valid".
-	 * @param binder the DataBinder to be used
-	 * @param param the method parameter
-	 * @throws MethodArgumentNotValidException in case of a binding error which
-	 * is meant to be fatal (i.e. without a declared {@link Errors} parameter)
-	 * @see #isBindingErrorFatal
-	 */
-	protected void validate(WebDataBinder binder, MethodParameter param) throws MethodArgumentNotValidException {
-		Annotation[] annotations = param.getParameterAnnotations();
-		for (Annotation ann : annotations) {
-			Validated validatedAnn = AnnotationUtils.getAnnotation(ann, Validated.class);
-			if (validatedAnn != null || ann.annotationType().getSimpleName().startsWith("Valid")) {
-				Object hints = (validatedAnn != null ? validatedAnn.value() : AnnotationUtils.getValue(ann));
-				Object[] validationHints = (hints instanceof Object[] ? (Object[]) hints : new Object[] {hints});
-				binder.validate(validationHints);
-				BindingResult bindingResult = binder.getBindingResult();
-				if (bindingResult.hasErrors()) {
-					if (isBindingErrorFatal(param)) {
-						throw new MethodArgumentNotValidException(param, bindingResult);
-					}
-				}
-			}
-		}
 	}
 
 
