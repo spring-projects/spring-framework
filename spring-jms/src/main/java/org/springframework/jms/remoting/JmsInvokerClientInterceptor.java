@@ -419,7 +419,7 @@ public class JmsInvokerClientInterceptor implements MethodInterceptor, Initializ
 	 * @return the RemoteAccessException to throw
 	 */
 	protected RemoteAccessException convertJmsInvokerAccessException(JMSException ex) {
-		throw new RemoteAccessException("Could not access JMS invoker queue [" + this.queue + "]", ex);
+		return new RemoteAccessException("Could not access JMS invoker queue [" + this.queue + "]", ex);
 	}
 
 }
