@@ -33,6 +33,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import org.springframework.http.HttpRequest;
 import org.springframework.util.Assert;
 import org.springframework.util.LinkedMultiValueMap;
@@ -130,6 +133,8 @@ public abstract class WebUtils {
 
 	/** Key for the mutex session attribute */
 	public static final String SESSION_MUTEX_ATTRIBUTE = WebUtils.class.getName() + ".MUTEX";
+
+	private static final Log logger = LogFactory.getLog(WebUtils.class);
 
 
 	/**
@@ -786,7 +791,14 @@ public abstract class WebUtils {
 			return true;
 		}
 		else if (allowedOrigins.isEmpty()) {
-			UriComponents originComponents = UriComponentsBuilder.fromHttpUrl(origin).build();
+			UriComponents originComponents;
+			try {
+				originComponents = UriComponentsBuilder.fromHttpUrl(origin).build();
+			}
+			catch (IllegalArgumentException ex) {
+				logger.error("Failed to parse Origin header value [" + origin + "]");
+				return false;
+			}
 			UriComponents requestComponents = UriComponentsBuilder.fromHttpRequest(request).build();
 			int originPort = getPort(originComponents);
 			int requestPort = getPort(requestComponents);
