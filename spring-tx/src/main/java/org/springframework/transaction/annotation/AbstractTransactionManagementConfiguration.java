@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,6 +40,9 @@ public abstract class AbstractTransactionManagementConfiguration implements Impo
 
 	protected AnnotationAttributes enableTx;
 
+	/**
+	 * Default transaction manager, as configured through a {@link TransactionManagementConfigurer}.
+	 */
 	protected PlatformTransactionManager txManager;
 
 
@@ -50,7 +53,7 @@ public abstract class AbstractTransactionManagementConfiguration implements Impo
 				"@EnableTransactionManagement is not present on importing class " + importMetadata.getClassName());
 	}
 
-	@Autowired(required=false)
+	@Autowired(required = false)
 	void setConfigurers(Collection<TransactionManagementConfigurer> configurers) {
 		if (CollectionUtils.isEmpty(configurers)) {
 			return;
