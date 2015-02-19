@@ -89,14 +89,14 @@ public class RequestResponseBodyMethodProcessor extends AbstractMessageConverter
 	public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer,
 			NativeWebRequest webRequest, WebDataBinderFactory binderFactory) throws Exception {
 
-		Object argument = readWithMessageConverters(webRequest, parameter, parameter.getGenericParameterType());
+		Object arg = readWithMessageConverters(webRequest, parameter, parameter.getGenericParameterType());
 		String name = Conventions.getVariableNameForParameter(parameter);
-		WebDataBinder binder = binderFactory.createBinder(webRequest, argument, name);
-		if (argument != null) {
+		WebDataBinder binder = binderFactory.createBinder(webRequest, arg, name);
+		if (arg != null) {
 			validate(binder, parameter);
 		}
 		mavContainer.addAttribute(BindingResult.MODEL_KEY_PREFIX + name, binder.getBindingResult());
-		return argument;
+		return arg;
 	}
 
 	/**
@@ -116,10 +116,8 @@ public class RequestResponseBodyMethodProcessor extends AbstractMessageConverter
 				Object hints = AnnotationUtils.getValue(ann);
 				binder.validate(hints instanceof Object[] ? (Object[]) hints : new Object[] {hints});
 				BindingResult bindingResult = binder.getBindingResult();
-				if (bindingResult.hasErrors()) {
-					if (isBindExceptionRequired(binder, methodParam)) {
-						throw new MethodArgumentNotValidException(methodParam, bindingResult);
-					}
+				if (bindingResult.hasErrors() && isBindExceptionRequired(binder, methodParam)) {
+					throw new MethodArgumentNotValidException(methodParam, bindingResult);
 				}
 				break;
 			}
@@ -127,7 +125,7 @@ public class RequestResponseBodyMethodProcessor extends AbstractMessageConverter
 	}
 
 	/**
-	 * Whether to raise a {@link MethodArgumentNotValidException} on validation errors.
+	 * Whether to raise a fatal bind exception on validation errors.
 	 * @param binder the data binder used to perform data binding
 	 * @param methodParam the method argument
 	 * @return {@code true} if the next method argument is not of type {@link Errors}

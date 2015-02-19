@@ -107,10 +107,8 @@ public class ModelAttributeMethodProcessor implements HandlerMethodArgumentResol
 		if (binder.getTarget() != null) {
 			bindRequestParameters(binder, webRequest);
 			validateIfApplicable(binder, parameter);
-			if (binder.getBindingResult().hasErrors()) {
-				if (isBindExceptionRequired(binder, parameter)) {
-					throw new BindException(binder.getBindingResult());
-				}
+			if (binder.getBindingResult().hasErrors() && isBindExceptionRequired(binder, parameter)) {
+				throw new BindException(binder.getBindingResult());
 			}
 		}
 
@@ -166,7 +164,7 @@ public class ModelAttributeMethodProcessor implements HandlerMethodArgumentResol
 	}
 
 	/**
-	 * Whether to raise a {@link BindException} on validation errors.
+	 * Whether to raise a fatal bind exception on validation errors.
 	 * @param binder the data binder used to perform data binding
 	 * @param methodParam the method argument
 	 * @return {@code true} if the next method argument is not of type {@link Errors}

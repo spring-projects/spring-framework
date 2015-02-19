@@ -76,6 +76,7 @@ public class RequestPartMethodArgumentResolver extends AbstractMessageConverterM
 		super(messageConverters);
 	}
 
+
 	/**
 	 * Supports the following:
 	 * <ul>
@@ -111,7 +112,7 @@ public class RequestPartMethodArgumentResolver extends AbstractMessageConverterM
 		assertIsMultipartRequest(servletRequest);
 
 		MultipartHttpServletRequest multipartRequest =
-			WebUtils.getNativeRequest(servletRequest, MultipartHttpServletRequest.class);
+				WebUtils.getNativeRequest(servletRequest, MultipartHttpServletRequest.class);
 
 		String partName = getPartName(parameter);
 		Object arg;
@@ -161,8 +162,8 @@ public class RequestPartMethodArgumentResolver extends AbstractMessageConverterM
 	}
 
 	private String getPartName(MethodParameter methodParam) {
-		RequestPart annot = methodParam.getParameterAnnotation(RequestPart.class);
-		String partName = (annot != null ? annot.value() : "");
+		RequestPart ann = methodParam.getParameterAnnotation(RequestPart.class);
+		String partName = (ann != null ? ann.value() : "");
 		if (partName.length() == 0) {
 			partName = methodParam.getParameterName();
 			if (partName == null) {
@@ -202,17 +203,16 @@ public class RequestPartMethodArgumentResolver extends AbstractMessageConverterM
 				Object hints = AnnotationUtils.getValue(ann);
 				binder.validate(hints instanceof Object[] ? (Object[]) hints : new Object[] {hints});
 				BindingResult bindingResult = binder.getBindingResult();
-				if (bindingResult.hasErrors()) {
-					if (isBindExceptionRequired(binder, methodParam)) {
-						throw new MethodArgumentNotValidException(methodParam, bindingResult);
-					}
+				if (bindingResult.hasErrors() && isBindExceptionRequired(binder, methodParam)) {
+					throw new MethodArgumentNotValidException(methodParam, bindingResult);
 				}
+				break;
 			}
 		}
 	}
 
 	/**
-	 * Whether to raise a {@link MethodArgumentNotValidException} on validation errors.
+	 * Whether to raise a fatal bind exception on validation errors.
 	 * @param binder the data binder used to perform data binding
 	 * @param methodParam the method argument
 	 * @return {@code true} if the next method argument is not of type {@link Errors}
