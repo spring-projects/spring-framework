@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,10 +31,13 @@ import javax.jms.QueueSession;
 import javax.jms.Session;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 import org.springframework.jms.support.converter.MessageConversionException;
 import org.springframework.jms.support.converter.SimpleMessageConverter;
+import org.springframework.remoting.RemoteTimeoutException;
 import org.springframework.tests.sample.beans.ITestBean;
 import org.springframework.tests.sample.beans.TestBean;
 
@@ -43,8 +46,12 @@ import static org.mockito.BDDMockito.*;
 
 /**
  * @author Juergen Hoeller
+ * @author Stephane Nicoll
  */
 public class JmsInvokerTests {
+
+	@Rule
+	public final ExpectedException thrown = ExpectedException.none();
 
 	private QueueConnectionFactory mockConnectionFactory;
 
@@ -76,6 +83,27 @@ public class JmsInvokerTests {
 	public void testJmsInvokerProxyFactoryBeanAndServiceExporterWithDynamicQueue() throws Throwable {
 		given(mockSession.createQueue("myQueue")).willReturn(mockQueue);
 		doTestJmsInvokerProxyFactoryBeanAndServiceExporter(true);
+	}
+
+	@Test
+	public void receiveTimeoutExpired() {
+		JmsInvokerProxyFactoryBean pfb = new JmsInvokerProxyFactoryBean() {
+			@Override
+			protected Message doExecuteRequest(Session session, Queue queue, Message requestMessage) throws JMSException {
+				return null; // faking no message received
+			}
+		};
+		pfb.setServiceInterface(ITestBean.class);
+		pfb.setConnectionFactory(this.mockConnectionFactory);
+		pfb.setQueue(this.mockQueue);
+		pfb.setReceiveTimeout(1500);
+		pfb.afterPropertiesSet();
+		ITestBean proxy = (ITestBean) pfb.getObject();
+
+		thrown.expect(RemoteTimeoutException.class);
+		thrown.expectMessage("1500 ms");
+		thrown.expectMessage("getAge");
+		proxy.getAge();
 	}
 
 	private void doTestJmsInvokerProxyFactoryBeanAndServiceExporter(boolean dynamicQueue) throws Throwable {

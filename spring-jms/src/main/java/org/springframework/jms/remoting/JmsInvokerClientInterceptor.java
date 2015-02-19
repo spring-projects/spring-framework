@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,6 +40,7 @@ import org.springframework.jms.support.destination.DestinationResolver;
 import org.springframework.jms.support.destination.DynamicDestinationResolver;
 import org.springframework.remoting.RemoteAccessException;
 import org.springframework.remoting.RemoteInvocationFailureException;
+import org.springframework.remoting.RemoteTimeoutException;
 import org.springframework.remoting.support.DefaultRemoteInvocationFactory;
 import org.springframework.remoting.support.RemoteInvocation;
 import org.springframework.remoting.support.RemoteInvocationFactory;
@@ -61,6 +62,7 @@ import org.springframework.remoting.support.RemoteInvocationResult;
  *
  * @author Juergen Hoeller
  * @author James Strachan
+ * @author Stephane Nicoll
  * @since 2.0
  * @see #setConnectionFactory
  * @see #setQueue
@@ -244,7 +246,12 @@ public class JmsInvokerClientInterceptor implements MethodInterceptor, Initializ
 			Message requestMessage = createRequestMessage(session, invocation);
 			con.start();
 			Message responseMessage = doExecuteRequest(session, queueToUse, requestMessage);
-			return extractInvocationResult(responseMessage);
+			if (responseMessage != null) {
+				return extractInvocationResult(responseMessage);
+			}
+			else {
+				return onReceiveTimeout(invocation);
+			}
 		}
 		finally {
 			JmsUtils.closeSession(session);
@@ -360,6 +367,19 @@ public class JmsInvokerClientInterceptor implements MethodInterceptor, Initializ
 			return (RemoteInvocationResult) content;
 		}
 		return onInvalidResponse(responseMessage);
+	}
+
+	/**
+	 * Callback that is invoked by {@code executeRequest} when the receive
+	 * timeout has expired for the specified {@link RemoteInvocation}
+	 * <p>By default, an {@link RemoteTimeoutException} is thrown. Sub-classes
+	 * can choose to either throw a more dedicated exception or event return
+	 * a default {@link RemoteInvocationResult} as a fallback.
+	 * @param invocation the invocation
+	 * @return a default result when the receive timeout has expired
+	 */
+	protected RemoteInvocationResult onReceiveTimeout(RemoteInvocation invocation) {
+		throw new RemoteTimeoutException("Receive timeout after " + this.receiveTimeout + " ms for " + invocation);
 	}
 
 	/**
