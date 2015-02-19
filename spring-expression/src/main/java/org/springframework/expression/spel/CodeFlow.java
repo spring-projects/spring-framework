@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -211,7 +211,7 @@ public class CodeFlow implements Opcodes {
 
 	/**
 	 * Create the JVM signature descriptor for a method. This consists of the descriptors
-	 * for the constructor parameters surrounded with parentheses, followed by the
+	 * for the method parameters surrounded with parentheses, followed by the
 	 * descriptor for the return type. Note the descriptors here are JVM descriptors,
 	 * unlike the other descriptor forms the compiler is using which do not include the
 	 * trailing semicolon.
@@ -232,11 +232,12 @@ public class CodeFlow implements Opcodes {
 
 	/**
 	 * Create the JVM signature descriptor for a constructor. This consists of the
-	 * descriptors for the constructor parameters surrounded with parentheses. Note the
+	 * descriptors for the constructor parameters surrounded with parentheses, followed by
+	 * the descriptor for the return type, which is always "V". Note the
 	 * descriptors here are JVM descriptors, unlike the other descriptor forms the
 	 * compiler is using which do not include the trailing semicolon.
 	 * @param ctor the constructor
-	 * @return a String signature descriptor (e.g. "(ILjava/lang/String;)")
+	 * @return a String signature descriptor (e.g. "(ILjava/lang/String;)V")
 	 */
 	public static String createSignatureDescriptor(Constructor<?> ctor) {
 		Class<?>[] params = ctor.getParameterTypes();
