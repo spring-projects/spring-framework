@@ -336,7 +336,9 @@ public abstract class AbstractSockJsService implements SockJsService {
 			String sockJsPath, WebSocketHandler wsHandler) throws SockJsException {
 
 		if (sockJsPath == null) {
-			logger.error("Expected SockJS path. Failing request: " + request.getURI());
+			if (logger.isWarnEnabled()) {
+				logger.warn("Expected SockJS path. Failing request: " + request.getURI());
+			}
 			response.setStatusCode(HttpStatus.NOT_FOUND);
 			return;
 		}
@@ -361,7 +363,10 @@ public abstract class AbstractSockJsService implements SockJsService {
 			}
 			else if (sockJsPath.matches("/iframe[0-9-.a-z_]*.html")) {
 				if (!this.allowedOrigins.isEmpty() && !this.allowedOrigins.contains("*")) {
-					logger.debug("Iframe support is disabled when an origin check is required, ignoring " + requestInfo);
+					if (logger.isDebugEnabled()) {
+						logger.debug("Iframe support is disabled when an origin check is required, ignoring " +
+										requestInfo);
+					}
 					response.setStatusCode(HttpStatus.NOT_FOUND);
 					return;
 				}
@@ -383,7 +388,9 @@ public abstract class AbstractSockJsService implements SockJsService {
 			else {
 				String[] pathSegments = StringUtils.tokenizeToStringArray(sockJsPath.substring(1), "/");
 				if (pathSegments.length != 3) {
-					logger.error("Ignoring invalid transport request " + requestInfo);
+					if (logger.isWarnEnabled()) {
+						logger.warn("Ignoring invalid transport request " + requestInfo);
+					}
 					response.setStatusCode(HttpStatus.NOT_FOUND);
 					return;
 				}
@@ -392,12 +399,16 @@ public abstract class AbstractSockJsService implements SockJsService {
 				String transport = pathSegments[2];
 
 				if (!isWebSocketEnabled() && transport.equals("websocket")) {
-					logger.debug("WebSocket transport is disabled, ignoring " + requestInfo);
+					if (logger.isDebugEnabled()) {
+						logger.debug("WebSocket transport is disabled, ignoring " + requestInfo);
+					}
 					response.setStatusCode(HttpStatus.NOT_FOUND);
 					return;
 				}
 				else if (!validateRequest(serverId, sessionId, transport)) {
-					logger.error("Ignoring transport request " + requestInfo);
+					if (logger.isWarnEnabled()) {
+						logger.warn("Ignoring transport request " + requestInfo);
+					}
 					response.setStatusCode(HttpStatus.NOT_FOUND);
 					return;
 				}
@@ -412,12 +423,12 @@ public abstract class AbstractSockJsService implements SockJsService {
 
 	protected boolean validateRequest(String serverId, String sessionId, String transport) {
 		if (!StringUtils.hasText(serverId) || !StringUtils.hasText(sessionId) || !StringUtils.hasText(transport)) {
-			logger.error("No server, session, or transport path segment");
+			logger.warn("No server, session, or transport path segment");
 			return false;
 		}
 		// Server and session id's must not contain "."
 		if (serverId.contains(".") || sessionId.contains(".")) {
-			logger.error("Either server or session contains a \".\" which is not allowed by SockJS protocol.");
+			logger.warn("Either server or session contains a \".\" which is not allowed by SockJS protocol.");
 			return false;
 		}
 		return true;
@@ -504,7 +515,7 @@ public abstract class AbstractSockJsService implements SockJsService {
 	}
 
 	protected void sendMethodNotAllowed(ServerHttpResponse response, HttpMethod... httpMethods) {
-		logger.error("Sending Method Not Allowed (405)");
+		logger.warn("Sending Method Not Allowed (405)");
 		response.setStatusCode(HttpStatus.METHOD_NOT_ALLOWED);
 		response.getHeaders().setAllow(new HashSet<HttpMethod>(Arrays.asList(httpMethods)));
 	}
