@@ -21,6 +21,8 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
+import org.springframework.util.ObjectUtils;
+
 /**
  * {@link Comparator} implementation for {@link Ordered} objects,
  * sorting by order value ascending (resp. by priority descending).
@@ -89,7 +91,19 @@ public class OrderComparator implements Comparator<Object> {
 	private int getOrder(Object obj, OrderSourceProvider sourceProvider) {
 		Integer order = null;
 		if (sourceProvider != null) {
-			order = findOrder(sourceProvider.getOrderSource(obj));
+			Object orderSource = sourceProvider.getOrderSource(obj);
+			if (orderSource != null && orderSource.getClass().isArray()) {
+				Object[] sources = ObjectUtils.toObjectArray(orderSource);
+				for (Object source : sources) {
+					order = findOrder(source);
+					if (order != null) {
+						break;
+					}
+				}
+			}
+			else {
+				order = findOrder(orderSource);
+			}
 		}
 		return (order != null ? order : getOrder(obj));
 	}
@@ -186,6 +200,7 @@ public class OrderComparator implements Comparator<Object> {
 		/**
 		 * Return an order source for the specified object, i.e. an object that
 		 * should be checked for an order value as a replacement to the given object.
+		 * <p>Can also be an array of order source objects.
 		 * <p>If the returned object does not indicate any order, the comparator
 		 * will fall back to checking the original object.
 		 * @param obj the object to find an order source for

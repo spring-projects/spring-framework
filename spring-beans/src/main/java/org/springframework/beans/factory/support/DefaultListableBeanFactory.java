@@ -1459,14 +1459,27 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 
 		@Override
 		public Object getOrderSource(Object obj) {
-			return getFactoryMethod(this.instancesToBeanNames.get(obj));
+			RootBeanDefinition beanDefinition = getRootBeanDefinition(this.instancesToBeanNames.get(obj));
+			if (beanDefinition == null) {
+				return null;
+			}
+			List<Object> sources = new ArrayList<Object>();
+			Method factoryMethod = beanDefinition.getResolvedFactoryMethod();
+			if (factoryMethod != null) {
+				sources.add(factoryMethod);
+			}
+			Class<?> targetType = beanDefinition.getTargetType();
+			if (targetType != null && !targetType.equals(obj.getClass())) {
+				sources.add(targetType);
+			}
+			return sources.toArray(new Object[sources.size()]);
 		}
 
-		private Method getFactoryMethod(String beanName) {
+		private RootBeanDefinition getRootBeanDefinition(String beanName) {
 			if (beanName != null && containsBeanDefinition(beanName)) {
 				BeanDefinition bd = getMergedBeanDefinition(beanName);
 				if (bd instanceof RootBeanDefinition) {
-					return ((RootBeanDefinition) bd).getResolvedFactoryMethod();
+					return (RootBeanDefinition) bd;
 				}
 			}
 			return null;
