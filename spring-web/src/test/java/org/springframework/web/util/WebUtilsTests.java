@@ -142,6 +142,10 @@ public class WebUtilsTests {
 		request.getHeaders().set(HttpHeaders.ORIGIN, "https://mydomain1.com");
 		assertFalse(WebUtils.isValidOrigin(request, allowedOrigins));
 
+		servletRequest.setServerName("invalid-origin");
+		request.getHeaders().set(HttpHeaders.ORIGIN, "invalid-origin");
+		assertFalse(WebUtils.isValidOrigin(request, allowedOrigins));
+
 		allowedOrigins = Arrays.asList("*");
 		servletRequest.setServerName("mydomain1.com");
 		request.getHeaders().set(HttpHeaders.ORIGIN, "http://mydomain2.com");
