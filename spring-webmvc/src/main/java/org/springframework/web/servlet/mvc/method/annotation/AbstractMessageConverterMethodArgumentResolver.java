@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,11 +25,11 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.core.GenericTypeResolver;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpInputMessage;
@@ -59,11 +59,13 @@ public abstract class AbstractMessageConverterMethodArgumentResolver implements 
 
 	protected final List<MediaType> allSupportedMediaTypes;
 
+
 	public AbstractMessageConverterMethodArgumentResolver(List<HttpMessageConverter<?>> messageConverters) {
 		Assert.notEmpty(messageConverters, "'messageConverters' must not be empty");
 		this.messageConverters = messageConverters;
 		this.allSupportedMediaTypes = getAllSupportedMediaTypes(messageConverters);
 	}
+
 
 	/**
 	 * Return the media types supported by all provided message converters sorted
@@ -79,10 +81,10 @@ public abstract class AbstractMessageConverterMethodArgumentResolver implements 
 		return Collections.unmodifiableList(result);
 	}
 
+
 	/**
-	 * Creates the method argument value of the expected parameter type by
+	 * Create the method argument value of the expected parameter type by
 	 * reading from the given request.
-	 *
 	 * @param <T> the expected type of the argument value to be created
 	 * @param webRequest the current request
 	 * @param methodParam the method argument
@@ -99,9 +101,8 @@ public abstract class AbstractMessageConverterMethodArgumentResolver implements 
 	}
 
 	/**
-	 * Creates the method argument value of the expected parameter type by reading
+	 * Create the method argument value of the expected parameter type by reading
 	 * from the given HttpInputMessage.
-	 *
 	 * @param <T> the expected type of the argument value to be created
 	 * @param inputMessage the HTTP input message representing the current request
 	 * @param methodParam the method argument
@@ -123,43 +124,41 @@ public abstract class AbstractMessageConverterMethodArgumentResolver implements 
 		catch (InvalidMediaTypeException ex) {
 			throw new HttpMediaTypeNotSupportedException(ex.getMessage());
 		}
-
 		if (contentType == null) {
 			contentType = MediaType.APPLICATION_OCTET_STREAM;
 		}
 
-				Class<?> contextClass = methodParam.getDeclaringClass();
-				Map<TypeVariable, Type> map = GenericTypeResolver.getTypeVariableMap(contextClass);
-				Class<T> targetClass = (Class<T>) GenericTypeResolver.resolveType(targetType, map);
+		Class<?> contextClass = methodParam.getDeclaringClass();
+		Map<TypeVariable, Type> map = GenericTypeResolver.getTypeVariableMap(contextClass);
+		Class<T> targetClass = (Class<T>) GenericTypeResolver.resolveType(targetType, map);
 
-				for (HttpMessageConverter<?> converter : this.messageConverters) {
-					if (converter instanceof GenericHttpMessageConverter) {
-						GenericHttpMessageConverter genericConverter = (GenericHttpMessageConverter) converter;
-						if (genericConverter.canRead(targetType, contextClass, contentType)) {
-							if (logger.isDebugEnabled()) {
-								logger.debug("Reading [" + targetType + "] as \"" +
-										contentType + "\" using [" + converter + "]");
-							}
-							return genericConverter.read(targetType, contextClass, inputMessage);
-						}
+		for (HttpMessageConverter<?> converter : this.messageConverters) {
+			if (converter instanceof GenericHttpMessageConverter) {
+				GenericHttpMessageConverter genericConverter = (GenericHttpMessageConverter) converter;
+				if (genericConverter.canRead(targetType, contextClass, contentType)) {
+					if (logger.isDebugEnabled()) {
+						logger.debug("Reading [" + targetType + "] as \"" +
+								contentType + "\" using [" + converter + "]");
 					}
-					if (targetClass != null) {
-						if (converter.canRead(targetClass, contentType)) {
-							if (logger.isDebugEnabled()) {
-								logger.debug("Reading [" + targetClass.getName() + "] as \"" +
-										contentType + "\" using [" + converter + "]");
-							}
-							return ((HttpMessageConverter<T>) converter).read(targetClass, inputMessage);
-						}
-					}
+					return genericConverter.read(targetType, contextClass, inputMessage);
 				}
-
-				throw new HttpMediaTypeNotSupportedException(contentType, allSupportedMediaTypes);
 			}
+			if (targetClass != null) {
+				if (converter.canRead(targetClass, contentType)) {
+					if (logger.isDebugEnabled()) {
+						logger.debug("Reading [" + targetClass.getName() + "] as \"" +
+								contentType + "\" using [" + converter + "]");
+					}
+					return ((HttpMessageConverter<T>) converter).read(targetClass, inputMessage);
+				}
+			}
+		}
+
+		throw new HttpMediaTypeNotSupportedException(contentType, this.allSupportedMediaTypes);
+	}
 
 	/**
-	 * Creates a new {@link HttpInputMessage} from the given {@link NativeWebRequest}.
-	 *
+	 * Create a new {@link HttpInputMessage} from the given {@link NativeWebRequest}.
 	 * @param webRequest the web request to create an input message from
 	 * @return the input message
 	 */
