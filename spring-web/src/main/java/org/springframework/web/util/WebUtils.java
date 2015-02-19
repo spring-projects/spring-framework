@@ -796,7 +796,9 @@ public abstract class WebUtils {
 				originComponents = UriComponentsBuilder.fromHttpUrl(origin).build();
 			}
 			catch (IllegalArgumentException ex) {
-				logger.error("Failed to parse Origin header value [" + origin + "]");
+				if (logger.isWarnEnabled()) {
+					logger.warn("Failed to parse Origin header value [" + origin + "]");
+				}
 				return false;
 			}
 			UriComponents requestComponents = UriComponentsBuilder.fromHttpRequest(request).build();
