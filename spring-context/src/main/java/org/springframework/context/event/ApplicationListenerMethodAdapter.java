@@ -19,8 +19,8 @@ package org.springframework.context.event;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.lang.reflect.Parameter;
 import java.lang.reflect.UndeclaredThrowableException;
+import java.util.Collection;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -37,6 +37,7 @@ import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.core.annotation.Order;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.util.Assert;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 
@@ -136,7 +137,27 @@ public class ApplicationListenerMethodAdapter implements GenericApplicationListe
 
 	protected void handleResult(Object result) {
 		Assert.notNull(this.applicationContext, "ApplicationContext must no be null.");
-		this.applicationContext.publishEvent(result);
+		if (result.getClass().isArray()) {
+			Object[] events = ObjectUtils.toObjectArray(result);
+			for (Object event : events) {
+				publishEvent(event);
+			}
+		}
+		else if (result instanceof Collection<?>) {
+			Collection<?> events = (Collection<?>) result;
+			for (Object event : events) {
+				publishEvent(event);
+			}
+		}
+		else {
+			publishEvent(result);
+		}
+	}
+
+	private void publishEvent(Object event) {
+		if (event != null) {
+			this.applicationContext.publishEvent(event);
+		}
 	}
 
 

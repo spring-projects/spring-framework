@@ -22,7 +22,9 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -157,7 +159,7 @@ public class AnnotationDrivenEventListenerTests {
 		this.eventCollector.assertNoEventReceived(replyEventListener);
 		this.context.publishEvent(event);
 		this.eventCollector.assertEvent(replyEventListener, event);
-		this.eventCollector.assertEvent(listener, new TestEvent(replyEventListener, event.getId(), event.msg)); // reply
+		this.eventCollector.assertEvent(listener, new TestEvent(replyEventListener, event.getId(), "dummy")); // reply
 		this.eventCollector.assertTotalEventsCount(2);
 	}
 
@@ -174,6 +176,55 @@ public class AnnotationDrivenEventListenerTests {
 		this.eventCollector.assertEvent(replyEventListener, event);
 		this.eventCollector.assertNoEventReceived(listener);
 		this.eventCollector.assertTotalEventsCount(1);
+	}
+
+	@Test
+	public void arrayReply() {
+		load(TestEventListener.class, ReplyEventListener.class);
+		AnotherTestEvent event = new AnotherTestEvent(this, new String[]{"first", "second"});
+		ReplyEventListener replyEventListener = this.context.getBean(ReplyEventListener.class);
+		TestEventListener listener = this.context.getBean(TestEventListener.class);
+
+		this.eventCollector.assertNoEventReceived(listener);
+		this.eventCollector.assertNoEventReceived(replyEventListener);
+		this.context.publishEvent(event);
+		this.eventCollector.assertEvent(replyEventListener, event);
+		this.eventCollector.assertEvent(listener, "first", "second"); // reply
+		this.eventCollector.assertTotalEventsCount(3);
+	}
+
+	@Test
+	public void collectionReply() {
+		load(TestEventListener.class, ReplyEventListener.class);
+		Set<Object> replies = new LinkedHashSet<>();
+		replies.add("first");
+		replies.add(4L);
+		replies.add("third");
+		AnotherTestEvent event = new AnotherTestEvent(this, replies);
+		ReplyEventListener replyEventListener = this.context.getBean(ReplyEventListener.class);
+		TestEventListener listener = this.context.getBean(TestEventListener.class);
+
+		this.eventCollector.assertNoEventReceived(listener);
+		this.eventCollector.assertNoEventReceived(replyEventListener);
+		this.context.publishEvent(event);
+		this.eventCollector.assertEvent(replyEventListener, event);
+		this.eventCollector.assertEvent(listener, "first", "third"); // reply (no listener for 4L)
+		this.eventCollector.assertTotalEventsCount(3);
+	}
+
+	@Test
+	public void collectionReplyNullValue() {
+		load(TestEventListener.class, ReplyEventListener.class);
+		AnotherTestEvent event = new AnotherTestEvent(this, Arrays.asList(null, "test"));
+		ReplyEventListener replyEventListener = this.context.getBean(ReplyEventListener.class);
+		TestEventListener listener = this.context.getBean(TestEventListener.class);
+
+		this.eventCollector.assertNoEventReceived(listener);
+		this.eventCollector.assertNoEventReceived(replyEventListener);
+		this.context.publishEvent(event);
+		this.eventCollector.assertEvent(replyEventListener, event);
+		this.eventCollector.assertEvent(listener, "test");
+		this.eventCollector.assertTotalEventsCount(2);
 	}
 
 	@Test
@@ -464,15 +515,19 @@ public class AnnotationDrivenEventListenerTests {
 		@EventListener
 		public Object handle(AnotherTestEvent event) {
 			collectEvent(event);
-			if (event.msg == null) {
+			if (event.content == null) {
 				return null;
 			}
-			else if (event.msg.equals("String")) {
-				return event.msg;
+			else if (event.content instanceof String) {
+				String s = (String) event.content;
+				if (s.equals("String")) {
+					return event.content;
+				}
+				else {
+					return new TestEvent(this, event.getId(), s);
+				}
 			}
-			else {
-				return new TestEvent(this, event.getId(), event.msg);
-			}
+			return event.content;
 		}
 
 	}
@@ -495,7 +550,7 @@ public class AnnotationDrivenEventListenerTests {
 		@Async
 		public void handleAsync(AnotherTestEvent event) {
 			collectEvent(event);
-			if ("fail".equals(event.msg)) {
+			if ("fail".equals(event.content)) {
 				countDownLatch.countDown();
 				throw new IllegalStateException("Test exception");
 			}
@@ -517,7 +572,7 @@ public class AnnotationDrivenEventListenerTests {
 		@EventListener
 		@Async
 		public void handleAsync(AnotherTestEvent event) {
-			assertTrue(!Thread.currentThread().getName().equals(event.msg));
+			assertTrue(!Thread.currentThread().getName().equals(event.content));
 			collectEvent(event);
 			countDownLatch.countDown();
 		}

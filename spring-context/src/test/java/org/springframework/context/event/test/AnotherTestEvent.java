@@ -22,11 +22,11 @@ package org.springframework.context.event.test;
 @SuppressWarnings("serial")
 public class AnotherTestEvent extends IdentifiableApplicationEvent {
 
-	public final String msg;
+	public final Object content;
 
-	public AnotherTestEvent(Object source, String msg) {
+	public AnotherTestEvent(Object source, Object content) {
 		super(source);
-		this.msg = msg;
+		this.content = content;
 	}
 
 }
