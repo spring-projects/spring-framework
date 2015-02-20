@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,6 +39,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import java.util.concurrent.Callable;
 
 import org.hamcrest.Matchers;
 import org.junit.Rule;
@@ -1208,6 +1209,16 @@ public class ResolvableTypeTests {
 		ResolvableType type = ResolvableType.forField(BaseProvider.class.getField("stuff"), BaseProvider.class);
 		assertTrue(type.getNested(2).isAssignableFrom(ResolvableType.forClass(BaseImplementation.class)));
 		assertEquals("java.util.Collection<org.springframework.core.ResolvableTypeTests$IBase<?>>", type.toString());
+	}
+
+	@Test
+	public void testSpr12701() throws Exception {
+		ResolvableType resolvableType = ResolvableType.forClassWithGenerics(Callable.class, String.class);
+		Type type = resolvableType.getType();
+		assertThat(type, is(instanceOf(ParameterizedType.class)));
+		assertThat(((ParameterizedType) type).getRawType(), is(equalTo(Callable.class)));
+		assertThat(((ParameterizedType) type).getActualTypeArguments().length, is(equalTo(1)));
+		assertThat(((ParameterizedType) type).getActualTypeArguments()[0], is(equalTo(String.class)));
 	}
 
 

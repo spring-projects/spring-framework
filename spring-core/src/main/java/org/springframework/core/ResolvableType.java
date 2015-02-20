@@ -1131,11 +1131,21 @@ public final class ResolvableType implements Serializable {
 	 * @return a {@link ResolvableType} for the specific class and generics
 	 * @see #forClassWithGenerics(Class, Class...)
 	 */
-	public static ResolvableType forClassWithGenerics(Class<?> sourceClass, ResolvableType... generics) {
+	public static ResolvableType forClassWithGenerics(final Class<?> sourceClass, final ResolvableType... generics) {
 		Assert.notNull(sourceClass, "Source class must not be null");
 		Assert.notNull(generics, "Generics must not be null");
-		TypeVariable<?>[] typeVariables = sourceClass.getTypeParameters();
-		return forType(sourceClass, new TypeVariablesVariableResolver(typeVariables, generics));
+		TypeVariable<?>[] variables = sourceClass.getTypeParameters();
+		Assert.isTrue(variables.length == generics.length, "Mismatched number of generics specified");
+
+		Type[] arguments = new Type[generics.length];
+		for (int i = 0; i < generics.length; i++) {
+			ResolvableType generic = generics[i];
+			Type argument = (generic != null ? generic.getType() : null);
+			arguments[i] = (argument != null ? argument : variables[i]);
+		}
+
+		ParameterizedType syntheticType = new SyntheticParameterizedType(sourceClass, arguments);
+		return forType(syntheticType, new TypeVariablesVariableResolver(variables, generics));
 	}
 
 	/**
@@ -1249,20 +1259,19 @@ public final class ResolvableType implements Serializable {
 	@SuppressWarnings("serial")
 	private static class TypeVariablesVariableResolver implements VariableResolver {
 
-		private final TypeVariable<?>[] typeVariables;
+		private final TypeVariable<?>[] variables;
 
 		private final ResolvableType[] generics;
 
-		public TypeVariablesVariableResolver(TypeVariable<?>[] typeVariables, ResolvableType[] generics) {
-			Assert.isTrue(typeVariables.length == generics.length, "Mismatched number of generics specified");
-			this.typeVariables = typeVariables;
+		public TypeVariablesVariableResolver(TypeVariable<?>[] variables, ResolvableType[] generics) {
+			this.variables = variables;
 			this.generics = generics;
 		}
 
 		@Override
 		public ResolvableType resolveVariable(TypeVariable<?> variable) {
-			for (int i = 0; i < this.typeVariables.length; i++) {
-				if (SerializableTypeWrapper.unwrap(this.typeVariables[i]).equals(
+			for (int i = 0; i < this.variables.length; i++) {
+				if (SerializableTypeWrapper.unwrap(this.variables[i]).equals(
 						SerializableTypeWrapper.unwrap(variable))) {
 					return this.generics[i];
 				}
@@ -1273,6 +1282,34 @@ public final class ResolvableType implements Serializable {
 		@Override
 		public Object getSource() {
 			return this.generics;
+		}
+	}
+
+
+	private static final class SyntheticParameterizedType implements ParameterizedType, Serializable {
+
+		private final Type rawType;
+
+		private final Type[] typeArguments;
+
+		public SyntheticParameterizedType(Type rawType, Type[] typeArguments) {
+			this.rawType = rawType;
+			this.typeArguments = typeArguments;
+		}
+
+		@Override
+		public Type[] getActualTypeArguments() {
+			return this.typeArguments;
+		}
+
+		@Override
+		public Type getRawType() {
+			return this.rawType;
+		}
+
+		@Override
+		public Type getOwnerType() {
+			return null;
 		}
 	}
 
