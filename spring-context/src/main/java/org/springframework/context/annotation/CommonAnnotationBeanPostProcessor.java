@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,6 +44,8 @@ import javax.xml.ws.Service;
 import javax.xml.ws.WebServiceClient;
 import javax.xml.ws.WebServiceRef;
 
+import org.springframework.aop.TargetSource;
+import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.PropertyValues;
@@ -415,6 +417,44 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 	}
 
 	/**
+	 * Obtain a lazily resolving resource proxy for the given name and type,
+	 * delegating to {@link #getResource} on demand once a method call comes in.
+	 * @param element the descriptor for the annotated field/method
+	 * @param requestingBeanName the name of the requesting bean
+	 * @return the resource object (never {@code null})
+	 * @since 4.2
+	 * @see #getResource
+	 * @see Lazy
+	 */
+	protected Object buildLazyResourceProxy(final LookupElement element, final String requestingBeanName) {
+		TargetSource ts = new TargetSource() {
+			@Override
+			public Class<?> getTargetClass() {
+				return element.lookupType;
+			}
+			@Override
+			public boolean isStatic() {
+				return false;
+			}
+			@Override
+			public Object getTarget() {
+				return getResource(element, requestingBeanName);
+			}
+			@Override
+			public void releaseTarget(Object target) {
+			}
+		};
+		ProxyFactory pf = new ProxyFactory();
+		pf.setTargetSource(ts);
+		if (element.lookupType.isInterface()) {
+			pf.addInterface(element.lookupType);
+		}
+		ClassLoader classLoader = (this.beanFactory instanceof ConfigurableBeanFactory ?
+				((ConfigurableBeanFactory) this.beanFactory).getBeanClassLoader() : null);
+		return pf.getProxy(classLoader);
+	}
+
+	/**
 	 * Obtain the resource object for the given name and type.
 	 * @param element the descriptor for the annotated field/method
 	 * @param requestingBeanName the name of the requesting bean
@@ -527,6 +567,8 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 	 */
 	private class ResourceElement extends LookupElement {
 
+		private final boolean lazyLookup;
+
 		public ResourceElement(Member member, AnnotatedElement ae, PropertyDescriptor pd) {
 			super(member, pd);
 			Resource resource = ae.getAnnotation(Resource.class);
@@ -552,11 +594,14 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 			this.name = resourceName;
 			this.lookupType = resourceType;
 			this.mappedName = resource.mappedName();
+			Lazy lazy = ae.getAnnotation(Lazy.class);
+			this.lazyLookup = (lazy != null && lazy.value());
 		}
 
 		@Override
 		protected Object getResourceToInject(Object target, String requestingBeanName) {
-			return getResource(this, requestingBeanName);
+			return (this.lazyLookup ? buildLazyResourceProxy(this, requestingBeanName) :
+					getResource(this, requestingBeanName));
 		}
 	}
 

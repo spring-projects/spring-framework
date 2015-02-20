@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -437,6 +437,60 @@ public class CommonAnnotationBeanPostProcessorTests {
 		assertTrue(bean.destroy2Called);
 	}
 
+	@Test
+	public void testLazyResolutionWithResourceField() {
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		CommonAnnotationBeanPostProcessor bpp = new CommonAnnotationBeanPostProcessor();
+		bpp.setBeanFactory(bf);
+		bf.addBeanPostProcessor(bpp);
+
+		bf.registerBeanDefinition("annotatedBean", new RootBeanDefinition(LazyResourceFieldInjectionBean.class));
+		bf.registerBeanDefinition("testBean", new RootBeanDefinition(TestBean.class));
+
+		LazyResourceFieldInjectionBean bean = (LazyResourceFieldInjectionBean) bf.getBean("annotatedBean");
+		assertFalse(bf.containsSingleton("testBean"));
+		bean.testBean.setName("notLazyAnymore");
+		assertTrue(bf.containsSingleton("testBean"));
+		TestBean tb = (TestBean) bf.getBean("testBean");
+		assertEquals("notLazyAnymore", tb.getName());
+	}
+
+	@Test
+	public void testLazyResolutionWithResourceMethod() {
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		CommonAnnotationBeanPostProcessor bpp = new CommonAnnotationBeanPostProcessor();
+		bpp.setBeanFactory(bf);
+		bf.addBeanPostProcessor(bpp);
+
+		bf.registerBeanDefinition("annotatedBean", new RootBeanDefinition(LazyResourceMethodInjectionBean.class));
+		bf.registerBeanDefinition("testBean", new RootBeanDefinition(TestBean.class));
+
+		LazyResourceMethodInjectionBean bean = (LazyResourceMethodInjectionBean) bf.getBean("annotatedBean");
+		assertFalse(bf.containsSingleton("testBean"));
+		bean.testBean.setName("notLazyAnymore");
+		assertTrue(bf.containsSingleton("testBean"));
+		TestBean tb = (TestBean) bf.getBean("testBean");
+		assertEquals("notLazyAnymore", tb.getName());
+	}
+
+	@Test
+	public void testLazyResolutionWithCglibProxy() {
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		CommonAnnotationBeanPostProcessor bpp = new CommonAnnotationBeanPostProcessor();
+		bpp.setBeanFactory(bf);
+		bf.addBeanPostProcessor(bpp);
+
+		bf.registerBeanDefinition("annotatedBean", new RootBeanDefinition(LazyResourceCglibInjectionBean.class));
+		bf.registerBeanDefinition("testBean", new RootBeanDefinition(TestBean.class));
+
+		LazyResourceCglibInjectionBean bean = (LazyResourceCglibInjectionBean) bf.getBean("annotatedBean");
+		assertFalse(bf.containsSingleton("testBean"));
+		bean.testBean.setName("notLazyAnymore");
+		assertTrue(bf.containsSingleton("testBean"));
+		TestBean tb = (TestBean) bf.getBean("testBean");
+		assertEquals("notLazyAnymore", tb.getName());
+	}
+
 
 	public static class AnnotatedInitDestroyBean {
 
@@ -713,6 +767,35 @@ public class CommonAnnotationBeanPostProcessorTests {
 
 		@Resource(name="value")
 		private int value;
+	}
+
+
+	private static class LazyResourceFieldInjectionBean {
+
+		@Resource @Lazy
+		private ITestBean testBean;
+	}
+
+
+	private static class LazyResourceMethodInjectionBean {
+
+		private ITestBean testBean;
+
+		@Resource @Lazy
+		public void setTestBean(ITestBean testBean) {
+			this.testBean = testBean;
+		}
+	}
+
+
+	private static class LazyResourceCglibInjectionBean {
+
+		private TestBean testBean;
+
+		@Resource @Lazy
+		public void setTestBean(TestBean testBean) {
+			this.testBean = testBean;
+		}
 	}
 
 
