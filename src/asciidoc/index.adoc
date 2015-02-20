@@ -7269,6 +7269,20 @@ method are automatically enlisted with a destruction callback. If you have a pub
 `close` or `shutdown` method and you do not wish for it to be called when the container
 shuts down, simply add `@Bean(destroyMethod="")` to your bean definition to disable the
 default `(inferred)` mode.
+
+You may want to do that by default for a resource that you acquire via JNDI as its lifecycle
+is managed outside the application. In particular, make sure to always do it for a
+`DataSource` as it is known to be problematic.
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@Bean(destroyMethod="")
+	public DataSource dataSource() throws NamingException {
+		return (DataSource) jndiTemplate.lookup("MyDS");
+	}
+----
+
 ====
 
 Of course, in the case of `Foo` above, it would be equally as valid to call the `init()`
@@ -8088,7 +8102,7 @@ now looks like this:
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	@Bean
+	@Bean(destroyMethod="")
 	public DataSource dataSource() throws Exception {
 		Context ctx = new InitialContext();
 		return (DataSource) ctx.lookup("java:comp/env/jdbc/datasource");
@@ -8143,7 +8157,7 @@ can rewrite the _dataSource_ configuration as follows:
 	**@Profile("production")**
 	public class JndiDataConfig {
 
-		@Bean
+		@Bean(destroyMethod="")
 		public DataSource dataSource() throws Exception {
 			Context ctx = new InitialContext();
 			return (DataSource) ctx.lookup("java:comp/env/jdbc/datasource");
@@ -20413,7 +20427,7 @@ integration test but using `@Configuration` classes instead of XML.
 	@Profile("production")
 	public class JndiDataConfig {
 
-		@Bean
+		@Bean(destroyMethod="")
 		public DataSource dataSource() throws Exception {
 			Context ctx = new InitialContext();
 			return (DataSource) ctx.lookup("java:comp/env/jdbc/datasource");
