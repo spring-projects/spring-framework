@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,6 +48,7 @@ import org.springframework.core.convert.converter.Converter;
 import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.format.Formatter;
 import org.springframework.format.Printer;
+import org.springframework.format.annotation.NumberFormat;
 import org.springframework.format.datetime.joda.DateTimeParser;
 import org.springframework.format.datetime.joda.JodaDateTimeFormatAnnotationFormatterFactory;
 import org.springframework.format.datetime.joda.ReadablePartialPrinter;
@@ -120,12 +121,15 @@ public class FormattingConversionServiceTests {
 		ac.registerBeanDefinition("ppc", new RootBeanDefinition(PropertyPlaceholderConfigurer.class));
 		ac.refresh();
 		System.setProperty("myDate", "10-31-09");
+		System.setProperty("myNumber", "99.99%");
 		try {
 			MetaValueBean valueBean = ac.getBean(MetaValueBean.class);
 			assertEquals(new LocalDate(2009, 10, 31), new LocalDate(valueBean.date));
+			assertEquals(Double.valueOf(0.9999), valueBean.number);
 		}
 		finally {
 			System.clearProperty("myDate");
+			System.clearProperty("myNumber");
 		}
 	}
 
@@ -341,6 +345,10 @@ public class FormattingConversionServiceTests {
 
 		@MyDateAnn
 		public Date date;
+
+		@MyNumberAnn
+		public Double number;
+
 	}
 
 
@@ -350,6 +358,11 @@ public class FormattingConversionServiceTests {
 	public static @interface MyDateAnn {
 	}
 
+	@Value("${myNumber}")
+	@org.springframework.format.annotation.NumberFormat(style = NumberFormat.Style.PERCENT)
+	@Retention(RetentionPolicy.RUNTIME)
+	public static @interface MyNumberAnn {
+	}
 
 	public static class Model {
 
