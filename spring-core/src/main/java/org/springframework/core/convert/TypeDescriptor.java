@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,9 +23,11 @@ import java.lang.reflect.Type;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Stream;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ResolvableType;
+import org.springframework.lang.UsesJava8;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
@@ -38,12 +40,16 @@ import org.springframework.util.ObjectUtils;
  * @author Juergen Hoeller
  * @author Phillip Webb
  * @author Sam Brannen
+ * @author Stephane Nicoll
  * @since 3.0
  */
 @SuppressWarnings("serial")
 public class TypeDescriptor implements Serializable {
 
 	static final Annotation[] EMPTY_ANNOTATION_ARRAY = new Annotation[0];
+
+	private static final boolean streamAvailable = ClassUtils.isPresent(
+			"java.util.stream.Stream", TypeDescriptor.class.getClassLoader());
 
 	private static final Map<Class<?>, TypeDescriptor> commonTypesCache = new HashMap<Class<?>, TypeDescriptor>(18);
 
@@ -316,6 +322,7 @@ public class TypeDescriptor implements Serializable {
 
 	/**
 	 * If this type is an array, returns the array's component type.
+	 * If this type is a {@code Stream}, returns the stream's component type.
 	 * If this type is a {@link Collection} and it is parameterized, returns the Collection's element type.
 	 * If the Collection is not parameterized, returns {@code null} indicating the element type is not declared.
 	 * @return the array component type or Collection element type, or {@code null} if this type is a
@@ -325,6 +332,9 @@ public class TypeDescriptor implements Serializable {
 	public TypeDescriptor getElementTypeDescriptor() {
 		if (this.resolvableType.isArray()) {
 			return new TypeDescriptor(this.resolvableType.getComponentType(), null, this.annotations);
+		}
+		if (streamAvailable && StreamHelper.isStream(this.type)) {
+			return StreamHelper.getStreamElementType(this);
 		}
 		return getRelatedIfResolvable(this, this.resolvableType.asCollection().getGeneric());
 	}
@@ -679,6 +689,21 @@ public class TypeDescriptor implements Serializable {
 			return null;
 		}
 		return new TypeDescriptor(type, null, source.annotations);
+	}
+
+	/**
+	 * Inner class to avoid a hard dependency on Java 8.
+	 */
+	@UsesJava8
+	private static class StreamHelper {
+
+		private static boolean isStream(Class<?> type) {
+			return Stream.class.isAssignableFrom(type);
+		}
+
+		private static TypeDescriptor getStreamElementType(TypeDescriptor source) {
+			return getRelatedIfResolvable(source, source.resolvableType.as(Stream.class).getGeneric());
+		}
 	}
 
 }
