@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.format.annotation;
 
+import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -26,8 +27,8 @@ import java.lang.annotation.Target;
  * Supports formatting by style or custom pattern string.
  * Can be applied to any JDK {@code java.lang.Number} type.
  *
- * <p>For style-based formatting, set the {@link #style()} attribute to be the desired {@link Style}.
- * For custom formatting, set the {@link #pattern()} attribute to be the number pattern, such as {@code #, ###.##}.
+ * <p>For style-based formatting, set the {@link #style} attribute to be the desired {@link Style}.
+ * For custom formatting, set the {@link #pattern} attribute to be the number pattern, such as {@code #, ###.##}.
  *
  * <p>Each attribute is mutually exclusive, so only set one attribute per annotation instance
  * (the one most convenient one for your formatting needs). When the pattern attribute is specified,
@@ -38,8 +39,9 @@ import java.lang.annotation.Target;
  * @since 3.0
  * @see java.text.NumberFormat
  */
-@Target({ElementType.METHOD, ElementType.FIELD, ElementType.PARAMETER})
+@Documented
 @Retention(RetentionPolicy.RUNTIME)
+@Target({ElementType.METHOD, ElementType.FIELD, ElementType.PARAMETER})
 public @interface NumberFormat {
 
 	/**
