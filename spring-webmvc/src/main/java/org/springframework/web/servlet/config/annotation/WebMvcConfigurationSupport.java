@@ -223,7 +223,7 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	 */
 	@Bean
 	public RequestMappingHandlerMapping requestMappingHandlerMapping() {
-		RequestMappingHandlerMapping handlerMapping = new RequestMappingHandlerMapping();
+		RequestMappingHandlerMapping handlerMapping = createRequestMappingHandlerMapping();
 		handlerMapping.setOrder(0);
 		handlerMapping.setInterceptors(getInterceptors());
 		handlerMapping.setContentNegotiationManager(mvcContentNegotiationManager());
@@ -246,6 +246,14 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 		}
 
 		return handlerMapping;
+	}
+
+	/**
+	 * Allow overriding of {@link RequestMappingHandlerMapping} to allow
+	 * custom implementation.
+	 */
+	protected RequestMappingHandlerMapping createRequestMappingHandlerMapping() {
+		return new RequestMappingHandlerMapping();
 	}
 
 	/**
