@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,12 +17,8 @@
 package org.springframework.web.socket.messaging;
 
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
@@ -64,10 +60,7 @@ import org.springframework.messaging.support.ImmutableMessageChannelInterceptor;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.messaging.support.MessageHeaderAccessor;
 import org.springframework.util.MimeTypeUtils;
-import org.springframework.web.socket.BinaryMessage;
-import org.springframework.web.socket.CloseStatus;
-import org.springframework.web.socket.TextMessage;
-import org.springframework.web.socket.WebSocketMessage;
+import org.springframework.web.socket.*;
 import org.springframework.web.socket.handler.TestWebSocketSession;
 import org.springframework.web.socket.sockjs.transport.SockJsSession;
 
@@ -392,6 +385,42 @@ public class StompSubProtocolHandlerTests {
 		assertTrue(actual.getPayload().startsWith("ERROR"));
 	}
 
+    @Test
+    public void handleMessageFromClientInvalidStompCommandCallsStompErrorHandler() {
+
+        TextMessage textMessage = new TextMessage("FOO\n\n\0");
+
+        StompSubProtocolErrorHandler mockErrorHandler = Mockito.mock(StompSubProtocolErrorHandler.class);
+
+        this.protocolHandler.setStompSubProtocolErrorHandler(mockErrorHandler);
+        this.protocolHandler.afterSessionStarted(this.session, this.channel);
+        this.protocolHandler.handleMessageFromClient(this.session, textMessage, this.channel);
+
+        verify(mockErrorHandler, times(1)).handleError(any(), any());
+    }
+
+    @Test
+    public void handleMessageFromClientCallsStompErrorHandlerWhenOutputChannelException() {
+
+        TestPublisher publisher = new TestPublisher();
+
+        UserSessionRegistry registry = new DefaultUserSessionRegistry();
+        StompSubProtocolErrorHandler mockErrorHandler = Mockito.mock(StompSubProtocolErrorHandler.class);
+        Mockito.doThrow(RuntimeException.class).when(this.channel).send(any(Message.class));
+
+        this.protocolHandler.setStompSubProtocolErrorHandler(mockErrorHandler);
+        this.protocolHandler.setUserSessionRegistry(registry);
+        this.protocolHandler.setApplicationEventPublisher(publisher);
+        this.protocolHandler.afterSessionStarted(this.session, this.channel);
+
+        StompHeaderAccessor headers = StompHeaderAccessor.create(StompCommand.SUBSCRIBE);
+        Message<byte[]> message = MessageBuilder.createMessage(EMPTY_PAYLOAD, headers.getMessageHeaders());
+        TextMessage textMessage = new TextMessage(new StompEncoder().encode(message));
+        this.protocolHandler.handleMessageFromClient(this.session, textMessage, this.channel);
+
+        verify(mockErrorHandler, times(1)).handleError(any(), any());
+    }
+
 	@Test
 	public void webSocketScope() {
 
@@ -427,8 +456,20 @@ public class StompSubProtocolHandlerTests {
 		verify(runnable, times(1)).run();
 	}
 
+    @Test(expected = IllegalArgumentException.class)
+    public void stompSubProtocolErrorHandlerShouldNotBeNull() throws Exception {
+        this.protocolHandler.setStompSubProtocolErrorHandler(null);
+    }
 
-	private static class UniqueUser extends TestPrincipal implements DestinationUserNameProvider {
+    @Test
+    public void stompSubProtocolErrorHandlerCanBeChanged() {
+        StompSubProtocolErrorHandler errorHandler = this.protocolHandler.getStompSubProtocolErrorHandler();
+        this.protocolHandler.setStompSubProtocolErrorHandler(Mockito.mock(StompSubProtocolErrorHandler.class));
+
+        assertNotEquals(errorHandler, this.protocolHandler.getStompSubProtocolErrorHandler());
+    }
+
+    private static class UniqueUser extends TestPrincipal implements DestinationUserNameProvider {
 
 		private UniqueUser(String name) {
 			super(name);
