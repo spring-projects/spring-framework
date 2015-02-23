@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -573,7 +573,7 @@ final class HierarchicalUriComponents extends UriComponents {
 		 * @see <a href="http://www.ietf.org/rfc/rfc3986.txt">RFC 3986, appendix A</a>
 		 */
 		protected boolean isReserved(char c) {
-			return isGenericDelimiter(c) || isReserved(c);
+			return isGenericDelimiter(c) || isSubDelimiter(c);
 		}
 
 		/**
