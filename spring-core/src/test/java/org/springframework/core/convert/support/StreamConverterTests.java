@@ -34,7 +34,7 @@ import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.*;
 
-public class StreamConverterTest {
+public class StreamConverterTests {
 
 	@Rule
 	public final ExpectedException thrown = ExpectedException.none();
