@@ -40,7 +40,7 @@ configure(allprojects) { project ->
 	ext.hsqldbVersion        = "2.3.2"
 	ext.jackson2Version      = "2.5.1"
 	ext.jasperReportsVersion = "6.0.3"
-	ext.jettyVersion         = "9.2.7.v20150116"
+	ext.jettyVersion         = "9.2.9.v20150224"
 	ext.jodaVersion          = "2.7"
 	ext.jtaVersion           = "1.2"
 	ext.junitVersion         = "4.12"
