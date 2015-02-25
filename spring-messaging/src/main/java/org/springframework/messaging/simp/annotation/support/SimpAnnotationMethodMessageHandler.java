@@ -299,6 +299,7 @@ public class SimpAnnotationMethodMessageHandler extends AbstractMethodMessageHan
 		resolvers.add(new HeaderMethodArgumentResolver(this.conversionService, beanFactory));
 		resolvers.add(new HeadersMethodArgumentResolver());
 		resolvers.add(new DestinationVariableMethodArgumentResolver(this.conversionService));
+		resolvers.add(new AuthenticationPrincipalArgumentResolver());
 
 		// Type-based argument resolution
 		resolvers.add(new PrincipalMethodArgumentResolver());
