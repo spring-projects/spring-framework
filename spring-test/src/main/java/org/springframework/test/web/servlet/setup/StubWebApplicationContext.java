@@ -137,6 +137,9 @@ class StubWebApplicationContext implements WebApplicationContext {
 	}
 
 	public void addBeans(List<?> beans) {
+		if (beans == null) {
+			return;
+		}
 		for (Object bean : beans) {
 			String name = bean.getClass().getName() + "#" +  ObjectUtils.getIdentityHexString(bean);
 			this.beanFactory.addBean(name, bean);

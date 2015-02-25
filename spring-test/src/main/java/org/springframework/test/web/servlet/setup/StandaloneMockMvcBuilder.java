@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ import java.util.Map;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanInitializationException;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.context.ApplicationContextAware;
 import org.springframework.format.support.DefaultFormattingConversionService;
 import org.springframework.format.support.FormattingConversionService;
 import org.springframework.http.converter.HttpMessageConverter;
@@ -86,6 +87,8 @@ public class StandaloneMockMvcBuilder extends AbstractMockMvcBuilder<StandaloneM
 
 	private final Object[] controllers;
 
+	private List<Object> controllerAdvice;
+
 	private List<HttpMessageConverter<?>> messageConverters = new ArrayList<HttpMessageConverter<?>>();
 
 	private List<HandlerMethodArgumentResolver> customArgumentResolvers = new ArrayList<HandlerMethodArgumentResolver>();
@@ -100,7 +103,7 @@ public class StandaloneMockMvcBuilder extends AbstractMockMvcBuilder<StandaloneM
 
 	private FormattingConversionService conversionService = null;
 
-	private List<HandlerExceptionResolver> handlerExceptionResolvers = new ArrayList<HandlerExceptionResolver>();
+	private List<HandlerExceptionResolver> handlerExceptionResolvers;
 
 	private Long asyncRequestTimeout;
 
@@ -126,6 +129,19 @@ public class StandaloneMockMvcBuilder extends AbstractMockMvcBuilder<StandaloneM
 	protected StandaloneMockMvcBuilder(Object... controllers) {
 		Assert.isTrue(!ObjectUtils.isEmpty(controllers), "At least one controller is required");
 		this.controllers = controllers;
+	}
+
+	/**
+	 * Register {@link org.springframework.web.bind.annotation.ControllerAdvice
+	 * ControllerAdvice} instances to be used with this MockMvc instance.
+	 * <p>Normally {@code @ControllerAdvice} are auto-detected. However since the
+	 * standalone setup does not load Spring configuration they need to be
+	 * registered explicitly instead.
+	 * @since 4.2
+	 */
+	public StandaloneMockMvcBuilder setControllerAdvice(Object... controllerAdvice) {
+		this.controllerAdvice = Arrays.asList(controllerAdvice);
+		return this;
 	}
 
 	/**
@@ -317,6 +333,9 @@ public class StandaloneMockMvcBuilder extends AbstractMockMvcBuilder<StandaloneM
 
 	private void registerMvcSingletons(StubWebApplicationContext wac) {
 		StandaloneConfiguration config = new StandaloneConfiguration();
+		config.setApplicationContext(wac);
+
+		wac.addBeans(this.controllerAdvice);
 
 		StaticRequestMappingHandlerMapping hm = config.getHandlerMapping();
 		hm.setServletContext(wac.getServletContext());
@@ -427,7 +446,23 @@ public class StandaloneMockMvcBuilder extends AbstractMockMvcBuilder<StandaloneM
 
 		@Override
 		protected void configureHandlerExceptionResolvers(List<HandlerExceptionResolver> exceptionResolvers) {
-			exceptionResolvers.addAll(StandaloneMockMvcBuilder.this.handlerExceptionResolvers);
+			if (handlerExceptionResolvers == null) {
+				return;
+			}
+			for (HandlerExceptionResolver resolver : handlerExceptionResolvers) {
+				if (resolver instanceof ApplicationContextAware) {
+					((ApplicationContextAware) resolver).setApplicationContext(getApplicationContext());
+				}
+				if (resolver instanceof InitializingBean) {
+					try {
+						((InitializingBean) resolver).afterPropertiesSet();
+					}
+					catch (Exception ex) {
+						throw new IllegalStateException("Failure from afterPropertiesSet", ex);
+					}
+				}
+				exceptionResolvers.add(resolver);
+			}
 		}
 	}
 

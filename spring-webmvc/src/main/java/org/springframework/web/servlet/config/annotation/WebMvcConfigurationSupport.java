@@ -207,6 +207,10 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 		this.applicationContext = applicationContext;
 	}
 
+	public ApplicationContext getApplicationContext() {
+		return this.applicationContext;
+	}
+
 	/**
 	 * Set the {@link javax.servlet.ServletContext}, e.g. for resource handling,
 	 * looking up file extensions, etc.
@@ -216,6 +220,9 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 		this.servletContext = servletContext;
 	}
 
+	public ServletContext getServletContext() {
+		return this.servletContext;
+	}
 
 	/**
 	 * Return a {@link RequestMappingHandlerMapping} ordered at 0 for mapping
