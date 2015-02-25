@@ -184,20 +184,21 @@ class ConfigurationClassBeanDefinitionReader {
 	private void loadBeanDefinitionsForBeanMethod(BeanMethod beanMethod) {
 		ConfigurationClass configClass = beanMethod.getConfigurationClass();
 		MethodMetadata metadata = beanMethod.getMetadata();
+		String methodName = metadata.getMethodName();
+
+		// Do we need to mark the bean as skipped by its condition?
+		if (this.conditionEvaluator.shouldSkip(metadata, ConfigurationPhase.REGISTER_BEAN)) {
+			configClass.skippedBeanMethods.add(methodName);
+			return;
+		}
+		if (configClass.skippedBeanMethods.contains(methodName)) {
+			return;
+		}
 
 		// Consider name and any aliases
 		AnnotationAttributes bean = AnnotationConfigUtils.attributesFor(metadata, Bean.class);
 		List<String> names = new ArrayList<String>(Arrays.asList(bean.getStringArray("name")));
-		String beanName = (names.size() > 0 ? names.remove(0) : beanMethod.getMetadata().getMethodName());
-
-		// Do we need to mark the bean as skipped by its condition?
-		if (this.conditionEvaluator.shouldSkip(metadata, ConfigurationPhase.REGISTER_BEAN)) {
-			configClass.skippedBeans.add(beanName);
-			return;
-		}
-		if (configClass.skippedBeans.contains(beanName)) {
-			return;
-		}
+		String beanName = (names.size() > 0 ? names.remove(0) : methodName);
 
 		// Register aliases even when overridden
 		for (String alias : names) {
@@ -216,12 +217,12 @@ class ConfigurationClassBeanDefinitionReader {
 		if (metadata.isStatic()) {
 			// static @Bean method
 			beanDef.setBeanClassName(configClass.getMetadata().getClassName());
-			beanDef.setFactoryMethodName(metadata.getMethodName());
+			beanDef.setFactoryMethodName(methodName);
 		}
 		else {
 			// instance @Bean method
 			beanDef.setFactoryBeanName(configClass.getBeanName());
-			beanDef.setUniqueFactoryMethodName(metadata.getMethodName());
+			beanDef.setUniqueFactoryMethodName(methodName);
 		}
 		beanDef.setAutowireMode(RootBeanDefinition.AUTOWIRE_CONSTRUCTOR);
 		beanDef.setAttribute(RequiredAnnotationBeanPostProcessor.SKIP_REQUIRED_CHECK_ATTRIBUTE, Boolean.TRUE);

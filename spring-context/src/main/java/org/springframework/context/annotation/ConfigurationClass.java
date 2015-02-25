@@ -64,7 +64,7 @@ final class ConfigurationClass {
 	private final Map<ImportBeanDefinitionRegistrar, AnnotationMetadata> importBeanDefinitionRegistrars =
 			new LinkedHashMap<ImportBeanDefinitionRegistrar, AnnotationMetadata>();
 
-	final Set<String> skippedBeans = new HashSet<String>();
+	final Set<String> skippedBeanMethods = new HashSet<String>();
 
 
 	/**

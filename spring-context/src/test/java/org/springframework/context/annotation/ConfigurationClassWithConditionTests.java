@@ -20,6 +20,7 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import java.util.Map;
 
 import org.junit.Rule;
 import org.junit.Test;
@@ -127,7 +128,17 @@ public class ConfigurationClassWithConditionTests {
 	@Test
 	public void noConditionOnOverriddenMethodHonored() {
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(ConfigWithBeanReactivated.class);
-		assertEquals(1, context.getBeansOfType(ExampleBean.class).size());
+		Map<String, ExampleBean> beans = context.getBeansOfType(ExampleBean.class);
+		assertEquals(1, beans.size());
+		assertEquals("baz", beans.keySet().iterator().next());
+	}
+
+	@Test
+	public void configWithAlternativeBeans() {
+		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(ConfigWithAlternativeBeans.class);
+		Map<String, ExampleBean> beans = context.getBeansOfType(ExampleBean.class);
+		assertEquals(1, beans.size());
+		assertEquals("baz", beans.keySet().iterator().next());
 	}
 
 
@@ -218,6 +229,14 @@ public class ConfigurationClassWithConditionTests {
 		}
 	}
 
+	static class AlwaysCondition implements Condition {
+
+		@Override
+		public boolean matches(ConditionContext context, AnnotatedTypeMetadata metadata) {
+			return true;
+		}
+	}
+
 	@Component
 	@Never
 	static class NonConfigurationClass {
@@ -277,7 +296,7 @@ public class ConfigurationClassWithConditionTests {
 	}
 
 	@Configuration
-	private static class ConfigWithBeanActive {
+	static class ConfigWithBeanActive {
 
 		@Bean
 		public ExampleBean baz() {
@@ -285,7 +304,7 @@ public class ConfigurationClassWithConditionTests {
 		}
 	}
 
-	private static class ConfigWithBeanSkipped extends ConfigWithBeanActive {
+	static class ConfigWithBeanSkipped extends ConfigWithBeanActive {
 
 		@Override
 		@Bean
@@ -295,11 +314,27 @@ public class ConfigurationClassWithConditionTests {
 		}
 	}
 
-	private static class ConfigWithBeanReactivated extends ConfigWithBeanSkipped {
+	static class ConfigWithBeanReactivated extends ConfigWithBeanSkipped {
 
 		@Override
 		@Bean
 		public ExampleBean baz() {
+			return new ExampleBean();
+		}
+	}
+
+	@Configuration
+	static class ConfigWithAlternativeBeans {
+
+		@Bean(name = "baz")
+		@Conditional(AlwaysCondition.class)
+		public ExampleBean baz1() {
+			return new ExampleBean();
+		}
+
+		@Bean(name = "baz")
+		@Conditional(NeverCondition.class)
+		public ExampleBean baz2() {
 			return new ExampleBean();
 		}
 	}
