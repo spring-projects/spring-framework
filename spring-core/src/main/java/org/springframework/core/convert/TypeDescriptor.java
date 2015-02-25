@@ -117,7 +117,7 @@ public class TypeDescriptor implements Serializable {
 	 * constructor is used internally and may also be used by subclasses that support
 	 * non-Java languages with extended type systems.
 	 * @param resolvableType the resolvable type
-	 * @param type the backing type or {@code null} if should be resolved
+	 * @param type the backing type (or {@code null} if it should get resolved)
 	 * @param annotations the type annotations
 	 */
 	protected TypeDescriptor(ResolvableType resolvableType, Class<?> type, Annotation[] annotations) {
@@ -333,8 +333,8 @@ public class TypeDescriptor implements Serializable {
 		if (this.resolvableType.isArray()) {
 			return new TypeDescriptor(this.resolvableType.getComponentType(), null, this.annotations);
 		}
-		if (streamAvailable && StreamHelper.isStream(this.type)) {
-			return StreamHelper.getStreamElementType(this);
+		if (streamAvailable && StreamDelegate.isStream(this.type)) {
+			return StreamDelegate.getStreamElementType(this);
 		}
 		return getRelatedIfResolvable(this, this.resolvableType.asCollection().getGeneric());
 	}
@@ -691,17 +691,18 @@ public class TypeDescriptor implements Serializable {
 		return new TypeDescriptor(type, null, source.annotations);
 	}
 
+
 	/**
 	 * Inner class to avoid a hard dependency on Java 8.
 	 */
 	@UsesJava8
-	private static class StreamHelper {
+	private static class StreamDelegate {
 
-		private static boolean isStream(Class<?> type) {
+		public static boolean isStream(Class<?> type) {
 			return Stream.class.isAssignableFrom(type);
 		}
 
-		private static TypeDescriptor getStreamElementType(TypeDescriptor source) {
+		public static TypeDescriptor getStreamElementType(TypeDescriptor source) {
 			return getRelatedIfResolvable(source, source.resolvableType.as(Stream.class).getGeneric());
 		}
 	}

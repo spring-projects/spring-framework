@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -83,12 +83,13 @@ import org.springframework.web.servlet.support.WebContentGenerator;
  */
 public class ResourceHttpRequestHandler extends WebContentGenerator implements HttpRequestHandler, InitializingBean {
 
-	private final static Log logger = LogFactory.getLog(ResourceHttpRequestHandler.class);
-
-	private static final boolean jafPresent =
-			ClassUtils.isPresent("javax.activation.FileTypeMap", ResourceHttpRequestHandler.class.getClassLoader());
-
 	private static final String CONTENT_ENCODING = "Content-Encoding";
+
+	private static final Log logger = LogFactory.getLog(ResourceHttpRequestHandler.class);
+
+	private static final boolean jafPresent = ClassUtils.isPresent(
+			"javax.activation.FileTypeMap", ResourceHttpRequestHandler.class.getClassLoader());
+
 
 	private final List<Resource> locations = new ArrayList<Resource>(4);
 
@@ -422,8 +423,9 @@ public class ResourceHttpRequestHandler extends WebContentGenerator implements H
 				getLocations() + ", resolvers=" + getResourceResolvers() + "]";
 	}
 
+
 	/**
-	 * Inner class to avoid hard-coded JAF dependency.
+	 * Inner class to avoid a hard-coded JAF dependency.
 	 */
 	private static class ActivationMediaTypeFactory {
 
@@ -434,7 +436,7 @@ public class ResourceHttpRequestHandler extends WebContentGenerator implements H
 		}
 
 		private static FileTypeMap loadFileTypeMapFromContextSupportModule() {
-			// see if we can find the extended mime.types from the context-support module
+			// See if we can find the extended mime.types from the context-support module...
 			Resource mappingLocation = new ClassPathResource("org/springframework/mail/javamail/mime.types");
 			if (mappingLocation.exists()) {
 				InputStream inputStream = null;
@@ -465,4 +467,4 @@ public class ResourceHttpRequestHandler extends WebContentGenerator implements H
 		}
 	}
 
- }
+}
