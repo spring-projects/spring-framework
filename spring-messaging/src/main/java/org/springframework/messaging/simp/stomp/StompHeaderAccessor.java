@@ -162,7 +162,7 @@ public class StompHeaderAccessor extends SimpMessageHeaderAccessor {
 		}
 	}
 
-	private void updateStompHeadersFromSimpMessageHeaders() {
+	void updateStompHeadersFromSimpMessageHeaders() {
 		if (getDestination() != null) {
 			setNativeHeader(STOMP_DESTINATION_HEADER, getDestination());
 		}
