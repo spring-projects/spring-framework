@@ -179,8 +179,10 @@ public class PathResourceResolver extends AbstractResourceResolver {
 			resourcePath = resource.getURL().getPath();
 			locationPath = StringUtils.cleanPath(location.getURL().getPath());
 		}
-		locationPath = (StringUtils.getFilenameExtension(locationPath) != null
-				|| locationPath.endsWith("/") || locationPath.isEmpty() ? locationPath : locationPath + "/");
+		if(locationPath.equals(resourcePath)) {
+			return true;
+		}
+		locationPath = (locationPath.endsWith("/") || locationPath.isEmpty() ? locationPath : locationPath + "/");
 		if (!resourcePath.startsWith(locationPath)) {
 			return false;
 		}
