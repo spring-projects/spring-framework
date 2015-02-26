@@ -128,8 +128,8 @@ public class EventListenerMethodProcessor implements SmartInitializingSingleton,
 			}
 			if (annotatedMethods.isEmpty()) {
 				this.nonAnnotatedClasses.add(type);
-				if (logger.isDebugEnabled()) {
-					logger.debug("No @EventListener annotations found on bean class: " + type);
+				if (logger.isTraceEnabled()) {
+					logger.trace("No @EventListener annotations found on bean class: " + type);
 				}
 			}
 			else {

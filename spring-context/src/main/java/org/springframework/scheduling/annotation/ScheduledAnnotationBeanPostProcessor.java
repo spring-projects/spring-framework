@@ -231,8 +231,8 @@ public class ScheduledAnnotationBeanPostProcessor implements BeanPostProcessor, 
 			});
 			if (annotatedMethods.isEmpty()) {
 				this.nonAnnotatedClasses.add(targetClass);
-				if (logger.isDebugEnabled()) {
-					logger.debug("No @Scheduled annotations found on bean class: " + bean.getClass());
+				if (logger.isTraceEnabled()) {
+					logger.trace("No @Scheduled annotations found on bean class: " + bean.getClass());
 				}
 			}
 			else {
