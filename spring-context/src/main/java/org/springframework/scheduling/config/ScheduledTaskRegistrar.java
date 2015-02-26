@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.scheduling.config;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -47,6 +48,7 @@ import org.springframework.util.CollectionUtils;
  *
  * @author Juergen Hoeller
  * @author Chris Beams
+ * @author Tobias Montagna-Hay
  * @since 3.0
  * @see org.springframework.scheduling.annotation.EnableAsync
  * @see org.springframework.scheduling.annotation.SchedulingConfigurer
@@ -124,6 +126,14 @@ public class ScheduledTaskRegistrar implements InitializingBean, DisposableBean 
 	}
 
 	/**
+	 * Return the trigger tasks as a list of {@link TriggerTask}
+	 * @since 4.2
+	 */
+	public List<TriggerTask> getTriggerTaskList() {
+		return Collections.unmodifiableList(this.triggerTasks);
+	}
+
+	/**
 	 * Specify triggered tasks as a Map of Runnables (the tasks) and cron expressions.
 	 * @see CronTrigger
 	 */
@@ -142,6 +152,14 @@ public class ScheduledTaskRegistrar implements InitializingBean, DisposableBean 
 	 */
 	public void setCronTasksList(List<CronTask> cronTasks) {
 		this.cronTasks = cronTasks;
+	}
+
+	/**
+	 * Return the cron tasks as a list of {@link CronTask}
+	 * @since 4.2
+	 */
+	public List<CronTask> getCronTaskList() {
+		return Collections.unmodifiableList(this.cronTasks);
 	}
 
 	/**
@@ -166,6 +184,14 @@ public class ScheduledTaskRegistrar implements InitializingBean, DisposableBean 
 	}
 
 	/**
+	 * Return the fixed-rate tasks as a list of {@link IntervalTask}.
+	 * @since 4.2
+	 */
+	public List<IntervalTask> getFixedRateTaskList() {
+		return Collections.unmodifiableList(this.fixedRateTasks);
+	}
+
+	/**
 	 * Specify triggered tasks as a Map of Runnables (the tasks) and fixed-delay values.
 	 * @see TaskScheduler#scheduleWithFixedDelay(Runnable, long)
 	 */
@@ -184,6 +210,14 @@ public class ScheduledTaskRegistrar implements InitializingBean, DisposableBean 
 	 */
 	public void setFixedDelayTasksList(List<IntervalTask> fixedDelayTasks) {
 		this.fixedDelayTasks = fixedDelayTasks;
+	}
+
+	/**
+	 * Return the fixed-delay tasks as a list of {@link IntervalTask}
+	 * @since 4.2
+	 */
+	public List<IntervalTask> getFixedDelayTaskList() {
+		return Collections.unmodifiableList(this.fixedDelayTasks);
 	}
 
 	/**
