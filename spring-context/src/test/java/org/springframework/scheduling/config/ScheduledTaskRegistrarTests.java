@@ -27,7 +27,7 @@ import static org.mockito.Mockito.*;
 /**
  * @author Tobias Montagna-Hay
  */
-public class ScheduledTaskRegistrarTest {
+public class ScheduledTaskRegistrarTests {
 
 	private final ScheduledTaskRegistrar taskRegistrar = new ScheduledTaskRegistrar();
 
