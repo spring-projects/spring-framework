@@ -132,11 +132,13 @@ public class StandaloneMockMvcBuilder extends AbstractMockMvcBuilder<StandaloneM
 	}
 
 	/**
-	 * Register {@link org.springframework.web.bind.annotation.ControllerAdvice
-	 * ControllerAdvice} instances to be used with this MockMvc instance.
-	 * <p>Normally {@code @ControllerAdvice} are auto-detected. However since the
-	 * standalone setup does not load Spring configuration they need to be
-	 * registered explicitly instead.
+	 * Register one or more
+	 * {@link org.springframework.web.bind.annotation.ControllerAdvice
+	 * ControllerAdvice} instances to be used in tests.
+	 * <p>Normally {@code @ControllerAdvice} are auto-detected as long as they're
+	 * declared as Spring beans. However since the standalone setup does not load
+	 * any Spring configuration they need to be registered explicitly here
+	 * instead much like controllers.
 	 * @since 4.2
 	 */
 	public StandaloneMockMvcBuilder setControllerAdvice(Object... controllerAdvice) {
