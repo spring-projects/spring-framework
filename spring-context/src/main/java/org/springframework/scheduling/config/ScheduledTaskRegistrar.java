@@ -1,5 +1,6 @@
+
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,6 +48,7 @@ import org.springframework.util.CollectionUtils;
  *
  * @author Juergen Hoeller
  * @author Chris Beams
+ * @author Tobias Montagna-Hay
  * @since 3.0
  * @see org.springframework.scheduling.annotation.EnableAsync
  * @see org.springframework.scheduling.annotation.SchedulingConfigurer
@@ -122,6 +124,18 @@ public class ScheduledTaskRegistrar implements InitializingBean, DisposableBean 
 	public void setTriggerTasksList(List<TriggerTask> triggerTasks) {
 		this.triggerTasks = triggerTasks;
 	}
+	
+	/**
+	 * Return trigger tasks as a list of {@link TriggerTask}
+	 * @since 4.2
+	 */
+	public List<TriggerTask> getTriggerTaskList() {
+		List<TriggerTask> result = new ArrayList<TriggerTask>();
+		synchronized (this.triggerTasks) {
+			result.addAll(this.triggerTasks);					
+		}
+		return result;
+	}
 
 	/**
 	 * Specify triggered tasks as a Map of Runnables (the tasks) and cron expressions.
@@ -142,6 +156,18 @@ public class ScheduledTaskRegistrar implements InitializingBean, DisposableBean 
 	 */
 	public void setCronTasksList(List<CronTask> cronTasks) {
 		this.cronTasks = cronTasks;
+	}
+	
+	/**
+	 * Return cron tasks as a list of {@link CronTask}
+	 * @since 4.2
+	 */
+	public List<CronTask> getCronTaskList() {
+		List<CronTask> result = new ArrayList<CronTask>();
+		synchronized (this.cronTasks) {
+			result.addAll(this.cronTasks);						
+		}
+		return result;
 	}
 
 	/**
@@ -164,6 +190,18 @@ public class ScheduledTaskRegistrar implements InitializingBean, DisposableBean 
 	public void setFixedRateTasksList(List<IntervalTask> fixedRateTasks) {
 		this.fixedRateTasks = fixedRateTasks;
 	}
+	
+	/**
+	 * Return fixed-rate tasks as a list of {@link IntervalTask}
+	 * @since 4.2
+	 */
+	public List<IntervalTask> getFixedRateTaskList() {
+		List<IntervalTask> result = new ArrayList<IntervalTask>();
+		synchronized (this.fixedRateTasks) {
+			result.addAll(this.fixedRateTasks);		
+		}
+		return result;
+	}
 
 	/**
 	 * Specify triggered tasks as a Map of Runnables (the tasks) and fixed-delay values.
@@ -184,6 +222,40 @@ public class ScheduledTaskRegistrar implements InitializingBean, DisposableBean 
 	 */
 	public void setFixedDelayTasksList(List<IntervalTask> fixedDelayTasks) {
 		this.fixedDelayTasks = fixedDelayTasks;
+	}
+	
+	/**
+	 * Return fixed-delay tasks as a list of {@link IntervalTask}
+	 * @since 4.2
+	 */
+	public List<IntervalTask> getFixedDelayTaskList() {
+		List<IntervalTask> result = new ArrayList<IntervalTask>();
+		synchronized (this.fixedDelayTasks) {
+			result.addAll(this.fixedDelayTasks);
+		}
+		return result;
+	}
+	
+	/**
+	 * Return all trigger, cron, fixed-delay and fixed-delay tasks as a list of 
+	 * {@link Task}
+	 * @since 4.2
+	 */
+	public List<Task> getAllTasks() {
+		List<Task> result = new ArrayList<Task>();
+		synchronized (this.triggerTasks) {
+			result.addAll(this.triggerTasks);					
+		}
+		synchronized (this.cronTasks) {
+			result.addAll(this.cronTasks);			
+		}
+		synchronized (this.fixedRateTasks) {
+			result.addAll(this.fixedRateTasks);			
+		}
+		synchronized (this.fixedDelayTasks) {
+			result.addAll(this.fixedDelayTasks);			
+		}
+		return result;
 	}
 
 	/**
