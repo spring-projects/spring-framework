@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.beans.factory.support.AbstractBeanFactory;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.core.OrderComparator;
@@ -65,47 +66,8 @@ public abstract class AbstractApplicationEventMulticaster
 
 	private BeanFactory beanFactory;
 
+	private Object retrievalMutex = this.defaultRetriever;
 
-	@Override
-	public void addApplicationListener(ApplicationListener<?> listener) {
-		synchronized (this.defaultRetriever) {
-			this.defaultRetriever.applicationListeners.add(listener);
-			this.retrieverCache.clear();
-		}
-	}
-
-	@Override
-	public void addApplicationListenerBean(String listenerBeanName) {
-		synchronized (this.defaultRetriever) {
-			this.defaultRetriever.applicationListenerBeans.add(listenerBeanName);
-			this.retrieverCache.clear();
-		}
-	}
-
-	@Override
-	public void removeApplicationListener(ApplicationListener<?> listener) {
-		synchronized (this.defaultRetriever) {
-			this.defaultRetriever.applicationListeners.remove(listener);
-			this.retrieverCache.clear();
-		}
-	}
-
-	@Override
-	public void removeApplicationListenerBean(String listenerBeanName) {
-		synchronized (this.defaultRetriever) {
-			this.defaultRetriever.applicationListenerBeans.remove(listenerBeanName);
-			this.retrieverCache.clear();
-		}
-	}
-
-	@Override
-	public void removeAllListeners() {
-		synchronized (this.defaultRetriever) {
-			this.defaultRetriever.applicationListeners.clear();
-			this.defaultRetriever.applicationListenerBeans.clear();
-			this.retrieverCache.clear();
-		}
-	}
 
 	@Override
 	public void setBeanClassLoader(ClassLoader classLoader) {
@@ -118,6 +80,9 @@ public abstract class AbstractApplicationEventMulticaster
 		if (this.beanClassLoader == null && beanFactory instanceof ConfigurableBeanFactory) {
 			this.beanClassLoader = ((ConfigurableBeanFactory) beanFactory).getBeanClassLoader();
 		}
+		if (beanFactory instanceof AbstractBeanFactory) {
+			this.retrievalMutex = ((AbstractBeanFactory) beanFactory).getSingletonMutex();
+		}
 	}
 
 	private BeanFactory getBeanFactory() {
@@ -129,13 +94,55 @@ public abstract class AbstractApplicationEventMulticaster
 	}
 
 
+	@Override
+	public void addApplicationListener(ApplicationListener<?> listener) {
+		synchronized (this.retrievalMutex) {
+			this.defaultRetriever.applicationListeners.add(listener);
+			this.retrieverCache.clear();
+		}
+	}
+
+	@Override
+	public void addApplicationListenerBean(String listenerBeanName) {
+		synchronized (this.retrievalMutex) {
+			this.defaultRetriever.applicationListenerBeans.add(listenerBeanName);
+			this.retrieverCache.clear();
+		}
+	}
+
+	@Override
+	public void removeApplicationListener(ApplicationListener<?> listener) {
+		synchronized (this.retrievalMutex) {
+			this.defaultRetriever.applicationListeners.remove(listener);
+			this.retrieverCache.clear();
+		}
+	}
+
+	@Override
+	public void removeApplicationListenerBean(String listenerBeanName) {
+		synchronized (this.retrievalMutex) {
+			this.defaultRetriever.applicationListenerBeans.remove(listenerBeanName);
+			this.retrieverCache.clear();
+		}
+	}
+
+	@Override
+	public void removeAllListeners() {
+		synchronized (this.retrievalMutex) {
+			this.defaultRetriever.applicationListeners.clear();
+			this.defaultRetriever.applicationListenerBeans.clear();
+			this.retrieverCache.clear();
+		}
+	}
+
+
 	/**
 	 * Return a Collection containing all ApplicationListeners.
 	 * @return a Collection of ApplicationListeners
 	 * @see org.springframework.context.ApplicationListener
 	 */
 	protected Collection<ApplicationListener<?>> getApplicationListeners() {
-		synchronized (this.defaultRetriever) {
+		synchronized (this.retrievalMutex) {
 			return this.defaultRetriever.getApplicationListeners();
 		}
 	}
@@ -163,13 +170,14 @@ public abstract class AbstractApplicationEventMulticaster
 				(ClassUtils.isCacheSafe(event.getClass(), this.beanClassLoader) &&
 						(sourceType == null || ClassUtils.isCacheSafe(sourceType, this.beanClassLoader)))) {
 			// Fully synchronized building and caching of a ListenerRetriever
-			synchronized (this.defaultRetriever) {
+			synchronized (this.retrievalMutex) {
 				retriever = this.retrieverCache.get(cacheKey);
 				if (retriever != null) {
 					return retriever.getApplicationListeners();
 				}
 				retriever = new ListenerRetriever(true);
-				Collection<ApplicationListener<?>> listeners = retrieveApplicationListeners(event, sourceType, retriever);
+				Collection<ApplicationListener<?>> listeners =
+						retrieveApplicationListeners(event, sourceType, retriever);
 				this.retrieverCache.put(cacheKey, retriever);
 				return listeners;
 			}
@@ -193,7 +201,7 @@ public abstract class AbstractApplicationEventMulticaster
 		LinkedList<ApplicationListener<?>> allListeners = new LinkedList<ApplicationListener<?>>();
 		Set<ApplicationListener<?>> listeners;
 		Set<String> listenerBeans;
-		synchronized (this.defaultRetriever) {
+		synchronized (this.retrievalMutex) {
 			listeners = new LinkedHashSet<ApplicationListener<?>>(this.defaultRetriever.applicationListeners);
 			listenerBeans = new LinkedHashSet<String>(this.defaultRetriever.applicationListenerBeans);
 		}
