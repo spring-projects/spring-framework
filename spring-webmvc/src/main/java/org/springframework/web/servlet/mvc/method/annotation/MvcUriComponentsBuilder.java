@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,7 +40,8 @@ import org.springframework.core.DefaultParameterNameDiscoverer;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.core.annotation.AnnotationUtils;
-import org.springframework.objenesis.ObjenesisStd;
+import org.springframework.objenesis.Objenesis;
+import org.springframework.objenesis.SpringObjenesis;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
@@ -79,7 +80,7 @@ public class MvcUriComponentsBuilder extends UriComponentsBuilder {
 
 	private static final Log logger = LogFactory.getLog(MvcUriComponentsBuilder.class);
 
-	private static final ObjenesisStd objenesis = new ObjenesisStd(true);
+	private static final Objenesis objenesis = new SpringObjenesis();
 
 	private static final PathMatcher pathMatcher = new AntPathMatcher();
 

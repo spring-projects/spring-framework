@@ -328,6 +328,7 @@ project("spring-core") {
 		jarjar("com.googlecode.jarjar:jarjar:1.3")
 
 		compile(files(cglibRepackJar))
+		compile(files(objenesisRepackJar))
 		compile("commons-logging:commons-logging:1.2")
 		optional("commons-codec:commons-codec:1.10")
 		optional("org.aspectj:aspectjweaver:${aspectjVersion}")
