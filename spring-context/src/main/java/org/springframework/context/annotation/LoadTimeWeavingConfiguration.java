@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,16 +26,15 @@ import org.springframework.context.weaving.DefaultContextLoadTimeWeaver;
 import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.instrument.classloading.LoadTimeWeaver;
-import org.springframework.util.Assert;
 
 import static org.springframework.context.weaving.AspectJWeavingEnabler.*;
 
 /**
  * {@code @Configuration} class that registers a {@link LoadTimeWeaver} bean.
  *
- * <p>This configuration class is automatically imported when using the @{@link
- * EnableLoadTimeWeaving} annotation.  See {@code @EnableLoadTimeWeaving} Javadoc for
- * complete usage details.
+ * <p>This configuration class is automatically imported when using the
+ * {@link EnableLoadTimeWeaving} annotation. See {@code @EnableLoadTimeWeaving}
+ * javadoc for complete usage details.
  *
  * @author Chris Beams
  * @since 3.1
@@ -47,28 +46,31 @@ public class LoadTimeWeavingConfiguration implements ImportAware, BeanClassLoade
 
 	private AnnotationAttributes enableLTW;
 
-	@Autowired(required=false)
+	@Autowired(required = false)
 	private LoadTimeWeavingConfigurer ltwConfigurer;
 
 	private ClassLoader beanClassLoader;
 
+
 	public void setImportMetadata(AnnotationMetadata importMetadata) {
 		this.enableLTW = MetadataUtils.attributesFor(importMetadata, EnableLoadTimeWeaving.class);
-		Assert.notNull(this.enableLTW,
-				"@EnableLoadTimeWeaving is not present on importing class " +
-				importMetadata.getClassName());
+		if (this.enableLTW == null) {
+			throw new IllegalArgumentException(
+					"@EnableLoadTimeWeaving is not present on importing class " + importMetadata.getClassName());
+		}
 	}
 
 	public void setBeanClassLoader(ClassLoader beanClassLoader) {
 		this.beanClassLoader = beanClassLoader;
 	}
 
-	@Bean(name=ConfigurableApplicationContext.LOAD_TIME_WEAVER_BEAN_NAME)
+
+	@Bean(name = ConfigurableApplicationContext.LOAD_TIME_WEAVER_BEAN_NAME)
 	@Role(BeanDefinition.ROLE_INFRASTRUCTURE)
 	public LoadTimeWeaver loadTimeWeaver() {
 		LoadTimeWeaver loadTimeWeaver = null;
 
-		if (ltwConfigurer != null) {
+		if (this.ltwConfigurer != null) {
 			// the user has provided a custom LTW instance
 			loadTimeWeaver = ltwConfigurer.getLoadTimeWeaver();
 		}
