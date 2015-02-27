@@ -280,6 +280,22 @@ public class ResourceHttpRequestHandlerTests {
 	}
 
 
+	// SPR-12747
+	@Test
+	public void getResourceWithResourceLocation() throws Exception {
+		List<Resource> resourcePaths = new ArrayList<Resource>();
+		resourcePaths.add(new ClassPathResource("test/foo.css", getClass()));
+		this.handler.setLocations(resourcePaths);
+		MockHttpServletRequest request = new MockHttpServletRequest();
+		request.setAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, "/foo.css");
+		request.setMethod("GET");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		handler.handleRequest(request, response);
+		assertEquals("text/css", response.getContentType());
+		assertEquals(17, response.getContentLength());
+	}
+
+
 	private static class TestServletContext extends MockServletContext {
 
 		@Override
