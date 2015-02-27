@@ -25,7 +25,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.ImportAware;
 import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.type.AnnotationMetadata;
-import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 
 /**
@@ -51,8 +50,10 @@ public abstract class AbstractAsyncConfiguration implements ImportAware {
 	public void setImportMetadata(AnnotationMetadata importMetadata) {
 		this.enableAsync = AnnotationAttributes.fromMap(
 				importMetadata.getAnnotationAttributes(EnableAsync.class.getName(), false));
-		Assert.notNull(this.enableAsync,
-				"@EnableAsync is not present on importing class " + importMetadata.getClassName());
+		if (this.enableAsync == null) {
+			throw new IllegalArgumentException(
+					"@EnableAsync is not present on importing class " + importMetadata.getClassName());
+		}
 	}
 
 	/**
