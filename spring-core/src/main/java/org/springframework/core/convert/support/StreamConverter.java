@@ -29,7 +29,7 @@ import org.springframework.core.convert.converter.ConditionalGenericConverter;
 import org.springframework.lang.UsesJava8;
 
 /**
- * Convert a {@link Stream} to an from a collection or array, converting the
+ * Converts a {@link Stream} to and from a collection or array, converting the
  * element type if necessary.
  *
  * @author Stephane Nicoll
@@ -77,7 +77,7 @@ public class StreamConverter implements ConditionalGenericConverter {
 
 	/**
 	 * Validate that the specified {@code sourceType} can be converted to a {@link Collection} of
-	 * type type of the stream elements
+	 * the type of the stream elements.
 	 * @param elementType the type of the stream elements
 	 * @param sourceType the type to convert from
 	 */

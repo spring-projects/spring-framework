@@ -34,20 +34,23 @@ import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.*;
 
+/**
+ * Tests for {@link StreamConverter}.
+ *
+ * @author Stephane Nicoll
+ * @since 4.2
+ */
 public class StreamConverterTests {
 
 	@Rule
 	public final ExpectedException thrown = ExpectedException.none();
 
-	private GenericConversionService conversionService;
+	private final GenericConversionService conversionService = new GenericConversionService();
 
-	private StreamConverter streamConverter;
+	private final StreamConverter streamConverter = new StreamConverter(this.conversionService);
 
 	@Before
 	public void setup() {
-		this.conversionService = new GenericConversionService();
-		this.streamConverter = new StreamConverter(this.conversionService);
-
 		this.conversionService.addConverter(new CollectionToCollectionConverter(this.conversionService));
 		this.conversionService.addConverter(new ArrayToCollectionConverter(this.conversionService));
 		this.conversionService.addConverter(new CollectionToArrayConverter(this.conversionService));
@@ -111,6 +114,7 @@ public class StreamConverterTests {
 	}
 
 	@Test
+	@SuppressWarnings("resource")
 	public void convertFromListToStream() throws NoSuchFieldException {
 		this.conversionService.addConverterFactory(new StringToNumberConverterFactory());
 		List<String> stream = Arrays.asList("1", "2", "3");
@@ -124,6 +128,7 @@ public class StreamConverterTests {
 	}
 
 	@Test
+	@SuppressWarnings("resource")
 	public void convertFromArrayToStream() throws NoSuchFieldException {
 		Integer[] stream = new Integer[] {1, 0, 1};
 		this.conversionService.addConverter(new Converter<Integer, Boolean>() {
@@ -142,6 +147,7 @@ public class StreamConverterTests {
 	}
 
 	@Test
+	@SuppressWarnings("resource")
 	public void convertFromListToRawStream() throws NoSuchFieldException {
 		List<String> stream = Arrays.asList("1", "2", "3");
 		TypeDescriptor streamOfInteger = new TypeDescriptor(Types.class.getField("rawStream")); ;
@@ -169,7 +175,7 @@ public class StreamConverterTests {
 				new TypeDescriptor(Types.class.getField("arrayOfLongs")));
 	}
 
-	@SuppressWarnings("unused")
+	@SuppressWarnings({ "rawtypes" })
 	static class Types {
 
 		public List<String> listOfStrings;
