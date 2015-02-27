@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,8 +32,11 @@ import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
 
 /**
+ * Unit tests for various {@link Resource} implementations.
+ *
  * @author Juergen Hoeller
  * @author Chris Beams
+ * @author Sam Brannen
  * @since 09.09.2004
  */
 public class ResourceTests {
@@ -55,7 +58,7 @@ public class ResourceTests {
 		assertFalse(resource.isOpen());
 		String content = FileCopyUtils.copyToString(new InputStreamReader(resource.getInputStream()));
 		assertEquals("testString", content);
-		assertEquals("my description", resource.getDescription());
+		assertTrue(resource.getDescription().contains("my description"));
 		assertEquals(resource, new ByteArrayResource("testString".getBytes()));
 	}
 
@@ -78,7 +81,7 @@ public class ResourceTests {
 		assertTrue(resource.isOpen());
 		String content = FileCopyUtils.copyToString(new InputStreamReader(resource.getInputStream()));
 		assertEquals("testString", content);
-		assertEquals("my description", resource.getDescription());
+		assertTrue(resource.getDescription().contains("my description"));
 		assertEquals(resource, new InputStreamResource(is));
 	}
 
@@ -114,7 +117,6 @@ public class ResourceTests {
 		assertEquals(resource, new ClassPathResource("Resource.class", getClass()));
 	}
 
-	@Ignore // passes under eclipse, fails under ant
 	@Test
 	public void testFileSystemResource() throws IOException {
 		Resource resource = new FileSystemResource(getClass().getResource("Resource.class").getFile());
