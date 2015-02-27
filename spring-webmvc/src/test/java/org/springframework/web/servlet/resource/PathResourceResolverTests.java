@@ -117,4 +117,11 @@ public class PathResourceResolverTests {
 		assertNotNull(this.resolver.resolveResource(null, "main.css", Arrays.asList(location), null));
 	}
 
+	// SPR-12747
+	@Test
+	public void checkFileLocation() throws Exception {
+		Resource resource = new ClassPathResource("test/main.css", PathResourceResolver.class);
+		assertTrue(this.resolver.checkResource(resource, resource));
+	}
+
 }
