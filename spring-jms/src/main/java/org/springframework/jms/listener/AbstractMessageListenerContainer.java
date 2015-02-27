@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -60,8 +60,13 @@ import org.springframework.util.ReflectionUtils;
  * <p>The listener container offers the following message acknowledgment options:
  * <ul>
  * <li>"sessionAcknowledgeMode" set to "AUTO_ACKNOWLEDGE" (default):
- * Automatic message acknowledgment <i>before</i> listener execution;
- * no redelivery in case of exception thrown.
+ * This mode is container-dependent: For {@link DefaultMessageListenerContainer},
+ * it means automatic message acknowledgment <i>before</i> listener execution, with
+ * no redelivery in case of an exception. For {@link SimpleMessageListenerContainer},
+ * it means automatic message acknowledgment <i>after</i> listener execution, with
+ * redelivery in case of an exception thrown, as defined by the JMS specification.
+ * In order to consistently achieve the latter behavior with any container variant,
+ * consider setting "sessionTransacted" to "true" instead.
  * <li>"sessionAcknowledgeMode" set to "CLIENT_ACKNOWLEDGE":
  * Automatic message acknowledgment <i>after</i> successful listener execution;
  * no redelivery in case of exception thrown.
