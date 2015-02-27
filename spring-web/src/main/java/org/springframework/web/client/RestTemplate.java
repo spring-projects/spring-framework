@@ -104,6 +104,7 @@ import org.springframework.web.util.UriTemplate;
  * @author Arjen Poutsma
  * @author Brian Clozel
  * @author Roy Clarkson
+ * @author Juergen Hoeller
  * @since 3.0
  * @see HttpMessageConverter
  * @see RequestCallback
@@ -566,12 +567,7 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 				requestCallback.doWithRequest(request);
 			}
 			response = request.execute();
-			if (!getErrorHandler().hasError(response)) {
-				logResponseStatus(method, url, response);
-			}
-			else {
-				handleResponseError(method, url, response);
-			}
+			handleResponse(url, method, response);
 			if (responseExtractor != null) {
 				return responseExtractor.extractData(response);
 			}
@@ -590,29 +586,33 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 		}
 	}
 
-	private void logResponseStatus(HttpMethod method, URI url, ClientHttpResponse response) {
+	/**
+	 * Handle the given response, performing appropriate logging and
+	 * invoking the {@link ResponseErrorHandler} if necessary.
+	 * <p>Can be overridden in subclasses.
+	 * @param url the fully-expanded URL to connect to
+	 * @param method the HTTP method to execute (GET, POST, etc.)
+	 * @param response the resulting {@link ClientHttpResponse}
+	 * @throws IOException if propagated from {@link ResponseErrorHandler}
+	 * @see #setErrorHandler
+	 * @since 4.1.6
+	 */
+	protected void handleResponse(URI url, HttpMethod method, ClientHttpResponse response) throws IOException {
+		ResponseErrorHandler errorHandler = getErrorHandler();
+		boolean hasError = errorHandler.hasError(response);
 		if (logger.isDebugEnabled()) {
 			try {
 				logger.debug(method.name() + " request for \"" + url + "\" resulted in " +
-						response.getRawStatusCode() + " (" + response.getStatusText() + ")");
+						response.getRawStatusCode() + " (" + response.getStatusText() + ")" +
+						(hasError ? "; invoking error handler" : ""));
 			}
 			catch (IOException ex) {
 				// ignore
 			}
 		}
-	}
-
-	private void handleResponseError(HttpMethod method, URI url, ClientHttpResponse response) throws IOException {
-		if (logger.isWarnEnabled()) {
-			try {
-				logger.warn(method.name() + " request for \"" + url + "\" resulted in " +
-						response.getRawStatusCode() + " (" + response.getStatusText() + "); invoking error handler");
-			}
-			catch (IOException ex) {
-				// ignore
-			}
+		if (hasError) {
+			errorHandler.handleError(response);
 		}
-		getErrorHandler().handleError(response);
 	}
 
 	/**
