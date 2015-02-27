@@ -433,7 +433,7 @@ public class SpelExpression implements Expression {
 		SpelCompilerMode compilerMode = expressionState.getConfiguration().getCompilerMode();
 		if (compilerMode != SpelCompilerMode.OFF) {
 			if (compilerMode == SpelCompilerMode.IMMEDIATE) {
-				if (this.interpretedCount > 1) {
+				if (this.interpretedCount >= 1) {
 					compileExpression();
 				}
 			}
