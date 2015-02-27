@@ -16,6 +16,7 @@
 package org.springframework.test.web.servlet.samples.standalone;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.request;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.*;
@@ -56,7 +57,7 @@ public class AsyncTests {
 		this.asyncController = new AsyncController();
 		this.mockMvc = standaloneSetup(this.asyncController).build();
 	}
-	
+
 
 	@Test
 	public void testCallable() throws Exception {
@@ -111,6 +112,25 @@ public class AsyncTests {
 				.andExpect(content().contentType(MediaType.APPLICATION_JSON))
 				.andExpect(content().string("{\"name\":\"Joe\",\"someDouble\":0.0,\"someBoolean\":false}"));
 	}
+
+	// SPR-12735
+
+	@Test
+	public void testPrintAsyncResult() throws Exception {
+		MvcResult mvcResult = this.mockMvc.perform(get("/1").param("deferredResult", "true"))
+				.andDo(print())
+				.andExpect(request().asyncStarted())
+				.andReturn();
+
+		this.asyncController.onMessage("Joe");
+
+		this.mockMvc.perform(asyncDispatch(mvcResult))
+				.andDo(print())
+				.andExpect(status().isOk())
+				.andExpect(content().contentType(MediaType.APPLICATION_JSON))
+				.andExpect(content().string("{\"name\":\"Joe\",\"someDouble\":0.0,\"someBoolean\":false}"));
+	}
+
 
 
 	@Controller
