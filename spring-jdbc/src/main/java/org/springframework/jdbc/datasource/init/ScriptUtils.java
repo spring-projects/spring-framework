@@ -464,8 +464,7 @@ public abstract class ScriptUtils {
 						boolean dropStatement = StringUtils.startsWithIgnoreCase(statement.trim(), "drop");
 						if (continueOnError || (dropStatement && ignoreFailedDrops)) {
 							if (logger.isDebugEnabled()) {
-								logger.debug("Failed to execute SQL script statement #" + stmtNumber +
-										" of resource " + resource + ": " + statement, ex);
+								logger.debug(ScriptStatementFailedException.buildErrorMessage(statement, stmtNumber, resource), ex);
 							}
 						}
 						else {
