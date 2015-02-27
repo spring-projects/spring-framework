@@ -25,7 +25,10 @@ import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
 /**
+ * Unit tests for {@link ScheduledTaskRegistrar}.
+ *
  * @author Tobias Montagna-Hay
+ * @since 4.2
  */
 public class ScheduledTaskRegistrarTests {
 
@@ -52,7 +55,7 @@ public class ScheduledTaskRegistrarTests {
 	}
 
 	@Test
-	public void testGetFixedRateTasks() {
+	public void getFixedRateTasks() {
 		IntervalTask mockFixedRateTask = mock(IntervalTask.class);
 		List<IntervalTask> fixedRateTaskList = Collections.singletonList(mockFixedRateTask);
 		this.taskRegistrar.setFixedRateTasksList(fixedRateTaskList);
@@ -62,7 +65,7 @@ public class ScheduledTaskRegistrarTests {
 	}
 
 	@Test
-	public void testGetFixedDelayTasks() {
+	public void getFixedDelayTasks() {
 		IntervalTask mockFixedDelayTask = mock(IntervalTask.class);
 		List<IntervalTask> fixedDelayTaskList = Collections.singletonList(mockFixedDelayTask);
 		this.taskRegistrar.setFixedDelayTasksList(fixedDelayTaskList);

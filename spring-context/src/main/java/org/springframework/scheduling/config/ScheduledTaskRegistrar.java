@@ -126,7 +126,7 @@ public class ScheduledTaskRegistrar implements InitializingBean, DisposableBean 
 	}
 
 	/**
-	 * Return the trigger tasks as a list of {@link TriggerTask}
+	 * Get the trigger tasks as an unmodifiable list of {@link TriggerTask} objects.
 	 * @since 4.2
 	 */
 	public List<TriggerTask> getTriggerTaskList() {
@@ -155,7 +155,7 @@ public class ScheduledTaskRegistrar implements InitializingBean, DisposableBean 
 	}
 
 	/**
-	 * Return the cron tasks as a list of {@link CronTask}
+	 * Get the cron tasks as an unmodifiable list of {@link CronTask} objects.
 	 * @since 4.2
 	 */
 	public List<CronTask> getCronTaskList() {
@@ -184,7 +184,7 @@ public class ScheduledTaskRegistrar implements InitializingBean, DisposableBean 
 	}
 
 	/**
-	 * Return the fixed-rate tasks as a list of {@link IntervalTask}.
+	 * Get the fixed-rate tasks as an unmodifiable list of {@link IntervalTask} objects.
 	 * @since 4.2
 	 */
 	public List<IntervalTask> getFixedRateTaskList() {
@@ -213,7 +213,7 @@ public class ScheduledTaskRegistrar implements InitializingBean, DisposableBean 
 	}
 
 	/**
-	 * Return the fixed-delay tasks as a list of {@link IntervalTask}
+	 * Get the fixed-delay tasks as an unmodifiable list of {@link IntervalTask} objects.
 	 * @since 4.2
 	 */
 	public List<IntervalTask> getFixedDelayTaskList() {
@@ -259,11 +259,11 @@ public class ScheduledTaskRegistrar implements InitializingBean, DisposableBean 
 	}
 
 	/**
-	 * Add a Runnable task to be triggered at the given fixed-rate period.
+	 * Add a {@code Runnable} task to be triggered at the given fixed-rate interval.
 	 * @see TaskScheduler#scheduleAtFixedRate(Runnable, long)
 	 */
-	public void addFixedRateTask(Runnable task, long period) {
-		this.addFixedRateTask(new IntervalTask(task, period, 0));
+	public void addFixedRateTask(Runnable task, long interval) {
+		this.addFixedRateTask(new IntervalTask(task, interval, 0));
 	}
 
 	/**
