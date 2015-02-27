@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,7 +47,7 @@ public class LoadTimeWeavingConfiguration implements ImportAware, BeanClassLoade
 
 	private AnnotationAttributes enableLTW;
 
-	@Autowired(required=false)
+	@Autowired(required = false)
 	private LoadTimeWeavingConfigurer ltwConfigurer;
 
 	private ClassLoader beanClassLoader;
@@ -66,7 +66,7 @@ public class LoadTimeWeavingConfiguration implements ImportAware, BeanClassLoade
 	}
 
 
-	@Bean(name=ConfigurableApplicationContext.LOAD_TIME_WEAVER_BEAN_NAME)
+	@Bean(name = ConfigurableApplicationContext.LOAD_TIME_WEAVER_BEAN_NAME)
 	@Role(BeanDefinition.ROLE_INFRASTRUCTURE)
 	public LoadTimeWeaver loadTimeWeaver() {
 		LoadTimeWeaver loadTimeWeaver = null;

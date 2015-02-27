@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,9 +28,9 @@ import org.springframework.context.annotation.Role;
  * annotated with @{@link org.springframework.beans.factory.annotation.Configurable
  * Configurable}.
  *
- * <p>This configuration class is automatically imported when using the @{@link
- * EnableSpringConfigured} annotation. See {@code @EnableSpringConfigured} Javadoc for
- * complete usage details.
+ * <p>This configuration class is automatically imported when using the
+ * @{@link EnableSpringConfigured} annotation. See {@code @EnableSpringConfigured}'s
+ * javadoc for complete usage details.
  *
  * @author Chris Beams
  * @since 3.1
@@ -42,9 +42,10 @@ public class SpringConfiguredConfiguration {
 	public static final String BEAN_CONFIGURER_ASPECT_BEAN_NAME =
 			"org.springframework.context.config.internalBeanConfigurerAspect";
 
-	@Bean(name=BEAN_CONFIGURER_ASPECT_BEAN_NAME)
+	@Bean(name = BEAN_CONFIGURER_ASPECT_BEAN_NAME)
 	@Role(BeanDefinition.ROLE_INFRASTRUCTURE)
 	public AnnotationBeanConfigurerAspect beanConfigurerAspect() {
 		return AnnotationBeanConfigurerAspect.aspectOf();
 	}
+
 }

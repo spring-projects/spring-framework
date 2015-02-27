@@ -30,18 +30,6 @@ import org.springframework.core.io.support.EncodedResource;
 public class ScriptStatementFailedException extends ScriptException {
 
 	/**
-	 * Build an error message based on the supplied parameters.
-	 * @param statement the actual SQL statement that failed
-	 * @param statementNumber the statement number in the SQL script (i.e.,
-	 * the nth statement present in the resource)
-	 * @param encodedResource the resource from which the SQL statement was read
-	 */
-	public static String buildErrorMessage(String statement, int statementNumber, EncodedResource encodedResource) {
-		return String.format("Failed to execute SQL script statement #%s of %s: %s",
-				statementNumber, encodedResource, statement);
-	}
-
-	/**
 	 * Construct a new {@code ScriptStatementFailedException}.
 	 * @param statement the actual SQL statement that failed
 	 * @param statementNumber the statement number in the SQL script (i.e.,
@@ -51,6 +39,18 @@ public class ScriptStatementFailedException extends ScriptException {
 	 */
 	public ScriptStatementFailedException(String statement, int statementNumber, EncodedResource resource, Throwable cause) {
 		super(buildErrorMessage(statement, statementNumber, resource), cause);
+	}
+
+	/**
+	 * Build an error message based on the supplied parameters.
+	 * @param statement the actual SQL statement that failed
+	 * @param statementNumber the statement number in the SQL script (i.e.,
+	 * the nth statement present in the resource)
+	 * @param encodedResource the resource from which the SQL statement was read
+	 */
+	public static String buildErrorMessage(String statement, int statementNumber, EncodedResource encodedResource) {
+		return String.format("Failed to execute SQL script statement #%s of %s: %s",
+				statementNumber, encodedResource, statement);
 	}
 
 }
