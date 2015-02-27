@@ -31,15 +31,14 @@ public class ScriptStatementFailedException extends ScriptException {
 
 	/**
 	 * Construct a new {@code ScriptStatementFailedException}.
-	 * @param statement the actual SQL statement that failed
-	 * @param statementNumber the statement number in the SQL script (i.e.,
+	 * @param stmt the actual SQL statement that failed
+	 * @param stmtNumber the statement number in the SQL script (i.e.,
 	 * the nth statement present in the resource)
 	 * @param resource the resource from which the SQL statement was read
 	 * @param cause the underlying cause of the failure
 	 */
-	public ScriptStatementFailedException(String statement, int statementNumber, EncodedResource resource, Throwable cause) {
-		super("Failed to execute SQL script statement #" + statementNumber + " of resource " + resource + ": "
-				+ statement, cause);
+	public ScriptStatementFailedException(String stmt, int stmtNumber, EncodedResource resource, Throwable cause) {
+		super("Failed to execute SQL script statement #" + stmtNumber + " of resource " + resource + ": " + stmt, cause);
 	}
 
 }

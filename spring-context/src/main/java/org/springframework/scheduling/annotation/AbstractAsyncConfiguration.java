@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,6 +43,7 @@ public abstract class AbstractAsyncConfiguration implements ImportAware {
 	protected AnnotationAttributes enableAsync;
 
 	protected Executor executor;
+
 	protected AsyncUncaughtExceptionHandler exceptionHandler;
 
 
@@ -57,7 +58,7 @@ public abstract class AbstractAsyncConfiguration implements ImportAware {
 	/**
 	 * Collect any {@link AsyncConfigurer} beans through autowiring.
 	 */
-	@Autowired(required=false)
+	@Autowired(required = false)
 	void setConfigurers(Collection<AsyncConfigurer> configurers) {
 		if (CollectionUtils.isEmpty(configurers)) {
 			return;
