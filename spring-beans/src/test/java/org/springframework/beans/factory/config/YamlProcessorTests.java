@@ -16,6 +16,7 @@
 package org.springframework.beans.factory.config;
 
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
@@ -49,10 +50,15 @@ public class YamlProcessorTests {
 		this.processor.process(new MatchCallback() {
 			@Override
 			public void process(Properties properties, Map<String, Object> map) {
+				assertEquals(5, properties.size());
 				assertEquals(1, properties.get("bar[0]"));
 				assertEquals(2, properties.get("bar[1]"));
 				assertEquals(3, properties.get("bar[2]"));
-				assertEquals(4, properties.size());
+				assertTrue(properties.containsKey("bar"));
+				assertEquals(3, ((List) properties.get("bar")).size());
+				assertEquals(1, ((List) properties.get("bar")).get(0));
+				assertEquals(2, ((List) properties.get("bar")).get(1));
+				assertEquals(3, ((List) properties.get("bar")).get(2));
 			}
 		});
 	}
