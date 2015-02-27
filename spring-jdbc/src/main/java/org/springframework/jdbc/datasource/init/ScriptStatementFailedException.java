@@ -42,11 +42,15 @@ public class ScriptStatementFailedException extends ScriptException {
 	}
 
 	/**
-	 * Build an error message based on the supplied parameters.
+	 * Build an error message for an SQL script execution failure, based on
+	 * the supplied arguments.
 	 * @param statement the actual SQL statement that failed
 	 * @param statementNumber the statement number in the SQL script (i.e.,
-	 * the nth statement present in the resource)
+	 * the n<sup>th</sup> statement present in the resource)
 	 * @param encodedResource the resource from which the SQL statement was read
+	 * @return an error message suitable for an exception's <em>detail message</em>
+	 * or logging
+	 * @since 4.2
 	 */
 	public static String buildErrorMessage(String statement, int statementNumber, EncodedResource encodedResource) {
 		return String.format("Failed to execute SQL script statement #%s of %s: %s",
