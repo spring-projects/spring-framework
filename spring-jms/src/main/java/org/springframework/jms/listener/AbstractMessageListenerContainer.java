@@ -114,13 +114,11 @@ import org.springframework.util.ReflectionUtils;
  * runtime processing overhead.
  * </ul>
  *
- * <p>Note that even if
- * {@link org.springframework.jms.connection.JmsTransactionManager} used to
- * only provide fully synchronized Spring transactions based
- * on local JMS transactions, "sessionTransacted" offers now the same feature and
- * is the recommended option when transactions are not managed externally. In
- * other words, set the transaction manager only if you are using JTA , or
- * synchronizing transactions.
+ * <p>Note that the "sessionTransacted" flag is strongly recommended over
+ * {@link org.springframework.jms.connection.JmsTransactionManager}, provided
+ * that transactions do not need to be managed externally. As a consequence,
+ * set the transaction manager only if you are using JTA or if you need to
+ * synchronize with custom external transaction arrangements.
  *
  * @author Juergen Hoeller
  * @author Stephane Nicoll

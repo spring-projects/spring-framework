@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 package org.springframework.cache.annotation;
 
 import java.util.Collection;
-import javax.annotation.PostConstruct;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.CacheManager;
@@ -28,12 +27,11 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.ImportAware;
 import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.type.AnnotationMetadata;
-import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 
 /**
- * Abstract base {@code @Configuration} class providing common structure for enabling
- * Spring's annotation-driven cache management capability.
+ * Abstract base {@code @Configuration} class providing common structure
+ * for enabling Spring's annotation-driven cache management capability.
  *
  * @author Chris Beams
  * @author Stephane Nicoll
@@ -53,13 +51,15 @@ public abstract class AbstractCachingConfiguration<C extends CachingConfigurer> 
 
 	protected CacheErrorHandler errorHandler;
 
+
 	@Override
 	public void setImportMetadata(AnnotationMetadata importMetadata) {
 		this.enableCaching = AnnotationAttributes.fromMap(
 				importMetadata.getAnnotationAttributes(EnableCaching.class.getName(), false));
-		Assert.notNull(this.enableCaching,
-				"@EnableCaching is not present on importing class " +
-						importMetadata.getClassName());
+		if (this.enableCaching == null) {
+			throw new IllegalArgumentException(
+					"@EnableCaching is not present on importing class " + importMetadata.getClassName());
+		}
 	}
 
 	@Autowired(required = false)
