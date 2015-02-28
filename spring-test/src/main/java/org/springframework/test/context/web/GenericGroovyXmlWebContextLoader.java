@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,8 @@
 package org.springframework.test.context.web;
 
 import org.springframework.beans.factory.groovy.GroovyBeanDefinitionReader;
+import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
+import org.springframework.util.StringUtils;
 import org.springframework.web.context.support.GenericWebApplicationContext;
 
 /**
@@ -35,13 +37,32 @@ import org.springframework.web.context.support.GenericWebApplicationContext;
 public class GenericGroovyXmlWebContextLoader extends GenericXmlWebContextLoader {
 
 	/**
-	 * Loads bean definitions using a {@link GroovyBeanDefinitionReader}.
+	 * Load bean definitions into the supplied {@link GenericWebApplicationContext context}
+	 * from the locations in the supplied {@code WebMergedContextConfiguration}.
+	 *
+	 * <p>If a location ends with the suffix {@code ".xml"}, bean definitions
+	 * will be loaded from that location using an {@link XmlBeanDefinitionReader};
+	 * otherwise, a {@link GroovyBeanDefinitionReader} will be used.
+	 *
+	 * @param context the context into which the bean definitions should be loaded
+	 * @param webMergedConfig the merged context configuration
 	 * @see AbstractGenericWebContextLoader#loadBeanDefinitions
 	 */
 	@Override
 	protected void loadBeanDefinitions(GenericWebApplicationContext context,
 			WebMergedContextConfiguration webMergedConfig) {
-		new GroovyBeanDefinitionReader(context).loadBeanDefinitions(webMergedConfig.getLocations());
+
+		XmlBeanDefinitionReader xmlReader = new XmlBeanDefinitionReader(context);
+		GroovyBeanDefinitionReader groovyReader = new GroovyBeanDefinitionReader(context);
+
+		for (String location : webMergedConfig.getLocations()) {
+			if (StringUtils.endsWithIgnoreCase(location, ".xml")) {
+				xmlReader.loadBeanDefinitions(location);
+			}
+			else {
+				groovyReader.loadBeanDefinitions(location);
+			}
+		}
 	}
 
 	/**
