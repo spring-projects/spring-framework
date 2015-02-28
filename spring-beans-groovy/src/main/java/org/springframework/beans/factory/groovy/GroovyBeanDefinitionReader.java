@@ -132,7 +132,17 @@ import org.springframework.util.StringUtils;
  */
 public class GroovyBeanDefinitionReader extends AbstractBeanDefinitionReader implements GroovyObject {
 
-	private final XmlBeanDefinitionReader xmlBeanDefinitionReader;
+	/**
+	 * Standard {@code XmlBeanDefinitionReader} created with default
+	 * settings for loading bean definitions from XML files.
+	 */
+	private final XmlBeanDefinitionReader standardXmlBeanDefinitionReader;
+
+	/**
+	 * Groovy DSL {@code XmlBeanDefinitionReader} for loading bean definitions
+	 * via the Groovy DSL, typically configured with XML validation disabled.
+	 */
+	private final XmlBeanDefinitionReader groovyDslXmlBeanDefinitionReader;
 
 	private final Map<String, String> namespaces = new HashMap<String, String>();
 
@@ -151,19 +161,21 @@ public class GroovyBeanDefinitionReader extends AbstractBeanDefinitionReader imp
 	 */
 	public GroovyBeanDefinitionReader(BeanDefinitionRegistry registry) {
 		super(registry);
-		this.xmlBeanDefinitionReader = new XmlBeanDefinitionReader(registry);
-		this.xmlBeanDefinitionReader.setValidating(false);
+		this.standardXmlBeanDefinitionReader = new XmlBeanDefinitionReader(registry);
+		this.groovyDslXmlBeanDefinitionReader = new XmlBeanDefinitionReader(registry);
+		this.groovyDslXmlBeanDefinitionReader.setValidating(false);
 	}
 
 	/**
 	 * Create a new {@code GroovyBeanDefinitionReader} based on the given {@link XmlBeanDefinitionReader},
-	 * using its {@code BeanDefinitionRegistry} and delegating XML loading to it.
+	 * using its {@code BeanDefinitionRegistry} and delegating Groovy DSL loading to it.
 	 * @param xmlBeanDefinitionReader the {@code XmlBeanDefinitionReader} to derive the registry
 	 * from and to delegate XML loading to
 	 */
 	public GroovyBeanDefinitionReader(XmlBeanDefinitionReader xmlBeanDefinitionReader) {
 		super(xmlBeanDefinitionReader.getRegistry());
-		this.xmlBeanDefinitionReader = xmlBeanDefinitionReader;
+		this.standardXmlBeanDefinitionReader = new XmlBeanDefinitionReader(xmlBeanDefinitionReader.getRegistry());
+		this.groovyDslXmlBeanDefinitionReader = xmlBeanDefinitionReader;
 	}
 
 
@@ -215,10 +227,10 @@ public class GroovyBeanDefinitionReader extends AbstractBeanDefinitionReader imp
 	 * @throws BeanDefinitionStoreException in case of loading or parsing errors
 	 */
 	public int loadBeanDefinitions(EncodedResource encodedResource) throws BeanDefinitionStoreException {
-		// Check for XML files and redirect them to the XmlBeanDefinitionReader
+		// Check for XML files and redirect them to the "standard" XmlBeanDefinitionReader
 		String filename = encodedResource.getResource().getFilename();
 		if (StringUtils.endsWithIgnoreCase(filename, ".xml")) {
-			return this.xmlBeanDefinitionReader.loadBeanDefinitions(encodedResource);
+			return this.standardXmlBeanDefinitionReader.loadBeanDefinitions(encodedResource);
 		}
 
 		Closure beans = new Closure(this) {
@@ -321,7 +333,8 @@ public class GroovyBeanDefinitionReader extends AbstractBeanDefinitionReader imp
 				if (uri == null) {
 					throw new IllegalArgumentException("Namespace definition must supply a non-null URI");
 				}
-				NamespaceHandler namespaceHandler = this.xmlBeanDefinitionReader.getNamespaceHandlerResolver().resolve(uri);
+				NamespaceHandler namespaceHandler = this.groovyDslXmlBeanDefinitionReader.getNamespaceHandlerResolver().resolve(
+					uri);
 				if (namespaceHandler == null) {
 					throw new BeanDefinitionParsingException(new Problem("No namespace handler found for URI: " + uri,
 							new Location(new DescriptiveResource(("Groovy")))));
@@ -673,7 +686,8 @@ public class GroovyBeanDefinitionReader extends AbstractBeanDefinitionReader imp
 	}
 
 	private GroovyDynamicElementReader createDynamicElementReader(String namespace) {
-		XmlReaderContext readerContext = this.xmlBeanDefinitionReader.createReaderContext(new DescriptiveResource("Groovy"));
+		XmlReaderContext readerContext = this.groovyDslXmlBeanDefinitionReader.createReaderContext(new DescriptiveResource(
+			"Groovy"));
 		BeanDefinitionParserDelegate delegate = new BeanDefinitionParserDelegate(readerContext);
 		boolean decorating = (this.currentBeanDefinition != null);
 		if (!decorating) {
