@@ -18,7 +18,6 @@ package org.springframework.test.web.servlet.samples.standalone;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.request;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.*;
 
 import java.util.Collection;
