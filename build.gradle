@@ -97,8 +97,6 @@ configure(allprojects) { project ->
 		options.compilerArgs += "-parameters"
 	}
 
-	sourceSets.test.resources.srcDirs = ["src/test/resources", "src/test/java"]
-
 	test {
 		systemProperty("java.awt.headless", "true")
 		systemProperty("testGroups", project.properties.get("testGroups"))
@@ -468,9 +466,6 @@ project("spring-context") {
 		testCompile("org.apache.commons:commons-pool2:2.2")
 		testCompile("org.slf4j:slf4j-api:${slf4jVersion}")
 	}
-
-	// pick up RmiInvocationWrapperRTD.xml in src/main
-	sourceSets.main.resources.srcDirs += "src/main/java"
 }
 
 project("spring-messaging") {
@@ -639,9 +634,6 @@ project("spring-context-support") {
 		testCompile("org.ehcache:jcache:${ehcacheJCacheVersion}")
 		testRuntime("com.sun.mail:javax.mail:1.5.2")
 	}
-
-	// pick up **/mime.types files in src/main
-	sourceSets.main.resources.srcDirs += "src/main/java"
 }
 
 project("spring-web") {
@@ -704,9 +696,6 @@ project("spring-web") {
 		testCompile("com.fasterxml.jackson.datatype:jackson-datatype-joda:${jackson2Version}")
 		testRuntime("com.sun.mail:javax.mail:1.5.2")
 	}
-
-	// pick up ContextLoader.properties in src/main
-	sourceSets.main.resources.srcDirs += "src/main/java"
 }
 
 project("spring-websocket") {
@@ -891,9 +880,6 @@ project("spring-webmvc") {
 		testCompile("joda-time:joda-time:${jodaVersion}")
 		testCompile("org.slf4j:slf4j-jcl:${slf4jVersion}")
 	}
-
-	// pick up DispatcherServlet.properties in src/main
-	sourceSets.main.resources.srcDirs += "src/main/java"
 }
 
 project("spring-webmvc-tiles2") {
@@ -941,9 +927,6 @@ project("spring-webmvc-portlet") {
 		provided("javax.portlet:portlet-api:2.0")
 		optional("commons-fileupload:commons-fileupload:1.3.1")
 	}
-
-	// pick up DispatcherPortlet.properties in src/main
-	sourceSets.main.resources.srcDirs += "src/main/java"
 }
 
 project("spring-test") {
