@@ -17,8 +17,6 @@
 package org.springframework.test.context.web;
 
 import org.springframework.beans.factory.groovy.GroovyBeanDefinitionReader;
-import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
-import org.springframework.util.StringUtils;
 import org.springframework.web.context.support.GenericWebApplicationContext;
 
 /**
@@ -38,11 +36,8 @@ public class GenericGroovyXmlWebContextLoader extends GenericXmlWebContextLoader
 
 	/**
 	 * Load bean definitions into the supplied {@link GenericWebApplicationContext context}
-	 * from the locations in the supplied {@code WebMergedContextConfiguration}.
-	 *
-	 * <p>If a location ends with the suffix {@code ".xml"}, bean definitions
-	 * will be loaded from that location using an {@link XmlBeanDefinitionReader};
-	 * otherwise, a {@link GroovyBeanDefinitionReader} will be used.
+	 * from the locations in the supplied {@code WebMergedContextConfiguration} using a
+	 * {@link GroovyBeanDefinitionReader}.
 	 *
 	 * @param context the context into which the bean definitions should be loaded
 	 * @param webMergedConfig the merged context configuration
@@ -51,18 +46,7 @@ public class GenericGroovyXmlWebContextLoader extends GenericXmlWebContextLoader
 	@Override
 	protected void loadBeanDefinitions(GenericWebApplicationContext context,
 			WebMergedContextConfiguration webMergedConfig) {
-
-		XmlBeanDefinitionReader xmlReader = new XmlBeanDefinitionReader(context);
-		GroovyBeanDefinitionReader groovyReader = new GroovyBeanDefinitionReader(context);
-
-		for (String location : webMergedConfig.getLocations()) {
-			if (StringUtils.endsWithIgnoreCase(location, ".xml")) {
-				xmlReader.loadBeanDefinitions(location);
-			}
-			else {
-				groovyReader.loadBeanDefinitions(location);
-			}
-		}
+		new GroovyBeanDefinitionReader(context).loadBeanDefinitions(webMergedConfig.getLocations());
 	}
 
 	/**
