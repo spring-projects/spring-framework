@@ -57,7 +57,7 @@ configure(allprojects) { project ->
 	ext.tyrusVersion         = "1.3.5"  // constrained by WebLogic 12.1.3 support
 	ext.undertowVersion      = "1.1.2.Final"
 	ext.woodstoxVersion      = "4.4.1"
-	ext.xstreamVersion       = "1.4.7"
+	ext.xstreamVersion       = "1.4.8"
 
 	ext.gradleScriptDir = "${rootProject.projectDir}/gradle"
 
