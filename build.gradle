@@ -50,7 +50,7 @@ configure(allprojects) { project ->
 	ext.reactorVersion       = "1.1.5.RELEASE"
 	ext.slf4jVersion         = "1.7.10"
 	ext.snakeYamlVersion     = "1.14"
-	ext.snifferVersion       = "1.11"
+	ext.snifferVersion       = "1.14"
 	ext.tiles2Version        = "2.2.2"
 	ext.tiles3Version        = "3.0.5"
 	ext.tomcatVersion        = "8.0.20"
