@@ -19,6 +19,7 @@ package org.springframework.web.client;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import javax.servlet.GenericServlet;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
@@ -85,6 +86,7 @@ public class AbstractJettyServerTestCase {
 		handler.addServlet(new ServletHolder(new ErrorServlet(500)), "/status/server");
 		handler.addServlet(new ServletHolder(new UriServlet()), "/uri/*");
 		handler.addServlet(new ServletHolder(new MultipartServlet()), "/multipart");
+		handler.addServlet(new ServletHolder(new FormServlet()), "/form");
 		handler.addServlet(new ServletHolder(new DeleteServlet()), "/delete");
 		handler.addServlet(
 				new ServletHolder(new PutServlet(helloWorld, bytes, textContentType)),
@@ -283,6 +285,28 @@ public class AbstractJettyServerTestCase {
 				throw new ServletException(ex);
 			}
 
+		}
+	}
+
+	@SuppressWarnings("serial")
+	private static class FormServlet extends HttpServlet {
+
+		@Override
+		protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+			assertEquals(MediaType.APPLICATION_FORM_URLENCODED_VALUE,
+					req.getContentType());
+
+			Map<String, String[]> parameters = req.getParameterMap();
+			assertEquals(2, parameters.size());
+
+			String[] values = parameters.get("name 1");
+			assertEquals(1, values.length);
+			assertEquals("value 1", values[0]);
+
+			values = parameters.get("name 2");
+			assertEquals(2, values.length);
+			assertEquals("value 2+1", values[0]);
+			assertEquals("value 2+2", values[1]);
 		}
 	}
 

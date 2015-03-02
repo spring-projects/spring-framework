@@ -180,6 +180,16 @@ public class RestTemplateIntegrationTests extends AbstractJettyServerTestCase {
 	}
 
 	@Test
+	public void form() throws UnsupportedEncodingException {
+		MultiValueMap<String, String> form = new LinkedMultiValueMap<String, String>();
+		form.add("name 1", "value 1");
+		form.add("name 2", "value 2+1");
+		form.add("name 2", "value 2+2");
+
+		template.postForLocation(baseUrl + "/form", form);
+	}
+
+	@Test
 	public void exchangeGet() throws Exception {
 		HttpHeaders requestHeaders = new HttpHeaders();
 		requestHeaders.set("MyHeader", "MyValue");
