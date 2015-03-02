@@ -319,10 +319,10 @@ If you are going to use Spring you need to get a copy of the jar libraries that 
 the pieces of Spring that you need. To make this easier Spring is packaged as a set of
 modules that separate the dependencies as much as possible, so for example if you don't
 want to write a web application you don't need the spring-web modules. To refer to
-Spring library modules in this guide we use a shorthand naming convention `spring-*` or
-`spring-*.jar,` where `*` represents the short name for the module (e.g. `spring-core`,
-`spring-webmvc`, `spring-jms`, etc.). The actual jar file name that you use is normally
-the module name concatenated with the version number
+Spring library modules in this guide we use a shorthand naming convention `spring-{asterisk}` or
+`spring-{asterisk}.jar,` where `{asterisk}` represents the short name for the module
+(e.g. `spring-core`, `spring-webmvc`, `spring-jms`, etc.). The actual jar file name that
+you use is normally the module name concatenated with the version number
 (e.g. __spring-core-{spring-version}.jar__).
 
 Each release of the Spring Framework will publish artifacts to the following places:
@@ -9022,7 +9022,7 @@ exist, the listener uses `/WEB-INF/applicationContext.xml` as a default. When th
 parameter __does__ exist, the listener separates the String by using predefined
 delimiters (comma, semicolon and whitespace) and uses the values as locations where
 application contexts will be searched. Ant-style path patterns are supported as well.
-Examples are `/WEB-INF/*Context.xml` for all files with names ending with "Context.xml",
+Examples are `/WEB-INF/{asterisk}Context.xml` for all files with names ending with "Context.xml",
 residing in the "WEB-INF" directory, and `/WEB-INF/**/*Context.xml`, for all such files
 in any subdirectory of "WEB-INF".
 
@@ -9778,7 +9778,7 @@ strategy described above is used for the wildcard subpath.
 
 [[resources-wildcards-in-path-other-stuff]]
 ===== Other notes relating to wildcards
-Please note that " `classpath*:`" when combined with Ant-style patterns will only work
+Please note that `classpath*:` when combined with Ant-style patterns will only work
 reliably with at least one root directory before the pattern starts, unless the actual
 target files reside in the file system. This means that a pattern like "
 `classpath*:*.xml`" will not retrieve files from the root of jar files but rather only
@@ -13770,12 +13770,12 @@ The format of an execution expression is:
 All parts except the returning type pattern (ret-type-pattern in the snippet above),
 name pattern, and parameters pattern are optional. The returning type pattern determines
 what the return type of the method must be in order for a join point to be matched. Most
-frequently you will use `*` as the returning type pattern, which matches any return
+frequently you will use `{asterisk}` as the returning type pattern, which matches any return
 type. A fully-qualified type name will match only when the method returns the given
-type. The name pattern matches the method name. You can use the `*` wildcard as all or
+type. The name pattern matches the method name. You can use the `{asterisk}` wildcard as all or
 part of a name pattern. The parameters pattern is slightly more complex: `()` matches a
 method that takes no parameters, whereas `(..)` matches any number of parameters (zero
-or more). The pattern `(*)` matches a method taking one parameter of any type,
+or more). The pattern `({asterisk})` matches a method taking one parameter of any type,
 `(*,String)` matches a method taking two parameters, the first can be of any type, the
 second must be a String. Consult the
 http://www.eclipse.org/aspectj/doc/released/progguide/semantics-pointcuts.html[Language
@@ -22230,10 +22230,11 @@ request and those will be discussed later.
 [[spring-mvc-test-server-static-imports]]
 ====== Static Imports
 The fluent API in the example above requires a few static imports such as
-`MockMvcRequestBuilders.*`, `MockMvcResultMatchers.*`, and `MockMvcBuilders.*`. An easy
-way to find these classes is to search for types matching __"MockMvc*"__. If using
-Eclipse, be sure to add them as "favorite static members" in the Eclipse preferences
-under__Java -> Editor -> Content Assist -> Favorites__. That will allow use of content
+`MockMvcRequestBuilders.{asterisk}`, `MockMvcResultMatchers.{asterisk}`, 
+and `MockMvcBuilders.{asterisk}`. An easy way to find these classes is to search for
+types matching __"MockMvc*"__. If using Eclipse, be sure to add them as 
+"favorite static members" in the Eclipse preferences under 
+__Java -> Editor -> Content Assist -> Favorites__. That will allow use of content
 assist after typing the first character of the static method name. Other IDEs (e.g.
 IntelliJ) may not require any additional configuration. Just check the support for code
 completion on static members.
@@ -22577,9 +22578,10 @@ used to verify that all expected requests were performed.
 ====== Static Imports
 Just like with server-side tests, the fluent API for client-side tests requires a few
 static imports. Those are easy to find by searching __"MockRest*"__. Eclipse users
-should add `"MockRestRequestMatchers.*"` and `"MockRestResponseCreators.*"` as "favorite
-static members" in the Eclipse preferences under __Java -> Editor -> Content Assist ->
-Favorites__. That allows using content assist after typing the first character of the
+should add `"MockRestRequestMatchers.{asterisk}"` and `"MockRestResponseCreators.{asterisk}"`
+as "favorite static members" in the Eclipse preferences under 
+__Java -> Editor -> Content Assist -> Favorites__.
+That allows using content assist after typing the first character of the
 static method name. Other IDEs (e.g. IntelliJ) may not require any additional
 configuration. Just check the support for code completion on static members.
 
@@ -23741,7 +23743,7 @@ that are nested within `<tx:advice/>` and `<tx:attributes/>` tags are summarized
 | Yes
 |
 | Method name(s) with which the transaction attributes are to be associated. The
-  wildcard (*) character can be used to associate the same transaction attribute
+  wildcard ({asterisk}) character can be used to associate the same transaction attribute
   settings with a number of methods; for example, `get*`, `handle*`, `on*Event`, and so
   forth.
 
@@ -27436,8 +27438,8 @@ bean, use the `initialize-database` tag in the `spring-jdbc` namespace:
 The example above runs the two scripts specified against the database: the first script
 is a schema creation, and the second is a test data set insert. The script locations can
 also be patterns with wildcards in the usual ant style used for resources in Spring
-(e.g. `classpath*:/com/foo/**/sql/*-data.sql`). If a pattern is used the scripts are
-executed in lexical order of their URL or filename.
+(e.g. `classpath{asterisk}:/com/foo/{asterisk}{asterisk}/sql/{asterisk}-data.sql`).
+If a pattern is used the scripts are executed in lexical order of their URL or filename.
 
 The default behavior of the database initializer is to unconditionally execute the
 scripts provided. This will not always be what you want, for instance if running against
@@ -30644,8 +30646,8 @@ name and the second - the regular expression.For example:
 [[mvc-ann-requestmapping-patterns]]
 ===== Path Patterns
 In addition to URI templates, the `@RequestMapping` annotation also supports Ant-style
-path patterns (for example, `/myPath/*.do`). A combination of URI template variables and
-Ant-style globs is also supported (e.g. `/owners/*/pets/{petId}`).
+path patterns (for example, `/myPath/{asterisk}.do`). A combination of URI template variables and
+Ant-style globs is also supported (e.g. `/owners/{asterisk}/pets/{petId}`).
 
 
 [[mvc-ann-requestmapping-pattern-comparison]]
@@ -30653,20 +30655,20 @@ Ant-style globs is also supported (e.g. `/owners/*/pets/{petId}`).
 When a URL matches multiple patterns, a sort is used to find the most specific match.
 
 A pattern with a lower count of URI variables and wild cards is considered more specific.
-For example `/hotels/{hotel}/*` has 1 URI variable and 1 wild card and is considered
-more specific than `/hotels/{hotel}/**` which as 1 URI variable and 2 wild cards.
+For example `/hotels/{hotel}/{asterisk}` has 1 URI variable and 1 wild card and is considered
+more specific than `/hotels/{hotel}/{asterisk}{asterisk}` which as 1 URI variable and 2 wild cards.
 
 If two patterns have the same count, the one that is longer is considered more specific.
-For example `/foo/bar*` is longer and considered more specific than `/foo/*`.
+For example `/foo/bar{asterisk}` is longer and considered more specific than `/foo/{asterisk}`.
 
 When two patterns have the same count and length, the pattern with fewer wild cards is considered more specific.
-For example `/hotels/{hotel}` is more specific than `/hotels/*`.
+For example `/hotels/{hotel}` is more specific than `/hotels/{asterisk}`.
 
 There are also some additional special rules:
 
-* The *default mapping pattern* `/**` is less specific than any other pattern.
+* The *default mapping pattern* `/{asterisk}{asterisk}` is less specific than any other pattern.
 For example `/api/{a}/{b}/{c}` is more specific.
-* A *prefix pattern* such as `/public/**` is less specific than any other pattern that doesn't contain double wildcards.
+* A *prefix pattern* such as `/public/{asterisk}{asterisk}` is less specific than any other pattern that doesn't contain double wildcards.
 For example `/public/path3/{a}/{b}/{c}` is more specific.
 
 For the full details see `AntPatternComparator` in `AntPathMatcher`. Note that the PathMatcher
@@ -30685,8 +30687,8 @@ configuration. For more information on placeholders, see the javadocs of the
 
 [[mvc-ann-requestmapping-suffix-pattern-match]]
 ===== Path Pattern Matching By Suffix
-By default Spring MVC automatically performs `".*"` suffix pattern matching so
-that a controller mapped to `/person` is also implicitly mapped to `/person.*`.
+By default Spring MVC automatically performs `".{asterisk}"` suffix pattern matching so
+that a controller mapped to `/person` is also implicitly mapped to `/person.{asterisk}`.
 This allows indicating content types via file extensions, e.g. `/person.pdf`,
 `/person.xml`, etc. A common pitfall however is when the last path segment of the
 mapping is a URI variable, e.g. `/person/{id}`. While a request for `/person/1.json`
@@ -31551,7 +31553,7 @@ requests from browser clients. The same annotation is recommended for use with r
 from non-browser clients as well. However there is one notable difference when it comes
 to working with HTTP PUT requests. Browsers can submit form data via HTTP GET or HTTP
 POST. Non-browser clients can also submit forms via HTTP PUT. This presents a challenge
-because the Servlet specification requires the `ServletRequest.getParameter*()` family
+because the Servlet specification requires the `ServletRequest.getParameter{asterisk}()` family
 of methods to support form field access only for HTTP POST, not for HTTP PUT.
 
 To support HTTP PUT and PATCH requests, the `spring-web` module provides the filter
@@ -31579,7 +31581,7 @@ To support HTTP PUT and PATCH requests, the `spring-web` module provides the fil
 The above filter intercepts HTTP PUT and PATCH requests with content type
 `application/x-www-form-urlencoded`, reads the form data from the body of the request,
 and wraps the `ServletRequest` in order to make the form data available through the
-`ServletRequest.getParameter*()` family of methods.
+`ServletRequest.getParameter{asterisk}()` family of methods.
 
 [NOTE]
 ====
@@ -32183,7 +32185,7 @@ properties that you can use to customize their behavior:
 * `alwaysUseFullPath` If `true` , Spring uses the full path within the current Servlet
   context to find an appropriate handler. If `false` (the default), the path within the
   current Servlet mapping is used. For example, if a Servlet is mapped using
-  `/testing/*` and the `alwaysUseFullPath` property is set to true,
+  `/testing/{asterisk}` and the `alwaysUseFullPath` property is set to true,
   `/testing/viewPage.html` is used, whereas if the property is set to false,
   `/viewPage.html` is used.
 * `urlDecode` Defaults to `true`, as of Spring 2.5. If you prefer to compare encoded
@@ -32646,7 +32648,7 @@ to the client. If a compatible view cannot be supplied by the `ViewResolver` cha
 the list of views specified through the `DefaultViews` property will be consulted. This
 latter option is appropriate for singleton `Views` that can render an appropriate
 representation of the current resource regardless of the logical view name. The `Accept`
-header may include wild cards, for example `text/*`, in which case a `View` whose
+header may include wild cards, for example `text/{asterisk}`, in which case a `View` whose
 Content-Type was `text/xml` is a compatible match.
 
 To support the resolution of a view based on a file extension, use the
@@ -32846,7 +32848,7 @@ including the context path:
 			.path("/accounts").build()
 ----
 
-Or in cases where the `DispatcherServlet` is mapped by name (e.g. `/main/*`), you can
+Or in cases where the `DispatcherServlet` is mapped by name (e.g. `/main/{asterisk}`), you can
 also have the literal part of the servlet mapping included:
 
 [source,java,indent=0]
@@ -33060,7 +33062,7 @@ session that might be associated with the user's request.
 You can enable changing of locales by adding the `LocaleChangeInterceptor` to one of the
 handler mappings (see <<mvc-handlermapping>>). It will detect a parameter in the request
 and change the locale. It calls `setLocale()` on the `LocaleResolver` that also exists
-in the context. The following example shows that calls to all `*.view` resources
+in the context. The following example shows that calls to all `{asterisk}.view` resources
 containing a parameter named `siteLanguage` will now change the locale. So, for example,
 a request for the following URL, `http://www.sf.net/home.view?siteLanguage=nl` will
 change the site language to Dutch.
@@ -33698,22 +33700,22 @@ Here is a snippet from the corresponding Spring Web MVC configuration file:
 The `ControllerClassNameHandlerMapping` finds all of the various handler (or
 `Controller`) beans defined in its application context and strips `Controller` off the
 name to define its handler mappings. Thus, `ViewShoppingCartController` maps to the
-`/viewshoppingcart*` request URL.
+`/viewshoppingcart{asterisk}` request URL.
 
 Let's look at some more examples so that the central idea becomes immediately familiar.
 (Notice all lowercase in the URLs, in contrast to camel-cased `Controller` class names.)
 
-* `WelcomeController` maps to the `/welcome*` request URL
-* `HomeController` maps to the `/home*` request URL
-* `IndexController` maps to the `/index*` request URL
-* `RegisterController` maps to the `/register*` request URL
+* `WelcomeController` maps to the `/welcome{asterisk}` request URL
+* `HomeController` maps to the `/home{asterisk}` request URL
+* `IndexController` maps to the `/index{asterisk}` request URL
+* `RegisterController` maps to the `/register{asterisk}` request URL
 
 In the case of `MultiActionController` handler classes, the mappings generated are
 slightly more complex. The `Controller` names in the following examples are assumed to
 be `MultiActionController` implementations:
 
-* `AdminController` maps to the `/admin/*` request URL
-* `CatalogController` maps to the `/catalog/*` request URL
+* `AdminController` maps to the `/admin/{asterisk}` request URL
+* `CatalogController` maps to the `/catalog/{asterisk}` request URL
 
 If you follow the convention of naming your `Controller` implementations as
 `xxxController`, the `ControllerClassNameHandlerMapping` saves you the tedium of
@@ -34446,7 +34448,7 @@ optimization tools such as Page Speed and YSlow) so that they will be more effic
 utilized by the client. The handler also properly evaluates the `Last-Modified` header
 (if present) so that a `304` status code will be returned as appropriate, avoiding
 unnecessary overhead for resources that are already cached by the client. For example,
-to serve resource requests with a URL pattern of `/resources/**` from a
+to serve resource requests with a URL pattern of `/resources/{asterisk}{asterisk}` from a
 `public-resources` directory within the web application root you would use:
 
 [source,java,indent=0]
@@ -35535,7 +35537,7 @@ what the HTML would look like:
 What if we want to display the entire list of errors for a given page? The example below
 shows that the `errors` tag also supports some basic wildcarding functionality.
 
-* `path="*"` - displays all errors
+* `path="{asterisk}"` - displays all errors
 * `path="lastName"` - displays all errors associated with the `lastName` field
 * if `path` is omitted - object errors only are displayed
 
@@ -35867,7 +35869,7 @@ your `'WEB-INF/lib'` directory too! If you make use of Spring's 'dateToolAttribu
 [[view-velocity-contextconfig]]
 ==== Context configuration
 A suitable configuration is initialized by adding the relevant configurer bean
-definition to your `'*-servlet.xml'` as shown below:
+definition to your `'{asterisk}-servlet.xml'` as shown below:
 
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
@@ -35921,7 +35923,7 @@ For non web-apps add a `VelocityConfigurationFactoryBean` or a
 
 [[view-velocity-createtemplates]]
 ==== Creating templates
-Your templates need to be stored in the directory specified by the `*Configurer` bean
+Your templates need to be stored in the directory specified by the `{asterisk}Configurer` bean
 shown above. This document does not cover details of creating templates for the two
 languages - please see their relevant websites for information. If you use the view
 resolvers highlighted, then the logical view names relate to the template file names in
@@ -39519,7 +39521,7 @@ The 3 possible behaviors are:
    or `https://`. In this mode, when SockJS is enabled, both IFrame and JSONP based
    transports are disabled. As a consequence, IE6 through IE9 are not supported when this
    mode is enabled.
- * Allow all origins: to enable this mode, you should provide `*` as the allowed origin
+ * Allow all origins: to enable this mode, you should provide `{asterisk}` as the allowed origin
    value. In this mode, all transports are available.
 
 WebSocket and SockJS allowed origins can be configured as shown bellow:
@@ -42443,7 +42445,7 @@ For all converters a default media type is used but can be overridden by setting
 ===== StringHttpMessageConverter
 An `HttpMessageConverter` implementation that can read and write Strings from the HTTP
 request and response. By default, this converter supports all text media types (
-`text/*`), and writes with a `Content-Type` of `text/plain`.
+`text/{asterisk}`), and writes with a `Content-Type` of `text/plain`.
 
 
 [[rest-form-converter]]
@@ -42457,7 +42459,7 @@ request and response. By default, this converter reads and writes the media type
 [[rest-byte-converter]]
 ===== ByteArrayHttpMessageConverter
 An `HttpMessageConverter` implementation that can read and write byte arrays from the
-HTTP request and response. By default, this converter supports all media types ( `*/*`),
+HTTP request and response. By default, this converter supports all media types ( `{asterisk}/{asterisk}`),
 and writes with a `Content-Type` of `application/octet-stream`. This can be overridden
 by setting the `supportedMediaTypes` property, and overriding `getContentType(byte[])`.
 
@@ -45123,7 +45125,7 @@ You can provide a reference to a particular MBean `server` if necessary, and the
 `defaultDomain` attribute (a property of `AnnotationMBeanExporter`) accepts an alternate
 value for the generated MBean `ObjectNames`' domains. This would be used in place of the
 fully qualified package name as described in the previous section on
-<<jmx-naming-metadata, `MetadataNamingStrategy`>>.
+<<jmx-naming-metadata, MetadataNamingStrategy>>.
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -45427,7 +45429,7 @@ You can also use straight bean names as the link between exported beans and list
 ----
 
 If one wants to register a single `NotificationListener` instance for all of the beans
-that the enclosing `MBeanExporter` is exporting, one can use the special wildcard `'*'`
+that the enclosing `MBeanExporter` is exporting, one can use the special wildcard `'{asterisk}'`
 (sans quotes) as the key for an entry in the `notificationListenerMappings` property
 map; for example:
 
@@ -49830,8 +49832,8 @@ annotate non-public methods as it changes the bytecode itself.
 [TIP]
 ====
 Spring recommends that you only annotate concrete classes (and methods of concrete
-classes) with the `@Cache*` annotation, as opposed to annotating interfaces. You
-certainly can place the `@Cache*` annotation on an interface (or an interface method),
+classes) with the `@Cache{asterisk}` annotation, as opposed to annotating interfaces. You
+certainly can place the `@Cache{asterisk}` annotation on an interface (or an interface method),
 but this works only as you would expect it to if you are using interface-based proxies.
 The fact that Java annotations are __not inherited from interfaces__ means that if you
 are using class-based proxies ( `proxy-target-class="true"`) or the weaving-based aspect

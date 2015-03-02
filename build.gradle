@@ -4,7 +4,7 @@ buildscript {
 	}
 	dependencies {
 		classpath("org.springframework.build.gradle:propdeps-plugin:0.0.7")
-		classpath("org.asciidoctor:asciidoctor-gradle-plugin:0.7.0")
+		classpath("org.asciidoctor:asciidoctor-gradle-plugin:1.5.2")
 		classpath("io.spring.gradle:docbook-reference-plugin:0.3.0")
 		classpath("ws.antonov.gradle.plugins:gradle-plugin-protobuf:0.9.1")
 	}
@@ -1096,7 +1096,7 @@ sonarRunner {
 configure(rootProject) {
 	description = "Spring Framework"
 
-	apply plugin: "asciidoctor"
+	apply plugin: "org.asciidoctor.convert"
 	apply plugin: "docbook-reference"
 	apply plugin: "groovy"
 
@@ -1104,17 +1104,13 @@ configure(rootProject) {
 	apply from: "${gradleScriptDir}/jdiff.gradle"
 
 	asciidoctor {
-		baseDir = project.file('src/asciidoc')
-		backend = 'docbook5'
-		options = [
-			eruby: 'erubis',
-			attributes: [
-				doctype: 'book',
-				'spring-version' : project.version,
-				revnumber : project.version,
-				docinfo : ""
-			]
-		]
+		sourceDir project.file('src/asciidoc')
+		separateOutputDirs = false
+		backends = ['docbook5']
+		options doctype: 'book', eruby: 'erubis'
+		attributes 'spring-version': project.version,
+					revnumber : project.version,
+					docinfo : ""
 	}
 
 	reference {
