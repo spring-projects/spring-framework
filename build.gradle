@@ -48,7 +48,7 @@ configure(allprojects) { project ->
 	ext.protobufVersion      = "2.6.1"
 	ext.reactorVersion       = "1.1.5.RELEASE"
 	ext.slf4jVersion         = "1.7.10"
-	ext.snakeYamlVersion     = "1.14"
+	ext.snakeYamlVersion     = "1.15"
 	ext.snifferVersion       = "1.11"
 	ext.tiles2Version        = "2.2.2"
 	ext.tiles3Version        = "3.0.5"
@@ -404,7 +404,7 @@ project("spring-aop") {
 		compile("aopalliance:aopalliance:1.0")
 		optional("org.aspectj:aspectjweaver:${aspectjVersion}")
 		optional("commons-pool:commons-pool:1.6")
-		optional("com.jamonapi:jamon:2.79")
+		optional("com.jamonapi:jamon:2.81")
 	}
 }
 
@@ -459,7 +459,7 @@ project("spring-context") {
 		optional("org.aspectj:aspectjweaver:${aspectjVersion}")
 		optional("org.codehaus.groovy:groovy-all:${groovyVersion}")
 		optional("org.beanshell:bsh:2.0b4")
-		optional("org.jruby:jruby:1.7.17")
+		optional("org.jruby:jruby:1.7.19")
 		testCompile("javax.inject:javax.inject-tck:1")
 		testCompile("commons-dbcp:commons-dbcp:1.4")
 		testCompile("org.slf4j:slf4j-api:${slf4jVersion}")
@@ -551,9 +551,9 @@ project("spring-oxm") {
 			exclude group: 'xpp3', module: 'xpp3_min'
 			exclude group: 'xmlpull', module: 'xmlpull'
 		}
-		optional("org.jibx:jibx-run:1.2.5")
+		optional("org.jibx:jibx-run:1.2.6")
 		testCompile(project(":spring-context"))
-		testCompile("xmlunit:xmlunit:1.5")
+		testCompile("xmlunit:xmlunit:1.6")
 		testCompile("xpp3:xpp3:1.1.4c")
 		testCompile("org.codehaus.jettison:jettison:1.3.7") {
 			exclude group: 'stax', module: 'stax-api'
@@ -616,7 +616,7 @@ project("spring-context-support") {
 		optional("org.quartz-scheduler:quartz:2.2.1")
 		optional("org.codehaus.fabric3.api:commonj:1.1.0")
 		optional("org.apache.velocity:velocity:1.7")
-		optional("org.freemarker:freemarker:2.3.21")
+		optional("org.freemarker:freemarker:2.3.22")
 		optional("com.lowagie:itext:2.1.7")
 		optional("net.sf.jasperreports:jasperreports:$jasperReportsVersion") {
 			exclude group: "com.fasterxml.jackson.core", module: "jackson-annotations"
@@ -830,7 +830,7 @@ project("spring-webmvc") {
 		optional("org.apache.poi:poi:3.11")
 		optional("org.apache.velocity:velocity:1.7")
 		optional("velocity-tools:velocity-tools-view:1.4")
-		optional("org.freemarker:freemarker:2.3.21")
+		optional("org.freemarker:freemarker:2.3.22")
 		optional("org.codehaus.groovy:groovy-all:${groovyVersion}")
 		optional("com.lowagie:itext:2.1.7")
 		optional("net.sf.jasperreports:jasperreports:$jasperReportsVersion") {
