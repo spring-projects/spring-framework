@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,55 +55,56 @@ public class CastorMarshallerTests extends AbstractMarshallerTests {
 	/**
 	 * Represents the expected result that doesn't contain the xml declaration.
 	 */
-	private static final String DOCUMENT_EXPECTED_STRING = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
-			+ "<tns:flights xmlns:tns=\"http://samples.springframework.org/flight\">"
-			+ "<tns:flight><tns:number>42</tns:number></tns:flight></tns:flights>";
+	private static final String DOCUMENT_EXPECTED_STRING = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
+			"<tns:flights xmlns:tns=\"http://samples.springframework.org/flight\">" +
+			"<tns:flight><tns:number>42</tns:number></tns:flight></tns:flights>";
 
 	/**
 	 * Represents the expected result that doesn't contain the xml namespaces.
 	 */
-	private static final String SUPPRESSED_NAMESPACE_EXPECTED_STRING = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><flights><flight><number>42</number></flight></flights>";
+	private static final String SUPPRESSED_NAMESPACE_EXPECTED_STRING =
+			"<?xml version=\"1.0\" encoding=\"UTF-8\"?><flights><flight><number>42</number></flight></flights>";
 
 	/**
 	 * Represents the expected result with modified root element name.
 	 */
-	private static final String ROOT_ELEMENT_EXPECTED_STRING = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
-			+ "<tns:canceledFlights xmlns:tns=\"http://samples.springframework.org/flight\">"
-			+ "<tns:flight><tns:number>42</tns:number></tns:flight></tns:canceledFlights>";
+	private static final String ROOT_ELEMENT_EXPECTED_STRING = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
+			"<tns:canceledFlights xmlns:tns=\"http://samples.springframework.org/flight\">" +
+			"<tns:flight><tns:number>42</tns:number></tns:flight></tns:canceledFlights>";
 
 	/**
 	 * Represents the expected result with 'xsi:type' attribute.
 	 */
-	private static final String XSI_EXPECTED_STRING = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
-			+ "<objects><castor-object xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\""
-			+ " xmlns:java=\"http://java.sun.com\""
-			+ " xsi:type=\"java:org.springframework.oxm.castor.CastorObject\">"
-			+ "<name>test</name><value>8</value></castor-object></objects>";
+	private static final String XSI_EXPECTED_STRING = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
+			"<objects><castor-object xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"" +
+			" xmlns:java=\"http://java.sun.com\"" +
+			" xsi:type=\"java:org.springframework.oxm.castor.CastorObject\">" +
+			"<name>test</name><value>8</value></castor-object></objects>";
 
 	/**
 	 * Represents the expected result with suppressed 'xsi:type' attribute.
 	 */
-	private static final String SUPPRESSED_XSI_EXPECTED_STRING = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
-			+ "<objects><castor-object><name>test</name><value>8</value></castor-object></objects>";
+	private static final String SUPPRESSED_XSI_EXPECTED_STRING = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
+			"<objects><castor-object><name>test</name><value>8</value></castor-object></objects>";
 
 	/**
 	 * Represents the expected result with 'xsi:type' attribute for root element.
 	 */
-	private static final String ROOT_WITH_XSI_EXPECTED_STRING = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
-			+ "<objects xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\""
-			+ " xmlns:java=\"http://java.sun.com\""
-			+ " xsi:type=\"java:java.util.Arrays$ArrayList\">"
-			+ "<castor-object xsi:type=\"java:org.springframework.oxm.castor.CastorObject\">"
-			+ "<name>test</name><value>8</value></castor-object></objects>";
+	private static final String ROOT_WITH_XSI_EXPECTED_STRING = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
+			"<objects xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"" +
+			" xmlns:java=\"http://java.sun.com\"" +
+			" xsi:type=\"java:java.util.Arrays$ArrayList\">" +
+			"<castor-object xsi:type=\"java:org.springframework.oxm.castor.CastorObject\">" +
+			"<name>test</name><value>8</value></castor-object></objects>";
 
 	/**
 	 * Represents the expected result without 'xsi:type' attribute for root element.
 	 */
-	private static final String ROOT_WITHOUT_XSI_EXPECTED_STRING = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
-			+ "<objects><castor-object xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\""
-			+ " xmlns:java=\"http://java.sun.com\""
-			+ " xsi:type=\"java:org.springframework.oxm.castor.CastorObject\">"
-			+ "<name>test</name><value>8</value></castor-object></objects>";
+	private static final String ROOT_WITHOUT_XSI_EXPECTED_STRING = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
+			"<objects><castor-object xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"" +
+			" xmlns:java=\"http://java.sun.com\"" +
+			" xsi:type=\"java:org.springframework.oxm.castor.CastorObject\">" +
+			"<name>test</name><value>8</value></castor-object></objects>";
 
 
 	@Override
@@ -277,9 +278,9 @@ public class CastorMarshallerTests extends AbstractMarshallerTests {
 	}
 
 	/**
-	 * Asserts the values of xpath expression evaluation is exactly the same as expected value. </p> The xpath may contain
-	 * the xml namespace prefixes, since namespaces from flight example are being registered.
-	 *
+	 * Asserts the values of xpath expression evaluation is exactly the same as expected value.
+	 * <p>The xpath may contain the xml namespace prefixes, since namespaces from flight example
+	 * are being registered.
 	 * @param msg the error message that will be used in case of test failure
 	 * @param expected the expected value
 	 * @param xpath the xpath to evaluate
@@ -302,8 +303,6 @@ public class CastorMarshallerTests extends AbstractMarshallerTests {
 
 	/**
 	 * Creates a instance of {@link CastorObject} for testing.
-	 *
-	 * @return a instance of {@link CastorObject}
 	 */
 	private CastorObject createCastorObject() {
 		CastorObject castorObject = new CastorObject();
@@ -311,4 +310,5 @@ public class CastorMarshallerTests extends AbstractMarshallerTests {
 		castorObject.setValue(8);
 		return castorObject;
 	}
+
 }
