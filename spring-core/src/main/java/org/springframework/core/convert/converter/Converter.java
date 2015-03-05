@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,6 @@ package org.springframework.core.convert.converter;
  *
  * @author Keith Donald
  * @since 3.0
- * @see ConditionalConverter
  * @param <S> The source type
  * @param <T> The target type
  */
@@ -32,8 +31,8 @@ public interface Converter<S, T> {
 
 	/**
 	 * Convert the source of type S to target type T.
-	 * @param source the source object to convert, which must be an instance of S
-	 * @return the converted object, which must be an instance of T
+	 * @param source the source object to convert, which must be an instance of S (never {@code null})
+	 * @return the converted object, which must be an instance of T (potentially {@code null})
 	 * @throws IllegalArgumentException if the source could not be converted to the desired target type
 	 */
 	T convert(S source);
