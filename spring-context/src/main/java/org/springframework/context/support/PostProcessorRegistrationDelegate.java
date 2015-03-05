@@ -316,7 +316,7 @@ class PostProcessorRegistrationDelegate {
 		}
 
 		private boolean isInfrastructureBean(String beanName) {
-			if (beanName != null && this.beanFactory.containsBean(beanName)) {
+			if (beanName != null && this.beanFactory.containsBeanDefinition(beanName)) {
 				BeanDefinition bd = this.beanFactory.getBeanDefinition(beanName);
 				return RootBeanDefinition.ROLE_INFRASTRUCTURE == bd.getRole();
 			}
