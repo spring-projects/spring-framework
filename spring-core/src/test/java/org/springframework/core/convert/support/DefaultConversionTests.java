@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -69,7 +69,7 @@ public class DefaultConversionTests {
 		assertEquals(null, conversionService.convert("", Character.class));
 	}
 
-	@Test(expected=ConversionFailedException.class)
+	@Test(expected = ConversionFailedException.class)
 	public void testStringToCharacterInvalidString() {
 		conversionService.convert("invalid", Character.class);
 	}
@@ -106,7 +106,7 @@ public class DefaultConversionTests {
 		assertEquals(null, conversionService.convert("", Boolean.class));
 	}
 
-	@Test(expected=ConversionFailedException.class)
+	@Test(expected = ConversionFailedException.class)
 	public void testStringToBooleanInvalidString() {
 		conversionService.convert("invalid", Boolean.class);
 	}
@@ -265,34 +265,9 @@ public class DefaultConversionTests {
 		assertEquals(Long.valueOf(1), conversionService.convert(Integer.valueOf(1), Long.class));
 	}
 
-	@Test(expected=ConversionFailedException.class)
+	@Test(expected = ConversionFailedException.class)
 	public void testNumberToNumberNotSupportedNumber() {
 		conversionService.convert(Integer.valueOf(1), CustomNumber.class);
-	}
-
-	@SuppressWarnings("serial")
-	public static class CustomNumber extends Number {
-
-		@Override
-		public double doubleValue() {
-			return 0;
-		}
-
-		@Override
-		public float floatValue() {
-			return 0;
-		}
-
-		@Override
-		public int intValue() {
-			return 0;
-		}
-
-		@Override
-		public long longValue() {
-			return 0;
-		}
-
 	}
 
 	@Test
@@ -798,13 +773,45 @@ public class DefaultConversionTests {
 		TypeDescriptor descriptor = new TypeDescriptor(parameter);
 		Object actual = conversionService.convert("1,2,3", TypeDescriptor.valueOf(String.class), descriptor);
 		assertEquals(Optional.class, actual.getClass());
-		assertEquals(Arrays.asList(1,2,3), ((Optional<List<Integer>>) actual).get());
+		assertEquals(Arrays.asList(1, 2, 3), ((Optional<List<Integer>>) actual).get());
 	}
 
 	@Test
 	public void convertObjectToOptionalNull() {
 		assertSame(Optional.empty(), conversionService.convert(null, TypeDescriptor.valueOf(Object.class), TypeDescriptor.valueOf(Optional.class)));
 		assertSame(Optional.empty(), conversionService.convert(null, Optional.class));
+	}
+
+	@Test
+	public void convertExistingOptional() {
+		assertSame(Optional.empty(), conversionService.convert(Optional.empty(), TypeDescriptor.valueOf(Object.class),
+				TypeDescriptor.valueOf(Optional.class)));
+		assertSame(Optional.empty(), conversionService.convert(Optional.empty(), Optional.class));
+	}
+
+
+	@SuppressWarnings("serial")
+	public static class CustomNumber extends Number {
+
+		@Override
+		public double doubleValue() {
+			return 0;
+		}
+
+		@Override
+		public float floatValue() {
+			return 0;
+		}
+
+		@Override
+		public int intValue() {
+			return 0;
+		}
+
+		@Override
+		public long longValue() {
+			return 0;
+		}
 	}
 
 
