@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.core.convert.support;
 
+import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.util.Collections;
 import java.util.HashSet;
@@ -26,8 +27,8 @@ import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.converter.ConditionalGenericConverter;
 
 /**
- * Converts a {@link ByteBuffer} directly to and from {@code byte[]}s and indirectly to
- * any type that the {@link ConversionService} support via {@code byte[]}.
+ * Converts a {@link ByteBuffer} directly to and from {@code byte[]}s and indirectly
+ * to any type that the {@link ConversionService} support via {@code byte[]}.
  *
  * @author Phillip Webb
  * @since 4.0
@@ -47,7 +48,7 @@ final class ByteBufferConverter implements ConditionalGenericConverter {
 	}
 
 
-	private ConversionService conversionService;
+	private final ConversionService conversionService;
 
 
 	public ByteBufferConverter(ConversionService conversionService) {
@@ -72,18 +73,17 @@ final class ByteBufferConverter implements ConditionalGenericConverter {
 	}
 
 	private boolean matchesFromByteBuffer(TypeDescriptor targetType) {
-		return (targetType.isAssignableTo(BYTE_ARRAY_TYPE) || this.conversionService.canConvert(
-				BYTE_ARRAY_TYPE, targetType));
+		return (targetType.isAssignableTo(BYTE_ARRAY_TYPE) ||
+				this.conversionService.canConvert(BYTE_ARRAY_TYPE, targetType));
 	}
 
 	private boolean matchesToByteBuffer(TypeDescriptor sourceType) {
-		return (sourceType.isAssignableTo(BYTE_ARRAY_TYPE) || this.conversionService.canConvert(
-				sourceType, BYTE_ARRAY_TYPE));
+		return (sourceType.isAssignableTo(BYTE_ARRAY_TYPE) ||
+				this.conversionService.canConvert(sourceType, BYTE_ARRAY_TYPE));
 	}
 
 	@Override
-	public Object convert(Object source, TypeDescriptor sourceType,
-			TypeDescriptor targetType) {
+	public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
 		if (sourceType.isAssignableTo(BYTE_BUFFER_TYPE)) {
 			return convertFromByteBuffer((ByteBuffer) source, targetType);
 		}
@@ -104,11 +104,17 @@ final class ByteBufferConverter implements ConditionalGenericConverter {
 	}
 
 	private Object convertToByteBuffer(Object source, TypeDescriptor sourceType) {
-		byte[] bytes = (byte[]) (source instanceof byte[] ? source
-				: this.conversionService.convert(source, sourceType, BYTE_ARRAY_TYPE));
+		byte[] bytes = (byte[]) (source instanceof byte[] ? source :
+				this.conversionService.convert(source, sourceType, BYTE_ARRAY_TYPE));
+
 		ByteBuffer byteBuffer = ByteBuffer.allocate(bytes.length);
 		byteBuffer.put(bytes);
-		byteBuffer.rewind();
+
+		// Extra cast necessary for compiling on JDK 9 plus running on JDK 8, since
+		// otherwise the overridden ByteBuffer-returning rewind method would be chosen
+		// which isn't available on JDK 8.
+		((Buffer) byteBuffer).rewind();
+
 		return byteBuffer;
 	}
 

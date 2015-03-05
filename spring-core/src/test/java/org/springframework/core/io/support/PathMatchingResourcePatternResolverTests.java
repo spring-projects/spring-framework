@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import java.util.List;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import org.springframework.core.JdkVersion;
 import org.springframework.core.io.Resource;
 
 import static org.junit.Assert.*;
@@ -82,7 +83,8 @@ public class PathMatchingResourcePatternResolverTests {
 	public void testSingleResourceInJar() throws IOException {
 		Resource[] resources = resolver.getResources("java/net/URL.class");
 		assertEquals(1, resources.length);
-		assertProtocolAndFilename(resources[0], "jar", "URL.class");
+		String expectedProtocol = (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_19 ? "jar" : "jrt");
+		assertProtocolAndFilename(resources[0], expectedProtocol, "URL.class");
 	}
 
 	@Ignore // passes under eclipse, fails under ant
