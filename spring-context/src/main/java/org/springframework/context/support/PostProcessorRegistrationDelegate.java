@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
@@ -303,7 +304,7 @@ class PostProcessorRegistrationDelegate {
 
 		@Override
 		public Object postProcessAfterInitialization(Object bean, String beanName) {
-			if (bean != null && !(bean instanceof BeanPostProcessor) &&
+			if (bean != null && !(bean instanceof BeanPostProcessor) && !isInfrastructureBean(beanName) &&
 					this.beanFactory.getBeanPostProcessorCount() < this.beanPostProcessorTargetCount) {
 				if (logger.isInfoEnabled()) {
 					logger.info("Bean '" + beanName + "' of type [" + bean.getClass() +
@@ -312,6 +313,14 @@ class PostProcessorRegistrationDelegate {
 				}
 			}
 			return bean;
+		}
+
+		private boolean isInfrastructureBean(String beanName) {
+			if (beanName != null && this.beanFactory.containsBean(beanName)) {
+				BeanDefinition bd = this.beanFactory.getBeanDefinition(beanName);
+				return RootBeanDefinition.ROLE_INFRASTRUCTURE == bd.getRole();
+			}
+			return false;
 		}
 	}
 
