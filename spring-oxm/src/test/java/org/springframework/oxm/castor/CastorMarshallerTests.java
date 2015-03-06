@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@ import java.io.StringWriter;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-
 import javax.xml.transform.sax.SAXResult;
 import javax.xml.transform.stream.StreamResult;
 
@@ -28,21 +27,24 @@ import org.custommonkey.xmlunit.NamespaceContext;
 import org.custommonkey.xmlunit.SimpleNamespaceContext;
 import org.custommonkey.xmlunit.XMLUnit;
 import org.custommonkey.xmlunit.XpathEngine;
-import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.InOrder;
-import org.springframework.core.io.ClassPathResource;
-import org.springframework.oxm.AbstractMarshallerTests;
-import org.springframework.oxm.Marshaller;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 import org.xml.sax.Attributes;
 import org.xml.sax.ContentHandler;
 
-import static org.custommonkey.xmlunit.XMLAssert.assertXMLEqual;
-import static org.junit.Assert.*;
-import static org.mockito.Matchers.*;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.oxm.AbstractMarshallerTests;
+import org.springframework.oxm.Marshaller;
+
+import static org.custommonkey.xmlunit.XMLAssert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.BDDMockito.*;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Matchers.isA;
 
 /**
  * Tests the {@link CastorMarshaller} class.
@@ -77,6 +79,7 @@ public class CastorMarshallerTests extends AbstractMarshallerTests {
 	 */
 	private static final String XSI_EXPECTED_STRING = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
 			"<objects><castor-object xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"" +
+			" xmlns:java=\"http://java.sun.com\"" +
 			" xsi:type=\"java:org.springframework.oxm.castor.CastorObject\">" +
 			"<name>test</name><value>8</value></castor-object></objects>";
 
@@ -91,6 +94,7 @@ public class CastorMarshallerTests extends AbstractMarshallerTests {
 	 */
 	private static final String ROOT_WITH_XSI_EXPECTED_STRING = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
 			"<objects xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"" +
+			" xmlns:java=\"http://java.sun.com\"" +
 			" xsi:type=\"java:java.util.Arrays$ArrayList\">" +
 			"<castor-object xsi:type=\"java:org.springframework.oxm.castor.CastorObject\">" +
 			"<name>test</name><value>8</value></castor-object></objects>";
@@ -100,8 +104,10 @@ public class CastorMarshallerTests extends AbstractMarshallerTests {
 	 */
 	private static final String ROOT_WITHOUT_XSI_EXPECTED_STRING = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
 			"<objects><castor-object xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"" +
+			" xmlns:java=\"http://java.sun.com\"" +
 			" xsi:type=\"java:org.springframework.oxm.castor.CastorObject\">" +
 			"<name>test</name><value>8</value></castor-object></objects>";
+
 
 	@Override
 	protected Marshaller createMarshaller() throws Exception {
@@ -121,6 +127,7 @@ public class CastorMarshallerTests extends AbstractMarshallerTests {
 		return flights;
 	}
 
+
 	@Test
 	public void marshalSaxResult() throws Exception {
 		ContentHandler contentHandler = mock(ContentHandler.class);
@@ -129,9 +136,12 @@ public class CastorMarshallerTests extends AbstractMarshallerTests {
 		InOrder ordered = inOrder(contentHandler);
 		ordered.verify(contentHandler).startDocument();
 		ordered.verify(contentHandler).startPrefixMapping("tns", "http://samples.springframework.org/flight");
-		ordered.verify(contentHandler).startElement(eq("http://samples.springframework.org/flight"), eq("flights"), eq("tns:flights"), isA(Attributes.class));
-		ordered.verify(contentHandler).startElement(eq("http://samples.springframework.org/flight"), eq("flight"), eq("tns:flight"), isA(Attributes.class));
-		ordered.verify(contentHandler).startElement(eq("http://samples.springframework.org/flight"), eq("number"), eq("tns:number"), isA(Attributes.class));
+		ordered.verify(contentHandler).startElement(eq("http://samples.springframework.org/flight"),
+				eq("flights"), eq("tns:flights"), isA(Attributes.class));
+		ordered.verify(contentHandler).startElement(eq("http://samples.springframework.org/flight"),
+				eq("flight"), eq("tns:flight"), isA(Attributes.class));
+		ordered.verify(contentHandler).startElement(eq("http://samples.springframework.org/flight"),
+				eq("number"), eq("tns:number"), isA(Attributes.class));
 		ordered.verify(contentHandler).characters(eq(new char[]{'4', '2'}), eq(0), eq(2));
 		ordered.verify(contentHandler).endElement("http://samples.springframework.org/flight", "number", "tns:number");
 		ordered.verify(contentHandler).endElement("http://samples.springframework.org/flight", "flight", "tns:flight");
@@ -142,8 +152,8 @@ public class CastorMarshallerTests extends AbstractMarshallerTests {
 
 	@Test
 	public void supports() throws Exception {
-		Assert.assertTrue("CastorMarshaller does not support Flights", marshaller.supports(Flights.class));
-		Assert.assertTrue("CastorMarshaller does not support Flight", marshaller.supports(Flight.class));
+		assertTrue("CastorMarshaller does not support Flights", marshaller.supports(Flights.class));
+		assertTrue("CastorMarshaller does not support Flight", marshaller.supports(Flight.class));
 	}
 
 	@Test
@@ -163,7 +173,6 @@ public class CastorMarshallerTests extends AbstractMarshallerTests {
 	@Test
 	public void testSuppressXsiTypeTrue() throws Exception {
 		CastorObject castorObject = createCastorObject();
-
 		getCastorMarshaller().setSuppressXsiType(true);
 		getCastorMarshaller().setRootElement("objects");
 		String result = marshal(Arrays.asList(castorObject));
@@ -173,7 +182,6 @@ public class CastorMarshallerTests extends AbstractMarshallerTests {
 	@Test
 	public void testSuppressXsiTypeFalse() throws Exception {
 		CastorObject castorObject = createCastorObject();
-
 		getCastorMarshaller().setSuppressXsiType(false);
 		getCastorMarshaller().setRootElement("objects");
 		String result = marshal(Arrays.asList(castorObject));
@@ -182,26 +190,23 @@ public class CastorMarshallerTests extends AbstractMarshallerTests {
 
 	@Test
 	public void testMarshalAsDocumentTrue() throws Exception {
-
 		getCastorMarshaller().setMarshalAsDocument(true);
 		String result = marshalFlights();
 		assertXMLEqual("Marshaller wrote invalid result", DOCUMENT_EXPECTED_STRING, result);
-		Assert.assertTrue("Result doesn't contain xml declaration.",
+		assertTrue("Result doesn't contain xml declaration.",
 				result.contains("<?xml version=\"1.0\" encoding=\"UTF-8\"?>"));
 	}
 
 	@Test
 	public void testMarshalAsDocumentFalse() throws Exception {
-
 		getCastorMarshaller().setMarshalAsDocument(true);
 		String result = marshalFlights();
 		assertXMLEqual("Marshaller wrote invalid result", EXPECTED_STRING, result);
-		Assert.assertFalse("Result contains xml declaration.", result.matches("<\\?\\s*xml"));
+		assertFalse("Result contains xml declaration.", result.matches("<\\?\\s*xml"));
 	}
 
 	@Test
 	public void testRootElement() throws Exception {
-
 		getCastorMarshaller().setRootElement("canceledFlights");
 		String result = marshalFlights();
 		assertXMLEqual("Marshaller wrote invalid result", ROOT_ELEMENT_EXPECTED_STRING, result);
@@ -210,10 +215,8 @@ public class CastorMarshallerTests extends AbstractMarshallerTests {
 	@Test
 	public void testNoNamespaceSchemaLocation() throws Exception {
 		String noNamespaceSchemaLocation = "flights.xsd";
-
 		getCastorMarshaller().setNoNamespaceSchemaLocation(noNamespaceSchemaLocation);
 		String result = marshalFlights();
-
 		assertXpathEvaluatesTo("The xsi:noNamespaceSchemaLocation hasn't been written or has invalid value.",
 				noNamespaceSchemaLocation, "/tns:flights/@xsi:noNamespaceSchemaLocation", result);
 		assertXMLEqual("Marshaller wrote invalid result", EXPECTED_STRING, result);
@@ -222,10 +225,8 @@ public class CastorMarshallerTests extends AbstractMarshallerTests {
 	@Test
 	public void testSchemaLocation() throws Exception {
 		String schemaLocation = "flights.xsd";
-
 		getCastorMarshaller().setSchemaLocation(schemaLocation);
 		String result = marshalFlights();
-
 		assertXpathEvaluatesTo("The xsi:noNamespaceSchemaLocation hasn't been written or has invalid value.",
 				schemaLocation, "/tns:flights/@xsi:schemaLocation", result);
 		assertXMLEqual("Marshaller wrote invalid result", EXPECTED_STRING, result);
@@ -234,7 +235,6 @@ public class CastorMarshallerTests extends AbstractMarshallerTests {
 	@Test
 	public void testUseXsiTypeAsRootTrue() throws Exception {
 		CastorObject castorObject = createCastorObject();
-
 		getCastorMarshaller().setSuppressXsiType(false);
 		getCastorMarshaller().setUseXSITypeAtRoot(true);
 		getCastorMarshaller().setRootElement("objects");
@@ -245,7 +245,6 @@ public class CastorMarshallerTests extends AbstractMarshallerTests {
 	@Test
 	public void testUseXsiTypeAsRootFalse() throws Exception {
 		CastorObject castorObject = createCastorObject();
-
 		getCastorMarshaller().setSuppressXsiType(false);
 		getCastorMarshaller().setUseXSITypeAtRoot(false);
 		getCastorMarshaller().setRootElement("objects");
@@ -259,11 +258,9 @@ public class CastorMarshallerTests extends AbstractMarshallerTests {
 	}
 
 	private String marshal(Object object) throws Exception {
-
 		StringWriter writer = new StringWriter();
 		StreamResult result = new StreamResult(writer);
 		getCastorMarshaller().marshal(object, result);
-
 		return writer.toString();
 	}
 
@@ -272,9 +269,9 @@ public class CastorMarshallerTests extends AbstractMarshallerTests {
 	}
 
 	/**
-	 * Asserts the values of xpath expression evaluation is exactly the same as expected value. </p> The xpath may contain
-	 * the xml namespace prefixes, since namespaces from flight example are being registered.
-	 *
+	 * Assert the values of xpath expression evaluation is exactly the same as expected value.
+	 * <p>The xpath may contain the xml namespace prefixes, since namespaces from flight example
+	 * are being registered.
 	 * @param msg the error message that will be used in case of test failure
 	 * @param expected the expected value
 	 * @param xpath the xpath to evaluate
@@ -296,9 +293,7 @@ public class CastorMarshallerTests extends AbstractMarshallerTests {
 	}
 
 	/**
-	 * Creates a instance of {@link CastorObject} for testing.
-	 *
-	 * @return a instance of {@link CastorObject}
+	 * Create an instance of {@link CastorObject} for testing.
 	 */
 	private CastorObject createCastorObject() {
 		CastorObject castorObject = new CastorObject();
@@ -306,4 +301,5 @@ public class CastorMarshallerTests extends AbstractMarshallerTests {
 		castorObject.setValue(8);
 		return castorObject;
 	}
+
 }

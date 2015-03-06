@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,6 @@
 
 package org.springframework.web.servlet.mvc.method.annotation;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-
 import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -26,6 +23,7 @@ import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
+
 import org.springframework.core.MethodParameter;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.ByteArrayHttpMessageConverter;
@@ -45,9 +43,11 @@ import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.method.support.ModelAndViewContainer;
 
+import static org.junit.Assert.*;
+
 /**
- * Test fixture for a {@link RequestResponseBodyMethodProcessor} with actual delegation
- * to HttpMessageConverter instances.
+ * Test fixture for a {@link RequestResponseBodyMethodProcessor} with
+ * actual delegation to {@link HttpMessageConverter} instances.
  *
  * <p>Also see {@link RequestResponseBodyMethodProcessorMockTests}.
  *
@@ -74,9 +74,7 @@ public class RequestResponseBodyMethodProcessorTests {
 
 	@Before
 	public void setUp() throws Exception {
-
-		Method method = getClass().getMethod("handle",
-				List.class, SimpleBean.class, MultiValueMap.class, String.class);
+		Method method = getClass().getMethod("handle", List.class, SimpleBean.class, MultiValueMap.class, String.class);
 
 		paramGenericList = new MethodParameter(method, 0);
 		paramSimpleBean = new MethodParameter(method, 1);
@@ -165,11 +163,8 @@ public class RequestResponseBodyMethodProcessorTests {
 		assertEquals("foobarbaz", result);
 	}
 
-	// SPR-9964
-
-	@Test
+	@Test  // SPR-9964
 	public void resolveArgumentTypeVariable() throws Exception {
-
 		Method method = MySimpleParameterizedController.class.getMethod("handleDto", Identifiable.class);
 		HandlerMethod handlerMethod = new HandlerMethod(new MySimpleParameterizedController(), method);
 		MethodParameter methodParam = handlerMethod.getMethodParameters()[0];
@@ -188,9 +183,7 @@ public class RequestResponseBodyMethodProcessorTests {
 		assertEquals("Jad", result.getName());
 	}
 
-	// SPR-9160
-
-	@Test
+	@Test  // SPR-9160
 	public void handleReturnValueSortByQuality() throws Exception {
 		this.servletRequest.addHeader("Accept", "text/plain; q=0.5, application/json");
 
@@ -241,22 +234,31 @@ public class RequestResponseBodyMethodProcessorTests {
 		return null;
 	}
 
+
 	private static abstract class MyParameterizedController<DTO extends Identifiable> {
+
 		@SuppressWarnings("unused")
 		public void handleDto(@RequestBody DTO dto) {}
 	}
 
-	private static class MySimpleParameterizedController extends MyParameterizedController<SimpleBean> { }
+
+	private static class MySimpleParameterizedController extends MyParameterizedController<SimpleBean> {
+	}
+
 
 	private interface Identifiable extends Serializable {
+
 		public Long getId();
+
 		public void setId(Long id);
 	}
+
 
 	@SuppressWarnings({ "serial" })
 	private static class SimpleBean implements Identifiable {
 
 		private Long id;
+
 		private String name;
 
 		@Override
@@ -278,7 +280,9 @@ public class RequestResponseBodyMethodProcessorTests {
 		}
 	}
 
+
 	private final class ValidatingBinderFactory implements WebDataBinderFactory {
+
 		@Override
 		public WebDataBinder createBinder(NativeWebRequest webRequest, Object target, String objectName) throws Exception {
 			LocalValidatorFactoryBean validator = new LocalValidatorFactoryBean();

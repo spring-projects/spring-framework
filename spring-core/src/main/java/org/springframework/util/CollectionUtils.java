@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,8 +42,8 @@ import java.util.Set;
 public abstract class CollectionUtils {
 
 	/**
-	 * Return {@code true} if the supplied Collection is {@code null}
-	 * or empty. Otherwise, return {@code false}.
+	 * Return {@code true} if the supplied Collection is {@code null} or empty.
+	 * Otherwise, return {@code false}.
 	 * @param collection the Collection to check
 	 * @return whether the given Collection is empty
 	 */
@@ -52,8 +52,8 @@ public abstract class CollectionUtils {
 	}
 
 	/**
-	 * Return {@code true} if the supplied Map is {@code null}
-	 * or empty. Otherwise, return {@code false}.
+	 * Return {@code true} if the supplied Map is {@code null} or empty.
+	 * Otherwise, return {@code false}.
 	 * @param map the Map to check
 	 * @return whether the given Map is empty
 	 */
@@ -62,13 +62,16 @@ public abstract class CollectionUtils {
 	}
 
 	/**
-	 * Convert the supplied array into a List. A primitive array gets
-	 * converted into a List of the appropriate wrapper type.
-	 * <p>A {@code null} source value will be converted to an
-	 * empty List.
+	 * Convert the supplied array into a List. A primitive array gets converted
+	 * into a List of the appropriate wrapper type.
+	 * <p><b>NOTE:</b> Generally prefer the standard {@link Arrays#asList} method.
+	 * This {@code arrayToList} method is just meant to deal with an incoming Object
+	 * value that might be an {@code Object[]} or a primitive array at runtime.
+	 * <p>A {@code null} source value will be converted to an empty List.
 	 * @param source the (potentially primitive) array
 	 * @return the converted List result
 	 * @see ObjectUtils#toObjectArray(Object)
+	 * @see Arrays#asList(Object[])
 	 */
 	public static List arrayToList(Object source) {
 		return Arrays.asList(ObjectUtils.toObjectArray(source));
@@ -312,7 +315,7 @@ public abstract class CollectionUtils {
 	 * Enumeration elements must be assignable to the type of the given array. The array
 	 * returned will be a different instance than the array given.
 	 */
-	public static <A,E extends A> A[] toArray(Enumeration<E> enumeration, A[] array) {
+	public static <A, E extends A> A[] toArray(Enumeration<E> enumeration, A[] array) {
 		ArrayList<A> elements = new ArrayList<A>();
 		while (enumeration.hasMoreElements()) {
 			elements.add(enumeration.nextElement());
@@ -330,10 +333,10 @@ public abstract class CollectionUtils {
 	}
 
 	/**
-	 * Adapts a {@code Map<K, List<V>>} to an {@code MultiValueMap<K,V>}.
-	 *
-	 * @param map the map
+	 * Adapt a {@code Map<K, List<V>>} to an {@code MultiValueMap<K, V>}.
+	 * @param map the original map
 	 * @return the multi-value map
+	 * @since 3.1
 	 */
 	public static <K, V> MultiValueMap<K, V> toMultiValueMap(Map<K, List<V>> map) {
 		return new MultiValueMapAdapter<K, V>(map);
@@ -341,12 +344,12 @@ public abstract class CollectionUtils {
 	}
 
 	/**
-	 * Returns an unmodifiable view of the specified multi-value map.
-	 *
+	 * Return an unmodifiable view of the specified multi-value map.
 	 * @param  map the map for which an unmodifiable view is to be returned.
 	 * @return an unmodifiable view of the specified multi-value map.
+	 * @since 3.1
 	 */
-	public static <K,V> MultiValueMap<K,V> unmodifiableMultiValueMap(MultiValueMap<? extends K, ? extends V> map) {
+	public static <K, V> MultiValueMap<K, V> unmodifiableMultiValueMap(MultiValueMap<? extends K, ? extends V> map) {
 		Assert.notNull(map, "'map' must not be null");
 		Map<K, List<V>> result = new LinkedHashMap<K, List<V>>(map.size());
 		for (Map.Entry<? extends K, ? extends List<? extends V>> entry : map.entrySet()) {
@@ -358,13 +361,12 @@ public abstract class CollectionUtils {
 	}
 
 
-
 	/**
 	 * Iterator wrapping an Enumeration.
 	 */
 	private static class EnumerationIterator<E> implements Iterator<E> {
 
-		private Enumeration<E> enumeration;
+		private final Enumeration<E> enumeration;
 
 		public EnumerationIterator(Enumeration<E> enumeration) {
 			this.enumeration = enumeration;
@@ -458,8 +460,8 @@ public abstract class CollectionUtils {
 			return this.map.remove(key);
 		}
 
-		public void putAll(Map<? extends K, ? extends List<V>> m) {
-			this.map.putAll(m);
+		public void putAll(Map<? extends K, ? extends List<V>> map) {
+			this.map.putAll(map);
 		}
 
 		public void clear() {
