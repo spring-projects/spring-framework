@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -1340,10 +1340,10 @@ public class DefaultListableBeanFactoryTests {
 	public void testDependsOnCycle() {
 		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
 		RootBeanDefinition bd1 = new RootBeanDefinition(TestBean.class);
-		bd1.setDependsOn(new String[] {"tb2"});
+		bd1.setDependsOn("tb2");
 		lbf.registerBeanDefinition("tb1", bd1);
 		RootBeanDefinition bd2 = new RootBeanDefinition(TestBean.class);
-		bd2.setDependsOn(new String[] {"tb1"});
+		bd2.setDependsOn("tb1");
 		lbf.registerBeanDefinition("tb2", bd2);
 		try {
 			lbf.preInstantiateSingletons();
@@ -1361,13 +1361,13 @@ public class DefaultListableBeanFactoryTests {
 	public void testImplicitDependsOnCycle() {
 		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
 		RootBeanDefinition bd1 = new RootBeanDefinition(TestBean.class);
-		bd1.setDependsOn(new String[] {"tb2"});
+		bd1.setDependsOn("tb2");
 		lbf.registerBeanDefinition("tb1", bd1);
 		RootBeanDefinition bd2 = new RootBeanDefinition(TestBean.class);
-		bd2.setDependsOn(new String[] {"tb3"});
+		bd2.setDependsOn("tb3");
 		lbf.registerBeanDefinition("tb2", bd2);
 		RootBeanDefinition bd3 = new RootBeanDefinition(TestBean.class);
-		bd3.setDependsOn(new String[] {"tb1"});
+		bd3.setDependsOn("tb1");
 		lbf.registerBeanDefinition("tb3", bd3);
 		try {
 			lbf.preInstantiateSingletons();
@@ -1540,7 +1540,7 @@ public class DefaultListableBeanFactoryTests {
 	}
 
 	@Test
-	public void testGetBeanByTypeInstanceWithPrimary() throws Exception {
+	public void testGetBeanByTypeInstanceWithPrimary() {
 		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
 		RootBeanDefinition bd1 = createConstructorDependencyBeanDefinition(99);
 		RootBeanDefinition bd2 = createConstructorDependencyBeanDefinition(43);
@@ -1553,7 +1553,7 @@ public class DefaultListableBeanFactoryTests {
 	}
 
 	@Test
-	public void testGetBeanByTypeInstanceWithMultiplePrimary() throws Exception {
+	public void testGetBeanByTypeInstanceWithMultiplePrimary() {
 		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
 		RootBeanDefinition bd1 = createConstructorDependencyBeanDefinition(99);
 		RootBeanDefinition bd2 = createConstructorDependencyBeanDefinition(43);
@@ -1584,16 +1584,35 @@ public class DefaultListableBeanFactoryTests {
 		try {
 			lbf.getBean(TestBean.class, 67);
 			fail("Should have thrown NoSuchBeanDefinitionException");
-		} catch (NoSuchBeanDefinitionException ex) {
+		}
+		catch (NoSuchBeanDefinitionException ex) {
 			// expected
 		}
 	}
 
-	private RootBeanDefinition createConstructorDependencyBeanDefinition(int age) {
+	@Test
+	public void testGetBeanWithArgsNotCreatedForFactoryBeanChecking() {
+		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
 		RootBeanDefinition bd1 = new RootBeanDefinition(ConstructorDependency.class);
 		bd1.setScope(RootBeanDefinition.SCOPE_PROTOTYPE);
-		bd1.getConstructorArgumentValues().addGenericArgumentValue(String.valueOf(age));
-		return bd1;
+		lbf.registerBeanDefinition("bd1", bd1);
+		RootBeanDefinition bd2 = new RootBeanDefinition(ConstructorDependencyFactoryBean.class);
+		bd2.setScope(RootBeanDefinition.SCOPE_PROTOTYPE);
+		lbf.registerBeanDefinition("bd2", bd2);
+
+		ConstructorDependency bean = lbf.getBean(ConstructorDependency.class, 42);
+		assertThat(bean.beanName, equalTo("bd1"));
+		assertThat(bean.spouseAge, equalTo(42));
+
+		assertEquals(1, lbf.getBeanNamesForType(ConstructorDependency.class).length);
+		assertEquals(1, lbf.getBeanNamesForType(ConstructorDependencyFactoryBean.class).length);
+	}
+
+	private RootBeanDefinition createConstructorDependencyBeanDefinition(int age) {
+		RootBeanDefinition bd = new RootBeanDefinition(ConstructorDependency.class);
+		bd.setScope(RootBeanDefinition.SCOPE_PROTOTYPE);
+		bd.getConstructorArgumentValues().addGenericArgumentValue(String.valueOf(age));
+		return bd;
 	}
 
 	@Test
@@ -1664,8 +1683,8 @@ public class DefaultListableBeanFactoryTests {
 		}
 		catch (UnsatisfiedDependencyException ex) {
 			// expected
-			assertTrue(ex.getMessage().indexOf("test") != -1);
-			assertTrue(ex.getMessage().indexOf("spouse") != -1);
+			assertTrue(ex.getMessage().contains("test"));
+			assertTrue(ex.getMessage().contains("spouse"));
 		}
 	}
 
@@ -1682,8 +1701,8 @@ public class DefaultListableBeanFactoryTests {
 		}
 		catch (UnsatisfiedDependencyException ex) {
 			// expected
-			assertTrue(ex.getMessage().indexOf("test") != -1);
-			assertTrue(ex.getMessage().indexOf("spouse") != -1);
+			assertTrue(ex.getMessage().contains("test"));
+			assertTrue(ex.getMessage().contains("spouse"));
 		}
 	}
 
