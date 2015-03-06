@@ -82,6 +82,7 @@ public class CastorUnmarshallerTests extends AbstractUnmarshallerTests {
 		return marshaller;
 	}
 
+
 	@Test
 	public void unmarshalTargetClass() throws Exception {
 		CastorMarshaller unmarshaller = new CastorMarshaller();
@@ -137,7 +138,6 @@ public class CastorUnmarshallerTests extends AbstractUnmarshallerTests {
 
 	@Test(expected = MarshallingException.class)
 	public void testIgnoreExtraAttributesFalse() throws Exception {
-
 		getCastorUnmarshaller().setIgnoreExtraAttributes(false);
 		unmarshal(EXTRA_ATTRIBUTES_STRING);
 	}
@@ -153,7 +153,6 @@ public class CastorUnmarshallerTests extends AbstractUnmarshallerTests {
 
 	@Test(expected = MarshallingException.class)
 	public void testIgnoreExtraElementsFalse() throws Exception {
-
 		getCastorUnmarshaller().setIgnoreExtraElements(false);
 		unmarshal(EXTRA_ELEMENTS_STRING);
 	}
@@ -181,7 +180,7 @@ public class CastorUnmarshallerTests extends AbstractUnmarshallerTests {
 	}
 
 	@Test
-	@Ignore("Fails on the builder server for some reason")
+	@Ignore("Fails on the build server for some reason")
 	public void testClearCollectionsFalse() throws Exception {
 		Flights flights = new Flights();
 		flights.setFlight(new Flight[]{new Flight(), null});
@@ -196,22 +195,8 @@ public class CastorUnmarshallerTests extends AbstractUnmarshallerTests {
 		testFlight(flights.getFlight()[2]);
 	}
 
-	private CastorMarshaller getCastorUnmarshaller() {
-		return (CastorMarshaller) unmarshaller;
-	}
-
-	private Object unmarshalFlights() throws Exception {
-		return unmarshal(INPUT_STRING);
-	}
-
-	private Object unmarshal(String xml) throws Exception {
-		StreamSource source = new StreamSource(new StringReader(xml));
-		return unmarshaller.unmarshal(source);
-	}
-
 	@Test
 	public void unmarshalStreamSourceExternalEntities() throws Exception {
-
 		final AtomicReference<XMLReader> result = new AtomicReference<XMLReader>();
 		CastorMarshaller marshaller = new CastorMarshaller() {
 			@Override
@@ -222,13 +207,11 @@ public class CastorUnmarshallerTests extends AbstractUnmarshallerTests {
 		};
 
 		// 1. external-general-entities disabled (default)
-
 		marshaller.unmarshal(new StreamSource("1"));
 		assertNotNull(result.get());
 		assertEquals(false, result.get().getFeature("http://xml.org/sax/features/external-general-entities"));
 
 		// 2. external-general-entities disabled (default)
-
 		result.set(null);
 		marshaller.setProcessExternalEntities(true);
 		marshaller.unmarshal(new StreamSource("1"));
@@ -258,6 +241,20 @@ public class CastorUnmarshallerTests extends AbstractUnmarshallerTests {
 		marshaller.unmarshal(new SAXSource(new InputSource("1")));
 		assertNotNull(result.get());
 		assertEquals(true, result.get().getFeature("http://xml.org/sax/features/external-general-entities"));
+	}
+
+
+	private CastorMarshaller getCastorUnmarshaller() {
+		return (CastorMarshaller) unmarshaller;
+	}
+
+	private Object unmarshalFlights() throws Exception {
+		return unmarshal(INPUT_STRING);
+	}
+
+	private Object unmarshal(String xml) throws Exception {
+		StreamSource source = new StreamSource(new StringReader(xml));
+		return unmarshaller.unmarshal(source);
 	}
 
 }
