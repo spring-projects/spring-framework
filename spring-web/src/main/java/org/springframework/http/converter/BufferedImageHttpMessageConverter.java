@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -210,26 +210,21 @@ public class BufferedImageHttpMessageConverter implements HttpMessageConverter<B
 			throws IOException, HttpMessageNotWritableException {
 
 		if (outputMessage instanceof StreamingHttpOutputMessage) {
-			StreamingHttpOutputMessage streamingOutputMessage =
-					(StreamingHttpOutputMessage) outputMessage;
+			StreamingHttpOutputMessage streamingOutputMessage = (StreamingHttpOutputMessage) outputMessage;
 			streamingOutputMessage.setBody(new StreamingHttpOutputMessage.Body() {
 				@Override
 				public void writeTo(OutputStream outputStream) throws IOException {
-					writeInternal(image, contentType, outputMessage.getHeaders(),
-							outputStream);
+					writeInternal(image, contentType, outputMessage.getHeaders(), outputStream);
 				}
 			});
-
 		}
 		else {
-			writeInternal(image, contentType, outputMessage.getHeaders(),
-					outputMessage.getBody());
+			writeInternal(image, contentType, outputMessage.getHeaders(), outputMessage.getBody());
 		}
 	}
 
-	private void writeInternal(BufferedImage image, MediaType contentType,
-			HttpHeaders headers, OutputStream body)
-			throws IOException, HttpMessageNotWritableException {
+	private void writeInternal(BufferedImage image, MediaType contentType, HttpHeaders headers,
+			OutputStream body) throws IOException, HttpMessageNotWritableException {
 
 		if (contentType == null || contentType.isWildcardType() || contentType.isWildcardSubtype()) {
 			contentType = getDefaultContentType();

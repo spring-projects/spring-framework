@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -257,8 +257,8 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 		return false;
 	}
 
-	private void writeForm(MultiValueMap<String, String> form, MediaType contentType, HttpOutputMessage outputMessage)
-			throws IOException {
+	private void writeForm(MultiValueMap<String, String> form, MediaType contentType,
+			HttpOutputMessage outputMessage) throws IOException {
 
 		Charset charset;
 		if (contentType != null) {
@@ -291,8 +291,7 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 		outputMessage.getHeaders().setContentLength(bytes.length);
 
 		if (outputMessage instanceof StreamingHttpOutputMessage) {
-			StreamingHttpOutputMessage streamingOutputMessage =
-					(StreamingHttpOutputMessage) outputMessage;
+			StreamingHttpOutputMessage streamingOutputMessage = (StreamingHttpOutputMessage) outputMessage;
 			streamingOutputMessage.setBody(new StreamingHttpOutputMessage.Body() {
 				@Override
 				public void writeTo(OutputStream outputStream) throws IOException {
@@ -314,8 +313,7 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 		headers.setContentType(contentType);
 
 		if (outputMessage instanceof StreamingHttpOutputMessage) {
-			StreamingHttpOutputMessage streamingOutputMessage =
-					(StreamingHttpOutputMessage) outputMessage;
+			StreamingHttpOutputMessage streamingOutputMessage = (StreamingHttpOutputMessage) outputMessage;
 			streamingOutputMessage.setBody(new StreamingHttpOutputMessage.Body() {
 				@Override
 				public void writeTo(OutputStream outputStream) throws IOException {
