@@ -19,6 +19,7 @@ package org.springframework.context.support;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.Reader;
 import java.net.URL;
 import java.net.URLConnection;
 import java.security.AccessController;
@@ -67,7 +68,7 @@ public class ResourceBundleMessageSource extends AbstractMessageSource implement
 
 	private String[] basenames = new String[0];
 
-	private String defaultEncoding;
+	private String defaultEncoding = "ISO-8859-1";
 
 	private boolean fallbackToSystemLocale = true;
 
@@ -150,9 +151,9 @@ public class ResourceBundleMessageSource extends AbstractMessageSource implement
 
 	/**
 	 * Set the default charset to use for parsing resource bundle files.
-	 * <p>Default is none, using the {@code java.util.ResourceBundle}
-	 * default encoding: ISO-8859-1.
-	 * and more flexibility in setting of an encoding per file.
+	 * <p>Default is the {@code java.util.ResourceBundle} default encoding:
+	 * ISO-8859-1.
+	 * @since 3.1.3
 	 */
 	public void setDefaultEncoding(String defaultEncoding) {
 		this.defaultEncoding = defaultEncoding;
@@ -167,6 +168,7 @@ public class ResourceBundleMessageSource extends AbstractMessageSource implement
 	 * {@code java.util.ResourceBundle}. However, this is often not desirable
 	 * in an application server environment, where the system Locale is not relevant
 	 * to the application at all: Set this flag to "false" in such a scenario.
+	 * @since 3.1.3
 	 */
 	public void setFallbackToSystemLocale(boolean fallbackToSystemLocale) {
 		this.fallbackToSystemLocale = fallbackToSystemLocale;
@@ -188,6 +190,7 @@ public class ResourceBundleMessageSource extends AbstractMessageSource implement
 	 * Consider {@link ReloadableResourceBundleMessageSource} in combination
 	 * with resource bundle files in a non-classpath location.
 	 * </ul>
+	 * @since 3.1.3
 	 */
 	public void setCacheSeconds(int cacheSeconds) {
 		this.cacheMillis = (cacheSeconds * 1000);
@@ -304,18 +307,24 @@ public class ResourceBundleMessageSource extends AbstractMessageSource implement
 	 * @param locale the Locale to look for
 	 * @return the corresponding ResourceBundle
 	 * @throws MissingResourceException if no matching bundle could be found
-	 * @see java.util.ResourceBundle#getBundle(String, java.util.Locale, ClassLoader)
+	 * @see java.util.ResourceBundle#getBundle(String, Locale, ClassLoader)
 	 * @see #getBundleClassLoader()
 	 */
 	protected ResourceBundle doGetBundle(String basename, Locale locale) throws MissingResourceException {
-		if ((this.defaultEncoding != null && !"ISO-8859-1".equals(this.defaultEncoding)) ||
-				!this.fallbackToSystemLocale || this.cacheMillis >= 0) {
-			return ResourceBundle.getBundle(basename, locale, getBundleClassLoader(), new MessageSourceControl());
-		}
-		else {
-			// Good old standard call...
-			return ResourceBundle.getBundle(basename, locale, getBundleClassLoader());
-		}
+		return ResourceBundle.getBundle(basename, locale, getBundleClassLoader(), new MessageSourceControl());
+	}
+
+	/**
+	 * Load a property-based resource bundle from the given reader.
+	 * <p>The default implementation returns a {@link PropertyResourceBundle}.
+	 * @param reader the reader for the target resource
+	 * @return the fully loaded bundle
+	 * @throws IOException in case of I/O failure
+	 * @since 4.2
+	 * @see PropertyResourceBundle#PropertyResourceBundle(Reader)
+	 */
+	protected ResourceBundle loadBundle(Reader reader) throws IOException {
+		return new PropertyResourceBundle(reader);
 	}
 
 	/**
@@ -430,9 +439,7 @@ public class ResourceBundleMessageSource extends AbstractMessageSource implement
 				}
 				if (stream != null) {
 					try {
-						return (defaultEncoding != null ?
-								new PropertyResourceBundle(new InputStreamReader(stream, defaultEncoding)) :
-								new PropertyResourceBundle(stream));
+						return loadBundle(new InputStreamReader(stream, defaultEncoding));
 					}
 					finally {
 						stream.close();
