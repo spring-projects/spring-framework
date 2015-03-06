@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,15 +47,16 @@ public class CastorUnmarshallerTests extends AbstractUnmarshallerTests {
 	 */
 	protected static final String EXTRA_ATTRIBUTES_STRING =
 			"<tns:flights xmlns:tns=\"http://samples.springframework.org/flight\">" +
-					"<tns:flight status=\"canceled\"><tns:number>42</tns:number></tns:flight></tns:flights>";
+			"<tns:flight status=\"canceled\"><tns:number>42</tns:number></tns:flight></tns:flights>";
 
 	/**
 	 * Represents the xml with additional element that is not mapped in Castor config.
 	 */
 	protected static final String EXTRA_ELEMENTS_STRING =
 			"<tns:flights xmlns:tns=\"http://samples.springframework.org/flight\">" +
-					"<tns:flight><tns:number>42</tns:number><tns:date>2011-06-14</tns:date>" +
-					"</tns:flight></tns:flights>";
+			"<tns:flight><tns:number>42</tns:number><tns:date>2011-06-14</tns:date>" +
+			"</tns:flight></tns:flights>";
+
 
 	@Override
 	protected void testFlights(Object o) {
@@ -237,7 +238,6 @@ public class CastorUnmarshallerTests extends AbstractUnmarshallerTests {
 
 	@Test
 	public void unmarshalSaxSourceExternalEntities() throws Exception {
-
 		final AtomicReference<XMLReader> result = new AtomicReference<XMLReader>();
 		CastorMarshaller marshaller = new CastorMarshaller() {
 			@Override
@@ -248,13 +248,11 @@ public class CastorUnmarshallerTests extends AbstractUnmarshallerTests {
 		};
 
 		// 1. external-general-entities disabled (default)
-
 		marshaller.unmarshal(new SAXSource(new InputSource("1")));
 		assertNotNull(result.get());
 		assertEquals(false, result.get().getFeature("http://xml.org/sax/features/external-general-entities"));
 
 		// 2. external-general-entities disabled (default)
-
 		result.set(null);
 		marshaller.setProcessExternalEntities(true);
 		marshaller.unmarshal(new SAXSource(new InputSource("1")));

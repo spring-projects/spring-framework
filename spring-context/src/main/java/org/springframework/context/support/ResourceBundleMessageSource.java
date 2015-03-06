@@ -152,7 +152,7 @@ public class ResourceBundleMessageSource extends AbstractMessageSource implement
 	 * Set the default charset to use for parsing resource bundle files.
 	 * <p>Default is none, using the {@code java.util.ResourceBundle}
 	 * default encoding: ISO-8859-1.
-	 * and more flexibility in setting of an encoding per file.
+	 * @since 3.1.3
 	 */
 	public void setDefaultEncoding(String defaultEncoding) {
 		this.defaultEncoding = defaultEncoding;
@@ -167,6 +167,7 @@ public class ResourceBundleMessageSource extends AbstractMessageSource implement
 	 * {@code java.util.ResourceBundle}. However, this is often not desirable
 	 * in an application server environment, where the system Locale is not relevant
 	 * to the application at all: Set this flag to "false" in such a scenario.
+	 * @since 3.1.3
 	 */
 	public void setFallbackToSystemLocale(boolean fallbackToSystemLocale) {
 		this.fallbackToSystemLocale = fallbackToSystemLocale;
@@ -188,6 +189,7 @@ public class ResourceBundleMessageSource extends AbstractMessageSource implement
 	 * Consider {@link ReloadableResourceBundleMessageSource} in combination
 	 * with resource bundle files in a non-classpath location.
 	 * </ul>
+	 * @since 3.1.3
 	 */
 	public void setCacheSeconds(int cacheSeconds) {
 		this.cacheMillis = (cacheSeconds * 1000);
@@ -304,7 +306,7 @@ public class ResourceBundleMessageSource extends AbstractMessageSource implement
 	 * @param locale the Locale to look for
 	 * @return the corresponding ResourceBundle
 	 * @throws MissingResourceException if no matching bundle could be found
-	 * @see java.util.ResourceBundle#getBundle(String, java.util.Locale, ClassLoader)
+	 * @see java.util.ResourceBundle#getBundle(String, Locale, ClassLoader)
 	 * @see #getBundleClassLoader()
 	 */
 	protected ResourceBundle doGetBundle(String basename, Locale locale) throws MissingResourceException {

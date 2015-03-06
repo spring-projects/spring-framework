@@ -50,8 +50,8 @@ import org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolv
  *
  * <p>An {@code @RequestBody} method argument is also validated if it is annotated
  * with {@code @javax.validation.Valid}. In case of validation failure,
- * {@link MethodArgumentNotValidException} is raised and results in a 400 response
- * status code if {@link DefaultHandlerExceptionResolver} is configured.
+ * {@link MethodArgumentNotValidException} is raised and results in an HTTP 400
+ * response status code if {@link DefaultHandlerExceptionResolver} is configured.
  *
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
@@ -114,7 +114,7 @@ public class RequestResponseBodyMethodProcessor extends AbstractMessageConverter
 	protected <T> Object readWithMessageConverters(NativeWebRequest webRequest, MethodParameter methodParam,
 			Type paramType) throws IOException, HttpMediaTypeNotSupportedException {
 
-		final HttpServletRequest servletRequest = webRequest.getNativeRequest(HttpServletRequest.class);
+		HttpServletRequest servletRequest = webRequest.getNativeRequest(HttpServletRequest.class);
 		HttpInputMessage inputMessage = new ServletServerHttpRequest(servletRequest);
 
 		InputStream inputStream = inputMessage.getBody();
@@ -139,7 +139,7 @@ public class RequestResponseBodyMethodProcessor extends AbstractMessageConverter
 			}
 			inputMessage = new ServletServerHttpRequest(servletRequest) {
 				@Override
-				public InputStream getBody() throws IOException {
+				public InputStream getBody() {
 					// Form POST should not get here
 					return pushbackInputStream;
 				}
