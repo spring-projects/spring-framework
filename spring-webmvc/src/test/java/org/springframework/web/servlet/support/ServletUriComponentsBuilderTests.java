@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,14 +36,17 @@ public class ServletUriComponentsBuilderTests {
 
 	private MockHttpServletRequest request;
 
+
 	@Before
 	public void setup() {
 		this.request = new MockHttpServletRequest();
 		this.request.setScheme("http");
 		this.request.setServerName("localhost");
 		this.request.setServerPort(-1);
+		this.request.setRequestURI("/mvc-showcase");
 		this.request.setContextPath("/mvc-showcase");
 	}
+
 
 	@Test
 	public void fromRequest() {
@@ -64,7 +67,7 @@ public class ServletUriComponentsBuilderTests {
 	public void fromRequestAtypicalHttpPort() {
 		this.request.setServerPort(8080);
 		String result = ServletUriComponentsBuilder.fromRequest(this.request).build().toUriString();
-		assertEquals("http://localhost:8080", result);
+		assertEquals("http://localhost:8080/mvc-showcase", result);
 	}
 
 	@Test
@@ -72,7 +75,7 @@ public class ServletUriComponentsBuilderTests {
 		this.request.setScheme("https");
 		this.request.setServerPort(9043);
 		String result = ServletUriComponentsBuilder.fromRequest(this.request).build().toUriString();
-		assertEquals("https://localhost:9043", result);
+		assertEquals("https://localhost:9043/mvc-showcase", result);
 	}
 
 	@Test
@@ -148,6 +151,19 @@ public class ServletUriComponentsBuilderTests {
 		assertEquals("example.org", result.getHost());
 		assertEquals("should have derived scheme from header", "https", result.getScheme());
 		assertEquals("should have used the default port of the forwarded request", -1, result.getPort());
+	}
+
+	// SPR-12771
+
+	@Test
+	public void fromRequestWithForwardedProtoAndDefaultPort() {
+		this.request.addHeader("X-Forwarded-Proto", "https");
+		this.request.addHeader("X-Forwarded-Host", "84.198.58.199");
+		this.request.addHeader("X-Forwarded-Port", "443");
+		this.request.setServerPort(80);
+		UriComponents result = ServletUriComponentsBuilder.fromRequest(this.request).build();
+
+		assertEquals("https://84.198.58.199/mvc-showcase", result.toString());
 	}
 
 	@Test
