@@ -36,11 +36,11 @@ AOP is used in the Spring Framework to...
 * ... allow users to implement custom aspects, complementing their use of OOP with AOP.
 
 [NOTE]
-===
+====
 If you are interested only in generic declarative services or other pre-packaged
 declarative middleware services such as pooling, you do not need to work directly with
 Spring AOP, and can skip most of this chapter.
-===
+====
 
 
 

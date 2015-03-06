@@ -386,11 +386,11 @@ loader since the default loader supports either resource `locations` or annotate
 +
 
 [NOTE]
-===
+====
 `@ContextConfiguration` provides support for __inheriting__ resource locations or
 configuration classes as well as context initializers declared by superclasses by
 default.
-===
+====
 
 +
 
@@ -530,13 +530,13 @@ should be active when loading an `ApplicationContext` for test classes.
 +
 
 [NOTE]
-===
+====
 `@ActiveProfiles` provides support for __inheriting__ active bean definition profiles
 declared by superclasses by default. It is also possible to resolve active bean
 definition profiles programmatically by implementing a custom
 <<testcontext-ctx-management-env-profiles-ActiveProfilesResolver,`ActiveProfilesResolver`>>
 and registering it via the `resolver` attribute of `@ActiveProfiles`.
-===
+====
 
 +
 
@@ -757,7 +757,7 @@ conjunction with `@ContextConfiguration`.
 +
 
 [NOTE]
-===
+====
 If the default conventions are sufficient for your test configuration, you can avoid
 using `@TransactionConfiguration` altogether. In other words, if you have only one
 transaction manager -- or if you have multiple transaction managers but the transaction
@@ -765,7 +765,7 @@ manager for tests is named "transactionManager" or specified via a
 `TransactionManagementConfigurer` -- and if you want transactions to roll back
 automatically, then there is no need to annotate your test class with
 `@TransactionConfiguration`.
-===
+====
 
 +
 
@@ -916,7 +916,7 @@ tests and can be used anywhere in the Spring Framework.
 
 .JSR-250 Lifecycle Annotations
 [NOTE]
-===
+====
 In the Spring TestContext Framework `@PostConstruct` and `@PreDestroy` may be used with
 standard semantics on any application components configured in the `ApplicationContext`;
 however, these lifecycle annotations have limited usage within an actual test class.
@@ -928,7 +928,7 @@ class. On the other hand, if a method within a test class is annotated with
 `@PreDestroy`, that method will __never__ be executed. Within a test class it is
 therefore recommended to use test lifecycle callbacks from the underlying test framework
 instead of `@PostConstruct` and `@PreDestroy`.
-===
+====
 
 
 [[integration-testing-annotations-junit]]
@@ -1819,11 +1819,11 @@ annotation and supplying a list of profiles that should be activated when loadin
 `ApplicationContext` for the test.
 
 [NOTE]
-===
+====
 `@ActiveProfiles` may be used with any implementation of the new `SmartContextLoader`
 SPI, but `@ActiveProfiles` is not supported with implementations of the older
 `ContextLoader` SPI.
-===
+====
 
 Let's take a look at some examples with XML configuration and `@Configuration` classes.
 
@@ -2149,7 +2149,7 @@ the `Environment`'s set of `PropertySources` for the `ApplicationContext` loaded
 annotated integration test.
 
 [NOTE]
-===
+====
 `@TestPropertySource` may be used with any implementation of the `SmartContextLoader`
 SPI, but `@TestPropertySource` is not supported with implementations of the older
 `ContextLoader` SPI.
@@ -2157,7 +2157,7 @@ SPI, but `@TestPropertySource` is not supported with implementations of the olde
 Implementations of `SmartContextLoader` gain access to merged test property source values
 via the `getPropertySourceLocations()` and `getPropertySourceProperties()` methods in
 `MergedContextConfiguration`.
-===
+====
 
 *Declaring test property sources*
 
@@ -2494,7 +2494,7 @@ is much faster.
 
 .Test suites and forked processes
 [NOTE]
-===
+====
 The Spring TestContext framework stores application contexts in a __static__ cache. This
 means that the context is literally stored in a `static` variable. In other words, if
 tests execute in separate processes the static cache will be cleared between each test
@@ -2509,7 +2509,7 @@ http://maven.apache.org/plugins/maven-surefire-plugin/test-mojo.html#forkMode[fo
 for the Maven Surefire plug-in is set to `always` or `pertest`, the TestContext
 framework will not be able to cache application contexts between test classes and the
 build process will run significantly slower as a result.
-===
+====
 
 Since having a large number of application contexts loaded within a given test suite can
 cause the suite to take an unnecessarily long time to execute, it is often beneficial to
@@ -2678,13 +2678,13 @@ application context for `ExtendedTests` will be loaded only from
 
 .Dirtying a context within a context hierarchy
 [NOTE]
-===
+====
 If `@DirtiesContext` is used in a test whose context is configured as part of a context
 hierarchy, the `hierarchyMode` flag can be used to control how the context cache is
 cleared. For further details consult the discussion of `@DirtiesContext` in
 <<integration-testing-annotations-spring,Spring Testing Annotations>> and the
 `@DirtiesContext` javadocs.
-===
+====
 --
 
 
@@ -2726,7 +2726,7 @@ use of `@Autowired` on fields and setter methods. The application context config
 is presented after all sample code listings.
 
 [NOTE]
-===
+====
 The dependency injection behavior in the following code listings is not specific to
 JUnit. The same DI techniques can be used in conjunction with any testing framework.
 
@@ -2734,7 +2734,7 @@ The following examples make calls to static assertion methods such as `assertNot
 but without prepending the call with `Assert`. In such cases, assume that the method was
 properly imported through an `import static` declaration that is not shown in the
 example.
-===
+====
 
 The first code listing shows a JUnit-based implementation of the test class that uses
 `@Autowired` for field injection.

@@ -1103,14 +1103,14 @@ arguments can be used in arbitrary order with the only exception of `BindingResu
 arguments. This is described in the next section.
 
 [NOTE]
-===
+====
 Spring 3.1 introduced a new set of support classes for `@RequestMapping` methods called
 `RequestMappingHandlerMapping` and `RequestMappingHandlerAdapter` respectively. They are
 recommended for use and even required to take advantage of new features in Spring MVC
 3.1 and going forward. The new support classes are enabled by default from the MVC
 namespace and with use of the MVC Java config but must be configured explicitly if using
 neither.
-===
+====
 
 
 [[mvc-ann-arguments]]
@@ -1124,11 +1124,11 @@ The following are the supported method arguments:
   `null`.
 
 [NOTE]
-===
+====
 Session access may not be thread-safe, in particular in a Servlet environment. Consider
 setting the ++RequestMappingHandlerAdapter++'s "synchronizeOnSession" flag to "true" if
 multiple requests are allowed to access a session concurrently.
-===
+====
 
 * `org.springframework.web.context.request.WebRequest` or
   `org.springframework.web.context.request.NativeWebRequest`. Allows for generic
@@ -1380,11 +1380,11 @@ will be raised. The exception is handled in the `DefaultHandlerExceptionResolver
 sends a `400` error back to the client.
 
 [NOTE]
-===
+====
 Also see <<mvc-config-enable>> for
 information on configuring message converters and a validator through the MVC namespace
 or the MVC Java config.
-===
+====
 
 
 [[mvc-ann-responsebody]]
@@ -1740,12 +1740,12 @@ and wraps the `ServletRequest` in order to make the form data available through 
 `ServletRequest.getParameter{asterisk}()` family of methods.
 
 [NOTE]
-===
+====
 As `HttpPutFormContentFilter` consumes the body of the request, it should not be
 configured for PUT or PATCH URLs that rely on other converters for
 `application/x-www-form-urlencoded`. This includes `@RequestBody MultiValueMap<String,
 String>` and `HttpEntity<MultiValueMap<String, String>>`.
-===
+====
 
 
 [[mvc-ann-cookievalue]]
@@ -2031,12 +2031,12 @@ the view class or interface to be used:
 ----
 
 [NOTE]
-===
+====
 Note that despite `@JsonView` allowing for more than one class to
 be specified, the use on a controller method is only supported with
 exactly one class argument. Consider the use of a composite interface
 if you need to enable multiple views.
-===
+====
 
 For controllers relying on view resolution, simply add the serialization view class
 to the model:
@@ -2180,12 +2180,12 @@ an exception. It is handled by a matching `@ExceptionHandler` method in the same
 controller or by one of the configured `HandlerExceptionResolver` instances.
 
 [NOTE]
-===
+====
 Under the covers, when a `Callable` raises an Exception, Spring MVC still dispatches to
 the Servlet container to resume processing. The only difference is that the result of
 executing the `Callable` is an `Exception` that must be processed with the configured
 `HandlerExceptionResolver` instances.
-===
+====
 
 When using a `DeferredResult`, you have a choice of calling its `setErrorResult(Object)`
 method and provide an `Exception` or any other Object you'd like to use as the result.
@@ -2447,10 +2447,10 @@ If the current time is outside office hours, the user is redirected to a static 
 file that says, for example, you can only access the website during office hours.
 
 [NOTE]
-===
+====
 When using the `RequestMappingHandlerMapping` the actual handler is an instance of
 `HandlerMethod` which identifies the specific controller method that will be invoked.
-===
+====
 
 As you can see, the Spring adapter class `HandlerInterceptorAdapter` makes it easier to
 extend the `HandlerInterceptor` interface.
@@ -2582,13 +2582,13 @@ As you can see, you can identify a parent view, from which all views in the prop
 file "extend". This way you can specify a default view class, for example.
 
 [NOTE]
-===
+====
 Subclasses of `AbstractCachingViewResolver` cache view instances that they resolve.
 Caching improves performance of certain view technologies. It's possible to turn off the
 cache by setting the `cache` property to `false`. Furthermore, if you must refresh a
 certain view at runtime (for example when a Velocity template is modified), you can use
 the `removeFromCache(String viewName, Locale loc)` method.
-===
+====
 
 
 
@@ -2865,10 +2865,10 @@ extension but with the `Accept` header set to the preferred media-type, and the 
 resolution of request to views would occur.
 
 [NOTE]
-===
+====
 If `ContentNegotiatingViewResolver`'s list of ViewResolvers is not configured
 explicitly, it automatically uses any ViewResolvers defined in the application context.
-===
+====
 
 The corresponding controller code that returns an Atom RSS feed for a URI of the form
 `http://localhost/content.atom` or `http://localhost/content` with an `Accept` header of
@@ -3081,9 +3081,9 @@ by implementing `HandlerMethodMappingNamingStrategy` and configuring it on your
 a name attribute that can be used to override the default strategy.
 
 [NOTE]
-===
+====
 The assigned request mapping names are logged at TRACE level on startup.
-===
+====
 
 The Spring JSP tag library provides a function called `mvcUrl` that can be used to
 prepare links to controller methods based on this mechanism.
@@ -4930,7 +4930,7 @@ Here is an example:
 ----
 
 [NOTE]
-===
+====
 An application should have only one configuration extending `DelegatingWebMvcConfiguration`
 or a single `@EnableWebMvc` annotated class, since they both register the same underlying
 beans.
@@ -4938,7 +4938,7 @@ beans.
 Modifying beans in this way does not prevent you from using any of the higher-level
 constructs shown earlier in this section. `WebMvcConfigurerAdapter` subclasses and
 `WebMvcConfigurer` implementations are still being used.
-===
+====
 
 
 

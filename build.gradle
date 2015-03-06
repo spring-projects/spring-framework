@@ -1106,7 +1106,7 @@ configure(rootProject) {
 	asciidoctor {
 		sourceDir project.file('src/asciidoc')
 		separateOutputDirs = false
-		backends = ['docbook5']
+		backends = ['docbook']
 		options doctype: 'book', eruby: 'erubis'
 		attributes 'spring-version': project.version,
 					revnumber : project.version,
