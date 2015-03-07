@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -159,6 +159,39 @@ public class ResponseEntityTests {
 		assertEquals(contentType.toString(), responseHeaders.getFirst("Content-Type"));
 
 		assertNull(responseEntity.getBody());
+	}
+
+	@Test
+	public void headersCopy(){
+		HttpHeaders customHeaders = new HttpHeaders();
+		customHeaders.set("X-CustomHeader", "vale");
+
+		ResponseEntity<Void> responseEntity =
+				ResponseEntity.ok().headers(customHeaders).build();
+		HttpHeaders responseHeaders = responseEntity.getHeaders();
+
+		assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
+		assertEquals(1, responseHeaders.size());
+		assertEquals(1, responseHeaders.get("X-CustomHeader").size());
+		assertEquals("vale", responseHeaders.getFirst("X-CustomHeader"));
+
+	}
+
+	// SPR-12792
+	@Test
+	public void headersCopyWithEmptyAndNull(){
+
+		ResponseEntity<Void> responseEntityWithEmptyHeaders
+				= ResponseEntity.ok().headers(new HttpHeaders()).build();
+		ResponseEntity<Void> responseEntityWithNullHeaders
+				= ResponseEntity.ok().headers(null).build();
+
+		assertEquals(HttpStatus.OK, responseEntityWithEmptyHeaders.getStatusCode());
+		assertTrue(responseEntityWithEmptyHeaders.getHeaders().isEmpty());
+
+		assertEquals(responseEntityWithEmptyHeaders.toString(),
+				responseEntityWithNullHeaders.toString());
+
 	}
 
 }
