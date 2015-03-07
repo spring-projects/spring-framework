@@ -437,10 +437,6 @@ public class TypeDescriptor implements Serializable {
 		return narrow(mapValue, getMapValueTypeDescriptor());
 	}
 
-	private Class<?> getType(TypeDescriptor typeDescriptor) {
-		return (typeDescriptor != null ? typeDescriptor.getType() : null);
-	}
-
 	private TypeDescriptor narrow(Object value, TypeDescriptor typeDescriptor) {
 		if (typeDescriptor != null) {
 			return typeDescriptor.narrow(value);
