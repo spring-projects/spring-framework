@@ -130,15 +130,23 @@ public abstract class YamlProcessor {
 	 * Properties. Depending on the {@link #setResolutionMethod(ResolutionMethod)} not all
 	 * of the documents will be parsed.
 	 * @param callback a callback to delegate to once matching documents are found
+	 * @see #createYaml()
 	 */
 	protected void process(MatchCallback callback) {
-		Yaml yaml = new Yaml(new StrictMapAppenderConstructor());
+		Yaml yaml = createYaml();
 		for (Resource resource : this.resources) {
 			boolean found = process(callback, yaml, resource);
 			if (this.resolutionMethod == ResolutionMethod.FIRST_FOUND && found) {
 				return;
 			}
 		}
+	}
+
+	/**
+	 * Create the {@link Yaml} instance to use.
+	 */
+	protected Yaml createYaml() {
+		return new Yaml(new StrictMapAppenderConstructor());
 	}
 
 	private boolean process(MatchCallback callback, Yaml yaml, Resource resource) {
@@ -331,7 +339,7 @@ public abstract class YamlProcessor {
 	/**
 	 * Status returned from {@link DocumentMatcher#matches(java.util.Properties)}
 	 */
-	public static enum MatchStatus {
+	public enum MatchStatus {
 
 		/**
 		 * A match was found.
@@ -360,7 +368,7 @@ public abstract class YamlProcessor {
 	/**
 	 * Method to use for resolving resources.
 	 */
-	public static enum ResolutionMethod {
+	public enum ResolutionMethod {
 
 		/**
 		 * Replace values from earlier in the list.
@@ -382,7 +390,7 @@ public abstract class YamlProcessor {
 	/**
 	 * A specialized {@link Constructor} that checks for duplicate keys.
 	 */
-	private static class StrictMapAppenderConstructor extends Constructor {
+	protected static class StrictMapAppenderConstructor extends Constructor {
 
 		public 	StrictMapAppenderConstructor() {
 			super();

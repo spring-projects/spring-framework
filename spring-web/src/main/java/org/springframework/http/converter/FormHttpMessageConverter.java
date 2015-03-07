@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,6 +36,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.MediaType;
+import org.springframework.http.StreamingHttpOutputMessage;
 import org.springframework.util.Assert;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -256,8 +257,8 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 		return false;
 	}
 
-	private void writeForm(MultiValueMap<String, String> form, MediaType contentType, HttpOutputMessage outputMessage)
-			throws IOException {
+	private void writeForm(MultiValueMap<String, String> form, MediaType contentType,
+			HttpOutputMessage outputMessage) throws IOException {
 
 		Charset charset;
 		if (contentType != null) {
@@ -286,20 +287,45 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 				builder.append('&');
 			}
 		}
-		byte[] bytes = builder.toString().getBytes(charset.name());
+		final byte[] bytes = builder.toString().getBytes(charset.name());
 		outputMessage.getHeaders().setContentLength(bytes.length);
-		StreamUtils.copy(bytes, outputMessage.getBody());
+
+		if (outputMessage instanceof StreamingHttpOutputMessage) {
+			StreamingHttpOutputMessage streamingOutputMessage = (StreamingHttpOutputMessage) outputMessage;
+			streamingOutputMessage.setBody(new StreamingHttpOutputMessage.Body() {
+				@Override
+				public void writeTo(OutputStream outputStream) throws IOException {
+					StreamUtils.copy(bytes, outputStream);
+				}
+			});
+		}
+		else {
+			StreamUtils.copy(bytes, outputMessage.getBody());
+		}
 	}
 
-	private void writeMultipart(MultiValueMap<String, Object> parts, HttpOutputMessage outputMessage) throws IOException {
-		byte[] boundary = generateMultipartBoundary();
+	private void writeMultipart(final MultiValueMap<String, Object> parts, HttpOutputMessage outputMessage) throws IOException {
+		final byte[] boundary = generateMultipartBoundary();
 		Map<String, String> parameters = Collections.singletonMap("boundary", new String(boundary, "US-ASCII"));
 
 		MediaType contentType = new MediaType(MediaType.MULTIPART_FORM_DATA, parameters);
-		outputMessage.getHeaders().setContentType(contentType);
+		HttpHeaders headers = outputMessage.getHeaders();
+		headers.setContentType(contentType);
 
-		writeParts(outputMessage.getBody(), parts, boundary);
-		writeEnd(outputMessage.getBody(), boundary);
+		if (outputMessage instanceof StreamingHttpOutputMessage) {
+			StreamingHttpOutputMessage streamingOutputMessage = (StreamingHttpOutputMessage) outputMessage;
+			streamingOutputMessage.setBody(new StreamingHttpOutputMessage.Body() {
+				@Override
+				public void writeTo(OutputStream outputStream) throws IOException {
+					writeParts(outputStream, parts, boundary);
+					writeEnd(outputStream, boundary);
+				}
+			});
+		}
+		else {
+			writeParts(outputMessage.getBody(), parts, boundary);
+			writeEnd(outputMessage.getBody(), boundary);
+		}
 	}
 
 	private void writeParts(OutputStream os, MultiValueMap<String, Object> parts, byte[] boundary) throws IOException {

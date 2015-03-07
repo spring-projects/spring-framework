@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,6 +35,7 @@ public class ByteBufferConverterTests {
 
 	private GenericConversionService conversionService;
 
+
 	@Before
 	public void setup() {
 		this.conversionService = new GenericConversionService();
@@ -42,6 +43,7 @@ public class ByteBufferConverterTests {
 		this.conversionService.addConverter(new ByteArrayToOtherTypeConverter());
 		this.conversionService.addConverter(new OtherTypeToByteArrayConverter());
 	}
+
 
 	@Test
 	public void byteArrayToByteBuffer() throws Exception {
@@ -78,6 +80,7 @@ public class ByteBufferConverterTests {
 		assertThat(bytes, equalTo(convert.array()));
 	}
 
+
 	private static class OtherType {
 
 		private byte[] bytes;
@@ -88,8 +91,8 @@ public class ByteBufferConverterTests {
 
 	}
 
-	private static class ByteArrayToOtherTypeConverter implements
-			Converter<byte[], OtherType> {
+
+	private static class ByteArrayToOtherTypeConverter implements Converter<byte[], OtherType> {
 
 		@Override
 		public OtherType convert(byte[] source) {
@@ -97,8 +100,8 @@ public class ByteBufferConverterTests {
 		}
 	}
 
-	private static class OtherTypeToByteArrayConverter implements
-			Converter<OtherType, byte[]> {
+
+	private static class OtherTypeToByteArrayConverter implements Converter<OtherType, byte[]> {
 
 		@Override
 		public byte[] convert(OtherType source) {

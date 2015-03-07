@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -177,6 +177,16 @@ public class RestTemplateIntegrationTests extends AbstractJettyServerTestCase {
 		parts.add("logo", logo);
 
 		template.postForLocation(baseUrl + "/multipart", parts);
+	}
+
+	@Test
+	public void form() throws UnsupportedEncodingException {
+		MultiValueMap<String, String> form = new LinkedMultiValueMap<String, String>();
+		form.add("name 1", "value 1");
+		form.add("name 2", "value 2+1");
+		form.add("name 2", "value 2+2");
+
+		template.postForLocation(baseUrl + "/form", form);
 	}
 
 	@Test

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,10 @@
 
 package org.springframework.http.converter.json;
 
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
@@ -28,6 +31,8 @@ import java.util.TimeZone;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.Version;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.JsonSerializer;
@@ -36,23 +41,28 @@ import com.fasterxml.jackson.databind.Module;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.cfg.DeserializerFactoryConfig;
 import com.fasterxml.jackson.databind.cfg.SerializerFactoryConfig;
 import com.fasterxml.jackson.databind.deser.BasicDeserializerFactory;
 import com.fasterxml.jackson.databind.deser.std.DateDeserializers.DateDeserializer;
 import com.fasterxml.jackson.databind.introspect.NopAnnotationIntrospector;
 import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.fasterxml.jackson.databind.module.SimpleSerializers;
 import com.fasterxml.jackson.databind.ser.BasicSerializerFactory;
 import com.fasterxml.jackson.databind.ser.Serializers;
 import com.fasterxml.jackson.databind.ser.std.ClassSerializer;
 import com.fasterxml.jackson.databind.ser.std.NumberSerializer;
 import com.fasterxml.jackson.databind.type.SimpleType;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
+import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 import org.junit.Before;
 import org.junit.Test;
 
 import org.springframework.beans.FatalBeanException;
 
+import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
 /**
@@ -60,6 +70,7 @@ import static org.junit.Assert.*;
  *
  * @author <a href="mailto:dmitry.katsubo@gmail.com">Dmitry Katsubo</a>
  * @author Brian Clozel
+ * @author Sebastien Deleuze
  */
 public class Jackson2ObjectMapperFactoryBeanTests {
 
@@ -187,7 +198,7 @@ public class Jackson2ObjectMapperFactoryBeanTests {
 	public void timeZoneStringSetter() {
 		String zoneId = "Europe/Paris";
 
-		this.factory.setTimeZone(zoneId);
+		this.factory.setTimeZone(TimeZone.getTimeZone(zoneId));
 		this.factory.afterPropertiesSet();
 
 		TimeZone timeZone = TimeZone.getTimeZone(zoneId);
@@ -199,7 +210,7 @@ public class Jackson2ObjectMapperFactoryBeanTests {
 	public void wrongTimeZoneStringSetter() {
 		String zoneId = "foo";
 
-		this.factory.setTimeZone(zoneId);
+		this.factory.setTimeZone(TimeZone.getTimeZone(zoneId));
 		this.factory.afterPropertiesSet();
 
 		TimeZone timeZone = TimeZone.getTimeZone("GMT");
@@ -213,12 +224,47 @@ public class Jackson2ObjectMapperFactoryBeanTests {
 		SimpleModule module = new SimpleModule();
 		module.addSerializer(Integer.class, serializer1);
 
-		this.factory.setModules(Arrays.asList(new Module[] {module}));
+		this.factory.setModules(Arrays.asList(new Module[]{module}));
 		this.factory.afterPropertiesSet();
 		ObjectMapper objectMapper = this.factory.getObject();
 
 		Serializers serializers = getSerializerFactoryConfig(objectMapper).serializers().iterator().next();
 		assertTrue(serializers.findSerializer(null, SimpleType.construct(Integer.class), null) == serializer1);
+	}
+
+	@Test
+	public void defaultModules() throws JsonProcessingException, UnsupportedEncodingException {
+		this.factory.afterPropertiesSet();
+		ObjectMapper objectMapper = this.factory.getObject();
+
+		Long timestamp = 1322903730000L;
+		DateTime dateTime = new DateTime(timestamp, DateTimeZone.UTC);
+		assertEquals(timestamp.toString(), new String(objectMapper.writeValueAsBytes(dateTime), "UTF-8"));
+	}
+
+	@Test // SPR-12634
+	public void customizeDefaultModulesWithModuleClass() throws JsonProcessingException, UnsupportedEncodingException {
+		this.factory.setModulesToInstall(CustomIntegerModule.class);
+		this.factory.afterPropertiesSet();
+		ObjectMapper objectMapper = this.factory.getObject();
+
+		DateTime dateTime = new DateTime(1322903730000L, DateTimeZone.UTC);
+		assertEquals("1322903730000", new String(objectMapper.writeValueAsBytes(dateTime), "UTF-8"));
+		assertThat(new String(objectMapper.writeValueAsBytes(new Integer(4)), "UTF-8"), containsString("customid"));
+	}
+
+	@Test // SPR-12634
+	public void customizeDefaultModulesWithSerializer() throws JsonProcessingException, UnsupportedEncodingException {
+		Map<Class<?>, JsonSerializer<?>> serializers = new HashMap<>();
+		serializers.put(Integer.class, new CustomIntegerSerializer());
+
+		this.factory.setSerializersByType(serializers);
+		this.factory.afterPropertiesSet();
+		ObjectMapper objectMapper = this.factory.getObject();
+
+		DateTime dateTime = new DateTime(1322903730000L, DateTimeZone.UTC);
+		assertEquals("1322903730000", new String(objectMapper.writeValueAsBytes(dateTime), "UTF-8"));
+		assertThat(new String(objectMapper.writeValueAsBytes(new Integer(4)), "UTF-8"), containsString("customid"));
 	}
 
 	@Test
@@ -283,6 +329,7 @@ public class Jackson2ObjectMapperFactoryBeanTests {
 		JsonSerializer<Class<?>> serializer1 = new ClassSerializer();
 		JsonSerializer<Number> serializer2 = new NumberSerializer();
 
+		factory.setModules(new ArrayList<>()); // Disable well-known modules detection
 		factory.setSerializers(serializer1);
 		factory.setSerializersByType(Collections.<Class<?>, JsonSerializer<?>> singletonMap(Boolean.class, serializer2));
 		factory.setDeserializersByType(deserializers);
@@ -348,6 +395,38 @@ public class Jackson2ObjectMapperFactoryBeanTests {
 		assertNotNull(this.factory.getObject());
 		assertTrue(this.factory.isSingleton());
 		assertEquals(XmlMapper.class, this.factory.getObjectType());
+	}
+
+
+	public static class CustomIntegerModule extends Module {
+
+		@Override
+		public String getModuleName() {
+			return this.getClass().getSimpleName();
+		}
+
+		@Override
+		public Version version() {
+			return Version.unknownVersion();
+		}
+
+		@Override
+		public void setupModule(SetupContext context) {
+			SimpleSerializers serializers = new SimpleSerializers();
+			serializers.addSerializer(Integer.class, new CustomIntegerSerializer());
+			context.addSerializers(serializers);
+		}
+	}
+
+
+	public static class CustomIntegerSerializer extends JsonSerializer<Integer> {
+
+		@Override
+		public void serialize(Integer value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
+			gen.writeStartObject();
+			gen.writeNumberField("customid", value);
+			gen.writeEndObject();
+		}
 	}
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -210,8 +210,127 @@ public class CodeFlow implements Opcodes {
 	}
 
 	/**
+	 * For numbers, use the appropriate method on the number to convert it to the primitive type requested.
+	 * @param mv the method visitor into which instructions should be inserted
+	 * @param targetDescriptor the primitive type desired as output
+	 * @param stackDescriptor the descriptor of the type on top of the stack
+	 */
+	public static void insertUnboxNumberInsns(MethodVisitor mv, char targetDescriptor, String stackDescriptor) {
+		switch (targetDescriptor) {
+			case 'D':
+				if (stackDescriptor.equals("Ljava/lang/Object")) {
+					mv.visitTypeInsn(CHECKCAST, "java/lang/Number");
+				}
+				mv.visitMethodInsn(INVOKEVIRTUAL, "java/lang/Number", "doubleValue", "()D", false);
+				break;				
+			case 'F':
+				if (stackDescriptor.equals("Ljava/lang/Object")) {
+					mv.visitTypeInsn(CHECKCAST, "java/lang/Number");
+				}
+				mv.visitMethodInsn(INVOKEVIRTUAL, "java/lang/Number", "floatValue", "()F", false);
+				break;
+			case 'J':
+				if (stackDescriptor.equals("Ljava/lang/Object")) {
+					mv.visitTypeInsn(CHECKCAST, "java/lang/Number");
+				}
+				mv.visitMethodInsn(INVOKEVIRTUAL, "java/lang/Number", "longValue", "()J", false);
+				break;
+			case 'I':
+				if (stackDescriptor.equals("Ljava/lang/Object")) {
+					mv.visitTypeInsn(CHECKCAST, "java/lang/Number");
+				}
+				mv.visitMethodInsn(INVOKEVIRTUAL, "java/lang/Number", "intValue", "()I", false);
+				break;
+			// does not handle Z, B, C, S
+			default:
+				throw new IllegalArgumentException("Unboxing should not be attempted for descriptor '" + targetDescriptor + "'");
+		}
+	}
+	
+	/**
+	 * Insert any necessary numeric conversion bytecodes based upon what is on the stack and the desired target type.
+	 * @param mv the method visitor into which instructions should be placed
+	 * @param targetDescriptor the (primitive) descriptor of the target type
+	 * @param stackDescriptor the descriptor of the operand on top of the stack
+	 */
+	public static void insertAnyNecessaryTypeConversionBytecodes(MethodVisitor mv, char targetDescriptor, String stackDescriptor) {
+		if (CodeFlow.isPrimitive(stackDescriptor)) {
+			char stackTop = stackDescriptor.charAt(0);
+			if (stackTop=='I' || stackTop=='B' || stackTop=='S' || stackTop=='C') {
+				if (targetDescriptor=='D') {
+					mv.visitInsn(I2D);
+				}
+				else if (targetDescriptor=='F') {
+					mv.visitInsn(I2F);
+				}
+				else if (targetDescriptor=='J') {
+					mv.visitInsn(I2L);
+				}
+				else if (targetDescriptor=='I') {
+					// nop
+				}
+				else {
+					throw new IllegalStateException("cannot get from "+stackTop+" to "+targetDescriptor);
+				}
+			}
+			else if (stackTop=='J') {
+				if (targetDescriptor=='D') {
+					mv.visitInsn(L2D);
+				}
+				else if (targetDescriptor=='F') {
+					mv.visitInsn(L2F);
+				}
+				else if (targetDescriptor=='J') {
+					// nop
+				}
+				else if (targetDescriptor=='I') {
+					mv.visitInsn(L2I);
+				}
+				else {
+					throw new IllegalStateException("cannot get from "+stackTop+" to "+targetDescriptor);
+				}
+			}
+			else if (stackTop=='F') {
+				if (targetDescriptor=='D') {
+					mv.visitInsn(F2D);
+				}
+				else if (targetDescriptor=='F') {
+					// nop
+				}
+				else if (targetDescriptor=='J') {
+					mv.visitInsn(F2L);
+				}
+				else if (targetDescriptor=='I') {
+					mv.visitInsn(F2I);
+				}
+				else {
+					throw new IllegalStateException("cannot get from "+stackTop+" to "+targetDescriptor);
+				}
+			}
+			else if (stackTop=='D') {
+				if (targetDescriptor=='D') {
+					// nop
+				}
+				else if (targetDescriptor=='F') {
+					mv.visitInsn(D2F);
+				}
+				else if (targetDescriptor=='J') {
+					mv.visitInsn(D2L);
+				}
+				else if (targetDescriptor=='I') {
+					mv.visitInsn(D2I);
+				}
+				else {
+					throw new IllegalStateException("cannot get from "+stackDescriptor+" to "+targetDescriptor);
+				}
+			}
+		}
+	}
+
+	
+	/**
 	 * Create the JVM signature descriptor for a method. This consists of the descriptors
-	 * for the constructor parameters surrounded with parentheses, followed by the
+	 * for the method parameters surrounded with parentheses, followed by the
 	 * descriptor for the return type. Note the descriptors here are JVM descriptors,
 	 * unlike the other descriptor forms the compiler is using which do not include the
 	 * trailing semicolon.
@@ -232,11 +351,12 @@ public class CodeFlow implements Opcodes {
 
 	/**
 	 * Create the JVM signature descriptor for a constructor. This consists of the
-	 * descriptors for the constructor parameters surrounded with parentheses. Note the
+	 * descriptors for the constructor parameters surrounded with parentheses, followed by
+	 * the descriptor for the return type, which is always "V". Note the
 	 * descriptors here are JVM descriptors, unlike the other descriptor forms the
 	 * compiler is using which do not include the trailing semicolon.
 	 * @param ctor the constructor
-	 * @return a String signature descriptor (e.g. "(ILjava/lang/String;)")
+	 * @return a String signature descriptor (e.g. "(ILjava/lang/String;)V")
 	 */
 	public static String createSignatureDescriptor(Constructor<?> ctor) {
 		Class<?>[] params = ctor.getParameterTypes();
@@ -832,6 +952,23 @@ public class CodeFlow implements Opcodes {
 			else {
 				mv.visitTypeInsn(ANEWARRAY, arraytype.substring(1));
 			}
+		}
+	}
+
+	/**
+	 * For use in mathematical operators, handles converting from a (possibly boxed) number on the stack to a primitive numeric type.
+	 * For example, from a Integer to a double, just need to call 'Number.doubleValue()' but from an int to a double, need to use
+	 * the bytecode 'i2d'.
+	 * @param mv the method visitor when instructions should be appended
+	 * @param stackDescriptor a descriptor of the operand on the stack
+	 * @param targetDescriptor a primitive type descriptor
+	 */
+	public static void insertNumericUnboxOrPrimitiveTypeCoercion(MethodVisitor mv,
+			String stackDescriptor, char targetDecriptor) {
+		if (!CodeFlow.isPrimitive(stackDescriptor)) {
+			CodeFlow.insertUnboxNumberInsns(mv, targetDecriptor, stackDescriptor);
+		} else {
+			CodeFlow.insertAnyNecessaryTypeConversionBytecodes(mv, targetDecriptor, stackDescriptor);
 		}
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,8 +36,8 @@ public class JavaVersionTests {
 
 	@Test
 	public void isAtLeast() throws Exception {
-		assertTrue(JavaVersion.JAVA_16.isAtLeast(JavaVersion.JAVA_15));
 		assertTrue(JavaVersion.JAVA_16.isAtLeast(JavaVersion.JAVA_16));
 		assertFalse(JavaVersion.JAVA_16.isAtLeast(JavaVersion.JAVA_17));
 	}
+
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,6 +41,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.util.concurrent.SettableListenableFuture;
 
+
 /**
  * {@link org.springframework.http.client.ClientHttpRequest} implementation that uses
  * Netty 4 to execute requests.
@@ -48,6 +49,7 @@ import org.springframework.util.concurrent.SettableListenableFuture;
  * <p>Created via the {@link Netty4ClientHttpRequestFactory}.
  *
  * @author Arjen Poutsma
+ * @author Rossen Stoyanchev
  * @since 4.1.2
  */
 class Netty4ClientHttpRequest extends AbstractAsyncClientHttpRequest implements ClientHttpRequest {
@@ -61,11 +63,11 @@ class Netty4ClientHttpRequest extends AbstractAsyncClientHttpRequest implements 
 	private final ByteBufOutputStream body;
 
 
-	public Netty4ClientHttpRequest(Bootstrap bootstrap, URI uri, HttpMethod method, int maxRequestSize) {
+	public Netty4ClientHttpRequest(Bootstrap bootstrap, URI uri, HttpMethod method) {
 		this.bootstrap = bootstrap;
 		this.uri = uri;
 		this.method = method;
-		this.body = new ByteBufOutputStream(Unpooled.buffer(maxRequestSize));
+		this.body = new ByteBufOutputStream(Unpooled.buffer(1024));
 	}
 
 

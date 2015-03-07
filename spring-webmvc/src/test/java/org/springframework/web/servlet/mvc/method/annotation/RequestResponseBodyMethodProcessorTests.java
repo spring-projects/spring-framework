@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,8 +59,8 @@ import org.springframework.web.servlet.view.json.MappingJackson2JsonView;
 import static org.junit.Assert.*;
 
 /**
- * Test fixture for a {@link RequestResponseBodyMethodProcessor} with actual delegation
- * to HttpMessageConverter instances.
+ * Test fixture for a {@link RequestResponseBodyMethodProcessor} with
+ * actual delegation to {@link HttpMessageConverter} instances.
  *
  * <p>Also see {@link RequestResponseBodyMethodProcessorMockTests}.
  *
@@ -177,9 +177,7 @@ public class RequestResponseBodyMethodProcessorTests {
 		assertEquals("foobarbaz", result);
 	}
 
-	// SPR-9942
-
-	@Test(expected = HttpMessageNotReadableException.class)
+	@Test(expected = HttpMessageNotReadableException.class)  // SPR-9942
 	public void resolveArgumentRequiredNoContent() throws Exception {
 		this.servletRequest.setContent(new byte[0]);
 		this.servletRequest.setContentType("text/plain");
@@ -189,9 +187,7 @@ public class RequestResponseBodyMethodProcessorTests {
 		processor.resolveArgument(paramString, mavContainer, webRequest, binderFactory);
 	}
 
-	// SPR-9964
-
-	@Test
+	@Test  // SPR-9964
 	public void resolveArgumentTypeVariable() throws Exception {
 		Method method = MyParameterizedController.class.getMethod("handleDto", Identifiable.class);
 		HandlerMethod handlerMethod = new HandlerMethod(new MySimpleParameterizedController(), method);
@@ -211,9 +207,7 @@ public class RequestResponseBodyMethodProcessorTests {
 		assertEquals("Jad", result.getName());
 	}
 
-	// SPR-11225
-
-	@Test
+	@Test  // SPR-11225
 	public void resolveArgumentTypeVariableWithNonGenericConverter() throws Exception {
 		Method method = MyParameterizedController.class.getMethod("handleDto", Identifiable.class);
 		HandlerMethod handlerMethod = new HandlerMethod(new MySimpleParameterizedController(), method);
@@ -235,9 +229,7 @@ public class RequestResponseBodyMethodProcessorTests {
 		assertEquals("Jad", result.getName());
 	}
 
-	// SPR-9160
-
-	@Test
+	@Test  // SPR-9160
 	public void handleReturnValueSortByQuality() throws Exception {
 		this.servletRequest.addHeader("Accept", "text/plain; q=0.5, application/json");
 
@@ -346,9 +338,7 @@ public class RequestResponseBodyMethodProcessorTests {
 		assertFalse(content.contains("\"withoutView\":\"without\""));
 	}
 
-	// SPR-12149
-
-	@Test
+	@Test  // SPR-12149
 	public void jacksonJsonViewWithResponseBodyAndXmlMessageConverter() throws Exception {
 		Method method = JacksonViewController.class.getMethod("handleResponseBody");
 		HandlerMethod handlerMethod = new HandlerMethod(new JacksonViewController(), method);

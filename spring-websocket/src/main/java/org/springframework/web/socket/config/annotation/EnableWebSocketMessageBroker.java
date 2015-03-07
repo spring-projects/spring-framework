@@ -34,13 +34,13 @@ import org.springframework.context.annotation.Import;
  * </pre>
  * <p>
  * Customize the imported configuration by implementing the
- * {@link WebSocketMessageBrokerConfigurer} interface or more likely the convenient
- * base class {@link AbstractWebSocketMessageBrokerConfigurer}:
+ * {@link WebSocketMessageBrokerConfigurer} interface or more likely extend the
+ * convenient base class {@link AbstractWebSocketMessageBrokerConfigurer}:
  *
  * <pre class="code">
  * &#064;Configuration
  * &#064;EnableWebSocketMessageBroker
- * public class MyConfiguration implements extends AbstractWebSocketMessageBrokerConfigurer {
+ * public class MyConfiguration extends AbstractWebSocketMessageBrokerConfigurer {
  *
  * 	&#064;Override
  * 	public void registerStompEndpoints(StompEndpointRegistry registry) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ import org.springframework.cache.annotation.AnnotationCacheOperationSource;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
 import org.springframework.cache.concurrent.ConcurrentMapCache;
+import org.springframework.context.expression.AnnotatedElementKey;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.util.ReflectionUtils;
@@ -79,7 +80,7 @@ public class ExpressionEvaluatorTests {
 
 		Iterator<CacheOperation> it = ops.iterator();
 
-		MethodCacheKey key = new MethodCacheKey(method, AnnotatedClass.class);
+		AnnotatedElementKey key = new AnnotatedElementKey(method, AnnotatedClass.class);
 
 		Object keyA = eval.key(it.next().getKey(), key, evalCtx);
 		Object keyB = eval.key(it.next().getKey(), key, evalCtx);

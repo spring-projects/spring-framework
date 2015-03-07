@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.test.web.servlet.result;
 
 import java.util.Enumeration;
 import java.util.Map;
+
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.http.HttpHeaders;
@@ -127,8 +128,15 @@ public class PrintingResultHandler implements ResultHandler {
 
 	protected void printAsyncResult(MvcResult result) throws Exception {
 		HttpServletRequest request = result.getRequest();
-		this.printer.printValue("Was async started", request.isAsyncStarted());
-		this.printer.printValue("Async result", (request.isAsyncStarted() ? result.getAsyncResult(0) : null));
+		this.printer.printValue("Async started", request.isAsyncStarted());
+		Object asyncResult = null;
+		try {
+			asyncResult = result.getAsyncResult(0);
+		}
+		catch (IllegalStateException ex) {
+			// Not set
+		}
+		this.printer.printValue("Async result", asyncResult);
 	}
 
 	/** Print the handler */

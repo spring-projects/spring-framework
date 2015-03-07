@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,8 +17,6 @@
 package org.springframework.web.socket.sockjs.transport;
 
 import java.io.IOException;
-import java.net.InetSocketAddress;
-import java.security.Principal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -194,14 +192,18 @@ public class TransportHandlingSockJsService extends AbstractSockJsService implem
 
 		TransportType transportType = TransportType.fromValue(transport);
 		if (transportType == null) {
-			logger.error("Unknown transport type for " + request.getURI());
+			if (logger.isWarnEnabled()) {
+				logger.warn("Unknown transport type for " + request.getURI());
+			}
 			response.setStatusCode(HttpStatus.NOT_FOUND);
 			return;
 		}
 
 		TransportHandler transportHandler = this.handlers.get(transportType);
 		if (transportHandler == null) {
-			logger.error("No TransportHandler for " + request.getURI());
+			if (logger.isWarnEnabled()) {
+				logger.warn("No TransportHandler for " + request.getURI());
+			}
 			response.setStatusCode(HttpStatus.NOT_FOUND);
 			return;
 		}
@@ -287,7 +289,9 @@ public class TransportHandlingSockJsService extends AbstractSockJsService implem
 	@Override
 	protected boolean validateRequest(String serverId, String sessionId, String transport) {
 		if (!getAllowedOrigins().contains("*") && !TransportType.fromValue(transport).supportsOrigin()) {
-			logger.error("Origin check has been enabled, but this transport does not support it");
+			if (logger.isWarnEnabled()) {
+				logger.warn("Origin check has been enabled, but transport " + transport + " does not support it");
+			}
 			return false;
 		}
 		return super.validateRequest(serverId, sessionId, transport);

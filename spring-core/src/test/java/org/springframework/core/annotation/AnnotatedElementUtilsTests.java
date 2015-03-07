@@ -22,8 +22,10 @@ import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import java.lang.reflect.Method;
 import java.util.Arrays;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import org.springframework.util.MultiValueMap;
@@ -123,6 +125,35 @@ public class AnnotatedElementUtilsTests {
 			attributes.getBoolean("readOnly"));
 	}
 
+	// SPR-12738
+
+	@Test
+	public void getAnnotationAttributesInheritedFromInterface() {
+		String name = Transactional.class.getName();
+		AnnotationAttributes attributes = getAnnotationAttributes(ConcreteClassWithInheritedAnnotation.class, name);
+//		assertNotNull(attributes);
+	}
+
+	// SPR-12738
+
+	@Test
+	public void getAnnotationAttributesInheritedFromAbstractMethod() throws NoSuchMethodException {
+		String name = Transactional.class.getName();
+		Method method = ConcreteClassWithInheritedAnnotation.class.getMethod("handle");
+		AnnotationAttributes attributes = getAnnotationAttributes(method, name);
+//		assertNotNull(attributes);
+	}
+
+	// SPR-12738
+
+	@Test
+	public void getAnnotationAttributesInheritedFromParameterizedMethod() throws NoSuchMethodException {
+		String name = Transactional.class.getName();
+		Method method = ConcreteClassWithInheritedAnnotation.class.getMethod("handleParameterized", String.class);
+		AnnotationAttributes attributes = getAnnotationAttributes(ConcreteClassWithInheritedAnnotation.class, name);
+//		assertNotNull(attributes);
+	}
+
 
 	// -------------------------------------------------------------------------
 
@@ -154,7 +185,7 @@ public class AnnotatedElementUtilsTests {
 	// -------------------------------------------------------------------------
 
 	@Retention(RetentionPolicy.RUNTIME)
-	@Target(ElementType.TYPE)
+	@Target({ElementType.TYPE, ElementType.METHOD})
 	@Documented
 	@Inherited
 	@interface Transactional {
@@ -224,6 +255,31 @@ public class AnnotatedElementUtilsTests {
 	@TxComposed1
 	@TxComposed2
 	static class TxFromMultipleComposedAnnotations {
+	}
+
+	@Transactional
+	static interface InterfaceWithInheritedAnnotation {
+	}
+
+	static abstract class AbstractClassWithInheritedAnnotation<T> implements InterfaceWithInheritedAnnotation {
+
+		@Transactional
+		public abstract void handle();
+
+		@Transactional
+		public void handleParameterized(T t) {
+		}
+	}
+
+	static class ConcreteClassWithInheritedAnnotation extends AbstractClassWithInheritedAnnotation<String> {
+
+		@Override
+		public void handle() {
+		}
+
+		@Override
+		public void handleParameterized(String s) {
+		}
 	}
 
 }

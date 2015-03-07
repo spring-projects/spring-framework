@@ -213,6 +213,12 @@ import java.util.concurrent.Callable;
  * <li>A {@link org.springframework.util.concurrent.ListenableFuture}
  * which the application uses to produce a return value in a separate
  * thread of its own choosing, as an alternative to returning a Callable.
+ * <li>A {@link org.springframework.web.servlet.mvc.method.annotation.ResponseBodyEmitter}
+ * can be used to write multiple objects to the response asynchronously;
+ * also supported as the body within {@code ResponseEntity}.</li>
+ * <li>An {@link org.springframework.web.servlet.mvc.method.annotation.SseEmitter}
+ * can be used to write Server-Sent Events to the response asynchronously;
+ * also supported as the body within {@code ResponseEntity}.</li>
  * <li>{@code void} if the method handles the response itself (by
  * writing the response content directly, declaring an argument of type
  * {@link javax.servlet.ServletResponse} / {@link javax.servlet.http.HttpServletResponse}

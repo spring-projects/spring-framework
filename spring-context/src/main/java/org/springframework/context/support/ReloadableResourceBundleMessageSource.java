@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -345,7 +345,7 @@ public class ReloadableResourceBundleMessageSource extends AbstractMessageSource
 		if (mergedHolder != null) {
 			return mergedHolder;
 		}
-		Properties mergedProps = new Properties();
+		Properties mergedProps = newProperties();
 		mergedHolder = new PropertiesHolder(mergedProps, -1);
 		for (int i = this.basenames.length - 1; i >= 0; i--) {
 			List<String> filenames = calculateAllFilenames(this.basenames[i], locale);
@@ -565,7 +565,7 @@ public class ReloadableResourceBundleMessageSource extends AbstractMessageSource
 	 */
 	protected Properties loadProperties(Resource resource, String filename) throws IOException {
 		InputStream is = resource.getInputStream();
-		Properties props = new Properties();
+		Properties props = newProperties();
 		try {
 			if (resource.getFilename().endsWith(XML_SUFFIX)) {
 				if (logger.isDebugEnabled()) {
@@ -599,6 +599,19 @@ public class ReloadableResourceBundleMessageSource extends AbstractMessageSource
 		finally {
 			is.close();
 		}
+	}
+
+	/**
+	 * Template method for creating a plain new {@link Properties} instance.
+	 * The default implementation simply calls {@link Properties#Properties()}.
+	 * <p>Allows for returning a custom {@link Properties} extension in subclasses.
+	 * Overriding methods should just instantiate a custom {@link Properties} subclass,
+	 * with no further initialization or population to be performed at that point.
+	 * @return a plain Properties instance
+	 * @since 4.2
+	 */
+	protected Properties newProperties() {
+		return new Properties();
 	}
 
 

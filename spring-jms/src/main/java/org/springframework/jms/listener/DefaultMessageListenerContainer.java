@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -107,9 +107,11 @@ import org.springframework.util.backoff.FixedBackOff;
  * <p><b>It is strongly recommended to either set {@link #setSessionTransacted
  * "sessionTransacted"} to "true" or specify an external {@link #setTransactionManager
  * "transactionManager"}.</b> See the {@link AbstractMessageListenerContainer}
- * javadoc for details on acknowledge modes and native transaction options,
- * as well as the {@link AbstractPollingMessageListenerContainer} javadoc
- * for details on configuring an external transaction manager.
+ * javadoc for details on acknowledge modes and native transaction options, as
+ * well as the {@link AbstractPollingMessageListenerContainer} javadoc for details
+ * on configuring an external transaction manager. Note that for the default
+ * "AUTO_ACKNOWLEDGE" mode, this container applies automatic message acknowledgment
+ * before listener execution, with no redelivery in case of an exception.
  *
  * @author Juergen Hoeller
  * @since 2.0
