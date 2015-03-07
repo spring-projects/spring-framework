@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,6 +37,7 @@ import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import org.hamcrest.Matchers;
+import org.joda.time.LocalDate;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -52,6 +53,7 @@ import org.springframework.core.convert.ConversionService;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.format.annotation.DateTimeFormat.ISO;
+import org.springframework.format.annotation.NumberFormat;
 import org.springframework.format.support.FormattingConversionServiceFactoryBean;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;
@@ -165,7 +167,7 @@ public class MvcNamespaceTests {
 		appContext.getServletContext().setAttribute(attributeName, appContext);
 
 		handler = new TestController();
-		Method method = TestController.class.getMethod("testBind", Date.class, TestBean.class, BindingResult.class);
+		Method method = TestController.class.getMethod("testBind", Date.class, Double.class, TestBean.class, BindingResult.class);
 		handlerMethod = new InvocableHandlerMethod(handler, method);
 	}
 
@@ -211,6 +213,7 @@ public class MvcNamespaceTests {
 		// default web binding initializer behavior test
 		request = new MockHttpServletRequest("GET", "/");
 		request.addParameter("date", "2009-10-31");
+		request.addParameter("percent", "99.99%");
 		MockHttpServletResponse response = new MockHttpServletResponse();
 
 		HandlerExecutionChain chain = mapping.getHandler(request);
@@ -222,6 +225,8 @@ public class MvcNamespaceTests {
 
 		adapter.handle(request, response, handlerMethod);
 		assertTrue(handler.recordedValidationError);
+		assertEquals(LocalDate.parse("2009-10-31").toDate(), handler.date);
+		assertEquals(Double.valueOf(0.9999),handler.percent);
 
 		CompositeUriComponentsContributor uriComponentsContributor = this.appContext.getBean(
 				MvcUriComponentsBuilder.MVC_URI_COMPONENTS_CONTRIBUTOR_BEAN_NAME,
@@ -841,6 +846,12 @@ public class MvcNamespaceTests {
 	public @interface IsoDate {
 	}
 
+	@NumberFormat(style = NumberFormat.Style.PERCENT)
+	@Target({ElementType.PARAMETER})
+	@Retention(RetentionPolicy.RUNTIME)
+	public @interface PercentNumber {
+	}
+
 	@Validated(MyGroup.class)
 	@Target({ElementType.PARAMETER})
 	@Retention(RetentionPolicy.RUNTIME)
@@ -850,10 +861,14 @@ public class MvcNamespaceTests {
 	@Controller
 	public static class TestController {
 
+		private Date date;
+		private Double percent;
 		private boolean recordedValidationError;
 
 		@RequestMapping
-		public void testBind(@RequestParam @IsoDate Date date, @MyValid TestBean bean, BindingResult result) {
+		public void testBind(@RequestParam @IsoDate Date date, @RequestParam(required = false) @PercentNumber Double percent, @MyValid TestBean bean, BindingResult result) {
+			this.date = date;
+			this.percent = percent;
 			this.recordedValidationError = (result.getErrorCount() == 1);
 		}
 	}
