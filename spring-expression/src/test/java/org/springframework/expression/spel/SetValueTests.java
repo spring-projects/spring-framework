@@ -75,12 +75,12 @@ public class SetValueTests extends AbstractExpressionTests {
 		setValue("arrayContainer.bytes[1]", (byte) 3);
 		setValue("arrayContainer.chars[1]", (char) 3);
 	}
-	
+
 	@Test
 	public void testIsWritableForInvalidExpressions_SPR10610() {
 		Expression e = null;
 		StandardEvaluationContext lContext = TestScenarioCreator.getTestEvaluationContext();
-		
+
 		// PROPERTYORFIELDREFERENCE
 		// Non existent field (or property):
 		e = parser.parseExpression("arrayContainer.wibble");
@@ -95,7 +95,7 @@ public class SetValueTests extends AbstractExpressionTests {
 //					at org.springframework.expression.spel.ast.PropertyOrFieldReference.readProperty(PropertyOrFieldReference.java:225)
 			// success!
 		}
-		
+
 		// VARIABLE
 		// the variable does not exist (but that is OK, we should be writable)
 		e = parser.parseExpression("#madeup1");
@@ -103,7 +103,7 @@ public class SetValueTests extends AbstractExpressionTests {
 
 		e = parser.parseExpression("#madeup2.bar"); // compound expression
 		assertFalse("Should not be writable!",e.isWritable(lContext));
-		
+
 		// INDEXER
 		// non existent indexer (wibble made up)
 		e = parser.parseExpression("arrayContainer.wibble[99]");
@@ -113,7 +113,7 @@ public class SetValueTests extends AbstractExpressionTests {
 		} catch (SpelEvaluationException see) {
 			// success!
 		}
-		
+
 		// non existent indexer (index via a string)
 		e = parser.parseExpression("arrayContainer.ints['abc']");
 		try {

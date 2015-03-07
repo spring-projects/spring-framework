@@ -120,7 +120,7 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 		}
 		return false;
 	}
-	
+
 	public Member getLastReadInvokerPair() {
 		return lastReadInvokerPair.member;
 	}
@@ -656,7 +656,7 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 		public void write(EvaluationContext context, Object target, String name, Object newValue) {
 			throw new UnsupportedOperationException("Should not be called on an OptimalPropertyAccessor");
 		}
-		
+
 		@Override
 		public boolean isCompilable() {
 			return (Modifier.isPublic(this.member.getModifiers()) &&

@@ -78,7 +78,7 @@ public class MapTests extends AbstractExpressionTests {
 	public void testInlineMapWithFunkyKeys() {
 		evaluate("{#root.name:true}","{Nikola Tesla=true}",LinkedHashMap.class);
 	}
-	
+
 	@Test
 	public void testInlineMapError() {
 		parseAndCheckError("{key:'abc'", SpelMessage.OOD);

@@ -56,7 +56,7 @@ public class CodeFlow implements Opcodes {
 	 * will be called after the main evaluation function has finished being generated.
 	 */
 	private List<FieldAdder> fieldAdders = null;
-	
+
 	/**
 	 * As SpEL ast nodes are called to generate code for the main evaluation method
 	 * they can register to add code to a static initializer in the class. Any
@@ -64,19 +64,19 @@ public class CodeFlow implements Opcodes {
 	 * has finished being generated.
 	 */
 	private List<ClinitAdder> clinitAdders = null;
-	
+
 	/**
 	 * Name of the class being generated. Typically used when generating code
 	 * that accesses freshly generated fields on the generated type.
 	 */
 	private String clazzName;
-	
+
 	/**
 	 * When code generation requires holding a value in a class level field, this
 	 * is used to track the next available field id (used as a name suffix).
 	 */
 	private int nextFieldId = 1;
-	
+
 	/**
 	 * When code generation requires an intermediate variable within a method,
 	 * this method records the next available variable (variable 0 is 'this').
@@ -222,7 +222,7 @@ public class CodeFlow implements Opcodes {
 					mv.visitTypeInsn(CHECKCAST, "java/lang/Number");
 				}
 				mv.visitMethodInsn(INVOKEVIRTUAL, "java/lang/Number", "doubleValue", "()D", false);
-				break;				
+				break;		
 			case 'F':
 				if (stackDescriptor.equals("Ljava/lang/Object")) {
 					mv.visitTypeInsn(CHECKCAST, "java/lang/Number");
@@ -246,7 +246,7 @@ public class CodeFlow implements Opcodes {
 				throw new IllegalArgumentException("Unboxing should not be attempted for descriptor '" + targetDescriptor + "'");
 		}
 	}
-	
+
 	/**
 	 * Insert any necessary numeric conversion bytecodes based upon what is on the stack and the desired target type.
 	 * @param mv the method visitor into which instructions should be placed
@@ -327,7 +327,7 @@ public class CodeFlow implements Opcodes {
 		}
 	}
 
-	
+
 	/**
 	 * Create the JVM signature descriptor for a method. This consists of the descriptors
 	 * for the method parameters surrounded with parentheses, followed by the
@@ -777,7 +777,7 @@ public class CodeFlow implements Opcodes {
 		}
 		return descriptors;
 	}
-	
+
 	/**
 	 * Called after the main expression evaluation method has been generated, this
 	 * method will callback any registered FieldAdders or ClinitAdders to add any
@@ -815,7 +815,7 @@ public class CodeFlow implements Opcodes {
 	}
 
 	/**
-	 * Register a ClinitAdder which will add code to the static 
+	 * Register a ClinitAdder which will add code to the static
 	 * initializer in the generated class to support the code
 	 * produced by an ast nodes primary generateCode() method.
 	 */
@@ -837,11 +837,11 @@ public class CodeFlow implements Opcodes {
 	public String getClassname() {
 		return clazzName;
 	}
-	
+
 	public interface FieldAdder {
 		public void generateField(ClassWriter cw, CodeFlow codeflow);
 	}
-	
+
 	public interface ClinitAdder {
 		public void generateCode(MethodVisitor mv, CodeFlow codeflow);
 	}
@@ -863,11 +863,11 @@ public class CodeFlow implements Opcodes {
 		}
 		else {
 			mv.visitLdcInsn(value);
-		}		
+		}
 	}
 
 	/**
-	 * Produce appropriate bytecode to store a stack item in an array. The 
+	 * Produce appropriate bytecode to store a stack item in an array. The
 	 * instruction to use varies depending on whether the type
 	 * is a primitive or reference type.
 	 * @param mv where to insert the bytecode
@@ -901,7 +901,7 @@ public class CodeFlow implements Opcodes {
 	public static int arrayCodeFor(String arraytype) {
 		switch (arraytype.charAt(0)) {
 			case 'I': return T_INT;
-			case 'J': return T_LONG; 
+			case 'J': return T_LONG;
 			case 'F': return T_FLOAT;
 			case 'D': return T_DOUBLE;
 			case 'B': return T_BYTE;
@@ -925,9 +925,9 @@ public class CodeFlow implements Opcodes {
 		}
 		return false;
 	}
-	
+
 	/**
-	 * Produce the correct bytecode to build an array. The opcode to use and the 
+	 * Produce the correct bytecode to build an array. The opcode to use and the
 	 * signature to pass along with the opcode can vary depending on the signature
 	 * of the array type.
 	 * @param mv the methodvisitor into which code should be inserted
@@ -972,5 +972,5 @@ public class CodeFlow implements Opcodes {
 		}
 	}
 
-	
+
 }

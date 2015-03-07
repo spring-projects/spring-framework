@@ -709,7 +709,7 @@ public class MvcNamespaceTests {
 				(DeferredResultProcessingInterceptor[]) fieldAccessor.getPropertyValue("deferredResultInterceptors");
 		assertEquals(1, deferredResultInterceptors.length);
 	}
-	
+
 	@Test
 	public void testViewResolution() throws Exception {
 		loadBeanDefinitions("mvc-config-view-resolution.xml", 6);
