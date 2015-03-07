@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ import java.util.Properties;
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 import org.joda.time.format.DateTimeFormat;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -48,6 +49,7 @@ import org.springframework.core.convert.converter.Converter;
 import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.format.Formatter;
 import org.springframework.format.Printer;
+import org.springframework.format.annotation.NumberFormat;
 import org.springframework.format.datetime.joda.DateTimeParser;
 import org.springframework.format.datetime.joda.JodaDateTimeFormatAnnotationFormatterFactory;
 import org.springframework.format.datetime.joda.ReadablePartialPrinter;
@@ -58,6 +60,8 @@ import static org.junit.Assert.*;
 /**
  * @author Keith Donald
  * @author Juergen Hoeller
+ * @author Kazuki Shimizu
+ * @author Sam Brannen
  */
 public class FormattingConversionServiceTests {
 
@@ -101,6 +105,7 @@ public class FormattingConversionServiceTests {
 	}
 
 	@Test
+	@SuppressWarnings("resource")
 	public void testFormatFieldForValueInjection() {
 		AnnotationConfigApplicationContext ac = new AnnotationConfigApplicationContext();
 		ac.registerBeanDefinition("valueBean", new RootBeanDefinition(ValueBean.class));
@@ -111,6 +116,7 @@ public class FormattingConversionServiceTests {
 	}
 
 	@Test
+	@SuppressWarnings("resource")
 	public void testFormatFieldForValueInjectionUsingMetaAnnotations() {
 		AnnotationConfigApplicationContext ac = new AnnotationConfigApplicationContext();
 		RootBeanDefinition bd = new RootBeanDefinition(MetaValueBean.class);
@@ -120,12 +126,15 @@ public class FormattingConversionServiceTests {
 		ac.registerBeanDefinition("ppc", new RootBeanDefinition(PropertyPlaceholderConfigurer.class));
 		ac.refresh();
 		System.setProperty("myDate", "10-31-09");
+		System.setProperty("myNumber", "99.99%");
 		try {
 			MetaValueBean valueBean = ac.getBean(MetaValueBean.class);
 			assertEquals(new LocalDate(2009, 10, 31), new LocalDate(valueBean.date));
+			assertEquals(Double.valueOf(0.9999), valueBean.number);
 		}
 		finally {
 			System.clearProperty("myDate");
+			System.clearProperty("myNumber");
 		}
 	}
 
@@ -142,6 +151,7 @@ public class FormattingConversionServiceTests {
 	}
 
 	@Test
+	@SuppressWarnings("resource")
 	public void testFormatFieldForAnnotationWithPlaceholders() throws Exception {
 		GenericApplicationContext context = new GenericApplicationContext();
 		PropertyPlaceholderConfigurer ppc = new PropertyPlaceholderConfigurer();
@@ -157,6 +167,7 @@ public class FormattingConversionServiceTests {
 	}
 
 	@Test
+	@SuppressWarnings("resource")
 	public void testFormatFieldForAnnotationWithPlaceholdersAndFactoryBean() throws Exception {
 		GenericApplicationContext context = new GenericApplicationContext();
 		PropertyPlaceholderConfigurer ppc = new PropertyPlaceholderConfigurer();
@@ -336,13 +347,14 @@ public class FormattingConversionServiceTests {
 		public Date date;
 	}
 
-
 	public static class MetaValueBean {
 
 		@MyDateAnn
 		public Date date;
-	}
 
+		@MyNumberAnn
+		public Double number;
+	}
 
 	@Value("${myDate}")
 	@org.springframework.format.annotation.DateTimeFormat(pattern="MM-d-yy")
@@ -350,6 +362,11 @@ public class FormattingConversionServiceTests {
 	public static @interface MyDateAnn {
 	}
 
+	@Value("${myNumber}")
+	@NumberFormat(style = NumberFormat.Style.PERCENT)
+	@Retention(RetentionPolicy.RUNTIME)
+	public static @interface MyNumberAnn {
+	}
 
 	public static class Model {
 
@@ -368,7 +385,6 @@ public class FormattingConversionServiceTests {
 		}
 	}
 
-
 	public static class ModelWithPlaceholders {
 
 		@org.springframework.format.annotation.DateTimeFormat(style="${dateStyle}")
@@ -386,12 +402,10 @@ public class FormattingConversionServiceTests {
 		}
 	}
 
-
 	@org.springframework.format.annotation.DateTimeFormat(pattern="${datePattern}")
 	@Retention(RetentionPolicy.RUNTIME)
 	public static @interface MyDatePattern {
 	}
-
 
 	public static class NullReturningFormatter implements Formatter<Integer> {
 
@@ -407,11 +421,9 @@ public class FormattingConversionServiceTests {
 
 	}
 
-
 	@SuppressWarnings("serial")
 	public static class MyDate extends Date {
 	}
-
 
 	private static class ModelWithSubclassField {
 
