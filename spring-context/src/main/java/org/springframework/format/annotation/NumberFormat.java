@@ -24,7 +24,8 @@ import java.lang.annotation.Target;
 
 /**
  * Declares that a field should be formatted as a number.
- * Supports formatting by style or custom pattern string.
+ *
+ * <p>Supports formatting by style or custom pattern string.
  * Can be applied to any JDK {@code java.lang.Number} type.
  *
  * <p>For style-based formatting, set the {@link #style} attribute to be the desired {@link Style}.
@@ -41,7 +42,7 @@ import java.lang.annotation.Target;
  */
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
-@Target({ElementType.METHOD, ElementType.FIELD, ElementType.PARAMETER})
+@Target({ElementType.METHOD, ElementType.FIELD, ElementType.PARAMETER, ElementType.ANNOTATION_TYPE})
 public @interface NumberFormat {
 
 	/**
