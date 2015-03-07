@@ -2104,14 +2104,14 @@ as a <<beans-factory-scopes-singleton,singleton>>, the same instance of the `com
 bean is returned each time.
 
 [TIP]
-===
+====
 The interested reader may also find the `ServiceLocatorFactoryBean` (in the
 `org.springframework.beans.factory.config` package) to be of use. The approach used in
 ServiceLocatorFactoryBean is similar to that of another utility class,
 `ObjectFactoryCreatingFactoryBean`, but it allows you to specify your own lookup
 interface as opposed to a Spring-specific lookup interface. Consult the javadocs of
 these classes for additional information.
-===
+====
 
 
 [[beans-factory-arbitrary-method-replacement]]
@@ -2806,7 +2806,7 @@ Spring `InitializingBean` and `DisposableBean` interfaces. The container calls
 to perform certain actions upon initialization and destruction of your beans.
 
 [TIP]
-===
+====
 
 The JSR-250 `@PostConstruct` and `@PreDestroy` annotations are generally considered best
 practice for receiving lifecycle callbacks in a modern Spring application. Using these
@@ -2815,7 +2815,7 @@ details see <<beans-postconstruct-and-predestroy-annotations>>.
 
 If you don't want to use the JSR-250 annotations but you are still looking to remove
 coupling consider the use of init-method and destroy-method object definition metadata.
-===
+====
 
 Internally, the Spring Framework uses `BeanPostProcessor` implementations to process any
 callback interfaces it can find and call the appropriate methods. If you need custom
@@ -2952,7 +2952,7 @@ is exactly the same as:
 but does not couple the code to Spring.
 
 [TIP]
-===
+====
 The `destroy-method` attribute of a `<bean>` element can be assigned a special
 `(inferred)` value which instructs Spring to automatically detect a public `close` or
 `shutdown` method on the specific bean class. This special `(inferred)` value can also be
@@ -2960,7 +2960,7 @@ set on the `default-destroy-method` attribute of a `<beans>` element to apply th
 behavior to an entire set of beans (see
 <<beans-factory-lifecycle-default-init-destroy-methods>>). Note that this is the
 default behavior with Java config.
-===
+====
 
 [[beans-factory-lifecycle-default-init-destroy-methods]]
 ==== Default initialization and destroy methods
@@ -3819,7 +3819,7 @@ the following three supported integer values:
 Consult the `PropertyPlaceholderConfigurer` javadocs for more information.
 
 [TIP]
-===
+====
 
 You can use the `PropertyPlaceholderConfigurer` to substitute class names, which is
 sometimes useful when you have to pick a particular implementation class at runtime. For
@@ -3843,7 +3843,7 @@ example:
 If the class cannot be resolved at runtime to a valid class, resolution of the bean
 fails when it is about to be created, which is during the `preInstantiateSingletons()`
 phase of an `ApplicationContext` for a non-lazy-init bean.
-===
+====
 
 
 [[beans-factory-overrideconfigurer]]
@@ -4173,11 +4173,11 @@ The same applies for typed collections:
 ----
 
 [TIP]
-===
+====
 Your beans can implement the `org.springframework.core.Ordered` interface or either use
 the `@Order` or standard `@Priority` annotation if you want items in the array or list
 to be sorted into a specific order.
-===
+====
 
 
 Even typed Maps can be autowired as long as the expected key type is `String`. The Map
@@ -4367,7 +4367,7 @@ multiple `MovieCatalog` beans with the same qualifier value "action"; all of whi
 be injected into a `Set<MovieCatalog>` annotated with `@Qualifier("action")`.
 
 [TIP]
-===
+====
 
 If you intend to express annotation-driven injection by name, do not primarily use
 `@Autowired`, even if is technically capable of referring to a bean name through
@@ -4385,7 +4385,7 @@ narrowing through qualifier annotations at the parameter level. By contrast, `@R
 is supported only for fields and bean property setter methods with a single argument. As
 a consequence, stick with qualifiers if your injection target is a constructor or a
 multi-argument method.
-===
+====
 
 You can create your own custom qualifier annotations. Simply define an annotation and
 provide the `@Qualifier` annotation within your definition:
@@ -5008,12 +5008,12 @@ The following is an alternative using XML
 ----
 
 [TIP]
-===
+====
 
 The use of `<context:component-scan>` implicitly enables the functionality of
 `<context:annotation-config>`. There is usually no need to include the
 `<context:annotation-config>` element when using `<context:component-scan>`.
-===
+====
 
 [NOTE]
 ====
@@ -5107,12 +5107,12 @@ and the equivalent using XML
 ----
 
 [NOTE]
-===
+====
 You can also disable the default filters by setting `useDefaultFilters=false` on the annotation or
 providing `use-default-filters="false"` as an attribute of the <component-scan/> element. This
 will in effect disable automatic detection of classes annotated with `@Component`, `@Repository`,
 `@Service`, or `@Controller`.
-===
+====
 
 
 
@@ -5149,11 +5149,11 @@ the `@Qualifier` annotation. Other method level annotations that can be specifie
 `@Scope`, `@Lazy`, and custom qualifier annotations.
 
 [TIP]
-===
+====
 In addition to its role for component initialization, the `@Lazy` annotation may also be
 placed on injection points marked with `@Autowired` or `@Inject`. In this context, it
 leads to the injection of a lazy-resolution proxy.
-===
+====
 
 Autowired fields and methods are supported as previously discussed, with additional
 support for autowiring of `@Bean` methods:
@@ -5413,7 +5413,7 @@ Starting with Spring 3.0, Spring offers support for JSR-330 standard annotations
 annotations. You just need to have the relevant jars in your classpath.
 
 [NOTE]
-===
+====
 If you are using Maven, the `javax.inject` artifact is available in the standard Maven
 repository (
 http://repo1.maven.org/maven2/javax/inject/javax.inject/1/[http://repo1.maven.org/maven2/javax/inject/javax.inject/1/]).
@@ -5428,7 +5428,7 @@ You can add the following dependency to your file pom.xml:
 		<version>1</version>
 	</dependency>
 ----
-===
+====
 
 
 
@@ -5754,7 +5754,7 @@ To enable component scanning, just annotate your `@Configuration` class as follo
 ----
 
 [TIP]
-===
+====
 
 Experienced Spring users will be familiar with the XML declaration equivalent from
 Spring's `context:` namespace
@@ -5766,7 +5766,7 @@ Spring's `context:` namespace
 		<context:component-scan base-package="com.acme"/>
 	</beans>
 ----
-===
+====
 
 
 In the example above, the `com.acme` package will be scanned, looking for any
@@ -5968,7 +5968,7 @@ on the `bean` element:
 ----
 
 [NOTE]
-===
+====
 By default, beans defined using Java config that have a public `close` or `shutdown`
 method are automatically enlisted with a destruction callback. If you have a public
 `close` or `shutdown` method and you do not wish for it to be called when the container
@@ -5988,7 +5988,7 @@ is managed outside the application. In particular, make sure to always do it for
 	}
 ----
 
-===
+====
 
 Of course, in the case of `Foo` above, it would be equally as valid to call the `init()`
 method directly during construction:
@@ -6011,11 +6011,11 @@ method directly during construction:
 ----
 
 [TIP]
-===
+====
 
 When you work directly in Java, you can do anything you like with your objects and do
 not always need to rely on the container lifecycle!
-===
+====
 
 
 [[beans-java-specifying-bean-scope]]
@@ -6915,7 +6915,7 @@ bean of a configuration class:
 ----
 
 [TIP]
-===
+====
 If a `@Configuration` class is marked with `@Profile`, all of the `@Bean` methods
 and `@Import` annotations associated with that class will be bypassed unless one
 or more of the specified profiles are active. If a `@Component` or `@Configuration`
@@ -6924,7 +6924,7 @@ processed unless profiles 'p1' and/or 'p2' have been activated. If a given profi
 is prefixed with the NOT operator (`!`), the annotated element will be registered
 if the profile is **not** active. e.g., for `@Profile({"p1", "!p2"})`, registration
 will occur if profile 'p1' is active or if profile 'p2' is not active.
-===
+====
 
 [[beans-definition-profiles-xml]]
 === XML Bean definition profiles
@@ -7105,12 +7105,12 @@ will return true if a `foo` system property or `foo` environment variable is pre
 runtime.
 
 [TIP]
-===
+====
 The search performed is hierarchical. By default, system properties have precedence over
 environment variables, so if the `foo` property happens to be set in both places during
 a call to `env.getProperty("foo")`, the system property value will 'win' and be returned
 preferentially over the environment variable.
-===
+====
 
 Most importantly, the entire mechanism is configurable. Perhaps you have a custom source
 of properties that you'd like to integrate into this search. No problem -- simply implement

@@ -1123,7 +1123,7 @@ method-level annotations 'narrowing' the primary mapping for specific portlet re
 parameters.
 
 [TIP]
-===
+====
 
 `@RequestMapping` at the type level may be used for plain implementations of the
 `Controller` interface as well. In this case, the request processing code would follow
@@ -1133,7 +1133,7 @@ would be expressed through an `@RequestMapping` annotation. This works for pre-b
 
 In the following discussion, we'll focus on controllers that are based on annotated
 handler methods.
-===
+====
 
 The following is an example of a form controller from the PetPortal sample application
 using this annotation:

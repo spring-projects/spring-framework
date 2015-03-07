@@ -156,7 +156,7 @@ API: Spring AOP remains backward-compatible. See <<aop-api,the following chapter
 discussion of the Spring AOP APIs.
 
 [NOTE]
-===
+====
 One of the central tenets of the Spring Framework is that of __non-invasiveness__; this
 is the idea that you should not be forced to introduce framework-specific classes and
 interfaces into your business/domain model. However, in some places the Spring Framework
@@ -176,7 +176,7 @@ favors the @AspectJ annotation-style approach over the Spring XML configuration-
 
 See <<aop-choosing>> for a more complete discussion of the whys and wherefores of each
 style.
-===
+====
 
 
 
@@ -210,10 +210,10 @@ for pointcut parsing and matching. The AOP runtime is still pure Spring AOP thou
 there is no dependency on the AspectJ compiler or weaver.
 
 [NOTE]
-===
+====
 Using the AspectJ compiler and weaver enables use of the full AspectJ language, and is
 discussed in <<aop-using-aspectj>>.
-===
+====
 
 
 
@@ -304,22 +304,22 @@ declarations.
 
 .Autodetecting aspects through component scanning
 [NOTE]
-===
+====
 You may register aspect classes as regular beans in your Spring XML configuration, or
 autodetect them through classpath scanning - just like any other Spring-managed bean.
 However, note that the __@Aspect__ annotation is __not__ sufficient for autodetection in
 the classpath: For that purpose, you need to add a separate __@Component__ annotation
 (or alternatively a custom stereotype annotation that qualifies, as per the rules of
 Spring's component scanner).
-===
+====
 
 .Advising aspects with other aspects?
 [NOTE]
-===
+====
 In Spring AOP, it is __not__ possible to have aspects themselves be the target of advice
 from other aspects. The __@Aspect__ annotation on a class marks it as an aspect, and
 hence excludes it from auto-proxying.
-===
+====
 
 
 
@@ -404,7 +404,7 @@ between the proxy object itself (bound to '++this++') and the target object behi
 proxy (bound to '++target++').
 
 [NOTE]
-===
+====
 Due to the proxy-based nature of Spring's AOP framework, protected methods are by
 definition __not__ intercepted, neither for JDK proxies (where this isn't applicable)
 nor for CGLIB proxies (where this is technically possible but not recommendable for AOP
@@ -416,7 +416,7 @@ consider the use of Spring-driven <<aop-aj-ltw,native AspectJ weaving>> instead 
 Spring's proxy-based AOP framework. This constitutes a different mode of AOP usage with
 different characteristics, so be sure to make yourself familiar with weaving first
 before making a decision.
-===
+====
 
 Spring AOP also supports an additional PCD named '++bean++'. This PCD allows you to limit
 the matching of join points to a particular named Spring bean, or to a set of named
@@ -435,7 +435,7 @@ to pick them out. As is the case with other pointcut designators, the '++bean++'
 be &&'ed, ||'ed, and ! (negated) too.
 
 [NOTE]
-===
+====
 Please note that the '++bean++' PCD is __only__ supported in Spring AOP - and __not__ in
 native AspectJ weaving. It is a Spring-specific extension to the standard PCDs that
 AspectJ defines.
@@ -445,7 +445,7 @@ concept) rather than at the type level only (which is what weaving-based AOP is 
 to). Instance-based pointcut designators are a special capability of Spring's
 proxy-based AOP framework and its close integration with the Spring bean factory, where
 it is natural and straightforward to identify specific beans by name.
-===
+====
 
 
 [[aop-pointcuts-combining]]
@@ -666,10 +666,10 @@ Some examples of common pointcut expressions are given below.
 ----
 
 [NOTE]
-===
+====
 'this' is more commonly used in a binding form :- see the following section on advice
 for how to make the proxy object available in the advice body.
-===
+====
 
 * any join point (method execution only in Spring AOP) where the target object
   implements the `AccountService` interface:
@@ -681,10 +681,10 @@ for how to make the proxy object available in the advice body.
 ----
 
 [NOTE]
-===
+====
 'target' is more commonly used in a binding form :- see the following section on advice
 for how to make the target object available in the advice body.
-===
+====
 
 * any join point (method execution only in Spring AOP) which takes a single parameter,
   and where the argument passed at runtime is `Serializable`:
@@ -696,10 +696,10 @@ for how to make the target object available in the advice body.
 ----
 
 [NOTE]
-===
+====
 'args' is more commonly used in a binding form :- see the following section on advice
 for how to make the method arguments available in the advice body.
-===
+====
 
 Note that the pointcut given in this example is different to `execution(*
 *(java.io.Serializable))`: the args version matches if the argument passed at runtime is
@@ -716,10 +716,10 @@ parameter of type `Serializable`.
 ----
 
 [NOTE]
-===
+====
 '@target' can also be used in a binding form :- see the following section on advice for
 how to make the annotation object available in the advice body.
-===
+====
 
 * any join point (method execution only in Spring AOP) where the declared type of the
   target object has an `@Transactional` annotation:
@@ -731,10 +731,10 @@ how to make the annotation object available in the advice body.
 ----
 
 [NOTE]
-===
+====
 '@within' can also be used in a binding form :- see the following section on advice for
 how to make the annotation object available in the advice body.
-===
+====
 
 * any join point (method execution only in Spring AOP) where the executing method has an
   `@Transactional` annotation:
@@ -746,10 +746,10 @@ how to make the annotation object available in the advice body.
 ----
 
 [NOTE]
-===
+====
 '@annotation' can also be used in a binding form :- see the following section on advice
 for how to make the annotation object available in the advice body.
-===
+====
 
 * any join point (method execution only in Spring AOP) which takes a single parameter,
   and where the runtime type of the argument passed has the `@Classified` annotation:
@@ -761,10 +761,10 @@ for how to make the annotation object available in the advice body.
 ----
 
 [NOTE]
-===
+====
 '@args' can also be used in a binding form :- see the following section on advice for
 how to make the annotation object(s) available in the advice body.
-===
+====
 
 * any join point (method execution only in Spring AOP) on a Spring bean named
   '++tradeService++':
@@ -893,11 +893,11 @@ declared using the `@AfterReturning` annotation:
 ----
 
 [NOTE]
-===
+====
 Note: it is of course possible to have multiple advice declarations, and other members
 as well, all inside the same aspect. We're just showing a single advice declaration in
 these examples to focus on the issue under discussion at the time.
-===
+====
 
 Sometimes you need access in the advice body to the actual value that was returned. You
 can use the form of `@AfterReturning` that binds the return value for this:
@@ -1025,7 +1025,7 @@ execute. The `proceed` method may also be called passing in an `Object[]` - the 
 in the array will be used as the arguments to the method execution when it proceeds.
 
 [NOTE]
-===
+====
 The behavior of proceed when called with an Object[] is a little different than the
 behavior of proceed for around advice compiled by the AspectJ compiler. For around
 advice written using the traditional AspectJ language, the number of arguments passed to
@@ -1039,7 +1039,7 @@ aspects written for Spring and using proceed with arguments with the AspectJ com
 and weaver. There is a way to write such aspects that is 100% compatible across both
 Spring AOP and AspectJ, and this is discussed in the following section on advice
 parameters.
-===
+====
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -1273,11 +1273,11 @@ the "argNames" attribute:
   other words, you should encounter no difficulties building with this flag on.
 
 [NOTE]
-===
+====
 If an @AspectJ aspect has been compiled by the AspectJ compiler (ajc) even without the
 debug information then there is no need to add the argNames attribute as the compiler
 will retain the needed information.
-===
+====
 
 * If the code has been compiled without the necessary debug information, then Spring AOP
   will attempt to deduce the pairing of binding variables to parameters (for example, if
@@ -1382,10 +1382,10 @@ you would write the following:
 [[aop-instantiation-models]]
 === Aspect instantiation models
 [NOTE]
-===
+====
 (This is an advanced topic, so if you are just starting out with AOP you can safely skip
 it until later.)
-===
+====
 
 By default there will be a single instance of each aspect within the application
 context. AspectJ calls this the singleton instantiation model. It is possible to define
@@ -1555,14 +1555,14 @@ application context configuration). An `<aop:config>` element can contain pointc
 advisor, and aspect elements (note these must be declared in that order).
 
 [WARNING]
-===
+====
 
 The `<aop:config>` style of configuration makes heavy use of Spring's
 <<aop-autoproxy,auto-proxying>> mechanism. This can cause issues (such as advice not
 being woven) if you are already using explicit auto-proxying via the use of
 `BeanNameAutoProxyCreator` or suchlike. The recommended usage pattern is to use either
 just the `<aop:config>` style, or just the `AutoProxyCreator` style.
-===
+====
 
 
 
@@ -2247,10 +2247,10 @@ proceed, and if we fail with a `PessimisticLockingFailureException` we simply tr
 unless we have exhausted all of our retry attempts.
 
 [NOTE]
-===
+====
 This class is identical to the one used in the @AspectJ example, but with the
 annotations removed.
-===
+====
 
 The corresponding Spring configuration is:
 
@@ -2461,7 +2461,7 @@ To force CGLIB proxying when using the @AspectJ autoproxy support, set the
 ----
 
 [NOTE]
-===
+====
 Multiple `<aop:config/>` sections are collapsed into a single unified auto-proxy creator
 at runtime, which applies the __strongest__ proxy settings that any of the
 `<aop:config/>` sections (typically from different XML bean definition files) specified.
@@ -2471,7 +2471,7 @@ elements.
 To be clear: using '++proxy-target-class="true"++' on `<tx:annotation-driven/>`,
 `<aop:aspectj-autoproxy/>` or `<aop:config/>` elements will force the use of CGLIB
 proxies __for all three of them__.
-===
+====
 
 
 
@@ -2746,7 +2746,7 @@ deserialization (e.g., via
 http://docs.oracle.com/javase/6/docs/api/java/io/Serializable.html[readResolve()]).
 
 [NOTE]
-===
+====
 One of the key phrases in the above paragraph is '__in essence__'. For most cases, the
 exact semantics of '__after returning from the initialization of a new object__' will be
 fine... in this context, '__after initialization__' means that the dependencies will be
@@ -2767,7 +2767,7 @@ types in AspectJ
 http://www.eclipse.org/aspectj/doc/next/progguide/semantics-joinPoints.html[in this
 appendix] of the http://www.eclipse.org/aspectj/doc/next/progguide/index.html[AspectJ
 Programming Guide].
-===
+====
 
 For this to work the annotated types must be woven with the AspectJ weaver - you can
 either use a build-time Ant or Maven task to do this (see for example the
@@ -2817,13 +2817,13 @@ configuration aspect.
 ----
 
 [NOTE]
-===
+====
 Do not activate `@Configurable` processing through the bean configurer aspect unless you
 really mean to rely on its semantics at runtime. In particular, make sure that you do
 not use `@Configurable` on bean classes which are registered as regular Spring beans
 with the container: You would get double initialization otherwise, once through the
 container and once through the aspect.
-===
+====
 
 
 [[aop-configurable-testing]]
@@ -2891,11 +2891,11 @@ default visibility methods directly is the only way to get transaction demarcati
 the execution of such methods.
 
 [TIP]
-===
+====
 Since Spring Framework 4.2, `spring-aspects` provides a similar aspect that offers the
 exact same features for the standard `javax.transaction.Transactional` annotation. Check
 `JtaAnnotationTransactionAspect` for more details.
-===
+====
 
 For AspectJ programmers that want to use the Spring configuration and transaction
 management support but don't want to (or cannot) use annotations, `spring-aspects.jar`
@@ -2975,11 +2975,11 @@ configuration:
 ----
 
 [NOTE]
-===
+====
 Do not be misled by the name of the `<aop:aspectj-autoproxy/>` element: using it will
 result in the creation of __Spring AOP proxies__. The @AspectJ style of aspect
 declaration is just being used here, but the AspectJ runtime is __not__ involved.
-===
+====
 
 
 
@@ -3027,12 +3027,12 @@ to very quickly get some performance metrics, so that we can then apply a finer-
 profiling tool to that specific area immediately afterwards.
 
 [NOTE]
-===
+====
 The example presented here uses XML style configuration, it is also possible to
 configure and use @AspectJ with <<beans-java,Java Configuration>>. Specifically the
 `@EnableLoadTimeWeaving` annotation can be used as an alternative to
 `<context:load-time-weaver/>` (see <<aop-aj-ltw-spring,below>> for details).
-===
+====
 
 Here is the profiling aspect. Nothing too fancy, just a quick-and-dirty time-based
 profiler, using the @AspectJ-style of aspect declaration.
@@ -3218,12 +3218,12 @@ have all been introduced in the above example, and the rest of this section will
 the 'why' behind each bit of configuration and usage in detail.
 
 [NOTE]
-===
+====
 The `ProfilingAspect` used in this example may be basic, but it is quite useful. It is a
 nice example of a development-time aspect that developers can use during development (of
 course), and then quite easily exclude from builds of the application being deployed
 into UAT or production.
-===
+====
 
 
 [[aop-aj-ltw-the-aspects]]
@@ -3274,14 +3274,14 @@ runtime, which opens the door to all manner of interesting applications, one of 
 happens to be the LTW of aspects.
 
 [TIP]
-===
+====
 
 If you are unfamiliar with the idea of runtime class file transformation, you are
 encouraged to read the javadoc API documentation for the `java.lang.instrument` package
 before continuing. This is not a huge chore because there is - rather annoyingly -
 precious little documentation there... the key interfaces and classes will at least be
 laid out in front of you for reference as you read through this section.
-===
+====
 
 Configuring a `LoadTimeWeaver` for a particular `ApplicationContext` can be as easy as
 adding one line. (Please note that you almost certainly will need to be using an

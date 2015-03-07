@@ -1170,7 +1170,7 @@ safe navigation operator will simply return null instead of throwing an exceptio
 ----
 
 [NOTE]
-===
+====
 The Elvis operator can be used to apply default values in expressions, e.g. in an
 `@Value` expression:
 
@@ -1181,7 +1181,7 @@ The Elvis operator can be used to apply default values in expressions, e.g. in a
 ----
 
 This will inject a system property `pop3.port` if it is defined or 25 if not.
-===
+====
 
 
 

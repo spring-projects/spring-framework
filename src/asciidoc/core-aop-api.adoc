@@ -87,11 +87,11 @@ Most MethodMatchers are static, meaning that their `isRuntime()` method returns 
 In this case, the 3-argument matches method will never be invoked.
 
 [TIP]
-===
+====
 
 If possible, try to make pointcuts static, allowing the AOP framework to cache the
 results of pointcut evaluation when an AOP proxy is created.
-===
+====
 
 
 
@@ -211,11 +211,11 @@ current call stack. For example, it might fire if the join point was invoked by 
 in the `com.mycompany.web` package, or by the `SomeCaller` class. Control flow pointcuts
 are specified using the `org.springframework.aop.support.ControlFlowPointcut` class.
 [NOTE]
-===
+====
 Control flow pointcuts are significantly more expensive to evaluate at runtime than even
 other dynamic pointcuts. In Java 1.4, the cost is about 5 times that of other dynamic
 pointcuts.
-===
+====
 
 
 
@@ -252,10 +252,10 @@ pointcuts in Spring can be arbitrarily complex. However, using the AspectJ point
 expression language is recommended if possible.
 
 [NOTE]
-===
+====
 Later versions of Spring may offer support for "semantic pointcuts" as offered by JAC:
 for example, "all methods that change instance variables in the target object."
-===
+====
 
 
 
@@ -334,7 +334,7 @@ return a different value or throw an exception rather than invoke the proceed me
 However, you don't want to do this without good reason!
 
 [NOTE]
-===
+====
 MethodInterceptors offer interoperability with other AOP Alliance-compliant AOP
 implementations. The other advice types discussed in the remainder of this section
 implement common AOP concepts, but in a Spring-specific way. While there is an advantage
@@ -342,7 +342,7 @@ in using the most specific advice type, stick with MethodInterceptor around advi
 you are likely to want to run the aspect in another AOP framework. Note that pointcuts
 are not currently interoperable between frameworks, and the AOP Alliance does not
 currently define pointcut interfaces.
-===
+====
 
 
 [[aop-api-advice-before]]
@@ -394,10 +394,10 @@ An example of a before advice in Spring, which counts all method invocations:
 ----
 
 [TIP]
-===
+====
 
 Before advice can be used with any pointcut.
-===
+====
 
 
 [[aop-api-advice-throws]]
@@ -466,7 +466,7 @@ methods can be combined in a single class.
 ----
 
 [NOTE]
-===
+====
 If a throws-advice method throws an exception itself, it will override the
 original exception (i.e. change the exception thrown to the user). The overriding
 exception will typically be a RuntimeException; this is compatible with any method
@@ -474,13 +474,13 @@ signature. However, if a throws-advice method throws a checked exception, it wil
 to match the declared exceptions of the target method and is hence to some degree
 coupled to specific target method signatures. __Do not throw an undeclared checked
 exception that is incompatible with the target method's signature!__
-===
+====
 
 [TIP]
-===
+====
 
 Throws advice can be used with any pointcut.
-===
+====
 
 
 [[aop-api-advice-after-returning]]
@@ -526,10 +526,10 @@ This advice doesn't change the execution path. If it throws an exception, this w
 thrown up the interceptor chain instead of the return value.
 
 [TIP]
-===
+====
 
 After returning advice can be used with any pointcut.
-===
+====
 
 
 [[aop-api-advice-introduction]]
@@ -720,9 +720,9 @@ FactoryBeans. (Remember that a factory bean introduces a layer of indirection, e
 it to create objects of a different type.)
 
 [NOTE]
-===
+====
 The Spring AOP support also uses factory beans under the covers.
-===
+====
 
 The basic way to create an AOP proxy in Spring is to use the
 __org.springframework.aop.framework.ProxyFactoryBean__. This gives complete control over
@@ -808,12 +808,12 @@ chooses to create one of either a JDK- and CGLIB-based proxy for a particular ta
 object (that is to be proxied).
 
 [NOTE]
-===
+====
 The behavior of the `ProxyFactoryBean` with regard to creating JDK- or CGLIB-based
 proxies changed between versions 1.2.x and 2.0 of Spring. The `ProxyFactoryBean` now
 exhibits similar semantics with regard to auto-detecting interfaces as those of the
 `TransactionProxyFactoryBean` class.
-===
+====
 
 If the class of a target object that is to be proxied (hereafter simply referred to as
 the target class) doesn't implement any interfaces, then a CGLIB-based proxy will be
@@ -897,13 +897,13 @@ interceptor or advisors in the current factory. Advisors, interceptors, before, 
 returning and throws advice objects can be used. The ordering of advisors is significant.
 
 [NOTE]
-===
+====
 You might be wondering why the list doesn't hold bean references. The reason for this is
 that if the ProxyFactoryBean's singleton property is set to false, it must be able to
 return independent proxy instances. If any of the advisors is itself a prototype, an
 independent instance would need to be returned, so it's necessary to be able to obtain
 an instance of the prototype from the factory; holding a reference isn't sufficient.
-===
+====
 
 The "person" bean definition above can be used in place of a Person implementation, as
 follows:
@@ -1134,12 +1134,12 @@ which allow you to add other advice types such as before and throws advice.
 AdvisedSupport is the superclass of both ProxyFactory and ProxyFactoryBean.
 
 [TIP]
-===
+====
 
 Integrating AOP proxy creation with the IoC framework is best practice in most
 applications. We recommend that you externalize configuration from Java code with AOP,
 as in general.
-===
+====
 
 
 
@@ -1215,7 +1215,7 @@ manipulating its advice:
 ----
 
 [NOTE]
-===
+====
 It's questionable whether it's advisable (no pun intended) to modify advice on a
 business object in production, although there are no doubt legitimate usage cases.
 However, it can be very useful in development: for example, in tests. I have sometimes
@@ -1223,7 +1223,7 @@ found it very useful to be able to add test code in the form of an interceptor o
 advice, getting inside a method invocation I want to test. (For example, the advice can
 get inside a transaction created for that method: for example, to run SQL to check that
 a database was correctly updated, before marking the transaction for roll back.)
-===
+====
 
 Depending on how you created the proxy, you can usually set a `frozen` flag, in which
 case the `Advised` `isFrozen()` method will return true, and any attempts to modify
@@ -1460,13 +1460,13 @@ this example, or Hibernate, JDO or JDBC):
 ----
 
 [TIP]
-===
+====
 
 If you require only declarative transaction management, using these generic XML
 definitions will result in Spring automatically proxying all classes or methods with
 transaction attributes. You won't need to work directly with AOP, and the programming
 model is similar to that of .NET ServicedComponents.
-===
+====
 
 This mechanism is extensible. It's possible to do auto-proxying based on custom
 attributes. You need to:
@@ -1517,12 +1517,12 @@ local object. The same target is returned for each invocation (as you would expe
 Let's look at the standard target sources provided with Spring, and how you can use them.
 
 [TIP]
-===
+====
 
 When using a custom target source, your target will usually need to be a prototype
 rather than a singleton bean definition. This allows Spring to create a new target
 instance when required.
-===
+====
 
 
 
@@ -1586,9 +1586,9 @@ application's classpath to use this feature. It's also possible to subclass
 pooling API.
 
 [NOTE]
-===
+====
 Commons Pool 1.5+ is also supported but deprecated as of Spring Framework 4.2.
-===
+====
 
 
 Sample configuration is shown below:
@@ -1652,11 +1652,11 @@ The cast will look as follows:
 ----
 
 [NOTE]
-===
+====
 Pooling stateless service objects is not usually necessary. We don't believe it should
 be the default choice, as most stateless objects are naturally thread safe, and instance
 pooling is problematic if resources are cached.
-===
+====
 
 Simpler pooling is available using auto-proxying. It's possible to set the TargetSources
 used by any auto-proxy creator.
@@ -1706,7 +1706,7 @@ of target source:
 ----
 
 [NOTE]
-===
+====
 ThreadLocals come with serious issues (potentially resulting in memory leaks) when
 incorrectly using them in a multi-threaded and multi-classloader environments. One
 should always consider wrapping a threadlocal in some other class and never directly use
@@ -1716,7 +1716,7 @@ always remember to correctly set and unset (where the latter simply involved a c
 any case since not unsetting it might result in problematic behavior. Spring's
 ThreadLocal support does this for you and should always be considered in favor of using
 ThreadLocals without other proper handling code.
-===
+====
 
 
 

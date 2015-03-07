@@ -449,13 +449,13 @@ on Servlet or Portlet APIs, although you can easily configure access to Servlet 
 Portlet facilities.
 
 [TIP]
-===
+====
 
 Available in the https://github.com/spring-projects/[spring-projects Org on Github],
 a number of web applications leverage the annotation support described in this section
 including __MvcShowcase__, __MvcAjax__, __MvcBasic__, __PetClinic__, __PetCare__,
 and others.
-===
+====
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -709,7 +709,7 @@ appropriate part of the URI. For example, when a request comes in for `/owners/f
 the value of `ownerId` is `fred`.
 
 [TIP]
-===
+====
 
 To process the @PathVariable annotation, Spring MVC needs to find the matching URI
 template variable by name. You can specify it in the annotation:
@@ -735,7 +735,7 @@ will match the method argument name to the URI template variable name:
 		// implementation omitted
 	}
 ----
-===
+====
 
 A method can have any number of `@PathVariable` annotations:
 
@@ -952,7 +952,7 @@ Note that to enable the use of matrix variables, you must set the
 default it is set to `true`.
 
 [TIP]
-===
+====
 
 The MVC Java config and the MVC namespace both provide options for enabling the use of
 matrix variables.
@@ -982,7 +982,7 @@ to `false`.
 
 	</beans>
 ----
-===
+====
 
 [[mvc-ann-requestmapping-consumes]]
 ==== Consumable Media Types
@@ -1004,12 +1004,12 @@ Consumable media type expressions can also be negated as in __!text/plain__ to m
 all requests other than those with __Content-Type__ of __text/plain__.
 
 [TIP]
-===
+====
 
 The __consumes__ condition is supported on the type and on the method level. Unlike most
 other conditions, when used at the type level, method-level consumable types override
 rather than extend type-level consumable types.
-===
+====
 
 
 [[mvc-ann-requestmapping-produces]]
@@ -1036,11 +1036,11 @@ __!text/plain__ to match to all requests other than those with an __Accept__ hea
 value of __text/plain__.
 
 [TIP]
-===
+====
 The __produces__ condition is supported on the type and on the method level. Unlike most
 other conditions, when used at the type level, method-level producible types override
 rather than extend type-level producible types.
-===
+====
 
 
 [[mvc-ann-requestmapping-params-and-headers]]
@@ -1084,13 +1084,13 @@ specific request header value:
 ----
 
 [TIP]
-===
+====
 
 Although you can match to __Content-Type__ and __Accept__ header values using media type
 wild cards (for example __"content-type=text/*"__ will match to __"text/plain"__ and
 __"text/html"__), it is recommended to use the __consumes__ and __produces__ conditions
 respectively instead. They are intended specifically for that purpose.
-===
+====
 
 
 
@@ -1213,11 +1213,11 @@ this working you have to reorder the parameters as follows:
 ----
 
 [NOTE]
-===
+====
 JDK 1.8's `java.util.Optional` is supported as a method parameter type with annotations
 that have a `required` attribute (e.g. `@RequestParam`, `@RequestHeader`, etc. The use
 of `java.util.Optional` in those cases is equivalent to having `required=false`.
-===
+====
 
 
 [[mvc-ann-return-types]]
@@ -1512,7 +1512,7 @@ and such methods apply to many controllers. See the <<mvc-ann-controller-advice>
 for more details.
 
 [TIP]
-===
+====
 
 What happens when a model attribute name is not explicitly specified? In such cases a
 default name is assigned to the model attribute based on its type. For example if the
@@ -1520,7 +1520,7 @@ method returns an object of type `Account`, the default name used is "account". 
 change that through the value of the `@ModelAttribute` annotation. If adding attributes
 directly to the `Model`, use the appropriate overloaded `addAttribute(..)` method -
 i.e., with or without an attribute name.
-===
+====
 
 The `@ModelAttribute` annotation can be used on `@RequestMapping` methods as well. In
 that case the return value of the `@RequestMapping` method is interpreted as a model
@@ -1818,12 +1818,12 @@ with all header values.
 
 
 [TIP]
-===
+====
 Built-in support is available for converting a comma-separated string into an
 array/collection of strings or other types known to the type conversion system. For
 example a method parameter annotated with `@RequestHeader("Accept")` may be of type
 `String` but also `String[]` or `List<String>`.
-===
+====
 
 This annotation is supported for annotated handler methods in Servlet and Portlet
 environments.
@@ -2248,14 +2248,14 @@ filters provided with the Spring Framework since they will not get involved in a
 dispatches unless needed.
 
 [WARNING]
-===
+====
 Note that for some Filters it is absolutely critical to ensure they are mapped to
 be invoked during asynchronous dispatches. For example if a filter such as the
 `OpenEntityManagerInViewFilter` is responsible for releasing database connection
 resources and must be invoked at the end of an async request.
 
 Below is an example of a propertly configured filter:
-===
+====
 
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
@@ -2456,13 +2456,13 @@ As you can see, the Spring adapter class `HandlerInterceptorAdapter` makes it ea
 extend the `HandlerInterceptor` interface.
 
 [TIP]
-===
+====
 
 In the example above, the configured interceptor will apply to all requests handled with
 annotated controller methods. If you want to narrow down the URL paths to which an
 interceptor applies, you can use the MVC namespace or the MVC Java config, or declare
 bean instances of type `MappedInterceptor` to do that. See <<mvc-config-enable>>.
-===
+====
 
 Note that the `postHandle` method of `HandlerInterceptor` is not always ideally suited for
 use with `@ResponseBody` and `ResponseEntity` methods. In such cases an `HttpMessageConverter`
@@ -2776,7 +2776,7 @@ server:
   http://en.wikipedia.org/wiki/Content_negotiation[content negotiation].
 
 [NOTE]
-===
+====
 One issue with the `Accept` header is that it is impossible to set it in a web browser
 within HTML. For example, in Firefox, it is fixed to:
 
@@ -2788,7 +2788,7 @@ Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
 
 For this reason it is common to see the use of a distinct URI for each representation
 when developing browser based web applications.
-===
+====
 
 To support multiple representations of a resource, Spring provides the
 `ContentNegotiatingViewResolver` to resolve a view based on the file extension or
@@ -4023,13 +4023,13 @@ then resolved into the `/WEB-INF/jsp/registration.jsp` view by the
 `InternalResourceViewResolver` bean.
 
 [TIP]
-===
+====
 
 You do not need to define a `DefaultRequestToViewNameTranslator` bean explicitly. If you
 like the default settings of the `DefaultRequestToViewNameTranslator`, you can rely on
 the Spring Web MVC `DispatcherServlet` to instantiate an instance of this class if one
 is not explicitly configured.
-===
+====
 
 Of course, if you need to change the default settings, then you do need to configure
 your own `DefaultRequestToViewNameTranslator` bean explicitly. Consult the comprehensive

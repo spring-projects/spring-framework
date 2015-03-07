@@ -111,14 +111,14 @@ dealing with Spring MVC `ModelAndView` objects.
 
 .Unit testing Spring MVC Controllers
 [TIP]
-===
+====
 To test your Spring MVC ++Controller++s, use `ModelAndViewAssert` combined with
 `MockHttpServletRequest`, `MockHttpSession`, and so on from the <<mock-objects-servlet,
 `org.springframework.mock.web`>> package.
 
 Note: As of Spring 4.0, the set of mocks in the `org.springframework.mock.web` package
 is now based on the Servlet 3.0 API.
-===
+====
 
 
 
@@ -1376,7 +1376,7 @@ provide access to the `ApplicationContext` automatically.
 
 .@Autowired ApplicationContext
 [TIP]
-===
+====
 As an alternative to implementing the `ApplicationContextAware` interface, you can
 inject the application context for your test class through the `@Autowired` annotation
 on either a field or setter method. For example:
@@ -1415,7 +1415,7 @@ the web application context into your test as follows:
 Dependency injection via `@Autowired` is provided by the
 `DependencyInjectionTestExecutionListener` which is configured by default (see
 <<testcontext-fixture-di>>).
-===
+====
 
 Test classes that use the TestContext framework do not need to extend any particular
 class or implement a specific interface to configure their application context. Instead,
@@ -1505,10 +1505,10 @@ configuration files>>.
 
 .Enabling Groovy script support
 [TIP]
-===
+====
 Support for using Groovy scripts to load an `ApplicationContext` in the Spring
 TestContext Framework is enabled automatically if Groovy is on the classpath.
-===
+====
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -1545,7 +1545,7 @@ detect a default location based on the name of the test class. If your class is 
 
 .Declaring XML config and Groovy scripts simultaneously
 [TIP]
-===
+====
 Both XML configuration files and Groovy scripts can be declared simultaneously via the
 `locations` or `value` attribute of `@ContextConfiguration`. If the path to a configured
 resource location ends with `.xml` it will be loaded using an `XmlBeanDefinitionReader`;
@@ -1564,7 +1564,7 @@ The following listing demonstrates how to combine both in an integration test.
 		// class body...
 	}
 ----
-===
+====
 
 [[testcontext-ctx-management-javaconfig]]
 ===== Context configuration with annotated classes
@@ -1586,7 +1586,7 @@ To load an `ApplicationContext` for your tests using __annotated classes__ (see
 
 .Annotated Classes
 [TIP]
-===
+====
 The term __annotated class__ can refer to any of the following.
 
 * A class annotated with `@Configuration`
@@ -1597,7 +1597,7 @@ The term __annotated class__ can refer to any of the following.
 Consult the javadocs of `@Configuration` and `@Bean` for further information regarding
 the configuration and semantics of __annotated classes__, paying special attention to
 the discussion of __`@Bean` Lite Mode__.
-===
+====
 
 If you omit the `classes` attribute from the `@ContextConfiguration` annotation, the
 TestContext framework will attempt to detect the presence of default configuration
@@ -2699,12 +2699,12 @@ support introduced in Spring 2.5 and 3.0, you can use Spring's `@Autowired` anno
 or the `@Inject` annotation from JSR 300.
 
 [TIP]
-===
+====
 
 The TestContext framework does not instrument the manner in which a test instance is
 instantiated. Thus the use of `@Autowired` or `@Inject` for constructors has no effect
 for test classes.
-===
+====
 
 Because `@Autowired` is used to perform <<beans-factory-autowire, __autowiring by type__
 >>, if you have multiple bean definitions of the same type, you cannot rely on this
@@ -2812,7 +2812,7 @@ this:
 ----
 
 [NOTE]
-===
+====
 If you are extending from a Spring-provided test base class that happens to use
 `@Autowired` on one of its setter methods, you might have multiple beans of the affected
 type defined in your application context: for example, multiple `DataSource` beans. In
@@ -2839,7 +2839,7 @@ narrowing the set of type matches to a specific bean. Its value is matched again
 `<qualifier>` declarations within the corresponding `<bean>` definitions. The bean name
 is used as a fallback qualifier value, so you may effectively also point to a specific
 bean by name there (as shown above, assuming that "myDataSource" is the bean id).
-===
+====
 
 
 [[testcontext-web-scoped-beans]]
@@ -3136,13 +3136,13 @@ void` method in your test class with one of these annotations, and the
 __after transaction method__ is executed at the appropriate time.
 
 [TIP]
-===
+====
 Any __before methods__ (such as methods annotated with JUnit's `@Before`) and any __after
 methods__ (such as methods annotated with JUnit's `@After`) are executed __within__ a
 transaction. In addition, methods annotated with `@BeforeTransaction` or
 `@AfterTransaction` are naturally not executed for test methods that are not configured
 to run within a transaction.
-===
+====
 
 [[testcontext-tx-mgr-config]]
 ===== Configuring a transaction manager
@@ -3211,7 +3211,7 @@ declarative SQL script execution with default transaction rollback semantics.
 [[testcontext-tx-false-positives]]
 .Avoid false positives when testing ORM code
 [NOTE]
-===
+====
 When you test application code that manipulates the state of the Hibernate session, make
 sure to __flush__ the underlying session within test methods that execute that code.
 Failing to flush the underlying session can produce __false positives__: your test may
@@ -3245,7 +3245,7 @@ work__.
 
 	// ...
 ----
-===
+====
 
 
 [[testcontext-executing-sql]]
@@ -3558,12 +3558,12 @@ provides an `executeSqlScript(..)` method for executing SQL scripts against the 
 `DataSource`.
 
 [TIP]
-===
+====
 These classes are a convenience for extension. If you do not want your test classes to be
 tied to a Spring-specific class hierarchy, you can configure your own custom test classes
 by using `@RunWith(SpringJUnit4ClassRunner.class)`, `@ContextConfiguration`,
 `@TestExecutionListeners`, and so on.
-===
+====
 
 [[testcontext-junit4-runner]]
 ===== Spring JUnit Runner
@@ -3624,13 +3624,13 @@ provides an `executeSqlScript(..)` method for executing SQL scripts against the 
 
 
 [TIP]
-===
+====
 These classes are a convenience for extension. If you do not want your test classes to be
 tied to a Spring-specific class hierarchy, you can configure your own custom test classes
 by using `@ContextConfiguration`, `@TestExecutionListeners`, and so on, and by manually
 instrumenting your test class with a `TestContextManager`. See the source code of
 `AbstractTestNGSpringContextTests` for an example of how to instrument your test class.
-===
+====
 
 
 
