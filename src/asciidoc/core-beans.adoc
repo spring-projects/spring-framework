@@ -5644,10 +5644,6 @@ The `AppConfig` class above would be equivalent to the following Spring `<beans/
 	</beans>
 ----
 
-The `@Bean` and `@Configuration` annotations will be discussed in depth in the sections
-below. First, however, we'll cover the various ways of creating a spring container using
-Java-based configuration.
-
 .Full @Configuration vs 'lite' @Beans mode?
 ****
 When `@Bean` methods are declared within classes that are __not__ annotated with
@@ -5665,6 +5661,9 @@ accidentally being invoked multiple times and helps to reduce subtle bugs that c
 hard to track down when operating in 'lite' mode.
 ****
 
+The `@Bean` and `@Configuration` annotations will be discussed in depth in the sections
+below. First, however, we'll cover the various ways of creating a spring container using
+Java-based configuration.
 
 [[beans-java-instantiating-container]]
 === Instantiating the Spring container using AnnotationConfigApplicationContext
@@ -5914,6 +5913,31 @@ Both declarations make a bean named `transferService` available in the
 ----
 transferService -> com.acme.TransferServiceImpl
 ----
+
+
+[[beans-java-dependencies]]
+==== Bean dependencies
+A `@Bean` annotated method can have an arbitrary number of parameters describing the
+dependencies required to build that bean. For instance if our `TransferService`
+requires an `AccountRepository` we can materialize that dependency via a method
+parameter:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@Configuration
+	public class AppConfig {
+
+		@Bean
+		public TransferService transferService(AccountRepository accountRepository) {
+			return new TransferServiceImpl(accountRepository);
+		}
+
+	}
+----
+
+The resolution mechanism is pretty much identical to constructor-based dependency
+injection, see <<beans-constructor-injection,the relevant section>> for more details.
 
 
 [[beans-java-lifecycle-callbacks]]
@@ -6366,12 +6390,64 @@ issue, per se, because there is no compiler involved, and one can simply declare
 Of course, when using `@Configuration` classes, the Java compiler places constraints on
 the configuration model, in that references to other beans must be valid Java syntax.
 
-Fortunately, solving this problem is simple. Remember that `@Configuration` classes are
+Fortunately, solving this problem is simple. As <<beans-java-dependencies,we already discussed>>,
+`@Bean` method can have an arbitrary number of parameters describing the bean
+dependencies. Let's consider a more real-world scenario with several `@Configuration`
+classes, each depending on beans declared in the others:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@Configuration
+	public class ServiceConfig {
+
+		@Bean
+		public TransferService transferService(AccountRepository accountRepository) {
+			return new TransferServiceImpl(accountRepository);
+		}
+
+	}
+
+	@Configuration
+	public class RepositoryConfig {
+
+		@Bean
+		public AccountRepository accountRepository(DataSource dataSource) {
+			return new JdbcAccountRepository(dataSource);
+		}
+
+	}
+
+	@Configuration
+	@Import({ServiceConfig.class, RepositoryConfig.class})
+	public class SystemTestConfig {
+
+		@Bean
+		public DataSource dataSource() {
+			// return new DataSource
+		}
+
+	}
+
+	public static void main(String[] args) {
+		ApplicationContext ctx = new AnnotationConfigApplicationContext(SystemTestConfig.class);
+		// everything wires up across configuration classes...
+		TransferService transferService = ctx.getBean(TransferService.class);
+		transferService.transfer(100.00, "A123", "C456");
+	}
+----
+
+There is another way to achieve the same result. Remember that `@Configuration` classes are
 ultimately just another bean in the container - this means that they can take advantage
 of `@Autowired` injection metadata just like any other bean!
 
-Let's consider a more real-world scenario with several `@Configuration` classes, each
-depending on beans declared in the others:
+[WARNING]
+====
+Make sure that the dependencies you inject that way are of the simplest kind only. `@Configuration`
+classes are processed quite early during the initialization of the context and forcing a
+dependency to be injected this way may lead to unexpected early initialization. Whenever possible,
+resort to parameter-based injection as in the example above.
+====
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
