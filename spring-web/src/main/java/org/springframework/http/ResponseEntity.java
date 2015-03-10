@@ -381,7 +381,9 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 
 		@Override
 		public BodyBuilder headers(HttpHeaders headers) {
-			this.headers.putAll(headers);
+			if (headers != null) {
+				this.headers.putAll(headers);
+			}
 			return this;
 		}
 
