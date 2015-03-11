@@ -685,11 +685,11 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 
 		if (getSessionAttributesHandler(handlerMethod).hasSessionAttributes()) {
 			// Always prevent caching in case of session attribute management.
-			checkAndPrepare(request, response, this.cacheSecondsForSessionAttributeHandlers, true);
+			checkAndPrepare(request, response, this.cacheSecondsForSessionAttributeHandlers);
 		}
 		else {
 			// Uses configured default cacheSeconds setting.
-			checkAndPrepare(request, response, true);
+			checkAndPrepare(request, response);
 		}
 
 		// Execute invokeHandlerMethod in synchronized block if required.

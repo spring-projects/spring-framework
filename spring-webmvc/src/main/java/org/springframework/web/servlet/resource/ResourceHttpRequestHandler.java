@@ -60,8 +60,8 @@ import org.springframework.web.servlet.support.WebContentGenerator;
  * <p>The {@linkplain #setLocations "locations" property} takes a list of Spring {@link Resource}
  * locations from which static resources are allowed  to be served by this handler. For a given request,
  * the list of locations will be consulted in order for the presence of the requested resource, and the
- * first found match will be written to the response, with {@code Expires} and {@code Cache-Control}
- * headers set as configured. The handler also properly evaluates the {@code Last-Modified} header
+ * first found match will be written to the response, with a HTTP Caching headers
+ * set as configured. The handler also properly evaluates the {@code Last-Modified} header
  * (if present) so that a {@code 304} status code will be returned as appropriate, avoiding unnecessary
  * overhead for resources that are already cached by the client. The use of {@code Resource} locations
  * allows resource requests to easily be mapped to locations other than the web application root.
@@ -210,7 +210,7 @@ public class ResourceHttpRequestHandler extends WebContentGenerator implements H
 	public void handleRequest(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 
-		checkAndPrepare(request, response, true);
+		checkAndPrepare(request, response);
 
 		// check whether a matching resource exists
 		Resource resource = getResource(request);

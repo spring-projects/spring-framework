@@ -477,6 +477,86 @@
 		<xsd:attribute name="cache-name" type="xsd:string" use="optional"/>
 	</xsd:complexType>
 
+	<xsd:complexType name="cachecontrol">
+		<xsd:annotation>
+			<xsd:documentation source="org.springframework.web.cache.CacheControl"><![CDATA[
+	Generates "Cache-Control" HTTP response headers.
+			]]></xsd:documentation>
+		</xsd:annotation>
+		<xsd:attribute name="must-revalidate" type="xsd:boolean" use="optional">
+			<xsd:annotation>
+				<xsd:documentation><![CDATA[
+	Adds a "must-revalidate" directive in the Cache-Control header.
+	This indicates that caches should revalidate the cached response when it's become stale.
+					]]></xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="no-cache" type="xsd:boolean" use="optional">
+			<xsd:annotation>
+				<xsd:documentation><![CDATA[
+	Adds a "no-cache" directive in the Cache-Control header.
+	This indicates that caches should always revalidate cached response with the server.
+					]]></xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="no-store" type="xsd:boolean" use="optional">
+			<xsd:annotation>
+				<xsd:documentation><![CDATA[
+	Adds a "no-store" directive in the Cache-Control header.
+	This indicates that caches should never cache the response.
+					]]></xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="no-transform" type="xsd:boolean" use="optional">
+			<xsd:annotation>
+				<xsd:documentation><![CDATA[
+	Adds a "no-transform" directive in the Cache-Control header.
+	This indicates that caches should never transform (i.e. compress, optimize) the response content.
+					]]></xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="cache-public" type="xsd:boolean" use="optional">
+			<xsd:annotation>
+				<xsd:documentation><![CDATA[
+	Adds a "public" directive in the Cache-Control header.
+	This indicates that any cache MAY store the response.
+					]]></xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="cache-private" type="xsd:boolean" use="optional">
+			<xsd:annotation>
+				<xsd:documentation><![CDATA[
+	Adds a "private" directive in the Cache-Control header.
+	This indicates that the response is intended for a single user and may not be stored by shared caches.
+					]]></xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="proxy-revalidate" type="xsd:boolean" use="optional">
+			<xsd:annotation>
+				<xsd:documentation><![CDATA[
+	Adds a "proxy-revalidate" directive in the Cache-Control header.
+	This directive has the same meaning as the "must-revalidate" directive, except it only applies to shared caches.
+					]]></xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="max-age" type="xsd:int" use="optional">
+			<xsd:annotation>
+				<xsd:documentation><![CDATA[
+	Adds a "max-age" directive in the Cache-Control header.
+	This indicates that the response should be cached for the given number of seconds.
+					]]></xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="s-maxage" type="xsd:int" use="optional">
+			<xsd:annotation>
+				<xsd:documentation><![CDATA[
+	Adds a "s-maxage" directive in the Cache-Control header.
+	This directive has the same meaning as the "max-age" directive, except it only applies to shared caches.
+					]]></xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+	</xsd:complexType>
+
 	<xsd:element name="resources">
 		<xsd:annotation>
 			<xsd:documentation
@@ -487,6 +567,7 @@
 		</xsd:annotation>
 		<xsd:complexType>
 			<xsd:sequence>
+				<xsd:element name="cachecontrol" type="cachecontrol" minOccurs="0" maxOccurs="1"/>
 				<xsd:element name="resource-chain" type="resource-chain" minOccurs="0" maxOccurs="1"/>
 			</xsd:sequence>
 			<xsd:attribute name="mapping" use="required" type="xsd:string">
