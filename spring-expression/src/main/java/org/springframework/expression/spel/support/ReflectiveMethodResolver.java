@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -66,13 +66,14 @@ public class ReflectiveMethodResolver implements MethodResolver {
 	}
 
 	/**
-	 * This constructors allows the ReflectiveMethodResolver to be configured such that it will
-	 * use a distance computation to check which is the better of two close matches (when there
-	 * are multiple matches). Using the distance computation is intended to ensure matches
-	 * are more closely representative of what a Java compiler would do when taking into
-	 * account boxing/unboxing and whether the method candidates are declared to handle a
-	 * supertype of the type (of the argument) being passed in.
-	 * @param useDistance true if distance computation should be used when calculating matches
+	 * This constructor allows the ReflectiveMethodResolver to be configured such that it
+	 * will use a distance computation to check which is the better of two close matches
+	 * (when there are multiple matches). Using the distance computation is intended to
+	 * ensure matches are more closely representative of what a Java compiler would do
+	 * when taking into account boxing/unboxing and whether the method candidates are
+	 * declared to handle a supertype of the type (of the argument) being passed in.
+	 * @param useDistance {@code true} if distance computation should be used when
+	 * calculating matches; {@code false} otherwise
 	 */
 	public ReflectiveMethodResolver(boolean useDistance) {
 		this.useDistance = useDistance;
@@ -122,7 +123,19 @@ public class ReflectiveMethodResolver implements MethodResolver {
 					public int compare(Method m1, Method m2) {
 						int m1pl = m1.getParameterTypes().length;
 						int m2pl = m2.getParameterTypes().length;
-						return (new Integer(m1pl)).compareTo(m2pl);
+						// varargs methods go last
+						if (m1pl == m2pl) {
+						    if (!m1.isVarArgs() && m2.isVarArgs()) {
+						    	return -1;
+						    }
+						    else if (m1.isVarArgs() && !m2.isVarArgs()) {
+						    	return 1;
+						    }
+						    else {
+						    	return 0;
+						    }
+						}
+						return (m1pl < m2pl ? -1 : (m1pl > m2pl ? 1 : 0));
 					}
 				});
 			}
@@ -162,14 +175,17 @@ public class ReflectiveMethodResolver implements MethodResolver {
 							return new ReflectiveMethodExecutor(method, null);
 						}
 						else if (matchInfo.isCloseMatch()) {
-							if (!this.useDistance) {
-								closeMatch = method;
+							if (this.useDistance) {
+								int matchDistance = ReflectionHelper.getTypeDifferenceWeight(paramDescriptors, argumentTypes);
+								if (closeMatch == null || matchDistance < closeMatchDistance) {
+									// This is a better match...
+									closeMatch = method;
+									closeMatchDistance = matchDistance;
+								}
 							}
 							else {
-								int matchDistance = ReflectionHelper.getTypeDifferenceWeight(paramDescriptors, argumentTypes);
-								if (matchDistance < closeMatchDistance) {
-									// This is a better match...
-									closeMatchDistance = matchDistance;
+								// Take this as a close match if there isn't one already
+								if (closeMatch == null) {
 									closeMatch = method;
 								}
 							}

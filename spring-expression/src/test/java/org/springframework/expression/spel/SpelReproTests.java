@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -1843,6 +1843,15 @@ public class SpelReproTests extends ExpressionTestCase {
 		assertEquals(NamedUser.class.getName(), expression.getValue(new NamedUser()));
 	}
 
+	@Test
+	public void SPR12803() throws Exception {
+		StandardEvaluationContext sec = new StandardEvaluationContext();
+		sec.setVariable("iterable", Collections.emptyList());
+		SpelExpressionParser parser = new SpelExpressionParser();
+		Expression expression = parser.parseExpression("T(org.springframework.expression.spel.SpelReproTests.GuavaLists).newArrayList(#iterable)");
+		assertTrue(expression.getValue(sec) instanceof ArrayList);
+	}
+
 
 	private static enum ABC { A, B, C }
 
@@ -1993,6 +2002,18 @@ public class SpelReproTests extends ExpressionTestCase {
 
 		public String getName() {
 			return "foo";
+		}
+	}
+
+
+	public static class GuavaLists {
+
+		public static <T> List<T> newArrayList(Iterable<T> iterable) {
+			return new ArrayList<T>();
+		}
+
+		public static <T> List<T> newArrayList(Object... elements) {
+			throw new UnsupportedOperationException();
 		}
 	}
 
