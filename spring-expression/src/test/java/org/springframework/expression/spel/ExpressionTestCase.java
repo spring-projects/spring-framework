@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,6 @@
 
 package org.springframework.expression.spel;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
-
 import java.util.Arrays;
 import java.util.List;
 
@@ -29,6 +26,8 @@ import org.springframework.expression.ParseException;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 
+import static org.junit.Assert.*;
+
 /**
  * Common superclass for expression tests.
  *
@@ -36,187 +35,146 @@ import org.springframework.expression.spel.support.StandardEvaluationContext;
  */
 public abstract class ExpressionTestCase {
 
-	private final static boolean DEBUG = false;
+	private static final boolean DEBUG = false;
 
-	protected final static boolean SHOULD_BE_WRITABLE = true;
-	protected final static boolean SHOULD_NOT_BE_WRITABLE = false;
+	protected static final boolean SHOULD_BE_WRITABLE = true;
+
+	protected static final boolean SHOULD_NOT_BE_WRITABLE = false;
+
 
 	protected final ExpressionParser parser = new SpelExpressionParser();
+
 	protected final StandardEvaluationContext eContext = TestScenarioCreator.getTestEvaluationContext();
 
+
 	/**
-	 * Evaluate an expression and check that the actual result matches the expectedValue and the class of the result
-	 * matches the expectedClassOfResult.
-	 * @param expression The expression to evaluate
+	 * Evaluate an expression and check that the actual result matches the
+	 * expectedValue and the class of the result matches the expectedClassOfResult.
+	 * @param expression the expression to evaluate
 	 * @param expectedValue the expected result for evaluating the expression
 	 * @param expectedResultType the expected class of the evaluation result
 	 */
 	public void evaluate(String expression, Object expectedValue, Class<?> expectedResultType) {
-		try {
-			Expression expr = parser.parseExpression(expression);
-			if (expr == null) {
-				fail("Parser returned null for expression");
+		Expression expr = parser.parseExpression(expression);
+		if (expr == null) {
+			fail("Parser returned null for expression");
+		}
+		if (DEBUG) {
+			SpelUtilities.printAbstractSyntaxTree(System.out, expr);
+		}
+
+		Object value = expr.getValue(eContext);
+
+		// Check the return value
+		if (value == null) {
+			if (expectedValue == null) {
+				return;  // no point doing other checks
 			}
-			if (DEBUG) {
-				SpelUtilities.printAbstractSyntaxTree(System.out, expr);
-			}
-			// Class<?> expressionType = expr.getValueType();
-			// assertEquals("Type of the expression is not as expected. Should be '"+expectedResultType+"' but is
-			// '"+expressionType+"'",
-			// expectedResultType,expressionType);
+			assertEquals("Expression returned null value, but expected '" + expectedValue + "'", expectedValue, null);
+		}
 
-			Object value = expr.getValue(eContext);
+		Class<?> resultType = value.getClass();
+		assertEquals("Type of the actual result was not as expected.  Expected '" + expectedResultType +
+				"' but result was of type '" + resultType + "'", expectedResultType, resultType);
 
-			// Check the return value
-			if (value == null) {
-				if (expectedValue == null) {
-					return; // no point doing other checks
-				}
-				assertEquals("Expression returned null value, but expected '" + expectedValue + "'", expectedValue,
-						null);
-			}
-
-			Class<?> resultType = value.getClass();
-			assertEquals("Type of the actual result was not as expected.  Expected '" + expectedResultType
-					+ "' but result was of type '" + resultType + "'", expectedResultType, resultType);
-			// .equals/* isAssignableFrom */(resultType), truers);
-
-			// TODO isAssignableFrom would allow some room for compatibility
-			// in the above expression...
-
-			if (expectedValue instanceof String) {
-				assertEquals("Did not get expected value for expression '" + expression + "'.", expectedValue,
-						ExpressionTestCase.stringValueOf(value));
-			} else {
-				assertEquals("Did not get expected value for expression '" + expression + "'.", expectedValue, value);
-			}
-		} catch (EvaluationException ee) {
-			ee.printStackTrace();
-			fail("Unexpected Exception: " + ee.getMessage());
-		} catch (ParseException pe) {
-			pe.printStackTrace();
-			fail("Unexpected Exception: " + pe.getMessage());
+		if (expectedValue instanceof String) {
+			assertEquals("Did not get expected value for expression '" + expression + "'.", expectedValue,
+					ExpressionTestCase.stringValueOf(value));
+		}
+		else {
+			assertEquals("Did not get expected value for expression '" + expression + "'.", expectedValue, value);
 		}
 	}
 
 	public void evaluateAndAskForReturnType(String expression, Object expectedValue, Class<?> expectedResultType) {
-		try {
-			Expression expr = parser.parseExpression(expression);
-			if (expr == null) {
-				fail("Parser returned null for expression");
-			}
-			if (DEBUG) {
-				SpelUtilities.printAbstractSyntaxTree(System.out, expr);
-			}
-			// Class<?> expressionType = expr.getValueType();
-			// assertEquals("Type of the expression is not as expected. Should be '"+expectedResultType+"' but is
-			// '"+expressionType+"'",
-			// expectedResultType,expressionType);
-
-			Object value = expr.getValue(eContext, expectedResultType);
-			if (value == null) {
-				if (expectedValue == null)
-					return; // no point doing other checks
-				assertEquals("Expression returned null value, but expected '" + expectedValue + "'", expectedValue,
-						null);
-			}
-
-			Class<?> resultType = value.getClass();
-			assertEquals("Type of the actual result was not as expected.  Expected '" + expectedResultType
-					+ "' but result was of type '" + resultType + "'", expectedResultType, resultType);
-			// .equals/* isAssignableFrom */(resultType), truers);
-			assertEquals("Did not get expected value for expression '" + expression + "'.", expectedValue, value);
-			// isAssignableFrom would allow some room for compatibility
-			// in the above expression...
-		} catch (EvaluationException ee) {
-			SpelEvaluationException ex = (SpelEvaluationException) ee;
-			ex.printStackTrace();
-			fail("Unexpected EvaluationException: " + ex.getMessage());
-		} catch (ParseException pe) {
-			fail("Unexpected ParseException: " + pe.getMessage());
+		Expression expr = parser.parseExpression(expression);
+		if (expr == null) {
+			fail("Parser returned null for expression");
 		}
+		if (DEBUG) {
+			SpelUtilities.printAbstractSyntaxTree(System.out, expr);
+		}
+
+		Object value = expr.getValue(eContext, expectedResultType);
+		if (value == null) {
+			if (expectedValue == null) {
+				return;  // no point doing other checks
+			}
+			assertEquals("Expression returned null value, but expected '" + expectedValue + "'", expectedValue, null);
+		}
+
+		Class<?> resultType = value.getClass();
+		assertEquals("Type of the actual result was not as expected.  Expected '" + expectedResultType +
+				"' but result was of type '" + resultType + "'", expectedResultType, resultType);
+		assertEquals("Did not get expected value for expression '" + expression + "'.", expectedValue, value);
 	}
 
 	/**
-	 * Evaluate an expression and check that the actual result matches the expectedValue and the class of the result
-	 * matches the expectedClassOfResult. This method can also check if the expression is writable (for example, it is a
-	 * variable or property reference).
-	 *
-	 * @param expression The expression to evaluate
+	 * Evaluate an expression and check that the actual result matches the
+	 * expectedValue and the class of the result matches the expectedClassOfResult.
+	 * This method can also check if the expression is writable (for example,
+	 * it is a variable or property reference).
+	 * @param expression the expression to evaluate
 	 * @param expectedValue the expected result for evaluating the expression
 	 * @param expectedClassOfResult the expected class of the evaluation result
 	 * @param shouldBeWritable should the parsed expression be writable?
 	 */
-	public void evaluate(String expression, Object expectedValue, Class<?> expectedClassOfResult,
-			boolean shouldBeWritable) {
-		try {
-			Expression e = parser.parseExpression(expression);
-			if (e == null) {
-				fail("Parser returned null for expression");
+	public void evaluate(String expression, Object expectedValue, Class<?> expectedClassOfResult, boolean shouldBeWritable) {
+		Expression expr = parser.parseExpression(expression);
+		if (expr == null) {
+			fail("Parser returned null for expression");
+		}
+		if (DEBUG) {
+			SpelUtilities.printAbstractSyntaxTree(System.out, expr);
+		}
+		Object value = expr.getValue(eContext);
+		if (value == null) {
+			if (expectedValue == null) {
+				return;  // no point doing other checks
 			}
-			if (DEBUG) {
-				SpelUtilities.printAbstractSyntaxTree(System.out, e);
-			}
-			Object value = e.getValue(eContext);
-			if (value == null) {
-				if (expectedValue == null)
-					return; // no point doing other
-				// checks
-				assertEquals("Expression returned null value, but expected '" + expectedValue + "'", expectedValue,
-						null);
-			}
-			Class<? extends Object> resultType = value.getClass();
-			if (expectedValue instanceof String) {
-				assertEquals("Did not get expected value for expression '" + expression + "'.", expectedValue,
-						ExpressionTestCase.stringValueOf(value));
-			} else {
-				assertEquals("Did not get expected value for expression '" + expression + "'.", expectedValue, value);
-			}
-//			assertEquals("Did not get expected value for expression '" + expression + "'.", expectedValue,
-//					ExpressionTestCase.stringValueOf(value));
-			assertEquals("Type of the result was not as expected.  Expected '" + expectedClassOfResult
-					+ "' but result was of type '" + resultType + "'", expectedClassOfResult
-					.equals/* isAssignableFrom */(resultType), true);
-			// TODO isAssignableFrom would allow some room for compatibility
-			// in the above expression...
+			assertEquals("Expression returned null value, but expected '" + expectedValue + "'", expectedValue, null);
+		}
+		Class<? extends Object> resultType = value.getClass();
+		if (expectedValue instanceof String) {
+			assertEquals("Did not get expected value for expression '" + expression + "'.", expectedValue,
+					ExpressionTestCase.stringValueOf(value));
+		}
+		else {
+			assertEquals("Did not get expected value for expression '" + expression + "'.", expectedValue, value);
+		}
+		assertEquals("Type of the result was not as expected.  Expected '" + expectedClassOfResult +
+				"' but result was of type '" + resultType + "'", expectedClassOfResult.equals(resultType), true);
 
-			boolean isWritable = e.isWritable(eContext);
-			if (isWritable != shouldBeWritable) {
-				if (shouldBeWritable)
-					fail("Expected the expression to be writable but it is not");
-				else
-					fail("Expected the expression to be readonly but it is not");
-			}
-		} catch (EvaluationException ee) {
-			ee.printStackTrace();
-			fail("Unexpected Exception: " + ee.getMessage());
-		} catch (ParseException pe) {
-			pe.printStackTrace();
-			fail("Unexpected Exception: " + pe.getMessage());
+		boolean isWritable = expr.isWritable(eContext);
+		if (isWritable != shouldBeWritable) {
+			if (shouldBeWritable)
+				fail("Expected the expression to be writable but it is not");
+			else
+				fail("Expected the expression to be readonly but it is not");
 		}
 	}
 
 	/**
-	 * Evaluate the specified expression and ensure the expected message comes out. The message may have inserts and
-	 * they will be checked if otherProperties is specified. The first entry in otherProperties should always be the
-	 * position.
-	 * @param expression The expression to evaluate
-	 * @param expectedMessage The expected message
-	 * @param otherProperties The expected inserts within the message
+	 * Evaluate the specified expression and ensure the expected message comes out.
+	 * The message may have inserts and they will be checked if otherProperties is specified.
+	 * The first entry in otherProperties should always be the position.
+	 * @param expression the expression to evaluate
+	 * @param expectedMessage the expected message
+	 * @param otherProperties the expected inserts within the message
 	 */
 	protected void evaluateAndCheckError(String expression, SpelMessage expectedMessage, Object... otherProperties) {
 		evaluateAndCheckError(expression, null, expectedMessage, otherProperties);
 	}
 
 	/**
-	 * Evaluate the specified expression and ensure the expected message comes out. The message may have inserts and
-	 * they will be checked if otherProperties is specified. The first entry in otherProperties should always be the
-	 * position.
-	 * @param expression The expression to evaluate
-	 * @param expectedReturnType Ask the expression return value to be of this type if possible (null indicates don't
-	 * ask for conversion)
-	 * @param expectedMessage The expected message
-	 * @param otherProperties The expected inserts within the message
+	 * Evaluate the specified expression and ensure the expected message comes out.
+	 * The message may have inserts and they will be checked if otherProperties is specified.
+	 * The first entry in otherProperties should always be the position.
+	 * @param expression the expression to evaluate
+	 * @param expectedReturnType ask the expression return value to be of this type if possible
+	 * ({@code null} indicates don't ask for conversion)
+	 * @param expectedMessage the expected message
+	 * @param otherProperties the expected inserts within the message
 	 */
 	protected void evaluateAndCheckError(String expression, Class<?> expectedReturnType, SpelMessage expectedMessage,
 			Object... otherProperties) {
@@ -226,18 +184,16 @@ public abstract class ExpressionTestCase {
 				fail("Parser returned null for expression");
 			}
 			if (expectedReturnType != null) {
-				@SuppressWarnings("unused")
-				Object value = expr.getValue(eContext, expectedReturnType);
-			} else {
-				@SuppressWarnings("unused")
-				Object value = expr.getValue(eContext);
+				expr.getValue(eContext, expectedReturnType);
+			}
+			else {
+				expr.getValue(eContext);
 			}
 			fail("Should have failed with message " + expectedMessage);
-		} catch (EvaluationException ee) {
+		}
+		catch (EvaluationException ee) {
 			SpelEvaluationException ex = (SpelEvaluationException) ee;
 			if (ex.getMessageCode() != expectedMessage) {
-//				System.out.println(ex.getMessage());
-				ex.printStackTrace();
 				assertEquals("Failed to get expected message", expectedMessage, ex.getMessageCode());
 			}
 			if (otherProperties != null && otherProperties.length != 0) {
@@ -251,66 +207,49 @@ public abstract class ExpressionTestCase {
 						inserts = new Object[0];
 					}
 					if (inserts.length < otherProperties.length - 1) {
-						ex.printStackTrace();
-						fail("Cannot check " + (otherProperties.length - 1)
-								+ " properties of the exception, it only has " + inserts.length + " inserts");
+						fail("Cannot check " + (otherProperties.length - 1) +
+								" properties of the exception, it only has " + inserts.length + " inserts");
 					}
 					for (int i = 1; i < otherProperties.length; i++) {
 						if (otherProperties[i] == null) {
 							if (inserts[i - 1] != null) {
-								ex.printStackTrace();
-								fail("Insert does not match, expected 'null' but insert value was '" + inserts[i - 1]
-										+ "'");
+								fail("Insert does not match, expected 'null' but insert value was '" +
+										inserts[i - 1] + "'");
 							}
-						} else if (inserts[i - 1] == null) {
+						}
+						else if (inserts[i - 1] == null) {
 							if (otherProperties[i] != null) {
-								ex.printStackTrace();
-								fail("Insert does not match, expected '" + otherProperties[i]
-										+ "' but insert value was 'null'");
+								fail("Insert does not match, expected '" + otherProperties[i] +
+										"' but insert value was 'null'");
 							}
-						} else if (!inserts[i - 1].equals(otherProperties[i])) {
-							ex.printStackTrace();
-							fail("Insert does not match, expected '" + otherProperties[i] + "' but insert value was '"
-									+ inserts[i - 1] + "'");
+						}
+						else if (!inserts[i - 1].equals(otherProperties[i])) {
+							fail("Insert does not match, expected '" + otherProperties[i] +
+									"' but insert value was '" + inserts[i - 1] + "'");
 						}
 					}
 				}
 			}
-		} catch (ParseException pe) {
-			pe.printStackTrace();
-			fail("Unexpected Exception: " + pe.getMessage());
 		}
 	}
 
 	/**
-	 * Parse the specified expression and ensure the expected message comes out. The message may have inserts and they
-	 * will be checked if otherProperties is specified. The first entry in otherProperties should always be the
-	 * position.
-	 * @param expression The expression to evaluate
-	 * @param expectedMessage The expected message
-	 * @param otherProperties The expected inserts within the message
+	 * Parse the specified expression and ensure the expected message comes out.
+	 * The message may have inserts and they will be checked if otherProperties is specified.
+	 * The first entry in otherProperties should always be the position.
+	 * @param expression the expression to evaluate
+	 * @param expectedMessage the expected message
+	 * @param otherProperties the expected inserts within the message
 	 */
 	protected void parseAndCheckError(String expression, SpelMessage expectedMessage, Object... otherProperties) {
 		try {
 			Expression expr = parser.parseExpression(expression);
 			SpelUtilities.printAbstractSyntaxTree(System.out, expr);
 			fail("Parsing should have failed!");
-		} catch (ParseException pe) {
-//			pe.printStackTrace();
-//			Throwable t = pe.getCause();
-//			if (t == null) {
-//				fail("ParseException caught with no defined cause");
-//			}
-//			if (!(t instanceof SpelEvaluationException)) {
-//				t.printStackTrace();
-//				fail("Cause of parse exception is not a SpelException");
-//			}
-//			SpelEvaluationException ex = (SpelEvaluationException) t;
-//			pe.printStackTrace();
+		}
+		catch (ParseException pe) {
 			SpelParseException ex = (SpelParseException)pe;
 			if (ex.getMessageCode() != expectedMessage) {
-//				System.out.println(ex.getMessage());
-				ex.printStackTrace();
 				assertEquals("Failed to get expected message", expectedMessage, ex.getMessageCode());
 			}
 			if (otherProperties != null && otherProperties.length != 0) {
@@ -324,15 +263,13 @@ public abstract class ExpressionTestCase {
 						inserts = new Object[0];
 					}
 					if (inserts.length < otherProperties.length - 1) {
-						ex.printStackTrace();
-						fail("Cannot check " + (otherProperties.length - 1)
-								+ " properties of the exception, it only has " + inserts.length + " inserts");
+						fail("Cannot check " + (otherProperties.length - 1) +
+								" properties of the exception, it only has " + inserts.length + " inserts");
 					}
 					for (int i = 1; i < otherProperties.length; i++) {
 						if (!inserts[i - 1].equals(otherProperties[i])) {
-							ex.printStackTrace();
-							fail("Insert does not match, expected '" + otherProperties[i] + "' but insert value was '"
-									+ inserts[i - 1] + "'");
+							fail("Insert does not match, expected '" + otherProperties[i] +
+									"' but insert value was '" + inserts[i - 1] + "'");
 						}
 					}
 				}
@@ -340,12 +277,13 @@ public abstract class ExpressionTestCase {
 		}
 	}
 
+
 	public static String stringValueOf(Object value) {
 		return stringValueOf(value, false);
 	}
+
 	/**
 	 * Produce a nice string representation of the input object.
-	 *
 	 * @param value object to be formatted
 	 * @return a nice string
 	 */
@@ -368,7 +306,8 @@ public abstract class ExpressionTestCase {
 						sb.append(stringValueOf(l[j]));
 					}
 					sb.append("}");
-				} else if (primitiveType == Long.TYPE) {
+				}
+				else if (primitiveType == Long.TYPE) {
 					long[] l = (long[]) value;
 					sb.append("long[").append(l.length).append("]{");
 					for (int j = 0; j < l.length; j++) {
@@ -378,11 +317,13 @@ public abstract class ExpressionTestCase {
 						sb.append(stringValueOf(l[j]));
 					}
 					sb.append("}");
-				} else {
-					throw new RuntimeException("Please implement support for type " + primitiveType.getName()
-							+ " in ExpressionTestCase.stringValueOf()");
 				}
-			} else if (value.getClass().getComponentType().isArray()) {
+				else {
+					throw new RuntimeException("Please implement support for type " + primitiveType.getName() +
+							" in ExpressionTestCase.stringValueOf()");
+				}
+			}
+			else if (value.getClass().getComponentType().isArray()) {
 				List<Object> l = Arrays.asList((Object[]) value);
 				if (!isNested) {
 					sb.append(value.getClass().getComponentType().getName());
@@ -397,7 +338,8 @@ public abstract class ExpressionTestCase {
 					sb.append(stringValueOf(object, true));
 				}
 				sb.append("}");
-			} else {
+			}
+			else {
 				List<Object> l = Arrays.asList((Object[]) value);
 				if (!isNested) {
 					sb.append(value.getClass().getComponentType().getName());
@@ -414,7 +356,8 @@ public abstract class ExpressionTestCase {
 				sb.append("}");
 			}
 			return sb.toString();
-		} else {
+		}
+		else {
 			return value.toString();
 		}
 	}
