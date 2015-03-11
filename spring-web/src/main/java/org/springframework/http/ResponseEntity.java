@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,6 +59,7 @@ import org.springframework.util.ObjectUtils;
  * </pre>
  *
  * @author Arjen Poutsma
+ * @author Brian Clozel
  * @since 3.0.2
  * @see #getStatusCode()
  */
@@ -319,6 +320,20 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 		B location(URI location);
 
 		/**
+		 * Set the caching directives for the resource, as specified by the
+		 * {@code Cache-Control} header.
+		 *
+		 * <p>A {@code CacheControl} instance can be built like
+		 * {@code CacheControl.maxAge(3600).cachePublic().noTransform()}.
+		 *
+		 * @param cacheControl the instance that builds cache related HTTP response headers
+		 * @return this builder
+		 * @see <a href="https://tools.ietf.org/html/rfc7234#section-5.2">RFC-7234 Section 5.2</a>
+		 * @since 4.2
+		 */
+		B cacheControl(CacheControl cacheControl);
+
+		/**
 		 * Build the response entity with no body.
 		 * @return the response entity
 		 * @see BodyBuilder#body(Object)
@@ -420,6 +435,15 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 		@Override
 		public BodyBuilder location(URI location) {
 			this.headers.setLocation(location);
+			return this;
+		}
+
+		@Override
+		public BodyBuilder cacheControl(CacheControl cacheControl) {
+			String ccValue = cacheControl.getHeaderValue();
+			if(ccValue != null) {
+				this.headers.setCacheControl(cacheControl.getHeaderValue());
+			}
 			return this;
 		}
 

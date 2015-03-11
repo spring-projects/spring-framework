@@ -19,10 +19,13 @@ package org.springframework.http;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
+import org.hamcrest.Matchers;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
+
 
 /**
  * @author Arjen Poutsma
@@ -163,7 +166,7 @@ public class ResponseEntityTests {
 	}
 
 	@Test
-	public void headersCopy(){
+	public void headersCopy() {
 		HttpHeaders customHeaders = new HttpHeaders();
 		customHeaders.set("X-CustomHeader", "vale");
 
@@ -178,7 +181,7 @@ public class ResponseEntityTests {
 	}
 
 	@Test  // SPR-12792
-	public void headersCopyWithEmptyAndNull(){
+	public void headersCopyWithEmptyAndNull() {
 		ResponseEntity<Void> responseEntityWithEmptyHeaders =
 				ResponseEntity.ok().headers(new HttpHeaders()).build();
 		ResponseEntity<Void> responseEntityWithNullHeaders =
@@ -187,6 +190,60 @@ public class ResponseEntityTests {
 		assertEquals(HttpStatus.OK, responseEntityWithEmptyHeaders.getStatusCode());
 		assertTrue(responseEntityWithEmptyHeaders.getHeaders().isEmpty());
 		assertEquals(responseEntityWithEmptyHeaders.toString(), responseEntityWithNullHeaders.toString());
+	}
+
+	@Test
+	public void emptyCacheControl() {
+
+		Integer entity = new Integer(42);
+
+		ResponseEntity<Integer> responseEntity =
+				ResponseEntity.status(HttpStatus.OK)
+						.cacheControl(CacheControl.empty())
+						.body(entity);
+
+		assertNotNull(responseEntity);
+		assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
+		assertFalse(responseEntity.getHeaders().containsKey(HttpHeaders.CACHE_CONTROL));
+		assertEquals(entity, responseEntity.getBody());
+	}
+
+	@Test
+	public void cacheControl() {
+
+		Integer entity = new Integer(42);
+
+		ResponseEntity<Integer> responseEntity =
+				ResponseEntity.status(HttpStatus.OK)
+						.cacheControl(CacheControl.maxAge(1, TimeUnit.HOURS).cachePrivate().
+								mustRevalidate().proxyRevalidate().sMaxAge(30, TimeUnit.MINUTES))
+						.body(entity);
+
+		assertNotNull(responseEntity);
+		assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
+		assertTrue(responseEntity.getHeaders().containsKey(HttpHeaders.CACHE_CONTROL));
+		assertEquals(entity, responseEntity.getBody());
+		String cacheControlHeader = responseEntity.getHeaders().getCacheControl();
+		assertThat(cacheControlHeader, Matchers.equalTo("max-age=3600, must-revalidate, private, proxy-revalidate, s-maxage=1800"));
+	}
+
+	@Test
+	public void cacheControlNoCache() {
+
+		Integer entity = new Integer(42);
+
+		ResponseEntity<Integer> responseEntity =
+				ResponseEntity.status(HttpStatus.OK)
+						.cacheControl(CacheControl.noStore())
+						.body(entity);
+
+		assertNotNull(responseEntity);
+		assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
+		assertTrue(responseEntity.getHeaders().containsKey(HttpHeaders.CACHE_CONTROL));
+		assertEquals(entity, responseEntity.getBody());
+
+		String cacheControlHeader = responseEntity.getHeaders().getCacheControl();
+		assertThat(cacheControlHeader, Matchers.equalTo("no-store"));
 	}
 
 }
