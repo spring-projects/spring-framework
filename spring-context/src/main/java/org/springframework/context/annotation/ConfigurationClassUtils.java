@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.context.annotation;
 
 import java.io.IOException;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.logging.Log;
@@ -27,6 +28,9 @@ import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.core.Conventions;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.core.annotation.Order;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.core.type.StandardAnnotationMetadata;
 import org.springframework.core.type.classreading.MetadataReader;
@@ -48,6 +52,9 @@ abstract class ConfigurationClassUtils {
 
 	private static final String CONFIGURATION_CLASS_ATTRIBUTE =
 			Conventions.getQualifiedAttributeName(ConfigurationClassPostProcessor.class, "configurationClass");
+
+	private static final String ORDER_ATTRIBUTE =
+			Conventions.getQualifiedAttributeName(ConfigurationClassPostProcessor.class, "order");
 
 
 	private static final Log logger = LogFactory.getLog(ConfigurationClassUtils.class);
@@ -99,6 +106,11 @@ abstract class ConfigurationClassUtils {
 				}
 				return false;
 			}
+		}
+
+		Map<String, Object> orderAttributes = metadata.getAnnotationAttributes(Order.class.getName());
+		if (orderAttributes != null) {
+			beanDef.setAttribute(ORDER_ATTRIBUTE, orderAttributes.get(AnnotationUtils.VALUE));
 		}
 
 		if (isFullConfigurationCandidate(metadata)) {
@@ -171,6 +183,18 @@ abstract class ConfigurationClassUtils {
 	 */
 	public static boolean isLiteConfigurationClass(BeanDefinition beanDef) {
 		return CONFIGURATION_CLASS_LITE.equals(beanDef.getAttribute(CONFIGURATION_CLASS_ATTRIBUTE));
+	}
+
+	/**
+	 * Determine the order for the given configuration class bean definition,
+	 * as set by {@link #checkConfigurationClassCandidate}.
+	 * @param beanDef the bean definition to check
+	 * @return the {@link @Order} annotation value on the configuration class,
+	 * or {@link Ordered#LOWEST_PRECEDENCE} if none declared
+	 */
+	public static int getOrder(BeanDefinition beanDef) {
+		Integer order = (Integer) beanDef.getAttribute(ORDER_ATTRIBUTE);
+		return (order != null ? order : Ordered.LOWEST_PRECEDENCE);
 	}
 
 }

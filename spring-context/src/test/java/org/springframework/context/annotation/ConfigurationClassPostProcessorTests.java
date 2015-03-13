@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ import org.junit.Test;
 import org.springframework.aop.scope.ScopedObject;
 import org.springframework.aop.scope.ScopedProxyUtils;
 import org.springframework.beans.factory.BeanCreationException;
+import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,6 +41,7 @@ import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.componentscan.simple.SimpleComponent;
+import org.springframework.core.annotation.Order;
 import org.springframework.core.env.StandardEnvironment;
 import org.springframework.core.io.DescriptiveResource;
 import org.springframework.stereotype.Component;
@@ -272,6 +274,35 @@ public class ConfigurationClassPostProcessorTests {
 	}
 
 	@Test
+	public void postProcessorFailsOnImplicitOverrideIfOverridingIsNotAllowed() {
+		RootBeanDefinition rbd = new RootBeanDefinition(TestBean.class);
+		rbd.setResource(new DescriptiveResource("XML or something"));
+		beanFactory.registerBeanDefinition("bar", rbd);
+		beanFactory.registerBeanDefinition("config", new RootBeanDefinition(SingletonBeanConfig.class));
+		beanFactory.setAllowBeanDefinitionOverriding(false);
+		ConfigurationClassPostProcessor pp = new ConfigurationClassPostProcessor();
+		try {
+			pp.postProcessBeanFactory(beanFactory);
+			fail("Should have thrown BeanDefinitionStoreException");
+		}
+		catch (BeanDefinitionStoreException ex) {
+			assertTrue(ex.getMessage().contains("bar"));
+			assertTrue(ex.getMessage().contains("SingletonBeanConfig"));
+			assertTrue(ex.getMessage().contains(TestBean.class.getName()));
+		}
+	}
+
+	@Test
+	public void configurationClassesProcessedInCorrectOrder() {
+		beanFactory.registerBeanDefinition("config1", new RootBeanDefinition(OverridingSingletonBeanConfig.class));
+		beanFactory.registerBeanDefinition("config2", new RootBeanDefinition(SingletonBeanConfig.class));
+		ConfigurationClassPostProcessor pp = new ConfigurationClassPostProcessor();
+		pp.postProcessBeanFactory(beanFactory);
+		assertTrue(beanFactory.getBean(Foo.class) instanceof ExtendedFoo);
+		beanFactory.getBean(Bar.class);
+	}
+
+	@Test
 	public void scopedProxyTargetMarkedAsNonAutowireCandidate() {
 		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
 		bpp.setBeanFactory(beanFactory);
@@ -485,6 +516,7 @@ public class ConfigurationClassPostProcessorTests {
 	// -------------------------------------------------------------------------
 
 	@Configuration
+	@Order(1)
 	static class SingletonBeanConfig {
 
 		public @Bean
@@ -498,7 +530,25 @@ public class ConfigurationClassPostProcessorTests {
 		}
 	}
 
+	@Configuration
+	@Order(2)
+	static class OverridingSingletonBeanConfig {
+
+		public @Bean
+		ExtendedFoo foo() {
+			return new ExtendedFoo();
+		}
+
+		public @Bean
+		Bar bar() {
+			return new Bar(foo());
+		}
+	}
+
 	static class Foo {
+	}
+
+	static class ExtendedFoo extends Foo {
 	}
 
 	static class Bar {
