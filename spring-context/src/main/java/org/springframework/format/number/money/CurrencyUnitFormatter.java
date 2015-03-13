@@ -14,33 +14,31 @@
  * limitations under the License.
  */
 
-package org.springframework.format.number;
+package org.springframework.format.number.money;
+
+import java.util.Locale;
+import javax.money.CurrencyUnit;
+import javax.money.MonetaryCurrencies;
+
+import org.springframework.format.Formatter;
 
 /**
- * A general-purpose Number formatter.
+ * Formatter for JSR-354 {@link javax.money.CurrencyUnit} values,
+ * from and to currency code Strings.
  *
- * @author Keith Donald
  * @author Juergen Hoeller
- * @since 3.0
- * @deprecated as of Spring 4.2, in favor of the more clearly named
- * {@link NumberStyleFormatter}
+ * @since 4.2
  */
-@Deprecated
-public class NumberFormatter extends NumberStyleFormatter {
+public class CurrencyUnitFormatter implements Formatter<CurrencyUnit> {
 
-	/**
-	 * Create a new NumberFormatter without a pattern.
-	 */
-	public NumberFormatter() {
+	@Override
+	public String print(CurrencyUnit object, Locale locale) {
+		return object.getCurrencyCode();
 	}
 
-	/**
-	 * Create a new NumberFormatter with the specified pattern.
-	 * @param pattern the format pattern
-	 * @see #setPattern
-	 */
-	public NumberFormatter(String pattern) {
-		super(pattern);
+	@Override
+	public CurrencyUnit parse(String text, Locale locale) {
+		return MonetaryCurrencies.getCurrency(text);
 	}
 
 }

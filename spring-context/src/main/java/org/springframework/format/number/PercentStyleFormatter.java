@@ -16,31 +16,31 @@
 
 package org.springframework.format.number;
 
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
+import java.util.Locale;
+
 /**
- * A general-purpose Number formatter.
+ * A formatter for number values in percent style.
+ *
+ * <p>Delegates to {@link java.text.NumberFormat#getPercentInstance(Locale)}.
+ * Configures BigDecimal parsing so there is no loss in precision.
+ * The {@link #parse(String, Locale)} routine always returns a BigDecimal.
  *
  * @author Keith Donald
  * @author Juergen Hoeller
- * @since 3.0
- * @deprecated as of Spring 4.2, in favor of the more clearly named
- * {@link NumberStyleFormatter}
+ * @since 4.2
+ * @see #setLenient
  */
-@Deprecated
-public class NumberFormatter extends NumberStyleFormatter {
+public class PercentStyleFormatter extends AbstractNumberFormatter {
 
-	/**
-	 * Create a new NumberFormatter without a pattern.
-	 */
-	public NumberFormatter() {
-	}
-
-	/**
-	 * Create a new NumberFormatter with the specified pattern.
-	 * @param pattern the format pattern
-	 * @see #setPattern
-	 */
-	public NumberFormatter(String pattern) {
-		super(pattern);
+	@Override
+	protected NumberFormat getNumberFormat(Locale locale) {
+		NumberFormat format = NumberFormat.getPercentInstance(locale);
+		if (format instanceof DecimalFormat) {
+			((DecimalFormat) format).setParseBigDecimal(true);
+		}
+		return format;
 	}
 
 }

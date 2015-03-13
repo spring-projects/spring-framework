@@ -28,15 +28,19 @@ import java.lang.annotation.Target;
  * <p>Supports formatting by style or custom pattern string.
  * Can be applied to any JDK {@code java.lang.Number} type.
  *
- * <p>For style-based formatting, set the {@link #style} attribute to be the desired {@link Style}.
- * For custom formatting, set the {@link #pattern} attribute to be the number pattern, such as {@code #, ###.##}.
+ * <p>For style-based formatting, set the {@link #style} attribute to be the
+ * desired {@link Style}. For custom formatting, set the {@link #pattern}
+ * attribute to be the number pattern, such as {@code #, ###.##}.
  *
- * <p>Each attribute is mutually exclusive, so only set one attribute per annotation instance
- * (the one most convenient one for your formatting needs). When the pattern attribute is specified,
- * it takes precedence over the style attribute. When no annotation attributes are specified,
- * the default format applied is style-based with a style of {@link Style#NUMBER}.
+ * <p>Each attribute is mutually exclusive, so only set one attribute per
+ * annotation instance (the one most convenient one for your formatting needs).
+ * When the {@link #pattern} attribute is specified, it takes precedence over
+ * the {@link #style} attribute. When no annotation attributes are specified,
+ * the default format applied is style-based for either number of currency,
+ * depending on the annotated field type.
  *
  * @author Keith Donald
+ * @author Juergen Hoeller
  * @since 3.0
  * @see java.text.NumberFormat
  */
@@ -47,11 +51,12 @@ public @interface NumberFormat {
 
 	/**
 	 * The style pattern to use to format the field.
-	 * <p>Defaults to {@link Style#NUMBER} for general-purpose number formatter.
-	 * Set this attribute when you wish to format your field in accordance with a
-	 * common style other than the default style.
+	 * <p>Defaults to {@link Style#DEFAULT} for general-purpose number formatting
+	 * for most annotated types, except for money types which default to currency
+	 * formatting. Set this attribute when you wish to format your field in
+	 * accordance with a common style other than the default style.
 	 */
-	Style style() default Style.NUMBER;
+	Style style() default Style.DEFAULT;
 
 	/**
 	 * The custom pattern to use to format the field.
@@ -66,6 +71,13 @@ public @interface NumberFormat {
 	 * Common number format styles.
 	 */
 	public enum Style {
+
+		/**
+		 * The default format for the annotated type: typically number
+		 * but possibly currency for a money type.
+		 * @since 4.2
+		 */
+		DEFAULT,
 
 		/**
 		 * The general-purpose number format for the current locale.

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,19 +27,19 @@ import static org.junit.Assert.*;
 /**
  * @author Keith Donald
  */
-public class PercentFormatterTests {
+public class NumberStyleFormatterTests {
 
-	private PercentFormatter formatter = new PercentFormatter();
+	private final NumberStyleFormatter formatter = new NumberStyleFormatter();
+
 
 	@Test
 	public void formatValue() {
-		assertEquals("23%", formatter.print(new BigDecimal(".23"), Locale.US));
+		assertEquals("23.56", formatter.print(new BigDecimal("23.56"), Locale.US));
 	}
 
 	@Test
 	public void parseValue() throws ParseException {
-		assertEquals(new BigDecimal(".2356"), formatter.parse("23.56%",
-				Locale.US));
+		assertEquals(new BigDecimal("23.56"), formatter.parse("23.56", Locale.US));
 	}
 
 	@Test(expected = ParseException.class)
@@ -49,7 +49,7 @@ public class PercentFormatterTests {
 
 	@Test(expected = ParseException.class)
 	public void parsePercentValueNotLenientFailure() throws ParseException {
-		formatter.parse("23.56%bogus", Locale.US);
+		formatter.parse("23.56bogus", Locale.US);
 	}
 
 }

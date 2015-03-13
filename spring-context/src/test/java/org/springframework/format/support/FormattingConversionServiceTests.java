@@ -28,7 +28,6 @@ import java.util.Properties;
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 import org.joda.time.format.DateTimeFormat;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -53,7 +52,7 @@ import org.springframework.format.annotation.NumberFormat;
 import org.springframework.format.datetime.joda.DateTimeParser;
 import org.springframework.format.datetime.joda.JodaDateTimeFormatAnnotationFormatterFactory;
 import org.springframework.format.datetime.joda.ReadablePartialPrinter;
-import org.springframework.format.number.NumberFormatter;
+import org.springframework.format.number.NumberStyleFormatter;
 
 import static org.junit.Assert.*;
 
@@ -67,6 +66,7 @@ public class FormattingConversionServiceTests {
 
 	private FormattingConversionService formattingService;
 
+
 	@Before
 	public void setUp() {
 		formattingService = new FormattingConversionService();
@@ -79,9 +79,10 @@ public class FormattingConversionServiceTests {
 		LocaleContextHolder.setLocale(null);
 	}
 
+
 	@Test
 	public void testFormatFieldForTypeWithFormatter() throws ParseException {
-		formattingService.addFormatterForFieldType(Number.class, new NumberFormatter());
+		formattingService.addFormatterForFieldType(Number.class, new NumberStyleFormatter());
 		String formatted = formattingService.convert(3, String.class);
 		assertEquals("3", formatted);
 		Integer i = formattingService.convert("3", Integer.class);
@@ -239,26 +240,26 @@ public class FormattingConversionServiceTests {
 
 	@Test
 	public void testPrintNull() throws ParseException {
-		formattingService.addFormatterForFieldType(Number.class, new NumberFormatter());
+		formattingService.addFormatterForFieldType(Number.class, new NumberStyleFormatter());
 		assertEquals("", formattingService.convert(null, TypeDescriptor.valueOf(Integer.class), TypeDescriptor.valueOf(String.class)));
 	}
 
 	@Test
 	public void testParseNull() throws ParseException {
-		formattingService.addFormatterForFieldType(Number.class, new NumberFormatter());
+		formattingService.addFormatterForFieldType(Number.class, new NumberStyleFormatter());
 		assertNull(formattingService
 				.convert(null, TypeDescriptor.valueOf(String.class), TypeDescriptor.valueOf(Integer.class)));
 	}
 
 	@Test
 	public void testParseEmptyString() throws ParseException {
-		formattingService.addFormatterForFieldType(Number.class, new NumberFormatter());
+		formattingService.addFormatterForFieldType(Number.class, new NumberStyleFormatter());
 		assertNull(formattingService.convert("", TypeDescriptor.valueOf(String.class), TypeDescriptor.valueOf(Integer.class)));
 	}
 
 	@Test
 	public void testParseBlankString() throws ParseException {
-		formattingService.addFormatterForFieldType(Number.class, new NumberFormatter());
+		formattingService.addFormatterForFieldType(Number.class, new NumberStyleFormatter());
 		assertNull(formattingService.convert("     ", TypeDescriptor.valueOf(String.class), TypeDescriptor.valueOf(Integer.class)));
 	}
 
@@ -270,7 +271,7 @@ public class FormattingConversionServiceTests {
 
 	@Test(expected=ConversionFailedException.class)
 	public void testParseNullPrimitiveProperty() throws ParseException {
-		formattingService.addFormatterForFieldType(Integer.class, new NumberFormatter());
+		formattingService.addFormatterForFieldType(Integer.class, new NumberStyleFormatter());
 		assertNull(formattingService.convert(null, TypeDescriptor.valueOf(String.class), TypeDescriptor.valueOf(int.class)));
 	}
 
