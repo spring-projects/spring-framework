@@ -297,7 +297,8 @@ public class UriComponentsBuilder implements Cloneable {
 
 		String portHeader = request.getHeaders().getFirst("X-Forwarded-Port");
 		if (StringUtils.hasText(portHeader)) {
-			port = Integer.parseInt(portHeader);
+			String[] ports = StringUtils.commaDelimitedListToStringArray(portHeader);
+			port = Integer.parseInt(ports[0]);
 		}
 
 		String protocolHeader = request.getHeaders().getFirst("X-Forwarded-Proto");
