@@ -1904,6 +1904,21 @@ public class SpelReproTests extends AbstractExpressionTests {
 		assertTrue(expression.getValue(sec) instanceof ArrayList);
 	}
 
+	@Test
+	public void SPR12808() throws Exception {
+		SpelExpressionParser parser = new SpelExpressionParser();
+		Expression expression = parser.parseExpression("T(org.springframework.expression.spel.SpelReproTests.DistanceEnforcer).from(#no)");
+		StandardEvaluationContext sec = new StandardEvaluationContext();
+		sec.setVariable("no", new Integer(1));
+		assertTrue(expression.getValue(sec).toString().startsWith("Integer"));
+		sec = new StandardEvaluationContext();
+		sec.setVariable("no", new Float(1.0));
+		assertTrue(expression.getValue(sec).toString().startsWith("Number"));
+		sec = new StandardEvaluationContext();
+		sec.setVariable("no", "1.0");
+		assertTrue(expression.getValue(sec).toString().startsWith("Object"));
+	}
+
 
 	private static enum ABC { A, B, C }
 
@@ -2198,6 +2213,22 @@ public class SpelReproTests extends AbstractExpressionTests {
 
 		public static <T> List<T> newArrayList(Object... elements) {
 			throw new UnsupportedOperationException();
+		}
+	}
+
+
+	public static class DistanceEnforcer {
+
+		public static String from(Number no) {
+			return "Number:" + no.toString();
+		}
+
+		public static String from(Integer no) {
+			return "Integer:" + no.toString();
+		}
+
+		public static String from(Object no) {
+			return "Object:" + no.toString();
 		}
 	}
 
