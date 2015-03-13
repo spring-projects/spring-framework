@@ -303,7 +303,8 @@ public class UriComponentsBuilder implements Cloneable {
 
 		String protocolHeader = request.getHeaders().getFirst("X-Forwarded-Proto");
 		if (StringUtils.hasText(protocolHeader)) {
-			scheme = protocolHeader;
+			String[] protocols = StringUtils.commaDelimitedListToStringArray(protocolHeader);
+			scheme = protocols[0];
 		}
 
 		builder.scheme(scheme);
