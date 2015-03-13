@@ -20,7 +20,6 @@ import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.Arrays;
 import java.util.Enumeration;
@@ -88,14 +87,36 @@ public class ContentCachingRequestWrapper extends HttpServletRequestWrapper {
 		return this.reader;
 	}
 
-	/**
-	 * Return the cached request content as a byte array.
-	 */
-	public byte[] getContentAsByteArray() {
+	@Override
+	public String getParameter(String name) {
 		if(this.cachedContent.size() == 0 && isFormPost()) {
 			writeRequestParamsToContent();
 		}
-		return this.cachedContent.toByteArray();
+		return super.getParameter(name);
+	}
+
+	@Override
+	public Map<String, String[]> getParameterMap() {
+		if(this.cachedContent.size() == 0 && isFormPost()) {
+			writeRequestParamsToContent();
+		}
+		return super.getParameterMap();
+	}
+
+	@Override
+	public Enumeration<String> getParameterNames() {
+		if(this.cachedContent.size() == 0 && isFormPost()) {
+			writeRequestParamsToContent();
+		}
+		return super.getParameterNames();
+	}
+
+	@Override
+	public String[] getParameterValues(String name) {
+		if(this.cachedContent.size() == 0 && isFormPost()) {
+			writeRequestParamsToContent();
+		}
+		return super.getParameterValues(name);
 	}
 
 	private boolean isFormPost() {
@@ -107,7 +128,7 @@ public class ContentCachingRequestWrapper extends HttpServletRequestWrapper {
 		try {
 			if (this.cachedContent.size() == 0) {
 				String requestEncoding = getCharacterEncoding();
-				Map<String, String[]> form = getParameterMap();
+				Map<String, String[]> form = super.getParameterMap();
 				for (Iterator<String> nameIterator = form.keySet().iterator(); nameIterator.hasNext(); ) {
 					String name = nameIterator.next();
 					List<String> values = Arrays.asList(form.get(name));
@@ -133,6 +154,13 @@ public class ContentCachingRequestWrapper extends HttpServletRequestWrapper {
 		}
 	}
 
+	/**
+	 * Return the cached request content as a byte array.
+	 */
+	public byte[] getContentAsByteArray() {
+		return this.cachedContent.toByteArray();
+	}
+
 	private class ContentCachingInputStream extends ServletInputStream {
 
 		private final ServletInputStream is;
@@ -150,5 +178,4 @@ public class ContentCachingRequestWrapper extends HttpServletRequestWrapper {
 			return ch;
 		}
 	}
-
 }
