@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,7 +39,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.util.WebUtils;
 
 /**
- * Base class for multipart resolvers that use Jakarta Commons FileUpload
+ * Base class for multipart resolvers that use Apache Commons FileUpload
  * 1.2 or above.
  *
  * <p>Provides common configuration properties and parsing functionality

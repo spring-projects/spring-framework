@@ -135,7 +135,7 @@ public class UriComponentsBuilder implements Cloneable {
 	// Factory methods
 
 	/**
-	 * Returns a new, empty builder.
+	 * Create a new, empty builder.
 	 * @return the new {@code UriComponentsBuilder}
 	 */
 	public static UriComponentsBuilder newInstance() {
@@ -143,7 +143,7 @@ public class UriComponentsBuilder implements Cloneable {
 	}
 
 	/**
-	 * Returns a builder that is initialized with the given path.
+	 * Create a builder that is initialized with the given path.
 	 * @param path the path to initialize with
 	 * @return the new {@code UriComponentsBuilder}
 	 */
@@ -154,7 +154,7 @@ public class UriComponentsBuilder implements Cloneable {
 	}
 
 	/**
-	 * Returns a builder that is initialized with the given {@code URI}.
+	 * Create a builder that is initialized with the given {@code URI}.
 	 * @param uri the URI to initialize with
 	 * @return the new {@code UriComponentsBuilder}
 	 */
@@ -165,7 +165,7 @@ public class UriComponentsBuilder implements Cloneable {
 	}
 
 	/**
-	 * Returns a builder that is initialized with the given URI string.
+	 * Create a builder that is initialized with the given URI string.
 	 * <p><strong>Note:</strong> The presence of reserved characters can prevent
 	 * correct parsing of the URI string. For example if a query parameter
 	 * contains {@code '='} or {@code '&'} characters, the query string cannot
@@ -225,7 +225,7 @@ public class UriComponentsBuilder implements Cloneable {
 	}
 
 	/**
-	 * Creates a new {@code UriComponents} object from the string HTTP URL.
+	 * Create a URI components builder from the given HTTP URL String.
 	 * <p><strong>Note:</strong> The presence of reserved characters can prevent
 	 * correct parsing of the URI string. For example if a query parameter
 	 * contains {@code '='} or {@code '&'} characters, the query string cannot
@@ -286,7 +286,7 @@ public class UriComponentsBuilder implements Cloneable {
 			String hostToUse = hosts[0];
 			if (hostToUse.contains(":")) {
 				String[] hostAndPort = StringUtils.split(hostToUse, ":");
-				host  = hostAndPort[0];
+				host = hostAndPort[0];
 				port = Integer.parseInt(hostAndPort[1]);
 			}
 			else {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,25 +30,23 @@ import org.springframework.web.multipart.MultipartException;
  * <p>There is one concrete implementation included in Spring:
  * <ul>
  * <li>{@link org.springframework.web.multipart.commons.CommonsMultipartResolver}
- * for Jakarta Commons FileUpload
+ * for Apache Commons FileUpload
  * </ul>
  *
  * <p>There is no default resolver implementation used for Spring
  * {@link org.springframework.web.portlet.DispatcherPortlet DispatcherPortlets},
  * as an application might choose to parse its multipart requests itself. To
- * define an implementation, create a bean with the id
- * {@link org.springframework.web.portlet.DispatcherPortlet#MULTIPART_RESOLVER_BEAN_NAME "portletMultipartResolver"}
+ * define an implementation, create a bean with the id "portletMultipartResolver"
  * in a {@code DispatcherPortlet's} application context. Such a resolver
  * gets applied to all requests handled by that {@code DispatcherPortlet}.
  *
  * <p>If a {@code DispatcherPortlet} detects a multipart request, it will
  * resolve it via the configured
- * {@link org.springframework.web.multipart.MultipartResolver} and pass on a
- * wrapped Portlet {@link ActionRequest}.
- * {@link org.springframework.web.portlet.mvc.Controller Controllers} can then
+ * {@link org.springframework.web.portlet.multipart.PortletMultipartResolver}
+ * and pass on a wrapped Portlet {@link ActionRequest}. Controllers can then
  * cast their given request to the {@link MultipartActionRequest} interface,
- * being able to access {@code MultipartFiles}. Note that this cast is
- * only supported in case of an actual multipart request.
+ * being able to access {@code MultipartFiles}. Note that this cast is only
+ * supported in case of an actual multipart request.
  *
  * <pre class="code"> public void handleActionRequest(ActionRequest request, ActionResponse response) {
  *   MultipartActionRequest multipartRequest = (MultipartActionRequest) request;
@@ -59,13 +57,12 @@ import org.springframework.web.multipart.MultipartException;
  * Instead of direct access, command or form controllers can register a
  * {@link org.springframework.web.multipart.support.ByteArrayMultipartFileEditor}
  * or {@link org.springframework.web.multipart.support.StringMultipartFileEditor}
- * with their data binder, to automatically apply multipart content to command
+ * with their data binder, to automatically apply multipart content to form
  * bean properties.
  *
- * <p>Note: There is hardly ever a need to access the
- * {@code MultipartResolver} itself from application code. It will simply
- * do its work behind the scenes, making {@code MultipartActionRequests}
- * available to controllers.
+ * <p>Note: There is hardly ever a need to access the {@code MultipartResolver}
+ * itself from application code. It will simply do its work behind the scenes,
+ * making {@code MultipartActionRequests} available to controllers.
  *
  * @author Juergen Hoeller
  * @since 2.0
