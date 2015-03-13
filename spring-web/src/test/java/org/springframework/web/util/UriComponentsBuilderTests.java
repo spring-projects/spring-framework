@@ -32,6 +32,7 @@ import java.util.Map;
 
 import org.junit.Test;
 
+import org.springframework.http.HttpRequest;
 import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.util.LinkedMultiValueMap;
@@ -237,8 +238,6 @@ public class UriComponentsBuilderTests {
 		assertEquals("bar@baz", result.getQueryParams().getFirst("foo"));
 	}
 
-	// Also see X-Forwarded-* related tests in ServletUriComponentsBuilderTests
-
 	@Test
 	public void fromHttpRequest() throws URISyntaxException {
 		MockHttpServletRequest request = new MockHttpServletRequest();
@@ -269,12 +268,139 @@ public class UriComponentsBuilderTests {
 		request.setServerPort(80);
 		request.setRequestURI("/rest/mobile/users/1");
 
-		UriComponents result = UriComponentsBuilder.fromHttpRequest(new ServletServerHttpRequest(request)).build();
+		HttpRequest httpRequest = new ServletServerHttpRequest(request);
+		UriComponents result = UriComponentsBuilder.fromHttpRequest(httpRequest).build();
+
 		assertEquals("https", result.getScheme());
 		assertEquals("84.198.58.199", result.getHost());
 		assertEquals(-1, result.getPort());
 		assertEquals("/rest/mobile/users/1", result.getPath());
 	}
+
+	@Test
+	public void fromHttpRequestWithForwardedHost() {
+		MockHttpServletRequest request = new MockHttpServletRequest();
+		request.setScheme("http");
+		request.setServerName("localhost");
+		request.setServerPort(-1);
+		request.setRequestURI("/mvc-showcase");
+		request.addHeader("X-Forwarded-Host", "anotherHost");
+
+		HttpRequest httpRequest = new ServletServerHttpRequest(request);
+		UriComponents result = UriComponentsBuilder.fromHttpRequest(httpRequest).build();
+
+		assertEquals("http://anotherHost/mvc-showcase", result.toString());
+	}
+
+	// SPR-10701
+
+	@Test
+	public void fromHttpRequestWithForwardedHostIncludingPort() {
+		MockHttpServletRequest request = new MockHttpServletRequest();
+		request.setScheme("http");
+		request.setServerName("localhost");
+		request.setServerPort(-1);
+		request.setRequestURI("/mvc-showcase");
+		request.addHeader("X-Forwarded-Host", "webtest.foo.bar.com:443");
+
+		HttpRequest httpRequest = new ServletServerHttpRequest(request);
+		UriComponents result = UriComponentsBuilder.fromHttpRequest(httpRequest).build();
+
+		assertEquals("webtest.foo.bar.com", result.getHost());
+		assertEquals(443, result.getPort());
+	}
+
+	// SPR-11140
+
+	@Test
+	public void fromHttpRequestWithForwardedHostMultiValuedHeader() {
+		MockHttpServletRequest request = new MockHttpServletRequest();
+		request.setScheme("http");
+		request.setServerName("localhost");
+		request.setServerPort(-1);
+		request.addHeader("X-Forwarded-Host", "a.example.org, b.example.org, c.example.org");
+
+		HttpRequest httpRequest = new ServletServerHttpRequest(request);
+		UriComponents result = UriComponentsBuilder.fromHttpRequest(httpRequest).build();
+
+		assertEquals("a.example.org", result.getHost());
+		assertEquals(-1, result.getPort());
+	}
+
+	// SPR-11855
+
+	@Test
+	public void fromHttpRequestWithForwardedHostAndPort() {
+		MockHttpServletRequest request = new MockHttpServletRequest();
+		request.setScheme("http");
+		request.setServerName("localhost");
+		request.setServerPort(8080);
+		request.addHeader("X-Forwarded-Host", "foobarhost");
+		request.addHeader("X-Forwarded-Port", "9090");
+
+		HttpRequest httpRequest = new ServletServerHttpRequest(request);
+		UriComponents result = UriComponentsBuilder.fromHttpRequest(httpRequest).build();
+
+		assertEquals("foobarhost", result.getHost());
+		assertEquals(9090, result.getPort());
+	}
+
+	// SPR-11872
+
+	@Test
+	public void fromHttpRequestWithForwardedHostWithDefaultPort() {
+		MockHttpServletRequest request = new MockHttpServletRequest();
+		request.setScheme("http");
+		request.setServerName("localhost");
+		request.setServerPort(10080);
+		request.addHeader("X-Forwarded-Host", "example.org");
+
+		HttpRequest httpRequest = new ServletServerHttpRequest(request);
+		UriComponents result = UriComponentsBuilder.fromHttpRequest(httpRequest).build();
+
+		assertEquals("example.org", result.getHost());
+		assertEquals(-1, result.getPort());
+	}
+
+
+	@Test
+	public void fromHttpRequestWithForwardedHostWithForwardedScheme() {
+		MockHttpServletRequest request = new MockHttpServletRequest();
+		request.setScheme("http");
+		request.setServerName("localhost");
+		request.setServerPort(10080);
+		request.addHeader("X-Forwarded-Host", "example.org");
+		request.addHeader("X-Forwarded-Proto", "https");
+
+		HttpRequest httpRequest = new ServletServerHttpRequest(request);
+		UriComponents result = UriComponentsBuilder.fromHttpRequest(httpRequest).build();
+
+		assertEquals("example.org", result.getHost());
+		assertEquals("https", result.getScheme());
+		assertEquals(-1, result.getPort());
+	}
+
+	// SPR-12771
+
+	@Test
+	public void fromHttpRequestWithForwardedProtoAndDefaultPort() {
+		MockHttpServletRequest request = new MockHttpServletRequest();
+		request.setScheme("http");
+		request.setServerName("localhost");
+		request.setServerPort(80);
+		request.setRequestURI("/mvc-showcase");
+		request.addHeader("X-Forwarded-Proto", "https");
+		request.addHeader("X-Forwarded-Host", "84.198.58.199");
+		request.addHeader("X-Forwarded-Port", "443");
+
+		HttpRequest httpRequest = new ServletServerHttpRequest(request);
+		UriComponents result = UriComponentsBuilder.fromHttpRequest(httpRequest).build();
+
+		assertEquals("https://84.198.58.199/mvc-showcase", result.toString());
+	}
+
+
+
 
 	@Test
 	public void path() throws URISyntaxException {
