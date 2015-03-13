@@ -16,20 +16,26 @@
 
 package example.scannable_implicitbasepackage;
 
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.Configuration;
+import org.springframework.stereotype.Component;
 
 /**
- * @author Phillip Webb
+ * @author Juergen Hoeller
  */
-@Configuration
-@ComponentScan
-public class ComponentScanAnnotatedConfigWithImplicitBasePackage {
+@Component
+public class ConfigurableComponent {
 
-	@Bean  // override of scanned class
-	public ConfigurableComponent configurableComponent() {
-		return new ConfigurableComponent(true);
+	private final boolean flag;
+
+	public ConfigurableComponent() {
+		this(false);
+	}
+
+	public ConfigurableComponent(boolean flag) {
+		this.flag = flag;
+	}
+
+	public boolean isFlag() {
+		return this.flag;
 	}
 
 }
