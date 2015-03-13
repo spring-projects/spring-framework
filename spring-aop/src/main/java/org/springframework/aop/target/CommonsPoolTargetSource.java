@@ -78,7 +78,7 @@ public class CommonsPoolTargetSource extends AbstractPoolingTargetSource impleme
 	private byte whenExhaustedAction = GenericObjectPool.DEFAULT_WHEN_EXHAUSTED_ACTION;
 
 	/**
-	 * The Jakarta Commons {@code ObjectPool} used to pool target objects
+	 * The Apache Commons {@code ObjectPool} used to pool target objects
 	 */
 	private ObjectPool pool;
 

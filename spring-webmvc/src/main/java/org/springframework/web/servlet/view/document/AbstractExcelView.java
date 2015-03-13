@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,7 +51,7 @@ import org.springframework.web.servlet.view.AbstractView;
  * </ul>
  *
  * <p>For working with the workbook in the subclass, see
- * <a href="http://jakarta.apache.org/poi/index.html">Jakarta's POI site</a>
+ * <a href="http://poi.apache.org">Apache's POI site</a>
  *
  * <p>As an example, you can try this snippet:
  *

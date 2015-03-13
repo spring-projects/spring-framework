@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,7 +41,7 @@ import org.springframework.util.ClassUtils;
  * <ul>
  * <li>{@code SingleConnectionDataSource} (using the same Connection for all getConnection calls)
  * <li>{@code DriverManagerDataSource} (creating a new Connection on each getConnection call)
- * <li>Apache's Jakarta Commons DBCP offers {@code org.apache.commons.dbcp.BasicDataSource} (a real pool)
+ * <li>Apache's Commons DBCP offers {@code org.apache.commons.dbcp.BasicDataSource} (a real pool)
  * </ul>
  *
  * <p>Typical usage in bootstrap code:

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,29 +55,31 @@ import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.ViewResolver;
 
 /**
- * Implementation of {@link ViewResolver} that resolves a view based on the request file name or {@code Accept} header.
+ * Implementation of {@link ViewResolver} that resolves a view based on the request file name
+ * or {@code Accept} header.
  *
- * <p>The {@code ContentNegotiatingViewResolver} does not resolve views itself, but delegates to other {@link
- * ViewResolver}s. By default, these other view resolvers are picked up automatically from the application context,
- * though they can also be set explicitly by using the {@link #setViewResolvers(List) viewResolvers} property.
- * <strong>Note</strong> that in order for this view resolver to work properly, the {@link #setOrder(int) order}
- * property needs to be set to a higher precedence than the others (the default is {@link Ordered#HIGHEST_PRECEDENCE}.)
+ * <p>The {@code ContentNegotiatingViewResolver} does not resolve views itself, but delegates to
+ * other {@link ViewResolver}s. By default, these other view resolvers are picked up automatically
+ * from the application context, though they can also be set explicitly by using the
+ * {@link #setViewResolvers viewResolvers} property. <strong>Note</strong> that in order for this
+ * view resolver to work properly, the {@link #setOrder order} property needs to be set to a higher
+ * precedence than the others (the default is {@link Ordered#HIGHEST_PRECEDENCE}).
  *
- * <p>This view resolver uses the requested {@linkplain MediaType media type} to select a suitable {@link View} for a
- * request. The requested media type is determined through the configured {@link ContentNegotiationManager}.
- * Once the requested media type has been determined, this resolver queries each delegate view resolver for a
- * {@link View} and determines if the requested media type is {@linkplain MediaType#includes(MediaType) compatible}
- * with the view's {@linkplain View#getContentType() content type}). The most compatible view is returned.
+ * <p>This view resolver uses the requested {@linkplain MediaType media type} to select a suitable
+ * {@link View} for a request. The requested media type is determined through the configured
+ * {@link ContentNegotiationManager}. Once the requested media type has been determined, this resolver
+ * queries each delegate view resolver for a {@link View} and determines if the requested media type
+ * is {@linkplain MediaType#includes(MediaType) compatible} with the view's
+ * {@linkplain View#getContentType() content type}). The most compatible view is returned.
  *
- * <p>Additionally, this view resolver exposes the {@link #setDefaultViews(List) defaultViews} property, allowing you to
- * override the views provided by the view resolvers. Note that these default views are offered as candidates, and
- * still need have the content type requested (via file extension, parameter, or {@code Accept} header, described above).
- * You can also set the {@linkplain #setDefaultContentType(MediaType) default content type} directly, which will be
- * returned when the other mechanisms ({@code Accept} header, file extension or parameter) do not result in a match.
+ * <p>Additionally, this view resolver exposes the {@link #setDefaultViews(List) defaultViews} property,
+ * allowing you to override the views provided by the view resolvers. Note that these default views are
+ * offered as candidates, and still need have the content type requested (via file extension, parameter,
+ * or {@code Accept} header, described above).
  *
- * <p>For example, if the request path is {@code /view.html}, this view resolver will look for a view that has the
- * {@code text/html} content type (based on the {@code html} file extension). A request for {@code /view} with a {@code
- * text/html} request {@code Accept} header has the same result.
+ * <p>For example, if the request path is {@code /view.html}, this view resolver will look for a view
+ * that has the {@code text/html} content type (based on the {@code html} file extension). A request
+ * for {@code /view} with a {@code text/html} request {@code Accept} header has the same result.
  *
  * @author Arjen Poutsma
  * @author Juergen Hoeller

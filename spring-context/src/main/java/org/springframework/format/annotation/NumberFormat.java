@@ -28,12 +28,14 @@ import java.lang.annotation.Target;
  * <p>Supports formatting by style or custom pattern string.
  * Can be applied to any JDK {@code java.lang.Number} type.
  *
- * <p>For style-based formatting, set the {@link #style} attribute to be the desired {@link Style}.
- * For custom formatting, set the {@link #pattern} attribute to be the number pattern, such as {@code #, ###.##}.
+ * <p>For style-based formatting, set the {@link #style} attribute to be the
+ * desired {@link Style}. For custom formatting, set the {@link #pattern}
+ * attribute to be the number pattern, such as {@code #, ###.##}.
  *
- * <p>Each attribute is mutually exclusive, so only set one attribute per annotation instance
- * (the one most convenient one for your formatting needs). When the pattern attribute is specified,
- * it takes precedence over the style attribute. When no annotation attributes are specified,
+ * <p>Each attribute is mutually exclusive, so only set one attribute per
+ * annotation instance (the one most convenient one for your formatting needs).
+ * When the {@link #pattern} attribute is specified, it takes precedence over
+ * the {@link #style} attribute. When no annotation attributes are specified,
  * the default format applied is style-based with a style of {@link Style#NUMBER}.
  *
  * @author Keith Donald

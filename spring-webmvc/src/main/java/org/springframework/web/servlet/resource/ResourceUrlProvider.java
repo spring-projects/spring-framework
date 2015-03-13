@@ -141,7 +141,7 @@ public class ResourceUrlProvider implements ApplicationListener<ContextRefreshed
 
 		Map<String, SimpleUrlHandlerMapping> map = appContext.getBeansOfType(SimpleUrlHandlerMapping.class);
 		List<SimpleUrlHandlerMapping> handlerMappings = new ArrayList<SimpleUrlHandlerMapping>(map.values());
-		Collections.sort(handlerMappings, new OrderComparator());
+		OrderComparator.sort(handlerMappings);
 
 		for (SimpleUrlHandlerMapping hm : handlerMappings) {
 			for (String pattern : hm.getHandlerMap().keySet()) {
