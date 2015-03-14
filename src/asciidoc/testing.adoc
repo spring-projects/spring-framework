@@ -3860,7 +3860,7 @@ an issue.
 
 Just like with integration vs unit testing, there is no right or wrong answer. Using the
 "standaloneSetup" does imply the need for some additional "webAppContextSetup" tests to
-verify the Spring MVC configuration. Alternatively, you can decide write all tests with
+verify the Spring MVC configuration. Alternatively, you can decide to write all tests with
 "webAppContextSetup" and always test against actual Spring MVC configuration.
 
 [[spring-mvc-test-server-performing-requests]]
