@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,6 +45,7 @@ import org.springframework.validation.SmartValidator;
  * {@link CustomValidatorBean} and {@link LocalValidatorFactoryBean}.
  *
  * @author Juergen Hoeller
+ * @author Kazuki Shimizu
  * @since 3.0
  */
 public class SpringValidatorAdapter implements SmartValidator, javax.validation.Validator {
@@ -131,8 +132,8 @@ public class SpringValidatorAdapter implements SmartValidator, javax.validation.
 						String nestedField = bindingResult.getNestedPath() + field;
 						if ("".equals(nestedField)) {
 							String[] errorCodes = bindingResult.resolveMessageCodes(errorCode);
-							bindingResult.addError(new ObjectError(
-									errors.getObjectName(), errorCodes, errorArgs, violation.getMessage()));
+							bindingResult.addError(
+									createObjectError(errors.getObjectName(), errorCodes, errorArgs, violation));
 						}
 						else {
 							Object invalidValue = violation.getInvalidValue();
@@ -143,9 +144,8 @@ public class SpringValidatorAdapter implements SmartValidator, javax.validation.
 								invalidValue = bindingResult.getRawFieldValue(field);
 							}
 							String[] errorCodes = bindingResult.resolveMessageCodes(errorCode, field);
-							bindingResult.addError(new FieldError(
-									errors.getObjectName(), nestedField, invalidValue, false,
-									errorCodes, errorArgs, violation.getMessage()));
+							bindingResult.addError(
+									createFieldError(errors.getObjectName(), nestedField, invalidValue, errorCodes, errorArgs, violation));
 						}
 					}
 					else {
@@ -161,6 +161,42 @@ public class SpringValidatorAdapter implements SmartValidator, javax.validation.
 				}
 			}
 		}
+	}
+
+	/**
+	 * Create a {@link ObjectError}.
+	 * <p>
+	 * If customize a {@link ObjectError} instance creation, please override a this method.
+	 * </p>
+	 * @param objectName the name of the affected object
+	 * @param codes the codes to be used to resolve this message
+	 * @param arguments	the array of arguments to be used to resolve this message
+	 * @param violation the violation of the Bean Validation
+	 * @return a new {@link ObjectError}
+	 */
+	protected ObjectError createObjectError(
+			String objectName, String[] codes, Object[] arguments, ConstraintViolation<Object> violation) {
+		return new ObjectError(objectName, codes, arguments, violation.getMessage());
+	}
+
+	/**
+	 * Create a {@link FieldError}.
+	 * <p>
+	 * If customize a {@link FieldError} instance creation, please override a this method.
+	 * </p>
+	 * @param objectName the name of the affected object
+	 * @param field the affected field of the object
+	 * @param rejectedValue the rejected field value
+	 * @param codes the codes to be used to resolve this message
+	 * @param arguments the array of arguments to be used to resolve this message
+	 * @param violation the violation of the Bean Validation
+	 * @return a new {@link FieldError}
+	 */
+	protected FieldError createFieldError(
+			String objectName, String field, Object rejectedValue,
+			String[] codes, Object[] arguments, ConstraintViolation<Object> violation) {
+		return new FieldError(objectName, field, rejectedValue, false,
+				codes, arguments, violation.getMessage());
 	}
 
 	/**
