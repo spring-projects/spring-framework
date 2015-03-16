@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -101,14 +101,14 @@ public class ApplicationContextExpressionTests {
 		ac.registerBeanDefinition("tb0", bd0);
 
 		GenericBeanDefinition bd1 = new GenericBeanDefinition();
-		bd1.setBeanClass(TestBean.class);
+		bd1.setBeanClassName("#{tb0.class}");
 		bd1.setScope("myScope");
 		bd1.getConstructorArgumentValues().addGenericArgumentValue("XXX#{tb0.name}YYY#{mySpecialAttr}ZZZ");
 		bd1.getConstructorArgumentValues().addGenericArgumentValue("#{mySpecialAttr}");
 		ac.registerBeanDefinition("tb1", bd1);
 
 		GenericBeanDefinition bd2 = new GenericBeanDefinition();
-		bd2.setBeanClass(TestBean.class);
+		bd2.setBeanClassName("#{tb1.class.name}");
 		bd2.setScope("myScope");
 		bd2.getPropertyValues().add("name", "{ XXX#{tb0.name}YYY#{mySpecialAttr}ZZZ }");
 		bd2.getPropertyValues().add("age", "#{mySpecialAttr}");

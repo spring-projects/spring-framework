@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -1333,20 +1333,44 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	}
 
 	private Class<?> doResolveBeanClass(RootBeanDefinition mbd, Class<?>... typesToMatch) throws ClassNotFoundException {
+		ClassLoader beanClassLoader = getBeanClassLoader();
+		ClassLoader classLoaderToUse = beanClassLoader;
 		if (!ObjectUtils.isEmpty(typesToMatch)) {
+			// When just doing type checks (i.e. not creating an actual instance yet),
+			// use the specified temporary class loader (e.g. in a weaving scenario).
 			ClassLoader tempClassLoader = getTempClassLoader();
 			if (tempClassLoader != null) {
+				classLoaderToUse = tempClassLoader;
 				if (tempClassLoader instanceof DecoratingClassLoader) {
 					DecoratingClassLoader dcl = (DecoratingClassLoader) tempClassLoader;
 					for (Class<?> typeToMatch : typesToMatch) {
 						dcl.excludeClass(typeToMatch.getName());
 					}
 				}
-				String className = mbd.getBeanClassName();
-				return (className != null ? ClassUtils.forName(className, tempClassLoader) : null);
 			}
 		}
-		return mbd.resolveBeanClass(getBeanClassLoader());
+		String className = mbd.getBeanClassName();
+		if (className != null) {
+			Object evaluated = evaluateBeanDefinitionString(className, mbd);
+			if (!className.equals(evaluated)) {
+				// A dynamically resolved expression, supported as of 4.2...
+				if (evaluated instanceof Class) {
+					return (Class<?>) evaluated;
+				}
+				else if (evaluated instanceof String) {
+					return ClassUtils.forName((String) evaluated, classLoaderToUse);
+				}
+				else {
+					throw new IllegalStateException("Invalid class name expression result: " + evaluated);
+				}
+			}
+			// When resolving against a temporary class loader, exit early in order
+			// to avoid storing the resolved Class in the bean definition.
+			if (classLoaderToUse != beanClassLoader) {
+				return ClassUtils.forName(className, classLoaderToUse);
+			}
+		}
+		return mbd.resolveBeanClass(beanClassLoader);
 	}
 
 	/**
