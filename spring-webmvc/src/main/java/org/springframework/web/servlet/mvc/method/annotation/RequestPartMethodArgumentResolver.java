@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.Part;
 
@@ -74,8 +75,22 @@ import org.springframework.web.util.WebUtils;
  */
 public class RequestPartMethodArgumentResolver extends AbstractMessageConverterMethodArgumentResolver {
 
+
+	/**
+	 * Basic constructor with converters only.
+	 */
 	public RequestPartMethodArgumentResolver(List<HttpMessageConverter<?>> messageConverters) {
 		super(messageConverters);
+	}
+
+	/**
+	 * Constructor with converters and {@code Request~} and
+	 * {@code ResponseBodyAdvice}.
+	 */
+	public RequestPartMethodArgumentResolver(List<HttpMessageConverter<?>> messageConverters,
+			List<Object> requestResponseBodyAdvice) {
+
+		super(messageConverters, requestResponseBodyAdvice);
 	}
 
 

@@ -97,7 +97,7 @@ public class AnnotationDrivenBeanDefinitionParserTests {
 		loadBeanDefinitions("mvc-config-message-converters.xml");
 		verifyMessageConverters(appContext.getBean(RequestMappingHandlerAdapter.class), true);
 		verifyMessageConverters(appContext.getBean(ExceptionHandlerExceptionResolver.class), true);
-		verifyResponseBodyAdvice(appContext.getBean(RequestMappingHandlerAdapter.class));
+		verifyRequestResponseBodyAdvice(appContext.getBean(RequestMappingHandlerAdapter.class));
 		verifyResponseBodyAdvice(appContext.getBean(ExceptionHandlerExceptionResolver.class));
 	}
 
@@ -176,6 +176,16 @@ public class AnnotationDrivenBeanDefinitionParserTests {
 	private void verifyResponseBodyAdvice(Object bean) {
 		assertNotNull(bean);
 		Object value = new DirectFieldAccessor(bean).getPropertyValue("responseBodyAdvice");
+		assertNotNull(value);
+		assertTrue(value instanceof List);
+		List<ResponseBodyAdvice> converters = (List<ResponseBodyAdvice>) value;
+		assertTrue(converters.get(0) instanceof JsonViewResponseBodyAdvice);
+	}
+
+	@SuppressWarnings("unchecked")
+	private void verifyRequestResponseBodyAdvice(Object bean) {
+		assertNotNull(bean);
+		Object value = new DirectFieldAccessor(bean).getPropertyValue("requestResponseBodyAdvice");
 		assertNotNull(value);
 		assertTrue(value instanceof List);
 		List<ResponseBodyAdvice> converters = (List<ResponseBodyAdvice>) value;

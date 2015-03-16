@@ -24,6 +24,7 @@ import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.logging.Log;
@@ -62,11 +63,27 @@ public abstract class AbstractMessageConverterMethodArgumentResolver implements 
 
 	protected final List<MediaType> allSupportedMediaTypes;
 
+	private final RequestResponseBodyAdviceChain advice;
 
-	public AbstractMessageConverterMethodArgumentResolver(List<HttpMessageConverter<?>> messageConverters) {
-		Assert.notEmpty(messageConverters, "'messageConverters' must not be empty");
-		this.messageConverters = messageConverters;
-		this.allSupportedMediaTypes = getAllSupportedMediaTypes(messageConverters);
+
+	/**
+	 * Basic constructor with converters only.
+	 */
+	public AbstractMessageConverterMethodArgumentResolver(List<HttpMessageConverter<?>> converters) {
+		this(converters, null);
+	}
+
+	/**
+	 * Constructor with converters and {@code Request~} and {@code ResponseBodyAdvice}.
+	 * @since 4.2
+	 */
+	public AbstractMessageConverterMethodArgumentResolver(List<HttpMessageConverter<?>> converters,
+			List<Object> requestResponseBodyAdvice) {
+
+		Assert.notEmpty(converters, "'messageConverters' must not be empty");
+		this.messageConverters = converters;
+		this.allSupportedMediaTypes = getAllSupportedMediaTypes(converters);
+		this.advice = new RequestResponseBodyAdviceChain(requestResponseBodyAdvice);
 	}
 
 
@@ -84,6 +101,15 @@ public abstract class AbstractMessageConverterMethodArgumentResolver implements 
 		return Collections.unmodifiableList(result);
 	}
 
+
+	/**
+	 * Return the configured {@link RequestBodyAdvice} and
+	 * {@link RequestBodyAdvice} where each instance may be wrapped as a
+	 * {@link org.springframework.web.method.ControllerAdviceBean ControllerAdviceBean}.
+	 */
+	protected RequestResponseBodyAdviceChain getAdvice() {
+		return this.advice;
+	}
 
 	/**
 	 * Create the method argument value of the expected parameter type by
@@ -108,7 +134,7 @@ public abstract class AbstractMessageConverterMethodArgumentResolver implements 
 	 * from the given HttpInputMessage.
 	 * @param <T> the expected type of the argument value to be created
 	 * @param inputMessage the HTTP input message representing the current request
-	 * @param methodParam the method parameter descriptor (may be {@code null})
+	 * @param param the method parameter descriptor (may be {@code null})
 	 * @param targetType the type of object to create, not necessarily the same as
 	 * the method parameter type (e.g. for {@code HttpEntity<String>} method
 	 * parameter the target type is String)
@@ -118,7 +144,7 @@ public abstract class AbstractMessageConverterMethodArgumentResolver implements 
 	 */
 	@SuppressWarnings("unchecked")
 	protected <T> Object readWithMessageConverters(HttpInputMessage inputMessage,
-			MethodParameter methodParam, Type targetType) throws IOException, HttpMediaTypeNotSupportedException {
+			MethodParameter param, Type targetType) throws IOException, HttpMediaTypeNotSupportedException {
 
 		MediaType contentType;
 		try {
@@ -131,32 +157,35 @@ public abstract class AbstractMessageConverterMethodArgumentResolver implements 
 			contentType = MediaType.APPLICATION_OCTET_STREAM;
 		}
 
-		Class<?> contextClass = (methodParam != null ? methodParam.getContainingClass() : null);
+		Class<?> contextClass = (param != null ? param.getContainingClass() : null);
 		Class<T> targetClass = (targetType instanceof Class<?> ? (Class<T>) targetType : null);
 		if (targetClass == null) {
-			ResolvableType resolvableType = (methodParam != null ?
-					ResolvableType.forMethodParameter(methodParam) : ResolvableType.forType(targetType));
+			ResolvableType resolvableType = (param != null ?
+					ResolvableType.forMethodParameter(param) : ResolvableType.forType(targetType));
 			targetClass = (Class<T>) resolvableType.resolve();
 		}
 
 		for (HttpMessageConverter<?> converter : this.messageConverters) {
+			Class<HttpMessageConverter<?>> converterType = (Class<HttpMessageConverter<?>>) converter.getClass();
 			if (converter instanceof GenericHttpMessageConverter) {
 				GenericHttpMessageConverter<?> genericConverter = (GenericHttpMessageConverter<?>) converter;
 				if (genericConverter.canRead(targetType, contextClass, contentType)) {
 					if (logger.isDebugEnabled()) {
-						logger.debug("Reading [" + targetType + "] as \"" +
-								contentType + "\" using [" + converter + "]");
+						logger.debug("Read [" + targetType + "] as \"" + contentType + "\" with [" + converter + "]");
 					}
-					return genericConverter.read(targetType, contextClass, inputMessage);
+					inputMessage = getAdvice().beforeBodyRead(inputMessage, param, targetType, converterType);
+					T body = (T) genericConverter.read(targetType, contextClass, inputMessage);
+					return getAdvice().afterBodyRead(body, inputMessage, param, targetType, converterType);
 				}
 			}
 			else if (targetClass != null) {
 				if (converter.canRead(targetClass, contentType)) {
 					if (logger.isDebugEnabled()) {
-						logger.debug("Reading [" + targetClass.getName() + "] as \"" +
-								contentType + "\" using [" + converter + "]");
+						logger.debug("Read [" + targetType + "] as \"" + contentType + "\" with [" + converter + "]");
 					}
-					return ((HttpMessageConverter<T>) converter).read(targetClass, inputMessage);
+					inputMessage = getAdvice().beforeBodyRead(inputMessage, param, targetType, converterType);
+					T body = ((HttpMessageConverter<T>) converter).read(targetClass, inputMessage);
+					return getAdvice().afterBodyRead(body, inputMessage, param, targetType, converterType);
 				}
 			}
 		}

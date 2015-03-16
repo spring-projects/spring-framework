@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,13 +16,18 @@
 
 package org.springframework.web.servlet.mvc.method.annotation;
 
+import static org.junit.Assert.*;
+import static org.mockito.BDDMockito.*;
+
 import java.util.Arrays;
+import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 
 import org.springframework.core.MethodParameter;
+import org.springframework.http.HttpInputMessage;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
@@ -38,17 +43,13 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.method.ControllerAdviceBean;
 
-import static org.junit.Assert.*;
-import static org.mockito.BDDMockito.*;
-
 /**
- * Unit tests for
- * {@link ResponseBodyAdviceChain}.
+ * Unit tests for {@link RequestResponseBodyAdviceChain}.
  *
  * @author Rossen Stoyanchev
- * @since 4.1
+ * @since 4.2
  */
-public class ResponseBodyAdviceChainTests {
+public class RequestResponseBodyAdviceChainTests {
 
 	private String body;
 
@@ -56,10 +57,10 @@ public class ResponseBodyAdviceChainTests {
 
 	private Class<? extends HttpMessageConverter<?>> converterType;
 
+	private MethodParameter paramType;
 	private MethodParameter returnType;
 
 	private ServerHttpRequest request;
-
 	private ServerHttpResponse response;
 
 
@@ -68,25 +69,53 @@ public class ResponseBodyAdviceChainTests {
 		this.body = "body";
 		this.contentType = MediaType.TEXT_PLAIN;
 		this.converterType = StringHttpMessageConverter.class;
-		this.returnType = new MethodParameter(ClassUtils.getMethod(this.getClass(), "handle"), -1);
+		this.paramType = new MethodParameter(ClassUtils.getMethod(this.getClass(), "handle", String.class), 0);
+		this.returnType = new MethodParameter(ClassUtils.getMethod(this.getClass(), "handle", String.class), -1);
 		this.request = new ServletServerHttpRequest(new MockHttpServletRequest());
 		this.response = new ServletServerHttpResponse(new MockHttpServletResponse());
 	}
 
+
+	@SuppressWarnings("unchecked")
+	@Test
+	public void requestBodyAdvice() {
+
+		RequestBodyAdvice requestAdvice = Mockito.mock(RequestBodyAdvice.class);
+		ResponseBodyAdvice<String> responseAdvice = Mockito.mock(ResponseBodyAdvice.class);
+		List<Object> advice = Arrays.asList(requestAdvice, responseAdvice);
+		RequestResponseBodyAdviceChain chain = new RequestResponseBodyAdviceChain(advice);
+
+		HttpInputMessage wrapped = new ServletServerHttpRequest(new MockHttpServletRequest());
+		given(requestAdvice.supports(this.paramType, String.class, this.converterType)).willReturn(true);
+		given(requestAdvice.beforeBodyRead(eq(this.request), eq(this.paramType), eq(String.class),
+				eq(this.converterType))).willReturn(wrapped);
+
+		assertSame(wrapped, chain.beforeBodyRead(this.request, this.paramType, String.class, this.converterType));
+
+		String modified = "body++";
+		given(requestAdvice.afterBodyRead(eq(this.body), eq(this.request), eq(this.paramType),
+				eq(String.class), eq(this.converterType))).willReturn(modified);
+
+		assertEquals(modified, chain.afterBodyRead(this.body, this.request, this.paramType,
+				String.class, this.converterType));
+	}
+
+	@SuppressWarnings("unchecked")
 	@Test
 	public void responseBodyAdvice() {
 
-		@SuppressWarnings("unchecked")
-		ResponseBodyAdvice<String> advice = Mockito.mock(ResponseBodyAdvice.class);
-		ResponseBodyAdviceChain chain = new ResponseBodyAdviceChain(Arrays.asList(advice));
+		RequestBodyAdvice requestAdvice = Mockito.mock(RequestBodyAdvice.class);
+		ResponseBodyAdvice<String> responseAdvice = Mockito.mock(ResponseBodyAdvice.class);
+		List<Object> advice = Arrays.asList(requestAdvice, responseAdvice);
+		RequestResponseBodyAdviceChain chain = new RequestResponseBodyAdviceChain(advice);
 
 		String expected = "body++";
-		given(advice.supports(this.returnType, this.converterType)).willReturn(true);
-		given(advice.beforeBodyWrite(eq(this.body), eq(this.returnType), eq(this.contentType),
+		given(responseAdvice.supports(this.returnType, this.converterType)).willReturn(true);
+		given(responseAdvice.beforeBodyWrite(eq(this.body), eq(this.returnType), eq(this.contentType),
 				eq(this.converterType), same(this.request), same(this.response))).willReturn(expected);
 
-		String actual = chain.invoke(this.body, this.returnType,
-				this.contentType, this.converterType, this.request, this.response);
+		String actual = (String) chain.beforeBodyWrite(this.body, this.returnType, this.contentType,
+				this.converterType, this.request, this.response);
 
 		assertEquals(expected, actual);
 	}
@@ -95,10 +124,10 @@ public class ResponseBodyAdviceChainTests {
 	public void controllerAdvice() {
 
 		Object adviceBean = new ControllerAdviceBean(new MyControllerAdvice());
-		ResponseBodyAdviceChain chain = new ResponseBodyAdviceChain(Arrays.asList(adviceBean));
+		RequestResponseBodyAdviceChain chain = new RequestResponseBodyAdviceChain(Arrays.asList(adviceBean));
 
-		String actual = chain.invoke(this.body, this.returnType,
-				this.contentType, this.converterType, this.request, this.response);
+		String actual = (String) chain.beforeBodyWrite(this.body, this.returnType, this.contentType,
+				this.converterType, this.request, this.response);
 
 		assertEquals("body-MyControllerAdvice", actual);
 	}
@@ -107,10 +136,10 @@ public class ResponseBodyAdviceChainTests {
 	public void controllerAdviceNotApplicable() {
 
 		Object adviceBean = new ControllerAdviceBean(new TargetedControllerAdvice());
-		ResponseBodyAdviceChain chain = new ResponseBodyAdviceChain(Arrays.asList(adviceBean));
+		RequestResponseBodyAdviceChain chain = new RequestResponseBodyAdviceChain(Arrays.asList(adviceBean));
 
-		String actual = chain.invoke(this.body, this.returnType,
-				this.contentType, this.converterType, this.request, this.response);
+		String actual = (String) chain.beforeBodyWrite(this.body, this.returnType, this.contentType,
+				this.converterType, this.request, this.response);
 
 		assertEquals(this.body, actual);
 	}
@@ -152,10 +181,10 @@ public class ResponseBodyAdviceChainTests {
 		}
 	}
 
-
 	@SuppressWarnings("unused")
 	@ResponseBody
-	public String handle() {
+	public String handle(String body) {
 		return "";
 	}
+
 }

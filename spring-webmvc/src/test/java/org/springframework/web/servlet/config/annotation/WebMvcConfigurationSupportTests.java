@@ -188,7 +188,8 @@ public class WebMvcConfigurationSupportTests {
 		assertTrue(validator instanceof LocalValidatorFactoryBean);
 
 		DirectFieldAccessor fieldAccessor = new DirectFieldAccessor(adapter);
-		List<Object> interceptors = (List<Object>) fieldAccessor.getPropertyValue("responseBodyAdvice");
+		@SuppressWarnings("unchecked")
+		List<Object> interceptors = (List<Object>) fieldAccessor.getPropertyValue("requestResponseBodyAdvice");
 		assertEquals(1, interceptors.size());
 		assertEquals(JsonViewResponseBodyAdvice.class, interceptors.get(0).getClass());
 	}

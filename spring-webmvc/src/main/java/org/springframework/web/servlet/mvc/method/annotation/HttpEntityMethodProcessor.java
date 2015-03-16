@@ -54,20 +54,47 @@ import org.springframework.web.method.support.ModelAndViewContainer;
  */
 public class HttpEntityMethodProcessor extends AbstractMessageConverterMethodProcessor {
 
-	public HttpEntityMethodProcessor(List<HttpMessageConverter<?>> messageConverters) {
-		super(messageConverters);
+
+	/**
+	 * Basic constructor with converters only. Suitable for resolving
+	 * {@code HttpEntity}. For handling {@code ResponseEntity} consider also
+	 * providing a {@code ContentNegotiationManager}.
+	 */
+	public HttpEntityMethodProcessor(List<HttpMessageConverter<?>> converters) {
+		super(converters);
 	}
 
-	public HttpEntityMethodProcessor(List<HttpMessageConverter<?>> messageConverters,
-			ContentNegotiationManager contentNegotiationManager) {
+	/**
+	 * Basic constructor with converters and {@code ContentNegotiationManager}.
+	 * Suitable for resolving {@code HttpEntity} and handling {@code ResponseEntity}
+	 * without {@code Request~} or {@code ResponseBodyAdvice}.
+	 */
+	public HttpEntityMethodProcessor(List<HttpMessageConverter<?>> converters,
+			ContentNegotiationManager manager) {
 
-		super(messageConverters, contentNegotiationManager);
+		super(converters, manager);
 	}
 
-	public HttpEntityMethodProcessor(List<HttpMessageConverter<?>> messageConverters,
-			ContentNegotiationManager contentNegotiationManager, List<Object> responseBodyAdvice) {
+	/**
+	 * Complete constructor for resolving {@code HttpEntity} method arguments.
+	 * For handling {@code ResponseEntity} consider also providing a
+	 * {@code ContentNegotiationManager}.
+	 * @since 4.2
+	 */
+	public HttpEntityMethodProcessor(List<HttpMessageConverter<?>> converters,
+			List<Object> requestResponseBodyAdvice) {
 
-		super(messageConverters, contentNegotiationManager, responseBodyAdvice);
+		super(converters, null, requestResponseBodyAdvice);
+	}
+
+	/**
+	 * Complete constructor for resolving {@code HttpEntity} and handling
+	 * {@code ResponseEntity}.
+	 */
+	public HttpEntityMethodProcessor(List<HttpMessageConverter<?>> converters,
+			ContentNegotiationManager manager, List<Object> requestResponseBodyAdvice) {
+
+		super(converters, manager, requestResponseBodyAdvice);
 	}
 
 
