@@ -15,7 +15,6 @@
  */
 package org.springframework.web.socket.messaging;
 
-
 import static org.junit.Assert.*;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.isNotNull;
@@ -28,6 +27,7 @@ import java.util.concurrent.ScheduledFuture;
 
 import org.junit.Before;
 import org.junit.Test;
+
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -53,7 +53,7 @@ import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.client.WebSocketClient;
 
 /**
- * Unit tests for {@link \WebSocketStompClient}.
+ * Unit tests for {@link WebSocketStompClient}.
  *
  * @author Rossen Stoyanchev
  */
@@ -93,11 +93,8 @@ public class WebSocketStompClientTests {
 				.thenReturn(this.handshakeFuture);
 	}
 
-
-	@SuppressWarnings("unchecked")
 	@Test
 	public void webSocketHandshakeFailure() throws Exception {
-
 		connect();
 
 		IllegalStateException handshakeFailure = new IllegalStateException("simulated exception");
@@ -106,8 +103,8 @@ public class WebSocketStompClientTests {
 		verify(this.stompSession).afterConnectFailure(same(handshakeFailure));
 	}
 
-	@SuppressWarnings("unchecked")
 	@Test
+	@SuppressWarnings("unchecked")
 	public void webSocketConnectionEstablished() throws Exception {
 		connect().afterConnectionEstablished(this.webSocketSession);
 		verify(this.stompSession).afterConnected(isNotNull(TcpConnection.class));
@@ -115,7 +112,6 @@ public class WebSocketStompClientTests {
 
 	@Test
 	public void webSocketTransportError() throws Exception {
-
 		IllegalStateException exception = new IllegalStateException("simulated exception");
 		connect().handleTransportError(this.webSocketSession, exception);
 
@@ -129,12 +125,12 @@ public class WebSocketStompClientTests {
 	}
 
 	@Test
+	@SuppressWarnings("unchecked")
 	public void handleWebSocketMessage() throws Exception {
-
 		String text = "SEND\na:alpha\n\nMessage payload\0";
 		connect().handleMessage(this.webSocketSession, new TextMessage(text));
 
-		ArgumentCaptor<? extends Message<byte[]>> captor = ArgumentCaptor.forClass(Message.class);
+		ArgumentCaptor<? extends Message<byte[]>> captor = (ArgumentCaptor<? extends Message<byte[]>>) ArgumentCaptor.forClass(Message.class);
 		verify(this.stompSession).handleMessage(captor.capture());
 		Message<byte[]> message = captor.getValue();
 		assertNotNull(message);
@@ -147,8 +143,8 @@ public class WebSocketStompClientTests {
 	}
 
 	@Test
+	@SuppressWarnings("unchecked")
 	public void handleWebSocketMessageSplitAcrossTwoMessage() throws Exception {
-
 		WebSocketHandler webSocketHandler = connect();
 
 		String part1 = "SEND\na:alpha\n\nMessage";
@@ -159,7 +155,7 @@ public class WebSocketStompClientTests {
 		String part2 = " payload\0";
 		webSocketHandler.handleMessage(this.webSocketSession, new TextMessage(part2));
 
-		ArgumentCaptor<? extends Message<byte[]>> captor = ArgumentCaptor.forClass(Message.class);
+		ArgumentCaptor<? extends Message<byte[]>> captor = (ArgumentCaptor<? extends Message<byte[]>>) ArgumentCaptor.forClass(Message.class);
 		verify(this.stompSession).handleMessage(captor.capture());
 		Message<byte[]> message = captor.getValue();
 		assertNotNull(message);
@@ -172,12 +168,12 @@ public class WebSocketStompClientTests {
 	}
 
 	@Test
+	@SuppressWarnings("unchecked")
 	public void handleWebSocketMessageBinary() throws Exception {
-
 		String text = "SEND\na:alpha\n\nMessage payload\0";
 		connect().handleMessage(this.webSocketSession, new BinaryMessage(text.getBytes(UTF_8)));
 
-		ArgumentCaptor<? extends Message<byte[]>> captor = ArgumentCaptor.forClass(Message.class);
+		ArgumentCaptor<? extends Message<byte[]>> captor = (ArgumentCaptor<? extends Message<byte[]>>) ArgumentCaptor.forClass(Message.class);
 		verify(this.stompSession).handleMessage(captor.capture());
 		Message<byte[]> message = captor.getValue();
 		assertNotNull(message);
@@ -197,7 +193,6 @@ public class WebSocketStompClientTests {
 
 	@Test
 	public void sendWebSocketMessage() throws Exception {
-
 		StompHeaderAccessor accessor = StompHeaderAccessor.create(StompCommand.SEND);
 		accessor.setDestination("/topic/foo");
 		byte[] payload = "payload".getBytes(UTF_8);
@@ -213,7 +208,6 @@ public class WebSocketStompClientTests {
 
 	@Test
 	public void sendWebSocketBinary() throws Exception {
-
 		StompHeaderAccessor accessor = StompHeaderAccessor.create(StompCommand.SEND);
 		accessor.setDestination("/b");
 		accessor.setContentType(MimeTypeUtils.APPLICATION_OCTET_STREAM);
@@ -243,7 +237,6 @@ public class WebSocketStompClientTests {
 		WebSocketStompClient stompClient = new WebSocketStompClient(mock(WebSocketClient.class));
 		stompClient.setTaskScheduler(mock(TaskScheduler.class));
 		assertArrayEquals(new long[] {10000, 10000}, stompClient.getDefaultHeartbeat());
-
 
 		StompHeaders connectHeaders = stompClient.processConnectHeaders(null);
 		assertArrayEquals(new long[] {10000, 10000}, connectHeaders.getHeartbeat());
@@ -299,8 +292,8 @@ public class WebSocketStompClientTests {
 	}
 
 	@Test
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public void cancelInactivityTasks() throws Exception {
-
 		TcpConnection<byte[]> tcpConnection = getTcpConnection();
 
 		ScheduledFuture future = mock(ScheduledFuture.class);
