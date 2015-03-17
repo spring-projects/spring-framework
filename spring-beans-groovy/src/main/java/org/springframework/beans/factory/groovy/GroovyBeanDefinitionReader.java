@@ -156,7 +156,8 @@ public class GroovyBeanDefinitionReader extends AbstractBeanDefinitionReader imp
 
 
 	/**
-	 * Create a new {@code GroovyBeanDefinitionReader} for the given {@link BeanDefinitionRegistry}.
+	 * Create a new {@code GroovyBeanDefinitionReader} for the given
+	 * {@link BeanDefinitionRegistry}.
 	 * @param registry the {@code BeanDefinitionRegistry} to load bean definitions into
 	 */
 	public GroovyBeanDefinitionReader(BeanDefinitionRegistry registry) {
@@ -167,10 +168,13 @@ public class GroovyBeanDefinitionReader extends AbstractBeanDefinitionReader imp
 	}
 
 	/**
-	 * Create a new {@code GroovyBeanDefinitionReader} based on the given {@link XmlBeanDefinitionReader},
-	 * using its {@code BeanDefinitionRegistry} and delegating Groovy DSL loading to it.
-	 * @param xmlBeanDefinitionReader the {@code XmlBeanDefinitionReader} to derive the registry
-	 * from and to delegate XML loading to
+	 * Create a new {@code GroovyBeanDefinitionReader} based on the given
+	 * {@link XmlBeanDefinitionReader}, loading bean definitions into its
+	 * {@code BeanDefinitionRegistry} and delegating Groovy DSL loading to it.
+	 * <p>The supplied {@code XmlBeanDefinitionReader} should typically
+	 * be pre-configured with XML validation disabled.
+	 * @param xmlBeanDefinitionReader the {@code XmlBeanDefinitionReader} to
+	 * derive the registry from and to delegate Groovy DSL loading to
 	 */
 	public GroovyBeanDefinitionReader(XmlBeanDefinitionReader xmlBeanDefinitionReader) {
 		super(xmlBeanDefinitionReader.getRegistry());
