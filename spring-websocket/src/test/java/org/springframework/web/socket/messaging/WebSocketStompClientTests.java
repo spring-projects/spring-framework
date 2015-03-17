@@ -125,12 +125,12 @@ public class WebSocketStompClientTests {
 	}
 
 	@Test
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void handleWebSocketMessage() throws Exception {
 		String text = "SEND\na:alpha\n\nMessage payload\0";
 		connect().handleMessage(this.webSocketSession, new TextMessage(text));
 
-		ArgumentCaptor<? extends Message<byte[]>> captor = (ArgumentCaptor<? extends Message<byte[]>>) ArgumentCaptor.forClass(Message.class);
+		ArgumentCaptor<Message> captor = ArgumentCaptor.forClass(Message.class);
 		verify(this.stompSession).handleMessage(captor.capture());
 		Message<byte[]> message = captor.getValue();
 		assertNotNull(message);
@@ -143,7 +143,7 @@ public class WebSocketStompClientTests {
 	}
 
 	@Test
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void handleWebSocketMessageSplitAcrossTwoMessage() throws Exception {
 		WebSocketHandler webSocketHandler = connect();
 
@@ -155,7 +155,7 @@ public class WebSocketStompClientTests {
 		String part2 = " payload\0";
 		webSocketHandler.handleMessage(this.webSocketSession, new TextMessage(part2));
 
-		ArgumentCaptor<? extends Message<byte[]>> captor = (ArgumentCaptor<? extends Message<byte[]>>) ArgumentCaptor.forClass(Message.class);
+		ArgumentCaptor<Message> captor = ArgumentCaptor.forClass(Message.class);
 		verify(this.stompSession).handleMessage(captor.capture());
 		Message<byte[]> message = captor.getValue();
 		assertNotNull(message);
@@ -168,12 +168,12 @@ public class WebSocketStompClientTests {
 	}
 
 	@Test
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void handleWebSocketMessageBinary() throws Exception {
 		String text = "SEND\na:alpha\n\nMessage payload\0";
 		connect().handleMessage(this.webSocketSession, new BinaryMessage(text.getBytes(UTF_8)));
 
-		ArgumentCaptor<? extends Message<byte[]>> captor = (ArgumentCaptor<? extends Message<byte[]>>) ArgumentCaptor.forClass(Message.class);
+		ArgumentCaptor<Message> captor = ArgumentCaptor.forClass(Message.class);
 		verify(this.stompSession).handleMessage(captor.capture());
 		Message<byte[]> message = captor.getValue();
 		assertNotNull(message);
