@@ -973,7 +973,7 @@
 						<xsd:annotation>
 							<xsd:documentation><![CDATA[
 	Register a TilesViewResolver based on Tiles 3.x.
-	To configure Tiles you must also add a top-level <mvc:tiles> element
+	To configure Tiles you must also add a top-level <mvc:tiles-configurer> element
 	or declare a TilesConfigurer bean.
 							]]></xsd:documentation>
 						</xsd:annotation>
@@ -983,7 +983,7 @@
 							<xsd:documentation><![CDATA[
 	Register a FreeMarkerViewResolver.
 	By default, ".ftl" is configured as a view name suffix.
-	To configure FreeMarker you must also add a top-level <mvc:freemarker> element
+	To configure FreeMarker you must also add a top-level <mvc:freemarker-configurer> element
 	or declare a FreeMarkerConfigurer bean.
 							]]></xsd:documentation>
 						</xsd:annotation>
@@ -993,7 +993,7 @@
 							<xsd:documentation><![CDATA[
 	Register a VelocityViewResolver.
 	By default, ".vm" is configured as a view name suffix.
-	To configure Velocity you must also add a top-level <mvc:velocity> element
+	To configure Velocity you must also add a top-level <mvc:velocity-configurer> element
 	or declare a VelocityConfigurer bean.
 							]]></xsd:documentation>
 						</xsd:annotation>
@@ -1003,8 +1003,17 @@
 							<xsd:documentation><![CDATA[
 	Register a GroovyMarkupViewResolver.
 	By default, ".tpl" is configured as a view name suffix.
-	To configure the Groovy markup template engine you must also add a top-level <mvc:groovy-markup> element
+	To configure the Groovy markup template engine you must also add a top-level <mvc:groovy-configurer> element
 	or declare a GroovyMarkupConfigurer bean.
+							]]></xsd:documentation>
+						</xsd:annotation>
+					</xsd:element>
+					<xsd:element name="script-template" type="urlViewResolverType">
+						<xsd:annotation>
+							<xsd:documentation><![CDATA[
+	Register a ScriptTemplateViewResolver.
+	To configure the Script engine you must also add a top-level <mvc:script-template-configurer> element
+	or declare a ScriptTemplateConfigurer bean.
 							]]></xsd:documentation>
 						</xsd:annotation>
 					</xsd:element>
@@ -1157,6 +1166,68 @@
 				<xsd:annotation>
 					<xsd:documentation><![CDATA[
 	The Groovy markup template engine resource loader path via a Spring resource location.
+					]]></xsd:documentation>
+				</xsd:annotation>
+			</xsd:attribute>
+		</xsd:complexType>
+	</xsd:element>
+
+	<xsd:element name="script-template-configurer">
+		<xsd:annotation>
+			<xsd:documentation><![CDATA[
+	Configure the script engine for view resolution by registering a ScriptTemplateConfigurer
+	bean. This is a shortcut alternative to declaring a ScriptTemplateConfigurer bean directly.
+			]]></xsd:documentation>
+		</xsd:annotation>
+		<xsd:complexType>
+			<xsd:sequence>
+			<xsd:element name="script" minOccurs="0" maxOccurs="unbounded">
+					<xsd:complexType>
+						<xsd:attribute name="location" type="xsd:string" use="required">
+							<xsd:annotation>
+								<xsd:documentation><![CDATA[
+	The location of the script to be loaded by the script engine (library or user provided).
+								]]></xsd:documentation>
+							</xsd:annotation>
+						</xsd:attribute>
+					</xsd:complexType>
+				</xsd:element>
+			</xsd:sequence>
+			<xsd:attribute name="engine-name" type="xsd:string" use="required">
+				<xsd:annotation>
+					<xsd:documentation><![CDATA[
+	The script engine name to use by the view.
+	The script engine must implement Invocable.
+					]]></xsd:documentation>
+				</xsd:annotation>
+			</xsd:attribute>
+			<xsd:attribute name="render-object" type="xsd:string">
+				<xsd:annotation>
+					<xsd:documentation><![CDATA[
+	The object where belong the render function.
+	For example, in order to call Mustache.render(), renderObject
+	should be set to Mustache and renderFunction to render.
+					]]></xsd:documentation>
+				</xsd:annotation>
+			</xsd:attribute>
+			<xsd:attribute name="render-function" type="xsd:string" use="required">
+				<xsd:annotation>
+					<xsd:documentation><![CDATA[
+	Set the render function name.
+					]]></xsd:documentation>
+				</xsd:annotation>
+			</xsd:attribute>
+			<xsd:attribute name="charset" type="xsd:string">
+				<xsd:annotation>
+					<xsd:documentation><![CDATA[
+	Set the charset used to read script and template files (UTF-8 by default).
+					]]></xsd:documentation>
+				</xsd:annotation>
+			</xsd:attribute>
+			<xsd:attribute name="resource-loader-path" type="xsd:string">
+				<xsd:annotation>
+					<xsd:documentation><![CDATA[
+	The script engine resource loader path via a Spring resource location.
 					]]></xsd:documentation>
 				</xsd:annotation>
 			</xsd:attribute>

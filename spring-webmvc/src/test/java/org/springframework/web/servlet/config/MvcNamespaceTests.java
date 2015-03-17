@@ -21,6 +21,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.lang.reflect.Method;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -129,6 +130,8 @@ import org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer;
 import org.springframework.web.servlet.view.freemarker.FreeMarkerViewResolver;
 import org.springframework.web.servlet.view.groovy.GroovyMarkupConfigurer;
 import org.springframework.web.servlet.view.groovy.GroovyMarkupViewResolver;
+import org.springframework.web.servlet.view.script.ScriptTemplateConfigurer;
+import org.springframework.web.servlet.view.script.ScriptTemplateViewResolver;
 import org.springframework.web.servlet.view.tiles3.TilesConfigurer;
 import org.springframework.web.servlet.view.tiles3.TilesViewResolver;
 import org.springframework.web.servlet.view.velocity.VelocityConfigurer;
@@ -720,11 +723,11 @@ public class MvcNamespaceTests {
 
 	@Test
 	public void testViewResolution() throws Exception {
-		loadBeanDefinitions("mvc-config-view-resolution.xml", 6);
+		loadBeanDefinitions("mvc-config-view-resolution.xml", 7);
 
 		ViewResolverComposite compositeResolver = this.appContext.getBean(ViewResolverComposite.class);
 		assertNotNull(compositeResolver);
-		assertEquals("Actual: " + compositeResolver.getViewResolvers(), 8, compositeResolver.getViewResolvers().size());
+		assertEquals("Actual: " + compositeResolver.getViewResolvers(), 9, compositeResolver.getViewResolvers().size());
 		assertEquals(Ordered.LOWEST_PRECEDENCE, compositeResolver.getOrder());
 
 		List<ViewResolver> resolvers = compositeResolver.getViewResolvers();
@@ -759,8 +762,15 @@ public class MvcNamespaceTests {
 		assertEquals(".tpl", accessor.getPropertyValue("suffix"));
 		assertEquals(1024, accessor.getPropertyValue("cacheLimit"));
 
-		assertEquals(InternalResourceViewResolver.class, resolvers.get(6).getClass());
+		resolver = resolvers.get(6);
+		assertThat(resolver, instanceOf(ScriptTemplateViewResolver.class));
+		accessor = new DirectFieldAccessor(resolver);
+		assertEquals("", accessor.getPropertyValue("prefix"));
+		assertEquals("", accessor.getPropertyValue("suffix"));
+		assertEquals(1024, accessor.getPropertyValue("cacheLimit"));
+
 		assertEquals(InternalResourceViewResolver.class, resolvers.get(7).getClass());
+		assertEquals(InternalResourceViewResolver.class, resolvers.get(8).getClass());
 
 		TilesConfigurer tilesConfigurer = appContext.getBean(TilesConfigurer.class);
 		assertNotNull(tilesConfigurer);
@@ -787,11 +797,21 @@ public class MvcNamespaceTests {
 		assertEquals("/test", groovyMarkupConfigurer.getResourceLoaderPath());
 		assertTrue(groovyMarkupConfigurer.isAutoIndent());
 		assertFalse(groovyMarkupConfigurer.isCacheTemplates());
+
+		ScriptTemplateConfigurer scriptTemplateConfigurer = appContext.getBean(ScriptTemplateConfigurer.class);
+		assertNotNull(scriptTemplateConfigurer);
+		assertEquals("Mustache", scriptTemplateConfigurer.getRenderObject());
+		assertEquals("render", scriptTemplateConfigurer.getRenderFunction());
+		assertEquals(StandardCharsets.ISO_8859_1, scriptTemplateConfigurer.getCharset());
+		assertEquals("classpath:", scriptTemplateConfigurer.getResourceLoaderPath());
+		String[] scripts = { "/META-INF/resources/webjars/mustachejs/0.8.2/mustache.js" };
+		accessor = new DirectFieldAccessor(scriptTemplateConfigurer);
+		assertArrayEquals(scripts, (String[]) accessor.getPropertyValue("scripts"));
 	}
 
 	@Test
 	public void testViewResolutionWithContentNegotiation() throws Exception {
-		loadBeanDefinitions("mvc-config-view-resolution-content-negotiation.xml", 6);
+		loadBeanDefinitions("mvc-config-view-resolution-content-negotiation.xml", 7);
 
 		ViewResolverComposite compositeResolver = this.appContext.getBean(ViewResolverComposite.class);
 		assertNotNull(compositeResolver);
@@ -801,7 +821,7 @@ public class MvcNamespaceTests {
 		List<ViewResolver> resolvers = compositeResolver.getViewResolvers();
 		assertEquals(ContentNegotiatingViewResolver.class, resolvers.get(0).getClass());
 		ContentNegotiatingViewResolver cnvr = (ContentNegotiatingViewResolver) resolvers.get(0);
-		assertEquals(6, cnvr.getViewResolvers().size());
+		assertEquals(7, cnvr.getViewResolvers().size());
 		assertEquals(1, cnvr.getDefaultViews().size());
 		assertTrue(cnvr.isUseNotAcceptableStatusCode());
 

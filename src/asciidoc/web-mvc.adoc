@@ -4762,7 +4762,7 @@ And the same in XML:
 	</mvc:view-resolvers>
 ----
 
-Note however that FreeMarker, Velocity, Tiles, and Groovy Markup also require
+Note however that FreeMarker, Velocity, Tiles, Groovy Markup and script templates also require
 configuration of the underlying view technology.
 
 The MVC namespace provides dedicated elements. For example with FreeMarker:

@@ -26,6 +26,7 @@
 		<mvc:freemarker />
 		<mvc:velocity />
 		<mvc:groovy />
+		<mvc:script-template />
 	</mvc:view-resolvers>
 
 	<mvc:tiles-configurer check-refresh="true">
@@ -39,6 +40,8 @@
 	<mvc:velocity-configurer resource-loader-path="/org/springframework/web/servlet/view" />
 
 	<mvc:groovy-configurer />
+
+	<mvc:script-template-configurer engine-name="nashorn" render-function="render"/>
 
 </beans>
  

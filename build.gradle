@@ -47,6 +47,7 @@ configure(allprojects) { project ->
 	ext.javamailVersion      = "1.5.3"
 	ext.jettyVersion         = "9.2.10.v20150310"
 	ext.jodaVersion          = "2.7"
+	ext.jrubyVersion         = "1.7.19"
 	ext.jtaVersion           = "1.2"
 	ext.junitVersion         = "4.12"
 	ext.nettyVersion         = "4.0.26.Final"
@@ -469,7 +470,7 @@ project("spring-context") {
 		optional("org.aspectj:aspectjweaver:${aspectjVersion}")
 		optional("org.codehaus.groovy:groovy-all:${groovyVersion}")
 		optional("org.beanshell:bsh:2.0b4")
-		optional("org.jruby:jruby:1.7.19")
+		optional("org.jruby:jruby:${jrubyVersion}")
 		testCompile("javax.inject:javax.inject-tck:1")
 		testCompile("org.javamoney:moneta:1.0-RC3")
 		testCompile("commons-dbcp:commons-dbcp:1.4")
@@ -898,6 +899,12 @@ project("spring-webmvc") {
 		testCompile("commons-io:commons-io:1.3")
 		testCompile("joda-time:joda-time:${jodaVersion}")
 		testCompile("org.slf4j:slf4j-jcl:${slf4jVersion}")
+		testCompile("org.webjars:mustachejs:0.8.2")
+		testCompile("org.webjars:handlebars:3.0.0-1")
+		testCompile("org.webjars:react:0.12.2")
+		testCompile("org.webjars:underscorejs:1.8.2")
+		testCompile("org.jruby:jruby:${jrubyVersion}")
+		testCompile("org.python:jython-standalone:2.5.3")
 	}
 }
 
