@@ -16,7 +16,6 @@
 package org.springframework.messaging.simp.stomp;
 
 import java.io.Serializable;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashMap;

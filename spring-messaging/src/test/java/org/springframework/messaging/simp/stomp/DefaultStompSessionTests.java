@@ -20,7 +20,6 @@ import static org.junit.Assert.*;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.*;
-import static org.mockito.Mockito.same;
 
 import java.nio.charset.Charset;
 import java.util.Date;
@@ -539,8 +538,8 @@ public class DefaultStompSessionTests {
 		assertTrue(received.get());
 	}
 
-	@SuppressWarnings("unchecked")
 	@Test
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void receiptNotReceived() throws Exception {
 
 		TaskScheduler taskScheduler = mock(TaskScheduler.class);

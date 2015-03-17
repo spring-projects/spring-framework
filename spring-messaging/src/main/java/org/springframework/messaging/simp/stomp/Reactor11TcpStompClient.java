@@ -31,7 +31,6 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.tcp.TcpOperations;
 import org.springframework.messaging.tcp.reactor.Reactor11TcpClient;
 import org.springframework.util.concurrent.ListenableFuture;
-import org.springframework.util.concurrent.SettableListenableFuture;
 
 /**
  * A STOMP over TCP client that uses

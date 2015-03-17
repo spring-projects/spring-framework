@@ -15,15 +15,10 @@
  */
 package org.springframework.messaging.simp.stomp;
 
-import static org.junit.Assert.*;
-import static org.mockito.Matchers.same;
-
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.mockito.MockitoAnnotations;
 
+import static org.junit.Assert.*;
 
 /**
  * Unit tests for {@@link StompClientSupport}.
