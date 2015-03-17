@@ -697,7 +697,7 @@ public class UriComponentsBuilder implements Cloneable {
 	}
 
 	@Override
-	protected Object clone() {
+	public Object clone() {
 		return new UriComponentsBuilder(this);
 	}
 
