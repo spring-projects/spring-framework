@@ -31,10 +31,10 @@ import org.springframework.util.ClassUtils;
 /**
  * Spring's base implementation of the JPA
  * {@link javax.persistence.spi.PersistenceUnitInfo} interface,
- * used to bootstrap an EntityManagerFactory in a container.
+ * used to bootstrap an {@code EntityManagerFactory} in a container.
  *
  * <p>This implementation is largely a JavaBean, offering mutators
- * for all standard PersistenceUnitInfo properties.
+ * for all standard {@code PersistenceUnitInfo} properties.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -170,7 +170,7 @@ public class MutablePersistenceUnitInfo implements SmartPersistenceUnitInfo {
 
 	/**
 	 * Add a managed package to the persistence provider's metadata.
-	 * <p>Note: This refers to annotated {{package-info.java}} files. It does
+	 * <p>Note: This refers to annotated {@code package-info.java} files. It does
 	 * <i>not</i> trigger entity scanning in the specified package; this is
 	 * rather the job of {@link DefaultPersistenceUnitManager#setPackagesToScan}.
 	 * @since 4.1
