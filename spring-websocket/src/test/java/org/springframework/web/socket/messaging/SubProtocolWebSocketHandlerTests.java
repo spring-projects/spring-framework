@@ -23,7 +23,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-
 import org.springframework.beans.DirectFieldAccessor;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.SubscribableChannel;
@@ -145,6 +144,7 @@ public class SubProtocolWebSocketHandlerTests {
 	}
 
 	@Test
+	@SuppressWarnings("unchecked")
 	public void checkSession() throws Exception {
 		TestWebSocketSession session1 = new TestWebSocketSession("id1");
 		TestWebSocketSession session2 = new TestWebSocketSession("id2");

@@ -23,7 +23,6 @@ import java.util.List;
 import org.hamcrest.Matchers;
 import org.junit.Before;
 import org.junit.Test;
-
 import org.springframework.beans.DirectFieldAccessor;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.config.CustomScopeConfigurer;
@@ -98,6 +97,7 @@ public class MessageBrokerBeanDefinitionParserTests {
 
 
 	@Test
+	@SuppressWarnings("unchecked")
 	public void simpleBroker() throws Exception {
 		loadBeanDefinitions("websocket-config-broker-simple.xml");
 
