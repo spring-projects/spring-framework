@@ -50,7 +50,7 @@ public class DefaultManagedAwareThreadFactory extends CustomizableThreadFactory 
 
 	private String jndiName = "java:comp/DefaultManagedThreadFactory";
 
-	private ThreadFactory threadFactory = this;
+	private ThreadFactory threadFactory;
 
 
 	/**
@@ -111,7 +111,11 @@ public class DefaultManagedAwareThreadFactory extends CustomizableThreadFactory 
 
 	@Override
 	public Thread newThread(Runnable runnable) {
-		return this.threadFactory.newThread(runnable);
+		if (this.threadFactory != null) {
+			return super.newThread(runnable);
+		} else {
+			return this.threadFactory.newThread(runnable);
+		}
 	}
 
 }
