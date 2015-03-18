@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,6 +41,8 @@ import org.springframework.messaging.MessagingException;
 import org.springframework.messaging.handler.DestinationPatternsMessageCondition;
 import org.springframework.messaging.handler.HandlerMethod;
 import org.springframework.messaging.handler.HandlerMethodSelector;
+import org.springframework.messaging.handler.MessagingAdviceBean;
+import org.springframework.messaging.handler.annotation.support.AnnotationExceptionHandlerMethodResolver;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.messaging.support.MessageHeaderAccessor;
 import org.springframework.util.ClassUtils;
@@ -86,6 +88,9 @@ public abstract class AbstractMethodMessageHandler<T>
 
 	private final Map<Class<?>, AbstractExceptionHandlerMethodResolver> exceptionHandlerCache =
 			new ConcurrentHashMap<Class<?>, AbstractExceptionHandlerMethodResolver>(64);
+
+	private final Map<MessagingAdviceBean, AbstractExceptionHandlerMethodResolver> exceptionHandlerAdviceCache =
+			new LinkedHashMap<MessagingAdviceBean, AbstractExceptionHandlerMethodResolver>(64);
 
 
 	/**
@@ -327,6 +332,25 @@ public abstract class AbstractMethodMessageHandler<T>
 	 */
 	protected abstract Set<String> getDirectLookupDestinations(T mapping);
 
+	/**
+	 * Sub-classes can invoke this method to populate the MessagingAdviceBean cache
+	 * (e.g. to support "global" {@code @MessageExceptionHandler}).
+	 * @since 4.2
+	 */
+	protected void initMessagingAdviceCache(List<MessagingAdviceBean> beans) {
+		if (beans == null) {
+			return;
+		}
+		for (MessagingAdviceBean bean : beans) {
+			Class<?> beanType = bean.getBeanType();
+			AnnotationExceptionHandlerMethodResolver resolver = new AnnotationExceptionHandlerMethodResolver(beanType);
+			if (resolver.hasExceptionMappings()) {
+				this.exceptionHandlerAdviceCache.put(bean, resolver);
+				logger.info("Detected @MessageExceptionHandler methods in " + bean);
+			}
+		}
+	}
+
 
 	@Override
 	public void handleMessage(Message<?> message) throws MessagingException {
@@ -464,21 +488,11 @@ public abstract class AbstractMethodMessageHandler<T>
 	}
 
 	protected void processHandlerMethodException(HandlerMethod handlerMethod, Exception ex, Message<?> message) {
-		if (logger.isDebugEnabled()) {
-			logger.debug("Searching methods to handle " + ex.getClass().getSimpleName());
-		}
-		Class<?> beanType = handlerMethod.getBeanType();
-		AbstractExceptionHandlerMethodResolver resolver = this.exceptionHandlerCache.get(beanType);
-		if (resolver == null) {
-			resolver = createExceptionHandlerMethodResolverFor(beanType);
-			this.exceptionHandlerCache.put(beanType, resolver);
-		}
-		Method method = resolver.resolveMethod(ex);
-		if (method == null) {
+		InvocableHandlerMethod invocable = getExceptionHandlerMethod(handlerMethod, ex);
+		if (invocable == null) {
 			logger.error("Unhandled exception", ex);
 			return;
 		}
-		InvocableHandlerMethod invocable = new InvocableHandlerMethod(handlerMethod.getBean(), method);
 		invocable.setMessageMethodArgumentResolvers(this.argumentResolvers);
 		if (logger.isDebugEnabled()) {
 			logger.debug("Invoking " + invocable.getShortLogMessage());
@@ -498,6 +512,44 @@ public abstract class AbstractMethodMessageHandler<T>
 	}
 
 	protected abstract AbstractExceptionHandlerMethodResolver createExceptionHandlerMethodResolverFor(Class<?> beanType);
+
+	/**
+	 * Find an {@code @MessageExceptionHandler} method for the given exception.
+	 * The default implementation searches methods in the class hierarchy of the
+	 * HandlerMethod first and if not found, it continues searching for additional
+	 * {@code @MessageExceptionHandler} methods among the configured
+	 * {@linkplain org.springframework.messaging.handler.MessagingAdviceBean
+	 * MessagingAdviceBean}, if any.
+	 * @param handlerMethod the method where the exception was raised
+	 * @param exception the raised exception
+	 * @return a method to handle the exception, or {@code null}
+	 * @since 4.2
+	 */
+	protected InvocableHandlerMethod getExceptionHandlerMethod(HandlerMethod handlerMethod, Exception exception) {
+		if (logger.isDebugEnabled()) {
+			logger.debug("Searching methods to handle " + exception.getClass().getSimpleName());
+		}
+		Class<?> beanType = handlerMethod.getBeanType();
+		AbstractExceptionHandlerMethodResolver resolver = this.exceptionHandlerCache.get(beanType);
+		if (resolver == null) {
+			resolver = createExceptionHandlerMethodResolverFor(beanType);
+			this.exceptionHandlerCache.put(beanType, resolver);
+		}
+		Method method = resolver.resolveMethod(exception);
+		if (method != null) {
+			return new InvocableHandlerMethod(handlerMethod.getBean(), method);
+		}
+		for (MessagingAdviceBean advice : this.exceptionHandlerAdviceCache.keySet()) {
+			if (advice.isApplicableToBeanType(beanType)) {
+				resolver = this.exceptionHandlerAdviceCache.get(advice);
+				method = resolver.resolveMethod(exception);
+				if (method != null) {
+					return new InvocableHandlerMethod(advice.resolveBean(), method);
+				}
+			}
+		}
+		return null;
+	}
 
 	protected void handleNoMatch(Set<T> ts, String lookupDestination, Message<?> message) {
 		if (logger.isDebugEnabled()) {
