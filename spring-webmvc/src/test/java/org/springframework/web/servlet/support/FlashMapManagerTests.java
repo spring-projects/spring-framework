@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,13 @@
 
 package org.springframework.web.servlet.support;
 
+import static org.junit.Assert.*;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -32,7 +35,6 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.servlet.FlashMap;
 import org.springframework.web.util.WebUtils;
 
-import static org.junit.Assert.*;
 
 /**
  * Test fixture for testing {@link AbstractFlashMapManager} methods.
@@ -47,6 +49,7 @@ public class FlashMapManagerTests {
 
 	private MockHttpServletResponse response;
 
+
 	@Before
 	public void setup() {
 		this.flashMapManager = new TestFlashMapManager();
@@ -54,13 +57,14 @@ public class FlashMapManagerTests {
 		this.response = new MockHttpServletResponse();
 	}
 
+
 	@Test
 	public void retrieveAndUpdateMatchByPath() {
 		FlashMap flashMap = new FlashMap();
 		flashMap.put("key", "value");
 		flashMap.setTargetRequestPath("/path");
 
-		this.flashMapManager.setFlashMaps(flashMap);
+		this.flashMapManager.setFlashMaps(Arrays.asList(flashMap));
 
 		this.request.setRequestURI("/path");
 		FlashMap inputFlashMap = this.flashMapManager.retrieveAndUpdate(this.request, this.response);
@@ -76,7 +80,7 @@ public class FlashMapManagerTests {
 		flashMap.put("key", "value");
 		flashMap.setTargetRequestPath("/accounts");
 
-		this.flashMapManager.setFlashMaps(flashMap);
+		this.flashMapManager.setFlashMaps(Arrays.asList(flashMap));
 
 		this.request.setAttribute(WebUtils.FORWARD_REQUEST_URI_ATTRIBUTE, "/accounts");
 		this.request.setRequestURI("/mvc/accounts");
@@ -92,7 +96,7 @@ public class FlashMapManagerTests {
 		flashMap.put("key", "value");
 		flashMap.setTargetRequestPath("/path");
 
-		this.flashMapManager.setFlashMaps(flashMap);
+		this.flashMapManager.setFlashMaps(Arrays.asList(flashMap));
 
 		this.request.setRequestURI("/path/");
 		FlashMap inputFlashMap = this.flashMapManager.retrieveAndUpdate(this.request, this.response);
@@ -107,7 +111,7 @@ public class FlashMapManagerTests {
 		flashMap.put("key", "value");
 		flashMap.addTargetRequestParam("number", "one");
 
-		this.flashMapManager.setFlashMaps(flashMap);
+		this.flashMapManager.setFlashMaps(Arrays.asList(flashMap));
 
 		this.request.setParameter("number", (String) null);
 		FlashMap inputFlashMap = this.flashMapManager.retrieveAndUpdate(this.request, this.response);
@@ -137,7 +141,7 @@ public class FlashMapManagerTests {
 		flashMap.addTargetRequestParam("id", "1");
 		flashMap.addTargetRequestParam("id", "2");
 
-		this.flashMapManager.setFlashMaps(flashMap);
+		this.flashMapManager.setFlashMaps(Arrays.asList(flashMap));
 
 		this.request.setParameter("id", "1");
 		FlashMap inputFlashMap = this.flashMapManager.retrieveAndUpdate(this.request, this.response);
@@ -165,7 +169,7 @@ public class FlashMapManagerTests {
 		flashMapTwo.put("key2", "value2");
 		flashMapTwo.setTargetRequestPath("/one/two");
 
-		this.flashMapManager.setFlashMaps(emptyFlashMap, flashMapOne, flashMapTwo);
+		this.flashMapManager.setFlashMaps(Arrays.asList(emptyFlashMap, flashMapOne, flashMapTwo));
 
 		this.request.setRequestURI("/one/two");
 		FlashMap inputFlashMap = this.flashMapManager.retrieveAndUpdate(this.request, this.response);
@@ -285,17 +289,15 @@ public class FlashMapManagerTests {
 
 		private List<FlashMap> flashMaps;
 
+
+		public void setFlashMaps(List<FlashMap> flashMaps) {
+			this.flashMaps = new CopyOnWriteArrayList<>(flashMaps);
+		}
+
 		public List<FlashMap> getFlashMaps() {
 			return this.flashMaps;
 		}
 
-		public void setFlashMaps(FlashMap... flashMaps) {
-			setFlashMaps(Arrays.asList(flashMaps));
-		}
-
-		public void setFlashMaps(List<FlashMap> flashMaps) {
-			this.flashMaps = new CopyOnWriteArrayList<FlashMap>(flashMaps);
-		}
 
 		@Override
 		protected List<FlashMap> retrieveFlashMaps(HttpServletRequest request) {
@@ -303,8 +305,8 @@ public class FlashMapManagerTests {
 		}
 
 		@Override
-		protected void updateFlashMaps(List<FlashMap> flashMaps, HttpServletRequest request, HttpServletResponse response) {
-			this.flashMaps = flashMaps;
+		protected void updateFlashMaps(List<FlashMap> maps, HttpServletRequest request, HttpServletResponse response) {
+			this.flashMaps = maps;
 		}
 	}
 
