@@ -447,40 +447,7 @@ public class UriComponentsBuilder implements Cloneable {
 	 */
 	public UriComponentsBuilder uriComponents(UriComponents uriComponents) {
 		Assert.notNull(uriComponents, "'uriComponents' must not be null");
-		this.scheme = uriComponents.getScheme();
-		if (uriComponents instanceof OpaqueUriComponents) {
-			this.ssp = uriComponents.getSchemeSpecificPart();
-			resetHierarchicalComponents();
-		}
-		else {
-			if (uriComponents.getUserInfo() != null) {
-				this.userInfo = uriComponents.getUserInfo();
-			}
-			if (uriComponents.getHost() != null) {
-				this.host = uriComponents.getHost();
-			}
-			if (uriComponents.getPort() != -1) {
-				this.port = String.valueOf(uriComponents.getPort());
-			}
-			if (StringUtils.hasLength(uriComponents.getPath())) {
-				List<String> segments = uriComponents.getPathSegments();
-				if (segments.isEmpty()) {
-					// Perhaps "/"
-					this.pathBuilder.addPath(uriComponents.getPath());
-				}
-				else {
-					this.pathBuilder.addPathSegments(segments.toArray(new String[segments.size()]));
-				}
-			}
-			if (!uriComponents.getQueryParams().isEmpty()) {
-				this.queryParams.clear();
-				this.queryParams.putAll(uriComponents.getQueryParams());
-			}
-			resetSchemeSpecificPart();
-		}
-		if (uriComponents.getFragment() != null) {
-			this.fragment = uriComponents.getFragment();
-		}
+		uriComponents.copyToUriComponentsBuilder(this);
 		return this;
 	}
 
@@ -676,6 +643,18 @@ public class UriComponentsBuilder implements Cloneable {
 			queryParam(name, values);
 		}
 		resetSchemeSpecificPart();
+		return this;
+	}
+
+	/**
+	 * Set the query parameter values overriding all existing query values.
+	 * @param params the query parameter name
+	 * @return this UriComponentsBuilder
+	 */
+	public UriComponentsBuilder replaceQueryParams(MultiValueMap<String, String> params) {
+		Assert.notNull(params, "'params' must not be null");
+		this.queryParams.clear();
+		this.queryParams.putAll(params);
 		return this;
 	}
 

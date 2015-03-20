@@ -418,6 +418,19 @@ final class HierarchicalUriComponents extends UriComponents {
 	}
 
 	@Override
+	protected void copyToUriComponentsBuilder(UriComponentsBuilder builder) {
+		builder.scheme(getScheme());
+		builder.userInfo(getUserInfo());
+		builder.host(getHost());
+		builder.port(getPort());
+		builder.replacePath("");
+		this.path.copyToUriComponentsBuilder(builder);
+		builder.replaceQueryParams(getQueryParams());
+		builder.fragment(getFragment());
+	}
+
+
+	@Override
 	public boolean equals(Object obj) {
 		if (this == obj) {
 			return true;
@@ -608,6 +621,8 @@ final class HierarchicalUriComponents extends UriComponents {
 		void verify();
 
 		PathComponent expand(UriTemplateVariables uriVariables);
+
+		void copyToUriComponentsBuilder(UriComponentsBuilder builder);
 	}
 
 
@@ -652,6 +667,11 @@ final class HierarchicalUriComponents extends UriComponents {
 		}
 
 		@Override
+		public void copyToUriComponentsBuilder(UriComponentsBuilder builder) {
+			builder.path(getPath());
+		}
+
+		@Override
 		public boolean equals(Object obj) {
 			return (this == obj || (obj instanceof FullPathComponent &&
 					getPath().equals(((FullPathComponent) obj).getPath())));
@@ -672,6 +692,7 @@ final class HierarchicalUriComponents extends UriComponents {
 		private final List<String> pathSegments;
 
 		public PathSegmentComponent(List<String> pathSegments) {
+			Assert.notNull(pathSegments);
 			this.pathSegments = Collections.unmodifiableList(new ArrayList<String>(pathSegments));
 		}
 
@@ -724,6 +745,11 @@ final class HierarchicalUriComponents extends UriComponents {
 		}
 
 		@Override
+		public void copyToUriComponentsBuilder(UriComponentsBuilder builder) {
+			builder.pathSegment(getPathSegments().toArray(new String[getPathSegments().size()]));
+		}
+
+		@Override
 		public boolean equals(Object obj) {
 			return (this == obj || (obj instanceof PathSegmentComponent &&
 					getPathSegments().equals(((PathSegmentComponent) obj).getPathSegments())));
@@ -744,6 +770,7 @@ final class HierarchicalUriComponents extends UriComponents {
 		private final List<PathComponent> pathComponents;
 
 		public PathComponentComposite(List<PathComponent> pathComponents) {
+			Assert.notNull(pathComponents);
 			this.pathComponents = pathComponents;
 		}
 
@@ -789,6 +816,13 @@ final class HierarchicalUriComponents extends UriComponents {
 			}
 			return new PathComponentComposite(expandedComponents);
 		}
+
+		@Override
+		public void copyToUriComponentsBuilder(UriComponentsBuilder builder) {
+			for (PathComponent pathComponent : this.pathComponents) {
+				pathComponent.copyToUriComponentsBuilder(builder);
+			}
+		}
 	}
 
 
@@ -814,6 +848,9 @@ final class HierarchicalUriComponents extends UriComponents {
 		@Override
 		public PathComponent expand(UriTemplateVariables uriVariables) {
 			return this;
+		}
+		@Override
+		public void copyToUriComponentsBuilder(UriComponentsBuilder builder) {
 		}
 		@Override
 		public boolean equals(Object obj) {

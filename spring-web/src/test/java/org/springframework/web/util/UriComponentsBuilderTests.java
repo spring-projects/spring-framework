@@ -436,6 +436,15 @@ public class UriComponentsBuilderTests {
 		assertEquals("https://a.example.org/mvc-showcase", result.toString());
 	}
 
+	// SPR-12742
+
+	@Test
+	public void fromHttpRequestWithTrailingSlash() throws Exception {
+		UriComponents before = UriComponentsBuilder.fromPath("/foo/").build();
+		UriComponents after = UriComponentsBuilder.newInstance().uriComponents(before).build();
+		assertEquals("/foo/", after.getPath());
+	}
+
 	@Test
 	public void path() throws URISyntaxException {
 		UriComponentsBuilder builder = UriComponentsBuilder.fromPath("/foo/bar");
