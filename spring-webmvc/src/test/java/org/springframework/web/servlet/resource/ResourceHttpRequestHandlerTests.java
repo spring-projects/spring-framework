@@ -286,8 +286,7 @@ public class ResourceHttpRequestHandlerTests {
 		assertEquals(206, this.response.getStatus());
 		assertEquals("text/plain", this.response.getContentType());
 		assertEquals(2, this.response.getContentLength());
-		assertEquals("bytes 0-1/10",
-				this.response.getHeader("Content-Range"));
+		assertEquals("bytes 0-1/10", this.response.getHeader("Content-Range"));
 		assertEquals("So", this.response.getContentAsString());
 	}
 
@@ -300,8 +299,7 @@ public class ResourceHttpRequestHandlerTests {
 		assertEquals(206, this.response.getStatus());
 		assertEquals("text/plain", this.response.getContentType());
 		assertEquals(1, this.response.getContentLength());
-		assertEquals("bytes 9-9/10",
-				this.response.getHeader("Content-Range"));
+		assertEquals("bytes 9-9/10", this.response.getHeader("Content-Range"));
 		assertEquals(".", this.response.getContentAsString());
 	}
 
@@ -314,8 +312,7 @@ public class ResourceHttpRequestHandlerTests {
 		assertEquals(206, this.response.getStatus());
 		assertEquals("text/plain", this.response.getContentType());
 		assertEquals(1, this.response.getContentLength());
-		assertEquals("bytes 9-9/10",
-				this.response.getHeader("Content-Range"));
+		assertEquals("bytes 9-9/10", this.response.getHeader("Content-Range"));
 		assertEquals(".", this.response.getContentAsString());
 	}
 
@@ -328,8 +325,7 @@ public class ResourceHttpRequestHandlerTests {
 		assertEquals(206, this.response.getStatus());
 		assertEquals("text/plain", this.response.getContentType());
 		assertEquals(1, this.response.getContentLength());
-		assertEquals("bytes 9-9/10",
-				this.response.getHeader("Content-Range"));
+		assertEquals("bytes 9-9/10", this.response.getHeader("Content-Range"));
 		assertEquals(".", this.response.getContentAsString());
 	}
 
@@ -342,21 +338,18 @@ public class ResourceHttpRequestHandlerTests {
 		assertEquals(206, this.response.getStatus());
 		assertEquals("text/plain", this.response.getContentType());
 		assertEquals(10, this.response.getContentLength());
-		assertEquals("bytes 0-9/10",
-				this.response.getHeader("Content-Range"));
+		assertEquals("bytes 0-9/10", this.response.getHeader("Content-Range"));
 		assertEquals("Some text.", this.response.getContentAsString());
 	}
 
 	@Test
 	public void partialContentInvalidRangeHeader() throws Exception {
 		this.request.addHeader("Range", "bytes= foo bar");
-		this.request.setAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE,
-				"foo.txt");
+		this.request.setAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, "foo.txt");
 		this.handler.handleRequest(this.request, this.response);
 
 		assertEquals(416, this.response.getStatus());
-		assertEquals("bytes */10",
-				this.response.getHeader("Content-Range"));
+		assertEquals("bytes */10", this.response.getHeader("Content-Range"));
 	}
 
 	@Test
@@ -366,13 +359,12 @@ public class ResourceHttpRequestHandlerTests {
 		this.handler.handleRequest(this.request, this.response);
 
 		assertEquals(206, this.response.getStatus());
-		assertTrue(this.response.getContentType()
-				.startsWith("multipart/byteranges; boundary="));
+		assertTrue(this.response.getContentType().startsWith("multipart/byteranges; boundary="));
 
 		String boundary = "--" + this.response.getContentType().substring(31);
 
-		String[] ranges = StringUtils.tokenizeToStringArray(this.response.getContentAsString(),
-				"\r\n", false, true);
+		String content = this.response.getContentAsString();
+		String[] ranges = StringUtils.tokenizeToStringArray(content, "\r\n", false, true);
 
 		assertEquals(boundary, ranges[0]);
 		assertEquals("Content-Type: text/plain", ranges[1]);
@@ -389,8 +381,6 @@ public class ResourceHttpRequestHandlerTests {
 		assertEquals("Content-Range: bytes 8-9/10", ranges[10]);
 		assertEquals("t.", ranges[11]);
 	}
-
-
 
 
 	private long headerAsLong(String responseHeaderName) {

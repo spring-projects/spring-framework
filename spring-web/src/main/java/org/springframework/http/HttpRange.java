@@ -27,7 +27,7 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 /**
- * Represents an HTTP (byte) range, as used in the {@code Range} header.
+ * Represents an HTTP (byte) range for use with the HTTP {@code "Range"} header.
  *
  * @author Arjen Poutsma
  * @see <a href="http://tools.ietf.org/html/rfc7233">HTTP/1.1: Range Requests</a>
@@ -41,10 +41,24 @@ public abstract class HttpRange {
 
 
 	/**
-	 * Creates a {@code HttpRange} that ranges from the given position to the end of the
-	 * representation.
+	 * Return the start of the range given the total length of a representation.
+	 * @param length the length of the representation
+	 * @return the start of this range for the representation
+	 */
+	public abstract long getRangeStart(long length);
+
+	/**
+	 * Return the end of the range (inclusive) given the total length of a representation.
+	 * @param length the length of the representation
+	 * @return the end of the range for the representation
+	 */
+	public abstract long getRangeEnd(long length);
+
+
+	/**
+	 * Create an {@code HttpRange} from the given position to the end.
 	 * @param firstBytePos the first byte position
-	 * @return a byte range that ranges from {@code firstBytePos} till the end
+	 * @return a byte range that ranges from {@code firstPos} till the end
 	 * @see <a href="http://tools.ietf.org/html/rfc7233#section-2.1">Byte Ranges</a>
 	 */
 	public static HttpRange createByteRange(long firstBytePos) {
@@ -52,45 +66,25 @@ public abstract class HttpRange {
 	}
 
 	/**
-	 * Creates a {@code HttpRange} that ranges from the given fist position to the given
-	 * last position.
+	 * Create a {@code HttpRange} from the given fist to last position.
 	 * @param firstBytePos the first byte position
 	 * @param lastBytePos the last byte position
-	 * @return a byte range that ranges from {@code firstBytePos} till {@code lastBytePos}
+	 * @return a byte range that ranges from {@code firstPos} till {@code lastPos}
 	 * @see <a href="http://tools.ietf.org/html/rfc7233#section-2.1">Byte Ranges</a>
 	 */
 	public static HttpRange createByteRange(long firstBytePos, long lastBytePos) {
-		Assert.isTrue(firstBytePos <= lastBytePos,
-				"\"firstBytePost\" should be " + "less then or equal to \"lastBytePos\"");
 		return new ByteRange(firstBytePos, lastBytePos);
 	}
 
 	/**
-	 * Creates a {@code HttpRange} that ranges over the last given number of bytes.
-	 * @param suffixLength the number of bytes
+	 * Create an {@code HttpRange} that ranges over the last given number of bytes.
+	 * @param suffixLength the number of bytes for the range
 	 * @return a byte range that ranges over the last {@code suffixLength} number of bytes
 	 * @see <a href="http://tools.ietf.org/html/rfc7233#section-2.1">Byte Ranges</a>
 	 */
 	public static HttpRange createSuffixRange(long suffixLength) {
 		return new SuffixByteRange(suffixLength);
 	}
-
-
-	/**
-	 * Return the start of this range, given the total length of the representation.
-	 * @param length the length of the representation.
-	 * @return the start of this range
-	 */
-	public abstract long getRangeStart(long length);
-
-	/**
-	 * Return the end of this range (inclusive), given the total length of the
-	 * representation.
-	 * @param length the length of the representation.
-	 * @return the end of this range
-	 */
-	public abstract long getRangeEnd(long length);
-
 
 	/**
 	 * Parse the given, comma-separated string into a list of {@code HttpRange} objects.
@@ -104,8 +98,7 @@ public abstract class HttpRange {
 			return Collections.emptyList();
 		}
 		if (!ranges.startsWith(BYTE_RANGE_PREFIX)) {
-			throw new IllegalArgumentException("Range \"" + ranges + "\" does not " +
-					"start with \"" + BYTE_RANGE_PREFIX + "\"");
+			throw new IllegalArgumentException("Range '" + ranges + "' does not start with 'bytes='");
 		}
 		ranges = ranges.substring(BYTE_RANGE_PREFIX.length());
 
@@ -118,35 +111,24 @@ public abstract class HttpRange {
 	}
 
 	private static HttpRange parseRange(String range) {
-		if (range == null) {
-			return null;
-		}
+		Assert.notNull(range);
 		int dashIdx = range.indexOf('-');
-		if (dashIdx < 0) {
-			throw new IllegalArgumentException("Range '\"" + range + "\" does not" +
-					"contain \"-\"");
-		}
-		else if (dashIdx > 0) {
-			// standard byte range, i.e. "bytes=0-500"
+		if (dashIdx > 0) {
 			long firstPos = Long.parseLong(range.substring(0, dashIdx));
-			ByteRange byteRange;
 			if (dashIdx < range.length() - 1) {
-				long lastPos =
-						Long.parseLong(range.substring(dashIdx + 1, range.length()));
-				byteRange = new ByteRange(firstPos, lastPos);
+				Long lastPos = Long.parseLong(range.substring(dashIdx + 1, range.length()));
+				return new ByteRange(firstPos, lastPos);
 			}
 			else {
-				byteRange = new ByteRange(firstPos, null);
+				return new ByteRange(firstPos, null);
 			}
-			if (!byteRange.validate()) {
-				throw new IllegalArgumentException("Invalid Range \"" + range + "\"");
-			}
-			return byteRange;
 		}
-		else { // dashIdx == 0
-			// suffix byte range, i.e. "bytes=-500"
+		else if (dashIdx == 0) {
 			long suffixLength = Long.parseLong(range.substring(1));
 			return new SuffixByteRange(suffixLength);
+		}
+		else {
+			throw new IllegalArgumentException("Range '" + range + "' does not contain \"-\"");
 		}
 	}
 
@@ -157,6 +139,7 @@ public abstract class HttpRange {
 	 * @return the string representation
 	 */
 	public static String toString(Collection<HttpRange> ranges) {
+		Assert.notNull(ranges);
 		StringBuilder builder = new StringBuilder(BYTE_RANGE_PREFIX);
 		for (Iterator<HttpRange> iterator = ranges.iterator(); iterator.hasNext(); ) {
 			HttpRange range = iterator.next();
@@ -177,6 +160,7 @@ public abstract class HttpRange {
 
 	abstract void appendTo(StringBuilder builder);
 
+
 	/**
 	 * Represents an HTTP/1.1 byte range, with a first and optional last position.
 	 * @see <a href="http://tools.ietf.org/html/rfc7233#section-2.1">Byte Ranges</a>
@@ -189,9 +173,21 @@ public abstract class HttpRange {
 
 		private final Long lastPos;
 
+
 		private ByteRange(long firstPos, Long lastPos) {
+			assertPositions(firstPos, lastPos);
 			this.firstPos = firstPos;
 			this.lastPos = lastPos;
+		}
+
+		private void assertPositions(long firstBytePos, Long lastBytePos) {
+			if (firstBytePos < 0) {
+				throw new IllegalArgumentException("Invalid firstPos=" + firstBytePos);
+			}
+			if (lastBytePos != null && lastBytePos < firstBytePos) {
+				throw new IllegalArgumentException("firstPost= " + firstBytePos +
+						" should be less then or equal to lastBytePosition=" + lastBytePos);
+			}
 		}
 
 		@Override
@@ -206,7 +202,6 @@ public abstract class HttpRange {
 			}
 			else {
 				return length - 1;
-
 			}
 		}
 
@@ -219,18 +214,6 @@ public abstract class HttpRange {
 			}
 		}
 
-		boolean validate() {
-			if (this.firstPos < 0) {
-				return false;
-			}
-			if (this.lastPos == null) {
-				return true;
-			}
-			else {
-				return this.firstPos <= this.lastPos;
-			}
-		}
-
 		@Override
 		public boolean equals(Object o) {
 			if (this == o) {
@@ -239,11 +222,8 @@ public abstract class HttpRange {
 			if (!(o instanceof ByteRange)) {
 				return false;
 			}
-
 			ByteRange other = (ByteRange) o;
-
-			return this.firstPos == other.firstPos &&
-					ObjectUtils.nullSafeEquals(this.lastPos, other.lastPos);
+			return this.firstPos == other.firstPos && ObjectUtils.nullSafeEquals(this.lastPos, other.lastPos);
 		}
 
 		@Override
@@ -252,7 +232,6 @@ public abstract class HttpRange {
 			hashCode = 31 * hashCode + ObjectUtils.nullSafeHashCode(this.lastPos);
 			return hashCode;
 		}
-
 	}
 
 	/**
@@ -264,15 +243,14 @@ public abstract class HttpRange {
 
 		private final long suffixLength;
 
+
 		private SuffixByteRange(long suffixLength) {
+			if (suffixLength < 0) {
+				throw new IllegalArgumentException("Invalid suffixLength=" + suffixLength);
+			}
 			this.suffixLength = suffixLength;
 		}
 
-		@Override
-		void appendTo(StringBuilder builder) {
-			builder.append('-');
-			builder.append(this.suffixLength);
-		}
 
 		@Override
 		public long getRangeStart(long length) {
@@ -287,6 +265,12 @@ public abstract class HttpRange {
 		@Override
 		public long getRangeEnd(long length) {
 			return length - 1;
+		}
+
+		@Override
+		void appendTo(StringBuilder builder) {
+			builder.append('-');
+			builder.append(this.suffixLength);
 		}
 
 		@Override

@@ -246,7 +246,7 @@ public class ResourceHttpRequestHandler extends WebContentGenerator implements H
 			return;
 		}
 
-		if (request.getHeader("Range") == null) {
+		if (request.getHeader(HttpHeaders.RANGE) == null) {
 			setHeaders(response, resource, mediaType);
 			writeContent(response, resource);
 		}
@@ -408,6 +408,8 @@ public class ResourceHttpRequestHandler extends WebContentGenerator implements H
 		if (resource instanceof EncodedResource) {
 			response.setHeader(CONTENT_ENCODING, ((EncodedResource) resource).getContentEncoding());
 		}
+
+		response.setHeader(HttpHeaders.ACCEPT_RANGES, "bytes");
 	}
 
 	/**
@@ -433,26 +435,25 @@ public class ResourceHttpRequestHandler extends WebContentGenerator implements H
 	}
 
 	/**
-	 * Write partial content out to the given servlet response,
-	 * streaming parts of the resource's content, as indicated by the request's
-	 * {@code Range} header.
+	 * Write parts of the resource as indicated by the request {@code Range} header.
 	 * @param request current servlet request
 	 * @param response current servlet response
 	 * @param resource the identified resource (never {@code null})
 	 * @param contentType the content type
 	 * @throws IOException in case of errors while writing the content
 	 */
-	protected void writePartialContent(HttpServletRequest request,
-			HttpServletResponse response, Resource resource, MediaType contentType) throws IOException {
-		long resourceLength = resource.contentLength();
+	protected void writePartialContent(HttpServletRequest request, HttpServletResponse response,
+			Resource resource, MediaType contentType) throws IOException {
+
+		long length = resource.contentLength();
 
 		List<HttpRange> ranges;
 		try {
-			HttpHeaders requestHeaders =
-					new ServletServerHttpRequest(request).getHeaders();
-			ranges = requestHeaders.getRange();
-		} catch (IllegalArgumentException ex) {
-			response.addHeader("Content-Range", "bytes */" + resourceLength);
+			HttpHeaders headers = new ServletServerHttpRequest(request).getHeaders();
+			ranges = headers.getRange();
+		}
+		catch (IllegalArgumentException ex) {
+			response.addHeader("Content-Range", "bytes */" + length);
 			response.sendError(HttpServletResponse.SC_REQUESTED_RANGE_NOT_SATISFIABLE);
             return;
 		}
@@ -462,20 +463,17 @@ public class ResourceHttpRequestHandler extends WebContentGenerator implements H
 		if (ranges.size() == 1) {
 			HttpRange range = ranges.get(0);
 
-			long rangeStart = range.getRangeStart(resourceLength);
-			long rangeEnd = range.getRangeEnd(resourceLength);
-			long rangeLength = rangeEnd - rangeStart + 1;
+			long start = range.getRangeStart(length);
+			long end = range.getRangeEnd(length);
+			long rangeLength = end - start + 1;
 
 			setHeaders(response, resource, contentType);
-			response.addHeader("Content-Range", "bytes "
-                      + rangeStart + "-"
-					  + rangeEnd + "/"
-                      + resourceLength);
+			response.addHeader("Content-Range", "bytes " + start + "-" + end + "/" + length);
             response.setContentLength((int) rangeLength);
 
 			InputStream in = resource.getInputStream();
 			try {
-				copyRange(in, response.getOutputStream(), rangeStart, rangeEnd);
+				copyRange(in, response.getOutputStream(), start, end);
 			}
 			finally {
 				try {
@@ -493,8 +491,8 @@ public class ResourceHttpRequestHandler extends WebContentGenerator implements H
 			ServletOutputStream out = response.getOutputStream();
 
 			for (HttpRange range : ranges) {
-				long rangeStart = range.getRangeStart(resourceLength);
-				long rangeEnd = range.getRangeEnd(resourceLength);
+				long start = range.getRangeStart(length);
+				long end = range.getRangeEnd(length);
 
 				InputStream in = resource.getInputStream();
 
@@ -504,27 +502,23 @@ public class ResourceHttpRequestHandler extends WebContentGenerator implements H
                 if (contentType != null) {
 	                out.println("Content-Type: " + contentType);
                 }
-                out.println("Content-Range: bytes " + rangeStart + "-" +
-		                rangeEnd + "/" + resourceLength);
+                out.println("Content-Range: bytes " + start + "-" + end + "/" + length);
                 out.println();
 
                 // Printing content
-                copyRange(in, out, rangeStart, rangeEnd);
-
+                copyRange(in, out, start, end);
 			}
 			out.println();
             out.print("--" + boundaryString + "--");
 		}
 	}
 
-	private void copyRange(InputStream in, OutputStream out, long start, long end)
-			throws IOException {
+	private void copyRange(InputStream in, OutputStream out, long start, long end) throws IOException {
 
 		long skipped = in.skip(start);
 
 		if (skipped < start) {
-			throw new IOException("Could only skip " + skipped + " bytes out of " +
-					start + " required");
+			throw new IOException("Skipped only " + skipped + " bytes out of " + start + " required.");
 		}
 
 		long bytesToCopy = end - start + 1;
@@ -545,6 +539,7 @@ public class ResourceHttpRequestHandler extends WebContentGenerator implements H
 			}
 		}
 	}
+
 
 	@Override
 	public String toString() {

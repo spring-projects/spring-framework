@@ -36,6 +36,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 /**
+ * Unit tests for {@link org.springframework.http.HttpHeaders}.
  * @author Arjen Poutsma
  */
 public class HttpHeadersTests {
@@ -264,18 +265,6 @@ public class HttpHeadersTests {
 	public void getAllowEmptySet() {
 		headers.setAllow(Collections.<HttpMethod> emptySet());
 		assertThat(headers.getAllow(), Matchers.emptyCollectionOf(HttpMethod.class));
-	}
-
-	@Test
-	public void range() {
-		List<HttpRange> ranges = new ArrayList<>();
-		ranges.add(HttpRange.createByteRange(0, 499));
-		ranges.add(HttpRange.createByteRange(9500));
-		ranges.add(HttpRange.createSuffixRange(500));
-
-		headers.setRange(ranges);
-		assertEquals("Invalid Range header", ranges, headers.getRange());
-		assertEquals("Invalid Range header", "bytes=0-499, 9500-, -500", headers.getFirst("Range"));
 	}
 
 }
