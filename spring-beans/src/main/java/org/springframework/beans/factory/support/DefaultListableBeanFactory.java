@@ -66,6 +66,7 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.config.DependencyDescriptor;
 import org.springframework.core.OrderComparator;
+import org.springframework.core.ResolvableType;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.lang.UsesJava8;
 import org.springframework.util.Assert;
@@ -323,7 +324,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 
 
 	//---------------------------------------------------------------------
-	// Implementation of ListableBeanFactory interface
+	// Implementation of remaining BeanFactory methods
 	//---------------------------------------------------------------------
 
 	@Override
@@ -372,6 +373,11 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		}
 	}
 
+
+	//---------------------------------------------------------------------
+	// Implementation of ListableBeanFactory interface
+	//---------------------------------------------------------------------
+
 	@Override
 	public boolean containsBeanDefinition(String beanName) {
 		Assert.notNull(beanName, "Bean name must not be null");
@@ -394,6 +400,11 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	}
 
 	@Override
+	public String[] getBeanNamesForType(ResolvableType type) {
+		return doGetBeanNamesForType(type, true, true);
+	}
+
+	@Override
 	public String[] getBeanNamesForType(Class<?> type) {
 		return getBeanNamesForType(type, true, true);
 	}
@@ -401,7 +412,8 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	@Override
 	public String[] getBeanNamesForType(Class<?> type, boolean includeNonSingletons, boolean allowEagerInit) {
 		if (!isConfigurationFrozen() || type == null || !allowEagerInit) {
-			return doGetBeanNamesForType(type, includeNonSingletons, allowEagerInit);
+			return doGetBeanNamesForType(ResolvableType.forClass(type != null ? type : Object.class),
+					includeNonSingletons, allowEagerInit);
 		}
 		Map<Class<?>, String[]> cache =
 				(includeNonSingletons ? this.allBeanNamesByType : this.singletonBeanNamesByType);
@@ -409,14 +421,14 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		if (resolvedBeanNames != null) {
 			return resolvedBeanNames;
 		}
-		resolvedBeanNames = doGetBeanNamesForType(type, includeNonSingletons, allowEagerInit);
+		resolvedBeanNames = doGetBeanNamesForType(ResolvableType.forClass(type), includeNonSingletons, allowEagerInit);
 		if (ClassUtils.isCacheSafe(type, getBeanClassLoader())) {
 			cache.put(type, resolvedBeanNames);
 		}
 		return resolvedBeanNames;
 	}
 
-	private String[] doGetBeanNamesForType(Class<?> type, boolean includeNonSingletons, boolean allowEagerInit) {
+	private String[] doGetBeanNamesForType(ResolvableType type, boolean includeNonSingletons, boolean allowEagerInit) {
 		List<String> result = new ArrayList<String>();
 
 		// Check all bean definitions.

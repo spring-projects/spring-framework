@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -288,6 +288,17 @@ class ConfigurationClassParser {
 			configClass.addBeanMethod(new BeanMethod(methodMetadata, configClass));
 		}
 
+		// Process default methods on interfaces
+		for (SourceClass ifc : sourceClass.getInterfaces()) {
+			beanMethods = ifc.getMetadata().getAnnotatedMethods(Bean.class.getName());
+			for (MethodMetadata methodMetadata : beanMethods) {
+				if (!methodMetadata.isAbstract()) {
+					// A default method or other concrete method on a Java 8+ interface...
+					configClass.addBeanMethod(new BeanMethod(methodMetadata, configClass));
+				}
+			}
+		}
+
 		// Process superclass, if any
 		if (sourceClass.getMetadata().hasSuperClass()) {
 			String superclass = sourceClass.getMetadata().getSuperClassName();
@@ -474,7 +485,7 @@ class ConfigurationClassParser {
 					}
 					else {
 						// Candidate class not an ImportSelector or ImportBeanDefinitionRegistrar ->
-						// process it as a @Configuration class
+						// process it as an @Configuration class
 						this.importStack.registerImport(
 								currentSourceClass.getMetadata(), candidate.getMetadata().getClassName());
 						processConfigurationClass(candidate.asConfigClass(configClass));
@@ -760,6 +771,22 @@ class ConfigurationClassParser {
 				return asSourceClass(((Class<?>) this.source).getSuperclass());
 			}
 			return asSourceClass(((MetadataReader) this.source).getClassMetadata().getSuperClassName());
+		}
+
+		public Set<SourceClass> getInterfaces() throws IOException {
+			Set<SourceClass> result = new LinkedHashSet<SourceClass>();
+			if (this.source instanceof Class<?>) {
+				Class<?> sourceClass = (Class<?>) this.source;
+				for (Class<?> ifcClass : sourceClass.getInterfaces()) {
+					result.add(asSourceClass(ifcClass));
+				}
+			}
+			else {
+				for (String className : this.metadata.getInterfaceNames()) {
+					result.add(asSourceClass(className));
+				}
+			}
+			return result;
 		}
 
 		public Set<SourceClass> getAnnotations() throws IOException {

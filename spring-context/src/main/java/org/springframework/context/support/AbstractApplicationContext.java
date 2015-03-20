@@ -47,13 +47,13 @@ import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.EnvironmentAware;
-import org.springframework.context.PayloadApplicationEvent;
 import org.springframework.context.HierarchicalMessageSource;
 import org.springframework.context.LifecycleProcessor;
 import org.springframework.context.MessageSource;
 import org.springframework.context.MessageSourceAware;
 import org.springframework.context.MessageSourceResolvable;
 import org.springframework.context.NoSuchMessageException;
+import org.springframework.context.PayloadApplicationEvent;
 import org.springframework.context.ResourceLoaderAware;
 import org.springframework.context.event.ApplicationEventMulticaster;
 import org.springframework.context.event.ContextClosedEvent;
@@ -1025,6 +1025,12 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	}
 
 	@Override
+	public boolean isTypeMatch(String name, ResolvableType targetType) throws NoSuchBeanDefinitionException {
+		assertBeanFactoryActive();
+		return getBeanFactory().isTypeMatch(name, targetType);
+	}
+
+	@Override
 	public boolean isTypeMatch(String name, Class<?> targetType) throws NoSuchBeanDefinitionException {
 		assertBeanFactoryActive();
 		return getBeanFactory().isTypeMatch(name, targetType);
@@ -1059,6 +1065,12 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	@Override
 	public String[] getBeanDefinitionNames() {
 		return getBeanFactory().getBeanDefinitionNames();
+	}
+
+	@Override
+	public String[] getBeanNamesForType(ResolvableType type) {
+		assertBeanFactoryActive();
+		return getBeanFactory().getBeanNamesForType(type);
 	}
 
 	@Override

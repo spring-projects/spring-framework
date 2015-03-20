@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.beans.factory;
 
 import org.springframework.beans.BeansException;
+import org.springframework.core.ResolvableType;
 
 /**
  * The root interface for accessing a Spring bean container.
@@ -114,6 +115,7 @@ public interface BeanFactory {
 	 */
 	String FACTORY_BEAN_PREFIX = "&";
 
+
 	/**
 	 * Return an instance, which may be shared or independent, of the specified bean.
 	 * <p>This method allows a Spring BeanFactory to be used as a replacement for the
@@ -202,6 +204,7 @@ public interface BeanFactory {
 	 */
 	<T> T getBean(Class<T> requiredType, Object... args) throws BeansException;
 
+
 	/**
 	 * Does this bean factory contain a bean definition or externally registered singleton
 	 * instance with the given name?
@@ -261,7 +264,24 @@ public interface BeanFactory {
 	 * <p>Translates aliases back to the corresponding canonical bean name.
 	 * Will ask the parent factory if the bean cannot be found in this factory instance.
 	 * @param name the name of the bean to query
-	 * @param targetType the type to match against
+	 * @param targetType the type to match against (as a {@code ResolvableType})
+	 * @return {@code true} if the bean type matches,
+	 * {@code false} if it doesn't match or cannot be determined yet
+	 * @throws NoSuchBeanDefinitionException if there is no bean with the given name
+	 * @since 4.2
+	 * @see #getBean
+	 * @see #getType
+	 */
+	boolean isTypeMatch(String name, ResolvableType targetType) throws NoSuchBeanDefinitionException;
+
+	/**
+	 * Check whether the bean with the given name matches the specified type.
+	 * More specifically, check whether a {@link #getBean} call for the given name
+	 * would return an object that is assignable to the specified target type.
+	 * <p>Translates aliases back to the corresponding canonical bean name.
+	 * Will ask the parent factory if the bean cannot be found in this factory instance.
+	 * @param name the name of the bean to query
+	 * @param targetType the type to match against (as a {@code Class})
 	 * @return {@code true} if the bean type matches,
 	 * {@code false} if it doesn't match or cannot be determined yet
 	 * @throws NoSuchBeanDefinitionException if there is no bean with the given name

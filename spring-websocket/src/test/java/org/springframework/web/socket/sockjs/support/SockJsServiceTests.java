@@ -18,13 +18,14 @@ package org.springframework.web.socket.sockjs.support;
 
 import java.io.IOException;
 import java.util.Arrays;
+
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 
 import static org.junit.Assert.assertEquals;
+
 import org.junit.Before;
 import org.junit.Test;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
@@ -156,6 +157,7 @@ public class SockJsServiceTests extends AbstractHttpRequestTests {
 	}
 
 	@Test  // SPR-11919
+	@SuppressWarnings("unchecked")
 	public void handleInfoGetWildflyNPE() throws Exception {
 		HttpServletResponse mockResponse = mock(HttpServletResponse.class);
 		ServletOutputStream ous = mock(ServletOutputStream.class);

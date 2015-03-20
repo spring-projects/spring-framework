@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.messaging.converter.MappingJackson2MessageConverter;
 import org.springframework.messaging.simp.SimpSessionScope;
+import org.springframework.messaging.simp.annotation.support.SimpAnnotationMethodMessageHandler;
 import org.springframework.messaging.simp.broker.AbstractBrokerMessageHandler;
 import org.springframework.messaging.simp.config.AbstractMessageBrokerConfiguration;
 import org.springframework.messaging.simp.stomp.StompBrokerRelayMessageHandler;
@@ -30,6 +31,7 @@ import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.config.WebSocketMessageBrokerStats;
 import org.springframework.web.socket.handler.WebSocketHandlerDecoratorFactory;
 import org.springframework.web.socket.messaging.SubProtocolWebSocketHandler;
+import org.springframework.web.socket.messaging.WebSocketAnnotationMethodMessageHandler;
 
 /**
  * Extends {@link AbstractMessageBrokerConfiguration} and adds configuration for
@@ -47,6 +49,12 @@ public abstract class WebSocketMessageBrokerConfigurationSupport extends Abstrac
 
 	private WebSocketTransportRegistration transportRegistration;
 
+
+	@Override
+	protected SimpAnnotationMethodMessageHandler createAnnotationMethodMessageHandler() {
+		return new WebSocketAnnotationMethodMessageHandler(clientInboundChannel(),
+				clientOutboundChannel(), brokerMessagingTemplate());
+	}
 
 	@Bean
 	public HandlerMapping stompWebSocketHandlerMapping() {

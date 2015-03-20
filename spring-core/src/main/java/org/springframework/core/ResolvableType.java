@@ -156,7 +156,7 @@ public final class ResolvableType implements Serializable {
 	}
 
 	/**
-	 * Return the underlying Java {@link Class} being  managed, if available;
+	 * Return the underlying Java {@link Class} being managed, if available;
 	 * otherwise {@code null}.
 	 */
 	public Class<?> getRawClass() {
@@ -180,13 +180,34 @@ public final class ResolvableType implements Serializable {
 	}
 
 	/**
+	 * Determine whether the given object is an instance of this {@code ResolvableType}.
+	 * @param obj the object to check
+	 * @since 4.2
+	 * @see #isAssignableFrom(Class)
+	 */
+	public boolean isInstance(Object obj) {
+		return (obj != null && isAssignableFrom(obj.getClass()));
+	}
+
+	/**
+	 * Determine whether this {@code ResolvableType} is assignable from the
+	 * specified other type.
+	 * @param other the type to be checked against (as a {@code Class})
+	 * @since 4.2
+	 * @see #isAssignableFrom(ResolvableType)
+	 */
+	public boolean isAssignableFrom(Class<?> other) {
+		return isAssignableFrom(forClass(other), null);
+	}
+
+	/**
 	 * Determine whether this {@code ResolvableType} is assignable from the
 	 * specified other type.
 	 * <p>Attempts to follow the same rules as the Java compiler, considering
 	 * whether both the {@link #resolve() resolved} {@code Class} is
 	 * {@link Class#isAssignableFrom(Class) assignable from} the given type
 	 * as well as whether all {@link #getGenerics() generics} are assignable.
-	 * @param other the type to be checked against
+	 * @param other the type to be checked against (as a {@code ResolvableType})
 	 * @return {@code true} if the specified other type can be assigned to this
 	 * {@code ResolvableType}; {@code false} otherwise
 	 */

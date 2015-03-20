@@ -68,6 +68,7 @@ import org.springframework.beans.factory.config.InstantiationAwareBeanPostProces
 import org.springframework.beans.factory.config.Scope;
 import org.springframework.core.DecoratingClassLoader;
 import org.springframework.core.NamedThreadLocal;
+import org.springframework.core.ResolvableType;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
@@ -479,9 +480,8 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	}
 
 	@Override
-	public boolean isTypeMatch(String name, Class<?> targetType) throws NoSuchBeanDefinitionException {
+	public boolean isTypeMatch(String name, ResolvableType typeToMatch) throws NoSuchBeanDefinitionException {
 		String beanName = transformedBeanName(name);
-		Class<?> typeToMatch = (targetType != null ? targetType : Object.class);
 
 		// Check manually registered singletons.
 		Object beanInstance = getSingleton(beanName, false);
@@ -489,15 +489,14 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 			if (beanInstance instanceof FactoryBean) {
 				if (!BeanFactoryUtils.isFactoryDereference(name)) {
 					Class<?> type = getTypeForFactoryBean((FactoryBean<?>) beanInstance);
-					return (type != null && ClassUtils.isAssignable(typeToMatch, type));
+					return (type != null && typeToMatch.isAssignableFrom(type));
 				}
 				else {
-					return ClassUtils.isAssignableValue(typeToMatch, beanInstance);
+					return typeToMatch.isInstance(beanInstance);
 				}
 			}
 			else {
-				return !BeanFactoryUtils.isFactoryDereference(name) &&
-						ClassUtils.isAssignableValue(typeToMatch, beanInstance);
+				return (!BeanFactoryUtils.isFactoryDereference(name) && typeToMatch.isInstance(beanInstance));
 			}
 		}
 		else if (containsSingleton(beanName) && !containsBeanDefinition(beanName)) {
@@ -510,14 +509,15 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 			BeanFactory parentBeanFactory = getParentBeanFactory();
 			if (parentBeanFactory != null && !containsBeanDefinition(beanName)) {
 				// No bean definition found in this factory -> delegate to parent.
-				return parentBeanFactory.isTypeMatch(originalBeanName(name), targetType);
+				return parentBeanFactory.isTypeMatch(originalBeanName(name), typeToMatch);
 			}
 
 			// Retrieve corresponding bean definition.
 			RootBeanDefinition mbd = getMergedLocalBeanDefinition(beanName);
 
-			Class<?>[] typesToMatch = (FactoryBean.class.equals(typeToMatch) ?
-					new Class<?>[] {typeToMatch} : new Class<?>[] {FactoryBean.class, typeToMatch});
+			Class<?> classToMatch = typeToMatch.getRawClass();
+			Class<?>[] typesToMatch = (FactoryBean.class.equals(classToMatch) ?
+					new Class<?>[] {classToMatch} : new Class<?>[] {FactoryBean.class, classToMatch});
 
 			// Check decorated bean definition, if any: We assume it'll be easier
 			// to determine the decorated bean's type than the proxy's type.
@@ -557,6 +557,11 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 
 			return typeToMatch.isAssignableFrom(beanType);
 		}
+	}
+
+	@Override
+	public boolean isTypeMatch(String name, Class<?> targetType) throws NoSuchBeanDefinitionException {
+		return isTypeMatch(name, ResolvableType.forClass(targetType));
 	}
 
 	@Override

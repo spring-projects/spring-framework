@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,8 +18,7 @@ package org.springframework.web.socket;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.EnumSet;
-import javax.servlet.DispatcherType;
+
 import javax.servlet.Filter;
 
 import org.apache.catalina.Context;
@@ -103,10 +102,6 @@ public class TomcatWebSocketTestServer implements WebSocketTestServer {
 			filterMap.setDispatcher("REQUEST,FORWARD,INCLUDE,ASYNC");
 			this.context.addFilterMap(filterMap);
 		}
-	}
-
-	private EnumSet<DispatcherType> getDispatcherTypes() {
-		return EnumSet.of(DispatcherType.REQUEST, DispatcherType.FORWARD, DispatcherType.INCLUDE, DispatcherType.ASYNC);
 	}
 
 	@Override

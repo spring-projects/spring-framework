@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,7 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.datasource.AbstractDriverBasedDataSource;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseFactoryBean;
 import org.springframework.jdbc.datasource.init.DataSourceInitializer;
 import org.springframework.tests.Assume;
@@ -38,6 +39,7 @@ import org.springframework.tests.TestGroup;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
+import static org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseFactory.*;
 
 /**
  * @author Dave Syer
@@ -67,6 +69,22 @@ public class JdbcNamespaceIntegrationTests {
 	@Test
 	public void createWithResourcePattern() throws Exception {
 		assertCorrectSetup("jdbc-config-pattern.xml", "dataSource");
+	}
+
+	@Test
+	public void createWithAnonymousDataSourceAndDefaultDatabaseName() throws Exception {
+		assertCorrectSetupForSingleDataSource("jdbc-config-db-name-default-and-anonymous-datasource.xml",
+			DEFAULT_DATABASE_NAME);
+	}
+
+	@Test
+	public void createWithImplicitDatabaseName() throws Exception {
+		assertCorrectSetupForSingleDataSource("jdbc-config-db-name-implicit.xml", "dataSource");
+	}
+
+	@Test
+	public void createWithExplicitDatabaseName() throws Exception {
+		assertCorrectSetupForSingleDataSource("jdbc-config-db-name-explicit.xml", "customDbName");
 	}
 
 	@Test
@@ -160,9 +178,25 @@ public class JdbcNamespaceIntegrationTests {
 		try {
 			for (String dataSourceName : dataSources) {
 				DataSource dataSource = context.getBean(dataSourceName, DataSource.class);
-				JdbcTemplate template = new JdbcTemplate(dataSource);
-				assertNumRowsInTestTable(template, count);
+				assertNumRowsInTestTable(new JdbcTemplate(dataSource), count);
+				assertTrue(dataSource instanceof AbstractDriverBasedDataSource);
+				AbstractDriverBasedDataSource adbDataSource = (AbstractDriverBasedDataSource) dataSource;
+				assertThat(adbDataSource.getUrl(), containsString(dataSourceName));
 			}
+		}
+		finally {
+			context.close();
+		}
+	}
+
+	private void assertCorrectSetupForSingleDataSource(String file, String dbName) {
+		ConfigurableApplicationContext context = context(file);
+		try {
+			DataSource dataSource = context.getBean(DataSource.class);
+			assertNumRowsInTestTable(new JdbcTemplate(dataSource), 1);
+			assertTrue(dataSource instanceof AbstractDriverBasedDataSource);
+			AbstractDriverBasedDataSource adbDataSource = (AbstractDriverBasedDataSource) dataSource;
+			assertThat(adbDataSource.getUrl(), containsString(dbName));
 		}
 		finally {
 			context.close();
