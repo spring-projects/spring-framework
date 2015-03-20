@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -62,6 +62,11 @@ public class JdbcNamespaceIntegrationTests {
 		// If Derby isn't cleaned up properly this will fail...
 		Assume.group(TestGroup.LONG_RUNNING);
 		assertCorrectSetup("jdbc-config.xml", "derbyDataSource");
+	}
+
+	@Test
+	public void createWithAnonymousDataSource() throws Exception {
+		assertCorrectSetupAndCloseContextForSingleDataSource("jdbc-config-anonymous-datasource.xml", 1);
 	}
 
 	@Test
@@ -163,6 +168,18 @@ public class JdbcNamespaceIntegrationTests {
 				JdbcTemplate template = new JdbcTemplate(dataSource);
 				assertNumRowsInTestTable(template, count);
 			}
+		}
+		finally {
+			context.close();
+		}
+	}
+
+	private void assertCorrectSetupAndCloseContextForSingleDataSource(String file, int count) {
+		ConfigurableApplicationContext context = context(file);
+		try {
+			DataSource dataSource = context.getBean(DataSource.class);
+			JdbcTemplate template = new JdbcTemplate(dataSource);
+			assertNumRowsInTestTable(template, count);
 		}
 		finally {
 			context.close();
