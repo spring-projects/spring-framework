@@ -18,12 +18,14 @@ package org.springframework.web.servlet.resource;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.List;
 import javax.activation.FileTypeMap;
 import javax.activation.MimetypesFileTypeMap;
 import javax.servlet.ServletException;
+import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -33,10 +35,14 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpRange;
 import org.springframework.http.MediaType;
+import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.MimeTypeUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.ResourceUtils;
 import org.springframework.util.StreamUtils;
@@ -79,6 +85,7 @@ import org.springframework.web.servlet.support.WebContentGenerator;
  * @author Keith Donald
  * @author Jeremy Grelle
  * @author Juergen Hoeller
+ * @author Arjen Poutsma
  * @since 3.0.4
  */
 public class ResourceHttpRequestHandler extends WebContentGenerator implements HttpRequestHandler, InitializingBean {
@@ -213,6 +220,12 @@ public class ResourceHttpRequestHandler extends WebContentGenerator implements H
 			return;
 		}
 
+		// header phase
+		if (new ServletWebRequest(request, response).checkNotModified(resource.lastModified())) {
+			logger.trace("Resource not modified - returning 304");
+			return;
+		}
+
 		// check the resource's media type
 		MediaType mediaType = getMediaType(resource);
 		if (mediaType != null) {
@@ -226,19 +239,20 @@ public class ResourceHttpRequestHandler extends WebContentGenerator implements H
 			}
 		}
 
-		// header phase
-		if (new ServletWebRequest(request, response).checkNotModified(resource.lastModified())) {
-			logger.trace("Resource not modified - returning 304");
-			return;
-		}
-		setHeaders(response, resource, mediaType);
-
 		// content phase
 		if (METHOD_HEAD.equals(request.getMethod())) {
+			setHeaders(response, resource, mediaType);
 			logger.trace("HEAD request - skipping content");
 			return;
 		}
-		writeContent(response, resource);
+
+		if (request.getHeader("Range") == null) {
+			setHeaders(response, resource, mediaType);
+			writeContent(response, resource);
+		}
+		else {
+			writePartialContent(request, response, resource, mediaType);
+		}
 	}
 
 	protected Resource getResource(HttpServletRequest request) throws IOException {
@@ -413,6 +427,121 @@ public class ResourceHttpRequestHandler extends WebContentGenerator implements H
 				in.close();
 			}
 			catch (IOException ex) {
+				// ignore
+			}
+		}
+	}
+
+	/**
+	 * Write partial content out to the given servlet response,
+	 * streaming parts of the resource's content, as indicated by the request's
+	 * {@code Range} header.
+	 * @param request current servlet request
+	 * @param response current servlet response
+	 * @param resource the identified resource (never {@code null})
+	 * @param contentType the content type
+	 * @throws IOException in case of errors while writing the content
+	 */
+	protected void writePartialContent(HttpServletRequest request,
+			HttpServletResponse response, Resource resource, MediaType contentType) throws IOException {
+		long resourceLength = resource.contentLength();
+
+		List<HttpRange> ranges;
+		try {
+			HttpHeaders requestHeaders =
+					new ServletServerHttpRequest(request).getHeaders();
+			ranges = requestHeaders.getRange();
+		} catch (IllegalArgumentException ex) {
+			response.addHeader("Content-Range", "bytes */" + resourceLength);
+			response.sendError(HttpServletResponse.SC_REQUESTED_RANGE_NOT_SATISFIABLE);
+            return;
+		}
+
+		response.setStatus(HttpServletResponse.SC_PARTIAL_CONTENT);
+
+		if (ranges.size() == 1) {
+			HttpRange range = ranges.get(0);
+
+			long rangeStart = range.getRangeStart(resourceLength);
+			long rangeEnd = range.getRangeEnd(resourceLength);
+			long rangeLength = rangeEnd - rangeStart + 1;
+
+			setHeaders(response, resource, contentType);
+			response.addHeader("Content-Range", "bytes "
+                      + rangeStart + "-"
+					  + rangeEnd + "/"
+                      + resourceLength);
+            response.setContentLength((int) rangeLength);
+
+			InputStream in = resource.getInputStream();
+			try {
+				copyRange(in, response.getOutputStream(), rangeStart, rangeEnd);
+			}
+			finally {
+				try {
+					in.close();
+				}
+				catch (IOException ex) {
+					// ignore
+				}
+			}
+		}
+		else {
+			String boundaryString = MimeTypeUtils.generateMultipartBoundaryString();
+			response.setContentType("multipart/byteranges; boundary=" + boundaryString);
+
+			ServletOutputStream out = response.getOutputStream();
+
+			for (HttpRange range : ranges) {
+				long rangeStart = range.getRangeStart(resourceLength);
+				long rangeEnd = range.getRangeEnd(resourceLength);
+
+				InputStream in = resource.getInputStream();
+
+                // Writing MIME header.
+                out.println();
+                out.println("--" + boundaryString);
+                if (contentType != null) {
+	                out.println("Content-Type: " + contentType);
+                }
+                out.println("Content-Range: bytes " + rangeStart + "-" +
+		                rangeEnd + "/" + resourceLength);
+                out.println();
+
+                // Printing content
+                copyRange(in, out, rangeStart, rangeEnd);
+
+			}
+			out.println();
+            out.print("--" + boundaryString + "--");
+		}
+	}
+
+	private void copyRange(InputStream in, OutputStream out, long start, long end)
+			throws IOException {
+
+		long skipped = in.skip(start);
+
+		if (skipped < start) {
+			throw new IOException("Could only skip " + skipped + " bytes out of " +
+					start + " required");
+		}
+
+		long bytesToCopy = end - start + 1;
+
+		byte buffer[] = new byte[StreamUtils.BUFFER_SIZE];
+		while (bytesToCopy > 0) {
+			int bytesRead = in.read(buffer);
+			if (bytesRead <= bytesToCopy) {
+				out.write(buffer, 0, bytesRead);
+				bytesToCopy -= bytesRead;
+			}
+			else {
+				out.write(buffer, 0, (int) bytesToCopy);
+				bytesToCopy = 0;
+			}
+			if (bytesRead < buffer.length) {
+				break;
 			}
 		}
 	}
