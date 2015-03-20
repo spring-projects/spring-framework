@@ -34,6 +34,16 @@
 							</xsd:annotation>
 						</xsd:element>
 					</xsd:sequence>
+					<xsd:attribute name="database-name" type="xsd:string" default="">
+						<xsd:annotation>
+							<xsd:documentation><![CDATA[
+			The name to assign to the embedded database. Note that this is not the
+			bean name but rather the name of the embedded database as used in the JDBC
+			connection URL for the database. Defaults to "testdb" if an explicit bean
+			'id' has not been provided.
+							]]></xsd:documentation>
+						</xsd:annotation>
+					</xsd:attribute>
 					<xsd:attribute name="type" type="databaseType" default="HSQL">
 						<xsd:annotation>
 							<xsd:documentation><![CDATA[

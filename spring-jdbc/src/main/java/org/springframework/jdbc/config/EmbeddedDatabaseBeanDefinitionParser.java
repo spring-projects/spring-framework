@@ -43,10 +43,16 @@ import org.w3c.dom.Element;
  */
 class EmbeddedDatabaseBeanDefinitionParser extends AbstractBeanDefinitionParser {
 
+	/**
+	 * Constant for the "database-name" attribute.
+	 */
+	static final String DB_NAME_ATTRIBUTE = "database-name";
+
+
 	@Override
 	protected AbstractBeanDefinition parseInternal(Element element, ParserContext parserContext) {
 		BeanDefinitionBuilder builder = BeanDefinitionBuilder.rootBeanDefinition(EmbeddedDatabaseFactoryBean.class);
-		useIdAsDatabaseNameIfGiven(element, builder);
+		setDatabaseName(element, builder);
 		setDatabaseType(element, builder);
 		DatabasePopulatorConfigUtils.setDatabasePopulator(element, builder);
 		builder.getRawBeanDefinition().setSource(parserContext.extractSource(element));
@@ -58,11 +64,20 @@ class EmbeddedDatabaseBeanDefinitionParser extends AbstractBeanDefinitionParser 
 		return true;
 	}
 
-	private void useIdAsDatabaseNameIfGiven(Element element, BeanDefinitionBuilder builder) {
-		String id = element.getAttribute(ID_ATTRIBUTE);
-		if (StringUtils.hasText(id)) {
-			builder.addPropertyValue("databaseName", id);
+	private void setDatabaseName(Element element, BeanDefinitionBuilder builder) {
+		// 1) Check for an explicit database name
+		String name = element.getAttribute(DB_NAME_ATTRIBUTE);
+
+		// 2) Fall back to an implicit database name based on the ID
+		if (!StringUtils.hasText(name)) {
+			name = element.getAttribute(ID_ATTRIBUTE);
 		}
+
+		if (StringUtils.hasText(name)) {
+			builder.addPropertyValue("databaseName", name);
+		}
+
+		// 3) Let EmbeddedDatabaseFactory set the default "testdb" name
 	}
 
 	private void setDatabaseType(Element element, BeanDefinitionBuilder builder) {
