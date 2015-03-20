@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,16 +24,14 @@ import org.junit.runners.Suite.SuiteClasses;
  * Test suite to investigate claims raised in
  * <a href="https://jira.spring.io/browse/SPR-8849">SPR-8849</a>.
  *
- * <p>By using a SpEL expression to generate a random {@code id} for the
- * embedded database (see {@code datasource-config.xml}), we ensure that each
- * {@code ApplicationContext} that imports the common configuration will create
- * an embedded database with a unique name (since the {@code id} is used as the
- * database name within
- * {@link org.springframework.jdbc.config.EmbeddedDatabaseBeanDefinitionParser#useIdAsDatabaseNameIfGiven()}).
+ * <p>By using a SpEL expression to generate a random {@code database-name}
+ * for the embedded database (see {@code datasource-config.xml}), we ensure
+ * that each {@code ApplicationContext} that imports the common configuration
+ * will create an embedded database with a unique name.
  *
- * <p>To reproduce the problem mentioned in SPEX-8849, change the {@code id} of
- * the embedded database in {@code datasource-config.xml} to "dataSource" (or
- * anything else that is not random) and run this <em>suite</em>.
+ * <p>To reproduce the problem mentioned in SPR-8849, delete the declaration
+ * of the {@code database-name} attribute of the embedded database in
+ * {@code datasource-config.xml} and run this <em>suite</em>.
  *
  * @author Sam Brannen
  * @since 3.2
