@@ -16,6 +16,8 @@
 
 package org.springframework.jdbc.config;
 
+import java.util.function.Predicate;
+
 import javax.sql.DataSource;
 
 import org.junit.Rule;
@@ -74,17 +76,26 @@ public class JdbcNamespaceIntegrationTests {
 	@Test
 	public void createWithAnonymousDataSourceAndDefaultDatabaseName() throws Exception {
 		assertCorrectSetupForSingleDataSource("jdbc-config-db-name-default-and-anonymous-datasource.xml",
-			DEFAULT_DATABASE_NAME);
+			(url) -> url.endsWith(DEFAULT_DATABASE_NAME));
 	}
 
 	@Test
 	public void createWithImplicitDatabaseName() throws Exception {
-		assertCorrectSetupForSingleDataSource("jdbc-config-db-name-implicit.xml", "dataSource");
+		assertCorrectSetupForSingleDataSource("jdbc-config-db-name-implicit.xml", (url) -> url.endsWith("dataSource"));
 	}
 
 	@Test
 	public void createWithExplicitDatabaseName() throws Exception {
-		assertCorrectSetupForSingleDataSource("jdbc-config-db-name-explicit.xml", "customDbName");
+		assertCorrectSetupForSingleDataSource("jdbc-config-db-name-explicit.xml", (url) -> url.endsWith("customDbName"));
+	}
+
+	@Test
+	public void createWithGeneratedDatabaseName() throws Exception {
+		Predicate<String> urlPredicate = (url) -> url.startsWith("jdbc:hsqldb:mem:");
+		urlPredicate.and((url) -> !url.endsWith("dataSource"));
+		urlPredicate.and((url) -> !url.endsWith("shouldBeOverriddenByGeneratedName"));
+
+		assertCorrectSetupForSingleDataSource("jdbc-config-db-name-generated.xml", urlPredicate);
 	}
 
 	@Test
@@ -189,14 +200,14 @@ public class JdbcNamespaceIntegrationTests {
 		}
 	}
 
-	private void assertCorrectSetupForSingleDataSource(String file, String dbName) {
+	private void assertCorrectSetupForSingleDataSource(String file, Predicate<String> urlPredicate) {
 		ConfigurableApplicationContext context = context(file);
 		try {
 			DataSource dataSource = context.getBean(DataSource.class);
 			assertNumRowsInTestTable(new JdbcTemplate(dataSource), 1);
 			assertTrue(dataSource instanceof AbstractDriverBasedDataSource);
 			AbstractDriverBasedDataSource adbDataSource = (AbstractDriverBasedDataSource) dataSource;
-			assertThat(adbDataSource.getUrl(), containsString(dbName));
+			assertTrue(urlPredicate.test(adbDataSource.getUrl()));
 		}
 		finally {
 			context.close();

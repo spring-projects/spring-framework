@@ -44,6 +44,17 @@
 							]]></xsd:documentation>
 						</xsd:annotation>
 					</xsd:attribute>
+					<xsd:attribute name="generate-name" type="xsd:string" use="optional" default="false">
+						<xsd:annotation>
+							<xsd:documentation>
+			If set to "true", a pseudo-random unique name will be generated for the embedded
+			database, overriding any implicit name provided via the 'id' attribute or any
+			explicit name provided via the 'database-name' attribute.
+			Note that this is not the bean name but rather the name of the embedded database
+			as used in the JDBC connection URL for the database.
+							</xsd:documentation>
+						</xsd:annotation>
+					</xsd:attribute>
 					<xsd:attribute name="type" type="databaseType" default="HSQL">
 						<xsd:annotation>
 							<xsd:documentation><![CDATA[
