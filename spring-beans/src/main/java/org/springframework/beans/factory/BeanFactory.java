@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -114,6 +114,7 @@ public interface BeanFactory {
 	 */
 	String FACTORY_BEAN_PREFIX = "&";
 
+
 	/**
 	 * Return an instance, which may be shared or independent, of the specified bean.
 	 * <p>This method allows a Spring BeanFactory to be used as a replacement for the
@@ -201,6 +202,7 @@ public interface BeanFactory {
 	 * @since 4.1
 	 */
 	<T> T getBean(Class<T> requiredType, Object... args) throws BeansException;
+
 
 	/**
 	 * Does this bean factory contain a bean definition or externally registered singleton

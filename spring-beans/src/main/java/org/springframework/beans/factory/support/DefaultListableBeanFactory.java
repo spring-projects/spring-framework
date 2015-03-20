@@ -323,7 +323,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 
 
 	//---------------------------------------------------------------------
-	// Implementation of ListableBeanFactory interface
+	// Implementation of remaining BeanFactory methods
 	//---------------------------------------------------------------------
 
 	@Override

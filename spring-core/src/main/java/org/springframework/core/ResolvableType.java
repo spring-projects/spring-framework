@@ -156,7 +156,7 @@ public final class ResolvableType implements Serializable {
 	}
 
 	/**
-	 * Return the underlying Java {@link Class} being  managed, if available;
+	 * Return the underlying Java {@link Class} being managed, if available;
 	 * otherwise {@code null}.
 	 */
 	public Class<?> getRawClass() {
@@ -1134,8 +1134,9 @@ public final class ResolvableType implements Serializable {
 	public static ResolvableType forClassWithGenerics(Class<?> sourceClass, ResolvableType... generics) {
 		Assert.notNull(sourceClass, "Source class must not be null");
 		Assert.notNull(generics, "Generics must not be null");
-		TypeVariable<?>[] typeVariables = sourceClass.getTypeParameters();
-		return forType(sourceClass, new TypeVariablesVariableResolver(typeVariables, generics));
+		TypeVariable<?>[] variables = sourceClass.getTypeParameters();
+		Assert.isTrue(variables.length == generics.length, "Mismatched number of generics specified");
+		return forType(sourceClass, new TypeVariablesVariableResolver(variables, generics));
 	}
 
 	/**
@@ -1249,20 +1250,19 @@ public final class ResolvableType implements Serializable {
 	@SuppressWarnings("serial")
 	private static class TypeVariablesVariableResolver implements VariableResolver {
 
-		private final TypeVariable<?>[] typeVariables;
+		private final TypeVariable<?>[] variables;
 
 		private final ResolvableType[] generics;
 
-		public TypeVariablesVariableResolver(TypeVariable<?>[] typeVariables, ResolvableType[] generics) {
-			Assert.isTrue(typeVariables.length == generics.length, "Mismatched number of generics specified");
-			this.typeVariables = typeVariables;
+		public TypeVariablesVariableResolver(TypeVariable<?>[] variables, ResolvableType[] generics) {
+			this.variables = variables;
 			this.generics = generics;
 		}
 
 		@Override
 		public ResolvableType resolveVariable(TypeVariable<?> variable) {
-			for (int i = 0; i < this.typeVariables.length; i++) {
-				if (SerializableTypeWrapper.unwrap(this.typeVariables[i]).equals(
+			for (int i = 0; i < this.variables.length; i++) {
+				if (SerializableTypeWrapper.unwrap(this.variables[i]).equals(
 						SerializableTypeWrapper.unwrap(variable))) {
 					return this.generics[i];
 				}

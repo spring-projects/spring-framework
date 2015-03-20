@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -770,7 +770,7 @@ public class BeanFactoryGenericsTests {
 	}
 
 	@Test
-	public void testSpr11250() {
+	public void testGenericMatchingWithBeanNameDifferentiation() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		bf.setAutowireCandidateResolver(new GenericTypeAwareAutowireCandidateResolver());
 
@@ -780,8 +780,23 @@ public class BeanFactoryGenericsTests {
 				new RootBeanDefinition(NumberBean.class, RootBeanDefinition.AUTOWIRE_CONSTRUCTOR, false));
 
 		NumberBean nb = bf.getBean(NumberBean.class);
-		assertNotNull(nb.getDoubleStore());
-		assertNotNull(nb.getFloatStore());
+		assertSame(bf.getBean("doubleStore"), nb.getDoubleStore());
+		assertSame(bf.getBean("floatStore"), nb.getFloatStore());
+	}
+
+	@Test
+	public void testGenericMatchingWithFullTypeDifferentiation() {
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		bf.setAutowireCandidateResolver(new GenericTypeAwareAutowireCandidateResolver());
+
+		bf.registerBeanDefinition("store1", new RootBeanDefinition(DoubleStore.class));
+		bf.registerBeanDefinition("store2", new RootBeanDefinition(FloatStore.class));
+		bf.registerBeanDefinition("numberBean",
+				new RootBeanDefinition(NumberBean.class, RootBeanDefinition.AUTOWIRE_CONSTRUCTOR, false));
+
+		NumberBean nb = bf.getBean(NumberBean.class);
+		assertSame(bf.getBean("store1"), nb.getDoubleStore());
+		assertSame(bf.getBean("store2"), nb.getFloatStore());
 	}
 
 
@@ -848,6 +863,14 @@ public class BeanFactoryGenericsTests {
 
 
 	public static class NumberStore<T extends Number> {
+	}
+
+
+	public static class DoubleStore extends NumberStore<Double> {
+	}
+
+
+	public static class FloatStore extends NumberStore<Float> {
 	}
 
 
