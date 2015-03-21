@@ -15,19 +15,19 @@
  */
 package org.springframework.http;
 
-import static org.junit.Assert.*;
-
 import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.Test;
 
+import static org.junit.Assert.*;
+
 /**
- * Unit tests for {@link org.springframework.http.HttpRange}.
+ * Unit tests for {@link HttpRange}.
+ *
  * @author Rossen Stoyanchev
  */
 public class HttpRangeTests {
-
 
 	@Test(expected = IllegalArgumentException.class)
 	public void invalidFirstPosition() throws Exception {

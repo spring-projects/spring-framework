@@ -30,10 +30,11 @@ import org.springframework.util.StringUtils;
  * Represents an HTTP (byte) range for use with the HTTP {@code "Range"} header.
  *
  * @author Arjen Poutsma
+ * @author Juergen Hoeller
+ * @since 4.2
  * @see <a href="http://tools.ietf.org/html/rfc7233">HTTP/1.1: Range Requests</a>
  * @see HttpHeaders#setRange(List)
  * @see HttpHeaders#getRange()
- * @since 4.2
  */
 public abstract class HttpRange {
 
@@ -111,7 +112,7 @@ public abstract class HttpRange {
 	}
 
 	private static HttpRange parseRange(String range) {
-		Assert.notNull(range);
+		Assert.hasLength(range, "Range String must not be empty");
 		int dashIdx = range.indexOf('-');
 		if (dashIdx > 0) {
 			long firstPos = Long.parseLong(range.substring(0, dashIdx));
@@ -139,26 +140,17 @@ public abstract class HttpRange {
 	 * @return the string representation
 	 */
 	public static String toString(Collection<HttpRange> ranges) {
-		Assert.notNull(ranges);
+		Assert.notEmpty(ranges, "Ranges Collection must not be empty");
 		StringBuilder builder = new StringBuilder(BYTE_RANGE_PREFIX);
 		for (Iterator<HttpRange> iterator = ranges.iterator(); iterator.hasNext(); ) {
 			HttpRange range = iterator.next();
-			range.appendTo(builder);
+			builder.append(range);
 			if (iterator.hasNext()) {
 				builder.append(", ");
 			}
 		}
 		return builder.toString();
 	}
-
-	@Override
-	public String toString() {
-		StringBuilder builder = new StringBuilder();
-		appendTo(builder);
-		return builder.toString();
-	}
-
-	abstract void appendTo(StringBuilder builder);
 
 
 	/**
@@ -173,8 +165,7 @@ public abstract class HttpRange {
 
 		private final Long lastPos;
 
-
-		private ByteRange(long firstPos, Long lastPos) {
+		public ByteRange(long firstPos, Long lastPos) {
 			assertPositions(firstPos, lastPos);
 			this.firstPos = firstPos;
 			this.lastPos = lastPos;
@@ -182,10 +173,10 @@ public abstract class HttpRange {
 
 		private void assertPositions(long firstBytePos, Long lastBytePos) {
 			if (firstBytePos < 0) {
-				throw new IllegalArgumentException("Invalid firstPos=" + firstBytePos);
+				throw new IllegalArgumentException("Invalid first byte position: " + firstBytePos);
 			}
 			if (lastBytePos != null && lastBytePos < firstBytePos) {
-				throw new IllegalArgumentException("firstPost= " + firstBytePos +
+				throw new IllegalArgumentException("firstBytePosition=" + firstBytePos +
 						" should be less then or equal to lastBytePosition=" + lastBytePos);
 			}
 		}
@@ -206,33 +197,36 @@ public abstract class HttpRange {
 		}
 
 		@Override
-		void appendTo(StringBuilder builder) {
+		public boolean equals(Object other) {
+			if (this == other) {
+				return true;
+			}
+			if (!(other instanceof ByteRange)) {
+				return false;
+			}
+			ByteRange otherRange = (ByteRange) other;
+			return (this.firstPos == otherRange.firstPos &&
+					ObjectUtils.nullSafeEquals(this.lastPos, otherRange.lastPos));
+		}
+
+		@Override
+		public int hashCode() {
+			return (ObjectUtils.nullSafeHashCode(this.firstPos) * 31 +
+					ObjectUtils.nullSafeHashCode(this.lastPos));
+		}
+
+		@Override
+		public String toString() {
+			StringBuilder builder = new StringBuilder();
 			builder.append(this.firstPos);
 			builder.append('-');
 			if (this.lastPos != null) {
 				builder.append(this.lastPos);
 			}
-		}
-
-		@Override
-		public boolean equals(Object o) {
-			if (this == o) {
-				return true;
-			}
-			if (!(o instanceof ByteRange)) {
-				return false;
-			}
-			ByteRange other = (ByteRange) o;
-			return this.firstPos == other.firstPos && ObjectUtils.nullSafeEquals(this.lastPos, other.lastPos);
-		}
-
-		@Override
-		public int hashCode() {
-			int hashCode = ObjectUtils.nullSafeHashCode(this.firstPos);
-			hashCode = 31 * hashCode + ObjectUtils.nullSafeHashCode(this.lastPos);
-			return hashCode;
+			return builder.toString();
 		}
 	}
+
 
 	/**
 	 * Represents an HTTP/1.1 suffix byte range, with a number of suffix bytes.
@@ -243,10 +237,9 @@ public abstract class HttpRange {
 
 		private final long suffixLength;
 
-
-		private SuffixByteRange(long suffixLength) {
+		public SuffixByteRange(long suffixLength) {
 			if (suffixLength < 0) {
-				throw new IllegalArgumentException("Invalid suffixLength=" + suffixLength);
+				throw new IllegalArgumentException("Invalid suffix length: " + suffixLength);
 			}
 			this.suffixLength = suffixLength;
 		}
@@ -268,26 +261,26 @@ public abstract class HttpRange {
 		}
 
 		@Override
-		void appendTo(StringBuilder builder) {
-			builder.append('-');
-			builder.append(this.suffixLength);
-		}
-
-		@Override
-		public boolean equals(Object o) {
-			if (this == o) {
+		public boolean equals(Object other) {
+			if (this == other) {
 				return true;
 			}
-			if (!(o instanceof SuffixByteRange)) {
+			if (!(other instanceof SuffixByteRange)) {
 				return false;
 			}
-			SuffixByteRange other = (SuffixByteRange) o;
-			return this.suffixLength == other.suffixLength;
+			SuffixByteRange otherRange = (SuffixByteRange) other;
+			return (this.suffixLength == otherRange.suffixLength);
 		}
 
 		@Override
 		public int hashCode() {
 			return ObjectUtils.hashCode(this.suffixLength);
 		}
+
+		@Override
+		public String toString() {
+			return "-" + this.suffixLength;
+		}
 	}
+
 }
