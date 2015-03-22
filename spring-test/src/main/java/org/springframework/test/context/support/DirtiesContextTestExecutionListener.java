@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,16 +27,18 @@ import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.annotation.DirtiesContext.HierarchyMode;
+import org.springframework.test.annotation.DirtiesContext.MethodMode;
 import org.springframework.test.context.TestContext;
 import org.springframework.util.Assert;
 
 import static org.springframework.test.annotation.DirtiesContext.ClassMode.*;
+import static org.springframework.test.annotation.DirtiesContext.MethodMode.*;
 
 /**
  * {@code TestExecutionListener} which provides support for marking the
  * {@code ApplicationContext} associated with a test as <em>dirty</em> for
- * both test classes and test methods configured with the {@link DirtiesContext
- * &#064;DirtiesContext} annotation.
+ * both test classes and test methods annotated with the
+ * {@link DirtiesContext @DirtiesContext} annotation.
  *
  * @author Sam Brannen
  * @author Juergen Hoeller
@@ -57,79 +59,80 @@ public class DirtiesContextTestExecutionListener extends AbstractTestExecutionLi
 	}
 
 	/**
-	 * If the current test method of the supplied {@linkplain TestContext test
-	 * context} is annotated with {@link DirtiesContext &#064;DirtiesContext},
-	 * or if the test class is annotated with {@link DirtiesContext
-	 * &#064;DirtiesContext} and the {@linkplain DirtiesContext#classMode() class
-	 * mode} is set to {@link ClassMode#AFTER_EACH_TEST_METHOD
-	 * AFTER_EACH_TEST_METHOD}, the {@linkplain ApplicationContext application
-	 * context} of the test context will be
-	 * {@linkplain TestContext#markApplicationContextDirty marked as dirty} and the
-	 * {@link DependencyInjectionTestExecutionListener#REINJECT_DEPENDENCIES_ATTRIBUTE}
-	 * in the test context will be set to {@code true}.
+	 * If the test class of the supplied {@linkplain TestContext test context}
+	 * is annotated with {@code @DirtiesContext} and the {@linkplain
+	 * DirtiesContext#classMode() class mode} is set to {@link
+	 * ClassMode#BEFORE_CLASS BEFORE_CLASS}, the {@linkplain ApplicationContext
+	 * application context} of the test context will be
+	 * {@linkplain TestContext#markApplicationContextDirty marked as dirty}, and the
+	 * {@link DependencyInjectionTestExecutionListener#REINJECT_DEPENDENCIES_ATTRIBUTE
+	 * REINJECT_DEPENDENCIES_ATTRIBUTE} in the test context will be set to
+	 * {@code true}.
 	 */
 	@Override
-	public void afterTestMethod(TestContext testContext) throws Exception {
-		Class<?> testClass = testContext.getTestClass();
-		Assert.notNull(testClass, "The test class of the supplied TestContext must not be null");
-		Method testMethod = testContext.getTestMethod();
-		Assert.notNull(testMethod, "The test method of the supplied TestContext must not be null");
-
-		final String annotationType = DirtiesContext.class.getName();
-		AnnotationAttributes methodAnnAttrs = AnnotatedElementUtils.getAnnotationAttributes(testMethod, annotationType);
-		AnnotationAttributes classAnnAttrs = AnnotatedElementUtils.getAnnotationAttributes(testClass, annotationType);
-		boolean methodDirtiesContext = methodAnnAttrs != null;
-		boolean classDirtiesContext = classAnnAttrs != null;
-		ClassMode classMode = classDirtiesContext ? classAnnAttrs.<ClassMode> getEnum("classMode") : null;
-
-		if (logger.isDebugEnabled()) {
-			logger.debug(String.format(
-				"After test method: context %s, class dirties context [%s], class mode [%s], method dirties context [%s].",
-				testContext, classDirtiesContext, classMode, methodDirtiesContext));
-		}
-
-		if (methodDirtiesContext || (classMode == AFTER_EACH_TEST_METHOD)) {
-			HierarchyMode hierarchyMode = methodDirtiesContext ? methodAnnAttrs.<HierarchyMode> getEnum("hierarchyMode")
-					: classAnnAttrs.<HierarchyMode> getEnum("hierarchyMode");
-			dirtyContext(testContext, hierarchyMode);
-		}
+	public void beforeTestClass(TestContext testContext) throws Exception {
+		beforeOrAfterTestClass(testContext, "Before", BEFORE_CLASS);
 	}
 
 	/**
-	 * If the test class of the supplied {@linkplain TestContext test context} is
-	 * annotated with {@link DirtiesContext &#064;DirtiesContext}, the
-	 * {@linkplain ApplicationContext application context} of the test context will
-	 * be {@linkplain TestContext#markApplicationContextDirty marked as dirty},
-	 * and the
+	 * If the current test method of the supplied {@linkplain TestContext test
+	 * context} is annotated with {@code @DirtiesContext} and the {@linkplain
+	 * DirtiesContext#methodMode() method mode} is set to {@link
+	 * MethodMode#BEFORE_METHOD BEFORE_METHOD}, or if the test class is
+	 * annotated with {@code @DirtiesContext} and the {@linkplain
+	 * DirtiesContext#classMode() class mode} is set to {@link
+	 * ClassMode#BEFORE_EACH_TEST_METHOD BEFORE_EACH_TEST_METHOD}, the
+	 * {@linkplain ApplicationContext application context} of the test context
+	 * will be {@linkplain TestContext#markApplicationContextDirty marked as dirty} and the
+	 * {@link DependencyInjectionTestExecutionListener#REINJECT_DEPENDENCIES_ATTRIBUTE
+	 * REINJECT_DEPENDENCIES_ATTRIBUTE} in the test context will be set to {@code true}.
+	 * @since 4.2
+	 */
+	@Override
+	public void beforeTestMethod(TestContext testContext) throws Exception {
+		beforeOrAfterTestMethod(testContext, "Before", BEFORE_METHOD, BEFORE_EACH_TEST_METHOD);
+	}
+
+	/**
+	 * If the current test method of the supplied {@linkplain TestContext test
+	 * context} is annotated with {@code @DirtiesContext} and the {@linkplain
+	 * DirtiesContext#methodMode() method mode} is set to {@link
+	 * MethodMode#AFTER_METHOD AFTER_METHOD}, or if the test class is
+	 * annotated with {@code @DirtiesContext} and the {@linkplain
+	 * DirtiesContext#classMode() class mode} is set to {@link
+	 * ClassMode#AFTER_EACH_TEST_METHOD AFTER_EACH_TEST_METHOD}, the
+	 * {@linkplain ApplicationContext application context} of the test context
+	 * will be {@linkplain TestContext#markApplicationContextDirty marked as dirty} and the
+	 * {@link DependencyInjectionTestExecutionListener#REINJECT_DEPENDENCIES_ATTRIBUTE
+	 * REINJECT_DEPENDENCIES_ATTRIBUTE} in the test context will be set to {@code true}.
+	 */
+	@Override
+	public void afterTestMethod(TestContext testContext) throws Exception {
+		beforeOrAfterTestMethod(testContext, "After", AFTER_METHOD, AFTER_EACH_TEST_METHOD);
+	}
+
+	/**
+	 * If the test class of the supplied {@linkplain TestContext test context}
+	 * is annotated with {@code @DirtiesContext} and the {@linkplain
+	 * DirtiesContext#classMode() class mode} is set to {@link
+	 * ClassMode#AFTER_CLASS AFTER_CLASS}, the {@linkplain ApplicationContext
+	 * application context} of the test context will be
+	 * {@linkplain TestContext#markApplicationContextDirty marked as dirty}, and the
 	 * {@link DependencyInjectionTestExecutionListener#REINJECT_DEPENDENCIES_ATTRIBUTE
 	 * REINJECT_DEPENDENCIES_ATTRIBUTE} in the test context will be set to
 	 * {@code true}.
 	 */
 	@Override
 	public void afterTestClass(TestContext testContext) throws Exception {
-		Class<?> testClass = testContext.getTestClass();
-		Assert.notNull(testClass, "The test class of the supplied TestContext must not be null");
-
-		final String annotationType = DirtiesContext.class.getName();
-		AnnotationAttributes annAttrs = AnnotatedElementUtils.getAnnotationAttributes(testClass, annotationType);
-		boolean dirtiesContext = annAttrs != null;
-
-		if (logger.isDebugEnabled()) {
-			logger.debug(String.format("After test class: context %s, dirtiesContext [%s].", testContext,
-				dirtiesContext));
-		}
-		if (dirtiesContext) {
-			HierarchyMode hierarchyMode = annAttrs.<HierarchyMode> getEnum("hierarchyMode");
-			dirtyContext(testContext, hierarchyMode);
-		}
+		beforeOrAfterTestClass(testContext, "After", AFTER_CLASS);
 	}
 
 	/**
 	 * Marks the {@linkplain ApplicationContext application context} of the supplied
 	 * {@linkplain TestContext test context} as
 	 * {@linkplain TestContext#markApplicationContextDirty(DirtiesContext.HierarchyMode) dirty}
-	 * and sets {@link DependencyInjectionTestExecutionListener#REINJECT_DEPENDENCIES_ATTRIBUTE}
-	 * in the test context to {@code true}.
+	 * and sets {@link DependencyInjectionTestExecutionListener#REINJECT_DEPENDENCIES_ATTRIBUTE
+	 * REINJECT_DEPENDENCIES_ATTRIBUTE} in the test context to {@code true}.
 	 * @param testContext the test context whose application context should
 	 * marked as dirty
 	 * @param hierarchyMode the context cache clearing mode to be applied if the
@@ -139,6 +142,64 @@ public class DirtiesContextTestExecutionListener extends AbstractTestExecutionLi
 	protected void dirtyContext(TestContext testContext, HierarchyMode hierarchyMode) {
 		testContext.markApplicationContextDirty(hierarchyMode);
 		testContext.setAttribute(DependencyInjectionTestExecutionListener.REINJECT_DEPENDENCIES_ATTRIBUTE, Boolean.TRUE);
+	}
+
+	/**
+	 * Perform the actual work for {@link #beforeTestMethod} and {@link #afterTestMethod}.
+	 * @since 4.2
+	 */
+	private void beforeOrAfterTestMethod(TestContext testContext, String phase, MethodMode requiredMethodMode,
+			ClassMode requiredClassMode) throws Exception {
+		Class<?> testClass = testContext.getTestClass();
+		Assert.notNull(testClass, "The test class of the supplied TestContext must not be null");
+		Method testMethod = testContext.getTestMethod();
+		Assert.notNull(testMethod, "The test method of the supplied TestContext must not be null");
+
+		final String annotationType = DirtiesContext.class.getName();
+		AnnotationAttributes methodAnnAttrs = AnnotatedElementUtils.getAnnotationAttributes(testMethod, annotationType);
+		AnnotationAttributes classAnnAttrs = AnnotatedElementUtils.getAnnotationAttributes(testClass, annotationType);
+		boolean methodAnnotated = methodAnnAttrs != null;
+		boolean classAnnotated = classAnnAttrs != null;
+		MethodMode methodMode = methodAnnotated ? methodAnnAttrs.<MethodMode> getEnum("methodMode") : null;
+		ClassMode classMode = classAnnotated ? classAnnAttrs.<ClassMode> getEnum("classMode") : null;
+
+		if (logger.isDebugEnabled()) {
+			logger.debug(String.format(
+				"%s test method: context %s, class annotated with @DirtiesContext [%s] with mode [%s], method annotated with @DirtiesContext [%s] with mode [%s].",
+				phase, testContext, classAnnotated, classMode, methodAnnotated, methodMode));
+		}
+
+		if ((methodMode == requiredMethodMode) || (classMode == requiredClassMode)) {
+			HierarchyMode hierarchyMode = methodAnnotated ? methodAnnAttrs.<HierarchyMode> getEnum("hierarchyMode")
+					: classAnnAttrs.<HierarchyMode> getEnum("hierarchyMode");
+			dirtyContext(testContext, hierarchyMode);
+		}
+	}
+
+	/**
+	 * Perform the actual work for {@link #beforeTestClass} and {@link #afterTestClass}.
+	 * @since 4.2
+	 */
+	private void beforeOrAfterTestClass(TestContext testContext, String phase, ClassMode requiredClassMode)
+			throws Exception {
+		Class<?> testClass = testContext.getTestClass();
+		Assert.notNull(testClass, "The test class of the supplied TestContext must not be null");
+
+		final String annotationType = DirtiesContext.class.getName();
+		AnnotationAttributes classAnnAttrs = AnnotatedElementUtils.getAnnotationAttributes(testClass, annotationType);
+		boolean classAnnotated = classAnnAttrs != null;
+		ClassMode classMode = classAnnotated ? classAnnAttrs.<ClassMode> getEnum("classMode") : null;
+
+		if (logger.isDebugEnabled()) {
+			logger.debug(String.format(
+				"%s test class: context %s, class annotated with @DirtiesContext [%s] with mode [%s].", phase,
+				testContext, classAnnotated, classMode));
+		}
+
+		if (classMode == requiredClassMode) {
+			HierarchyMode hierarchyMode = classAnnAttrs.<HierarchyMode> getEnum("hierarchyMode");
+			dirtyContext(testContext, hierarchyMode);
+		}
 	}
 
 }

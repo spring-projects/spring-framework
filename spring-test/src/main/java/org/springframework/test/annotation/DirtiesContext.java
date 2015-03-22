@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,42 +26,76 @@ import java.lang.annotation.Target;
 /**
  * Test annotation which indicates that the
  * {@link org.springframework.context.ApplicationContext ApplicationContext}
- * associated with a test is <em>dirty</em> and should be closed:
+ * associated with a test is <em>dirty</em> and should therefore be closed
+ * and removed from the context cache.
  *
- * <ul>
- * <li>after the current test, when declared at the method level</li>
- * <li>after each test method in the current test class, when declared at the
- * class level with class mode set to {@link ClassMode#AFTER_EACH_TEST_METHOD
- * AFTER_EACH_TEST_METHOD}</li>
- * <li>after the current test class, when declared at the class level with class
- * mode set to {@link ClassMode#AFTER_CLASS AFTER_CLASS}</li>
- * </ul>
- *
- * <p>Use this annotation if a test has modified the context &mdash; for example,
- * by replacing a bean definition or changing the state of a singleton bean.
- * Subsequent tests will be supplied a new context.
+ * <p>Use this annotation if a test has modified the context &mdash; for
+ * example, by modifying the state of a singleton bean, modifying the state
+ * of an embedded database, etc. Subsequent tests that request the same
+ * context will be supplied a new context.
  *
  * <p>{@code @DirtiesContext} may be used as a class-level and method-level
- * annotation within the same class. In such scenarios, the
- * {@code ApplicationContext} will be marked as <em>dirty</em> after any
- * such annotated method as well as after the entire class. If the
- * {@link ClassMode} is set to {@link ClassMode#AFTER_EACH_TEST_METHOD
- * AFTER_EACH_TEST_METHOD}, the context will be marked dirty after each test
- * method in the class.
+ * annotation within the same class or class hierarchy. In such scenarios, the
+ * {@code ApplicationContext} will be marked as <em>dirty</em> before or 
+ * after any such annotated method as well as before or after the current test
+ * class, depending on the configured {@link #methodMode} and {@link #classMode}.
  *
  * <p>As of Spring Framework 4.0, this annotation may be used as a
  * <em>meta-annotation</em> to create custom <em>composed annotations</em>.
+ *
+ * <h3>Supported Test Phases</h3>
+ * <ul>
+ * <li><strong>Before current test class</strong>: when declared at the class
+ * level with class mode set to {@link ClassMode#BEFORE_CLASS BEFORE_CLASS}</li>
+ * <li><strong>Before each test method in current test class</strong>: when
+ * declared at the class level with class mode set to
+ * {@link ClassMode#BEFORE_EACH_TEST_METHOD BEFORE_EACH_TEST_METHOD}</li>
+ * <li><strong>Before current test method</strong>: when declared at the
+ * method level with method mode set to
+ * {@link MethodMode#BEFORE_METHOD BEFORE_METHOD}</li>
+ * <li><strong>After current test method</strong>: when declared at the
+ * method level with method mode set to
+ * {@link MethodMode#AFTER_METHOD AFTER_METHOD}</li>
+ * <li><strong>After each test method in current test class</strong>: when
+ * declared at the class level with class mode set to
+ * {@link ClassMode#AFTER_EACH_TEST_METHOD AFTER_EACH_TEST_METHOD}</li>
+ * <li><strong>After current test class</strong>: when declared at the
+ * class level with class mode set to
+ * {@link ClassMode#AFTER_CLASS AFTER_CLASS}</li>
+ * </ul>
  *
  * @author Sam Brannen
  * @author Rod Johnson
  * @since 2.0
  * @see org.springframework.test.context.ContextConfiguration
+ * @see org.springframework.test.context.support.DirtiesContextTestExecutionListener
  */
 @Documented
 @Inherited
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ ElementType.TYPE, ElementType.METHOD })
 public @interface DirtiesContext {
+
+	/**
+	 * Defines <i>modes</i> which determine how {@code @DirtiesContext} is
+	 * interpreted when used to annotate a test method.
+	 *
+	 * @since 4.2
+	 */
+	static enum MethodMode {
+
+		/**
+		 * The associated {@code ApplicationContext} will be marked as
+		 * <em>dirty</em> before the corresponding test method.
+		 */
+		BEFORE_METHOD,
+
+		/**
+		 * The associated {@code ApplicationContext} will be marked as
+		 * <em>dirty</em> after the corresponding test method.
+		 */
+		AFTER_METHOD;
+	}
 
 	/**
 	 * Defines <i>modes</i> which determine how {@code @DirtiesContext} is
@@ -73,15 +107,31 @@ public @interface DirtiesContext {
 
 		/**
 		 * The associated {@code ApplicationContext} will be marked as
-		 * <em>dirty</em> after the test class.
+		 * <em>dirty</em> before the test class.
+		 *
+		 * @since 4.2
 		 */
-		AFTER_CLASS,
+		BEFORE_CLASS,
+
+		/**
+		 * The associated {@code ApplicationContext} will be marked as
+		 * <em>dirty</em> before each test method in the class.
+		 *
+		 * @since 4.2
+		 */
+		BEFORE_EACH_TEST_METHOD,
 
 		/**
 		 * The associated {@code ApplicationContext} will be marked as
 		 * <em>dirty</em> after each test method in the class.
 		 */
-		AFTER_EACH_TEST_METHOD;
+		AFTER_EACH_TEST_METHOD,
+
+		/**
+		 * The associated {@code ApplicationContext} will be marked as
+		 * <em>dirty</em> after the test class.
+		 */
+		AFTER_CLASS;
 	}
 
 	/**
@@ -120,12 +170,22 @@ public @interface DirtiesContext {
 
 
 	/**
+	 * The <i>mode</i> to use when a test method is annotated with
+	 * {@code @DirtiesContext}.
+	 * <p>Defaults to {@link MethodMode#AFTER_METHOD AFTER_METHOD}.
+	 * <p>Setting the method mode on an annotated test class has no meaning.
+	 * For class-level control, use {@link #classMode} instead.
+	 *
+	 * @since 4.2
+	 */
+	MethodMode methodMode() default MethodMode.AFTER_METHOD;
+
+	/**
 	 * The <i>mode</i> to use when a test class is annotated with
 	 * {@code @DirtiesContext}.
 	 * <p>Defaults to {@link ClassMode#AFTER_CLASS AFTER_CLASS}.
-	 * <p>Note: Setting the class mode on an annotated test method has no meaning,
-	 * since the mere presence of the {@code @DirtiesContext} annotation on a
-	 * test method is sufficient.
+	 * <p>Setting the class mode on an annotated test method has no meaning.
+	 * For method-level control, use {@link #methodMode} instead.
 	 *
 	 * @since 3.0
 	 */

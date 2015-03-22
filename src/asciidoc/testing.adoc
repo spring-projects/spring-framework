@@ -598,24 +598,38 @@ The following example demonstrates how to declare _inlined_ properties.
 
 Indicates that the underlying Spring `ApplicationContext` has been __dirtied__ during
 the execution of a test (i.e., modified or corrupted in some manner -- for example, by
-changing the state of a singleton bean) and should be closed, regardless of whether the
-test passed. When an application context is marked __dirty__, it is removed from the
-testing framework's cache and closed. As a consequence, the underlying Spring container
-will be rebuilt for any subsequent test that requires a context with the same
-configuration metadata.
+changing the state of a singleton bean) and should be closed. When an application
+context is marked __dirty__, it is removed from the testing framework's cache and
+closed. As a consequence, the underlying Spring container will be rebuilt for any
+subsequent test that requires a context with the same configuration metadata.
 
 +
 
 `@DirtiesContext` can be used as both a class-level and method-level annotation within
-the same test class. In such scenarios, the `ApplicationContext` is marked as __dirty__
-after any such annotated method as well as after the entire class. If the `ClassMode` is
-set to `AFTER_EACH_TEST_METHOD`, the context is marked dirty after each test method in
-the class.
+the same class or class hierarchy. In such scenarios, the `ApplicationContext` is marked
+as __dirty__ before or after any such annotated method as well as before or after the
+current test class, depending on the configured `methodMode` and `classMode`.
 
 +
 
 The following examples explain when the context would be dirtied for various
 configuration scenarios:
+
++
+
+** Before the current test class, when declared on a class with class mode set to
+`BEFORE_CLASS`.
+
++
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	**@DirtiesContext(classMode = BEFORE_CLASS)**
+	public class FreshContextTests {
+		// some tests that require a new Spring container
+	}
+----
 
 +
 
@@ -635,6 +649,22 @@ configuration scenarios:
 
 +
 
+** Before each test method in the current test class, when declared on a class with class
+mode set to `BEFORE_EACH_TEST_METHOD.`
+
++
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	**@DirtiesContext(classMode = BEFORE_EACH_TEST_METHOD)**
+	public class FreshContextTests {
+		// some tests that require a new Spring container
+	}
+----
+
++
+
 ** After each test method in the current test class, when declared on a class with class
 mode set to `AFTER_EACH_TEST_METHOD.`
 
@@ -643,7 +673,7 @@ mode set to `AFTER_EACH_TEST_METHOD.`
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	**@DirtiesContext**(**classMode** = ClassMode.AFTER_EACH_TEST_METHOD)
+	**@DirtiesContext(classMode = AFTER_EACH_TEST_METHOD)**
 	public class ContextDirtyingTests {
 		// some tests that result in the Spring container being dirtied
 	}
@@ -651,7 +681,25 @@ mode set to `AFTER_EACH_TEST_METHOD.`
 
 +
 
-** After the current test, when declared on a method.
+** Before the current test, when declared on a method with the method mode set to
+`BEFORE_METHOD`.
+
++
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	**@DirtiesContext(methodMode = BEFORE_METHOD)**
+	@Test
+	public void testProcessWhichRequiresFreshAppCtx() {
+		// some logic that requires a new Spring container
+	}
+----
+
++
+
+** After the current test, when declared on a method with the method mode set to
+`AFTER_METHOD` (i.e., the default method mode).
 
 +
 
@@ -693,7 +741,7 @@ specified instead, as seen below.
 	public class ExtendedTests extends BaseTests {
 
 		@Test
-		@DirtiesContext(**hierarchyMode = HierarchyMode.CURRENT_LEVEL**)
+		@DirtiesContext(**hierarchyMode = CURRENT_LEVEL**)
 		public void test() {
 			// some logic that results in the child context being dirtied
 		}
