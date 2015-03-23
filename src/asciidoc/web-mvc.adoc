@@ -1911,39 +1911,6 @@ which case they apply to matching controllers. This provides an alternative to u
 `WebBindingInitializer`. See the <<mvc-ann-controller-advice>> section for more details.
 
 
-[[mvc-ann-lastmodified]]
-==== Support for the Last-Modified Response Header To Facilitate Content Caching
-An `@RequestMapping` method may wish to support `'Last-Modified'` HTTP requests, as
-defined in the contract for the Servlet API's `getLastModified` method, to facilitate
-content caching. This involves calculating a lastModified `long` value for a given
-request, comparing it against the `'If-Modified-Since'` request header value, and
-potentially returning a response with status code 304 (Not Modified). An annotated
-controller method can achieve that as follows:
-
-[source,java,indent=0]
-[subs="verbatim,quotes"]
-----
-	@RequestMapping
-	public String myHandleMethod(WebRequest webRequest, Model model) {
-
-		long lastModified = // 1. application-specific calculation
-
-		if (request.checkNotModified(lastModified)) {
-			// 2. shortcut exit - no further processing necessary
-			return null;
-		}
-
-		// 3. or otherwise further request processing, actually preparing content
-		model.addAttribute(...);
-		return "myViewName";
-	}
-----
-
-There are two key elements to note: calling `request.checkNotModified(lastModified)` and
-returning `null`. The former sets the response status to 304 before it returns `true`.
-The latter, in combination with the former, causes Spring MVC to do no further
-processing of the request.
-
 [[mvc-ann-controller-advice]]
 ==== Advising controllers with the `@ControllerAdvice` annotation
 The `@ControllerAdvice` annotation is a component annotation allowing implementation
@@ -4029,6 +3996,7 @@ You do not need to define a `DefaultRequestToViewNameTranslator` bean explicitly
 like the default settings of the `DefaultRequestToViewNameTranslator`, you can rely on
 the Spring Web MVC `DispatcherServlet` to instantiate an instance of this class if one
 is not explicitly configured.
+
 ====
 
 Of course, if you need to change the default settings, then you do need to configure
@@ -4038,15 +4006,179 @@ that can be configured.
 
 
 
+[[mvc-caching]]
+== HTTP caching support
 
-[[mvc-etag]]
-== ETag support
+A good HTTP caching strategy can significantly improve the performance of a web application
+and the experience of its clients. The `'Cache-Control'` HTTP response header is mostly
+responsible for this, along with conditional headers such as `'Last-Modified'` and `'ETag'`.
+
+The `'Cache-Control'` HTTP response header advice private caches (e.g. browsers) and
+ public caches (e.g. proxies) on how they can cache HTTP responses for further reuse.
+
 An http://en.wikipedia.org/wiki/HTTP_ETag[ETag] (entity tag) is an HTTP response header
 returned by an HTTP/1.1 compliant web server used to determine change in content at a
 given URL. It can be considered to be the more sophisticated successor to the
 `Last-Modified` header. When a server returns a representation with an ETag header, the
 client can use this header in subsequent GETs, in an `If-None-Match` header. If the
 content has not changed, the server returns `304: Not Modified`.
+
+This section describes the different choices available to configure HTTP caching in a
+Spring Web MVC application.
+
+
+[[mvc-caching-cachecontrol]]
+=== Cache-Control HTTP header
+
+Spring Web MVC supports many use cases and ways to configure "Cache-Control" headers for
+an application. While the https://tools.ietf.org/html/rfc7234#section-5.2.2[RFC 7234 Section 5.2.2]
+completely describes that header and its possible directives, there are several ways to
+address the most common cases.
+
+Spring Web MVC is using a configuration convention in several of its APIs:
+`setCachePeriod(int seconds)`:
+
+* A `-1` value won't generate a `'Cache-Control'` response header
+* A `0` value will prevent caching using the `'Cache-Control: no-store'` directive
+* A `n > 0` value will cache the given response for `n` seconds using the
+`'Cache-Control: max-age=n'` directive
+
+The {javadoc-baseurl}/org/springframework/http/CacheControl.html[`CacheControl`] builder
+class simply describes the available "Cache-Control" directives and makes it easier to
+build your own HTTP caching strategy. Once built, a `CacheControl` instance can be then
+taken as an argument in several Spring Web MVC APIs.
+
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	// Cache for an hour - "Cache-Control: max-age=3600"
+    CacheControl ccCacheOneHour = CacheControl.maxAge(1, TimeUnit.HOURS);
+
+    // Prevent caching - "Cache-Control: no-store"
+    CacheControl ccNoStore = CacheControl.noStore();
+
+    // Cache for ten days in public and private caches,
+    // public caches should not transform the response
+    // "Cache-Control: max-age=864000, public, no-transform"
+    CacheControl ccCustom = CacheControl.maxAge(10, TimeUnit.DAYS)
+    									.noTransform().cachePublic();
+----
+
+[[mvc-caching-static-resources]]
+=== HTTP caching support for static resources
+
+Static resources should be served with appropriate `'Cache-Control'` and conditional
+headers for optimal performance.
+<<mvc-config-static-resources,Configuring a `ResourceHttpRequestHandler`>> for serving
+static resources not only natively writes `'Last-Modified'` headers by reading files
+metadata, but also `'Cache-Control'` if properly configured.
+
+You can set the `cachePeriod` attribute on a `ResourceHttpRequestHandler` or use
+a `CacheControl` instance, which supports more specific directives:
+
+
+[source,java,indent=0]
+[subs="verbatim"]
+----
+	@Configuration
+	@EnableWebMvc
+	public class WebConfig extends WebMvcConfigurerAdapter {
+
+		@Override
+		public void addResourceHandlers(ResourceHandlerRegistry registry) {
+			registry.addResourceHandler("/resources/**")
+					.addResourceLocations("/public-resources/")
+					.setCacheControl(CacheControl.maxAge(1, TimeUnit.HOURS).cachePublic());
+		}
+
+	}
+----
+
+And in XML:
+
+[source,xml,indent=0]
+[subs="verbatim"]
+----
+	<mvc:resources mapping="/resources/**" location="/public-resources/">
+		<mvc:cachecontrol max-age="3600" cache-public="true"/>
+	</mvc:resources>
+----
+
+
+[[mvc-caching-etag-lastmodified]]
+=== Support for the Cache-Control, ETag and Last-Modified response headers in Controllers
+
+Controllers can support `'Cache-Control'` `'ETag'` and/or `'If-Modified-Since'` HTTP requests;
+this is indeed recommended if a `'Cache-Control'` header is to be set on the response.
+This involves calculating a lastModified `long` and/or an Etag value for a given request,
+comparing it against the `'If-Modified-Since'` request header value, and potentially returning
+a response with status code 304 (Not Modified).
+
+As described in <<mvc-ann-httpentity>>, Controllers can access request/response using `HttpEntity` types.
+Controllers returning `ResponseEntity` can include HTTP caching information in responses like this:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@RequestMapping("/book/{id}")
+	public ResponseEntity<Book> showBook(@PathVariable Long id) {
+
+		Book book = findBook(id);
+		String version = book.getVersion();
+
+		return ResponseEntity
+					.ok()
+					.cacheControl(CacheControl.maxAge(30, TimeUnit.DAYS))
+					.eTag(version) // lastModified is also available
+					.body(book);
+	}
+----
+
+
+Doing this will not only include `'ETag'` and `'Cache-Control'` headers in the response, it will **also convert the
+response to a `HTTP 304 Not Modified` response with an empty body** if the conditional headers sent by the client
+match the caching information set by the Controller.
+
+
+An `@RequestMapping` method may also wish to support the same behavior.
+This can be achieved as follows:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@RequestMapping
+	public String myHandleMethod(WebRequest webRequest, Model model) {
+
+		long lastModified = // 1. application-specific calculation
+
+		if (request.checkNotModified(lastModified)) {
+			// 2. shortcut exit - no further processing necessary
+			return null;
+		}
+
+		// 3. or otherwise further request processing, actually preparing content
+		model.addAttribute(...);
+		return "myViewName";
+	}
+----
+
+There are two key elements here: calling `request.checkNotModified(lastModified)` and
+returning `null`. The former sets the response status to 304 before it returns `true`.
+The latter, in combination with the former, causes Spring MVC to do no further
+processing of the request.
+
+Note that there are 3 variants for this:
+
+* `request.checkNotModified(lastModified)` compares lastModified with the
+`'If-Modified-Since'` request header
+* `request.checkNotModified(eTag)` compares eTag with the `'ETag'` request header
+* `request.checkNotModified(eTag, lastModified)` does both, meaning that both
+conditions should be valid for the server to issue an `HTTP 304 Not Modified` response
+
+
+[[mvc-httpcaching-shallowetag]]
+=== Shallow ETag support
 
 Support for ETags is provided by the Servlet filter `ShallowEtagHeaderFilter`. It is a
 plain Servlet Filter, and thus can be used in combination with any web framework. The
@@ -4058,6 +4190,10 @@ hash as the `If-None-Match` value. The filter detects this, renders the view aga
 compares the two hashes. If they are equal, a `304` is returned. This filter will not
 save processing power, as the view is still rendered. The only thing it saves is
 bandwidth, as the rendered response is not sent back over the wire.
+
+Note that this strategy saves network bandwidth but not CPU, as the full response must be
+computed for each request. Other strategies at the controller level (described above) can
+save network bandwidth and avoid computation.
 
 You configure the `ShallowEtagHeaderFilter` in `web.xml`:
 
@@ -4075,6 +4211,24 @@ You configure the `ShallowEtagHeaderFilter` in `web.xml`:
 	</filter-mapping>
 ----
 
+Or in Servlet 3.0+ environments,
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	public class MyWebAppInitializer extends AbstractDispatcherServletInitializer {
+
+		// ...
+
+		@Override
+		protected Filter[] getServletFilters() {
+			return new Filter[] { new ShallowEtagHeaderFilter() };
+		}
+
+	}
+----
+
+See <<mvc-container-config>> for more details.
 
 
 
@@ -4655,6 +4809,9 @@ And in XML:
 ----
 	<mvc:resources mapping="/resources/**" location="/public-resources/" cache-period="31556926"/>
 ----
+
+For more details, see <<mvc-caching-static-resources, HTTP caching support for static resources>>.
+
 
 The `mapping` attribute must be an Ant pattern that can be used by
 `SimpleUrlHandlerMapping`, and the `location` attribute must specify one or more valid
