@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -96,19 +96,6 @@ public class UriTemplateTests {
 		uriVariables.put("bar", "1");
 		UriTemplate template = new UriTemplate("http://example.com/hotels/{hotel}/bookings/{booking}");
 		template.expand(uriVariables);
-	}
-
-	//SPR-12750
-
-	@Test
-	public void expandMapForRFC6570() throws Exception {
-		Map<String, String> uriVariables = new HashMap<String, String>(2);
-		uriVariables.put("hotel", "1");
-		uriVariables.put("publicpath", "pics/logo.png");
-		uriVariables.put("scale", "150x150");
-		UriTemplate template = new UriTemplate("/hotels/{hotel}/pic/{/publicpath}/size/{scale}");
-		URI result = template.expand(uriVariables);
-		assertEquals("Invalid expanded template", new URI("/hotels/1/pic/pics%2Flogo.png/size/150x150"), result);
 	}
 
 	@Test

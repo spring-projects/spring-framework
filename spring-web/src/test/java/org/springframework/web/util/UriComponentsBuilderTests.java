@@ -195,16 +195,6 @@ public class UriComponentsBuilderTests {
 		assertEquals("1USD=?EUR", result.getQueryParams().getFirst("q"));
 	}
 
-	//SPR-12750
-
-	@Test
-	public void fromUriStringWithVariablesRfc6570() {
-		String url = "http://example.com/part1/{/part2}/{var1}/url/{/urlvar}/";
-		UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(url);
-		UriComponents uriComponents = builder.build().expand("part/2", "var/1", "url/var").encode();
-		assertEquals("/part1/part%2F2/var/1/url/url%2Fvar/", uriComponents.getPath());
-	}
-
 	// SPR-10779
 
 	@Test
