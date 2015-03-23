@@ -26,7 +26,6 @@ import org.apache.poi.hssf.usermodel.HSSFCell;
 import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.apache.poi.poifs.filesystem.POIFSFileSystem;
 
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.LocalizedResourceHelper;
@@ -172,8 +171,7 @@ public abstract class AbstractExcelView extends AbstractView {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Loading Excel workbook from " + inputFile);
 		}
-		POIFSFileSystem fs = new POIFSFileSystem(inputFile.getInputStream());
-		return new HSSFWorkbook(fs);
+		return new HSSFWorkbook(inputFile.getInputStream());
 	}
 
 	/**
@@ -194,7 +192,7 @@ public abstract class AbstractExcelView extends AbstractView {
 	 * <p>Creates the row and the cell if they still doesn't already exist.
 	 * Thus, the column can be passed as an int, the method making the needed downcasts.
 	 * @param sheet a sheet object. The first sheet is usually obtained by workbook.getSheetAt(0)
-	 * @param row thr row number
+	 * @param row the row number
 	 * @param col the column number
 	 * @return the HSSFCell
 	 */
