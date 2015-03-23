@@ -560,8 +560,8 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	}
 
 	@Override
-	public boolean isTypeMatch(String name, Class<?> targetType) throws NoSuchBeanDefinitionException {
-		return isTypeMatch(name, ResolvableType.forClass(targetType));
+	public boolean isTypeMatch(String name, Class<?> typeToMatch) throws NoSuchBeanDefinitionException {
+		return isTypeMatch(name, ResolvableType.forClass(typeToMatch != null ? typeToMatch : Object.class));
 	}
 
 	@Override

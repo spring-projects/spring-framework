@@ -1666,6 +1666,36 @@ public class DefaultListableBeanFactoryTests {
 		assertNull(lbf.getType("factoryBean"));
 	}
 
+	@Test
+	public void testGetBeanNamesForTypeBeforeFactoryBeanCreation() {
+		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
+		lbf.registerBeanDefinition("factoryBean", new RootBeanDefinition(FactoryBeanThatShouldntBeCalled.class.getName()));
+		assertFalse(lbf.containsSingleton("factoryBean"));
+
+		String[] beanNames = lbf.getBeanNamesForType(Runnable.class, false, false);
+		assertEquals(1, beanNames.length);
+		assertEquals("&factoryBean", beanNames[0]);
+
+		beanNames = lbf.getBeanNamesForType(FactoryBean.class, false, false);
+		assertEquals(1, beanNames.length);
+		assertEquals("&factoryBean", beanNames[0]);
+	}
+
+	@Test
+	public void testGetBeanNamesForTypeAfterFactoryBeanCreation() {
+		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
+		lbf.registerBeanDefinition("factoryBean", new RootBeanDefinition(FactoryBeanThatShouldntBeCalled.class.getName()));
+		lbf.getBean("&factoryBean");
+
+		String[] beanNames = lbf.getBeanNamesForType(Runnable.class, false, false);
+		assertEquals(1, beanNames.length);
+		assertEquals("&factoryBean", beanNames[0]);
+
+		beanNames = lbf.getBeanNamesForType(FactoryBean.class, false, false);
+		assertEquals(1, beanNames.length);
+		assertEquals("&factoryBean", beanNames[0]);
+	}
+
 	/**
 	 * Verifies that a dependency on a {@link FactoryBean} can <strong>not</strong>
 	 * be autowired <em>by name</em>, as &amp; is an illegal character in
@@ -2862,7 +2892,7 @@ public class DefaultListableBeanFactoryTests {
 	}
 
 
-	public static class FactoryBeanThatShouldntBeCalled implements FactoryBean<Object> {
+	public static class FactoryBeanThatShouldntBeCalled implements FactoryBean<Object>, Runnable {
 
 		@Override
 		public Object getObject() {
@@ -2877,6 +2907,11 @@ public class DefaultListableBeanFactoryTests {
 		@Override
 		public boolean isSingleton() {
 			return false;
+		}
+
+		@Override
+		public void run() {
+			throw new IllegalStateException();
 		}
 	}
 
@@ -2992,7 +3027,6 @@ public class DefaultListableBeanFactoryTests {
 	private static class FactoryBeanDependentBean {
 
 		private FactoryBean<?> factoryBean;
-
 
 		public final FactoryBean<?> getFactoryBean() {
 			return this.factoryBean;
