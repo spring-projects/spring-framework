@@ -2220,7 +2220,7 @@ Note that `ResponseBodyEmitter` can also be used as the body in a
 the response.
 
 [[mvc-ann-async-sse]]
-==== Server-Sent Events
+==== HTTP Streaming With Server-Sent Events
 
 `SseEmitter` is a sub-class of `ResponseBodyEmitter` providing support for
 http://www.w3.org/TR/eventsource/[Server-Sent Events].
