@@ -17,6 +17,7 @@
 package org.springframework.beans.factory;
 
 import java.io.Closeable;
+import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.net.MalformedURLException;
 import java.security.AccessControlContext;
@@ -32,6 +33,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.concurrent.Callable;
 import javax.annotation.Priority;
 import javax.security.auth.Subject;
 
@@ -1669,10 +1671,18 @@ public class DefaultListableBeanFactoryTests {
 	@Test
 	public void testGetBeanNamesForTypeBeforeFactoryBeanCreation() {
 		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
-		lbf.registerBeanDefinition("factoryBean", new RootBeanDefinition(FactoryBeanThatShouldntBeCalled.class.getName()));
+		lbf.registerBeanDefinition("factoryBean", new RootBeanDefinition(FactoryBeanThatShouldntBeCalled.class));
 		assertFalse(lbf.containsSingleton("factoryBean"));
 
 		String[] beanNames = lbf.getBeanNamesForType(Runnable.class, false, false);
+		assertEquals(1, beanNames.length);
+		assertEquals("&factoryBean", beanNames[0]);
+
+		beanNames = lbf.getBeanNamesForType(Callable.class, false, false);
+		assertEquals(1, beanNames.length);
+		assertEquals("&factoryBean", beanNames[0]);
+
+		beanNames = lbf.getBeanNamesForType(RepositoryFactoryInformation.class, false, false);
 		assertEquals(1, beanNames.length);
 		assertEquals("&factoryBean", beanNames[0]);
 
@@ -1684,10 +1694,18 @@ public class DefaultListableBeanFactoryTests {
 	@Test
 	public void testGetBeanNamesForTypeAfterFactoryBeanCreation() {
 		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
-		lbf.registerBeanDefinition("factoryBean", new RootBeanDefinition(FactoryBeanThatShouldntBeCalled.class.getName()));
+		lbf.registerBeanDefinition("factoryBean", new RootBeanDefinition(FactoryBeanThatShouldntBeCalled.class));
 		lbf.getBean("&factoryBean");
 
 		String[] beanNames = lbf.getBeanNamesForType(Runnable.class, false, false);
+		assertEquals(1, beanNames.length);
+		assertEquals("&factoryBean", beanNames[0]);
+
+		beanNames = lbf.getBeanNamesForType(Callable.class, false, false);
+		assertEquals(1, beanNames.length);
+		assertEquals("&factoryBean", beanNames[0]);
+
+		beanNames = lbf.getBeanNamesForType(RepositoryFactoryInformation.class, false, false);
 		assertEquals(1, beanNames.length);
 		assertEquals("&factoryBean", beanNames[0]);
 
@@ -2892,10 +2910,24 @@ public class DefaultListableBeanFactoryTests {
 	}
 
 
-	public static class FactoryBeanThatShouldntBeCalled implements FactoryBean<Object>, Runnable {
+	public interface Repository<T, ID extends Serializable> {
+	}
+
+
+	public interface RepositoryFactoryInformation<T, ID extends Serializable> {
+	}
+
+
+	public static abstract class RepositoryFactoryBeanSupport<T extends Repository<S, ID>, S, ID extends Serializable>
+			implements RepositoryFactoryInformation<S, ID>, FactoryBean<T> {
+	}
+
+
+	public static class FactoryBeanThatShouldntBeCalled<T extends Repository<S, ID>, S, ID extends Serializable>
+			extends RepositoryFactoryBeanSupport<T, S, ID> implements Runnable, Callable<T> {
 
 		@Override
-		public Object getObject() {
+		public T getObject() {
 			throw new IllegalStateException();
 		}
 
@@ -2911,6 +2943,11 @@ public class DefaultListableBeanFactoryTests {
 
 		@Override
 		public void run() {
+			throw new IllegalStateException();
+		}
+
+		@Override
+		public T call() throws Exception {
 			throw new IllegalStateException();
 		}
 	}
