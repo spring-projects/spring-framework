@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.test.web.servlet.result;
 
 import org.hamcrest.Matcher;
@@ -21,8 +22,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultMatcher;
 
+import static org.hamcrest.MatcherAssert.*;
 import static org.springframework.test.util.AssertionErrors.*;
-import static org.springframework.test.util.MatcherAssertionErrors.*;
 
 /**
  * Factory for assertions on the response status. An instance of this class is
@@ -35,13 +36,13 @@ import static org.springframework.test.util.MatcherAssertionErrors.*;
  */
 public class StatusResultMatchers {
 
-
 	/**
 	 * Protected constructor.
 	 * Use {@link MockMvcResultMatchers#status()}.
 	 */
 	protected StatusResultMatchers() {
 	}
+
 
 	/**
 	 * Assert the response status code with the given Hamcrest {@link Matcher}.

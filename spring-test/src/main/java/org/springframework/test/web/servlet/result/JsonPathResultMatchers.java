@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,8 +23,8 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultMatcher;
 
 /**
- * Factory for assertions on the response content using <a
- * href="http://goessner.net/articles/JsonPath/">JSONPath</a> expressions.
+ * Factory for assertions on the response content using
+ * <a href="http://goessner.net/articles/JsonPath/">JSONPath</a> expressions.
  * An instance of this class is typically accessed via
  * {@link MockMvcResultMatchers#jsonPath}.
  *
@@ -33,7 +33,8 @@ import org.springframework.test.web.servlet.ResultMatcher;
  */
 public class JsonPathResultMatchers {
 
-	private JsonPathExpectationsHelper jsonPathHelper;
+	private final JsonPathExpectationsHelper jsonPathHelper;
+
 
 	/**
 	 * Protected constructor. Use
@@ -43,6 +44,7 @@ public class JsonPathResultMatchers {
 	protected JsonPathResultMatchers(String expression, Object ... args) {
 		this.jsonPathHelper = new JsonPathExpectationsHelper(expression, args);
 	}
+
 
 	/**
 	 * Evaluate the JSONPath and assert the value of the content found with the
@@ -108,4 +110,5 @@ public class JsonPathResultMatchers {
 			}
 		};
 	}
+
 }

@@ -12,7 +12,6 @@
  */
 package org.springframework.test.web.servlet.setup;
 
-import java.io.IOException;
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
@@ -28,19 +27,24 @@ import org.springframework.mock.web.MockFilterConfig;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 
+import static org.hamcrest.MatcherAssert.*;
 import static org.hamcrest.Matchers.*;
-import static org.springframework.test.util.MatcherAssertionErrors.*;
 
 /**
- *
  * @author Rob Winch
  */
 public class ConditionalDelegatingFilterProxyTests {
+
 	private MockHttpServletRequest request;
+
 	private MockHttpServletResponse response;
+
 	private MockFilterChain filterChain;
+
 	private MockFilter delegate;
+
 	private PatternMappingFilterProxy filter;
+
 
 	@Before
 	public void setup() {
@@ -50,6 +54,7 @@ public class ConditionalDelegatingFilterProxyTests {
 		filterChain = new MockFilterChain();
 		delegate = new MockFilter();
 	}
+
 
 	@Test
 	public void init() throws Exception {
@@ -245,11 +250,17 @@ public class ConditionalDelegatingFilterProxyTests {
 		delegate = new MockFilter();
 	}
 
+
 	private static class MockFilter implements Filter {
+
 		private FilterConfig filterConfig;
+
 		private ServletRequest request;
+
 		private ServletResponse response;
+
 		private FilterChain chain;
+
 		private boolean destroy;
 
 		@Override
@@ -258,8 +269,7 @@ public class ConditionalDelegatingFilterProxyTests {
 		}
 
 		@Override
-		public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException,
-				ServletException {
+		public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) {
 			this.request = request;
 			this.response = response;
 			this.chain = chain;
@@ -270,4 +280,5 @@ public class ConditionalDelegatingFilterProxyTests {
 			this.destroy = true;
 		}
 	}
+
 }

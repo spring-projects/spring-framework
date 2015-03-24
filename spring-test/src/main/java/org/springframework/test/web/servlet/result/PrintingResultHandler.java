@@ -18,7 +18,6 @@ package org.springframework.test.web.servlet.result;
 
 import java.util.Enumeration;
 import java.util.Map;
-
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.http.HttpHeaders;
@@ -69,7 +68,6 @@ public class PrintingResultHandler implements ResultHandler {
 	 */
 	@Override
 	public final void handle(MvcResult result) throws Exception {
-
 		this.printer.printHeading("MockHttpServletRequest");
 		printRequest(result.getRequest());
 
@@ -92,7 +90,9 @@ public class PrintingResultHandler implements ResultHandler {
 		printResponse(result.getResponse());
 	}
 
-	/** Print the request */
+	/**
+	 * Print the request.
+	 */
 	protected void printRequest(MockHttpServletRequest request) throws Exception {
 		this.printer.printValue("HTTP Method", request.getMethod());
 		this.printer.printValue("Request URI", request.getRequestURI());
@@ -139,7 +139,9 @@ public class PrintingResultHandler implements ResultHandler {
 		this.printer.printValue("Async result", asyncResult);
 	}
 
-	/** Print the handler */
+	/**
+	 * Print the handler.
+	 */
 	protected void printHandler(Object handler, HandlerInterceptor[] interceptors) throws Exception {
 		if (handler == null) {
 			this.printer.printValue("Type", null);
@@ -156,7 +158,9 @@ public class PrintingResultHandler implements ResultHandler {
 		}
 	}
 
-	/** Print exceptions resolved through a HandlerExceptionResolver */
+	/**
+	 * Print exceptions resolved through a HandlerExceptionResolver.
+	 */
 	protected void printResolvedException(Exception resolvedException) throws Exception {
 		if (resolvedException == null) {
 			this.printer.printValue("Type", null);
@@ -166,7 +170,9 @@ public class PrintingResultHandler implements ResultHandler {
 		}
 	}
 
-	/** Print the ModelAndView */
+	/**
+	 * Print the ModelAndView.
+	 */
 	protected void printModelAndView(ModelAndView mav) throws Exception {
 		this.printer.printValue("View name", (mav != null) ? mav.getViewName() : null);
 		this.printer.printValue("View", (mav != null) ? mav.getView() : null);
@@ -188,7 +194,9 @@ public class PrintingResultHandler implements ResultHandler {
 		}
 	}
 
-	/** Print "output" flash attributes */
+	/**
+	 * Print "output" flash attributes.
+	 */
 	protected void printFlashMap(FlashMap flashMap) throws Exception {
 		if (flashMap == null) {
 			this.printer.printValue("Attributes", null);
@@ -201,7 +209,9 @@ public class PrintingResultHandler implements ResultHandler {
 		}
 	}
 
-	/** Print the response */
+	/**
+	 * Print the response.
+	 */
 	protected void printResponse(MockHttpServletResponse response) throws Exception {
 		this.printer.printValue("Status", response.getStatus());
 		this.printer.printValue("Error message", response.getErrorMessage());
