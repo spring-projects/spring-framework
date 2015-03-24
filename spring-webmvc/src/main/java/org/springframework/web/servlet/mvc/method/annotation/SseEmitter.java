@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.servlet.mvc.method.annotation;
 
 import java.io.IOException;
@@ -26,9 +27,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.server.ServerHttpResponse;
 
 /**
- * A specialization of
- * {@link org.springframework.web.servlet.mvc.method.annotation.ResponseBodyEmitter
- * ResponseBodyEmitter} for sending
+ * A specialization of {@link ResponseBodyEmitter} for sending
  * <a href="http://www.w3.org/TR/eventsource/">Server-Sent Events</a>.
  *
  * @author Rossen Stoyanchev
@@ -36,7 +35,7 @@ import org.springframework.http.server.ServerHttpResponse;
  */
 public class SseEmitter extends ResponseBodyEmitter {
 
-	public static final MediaType TEXT_PLAIN = new MediaType("text", "plain", Charset.forName("UTF-8"));
+	static final MediaType TEXT_PLAIN = new MediaType("text", "plain", Charset.forName("UTF-8"));
 
 
 	@Override
@@ -51,7 +50,6 @@ public class SseEmitter extends ResponseBodyEmitter {
 	/**
 	 * Send the object formatted as a single SSE "data" line. It's equivalent to:
 	 * <pre>
-	 *
 	 * // static import of SseEmitter.*
 	 *
 	 * SseEmitter emitter = new SseEmitter();
@@ -69,7 +67,6 @@ public class SseEmitter extends ResponseBodyEmitter {
 	/**
 	 * Send the object formatted as a single SSE "data" line. It's equivalent to:
 	 * <pre>
-	 *
 	 * // static import of SseEmitter.*
 	 *
 	 * SseEmitter emitter = new SseEmitter();
@@ -91,7 +88,6 @@ public class SseEmitter extends ResponseBodyEmitter {
 	/**
 	 * Send an SSE event prepared with the given builder. For example:
 	 * <pre>
-	 *
 	 * // static import of SseEmitter
 	 *
 	 * SseEmitter emitter = new SseEmitter();
@@ -107,6 +103,7 @@ public class SseEmitter extends ResponseBodyEmitter {
 			super.send(entry.getKey(), entry.getValue());
 		}
 	}
+
 
 	public static SseEventBuilder event() {
 		return new DefaultSseEventBuilder();
@@ -156,6 +153,7 @@ public class SseEmitter extends ResponseBodyEmitter {
 		Map<Object, MediaType> build();
 	}
 
+
 	/**
 	 * Default implementation of SseEventBuilder.
 	 */
@@ -164,7 +162,6 @@ public class SseEmitter extends ResponseBodyEmitter {
 		private final Map<Object, MediaType> map = new LinkedHashMap<Object, MediaType>(4);
 
 		private StringBuilder sb;
-
 
 		@Override
 		public SseEventBuilder comment(String comment) {
