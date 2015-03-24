@@ -37,7 +37,7 @@ import org.springframework.web.context.support.WebApplicationContextUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 /**
- * Servlet 2.3 Filter that binds a JPA EntityManager to the thread for the
+ * Servlet Filter that binds a JPA EntityManager to the thread for the
  * entire processing of the request. Intended for the "Open EntityManager in
  * View" pattern, i.e. to allow for lazy loading in web views despite the
  * original transactions already being completed.
@@ -122,9 +122,9 @@ public class OpenEntityManagerInViewFilter extends OncePerRequestFilter {
 
 
 	/**
-	 * Returns "false" so that the filter may re-bind the opened
-	 * {@code EntityManager} to each asynchronously dispatched thread and postpone
-	 * closing it until the very last asynchronous dispatch.
+	 * Returns "false" so that the filter may re-bind the opened {@code EntityManager}
+	 * to each asynchronously dispatched thread and postpone closing it until the very
+	 * last asynchronous dispatch.
 	 */
 	@Override
 	protected boolean shouldNotFilterAsyncDispatch() {
