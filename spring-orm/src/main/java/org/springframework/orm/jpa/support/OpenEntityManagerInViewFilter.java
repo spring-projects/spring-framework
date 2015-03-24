@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -71,6 +71,7 @@ public class OpenEntityManagerInViewFilter extends OncePerRequestFilter {
 	 */
 	public static final String DEFAULT_ENTITY_MANAGER_FACTORY_BEAN_NAME = "entityManagerFactory";
 
+
 	private String entityManagerFactoryBeanName;
 
 	private String persistenceUnitName;
@@ -118,6 +119,7 @@ public class OpenEntityManagerInViewFilter extends OncePerRequestFilter {
 	protected String getPersistenceUnitName() {
 		return this.persistenceUnitName;
 	}
+
 
 	/**
 	 * Returns "false" so that the filter may re-bind the opened
