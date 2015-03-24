@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -353,8 +353,8 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 
 		/**
 		 * Set the body of the response entity and returns it.
-		 * @param body the body of the response entity
 		 * @param <T> the type of the body
+		 * @param body the body of the response entity
 		 * @return the built response entity
 		 */
 		<T> ResponseEntity<T> body(T body);
