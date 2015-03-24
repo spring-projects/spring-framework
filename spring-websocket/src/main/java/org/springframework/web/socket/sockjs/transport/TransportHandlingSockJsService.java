@@ -146,7 +146,7 @@ public class TransportHandlingSockJsService extends AbstractSockJsService implem
 	 * Return the configured WebSocket handshake request interceptors.
 	 */
 	public List<HandshakeInterceptor> getHandshakeInterceptors() {
-		return Collections.unmodifiableList(this.interceptors);
+		return this.interceptors;
 	}
 
 
