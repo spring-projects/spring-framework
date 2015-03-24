@@ -33,7 +33,7 @@ configure(allprojects) { project ->
 	ext.ehcachejcacheVersion = "1.0.1"
 	ext.fileuploadVersion    = "1.3.1"
 	ext.freemarkerVersion    = "2.3.22"
-	ext.groovyVersion        = "2.4.2"
+	ext.groovyVersion        = "2.4.3"
 	ext.gsonVersion          = "2.3.1"
 	ext.hibernate3Version    = "3.6.10.Final"
 	ext.hibernate4Version    = "4.3.8.Final"
@@ -647,8 +647,9 @@ project("spring-context-support") {
 		testCompile("commons-digester:commons-digester:1.8.1")  // for Velocity/JasperReports
 		testCompile("org.hsqldb:hsqldb:${hsqldbVersion}")
 		testCompile("org.slf4j:slf4j-api:${slf4jVersion}")
-		testCompile("org.ehcache:jcache:${ehcachejcacheVersion}")
 		testRuntime("com.sun.mail:javax.mail:1.5.2")
+		testCompile("org.ehcache:jcache:${ehcachejcacheVersion}")
+		// testCompile("org.ehcache:ehcache:3.0.0.m1")  // alternative to ehcache-jcache above
 	}
 }
 
