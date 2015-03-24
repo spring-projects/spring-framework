@@ -1,5 +1,5 @@
- /*
- * Copyright 2002-2013 the original author or authors.
+/*
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,9 +28,9 @@ import org.springframework.util.Assert;
  * based on an {@link AdviceMode} value from an annotation (such as the {@code @Enable*}
  * annotations).
  *
- * @param <A> Annotation containing {@linkplain #getAdviceModeAttributeName() AdviceMode attribute}
  * @author Chris Beams
  * @since 3.1
+ * @param <A> annotation containing {@linkplain #getAdviceModeAttributeName() AdviceMode attribute}
  */
 public abstract class AdviceModeImportSelector<A extends Annotation> implements ImportSelector {
 

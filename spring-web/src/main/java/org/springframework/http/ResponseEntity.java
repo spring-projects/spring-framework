@@ -368,8 +368,8 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 
 		/**
 		 * Set the body of the response entity and returns it.
-		 * @param body the body of the response entity
 		 * @param <T> the type of the body
+		 * @param body the body of the response entity
 		 * @return the built response entity
 		 */
 		<T> ResponseEntity<T> body(T body);
