@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -113,17 +113,17 @@ public class GenericConversionServiceTests {
 		assertEquals(null, conversionService.convert(null, Integer.class));
 	}
 
-	@Test(expected=ConversionFailedException.class)
+	@Test(expected = ConversionFailedException.class)
 	public void convertNullSourcePrimitiveTarget() {
 		assertEquals(null, conversionService.convert(null, int.class));
 	}
 
-	@Test(expected=ConversionFailedException.class)
+	@Test(expected = ConversionFailedException.class)
 	public void convertNullSourcePrimitiveTargetTypeDescriptor() {
 		conversionService.convert(null, TypeDescriptor.valueOf(String.class), TypeDescriptor.valueOf(int.class));
 	}
 
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void convertNotNullSourceNullSourceTypeDescriptor() {
 		conversionService.convert("3", null, TypeDescriptor.valueOf(int.class));
 	}
@@ -177,18 +177,18 @@ public class GenericConversionServiceTests {
 		assertNull(conversionService.convert(null, Integer.class));
 	}
 
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void convertNullTargetClass() {
 		assertNull(conversionService.convert("3", (Class<?>) null));
 		assertNull(conversionService.convert("3", TypeDescriptor.valueOf(String.class), null));
 	}
 
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void convertNullTypeDescriptor() {
 		assertNull(conversionService.convert("3", TypeDescriptor.valueOf(String.class), null));
 	}
 
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void convertWrongSourceTypeDescriptor() {
 		conversionService.convert("3", TypeDescriptor.valueOf(Integer.class), TypeDescriptor.valueOf(Long.class));
 	}
@@ -218,8 +218,7 @@ public class GenericConversionServiceTests {
 	}
 
 	// SPR-8718
-
-	@Test(expected=ConverterNotFoundException.class)
+	@Test(expected = ConverterNotFoundException.class)
 	public void convertSuperTarget() {
 		conversionService.addConverter(new ColorConverter());
 		conversionService.convert("#000000", SystemColor.class);
@@ -295,7 +294,7 @@ public class GenericConversionServiceTests {
 	@Test
 	public void testInterfaceToString() {
 		GenericConversionService conversionService = new GenericConversionService();
-		conversionService.addConverter(new MyBaseInterfaceConverter());
+		conversionService.addConverter(new MyBaseInterfaceToStringConverter());
 		conversionService.addConverter(new ObjectToStringConverter());
 		Object converted = conversionService.convert(new MyInterfaceImplementer(), String.class);
 		assertEquals("RESULT", converted);
@@ -304,7 +303,7 @@ public class GenericConversionServiceTests {
 	@Test
 	public void testInterfaceArrayToStringArray() {
 		GenericConversionService conversionService = new GenericConversionService();
-		conversionService.addConverter(new MyBaseInterfaceConverter());
+		conversionService.addConverter(new MyBaseInterfaceToStringConverter());
 		conversionService.addConverter(new ArrayToArrayConverter(conversionService));
 		String[] converted = conversionService.convert(new MyInterface[] {new MyInterfaceImplementer()}, String[].class);
 		assertEquals("RESULT", converted[0]);
@@ -313,7 +312,7 @@ public class GenericConversionServiceTests {
 	@Test
 	public void testObjectArrayToStringArray() {
 		GenericConversionService conversionService = new GenericConversionService();
-		conversionService.addConverter(new MyBaseInterfaceConverter());
+		conversionService.addConverter(new MyBaseInterfaceToStringConverter());
 		conversionService.addConverter(new ArrayToArrayConverter(conversionService));
 		String[] converted = conversionService.convert(new MyInterfaceImplementer[] {new MyInterfaceImplementer()}, String[].class);
 		assertEquals("RESULT", converted[0]);
@@ -813,7 +812,7 @@ public class GenericConversionServiceTests {
 	}
 
 
-	private static class MyBaseInterfaceConverter implements Converter<MyBaseInterface, String> {
+	private static class MyBaseInterfaceToStringConverter implements Converter<MyBaseInterface, String> {
 
 		@Override
 		public String convert(MyBaseInterface source) {
