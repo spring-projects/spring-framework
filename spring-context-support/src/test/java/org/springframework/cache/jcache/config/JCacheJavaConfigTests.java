@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,12 +18,15 @@ package org.springframework.cache.jcache.config;
 
 import java.util.Arrays;
 
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.cache.concurrent.ConcurrentMapCache;
+import org.springframework.cache.concurrent.ConcurrentMapCacheManager;
 import org.springframework.cache.config.SomeKeyGenerator;
 import org.springframework.cache.interceptor.CacheErrorHandler;
 import org.springframework.cache.interceptor.CacheResolver;
@@ -35,7 +38,6 @@ import org.springframework.cache.interceptor.SimpleKeyGenerator;
 import org.springframework.cache.jcache.interceptor.AnnotatedJCacheableService;
 import org.springframework.cache.jcache.interceptor.DefaultJCacheOperationSource;
 import org.springframework.cache.jcache.interceptor.JCacheInterceptor;
-import org.springframework.cache.jcache.interceptor.SimpleExceptionCacheResolver;
 import org.springframework.cache.support.NoOpCacheManager;
 import org.springframework.cache.support.SimpleCacheManager;
 import org.springframework.context.ApplicationContext;
@@ -50,6 +52,9 @@ import static org.junit.Assert.*;
  * @author Stephane Nicoll
  */
 public class JCacheJavaConfigTests extends AbstractJCacheAnnotationTests {
+
+	@Rule
+	public final ExpectedException thrown = ExpectedException.none();
 
 	@Override
 	protected ApplicationContext getApplicationContext() {
@@ -80,10 +85,7 @@ public class JCacheJavaConfigTests extends AbstractJCacheAnnotationTests {
 		assertEquals(SimpleCacheResolver.class, cos.getCacheResolver().getClass());
 		assertSame(context.getBean(CacheManager.class),
 				((SimpleCacheResolver) cos.getCacheResolver()).getCacheManager());
-		assertNotNull(cos.getExceptionCacheResolver());
-		assertEquals(SimpleExceptionCacheResolver.class, cos.getExceptionCacheResolver().getClass());
-		assertSame(context.getBean(CacheManager.class),
-				((SimpleExceptionCacheResolver) cos.getExceptionCacheResolver()).getCacheManager());
+		assertNull(cos.getExceptionCacheResolver());
 		context.close();
 	}
 
@@ -97,6 +99,28 @@ public class JCacheJavaConfigTests extends AbstractJCacheAnnotationTests {
 		assertSame(context.getBean("keyGenerator"), cos.getKeyGenerator());
 		assertSame(context.getBean("exceptionCacheResolver"), cos.getExceptionCacheResolver());
 		context.close();
+	}
+
+	@Test
+	public void exceptionCacheResolverFallbacksToMainOne() {
+		ConfigurableApplicationContext context = new AnnotationConfigApplicationContext(
+				NoExceptionCacheResolverConfig.class);
+		try {
+			DefaultJCacheOperationSource cos = context.getBean(DefaultJCacheOperationSource.class);
+			assertSame(context.getBean("cacheResolver"), cos.getCacheResolver());
+			assertNull(cos.getExceptionCacheResolver());
+
+			JCacheableService<?> service = context.getBean(JCacheableService.class);
+
+			service.cache("id");
+
+			// This call requires the cache manager to be set
+			thrown.expect(IllegalStateException.class);
+			service.cacheWithException("test", false);
+		}
+		finally {
+			context.close();
+		}
 	}
 
 
@@ -197,6 +221,22 @@ public class JCacheJavaConfigTests extends AbstractJCacheAnnotationTests {
 		@Bean
 		public CacheResolver exceptionCacheResolver() {
 			return new NamedCacheResolver(cacheManager(), "exception");
+		}
+	}
+
+	@Configuration
+	@EnableCaching
+	static class NoExceptionCacheResolverConfig extends JCacheConfigurerSupport {
+
+		@Override
+		@Bean
+		public CacheResolver cacheResolver() {
+			return new NamedCacheResolver(new ConcurrentMapCacheManager(), "default");
+		}
+
+		@Bean
+		public JCacheableService<?> cacheableService() {
+			return new AnnotatedJCacheableService(new ConcurrentMapCache("default"));
 		}
 	}
 
