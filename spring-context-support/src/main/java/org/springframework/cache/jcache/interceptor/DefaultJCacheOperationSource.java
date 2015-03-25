@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -128,9 +128,9 @@ public class DefaultJCacheOperationSource extends AnnotationJCacheOperationSourc
 
 	@Override
 	public void afterSingletonsInstantiated() {
-		// Make sure those are initialized on startup...
+		// Make sure that the cache resolver is initialized. An exception cache resolver is only
+		// required if the exceptionCacheName attribute is set on an operation
 		Assert.notNull(getDefaultCacheResolver(), "Cache resolver should have been initialized");
-		Assert.notNull(getDefaultExceptionCacheResolver(), "Exception cache resolver should have been initialized");
 	}
 
 
