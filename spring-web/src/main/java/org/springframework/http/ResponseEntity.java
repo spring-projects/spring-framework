@@ -322,10 +322,8 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 		/**
 		 * Set the caching directives for the resource, as specified by the
 		 * {@code Cache-Control} header.
-		 *
 		 * <p>A {@code CacheControl} instance can be built like
 		 * {@code CacheControl.maxAge(3600).cachePublic().noTransform()}.
-		 *
 		 * @param cacheControl the instance that builds cache related HTTP response headers
 		 * @return this builder
 		 * @see <a href="https://tools.ietf.org/html/rfc7234#section-5.2">RFC-7234 Section 5.2</a>
@@ -441,7 +439,7 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 		@Override
 		public BodyBuilder cacheControl(CacheControl cacheControl) {
 			String ccValue = cacheControl.getHeaderValue();
-			if(ccValue != null) {
+			if (ccValue != null) {
 				this.headers.setCacheControl(cacheControl.getHeaderValue());
 			}
 			return this;
