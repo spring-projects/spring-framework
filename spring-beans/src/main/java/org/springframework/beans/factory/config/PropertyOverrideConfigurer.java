@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.beans.factory.config;
 
+import java.io.IOException;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Properties;
@@ -58,6 +59,7 @@ import org.springframework.beans.factory.BeanInitializationException;
  *
  * @author Juergen Hoeller
  * @author Rod Johnson
+ * @author Kazuki Shimizu
  * @since 12.03.2003
  * @see #convertPropertyValue
  * @see PropertyPlaceholderConfigurer
@@ -70,6 +72,8 @@ public class PropertyOverrideConfigurer extends PropertyResourceConfigurer {
 	private String beanNameSeparator = DEFAULT_BEAN_NAME_SEPARATOR;
 
 	private boolean ignoreInvalidKeys = false;
+
+	private boolean overrideSystemProperties = false;
 
 	/**
 	 * Contains names of beans that have overrides
@@ -95,6 +99,30 @@ public class PropertyOverrideConfigurer extends PropertyResourceConfigurer {
 		this.ignoreInvalidKeys = ignoreInvalidKeys;
 	}
 
+	/**
+	 * Set whether system properties override as override properties.
+	 * <p>Default is "false": System properties does not override as override properties.
+	 * Can be switched to "true" to let system properties override as override properties.
+	 *
+	 * @since 4.2
+	 */
+	public void setUseSystemProperties(boolean overrideSystemProperties){
+		this.overrideSystemProperties = overrideSystemProperties;
+	}
+
+	@Override
+	protected void loadProperties(Properties props) throws IOException {
+		super.loadProperties(props);
+		if (overrideSystemProperties){
+			for (Enumeration<?> names = props.propertyNames(); names.hasMoreElements();) {
+				String key = (String) names.nextElement();
+				String systemProperty = System.getProperty(key);
+				if(systemProperty != null){
+					props.setProperty(key, systemProperty);
+				}
+			}
+		}
+	}
 
 	@Override
 	protected void processProperties(ConfigurableListableBeanFactory beanFactory, Properties props)
@@ -116,6 +144,7 @@ public class PropertyOverrideConfigurer extends PropertyResourceConfigurer {
 			}
 		}
 	}
+
 
 	/**
 	 * Process the given key as 'beanName.property' entry.

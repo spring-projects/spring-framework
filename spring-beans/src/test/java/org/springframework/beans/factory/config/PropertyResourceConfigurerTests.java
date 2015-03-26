@@ -55,6 +55,7 @@ import static org.springframework.tests.TestResourceUtils.*;
  * @author Juergen Hoeller
  * @author Chris Beams
  * @author Phillip Webb
+ * @author Kazuki Shimizu
  * @since 02.10.2003
  * @see PropertyPlaceholderConfigurerTests
  */
@@ -309,6 +310,69 @@ public class PropertyResourceConfigurerTests {
 		assertEquals(99, tb2.getAge());
 		assertEquals(null, tb1.getName());
 		assertEquals("test", tb2.getName());
+	}
+
+	// SPR-12853
+	@Test
+	public void testPropertyOverrideConfigurerDisableOverrideSystemProperty() {
+		factory.registerBeanDefinition("tb1", genericBeanDefinition(TestBean.class).getBeanDefinition());
+
+		try {
+			System.setProperty("tb1.name", "Jiro");
+			System.setProperty("tb1.sex", "MAN");
+
+			PropertyOverrideConfigurer poc = new PropertyOverrideConfigurer();
+
+			Properties props = new Properties();
+			props.setProperty("tb1.name", "Ichiro");
+			props.setProperty("tb1.country", "Japan");
+			poc.setProperties(props);
+			poc.setOrder(0);
+
+			poc.postProcessBeanFactory(factory);
+
+			TestBean tb1 = factory.getBean("tb1", TestBean.class);
+			assertEquals("Ichiro", tb1.getName());
+			assertEquals("Japan", tb1.getCountry());
+			assertEquals(null, tb1.getSex());
+
+		} finally {
+			System.clearProperty("tb1.beanName");
+			System.clearProperty("tb1.country");
+			System.clearProperty("tb1.sex");
+		}
+	}
+
+	// SPR-12853
+	@Test
+	public void testPropertyOverrideConfigurerEnableOverrideSystemProperty() {
+		factory.registerBeanDefinition("tb1", genericBeanDefinition(TestBean.class).getBeanDefinition());
+
+		try {
+			System.setProperty("tb1.name", "Jiro");
+			System.setProperty("tb1.sex", "MAN");
+
+			PropertyOverrideConfigurer poc = new PropertyOverrideConfigurer();
+			poc.setUseSystemProperties(true);
+
+			Properties props = new Properties();
+			props.setProperty("tb1.name", "Ichiro");
+			props.setProperty("tb1.country", "Japan");
+			poc.setProperties(props);
+			poc.setOrder(0);
+
+			poc.postProcessBeanFactory(factory);
+
+			TestBean tb1 = factory.getBean("tb1", TestBean.class);
+			assertEquals("Jiro", tb1.getName());
+			assertEquals("Japan", tb1.getCountry());
+			assertEquals(null, tb1.getSex());
+
+		} finally {
+			System.clearProperty("tb1.beanName");
+			System.clearProperty("tb1.country");
+			System.clearProperty("tb1.sex");
+		}
 	}
 
 	@Test
