@@ -1823,6 +1823,106 @@ to access information about the message.
 ----
 
 
+[[websocket-stomp-client]]
+=== STOMP Client
+
+Spring provides STOMP/WebSocket client and STOMP/TCP client support with the
+following built-in choices (other libraries can be adapted):
+
+* `WebSocketStompClient` built on the Spring WebSocket API with
+  support for standard JSR-356 WebSocket, Jetty 9, as well as SockJS
+  for HTTP-based WebSocket emulation (see <<websocket-fallback-sockjs-client>>).
+* `Reactor11TcpStompClient` built on `NettyTcpClient` from the reactor-net project.
+
+To begin, create and configure the client:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+WebSocketClient transport = new StandardWebSocketClient();
+WebSocketStompClient stompClient = new WebSocketStompClient(transport);
+stompClient.setMessageConverter(new StringMessageConverter());
+stompClient.setTaskScheduler(taskScheduler); // for heartbeats, receipts
+----
+
+Then connect to the WebSocket and provide a handler for the STOMP session:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+String url = "ws://127.0.0.1:8080/endpoint";
+StompSessionHandler handler = ... ;
+stompClient.connect(url, handler);
+----
+
+When the session is ready for use, the handler is notified:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+public class MySessionHandler extends StompSessionHandlerAdapter {
+
+    @Override
+    public void afterConnected(StompSession session, StompHeaders connectedHeaders) {
+        // ...
+    }
+}
+----
+
+Send any Object as the payload and it will be serialized with a `MessageConverter`:
+ 
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+session.send("/topic/foo", "payload");
+----
+
+The subscribe methods take a `StompFrameHandler` for messages on the subscription
+and return a `Subscription` handle for unsubscribing. For each received message,
+the handler must help to select the target type and then handle the
+deserialized payload:
+ 
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+session.subscribe("/topic/foo", new StompFrameHandler() {
+
+    @Override
+    public Type getPayloadType(StompHeaders headers) {
+        return String.class;
+    }
+
+    @Override
+    public void handleFrame(StompHeaders headers, Object payload) {
+        // ...
+    }
+
+});
+----
+
+STOMP supports heartbeats. To use this feature simply configure the
+`WebSocketStompClient` with a `TaskScheduler` and if desired customize the
+default heartbeat intervals (10, 10 seconds respectively by default) for
+write inactivity which causes a heartbeat to be sent and for read
+inactivity which closes the connection.
+
+The STOMP protocol also supports receipts where the client must add a "receipt"
+header to which the server responds with a RECEIPT frame after the send or
+subscribe are processed. To support this the `StompSession` offers
+`setAutoReceipt(boolean)` that causes a "receipt" header to be
+added on every subsequent send or subscribe.
+Alternatively you can also manually add a "receipt" header to the `StompHeaders`.
+Both send and subscribe return an instance of `Receiptable`
+that can be used to register for receipt success and failure callbacks.
+For this feature the client must be configured with a `TaskScheduler`
+and the amount of time before a receipt expires (15 seconds by default).
+
+Note that `StompSessionHandler` itself is a `StompFrameHandler` which allows
+it to handle ERROR frames in addition to the `handleException` callback for
+exceptions from the handling of messages, and `handleTransportError` for
+transport-level errors including `ConnectionLostException`.
+
+
 
 [[websocket-stomp-websocket-scope]]
 === WebSocket Scope
