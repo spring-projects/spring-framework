@@ -102,7 +102,7 @@ public class JCacheJavaConfigTests extends AbstractJCacheAnnotationTests {
 	}
 
 	@Test
-	public void exceptionCacheResolverFallbacksToMainOne() {
+	public void exceptionCacheResolverLazilyRequired() {
 		ConfigurableApplicationContext context = new AnnotationConfigApplicationContext(
 				NoExceptionCacheResolverConfig.class);
 		try {
