@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,9 +18,9 @@ package org.springframework.web.socket.sockjs.transport.handler;
 
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.List;
 import java.util.Map;
 
+import org.hamcrest.Matchers;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -55,8 +55,6 @@ public class DefaultSockJsServiceTests extends AbstractHttpRequestTests {
 	private static final String sessionId = "session1";
 
 	private static final String sessionUrlPrefix = "/server1/" + sessionId + "/";
-
-	private static final List<String> origins = Arrays.asList("http://mydomain1.com", "http://mydomain2.com");
 
 
 	@Mock private SessionCreatingTransportHandler xhrHandler;
@@ -124,6 +122,27 @@ public class DefaultSockJsServiceTests extends AbstractHttpRequestTests {
 		assertSame(xhrHandler, handlers.get(xhrHandler.getTransportType()));
 	}
 
+	@Test(expected = IllegalArgumentException.class)
+	public void nullAllowedOriginList() {
+		this.service.setAllowedOrigins(null);
+	}
+
+	@Test
+	public void emptyAllowedOriginList() {
+		this.service.setAllowedOrigins(Arrays.asList());
+		assertThat(this.service.getAllowedOrigins(), Matchers.empty());
+	}
+
+	@Test(expected = IllegalArgumentException.class)
+	public void invalidAllowedOrigin() {
+		this.service.setAllowedOrigins(Arrays.asList("domain.com"));
+	}
+
+	@Test
+	public void validAllowedOrigins() {
+		this.service.setAllowedOrigins(Arrays.asList("http://domain.com", "https://domain.com", "*"));
+	}
+
 	@Test
 	public void customizedTransportHandlerList() {
 		TransportHandlingSockJsService service = new TransportHandlingSockJsService(
@@ -149,26 +168,15 @@ public class DefaultSockJsServiceTests extends AbstractHttpRequestTests {
 	}
 
 	@Test  // SPR-12226
-	public void handleTransportRequestXhrAllowNullOrigin() throws Exception {
-		String sockJsPath = sessionUrlPrefix + "xhr";
-		setRequest("POST", sockJsPrefix + sockJsPath);
-		this.service.setAllowedOrigins(null);
-		this.service.handleRequest(this.request, this.response, sockJsPath, this.wsHandler);
-
-		assertNull(this.response.getHeaders().getFirst("Access-Control-Allow-Origin"));
-		assertNull(this.response.getHeaders().getFirst("Access-Control-Allow-Credentials"));
-	}
-
-	@Test  // SPR-12226
 	public void handleTransportRequestXhrAllowedOriginsMatch() throws Exception {
 		String sockJsPath = sessionUrlPrefix + "xhr";
 		setRequest("POST", sockJsPrefix + sockJsPath);
-		setOrigin(origins.get(0));
-		this.service.setAllowedOrigins(origins);
+		this.service.setAllowedOrigins(Arrays.asList("http://mydomain1.com", "http://mydomain2.com"));
+		setOrigin("http://mydomain1.com");
 		this.service.handleRequest(this.request, this.response, sockJsPath, this.wsHandler);
 
 		assertEquals(200, this.servletResponse.getStatus());
-		assertEquals(origins.get(0), this.response.getHeaders().getFirst("Access-Control-Allow-Origin"));
+		assertEquals("http://mydomain1.com", this.response.getHeaders().getFirst("Access-Control-Allow-Origin"));
 		assertEquals("true", this.response.getHeaders().getFirst("Access-Control-Allow-Credentials"));
 	}
 
@@ -176,8 +184,8 @@ public class DefaultSockJsServiceTests extends AbstractHttpRequestTests {
 	public void handleTransportRequestXhrAllowedOriginsNoMatch() throws Exception {
 		String sockJsPath = sessionUrlPrefix + "xhr";
 		setRequest("POST", sockJsPrefix + sockJsPath);
+		this.service.setAllowedOrigins(Arrays.asList("http://mydomain1.com", "http://mydomain2.com"));
 		setOrigin("http://mydomain3.com");
-		this.service.setAllowedOrigins(origins);
 		this.service.handleRequest(this.request, this.response, sockJsPath, this.wsHandler);
 
 		assertEquals(403, this.servletResponse.getStatus());
@@ -192,19 +200,6 @@ public class DefaultSockJsServiceTests extends AbstractHttpRequestTests {
 		this.service.handleRequest(this.request, this.response, sockJsPath, this.wsHandler);
 
 		assertEquals(204, this.servletResponse.getStatus());
-		assertNull(this.response.getHeaders().getFirst("Access-Control-Allow-Origin"));
-		assertNull(this.response.getHeaders().getFirst("Access-Control-Allow-Credentials"));
-		assertNull(this.response.getHeaders().getFirst("Access-Control-Allow-Methods"));
-	}
-
-	@Test  // SPR-12226
-	public void handleTransportRequestXhrOptionsAllowNullOrigin() throws Exception {
-		String sockJsPath = sessionUrlPrefix + "xhr";
-		setRequest("OPTIONS", sockJsPrefix + sockJsPath);
-		this.service.setAllowedOrigins(null);
-		this.service.handleRequest(this.request, this.response, sockJsPath, this.wsHandler);
-
-		assertEquals(403, this.servletResponse.getStatus());
 		assertNull(this.response.getHeaders().getFirst("Access-Control-Allow-Origin"));
 		assertNull(this.response.getHeaders().getFirst("Access-Control-Allow-Credentials"));
 		assertNull(this.response.getHeaders().getFirst("Access-Control-Allow-Methods"));
@@ -272,7 +267,7 @@ public class DefaultSockJsServiceTests extends AbstractHttpRequestTests {
 		String sockJsPath = sessionUrlPrefix+ "jsonp";
 		setRequest("GET", sockJsPrefix + sockJsPath);
 		jsonpService.handleRequest(this.request, this.response, sockJsPath, this.wsHandler);
-		assertNotEquals(404, this.servletResponse.getStatus());
+		assertEquals(404, this.servletResponse.getStatus());
 
 		resetRequestAndResponse();
 		jsonpService.setAllowedOrigins(Arrays.asList("http://mydomain1.com"));
@@ -281,10 +276,10 @@ public class DefaultSockJsServiceTests extends AbstractHttpRequestTests {
 		assertEquals(404, this.servletResponse.getStatus());
 
 		resetRequestAndResponse();
-		jsonpService.setAllowedOrigins(null);
+		jsonpService.setAllowedOrigins(Arrays.asList("*"));
 		setRequest("GET", sockJsPrefix + sockJsPath);
 		jsonpService.handleRequest(this.request, this.response, sockJsPath, this.wsHandler);
-		assertEquals(404, this.servletResponse.getStatus());
+		assertNotEquals(404, this.servletResponse.getStatus());
 	}
 
 	@Test
@@ -296,8 +291,7 @@ public class DefaultSockJsServiceTests extends AbstractHttpRequestTests {
 		assertNotEquals(403, this.servletResponse.getStatus());
 
 		resetRequestAndResponse();
-		OriginHandshakeInterceptor interceptor = new OriginHandshakeInterceptor();
-		interceptor.setAllowedOrigins(Arrays.asList("http://mydomain1.com"));
+		OriginHandshakeInterceptor interceptor = new OriginHandshakeInterceptor(Arrays.asList("http://mydomain1.com"));
 		wsService.setHandshakeInterceptors(Arrays.asList(interceptor));
 		setRequest("GET", sockJsPrefix + sockJsPath);
 		setOrigin("http://mydomain1.com");
@@ -309,6 +303,29 @@ public class DefaultSockJsServiceTests extends AbstractHttpRequestTests {
 		setOrigin("http://mydomain2.com");
 		wsService.handleRequest(this.request, this.response, sockJsPath, this.wsHandler);
 		assertEquals(403, this.servletResponse.getStatus());
+	}
+
+	@Test
+	public void handleTransportRequestIframe() throws Exception {
+		String sockJsPath = "/iframe.html";
+		setRequest("GET", sockJsPrefix + sockJsPath);
+		this.service.handleRequest(this.request, this.response, sockJsPath, this.wsHandler);
+		assertNotEquals(404, this.servletResponse.getStatus());
+		assertEquals("SAMEORIGIN", this.servletResponse.getHeader("X-Frame-Options"));
+
+		resetRequestAndResponse();
+		setRequest("GET", sockJsPrefix + sockJsPath);
+		this.service.setAllowedOrigins(Arrays.asList("http://mydomain1.com"));
+		this.service.handleRequest(this.request, this.response, sockJsPath, this.wsHandler);
+		assertEquals(404, this.servletResponse.getStatus());
+		assertNull(this.servletResponse.getHeader("X-Frame-Options"));
+
+		resetRequestAndResponse();
+		setRequest("GET", sockJsPrefix + sockJsPath);
+		this.service.setAllowedOrigins(Arrays.asList("*"));
+		this.service.handleRequest(this.request, this.response, sockJsPath, this.wsHandler);
+		assertNotEquals(404, this.servletResponse.getStatus());
+		assertNull(this.servletResponse.getHeader("X-Frame-Options"));
 	}
 
 

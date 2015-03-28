@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2014 the original author or authors.
+ * Copyright 2012-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,10 @@
  */
 
 package org.springframework.web.servlet.mvc.method.annotation;
+
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
+import static org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder.*;
 
 import java.util.Arrays;
 import java.util.List;
@@ -38,10 +42,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.util.UriComponents;
-
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
-import static org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder.*;
+import org.springframework.web.util.UriComponentsBuilder;
 
 /**
  * Unit tests for {@link org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder}.
@@ -99,6 +100,15 @@ public class MvcUriComponentsBuilderTests {
 	}
 
 	@Test
+	public void testFromControllerWithCustomBaseUrl() {
+		UriComponentsBuilder builder = UriComponentsBuilder.fromUriString("http://example.org:9090/base");
+		UriComponents uriComponents = fromController(builder, PersonControllerImpl.class).build();
+
+		assertEquals("http://example.org:9090/base/people", uriComponents.toString());
+		assertEquals("http://example.org:9090/base", builder.toUriString());
+	}
+
+	@Test
 	public void testFromMethodNamePathVariable() throws Exception {
 		UriComponents uriComponents = fromMethodName(
 				ControllerWithMethods.class, "methodWithPathVariable", new Object[]{"1"}).build();
@@ -152,6 +162,16 @@ public class MvcUriComponentsBuilderTests {
 	}
 
 	@Test
+	public void testFromMethodNameWithCustomBaseUrl() throws Exception {
+		UriComponentsBuilder builder = UriComponentsBuilder.fromUriString("http://example.org:9090/base");
+		UriComponents uriComponents = fromMethodName(builder, ControllerWithMethods.class,
+				"methodWithPathVariable", new Object[] {"1"}).build();
+
+		assertEquals("http://example.org:9090/base/something/1/foo", uriComponents.toString());
+		assertEquals("http://example.org:9090/base", builder.toUriString());
+	}
+
+	@Test
 	public void testFromMethodCall() {
 		UriComponents uriComponents = fromMethodCall(on(ControllerWithMethods.class).myMethod(null)).build();
 
@@ -199,6 +219,15 @@ public class MvcUriComponentsBuilderTests {
 		MultiValueMap<String, String> queryParams = uriComponents.getQueryParams();
 		assertThat(queryParams.get("limit"), contains("5"));
 		assertThat(queryParams.get("items"), containsInAnyOrder("3", "7"));
+	}
+
+	@Test
+	public void testFromMethodCallWithCustomBaseUrl() {
+		UriComponentsBuilder builder = UriComponentsBuilder.fromUriString("http://example.org:9090/base");
+		UriComponents uriComponents = fromMethodCall(builder, on(ControllerWithMethods.class).myMethod(null)).build();
+
+		assertEquals("http://example.org:9090/base/something/else", uriComponents.toString());
+		assertEquals("http://example.org:9090/base", builder.toUriString());
 	}
 
 	@Test

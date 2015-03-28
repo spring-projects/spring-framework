@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,8 +27,8 @@ import org.springframework.test.web.servlet.ResultMatcher;
 import org.springframework.web.context.request.async.DeferredResult;
 import org.springframework.web.context.request.async.WebAsyncTask;
 
+import static org.hamcrest.MatcherAssert.*;
 import static org.springframework.test.util.AssertionErrors.*;
-import static org.springframework.test.util.MatcherAssertionErrors.*;
 
 /**
  * Factory for assertions on the request. An instance of this class is
@@ -39,13 +39,13 @@ import static org.springframework.test.util.MatcherAssertionErrors.*;
  */
 public class RequestResultMatchers {
 
-
 	/**
 	 * Protected constructor.
 	 * Use {@link MockMvcResultMatchers#request()}.
 	 */
 	protected RequestResultMatchers() {
 	}
+
 
 	/**
 	 * Assert a request attribute value with the given Hamcrest {@link Matcher}.

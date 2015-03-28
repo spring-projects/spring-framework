@@ -465,7 +465,7 @@ public class EvaluationTests extends AbstractExpressionTests {
 		assertEquals("T(java.lang.String)", expr.toStringAST());
 		assertEquals(String.class, expr.getValue(Class.class));
 	}
-	
+
 	@Test
 	public void operatorVariants() throws Exception {
 		SpelExpression expr = (SpelExpression)parser.parseExpression("#a < #b");

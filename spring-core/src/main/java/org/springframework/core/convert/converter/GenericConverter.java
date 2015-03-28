@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,9 +27,9 @@ import org.springframework.util.Assert;
  * <p>This is the most flexible of the Converter SPI interfaces, but also the most complex.
  * It is flexible in that a GenericConverter may support converting between multiple source/target
  * type pairs (see {@link #getConvertibleTypes()}. In addition, GenericConverter implementations
- * have access to source/target {@link TypeDescriptor field context} during the type conversion process.
- * This allows for resolving source and target field metadata such as annotations and generics
- * information, which can be used influence the conversion logic.
+ * have access to source/target {@link TypeDescriptor field context} during the type conversion
+ * process. This allows for resolving source and target field metadata such as annotations and
+ * generics information, which can be used influence the conversion logic.
  *
  * <p>This interface should generally not be used when the simpler {@link Converter} or
  * {@link ConverterFactory} interfaces are sufficient.
@@ -49,9 +49,8 @@ public interface GenericConverter {
 	/**
 	 * Return the source and target types which this converter can convert between. Each
 	 * entry is a convertible source-to-target type pair.
-	 * <p>
-	 * For {@link ConditionalConverter conditional} converters this method may return
-	 * {@code null} to indicate all source-to-target pairs should be considered. *
+	 * <p>For {@link ConditionalConverter conditional} converters this method may return
+	 * {@code null} to indicate all source-to-target pairs should be considered.
 	 */
 	Set<ConvertiblePair> getConvertibleTypes();
 
@@ -95,25 +94,25 @@ public interface GenericConverter {
 		}
 
 		@Override
-		public boolean equals(Object obj) {
-			if (this == obj) {
+		public boolean equals(Object other) {
+			if (this == other) {
 				return true;
 			}
-			if (obj == null || obj.getClass() != ConvertiblePair.class) {
+			if (other == null || other.getClass() != ConvertiblePair.class) {
 				return false;
 			}
-			ConvertiblePair other = (ConvertiblePair) obj;
-			return this.sourceType.equals(other.sourceType) && this.targetType.equals(other.targetType);
+			ConvertiblePair otherPair = (ConvertiblePair) other;
+			return (this.sourceType.equals(otherPair.sourceType) && this.targetType.equals(otherPair.targetType));
 		}
 
 		@Override
 		public int hashCode() {
-			return this.sourceType.hashCode() * 31 + this.targetType.hashCode();
+			return (this.sourceType.hashCode() * 31 + this.targetType.hashCode());
 		}
 
 		@Override
 		public String toString() {
-			return this.sourceType.getName() + " -> " + this.targetType.getName();
+			return (this.sourceType.getName() + " -> " + this.targetType.getName());
 		}
 	}
 

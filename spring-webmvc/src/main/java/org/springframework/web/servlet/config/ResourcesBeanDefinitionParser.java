@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.web.servlet.config;
 
 import java.util.Arrays;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import org.w3c.dom.Element;
 
@@ -34,6 +35,7 @@ import org.springframework.cache.concurrent.ConcurrentMapCache;
 import org.springframework.core.Ordered;
 import org.springframework.util.StringUtils;
 import org.springframework.util.xml.DomUtils;
+import org.springframework.http.CacheControl;
 import org.springframework.web.servlet.handler.MappedInterceptor;
 import org.springframework.web.servlet.handler.SimpleUrlHandlerMapping;
 import org.springframework.web.servlet.mvc.HttpRequestHandlerAdapter;
@@ -162,6 +164,12 @@ class ResourcesBeanDefinitionParser implements BeanDefinitionParser {
 			resourceHandlerDef.getPropertyValues().add("cacheSeconds", cacheSeconds);
 		}
 
+		Element cacheControlElement = DomUtils.getChildElementByTagName(element, "cachecontrol");
+		if (cacheControlElement != null) {
+			CacheControl cacheControl = parseCacheControl(cacheControlElement);
+			resourceHandlerDef.getPropertyValues().add("cacheControl", cacheControl);
+		}
+
 		Element resourceChainElement = DomUtils.getChildElementByTagName(element, "resource-chain");
 		if (resourceChainElement != null) {
 			parseResourceChain(resourceHandlerDef, parserContext, resourceChainElement, source);
@@ -195,6 +203,38 @@ class ResourcesBeanDefinitionParser implements BeanDefinitionParser {
 		if (!resourceTransformers.isEmpty()) {
 			resourceHandlerDef.getPropertyValues().add("resourceTransformers", resourceTransformers);
 		}
+	}
+
+	private CacheControl parseCacheControl(Element element) {
+		CacheControl cacheControl = CacheControl.empty();
+		if ("true".equals(element.getAttribute("no-cache"))) {
+			cacheControl = CacheControl.noCache();
+		}
+		else if ("true".equals(element.getAttribute("no-store"))) {
+			cacheControl = CacheControl.noStore();
+		}
+		else if (element.hasAttribute("max-age")) {
+			cacheControl = CacheControl.maxAge(Long.parseLong(element.getAttribute("max-age")), TimeUnit.SECONDS);
+		}
+		if ("true".equals(element.getAttribute("must-revalidate"))) {
+			cacheControl = cacheControl.mustRevalidate();
+		}
+		if ("true".equals(element.getAttribute("no-transform"))) {
+			cacheControl = cacheControl.noTransform();
+		}
+		if ("true".equals(element.getAttribute("cache-public"))) {
+			cacheControl = cacheControl.cachePublic();
+		}
+		if ("true".equals(element.getAttribute("cache-private"))) {
+			cacheControl = cacheControl.cachePrivate();
+		}
+		if ("true".equals(element.getAttribute("proxy-revalidate"))) {
+			cacheControl = cacheControl.proxyRevalidate();
+		}
+		if (element.hasAttribute("s-maxage")) {
+			cacheControl = cacheControl.sMaxAge(Long.parseLong(element.getAttribute("s-maxage")), TimeUnit.SECONDS);
+		}
+		return cacheControl;
 	}
 
 	private void parseResourceCache(ManagedList<? super Object> resourceResolvers,

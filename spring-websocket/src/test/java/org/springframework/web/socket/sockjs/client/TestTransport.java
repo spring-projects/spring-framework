@@ -21,7 +21,6 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.mockito.ArgumentCaptor;
-
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.util.concurrent.ListenableFutureCallback;
 import org.springframework.web.socket.TextMessage;
@@ -36,6 +35,7 @@ import static org.mockito.Mockito.*;
  *
  * @author Rossen Stoyanchev
  */
+@SuppressWarnings("rawtypes")
 class TestTransport implements Transport {
 
 	private final String name;

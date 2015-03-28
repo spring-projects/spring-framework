@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import org.springframework.cache.Cache;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.util.Assert;
+import org.springframework.http.CacheControl;
 import org.springframework.web.servlet.resource.PathResourceResolver;
 import org.springframework.web.servlet.resource.ResourceHttpRequestHandler;
 
@@ -44,6 +45,8 @@ public class ResourceHandlerRegistration {
 	private final List<Resource> locations = new ArrayList<Resource>();
 
 	private Integer cachePeriod;
+
+	private CacheControl cacheControl;
 
 	private ResourceChainRegistration resourceChainRegistration;
 
@@ -69,7 +72,7 @@ public class ResourceHandlerRegistration {
 	 * {@code /META-INF/public-web-resources/} directory, with resources in the web application root taking precedence.
 	 * @return the same {@link ResourceHandlerRegistration} instance for chained method invocation
 	 */
-	public ResourceHandlerRegistration addResourceLocations(String...resourceLocations) {
+	public ResourceHandlerRegistration addResourceLocations(String... resourceLocations) {
 		for (String location : resourceLocations) {
 			this.locations.add(resourceLoader.getResource(location));
 		}
@@ -85,6 +88,22 @@ public class ResourceHandlerRegistration {
 	 */
 	public ResourceHandlerRegistration setCachePeriod(Integer cachePeriod) {
 		this.cachePeriod = cachePeriod;
+		return this;
+	}
+
+	/**
+	 * Specify the {@link org.springframework.http.CacheControl} which should be used
+	 * by the the resource handler.
+	 *
+	 * <p>Setting a custom value here will override the configuration set with {@link #setCachePeriod}.
+	 *
+	 * @param cacheControl the CacheControl configuration to use
+	 * @return the same {@link ResourceHandlerRegistration} instance for chained method invocation
+	 *
+	 * @since 4.2
+	 */
+	public ResourceHandlerRegistration setCacheControl(CacheControl cacheControl) {
+		this.cacheControl = cacheControl;
 		return this;
 	}
 
@@ -146,7 +165,10 @@ public class ResourceHandlerRegistration {
 			handler.setResourceTransformers(this.resourceChainRegistration.getResourceTransformers());
 		}
 		handler.setLocations(this.locations);
-		if (this.cachePeriod != null) {
+		if (this.cacheControl != null) {
+			handler.setCacheControl(this.cacheControl);
+		}
+		else if (this.cachePeriod != null) {
 			handler.setCacheSeconds(this.cachePeriod);
 		}
 		return handler;

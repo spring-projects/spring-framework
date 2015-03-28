@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,10 +38,6 @@ import org.springframework.web.servlet.ModelAndView;
  * @since 3.0
  */
 public abstract class AbstractHandlerExceptionResolver implements HandlerExceptionResolver, Ordered {
-
-	private static final String HEADER_PRAGMA = "Pragma";
-
-	private static final String HEADER_EXPIRES = "Expires";
 
 	private static final String HEADER_CACHE_CONTROL = "Cache-Control";
 
@@ -215,13 +211,10 @@ public abstract class AbstractHandlerExceptionResolver implements HandlerExcepti
 
 	/**
 	 * Prevents the response from being cached, through setting corresponding
-	 * HTTP headers. See {@code http://www.mnot.net/cache_docs}.
+	 * HTTP {@code Cache-Control: no-store} header.
 	 * @param response current HTTP response
 	 */
 	protected void preventCaching(HttpServletResponse response) {
-		response.setHeader(HEADER_PRAGMA, "no-cache");
-		response.setDateHeader(HEADER_EXPIRES, 1L);
-		response.setHeader(HEADER_CACHE_CONTROL, "no-cache");
 		response.addHeader(HEADER_CACHE_CONTROL, "no-store");
 	}
 

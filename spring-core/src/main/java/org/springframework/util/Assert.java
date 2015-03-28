@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -41,7 +41,7 @@ import java.util.Map;
  * Assert.notNull(clazz, "The class must not be null");
  * Assert.isTrue(i > 0, "The value must be greater than zero");</pre>
  *
- * Mainly for internal use within the framework; consider Jakarta's Commons Lang
+ * Mainly for internal use within the framework; consider Apache's Commons Lang
  * >= 2.0 for a more comprehensive suite of assertion utilities.
  *
  * @author Keith Donald

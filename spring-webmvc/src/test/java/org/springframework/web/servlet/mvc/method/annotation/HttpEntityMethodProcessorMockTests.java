@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,8 +18,12 @@ package org.springframework.web.servlet.mvc.method.annotation;
 
 import java.lang.reflect.Method;
 import java.net.URI;
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Date;
+import java.util.Locale;
+import java.util.TimeZone;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -106,7 +110,7 @@ public class HttpEntityMethodProcessorMockTests {
 		returnTypeInt = new MethodParameter(getClass().getMethod("handle3"), -1);
 
 		mavContainer = new ModelAndViewContainer();
-		servletRequest = new MockHttpServletRequest();
+		servletRequest = new MockHttpServletRequest("GET", "/foo");
 		servletResponse = new MockHttpServletResponse();
 		webRequest = new ServletWebRequest(servletRequest, servletResponse);
 	}
@@ -318,6 +322,98 @@ public class HttpEntityMethodProcessorMockTests {
 		verify(messageConverter).write(eq("body"), eq(MediaType.TEXT_PLAIN),  outputMessage.capture());
 		assertTrue(mavContainer.isRequestHandled());
 		assertEquals("headerValue", outputMessage.getValue().getHeaders().get("header").get(0));
+	}
+
+	@Test
+	public void handleReturnTypeLastModified() throws Exception {
+		long currentTime = new Date().getTime();
+		long oneMinuteAgo  = currentTime - (1000 * 60);
+		servletRequest.addHeader(HttpHeaders.IF_MODIFIED_SINCE, currentTime);
+		HttpHeaders responseHeaders = new HttpHeaders();
+		responseHeaders.setDate(HttpHeaders.LAST_MODIFIED, oneMinuteAgo);
+		ResponseEntity<String> returnValue = new ResponseEntity<String>("body", responseHeaders, HttpStatus.OK);
+
+		given(messageConverter.canWrite(String.class, null)).willReturn(true);
+		given(messageConverter.getSupportedMediaTypes()).willReturn(Collections.singletonList(MediaType.TEXT_PLAIN));
+		given(messageConverter.canWrite(String.class, MediaType.TEXT_PLAIN)).willReturn(true);
+
+		processor.handleReturnValue(returnValue, returnTypeResponseEntity, mavContainer, webRequest);
+
+		assertTrue(mavContainer.isRequestHandled());
+		assertEquals(HttpStatus.NOT_MODIFIED.value(), servletResponse.getStatus());
+		assertEquals(oneMinuteAgo/1000 * 1000, Long.parseLong(servletResponse.getHeader(HttpHeaders.LAST_MODIFIED)));
+		assertEquals(0, servletResponse.getContentAsByteArray().length);
+	}
+
+	@Test
+	public void handleReturnTypeEtag() throws Exception {
+		String etagValue = "\"deadb33f8badf00d\"";
+		servletRequest.addHeader(HttpHeaders.IF_NONE_MATCH, etagValue);
+		HttpHeaders responseHeaders = new HttpHeaders();
+		responseHeaders.set(HttpHeaders.ETAG, etagValue);
+		ResponseEntity<String> returnValue = new ResponseEntity<String>("body", responseHeaders, HttpStatus.OK);
+
+		given(messageConverter.canWrite(String.class, null)).willReturn(true);
+		given(messageConverter.getSupportedMediaTypes()).willReturn(Collections.singletonList(MediaType.TEXT_PLAIN));
+		given(messageConverter.canWrite(String.class, MediaType.TEXT_PLAIN)).willReturn(true);
+
+		processor.handleReturnValue(returnValue, returnTypeResponseEntity, mavContainer, webRequest);
+
+		assertTrue(mavContainer.isRequestHandled());
+		assertEquals(HttpStatus.NOT_MODIFIED.value(), servletResponse.getStatus());
+		assertEquals(etagValue, servletResponse.getHeader(HttpHeaders.ETAG));
+		assertEquals(0, servletResponse.getContentAsByteArray().length);
+	}
+
+	@Test
+	public void handleReturnTypeETagAndLastModified() throws Exception {
+		long currentTime = new Date().getTime();
+		long oneMinuteAgo  = currentTime - (1000 * 60);
+		String etagValue = "\"deadb33f8badf00d\"";
+		servletRequest.addHeader(HttpHeaders.IF_MODIFIED_SINCE, currentTime);
+		servletRequest.addHeader(HttpHeaders.IF_NONE_MATCH, etagValue);
+		HttpHeaders responseHeaders = new HttpHeaders();
+		responseHeaders.setDate(HttpHeaders.LAST_MODIFIED, oneMinuteAgo);
+		responseHeaders.set(HttpHeaders.ETAG, etagValue);
+		ResponseEntity<String> returnValue = new ResponseEntity<String>("body", responseHeaders, HttpStatus.OK);
+
+		given(messageConverter.canWrite(String.class, null)).willReturn(true);
+		given(messageConverter.getSupportedMediaTypes()).willReturn(Collections.singletonList(MediaType.TEXT_PLAIN));
+		given(messageConverter.canWrite(String.class, MediaType.TEXT_PLAIN)).willReturn(true);
+
+		processor.handleReturnValue(returnValue, returnTypeResponseEntity, mavContainer, webRequest);
+
+		assertTrue(mavContainer.isRequestHandled());
+		assertEquals(HttpStatus.NOT_MODIFIED.value(), servletResponse.getStatus());
+		assertEquals(oneMinuteAgo/1000 * 1000, Long.parseLong(servletResponse.getHeader(HttpHeaders.LAST_MODIFIED)));
+		assertEquals(etagValue, servletResponse.getHeader(HttpHeaders.ETAG));
+		assertEquals(0, servletResponse.getContentAsByteArray().length);
+	}
+
+	@Test
+	public void handleReturnTypeChangedETagAndLastModified() throws Exception {
+		long currentTime = new Date().getTime();
+		long oneMinuteAgo  = currentTime - (1000 * 60);
+		String etagValue = "\"deadb33f8badf00d\"";
+		String changedEtagValue = "\"changed-etag-value\"";
+		servletRequest.addHeader(HttpHeaders.IF_MODIFIED_SINCE, currentTime);
+		servletRequest.addHeader(HttpHeaders.IF_NONE_MATCH, etagValue);
+		HttpHeaders responseHeaders = new HttpHeaders();
+		responseHeaders.setDate(HttpHeaders.LAST_MODIFIED, oneMinuteAgo);
+		responseHeaders.set(HttpHeaders.ETAG, changedEtagValue);
+		ResponseEntity<String> returnValue = new ResponseEntity<String>("body", responseHeaders, HttpStatus.OK);
+
+		given(messageConverter.canWrite(String.class, null)).willReturn(true);
+		given(messageConverter.getSupportedMediaTypes()).willReturn(Collections.singletonList(MediaType.TEXT_PLAIN));
+		given(messageConverter.canWrite(String.class, MediaType.TEXT_PLAIN)).willReturn(true);
+
+		processor.handleReturnValue(returnValue, returnTypeResponseEntity, mavContainer, webRequest);
+
+		assertTrue(mavContainer.isRequestHandled());
+		assertEquals(HttpStatus.OK.value(), servletResponse.getStatus());
+		assertEquals(oneMinuteAgo/1000 * 1000, Long.parseLong(servletResponse.getHeader(HttpHeaders.LAST_MODIFIED)));
+		assertEquals(changedEtagValue, servletResponse.getHeader(HttpHeaders.ETAG));
+		assertEquals(0, servletResponse.getContentAsByteArray().length);
 	}
 
 	public ResponseEntity<String> handle1(HttpEntity<String> httpEntity, ResponseEntity<String> responseEntity, int i, RequestEntity<String> requestEntity) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -88,10 +88,10 @@ public abstract class AbstractWebSocketHandlerRegistration<M> implements WebSock
 	}
 
 	@Override
-	public WebSocketHandlerRegistration setAllowedOrigins(String... origins) {
+	public WebSocketHandlerRegistration setAllowedOrigins(String... allowedOrigins) {
 		this.allowedOrigins.clear();
-		if (!ObjectUtils.isEmpty(origins)) {
-			this.allowedOrigins.addAll(Arrays.asList(origins));
+		if (!ObjectUtils.isEmpty(allowedOrigins)) {
+			this.allowedOrigins.addAll(Arrays.asList(allowedOrigins));
 		}
 		return this;
 	}
@@ -116,11 +116,7 @@ public abstract class AbstractWebSocketHandlerRegistration<M> implements WebSock
 	protected HandshakeInterceptor[] getInterceptors() {
 		List<HandshakeInterceptor> interceptors = new ArrayList<HandshakeInterceptor>();
 		interceptors.addAll(this.interceptors);
-		if (!this.allowedOrigins.isEmpty()) {
-			OriginHandshakeInterceptor interceptor = new OriginHandshakeInterceptor();
-			interceptor.setAllowedOrigins(this.allowedOrigins);
-			interceptors.add(interceptor);
-		}
+		interceptors.add(new OriginHandshakeInterceptor(this.allowedOrigins));
 		return interceptors.toArray(new HandshakeInterceptor[interceptors.size()]);
 	}
 

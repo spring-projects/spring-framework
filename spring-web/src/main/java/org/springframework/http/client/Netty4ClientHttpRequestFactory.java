@@ -18,17 +18,22 @@ package org.springframework.http.client;
 
 import java.io.IOException;
 import java.net.URI;
+import java.net.URLConnection;
+import java.util.concurrent.TimeUnit;
 
 import io.netty.bootstrap.Bootstrap;
+import io.netty.channel.ChannelConfig;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelPipeline;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
+import io.netty.channel.socket.SocketChannelConfig;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.codec.http.HttpClientCodec;
 import io.netty.handler.codec.http.HttpObjectAggregator;
 import io.netty.handler.ssl.SslContext;
+import io.netty.handler.timeout.ReadTimeoutHandler;
 
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
@@ -66,6 +71,10 @@ public class Netty4ClientHttpRequestFactory implements ClientHttpRequestFactory,
 	private SslContext sslContext;
 
 	private volatile Bootstrap bootstrap;
+
+	private int connectTimeout = -1;
+
+	private int readTimeout = -1;
 
 
 	/**
@@ -111,6 +120,24 @@ public class Netty4ClientHttpRequestFactory implements ClientHttpRequestFactory,
 		this.sslContext = sslContext;
 	}
 
+	/**
+	 * Set the underlying connect timeout (in milliseconds).
+	 * A timeout value of 0 specifies an infinite timeout.
+	 * @see ChannelConfig#setConnectTimeoutMillis(int)
+	 */
+	public void setConnectTimeout(int connectTimeout) {
+		this.connectTimeout = connectTimeout;
+	}
+
+	/**
+	 * Set the underlying URLConnection's read timeout (in milliseconds).
+	 * A timeout value of 0 specifies an infinite timeout.
+	 * @see ReadTimeoutHandler
+	 */
+	public void setReadTimeout(int readTimeout) {
+		this.readTimeout = readTimeout;
+	}
+
 	private Bootstrap getBootstrap() {
 		if (this.bootstrap == null) {
 			Bootstrap bootstrap = new Bootstrap();
@@ -118,17 +145,33 @@ public class Netty4ClientHttpRequestFactory implements ClientHttpRequestFactory,
 					.handler(new ChannelInitializer<SocketChannel>() {
 						@Override
 						protected void initChannel(SocketChannel channel) throws Exception {
+							configureChannel(channel.config());
 							ChannelPipeline pipeline = channel.pipeline();
 							if (sslContext != null) {
 								pipeline.addLast(sslContext.newHandler(channel.alloc()));
 							}
 							pipeline.addLast(new HttpClientCodec());
 							pipeline.addLast(new HttpObjectAggregator(maxResponseSize));
+							if (readTimeout > 0) {
+								pipeline.addLast(new ReadTimeoutHandler(readTimeout,
+										TimeUnit.MILLISECONDS));
+							}
 						}
 					});
 			this.bootstrap = bootstrap;
 		}
 		return this.bootstrap;
+	}
+
+	/**
+	 * Template method for changing properties on the given {@link SocketChannelConfig}.
+	 * <p>The default implementation sets the connect timeout based on the set property.
+	 * @param config the channel configuration
+	 */
+	protected void configureChannel(SocketChannelConfig config) {
+		if (this.connectTimeout >= 0) {
+			config.setConnectTimeoutMillis(this.connectTimeout);
+		}
 	}
 
 	@Override

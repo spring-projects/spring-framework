@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,9 +46,10 @@ import static org.junit.Assert.*;
  */
 public class DateFormattingTests {
 
-	private FormattingConversionService conversionService = new FormattingConversionService();
+	private final FormattingConversionService conversionService = new FormattingConversionService();
 
 	private DataBinder binder;
+
 
 	@Before
 	public void setUp() {
@@ -72,6 +73,7 @@ public class DateFormattingTests {
 	public void tearDown() {
 		LocaleContextHolder.setLocale(null);
 	}
+
 
 	@Test
 	public void testBindDate() {

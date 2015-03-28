@@ -100,6 +100,17 @@ public class MockHttpServletRequestTests {
 		assertEquals("UTF-8", request.getCharacterEncoding());
 	}
 
+	// SPR-12677
+
+	@Test
+	public void setContentTypeHeaderWithMoreComplexCharsetSyntax() {
+		String contentType = "test/plain;charset=\"utf-8\";foo=\"charset=bar\";foocharset=bar;foo=bar";
+		request.addHeader("Content-Type", contentType);
+		assertEquals(contentType, request.getContentType());
+		assertEquals(contentType, request.getHeader("Content-Type"));
+		assertEquals("UTF-8", request.getCharacterEncoding());
+	}
+
 	@Test
 	public void setContentTypeThenCharacterEncoding() {
 		request.setContentType("test/plain");

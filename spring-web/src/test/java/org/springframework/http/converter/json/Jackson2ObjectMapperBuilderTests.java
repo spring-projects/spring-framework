@@ -56,13 +56,13 @@ import com.fasterxml.jackson.databind.ser.std.ClassSerializer;
 import com.fasterxml.jackson.databind.ser.std.NumberSerializer;
 import com.fasterxml.jackson.databind.type.SimpleType;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
-import static org.hamcrest.Matchers.containsString;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.junit.Test;
 
 import org.springframework.beans.FatalBeanException;
 
+import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
 /**
@@ -201,13 +201,10 @@ public class Jackson2ObjectMapperBuilderTests {
 		assertEquals(timeZone, objectMapper.getDeserializationConfig().getTimeZone());
 	}
 
-	@Test
+	@Test(expected = IllegalArgumentException.class)
 	public void wrongTimeZoneStringSetter() {
 		String zoneId = "foo";
-		ObjectMapper objectMapper = Jackson2ObjectMapperBuilder.json().timeZone(zoneId).build();
-		TimeZone timeZone = TimeZone.getTimeZone("GMT");
-		assertEquals(timeZone, objectMapper.getSerializationConfig().getTimeZone());
-		assertEquals(timeZone, objectMapper.getDeserializationConfig().getTimeZone());
+		Jackson2ObjectMapperBuilder.json().timeZone(zoneId).build();
 	}
 
 	@Test
@@ -428,10 +425,11 @@ public class Jackson2ObjectMapperBuilderTests {
 		}
 	}
 
+
 	public static class CustomIntegerSerializer extends JsonSerializer<Integer> {
 
 		@Override
-		public void serialize(Integer value, JsonGenerator gen, SerializerProvider serializers) throws IOException, JsonProcessingException {
+		public void serialize(Integer value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
 			gen.writeStartObject();
 			gen.writeNumberField("customid", value);
 			gen.writeEndObject();

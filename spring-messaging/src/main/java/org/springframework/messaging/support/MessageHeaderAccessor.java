@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -418,11 +418,31 @@ public class MessageHeaderAccessor {
 	// Specific header accessors
 
 	public UUID getId() {
-		return (UUID) getHeader(MessageHeaders.ID);
+		Object value = getHeader(MessageHeaders.ID);
+		if (value == null) {
+			return null;
+		}
+		return (value instanceof UUID ? (UUID) value : UUID.fromString(value.toString()));
 	}
 
 	public Long getTimestamp() {
-		return (Long) getHeader(MessageHeaders.TIMESTAMP);
+		Object value = getHeader(MessageHeaders.TIMESTAMP);
+		if (value == null) {
+			return null;
+		}
+		return (value instanceof Long ? (Long) value : Long.parseLong(value.toString()));
+	}
+
+	public void setContentType(MimeType contentType) {
+		setHeader(MessageHeaders.CONTENT_TYPE, contentType);
+	}
+
+	public MimeType getContentType() {
+		Object value = getHeader(MessageHeaders.CONTENT_TYPE);
+		if (value == null) {
+			return null;
+		}
+		return (value instanceof MimeType ? (MimeType) value : MimeType.valueOf(value.toString()));
 	}
 
 	public void setReplyChannelName(String replyChannelName) {
@@ -448,14 +468,6 @@ public class MessageHeaderAccessor {
     public Object getErrorChannel() {
         return getHeader(MessageHeaders.ERROR_CHANNEL);
     }
-
-	public void setContentType(MimeType contentType) {
-		setHeader(MessageHeaders.CONTENT_TYPE, contentType);
-	}
-
-	public MimeType getContentType() {
-		return (MimeType) getHeader(MessageHeaders.CONTENT_TYPE);
-	}
 
 
 	// Log message stuff
@@ -508,7 +520,7 @@ public class MessageHeaderAccessor {
 
 	protected String getDetailedPayloadLogMessage(Object payload) {
 		if (payload instanceof String) {
-			return " payload=" + ((String) payload);
+			return " payload=" + payload;
 		}
 		else if (payload instanceof byte[]) {
 			byte[] bytes = (byte[]) payload;

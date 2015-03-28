@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,10 +21,14 @@ import static org.junit.Assert.assertNull;
 
 import org.junit.Before;
 import org.junit.Test;
+
+import org.springframework.http.HttpRequest;
+import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.util.UriComponents;
+import org.springframework.web.util.UriComponentsBuilder;
 
 /**
  * Unit tests for
@@ -36,14 +40,17 @@ public class ServletUriComponentsBuilderTests {
 
 	private MockHttpServletRequest request;
 
+
 	@Before
 	public void setup() {
 		this.request = new MockHttpServletRequest();
 		this.request.setScheme("http");
 		this.request.setServerName("localhost");
-		this.request.setServerPort(80);
+		this.request.setServerPort(-1);
+		this.request.setRequestURI("/mvc-showcase");
 		this.request.setContextPath("/mvc-showcase");
 	}
+
 
 	@Test
 	public void fromRequest() {
@@ -64,7 +71,7 @@ public class ServletUriComponentsBuilderTests {
 	public void fromRequestAtypicalHttpPort() {
 		this.request.setServerPort(8080);
 		String result = ServletUriComponentsBuilder.fromRequest(this.request).build().toUriString();
-		assertEquals("http://localhost:8080", result);
+		assertEquals("http://localhost:8080/mvc-showcase", result);
 	}
 
 	@Test
@@ -72,7 +79,26 @@ public class ServletUriComponentsBuilderTests {
 		this.request.setScheme("https");
 		this.request.setServerPort(9043);
 		String result = ServletUriComponentsBuilder.fromRequest(this.request).build().toUriString();
-		assertEquals("https://localhost:9043", result);
+		assertEquals("https://localhost:9043/mvc-showcase", result);
+	}
+
+	// Most X-Forwarded-* tests in UriComponentsBuilderTests
+
+	@Test
+	public void fromRequestWithForwardedHostAndPort() {
+		MockHttpServletRequest request = new MockHttpServletRequest();
+		request.setScheme("http");
+		request.setServerName("localhost");
+		request.setServerPort(80);
+		request.setRequestURI("/mvc-showcase");
+		request.addHeader("X-Forwarded-Proto", "https");
+		request.addHeader("X-Forwarded-Host", "84.198.58.199");
+		request.addHeader("X-Forwarded-Port", "443");
+
+		HttpRequest httpRequest = new ServletServerHttpRequest(request);
+		UriComponents result = UriComponentsBuilder.fromHttpRequest(httpRequest).build();
+
+		assertEquals("https://84.198.58.199/mvc-showcase", result.toString());
 	}
 
 	@Test
@@ -81,73 +107,6 @@ public class ServletUriComponentsBuilderTests {
 		this.request.setQueryString("foo=123");
 		String result = ServletUriComponentsBuilder.fromRequestUri(this.request).build().toUriString();
 		assertEquals("http://localhost/mvc-showcase/data/param", result);
-	}
-
-	@Test
-	public void fromRequestWithForwardedHost() {
-		this.request.addHeader("X-Forwarded-Host", "anotherHost");
-		this.request.setRequestURI("/mvc-showcase/data/param");
-		this.request.setQueryString("foo=123");
-		String result = ServletUriComponentsBuilder.fromRequest(this.request).build().toUriString();
-		assertEquals("http://anotherHost/mvc-showcase/data/param?foo=123", result);
-	}
-
-	// SPR-10701
-
-	@Test
-	public void fromRequestWithForwardedHostIncludingPort() {
-		this.request.addHeader("X-Forwarded-Host", "webtest.foo.bar.com:443");
-		this.request.setRequestURI("/mvc-showcase/data/param");
-		this.request.setQueryString("foo=123");
-		UriComponents result = ServletUriComponentsBuilder.fromRequest(this.request).build();
-
-		assertEquals("webtest.foo.bar.com", result.getHost());
-		assertEquals(443, result.getPort());
-	}
-
-	// SPR-11140
-
-	@Test
-	public void fromRequestWithForwardedHostMultiValuedHeader() {
-		this.request.addHeader("X-Forwarded-Host", "a.example.org, b.example.org, c.example.org");
-		assertEquals("a.example.org", ServletUriComponentsBuilder.fromRequest(this.request).build().getHost());
-	}
-
-	// SPR-11855
-
-	@Test
-	public void fromRequestWithForwardedHostAndPort() {
-		this.request.addHeader("X-Forwarded-Host", "foobarhost");
-		this.request.addHeader("X-Forwarded-Port", "9090");
-		this.request.setServerPort(8080);
-		UriComponents uriComponents = ServletUriComponentsBuilder.fromRequest(this.request).build();
-
-		assertEquals("foobarhost", uriComponents.getHost());
-		assertEquals(9090, uriComponents.getPort());
-	}
-
-	// SPR-11872
-
-	@Test
-	public void fromRequestWithForwardedHostWithDefaultPort() {
-		this.request.setServerPort(10080);
-		this.request.addHeader("X-Forwarded-Host", "example.org");
-		UriComponents result = ServletUriComponentsBuilder.fromRequest(this.request).build();
-
-		assertEquals("example.org", result.getHost());
-		assertEquals("should have used the default port of the forwarded request", -1, result.getPort());
-	}
-
-	@Test
-	public void fromRequestWithForwardedHostWithForwardedScheme() {
-		this.request.setServerPort(10080);
-		this.request.addHeader("X-Forwarded-Proto", "https");
-		this.request.addHeader("X-Forwarded-Host", "example.org");
-		UriComponents result = ServletUriComponentsBuilder.fromRequest(this.request).build();
-
-		assertEquals("example.org", result.getHost());
-		assertEquals("should have derived scheme from header", "https", result.getScheme());
-		assertEquals("should have used the default port of the forwarded request", -1, result.getPort());
 	}
 
 	@Test

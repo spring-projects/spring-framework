@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,8 @@
  */
 
 package org.springframework.web.servlet.mvc.method.annotation;
+
+import static org.junit.Assert.*;
 
 import java.beans.PropertyEditorSupport;
 import java.io.IOException;
@@ -42,6 +44,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -136,8 +139,6 @@ import org.springframework.web.servlet.mvc.annotation.ModelAndViewResolver;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.support.RequestContextUtils;
 import org.springframework.web.servlet.view.InternalResourceViewResolver;
-
-import static org.junit.Assert.*;
 
 /**
  * The origin of this test class is {@link ServletAnnotationControllerHandlerMethodTests}.
@@ -1532,7 +1533,7 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 
 		// GET after POST
 		request = new MockHttpServletRequest("GET", "/messages/1");
-		request.addParameter("name", "value");
+		request.setQueryString("name=value");
 		request.setSession(session);
 		response = new MockHttpServletResponse();
 		getServlet().service(request, response);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -106,7 +106,8 @@ public class HandlersBeanDefinitionParserTests {
 				HandshakeHandler handshakeHandler = handler.getHandshakeHandler();
 				assertNotNull(handshakeHandler);
 				assertTrue(handshakeHandler instanceof DefaultHandshakeHandler);
-				assertTrue(handler.getHandshakeInterceptors().isEmpty());
+				assertFalse(handler.getHandshakeInterceptors().isEmpty());
+				assertTrue(handler.getHandshakeInterceptors().get(0) instanceof OriginHandshakeInterceptor);
 			}
 			else {
 				assertThat(shm.getUrlMap().keySet(), contains("/test"));
@@ -116,7 +117,8 @@ public class HandlersBeanDefinitionParserTests {
 				HandshakeHandler handshakeHandler = handler.getHandshakeHandler();
 				assertNotNull(handshakeHandler);
 				assertTrue(handshakeHandler instanceof DefaultHandshakeHandler);
-				assertTrue(handler.getHandshakeInterceptors().isEmpty());
+				assertFalse(handler.getHandshakeInterceptors().isEmpty());
+				assertTrue(handler.getHandshakeInterceptors().get(0) instanceof OriginHandshakeInterceptor);
 			}
 		}
 	}
@@ -196,7 +198,7 @@ public class HandlersBeanDefinitionParserTests {
 		assertEquals(TestHandshakeHandler.class, handler.getHandshakeHandler().getClass());
 
 		List<HandshakeInterceptor> interceptors = defaultSockJsService.getHandshakeInterceptors();
-		assertThat(interceptors, contains(instanceOf(FooTestInterceptor.class), instanceOf(BarTestInterceptor.class)));
+		assertThat(interceptors, contains(instanceOf(FooTestInterceptor.class), instanceOf(BarTestInterceptor.class), instanceOf(OriginHandshakeInterceptor.class)));
 	}
 
 	@Test

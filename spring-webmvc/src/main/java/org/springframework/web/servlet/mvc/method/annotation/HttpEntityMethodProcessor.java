@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,7 @@ import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.http.server.ServletServerHttpResponse;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.accept.ContentNegotiationManager;
 import org.springframework.web.bind.support.WebDataBinderFactory;
@@ -48,6 +49,7 @@ import org.springframework.web.method.support.ModelAndViewContainer;
  *
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
+ * @author Brian Clozel
  * @since 3.1
  */
 public class HttpEntityMethodProcessor extends AbstractMessageConverterMethodProcessor {
@@ -58,25 +60,27 @@ public class HttpEntityMethodProcessor extends AbstractMessageConverterMethodPro
 
 	public HttpEntityMethodProcessor(List<HttpMessageConverter<?>> messageConverters,
 			ContentNegotiationManager contentNegotiationManager) {
+
 		super(messageConverters, contentNegotiationManager);
 	}
 
 	public HttpEntityMethodProcessor(List<HttpMessageConverter<?>> messageConverters,
 			ContentNegotiationManager contentNegotiationManager, List<Object> responseBodyAdvice) {
+
 		super(messageConverters, contentNegotiationManager, responseBodyAdvice);
 	}
 
 
 	@Override
 	public boolean supportsParameter(MethodParameter parameter) {
-		return HttpEntity.class.equals(parameter.getParameterType()) ||
-				RequestEntity.class.equals(parameter.getParameterType());
+		return (HttpEntity.class.equals(parameter.getParameterType()) ||
+				RequestEntity.class.equals(parameter.getParameterType()));
 	}
 
 	@Override
 	public boolean supportsReturnType(MethodParameter returnType) {
-		return HttpEntity.class.isAssignableFrom(returnType.getParameterType()) &&
-				!RequestEntity.class.isAssignableFrom(returnType.getParameterType());
+		return (HttpEntity.class.isAssignableFrom(returnType.getParameterType()) &&
+				!RequestEntity.class.isAssignableFrom(returnType.getParameterType()));
 	}
 
 	@Override
@@ -139,12 +143,36 @@ public class HttpEntityMethodProcessor extends AbstractMessageConverterMethodPro
 		}
 
 		Object body = responseEntity.getBody();
+		if (responseEntity instanceof ResponseEntity) {
+			if (isResourceNotModified(webRequest, (ResponseEntity<?>) responseEntity)) {
+				// Ensure headers are flushed, no body should be written.
+				outputMessage.flush();
+				// Skip call to converters, as they may update the body.
+				return;
+			}
+		}
 
 		// Try even with null body. ResponseBodyAdvice could get involved.
 		writeWithMessageConverters(body, returnType, inputMessage, outputMessage);
 
-		// Ensure headers are flushed even if no body was written
-		outputMessage.getBody();
+		// Ensure headers are flushed even if no body was written.
+		outputMessage.flush();
+	}
+
+	private boolean isResourceNotModified(NativeWebRequest webRequest, ResponseEntity<?> responseEntity) {
+		String eTag = responseEntity.getHeaders().getETag();
+		long lastModified = responseEntity.getHeaders().getLastModified();
+		boolean notModified = false;
+		if (lastModified != -1 && StringUtils.hasLength(eTag)) {
+			notModified = webRequest.checkNotModified(eTag, lastModified);
+		}
+		else if (lastModified != -1) {
+			notModified = webRequest.checkNotModified(lastModified);
+		}
+		else if (StringUtils.hasLength(eTag)) {
+			notModified = webRequest.checkNotModified(eTag);
+		}
+		return notModified;
 	}
 
 	@Override

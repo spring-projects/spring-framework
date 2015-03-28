@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ import org.springframework.aop.framework.Advised;
 import org.springframework.aop.framework.autoproxy.target.AbstractBeanFactoryBasedTargetSourceCreator;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.aop.target.AbstractBeanFactoryBasedTargetSource;
-import org.springframework.aop.target.CommonsPoolTargetSource;
+import org.springframework.aop.target.CommonsPool2TargetSource;
 import org.springframework.aop.target.LazyInitTargetSource;
 import org.springframework.aop.target.PrototypeTargetSource;
 import org.springframework.aop.target.ThreadLocalTargetSource;
@@ -154,7 +154,7 @@ public final class AdvisorAutoProxyCreatorTests {
 		test = (ITestBean) bf.getBean(":test");
 		assertTrue(AopUtils.isAopProxy(test));
 		Advised advised = (Advised) test;
-		assertTrue(advised.getTargetSource() instanceof CommonsPoolTargetSource);
+		assertTrue(advised.getTargetSource() instanceof CommonsPool2TargetSource);
 		assertEquals("Rod", test.getName());
 		// Check that references survived pooling
 		assertEquals("Kerry", test.getSpouse().getName());

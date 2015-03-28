@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,7 +48,7 @@ import org.springframework.context.support.ResourceBundleMessageSource;
 import org.springframework.context.support.StaticMessageSource;
 import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.format.Formatter;
-import org.springframework.format.number.NumberFormatter;
+import org.springframework.format.number.NumberStyleFormatter;
 import org.springframework.format.support.FormattingConversionService;
 import org.springframework.tests.sample.beans.BeanWithObjectProperty;
 import org.springframework.tests.sample.beans.DerivedTestBean;
@@ -332,7 +332,7 @@ public class DataBinderTests extends TestCase {
 		DataBinder binder = new DataBinder(tb);
 		FormattingConversionService conversionService = new FormattingConversionService();
 		DefaultConversionService.addDefaultConverters(conversionService);
-		conversionService.addFormatterForFieldType(Float.class, new NumberFormatter());
+		conversionService.addFormatterForFieldType(Float.class, new NumberStyleFormatter());
 		binder.setConversionService(conversionService);
 		MutablePropertyValues pvs = new MutablePropertyValues();
 		pvs.add("myFloat", "1,2");
@@ -363,7 +363,7 @@ public class DataBinderTests extends TestCase {
 		DataBinder binder = new DataBinder(tb);
 		FormattingConversionService conversionService = new FormattingConversionService();
 		DefaultConversionService.addDefaultConverters(conversionService);
-		conversionService.addFormatterForFieldType(Float.class, new NumberFormatter());
+		conversionService.addFormatterForFieldType(Float.class, new NumberStyleFormatter());
 		binder.setConversionService(conversionService);
 		MutablePropertyValues pvs = new MutablePropertyValues();
 		pvs.add("myFloat", "1x2");
@@ -409,7 +409,7 @@ public class DataBinderTests extends TestCase {
 		DataBinder binder = new DataBinder(tb);
 		FormattingConversionService conversionService = new FormattingConversionService();
 		DefaultConversionService.addDefaultConverters(conversionService);
-		conversionService.addFormatterForFieldType(Float.class, new NumberFormatter());
+		conversionService.addFormatterForFieldType(Float.class, new NumberStyleFormatter());
 		binder.setConversionService(conversionService);
 		MutablePropertyValues pvs = new MutablePropertyValues();
 		pvs.add("integerList[0]", "1");
@@ -430,7 +430,7 @@ public class DataBinderTests extends TestCase {
 		DataBinder binder = new DataBinder(tb);
 		FormattingConversionService conversionService = new FormattingConversionService();
 		DefaultConversionService.addDefaultConverters(conversionService);
-		conversionService.addFormatterForFieldType(Float.class, new NumberFormatter());
+		conversionService.addFormatterForFieldType(Float.class, new NumberStyleFormatter());
 		binder.setConversionService(conversionService);
 		MutablePropertyValues pvs = new MutablePropertyValues();
 		pvs.add("integerList[0]", "1x2");
@@ -452,7 +452,7 @@ public class DataBinderTests extends TestCase {
 		DataBinder binder = new DataBinder(tb);
 		FormattingConversionService conversionService = new FormattingConversionService();
 		DefaultConversionService.addDefaultConverters(conversionService);
-		conversionService.addFormatterForFieldType(Float.class, new NumberFormatter());
+		conversionService.addFormatterForFieldType(Float.class, new NumberStyleFormatter());
 		binder.setConversionService(conversionService);
 		binder.initDirectFieldAccess();
 		MutablePropertyValues pvs = new MutablePropertyValues();
@@ -485,7 +485,7 @@ public class DataBinderTests extends TestCase {
 		binder.initDirectFieldAccess();
 		FormattingConversionService conversionService = new FormattingConversionService();
 		DefaultConversionService.addDefaultConverters(conversionService);
-		conversionService.addFormatterForFieldType(Float.class, new NumberFormatter());
+		conversionService.addFormatterForFieldType(Float.class, new NumberStyleFormatter());
 		binder.setConversionService(conversionService);
 		MutablePropertyValues pvs = new MutablePropertyValues();
 		pvs.add("myFloat", "1x2");

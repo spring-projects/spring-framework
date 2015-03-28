@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -146,7 +146,7 @@ public class StompBrokerRelayMessageHandlerTests {
 	}
 
 	@Test
-	public void testOutboundMessage() throws Exception {
+	public void testOutboundMessageIsEnriched() throws Exception {
 
 		this.brokerRelay.start();
 
@@ -168,6 +168,59 @@ public class StompBrokerRelayMessageHandlerTests {
 		StompHeaderAccessor actualHeaders = StompHeaderAccessor.getAccessor(actual, StompHeaderAccessor.class);
 		assertEquals(sessionId, actualHeaders.getSessionId());
 		assertEquals("joe", actualHeaders.getUser().getName());
+	}
+
+	// SPR-12820
+
+	@Test
+	public void testConnectWhenBrokerNotAvailable() throws Exception {
+
+		this.brokerRelay.start();
+		this.brokerRelay.stopInternal();
+
+		String sessionId = "sess1";
+		StompHeaderAccessor headers = StompHeaderAccessor.create(StompCommand.CONNECT);
+		headers.setSessionId(sessionId);
+		headers.setUser(new TestPrincipal("joe"));
+		this.brokerRelay.handleMessage(MessageBuilder.createMessage(new byte[0], headers.getMessageHeaders()));
+
+		Message<byte[]> actual = this.outboundChannel.getMessages().get(0);
+		StompHeaderAccessor actualHeaders = StompHeaderAccessor.getAccessor(actual, StompHeaderAccessor.class);
+		assertEquals(StompCommand.ERROR, actualHeaders.getCommand());
+		assertEquals(sessionId, actualHeaders.getSessionId());
+		assertEquals("joe", actualHeaders.getUser().getName());
+		assertEquals("Broker not available.", actualHeaders.getMessage());
+	}
+
+	@Test
+	public void testSendAfterBrokerUnavailable() throws Exception {
+
+		this.brokerRelay.start();
+
+		String sessionId = "sess1";
+		StompHeaderAccessor headers = StompHeaderAccessor.create(StompCommand.CONNECT);
+		headers.setSessionId(sessionId);
+		headers.setUser(new TestPrincipal("joe"));
+		this.brokerRelay.handleMessage(MessageBuilder.createMessage(new byte[0], headers.getMessageHeaders()));
+
+		assertEquals(2, this.brokerRelay.getConnectionCount());
+
+		this.brokerRelay.stopInternal();
+
+		headers = StompHeaderAccessor.create(StompCommand.SEND);
+		headers.setSessionId(sessionId);
+		headers.setUser(new TestPrincipal("joe"));
+		headers.setDestination("/foo");
+		this.brokerRelay.handleMessage(MessageBuilder.createMessage(new byte[0], headers.getMessageHeaders()));
+
+		assertEquals(1, this.brokerRelay.getConnectionCount());
+
+		Message<byte[]> actual = this.outboundChannel.getMessages().get(0);
+		StompHeaderAccessor actualHeaders = StompHeaderAccessor.getAccessor(actual, StompHeaderAccessor.class);
+		assertEquals(StompCommand.ERROR, actualHeaders.getCommand());
+		assertEquals(sessionId, actualHeaders.getSessionId());
+		assertEquals("joe", actualHeaders.getUser().getName());
+		assertEquals("Broker not available.", actualHeaders.getMessage());
 	}
 
 

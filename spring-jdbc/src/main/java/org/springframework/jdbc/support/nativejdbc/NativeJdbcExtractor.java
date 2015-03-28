@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,7 +42,7 @@ import java.sql.Statement;
  *
  * <p>When working with a simple connection pool that wraps Connections but not
  * Statements, a {@link SimpleNativeJdbcExtractor} is often sufficient. However,
- * some pools (like Jakarta's Commons DBCP) wrap <i>all</i> JDBC objects that they
+ * some pools (like Apache's Commons DBCP) wrap <i>all</i> JDBC objects that they
  * return: Therefore, you need to use a specific {@code NativeJdbcExtractor}
  * (like {@link CommonsDbcpNativeJdbcExtractor}) with them.
  *

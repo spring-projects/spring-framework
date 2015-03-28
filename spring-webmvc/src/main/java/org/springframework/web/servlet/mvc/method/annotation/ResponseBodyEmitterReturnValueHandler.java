@@ -13,18 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.servlet.mvc.method.annotation;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
 import java.util.List;
-
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ResolvableType;
 import org.springframework.http.HttpHeaders;
@@ -40,7 +39,6 @@ import org.springframework.web.context.request.async.DeferredResult;
 import org.springframework.web.context.request.async.WebAsyncUtils;
 import org.springframework.web.method.support.HandlerMethodReturnValueHandler;
 import org.springframework.web.method.support.ModelAndViewContainer;
-
 
 /**
  * Supports return values of type {@link ResponseBodyEmitter} and also
@@ -60,6 +58,7 @@ public class ResponseBodyEmitterReturnValueHandler implements HandlerMethodRetur
 		Assert.notEmpty(messageConverters, "'messageConverters' must not be empty");
 		this.messageConverters = messageConverters;
 	}
+
 
 	@Override
 	public boolean supportsReturnType(MethodParameter returnType) {
@@ -121,12 +120,10 @@ public class ResponseBodyEmitterReturnValueHandler implements HandlerMethodRetur
 
 		private final DeferredResult<?> deferredResult;
 
-
 		public HttpMessageConvertingHandler(ServerHttpResponse outputMessage, DeferredResult<?> deferredResult) {
 			this.outputMessage = outputMessage;
 			this.deferredResult = deferredResult;
 		}
-
 
 		@Override
 		public void send(Object data, MediaType mediaType) throws IOException {
@@ -145,7 +142,7 @@ public class ResponseBodyEmitterReturnValueHandler implements HandlerMethodRetur
 					return;
 				}
 			}
-			throw new IllegalArgumentException("No suitable converter for " + data);
+			throw new IllegalArgumentException("No suitable converter for " + data.getClass());
 		}
 
 		@Override
@@ -170,12 +167,10 @@ public class ResponseBodyEmitterReturnValueHandler implements HandlerMethodRetur
 
 		private final HttpHeaders mutableHeaders = new HttpHeaders();
 
-
 		public StreamingServletServerHttpResponse(ServerHttpResponse delegate) {
 			this.delegate = delegate;
 			this.mutableHeaders.putAll(delegate.getHeaders());
 		}
-
 
 		@Override
 		public void setStatusCode(HttpStatus status) {

@@ -696,7 +696,7 @@
 						<xsd:documentation><![CDATA[
 	Configures HandlerMethodArgumentResolver types to support custom controller method argument types.
 	Using this option does not override the built-in support for resolving handler method arguments.
-	To customize the built-in support for argument resolution configure SimpAnnotationMethodMessageHandler directly.
+	To customize the built-in support for argument resolution configure WebSocketAnnotationMethodMessageHandler directly.
 						]]></xsd:documentation>
 					</xsd:annotation>
 					<xsd:complexType>
@@ -728,7 +728,7 @@
 						<xsd:documentation><![CDATA[
 	Configures HandlerMethodReturnValueHandler types to support custom controller method return value handling.
 	Using this option does not override the built-in support for handling return values.
-	To customize the built-in support for handling return values configure SimpAnnotationMethodMessageHandler directly.
+	To customize the built-in support for handling return values configure WebSocketAnnotationMethodMessageHandler directly.
 						]]></xsd:documentation>
 					</xsd:annotation>
 					<xsd:complexType>

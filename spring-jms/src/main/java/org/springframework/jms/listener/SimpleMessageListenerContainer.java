@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,7 +44,10 @@ import org.springframework.util.Assert;
  * on the JMS provider: Not even the ServerSessionPool facility is required.
  *
  * <p>See the {@link AbstractMessageListenerContainer} javadoc for details
- * on acknowledge modes and transaction options.
+ * on acknowledge modes and transaction options. Note that this container
+ * exposes standard JMS behavior for the default "AUTO_ACKNOWLEDGE" mode:
+ * that is, automatic message acknowledgment after listener execution,
+ * with redelivery in case of an exception thrown.
  *
  * <p>For a different style of MessageListener handling, through looped
  * {@code MessageConsumer.receive()} calls that also allow for

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -412,12 +412,12 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 
 		if (annotatedWithSessionAttributes) {
 			// Always prevent caching in case of session attribute management.
-			checkAndPrepare(request, response, this.cacheSecondsForSessionAttributeHandlers, true);
+			checkAndPrepare(request, response, this.cacheSecondsForSessionAttributeHandlers);
 			// Prepare cached set of session attributes names.
 		}
 		else {
 			// Uses configured default cacheSeconds setting.
-			checkAndPrepare(request, response, true);
+			checkAndPrepare(request, response);
 		}
 
 		// Execute invokeHandlerMethod in synchronized block if required.

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -104,6 +104,7 @@ import org.springframework.web.util.UriTemplate;
  * @author Arjen Poutsma
  * @author Brian Clozel
  * @author Roy Clarkson
+ * @author Juergen Hoeller
  * @since 3.0
  * @see HttpMessageConverter
  * @see RequestCallback
@@ -566,12 +567,7 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 				requestCallback.doWithRequest(request);
 			}
 			response = request.execute();
-			if (!getErrorHandler().hasError(response)) {
-				logResponseStatus(method, url, response);
-			}
-			else {
-				handleResponseError(method, url, response);
-			}
+			handleResponse(url, method, response);
 			if (responseExtractor != null) {
 				return responseExtractor.extractData(response);
 			}
@@ -590,29 +586,33 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 		}
 	}
 
-	private void logResponseStatus(HttpMethod method, URI url, ClientHttpResponse response) {
+	/**
+	 * Handle the given response, performing appropriate logging and
+	 * invoking the {@link ResponseErrorHandler} if necessary.
+	 * <p>Can be overridden in subclasses.
+	 * @param url the fully-expanded URL to connect to
+	 * @param method the HTTP method to execute (GET, POST, etc.)
+	 * @param response the resulting {@link ClientHttpResponse}
+	 * @throws IOException if propagated from {@link ResponseErrorHandler}
+	 * @see #setErrorHandler
+	 * @since 4.1.6
+	 */
+	protected void handleResponse(URI url, HttpMethod method, ClientHttpResponse response) throws IOException {
+		ResponseErrorHandler errorHandler = getErrorHandler();
+		boolean hasError = errorHandler.hasError(response);
 		if (logger.isDebugEnabled()) {
 			try {
 				logger.debug(method.name() + " request for \"" + url + "\" resulted in " +
-						response.getRawStatusCode() + " (" + response.getStatusText() + ")");
+						response.getRawStatusCode() + " (" + response.getStatusText() + ")" +
+						(hasError ? "; invoking error handler" : ""));
 			}
-			catch (IOException e) {
+			catch (IOException ex) {
 				// ignore
 			}
 		}
-	}
-
-	private void handleResponseError(HttpMethod method, URI url, ClientHttpResponse response) throws IOException {
-		if (logger.isWarnEnabled()) {
-			try {
-				logger.warn(method.name() + " request for \"" + url + "\" resulted in " +
-						response.getRawStatusCode() + " (" + response.getStatusText() + "); invoking error handler");
-			}
-			catch (IOException e) {
-				// ignore
-			}
+		if (hasError) {
+			errorHandler.handleError(response);
 		}
-		getErrorHandler().handleError(response);
 	}
 
 	/**
@@ -668,12 +668,11 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 
 		@Override
 		public void doWithRequest(ClientHttpRequest request) throws IOException {
-			if (responseType != null) {
+			if (this.responseType != null) {
 				Class<?> responseClass = null;
-				if (responseType instanceof Class) {
-					responseClass = (Class<?>) responseType;
+				if (this.responseType instanceof Class) {
+					responseClass = (Class<?>) this.responseType;
 				}
-
 				List<MediaType> allSupportedMediaTypes = new ArrayList<MediaType>();
 				for (HttpMessageConverter<?> converter : getMessageConverters()) {
 					if (responseClass != null) {
@@ -682,13 +681,11 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 						}
 					}
 					else if (converter instanceof GenericHttpMessageConverter) {
-
 						GenericHttpMessageConverter<?> genericConverter = (GenericHttpMessageConverter<?>) converter;
-						if (genericConverter.canRead(responseType, null, null)) {
+						if (genericConverter.canRead(this.responseType, null, null)) {
 							allSupportedMediaTypes.addAll(getSupportedMediaTypes(converter));
 						}
 					}
-
 				}
 				if (!allSupportedMediaTypes.isEmpty()) {
 					MediaType.sortBySpecificity(allSupportedMediaTypes);
@@ -744,9 +741,9 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 		@SuppressWarnings("unchecked")
 		public void doWithRequest(ClientHttpRequest httpRequest) throws IOException {
 			super.doWithRequest(httpRequest);
-			if (!requestEntity.hasBody()) {
+			if (!this.requestEntity.hasBody()) {
 				HttpHeaders httpHeaders = httpRequest.getHeaders();
-				HttpHeaders requestHeaders = requestEntity.getHeaders();
+				HttpHeaders requestHeaders = this.requestEntity.getHeaders();
 				if (!requestHeaders.isEmpty()) {
 					httpHeaders.putAll(requestHeaders);
 				}
@@ -755,9 +752,9 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 				}
 			}
 			else {
-				Object requestBody = requestEntity.getBody();
+				Object requestBody = this.requestEntity.getBody();
 				Class<?> requestType = requestBody.getClass();
-				HttpHeaders requestHeaders = requestEntity.getHeaders();
+				HttpHeaders requestHeaders = this.requestEntity.getHeaders();
 				MediaType requestContentType = requestHeaders.getContentType();
 				for (HttpMessageConverter<?> messageConverter : getMessageConverters()) {
 					if (messageConverter.canWrite(requestType, requestContentType)) {

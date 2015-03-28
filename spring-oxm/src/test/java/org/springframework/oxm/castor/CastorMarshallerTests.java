@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,55 +55,56 @@ public class CastorMarshallerTests extends AbstractMarshallerTests {
 	/**
 	 * Represents the expected result that doesn't contain the xml declaration.
 	 */
-	private static final String DOCUMENT_EXPECTED_STRING = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
-			+ "<tns:flights xmlns:tns=\"http://samples.springframework.org/flight\">"
-			+ "<tns:flight><tns:number>42</tns:number></tns:flight></tns:flights>";
+	private static final String DOCUMENT_EXPECTED_STRING = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
+			"<tns:flights xmlns:tns=\"http://samples.springframework.org/flight\">" +
+			"<tns:flight><tns:number>42</tns:number></tns:flight></tns:flights>";
 
 	/**
 	 * Represents the expected result that doesn't contain the xml namespaces.
 	 */
-	private static final String SUPPRESSED_NAMESPACE_EXPECTED_STRING = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><flights><flight><number>42</number></flight></flights>";
+	private static final String SUPPRESSED_NAMESPACE_EXPECTED_STRING =
+			"<?xml version=\"1.0\" encoding=\"UTF-8\"?><flights><flight><number>42</number></flight></flights>";
 
 	/**
 	 * Represents the expected result with modified root element name.
 	 */
-	private static final String ROOT_ELEMENT_EXPECTED_STRING = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
-			+ "<tns:canceledFlights xmlns:tns=\"http://samples.springframework.org/flight\">"
-			+ "<tns:flight><tns:number>42</tns:number></tns:flight></tns:canceledFlights>";
+	private static final String ROOT_ELEMENT_EXPECTED_STRING = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
+			"<tns:canceledFlights xmlns:tns=\"http://samples.springframework.org/flight\">" +
+			"<tns:flight><tns:number>42</tns:number></tns:flight></tns:canceledFlights>";
 
 	/**
 	 * Represents the expected result with 'xsi:type' attribute.
 	 */
-	private static final String XSI_EXPECTED_STRING = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
-			+ "<objects><castor-object xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\""
-			+ " xmlns:java=\"http://java.sun.com\""
-			+ " xsi:type=\"java:org.springframework.oxm.castor.CastorObject\">"
-			+ "<name>test</name><value>8</value></castor-object></objects>";
+	private static final String XSI_EXPECTED_STRING = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
+			"<objects><castor-object xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"" +
+			" xmlns:java=\"http://java.sun.com\"" +
+			" xsi:type=\"java:org.springframework.oxm.castor.CastorObject\">" +
+			"<name>test</name><value>8</value></castor-object></objects>";
 
 	/**
 	 * Represents the expected result with suppressed 'xsi:type' attribute.
 	 */
-	private static final String SUPPRESSED_XSI_EXPECTED_STRING = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
-			+ "<objects><castor-object><name>test</name><value>8</value></castor-object></objects>";
+	private static final String SUPPRESSED_XSI_EXPECTED_STRING = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
+			"<objects><castor-object><name>test</name><value>8</value></castor-object></objects>";
 
 	/**
 	 * Represents the expected result with 'xsi:type' attribute for root element.
 	 */
-	private static final String ROOT_WITH_XSI_EXPECTED_STRING = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
-			+ "<objects xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\""
-			+ " xmlns:java=\"http://java.sun.com\""
-			+ " xsi:type=\"java:java.util.Arrays$ArrayList\">"
-			+ "<castor-object xsi:type=\"java:org.springframework.oxm.castor.CastorObject\">"
-			+ "<name>test</name><value>8</value></castor-object></objects>";
+	private static final String ROOT_WITH_XSI_EXPECTED_STRING = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
+			"<objects xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"" +
+			" xmlns:java=\"http://java.sun.com\"" +
+			" xsi:type=\"java:java.util.Arrays$ArrayList\">" +
+			"<castor-object xsi:type=\"java:org.springframework.oxm.castor.CastorObject\">" +
+			"<name>test</name><value>8</value></castor-object></objects>";
 
 	/**
 	 * Represents the expected result without 'xsi:type' attribute for root element.
 	 */
-	private static final String ROOT_WITHOUT_XSI_EXPECTED_STRING = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
-			+ "<objects><castor-object xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\""
-			+ " xmlns:java=\"http://java.sun.com\""
-			+ " xsi:type=\"java:org.springframework.oxm.castor.CastorObject\">"
-			+ "<name>test</name><value>8</value></castor-object></objects>";
+	private static final String ROOT_WITHOUT_XSI_EXPECTED_STRING = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
+			"<objects><castor-object xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"" +
+			" xmlns:java=\"http://java.sun.com\"" +
+			" xsi:type=\"java:org.springframework.oxm.castor.CastorObject\">" +
+			"<name>test</name><value>8</value></castor-object></objects>";
 
 
 	@Override
@@ -124,6 +125,7 @@ public class CastorMarshallerTests extends AbstractMarshallerTests {
 		return flights;
 	}
 
+
 	@Test
 	public void marshalSaxResult() throws Exception {
 		ContentHandler contentHandler = mock(ContentHandler.class);
@@ -132,13 +134,13 @@ public class CastorMarshallerTests extends AbstractMarshallerTests {
 		InOrder ordered = inOrder(contentHandler);
 		ordered.verify(contentHandler).startDocument();
 		ordered.verify(contentHandler).startPrefixMapping("tns", "http://samples.springframework.org/flight");
-		ordered.verify(contentHandler).startElement(eq("http://samples.springframework.org/flight"), eq("flights"),
-			eq("tns:flights"), isA(Attributes.class));
-		ordered.verify(contentHandler).startElement(eq("http://samples.springframework.org/flight"), eq("flight"),
-			eq("tns:flight"), isA(Attributes.class));
-		ordered.verify(contentHandler).startElement(eq("http://samples.springframework.org/flight"), eq("number"),
-			eq("tns:number"), isA(Attributes.class));
-		ordered.verify(contentHandler).characters(eq(new char[] { '4', '2' }), eq(0), eq(2));
+		ordered.verify(contentHandler).startElement(eq("http://samples.springframework.org/flight"),
+				eq("flights"), eq("tns:flights"), isA(Attributes.class));
+		ordered.verify(contentHandler).startElement(eq("http://samples.springframework.org/flight"),
+				eq("flight"), eq("tns:flight"), isA(Attributes.class));
+		ordered.verify(contentHandler).startElement(eq("http://samples.springframework.org/flight"),
+				eq("number"), eq("tns:number"), isA(Attributes.class));
+		ordered.verify(contentHandler).characters(eq(new char[]{'4', '2'}), eq(0), eq(2));
 		ordered.verify(contentHandler).endElement("http://samples.springframework.org/flight", "number", "tns:number");
 		ordered.verify(contentHandler).endElement("http://samples.springframework.org/flight", "flight", "tns:flight");
 		ordered.verify(contentHandler).endElement("http://samples.springframework.org/flight", "flights", "tns:flights");
@@ -169,7 +171,6 @@ public class CastorMarshallerTests extends AbstractMarshallerTests {
 	@Test
 	public void testSuppressXsiTypeTrue() throws Exception {
 		CastorObject castorObject = createCastorObject();
-
 		getCastorMarshaller().setSuppressXsiType(true);
 		getCastorMarshaller().setRootElement("objects");
 		String result = marshal(Arrays.asList(castorObject));
@@ -179,7 +180,6 @@ public class CastorMarshallerTests extends AbstractMarshallerTests {
 	@Test
 	public void testSuppressXsiTypeFalse() throws Exception {
 		CastorObject castorObject = createCastorObject();
-
 		getCastorMarshaller().setSuppressXsiType(false);
 		getCastorMarshaller().setRootElement("objects");
 		String result = marshal(Arrays.asList(castorObject));
@@ -188,17 +188,15 @@ public class CastorMarshallerTests extends AbstractMarshallerTests {
 
 	@Test
 	public void testMarshalAsDocumentTrue() throws Exception {
-
 		getCastorMarshaller().setMarshalAsDocument(true);
 		String result = marshalFlights();
 		assertXMLEqual("Marshaller wrote invalid result", DOCUMENT_EXPECTED_STRING, result);
 		assertTrue("Result doesn't contain xml declaration.",
-			result.contains("<?xml version=\"1.0\" encoding=\"UTF-8\"?>"));
+				result.contains("<?xml version=\"1.0\" encoding=\"UTF-8\"?>"));
 	}
 
 	@Test
 	public void testMarshalAsDocumentFalse() throws Exception {
-
 		getCastorMarshaller().setMarshalAsDocument(true);
 		String result = marshalFlights();
 		assertXMLEqual("Marshaller wrote invalid result", EXPECTED_STRING, result);
@@ -207,7 +205,6 @@ public class CastorMarshallerTests extends AbstractMarshallerTests {
 
 	@Test
 	public void testRootElement() throws Exception {
-
 		getCastorMarshaller().setRootElement("canceledFlights");
 		String result = marshalFlights();
 		assertXMLEqual("Marshaller wrote invalid result", ROOT_ELEMENT_EXPECTED_STRING, result);
@@ -216,31 +213,26 @@ public class CastorMarshallerTests extends AbstractMarshallerTests {
 	@Test
 	public void testNoNamespaceSchemaLocation() throws Exception {
 		String noNamespaceSchemaLocation = "flights.xsd";
-
 		getCastorMarshaller().setNoNamespaceSchemaLocation(noNamespaceSchemaLocation);
 		String result = marshalFlights();
-
 		assertXpathEvaluatesTo("The xsi:noNamespaceSchemaLocation hasn't been written or has invalid value.",
-			noNamespaceSchemaLocation, "/tns:flights/@xsi:noNamespaceSchemaLocation", result);
+				noNamespaceSchemaLocation, "/tns:flights/@xsi:noNamespaceSchemaLocation", result);
 		assertXMLEqual("Marshaller wrote invalid result", EXPECTED_STRING, result);
 	}
 
 	@Test
 	public void testSchemaLocation() throws Exception {
 		String schemaLocation = "flights.xsd";
-
 		getCastorMarshaller().setSchemaLocation(schemaLocation);
 		String result = marshalFlights();
-
 		assertXpathEvaluatesTo("The xsi:noNamespaceSchemaLocation hasn't been written or has invalid value.",
-			schemaLocation, "/tns:flights/@xsi:schemaLocation", result);
+				schemaLocation, "/tns:flights/@xsi:schemaLocation", result);
 		assertXMLEqual("Marshaller wrote invalid result", EXPECTED_STRING, result);
 	}
 
 	@Test
 	public void testUseXsiTypeAsRootTrue() throws Exception {
 		CastorObject castorObject = createCastorObject();
-
 		getCastorMarshaller().setSuppressXsiType(false);
 		getCastorMarshaller().setUseXSITypeAtRoot(true);
 		getCastorMarshaller().setRootElement("objects");
@@ -251,7 +243,6 @@ public class CastorMarshallerTests extends AbstractMarshallerTests {
 	@Test
 	public void testUseXsiTypeAsRootFalse() throws Exception {
 		CastorObject castorObject = createCastorObject();
-
 		getCastorMarshaller().setSuppressXsiType(false);
 		getCastorMarshaller().setUseXSITypeAtRoot(false);
 		getCastorMarshaller().setRootElement("objects");
@@ -259,16 +250,15 @@ public class CastorMarshallerTests extends AbstractMarshallerTests {
 		assertXMLEqual("Marshaller wrote invalid result", ROOT_WITHOUT_XSI_EXPECTED_STRING, result);
 	}
 
+
 	private CastorMarshaller getCastorMarshaller() {
 		return (CastorMarshaller) marshaller;
 	}
 
 	private String marshal(Object object) throws Exception {
-
 		StringWriter writer = new StringWriter();
 		StreamResult result = new StreamResult(writer);
 		getCastorMarshaller().marshal(object, result);
-
 		return writer.toString();
 	}
 
@@ -277,9 +267,9 @@ public class CastorMarshallerTests extends AbstractMarshallerTests {
 	}
 
 	/**
-	 * Asserts the values of xpath expression evaluation is exactly the same as expected value. </p> The xpath may contain
-	 * the xml namespace prefixes, since namespaces from flight example are being registered.
-	 *
+	 * Assert the values of xpath expression evaluation is exactly the same as expected value.
+	 * <p>The xpath may contain the xml namespace prefixes, since namespaces from flight example
+	 * are being registered.
 	 * @param msg the error message that will be used in case of test failure
 	 * @param expected the expected value
 	 * @param xpath the xpath to evaluate
@@ -301,9 +291,7 @@ public class CastorMarshallerTests extends AbstractMarshallerTests {
 	}
 
 	/**
-	 * Creates a instance of {@link CastorObject} for testing.
-	 *
-	 * @return a instance of {@link CastorObject}
+	 * Create an instance of {@link CastorObject} for testing.
 	 */
 	private CastorObject createCastorObject() {
 		CastorObject castorObject = new CastorObject();
@@ -311,4 +299,5 @@ public class CastorMarshallerTests extends AbstractMarshallerTests {
 		castorObject.setValue(8);
 		return castorObject;
 	}
+
 }

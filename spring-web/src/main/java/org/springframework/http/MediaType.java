@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -276,6 +276,7 @@ public class MediaType extends MimeType implements Serializable {
 	}
 
 
+	@Override
 	protected void checkParameters(String attribute, String value) {
 		super.checkParameters(attribute, value);
 		if (PARAM_QUALITY_FACTOR.equals(attribute)) {
@@ -400,9 +401,8 @@ public class MediaType extends MimeType implements Serializable {
 	/**
 	 * Return a string representation of the given list of {@code MediaType} objects.
 	 * <p>This method can be used to for an {@code Accept} or {@code Content-Type} header.
-	 * @param mediaTypes the string to parse
-	 * @return the list of media types
-	 * @throws IllegalArgumentException if the String cannot be parsed
+	 * @param mediaTypes the media types to create a string representation for
+	 * @return the string representation
 	 */
 	public static String toString(Collection<MediaType> mediaTypes) {
 		return MimeTypeUtils.toString(mediaTypes);

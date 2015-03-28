@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,13 +16,8 @@
 
 package org.springframework.test.context.support;
 
-import java.io.IOException;
-import java.io.StringReader;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Properties;
 import java.util.Set;
 
 import org.apache.commons.logging.Log;
@@ -34,12 +29,8 @@ import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.GenericTypeResolver;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
-import org.springframework.core.env.ConfigurableEnvironment;
-import org.springframework.core.env.MapPropertySource;
 import org.springframework.core.env.PropertySource;
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.core.io.Resource;
-import org.springframework.core.io.support.ResourcePropertySource;
 import org.springframework.test.context.ContextConfigurationAttributes;
 import org.springframework.test.context.ContextLoader;
 import org.springframework.test.context.MergedContextConfiguration;
@@ -64,7 +55,6 @@ import org.springframework.util.ResourceUtils;
  *
  * @author Sam Brannen
  * @author Juergen Hoeller
- * @author Dave Syer
  * @since 2.5
  * @see #generateDefaultLocations
  * @see #getResourceSuffixes
@@ -73,8 +63,6 @@ import org.springframework.util.ResourceUtils;
 public abstract class AbstractContextLoader implements SmartContextLoader {
 
 	private static final String[] EMPTY_STRING_ARRAY = new String[0];
-
-	private static final String LINE_SEPARATOR = System.getProperty("line.separator");
 
 	private static final Log logger = LogFactory.getLog(AbstractContextLoader.class);
 
@@ -131,78 +119,17 @@ public abstract class AbstractContextLoader implements SmartContextLoader {
 	 * @param context the newly created application context
 	 * @param mergedConfig the merged context configuration
 	 * @since 3.2
+	 * @see TestPropertySourceUtils#addPropertiesFilesToEnvironment
+	 * @see TestPropertySourceUtils#addInlinedPropertiesToEnvironment
 	 * @see ApplicationContextInitializer#initialize(ConfigurableApplicationContext)
 	 * @see #loadContext(MergedContextConfiguration)
 	 * @see ConfigurableApplicationContext#setId
 	 */
 	protected void prepareContext(ConfigurableApplicationContext context, MergedContextConfiguration mergedConfig) {
 		context.getEnvironment().setActiveProfiles(mergedConfig.getActiveProfiles());
-		addResourcePropertySourcesToEnvironment(context, mergedConfig);
-		addInlinedPropertiesToEnvironment(context, mergedConfig);
+		TestPropertySourceUtils.addPropertiesFilesToEnvironment(context, mergedConfig.getPropertySourceLocations());
+		TestPropertySourceUtils.addInlinedPropertiesToEnvironment(context, mergedConfig.getPropertySourceProperties());
 		invokeApplicationContextInitializers(context, mergedConfig);
-	}
-
-	/**
-	 * @since 4.1
-	 */
-	private void addResourcePropertySourcesToEnvironment(ConfigurableApplicationContext context,
-			MergedContextConfiguration mergedConfig) {
-		try {
-			ConfigurableEnvironment environment = context.getEnvironment();
-			String[] locations = mergedConfig.getPropertySourceLocations();
-			for (String location : locations) {
-				String resolvedLocation = environment.resolveRequiredPlaceholders(location);
-				Resource resource = context.getResource(resolvedLocation);
-				ResourcePropertySource ps = new ResourcePropertySource(resource);
-				environment.getPropertySources().addFirst(ps);
-			}
-		}
-		catch (IOException e) {
-			throw new IllegalStateException("Failed to add PropertySource to Environment", e);
-		}
-	}
-
-	/**
-	 * @since 4.1
-	 */
-	private void addInlinedPropertiesToEnvironment(ConfigurableApplicationContext context,
-			MergedContextConfiguration mergedConfig) {
-		String[] keyValuePairs = mergedConfig.getPropertySourceProperties();
-		if (!ObjectUtils.isEmpty(keyValuePairs)) {
-			String name = "test properties " + ObjectUtils.nullSafeToString(keyValuePairs);
-			MapPropertySource ps = new MapPropertySource(name, extractEnvironmentProperties(keyValuePairs));
-			context.getEnvironment().getPropertySources().addFirst(ps);
-		}
-	}
-
-	/**
-	 * Extract environment properties from the supplied key/value pairs.
-	 * <p>Parsing of the key/value pairs is achieved by converting all pairs
-	 * into a single <em>virtual</em> properties file in memory and delegating
-	 * to {@link Properties#load(java.io.Reader)} to parse that virtual file.
-	 * <p>This code has been adapted from Spring Boot's
-	 * {@link org.springframework.boot.test.SpringApplicationContextLoader SpringApplicationContextLoader}.
-	 * @since 4.1
-	 */
-	private Map<String, Object> extractEnvironmentProperties(String[] keyValuePairs) {
-		StringBuilder sb = new StringBuilder();
-		for (String keyValuePair : keyValuePairs) {
-			sb.append(keyValuePair).append(LINE_SEPARATOR);
-		}
-		String content = sb.toString();
-		Properties props = new Properties();
-		try {
-			props.load(new StringReader(content));
-		}
-		catch (IOException e) {
-			throw new IllegalStateException("Failed to load test environment properties from: " + content, e);
-		}
-
-		Map<String, Object> properties = new HashMap<String, Object>();
-		for (String name : props.stringPropertyNames()) {
-			properties.put(name, props.getProperty(name));
-		}
-		return properties;
 	}
 
 	@SuppressWarnings("unchecked")

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,9 +45,9 @@ public enum TransportType {
 
 	XHR_STREAMING("xhr_streaming", HttpMethod.POST, "cors", "jsessionid", "no_cache"),
 
-	EVENT_SOURCE("eventsource", HttpMethod.GET, "jsessionid", "no_cache"),
+	EVENT_SOURCE("eventsource", HttpMethod.GET, "origin", "jsessionid", "no_cache"),
 
-	HTML_FILE("htmlfile", HttpMethod.GET, "jsessionid", "no_cache");
+	HTML_FILE("htmlfile", HttpMethod.GET, "cors", "jsessionid", "no_cache");
 
 
 	private final String value;

@@ -21,7 +21,7 @@ import org.springframework.asm.Opcodes;
 import org.springframework.expression.PropertyAccessor;
 
 /**
- * A compilable property accessor is able to generate bytecode that represents 
+ * A compilable property accessor is able to generate bytecode that represents
  * the access operation, facilitating compilation to bytecode of expressions
  * that use the accessor.
  *

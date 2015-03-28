@@ -67,7 +67,7 @@ public class LookupMethodTests {
 		assertEquals(TestBean.class, expected.getClass());
 		assertEquals("haha", expected.getName());
 	}
-	
+
 	@Test
 	public void testWithTwoConstructorArg() {
 		AbstractBean bean = (AbstractBean) beanFactory.getBean("abstractBean");
@@ -77,7 +77,7 @@ public class LookupMethodTests {
 		assertEquals("haha", expected.getName());
 		assertEquals(72, expected.getAge());
 	}
-	
+
 	@Test
 	public void testWithThreeArgsShouldFail() {
 		AbstractBean bean = (AbstractBean) beanFactory.getBean("abstractBean");

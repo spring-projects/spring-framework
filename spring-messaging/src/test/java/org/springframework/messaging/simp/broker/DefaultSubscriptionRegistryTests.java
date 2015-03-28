@@ -331,6 +331,7 @@ public class DefaultSubscriptionRegistryTests {
 	// SPR-12665
 
 	@Test
+	@SuppressWarnings("rawtypes")
 	public void findSubscriptionsReturnsMapSafeToIterate() throws Exception {
 		this.registry.registerSubscription(subscribeMessage("sess1", "1", "/foo"));
 		this.registry.registerSubscription(subscribeMessage("sess2", "1", "/foo"));

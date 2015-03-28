@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,8 +43,7 @@ import org.springframework.util.Assert;
  * @since 4.0
  * @see HttpAsyncClient
  */
-public class HttpComponentsAsyncClientHttpRequestFactory
-		extends HttpComponentsClientHttpRequestFactory
+public class HttpComponentsAsyncClientHttpRequestFactory extends HttpComponentsClientHttpRequestFactory
 		implements AsyncClientHttpRequestFactory, InitializingBean {
 
 	private CloseableHttpAsyncClient httpAsyncClient;
@@ -86,7 +85,7 @@ public class HttpComponentsAsyncClientHttpRequestFactory
 
 	/**
 	 * Set the {@code HttpClient} used for
-	 * {@linkplain #createAsyncRequest(java.net.URI, org.springframework.http.HttpMethod) asynchronous execution}.
+	 * {@linkplain #createAsyncRequest(URI, HttpMethod) asynchronous execution}.
 	 */
 	public void setHttpAsyncClient(CloseableHttpAsyncClient httpAsyncClient) {
 		this.httpAsyncClient = httpAsyncClient;
@@ -97,8 +96,9 @@ public class HttpComponentsAsyncClientHttpRequestFactory
 	 * {@linkplain #createAsyncRequest(URI, HttpMethod) asynchronous execution}.
 	 */
 	public CloseableHttpAsyncClient getHttpAsyncClient() {
-		return httpAsyncClient;
+		return this.httpAsyncClient;
 	}
+
 
 	@Override
 	public void afterPropertiesSet() {

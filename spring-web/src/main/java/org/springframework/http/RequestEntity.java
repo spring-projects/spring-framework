@@ -325,8 +325,8 @@ public class RequestEntity<T> extends HttpEntity<T> {
 
 		/**
 		 * Set the body of the request entity and build the RequestEntity.
-		 * @param body the body of the request entity
 		 * @param <T> the type of the body
+		 * @param body the body of the request entity
 		 * @return the built request entity
 		 */
 		<T> RequestEntity<T> body(T body);

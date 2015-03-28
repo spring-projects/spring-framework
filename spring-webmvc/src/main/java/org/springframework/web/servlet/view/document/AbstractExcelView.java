@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,6 @@ import org.apache.poi.hssf.usermodel.HSSFCell;
 import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.apache.poi.poifs.filesystem.POIFSFileSystem;
 
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.LocalizedResourceHelper;
@@ -51,7 +50,7 @@ import org.springframework.web.servlet.view.AbstractView;
  * </ul>
  *
  * <p>For working with the workbook in the subclass, see
- * <a href="http://jakarta.apache.org/poi/index.html">Jakarta's POI site</a>
+ * <a href="http://poi.apache.org">Apache's POI site</a>
  *
  * <p>As an example, you can try this snippet:
  *
@@ -92,7 +91,10 @@ import org.springframework.web.servlet.view.AbstractView;
  * @author Jean-Pierre Pawlak
  * @author Juergen Hoeller
  * @see AbstractPdfView
+ * @deprecated as of Spring 4.2, in favor of {@link AbstractXlsView} and its
+ * {@link AbstractXlsxView} and {@link AbstractXlsxStreamingView} variants
  */
+@Deprecated
 public abstract class AbstractExcelView extends AbstractView {
 
 	/** The content type for an Excel response */
@@ -172,8 +174,7 @@ public abstract class AbstractExcelView extends AbstractView {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Loading Excel workbook from " + inputFile);
 		}
-		POIFSFileSystem fs = new POIFSFileSystem(inputFile.getInputStream());
-		return new HSSFWorkbook(fs);
+		return new HSSFWorkbook(inputFile.getInputStream());
 	}
 
 	/**
@@ -194,7 +195,7 @@ public abstract class AbstractExcelView extends AbstractView {
 	 * <p>Creates the row and the cell if they still doesn't already exist.
 	 * Thus, the column can be passed as an int, the method making the needed downcasts.
 	 * @param sheet a sheet object. The first sheet is usually obtained by workbook.getSheetAt(0)
-	 * @param row thr row number
+	 * @param row the row number
 	 * @param col the column number
 	 * @return the HSSFCell
 	 */

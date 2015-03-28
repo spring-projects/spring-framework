@@ -20,14 +20,12 @@ import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-
 import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
@@ -40,6 +38,7 @@ import javax.servlet.http.HttpServletRequestWrapper;
  * <p>Used e.g. by {@link org.springframework.web.filter.AbstractRequestLoggingFilter}.
  *
  * @author Juergen Hoeller
+ * @author Brian Clozel
  * @since 4.1.3
  */
 public class ContentCachingRequestWrapper extends HttpServletRequestWrapper {
@@ -47,6 +46,7 @@ public class ContentCachingRequestWrapper extends HttpServletRequestWrapper {
 	private static final String FORM_CONTENT_TYPE = "application/x-www-form-urlencoded";
 
 	private static final String METHOD_POST = "POST";
+
 
 	private final ByteArrayOutputStream cachedContent;
 
@@ -88,50 +88,82 @@ public class ContentCachingRequestWrapper extends HttpServletRequestWrapper {
 		return this.reader;
 	}
 
-	/**
-	 * Return the cached request content as a byte array.
-	 */
-	public byte[] getContentAsByteArray() {
-		if(this.cachedContent.size() == 0 && isFormPost()) {
-			writeRequestParamsToContent();
+	@Override
+	public String getParameter(String name) {
+		if (this.cachedContent.size() == 0 && isFormPost()) {
+			writeRequestParametersToCachedContent();
 		}
-		return this.cachedContent.toByteArray();
+		return super.getParameter(name);
 	}
 
+	@Override
+	public Map<String, String[]> getParameterMap() {
+		if (this.cachedContent.size() == 0 && isFormPost()) {
+			writeRequestParametersToCachedContent();
+		}
+		return super.getParameterMap();
+	}
+
+	@Override
+	public Enumeration<String> getParameterNames() {
+		if (this.cachedContent.size() == 0 && isFormPost()) {
+			writeRequestParametersToCachedContent();
+		}
+		return super.getParameterNames();
+	}
+
+	@Override
+	public String[] getParameterValues(String name) {
+		if (this.cachedContent.size() == 0 && isFormPost()) {
+			writeRequestParametersToCachedContent();
+		}
+		return super.getParameterValues(name);
+	}
+
+
 	private boolean isFormPost() {
-		return (getContentType() != null && getContentType().contains(FORM_CONTENT_TYPE) &&
+		String contentType = getContentType();
+		return (contentType != null && contentType.contains(FORM_CONTENT_TYPE) &&
 				METHOD_POST.equalsIgnoreCase(getMethod()));
 	}
 
-	private void writeRequestParamsToContent() {
+	private void writeRequestParametersToCachedContent() {
 		try {
 			if (this.cachedContent.size() == 0) {
 				String requestEncoding = getCharacterEncoding();
-				Map<String, String[]> form = getParameterMap();
+				Map<String, String[]> form = super.getParameterMap();
 				for (Iterator<String> nameIterator = form.keySet().iterator(); nameIterator.hasNext(); ) {
 					String name = nameIterator.next();
 					List<String> values = Arrays.asList(form.get(name));
 					for (Iterator<String> valueIterator = values.iterator(); valueIterator.hasNext(); ) {
 						String value = valueIterator.next();
-						cachedContent.write(URLEncoder.encode(name, requestEncoding).getBytes());
+						this.cachedContent.write(URLEncoder.encode(name, requestEncoding).getBytes());
 						if (value != null) {
-							cachedContent.write('=');
-							cachedContent.write(URLEncoder.encode(value, requestEncoding).getBytes());
+							this.cachedContent.write('=');
+							this.cachedContent.write(URLEncoder.encode(value, requestEncoding).getBytes());
 							if (valueIterator.hasNext()) {
-								cachedContent.write('&');
+								this.cachedContent.write('&');
 							}
 						}
 					}
 					if (nameIterator.hasNext()) {
-						cachedContent.write('&');
+						this.cachedContent.write('&');
 					}
 				}
 			}
 		}
-		catch (IOException e) {
-			throw new RuntimeException(e);
+		catch (IOException ex) {
+			throw new IllegalStateException("Failed to write request parameters to cached content", ex);
 		}
 	}
+
+	/**
+	 * Return the cached request content as a byte array.
+	 */
+	public byte[] getContentAsByteArray() {
+		return this.cachedContent.toByteArray();
+	}
+
 
 	private class ContentCachingInputStream extends ServletInputStream {
 

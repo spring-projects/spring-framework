@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,10 +25,10 @@ import java.util.concurrent.ExecutionException;
  * and {@link ListenableFutureCallback#onSuccess(Object)} call {@link #adapt(Object)}
  * on the adaptee's result.
  *
- * @param <T> the type of this {@code Future}
- * @param <S> the type of the adaptee's {@code Future}
  * @author Arjen Poutsma
  * @since 4.0
+ * @param <T> the type of this {@code Future}
+ * @param <S> the type of the adaptee's {@code Future}
  */
 public abstract class ListenableFutureAdapter<T, S> extends FutureAdapter<T, S> implements ListenableFuture<T> {
 
