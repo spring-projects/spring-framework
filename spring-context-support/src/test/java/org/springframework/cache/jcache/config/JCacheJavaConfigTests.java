@@ -108,7 +108,6 @@ public class JCacheJavaConfigTests extends AbstractJCacheAnnotationTests {
 		try {
 			DefaultJCacheOperationSource cos = context.getBean(DefaultJCacheOperationSource.class);
 			assertSame(context.getBean("cacheResolver"), cos.getCacheResolver());
-			assertNull(cos.getExceptionCacheResolver());
 
 			JCacheableService<?> service = context.getBean(JCacheableService.class);
 
