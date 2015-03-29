@@ -565,7 +565,7 @@ public class CallMetaDataContext {
 		String schemaNameToUse;
 
 		// For Oracle where catalogs are not supported we need to reverse the schema name
-		// and the catalog name since the cataog is used for the package name
+		// and the catalog name since the catalog is used for the package name
 		if (this.metaDataProvider.isSupportsSchemasInProcedureCalls() &&
 				!this.metaDataProvider.isSupportsCatalogsInProcedureCalls()) {
 			schemaNameToUse = this.metaDataProvider.catalogNameToUse(getCatalogName());
@@ -595,7 +595,7 @@ public class CallMetaDataContext {
 					callString += ", ";
 				}
 				if (parameterCount >= 0) {
-					callString += "?";
+					callString += constructParameterBinding(parameter);
 				}
 				parameterCount++;
 			}
@@ -605,4 +605,13 @@ public class CallMetaDataContext {
 		return callString;
 	}
 
+	/**
+	 * Build parameter binding fragment
+	 *
+	 * @param parameter call parameter
+	 * @return parameter binding fragment
+	 */
+	protected String constructParameterBinding(SqlParameter parameter) {
+		return "?";
+	}
 }
