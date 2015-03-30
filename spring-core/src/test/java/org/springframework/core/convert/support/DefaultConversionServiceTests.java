@@ -758,13 +758,45 @@ public class DefaultConversionServiceTests {
 	// generic object conversion
 
 	@Test
-	public void convertObjectToStringValueOfMethodPresent() {
-		assertEquals("123456789", conversionService.convert(ISBN.valueOf("123456789"), String.class));
+	public void convertObjectToStringWithValueOfMethodPresentUsingToString() {
+		ISBN.reset();
+		assertEquals("123456789", conversionService.convert(new ISBN("123456789"), String.class));
+
+		assertEquals("constructor invocations", 1, ISBN.constructorCount);
+		assertEquals("valueOf() invocations", 0, ISBN.valueOfCount);
+		assertEquals("toString() invocations", 1, ISBN.toStringCount);
 	}
 
 	@Test
-	public void convertObjectToStringStringConstructorPresent() {
+	public void convertObjectToObjectUsingValueOfMethod() {
+		ISBN.reset();
+		assertEquals(new ISBN("123456789"), conversionService.convert("123456789", ISBN.class));
+
+		assertEquals("valueOf() invocations", 1, ISBN.valueOfCount);
+		// valueOf() invokes the constructor
+		assertEquals("constructor invocations", 2, ISBN.constructorCount);
+		assertEquals("toString() invocations", 0, ISBN.toStringCount);
+	}
+
+	@Test
+	public void convertObjectToStringUsingToString() {
+		SSN.reset();
 		assertEquals("123456789", conversionService.convert(new SSN("123456789"), String.class));
+
+		// TODO What if the target type has a static factory method that takes precedence
+		// over the source type's toString() method?
+
+		assertEquals("constructor invocations", 1, SSN.constructorCount);
+		assertEquals("toString() invocations", 1, SSN.toStringCount);
+	}
+
+	@Test
+	public void convertObjectToObjectUsingObjectConstructor() {
+		SSN.reset();
+		assertEquals(new SSN("123456789"), conversionService.convert("123456789", SSN.class));
+
+		assertEquals("constructor invocations", 2, SSN.constructorCount);
+		assertEquals("toString() invocations", 0, SSN.toStringCount);
 	}
 
 	@Test
@@ -778,22 +810,11 @@ public class DefaultConversionServiceTests {
 	}
 
 	@Test
-	public void convertObjectToObjectValueOfMethod() {
-		assertEquals(ISBN.valueOf("123456789"), conversionService.convert("123456789", ISBN.class));
-	}
-
-	@Test
-	public void convertObjectToObjectConstructor() {
-		assertEquals(new SSN("123456789"), conversionService.convert("123456789", SSN.class));
-		assertEquals("123456789", conversionService.convert(new SSN("123456789"), String.class));
-	}
-
-	@Test
 	public void convertObjectToObjectWithJavaTimeOfMethod() {
 		assertEquals(ZoneId.of("GMT+1"), conversionService.convert("GMT+1", ZoneId.class));
 	}
 
-	@Test(expected=ConverterNotFoundException.class)
+	@Test(expected = ConverterNotFoundException.class)
 	public void convertObjectToObjectNoValueOFMethodOrConstructor() {
 		conversionService.convert(new Long(3), SSN.class);
 	}
@@ -972,9 +993,19 @@ public class DefaultConversionServiceTests {
 
 	private static class SSN {
 
-		private String value;
+		static int constructorCount = 0;
+		static int toStringCount = 0;
+
+
+		static void reset() {
+			constructorCount = 0;
+			toStringCount = 0;
+		}
+
+		private final String value;
 
 		public SSN(String value) {
+			constructorCount++;
 			this.value = value;
 		}
 
@@ -994,6 +1025,7 @@ public class DefaultConversionServiceTests {
 
 		@Override
 		public String toString() {
+			toStringCount++;
 			return value;
 		}
 	}
@@ -1001,9 +1033,21 @@ public class DefaultConversionServiceTests {
 
 	private static class ISBN {
 
-		private String value;
+		static int constructorCount = 0;
+		static int toStringCount = 0;
+
+		static int valueOfCount = 0;
+
+		static void reset() {
+			constructorCount = 0;
+			toStringCount = 0;
+			valueOfCount = 0;
+		}
+
+		private final String value;
 
 		private ISBN(String value) {
+			constructorCount++;
 			this.value = value;
 		}
 
@@ -1023,10 +1067,13 @@ public class DefaultConversionServiceTests {
 
 		@Override
 		public String toString() {
+			toStringCount++;
 			return value;
 		}
 
+		@SuppressWarnings("unused")
 		public static ISBN valueOf(String value) {
+			valueOfCount++;
 			return new ISBN(value);
 		}
 	}
