@@ -4095,8 +4095,8 @@ A good HTTP caching strategy can significantly improve the performance of a web 
 and the experience of its clients. The `'Cache-Control'` HTTP response header is mostly
 responsible for this, along with conditional headers such as `'Last-Modified'` and `'ETag'`.
 
-The `'Cache-Control'` HTTP response header advice private caches (e.g. browsers) and
- public caches (e.g. proxies) on how they can cache HTTP responses for further reuse.
+The `'Cache-Control'` HTTP response header advises private caches (e.g. browsers) and
+public caches (e.g. proxies) on how they can cache HTTP responses for further reuse.
 
 An http://en.wikipedia.org/wiki/HTTP_ETag[ETag] (entity tag) is an HTTP response header
 returned by an HTTP/1.1 compliant web server used to determine change in content at a
@@ -4113,22 +4113,22 @@ Spring Web MVC application.
 === Cache-Control HTTP header
 
 Spring Web MVC supports many use cases and ways to configure "Cache-Control" headers for
-an application. While the https://tools.ietf.org/html/rfc7234#section-5.2.2[RFC 7234 Section 5.2.2]
+an application. While https://tools.ietf.org/html/rfc7234#section-5.2.2[RFC 7234 Section 5.2.2]
 completely describes that header and its possible directives, there are several ways to
 address the most common cases.
 
-Spring Web MVC is using a configuration convention in several of its APIs:
+Spring Web MVC uses a configuration convention in several of its APIs:
 `setCachePeriod(int seconds)`:
 
-* A `-1` value won't generate a `'Cache-Control'` response header
-* A `0` value will prevent caching using the `'Cache-Control: no-store'` directive
-* A `n > 0` value will cache the given response for `n` seconds using the
-`'Cache-Control: max-age=n'` directive
+* A `-1` value won't generate a `'Cache-Control'` response header.
+* A `0` value will prevent caching using the `'Cache-Control: no-store'` directive.
+* An `n > 0` value will cache the given response for `n` seconds using the
+`'Cache-Control: max-age=n'` directive.
 
 The {javadoc-baseurl}/org/springframework/http/CacheControl.html[`CacheControl`] builder
 class simply describes the available "Cache-Control" directives and makes it easier to
-build your own HTTP caching strategy. Once built, a `CacheControl` instance can be then
-taken as an argument in several Spring Web MVC APIs.
+build your own HTTP caching strategy. Once built, a `CacheControl` instance can then be
+accepted as an argument in several Spring Web MVC APIs.
 
 
 [source,java,indent=0]
@@ -4153,8 +4153,8 @@ taken as an argument in several Spring Web MVC APIs.
 Static resources should be served with appropriate `'Cache-Control'` and conditional
 headers for optimal performance.
 <<mvc-config-static-resources,Configuring a `ResourceHttpRequestHandler`>> for serving
-static resources not only natively writes `'Last-Modified'` headers by reading files
-metadata, but also `'Cache-Control'` if properly configured.
+static resources not only natively writes `'Last-Modified'` headers by reading a file's
+metadata, but also `'Cache-Control'` headers if properly configured.
 
 You can set the `cachePeriod` attribute on a `ResourceHttpRequestHandler` or use
 a `CacheControl` instance, which supports more specific directives:
@@ -4191,14 +4191,15 @@ And in XML:
 [[mvc-caching-etag-lastmodified]]
 === Support for the Cache-Control, ETag and Last-Modified response headers in Controllers
 
-Controllers can support `'Cache-Control'` `'ETag'` and/or `'If-Modified-Since'` HTTP requests;
+Controllers can support `'Cache-Control'`, `'ETag'`, and/or `'If-Modified-Since'` HTTP requests;
 this is indeed recommended if a `'Cache-Control'` header is to be set on the response.
 This involves calculating a lastModified `long` and/or an Etag value for a given request,
 comparing it against the `'If-Modified-Since'` request header value, and potentially returning
 a response with status code 304 (Not Modified).
 
-As described in <<mvc-ann-httpentity>>, Controllers can access request/response using `HttpEntity` types.
-Controllers returning `ResponseEntity` can include HTTP caching information in responses like this:
+As described in <<mvc-ann-httpentity>>, Controllers can interact with the request/response using
+`HttpEntity` types. Controllers returning `ResponseEntity` can include HTTP caching information
+in responses like this:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -4217,11 +4218,9 @@ Controllers returning `ResponseEntity` can include HTTP caching information in r
 	}
 ----
 
-
 Doing this will not only include `'ETag'` and `'Cache-Control'` headers in the response, it will **also convert the
-response to a `HTTP 304 Not Modified` response with an empty body** if the conditional headers sent by the client
+response to an `HTTP 304 Not Modified` response with an empty body** if the conditional headers sent by the client
 match the caching information set by the Controller.
-
 
 An `@RequestMapping` method may also wish to support the same behavior.
 This can be achieved as follows:
