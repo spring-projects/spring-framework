@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,8 +17,8 @@
 package org.springframework.context;
 
 /**
- * An extension of the {@link Lifecycle} interface for those objects that require to be
- * started upon ApplicationContext refresh and/or shutdown in a particular order.
+ * An extension of the {@link Lifecycle} interface for those objects that require to
+ * be started upon ApplicationContext refresh and/or shutdown in a particular order.
  * The {@link #isAutoStartup()} return value indicates whether this object should
  * be started at the time of a context refresh. The callback-accepting
  * {@link #stop(Runnable)} method is useful for objects that have an asynchronous
@@ -55,26 +55,37 @@ package org.springframework.context;
  *
  * @author Mark Fisher
  * @since 3.0
+ * @see LifecycleProcessor
+ * @see ConfigurableApplicationContext
  */
 public interface SmartLifecycle extends Lifecycle, Phased {
 
 	/**
-	 * Return whether this Lifecycle component should be started automatically
-	 * by the container when the ApplicationContext is refreshed. A value of
-	 * "false" indicates that the component is intended to be started manually.
+	 * Returns {@code true} if this {@code Lifecycle} component should get
+	 * started automatically by the container at the time that the containing
+	 * {@link ApplicationContext} gets refreshed.
+	 * <p>A value of {@code false} indicates that the component is intended to
+	 * be started through an explicit {@link #start()} call instead, analogous
+	 * to a plain {@link Lifecycle} implementation.
+	 * @see #start()
+	 * @see #getPhase()
+	 * @see LifecycleProcessor#onRefresh()
+	 * @see ConfigurableApplicationContext#refresh()
 	 */
 	boolean isAutoStartup();
 
 	/**
 	 * Indicates that a Lifecycle component must stop if it is currently running.
-	 * <p>The provided callback is used by the {@link LifecycleProcessor} to support an
-	 * ordered, and potentially concurrent, shutdown of all components having a
+	 * <p>The provided callback is used by the {@link LifecycleProcessor} to support
+	 * an ordered, and potentially concurrent, shutdown of all components having a
 	 * common shutdown order value. The callback <b>must</b> be executed after
-	 * the SmartLifecycle component does indeed stop.
-	 * <p>The {@code LifecycleProcessor} will call <i>only</i> this variant of the
+	 * the {@code SmartLifecycle} component does indeed stop.
+	 * <p>The {@link LifecycleProcessor} will call <i>only</i> this variant of the
 	 * {@code stop} method; i.e. {@link Lifecycle#stop()} will not be called for
-	 * {@link SmartLifecycle} implementations unless explicitly delegated to within
-	 * this method.
+	 * {@code SmartLifecycle} implementations unless explicitly delegated to within
+	 * the implementation of this method.
+	 * @see #stop()
+	 * @see #getPhase()
 	 */
 	void stop(Runnable callback);
 
