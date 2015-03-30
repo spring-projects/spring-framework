@@ -22,7 +22,6 @@ import java.util.Set;
 
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.converter.ConditionalGenericConverter;
-import org.springframework.util.ClassUtils;
 
 /**
  * Simply calls {@link Object#toString()} to convert any supported object
@@ -37,7 +36,9 @@ import org.springframework.util.ClassUtils;
  *
  * @author Keith Donald
  * @author Juergen Hoeller
+ * @author Sam Brannen
  * @since 3.0
+ * @see ObjectToObjectConverter
  */
 final class FallbackObjectToStringConverter implements ConditionalGenericConverter {
 
@@ -50,12 +51,13 @@ final class FallbackObjectToStringConverter implements ConditionalGenericConvert
 	public boolean matches(TypeDescriptor sourceType, TypeDescriptor targetType) {
 		Class<?> sourceClass = sourceType.getObjectType();
 		if (String.class.equals(sourceClass)) {
+			// no conversion required
 			return false;
 		}
 		return (CharSequence.class.isAssignableFrom(sourceClass) ||
 				StringWriter.class.isAssignableFrom(sourceClass) ||
-				ObjectToObjectConverter.getOfMethod(sourceClass, String.class) != null ||
-				ClassUtils.getConstructorIfAvailable(sourceClass, String.class) != null);
+				ObjectToObjectConverter.hasFactoryMethod(sourceClass, String.class) ||
+				ObjectToObjectConverter.hasFactoryConstructor(sourceClass, String.class));
 	}
 
 	@Override

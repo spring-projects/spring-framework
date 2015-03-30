@@ -47,9 +47,16 @@ import org.springframework.util.ReflectionUtils;
  * <li>Otherwise throw a {@link ConversionFailedException}.
  * </ol>
  *
+ * <p><strong>Warning</strong>: this converter does <em>not</em> support the
+ * {@link Object#toString()} method for converting from a {@code sourceType}
+ * to {@code java.lang.String}. For {@code toString()} support, use
+ * {@link FallbackObjectToStringConverter} instead.
+ *
  * @author Keith Donald
  * @author Juergen Hoeller
+ * @author Sam Brannen
  * @since 3.0
+ * @see FallbackObjectToStringConverter
  */
 final class ObjectToObjectConverter implements ConditionalGenericConverter {
 
@@ -65,8 +72,8 @@ final class ObjectToObjectConverter implements ConditionalGenericConverter {
 			return false;
 		}
 		return (String.class.equals(targetType.getType()) ?
-				(ClassUtils.getConstructorIfAvailable(String.class, sourceType.getType()) != null) :
-				hasToMethodOrOfMethodOrConstructor(targetType.getType(), sourceType.getType()));
+				hasFactoryConstructor(String.class, sourceType.getType()) :
+				hasToMethodOrFactoryMethodOrConstructor(targetType.getType(), sourceType.getType()));
 	}
 
 	@Override
@@ -77,19 +84,22 @@ final class ObjectToObjectConverter implements ConditionalGenericConverter {
 		Class<?> sourceClass = sourceType.getType();
 		Class<?> targetClass = targetType.getType();
 		try {
+			// Do not invoke a toString() method
 			if (!String.class.equals(targetClass)) {
 				Method method = getToMethod(targetClass, sourceClass);
 				if (method != null) {
 					ReflectionUtils.makeAccessible(method);
 					return method.invoke(source);
 				}
-				method = getOfMethod(targetClass, sourceClass);
-				if (method != null) {
-					ReflectionUtils.makeAccessible(method);
-					return method.invoke(null, source);
-				}
 			}
-			Constructor<?> constructor = ClassUtils.getConstructorIfAvailable(targetClass, sourceClass);
+
+			Method method = getFactoryMethod(targetClass, sourceClass);
+			if (method != null) {
+				ReflectionUtils.makeAccessible(method);
+				return method.invoke(null, source);
+			}
+
+			Constructor<?> constructor = getFactoryConstructor(targetClass, sourceClass);
 			if (constructor != null) {
 				return constructor.newInstance(source);
 			}
@@ -100,23 +110,26 @@ final class ObjectToObjectConverter implements ConditionalGenericConverter {
 		catch (Throwable ex) {
 			throw new ConversionFailedException(sourceType, targetType, source, ex);
 		}
-		throw new IllegalStateException("No static valueOf/of/from(" + sourceClass.getName() +
-				") method or Constructor(" + sourceClass.getName() + ") exists on " + targetClass.getName());
+
+		// If sourceClass is Number and targetClass is Integer, then the following message
+		// format should expand to:
+		// No toInteger() method exists on java.lang.Number, and no static
+		// valueOf/of/from(java.lang.Number) method or Integer(java.lang.Number)
+		// constructor exists on java.lang.Integer.
+		String message = String.format(
+			"No to%3$s() method exists on %1$s, and no static valueOf/of/from(%1$s) method or %3$s(%1$s) constructor exists on %2$s.",
+			sourceClass.getName(), targetClass.getName(), targetClass.getSimpleName());
+
+		throw new IllegalStateException(message);
 	}
 
-
-	private static boolean hasToMethodOrOfMethodOrConstructor(Class<?> targetClass, Class<?> sourceClass) {
-		return (getToMethod(targetClass, sourceClass) != null ||
-				getOfMethod(targetClass, sourceClass) != null ||
-				ClassUtils.getConstructorIfAvailable(targetClass, sourceClass) != null);
-	}
 
 	private static Method getToMethod(Class<?> targetClass, Class<?> sourceClass) {
 		Method method = ClassUtils.getMethodIfAvailable(sourceClass, "to" + targetClass.getSimpleName());
 		return (method != null && targetClass.equals(method.getReturnType()) ? method : null);
 	}
 
-	static Method getOfMethod(Class<?> targetClass, Class<?> sourceClass) {
+	private static Method getFactoryMethod(Class<?> targetClass, Class<?> sourceClass) {
 		Method method = ClassUtils.getStaticMethod(targetClass, "valueOf", sourceClass);
 		if (method == null) {
 			method = ClassUtils.getStaticMethod(targetClass, "of", sourceClass);
@@ -125,6 +138,29 @@ final class ObjectToObjectConverter implements ConditionalGenericConverter {
 			}
 		}
 		return method;
+	}
+
+	private static Constructor<?> getFactoryConstructor(Class<?> targetClass, Class<?> sourceClass) {
+		return ClassUtils.getConstructorIfAvailable(targetClass, sourceClass);
+	}
+
+	private static boolean hasToMethodOrFactoryMethodOrConstructor(Class<?> targetClass,
+			Class<?> sourceClass) {
+		return (hasToMethod(targetClass, sourceClass) ||
+				hasFactoryMethod(targetClass, sourceClass) ||
+				hasFactoryConstructor(targetClass, sourceClass));
+	}
+
+	static boolean hasToMethod(Class<?> targetClass, Class<?> sourceClass) {
+		return getToMethod(targetClass, sourceClass) != null;
+	}
+
+	static boolean hasFactoryMethod(Class<?> targetClass, Class<?> sourceClass) {
+		return getFactoryMethod(targetClass, sourceClass) != null;
+	}
+
+	static boolean hasFactoryConstructor(Class<?> targetClass, Class<?> sourceClass) {
+		return getFactoryConstructor(targetClass, sourceClass) != null;
 	}
 
 }
