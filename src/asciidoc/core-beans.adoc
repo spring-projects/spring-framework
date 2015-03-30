@@ -3093,9 +3093,9 @@ lifecycle requirements (e.g. starts and stops some background process):
 ----
 
 Any Spring-managed object may implement that interface. Then, when the
-`ApplicationContext` itself starts and stops, it will cascade those calls to all `Lifecycle`
-implementations defined within that context. It does this by delegating to a
-`LifecycleProcessor`:
+`ApplicationContext` itself receives start and stop signals, e.g. for a stop/restart
+scenario at runtime, it will cascade those calls to all `Lifecycle` implementations
+defined within that context. It does this by delegating to a `LifecycleProcessor`:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -3112,6 +3112,14 @@ implementations defined within that context. It does this by delegating to a
 Notice that the `LifecycleProcessor` is itself an extension of the `Lifecycle`
 interface. It also adds two other methods for reacting to the context being refreshed
 and closed.
+
+[TIP]
+====
+Note that the regular `org.springframework.context.Lifecycle` interface is just a plain
+contract for explicit start/stop notifications and does NOT imply auto-startup at context
+refresh time. Consider implementing `org.springframework.context.SmartLifecycle` instead
+for fine-grained control over auto-startup of a specific bean (including startup phases).
+====
 
 The order of startup and shutdown invocations can be important. If a "depends-on"
 relationship exists between any two objects, the dependent side will start __after__ its
