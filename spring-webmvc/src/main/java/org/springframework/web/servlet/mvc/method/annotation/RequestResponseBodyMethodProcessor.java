@@ -17,8 +17,6 @@
 package org.springframework.web.servlet.mvc.method.annotation;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.PushbackInputStream;
 import java.lang.reflect.Type;
 import java.util.List;
 
@@ -146,43 +144,14 @@ public class RequestResponseBodyMethodProcessor extends AbstractMessageConverter
 		HttpServletRequest servletRequest = webRequest.getNativeRequest(HttpServletRequest.class);
 		HttpInputMessage inputMessage = new ServletServerHttpRequest(servletRequest);
 
-		InputStream inputStream = inputMessage.getBody();
-		if (inputStream == null) {
-			return handleEmptyBody(methodParam);
-		}
-		else if (inputStream.markSupported()) {
-			inputStream.mark(1);
-			if (inputStream.read() == -1) {
-				return handleEmptyBody(methodParam);
+		Object arg = readWithMessageConverters(inputMessage, methodParam, paramType);
+		if (arg == null) {
+			if (methodParam.getParameterAnnotation(RequestBody.class).required()) {
+				throw new HttpMessageNotReadableException("Required request body is missing: " + methodParam);
 			}
-			inputStream.reset();
-		}
-		else {
-			final PushbackInputStream pushbackInputStream = new PushbackInputStream(inputStream);
-			int b = pushbackInputStream.read();
-			if (b == -1) {
-				return handleEmptyBody(methodParam);
-			}
-			else {
-				pushbackInputStream.unread(b);
-			}
-			inputMessage = new ServletServerHttpRequest(servletRequest) {
-				@Override
-				public InputStream getBody() {
-					// Form POST should not get here
-					return pushbackInputStream;
-				}
-			};
 		}
 
-		return super.readWithMessageConverters(inputMessage, methodParam, paramType);
-	}
-
-	private Object handleEmptyBody(MethodParameter param) {
-		if (param.getParameterAnnotation(RequestBody.class).required()) {
-			throw new HttpMessageNotReadableException("Required request body content is missing: " + param);
-		}
-		return null;
+		return arg;
 	}
 
 	@Override

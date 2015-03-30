@@ -16,14 +16,19 @@
 
 package org.springframework.web.servlet.mvc.method.annotation;
 
+import static org.junit.Assert.*;
+import static org.mockito.BDDMockito.any;
+import static org.mockito.BDDMockito.*;
+import static org.mockito.BDDMockito.isA;
+import static org.mockito.Matchers.eq;
+import static org.springframework.web.servlet.HandlerMapping.*;
+
 import java.lang.reflect.Method;
 import java.net.URI;
-import java.text.SimpleDateFormat;
+import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
-import java.util.Locale;
-import java.util.TimeZone;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -47,13 +52,6 @@ import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.method.support.ModelAndViewContainer;
-
-import static org.junit.Assert.*;
-import static org.mockito.BDDMockito.any;
-import static org.mockito.BDDMockito.*;
-import static org.mockito.BDDMockito.isA;
-import static org.mockito.Matchers.eq;
-import static org.springframework.web.servlet.HandlerMapping.*;
 
 /**
  * Test fixture for {@link HttpEntityMethodProcessor} delegating to a mock
@@ -136,10 +134,12 @@ public class HttpEntityMethodProcessorMockTests {
 
 	@Test
 	public void resolveArgument() throws Exception {
+		String body = "Foo";
+
 		MediaType contentType = MediaType.TEXT_PLAIN;
 		servletRequest.addHeader("Content-Type", contentType.toString());
+		servletRequest.setContent(body.getBytes(Charset.forName("UTF-8")));
 
-		String body = "Foo";
 		given(messageConverter.canRead(String.class, contentType)).willReturn(true);
 		given(messageConverter.read(eq(String.class), isA(HttpInputMessage.class))).willReturn(body);
 
@@ -152,14 +152,16 @@ public class HttpEntityMethodProcessorMockTests {
 
 	@Test
 	public void resolveArgumentRequestEntity() throws Exception {
+		String body = "Foo";
+
 		MediaType contentType = MediaType.TEXT_PLAIN;
 		servletRequest.addHeader("Content-Type", contentType.toString());
 		servletRequest.setMethod("GET");
 		servletRequest.setServerName("www.example.com");
 		servletRequest.setServerPort(80);
 		servletRequest.setRequestURI("/path");
+		servletRequest.setContent(body.getBytes(Charset.forName("UTF-8")));
 
-		String body = "Foo";
 		given(messageConverter.canRead(String.class, contentType)).willReturn(true);
 		given(messageConverter.read(eq(String.class), isA(HttpInputMessage.class))).willReturn(body);
 
@@ -226,6 +228,7 @@ public class HttpEntityMethodProcessorMockTests {
 		verify(messageConverter).write(eq(body), eq(MediaType.TEXT_HTML), isA(HttpOutputMessage.class));
 	}
 
+	@SuppressWarnings("unchecked")
 	@Test
 	public void handleReturnValueWithResponseBodyAdvice() throws Exception {
 		ResponseEntity<String> returnValue = new ResponseEntity<>(HttpStatus.OK);
@@ -416,28 +419,35 @@ public class HttpEntityMethodProcessorMockTests {
 		assertEquals(0, servletResponse.getContentAsByteArray().length);
 	}
 
-	public ResponseEntity<String> handle1(HttpEntity<String> httpEntity, ResponseEntity<String> responseEntity, int i, RequestEntity<String> requestEntity) {
-		return responseEntity;
+	@SuppressWarnings("unused")
+	public ResponseEntity<String> handle1(HttpEntity<String> httpEntity, ResponseEntity<String> entity,
+			int i, RequestEntity<String> requestEntity) {
+
+		return entity;
 	}
 
+	@SuppressWarnings("unused")
 	public HttpEntity<?> handle2(HttpEntity<?> entity) {
 		return entity;
 	}
 
+	@SuppressWarnings("unused")
 	public CustomHttpEntity handle2x(HttpEntity<?> entity) {
 		return new CustomHttpEntity();
 	}
 
+	@SuppressWarnings("unused")
 	public int handle3() {
 		return 42;
 	}
 
+	@SuppressWarnings("unused")
 	@RequestMapping(produces = {"text/html", "application/xhtml+xml"})
 	public ResponseEntity<String> handle4() {
 		return null;
 	}
 
-
+	@SuppressWarnings("unused")
 	public static class CustomHttpEntity extends HttpEntity<Object> {
 	}
 

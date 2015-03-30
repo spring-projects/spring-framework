@@ -18,6 +18,7 @@ package org.springframework.web.servlet.mvc.method.annotation;
 
 import java.io.Serializable;
 import java.lang.reflect.Method;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -29,6 +30,7 @@ import org.junit.Test;
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.aop.target.SingletonTargetSource;
 import org.springframework.core.MethodParameter;
+import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -177,7 +179,9 @@ public class RequestResponseBodyMethodProcessorTests {
 		assertEquals("foobarbaz", result);
 	}
 
-	@Test(expected = HttpMessageNotReadableException.class)  // SPR-9942
+	// SPR-9942
+
+	@Test(expected = HttpMessageNotReadableException.class)
 	public void resolveArgumentRequiredNoContent() throws Exception {
 		this.servletRequest.setContent(new byte[0]);
 		this.servletRequest.setContentType("text/plain");
@@ -187,7 +191,23 @@ public class RequestResponseBodyMethodProcessorTests {
 		processor.resolveArgument(paramString, mavContainer, webRequest, binderFactory);
 	}
 
-	@Test  // SPR-9964
+	// SPR-12778
+
+	@Test
+	public void resolveArgumentRequiredNoContentDefaultValue() throws Exception {
+		this.servletRequest.setContent(new byte[0]);
+		this.servletRequest.setContentType("text/plain");
+		List<HttpMessageConverter<?>> converters = Arrays.asList(new StringHttpMessageConverter());
+		List<Object> advice = Arrays.asList(new EmptyRequestBodyAdvice());
+		RequestResponseBodyMethodProcessor processor = new RequestResponseBodyMethodProcessor(converters, advice);
+		String arg = (String) processor.resolveArgument(paramString, mavContainer, webRequest, binderFactory);
+		assertNotNull(arg);
+		assertEquals("default value for empty body", arg);
+	}
+
+	// SPR-9964
+
+	@Test
 	public void resolveArgumentTypeVariable() throws Exception {
 		Method method = MyParameterizedController.class.getMethod("handleDto", Identifiable.class);
 		HandlerMethod handlerMethod = new HandlerMethod(new MySimpleParameterizedController(), method);
@@ -207,7 +227,9 @@ public class RequestResponseBodyMethodProcessorTests {
 		assertEquals("Jad", result.getName());
 	}
 
-	@Test  // SPR-11225
+	// SPR-11225
+
+	@Test
 	public void resolveArgumentTypeVariableWithNonGenericConverter() throws Exception {
 		Method method = MyParameterizedController.class.getMethod("handleDto", Identifiable.class);
 		HandlerMethod handlerMethod = new HandlerMethod(new MySimpleParameterizedController(), method);
@@ -229,7 +251,9 @@ public class RequestResponseBodyMethodProcessorTests {
 		assertEquals("Jad", result.getName());
 	}
 
-	@Test  // SPR-9160
+	// SPR-9160
+
+	@Test
 	public void handleReturnValueSortByQuality() throws Exception {
 		this.servletRequest.addHeader("Accept", "text/plain; q=0.5, application/json");
 
@@ -383,6 +407,7 @@ public class RequestResponseBodyMethodProcessorTests {
 	}
 
 
+	@SuppressWarnings("unused")
 	public String handle(
 			@RequestBody List<SimpleBean> list,
 			@RequestBody SimpleBean simpleBean,
@@ -393,6 +418,7 @@ public class RequestResponseBodyMethodProcessorTests {
 	}
 
 
+	@SuppressWarnings("unused")
 	private static abstract class MyParameterizedController<DTO extends Identifiable> {
 
 		@SuppressWarnings("unused")
@@ -400,6 +426,7 @@ public class RequestResponseBodyMethodProcessorTests {
 	}
 
 
+	@SuppressWarnings("unused")
 	private static class MySimpleParameterizedController extends MyParameterizedController<SimpleBean> {
 	}
 
@@ -472,9 +499,10 @@ public class RequestResponseBodyMethodProcessorTests {
 		}
 	}
 
-	private interface MyJacksonView1 {};
-	private interface MyJacksonView2 {};
+	private interface MyJacksonView1 {}
+	private interface MyJacksonView2 {}
 
+	@SuppressWarnings("unused")
 	private static class JacksonViewBean {
 
 		@JsonView(MyJacksonView1.class)
@@ -535,6 +563,37 @@ public class RequestResponseBodyMethodProcessorTests {
 			return new ResponseEntity<JacksonViewBean>(bean, HttpStatus.OK);
 		}
 
+	}
+
+	private static class EmptyRequestBodyAdvice implements RequestBodyAdvice {
+
+		@Override
+		public boolean supports(MethodParameter methodParameter, Type targetType,
+				Class<? extends HttpMessageConverter<?>> converterType) {
+
+			return StringHttpMessageConverter.class.equals(converterType);
+		}
+
+		@Override
+		public Object handleEmptyBody(Object body, HttpInputMessage inputMessage, MethodParameter parameter,
+				Type targetType, Class<? extends HttpMessageConverter<?>> converterType) {
+
+			return "default value for empty body";
+		}
+
+		@Override
+		public HttpInputMessage beforeBodyRead(HttpInputMessage inputMessage, MethodParameter parameter,
+				Type targetType, Class<? extends HttpMessageConverter<?>> converterType) {
+
+			return inputMessage;
+		}
+
+		@Override
+		public Object afterBodyRead(Object body, HttpInputMessage inputMessage, MethodParameter parameter,
+				Type targetType, Class<? extends HttpMessageConverter<?>> converterType) {
+
+			return body;
+		}
 	}
 
 }

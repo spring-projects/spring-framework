@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,12 @@
 
 package org.springframework.web.servlet.mvc.method.annotation;
 
+import static org.junit.Assert.*;
+
 import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.junit.Before;
@@ -38,8 +41,6 @@ import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.method.support.ModelAndViewContainer;
-
-import static org.junit.Assert.*;
 
 /**
  * Test fixture with {@link HttpEntityMethodProcessor} delegating to
@@ -61,8 +62,6 @@ public class HttpEntityMethodProcessorTests {
 
 	private MockHttpServletRequest servletRequest;
 
-	private MockHttpServletResponse servletResponse;
-
 	private ServletWebRequest webRequest;
 
 
@@ -75,8 +74,7 @@ public class HttpEntityMethodProcessorTests {
 		mavContainer = new ModelAndViewContainer();
 		binderFactory = new ValidatingBinderFactory();
 		servletRequest = new MockHttpServletRequest();
-		servletResponse = new MockHttpServletResponse();
-		webRequest = new ServletWebRequest(servletRequest, servletResponse);
+		webRequest = new ServletWebRequest(servletRequest, new MockHttpServletResponse());
 	}
 
 	@Test
@@ -95,6 +93,23 @@ public class HttpEntityMethodProcessorTests {
 
 		assertNotNull(result);
 		assertEquals("Jad", result.getBody().getName());
+	}
+
+	// SPR-12861
+
+	@Test
+	public void resolveArgumentWithEmptyBody() throws Exception {
+		this.servletRequest.setContent(new byte[0]);
+		this.servletRequest.setContentType("application/json");
+
+		List<HttpMessageConverter<?>> converters = Arrays.asList(new MappingJackson2HttpMessageConverter());
+		HttpEntityMethodProcessor processor = new HttpEntityMethodProcessor(converters);
+
+		HttpEntity<?> result = (HttpEntity<?>) processor.resolveArgument(this.paramSimpleBean,
+				this.mavContainer, this.webRequest, this.binderFactory);
+
+		assertNotNull(result);
+		assertNull(result.getBody());
 	}
 
 	@Test
@@ -139,20 +154,20 @@ public class HttpEntityMethodProcessorTests {
 	}
 
 
+	@SuppressWarnings("unused")
 	public void handle(HttpEntity<List<SimpleBean>> arg1, HttpEntity<SimpleBean> arg2) {
 	}
 
-
+	@SuppressWarnings("unused")
 	private static abstract class MyParameterizedController<DTO extends Identifiable> {
 
 		public void handleDto(HttpEntity<DTO> dto) {
 		}
 	}
 
-
+	@SuppressWarnings("unused")
 	private static class MySimpleParameterizedController extends MyParameterizedController<SimpleBean> {
 	}
-
 
 	private interface Identifiable extends Serializable {
 

@@ -19,12 +19,14 @@ package org.springframework.web.servlet.mvc.method.annotation;
 import java.io.IOException;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.net.URI;
 import java.util.List;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ResolvableType;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageConverter;
@@ -120,8 +122,9 @@ public class HttpEntityMethodProcessor extends AbstractMessageConverterMethodPro
 
 		Object body = readWithMessageConverters(webRequest, parameter, paramType);
 		if (RequestEntity.class.equals(parameter.getParameterType())) {
-			return new RequestEntity<Object>(body, inputMessage.getHeaders(),
-					inputMessage.getMethod(), inputMessage.getURI());
+			URI url = inputMessage.getURI();
+			HttpMethod httpMethod = inputMessage.getMethod();
+			return new RequestEntity<Object>(body, inputMessage.getHeaders(), httpMethod, url);
 		}
 		else {
 			return new HttpEntity<Object>(body, inputMessage.getHeaders());
