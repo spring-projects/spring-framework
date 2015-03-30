@@ -642,13 +642,49 @@ final class HierarchicalUriComponents extends UriComponents {
 
 
 		public FullPathComponent(String path) {
-			this.partialPaths = PartialPath.parse(path);
+			this.partialPaths = Collections.unmodifiableList(initPartialPaths(path));
 			this.path = path;
 		}
 
 		private FullPathComponent(List<PartialPath> partialPaths) {
-			this.partialPaths = partialPaths;
-			this.path = PartialPath.getPath(partialPaths);
+			this.partialPaths = Collections.unmodifiableList(partialPaths);
+			this.path = initPath(partialPaths);
+		}
+
+		private static String initPath(List<PartialPath> partialPaths) {
+			StringBuilder builder = new StringBuilder();
+			for (PartialPath partialPath : partialPaths) {
+				builder.append(partialPath.getValue());
+			}
+			return builder.toString();
+		}
+
+		private static List<PartialPath> initPartialPaths(String path) {
+			List<PartialPath> result = new ArrayList<PartialPath>();
+			int startIdx;
+			int endIdx = 0;
+			while ((startIdx = path.indexOf("{/", endIdx)) != -1) {
+				if (startIdx > endIdx) {
+					String prevPart = path.substring(endIdx, startIdx);
+					result.add(new PartialPath(prevPart, Type.PATH));
+				}
+				endIdx = path.indexOf('}', startIdx + 2) + 1;
+				if (endIdx == -1) {
+					throw new IllegalArgumentException("Path \"" + path + "\" has no " +
+							"closing \"}\" after \"{/\" at index " + startIdx);
+				}
+				String part = path.substring(startIdx, endIdx);
+				result.add(new PartialPath(part, Type.PATH_SEGMENT));
+			}
+			if (endIdx < path.length()) {
+				String endPart = path.substring(endIdx);
+				result.add(new PartialPath(endPart, Type.PATH));
+			}
+			return result;
+		}
+
+		List<PartialPath> getPartialPaths() {
+			return this.partialPaths;
 		}
 
 		@Override
@@ -670,21 +706,29 @@ final class HierarchicalUriComponents extends UriComponents {
 
 		@Override
 		public PathComponent encode(String encoding) throws UnsupportedEncodingException {
-			List<PartialPath> encodedPath =
-					PartialPath.encode(this.partialPaths, encoding);
-			return new FullPathComponent(encodedPath);
+			List<PartialPath> result = new ArrayList<PartialPath>();
+			for (PartialPath partialPath : this.partialPaths) {
+				PartialPath encoded = partialPath.encode(encoding);
+				result.add(encoded);
+			}
+			return new FullPathComponent(result);
 		}
 
 		@Override
 		public void verify() {
-			verifyUriComponent(getPath(), Type.PATH);
+			for (PartialPath partialPath : this.partialPaths) {
+				partialPath.verify();
+			}
 		}
 
 		@Override
 		public PathComponent expand(UriTemplateVariables uriVariables) {
-			List<PartialPath> expandedPath =
-					PartialPath.expand(this.partialPaths, uriVariables);
-			return new FullPathComponent(expandedPath);
+			List<PartialPath> result = new ArrayList<PartialPath>();
+			for (PartialPath partialPath : this.partialPaths) {
+				PartialPath expanded = partialPath.expand(uriVariables);
+				result.add(expanded);
+			}
+			return new FullPathComponent(result);
 		}
 
 		@Override
@@ -721,80 +765,30 @@ final class HierarchicalUriComponents extends UriComponents {
 				this.type = type;
 			}
 
+			public String getValue() {
+				return this.value;
+			}
+
 			private PartialPath expand(UriTemplateVariables uriVariables) {
 				String expandedValue = expandUriComponent(this.value, uriVariables);
 				return new PartialPath(expandedValue, this.type);
 			}
 
-			private PartialPath encode(String encoding)
-					throws UnsupportedEncodingException {
+			private PartialPath encode(String encoding) throws UnsupportedEncodingException {
 				String encodedPath = encodeUriComponent(this.value, encoding, this.type);
 				return new PartialPath(encodedPath, this.type);
 			}
 
+			public void verify() {
+				verifyUriComponent(this.value, this.type);
+			}
+
 			@Override
 			public String toString() {
-				return value;
+				return this.value;
 			}
-
-			public static List<PartialPath> parse(String path) {
-				List<PartialPath> result = new ArrayList<PartialPath>();
-				int startIdx;
-				int endIdx = 0;
-				while ((startIdx = path.indexOf("{/", endIdx)) != -1) {
-					if (startIdx > endIdx) {
-						String prevPart = path.substring(endIdx, startIdx);
-						result.add(new PartialPath(prevPart, Type.PATH));
-					}
-					endIdx = path.indexOf('}', startIdx + 2) + 1;
-					if (endIdx == -1) {
-						throw new IllegalArgumentException("Path \"" + path + "\" has no " +
-								"closing \"}\" after \"{/\" at index " + startIdx);
-					}
-					String part = path.substring(startIdx, endIdx);
-					result.add(new PartialPath(part, Type.PATH_SEGMENT));
-				}
-				if (endIdx < path.length()) {
-					String endPart = path.substring(endIdx);
-					result.add(new PartialPath(endPart, Type.PATH));
-				}
-				return Collections.unmodifiableList(result);
-			}
-
-			public static String getPath(List<PartialPath> partialPaths) {
-				StringBuilder builder = new StringBuilder();
-				for (PartialPath partialPath : partialPaths) {
-					builder.append(partialPath.value);
-				}
-				return builder.toString();
-			}
-
-			public static List<PartialPath> expand(
-					List<PartialPath> partialPaths,
-					UriTemplateVariables uriVariables) {
-				List<PartialPath> result = new ArrayList<PartialPath>();
-				for (PartialPath partialPath : partialPaths) {
-					PartialPath expanded = partialPath.expand(uriVariables);
-					result.add(expanded);
-				}
-				return result;
-			}
-
-			public static List<PartialPath> encode(
-					List<PartialPath> partialPaths, String encoding)
-					throws UnsupportedEncodingException {
-				List<PartialPath> result = new ArrayList<PartialPath>();
-				for (PartialPath partialPath : partialPaths) {
-					PartialPath encoded = partialPath.encode(encoding);
-					result.add(encoded);
-				}
-				return result;
-			}
-
 		}
-
 	}
-
 
 	/**
 	 * Represents a path backed by a string list (i.e. path segments).
@@ -964,6 +958,7 @@ final class HierarchicalUriComponents extends UriComponents {
 		@Override
 		public void copyToUriComponentsBuilder(UriComponentsBuilder builder) {
 		}
+		@SuppressWarnings("EqualsWhichDoesntCheckParameterClass")
 		@Override
 		public boolean equals(Object obj) {
 			return (this == obj);
