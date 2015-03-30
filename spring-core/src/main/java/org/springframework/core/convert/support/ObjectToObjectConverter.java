@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,14 +29,23 @@ import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 
 /**
- * Generic converter that attempts to convert a source Object to a target type
- * by delegating to methods on the target type.
+ * Generic converter that uses conventions to convert a source object to a
+ * {@code targetType} by delegating to a method on the source object or to
+ * a static factory method or constructor on the {@code targetType}.
  *
- * <p>Calls a static {@code valueOf(sourceType)} or Java 8 style {@code of|from(sourceType)}
- * method on the target type to perform the conversion, if such a method exists. Otherwise,
- * it checks for a {@code to[targetType.simpleName]} method on the source type calls
- * the target type's constructor that accepts a single {@code sourceType} argument, if such
- * a constructor exists. If neither strategy works, it throws a ConversionFailedException.
+ * <h3>Conversion Algorithm</h3>
+ * <ol>
+ * <li>Invoke a {@code to[targetType.simpleName]()} method on the source object
+ * that has a return type equal to {@code targetType}, if such a method exists.
+ * For example, {@code org.example.Bar Foo#toBar()} is a method that follows this
+ * convention.
+ * <li>Otherwise invoke a <em>static</em> {@code valueOf(sourceType)} or Java
+ * 8 style <em>static</em> {@code of(sourceType)} or {@code from(sourceType)}
+ * method on the {@code targetType}, if such a method exists.
+ * <li>Otherwise invoke a constructor on the {@code targetType} that accepts
+ * a single {@code sourceType} argument, if such a constructor exists.
+ * <li>Otherwise throw a {@link ConversionFailedException}.
+ * </ol>
  *
  * @author Keith Donald
  * @author Juergen Hoeller
