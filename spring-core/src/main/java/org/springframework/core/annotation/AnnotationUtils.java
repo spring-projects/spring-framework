@@ -583,6 +583,7 @@ public abstract class AnnotationUtils {
 		for (Method method : methods) {
 			if (method.getParameterTypes().length == 0 && method.getReturnType() != void.class) {
 				try {
+					ReflectionUtils.makeAccessible(method);
 					Object value = method.invoke(annotation);
 					attrs.put(method.getName(), adaptValue(value, classValuesAsString, nestedAnnotationsAsMap));
 				}
