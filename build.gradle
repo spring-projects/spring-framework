@@ -46,13 +46,13 @@ configure(allprojects) { project ->
 	ext.nettyVersion         = "4.0.26.Final"
 	ext.openJpaVersion       = "2.2.2"  // 2.3.0 not Java 8 compatible (based on ASM 4)
 	ext.protobufVersion      = "2.6.1"
-	ext.reactorVersion       = "1.1.5.RELEASE"
-	ext.slf4jVersion         = "1.7.10"
+	ext.reactorVersion       = "1.1.6.RELEASE"
+	ext.slf4jVersion         = "1.7.11"
 	ext.snakeYamlVersion     = "1.15"
 	ext.snifferVersion       = "1.11"
 	ext.tiles2Version        = "2.2.2"
 	ext.tiles3Version        = "3.0.5"
-	ext.tomcatVersion        = "8.0.20"
+	ext.tomcatVersion        = "8.0.21"
 	ext.tyrusVersion         = "1.3.5"  // constrained by WebLogic 12.1.3 support
 	ext.undertowVersion      = "1.1.3.Final"
 	ext.woodstoxVersion      = "4.4.1"
@@ -86,13 +86,13 @@ configure(allprojects) { project ->
 		"-Xlint:-unchecked", "-Xlint:-options"]
 
 	compileJava {
-		sourceCompatibility=1.6
-		targetCompatibility=1.6
+		sourceCompatibility = 1.6
+		targetCompatibility = 1.6
 	}
 
 	compileTestJava {
-		sourceCompatibility=1.8
-		targetCompatibility=1.8
+		sourceCompatibility = 1.8
+		targetCompatibility = 1.8
 		options.compilerArgs += "-parameters"
 	}
 
@@ -388,8 +388,8 @@ project("spring-beans-groovy") {
 	}
 
 	compileGroovy {
-		sourceCompatibility=1.6
-		targetCompatibility=1.6
+		sourceCompatibility = 1.6
+		targetCompatibility = 1.6
 	}
 }
 
@@ -533,8 +533,8 @@ project("spring-oxm") {
 	compileTestJava {
 		// necessary to avoid java.lang.VerifyError on jibx compilation
 		// see http://jira.codehaus.org/browse/JIBX-465
-		sourceCompatibility=1.6
-		targetCompatibility=1.6
+		sourceCompatibility = 1.6
+		targetCompatibility = 1.6
 	}
 
 	dependencies {
