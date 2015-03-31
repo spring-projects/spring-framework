@@ -23,6 +23,7 @@ import java.io.ObjectOutputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Arrays;
+import java.util.List;
 
 import org.junit.Test;
 
@@ -163,6 +164,51 @@ public class UriComponentsTests {
 		assertThat(uriComponents1, equalTo(uriComponents1));
 		assertThat(uriComponents1, equalTo(uriComponents2));
 		assertThat(uriComponents1, not(equalTo(uriComponents3)));
+	}
+
+	@Test
+	public void partialPath() throws Exception {
+		List<HierarchicalUriComponents.FullPathComponent.PartialPath> l;
+
+		l = HierarchicalUriComponents.FullPathComponent.PartialPath.parse("x");
+		assertEquals(1, l.size());
+		assertEquals("x", l.get(0).value);
+		assertEquals(HierarchicalUriComponents.Type.PATH, l.get(0).type);
+
+		l = HierarchicalUriComponents.FullPathComponent.PartialPath.parse("/foo");
+		assertEquals(1, l.size());
+		assertEquals("/foo", l.get(0).value);
+		assertEquals(HierarchicalUriComponents.Type.PATH, l.get(0).type);
+
+		l = HierarchicalUriComponents.FullPathComponent.PartialPath.parse("{/foo}");
+		assertEquals(1, l.size());
+		assertEquals("{/foo}", l.get(0).value);
+		assertEquals(HierarchicalUriComponents.Type.PATH_SEGMENT, l.get(0).type);
+
+		l = HierarchicalUriComponents.FullPathComponent.PartialPath.parse("/foo{/bar}");
+		assertEquals(2, l.size());
+		assertEquals("/foo", l.get(0).value);
+		assertEquals(HierarchicalUriComponents.Type.PATH, l.get(0).type);
+		assertEquals("{/bar}", l.get(1).value);
+		assertEquals(HierarchicalUriComponents.Type.PATH_SEGMENT, l.get(1).type);
+
+		l = HierarchicalUriComponents.FullPathComponent.PartialPath.parse("{/foo}{/bar}");
+		assertEquals(2, l.size());
+		assertEquals("{/foo}", l.get(0).value);
+		assertEquals(HierarchicalUriComponents.Type.PATH_SEGMENT, l.get(0).type);
+		assertEquals("{/bar}", l.get(1).value);
+		assertEquals(HierarchicalUriComponents.Type.PATH_SEGMENT, l.get(1).type);
+
+		l = HierarchicalUriComponents.FullPathComponent.PartialPath.parse("foo{/bar}baz");
+		assertEquals(3, l.size());
+		assertEquals("foo", l.get(0).value);
+		assertEquals(HierarchicalUriComponents.Type.PATH, l.get(0).type);
+		assertEquals("{/bar}", l.get(1).value);
+		assertEquals(HierarchicalUriComponents.Type.PATH_SEGMENT, l.get(1).type);
+		assertEquals("baz", l.get(2).value);
+		assertEquals(HierarchicalUriComponents.Type.PATH, l.get(2).type);
+
+
 	}
 
 }
