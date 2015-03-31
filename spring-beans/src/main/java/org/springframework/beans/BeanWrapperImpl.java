@@ -1055,7 +1055,7 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 			else {
 				throw new InvalidPropertyException(getRootClass(), this.nestedPath + propertyName,
 						"Property referenced in indexed property path '" + propertyName +
-						"' is neither an array nor a List nor a Map; returned value was [" + pv.getValue() + "]");
+						"' is neither an array nor a List nor a Map; returned value was [" + propValue + "]");
 			}
 		}
 
