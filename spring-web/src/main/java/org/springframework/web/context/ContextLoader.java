@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -107,7 +107,6 @@ public class ContextLoader {
 	/**
 	 * Config param for the root WebApplicationContext implementation class to use: {@value}
 	 * @see #determineContextClass(ServletContext)
-	 * @see #createWebApplicationContext(ServletContext, ApplicationContext)
 	 */
 	public static final String CONTEXT_CLASS_PARAM = "contextClass";
 
@@ -193,6 +192,7 @@ public class ContextLoader {
 	 * deployed in the web app ClassLoader itself.
 	 */
 	private static volatile WebApplicationContext currentContext;
+
 
 	/**
 	 * The root WebApplicationContext instance that this loader manages.
@@ -361,6 +361,37 @@ public class ContextLoader {
 	}
 
 	/**
+	 * Return the WebApplicationContext implementation class to use, either the
+	 * default XmlWebApplicationContext or a custom context class if specified.
+	 * @param servletContext current servlet context
+	 * @return the WebApplicationContext implementation class to use
+	 * @see #CONTEXT_CLASS_PARAM
+	 * @see org.springframework.web.context.support.XmlWebApplicationContext
+	 */
+	protected Class<?> determineContextClass(ServletContext servletContext) {
+		String contextClassName = servletContext.getInitParameter(CONTEXT_CLASS_PARAM);
+		if (contextClassName != null) {
+			try {
+				return ClassUtils.forName(contextClassName, ClassUtils.getDefaultClassLoader());
+			}
+			catch (ClassNotFoundException ex) {
+				throw new ApplicationContextException(
+						"Failed to load custom context class [" + contextClassName + "]", ex);
+			}
+		}
+		else {
+			contextClassName = defaultStrategies.getProperty(WebApplicationContext.class.getName());
+			try {
+				return ClassUtils.forName(contextClassName, ContextLoader.class.getClassLoader());
+			}
+			catch (ClassNotFoundException ex) {
+				throw new ApplicationContextException(
+						"Failed to load default context class [" + contextClassName + "]", ex);
+			}
+		}
+	}
+
+	/**
 	 * @deprecated as of Spring 3.1 in favor of
 	 * {@link #createWebApplicationContext(ServletContext)} and
 	 * {@link #configureAndRefreshWebApplicationContext(ConfigurableWebApplicationContext, ServletContext)}
@@ -417,7 +448,6 @@ public class ContextLoader {
 	 * org.springframework.core.annotation.Order Order} will be sorted appropriately.
 	 * @param sc the current servlet context
 	 * @param wac the newly created application context
-	 * @see #createWebApplicationContext(ServletContext, ApplicationContext)
 	 * @see #CONTEXT_INITIALIZER_CLASSES_PARAM
 	 * @see ApplicationContextInitializer#initialize(ConfigurableApplicationContext)
 	 */
@@ -448,37 +478,6 @@ public class ContextLoader {
 		AnnotationAwareOrderComparator.sort(initializerInstances);
 		for (ApplicationContextInitializer<ConfigurableApplicationContext> initializer : initializerInstances) {
 			initializer.initialize(wac);
-		}
-	}
-
-	/**
-	 * Return the WebApplicationContext implementation class to use, either the
-	 * default XmlWebApplicationContext or a custom context class if specified.
-	 * @param servletContext current servlet context
-	 * @return the WebApplicationContext implementation class to use
-	 * @see #CONTEXT_CLASS_PARAM
-	 * @see org.springframework.web.context.support.XmlWebApplicationContext
-	 */
-	protected Class<?> determineContextClass(ServletContext servletContext) {
-		String contextClassName = servletContext.getInitParameter(CONTEXT_CLASS_PARAM);
-		if (contextClassName != null) {
-			try {
-				return ClassUtils.forName(contextClassName, ClassUtils.getDefaultClassLoader());
-			}
-			catch (ClassNotFoundException ex) {
-				throw new ApplicationContextException(
-						"Failed to load custom context class [" + contextClassName + "]", ex);
-			}
-		}
-		else {
-			contextClassName = defaultStrategies.getProperty(WebApplicationContext.class.getName());
-			try {
-				return ClassUtils.forName(contextClassName, ContextLoader.class.getClassLoader());
-			}
-			catch (ClassNotFoundException ex) {
-				throw new ApplicationContextException(
-						"Failed to load default context class [" + contextClassName + "]", ex);
-			}
 		}
 	}
 

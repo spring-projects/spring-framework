@@ -168,7 +168,7 @@ class ConfigurationClassBeanDefinitionReader {
 			this.registry.registerBeanDefinition(definitionHolder.getBeanName(), definitionHolder.getBeanDefinition());
 			configClass.setBeanName(configBeanName);
 			if (logger.isDebugEnabled()) {
-				logger.debug(String.format("Registered bean definition for imported @Configuration class %s", configBeanName));
+				logger.debug("Registered bean definition for imported class '" + configBeanName + "'");
 			}
 		}
 		else {
