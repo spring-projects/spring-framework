@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -232,7 +232,7 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator
 	 * having a chance to resolve an argument value before the standard
 	 * argument handling kicks in.
 	 */
-	public void setCustomArgumentResolvers(WebArgumentResolver[] argumentResolvers) {
+	public void setCustomArgumentResolvers(WebArgumentResolver... argumentResolvers) {
 		this.customArgumentResolvers = argumentResolvers;
 	}
 
@@ -250,7 +250,7 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator
 	 * Any such custom ModelAndViewResolver will kick in first, having a chance to
 	 * resolve an return value before the standard ModelAndView handling kicks in.
 	 */
-	public void setCustomModelAndViewResolvers(ModelAndViewResolver[] customModelAndViewResolvers) {
+	public void setCustomModelAndViewResolvers(ModelAndViewResolver... customModelAndViewResolvers) {
 		this.customModelAndViewResolvers = customModelAndViewResolvers;
 	}
 
@@ -381,7 +381,8 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator
 				if (response instanceof EventResponse) {
 					// Update the existing model, if any, when responding to an event -
 					// whereas we're replacing the model in case of an action response.
-					Map<String, Object> existingModel = (Map<String, Object>) request.getPortletSession().getAttribute(IMPLICIT_MODEL_SESSION_ATTRIBUTE);
+					Map<String, Object> existingModel = (Map<String, Object>)
+							request.getPortletSession().getAttribute(IMPLICIT_MODEL_SESSION_ATTRIBUTE);
 					if (existingModel != null) {
 						existingModel.putAll(implicitModel);
 						modelToStore = existingModel;
@@ -812,9 +813,9 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator
 					}
 				}
 			}
-			return PortletAnnotationMappingUtils.checkRequestMethod(this.methods, request) &&
+			return (PortletAnnotationMappingUtils.checkRequestMethod(this.methods, request) &&
 					PortletAnnotationMappingUtils.checkParameters(this.params, request) &&
-					PortletAnnotationMappingUtils.checkHeaders(this.headers, request);
+					PortletAnnotationMappingUtils.checkHeaders(this.headers, request));
 		}
 
 		public boolean isBetterMatchThan(RequestMappingInfo other) {

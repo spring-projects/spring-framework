@@ -38,7 +38,7 @@ configure(allprojects) { project ->
 	ext.hibernate3Version    = "3.6.10.Final"
 	ext.hibernate4Version    = "4.3.8.Final"
 	ext.hibval4Version       = "4.3.2.Final"
-	ext.hibval5Version       = "5.2.0.Beta1"
+	ext.hibval5Version       = "5.2.0.Beta1"  // to be upgraded to 5.2 final in time for Spring Framework 4.2 GA
 	ext.hsqldbVersion        = "2.3.2"
 	ext.httpclientVersion    = "4.4"
 	ext.httpasyncVersion     = "4.0.2"
@@ -93,13 +93,13 @@ configure(allprojects) { project ->
 		"-Xlint:-unchecked", "-Xlint:-options"]
 
 	compileJava {
-		sourceCompatibility=1.6
-		targetCompatibility=1.6
+		sourceCompatibility = 1.6
+		targetCompatibility = 1.6
 	}
 
 	compileTestJava {
-		sourceCompatibility=1.8
-		targetCompatibility=1.8
+		sourceCompatibility = 1.8
+		targetCompatibility = 1.8
 		options.compilerArgs += "-parameters"
 	}
 
@@ -395,8 +395,8 @@ project("spring-beans-groovy") {
 	}
 
 	compileGroovy {
-		sourceCompatibility=1.6
-		targetCompatibility=1.6
+		sourceCompatibility = 1.6
+		targetCompatibility = 1.6
 	}
 }
 
@@ -541,8 +541,8 @@ project("spring-oxm") {
 	compileTestJava {
 		// necessary to avoid java.lang.VerifyError on jibx compilation
 		// see http://jira.codehaus.org/browse/JIBX-465
-		sourceCompatibility=1.6
-		targetCompatibility=1.6
+		sourceCompatibility = 1.6
+		targetCompatibility = 1.6
 	}
 
 	if (System.getProperty("java.version").contains("1.9.")) {
@@ -1031,7 +1031,7 @@ project("spring-aspects") {
 	dependencies {
 		aspects(project(":spring-orm"))
 		ajc("org.aspectj:aspectjtools:1.9.0.BETA-1")  // for the ability to build on JDK 9, not exposed in the POMs yet
-		rt("org.aspectj:aspectjrt:${aspectjVersion}")
+		rt("org.aspectj:aspectjrt:${aspectjVersion}")  // regular AspectJ version here, to be exposed in the POMs
 		compile("org.aspectj:aspectjweaver:${aspectjVersion}")
 		provided("org.eclipse.persistence:javax.persistence:2.0.0")
 		optional(project(":spring-aop"))  // for @Async support

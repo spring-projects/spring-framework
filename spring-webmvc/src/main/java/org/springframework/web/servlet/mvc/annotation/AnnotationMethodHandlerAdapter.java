@@ -334,7 +334,7 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 	 * <p>Any such custom WebArgumentResolver will kick in first, having a chance to resolve
 	 * an argument value before the standard argument handling kicks in.
 	 */
-	public void setCustomArgumentResolvers(WebArgumentResolver[] argumentResolvers) {
+	public void setCustomArgumentResolvers(WebArgumentResolver... argumentResolvers) {
 		this.customArgumentResolvers = argumentResolvers;
 	}
 
@@ -352,7 +352,7 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 	 * <p>Any such custom ModelAndViewResolver will kick in first, having a chance to resolve
 	 * a return value before the standard ModelAndView handling kicks in.
 	 */
-	public void setCustomModelAndViewResolvers(ModelAndViewResolver[] customModelAndViewResolvers) {
+	public void setCustomModelAndViewResolvers(ModelAndViewResolver... customModelAndViewResolvers) {
 		this.customModelAndViewResolvers = customModelAndViewResolvers;
 	}
 
@@ -929,7 +929,7 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 				// to be picked up by the RedirectView
 				webRequest.getRequest().setAttribute(View.RESPONSE_STATUS_ATTRIBUTE, responseStatus);
 
-				responseArgumentUsed = true;
+				this.responseArgumentUsed = true;
 			}
 
 			// Invoke custom resolvers if present...
@@ -992,8 +992,7 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 			}
 		}
 
-		private void handleResponseBody(Object returnValue, ServletWebRequest webRequest)
-				throws Exception {
+		private void handleResponseBody(Object returnValue, ServletWebRequest webRequest) throws Exception {
 			if (returnValue == null) {
 				return;
 			}
@@ -1002,8 +1001,7 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 			writeWithMessageConverters(returnValue, inputMessage, outputMessage);
 		}
 
-		private void handleHttpEntityResponse(HttpEntity<?> responseEntity, ServletWebRequest webRequest)
-				throws Exception {
+		private void handleHttpEntityResponse(HttpEntity<?> responseEntity, ServletWebRequest webRequest) throws Exception {
 			if (responseEntity == null) {
 				return;
 			}
@@ -1030,6 +1028,7 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 		private void writeWithMessageConverters(Object returnValue,
 				HttpInputMessage inputMessage, HttpOutputMessage outputMessage)
 				throws IOException, HttpMediaTypeNotAcceptableException {
+
 			List<MediaType> acceptedMediaTypes = inputMessage.getHeaders().getAccept();
 			if (acceptedMediaTypes.isEmpty()) {
 				acceptedMediaTypes = Collections.singletonList(MediaType.ALL);
@@ -1061,7 +1060,6 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 			}
 			throw new HttpMediaTypeNotAcceptableException(allSupportedMediaTypes);
 		}
-
 	}
 
 
@@ -1079,30 +1077,30 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 		private final String[] headers;
 
 		RequestMappingInfo(String[] patterns, RequestMethod[] methods, String[] params, String[] headers) {
-			this.patterns = patterns != null ? patterns : new String[0];
-			this.methods = methods != null ? methods : new RequestMethod[0];
-			this.params = params != null ? params : new String[0];
-			this.headers = headers != null ? headers : new String[0];
+			this.patterns = (patterns != null ? patterns : new String[0]);
+			this.methods = (methods != null ? methods : new RequestMethod[0]);
+			this.params = (params != null ? params : new String[0]);
+			this.headers = (headers != null ? headers : new String[0]);
 		}
 
 		public boolean hasPatterns() {
-			return patterns.length > 0;
+			return (this.patterns.length > 0);
 		}
 
 		public String[] getPatterns() {
-			return patterns;
+			return this.patterns;
 		}
 
 		public int getMethodCount() {
-			return methods.length;
+			return this.methods.length;
 		}
 
 		public int getParamCount() {
-			return params.length;
+			return this.params.length;
 		}
 
 		public int getHeaderCount() {
-			return headers.length;
+			return this.headers.length;
 		}
 
 		public boolean matches(HttpServletRequest request) {
@@ -1122,8 +1120,8 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 		}
 
 		public Set<String> methodNames() {
-			Set<String> methodNames = new LinkedHashSet<String>(methods.length);
-			for (RequestMethod method : methods) {
+			Set<String> methodNames = new LinkedHashSet<String>(this.methods.length);
+			for (RequestMethod method : this.methods) {
 				methodNames.add(method.name());
 			}
 			return methodNames;
@@ -1145,18 +1143,18 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 		@Override
 		public String toString() {
 			StringBuilder builder = new StringBuilder();
-			builder.append(Arrays.asList(patterns));
-			if (methods.length > 0) {
+			builder.append(Arrays.asList(this.patterns));
+			if (this.methods.length > 0) {
 				builder.append(',');
-				builder.append(Arrays.asList(methods));
+				builder.append(Arrays.asList(this.methods));
 			}
-			if (headers.length > 0) {
+			if (this.headers.length > 0) {
 				builder.append(',');
-				builder.append(Arrays.asList(headers));
+				builder.append(Arrays.asList(this.headers));
 			}
-			if (params.length > 0) {
+			if (this.params.length > 0) {
 				builder.append(',');
-				builder.append(Arrays.asList(params));
+				builder.append(Arrays.asList(this.params));
 			}
 			return builder.toString();
 		}
