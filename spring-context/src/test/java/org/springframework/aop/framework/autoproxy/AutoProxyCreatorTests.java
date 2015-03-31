@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,8 @@
 package org.springframework.aop.framework.autoproxy;
 
 import java.io.Serializable;
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 
 import org.aopalliance.intercept.MethodInterceptor;
@@ -42,6 +44,7 @@ import org.springframework.tests.sample.beans.ITestBean;
 import org.springframework.tests.sample.beans.IndexedTestBean;
 import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.tests.sample.beans.factory.DummyFactory;
+import org.springframework.util.ReflectionUtils;
 
 import static org.junit.Assert.*;
 
@@ -181,6 +184,46 @@ public final class AutoProxyCreatorTests {
 		sac.registerSingleton("singletonNoInterceptor", TestBean.class);
 		sac.registerSingleton("singletonToBeProxied", TestBean.class);
 		sac.registerPrototype("prototypeToBeProxied", TestBean.class);
+		sac.refresh();
+
+		MessageSource messageSource = (MessageSource) sac.getBean("messageSource");
+		NoInterfaces noInterfaces = (NoInterfaces) sac.getBean("noInterfaces");
+		ContainerCallbackInterfacesOnly containerCallbackInterfacesOnly =
+				(ContainerCallbackInterfacesOnly) sac.getBean("containerCallbackInterfacesOnly");
+		ITestBean singletonNoInterceptor = (ITestBean) sac.getBean("singletonNoInterceptor");
+		ITestBean singletonToBeProxied = (ITestBean) sac.getBean("singletonToBeProxied");
+		ITestBean prototypeToBeProxied = (ITestBean) sac.getBean("prototypeToBeProxied");
+		assertFalse(AopUtils.isCglibProxy(messageSource));
+		assertTrue(AopUtils.isCglibProxy(noInterfaces));
+		assertTrue(AopUtils.isCglibProxy(containerCallbackInterfacesOnly));
+		assertFalse(AopUtils.isCglibProxy(singletonNoInterceptor));
+		assertFalse(AopUtils.isCglibProxy(singletonToBeProxied));
+		assertFalse(AopUtils.isCglibProxy(prototypeToBeProxied));
+
+		TestAutoProxyCreator tapc = (TestAutoProxyCreator) sac.getBean("testAutoProxyCreator");
+		assertEquals(0, tapc.testInterceptor.nrOfInvocations);
+		singletonNoInterceptor.getName();
+		assertEquals(0, tapc.testInterceptor.nrOfInvocations);
+		singletonToBeProxied.getAge();
+		assertEquals(1, tapc.testInterceptor.nrOfInvocations);
+		prototypeToBeProxied.getSpouse();
+		assertEquals(2, tapc.testInterceptor.nrOfInvocations);
+	}
+
+	@Test
+	public void testAutoProxyCreatorWithFallbackToDynamicProxy() {
+		StaticApplicationContext sac = new StaticApplicationContext();
+
+		MutablePropertyValues pvs = new MutablePropertyValues();
+		pvs.add("proxyFactoryBean", "false");
+		sac.registerSingleton("testAutoProxyCreator", TestAutoProxyCreator.class, pvs);
+
+		sac.registerSingleton("noInterfaces", NoInterfaces.class);
+		sac.registerSingleton("containerCallbackInterfacesOnly", ContainerCallbackInterfacesOnly.class);
+		sac.registerSingleton("singletonNoInterceptor", CustomProxyFactoryBean.class);
+		sac.registerSingleton("singletonToBeProxied", CustomProxyFactoryBean.class);
+		sac.registerPrototype("prototypeToBeProxied", CustomProxyFactoryBean.class);
+
 		sac.refresh();
 
 		MessageSource messageSource = (MessageSource) sac.getBean("messageSource");
@@ -401,6 +444,32 @@ public final class AutoProxyCreatorTests {
 
 		@Override
 		public void destroy() {
+		}
+	}
+
+
+	public static class CustomProxyFactoryBean implements FactoryBean<ITestBean> {
+
+		private final TestBean tb = new TestBean();
+
+		@Override
+		public ITestBean getObject() {
+			return (ITestBean) Proxy.newProxyInstance(CustomProxyFactoryBean.class.getClassLoader(), new Class<?>[]{ITestBean.class}, new InvocationHandler() {
+				@Override
+				public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+					return ReflectionUtils.invokeMethod(method, tb, args);
+				}
+			});
+		}
+
+		@Override
+		public Class<?> getObjectType() {
+			return ITestBean.class;
+		}
+
+		@Override
+		public boolean isSingleton() {
+			return false;
 		}
 	}
 

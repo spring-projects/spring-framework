@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.aop.framework;
 
+import java.lang.reflect.Proxy;
 import java.util.Arrays;
 
 import org.springframework.aop.SpringProxy;
@@ -83,8 +84,13 @@ public abstract class AopProxyUtils {
 		if (specifiedInterfaces.length == 0) {
 			// No user-specified interfaces: check whether target class is an interface.
 			Class<?> targetClass = advised.getTargetClass();
-			if (targetClass != null && targetClass.isInterface()) {
-				specifiedInterfaces = new Class<?>[] {targetClass};
+			if (targetClass != null) {
+				if (targetClass.isInterface()) {
+					specifiedInterfaces = new Class<?>[] {targetClass};
+				}
+				else if (Proxy.isProxyClass(targetClass)) {
+					specifiedInterfaces = targetClass.getInterfaces();
+				}
 			}
 		}
 		boolean addSpringProxy = !advised.isInterfaceProxied(SpringProxy.class);
