@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -364,6 +364,18 @@ public class RequestMappingInfoHandlerMappingTests {
 		assertNull(matrixVariables);
 		assertEquals("cars", uriVariables.get("cars"));
 		assertEquals("", uriVariables.get("params"));
+		
+		// SPR-11897
+		request = new MockHttpServletRequest();
+		testHandleMatch(request, "/{cars}", "/cars=suv;colors=red,blue,green;year=2012");
+
+		matrixVariables = getMatrixVariables(request, "cars");
+		uriVariables = getUriTemplateVariables(request);
+
+		assertNotNull(matrixVariables);
+		assertEquals(Arrays.asList("red", "blue", "green"), matrixVariables.get("colors"));
+		assertEquals("2012", matrixVariables.getFirst("year"));
+		assertEquals("cars=suv", uriVariables.get("cars"));
 	}
 
 	@Test

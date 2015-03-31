@@ -143,7 +143,7 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 		for (Entry<String, String> uriVar : uriVariables.entrySet()) {
 			String uriVarValue = uriVar.getValue();
 
-			int equalsIndex = uriVarValue.indexOf('=');
+			int equalsIndex = uriVarValue.lastIndexOf('=');
 			if (equalsIndex == -1) {
 				continue;
 			}
