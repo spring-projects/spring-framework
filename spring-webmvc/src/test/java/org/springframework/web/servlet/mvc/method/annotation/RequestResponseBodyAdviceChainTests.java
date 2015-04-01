@@ -19,6 +19,7 @@ package org.springframework.web.servlet.mvc.method.annotation;
 import static org.junit.Assert.*;
 import static org.mockito.BDDMockito.*;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
@@ -78,7 +79,7 @@ public class RequestResponseBodyAdviceChainTests {
 
 	@SuppressWarnings("unchecked")
 	@Test
-	public void requestBodyAdvice() {
+	public void requestBodyAdvice() throws IOException {
 
 		RequestBodyAdvice requestAdvice = Mockito.mock(RequestBodyAdvice.class);
 		ResponseBodyAdvice<String> responseAdvice = Mockito.mock(ResponseBodyAdvice.class);

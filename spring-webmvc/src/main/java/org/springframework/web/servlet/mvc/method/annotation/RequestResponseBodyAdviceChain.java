@@ -16,6 +16,7 @@
 
 package org.springframework.web.servlet.mvc.method.annotation;
 
+import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -107,7 +108,7 @@ class RequestResponseBodyAdviceChain implements RequestBodyAdvice, ResponseBodyA
 
 	@Override
 	public HttpInputMessage beforeBodyRead(HttpInputMessage request, MethodParameter parameter,
-			Type targetType, Class<? extends HttpMessageConverter<?>> converterType) {
+			Type targetType, Class<? extends HttpMessageConverter<?>> converterType) throws IOException {
 
 		for (RequestBodyAdvice advice : getMatchingAdvice(parameter, RequestBodyAdvice.class)) {
 			if (advice.supports(parameter, targetType, converterType)) {
