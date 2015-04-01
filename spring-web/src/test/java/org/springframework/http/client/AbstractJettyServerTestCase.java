@@ -38,12 +38,15 @@ import org.junit.BeforeClass;
 import org.springframework.util.SocketUtils;
 import org.springframework.util.StreamUtils;
 
-/** @author Arjen Poutsma */
+/**
+ * @author Arjen Poutsma
+ */
 public abstract class AbstractJettyServerTestCase {
 
 	protected static String baseUrl;
 
 	private static Server jettyServer;
+
 
 	@BeforeClass
 	public static void startJettyServer() throws Exception {
@@ -77,6 +80,7 @@ public abstract class AbstractJettyServerTestCase {
 		}
 	}
 
+
 	/**
 	 * Servlet that sets a given status code.
 	 */
@@ -96,6 +100,7 @@ public abstract class AbstractJettyServerTestCase {
 		}
 	}
 
+
 	@SuppressWarnings("serial")
 	private static class MethodServlet extends GenericServlet {
 
@@ -113,6 +118,7 @@ public abstract class AbstractJettyServerTestCase {
 			((HttpServletResponse) res).setStatus(200);
 		}
 	}
+
 
 	@SuppressWarnings("serial")
 	private static class PostServlet extends MethodServlet {
@@ -138,6 +144,7 @@ public abstract class AbstractJettyServerTestCase {
 		}
 	}
 
+
 	@SuppressWarnings("serial")
 	private static class EchoServlet extends HttpServlet {
 
@@ -161,12 +168,12 @@ public abstract class AbstractJettyServerTestCase {
 		}
 	}
 
+
 	@SuppressWarnings("serial")
 	private static class ParameterServlet extends HttpServlet {
 
 		@Override
-		protected void service(HttpServletRequest req, HttpServletResponse resp)
-				throws ServletException, IOException {
+		protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 			Map<String, String[]> parameters = req.getParameterMap();
 			assertEquals(2, parameters.size());
 

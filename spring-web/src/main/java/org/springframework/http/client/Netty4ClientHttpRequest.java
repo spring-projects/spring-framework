@@ -41,7 +41,6 @@ import org.springframework.http.HttpMethod;
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.util.concurrent.SettableListenableFuture;
 
-
 /**
  * {@link org.springframework.http.client.ClientHttpRequest} implementation that uses
  * Netty 4 to execute requests.
