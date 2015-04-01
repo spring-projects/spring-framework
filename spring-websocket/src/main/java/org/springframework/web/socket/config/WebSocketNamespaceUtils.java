@@ -137,6 +137,10 @@ class WebSocketNamespaceUtils {
 			if (!attrValue.isEmpty()) {
 				sockJsServiceDef.getPropertyValues().add("heartbeatTime", Long.valueOf(attrValue));
 			}
+			attrValue = sockJsElement.getAttribute("client-library-url");
+			if (!attrValue.isEmpty()) {
+				sockJsServiceDef.getPropertyValues().add("sockJsClientLibraryUrl", attrValue);
+			}
 			attrValue = sockJsElement.getAttribute("message-codec");
 			if (!attrValue.isEmpty()) {
 				sockJsServiceDef.getPropertyValues().add("messageCodec", new RuntimeBeanReference(attrValue));
