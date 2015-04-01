@@ -86,11 +86,12 @@ public abstract class AopProxyUtils {
 			Class<?> targetClass = advised.getTargetClass();
 			if (targetClass != null) {
 				if (targetClass.isInterface()) {
-					specifiedInterfaces = new Class<?>[] {targetClass};
+					advised.setInterfaces(targetClass);
 				}
 				else if (Proxy.isProxyClass(targetClass)) {
-					specifiedInterfaces = targetClass.getInterfaces();
+					advised.setInterfaces(targetClass.getInterfaces());
 				}
+				specifiedInterfaces = advised.getProxiedInterfaces();
 			}
 		}
 		boolean addSpringProxy = !advised.isInterfaceProxied(SpringProxy.class);

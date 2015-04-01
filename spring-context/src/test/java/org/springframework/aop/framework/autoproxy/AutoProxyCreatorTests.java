@@ -26,7 +26,9 @@ import org.aopalliance.intercept.MethodInvocation;
 import org.junit.Test;
 
 import org.springframework.aop.TargetSource;
+import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.aop.support.AopUtils;
+import org.springframework.aop.target.SingletonTargetSource;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
@@ -222,7 +224,7 @@ public final class AutoProxyCreatorTests {
 		sac.registerSingleton("containerCallbackInterfacesOnly", ContainerCallbackInterfacesOnly.class);
 		sac.registerSingleton("singletonNoInterceptor", CustomProxyFactoryBean.class);
 		sac.registerSingleton("singletonToBeProxied", CustomProxyFactoryBean.class);
-		sac.registerPrototype("prototypeToBeProxied", CustomProxyFactoryBean.class);
+		sac.registerPrototype("prototypeToBeProxied", SpringProxyFactoryBean.class);
 
 		sac.refresh();
 
@@ -460,6 +462,27 @@ public final class AutoProxyCreatorTests {
 					return ReflectionUtils.invokeMethod(method, tb, args);
 				}
 			});
+		}
+
+		@Override
+		public Class<?> getObjectType() {
+			return ITestBean.class;
+		}
+
+		@Override
+		public boolean isSingleton() {
+			return false;
+		}
+	}
+
+
+	public static class SpringProxyFactoryBean implements FactoryBean<ITestBean> {
+
+		private final TestBean tb = new TestBean();
+
+		@Override
+		public ITestBean getObject() {
+			return ProxyFactory.getProxy(ITestBean.class, new SingletonTargetSource(tb));
 		}
 
 		@Override
