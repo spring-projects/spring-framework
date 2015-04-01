@@ -19,6 +19,7 @@ package org.springframework.http.client;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Enumeration;
+import java.util.Map;
 import javax.servlet.GenericServlet;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
@@ -38,7 +39,7 @@ import org.springframework.util.SocketUtils;
 import org.springframework.util.StreamUtils;
 
 /** @author Arjen Poutsma */
-public class AbstractJettyServerTestCase {
+public abstract class AbstractJettyServerTestCase {
 
 	protected static String baseUrl;
 
@@ -54,6 +55,7 @@ public class AbstractJettyServerTestCase {
 		handler.setContextPath("/");
 
 		handler.addServlet(new ServletHolder(new EchoServlet()), "/echo");
+		handler.addServlet(new ServletHolder(new ParameterServlet()), "/params");
 		handler.addServlet(new ServletHolder(new StatusServlet(200)), "/status/ok");
 		handler.addServlet(new ServletHolder(new StatusServlet(404)), "/status/notfound");
 		handler.addServlet(new ServletHolder(new MethodServlet("DELETE")), "/methods/delete");
@@ -158,4 +160,28 @@ public class AbstractJettyServerTestCase {
 			StreamUtils.copy(request.getInputStream(), response.getOutputStream());
 		}
 	}
+
+	@SuppressWarnings("serial")
+	private static class ParameterServlet extends HttpServlet {
+
+		@Override
+		protected void service(HttpServletRequest req, HttpServletResponse resp)
+				throws ServletException, IOException {
+			Map<String, String[]> parameters = req.getParameterMap();
+			assertEquals(2, parameters.size());
+
+			String[] values = parameters.get("param1");
+			assertEquals(1, values.length);
+			assertEquals("value", values[0]);
+
+			values = parameters.get("param2");
+			assertEquals(2, values.length);
+			assertEquals("value1", values[0]);
+			assertEquals("value2", values[1]);
+
+			resp.setStatus(200);
+			resp.setContentLength(0);
+		}
+	}
+
 }

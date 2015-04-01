@@ -147,7 +147,7 @@ class Netty4ClientHttpRequest extends AbstractAsyncClientHttpRequest implements 
 				io.netty.handler.codec.http.HttpMethod.valueOf(this.method.name());
 
 		FullHttpRequest nettyRequest = new DefaultFullHttpRequest(HttpVersion.HTTP_1_1,
-				nettyMethod, this.uri.getRawPath(), this.body.buffer());
+				nettyMethod, this.uri.toString(), this.body.buffer());
 
 		nettyRequest.headers().set(HttpHeaders.HOST, uri.getHost());
 		nettyRequest.headers().set(HttpHeaders.CONNECTION, io.netty.handler.codec.http.HttpHeaders.Values.CLOSE);
