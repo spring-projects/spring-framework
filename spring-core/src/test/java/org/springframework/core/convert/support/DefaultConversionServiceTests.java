@@ -510,6 +510,7 @@ public class DefaultConversionServiceTests {
 	}
 
 	@Test
+	@SuppressWarnings("rawtypes")
 	public void convertStringToCollection() {
 		List result = conversionService.convert("1,2,3", List.class);
 		assertEquals(3, result.size());
@@ -519,6 +520,7 @@ public class DefaultConversionServiceTests {
 	}
 
 	@Test
+	@SuppressWarnings("rawtypes")
 	public void convertStringToCollectionWithElementConversion() throws Exception {
 		List result = (List) conversionService.convert("1,2,3", TypeDescriptor.valueOf(String.class),
 				new TypeDescriptor(getClass().getField("genericList")));
@@ -529,6 +531,7 @@ public class DefaultConversionServiceTests {
 	}
 
 	@Test
+	@SuppressWarnings("rawtypes")
 	public void convertEmptyStringToCollection() {
 		Collection result = conversionService.convert("", Collection.class);
 		assertEquals(0, result.size());
@@ -557,6 +560,7 @@ public class DefaultConversionServiceTests {
 	}
 
 	@Test
+	@SuppressWarnings("rawtypes")
 	public void convertCollectionToObjectWithCustomConverter() throws Exception {
 		List<String> source = new ArrayList<String>();
 		source.add("A");
@@ -572,8 +576,8 @@ public class DefaultConversionServiceTests {
 	}
 
 	@Test
+	@SuppressWarnings({ "cast", "unchecked" })
 	public void convertObjectToCollection() {
-		@SuppressWarnings("unchecked")
 		List<String> result = (List<String>) conversionService.convert(3L, List.class);
 		assertEquals(1, result.size());
 		assertEquals(3L, result.get(0));
@@ -652,6 +656,7 @@ public class DefaultConversionServiceTests {
 	}
 
 	@Test
+	@SuppressWarnings("rawtypes")
 	public void convertCollectionToCollectionNotGeneric() throws Exception {
 		Set<String> foo = new LinkedHashSet<String>();
 		foo.add("1");
@@ -664,8 +669,8 @@ public class DefaultConversionServiceTests {
 		assertEquals("3", bar.get(2));
 	}
 
-	@SuppressWarnings("unchecked")
 	@Test
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void convertCollectionToCollectionSpecialCaseSourceImpl() throws Exception {
 		Map map = new LinkedHashMap();
 		map.put("1", "1");
@@ -783,9 +788,6 @@ public class DefaultConversionServiceTests {
 		SSN.reset();
 		assertEquals("123456789", conversionService.convert(new SSN("123456789"), String.class));
 
-		// TODO What if the target type has a static factory method that takes precedence
-		// over the source type's toString() method?
-
 		assertEquals("constructor invocations", 1, SSN.constructorCount);
 		assertEquals("toString() invocations", 1, SSN.toStringCount);
 	}
@@ -863,6 +865,7 @@ public class DefaultConversionServiceTests {
 	}
 
 	@Test
+	@SuppressWarnings("unchecked")
 	public void multidimensionalArrayToListConversionShouldConvertEntriesCorrectly() {
 		String[][] grid = new String[][] { new String[] { "1", "2", "3", "4" }, new String[] { "5", "6", "7", "8" },
 				new String[] { "9", "10", "11", "12" } };
@@ -1035,7 +1038,6 @@ public class DefaultConversionServiceTests {
 
 		static int constructorCount = 0;
 		static int toStringCount = 0;
-
 		static int valueOfCount = 0;
 
 		static void reset() {
@@ -1046,7 +1048,7 @@ public class DefaultConversionServiceTests {
 
 		private final String value;
 
-		private ISBN(String value) {
+		public ISBN(String value) {
 			constructorCount++;
 			this.value = value;
 		}
