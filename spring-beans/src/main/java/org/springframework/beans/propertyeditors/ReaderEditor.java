@@ -21,45 +21,45 @@ import java.io.IOException;
 
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceEditor;
+import org.springframework.core.io.support.EncodedResource;
 import org.springframework.util.Assert;
 
 /**
  * One-way PropertyEditor which can convert from a text String to a
- * {@code java.io.InputStream}, interpreting the given String as a
- * Spring resource location (e.g. a URL String).
+ * {@code java.io.Reader}, interpreting the given String as a Spring
+ * resource location (e.g. a URL String).
  *
  * <p>Supports Spring-style URL notation: any fully qualified standard URL
  * ("file:", "http:", etc) and Spring's special "classpath:" pseudo-URL.
  *
- * <p>Note that such streams do usually not get closed by Spring itself!
+ * <p>Note that such readers do usually not get closed by Spring itself!
  *
  * @author Juergen Hoeller
- * @since 1.0.1
- * @see java.io.InputStream
+ * @since 4.2
+ * @see java.io.Reader
  * @see org.springframework.core.io.ResourceEditor
  * @see org.springframework.core.io.ResourceLoader
- * @see URLEditor
- * @see FileEditor
+ * @see InputStreamEditor
  */
-public class InputStreamEditor extends PropertyEditorSupport {
+public class ReaderEditor extends PropertyEditorSupport {
 
 	private final ResourceEditor resourceEditor;
 
 
 	/**
-	 * Create a new InputStreamEditor,
+	 * Create a new ReaderEditor,
 	 * using the default ResourceEditor underneath.
 	 */
-	public InputStreamEditor() {
+	public ReaderEditor() {
 		this.resourceEditor = new ResourceEditor();
 	}
 
 	/**
-	 * Create a new InputStreamEditor,
+	 * Create a new ReaderEditor,
 	 * using the given ResourceEditor underneath.
 	 * @param resourceEditor the ResourceEditor to use
 	 */
-	public InputStreamEditor(ResourceEditor resourceEditor) {
+	public ReaderEditor(ResourceEditor resourceEditor) {
 		Assert.notNull(resourceEditor, "ResourceEditor must not be null");
 		this.resourceEditor = resourceEditor;
 	}
@@ -70,10 +70,10 @@ public class InputStreamEditor extends PropertyEditorSupport {
 		this.resourceEditor.setAsText(text);
 		Resource resource = (Resource) this.resourceEditor.getValue();
 		try {
-			setValue(resource != null ? resource.getInputStream() : null);
+			setValue(resource != null ? new EncodedResource(resource).getReader() : null);
 		}
 		catch (IOException ex) {
-			throw new IllegalArgumentException("Failed to retrieve InputStream for " + resource, ex);
+			throw new IllegalArgumentException("Failed to retrieve Reader for " + resource, ex);
 		}
 	}
 

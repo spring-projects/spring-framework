@@ -16,7 +16,13 @@
 
 package org.springframework.context.expression;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.Reader;
 import java.io.Serializable;
+import java.net.URI;
+import java.net.URL;
 import java.security.AccessControlException;
 import java.security.Permission;
 import java.util.Properties;
@@ -36,13 +42,18 @@ import org.springframework.beans.factory.support.AutowireCandidateQualifier;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.GenericBeanDefinition;
 import org.springframework.beans.factory.support.RootBeanDefinition;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigUtils;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.core.convert.support.GenericConversionService;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.support.EncodedResource;
 import org.springframework.tests.Assume;
 import org.springframework.tests.TestGroup;
 import org.springframework.tests.sample.beans.TestBean;
+import org.springframework.util.FileCopyUtils;
 import org.springframework.util.SerializationTestUtils;
 import org.springframework.util.StopWatch;
 
@@ -55,6 +66,7 @@ import static org.junit.Assert.*;
 public class ApplicationContextExpressionTests {
 
 	private static final Log factoryLog = LogFactory.getLog(DefaultListableBeanFactory.class);
+
 
 	@Test
 	public void genericApplicationContext() throws Exception {
@@ -312,6 +324,27 @@ public class ApplicationContextExpressionTests {
 		assertTrue(str.startsWith("test-"));
 	}
 
+	@Test
+	public void resourceInjection() throws IOException {
+		System.setProperty("logfile", "log4j.properties");
+		try {
+			AnnotationConfigApplicationContext ac = new AnnotationConfigApplicationContext(ResourceInjectionBean.class);
+			ResourceInjectionBean resourceInjectionBean = ac.getBean(ResourceInjectionBean.class);
+			Resource resource = new ClassPathResource("log4j.properties");
+			assertEquals(resource, resourceInjectionBean.resource);
+			assertEquals(resource.getURL(), resourceInjectionBean.url);
+			assertEquals(resource.getURI(), resourceInjectionBean.uri);
+			assertEquals(resource.getFile(), resourceInjectionBean.file);
+			assertArrayEquals(FileCopyUtils.copyToByteArray(resource.getInputStream()),
+					FileCopyUtils.copyToByteArray(resourceInjectionBean.inputStream));
+			assertEquals(FileCopyUtils.copyToString(new EncodedResource(resource).getReader()),
+					FileCopyUtils.copyToString(resourceInjectionBean.reader));
+		}
+		finally {
+			System.getProperties().remove("logfile");
+		}
+	}
+
 
 	@SuppressWarnings("serial")
 	public static class ValueTestBean implements Serializable {
@@ -448,6 +481,28 @@ public class ApplicationContextExpressionTests {
 		public String getCountry2() {
 			return country2;
 		}
+	}
+
+
+	public static class ResourceInjectionBean {
+
+		@Value("classpath:#{systemProperties.logfile}")
+		Resource resource;
+
+		@Value("classpath:#{systemProperties.logfile}")
+		URL url;
+
+		@Value("classpath:#{systemProperties.logfile}")
+		URI uri;
+
+		@Value("classpath:#{systemProperties.logfile}")
+		File file;
+
+		@Value("classpath:#{systemProperties.logfile}")
+		InputStream inputStream;
+
+		@Value("classpath:#{systemProperties.logfile}")
+		Reader reader;
 	}
 
 }
