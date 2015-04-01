@@ -16,6 +16,7 @@
 
 package org.springframework.web.servlet.mvc.method.annotation;
 
+import java.io.IOException;
 import java.lang.reflect.Type;
 
 import org.springframework.core.MethodParameter;
@@ -73,7 +74,7 @@ public interface RequestBodyAdvice {
 	 * @return the input request or a new instance, never {@code null}
 	 */
 	HttpInputMessage beforeBodyRead(HttpInputMessage inputMessage, MethodParameter parameter,
-			Type targetType, Class<? extends HttpMessageConverter<?>> converterType);
+			Type targetType, Class<? extends HttpMessageConverter<?>> converterType) throws IOException;
 
 	/**
 	 * Invoked third (and last) after the request body is converted to an Object.
