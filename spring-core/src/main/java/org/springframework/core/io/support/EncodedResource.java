@@ -85,6 +85,7 @@ public class EncodedResource {
 		this.charset = charset;
 	}
 
+
 	/**
 	 * Return the {@code Resource} held by this {@code EncodedResource}.
 	 */
@@ -152,17 +153,17 @@ public class EncodedResource {
 
 
 	@Override
-	public boolean equals(Object obj) {
-		if (obj == this) {
+	public boolean equals(Object other) {
+		if (this == other) {
 			return true;
 		}
-		if (obj instanceof EncodedResource) {
-			EncodedResource that = (EncodedResource) obj;
-			return (this.resource.equals(that.resource) &&
-					ObjectUtils.nullSafeEquals(this.charset, that.charset) &&
-					ObjectUtils.nullSafeEquals(this.encoding, that.encoding));
+		if (!(other instanceof EncodedResource)) {
+			return false;
 		}
-		return false;
+		EncodedResource otherResource = (EncodedResource) other;
+		return (this.resource.equals(otherResource.resource) &&
+				ObjectUtils.nullSafeEquals(this.charset, otherResource.charset) &&
+				ObjectUtils.nullSafeEquals(this.encoding, otherResource.encoding));
 	}
 
 	@Override
