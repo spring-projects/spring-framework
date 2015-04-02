@@ -5922,6 +5922,25 @@ Both declarations make a bean named `transferService` available in the
 transferService -> com.acme.TransferServiceImpl
 ----
 
+You can also use Java 8 default methods to define beans. This allows composition
+of bean configurations by implementing interfaces with bean definitions on default methods. 
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+public interface FooConfig {
+	@Bean
+	default Foo foo() {
+		Foo foo = new Foo();
+		foo.init();
+		return foo;
+	}
+}
+
+@Configuration
+public class AppConfig implements FooConfig {
+}
+----
 
 [[beans-java-dependencies]]
 ==== Bean dependencies
