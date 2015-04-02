@@ -30,6 +30,7 @@ import org.junit.Test;
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.aop.target.SingletonTargetSource;
 import org.springframework.core.MethodParameter;
+import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -179,9 +180,7 @@ public class RequestResponseBodyMethodProcessorTests {
 		assertEquals("foobarbaz", result);
 	}
 
-	// SPR-9942
-
-	@Test(expected = HttpMessageNotReadableException.class)
+	@Test(expected = HttpMessageNotReadableException.class)  // SPR-9942
 	public void resolveArgumentRequiredNoContent() throws Exception {
 		this.servletRequest.setContent(new byte[0]);
 		this.servletRequest.setContentType("text/plain");
@@ -191,9 +190,7 @@ public class RequestResponseBodyMethodProcessorTests {
 		processor.resolveArgument(paramString, mavContainer, webRequest, binderFactory);
 	}
 
-	// SPR-12778
-
-	@Test
+	@Test  // SPR-12778
 	public void resolveArgumentRequiredNoContentDefaultValue() throws Exception {
 		this.servletRequest.setContent(new byte[0]);
 		this.servletRequest.setContentType("text/plain");
@@ -205,9 +202,7 @@ public class RequestResponseBodyMethodProcessorTests {
 		assertEquals("default value for empty body", arg);
 	}
 
-	// SPR-9964
-
-	@Test
+	@Test  // SPR-9964
 	public void resolveArgumentTypeVariable() throws Exception {
 		Method method = MyParameterizedController.class.getMethod("handleDto", Identifiable.class);
 		HandlerMethod handlerMethod = new HandlerMethod(new MySimpleParameterizedController(), method);
@@ -227,9 +222,7 @@ public class RequestResponseBodyMethodProcessorTests {
 		assertEquals("Jad", result.getName());
 	}
 
-	// SPR-11225
-
-	@Test
+	@Test  // SPR-11225
 	public void resolveArgumentTypeVariableWithNonGenericConverter() throws Exception {
 		Method method = MyParameterizedController.class.getMethod("handleDto", Identifiable.class);
 		HandlerMethod handlerMethod = new HandlerMethod(new MySimpleParameterizedController(), method);
@@ -251,9 +244,7 @@ public class RequestResponseBodyMethodProcessorTests {
 		assertEquals("Jad", result.getName());
 	}
 
-	// SPR-9160
-
-	@Test
+	@Test  // SPR-9160
 	public void handleReturnValueSortByQuality() throws Exception {
 		this.servletRequest.addHeader("Accept", "text/plain; q=0.5, application/json");
 
@@ -383,9 +374,7 @@ public class RequestResponseBodyMethodProcessorTests {
 		assertFalse(content.contains("<withoutView>without</withoutView>"));
 	}
 
-	// SPR-12149
-
-	@Test
+	@Test  // SPR-12149
 	public void jacksonJsonViewWithResponseEntityAndXmlMessageConverter() throws Exception {
 		Method method = JacksonViewController.class.getMethod("handleResponseEntity");
 		HandlerMethod handlerMethod = new HandlerMethod(new JacksonViewController(), method);
@@ -404,6 +393,112 @@ public class RequestResponseBodyMethodProcessorTests {
 		assertFalse(content.contains("<withView1>with</withView1>"));
 		assertTrue(content.contains("<withView2>with</withView2>"));
 		assertFalse(content.contains("<withoutView>without</withoutView>"));
+	}
+
+	@Test  // SPR-12501
+	public void resolveArgumentWithJacksonJsonView() throws Exception {
+		String content = "{\"withView1\" : \"with\", \"withView2\" : \"with\", \"withoutView\" : \"without\"}";
+		this.servletRequest.setContent(content.getBytes("UTF-8"));
+		this.servletRequest.setContentType(MediaType.APPLICATION_JSON_VALUE);
+
+		Method method = JacksonViewController.class.getMethod("handleRequestBody", JacksonViewBean.class);
+		HandlerMethod handlerMethod = new HandlerMethod(new JacksonViewController(), method);
+		MethodParameter methodParameter = handlerMethod.getMethodParameters()[0];
+
+		List<HttpMessageConverter<?>> converters = new ArrayList<HttpMessageConverter<?>>();
+		converters.add(new MappingJackson2HttpMessageConverter());
+
+		RequestResponseBodyMethodProcessor processor = new RequestResponseBodyMethodProcessor(
+				converters, null, Arrays.asList(new JsonViewRequestBodyAdvice()));
+
+		@SuppressWarnings("unchecked")
+		JacksonViewBean result = (JacksonViewBean)processor.resolveArgument(methodParameter,
+				this.mavContainer, this.webRequest, this.binderFactory);
+
+		assertNotNull(result);
+		assertEquals("with", result.getWithView1());
+		assertNull(result.getWithView2());
+		assertNull(result.getWithoutView());
+	}
+
+	@Test  // SPR-12501
+	public void resolveHttpEntityArgumentWithJacksonJsonView() throws Exception {
+		String content = "{\"withView1\" : \"with\", \"withView2\" : \"with\", \"withoutView\" : \"without\"}";
+		this.servletRequest.setContent(content.getBytes("UTF-8"));
+		this.servletRequest.setContentType(MediaType.APPLICATION_JSON_VALUE);
+
+		Method method = JacksonViewController.class.getMethod("handleHttpEntity", HttpEntity.class);
+		HandlerMethod handlerMethod = new HandlerMethod(new JacksonViewController(), method);
+		MethodParameter methodParameter = handlerMethod.getMethodParameters()[0];
+
+		List<HttpMessageConverter<?>> converters = new ArrayList<HttpMessageConverter<?>>();
+		converters.add(new MappingJackson2HttpMessageConverter());
+
+		HttpEntityMethodProcessor processor = new HttpEntityMethodProcessor(
+				converters, null, Arrays.asList(new JsonViewRequestBodyAdvice()));
+
+		@SuppressWarnings("unchecked")
+		HttpEntity<JacksonViewBean> result = (HttpEntity<JacksonViewBean>)processor.resolveArgument(methodParameter,
+				this.mavContainer, this.webRequest, this.binderFactory);
+
+		assertNotNull(result);
+		assertNotNull(result.getBody());
+		assertEquals("with", result.getBody().getWithView1());
+		assertNull(result.getBody().getWithView2());
+		assertNull(result.getBody().getWithoutView());
+	}
+
+	@Test  // SPR-12501
+	public void resolveArgumentWithJacksonJsonViewAndXmlMessageConverter() throws Exception {
+		String content = "<root><withView1>with</withView1><withView2>with</withView2><withoutView>without</withoutView></root>";
+		this.servletRequest.setContent(content.getBytes("UTF-8"));
+		this.servletRequest.setContentType(MediaType.APPLICATION_XML_VALUE);
+
+		Method method = JacksonViewController.class.getMethod("handleRequestBody", JacksonViewBean.class);
+		HandlerMethod handlerMethod = new HandlerMethod(new JacksonViewController(), method);
+		MethodParameter methodParameter = handlerMethod.getMethodParameters()[0];
+
+		List<HttpMessageConverter<?>> converters = new ArrayList<HttpMessageConverter<?>>();
+		converters.add(new MappingJackson2XmlHttpMessageConverter());
+
+		RequestResponseBodyMethodProcessor processor = new RequestResponseBodyMethodProcessor(
+				converters, null, Arrays.asList(new JsonViewRequestBodyAdvice()));
+
+		@SuppressWarnings("unchecked")
+		JacksonViewBean result = (JacksonViewBean)processor.resolveArgument(methodParameter,
+				this.mavContainer, this.webRequest, this.binderFactory);
+
+		assertNotNull(result);
+		assertEquals("with", result.getWithView1());
+		assertNull(result.getWithView2());
+		assertNull(result.getWithoutView());
+	}
+
+	@Test  // SPR-12501
+	public void resolveHttpEntityArgumentWithJacksonJsonViewAndXmlMessageConverter() throws Exception {
+		String content = "<root><withView1>with</withView1><withView2>with</withView2><withoutView>without</withoutView></root>";
+		this.servletRequest.setContent(content.getBytes("UTF-8"));
+		this.servletRequest.setContentType(MediaType.APPLICATION_XML_VALUE);
+
+		Method method = JacksonViewController.class.getMethod("handleHttpEntity", HttpEntity.class);
+		HandlerMethod handlerMethod = new HandlerMethod(new JacksonViewController(), method);
+		MethodParameter methodParameter = handlerMethod.getMethodParameters()[0];
+
+		List<HttpMessageConverter<?>> converters = new ArrayList<HttpMessageConverter<?>>();
+		converters.add(new MappingJackson2XmlHttpMessageConverter());
+
+		HttpEntityMethodProcessor processor = new HttpEntityMethodProcessor(
+				converters, null, Arrays.asList(new JsonViewRequestBodyAdvice()));
+
+		@SuppressWarnings("unchecked")
+		HttpEntity<JacksonViewBean> result = (HttpEntity<JacksonViewBean>)processor.resolveArgument(methodParameter,
+				this.mavContainer, this.webRequest, this.binderFactory);
+
+		assertNotNull(result);
+		assertNotNull(result.getBody());
+		assertEquals("with", result.getBody().getWithView1());
+		assertNull(result.getBody().getWithView2());
+		assertNull(result.getBody().getWithoutView());
 	}
 
 
@@ -561,6 +656,18 @@ public class RequestResponseBodyMethodProcessorTests {
 			ModelAndView mav = new ModelAndView(new MappingJackson2JsonView());
 			mav.addObject("bean", bean);
 			return new ResponseEntity<JacksonViewBean>(bean, HttpStatus.OK);
+		}
+
+		@RequestMapping
+		@ResponseBody
+		public JacksonViewBean handleRequestBody(@JsonView(MyJacksonView1.class) @RequestBody JacksonViewBean bean) {
+			return bean;
+		}
+
+		@RequestMapping
+		@ResponseBody
+		public JacksonViewBean handleHttpEntity(@JsonView(MyJacksonView1.class) HttpEntity<JacksonViewBean> entity) {
+			return entity.getBody();
 		}
 
 	}
