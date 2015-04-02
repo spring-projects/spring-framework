@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -12,69 +12,28 @@
  */
 package org.springframework.test.web.servlet.setup;
 
-import java.io.IOException;
-import javax.servlet.Filter;
-import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-import org.junit.Before;
 import org.junit.Test;
 
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.filter.OncePerRequestFilter;
+import org.springframework.mock.web.MockServletContext;
+import org.springframework.web.context.support.WebApplicationContextUtils;
+
+import static org.junit.Assert.*;
 
 /**
  * Tests for {@link DefaultMockMvcBuilder}.
  *
  * @author Rob Winch
+ * @author Sebastien Deleuze
  */
 public class DefaultMockMvcBuilderTests {
 
-	private StandaloneMockMvcBuilder builder;
-
-	@Before
-	public void setup() {
-		builder = MockMvcBuilders.standaloneSetup(new PersonController());
-	}
-
-	@Test(expected = IllegalArgumentException.class)
-	public void addFiltersFiltersNull() {
-		builder.addFilters((Filter[]) null);
-	}
-
-	@Test(expected = IllegalArgumentException.class)
-	public void addFiltersFiltersContainsNull() {
-		builder.addFilters(new ContinueFilter(), (Filter) null);
-	}
-
-	@Test(expected = IllegalArgumentException.class)
-	public void addFilterPatternsNull() {
-		builder.addFilter(new ContinueFilter(), (String[]) null);
-	}
-
-	@Test(expected = IllegalArgumentException.class)
-	public void addFilterPatternContainsNull() {
-		builder.addFilter(new ContinueFilter(), (String) null);
-	}
-
-
-	@Controller
-	private static class PersonController {
-		@RequestMapping(value="/forward")
-		public String forward() {
-			return "forward:/persons";
-		}
-	}
-
-	private class ContinueFilter extends OncePerRequestFilter {
-		@Override
-		protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
-				FilterChain filterChain) throws ServletException, IOException {
-			filterChain.doFilter(request, response);
-		}
+	@Test // SPR-12553
+	public void applicationContextAttribute() {
+		MockServletContext servletContext = new MockServletContext();
+		StubWebApplicationContext wac = new StubWebApplicationContext(servletContext);
+		DefaultMockMvcBuilder builder = MockMvcBuilders.webAppContextSetup(wac);
+		assertEquals(builder.initWebAppContext(), WebApplicationContextUtils
+				.getRequiredWebApplicationContext(servletContext));
 	}
 
 }

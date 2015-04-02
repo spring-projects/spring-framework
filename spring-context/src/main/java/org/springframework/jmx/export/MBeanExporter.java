@@ -39,6 +39,7 @@ import javax.management.modelmbean.ModelMBeanInfo;
 import javax.management.modelmbean.RequiredModelMBean;
 
 import org.springframework.aop.framework.ProxyFactory;
+import org.springframework.aop.scope.ScopedProxyUtils;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.aop.target.LazyInitTargetSource;
 import org.springframework.beans.factory.BeanClassLoaderAware;
@@ -160,7 +161,7 @@ public class MBeanExporter extends MBeanRegistrationSupport implements MBeanExpo
 	private boolean exposeManagedResourceClassLoader = true;
 
 	/** A set of bean names that should be excluded from autodetection */
-	private Set<String> excludedBeans;
+	private Set<String> excludedBeans = new HashSet<String>();
 
 	/** The MBeanExporterListeners registered with this exporter. */
 	private MBeanExporterListener[] listeners;
@@ -313,7 +314,18 @@ public class MBeanExporter extends MBeanRegistrationSupport implements MBeanExpo
 	 * Set the list of names for beans that should be excluded from autodetection.
 	 */
 	public void setExcludedBeans(String... excludedBeans) {
-		this.excludedBeans = (excludedBeans != null ? new HashSet<String>(Arrays.asList(excludedBeans)) : null);
+		this.excludedBeans.clear();
+		if (excludedBeans != null) {
+			this.excludedBeans.addAll(Arrays.asList(excludedBeans));
+		}
+	}
+
+	/**
+	 * Add the name of bean that should be excluded from autodetection.
+	 */
+	public void addExcludedBean(String excludedBean) {
+		Assert.notNull(excludedBean, "ExcludedBean must not be null");
+		this.excludedBeans.add(excludedBean);
 	}
 
 	/**
@@ -891,8 +903,9 @@ public class MBeanExporter extends MBeanRegistrationSupport implements MBeanExpo
 					if (beanClass != null && callback.include(beanClass, beanName)) {
 						boolean lazyInit = isBeanDefinitionLazyInit(this.beanFactory, beanName);
 						Object beanInstance = (!lazyInit ? this.beanFactory.getBean(beanName) : null);
-						if (!this.beans.containsValue(beanName) && (beanInstance == null ||
-								!CollectionUtils.containsInstance(this.beans.values(), beanInstance))) {
+						if (!ScopedProxyUtils.isScopedTarget(beanName) && !this.beans.containsValue(beanName) &&
+								(beanInstance == null ||
+										!CollectionUtils.containsInstance(this.beans.values(), beanInstance))) {
 							// Not already registered for JMX exposure.
 							this.beans.put(beanName, (beanInstance != null ? beanInstance : beanName));
 							if (logger.isInfoEnabled()) {
@@ -920,10 +933,9 @@ public class MBeanExporter extends MBeanRegistrationSupport implements MBeanExpo
 	 * Indicates whether or not a particular bean name is present in the excluded beans list.
 	 */
 	private boolean isExcluded(String beanName) {
-		return (this.excludedBeans != null &&
-				(this.excludedBeans.contains(beanName) ||
-						(beanName.startsWith(BeanFactory.FACTORY_BEAN_PREFIX) &&
-								this.excludedBeans.contains(beanName.substring(BeanFactory.FACTORY_BEAN_PREFIX.length())))));
+		return (this.excludedBeans.contains(beanName) ||
+					(beanName.startsWith(BeanFactory.FACTORY_BEAN_PREFIX) &&
+							this.excludedBeans.contains(beanName.substring(BeanFactory.FACTORY_BEAN_PREFIX.length()))));
 	}
 
 	/**

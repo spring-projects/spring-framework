@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -61,6 +61,49 @@ public class UriTemplateTests {
 		UriTemplate template = new UriTemplate("http://example.com/hotels/{hotel}/bookings/{booking}");
 		URI result = template.expand(uriVariables);
 		assertEquals("Invalid expanded template", new URI("http://example.com/hotels/1/bookings/42"), result);
+	}
+
+	//SPR-12750
+
+	@Test
+	public void expandSlashPrefixedVariable() throws Exception {
+		Map<String, String> uriVariables = new HashMap<String, String>(2);
+		uriVariables.put("hotel", "1");
+		uriVariables.put("publicpath", "pics/logo.png");
+		uriVariables.put("scale", "150x150");
+		UriTemplate template = new UriTemplate(
+				"http://example.com/hotels/{hotel}/pic/{/publicpath}/size/{scale}");
+		URI result = template.expand(uriVariables);
+		assertEquals("Invalid expanded template",
+				new URI("http://example.com/hotels/1/pic/pics%2Flogo.png/size/150x150"),
+				result);
+	}
+
+	@Test
+	public void expandSlashPrefixedVariableInBetween() throws Exception {
+		Map<String, String> uriVariables = new HashMap<String, String>(2);
+		uriVariables.put("var1", "foo/bar");
+		uriVariables.put("var2", "baz");
+		UriTemplate template = new UriTemplate(
+				"http://example.com/part1/before-{/var1}-after/{var2}");
+		URI result = template.expand(uriVariables);
+		assertEquals("Invalid expanded template",
+				new URI("http://example.com/part1/before-foo%2Fbar-after/baz"),
+				result);
+	}
+
+	@Test
+	public void expandSlashPrefixedVariableAfterNonPrefixedVariable() throws Exception {
+		Map<String, String> uriVariables = new HashMap<String, String>(2);
+		uriVariables.put("var1", "foo/bar");
+		uriVariables.put("var2", "baz");
+		uriVariables.put("var3", "qux");
+		UriTemplate template = new UriTemplate(
+				"http://example.com/part1/before-{/var1}-{var2}-after/{var3}");
+		URI result = template.expand(uriVariables);
+		assertEquals("Invalid expanded template",
+				new URI("http://example.com/part1/before-foo%2Fbar-baz-after/qux"),
+				result);
 	}
 
 	@Test

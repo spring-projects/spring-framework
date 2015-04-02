@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,20 @@
 
 package org.springframework.web.socket.messaging;
 
+import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.verifyZeroInteractions;
+
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -28,9 +42,9 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
-
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.PayloadApplicationEvent;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.simp.SimpAttributes;
@@ -50,15 +64,13 @@ import org.springframework.messaging.support.ExecutorSubscribableChannel;
 import org.springframework.messaging.support.ImmutableMessageChannelInterceptor;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.messaging.support.MessageHeaderAccessor;
+import org.springframework.util.MimeTypeUtils;
+import org.springframework.web.socket.BinaryMessage;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketMessage;
 import org.springframework.web.socket.handler.TestWebSocketSession;
 import org.springframework.web.socket.sockjs.transport.SockJsSession;
-
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
 
 /**
  * Test fixture for {@link StompSubProtocolHandler} tests.
@@ -267,6 +279,38 @@ public class StompSubProtocolHandlerTests {
 		assertFalse(((String) textMessage.getPayload()).contains(SimpMessageHeaderAccessor.ORIGINAL_DESTINATION));
 	}
 
+	// SPR-12475
+
+	@Test
+	public void handleMessageToClientBinaryWebSocketMessage() {
+
+		StompHeaderAccessor headers = StompHeaderAccessor.create(StompCommand.MESSAGE);
+		headers.setMessageId("mess0");
+		headers.setSubscriptionId("sub0");
+		headers.setContentType(MimeTypeUtils.APPLICATION_OCTET_STREAM);
+		headers.setDestination("/queue/foo");
+
+		// Non-empty payload
+
+		byte[] payload = new byte[1];
+		Message<byte[]> message = MessageBuilder.createMessage(payload, headers.getMessageHeaders());
+		this.protocolHandler.handleMessageToClient(this.session, message);
+
+		assertEquals(1, this.session.getSentMessages().size());
+		WebSocketMessage<?> webSocketMessage = this.session.getSentMessages().get(0);
+		assertTrue(webSocketMessage instanceof BinaryMessage);
+
+		// Empty payload
+
+		payload = EMPTY_PAYLOAD;
+		message = MessageBuilder.createMessage(payload, headers.getMessageHeaders());
+		this.protocolHandler.handleMessageToClient(this.session, message);
+
+		assertEquals(2, this.session.getSentMessages().size());
+		webSocketMessage = this.session.getSentMessages().get(1);
+		assertTrue(webSocketMessage instanceof TextMessage);
+	}
+
 	@Test
 	public void handleMessageFromClient() {
 
@@ -404,6 +448,11 @@ public class StompSubProtocolHandlerTests {
 		@Override
 		public void publishEvent(ApplicationEvent event) {
 			events.add(event);
+		}
+
+		@Override
+		public void publishEvent(Object event) {
+			publishEvent(new PayloadApplicationEvent<Object>(this, event));
 		}
 	}
 

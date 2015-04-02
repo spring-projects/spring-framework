@@ -176,9 +176,9 @@ public class SpelCompiler implements Opcodes {
 		mv.visitMaxs(0, 0);  // not supplied due to COMPUTE_MAXS
 		mv.visitEnd();
 		cw.visitEnd();
-		
+
 		cf.finish();
-		
+
 		byte[] data = cw.toByteArray();
 		// TODO need to make this conditionally occur based on a debug flag
 		// dump(expressionToCompile.toStringAST(), clazzName, data);

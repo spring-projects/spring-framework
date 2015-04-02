@@ -23,7 +23,6 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.ClientHttpResponse;
@@ -80,10 +79,12 @@ public class HttpMessageConverterExtractor<T> implements ResponseExtractor<T> {
 	@Override
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public T extractData(ClientHttpResponse response) throws IOException {
-		if (!hasMessageBody(response)) {
+
+		MessageBodyClientHttpResponseWrapper responseWrapper = new MessageBodyClientHttpResponseWrapper(response);
+		if(!responseWrapper.hasMessageBody() || responseWrapper.hasEmptyMessageBody()) {
 			return null;
 		}
-		MediaType contentType = getContentType(response);
+		MediaType contentType = getContentType(responseWrapper);
 
 		for (HttpMessageConverter<?> messageConverter : this.messageConverters) {
 			if (messageConverter instanceof GenericHttpMessageConverter) {
@@ -93,7 +94,7 @@ public class HttpMessageConverterExtractor<T> implements ResponseExtractor<T> {
 						logger.debug("Reading [" + this.responseType + "] as \"" +
 								contentType + "\" using [" + messageConverter + "]");
 					}
-					return (T) genericMessageConverter.read(this.responseType, null, response);
+					return (T) genericMessageConverter.read(this.responseType, null, responseWrapper);
 				}
 			}
 			if (this.responseClass != null) {
@@ -102,7 +103,7 @@ public class HttpMessageConverterExtractor<T> implements ResponseExtractor<T> {
 						logger.debug("Reading [" + this.responseClass.getName() + "] as \"" +
 								contentType + "\" using [" + messageConverter + "]");
 					}
-					return (T) messageConverter.read((Class) this.responseClass, response);
+					return (T) messageConverter.read((Class) this.responseClass, responseWrapper);
 				}
 			}
 		}
@@ -120,41 +121,6 @@ public class HttpMessageConverterExtractor<T> implements ResponseExtractor<T> {
 			contentType = MediaType.APPLICATION_OCTET_STREAM;
 		}
 		return contentType;
-	}
-
-	/**
-	 * Indicates whether the given response has a message body.
-	 * <p>Default implementation returns {@code false} for:
-	 * <ul>
-	 *     <li>a response status of {@code 204} or {@code 304}</li>
-	 *     <li>a {@code Content-Length} of {@code 0}</li>
-	 *     <li>no indication of content (no {@code Content-Length} nor {@code Transfer-encoding: chunked}) and
-	 *     a ({@code Connection: closed}) header. See rfc7230 section 3.4</li>
-	 * </ul>
-	 *
-	 * @param response the response to check for a message body
-	 * @return {@code true} if the response has a body, {@code false} otherwise
-	 * @throws IOException in case of I/O errors
-	 */
-	protected boolean hasMessageBody(ClientHttpResponse response) throws IOException {
-		HttpStatus responseStatus = response.getStatusCode();
-		if (responseStatus == HttpStatus.NO_CONTENT ||
-				responseStatus == HttpStatus.NOT_MODIFIED) {
-			return false;
-		}
-		HttpHeaders headers = response.getHeaders();
-		long contentLength = headers.getContentLength();
-		if(contentLength == 0) {
-			return false;
-		}
-		boolean chunked = headers.containsKey(HttpHeaders.TRANSFER_ENCODING)
-				&& headers.get(HttpHeaders.TRANSFER_ENCODING).contains("chunked");
-		boolean closed = headers.containsKey(HttpHeaders.CONNECTION)
-				&& headers.getConnection().contains("close");
-		if(!chunked && contentLength == -1 && closed) {
-			return false;
-		}
-		return true;
 	}
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,17 +54,6 @@ public class MethodInvocationTests extends AbstractExpressionTests {
 		evaluate("getPlaceOfBirth().getCity()", "SmilJan", String.class);
 	}
 
-	// public void testBuiltInProcessors() {
-	// evaluate("new int[]{1,2,3,4}.count()", 4, Integer.class);
-	// evaluate("new int[]{4,3,2,1}.sort()[3]", 4, Integer.class);
-	// evaluate("new int[]{4,3,2,1}.average()", 2, Integer.class);
-	// evaluate("new int[]{4,3,2,1}.max()", 4, Integer.class);
-	// evaluate("new int[]{4,3,2,1}.min()", 1, Integer.class);
-	// evaluate("new int[]{4,3,2,1,2,3}.distinct().count()", 4, Integer.class);
-	// evaluate("{1,2,3,null}.nonnull().count()", 3, Integer.class);
-	// evaluate("new int[]{4,3,2,1,2,3}.distinct().count()", 4, Integer.class);
-	// }
-
 	@Test
 	public void testStringClass() {
 		evaluate("new java.lang.String('hello').charAt(2)", 'l', Character.class);
@@ -107,7 +96,7 @@ public class MethodInvocationTests extends AbstractExpressionTests {
 
 		// Normal exit
 		StandardEvaluationContext eContext = TestScenarioCreator.getTestEvaluationContext();
-		eContext.setVariable("bar",3);
+		eContext.setVariable("bar", 3);
 		Object o = expr.getValue(eContext);
 		assertEquals(o, 3);
 		assertEquals(1, parser.parseExpression("counter").getValue(eContext));
@@ -115,46 +104,44 @@ public class MethodInvocationTests extends AbstractExpressionTests {
 		// Now the expression has cached that throwException(int) is the right thing to call
 		// Let's change 'bar' to be a PlaceOfBirth which indicates the cached reference is
 		// out of date.
-		eContext.setVariable("bar",new PlaceOfBirth("London"));
+		eContext.setVariable("bar", new PlaceOfBirth("London"));
 		o = expr.getValue(eContext);
 		assertEquals("London", o);
 		// That confirms the logic to mark the cached reference stale and retry is working
 
-
-		// Now let's cause the method to exit via exception and ensure it doesn't cause
-		// a retry.
+		// Now let's cause the method to exit via exception and ensure it doesn't cause a retry.
 
 		// First, switch back to throwException(int)
-		eContext.setVariable("bar",3);
+		eContext.setVariable("bar", 3);
 		o = expr.getValue(eContext);
 		assertEquals(3, o);
 		assertEquals(2, parser.parseExpression("counter").getValue(eContext));
 
 
 		// Now cause it to throw an exception:
-		eContext.setVariable("bar",1);
+		eContext.setVariable("bar", 1);
 		try {
 			o = expr.getValue(eContext);
 			fail();
-		} catch (Exception e) {
-			if (e instanceof SpelEvaluationException) {
-				e.printStackTrace();
-				fail("Should not be a SpelEvaluationException");
+		}
+		catch (Exception ex) {
+			if (ex instanceof SpelEvaluationException) {
+				fail("Should not be a SpelEvaluationException: " + ex);
 			}
 			// normal
 		}
 		// If counter is 4 then the method got called twice!
 		assertEquals(3, parser.parseExpression("counter").getValue(eContext));
 
-		eContext.setVariable("bar",4);
+		eContext.setVariable("bar", 4);
 		try {
 			o = expr.getValue(eContext);
 			fail();
-		} catch (Exception e) {
+		}
+		catch (Exception ex) {
 			// 4 means it will throw a checked exception - this will be wrapped
-			if (!(e instanceof ExpressionInvocationTargetException)) {
-				e.printStackTrace();
-				fail("Should have been wrapped");
+			if (!(ex instanceof ExpressionInvocationTargetException)) {
+				fail("Should have been wrapped: " + ex);
 			}
 			// normal
 		}
@@ -176,14 +163,14 @@ public class MethodInvocationTests extends AbstractExpressionTests {
 		SpelExpressionParser parser = new SpelExpressionParser();
 		Expression expr = parser.parseExpression("throwException(#bar)");
 
-		eContext.setVariable("bar",2);
+		eContext.setVariable("bar", 2);
 		try {
 			expr.getValue(eContext);
 			fail();
-		} catch (Exception e) {
-			if (e instanceof SpelEvaluationException) {
-				e.printStackTrace();
-				fail("Should not be a SpelEvaluationException");
+		}
+		catch (Exception ex) {
+			if (ex instanceof SpelEvaluationException) {
+				fail("Should not be a SpelEvaluationException: " + ex);
 			}
 			// normal
 		}
@@ -200,18 +187,16 @@ public class MethodInvocationTests extends AbstractExpressionTests {
 		SpelExpressionParser parser = new SpelExpressionParser();
 		Expression expr = parser.parseExpression("throwException(#bar)");
 
-		eContext.setVariable("bar",4);
+		eContext.setVariable("bar", 4);
 		try {
 			expr.getValue(eContext);
 			fail();
-		} catch (ExpressionInvocationTargetException e) {
-			Throwable t = e.getCause();
-			assertEquals(
-					"org.springframework.expression.spel.testresources.Inventor$TestException",
-					t.getClass().getName());
-			return;
 		}
-		fail("Should not be a SpelEvaluationException");
+		catch (ExpressionInvocationTargetException ex) {
+			Throwable cause = ex.getCause();
+			assertEquals("org.springframework.expression.spel.testresources.Inventor$TestException",
+					cause.getClass().getName());
+		}
 	}
 
 	@Test
@@ -224,7 +209,7 @@ public class MethodInvocationTests extends AbstractExpressionTests {
 
 		// Filter will be called but not do anything, so first doit() will be invoked
 		SpelExpression expr = (SpelExpression) parser.parseExpression("doit(1)");
-		String result = expr.getValue(context,String.class);
+		String result = expr.getValue(context, String.class);
 		assertEquals("1", result);
 		assertTrue(filter.filterCalled);
 
@@ -232,15 +217,15 @@ public class MethodInvocationTests extends AbstractExpressionTests {
 		filter.removeIfNotAnnotated = true;
 		filter.filterCalled = false;
 		expr = (SpelExpression) parser.parseExpression("doit(1)");
-		result = expr.getValue(context,String.class);
+		result = expr.getValue(context, String.class);
 		assertEquals("double 1.0", result);
 		assertTrue(filter.filterCalled);
 
 		// check not called for other types
-		filter.filterCalled=false;
+		filter.filterCalled = false;
 		context.setRootObject(new String("abc"));
 		expr = (SpelExpression) parser.parseExpression("charAt(0)");
-		result = expr.getValue(context,String.class);
+		result = expr.getValue(context, String.class);
 		assertEquals("a", result);
 		assertFalse(filter.filterCalled);
 
@@ -249,62 +234,9 @@ public class MethodInvocationTests extends AbstractExpressionTests {
 		context.registerMethodFilter(TestObject.class,null);//clear filter
 		context.setRootObject(new TestObject());
 		expr = (SpelExpression) parser.parseExpression("doit(1)");
-		result = expr.getValue(context,String.class);
+		result = expr.getValue(context, String.class);
 		assertEquals("1", result);
 		assertFalse(filter.filterCalled);
-	}
-
-	// Simple filter
-	static class LocalFilter implements MethodFilter {
-
-		public boolean removeIfNotAnnotated = false;
-
-		public boolean filterCalled = false;
-
-		private boolean isAnnotated(Method m) {
-			Annotation[] annos = m.getAnnotations();
-			if (annos==null) {
-				return false;
-			}
-			for (Annotation anno: annos) {
-				String s = anno.annotationType().getName();
-				if (s.endsWith("Anno")) {
-					return true;
-				}
-			}
-			return false;
-		}
-
-		@Override
-		public List<Method> filter(List<Method> methods) {
-			filterCalled = true;
-			List<Method> forRemoval = new ArrayList<Method>();
-			for (Method m: methods) {
-				if (removeIfNotAnnotated && !isAnnotated(m)) {
-					forRemoval.add(m);
-				}
-			}
-			for (Method m: forRemoval) {
-				methods.remove(m);
-			}
-			return methods;
-		}
-
-	}
-
-	@Retention(RetentionPolicy.RUNTIME)
-	@interface Anno {}
-
-	class TestObject {
-		public int doit(int i) {
-			return i;
-		}
-
-		@Anno
-		public String doit(double d) {
-			return "double "+d;
-		}
-
 	}
 
 	@Test
@@ -328,17 +260,6 @@ public class MethodInvocationTests extends AbstractExpressionTests {
 		ctx.setMethodResolvers(copy);
 		assertEquals(2, ctx.getMethodResolvers().size());
 	}
-
-	static class DummyMethodResolver implements MethodResolver {
-
-		@Override
-		public MethodExecutor resolve(EvaluationContext context, Object targetObject, String name,
-				List<TypeDescriptor> argumentTypes) throws AccessException {
-			throw new UnsupportedOperationException("Auto-generated method stub");
-		}
-
-	}
-
 
 	@Test
 	public void testVarargsInvocation01() {
@@ -383,8 +304,7 @@ public class MethodInvocationTests extends AbstractExpressionTests {
 		StandardEvaluationContext context = new StandardEvaluationContext(bytes);
 		context.setBeanResolver(new BeanResolver() {
 			@Override
-			public Object resolve(EvaluationContext context, String beanName)
-					throws AccessException {
+			public Object resolve(EvaluationContext context, String beanName) throws AccessException {
 				if ("service".equals(beanName)) {
 					return service;
 				}
@@ -396,10 +316,78 @@ public class MethodInvocationTests extends AbstractExpressionTests {
 		assertSame(bytes, outBytes);
 	}
 
+
+	// Simple filter
+	static class LocalFilter implements MethodFilter {
+
+		public boolean removeIfNotAnnotated = false;
+
+		public boolean filterCalled = false;
+
+		private boolean isAnnotated(Method method) {
+			Annotation[] anns = method.getAnnotations();
+			if (anns == null) {
+				return false;
+			}
+			for (Annotation ann : anns) {
+				String name = ann.annotationType().getName();
+				if (name.endsWith("Anno")) {
+					return true;
+				}
+			}
+			return false;
+		}
+
+		@Override
+		public List<Method> filter(List<Method> methods) {
+			filterCalled = true;
+			List<Method> forRemoval = new ArrayList<Method>();
+			for (Method method: methods) {
+				if (removeIfNotAnnotated && !isAnnotated(method)) {
+					forRemoval.add(method);
+				}
+			}
+			for (Method method: forRemoval) {
+				methods.remove(method);
+			}
+			return methods;
+		}
+	}
+
+
+	@Retention(RetentionPolicy.RUNTIME)
+	@interface Anno {
+	}
+
+
+	class TestObject {
+
+		public int doit(int i) {
+			return i;
+		}
+
+		@Anno
+		public String doit(double d) {
+			return "double "+d;
+		}
+	}
+
+
+	static class DummyMethodResolver implements MethodResolver {
+
+		@Override
+		public MethodExecutor resolve(EvaluationContext context, Object targetObject, String name,
+				List<TypeDescriptor> argumentTypes) throws AccessException {
+			throw new UnsupportedOperationException();
+		}
+	}
+
+
 	public static class BytesService {
 
 		public byte[] handleBytes(byte[] bytes) {
 			return bytes;
 		}
 	}
+
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,12 +24,6 @@ package org.springframework.tests;
  */
 public enum JavaVersion {
 
-
-	/**
-	 * Java 1.5
-	 */
-	JAVA_15("1.5", 15),
-
 	/**
 	 * Java 1.6
 	 */
@@ -43,7 +37,12 @@ public enum JavaVersion {
 	/**
 	 * Java 1.8
 	 */
-	JAVA_18("1.8", 18);
+	JAVA_18("1.8", 18),
+
+	/**
+	 * Java 1.9
+	 */
+	JAVA_19("1.9", 19);
 
 
 	private static final JavaVersion runningVersion = findRunningVersion();
@@ -55,7 +54,7 @@ public enum JavaVersion {
 				return candidate;
 			}
 		}
-		return JavaVersion.JAVA_15;
+		return JavaVersion.JAVA_16;
 	}
 
 
@@ -81,16 +80,16 @@ public enum JavaVersion {
 	 * @return {@code true} if the specified version is at least this version
 	 */
 	public boolean isAtLeast(JavaVersion version) {
-		return this.value >= version.value;
+		return (this.value >= version.value);
 	}
-
 
 	/**
 	 * Returns the current running JDK version. If the current version cannot be
-	 * determined {@link #JAVA_15} will be returned.
+	 * determined {@link #JAVA_16} will be returned.
 	 * @return the JDK version
 	 */
 	public static JavaVersion runningVersion() {
 		return runningVersion;
 	}
+
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -54,30 +55,24 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 
 	private final ContentNegotiationManager contentNegotiationManager;
 
-	private final ResponseBodyAdviceChain adviceChain;
 
-
-	protected AbstractMessageConverterMethodProcessor(List<HttpMessageConverter<?>> messageConverters) {
-		this(messageConverters, null);
+	protected AbstractMessageConverterMethodProcessor(List<HttpMessageConverter<?>> converters) {
+		this(converters, null);
 	}
 
-	protected AbstractMessageConverterMethodProcessor(List<HttpMessageConverter<?>> messageConverters,
-			ContentNegotiationManager manager) {
-		this(messageConverters, manager, null);
+	protected AbstractMessageConverterMethodProcessor(List<HttpMessageConverter<?>> converters,
+			ContentNegotiationManager contentNegotiationManager) {
+
+		this(converters, contentNegotiationManager, null);
 	}
 
-	protected AbstractMessageConverterMethodProcessor(List<HttpMessageConverter<?>> messageConverters,
-			ContentNegotiationManager manager, List<Object> responseBodyAdvice) {
+	protected AbstractMessageConverterMethodProcessor(List<HttpMessageConverter<?>> converters,
+			ContentNegotiationManager manager, List<Object> requestResponseBodyAdvice) {
 
-		super(messageConverters);
+		super(converters, requestResponseBodyAdvice);
 		this.contentNegotiationManager = (manager != null ? manager : new ContentNegotiationManager());
-		this.adviceChain = new ResponseBodyAdviceChain(responseBodyAdvice);
 	}
 
-
-	protected ResponseBodyAdviceChain getAdviceChain() {
-		return this.adviceChain;
-	}
 
 	/**
 	 * Creates a new {@link HttpOutputMessage} from the given {@link NativeWebRequest}.
@@ -155,13 +150,14 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 			selectedMediaType = selectedMediaType.removeQualityValue();
 			for (HttpMessageConverter<?> messageConverter : this.messageConverters) {
 				if (messageConverter.canWrite(returnValueClass, selectedMediaType)) {
-					returnValue = this.adviceChain.invoke(returnValue, returnType, selectedMediaType,
-							(Class<HttpMessageConverter<?>>) messageConverter.getClass(), inputMessage, outputMessage);
+					returnValue = (T) getAdvice().beforeBodyWrite(returnValue, returnType, selectedMediaType,
+							(Class<? extends HttpMessageConverter<?>>) messageConverter.getClass(),
+							inputMessage, outputMessage);
 					if (returnValue != null) {
 						((HttpMessageConverter<T>) messageConverter).write(returnValue, selectedMediaType, outputMessage);
 						if (logger.isDebugEnabled()) {
-							logger.debug("Written [" + returnValue + "] as \"" + selectedMediaType + "\" using [" +
-									messageConverter + "]");
+							logger.debug("Written [" + returnValue + "] as \"" +
+									selectedMediaType + "\" using [" + messageConverter + "]");
 						}
 					}
 					return;

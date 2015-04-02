@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageDeliveryException;
+import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.SubscribableChannel;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessageType;
@@ -399,12 +400,21 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 				throw new MessageDeliveryException("Message broker not active. Consider subscribing to " +
 						"receive BrokerAvailabilityEvent's from an ApplicationListener Spring bean.");
 			}
-			SimpMessageType messageType = SimpMessageHeaderAccessor.getMessageType(message.getHeaders());
-			if (logger.isErrorEnabled() && SimpMessageType.CONNECT.equals(messageType)) {
-				logger.error("Broker not active. Ignoring " + message);
+			StompConnectionHandler handler = this.connectionHandlers.get(sessionId);
+			if (handler != null) {
+				handler.sendStompErrorFrameToClient("Broker not available.");
+				handler.clearConnection();
 			}
-			else if (logger.isDebugEnabled()) {
-				logger.debug("Broker not active. Ignoring " + message);
+			else {
+				StompHeaderAccessor accessor = StompHeaderAccessor.create(StompCommand.ERROR);
+				if (getHeaderInitializer() != null) {
+					getHeaderInitializer().initHeaders(accessor);
+				}
+				accessor.setSessionId(sessionId);
+				accessor.setUser(SimpMessageHeaderAccessor.getUser(message.getHeaders()));
+				accessor.setMessage("Broker not available.");
+				MessageHeaders headers = accessor.getMessageHeaders();
+				getClientOutboundChannel().send(MessageBuilder.createMessage(EMPTY_PAYLOAD, headers));
 			}
 			return;
 		}

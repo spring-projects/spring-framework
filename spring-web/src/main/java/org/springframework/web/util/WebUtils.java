@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.web.util;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.util.Collection;
 import java.util.Enumeration;
 import java.util.Map;
 import java.util.StringTokenizer;
@@ -32,6 +33,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import org.springframework.http.HttpRequest;
 import org.springframework.util.Assert;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -43,6 +48,7 @@ import org.springframework.util.StringUtils;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
+ * @author Sebastien Deleuze
  */
 public abstract class WebUtils {
 
@@ -109,6 +115,7 @@ public abstract class WebUtils {
 	/**
 	 * Use of response encoding for HTML escaping parameter at the servlet context level
 	 * (i.e. a context-param in {@code web.xml}): "responseEncodedHtmlEscape".
+	 * @since 4.1.2
 	 */
 	public static final String RESPONSE_ENCODED_HTML_ESCAPE_CONTEXT_PARAM = "responseEncodedHtmlEscape";
 
@@ -126,6 +133,8 @@ public abstract class WebUtils {
 
 	/** Key for the mutex session attribute */
 	public static final String SESSION_MUTEX_ATTRIBUTE = WebUtils.class.getName() + ".MUTEX";
+
+	private static final Log logger = LogFactory.getLog(WebUtils.class);
 
 
 	/**
@@ -207,7 +216,7 @@ public abstract class WebUtils {
 			return null;
 		}
 		String param = servletContext.getInitParameter(HTML_ESCAPE_CONTEXT_PARAM);
-		return (StringUtils.hasText(param)? Boolean.valueOf(param) : null);
+		return (StringUtils.hasText(param) ? Boolean.valueOf(param) : null);
 	}
 
 	/**
@@ -221,13 +230,14 @@ public abstract class WebUtils {
 	 * default in case of no setting at the global level.
 	 * @param servletContext the servlet context of the web application
 	 * @return whether response encoding is used for HTML escaping (null = no explicit default)
+	 * @since 4.1.2
 	 */
 	public static Boolean getResponseEncodedHtmlEscape(ServletContext servletContext) {
 		if (servletContext == null) {
 			return null;
 		}
 		String param = servletContext.getInitParameter(RESPONSE_ENCODED_HTML_ESCAPE_CONTEXT_PARAM);
-		return (StringUtils.hasText(param)? Boolean.valueOf(param) : null);
+		return (StringUtils.hasText(param) ? Boolean.valueOf(param) : null);
 	}
 
 	/**
@@ -737,9 +747,9 @@ public abstract class WebUtils {
 	 * like this {@code "q1=a;q1=b;q2=a,b,c"}. The resulting map would contain
 	 * keys {@code "q1"} and {@code "q2"} with values {@code ["a","b"]} and
 	 * {@code ["a","b","c"]} respectively.
-	 *
 	 * @param matrixVariables the unparsed matrix variables string
 	 * @return a map with matrix variable names and values, never {@code null}
+	 * @since 3.2
 	 */
 	public static MultiValueMap<String, String> parseMatrixVariables(String matrixVariables) {
 		MultiValueMap<String, String> result = new LinkedMultiValueMap<String, String>();
@@ -763,4 +773,55 @@ public abstract class WebUtils {
 		}
 		return result;
 	}
+
+	/**
+	 * Check the given request origin against a list of allowed origins.
+	 * A list containing "*" means that all origins are allowed.
+	 * An empty list means only same origin is allowed.
+	 * @return true if the request origin is valid, false otherwise
+	 * @since 4.1.5
+	 * @see <a href="https://tools.ietf.org/html/rfc6454">RFC 6454: The Web Origin Concept</a>
+	 */
+	public static boolean isValidOrigin(HttpRequest request, Collection<String> allowedOrigins) {
+		Assert.notNull(request, "Request must not be null");
+		Assert.notNull(allowedOrigins, "Allowed origins must not be null");
+
+		String origin = request.getHeaders().getOrigin();
+		if (origin == null || allowedOrigins.contains("*")) {
+			return true;
+		}
+		else if (allowedOrigins.isEmpty()) {
+			UriComponents originComponents;
+			try {
+				originComponents = UriComponentsBuilder.fromHttpUrl(origin).build();
+			}
+			catch (IllegalArgumentException ex) {
+				if (logger.isWarnEnabled()) {
+					logger.warn("Failed to parse Origin header value [" + origin + "]");
+				}
+				return false;
+			}
+			UriComponents requestComponents = UriComponentsBuilder.fromHttpRequest(request).build();
+			int originPort = getPort(originComponents);
+			int requestPort = getPort(requestComponents);
+			return (originComponents.getHost().equals(requestComponents.getHost()) && originPort == requestPort);
+		}
+		else {
+			return allowedOrigins.contains(origin);
+		}
+	}
+
+	private static int getPort(UriComponents component) {
+		int port = component.getPort();
+		if (port == -1) {
+			if ("http".equals(component.getScheme())) {
+				port = 80;
+			}
+			else if ("https".equals(component.getScheme())) {
+				port = 443;
+			}
+		}
+		return port;
+	}
+
 }

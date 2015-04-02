@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,18 +16,21 @@
 
 package org.springframework.web.util;
 
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
+import static org.springframework.web.util.UriComponentsBuilder.*;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Arrays;
 
 import org.junit.Test;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
-import static org.springframework.web.util.UriComponentsBuilder.*;
+import org.springframework.web.util.HierarchicalUriComponents.FullPathComponent;
 
 /**
  * @author Arjen Poutsma
@@ -133,6 +136,16 @@ public class UriComponentsTests {
 	}
 
 	@Test
+	public void copyToUriComponentsBuilder() {
+		UriComponents source = UriComponentsBuilder.fromPath("/foo/bar").pathSegment("ba/z").build();
+		UriComponentsBuilder targetBuilder = UriComponentsBuilder.newInstance();
+		source.copyToUriComponentsBuilder(targetBuilder);
+		UriComponents result = targetBuilder.build().encode();
+		assertEquals("/foo/bar/ba%2Fz", result.getPath());
+		assertEquals(Arrays.asList("foo", "bar", "ba%2Fz"), result.getPathSegments());
+	}
+
+	@Test
 	public void equalsHierarchicalUriComponents() throws Exception {
 		UriComponents uriComponents1 = UriComponentsBuilder.fromUriString("http://example.com").path("/{foo}").query("bar={baz}").build();
 		UriComponents uriComponents2 = UriComponentsBuilder.fromUriString("http://example.com").path("/{foo}").query("bar={baz}").build();
@@ -152,6 +165,51 @@ public class UriComponentsTests {
 		assertThat(uriComponents1, equalTo(uriComponents1));
 		assertThat(uriComponents1, equalTo(uriComponents2));
 		assertThat(uriComponents1, not(equalTo(uriComponents3)));
+	}
+
+	@Test
+	public void partialPath() throws Exception {
+		FullPathComponent l;
+
+		l = new FullPathComponent("x");
+		assertEquals(1, l.getPartialPaths().size());
+		assertEquals("x", l.getPartialPaths().get(0).value);
+		assertEquals(HierarchicalUriComponents.Type.PATH, l.getPartialPaths().get(0).type);
+
+		l = new FullPathComponent("/foo");
+		assertEquals(1, l.getPartialPaths().size());
+		assertEquals("/foo", l.getPartialPaths().get(0).value);
+		assertEquals(HierarchicalUriComponents.Type.PATH, l.getPartialPaths().get(0).type);
+
+		l = new FullPathComponent("{/foo}");
+		assertEquals(1, l.getPartialPaths().size());
+		assertEquals("{/foo}", l.getPartialPaths().get(0).value);
+		assertEquals(HierarchicalUriComponents.Type.PATH_SEGMENT, l.getPartialPaths().get(0).type);
+
+		l = new FullPathComponent("/foo{/bar}");
+		assertEquals(2, l.getPartialPaths().size());
+		assertEquals("/foo", l.getPartialPaths().get(0).value);
+		assertEquals(HierarchicalUriComponents.Type.PATH, l.getPartialPaths().get(0).type);
+		assertEquals("{/bar}", l.getPartialPaths().get(1).value);
+		assertEquals(HierarchicalUriComponents.Type.PATH_SEGMENT, l.getPartialPaths().get(1).type);
+
+		l = new FullPathComponent("{/foo}{/bar}");
+		assertEquals(2, l.getPartialPaths().size());
+		assertEquals("{/foo}", l.getPartialPaths().get(0).value);
+		assertEquals(HierarchicalUriComponents.Type.PATH_SEGMENT, l.getPartialPaths().get(0).type);
+		assertEquals("{/bar}", l.getPartialPaths().get(1).value);
+		assertEquals(HierarchicalUriComponents.Type.PATH_SEGMENT, l.getPartialPaths().get(1).type);
+
+		l = new FullPathComponent("foo{/bar}baz");
+		assertEquals(3, l.getPartialPaths().size());
+		assertEquals("foo", l.getPartialPaths().get(0).value);
+		assertEquals(HierarchicalUriComponents.Type.PATH, l.getPartialPaths().get(0).type);
+		assertEquals("{/bar}", l.getPartialPaths().get(1).value);
+		assertEquals(HierarchicalUriComponents.Type.PATH_SEGMENT, l.getPartialPaths().get(1).type);
+		assertEquals("baz", l.getPartialPaths().get(2).value);
+		assertEquals(HierarchicalUriComponents.Type.PATH, l.getPartialPaths().get(2).type);
+
+
 	}
 
 }

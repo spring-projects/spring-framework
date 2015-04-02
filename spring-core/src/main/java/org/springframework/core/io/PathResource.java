@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,8 +33,8 @@ import org.springframework.util.Assert;
 
 /**
  * {@link Resource} implementation for {@code java.nio.file.Path} handles.
- * Supports resolution as File, and also as URL.
- * Implements the extended {@link WritableResource} interface.
+ * <p>Supports resolution as File, and also as URL.
+ * <p>Implements the extended {@link WritableResource} interface.
  *
  * @author Philippe Marschall
  * @since 4.0

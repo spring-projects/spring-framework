@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,7 +39,10 @@ import org.springframework.beans.factory.NoUniqueBeanDefinitionException;
 import org.springframework.beans.factory.SmartInitializingSingleton;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
+import org.springframework.context.ApplicationListener;
 import org.springframework.context.EmbeddedValueResolverAware;
+import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.scheduling.TaskScheduler;
@@ -61,12 +64,12 @@ import org.springframework.util.StringValueResolver;
  * to the "fixedRate", "fixedDelay", or "cron" expression provided via the annotation.
  *
  * <p>This post-processor is automatically registered by Spring's
- * {@code <task:annotation-driven>} XML element, and also by the @{@link EnableScheduling}
- * annotation.
+ * {@code <task:annotation-driven>} XML element, and also by the
+ * @{@link EnableScheduling} annotation.
  *
- * <p>Auto-detects any {@link SchedulingConfigurer} instances in the container,
- * allowing for customization of the scheduler to be used or for fine-grained control
- * over task registration (e.g. registration of {@link Trigger} tasks.
+ * <p>Autodetects any {@link SchedulingConfigurer} instances in the container,
+ * allowing for customization of the scheduler to be used or for fine-grained
+ * control over task registration (e.g. registration of {@link Trigger} tasks.
  * See the @{@link EnableScheduling} javadocs for complete usage details.
  *
  * @author Mark Fisher
@@ -80,7 +83,8 @@ import org.springframework.util.StringValueResolver;
  * @see org.springframework.scheduling.config.ScheduledTaskRegistrar
  */
 public class ScheduledAnnotationBeanPostProcessor implements BeanPostProcessor, Ordered,
-		EmbeddedValueResolverAware, BeanFactoryAware, SmartInitializingSingleton, DisposableBean {
+		EmbeddedValueResolverAware, BeanFactoryAware, ApplicationContextAware,
+		SmartInitializingSingleton, ApplicationListener<ContextRefreshedEvent>, DisposableBean {
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
@@ -89,6 +93,8 @@ public class ScheduledAnnotationBeanPostProcessor implements BeanPostProcessor, 
 	private StringValueResolver embeddedValueResolver;
 
 	private BeanFactory beanFactory;
+
+	private ApplicationContext applicationContext;
 
 	private final ScheduledTaskRegistrar registrar = new ScheduledTaskRegistrar();
 
@@ -126,10 +132,13 @@ public class ScheduledAnnotationBeanPostProcessor implements BeanPostProcessor, 
 	}
 
 	/**
-	 * @deprecated as of Spring 4.1, in favor of {@link #setBeanFactory}
+	 * Setting an {@link ApplicationContext} is optional: If set, registered
+	 * tasks will be activated in the {@link ContextRefreshedEvent} phase;
+	 * if not set, it will happen at {@link #afterSingletonsInstantiated} time.
 	 */
-	@Deprecated
+	@Override
 	public void setApplicationContext(ApplicationContext applicationContext) {
+		this.applicationContext = applicationContext;
 		if (this.beanFactory == null) {
 			this.beanFactory = applicationContext;
 		}
@@ -138,6 +147,23 @@ public class ScheduledAnnotationBeanPostProcessor implements BeanPostProcessor, 
 
 	@Override
 	public void afterSingletonsInstantiated() {
+		if (this.applicationContext == null) {
+			// Not running in an ApplicationContext -> register tasks early...
+			finishRegistration();
+		}
+	}
+
+	@Override
+	public void onApplicationEvent(ContextRefreshedEvent event) {
+		if (event.getApplicationContext() == this.applicationContext) {
+			// Running in an ApplicationContext -> register tasks this late...
+			// giving other ContextRefreshedEvent listeners a chance to perform
+			// their work at the same time (e.g. Spring Batch's job registration).
+			finishRegistration();
+		}
+	}
+
+	private void finishRegistration() {
 		if (this.scheduler != null) {
 			this.registrar.setScheduler(this.scheduler);
 		}
@@ -190,9 +216,9 @@ public class ScheduledAnnotationBeanPostProcessor implements BeanPostProcessor, 
 
 	@Override
 	public Object postProcessAfterInitialization(final Object bean, String beanName) {
-		if (!this.nonAnnotatedClasses.contains(bean.getClass())) {
+		Class<?> targetClass = AopUtils.getTargetClass(bean);
+		if (!this.nonAnnotatedClasses.contains(targetClass)) {
 			final Set<Method> annotatedMethods = new LinkedHashSet<Method>(1);
-			Class<?> targetClass = AopUtils.getTargetClass(bean);
 			ReflectionUtils.doWithMethods(targetClass, new MethodCallback() {
 				@Override
 				public void doWith(Method method) throws IllegalArgumentException, IllegalAccessException {
@@ -204,9 +230,9 @@ public class ScheduledAnnotationBeanPostProcessor implements BeanPostProcessor, 
 				}
 			});
 			if (annotatedMethods.isEmpty()) {
-				this.nonAnnotatedClasses.add(bean.getClass());
-				if (logger.isDebugEnabled()) {
-					logger.debug("No @Scheduled annotations found on bean class: " + bean.getClass());
+				this.nonAnnotatedClasses.add(targetClass);
+				if (logger.isTraceEnabled()) {
+					logger.trace("No @Scheduled annotations found on bean class: " + bean.getClass());
 				}
 			}
 			else {

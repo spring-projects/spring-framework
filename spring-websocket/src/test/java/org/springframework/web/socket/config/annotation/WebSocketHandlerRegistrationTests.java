@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -69,12 +69,14 @@ public class WebSocketHandlerRegistrationTests {
 		Mapping m1 = mappings.get(0);
 		assertEquals(handler, m1.webSocketHandler);
 		assertEquals("/foo", m1.path);
-		assertEquals(0, m1.interceptors.length);
+		assertEquals(1, m1.interceptors.length);
+		assertEquals(OriginHandshakeInterceptor.class, m1.interceptors[0].getClass());
 
 		Mapping m2 = mappings.get(1);
 		assertEquals(handler, m2.webSocketHandler);
 		assertEquals("/bar", m2.path);
-		assertEquals(0, m2.interceptors.length);
+		assertEquals(1, m2.interceptors.length);
+		assertEquals(OriginHandshakeInterceptor.class, m2.interceptors[0].getClass());
 	}
 
 	@Test
@@ -90,7 +92,27 @@ public class WebSocketHandlerRegistrationTests {
 		Mapping mapping = mappings.get(0);
 		assertEquals(handler, mapping.webSocketHandler);
 		assertEquals("/foo", mapping.path);
-		assertArrayEquals(new HandshakeInterceptor[] {interceptor}, mapping.interceptors);
+		assertEquals(2, mapping.interceptors.length);
+		assertEquals(interceptor, mapping.interceptors[0]);
+		assertEquals(OriginHandshakeInterceptor.class, mapping.interceptors[1].getClass());
+	}
+
+	@Test
+	public void emptyAllowedOrigin() {
+		WebSocketHandler handler = new TextWebSocketHandler();
+		HttpSessionHandshakeInterceptor interceptor = new HttpSessionHandshakeInterceptor();
+
+		this.registration.addHandler(handler, "/foo").addInterceptors(interceptor).setAllowedOrigins();
+
+		List<Mapping> mappings = this.registration.getMappings();
+		assertEquals(1, mappings.size());
+
+		Mapping mapping = mappings.get(0);
+		assertEquals(handler, mapping.webSocketHandler);
+		assertEquals("/foo", mapping.path);
+		assertEquals(2, mapping.interceptors.length);
+		assertEquals(interceptor, mapping.interceptors[0]);
+		assertEquals(OriginHandshakeInterceptor.class, mapping.interceptors[1].getClass());
 	}
 
 	@Test

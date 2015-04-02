@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.web.socket;
 
 import org.junit.Before;
 
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.server.ServerHttpAsyncRequestControl;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
@@ -55,7 +56,7 @@ public abstract class AbstractHttpRequestTests {
 	}
 
 	protected void setOrigin(String origin) {
-		this.servletRequest.addHeader("Origin", origin);
+		this.request.getHeaders().add(HttpHeaders.ORIGIN, origin);
 	}
 
 	protected void resetRequestAndResponse() {

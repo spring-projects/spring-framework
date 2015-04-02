@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,11 +21,17 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.hamcrest.Matchers;
 import org.junit.Before;
 import org.junit.Test;
 
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
+import org.springframework.mock.web.test.MockServletContext;
+import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
+import org.springframework.web.servlet.handler.SimpleUrlHandlerMapping;
 
 import static org.junit.Assert.*;
 
@@ -38,6 +44,8 @@ import static org.junit.Assert.*;
  */
 public class ResourceUrlProviderTests {
 
+	private List<Resource> locations;
+
 	private ResourceUrlProvider translator;
 
 	private ResourceHttpRequestHandler handler;
@@ -47,9 +55,9 @@ public class ResourceUrlProviderTests {
 
 	@Before
 	public void setUp() {
-		List<Resource> locations = new ArrayList<Resource>();
-		locations.add(new ClassPathResource("test/", getClass()));
-		locations.add(new ClassPathResource("testalternatepath/", getClass()));
+		this.locations = new ArrayList<Resource>();
+		this.locations.add(new ClassPathResource("test/", getClass()));
+		this.locations.add(new ClassPathResource("testalternatepath/", getClass()));
 
 		this.handler = new ResourceHttpRequestHandler();
 		this.handler.setLocations(locations);
@@ -86,6 +94,58 @@ public class ResourceUrlProviderTests {
 	private void initTranslator() {
 		this.translator = new ResourceUrlProvider();
 		this.translator.setHandlerMap(this.handlerMap);
+	}
+
+	// SPR-12647
+	@Test
+	public void bestPatternMatch() throws Exception {
+		ResourceHttpRequestHandler otherHandler = new ResourceHttpRequestHandler();
+		otherHandler.setLocations(this.locations);
+		Map<String, VersionStrategy> versionStrategyMap = new HashMap<>();
+		versionStrategyMap.put("/**", new ContentVersionStrategy());
+		VersionResourceResolver versionResolver = new VersionResourceResolver();
+		versionResolver.setStrategyMap(versionStrategyMap);
+
+		List<ResourceResolver> resolvers = new ArrayList<ResourceResolver>();
+		resolvers.add(versionResolver);
+		resolvers.add(new PathResourceResolver());
+		otherHandler.setResourceResolvers(resolvers);
+
+		this.handlerMap.put("/resources/*.css", otherHandler);
+		initTranslator();
+
+		String url = this.translator.getForLookupPath("/resources/foo.css");
+		assertEquals("/resources/foo-e36d2e05253c6c7085a91522ce43a0b4.css", url);
+	}
+
+	// SPR-12592
+	@Test
+	public void initializeOnce() throws Exception {
+		AnnotationConfigWebApplicationContext context = new AnnotationConfigWebApplicationContext();
+		context.setServletContext(new MockServletContext());
+		context.register(HandlerMappingConfiguration.class);
+		context.refresh();
+		ResourceUrlProvider translator = context.getBean(ResourceUrlProvider.class);
+		assertThat(translator.getHandlerMap(), Matchers.hasKey("/resources/**"));
+		assertFalse(translator.isAutodetect());
+	}
+
+	@Configuration
+	public static class HandlerMappingConfiguration {
+		@Bean
+		public SimpleUrlHandlerMapping simpleUrlHandlerMapping() {
+			ResourceHttpRequestHandler handler = new ResourceHttpRequestHandler();
+			HashMap<String, ResourceHttpRequestHandler> handlerMap = new HashMap<String, ResourceHttpRequestHandler>();
+			handlerMap.put("/resources/**", handler);
+			SimpleUrlHandlerMapping hm = new SimpleUrlHandlerMapping();
+			hm.setUrlMap(handlerMap);
+			return hm;
+		}
+
+		@Bean
+		public ResourceUrlProvider resourceUrlProvider() {
+			return new ResourceUrlProvider();
+		}
 	}
 
 }

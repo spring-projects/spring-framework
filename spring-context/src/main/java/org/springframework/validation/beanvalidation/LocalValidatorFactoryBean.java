@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -221,6 +221,17 @@ public class LocalValidatorFactoryBean extends SpringValidatorAdapter
 		Configuration<?> configuration = (this.providerClass != null ?
 				Validation.byProvider(this.providerClass).configure() :
 				Validation.byDefaultProvider().configure());
+
+		// Try Hibernate Validator 5.2's externalClassLoader(ClassLoader) method
+		if (this.applicationContext != null) {
+			try {
+				Method eclMethod = configuration.getClass().getMethod("externalClassLoader", ClassLoader.class);
+				ReflectionUtils.invokeMethod(eclMethod, configuration, this.applicationContext.getClassLoader());
+			}
+			catch (NoSuchMethodException ex) {
+				// Ignore - no Hibernate Validator 5.2+ or similar provider
+			}
+		}
 
 		MessageInterpolator targetInterpolator = this.messageInterpolator;
 		if (targetInterpolator == null) {

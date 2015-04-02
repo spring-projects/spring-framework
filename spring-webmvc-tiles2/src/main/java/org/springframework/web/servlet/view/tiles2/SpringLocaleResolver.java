@@ -39,7 +39,9 @@ import org.springframework.web.servlet.support.RequestContextUtils;
  * @author Juergen Hoeller
  * @since 2.5
  * @see org.apache.tiles.definition.UrlDefinitionsFactory#LOCALE_RESOLVER_IMPL_PROPERTY
+ * @deprecated as of Spring 4.2, in favor of Tiles 3
  */
+@Deprecated
 public class SpringLocaleResolver extends DefaultLocaleResolver {
 
 	@Override

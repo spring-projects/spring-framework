@@ -25,6 +25,7 @@ import org.springframework.messaging.Message;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.util.ObjectUtils;
 
 /**
@@ -184,6 +185,17 @@ public class NativeMessageHeaderAccessor extends MessageHeaderAccessor {
 		}
 		values.add(value);
 		setModified(true);
+	}
+
+	public void addNativeHeaders(MultiValueMap<String, String> headers) {
+		if (headers == null) {
+			return;
+		}
+		for (String header : headers.keySet()) {
+			for (String value : headers.get(header)) {
+				addNativeHeader(header, value);
+			}
+		}
 	}
 
 	public List<String> removeNativeHeader(String name) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,6 +52,7 @@ import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.messaging.support.MessageHeaderAccessor;
 import org.springframework.messaging.support.MessageHeaderInitializer;
 import org.springframework.util.Assert;
+import org.springframework.util.MimeTypeUtils;
 import org.springframework.web.socket.BinaryMessage;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
@@ -200,7 +201,7 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 				byteBuffer = ((BinaryMessage) webSocketMessage).getPayload();
 			}
 			else {
-				throw new IllegalArgumentException("Unexpected WebSocket message type: " + webSocketMessage);
+				return;
 			}
 
 			BufferingStompDecoder decoder = this.decoders.get(session.getId());
@@ -354,8 +355,18 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 			}
 		}
 		try {
-			byte[] bytes = this.stompEncoder.encode(stompAccessor.getMessageHeaders(), (byte[]) message.getPayload());
-			session.sendMessage(new TextMessage(bytes));
+			byte[] payload = (byte[]) message.getPayload();
+			byte[] bytes = this.stompEncoder.encode(stompAccessor.getMessageHeaders(), payload);
+
+			boolean useBinary = (payload.length > 0 && !(session instanceof SockJsSession) &&
+					MimeTypeUtils.APPLICATION_OCTET_STREAM.isCompatibleWith(stompAccessor.getContentType()));
+
+			if (useBinary) {
+				session.sendMessage(new BinaryMessage(bytes));
+			}
+			else {
+				session.sendMessage(new TextMessage(bytes));
+			}
 		}
 		catch (SessionLimitExceededException ex) {
 			// Bad session, just get out

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -157,19 +157,6 @@ public class FormattingConversionServiceFactoryBean
 				registrar.registerFormatters(this.conversionService);
 			}
 		}
-		installFormatters(this.conversionService);
-	}
-
-	/**
-	 * Subclasses may override this method to register formatters and/or converters.
-	 * Starting with Spring 3.1 however the recommended way of doing that is to
-	 * through FormatterRegistrars.
-	 * @see #setFormatters(Set)
-	 * @see #setFormatterRegistrars(Set)
-	 * @deprecated since Spring 3.1 in favor of {@link #setFormatterRegistrars(Set)}
-	 */
-	@Deprecated
-	protected void installFormatters(FormatterRegistry registry) {
 	}
 
 

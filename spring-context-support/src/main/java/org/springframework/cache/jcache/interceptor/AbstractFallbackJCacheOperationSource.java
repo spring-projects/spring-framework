@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import org.springframework.cache.interceptor.MethodCacheKey;
+import org.springframework.context.expression.AnnotatedElementKey;
 import org.springframework.core.BridgeMethodResolver;
 import org.springframework.util.ClassUtils;
 
@@ -57,7 +57,7 @@ public abstract class AbstractFallbackJCacheOperationSource
 	@Override
 	public JCacheOperation<?> getCacheOperation(Method method, Class<?> targetClass) {
 		// First, see if we have a cached value.
-		Object cacheKey = new MethodCacheKey(method, targetClass);
+		Object cacheKey = new AnnotatedElementKey(method, targetClass);
 		Object cached = this.cache.get(cacheKey);
 		if (cached != null) {
 			if (cached == NULL_CACHING_ATTRIBUTE) {

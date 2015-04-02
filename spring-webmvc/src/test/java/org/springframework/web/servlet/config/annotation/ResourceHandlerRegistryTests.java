@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ import org.springframework.cache.concurrent.ConcurrentMapCache;
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockHttpServletResponse;
 import org.springframework.mock.web.test.MockServletContext;
+import org.springframework.http.CacheControl;
 import org.springframework.web.context.support.GenericWebApplicationContext;
 import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.servlet.handler.SimpleUrlHandlerMapping;
@@ -88,6 +89,18 @@ public class ResourceHandlerRegistryTests {
 
 		this.registration.setCachePeriod(0);
 		assertEquals(0, getHandler("/resources/**").getCacheSeconds());
+		assertThat(getHandler("/resources/**").getCacheControl().getHeaderValue(),
+				Matchers.equalTo(CacheControl.noStore().getHeaderValue()));
+	}
+
+	@Test
+	public void cacheControl() {
+		assertThat(getHandler("/resources/**").getCacheControl(),
+				Matchers.nullValue());
+
+		this.registration.setCacheControl(CacheControl.noCache().cachePrivate());
+		assertThat(getHandler("/resources/**").getCacheControl().getHeaderValue(),
+				Matchers.equalTo(CacheControl.noCache().cachePrivate().getHeaderValue()));
 	}
 
 	@Test

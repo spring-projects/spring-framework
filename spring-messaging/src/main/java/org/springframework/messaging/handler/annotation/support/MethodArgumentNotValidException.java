@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,22 +49,21 @@ public class MethodArgumentNotValidException extends AbstractMethodArgumentResol
 	public MethodArgumentNotValidException(Message<?> message, MethodParameter parameter,
 			BindingResult bindingResult) {
 
-		super(message, parameter, getMethodParamMessage(parameter) +
-				getValidationErrorMessage(parameter, bindingResult));
-
+		super(message, parameter, getMethodParamMessage(parameter) + getValidationErrorMessage(bindingResult));
 		this.bindingResult = bindingResult;
 	}
 
 
 	/**
-	 * Return the BindingResult if the failure is validation-related or {@code null}.
+	 * Return the BindingResult if the failure is validation-related,
+	 * or {@code null} if none.
 	 */
-	public BindingResult getBindingResult() {
+	public final BindingResult getBindingResult() {
 		return this.bindingResult;
 	}
 
 
-	private static String getValidationErrorMessage(MethodParameter parameter, BindingResult bindingResult) {
+	private static String getValidationErrorMessage(BindingResult bindingResult) {
 		if (bindingResult != null) {
 			StringBuilder sb = new StringBuilder();
 			sb.append(", with ").append(bindingResult.getErrorCount()).append(" error(s): ");

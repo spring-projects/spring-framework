@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.http.client;
 
+import java.io.Closeable;
 import java.io.IOException;
 import java.net.URI;
 
@@ -32,7 +33,6 @@ import org.apache.http.client.methods.HttpPut;
 import org.apache.http.client.methods.HttpTrace;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.client.protocol.HttpClientContext;
-import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.protocol.HttpContext;
 
@@ -57,11 +57,9 @@ import org.springframework.util.Assert;
  */
 public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequestFactory, DisposableBean {
 
-	private CloseableHttpClient httpClient;
+	private HttpClient httpClient;
 
-	private int connectTimeout;
-
-	private int socketTimeout;
+	private RequestConfig requestConfig;
 
 	private boolean bufferRequestBody = true;
 
@@ -77,25 +75,20 @@ public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequest
 	/**
 	 * Create a new instance of the {@code HttpComponentsClientHttpRequestFactory}
 	 * with the given {@link HttpClient} instance.
-	 * <p>As of Spring Framework 4.0, the given client is expected to be of type
-	 * {@link CloseableHttpClient} (requiring HttpClient 4.3+).
 	 * @param httpClient the HttpClient instance to use for this request factory
 	 */
 	public HttpComponentsClientHttpRequestFactory(HttpClient httpClient) {
-		Assert.notNull(httpClient, "'httpClient' must not be null");
-		Assert.isInstanceOf(CloseableHttpClient.class, httpClient, "'httpClient' is not of type CloseableHttpClient");
-		this.httpClient = (CloseableHttpClient) httpClient;
+		Assert.notNull(httpClient, "HttpClient must not be null");
+		this.httpClient = httpClient;
 	}
 
 
 	/**
 	 * Set the {@code HttpClient} used for
-	 * <p>As of Spring Framework 4.0, the given client is expected to be of type
-	 * {@link CloseableHttpClient} (requiring HttpClient 4.3+).
+	 * {@linkplain #createRequest(URI, HttpMethod) synchronous execution}.
 	 */
 	public void setHttpClient(HttpClient httpClient) {
-		Assert.isInstanceOf(CloseableHttpClient.class, httpClient, "'httpClient' is not of type CloseableHttpClient");
-		this.httpClient = (CloseableHttpClient) httpClient;
+		this.httpClient = httpClient;
 	}
 
 	/**
@@ -109,11 +102,15 @@ public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequest
 	/**
 	 * Set the connection timeout for the underlying HttpClient.
 	 * A timeout value of 0 specifies an infinite timeout.
+	 * <p>Additional properties can be configured by specifying a
+	 * {@link RequestConfig} instance on a custom {@link HttpClient}.
 	 * @param timeout the timeout value in milliseconds
+	 * @see RequestConfig#getConnectTimeout()
 	 */
 	public void setConnectTimeout(int timeout) {
 		Assert.isTrue(timeout >= 0, "Timeout must be a non-negative value");
-		this.connectTimeout = timeout;
+		this.requestConfig = cloneRequestConfig()
+				.setConnectTimeout(timeout).build();
 		setLegacyConnectionTimeout(getHttpClient(), timeout);
 	}
 
@@ -140,13 +137,31 @@ public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequest
 	}
 
 	/**
+	 * Set the timeout in milliseconds used when requesting a connection from the connection
+	 * manager using the underlying HttpClient.
+	 * A timeout value of 0 specifies an infinite timeout.
+	 * <p>Additional properties can be configured by specifying a
+	 * {@link RequestConfig} instance on a custom {@link HttpClient}.
+	 * @param connectionRequestTimeout the timeout value to request a connection in milliseconds
+	 * @see RequestConfig#getConnectionRequestTimeout()
+	 */
+	public void setConnectionRequestTimeout(int connectionRequestTimeout) {
+		this.requestConfig = cloneRequestConfig()
+				.setConnectionRequestTimeout(connectionRequestTimeout).build();
+	}
+
+	/**
 	 * Set the socket read timeout for the underlying HttpClient.
 	 * A timeout value of 0 specifies an infinite timeout.
+	 * <p>Additional properties can be configured by specifying a
+	 * {@link RequestConfig} instance on a custom {@link HttpClient}.
 	 * @param timeout the timeout value in milliseconds
+	 * @see RequestConfig#getSocketTimeout()
 	 */
 	public void setReadTimeout(int timeout) {
 		Assert.isTrue(timeout >= 0, "Timeout must be a non-negative value");
-		this.socketTimeout = timeout;
+		this.requestConfig = cloneRequestConfig()
+				.setSocketTimeout(timeout).build();
 		setLegacySocketTimeout(getHttpClient(), timeout);
 	}
 
@@ -165,6 +180,10 @@ public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequest
 		}
 	}
 
+	private RequestConfig.Builder cloneRequestConfig() {
+		return this.requestConfig != null ? RequestConfig.copy(this.requestConfig) : RequestConfig.custom();
+	}
+
 	/**
 	 * Indicates whether this request factory should buffer the request body internally.
 	 * <p>Default is {@code true}. When sending large amounts of data via POST or PUT, it is
@@ -176,8 +195,9 @@ public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequest
 
 
 	@Override
+	@SuppressWarnings("deprecation")
 	public ClientHttpRequest createRequest(URI uri, HttpMethod httpMethod) throws IOException {
-		CloseableHttpClient client = (CloseableHttpClient) getHttpClient();
+		HttpClient client = getHttpClient();
 		Assert.state(client != null, "Synchronous execution requires an HttpClient to be set");
 		HttpUriRequest httpRequest = createHttpUriRequest(httpMethod, uri);
 		postProcessHttpRequest(httpRequest);
@@ -193,17 +213,11 @@ public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequest
 				config = ((Configurable) httpRequest).getConfig();
 			}
 			if (config == null) {
-				if (this.socketTimeout > 0 || this.connectTimeout > 0) {
-					config = RequestConfig.custom()
-							.setConnectTimeout(this.connectTimeout)
-							.setSocketTimeout(this.socketTimeout)
-							.build();
-				}
-				else {
-					config = RequestConfig.DEFAULT;
-				}
+				config = createRequestConfig(client);
 			}
-			context.setAttribute(HttpClientContext.REQUEST_CONFIG, config);
+			if (config != null) {
+				context.setAttribute(HttpClientContext.REQUEST_CONFIG, config);
+			}
 		}
 		if (this.bufferRequestBody) {
 			return new HttpComponentsClientHttpRequest(client, httpRequest, context);
@@ -211,6 +225,44 @@ public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequest
 		else {
 			return new HttpComponentsStreamingClientHttpRequest(client, httpRequest, context);
 		}
+	}
+
+	/**
+	 * Create a default {@link RequestConfig} to use with the given client.
+	 * Can return {@code null} to indicate that no custom request config should
+	 * be set and the defaults of the {@link HttpClient} should be used.
+	 * <p>The default implementation tries to merge the defaults of the client
+	 * with the local customizations of this instance, if any.
+	 * @param client the client
+	 * @return the RequestConfig to use
+	 * @since 4.2
+	 */
+	protected RequestConfig createRequestConfig(HttpClient client) {
+		if (client instanceof Configurable) {
+			RequestConfig clientRequestConfig = ((Configurable) client).getConfig();
+			return mergeRequestConfig(clientRequestConfig);
+		}
+		return this.requestConfig;
+	}
+
+	private RequestConfig mergeRequestConfig(RequestConfig defaultRequestConfig) {
+		if (this.requestConfig == null) { // nothing to merge
+			return defaultRequestConfig;
+		}
+		RequestConfig.Builder builder = RequestConfig.copy(defaultRequestConfig);
+		int connectTimeout = this.requestConfig.getConnectTimeout();
+		if (connectTimeout >= 0) {
+			builder.setConnectTimeout(connectTimeout);
+		}
+		int connectionRequestTimeout = this.requestConfig.getConnectionRequestTimeout();
+		if (connectionRequestTimeout >= 0) {
+			builder.setConnectionRequestTimeout(connectionRequestTimeout);
+		}
+		int socketTimeout = this.requestConfig.getSocketTimeout();
+		if (socketTimeout >= 0) {
+			builder.setSocketTimeout(socketTimeout);
+		}
+		return builder.build();
 	}
 
 	/**
@@ -270,7 +322,9 @@ public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequest
 	 */
 	@Override
 	public void destroy() throws Exception {
-		this.httpClient.close();
+		if (this.httpClient instanceof Closeable) {
+			((Closeable) this.httpClient).close();
+		}
 	}
 
 
@@ -294,4 +348,5 @@ public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequest
 			return "DELETE";
 		}
 	}
+
 }

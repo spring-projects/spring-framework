@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ package org.springframework.web.servlet.mvc.method.annotation;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -36,8 +35,8 @@ import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.core.DefaultParameterNameDiscoverer;
-import org.springframework.core.OrderComparator;
 import org.springframework.core.ParameterNameDiscoverer;
+import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
@@ -132,7 +131,7 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 
 	private List<HttpMessageConverter<?>> messageConverters;
 
-	private List<Object> responseBodyAdvice = new ArrayList<Object>();
+	private List<Object> requestResponseBodyAdvice = new ArrayList<Object>();
 
 	private WebBindingInitializer webBindingInitializer;
 
@@ -330,15 +329,24 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 	}
 
 	/**
-	 * Add one or more components to modify the response after the execution of a
-	 * controller method annotated with {@code @ResponseBody}, or a method returning
-	 * {@code ResponseEntity} and before the body is written to the response with
-	 * the selected {@code HttpMessageConverter}.
+	 * Add one or more {@code RequestBodyAdvice} instances to intercept the
+	 * request before it is read and converted for {@code @RequestBody} and
+	 * {@code HttpEntity} method arguments.
+	 */
+	public void setRequestBodyAdvice(List<RequestBodyAdvice> requestBodyAdvice) {
+		if (requestBodyAdvice != null) {
+			this.requestResponseBodyAdvice.addAll(requestBodyAdvice);
+		}
+	}
+
+	/**
+	 * Add one or more {@code ResponseBodyAdvice} instances to intercept the
+	 * response before {@code @ResponseBody} or {@code ResponseEntity} return
+	 * values are written to the response body.
 	 */
 	public void setResponseBodyAdvice(List<ResponseBodyAdvice<?>> responseBodyAdvice) {
-		this.responseBodyAdvice.clear();
 		if (responseBodyAdvice != null) {
-			this.responseBodyAdvice.addAll(responseBodyAdvice);
+			this.requestResponseBodyAdvice.addAll(responseBodyAdvice);
 		}
 	}
 
@@ -519,9 +527,9 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 		}
 
 		List<ControllerAdviceBean> beans = ControllerAdviceBean.findAnnotatedBeans(getApplicationContext());
-		Collections.sort(beans, new OrderComparator());
+		AnnotationAwareOrderComparator.sort(beans);
 
-		List<Object> responseBodyAdviceBeans = new ArrayList<Object>();
+		List<Object> requestResponseBodyAdviceBeans = new ArrayList<Object>();
 
 		for (ControllerAdviceBean bean : beans) {
 			Set<Method> attrMethods = HandlerMethodSelector.selectMethods(bean.getBeanType(), MODEL_ATTRIBUTE_METHODS);
@@ -534,14 +542,18 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 				this.initBinderAdviceCache.put(bean, binderMethods);
 				logger.info("Detected @InitBinder methods in " + bean);
 			}
+			if (RequestBodyAdvice.class.isAssignableFrom(bean.getBeanType())) {
+				requestResponseBodyAdviceBeans.add(bean);
+				logger.info("Detected RequestBodyAdvice bean in " + bean);
+			}
 			if (ResponseBodyAdvice.class.isAssignableFrom(bean.getBeanType())) {
-				responseBodyAdviceBeans.add(bean);
+				requestResponseBodyAdviceBeans.add(bean);
 				logger.info("Detected ResponseBodyAdvice bean in " + bean);
 			}
 		}
 
-		if (!responseBodyAdviceBeans.isEmpty()) {
-			this.responseBodyAdvice.addAll(0, responseBodyAdviceBeans);
+		if (!requestResponseBodyAdviceBeans.isEmpty()) {
+			this.requestResponseBodyAdvice.addAll(0, requestResponseBodyAdviceBeans);
 		}
 	}
 
@@ -560,8 +572,8 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 		resolvers.add(new MatrixVariableMethodArgumentResolver());
 		resolvers.add(new MatrixVariableMapMethodArgumentResolver());
 		resolvers.add(new ServletModelAttributeMethodProcessor(false));
-		resolvers.add(new RequestResponseBodyMethodProcessor(getMessageConverters()));
-		resolvers.add(new RequestPartMethodArgumentResolver(getMessageConverters()));
+		resolvers.add(new RequestResponseBodyMethodProcessor(getMessageConverters(), this.requestResponseBodyAdvice));
+		resolvers.add(new RequestPartMethodArgumentResolver(getMessageConverters(), this.requestResponseBodyAdvice));
 		resolvers.add(new RequestHeaderMethodArgumentResolver(getBeanFactory()));
 		resolvers.add(new RequestHeaderMapMethodArgumentResolver());
 		resolvers.add(new ServletCookieValueMethodArgumentResolver(getBeanFactory()));
@@ -570,7 +582,7 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 		// Type-based argument resolution
 		resolvers.add(new ServletRequestMethodArgumentResolver());
 		resolvers.add(new ServletResponseMethodArgumentResolver());
-		resolvers.add(new HttpEntityMethodProcessor(getMessageConverters()));
+		resolvers.add(new HttpEntityMethodProcessor(getMessageConverters(), this.requestResponseBodyAdvice));
 		resolvers.add(new RedirectAttributesMethodArgumentResolver());
 		resolvers.add(new ModelMethodProcessor());
 		resolvers.add(new MapMethodProcessor());
@@ -632,8 +644,10 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 		handlers.add(new ModelAndViewMethodReturnValueHandler());
 		handlers.add(new ModelMethodProcessor());
 		handlers.add(new ViewMethodReturnValueHandler());
-		handlers.add(new HttpEntityMethodProcessor(
-				getMessageConverters(), this.contentNegotiationManager, this.responseBodyAdvice));
+		handlers.add(new ResponseBodyEmitterReturnValueHandler(getMessageConverters()));
+		handlers.add(new StreamingResponseBodyReturnValueHandler());
+		handlers.add(new HttpEntityMethodProcessor(getMessageConverters(),
+				this.contentNegotiationManager, this.requestResponseBodyAdvice));
 		handlers.add(new HttpHeadersReturnValueHandler());
 		handlers.add(new CallableMethodReturnValueHandler());
 		handlers.add(new DeferredResultMethodReturnValueHandler());
@@ -642,8 +656,8 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 
 		// Annotation-based return value types
 		handlers.add(new ModelAttributeMethodProcessor(false));
-		handlers.add(new RequestResponseBodyMethodProcessor(
-				getMessageConverters(), this.contentNegotiationManager, this.responseBodyAdvice));
+		handlers.add(new RequestResponseBodyMethodProcessor(getMessageConverters(),
+				this.contentNegotiationManager, this.requestResponseBodyAdvice));
 
 		// Multi-purpose return value types
 		handlers.add(new ViewNameMethodReturnValueHandler());
@@ -685,11 +699,11 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 
 		if (getSessionAttributesHandler(handlerMethod).hasSessionAttributes()) {
 			// Always prevent caching in case of session attribute management.
-			checkAndPrepare(request, response, this.cacheSecondsForSessionAttributeHandlers, true);
+			checkAndPrepare(request, response, this.cacheSecondsForSessionAttributeHandlers);
 		}
 		else {
 			// Uses configured default cacheSeconds setting.
-			checkAndPrepare(request, response, true);
+			checkAndPrepare(request, response);
 		}
 
 		// Execute invokeHandlerMethod in synchronized block if required.

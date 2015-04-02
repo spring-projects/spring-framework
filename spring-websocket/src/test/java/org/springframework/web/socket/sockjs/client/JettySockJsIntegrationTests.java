@@ -17,9 +17,11 @@
 package org.springframework.web.socket.sockjs.client;
 
 import org.eclipse.jetty.client.HttpClient;
-
+import org.junit.BeforeClass;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.tests.Assume;
+import org.springframework.tests.TestGroup;
 import org.springframework.web.socket.JettyWebSocketTestServer;
 import org.springframework.web.socket.client.jetty.JettyWebSocketClient;
 import org.springframework.web.socket.server.RequestUpgradeStrategy;
@@ -32,6 +34,10 @@ import org.springframework.web.socket.server.jetty.JettyRequestUpgradeStrategy;
  */
 public class JettySockJsIntegrationTests extends AbstractSockJsIntegrationTests {
 
+	@BeforeClass
+	public static void setUpOnce() throws Exception {
+		Assume.group(TestGroup.PERFORMANCE);
+	}
 
 	@Override
 	protected Class<?> upgradeStrategyConfigClass() {

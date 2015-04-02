@@ -208,8 +208,8 @@ public class JmsListenerAnnotationBeanPostProcessor
 			});
 			if (annotatedMethods.isEmpty()) {
 				this.nonAnnotatedClasses.add(bean.getClass());
-				if (logger.isDebugEnabled()) {
-					logger.debug("No @JmsListener annotations found on bean class: " + bean.getClass());
+				if (logger.isTraceEnabled()) {
+					logger.trace("No @JmsListener annotations found on bean class: " + bean.getClass());
 				}
 			}
 			else {

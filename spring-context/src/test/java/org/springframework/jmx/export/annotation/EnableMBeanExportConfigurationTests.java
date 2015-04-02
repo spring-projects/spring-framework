@@ -29,6 +29,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.EnableMBeanExport;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.MBeanExportConfiguration;
+import org.springframework.context.annotation.Scope;
+import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.jmx.export.MBeanExporterTests;
 import org.springframework.jmx.export.TestDynamicMBean;
 import org.springframework.jmx.support.MBeanServerFactoryBean;
@@ -58,6 +60,20 @@ public class EnableMBeanExportConfigurationTests {
 			assertEquals("Invalid name returned", "TEST", name);
 		}
 		finally {
+			ctx.close();
+		}
+	}
+
+	@Test
+	public void testOnlyTargetClassIsExposed() throws Exception {
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(
+				ProxyConfiguration.class);
+		try {
+			MBeanServer server = (MBeanServer) ctx.getBean("server");
+			ObjectName oname = ObjectNameManager.getInstance("bean:name=testBean4");
+			assertNotNull(server.getObjectInstance(oname));
+			assertEquals("TEST", server.getAttribute(oname, "Name"));
+		} finally {
 			ctx.close();
 		}
 	}
@@ -143,6 +159,26 @@ public class EnableMBeanExportConfigurationTests {
 
 		@Bean
 		@Lazy
+		public AnnotationTestBean testBean() {
+			AnnotationTestBean bean = new AnnotationTestBean();
+			bean.setName("TEST");
+			bean.setAge(100);
+			return bean;
+		}
+	}
+
+	@Configuration
+	@EnableMBeanExport(server = "server")
+	static class ProxyConfiguration {
+
+		@Bean
+		public MBeanServerFactoryBean server() throws Exception {
+			return new MBeanServerFactoryBean();
+		}
+
+		@Bean
+		@Lazy
+		@Scope(proxyMode = ScopedProxyMode.TARGET_CLASS)
 		public AnnotationTestBean testBean() {
 			AnnotationTestBean bean = new AnnotationTestBean();
 			bean.setName("TEST");

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.web.socket.server.support;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -27,8 +28,10 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
+import org.springframework.util.Assert;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.server.HandshakeInterceptor;
+import org.springframework.web.util.WebUtils;
 
 /**
  * An interceptor to check request {@code Origin} header value against a collection of
@@ -45,26 +48,55 @@ public class OriginHandshakeInterceptor implements HandshakeInterceptor {
 
 
 	/**
-	 * Default constructor with no origin allowed.
+	 * Default constructor with only same origin requests allowed.
 	 */
 	public OriginHandshakeInterceptor() {
 		this.allowedOrigins = new ArrayList<String>();
 	}
 
 	/**
-	 * Use this property to define a collection of allowed origins.
+	 * Constructor using the specified allowed origin values.
+	 *
+	 * @see #setAllowedOrigins(Collection)
+	 */
+	public OriginHandshakeInterceptor(Collection<String> allowedOrigins) {
+		this();
+		setAllowedOrigins(allowedOrigins);
+	}
+
+	/**
+	 * Configure allowed {@code Origin} header values. This check is mostly designed for
+	 * browser clients. There is nothing preventing other types of client to modify the
+	 * {@code Origin} header value.
+	 *
+	 * <p>Each provided allowed origin must start by "http://", "https://" or be "*"
+	 * (means that all origins are allowed).
+	 *
+	 * @see <a href="https://tools.ietf.org/html/rfc6454">RFC 6454: The Web Origin Concept</a>
 	 */
 	public void setAllowedOrigins(Collection<String> allowedOrigins) {
-		this.allowedOrigins.clear();
-		if (allowedOrigins != null) {
-			this.allowedOrigins.addAll(allowedOrigins);
+		Assert.notNull(allowedOrigins, "Allowed origin Collection must not be null");
+		for (String allowedOrigin : allowedOrigins) {
+			Assert.isTrue(allowedOrigin.equals("*") || allowedOrigin.startsWith("http://") ||
+					allowedOrigin.startsWith("https://"), "Invalid allowed origin provided: \"" +
+					allowedOrigin + "\". It must start with \"http://\", \"https://\" or be \"*\"");
 		}
+		this.allowedOrigins.clear();
+		this.allowedOrigins.addAll(allowedOrigins);
+	}
+
+	/**
+	 * @see #setAllowedOrigins(Collection)
+	 * @since 4.1.5
+	 */
+	public Collection<String> getAllowedOrigins() {
+		return Collections.unmodifiableList(this.allowedOrigins);
 	}
 
 	@Override
 	public boolean beforeHandshake(ServerHttpRequest request, ServerHttpResponse response,
 			WebSocketHandler wsHandler, Map<String, Object> attributes) throws Exception {
-		if (!isValidOrigin(request)) {
+		if (!WebUtils.isValidOrigin(request, this.allowedOrigins)) {
 			response.setStatusCode(HttpStatus.FORBIDDEN);
 			if (logger.isDebugEnabled()) {
 				logger.debug("Handshake request rejected, Origin header value "
@@ -73,10 +105,6 @@ public class OriginHandshakeInterceptor implements HandshakeInterceptor {
 			return false;
 		}
 		return true;
-	}
-
-	protected boolean isValidOrigin(ServerHttpRequest request) {
-		return this.allowedOrigins.contains(request.getHeaders().getOrigin());
 	}
 
 	@Override

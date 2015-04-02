@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -56,9 +56,24 @@ public class PayloadArgumentResolver implements HandlerMethodArgumentResolver {
 	private final Validator validator;
 
 
+	/**
+	 * Create a new {@code PayloadArgumentResolver} with the given
+	 * {@link MessageConverter}.
+	 * @param messageConverter the MessageConverter to use (required)
+	 * @since 4.0.9
+	 */
+	public PayloadArgumentResolver(MessageConverter messageConverter) {
+		this(messageConverter, null);
+	}
+
+	/**
+	 * Create a new {@code PayloadArgumentResolver} with the given
+	 * {@link MessageConverter} and {@link Validator}.
+	 * @param messageConverter the MessageConverter to use (required)
+	 * @param validator the Validator to use (optional)
+	 */
 	public PayloadArgumentResolver(MessageConverter messageConverter, Validator validator) {
-		Assert.notNull(messageConverter, "converter must not be null");
-		Assert.notNull(validator, "validator must not be null");
+		Assert.notNull(messageConverter, "MessageConverter must not be null");
 		this.converter = messageConverter;
 		this.validator = validator;
 	}
@@ -129,6 +144,16 @@ public class PayloadArgumentResolver implements HandlerMethodArgumentResolver {
 		}
 	}
 
+	/**
+	 * Validate the payload if applicable.
+	 * <p>The default implementation checks for {@code @javax.validation.Valid},
+	 * Spring's {@link org.springframework.validation.annotation.Validated},
+	 * and custom annotations whose name starts with "Valid".
+	 * @param message the currently processed message
+	 * @param parameter the method parameter
+	 * @param target the target payload object
+	 * @throws MethodArgumentNotValidException in case of binding errors
+	 */
 	protected void validate(Message<?> message, MethodParameter parameter, Object target) {
 		if (this.validator == null) {
 			return;

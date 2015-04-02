@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,11 +34,10 @@ import org.springframework.util.concurrent.SuccessCallback;
  * Adapts a reactor {@link Promise} to {@link ListenableFuture} optionally converting
  * the result Object type {@code <S>} to the expected target type {@code <T>}.
  *
- * @param <S> the type of object expected from the {@link Promise}
- * @param <T> the type of object expected from the {@link ListenableFuture}
- *
  * @author Rossen Stoyanchev
  * @since 4.0
+ * @param <S> the type of object expected from the {@link Promise}
+ * @param <T> the type of object expected from the {@link ListenableFuture}
  */
 abstract class AbstractPromiseToListenableFutureAdapter<S, T> implements ListenableFuture<T> {
 
@@ -113,4 +112,5 @@ abstract class AbstractPromiseToListenableFutureAdapter<S, T> implements Listena
 		this.registry.addSuccessCallback(successCallback);
 		this.registry.addFailureCallback(failureCallback);
 	}
+
 }

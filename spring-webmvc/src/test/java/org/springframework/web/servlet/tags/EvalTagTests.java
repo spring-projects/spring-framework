@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@ import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.env.MapPropertySource;
 import org.springframework.format.annotation.NumberFormat;
 import org.springframework.format.annotation.NumberFormat.Style;
-import org.springframework.format.number.PercentFormatter;
+import org.springframework.format.number.PercentStyleFormatter;
 import org.springframework.format.support.FormattingConversionServiceFactoryBean;
 import org.springframework.mock.web.test.MockHttpServletResponse;
 import org.springframework.mock.web.test.MockPageContext;
@@ -71,7 +71,7 @@ public class EvalTagTests extends AbstractTagTests {
 	}
 
 	public void testPrintFormattedScopedAttributeResult() throws Exception {
-		PercentFormatter formatter = new PercentFormatter();
+		PercentStyleFormatter formatter = new PercentStyleFormatter();
 		tag.setExpression("bean.formattable");
 		int action = tag.doStartTag();
 		assertEquals(Tag.EVAL_BODY_INCLUDE, action);
@@ -98,7 +98,8 @@ public class EvalTagTests extends AbstractTagTests {
 		assertEquals(Tag.EVAL_BODY_INCLUDE, action);
 		action = tag.doEndTag();
 		assertEquals(Tag.EVAL_PAGE, action);
-		assertEquals("function foo() { alert(\\\"hi\\\") }", ((MockHttpServletResponse)context.getResponse()).getContentAsString());
+		assertEquals("function foo() { alert(\\\"hi\\\") }",
+				((MockHttpServletResponse)context.getResponse()).getContentAsString());
 	}
 
 	public void testSetFormattedScopedAttributeResult() throws Exception {

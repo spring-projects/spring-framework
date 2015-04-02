@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,19 +40,18 @@ import org.springframework.web.method.HandlerMethodSelector;
 import org.springframework.web.servlet.HandlerMapping;
 
 /**
- * Abstract base class for {@link HandlerMapping} implementations that define a
- * mapping between a request and a {@link HandlerMethod}.
+ * Abstract base class for {@link HandlerMapping} implementations that define
+ * a mapping between a request and a {@link HandlerMethod}.
  *
  * <p>For each registered handler method, a unique mapping is maintained with
  * subclasses defining the details of the mapping type {@code <T>}.
- *
- * @param <T> The mapping for a {@link HandlerMethod} containing the conditions
- * needed to match the handler method to incoming request.
  *
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
  * @author Juergen Hoeller
  * @since 3.1
+ * @param <T> The mapping for a {@link HandlerMethod} containing the conditions
+ * needed to match the handler method to incoming request.
  */
 public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMapping implements InitializingBean {
 
@@ -72,7 +71,6 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 	private boolean detectHandlerMethodsInAncestorContexts = false;
 
 	private HandlerMethodMappingNamingStrategy<T> namingStrategy;
-
 
 	private final Map<T, HandlerMethod> handlerMethods = new LinkedHashMap<T, HandlerMethod>();
 
@@ -96,8 +94,6 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 	/**
 	 * Configure the naming strategy to use for assigning a default name to every
 	 * mapped handler method.
-	 *
-	 * @param namingStrategy strategy to use.
 	 */
 	public void setHandlerMethodMappingNamingStrategy(HandlerMethodMappingNamingStrategy<T> namingStrategy) {
 		this.namingStrategy = namingStrategy;
@@ -117,6 +113,7 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 	public List<HandlerMethod> getHandlerMethodsForMappingName(String mappingName) {
 		return this.nameMap.get(mappingName);
 	}
+
 
 	/**
 	 * Detects handler methods at initialization.
@@ -234,7 +231,6 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 	}
 
 	private void updateNameMap(String name, HandlerMethod newHandlerMethod) {
-
 		List<HandlerMethod> handlerMethods = this.nameMap.get(name);
 		if (handlerMethods != null) {
 			for (HandlerMethod handlerMethod : handlerMethods) {
@@ -266,7 +262,8 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 		HandlerMethod handlerMethod;
 		if (handler instanceof String) {
 			String beanName = (String) handler;
-			handlerMethod = new HandlerMethod(beanName, getApplicationContext(), method);
+			handlerMethod = new HandlerMethod(beanName,
+					getApplicationContext().getAutowireCapableBeanFactory(), method);
 		}
 		else {
 			handlerMethod = new HandlerMethod(handler, method);
@@ -375,7 +372,7 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 	 * Return a comparator for sorting matching mappings.
 	 * The returned comparator should sort 'better' matches higher.
 	 * @param request the current request
-	 * @return the comparator, never {@code null}
+	 * @return the comparator (never {@code null})
 	 */
 	protected abstract Comparator<T> getMappingComparator(HttpServletRequest request);
 

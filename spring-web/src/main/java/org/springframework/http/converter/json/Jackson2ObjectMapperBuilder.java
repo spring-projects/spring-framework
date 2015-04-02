@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,11 +18,14 @@ package org.springframework.http.converter.json;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.TimeZone;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonGenerator;
@@ -40,13 +43,13 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.cfg.HandlerInstantiator;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
-import javafx.application.Application;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.FatalBeanException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.StringUtils;
 
 /**
  * A builder used to create {@link ObjectMapper} instances with a fluent API.
@@ -76,6 +79,10 @@ public class Jackson2ObjectMapperBuilder {
 
 	private DateFormat dateFormat;
 
+	private Locale locale;
+
+	private TimeZone timeZone;
+
 	private AnnotationIntrospector annotationIntrospector;
 
 	private PropertyNamingStrategy propertyNamingStrategy;
@@ -92,9 +99,11 @@ public class Jackson2ObjectMapperBuilder {
 
 	private List<Module> modules;
 
-	private Class<? extends Module>[] modulesToInstall;
+	private Class<? extends Module>[] moduleClasses;
 
-	private boolean findModulesViaServiceLoader;
+	private boolean findModulesViaServiceLoader = false;
+
+	private boolean findWellKnownModules = true;
 
 	private ClassLoader moduleClassLoader = getClass().getClassLoader();
 
@@ -132,6 +141,48 @@ public class Jackson2ObjectMapperBuilder {
 	 */
 	public Jackson2ObjectMapperBuilder simpleDateFormat(String format) {
 		this.dateFormat = new SimpleDateFormat(format);
+		return this;
+	}
+
+	/**
+	 * Override the default {@link Locale} to use for formatting.
+	 * Default value used is {@link Locale#getDefault()}.
+	 * @since 4.1.5
+	 */
+	public Jackson2ObjectMapperBuilder locale(Locale locale) {
+		this.locale = locale;
+		return this;
+	}
+
+	/**
+	 * Override the default {@link Locale} to use for formatting.
+	 * Default value used is {@link Locale#getDefault()}.
+	 * @param localeString the locale ID as a String representation
+	 * @since 4.1.5
+	 */
+	public Jackson2ObjectMapperBuilder locale(String localeString) {
+		this.locale = StringUtils.parseLocaleString(localeString);
+		return this;
+	}
+
+	/**
+	 * Override the default {@link TimeZone} to use for formatting.
+	 * Default value used is UTC (NOT local timezone).
+	 * @since 4.1.5
+	 */
+	public Jackson2ObjectMapperBuilder timeZone(TimeZone timeZone) {
+		this.timeZone = timeZone;
+		return this;
+	}
+
+	/**
+	 * Override the default {@link TimeZone} to use for formatting.
+	 * Default value used is UTC (NOT local timezone).
+	 * @param timeZoneString the zone ID as a String representation
+	 * @since 4.1.5
+	 */
+	public Jackson2ObjectMapperBuilder timeZone(String timeZoneString) {
+		this.timeZone = StringUtils.parseTimeZoneString(timeZoneString);
 		return this;
 	}
 
@@ -233,7 +284,7 @@ public class Jackson2ObjectMapperBuilder {
 	 * @see com.fasterxml.jackson.databind.ObjectMapper#addMixInAnnotations(Class, Class)
 	 */
 	public Jackson2ObjectMapperBuilder mixIn(Class<?> target, Class<?> mixinSource) {
-		if (mixIns != null) {
+		if (mixinSource != null) {
 			this.mixIns.put(target, mixinSource);
 		}
 		return this;
@@ -339,30 +390,67 @@ public class Jackson2ObjectMapperBuilder {
 	}
 
 	/**
+	 * Specify one or more modules to be registered with the {@link ObjectMapper}.
+	 * <p>Note: If this is set, no finding of modules is going to happen - not by
+	 * Jackson, and not by Spring either (see {@link #findModulesViaServiceLoader}).
+	 * As a consequence, specifying an empty list here will suppress any kind of
+	 * module detection.
+	 * <p>Specify either this or {@link #modulesToInstall}, not both.
+	 * @since 4.1.5
+	 * @see #modules(List)
+	 * @see com.fasterxml.jackson.databind.Module
+	 */
+	public Jackson2ObjectMapperBuilder modules(Module... modules) {
+		return modules(Arrays.asList(modules));
+	}
+
+	/**
 	 * Set a complete list of modules to be registered with the {@link ObjectMapper}.
 	 * <p>Note: If this is set, no finding of modules is going to happen - not by
 	 * Jackson, and not by Spring either (see {@link #findModulesViaServiceLoader}).
 	 * As a consequence, specifying an empty list here will suppress any kind of
 	 * module detection.
 	 * <p>Specify either this or {@link #modulesToInstall}, not both.
+	 * @see #modules(Module...)
 	 * @see com.fasterxml.jackson.databind.Module
 	 */
 	public Jackson2ObjectMapperBuilder modules(List<Module> modules) {
 		this.modules = new LinkedList<Module>(modules);
+		this.findModulesViaServiceLoader = false;
+		this.findWellKnownModules = false;
 		return this;
 	}
 
 	/**
-	 * Specify one or more modules by class (or class name in XML),
-	 * to be registered with the {@link ObjectMapper}.
-	 * <p>Modules specified here will be registered in combination with
+	 * Specify one or more modules to be registered with the {@link ObjectMapper}.
+	 * <p>Modules specified here will be registered after
 	 * Spring's autodetection of JSR-310 and Joda-Time, or Jackson's
-	 * finding of modules (see {@link #findModulesViaServiceLoader}).
+	 * finding of modules (see {@link #findModulesViaServiceLoader}),
+	 * allowing to eventually override their configuration.
 	 * <p>Specify either this or {@link #modules}, not both.
+	 * @since 4.1.5
+	 * @see com.fasterxml.jackson.databind.Module
+	 */
+	public Jackson2ObjectMapperBuilder modulesToInstall(Module... modules) {
+		this.modules = Arrays.asList(modules);
+		this.findWellKnownModules = true;
+		return this;
+	}
+
+	/**
+	 * Specify one or more modules by class to be registered with
+	 * the {@link ObjectMapper}.
+	 * <p>Modules specified here will be registered after
+	 * Spring's autodetection of JSR-310 and Joda-Time, or Jackson's
+	 * finding of modules (see {@link #findModulesViaServiceLoader}),
+	 * allowing to eventually override their configuration.
+	 * <p>Specify either this or {@link #modules}, not both.
+	 * @see #modulesToInstall(Module...)
 	 * @see com.fasterxml.jackson.databind.Module
 	 */
 	public Jackson2ObjectMapperBuilder modulesToInstall(Class<? extends Module>... modules) {
-		this.modulesToInstall = modules;
+		this.moduleClasses = modules;
+		this.findWellKnownModules = true;
 		return this;
 	}
 
@@ -441,11 +529,38 @@ public class Jackson2ObjectMapperBuilder {
 	 * settings. This can be applied to any number of {@code ObjectMappers}.
 	 * @param objectMapper the ObjectMapper to configure
 	 */
+	@SuppressWarnings("deprecation")
 	public void configure(ObjectMapper objectMapper) {
 		Assert.notNull(objectMapper, "ObjectMapper must not be null");
 
+		if (this.findModulesViaServiceLoader) {
+			// Jackson 2.2+
+			objectMapper.registerModules(ObjectMapper.findModules(this.moduleClassLoader));
+		}
+		else if (this.findWellKnownModules) {
+			registerWellKnownModulesIfAvailable(objectMapper);
+		}
+
+		if (this.modules != null) {
+			for (Module module : this.modules) {
+				// Using Jackson 2.0+ registerModule method, not Jackson 2.2+ registerModules
+				objectMapper.registerModule(module);
+			}
+		}
+		if (this.moduleClasses != null) {
+			for (Class<? extends Module> module : this.moduleClasses) {
+				objectMapper.registerModule(BeanUtils.instantiate(module));
+			}
+		}
+
 		if (this.dateFormat != null) {
 			objectMapper.setDateFormat(this.dateFormat);
+		}
+		if (this.locale != null) {
+			objectMapper.setLocale(this.locale);
+		}
+		if (this.timeZone != null) {
+			objectMapper.setTimeZone(this.timeZone);
 		}
 
 		if (this.annotationIntrospector != null) {
@@ -468,40 +583,19 @@ public class Jackson2ObjectMapperBuilder {
 			configureFeature(objectMapper, feature, this.features.get(feature));
 		}
 
-		if (this.modules != null) {
-			// Complete list of modules given
-			for (Module module : this.modules) {
-				// Using Jackson 2.0+ registerModule method, not Jackson 2.2+ registerModules
-				objectMapper.registerModule(module);
-			}
-		}
-		else {
-			// Combination of modules by class names specified and class presence in the classpath
-			if (this.modulesToInstall != null) {
-				for (Class<? extends Module> module : this.modulesToInstall) {
-					objectMapper.registerModule(BeanUtils.instantiate(module));
-				}
-			}
-			if (this.findModulesViaServiceLoader) {
-				// Jackson 2.2+
-				objectMapper.registerModules(ObjectMapper.findModules(this.moduleClassLoader));
-			}
-			else {
-				registerWellKnownModulesIfAvailable(objectMapper);
-			}
-		}
-
 		if (this.propertyNamingStrategy != null) {
 			objectMapper.setPropertyNamingStrategy(this.propertyNamingStrategy);
 		}
 		for (Class<?> target : this.mixIns.keySet()) {
+			// Deprecated as of Jackson 2.5, but just in favor of a fluent variant.
 			objectMapper.addMixInAnnotations(target, this.mixIns.get(target));
 		}
 		if (this.handlerInstantiator != null) {
 			objectMapper.setHandlerInstantiator(this.handlerInstantiator);
 		}
 		else if (this.applicationContext != null) {
-			objectMapper.setHandlerInstantiator(new SpringHandlerInstantiator(this.applicationContext.getAutowireCapableBeanFactory()));
+			objectMapper.setHandlerInstantiator(
+					new SpringHandlerInstantiator(this.applicationContext.getAutowireCapableBeanFactory()));
 		}
 	}
 

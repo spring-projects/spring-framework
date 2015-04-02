@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,6 +34,8 @@ import org.springframework.context.BeanThatListens;
 import org.springframework.context.support.AbstractApplicationContext;
 import org.springframework.context.support.StaticApplicationContext;
 import org.springframework.core.Ordered;
+import org.springframework.core.ResolvableType;
+import org.springframework.core.annotation.Order;
 import org.springframework.scheduling.support.TaskUtils;
 import org.springframework.tests.sample.beans.TestBean;
 
@@ -45,20 +47,59 @@ import static org.mockito.BDDMockito.*;
  *
  * @author Alef Arendsen
  * @author Rick Evans
+ * @author Stephane Nicoll
  */
-public class ApplicationContextEventTests {
+public class ApplicationContextEventTests extends AbstractApplicationEventListenerTests {
 
 	@Test
-	public void simpleApplicationEventMulticaster() {
-		@SuppressWarnings("unchecked")
-		ApplicationListener<ApplicationEvent> listener = mock(ApplicationListener.class);
-		ApplicationEvent evt = new ContextClosedEvent(new StaticApplicationContext());
+	public void multicastSimpleEvent() {
+		multicastEvent(true, ApplicationListener.class,
+				new ContextClosedEvent(new StaticApplicationContext()), null);
+	}
 
+	@Test
+	public void multicastGenericEvent() {
+		multicastEvent(true, StringEventListener.class, createGenericTestEvent("test"),
+				getGenericApplicationEventType("stringEvent"));
+	}
+
+	@Test
+	public void multicastGenericEventWrongType() {
+		multicastEvent(false, StringEventListener.class, createGenericTestEvent(123L),
+				getGenericApplicationEventType("longEvent"));
+	}
+
+	@Test // Unfortunate - this should work as well
+	public void multicastGenericEventWildcardSubType() {
+		multicastEvent(false, StringEventListener.class, createGenericTestEvent("test"),
+				getGenericApplicationEventType("wildcardEvent"));
+	}
+
+	@Test
+	public void multicastConcreteTypeGenericListener() {
+		multicastEvent(true, StringEventListener.class, new StringEvent(this, "test"), null);
+	}
+
+	@Test
+	public void multicastConcreteWrongTypeGenericListener() {
+		multicastEvent(false, StringEventListener.class, new LongEvent(this, 123L), null);
+	}
+
+	private void multicastEvent(boolean match, Class<?> listenerType,
+			ApplicationEvent event, ResolvableType eventType) {
+		@SuppressWarnings("unchecked")
+		ApplicationListener<ApplicationEvent> listener =
+				(ApplicationListener<ApplicationEvent>) mock(listenerType);
 		SimpleApplicationEventMulticaster smc = new SimpleApplicationEventMulticaster();
 		smc.addApplicationListener(listener);
 
-		smc.multicastEvent(evt);
-		verify(listener).onApplicationEvent(evt);
+		if (eventType != null) {
+			smc.multicastEvent(event, eventType);
+		} else {
+			smc.multicastEvent(event);
+		}
+		int invocation = match ? 1 : 0;
+		verify(listener, times(invocation)).onApplicationEvent(event);
 	}
 
 	@Test
@@ -119,6 +160,19 @@ public class ApplicationContextEventTests {
 	public void orderedListeners() {
 		MyOrderedListener1 listener1 = new MyOrderedListener1();
 		MyOrderedListener2 listener2 = new MyOrderedListener2(listener1);
+
+		SimpleApplicationEventMulticaster smc = new SimpleApplicationEventMulticaster();
+		smc.addApplicationListener(listener2);
+		smc.addApplicationListener(listener1);
+
+		smc.multicastEvent(new MyEvent(this));
+		smc.multicastEvent(new MyOtherEvent(this));
+	}
+
+	@Test
+	public void orderedListenersWithAnnotation() {
+		MyOrderedListener3 listener1 = new MyOrderedListener3();
+		MyOrderedListener4 listener2 = new MyOrderedListener4(listener1);
 
 		SimpleApplicationEventMulticaster smc = new SimpleApplicationEventMulticaster();
 		smc.addApplicationListener(listener2);
@@ -353,6 +407,33 @@ public class ApplicationContextEventTests {
 		@Override
 		public void onApplicationEvent(ApplicationEvent event) {
 			seenEvents.add(event);
+		}
+	}
+
+	@Order(5)
+	public static class MyOrderedListener3 implements ApplicationListener<ApplicationEvent> {
+
+		public final Set<ApplicationEvent> seenEvents = new HashSet<ApplicationEvent>();
+
+		@Override
+		public void onApplicationEvent(ApplicationEvent event) {
+			this.seenEvents.add(event);
+		}
+
+	}
+
+	@Order(50)
+	public static class MyOrderedListener4 implements ApplicationListener<MyEvent> {
+
+		private final MyOrderedListener3 otherListener;
+
+		public MyOrderedListener4(MyOrderedListener3 otherListener) {
+			this.otherListener = otherListener;
+		}
+
+		@Override
+		public void onApplicationEvent(MyEvent event) {
+			assertTrue(otherListener.seenEvents.contains(event));
 		}
 	}
 

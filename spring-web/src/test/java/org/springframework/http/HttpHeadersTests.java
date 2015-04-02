@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -30,22 +30,25 @@ import java.util.Locale;
 import java.util.TimeZone;
 
 import org.hamcrest.Matchers;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
 import org.junit.Before;
 import org.junit.Test;
 
-import static org.junit.Assert.*;
-
 /**
+ * Unit tests for {@link org.springframework.http.HttpHeaders}.
  * @author Arjen Poutsma
  */
 public class HttpHeadersTests {
 
 	private HttpHeaders headers;
 
+
 	@Before
 	public void setUp() {
 		headers = new HttpHeaders();
 	}
+
 
 	@Test
 	public void accept() {
@@ -59,9 +62,7 @@ public class HttpHeadersTests {
 		assertEquals("Invalid Accept header", "text/html, text/plain", headers.getFirst("Accept"));
 	}
 
-	// SPR-9655
-
-	@Test
+	@Test  // SPR-9655
 	public void acceptiPlanet() {
 		headers.add("Accept", "text/html");
 		headers.add("Accept", "text/plain");
@@ -228,7 +229,7 @@ public class HttpHeadersTests {
 		calendar.setTimeZone(TimeZone.getTimeZone("CET"));
 		long date = calendar.getTimeInMillis();
 		headers.setIfModifiedSince(date);
-		assertEquals("Invalid If-Modified-Since header", date, headers.getIfNotModifiedSince());
+		assertEquals("Invalid If-Modified-Since header", date, headers.getIfModifiedSince());
 		assertEquals("Invalid If-Modified-Since header", "Thu, 18 Dec 2008 10:20:00 GMT",
 				headers.getFirst("if-modified-since"));
 	}
@@ -260,12 +261,9 @@ public class HttpHeadersTests {
 				headers.getFirst("Content-Disposition"));
 	}
 
-	// SPR-11917
-
-	@Test
+	@Test  // SPR-11917
 	public void getAllowEmptySet() {
 		headers.setAllow(Collections.<HttpMethod> emptySet());
-
 		assertThat(headers.getAllow(), Matchers.emptyCollectionOf(HttpMethod.class));
 	}
 

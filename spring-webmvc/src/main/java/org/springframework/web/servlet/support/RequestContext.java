@@ -265,6 +265,8 @@ public class RequestContext {
 		// context-param in web.xml, if any.
 		this.defaultHtmlEscape = WebUtils.getDefaultHtmlEscape(this.webApplicationContext.getServletContext());
 
+		// Determine response-encoded HTML escape setting from the "responseEncodedHtmlEscape"
+		// context-param in web.xml, if any.
 		this.responseEncodedHtmlEscape = WebUtils.getResponseEncodedHtmlEscape(this.webApplicationContext.getServletContext());
 
 		this.urlPathHelper = new UrlPathHelper();
@@ -491,11 +493,11 @@ public class RequestContext {
 	/**
 	 * Is HTML escaping using the response encoding by default?
 	 * If enabled, only XML markup significant characters will be escaped with UTF-* encodings.
-	 * <p>Falls back to {@code false} in case of no explicit default given.
+	 * <p>Falls back to {@code true} in case of no explicit default given, as of Spring 4.2.
 	 * @since 4.1.2
 	 */
 	public boolean isResponseEncodedHtmlEscape() {
-		return (this.responseEncodedHtmlEscape != null && this.responseEncodedHtmlEscape.booleanValue());
+		return (this.responseEncodedHtmlEscape == null || this.responseEncodedHtmlEscape.booleanValue());
 	}
 
 	/**

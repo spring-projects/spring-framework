@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -223,11 +223,17 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 	protected void configureMessageBroker(MessageBrokerRegistry registry) {
 	}
 
+	/**
+	 * Provide access to the configured PatchMatcher for access from other
+	 * configuration classes.
+	 */
+	public final PathMatcher getPathMatcher() {
+		return getBrokerRegistry().getPathMatcher();
+	}
+
 	@Bean
 	public SimpAnnotationMethodMessageHandler simpAnnotationMethodMessageHandler() {
-		SimpAnnotationMethodMessageHandler handler = new SimpAnnotationMethodMessageHandler(
-				clientInboundChannel(), clientOutboundChannel(), brokerMessagingTemplate());
-
+		SimpAnnotationMethodMessageHandler handler = createAnnotationMethodMessageHandler();
 		handler.setDestinationPrefixes(getBrokerRegistry().getApplicationDestinationPrefixes());
 		handler.setMessageConverter(brokerMessageConverter());
 		handler.setValidator(simpValidator());
@@ -245,6 +251,17 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 			handler.setPathMatcher(pathMatcher);
 		}
 		return handler;
+	}
+
+	/**
+	 * Protected method for plugging in a custom sub-class of
+	 * {@link org.springframework.messaging.simp.annotation.support.SimpAnnotationMethodMessageHandler
+	 * SimpAnnotationMethodMessageHandler}.
+	 * @since 4.2
+	 */
+	protected SimpAnnotationMethodMessageHandler createAnnotationMethodMessageHandler() {
+		return new SimpAnnotationMethodMessageHandler(clientInboundChannel(),
+				clientOutboundChannel(), brokerMessagingTemplate());
 	}
 
 	protected void addArgumentResolvers(List<HandlerMethodArgumentResolver> argumentResolvers) {

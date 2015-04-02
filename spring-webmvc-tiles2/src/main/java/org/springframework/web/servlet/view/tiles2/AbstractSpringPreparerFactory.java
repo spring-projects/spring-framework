@@ -34,7 +34,9 @@ import org.springframework.web.servlet.DispatcherServlet;
  * @see #getPreparer(String, org.springframework.web.context.WebApplicationContext)
  * @see SimpleSpringPreparerFactory
  * @see SpringBeanPreparerFactory
+ * @deprecated as of Spring 4.2, in favor of Tiles 3
  */
+@Deprecated
 public abstract class AbstractSpringPreparerFactory implements PreparerFactory {
 
 	@Override

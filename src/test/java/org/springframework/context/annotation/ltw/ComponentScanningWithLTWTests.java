@@ -16,8 +16,6 @@
 
 package org.springframework.context.annotation.ltw;
 
-import org.springframework.test.jpa.AbstractJpaTests;
-
 /**
  * Test to ensure that component scanning work with load-time weaver.
  * See SPR-3873 for more details.
@@ -25,7 +23,7 @@ import org.springframework.test.jpa.AbstractJpaTests;
  * @author Ramnivas Laddad
  */
 @SuppressWarnings("deprecation")
-public class ComponentScanningWithLTWTests extends AbstractJpaTests {
+public class ComponentScanningWithLTWTests extends org.springframework.test.jpa.AbstractJpaTests {
 
 	public ComponentScanningWithLTWTests() {
 		setDependencyCheck(false);

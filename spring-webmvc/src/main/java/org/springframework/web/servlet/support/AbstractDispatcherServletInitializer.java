@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRegistration;
 
+import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.core.Conventions;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
@@ -51,6 +52,7 @@ import org.springframework.web.servlet.DispatcherServlet;
  * @author Arjen Poutsma
  * @author Chris Beams
  * @author Rossen Stoyanchev
+ * @author Juergen Hoeller
  * @since 3.2
  */
 public abstract class AbstractDispatcherServletInitializer extends AbstractContextLoaderInitializer {
@@ -64,7 +66,6 @@ public abstract class AbstractDispatcherServletInitializer extends AbstractConte
 	@Override
 	public void onStartup(ServletContext servletContext) throws ServletException {
 		super.onStartup(servletContext);
-
 		registerDispatcherServlet(servletContext);
 	}
 
@@ -80,7 +81,7 @@ public abstract class AbstractDispatcherServletInitializer extends AbstractConte
 	 */
 	protected void registerDispatcherServlet(ServletContext servletContext) {
 		String servletName = getServletName();
-		Assert.hasLength(servletName, "getServletName() may not return empty or null");
+		Assert.hasLength(servletName, "getServletName() must not return empty or null");
 
 		WebApplicationContext servletAppContext = createServletApplicationContext();
 		Assert.notNull(servletAppContext,
@@ -88,6 +89,8 @@ public abstract class AbstractDispatcherServletInitializer extends AbstractConte
 				"context for servlet [" + servletName + "]");
 
 		DispatcherServlet dispatcherServlet = new DispatcherServlet(servletAppContext);
+		dispatcherServlet.setContextInitializers(getServletApplicationContextInitializers());
+
 		ServletRegistration.Dynamic registration = servletContext.addServlet(servletName, dispatcherServlet);
 		Assert.notNull(registration,
 				"Failed to register servlet with name '" + servletName + "'." +
@@ -125,6 +128,18 @@ public abstract class AbstractDispatcherServletInitializer extends AbstractConte
 	 * @see #registerDispatcherServlet(ServletContext)
 	 */
 	protected abstract WebApplicationContext createServletApplicationContext();
+
+	/**
+	 * Specify application context initializers to be applied to the servlet-specific
+	 * application context that the {@code DispatcherServlet} is being created with.
+	 * @since 4.2
+	 * @see #createServletApplicationContext()
+	 * @see DispatcherServlet#setContextInitializers
+	 * @see #getRootApplicationContextInitializers()
+	 */
+	protected ApplicationContextInitializer<?>[] getServletApplicationContextInitializers() {
+		return null;
+	}
 
 	/**
 	 * Specify the servlet mapping(s) for the {@code DispatcherServlet} &mdash;
@@ -178,9 +193,9 @@ public abstract class AbstractDispatcherServletInitializer extends AbstractConte
 	}
 
 	private EnumSet<DispatcherType> getDispatcherTypes() {
-		return isAsyncSupported() ?
-			EnumSet.of(DispatcherType.REQUEST, DispatcherType.FORWARD, DispatcherType.INCLUDE, DispatcherType.ASYNC) :
-			EnumSet.of(DispatcherType.REQUEST, DispatcherType.FORWARD, DispatcherType.INCLUDE);
+		return (isAsyncSupported() ?
+				EnumSet.of(DispatcherType.REQUEST, DispatcherType.FORWARD, DispatcherType.INCLUDE, DispatcherType.ASYNC) :
+				EnumSet.of(DispatcherType.REQUEST, DispatcherType.FORWARD, DispatcherType.INCLUDE));
 	}
 
 	/**

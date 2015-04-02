@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,14 @@
 
 package org.springframework.web.servlet.mvc.method.annotation;
 
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.*;
+
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
 import javax.servlet.http.HttpServletResponse;
 
 import org.junit.Before;
@@ -46,8 +50,6 @@ import org.springframework.web.method.support.HandlerMethodReturnValueHandlerCom
 import org.springframework.web.method.support.ModelAndViewContainer;
 import org.springframework.web.servlet.view.RedirectView;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
 
 /**
  * Test fixture with {@link ServletInvocableHandlerMethod}.
@@ -220,6 +222,30 @@ public class ServletInvocableHandlerMethodTests {
 		assertEquals("", this.response.getContentAsString());
 	}
 
+	@Test
+	public void wrapConcurrentResult_ResponseBodyEmitter() throws Exception {
+		List<HttpMessageConverter<?>> converters = new ArrayList<HttpMessageConverter<?>>();
+		converters.add(new StringHttpMessageConverter());
+		this.returnValueHandlers.addHandler(new ResponseBodyEmitterReturnValueHandler(converters));
+		ServletInvocableHandlerMethod handlerMethod = getHandlerMethod(new AsyncHandler(), "handleWithEmitter");
+		handlerMethod = handlerMethod.wrapConcurrentResult(null);
+		handlerMethod.invokeAndHandle(this.webRequest, this.mavContainer);
+
+		assertEquals(200, this.response.getStatus());
+		assertEquals("", this.response.getContentAsString());
+	}
+
+	@Test
+	public void wrapConcurrentResult_StreamingResponseBody() throws Exception {
+		this.returnValueHandlers.addHandler(new StreamingResponseBodyReturnValueHandler());
+		ServletInvocableHandlerMethod handlerMethod = getHandlerMethod(new AsyncHandler(), "handleWithStreaming");
+		handlerMethod = handlerMethod.wrapConcurrentResult(null);
+		handlerMethod.invokeAndHandle(this.webRequest, this.mavContainer);
+
+		assertEquals(200, this.response.getStatus());
+		assertEquals("", this.response.getContentAsString());
+	}
+
 	// SPR-12287 (16/Oct/14 comments)
 
 	@Test
@@ -273,6 +299,7 @@ public class ServletInvocableHandlerMethodTests {
 		}
 	}
 
+	@SuppressWarnings("unused")
 	private static class MethodLevelResponseBodyHandler {
 
 		@ResponseBody
@@ -281,28 +308,28 @@ public class ServletInvocableHandlerMethodTests {
 		}
 	}
 
+	@SuppressWarnings("unused")
 	@ResponseBody
 	private static class TypeLevelResponseBodyHandler {
 
-		@SuppressWarnings("unused")
 		public DeferredResult<String> handle() {
 			return new DeferredResult<String>();
 		}
 	}
 
+	@SuppressWarnings("unused")
 	private static class ResponseEntityHandler {
 
-		@SuppressWarnings("unused")
 		public DeferredResult<ResponseEntity<String>> handleDeferred() {
 			return new DeferredResult<>();
 		}
 
-		@SuppressWarnings("unused")
 		public ResponseEntity handleRawType() {
 			return ResponseEntity.ok().build();
 		}
 	}
 
+	@SuppressWarnings("unused")
 	private static class ExceptionRaisingReturnValueHandler implements HandlerMethodReturnValueHandler {
 
 		@Override
@@ -314,6 +341,18 @@ public class ServletInvocableHandlerMethodTests {
 		public void handleReturnValue(Object returnValue, MethodParameter returnType,
 				ModelAndViewContainer mavContainer, NativeWebRequest webRequest) throws Exception {
 			throw new HttpMessageNotWritableException("oops, can't write");
+		}
+	}
+
+	@SuppressWarnings("unused")
+	private static class AsyncHandler {
+
+		public ResponseBodyEmitter handleWithEmitter() {
+			return null;
+		}
+
+		public StreamingResponseBody handleWithStreaming() {
+			return null;
 		}
 	}
 

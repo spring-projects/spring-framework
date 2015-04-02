@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,16 +16,22 @@
 
 package org.springframework.http.converter.json;
 
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.text.SimpleDateFormat;
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
+import java.util.TimeZone;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.Version;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.JsonMappingException;
@@ -35,6 +41,7 @@ import com.fasterxml.jackson.databind.Module;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.cfg.DeserializerFactoryConfig;
 import com.fasterxml.jackson.databind.cfg.SerializerFactoryConfig;
 import com.fasterxml.jackson.databind.deser.BasicDeserializerFactory;
@@ -42,16 +49,20 @@ import com.fasterxml.jackson.databind.deser.Deserializers;
 import com.fasterxml.jackson.databind.deser.std.DateDeserializers;
 import com.fasterxml.jackson.databind.introspect.NopAnnotationIntrospector;
 import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.fasterxml.jackson.databind.module.SimpleSerializers;
 import com.fasterxml.jackson.databind.ser.BasicSerializerFactory;
 import com.fasterxml.jackson.databind.ser.Serializers;
 import com.fasterxml.jackson.databind.ser.std.ClassSerializer;
 import com.fasterxml.jackson.databind.ser.std.NumberSerializer;
 import com.fasterxml.jackson.databind.type.SimpleType;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
+import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 import org.junit.Test;
 
 import org.springframework.beans.FatalBeanException;
 
+import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
 /**
@@ -167,14 +178,93 @@ public class Jackson2ObjectMapperBuilderTests {
 	}
 
 	@Test
-	public void setModules() {
+	public void localeSetter() {
+		ObjectMapper objectMapper = Jackson2ObjectMapperBuilder.json().locale(Locale.FRENCH).build();
+		assertEquals(Locale.FRENCH, objectMapper.getSerializationConfig().getLocale());
+		assertEquals(Locale.FRENCH, objectMapper.getDeserializationConfig().getLocale());
+	}
+
+	@Test
+	public void timeZoneSetter() {
+		TimeZone timeZone = TimeZone.getTimeZone("Europe/Paris");
+		ObjectMapper objectMapper = Jackson2ObjectMapperBuilder.json().timeZone(timeZone).build();
+		assertEquals(timeZone, objectMapper.getSerializationConfig().getTimeZone());
+		assertEquals(timeZone, objectMapper.getDeserializationConfig().getTimeZone());
+	}
+
+	@Test
+	public void timeZoneStringSetter() {
+		String zoneId = "Europe/Paris";
+		ObjectMapper objectMapper = Jackson2ObjectMapperBuilder.json().timeZone(zoneId).build();
+		TimeZone timeZone = TimeZone.getTimeZone(zoneId);
+		assertEquals(timeZone, objectMapper.getSerializationConfig().getTimeZone());
+		assertEquals(timeZone, objectMapper.getDeserializationConfig().getTimeZone());
+	}
+
+	@Test(expected = IllegalArgumentException.class)
+	public void wrongTimeZoneStringSetter() {
+		String zoneId = "foo";
+		Jackson2ObjectMapperBuilder.json().timeZone(zoneId).build();
+	}
+
+	@Test
+	public void modules() {
 		NumberSerializer serializer1 = new NumberSerializer();
 		SimpleModule module = new SimpleModule();
 		module.addSerializer(Integer.class, serializer1);
-		ObjectMapper objectMapper = Jackson2ObjectMapperBuilder.json().modules(Arrays.asList(new Module[]{module})).build();
+		ObjectMapper objectMapper = Jackson2ObjectMapperBuilder.json().modules(module).build();
 		Serializers serializers = getSerializerFactoryConfig(objectMapper).serializers().iterator().next();
 		assertTrue(serializers.findSerializer(null, SimpleType.construct(Integer.class), null) == serializer1);
 	}
+
+	@Test
+	public void modulesToInstallByClass() {
+		ObjectMapper objectMapper = Jackson2ObjectMapperBuilder.json().modulesToInstall(CustomIntegerModule.class).build();
+		Serializers serializers = getSerializerFactoryConfig(objectMapper).serializers().iterator().next();
+		assertTrue(serializers.findSerializer(null, SimpleType.construct(Integer.class), null).getClass() == CustomIntegerSerializer.class);
+	}
+
+	@Test
+	public void modulesToInstallByInstance() {
+		ObjectMapper objectMapper = Jackson2ObjectMapperBuilder.json().modulesToInstall(new CustomIntegerModule()).build();
+		Serializers serializers = getSerializerFactoryConfig(objectMapper).serializers().iterator().next();
+		assertTrue(serializers.findSerializer(null, SimpleType.construct(Integer.class), null).getClass() == CustomIntegerSerializer.class);
+	}
+
+	@Test
+	public void defaultModules() throws JsonProcessingException, UnsupportedEncodingException {
+		ObjectMapper objectMapper = Jackson2ObjectMapperBuilder.json().build();
+		Long timestamp = 1322903730000L;
+		DateTime dateTime = new DateTime(timestamp, DateTimeZone.UTC);
+		assertEquals(timestamp.toString(), new String(objectMapper.writeValueAsBytes(dateTime), "UTF-8"));
+	}
+
+	@Test // SPR-12634
+	public void customizeDefaultModulesWithModule() throws JsonProcessingException, UnsupportedEncodingException {
+		ObjectMapper objectMapper = Jackson2ObjectMapperBuilder.json()
+				.modulesToInstall(new CustomIntegerModule()).build();
+		DateTime dateTime = new DateTime(1322903730000L, DateTimeZone.UTC);
+		assertEquals("1322903730000", new String(objectMapper.writeValueAsBytes(dateTime), "UTF-8"));
+		assertThat(new String(objectMapper.writeValueAsBytes(new Integer(4)), "UTF-8"), containsString("customid"));
+	}
+
+	@Test // SPR-12634
+	public void customizeDefaultModulesWithModuleClass() throws JsonProcessingException, UnsupportedEncodingException {
+		ObjectMapper objectMapper = Jackson2ObjectMapperBuilder.json().modulesToInstall(CustomIntegerModule.class).build();
+		DateTime dateTime = new DateTime(1322903730000L, DateTimeZone.UTC);
+		assertEquals("1322903730000", new String(objectMapper.writeValueAsBytes(dateTime), "UTF-8"));
+		assertThat(new String(objectMapper.writeValueAsBytes(new Integer(4)), "UTF-8"), containsString("customid"));
+	}
+
+	@Test // SPR-12634
+	public void customizeDefaultModulesWithSerializer() throws JsonProcessingException, UnsupportedEncodingException {
+		ObjectMapper objectMapper = Jackson2ObjectMapperBuilder.json()
+				.serializerByType(Integer.class, new CustomIntegerSerializer()).build();
+		DateTime dateTime = new DateTime(1322903730000L, DateTimeZone.UTC);
+		assertEquals("1322903730000", new String(objectMapper.writeValueAsBytes(dateTime), "UTF-8"));
+		assertThat(new String(objectMapper.writeValueAsBytes(new Integer(4)), "UTF-8"), containsString("customid"));
+	}
+
 
 	private static SerializerFactoryConfig getSerializerFactoryConfig(ObjectMapper objectMapper) {
 		return ((BasicSerializerFactory) objectMapper.getSerializerFactory()).getFactoryConfig();
@@ -196,6 +286,7 @@ public class Jackson2ObjectMapperBuilderTests {
 	public void serializerByType() {
 		JsonSerializer<Number> serializer = new NumberSerializer();
 		ObjectMapper objectMapper = Jackson2ObjectMapperBuilder.json()
+				.modules(new ArrayList<>())  // Disable well-known modules detection
 				.serializerByType(Boolean.class, serializer).build();
 		assertTrue(getSerializerFactoryConfig(objectMapper).hasSerializers());
 		Serializers serializers = getSerializerFactoryConfig(objectMapper).serializers().iterator().next();
@@ -206,6 +297,7 @@ public class Jackson2ObjectMapperBuilderTests {
 	public void deserializerByType() throws JsonMappingException {
 		JsonDeserializer<Date> deserializer = new DateDeserializers.DateDeserializer();
 		ObjectMapper objectMapper = Jackson2ObjectMapperBuilder.json()
+				.modules(new ArrayList<>())  // Disable well-known modules detection
 				.deserializerByType(Date.class, deserializer).build();
 		assertTrue(getDeserializerFactoryConfig(objectMapper).hasDeserializers());
 		Deserializers deserializers = getDeserializerFactoryConfig(objectMapper).deserializers().iterator().next();
@@ -249,6 +341,7 @@ public class Jackson2ObjectMapperBuilderTests {
 		JsonSerializer<Number> serializer2 = new NumberSerializer();
 
 		Jackson2ObjectMapperBuilder builder = Jackson2ObjectMapperBuilder.json()
+				.modules(new ArrayList<>()) // Disable well-known modules detection
 				.serializers(serializer1)
 				.serializersByType(Collections.<Class<?>, JsonSerializer<?>>singletonMap(Boolean.class, serializer2))
 				.deserializersByType(deserializerMap)
@@ -309,6 +402,38 @@ public class Jackson2ObjectMapperBuilderTests {
 		assertTrue(jsonObjectMapper.isEnabled(SerializationFeature.INDENT_OUTPUT));
 		assertTrue(xmlObjectMapper.isEnabled(SerializationFeature.INDENT_OUTPUT));
 		assertTrue(xmlObjectMapper.getClass().isAssignableFrom(XmlMapper.class));
+	}
+
+
+	public static class CustomIntegerModule extends Module {
+
+		@Override
+		public String getModuleName() {
+			return this.getClass().getSimpleName();
+		}
+
+		@Override
+		public Version version() {
+			return Version.unknownVersion();
+		}
+
+		@Override
+		public void setupModule(SetupContext context) {
+			SimpleSerializers serializers = new SimpleSerializers();
+			serializers.addSerializer(Integer.class, new CustomIntegerSerializer());
+			context.addSerializers(serializers);
+		}
+	}
+
+
+	public static class CustomIntegerSerializer extends JsonSerializer<Integer> {
+
+		@Override
+		public void serialize(Integer value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
+			gen.writeStartObject();
+			gen.writeNumberField("customid", value);
+			gen.writeEndObject();
+		}
 	}
 
 }

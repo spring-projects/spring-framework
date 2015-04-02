@@ -16,6 +16,8 @@
 
 package org.springframework.test.web.servlet.setup;
 
+import javax.servlet.ServletContext;
+
 import org.springframework.util.Assert;
 import org.springframework.web.context.WebApplicationContext;
 
@@ -25,6 +27,7 @@ import org.springframework.web.context.WebApplicationContext;
  *
  * @author Rossen Stoyanchev
  * @author Rob Winch
+ * @author Sebastien Deleuze
  * @since 3.2
  */
 public class DefaultMockMvcBuilder extends AbstractMockMvcBuilder<DefaultMockMvcBuilder> {
@@ -45,6 +48,8 @@ public class DefaultMockMvcBuilder extends AbstractMockMvcBuilder<DefaultMockMvc
 
 	@Override
 	protected WebApplicationContext initWebAppContext() {
+		ServletContext servletContext = this.webAppContext.getServletContext();
+		servletContext.setAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE, this.webAppContext);
 		return this.webAppContext;
 	}
 

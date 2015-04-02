@@ -157,7 +157,7 @@ class ConstructorResolver {
 			AutowireUtils.sortConstructors(candidates);
 			int minTypeDiffWeight = Integer.MAX_VALUE;
 			Set<Constructor<?>> ambiguousConstructors = null;
-			List<Exception> causes = null;
+			LinkedList<UnsatisfiedDependencyException> causes = null;
 
 			for (int i = 0; i < candidates.length; i++) {
 				Constructor<?> candidate = candidates[i];
@@ -190,22 +190,12 @@ class ConstructorResolver {
 							this.beanFactory.logger.trace(
 									"Ignoring constructor [" + candidate + "] of bean '" + beanName + "': " + ex);
 						}
-						if (i == candidates.length - 1 && constructorToUse == null) {
-							if (causes != null) {
-								for (Exception cause : causes) {
-									this.beanFactory.onSuppressedException(cause);
-								}
-							}
-							throw ex;
+						// Swallow and try next constructor.
+						if (causes == null) {
+							causes = new LinkedList<UnsatisfiedDependencyException>();
 						}
-						else {
-							// Swallow and try next constructor.
-							if (causes == null) {
-								causes = new LinkedList<Exception>();
-							}
-							causes.add(ex);
-							continue;
-						}
+						causes.add(ex);
+						continue;
 					}
 				}
 				else {
@@ -236,6 +226,13 @@ class ConstructorResolver {
 			}
 
 			if (constructorToUse == null) {
+				if (causes != null) {
+					UnsatisfiedDependencyException ex = causes.removeLast();
+					for (Exception cause : causes) {
+						this.beanFactory.onSuppressedException(cause);
+					}
+					throw ex;
+				}
 				throw new BeanCreationException(mbd.getResourceDescription(), beanName,
 						"Could not resolve matching constructor " +
 						"(hint: specify index/type/name arguments for simple parameters to avoid type ambiguities)");

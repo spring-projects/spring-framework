@@ -196,7 +196,9 @@ public class Reactor11TcpClient<P> implements TcpOperations<P> {
 			};
 		}
 		finally {
-			this.environment.shutdown();
+			if (this.environment != null) {
+				this.environment.shutdown();
+			}
 
 		}
 	}

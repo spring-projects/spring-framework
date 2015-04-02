@@ -134,25 +134,6 @@ public class MappingJackson2JsonView extends AbstractJackson2View {
 	}
 
 	/**
-	 * Set the attributes in the model that should be rendered by this view.
-	 * When set, all other model attributes will be ignored.
-	 * @deprecated use {@link #setModelKeys(Set)} instead
-	 */
-	@Deprecated
-	public void setRenderedAttributes(Set<String> renderedAttributes) {
-		this.modelKeys = renderedAttributes;
-	}
-
-	/**
-	 * Return the attributes in the model that should be rendered by this view.
-	 * @deprecated use {@link #getModelKeys()} instead
-	 */
-	@Deprecated
-	public final Set<String> getRenderedAttributes() {
-		return this.modelKeys;
-	}
-
-	/**
 	 * Set whether to serialize models containing a single attribute as a map or whether to
 	 * extract the single value from the model and serialize it directly.
 	 * <p>The effect of setting this flag is similar to using {@code MappingJackson2HttpMessageConverter}

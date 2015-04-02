@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,7 @@
 
 package org.springframework.web.socket.config.annotation;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,6 +25,7 @@ import java.util.Set;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 
 import org.junit.Test;
+
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -92,7 +90,8 @@ public class WebSocketMessageBrokerConfigurationSupportTests {
 		List<ChannelInterceptor> interceptors = channel.getInterceptors();
 		assertEquals(ImmutableMessageChannelInterceptor.class, interceptors.get(interceptors.size()-1).getClass());
 
-		WebSocketSession session = new TestWebSocketSession("s1");
+		TestWebSocketSession session = new TestWebSocketSession("s1");
+		session.setOpen(true);
 		webSocketHandler.afterConnectionEstablished(session);
 
 		TextMessage textMessage = StompTextMessageBuilder.create(StompCommand.SEND).headers("destination:/foo").build();

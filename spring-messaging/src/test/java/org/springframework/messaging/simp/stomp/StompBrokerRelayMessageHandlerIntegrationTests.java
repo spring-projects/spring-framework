@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,6 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestName;
-
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.messaging.Message;
@@ -49,7 +48,9 @@ import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.util.Assert;
 import org.springframework.util.SocketUtils;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Integration tests for {@link StompBrokerRelayMessageHandler} running against ActiveMQ.
@@ -230,25 +231,6 @@ public class StompBrokerRelayMessageHandlerIntegrationTests {
 	}
 
 	@Test
-	public void disconnectClosesRelaySessionCleanly() throws Exception {
-
-		logger.debug("Starting test disconnectClosesRelaySessionCleanly()");
-
-		MessageExchange connect = MessageExchangeBuilder.connect("sess1").build();
-		this.relay.handleMessage(connect.message);
-		this.responseHandler.expectMessages(connect);
-
-		StompHeaderAccessor headers = StompHeaderAccessor.create(StompCommand.DISCONNECT);
-		headers.setSessionId("sess1");
-		this.relay.handleMessage(MessageBuilder.createMessage(new byte[0], headers.getMessageHeaders()));
-
-		Thread.sleep(2000);
-
-		// Check that we have not received an ERROR as a result of the connection closing
-		assertTrue("Unexpected messages: " + this.responseHandler.queue, this.responseHandler.queue.isEmpty());
-	}
-
-	@Test
 	public void disconnectWithReceipt() throws Exception {
 
 		logger.debug("Starting test disconnectWithReceipt()");
@@ -270,6 +252,11 @@ public class StompBrokerRelayMessageHandlerIntegrationTests {
 
 		@Override
 		public void publishEvent(ApplicationEvent event) {
+			publishEvent((Object) event);
+		}
+
+		@Override
+		public void publishEvent(Object event) {
 			logger.debug("Processing ApplicationEvent " + event);
 			if (event instanceof BrokerAvailabilityEvent) {
 				this.eventQueue.add((BrokerAvailabilityEvent) event);

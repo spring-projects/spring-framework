@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -84,14 +84,14 @@ public class HeaderAssertionTests {
 	public void stringWithMissingResponseHeader() throws Exception {
 		this.mockMvc.perform(get("/persons/1").header(IF_MODIFIED_SINCE, currentTime))//
 		.andExpect(status().isNotModified())//
-		.andExpect(header().string(LAST_MODIFIED, (String) null));
+		.andExpect(header().string("X-Custom-Header", (String) null));
 	}
 
 	@Test
 	public void stringWithMatcherAndMissingResponseHeader() throws Exception {
 		this.mockMvc.perform(get("/persons/1").header(IF_MODIFIED_SINCE, currentTime))//
 		.andExpect(status().isNotModified())//
-		.andExpect(header().string(LAST_MODIFIED, nullValue()));
+		.andExpect(header().string("X-Custom-Header", nullValue()));
 	}
 
 	@Test
@@ -99,7 +99,7 @@ public class HeaderAssertionTests {
 		try {
 			this.mockMvc.perform(get("/persons/1").header(IF_MODIFIED_SINCE, currentTime))//
 			.andExpect(status().isNotModified())//
-			.andExpect(header().longValue(LAST_MODIFIED, 99L));
+			.andExpect(header().longValue("X-Custom-Header", 99L));
 
 			fail(EXPECTED_ASSERTION_ERROR_MSG);
 		}
@@ -107,7 +107,7 @@ public class HeaderAssertionTests {
 			if (EXPECTED_ASSERTION_ERROR_MSG.equals(e.getMessage())) {
 				throw e;
 			}
-			assertEquals("Response does not contain header " + LAST_MODIFIED, e.getMessage());
+			assertEquals("Response does not contain header " + "X-Custom-Header", e.getMessage());
 		}
 	}
 

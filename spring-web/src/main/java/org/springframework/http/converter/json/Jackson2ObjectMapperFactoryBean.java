@@ -19,7 +19,9 @@ package org.springframework.http.converter.json;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.TimeZone;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.AnnotationIntrospector;
@@ -172,6 +174,24 @@ public class Jackson2ObjectMapperFactoryBean implements FactoryBean<ObjectMapper
 	}
 
 	/**
+	 * Override the default {@link Locale} to use for formatting.
+	 * Default value used is {@link Locale#getDefault()}.
+	 * @since 4.1.5
+	 */
+	public void setLocale(Locale locale) {
+		this.builder.locale(locale);
+	}
+
+	/**
+	 * Override the default {@link TimeZone} to use for formatting.
+	 * Default value used is UTC (NOT local timezone).
+	 * @since 4.1.5
+	 */
+	public void setTimeZone(TimeZone timeZone) {
+		this.builder.timeZone(timeZone);
+	}
+
+	/**
 	 * Set an {@link AnnotationIntrospector} for both serialization and deserialization.
 	 */
 	public void setAnnotationIntrospector(AnnotationIntrospector annotationIntrospector) {
@@ -316,11 +336,12 @@ public class Jackson2ObjectMapperFactoryBean implements FactoryBean<ObjectMapper
 	}
 
 	/**
-	 * Specify one or more modules by class (or class name in XML),
+	 * Specify one or more modules by class (or class name in XML)
 	 * to be registered with the {@link ObjectMapper}.
-	 * <p>Modules specified here will be registered in combination with
+	 * <p>Modules specified here will be registered after
 	 * Spring's autodetection of JSR-310 and Joda-Time, or Jackson's
-	 * finding of modules (see {@link #setFindModulesViaServiceLoader}).
+	 * finding of modules (see {@link #setFindModulesViaServiceLoader}),
+	 * allowing to eventually override their configuration.
 	 * <p>Specify either this or {@link #setModules}, not both.
 	 * @since 4.0.1
 	 * @see com.fasterxml.jackson.databind.Module

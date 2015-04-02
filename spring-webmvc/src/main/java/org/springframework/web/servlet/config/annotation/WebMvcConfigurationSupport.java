@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -207,6 +207,10 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 		this.applicationContext = applicationContext;
 	}
 
+	public ApplicationContext getApplicationContext() {
+		return this.applicationContext;
+	}
+
 	/**
 	 * Set the {@link javax.servlet.ServletContext}, e.g. for resource handling,
 	 * looking up file extensions, etc.
@@ -216,6 +220,9 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 		this.servletContext = servletContext;
 	}
 
+	public ServletContext getServletContext() {
+		return this.servletContext;
+	}
 
 	/**
 	 * Return a {@link RequestMappingHandlerMapping} ordered at 0 for mapping
@@ -223,7 +230,7 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	 */
 	@Bean
 	public RequestMappingHandlerMapping requestMappingHandlerMapping() {
-		RequestMappingHandlerMapping handlerMapping = new RequestMappingHandlerMapping();
+		RequestMappingHandlerMapping handlerMapping = createRequestMappingHandlerMapping();
 		handlerMapping.setOrder(0);
 		handlerMapping.setInterceptors(getInterceptors());
 		handlerMapping.setContentNegotiationManager(mvcContentNegotiationManager());
@@ -246,6 +253,14 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 		}
 
 		return handlerMapping;
+	}
+
+	/**
+	 * Protected method for plugging in a custom sub-class of
+	 * {@link RequestMappingHandlerMapping}.
+	 */
+	protected RequestMappingHandlerMapping createRequestMappingHandlerMapping() {
+		return new RequestMappingHandlerMapping();
 	}
 
 	/**

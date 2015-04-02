@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -68,7 +68,6 @@ public class PrintingResultHandler implements ResultHandler {
 	 */
 	@Override
 	public final void handle(MvcResult result) throws Exception {
-
 		this.printer.printHeading("MockHttpServletRequest");
 		printRequest(result.getRequest());
 
@@ -91,7 +90,9 @@ public class PrintingResultHandler implements ResultHandler {
 		printResponse(result.getResponse());
 	}
 
-	/** Print the request */
+	/**
+	 * Print the request.
+	 */
 	protected void printRequest(MockHttpServletRequest request) throws Exception {
 		this.printer.printValue("HTTP Method", request.getMethod());
 		this.printer.printValue("Request URI", request.getRequestURI());
@@ -127,11 +128,20 @@ public class PrintingResultHandler implements ResultHandler {
 
 	protected void printAsyncResult(MvcResult result) throws Exception {
 		HttpServletRequest request = result.getRequest();
-		this.printer.printValue("Was async started", request.isAsyncStarted());
-		this.printer.printValue("Async result", (request.isAsyncStarted() ? result.getAsyncResult(0) : null));
+		this.printer.printValue("Async started", request.isAsyncStarted());
+		Object asyncResult = null;
+		try {
+			asyncResult = result.getAsyncResult(0);
+		}
+		catch (IllegalStateException ex) {
+			// Not set
+		}
+		this.printer.printValue("Async result", asyncResult);
 	}
 
-	/** Print the handler */
+	/**
+	 * Print the handler.
+	 */
 	protected void printHandler(Object handler, HandlerInterceptor[] interceptors) throws Exception {
 		if (handler == null) {
 			this.printer.printValue("Type", null);
@@ -148,7 +158,9 @@ public class PrintingResultHandler implements ResultHandler {
 		}
 	}
 
-	/** Print exceptions resolved through a HandlerExceptionResolver */
+	/**
+	 * Print exceptions resolved through a HandlerExceptionResolver.
+	 */
 	protected void printResolvedException(Exception resolvedException) throws Exception {
 		if (resolvedException == null) {
 			this.printer.printValue("Type", null);
@@ -158,7 +170,9 @@ public class PrintingResultHandler implements ResultHandler {
 		}
 	}
 
-	/** Print the ModelAndView */
+	/**
+	 * Print the ModelAndView.
+	 */
 	protected void printModelAndView(ModelAndView mav) throws Exception {
 		this.printer.printValue("View name", (mav != null) ? mav.getViewName() : null);
 		this.printer.printValue("View", (mav != null) ? mav.getView() : null);
@@ -180,7 +194,9 @@ public class PrintingResultHandler implements ResultHandler {
 		}
 	}
 
-	/** Print "output" flash attributes */
+	/**
+	 * Print "output" flash attributes.
+	 */
 	protected void printFlashMap(FlashMap flashMap) throws Exception {
 		if (flashMap == null) {
 			this.printer.printValue("Attributes", null);
@@ -193,7 +209,9 @@ public class PrintingResultHandler implements ResultHandler {
 		}
 	}
 
-	/** Print the response */
+	/**
+	 * Print the response.
+	 */
 	protected void printResponse(MockHttpServletResponse response) throws Exception {
 		this.printer.printValue("Status", response.getStatus());
 		this.printer.printValue("Error message", response.getErrorMessage());

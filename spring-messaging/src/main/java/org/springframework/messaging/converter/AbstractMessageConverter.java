@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,10 +32,10 @@ import org.springframework.util.Assert;
 import org.springframework.util.MimeType;
 
 /**
- * Abstract base class for {@link MessageConverter} implementations including support for
- * common properties and a partial implementation of the conversion methods mainly to
- * check if the converter supports the conversion based on the payload class and MIME
- * type.
+ * Abstract base class for {@link MessageConverter} implementations including support
+ * for common properties and a partial implementation of the conversion methods,
+ * mainly to check if the converter supports the conversion based on the payload class
+ * and MIME type.
  *
  * @author Rossen Stoyanchev
  * @since 4.0
@@ -68,7 +68,7 @@ public abstract class AbstractMessageConverter implements MessageConverter {
 	 * @param supportedMimeTypes the supported MIME types
 	 */
 	protected AbstractMessageConverter(Collection<MimeType> supportedMimeTypes) {
-		Assert.notNull(supportedMimeTypes, "SupportedMimeTypes must not be null");
+		Assert.notNull(supportedMimeTypes, "supportedMimeTypes must not be null");
 		this.supportedMimeTypes = new ArrayList<MimeType>(supportedMimeTypes);
 	}
 
@@ -83,13 +83,11 @@ public abstract class AbstractMessageConverter implements MessageConverter {
 	/**
 	 * Configure the {@link ContentTypeResolver} to use to resolve the content
 	 * type of an input message.
-	 * <p>
-	 * Note that if no resolver is configured, then
+	 * <p>Note that if no resolver is configured, then
 	 * {@link #setStrictContentTypeMatch(boolean) strictContentTypeMatch} should
 	 * be left as {@code false} (the default) or otherwise this converter will
 	 * ignore all messages.
-	 * <p>
-	 * By default, a {@code DefaultContentTypeResolver} instance is used.
+	 * <p>By default, a {@code DefaultContentTypeResolver} instance is used.
 	 */
 	public void setContentTypeResolver(ContentTypeResolver resolver) {
 		this.contentTypeResolver = resolver;
@@ -106,20 +104,17 @@ public abstract class AbstractMessageConverter implements MessageConverter {
 	 * Whether this converter should convert messages for which no content type
 	 * could be resolved through the configured
 	 * {@link org.springframework.messaging.converter.ContentTypeResolver}.
-	 * A converter can configured to be strict only when a
-	 * {@link #setContentTypeResolver(ContentTypeResolver) contentTypeResolver}
-	 * is  configured and the list of {@link #getSupportedMimeTypes() supportedMimeTypes}
-	 * is not be empty.
-	 *
-	 * then requires the content type of a message to be resolved
-	 *
-	 * When set to true, #supportsMimeType(MessageHeaders) will return false if the
-	 * contentTypeResolver is not defined or if no content-type header is present.
+	 * <p>A converter can configured to be strict only when a
+	 * {@link #setContentTypeResolver contentTypeResolver} is configured and the
+	 * list of {@link #getSupportedMimeTypes() supportedMimeTypes} is not be empty.
+	 * <p>When this flag is set to {@code true}, {@link #supportsMimeType(MessageHeaders)}
+	 * will return {@code false} if the {@link #setContentTypeResolver contentTypeResolver}
+	 * is not defined or if no content-type header is present.
 	 */
 	public void setStrictContentTypeMatch(boolean strictContentTypeMatch) {
 		if (strictContentTypeMatch) {
-			Assert.notEmpty(getSupportedMimeTypes(), "Strict match requires non-empty list of supported mime types.");
-			Assert.notNull(getContentTypeResolver(), "Strict match requires ContentTypeResolver.");
+			Assert.notEmpty(getSupportedMimeTypes(), "Strict match requires non-empty list of supported mime types");
+			Assert.notNull(getContentTypeResolver(), "Strict match requires ContentTypeResolver");
 		}
 		this.strictContentTypeMatch = strictContentTypeMatch;
 	}
@@ -166,14 +161,6 @@ public abstract class AbstractMessageConverter implements MessageConverter {
 		return (!mimeTypes.isEmpty() ? mimeTypes.get(0) : null);
 	}
 
-	/**
-	 * Whether the given class is supported by this converter.
-	 * @param clazz the class to test for support
-	 * @return {@code true} if supported; {@code false} otherwise
-	 */
-	protected abstract boolean supports(Class<?> clazz);
-
-
 	@Override
 	public final Object fromMessage(Message<?> message, Class<?> targetClass) {
 		if (!canConvertFrom(message, targetClass)) {
@@ -186,14 +173,8 @@ public abstract class AbstractMessageConverter implements MessageConverter {
 		return (supports(targetClass) && supportsMimeType(message.getHeaders()));
 	}
 
-	/**
-	 * Convert the message payload from serialized form to an Object.
-	 */
-	public abstract Object convertFromInternal(Message<?> message, Class<?> targetClass);
-
 	@Override
 	public final Message<?> toMessage(Object payload, MessageHeaders headers) {
-
 		if (!canConvertTo(payload, headers)) {
 			return null;
 		}
@@ -218,14 +199,9 @@ public abstract class AbstractMessageConverter implements MessageConverter {
 	}
 
 	protected boolean canConvertTo(Object payload, MessageHeaders headers) {
-		Class<?> clazz = (payload != null) ? payload.getClass() : null;
+		Class<?> clazz = (payload != null ? payload.getClass() : null);
 		return (supports(clazz) && supportsMimeType(headers));
 	}
-
-	/**
-	 * Convert the payload object to serialized form.
-	 */
-	public abstract Object convertToInternal(Object payload, MessageHeaders headers);
 
 	protected boolean supportsMimeType(MessageHeaders headers) {
 		if (getSupportedMimeTypes().isEmpty()) {
@@ -249,7 +225,26 @@ public abstract class AbstractMessageConverter implements MessageConverter {
 	}
 
 	protected MimeType getMimeType(MessageHeaders headers) {
-		return (this.contentTypeResolver != null) ? this.contentTypeResolver.resolve(headers) : null;
+		return (this.contentTypeResolver != null ? this.contentTypeResolver.resolve(headers) : null);
 	}
+
+
+	/**
+	 * Whether the given class is supported by this converter.
+	 * @param clazz the class to test for support
+	 * @return {@code true} if supported; {@code false} otherwise
+	 */
+	protected abstract boolean supports(Class<?> clazz);
+
+	/**
+	 * Convert the message payload from serialized form to an Object.
+	 */
+	public abstract Object convertFromInternal(Message<?> message, Class<?> targetClass);
+
+
+	/**
+	 * Convert the payload object to serialized form.
+	 */
+	public abstract Object convertToInternal(Object payload, MessageHeaders headers);
 
 }

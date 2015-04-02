@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,10 +23,11 @@ import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpStatus;
 
 /**
- * Represents a client-side HTTP response. Obtained via an calling of the {@link ClientHttpRequest#execute()}.
+ * Represents a client-side HTTP response.
+ * Obtained via an calling of the {@link ClientHttpRequest#execute()}.
  *
- * <p>A {@code ClientHttpResponse} must be {@linkplain #close() closed}, typically in a
- * {@code finally} block.
+ * <p>A {@code ClientHttpResponse} must be {@linkplain #close() closed},
+ * typically in a {@code finally} block.
  *
  * @author Arjen Poutsma
  * @since 3.0
@@ -55,7 +56,7 @@ public interface ClientHttpResponse extends HttpInputMessage, Closeable {
 	String getStatusText() throws IOException;
 
 	/**
-	 * Closes this response, freeing any resources created.
+	 * Close this response, freeing any resources created.
 	 */
 	@Override
 	void close();

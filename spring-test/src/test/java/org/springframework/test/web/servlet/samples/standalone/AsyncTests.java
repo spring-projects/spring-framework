@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +14,11 @@
  * limitations under the License.
  */
 package org.springframework.test.web.servlet.samples.standalone;
+
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.setup.MockMvcBuilders.*;
 
 import java.util.Collection;
 import java.util.concurrent.Callable;
@@ -34,10 +39,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.context.request.async.DeferredResult;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-import static org.springframework.test.web.servlet.setup.MockMvcBuilders.*;
-
 /**
  * Tests with asynchronous request handling.
  *
@@ -56,31 +57,32 @@ public class AsyncTests {
 		this.mockMvc = standaloneSetup(this.asyncController).build();
 	}
 
+
 	@Test
 	public void testCallable() throws Exception {
 		MvcResult mvcResult = this.mockMvc.perform(get("/1").param("callable", "true"))
-			.andExpect(request().asyncStarted())
-			.andExpect(request().asyncResult(new Person("Joe")))
-			.andReturn();
+				.andExpect(request().asyncStarted())
+				.andExpect(request().asyncResult(new Person("Joe")))
+				.andReturn();
 
 		this.mockMvc.perform(asyncDispatch(mvcResult))
-			.andExpect(status().isOk())
-			.andExpect(content().contentType(MediaType.APPLICATION_JSON))
-			.andExpect(content().string("{\"name\":\"Joe\",\"someDouble\":0.0,\"someBoolean\":false}"));
+				.andExpect(status().isOk())
+				.andExpect(content().contentType(MediaType.APPLICATION_JSON))
+				.andExpect(content().string("{\"name\":\"Joe\",\"someDouble\":0.0,\"someBoolean\":false}"));
 	}
 
 	@Test
 	public void testDeferredResult() throws Exception {
 		MvcResult mvcResult = this.mockMvc.perform(get("/1").param("deferredResult", "true"))
-			.andExpect(request().asyncStarted())
-			.andReturn();
+				.andExpect(request().asyncStarted())
+				.andReturn();
 
 		this.asyncController.onMessage("Joe");
 
 		this.mockMvc.perform(asyncDispatch(mvcResult))
-		.andExpect(status().isOk())
-		.andExpect(content().contentType(MediaType.APPLICATION_JSON))
-		.andExpect(content().string("{\"name\":\"Joe\",\"someDouble\":0.0,\"someBoolean\":false}"));
+				.andExpect(status().isOk())
+				.andExpect(content().contentType(MediaType.APPLICATION_JSON))
+				.andExpect(content().string("{\"name\":\"Joe\",\"someDouble\":0.0,\"someBoolean\":false}"));
 	}
 
 	@Test
@@ -109,6 +111,25 @@ public class AsyncTests {
 				.andExpect(content().contentType(MediaType.APPLICATION_JSON))
 				.andExpect(content().string("{\"name\":\"Joe\",\"someDouble\":0.0,\"someBoolean\":false}"));
 	}
+
+	// SPR-12735
+
+	@Test
+	public void testPrintAsyncResult() throws Exception {
+		MvcResult mvcResult = this.mockMvc.perform(get("/1").param("deferredResult", "true"))
+				.andDo(print())
+				.andExpect(request().asyncStarted())
+				.andReturn();
+
+		this.asyncController.onMessage("Joe");
+
+		this.mockMvc.perform(asyncDispatch(mvcResult))
+				.andDo(print())
+				.andExpect(status().isOk())
+				.andExpect(content().contentType(MediaType.APPLICATION_JSON))
+				.andExpect(content().string("{\"name\":\"Joe\",\"someDouble\":0.0,\"someBoolean\":false}"));
+	}
+
 
 
 	@Controller

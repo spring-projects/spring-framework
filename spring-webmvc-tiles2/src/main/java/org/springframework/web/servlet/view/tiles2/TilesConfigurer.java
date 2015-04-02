@@ -106,7 +106,9 @@ import org.springframework.web.context.ServletContextAware;
  * @since 2.5
  * @see TilesView
  * @see TilesViewResolver
+ * @deprecated as of Spring 4.2, in favor of Tiles 3
  */
+@Deprecated
 public class TilesConfigurer implements ServletContextAware, InitializingBean, DisposableBean {
 
 	private static final boolean tilesElPresent =

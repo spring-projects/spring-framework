@@ -58,12 +58,19 @@ import org.springframework.util.StringUtils;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
+ * @author Stéphane Nicoll
+ * @author Sam Brannen
  * @since 1.1
  * @see #setTransactionManager
  * @see #setTransactionAttributes
  * @see #setTransactionAttributeSource
  */
 public abstract class TransactionAspectSupport implements BeanFactoryAware, InitializingBean {
+
+	/**
+	 * Key to use to store the default transaction manager.
+	 */
+	private final Object DEFAULT_TRANSACTION_MANAGER_KEY = new Object();
 
 	// NOTE: This class must not implement Serializable because it serves as base
 	// class for AspectJ aspects (which are not allowed to implement Serializable)!
@@ -78,8 +85,8 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 			new NamedThreadLocal<TransactionInfo>("Current aspect-driven transaction");
 
 
-	private final ConcurrentHashMap<String, PlatformTransactionManager> transactionManagerCache =
-			new ConcurrentHashMap<String, PlatformTransactionManager>();
+	private final ConcurrentHashMap<Object, PlatformTransactionManager> transactionManagerCache =
+			new ConcurrentHashMap<Object, PlatformTransactionManager>();
 
 	/**
 	 * Subclasses can use this to return the current TransactionInfo.
@@ -120,9 +127,10 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
+	/**
+	 * Default transaction manager bean name.
+	 */
 	private String transactionManagerBeanName;
-
-	private PlatformTransactionManager transactionManager;
 
 	private TransactionAttributeSource transactionAttributeSource;
 
@@ -144,17 +152,23 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 	}
 
 	/**
-	 * Specify the target transaction manager.
+	 * Specify the <em>default</em> transaction manager to use to drive transactions.
+	 * <p>The default transaction manager will be used if a <em>qualifier</em>
+	 * has not been declared for a given transaction or if an explicit name for the
+	 * default transaction manager bean has not been specified.
+	 * @see #setTransactionManagerBeanName
 	 */
 	public void setTransactionManager(PlatformTransactionManager transactionManager) {
-		this.transactionManager = transactionManager;
+		if (transactionManager != null) {
+			this.transactionManagerCache.put(DEFAULT_TRANSACTION_MANAGER_KEY, transactionManager);
+		}
 	}
 
 	/**
-	 * Return the transaction manager, if specified.
+	 * Return the default transaction manager, or {@code null} if unknown.
 	 */
 	public PlatformTransactionManager getTransactionManager() {
-		return this.transactionManager;
+		return this.transactionManagerCache.get(DEFAULT_TRANSACTION_MANAGER_KEY);
 	}
 
 	/**
@@ -227,7 +241,7 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 	 */
 	@Override
 	public void afterPropertiesSet() {
-		if (this.transactionManager == null && this.beanFactory == null) {
+		if (getTransactionManager() == null && this.beanFactory == null) {
 			throw new IllegalStateException(
 					"Setting the property 'transactionManager' or running in a ListableBeanFactory is required");
 		}
@@ -325,36 +339,46 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 	}
 
 	/**
+	 * Clear the cached transaction managers.
+	 */
+	protected void clearTransactionManagerCache() {
+		this.transactionManagerCache.clear();
+	}
+
+	/**
 	 * Determine the specific transaction manager to use for the given transaction.
 	 */
 	protected PlatformTransactionManager determineTransactionManager(TransactionAttribute txAttr) {
-		if (this.transactionManager != null || this.beanFactory == null || txAttr == null) {
-			return this.transactionManager;
+		// Do not attempt to lookup tx manager if no tx attributes are set
+		if (txAttr == null || this.beanFactory == null) {
+			return getTransactionManager();
 		}
 		String qualifier = txAttr.getQualifier();
-		if (StringUtils.hasLength(qualifier)) {
-			PlatformTransactionManager txManager = this.transactionManagerCache.get(qualifier);
-			if (txManager == null) {
-				txManager = BeanFactoryAnnotationUtils.qualifiedBeanOfType(
-						this.beanFactory, PlatformTransactionManager.class, qualifier);
-				this.transactionManagerCache.putIfAbsent(qualifier, txManager);
-			}
-			return txManager;
+		if (StringUtils.hasText(qualifier)) {
+			return determineQualifiedTransactionManager(qualifier);
 		}
-		else if (this.transactionManagerBeanName != null) {
-			PlatformTransactionManager txManager  = this.transactionManagerCache.get(this.transactionManagerBeanName);
-			if (txManager == null) {
-				txManager = this.beanFactory.getBean(
-						this.transactionManagerBeanName, PlatformTransactionManager.class);
-				this.transactionManagerCache.putIfAbsent(this.transactionManagerBeanName, txManager);
-			}
-			return txManager;
+		else if (StringUtils.hasText(this.transactionManagerBeanName)) {
+			return determineQualifiedTransactionManager(this.transactionManagerBeanName);
 		}
 		else {
-			// Lookup the default transaction manager and store it for next call
-			this.transactionManager = this.beanFactory.getBean(PlatformTransactionManager.class);
-			return this.transactionManager;
+			PlatformTransactionManager defaultTransactionManager = getTransactionManager();
+			if (defaultTransactionManager == null) {
+				defaultTransactionManager = this.beanFactory.getBean(PlatformTransactionManager.class);
+				this.transactionManagerCache.putIfAbsent(
+						DEFAULT_TRANSACTION_MANAGER_KEY, defaultTransactionManager);
+			}
+			return defaultTransactionManager;
 		}
+	}
+
+	private PlatformTransactionManager determineQualifiedTransactionManager(String qualifier) {
+		PlatformTransactionManager txManager = this.transactionManagerCache.get(qualifier);
+		if (txManager == null) {
+			txManager = BeanFactoryAnnotationUtils.qualifiedBeanOfType(
+					this.beanFactory, PlatformTransactionManager.class, qualifier);
+			this.transactionManagerCache.putIfAbsent(qualifier, txManager);
+		}
+		return txManager;
 	}
 
 	/**
@@ -367,44 +391,7 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 	 * @see org.springframework.util.ClassUtils#getQualifiedMethodName
 	 */
 	protected String methodIdentification(Method method, Class<?> targetClass) {
-		String simpleMethodId = methodIdentification(method);
-		if (simpleMethodId != null) {
-			return simpleMethodId;
-		}
 		return (targetClass != null ? targetClass : method.getDeclaringClass()).getName() + "." + method.getName();
-	}
-
-	/**
-	 * Convenience method to return a String representation of this Method
-	 * for use in logging. Can be overridden in subclasses to provide a
-	 * different identifier for the given method.
-	 * @param method the method we're interested in
-	 * @return a String representation identifying this method
-	 * @deprecated in favor of {@link #methodIdentification(Method, Class)}
-	 */
-	@Deprecated
-	protected String methodIdentification(Method method) {
-		return null;
-	}
-
-	/**
-	 * Create a transaction if necessary, based on the given method and class.
-	 * <p>Performs a default TransactionAttribute lookup for the given method.
-	 * @param method the method about to execute
-	 * @param targetClass the class that the method is being invoked on
-	 * @return a TransactionInfo object, whether or not a transaction was created.
-	 * The {@code hasTransaction()} method on TransactionInfo can be used to
-	 * tell if there was a transaction created.
-	 * @see #getTransactionAttributeSource()
-	 * @deprecated in favor of
-	 * {@link #createTransactionIfNecessary(PlatformTransactionManager, TransactionAttribute, String)}
-	 */
-	@Deprecated
-	protected TransactionInfo createTransactionIfNecessary(Method method, Class<?> targetClass) {
-		// If the transaction attribute is null, the method is non-transactional.
-		TransactionAttribute txAttr = getTransactionAttributeSource().getTransactionAttribute(method, targetClass);
-		PlatformTransactionManager tm = determineTransactionManager(txAttr);
-		return createTransactionIfNecessary(tm, txAttr, methodIdentification(method, targetClass));
 	}
 
 	/**

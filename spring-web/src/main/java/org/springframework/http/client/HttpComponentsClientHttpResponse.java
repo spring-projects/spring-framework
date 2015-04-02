@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,13 @@
 
 package org.springframework.http.client;
 
+import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
 
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
-import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.HttpResponse;
 import org.apache.http.util.EntityUtils;
 
 import org.springframework.http.HttpHeaders;
@@ -41,12 +42,12 @@ import org.springframework.http.HttpHeaders;
  */
 final class HttpComponentsClientHttpResponse extends AbstractClientHttpResponse {
 
-	private final CloseableHttpResponse httpResponse;
+	private final HttpResponse httpResponse;
 
 	private HttpHeaders headers;
 
 
-	HttpComponentsClientHttpResponse(CloseableHttpResponse httpResponse) {
+	HttpComponentsClientHttpResponse(HttpResponse httpResponse) {
 		this.httpResponse = httpResponse;
 	}
 
@@ -87,7 +88,9 @@ final class HttpComponentsClientHttpResponse extends AbstractClientHttpResponse 
                 EntityUtils.consume(this.httpResponse.getEntity());
             }
 			finally {
-                this.httpResponse.close();
+				if (this.httpResponse instanceof Closeable) {
+					((Closeable) this.httpResponse).close();
+				}
             }
         }
         catch (IOException ex) {

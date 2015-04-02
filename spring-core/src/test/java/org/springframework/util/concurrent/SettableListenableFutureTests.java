@@ -316,16 +316,16 @@ public class SettableListenableFutureTests {
 		settableListenableFuture.setException(new RuntimeException());
 		verifyNoMoreInteractions(callback);
 	}
-	
+
 	private static class InterruptableSettableListenableFuture extends SettableListenableFuture<String> {
 
 		private boolean interrupted = false;
-		
+	
 		@Override
 		protected void interruptTask() {
 			interrupted = true;
 		}
-		
+	
 		boolean calledInterruptTask() {
 			return interrupted;
 		}
