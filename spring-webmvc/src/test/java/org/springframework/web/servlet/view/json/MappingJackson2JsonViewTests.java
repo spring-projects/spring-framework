@@ -25,6 +25,7 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
+import com.fasterxml.jackson.annotation.JsonFilter;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JavaType;
@@ -35,7 +36,12 @@ import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.cfg.SerializerFactoryConfig;
 import com.fasterxml.jackson.databind.ser.BeanSerializerFactory;
+import com.fasterxml.jackson.databind.ser.FilterProvider;
 import com.fasterxml.jackson.databind.ser.SerializerFactory;
+import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
+import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
+import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.CoreMatchers.not;
 import org.junit.Before;
 import org.junit.Test;
 import org.mozilla.javascript.Context;
@@ -294,6 +300,29 @@ public class MappingJackson2JsonViewTests {
 	}
 
 	@Test
+	public void renderSimpleBeanWithFilters() throws Exception {
+		TestSimpleBeanFiltered bean = new TestSimpleBeanFiltered();
+		bean.setProperty1("value");
+		bean.setProperty2("value");
+		Map<String, Object> model = new HashMap<String, Object>();
+		model.put("bindingResult", mock(BindingResult.class, "binding_result"));
+		model.put("foo", bean);
+		FilterProvider filters = new SimpleFilterProvider().addFilter("myJacksonFilter",
+				SimpleBeanPropertyFilter.serializeAllExcept("property2"));
+		model.put(FilterProvider.class.getName(), filters);
+
+		view.setUpdateContentLength(true);
+		view.render(model, request, response);
+
+		String content = response.getContentAsString();
+		assertTrue(content.length() > 0);
+		assertEquals(content.length(), response.getContentLength());
+		assertThat(content, containsString("\"property1\":\"value\""));
+		assertThat(content, not(containsString("\"property2\":\"value\"")));
+		assertFalse(content.contains(FilterProvider.class.getName()));
+	}
+
+	@Test
 	public void renderWithJsonpDefaultParameterName() throws Exception {
 		Map<String, Object> model = new HashMap<String, Object>();
 		model.put("foo", "bar");
@@ -423,6 +452,30 @@ public class MappingJackson2JsonViewTests {
 			jgen.writeFieldName("testBeanSimple");
 			jgen.writeString("custom");
 			jgen.writeEndObject();
+		}
+	}
+
+
+	@JsonFilter("myJacksonFilter")
+	private static class TestSimpleBeanFiltered {
+
+		private String property1;
+		private String property2;
+
+		public String getProperty1() {
+			return property1;
+		}
+
+		public void setProperty1(String property1) {
+			this.property1 = property1;
+		}
+
+		public String getProperty2() {
+			return property2;
+		}
+
+		public void setProperty2(String property2) {
+			this.property2 = property2;
 		}
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,7 @@ import javax.servlet.http.HttpServletResponse;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ser.FilterProvider;
 
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.http.converter.json.MappingJacksonValue;
@@ -182,7 +183,8 @@ public class MappingJackson2JsonView extends AbstractJackson2View {
 		Set<String> modelKeys = (!CollectionUtils.isEmpty(this.modelKeys) ? this.modelKeys : model.keySet());
 		for (Map.Entry<String, Object> entry : model.entrySet()) {
 			if (!(entry.getValue() instanceof BindingResult) && modelKeys.contains(entry.getKey()) &&
-					!entry.getKey().equals(JsonView.class.getName())) {
+					!entry.getKey().equals(JsonView.class.getName()) &&
+					!entry.getKey().equals(FilterProvider.class.getName())) {
 				result.put(entry.getKey(), entry.getValue());
 			}
 		}

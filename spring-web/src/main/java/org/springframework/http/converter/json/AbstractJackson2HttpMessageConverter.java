@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.ser.FilterProvider;
 
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpOutputMessage;
@@ -218,14 +219,19 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractHttpM
 		try {
 			writePrefix(generator, object);
 			Class<?> serializationView = null;
+			FilterProvider filters = null;
 			Object value = object;
 			if (value instanceof MappingJacksonValue) {
 				MappingJacksonValue container = (MappingJacksonValue) object;
 				value = container.getValue();
 				serializationView = container.getSerializationView();
+				filters = container.getFilters();
 			}
 			if (serializationView != null) {
 				this.objectMapper.writerWithView(serializationView).writeValue(generator, value);
+			}
+			else if (filters != null) {
+				this.objectMapper.writer(filters).writeValue(generator, value);
 			}
 			else {
 				this.objectMapper.writeValue(generator, value);

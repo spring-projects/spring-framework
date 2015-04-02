@@ -28,6 +28,7 @@ import com.fasterxml.jackson.core.JsonEncoding;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.ser.FilterProvider;
 
 import org.springframework.http.converter.json.MappingJacksonValue;
 import org.springframework.util.Assert;
@@ -176,9 +177,11 @@ public abstract class AbstractJackson2View extends AbstractView {
 	protected Object filterAndWrapModel(Map<String, Object> model, HttpServletRequest request) {
 		Object value = filterModel(model);
 		Class<?> serializationView = (Class<?>) model.get(JsonView.class.getName());
-		if (serializationView != null) {
+		FilterProvider filters = (FilterProvider) model.get(FilterProvider.class.getName());
+		if (serializationView != null || filters != null) {
 			MappingJacksonValue container = new MappingJacksonValue(value);
 			container.setSerializationView(serializationView);
+			container.setFilters(filters);
 			value = container;
 		}
 		return value;
@@ -205,15 +208,20 @@ public abstract class AbstractJackson2View extends AbstractView {
 
 		writePrefix(generator, object);
 		Class<?> serializationView = null;
+		FilterProvider filters = null;
 		Object value = object;
 
 		if (value instanceof MappingJacksonValue) {
 			MappingJacksonValue container = (MappingJacksonValue) value;
 			value = container.getValue();
 			serializationView = container.getSerializationView();
+			filters = container.getFilters();
 		}
 		if (serializationView != null) {
 			this.objectMapper.writerWithView(serializationView).writeValue(generator, value);
+		}
+		else if (filters != null) {
+			this.objectMapper.writer(filters).writeValue(generator, value);
 		}
 		else {
 			this.objectMapper.writeValue(generator, value);
