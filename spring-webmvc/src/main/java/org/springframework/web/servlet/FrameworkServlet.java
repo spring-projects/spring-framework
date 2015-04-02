@@ -903,7 +903,7 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 	protected void doOptions(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 
-		if (this.dispatchOptionsRequest) {
+		if (this.dispatchOptionsRequest || request.getHeader("Origin") != null) {
 			processRequest(request, response);
 			if (response.containsHeader("Allow")) {
 				// Proper OPTIONS response coming from a handler - we're done.

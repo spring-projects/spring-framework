@@ -26,7 +26,9 @@ import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import org.springframework.http.HttpHeaders;
 import org.springframework.scheduling.TaskScheduler;
+import org.springframework.web.cors.CorsUtils;
 import org.springframework.web.socket.AbstractHttpRequestTests;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.handler.TestPrincipal;
@@ -163,8 +165,8 @@ public class DefaultSockJsServiceTests extends AbstractHttpRequestTests {
 		verify(taskScheduler).scheduleAtFixedRate(any(Runnable.class), eq(service.getDisconnectDelay()));
 
 		assertEquals("no-store, no-cache, must-revalidate, max-age=0", this.response.getHeaders().getCacheControl());
-		assertNull(this.response.getHeaders().getFirst("Access-Control-Allow-Origin"));
-		assertNull(this.response.getHeaders().getFirst("Access-Control-Allow-Credentials"));
+		assertNull(this.servletResponse.getHeader(CorsUtils.ACCESS_CONTROL_ALLOW_ORIGIN));
+		assertNull(this.servletResponse.getHeader(CorsUtils.ACCESS_CONTROL_ALLOW_CREDENTIALS));
 	}
 
 	@Test  // SPR-12226
@@ -172,12 +174,10 @@ public class DefaultSockJsServiceTests extends AbstractHttpRequestTests {
 		String sockJsPath = sessionUrlPrefix + "xhr";
 		setRequest("POST", sockJsPrefix + sockJsPath);
 		this.service.setAllowedOrigins(Arrays.asList("http://mydomain1.com", "http://mydomain2.com"));
-		setOrigin("http://mydomain1.com");
+		this.servletRequest.addHeader(HttpHeaders.ORIGIN, "http://mydomain1.com");
 		this.service.handleRequest(this.request, this.response, sockJsPath, this.wsHandler);
 
 		assertEquals(200, this.servletResponse.getStatus());
-		assertEquals("http://mydomain1.com", this.response.getHeaders().getFirst("Access-Control-Allow-Origin"));
-		assertEquals("true", this.response.getHeaders().getFirst("Access-Control-Allow-Credentials"));
 	}
 
 	@Test  // SPR-12226
@@ -185,12 +185,10 @@ public class DefaultSockJsServiceTests extends AbstractHttpRequestTests {
 		String sockJsPath = sessionUrlPrefix + "xhr";
 		setRequest("POST", sockJsPrefix + sockJsPath);
 		this.service.setAllowedOrigins(Arrays.asList("http://mydomain1.com", "http://mydomain2.com"));
-		setOrigin("http://mydomain3.com");
+		this.servletRequest.addHeader(HttpHeaders.ORIGIN, "http://mydomain3.com");
 		this.service.handleRequest(this.request, this.response, sockJsPath, this.wsHandler);
 
 		assertEquals(403, this.servletResponse.getStatus());
-		assertNull(this.response.getHeaders().getFirst("Access-Control-Allow-Origin"));
-		assertNull(this.response.getHeaders().getFirst("Access-Control-Allow-Credentials"));
 	}
 
 	@Test
@@ -200,9 +198,9 @@ public class DefaultSockJsServiceTests extends AbstractHttpRequestTests {
 		this.service.handleRequest(this.request, this.response, sockJsPath, this.wsHandler);
 
 		assertEquals(204, this.servletResponse.getStatus());
-		assertNull(this.response.getHeaders().getFirst("Access-Control-Allow-Origin"));
-		assertNull(this.response.getHeaders().getFirst("Access-Control-Allow-Credentials"));
-		assertNull(this.response.getHeaders().getFirst("Access-Control-Allow-Methods"));
+		assertNull(this.servletResponse.getHeader("Access-Control-Allow-Origin"));
+		assertNull(this.servletResponse.getHeader("Access-Control-Allow-Credentials"));
+		assertNull(this.servletResponse.getHeader("Access-Control-Allow-Methods"));
 	}
 
 	@Test
@@ -294,13 +292,13 @@ public class DefaultSockJsServiceTests extends AbstractHttpRequestTests {
 		OriginHandshakeInterceptor interceptor = new OriginHandshakeInterceptor(Arrays.asList("http://mydomain1.com"));
 		wsService.setHandshakeInterceptors(Arrays.asList(interceptor));
 		setRequest("GET", sockJsPrefix + sockJsPath);
-		setOrigin("http://mydomain1.com");
+		this.servletRequest.addHeader(HttpHeaders.ORIGIN, "http://mydomain1.com");
 		wsService.handleRequest(this.request, this.response, sockJsPath, this.wsHandler);
 		assertNotEquals(403, this.servletResponse.getStatus());
 
 		resetRequestAndResponse();
 		setRequest("GET", sockJsPrefix + sockJsPath);
-		setOrigin("http://mydomain2.com");
+		this.servletRequest.addHeader(HttpHeaders.ORIGIN, "http://mydomain2.com");
 		wsService.handleRequest(this.request, this.response, sockJsPath, this.wsHandler);
 		assertEquals(403, this.servletResponse.getStatus());
 	}

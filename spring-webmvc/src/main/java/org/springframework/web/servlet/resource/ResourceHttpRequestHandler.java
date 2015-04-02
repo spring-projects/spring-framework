@@ -38,7 +38,9 @@ import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpRange;
 import org.springframework.http.MediaType;
+import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.http.server.ServletServerHttpRequest;
+import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
@@ -88,7 +90,7 @@ import org.springframework.web.servlet.support.WebContentGenerator;
  * @author Arjen Poutsma
  * @since 3.0.4
  */
-public class ResourceHttpRequestHandler extends WebContentGenerator implements HttpRequestHandler, InitializingBean {
+public class ResourceHttpRequestHandler extends WebContentGenerator implements HttpRequestHandler, InitializingBean, CorsConfigurationSource {
 
 	private static final String CONTENT_ENCODING = "Content-Encoding";
 
@@ -103,6 +105,8 @@ public class ResourceHttpRequestHandler extends WebContentGenerator implements H
 	private final List<ResourceResolver> resourceResolvers = new ArrayList<ResourceResolver>(4);
 
 	private final List<ResourceTransformer> resourceTransformers = new ArrayList<ResourceTransformer>(4);
+
+	private CorsConfiguration corsConfiguration;
 
 
 	public ResourceHttpRequestHandler() {
@@ -162,6 +166,9 @@ public class ResourceHttpRequestHandler extends WebContentGenerator implements H
 		return this.resourceTransformers;
 	}
 
+	public void setCorsConfiguration(CorsConfiguration corsConfiguration) {
+		this.corsConfiguration = corsConfiguration;
+	}
 
 	@Override
 	public void afterPropertiesSet() throws Exception {
@@ -170,6 +177,11 @@ public class ResourceHttpRequestHandler extends WebContentGenerator implements H
 					"custom ResourceResolver is configured as an alternative to PathResourceResolver.");
 		}
 		initAllowedLocations();
+	}
+
+	@Override
+	public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
+		return corsConfiguration;
 	}
 
 	/**

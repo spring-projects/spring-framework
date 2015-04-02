@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,8 +22,10 @@ import java.util.List;
 
 import org.junit.Test;
 
+import org.springframework.http.HttpHeaders;
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.cors.CorsUtils;
 import org.springframework.web.servlet.mvc.condition.ConsumesRequestCondition;
 import org.springframework.web.servlet.mvc.condition.HeadersRequestCondition;
 import org.springframework.web.servlet.mvc.condition.ParamsRequestCondition;
@@ -313,6 +315,25 @@ public class RequestMappingInfoTests {
 
 		assertFalse(info1.equals(info2));
 		assertNotEquals(info1.hashCode(), info2.hashCode());
+	}
+
+	@Test
+	public void preFlightRequest() {
+		MockHttpServletRequest request = new MockHttpServletRequest("OPTIONS", "/foo");
+		request.addHeader(HttpHeaders.ORIGIN, "http://domain.com");
+		request.addHeader(CorsUtils.ACCESS_CONTROL_REQUEST_METHOD, "POST");
+
+		RequestMappingInfo info = new RequestMappingInfo(
+				new PatternsRequestCondition("/foo"), new RequestMethodsRequestCondition(RequestMethod.POST), null,
+				null, null, null, null);
+		RequestMappingInfo match = info.getMatchingCondition(request);
+		assertNotNull(match);
+
+		info = new RequestMappingInfo(
+				new PatternsRequestCondition("/foo"), new RequestMethodsRequestCondition(RequestMethod.OPTIONS), null,
+				null, null, null, null);
+		match = info.getMatchingCondition(request);
+		assertNotNull(match);
 	}
 
 }
