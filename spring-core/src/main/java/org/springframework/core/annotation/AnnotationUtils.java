@@ -613,7 +613,7 @@ public abstract class AnnotationUtils {
 				value = ((Class<?>) value).getName();
 			}
 			else if (value instanceof Class[]) {
-				Class<?>[] clazzArray = (Class[]) value;
+				Class<?>[] clazzArray = (Class<?>[]) value;
 				String[] newValue = new String[clazzArray.length];
 				for (int i = 0; i < clazzArray.length; i++) {
 					newValue[i] = clazzArray[i].getName();
@@ -726,14 +726,30 @@ public abstract class AnnotationUtils {
 	}
 
 
-	private static void logIntrospectionFailure(AnnotatedElement annotatedElement, Exception ex) {
+	/**
+	 * Log an introspection failure (in particular {@code TypeNotPresentExceptions}) -
+	 * before moving on, pretending there were no annotations on this specific element.
+	 * @param element the element that we tried to introspect annotations on
+	 * @param ex the exception that we encountered
+	 */
+	static void logIntrospectionFailure(AnnotatedElement element, Exception ex) {
 		Log loggerToUse = logger;
 		if (loggerToUse == null) {
 			loggerToUse = LogFactory.getLog(AnnotationUtils.class);
 			logger = loggerToUse;
 		}
-		if (loggerToUse.isInfoEnabled()) {
-			loggerToUse.info("Failed to introspect annotations on [" + annotatedElement + "]: " + ex);
+		if (element instanceof Class && Annotation.class.isAssignableFrom((Class<?>) element)) {
+			// Meta-annotation lookup on an annotation type
+			if (logger.isDebugEnabled()) {
+				logger.debug("Failed to introspect meta-annotations on [" + element + "]: " + ex);
+			}
+		}
+		else {
+			// Direct annotation lookup on regular Class, Method, Field
+			if (loggerToUse.isInfoEnabled()) {
+				logger.info("Failed to introspect annotations on [" + element + "]: " + ex);
+			}
+
 		}
 	}
 
@@ -793,18 +809,23 @@ public abstract class AnnotationUtils {
 		}
 
 		@SuppressWarnings("unchecked")
-		private void process(AnnotatedElement annotatedElement) {
-			if (this.visited.add(annotatedElement)) {
-				for (Annotation ann : annotatedElement.getAnnotations()) {
-					if (ObjectUtils.nullSafeEquals(this.annotationType, ann.annotationType())) {
-						this.result.add((A) ann);
+		private void process(AnnotatedElement element) {
+			if (this.visited.add(element)) {
+				try {
+					for (Annotation ann : element.getAnnotations()) {
+						if (ObjectUtils.nullSafeEquals(this.annotationType, ann.annotationType())) {
+							this.result.add((A) ann);
+						}
+						else if (ObjectUtils.nullSafeEquals(this.containerAnnotationType, ann.annotationType())) {
+							this.result.addAll(getValue(ann));
+						}
+						else if (!isInJavaLangAnnotationPackage(ann)) {
+							process(ann.annotationType());
+						}
 					}
-					else if (ObjectUtils.nullSafeEquals(this.containerAnnotationType, ann.annotationType())) {
-						this.result.addAll(getValue(ann));
-					}
-					else if (!isInJavaLangAnnotationPackage(ann)) {
-						process(ann.annotationType());
-					}
+				}
+				catch (Exception ex) {
+					logIntrospectionFailure(element, ex);
 				}
 			}
 		}
