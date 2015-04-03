@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -188,40 +188,45 @@ public class AnnotatedElementUtils {
 			Processor<T> processor, Set<AnnotatedElement> visited, int metaDepth) {
 
 		if (visited.add(element)) {
-			Annotation[] annotations =
-					(traverseClassHierarchy ? element.getDeclaredAnnotations() : element.getAnnotations());
-			for (Annotation annotation : annotations) {
-				if (annotation.annotationType().getName().equals(annotationType) || metaDepth > 0) {
-					T result = processor.process(annotation, metaDepth);
-					if (result != null) {
-						return result;
+			try {
+				Annotation[] annotations =
+						(traverseClassHierarchy ? element.getDeclaredAnnotations() : element.getAnnotations());
+				for (Annotation annotation : annotations) {
+					if (annotation.annotationType().getName().equals(annotationType) || metaDepth > 0) {
+						T result = processor.process(annotation, metaDepth);
+						if (result != null) {
+							return result;
+						}
+						result = doProcess(annotation.annotationType(), annotationType, traverseClassHierarchy,
+								processor, visited, metaDepth + 1);
+						if (result != null) {
+							processor.postProcess(annotation, result);
+							return result;
+						}
 					}
-					result = doProcess(annotation.annotationType(), annotationType, traverseClassHierarchy,
-							processor, visited, metaDepth + 1);
-					if (result != null) {
-						processor.postProcess(annotation, result);
-						return result;
+				}
+				for (Annotation annotation : annotations) {
+					if (!AnnotationUtils.isInJavaLangAnnotationPackage(annotation)) {
+						T result = doProcess(annotation.annotationType(), annotationType, traverseClassHierarchy,
+								processor, visited, metaDepth);
+						if (result != null) {
+							processor.postProcess(annotation, result);
+							return result;
+						}
+					}
+				}
+				if (traverseClassHierarchy && element instanceof Class) {
+					Class<?> superclass = ((Class<?>) element).getSuperclass();
+					if (superclass != null && !superclass.equals(Object.class)) {
+						T result = doProcess(superclass, annotationType, true, processor, visited, metaDepth);
+						if (result != null) {
+							return result;
+						}
 					}
 				}
 			}
-			for (Annotation annotation : annotations) {
-				if (!AnnotationUtils.isInJavaLangAnnotationPackage(annotation)) {
-					T result = doProcess(annotation.annotationType(), annotationType, traverseClassHierarchy,
-							processor, visited, metaDepth);
-					if (result != null) {
-						processor.postProcess(annotation, result);
-						return result;
-					}
-				}
-			}
-			if (traverseClassHierarchy && element instanceof Class) {
-				Class<?> superclass = ((Class<?>) element).getSuperclass();
-				if (superclass != null && !superclass.equals(Object.class)) {
-					T result = doProcess(superclass, annotationType, true, processor, visited, metaDepth);
-					if (result != null) {
-						return result;
-					}
-				}
+			catch (Exception ex) {
+				AnnotationUtils.logIntrospectionFailure(element, ex);
 			}
 		}
 		return null;
@@ -232,7 +237,7 @@ public class AnnotatedElementUtils {
 	 * Callback interface used to process an annotation.
 	 * @param <T> the result type
 	 */
-	private static interface Processor<T> {
+	private interface Processor<T> {
 
 		/**
 		 * Called to process the annotation.
