@@ -75,6 +75,7 @@ public class CorsUtils {
 	 */
 	public static final String ACCESS_CONTROL_EXPOSE_HEADERS = "Access-Control-Expose-Headers";
 
+
 	/**
 	 * Returns {@code true} if the request is a valid CORS one.
 	 */
@@ -90,21 +91,6 @@ public class CorsUtils {
 			return false;
 		}
 		return request.getMethod().equals(HttpMethod.OPTIONS.name());
-	}
-
-	/**
-	 * Returns {@code true} if the response already contains CORS headers.
-	 */
-	public static boolean isCorsResponse(HttpServletResponse response) {
-		boolean hasCorsResponseHeaders = false;
-		try {
-			// Perhaps a CORS Filter has already added this?
-			hasCorsResponseHeaders = !CollectionUtils.isEmpty(response.getHeaders(CorsUtils.ACCESS_CONTROL_ALLOW_ORIGIN));
-		}
-		catch (NullPointerException npe) {
-			// See SPR-11919 and https://issues.jboss.org/browse/WFLY-3474
-		}
-		return hasCorsResponseHeaders;
 	}
 
 }

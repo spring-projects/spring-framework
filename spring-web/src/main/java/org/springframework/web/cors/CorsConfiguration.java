@@ -33,21 +33,28 @@ import java.util.List;
 public class CorsConfiguration {
 
 	private List<String> allowedOrigins;
+
 	private List<String> allowedMethods;
+
 	private List<String> allowedHeaders;
+
 	private List<String> exposedHeaders;
+
 	private Boolean allowCredentials;
+
 	private Long maxAge;
+
 
 	public CorsConfiguration() {
 	}
+
 
 	public CorsConfiguration(CorsConfiguration config) {
 		if (config.allowedOrigins != null) {
 			this.allowedOrigins = new ArrayList<String>(config.allowedOrigins);
 		}
 		if (config.allowCredentials != null) {
-			this.allowCredentials = new Boolean(config.allowCredentials);
+			this.allowCredentials = config.allowCredentials;
 		}
 		if (config.exposedHeaders != null) {
 			this.exposedHeaders = new ArrayList<String>(config.exposedHeaders);
@@ -59,7 +66,7 @@ public class CorsConfiguration {
 			this.allowedHeaders = new ArrayList<String>(config.allowedHeaders);
 		}
 		if (config.maxAge != null) {
-			this.maxAge = new Long(config.maxAge);
+			this.maxAge = config.maxAge;
 		}
 	}
 
@@ -98,7 +105,7 @@ public class CorsConfiguration {
 	}
 
 	/**
-	 * Set allowed origins that will define Access-Control-Allow-Origin response
+	 * Set allowed allowedOrigins that will define Access-Control-Allow-Origin response
 	 * header values (mandatory). For example "http://domain1.com", "http://domain2.com" ...
 	 * "*" means that all domains are allowed.
 	 */

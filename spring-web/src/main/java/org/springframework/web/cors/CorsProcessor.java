@@ -21,7 +21,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 /**
- * Interface to be implemented by classes that process CORS preflight and actual requests.
+ * Contract for handling CORS preflight requests and intercepting CORS simple
+ * and actual requests.
  *
  * @author Sebastien Deleuze
  * @since 4.2
@@ -30,21 +31,23 @@ import javax.servlet.http.HttpServletResponse;
 public interface CorsProcessor {
 
 	/**
-	 * Process a pre-flight CORS request based on the provided {@link CorsConfiguration}.
-	 * If the request is not a valid CORS pre-flight request or if it does not comply with
-	 * the configuration, it should be rejected.
-	 * If the request is valid and comply with the configuration, this method adds the related
-	 * CORS headers to the response.
+	 * Process a preflight CORS request given a {@link CorsConfiguration}.
+	 * If the request is not a valid CORS pre-flight request or if it does not
+	 * comply with the configuration it should be rejected.
+	 * If the request is valid and complies with the configuration, CORS headers
+	 * should be added to the response.
 	 */
-	boolean processPreFlightRequest(CorsConfiguration conf, HttpServletRequest request, HttpServletResponse response) throws IOException;
+	boolean processPreFlightRequest(CorsConfiguration conf, HttpServletRequest request,
+			HttpServletResponse response) throws IOException;
 
 	/**
-	 * Process a simple or actual CORS request based on the provided {@link CorsConfiguration}.
-	 * If the request is not a valid CORS simple or actual request or if it does not comply
-	 * with the configuration, it should be rejected.
+	 * Process a simple or actual CORS request given a {@link CorsConfiguration}.
+	 * If the request is not a valid CORS simple or actual request or if it does
+	 * not comply with the configuration, it should be rejected.
 	 * If the request is valid and comply with the configuration, this method adds the related
 	 * CORS headers to the response.
 	 */
-	boolean processActualRequest(CorsConfiguration conf, HttpServletRequest request, HttpServletResponse response) throws IOException;
+	boolean processActualRequest(CorsConfiguration conf, HttpServletRequest request,
+			HttpServletResponse response) throws IOException;
 
 }
