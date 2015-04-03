@@ -22,6 +22,7 @@ import java.lang.reflect.Array;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.lang.reflect.UndeclaredThrowableException;
 import java.security.AccessControlContext;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
@@ -1179,7 +1180,12 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 					throw new TypeMismatchException(propertyChangeEvent, pd.getPropertyType(), ex.getTargetException());
 				}
 				else {
-					throw new MethodInvocationException(propertyChangeEvent, ex.getTargetException());
+					Throwable cause = ex.getTargetException();
+					if (cause instanceof UndeclaredThrowableException) {
+						// May happen e.g. with Groovy-generated methods
+						cause = cause.getCause();
+					}
+					throw new MethodInvocationException(propertyChangeEvent, cause);
 				}
 			}
 			catch (Exception ex) {
