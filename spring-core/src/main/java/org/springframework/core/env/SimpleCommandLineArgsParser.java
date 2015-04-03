@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,8 +17,8 @@
 package org.springframework.core.env;
 
 /**
- * Parses a {@code String[]} of command line arguments in order to populate a
- * {@link CommandLineArgs} object.
+ * Parses a {@code String[]} of command line arguments in order to populate a {@link
+ * CommandLineArgs} object.
  *
  * <h3>Working with option arguments</h3>
  * Option arguments must adhere to the exact syntax:
@@ -49,28 +49,23 @@ package org.springframework.core.env;
  * @author Chris Beams
  * @since 3.1
  */
-class SimpleCommandLineArgsParser {
+public class SimpleCommandLineArgsParser {
+
+	public static final String OPTION_NAME_PREFIX = "--";
+	public static final String OPTION_VALUE_SEPARATOR = "=";
 
 	/**
 	 * Parse the given {@code String} array based on the rules described {@linkplain
-	 * SimpleCommandLineArgsParser above}, returning a fully-populated
-	 * {@link CommandLineArgs} object.
+	 * SimpleCommandLineArgsParser above}, returning a fully-populated {@link
+	 * CommandLineArgs} object.
 	 * @param args command line arguments, typically from a {@code main()} method
 	 */
 	public CommandLineArgs parse(String... args) {
 		CommandLineArgs commandLineArgs = new CommandLineArgs();
 		for (String arg : args) {
-			if (arg.startsWith("--")) {
-				String optionText = arg.substring(2, arg.length());
-				String optionName;
-				String optionValue = null;
-				if (optionText.contains("=")) {
-					optionName = optionText.substring(0, optionText.indexOf("="));
-					optionValue = optionText.substring(optionText.indexOf("=")+1, optionText.length());
-				}
-				else {
-					optionName = optionText;
-				}
+			if (arg.startsWith(OPTION_NAME_PREFIX)) {
+				String optionName = parseOptionName(arg);
+				String optionValue = parseOptionValue(arg);
 				if (optionName.isEmpty() || (optionValue != null && optionValue.isEmpty())) {
 					throw new IllegalArgumentException("Invalid argument syntax: " + arg);
 				}
@@ -81,6 +76,40 @@ class SimpleCommandLineArgsParser {
 			}
 		}
 		return commandLineArgs;
+	}
+
+	/**
+	 * Parse the given command line argument on the rules described {@linkplain
+	 * SimpleCommandLineArgsParser above}, returning option name
+	 * @param arg command line argument, typically from a {@code main()} method
+	 */
+	public String parseOptionName(String arg) {
+		String optionText = parseOptionText(arg);
+		int valueSeparatorIndex = optionText.indexOf(OPTION_VALUE_SEPARATOR);
+		return valueSeparatorIndex < 0 ? optionText
+																	 : optionText.substring(0, valueSeparatorIndex);
+	}
+
+	/**
+	 * Parse the given {@code String} command line argument on the rules described
+	 * {@linkplain SimpleCommandLineArgsParser above}, returning option text in format: <pre
+	 * class="code">optName[=optValue]</pre>
+	 * @param arg command line argument, typically from a {@code main()} method
+	 */
+	private String parseOptionText(String arg) {
+		return arg.substring(OPTION_NAME_PREFIX.length(), arg.length());
+	}
+
+	/**
+	 * Parse the given {@code String} command line argument on the rules described
+	 * {@linkplain SimpleCommandLineArgsParser above}, returning option value
+	 * @param arg command line argument, typically from a {@code main()} method
+	 */
+	public String parseOptionValue(String arg) {
+		String optionText = parseOptionText(arg);
+		int valueSeparatorIndex = optionText.indexOf(OPTION_VALUE_SEPARATOR);
+		return valueSeparatorIndex < 0 ? null : optionText
+				.substring(valueSeparatorIndex + 1, optionText.length());
 	}
 
 }

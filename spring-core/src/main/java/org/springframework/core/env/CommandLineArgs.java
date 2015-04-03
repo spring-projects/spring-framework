@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,7 +31,7 @@ import java.util.Set;
  * @since 3.1
  * @see SimpleCommandLineArgsParser
  */
-class CommandLineArgs {
+public class CommandLineArgs {
 
 	private final Map<String, List<String>> optionArgs = new HashMap<String, List<String>>();
 	private final List<String> nonOptionArgs = new ArrayList<String>();
