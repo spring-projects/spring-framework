@@ -51,12 +51,10 @@ public class DefaultCorsProcessorTests {
 		this.processor = new DefaultCorsProcessor();
 	}
 
-	@Test
+	@Test(expected = IllegalArgumentException.class)
 	public void actualRequestWithoutOriginHeader() throws Exception {
 		this.request.setMethod(HttpMethod.GET.name());
 		this.processor.processActualRequest(this.conf, request, response);
-		assertFalse(response.containsHeader(CorsUtils.ACCESS_CONTROL_ALLOW_ORIGIN));
-		assertEquals(HttpServletResponse.SC_FORBIDDEN, response.getStatus());
 	}
 
 	@Test
@@ -168,13 +166,11 @@ public class DefaultCorsProcessorTests {
 		assertEquals("GET", response.getHeader(CorsUtils.ACCESS_CONTROL_ALLOW_METHODS));
 	}
 
-	@Test
+	@Test(expected = IllegalArgumentException.class)
 	public void preflightRequestWithoutOriginHeader() throws Exception {
 		this.request.setMethod(HttpMethod.OPTIONS.name());
 		this.request.addHeader(CorsUtils.ACCESS_CONTROL_REQUEST_METHOD, "GET");
 		this.processor.processPreFlightRequest(this.conf, request, response);
-		assertFalse(response.containsHeader(CorsUtils.ACCESS_CONTROL_ALLOW_ORIGIN));
-		assertEquals(HttpServletResponse.SC_FORBIDDEN, response.getStatus());
 	}
 
 	@Test

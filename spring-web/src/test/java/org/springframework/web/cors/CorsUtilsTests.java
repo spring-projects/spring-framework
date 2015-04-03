@@ -17,11 +17,11 @@
 package org.springframework.web.cors;
 
 import static org.junit.Assert.*;
+
 import org.junit.Test;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.mock.web.test.MockHttpServletRequest;
-import org.springframework.mock.web.test.MockHttpServletResponse;
 
 /**
  * Test case for {@link CorsUtils}.
@@ -64,19 +64,6 @@ public class CorsUtilsTests {
 		request = new MockHttpServletRequest();
 		request.addHeader(CorsUtils.ACCESS_CONTROL_REQUEST_METHOD, "GET");
 		assertFalse(CorsUtils.isPreFlightRequest(request));
-	}
-
-	@Test
-	public void isCorsResponse() {
-		MockHttpServletResponse response = new MockHttpServletResponse();
-		response.addHeader(CorsUtils.ACCESS_CONTROL_ALLOW_ORIGIN, "*");
-		assertTrue(CorsUtils.isCorsResponse(response));
-	}
-
-	@Test
-	public void isNotCorsResponse() {
-		MockHttpServletResponse response = new MockHttpServletResponse();
-		assertFalse(CorsUtils.isCorsResponse(response));
 	}
 
 }
