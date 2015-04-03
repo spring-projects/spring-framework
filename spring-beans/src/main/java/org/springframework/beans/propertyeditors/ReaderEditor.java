@@ -30,9 +30,9 @@ import org.springframework.util.Assert;
  * resource location (e.g. a URL String).
  *
  * <p>Supports Spring-style URL notation: any fully qualified standard URL
- * ("file:", "http:", etc) and Spring's special "classpath:" pseudo-URL.
+ * ("file:", "http:", etc.) and Spring's special "classpath:" pseudo-URL.
  *
- * <p>Note that such readers do usually not get closed by Spring itself!
+ * <p>Note that such readers usually do not get closed by Spring itself!
  *
  * @author Juergen Hoeller
  * @since 4.2
