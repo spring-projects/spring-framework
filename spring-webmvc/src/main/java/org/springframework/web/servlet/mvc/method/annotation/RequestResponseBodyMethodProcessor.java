@@ -147,7 +147,8 @@ public class RequestResponseBodyMethodProcessor extends AbstractMessageConverter
 		Object arg = readWithMessageConverters(inputMessage, methodParam, paramType);
 		if (arg == null) {
 			if (methodParam.getParameterAnnotation(RequestBody.class).required()) {
-				throw new HttpMessageNotReadableException("Required request body is missing: " + methodParam);
+				throw new HttpMessageNotReadableException("Required request body is missing: " +
+						methodParam.getMethod().toGenericString());
 			}
 		}
 
