@@ -51,8 +51,6 @@ public class SimpMessageHeaderAccessor extends NativeMessageHeaderAccessor {
 
 	// SiMP header names
 
-	public static final String CONNECT_MESSAGE_HEADER = "simpConnectMessage";
-
 	public static final String DESTINATION_HEADER = "simpDestination";
 
 	public static final String MESSAGE_TYPE_HEADER = "simpMessageType";
@@ -64,6 +62,11 @@ public class SimpMessageHeaderAccessor extends NativeMessageHeaderAccessor {
 	public static final String SUBSCRIPTION_ID_HEADER = "simpSubscriptionId";
 
 	public static final String USER_HEADER = "simpUser";
+
+	public static final String CONNECT_MESSAGE_HEADER = "simpConnectMessage";
+
+	public static final String HEART_BEAT_HEADER = "simpHeartbeat";
+
 
 	/**
 	 * For internal use.
@@ -260,6 +263,10 @@ public class SimpMessageHeaderAccessor extends NativeMessageHeaderAccessor {
 
 	public static Principal getUser(Map<String, Object> headers) {
 		return (Principal) headers.get(USER_HEADER);
+	}
+
+	public static long[] getHeartbeat(Map<String, Object> headers) {
+		return (long[]) headers.get(HEART_BEAT_HEADER);
 	}
 
 }

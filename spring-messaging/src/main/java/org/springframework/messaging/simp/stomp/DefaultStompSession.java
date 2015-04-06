@@ -389,7 +389,7 @@ public class DefaultStompSession implements ConnectionHandlingStompSession {
 					}
 				}
 				else if (StompCommand.CONNECTED.equals(command)) {
-					initHeartbeats(stompHeaders);
+					initHeartbeatTasks(stompHeaders);
 					this.sessionFuture.set(this);
 					this.sessionHandler.afterConnected(this, stompHeaders);
 				}
@@ -420,20 +420,18 @@ public class DefaultStompSession implements ConnectionHandlingStompSession {
 		handler.handleFrame(stompHeaders, object);
 	}
 
-	private void initHeartbeats(StompHeaders connectedHeaders) {
-		long clientRead = this.connectHeaders.getHeartbeat()[0];
-		long serverWrite = connectedHeaders.getHeartbeat()[1];
-
-		if (clientRead > 0 && serverWrite > 0) {
-			long interval = Math.max(clientRead,  serverWrite);
+	private void initHeartbeatTasks(StompHeaders connectedHeaders) {
+		long[] connect = this.connectHeaders.getHeartbeat();
+		long[] connected = connectedHeaders.getHeartbeat();
+		if (connect == null || connected == null) {
+			return;
+		}
+		if (connect[0] > 0 && connected[1] > 0) {
+			long interval = Math.max(connect[0],  connected[1]);
 			this.connection.onWriteInactivity(new WriteInactivityTask(), interval);
 		}
-
-		long clientWrite = this.connectHeaders.getHeartbeat()[1];
-		long serverRead = connectedHeaders.getHeartbeat()[0];
-
-		if (clientWrite > 0 && serverRead > 0) {
-			final long interval = Math.max(clientWrite, serverRead) * HEARTBEAT_MULTIPLIER;
+		if (connect[1] > 0 && connected[0] > 0) {
+			final long interval = Math.max(connect[1], connected[0]) * HEARTBEAT_MULTIPLIER;
 			this.connection.onReadInactivity(new ReadInactivityTask(), interval);
 		}
 	}

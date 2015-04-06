@@ -17,6 +17,7 @@
 package org.springframework.web.socket.config.annotation;
 
 import static org.junit.Assert.*;
+import static org.mockito.Mockito.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,6 +38,7 @@ import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.SimpMessageType;
 import org.springframework.messaging.simp.annotation.SubscribeMapping;
 import org.springframework.messaging.simp.broker.SimpleBrokerMessageHandler;
+import org.springframework.messaging.simp.config.MessageBrokerRegistry;
 import org.springframework.messaging.simp.stomp.StompCommand;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.messaging.simp.user.UserDestinationMessageHandler;
@@ -44,6 +46,7 @@ import org.springframework.messaging.support.AbstractSubscribableChannel;
 import org.springframework.messaging.support.ChannelInterceptor;
 import org.springframework.messaging.support.ExecutorSubscribableChannel;
 import org.springframework.messaging.support.ImmutableMessageChannelInterceptor;
+import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.servlet.HandlerMapping;
@@ -149,14 +152,18 @@ public class WebSocketMessageBrokerConfigurationSupportTests {
 	}
 
 	@Test
-	public void messageBrokerSockJsTaskScheduler() {
+	public void taskScheduler() {
 		ApplicationContext config = createConfig(TestChannelConfig.class, TestConfigurer.class);
-		ThreadPoolTaskScheduler taskScheduler =
-				config.getBean("messageBrokerSockJsTaskScheduler", ThreadPoolTaskScheduler.class);
 
+		String name = "messageBrokerSockJsTaskScheduler";
+		ThreadPoolTaskScheduler taskScheduler = config.getBean(name, ThreadPoolTaskScheduler.class);
 		ScheduledThreadPoolExecutor executor = taskScheduler.getScheduledThreadPoolExecutor();
 		assertEquals(Runtime.getRuntime().availableProcessors(), executor.getCorePoolSize());
 		assertTrue(executor.getRemoveOnCancelPolicy());
+
+		SimpleBrokerMessageHandler handler = config.getBean(SimpleBrokerMessageHandler.class);
+		assertNotNull(handler.getTaskScheduler());
+		assertArrayEquals(new long[] {15000, 15000}, handler.getHeartbeatValue());
 	}
 
 	@Test
@@ -200,6 +207,7 @@ public class WebSocketMessageBrokerConfigurationSupportTests {
 	}
 
 
+	@SuppressWarnings("unused")
 	@Controller
 	static class TestController {
 
@@ -215,6 +223,7 @@ public class WebSocketMessageBrokerConfigurationSupportTests {
 		}
 	}
 
+	@SuppressWarnings("unused")
 	@Configuration
 	static class TestConfigurer extends AbstractWebSocketMessageBrokerConfigurer {
 
@@ -233,6 +242,13 @@ public class WebSocketMessageBrokerConfigurationSupportTests {
 			registration.setMessageSizeLimit(128 * 1024);
 			registration.setSendTimeLimit(25 * 1000);
 			registration.setSendBufferSizeLimit(1024 * 1024);
+		}
+
+		@Override
+		public void configureMessageBroker(MessageBrokerRegistry registry) {
+			registry.enableSimpleBroker()
+					.setTaskScheduler(mock(TaskScheduler.class))
+					.setHeartbeatValue(new long[] {15000, 15000});
 		}
 	}
 

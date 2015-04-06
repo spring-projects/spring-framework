@@ -175,6 +175,14 @@ public class WebSocketStompClientIntegrationTests {
 					received.add((String) payload);
 				}
 			});
+			try {
+				// Delay send since server processes concurrently
+				// Ideally order should be preserved or receipts supported (simple broker)
+				Thread.sleep(500);
+			}
+			catch (InterruptedException ex) {
+				logger.error(ex);
+			}
 			session.send(this.topic, this.payload);
 		}
 
