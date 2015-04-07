@@ -87,6 +87,24 @@ public class ExpressionException extends RuntimeException {
 	}
 
 
+	/**
+	 * Return the exception message. Since Spring 4.0 this method returns the same
+	 * result as {@link #toDetailedString()}.
+	 * @see java.lang.Throwable#getMessage()
+	 */
+	@Override
+	public String getMessage() {
+		return toDetailedString();
+	}
+
+	/**
+	 * Return the exception simple message without including the expression that caused
+	 * the failure.
+	 */
+	public String getSimpleMessage() {
+		return super.getMessage();
+	}
+
 	public String toDetailedString() {
 		StringBuilder output = new StringBuilder();
 		if (this.expressionString!=null) {
@@ -99,7 +117,7 @@ public class ExpressionException extends RuntimeException {
 			}
 			output.append(": ");
 		}
-		output.append(getMessage());
+		output.append(getSimpleMessage());
 		return output.toString();
 	}
 

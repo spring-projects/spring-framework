@@ -21,7 +21,6 @@ import java.io.Serializable;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-
 import javax.transaction.TransactionManager;
 
 import org.apache.commons.logging.Log;
@@ -31,8 +30,8 @@ import org.hibernate.usertype.UserType;
 import org.hibernate.util.EqualsHelper;
 
 import org.springframework.jdbc.support.lob.LobCreator;
-import org.springframework.jdbc.support.lob.LobHandler;
 import org.springframework.jdbc.support.lob.LobCreatorUtils;
+import org.springframework.jdbc.support.lob.LobHandler;
 import org.springframework.orm.hibernate3.LocalSessionFactoryBean;
 
 /**
@@ -148,6 +147,7 @@ public abstract class AbstractLobType implements UserType {
 	 * @see #nullSafeGetInternal
 	 */
 	@Override
+	@Deprecated
 	public final Object nullSafeGet(ResultSet rs, String[] names, Object owner)
 			throws HibernateException, SQLException {
 
@@ -171,6 +171,7 @@ public abstract class AbstractLobType implements UserType {
 	 * @see #nullSafeSetInternal
 	 */
 	@Override
+	@Deprecated
 	public final void nullSafeSet(PreparedStatement st, Object value, int index)
 			throws HibernateException, SQLException {
 

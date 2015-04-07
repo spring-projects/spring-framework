@@ -18,6 +18,7 @@ package org.springframework.test.context.junit4.spr9799;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
@@ -26,7 +27,7 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
 /**
  * Integration tests used to assess claims raised in
- * <a href="https://jira.springsource.org/browse/SPR-9799" target="_blank">SPR-9799</a>.
+ * <a href="https://jira.spring.io/browse/SPR-9799" target="_blank">SPR-9799</a>.
  *
  * @author Sam Brannen
  * @since 3.2

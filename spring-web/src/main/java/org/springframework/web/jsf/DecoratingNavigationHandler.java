@@ -115,7 +115,7 @@ public abstract class DecoratingNavigationHandler extends NavigationHandler {
 	 * <p>If no decorated NavigationHandler specified as constructor argument,
 	 * this instance is the last element in the chain. Hence, this method will
 	 * call the original NavigationHandler as passed into this method. If no
-	 * original NavigantionHandler has been passed in (for example if this
+	 * original NavigationHandler has been passed in (for example if this
 	 * instance is the last element in a chain with standard NavigationHandlers
 	 * as earlier elements), this method corresponds to a no-op.
 	 * @param facesContext the current JSF context

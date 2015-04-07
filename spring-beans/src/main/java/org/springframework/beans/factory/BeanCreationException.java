@@ -185,7 +185,7 @@ public class BeanCreationException extends FatalBeanException {
 	}
 
 	@Override
-	public boolean contains(Class exClass) {
+	public boolean contains(Class<?> exClass) {
 		if (super.contains(exClass)) {
 			return true;
 		}

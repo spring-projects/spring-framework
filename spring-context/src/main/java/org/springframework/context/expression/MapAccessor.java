@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,14 +34,19 @@ import org.springframework.expression.TypedValue;
 public class MapAccessor implements PropertyAccessor {
 
 	@Override
+	public Class<?>[] getSpecificTargetClasses() {
+		return new Class<?>[] {Map.class};
+	}
+
+	@Override
 	public boolean canRead(EvaluationContext context, Object target, String name) throws AccessException {
-		Map map = (Map) target;
+		Map<?, ?> map = (Map<?, ?>) target;
 		return map.containsKey(name);
 	}
 
 	@Override
 	public TypedValue read(EvaluationContext context, Object target, String name) throws AccessException {
-		Map map = (Map) target;
+		Map<?, ?> map = (Map<?, ?>) target;
 		Object value = map.get(name);
 		if (value == null && !map.containsKey(name)) {
 			throw new MapAccessException(name);
@@ -57,13 +62,8 @@ public class MapAccessor implements PropertyAccessor {
 	@Override
 	@SuppressWarnings("unchecked")
 	public void write(EvaluationContext context, Object target, String name, Object newValue) throws AccessException {
-		Map map = (Map) target;
+		Map<Object, Object> map = (Map<Object, Object>) target;
 		map.put(name, newValue);
-	}
-
-	@Override
-	public Class[] getSpecificTargetClasses() {
-		return new Class[] {Map.class};
 	}
 
 

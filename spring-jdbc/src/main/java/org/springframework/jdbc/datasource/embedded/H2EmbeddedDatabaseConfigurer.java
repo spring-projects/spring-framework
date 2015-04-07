@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,32 +21,35 @@ import java.sql.Driver;
 import org.springframework.util.ClassUtils;
 
 /**
- * Initializes an H2 embedded database instance.
- * Call {@link #getInstance()} to get the singleton instance of this class.
+ * {@link EmbeddedDatabaseConfigurer} for an H2 embedded database instance.
+ * <p>Call {@link #getInstance()} to get the singleton instance of this class.
  *
  * @author Oliver Gierke
  * @author Juergen Hoeller
+ * @author Sam Brannen
  * @since 3.0
  */
 final class H2EmbeddedDatabaseConfigurer extends AbstractEmbeddedDatabaseConfigurer {
 
-	private static H2EmbeddedDatabaseConfigurer INSTANCE;
+	private static H2EmbeddedDatabaseConfigurer instance;
 
 	private final Class<? extends Driver> driverClass;
 
+
 	/**
-	 * Get the singleton {@link H2EmbeddedDatabaseConfigurer} instance.
+	 * Get the singleton {@code H2EmbeddedDatabaseConfigurer} instance.
 	 * @return the configurer
 	 * @throws ClassNotFoundException if H2 is not on the classpath
 	 */
 	@SuppressWarnings("unchecked")
 	public static synchronized H2EmbeddedDatabaseConfigurer getInstance() throws ClassNotFoundException {
-		if (INSTANCE == null) {
-			INSTANCE = new H2EmbeddedDatabaseConfigurer(
-					(Class<? extends Driver>) ClassUtils.forName("org.h2.Driver", H2EmbeddedDatabaseConfigurer.class.getClassLoader()));
+		if (instance == null) {
+			instance = new H2EmbeddedDatabaseConfigurer( (Class<? extends Driver>)
+					ClassUtils.forName("org.h2.Driver", H2EmbeddedDatabaseConfigurer.class.getClassLoader()));
 		}
-		return INSTANCE;
+		return instance;
 	}
+
 
 	private H2EmbeddedDatabaseConfigurer(Class<? extends Driver> driverClass) {
 		this.driverClass = driverClass;
@@ -55,7 +58,7 @@ final class H2EmbeddedDatabaseConfigurer extends AbstractEmbeddedDatabaseConfigu
 	@Override
 	public void configureConnectionProperties(ConnectionProperties properties, String databaseName) {
 		properties.setDriverClass(this.driverClass);
-		properties.setUrl(String.format("jdbc:h2:mem:%s;DB_CLOSE_DELAY=-1", databaseName));
+		properties.setUrl(String.format("jdbc:h2:mem:%s;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=false", databaseName));
 		properties.setUsername("sa");
 		properties.setPassword("");
 	}

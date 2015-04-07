@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,25 +16,28 @@
 
 package org.springframework.core.annotation;
 
+import java.lang.reflect.AnnotatedElement;
+import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
 import org.springframework.core.OrderComparator;
-import org.springframework.core.Ordered;
 
 /**
- * {@link java.util.Comparator} implementation that checks
- * {@link org.springframework.core.Ordered} as well as the
- * {@link Order} annotation, with an order value provided by an
- * {@code Ordered} instance overriding a statically defined
- * annotation value (if any).
+ * {@link java.util.Comparator} implementation that checks Spring's
+ * {@link org.springframework.core.Ordered} interface as well as the
+ * {@link Order @Order} and {@link javax.annotation.Priority @Priority}
+ * annotations, with an order value provided by an {@code Ordered}
+ * instance overriding a statically defined annotation value (if any).
  *
  * @author Juergen Hoeller
  * @author Oliver Gierke
+ * @author Stephane Nicoll
  * @since 2.0.1
  * @see org.springframework.core.Ordered
- * @see Order
+ * @see org.springframework.core.annotation.Order
+ * @see javax.annotation.Priority
  */
 public class AnnotationAwareOrderComparator extends OrderComparator {
 
@@ -44,19 +47,55 @@ public class AnnotationAwareOrderComparator extends OrderComparator {
 	public static final AnnotationAwareOrderComparator INSTANCE = new AnnotationAwareOrderComparator();
 
 
-	@Override
-	protected int getOrder(Object obj) {
-		if (obj instanceof Ordered) {
-			return ((Ordered) obj).getOrder();
+	/**
+	 * This implementation checks for the {@link Order} annotation
+	 * on various kinds of elements, in addition to the
+	 * {@link org.springframework.core.Ordered} check in the superclass.
+	 */
+	protected Integer findOrder(Object obj) {
+		// Check for regular Ordered interface
+		Integer order = super.findOrder(obj);
+		if (order != null) {
+			return order;
 		}
-		if (obj != null) {
-			Class<?> clazz = (obj instanceof Class ? (Class) obj : obj.getClass());
-			Order order = AnnotationUtils.findAnnotation(clazz, Order.class);
-			if (order != null) {
-				return order.value();
+
+		// Check for @Order annotation on various kinds of elements
+		if (obj instanceof Class) {
+			return OrderUtils.getOrder((Class<?>) obj);
+		}
+		else if (obj instanceof Method) {
+			Order ann = AnnotationUtils.findAnnotation((Method) obj, Order.class);
+			if (ann != null) {
+				return ann.value();
 			}
 		}
-		return Ordered.LOWEST_PRECEDENCE;
+		else if (obj instanceof AnnotatedElement) {
+			Order ann = AnnotationUtils.getAnnotation((AnnotatedElement) obj, Order.class);
+			if (ann != null) {
+				return ann.value();
+			}
+		}
+		else if (obj != null) {
+			return OrderUtils.getOrder(obj.getClass());
+		}
+
+		return null;
+	}
+
+	/**
+	 * This implementation retrieves an @{@link javax.annotation.Priority}
+	 * value, allowing for additional semantics over the regular @{@link Order}
+	 * annotation: typically, selecting one object over another in case of
+	 * multiple matches but only one object to be returned.
+	 */
+	public Integer getPriority(Object obj) {
+		if (obj instanceof Class) {
+			return OrderUtils.getPriority((Class<?>) obj);
+		}
+		else if (obj != null) {
+			return OrderUtils.getPriority(obj.getClass());
+		}
+		return null;
 	}
 
 
@@ -99,7 +138,7 @@ public class AnnotationAwareOrderComparator extends OrderComparator {
 			sort((Object[]) value);
 		}
 		else if (value instanceof List) {
-			sort((List) value);
+			sort((List<?>) value);
 		}
 	}
 

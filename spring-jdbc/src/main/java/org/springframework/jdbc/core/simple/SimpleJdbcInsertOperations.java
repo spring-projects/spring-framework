@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,8 +24,8 @@ import org.springframework.jdbc.support.nativejdbc.NativeJdbcExtractor;
 
 /**
  * Interface specifying the API for a Simple JDBC Insert implemented by {@link SimpleJdbcInsert}.
- * This interface is not often used directly, but provides the
- * option to enhance testability, as it can easily be mocked or stubbed.
+ * This interface is not often used directly, but provides the option to enhance testability,
+ * as it can easily be mocked or stubbed.
  *
  * @author Thomas Risberg
  * @since 2.5
@@ -40,7 +40,7 @@ public interface SimpleJdbcInsertOperations {
 	SimpleJdbcInsertOperations withTableName(String tableName);
 
 	/**
-	 * Specify the shema name, if any, to be used for the insert.
+	 * Specify the schema name, if any, to be used for the insert.
 	 * @param schemaName the name of the schema
 	 * @return the instance of this SimpleJdbcInsert
 	 */
@@ -61,7 +61,7 @@ public interface SimpleJdbcInsertOperations {
 	SimpleJdbcInsertOperations usingColumns(String... columnNames);
 
 	/**
-	 * Specify the name sof any columns that have auto generated keys.
+	 * Specify the names of any columns that have auto generated keys.
 	 * @param columnNames one or more column names
 	 * @return the instance of this SimpleJdbcInsert
 	 */
@@ -98,7 +98,7 @@ public interface SimpleJdbcInsertOperations {
 	 * @param args Map containing column names and corresponding value
 	 * @return the number of rows affected as returned by the JDBC driver
 	 */
-	int execute(Map<String, Object> args);
+	int execute(Map<String, ?> args);
 
 	/**
 	 * Execute the insert using the values passed in.
@@ -108,36 +108,40 @@ public interface SimpleJdbcInsertOperations {
 	int execute(SqlParameterSource parameterSource);
 
 	/**
-	 * Execute the insert using the values passed in and return the generated key.  This requires that
-	 * the name of the columns with auto generated keys have been specified. This method will always
-	 * return a key or throw an exception if a key was not returned.
+	 * Execute the insert using the values passed in and return the generated key.
+	 * <p>This requires that the name of the columns with auto generated keys have been specified.
+	 * This method will always return a KeyHolder but the caller must verify that it actually
+	 * contains the generated keys.
 	 * @param args Map containing column names and corresponding value
 	 * @return the generated key value
 	 */
-	Number executeAndReturnKey(Map<String, Object> args);
+	Number executeAndReturnKey(Map<String, ?> args);
 
 	/**
-	 * Execute the insert using the values passed in and return the generated key.  This requires that
-	 * the name of the columns with auto generated keys have been specified. This method will always
-	 * return a key or throw an exception if a key was not returned.
+	 * Execute the insert using the values passed in and return the generated key.
+	 * <p>This requires that the name of the columns with auto generated keys have been specified.
+	 * This method will always return a KeyHolder but the caller must verify that it actually
+	 * contains the generated keys.
 	 * @param parameterSource SqlParameterSource containing values to use for insert
 	 * @return the generated key value.
 	 */
 	Number executeAndReturnKey(SqlParameterSource parameterSource);
 
 	/**
-	 * Execute the insert using the values passed in and return the generated keys.  This requires that
-	 * the name of the columns with auto generated keys have been specified. This method will always return
-	 * a KeyHolder but the caller must verify that it actually contains the generated keys.
+	 * Execute the insert using the values passed in and return the generated keys.
+	 * <p>This requires that the name of the columns with auto generated keys have been specified.
+	 * This method will always return a KeyHolder but the caller must verify that it actually
+	 * contains the generated keys.
 	 * @param args Map containing column names and corresponding value
 	 * @return the KeyHolder containing all generated keys
 	 */
-	KeyHolder executeAndReturnKeyHolder(Map<String, Object> args);
+	KeyHolder executeAndReturnKeyHolder(Map<String, ?> args);
 
 	/**
-	 * Execute the insert using the values passed in and return the generated keys.  This requires that
-	 * the name of the columns with auto generated keys have been specified. This method will always return
-	 * a KeyHolder but the caller must verify that it actually contains the generated keys.
+	 * Execute the insert using the values passed in and return the generated keys.
+	 * <p>This requires that the name of the columns with auto generated keys have been specified.
+	 * This method will always return a KeyHolder but the caller must verify that it actually
+	 * contains the generated keys.
 	 * @param parameterSource SqlParameterSource containing values to use for insert
 	 * @return the KeyHolder containing all generated keys
 	 */
@@ -148,13 +152,13 @@ public interface SimpleJdbcInsertOperations {
 	 * @param batch an array of Maps containing a batch of column names and corresponding value
 	 * @return the array of number of rows affected as returned by the JDBC driver
 	 */
-	int[] executeBatch(Map<String, Object>[] batch);
+	int[] executeBatch(Map<String, ?>... batch);
 
 	/**
 	 * Execute a batch insert using the batch of values passed in.
 	 * @param batch an array of SqlParameterSource containing values for the batch
 	 * @return the array of number of rows affected as returned by the JDBC driver
 	 */
-	int[] executeBatch(SqlParameterSource[] batch);
+	int[] executeBatch(SqlParameterSource... batch);
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,6 +35,7 @@ import org.hibernate.cache.NoCacheProvider;
 import org.hibernate.cfg.Configuration;
 import org.hibernate.classic.Session;
 import org.hibernate.dialect.HSQLDialect;
+import org.hibernate.engine.SessionFactoryImplementor;
 import org.hibernate.exception.ConstraintViolationException;
 import org.hibernate.exception.GenericJDBCException;
 import org.junit.After;
@@ -65,6 +66,7 @@ import static org.mockito.BDDMockito.*;
  * @author Phillip Webb
  * @since 05.03.2005
  */
+@SuppressWarnings({"rawtypes", "unchecked", "deprecation"})
 public class HibernateTransactionManagerTests {
 
 	@After
@@ -612,6 +614,49 @@ public class HibernateTransactionManagerTests {
 	}
 
 	@Test
+	public void testTransactionWithPropagationSupportsAndCurrentSession() throws Exception {
+		final SessionFactoryImplementor sf = mock(SessionFactoryImplementor.class);
+		final Session session = mock(Session.class);
+
+		given(sf.openSession()).willReturn(session);
+		given(session.getSessionFactory()).willReturn(sf);
+		given(session.getFlushMode()).willReturn(FlushMode.MANUAL);
+
+		LocalSessionFactoryBean lsfb = new LocalSessionFactoryBean() {
+			@Override
+			protected SessionFactory newSessionFactory(Configuration config) throws HibernateException {
+				return sf;
+			}
+		};
+		lsfb.afterPropertiesSet();
+		final SessionFactory sfProxy = lsfb.getObject();
+
+		PlatformTransactionManager tm = new HibernateTransactionManager(sfProxy);
+		TransactionTemplate tt = new TransactionTemplate(tm);
+		tt.setPropagationBehavior(TransactionDefinition.PROPAGATION_SUPPORTS);
+		assertTrue("Hasn't thread session", !TransactionSynchronizationManager.hasResource(sfProxy));
+
+		tt.execute(new TransactionCallback() {
+			@Override
+			public Object doInTransaction(TransactionStatus status) {
+				assertTrue("Hasn't thread session", !TransactionSynchronizationManager.hasResource(sfProxy));
+				assertTrue("Is not new transaction", !status.isNewTransaction());
+				assertFalse(TransactionSynchronizationManager.isCurrentTransactionReadOnly());
+				assertFalse(TransactionSynchronizationManager.isActualTransactionActive());
+				Session session = new SpringSessionContext(sf).currentSession();
+				assertTrue("Has thread session", TransactionSynchronizationManager.hasResource(sfProxy));
+				session.flush();
+				return null;
+			}
+		});
+
+		assertTrue("Hasn't thread session", !TransactionSynchronizationManager.hasResource(sfProxy));
+		InOrder ordered = inOrder(session);
+		ordered.verify(session).flush();
+		ordered.verify(session).close();
+	}
+
+	@Test
 	public void testTransactionWithPropagationSupportsAndInnerTransaction() throws Exception {
 		final SessionFactory sf = mock(SessionFactory.class);
 		final Session session1 = mock(Session.class);
@@ -896,7 +941,7 @@ public class HibernateTransactionManagerTests {
 		catch (DataIntegrityViolationException ex) {
 			// expected
 			assertEquals(rootCause, ex.getCause());
-			assertTrue(ex.getMessage().indexOf("mymsg") != -1);
+			assertTrue(ex.getMessage().contains("mymsg"));
 		}
 
 		assertTrue("Hasn't thread session", !TransactionSynchronizationManager.hasResource(sf));

@@ -20,7 +20,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
-
 import javax.transaction.TransactionManager;
 
 import org.springframework.jdbc.support.lob.LobCreator;
@@ -68,7 +67,7 @@ public class ClobStringType extends AbstractLobType {
 	}
 
 	@Override
-	public Class returnedClass() {
+	public Class<?> returnedClass() {
 		return String.class;
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpOutputMessage;
@@ -169,11 +170,12 @@ public abstract class AbstractHttpMessageConverter<T> implements HttpMessageConv
 
 		final HttpHeaders headers = outputMessage.getHeaders();
 		if (headers.getContentType() == null) {
+			MediaType contentTypeToUse = contentType;
 			if (contentType == null || contentType.isWildcardType() || contentType.isWildcardSubtype()) {
-				contentType = getDefaultContentType(t);
+				contentTypeToUse = getDefaultContentType(t);
 			}
-			if (contentType != null) {
-				headers.setContentType(contentType);
+			if (contentTypeToUse != null) {
+				headers.setContentType(contentTypeToUse);
 			}
 		}
 		if (headers.getContentLength() == -1) {
@@ -182,10 +184,10 @@ public abstract class AbstractHttpMessageConverter<T> implements HttpMessageConv
 				headers.setContentLength(contentLength);
 			}
 		}
+
 		if (outputMessage instanceof StreamingHttpOutputMessage) {
 			StreamingHttpOutputMessage streamingOutputMessage =
 					(StreamingHttpOutputMessage) outputMessage;
-
 			streamingOutputMessage.setBody(new StreamingHttpOutputMessage.Body() {
 				@Override
 				public void writeTo(final OutputStream outputStream) throws IOException {
@@ -194,7 +196,6 @@ public abstract class AbstractHttpMessageConverter<T> implements HttpMessageConv
 						public OutputStream getBody() throws IOException {
 							return outputStream;
 						}
-
 						@Override
 						public HttpHeaders getHeaders() {
 							return headers;
@@ -256,7 +257,7 @@ public abstract class AbstractHttpMessageConverter<T> implements HttpMessageConv
 	/**
 	 * Abstract template method that writes the actual body. Invoked from {@link #write}.
 	 * @param t the object to write to the output message
-	 * @param outputMessage the message to write to
+	 * @param outputMessage the HTTP output message to write to
 	 * @throws IOException in case of I/O errors
 	 * @throws HttpMessageNotWritableException in case of conversion errors
 	 */

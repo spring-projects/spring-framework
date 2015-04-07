@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.jdbc.datasource.init;
 
 import java.sql.Connection;
@@ -23,10 +24,11 @@ import java.util.List;
 
 /**
  * {@link DatabasePopulator} implementation that delegates to a list of other
- * DatabasePopulator implementations, executing all scripts.
+ * {@code DatabasePopulator} implementations, executing all scripts.
  *
  * @author Dave Syer
  * @author Juergen Hoeller
+ * @author Sam Brannen
  * @since 3.1
  */
 public class CompositeDatabasePopulator implements DatabasePopulator {
@@ -43,15 +45,17 @@ public class CompositeDatabasePopulator implements DatabasePopulator {
 	}
 
 	/**
-	 * Add a populator to the list of delegates.
+	 * Add one or more populators to the list of delegates.
 	 */
 	public void addPopulators(DatabasePopulator... populators) {
 		this.populators.addAll(Arrays.asList(populators));
 	}
 
-
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
-	public void populate(Connection connection) throws SQLException {
+	public void populate(Connection connection) throws SQLException, ScriptException {
 		for (DatabasePopulator populator : this.populators) {
 			populator.populate(connection);
 		}

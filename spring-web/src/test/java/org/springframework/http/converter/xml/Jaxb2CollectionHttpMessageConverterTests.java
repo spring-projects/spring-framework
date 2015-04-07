@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,23 +16,25 @@
 
 package org.springframework.http.converter.xml;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-
 import java.lang.reflect.Type;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
-
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
+import javax.xml.stream.XMLInputFactory;
 
 import org.junit.Before;
 import org.junit.Test;
+
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
 import org.springframework.http.MockHttpInputMessage;
+
+import static org.junit.Assert.*;
 
 /**
  * Test fixture for {@link Jaxb2CollectionHttpMessageConverter}.
@@ -120,6 +122,47 @@ public class Jaxb2CollectionHttpMessageConverterTests {
 		assertTrue("Invalid result", result.contains(new TestType("2")));
 	}
 
+	@Test
+	@SuppressWarnings("unchecked")
+	public void readXmlRootElementExternalEntityDisabled() throws Exception {
+
+		Resource external = new ClassPathResource("external.txt", getClass());
+		String content =  "<!DOCTYPE root [" +
+				"  <!ELEMENT external ANY >\n" +
+				"  <!ENTITY ext SYSTEM \"" + external.getURI() + "\" >]>" +
+				"  <list><rootElement><type s=\"1\"/><external>&ext;</external></rootElement></list>";
+		MockHttpInputMessage inputMessage = new MockHttpInputMessage(content.getBytes("UTF-8"));
+
+		Collection<RootElement> result = converter.read(rootElementListType, null, inputMessage);
+		assertEquals(1, result.size());
+		assertEquals("", result.iterator().next().external);
+	}
+
+	@Test
+	@SuppressWarnings("unchecked")
+	public void readXmlRootElementExternalEntityEnabled() throws Exception {
+
+		Resource external = new ClassPathResource("external.txt", getClass());
+		String content =  "<!DOCTYPE root [" +
+				"  <!ELEMENT external ANY >\n" +
+				"  <!ENTITY ext SYSTEM \"" + external.getURI() + "\" >]>" +
+				"  <list><rootElement><type s=\"1\"/><external>&ext;</external></rootElement></list>";
+		MockHttpInputMessage inputMessage = new MockHttpInputMessage(content.getBytes("UTF-8"));
+
+		Jaxb2CollectionHttpMessageConverter<?> c = new Jaxb2CollectionHttpMessageConverter<Collection<Object>>() {
+			@Override
+			protected XMLInputFactory createXmlInputFactory() {
+				XMLInputFactory inputFactory = XMLInputFactory.newInstance();
+				inputFactory.setProperty(XMLInputFactory.IS_REPLACING_ENTITY_REFERENCES, true);
+				return inputFactory;
+			}
+		};
+
+		Collection<RootElement> result = c.read(rootElementListType, null, inputMessage);
+		assertEquals(1, result.size());
+		assertEquals("Foo Bar", result.iterator().next().external);
+	}
+
 
 	@XmlRootElement
 	public static class RootElement {
@@ -133,6 +176,9 @@ public class Jaxb2CollectionHttpMessageConverterTests {
 
 		@XmlElement
 		public TestType type = new TestType();
+
+		@XmlElement(required=false)
+		public String external;
 
 		@Override
 		public boolean equals(Object o) {
@@ -181,9 +227,6 @@ public class Jaxb2CollectionHttpMessageConverterTests {
 		public int hashCode() {
 			return s.hashCode();
 		}
-
-
-
 	}
 
 }

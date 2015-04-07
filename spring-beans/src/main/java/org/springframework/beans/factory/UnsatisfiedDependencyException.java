@@ -69,7 +69,7 @@ public class UnsatisfiedDependencyException extends BeanCreationException {
 	 * @param msg the detail message
 	 */
 	public UnsatisfiedDependencyException(
-			String resourceDescription, String beanName, int ctorArgIndex, Class ctorArgType, String msg) {
+			String resourceDescription, String beanName, int ctorArgIndex, Class<?> ctorArgType, String msg) {
 
 		super(resourceDescription, beanName,
 				"Unsatisfied dependency expressed through constructor argument with index " +
@@ -86,7 +86,7 @@ public class UnsatisfiedDependencyException extends BeanCreationException {
 	 * @param ex the bean creation exception that indicated the unsatisfied dependency
 	 */
 	public UnsatisfiedDependencyException(
-			String resourceDescription, String beanName, int ctorArgIndex, Class ctorArgType, BeansException ex) {
+			String resourceDescription, String beanName, int ctorArgIndex, Class<?> ctorArgType, BeansException ex) {
 
 		this(resourceDescription, beanName, ctorArgIndex, ctorArgType, (ex != null ? ": " + ex.getMessage() : ""));
 		initCause(ex);

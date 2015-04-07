@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,20 +21,9 @@ package org.springframework.util.concurrent;
  * {@link ListenableFuture}.
  *
  * @author Arjen Poutsma
+ * @author Sebastien Deleuze
  * @since 4.0
  */
-public interface ListenableFutureCallback<T> {
-
-	/**
-	 * Called when the {@link ListenableFuture} successfully completes.
-	 * @param result the result
-	 */
-	void onSuccess(T result);
-
-	/**
-	 * Called when the {@link ListenableFuture} fails to complete.
-	 * @param t the exception that triggered the failure
-	 */
-	void onFailure(Throwable t);
+public interface ListenableFutureCallback<T> extends SuccessCallback<T>, FailureCallback {
 
 }

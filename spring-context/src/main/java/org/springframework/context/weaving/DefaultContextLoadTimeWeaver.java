@@ -53,7 +53,6 @@ import org.springframework.instrument.classloading.websphere.WebSphereLoadTimeWe
  * @since 2.5
  * @see org.springframework.context.ConfigurableApplicationContext#LOAD_TIME_WEAVER_BEAN_NAME
  */
-@SuppressWarnings("deprecation")
 public class DefaultContextLoadTimeWeaver implements LoadTimeWeaver, BeanClassLoaderAware, DisposableBean {
 
 	protected final Log logger = LogFactory.getLog(getClass());

@@ -30,7 +30,6 @@ import javax.xml.transform.sax.SAXSource;
 import javax.xml.transform.stax.StAXSource;
 import javax.xml.transform.stream.StreamSource;
 
-import static org.junit.Assert.assertEquals;
 import org.junit.Before;
 import org.junit.Test;
 import org.w3c.dom.Document;
@@ -41,6 +40,8 @@ import org.xml.sax.XMLReader;
 import org.xml.sax.helpers.XMLReaderFactory;
 
 import org.springframework.util.xml.StaxUtils;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Arjen Poutsma

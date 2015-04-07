@@ -16,11 +16,12 @@
 
 package org.springframework.web.servlet.view.xslt;
 
+import java.util.Locale;
+
 import junit.framework.TestCase;
+
 import org.springframework.context.support.StaticApplicationContext;
 import org.springframework.util.ClassUtils;
-
-import java.util.Locale;
 
 /**
  * @author Rob Harrop

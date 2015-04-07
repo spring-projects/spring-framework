@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,15 +19,15 @@ package org.springframework.test.context.junit4.statements;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.internal.runners.model.MultipleFailureException;
+import org.junit.runners.model.MultipleFailureException;
 import org.junit.runners.model.Statement;
+
 import org.springframework.test.context.TestContextManager;
 
 /**
- * {@code RunAfterTestClassCallbacks} is a custom JUnit 4.5+
- * {@link Statement} which allows the <em>Spring TestContext Framework</em> to
- * be plugged into the JUnit execution chain by calling
- * {@link TestContextManager#afterTestClass() afterTestClass()} on the supplied
+ * {@code RunAfterTestClassCallbacks} is a custom JUnit {@link Statement} which allows the
+ * <em>Spring TestContext Framework</em> to be plugged into the JUnit execution chain by
+ * calling {@link TestContextManager#afterTestClass() afterTestClass()} on the supplied
  * {@link TestContextManager}.
  *
  * @see #evaluate()
@@ -35,7 +35,6 @@ import org.springframework.test.context.TestContextManager;
  * @author Sam Brannen
  * @since 3.0
  */
-@SuppressWarnings("deprecation")
 public class RunAfterTestClassCallbacks extends Statement {
 
 	private final Statement next;
@@ -56,13 +55,11 @@ public class RunAfterTestClassCallbacks extends Statement {
 	}
 
 	/**
-	 * Invokes the next {@link Statement} in the execution chain (typically an
-	 * instance of {@link org.junit.internal.runners.statements.RunAfters
-	 * RunAfters}), catching any exceptions thrown, and then calls
-	 * {@link TestContextManager#afterTestClass()}. If the call to
-	 * {@code afterTestClass()} throws an exception, it will also be
-	 * tracked. Multiple exceptions will be combined into a
-	 * {@link MultipleFailureException}.
+	 * Invokes the next {@link Statement} in the execution chain (typically an instance of
+	 * {@link org.junit.internal.runners.statements.RunAfters RunAfters}), catching any
+	 * exceptions thrown, and then calls {@link TestContextManager#afterTestClass()}. If
+	 * the call to {@code afterTestClass()} throws an exception, it will also be tracked.
+	 * Multiple exceptions will be combined into a {@link MultipleFailureException}.
 	 */
 	@Override
 	public void evaluate() throws Throwable {
@@ -89,4 +86,5 @@ public class RunAfterTestClassCallbacks extends Statement {
 		}
 		throw new MultipleFailureException(errors);
 	}
+
 }

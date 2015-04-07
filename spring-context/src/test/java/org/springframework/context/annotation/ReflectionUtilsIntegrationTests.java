@@ -16,15 +16,14 @@
 
 package org.springframework.context.annotation;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
-
 import java.lang.reflect.Method;
 
 import org.junit.Test;
-import org.springframework.beans.factory.support.DefaultListableBeanFactory;
+
 import org.springframework.util.ReflectionUtils;
+
+import static org.hamcrest.CoreMatchers.*;
+import static org.junit.Assert.*;
 
 /**
  * Tests ReflectionUtils methods as used against CGLIB-generated classes created

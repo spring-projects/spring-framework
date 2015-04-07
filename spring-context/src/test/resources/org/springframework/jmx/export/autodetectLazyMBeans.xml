@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+ <!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "http://www.springframework.org/dtd/spring-beans-2.0.dtd">
+
+<beans>
+
+	<bean id="server" class="org.springframework.jmx.support.MBeanServerFactoryBean"/>
+
+	<bean id="exporter" class="org.springframework.jmx.export.MBeanExporter">
+		<property name="server" ref="server"/>
+		<property name="autodetect" value="true"/>
+		<property name="excludedBeans" value="connector"/>
+	</bean>
+
+	<bean name="spring:mbean=true" class="org.springframework.jmx.export.TestDynamicMBean" lazy-init="true"/>
+
+	<bean name="spring:mbean=another" class="org.springframework.jmx.export.MBeanExporterTests$Person" lazy-init="true">
+		<property name="name" value="Juergen Hoeller"/>
+	</bean>
+
+</beans>

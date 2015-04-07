@@ -21,7 +21,6 @@ import java.util.List;
 
 import org.springframework.tests.sample.beans.TestBean;
 
-
 /**
  * Test class for Spring's ability to create objects using static
  * factory methods, rather than constructors.
@@ -55,11 +54,11 @@ public class FactoryMethods {
 		return new FactoryMethods(tb, name, num);
 	}
 
-	static FactoryMethods newInstance(TestBean tb, int num, Integer something) {
+	static ExtendedFactoryMethods newInstance(TestBean tb, int num, Integer something) {
 		if (something != null) {
 			throw new IllegalStateException("Should never be called with non-null value");
 		}
-		return new FactoryMethods(tb, null, num);
+		return new ExtendedFactoryMethods(tb, null, num);
 	}
 
 	@SuppressWarnings("unused")
@@ -118,6 +117,14 @@ public class FactoryMethods {
 	 */
 	public void setName(String name) {
 		this.name = name;
+	}
+
+
+	public static class ExtendedFactoryMethods extends FactoryMethods {
+
+		ExtendedFactoryMethods(TestBean tb, String name, int num) {
+			super(tb, name, num);
+		}
 	}
 
 }

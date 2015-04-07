@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,19 +17,23 @@
 package org.springframework.web.servlet.mvc.method.annotation;
 
 import java.lang.reflect.Method;
+import java.net.URI;
 import java.util.Arrays;
 import java.util.Collections;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
+
 import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpInputMessage;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.mock.web.test.MockHttpServletRequest;
@@ -40,10 +44,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.method.support.ModelAndViewContainer;
 
-import static org.mockito.Mockito.*;
-
 import static org.junit.Assert.*;
+import static org.mockito.BDDMockito.any;
 import static org.mockito.BDDMockito.*;
+import static org.mockito.BDDMockito.isA;
+import static org.mockito.Matchers.eq;
 import static org.springframework.web.servlet.HandlerMapping.*;
 
 /**
@@ -62,20 +67,23 @@ public class HttpEntityMethodProcessorMockTests {
 	private HttpMessageConverter<String> messageConverter;
 
 	private MethodParameter paramHttpEntity;
+	private MethodParameter paramRequestEntity;
 	private MethodParameter paramResponseEntity;
 	private MethodParameter paramInt;
 	private MethodParameter returnTypeResponseEntity;
-	private MethodParameter returnTypeHttpEntity;
-	private MethodParameter returnTypeInt;
 	private MethodParameter returnTypeResponseEntityProduces;
+	private MethodParameter returnTypeHttpEntity;
+	private MethodParameter returnTypeHttpEntitySubclass;
+	private MethodParameter returnTypeInt;
 
 	private ModelAndViewContainer mavContainer;
 
-	private ServletWebRequest webRequest;
+	private MockHttpServletRequest servletRequest;
 
 	private MockHttpServletResponse servletResponse;
 
-	private MockHttpServletRequest servletRequest;
+	private ServletWebRequest webRequest;
+
 
 	@SuppressWarnings("unchecked")
 	@Before
@@ -86,29 +94,28 @@ public class HttpEntityMethodProcessorMockTests {
 		processor = new HttpEntityMethodProcessor(Collections.<HttpMessageConverter<?>>singletonList(messageConverter));
 		reset(messageConverter);
 
-
-		Method handle1 = getClass().getMethod("handle1", HttpEntity.class, ResponseEntity.class, Integer.TYPE);
+		Method handle1 = getClass().getMethod("handle1", HttpEntity.class, ResponseEntity.class, Integer.TYPE, RequestEntity.class);
 		paramHttpEntity = new MethodParameter(handle1, 0);
+		paramRequestEntity = new MethodParameter(handle1, 3);
 		paramResponseEntity = new MethodParameter(handle1, 1);
 		paramInt = new MethodParameter(handle1, 2);
 		returnTypeResponseEntity = new MethodParameter(handle1, -1);
-
+		returnTypeResponseEntityProduces = new MethodParameter(getClass().getMethod("handle4"), -1);
 		returnTypeHttpEntity = new MethodParameter(getClass().getMethod("handle2", HttpEntity.class), -1);
-
+		returnTypeHttpEntitySubclass = new MethodParameter(getClass().getMethod("handle2x", HttpEntity.class), -1);
 		returnTypeInt = new MethodParameter(getClass().getMethod("handle3"), -1);
 
-		returnTypeResponseEntityProduces = new MethodParameter(getClass().getMethod("handle4"), -1);
-
 		mavContainer = new ModelAndViewContainer();
-
 		servletRequest = new MockHttpServletRequest();
 		servletResponse = new MockHttpServletResponse();
 		webRequest = new ServletWebRequest(servletRequest, servletResponse);
 	}
 
+
 	@Test
 	public void supportsParameter() {
 		assertTrue("HttpEntity parameter not supported", processor.supportsParameter(paramHttpEntity));
+		assertTrue("RequestEntity parameter not supported", processor.supportsParameter(paramRequestEntity));
 		assertFalse("ResponseEntity parameter supported", processor.supportsParameter(paramResponseEntity));
 		assertFalse("non-entity parameter supported", processor.supportsParameter(paramInt));
 	}
@@ -117,6 +124,9 @@ public class HttpEntityMethodProcessorMockTests {
 	public void supportsReturnType() {
 		assertTrue("ResponseEntity return type not supported", processor.supportsReturnType(returnTypeResponseEntity));
 		assertTrue("HttpEntity return type not supported", processor.supportsReturnType(returnTypeHttpEntity));
+		assertTrue("Custom HttpEntity subclass not supported", processor.supportsReturnType(returnTypeHttpEntitySubclass));
+		assertFalse("RequestEntity parameter supported",
+				processor.supportsReturnType(paramRequestEntity));
 		assertFalse("non-ResponseBody return type supported", processor.supportsReturnType(returnTypeInt));
 	}
 
@@ -134,6 +144,29 @@ public class HttpEntityMethodProcessorMockTests {
 		assertTrue(result instanceof HttpEntity);
 		assertFalse("The requestHandled flag shouldn't change", mavContainer.isRequestHandled());
 		assertEquals("Invalid argument", body, ((HttpEntity<?>) result).getBody());
+	}
+
+	@Test
+	public void resolveArgumentRequestEntity() throws Exception {
+		MediaType contentType = MediaType.TEXT_PLAIN;
+		servletRequest.addHeader("Content-Type", contentType.toString());
+		servletRequest.setMethod("GET");
+		servletRequest.setServerName("www.example.com");
+		servletRequest.setServerPort(80);
+		servletRequest.setRequestURI("/path");
+
+		String body = "Foo";
+		given(messageConverter.canRead(String.class, contentType)).willReturn(true);
+		given(messageConverter.read(eq(String.class), isA(HttpInputMessage.class))).willReturn(body);
+
+		Object result = processor.resolveArgument(paramRequestEntity, mavContainer, webRequest, null);
+
+		assertTrue(result instanceof RequestEntity);
+		assertFalse("The requestHandled flag shouldn't change", mavContainer.isRequestHandled());
+		RequestEntity<?> requestEntity = (RequestEntity<?>) result;
+		assertEquals("Invalid method", HttpMethod.GET, requestEntity.getMethod());
+		assertEquals("Invalid url", new URI("http", null, "www.example.com", 80, "/path", null, null), requestEntity.getUrl());
+		assertEquals("Invalid argument", body, requestEntity.getBody());
 	}
 
 	@Test(expected = HttpMediaTypeNotSupportedException.class)
@@ -187,6 +220,29 @@ public class HttpEntityMethodProcessorMockTests {
 
 		assertTrue(mavContainer.isRequestHandled());
 		verify(messageConverter).write(eq(body), eq(MediaType.TEXT_HTML), isA(HttpOutputMessage.class));
+	}
+
+	@Test
+	public void handleReturnValueWithResponseBodyAdvice() throws Exception {
+		ResponseEntity<String> returnValue = new ResponseEntity<>(HttpStatus.OK);
+
+		servletRequest.addHeader("Accept", "text/*");
+		servletRequest.setAttribute(PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE, Collections.singleton(MediaType.TEXT_HTML));
+
+		ResponseBodyAdvice<String> advice = mock(ResponseBodyAdvice.class);
+		given(advice.supports(any(), any())).willReturn(true);
+		given(advice.beforeBodyWrite(any(), any(), any(), any(), any(), any())).willReturn("Foo");
+
+		HttpEntityMethodProcessor processor = new HttpEntityMethodProcessor(
+				Collections.singletonList(messageConverter), null, Collections.singletonList(advice));
+
+		reset(messageConverter);
+		given(messageConverter.canWrite(String.class, MediaType.TEXT_HTML)).willReturn(true);
+
+		processor.handleReturnValue(returnValue, returnTypeResponseEntity, mavContainer, webRequest);
+
+		assertTrue(mavContainer.isRequestHandled());
+		verify(messageConverter).write(eq("Foo"), eq(MediaType.TEXT_HTML), isA(HttpOutputMessage.class));
 	}
 
 	@Test(expected = HttpMediaTypeNotAcceptableException.class)
@@ -264,12 +320,16 @@ public class HttpEntityMethodProcessorMockTests {
 		assertEquals("headerValue", outputMessage.getValue().getHeaders().get("header").get(0));
 	}
 
-	public ResponseEntity<String> handle1(HttpEntity<String> httpEntity, ResponseEntity<String> responseEntity, int i) {
+	public ResponseEntity<String> handle1(HttpEntity<String> httpEntity, ResponseEntity<String> responseEntity, int i, RequestEntity<String> requestEntity) {
 		return responseEntity;
 	}
 
 	public HttpEntity<?> handle2(HttpEntity<?> entity) {
 		return entity;
+	}
+
+	public CustomHttpEntity handle2x(HttpEntity<?> entity) {
+		return new CustomHttpEntity();
 	}
 
 	public int handle3() {
@@ -281,5 +341,8 @@ public class HttpEntityMethodProcessorMockTests {
 		return null;
 	}
 
+
+	public static class CustomHttpEntity extends HttpEntity<Object> {
+	}
 
 }

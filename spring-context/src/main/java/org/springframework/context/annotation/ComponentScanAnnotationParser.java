@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,8 @@ package org.springframework.context.annotation;
 
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.regex.Pattern;
@@ -26,6 +28,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanNameGenerator;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.env.Environment;
 import org.springframework.core.io.ResourceLoader;
@@ -106,21 +109,24 @@ class ComponentScanAnnotationParser {
 			}
 		}
 
-		List<String> basePackages = new ArrayList<String>();
-		for (String pkg : componentScan.getStringArray("value")) {
-			if (StringUtils.hasText(pkg)) {
-				basePackages.add(pkg);
-			}
+		boolean lazyInit = componentScan.getBoolean("lazyInit");
+		if (lazyInit) {
+			scanner.getBeanDefinitionDefaults().setLazyInit(true);
 		}
-		for (String pkg : componentScan.getStringArray("basePackages")) {
-			if (StringUtils.hasText(pkg)) {
-				basePackages.add(pkg);
-			}
+
+		Set<String> basePackages = new LinkedHashSet<String>();
+		Set<String> specifiedPackages = new LinkedHashSet<String>();
+		specifiedPackages.addAll(Arrays.asList(componentScan.getStringArray("value")));
+		specifiedPackages.addAll(Arrays.asList(componentScan.getStringArray("basePackages")));
+
+		for (String pkg : specifiedPackages) {
+			String[] tokenized = StringUtils.tokenizeToStringArray(this.environment.resolvePlaceholders(pkg),
+					ConfigurableApplicationContext.CONFIG_LOCATION_DELIMITERS);
+			basePackages.addAll(Arrays.asList(tokenized));
 		}
 		for (Class<?> clazz : componentScan.getClassArray("basePackageClasses")) {
 			basePackages.add(ClassUtils.getPackageName(clazz));
 		}
-
 		if (basePackages.isEmpty()) {
 			basePackages.add(ClassUtils.getPackageName(declaringClass));
 		}

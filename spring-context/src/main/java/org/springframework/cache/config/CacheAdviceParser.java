@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import org.w3c.dom.Element;
+
 import org.springframework.beans.factory.config.TypedStringValue;
 import org.springframework.beans.factory.parsing.ReaderContext;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
@@ -28,7 +30,6 @@ import org.springframework.beans.factory.support.ManagedMap;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.factory.xml.AbstractSingleBeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
-import org.springframework.cache.annotation.AnnotationCacheOperationSource;
 import org.springframework.cache.interceptor.CacheEvictOperation;
 import org.springframework.cache.interceptor.CacheInterceptor;
 import org.springframework.cache.interceptor.CacheOperation;
@@ -37,7 +38,6 @@ import org.springframework.cache.interceptor.CacheableOperation;
 import org.springframework.cache.interceptor.NameMatchCacheOperationSource;
 import org.springframework.util.StringUtils;
 import org.springframework.util.xml.DomUtils;
-import org.w3c.dom.Element;
 
 /**
  * {@link org.springframework.beans.factory.xml.BeanDefinitionParser
@@ -45,6 +45,7 @@ import org.w3c.dom.Element;
  *
  * @author Costin Leau
  * @author Phillip Webb
+ * @author Stephane Nicoll
  */
 class CacheAdviceParser extends AbstractSingleBeanDefinitionParser {
 
@@ -74,10 +75,11 @@ class CacheAdviceParser extends AbstractSingleBeanDefinitionParser {
 			// Using attributes source.
 			List<RootBeanDefinition> attributeSourceDefinitions = parseDefinitionsSources(cacheDefs, parserContext);
 			builder.addPropertyValue("cacheOperationSources", attributeSourceDefinitions);
-		} else {
+		}
+		else {
 			// Assume annotations source.
-			builder.addPropertyValue("cacheOperationSources", new RootBeanDefinition(
-					AnnotationCacheOperationSource.class));
+			builder.addPropertyValue("cacheOperationSources",
+					new RootBeanDefinition("org.springframework.cache.annotation.AnnotationCacheOperationSource"));
 		}
 	}
 
@@ -168,7 +170,7 @@ class CacheAdviceParser extends AbstractSingleBeanDefinitionParser {
 
 	private static String getAttributeValue(Element element, String attributeName, String defaultValue) {
 		String attribute = element.getAttribute(attributeName);
-		if(StringUtils.hasText(attribute)) {
+		if (StringUtils.hasText(attribute)) {
 			return attribute.trim();
 		}
 		return defaultValue;
@@ -177,12 +179,14 @@ class CacheAdviceParser extends AbstractSingleBeanDefinitionParser {
 
 	/**
 	 * Simple, reusable class used for overriding defaults.
-	 *
-	 * @author Costin Leau
 	 */
 	private static class Props {
 
 		private String key;
+
+		private String keyGenerator;
+
+		private String cacheManager;
 
 		private String condition;
 
@@ -190,10 +194,11 @@ class CacheAdviceParser extends AbstractSingleBeanDefinitionParser {
 
 		private String[] caches = null;
 
-
 		Props(Element root) {
 			String defaultCache = root.getAttribute("cache");
 			key = root.getAttribute("key");
+			keyGenerator = root.getAttribute("key-generator");
+			cacheManager = root.getAttribute("cache-manager");
 			condition = root.getAttribute("condition");
 			method = root.getAttribute(METHOD_ATTRIBUTE);
 
@@ -202,7 +207,6 @@ class CacheAdviceParser extends AbstractSingleBeanDefinitionParser {
 			}
 		}
 
-
 		<T extends CacheOperation> T merge(Element element, ReaderContext readerCtx, T op) {
 			String cache = element.getAttribute("cache");
 
@@ -210,7 +214,8 @@ class CacheAdviceParser extends AbstractSingleBeanDefinitionParser {
 			String[] localCaches = caches;
 			if (StringUtils.hasText(cache)) {
 				localCaches = StringUtils.commaDelimitedListToStringArray(cache.trim());
-			} else {
+			}
+			else {
 				if (caches == null) {
 					readerCtx.error("No cache specified specified for " + element.getNodeName(), element);
 				}
@@ -218,22 +223,31 @@ class CacheAdviceParser extends AbstractSingleBeanDefinitionParser {
 			op.setCacheNames(localCaches);
 
 			op.setKey(getAttributeValue(element, "key", this.key));
+			op.setKeyGenerator(getAttributeValue(element, "key-generator", this.keyGenerator));
+			op.setCacheManager(getAttributeValue(element, "cache-manager", this.cacheManager));
 			op.setCondition(getAttributeValue(element, "condition", this.condition));
+
+			if (StringUtils.hasText(op.getKey()) && StringUtils.hasText(op.getKeyGenerator())) {
+				throw new IllegalStateException("Invalid cache advice configuration on '"
+						+ element.toString() + "'. Both 'key' and 'keyGenerator' attributes have been set. " +
+						"These attributes are mutually exclusive: either set the SpEL expression used to" +
+						"compute the key at runtime or set the name of the KeyGenerator bean to use.");
+			}
 
 			return op;
 		}
 
 		String merge(Element element, ReaderContext readerCtx) {
-			String m = element.getAttribute(METHOD_ATTRIBUTE);
-
-			if (StringUtils.hasText(m)) {
-				return m.trim();
-			}
+			String method = element.getAttribute(METHOD_ATTRIBUTE);
 			if (StringUtils.hasText(method)) {
-				return method;
+				return method.trim();
+			}
+			if (StringUtils.hasText(this.method)) {
+				return this.method;
 			}
 			readerCtx.error("No method specified for " + element.getNodeName(), element);
 			return null;
 		}
 	}
+
 }

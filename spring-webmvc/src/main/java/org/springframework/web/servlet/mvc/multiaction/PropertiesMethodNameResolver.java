@@ -86,7 +86,7 @@ public class PropertiesMethodNameResolver extends AbstractUrlMethodNameResolver
 		if (methodName != null) {
 			return methodName;
 		}
-		Enumeration propNames = this.mappings.propertyNames();
+		Enumeration<?> propNames = this.mappings.propertyNames();
 		while (propNames.hasMoreElements()) {
 			String registeredPath = (String) propNames.nextElement();
 			if (this.pathMatcher.match(registeredPath, urlPath)) {

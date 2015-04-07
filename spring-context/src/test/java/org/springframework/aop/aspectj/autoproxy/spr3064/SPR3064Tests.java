@@ -15,8 +15,6 @@
  */
 package org.springframework.aop.aspectj.autoproxy.spr3064;
 
-import static org.junit.Assert.*;
-
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
@@ -24,8 +22,10 @@ import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.junit.Test;
+
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
+import static org.junit.Assert.*;
 
 /**
  * @author Adrian Colyer

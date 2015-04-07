@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,13 +21,14 @@ import java.lang.reflect.Method;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.junit.runners.model.Statement;
+
 import org.springframework.test.annotation.Repeat;
 import org.springframework.util.ClassUtils;
 
 /**
- * {@code SpringRepeat} is a custom JUnit 4.5+ {@link Statement} which adds
- * support for Spring's {@link Repeat &#064;Repeat} annotation by repeating the
- * test for the specified number of times.
+ * {@code SpringRepeat} is a custom JUnit {@link Statement} which adds support
+ * for Spring's {@link Repeat @Repeat} annotation by repeating the test for
+ * the specified number of times.
  *
  * @see #evaluate()
  * @author Sam Brannen

@@ -17,7 +17,6 @@
 package org.springframework.jmx.export.naming;
 
 import java.util.Hashtable;
-
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 
@@ -50,7 +49,7 @@ public class IdentityNamingStrategy implements ObjectNamingStrategy {
 	@Override
 	public ObjectName getObjectName(Object managedBean, String beanKey) throws MalformedObjectNameException {
 		String domain = ClassUtils.getPackageName(managedBean.getClass());
-		Hashtable keys = new Hashtable();
+		Hashtable<String, String> keys = new Hashtable<String, String>();
 		keys.put(TYPE_KEY, ClassUtils.getShortName(managedBean.getClass()));
 		keys.put(HASH_CODE_KEY, ObjectUtils.getIdentityHexString(managedBean));
 		return ObjectNameManager.getInstance(domain, keys);

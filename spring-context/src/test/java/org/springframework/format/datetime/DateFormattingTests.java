@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,6 @@
 
 package org.springframework.format.datetime;
 
-import static org.hamcrest.Matchers.equalTo;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThat;
-
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -31,6 +26,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
+
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.core.convert.TypeDescriptor;
@@ -40,6 +36,9 @@ import org.springframework.format.annotation.DateTimeFormat.ISO;
 import org.springframework.format.support.FormattingConversionService;
 import org.springframework.validation.DataBinder;
 
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
+
 /**
  * @author Phillip Webb
  * @author Keith Donald
@@ -47,9 +46,10 @@ import org.springframework.validation.DataBinder;
  */
 public class DateFormattingTests {
 
-	private FormattingConversionService conversionService = new FormattingConversionService();
+	private final FormattingConversionService conversionService = new FormattingConversionService();
 
 	private DataBinder binder;
+
 
 	@Before
 	public void setUp() {
@@ -73,6 +73,7 @@ public class DateFormattingTests {
 	public void tearDown() {
 		LocaleContextHolder.setLocale(null);
 	}
+
 
 	@Test
 	public void testBindDate() {

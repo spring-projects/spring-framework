@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +19,7 @@ package org.springframework.aop.aspectj.annotation;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.core.Ordered;
-import org.springframework.core.annotation.AnnotationUtils;
-import org.springframework.core.annotation.Order;
+import org.springframework.core.annotation.OrderUtils;
 import org.springframework.util.ClassUtils;
 
 /**
@@ -66,7 +65,7 @@ public class BeanFactoryAspectInstanceFactory implements MetadataAwareAspectInst
 	 * @param name the name of the bean
 	 * @param type the type that should be introspected by AspectJ
 	 */
-	public BeanFactoryAspectInstanceFactory(BeanFactory beanFactory, String name, Class type) {
+	public BeanFactoryAspectInstanceFactory(BeanFactory beanFactory, String name, Class<?> type) {
 		this.beanFactory = beanFactory;
 		this.name = name;
 		this.aspectMetadata = new AspectMetadata(type, name);
@@ -110,10 +109,7 @@ public class BeanFactoryAspectInstanceFactory implements MetadataAwareAspectInst
 			if (Ordered.class.isAssignableFrom(type) && this.beanFactory.isSingleton(this.name)) {
 				return ((Ordered) this.beanFactory.getBean(this.name)).getOrder();
 			}
-			Order order = AnnotationUtils.findAnnotation(type, Order.class);
-			if (order != null) {
-				return order.value();
-			}
+			return OrderUtils.getOrder(type, Ordered.LOWEST_PRECEDENCE);
 		}
 		return Ordered.LOWEST_PRECEDENCE;
 	}

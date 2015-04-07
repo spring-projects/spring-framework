@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,7 +17,6 @@
 package org.springframework.web.socket.client;
 
 import java.net.URI;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -26,13 +25,15 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.http.HttpHeaders;
 import org.springframework.util.Assert;
 import org.springframework.util.concurrent.ListenableFuture;
+import org.springframework.web.socket.WebSocketExtension;
 import org.springframework.web.socket.WebSocketHandler;
+import org.springframework.web.socket.WebSocketHttpHeaders;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.util.UriComponentsBuilder;
-
 
 /**
  * Abstract base class for {@link WebSocketClient} implementations.
@@ -44,19 +45,18 @@ public abstract class AbstractWebSocketClient implements WebSocketClient {
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
-	private static final Set<String> disallowedHeaders = new HashSet<String>();
+	private static final Set<String> specialHeaders = new HashSet<String>();
 
 	static {
-		disallowedHeaders.add("cache-control");
-		disallowedHeaders.add("cookie");
-		disallowedHeaders.add("connection");
-		disallowedHeaders.add("host");
-		disallowedHeaders.add("sec-websocket-extensions");
-		disallowedHeaders.add("sec-websocket-key");
-		disallowedHeaders.add("sec-websocket-protocol");
-		disallowedHeaders.add("sec-websocket-version");
-		disallowedHeaders.add("pragma");
-		disallowedHeaders.add("upgrade");
+		specialHeaders.add("cache-control");
+		specialHeaders.add("connection");
+		specialHeaders.add("host");
+		specialHeaders.add("sec-websocket-extensions");
+		specialHeaders.add("sec-websocket-key");
+		specialHeaders.add("sec-websocket-protocol");
+		specialHeaders.add("sec-websocket-version");
+		specialHeaders.add("pragma");
+		specialHeaders.add("upgrade");
 	}
 
 
@@ -71,13 +71,10 @@ public abstract class AbstractWebSocketClient implements WebSocketClient {
 
 	@Override
 	public final ListenableFuture<WebSocketSession> doHandshake(WebSocketHandler webSocketHandler,
-			HttpHeaders headers, URI uri) {
+			WebSocketHttpHeaders headers, URI uri) {
 
 		Assert.notNull(webSocketHandler, "webSocketHandler must not be null");
-		Assert.notNull(uri, "uri must not be null");
-
-		String scheme = uri.getScheme();
-		Assert.isTrue(((scheme != null) && ("ws".equals(scheme) || "wss".equals(scheme))), "Invalid scheme: " + scheme);
+		assertUri(uri);
 
 		if (logger.isDebugEnabled()) {
 			logger.debug("Connecting to " + uri);
@@ -86,19 +83,26 @@ public abstract class AbstractWebSocketClient implements WebSocketClient {
 		HttpHeaders headersToUse = new HttpHeaders();
 		if (headers != null) {
 			for (String header : headers.keySet()) {
-				if (!disallowedHeaders.contains(header.toLowerCase())) {
+				if (!specialHeaders.contains(header.toLowerCase())) {
 					headersToUse.put(header, headers.get(header));
 				}
 			}
 		}
 
-		List<String> subProtocols = new ArrayList<String>();
-		if ((headers != null) && (headers.getSecWebSocketProtocol() != null)) {
-			subProtocols.addAll(headers.getSecWebSocketProtocol());
-		}
+		List<String> subProtocols = ((headers != null) && (headers.getSecWebSocketProtocol() != null)) ?
+				headers.getSecWebSocketProtocol() : Collections.<String>emptyList();
 
-		return doHandshakeInternal(webSocketHandler, headersToUse, uri, subProtocols,
+		List<WebSocketExtension> extensions = ((headers != null) && (headers.getSecWebSocketExtensions() != null)) ?
+				headers.getSecWebSocketExtensions() : Collections.<WebSocketExtension>emptyList();
+
+		return doHandshakeInternal(webSocketHandler, headersToUse, uri, subProtocols, extensions,
 				Collections.<String, Object>emptyMap());
+	}
+
+	protected void assertUri(URI uri) {
+		Assert.notNull(uri, "uri must not be null");
+		String scheme = uri.getScheme();
+		Assert.isTrue(scheme != null && ("ws".equals(scheme) || "wss".equals(scheme)), "Invalid scheme: " + scheme);
 	}
 
 	/**
@@ -106,15 +110,17 @@ public abstract class AbstractWebSocketClient implements WebSocketClient {
 	 *
 	 * @param webSocketHandler the client-side handler for WebSocket messages
 	 * @param headers HTTP headers to use for the handshake, with unwanted (forbidden)
-	 *        headers filtered out, never {@code null}
+	 * headers filtered out, never {@code null}
 	 * @param uri the target URI for the handshake, never {@code null}
 	 * @param subProtocols requested sub-protocols, or an empty list
-	 * @param handshakeAttributes attributes to make available via
-	 *        {@link WebSocketSession#getHandshakeAttributes()}; currently always an empty map.
+	 * @param extensions requested WebSocket extensions, or an empty list
+	 * @param attributes attributes to associate with the WebSocketSession, i.e. via
+	 * {@link WebSocketSession#getAttributes()}; currently always an empty map.
 	 *
 	 * @return the established WebSocket session wrapped in a ListenableFuture.
 	 */
 	protected abstract ListenableFuture<WebSocketSession> doHandshakeInternal(WebSocketHandler webSocketHandler,
-			HttpHeaders headers, URI uri, List<String> subProtocols, Map<String, Object> handshakeAttributes);
+			HttpHeaders headers, URI uri, List<String> subProtocols, List<WebSocketExtension> extensions,
+			Map<String, Object> attributes);
 
 }

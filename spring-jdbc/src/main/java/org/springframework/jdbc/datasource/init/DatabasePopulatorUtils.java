@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,28 +17,29 @@
 package org.springframework.jdbc.datasource.init;
 
 import java.sql.Connection;
-
 import javax.sql.DataSource;
 
-import org.springframework.dao.DataAccessResourceFailureException;
+import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.datasource.DataSourceUtils;
 import org.springframework.util.Assert;
 
 /**
- * Utility methods for executing a DatabasePopulator.
+ * Utility methods for executing a {@link DatabasePopulator}.
  *
  * @author Juergen Hoeller
  * @author Oliver Gierke
+ * @author Sam Brannen
  * @since 3.1
  */
 public abstract class DatabasePopulatorUtils {
 
 	/**
-	 * Execute the given DatabasePopulator against the given DataSource.
-	 * @param populator the DatabasePopulator to execute
-	 * @param dataSource the DataSource to execute against
+	 * Execute the given {@link DatabasePopulator} against the given {@link DataSource}.
+	 * @param populator the {@code DatabasePopulator} to execute
+	 * @param dataSource the {@code DataSource} to execute against
+	 * @throws DataAccessException if an error occurs, specifically a {@link ScriptException}
 	 */
-	public static void execute(DatabasePopulator populator, DataSource dataSource) {
+	public static void execute(DatabasePopulator populator, DataSource dataSource) throws DataAccessException {
 		Assert.notNull(populator, "DatabasePopulator must be provided");
 		Assert.notNull(dataSource, "DataSource must be provided");
 		try {
@@ -53,7 +54,11 @@ public abstract class DatabasePopulatorUtils {
 			}
 		}
 		catch (Exception ex) {
-			throw new DataAccessResourceFailureException("Failed to execute database script", ex);
+			if (ex instanceof ScriptException) {
+				throw (ScriptException) ex;
+			}
+
+			throw new UncategorizedScriptException("Failed to execute database script", ex);
 		}
 	}
 

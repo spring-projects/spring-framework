@@ -66,7 +66,7 @@ public class MethodLocatingFactoryBean implements FactoryBean<Method>, BeanFacto
 			throw new IllegalArgumentException("Property 'methodName' is required");
 		}
 
-		Class beanClass = beanFactory.getType(this.targetBeanName);
+		Class<?> beanClass = beanFactory.getType(this.targetBeanName);
 		if (beanClass == null) {
 			throw new IllegalArgumentException("Can't determine type of bean with name '" + this.targetBeanName + "'");
 		}

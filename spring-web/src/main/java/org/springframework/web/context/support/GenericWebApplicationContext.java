@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,6 @@ import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.ui.context.Theme;
 import org.springframework.ui.context.ThemeSource;
 import org.springframework.ui.context.support.UiApplicationContextUtils;
-import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.context.ConfigurableWebApplicationContext;
@@ -128,17 +127,7 @@ public class GenericWebApplicationContext extends GenericApplicationContext
 
 	@Override
 	public String getApplicationName() {
-		if (this.servletContext == null) {
-			return "";
-		}
-		if (this.servletContext.getMajorVersion() == 2 && this.servletContext.getMinorVersion() < 5) {
-			String name = this.servletContext.getServletContextName();
-			return (name != null ? name : "");
-		}
-		else {
-			// Servlet 2.5 available
-			return this.servletContext.getContextPath();
-		}
+		return (this.servletContext != null ? this.servletContext.getContextPath() : "");
 	}
 
 	/**
@@ -194,11 +183,9 @@ public class GenericWebApplicationContext extends GenericApplicationContext
 	 */
 	@Override
 	protected void initPropertySources() {
-		super.initPropertySources();
-		ConfigurableEnvironment env = this.getEnvironment();
+		ConfigurableEnvironment env = getEnvironment();
 		if (env instanceof ConfigurableWebEnvironment) {
-			((ConfigurableWebEnvironment)env).initPropertySources(
-					this.servletContext, null);
+			((ConfigurableWebEnvironment) env).initPropertySources(this.servletContext, null);
 		}
 	}
 
@@ -244,7 +231,7 @@ public class GenericWebApplicationContext extends GenericApplicationContext
 	}
 
 	@Override
-	public void setConfigLocations(String[] configLocations) {
+	public void setConfigLocations(String... configLocations) {
 		if (!ObjectUtils.isEmpty(configLocations)) {
 			throw new UnsupportedOperationException(
 					"GenericWebApplicationContext does not support setConfigLocations(). " +

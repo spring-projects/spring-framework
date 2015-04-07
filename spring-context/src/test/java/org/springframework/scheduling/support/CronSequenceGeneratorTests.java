@@ -25,6 +25,7 @@ import static org.junit.Assert.*;
 /**
  * @author Juergen Hoeller
  */
+@SuppressWarnings("deprecation")
 public class CronSequenceGeneratorTests {
 
 	@Test

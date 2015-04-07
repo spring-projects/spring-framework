@@ -43,7 +43,7 @@ import org.springframework.util.ClassUtils;
 public class JmsInvokerProxyFactoryBean extends JmsInvokerClientInterceptor
 		implements FactoryBean<Object>, BeanClassLoaderAware {
 
-	private Class serviceInterface;
+	private Class<?> serviceInterface;
 
 	private ClassLoader beanClassLoader = ClassUtils.getDefaultClassLoader();
 
@@ -57,7 +57,7 @@ public class JmsInvokerProxyFactoryBean extends JmsInvokerClientInterceptor
 	 * is {@code null}, or if the supplied {@code serviceInterface}
 	 * is not an interface type
 	 */
-	public void setServiceInterface(Class serviceInterface) {
+	public void setServiceInterface(Class<?> serviceInterface) {
 		if (serviceInterface == null || !serviceInterface.isInterface()) {
 			throw new IllegalArgumentException("'serviceInterface' must be an interface");
 		}

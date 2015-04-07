@@ -75,6 +75,12 @@ import org.springframework.core.Ordered;
  * proxy- or AspectJ-based advice that weaves the interceptor into the call stack when
  * {@link org.springframework.cache.annotation.Cacheable @Cacheable} methods are invoked.
  *
+ * <p>If the JSR-107 API and Spring's JCache implementation are present, the necessary
+ * components to manage standard cache annotations are also registered. This creates the
+ * proxy- or AspectJ-based advice that weaves the interceptor into the call stack when
+ * methods annotated with {@code CacheResult}, {@code CachePut}, {@code CacheRemove} or
+ * {@code CacheRemoveAll} are invoked.
+ *
  * <p><strong>A bean of type {@link org.springframework.cache.CacheManager CacheManager}
  * must be registered</strong>, as there is no reasonable default that the framework can
  * use as a convention. And whereas the {@code <cache:annotation-driven>} element assumes
@@ -85,11 +91,11 @@ import org.springframework.core.Ordered;
  * <p>For those that wish to establish a more direct relationship between
  * {@code @EnableCaching} and the exact cache manager bean to be used,
  * the {@link CachingConfigurer} callback interface may be implemented - notice the
- * {@code implements} clause and the {@code @Override}-annotated methods below:
+ * the {@code @Override}-annotated methods below:
  * <pre class="code">
  * &#064;Configuration
  * &#064;EnableCaching
- * public class AppConfig implements CachingConfigurer {
+ * public class AppConfig extends CachingConfigurerSupport {
  *     &#064;Bean
  *     public MyService myService() {
  *         // configure and return a class having &#064;Cacheable methods
@@ -122,9 +128,14 @@ import org.springframework.core.Ordered;
  * {@code @EnableCaching} will configure Spring's
  * {@link org.springframework.cache.interceptor.SimpleKeyGenerator SimpleKeyGenerator}
  * for this purpose, but when implementing {@code CachingConfigurer}, a key generator
- * must be provided explicitly. Return {@code new SimpleKeyGenerator()} from this method
- * if no customization is necessary. See {@link CachingConfigurer} Javadoc for further
- * details.
+ * must be provided explicitly. Return {@code null} or {@code new SimpleKeyGenerator()}
+ * from this method if no customization is necessary.
+ *
+ * <p>{@link CachingConfigurer} offers additional customization options: it is recommended
+ * to extend from {@link org.springframework.cache.annotation.CachingConfigurerSupport
+ * CachingConfigurerSupport} that provides a default implementation for all methods which
+ * can be useful if you do not need to customize everything. See {@link CachingConfigurer}
+ * Javadoc for further details.
  *
  * <p>The {@link #mode()} attribute controls how advice is applied; if the mode is
  * {@link AdviceMode#PROXY} (the default), then the other attributes such as

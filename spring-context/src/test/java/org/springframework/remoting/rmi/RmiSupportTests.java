@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -180,8 +180,8 @@ public class RmiSupportTests extends TestCase {
 		}
 		catch (RemoteProxyFailureException ex) {
 			assertTrue(ex.getCause() instanceof NoSuchMethodException);
-			assertTrue(ex.getMessage().indexOf("setOtherName") != -1);
-			assertTrue(ex.getMessage().indexOf("IWrongBusinessBean") != -1);
+			assertTrue(ex.getMessage().contains("setOtherName"));
+			assertTrue(ex.getMessage().contains("IWrongBusinessBean"));
 		}
 		assertEquals(1, factory.counter);
 	}
@@ -319,7 +319,7 @@ public class RmiSupportTests extends TestCase {
 		// let's see if the remote invocation object works
 
 		final RemoteBean rb = new RemoteBean();
-		final Method setNameMethod = rb.getClass().getDeclaredMethod("setName", new Class<?>[] {String.class});
+		final Method setNameMethod = rb.getClass().getDeclaredMethod("setName", String.class);
 
 		MethodInvocation mi = new MethodInvocation() {
 			@Override
@@ -388,8 +388,8 @@ public class RmiSupportTests extends TestCase {
 		IBusinessBean proxy = (IBusinessBean) factory.getObject();
 
 		// shouldn't go through to remote service
-		assertTrue(proxy.toString().indexOf("RMI invoker") != -1);
-		assertTrue(proxy.toString().indexOf(serviceUrl) != -1);
+		assertTrue(proxy.toString().contains("RMI invoker"));
+		assertTrue(proxy.toString().contains(serviceUrl));
 		assertEquals(proxy.hashCode(), proxy.hashCode());
 		assertTrue(proxy.equals(proxy));
 
@@ -444,11 +444,11 @@ public class RmiSupportTests extends TestCase {
 		@Override
 		public void setName(String nam) throws RemoteException {
 			if (nam != null && nam.endsWith("Exception")) {
-				RemoteException rex = null;
+				RemoteException rex;
 				try {
 					Class<?> exClass = Class.forName(nam);
-					Constructor<?> ctor = exClass.getConstructor(new Class<?>[] {String.class});
-					rex = (RemoteException) ctor.newInstance(new Object[] {"myMessage"});
+					Constructor<?> ctor = exClass.getConstructor(String.class);
+					rex = (RemoteException) ctor.newInstance("myMessage");
 				}
 				catch (Exception ex) {
 					throw new RemoteException("Illegal exception class name: " + nam, ex);

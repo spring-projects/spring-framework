@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,7 @@ import org.springframework.util.StringUtils;
  * of {@link ObjectError ObjectErrors} and {@link FieldError FieldErrors}.
  *
  * @author Juergen Hoeller
+ * @author Rossen Stoyanchev
  * @since 2.5.3
  */
 @SuppressWarnings("serial")
@@ -214,10 +215,7 @@ public abstract class AbstractErrors implements Errors, Serializable {
 	@Override
 	public Class<?> getFieldType(String field) {
 		Object value = getFieldValue(field);
-		if (value != null) {
-			return value.getClass();
-		}
-		return null;
+		return (value != null ? value.getClass() : null);
 	}
 
 	/**
@@ -227,8 +225,13 @@ public abstract class AbstractErrors implements Errors, Serializable {
 	 * @return whether the FieldError matches the given field
 	 */
 	protected boolean isMatchingFieldError(String field, FieldError fieldError) {
-		return (field.equals(fieldError.getField()) ||
-				(field.endsWith("*") && fieldError.getField().startsWith(field.substring(0, field.length() - 1))));
+		if (field.equals(fieldError.getField())) {
+			return true;
+		}
+		// Optimization: use charAt and regionMatches instead of endsWith and startsWith (SPR-11304)
+		int endIndex = field.length() - 1;
+		return (endIndex >= 0 && field.charAt(endIndex) == '*' &&
+				(endIndex == 0 || field.regionMatches(0, fieldError.getField(), 0, endIndex)));
 	}
 
 

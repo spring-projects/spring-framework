@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,8 +49,8 @@ import org.springframework.validation.annotation.Validated;
  * as well. By default, JSR-303 will validate against its default group only.
  *
  * <p>As of Spring 4.0, this functionality requires either a Bean Validation 1.1 provider
- * (such as Hibernate Validator 5.0) or the Bean Validation 1.0 API with Hibernate Validator
- * 4.2 or 4.3. The actual provider will be autodetected and automatically adapted.
+ * (such as Hibernate Validator 5.x) or the Bean Validation 1.0 API with Hibernate Validator
+ * 4.3. The actual provider will be autodetected and automatically adapted.
  *
  * @author Juergen Hoeller
  * @since 3.1
@@ -83,7 +83,7 @@ public class MethodValidationPostProcessor extends AbstractAdvisingBeanPostProce
 	 * <p>Default is the default ValidatorFactory's default Validator.
 	 */
 	public void setValidator(Validator validator) {
-		if(validator instanceof LocalValidatorFactoryBean) {
+		if (validator instanceof LocalValidatorFactoryBean) {
 			this.validator = ((LocalValidatorFactoryBean) validator).getValidator();
 		}
 		else {

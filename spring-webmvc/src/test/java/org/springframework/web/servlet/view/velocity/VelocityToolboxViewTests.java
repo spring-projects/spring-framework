@@ -1,12 +1,7 @@
 package org.springframework.web.servlet.view.velocity;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-
 import java.util.HashMap;
 import java.util.Map;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -18,11 +13,13 @@ import org.apache.velocity.tools.generic.MathTool;
 import org.apache.velocity.tools.view.context.ChainedContext;
 import org.apache.velocity.tools.view.tools.LinkTool;
 import org.junit.Test;
+
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockHttpServletResponse;
 import org.springframework.mock.web.test.MockServletContext;
 import org.springframework.web.context.support.StaticWebApplicationContext;
 
+import static org.junit.Assert.*;
 
 /**
  * @author Rod Johnson
@@ -73,8 +70,7 @@ public class VelocityToolboxViewTests {
 
 		vv.setUrl(templateName);
 		vv.setApplicationContext(wac);
-		@SuppressWarnings("unchecked")
-		Map<String, Class> toolAttributes = new HashMap<String, Class>();
+		Map<String, Class<?>> toolAttributes = new HashMap<String, Class<?>>();
 		toolAttributes.put("math", MathTool.class);
 		toolAttributes.put("link2", LinkTool.class);
 		vv.setToolAttributes(toolAttributes);

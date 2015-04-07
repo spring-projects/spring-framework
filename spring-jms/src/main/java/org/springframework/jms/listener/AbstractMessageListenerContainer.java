@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,19 +16,25 @@
 
 package org.springframework.jms.listener;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import javax.jms.Connection;
 import javax.jms.Destination;
 import javax.jms.ExceptionListener;
 import javax.jms.JMSException;
 import javax.jms.Message;
+import javax.jms.MessageConsumer;
 import javax.jms.MessageListener;
 import javax.jms.Queue;
 import javax.jms.Session;
 import javax.jms.Topic;
 
 import org.springframework.jms.support.JmsUtils;
+import org.springframework.jms.support.converter.MessageConverter;
 import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.ErrorHandler;
+import org.springframework.util.ReflectionUtils;
 
 /**
  * Abstract base class for message listener containers. Can either host
@@ -54,8 +60,13 @@ import org.springframework.util.ErrorHandler;
  * <p>The listener container offers the following message acknowledgment options:
  * <ul>
  * <li>"sessionAcknowledgeMode" set to "AUTO_ACKNOWLEDGE" (default):
- * Automatic message acknowledgment <i>before</i> listener execution;
- * no redelivery in case of exception thrown.
+ * This mode is container-dependent: For {@link DefaultMessageListenerContainer},
+ * it means automatic message acknowledgment <i>before</i> listener execution, with
+ * no redelivery in case of an exception. For {@link SimpleMessageListenerContainer},
+ * it means automatic message acknowledgment <i>after</i> listener execution, with
+ * redelivery in case of an exception thrown, as defined by the JMS specification.
+ * In order to consistently achieve the latter behavior with any container variant,
+ * consider setting "sessionTransacted" to "true" instead.
  * <li>"sessionAcknowledgeMode" set to "CLIENT_ACKNOWLEDGE":
  * Automatic message acknowledgment <i>after</i> successful listener execution;
  * no redelivery in case of exception thrown.
@@ -103,17 +114,14 @@ import org.springframework.util.ErrorHandler;
  * runtime processing overhead.
  * </ul>
  *
- * <p>Note that it is also possible to specify a
- * {@link org.springframework.jms.connection.JmsTransactionManager} as external
- * "transactionManager", providing fully synchronized Spring transactions based
- * on local JMS transactions. The effect is similar to "sessionTransacted" set
- * to "true", the difference being that this external transaction management
- * will also affect independent JMS access code within the service layer
- * (e.g. based on {@link org.springframework.jms.core.JmsTemplate} or
- * {@link org.springframework.jms.connection.TransactionAwareConnectionFactoryProxy}),
- * not just direct JMS Session usage in a {@link SessionAwareMessageListener}.
+ * <p>Note that the "sessionTransacted" flag is strongly recommended over
+ * {@link org.springframework.jms.connection.JmsTransactionManager}, provided
+ * that transactions do not need to be managed externally. As a consequence,
+ * set the transaction manager only if you are using JTA or if you need to
+ * synchronize with custom external transaction arrangements.
  *
  * @author Juergen Hoeller
+ * @author Stephane Nicoll
  * @since 2.0
  * @see #setMessageListener
  * @see javax.jms.MessageListener
@@ -123,7 +131,15 @@ import org.springframework.util.ErrorHandler;
  * @see SimpleMessageListenerContainer
  * @see org.springframework.jms.listener.endpoint.JmsMessageEndpointManager
  */
-public abstract class AbstractMessageListenerContainer extends AbstractJmsListeningContainer {
+public abstract class AbstractMessageListenerContainer extends AbstractJmsListeningContainer
+		implements MessageListenerContainer {
+
+	private static final Method createSharedConsumerMethod = ClassUtils.getMethodIfAvailable(
+			Session.class, "createSharedConsumer", Topic.class, String.class, String.class);
+
+	private static final Method createSharedDurableConsumerMethod = ClassUtils.getMethodIfAvailable(
+			Session.class, "createSharedDurableConsumer", Topic.class, String.class, String.class);
+
 
 	private volatile Object destination;
 
@@ -133,7 +149,13 @@ public abstract class AbstractMessageListenerContainer extends AbstractJmsListen
 
 	private boolean subscriptionDurable = false;
 
-	private String durableSubscriptionName;
+	private boolean subscriptionShared = false;
+
+	private String subscriptionName;
+
+	private boolean pubSubNoLocal = false;
+
+	private MessageConverter messageConverter;
 
 	private ExceptionListener exceptionListener;
 
@@ -143,6 +165,11 @@ public abstract class AbstractMessageListenerContainer extends AbstractJmsListen
 
 	private boolean acceptMessagesWhileStopping = false;
 
+
+	/**
+	 * Specify concurrency limits.
+	 */
+	public abstract void setConcurrency(String concurrency);
 
 	/**
 	 * Set the destination to receive messages from.
@@ -244,8 +271,8 @@ public abstract class AbstractMessageListenerContainer extends AbstractJmsListen
 	public void setMessageListener(Object messageListener) {
 		checkMessageListener(messageListener);
 		this.messageListener = messageListener;
-		if (this.durableSubscriptionName == null) {
-			this.durableSubscriptionName = getDefaultSubscriptionName(messageListener);
+		if (this.subscriptionName == null) {
+			this.subscriptionName = getDefaultSubscriptionName(messageListener);
 		}
 	}
 
@@ -293,15 +320,20 @@ public abstract class AbstractMessageListenerContainer extends AbstractJmsListen
 
 	/**
 	 * Set whether to make the subscription durable. The durable subscription name
-	 * to be used can be specified through the "durableSubscriptionName" property.
+	 * to be used can be specified through the "subscriptionName" property.
 	 * <p>Default is "false". Set this to "true" to register a durable subscription,
-	 * typically in combination with a "durableSubscriptionName" value (unless
+	 * typically in combination with a "subscriptionName" value (unless
 	 * your message listener class name is good enough as subscription name).
-	 * <p>Only makes sense when listening to a topic (pub-sub domain).
-	 * @see #setDurableSubscriptionName
+	 * <p>Only makes sense when listening to a topic (pub-sub domain),
+	 * therefore this method switches the "pubSubDomain" flag as well.
+	 * @see #setSubscriptionName
+	 * @see #setPubSubDomain
 	 */
 	public void setSubscriptionDurable(boolean subscriptionDurable) {
 		this.subscriptionDurable = subscriptionDurable;
+		if (subscriptionDurable) {
+			setPubSubDomain(true);
+		}
 	}
 
 	/**
@@ -312,25 +344,118 @@ public abstract class AbstractMessageListenerContainer extends AbstractJmsListen
 	}
 
 	/**
-	 * Set the name of a durable subscription to create. To be applied in case
-	 * of a topic (pub-sub domain) with subscription durability activated.
+	 * Set whether to make the subscription shared. The shared subscription name
+	 * to be used can be specified through the "subscriptionName" property.
+	 * <p>Default is "false". Set this to "true" to register a shared subscription,
+	 * typically in combination with a "subscriptionName" value (unless
+	 * your message listener class name is good enough as subscription name).
+	 * Note that shared subscriptions may also be durable, so this flag can
+	 * (and often will) be combined with "subscriptionDurable" as well.
+	 * <p>Only makes sense when listening to a topic (pub-sub domain),
+	 * therefore this method switches the "pubSubDomain" flag as well.
+	 * <p><b>Requires a JMS 2.0 compatible message broker.</b>
+	 * @since 4.1
+	 * @see #setSubscriptionName
+	 * @see #setSubscriptionDurable
+	 * @see #setPubSubDomain
+	 */
+	public void setSubscriptionShared(boolean subscriptionShared) {
+		this.subscriptionShared = subscriptionShared;
+		if (subscriptionShared) {
+			setPubSubDomain(true);
+		}
+	}
+
+	/**
+	 * Return whether to make the subscription shared.
+	 * @since 4.1
+	 */
+	public boolean isSubscriptionShared() {
+		return this.subscriptionShared;
+	}
+
+	/**
+	 * Set the name of a subscription to create. To be applied in case
+	 * of a topic (pub-sub domain) with a shared or durable subscription.
+	 * <p>The subscription name needs to be unique within this client's
+	 * JMS client id. Default is the class name of the specified message listener.
+	 * <p>Note: Only 1 concurrent consumer (which is the default of this
+	 * message listener container) is allowed for each subscription,
+	 * except for a shared subscription (which requires JMS 2.0).
+	 * @since 4.1
+	 * @see #setPubSubDomain
+	 * @see #setSubscriptionDurable
+	 * @see #setSubscriptionShared
+	 * @see #setClientId
+	 * @see #setMessageListener
+	 */
+	public void setSubscriptionName(String subscriptionName) {
+		this.subscriptionName = subscriptionName;
+	}
+
+	/**
+	 * Return the name of a subscription to create, if any.
+	 * @since 4.1
+	 */
+	public String getSubscriptionName() {
+		return this.subscriptionName;
+	}
+
+	/**
+	 * Set the name of a durable subscription to create. This method switches
+	 * to pub-sub domain mode and activates subscription durability as well.
 	 * <p>The durable subscription name needs to be unique within this client's
 	 * JMS client id. Default is the class name of the specified message listener.
 	 * <p>Note: Only 1 concurrent consumer (which is the default of this
-	 * message listener container) is allowed for each durable subscription.
+	 * message listener container) is allowed for each durable subscription,
+	 * except for a shared durable subscription (which requires JMS 2.0).
+	 * @see #setPubSubDomain
 	 * @see #setSubscriptionDurable
+	 * @see #setSubscriptionShared
 	 * @see #setClientId
 	 * @see #setMessageListener
 	 */
 	public void setDurableSubscriptionName(String durableSubscriptionName) {
-		this.durableSubscriptionName = durableSubscriptionName;
+		this.subscriptionName = durableSubscriptionName;
+		this.subscriptionDurable = true;
 	}
 
 	/**
 	 * Return the name of a durable subscription to create, if any.
 	 */
 	public String getDurableSubscriptionName() {
-		return this.durableSubscriptionName;
+		return (this.subscriptionDurable ? this.subscriptionName : null);
+	}
+
+	/**
+	 * Set whether to inhibit the delivery of messages published by its own connection.
+	 * Default is "false".
+	 * @since 4.1
+	 * @see javax.jms.Session#createConsumer(javax.jms.Destination, String, boolean)
+	 */
+	public void setPubSubNoLocal(boolean pubSubNoLocal) {
+		this.pubSubNoLocal = pubSubNoLocal;
+	}
+
+	/**
+	 * Return whether to inhibit the delivery of messages published by its own connection.
+	 * @since 4.1
+	 */
+	public boolean isPubSubNoLocal() {
+		return this.pubSubNoLocal;
+	}
+
+	/**
+	 * Set the {@link MessageConverter} strategy for converting JMS Messages.
+	 * @since 4.1
+	 */
+	public void setMessageConverter(MessageConverter messageConverter) {
+		this.messageConverter = messageConverter;
+	}
+
+	@Override
+	public MessageConverter getMessageConverter() {
+		return this.messageConverter;
 	}
 
 	/**
@@ -350,12 +475,22 @@ public abstract class AbstractMessageListenerContainer extends AbstractJmsListen
 	}
 
 	/**
-	 * Set an ErrorHandler to be invoked in case of any uncaught exceptions thrown
-	 * while processing a Message. By default there will be <b>no</b> ErrorHandler
-	 * so that error-level logging is the only result.
+	 * Set the ErrorHandler to be invoked in case of any uncaught exceptions thrown
+	 * while processing a Message.
+	 * <p>By default, there will be <b>no</b> ErrorHandler so that error-level
+	 * logging is the only result.
 	 */
 	public void setErrorHandler(ErrorHandler errorHandler) {
 		this.errorHandler = errorHandler;
+	}
+
+	/**
+	 * Return the ErrorHandler to be invoked in case of any uncaught exceptions thrown
+	 * while processing a Message.
+	 * @since 4.1
+	 */
+	public ErrorHandler getErrorHandler() {
+		return this.errorHandler;
 	}
 
 	/**
@@ -415,9 +550,11 @@ public abstract class AbstractMessageListenerContainer extends AbstractJmsListen
 		if (this.destination == null) {
 			throw new IllegalArgumentException("Property 'destination' or 'destinationName' is required");
 		}
-		if (isSubscriptionDurable() && !isPubSubDomain()) {
-			throw new IllegalArgumentException("A durable subscription requires a topic (pub-sub domain)");
-		}
+	}
+
+	@Override
+	public void setupMessageListener(Object messageListener) {
+		setMessageListener(messageListener);
 	}
 
 
@@ -588,9 +725,14 @@ public abstract class AbstractMessageListenerContainer extends AbstractJmsListen
 	 * @throws javax.jms.JMSException in case of a rollback error
 	 */
 	protected void rollbackIfNecessary(Session session) throws JMSException {
-		if (session.getTransacted() && isSessionLocallyTransacted(session)) {
-			// Transacted session created by this container -> rollback.
-			JmsUtils.rollbackIfNecessary(session);
+		if (session.getTransacted()) {
+			if (isSessionLocallyTransacted(session)) {
+				// Transacted session created by this container -> rollback.
+				JmsUtils.rollbackIfNecessary(session);
+			}
+		}
+		else {
+			session.recover();
 		}
 	}
 
@@ -602,12 +744,17 @@ public abstract class AbstractMessageListenerContainer extends AbstractJmsListen
 	 */
 	protected void rollbackOnExceptionIfNecessary(Session session, Throwable ex) throws JMSException {
 		try {
-			if (session.getTransacted() && isSessionLocallyTransacted(session)) {
-				// Transacted session created by this container -> rollback.
-				if (logger.isDebugEnabled()) {
-					logger.debug("Initiating transaction rollback on application exception", ex);
+			if (session.getTransacted()) {
+				if (isSessionLocallyTransacted(session)) {
+					// Transacted session created by this container -> rollback.
+					if (logger.isDebugEnabled()) {
+						logger.debug("Initiating transaction rollback on application exception", ex);
+					}
+					JmsUtils.rollbackIfNecessary(session);
 				}
-				JmsUtils.rollbackIfNecessary(session);
+			}
+			else {
+				session.recover();
 			}
 		}
 		catch (IllegalStateException ex2) {
@@ -641,6 +788,51 @@ public abstract class AbstractMessageListenerContainer extends AbstractJmsListen
 	 */
 	protected boolean isSessionLocallyTransacted(Session session) {
 		return isSessionTransacted();
+	}
+
+	/**
+	 * Create a JMS MessageConsumer for the given Session and Destination.
+	 * <p>This implementation uses JMS 1.1 API.
+	 * @param session the JMS Session to create a MessageConsumer for
+	 * @param destination the JMS Destination to create a MessageConsumer for
+	 * @return the new JMS MessageConsumer
+	 * @throws javax.jms.JMSException if thrown by JMS API methods
+	 */
+	protected MessageConsumer createConsumer(Session session, Destination destination) throws JMSException {
+		if (isPubSubDomain() && destination instanceof Topic) {
+			if (isSubscriptionShared()) {
+				// createSharedConsumer((Topic) dest, subscription, selector);
+				// createSharedDurableConsumer((Topic) dest, subscription, selector);
+				Method method = (isSubscriptionDurable() ?
+						createSharedDurableConsumerMethod : createSharedConsumerMethod);
+				try {
+					return (MessageConsumer) method.invoke(session, destination, getSubscriptionName(), getMessageSelector());
+				}
+				catch (InvocationTargetException ex) {
+					if (ex.getTargetException() instanceof JMSException) {
+						throw (JMSException) ex.getTargetException();
+					}
+					ReflectionUtils.handleInvocationTargetException(ex);
+					return null;
+				}
+				catch (IllegalAccessException ex) {
+					throw new IllegalStateException("Could not access JMS 2.0 API method: " + ex.getMessage());
+				}
+			}
+			else if (isSubscriptionDurable()) {
+				return session.createDurableSubscriber(
+						(Topic) destination, getSubscriptionName(), getMessageSelector(), isPubSubNoLocal());
+			}
+			else {
+				// Only pass in the NoLocal flag in case of a Topic (pub-sub mode):
+				// Some JMS providers, such as WebSphere MQ 6.0, throw IllegalStateException
+				// in case of the NoLocal flag being specified for a Queue.
+				return session.createConsumer(destination, getMessageSelector(), isPubSubNoLocal());
+			}
+		}
+		else {
+			return session.createConsumer(destination, getMessageSelector());
+		}
 	}
 
 	/**
@@ -689,8 +881,9 @@ public abstract class AbstractMessageListenerContainer extends AbstractJmsListen
 	 * @see #setErrorHandler
 	 */
 	protected void invokeErrorHandler(Throwable ex) {
-		if (this.errorHandler != null) {
-			this.errorHandler.handleError(ex);
+		ErrorHandler errorHandler = getErrorHandler();
+		if (errorHandler != null) {
+			errorHandler.handleError(ex);
 		}
 		else if (logger.isWarnEnabled()) {
 			logger.warn("Execution of JMS message listener failed, and no ErrorHandler has been set.", ex);

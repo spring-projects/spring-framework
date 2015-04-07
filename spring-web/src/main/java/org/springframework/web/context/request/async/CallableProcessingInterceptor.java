@@ -55,7 +55,7 @@ public interface CallableProcessingInterceptor {
 	 * <p>
 	 * This is useful for capturing the state of the current thread just prior to
 	 * invoking the {@link Callable}. Once the state is captured, it can then be
-	 * transfered to the new {@link Thread} in
+	 * transferred to the new {@link Thread} in
 	 * {@link #preProcess(NativeWebRequest, Callable)}. Capturing the state of
 	 * Spring Security's SecurityContextHolder and migrating it to the new Thread
 	 * is a concrete example of where this is useful.

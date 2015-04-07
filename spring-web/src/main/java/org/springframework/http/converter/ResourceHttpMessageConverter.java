@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,12 +18,12 @@ package org.springframework.http.converter;
 
 import java.io.IOException;
 import java.io.InputStream;
-
 import javax.activation.FileTypeMap;
 import javax.activation.MimetypesFileTypeMap;
 
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpOutputMessage;
@@ -44,8 +44,8 @@ import org.springframework.util.StringUtils;
  */
 public class ResourceHttpMessageConverter extends AbstractHttpMessageConverter<Resource> {
 
-	private static final boolean jafPresent =
-			ClassUtils.isPresent("javax.activation.FileTypeMap", ResourceHttpMessageConverter.class.getClassLoader());
+	private static final boolean jafPresent = ClassUtils.isPresent(
+			"javax.activation.FileTypeMap", ResourceHttpMessageConverter.class.getClassLoader());
 
 
 	public ResourceHttpMessageConverter() {
@@ -78,7 +78,9 @@ public class ResourceHttpMessageConverter extends AbstractHttpMessageConverter<R
 
 	@Override
 	protected Long getContentLength(Resource resource, MediaType contentType) throws IOException {
-		return resource.contentLength();
+		// Don't try to determine contentLength on InputStreamResource - cannot be read afterwards...
+		// Note: custom InputStreamResource subclasses could provide a pre-calculated content length!
+		return (InputStreamResource.class.equals(resource.getClass()) ? null : resource.contentLength());
 	}
 
 	@Override
@@ -101,7 +103,7 @@ public class ResourceHttpMessageConverter extends AbstractHttpMessageConverter<R
 
 
 	/**
-	 * Inner class to avoid hard-coded JAF dependency.
+	 * Inner class to avoid a hard-coded JAF dependency.
 	 */
 	private static class ActivationMediaTypeFactory {
 
@@ -112,7 +114,7 @@ public class ResourceHttpMessageConverter extends AbstractHttpMessageConverter<R
 		}
 
 		private static FileTypeMap loadFileTypeMapFromContextSupportModule() {
-			// see if we can find the extended mime.types from the context-support module
+			// See if we can find the extended mime.types from the context-support module...
 			Resource mappingLocation = new ClassPathResource("org/springframework/mail/javamail/mime.types");
 			if (mappingLocation.exists()) {
 				InputStream inputStream = null;
@@ -138,11 +140,14 @@ public class ResourceHttpMessageConverter extends AbstractHttpMessageConverter<R
 		}
 
 		public static MediaType getMediaType(Resource resource) {
-			if(resource.getFilename() == null) {
-				return null;
+			String filename = resource.getFilename();
+			if (filename != null) {
+				String mediaType = fileTypeMap.getContentType(filename);
+				if (StringUtils.hasText(mediaType)) {
+					return MediaType.parseMediaType(mediaType);
+				}
 			}
-			String mediaType = fileTypeMap.getContentType(resource.getFilename());
-			return (StringUtils.hasText(mediaType) ? MediaType.parseMediaType(mediaType) : null);
+			return null;
 		}
 	}
 

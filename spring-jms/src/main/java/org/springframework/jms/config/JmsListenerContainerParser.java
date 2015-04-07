@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,8 @@ import javax.jms.Session;
 
 import org.w3c.dom.Element;
 
-import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.MutablePropertyValues;
+import org.springframework.beans.PropertyValues;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.factory.xml.ParserContext;
@@ -31,6 +32,7 @@ import org.springframework.util.StringUtils;
  *
  * @author Mark Fisher
  * @author Juergen Hoeller
+ * @author Stephane Nicoll
  * @since 2.5
  */
 class JmsListenerContainerParser extends AbstractListenerContainerParser {
@@ -51,14 +53,41 @@ class JmsListenerContainerParser extends AbstractListenerContainerParser {
 
 	private static final String RECOVERY_INTERVAL_ATTRIBUTE = "recovery-interval";
 
+	private static final String BACK_OFF_ATTRIBUTE = "back-off";
+
 
 	@Override
-	protected BeanDefinition parseContainer(Element listenerEle, Element containerEle, ParserContext parserContext) {
+	protected RootBeanDefinition createContainerFactory(String factoryId, Element containerEle, ParserContext parserContext,
+			PropertyValues commonContainerProperties, PropertyValues specificContainerProperties) {
+
+		RootBeanDefinition factoryDef = new RootBeanDefinition();
+
+		String containerType = containerEle.getAttribute(CONTAINER_TYPE_ATTRIBUTE);
+		String containerClass = containerEle.getAttribute(CONTAINER_CLASS_ATTRIBUTE);
+		if (!"".equals(containerClass)) {
+			return null; // Not supported
+		}
+		else if ("".equals(containerType) || containerType.startsWith("default")) {
+			factoryDef.setBeanClassName("org.springframework.jms.config.DefaultJmsListenerContainerFactory");
+		}
+		else if (containerType.startsWith("simple")) {
+			factoryDef.setBeanClassName("org.springframework.jms.config.SimpleJmsListenerContainerFactory");
+		}
+
+		factoryDef.getPropertyValues().addPropertyValues(commonContainerProperties);
+		factoryDef.getPropertyValues().addPropertyValues(specificContainerProperties);
+
+		return factoryDef;
+	}
+
+	@Override
+	protected RootBeanDefinition createContainer(Element containerEle, Element listenerEle, ParserContext parserContext,
+			PropertyValues commonContainerProperties, PropertyValues specificContainerProperties) {
+
 		RootBeanDefinition containerDef = new RootBeanDefinition();
 		containerDef.setSource(parserContext.extractSource(containerEle));
-
-		parseListenerConfiguration(listenerEle, parserContext, containerDef);
-		parseContainerConfiguration(containerEle, parserContext, containerDef);
+		containerDef.getPropertyValues().addPropertyValues(commonContainerProperties);
+		containerDef.getPropertyValues().addPropertyValues(specificContainerProperties);
 
 		String containerType = containerEle.getAttribute(CONTAINER_TYPE_ATTRIBUTE);
 		String containerClass = containerEle.getAttribute(CONTAINER_CLASS_ATTRIBUTE);
@@ -76,6 +105,18 @@ class JmsListenerContainerParser extends AbstractListenerContainerParser {
 					"Invalid 'container-type' attribute: only \"default\" and \"simple\" supported.", containerEle);
 		}
 
+		// Parse listener specific settings
+		parseListenerConfiguration(listenerEle, parserContext, containerDef.getPropertyValues());
+
+		return containerDef;
+	}
+
+	@Override
+	protected MutablePropertyValues parseSpecificContainerProperties(Element containerEle, ParserContext parserContext) {
+		MutablePropertyValues properties = new MutablePropertyValues();
+
+		boolean isSimpleContainer = containerEle.getAttribute(CONTAINER_TYPE_ATTRIBUTE).startsWith("simple");
+
 		String connectionFactoryBeanName = "connectionFactory";
 		if (containerEle.hasAttribute(CONNECTION_FACTORY_ATTRIBUTE)) {
 			connectionFactoryBeanName = containerEle.getAttribute(CONNECTION_FACTORY_ATTRIBUTE);
@@ -85,101 +126,99 @@ class JmsListenerContainerParser extends AbstractListenerContainerParser {
 			}
 		}
 		if (StringUtils.hasText(connectionFactoryBeanName)) {
-			containerDef.getPropertyValues().add("connectionFactory",
-					new RuntimeBeanReference(connectionFactoryBeanName));
+			properties.add("connectionFactory", new RuntimeBeanReference(connectionFactoryBeanName));
 		}
 
 		String taskExecutorBeanName = containerEle.getAttribute(TASK_EXECUTOR_ATTRIBUTE);
 		if (StringUtils.hasText(taskExecutorBeanName)) {
-			containerDef.getPropertyValues().add("taskExecutor",
-					new RuntimeBeanReference(taskExecutorBeanName));
+			properties.add("taskExecutor", new RuntimeBeanReference(taskExecutorBeanName));
 		}
 
 		String errorHandlerBeanName = containerEle.getAttribute(ERROR_HANDLER_ATTRIBUTE);
 		if (StringUtils.hasText(errorHandlerBeanName)) {
-			containerDef.getPropertyValues().add("errorHandler",
-					new RuntimeBeanReference(errorHandlerBeanName));
+			properties.add("errorHandler", new RuntimeBeanReference(errorHandlerBeanName));
 		}
 
 		String destinationResolverBeanName = containerEle.getAttribute(DESTINATION_RESOLVER_ATTRIBUTE);
 		if (StringUtils.hasText(destinationResolverBeanName)) {
-			containerDef.getPropertyValues().add("destinationResolver",
-					new RuntimeBeanReference(destinationResolverBeanName));
+			properties.add("destinationResolver", new RuntimeBeanReference(destinationResolverBeanName));
 		}
 
 		String cache = containerEle.getAttribute(CACHE_ATTRIBUTE);
 		if (StringUtils.hasText(cache)) {
-			if (containerType.startsWith("simple")) {
+			if (isSimpleContainer) {
 				if (!("auto".equals(cache) || "consumer".equals(cache))) {
 					parserContext.getReaderContext().warning(
 							"'cache' attribute not actively supported for listener container of type \"simple\". " +
-							"Effective runtime behavior will be equivalent to \"consumer\" / \"auto\".", containerEle);
+									"Effective runtime behavior will be equivalent to \"consumer\" / \"auto\".", containerEle);
 				}
 			}
 			else {
-				containerDef.getPropertyValues().add("cacheLevelName", "CACHE_" + cache.toUpperCase());
+				properties.add("cacheLevelName", "CACHE_" + cache.toUpperCase());
 			}
 		}
 
 		Integer acknowledgeMode = parseAcknowledgeMode(containerEle, parserContext);
 		if (acknowledgeMode != null) {
 			if (acknowledgeMode == Session.SESSION_TRANSACTED) {
-				containerDef.getPropertyValues().add("sessionTransacted", Boolean.TRUE);
+				properties.add("sessionTransacted", Boolean.TRUE);
 			}
 			else {
-				containerDef.getPropertyValues().add("sessionAcknowledgeMode", acknowledgeMode);
+				properties.add("sessionAcknowledgeMode", acknowledgeMode);
 			}
 		}
 
 		String transactionManagerBeanName = containerEle.getAttribute(TRANSACTION_MANAGER_ATTRIBUTE);
 		if (StringUtils.hasText(transactionManagerBeanName)) {
-			if (containerType.startsWith("simple")) {
+			if (isSimpleContainer) {
 				parserContext.getReaderContext().error(
 						"'transaction-manager' attribute not supported for listener container of type \"simple\".", containerEle);
 			}
 			else {
-				containerDef.getPropertyValues().add("transactionManager",
-						new RuntimeBeanReference(transactionManagerBeanName));
+				properties.add("transactionManager", new RuntimeBeanReference(transactionManagerBeanName));
 			}
 		}
 
 		String concurrency = containerEle.getAttribute(CONCURRENCY_ATTRIBUTE);
 		if (StringUtils.hasText(concurrency)) {
-			containerDef.getPropertyValues().add("concurrency", concurrency);
+			properties.add("concurrency", concurrency);
 		}
 
 		String prefetch = containerEle.getAttribute(PREFETCH_ATTRIBUTE);
 		if (StringUtils.hasText(prefetch)) {
-			if (containerType.startsWith("default")) {
-				containerDef.getPropertyValues().add("maxMessagesPerTask", new Integer(prefetch));
-			}
-		}
-
-		String receiveTimeout = containerEle.getAttribute(RECEIVE_TIMEOUT_ATTRIBUTE);
-		if (StringUtils.hasText(receiveTimeout)) {
-			if (containerType.startsWith("default")) {
-				containerDef.getPropertyValues().add("receiveTimeout", new Integer(receiveTimeout));
-			}
-		}
-
-		String recoveryInterval = containerEle.getAttribute(RECOVERY_INTERVAL_ATTRIBUTE);
-		if (StringUtils.hasText(recoveryInterval)) {
-			if (containerType.startsWith("default")) {
-				containerDef.getPropertyValues().add("recoveryInterval", recoveryInterval);
+			if (!isSimpleContainer) {
+				properties.add("maxMessagesPerTask", prefetch);
 			}
 		}
 
 		String phase = containerEle.getAttribute(PHASE_ATTRIBUTE);
 		if (StringUtils.hasText(phase)) {
-			containerDef.getPropertyValues().add("phase", phase);
+			properties.add("phase", phase);
 		}
 
-		return containerDef;
-	}
+		String receiveTimeout = containerEle.getAttribute(RECEIVE_TIMEOUT_ATTRIBUTE);
+		if (StringUtils.hasText(receiveTimeout)) {
+			if (!isSimpleContainer) {
+				properties.add("receiveTimeout", receiveTimeout);
+			}
+		}
 
-	@Override
-	protected boolean indicatesPubSub(BeanDefinition containerDef) {
-		return indicatesPubSubConfig(containerDef);
+		String backOffBeanName = containerEle.getAttribute(BACK_OFF_ATTRIBUTE);
+		if (StringUtils.hasText(backOffBeanName)) {
+			if (!isSimpleContainer) {
+				properties.add("backOff", new RuntimeBeanReference(backOffBeanName));
+			}
+		}
+		else { // No need to consider this if back-off is set
+			String recoveryInterval = containerEle.getAttribute(RECOVERY_INTERVAL_ATTRIBUTE);
+			if (StringUtils.hasText(recoveryInterval)) {
+				if (!isSimpleContainer) {
+					properties.add("recoveryInterval", recoveryInterval);
+				}
+			}
+		}
+
+		return properties;
 	}
 
 }

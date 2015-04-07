@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 package org.springframework.web.portlet.handler;
 
 import java.io.IOException;
-
 import javax.portlet.PortletException;
 import javax.portlet.PortletRequest;
 import javax.portlet.PortletResponse;
@@ -41,7 +40,7 @@ public class UserRoleAuthorizationInterceptor extends HandlerInterceptorAdapter 
 	 * Set the roles that this interceptor should treat as authorized.
 	 * @param authorizedRoles array of role names
 	 */
-	public final void setAuthorizedRoles(String[] authorizedRoles) {
+	public final void setAuthorizedRoles(String... authorizedRoles) {
 		this.authorizedRoles = authorizedRoles;
 	}
 

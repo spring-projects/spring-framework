@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,14 +16,13 @@
 
 package org.springframework.web.socket.sockjs.transport.handler;
 
-import java.nio.charset.Charset;
 import java.util.Map;
 
 import org.springframework.http.MediaType;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.web.socket.WebSocketHandler;
-import org.springframework.web.socket.sockjs.support.frame.SockJsFrame.DefaultFrameFormat;
-import org.springframework.web.socket.sockjs.support.frame.SockJsFrame.FrameFormat;
+import org.springframework.web.socket.sockjs.frame.DefaultSockJsFrameFormat;
+import org.springframework.web.socket.sockjs.frame.SockJsFrameFormat;
 import org.springframework.web.socket.sockjs.transport.TransportHandler;
 import org.springframework.web.socket.sockjs.transport.TransportType;
 import org.springframework.web.socket.sockjs.transport.session.PollingSockJsSession;
@@ -43,19 +42,19 @@ public class XhrPollingTransportHandler extends AbstractHttpSendingTransportHand
 
 	@Override
 	protected MediaType getContentType() {
-		return new MediaType("application", "javascript", Charset.forName("UTF-8"));
+		return new MediaType("application", "javascript", UTF8_CHARSET);
 	}
 
 	@Override
-	protected FrameFormat getFrameFormat(ServerHttpRequest request) {
-		return new DefaultFrameFormat("%s\n");
+	protected SockJsFrameFormat getFrameFormat(ServerHttpRequest request) {
+		return new DefaultSockJsFrameFormat("%s\n");
 	}
 
 	@Override
-	public PollingSockJsSession createSession(String sessionId, WebSocketHandler wsHandler,
-			Map<String, Object> attributes) {
+	public PollingSockJsSession createSession(
+			String sessionId, WebSocketHandler handler, Map<String, Object> attributes) {
 
-		return new PollingSockJsSession(sessionId, getSockJsServiceConfig(), wsHandler, attributes);
+		return new PollingSockJsSession(sessionId, getServiceConfig(), handler, attributes);
 	}
 
 }

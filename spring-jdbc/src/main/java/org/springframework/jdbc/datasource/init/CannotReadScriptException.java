@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,14 +19,14 @@ package org.springframework.jdbc.datasource.init;
 import org.springframework.core.io.support.EncodedResource;
 
 /**
- * Thrown by {@link ResourceDatabasePopulator} if one of its SQL scripts cannot
- * be read during population.
+ * Thrown by {@link ScriptUtils} if an SQL script cannot be read.
  *
  * @author Keith Donald
+ * @author Sam Brannen
  * @since 3.0
  */
 @SuppressWarnings("serial")
-public class CannotReadScriptException extends RuntimeException {
+public class CannotReadScriptException extends ScriptException {
 
 	/**
 	 * Construct a new {@code CannotReadScriptException}.

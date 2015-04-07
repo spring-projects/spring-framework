@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,8 +22,8 @@ import java.net.URI;
 import org.springframework.http.HttpMethod;
 
 /**
- * Factory for {@link AsyncClientHttpRequest} objects. Requests are created by the
- * {@link #createAsyncRequest(URI, HttpMethod)} method.
+ * Factory for {@link AsyncClientHttpRequest} objects.
+ * Requests are created by the {@link #createAsyncRequest(URI, HttpMethod)} method.
  *
  * @author Arjen Poutsma
  * @since 4.0
@@ -31,17 +31,15 @@ import org.springframework.http.HttpMethod;
 public interface AsyncClientHttpRequestFactory {
 
 	/**
-	 * Create a new asynchronous {@link AsyncClientHttpRequest} for the specified URI and
-	 * HTTP method.
+	 * Create a new asynchronous {@link AsyncClientHttpRequest} for the specified URI
+	 * and HTTP method.
 	 * <p>The returned request can be written to, and then executed by calling
 	 * {@link AsyncClientHttpRequest#executeAsync()}.
-	 *
 	 * @param uri the URI to create a request for
 	 * @param httpMethod the HTTP method to execute
 	 * @return the created request
 	 * @throws IOException in case of I/O errors
 	 */
-	AsyncClientHttpRequest createAsyncRequest(URI uri, HttpMethod httpMethod)
-			throws IOException;
+	AsyncClientHttpRequest createAsyncRequest(URI uri, HttpMethod httpMethod) throws IOException;
 
 }

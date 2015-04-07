@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,10 @@
 
 package org.springframework.expression.spel.ast;
 
+import org.springframework.asm.MethodVisitor;
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.TypedValue;
+import org.springframework.expression.spel.CodeFlow;
 import org.springframework.expression.spel.ExpressionState;
 import org.springframework.expression.spel.SpelEvaluationException;
 
@@ -30,9 +32,10 @@ import org.springframework.expression.spel.SpelEvaluationException;
 public class CompoundExpression extends SpelNodeImpl {
 
 	public CompoundExpression(int pos,SpelNodeImpl... expressionComponents) {
-		super(pos,expressionComponents);
-		if (expressionComponents.length<2) {
-			throw new IllegalStateException("Dont build compound expression less than one entry: "+expressionComponents.length);
+		super(pos, expressionComponents);
+		if (expressionComponents.length < 2) {
+			throw new IllegalStateException("Do not build compound expressions with less than two entries: " +
+					expressionComponents.length);
 		}
 	}
 
@@ -42,11 +45,10 @@ public class CompoundExpression extends SpelNodeImpl {
 		if (getChildCount() == 1) {
 			return this.children[0].getValueRef(state);
 		}
-		TypedValue result = null;
-		SpelNodeImpl nextNode = null;
+
+		SpelNodeImpl nextNode = this.children[0];
 		try {
-			nextNode = this.children[0];
-			result = nextNode.getValueInternal(state);
+			TypedValue result = nextNode.getValueInternal(state);
 			int cc = getChildCount();
 			for (int i = 1; i < cc - 1; i++) {
 				try {
@@ -67,22 +69,25 @@ public class CompoundExpression extends SpelNodeImpl {
 				state.popActiveContextObject();
 			}
 		}
-		catch (SpelEvaluationException ee) {
+		catch (SpelEvaluationException ex) {
 			// Correct the position for the error before re-throwing
-			ee.setPosition(nextNode.getStartPosition());
-			throw ee;
+			ex.setPosition(nextNode.getStartPosition());
+			throw ex;
 		}
 	}
 
 	/**
-	 * Evaluates a compound expression. This involves evaluating each piece in turn and the return value from each piece
-	 * is the active context object for the subsequent piece.
+	 * Evaluates a compound expression. This involves evaluating each piece in turn and the
+	 * return value from each piece is the active context object for the subsequent piece.
 	 * @param state the state in which the expression is being evaluated
 	 * @return the final value from the last piece of the compound expression
 	 */
 	@Override
 	public TypedValue getValueInternal(ExpressionState state) throws EvaluationException {
-		return getValueRef(state).getValue();
+		ValueRef ref = getValueRef(state);
+		TypedValue result = ref.getValue();
+		this.exitTypeDescriptor = this.children[this.children.length - 1].exitTypeDescriptor;
+		return result;
 	}
 
 	@Override
@@ -105,6 +110,30 @@ public class CompoundExpression extends SpelNodeImpl {
 			sb.append(getChild(i).toStringAST());
 		}
 		return sb.toString();
+	}
+	
+	@Override
+	public boolean isCompilable() {
+		for (SpelNodeImpl child: this.children) {
+			if (!child.isCompilable()) {
+				return false;
+			}
+		}
+		return true;
+	}
+	
+	@Override
+	public void generateCode(MethodVisitor mv, CodeFlow cf) {
+		// TODO could optimize T(SomeType).staticMethod - no need to generate the T() part
+		for (int i = 0; i < this.children.length;i++) {
+			SpelNodeImpl child = this.children[i];
+			if (child instanceof TypeReference && (i + 1) < this.children.length &&
+					this.children[i + 1] instanceof MethodReference) {
+				continue;
+			}
+			child.generateCode(mv, cf);
+		}
+		cf.pushDescriptor(this.exitTypeDescriptor);
 	}
 
 }

@@ -19,13 +19,14 @@ package org.springframework.http.converter;
 import java.io.IOException;
 import java.nio.charset.Charset;
 
-import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
 
 import org.springframework.http.MediaType;
 import org.springframework.http.MockHttpInputMessage;
 import org.springframework.http.MockHttpOutputMessage;
+
+import static org.junit.Assert.*;
 
 /** @author Arjen Poutsma */
 public class StringHttpMessageConverterTests {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,9 @@
 
 package org.springframework.orm.jpa;
 
+import javax.persistence.EntityManager;
+import javax.persistence.Query;
+
 import org.springframework.test.jpa.AbstractJpaTests;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
@@ -23,6 +26,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * @author Rod Johnson
  * @author Juergen Hoeller
  */
+@SuppressWarnings("deprecation")
 public abstract class AbstractEntityManagerFactoryIntegrationTests extends AbstractJpaTests {
 
 	public static final String[] ECLIPSELINK_CONFIG_LOCATIONS = new String[] {
@@ -81,8 +85,14 @@ public abstract class AbstractEntityManagerFactoryIntegrationTests extends Abstr
 		assertFalse(TransactionSynchronizationManager.isActualTransactionActive());
 	}
 
+	protected int countRowsInTable(EntityManager em, String tableName) {
+		Query query = em.createNativeQuery("SELECT COUNT(0) FROM " + tableName);
+		return ((Number) query.getSingleResult()).intValue();
+	}
+
 
 	public enum Provider {
+
 		ECLIPSELINK, HIBERNATE, OPENJPA
 	}
 

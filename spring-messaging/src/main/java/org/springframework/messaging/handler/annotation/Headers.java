@@ -22,7 +22,6 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-
 /**
  * Annotation which indicates that a method parameter should be bound to the headers of a
  * message. The annotated parameter must be assignable to {@link java.util.Map} with

@@ -30,6 +30,7 @@ import org.springframework.beans.PropertyValues;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.BeanInitializationException;
+import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.config.InstantiationAwareBeanPostProcessorAdapter;
 import org.springframework.beans.factory.support.MergedBeanDefinitionPostProcessor;
@@ -165,6 +166,8 @@ public class RequiredAnnotationBeanPostProcessor extends InstantiationAwareBeanP
 	 * required property check as performed by this post-processor.
 	 * <p>The default implementations check for the presence of the
 	 * {@link #SKIP_REQUIRED_CHECK_ATTRIBUTE} attribute in the bean definition, if any.
+	 * It also suggests skipping in case of a bean definition with a "factory-bean"
+	 * reference set, assuming that instance-based factories pre-populate the bean.
 	 * @param beanFactory the BeanFactory to check against
 	 * @param beanName the name of the bean to check against
 	 * @return {@code true} to skip the bean; {@code false} to process it
@@ -173,7 +176,11 @@ public class RequiredAnnotationBeanPostProcessor extends InstantiationAwareBeanP
 		if (beanFactory == null || !beanFactory.containsBeanDefinition(beanName)) {
 			return false;
 		}
-		Object value = beanFactory.getBeanDefinition(beanName).getAttribute(SKIP_REQUIRED_CHECK_ATTRIBUTE);
+		BeanDefinition beanDefinition = beanFactory.getBeanDefinition(beanName);
+		if (beanDefinition.getFactoryBeanName() != null) {
+			return true;
+		}
+		Object value = beanDefinition.getAttribute(SKIP_REQUIRED_CHECK_ATTRIBUTE);
 		return (value != null && (Boolean.TRUE.equals(value) || Boolean.valueOf(value.toString())));
 	}
 

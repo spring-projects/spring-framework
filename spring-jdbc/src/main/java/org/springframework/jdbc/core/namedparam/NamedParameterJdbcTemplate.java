@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,6 +51,8 @@ import org.springframework.util.Assert;
  * <p>The underlying {@link org.springframework.jdbc.core.JdbcTemplate} is
  * exposed to allow for convenient access to the traditional
  * {@link org.springframework.jdbc.core.JdbcTemplate} methods.
+ *
+ * <p><b>NOTE: An instance of this class is thread-safe once configured.</b>
  *
  * @author Thomas Risberg
  * @author Juergen Hoeller
@@ -242,32 +244,6 @@ public class NamedParameterJdbcTemplate implements NamedParameterJdbcOperations 
 	}
 
 	@Override
-	@Deprecated
-	public long queryForLong(String sql, SqlParameterSource paramSource) throws DataAccessException {
-		Number number = queryForObject(sql, paramSource, Long.class);
-		return (number != null ? number.longValue() : 0);
-	}
-
-	@Override
-	@Deprecated
-	public long queryForLong(String sql, Map<String, ?> paramMap) throws DataAccessException {
-		return queryForLong(sql, new MapSqlParameterSource(paramMap));
-	}
-
-	@Override
-	@Deprecated
-	public int queryForInt(String sql, SqlParameterSource paramSource) throws DataAccessException {
-		Number number = queryForObject(sql, paramSource, Integer.class);
-		return (number != null ? number.intValue() : 0);
-	}
-
-	@Override
-	@Deprecated
-	public int queryForInt(String sql, Map<String, ?> paramMap) throws DataAccessException {
-		return queryForInt(sql, new MapSqlParameterSource(paramMap));
-	}
-
-	@Override
 	public <T> List<T> queryForList(String sql, SqlParameterSource paramSource, Class<T> elementType)
 			throws DataAccessException {
 
@@ -355,7 +331,7 @@ public class NamedParameterJdbcTemplate implements NamedParameterJdbcOperations 
 
 	@Override
 	public int[] batchUpdate(String sql, SqlParameterSource[] batchArgs) {
-		ParsedSql parsedSql = this.getParsedSql(sql);
+		ParsedSql parsedSql = getParsedSql(sql);
 		return NamedParameterBatchUpdateUtils.executeBatchUpdateWithNamedParameters(parsedSql, batchArgs, getJdbcOperations());
 	}
 

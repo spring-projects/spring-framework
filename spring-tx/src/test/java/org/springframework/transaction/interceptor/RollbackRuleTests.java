@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,14 +16,14 @@
 
 package org.springframework.transaction.interceptor;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.junit.Assert.assertThat;
-
 import java.io.IOException;
 
 import junit.framework.TestCase;
 
 import org.springframework.beans.FatalBeanException;
+
+import static org.hamcrest.CoreMatchers.*;
+import static org.junit.Assert.*;
 
 /**
  * Unit tests for the {@link RollbackRuleAttribute} class.
@@ -75,7 +75,7 @@ public class RollbackRuleTests extends TestCase {
 
 	public void testCtorArgMustBeAThrowableClassWithNullThrowableType() {
 		try {
-			new RollbackRuleAttribute((Class) null);
+			new RollbackRuleAttribute((Class<?>) null);
 			fail("Cannot construct a RollbackRuleAttribute with a null-Throwable type");
 		}
 		catch (IllegalArgumentException expected) {

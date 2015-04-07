@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,15 +16,20 @@
 
 package org.springframework.expression.spel.ast;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
+
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.Operation;
 import org.springframework.expression.TypedValue;
 import org.springframework.expression.spel.ExpressionState;
+import org.springframework.util.NumberUtils;
 
 /**
  * The power operator.
  *
  * @author Andy Clement
+ * @author Giovanni Dall'Oglio Risso
  * @since 3.0
  */
 public class OperatorPower extends Operator {
@@ -39,32 +44,38 @@ public class OperatorPower extends Operator {
 		SpelNodeImpl leftOp = getLeftOperand();
 		SpelNodeImpl rightOp = getRightOperand();
 
-		Object operandOne = leftOp.getValueInternal(state).getValue();
-		Object operandTwo = rightOp.getValueInternal(state).getValue();
-		if (operandOne instanceof Number && operandTwo instanceof Number) {
-			Number op1 = (Number) operandOne;
-			Number op2 = (Number) operandTwo;
-			if (op1 instanceof Double || op2 instanceof Double) {
-				return new TypedValue(Math.pow(op1.doubleValue(), op2.doubleValue()));
+		Object leftOperand = leftOp.getValueInternal(state).getValue();
+		Object rightOperand = rightOp.getValueInternal(state).getValue();
+
+		if (leftOperand instanceof Number && rightOperand instanceof Number) {
+			Number leftNumber = (Number) leftOperand;
+			Number rightNumber = (Number) rightOperand;
+
+			if (leftNumber instanceof BigDecimal) {
+				BigDecimal leftBigDecimal = NumberUtils.convertNumberToTargetClass(leftNumber, BigDecimal.class);
+				return new TypedValue(leftBigDecimal.pow(rightNumber.intValue()));
 			}
-			else if (op1 instanceof Float || op2 instanceof Float) {
-				return new TypedValue(Math.pow(op1.floatValue(), op2.floatValue()));
+			else if (leftNumber instanceof BigInteger) {
+				BigInteger leftBigInteger = NumberUtils.convertNumberToTargetClass(leftNumber, BigInteger.class);
+				return new TypedValue(leftBigInteger.pow(rightNumber.intValue()));
 			}
-			else if (op1 instanceof Long || op2 instanceof Long) {
-				double d = Math.pow(op1.longValue(), op2.longValue());
+			else if (leftNumber instanceof Double || rightNumber instanceof Double) {
+				return new TypedValue(Math.pow(leftNumber.doubleValue(), rightNumber.doubleValue()));
+			}
+			else if (leftNumber instanceof Float || rightNumber instanceof Float) {
+				return new TypedValue(Math.pow(leftNumber.floatValue(), rightNumber.floatValue()));
+			}
+
+			double d = Math.pow(leftNumber.doubleValue(), rightNumber.doubleValue());
+			if (d > Integer.MAX_VALUE || leftNumber instanceof Long || rightNumber instanceof Long) {
 				return new TypedValue((long) d);
 			}
 			else {
-				double d = Math.pow(op1.longValue(), op2.longValue());
-				if (d > Integer.MAX_VALUE) {
-					return new TypedValue((long) d);
-				}
-				else {
-					return new TypedValue((int) d);
-				}
+				return new TypedValue((int) d);
 			}
 		}
-		return state.operate(Operation.POWER, operandOne, operandTwo);
+
+		return state.operate(Operation.POWER, leftOperand, rightOperand);
 	}
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,55 +29,56 @@ import org.springframework.beans.factory.BeanFactory;
  * including using CGLIB to create subclasses on the fly to support Method Injection.
  *
  * @author Rod Johnson
+ * @author Juergen Hoeller
  * @since 1.1
  */
 public interface InstantiationStrategy {
 
 	/**
 	 * Return an instance of the bean with the given name in this factory.
-	 * @param beanDefinition the bean definition
-	 * @param beanName name of the bean when it's created in this context.
-	 * The name can be {@code null} if we're autowiring a bean that
-	 * doesn't belong to the factory.
-	 * @param owner owning BeanFactory
+	 * @param bd the bean definition
+	 * @param beanName the name of the bean when it's created in this context.
+	 * The name can be {@code null} if we're autowiring a bean which doesn't
+	 * belong to the factory.
+	 * @param owner the owning BeanFactory
 	 * @return a bean instance for this bean definition
-	 * @throws BeansException if the instantiation failed
+	 * @throws BeansException if the instantiation attempt failed
 	 */
-	Object instantiate(RootBeanDefinition beanDefinition, String beanName, BeanFactory owner)
+	Object instantiate(RootBeanDefinition bd, String beanName, BeanFactory owner)
 			throws BeansException;
 
 	/**
 	 * Return an instance of the bean with the given name in this factory,
 	 * creating it via the given constructor.
-	 * @param beanDefinition the bean definition
-	 * @param beanName name of the bean when it's created in this context.
-	 * The name can be {@code null} if we're autowiring a bean
-	 * that doesn't belong to the factory.
-	 * @param owner owning BeanFactory
+	 * @param bd the bean definition
+	 * @param beanName the name of the bean when it's created in this context.
+	 * The name can be {@code null} if we're autowiring a bean which doesn't
+	 * belong to the factory.
+	 * @param owner the owning BeanFactory
 	 * @param ctor the constructor to use
 	 * @param args the constructor arguments to apply
 	 * @return a bean instance for this bean definition
-	 * @throws BeansException if the instantiation failed
+	 * @throws BeansException if the instantiation attempt failed
 	 */
-	Object instantiate(RootBeanDefinition beanDefinition, String beanName, BeanFactory owner,
-			Constructor<?> ctor, Object[] args) throws BeansException;
+	Object instantiate(RootBeanDefinition bd, String beanName, BeanFactory owner,
+			Constructor<?> ctor, Object... args) throws BeansException;
 
 	/**
 	 * Return an instance of the bean with the given name in this factory,
 	 * creating it via the given factory method.
-	 * @param beanDefinition bean definition
-	 * @param beanName name of the bean when it's created in this context.
-	 * The name can be {@code null} if we're autowiring a bean
-	 * that doesn't belong to the factory.
-	 * @param owner owning BeanFactory
+	 * @param bd the bean definition
+	 * @param beanName the name of the bean when it's created in this context.
+	 * The name can be {@code null} if we're autowiring a bean which doesn't
+	 * belong to the factory.
+	 * @param owner the owning BeanFactory
 	 * @param factoryBean the factory bean instance to call the factory method on,
 	 * or {@code null} in case of a static factory method
 	 * @param factoryMethod the factory method to use
 	 * @param args the factory method arguments to apply
 	 * @return a bean instance for this bean definition
-	 * @throws BeansException if the instantiation failed
+	 * @throws BeansException if the instantiation attempt failed
 	 */
-	Object instantiate(RootBeanDefinition beanDefinition, String beanName, BeanFactory owner,
-			Object factoryBean, Method factoryMethod, Object[] args) throws BeansException;
+	Object instantiate(RootBeanDefinition bd, String beanName, BeanFactory owner,
+			Object factoryBean, Method factoryMethod, Object... args) throws BeansException;
 
 }

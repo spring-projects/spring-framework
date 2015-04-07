@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -15,7 +15,6 @@
  */
 
 package org.springframework.web.socket.sockjs;
-
 
 /**
  * Indicates a serious failure that occurred in the SockJS implementation as opposed to in
@@ -27,7 +26,6 @@ package org.springframework.web.socket.sockjs;
  */
 @SuppressWarnings("serial")
 public class SockJsTransportFailureException extends SockJsException {
-
 
 	public SockJsTransportFailureException(String message, String sessionId, Throwable cause) {
 		super(message, sessionId, cause);

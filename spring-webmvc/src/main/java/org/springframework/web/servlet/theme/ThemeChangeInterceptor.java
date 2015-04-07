@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@ import org.springframework.web.servlet.support.RequestContextUtils;
 
 /**
  * Interceptor that allows for changing the current theme on every request,
- * via a configurable request parameter.
+ * via a configurable request parameter (default parameter name: "theme").
  *
  * @author Juergen Hoeller
  * @since 20.06.2003
@@ -63,12 +63,12 @@ public class ThemeChangeInterceptor extends HandlerInterceptorAdapter {
 	public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
 			throws ServletException {
 
-		ThemeResolver themeResolver = RequestContextUtils.getThemeResolver(request);
-		if (themeResolver == null) {
-			throw new IllegalStateException("No ThemeResolver found: not in a DispatcherServlet request?");
-		}
 		String newTheme = request.getParameter(this.paramName);
 		if (newTheme != null) {
+			ThemeResolver themeResolver = RequestContextUtils.getThemeResolver(request);
+			if (themeResolver == null) {
+				throw new IllegalStateException("No ThemeResolver found: not in a DispatcherServlet request?");
+			}
 			themeResolver.setThemeName(request, response, newTheme);
 		}
 		// Proceed in any case.

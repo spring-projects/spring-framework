@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,11 +20,15 @@ import javax.sql.DataSource;
 
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.util.Assert;
 
 /**
- * Used to populate a database during initialization.
+ * Used to {@linkplain #setDatabasePopulator set up} a database during
+ * initialization and {@link #setDatabaseCleaner clean up} a database during
+ * destruction.
  *
  * @author Dave Syer
+ * @author Sam Brannen
  * @since 3.0
  * @see DatabasePopulator
  */
@@ -40,8 +44,9 @@ public class DataSourceInitializer implements InitializingBean, DisposableBean {
 
 
 	/**
-	 * The {@link DataSource} to populate when this component is initialized.
-	 * Mandatory with no default.
+	 * The {@link DataSource} for the database to populate when this component
+	 * is initialized and to clean up when this component is shut down.
+	 * <p>This property is mandatory with no default provided.
 	 * @param dataSource the DataSource
 	 */
 	public void setDataSource(DataSource dataSource) {
@@ -49,49 +54,58 @@ public class DataSourceInitializer implements InitializingBean, DisposableBean {
 	}
 
 	/**
-	 * The {@link DatabasePopulator} to use to populate the data source.
-	 * Mandatory with no default.
-	 * @param databasePopulator the database populator to use.
+	 * Set the {@link DatabasePopulator} to execute during the bean initialization
+	 * phase.
+	 * @param databasePopulator the {@code DatabasePopulator} to use during
+	 * initialization
+	 * @see #setDatabaseCleaner
 	 */
 	public void setDatabasePopulator(DatabasePopulator databasePopulator) {
 		this.databasePopulator = databasePopulator;
 	}
 
 	/**
-	 * Set a script execution to be run in the bean destruction callback,
-	 * cleaning up the database and leaving it in a known state for others.
-	 * @param databaseCleaner the database script executor to run on destroy
+	 * Set the {@link DatabasePopulator} to execute during the bean destruction
+	 * phase, cleaning up the database and leaving it in a known state for others.
+	 * @param databaseCleaner the {@code DatabasePopulator} to use during destruction
+	 * @see #setDatabasePopulator
 	 */
 	public void setDatabaseCleaner(DatabasePopulator databaseCleaner) {
 		this.databaseCleaner = databaseCleaner;
 	}
 
 	/**
-	 * Flag to explicitly enable or disable the database populator.
-	 * @param enabled true if the database populator will be called on startup
+	 * Flag to explicitly enable or disable the {@linkplain #setDatabasePopulator
+	 * database populator} and {@linkplain #setDatabaseCleaner database cleaner}.
+	 * @param enabled {@code true} if the database populator and database cleaner
+	 * should be called on startup and shutdown, respectively
 	 */
 	public void setEnabled(boolean enabled) {
 		this.enabled = enabled;
 	}
 
-
 	/**
-	 * Use the populator to set up data in the data source.
+	 * Use the {@linkplain #setDatabasePopulator database populator} to set up
+	 * the database.
 	 */
 	@Override
 	public void afterPropertiesSet() {
-		if (this.databasePopulator != null && this.enabled) {
-			DatabasePopulatorUtils.execute(this.databasePopulator, this.dataSource);
-		}
+		execute(this.databasePopulator);
 	}
 
 	/**
-	 * Use the populator to clean up data in the data source.
+	 * Use the {@linkplain #setDatabaseCleaner database cleaner} to clean up the
+	 * database.
 	 */
 	@Override
 	public void destroy() {
-		if (this.databaseCleaner != null && this.enabled) {
-			DatabasePopulatorUtils.execute(this.databaseCleaner, this.dataSource);
+		execute(this.databaseCleaner);
+	}
+
+	private void execute(DatabasePopulator populator) {
+		Assert.state(dataSource != null, "DataSource must be set");
+		if (this.enabled && populator != null) {
+			DatabasePopulatorUtils.execute(populator, this.dataSource);
 		}
 	}
 

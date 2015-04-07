@@ -17,7 +17,6 @@
 package org.springframework.jca.cci.object;
 
 import java.sql.SQLException;
-
 import javax.resource.ResourceException;
 import javax.resource.cci.ConnectionFactory;
 import javax.resource.cci.InteractionSpec;
@@ -140,7 +139,7 @@ public abstract class MappingRecordOperation extends EisOperation {
 	 * Implementation of RecordExtractor that calls the enclosing
 	 * class's {@code extractOutputData} method.
 	 */
-	protected class RecordExtractorImpl implements RecordExtractor {
+	protected class RecordExtractorImpl implements RecordExtractor<Object> {
 
 		@Override
 		public Object extractData(Record record) throws ResourceException, SQLException, DataAccessException {

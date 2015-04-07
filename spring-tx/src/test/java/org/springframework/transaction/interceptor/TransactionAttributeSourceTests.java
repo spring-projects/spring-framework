@@ -16,8 +16,6 @@
 
 package org.springframework.transaction.interceptor;
 
-import static org.junit.Assert.*;
-
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -25,7 +23,10 @@ import java.util.Properties;
 
 import org.junit.Ignore;
 import org.junit.Test;
+
 import org.springframework.transaction.TransactionDefinition;
+
+import static org.junit.Assert.*;
 
 /**
  * Unit tests for the various {@link TransactionAttributeSource} implementations.
@@ -52,6 +53,16 @@ public final class TransactionAttributeSourceTests {
 				IOException.class.getMethod("getMessage", (Class[]) null), IOException.class);
 		assertNotNull(ta);
 		assertTrue(TransactionDefinition.PROPAGATION_SUPPORTS == ta.getPropagationBehavior());
+	}
+
+	@Test
+	public void testMatchAlwaysTransactionAttributeSourceWithNulls() throws Exception {
+		MatchAlwaysTransactionAttributeSource tas = new MatchAlwaysTransactionAttributeSource();
+		TransactionDefinition definition = tas.getTransactionAttribute(null, null);
+		assertEquals(TransactionDefinition.PROPAGATION_REQUIRED, definition.getPropagationBehavior());
+		assertEquals(TransactionDefinition.ISOLATION_DEFAULT, definition.getIsolationLevel());
+		assertEquals(TransactionDefinition.TIMEOUT_DEFAULT, definition.getTimeout());
+		assertFalse(definition.isReadOnly());
 	}
 
 	@SuppressWarnings("unchecked")

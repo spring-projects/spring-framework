@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,16 +15,6 @@
  */
 
 package org.springframework.web.servlet.mvc.annotation;
-
-import static org.hamcrest.Matchers.instanceOf;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 import java.beans.PropertyEditorSupport;
 import java.io.IOException;
@@ -53,7 +43,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
-
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -65,6 +54,7 @@ import javax.validation.constraints.NotNull;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import org.junit.Test;
+
 import org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator;
 import org.springframework.aop.interceptor.SimpleTraceInterceptor;
 import org.springframework.aop.support.DefaultPointcutAdvisor;
@@ -150,12 +140,16 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.view.InternalResourceViewResolver;
 import org.springframework.web.util.NestedServletException;
 
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
+
 /**
  * @author Juergen Hoeller
  * @author Sam Brannen
  * @author Arjen Poutsma
  * @since 2.5
  */
+@SuppressWarnings("deprecation")
 public class ServletAnnotationControllerTests {
 
 	private DispatcherServlet servlet;
@@ -2394,7 +2388,12 @@ public class ServletAnnotationControllerTests {
 	@Controller
 	private static class MyTypedCommandProvidingFormController
 			extends MyCommandProvidingFormController<Integer, TestBean, ITestBean> {
+	}
 
+	@Validated(MyGroup.class)
+	@Target({ElementType.PARAMETER})
+	@Retention(RetentionPolicy.RUNTIME)
+	public @interface MyValid {
 	}
 
 	@Controller
@@ -2415,7 +2414,7 @@ public class ServletAnnotationControllerTests {
 
 		@Override
 		@RequestMapping("/myPath.do")
-		public String myHandle(@ModelAttribute("myCommand") @Validated(MyGroup.class) TestBean tb, BindingResult errors, ModelMap model) {
+		public String myHandle(@ModelAttribute("myCommand") @MyValid TestBean tb, BindingResult errors, ModelMap model) {
 			if (!errors.hasFieldErrors("sex")) {
 				throw new IllegalStateException("requiredFields not applied");
 			}
@@ -2482,18 +2481,21 @@ public class ServletAnnotationControllerTests {
 		private transient ServletConfig servletConfig;
 
 		@Autowired
-		private HttpSession session;
+		private HttpServletRequest request;
 
 		@Autowired
-		private HttpServletRequest request;
+		private HttpServletResponse response;
+
+		@Autowired
+		private HttpSession session;
 
 		@Autowired
 		private WebRequest webRequest;
 
 		@RequestMapping
 		public void myHandle(HttpServletResponse response, HttpServletRequest request) throws IOException {
-			if (this.servletContext == null || this.servletConfig == null || this.session == null ||
-					this.request == null || this.webRequest == null) {
+			if (this.servletContext == null || this.servletConfig == null || this.request == null ||
+					this.response == null || this.session == null || this.webRequest == null) {
 				throw new IllegalStateException();
 			}
 			response.getWriter().write("myView");
@@ -2715,11 +2717,10 @@ public class ServletAnnotationControllerTests {
 		}
 	}
 
+	@Controller
 	@Target({ElementType.TYPE})
 	@Retention(RetentionPolicy.RUNTIME)
-	@Controller
 	public @interface MyControllerAnnotation {
-
 	}
 
 	@MyControllerAnnotation

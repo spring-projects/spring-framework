@@ -58,7 +58,6 @@ abstract class AbstractAsyncClientHttpRequest implements AsyncClientHttpRequest 
 
 	/**
 	 * Asserts that this request has not been {@linkplain #executeAsync() executed} yet.
-	 *
 	 * @throws IllegalStateException if this request has been executed
 	 */
 	protected void assertNotExecuted() {

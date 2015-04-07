@@ -32,17 +32,18 @@ import org.springframework.core.GenericCollectionTypeResolver;
  * @see SetFactoryBean
  * @see MapFactoryBean
  */
-public class ListFactoryBean extends AbstractFactoryBean<List> {
+public class ListFactoryBean extends AbstractFactoryBean<List<Object>> {
 
-	private List sourceList;
+	private List<?> sourceList;
 
-	private Class targetListClass;
+	@SuppressWarnings("rawtypes")
+	private Class<? extends List> targetListClass;
 
 
 	/**
 	 * Set the source List, typically populated via XML "list" elements.
 	 */
-	public void setSourceList(List sourceList) {
+	public void setSourceList(List<?> sourceList) {
 		this.sourceList = sourceList;
 	}
 
@@ -52,7 +53,8 @@ public class ListFactoryBean extends AbstractFactoryBean<List> {
 	 * <p>Default is a {@code java.util.ArrayList}.
 	 * @see java.util.ArrayList
 	 */
-	public void setTargetListClass(Class targetListClass) {
+	@SuppressWarnings("rawtypes")
+	public void setTargetListClass(Class<? extends List> targetListClass) {
 		if (targetListClass == null) {
 			throw new IllegalArgumentException("'targetListClass' must not be null");
 		}
@@ -64,24 +66,25 @@ public class ListFactoryBean extends AbstractFactoryBean<List> {
 
 
 	@Override
+	@SuppressWarnings("rawtypes")
 	public Class<List> getObjectType() {
 		return List.class;
 	}
 
 	@Override
 	@SuppressWarnings("unchecked")
-	protected List createInstance() {
+	protected List<Object> createInstance() {
 		if (this.sourceList == null) {
 			throw new IllegalArgumentException("'sourceList' is required");
 		}
-		List result = null;
+		List<Object> result = null;
 		if (this.targetListClass != null) {
-			result = (List) BeanUtils.instantiateClass(this.targetListClass);
+			result = BeanUtils.instantiateClass(this.targetListClass);
 		}
 		else {
-			result = new ArrayList(this.sourceList.size());
+			result = new ArrayList<Object>(this.sourceList.size());
 		}
-		Class valueType = null;
+		Class<?> valueType = null;
 		if (this.targetListClass != null) {
 			valueType = GenericCollectionTypeResolver.getCollectionType(this.targetListClass);
 		}

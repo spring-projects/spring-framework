@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -184,44 +184,6 @@ public interface JdbcOperations {
 	Map<String, Object> queryForMap(String sql) throws DataAccessException;
 
 	/**
-	 * Execute a query that results in a long value, given static SQL.
-	 * <p>Uses a JDBC Statement, not a PreparedStatement. If you want to
-	 * execute a static query with a PreparedStatement, use the overloaded
-	 * {@code queryForLong} method with {@code null} as argument array.
-	 * <p>This method is useful for running static SQL with a known outcome.
-	 * The query is expected to be a single row/single column query that results
-	 * in a long value.
-	 * @param sql SQL query to execute
-	 * @return the long value, or 0 in case of SQL NULL
-	 * @throws IncorrectResultSizeDataAccessException if the query does not return
-	 * exactly one row, or does not return exactly one column in that row
-	 * @throws DataAccessException if there is any problem executing the query
-	 * @see #queryForLong(String, Object[])
-	 * @deprecated in favor of {@link #queryForObject(String, Class)}
-	 */
-	@Deprecated
-	long queryForLong(String sql) throws DataAccessException;
-
-	/**
-	 * Execute a query that results in an int value, given static SQL.
-	 * <p>Uses a JDBC Statement, not a PreparedStatement. If you want to
-	 * execute a static query with a PreparedStatement, use the overloaded
-	 * {@code queryForInt} method with {@code null} as argument array.
-	 * <p>This method is useful for running static SQL with a known outcome.
-	 * The query is expected to be a single row/single column query that results
-	 * in an int value.
-	 * @param sql SQL query to execute
-	 * @return the int value, or 0 in case of SQL NULL
-	 * @throws IncorrectResultSizeDataAccessException if the query does not return
-	 * exactly one row, or does not return exactly one column in that row
-	 * @throws DataAccessException if there is any problem executing the query
-	 * @see #queryForInt(String, Object[])
-	 * @deprecated in favor of {@link #queryForObject(String, Class)}
-	 */
-	@Deprecated
-	int queryForInt(String sql) throws DataAccessException;
-
-	/**
 	 * Execute a query for a result list, given static SQL.
 	 * <p>Uses a JDBC Statement, not a PreparedStatement. If you want to
 	 * execute a static query with a PreparedStatement, use the overloaded
@@ -291,7 +253,7 @@ public interface JdbcOperations {
 	 * @return an array of the number of rows affected by each statement
 	 * @throws DataAccessException if there is any problem executing the batch
 	 */
-	int[] batchUpdate(String[] sql) throws DataAccessException;
+	int[] batchUpdate(String... sql) throws DataAccessException;
 
 
 	//-------------------------------------------------------------------------
@@ -311,8 +273,7 @@ public interface JdbcOperations {
 	 * @return a result object returned by the action, or {@code null}
 	 * @throws DataAccessException if there is any problem
 	 */
-	<T> T execute(PreparedStatementCreator psc, PreparedStatementCallback<T> action)
-			throws DataAccessException;
+	<T> T execute(PreparedStatementCreator psc, PreparedStatementCallback<T> action) throws DataAccessException;
 
 	/**
 	 * Execute a JDBC data access operation, implemented as callback action
@@ -354,8 +315,7 @@ public interface JdbcOperations {
 	 * @return an arbitrary result object, as returned by the ResultSetExtractor
 	 * @throws DataAccessException if there is any problem
 	 */
-	<T> T query(String sql, PreparedStatementSetter pss, ResultSetExtractor<T> rse)
-			throws DataAccessException;
+	<T> T query(String sql, PreparedStatementSetter pss, ResultSetExtractor<T> rse) throws DataAccessException;
 
 	/**
 	 * Query given SQL to create a prepared statement from SQL and a list
@@ -370,8 +330,7 @@ public interface JdbcOperations {
 	 * @throws DataAccessException if the query fails
 	 * @see java.sql.Types
 	 */
-	<T> T query(String sql, Object[] args, int[] argTypes, ResultSetExtractor<T> rse)
-			throws DataAccessException;
+	<T> T query(String sql, Object[] args, int[] argTypes, ResultSetExtractor<T> rse) throws DataAccessException;
 
 	/**
 	 * Query given SQL to create a prepared statement from SQL and a list
@@ -428,8 +387,7 @@ public interface JdbcOperations {
 	 * @param rch object that will extract results, one row at a time
 	 * @throws DataAccessException if the query fails
 	 */
-	void query(String sql, PreparedStatementSetter pss, RowCallbackHandler rch)
-			throws DataAccessException;
+	void query(String sql, PreparedStatementSetter pss, RowCallbackHandler rch) throws DataAccessException;
 
 	/**
 	 * Query given SQL to create a prepared statement from SQL and a list of
@@ -443,8 +401,7 @@ public interface JdbcOperations {
 	 * @throws DataAccessException if the query fails
 	 * @see java.sql.Types
 	 */
-	void query(String sql, Object[] args, int[] argTypes, RowCallbackHandler rch)
-			throws DataAccessException;
+	void query(String sql, Object[] args, int[] argTypes, RowCallbackHandler rch) throws DataAccessException;
 
 	/**
 	 * Query given SQL to create a prepared statement from SQL and a list of
@@ -500,8 +457,7 @@ public interface JdbcOperations {
 	 * @return the result List, containing mapped objects
 	 * @throws DataAccessException if the query fails
 	 */
-	<T> List<T> query(String sql, PreparedStatementSetter pss, RowMapper<T> rowMapper)
-			throws DataAccessException;
+	<T> List<T> query(String sql, PreparedStatementSetter pss, RowMapper<T> rowMapper) throws DataAccessException;
 
 	/**
 	 * Query given SQL to create a prepared statement from SQL and a list
@@ -516,8 +472,7 @@ public interface JdbcOperations {
 	 * @throws DataAccessException if the query fails
 	 * @see java.sql.Types
 	 */
-	<T> List<T> query(String sql, Object[] args, int[] argTypes, RowMapper<T> rowMapper)
-			throws DataAccessException;
+	<T> List<T> query(String sql, Object[] args, int[] argTypes, RowMapper<T> rowMapper) throws DataAccessException;
 
 	/**
 	 * Query given SQL to create a prepared statement from SQL and a list
@@ -582,8 +537,7 @@ public interface JdbcOperations {
 	 * return exactly one row
 	 * @throws DataAccessException if the query fails
 	 */
-	<T> T queryForObject(String sql, Object[] args, RowMapper<T> rowMapper)
-			throws DataAccessException;
+	<T> T queryForObject(String sql, Object[] args, RowMapper<T> rowMapper) throws DataAccessException;
 
 	/**
 	 * Query given SQL to create a prepared statement from SQL and a list
@@ -600,8 +554,7 @@ public interface JdbcOperations {
 	 * return exactly one row
 	 * @throws DataAccessException if the query fails
 	 */
-	<T> T queryForObject(String sql, RowMapper<T> rowMapper, Object... args)
-			throws DataAccessException;
+	<T> T queryForObject(String sql, RowMapper<T> rowMapper, Object... args) throws DataAccessException;
 
 	/**
 	 * Query given SQL to create a prepared statement from SQL and a
@@ -703,86 +656,6 @@ public interface JdbcOperations {
 	 * @see ColumnMapRowMapper
 	 */
 	Map<String, Object> queryForMap(String sql, Object... args) throws DataAccessException;
-
-	/**
-	 * Query given SQL to create a prepared statement from SQL and a
-	 * list of arguments to bind to the query, resulting in a long value.
-	 * <p>The query is expected to be a single row/single column query that
-	 * results in a long value.
-	 * @param sql SQL query to execute
-	 * @param args arguments to bind to the query
-	 * @param argTypes SQL types of the arguments
-	 * (constants from {@code java.sql.Types})
-	 * @return the long value, or 0 in case of SQL NULL
-	 * @throws IncorrectResultSizeDataAccessException if the query does not return
-	 * exactly one row, or does not return exactly one column in that row
-	 * @throws DataAccessException if the query fails
-	 * @see #queryForLong(String)
-	 * @see java.sql.Types
-	 * @deprecated in favor of {@link #queryForObject(String, Object[], int[], Class)} )}
-	 */
-	@Deprecated
-	long queryForLong(String sql, Object[] args, int[] argTypes) throws DataAccessException;
-
-	/**
-	 * Query given SQL to create a prepared statement from SQL and a
-	 * list of arguments to bind to the query, resulting in a long value.
-	 * <p>The query is expected to be a single row/single column query that
-	 * results in a long value.
-	 * @param sql SQL query to execute
-	 * @param args arguments to bind to the query
-	 * (leaving it to the PreparedStatement to guess the corresponding SQL type);
-	 * may also contain {@link SqlParameterValue} objects which indicate not
-	 * only the argument value but also the SQL type and optionally the scale
-	 * @return the long value, or 0 in case of SQL NULL
-	 * @throws IncorrectResultSizeDataAccessException if the query does not return
-	 * exactly one row, or does not return exactly one column in that row
-	 * @throws DataAccessException if the query fails
-	 * @see #queryForLong(String)
-	 * @deprecated in favor of {@link #queryForObject(String, Class, Object[])} )}
-	 */
-	@Deprecated
-	long queryForLong(String sql, Object... args) throws DataAccessException;
-
-	/**
-	 * Query given SQL to create a prepared statement from SQL and a
-	 * list of arguments to bind to the query, resulting in an int value.
-	 * <p>The query is expected to be a single row/single column query that
-	 * results in an int value.
-	 * @param sql SQL query to execute
-	 * @param args arguments to bind to the query
-	 * @param argTypes SQL types of the arguments
-	 * (constants from {@code java.sql.Types})
-	 * @return the int value, or 0 in case of SQL NULL
-	 * @throws IncorrectResultSizeDataAccessException if the query does not return
-	 * exactly one row, or does not return exactly one column in that row
-	 * @throws DataAccessException if the query fails
-	 * @see #queryForInt(String)
-	 * @see java.sql.Types
-	 * @deprecated in favor of {@link #queryForObject(String, Object[], int[], Class)} )}
-	 */
-	@Deprecated
-	int queryForInt(String sql, Object[] args, int[] argTypes) throws DataAccessException;
-
-	/**
-	 * Query given SQL to create a prepared statement from SQL and a
-	 * list of arguments to bind to the query, resulting in an int value.
-	 * <p>The query is expected to be a single row/single column query that
-	 * results in an int value.
-	 * @param sql SQL query to execute
-	 * @param args arguments to bind to the query
-	 * (leaving it to the PreparedStatement to guess the corresponding SQL type);
-	 * may also contain {@link SqlParameterValue} objects which indicate not
-	 * only the argument value but also the SQL type and optionally the scale
-	 * @return the int value, or 0 in case of SQL NULL
-	 * @throws IncorrectResultSizeDataAccessException if the query does not return
-	 * exactly one row, or does not return exactly one column in that row
-	 * @throws DataAccessException if the query fails
-	 * @see #queryForInt(String)
-	 * @deprecated in favor of {@link #queryForObject(String, Class, Object[])} )}
-	 */
-	@Deprecated
-	int queryForInt(String sql, Object... args) throws DataAccessException;
 
 	/**
 	 * Query given SQL to create a prepared statement from SQL and a
@@ -1009,7 +882,7 @@ public interface JdbcOperations {
 	 * @param batchArgs the List of Object arrays containing the batch of arguments for the query
 	 * @return an array containing the numbers of rows affected by each update in the batch
 	 */
-	public int[] batchUpdate(String sql, List<Object[]> batchArgs);
+	public int[] batchUpdate(String sql, List<Object[]> batchArgs) throws DataAccessException;
 
 	/**
 	 * Execute a batch using the supplied SQL statement with the batch of supplied arguments.
@@ -1019,7 +892,7 @@ public interface JdbcOperations {
 	 * (constants from {@code java.sql.Types})
 	 * @return an array containing the numbers of rows affected by each update in the batch
 	 */
-	public int[] batchUpdate(String sql, List<Object[]> batchArgs, int[] argTypes);
+	public int[] batchUpdate(String sql, List<Object[]> batchArgs, int[] argTypes) throws DataAccessException;
 
 	/**
 	 * Execute multiple batches using the supplied SQL statement with the collect of supplied arguments.
@@ -1032,7 +905,9 @@ public interface JdbcOperations {
 	 * @return an array containing for each batch another array containing the numbers of rows affected
 	 * by each update in the batch
 	 */
-	public <T> int[][] batchUpdate(String sql, Collection<T> batchArgs, int batchSize, ParameterizedPreparedStatementSetter<T> pss);
+	public <T> int[][] batchUpdate(String sql, Collection<T> batchArgs, int batchSize,
+			ParameterizedPreparedStatementSetter<T> pss) throws DataAccessException;
+
 
 	//-------------------------------------------------------------------------
 	// Methods dealing with callable statements
@@ -1051,8 +926,7 @@ public interface JdbcOperations {
 	 * @return a result object returned by the action, or {@code null}
 	 * @throws DataAccessException if there is any problem
 	 */
-	<T> T execute(CallableStatementCreator csc, CallableStatementCallback<T> action)
-			throws DataAccessException;
+	<T> T execute(CallableStatementCreator csc, CallableStatementCallback<T> action) throws DataAccessException;
 
 	/**
 	 * Execute a JDBC data access operation, implemented as callback action

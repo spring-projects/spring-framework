@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -21,7 +21,6 @@ import java.net.ServerSocket;
 import java.util.Random;
 import java.util.SortedSet;
 import java.util.TreeSet;
-
 import javax.net.ServerSocketFactory;
 
 /**
@@ -29,7 +28,7 @@ import javax.net.ServerSocketFactory;
  * for finding available ports on {@code localhost}.
  *
  * <p>Within this class, a TCP port refers to a port for a {@link ServerSocket};
- * whereas, a UDP port refers to a port for a {@link DatagramSocket}. 
+ * whereas, a UDP port refers to a port for a {@link DatagramSocket}.
  *
  * @author Sam Brannen
  * @author Ben Hale
@@ -37,7 +36,7 @@ import javax.net.ServerSocketFactory;
  * @author Gunnar Hillert
  * @since 4.0
  */
-public final class SocketUtils {
+public class SocketUtils {
 
 	/**
 	 * The default minimum value for port ranges used when finding an available
@@ -51,40 +50,34 @@ public final class SocketUtils {
 	 */
 	public static final int PORT_RANGE_MAX = 65535;
 
+
 	private static final Random random = new Random(System.currentTimeMillis());
 
 
 	/**
 	 * Although {@code SocketUtils} consists solely of static utility methods,
 	 * this constructor is intentionally {@code public}.
-	 * 
 	 * <h4>Rationale</h4>
-	 *
 	 * <p>Static methods from this class may be invoked from within XML
 	 * configuration files using the Spring Expression Language (SpEL) and the
 	 * following syntax.
-	 *
 	 * <pre><code>&lt;bean id="bean1" ... p:port="#{T(org.springframework.util.SocketUtils).findAvailableTcpPort(12000)}" /&gt;</code></pre>
-	 *
 	 * If this constructor were {@code private}, you would be required to supply
 	 * the fully qualified class name to SpEL's {@code T()} function for each usage.
 	 * Thus, the fact that this constructor is {@code public} allows you to reduce
 	 * boilerplate configuration with SpEL as can be seen in the following example.
-	 *
 	 * <pre><code>&lt;bean id="socketUtils" class="org.springframework.util.SocketUtils" /&gt;
-	 *
-	 *&lt;bean id="bean1" ... p:port="#{socketUtils.findAvailableTcpPort(12000)}" /&gt;
-	 *
-	 *&lt;bean id="bean2" ... p:port="#{socketUtils.findAvailableTcpPort(30000)}" /&gt;</code></pre>
+	 * &lt;bean id="bean1" ... p:port="#{socketUtils.findAvailableTcpPort(12000)}" /&gt;
+	 * &lt;bean id="bean2" ... p:port="#{socketUtils.findAvailableTcpPort(30000)}" /&gt;</code></pre>
 	 */
 	public SocketUtils() {
 		/* no-op */
 	}
 
+
 	/**
 	 * Find an available TCP port randomly selected from the range
 	 * [{@value #PORT_RANGE_MIN}, {@value #PORT_RANGE_MAX}].
-	 *
 	 * @return an available TCP port number
 	 * @throws IllegalStateException if no available port could be found
 	 */
@@ -95,7 +88,6 @@ public final class SocketUtils {
 	/**
 	 * Find an available TCP port randomly selected from the range
 	 * [{@code minPort}, {@value #PORT_RANGE_MAX}].
-	 *
 	 * @param minPort the minimum port number
 	 * @return an available TCP port number
 	 * @throws IllegalStateException if no available port could be found
@@ -107,7 +99,6 @@ public final class SocketUtils {
 	/**
 	 * Find an available TCP port randomly selected from the range
 	 * [{@code minPort}, {@code maxPort}].
-	 *
 	 * @param minPort the minimum port number
 	 * @param maxPort the maximum port number
 	 * @return an available TCP port number
@@ -120,7 +111,6 @@ public final class SocketUtils {
 	/**
 	 * Find the requested number of available TCP ports, each randomly selected
 	 * from the range [{@value #PORT_RANGE_MIN}, {@value #PORT_RANGE_MAX}].
-	 *
 	 * @param numRequested the number of available ports to find
 	 * @return a sorted set of available TCP port numbers
 	 * @throws IllegalStateException if the requested number of available ports could not be found
@@ -132,7 +122,6 @@ public final class SocketUtils {
 	/**
 	 * Find the requested number of available TCP ports, each randomly selected
 	 * from the range [{@code minPort}, {@code maxPort}].
-	 *
 	 * @param numRequested the number of available ports to find
 	 * @param minPort the minimum port number
 	 * @param maxPort the maximum port number
@@ -146,7 +135,6 @@ public final class SocketUtils {
 	/**
 	 * Find an available UDP port randomly selected from the range
 	 * [{@value #PORT_RANGE_MIN}, {@value #PORT_RANGE_MAX}].
-	 *
 	 * @return an available UDP port number
 	 * @throws IllegalStateException if no available port could be found
 	 */
@@ -157,7 +145,6 @@ public final class SocketUtils {
 	/**
 	 * Find an available UDP port randomly selected from the range
 	 * [{@code minPort}, {@value #PORT_RANGE_MAX}].
-	 *
 	 * @param minPort the minimum port number
 	 * @return an available UDP port number
 	 * @throws IllegalStateException if no available port could be found
@@ -169,7 +156,6 @@ public final class SocketUtils {
 	/**
 	 * Find an available UDP port randomly selected from the range
 	 * [{@code minPort}, {@code maxPort}].
-	 *
 	 * @param minPort the minimum port number
 	 * @param maxPort the maximum port number
 	 * @return an available UDP port number
@@ -182,7 +168,6 @@ public final class SocketUtils {
 	/**
 	 * Find the requested number of available UDP ports, each randomly selected
 	 * from the range [{@value #PORT_RANGE_MIN}, {@value #PORT_RANGE_MAX}].
-	 *
 	 * @param numRequested the number of available ports to find
 	 * @return a sorted set of available UDP port numbers
 	 * @throws IllegalStateException if the requested number of available ports could not be found
@@ -194,7 +179,6 @@ public final class SocketUtils {
 	/**
 	 * Find the requested number of available UDP ports, each randomly selected
 	 * from the range [{@code minPort}, {@code maxPort}].
-	 *
 	 * @param numRequested the number of available ports to find
 	 * @param minPort the minimum port number
 	 * @param maxPort the maximum port number
@@ -209,7 +193,6 @@ public final class SocketUtils {
 	private static enum SocketType {
 
 		TCP {
-
 			@Override
 			protected boolean isPortAvailable(int port) {
 				try {
@@ -224,7 +207,6 @@ public final class SocketUtils {
 		},
 
 		UDP {
-
 			@Override
 			protected boolean isPortAvailable(int port) {
 				try {
@@ -247,7 +229,6 @@ public final class SocketUtils {
 		/**
 		 * Find a pseudo-random port number within the range
 		 * [{@code minPort}, {@code maxPort}].
-		 *
 		 * @param minPort the minimum port number
 		 * @param maxPort the maximum port number
 		 * @return a random port number within the specified range
@@ -260,7 +241,6 @@ public final class SocketUtils {
 		/**
 		 * Find an available port for this {@code SocketType}, randomly selected
 		 * from the range [{@code minPort}, {@code maxPort}].
-		 *
 		 * @param minPort the minimum port number
 		 * @param maxPort the maximum port number
 		 * @return an available port number for this socket type
@@ -281,7 +261,8 @@ public final class SocketUtils {
 						maxPort, searchCounter));
 				}
 				candidatePort = findRandomPort(minPort, maxPort);
-			} while (!isPortAvailable(candidatePort));
+			}
+			while (!isPortAvailable(candidatePort));
 
 			return candidatePort;
 		}
@@ -289,7 +270,6 @@ public final class SocketUtils {
 		/**
 		 * Find the requested number of available ports for this {@code SocketType},
 		 * each randomly selected from the range [{@code minPort}, {@code maxPort}].
-		 *
 		 * @param numRequested the number of available ports to find
 		 * @param minPort the minimum port number
 		 * @param maxPort the maximum port number

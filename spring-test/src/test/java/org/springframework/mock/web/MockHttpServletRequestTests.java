@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,8 @@
 
 package org.springframework.mock.web;
 
+import java.io.IOException;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -26,6 +28,8 @@ import java.util.Locale;
 import java.util.Map;
 
 import org.junit.Test;
+
+import org.springframework.util.StreamUtils;
 
 import static org.junit.Assert.*;
 
@@ -39,8 +43,26 @@ import static org.junit.Assert.*;
  */
 public class MockHttpServletRequestTests {
 
+	private static final String HOST = "Host";
+
 	private MockHttpServletRequest request = new MockHttpServletRequest();
 
+
+	@Test
+	public void content() throws IOException {
+		byte[] bytes = "body".getBytes(Charset.defaultCharset());
+		request.setContent(bytes);
+		assertEquals(bytes.length, request.getContentLength());
+		assertNotNull(request.getInputStream());
+		assertEquals("body", StreamUtils.copyToString(request.getInputStream(), Charset.defaultCharset()));
+	}
+
+	@Test
+	public void noContent() throws IOException {
+		assertEquals(-1, request.getContentLength());
+		assertNotNull(request.getInputStream());
+		assertEquals(-1, request.getInputStream().read());
+	}
 
 	@Test
 	public void setContentType() {
@@ -72,6 +94,17 @@ public class MockHttpServletRequestTests {
 	@Test
 	public void contentTypeHeaderUTF8() {
 		String contentType = "test/plain;charset=UTF-8";
+		request.addHeader("Content-Type", contentType);
+		assertEquals(contentType, request.getContentType());
+		assertEquals(contentType, request.getHeader("Content-Type"));
+		assertEquals("UTF-8", request.getCharacterEncoding());
+	}
+
+	// SPR-12677
+
+	@Test
+	public void setContentTypeHeaderWithMoreComplexCharsetSyntax() {
+		String contentType = "test/plain;charset=\"utf-8\";foo=\"charset=bar\";foocharset=bar;foo=bar";
 		request.addHeader("Content-Type", contentType);
 		assertEquals(contentType, request.getContentType());
 		assertEquals(contentType, request.getHeader("Content-Type"));
@@ -194,6 +227,86 @@ public class MockHttpServletRequestTests {
 	}
 
 	@Test
+	public void getServerNameWithDefaultName() {
+		assertEquals("localhost", request.getServerName());
+	}
+
+	@Test
+	public void getServerNameWithCustomName() {
+		request.setServerName("example.com");
+		assertEquals("example.com", request.getServerName());
+	}
+
+	@Test
+	public void getServerNameViaHostHeaderWithoutPort() {
+		String testServer = "test.server";
+		request.addHeader(HOST, testServer);
+		assertEquals(testServer, request.getServerName());
+	}
+
+	@Test
+	public void getServerNameViaHostHeaderWithPort() {
+		String testServer = "test.server";
+		request.addHeader(HOST, testServer + ":8080");
+		assertEquals(testServer, request.getServerName());
+	}
+
+	@Test
+	public void getServerNameViaHostHeaderAsIpv6AddressWithoutPort() {
+		String ipv6Address = "[2001:db8:0:1]";
+		request.addHeader(HOST, ipv6Address);
+		assertEquals("2001:db8:0:1", request.getServerName());
+	}
+
+	@Test
+	public void getServerNameViaHostHeaderAsIpv6AddressWithPort() {
+		String ipv6Address = "[2001:db8:0:1]:8081";
+		request.addHeader(HOST, ipv6Address);
+		assertEquals("2001:db8:0:1", request.getServerName());
+	}
+
+	@Test
+	public void getServerPortWithDefaultPort() {
+		assertEquals(80, request.getServerPort());
+	}
+
+	@Test
+	public void getServerPortWithCustomPort() {
+		request.setServerPort(8080);
+		assertEquals(8080, request.getServerPort());
+	}
+
+	@Test
+	public void getServerPortViaHostHeaderAsIpv6AddressWithoutPort() {
+		String testServer = "[2001:db8:0:1]";
+		request.addHeader(HOST, testServer);
+		assertEquals(80, request.getServerPort());
+	}
+
+	@Test
+	public void getServerPortViaHostHeaderAsIpv6AddressWithPort() {
+		String testServer = "[2001:db8:0:1]";
+		int testPort = 9999;
+		request.addHeader(HOST, testServer + ":" + testPort);
+		assertEquals(testPort, request.getServerPort());
+	}
+
+	@Test
+	public void getServerPortViaHostHeaderWithoutPort() {
+		String testServer = "test.server";
+		request.addHeader(HOST, testServer);
+		assertEquals(80, request.getServerPort());
+	}
+
+	@Test
+	public void getServerPortViaHostHeaderWithPort() {
+		String testServer = "test.server";
+		int testPort = 9999;
+		request.addHeader(HOST, testServer + ":" + testPort);
+		assertEquals(testPort, request.getServerPort());
+	}
+
+	@Test
 	public void getRequestURL() {
 		request.setServerPort(8080);
 		request.setRequestURI("/path");
@@ -231,6 +344,38 @@ public class MockHttpServletRequestTests {
 		request.setServerPort(-99);
 		StringBuffer requestURL = request.getRequestURL();
 		assertEquals("http://localhost", requestURL.toString());
+	}
+
+	@Test
+	public void isSecureWithHttpSchemeAndSecureFlagIsFalse() {
+		assertFalse(request.isSecure());
+		request.setScheme("http");
+		request.setSecure(false);
+		assertFalse(request.isSecure());
+	}
+
+	@Test
+	public void isSecureWithHttpSchemeAndSecureFlagIsTrue() {
+		assertFalse(request.isSecure());
+		request.setScheme("http");
+		request.setSecure(true);
+		assertTrue(request.isSecure());
+	}
+
+	@Test
+	public void isSecureWithHttpsSchemeAndSecureFlagIsFalse() {
+		assertFalse(request.isSecure());
+		request.setScheme("https");
+		request.setSecure(false);
+		assertTrue(request.isSecure());
+	}
+
+	@Test
+	public void isSecureWithHttpsSchemeAndSecureFlagIsTrue() {
+		assertFalse(request.isSecure());
+		request.setScheme("https");
+		request.setSecure(true);
+		assertTrue(request.isSecure());
 	}
 
 	private void assertEqualEnumerations(Enumeration<?> enum1, Enumeration<?> enum2) {

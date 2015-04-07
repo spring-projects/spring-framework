@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -100,17 +100,17 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * special restrictions with EJB CMT and restrictive JTA subsystems: See
  * {@link org.springframework.transaction.jta.JtaTransactionManager}'s javadoc for details.
  *
- * <p>On JDBC 3.0, this transaction manager supports nested transactions via JDBC 3.0
- * Savepoints. The {@link #setNestedTransactionAllowed} "nestedTransactionAllowed"}
- * flag defaults to "false", though, as nested transactions will just apply to the
- * JDBC Connection, not to the Hibernate Session and its cached objects. You can
- * manually set the flag to "true" if you want to use nested transactions for
- * JDBC access code which participates in Hibernate transactions (provided that
+ * <p>This transaction manager supports nested transactions via JDBC 3.0 Savepoints.
+ * The {@link #setNestedTransactionAllowed} "nestedTransactionAllowed"} flag defaults
+ * to "false", though, as nested transactions will just apply to the JDBC Connection,
+ * not to the Hibernate Session and its cached entity objects and related context.
+ * You can manually set the flag to "true" if you want to use nested transactions
+ * for JDBC access code which participates in Hibernate transactions (provided that
  * your JDBC driver supports Savepoints). <i>Note that Hibernate itself does not
  * support nested transactions! Hence, do not expect Hibernate access code to
  * semantically participate in a nested transaction.</i>
  *
- * <p>Requires Hibernate 3.6 or later, as of Spring 4.0.
+ * <p>Requires Hibernate 3.6.x, as of Spring 4.0.
  *
  * @author Juergen Hoeller
  * @since 1.2
@@ -475,6 +475,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 	}
 
 	@Override
+	@SuppressWarnings("deprecation")
 	protected void doBegin(Object transaction, TransactionDefinition definition) {
 		HibernateTransactionObject txObject = (HibernateTransactionObject) transaction;
 
@@ -595,6 +596,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 				}
 				finally {
 					SessionFactoryUtils.closeSession(session);
+					txObject.setSessionHolder(null);
 				}
 			}
 			throw new CannotCreateTransactionException("Could not open Hibernate Session for transaction", ex);
@@ -706,6 +708,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 	}
 
 	@Override
+	@SuppressWarnings("deprecation")
 	protected void doCleanupAfterCompletion(Object transaction) {
 		HibernateTransactionObject txObject = (HibernateTransactionObject) transaction;
 

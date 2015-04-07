@@ -18,7 +18,6 @@ package org.springframework.web.servlet;
 
 import java.io.IOException;
 import java.util.Locale;
-
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -31,6 +30,7 @@ import org.springframework.ui.context.ThemeSource;
 import org.springframework.ui.context.support.SimpleTheme;
 import org.springframework.ui.context.support.UiApplicationContextUtils;
 import org.springframework.web.context.support.StaticWebApplicationContext;
+import org.springframework.web.servlet.handler.BeanNameUrlHandlerMapping;
 import org.springframework.web.servlet.i18n.AcceptHeaderLocaleResolver;
 import org.springframework.web.servlet.mvc.Controller;
 import org.springframework.web.servlet.mvc.LastModified;
@@ -38,7 +38,6 @@ import org.springframework.web.servlet.support.RequestContextUtils;
 import org.springframework.web.servlet.theme.AbstractThemeResolver;
 import org.springframework.web.servlet.view.InternalResourceViewResolver;
 import org.springframework.web.servlet.view.XmlViewResolver;
-import org.springframework.web.servlet.handler.BeanNameUrlHandlerMapping;
 
 /**
  * @author Juergen Hoeller

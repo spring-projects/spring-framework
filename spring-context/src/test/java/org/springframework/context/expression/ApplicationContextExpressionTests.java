@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,10 +23,8 @@ import java.util.Properties;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import static org.junit.Assert.*;
 import org.junit.Test;
 
-import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -38,12 +36,17 @@ import org.springframework.beans.factory.support.AutowireCandidateQualifier;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.GenericBeanDefinition;
 import org.springframework.beans.factory.support.RootBeanDefinition;
-import org.springframework.tests.Assume;
-import org.springframework.tests.TestGroup;
 import org.springframework.context.annotation.AnnotationConfigUtils;
 import org.springframework.context.support.GenericApplicationContext;
+import org.springframework.core.convert.converter.Converter;
+import org.springframework.core.convert.support.GenericConversionService;
+import org.springframework.tests.Assume;
+import org.springframework.tests.TestGroup;
+import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.util.SerializationTestUtils;
 import org.springframework.util.StopWatch;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Juergen Hoeller
@@ -98,14 +101,14 @@ public class ApplicationContextExpressionTests {
 		ac.registerBeanDefinition("tb0", bd0);
 
 		GenericBeanDefinition bd1 = new GenericBeanDefinition();
-		bd1.setBeanClass(TestBean.class);
+		bd1.setBeanClassName("#{tb0.class}");
 		bd1.setScope("myScope");
 		bd1.getConstructorArgumentValues().addGenericArgumentValue("XXX#{tb0.name}YYY#{mySpecialAttr}ZZZ");
 		bd1.getConstructorArgumentValues().addGenericArgumentValue("#{mySpecialAttr}");
 		ac.registerBeanDefinition("tb1", bd1);
 
 		GenericBeanDefinition bd2 = new GenericBeanDefinition();
-		bd2.setBeanClass(TestBean.class);
+		bd2.setBeanClassName("#{tb1.class.name}");
 		bd2.setScope("myScope");
 		bd2.getPropertyValues().add("name", "{ XXX#{tb0.name}YYY#{mySpecialAttr}ZZZ }");
 		bd2.getPropertyValues().add("age", "#{mySpecialAttr}");
@@ -150,6 +153,7 @@ public class ApplicationContextExpressionTests {
 			ValueTestBean tb3 = ac.getBean("tb3", ValueTestBean.class);
 			assertEquals("XXXmyNameYYY42ZZZ", tb3.name);
 			assertEquals(42, tb3.age);
+			assertEquals(42, tb3.ageFactory.getObject().intValue());
 			assertEquals("123 UK", tb3.country);
 			assertEquals("123 UK", tb3.countryFactory.getObject());
 			System.getProperties().put("country", "US");
@@ -190,27 +194,35 @@ public class ApplicationContextExpressionTests {
 	public void prototypeCreationReevaluatesExpressions() {
 		GenericApplicationContext ac = new GenericApplicationContext();
 		AnnotationConfigUtils.registerAnnotationConfigProcessors(ac);
+		GenericConversionService cs = new GenericConversionService();
+		cs.addConverter(String.class, String.class, new Converter<String, String>() {
+			@Override
+			public String convert(String source) {
+				return source.trim();
+			}
+		});
+		ac.getBeanFactory().registerSingleton(GenericApplicationContext.CONVERSION_SERVICE_BEAN_NAME, cs);
 		RootBeanDefinition rbd = new RootBeanDefinition(PrototypeTestBean.class);
 		rbd.setScope(RootBeanDefinition.SCOPE_PROTOTYPE);
 		rbd.getPropertyValues().add("country", "#{systemProperties.country}");
-		rbd.getPropertyValues().add("country2", new TypedStringValue("#{systemProperties.country}"));
+		rbd.getPropertyValues().add("country2", new TypedStringValue("-#{systemProperties.country}-"));
 		ac.registerBeanDefinition("test", rbd);
 		ac.refresh();
 
 		try {
 			System.getProperties().put("name", "juergen1");
-			System.getProperties().put("country", "UK1");
+			System.getProperties().put("country", " UK1 ");
 			PrototypeTestBean tb = (PrototypeTestBean) ac.getBean("test");
 			assertEquals("juergen1", tb.getName());
 			assertEquals("UK1", tb.getCountry());
-			assertEquals("UK1", tb.getCountry2());
+			assertEquals("-UK1-", tb.getCountry2());
 
 			System.getProperties().put("name", "juergen2");
-			System.getProperties().put("country", "UK2");
+			System.getProperties().put("country", "  UK2  ");
 			tb = (PrototypeTestBean) ac.getBean("test");
 			assertEquals("juergen2", tb.getName());
 			assertEquals("UK2", tb.getCountry());
-			assertEquals("UK2", tb.getCountry2());
+			assertEquals("-UK2-", tb.getCountry2());
 		}
 		finally {
 			System.getProperties().remove("name");
@@ -309,6 +321,9 @@ public class ApplicationContextExpressionTests {
 
 		@Autowired @Value("#{mySpecialAttr}")
 		public int age;
+
+		@Value("#{mySpecialAttr}")
+		public ObjectFactory<Integer> ageFactory;
 
 		@Value("${code} #{systemProperties.country}")
 		public String country;

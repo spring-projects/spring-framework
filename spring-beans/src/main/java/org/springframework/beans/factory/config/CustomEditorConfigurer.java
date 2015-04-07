@@ -91,8 +91,6 @@ import org.springframework.util.ClassUtils;
  * @see ConfigurableBeanFactory#addPropertyEditorRegistrar
  * @see ConfigurableBeanFactory#registerCustomEditor
  * @see org.springframework.validation.DataBinder#registerCustomEditor
- * @see org.springframework.web.servlet.mvc.BaseCommandController#setPropertyEditorRegistrars
- * @see org.springframework.web.servlet.mvc.BaseCommandController#initBinder
  */
 public class CustomEditorConfigurer implements BeanFactoryPostProcessor, Ordered {
 
@@ -140,7 +138,6 @@ public class CustomEditorConfigurer implements BeanFactoryPostProcessor, Ordered
 
 
 	@Override
-	@SuppressWarnings("unchecked")
 	public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
 		if (this.propertyEditorRegistrars != null) {
 			for (PropertyEditorRegistrar propertyEditorRegistrar : this.propertyEditorRegistrars) {
@@ -149,7 +146,7 @@ public class CustomEditorConfigurer implements BeanFactoryPostProcessor, Ordered
 		}
 		if (this.customEditors != null) {
 			for (Map.Entry<Class<?>, Class<? extends PropertyEditor>> entry : this.customEditors.entrySet()) {
-				Class requiredType = entry.getKey();
+				Class<?> requiredType = entry.getKey();
 				Class<? extends PropertyEditor> propertyEditorClass = entry.getValue();
 				beanFactory.registerCustomEditor(requiredType, propertyEditorClass);
 			}

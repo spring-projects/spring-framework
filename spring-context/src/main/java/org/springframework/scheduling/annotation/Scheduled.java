@@ -42,6 +42,7 @@ import java.lang.annotation.Target;
  * @since 3.0
  * @see EnableScheduling
  * @see ScheduledAnnotationBeanPostProcessor
+ * @see Schedules
  */
 @Target({ElementType.METHOD, ElementType.ANNOTATION_TYPE})
 @Retention(RetentionPolicy.RUNTIME)
@@ -60,12 +61,13 @@ public @interface Scheduled {
 	String cron() default "";
 
 	/**
-	 * A time zone for which the cron expression will be resolved.
-	 * By default, the server's local time zone will be used.
-	 * @return a zone id accepted by {@link java.util.TimeZone#getTimeZone(String)}
+	 * A time zone for which the cron expression will be resolved. By default, this
+	 * attribute is the empty String (i.e. the server's local time zone will be used).
+	 * @return a zone id accepted by {@link java.util.TimeZone#getTimeZone(String)},
+	 * or an empty String to indicate the server's default time zone
+	 * @since 4.0
 	 * @see org.springframework.scheduling.support.CronTrigger#CronTrigger(String, java.util.TimeZone)
 	 * @see java.util.TimeZone
-	 * @since 4.0
 	 */
 	String zone() default "";
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@ package org.springframework.aop.support;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -82,26 +82,6 @@ public abstract class AopUtils {
 	 */
 	public static boolean isCglibProxy(Object object) {
 		return (object instanceof SpringProxy && ClassUtils.isCglibProxy(object));
-	}
-
-	/**
-	 * Check whether the specified class is a CGLIB-generated class.
-	 * @param clazz the class to check
-	 * @deprecated as of Spring 3.1 in favor of {@link ClassUtils#isCglibProxyClass(Class)}
-	 */
-	@Deprecated
-	public static boolean isCglibProxyClass(Class<?> clazz) {
-		return ClassUtils.isCglibProxyClass(clazz);
-	}
-
-	/**
-	 * Check whether the specified class name is a CGLIB-generated class.
-	 * @param className the class name to check
-	 * @deprecated as of Spring 3.1 in favor of {@link ClassUtils#isCglibProxyClassName(String)}
-	 */
-	@Deprecated
-	public static boolean isCglibProxyClassName(String className) {
-		return ClassUtils.isCglibProxyClassName(className);
 	}
 
 	/**
@@ -215,7 +195,7 @@ public abstract class AopUtils {
 			introductionAwareMethodMatcher = (IntroductionAwareMethodMatcher) methodMatcher;
 		}
 
-		Set<Class> classes = new HashSet<Class>(ClassUtils.getAllInterfacesForClassAsSet(targetClass));
+		Set<Class<?>> classes = new LinkedHashSet<Class<?>>(ClassUtils.getAllInterfacesForClassAsSet(targetClass));
 		classes.add(targetClass);
 		for (Class<?> clazz : classes) {
 			Method[] methods = clazz.getMethods();

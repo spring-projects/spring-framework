@@ -8,18 +8,17 @@
 		elementFormDefault="qualified"
 		attributeFormDefault="unqualified">
 
-	<xsd:import namespace="http://www.springframework.org/schema/beans" schemaLocation="http://www.springframework.org/schema/beans/spring-beans-3.2.xsd" />
-	<xsd:import namespace="http://www.springframework.org/schema/tool" schemaLocation="http://www.springframework.org/schema/tool/spring-tool-3.2.xsd" />
+	<xsd:import namespace="http://www.springframework.org/schema/beans" schemaLocation="http://www.springframework.org/schema/beans/spring-beans-3.2.xsd"/>
+	<xsd:import namespace="http://www.springframework.org/schema/tool" schemaLocation="http://www.springframework.org/schema/tool/spring-tool-3.2.xsd"/>
 
 	<xsd:element name="annotation-driven">
 		<xsd:annotation>
 			<xsd:documentation source="java:org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter"><![CDATA[
 	Configures the annotation-driven Spring MVC Controller programming model.
-	Note that, with Spring 3.0, this tag works in Servlet MVC only!
+	Note that this tag works in Web MVC only, not in Portlet MVC!
 
-	See org.springframework.web.servlet.config.annotation.EnableWebMvc Javadoc for
-	information on code-based alternatives to enabling annotation-driven Spring MVC
-	support.
+	See org.springframework.web.servlet.config.annotation.EnableWebMvc javadoc for details
+	on code-based alternatives to enabling annotation-driven Spring MVC support.
 			]]></xsd:documentation>
 		</xsd:annotation>
 		<xsd:complexType>
@@ -39,14 +38,14 @@
 								<xsd:element ref="beans:bean">
 									<xsd:annotation>
 										<xsd:documentation><![CDATA[
-		An HttpMessageConverter bean definition.
+	An HttpMessageConverter bean definition.
 										]]></xsd:documentation>
 									</xsd:annotation>
 								</xsd:element>
 								<xsd:element ref="beans:ref">
 									<xsd:annotation>
 										<xsd:documentation><![CDATA[
-		A reference to an HttpMessageConverter bean.
+	A reference to an HttpMessageConverter bean.
 										]]></xsd:documentation>
 									</xsd:annotation>
 								</xsd:element>
@@ -65,8 +64,8 @@
 					<xsd:annotation>
 						<xsd:documentation><![CDATA[
 	Configures HandlerMethodArgumentResolver types to support custom controller method argument types.
-    Using this option does not override the built-in support for resolving handler method arguments.
-    To customize the built-in support for argument resolution configure RequestMappingHandlerAdapter directly.
+	Using this option does not override the built-in support for resolving handler method arguments.
+	To customize the built-in support for argument resolution configure RequestMappingHandlerAdapter directly.
 						]]></xsd:documentation>
 					</xsd:annotation>
 					<xsd:complexType>
@@ -80,13 +79,13 @@
 							</xsd:element>
 						</xsd:sequence>
 					</xsd:complexType>
-				</xsd:element>			
+				</xsd:element>
 				<xsd:element name="return-value-handlers" minOccurs="0">
 					<xsd:annotation>
 						<xsd:documentation><![CDATA[
 	Configures HandlerMethodReturnValueHandler types to support custom controller method return value handling.
-    Using this option does not override the built-in support for handling return values.
-    To customize the built-in support for handling return values configure RequestMappingHandlerAdapter directly.
+	Using this option does not override the built-in support for handling return values.
+	To customize the built-in support for handling return values configure RequestMappingHandlerAdapter directly.
 						]]></xsd:documentation>
 					</xsd:annotation>
 					<xsd:complexType>
@@ -100,7 +99,7 @@
 							</xsd:element>
 						</xsd:sequence>
 					</xsd:complexType>
-				</xsd:element>			
+				</xsd:element>
 				<xsd:element name="async-support" minOccurs="0">
 					<xsd:annotation>
 						<xsd:documentation><![CDATA[
@@ -153,7 +152,7 @@
 								<xsd:documentation source="java:org.springframework.core.task.AsyncTaskExecutor"><![CDATA[
 	The bean name of a default AsyncTaskExecutor to use when a controller method returns a {@link Callable}.
 	Controller methods can override this default on a per-request basis by returning an AsyncTask.
-	By default a SimpleAsyncTaskExecutor is used which does not re-use threads and is not recommended for production.
+	By default, a SimpleAsyncTaskExecutor is used which does not re-use threads and is not recommended for production.
 								]]></xsd:documentation>
 								<xsd:appinfo>
 									<tool:annotation kind="ref">
@@ -237,7 +236,7 @@
 				<xsd:annotation>
 					<xsd:documentation><![CDATA[
 	Matrix variables can appear in any path segment, each matrix variable separated with a ";" (semicolon).
-	For example "/cars;color=red;year=2012". By default they're removed from the URL. If this property
+	For example "/cars;color=red;year=2012". By default, they're removed from the URL. If this property
 	is set to true, matrix variables are not removed from the URL, and the request mapping pattern
 	must use URI variable in path segments where matrix variables are expected. For example "/{cars}".
 	Matrix variables can then be injected into a controller method with @MatrixVariable.
@@ -247,8 +246,8 @@
 			<xsd:attribute name="ignoreDefaultModelOnRedirect" type="xsd:boolean">
 				<xsd:annotation>
 					<xsd:documentation><![CDATA[
-	By default the content of the "default" model is used both during rendering and redirect scenarios. 
-	Alternatively a controller method can declare a RedirectAttributes argument and use it to provide attributes for a redirect. 
+	By default, the content of the "default" model is used both during rendering and redirect scenarios.
+	Alternatively a controller method can declare a RedirectAttributes argument and use it to provide attributes for a redirect.
 	Setting this flag to true ensures the "default" model is never used in a redirect scenario even if a RedirectAttributes argument is not declared.
 	Setting it to false means the "default" model may be used in a redirect if the controller method doesn't declare a RedirectAttributes argument.
 	The default setting is false but new applications should consider setting it to true.
@@ -420,16 +419,16 @@
 
 	<xsd:element name="view-controller">
 		<xsd:annotation>
-			<xsd:documentation
-				source="java:org.springframework.web.servlet.mvc.ParameterizableViewController"><![CDATA[
-	Defines a simple Controller that selects a view to render the response.
+			<xsd:documentation source="java:org.springframework.web.servlet.mvc.ParameterizableViewController"><![CDATA[
+	Map a simple (logic-less) view controller to a specific URL path (or pattern)
+	in order to render a response with a pre-configured status code and view.
 			]]></xsd:documentation>
 		</xsd:annotation>
 		<xsd:complexType>
 			<xsd:attribute name="path" type="xsd:string" use="required">
 				<xsd:annotation>
 					<xsd:documentation><![CDATA[
-	The URL path the view is mapped to.
+	The URL path (or pattern) the controller is mapped to.
 					]]></xsd:documentation>
 				</xsd:annotation>
 			</xsd:attribute>

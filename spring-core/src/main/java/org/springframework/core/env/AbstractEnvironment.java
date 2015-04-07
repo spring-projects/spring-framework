@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.core.SpringProperties;
 import org.springframework.core.convert.support.ConfigurableConversionService;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
@@ -42,15 +43,28 @@ import static org.springframework.util.StringUtils.*;
  * add by default. {@code AbstractEnvironment} adds none. Subclasses should contribute
  * property sources through the protected {@link #customizePropertySources(MutablePropertySources)}
  * hook, while clients should customize using {@link ConfigurableEnvironment#getPropertySources()}
- * and working against the {@link MutablePropertySources} API. See
- * {@link ConfigurableEnvironment} Javadoc for usage examples.
+ * and working against the {@link MutablePropertySources} API.
+ * See {@link ConfigurableEnvironment} javadoc for usage examples.
  *
  * @author Chris Beams
+ * @author Juergen Hoeller
  * @since 3.1
  * @see ConfigurableEnvironment
  * @see StandardEnvironment
  */
 public abstract class AbstractEnvironment implements ConfigurableEnvironment {
+
+	/**
+	 * System property that instructs Spring to ignore system environment variables,
+	 * i.e. to never attempt to retrieve such a variable via {@link System#getenv()}.
+	 * <p>The default is "false", falling back to system environment variable checks if a
+	 * Spring environment property (e.g. a placeholder in a configuration String) isn't
+	 * resolvable otherwise. Consider switching this flag to "true" if you experience
+	 * log warnings from {@code getenv} calls coming from Spring, e.g. on WebSphere
+	 * with strict SecurityManager settings and AccessControlExceptions warnings.
+	 * @see #suppressGetenvAccess()
+	 */
+	public static final String IGNORE_GETENV_PROPERTY_NAME = "spring.getenv.ignore";
 
 	/**
 	 * Name of property to set to specify active profiles: {@value}. Value may be comma
@@ -107,14 +121,10 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 	 * @see #customizePropertySources(MutablePropertySources)
 	 */
 	public AbstractEnvironment() {
-		String name = getClass().getSimpleName();
-		if (this.logger.isDebugEnabled()) {
-			this.logger.debug(format("Initializing new %s", name));
-		}
 		customizePropertySources(this.propertySources);
 		if (this.logger.isDebugEnabled()) {
 			this.logger.debug(format(
-					"Initialized %s with PropertySources %s", name, this.propertySources));
+					"Initialized %s with PropertySources %s", getClass().getSimpleName(), this.propertySources));
 		}
 	}
 
@@ -168,8 +178,7 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 	 * {@code remove}, or {@code replace} methods exposed by {@link MutablePropertySources}
 	 * in order to create the exact arrangement of property sources desired.
 	 *
-	 * <p>The base implementation in {@link AbstractEnvironment#customizePropertySources}
-	 * registers no property sources.
+	 * <p>The base implementation registers no property sources.
 	 *
 	 * <p>Note that clients of any {@link ConfigurableEnvironment} may further customize
 	 * property sources via the {@link #getPropertySources()} accessor, typically within
@@ -229,7 +238,7 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 	 */
 	protected Set<String> doGetActiveProfiles() {
 		if (this.activeProfiles.isEmpty()) {
-			String profiles = this.getProperty(ACTIVE_PROFILES_PROPERTY_NAME);
+			String profiles = getProperty(ACTIVE_PROFILES_PROPERTY_NAME);
 			if (StringUtils.hasText(profiles)) {
 				setActiveProfiles(commaDelimitedListToStringArray(trimAllWhitespace(profiles)));
 			}
@@ -277,7 +286,7 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 	 */
 	protected Set<String> doGetDefaultProfiles() {
 		if (this.defaultProfiles.equals(getReservedDefaultProfiles())) {
-			String profiles = this.getProperty(DEFAULT_PROFILES_PROPERTY_NAME);
+			String profiles = getProperty(DEFAULT_PROFILES_PROPERTY_NAME);
 			if (StringUtils.hasText(profiles)) {
 				setDefaultProfiles(commaDelimitedListToStringArray(trimAllWhitespace(profiles)));
 			}
@@ -286,7 +295,8 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 	}
 
 	/**
-	 * {@inheritDoc}
+	 * Specify the set of profiles to be made active by default if no other profiles
+	 * are explicitly made active through {@link #setActiveProfiles}.
 	 * <p>Calling this method removes overrides any reserved default profiles
 	 * that may have been added during construction of the environment.
 	 * @see #AbstractEnvironment()
@@ -307,9 +317,11 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 		Assert.notEmpty(profiles, "Must specify at least one profile");
 		for (String profile : profiles) {
 			if (profile != null && profile.length() > 0 && profile.charAt(0) == '!') {
-				return !isProfileActive(profile.substring(1));
+				if (!isProfileActive(profile.substring(1))) {
+					return true;
+				}
 			}
-			if (isProfileActive(profile)) {
+			else if (isProfileActive(profile)) {
 				return true;
 			}
 		}
@@ -338,9 +350,12 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 	 * @see #setDefaultProfiles
 	 */
 	protected void validateProfile(String profile) {
-		Assert.hasText(profile, "Invalid profile [" + profile + "]: must contain text");
-		Assert.isTrue(profile.charAt(0) != '!',
-				"Invalid profile [" + profile + "]: must not begin with the ! operator");
+		if (!StringUtils.hasText(profile)) {
+			throw new IllegalArgumentException("Invalid profile [" + profile + "]: must contain text");
+		}
+		if (profile.charAt(0) == '!') {
+			throw new IllegalArgumentException("Invalid profile [" + profile + "]: must not begin with ! operator");
+		}
 	}
 
 	@Override
@@ -351,59 +366,71 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 	@Override
 	@SuppressWarnings("unchecked")
 	public Map<String, Object> getSystemEnvironment() {
-		Map<String, ?> systemEnvironment;
+		if (suppressGetenvAccess()) {
+			return Collections.emptyMap();
+		}
 		try {
-			systemEnvironment = System.getenv();
+			return (Map) System.getenv();
 		}
 		catch (AccessControlException ex) {
-			systemEnvironment = new ReadOnlySystemAttributesMap() {
+			return (Map) new ReadOnlySystemAttributesMap() {
 				@Override
-				protected String getSystemAttribute(String variableName) {
+				protected String getSystemAttribute(String attributeName) {
 					try {
-						return System.getenv(variableName);
+						return System.getenv(attributeName);
 					}
 					catch (AccessControlException ex) {
 						if (logger.isInfoEnabled()) {
-							logger.info(format("Caught AccessControlException when " +
-									"accessing system environment variable [%s]; its " +
-									"value will be returned [null]. Reason: %s",
-									variableName, ex.getMessage()));
+							logger.info(format("Caught AccessControlException when accessing system " +
+									"environment variable [%s]; its value will be returned [null]. Reason: %s",
+									attributeName, ex.getMessage()));
 						}
 						return null;
 					}
 				}
 			};
 		}
-		return (Map<String, Object>) systemEnvironment;
+	}
+
+	/**
+	 * Determine whether to suppress {@link System#getenv()}/{@link System#getenv(String)}
+	 * access for the purposes of {@link #getSystemEnvironment()}.
+	 * <p>If this method returns {@code true}, an empty dummy Map will be used instead
+	 * of the regular system environment Map, never even trying to call {@code getenv}
+	 * and therefore avoiding security manager warnings (if any).
+	 * <p>The default implementation checks for the "spring.getenv.ignore" system property,
+	 * returning {@code true} if its value equals "true" in any case.
+	 * @see #IGNORE_GETENV_PROPERTY_NAME
+	 * @see SpringProperties#getFlag
+	 */
+	protected boolean suppressGetenvAccess() {
+		return SpringProperties.getFlag(IGNORE_GETENV_PROPERTY_NAME);
 	}
 
 	@Override
-	@SuppressWarnings({"unchecked", "rawtypes"})
+	@SuppressWarnings("unchecked")
 	public Map<String, Object> getSystemProperties() {
-		Map systemProperties;
 		try {
-			systemProperties = System.getProperties();
+			return (Map) System.getProperties();
 		}
 		catch (AccessControlException ex) {
-			systemProperties = new ReadOnlySystemAttributesMap() {
+			return (Map) new ReadOnlySystemAttributesMap() {
 				@Override
-				protected String getSystemAttribute(String propertyName) {
+				protected String getSystemAttribute(String attributeName) {
 					try {
-						return System.getProperty(propertyName);
+						return System.getProperty(attributeName);
 					}
 					catch (AccessControlException ex) {
 						if (logger.isInfoEnabled()) {
-							logger.info(format("Caught AccessControlException when " +
-									"accessing system property [%s]; its value will be " +
-									"returned [null]. Reason: %s",
-									propertyName, ex.getMessage()));
+							logger.info(format("Caught AccessControlException when accessing system " +
+									"property [%s]; its value will be returned [null]. Reason: %s",
+									attributeName, ex.getMessage()));
 						}
 						return null;
 					}
 				}
 			};
 		}
-		return systemProperties;
 	}
 
 	@Override
@@ -427,6 +454,51 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 
 	//---------------------------------------------------------------------
 	// Implementation of ConfigurablePropertyResolver interface
+	//---------------------------------------------------------------------
+
+	@Override
+	public ConfigurableConversionService getConversionService() {
+		return this.propertyResolver.getConversionService();
+	}
+
+	@Override
+	public void setConversionService(ConfigurableConversionService conversionService) {
+		this.propertyResolver.setConversionService(conversionService);
+	}
+
+	@Override
+	public void setPlaceholderPrefix(String placeholderPrefix) {
+		this.propertyResolver.setPlaceholderPrefix(placeholderPrefix);
+	}
+
+	@Override
+	public void setPlaceholderSuffix(String placeholderSuffix) {
+		this.propertyResolver.setPlaceholderSuffix(placeholderSuffix);
+	}
+
+	@Override
+	public void setValueSeparator(String valueSeparator) {
+		this.propertyResolver.setValueSeparator(valueSeparator);
+	}
+
+	@Override
+	public void setIgnoreUnresolvableNestedPlaceholders(boolean ignoreUnresolvableNestedPlaceholders) {
+		this.propertyResolver.setIgnoreUnresolvableNestedPlaceholders(ignoreUnresolvableNestedPlaceholders);
+	}
+
+	@Override
+	public void setRequiredProperties(String... requiredProperties) {
+		this.propertyResolver.setRequiredProperties(requiredProperties);
+	}
+
+	@Override
+	public void validateRequiredProperties() throws MissingRequiredPropertiesException {
+		this.propertyResolver.validateRequiredProperties();
+	}
+
+
+	//---------------------------------------------------------------------
+	// Implementation of PropertyResolver interface
 	//---------------------------------------------------------------------
 
 	@Override
@@ -470,16 +542,6 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 	}
 
 	@Override
-	public void setRequiredProperties(String... requiredProperties) {
-		this.propertyResolver.setRequiredProperties(requiredProperties);
-	}
-
-	@Override
-	public void validateRequiredProperties() throws MissingRequiredPropertiesException {
-		this.propertyResolver.validateRequiredProperties();
-	}
-
-	@Override
 	public String resolvePlaceholders(String text) {
 		return this.propertyResolver.resolvePlaceholders(text);
 	}
@@ -487,36 +549,6 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 	@Override
 	public String resolveRequiredPlaceholders(String text) throws IllegalArgumentException {
 		return this.propertyResolver.resolveRequiredPlaceholders(text);
-	}
-
-	@Override
-	public void setIgnoreUnresolvableNestedPlaceholders(boolean ignoreUnresolvableNestedPlaceholders) {
-		this.propertyResolver.setIgnoreUnresolvableNestedPlaceholders(ignoreUnresolvableNestedPlaceholders);
-	}
-
-	@Override
-	public void setConversionService(ConfigurableConversionService conversionService) {
-		this.propertyResolver.setConversionService(conversionService);
-	}
-
-	@Override
-	public ConfigurableConversionService getConversionService() {
-		return this.propertyResolver.getConversionService();
-	}
-
-	@Override
-	public void setPlaceholderPrefix(String placeholderPrefix) {
-		this.propertyResolver.setPlaceholderPrefix(placeholderPrefix);
-	}
-
-	@Override
-	public void setPlaceholderSuffix(String placeholderSuffix) {
-		this.propertyResolver.setPlaceholderSuffix(placeholderSuffix);
-	}
-
-	@Override
-	public void setValueSeparator(String valueSeparator) {
-		this.propertyResolver.setValueSeparator(valueSeparator);
 	}
 
 

@@ -1,12 +1,11 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 
 <xsd:schema xmlns="http://www.springframework.org/schema/aop"
-		xmlns:xsd="http://www.w3.org/2001/XMLSchema"
-		xmlns:beans="http://www.springframework.org/schema/beans"
-		xmlns:tool="http://www.springframework.org/schema/tool"
-		targetNamespace="http://www.springframework.org/schema/aop"
-		elementFormDefault="qualified"
-		attributeFormDefault="unqualified">
+			xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+			xmlns:tool="http://www.springframework.org/schema/tool"
+			targetNamespace="http://www.springframework.org/schema/aop"
+			elementFormDefault="qualified"
+			attributeFormDefault="unqualified">
 
 	<xsd:import namespace="http://www.springframework.org/schema/beans" schemaLocation="http://www.springframework.org/schema/beans/spring-beans-4.0.xsd"/>
 	<xsd:import namespace="http://www.springframework.org/schema/tool" schemaLocation="http://www.springframework.org/schema/tool/spring-tool-4.0.xsd"/>
@@ -197,7 +196,7 @@
 				]]></xsd:documentation>
 			</xsd:annotation>
 		</xsd:attribute>
-		<xsd:attribute name="order" type="xsd:int">
+		<xsd:attribute name="order" type="xsd:token">
 			<xsd:annotation>
 				<xsd:documentation source="java:org.springframework.core.Ordered"><![CDATA[
 	Controls the ordering of the execution of this aspect when multiple
@@ -386,7 +385,7 @@
 				]]></xsd:documentation>
 			</xsd:annotation>
 		</xsd:attribute>
-		<xsd:attribute name="order" type="xsd:int">
+		<xsd:attribute name="order" type="xsd:token">
 			<xsd:annotation>
 				<xsd:documentation source="java:org.springframework.core.Ordered"><![CDATA[
 	Controls the ordering of the execution of this advice when multiple

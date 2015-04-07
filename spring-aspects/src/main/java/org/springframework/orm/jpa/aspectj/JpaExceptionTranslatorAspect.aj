@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,14 +21,18 @@ import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityTransaction;
 import javax.persistence.Query;
 
+import org.aspectj.lang.annotation.SuppressAjWarnings;
+
 import org.springframework.dao.DataAccessException;
 import org.springframework.orm.jpa.EntityManagerFactoryUtils;
 
 public aspect JpaExceptionTranslatorAspect {
+
 	pointcut entityManagerCall():
 		call(* EntityManager.*(..)) || call(* EntityManagerFactory.*(..)) ||
 		call(* EntityTransaction.*(..)) || call(* Query.*(..));
 
+	@SuppressAjWarnings("adviceDidNotMatch")
 	after() throwing(RuntimeException re): entityManagerCall() {
 		DataAccessException dex = EntityManagerFactoryUtils.convertJpaAccessExceptionIfPossible(re);
 		if (dex != null) {
@@ -38,4 +42,5 @@ public aspect JpaExceptionTranslatorAspect {
 			throw re;
 		}
 	}
+
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,10 @@
 
 package org.springframework.core;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
@@ -35,6 +39,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import java.util.concurrent.Callable;
 
 import org.hamcrest.Matchers;
 import org.junit.Rule;
@@ -45,6 +50,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.runners.MockitoJUnitRunner;
 
+import org.springframework.core.ResolvableType.VariableResolver;
 import org.springframework.util.MultiValueMap;
 
 import static org.hamcrest.Matchers.*;
@@ -55,11 +61,11 @@ import static org.mockito.BDDMockito.*;
  * Tests for {@link ResolvableType}.
  *
  * @author Phillip Webb
+ * @author Juergen Hoeller
  */
 @SuppressWarnings("rawtypes")
 @RunWith(MockitoJUnitRunner.class)
 public class ResolvableTypeTests {
-
 
 	@Rule
 	public ExpectedException thrown = ExpectedException.none();
@@ -86,8 +92,8 @@ public class ResolvableTypeTests {
 		assertThat(none.resolve(String.class), equalTo((Class) String.class));
 		assertThat(none.resolveGeneric(0), nullValue());
 		assertThat(none.resolveGenerics().length, equalTo(0));
-		assertThat(none.resolveVariable(mock(TypeVariable.class)), nullValue());
 		assertThat(none.toString(), equalTo("?"));
+		assertThat(none.hasUnresolvableGenerics(), equalTo(false));
 		assertThat(none.isAssignableFrom(ResolvableType.forClass(Object.class)), equalTo(false));
 	}
 
@@ -416,6 +422,13 @@ public class ResolvableTypeTests {
 	}
 
 	@Test
+	public void genericOfGenericWithAs() throws Exception {
+		ResolvableType type = ResolvableType.forField(Fields.class.getField("stringListList")).asCollection();
+		assertThat(type.toString(), equalTo("java.util.Collection<java.util.List<java.lang.String>>"));
+		assertThat(type.getGeneric().asCollection().toString(), equalTo("java.util.Collection<java.lang.String>"));
+	}
+
+	@Test
 	public void getGenericOfGenericByIndexes() throws Exception {
 		ResolvableType type = ResolvableType.forField(Fields.class.getField("stringListList"));
 		assertThat(type.getGeneric(0, 0).getType(), equalTo((Type) String.class));
@@ -437,11 +450,19 @@ public class ResolvableTypeTests {
 	}
 
 	@Test
-	public void getGenerics() throws Exception {
+	public void getGenericsFromParameterizedType() throws Exception {
 		ResolvableType type = ResolvableType.forClass(List.class, ExtendsList.class);
 		ResolvableType[] generics = type.getGenerics();
 		assertThat(generics.length, equalTo(1));
 		assertThat(generics[0].resolve(), equalTo((Class) CharSequence.class));
+	}
+
+	@Test
+	public void getGenericsFromClass() throws Exception {
+		ResolvableType type = ResolvableType.forClass(List.class);
+		ResolvableType[] generics = type.getGenerics();
+		assertThat(generics.length, equalTo(1));
+		assertThat(generics[0].getType().toString(), equalTo("E"));
 	}
 
 	@Test
@@ -502,6 +523,30 @@ public class ResolvableTypeTests {
 	}
 
 	@Test
+	public void resolveVariableGenericArray() throws Exception {
+		ResolvableType type = ResolvableType.forField(Fields.class.getField("variableTypeGenericArray"), TypedFields.class);
+		assertThat(type.getType().toString(), equalTo("T[]"));
+		assertThat(type.isArray(), equalTo(true));
+		assertThat(type.resolve(), equalTo((Class) String[].class));
+	}
+
+	@Test
+	public void resolveVariableGenericArrayUnknown() throws Exception {
+		ResolvableType type = ResolvableType.forField(Fields.class.getField("variableTypeGenericArray"));
+		assertThat(type.getType().toString(), equalTo("T[]"));
+		assertThat(type.isArray(), equalTo(true));
+		assertThat(type.resolve(), nullValue());
+	}
+
+	@Test
+	public void resolveVariableGenericArrayUnknownWithFallback() throws Exception {
+		ResolvableType type = ResolvableType.forField(Fields.class.getField("variableTypeGenericArray"));
+		assertThat(type.getType().toString(), equalTo("T[]"));
+		assertThat(type.isArray(), equalTo(true));
+		assertThat(type.resolve(Object.class), equalTo((Class) Object.class));
+	}
+
+	@Test
 	public void resolveWildcardTypeUpperBounds() throws Exception {
 		ResolvableType type = ResolvableType.forField(Fields.class.getField("wildcardType"));
 		assertThat(type.getGeneric().resolve(), equalTo((Class) Number.class));
@@ -549,9 +594,8 @@ public class ResolvableTypeTests {
 	public void doesResolveFromOuterOwner() throws Exception {
 		ResolvableType type = ResolvableType.forField(
 				Fields.class.getField("listOfListOfUnknown")).as(Collection.class);
-		ResolvableType generic = type.getGeneric(0);
-		assertThat(generic.resolve(), equalTo((Class) List.class));
-		assertThat(generic.as(Collection.class).getGeneric(0).as(Collection.class).resolve(), nullValue());
+		assertThat(type.getGeneric(0).resolve(), equalTo((Class) List.class));
+		assertThat(type.getGeneric(0).as(Collection.class).getGeneric(0).as(Collection.class).resolve(), nullValue());
 	}
 
 	@Test
@@ -615,6 +659,16 @@ public class ResolvableTypeTests {
 				Fields.class.getField("parameterizedType"), TypedFields.class);
 		assertThat(type.resolve(), equalTo((Class) List.class));
 		assertThat(type.getGeneric().resolve(), equalTo((Class) String.class));
+	}
+
+	@Test
+	public void resolveTypeVariableFromFieldTypeWithImplementsType() throws Exception {
+		ResolvableType implementationType = ResolvableType.forClassWithGenerics(
+				Fields.class, Integer.class);
+		ResolvableType type = ResolvableType.forField(
+				Fields.class.getField("parameterizedType"), implementationType);
+		assertThat(type.resolve(), equalTo((Class) List.class));
+		assertThat(type.getGeneric().resolve(), equalTo((Class) Integer.class));
 	}
 
 	@Test
@@ -694,6 +748,16 @@ public class ResolvableTypeTests {
 	}
 
 	@Test
+	public void resolveTypeVariableFromMethodParameterTypeWithImplementsType() throws Exception {
+		Method method = Methods.class.getMethod("typedParameter", Object.class);
+		MethodParameter methodParameter = MethodParameter.forMethodOrConstructor(method, 0);
+		ResolvableType implementationType = ResolvableType.forClassWithGenerics(Methods.class, Integer.class);
+		ResolvableType type = ResolvableType.forMethodParameter(methodParameter, implementationType);
+		assertThat(type.resolve(), equalTo((Class) Integer.class));
+		assertThat(type.getType().toString(), equalTo("T"));
+	}
+
+	@Test
 	public void resolveTypeVariableFromMethodReturn() throws Exception {
 		Method method = Methods.class.getMethod("typedReturn");
 		ResolvableType type = ResolvableType.forMethodReturnType(method);
@@ -721,15 +785,17 @@ public class ResolvableTypeTests {
 	public void resolveTypeVariableFromTypeWithVariableResolver() throws Exception {
 		Type sourceType = Methods.class.getMethod("typedReturn").getGenericReturnType();
 		ResolvableType type = ResolvableType.forType(
-				sourceType, ResolvableType.forClass(TypedMethods.class).as(Methods.class));
+				sourceType, ResolvableType.forClass(TypedMethods.class).as(Methods.class).asVariableResolver());
 		assertThat(type.resolve(), equalTo((Class) String.class));
 		assertThat(type.getType().toString(), equalTo("T"));
 	}
 
 	@Test
 	public void resolveTypeWithCustomVariableResolver() throws Exception {
-		TypeVariableResolver variableResolver = mock(TypeVariableResolver.class);
-		given(variableResolver.resolveVariable((TypeVariable<?>) anyObject())).willReturn(Long.class);
+		VariableResolver variableResolver = mock(VariableResolver.class);
+		given(variableResolver.getSource()).willReturn(this);
+		ResolvableType longType = ResolvableType.forClass(Long.class);
+		given(variableResolver.resolveVariable((TypeVariable<?>) anyObject())).willReturn(longType);
 
 		ResolvableType variable = ResolvableType.forType(
 				Fields.class.getField("typeVariableType").getGenericType(), variableResolver);
@@ -747,10 +813,10 @@ public class ResolvableTypeTests {
 	public void toStrings() throws Exception {
 		assertThat(ResolvableType.NONE.toString(), equalTo("?"));
 
-		assertFieldToStringValue("classType", "java.util.List");
+		assertFieldToStringValue("classType", "java.util.List<?>");
 		assertFieldToStringValue("typeVariableType", "?");
 		assertFieldToStringValue("parameterizedType", "java.util.List<?>");
-		assertFieldToStringValue("arrayClassType", "java.util.List[]");
+		assertFieldToStringValue("arrayClassType", "java.util.List<?>[]");
 		assertFieldToStringValue("genericArrayType", "java.util.List<java.lang.String>[]");
 		assertFieldToStringValue("genericMultiArrayType", "java.util.List<java.lang.String>[][][]");
 		assertFieldToStringValue("wildcardType", "java.util.List<java.lang.Number>");
@@ -761,7 +827,7 @@ public class ResolvableTypeTests {
 		assertFieldToStringValue("stringArrayList", "java.util.List<java.lang.String[]>");
 		assertFieldToStringValue("stringIntegerMultiValueMap", "org.springframework.util.MultiValueMap<java.lang.String, java.lang.Integer>");
 		assertFieldToStringValue("stringIntegerMultiValueMapSwitched", VariableNameSwitch.class.getName() + "<java.lang.Integer, java.lang.String>");
-		assertFieldToStringValue("listOfListOfUnknown", "java.util.List<java.util.List>");
+		assertFieldToStringValue("listOfListOfUnknown", "java.util.List<java.util.List<?>>");
 
 		assertTypedFieldToStringValue("typeVariableType", "java.lang.String");
 		assertTypedFieldToStringValue("parameterizedType", "java.util.List<java.lang.String>");
@@ -770,13 +836,27 @@ public class ResolvableTypeTests {
 		assertThat(ResolvableType.forClass(List.class, ListOfGenericArray.class).toString(), equalTo("java.util.List<java.util.List<java.lang.String>[]>"));
 	}
 
+	@Test
+	public void getSource() throws Exception {
+		Class<?> classType = MySimpleInterfaceType.class;
+		Field basicField = Fields.class.getField("classType");
+		Field field = Fields.class.getField("charSequenceList");
+		Method method = Methods.class.getMethod("charSequenceParameter", List.class);
+		MethodParameter methodParameter = MethodParameter.forMethodOrConstructor(method, 0);
+		assertThat(ResolvableType.forField(basicField).getSource(), equalTo((Object) basicField));
+		assertThat(ResolvableType.forField(field).getSource(), equalTo((Object) field));
+		assertThat(ResolvableType.forMethodParameter(methodParameter).getSource(), equalTo((Object) methodParameter));
+		assertThat(ResolvableType.forMethodParameter(method, 0).getSource(), equalTo((Object) methodParameter));
+		assertThat(ResolvableType.forClass(classType).getSource(), equalTo((Object) classType));
+		assertThat(ResolvableType.forClass(classType).getSuperType().getSource(), equalTo((Object) classType.getGenericSuperclass()));
+	}
+
 	private void assertFieldToStringValue(String field, String expected) throws Exception {
 		ResolvableType type = ResolvableType.forField(Fields.class.getField(field));
 		assertThat("field " + field + " toString", type.toString(), equalTo(expected));
 	}
 
-	private void assertTypedFieldToStringValue(String field, String expected)
-			throws Exception {
+	private void assertTypedFieldToStringValue(String field, String expected) throws Exception {
 		ResolvableType type = ResolvableType.forField(Fields.class.getField(field), TypedFields.class);
 		assertThat("field " + field + " toString", type.toString(), equalTo(expected));
 	}
@@ -784,16 +864,26 @@ public class ResolvableTypeTests {
 	@Test
 	public void resolveFromOuterClass() throws Exception {
 		Field field = EnclosedInParameterizedType.InnerTyped.class.getField("field");
-		ResolvableType type = ResolvableType.forField(
-				field, TypedEnclosedInParameterizedType.TypedInnerTyped.class);
+		ResolvableType type = ResolvableType.forField(field, TypedEnclosedInParameterizedType.TypedInnerTyped.class);
 		assertThat(type.resolve(), equalTo((Type) Integer.class));
 	}
+
+	@Test
+	public void resolveFromClassWithGenerics() throws Exception {
+		ResolvableType type = ResolvableType.forClassWithGenerics(List.class, ResolvableType.forClassWithGenerics(List.class, String.class));
+		assertThat(type.asCollection().toString(), equalTo("java.util.Collection<java.util.List<java.lang.String>>"));
+		assertThat(type.asCollection().getGeneric().toString(), equalTo("java.util.List<java.lang.String>"));
+		assertThat(type.asCollection().getGeneric().asCollection().toString(), equalTo("java.util.Collection<java.lang.String>"));
+		assertThat(type.toString(), equalTo("java.util.List<java.util.List<java.lang.String>>"));
+		assertThat(type.asCollection().getGeneric().getGeneric().resolve(), equalTo((Type) String.class));
+	}
+
 
 	@Test
 	public void isAssignableFromMustNotBeNull() throws Exception {
 		this.thrown.expect(IllegalArgumentException.class);
 		this.thrown.expectMessage("Type must not be null");
-		ResolvableType.forClass(Object.class).isAssignableFrom(null);
+		ResolvableType.forClass(Object.class).isAssignableFrom((ResolvableType) null);
 	}
 
 	@Test
@@ -812,6 +902,20 @@ public class ResolvableTypeTests {
 		assertAssignable(objectType, objectType, charSequenceType, stringType).equalTo(true, true, true);
 		assertAssignable(charSequenceType, objectType, charSequenceType, stringType).equalTo(false, true, true);
 		assertAssignable(stringType, objectType, charSequenceType, stringType).equalTo(false, false, true);
+
+		assertTrue(objectType.isAssignableFrom(String.class));
+		assertTrue(objectType.isAssignableFrom(StringBuilder.class));
+		assertTrue(charSequenceType.isAssignableFrom(String.class));
+		assertTrue(charSequenceType.isAssignableFrom(StringBuilder.class));
+		assertTrue(stringType.isAssignableFrom(String.class));
+		assertFalse(stringType.isAssignableFrom(StringBuilder.class));
+
+		assertTrue(objectType.isInstance("a String"));
+		assertTrue(objectType.isInstance(new StringBuilder("a StringBuilder")));
+		assertTrue(charSequenceType.isInstance("a String"));
+		assertTrue(charSequenceType.isInstance(new StringBuilder("a StringBuilder")));
+		assertTrue(stringType.isInstance("a String"));
+		assertFalse(stringType.isInstance(new StringBuilder("a StringBuilder")));
 	}
 
 	@Test
@@ -997,7 +1101,7 @@ public class ResolvableTypeTests {
 	public void hashCodeAndEquals() throws Exception {
 		ResolvableType forClass = ResolvableType.forClass(List.class);
 		ResolvableType forFieldDirect = ResolvableType.forField(Fields.class.getDeclaredField("stringList"));
-		ResolvableType forFieldViaType = ResolvableType.forType(Fields.class.getDeclaredField("stringList").getGenericType());
+		ResolvableType forFieldViaType = ResolvableType.forType(Fields.class.getDeclaredField("stringList").getGenericType(), (VariableResolver) null);
 		ResolvableType forFieldWithImplementation = ResolvableType.forField(Fields.class.getDeclaredField("stringList"), TypedFields.class);
 
 		assertThat(forClass, equalTo(forClass));
@@ -1006,7 +1110,7 @@ public class ResolvableTypeTests {
 		assertThat(forClass, not(equalTo(forFieldWithImplementation)));
 
 		assertThat(forFieldDirect, equalTo(forFieldDirect));
-		assertThat(forFieldDirect, equalTo(forFieldViaType));
+		assertThat(forFieldDirect, not(equalTo(forFieldViaType)));
 		assertThat(forFieldDirect, not(equalTo(forFieldWithImplementation)));
 	}
 
@@ -1024,17 +1128,135 @@ public class ResolvableTypeTests {
 		assertThat(t.resolveGeneric(1, 0), equalTo((Class) String.class));
 	}
 
+	@Test
+	public void forClassWithGenerics() throws Exception {
+		ResolvableType elementType = ResolvableType.forClassWithGenerics(Map.class, Integer.class, String.class);
+		ResolvableType listType = ResolvableType.forClassWithGenerics(List.class, elementType);
+		assertThat(listType.toString(), equalTo("java.util.List<java.util.Map<java.lang.Integer, java.lang.String>>"));
+	}
 
-	private static AssertAssignbleMatcher assertAssignable(final ResolvableType type,
-			final ResolvableType... fromTypes) {
+	@Test
+	public void classWithGenericsAs() throws Exception {
+		ResolvableType type = ResolvableType.forClassWithGenerics(MultiValueMap.class, Integer.class, String.class);
+		assertThat(type.asMap().toString(), equalTo("java.util.Map<java.lang.Integer, java.util.List<java.lang.String>>"));
+	}
+
+	@Test
+	public void forClassWithMismatchedGenerics() throws Exception {
+		thrown.expect(IllegalArgumentException.class);
+		thrown.expectMessage("Mismatched number of generics specified");
+		ResolvableType.forClassWithGenerics(Map.class, Integer.class);
+	}
+
+	@Test
+	public void forArrayComponent() throws Exception {
+		ResolvableType elementType = ResolvableType.forField(Fields.class.getField("stringList"));
+		ResolvableType type = ResolvableType.forArrayComponent(elementType);
+		assertThat(type.toString(), equalTo("java.util.List<java.lang.String>[]"));
+		assertThat(type.resolve(), equalTo((Class) List[].class));
+	}
+
+	@Test
+	public void serialize() throws Exception {
+		testSerialization(ResolvableType.forClass(List.class));
+		testSerialization(ResolvableType.forField(Fields.class.getField("charSequenceList")));
+		testSerialization(ResolvableType.forMethodParameter(Methods.class.getMethod("charSequenceParameter", List.class), 0));
+		testSerialization(ResolvableType.forMethodReturnType(Methods.class.getMethod("charSequenceReturn")));
+		testSerialization(ResolvableType.forConstructorParameter(Constructors.class.getConstructor(List.class), 0));
+		testSerialization(ResolvableType.forField(Fields.class.getField("charSequenceList")).getGeneric());
+		testSerialization(ResolvableType.forField(Fields.class.getField("charSequenceList")).asCollection());
+		testSerialization(ResolvableType.forClass(ExtendsMap.class).getSuperType());
+		ResolvableType deserializedNone = testSerialization(ResolvableType.NONE);
+		assertThat(deserializedNone, sameInstance(ResolvableType.NONE));
+	}
+
+	@Test
+	public void canResolveVoid() throws Exception {
+		ResolvableType type = ResolvableType.forClass(void.class);
+		assertThat(type.resolve(), equalTo((Class) void.class));
+	}
+
+	@Test
+	public void narrow() throws Exception {
+		ResolvableType type = ResolvableType.forField(Fields.class.getField("stringList"));
+		ResolvableType narrow = ResolvableType.forType(ArrayList.class, type);
+		assertThat(narrow.getGeneric().resolve(), equalTo((Class) String.class));
+	}
+
+	@Test
+	public void hasUnresolvableGenerics() throws Exception {
+		ResolvableType type = ResolvableType.forField(Fields.class.getField("stringList"));
+		assertThat(type.hasUnresolvableGenerics(), equalTo(false));
+	}
+
+	@Test
+	public void hasUnresolvableGenericsBasedOnOwnGenerics() throws Exception {
+		ResolvableType type = ResolvableType.forClass(List.class);
+		assertThat(type.hasUnresolvableGenerics(), equalTo(true));
+	}
+
+	@Test
+	public void hasUnresolvableGenericsWhenSelfNotResolvable() throws Exception {
+		ResolvableType type = ResolvableType.forClass(List.class).getGeneric();
+		assertThat(type.hasUnresolvableGenerics(), equalTo(false));
+	}
+
+	@Test
+	public void hasUnresolvableGenericsWhenImplementesRawInterface() throws Exception {
+		ResolvableType type = ResolvableType.forClass(MySimpleInterfaceTypeWithImplementsRaw.class);
+		for (ResolvableType generic : type.getGenerics()) {
+			assertThat(generic.resolve(), not(nullValue()));
+		}
+		assertThat(type.hasUnresolvableGenerics(), equalTo(true));
+	}
+
+	@Test
+	public void hasUnresolvableGenericsWhenExtends() throws Exception {
+		ResolvableType type = ResolvableType.forClass(ExtendsMySimpleInterfaceTypeWithImplementsRaw.class);
+		for (ResolvableType generic : type.getGenerics()) {
+			assertThat(generic.resolve(), not(nullValue()));
+		}
+		assertThat(type.hasUnresolvableGenerics(), equalTo(true));
+	}
+
+	@Test
+	public void testSpr11219() throws Exception {
+		ResolvableType type = ResolvableType.forField(BaseProvider.class.getField("stuff"), BaseProvider.class);
+		assertTrue(type.getNested(2).isAssignableFrom(ResolvableType.forClass(BaseImplementation.class)));
+		assertEquals("java.util.Collection<org.springframework.core.ResolvableTypeTests$IBase<?>>", type.toString());
+	}
+
+	@Test
+	public void testSpr12701() throws Exception {
+		ResolvableType resolvableType = ResolvableType.forClassWithGenerics(Callable.class, String.class);
+		Type type = resolvableType.getType();
+		assertThat(type, is(instanceOf(ParameterizedType.class)));
+		assertThat(((ParameterizedType) type).getRawType(), is(equalTo(Callable.class)));
+		assertThat(((ParameterizedType) type).getActualTypeArguments().length, is(equalTo(1)));
+		assertThat(((ParameterizedType) type).getActualTypeArguments()[0], is(equalTo(String.class)));
+	}
+
+
+	private ResolvableType testSerialization(ResolvableType type) throws Exception {
+		ByteArrayOutputStream bos = new ByteArrayOutputStream();
+		ObjectOutputStream oos = new ObjectOutputStream(bos);
+		oos.writeObject(type);
+		oos.close();
+		ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(bos.toByteArray()));
+		ResolvableType read = (ResolvableType) ois.readObject();
+		assertThat(read, equalTo(type));
+		assertThat(read.getType(), equalTo(type.getType()));
+		assertThat(read.resolve(), equalTo((Class) type.resolve()));
+		return read;
+	}
+
+	private static AssertAssignbleMatcher assertAssignable(final ResolvableType type, final ResolvableType... fromTypes) {
 		return new AssertAssignbleMatcher() {
 			@Override
 			public void equalTo(boolean... values) {
 				for (int i = 0; i < fromTypes.length; i++) {
-					assertThat(stringDesc(type) + " isAssignableFrom "
-							+ stringDesc(fromTypes[i]),
-							type.isAssignableFrom(fromTypes[i]),
-							Matchers.equalTo(values[i]));
+					assertThat(stringDesc(type) + " isAssignableFrom " + stringDesc(fromTypes[i]),
+							type.isAssignableFrom(fromTypes[i]), Matchers.equalTo(values[i]));
 				}
 			}
 		};
@@ -1054,17 +1276,16 @@ public class ResolvableTypeTests {
 	private static interface AssertAssignbleMatcher {
 
 		void equalTo(boolean... values);
-
 	}
 
 
+	@SuppressWarnings("serial")
 	static class ExtendsList extends ArrayList<CharSequence> {
-
 	}
 
 
+	@SuppressWarnings("serial")
 	static class ExtendsMap extends HashMap<String, Integer> {
-
 	}
 
 
@@ -1105,11 +1326,11 @@ public class ResolvableTypeTests {
 
 		public Map<Map<String, Integer>, Map<Byte, Long>> nested;
 
+		public T[] variableTypeGenericArray;
 	}
 
 
 	static class TypedFields extends Fields<String> {
-
 	}
 
 
@@ -1126,7 +1347,6 @@ public class ResolvableTypeTests {
 		void typedParameter(T p);
 
 		T typedReturn();
-
 	}
 
 
@@ -1175,17 +1395,14 @@ public class ResolvableTypeTests {
 		public Collection<? extends Collection<? extends CharSequence>> complexWildcard3;
 
 		public List<List<String>> complexWildcard4;
-
 	}
 
 
 	static class Assignment extends AssignmentBase<Object, CharSequence, String> {
-
 	}
 
 
 	static interface TypedMethods extends Methods<String> {
-
 	}
 
 
@@ -1196,7 +1413,6 @@ public class ResolvableTypeTests {
 
 		public Constructors(Map<T, Long> p) {
 		}
-
 	}
 
 
@@ -1209,57 +1425,52 @@ public class ResolvableTypeTests {
 		public TypedConstructors(Map<String, Long> p) {
 			super(p);
 		}
-
 	}
 
 
 	public interface MyInterfaceType<T> {
-
 	}
 
 
 	public class MySimpleInterfaceType implements MyInterfaceType<String> {
+	}
 
+	public abstract class MySimpleInterfaceTypeWithImplementsRaw implements MyInterfaceType<String>, List {
+	}
+
+	public abstract class ExtendsMySimpleInterfaceTypeWithImplementsRaw extends MySimpleInterfaceTypeWithImplementsRaw {
 	}
 
 
 	public class MyCollectionInterfaceType implements MyInterfaceType<Collection<String>> {
-
 	}
 
 
 	public abstract class MySuperclassType<T> {
-
 	}
 
 
 	public class MySimpleSuperclassType extends MySuperclassType<String> {
-
 	}
 
 
 	public class MyCollectionSuperclassType extends MySuperclassType<Collection<String>> {
-
 	}
 
 
 	static interface Wildcard<T extends Number> extends List<T> {
-
 	}
 
 
 	static interface RawExtendsWildcard extends Wildcard {
-
 	}
 
 
 	static interface VariableNameSwitch<V, K> extends MultiValueMap<K, V> {
-
 	}
 
 
 	static interface ListOfGenericArray extends List<List<String>[]> {
-
 	}
 
 
@@ -1272,16 +1483,31 @@ public class ResolvableTypeTests {
 
 			public T field;
 		}
-
 	}
 
 
-	static class TypedEnclosedInParameterizedType extends
-			EnclosedInParameterizedType<Integer> {
+	static class TypedEnclosedInParameterizedType extends EnclosedInParameterizedType<Integer> {
 
 		class TypedInnerTyped extends InnerTyped<Long> {
 		}
+	}
 
+
+	public interface IProvider<P> {
+	}
+
+	public interface IBase<BT extends IBase<BT>> {
+	}
+
+	public abstract class AbstractBase<BT extends IBase<BT>> implements IBase<BT> {
+	}
+
+	public class BaseImplementation extends AbstractBase<BaseImplementation> {
+	}
+
+	public class BaseProvider<BT extends IBase<BT>> implements IProvider<IBase<BT>> {
+
+		public Collection<IBase<BT>> stuff;
 	}
 
 }

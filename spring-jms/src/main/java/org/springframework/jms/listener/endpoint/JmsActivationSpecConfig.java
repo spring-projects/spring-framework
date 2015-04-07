@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.jms.listener.endpoint;
 import javax.jms.Session;
 
 import org.springframework.core.Constants;
+import org.springframework.jms.support.converter.MessageConverter;
 
 /**
  * Common configuration object for activating a JMS message endpoint.
@@ -29,6 +30,7 @@ import org.springframework.core.Constants;
  * but not tied to it.
  *
  * @author Juergen Hoeller
+ * @author Stephane Nicoll
  * @since 2.5
  * @see JmsActivationSpecFactory
  * @see JmsMessageEndpointManager#setActivationSpecConfig
@@ -46,7 +48,9 @@ public class JmsActivationSpecConfig {
 
 	private boolean subscriptionDurable = false;
 
-	private String durableSubscriptionName;
+	private boolean subscriptionShared = false;
+
+	private String subscriptionName;
 
 	private String clientId;
 
@@ -57,6 +61,8 @@ public class JmsActivationSpecConfig {
 	private int maxConcurrency = -1;
 
 	private int prefetchSize = -1;
+
+	private MessageConverter messageConverter;
 
 
 	public void setDestinationName(String destinationName) {
@@ -77,18 +83,41 @@ public class JmsActivationSpecConfig {
 
 	public void setSubscriptionDurable(boolean subscriptionDurable) {
 		this.subscriptionDurable = subscriptionDurable;
+		if (subscriptionDurable) {
+			this.pubSubDomain = true;
+		}
 	}
 
 	public boolean isSubscriptionDurable() {
 		return this.subscriptionDurable;
 	}
 
+	public void setSubscriptionShared(boolean subscriptionShared) {
+		this.subscriptionShared = subscriptionShared;
+		if (subscriptionShared) {
+			this.pubSubDomain = true;
+		}
+	}
+
+	public boolean isSubscriptionShared() {
+		return this.subscriptionShared;
+	}
+
+	public void setSubscriptionName(String subscriptionName) {
+		this.subscriptionName = subscriptionName;
+	}
+
+	public String getSubscriptionName() {
+		return this.subscriptionName;
+	}
+
 	public void setDurableSubscriptionName(String durableSubscriptionName) {
-		this.durableSubscriptionName = durableSubscriptionName;
+		this.subscriptionName = durableSubscriptionName;
+		this.subscriptionDurable = true;
 	}
 
 	public String getDurableSubscriptionName() {
-		return this.durableSubscriptionName;
+		return (this.subscriptionDurable ? this.subscriptionName : null);
 	}
 
 	public void setClientId(String clientId) {
@@ -199,6 +228,21 @@ public class JmsActivationSpecConfig {
 	 */
 	public int getPrefetchSize() {
 		return this.prefetchSize;
+	}
+
+	/**
+	 * Set the {@link MessageConverter} strategy for converting JMS Messages.
+	 * @param messageConverter the message converter to use
+	 */
+	public void setMessageConverter(MessageConverter messageConverter) {
+		this.messageConverter = messageConverter;
+	}
+
+	/**
+	 * Return the {@link MessageConverter} to use, if any.
+	 */
+	public MessageConverter getMessageConverter() {
+		return this.messageConverter;
 	}
 
 }

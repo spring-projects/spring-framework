@@ -232,7 +232,7 @@ public class WebDataBinder extends DataBinder {
 				if (pv.getName().startsWith(fieldMarkerPrefix)) {
 					String field = pv.getName().substring(fieldMarkerPrefix.length());
 					if (getPropertyAccessor().isWritableProperty(field) && !mpvs.contains(field)) {
-						Class fieldType = getPropertyAccessor().getPropertyType(field);
+						Class<?> fieldType = getPropertyAccessor().getPropertyType(field);
 						mpvs.add(field, getEmptyValue(field, fieldType));
 					}
 					mpvs.removePropertyValue(pv);
@@ -250,7 +250,7 @@ public class WebDataBinder extends DataBinder {
 	 * @param fieldType the type of the field
 	 * @return the empty value (for most fields: null)
 	 */
-	protected Object getEmptyValue(String field, Class fieldType) {
+	protected Object getEmptyValue(String field, Class<?> fieldType) {
 		if (fieldType != null && boolean.class.equals(fieldType) || Boolean.class.equals(fieldType)) {
 			// Special handling of boolean property.
 			return Boolean.FALSE;

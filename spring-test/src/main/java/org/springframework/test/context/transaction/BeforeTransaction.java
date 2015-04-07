@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,29 +17,30 @@
 package org.springframework.test.context.transaction;
 
 import java.lang.annotation.Documented;
-import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import static java.lang.annotation.ElementType.*;
+import static java.lang.annotation.RetentionPolicy.*;
+
 /**
- * <p>
- * Test annotation to indicate that the annotated {@code public void}
- * method should be executed <em>before</em> a transaction is started for test
- * methods configured to run within a transaction via the
- * {@code &#064;Transactional} annotation.
- * </p>
- * <p>
- * The {@code &#064;BeforeTransaction} methods of superclasses will be
- * executed before those of the current class.
- * </p>
+ * <p>Test annotation to indicate that the annotated {@code public void} method
+ * should be executed <em>before</em> a transaction is started for a test method
+ * configured to run within a transaction via the {@code @Transactional} annotation.
+ *
+ * <p>The {@code @BeforeTransaction} methods of superclasses will be executed
+ * before those of the current class.
+ *
+ * <p>As of Spring Framework 4.0, this annotation may be used as a
+ * <em>meta-annotation</em> to create custom <em>composed annotations</em>.
  *
  * @author Sam Brannen
  * @since 2.5
  * @see org.springframework.transaction.annotation.Transactional
+ * @see AfterTransaction
  */
 @Documented
-@Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.METHOD)
+@Retention(RUNTIME)
+@Target({ METHOD, ANNOTATION_TYPE })
 public @interface BeforeTransaction {
 }

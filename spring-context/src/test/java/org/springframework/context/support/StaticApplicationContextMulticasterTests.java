@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,6 @@ import java.util.Locale;
 import java.util.Map;
 
 import org.springframework.beans.MutablePropertyValues;
-import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.beans.factory.support.PropertiesBeanDefinitionReader;
 import org.springframework.context.ACATester;
 import org.springframework.context.AbstractApplicationContextTests;
@@ -29,9 +28,11 @@ import org.springframework.context.ApplicationEvent;
 import org.springframework.context.BeanThatListens;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.event.SimpleApplicationEventMulticaster;
+import org.springframework.core.ResolvableType;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.EncodedResource;
+import org.springframework.tests.sample.beans.TestBean;
 
 /**
  * Tests for static application context with custom application event multicaster.
@@ -92,8 +93,8 @@ public class StaticApplicationContextMulticasterTests extends AbstractApplicatio
 		private static int counter = 0;
 
 		@Override
-		public void multicastEvent(ApplicationEvent event) {
-			super.multicastEvent(event);
+		public void multicastEvent(ApplicationEvent event, ResolvableType eventType) {
+			super.multicastEvent(event, eventType);
 			counter++;
 		}
 	}

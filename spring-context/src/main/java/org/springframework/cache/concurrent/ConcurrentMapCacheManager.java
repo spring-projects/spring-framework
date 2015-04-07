@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.cache.concurrent;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -31,14 +32,23 @@ import org.springframework.cache.CacheManager;
  * the set of cache names is pre-defined through {@link #setCacheNames}, with no
  * dynamic creation of further cache regions at runtime.
  *
+ * <p>Note: This is by no means a sophisticated CacheManager; it comes with no
+ * cache configuration options. However, it may be useful for testing or simple
+ * caching scenarios. For advanced local caching needs, consider
+ * {@link org.springframework.cache.guava.GuavaCacheManager} or
+ * {@link org.springframework.cache.ehcache.EhCacheCacheManager}.
+ *
  * @author Juergen Hoeller
  * @since 3.1
+ * @see ConcurrentMapCache
  */
 public class ConcurrentMapCacheManager implements CacheManager {
 
 	private final ConcurrentMap<String, Cache> cacheMap = new ConcurrentHashMap<String, Cache>(16);
 
 	private boolean dynamic = true;
+
+	private boolean allowNullValues = true;
 
 
 	/**
@@ -61,6 +71,8 @@ public class ConcurrentMapCacheManager implements CacheManager {
 	 * Specify the set of cache names for this CacheManager's 'static' mode.
 	 * <p>The number of caches and their names will be fixed after a call to this method,
 	 * with no creation of further cache regions at runtime.
+	 * <p>Calling this with a {@code null} collection argument resets the
+	 * mode to 'dynamic', allowing for further creation of caches again.
 	 */
 	public void setCacheNames(Collection<String> cacheNames) {
 		if (cacheNames != null) {
@@ -69,7 +81,37 @@ public class ConcurrentMapCacheManager implements CacheManager {
 			}
 			this.dynamic = false;
 		}
+		else {
+			this.dynamic = true;
+		}
 	}
+
+	/**
+	 * Specify whether to accept and convert {@code null} values for all caches
+	 * in this cache manager.
+	 * <p>Default is "true", despite ConcurrentHashMap itself not supporting {@code null}
+	 * values. An internal holder object will be used to store user-level {@code null}s.
+	 * <p>Note: A change of the null-value setting will reset all existing caches,
+	 * if any, to reconfigure them with the new null-value requirement.
+	 */
+	public void setAllowNullValues(boolean allowNullValues) {
+		if (allowNullValues != this.allowNullValues) {
+			this.allowNullValues = allowNullValues;
+			// Need to recreate all Cache instances with the new null-value configuration...
+			for (Map.Entry<String, Cache> entry : this.cacheMap.entrySet()) {
+				entry.setValue(createConcurrentMapCache(entry.getKey()));
+			}
+		}
+	}
+
+	/**
+	 * Return whether this cache manager accepts and converts {@code null} values
+	 * for all of its caches.
+	 */
+	public boolean isAllowNullValues() {
+		return this.allowNullValues;
+	}
+
 
 	@Override
 	public Collection<String> getCacheNames() {
@@ -97,7 +139,7 @@ public class ConcurrentMapCacheManager implements CacheManager {
 	 * @return the ConcurrentMapCache (or a decorator thereof)
 	 */
 	protected Cache createConcurrentMapCache(String name) {
-		return new ConcurrentMapCache(name);
+		return new ConcurrentMapCache(name, isAllowNullValues());
 	}
 
 }

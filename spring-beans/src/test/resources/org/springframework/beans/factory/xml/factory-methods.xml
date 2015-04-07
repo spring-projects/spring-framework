@@ -84,6 +84,11 @@
 		<property name="stringValue"><value>testBeanOnlyPrototypeDISetterString</value></property>
 	</bean>
 
+	<bean id="invalidPrototype" class="org.springframework.beans.factory.xml.FactoryMethods"
+		  factory-method="nonExisting" scope="prototype">
+		<constructor-arg><ref local="juergen"/></constructor-arg>
+	</bean>
+
 	<bean id="fullPrototype" class="org.springframework.beans.factory.xml.FactoryMethods"
 			factory-method="newInstance" scope="prototype">
 		<constructor-arg type="int"><value>27</value></constructor-arg>
@@ -120,9 +125,7 @@
 		<constructor-arg><value type="java.lang.Integer">33</value></constructor-arg>
 	</bean>
 	
-	<bean id="instanceFactoryMethodWithoutArgs"
-			factory-bean="instanceFactory"
-			factory-method="defaultInstance"/>
+	<bean id="instanceFactoryMethodWithoutArgs" factory-bean="instanceFactory" factory-method="defaultInstance"/>
 
 	<!-- Unnamed bean with factory-bean declaration -->
 	<bean factory-bean="instanceFactory" factory-method="defaultInstance"/>

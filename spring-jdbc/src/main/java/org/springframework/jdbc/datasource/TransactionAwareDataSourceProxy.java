@@ -138,7 +138,7 @@ public class TransactionAwareDataSourceProxy extends DelegatingDataSource {
 	protected Connection getTransactionAwareConnectionProxy(DataSource targetDataSource) {
 		return (Connection) Proxy.newProxyInstance(
 				ConnectionProxy.class.getClassLoader(),
-				new Class[] {ConnectionProxy.class},
+				new Class<?>[] {ConnectionProxy.class},
 				new TransactionAwareInvocationHandler(targetDataSource));
 	}
 
@@ -198,12 +198,12 @@ public class TransactionAwareDataSourceProxy extends DelegatingDataSource {
 				return sb.toString();
 			}
 			else if (method.getName().equals("unwrap")) {
-				if (((Class) args[0]).isInstance(proxy)) {
+				if (((Class<?>) args[0]).isInstance(proxy)) {
 					return proxy;
 				}
 			}
 			else if (method.getName().equals("isWrapperFor")) {
-				if (((Class) args[0]).isInstance(proxy)) {
+				if (((Class<?>) args[0]).isInstance(proxy)) {
 					return true;
 				}
 			}

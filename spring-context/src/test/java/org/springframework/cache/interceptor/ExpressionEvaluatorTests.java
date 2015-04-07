@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,14 +21,13 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 
 import org.springframework.cache.annotation.AnnotationCacheOperationSource;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
 import org.springframework.cache.concurrent.ConcurrentMapCache;
+import org.springframework.context.expression.AnnotatedElementKey;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.util.ReflectionUtils;
@@ -39,11 +38,10 @@ import static org.junit.Assert.*;
 /**
  * @author Costin Leau
  * @author Phillip Webb
+ * @author Sam Brannen
+ * @author Stephane Nicoll
  */
 public class ExpressionEvaluatorTests {
-
-	@Rule
-	public ExpectedException thrown = ExpectedException.none();
 
 	private ExpressionEvaluator eval = new ExpressionEvaluator();
 
@@ -70,21 +68,22 @@ public class ExpressionEvaluatorTests {
 	}
 
 	@Test
-	@SuppressWarnings("unchecked")
 	public void testMultipleCachingEval() throws Exception {
 		AnnotatedClass target = new AnnotatedClass();
 		Method method = ReflectionUtils.findMethod(AnnotatedClass.class, "multipleCaching", Object.class,
 				Object.class);
 		Object[] args = new Object[] { new Object(), new Object() };
-		Collection caches = Collections.singleton(new ConcurrentMapCache("test"));
+		Collection<ConcurrentMapCache> caches = Collections.singleton(new ConcurrentMapCache("test"));
 
 		EvaluationContext evalCtx = eval.createEvaluationContext(caches, method, args, target, target.getClass());
 		Collection<CacheOperation> ops = getOps("multipleCaching");
 
 		Iterator<CacheOperation> it = ops.iterator();
 
-		Object keyA = eval.key(it.next().getKey(), method, evalCtx);
-		Object keyB = eval.key(it.next().getKey(), method, evalCtx);
+		AnnotatedElementKey key = new AnnotatedElementKey(method, AnnotatedClass.class);
+
+		Object keyA = eval.key(it.next().getKey(), key, evalCtx);
+		Object keyB = eval.key(it.next().getKey(), key, evalCtx);
 
 		assertEquals(args[0], keyA);
 		assertEquals(args[1], keyB);
@@ -111,13 +110,24 @@ public class ExpressionEvaluatorTests {
 		assertThat(value, nullValue());
 	}
 
+	@Test
+	public void unavailableReturnValue() throws Exception {
+		EvaluationContext context = createEvaluationContext(ExpressionEvaluator.RESULT_UNAVAILABLE);
+		try {
+			new SpelExpressionParser().parseExpression("#result").getValue(context);
+			fail("Should have failed to parse expression, result not available");
+		}
+		catch (VariableNotAvailableException e) {
+			assertEquals("wrong variable name", "result", e.getName());
+		}
+	}
+
 	private EvaluationContext createEvaluationContext(Object result) {
 		AnnotatedClass target = new AnnotatedClass();
 		Method method = ReflectionUtils.findMethod(AnnotatedClass.class, "multipleCaching", Object.class,
 				Object.class);
 		Object[] args = new Object[] { new Object(), new Object() };
-		@SuppressWarnings("unchecked")
-		Collection caches = Collections.singleton(new ConcurrentMapCache("test"));
+		Collection<ConcurrentMapCache> caches = Collections.singleton(new ConcurrentMapCache("test"));
 		EvaluationContext context = eval.createEvaluationContext(caches, method, args, target, target.getClass(), result);
 		return context;
 	}

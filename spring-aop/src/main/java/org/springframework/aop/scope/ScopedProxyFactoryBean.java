@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -91,7 +91,7 @@ public class ScopedProxyFactoryBean extends ProxyConfig implements FactoryBean<O
 		pf.copyFrom(this);
 		pf.setTargetSource(this.scopedTargetSource);
 
-		Class beanType = beanFactory.getType(this.targetBeanName);
+		Class<?> beanType = beanFactory.getType(this.targetBeanName);
 		if (beanType == null) {
 			throw new IllegalStateException("Cannot create scoped proxy for bean '" + this.targetBeanName +
 					"': Target type could not be determined at the time of proxy creation.");
@@ -125,10 +125,7 @@ public class ScopedProxyFactoryBean extends ProxyConfig implements FactoryBean<O
 		if (this.proxy != null) {
 			return this.proxy.getClass();
 		}
-		if (this.scopedTargetSource != null) {
-			return this.scopedTargetSource.getTargetClass();
-		}
-		return null;
+		return this.scopedTargetSource.getTargetClass();
 	}
 
 	@Override

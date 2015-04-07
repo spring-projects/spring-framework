@@ -78,13 +78,13 @@ public abstract class AopProxyUtils {
 	 * @see Advised
 	 * @see org.springframework.aop.SpringProxy
 	 */
-	public static Class[] completeProxiedInterfaces(AdvisedSupport advised) {
-		Class[] specifiedInterfaces = advised.getProxiedInterfaces();
+	public static Class<?>[] completeProxiedInterfaces(AdvisedSupport advised) {
+		Class<?>[] specifiedInterfaces = advised.getProxiedInterfaces();
 		if (specifiedInterfaces.length == 0) {
 			// No user-specified interfaces: check whether target class is an interface.
-			Class targetClass = advised.getTargetClass();
+			Class<?> targetClass = advised.getTargetClass();
 			if (targetClass != null && targetClass.isInterface()) {
-				specifiedInterfaces = new Class[] {targetClass};
+				specifiedInterfaces = new Class<?>[] {targetClass};
 			}
 		}
 		boolean addSpringProxy = !advised.isInterfaceProxied(SpringProxy.class);
@@ -96,7 +96,7 @@ public abstract class AopProxyUtils {
 		if (addAdvised) {
 			nonUserIfcCount++;
 		}
-		Class[] proxiedInterfaces = new Class[specifiedInterfaces.length + nonUserIfcCount];
+		Class<?>[] proxiedInterfaces = new Class<?>[specifiedInterfaces.length + nonUserIfcCount];
 		System.arraycopy(specifiedInterfaces, 0, proxiedInterfaces, 0, specifiedInterfaces.length);
 		if (addSpringProxy) {
 			proxiedInterfaces[specifiedInterfaces.length] = SpringProxy.class;
@@ -115,8 +115,8 @@ public abstract class AopProxyUtils {
 	 * in the original order (never {@code null} or empty)
 	 * @see Advised
 	 */
-	public static Class[] proxiedUserInterfaces(Object proxy) {
-		Class[] proxyInterfaces = proxy.getClass().getInterfaces();
+	public static Class<?>[] proxiedUserInterfaces(Object proxy) {
+		Class<?>[] proxyInterfaces = proxy.getClass().getInterfaces();
 		int nonUserIfcCount = 0;
 		if (proxy instanceof SpringProxy) {
 			nonUserIfcCount++;
@@ -124,7 +124,7 @@ public abstract class AopProxyUtils {
 		if (proxy instanceof Advised) {
 			nonUserIfcCount++;
 		}
-		Class[] userInterfaces = new Class[proxyInterfaces.length - nonUserIfcCount];
+		Class<?>[] userInterfaces = new Class<?>[proxyInterfaces.length - nonUserIfcCount];
 		System.arraycopy(proxyInterfaces, 0, userInterfaces, 0, userInterfaces.length);
 		Assert.notEmpty(userInterfaces, "JDK proxy must implement one or more interfaces");
 		return userInterfaces;

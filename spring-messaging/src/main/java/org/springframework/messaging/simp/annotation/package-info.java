@@ -1,5 +1,4 @@
 /**
- * Annotations and support classes for handling messages from simple messaging
- * protocols (like STOMP).
+ * Annotations and for handling messages from SImple Messaging Protocols such as STOMP.
  */
 package org.springframework.messaging.simp.annotation;

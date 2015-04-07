@@ -19,6 +19,7 @@ package org.springframework.beans.factory.config;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
+
 import org.springframework.beans.FatalBeanException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
@@ -252,9 +253,10 @@ public final class ServiceLocatorFactoryBeanTests {
 	}
 
 	@Test(expected=IllegalArgumentException.class)
+	@SuppressWarnings("unchecked")
 	public void testWhenServiceLocatorExceptionClassIsNotAnExceptionSubclass() throws Exception {
 		ServiceLocatorFactoryBean factory = new ServiceLocatorFactoryBean();
-		factory.setServiceLocatorExceptionClass(getClass());
+		factory.setServiceLocatorExceptionClass((Class) getClass());
 		// should throw, bad (non-Exception-type) serviceLocatorException class supplied
 	}
 

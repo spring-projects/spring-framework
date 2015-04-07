@@ -19,14 +19,13 @@ package org.springframework.web.servlet.mvc;
 import java.util.List;
 import java.util.Properties;
 
+import org.junit.Before;
+import org.junit.Test;
+
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockHttpServletResponse;
 import org.springframework.web.servlet.support.WebContentGenerator;
 
-import org.junit.Before;
-import org.junit.Test;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.*;
 
 /**

@@ -128,7 +128,7 @@ public class MethodMapTransactionAttributeSource
 		}
 		String className = name.substring(0, lastDotIndex);
 		String methodName = name.substring(lastDotIndex + 1);
-		Class clazz = ClassUtils.resolveClassName(className, this.beanClassLoader);
+		Class<?> clazz = ClassUtils.resolveClassName(className, this.beanClassLoader);
 		addTransactionalMethod(clazz, methodName, attr);
 	}
 

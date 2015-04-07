@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,8 +34,7 @@ public class FormatHelper {
 	 * @return nicely formatted string, eg. foo(String,int)
 	 */
 	public static String formatMethodForMessage(String name, List<TypeDescriptor> argumentTypes) {
-		StringBuilder sb = new StringBuilder();
-		sb.append(name);
+		StringBuilder sb = new StringBuilder(name);
 		sb.append("(");
 		for (int i = 0; i < argumentTypes.size(); i++) {
 			if (i > 0) {
@@ -63,23 +62,23 @@ public class FormatHelper {
 		if (clazz == null) {
 			return "null";
 		}
-		StringBuilder fmtd = new StringBuilder();
 		if (clazz.isArray()) {
+			StringBuilder sb = new StringBuilder();
 			int dims = 1;
-			Class baseClass = clazz.getComponentType();
+			Class<?> baseClass = clazz.getComponentType();
 			while (baseClass.isArray()) {
 				baseClass = baseClass.getComponentType();
 				dims++;
 			}
-			fmtd.append(baseClass.getName());
+			sb.append(baseClass.getName());
 			for (int i = 0; i < dims; i++) {
-				fmtd.append("[]");
+				sb.append("[]");
 			}
+			return sb.toString();
 		}
 		else {
-			fmtd.append(clazz.getName());
+			return clazz.getName();
 		}
-		return fmtd.toString();
 	}
 
 }

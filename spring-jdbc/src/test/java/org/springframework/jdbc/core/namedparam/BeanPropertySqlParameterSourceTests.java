@@ -19,10 +19,11 @@ package org.springframework.jdbc.core.namedparam;
 import java.sql.Types;
 import java.util.Arrays;
 
-import static org.junit.Assert.*;
 import org.junit.Test;
 
 import org.springframework.tests.sample.beans.TestBean;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Rick Evans

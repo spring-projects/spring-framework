@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,25 +28,25 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.springframework.context.EmbeddedValueResolverAware;
+import org.springframework.context.support.EmbeddedValueResolutionSupport;
 import org.springframework.format.AnnotationFormatterFactory;
 import org.springframework.format.Parser;
 import org.springframework.format.Printer;
 import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.util.StringValueResolver;
 
 /**
- * Formats fields annotated with the {@link DateTimeFormat} annotation using
- * the JSR-310 <code>java.time</code> package in JDK 8.
+ * Formats fields annotated with the {@link DateTimeFormat} annotation using the
+ * JSR-310 <code>java.time</code> package in JDK 8.
  *
  * @author Juergen Hoeller
  * @since 4.0
  * @see org.springframework.format.annotation.DateTimeFormat
  */
-public class Jsr310DateTimeFormatAnnotationFormatterFactory
-		implements AnnotationFormatterFactory<DateTimeFormat>, EmbeddedValueResolverAware {
+public class Jsr310DateTimeFormatAnnotationFormatterFactory extends EmbeddedValueResolutionSupport
+		implements AnnotationFormatterFactory<DateTimeFormat> {
 
 	private static final Set<Class<?>> FIELD_TYPES;
+
 	static {
 		// Create the set of field types that may be annotated with @DateTimeFormat.
 		Set<Class<?>> fieldTypes = new HashSet<Class<?>>(8);
@@ -57,19 +57,6 @@ public class Jsr310DateTimeFormatAnnotationFormatterFactory
 		fieldTypes.add(OffsetDateTime.class);
 		fieldTypes.add(OffsetTime.class);
 		FIELD_TYPES = Collections.unmodifiableSet(fieldTypes);
-	}
-
-
-	private StringValueResolver embeddedValueResolver;
-
-
-	@Override
-	public void setEmbeddedValueResolver(StringValueResolver resolver) {
-		this.embeddedValueResolver = resolver;
-	}
-
-	protected String resolveEmbeddedValue(String value) {
-		return (this.embeddedValueResolver != null ? this.embeddedValueResolver.resolveStringValue(value) : value);
 	}
 
 
@@ -92,10 +79,10 @@ public class Jsr310DateTimeFormatAnnotationFormatterFactory
 	}
 
 	/**
-	 * Factory method used to create a {@link org.joda.time.format.DateTimeFormatter}.
+	 * Factory method used to create a {@link DateTimeFormatter}.
 	 * @param annotation the format annotation for the field
 	 * @param fieldType the type of field
-	 * @return a {@link org.joda.time.format.DateTimeFormatter} instance
+	 * @return a {@link DateTimeFormatter} instance
 	 */
 	protected DateTimeFormatter getFormatter(DateTimeFormat annotation, Class<?> fieldType) {
 		DateTimeFormatterFactory factory = new DateTimeFormatterFactory();

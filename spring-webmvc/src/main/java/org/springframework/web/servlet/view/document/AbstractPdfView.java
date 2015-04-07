@@ -172,7 +172,7 @@ public abstract class AbstractPdfView extends AbstractView {
 	 * @param writer the PdfWriter to use
 	 * @param request in case we need locale etc. Shouldn't look at attributes.
 	 * @param response in case we need to set cookies. Shouldn't write to it.
-	 * @throws Exception any exception that occured during document building
+	 * @throws Exception any exception that occurred during document building
 	 * @see com.lowagie.text.Document#open()
 	 * @see com.lowagie.text.Document#close()
 	 */

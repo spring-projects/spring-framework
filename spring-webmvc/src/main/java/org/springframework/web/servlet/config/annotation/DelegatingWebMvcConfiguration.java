@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,6 +42,7 @@ public class DelegatingWebMvcConfiguration extends WebMvcConfigurationSupport {
 
 	private final WebMvcConfigurerComposite configurers = new WebMvcConfigurerComposite();
 
+
 	@Autowired(required = false)
 	public void setConfigurers(List<WebMvcConfigurer> configurers) {
 		if (configurers == null || configurers.isEmpty()) {
@@ -49,6 +50,7 @@ public class DelegatingWebMvcConfiguration extends WebMvcConfigurationSupport {
 		}
 		this.configurers.addWebMvcConfigurers(configurers);
 	}
+
 
 	@Override
 	protected void addInterceptors(InterceptorRegistry registry) {
@@ -66,8 +68,18 @@ public class DelegatingWebMvcConfiguration extends WebMvcConfigurationSupport {
 	}
 
 	@Override
+	public void configurePathMatch(PathMatchConfigurer configurer) {
+		this.configurers.configurePathMatch(configurer);
+	}
+
+	@Override
 	protected void addViewControllers(ViewControllerRegistry registry) {
 		this.configurers.addViewControllers(registry);
+	}
+
+	@Override
+	protected void configureViewResolvers(ViewResolverRegistry registry) {
+		this.configurers.configureViewResolvers(registry);
 	}
 
 	@Override
@@ -93,6 +105,11 @@ public class DelegatingWebMvcConfiguration extends WebMvcConfigurationSupport {
 	@Override
 	protected void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
 		this.configurers.configureMessageConverters(converters);
+	}
+
+	@Override
+	protected void extendMessageConverters(List<HttpMessageConverter<?>> converters) {
+		this.configurers.extendMessageConverters(converters);
 	}
 
 	@Override

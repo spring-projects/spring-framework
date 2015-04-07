@@ -108,7 +108,7 @@ public class MetadataNamingStrategy implements ObjectNamingStrategy, Initializin
 	 */
 	@Override
 	public ObjectName getObjectName(Object managedBean, String beanKey) throws MalformedObjectNameException {
-		Class managedClass = AopUtils.getTargetClass(managedBean);
+		Class<?> managedClass = AopUtils.getTargetClass(managedBean);
 		ManagedResource mr = this.attributeSource.getManagedResource(managedClass);
 
 		// Check that an object name has been specified.

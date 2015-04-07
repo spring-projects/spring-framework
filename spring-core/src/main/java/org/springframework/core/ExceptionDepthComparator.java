@@ -62,7 +62,7 @@ public class ExceptionDepthComparator implements Comparator<Class<? extends Thro
 		return (depth1 - depth2);
 	}
 
-	private int getDepth(Class declaredException, Class exceptionToMatch, int depth) {
+	private int getDepth(Class<?> declaredException, Class<?> exceptionToMatch, int depth) {
 		if (declaredException.equals(exceptionToMatch)) {
 			// Found it!
 			return depth;

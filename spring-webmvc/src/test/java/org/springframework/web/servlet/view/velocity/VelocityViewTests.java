@@ -20,7 +20,6 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -33,6 +32,7 @@ import org.apache.velocity.tools.generic.DateTool;
 import org.apache.velocity.tools.generic.MathTool;
 import org.apache.velocity.tools.generic.NumberTool;
 import org.junit.Test;
+
 import org.springframework.context.ApplicationContextException;
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockHttpServletResponse;
@@ -265,7 +265,7 @@ public class VelocityViewTests {
 
 		vv.setUrl(templateName);
 		vv.setApplicationContext(wac);
-		Map<String, Class> toolAttributes = new HashMap<String, Class>();
+		Map<String, Class<?>> toolAttributes = new HashMap<String, Class<?>>();
 		toolAttributes.put("math", MathTool.class);
 		vv.setToolAttributes(toolAttributes);
 		vv.setDateToolAttribute("dateTool");

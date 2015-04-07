@@ -1,0 +1,319 @@
+#**
+ * spring.vm
+ *
+ * This file consists of a collection of Velocity macros aimed at easing
+ * some of the common requirements of web applications - in particular
+ * handling of forms.
+ *
+ * Spring's Velocity support will automatically make this file and therefore
+ * all macros within it available to any application using Spring's
+ * VelocityConfigurer.
+ *
+ * To take advantage of these macros, the "exposeSpringMacroHelpers" property
+ * of the VelocityView class needs to be set to "true". This will expose a
+ * RequestContext under the name "springMacroRequestContext", as needed by
+ * the macros in this library.
+ *
+ * @author Darren Davison
+ * @author Juergen Hoeller
+ * @since 1.1
+ *#
+
+#**
+ * springMessage
+ *
+ * Macro to translate a message code into a message.
+ *#
+#macro( springMessage $code )$springMacroRequestContext.getMessage($code)#end
+
+#**
+ * springMessageText
+ *
+ * Macro to translate a message code into a message,
+ * using the given default text if no message found.
+ *#
+#macro( springMessageText $code $text )$springMacroRequestContext.getMessage($code, $text)#end
+
+#**
+ * springTheme
+ *
+ * Macro to translate a theme message code into a string.
+ *#
+#macro( springTheme $code )$springMacroRequestContext.getThemeMessage($code)#end
+
+#**
+ * springThemeText
+ *
+ * Macro to translate a theme message code into a string,
+ * using the given default text if no message found.
+ *#
+#macro( springThemeText $code $text )$springMacroRequestContext.getThemeMessage($code, $text)#end
+
+#**
+ * springUrl
+ *
+ * Takes a relative URL and makes it absolute from the server root by
+ * adding the context root for the web application.
+ *#
+#macro( springUrl $relativeUrl )$springMacroRequestContext.getContextPath()${relativeUrl}#end
+
+#**
+ * springBind
+ *
+ * Exposes a BindStatus object for the given bind path, which can be
+ * a bean (e.g. "person") to get global errors, or a bean property
+ * (e.g. "person.name") to get field errors. Can be called multiple times
+ * within a form to bind to multiple command objects and/or field names.
+ *
+ * This macro will participate in the default HTML escape setting for the given
+ * RequestContext. This can be customized by calling "setDefaultHtmlEscape"
+ * on the "springMacroRequestContext" context variable, or via the
+ * "defaultHtmlEscape" context-param in web.xml (same as for the JSP bind tag).
+ * Also regards a "springHtmlEscape" variable in the template context.
+ *
+ * Producing no output, the following context variable will be available
+ * each time this macro is referenced:
+ *
+ *   $status : a BindStatus instance holding the command object name,
+ *   expression, value, and error codes and messages for the path supplied
+ *
+ * @param $path : the path (string value) of the value required to bind to.
+ *   Spring defaults to a command name of "command" but this can be overridden
+ *   by user config.
+ *#
+#macro( springBind $path )
+    #if("$!springHtmlEscape"!="")
+        #set( $status = $springMacroRequestContext.getBindStatus($path, $springHtmlEscape) )
+    #else
+        #set( $status = $springMacroRequestContext.getBindStatus($path) )
+    #end
+#end
+
+#**
+ * springBindEscaped
+ *
+ * Similar to springBind, but takes an explicit HTML escape flag rather
+ * than relying on the default HTML escape setting.
+ *#
+#macro( springBindEscaped $path $htmlEscape )
+    #set( $status = $springMacroRequestContext.getBindStatus($path, $htmlEscape) )
+#end
+
+#**
+ * springFormInput
+ *
+ * Display a form input field of type 'text' and bind it to an attribute
+ * of a command or bean.
+ *
+ * @param path the name of the field to bind to
+ * @param attributes any additional attributes for the element (such as class
+ *    or CSS styles or size)
+ *
+ *#
+#macro( springFormInput $path $attributes )
+    #springBind($path)
+    <input type="text" id="#springXmlId(${status.expression})" name="${status.expression}" value="$!status.value" ${attributes}#springCloseTag()
+#end
+
+#**
+ * springFormPasswordInput
+ *
+ * Display a form input field of type 'password' and bind it to an attribute
+ * of a command or bean.  No value will ever be specified for this field regardless
+ * of whether one exists or not.  For hopefully obvious reasons!
+ *
+ * @param path the name of the field to bind to
+ * @param attributes any additional attributes for the element (such as class
+ *    or CSS styles or size)
+ *
+ *#
+#macro( springFormPasswordInput $path $attributes )
+    #springBind($path)
+    <input type="password" id="#springXmlId(${status.expression})" name="${status.expression}" value="" ${attributes}#springCloseTag()
+#end
+
+#**
+ * springFormHiddenInput
+ *
+ * Generate a form input field of type 'hidden' and bind it to an attribute
+ * of a command or bean.
+ *
+ * @param path the name of the field to bind to
+ * @param attributes any additional attributes for the element (such as class
+ *    or CSS styles or size)
+ *
+ *#
+#macro( springFormHiddenInput $path $attributes )
+    #springBind($path)
+    <input type="hidden" id="#springXmlId(${status.expression})" name="${status.expression}" value="$!status.value" ${attributes}#springCloseTag()
+#end
+
+#**
+ * formTextArea
+ *
+ * display a text area and bind it to an attribute
+ * of a command or bean
+ *
+ * @param path the name of the field to bind to
+ * @param attributes any additional attributes for the element (such as class
+ *    or CSS styles or size)
+ *
+ *#
+#macro( springFormTextarea $path $attributes )
+    #springBind($path)
+    <textarea id="#springXmlId(${status.expression})" name="${status.expression}" ${attributes}>$!status.value</textarea>
+#end
+
+#**
+ * springFormSingleSelect
+ *
+ * Show a selectbox (dropdown) input element allowing a single value to be chosen
+ * from a list of options.
+ *
+ * The null check for $status.value leverages Velocity's 'quiet' notation rather
+ * than the more common #if($status.value) since this method evaluates to the
+ * boolean 'false' if the content of $status.value is the String "false" - not
+ * what we want.
+ *
+ * @param path the name of the field to bind to
+ * @param options a map (value=label) of all the available options
+ * @param attributes any additional attributes for the element (such as class
+ *    or CSS styles or size)
+*#
+#macro( springFormSingleSelect $path $options $attributes )
+    #springBind($path)
+    <select id="#springXmlId(${status.expression})" name="${status.expression}" ${attributes}>
+        #foreach($option in $options.keySet())
+            <option value="${option}"
+            #if("$!status.value"=="$option") selected="selected" #end>
+            ${options.get($option)}</option>
+        #end
+    </select>
+#end
+
+#**
+ * springFormMultiSelect
+ *
+ * Show a listbox of options allowing the user to make 0 or more choices from
+ * the list of options.
+ *
+ * @param path the name of the field to bind to
+ * @param options a map (value=label) of all the available options
+ * @param attributes any additional attributes for the element (such as class
+ *    or CSS styles or size)
+*#
+#macro( springFormMultiSelect $path $options $attributes )
+    #springBind($path)
+    <select multiple="multiple" id="#springXmlId(${status.expression})" name="${status.expression}" ${attributes}>
+        #foreach($option in $options.keySet())
+            <option value="${option}"
+            #foreach($item in $status.actualValue)
+                #if($item==$option) selected="selected" #end
+            #end
+            >${options.get($option)}</option>
+        #end
+    </select>
+#end
+
+#**
+ * springFormRadioButtons
+ *
+ * Show radio buttons.
+ *
+ * @param path the name of the field to bind to
+ * @param options a map (value=label) of all the available options
+ * @param separator the html tag or other character list that should be used to
+ *    separate each option.  Typically '&nbsp;' or '<br>'
+ * @param attributes any additional attributes for the element (such as class
+ *    or CSS styles or size)
+*#
+#macro( springFormRadioButtons $path $options $separator $attributes )
+    #springBind($path)
+    #foreach($option in $options.keySet())
+        <input type="radio" name="${status.expression}" value="${option}"
+        #if("$!status.value"=="$option") checked="checked" #end
+        ${attributes}
+        #springCloseTag()
+        ${options.get($option)} ${separator}
+    #end
+#end
+
+#**
+ * springFormCheckboxes
+ *
+ * Show checkboxes.
+ *
+ * @param path the name of the field to bind to
+ * @param options a map (value=label) of all the available options
+ * @param separator the html tag or other character list that should be used to
+ *    separate each option. Typically '&nbsp;' or '<br>'.
+ * @param attributes any additional attributes for the element (such as class
+ *    or CSS styles or size)
+*#
+#macro( springFormCheckboxes $path $options $separator $attributes )
+    #springBind($path)
+    #foreach($option in $options.keySet())
+        <input type="checkbox" name="${status.expression}" value="${option}" 
+        #foreach($item in $status.actualValue)
+            #if($item==$option) checked="checked" #end
+        #end
+        ${attributes} #springCloseTag()
+        ${options.get($option)} ${separator}
+    #end
+    <input type="hidden" name="_${status.expression}" value="on"/>
+#end
+
+#**
+ * springFormCheckbox
+ *
+ * Show a single checkbox.
+ *
+ * @param path the name of the field to bind to
+ * @param attributes any additional attributes for the element (such as class
+ *    or CSS styles or size)
+*#
+#macro( springFormCheckbox $path $attributes )
+    #springBind($path)
+    <input type="hidden" name="_#springXmlId(${status.expression})" value="on"/>
+    <input type="checkbox" id="#springXmlId(${status.expression})" name="${status.expression}"#if("$!{status.value}"=="true") checked="checked"#end ${attributes}/>
+#end
+
+#**
+ * springShowErrors
+ *
+ * Show validation errors for the currently bound field, with
+ * optional style attributes.
+ *
+ * @param separator the html tag or other character list that should be used to
+ *    separate each option. Typically '<br>'.
+ * @param classOrStyle either the name of a CSS class element (which is defined in
+ *    the template or an external CSS file) or an inline style. If the value passed in here
+ *    contains a colon (:) then a 'style=' attribute will be used, else a 'class=' attribute
+ *    will be used.
+*#
+#macro( springShowErrors $separator $classOrStyle )
+    #foreach($error in $status.errorMessages)
+        #if($classOrStyle=="")
+            <b>${error}</b>
+        #else
+            #if($classOrStyle.indexOf(":")==-1)
+                #set($attr="class")
+            #else
+                #set($attr="style")
+            #end
+            <span ${attr}="${classOrStyle}">${error}</span>
+        #end
+        ${separator}
+    #end
+#end
+
+#**
+ * springCloseTag
+ *
+ * Simple macro to close an HTML tag that has no body with '>' or '/>',
+ * depending on the value of a 'springXhtmlCompliant' variable in the
+ * template context.
+ *#
+#macro( springCloseTag )#if($springXhtmlCompliant)/>#else>#end#end
+
+#macro( springXmlId $id)#if($id)$id.replaceAll("\[","").replaceAll("\]","")#else$id#end#end

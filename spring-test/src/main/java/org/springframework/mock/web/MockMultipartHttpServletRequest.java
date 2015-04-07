@@ -35,6 +35,8 @@ import org.springframework.web.multipart.MultipartHttpServletRequest;
  * Mock implementation of the
  * {@link org.springframework.web.multipart.MultipartHttpServletRequest} interface.
  *
+ * <p>As of Spring 4.0, this set of mocks is designed on a Servlet 3.0 baseline.
+ *
  * <p>Useful for testing application controllers that access multipart uploads.
  * The {@link MockMultipartFile} can be used to populate these mock requests
  * with files.

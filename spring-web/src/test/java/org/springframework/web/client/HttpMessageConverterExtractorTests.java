@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.web.client;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -23,8 +24,10 @@ import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
+
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.ClientHttpResponse;
@@ -41,7 +44,7 @@ import static org.mockito.BDDMockito.*;
  */
 public class HttpMessageConverterExtractorTests {
 
-	private HttpMessageConverterExtractor extractor;
+	private HttpMessageConverterExtractor<?> extractor;
 
 	private ClientHttpResponse response;
 
@@ -73,6 +76,17 @@ public class HttpMessageConverterExtractorTests {
 	}
 
 	@Test
+	public void informational() throws IOException {
+		HttpMessageConverter<?> converter = mock(HttpMessageConverter.class);
+		extractor = new HttpMessageConverterExtractor<String>(String.class, createConverterList(converter));
+		given(response.getStatusCode()).willReturn(HttpStatus.CONTINUE);
+
+		Object result = extractor.extractData(response);
+
+		assertNull(result);
+	}
+
+	@Test
 	public void zeroContentLength() throws IOException {
 		HttpMessageConverter<?> converter = mock(HttpMessageConverter.class);
 		HttpHeaders responseHeaders = new HttpHeaders();
@@ -83,6 +97,22 @@ public class HttpMessageConverterExtractorTests {
 
 		Object result = extractor.extractData(response);
 
+		assertNull(result);
+	}
+
+	@Test
+	@SuppressWarnings("unchecked")
+	public void emptyMessageBody() throws IOException {
+		HttpMessageConverter<String> converter = mock(HttpMessageConverter.class);
+		List<HttpMessageConverter<?>> converters = new ArrayList<HttpMessageConverter<?>>();
+		converters.add(converter);
+		HttpHeaders responseHeaders = new HttpHeaders();
+		extractor = new HttpMessageConverterExtractor<String>(String.class, createConverterList(converter));
+		given(response.getStatusCode()).willReturn(HttpStatus.OK);
+		given(response.getHeaders()).willReturn(responseHeaders);
+		given(response.getBody()).willReturn(new ByteArrayInputStream("".getBytes()));
+
+		Object result = extractor.extractData(response);
 		assertNull(result);
 	}
 
@@ -99,15 +129,16 @@ public class HttpMessageConverterExtractorTests {
 		extractor = new HttpMessageConverterExtractor<String>(String.class, converters);
 		given(response.getStatusCode()).willReturn(HttpStatus.OK);
 		given(response.getHeaders()).willReturn(responseHeaders);
+		given(response.getBody()).willReturn(new ByteArrayInputStream(expected.getBytes()));
 		given(converter.canRead(String.class, contentType)).willReturn(true);
-		given(converter.read(String.class, response)).willReturn(expected);
+		given(converter.read(eq(String.class), any(HttpInputMessage.class))).willReturn(expected);
 
 		Object result = extractor.extractData(response);
 
 		assertEquals(expected, result);
 	}
 
-	@Test
+	@Test(expected = RestClientException.class)
 	@SuppressWarnings("unchecked")
 	public void cannotRead() throws IOException {
 		HttpMessageConverter<String> converter = mock(HttpMessageConverter.class);
@@ -119,15 +150,10 @@ public class HttpMessageConverterExtractorTests {
 		extractor = new HttpMessageConverterExtractor<String>(String.class, converters);
 		given(response.getStatusCode()).willReturn(HttpStatus.OK);
 		given(response.getHeaders()).willReturn(responseHeaders);
+		given(response.getBody()).willReturn(new ByteArrayInputStream("Foobar".getBytes()));
 		given(converter.canRead(String.class, contentType)).willReturn(false);
 
-		try {
-			extractor.extractData(response);
-			fail("RestClientException expected");
-		}
-		catch (RestClientException expected) {
-			// expected
-		}
+		extractor.extractData(response);
 	}
 
 	@Test
@@ -144,15 +170,17 @@ public class HttpMessageConverterExtractorTests {
 		extractor = new HttpMessageConverterExtractor<List<String>>(type, converters);
 		given(response.getStatusCode()).willReturn(HttpStatus.OK);
 		given(response.getHeaders()).willReturn(responseHeaders);
+		given(response.getBody()).willReturn(new ByteArrayInputStream(expected.getBytes()));
 		given(converter.canRead(type, null, contentType)).willReturn(true);
-		given(converter.read(type, null, response)).willReturn(expected);
+		given(converter.read(eq(type), eq(null), any(HttpInputMessage.class))).willReturn(expected);
 
 		Object result = extractor.extractData(response);
 
 		assertEquals(expected, result);
 	}
 
-	private List<HttpMessageConverter<?>> createConverterList(HttpMessageConverter converter) {
+	private List<HttpMessageConverter<?>> createConverterList(
+			HttpMessageConverter<?> converter) {
 		List<HttpMessageConverter<?>> converters = new ArrayList<HttpMessageConverter<?>>(1);
 		converters.add(converter);
 		return converters;

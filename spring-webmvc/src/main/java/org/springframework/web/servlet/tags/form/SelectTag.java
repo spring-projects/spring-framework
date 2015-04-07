@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -84,7 +84,7 @@ public class SelectTag extends AbstractHtmlInputElementTag {
 	 * Indicates whether or not the '{@code select}' tag allows
 	 * multiple-selections.
 	 */
-	private Object multiple = Boolean.FALSE;
+	private Object multiple;
 
 	/**
 	 * The {@link TagWriter} instance that the output is being written.
@@ -249,8 +249,9 @@ public class SelectTag extends AbstractHtmlInputElementTag {
 
 	private boolean isMultiple() throws JspException {
 		Object multiple = getMultiple();
-		if (Boolean.TRUE.equals(multiple) || "multiple".equals(multiple)) {
-			return true;
+		if (multiple != null) {
+			String stringValue = multiple.toString();
+			return ("multiple".equalsIgnoreCase(stringValue) || Boolean.parseBoolean(stringValue));
 		}
 		return forceMultiple();
 	}
@@ -261,7 +262,7 @@ public class SelectTag extends AbstractHtmlInputElementTag {
 	 */
 	private boolean forceMultiple() throws JspException {
 		BindStatus bindStatus = getBindStatus();
-		Class valueType = bindStatus.getValueType();
+		Class<?> valueType = bindStatus.getValueType();
 		if (valueType != null && typeRequiresMultiple(valueType)) {
 			return true;
 		}
@@ -278,7 +279,7 @@ public class SelectTag extends AbstractHtmlInputElementTag {
 	 * Returns '{@code true}' for arrays, {@link Collection Collections}
 	 * and {@link Map Maps}.
 	 */
-	private static boolean typeRequiresMultiple(Class type) {
+	private static boolean typeRequiresMultiple(Class<?> type) {
 		return (type.isArray() || Collection.class.isAssignableFrom(type) || Map.class.isAssignableFrom(type));
 	}
 

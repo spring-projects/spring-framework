@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 package org.springframework.web.context.request.async;
 
 import java.util.concurrent.Callable;
-
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.http.HttpStatus;
@@ -27,7 +26,7 @@ import org.springframework.web.context.request.NativeWebRequest;
  * already committed. Registered at the end, after all other interceptors and
  * therefore invoked only if no other interceptor handles the timeout.
  *
- * <p>Note that according to RFC 2616, a 503 without a 'Retry-After' header is
+ * <p>Note that according to RFC 7231, a 503 without a 'Retry-After' header is
  * interpreted as a 500 error and the client should not retry. Applications
  * can install their own interceptor to handle a timeout and add a 'Retry-After'
  * header if necessary.

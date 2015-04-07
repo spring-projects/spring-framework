@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -78,6 +78,23 @@ public class MockHttpServletResponseTests {
 	@Test
 	public void contentTypeHeaderUTF8() {
 		String contentType = "test/plain;charset=UTF-8";
+		response.setHeader("Content-Type", contentType);
+		assertEquals(contentType, response.getContentType());
+		assertEquals(contentType, response.getHeader("Content-Type"));
+		assertEquals("UTF-8", response.getCharacterEncoding());
+
+		response = new MockHttpServletResponse();
+		response.addHeader("Content-Type", contentType);
+		assertEquals(contentType, response.getContentType());
+		assertEquals(contentType, response.getHeader("Content-Type"));
+		assertEquals("UTF-8", response.getCharacterEncoding());
+	}
+
+	// SPR-12677
+
+	@Test
+	public void contentTypeHeaderWithMoreComplexCharsetSyntax() {
+		String contentType = "test/plain;charset=\"utf-8\";foo=\"charset=bar\";foocharset=bar;foo=bar";
 		response.setHeader("Content-Type", contentType);
 		assertEquals(contentType, response.getContentType());
 		assertEquals(contentType, response.getHeader("Content-Type"));
@@ -221,8 +238,9 @@ public class MockHttpServletResponseTests {
 		assertEquals(redirectUrl, response.getRedirectedUrl());
 	}
 
-	// SPR-10414
-
+	/**
+	 * SPR-10414
+	 */
 	@Test
 	public void modifyStatusAfterSendError() throws IOException {
 		response.sendError(HttpServletResponse.SC_NOT_FOUND);
@@ -230,9 +248,11 @@ public class MockHttpServletResponseTests {
 		assertEquals(response.getStatus(),HttpServletResponse.SC_NOT_FOUND);
 	}
 
-	// SPR-10414
-
+	/**
+	 * SPR-10414
+	 */
 	@Test
+	@SuppressWarnings("deprecation")
 	public void modifyStatusMessageAfterSendError() throws IOException {
 		response.sendError(HttpServletResponse.SC_NOT_FOUND);
 		response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,"Server Error");

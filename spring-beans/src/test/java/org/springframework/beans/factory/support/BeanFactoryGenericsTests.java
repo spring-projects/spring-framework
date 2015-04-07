@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,11 +33,14 @@ import java.util.Set;
 
 import org.junit.Test;
 import org.mockito.Mockito;
+
 import org.springframework.beans.PropertyEditorRegistrar;
 import org.springframework.beans.PropertyEditorRegistry;
 import org.springframework.beans.factory.BeanCreationException;
+import org.springframework.beans.factory.config.TypedStringValue;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.beans.propertyeditors.CustomNumberEditor;
+import org.springframework.core.ResolvableType;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.tests.Assume;
@@ -653,17 +656,12 @@ public class BeanFactoryGenericsTests {
 	/**
 	 * Tests support for parameterized static {@code factory-method} declarations such as
 	 * Mockito's {@code mock()} method which has the following signature.
-	 * 
 	 * <pre>
 	 * {@code
 	 * public static <T> T mock(Class<T> classToMock)
 	 * }
 	 * </pre>
-	 * 
-	 * <p>
-	 * See SPR-9493
-	 * 
-	 * @since 3.2
+	 * <p>See SPR-9493
 	 */
 	@Test
 	public void parameterizedStaticFactoryMethod() {
@@ -682,17 +680,12 @@ public class BeanFactoryGenericsTests {
 	 * Tests support for parameterized instance {@code factory-method} declarations such
 	 * as EasyMock's {@code IMocksControl.createMock()} method which has the following
 	 * signature.
-	 * 
 	 * <pre>
 	 * {@code
 	 * public <T> T createMock(Class<T> toMock)
 	 * }
 	 * </pre>
-	 * 
-	 * <p>
-	 * See SPR-10411
-	 * 
-	 * @since 4.0
+	 * <p>See SPR-10411
 	 */
 	@Test
 	public void parameterizedInstanceFactoryMethod() {
@@ -705,12 +698,128 @@ public class BeanFactoryGenericsTests {
 		rbd.setFactoryBeanName("mocksControl");
 		rbd.setFactoryMethodName("createMock");
 		rbd.getConstructorArgumentValues().addGenericArgumentValue(Runnable.class);
-
 		bf.registerBeanDefinition("mock", rbd);
 
 		Map<String, Runnable> beans = bf.getBeansOfType(Runnable.class);
 		assertEquals(1, beans.size());
 	}
+
+	@Test
+	public void parameterizedInstanceFactoryMethodWithNonResolvedClassName() {
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+
+		RootBeanDefinition rbd = new RootBeanDefinition(MocksControl.class);
+		bf.registerBeanDefinition("mocksControl", rbd);
+
+		rbd = new RootBeanDefinition();
+		rbd.setFactoryBeanName("mocksControl");
+		rbd.setFactoryMethodName("createMock");
+		rbd.getConstructorArgumentValues().addGenericArgumentValue(Runnable.class.getName());
+		bf.registerBeanDefinition("mock", rbd);
+
+		Map<String, Runnable> beans = bf.getBeansOfType(Runnable.class);
+		assertEquals(1, beans.size());
+	}
+
+	@Test
+	public void parameterizedInstanceFactoryMethodWithWrappedClassName() {
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+
+		RootBeanDefinition rbd = new RootBeanDefinition();
+		rbd.setBeanClassName(Mockito.class.getName());
+		rbd.setFactoryMethodName("mock");
+		// TypedStringValue used to be equivalent to an XML-defined argument String
+		rbd.getConstructorArgumentValues().addGenericArgumentValue(new TypedStringValue(Runnable.class.getName()));
+		bf.registerBeanDefinition("mock", rbd);
+
+		Map<String, Runnable> beans = bf.getBeansOfType(Runnable.class);
+		assertEquals(1, beans.size());
+	}
+
+	@Test
+	public void parameterizedInstanceFactoryMethodWithInvalidClassName() {
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+
+		RootBeanDefinition rbd = new RootBeanDefinition(MocksControl.class);
+		bf.registerBeanDefinition("mocksControl", rbd);
+
+		rbd = new RootBeanDefinition();
+		rbd.setFactoryBeanName("mocksControl");
+		rbd.setFactoryMethodName("createMock");
+		rbd.getConstructorArgumentValues().addGenericArgumentValue("x");
+		bf.registerBeanDefinition("mock", rbd);
+
+		Map<String, Runnable> beans = bf.getBeansOfType(Runnable.class);
+		assertEquals(0, beans.size());
+	}
+
+	@Test
+	public void parameterizedInstanceFactoryMethodWithIndexedArgument() {
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+
+		RootBeanDefinition rbd = new RootBeanDefinition(MocksControl.class);
+		bf.registerBeanDefinition("mocksControl", rbd);
+
+		rbd = new RootBeanDefinition();
+		rbd.setFactoryBeanName("mocksControl");
+		rbd.setFactoryMethodName("createMock");
+		rbd.getConstructorArgumentValues().addIndexedArgumentValue(0, Runnable.class);
+		bf.registerBeanDefinition("mock", rbd);
+
+		Map<String, Runnable> beans = bf.getBeansOfType(Runnable.class);
+		assertEquals(1, beans.size());
+	}
+
+	@Test
+	public void testGenericMatchingWithBeanNameDifferentiation() {
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		bf.setAutowireCandidateResolver(new GenericTypeAwareAutowireCandidateResolver());
+
+		bf.registerBeanDefinition("doubleStore", new RootBeanDefinition(NumberStore.class));
+		bf.registerBeanDefinition("floatStore", new RootBeanDefinition(NumberStore.class));
+		bf.registerBeanDefinition("numberBean",
+				new RootBeanDefinition(NumberBean.class, RootBeanDefinition.AUTOWIRE_CONSTRUCTOR, false));
+
+		NumberBean nb = bf.getBean(NumberBean.class);
+		assertSame(bf.getBean("doubleStore"), nb.getDoubleStore());
+		assertSame(bf.getBean("floatStore"), nb.getFloatStore());
+
+		String[] numberStoreNames = bf.getBeanNamesForType(ResolvableType.forClass(NumberStore.class));
+		String[] doubleStoreNames = bf.getBeanNamesForType(ResolvableType.forClassWithGenerics(NumberStore.class, Double.class));
+		String[] floatStoreNames = bf.getBeanNamesForType(ResolvableType.forClassWithGenerics(NumberStore.class, Float.class));
+		assertEquals(2, numberStoreNames.length);
+		assertEquals("doubleStore", numberStoreNames[0]);
+		assertEquals("floatStore", numberStoreNames[1]);
+		assertEquals(0, doubleStoreNames.length);
+		assertEquals(0, floatStoreNames.length);
+	}
+
+	@Test
+	public void testGenericMatchingWithFullTypeDifferentiation() {
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		bf.setAutowireCandidateResolver(new GenericTypeAwareAutowireCandidateResolver());
+
+		bf.registerBeanDefinition("store1", new RootBeanDefinition(DoubleStore.class));
+		bf.registerBeanDefinition("store2", new RootBeanDefinition(FloatStore.class));
+		bf.registerBeanDefinition("numberBean",
+				new RootBeanDefinition(NumberBean.class, RootBeanDefinition.AUTOWIRE_CONSTRUCTOR, false));
+
+		NumberBean nb = bf.getBean(NumberBean.class);
+		assertSame(bf.getBean("store1"), nb.getDoubleStore());
+		assertSame(bf.getBean("store2"), nb.getFloatStore());
+
+		String[] numberStoreNames = bf.getBeanNamesForType(ResolvableType.forClass(NumberStore.class));
+		String[] doubleStoreNames = bf.getBeanNamesForType(ResolvableType.forClassWithGenerics(NumberStore.class, Double.class));
+		String[] floatStoreNames = bf.getBeanNamesForType(ResolvableType.forClassWithGenerics(NumberStore.class, Float.class));
+		assertEquals(2, numberStoreNames.length);
+		assertEquals("store1", numberStoreNames[0]);
+		assertEquals("store2", numberStoreNames[1]);
+		assertEquals(1, doubleStoreNames.length);
+		assertEquals("store1", doubleStoreNames[0]);
+		assertEquals(1, floatStoreNames.length);
+		assertEquals("store2", floatStoreNames[0]);
+	}
+
 
 	@SuppressWarnings("serial")
 	public static class NamedUrlList extends LinkedList<URL> {
@@ -755,6 +864,7 @@ public class BeanFactoryGenericsTests {
 		}
 	}
 
+
 	/**
 	 * Pseudo-implementation of EasyMock's {@code MocksControl} class.
 	 */
@@ -762,17 +872,46 @@ public class BeanFactoryGenericsTests {
 
 		@SuppressWarnings("unchecked")
 		public <T> T createMock(Class<T> toMock) {
-
-			return (T) Proxy.newProxyInstance(
-					BeanFactoryGenericsTests.class.getClassLoader(),
-					new Class[] { toMock }, new InvocationHandler() {
-
+			return (T) Proxy.newProxyInstance(BeanFactoryGenericsTests.class.getClassLoader(), new Class<?>[] {toMock},
+					new InvocationHandler() {
 						@Override
-						public Object invoke(Object proxy, Method method, Object[] args)
-								throws Throwable {
+						public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 							throw new UnsupportedOperationException("mocked!");
 						}
 					});
+		}
+	}
+
+
+	public static class NumberStore<T extends Number> {
+	}
+
+
+	public static class DoubleStore extends NumberStore<Double> {
+	}
+
+
+	public static class FloatStore extends NumberStore<Float> {
+	}
+
+
+	public static class NumberBean {
+
+		private final NumberStore<Double> doubleStore;
+
+		private final NumberStore<Float> floatStore;
+
+		public NumberBean(NumberStore<Double> doubleStore, NumberStore<Float> floatStore) {
+			this.doubleStore = doubleStore;
+			this.floatStore = floatStore;
+		}
+
+		public NumberStore<Double> getDoubleStore() {
+			return this.doubleStore;
+		}
+
+		public NumberStore<Float> getFloatStore() {
+			return this.floatStore;
 		}
 	}
 

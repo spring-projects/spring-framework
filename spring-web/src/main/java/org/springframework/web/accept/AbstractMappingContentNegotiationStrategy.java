@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import java.util.Map;
 
 import org.springframework.http.MediaType;
 import org.springframework.util.StringUtils;
+import org.springframework.web.HttpMediaTypeNotAcceptableException;
 import org.springframework.web.context.request.NativeWebRequest;
 
 /**
@@ -34,6 +35,7 @@ import org.springframework.web.context.request.NativeWebRequest;
 public abstract class AbstractMappingContentNegotiationStrategy extends MappingMediaTypeFileExtensionResolver
 		implements ContentNegotiationStrategy, MediaTypeFileExtensionResolver {
 
+
 	/**
 	 * Create an instance with the given extension-to-MediaType lookup.
 	 * @throws IllegalArgumentException if a media type string cannot be parsed
@@ -42,8 +44,9 @@ public abstract class AbstractMappingContentNegotiationStrategy extends MappingM
 		super(mediaTypes);
 	}
 
+
 	@Override
-	public List<MediaType> resolveMediaTypes(NativeWebRequest webRequest) {
+	public List<MediaType> resolveMediaTypes(NativeWebRequest webRequest) throws HttpMediaTypeNotAcceptableException {
 		String key = getMediaTypeKey(webRequest);
 		if (StringUtils.hasText(key)) {
 			MediaType mediaType = lookupMediaType(key);
@@ -76,7 +79,7 @@ public abstract class AbstractMappingContentNegotiationStrategy extends MappingM
 	 * Invoked when no matching media type is found in the lookup map.
 	 * Sub-classes can take further steps to determine the media type.
 	 */
-	protected MediaType handleNoMatch(NativeWebRequest request, String mappingKey) {
+	protected MediaType handleNoMatch(NativeWebRequest request, String key) throws HttpMediaTypeNotAcceptableException {
 		return null;
 	}
 

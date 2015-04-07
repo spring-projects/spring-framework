@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,8 +34,8 @@ import org.junit.AfterClass;
 import static org.junit.Assert.assertEquals;
 import org.junit.BeforeClass;
 
-import org.springframework.util.FileCopyUtils;
 import org.springframework.util.SocketUtils;
+import org.springframework.util.StreamUtils;
 
 /** @author Arjen Poutsma */
 public class AbstractJettyServerTestCase {
@@ -53,7 +53,6 @@ public class AbstractJettyServerTestCase {
 		ServletContextHandler handler = new ServletContextHandler();
 		handler.setContextPath("/");
 
-		handler.addServlet(new ServletHolder(new EchoServlet()), "/echo");
 		handler.addServlet(new ServletHolder(new EchoServlet()), "/echo");
 		handler.addServlet(new ServletHolder(new StatusServlet(200)), "/status/ok");
 		handler.addServlet(new ServletHolder(new StatusServlet(404)), "/status/notfound");
@@ -147,14 +146,16 @@ public class AbstractJettyServerTestCase {
 
 		private void echo(HttpServletRequest request, HttpServletResponse response) throws IOException {
 			response.setStatus(HttpServletResponse.SC_OK);
-			for (Enumeration e1 = request.getHeaderNames(); e1.hasMoreElements();) {
-				String headerName = (String) e1.nextElement();
-				for (Enumeration e2 = request.getHeaders(headerName); e2.hasMoreElements();) {
-					String headerValue = (String) e2.nextElement();
+			response.setContentType(request.getContentType());
+			response.setContentLength(request.getContentLength());
+			for (Enumeration<String> e1 = request.getHeaderNames(); e1.hasMoreElements();) {
+				String headerName = e1.nextElement();
+				for (Enumeration<String> e2 = request.getHeaders(headerName); e2.hasMoreElements();) {
+					String headerValue = e2.nextElement();
 					response.addHeader(headerName, headerValue);
 				}
 			}
-			FileCopyUtils.copy(request.getInputStream(), response.getOutputStream());
+			StreamUtils.copy(request.getInputStream(), response.getOutputStream());
 		}
 	}
 }

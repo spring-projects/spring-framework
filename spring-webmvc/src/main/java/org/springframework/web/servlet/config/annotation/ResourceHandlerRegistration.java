@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,10 +19,11 @@ package org.springframework.web.servlet.config.annotation;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.cache.Cache;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.util.Assert;
-import org.springframework.util.CollectionUtils;
+import org.springframework.web.servlet.resource.PathResourceResolver;
 import org.springframework.web.servlet.resource.ResourceHttpRequestHandler;
 
 /**
@@ -30,6 +31,7 @@ import org.springframework.web.servlet.resource.ResourceHttpRequestHandler;
  *
  * @author Rossen Stoyanchev
  * @author Keith Donald
+ * @author Brian Clozel
  *
  * @since 3.1
  */
@@ -43,6 +45,9 @@ public class ResourceHandlerRegistration {
 
 	private Integer cachePeriod;
 
+	private ResourceChainRegistration resourceChainRegistration;
+
+
 	/**
 	 * Create a {@link ResourceHandlerRegistration} instance.
 	 * @param resourceLoader a resource loader for turning a String location into a {@link Resource}
@@ -53,6 +58,7 @@ public class ResourceHandlerRegistration {
 		this.resourceLoader = resourceLoader;
 		this.pathPatterns = pathPatterns;
 	}
+
 
 	/**
 	 * Add one or more resource locations from which to serve static content. Each location must point to a valid
@@ -83,23 +89,67 @@ public class ResourceHandlerRegistration {
 	}
 
 	/**
+	 * Configure a chain of resource resolvers and transformers to use. This
+	 * can be useful for example to apply a version strategy to resource URLs.
+	 *
+	 * <p>If this method is not invoked, by default only a simple
+	 * {@link PathResourceResolver} is used in order to match URL paths to
+	 * resources under the configured locations.
+	 *
+	 * @param cacheResources whether to cache the result of resource resolution;
+	 * 		setting this to "true" is recommended for production (and "false" for
+	 * 	    development, especially when applying a version strategy).
+	 * @return the same {@link ResourceHandlerRegistration} instance for chained method invocation
+	 * @since 4.1
+	 */
+	public ResourceChainRegistration resourceChain(boolean cacheResources) {
+		this.resourceChainRegistration = new ResourceChainRegistration(cacheResources);
+		return this.resourceChainRegistration;
+	}
+
+	/**
+	 * Configure a chain of resource resolvers and transformers to use. This
+	 * can be useful for example to apply a version strategy to resource URLs.
+	 *
+	 * <p>If this method is not invoked, by default only a simple
+	 * {@link PathResourceResolver} is used in order to match URL paths to
+	 * resources under the configured locations.
+	 *
+	 * @param cacheResources whether to cache the result of resource resolution;
+	 * 		setting this to "true" is recommended for production (and "false" for
+	 * 	    development, especially when applying a version strategy.
+	 * @param cache the cache to use for storing resolved and transformed resources;
+	 *      by default a {@link org.springframework.cache.concurrent.ConcurrentMapCache}
+	 *      is used.
+	 * @return the same {@link ResourceHandlerRegistration} instance for chained method invocation
+	 * @since 4.1
+	 */
+	public ResourceChainRegistration resourceChain(boolean cacheResources, Cache cache) {
+		this.resourceChainRegistration = new ResourceChainRegistration(cacheResources, cache);
+		return this.resourceChainRegistration;
+	}
+
+	/**
 	 * Returns the URL path patterns for the resource handler.
 	 */
 	protected String[] getPathPatterns() {
-		return pathPatterns;
+		return this.pathPatterns;
 	}
 
 	/**
 	 * Returns a {@link ResourceHttpRequestHandler} instance.
 	 */
 	protected ResourceHttpRequestHandler getRequestHandler() {
-		Assert.isTrue(!CollectionUtils.isEmpty(locations), "At least one location is required for resource handling.");
-		ResourceHttpRequestHandler requestHandler = new ResourceHttpRequestHandler();
-		requestHandler.setLocations(locations);
-		if (cachePeriod != null) {
-			requestHandler.setCacheSeconds(cachePeriod);
+		ResourceHttpRequestHandler handler = new ResourceHttpRequestHandler();
+		if (this.resourceChainRegistration != null) {
+			handler.setResourceResolvers(this.resourceChainRegistration.getResourceResolvers());
+			handler.setResourceTransformers(this.resourceChainRegistration.getResourceTransformers());
 		}
-		return requestHandler;
+		handler.setLocations(this.locations);
+		if (this.cachePeriod != null) {
+			handler.setCacheSeconds(this.cachePeriod);
+		}
+		return handler;
 	}
 
 }

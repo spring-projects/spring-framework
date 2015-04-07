@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -73,6 +73,7 @@ import java.util.concurrent.Callable;
  * <li>{@link java.io.OutputStream} / {@link java.io.Writer} for generating
  * the response's content. This will be the raw OutputStream/Writer as
  * exposed by the Servlet/Portlet API.
+ * <li>{@link org.springframework.http.HttpMethod} for the HTTP request method</li>
  * <li>{@link PathVariable @PathVariable} annotated parameters (Servlet-only)
  * for access to URI template values (i.e. /hotels/{hotel}). Variable values will be
  * converted to the declared method argument type. By default, the URI template
@@ -159,9 +160,15 @@ import java.util.concurrent.Callable;
  * context path, and the literal part of the servlet mapping.
  * </ul>
  *
+ * <p><strong>Note:</strong> JDK 1.8's {@code java.util.Optional} is supported
+ * as a method parameter type with annotations that provide a {@code required}
+ * attribute (e.g. {@code @RequestParam}, {@code @RequestHeader}, etc.). The use
+ * of {@code java.util.Optional} in those cases is equivalent to having
+ * {@code required=false}.
+ *
  * <p>The following return types are supported for handler methods:
  * <ul>
- * <li>A {@link ModelAndView} object (Servlet MVC or Portlet MVC),
+ * <li>A {@code ModelAndView} object (Servlet MVC or Portlet MVC),
  * with the model implicitly enriched with command objects and the results
  * of {@link ModelAttribute @ModelAttribute} annotated reference data accessor methods.
  * <li>A {@link org.springframework.ui.Model Model} object, with the view name
@@ -195,12 +202,23 @@ import java.util.concurrent.Callable;
  * The entity body will be converted to the response stream using
  * {@linkplain org.springframework.http.converter.HttpMessageConverter message
  * converters}.
+ * <li>An {@link org.springframework.http.HttpHeaders HttpHeaders} object to
+ * return a response with no body.</li>
  * <li>A {@link Callable} which is used by Spring MVC to obtain the return
  * value asynchronously in a separate thread transparently managed by Spring MVC
  * on behalf of the application.
  * <li>A {@link org.springframework.web.context.request.async.DeferredResult}
  * which the application uses to produce a return value in a separate
  * thread of its own choosing, as an alternative to returning a Callable.
+ * <li>A {@link org.springframework.util.concurrent.ListenableFuture}
+ * which the application uses to produce a return value in a separate
+ * thread of its own choosing, as an alternative to returning a Callable.
+ * <li>A {@link org.springframework.web.servlet.mvc.method.annotation.ResponseBodyEmitter}
+ * can be used to write multiple objects to the response asynchronously;
+ * also supported as the body within {@code ResponseEntity}.</li>
+ * <li>An {@link org.springframework.web.servlet.mvc.method.annotation.SseEmitter}
+ * can be used to write Server-Sent Events to the response asynchronously;
+ * also supported as the body within {@code ResponseEntity}.</li>
  * <li>{@code void} if the method handles the response itself (by
  * writing the response content directly, declaring an argument of type
  * {@link javax.servlet.ServletResponse} / {@link javax.servlet.http.HttpServletResponse}
@@ -261,6 +279,16 @@ import java.util.concurrent.Callable;
 public @interface RequestMapping {
 
 	/**
+	 * Assign a name to this mapping.
+	 * <p><b>Supported at the type level as well as at the method level!</b>
+	 * When used on both levels, a combined name is derived by concatenation
+	 * with "#" as separator.
+	 * @see org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder
+	 * @see org.springframework.web.servlet.handler.HandlerMethodMappingNamingStrategy
+	 */
+	String name() default "";
+
+	/**
 	 * The primary mapping expressed by this annotation.
 	 * <p>In a Servlet environment: the path mapping URIs (e.g. "/myPath.do").
 	 * Ant-style path patterns are also supported (e.g. "/myPath/*.do").
@@ -272,6 +300,7 @@ public @interface RequestMapping {
 	 * <p><b>Supported at the type level as well as at the method level!</b>
 	 * When used at the type level, all method-level mappings inherit
 	 * this primary mapping, narrowing it for a specific handler method.
+	 * @see org.springframework.web.bind.annotation.ValueConstants#DEFAULT_NONE
 	 */
 	String[] value() default {};
 
@@ -367,7 +396,7 @@ public @interface RequestMapping {
 	 * all requests with a {@code Accept} other than "text/plain".
 	 * <p><b>Supported at the type level as well as at the method level!</b>
 	 * When used at the type level, all method-level mappings override
-	 * this consumes restriction.
+	 * this produces restriction.
 	 * @see org.springframework.http.MediaType
 	 */
 	String[] produces() default {};

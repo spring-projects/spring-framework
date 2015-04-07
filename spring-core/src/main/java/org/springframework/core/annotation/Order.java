@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,9 @@ import org.springframework.core.Ordered;
  * The default value is {@code Ordered.LOWEST_PRECEDENCE}, indicating
  * lowest priority (losing to any other specified order value).
  *
+ * <p>Since Spring 4.1, the standard {@link javax.annotation.Priority} can be used as
+ * a drop-in replacement of this annotation.
+ *
  * <p><b>NOTE:</b> Annotation-based ordering is supported for specific kinds of
  * components only, e.g. for annotation-based AspectJ aspects. Spring container
  * strategies, on the other hand, are typically based on the {@link Ordered}
@@ -39,6 +42,8 @@ import org.springframework.core.Ordered;
  * @since 2.0
  * @see org.springframework.core.Ordered
  * @see AnnotationAwareOrderComparator
+ * @see OrderUtils
+ * @see javax.annotation.Priority
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.TYPE, ElementType.METHOD, ElementType.FIELD})

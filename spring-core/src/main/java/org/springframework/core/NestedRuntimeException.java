@@ -110,7 +110,7 @@ public abstract class NestedRuntimeException extends RuntimeException {
 	 * @param exType the exception type to look for
 	 * @return whether there is a nested exception of the specified type
 	 */
-	public boolean contains(Class exType) {
+	public boolean contains(Class<?> exType) {
 		if (exType == null) {
 			return false;
 		}

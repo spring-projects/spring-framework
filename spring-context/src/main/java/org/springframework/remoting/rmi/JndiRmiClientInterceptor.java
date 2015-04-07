@@ -78,7 +78,7 @@ import org.springframework.util.ReflectionUtils;
  */
 public class JndiRmiClientInterceptor extends JndiObjectLocator implements MethodInterceptor, InitializingBean {
 
-	private Class serviceInterface;
+	private Class<?> serviceInterface;
 
 	private RemoteInvocationFactory remoteInvocationFactory = new DefaultRemoteInvocationFactory();
 
@@ -101,7 +101,7 @@ public class JndiRmiClientInterceptor extends JndiObjectLocator implements Metho
 	 * <p>Typically required to be able to create a suitable service proxy,
 	 * but can also be optional if the lookup returns a typed stub.
 	 */
-	public void setServiceInterface(Class serviceInterface) {
+	public void setServiceInterface(Class<?> serviceInterface) {
 		if (serviceInterface != null && !serviceInterface.isInterface()) {
 			throw new IllegalArgumentException("'serviceInterface' must be an interface");
 		}
@@ -111,7 +111,7 @@ public class JndiRmiClientInterceptor extends JndiObjectLocator implements Metho
 	/**
 	 * Return the interface of the service to access.
 	 */
-	public Class getServiceInterface() {
+	public Class<?> getServiceInterface() {
 		return this.serviceInterface;
 	}
 

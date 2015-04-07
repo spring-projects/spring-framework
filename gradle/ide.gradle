@@ -5,19 +5,19 @@ import org.gradle.plugins.ide.eclipse.model.SourceFolder
 apply plugin: "propdeps-eclipse"
 apply plugin: "propdeps-idea"
 
-// Until eclipse fully supports Java 8 use 1.7 source level
 eclipse.jdt {
-	sourceCompatibility = 1.7
-	targetCompatibility = 1.7
+	sourceCompatibility = 1.8
+	targetCompatibility = 1.8
 }
 
 // Replace classpath entries with project dependencies (GRADLE-1116)
+// http://issues.gradle.org/browse/GRADLE-1116
 eclipse.classpath.file.whenMerged { classpath ->
 	def regexp = /.*?\/([^\/]+)\/build\/[^\/]+\/(?:main|test)/ // only match those that end in main or test (avoids removing necessary entries like build/classes/jaxb)
 	def projectOutputDependencies = classpath.entries.findAll { entry -> entry.path =~ regexp }
 	projectOutputDependencies.each { entry ->
 		def matcher = (entry.path =~ regexp)
-		if(matcher) {
+		if (matcher) {
 			def projectName = matcher[0][1]
 			def path = "/${projectName}"
 			if(!classpath.entries.find { e -> e instanceof ProjectDependency && e.path == path }) {
@@ -47,9 +47,19 @@ eclipse.classpath.file.whenMerged { classpath ->
 	}
 }
 
-// Allow projects to be used as WPT modules
-eclipse.project.natures "org.eclipse.wst.common.project.facet.core.nature"
+// Ensure project dependencies come after 3rd-party libs (SPR-11836)
+// https://jira.spring.io/browse/SPR-11836
+eclipse.classpath.file.whenMerged { classpath ->
+	classpath.entries.findAll { it instanceof ProjectDependency }.each {
+		// delete from original position
+		classpath.entries.remove(it)
+		// append to end of classpath
+		classpath.entries.add(it)
+	}
+}
 
+// Allow projects to be used as WTP modules
+eclipse.project.natures "org.eclipse.wst.common.project.facet.core.nature"
 
 // Include project specific settings
 task eclipseSettings(type: Copy) {
@@ -75,8 +85,8 @@ task eclipseJdtPrepare(type: Copy) {
 }
 
 task cleanEclipseJdtUi(type: Delete) {
+	delete project.file(".settings/org.eclipse.jdt.core.prefs")
 	delete project.file(".settings/org.eclipse.jdt.ui.prefs")
-	delete project.file("org.eclipse.jdt.core.prefs")
 	delete project.file(".settings/org.eclipse.wst.common.component")
 	delete project.file(".settings/org.eclipse.wst.common.project.facet.core.xml")
 }
@@ -87,7 +97,6 @@ tasks["eclipse"].dependsOn(eclipseSettings, eclipseWstComponent)
 
 
 // Filter 'build' folder
-
 eclipse.project.file.withXml {
 	def node = it.asNode()
 

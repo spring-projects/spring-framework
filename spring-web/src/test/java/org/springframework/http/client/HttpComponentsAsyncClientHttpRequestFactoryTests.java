@@ -34,6 +34,7 @@ public class HttpComponentsAsyncClientHttpRequestFactoryTests extends AbstractAs
 	@Override
 	@Test
 	public void httpMethods() throws Exception {
+        super.httpMethods();
 		assertHttpMethod("patch", HttpMethod.PATCH);
 	}
 

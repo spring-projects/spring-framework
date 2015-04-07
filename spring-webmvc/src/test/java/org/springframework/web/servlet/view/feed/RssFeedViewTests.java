@@ -1,5 +1,5 @@
 /*
- * Copyright ${YEAR} the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,16 +17,15 @@
 package org.springframework.web.servlet.view.feed;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.sun.syndication.feed.rss.Channel;
-import com.sun.syndication.feed.rss.Description;
-import com.sun.syndication.feed.rss.Item;
+import com.rometools.rome.feed.rss.Channel;
+import com.rometools.rome.feed.rss.Description;
+import com.rometools.rome.feed.rss.Item;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -48,7 +47,6 @@ public class RssFeedViewTests {
 	public void createView() throws Exception {
 		view = new MyRssFeedView();
 		setIgnoreWhitespace(true);
-
 	}
 
 	@Test
@@ -69,6 +67,7 @@ public class RssFeedViewTests {
 		assertXMLEqual(expected, response.getContentAsString());
 	}
 
+
 	private static class MyRssFeedView extends AbstractRssFeedView {
 
 		@Override
@@ -79,11 +78,9 @@ public class RssFeedViewTests {
 		}
 
 		@Override
-		protected List<Item> buildFeedItems(Map model, HttpServletRequest request, HttpServletResponse response)
-				throws Exception {
+		protected List<Item> buildFeedItems(Map<String, Object> model, HttpServletRequest request, HttpServletResponse response) throws Exception {
 			List<Item> items = new ArrayList<Item>();
-			for (Iterator iterator = model.keySet().iterator(); iterator.hasNext();) {
-				String name = (String) iterator.next();
+			for (String name : model.keySet()) {
 				Item item = new Item();
 				item.setTitle(name);
 				Description description = new Description();
@@ -94,4 +91,5 @@ public class RssFeedViewTests {
 			return items;
 		}
 	}
+
 }

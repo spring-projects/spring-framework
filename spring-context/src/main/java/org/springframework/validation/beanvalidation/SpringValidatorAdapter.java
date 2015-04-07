@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -83,27 +83,30 @@ public class SpringValidatorAdapter implements SmartValidator, javax.validation.
 
 	@Override
 	public boolean supports(Class<?> clazz) {
-		return true;
+		return (this.targetValidator != null);
 	}
 
 	@Override
 	public void validate(Object target, Errors errors) {
-		processConstraintViolations(this.targetValidator.validate(target), errors);
+		if (this.targetValidator != null) {
+			processConstraintViolations(this.targetValidator.validate(target), errors);
+		}
 	}
 
 	@Override
-	@SuppressWarnings("rawtypes")
 	public void validate(Object target, Errors errors, Object... validationHints) {
-		Set<Class> groups = new LinkedHashSet<Class>();
-		if (validationHints != null) {
-			for (Object hint : validationHints) {
-				if (hint instanceof Class) {
-					groups.add((Class) hint);
+		if (this.targetValidator != null) {
+			Set<Class<?>> groups = new LinkedHashSet<Class<?>>();
+			if (validationHints != null) {
+				for (Object hint : validationHints) {
+					if (hint instanceof Class) {
+						groups.add((Class<?>) hint);
+					}
 				}
 			}
+			processConstraintViolations(
+					this.targetValidator.validate(target, groups.toArray(new Class<?>[groups.size()])), errors);
 		}
-		processConstraintViolations(
-				this.targetValidator.validate(target, groups.toArray(new Class[groups.size()])), errors);
 	}
 
 	/**
@@ -114,12 +117,12 @@ public class SpringValidatorAdapter implements SmartValidator, javax.validation.
 	 */
 	protected void processConstraintViolations(Set<ConstraintViolation<Object>> violations, Errors errors) {
 		for (ConstraintViolation<Object> violation : violations) {
-			String field = violation.getPropertyPath().toString();
+			String field = determineField(violation);
 			FieldError fieldError = errors.getFieldError(field);
 			if (fieldError == null || !fieldError.isBindingFailure()) {
 				try {
 					ConstraintDescriptor<?> cd = violation.getConstraintDescriptor();
-					String errorCode = cd.getAnnotation().annotationType().getSimpleName();
+					String errorCode = determineErrorCode(cd);
 					Object[] errorArgs = getArgumentsForConstraint(errors.getObjectName(), field, cd);
 					if (errors instanceof BindingResult) {
 						// Can do custom FieldError registration with invalid value from ConstraintViolation,
@@ -132,16 +135,10 @@ public class SpringValidatorAdapter implements SmartValidator, javax.validation.
 									errors.getObjectName(), errorCodes, errorArgs, violation.getMessage()));
 						}
 						else {
-							Object invalidValue = violation.getInvalidValue();
-							if (!"".equals(field) && (invalidValue == violation.getLeafBean() ||
-									(field.contains(".") && !field.contains("[]")))) {
-								// Possibly a bean constraint with property path: retrieve the actual property value.
-								// However, explicitly avoid this for "address[]" style paths that we can't handle.
-								invalidValue = bindingResult.getRawFieldValue(field);
-							}
+							Object rejectedValue = getRejectedValue(field, violation, bindingResult);
 							String[] errorCodes = bindingResult.resolveMessageCodes(errorCode, field);
 							bindingResult.addError(new FieldError(
-									errors.getObjectName(), nestedField, invalidValue, false,
+									errors.getObjectName(), nestedField, rejectedValue, false,
 									errorCodes, errorArgs, violation.getMessage()));
 						}
 					}
@@ -158,6 +155,35 @@ public class SpringValidatorAdapter implements SmartValidator, javax.validation.
 				}
 			}
 		}
+	}
+
+	/**
+	 * Determine a field for the given constraint violation.
+	 * <p>The default implementation returns the stringified property path.
+	 * @param violation the current JSR-303 ConstraintViolation
+	 * @return the Spring-reported field (for use with {@link Errors})
+	 * @since 4.2
+	 * @see javax.validation.ConstraintViolation#getPropertyPath()
+	 * @see org.springframework.validation.FieldError#getField()
+	 */
+	protected String determineField(ConstraintViolation<Object> violation) {
+		return violation.getPropertyPath().toString();
+	}
+
+	/**
+	 * Determine a Spring-reported error code for the given constraint descriptor.
+	 * <p>The default implementation returns the simple class name of the descriptor's
+	 * annotation type. Note that the configured
+	 * {@link org.springframework.validation.MessageCodesResolver} will automatically
+	 * generate error code variations which include the object name and the field name.
+	 * @param descriptor the JSR-303 ConstraintDescriptor for the current violation
+	 * @return a corresponding error code (for use with {@link Errors})
+	 * @since 4.2
+	 * @see javax.validation.metadata.ConstraintDescriptor#getAnnotation()
+	 * @see org.springframework.validation.MessageCodesResolver
+	 */
+	protected String determineErrorCode(ConstraintDescriptor<?> descriptor) {
+		return descriptor.getAnnotation().annotationType().getSimpleName();
 	}
 
 	/**
@@ -193,6 +219,29 @@ public class SpringValidatorAdapter implements SmartValidator, javax.validation.
 		return arguments.toArray(new Object[arguments.size()]);
 	}
 
+	/**
+	 * Extract the rejected value behind the given constraint violation,
+	 * for exposure through the Spring errors representation.
+	 * @param field the field that caused the binding error
+	 * @param violation the corresponding JSR-303 ConstraintViolation
+	 * @param bindingResult a Spring BindingResult for the backing object
+	 * which contains the current field's value
+	 * @return the invalid value to expose as part of the field error
+	 * @since 4.2
+	 * @see javax.validation.ConstraintViolation#getInvalidValue()
+	 * @see org.springframework.validation.FieldError#getRejectedValue()
+	 */
+	protected Object getRejectedValue(String field, ConstraintViolation<Object> violation, BindingResult bindingResult) {
+		Object invalidValue = violation.getInvalidValue();
+		if (!"".equals(field) && (invalidValue == violation.getLeafBean() ||
+				(field.contains(".") && !field.contains("[]")))) {
+			// Possibly a bean constraint with property path: retrieve the actual property value.
+			// However, explicitly avoid this for "address[]" style paths that we can't handle.
+			invalidValue = bindingResult.getRawFieldValue(field);
+		}
+		return invalidValue;
+	}
+
 
 	//---------------------------------------------------------------------
 	// Implementation of JSR-303 Validator interface
@@ -200,11 +249,13 @@ public class SpringValidatorAdapter implements SmartValidator, javax.validation.
 
 	@Override
 	public <T> Set<ConstraintViolation<T>> validate(T object, Class<?>... groups) {
+		Assert.notNull(this.targetValidator, "No target Validator set");
 		return this.targetValidator.validate(object, groups);
 	}
 
 	@Override
 	public <T> Set<ConstraintViolation<T>> validateProperty(T object, String propertyName, Class<?>... groups) {
+		Assert.notNull(this.targetValidator, "No target Validator set");
 		return this.targetValidator.validateProperty(object, propertyName, groups);
 	}
 
@@ -212,16 +263,19 @@ public class SpringValidatorAdapter implements SmartValidator, javax.validation.
 	public <T> Set<ConstraintViolation<T>> validateValue(
 			Class<T> beanType, String propertyName, Object value, Class<?>... groups) {
 
+		Assert.notNull(this.targetValidator, "No target Validator set");
 		return this.targetValidator.validateValue(beanType, propertyName, value, groups);
 	}
 
 	@Override
 	public BeanDescriptor getConstraintsForClass(Class<?> clazz) {
+		Assert.notNull(this.targetValidator, "No target Validator set");
 		return this.targetValidator.getConstraintsForClass(clazz);
 	}
 
 	@Override
 	public <T> T unwrap(Class<T> type) {
+		Assert.notNull(this.targetValidator, "No target Validator set");
 		return this.targetValidator.unwrap(type);
 	}
 

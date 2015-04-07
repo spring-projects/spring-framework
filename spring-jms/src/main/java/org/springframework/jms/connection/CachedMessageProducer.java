@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,7 +47,7 @@ class CachedMessageProducer implements MessageProducer, QueueSender, TopicPublis
 	private static final Method getDeliveryDelayMethod =
 			ClassUtils.getMethodIfAvailable(MessageProducer.class, "getDeliveryDelay");
 
-	private static Class completionListenerClass;
+	private static Class<?> completionListenerClass;
 
 	private static Method sendWithCompletionListenerMethod;
 
@@ -254,7 +254,7 @@ class CachedMessageProducer implements MessageProducer, QueueSender, TopicPublis
 	public MessageProducer getProxyIfNecessary() {
 		if (completionListenerClass != null) {
 			return (MessageProducer) Proxy.newProxyInstance(CachedMessageProducer.class.getClassLoader(),
-					new Class[] {MessageProducer.class, QueueSender.class, TopicPublisher.class},
+					new Class<?>[] {MessageProducer.class, QueueSender.class, TopicPublisher.class},
 					new Jms2MessageProducerInvocationHandler());
 		}
 		else {
@@ -275,16 +275,20 @@ class CachedMessageProducer implements MessageProducer, QueueSender, TopicPublis
 			try {
 				if (method.getName().equals("send") && args != null &&
 						completionListenerClass.equals(method.getParameterTypes()[args.length - 1])) {
-					if (args.length == 2) {
-						return sendWithCompletionListenerMethod.invoke(
-								target, args[0], deliveryMode, priority, timeToLive, args[1]);
-					}
-					else if (args.length == 3) {
-						return sendWithDestinationAndCompletionListenerMethod.invoke(
-								target, args[0], args[1], deliveryMode, priority, timeToLive, args[2]);
+					switch (args.length) {
+						case 2: // send(message, completionListener)
+							return sendWithCompletionListenerMethod.invoke(
+									target, args[0], deliveryMode, priority, timeToLive, args[1]);
+						case 3: // send(destination, message, completionListener)
+							return sendWithDestinationAndCompletionListenerMethod.invoke(
+									target, args[0], args[1], deliveryMode, priority, timeToLive, args[2]);
+						case 5: // send(message, deliveryMode, priority, timeToLive, completionListener)
+							return sendWithCompletionListenerMethod.invoke(target, args);
+						case 6: // send(destination, message, deliveryMode, priority, timeToLive, completionListener)
+							return sendWithDestinationAndCompletionListenerMethod.invoke(target, args);
 					}
 				}
-				return method.invoke(target, args);
+				return method.invoke(CachedMessageProducer.this, args);
 			}
 			catch (InvocationTargetException ex) {
 				throw ex.getTargetException();

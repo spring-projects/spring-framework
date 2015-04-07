@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import java.time.format.FormatStyle;
 import java.util.TimeZone;
 
 import org.springframework.format.annotation.DateTimeFormat.ISO;
+import org.springframework.lang.UsesJava8;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
@@ -42,6 +43,7 @@ import org.springframework.util.StringUtils;
  * @see #setDateTimeStyle
  * @see DateTimeFormatterFactoryBean
  */
+@UsesJava8
 public class DateTimeFormatterFactory {
 
 	private String pattern;

@@ -28,7 +28,11 @@ import org.springframework.util.ObjectUtils;
 @SuppressWarnings("serial")
 public class SerializablePerson implements Person, Serializable {
 
+	private static final long serialVersionUID = 1L;
+
+
 	private String name;
+
 	private int age;
 
 	@Override
@@ -57,6 +61,11 @@ public class SerializablePerson implements Person, Serializable {
 			throw (Throwable) o;
 		}
 		return o;
+	}
+
+	@Override
+	public int hashCode() {
+		return 0;
 	}
 
 	@Override

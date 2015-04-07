@@ -202,7 +202,7 @@ public class EscapedErrors implements Errors {
 	}
 
 	@Override
-	public Class getFieldType(String field) {
+	public Class<?> getFieldType(String field) {
 		return this.source.getFieldType(field);
 	}
 

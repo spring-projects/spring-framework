@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -67,6 +67,7 @@ import org.springframework.web.servlet.theme.SessionThemeResolver;
 import org.springframework.web.servlet.theme.ThemeChangeInterceptor;
 import org.springframework.web.servlet.view.InternalResourceViewResolver;
 import org.springframework.web.servlet.view.ResourceBundleViewResolver;
+import org.springframework.web.util.WebUtils;
 
 /**
  * @author Juergen Hoeller
@@ -401,7 +402,7 @@ public class ComplexWebApplicationContext extends StaticWebApplicationContext {
 			if (!(wac instanceof ComplexWebApplicationContext)) {
 				throw new ServletException("Incorrect WebApplicationContext");
 			}
-			if (!(request instanceof MultipartHttpServletRequest)) {
+			if (WebUtils.getNativeRequest(request, MultipartHttpServletRequest.class) == null) {
 				throw new ServletException("Not in a MultipartHttpServletRequest");
 			}
 			if (request.getParameter("fail") != null) {

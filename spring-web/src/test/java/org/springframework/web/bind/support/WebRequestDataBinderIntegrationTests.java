@@ -18,7 +18,7 @@ package org.springframework.web.bind.support;
 
 import java.io.IOException;
 import java.util.List;
-
+import javax.servlet.MultipartConfigElement;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -32,11 +32,11 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
-import org.springframework.mock.web.test.MockMultipartFile;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.SocketUtils;
@@ -44,7 +44,6 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.context.request.ServletWebRequest;
 
 import static org.junit.Assert.*;
-
 
 /**
  * @author Brian Clozel
@@ -79,8 +78,15 @@ public class WebRequestDataBinderIntegrationTests {
 		partsServlet = new PartsServlet();
 		partListServlet = new PartListServlet();
 
-		handler.addServlet(new ServletHolder(partsServlet), "/parts");
-		handler.addServlet(new ServletHolder(partListServlet), "/partlist");
+		MultipartConfigElement multipartConfig = new MultipartConfigElement("");
+
+		ServletHolder holder = new ServletHolder(partsServlet);
+		holder.getRegistration().setMultipartConfig(multipartConfig);
+		handler.addServlet(holder, "/parts");
+
+		holder = new ServletHolder(partListServlet);
+		holder.getRegistration().setMultipartConfig(multipartConfig);
+		handler.addServlet(holder, "/partlist");
 		jettyServer.setHandler(handler);
 		jettyServer.start();
 	}
@@ -100,7 +106,7 @@ public class WebRequestDataBinderIntegrationTests {
 		partsServlet.setBean(bean);
 
 		MultiValueMap<String, Object> parts = new LinkedMultiValueMap<String, Object>();
-		MockMultipartFile firstPart = new MockMultipartFile("fileName", "aValue".getBytes());
+		Resource firstPart = new ClassPathResource("/org/springframework/http/converter/logo.jpg");
 		parts.add("firstPart", firstPart);
 		parts.add("secondPart", "secondValue");
 
@@ -125,7 +131,7 @@ public class WebRequestDataBinderIntegrationTests {
 		template.postForLocation(baseUrl + "/partlist", parts);
 
 		assertNotNull(bean.getPartList());
-		assertEquals(parts.size(), bean.getPartList().size());
+		assertEquals(parts.get("partList").size(), bean.getPartList().size());
 	}
 
 
@@ -178,7 +184,6 @@ public class WebRequestDataBinderIntegrationTests {
 
 	@SuppressWarnings("serial")
 	private static class PartsServlet extends AbstractStandardMultipartServlet<PartsBean> {
-
 	}
 
 	private static class PartListBean {
@@ -197,7 +202,6 @@ public class WebRequestDataBinderIntegrationTests {
 
 	@SuppressWarnings("serial")
 	private static class PartListServlet extends AbstractStandardMultipartServlet<PartListBean> {
-
 	}
 
 }

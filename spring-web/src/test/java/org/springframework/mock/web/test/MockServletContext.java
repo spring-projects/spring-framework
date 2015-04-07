@@ -56,7 +56,9 @@ import org.springframework.web.util.WebUtils;
 /**
  * Mock implementation of the {@link javax.servlet.ServletContext} interface.
  *
- * <p>Compatible with Servlet 3.0. Can be configured to expose a specific version
+ * <p>As of Spring 4.0, this set of mocks is designed on a Servlet 3.0 baseline.
+ *
+ * <p>Compatible with Servlet 3.0 but can be configured to expose a specific version
  * through {@link #setMajorVersion}/{@link #setMinorVersion}; default is 3.0.
  * Note that Servlet 3.0 support is limited: servlet, filter and listener
  * registration methods are not supported; neither is JSP configuration.

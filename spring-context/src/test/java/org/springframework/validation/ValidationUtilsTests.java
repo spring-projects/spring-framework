@@ -16,10 +16,11 @@
 
 package org.springframework.validation;
 
-import static org.junit.Assert.*;
-
 import org.junit.Test;
+
 import org.springframework.tests.sample.beans.TestBean;
+
+import static org.junit.Assert.*;
 
 /**
  * Unit tests for {@link ValidationUtils}.

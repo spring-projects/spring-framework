@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,9 +21,9 @@ import java.lang.reflect.Proxy;
 import java.util.Map;
 
 import junit.framework.TestCase;
-
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
+
 import org.springframework.aop.support.AopUtils;
 import org.springframework.aop.support.StaticMethodMatcherPointcut;
 import org.springframework.aop.target.HotSwappableTargetSource;
@@ -159,7 +159,7 @@ public class BeanFactoryTransactionTests extends TestCase {
 	}
 
 	public void testGetBeansOfTypeWithAbstract() {
-		Map beansOfType = factory.getBeansOfType(ITestBean.class, true, true);
+		Map<String, ITestBean> beansOfType = factory.getBeansOfType(ITestBean.class, true, true);
 		assertNotNull(beansOfType);
 	}
 
@@ -211,7 +211,7 @@ public class BeanFactoryTransactionTests extends TestCase {
 		int counter = 0;
 
 		@Override
-		public boolean matches(Method method, Class clazz) {
+		public boolean matches(Method method, Class<?> clazz) {
 			counter++;
 			return true;
 		}

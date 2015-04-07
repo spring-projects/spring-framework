@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,17 +17,18 @@
 package org.springframework.web.servlet.view.document;
 
 import java.io.ByteArrayInputStream;
+import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import junit.framework.TestCase;
 import jxl.Cell;
 import jxl.Sheet;
 import jxl.Workbook;
+import jxl.WorkbookSettings;
+import jxl.read.biff.WorkbookParser;
 import jxl.write.Label;
 import jxl.write.WritableSheet;
 import jxl.write.WritableWorkbook;
@@ -36,13 +37,18 @@ import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.poifs.filesystem.POIFSFileSystem;
+import org.junit.Before;
+import org.junit.Test;
 
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockHttpServletResponse;
 import org.springframework.mock.web.test.MockServletContext;
+import org.springframework.util.ReflectionUtils;
 import org.springframework.web.context.support.StaticWebApplicationContext;
 import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.servlet.LocaleResolver;
+
+import static org.junit.Assert.*;
 
 /**
  * Tests for the AbstractExcelView and the AbstractJExcelView classes.
@@ -50,14 +56,19 @@ import org.springframework.web.servlet.LocaleResolver;
  * @author Alef Arendsen
  * @author Bram Smeets
  */
-public class ExcelViewTests extends TestCase {
+@SuppressWarnings("deprecation")
+public class ExcelViewTests {
 
 	private MockServletContext servletCtx;
+
 	private MockHttpServletRequest request;
+
 	private MockHttpServletResponse response;
+
 	private StaticWebApplicationContext webAppCtx;
 
-	@Override
+
+	@Before
 	public void setUp() {
 		servletCtx = new MockServletContext("org/springframework/web/servlet/view/document");
 		request = new MockHttpServletRequest(servletCtx);
@@ -66,15 +77,14 @@ public class ExcelViewTests extends TestCase {
 		webAppCtx.setServletContext(servletCtx);
 	}
 
+
+	@Test
 	public void testExcel() throws Exception {
 		AbstractExcelView excelView = new AbstractExcelView() {
 			@Override
-			protected void buildExcelDocument(Map model, HSSFWorkbook wb,
-					HttpServletRequest request, HttpServletResponse response)
-					throws Exception {
-				HSSFSheet sheet = wb.createSheet();
-				wb.setSheetName(0, "Test Sheet");
-
+			protected void buildExcelDocument(Map<String, Object> model, HSSFWorkbook wb,
+					HttpServletRequest request, HttpServletResponse response) throws Exception {
+				HSSFSheet sheet = wb.createSheet("Test Sheet");
 				// test all possible permutation of row or column not existing
 				HSSFCell cell = getCell(sheet, 2, 4);
 				cell.setCellValue("Test Value");
@@ -87,28 +97,27 @@ public class ExcelViewTests extends TestCase {
 			}
 		};
 
-		excelView.render(new HashMap(), request, response);
+		excelView.render(new HashMap<String, Object>(), request, response);
 
 		POIFSFileSystem poiFs = new POIFSFileSystem(new ByteArrayInputStream(response.getContentAsByteArray()));
 		HSSFWorkbook wb = new HSSFWorkbook(poiFs);
 		assertEquals("Test Sheet", wb.getSheetName(0));
 		HSSFSheet sheet = wb.getSheet("Test Sheet");
 		HSSFRow row = sheet.getRow(2);
-		HSSFCell cell = row.getCell((short) 4);
+		HSSFCell cell = row.getCell(4);
 		assertEquals("Test Value", cell.getStringCellValue());
 	}
 
+	@Test
 	public void testExcelWithTemplateNoLoc() throws Exception {
 		request.setAttribute(DispatcherServlet.LOCALE_RESOLVER_ATTRIBUTE,
 				newDummyLocaleResolver("nl", "nl"));
 
 		AbstractExcelView excelView = new AbstractExcelView() {
 			@Override
-			protected void buildExcelDocument(Map model, HSSFWorkbook wb,
-					HttpServletRequest request, HttpServletResponse response)
-					throws Exception {
+			protected void buildExcelDocument(Map<String, Object> model, HSSFWorkbook wb,
+					HttpServletRequest request, HttpServletResponse response) throws Exception {
 				HSSFSheet sheet = wb.getSheet("Sheet1");
-
 				// test all possible permutation of row or column not existing
 				HSSFCell cell = getCell(sheet, 2, 4);
 				cell.setCellValue("Test Value");
@@ -123,27 +132,26 @@ public class ExcelViewTests extends TestCase {
 
 		excelView.setApplicationContext(webAppCtx);
 		excelView.setUrl("template");
-		excelView.render(new HashMap(), request, response);
+		excelView.render(new HashMap<String, Object>(), request, response);
 
 		POIFSFileSystem poiFs = new POIFSFileSystem(new ByteArrayInputStream(response.getContentAsByteArray()));
 		HSSFWorkbook wb = new HSSFWorkbook(poiFs);
 		HSSFSheet sheet = wb.getSheet("Sheet1");
 		HSSFRow row = sheet.getRow(0);
-		HSSFCell cell = row.getCell((short) 0);
+		HSSFCell cell = row.getCell(0);
 		assertEquals("Test Template", cell.getStringCellValue());
 	}
 
+	@Test
 	public void testExcelWithTemplateAndCountryAndLanguage() throws Exception {
 		request.setAttribute(DispatcherServlet.LOCALE_RESOLVER_ATTRIBUTE,
 				newDummyLocaleResolver("en", "US"));
 
 		AbstractExcelView excelView = new AbstractExcelView() {
 			@Override
-			protected void buildExcelDocument(Map model, HSSFWorkbook wb,
-					HttpServletRequest request, HttpServletResponse response)
-					throws Exception {
+			protected void buildExcelDocument(Map<String, Object> model, HSSFWorkbook wb,
+					HttpServletRequest request, HttpServletResponse response) throws Exception {
 				HSSFSheet sheet = wb.getSheet("Sheet1");
-
 				// test all possible permutation of row or column not existing
 				HSSFCell cell = getCell(sheet, 2, 4);
 				cell.setCellValue("Test Value");
@@ -158,27 +166,26 @@ public class ExcelViewTests extends TestCase {
 
 		excelView.setApplicationContext(webAppCtx);
 		excelView.setUrl("template");
-		excelView.render(new HashMap(), request, response);
+		excelView.render(new HashMap<String, Object>(), request, response);
 
 		POIFSFileSystem poiFs = new POIFSFileSystem(new ByteArrayInputStream(response.getContentAsByteArray()));
 		HSSFWorkbook wb = new HSSFWorkbook(poiFs);
 		HSSFSheet sheet = wb.getSheet("Sheet1");
 		HSSFRow row = sheet.getRow(0);
-		HSSFCell cell = row.getCell((short) 0);
+		HSSFCell cell = row.getCell(0);
 		assertEquals("Test Template American English", cell.getStringCellValue());
 	}
 
+	@Test
 	public void testExcelWithTemplateAndLanguage() throws Exception {
 		request.setAttribute(DispatcherServlet.LOCALE_RESOLVER_ATTRIBUTE,
 				newDummyLocaleResolver("de", ""));
 
 		AbstractExcelView excelView = new AbstractExcelView() {
 			@Override
-			protected void buildExcelDocument(Map model, HSSFWorkbook wb,
-					HttpServletRequest request, HttpServletResponse response)
-					throws Exception {
+			protected void buildExcelDocument(Map<String, Object> model, HSSFWorkbook wb,
+					HttpServletRequest request, HttpServletResponse response) throws Exception {
 				HSSFSheet sheet = wb.getSheet("Sheet1");
-
 				// test all possible permutation of row or column not existing
 				HSSFCell cell = getCell(sheet, 2, 4);
 				cell.setCellValue("Test Value");
@@ -193,26 +200,23 @@ public class ExcelViewTests extends TestCase {
 
 		excelView.setApplicationContext(webAppCtx);
 		excelView.setUrl("template");
-		excelView.render(new HashMap(), request, response);
+		excelView.render(new HashMap<String, Object>(), request, response);
 
 		POIFSFileSystem poiFs = new POIFSFileSystem(new ByteArrayInputStream(response.getContentAsByteArray()));
 		HSSFWorkbook wb = new HSSFWorkbook(poiFs);
 		HSSFSheet sheet = wb.getSheet("Sheet1");
 		HSSFRow row = sheet.getRow(0);
-		HSSFCell cell = row.getCell((short) 0);
+		HSSFCell cell = row.getCell(0);
 		assertEquals("Test Template auf Deutsch", cell.getStringCellValue());
 	}
 
+	@Test
 	public void testJExcel() throws Exception {
-		AbstractJExcelView excelView = new AbstractJExcelView() {
+		AbstractJExcelView excelView = new UnixSafeAbstractJExcelView() {
 			@Override
-			protected void buildExcelDocument(Map model,
-					WritableWorkbook wb,
-					HttpServletRequest request,
-					HttpServletResponse response)
-					throws Exception {
+			protected void buildExcelDocument(Map<String, Object> model, WritableWorkbook wb,
+					HttpServletRequest request, HttpServletResponse response) throws Exception {
 				WritableSheet sheet = wb.createSheet("Test Sheet", 0);
-
 				// test all possible permutation of row or column not existing
 				sheet.addCell(new Label(2, 4, "Test Value"));
 				sheet.addCell(new Label(2, 3, "Test Value"));
@@ -221,7 +225,7 @@ public class ExcelViewTests extends TestCase {
 			}
 		};
 
-		excelView.render(new HashMap(), request, response);
+		excelView.render(new HashMap<String, Object>(), request, response);
 
 		Workbook wb = Workbook.getWorkbook(new ByteArrayInputStream(response.getContentAsByteArray()));
 		assertEquals("Test Sheet", wb.getSheet(0).getName());
@@ -230,19 +234,16 @@ public class ExcelViewTests extends TestCase {
 		assertEquals("Test Value", cell.getContents());
 	}
 
+	@Test
 	public void testJExcelWithTemplateNoLoc() throws Exception {
 		request.setAttribute(DispatcherServlet.LOCALE_RESOLVER_ATTRIBUTE,
 				newDummyLocaleResolver("nl", "nl"));
 
-		AbstractJExcelView excelView = new AbstractJExcelView() {
+		AbstractJExcelView excelView = new UnixSafeAbstractJExcelView() {
 			@Override
-			protected void buildExcelDocument(Map model,
-					WritableWorkbook wb,
-					HttpServletRequest request,
-					HttpServletResponse response)
-					throws Exception {
+			protected void buildExcelDocument(Map<String, Object> model, WritableWorkbook wb,
+					HttpServletRequest request, HttpServletResponse response) throws Exception {
 				WritableSheet sheet = wb.getSheet("Sheet1");
-
 				// test all possible permutation of row or column not existing
 				sheet.addCell(new Label(2, 4, "Test Value"));
 				sheet.addCell(new Label(2, 3, "Test Value"));
@@ -253,7 +254,7 @@ public class ExcelViewTests extends TestCase {
 
 		excelView.setApplicationContext(webAppCtx);
 		excelView.setUrl("template");
-		excelView.render(new HashMap(), request, response);
+		excelView.render(new HashMap<String, Object>(), request, response);
 
 		Workbook wb = Workbook.getWorkbook(new ByteArrayInputStream(response.getContentAsByteArray()));
 		Sheet sheet = wb.getSheet("Sheet1");
@@ -261,19 +262,16 @@ public class ExcelViewTests extends TestCase {
 		assertEquals("Test Template", cell.getContents());
 	}
 
+	@Test
 	public void testJExcelWithTemplateAndCountryAndLanguage() throws Exception {
 		request.setAttribute(DispatcherServlet.LOCALE_RESOLVER_ATTRIBUTE,
 				newDummyLocaleResolver("en", "US"));
 
-		AbstractJExcelView excelView = new AbstractJExcelView() {
+		AbstractJExcelView excelView = new UnixSafeAbstractJExcelView() {
 			@Override
-			protected void buildExcelDocument(Map model,
-					WritableWorkbook wb,
-					HttpServletRequest request,
-					HttpServletResponse response)
-					throws Exception {
+			protected void buildExcelDocument(Map<String, Object> model, WritableWorkbook wb,
+					HttpServletRequest request, HttpServletResponse response) throws Exception {
 				WritableSheet sheet = wb.getSheet("Sheet1");
-
 				// test all possible permutation of row or column not existing
 				sheet.addCell(new Label(2, 4, "Test Value"));
 				sheet.addCell(new Label(2, 3, "Test Value"));
@@ -284,7 +282,7 @@ public class ExcelViewTests extends TestCase {
 
 		excelView.setApplicationContext(webAppCtx);
 		excelView.setUrl("template");
-		excelView.render(new HashMap(), request, response);
+		excelView.render(new HashMap<String, Object>(), request, response);
 
 		Workbook wb = Workbook.getWorkbook(new ByteArrayInputStream(response.getContentAsByteArray()));
 		Sheet sheet = wb.getSheet("Sheet1");
@@ -292,19 +290,16 @@ public class ExcelViewTests extends TestCase {
 		assertEquals("Test Template American English", cell.getContents());
 	}
 
+	@Test
 	public void testJExcelWithTemplateAndLanguage() throws Exception {
 		request.setAttribute(DispatcherServlet.LOCALE_RESOLVER_ATTRIBUTE,
 				newDummyLocaleResolver("de", ""));
 
-		AbstractJExcelView excelView = new AbstractJExcelView() {
+		AbstractJExcelView excelView = new UnixSafeAbstractJExcelView() {
 			@Override
-			protected void buildExcelDocument(Map model,
-					WritableWorkbook wb,
-					HttpServletRequest request,
-					HttpServletResponse response)
-					throws Exception {
+			protected void buildExcelDocument(Map<String, Object> model, WritableWorkbook wb,
+					HttpServletRequest request, HttpServletResponse response) throws Exception {
 				WritableSheet sheet = wb.getSheet("Sheet1");
-
 				// test all possible permutation of row or column not existing
 				sheet.addCell(new Label(2, 4, "Test Value"));
 				sheet.addCell(new Label(2, 3, "Test Value"));
@@ -315,7 +310,7 @@ public class ExcelViewTests extends TestCase {
 
 		excelView.setApplicationContext(webAppCtx);
 		excelView.setUrl("template");
-		excelView.render(new HashMap(), request, response);
+		excelView.render(new HashMap<String, Object>(), request, response);
 
 		Workbook wb = Workbook.getWorkbook(new ByteArrayInputStream(response.getContentAsByteArray()));
 		Sheet sheet = wb.getSheet("Sheet1");
@@ -323,20 +318,39 @@ public class ExcelViewTests extends TestCase {
 		assertEquals("Test Template auf Deutsch", cell.getContents());
 	}
 
+
 	private LocaleResolver newDummyLocaleResolver(final String lang, final String country) {
 		return new LocaleResolver() {
 			@Override
 			public Locale resolveLocale(HttpServletRequest request) {
 				return new Locale(lang, country);
 			}
-
 			@Override
-			public void setLocale(HttpServletRequest request,
-					HttpServletResponse response, Locale locale) {
-				// not supported!
-
+			public void setLocale(HttpServletRequest request, HttpServletResponse response, Locale locale) {
+				// not supported
 			}
 		};
+	}
+
+
+	/**
+	 * Workaround JXL bug that causes ArrayIndexOutOfBounds exceptions when running in
+	 * *nix machines. Same bug as reported at http://jira.pentaho.com/browse/PDI-5031.
+	 * <p>We want to use the latest JXL code because it doesn't include log4j config files
+	 * inside the jar. Since the project appears to be abandoned, AbstractJExcelView is
+	 * deprecated as of Spring 4.0.
+	 */
+	private static abstract class UnixSafeAbstractJExcelView extends AbstractJExcelView {
+
+		@Override
+		protected Workbook getTemplateSource(String url, HttpServletRequest request) throws Exception {
+			Workbook workbook = super.getTemplateSource(url, request);
+			Field field = WorkbookParser.class.getDeclaredField("settings");
+			field.setAccessible(true);
+			WorkbookSettings settings = (WorkbookSettings) ReflectionUtils.getField(field, workbook);
+			settings.setWriteAccess(null);
+			return workbook;
+		}
 	}
 
 }

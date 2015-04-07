@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.context.event;
 
 import org.junit.Before;
 import org.junit.Test;
+
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.MutablePropertyValues;
@@ -25,6 +26,7 @@ import org.springframework.beans.factory.FactoryBean;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.TestListener;
+import org.springframework.context.event.test.TestEvent;
 import org.springframework.context.support.StaticApplicationContext;
 import org.springframework.tests.sample.beans.ITestBean;
 import org.springframework.tests.sample.beans.TestBean;
@@ -112,15 +114,6 @@ public class EventPublicationInterceptorTests {
 		assertTrue("Interceptor must have published 2 events", listener.getEventCount() == 2);
 		TestListener otherListener = (TestListener) ctx.getBean("&otherListener");
 		assertTrue("Interceptor must have published 2 events", otherListener.getEventCount() == 2);
-	}
-
-
-	@SuppressWarnings("serial")
-	public static class TestEvent extends ApplicationEvent {
-
-		public TestEvent(Object source) {
-			super(source);
-		}
 	}
 
 

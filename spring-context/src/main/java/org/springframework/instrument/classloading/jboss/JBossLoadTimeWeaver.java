@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,9 +26,9 @@ import org.springframework.util.ClassUtils;
 /**
  * {@link LoadTimeWeaver} implementation for JBoss's instrumentable ClassLoader.
  * Autodetects the specific JBoss version at runtime: currently supports
- * JBoss AS 5, 6 and 7 (as of Spring 3.1).
+ * JBoss AS 6 and 7, as well as WildFly 8 (as of Spring 4.0).
  *
- * <p><b>NOTE:</b> On JBoss 6.0, to avoid the container loading the classes before the
+ * <p><b>NOTE:</b> On JBoss 6, to avoid the container loading the classes before the
  * application actually starts, one needs to add a <tt>WEB-INF/jboss-scanning.xml</tt>
  * file to the application archive - with the following content:
  * <pre class="code">&lt;scanning xmlns="urn:jboss:scanning:1.0"/&gt;</pre>
@@ -62,11 +62,11 @@ public class JBossLoadTimeWeaver implements LoadTimeWeaver {
 	public JBossLoadTimeWeaver(ClassLoader classLoader) {
 		Assert.notNull(classLoader, "ClassLoader must not be null");
 		if (classLoader.getClass().getName().startsWith("org.jboss.modules")) {
-			// JBoss AS 7
+			// JBoss AS 7 or WildFly 8
 			this.adapter = new JBossModulesAdapter(classLoader);
 		}
 		else {
-			// JBoss AS 5 or JBoss AS 6
+			// JBoss AS 6
 			this.adapter = new JBossMCAdapter(classLoader);
 		}
 	}

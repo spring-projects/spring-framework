@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.Properties;
 import java.util.TimeZone;
 
+import org.junit.After;
 import org.junit.Test;
 
 import org.springframework.beans.DirectFieldAccessor;
@@ -46,6 +47,8 @@ import org.springframework.scheduling.support.ScheduledMethodRunnable;
 import org.springframework.scheduling.support.SimpleTriggerContext;
 import org.springframework.tests.Assume;
 import org.springframework.tests.TestGroup;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.validation.beanvalidation.MethodValidationPostProcessor;
 
 import static org.junit.Assert.*;
 
@@ -60,6 +63,13 @@ public class ScheduledAnnotationBeanPostProcessorTests {
 
 	private final StaticApplicationContext context = new StaticApplicationContext();
 
+
+	@After
+	public void closeContextAfterTest() {
+		context.close();
+	}
+
+
 	@Test
 	public void fixedDelayTask() {
 		BeanDefinition processorDefinition = new RootBeanDefinition(ScheduledAnnotationBeanPostProcessor.class);
@@ -67,6 +77,7 @@ public class ScheduledAnnotationBeanPostProcessorTests {
 		context.registerBeanDefinition("postProcessor", processorDefinition);
 		context.registerBeanDefinition("target", targetDefinition);
 		context.refresh();
+
 		Object postProcessor = context.getBean("postProcessor");
 		Object target = context.getBean("target");
 		ScheduledTaskRegistrar registrar = (ScheduledTaskRegistrar)
@@ -88,11 +99,11 @@ public class ScheduledAnnotationBeanPostProcessorTests {
 	@Test
 	public void fixedRateTask() {
 		BeanDefinition processorDefinition = new RootBeanDefinition(ScheduledAnnotationBeanPostProcessor.class);
-		BeanDefinition targetDefinition = new RootBeanDefinition(
-				ScheduledAnnotationBeanPostProcessorTests.FixedRateTestBean.class);
+		BeanDefinition targetDefinition = new RootBeanDefinition(FixedRateTestBean.class);
 		context.registerBeanDefinition("postProcessor", processorDefinition);
 		context.registerBeanDefinition("target", targetDefinition);
 		context.refresh();
+
 		Object postProcessor = context.getBean("postProcessor");
 		Object target = context.getBean("target");
 		ScheduledTaskRegistrar registrar = (ScheduledTaskRegistrar)
@@ -118,6 +129,7 @@ public class ScheduledAnnotationBeanPostProcessorTests {
 		context.registerBeanDefinition("postProcessor", processorDefinition);
 		context.registerBeanDefinition("target", targetDefinition);
 		context.refresh();
+
 		Object postProcessor = context.getBean("postProcessor");
 		Object target = context.getBean("target");
 		ScheduledTaskRegistrar registrar = (ScheduledTaskRegistrar)
@@ -138,26 +150,39 @@ public class ScheduledAnnotationBeanPostProcessorTests {
 
 	@Test
 	public void severalFixedRatesWithRepeatedScheduledAnnotation() {
-		BeanDefinition processorDefinition = new
-		RootBeanDefinition(ScheduledAnnotationBeanPostProcessor.class);
+		BeanDefinition processorDefinition = new RootBeanDefinition(ScheduledAnnotationBeanPostProcessor.class);
 		BeanDefinition targetDefinition = new RootBeanDefinition(SeveralFixedRatesWithRepeatedScheduledAnnotationTestBean.class);
 		severalFixedRates(context, processorDefinition, targetDefinition);
 	}
 
 	@Test
 	public void severalFixedRatesWithSchedulesContainerAnnotation() {
-		BeanDefinition processorDefinition = new RootBeanDefinition(
-				ScheduledAnnotationBeanPostProcessor.class);
-		BeanDefinition targetDefinition = new RootBeanDefinition(
-				SeveralFixedRatesWithSchedulesContainerAnnotationTestBean.class);
+		BeanDefinition processorDefinition = new RootBeanDefinition(ScheduledAnnotationBeanPostProcessor.class);
+		BeanDefinition targetDefinition = new RootBeanDefinition(SeveralFixedRatesWithSchedulesContainerAnnotationTestBean.class);
+		severalFixedRates(context, processorDefinition, targetDefinition);
+	}
+
+	@Test
+	public void severalFixedRatesOnBaseClass() {
+		BeanDefinition processorDefinition = new RootBeanDefinition(ScheduledAnnotationBeanPostProcessor.class);
+		BeanDefinition targetDefinition = new RootBeanDefinition(FixedRatesSubBean.class);
+		severalFixedRates(context, processorDefinition, targetDefinition);
+	}
+
+	@Test
+	public void severalFixedRatesOnDefaultMethod() {
+		BeanDefinition processorDefinition = new RootBeanDefinition(ScheduledAnnotationBeanPostProcessor.class);
+		BeanDefinition targetDefinition = new RootBeanDefinition(FixedRatesDefaultBean.class);
 		severalFixedRates(context, processorDefinition, targetDefinition);
 	}
 
 	private void severalFixedRates(StaticApplicationContext context,
 			BeanDefinition processorDefinition, BeanDefinition targetDefinition) {
+
 		context.registerBeanDefinition("postProcessor", processorDefinition);
 		context.registerBeanDefinition("target", targetDefinition);
 		context.refresh();
+
 		Object postProcessor = context.getBean("postProcessor");
 		Object target = context.getBean("target");
 		ScheduledTaskRegistrar registrar = (ScheduledTaskRegistrar)
@@ -189,11 +214,11 @@ public class ScheduledAnnotationBeanPostProcessorTests {
 		Assume.group(TestGroup.LONG_RUNNING);
 
 		BeanDefinition processorDefinition = new RootBeanDefinition(ScheduledAnnotationBeanPostProcessor.class);
-		BeanDefinition targetDefinition = new RootBeanDefinition(
-				ScheduledAnnotationBeanPostProcessorTests.CronTestBean.class);
+		BeanDefinition targetDefinition = new RootBeanDefinition(CronTestBean.class);
 		context.registerBeanDefinition("postProcessor", processorDefinition);
 		context.registerBeanDefinition("target", targetDefinition);
 		context.refresh();
+
 		Object postProcessor = context.getBean("postProcessor");
 		Object target = context.getBean("target");
 		ScheduledTaskRegistrar registrar = (ScheduledTaskRegistrar)
@@ -217,11 +242,11 @@ public class ScheduledAnnotationBeanPostProcessorTests {
 		Assume.group(TestGroup.LONG_RUNNING);
 
 		BeanDefinition processorDefinition = new RootBeanDefinition(ScheduledAnnotationBeanPostProcessor.class);
-		BeanDefinition targetDefinition = new RootBeanDefinition(
-				ScheduledAnnotationBeanPostProcessorTests.CronWithTimezoneTestBean.class);
+		BeanDefinition targetDefinition = new RootBeanDefinition(CronWithTimezoneTestBean.class);
 		context.registerBeanDefinition("postProcessor", processorDefinition);
 		context.registerBeanDefinition("target", targetDefinition);
 		context.refresh();
+
 		Object postProcessor = context.getBean("postProcessor");
 		Object target = context.getBean("target");
 		ScheduledTaskRegistrar registrar = (ScheduledTaskRegistrar)
@@ -248,7 +273,8 @@ public class ScheduledAnnotationBeanPostProcessorTests {
 		Date lastActualExecutionTime = cal.getTime();
 		cal.add(Calendar.MINUTE, 30); // 4:30
 		Date lastCompletionTime = cal.getTime();
-		TriggerContext triggerContext = new SimpleTriggerContext(lastScheduledExecutionTime, lastActualExecutionTime, lastCompletionTime);
+		TriggerContext triggerContext = new SimpleTriggerContext(
+				lastScheduledExecutionTime, lastActualExecutionTime, lastCompletionTime);
 		cal.add(Calendar.MINUTE, 30);
 		cal.add(Calendar.HOUR_OF_DAY, 1); // 6:00
 		Date nextExecutionTime = cronTrigger.nextExecutionTime(triggerContext);
@@ -261,12 +287,22 @@ public class ScheduledAnnotationBeanPostProcessorTests {
 		Assume.group(TestGroup.LONG_RUNNING);
 
 		BeanDefinition processorDefinition = new RootBeanDefinition(ScheduledAnnotationBeanPostProcessor.class);
-		BeanDefinition targetDefinition = new RootBeanDefinition(
-				ScheduledAnnotationBeanPostProcessorTests.CronWithInvalidTimezoneTestBean.class);
+		BeanDefinition targetDefinition = new RootBeanDefinition(CronWithInvalidTimezoneTestBean.class);
 		context.registerBeanDefinition("postProcessor", processorDefinition);
 		context.registerBeanDefinition("target", targetDefinition);
 		context.refresh();
 		Thread.sleep(10000);
+	}
+
+	@Test(expected = BeanCreationException.class)
+	public void cronTaskWithMethodValidation() throws InterruptedException {
+		BeanDefinition validationDefinition = new RootBeanDefinition(MethodValidationPostProcessor.class);
+		BeanDefinition processorDefinition = new RootBeanDefinition(ScheduledAnnotationBeanPostProcessor.class);
+		BeanDefinition targetDefinition = new RootBeanDefinition(CronTestBean.class);
+		context.registerBeanDefinition("methodValidation", validationDefinition);
+		context.registerBeanDefinition("postProcessor", processorDefinition);
+		context.registerBeanDefinition("target", targetDefinition);
+		context.refresh();
 	}
 
 	@Test
@@ -276,6 +312,7 @@ public class ScheduledAnnotationBeanPostProcessorTests {
 		context.registerBeanDefinition("postProcessor", processorDefinition);
 		context.registerBeanDefinition("target", targetDefinition);
 		context.refresh();
+
 		Object postProcessor = context.getBean("postProcessor");
 		Object target = context.getBean("target");
 		ScheduledTaskRegistrar registrar = (ScheduledTaskRegistrar)
@@ -296,11 +333,11 @@ public class ScheduledAnnotationBeanPostProcessorTests {
 	@Test
 	public void metaAnnotationWithCronExpression() {
 		BeanDefinition processorDefinition = new RootBeanDefinition(ScheduledAnnotationBeanPostProcessor.class);
-		BeanDefinition targetDefinition = new RootBeanDefinition(
-				ScheduledAnnotationBeanPostProcessorTests.MetaAnnotationCronTestBean.class);
+		BeanDefinition targetDefinition = new RootBeanDefinition(MetaAnnotationCronTestBean.class);
 		context.registerBeanDefinition("postProcessor", processorDefinition);
 		context.registerBeanDefinition("target", targetDefinition);
 		context.refresh();
+
 		Object postProcessor = context.getBean("postProcessor");
 		Object target = context.getBean("target");
 		ScheduledTaskRegistrar registrar = (ScheduledTaskRegistrar)
@@ -331,6 +368,7 @@ public class ScheduledAnnotationBeanPostProcessorTests {
 		context.registerBeanDefinition("postProcessor", processorDefinition);
 		context.registerBeanDefinition("target", targetDefinition);
 		context.refresh();
+
 		Object postProcessor = context.getBean("postProcessor");
 		Object target = context.getBean("target");
 		ScheduledTaskRegistrar registrar = (ScheduledTaskRegistrar)
@@ -361,6 +399,7 @@ public class ScheduledAnnotationBeanPostProcessorTests {
 		context.registerBeanDefinition("postProcessor", processorDefinition);
 		context.registerBeanDefinition("target", targetDefinition);
 		context.refresh();
+
 		Object postProcessor = context.getBean("postProcessor");
 		Object target = context.getBean("target");
 		ScheduledTaskRegistrar registrar = (ScheduledTaskRegistrar)
@@ -392,6 +431,7 @@ public class ScheduledAnnotationBeanPostProcessorTests {
 		context.registerBeanDefinition("postProcessor", processorDefinition);
 		context.registerBeanDefinition("target", targetDefinition);
 		context.refresh();
+
 		Object postProcessor = context.getBean("postProcessor");
 		Object target = context.getBean("target");
 		ScheduledTaskRegistrar registrar = (ScheduledTaskRegistrar)
@@ -418,12 +458,12 @@ public class ScheduledAnnotationBeanPostProcessorTests {
 		Properties properties = new Properties();
 		properties.setProperty("schedules.businessHours", businessHoursCronExpression);
 		placeholderDefinition.getPropertyValues().addPropertyValue("properties", properties);
-		BeanDefinition targetDefinition = new RootBeanDefinition(
-				ScheduledAnnotationBeanPostProcessorTests.PropertyPlaceholderMetaAnnotationTestBean.class);
+		BeanDefinition targetDefinition = new RootBeanDefinition(PropertyPlaceholderMetaAnnotationTestBean.class);
 		context.registerBeanDefinition("postProcessor", processorDefinition);
 		context.registerBeanDefinition("placeholder", placeholderDefinition);
 		context.registerBeanDefinition("target", targetDefinition);
 		context.refresh();
+
 		Object postProcessor = context.getBean("postProcessor");
 		Object target = context.getBean("target");
 		ScheduledTaskRegistrar registrar = (ScheduledTaskRegistrar)
@@ -444,8 +484,7 @@ public class ScheduledAnnotationBeanPostProcessorTests {
 	@Test(expected = BeanCreationException.class)
 	public void emptyAnnotation() {
 		BeanDefinition processorDefinition = new RootBeanDefinition(ScheduledAnnotationBeanPostProcessor.class);
-		BeanDefinition targetDefinition = new RootBeanDefinition(
-				ScheduledAnnotationBeanPostProcessorTests.EmptyAnnotationTestBean.class);
+		BeanDefinition targetDefinition = new RootBeanDefinition(EmptyAnnotationTestBean.class);
 		context.registerBeanDefinition("postProcessor", processorDefinition);
 		context.registerBeanDefinition("target", targetDefinition);
 		context.refresh();
@@ -454,8 +493,7 @@ public class ScheduledAnnotationBeanPostProcessorTests {
 	@Test(expected = BeanCreationException.class)
 	public void invalidCron() throws Throwable {
 		BeanDefinition processorDefinition = new RootBeanDefinition(ScheduledAnnotationBeanPostProcessor.class);
-		BeanDefinition targetDefinition = new RootBeanDefinition(
-				ScheduledAnnotationBeanPostProcessorTests.InvalidCronTestBean.class);
+		BeanDefinition targetDefinition = new RootBeanDefinition(InvalidCronTestBean.class);
 		context.registerBeanDefinition("postProcessor", processorDefinition);
 		context.registerBeanDefinition("target", targetDefinition);
 		context.refresh();
@@ -464,8 +502,7 @@ public class ScheduledAnnotationBeanPostProcessorTests {
 	@Test(expected = BeanCreationException.class)
 	public void nonVoidReturnType() {
 		BeanDefinition processorDefinition = new RootBeanDefinition(ScheduledAnnotationBeanPostProcessor.class);
-		BeanDefinition targetDefinition = new RootBeanDefinition(
-				ScheduledAnnotationBeanPostProcessorTests.NonVoidReturnTypeTestBean.class);
+		BeanDefinition targetDefinition = new RootBeanDefinition(NonVoidReturnTypeTestBean.class);
 		context.registerBeanDefinition("postProcessor", processorDefinition);
 		context.registerBeanDefinition("target", targetDefinition);
 		context.refresh();
@@ -474,8 +511,7 @@ public class ScheduledAnnotationBeanPostProcessorTests {
 	@Test(expected = BeanCreationException.class)
 	public void nonEmptyParamList() {
 		BeanDefinition processorDefinition = new RootBeanDefinition(ScheduledAnnotationBeanPostProcessor.class);
-		BeanDefinition targetDefinition = new RootBeanDefinition(
-				ScheduledAnnotationBeanPostProcessorTests.NonEmptyParamListTestBean.class);
+		BeanDefinition targetDefinition = new RootBeanDefinition(NonEmptyParamListTestBean.class);
 		context.registerBeanDefinition("postProcessor", processorDefinition);
 		context.registerBeanDefinition("target", targetDefinition);
 		context.refresh();
@@ -517,20 +553,44 @@ public class ScheduledAnnotationBeanPostProcessorTests {
 
 	static class SeveralFixedRatesWithRepeatedScheduledAnnotationTestBean {
 
-		// can use Java 8 repeated @Scheduled once we have Eclipse IDE support for it
-		@Schedules({
-			@Scheduled(fixedRate=4000),
-			@Scheduled(fixedRate=4000, initialDelay=2000)
-		})
+		@Scheduled(fixedRate=4000)
+		@Scheduled(fixedRate=4000, initialDelay=2000)
 		public void fixedRate() {
 		}
 	}
 
 
+	static class FixedRatesBaseBean {
+
+		@Scheduled(fixedRate=4000)
+		@Scheduled(fixedRate=4000, initialDelay=2000)
+		public void fixedRate() {
+		}
+	}
+
+
+	static class FixedRatesSubBean extends FixedRatesBaseBean {
+	}
+
+
+	static interface FixedRatesDefaultMethod {
+
+		@Scheduled(fixedRate=4000)
+		@Scheduled(fixedRate=4000, initialDelay=2000)
+		default void fixedRate() {
+		}
+	}
+
+
+	static class FixedRatesDefaultBean implements FixedRatesDefaultMethod {
+	}
+
+
+	@Validated
 	static class CronTestBean {
 
 		@Scheduled(cron="*/7 * * * * ?")
-		public void cron() throws IOException {
+		private void cron() throws IOException {
 			throw new IOException("no no no");
 		}
 	}
@@ -539,7 +599,7 @@ public class ScheduledAnnotationBeanPostProcessorTests {
 	static class CronWithTimezoneTestBean {
 
 		@Scheduled(cron="0 0 0-4,6-23 * * ?", zone = "GMT+10")
-		public void cron() throws IOException {
+		protected void cron() throws IOException {
 			throw new IOException("no no no");
 		}
 	}
@@ -642,7 +702,8 @@ public class ScheduledAnnotationBeanPostProcessorTests {
 	@Scheduled(cron="${schedules.businessHours}")
 	@Target(ElementType.METHOD)
 	@Retention(RetentionPolicy.RUNTIME)
-	private static @interface BusinessHours {}
+	private static @interface BusinessHours {
+	}
 
 
 	static class PropertyPlaceholderMetaAnnotationTestBean {

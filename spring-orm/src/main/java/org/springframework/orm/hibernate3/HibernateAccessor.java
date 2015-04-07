@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -289,7 +289,7 @@ public abstract class HibernateAccessor implements InitializingBean, BeanFactory
 	 * @see org.hibernate.Session#enableFilter(String)
 	 * @see LocalSessionFactoryBean#setFilterDefinitions
 	 */
-	public void setFilterNames(String[] filterNames) {
+	public void setFilterNames(String... filterNames) {
 		this.filterNames = filterNames;
 	}
 
@@ -466,8 +466,8 @@ public abstract class HibernateAccessor implements InitializingBean, BeanFactory
 	protected void enableFilters(Session session) {
 		String[] filterNames = getFilterNames();
 		if (filterNames != null) {
-			for (int i = 0; i < filterNames.length; i++) {
-				session.enableFilter(filterNames[i]);
+			for (String filterName : filterNames) {
+				session.enableFilter(filterName);
 			}
 		}
 	}
@@ -481,8 +481,8 @@ public abstract class HibernateAccessor implements InitializingBean, BeanFactory
 	protected void disableFilters(Session session) {
 		String[] filterNames = getFilterNames();
 		if (filterNames != null) {
-			for (int i = 0; i < filterNames.length; i++) {
-				session.disableFilter(filterNames[i]);
+			for (String filterName : filterNames) {
+				session.disableFilter(filterName);
 			}
 		}
 	}

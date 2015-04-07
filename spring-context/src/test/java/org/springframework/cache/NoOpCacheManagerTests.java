@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 the original author or authors.
+ * Copyright 2010-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,13 +16,14 @@
 
 package org.springframework.cache;
 
-import static org.junit.Assert.*;
-
 import java.util.UUID;
 
 import org.junit.Before;
 import org.junit.Test;
+
 import org.springframework.cache.support.NoOpCacheManager;
+
+import static org.junit.Assert.*;
 
 public class NoOpCacheManagerTests {
 
@@ -48,6 +49,7 @@ public class NoOpCacheManagerTests {
 		Object key = new Object();
 		cache.put(key, new Object());
 		assertNull(cache.get(key));
+		assertNull(cache.get(key, Object.class));
 		assertNull(cache.getNativeCache());
 	}
 

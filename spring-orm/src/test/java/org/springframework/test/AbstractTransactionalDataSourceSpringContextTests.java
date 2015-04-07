@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,6 @@ import java.io.LineNumberReader;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-
 import javax.sql.DataSource;
 
 import org.springframework.core.io.support.EncodedResource;
@@ -31,7 +30,9 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.jdbc.JdbcTestUtils;
 
 /**
- * Subclass of AbstractTransactionalSpringContextTests that adds some convenience
+ * This class is only used within tests in the spring-orm module.
+ *
+ * <p>Subclass of AbstractTransactionalSpringContextTests that adds some convenience
  * functionality for JDBC access. Expects a {@link javax.sql.DataSource} bean
  * to be defined in the Spring application context.
  *
@@ -48,8 +49,7 @@ import org.springframework.test.jdbc.JdbcTestUtils;
  * ({@link org.springframework.test.context.junit38.AbstractJUnit38SpringContextTests})
  */
 @Deprecated
-public abstract class AbstractTransactionalDataSourceSpringContextTests
-	extends AbstractTransactionalSpringContextTests {
+public abstract class AbstractTransactionalDataSourceSpringContextTests extends AbstractTransactionalSpringContextTests {
 
 	protected JdbcTemplate jdbcTemplate;
 
@@ -105,11 +105,11 @@ public abstract class AbstractTransactionalDataSourceSpringContextTests
 	 * {@code setComplete()} impossible.
 	 * @see #setComplete
 	 */
-	protected void deleteFromTables(String[] names) {
-		for (int i = 0; i < names.length; i++) {
-			int rowCount = this.jdbcTemplate.update("DELETE FROM " + names[i]);
+	protected void deleteFromTables(String... names) {
+		for (String name : names) {
+			int rowCount = this.jdbcTemplate.update("DELETE FROM " + name);
 			if (logger.isInfoEnabled()) {
-				logger.info("Deleted " + rowCount + " rows from table " + names[i]);
+				logger.info("Deleted " + rowCount + " rows from table " + name);
 			}
 		}
 		this.zappedTables = true;
@@ -134,7 +134,7 @@ public abstract class AbstractTransactionalDataSourceSpringContextTests
 	 * @return the number of rows in the table
 	 */
 	protected int countRowsInTable(String tableName) {
-		return this.jdbcTemplate.queryForInt("SELECT COUNT(0) FROM " + tableName);
+		return this.jdbcTemplate.queryForObject("SELECT COUNT(0) FROM " + tableName, Integer.class);
 	}
 
 

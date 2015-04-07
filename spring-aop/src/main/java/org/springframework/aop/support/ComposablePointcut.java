@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -180,7 +180,6 @@ public class ComposablePointcut implements Pointcut, Serializable {
 		return this.methodMatcher;
 	}
 
-
 	@Override
 	public boolean equals(Object other) {
 		if (this == other) {
@@ -189,7 +188,6 @@ public class ComposablePointcut implements Pointcut, Serializable {
 		if (!(other instanceof ComposablePointcut)) {
 			return false;
 		}
-
 		ComposablePointcut that = (ComposablePointcut) other;
 		return ObjectUtils.nullSafeEquals(that.classFilter, this.classFilter) &&
 				ObjectUtils.nullSafeEquals(that.methodMatcher, this.methodMatcher);
@@ -209,8 +207,7 @@ public class ComposablePointcut implements Pointcut, Serializable {
 
 	@Override
 	public String toString() {
-		return "ComposablePointcut: ClassFilter [" + this.classFilter +
-				"], MethodMatcher [" + this.methodMatcher + "]";
+		return "ComposablePointcut: " + this.classFilter + ", " +this.methodMatcher;
 	}
 
 }

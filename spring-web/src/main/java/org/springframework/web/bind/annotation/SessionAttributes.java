@@ -71,6 +71,6 @@ public @interface SessionAttributes {
 	 * session or some conversational storage. All model attributes of this
 	 * type will be stored in the session, regardless of attribute name.
 	 */
-	Class[] types() default {};
+	Class<?>[] types() default {};
 
 }

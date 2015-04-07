@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,8 @@ package org.springframework.cache;
 import java.util.Collection;
 
 /**
- * A manager for a set of {@link Cache}s.
+ * Spring's central cache manager SPI.
+ * Allows for retrieving named {@link Cache} regions.
  *
  * @author Costin Leau
  * @since 3.1
@@ -28,14 +29,14 @@ public interface CacheManager {
 
 	/**
 	 * Return the cache associated with the given name.
-	 * @param name cache identifier (must not be {@code null})
-	 * @return associated cache, or {@code null} if none is found
+	 * @param name the cache identifier (must not be {@code null})
+	 * @return the associated cache, or {@code null} if none found
 	 */
 	Cache getCache(String name);
 
 	/**
-	 * Return a collection of the caches known by this cache manager.
-	 * @return names of caches known by the cache manager.
+	 * Return a collection of the cache names known by this manager.
+	 * @return the names of all caches known by the cache manager
 	 */
 	Collection<String> getCacheNames();
 

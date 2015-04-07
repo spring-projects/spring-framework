@@ -18,7 +18,6 @@ package org.springframework.tests.sample.beans;
 
 import java.util.Set;
 
-
 /**
  * @author Juergen Hoeller
  */

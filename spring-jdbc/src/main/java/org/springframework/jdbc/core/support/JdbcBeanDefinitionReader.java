@@ -19,7 +19,6 @@ package org.springframework.jdbc.core.support;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Properties;
-
 import javax.sql.DataSource;
 
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;

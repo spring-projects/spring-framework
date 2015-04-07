@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ package org.springframework.jmx.support;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-
 import javax.management.MBeanServer;
 
 import org.springframework.beans.factory.FactoryBean;
@@ -34,8 +33,9 @@ import org.springframework.jmx.MBeanServerNotFoundException;
  * This FactoryBean is a direct alternative to {@link MBeanServerFactoryBean},
  * which uses standard JMX 1.2 API to access the platform's MBeanServer.
  *
- * <p>See Javadoc for WebSphere's <a href="http://bit.ly/UzccDt">{@code
- * AdminServiceFactory}</a> and <a href="http://bit.ly/TRlX2r">{@code MBeanFactory}</a>.
+ * <p>See the javadocs for WebSphere's
+ * <a href="http://bit.ly/UzccDt">{@code AdminServiceFactory}</a>
+ * and <a href="http://bit.ly/TRlX2r">{@code MBeanFactory}</a>.
  *
  * @author Juergen Hoeller
  * @author Rob Harrop
@@ -61,7 +61,7 @@ public class WebSphereMBeanServerFactoryBean implements FactoryBean<MBeanServer>
 			/*
 			 * this.mbeanServer = AdminServiceFactory.getMBeanFactory().getMBeanServer();
 			 */
-			Class adminServiceClass = getClass().getClassLoader().loadClass(ADMIN_SERVICE_FACTORY_CLASS);
+			Class<?> adminServiceClass = getClass().getClassLoader().loadClass(ADMIN_SERVICE_FACTORY_CLASS);
 			Method getMBeanFactoryMethod = adminServiceClass.getMethod(GET_MBEAN_FACTORY_METHOD);
 			Object mbeanFactory = getMBeanFactoryMethod.invoke(null);
 			Method getMBeanServerMethod = mbeanFactory.getClass().getMethod(GET_MBEAN_SERVER_METHOD);

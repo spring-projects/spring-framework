@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,15 @@
 
 package org.springframework.expression.spel.ast;
 
+import org.springframework.asm.Label;
+import org.springframework.asm.MethodVisitor;
 import org.springframework.expression.EvaluationException;
+import org.springframework.expression.spel.CodeFlow;
 import org.springframework.expression.spel.ExpressionState;
 import org.springframework.expression.spel.support.BooleanTypedValue;
 
 /**
- * Implements equality operator.
+ * Implements the equality operator.
  *
  * @author Andy Clement
  * @since 3.0
@@ -30,37 +33,118 @@ public class OpEQ extends Operator {
 
 	public OpEQ(int pos, SpelNodeImpl... operands) {
 		super("==", pos, operands);
+		this.exitTypeDescriptor = "Z";
 	}
 
 
 	@Override
-	public BooleanTypedValue getValueInternal(ExpressionState state)
-			throws EvaluationException {
+	public BooleanTypedValue getValueInternal(ExpressionState state) throws EvaluationException {
 		Object left = getLeftOperand().getValueInternal(state).getValue();
 		Object right = getRightOperand().getValueInternal(state).getValue();
-		if (left instanceof Number && right instanceof Number) {
-			Number op1 = (Number) left;
-			Number op2 = (Number) right;
-			if (op1 instanceof Double || op2 instanceof Double) {
-				return BooleanTypedValue.forValue(op1.doubleValue() == op2.doubleValue());
+		this.leftActualDescriptor = CodeFlow.toDescriptorFromObject(left);
+		this.rightActualDescriptor = CodeFlow.toDescriptorFromObject(right);
+		return BooleanTypedValue.forValue(equalityCheck(state, left, right));
+	}
+	
+	// This check is different to the one in the other numeric operators (OpLt/etc)
+	// because it allows for simple object comparison
+	@Override
+	public boolean isCompilable() {
+		SpelNodeImpl left = getLeftOperand();
+		SpelNodeImpl right= getRightOperand();
+		if (!left.isCompilable() || !right.isCompilable()) {
+			return false;
+		}
+
+		String leftDesc = left.exitTypeDescriptor;
+		String rightDesc = right.exitTypeDescriptor;
+		DescriptorComparison dc = DescriptorComparison.checkNumericCompatibility(leftDesc, rightDesc,
+				this.leftActualDescriptor, this.rightActualDescriptor);
+		return (!dc.areNumbers || dc.areCompatible);
+	}
+	
+	
+	@Override
+	public void generateCode(MethodVisitor mv, CodeFlow cf) {
+		String leftDesc = getLeftOperand().exitTypeDescriptor;
+		String rightDesc = getRightOperand().exitTypeDescriptor;
+		Label elseTarget = new Label();
+		Label endOfIf = new Label();
+		boolean leftPrim = CodeFlow.isPrimitive(leftDesc);
+		boolean rightPrim = CodeFlow.isPrimitive(rightDesc);
+
+		DescriptorComparison dc = DescriptorComparison.checkNumericCompatibility(leftDesc, rightDesc,
+				this.leftActualDescriptor, this.rightActualDescriptor);
+		
+		if (dc.areNumbers && dc.areCompatible) {
+			char targetType = dc.compatibleType;
+			
+			getLeftOperand().generateCode(mv, cf);
+			if (!leftPrim) {
+				CodeFlow.insertUnboxInsns(mv, targetType, leftDesc);
 			}
-			else if (op1 instanceof Float || op2 instanceof Float) {
-				return BooleanTypedValue.forValue(op1.floatValue() == op2.floatValue());
+		
+			cf.enterCompilationScope();
+			getRightOperand().generateCode(mv, cf);
+			cf.exitCompilationScope();
+			if (!rightPrim) {
+				CodeFlow.insertUnboxInsns(mv, targetType, rightDesc);
 			}
-			else if (op1 instanceof Long || op2 instanceof Long) {
-				return BooleanTypedValue.forValue(op1.longValue() == op2.longValue());
+			// assert: SpelCompiler.boxingCompatible(leftDesc, rightDesc)
+			if (targetType=='D') {
+				mv.visitInsn(DCMPL);
+				mv.visitJumpInsn(IFNE, elseTarget);
+			}
+			else if (targetType=='F') {
+				mv.visitInsn(FCMPL);		
+				mv.visitJumpInsn(IFNE, elseTarget);
+			}
+			else if (targetType=='J') {
+				mv.visitInsn(LCMP);		
+				mv.visitJumpInsn(IFNE, elseTarget);
+			}
+			else if (targetType=='I' || targetType=='Z') {
+				mv.visitJumpInsn(IF_ICMPNE, elseTarget);		
 			}
 			else {
-				return BooleanTypedValue.forValue(op1.intValue() == op2.intValue());
+				throw new IllegalStateException("Unexpected descriptor "+leftDesc);
 			}
 		}
-		if (left != null && (left instanceof Comparable)) {
-			return BooleanTypedValue.forValue(state.getTypeComparator().compare(left,
-					right) == 0);
-		}
 		else {
-			return BooleanTypedValue.forValue(left == right);
+			getLeftOperand().generateCode(mv, cf);
+			if (leftPrim) {
+				CodeFlow.insertBoxIfNecessary(mv, leftDesc.charAt(0));
+			}
+			getRightOperand().generateCode(mv, cf);
+			if (rightPrim) {
+				CodeFlow.insertBoxIfNecessary(mv, rightDesc.charAt(0));
+			}
+			Label leftNotNull = new Label();
+			mv.visitInsn(DUP_X1); // Dup right on the top of the stack
+			mv.visitJumpInsn(IFNONNULL,leftNotNull);
+			// Right is null!
+			mv.visitInsn(SWAP);
+			mv.visitInsn(POP); // remove it
+			Label rightNotNull = new Label();
+			mv.visitJumpInsn(IFNONNULL, rightNotNull);
+			// Left is null too
+			mv.visitInsn(ICONST_1);
+			mv.visitJumpInsn(GOTO, endOfIf);
+			mv.visitLabel(rightNotNull);
+			mv.visitInsn(ICONST_0);
+			mv.visitJumpInsn(GOTO,endOfIf);
+			mv.visitLabel(leftNotNull);
+			mv.visitMethodInsn(INVOKEVIRTUAL, "java/lang/Object", "equals", "(Ljava/lang/Object;)Z", false);
+			mv.visitLabel(endOfIf);
+			cf.pushDescriptor("Z");
+			return;
 		}
+		mv.visitInsn(ICONST_1);
+		mv.visitJumpInsn(GOTO,endOfIf);
+		mv.visitLabel(elseTarget);
+		mv.visitInsn(ICONST_0);
+		mv.visitLabel(endOfIf);
+		cf.pushDescriptor("Z");
 	}
 
 }

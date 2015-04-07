@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import org.springframework.core.MethodParameter;
+import org.springframework.http.HttpMethod;
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockHttpServletResponse;
 import org.springframework.mock.web.test.MockHttpSession;
@@ -63,9 +64,9 @@ public class ServletRequestMethodArgumentResolverTests {
 	public void setUp() throws Exception {
 		method = getClass().getMethod("supportedParams", ServletRequest.class, MultipartRequest.class,
 				HttpSession.class, Principal.class, Locale.class, InputStream.class, Reader.class,
-				WebRequest.class, TimeZone.class, ZoneId.class);
+				WebRequest.class, TimeZone.class, ZoneId.class, HttpMethod.class);
 		mavContainer = new ModelAndViewContainer();
-		servletRequest = new MockHttpServletRequest();
+		servletRequest = new MockHttpServletRequest("GET", "");
 		webRequest = new ServletWebRequest(servletRequest, new MockHttpServletResponse());
 	}
 
@@ -213,6 +214,17 @@ public class ServletRequestMethodArgumentResolverTests {
 		assertSame("Invalid result", webRequest, result);
 	}
 
+	@Test
+	public void httpMethod() throws Exception {
+		MethodParameter httpMethodParameter = new MethodParameter(method, 10);
+
+		assertTrue("HttpMethod not supported", resolver.supportsParameter(httpMethodParameter));
+
+		Object result = resolver.resolveArgument(httpMethodParameter, null, webRequest, null);
+		assertSame("Invalid result", HttpMethod.valueOf(webRequest.getRequest().getMethod()), result);
+	}
+
+
 	@SuppressWarnings("unused")
 	public void supportedParams(ServletRequest p0,
 								MultipartRequest p1,
@@ -223,7 +235,8 @@ public class ServletRequestMethodArgumentResolverTests {
 								Reader p6,
 								WebRequest p7,
 								TimeZone p8,
-								ZoneId p9) {
+								ZoneId p9,
+								HttpMethod p10) {
 	}
 
 }

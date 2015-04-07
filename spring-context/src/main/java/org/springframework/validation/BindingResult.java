@@ -73,7 +73,6 @@ public interface BindingResult extends Errors {
 	 * @see #MODEL_KEY_PREFIX
 	 * @see org.springframework.web.servlet.ModelAndView
 	 * @see org.springframework.web.servlet.tags.BindTag
-	 * @see org.springframework.web.servlet.mvc.SimpleFormController
 	 */
 	Map<String, Object> getModel();
 

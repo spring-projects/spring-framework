@@ -381,7 +381,7 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator
 				if (response instanceof EventResponse) {
 					// Update the existing model, if any, when responding to an event -
 					// whereas we're replacing the model in case of an action response.
-					Map existingModel = (Map) request.getPortletSession().getAttribute(IMPLICIT_MODEL_SESSION_ATTRIBUTE);
+					Map<String, Object> existingModel = (Map<String, Object>) request.getPortletSession().getAttribute(IMPLICIT_MODEL_SESSION_ATTRIBUTE);
 					if (existingModel != null) {
 						existingModel.putAll(implicitModel);
 						modelToStore = existingModel;
@@ -401,7 +401,7 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator
 	 * Build a HandlerMethodResolver for the given handler type.
 	 */
 	private PortletHandlerMethodResolver getMethodResolver(Object handler) {
-		Class handlerClass = ClassUtils.getUserClass(handler);
+		Class<?> handlerClass = ClassUtils.getUserClass(handler);
 		PortletHandlerMethodResolver resolver = this.methodResolverCache.get(handlerClass);
 		if (resolver == null) {
 			synchronized (this.methodResolverCache) {
@@ -554,7 +554,7 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator
 		}
 
 		@Override
-		protected void raiseMissingParameterException(String paramName, Class paramType) throws Exception {
+		protected void raiseMissingParameterException(String paramName, Class<?> paramType) throws Exception {
 			throw new MissingPortletRequestParameterException(paramName, paramType.getSimpleName());
 		}
 
@@ -591,7 +591,7 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator
 		}
 
 		@Override
-		protected Object resolveCookieValue(String cookieName, Class paramType, NativeWebRequest webRequest)
+		protected Object resolveCookieValue(String cookieName, Class<?> paramType, NativeWebRequest webRequest)
 				throws Exception {
 
 			PortletRequest portletRequest = webRequest.getNativeRequest(PortletRequest.class);
@@ -686,7 +686,7 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator
 		}
 
 		@SuppressWarnings("unchecked")
-		public ModelAndView getModelAndView(Method handlerMethod, Class handlerType, Object returnValue, ExtendedModelMap implicitModel,
+		public ModelAndView getModelAndView(Method handlerMethod, Class<?> handlerType, Object returnValue, ExtendedModelMap implicitModel,
 				PortletWebRequest webRequest) {
 			// Invoke custom resolvers if present...
 			if (customModelAndViewResolvers != null) {
@@ -725,7 +725,7 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator
 				return new ModelAndView().addAllObjects(implicitModel);
 			}
 			else if (returnValue instanceof Map) {
-				return new ModelAndView().addAllObjects(implicitModel).addAllObjects((Map) returnValue);
+				return new ModelAndView().addAllObjects(implicitModel).addAllObjects((Map<String, Object>) returnValue);
 			}
 			else if (returnValue instanceof String) {
 				return new ModelAndView((String) returnValue).addAllObjects(implicitModel);

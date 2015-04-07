@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,11 +29,14 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.EnableMBeanExport;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.MBeanExportConfiguration;
+import org.springframework.context.annotation.Scope;
+import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.jmx.export.MBeanExporterTests;
 import org.springframework.jmx.export.TestDynamicMBean;
 import org.springframework.jmx.support.MBeanServerFactoryBean;
 import org.springframework.jmx.support.ObjectNameManager;
 import org.springframework.jmx.support.RegistrationPolicy;
+import org.springframework.mock.env.MockEnvironment;
 
 import static org.junit.Assert.*;
 
@@ -49,6 +52,40 @@ public class EnableMBeanExportConfigurationTests {
 	public void testLazyNaming() throws Exception {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(
 				LazyNamingConfiguration.class);
+		try {
+			MBeanServer server = (MBeanServer) ctx.getBean("server");
+			ObjectName oname = ObjectNameManager.getInstance("bean:name=testBean4");
+			assertNotNull(server.getObjectInstance(oname));
+			String name = (String) server.getAttribute(oname, "Name");
+			assertEquals("Invalid name returned", "TEST", name);
+		}
+		finally {
+			ctx.close();
+		}
+	}
+
+	@Test
+	public void testOnlyTargetClassIsExposed() throws Exception {
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(
+				ProxyConfiguration.class);
+		try {
+			MBeanServer server = (MBeanServer) ctx.getBean("server");
+			ObjectName oname = ObjectNameManager.getInstance("bean:name=testBean4");
+			assertNotNull(server.getObjectInstance(oname));
+			assertEquals("TEST", server.getAttribute(oname, "Name"));
+		} finally {
+			ctx.close();
+		}
+	}
+
+	@Test
+	public void testPlaceholderBased() throws Exception {
+		MockEnvironment env = new MockEnvironment();
+		env.setProperty("serverName", "server");
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
+		ctx.setEnvironment(env);
+		ctx.register(PlaceholderBasedConfiguration.class);
+		ctx.refresh();
 		try {
 			MBeanServer server = (MBeanServer) ctx.getBean("server");
 			ObjectName oname = ObjectNameManager.getInstance("bean:name=testBean4");
@@ -110,6 +147,7 @@ public class EnableMBeanExportConfigurationTests {
 		}
 	}
 
+
 	@Configuration
 	@EnableMBeanExport(server = "server")
 	static class LazyNamingConfiguration {
@@ -128,6 +166,47 @@ public class EnableMBeanExportConfigurationTests {
 			return bean;
 		}
 	}
+
+	@Configuration
+	@EnableMBeanExport(server = "server")
+	static class ProxyConfiguration {
+
+		@Bean
+		public MBeanServerFactoryBean server() throws Exception {
+			return new MBeanServerFactoryBean();
+		}
+
+		@Bean
+		@Lazy
+		@Scope(proxyMode = ScopedProxyMode.TARGET_CLASS)
+		public AnnotationTestBean testBean() {
+			AnnotationTestBean bean = new AnnotationTestBean();
+			bean.setName("TEST");
+			bean.setAge(100);
+			return bean;
+		}
+	}
+
+
+	@Configuration
+	@EnableMBeanExport(server = "${serverName}")
+	static class PlaceholderBasedConfiguration {
+
+		@Bean
+		public MBeanServerFactoryBean server() throws Exception {
+			return new MBeanServerFactoryBean();
+		}
+
+		@Bean
+		@Lazy
+		public AnnotationTestBean testBean() {
+			AnnotationTestBean bean = new AnnotationTestBean();
+			bean.setName("TEST");
+			bean.setAge(100);
+			return bean;
+		}
+	}
+
 
 	@Configuration
 	@EnableMBeanExport(server="server", registration=RegistrationPolicy.REPLACE_EXISTING)
@@ -177,6 +256,7 @@ public class EnableMBeanExportConfigurationTests {
 			return Class.forName("does.not.exist").newInstance();
 		}
 	}
+
 
 	@Configuration
 	@ComponentScan(excludeFilters = @ComponentScan.Filter(value=Configuration.class))

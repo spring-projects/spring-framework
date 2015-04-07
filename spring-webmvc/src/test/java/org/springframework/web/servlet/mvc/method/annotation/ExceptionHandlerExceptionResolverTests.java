@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,6 @@
 
 package org.springframework.web.servlet.mvc.method.annotation;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
@@ -30,6 +24,7 @@ import java.util.Arrays;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -46,6 +41,8 @@ import org.springframework.web.method.annotation.ModelMethodProcessor;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.HandlerMethodReturnValueHandler;
 import org.springframework.web.servlet.ModelAndView;
+
+import static org.junit.Assert.*;
 
 /**
  * Test fixture with {@link ExceptionHandlerExceptionResolver}.
@@ -204,6 +201,52 @@ public class ExceptionHandlerExceptionResolverTests {
 		assertEquals("TestExceptionResolver: IllegalStateException", this.response.getContentAsString());
 	}
 
+	// SPR-12605
+
+	@Test
+	public void resolveExceptionWithHandlerMethodArg() throws Exception {
+		AnnotationConfigApplicationContext cxt = new AnnotationConfigApplicationContext(MyConfig.class);
+		this.resolver.setApplicationContext(cxt);
+		this.resolver.afterPropertiesSet();
+
+		ArrayIndexOutOfBoundsException ex = new ArrayIndexOutOfBoundsException();
+		HandlerMethod handlerMethod = new HandlerMethod(new ResponseBodyController(), "handle");
+		ModelAndView mav = this.resolver.resolveException(this.request, this.response, handlerMethod, ex);
+
+		assertNotNull("Exception was not handled", mav);
+		assertTrue(mav.isEmpty());
+		assertEquals("HandlerMethod: handle", this.response.getContentAsString());
+	}
+
+	@Test
+	public void resolveExceptionControllerAdviceHandler() throws Exception {
+		AnnotationConfigApplicationContext cxt = new AnnotationConfigApplicationContext(MyControllerAdviceConfig.class);
+		this.resolver.setApplicationContext(cxt);
+		this.resolver.afterPropertiesSet();
+
+		IllegalStateException ex = new IllegalStateException();
+		HandlerMethod handlerMethod = new HandlerMethod(new ResponseBodyController(), "handle");
+		ModelAndView mav = this.resolver.resolveException(this.request, this.response, handlerMethod, ex);
+
+		assertNotNull("Exception was not handled", mav);
+		assertTrue(mav.isEmpty());
+		assertEquals("BasePackageTestExceptionResolver: IllegalStateException", this.response.getContentAsString());
+	}
+
+	@Test
+	public void resolveExceptionControllerAdviceNoHandler() throws Exception {
+		AnnotationConfigApplicationContext cxt = new AnnotationConfigApplicationContext(MyControllerAdviceConfig.class);
+		this.resolver.setApplicationContext(cxt);
+		this.resolver.afterPropertiesSet();
+
+		IllegalStateException ex = new IllegalStateException();
+		ModelAndView mav = this.resolver.resolveException(this.request, this.response, null, ex);
+
+		assertNotNull("Exception was not handled", mav);
+		assertTrue(mav.isEmpty());
+		assertEquals("DefaultTestExceptionResolver: IllegalStateException", this.response.getContentAsString());
+	}
+
 
 	private void assertMethodProcessorCount(int resolverCount, int handlerCount) {
 		assertEquals(resolverCount, this.resolver.getArgumentResolvers().getResolvers().size());
@@ -263,6 +306,12 @@ public class ExceptionHandlerExceptionResolverTests {
 		public String handleException(IllegalStateException ex) {
 			return "TestExceptionResolver: " + ClassUtils.getShortName(ex.getClass());
 		}
+
+		@ExceptionHandler(ArrayIndexOutOfBoundsException.class)
+		@ResponseBody
+		public String handleWithHandlerMethod(HandlerMethod handlerMethod) {
+			return "HandlerMethod: " + handlerMethod.getMethod().getName();
+		}
 	}
 
 	@ControllerAdvice
@@ -288,4 +337,51 @@ public class ExceptionHandlerExceptionResolverTests {
 		}
 	}
 
+	@ControllerAdvice("java.lang")
+	@Order(1)
+	static class NotCalledTestExceptionResolver {
+
+		@ExceptionHandler
+		@ResponseBody
+		public String handleException(IllegalStateException ex) {
+			return "NotCalledTestExceptionResolver: " + ClassUtils.getShortName(ex.getClass());
+		}
+	}
+
+	@ControllerAdvice("org.springframework.web.servlet.mvc.method.annotation")
+	@Order(2)
+	static class BasePackageTestExceptionResolver {
+
+		@ExceptionHandler
+		@ResponseBody
+		public String handleException(IllegalStateException ex) {
+			return "BasePackageTestExceptionResolver: " + ClassUtils.getShortName(ex.getClass());
+		}
+	}
+
+	@ControllerAdvice
+	@Order(3)
+	static class DefaultTestExceptionResolver {
+
+		@ExceptionHandler
+		@ResponseBody
+		public String handleException(IllegalStateException ex) {
+			return "DefaultTestExceptionResolver: " + ClassUtils.getShortName(ex.getClass());
+		}
+	}
+
+	@Configuration
+	static class MyControllerAdviceConfig {
+		@Bean public NotCalledTestExceptionResolver notCalledTestExceptionResolver() {
+			return new NotCalledTestExceptionResolver();
+		}
+
+		@Bean public BasePackageTestExceptionResolver basePackageTestExceptionResolver() {
+			return new BasePackageTestExceptionResolver();
+		}
+
+		@Bean public DefaultTestExceptionResolver defaultTestExceptionResolver() {
+			return new DefaultTestExceptionResolver();
+		}
+	}
 }

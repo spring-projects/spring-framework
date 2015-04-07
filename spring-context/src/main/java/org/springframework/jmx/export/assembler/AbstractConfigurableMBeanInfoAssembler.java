@@ -77,7 +77,7 @@ public abstract class AbstractConfigurableMBeanInfoAssembler extends AbstractRef
 			return new ModelMBeanNotificationInfo[] {JmxMetadataUtils.convertToModelMBeanNotificationInfo(mn)};
 		}
 		else if (mapValue instanceof Collection) {
-			Collection col = (Collection) mapValue;
+			Collection<?> col = (Collection<?>) mapValue;
 			List<ModelMBeanNotificationInfo> result = new ArrayList<ModelMBeanNotificationInfo>();
 			for (Object colValue : col) {
 				if (!(colValue instanceof ManagedNotification)) {

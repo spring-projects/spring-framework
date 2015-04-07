@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,11 @@
 
 package org.springframework.expression.spel.ast;
 
+import org.springframework.asm.Label;
+import org.springframework.asm.MethodVisitor;
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.TypedValue;
+import org.springframework.expression.spel.CodeFlow;
 import org.springframework.expression.spel.ExpressionState;
 import org.springframework.expression.spel.SpelEvaluationException;
 import org.springframework.expression.spel.SpelMessage;
@@ -35,6 +38,7 @@ public class OpAnd extends Operator {
 
 	public OpAnd(int pos, SpelNodeImpl... operands) {
 		super("and", pos, operands);
+		this.exitTypeDescriptor = "Z";
 	}
 
 
@@ -63,6 +67,36 @@ public class OpAnd extends Operator {
 		if (value == null) {
 			throw new SpelEvaluationException(SpelMessage.TYPE_CONVERSION_ERROR, "null", "boolean");
 		}
+	}
+
+	@Override
+	public boolean isCompilable() {
+		SpelNodeImpl left = getLeftOperand();
+		SpelNodeImpl right = getRightOperand();
+		return (left.isCompilable() && right.isCompilable() &&
+				CodeFlow.isBooleanCompatible(left.exitTypeDescriptor) &&
+				CodeFlow.isBooleanCompatible(right.exitTypeDescriptor));
+	}
+	
+	@Override
+	public void generateCode(MethodVisitor mv, CodeFlow cf) {
+		// Pseudo: if (!leftOperandValue) { result=false; } else { result=rightOperandValue; }
+		Label elseTarget = new Label();
+		Label endOfIf = new Label();
+		cf.enterCompilationScope();
+		getLeftOperand().generateCode(mv, cf);
+		cf.unboxBooleanIfNecessary(mv);
+		cf.exitCompilationScope();
+		mv.visitJumpInsn(IFNE, elseTarget);
+		mv.visitLdcInsn(0); // FALSE
+		mv.visitJumpInsn(GOTO,endOfIf);
+		mv.visitLabel(elseTarget);
+		cf.enterCompilationScope();
+		getRightOperand().generateCode(mv, cf);
+		cf.unboxBooleanIfNecessary(mv);
+		cf.exitCompilationScope();
+		mv.visitLabel(endOfIf);
+		cf.pushDescriptor(this.exitTypeDescriptor);
 	}
 
 }

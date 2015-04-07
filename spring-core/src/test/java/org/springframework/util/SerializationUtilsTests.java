@@ -16,15 +16,11 @@
 
 package org.springframework.util;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-
 import java.math.BigInteger;
 
 import org.junit.Test;
 
-import org.springframework.util.SerializationUtils;
+import static org.junit.Assert.*;
 
 /**
  * Test for static utility to help with serialization.

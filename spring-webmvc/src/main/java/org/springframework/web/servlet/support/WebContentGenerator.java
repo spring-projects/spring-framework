@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,6 @@ import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.HttpSessionRequiredException;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.context.support.WebApplicationObjectSupport;
-import org.springframework.web.servlet.mvc.LastModified;
 
 /**
  * Convenient superclass for any kind of web content generator,
@@ -121,7 +120,7 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 	 * <p>Default is GET, HEAD and POST for simple form controller types;
 	 * unrestricted for general controllers and interceptors.
 	 */
-	public final void setSupportedMethods(String[] methods) {
+	public final void setSupportedMethods(String... methods) {
 		if (methods != null) {
 			this.supportedMethods = new HashSet<String>(Arrays.asList(methods));
 		}
@@ -204,14 +203,14 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 	 * programmatically do a lastModified calculation as described in
 	 * {@link WebRequest#checkNotModified(long)}. Default is "false",
 	 * effectively relying on whether the handler implements
-	 * {@link LastModified} or not.
+	 * {@link org.springframework.web.servlet.mvc.LastModified} or not.
 	 */
 	public void setAlwaysMustRevalidate(boolean mustRevalidate) {
 		this.alwaysMustRevalidate = mustRevalidate;
 	}
 
 	/**
-	 * Return whether 'must-revaliate' is added to every Cache-Control header.
+	 * Return whether 'must-revalidate' is added to every Cache-Control header.
 	 */
 	public boolean isAlwaysMustRevalidate() {
 		return alwaysMustRevalidate;

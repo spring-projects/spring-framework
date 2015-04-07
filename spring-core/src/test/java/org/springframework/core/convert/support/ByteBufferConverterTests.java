@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -20,6 +20,7 @@ import java.nio.ByteBuffer;
 
 import org.junit.Before;
 import org.junit.Test;
+
 import org.springframework.core.convert.converter.Converter;
 
 import static org.hamcrest.Matchers.*;
@@ -34,6 +35,7 @@ public class ByteBufferConverterTests {
 
 	private GenericConversionService conversionService;
 
+
 	@Before
 	public void setup() {
 		this.conversionService = new GenericConversionService();
@@ -41,6 +43,7 @@ public class ByteBufferConverterTests {
 		this.conversionService.addConverter(new ByteArrayToOtherTypeConverter());
 		this.conversionService.addConverter(new OtherTypeToByteArrayConverter());
 	}
+
 
 	@Test
 	public void byteArrayToByteBuffer() throws Exception {
@@ -77,6 +80,7 @@ public class ByteBufferConverterTests {
 		assertThat(bytes, equalTo(convert.array()));
 	}
 
+
 	private static class OtherType {
 
 		private byte[] bytes;
@@ -87,8 +91,8 @@ public class ByteBufferConverterTests {
 
 	}
 
-	private static class ByteArrayToOtherTypeConverter implements
-			Converter<byte[], OtherType> {
+
+	private static class ByteArrayToOtherTypeConverter implements Converter<byte[], OtherType> {
 
 		@Override
 		public OtherType convert(byte[] source) {
@@ -96,8 +100,8 @@ public class ByteBufferConverterTests {
 		}
 	}
 
-	private static class OtherTypeToByteArrayConverter implements
-			Converter<OtherType, byte[]> {
+
+	private static class OtherTypeToByteArrayConverter implements Converter<OtherType, byte[]> {
 
 		@Override
 		public byte[] convert(OtherType source) {

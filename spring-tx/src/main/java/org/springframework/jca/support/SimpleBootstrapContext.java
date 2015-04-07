@@ -17,7 +17,6 @@
 package org.springframework.jca.support;
 
 import java.util.Timer;
-
 import javax.resource.spi.BootstrapContext;
 import javax.resource.spi.UnavailableException;
 import javax.resource.spi.XATerminator;

@@ -54,7 +54,7 @@ public interface ModelAndViewResolver {
 	ModelAndView UNRESOLVED = new ModelAndView();
 
 	ModelAndView resolveModelAndView(Method handlerMethod,
-			Class handlerType,
+			Class<?> handlerType,
 			Object returnValue,
 			ExtendedModelMap implicitModel,
 			NativeWebRequest webRequest);

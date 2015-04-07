@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,33 +20,36 @@ import java.beans.BeanInfo;
 import java.beans.IntrospectionException;
 
 /**
- * Strategy for creating {@link BeanInfo} instances.
+ * Strategy interface for creating {@link BeanInfo} instances for Spring beans.
+ * Can be used to plug in custom bean property resolution strategies (e.g. for other
+ * languages on the JVM) or more efficient {@link BeanInfo} retrieval algorithms.
  *
  * <p>BeanInfoFactories are are instantiated by the {@link CachedIntrospectionResults},
- * by using the {@link org.springframework.core.io.support.SpringFactoriesLoader} utility
- * class.
+ * by using the {@link org.springframework.core.io.support.SpringFactoriesLoader}
+ * utility class.
  *
  * When a {@link BeanInfo} is to be created, the {@code CachedIntrospectionResults}
- * will iterate through the discovered factories, calling {@link
- * #getBeanInfo(Class)} on each one. If {@code null} is returned, the next factory will
- * be queried. If none of the factories support the class, an standard {@link BeanInfo}
- * is created as a default.
+ * will iterate through the discovered factories, calling {@link #getBeanInfo(Class)}
+ * on each one. If {@code null} is returned, the next factory will be queried.
+ * If none of the factories support the class, a standard {@link BeanInfo} will be
+ * created as a default.
  *
  * <p>Note that the {@link org.springframework.core.io.support.SpringFactoriesLoader}
  * sorts the {@code BeanInfoFactory} instances by
- * {@link org.springframework.core.annotation.Order @Order}, so that ones with
- * a higher precedence come first.
+ * {@link org.springframework.core.annotation.Order @Order}, so that ones with a
+ * higher precedence come first.
  *
  * @author Arjen Poutsma
  * @since 3.2
+ * @see CachedIntrospectionResults
+ * @see org.springframework.core.io.support.SpringFactoriesLoader
  */
 public interface BeanInfoFactory {
 
 	/**
-	 * Returns the bean info for the given class, if supported.
-	 *
+	 * Return the bean info for the given class, if supported.
 	 * @param beanClass the bean class
-	 * @return the bean info, or {@code null} if not the given class is not supported
+	 * @return the BeanInfo, or {@code null} if the given class is not supported
 	 * @throws IntrospectionException in case of exceptions
 	 */
 	BeanInfo getBeanInfo(Class<?> beanClass) throws IntrospectionException;

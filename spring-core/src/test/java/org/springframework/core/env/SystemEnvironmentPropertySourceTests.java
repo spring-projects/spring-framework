@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,25 +16,30 @@
 
 package org.springframework.core.env;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.junit.Assert.assertThat;
-
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import org.junit.Before;
 import org.junit.Test;
+
+import static org.hamcrest.CoreMatchers.*;
+import static org.junit.Assert.*;
 
 /**
  * Unit tests for {@link SystemEnvironmentPropertySource}.
  *
  * @author Chris Beams
+ * @author Juergen Hoeller
  * @since 3.1
  */
 public class SystemEnvironmentPropertySourceTests {
 
 	private Map<String, Object> envMap;
+
 	private PropertySource<?> ps;
+
 
 	@Before
 	public void setUp() {
@@ -42,10 +47,9 @@ public class SystemEnvironmentPropertySourceTests {
 		ps = new SystemEnvironmentPropertySource("sysEnv", envMap);
 	}
 
+
 	@Test
 	public void none() {
-		//envMap.put("a.key", "a_value");
-
 		assertThat(ps.containsProperty("a.key"), equalTo(false));
 		assertThat(ps.getProperty("a.key"), equalTo(null));
 	}
@@ -99,6 +103,32 @@ public class SystemEnvironmentPropertySourceTests {
 		assertThat(ps.getProperty("A.KEY"), equalTo((Object)"a_value"));
 		assertThat(ps.getProperty("a_key"), equalTo((Object)"a_value"));
 		assertThat(ps.getProperty("a.key"), equalTo((Object)"a_value"));
+	}
+
+	@Test
+	@SuppressWarnings("serial")
+	public void withSecurityConstraints() throws Exception {
+		envMap = new HashMap<String, Object>() {
+			@Override
+			public boolean containsKey(Object key) {
+				throw new UnsupportedOperationException();
+			}
+			@Override
+			public Set<String> keySet() {
+				return new HashSet<String>(super.keySet());
+			}
+		};
+		envMap.put("A_KEY", "a_value");
+
+		ps = new SystemEnvironmentPropertySource("sysEnv", envMap) {
+			@Override
+			protected boolean isSecurityManagerPresent() {
+				return true;
+			}
+		};
+
+		assertThat(ps.containsProperty("A_KEY"), equalTo(true));
+		assertThat(ps.getProperty("A_KEY"), equalTo((Object)"a_value"));
 	}
 
 }

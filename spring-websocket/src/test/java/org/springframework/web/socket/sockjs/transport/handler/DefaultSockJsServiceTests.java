@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,42 +18,54 @@ package org.springframework.web.socket.sockjs.transport.handler;
 
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.List;
 import java.util.Map;
 
+import org.hamcrest.Matchers;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.web.socket.AbstractHttpRequestTests;
 import org.springframework.web.socket.WebSocketHandler;
+import org.springframework.web.socket.handler.TestPrincipal;
+import org.springframework.web.socket.server.HandshakeHandler;
+import org.springframework.web.socket.server.support.OriginHandshakeInterceptor;
+import org.springframework.web.socket.sockjs.transport.SockJsSessionFactory;
 import org.springframework.web.socket.sockjs.transport.TransportHandler;
+import org.springframework.web.socket.sockjs.transport.TransportHandlingSockJsService;
 import org.springframework.web.socket.sockjs.transport.TransportType;
 import org.springframework.web.socket.sockjs.transport.session.StubSockJsServiceConfig;
 import org.springframework.web.socket.sockjs.transport.session.TestSockJsSession;
 
 import static org.junit.Assert.*;
-import static org.mockito.Matchers.*;
-import static org.mockito.Mockito.*;
+import static org.mockito.BDDMockito.*;
 
 /**
- * Test fixture for {@link DefaultSockJsService}.
+ * Test fixture for {@link org.springframework.web.socket.sockjs.transport.handler.DefaultSockJsService}.
  *
  * @author Rossen Stoyanchev
+ * @author Sebastien Deleuze
  */
 public class DefaultSockJsServiceTests extends AbstractHttpRequestTests {
 
-	private static final String sockJsPrefix = "mysockjs";
+	private static final String sockJsPrefix = "/mysockjs";
 
 	private static final String sessionId = "session1";
 
-	private static final String sessionUrlPrefix = "/mysockjs/server1/" + sessionId + "/";
+	private static final String sessionUrlPrefix = "/server1/" + sessionId + "/";
 
 
 	@Mock private SessionCreatingTransportHandler xhrHandler;
 
 	@Mock private TransportHandler xhrSendHandler;
+
+	@Mock private SessionCreatingTransportHandler jsonpHandler;
+
+	@Mock private TransportHandler jsonpSendHandler;
+
+	@Mock private HandshakeTransportHandler wsTransportHandler;
 
 	@Mock private WebSocketHandler wsHandler;
 
@@ -61,31 +73,30 @@ public class DefaultSockJsServiceTests extends AbstractHttpRequestTests {
 
 	private TestSockJsSession session;
 
-	private DefaultSockJsService service;
+	private TransportHandlingSockJsService service;
 
 
 	@Before
 	public void setup() {
-
 		super.setUp();
-
 		MockitoAnnotations.initMocks(this);
 
 		Map<String, Object> attributes = Collections.emptyMap();
 		this.session = new TestSockJsSession(sessionId, new StubSockJsServiceConfig(), this.wsHandler, attributes);
 
-		when(this.xhrHandler.getTransportType()).thenReturn(TransportType.XHR);
-		when(this.xhrHandler.createSession(sessionId, this.wsHandler, attributes)).thenReturn(this.session);
-		when(this.xhrSendHandler.getTransportType()).thenReturn(TransportType.XHR_SEND);
+		given(this.xhrHandler.getTransportType()).willReturn(TransportType.XHR);
+		given(this.xhrHandler.createSession(sessionId, this.wsHandler, attributes)).willReturn(this.session);
+		given(this.xhrSendHandler.getTransportType()).willReturn(TransportType.XHR_SEND);
+		given(this.jsonpHandler.getTransportType()).willReturn(TransportType.JSONP);
+		given(this.jsonpHandler.createSession(sessionId, this.wsHandler, attributes)).willReturn(this.session);
+		given(this.jsonpSendHandler.getTransportType()).willReturn(TransportType.JSONP_SEND);
+		given(this.wsTransportHandler.getTransportType()).willReturn(TransportType.WEBSOCKET);
 
-		this.service = new DefaultSockJsService(this.taskScheduler,
-				Arrays.<TransportHandler>asList(this.xhrHandler, this.xhrSendHandler));
-		this.service.setValidSockJsPrefixes(sockJsPrefix);
+		this.service = new TransportHandlingSockJsService(this.taskScheduler, this.xhrHandler, this.xhrSendHandler);
 	}
 
 	@Test
 	public void defaultTransportHandlers() {
-
 		DefaultSockJsService service = new DefaultSockJsService(mock(TaskScheduler.class));
 		Map<TransportType, TransportHandler> handlers = service.getTransportHandlers();
 
@@ -102,89 +113,226 @@ public class DefaultSockJsServiceTests extends AbstractHttpRequestTests {
 
 	@Test
 	public void defaultTransportHandlersWithOverride() {
-
 		XhrReceivingTransportHandler xhrHandler = new XhrReceivingTransportHandler();
 
-		DefaultSockJsService service = new DefaultSockJsService(mock(TaskScheduler.class), null, xhrHandler);
+		DefaultSockJsService service = new DefaultSockJsService(mock(TaskScheduler.class), xhrHandler);
 		Map<TransportType, TransportHandler> handlers = service.getTransportHandlers();
 
 		assertEquals(8, handlers.size());
 		assertSame(xhrHandler, handlers.get(xhrHandler.getTransportType()));
 	}
 
+	@Test(expected = IllegalArgumentException.class)
+	public void nullAllowedOriginList() {
+		this.service.setAllowedOrigins(null);
+	}
+
+	@Test
+	public void emptyAllowedOriginList() {
+		this.service.setAllowedOrigins(Arrays.asList());
+		assertThat(this.service.getAllowedOrigins(), Matchers.empty());
+	}
+
+	@Test(expected = IllegalArgumentException.class)
+	public void invalidAllowedOrigin() {
+		this.service.setAllowedOrigins(Arrays.asList("domain.com"));
+	}
+
+	@Test
+	public void validAllowedOrigins() {
+		this.service.setAllowedOrigins(Arrays.asList("http://domain.com", "https://domain.com", "*"));
+	}
+
 	@Test
 	public void customizedTransportHandlerList() {
-
-		List<TransportHandler> handlers = Arrays.<TransportHandler>asList(
-				new XhrPollingTransportHandler(), new XhrReceivingTransportHandler());
-
-		DefaultSockJsService service = new DefaultSockJsService(mock(TaskScheduler.class), handlers);
+		TransportHandlingSockJsService service = new TransportHandlingSockJsService(
+				mock(TaskScheduler.class), new XhrPollingTransportHandler(), new XhrReceivingTransportHandler());
 		Map<TransportType, TransportHandler> actualHandlers = service.getTransportHandlers();
 
-		assertEquals(handlers.size(), actualHandlers.size());
+		assertEquals(2, actualHandlers.size());
 	}
 
 	@Test
 	public void handleTransportRequestXhr() throws Exception {
-
-		setRequest("POST", sessionUrlPrefix + "xhr");
-		this.service.handleRequest(this.request, this.response, this.wsHandler);
+		String sockJsPath = sessionUrlPrefix + "xhr";
+		setRequest("POST", sockJsPrefix + sockJsPath);
+		this.service.handleRequest(this.request, this.response, sockJsPath, this.wsHandler);
 
 		assertEquals(200, this.servletResponse.getStatus());
 		verify(this.xhrHandler).handleRequest(this.request, this.response, this.wsHandler, this.session);
 		verify(taskScheduler).scheduleAtFixedRate(any(Runnable.class), eq(service.getDisconnectDelay()));
 
 		assertEquals("no-store, no-cache, must-revalidate, max-age=0", this.response.getHeaders().getCacheControl());
-		assertEquals("*", this.response.getHeaders().getFirst("Access-Control-Allow-Origin"));
+		assertNull(this.response.getHeaders().getFirst("Access-Control-Allow-Origin"));
+		assertNull(this.response.getHeaders().getFirst("Access-Control-Allow-Credentials"));
+	}
+
+	@Test  // SPR-12226
+	public void handleTransportRequestXhrAllowedOriginsMatch() throws Exception {
+		String sockJsPath = sessionUrlPrefix + "xhr";
+		setRequest("POST", sockJsPrefix + sockJsPath);
+		this.service.setAllowedOrigins(Arrays.asList("http://mydomain1.com", "http://mydomain2.com"));
+		setOrigin("http://mydomain1.com");
+		this.service.handleRequest(this.request, this.response, sockJsPath, this.wsHandler);
+
+		assertEquals(200, this.servletResponse.getStatus());
+		assertEquals("http://mydomain1.com", this.response.getHeaders().getFirst("Access-Control-Allow-Origin"));
 		assertEquals("true", this.response.getHeaders().getFirst("Access-Control-Allow-Credentials"));
+	}
+
+	@Test  // SPR-12226
+	public void handleTransportRequestXhrAllowedOriginsNoMatch() throws Exception {
+		String sockJsPath = sessionUrlPrefix + "xhr";
+		setRequest("POST", sockJsPrefix + sockJsPath);
+		this.service.setAllowedOrigins(Arrays.asList("http://mydomain1.com", "http://mydomain2.com"));
+		setOrigin("http://mydomain3.com");
+		this.service.handleRequest(this.request, this.response, sockJsPath, this.wsHandler);
+
+		assertEquals(403, this.servletResponse.getStatus());
+		assertNull(this.response.getHeaders().getFirst("Access-Control-Allow-Origin"));
+		assertNull(this.response.getHeaders().getFirst("Access-Control-Allow-Credentials"));
 	}
 
 	@Test
 	public void handleTransportRequestXhrOptions() throws Exception {
-
-		setRequest("OPTIONS", sessionUrlPrefix + "xhr");
-		this.service.handleRequest(this.request, this.response, this.wsHandler);
+		String sockJsPath = sessionUrlPrefix + "xhr";
+		setRequest("OPTIONS", sockJsPrefix + sockJsPath);
+		this.service.handleRequest(this.request, this.response, sockJsPath, this.wsHandler);
 
 		assertEquals(204, this.servletResponse.getStatus());
-		assertEquals("*", this.response.getHeaders().getFirst("Access-Control-Allow-Origin"));
-		assertEquals("true", this.response.getHeaders().getFirst("Access-Control-Allow-Credentials"));
-		assertEquals("OPTIONS, POST", this.response.getHeaders().getFirst("Access-Control-Allow-Methods"));
+		assertNull(this.response.getHeaders().getFirst("Access-Control-Allow-Origin"));
+		assertNull(this.response.getHeaders().getFirst("Access-Control-Allow-Credentials"));
+		assertNull(this.response.getHeaders().getFirst("Access-Control-Allow-Methods"));
 	}
 
 	@Test
 	public void handleTransportRequestNoSuitableHandler() throws Exception {
-
-		setRequest("POST", sessionUrlPrefix + "eventsource");
-		this.service.handleRequest(this.request, this.response, this.wsHandler);
+		String sockJsPath = sessionUrlPrefix + "eventsource";
+		setRequest("POST", sockJsPrefix + sockJsPath);
+		this.service.handleRequest(this.request, this.response, sockJsPath, this.wsHandler);
 
 		assertEquals(404, this.servletResponse.getStatus());
 	}
 
 	@Test
 	public void handleTransportRequestXhrSend() throws Exception {
-
-		setRequest("POST", sessionUrlPrefix + "xhr_send");
-		this.service.handleRequest(this.request, this.response, this.wsHandler);
+		String sockJsPath = sessionUrlPrefix + "xhr_send";
+		setRequest("POST", sockJsPrefix + sockJsPath);
+		this.service.handleRequest(this.request, this.response, sockJsPath, this.wsHandler);
 
 		assertEquals(404, this.servletResponse.getStatus()); // no session yet
 
 		resetResponse();
-		setRequest("POST", sessionUrlPrefix + "xhr");
-		this.service.handleRequest(this.request, this.response, this.wsHandler);
+		sockJsPath = sessionUrlPrefix + "xhr";
+		setRequest("POST", sockJsPrefix + sockJsPath);
+		this.service.handleRequest(this.request, this.response, sockJsPath, this.wsHandler);
 
 		assertEquals(200, this.servletResponse.getStatus()); // session created
 		verify(this.xhrHandler).handleRequest(this.request, this.response, this.wsHandler, this.session);
 
 		resetResponse();
-		setRequest("POST", sessionUrlPrefix + "xhr_send");
-		this.service.handleRequest(this.request, this.response, this.wsHandler);
+		sockJsPath = sessionUrlPrefix + "xhr_send";
+		setRequest("POST", sockJsPrefix + sockJsPath);
+		this.service.handleRequest(this.request, this.response, sockJsPath, this.wsHandler);
 
 		assertEquals(200, this.servletResponse.getStatus()); // session exists
 		verify(this.xhrSendHandler).handleRequest(this.request, this.response, this.wsHandler, this.session);
 	}
 
+	@Test
+	public void handleTransportRequestXhrSendWithDifferentUser() throws Exception {
+		String sockJsPath = sessionUrlPrefix + "xhr";
+		setRequest("POST", sockJsPrefix + sockJsPath);
+		this.service.handleRequest(this.request, this.response, sockJsPath, this.wsHandler);
+
+		assertEquals(200, this.servletResponse.getStatus()); // session created
+		verify(this.xhrHandler).handleRequest(this.request, this.response, this.wsHandler, this.session);
+
+		this.session.setPrincipal(new TestPrincipal("little red riding hood"));
+		this.servletRequest.setUserPrincipal(new TestPrincipal("wolf"));
+
+		resetResponse();
+		reset(this.xhrSendHandler);
+		sockJsPath = sessionUrlPrefix + "xhr_send";
+		setRequest("POST", sockJsPrefix + sockJsPath);
+		this.service.handleRequest(this.request, this.response, sockJsPath, this.wsHandler);
+
+		assertEquals(404, this.servletResponse.getStatus());
+		verifyNoMoreInteractions(this.xhrSendHandler);
+	}
+
+	@Test
+	 public void handleTransportRequestJsonp() throws Exception {
+		TransportHandlingSockJsService jsonpService = new TransportHandlingSockJsService(this.taskScheduler, this.jsonpHandler, this.jsonpSendHandler);
+		String sockJsPath = sessionUrlPrefix+ "jsonp";
+		setRequest("GET", sockJsPrefix + sockJsPath);
+		jsonpService.handleRequest(this.request, this.response, sockJsPath, this.wsHandler);
+		assertEquals(404, this.servletResponse.getStatus());
+
+		resetRequestAndResponse();
+		jsonpService.setAllowedOrigins(Arrays.asList("http://mydomain1.com"));
+		setRequest("GET", sockJsPrefix + sockJsPath);
+		jsonpService.handleRequest(this.request, this.response, sockJsPath, this.wsHandler);
+		assertEquals(404, this.servletResponse.getStatus());
+
+		resetRequestAndResponse();
+		jsonpService.setAllowedOrigins(Arrays.asList("*"));
+		setRequest("GET", sockJsPrefix + sockJsPath);
+		jsonpService.handleRequest(this.request, this.response, sockJsPath, this.wsHandler);
+		assertNotEquals(404, this.servletResponse.getStatus());
+	}
+
+	@Test
+	public void handleTransportRequestWebsocket() throws Exception {
+		TransportHandlingSockJsService wsService = new TransportHandlingSockJsService(this.taskScheduler, this.wsTransportHandler);
+		String sockJsPath = "/websocket";
+		setRequest("GET", sockJsPrefix + sockJsPath);
+		wsService.handleRequest(this.request, this.response, sockJsPath, this.wsHandler);
+		assertNotEquals(403, this.servletResponse.getStatus());
+
+		resetRequestAndResponse();
+		OriginHandshakeInterceptor interceptor = new OriginHandshakeInterceptor(Arrays.asList("http://mydomain1.com"));
+		wsService.setHandshakeInterceptors(Arrays.asList(interceptor));
+		setRequest("GET", sockJsPrefix + sockJsPath);
+		setOrigin("http://mydomain1.com");
+		wsService.handleRequest(this.request, this.response, sockJsPath, this.wsHandler);
+		assertNotEquals(403, this.servletResponse.getStatus());
+
+		resetRequestAndResponse();
+		setRequest("GET", sockJsPrefix + sockJsPath);
+		setOrigin("http://mydomain2.com");
+		wsService.handleRequest(this.request, this.response, sockJsPath, this.wsHandler);
+		assertEquals(403, this.servletResponse.getStatus());
+	}
+
+	@Test
+	public void handleTransportRequestIframe() throws Exception {
+		String sockJsPath = "/iframe.html";
+		setRequest("GET", sockJsPrefix + sockJsPath);
+		this.service.handleRequest(this.request, this.response, sockJsPath, this.wsHandler);
+		assertNotEquals(404, this.servletResponse.getStatus());
+		assertEquals("SAMEORIGIN", this.servletResponse.getHeader("X-Frame-Options"));
+
+		resetRequestAndResponse();
+		setRequest("GET", sockJsPrefix + sockJsPath);
+		this.service.setAllowedOrigins(Arrays.asList("http://mydomain1.com"));
+		this.service.handleRequest(this.request, this.response, sockJsPath, this.wsHandler);
+		assertEquals(404, this.servletResponse.getStatus());
+		assertNull(this.servletResponse.getHeader("X-Frame-Options"));
+
+		resetRequestAndResponse();
+		setRequest("GET", sockJsPrefix + sockJsPath);
+		this.service.setAllowedOrigins(Arrays.asList("*"));
+		this.service.handleRequest(this.request, this.response, sockJsPath, this.wsHandler);
+		assertNotEquals(404, this.servletResponse.getStatus());
+		assertNull(this.servletResponse.getHeader("X-Frame-Options"));
+	}
+
 
 	interface SessionCreatingTransportHandler extends TransportHandler, SockJsSessionFactory {
+	}
+
+	interface HandshakeTransportHandler extends TransportHandler, HandshakeHandler {
 	}
 
 }

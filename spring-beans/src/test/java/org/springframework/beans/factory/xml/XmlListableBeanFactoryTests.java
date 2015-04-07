@@ -33,7 +33,6 @@ import org.springframework.tests.sample.beans.LifecycleBean;
 import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.tests.sample.beans.factory.DummyFactory;
 
-
 /**
  * @author Juergen Hoeller
  * @since 09.11.2003

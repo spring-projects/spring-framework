@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,21 +16,16 @@
 
 package org.springframework.context.annotation;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import example.profilescan.ProfileAnnotatedComponent;
+import example.scannable.AutowiredQualifierFooService;
 import org.junit.Test;
+
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.context.support.GenericXmlApplicationContext;
@@ -38,72 +33,98 @@ import org.springframework.core.type.classreading.MetadataReader;
 import org.springframework.core.type.classreading.MetadataReaderFactory;
 import org.springframework.core.type.filter.TypeFilter;
 
-import example.profilescan.ProfileAnnotatedComponent;
-import example.scannable.AutowiredQualifierFooService;
+import static org.hamcrest.CoreMatchers.*;
+import static org.junit.Assert.*;
 
 /**
  * @author Mark Fisher
  * @author Juergen Hoeller
  * @author Chris Beams
+ * @author Sam Brannen
  */
 public class ComponentScanParserTests {
 
+	private ClassPathXmlApplicationContext loadContext(String path) {
+		return new ClassPathXmlApplicationContext(path, getClass());
+	}
+
+
 	@Test
-	public void testAspectJTypeFilter() {
-		ApplicationContext context = new ClassPathXmlApplicationContext(
-				"org/springframework/context/annotation/aspectjTypeFilterTests.xml");
+	public void aspectjTypeFilter() {
+		ClassPathXmlApplicationContext context = loadContext("aspectjTypeFilterTests.xml");
 		assertTrue(context.containsBean("fooServiceImpl"));
 		assertTrue(context.containsBean("stubFooDao"));
 		assertFalse(context.containsBean("scopedProxyTestBean"));
+		context.close();
 	}
 
 	@Test
-	public void testNonMatchingResourcePattern() {
-		ApplicationContext context = new ClassPathXmlApplicationContext(
-				"org/springframework/context/annotation/nonMatchingResourcePatternTests.xml");
+	public void aspectjTypeFilterWithPlaceholders() {
+		System.setProperty("basePackage", "example.scannable, test");
+		System.setProperty("scanInclude", "example.scannable.FooService+");
+		System.setProperty("scanExclude", "example..Scoped*Test*");
+		try {
+			ClassPathXmlApplicationContext context = loadContext("aspectjTypeFilterTestsWithPlaceholders.xml");
+			assertTrue(context.containsBean("fooServiceImpl"));
+			assertTrue(context.containsBean("stubFooDao"));
+			assertFalse(context.containsBean("scopedProxyTestBean"));
+			context.close();
+		}
+		finally {
+			System.clearProperty("basePackage");
+			System.clearProperty("scanInclude");
+			System.clearProperty("scanExclude");
+		}
+	}
+
+	@Test
+	public void nonMatchingResourcePattern() {
+		ClassPathXmlApplicationContext context = loadContext("nonMatchingResourcePatternTests.xml");
 		assertFalse(context.containsBean("fooServiceImpl"));
+		context.close();
 	}
 
 	@Test
-	public void testMatchingResourcePattern() {
-		ApplicationContext context = new ClassPathXmlApplicationContext(
-				"org/springframework/context/annotation/matchingResourcePatternTests.xml");
+	public void matchingResourcePattern() {
+		ClassPathXmlApplicationContext context = loadContext("matchingResourcePatternTests.xml");
 		assertTrue(context.containsBean("fooServiceImpl"));
+		context.close();
 	}
 
 	@Test
-	public void testComponentScanWithAutowiredQualifier() {
-		ApplicationContext context = new ClassPathXmlApplicationContext(
-				"org/springframework/context/annotation/componentScanWithAutowiredQualifierTests.xml");
+	public void componentScanWithAutowiredQualifier() {
+		ClassPathXmlApplicationContext context = loadContext("componentScanWithAutowiredQualifierTests.xml");
 		AutowiredQualifierFooService fooService = (AutowiredQualifierFooService) context.getBean("fooService");
 		assertTrue(fooService.isInitCalled());
 		assertEquals("bar", fooService.foo(123));
+		context.close();
 	}
 
 	@Test
-	public void testCustomAnnotationUsedForBothComponentScanAndQualifier() {
-		ApplicationContext context = new ClassPathXmlApplicationContext(
-				"org/springframework/context/annotation/customAnnotationUsedForBothComponentScanAndQualifierTests.xml");
-		CustomAnnotationAutowiredBean testBean = (CustomAnnotationAutowiredBean) context.getBean("testBean");
+	public void customAnnotationUsedForBothComponentScanAndQualifier() {
+		ClassPathXmlApplicationContext context = loadContext("customAnnotationUsedForBothComponentScanAndQualifierTests.xml");
+		KustomAnnotationAutowiredBean testBean = (KustomAnnotationAutowiredBean) context.getBean("testBean");
 		assertNotNull(testBean.getDependency());
+		context.close();
 	}
 
 	@Test
-	public void testCustomTypeFilter() {
-		ApplicationContext context = new ClassPathXmlApplicationContext(
-				"org/springframework/context/annotation/customTypeFilterTests.xml");
-		CustomAnnotationAutowiredBean testBean = (CustomAnnotationAutowiredBean) context.getBean("testBean");
+	public void customTypeFilter() {
+		ClassPathXmlApplicationContext context = loadContext("customTypeFilterTests.xml");
+		KustomAnnotationAutowiredBean testBean = (KustomAnnotationAutowiredBean) context.getBean("testBean");
 		assertNotNull(testBean.getDependency());
+		context.close();
 	}
 
 	@Test
-	public void testComponentScanRespectsProfileAnnotation() {
+	public void componentScanRespectsProfileAnnotation() {
 		String xmlLocation = "org/springframework/context/annotation/componentScanRespectsProfileAnnotationTests.xml";
 		{ // should exclude the profile-annotated bean if active profiles remains unset
 			GenericXmlApplicationContext context = new GenericXmlApplicationContext();
 			context.load(xmlLocation);
 			context.refresh();
 			assertThat(context.containsBean(ProfileAnnotatedComponent.BEAN_NAME), is(false));
+			context.close();
 		}
 		{ // should include the profile-annotated bean with active profiles set
 			GenericXmlApplicationContext context = new GenericXmlApplicationContext();
@@ -111,45 +132,59 @@ public class ComponentScanParserTests {
 			context.load(xmlLocation);
 			context.refresh();
 			assertThat(context.containsBean(ProfileAnnotatedComponent.BEAN_NAME), is(true));
+			context.close();
 		}
 		{ // ensure the same works for AbstractRefreshableApplicationContext impls too
-			ConfigurableApplicationContext context =
-				new ClassPathXmlApplicationContext(new String[]{xmlLocation}, false);
+			ConfigurableApplicationContext context = new ClassPathXmlApplicationContext(new String[] { xmlLocation },
+				false);
 			context.getEnvironment().setActiveProfiles(ProfileAnnotatedComponent.PROFILE_NAME);
 			context.refresh();
 			assertThat(context.containsBean(ProfileAnnotatedComponent.BEAN_NAME), is(true));
+			context.close();
 		}
 	}
 
 
-	@Target({ElementType.TYPE, ElementType.FIELD})
+	@Target({ ElementType.TYPE, ElementType.FIELD })
 	@Retention(RetentionPolicy.RUNTIME)
 	public static @interface CustomAnnotation {
 	}
 
 
-	public static class CustomAnnotationAutowiredBean {
+	/**
+	 * Intentionally spelling "custom" with a "k" since there are numerous
+	 * classes in this package named *Custom*.
+	 */
+	public static class KustomAnnotationAutowiredBean {
 
 		@Autowired
 		@CustomAnnotation
-		private CustomAnnotationDependencyBean dependency;
+		private KustomAnnotationDependencyBean dependency;
 
-		public CustomAnnotationDependencyBean getDependency() {
+		public KustomAnnotationDependencyBean getDependency() {
 			return this.dependency;
 		}
 	}
 
 
+	/**
+	 * Intentionally spelling "custom" with a "k" since there are numerous
+	 * classes in this package named *Custom*.
+	 */
 	@CustomAnnotation
-	public static class CustomAnnotationDependencyBean {
+	public static class KustomAnnotationDependencyBean {
 	}
 
 
 	public static class CustomTypeFilter implements TypeFilter {
 
+		/**
+		 * Intentionally spelling "custom" with a "k" since there are numerous
+		 * classes in this package named *Custom*.
+		 */
 		@Override
 		public boolean match(MetadataReader metadataReader, MetadataReaderFactory metadataReaderFactory) {
-			return metadataReader.getClassMetadata().getClassName().contains("Custom");
+			return metadataReader.getClassMetadata().getClassName().contains("Kustom");
 		}
 	}
 

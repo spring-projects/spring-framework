@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 package org.springframework.mock.jndi;
 
 import java.util.Hashtable;
-
 import javax.naming.Context;
 import javax.naming.NamingException;
 import javax.naming.spi.InitialContextFactory;
@@ -42,7 +41,7 @@ import org.springframework.util.ClassUtils;
  * <ul>
  * <li>{@code SingleConnectionDataSource} (using the same Connection for all getConnection calls)
  * <li>{@code DriverManagerDataSource} (creating a new Connection on each getConnection call)
- * <li>Apache's Jakarta Commons DBCP offers {@code org.apache.commons.dbcp.BasicDataSource} (a real pool)
+ * <li>Apache's Commons DBCP offers {@code org.apache.commons.dbcp.BasicDataSource} (a real pool)
  * </ul>
  *
  * <p>Typical usage in bootstrap code:
@@ -196,7 +195,7 @@ public class SimpleNamingContextBuilder implements InitialContextFactoryBuilder 
 		if (activated == null && environment != null) {
 			Object icf = environment.get(Context.INITIAL_CONTEXT_FACTORY);
 			if (icf != null) {
-				Class<?> icfClass = null;
+				Class<?> icfClass;
 				if (icf instanceof Class) {
 					icfClass = (Class<?>) icf;
 				}
@@ -215,10 +214,7 @@ public class SimpleNamingContextBuilder implements InitialContextFactoryBuilder 
 					return (InitialContextFactory) icfClass.newInstance();
 				}
 				catch (Throwable ex) {
-					IllegalStateException ise =
-							new IllegalStateException("Cannot instantiate specified InitialContextFactory: " + icf);
-					ise.initCause(ex);
-					throw ise;
+					throw new IllegalStateException("Cannot instantiate specified InitialContextFactory: " + icf, ex);
 				}
 			}
 		}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,12 +27,12 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import javax.sql.DataSource;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+
 import org.springframework.jdbc.core.RowMapper;
 
 import static org.junit.Assert.*;
@@ -91,9 +91,9 @@ public class NamedParameterQueryTests {
 
 		assertEquals("All rows returned", 2, li.size());
 		assertEquals("First row is Integer", 11,
-				((Integer) ((Map) li.get(0)).get("age")).intValue());
+				((Integer) li.get(0).get("age")).intValue());
 		assertEquals("Second row is Integer", 12,
-				((Integer) ((Map) li.get(1)).get("age")).intValue());
+				((Integer) li.get(1).get("age")).intValue());
 
 		verify(connection).prepareStatement("SELECT AGE FROM CUSTMR WHERE ID < ?");
 		verify(preparedStatement).setObject(1, 3);
@@ -126,7 +126,7 @@ public class NamedParameterQueryTests {
 
 		assertEquals("All rows returned", 1, li.size());
 		assertEquals("First row is Integer", 11,
-				((Integer) ((Map) li.get(0)).get("age")).intValue());
+				((Integer) li.get(0).get("age")).intValue());
 		verify(connection).prepareStatement("SELECT AGE FROM CUSTMR WHERE ID < ?");
 		verify(preparedStatement).setObject(1, 3);
 	}
@@ -157,7 +157,7 @@ public class NamedParameterQueryTests {
 
 		MapSqlParameterSource parms = new MapSqlParameterSource();
 		parms.addValue("id", 3);
-		Map map = template.queryForMap("SELECT AGE FROM CUSTMR WHERE ID < :id", parms);
+		Map<String, Object> map = template.queryForMap("SELECT AGE FROM CUSTMR WHERE ID < :id", parms);
 
 		assertEquals("Row is Integer", 11, ((Integer) map.get("age")).intValue());
 		verify(connection).prepareStatement("SELECT AGE FROM CUSTMR WHERE ID < ?");
@@ -173,11 +173,11 @@ public class NamedParameterQueryTests {
 		parms.addValue("id", 3);
 		Object o = template.queryForObject("SELECT AGE FROM CUSTMR WHERE ID = :id",
 				parms, new RowMapper<Object>() {
-					@Override
-					public Object mapRow(ResultSet rs, int rowNum) throws SQLException {
-						return rs.getInt(1);
-					}
-				});
+			@Override
+			public Object mapRow(ResultSet rs, int rowNum) throws SQLException {
+				return rs.getInt(1);
+			}
+		});
 
 		assertTrue("Correct result type", o instanceof Integer);
 		verify(connection).prepareStatement("SELECT AGE FROM CUSTMR WHERE ID = ?");
@@ -225,7 +225,7 @@ public class NamedParameterQueryTests {
 		given(resultSet.getInt(1)).willReturn(22);
 
 		MapSqlParameterSource parms = new MapSqlParameterSource();
-		parms.addValue("ids", Arrays.asList(new Object[] { 3, 4 }));
+		parms.addValue("ids", Arrays.asList(3, 4));
 		Object o = template.queryForObject(sql, parms, Integer.class);
 
 		assertTrue("Correct result type", o instanceof Integer);
@@ -241,8 +241,8 @@ public class NamedParameterQueryTests {
 
 		MapSqlParameterSource parms = new MapSqlParameterSource();
 		List<Object[]> l1 = new ArrayList<Object[]>();
-		l1.add(new Object[] { 3, "Rod" });
-		l1.add(new Object[] { 4, "Juergen" });
+		l1.add(new Object[] {3, "Rod"});
+		l1.add(new Object[] {4, "Juergen"});
 		parms.addValue("multiExpressionList", l1);
 		Object o = template.queryForObject(
 				"SELECT AGE FROM CUSTMR WHERE (ID, NAME) IN (:multiExpressionList)",
@@ -262,7 +262,7 @@ public class NamedParameterQueryTests {
 
 		MapSqlParameterSource parms = new MapSqlParameterSource();
 		parms.addValue("id", 3);
-		int i = template.queryForInt("SELECT AGE FROM CUSTMR WHERE ID = :id", parms);
+		int i = template.queryForObject("SELECT AGE FROM CUSTMR WHERE ID = :id", parms, Integer.class).intValue();
 
 		assertEquals("Return of an int", 22, i);
 		verify(connection).prepareStatement("SELECT AGE FROM CUSTMR WHERE ID = ?");
@@ -278,7 +278,7 @@ public class NamedParameterQueryTests {
 		BeanPropertySqlParameterSource parms = new BeanPropertySqlParameterSource(
 				new ParameterBean(3));
 
-		long l = template.queryForLong("SELECT AGE FROM CUSTMR WHERE ID = :id", parms);
+		long l = template.queryForObject("SELECT AGE FROM CUSTMR WHERE ID = :id", parms, Long.class).longValue();
 
 		assertEquals("Return of a long", 87, l);
 		verify(connection).prepareStatement("SELECT AGE FROM CUSTMR WHERE ID = ?");

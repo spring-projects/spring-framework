@@ -32,8 +32,9 @@ import org.springframework.util.ReflectionUtils;
  * Generic converter that attempts to convert a source Object to a target type
  * by delegating to methods on the target type.
  *
- * <p>Calls a static {@code valueOf(sourceType)} or Java 8 style {@code of(sourceType)} method
- * on the target type to perform the conversion, if such a method exists. Otherwise, it calls
+ * <p>Calls a static {@code valueOf(sourceType)} or Java 8 style {@code of|from(sourceType)}
+ * method on the target type to perform the conversion, if such a method exists. Otherwise,
+ * it checks for a {@code to[targetType.simpleName]} method on the source type calls
  * the target type's constructor that accepts a single {@code sourceType} argument, if such
  * a constructor exists. If neither strategy works, it throws a ConversionFailedException.
  *
@@ -54,7 +55,9 @@ final class ObjectToObjectConverter implements ConditionalGenericConverter {
 			// no conversion required
 			return false;
 		}
-		return hasValueOfMethodOrConstructor(targetType.getType(), sourceType.getType());
+		return (String.class.equals(targetType.getType()) ?
+				(ClassUtils.getConstructorIfAvailable(String.class, sourceType.getType()) != null) :
+				hasToMethodOrOfMethodOrConstructor(targetType.getType(), sourceType.getType()));
 	}
 
 	@Override
@@ -64,17 +67,22 @@ final class ObjectToObjectConverter implements ConditionalGenericConverter {
 		}
 		Class<?> sourceClass = sourceType.getType();
 		Class<?> targetClass = targetType.getType();
-		Method method = getValueOfMethodOn(targetClass, sourceClass);
 		try {
-			if (method != null) {
-				ReflectionUtils.makeAccessible(method);
-				return method.invoke(null, source);
-			}
-			else {
-				Constructor<?> constructor = getConstructor(targetClass, sourceClass);
-				if (constructor != null) {
-					return constructor.newInstance(source);
+			if (!String.class.equals(targetClass)) {
+				Method method = getToMethod(targetClass, sourceClass);
+				if (method != null) {
+					ReflectionUtils.makeAccessible(method);
+					return method.invoke(source);
 				}
+				method = getOfMethod(targetClass, sourceClass);
+				if (method != null) {
+					ReflectionUtils.makeAccessible(method);
+					return method.invoke(null, source);
+				}
+			}
+			Constructor<?> constructor = ClassUtils.getConstructorIfAvailable(targetClass, sourceClass);
+			if (constructor != null) {
+				return constructor.newInstance(source);
 			}
 		}
 		catch (InvocationTargetException ex) {
@@ -83,24 +91,31 @@ final class ObjectToObjectConverter implements ConditionalGenericConverter {
 		catch (Throwable ex) {
 			throw new ConversionFailedException(sourceType, targetType, source, ex);
 		}
-		throw new IllegalStateException("No static valueOf(" + sourceClass.getName() +
+		throw new IllegalStateException("No static valueOf/of/from(" + sourceClass.getName() +
 				") method or Constructor(" + sourceClass.getName() + ") exists on " + targetClass.getName());
 	}
 
-	static boolean hasValueOfMethodOrConstructor(Class<?> clazz, Class<?> sourceParameterType) {
-		return getValueOfMethodOn(clazz, sourceParameterType) != null || getConstructor(clazz, sourceParameterType) != null;
+
+	private static boolean hasToMethodOrOfMethodOrConstructor(Class<?> targetClass, Class<?> sourceClass) {
+		return (getToMethod(targetClass, sourceClass) != null ||
+				getOfMethod(targetClass, sourceClass) != null ||
+				ClassUtils.getConstructorIfAvailable(targetClass, sourceClass) != null);
 	}
 
-	private static Method getValueOfMethodOn(Class<?> clazz, Class<?> sourceParameterType) {
-		Method method = ClassUtils.getStaticMethod(clazz, "valueOf", sourceParameterType);
+	private static Method getToMethod(Class<?> targetClass, Class<?> sourceClass) {
+		Method method = ClassUtils.getMethodIfAvailable(sourceClass, "to" + targetClass.getSimpleName());
+		return (method != null && targetClass.equals(method.getReturnType()) ? method : null);
+	}
+
+	static Method getOfMethod(Class<?> targetClass, Class<?> sourceClass) {
+		Method method = ClassUtils.getStaticMethod(targetClass, "valueOf", sourceClass);
 		if (method == null) {
-			method = ClassUtils.getStaticMethod(clazz, "of", sourceParameterType);
+			method = ClassUtils.getStaticMethod(targetClass, "of", sourceClass);
+			if (method == null) {
+				method = ClassUtils.getStaticMethod(targetClass, "from", sourceClass);
+			}
 		}
 		return method;
-	}
-
-	private static Constructor<?> getConstructor(Class<?> clazz, Class<?> sourceParameterType) {
-		return ClassUtils.getConstructorIfAvailable(clazz, sourceParameterType);
 	}
 
 }

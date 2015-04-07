@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 
 package org.springframework.cache.annotation;
 
-import java.lang.reflect.AnnotatedElement;
+import java.lang.reflect.Method;
 import java.util.Collection;
 
 import org.springframework.cache.interceptor.CacheOperation;
@@ -28,20 +28,34 @@ import org.springframework.cache.interceptor.CacheOperation;
  * {@link Cacheable}, {@link CachePut} or {@link CacheEvict}.
  *
  * @author Costin Leau
+ * @author Stephane Nicoll
  * @since 3.1
  */
 public interface CacheAnnotationParser {
 
 	/**
-	 * Parses the cache definition for the given method or class,
+	 * Parses the cache definition for the given class,
 	 * based on a known annotation type.
 	 * <p>This essentially parses a known cache annotation into Spring's
-	 * metadata attribute class. Returns {@code null} if the method/class
+	 * metadata attribute class. Returns {@code null} if the class
 	 * is not cacheable.
-	 * @param ae the annotated method or class
+	 * @param type the annotated class
 	 * @return CacheOperation the configured caching operation,
 	 * or {@code null} if none was found
-	 * @see AnnotationCacheOperationSource#determineCacheOperations(AnnotatedElement)
+	 * @see AnnotationCacheOperationSource#findCacheOperations(Class)
 	 */
-	Collection<CacheOperation> parseCacheAnnotations(AnnotatedElement ae);
+	Collection<CacheOperation> parseCacheAnnotations(Class<?> type);
+
+	/**
+	 * Parses the cache definition for the given method,
+	 * based on a known annotation type.
+	 * <p>This essentially parses a known cache annotation into Spring's
+	 * metadata attribute class. Returns {@code null} if the method
+	 * is not cacheable.
+	 * @param method the annotated method
+	 * @return CacheOperation the configured caching operation,
+	 * or {@code null} if none was found
+	 * @see AnnotationCacheOperationSource#findCacheOperations(Method)
+	 */
+	Collection<CacheOperation> parseCacheAnnotations(Method method);
 }

@@ -87,7 +87,7 @@ public class SessionScope extends AbstractRequestAttributesScope {
 	}
 
 	@Override
-	public Object get(String name, ObjectFactory objectFactory) {
+	public Object get(String name, ObjectFactory<?> objectFactory) {
 		Object mutex = RequestContextHolder.currentRequestAttributes().getSessionMutex();
 		synchronized (mutex) {
 			return super.get(name, objectFactory);

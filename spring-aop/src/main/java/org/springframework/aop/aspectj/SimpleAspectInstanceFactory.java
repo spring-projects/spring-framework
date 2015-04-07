@@ -29,14 +29,14 @@ import org.springframework.util.Assert;
  */
 public class SimpleAspectInstanceFactory implements AspectInstanceFactory {
 
-	private final Class aspectClass;
+	private final Class<?> aspectClass;
 
 
 	/**
 	 * Create a new SimpleAspectInstanceFactory for the given aspect class.
 	 * @param aspectClass the aspect class
 	 */
-	public SimpleAspectInstanceFactory(Class aspectClass) {
+	public SimpleAspectInstanceFactory(Class<?> aspectClass) {
 		Assert.notNull(aspectClass, "Aspect class must not be null");
 		this.aspectClass = aspectClass;
 	}
@@ -44,7 +44,7 @@ public class SimpleAspectInstanceFactory implements AspectInstanceFactory {
 	/**
 	 * Return the specified aspect class (never {@code null}).
 	 */
-	public final Class getAspectClass() {
+	public final Class<?> getAspectClass() {
 		return this.aspectClass;
 	}
 

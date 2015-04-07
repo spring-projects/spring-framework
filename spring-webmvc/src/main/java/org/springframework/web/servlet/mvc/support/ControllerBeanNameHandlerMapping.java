@@ -65,7 +65,7 @@ public class ControllerBeanNameHandlerMapping extends AbstractControllerUrlHandl
 
 
 	@Override
-	protected String[] buildUrlsForHandler(String beanName, Class beanClass) {
+	protected String[] buildUrlsForHandler(String beanName, Class<?> beanClass) {
 		List<String> urls = new ArrayList<String>();
 		urls.add(generatePathMapping(beanName));
 		String[] aliases = getApplicationContext().getAliases(beanName);

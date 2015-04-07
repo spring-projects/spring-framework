@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,7 +41,6 @@ import org.dom4j.io.SAXReader;
 import org.springframework.beans.propertyeditors.CustomCollectionEditor;
 import org.springframework.format.Formatter;
 import org.springframework.format.support.FormattingConversionService;
-import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.BindingResult;
@@ -195,8 +194,6 @@ public class SelectTagTests extends AbstractFormTagTests {
 		transformTag.setParent(this.tag);
 		transformTag.setPageContext(getPageContext());
 		transformTag.doStartTag();
-		String output = getOutput();
-		System.err.println(output);
 		assertEquals("Austria", getPageContext().findAttribute("key"));
 	}
 
@@ -256,10 +253,10 @@ public class SelectTagTests extends AbstractFormTagTests {
 		getPageContext().getRequest().setAttribute(BindingResult.MODEL_KEY_PREFIX + "testBean", bindingResult);
 		this.tag.doStartTag();
 		String output = getOutput();
-		System.err.println(output);
 		assertTrue(output.startsWith("<select "));
 		assertTrue(output.endsWith("</select>"));
 		assertFalse(output.contains("selected=\"selected\""));
+		assertFalse(output.contains("multiple=\"multiple\""));
 	}
 
 	public void testNestedPathWithListAndEditor() throws Exception {
@@ -313,7 +310,6 @@ public class SelectTagTests extends AbstractFormTagTests {
 		getPageContext().getRequest().setAttribute(BindingResult.MODEL_KEY_PREFIX + "testBean", bindingResult);
 		this.tag.doStartTag();
 		String output = getOutput();
-		System.err.println(output);
 		assertTrue(output.startsWith("<select "));
 		assertTrue(output.endsWith("</select>"));
 		assertFalse(output.contains("selected=\"selected\""));
@@ -336,8 +332,8 @@ public class SelectTagTests extends AbstractFormTagTests {
 		}
 		catch (JspException expected) {
 			String message = expected.getMessage();
-			assertTrue(message.indexOf("items") > -1);
-			assertTrue(message.indexOf("org.springframework.tests.sample.beans.TestBean") > -1);
+			assertTrue(message.contains("items"));
+			assertTrue(message.contains("org.springframework.tests.sample.beans.TestBean"));
 		}
 	}
 
@@ -665,7 +661,6 @@ public class SelectTagTests extends AbstractFormTagTests {
 	 * </ul>
 	 */
 	public void testWithMultiMapWithItemValueAndItemLabel() throws Exception {
-
 		// Save original default locale.
 		final Locale defaultLocale = Locale.getDefault();
 		// Use a locale that doesn't result in the generation of HTML entities
@@ -687,7 +682,6 @@ public class SelectTagTests extends AbstractFormTagTests {
 
 			BeanPropertyBindingResult bindingResult = new BeanPropertyBindingResult(getTestBean(), COMMAND_NAME);
 			bindingResult.getPropertyAccessor().registerCustomEditor(Country.class, new PropertyEditorSupport() {
-
 				@Override
 				public void setAsText(final String text) throws IllegalArgumentException {
 					setValue(Country.getCountryWithIsoCode(text));
@@ -738,7 +732,7 @@ public class SelectTagTests extends AbstractFormTagTests {
 		}
 	}
 
-	public void testMultiWithEmptyCollection() throws Exception {
+	public void testMultipleForCollection() throws Exception {
 		this.bean.setSomeList(new ArrayList());
 
 		this.tag.setPath("someList");
@@ -765,6 +759,140 @@ public class SelectTagTests extends AbstractFormTagTests {
 
 		Element inputElement = rootElement.element("input");
 		assertNotNull(inputElement);
+	}
+
+	public void testMultipleWithStringValue() throws Exception {
+		this.tag.setPath("name");
+		this.tag.setItems(Country.getCountries());
+		this.tag.setItemValue("isoCode");
+		this.tag.setMultiple("multiple");
+		int result = this.tag.doStartTag();
+		assertEquals(Tag.SKIP_BODY, result);
+
+		String output = getOutput();
+		output = "<doc>" + output + "</doc>";
+
+		SAXReader reader = new SAXReader();
+		Document document = reader.read(new StringReader(output));
+		Element rootElement = document.getRootElement();
+		assertEquals(2, rootElement.elements().size());
+
+		Element selectElement = rootElement.element("select");
+		assertEquals("select", selectElement.getName());
+		assertEquals("name", selectElement.attribute("name").getValue());
+		assertEquals("multiple", selectElement.attribute("multiple").getValue());
+
+		List children = selectElement.elements();
+		assertEquals("Incorrect number of children", 4, children.size());
+
+		Element inputElement = rootElement.element("input");
+		assertNotNull(inputElement);
+	}
+
+	public void testMultipleExplicitlyTrue() throws Exception {
+		this.tag.setPath("name");
+		this.tag.setItems(Country.getCountries());
+		this.tag.setItemValue("isoCode");
+		this.tag.setMultiple("true");
+		int result = this.tag.doStartTag();
+		assertEquals(Tag.SKIP_BODY, result);
+
+		String output = getOutput();
+		output = "<doc>" + output + "</doc>";
+
+		SAXReader reader = new SAXReader();
+		Document document = reader.read(new StringReader(output));
+		Element rootElement = document.getRootElement();
+		assertEquals(2, rootElement.elements().size());
+
+		Element selectElement = rootElement.element("select");
+		assertEquals("select", selectElement.getName());
+		assertEquals("name", selectElement.attribute("name").getValue());
+		assertEquals("multiple", selectElement.attribute("multiple").getValue());
+
+		List children = selectElement.elements();
+		assertEquals("Incorrect number of children", 4, children.size());
+
+		Element inputElement = rootElement.element("input");
+		assertNotNull(inputElement);
+	}
+
+	public void testMultipleExplicitlyFalse() throws Exception {
+		this.tag.setPath("name");
+		this.tag.setItems(Country.getCountries());
+		this.tag.setItemValue("isoCode");
+		this.tag.setMultiple("false");
+		int result = this.tag.doStartTag();
+		assertEquals(Tag.SKIP_BODY, result);
+
+		String output = getOutput();
+		output = "<doc>" + output + "</doc>";
+
+		SAXReader reader = new SAXReader();
+		Document document = reader.read(new StringReader(output));
+		Element rootElement = document.getRootElement();
+		assertEquals(1, rootElement.elements().size());
+
+		Element selectElement = rootElement.element("select");
+		assertEquals("select", selectElement.getName());
+		assertEquals("name", selectElement.attribute("name").getValue());
+		assertNull(selectElement.attribute("multiple"));
+
+		List children = selectElement.elements();
+		assertEquals("Incorrect number of children", 4, children.size());
+	}
+
+	public void testMultipleWithBooleanTrue() throws Exception {
+		this.tag.setPath("name");
+		this.tag.setItems(Country.getCountries());
+		this.tag.setItemValue("isoCode");
+		this.tag.setMultiple(true);
+		int result = this.tag.doStartTag();
+		assertEquals(Tag.SKIP_BODY, result);
+
+		String output = getOutput();
+		output = "<doc>" + output + "</doc>";
+
+		SAXReader reader = new SAXReader();
+		Document document = reader.read(new StringReader(output));
+		Element rootElement = document.getRootElement();
+		assertEquals(2, rootElement.elements().size());
+
+		Element selectElement = rootElement.element("select");
+		assertEquals("select", selectElement.getName());
+		assertEquals("name", selectElement.attribute("name").getValue());
+		assertEquals("multiple", selectElement.attribute("multiple").getValue());
+
+		List children = selectElement.elements();
+		assertEquals("Incorrect number of children", 4, children.size());
+
+		Element inputElement = rootElement.element("input");
+		assertNotNull(inputElement);
+	}
+
+	public void testMultipleWithBooleanFalse() throws Exception {
+		this.tag.setPath("name");
+		this.tag.setItems(Country.getCountries());
+		this.tag.setItemValue("isoCode");
+		this.tag.setMultiple(false);
+		int result = this.tag.doStartTag();
+		assertEquals(Tag.SKIP_BODY, result);
+
+		String output = getOutput();
+		output = "<doc>" + output + "</doc>";
+
+		SAXReader reader = new SAXReader();
+		Document document = reader.read(new StringReader(output));
+		Element rootElement = document.getRootElement();
+		assertEquals(1, rootElement.elements().size());
+
+		Element selectElement = rootElement.element("select");
+		assertEquals("select", selectElement.getName());
+		assertEquals("name", selectElement.attribute("name").getValue());
+		assertNull(selectElement.attribute("multiple"));
+
+		List children = selectElement.elements();
+		assertEquals("Incorrect number of children", 4, children.size());
 	}
 
 

@@ -16,21 +16,15 @@
 
 package org.springframework.expression.spel;
 
-import static org.hamcrest.Matchers.equalTo;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-
 import java.lang.reflect.Method;
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 import org.junit.Test;
+
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.expression.AccessException;
 import org.springframework.expression.BeanResolver;
@@ -48,6 +42,9 @@ import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.expression.spel.support.StandardTypeLocator;
 import org.springframework.expression.spel.testresources.TestPerson;
 
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
+
 /**
  * Tests the evaluation of real expressions in a real context.
  *
@@ -55,9 +52,10 @@ import org.springframework.expression.spel.testresources.TestPerson;
  * @author Mark Fisher
  * @author Sam Brannen
  * @author Phillip Webb
+ * @author Giovanni Dall'Oglio Risso
  * @since 3.0
  */
-public class EvaluationTests extends ExpressionTestCase {
+public class EvaluationTests extends AbstractExpressionTests {
 
 	@Test
 	public void testCreateListsOnAttemptToIndexNull01() throws EvaluationException, ParseException {
@@ -469,6 +467,35 @@ public class EvaluationTests extends ExpressionTestCase {
 	}
 
 	@Test
+	public void operatorVariants() throws Exception {
+		SpelExpression expr = (SpelExpression)parser.parseExpression("#a < #b");
+		EvaluationContext ctx = new StandardEvaluationContext();
+		ctx.setVariable("a", (short)3);
+		ctx.setVariable("b", (short)6);
+		assertTrue(expr.getValue(ctx, Boolean.class));
+		ctx.setVariable("b", (byte)6);
+		assertTrue(expr.getValue(ctx, Boolean.class));
+		ctx.setVariable("a", (byte)9);
+		ctx.setVariable("b", (byte)6);
+		assertFalse(expr.getValue(ctx, Boolean.class));
+		ctx.setVariable("a", 10L);
+		ctx.setVariable("b", (short)30);
+		assertTrue(expr.getValue(ctx, Boolean.class));
+		ctx.setVariable("a", (byte)3);
+		ctx.setVariable("b", (short)30);
+		assertTrue(expr.getValue(ctx, Boolean.class));
+		ctx.setVariable("a", (byte)3);
+		ctx.setVariable("b", 30L);
+		assertTrue(expr.getValue(ctx, Boolean.class));
+		ctx.setVariable("a", (byte)3);
+		ctx.setVariable("b", 30f);
+		assertTrue(expr.getValue(ctx, Boolean.class));
+		ctx.setVariable("a", new BigInteger("10"));
+		ctx.setVariable("b", new BigInteger("20"));
+		assertTrue(expr.getValue(ctx, Boolean.class));
+	}
+
+	@Test
 	public void testTypeReferencesPrimitive() {
 		evaluate("T(int)", "int", Class.class);
 		evaluate("T(byte)", "byte", Class.class);
@@ -636,6 +663,7 @@ public class EvaluationTests extends ExpressionTestCase {
 
 	static class Spr9751 {
 		public String type = "hello";
+		public BigDecimal bd = new BigDecimal("2");
 		public double ddd = 2.0d;
 		public float fff = 3.0f;
 		public long lll = 66666L;
@@ -755,6 +783,13 @@ public class EvaluationTests extends ExpressionTestCase {
 		ExpressionParser parser = new SpelExpressionParser(new SpelParserConfiguration(true, true));
 		Expression e = null;
 
+		// BigDecimal
+		e = parser.parseExpression("bd++");
+		assertTrue(new BigDecimal("2").equals(helper.bd));
+		BigDecimal return_bd = e.getValue(ctx,BigDecimal.class);
+		assertTrue(new BigDecimal("2").equals(return_bd));
+		assertTrue(new BigDecimal("3").equals(helper.bd));
+
 		// double
 		e = parser.parseExpression("ddd++");
 		assertEquals(2.0d,helper.ddd,0d);
@@ -800,6 +835,14 @@ public class EvaluationTests extends ExpressionTestCase {
 		StandardEvaluationContext ctx = new StandardEvaluationContext(helper);
 		ExpressionParser parser = new SpelExpressionParser(new SpelParserConfiguration(true, true));
 		Expression e = null;
+
+
+		// BigDecimal
+		e = parser.parseExpression("++bd");
+		assertTrue(new BigDecimal("2").equals(helper.bd));
+		BigDecimal return_bd = e.getValue(ctx,BigDecimal.class);
+		assertTrue(new BigDecimal("3").equals(return_bd));
+		assertTrue(new BigDecimal("3").equals(helper.bd));
 
 		// double
 		e = parser.parseExpression("++ddd");
@@ -907,6 +950,13 @@ public class EvaluationTests extends ExpressionTestCase {
 		ExpressionParser parser = new SpelExpressionParser(new SpelParserConfiguration(true, true));
 		Expression e = null;
 
+		// BigDecimal
+		e = parser.parseExpression("bd--");
+		assertTrue(new BigDecimal("2").equals(helper.bd));
+		BigDecimal return_bd = e.getValue(ctx,BigDecimal.class);
+		assertTrue(new BigDecimal("2").equals(return_bd));
+		assertTrue(new BigDecimal("1").equals(helper.bd));
+
 		// double
 		e = parser.parseExpression("ddd--");
 		assertEquals(2.0d,helper.ddd,0d);
@@ -952,6 +1002,13 @@ public class EvaluationTests extends ExpressionTestCase {
 		StandardEvaluationContext ctx = new StandardEvaluationContext(helper);
 		ExpressionParser parser = new SpelExpressionParser(new SpelParserConfiguration(true, true));
 		Expression e = null;
+
+		// BigDecimal
+		e = parser.parseExpression("--bd");
+		assertTrue(new BigDecimal("2").equals(helper.bd));
+		BigDecimal return_bd = e.getValue(ctx,BigDecimal.class);
+		assertTrue(new BigDecimal("1").equals(return_bd));
+		assertTrue(new BigDecimal("1").equals(helper.bd));
 
 		// double
 		e = parser.parseExpression("--ddd");
@@ -1368,6 +1425,11 @@ public class EvaluationTests extends ExpressionTestCase {
 		expectFailNotAssignable(parser, ctx, "({1,2,3})++");
 		expectFailNotAssignable(parser, ctx, "--({1,2,3})");
 		expectFailSetValueNotSupported(parser, ctx, "({1,2,3})=({1,2,3})");
+
+		// InlineMap
+		expectFailNotAssignable(parser, ctx, "({'a':1,'b':2,'c':3})++");
+		expectFailNotAssignable(parser, ctx, "--({'a':1,'b':2,'c':3})");
+		expectFailSetValueNotSupported(parser, ctx, "({'a':1,'b':2,'c':3})=({'a':1,'b':2,'c':3})");
 
 		// BeanReference
 		ctx.setBeanResolver(new MyBeanResolver());

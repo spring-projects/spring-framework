@@ -20,7 +20,6 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
-
 import javax.resource.NotSupportedException;
 import javax.resource.ResourceException;
 import javax.resource.cci.Connection;
@@ -213,7 +212,7 @@ public class SingleConnectionFactory extends DelegatingConnectionFactory impleme
 	protected Connection getCloseSuppressingConnectionProxy(Connection target) {
 		return (Connection) Proxy.newProxyInstance(
 				Connection.class.getClassLoader(),
-				new Class[] {Connection.class},
+				new Class<?>[] {Connection.class},
 				new CloseSuppressingInvocationHandler(target));
 	}
 

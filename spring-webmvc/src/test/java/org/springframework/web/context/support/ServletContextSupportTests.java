@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,33 +16,22 @@
 
 package org.springframework.web.context.support;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-
 import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import org.junit.Test;
+
 import org.springframework.beans.MutablePropertyValues;
-import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.beans.factory.BeanCreationException;
-import org.springframework.beans.factory.config.BeanDefinitionHolder;
-import org.springframework.beans.factory.config.ConstructorArgumentValues;
-import org.springframework.beans.factory.config.RuntimeBeanReference;
-import org.springframework.beans.factory.support.ChildBeanDefinition;
-import org.springframework.beans.factory.support.ManagedList;
-import org.springframework.beans.factory.support.ManagedMap;
-import org.springframework.beans.factory.support.ManagedSet;
-import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.core.io.Resource;
 import org.springframework.mock.web.test.MockServletContext;
+import org.springframework.tests.sample.beans.TestBean;
+
+import static org.junit.Assert.*;
 
 /**
  * Tests for various ServletContext-related support classes.
@@ -144,213 +133,6 @@ public class ServletContextSupportTests {
 	}
 
 	@Test
-	@Deprecated
-	public void testServletContextPropertyPlaceholderConfigurer() {
-		MockServletContext sc = new MockServletContext();
-		sc.addInitParameter("key4", "mykey4");
-
-		StaticWebApplicationContext wac = new StaticWebApplicationContext();
-		wac.setServletContext(sc);
-
-		MutablePropertyValues pvs = new MutablePropertyValues();
-		pvs.add("age", "${age}");
-		pvs.add("name", "${key4}name${var}${var}${");
-		pvs.add("spouse", new RuntimeBeanReference("${ref}"));
-		wac.registerSingleton("tb1", TestBean.class, pvs);
-
-		RootBeanDefinition bd = new RootBeanDefinition(TestBean.class);
-		wac.getDefaultListableBeanFactory().registerBeanDefinition("tb2", bd);
-
-		pvs = new MutablePropertyValues();
-		pvs.add("properties", "age=98\nvar=${m}var\nref=tb2\nm=my");
-		wac.registerSingleton("configurer", ServletContextPropertyPlaceholderConfigurer.class, pvs);
-
-		wac.refresh();
-
-		TestBean tb1 = (TestBean) wac.getBean("tb1");
-		TestBean tb2 = (TestBean) wac.getBean("tb2");
-		assertEquals(98, tb1.getAge());
-		assertEquals("mykey4namemyvarmyvar${", tb1.getName());
-		assertEquals(tb2, tb1.getSpouse());
-	}
-
-	@Test
-	@Deprecated
-	public void testServletContextPropertyPlaceholderConfigurerWithLocalOverriding() {
-		MockServletContext sc = new MockServletContext();
-		sc.addInitParameter("key4", "mykey4");
-
-		StaticWebApplicationContext wac = new StaticWebApplicationContext();
-		wac.setServletContext(sc);
-
-		MutablePropertyValues pvs = new MutablePropertyValues();
-		pvs.add("age", "${age}");
-		pvs.add("name", "${key4}name${var}${var}${");
-		pvs.add("spouse", new RuntimeBeanReference("${ref}"));
-		wac.registerSingleton("tb1", TestBean.class, pvs);
-
-		RootBeanDefinition bd = new RootBeanDefinition(TestBean.class);
-		wac.getDefaultListableBeanFactory().registerBeanDefinition("tb2", bd);
-
-		pvs = new MutablePropertyValues();
-		pvs.add("properties", "age=98\nvar=${m}var\nref=tb2\nm=my\nkey4=yourkey4");
-		wac.registerSingleton("configurer", ServletContextPropertyPlaceholderConfigurer.class, pvs);
-
-		wac.refresh();
-
-		TestBean tb1 = (TestBean) wac.getBean("tb1");
-		TestBean tb2 = (TestBean) wac.getBean("tb2");
-		assertEquals(98, tb1.getAge());
-		assertEquals("yourkey4namemyvarmyvar${", tb1.getName());
-		assertEquals(tb2, tb1.getSpouse());
-	}
-
-	@Test
-	@Deprecated
-	public void testServletContextPropertyPlaceholderConfigurerWithContextOverride() {
-		MockServletContext sc = new MockServletContext();
-		sc.addInitParameter("key4", "mykey4");
-
-		StaticWebApplicationContext wac = new StaticWebApplicationContext();
-		wac.setServletContext(sc);
-
-		MutablePropertyValues pvs = new MutablePropertyValues();
-		pvs.add("age", "${age}");
-		pvs.add("name", "${key4}name${var}${var}${");
-		pvs.add("spouse", new RuntimeBeanReference("${ref}"));
-		wac.registerSingleton("tb1", TestBean.class, pvs);
-
-		RootBeanDefinition bd = new RootBeanDefinition(TestBean.class);
-		wac.getDefaultListableBeanFactory().registerBeanDefinition("tb2", bd);
-
-		pvs = new MutablePropertyValues();
-		pvs.add("properties", "age=98\nvar=${m}var\nref=tb2\nm=my\nkey4=yourkey4");
-		pvs.add("contextOverride", Boolean.TRUE);
-		wac.registerSingleton("configurer", ServletContextPropertyPlaceholderConfigurer.class, pvs);
-
-		wac.refresh();
-
-		TestBean tb1 = (TestBean) wac.getBean("tb1");
-		TestBean tb2 = (TestBean) wac.getBean("tb2");
-		assertEquals(98, tb1.getAge());
-		assertEquals("mykey4namemyvarmyvar${", tb1.getName());
-		assertEquals(tb2, tb1.getSpouse());
-	}
-
-	@Test
-	@Deprecated
-	public void testServletContextPropertyPlaceholderConfigurerWithContextOverrideAndAttributes() {
-		MockServletContext sc = new MockServletContext();
-		sc.addInitParameter("key4", "mykey4");
-		sc.setAttribute("key4", "attrkey4");
-
-		StaticWebApplicationContext wac = new StaticWebApplicationContext();
-		wac.setServletContext(sc);
-
-		MutablePropertyValues pvs = new MutablePropertyValues();
-		pvs.add("age", "${age}");
-		pvs.add("name", "${key4}name${var}${var}${");
-		pvs.add("spouse", new RuntimeBeanReference("${ref}"));
-		wac.registerSingleton("tb1", TestBean.class, pvs);
-
-		RootBeanDefinition bd = new RootBeanDefinition(TestBean.class);
-		wac.getDefaultListableBeanFactory().registerBeanDefinition("tb2", bd);
-
-		pvs = new MutablePropertyValues();
-		pvs.add("properties", "age=98\nvar=${m}var\nref=tb2\nm=my\nkey4=yourkey4");
-		pvs.add("contextOverride", Boolean.TRUE);
-		pvs.add("searchContextAttributes", Boolean.TRUE);
-		wac.registerSingleton("configurer", ServletContextPropertyPlaceholderConfigurer.class, pvs);
-
-		wac.refresh();
-
-		TestBean tb1 = (TestBean) wac.getBean("tb1");
-		TestBean tb2 = (TestBean) wac.getBean("tb2");
-		assertEquals(98, tb1.getAge());
-		assertEquals("attrkey4namemyvarmyvar${", tb1.getName());
-		assertEquals(tb2, tb1.getSpouse());
-	}
-
-	@Test
-	@Deprecated
-	public void testServletContextPropertyPlaceholderConfigurerWithAttributes() {
-		MockServletContext sc = new MockServletContext();
-		sc.addInitParameter("key4", "mykey4");
-
-		StaticWebApplicationContext wac = new StaticWebApplicationContext();
-		wac.setServletContext(sc);
-
-		MutablePropertyValues pvs = new MutablePropertyValues();
-		pvs.add("age", "${age}");
-		pvs.add("name", "name${var}${var}${");
-		pvs.add("spouse", new RuntimeBeanReference("${ref}"));
-		wac.registerSingleton("tb1", TestBean.class, pvs);
-
-		ConstructorArgumentValues cas = new ConstructorArgumentValues();
-		cas.addIndexedArgumentValue(1, "${age}");
-		cas.addGenericArgumentValue("${var}name${age}");
-
-		pvs = new MutablePropertyValues();
-		List<Object> friends = new ManagedList<Object>();
-		friends.add("na${age}me");
-		friends.add(new RuntimeBeanReference("${ref}"));
-		pvs.add("friends", friends);
-
-		Set<Object> someSet = new ManagedSet<Object>();
-		someSet.add("na${age}me");
-		someSet.add(new RuntimeBeanReference("${ref}"));
-		pvs.add("someSet", someSet);
-
-		Map<String, Object> someMap = new ManagedMap<String, Object>();
-		someMap.put("key1", new RuntimeBeanReference("${ref}"));
-		someMap.put("key2", "${age}name");
-		MutablePropertyValues innerPvs = new MutablePropertyValues();
-		innerPvs.add("touchy", "${os.name}");
-		RootBeanDefinition innerBd = new RootBeanDefinition(TestBean.class);
-		innerBd.setPropertyValues(innerPvs);
-		someMap.put("key3", innerBd);
-		MutablePropertyValues innerPvs2 = new MutablePropertyValues(innerPvs);
-		someMap.put("${key4}", new BeanDefinitionHolder(new ChildBeanDefinition("tb1", innerPvs2), "child"));
-		pvs.add("someMap", someMap);
-
-		RootBeanDefinition bd = new RootBeanDefinition(TestBean.class, cas, pvs);
-		wac.getDefaultListableBeanFactory().registerBeanDefinition("tb2", bd);
-
-		pvs = new MutablePropertyValues();
-		pvs.add("properties", "var=${m}var\nref=tb2\nm=my");
-		pvs.add("searchContextAttributes", Boolean.TRUE);
-		wac.registerSingleton("configurer", ServletContextPropertyPlaceholderConfigurer.class, pvs);
-		sc.setAttribute("age", new Integer(98));
-
-		wac.refresh();
-
-		TestBean tb1 = (TestBean) wac.getBean("tb1");
-		TestBean tb2 = (TestBean) wac.getBean("tb2");
-		assertEquals(98, tb1.getAge());
-		assertEquals(98, tb2.getAge());
-		assertEquals("namemyvarmyvar${", tb1.getName());
-		assertEquals("myvarname98", tb2.getName());
-		assertEquals(tb2, tb1.getSpouse());
-		assertEquals(2, tb2.getFriends().size());
-		assertEquals("na98me", tb2.getFriends().iterator().next());
-		assertEquals(tb2, tb2.getFriends().toArray()[1]);
-		assertEquals(2, tb2.getSomeSet().size());
-		assertTrue(tb2.getSomeSet().contains("na98me"));
-		assertTrue(tb2.getSomeSet().contains(tb2));
-		assertEquals(4, tb2.getSomeMap().size());
-		assertEquals(tb2, tb2.getSomeMap().get("key1"));
-		assertEquals("98name", tb2.getSomeMap().get("key2"));
-		TestBean inner1 = (TestBean) tb2.getSomeMap().get("key3");
-		TestBean inner2 = (TestBean) tb2.getSomeMap().get("mykey4");
-		assertEquals(0, inner1.getAge());
-		assertEquals(null, inner1.getName());
-		assertEquals(System.getProperty("os.name"), inner1.getTouchy());
-		assertEquals(98, inner2.getAge());
-		assertEquals("namemyvarmyvar${", inner2.getName());
-		assertEquals(System.getProperty("os.name"), inner2.getTouchy());
-	}
-
-	@Test
 	public void testServletContextResourceLoader() {
 		MockServletContext sc = new MockServletContext("classpath:org/springframework/web/context");
 		ServletContextResourceLoader rl = new ServletContextResourceLoader(sc);
@@ -379,8 +161,8 @@ public class ServletContextSupportTests {
 		ServletContextResourcePatternResolver rpr = new ServletContextResourcePatternResolver(sc);
 		Resource[] found = rpr.getResources("/WEB-INF/*.xml");
 		Set<String> foundPaths = new HashSet<String>();
-		for (int i = 0; i < found.length; i++) {
-			foundPaths.add(((ServletContextResource) found[i]).getPath());
+		for (Resource resource : found) {
+			foundPaths.add(((ServletContextResource) resource).getPath());
 		}
 		assertEquals(2, foundPaths.size());
 		assertTrue(foundPaths.contains("/WEB-INF/context1.xml"));
@@ -412,8 +194,8 @@ public class ServletContextSupportTests {
 		ServletContextResourcePatternResolver rpr = new ServletContextResourcePatternResolver(sc);
 		Resource[] found = rpr.getResources("/WEB-INF/*/*.xml");
 		Set<String> foundPaths = new HashSet<String>();
-		for (int i = 0; i < found.length; i++) {
-			foundPaths.add(((ServletContextResource) found[i]).getPath());
+		for (Resource resource : found) {
+			foundPaths.add(((ServletContextResource) resource).getPath());
 		}
 		assertEquals(2, foundPaths.size());
 		assertTrue(foundPaths.contains("/WEB-INF/mydir1/context1.xml"));
@@ -452,8 +234,8 @@ public class ServletContextSupportTests {
 		ServletContextResourcePatternResolver rpr = new ServletContextResourcePatternResolver(sc);
 		Resource[] found = rpr.getResources("/WEB-INF/**/*.xml");
 		Set<String> foundPaths = new HashSet<String>();
-		for (int i = 0; i < found.length; i++) {
-			foundPaths.add(((ServletContextResource) found[i]).getPath());
+		for (Resource resource : found) {
+			foundPaths.add(((ServletContextResource) resource).getPath());
 		}
 		assertEquals(3, foundPaths.size());
 		assertTrue(foundPaths.contains("/WEB-INF/mydir1/context1.xml"));
@@ -481,8 +263,8 @@ public class ServletContextSupportTests {
 		ServletContextResourcePatternResolver rpr = new ServletContextResourcePatternResolver(sc);
 		Resource[] found = rpr.getResources("/WEB-INF/*.xml");
 		Set<String> foundPaths = new HashSet<String>();
-		for (int i = 0; i < found.length; i++) {
-			foundPaths.add(((ServletContextResource) found[i]).getPath());
+		for (Resource resource : found) {
+			foundPaths.add(((ServletContextResource) resource).getPath());
 		}
 		assertEquals(2, foundPaths.size());
 		assertTrue(foundPaths.contains("/WEB-INF/context1.xml"));

@@ -75,7 +75,7 @@ public class ResourceEntityResolver extends DelegatingEntityResolver {
 		if (source == null && systemId != null) {
 			String resourcePath = null;
 			try {
-				String decodedSystemId = URLDecoder.decode(systemId);
+				String decodedSystemId = URLDecoder.decode(systemId, "UTF-8");
 				String givenUrl = new URL(decodedSystemId).toString();
 				String systemRootUrl = new File("").toURI().toURL().toString();
 				// Try relative to resource base if currently in system root.

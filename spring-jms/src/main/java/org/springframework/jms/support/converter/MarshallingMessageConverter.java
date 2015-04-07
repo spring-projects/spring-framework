@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -231,7 +231,7 @@ public class MarshallingMessageConverter implements MessageConverter, Initializi
 	protected BytesMessage marshalToBytesMessage(Object object, Session session, Marshaller marshaller)
 			throws JMSException, IOException, XmlMappingException {
 
-		ByteArrayOutputStream bos = new ByteArrayOutputStream();
+		ByteArrayOutputStream bos = new ByteArrayOutputStream(1024);
 		StreamResult streamResult = new StreamResult(bos);
 		marshaller.marshal(object, streamResult);
 		BytesMessage message = session.createBytesMessage();

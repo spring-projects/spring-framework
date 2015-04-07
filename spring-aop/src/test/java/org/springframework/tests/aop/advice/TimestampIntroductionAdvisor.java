@@ -16,10 +16,9 @@
 
 package org.springframework.tests.aop.advice;
 
-import org.springframework.aop.support.DelegatingIntroductionInterceptor;
 import org.springframework.aop.support.DefaultIntroductionAdvisor;
+import org.springframework.aop.support.DelegatingIntroductionInterceptor;
 import org.springframework.tests.aop.interceptor.TimestampIntroductionInterceptor;
-
 
 /**
  *

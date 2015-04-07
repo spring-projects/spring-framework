@@ -16,7 +16,6 @@
 
 package org.springframework.orm.hibernate3;
 
-import java.lang.reflect.Method;
 import java.util.Properties;
 
 import org.hibernate.cache.CacheDataDescription;
@@ -28,8 +27,6 @@ import org.hibernate.cache.RegionFactory;
 import org.hibernate.cache.TimestampsRegion;
 import org.hibernate.cache.access.AccessType;
 import org.hibernate.cfg.Settings;
-
-import org.springframework.util.ReflectionUtils;
 
 /**
  * Proxy for a Hibernate RegionFactory, delegating to a Spring-managed

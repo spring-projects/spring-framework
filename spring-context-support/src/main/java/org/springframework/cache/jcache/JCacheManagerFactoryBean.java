@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,8 @@
 
 package org.springframework.cache.jcache;
 
+import java.net.URI;
+import java.util.Properties;
 import javax.cache.CacheManager;
 import javax.cache.Caching;
 
@@ -29,15 +31,19 @@ import org.springframework.beans.factory.InitializingBean;
  * obtaining a pre-defined CacheManager by name through the standard
  * JCache {@link javax.cache.Caching} class.
  *
+ * <p>Note: This class has been updated for JCache 1.0, as of Spring 4.0.
+ *
  * @author Juergen Hoeller
  * @since 3.2
- * @see javax.cache.Caching#getCacheManager()
- * @see javax.cache.Caching#getCacheManager(String)
+ * @see javax.cache.Caching#getCachingProvider()
+ * @see javax.cache.spi.CachingProvider#getCacheManager()
  */
 public class JCacheManagerFactoryBean
 		implements FactoryBean<CacheManager>, BeanClassLoaderAware, InitializingBean, DisposableBean {
 
-	private String cacheManagerName = Caching.DEFAULT_CACHE_MANAGER_NAME;
+	private URI cacheManagerUri;
+
+	private Properties cacheManagerProperties;
 
 	private ClassLoader beanClassLoader;
 
@@ -45,12 +51,20 @@ public class JCacheManagerFactoryBean
 
 
 	/**
-	 * Specify the name of the desired CacheManager.
-	 * Default is JCache's default.
-	 * @see Caching#DEFAULT_CACHE_MANAGER_NAME
+	 * Specify the URI for the desired CacheManager.
+	 * Default is {@code null} (i.e. JCache's default).
 	 */
-	public void setCacheManagerName(String cacheManagerName) {
-		this.cacheManagerName = cacheManagerName;
+	public void setCacheManagerUri(URI cacheManagerUri) {
+		this.cacheManagerUri = cacheManagerUri;
+	}
+
+	/**
+	 * Specify properties for the to-be-created CacheManager.
+	 * Default is {@code null} (i.e. no special properties to apply).
+	 * @see javax.cache.spi.CachingProvider#getCacheManager(URI, ClassLoader, Properties)
+	 */
+	public void setCacheManagerProperties(Properties cacheManagerProperties) {
+		this.cacheManagerProperties = cacheManagerProperties;
 	}
 
 	@Override
@@ -60,9 +74,8 @@ public class JCacheManagerFactoryBean
 
 	@Override
 	public void afterPropertiesSet() {
-		this.cacheManager = (this.beanClassLoader != null ?
-				Caching.getCacheManager(this.beanClassLoader, this.cacheManagerName) :
-				Caching.getCacheManager(this.cacheManagerName));
+		this.cacheManager = Caching.getCachingProvider().getCacheManager(
+				this.cacheManagerUri, this.beanClassLoader, this.cacheManagerProperties);
 	}
 
 
@@ -84,7 +97,7 @@ public class JCacheManagerFactoryBean
 
 	@Override
 	public void destroy() {
-		this.cacheManager.shutdown();
+		this.cacheManager.close();
 	}
 
 }

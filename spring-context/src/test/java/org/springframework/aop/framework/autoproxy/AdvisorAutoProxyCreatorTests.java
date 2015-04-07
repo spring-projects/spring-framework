@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,18 +16,16 @@
 
 package org.springframework.aop.framework.autoproxy;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-
 import java.io.IOException;
 
 import org.junit.Test;
+import test.mixin.Lockable;
+
 import org.springframework.aop.framework.Advised;
 import org.springframework.aop.framework.autoproxy.target.AbstractBeanFactoryBasedTargetSourceCreator;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.aop.target.AbstractBeanFactoryBasedTargetSource;
-import org.springframework.aop.target.CommonsPoolTargetSource;
+import org.springframework.aop.target.CommonsPool2TargetSource;
 import org.springframework.aop.target.LazyInitTargetSource;
 import org.springframework.aop.target.PrototypeTargetSource;
 import org.springframework.aop.target.ThreadLocalTargetSource;
@@ -38,7 +36,7 @@ import org.springframework.tests.aop.interceptor.NopInterceptor;
 import org.springframework.tests.sample.beans.CountingTestBean;
 import org.springframework.tests.sample.beans.ITestBean;
 
-import test.mixin.Lockable;
+import static org.junit.Assert.*;
 
 /**
  * Tests for auto proxy creation by advisor recognition.
@@ -49,6 +47,7 @@ import test.mixin.Lockable;
  * @author Dave Syer
  * @author Chris Beams
  */
+@SuppressWarnings("resource")
 public final class AdvisorAutoProxyCreatorTests {
 
 	private static final Class<?> CLASS = AdvisorAutoProxyCreatorTests.class;
@@ -59,9 +58,6 @@ public final class AdvisorAutoProxyCreatorTests {
 	private static final String CUSTOM_TARGETSOURCE_CONTEXT = CLASSNAME + "-custom-targetsource.xml";
 	private static final String QUICK_TARGETSOURCE_CONTEXT = CLASSNAME + "-quick-targetsource.xml";
 	private static final String OPTIMIZED_CONTEXT = CLASSNAME + "-optimized.xml";
-
-	private static final String ADVISOR_APC_BEAN_NAME = "aapc";
-	private static final String TXMANAGER_BEAN_NAME = "txManager";
 
 	/**
 	 * Return a bean factory with attributes and EnterpriseServices configured.
@@ -158,7 +154,7 @@ public final class AdvisorAutoProxyCreatorTests {
 		test = (ITestBean) bf.getBean(":test");
 		assertTrue(AopUtils.isAopProxy(test));
 		Advised advised = (Advised) test;
-		assertTrue(advised.getTargetSource() instanceof CommonsPoolTargetSource);
+		assertTrue(advised.getTargetSource() instanceof CommonsPool2TargetSource);
 		assertEquals("Rod", test.getName());
 		// Check that references survived pooling
 		assertEquals("Kerry", test.getSpouse().getName());

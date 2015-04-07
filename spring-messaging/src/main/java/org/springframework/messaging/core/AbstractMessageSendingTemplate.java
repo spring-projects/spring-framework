@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,59 +13,59 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.messaging.core;
 
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.MessagingException;
-import org.springframework.messaging.support.converter.ByteArrayMessageConverter;
-import org.springframework.messaging.support.converter.CompositeMessageConverter;
-import org.springframework.messaging.support.converter.MessageConverter;
-import org.springframework.messaging.support.converter.StringMessageConverter;
+import org.springframework.messaging.converter.MessageConversionException;
+import org.springframework.messaging.converter.MessageConverter;
+import org.springframework.messaging.converter.SimpleMessageConverter;
 import org.springframework.util.Assert;
 
-
 /**
- * Base class for templates that support sending messages.
+ * Abstract base class for implementations of {@link MessageSendingOperations}.
  *
  * @author Mark Fisher
  * @author Rossen Stoyanchev
+ * @author Stephane Nicoll
  * @since 4.0
  */
 public abstract class AbstractMessageSendingTemplate<D> implements MessageSendingOperations<D> {
 
-	protected final Log logger = LogFactory.getLog(this.getClass());
+	protected final Log logger = LogFactory.getLog(getClass());
 
 	private volatile D defaultDestination;
 
-	private volatile MessageConverter converter;
+	private volatile MessageConverter converter = new SimpleMessageConverter();
 
 
-	public AbstractMessageSendingTemplate() {
-		Collection<MessageConverter> converters = new ArrayList<MessageConverter>();
-		converters.add(new StringMessageConverter());
-		converters.add(new ByteArrayMessageConverter());
-		this.converter = new CompositeMessageConverter(converters);
-	}
-
+	/**
+	 * Configure the default destination to use in send methods that don't have
+	 * a destination argument. If a default destination is not configured, send methods
+	 * without a destination argument will raise an exception if invoked.
+	 */
 	public void setDefaultDestination(D defaultDestination) {
 		this.defaultDestination = defaultDestination;
 	}
 
+	/**
+	 * Return the configured default destination.
+	 */
 	public D getDefaultDestination() {
 		return this.defaultDestination;
 	}
 
 	/**
-	 * Set the {@link MessageConverter} that is to be used to convert
-	 * between Messages and objects for this template.
-	 * <p>The default is {@link SimplePayloadMessageConverter}.
+	 * Set the {@link MessageConverter} to use in {@code convertAndSend} methods.
+	 * <p>By default, {@link SimpleMessageConverter} is used.
+	 * @param messageConverter the message converter to use
 	 */
 	public void setMessageConverter(MessageConverter messageConverter) {
 		Assert.notNull(messageConverter, "'messageConverter' must not be null");
@@ -73,7 +73,7 @@ public abstract class AbstractMessageSendingTemplate<D> implements MessageSendin
 	}
 
 	/**
-	 * @return the configured {@link MessageConverter}
+	 * Return the configured {@link MessageConverter}.
 	 */
 	public MessageConverter getMessageConverter() {
 		return this.converter;
@@ -82,63 +82,100 @@ public abstract class AbstractMessageSendingTemplate<D> implements MessageSendin
 
 	@Override
 	public void send(Message<?> message) {
-		this.send(getRequiredDefaultDestination(), message);
+		send(getRequiredDefaultDestination(), message);
 	}
 
 	protected final D getRequiredDefaultDestination() {
-		Assert.state(this.defaultDestination != null,
-				"No 'defaultDestination' specified for MessagingTemplate. "
-				+ "Unable to invoke method without an explicit destination argument.");
+		Assert.state(this.defaultDestination != null, "No 'defaultDestination' configured");
 		return this.defaultDestination;
 	}
 
 	@Override
 	public void send(D destination, Message<?> message) {
-		this.doSend(destination, message);
+		doSend(destination, message);
 	}
 
 	protected abstract void doSend(D destination, Message<?> message);
 
 
 	@Override
-	public void convertAndSend(Object message) throws MessagingException {
-		this.convertAndSend(getRequiredDefaultDestination(), message);
+	public void convertAndSend(Object payload) throws MessagingException {
+		convertAndSend(payload, null);
 	}
 
 	@Override
 	public void convertAndSend(D destination, Object payload) throws MessagingException {
-		this.convertAndSend(destination, payload, (Map<String, Object>) null);
+		convertAndSend(destination, payload, (Map<String, Object>) null);
 	}
 
 	@Override
 	public void convertAndSend(D destination, Object payload, Map<String, Object> headers) throws MessagingException {
-		MessagePostProcessor postProcessor = null;
-		this.convertAndSend(destination, payload, headers, postProcessor);
+		convertAndSend(destination, payload, headers, null);
 	}
 
 	@Override
 	public void convertAndSend(Object payload, MessagePostProcessor postProcessor) throws MessagingException {
-		this.convertAndSend(getRequiredDefaultDestination(), payload, postProcessor);
+		convertAndSend(getRequiredDefaultDestination(), payload, postProcessor);
 	}
 
 	@Override
 	public void convertAndSend(D destination, Object payload, MessagePostProcessor postProcessor)
 			throws MessagingException {
 
-		Map<String, Object> headers = null;
-		this.convertAndSend(destination, payload, headers, postProcessor);
+		convertAndSend(destination, payload, null, postProcessor);
 	}
 
 	@Override
 	public void convertAndSend(D destination, Object payload, Map<String, Object> headers,
 			MessagePostProcessor postProcessor) throws MessagingException {
 
-		MessageHeaders messageHeaders = (headers != null) ? new MessageHeaders(headers) : null;
-		Message<?> message = this.converter.toMessage(payload, messageHeaders);
+		Message<?> message = doConvert(payload, headers, postProcessor);
+		send(destination, message);
+	}
+
+	/**
+	 * Convert the given Object to serialized form, possibly using a
+	 * {@link MessageConverter}, wrap it as a message with the given
+	 * headers and apply the given post processor.
+	 * @param payload the Object to use as payload
+	 * @param headers headers for the message to send
+	 * @param postProcessor the post processor to apply to the message
+	 * @return the converted message
+	 */
+	protected Message<?> doConvert(Object payload, Map<String, Object> headers, MessagePostProcessor postProcessor) {
+		MessageHeaders messageHeaders = null;
+		Map<String, Object> headersToUse = processHeadersToSend(headers);
+		if (headersToUse != null) {
+			if (headersToUse instanceof MessageHeaders) {
+				messageHeaders = (MessageHeaders) headersToUse;
+			}
+			else {
+				messageHeaders = new MessageHeaders(headersToUse);
+			}
+		}
+
+		Message<?> message = getMessageConverter().toMessage(payload, messageHeaders);
+		if (message == null) {
+			String payloadType = (payload != null ? payload.getClass().getName() : null);
+			Object contentType = (messageHeaders != null ? messageHeaders.get(MessageHeaders.CONTENT_TYPE) : null);
+			throw new MessageConversionException("Unable to convert payload with type='" + payloadType +
+					"', contentType='" + contentType + "', converter=[" + getMessageConverter() + "]");
+		}
 		if (postProcessor != null) {
 			message = postProcessor.postProcessMessage(message);
 		}
-		this.send(destination, message);
+		return message;
+	}
+
+	/**
+	 * Provides access to the map of input headers before a send operation. Sub-classes
+	 * can modify the headers and then return the same or a different map.
+	 * <p>This default implementation in this class returns the input map.
+	 * @param headers the headers to send or {@code null}
+	 * @return the actual headers to send or {@code null}
+	 */
+	protected Map<String, Object> processHeadersToSend(Map<String, Object> headers) {
+		return headers;
 	}
 
 }

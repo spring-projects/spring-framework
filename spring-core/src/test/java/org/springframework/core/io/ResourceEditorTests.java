@@ -18,9 +18,11 @@ package org.springframework.core.io;
 
 import java.beans.PropertyEditor;
 
-import static org.junit.Assert.*;
 import org.junit.Test;
+
 import org.springframework.core.env.StandardEnvironment;
+
+import static org.junit.Assert.*;
 
 /**
  * Unit tests for the {@link ResourceEditor} class.

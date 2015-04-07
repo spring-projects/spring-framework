@@ -25,10 +25,10 @@ import java.sql.Types;
 import java.util.List;
 
 import junit.framework.TestCase;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+
 import org.springframework.jdbc.datasource.SingleConnectionDataSource;
 import org.springframework.jdbc.support.SQLStateSQLExceptionTranslator;
 import org.springframework.tests.sample.beans.TestBean;

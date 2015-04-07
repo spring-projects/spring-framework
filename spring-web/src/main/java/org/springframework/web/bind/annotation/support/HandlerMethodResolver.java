@@ -63,7 +63,7 @@ public class HandlerMethodResolver {
 
 	private final Set<String> sessionAttributeNames = new HashSet<String>();
 
-	private final Set<Class> sessionAttributeTypes = new HashSet<Class>();
+	private final Set<Class<?>> sessionAttributeTypes = new HashSet<Class<?>>();
 
 	private final Set<String> actualSessionAttributeNames =
 			Collections.newSetFromMap(new ConcurrentHashMap<String, Boolean>(4));
@@ -153,7 +153,7 @@ public class HandlerMethodResolver {
 		return this.sessionAttributesFound;
 	}
 
-	public boolean isSessionAttribute(String attrName, Class attrType) {
+	public boolean isSessionAttribute(String attrName, Class<?> attrType) {
 		if (this.sessionAttributeNames.contains(attrName) || this.sessionAttributeTypes.contains(attrType)) {
 			this.actualSessionAttributeNames.add(attrName);
 			return true;

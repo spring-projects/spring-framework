@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,11 +19,12 @@ package org.springframework.jdbc.datasource.embedded;
 import org.springframework.util.Assert;
 
 /**
- * Maps well-known {@link EmbeddedDatabaseType embedded database types} to
+ * Maps well-known {@linkplain EmbeddedDatabaseType embedded database types} to
  * {@link EmbeddedDatabaseConfigurer} strategies.
  *
  * @author Keith Donald
  * @author Oliver Gierke
+ * @author Sam Brannen
  * @since 3.0
  */
 final class EmbeddedDatabaseConfigurerFactory {
@@ -39,7 +40,7 @@ final class EmbeddedDatabaseConfigurerFactory {
 				case DERBY:
 					return DerbyEmbeddedDatabaseConfigurer.getInstance();
 				default:
-					throw new UnsupportedOperationException("Other embedded database types not yet supported");
+					throw new UnsupportedOperationException("Embedded database type [" + type + "] is not supported");
 			}
 		}
 		catch (ClassNotFoundException ex) {
@@ -49,6 +50,7 @@ final class EmbeddedDatabaseConfigurerFactory {
 	}
 
 	private EmbeddedDatabaseConfigurerFactory() {
+		/* no-op */
 	}
 
 }

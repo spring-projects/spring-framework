@@ -155,9 +155,11 @@ public class HessianExporter extends RemoteExporter implements InitializingBean 
 
 			if (this.debugLogger != null && this.debugLogger.isDebugEnabled()) {
 				PrintWriter debugWriter = new PrintWriter(new CommonsLogWriter(this.debugLogger));
+				@SuppressWarnings("resource")
 				HessianDebugInputStream dis = new HessianDebugInputStream(inputStream, debugWriter);
-				dis.startTop2();
+				@SuppressWarnings("resource")
 				HessianDebugOutputStream dos = new HessianDebugOutputStream(outputStream, debugWriter);
+				dis.startTop2();
 				dos.startTop2();
 				isToUse = dis;
 				osToUse = dos;

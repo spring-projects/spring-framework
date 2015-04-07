@@ -20,9 +20,9 @@ import java.io.Serializable;
 import java.lang.reflect.AnnotatedElement;
 import java.util.ArrayList;
 
+import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.annotation.AnnotationUtils;
-import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.transaction.interceptor.NoRollbackRuleAttribute;
 import org.springframework.transaction.interceptor.RollbackRuleAttribute;
 import org.springframework.transaction.interceptor.RuleBasedTransactionAttribute;
@@ -57,13 +57,13 @@ public class JtaTransactionAnnotationParser implements TransactionAnnotationPars
 		rbta.setPropagationBehaviorName(
 				RuleBasedTransactionAttribute.PREFIX_PROPAGATION + attributes.getEnum("value").toString());
 		ArrayList<RollbackRuleAttribute> rollBackRules = new ArrayList<RollbackRuleAttribute>();
-		Class[] rbf = attributes.getClassArray("rollbackOn");
-		for (Class rbRule : rbf) {
+		Class<?>[] rbf = attributes.getClassArray("rollbackOn");
+		for (Class<?> rbRule : rbf) {
 			RollbackRuleAttribute rule = new RollbackRuleAttribute(rbRule);
 			rollBackRules.add(rule);
 		}
-		Class[] nrbf = attributes.getClassArray("dontRollbackOn");
-		for (Class rbRule : nrbf) {
+		Class<?>[] nrbf = attributes.getClassArray("dontRollbackOn");
+		for (Class<?> rbRule : nrbf) {
 			NoRollbackRuleAttribute rule = new NoRollbackRuleAttribute(rbRule);
 			rollBackRules.add(rule);
 		}

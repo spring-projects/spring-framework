@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,21 +18,21 @@ package org.springframework.web.portlet.context;
 
 import java.util.Locale;
 import java.util.Map;
-
 import javax.portlet.PortletRequest;
+import javax.portlet.PortletResponse;
 import javax.portlet.RenderRequest;
 import javax.portlet.RenderResponse;
-import javax.portlet.PortletResponse;
 import javax.portlet.filter.PortletRequestWrapper;
 import javax.portlet.filter.PortletResponseWrapper;
 
-import static org.junit.Assert.*;
 import org.junit.Test;
 
 import org.springframework.mock.web.portlet.MockPortletRequest;
 import org.springframework.mock.web.portlet.MockRenderRequest;
 import org.springframework.mock.web.portlet.MockRenderResponse;
 import org.springframework.web.multipart.MultipartRequest;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Juergen Hoeller
@@ -56,13 +56,13 @@ public class PortletWebRequestTests {
 		assertEquals("value2", request.getParameterValues("param2")[0]);
 		assertEquals("value2a", request.getParameterValues("param2")[1]);
 
-		Map paramMap = request.getParameterMap();
+		Map<String, String[]> paramMap = request.getParameterMap();
 		assertEquals(2, paramMap.size());
-		assertEquals(1, ((String[]) paramMap.get("param1")).length);
-		assertEquals("value1", ((String[]) paramMap.get("param1"))[0]);
-		assertEquals(2, ((String[]) paramMap.get("param2")).length);
-		assertEquals("value2", ((String[]) paramMap.get("param2"))[0]);
-		assertEquals("value2a", ((String[]) paramMap.get("param2"))[1]);
+		assertEquals(1, paramMap.get("param1").length);
+		assertEquals("value1", paramMap.get("param1")[0]);
+		assertEquals(2, paramMap.get("param2").length);
+		assertEquals("value2", paramMap.get("param2")[0]);
+		assertEquals("value2a", paramMap.get("param2")[1]);
 	}
 
 	@Test

@@ -140,7 +140,7 @@ public class JndiDestinationResolver extends JndiLocatorSupport implements Cachi
 	 * {@code false} in case of a Queue
 	 */
 	protected void validateDestination(Destination destination, String destinationName, boolean pubSubDomain) {
-		Class targetClass = Queue.class;
+		Class<?> targetClass = Queue.class;
 		if (pubSubDomain) {
 			targetClass = Topic.class;
 		}

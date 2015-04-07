@@ -79,7 +79,7 @@ class WebSphereClassLoaderAdapter {
 		try {
 			InvocationHandler adapter = new WebSphereClassPreDefinePlugin(transformer);
 			Object adapterInstance = Proxy.newProxyInstance(this.wsPreProcessorClass.getClassLoader(),
-					new Class[] { this.wsPreProcessorClass }, adapter);
+					new Class<?>[] { this.wsPreProcessorClass }, adapter);
 			this.addPreDefinePlugin.invoke(this.classLoader, adapterInstance);
 
 		}

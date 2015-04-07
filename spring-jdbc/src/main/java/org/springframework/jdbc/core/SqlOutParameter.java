@@ -83,7 +83,7 @@ public class SqlOutParameter extends ResultSetSupportingSqlParameter {
 	 * @param sqlType SQL type of the parameter according to java.sql.Types
 	 * @param rse ResultSetExtractor to use for parsing the ResultSet
 	 */
-	public SqlOutParameter(String name, int sqlType, ResultSetExtractor rse) {
+	public SqlOutParameter(String name, int sqlType, ResultSetExtractor<?> rse) {
 		super(name, sqlType, rse);
 	}
 
@@ -103,7 +103,7 @@ public class SqlOutParameter extends ResultSetSupportingSqlParameter {
 	 * @param sqlType SQL type of the parameter according to java.sql.Types
 	 * @param rm RowMapper to use for parsing the ResultSet
 	 */
-	public SqlOutParameter(String name, int sqlType, RowMapper rm) {
+	public SqlOutParameter(String name, int sqlType, RowMapper<?> rm) {
 		super(name, sqlType, rm);
 	}
 

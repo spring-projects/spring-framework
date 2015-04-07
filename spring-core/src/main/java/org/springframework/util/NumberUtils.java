@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,10 +21,13 @@ import java.math.BigInteger;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.text.ParseException;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Miscellaneous utility methods for number conversion and parsing.
- * Mainly for internal use within the framework; consider Jakarta's
+ * Mainly for internal use within the framework; consider Apache's
  * Commons Lang for a more comprehensive suite of string utilities.
  *
  * @author Juergen Hoeller
@@ -32,6 +35,30 @@ import java.text.ParseException;
  * @since 1.1.2
  */
 public abstract class NumberUtils {
+
+	private static final BigInteger LONG_MIN = BigInteger.valueOf(Long.MIN_VALUE);
+
+	private static final BigInteger LONG_MAX = BigInteger.valueOf(Long.MAX_VALUE);
+
+	/**
+	 * Standard number types (all immutable):
+	 * Byte, Short, Integer, Long, BigInteger, Float, Double, BigDecimal.
+	 */
+	public static final Set<Class<?>> STANDARD_NUMBER_TYPES;
+
+	static {
+		Set<Class<?>> numberTypes = new HashSet<Class<?>>(8);
+		numberTypes.add(Byte.class);
+		numberTypes.add(Short.class);
+		numberTypes.add(Integer.class);
+		numberTypes.add(Long.class);
+		numberTypes.add(BigInteger.class);
+		numberTypes.add(Float.class);
+		numberTypes.add(Double.class);
+		numberTypes.add(BigDecimal.class);
+		STANDARD_NUMBER_TYPES = Collections.unmodifiableSet(numberTypes);
+	}
+
 
 	/**
 	 * Convert the given number into an instance of the given target class.
@@ -81,6 +108,17 @@ public abstract class NumberUtils {
 			return (T) new Integer(number.intValue());
 		}
 		else if (targetClass.equals(Long.class)) {
+			BigInteger bigInt = null;
+			if (number instanceof BigInteger) {
+				bigInt = (BigInteger) number;
+			}
+			else if (number instanceof BigDecimal) {
+				bigInt = ((BigDecimal) number).toBigInteger();
+			}
+			// Effectively analogous to JDK 8's BigInteger.longValueExact()
+			if (bigInt != null && (bigInt.compareTo(LONG_MIN) < 0 || bigInt.compareTo(LONG_MAX) > 0)) {
+				raiseOverflowException(number, targetClass);
+			}
 			return (T) new Long(number.longValue());
 		}
 		else if (targetClass.equals(BigInteger.class)) {
@@ -115,7 +153,7 @@ public abstract class NumberUtils {
 	 * @param number the number we tried to convert
 	 * @param targetClass the target class we tried to convert to
 	 */
-	private static void raiseOverflowException(Number number, Class targetClass) {
+	private static void raiseOverflowException(Number number, Class<?> targetClass) {
 		throw new IllegalArgumentException("Could not convert number [" + number + "] of type [" +
 				number.getClass().getName() + "] to target class [" + targetClass.getName() + "]: overflow");
 	}

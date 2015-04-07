@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,9 +17,7 @@
 package org.springframework.web.util;
 
 import java.io.Serializable;
-import java.io.UnsupportedEncodingException;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
@@ -88,17 +86,17 @@ public class UriTemplate implements Serializable {
 	 * UriTemplate template = new UriTemplate("http://example.com/hotels/{hotel}/bookings/{booking}");
 	 * Map&lt;String, String&gt; uriVariables = new HashMap&lt;String, String&gt;();
 	 * uriVariables.put("booking", "42");
-	 * uriVariables.put("hotel", "1");
+	 * uriVariables.put("hotel", "Rest & Relax");
 	 * System.out.println(template.expand(uriVariables));
 	 * </pre>
-	 * will print: <blockquote>{@code http://example.com/hotels/1/bookings/42}</blockquote>
+	 * will print: <blockquote>{@code http://example.com/hotels/Rest%20%26%20Relax/bookings/42}</blockquote>
 	 * @param uriVariables the map of URI variables
 	 * @return the expanded URI
 	 * @throws IllegalArgumentException if {@code uriVariables} is {@code null};
 	 * or if it does not contain values for all the variable names
 	 */
 	public URI expand(Map<String, ?> uriVariables) {
-		UriComponents expandedComponents = uriComponents.expand(uriVariables);
+		UriComponents expandedComponents = this.uriComponents.expand(uriVariables);
 		UriComponents encodedComponents = expandedComponents.encode();
 		return encodedComponents.toUri();
 	}
@@ -109,16 +107,16 @@ public class UriTemplate implements Serializable {
      * <p>Example:
      * <pre class="code">
      * UriTemplate template = new UriTemplate("http://example.com/hotels/{hotel}/bookings/{booking}");
-     * System.out.println(template.expand("1", "42));
+     * System.out.println(template.expand("Rest & Relax", "42));
      * </pre>
-     * will print: <blockquote>{@code http://example.com/hotels/1/bookings/42}</blockquote>
+     * will print: <blockquote>{@code http://example.com/hotels/Rest%20%26%20Relax/bookings/42}</blockquote>
      * @param uriVariableValues the array of URI variables
      * @return the expanded URI
      * @throws IllegalArgumentException if {@code uriVariables} is {@code null}
      * or if it does not contain sufficient variables
      */
 	public URI expand(Object... uriVariableValues) {
-		UriComponents expandedComponents = uriComponents.expand(uriVariableValues);
+		UriComponents expandedComponents = this.uriComponents.expand(uriVariableValues);
 		UriComponents encodedComponents = expandedComponents.encode();
 		return encodedComponents.toUri();
 	}
@@ -179,11 +177,11 @@ public class UriTemplate implements Serializable {
 
 		private Parser(String uriTemplate) {
 			Assert.hasText(uriTemplate, "'uriTemplate' must not be null");
-			Matcher m = NAMES_PATTERN.matcher(uriTemplate);
+			Matcher matcher = NAMES_PATTERN.matcher(uriTemplate);
 			int end = 0;
-			while (m.find()) {
-				this.patternBuilder.append(quote(uriTemplate, end, m.start()));
-				String match = m.group(1);
+			while (matcher.find()) {
+				this.patternBuilder.append(quote(uriTemplate, end, matcher.start()));
+				String match = matcher.group(1);
 				int colonIdx = match.indexOf(':');
 				if (colonIdx == -1) {
 					this.patternBuilder.append(DEFAULT_VARIABLE_PATTERN);
@@ -201,7 +199,7 @@ public class UriTemplate implements Serializable {
 					String variableName = match.substring(0, colonIdx);
 					this.variableNames.add(variableName);
 				}
-				end = m.end();
+				end = matcher.end();
 			}
 			this.patternBuilder.append(quote(uriTemplate, end, uriTemplate.length()));
 			int lastIdx = this.patternBuilder.length() - 1;

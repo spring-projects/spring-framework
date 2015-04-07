@@ -266,7 +266,7 @@ public class XStreamMarshallerTests {
 	}
 
 	@Test
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public void omitFields() throws Exception {
 		Map omittedFieldsMap = Collections.singletonMap(Flight.class, "flightNumber");
 		marshaller.setOmittedFields(omittedFieldsMap);
@@ -276,13 +276,13 @@ public class XStreamMarshallerTests {
 	}
 
 	@Test
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public void implicitCollections() throws Exception {
 		Flights flights = new Flights();
 		flights.getFlights().add(flight);
 		flights.getStrings().add("42");
 
-		Map<String, Class> aliases = new HashMap<String, Class>();
+		Map<String, Class<?>> aliases = new HashMap<String, Class<?>>();
 		aliases.put("flight", Flight.class);
 		aliases.put("flights", Flights.class);
 		marshaller.setAliases(aliases);

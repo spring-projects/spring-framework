@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,69 +41,69 @@ import org.springframework.web.portlet.util.PortletUtils;
  * <p><b><a name="workflow">Workflow
  * (<a href="Controller.html#workflow">and that defined by interface</a>):</b><br>
  * <ol>
- *  <li>If this is an action request, {@link #handleActionRequest handleActionRequest}
- *      will be called by the DispatcherPortlet once to perform the action defined by this
- *      controller.</li>
- *  <li>If a session is required, try to get it (PortletException if not found).</li>
- *  <li>Call method {@link #handleActionRequestInternal handleActionRequestInternal},
- *      (optionally synchronizing around the call on the PortletSession),
- *      which should be overridden by extending classes to provide actual functionality to
- *      perform the desired action of the controller.  This will be executed only once.</li>
- *  <li>For a straight render request, or the render phase of an action request (assuming the
- *      same controller is called for the render phase -- see tip below),
- *      {@link #handleRenderRequest handleRenderRequest} will be called by the DispatcherPortlet
- *      repeatedly to render the display defined by this controller.</li>
- *  <li>If a session is required, try to get it (PortletException if none found).</li>
- *  <li>It will control caching as defined by the cacheSeconds property.</li>
- *  <li>Call method {@link #handleRenderRequestInternal handleRenderRequestInternal},
- *      (optionally synchronizing around the call on the PortletSession),
- *      which should be overridden by extending classes to provide actual functionality to
- *      return {@link org.springframework.web.portlet.ModelAndView ModelAndView} objects.
- *      This will be executed repeatedly as the portal updates the current displayed page.</li>
+ * <li>If this is an action request, {@link #handleActionRequest handleActionRequest}
+ * will be called by the DispatcherPortlet once to perform the action defined by this
+ * controller.</li>
+ * <li>If a session is required, try to get it (PortletException if not found).</li>
+ * <li>Call method {@link #handleActionRequestInternal handleActionRequestInternal},
+ * (optionally synchronizing around the call on the PortletSession),
+ * which should be overridden by extending classes to provide actual functionality to
+ * perform the desired action of the controller.  This will be executed only once.</li>
+ * <li>For a straight render request, or the render phase of an action request (assuming the
+ * same controller is called for the render phase -- see tip below),
+ * {@link #handleRenderRequest handleRenderRequest} will be called by the DispatcherPortlet
+ * repeatedly to render the display defined by this controller.</li>
+ * <li>If a session is required, try to get it (PortletException if none found).</li>
+ * <li>It will control caching as defined by the cacheSeconds property.</li>
+ * <li>Call method {@link #handleRenderRequestInternal handleRenderRequestInternal},
+ * (optionally synchronizing around the call on the PortletSession),
+ * which should be overridden by extending classes to provide actual functionality to
+ * return {@link org.springframework.web.portlet.ModelAndView ModelAndView} objects.
+ * This will be executed repeatedly as the portal updates the current displayed page.</li>
  * </ol>
  *
  * <p><b><a name="config">Exposed configuration properties</a>
  * (<a href="Controller.html#config">and those defined by interface</a>):</b><br>
  * <table border="1">
- *  <tr>
- *      <td><b>name</b></th>
- *      <td><b>default</b></td>
- *      <td><b>description</b></td>
- *  </tr>
- *  <tr>
- *      <td>requireSession</td>
- *      <td>false</td>
- *      <td>whether a session should be required for requests to be able to
- *          be handled by this controller. This ensures, derived controller
- *          can - without fear of Nullpointers - call request.getSession() to
- *          retrieve a session. If no session can be found while processing
- *          the request, a PortletException will be thrown</td>
- *  </tr>
- *  <tr>
- *      <td>synchronizeOnSession</td>
- *      <td>false</td>
- *      <td>whether the calls to {@code handleRenderRequestInternal} and
- *          {@code handleRenderRequestInternal} should be
- *          synchronized around the PortletSession, to serialize invocations
- *          from the same client. No effect if there is no PortletSession.
- *      </td>
- *  </tr>
- *  <tr>
- *      <td>cacheSeconds</td>
- *      <td>-1</td>
- *      <td>indicates the amount of seconds to specify caching is allowed in
- *          the render response generatedby  this request. 0 (zero) will indicate
- *          no caching is allowed at all, -1 (the default) will not override the
- *          portlet configuration and any positive number will cause the render
- *          response to declare the amount indicated as seconds to cache the content</td>
- *  </tr>
- *  <tr>
- *      <td>renderWhenMinimized</td>
- *      <td>false</td>
- *      <td>whether should be rendered when the portlet is in a minimized state --
- *          will return null for the ModelandView when the portlet is minimized
- *          and this is false</td>
- *  </tr>
+ * <tr>
+ * <td><b>name</b></th>
+ * <td><b>default</b></td>
+ * <td><b>description</b></td>
+ * </tr>
+ * <tr>
+ * <td>requireSession</td>
+ * <td>false</td>
+ * <td>whether a session should be required for requests to be able to
+ * be handled by this controller. This ensures, derived controller
+ * can - without fear of Nullpointers - call request.getSession() to
+ * retrieve a session. If no session can be found while processing
+ * the request, a PortletException will be thrown</td>
+ * </tr>
+ * <tr>
+ * <td>synchronizeOnSession</td>
+ * <td>false</td>
+ * <td>whether the calls to {@code handleRenderRequestInternal} and
+ * {@code handleRenderRequestInternal} should be synchronized around
+ * the PortletSession, to serialize invocations from the same client.
+ * No effect if there is no PortletSession.
+ * </td>
+ * </tr>
+ * <tr>
+ * <td>cacheSeconds</td>
+ * <td>-1</td>
+ * <td>indicates the amount of seconds to specify caching is allowed in
+ * the render response generatedby  this request. 0 (zero) will indicate
+ * no caching is allowed at all, -1 (the default) will not override the
+ * portlet configuration and any positive number will cause the render
+ * response to declare the amount indicated as seconds to cache the content</td>
+ * </tr>
+ * <tr>
+ * <td>renderWhenMinimized</td>
+ * <td>false</td>
+ * <td>whether should be rendered when the portlet is in a minimized state --
+ * will return null for the ModelandView when the portlet is minimized
+ * and this is false</td>
+ * </tr>
  * </table>
  *
  * <p><b>TIP:</b> The controller mapping will be run twice by the PortletDispatcher for

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.core;
 import java.io.IOException;
 import java.io.InputStream;
 
+import org.springframework.lang.UsesJava7;
 import org.springframework.util.FileCopyUtils;
 
 /**
@@ -33,17 +34,23 @@ import org.springframework.util.FileCopyUtils;
  * @author Juergen Hoeller
  * @since 2.0.1
  */
+@UsesJava7
 public class OverridingClassLoader extends DecoratingClassLoader {
 
 	/** Packages that are excluded by default */
-	public static final String[] DEFAULT_EXCLUDED_PACKAGES =
-			new String[] {"java.", "javax.", "sun.", "oracle."};
+	public static final String[] DEFAULT_EXCLUDED_PACKAGES = new String[] {"java.", "javax.", "sun.", "oracle."};
 
 	private static final String CLASS_FILE_SUFFIX = ".class";
 
+	static {
+		if (parallelCapableClassLoaderAvailable) {
+			ClassLoader.registerAsParallelCapable();
+		}
+	}
+
 
 	/**
-	 * Create a new OverridingClassLoader for the given class loader.
+	 * Create a new OverridingClassLoader for the given ClassLoader.
 	 * @param parent the ClassLoader to build an overriding ClassLoader for
 	 */
 	public OverridingClassLoader(ClassLoader parent) {
@@ -55,8 +62,8 @@ public class OverridingClassLoader extends DecoratingClassLoader {
 
 
 	@Override
-	protected Class loadClass(String name, boolean resolve) throws ClassNotFoundException {
-		Class result = null;
+	protected Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException {
+		Class<?> result = null;
 		if (isEligibleForOverriding(name)) {
 			result = loadClassForOverriding(name);
 		}
@@ -90,8 +97,8 @@ public class OverridingClassLoader extends DecoratingClassLoader {
 	 * @return the Class object, or {@code null} if no class defined for that name
 	 * @throws ClassNotFoundException if the class for the given name couldn't be loaded
 	 */
-	protected Class loadClassForOverriding(String name) throws ClassNotFoundException {
-		Class result = findLoadedClass(name);
+	protected Class<?> loadClassForOverriding(String name) throws ClassNotFoundException {
+		Class<?> result = findLoadedClass(name);
 		if (result == null) {
 			byte[] bytes = loadBytesForClass(name);
 			if (bytes != null) {

@@ -16,8 +16,6 @@
 
 package org.springframework.test.web;
 
-import static org.springframework.test.util.AssertionErrors.*;
-
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
@@ -27,6 +25,8 @@ import java.util.Set;
 
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.servlet.ModelAndView;
+
+import static org.springframework.test.util.AssertionErrors.*;
 
 /**
  * A collection of assertions intended to simplify testing scenarios dealing

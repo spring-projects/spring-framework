@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -32,14 +33,20 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.junit.Test;
+
 import org.springframework.core.MethodParameter;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
 /**
+ * Tests for {@link TypeDescriptor}.
+ *
  * @author Keith Donald
  * @author Andy Clement
  * @author Phillip Webb
@@ -62,6 +69,7 @@ public class TypeDescriptorTests {
 	public Map<String, Integer> mapField = new HashMap<String, Integer>();
 
 	public Map<String, List<Integer>> nestedMapField = new HashMap<String, List<Integer>>();
+
 
 	@Test
 	public void parameterPrimitive() throws Exception {
@@ -105,7 +113,7 @@ public class TypeDescriptorTests {
 		assertEquals(List.class, desc.getType());
 		assertEquals(List.class, desc.getObjectType());
 		assertEquals("java.util.List", desc.getName());
-		assertEquals("java.util.List<java.util.List<java.util.Map<java.lang.Integer, java.lang.Enum>>>", desc.toString());
+		assertEquals("java.util.List<java.util.List<java.util.Map<java.lang.Integer, java.lang.Enum<?>>>>", desc.toString());
 		assertTrue(!desc.isPrimitive());
 		assertEquals(0, desc.getAnnotations().length);
 		assertTrue(desc.isCollection());
@@ -435,7 +443,7 @@ public class TypeDescriptorTests {
 		assertTrue(typeDescriptor.isArray());
 		assertEquals(List.class,typeDescriptor.getElementTypeDescriptor().getType());
 		assertEquals(String.class, typeDescriptor.getElementTypeDescriptor().getElementTypeDescriptor().getType());
-		assertEquals("java.util.List[]",typeDescriptor.toString());
+		assertEquals("java.util.List<java.lang.String>[]",typeDescriptor.toString());
 	}
 
 	@Test
@@ -549,15 +557,16 @@ public class TypeDescriptorTests {
 		TypeDescriptor.nested(new MethodParameter(getClass().getMethod("test4", List.class), 0, 2), 2);
 	}
 
-	@Test(expected=IllegalStateException.class)
+	@Test
 	public void nestedTooManyLevels() throws Exception {
 		TypeDescriptor t1 = TypeDescriptor.nested(new MethodParameter(getClass().getMethod("test4", List.class), 0), 3);
-		assertEquals(String.class, t1.getType());
+		assertNull(t1);
 	}
 
-	@Test(expected=IllegalStateException.class)
+	@Test
 	public void nestedMethodParameterTypeNotNestable() throws Exception {
-		TypeDescriptor.nested(new MethodParameter(getClass().getMethod("test5", String.class), 0), 2);
+		TypeDescriptor t1 = TypeDescriptor.nested(new MethodParameter(getClass().getMethod("test5", String.class), 0), 2);
+		assertNull(t1);
 	}
 
 	@Test(expected=IllegalArgumentException.class)
@@ -813,6 +822,32 @@ public class TypeDescriptorTests {
 	public Map<CharSequence, Number> isAssignableMapKeyValueTypes;
 
 	@Test
+	public void multiValueMap() throws Exception {
+		TypeDescriptor td = new TypeDescriptor(getClass().getField("multiValueMap"));
+		assertTrue(td.isMap());
+		assertEquals(String.class, td.getMapKeyTypeDescriptor().getType());
+		assertEquals(List.class, td.getMapValueTypeDescriptor().getType());
+		assertEquals(Integer.class,
+				td.getMapValueTypeDescriptor().getElementTypeDescriptor().getType());
+	}
+
+	public MultiValueMap<String, Integer> multiValueMap = new LinkedMultiValueMap<String, Integer>();
+
+	@Test
+	public void passDownGeneric() throws Exception {
+		TypeDescriptor td = new TypeDescriptor(getClass().getField("passDownGeneric"));
+		assertEquals(List.class, td.getElementTypeDescriptor().getType());
+		assertEquals(Set.class, td.getElementTypeDescriptor().getElementTypeDescriptor().getType());
+		assertEquals(Integer.class, td.getElementTypeDescriptor().getElementTypeDescriptor().getElementTypeDescriptor().getType());
+	}
+
+	public PassDownGeneric<Integer> passDownGeneric = new PassDownGeneric<Integer>();
+
+	@SuppressWarnings("serial")
+	public static class PassDownGeneric<T> extends ArrayList<List<Set<T>>> {
+	}
+
+	@Test
 	public void testUpCast() throws Exception {
 		Property property = new Property(getClass(), getClass().getMethod("getProperty"),
 				getClass().getMethod("setProperty", Map.class));
@@ -887,4 +922,27 @@ public class TypeDescriptorTests {
 		TypeDescriptor readObject = (TypeDescriptor) inputStream.readObject();
 		assertThat(readObject, equalTo(typeDescriptor));
 	}
+
+	@Test
+	public void createCollectionWithNullElement() throws Exception {
+		TypeDescriptor typeDescriptor = TypeDescriptor.collection(List.class, null);
+		assertThat(typeDescriptor.getElementTypeDescriptor(), nullValue());
+	}
+
+	@Test
+	public void createMapWithNullElements() throws Exception {
+		TypeDescriptor typeDescriptor = TypeDescriptor.map(LinkedHashMap.class, null, null);
+		assertThat(typeDescriptor.getMapKeyTypeDescriptor(), nullValue());
+		assertThat(typeDescriptor.getMapValueTypeDescriptor(), nullValue());
+	}
+
+	@Test
+	public void getSource() throws Exception {
+		Field field = getClass().getField("fieldScalar");
+		MethodParameter methodParameter = new MethodParameter(getClass().getMethod("testParameterPrimitive", int.class), 0);
+		assertThat(new TypeDescriptor(field).getSource(), equalTo((Object) field));
+		assertThat(new TypeDescriptor(methodParameter).getSource(), equalTo((Object) methodParameter));
+		assertThat(TypeDescriptor.valueOf(Integer.class).getSource(), equalTo((Object) Integer.class));
+	}
+
 }

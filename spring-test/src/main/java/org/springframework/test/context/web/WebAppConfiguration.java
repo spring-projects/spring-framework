@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,8 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import org.springframework.test.context.BootstrapWith;
+
 /**
  * {@code @WebAppConfiguration} is a class-level annotation that is used to
  * declare that the {@code ApplicationContext} loaded for an integration test
@@ -38,6 +40,9 @@ import java.lang.annotation.Target;
  * {@link org.springframework.test.context.ContextConfiguration @ContextConfiguration},
  * either within a single test class or within a test class hierarchy.
  *
+ * <p>As of Spring Framework 4.0, this annotation may be used as a
+ * <em>meta-annotation</em> to create custom <em>composed annotations</em>.
+ *
  * @author Sam Brannen
  * @since 3.2
  * @see org.springframework.web.context.WebApplicationContext
@@ -48,6 +53,7 @@ import java.lang.annotation.Target;
 @Inherited
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
+@BootstrapWith(WebTestContextBootstrapper.class)
 public @interface WebAppConfiguration {
 
 	/**

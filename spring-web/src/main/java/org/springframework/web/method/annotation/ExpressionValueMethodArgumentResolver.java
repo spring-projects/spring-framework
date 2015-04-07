@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,6 +48,7 @@ public class ExpressionValueMethodArgumentResolver extends AbstractNamedValueMet
 		super(beanFactory);
 	}
 
+
 	@Override
 	public boolean supportsParameter(MethodParameter parameter) {
 		return parameter.hasParameterAnnotation(Value.class);
@@ -60,8 +61,7 @@ public class ExpressionValueMethodArgumentResolver extends AbstractNamedValueMet
 	}
 
 	@Override
-	protected Object resolveName(String name, MethodParameter parameter, NativeWebRequest webRequest)
-			throws Exception {
+	protected Object resolveName(String name, MethodParameter parameter, NativeWebRequest webRequest) throws Exception {
 		// No name to resolve
 		return null;
 	}
@@ -71,10 +71,12 @@ public class ExpressionValueMethodArgumentResolver extends AbstractNamedValueMet
 		throw new UnsupportedOperationException("@Value is never required: " + parameter.getMethod());
 	}
 
+
 	private static class ExpressionValueNamedValueInfo extends NamedValueInfo {
 
 		private ExpressionValueNamedValueInfo(Value annotation) {
 			super("@Value", false, annotation.value());
 		}
 	}
+
 }

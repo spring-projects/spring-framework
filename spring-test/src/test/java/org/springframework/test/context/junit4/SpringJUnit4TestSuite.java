@@ -19,6 +19,7 @@ package org.springframework.test.context.junit4;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
+
 import org.springframework.test.context.ClassLevelDirtiesContextTests;
 import org.springframework.test.context.SpringRunnerContextCacheTests;
 import org.springframework.test.context.junit4.annotation.AnnotationConfigSpringJUnit4ClassRunnerAppCtxTests;

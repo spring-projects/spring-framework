@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -24,11 +24,10 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.messaging.handler.annotation.Headers;
-import org.springframework.messaging.handler.method.HandlerMethodArgumentResolver;
+import org.springframework.messaging.handler.invocation.HandlerMethodArgumentResolver;
 import org.springframework.messaging.support.MessageHeaderAccessor;
-import org.springframework.util.ClassUtils;
+import org.springframework.util.Assert;
 import org.springframework.util.ReflectionUtils;
-
 
 /**
  * Resolves the following method parameters:
@@ -42,7 +41,6 @@ import org.springframework.util.ReflectionUtils;
  * @since 4.0
  */
 public class HeadersMethodArgumentResolver implements HandlerMethodArgumentResolver {
-
 
 	@Override
 	public boolean supportsParameter(MethodParameter parameter) {
@@ -61,15 +59,23 @@ public class HeadersMethodArgumentResolver implements HandlerMethodArgumentResol
 			return message.getHeaders();
 		}
 		else if (MessageHeaderAccessor.class.equals(paramType)) {
-			return new MessageHeaderAccessor(message);
+			MessageHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(message, MessageHeaderAccessor.class);
+			return (accessor != null ? accessor : new MessageHeaderAccessor(message));
 		}
 		else if (MessageHeaderAccessor.class.isAssignableFrom(paramType)) {
-			Method factoryMethod = ClassUtils.getMethod(paramType, "wrap", Message.class);
-			return ReflectionUtils.invokeMethod(factoryMethod, null, message);
+			MessageHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(message, MessageHeaderAccessor.class);
+			if (accessor != null && paramType.isAssignableFrom(accessor.getClass())) {
+				return accessor;
+			}
+			else {
+				Method method = ReflectionUtils.findMethod(paramType, "wrap", Message.class);
+				Assert.notNull(method, "Cannot create accessor of type " + paramType + " for message " +  message);
+				return ReflectionUtils.invokeMethod(method, null, message);
+			}
 		}
 		else {
-			throw new IllegalStateException("Unexpected method parameter type "
-					+ paramType + "in method " + parameter.getMethod() + ". "
+			throw new IllegalStateException(
+					"Unexpected method parameter type " + paramType + "in method " + parameter.getMethod() + ". "
 					+ "@Headers method arguments must be assignable to java.util.Map.");
 		}
 	}

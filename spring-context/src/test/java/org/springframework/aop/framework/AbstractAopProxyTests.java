@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,14 +16,6 @@
 
 package org.springframework.aop.framework;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotSame;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.lang.reflect.Method;
@@ -37,13 +29,17 @@ import java.util.List;
 import java.util.Map;
 
 import junit.framework.TestCase;
-
 import org.aopalliance.aop.Advice;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import test.mixin.LockMixin;
+import test.mixin.LockMixinAdvisor;
+import test.mixin.Lockable;
+import test.mixin.LockedException;
+
 import org.springframework.aop.Advisor;
 import org.springframework.aop.AfterReturningAdvice;
 import org.springframework.aop.DynamicIntroductionAdvice;
@@ -80,10 +76,7 @@ import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.util.SerializationTestUtils;
 import org.springframework.util.StopWatch;
 
-import test.mixin.LockMixin;
-import test.mixin.LockMixinAdvisor;
-import test.mixin.Lockable;
-import test.mixin.LockedException;
+import static org.junit.Assert.*;
 
 /**
  * @author Rod Johnson
@@ -1776,7 +1769,6 @@ public abstract class AbstractAopProxyTests {
 	protected static class TestStaticPointcutAdvice extends StaticMethodMatcherPointcutAdvisor {
 
 		private String pattern;
-		private int count;
 
 		public TestStaticPointcutAdvice(MethodInterceptor mi, String pattern) {
 			super(mi);
@@ -1784,9 +1776,7 @@ public abstract class AbstractAopProxyTests {
 		}
 		@Override
 		public boolean matches(Method m, Class<?> targetClass) {
-			boolean run = m.getName().indexOf(pattern) != -1;
-			if (run) ++count;
-			return run;
+			return m.getName().indexOf(pattern) != -1;
 		}
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,6 +34,7 @@ public abstract class HttpStatusCodeException extends RestClientException {
 	private static final long serialVersionUID = -5807494703720513267L;
 
 	private static final String DEFAULT_CHARSET = "ISO-8859-1";
+
 
 	private final HttpStatus statusCode;
 
@@ -74,10 +75,9 @@ public abstract class HttpStatusCodeException extends RestClientException {
 	 * @param responseCharset the response body charset, may be {@code null}
 	 * @since 3.0.5
 	 */
-	protected HttpStatusCodeException(HttpStatus statusCode,
-			String statusText,
-			byte[] responseBody,
-			Charset responseCharset) {
+	protected HttpStatusCodeException(
+			HttpStatus statusCode, String statusText, byte[] responseBody, Charset responseCharset) {
+
 		this(statusCode, statusText, null, responseBody, responseCharset);
 	}
 
@@ -93,6 +93,7 @@ public abstract class HttpStatusCodeException extends RestClientException {
 	 */
 	protected HttpStatusCodeException(HttpStatus statusCode, String statusText,
 			HttpHeaders responseHeaders, byte[] responseBody, Charset responseCharset) {
+
 		super(statusCode.value() + " " + statusText);
 		this.statusCode = statusCode;
 		this.statusText = statusText;
@@ -126,11 +127,10 @@ public abstract class HttpStatusCodeException extends RestClientException {
 
 	/**
 	 * Return the response body as a byte array.
-	 *
 	 * @since 3.0.5
 	 */
 	public byte[] getResponseBodyAsByteArray() {
-		return responseBody;
+		return this.responseBody;
 	}
 
 	/**
@@ -139,11 +139,11 @@ public abstract class HttpStatusCodeException extends RestClientException {
 	 */
 	public String getResponseBodyAsString() {
 		try {
-			return new String(responseBody, responseCharset);
+			return new String(this.responseBody, this.responseCharset);
 		}
 		catch (UnsupportedEncodingException ex) {
 			// should not occur
-			throw new InternalError(ex.getMessage());
+			throw new IllegalStateException(ex);
 		}
 	}
 

@@ -94,7 +94,7 @@ public class TypePatternClassFilter implements ClassFilter {
 	 * @throws IllegalStateException if no {@link #setTypePattern(String)} has been set
 	 */
 	@Override
-	public boolean matches(Class clazz) {
+	public boolean matches(Class<?> clazz) {
 		if (this.aspectJTypePatternMatcher == null) {
 			throw new IllegalStateException("No 'typePattern' has been set via ctor/setter.");
 		}

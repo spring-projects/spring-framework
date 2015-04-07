@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,11 +25,11 @@ import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
 import org.springframework.web.socket.WebSocketHandler;
-import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.sockjs.SockJsException;
-import org.springframework.web.socket.sockjs.support.frame.SockJsFrame;
-import org.springframework.web.socket.sockjs.support.frame.SockJsFrame.FrameFormat;
-import org.springframework.web.socket.sockjs.transport.TransportHandler;
+import org.springframework.web.socket.sockjs.frame.SockJsFrame;
+import org.springframework.web.socket.sockjs.frame.SockJsFrameFormat;
+import org.springframework.web.socket.sockjs.transport.SockJsSession;
+import org.springframework.web.socket.sockjs.transport.SockJsSessionFactory;
 import org.springframework.web.socket.sockjs.transport.session.AbstractHttpSockJsSession;
 import org.springframework.web.util.UriComponentsBuilder;
 import org.springframework.web.util.UriUtils;
@@ -40,17 +40,16 @@ import org.springframework.web.util.UriUtils;
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public abstract class AbstractHttpSendingTransportHandler extends TransportHandlerSupport
-		implements TransportHandler, SockJsSessionFactory {
-
+public abstract class AbstractHttpSendingTransportHandler extends AbstractTransportHandler
+		implements SockJsSessionFactory {
 
 	@Override
 	public final void handleRequest(ServerHttpRequest request, ServerHttpResponse response,
-			WebSocketHandler wsHandler, WebSocketSession wsSession) throws SockJsException {
+			WebSocketHandler wsHandler, SockJsSession wsSession) throws SockJsException {
 
 		AbstractHttpSockJsSession sockJsSession = (AbstractHttpSockJsSession) wsSession;
 
-		String protocol = null; // https://github.com/sockjs/sockjs-client/issues/130
+		String protocol = null;  // https://github.com/sockjs/sockjs-client/issues/130
 		sockJsSession.setAcceptedProtocol(protocol);
 
 		// Set content type before writing
@@ -63,11 +62,15 @@ public abstract class AbstractHttpSendingTransportHandler extends TransportHandl
 			AbstractHttpSockJsSession sockJsSession) throws SockJsException {
 
 		if (sockJsSession.isNew()) {
-			logger.debug("Opening " + getTransportType() + " connection");
+			if (logger.isDebugEnabled()) {
+				logger.debug(request.getMethod() + " " + request.getURI());
+			}
 			sockJsSession.handleInitialRequest(request, response, getFrameFormat(request));
 		}
 		else if (sockJsSession.isClosed()) {
-			logger.debug("Connection already closed (but not removed yet)");
+			if (logger.isDebugEnabled()) {
+				logger.debug("Connection already closed (but not removed yet) for " + sockJsSession);
+			}
 			SockJsFrame frame = SockJsFrame.closeFrameGoAway();
 			try {
 				response.getBody().write(frame.getContentBytes());
@@ -75,38 +78,43 @@ public abstract class AbstractHttpSendingTransportHandler extends TransportHandl
 			catch (IOException ex) {
 				throw new SockJsException("Failed to send " + frame, sockJsSession.getId(), ex);
 			}
-			return;
 		}
 		else if (!sockJsSession.isActive()) {
-			logger.debug("starting " + getTransportType() + " async request");
-			sockJsSession.startLongPollingRequest(request, response, getFrameFormat(request));
+			if (logger.isTraceEnabled()) {
+				logger.trace("Starting " + getTransportType() + " async request.");
+			}
+			sockJsSession.handleSuccessiveRequest(request, response, getFrameFormat(request));
 		}
 		else {
-			logger.debug("another " + getTransportType() + " connection still open: " + sockJsSession);
-			SockJsFrame frame = getFrameFormat(request).format(SockJsFrame.closeFrameAnotherConnectionOpen());
+			if (logger.isDebugEnabled()) {
+				logger.debug("Another " + getTransportType() + " connection still open for " + sockJsSession);
+			}
+			String formattedFrame = getFrameFormat(request).format(SockJsFrame.closeFrameAnotherConnectionOpen());
 			try {
-				response.getBody().write(frame.getContentBytes());
+				response.getBody().write(formattedFrame.getBytes(SockJsFrame.CHARSET));
 			}
 			catch (IOException ex) {
-				throw new SockJsException("Failed to send " + frame, sockJsSession.getId(), ex);
+				throw new SockJsException("Failed to send " + formattedFrame, sockJsSession.getId(), ex);
 			}
 		}
 	}
 
+
 	protected abstract MediaType getContentType();
 
-	protected abstract FrameFormat getFrameFormat(ServerHttpRequest request);
+	protected abstract SockJsFrameFormat getFrameFormat(ServerHttpRequest request);
+
 
 	protected final String getCallbackParam(ServerHttpRequest request) {
 		String query = request.getURI().getQuery();
 		MultiValueMap<String, String> params = UriComponentsBuilder.newInstance().query(query).build().getQueryParams();
 		String value = params.getFirst("c");
 		try {
-			return StringUtils.isEmpty(value) ? null : UriUtils.decode(value, "UTF-8");
+			return (!StringUtils.isEmpty(value) ? UriUtils.decode(value, "UTF-8") : null);
 		}
-		catch (UnsupportedEncodingException e) {
+		catch (UnsupportedEncodingException ex) {
 			// should never happen
-			throw new SockJsException("Unable to decode callback query parameter", null, e);
+			throw new SockJsException("Unable to decode callback query parameter", null, ex);
 		}
 	}
 

@@ -16,10 +16,9 @@
 
 package org.springframework.test.context.junit4.spr9645;
 
-import static org.junit.Assert.assertEquals;
-
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
@@ -27,9 +26,11 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.tests.transaction.CallCountingTransactionManager;
 import org.springframework.transaction.PlatformTransactionManager;
 
+import static org.junit.Assert.*;
+
 /**
  * Integration tests that verify the behavior requested in
- * <a href="https://jira.springsource.org/browse/SPR-9645">SPR-9645</a>.
+ * <a href="https://jira.spring.io/browse/SPR-9645">SPR-9645</a>.
  *
  * @author Sam Brannen
  * @since 3.2

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,6 @@
 
 package org.springframework.test.context.support;
 
-import static org.junit.Assert.assertArrayEquals;
-
 import java.util.Arrays;
 import java.util.Collection;
 
@@ -27,10 +25,13 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
+
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.ContextLoader;
 import org.springframework.util.ObjectUtils;
+
+import static org.junit.Assert.*;
 
 /**
  * JUnit 4 based unit test which verifies proper
@@ -96,7 +97,7 @@ public class GenericXmlContextLoaderResourceLocationsTests {
 
 			{
 				ClasspathExistentDefaultLocationsTestCase.class,
-				new String[] { "classpath:/org/springframework/test/context/support/GenericXmlContextLoaderResourceLocationsTests$1ClasspathExistentDefaultLocationsTestCase-context.xml" } },
+				new String[] { "classpath:org/springframework/test/context/support/GenericXmlContextLoaderResourceLocationsTests$1ClasspathExistentDefaultLocationsTestCase-context.xml" } },
 
 			{
 				ImplicitClasspathLocationsTestCase.class,

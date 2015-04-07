@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import javax.jms.Session;
 import javax.naming.NamingException;
 
 import org.junit.Test;
+
 import org.springframework.jms.StubTopic;
 
 import static org.junit.Assert.*;
@@ -77,7 +78,7 @@ public class JndiDestinationResolverTests {
 
 		JndiDestinationResolver resolver = new JndiDestinationResolver() {
 			@Override
-			protected Object lookup(String jndiName, Class requiredClass) throws NamingException {
+			protected <T> T lookup(String jndiName, Class<T> requiredClass) throws NamingException {
 				throw new NamingException();
 			}
 		};
@@ -96,7 +97,7 @@ public class JndiDestinationResolverTests {
 
 		final JndiDestinationResolver resolver = new JndiDestinationResolver() {
 			@Override
-			protected Object lookup(String jndiName, Class requiredClass) throws NamingException {
+			protected <T> T lookup(String jndiName, Class<T> requiredClass) throws NamingException {
 				throw new NamingException();
 			}
 		};
@@ -117,13 +118,13 @@ public class JndiDestinationResolverTests {
 		private boolean called;
 
 		@Override
-		protected Object lookup(String jndiName, Class requiredType) throws NamingException {
+		protected <T> T lookup(String jndiName, Class<T> requiredType) throws NamingException {
 			if (called) {
 				fail("Must not be delegating to lookup(..), must be resolving from cache.");
 			}
 			assertEquals(DESTINATION_NAME, jndiName);
 			called = true;
-			return DESTINATION;
+			return requiredType.cast(DESTINATION);
 		}
 	}
 
@@ -136,9 +137,9 @@ public class JndiDestinationResolverTests {
 		}
 
 		@Override
-		protected Object lookup(String jndiName, Class requiredType) throws NamingException {
+		protected <T> T lookup(String jndiName, Class<T> requiredType) throws NamingException {
 			++this.callCount;
-			return DESTINATION;
+			return requiredType.cast(DESTINATION);
 		}
 	}
 }

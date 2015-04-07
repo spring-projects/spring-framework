@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,9 +27,10 @@ import org.springframework.beans.factory.DisposableBean;
 import org.springframework.core.NamedThreadLocal;
 
 /**
- * Alternative to an object pool. This TargetSource uses a threading model in which
- * every thread has its own copy of the target. There's no contention for targets.
- * Target object creation is kept to a minimum on the running server.
+ * Alternative to an object pool. This {@link org.springframework.aop.TargetSource}
+ * uses a threading model in which every thread has its own copy of the target.
+ * There's no contention for targets. Target object creation is kept to a minimum
+ * on the running server.
  *
  * <p>Application code is written as to a normal pool; callers can't assume they
  * will be dealing with the same instance in invocations in different threads.
@@ -47,10 +48,9 @@ import org.springframework.core.NamedThreadLocal;
  * @see ThreadLocalTargetSourceStats
  * @see org.springframework.beans.factory.DisposableBean#destroy()
  */
+@SuppressWarnings("serial")
 public class ThreadLocalTargetSource extends AbstractPrototypeBasedTargetSource
 		implements ThreadLocalTargetSourceStats, DisposableBean {
-
-	private static final long serialVersionUID = 1L;
 
 	/**
 	 * ThreadLocal holding the target associated with the current
@@ -81,10 +81,8 @@ public class ThreadLocalTargetSource extends AbstractPrototypeBasedTargetSource
 		Object target = this.targetInThread.get();
 		if (target == null) {
 			if (logger.isDebugEnabled()) {
-				logger.debug("No target for prototype '" + getTargetBeanName() +
-						"' bound to thread: " +
-						"creating one and binding it to thread '" +
-						Thread.currentThread().getName() + "'");
+				logger.debug("No target for prototype '" + getTargetBeanName() + "' bound to thread: " +
+						"creating one and binding it to thread '" + Thread.currentThread().getName() + "'");
 			}
 			// Associate target with ThreadLocal.
 			target = newPrototypeInstance();

@@ -20,7 +20,6 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
-
 import javax.resource.ResourceException;
 import javax.resource.cci.Connection;
 import javax.resource.cci.ConnectionFactory;
@@ -108,7 +107,7 @@ public class TransactionAwareConnectionFactoryProxy extends DelegatingConnection
 	protected Connection getTransactionAwareConnectionProxy(Connection target, ConnectionFactory cf) {
 		return (Connection) Proxy.newProxyInstance(
 				Connection.class.getClassLoader(),
-				new Class[] {Connection.class},
+				new Class<?>[] {Connection.class},
 				new TransactionAwareInvocationHandler(target, cf));
 	}
 

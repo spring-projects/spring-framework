@@ -16,19 +16,20 @@
 
 package org.springframework.web.bind;
 
-import static org.junit.Assert.*;
-
 import java.beans.PropertyEditorSupport;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.junit.Test;
-import org.springframework.tests.sample.beans.ITestBean;
+
 import org.springframework.beans.PropertyValue;
 import org.springframework.beans.PropertyValues;
-import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.mock.web.test.MockHttpServletRequest;
+import org.springframework.tests.sample.beans.ITestBean;
+import org.springframework.tests.sample.beans.TestBean;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Rod Johnson

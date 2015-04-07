@@ -226,7 +226,7 @@ public class UrlTag extends HtmlEscapingAwareTag implements ParamAware {
 		}
 
 		// HTML and/or JavaScript escape, if demanded.
-		urlStr = isHtmlEscape() ? HtmlUtils.htmlEscape(urlStr) : urlStr;
+		urlStr = htmlEscape(urlStr);
 		urlStr = this.javaScriptEscape ? JavaScriptUtils.javaScriptEscape(urlStr) : urlStr;
 
 		return urlStr;
@@ -293,6 +293,18 @@ public class UrlTag extends HtmlEscapingAwareTag implements ParamAware {
 				}
 				catch (UnsupportedEncodingException ex) {
 					throw new JspException(ex);
+				}
+			}
+			else {
+				template = URL_TEMPLATE_DELIMITER_PREFIX + "/" + param.getName() + URL_TEMPLATE_DELIMITER_SUFFIX;
+				if (uri.contains(template)) {
+					usedParams.add(param.getName());
+					try {
+						uri = uri.replace(template, UriUtils.encodePathSegment(param.getValue(), encoding));
+					}
+					catch (UnsupportedEncodingException ex) {
+						throw new JspException(ex);
+					}
 				}
 			}
 		}

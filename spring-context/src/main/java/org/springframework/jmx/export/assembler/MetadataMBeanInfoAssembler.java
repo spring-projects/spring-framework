@@ -153,7 +153,7 @@ public class MetadataMBeanInfoAssembler extends AbstractReflectiveMBeanInfoAssem
 	protected boolean includeOperation(Method method, String beanKey) {
 		PropertyDescriptor pd = BeanUtils.findPropertyForMethod(method);
 		if (pd != null) {
-			if(hasManagedAttribute(method)) {
+			if (hasManagedAttribute(method)) {
 				return true;
 			}
 		}
@@ -263,7 +263,7 @@ public class MetadataMBeanInfoAssembler extends AbstractReflectiveMBeanInfoAssem
 		}
 
 		MBeanParameterInfo[] parameterInfo = new MBeanParameterInfo[params.length];
-		Class[] methodParameters = method.getParameterTypes();
+		Class<?>[] methodParameters = method.getParameterTypes();
 		for (int i = 0; i < params.length; i++) {
 			ManagedOperationParameter param = params[i];
 			parameterInfo[i] =
@@ -334,7 +334,7 @@ public class MetadataMBeanInfoAssembler extends AbstractReflectiveMBeanInfoAssem
 	 */
 	@Override
 	protected void populateAttributeDescriptor(Descriptor desc, Method getter, Method setter, String beanKey) {
-		if(getter != null && hasManagedMetric(getter)) {
+		if (getter != null && hasManagedMetric(getter)) {
 			populateMetricDescriptor(desc, this.attributeSource.getManagedMetric(getter));
 		}
 		else {
@@ -376,11 +376,11 @@ public class MetadataMBeanInfoAssembler extends AbstractReflectiveMBeanInfoAssem
 			desc.setField(FIELD_DISPLAY_NAME, metric.getDisplayName());
 		}
 
-		if(StringUtils.hasLength(metric.getUnit())) {
+		if (StringUtils.hasLength(metric.getUnit())) {
 			desc.setField(FIELD_UNITS, metric.getUnit());
 		}
 
-		if(StringUtils.hasLength(metric.getCategory())) {
+		if (StringUtils.hasLength(metric.getCategory())) {
 			desc.setField(FIELD_METRIC_CATEGORY, metric.getCategory());
 		}
 

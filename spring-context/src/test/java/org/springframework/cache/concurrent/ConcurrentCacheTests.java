@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,8 @@ import static org.junit.Assert.*;
 
 /**
  * @author Costin Leau
+ * @author Juergen Hoeller
+ * @author Stephane Nicoll
  */
 public class ConcurrentCacheTests  {
 
@@ -62,8 +64,32 @@ public class ConcurrentCacheTests  {
 		Object value = "george";
 
 		assertNull(cache.get(key));
+		assertNull(cache.get(key, String.class));
+		assertNull(cache.get(key, Object.class));
+
 		cache.put(key, value);
 		assertEquals(value, cache.get(key).get());
+		assertEquals(value, cache.get(key, String.class));
+		assertEquals(value, cache.get(key, Object.class));
+		assertEquals(value, cache.get(key, null));
+
+		cache.put(key, null);
+		assertNotNull(cache.get(key));
+		assertNull(cache.get(key).get());
+		assertNull(cache.get(key, String.class));
+		assertNull(cache.get(key, Object.class));
+	}
+
+	@Test
+	public void testCachePutIfAbsent() throws Exception {
+		Object key = new Object();
+		Object value = "initialValue";
+
+		assertNull(cache.get(key));
+		assertNull(cache.putIfAbsent(key, value));
+		assertEquals(value, cache.get(key).get());
+		assertEquals("initialValue", cache.putIfAbsent(key, "anotherValue").get());
+		assertEquals(value, cache.get(key).get()); // not changed
 	}
 
 	@Test

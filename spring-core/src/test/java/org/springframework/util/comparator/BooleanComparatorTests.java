@@ -16,12 +16,12 @@
 
 package org.springframework.util.comparator;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.*;
-
 import java.util.Comparator;
 
 import org.junit.Test;
+
+import static org.hamcrest.CoreMatchers.*;
+import static org.junit.Assert.*;
 
 /**
  * Tests for {@link BooleanComparator}.

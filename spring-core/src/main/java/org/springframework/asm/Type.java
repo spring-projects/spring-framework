@@ -401,8 +401,8 @@ public class Type {
      * @return the size of the arguments of the method (plus one for the
      *         implicit this argument), argSize, and the size of its return
      *         value, retSize, packed into a single int i =
-     *         <tt>(argSize << 2) | retSize</tt> (argSize is therefore equal to
-     *         <tt>i >> 2</tt>, and retSize to <tt>i & 0x03</tt>).
+     *         <tt>(argSize &lt;&lt; 2) | retSize</tt> (argSize is therefore equal to
+     *         <tt>i &gt;&gt; 2</tt>, and retSize to <tt>i &amp; 0x03</tt>).
      */
     public static int getArgumentsAndReturnSizes(final String desc) {
         int n = 1;
@@ -556,11 +556,11 @@ public class Type {
         case DOUBLE:
             return "double";
         case ARRAY:
-            StringBuffer b = new StringBuffer(getElementType().getClassName());
+            StringBuilder sb = new StringBuilder(getElementType().getClassName());
             for (int i = getDimensions(); i > 0; --i) {
-                b.append("[]");
+                sb.append("[]");
             }
-            return b.toString();
+            return sb.toString();
         case OBJECT:
             return new String(buf, off, len).replace('/', '.');
         default:
@@ -606,9 +606,10 @@ public class Type {
      * 
      * @return the size of the arguments (plus one for the implicit this
      *         argument), argSize, and the size of the return value, retSize,
-     *         packed into a single int i = <tt>(argSize << 2) | retSize</tt>
-     *         (argSize is therefore equal to <tt>i >> 2</tt>, and retSize to
-     *         <tt>i & 0x03</tt>).
+     *         packed into a single
+     *         int i = <tt>(argSize &lt;&lt; 2) | retSize</tt>
+     *         (argSize is therefore equal to <tt>i &gt;&gt; 2</tt>,
+     *         and retSize to <tt>i &amp; 0x03</tt>).
      */
     public int getArgumentsAndReturnSizes() {
         return getArgumentsAndReturnSizes(getDescriptor());
@@ -624,9 +625,9 @@ public class Type {
      * @return the descriptor corresponding to this Java type.
      */
     public String getDescriptor() {
-        StringBuffer buf = new StringBuffer();
-        getDescriptor(buf);
-        return buf.toString();
+        StringBuilder sb = new StringBuilder();
+        getDescriptor(sb);
+        return sb.toString();
     }
 
     /**
@@ -642,34 +643,34 @@ public class Type {
      */
     public static String getMethodDescriptor(final Type returnType,
             final Type... argumentTypes) {
-        StringBuffer buf = new StringBuffer();
-        buf.append('(');
+		StringBuilder sb = new StringBuilder();
+        sb.append('(');
         for (int i = 0; i < argumentTypes.length; ++i) {
-            argumentTypes[i].getDescriptor(buf);
+            argumentTypes[i].getDescriptor(sb);
         }
-        buf.append(')');
-        returnType.getDescriptor(buf);
-        return buf.toString();
+        sb.append(')');
+        returnType.getDescriptor(sb);
+        return sb.toString();
     }
 
     /**
      * Appends the descriptor corresponding to this Java type to the given
-     * string buffer.
+     * string builder.
      * 
-     * @param buf
-     *            the string buffer to which the descriptor must be appended.
+     * @param sb
+     *            the string builder to which the descriptor must be appended.
      */
-    private void getDescriptor(final StringBuffer buf) {
+    private void getDescriptor(final StringBuilder sb) {
         if (this.buf == null) {
             // descriptor is in byte 3 of 'off' for primitive types (buf ==
             // null)
-            buf.append((char) ((off & 0xFF000000) >>> 24));
+            sb.append((char) ((off & 0xFF000000) >>> 24));
         } else if (sort == OBJECT) {
-            buf.append('L');
-            buf.append(this.buf, off, len);
-            buf.append(';');
+            sb.append('L');
+            sb.append(this.buf, off, len);
+            sb.append(';');
         } else { // sort == ARRAY || sort == METHOD
-            buf.append(this.buf, off, len);
+            sb.append(this.buf, off, len);
         }
     }
 
@@ -699,9 +700,9 @@ public class Type {
      * @return the descriptor corresponding to the given class.
      */
     public static String getDescriptor(final Class<?> c) {
-        StringBuffer buf = new StringBuffer();
-        getDescriptor(buf, c);
-        return buf.toString();
+		StringBuilder sb = new StringBuilder();
+        getDescriptor(sb, c);
+        return sb.toString();
     }
 
     /**
@@ -713,12 +714,12 @@ public class Type {
      */
     public static String getConstructorDescriptor(final Constructor<?> c) {
         Class<?>[] parameters = c.getParameterTypes();
-        StringBuffer buf = new StringBuffer();
-        buf.append('(');
+		StringBuilder sb = new StringBuilder();
+        sb.append('(');
         for (int i = 0; i < parameters.length; ++i) {
-            getDescriptor(buf, parameters[i]);
+            getDescriptor(sb, parameters[i]);
         }
-        return buf.append(")V").toString();
+        return sb.append(")V").toString();
     }
 
     /**
@@ -730,25 +731,25 @@ public class Type {
      */
     public static String getMethodDescriptor(final Method m) {
         Class<?>[] parameters = m.getParameterTypes();
-        StringBuffer buf = new StringBuffer();
-        buf.append('(');
+		StringBuilder sb = new StringBuilder();
+        sb.append('(');
         for (int i = 0; i < parameters.length; ++i) {
-            getDescriptor(buf, parameters[i]);
+            getDescriptor(sb, parameters[i]);
         }
-        buf.append(')');
-        getDescriptor(buf, m.getReturnType());
-        return buf.toString();
+        sb.append(')');
+        getDescriptor(sb, m.getReturnType());
+        return sb.toString();
     }
 
     /**
-     * Appends the descriptor of the given class to the given string buffer.
+     * Appends the descriptor of the given class to the given string builder.
      * 
-     * @param buf
+     * @param sb
      *            the string buffer to which the descriptor must be appended.
      * @param c
      *            the class whose descriptor must be computed.
      */
-    private static void getDescriptor(final StringBuffer buf, final Class<?> c) {
+    private static void getDescriptor(final StringBuilder sb, final Class<?> c) {
         Class<?> d = c;
         while (true) {
             if (d.isPrimitive()) {
@@ -772,20 +773,20 @@ public class Type {
                 } else /* if (d == Long.TYPE) */{
                     car = 'J';
                 }
-                buf.append(car);
+                sb.append(car);
                 return;
             } else if (d.isArray()) {
-                buf.append('[');
+                sb.append('[');
                 d = d.getComponentType();
             } else {
-                buf.append('L');
+                sb.append('L');
                 String name = d.getName();
                 int len = name.length();
                 for (int i = 0; i < len; ++i) {
                     char car = name.charAt(i);
-                    buf.append(car == '.' ? '/' : car);
+                    sb.append(car == '.' ? '/' : car);
                 }
-                buf.append(';');
+                sb.append(';');
                 return;
             }
         }

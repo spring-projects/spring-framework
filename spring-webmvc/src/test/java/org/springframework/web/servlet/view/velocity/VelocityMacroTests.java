@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ package org.springframework.web.servlet.view.velocity;
 
 import java.util.HashMap;
 import java.util.Map;
-
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletResponse;
 
@@ -27,10 +26,10 @@ import org.apache.velocity.Template;
 import org.apache.velocity.app.VelocityEngine;
 import org.apache.velocity.context.Context;
 
-import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockHttpServletResponse;
 import org.springframework.mock.web.test.MockServletContext;
+import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.util.StringUtils;
 import org.springframework.web.context.support.StaticWebApplicationContext;
 import org.springframework.web.servlet.DispatcherServlet;
@@ -94,7 +93,7 @@ public class VelocityMacroTests extends TestCase {
 		vv.setApplicationContext(wac);
 		vv.setExposeSpringMacroHelpers(true);
 
-		Map model = new HashMap();
+		Map<String, Object> model = new HashMap<String, Object>();
 		model.put("tb", new TestBean("juergen", 99));
 		vv.render(model, request, response);
 	}
@@ -112,7 +111,7 @@ public class VelocityMacroTests extends TestCase {
 		vv.setApplicationContext(wac);
 		vv.setExposeSpringMacroHelpers(true);
 
-		Map model = new HashMap();
+		Map<String, Object> model = new HashMap<String, Object>();
 		model.put(VelocityView.SPRING_MACRO_REQUEST_CONTEXT_ATTRIBUTE, helperTool);
 
 		try {
@@ -126,11 +125,11 @@ public class VelocityMacroTests extends TestCase {
 
 	public void testAllMacros() throws Exception {
 		DummyMacroRequestContext rc = new DummyMacroRequestContext(request);
-		Map msgMap = new HashMap();
+		Map<String, String> msgMap = new HashMap<String, String>();
 		msgMap.put("hello", "Howdy");
 		msgMap.put("world", "Mundo");
 		rc.setMessageMap(msgMap);
-		Map themeMsgMap = new HashMap();
+		Map<String, String> themeMsgMap = new HashMap<String, String>();
 		themeMsgMap.put("hello", "Howdy!");
 		themeMsgMap.put("world", "Mundo!");
 		rc.setThemeMessageMap(themeMsgMap);
@@ -138,9 +137,10 @@ public class VelocityMacroTests extends TestCase {
 
 		TestBean tb = new TestBean("Darren", 99);
 		tb.setJedi(true);
+		tb.setStringArray(new String[] {"John", "Fred"});
 		request.setAttribute("command", tb);
 
-		HashMap names = new HashMap();
+		Map<String, String> names = new HashMap<String, String>();
 		names.put("Darren", "Darren Davison");
 		names.put("John", "John Doe");
 		names.put("Fred", "Fred Bloggs");
@@ -149,7 +149,7 @@ public class VelocityMacroTests extends TestCase {
 		vc.setPreferFileSystemAccess(false);
 		VelocityEngine ve = vc.createVelocityEngine();
 
-		Map model = new HashMap();
+		Map<String, Object> model = new HashMap<String, Object>();
 		model.put("command", tb);
 		model.put("springMacroRequestContext", rc);
 		model.put("nameOptionMap", names);
@@ -190,4 +190,67 @@ public class VelocityMacroTests extends TestCase {
 		}
 	}
 
+	// SPR-5172
+
+	public void testIdContainsBraces() throws Exception {
+		DummyMacroRequestContext rc = new DummyMacroRequestContext(request);
+		Map<String, String> msgMap = new HashMap<String, String>();
+		msgMap.put("hello", "Howdy");
+		msgMap.put("world", "Mundo");
+		rc.setMessageMap(msgMap);
+		Map<String, String> themeMsgMap = new HashMap<String, String>();
+		themeMsgMap.put("hello", "Howdy!");
+		themeMsgMap.put("world", "Mundo!");
+		rc.setThemeMessageMap(themeMsgMap);
+		rc.setContextPath("/springtest");
+
+		TestBean darren = new TestBean("Darren", 99);
+		TestBean fred = new TestBean("Fred");
+		fred.setJedi(true);
+		darren.setSpouse(fred);
+		darren.setJedi(true);
+		darren.setStringArray(new String[] {"John", "Fred"});
+		request.setAttribute("command", darren);
+
+		Map<String, String> names = new HashMap<String, String>();
+		names.put("Darren", "Darren Davison");
+		names.put("John", "John Doe");
+		names.put("Fred", "Fred Bloggs");
+
+		VelocityConfigurer vc = new VelocityConfigurer();
+		vc.setPreferFileSystemAccess(false);
+		VelocityEngine ve = vc.createVelocityEngine();
+
+		Map<String, Object> model = new HashMap<String, Object>();
+		model.put("command", darren);
+		model.put("springMacroRequestContext", rc);
+		model.put("nameOptionMap", names);
+
+		VelocityView view = new VelocityView();
+		view.setBeanName("myView");
+		view.setUrl("org/springframework/web/servlet/view/velocity/test-spr5172.vm");
+		view.setEncoding("UTF-8");
+		view.setExposeSpringMacroHelpers(false);
+		view.setVelocityEngine(ve);
+
+		view.render(model, request, response);
+
+		// tokenize output and ignore whitespace
+		String output = response.getContentAsString();
+		String[] tokens = StringUtils.tokenizeToStringArray(output, "\t\n");
+
+		for (int i = 0; i < tokens.length; i++) {
+			if (tokens[i].equals("FORM1")) assertEquals("<input type=\"text\" id=\"spouses0.name\" name=\"spouses[0].name\" value=\"Fred\" >", tokens[i + 1]); //
+			if (tokens[i].equals("FORM2")) assertEquals("<textarea id=\"spouses0.name\" name=\"spouses[0].name\" >Fred</textarea>", tokens[i + 1]);
+			if (tokens[i].equals("FORM3")) assertEquals("<select id=\"spouses0.name\" name=\"spouses[0].name\" >", tokens[i + 1]);
+			if (tokens[i].equals("FORM4")) assertEquals("<select multiple=\"multiple\" id=\"spouses\" name=\"spouses\" >", tokens[i + 1]);
+			if (tokens[i].equals("FORM5")) assertEquals("<input type=\"radio\" name=\"spouses[0].name\" value=\"Darren\"", tokens[i + 1]);
+			if (tokens[i].equals("FORM6")) assertEquals("<input type=\"password\" id=\"spouses0.name\" name=\"spouses[0].name\" value=\"\" >", tokens[i + 1]);
+			if (tokens[i].equals("FORM7")) assertEquals("<input type=\"hidden\" id=\"spouses0.name\" name=\"spouses[0].name\" value=\"Fred\" >", tokens[i + 1]);
+			if (tokens[i].equals("FORM8")) assertEquals("<input type=\"hidden\" name=\"_spouses0.name\" value=\"on\"/>", tokens[i + 1]);
+			if (tokens[i].equals("FORM8")) assertEquals("<input type=\"checkbox\" id=\"spouses0.name\" name=\"spouses[0].name\" />", tokens[i + 2]);
+			if (tokens[i].equals("FORM9")) assertEquals("<input type=\"hidden\" name=\"_spouses0.jedi\" value=\"on\"/>", tokens[i + 1]);
+			if (tokens[i].equals("FORM9")) assertEquals("<input type=\"checkbox\" id=\"spouses0.jedi\" name=\"spouses[0].jedi\" checked=\"checked\" />", tokens[i + 2]);
+		}
+	}
 }

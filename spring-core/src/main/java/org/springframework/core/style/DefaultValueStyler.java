@@ -57,20 +57,20 @@ public class DefaultValueStyler implements ValueStyler {
 			return "\'" + value + "\'";
 		}
 		else if (value instanceof Class) {
-			return ClassUtils.getShortName((Class) value);
+			return ClassUtils.getShortName((Class<?>) value);
 		}
 		else if (value instanceof Method) {
 			Method method = (Method) value;
 			return method.getName() + "@" + ClassUtils.getShortName(method.getDeclaringClass());
 		}
 		else if (value instanceof Map) {
-			return style((Map) value);
+			return style((Map<?, ?>) value);
 		}
 		else if (value instanceof Map.Entry) {
-			return style((Map.Entry) value);
+			return style((Map.Entry<? ,?>) value);
 		}
 		else if (value instanceof Collection) {
-			return style((Collection) value);
+			return style((Collection<?>) value);
 		}
 		else if (value.getClass().isArray()) {
 			return styleArray(ObjectUtils.toObjectArray(value));
@@ -80,11 +80,11 @@ public class DefaultValueStyler implements ValueStyler {
 		}
 	}
 
-	private String style(Map value) {
+	private <K, V> String style(Map<K, V> value) {
 		StringBuilder result = new StringBuilder(value.size() * 8 + 16);
 		result.append(MAP + "[");
-		for (Iterator it = value.entrySet().iterator(); it.hasNext();) {
-			Map.Entry entry = (Map.Entry) it.next();
+		for (Iterator<Map.Entry<K, V>> it = value.entrySet().iterator(); it.hasNext();) {
+			Map.Entry<K, V> entry = it.next();
 			result.append(style(entry));
 			if (it.hasNext()) {
 				result.append(',').append(' ');
@@ -97,14 +97,14 @@ public class DefaultValueStyler implements ValueStyler {
 		return result.toString();
 	}
 
-	private String style(Map.Entry value) {
+	private String style(Map.Entry<?, ?> value) {
 		return style(value.getKey()) + " -> " + style(value.getValue());
 	}
 
-	private String style(Collection value) {
+	private String style(Collection<?> value) {
 		StringBuilder result = new StringBuilder(value.size() * 8 + 16);
 		result.append(getCollectionTypeString(value)).append('[');
-		for (Iterator i = value.iterator(); i.hasNext();) {
+		for (Iterator<?> i = value.iterator(); i.hasNext();) {
 			result.append(style(i.next()));
 			if (i.hasNext()) {
 				result.append(',').append(' ');
@@ -117,7 +117,7 @@ public class DefaultValueStyler implements ValueStyler {
 		return result.toString();
 	}
 
-	private String getCollectionTypeString(Collection value) {
+	private String getCollectionTypeString(Collection<?> value) {
 		if (value instanceof List) {
 			return LIST;
 		}

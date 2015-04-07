@@ -1,4 +1,3 @@
-
 /*
  * Copyright 2002-2012 the original author or authors.
  *
@@ -17,18 +16,9 @@
 
 package org.springframework.tests.sample.beans;
 
-import org.springframework.tests.sample.beans.TestBean;
-
 public class Employee extends TestBean {
 
 	private String co;
-
-	/**
-	 * Constructor for Employee.
-	 */
-	public Employee() {
-		super();
-	}
 
 	public String getCompany() {
 		return co;

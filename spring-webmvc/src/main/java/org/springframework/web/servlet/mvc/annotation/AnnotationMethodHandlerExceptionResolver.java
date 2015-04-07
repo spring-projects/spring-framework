@@ -38,6 +38,7 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import javax.xml.transform.Source;
 
 import org.springframework.core.ExceptionDepthComparator;
 import org.springframework.core.GenericTypeResolver;
@@ -51,7 +52,6 @@ import org.springframework.http.converter.ByteArrayHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.http.converter.xml.SourceHttpMessageConverter;
-import org.springframework.http.converter.xml.XmlAwareFormHttpMessageConverter;
 import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.http.server.ServletServerHttpResponse;
 import org.springframework.ui.Model;
@@ -96,8 +96,9 @@ public class AnnotationMethodHandlerExceptionResolver extends AbstractHandlerExc
 	private WebArgumentResolver[] customArgumentResolvers;
 
 	private HttpMessageConverter<?>[] messageConverters =
-			new HttpMessageConverter[] {new ByteArrayHttpMessageConverter(), new StringHttpMessageConverter(),
-					new SourceHttpMessageConverter(), new XmlAwareFormHttpMessageConverter()};
+			new HttpMessageConverter<?>[] {new ByteArrayHttpMessageConverter(), new StringHttpMessageConverter(),
+			new SourceHttpMessageConverter<Source>(),
+			new org.springframework.http.converter.xml.XmlAwareFormHttpMessageConverter()};
 
 
 	/**
@@ -206,7 +207,7 @@ public class AnnotationMethodHandlerExceptionResolver extends AbstractHandlerExc
 
 	/**
 	 * Returns all the exception classes handled by the given method.
-	 * <p>The default implementation looks for exceptions in the {@linkplain ExceptionHandler#value() annotation},
+	 * <p>The default implementation looks for exceptions in the annotation,
 	 * or - if that annotation element is empty - any exceptions listed in the method parameters if the method
 	 * is annotated with {@code @ExceptionHandler}.
 	 * @param method the method
@@ -415,7 +416,7 @@ public class AnnotationMethodHandlerExceptionResolver extends AbstractHandlerExc
 		}
 	}
 
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes", "resource" })
 	private ModelAndView handleResponseBody(Object returnValue, ServletWebRequest webRequest)
 			throws ServletException, IOException {
 

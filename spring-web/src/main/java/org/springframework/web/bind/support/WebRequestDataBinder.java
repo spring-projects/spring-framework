@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,14 +16,15 @@
 
 package org.springframework.web.bind.support;
 
-import java.io.IOException;
-
-import javax.servlet.ServletException;
+import java.util.List;
+import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.Part;
 
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.BindException;
 import org.springframework.web.bind.WebDataBinder;
@@ -69,7 +70,6 @@ import org.springframework.web.multipart.MultipartRequest;
  */
 public class WebRequestDataBinder extends WebDataBinder {
 
-
 	/**
 	 * Create a new WebRequestDataBinder instance, with default object name.
 	 * @param target the target object to bind onto (or {@code null}
@@ -111,18 +111,26 @@ public class WebRequestDataBinder extends WebDataBinder {
 	 */
 	public void bind(WebRequest request) {
 		MutablePropertyValues mpvs = new MutablePropertyValues(request.getParameterMap());
-
-		if(isMultipartRequest(request) && (request instanceof NativeWebRequest)) {
+		if (isMultipartRequest(request) && request instanceof NativeWebRequest) {
 			MultipartRequest multipartRequest = ((NativeWebRequest) request).getNativeRequest(MultipartRequest.class);
 			if (multipartRequest != null) {
 				bindMultipart(multipartRequest.getMultiFileMap(), mpvs);
 			}
 			else if (ClassUtils.hasMethod(HttpServletRequest.class, "getParts")) {
 				HttpServletRequest serlvetRequest = ((NativeWebRequest) request).getNativeRequest(HttpServletRequest.class);
-				new Servlet3MultipartHelper().bindParts(serlvetRequest, mpvs);
+				new Servlet3MultipartHelper(isBindEmptyMultipartFiles()).bindParts(serlvetRequest, mpvs);
 			}
 		}
 		doBind(mpvs);
+	}
+
+	/**
+	 * Check if the request is a multipart request (by checking its Content-Type header).
+	 * @param request request with parameters to bind
+	 */
+	private boolean isMultipartRequest(WebRequest request) {
+		String contentType = request.getHeader("Content-Type");
+		return (contentType != null && StringUtils.startsWithIgnoreCase(contentType, "multipart"));
 	}
 
 	/**
@@ -137,16 +145,6 @@ public class WebRequestDataBinder extends WebDataBinder {
 		}
 	}
 
-	/**
-	 * Check if the request is a multipart request (by checking its Content-Type header).
-	 *
-	 * @param request request with parameters to bind
-	 */
-	private boolean isMultipartRequest(WebRequest request) {
-		String contentType = request.getHeader("Content-Type");
-		return ((contentType != null) && StringUtils.startsWithIgnoreCase(contentType, "multipart"));
-	}
-
 
 	/**
 	 * Encapsulate Part binding code for Servlet 3.0+ only containers.
@@ -154,20 +152,34 @@ public class WebRequestDataBinder extends WebDataBinder {
 	 */
 	private static class Servlet3MultipartHelper {
 
+		private final boolean bindEmptyMultipartFiles;
+
+		public Servlet3MultipartHelper(boolean bindEmptyMultipartFiles) {
+			this.bindEmptyMultipartFiles = bindEmptyMultipartFiles;
+		}
+
 		public void bindParts(HttpServletRequest request, MutablePropertyValues mpvs) {
 			try {
-				for(Part part : request.getParts()) {
-					mpvs.add(part.getName(), part);
+				MultiValueMap<String, Part> map = new LinkedMultiValueMap<String, Part>();
+				for (Part part : request.getParts()) {
+					map.add(part.getName(), part);
+				}
+				for (Map.Entry<String, List<Part>> entry: map.entrySet()) {
+					if (entry.getValue().size() == 1) {
+						Part part = entry.getValue().get(0);
+						if (this.bindEmptyMultipartFiles || part.getSize() > 0) {
+							mpvs.add(entry.getKey(), part);
+						}
+					}
+					else {
+						mpvs.add(entry.getKey(), entry.getValue());
+					}
 				}
 			}
-			catch (IOException ex) {
-				throw new MultipartException("Failed to get request parts", ex);
-			}
-			catch(ServletException ex) {
+			catch (Exception ex) {
 				throw new MultipartException("Failed to get request parts", ex);
 			}
 		}
-
 	}
 
 }

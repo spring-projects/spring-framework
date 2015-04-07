@@ -16,13 +16,13 @@
 
 package org.springframework.beans.propertyeditors;
 
-import static org.junit.Assert.*;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
 import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  * Unit tests for the {@link CustomCollectionEditor} class.
@@ -38,8 +38,9 @@ public final class CustomCollectionEditorTests {
 	}
 
 	@Test(expected=IllegalArgumentException.class)
+	@SuppressWarnings("unchecked")
 	public void testCtorWithNonCollectionType() throws Exception {
-		new CustomCollectionEditor(String.class);
+		new CustomCollectionEditor((Class) String.class);
 	}
 
 	@Test(expected=IllegalArgumentException.class)

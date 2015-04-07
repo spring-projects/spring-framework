@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.rules.TemporaryFolder;
+
 import org.springframework.util.FileCopyUtils;
 
 import static org.hamcrest.Matchers.*;
@@ -39,16 +40,17 @@ import static org.mockito.BDDMockito.*;
  * @author Philippe Marschall
  * @author Phillip Webb
  * @author Nicholas Williams
+ * @author Stephane Nicoll
  */
 public class PathResourceTests {
 
-	private static final String TEST_DIR = platformPath("src/test/java/org/"
+	private static final String TEST_DIR = platformPath("src/test/resources/org/"
 			+ "springframework/core/io");
 
-	private static final String TEST_FILE = platformPath("src/test/java/org/"
+	private static final String TEST_FILE = platformPath("src/test/resources/org/"
 			+ "springframework/core/io/example.properties");
 
-	private static final String NON_EXISTING_FILE = platformPath("src/test/java/org/"
+	private static final String NON_EXISTING_FILE = platformPath("src/test/resources/org/"
 			+ "springframework/core/io/doesnotexist.properties");
 
 

@@ -18,7 +18,6 @@ package org.springframework.context.annotation;
 
 import example.scannable.FooService;
 import example.scannable.ScopedProxyTestBean;
-import static org.junit.Assert.*;
 import org.junit.Test;
 
 import org.springframework.aop.support.AopUtils;
@@ -26,6 +25,8 @@ import org.springframework.beans.FatalBeanException;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.tests.context.SimpleMapScope;
 import org.springframework.util.SerializationTestUtils;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Mark Fisher

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,9 +27,9 @@ import org.springframework.util.StreamUtils;
 /**
  * Implementation of {@link HttpMessageConverter} that can read and write byte arrays.
  *
- * <p>By default, this converter supports all media types ({@code &#42;&#47;&#42;}), and writes with a {@code
- * Content-Type} of {@code application/octet-stream}. This can be overridden by setting the {@link
- * #setSupportedMediaTypes(java.util.List) supportedMediaTypes} property.
+ * <p>By default, this converter supports all media types ({@code &#42;&#47;&#42;}), and
+ * writes with a {@code Content-Type} of {@code application/octet-stream}. This can be
+ * overridden by setting the {@link #setSupportedMediaTypes supportedMediaTypes} property.
  *
  * @author Arjen Poutsma
  * @since 3.0
@@ -47,9 +47,10 @@ public class ByteArrayHttpMessageConverter extends AbstractHttpMessageConverter<
 	}
 
 	@Override
-	public byte[] readInternal(Class clazz, HttpInputMessage inputMessage) throws IOException {
+	public byte[] readInternal(Class<? extends byte[]> clazz, HttpInputMessage inputMessage) throws IOException {
 		long contentLength = inputMessage.getHeaders().getContentLength();
-		ByteArrayOutputStream bos = new ByteArrayOutputStream(contentLength >= 0 ? (int) contentLength : StreamUtils.BUFFER_SIZE);
+		ByteArrayOutputStream bos =
+				new ByteArrayOutputStream(contentLength >= 0 ? (int) contentLength : StreamUtils.BUFFER_SIZE);
 		StreamUtils.copy(inputMessage.getBody(), bos);
 		return bos.toByteArray();
 	}

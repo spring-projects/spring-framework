@@ -44,8 +44,9 @@ import org.springframework.util.ConcurrentReferenceHashMap;
 public abstract class GenericTypeResolver {
 
 	/** Cache from Class to TypeVariable Map */
-	private static final Map<Class, Map<TypeVariable, Type>> typeVariableCache =
-			new ConcurrentReferenceHashMap<Class, Map<TypeVariable,Type>>();
+	@SuppressWarnings("rawtypes")
+	private static final Map<Class<?>, Map<TypeVariable, Type>> typeVariableCache =
+			new ConcurrentReferenceHashMap<Class<?>, Map<TypeVariable, Type>>();
 
 
 	/**
@@ -240,26 +241,25 @@ public abstract class GenericTypeResolver {
 	 * @return the resolved type of each argument, with the array size matching the
 	 * number of actual type arguments, or {@code null} if not resolvable
 	 */
-	public static Class[] resolveTypeArguments(Class<?> clazz, Class<?> genericIfc) {
+	public static Class<?>[] resolveTypeArguments(Class<?> clazz, Class<?> genericIfc) {
 		ResolvableType type = ResolvableType.forClass(clazz).as(genericIfc);
-		if (!type.hasGenerics()) {
+		if (!type.hasGenerics() || type.isEntirelyUnresolvable()) {
 			return null;
 		}
-		return type.resolveGenerics();
+		return type.resolveGenerics(Object.class);
 	}
 
 	/**
 	 * Resolve the specified generic type against the given TypeVariable map.
 	 * @param genericType the generic type to resolve
-	 * @param typeVariableMap the TypeVariable Map to resolved against
+	 * @param map the TypeVariable Map to resolved against
 	 * @return the type if it resolves to a Class, or {@code Object.class} otherwise
 	 * @deprecated as of Spring 4.0 in favor of {@link ResolvableType}
 	 */
 	@Deprecated
-	public static Class<?> resolveType(Type genericType, Map<TypeVariable, Type> typeVariableMap) {
-		TypeVariableResolver variableResolver = new TypeVariableMapResolver(typeVariableMap);
-		Class<?> resolved = ResolvableType.forType(genericType, variableResolver).resolve();
-		return (resolved == null ? Object.class : resolved);
+	@SuppressWarnings("rawtypes")
+	public static Class<?> resolveType(Type genericType, Map<TypeVariable, Type> map) {
+		return ResolvableType.forType(genericType, new TypeVariableMapVariableResolver(map)).resolve(Object.class);
 	}
 
 	/**
@@ -269,6 +269,7 @@ public abstract class GenericTypeResolver {
 	 * @deprecated as of Spring 4.0 in favor of {@link ResolvableType}
 	 */
 	@Deprecated
+	@SuppressWarnings("rawtypes")
 	public static Map<TypeVariable, Type> getTypeVariableMap(Class<?> clazz) {
 		Map<TypeVariable, Type> typeVariableMap = typeVariableCache.get(clazz);
 		if (typeVariableMap == null) {
@@ -279,6 +280,7 @@ public abstract class GenericTypeResolver {
 		return typeVariableMap;
 	}
 
+	@SuppressWarnings("rawtypes")
 	private static void buildTypeVariableMap(ResolvableType type, Map<TypeVariable, Type> typeVariableMap) {
 		if (type != ResolvableType.NONE) {
 			if (type.getType() instanceof ParameterizedType) {
@@ -304,38 +306,24 @@ public abstract class GenericTypeResolver {
 	}
 
 
-	/**
-	 * Adapts a {@code typeVariableMap} to a {@link TypeVariableResolver}.
-	 */
-	private static class TypeVariableMapResolver implements TypeVariableResolver {
+	@SuppressWarnings({"serial", "rawtypes"})
+	private static class TypeVariableMapVariableResolver implements ResolvableType.VariableResolver {
 
 		private final Map<TypeVariable, Type> typeVariableMap;
 
-		public TypeVariableMapResolver(Map<TypeVariable, Type> typeVariableMap) {
-			Assert.notNull("TypeVariableMap must not be null");
+		public TypeVariableMapVariableResolver(Map<TypeVariable, Type> typeVariableMap) {
 			this.typeVariableMap = typeVariableMap;
 		}
 
 		@Override
-		public Type resolveVariable(TypeVariable typeVariable) {
-			return this.typeVariableMap.get(typeVariable);
+		public ResolvableType resolveVariable(TypeVariable<?> variable) {
+			Type type = this.typeVariableMap.get(variable);
+			return (type != null ? ResolvableType.forType(type) : null);
 		}
 
 		@Override
-		public boolean equals(Object obj) {
-			if (this == obj) {
-				return true;
-			}
-			if (obj instanceof TypeVariableMapResolver) {
-				TypeVariableMapResolver other = (TypeVariableMapResolver) obj;
-				return this.typeVariableMap.equals(other.typeVariableMap);
-			}
-			return false;
-		}
-
-		@Override
-		public int hashCode() {
-			return this.typeVariableMap.hashCode();
+		public Object getSource() {
+			return this.typeVariableMap;
 		}
 	}
 

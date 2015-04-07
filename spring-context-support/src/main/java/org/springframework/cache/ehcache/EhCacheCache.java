@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,7 @@ import org.springframework.util.Assert;
  *
  * @author Costin Leau
  * @author Juergen Hoeller
+ * @author Stephane Nicoll
  * @since 3.1
  */
 public class EhCacheCache implements Cache {
@@ -50,24 +51,41 @@ public class EhCacheCache implements Cache {
 
 
 	@Override
-	public String getName() {
+	public final String getName() {
 		return this.cache.getName();
 	}
 
 	@Override
-	public Ehcache getNativeCache() {
+	public final Ehcache getNativeCache() {
 		return this.cache;
 	}
 
 	@Override
 	public ValueWrapper get(Object key) {
 		Element element = this.cache.get(key);
-		return (element != null ? new SimpleValueWrapper(element.getObjectValue()) : null);
+		return toWrapper(element);
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public <T> T get(Object key, Class<T> type) {
+		Element element = this.cache.get(key);
+		Object value = (element != null ? element.getObjectValue() : null);
+		if (value != null && type != null && !type.isInstance(value)) {
+			throw new IllegalStateException("Cached value is not of required type [" + type.getName() + "]: " + value);
+		}
+		return (T) value;
 	}
 
 	@Override
 	public void put(Object key, Object value) {
 		this.cache.put(new Element(key, value));
+	}
+
+	@Override
+	public ValueWrapper putIfAbsent(Object key, Object value) {
+		Element existingElement = this.cache.putIfAbsent(new Element(key, value));
+		return toWrapper(existingElement);
 	}
 
 	@Override
@@ -78,6 +96,10 @@ public class EhCacheCache implements Cache {
 	@Override
 	public void clear() {
 		this.cache.removeAll();
+	}
+
+	private ValueWrapper toWrapper(Element element) {
+		return (element != null ? new SimpleValueWrapper(element.getObjectValue()) : null);
 	}
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,6 @@ import java.io.InputStream;
 import java.io.StringReader;
 import java.nio.charset.Charset;
 import java.util.List;
-
 import javax.xml.transform.Source;
 import javax.xml.transform.stream.StreamSource;
 
@@ -33,6 +32,7 @@ import org.apache.commons.fileupload.RequestContext;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.junit.Before;
 import org.junit.Test;
+
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpEntity;
@@ -69,6 +69,7 @@ public class FormHttpMessageConverterTests {
 	public void canWrite() {
 		assertTrue(converter.canWrite(MultiValueMap.class, new MediaType("application", "x-www-form-urlencoded")));
 		assertTrue(converter.canWrite(MultiValueMap.class, new MediaType("multipart", "form-data")));
+		assertTrue(converter.canWrite(MultiValueMap.class, new MediaType("multipart", "form-data", Charset.forName("UTF-8"))));
 		assertTrue(converter.canWrite(MultiValueMap.class, MediaType.ALL));
 	}
 
@@ -116,6 +117,17 @@ public class FormHttpMessageConverterTests {
 
 		Resource logo = new ClassPathResource("/org/springframework/http/converter/logo.jpg");
 		parts.add("logo", logo);
+
+		// SPR-12108
+
+		Resource utf8 = new ClassPathResource("/org/springframework/http/converter/logo.jpg") {
+			@Override
+			public String getFilename() {
+				return "Hall\u00F6le.jpg";
+			}
+		};
+		parts.add("utf8", utf8);
+
 		Source xml = new StreamSource(new StringReader("<root><child/></root>"));
 		HttpHeaders entityHeaders = new HttpHeaders();
 		entityHeaders.setContentType(MediaType.TEXT_XML);
@@ -123,7 +135,8 @@ public class FormHttpMessageConverterTests {
 		parts.add("xml", entity);
 
 		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
-		converter.write(parts, MediaType.MULTIPART_FORM_DATA, outputMessage);
+		converter.setMultipartCharset(Charset.forName("UTF-8"));
+		converter.write(parts, new MediaType("multipart", "form-data", Charset.forName("UTF-8")), outputMessage);
 
 		final MediaType contentType = outputMessage.getHeaders().getContentType();
 		assertNotNull("No boundary found", contentType.getParameter("boundary"));
@@ -131,31 +144,38 @@ public class FormHttpMessageConverterTests {
 		// see if Commons FileUpload can read what we wrote
 		FileItemFactory fileItemFactory = new DiskFileItemFactory();
 		FileUpload fileUpload = new FileUpload(fileItemFactory);
-		List items = fileUpload.parseRequest(new MockHttpOutputMessageRequestContext(outputMessage));
-		assertEquals(5, items.size());
-		FileItem item = (FileItem) items.get(0);
+		List<FileItem> items = fileUpload.parseRequest(new MockHttpOutputMessageRequestContext(outputMessage));
+		assertEquals(6, items.size());
+		FileItem item = items.get(0);
 		assertTrue(item.isFormField());
 		assertEquals("name 1", item.getFieldName());
 		assertEquals("value 1", item.getString());
 
-		item = (FileItem) items.get(1);
+		item = items.get(1);
 		assertTrue(item.isFormField());
 		assertEquals("name 2", item.getFieldName());
 		assertEquals("value 2+1", item.getString());
 
-		item = (FileItem) items.get(2);
+		item = items.get(2);
 		assertTrue(item.isFormField());
 		assertEquals("name 2", item.getFieldName());
 		assertEquals("value 2+2", item.getString());
 
-		item = (FileItem) items.get(3);
+		item = items.get(3);
 		assertFalse(item.isFormField());
 		assertEquals("logo", item.getFieldName());
 		assertEquals("logo.jpg", item.getName());
 		assertEquals("image/jpeg", item.getContentType());
 		assertEquals(logo.getFile().length(), item.getSize());
 
-		item = (FileItem) items.get(4);
+		item = items.get(4);
+		assertFalse(item.isFormField());
+		assertEquals("utf8", item.getFieldName());
+		assertEquals("Hall\u00F6le.jpg", item.getName());
+		assertEquals("image/jpeg", item.getContentType());
+		assertEquals(logo.getFile().length(), item.getSize());
+
+		item = items.get(5);
 		assertEquals("xml", item.getFieldName());
 		assertEquals("text/xml", item.getContentType());
 		verify(outputMessage.getBody(), never()).close();
@@ -182,6 +202,7 @@ public class FormHttpMessageConverterTests {
 		}
 
 		@Override
+		@Deprecated
 		public int getContentLength() {
 			return outputMessage.getBodyAsBytes().length;
 		}

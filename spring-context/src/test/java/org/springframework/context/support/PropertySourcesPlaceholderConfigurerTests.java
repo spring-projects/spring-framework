@@ -21,6 +21,7 @@ import java.util.Properties;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.core.env.MutablePropertySources;
@@ -177,6 +178,7 @@ public class PropertySourcesPlaceholderConfigurerTests {
 	}
 
 	@Test(expected=BeanDefinitionStoreException.class)
+	@SuppressWarnings("serial")
 	public void nestedUnresolvablePlaceholder() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		bf.registerBeanDefinition("testBean",
@@ -192,6 +194,7 @@ public class PropertySourcesPlaceholderConfigurerTests {
 	}
 
 	@Test
+	@SuppressWarnings("serial")
 	public void ignoredNestedUnresolvablePlaceholder() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		bf.registerBeanDefinition("testBean",

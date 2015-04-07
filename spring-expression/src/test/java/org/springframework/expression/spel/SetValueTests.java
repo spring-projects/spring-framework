@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,22 +16,18 @@
 
 package org.springframework.expression.spel;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-
 import java.util.Collection;
 import java.util.Set;
 
 import org.junit.Test;
+
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.Expression;
 import org.springframework.expression.ParseException;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.expression.spel.testresources.PlaceOfBirth;
 
+import static org.junit.Assert.*;
 
 /**
  * Tests set value expressions.
@@ -39,7 +35,7 @@ import org.springframework.expression.spel.testresources.PlaceOfBirth;
  * @author Keith Donald
  * @author Andy Clement
  */
-public class SetValueTests extends ExpressionTestCase {
+public class SetValueTests extends AbstractExpressionTests {
 
 	private final static boolean DEBUG = false;
 
@@ -78,6 +74,54 @@ public class SetValueTests extends ExpressionTestCase {
 		setValue("arrayContainer.longs[1]", 3L);
 		setValue("arrayContainer.bytes[1]", (byte) 3);
 		setValue("arrayContainer.chars[1]", (char) 3);
+	}
+
+	@Test
+	public void testIsWritableForInvalidExpressions_SPR10610() {
+		Expression e = null;
+		StandardEvaluationContext lContext = TestScenarioCreator.getTestEvaluationContext();
+
+		// PROPERTYORFIELDREFERENCE
+		// Non existent field (or property):
+		e = parser.parseExpression("arrayContainer.wibble");
+		assertFalse("Should not be writable!",e.isWritable(lContext));
+
+		e = parser.parseExpression("arrayContainer.wibble.foo");
+		try {
+			assertFalse("Should not be writable!",e.isWritable(lContext));
+			fail("Should have had an error because wibble does not really exist");
+		} catch (SpelEvaluationException see) {
+//			org.springframework.expression.spel.SpelEvaluationException: EL1008E:(pos 15): Property or field 'wibble' cannot be found on object of type 'org.springframework.expression.spel.testresources.ArrayContainer' - maybe not public?
+//					at org.springframework.expression.spel.ast.PropertyOrFieldReference.readProperty(PropertyOrFieldReference.java:225)
+			// success!
+		}
+
+		// VARIABLE
+		// the variable does not exist (but that is OK, we should be writable)
+		e = parser.parseExpression("#madeup1");
+		assertTrue("Should be writable!",e.isWritable(lContext));
+
+		e = parser.parseExpression("#madeup2.bar"); // compound expression
+		assertFalse("Should not be writable!",e.isWritable(lContext));
+
+		// INDEXER
+		// non existent indexer (wibble made up)
+		e = parser.parseExpression("arrayContainer.wibble[99]");
+		try {
+			assertFalse("Should not be writable!",e.isWritable(lContext));
+			fail("Should have had an error because wibble does not really exist");
+		} catch (SpelEvaluationException see) {
+			// success!
+		}
+
+		// non existent indexer (index via a string)
+		e = parser.parseExpression("arrayContainer.ints['abc']");
+		try {
+			assertFalse("Should not be writable!",e.isWritable(lContext));
+			fail("Should have had an error because wibble does not really exist");
+		} catch (SpelEvaluationException see) {
+			// success!
+		}
 	}
 
 	@Test
@@ -167,15 +211,15 @@ public class SetValueTests extends ExpressionTestCase {
 		e.setValue(eContext, "true");
 
 		// All keys should be strings
-		Set ks = parse("mapOfStringToBoolean.keySet()").getValue(eContext,Set.class);
+		Set<?> ks = parse("mapOfStringToBoolean.keySet()").getValue(eContext, Set.class);
 		for (Object o: ks) {
 			assertEquals(String.class,o.getClass());
 		}
 
 		// All values should be booleans
-		Collection vs = parse("mapOfStringToBoolean.values()").getValue(eContext,Collection.class);
+		Collection<?> vs = parse("mapOfStringToBoolean.values()").getValue(eContext, Collection.class);
 		for (Object o: vs) {
-			assertEquals(Boolean.class,o.getClass());
+			assertEquals(Boolean.class, o.getClass());
 		}
 
 		// One final test check coercion on the key for a map lookup

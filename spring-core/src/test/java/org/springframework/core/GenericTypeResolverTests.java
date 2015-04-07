@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,13 @@
 
 package org.springframework.core;
 
+import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.junit.Test;
@@ -74,6 +76,7 @@ public class GenericTypeResolverTests {
 	}
 
 	@Test
+	@Deprecated
 	public void testResolveType() {
 		Method intMessageMethod = findMethod(MyTypeWithMethods.class, "readIntegerInputMessage", MyInterfaceType.class);
 		MethodParameter intMessageMethodParam = new MethodParameter(intMessageMethod, 0);
@@ -95,10 +98,11 @@ public class GenericTypeResolverTests {
 
 	@Test
 	public void testBoundParameterizedType() {
-		assertEquals(B.class, resolveTypeArgument(TestImpl.class, ITest.class));
+		assertEquals(B.class, resolveTypeArgument(TestImpl.class, TestIfc.class));
 	}
 
 	@Test
+	@Deprecated
 	public void testGetTypeVariableMap() throws Exception {
 		Map<TypeVariable, Type> map;
 
@@ -134,6 +138,47 @@ public class GenericTypeResolverTests {
 		}
 		assertThat(t, equalTo((Type) Integer.class));
 		assertThat(x, equalTo((Type) Long.class));
+	}
+
+	@Test
+	public void getGenericsCannotBeResolved() throws Exception {
+		// SPR-11030
+		Class<?>[] resolved = GenericTypeResolver.resolveTypeArguments(List.class, Iterable.class);
+		assertNull(resolved);
+	}
+
+	@Test
+	public void getRawMapTypeCannotBeResolved() throws Exception {
+		// SPR-11052
+		Class<?>[] resolved = GenericTypeResolver.resolveTypeArguments(Map.class, Map.class);
+		assertNull(resolved);
+	}
+
+	@Test
+	public void getGenericsOnArrayFromParamCannotBeResolved() throws Exception {
+		// SPR-11044
+		MethodParameter methodParameter = MethodParameter.forMethodOrConstructor(
+				WithArrayBase.class.getDeclaredMethod("array", Object[].class), 0);
+		Class<?> resolved = GenericTypeResolver.resolveParameterType(methodParameter, WithArray.class);
+		assertThat(resolved, equalTo((Class) Object[].class));
+	}
+
+	@Test
+	public void getGenericsOnArrayFromReturnCannotBeResolved() throws Exception {
+		// SPR-11044
+		Class<?> resolved = GenericTypeResolver.resolveReturnType(
+				WithArrayBase.class.getDeclaredMethod("array", Object[].class), WithArray.class);
+		assertThat(resolved, equalTo((Class) Object[].class));
+	}
+
+	@Test
+	public void resolveIncompleteTypeVariables() {
+		// SPR-11763
+		Class<?>[] resolved = GenericTypeResolver.resolveTypeArguments(IdFixingRepository.class, Repository.class);
+		assertNotNull(resolved);
+		assertEquals(2, resolved.length);
+		assertEquals(Object.class, resolved[0]);
+		assertEquals(Long.class, resolved[1]);
 	}
 
 
@@ -257,9 +302,9 @@ public class GenericTypeResolverTests {
 
 	class B<T>{}
 
-	class ITest<T>{}
+	class TestIfc<T>{}
 
-	class TestImpl<I extends A, T extends B<I>> extends ITest<T>{
+	class TestImpl<I extends A, T extends B<I>> extends TestIfc<T>{
 	}
 
 	static class TopLevelClass<T> {
@@ -270,6 +315,20 @@ public class GenericTypeResolverTests {
 	static class TypedTopLevelClass extends TopLevelClass<Integer> {
 		class TypedNested extends Nested<Long> {
 		}
+	}
+
+	static abstract class WithArrayBase<T> {
+
+		public abstract T[] array(T... args);
+	}
+
+	static abstract class WithArray<T> extends WithArrayBase<T> {
+	}
+
+	interface Repository<T, ID extends Serializable> {
+	}
+
+	interface IdFixingRepository<T> extends Repository<T, Long> {
 	}
 
 }

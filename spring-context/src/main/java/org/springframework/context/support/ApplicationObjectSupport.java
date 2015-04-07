@@ -100,7 +100,7 @@ public abstract class ApplicationObjectSupport implements ApplicationContextAwar
 	 * Can be overridden in subclasses.
 	 * @see #setApplicationContext
 	 */
-	protected Class requiredContextClass() {
+	protected Class<?> requiredContextClass() {
 		return ApplicationContext.class;
 	}
 

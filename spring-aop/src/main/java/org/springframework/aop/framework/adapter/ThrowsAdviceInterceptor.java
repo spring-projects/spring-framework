@@ -61,7 +61,7 @@ public class ThrowsAdviceInterceptor implements MethodInterceptor, AfterAdvice {
 	private final Object throwsAdvice;
 
 	/** Methods on throws advice, keyed by exception class */
-	private final Map<Class, Method> exceptionHandlerMap = new HashMap<Class, Method>();
+	private final Map<Class<?>, Method> exceptionHandlerMap = new HashMap<Class<?>, Method>();
 
 
 	/**
@@ -104,7 +104,7 @@ public class ThrowsAdviceInterceptor implements MethodInterceptor, AfterAdvice {
 	 * @return a handler for the given exception type
 	 */
 	private Method getExceptionHandler(Throwable exception) {
-		Class exceptionClass = exception.getClass();
+		Class<?> exceptionClass = exception.getClass();
 		if (logger.isTraceEnabled()) {
 			logger.trace("Trying to find handler for exception of type [" + exceptionClass.getName() + "]");
 		}

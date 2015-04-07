@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,6 +57,9 @@ public abstract class ResourceUtils {
 	/** URL prefix for loading from the file system: "file:" */
 	public static final String FILE_URL_PREFIX = "file:";
 
+	/** URL prefix for loading from the file system: "jar:" */
+	public static final String JAR_URL_PREFIX = "jar:";
+
 	/** URL protocol for a file in the file system: "file" */
 	public static final String URL_PROTOCOL_FILE = "file";
 
@@ -66,16 +69,22 @@ public abstract class ResourceUtils {
 	/** URL protocol for an entry from a zip file: "zip" */
 	public static final String URL_PROTOCOL_ZIP = "zip";
 
-	/** URL protocol for an entry from a JBoss jar file: "vfszip" */
-	public static final String URL_PROTOCOL_VFSZIP = "vfszip";
-
-	/** URL protocol for a JBoss VFS resource: "vfs" */
-	public static final String URL_PROTOCOL_VFS = "vfs";
-
 	/** URL protocol for an entry from a WebSphere jar file: "wsjar" */
 	public static final String URL_PROTOCOL_WSJAR = "wsjar";
 
-	/** Separator between JAR URL and file path within the JAR */
+	/** URL protocol for an entry from a JBoss jar file: "vfszip" */
+	public static final String URL_PROTOCOL_VFSZIP = "vfszip";
+
+	/** URL protocol for a JBoss file system resource: "vfsfile" */
+	public static final String URL_PROTOCOL_VFSFILE = "vfsfile";
+
+	/** URL protocol for a general JBoss VFS resource: "vfs" */
+	public static final String URL_PROTOCOL_VFS = "vfs";
+
+	/** File extension for a regular jar file: ".jar" */
+	public static final String JAR_FILE_EXTENSION = ".jar";
+
+	/** Separator between JAR URL and file path within the JAR: "!/" */
 	public static final String JAR_URL_SEPARATOR = "!/";
 
 
@@ -116,11 +125,12 @@ public abstract class ResourceUtils {
 		Assert.notNull(resourceLocation, "Resource location must not be null");
 		if (resourceLocation.startsWith(CLASSPATH_URL_PREFIX)) {
 			String path = resourceLocation.substring(CLASSPATH_URL_PREFIX.length());
-			URL url = ClassUtils.getDefaultClassLoader().getResource(path);
+			ClassLoader cl = ClassUtils.getDefaultClassLoader();
+			URL url = (cl != null ? cl.getResource(path) : ClassLoader.getSystemResource(path));
 			if (url == null) {
 				String description = "class path resource [" + path + "]";
-				throw new FileNotFoundException(
-						description + " cannot be resolved to URL because it does not exist");
+				throw new FileNotFoundException(description +
+						" cannot be resolved to URL because it does not exist");
 			}
 			return url;
 		}
@@ -156,11 +166,11 @@ public abstract class ResourceUtils {
 		if (resourceLocation.startsWith(CLASSPATH_URL_PREFIX)) {
 			String path = resourceLocation.substring(CLASSPATH_URL_PREFIX.length());
 			String description = "class path resource [" + path + "]";
-			URL url = ClassUtils.getDefaultClassLoader().getResource(path);
+			ClassLoader cl = ClassUtils.getDefaultClassLoader();
+			URL url = (cl != null ? cl.getResource(path) : ClassLoader.getSystemResource(path));
 			if (url == null) {
-				throw new FileNotFoundException(
-						description + " cannot be resolved to absolute file path " +
-						"because it does not reside in the file system");
+				throw new FileNotFoundException(description +
+						" cannot be resolved to absolute file path because it does not exist");
 			}
 			return getFile(url, description);
 		}
@@ -246,26 +256,38 @@ public abstract class ResourceUtils {
 
 	/**
 	 * Determine whether the given URL points to a resource in the file system,
-	 * that is, has protocol "file" or "vfs".
+	 * that is, has protocol "file", "vfsfile" or "vfs".
 	 * @param url the URL to check
 	 * @return whether the URL has been identified as a file system URL
 	 */
 	public static boolean isFileURL(URL url) {
 		String protocol = url.getProtocol();
-		return (URL_PROTOCOL_FILE.equals(protocol) || protocol.startsWith(URL_PROTOCOL_VFS));
+		return (URL_PROTOCOL_FILE.equals(protocol) || URL_PROTOCOL_VFSFILE.equals(protocol) ||
+				URL_PROTOCOL_VFS.equals(protocol));
 	}
 
 	/**
 	 * Determine whether the given URL points to a resource in a jar file,
-	 * that is, has protocol "jar", "zip", "wsjar" or "code-source".
-	 * <p>"zip" and "wsjar" are used by WebLogic Server and WebSphere, respectively,
-	 * but can be treated like jar files.
+	 * that is, has protocol "jar", "zip", "vfszip" or "wsjar".
 	 * @param url the URL to check
 	 * @return whether the URL has been identified as a JAR URL
 	 */
 	public static boolean isJarURL(URL url) {
-		String up = url.getProtocol();
-		return (URL_PROTOCOL_JAR.equals(up) || URL_PROTOCOL_ZIP.equals(up) || URL_PROTOCOL_WSJAR.equals(up));
+		String protocol = url.getProtocol();
+		return (URL_PROTOCOL_JAR.equals(protocol) || URL_PROTOCOL_ZIP.equals(protocol) ||
+				URL_PROTOCOL_VFSZIP.equals(protocol) || URL_PROTOCOL_WSJAR.equals(protocol));
+	}
+
+	/**
+	 * Determine whether the given URL points to a jar file itself,
+	 * that is, has protocol "file" and ends with the ".jar" extension.
+	 * @param url the URL to check
+	 * @return whether the URL has been identified as a JAR file URL
+	 * @since 4.1
+	 */
+	public static boolean isJarFileURL(URL url) {
+		return (URL_PROTOCOL_FILE.equals(url.getProtocol()) &&
+				url.getPath().toLowerCase().endsWith(JAR_FILE_EXTENSION));
 	}
 
 	/**

@@ -44,8 +44,7 @@ public class UnsatisfiedServletRequestParameterException extends ServletRequestB
 	 * @param paramConditions the parameter conditions that have been violated
 	 * @param actualParams the actual parameter Map associated with the ServletRequest
 	 */
-	@SuppressWarnings("unchecked")
-	public UnsatisfiedServletRequestParameterException(String[] paramConditions, Map actualParams) {
+	public UnsatisfiedServletRequestParameterException(String[] paramConditions, Map<String, String[]> actualParams) {
 		super("");
 		this.paramConditions = paramConditions;
 		this.actualParams = actualParams;

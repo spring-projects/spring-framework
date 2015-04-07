@@ -99,7 +99,7 @@ public class BeanPropertySqlParameterSource extends AbstractSqlParameterSource {
 		if (sqlType != TYPE_UNKNOWN) {
 			return sqlType;
 		}
-		Class propType = this.beanWrapper.getPropertyType(paramName);
+		Class<?> propType = this.beanWrapper.getPropertyType(paramName);
 		return StatementCreatorUtils.javaTypeToSqlParameterType(propType);
 	}
 

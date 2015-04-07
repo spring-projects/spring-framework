@@ -83,7 +83,7 @@ public class TransactionSystemException extends TransactionException {
 	}
 
 	@Override
-	public boolean contains(Class exType) {
+	public boolean contains(Class<?> exType) {
 		return super.contains(exType) || (exType != null && exType.isInstance(this.applicationException));
 	}
 

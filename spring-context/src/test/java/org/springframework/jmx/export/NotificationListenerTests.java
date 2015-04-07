@@ -27,6 +27,7 @@ import javax.management.NotificationListener;
 import javax.management.ObjectName;
 
 import org.junit.Test;
+
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.jmx.AbstractMBeanServerTests;
 import org.springframework.jmx.JmxTestBean;
@@ -61,7 +62,7 @@ public class NotificationListenerTests extends AbstractMBeanServerTests {
 		exporter.setServer(server);
 		exporter.setBeans(beans);
 		exporter.setNotificationListenerMappings(notificationListeners);
-		exporter.afterPropertiesSet();
+		start(exporter);
 
 		// update the attribute
 		String attributeName = "Name";
@@ -87,7 +88,7 @@ public class NotificationListenerTests extends AbstractMBeanServerTests {
 		exporter.setServer(server);
 		exporter.setBeans(beans);
 		exporter.setNotificationListenerMappings(notificationListeners);
-		exporter.afterPropertiesSet();
+		start(exporter);
 
 		// update the attribute
 		String attributeName = "Name";
@@ -115,7 +116,7 @@ public class NotificationListenerTests extends AbstractMBeanServerTests {
 		exporter.setServer(server);
 		exporter.setBeans(beans);
 		exporter.setNotificationListeners(new NotificationListenerBean[] { listenerBean });
-		exporter.afterPropertiesSet();
+		start(exporter);
 
 		// update the attribute
 		String attributeName = "Name";
@@ -143,7 +144,7 @@ public class NotificationListenerTests extends AbstractMBeanServerTests {
 		exporter.setServer(server);
 		exporter.setBeans(beans);
 		exporter.setNotificationListeners(new NotificationListenerBean[] { listenerBean });
-		exporter.afterPropertiesSet();
+		start(exporter);
 
 		// update the attribute
 		String attributeName = "Name";
@@ -181,7 +182,7 @@ public class NotificationListenerTests extends AbstractMBeanServerTests {
 		exporter.setServer(server);
 		exporter.setBeans(beans);
 		exporter.setNotificationListeners(new NotificationListenerBean[] { listenerBean });
-		exporter.afterPropertiesSet();
+		start(exporter);
 
 		// update the attributes
 		String nameAttribute = "Name";
@@ -227,7 +228,7 @@ public class NotificationListenerTests extends AbstractMBeanServerTests {
 		exporter.setBeans(beans);
 		exporter.setNotificationListenerMappings(listenerMappings);
 		exporter.setBeanFactory(factory);
-		exporter.afterPropertiesSet();
+		start(exporter);
 		assertIsRegistered("Should have registered MBean", objectName);
 
 		server.setAttribute(objectName, new Attribute("Age", new Integer(77)));
@@ -258,7 +259,7 @@ public class NotificationListenerTests extends AbstractMBeanServerTests {
 		exporter.setBeans(beans);
 		exporter.setNotificationListenerMappings(listenerMappings);
 		exporter.setBeanFactory(factory);
-		exporter.afterPropertiesSet();
+		start(exporter);
 		assertIsRegistered("Should have registered MBean", objectName);
 
 		server.setAttribute(objectName, new Attribute("Age", new Integer(77)));
@@ -290,7 +291,7 @@ public class NotificationListenerTests extends AbstractMBeanServerTests {
 		exporter.setBeans(beans);
 		exporter.setNotificationListenerMappings(listenerMappings);
 		exporter.setBeanFactory(factory);
-		exporter.afterPropertiesSet();
+		start(exporter);
 		assertIsRegistered("Should have registered MBean", objectName);
 
 		server.setAttribute(objectName, new Attribute("Age", new Integer(77)));
@@ -322,7 +323,7 @@ public class NotificationListenerTests extends AbstractMBeanServerTests {
 		exporter.setBeans(beans);
 		exporter.setNotificationListenerMappings(listenerMappings);
 		exporter.setBeanFactory(factory);
-		exporter.afterPropertiesSet();
+		start(exporter);
 		assertIsRegistered("Should have registered MBean", objectName);
 
 		server.setAttribute(objectName, new Attribute("Age", new Integer(77)));
@@ -362,7 +363,7 @@ public class NotificationListenerTests extends AbstractMBeanServerTests {
 		exporter.setBeans(beans);
 		exporter.setNotificationListenerMappings(listenerMappings);
 		exporter.setBeanFactory(factory);
-		exporter.afterPropertiesSet();
+		start(exporter);
 		assertIsRegistered("Should have registered MBean", objectName1);
 		assertIsRegistered("Should have registered MBean", objectName2);
 
@@ -384,7 +385,7 @@ public class NotificationListenerTests extends AbstractMBeanServerTests {
 		MBeanExporter exporter = new MBeanExporter();
 		exporter.setServer(server);
 		exporter.setBeans(beans);
-		exporter.afterPropertiesSet();
+		start(exporter);
 
 		CountingAttributeChangeNotificationListener listener = new CountingAttributeChangeNotificationListener();
 
@@ -420,7 +421,7 @@ public class NotificationListenerTests extends AbstractMBeanServerTests {
 		MBeanExporter exporter = new MBeanExporter();
 		exporter.setServer(server);
 		exporter.setBeans(beans);
-		exporter.afterPropertiesSet();
+		start(exporter);
 
 		CountingAttributeChangeNotificationListener listener = new CountingAttributeChangeNotificationListener();
 

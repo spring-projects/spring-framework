@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,7 +59,6 @@ import org.springframework.beans.factory.support.ManagedSet;
 import org.springframework.beans.factory.support.MethodOverrides;
 import org.springframework.beans.factory.support.ReplaceOverride;
 import org.springframework.core.env.Environment;
-import org.springframework.core.env.StandardEnvironment;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
@@ -88,10 +87,6 @@ public class BeanDefinitionParserDelegate {
 	public static final String BEANS_NAMESPACE_URI = "http://www.springframework.org/schema/beans";
 
 	public static final String MULTI_VALUE_ATTRIBUTE_DELIMITERS = ",; ";
-
-	/** @deprecated as of Spring 3.1 in favor of {@link #MULTI_VALUE_ATTRIBUTE_DELIMITERS} */
-	@Deprecated
-	public static final String BEAN_NAME_DELIMITERS = MULTI_VALUE_ATTRIBUTE_DELIMITERS;
 
 	/**
 	 * Value of a T/F attribute that represents true.
@@ -136,6 +131,8 @@ public class BeanDefinitionParserDelegate {
 	public static final String ABSTRACT_ATTRIBUTE = "abstract";
 
 	public static final String SCOPE_ATTRIBUTE = "scope";
+
+	private static final String SINGLETON_ATTRIBUTE = "singleton";
 
 	public static final String LAZY_INIT_ATTRIBUTE = "lazy-init";
 
@@ -248,8 +245,6 @@ public class BeanDefinitionParserDelegate {
 
 	private final ParseState parseState = new ParseState();
 
-	private Environment environment;
-
 	/**
 	 * Stores all used bean names so we can enforce uniqueness on a per
 	 * beans-element basis. Duplicate bean ids/names may not exist within the
@@ -259,26 +254,14 @@ public class BeanDefinitionParserDelegate {
 
 
 	/**
-	 * Create a new BeanDefinitionParserDelegate associated with the
-	 * supplied {@link XmlReaderContext} and {@link Environment}.
+	 * Create a new BeanDefinitionParserDelegate associated with the supplied
+	 * {@link XmlReaderContext}.
 	 */
-	public BeanDefinitionParserDelegate(XmlReaderContext readerContext, Environment environment) {
+	public BeanDefinitionParserDelegate(XmlReaderContext readerContext) {
 		Assert.notNull(readerContext, "XmlReaderContext must not be null");
-		Assert.notNull(readerContext, "Environment must not be null");
 		this.readerContext = readerContext;
-		this.environment = environment;
 	}
 
-	/**
-	 * Create a new BeanDefinitionParserDelegate associated with the
-	 * supplied {@link XmlReaderContext} and a new {@link StandardEnvironment}.
-	 * @deprecated since Spring 3.1 in favor of
-	 * {@link #BeanDefinitionParserDelegate(XmlReaderContext, Environment)}
-	 */
-	@Deprecated
-	public BeanDefinitionParserDelegate(XmlReaderContext readerContext) {
-		this(readerContext, new StandardEnvironment());
-	}
 
 	/**
 	 * Get the {@link XmlReaderContext} associated with this helper instance.
@@ -289,9 +272,11 @@ public class BeanDefinitionParserDelegate {
 
 	/**
 	 * Get the {@link Environment} associated with this helper instance.
+	 * @deprecated in favor of {@link XmlReaderContext#getEnvironment()}
 	 */
+	@Deprecated
 	public final Environment getEnvironment() {
-		return this.environment;
+		return this.readerContext.getEnvironment();
 	}
 
 	/**
@@ -325,6 +310,13 @@ public class BeanDefinitionParserDelegate {
 
 
 	/**
+	 * Initialize the default settings assuming a {@code null} parent delegate.
+	 */
+	public void initDefaults(Element root) {
+		initDefaults(root, null);
+	}
+
+	/**
 	 * Initialize the default lazy-init, autowire, dependency check settings,
 	 * init-method, destroy-method and merge settings. Support nested 'beans'
 	 * element use cases by falling back to the given parent in case the
@@ -335,16 +327,6 @@ public class BeanDefinitionParserDelegate {
 	public void initDefaults(Element root, BeanDefinitionParserDelegate parent) {
 		populateDefaults(this.defaults, (parent != null ? parent.defaults : null), root);
 		this.readerContext.fireDefaultsRegistered(this.defaults);
-	}
-
-	/**
-	 * Initialize the default settings assuming a {@code null} parent delegate.
-	 * @deprecated in Spring 3.1 in favor of
-	 * {@link #initDefaults(Element, BeanDefinitionParserDelegate)}
-	 */
-	@Deprecated
-	public void initDefaults(Element root) {
-		initDefaults(root, null);
 	}
 
 	/**
@@ -522,7 +504,7 @@ public class BeanDefinitionParserDelegate {
 			foundName = beanName;
 		}
 		if (foundName == null) {
-			foundName = (String) CollectionUtils.findFirstMatch(this.usedNames, aliases);
+			foundName = CollectionUtils.findFirstMatch(this.usedNames, aliases);
 		}
 		if (foundName != null) {
 			error("Bean name '" + foundName + "' is already used in this <beans> element", beanElement);
@@ -595,7 +577,10 @@ public class BeanDefinitionParserDelegate {
 	public AbstractBeanDefinition parseBeanDefinitionAttributes(Element ele, String beanName,
 			BeanDefinition containingBean, AbstractBeanDefinition bd) {
 
-		if (ele.hasAttribute(SCOPE_ATTRIBUTE)) {
+		if (ele.hasAttribute(SINGLETON_ATTRIBUTE)) {
+			error("Old 1.x 'singleton' attribute in use - upgrade to 'scope' declaration", ele);
+		}
+		else if (ele.hasAttribute(SCOPE_ATTRIBUTE)) {
 			bd.setScope(ele.getAttribute(SCOPE_ATTRIBUTE));
 		}
 		else if (containingBean != null) {
@@ -1184,7 +1169,7 @@ public class BeanDefinitionParserDelegate {
 	/**
 	 * Parse a list element.
 	 */
-	public List parseListElement(Element collectionEle, BeanDefinition bd) {
+	public List<Object> parseListElement(Element collectionEle, BeanDefinition bd) {
 		String defaultElementType = collectionEle.getAttribute(VALUE_TYPE_ATTRIBUTE);
 		NodeList nl = collectionEle.getChildNodes();
 		ManagedList<Object> target = new ManagedList<Object>(nl.getLength());
@@ -1198,7 +1183,7 @@ public class BeanDefinitionParserDelegate {
 	/**
 	 * Parse a set element.
 	 */
-	public Set parseSetElement(Element collectionEle, BeanDefinition bd) {
+	public Set<Object> parseSetElement(Element collectionEle, BeanDefinition bd) {
 		String defaultElementType = collectionEle.getAttribute(VALUE_TYPE_ATTRIBUTE);
 		NodeList nl = collectionEle.getChildNodes();
 		ManagedSet<Object> target = new ManagedSet<Object>(nl.getLength());
@@ -1223,7 +1208,7 @@ public class BeanDefinitionParserDelegate {
 	/**
 	 * Parse a map element.
 	 */
-	public Map parseMapElement(Element mapEle, BeanDefinition bd) {
+	public Map<Object, Object> parseMapElement(Element mapEle, BeanDefinition bd) {
 		String defaultKeyType = mapEle.getAttribute(KEY_TYPE_ATTRIBUTE);
 		String defaultValueType = mapEle.getAttribute(VALUE_TYPE_ATTRIBUTE);
 
@@ -1454,7 +1439,7 @@ public class BeanDefinitionParserDelegate {
 		return finalDefinition;
 	}
 
-	private BeanDefinitionHolder decorateIfRequired(
+	public BeanDefinitionHolder decorateIfRequired(
 			Node node, BeanDefinitionHolder originalDef, BeanDefinition containingBd) {
 
 		String namespaceUri = getNamespaceURI(node);

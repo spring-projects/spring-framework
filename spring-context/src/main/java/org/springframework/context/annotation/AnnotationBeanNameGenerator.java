@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -89,13 +89,16 @@ public class AnnotationBeanNameGenerator implements BeanNameGenerator {
 		for (String type : types) {
 			AnnotationAttributes attributes = AnnotationConfigUtils.attributesFor(amd, type);
 			if (isStereotypeWithNameValue(type, amd.getMetaAnnotationTypes(type), attributes)) {
-				String value = (String) attributes.get("value");
-				if (StringUtils.hasLength(value)) {
-					if (beanName != null && !value.equals(beanName)) {
-						throw new IllegalStateException("Stereotype annotations suggest inconsistent " +
-								"component names: '" + beanName + "' versus '" + value + "'");
+				Object value = attributes.get("value");
+				if (value instanceof String) {
+					String strVal = (String) value;
+					if (StringUtils.hasLength(strVal)) {
+						if (beanName != null && !strVal.equals(beanName)) {
+							throw new IllegalStateException("Stereotype annotations suggest inconsistent " +
+									"component names: '" + beanName + "' versus '" + strVal + "'");
+						}
+						beanName = strVal;
 					}
-					beanName = value;
 				}
 			}
 		}
@@ -118,9 +121,7 @@ public class AnnotationBeanNameGenerator implements BeanNameGenerator {
 				annotationType.equals("javax.annotation.ManagedBean") ||
 				annotationType.equals("javax.inject.Named");
 
-		return (isStereotype && attributes != null &&
-				attributes.containsKey("value") &&
-				attributes.get("value") instanceof String);
+		return (isStereotype && attributes != null && attributes.containsKey("value"));
 	}
 
 	/**
@@ -139,7 +140,7 @@ public class AnnotationBeanNameGenerator implements BeanNameGenerator {
 	 * <p>The default implementation simply builds a decapitalized version
 	 * of the short class name: e.g. "mypackage.MyJdbcDao" -> "myJdbcDao".
 	 * <p>Note that inner classes will thus have names of the form
-	 * "outerClassName.innerClassName", which because of the period in the
+	 * "outerClassName.InnerClassName", which because of the period in the
 	 * name may be an issue if you are autowiring by name.
 	 * @param definition the bean definition to build a bean name for
 	 * @return the default bean name (never {@code null})

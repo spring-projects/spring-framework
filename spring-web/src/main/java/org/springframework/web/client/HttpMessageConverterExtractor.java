@@ -77,22 +77,24 @@ public class HttpMessageConverterExtractor<T> implements ResponseExtractor<T> {
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public T extractData(ClientHttpResponse response) throws IOException {
-		if (!hasMessageBody(response)) {
+
+		MessageBodyClientHttpResponseWrapper responseWrapper = new MessageBodyClientHttpResponseWrapper(response);
+		if(!responseWrapper.hasMessageBody() || responseWrapper.hasEmptyMessageBody()) {
 			return null;
 		}
-		MediaType contentType = getContentType(response);
+		MediaType contentType = getContentType(responseWrapper);
 
-		for (HttpMessageConverter messageConverter : this.messageConverters) {
+		for (HttpMessageConverter<?> messageConverter : this.messageConverters) {
 			if (messageConverter instanceof GenericHttpMessageConverter) {
-				GenericHttpMessageConverter genericMessageConverter = (GenericHttpMessageConverter) messageConverter;
+				GenericHttpMessageConverter<?> genericMessageConverter = (GenericHttpMessageConverter<?>) messageConverter;
 				if (genericMessageConverter.canRead(this.responseType, null, contentType)) {
 					if (logger.isDebugEnabled()) {
 						logger.debug("Reading [" + this.responseType + "] as \"" +
 								contentType + "\" using [" + messageConverter + "]");
 					}
-					return (T) genericMessageConverter.read(this.responseType, null, response);
+					return (T) genericMessageConverter.read(this.responseType, null, responseWrapper);
 				}
 			}
 			if (this.responseClass != null) {
@@ -101,7 +103,7 @@ public class HttpMessageConverterExtractor<T> implements ResponseExtractor<T> {
 						logger.debug("Reading [" + this.responseClass.getName() + "] as \"" +
 								contentType + "\" using [" + messageConverter + "]");
 					}
-					return (T) messageConverter.read(this.responseClass, response);
+					return (T) messageConverter.read((Class) this.responseClass, responseWrapper);
 				}
 			}
 		}
@@ -119,25 +121,6 @@ public class HttpMessageConverterExtractor<T> implements ResponseExtractor<T> {
 			contentType = MediaType.APPLICATION_OCTET_STREAM;
 		}
 		return contentType;
-	}
-
-	/**
-	 * Indicates whether the given response has a message body. <p>Default implementation
-	 * returns {@code false} for a response status of {@code 204} or {@code 304}, or a {@code
-	 * Content-Length} of {@code 0}.
-	 *
-	 * @param response the response to check for a message body
-	 * @return {@code true} if the response has a body, {@code false} otherwise
-	 * @throws IOException in case of I/O errors
-	 */
-	protected boolean hasMessageBody(ClientHttpResponse response) throws IOException {
-		HttpStatus responseStatus = response.getStatusCode();
-		if (responseStatus == HttpStatus.NO_CONTENT ||
-				responseStatus == HttpStatus.NOT_MODIFIED) {
-			return false;
-		}
-		long contentLength = response.getHeaders().getContentLength();
-		return contentLength != 0;
 	}
 
 }

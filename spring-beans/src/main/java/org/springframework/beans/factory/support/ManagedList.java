@@ -102,7 +102,7 @@ public class ManagedList<E> extends ArrayList<E> implements Mergeable, BeanMetad
 			throw new IllegalArgumentException("Cannot merge with object of type [" + parent.getClass() + "]");
 		}
 		List<E> merged = new ManagedList<E>();
-		merged.addAll((List) parent);
+		merged.addAll((List<E>) parent);
 		merged.addAll(this);
 		return merged;
 	}

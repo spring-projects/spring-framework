@@ -17,7 +17,6 @@
 package org.springframework.web.servlet.tags.form;
 
 import java.io.Writer;
-
 import javax.servlet.jsp.tagext.Tag;
 
 import org.springframework.tests.sample.beans.TestBean;

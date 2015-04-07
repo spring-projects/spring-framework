@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import java.io.UnsupportedEncodingException;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
+
 import org.springframework.mock.web.test.MockHttpServletRequest;
 
 import static org.junit.Assert.*;
@@ -75,6 +76,30 @@ public class UrlPathHelperTests {
 		request.setRequestURI("/petclinic/main/welcome.html");
 
 		assertEquals("Incorrect path returned", "/welcome.html", helper.getPathWithinServletMapping(request));
+	}
+
+	@Test
+	public void alwaysUseFullPath() {
+		helper.setAlwaysUseFullPath(true);
+		request.setContextPath("/petclinic");
+		request.setServletPath("/main");
+		request.setRequestURI("/petclinic/main/welcome.html");
+
+		assertEquals("Incorrect path returned", "/main/welcome.html", helper.getLookupPathForRequest(request));
+	}
+
+	// SPR-11101
+
+	@Test
+	public void getPathWithinServletWithoutUrlDecoding() {
+		request.setContextPath("/SPR-11101");
+		request.setServletPath("/test_url_decoding/a/b");
+		request.setRequestURI("/test_url_decoding/a%2Fb");
+
+		helper.setUrlDecode(false);
+		String actual = helper.getPathWithinServletMapping(request);
+
+		assertEquals("/test_url_decoding/a%2Fb", actual);
 	}
 
 	@Test
@@ -177,6 +202,28 @@ public class UrlPathHelperTests {
 		request.setRequestURI("/test/foo/");
 
 		assertEquals("/foo/", helper.getLookupPathForRequest(request));
+	}
+
+	//SPR-12372
+	@Test
+	public void defaultServletEndingWithDoubleSlash() throws Exception {
+		request.setContextPath("/SPR-12372");
+		request.setPathInfo(null);
+		request.setServletPath("/foo/bar/");
+		request.setRequestURI("/SPR-12372/foo//bar/");
+
+		assertEquals("/foo//bar/", helper.getLookupPathForRequest(request));
+
+		request.setServletPath("/foo/bar/");
+		request.setRequestURI("/SPR-12372/foo/bar//");
+
+		assertEquals("/foo/bar//", helper.getLookupPathForRequest(request));
+
+		// "normal" case
+		request.setServletPath("/foo/bar//");
+		request.setRequestURI("/SPR-12372/foo/bar//");
+
+		assertEquals("/foo/bar//", helper.getLookupPathForRequest(request));
 	}
 
 	@Test
@@ -349,6 +396,26 @@ public class UrlPathHelperTests {
 	public void wasCasualServletFolderWithCompliantSetting() throws Exception {
 		request.setAttribute(WEBSPHERE_URI_ATTRIBUTE, "/test/foo/foo/");
 		tomcatCasualServletFolder();
+	}
+
+	@Test
+	public void getOriginatingRequestUri() {
+		request.setAttribute(WebUtils.FORWARD_REQUEST_URI_ATTRIBUTE, "/path");
+		request.setRequestURI("/forwarded");
+		assertEquals("/path", helper.getOriginatingRequestUri(request));
+	}
+
+	@Test
+	public void getOriginatingRequestUriWebsphere() {
+		request.setAttribute(WEBSPHERE_URI_ATTRIBUTE, "/path");
+		request.setRequestURI("/forwarded");
+		assertEquals("/path", helper.getOriginatingRequestUri(request));
+	}
+
+	@Test
+	public void getOriginatingRequestUriDefault() {
+		request.setRequestURI("/forwarded");
+		assertEquals("/forwarded", helper.getOriginatingRequestUri(request));
 	}
 
 	@Test

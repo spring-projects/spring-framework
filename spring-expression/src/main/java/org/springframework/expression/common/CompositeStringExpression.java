@@ -26,15 +26,15 @@ import org.springframework.expression.TypedValue;
  * Represents a template expression broken into pieces. Each piece will be an Expression
  * but pure text parts to the template will be represented as LiteralExpression objects.
  * An example of a template expression might be:
- * 
+ *
  * <pre class="code">
  * &quot;Hello ${getName()}&quot;
  * </pre>
- * 
+ *
  * which will be represented as a CompositeStringExpression of two parts. The first part
  * being a LiteralExpression representing 'Hello ' and the second part being a real
  * expression that will call {@code getName()} when invoked.
- * 
+ *
  * @author Andy Clement
  * @author Juergen Hoeller
  * @since 3.0
@@ -107,12 +107,12 @@ public class CompositeStringExpression implements Expression {
 	}
 
 	@Override
-	public Class getValueType(EvaluationContext context) {
+	public Class<?> getValueType(EvaluationContext context) {
 		return String.class;
 	}
 
 	@Override
-	public Class getValueType() {
+	public Class<?> getValueType() {
 		return String.class;
 	}
 
@@ -167,12 +167,12 @@ public class CompositeStringExpression implements Expression {
 	}
 
 	@Override
-	public Class getValueType(Object rootObject) throws EvaluationException {
+	public Class<?> getValueType(Object rootObject) throws EvaluationException {
 		return String.class;
 	}
 
 	@Override
-	public Class getValueType(EvaluationContext context, Object rootObject) throws EvaluationException {
+	public Class<?> getValueType(EvaluationContext context, Object rootObject) throws EvaluationException {
 		return String.class;
 	}
 

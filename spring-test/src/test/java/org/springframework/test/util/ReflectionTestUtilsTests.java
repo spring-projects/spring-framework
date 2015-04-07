@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,16 +16,15 @@
 
 package org.springframework.test.util;
 
-import static org.junit.Assert.*;
-import static org.springframework.test.util.ReflectionTestUtils.*;
-
 import org.junit.Ignore;
 import org.junit.Test;
 
-import org.springframework.test.AssertThrows;
 import org.springframework.test.util.subpackage.Component;
 import org.springframework.test.util.subpackage.LegacyEntity;
 import org.springframework.test.util.subpackage.Person;
+
+import static org.junit.Assert.*;
+import static org.springframework.test.util.ReflectionTestUtils.*;
 
 /**
  * Unit tests for {@link ReflectionTestUtils}.
@@ -33,7 +32,6 @@ import org.springframework.test.util.subpackage.Person;
  * @author Sam Brannen
  * @author Juergen Hoeller
  */
-@SuppressWarnings("deprecation")
 public class ReflectionTestUtilsTests {
 
 	private static final Float PI = new Float((float) 22 / 7);
@@ -43,11 +41,7 @@ public class ReflectionTestUtilsTests {
 
 
 	@Test
-	public void setAndGetFields() throws Exception {
-
-		// ---------------------------------------------------------------------
-		// Standard
-
+	public void setFieldForStandardUseCases() throws Exception {
 		setField(person, "id", new Long(99), long.class);
 		setField(person, "name", "Tom");
 		setField(person, "age", new Integer(42));
@@ -68,10 +62,10 @@ public class ReflectionTestUtilsTests {
 		assertEquals("blue", getField(person, "eyeColor"));
 		assertEquals(Boolean.TRUE, getField(person, "likesPets"));
 		assertEquals(PI, getField(person, "favoriteNumber"));
+	}
 
-		// ---------------------------------------------------------------------
-		// Null - non-primitives
-
+	@Test
+	public void setFieldWithNullValuesForNonPrimitives() throws Exception {
 		setField(person, "name", null, String.class);
 		setField(person, "eyeColor", null, String.class);
 		setField(person, "favoriteNumber", null, Number.class);
@@ -79,40 +73,25 @@ public class ReflectionTestUtilsTests {
 		assertNull("name (protected field)", person.getName());
 		assertNull("eye color (package private field)", person.getEyeColor());
 		assertNull("'favorite number' (package field)", person.getFavoriteNumber());
+	}
 
-		// ---------------------------------------------------------------------
-		// Null - primitives
+	@Test(expected = IllegalArgumentException.class)
+	public void setFieldWithNullValueForPrimitiveLong() throws Exception {
+		setField(person, "id", null, long.class);
+	}
 
-		new AssertThrows(IllegalArgumentException.class,
-			"Calling setField() with NULL for a primitive type should throw an IllegalArgumentException.") {
+	@Test(expected = IllegalArgumentException.class)
+	public void setFieldWithNullValueForPrimitiveInt() throws Exception {
+		setField(person, "age", null, int.class);
+	}
 
-			@Override
-			public void test() throws Exception {
-				setField(person, "id", null, long.class);
-			}
-		}.runTest();
-
-		new AssertThrows(IllegalArgumentException.class,
-			"Calling setField() with NULL for a primitive type should throw an IllegalArgumentException.") {
-
-			@Override
-			public void test() throws Exception {
-				setField(person, "age", null, int.class);
-			}
-		}.runTest();
-
-		new AssertThrows(IllegalArgumentException.class,
-			"Calling setField() with NULL for a primitive type should throw an IllegalArgumentException.") {
-
-			@Override
-			public void test() throws Exception {
-				setField(person, "likesPets", null, boolean.class);
-			}
-		}.runTest();
+	@Test(expected = IllegalArgumentException.class)
+	public void setFieldWithNullValueForPrimitiveBoolean() throws Exception {
+		setField(person, "likesPets", null, boolean.class);
 	}
 
 	/**
-	 * Verifies behavior requested in <a href="https://jira.springsource.org/browse/SPR-9571">SPR-9571</a>.
+	 * Verifies behavior requested in <a href="https://jira.spring.io/browse/SPR-9571">SPR-9571</a>.
 	 */
 	@Test
 	public void setFieldOnLegacyEntityWithSideEffectsInToString() {
@@ -123,35 +102,7 @@ public class ReflectionTestUtilsTests {
 	}
 
 	@Test
-	public void invokeSetterAndMethods() throws Exception {
-
-		// ---------------------------------------------------------------------
-		// Standard - properties
-
-		invokeSetterMethod(person, "id", new Long(99), long.class);
-		invokeSetterMethod(person, "name", "Tom");
-		invokeSetterMethod(person, "age", new Integer(42));
-		invokeSetterMethod(person, "eyeColor", "blue", String.class);
-		invokeSetterMethod(person, "likesPets", Boolean.TRUE);
-		invokeSetterMethod(person, "favoriteNumber", PI, Number.class);
-
-		assertEquals("ID (protected method in a superclass)", 99, person.getId());
-		assertEquals("name (private method)", "Tom", person.getName());
-		assertEquals("age (protected method)", 42, person.getAge());
-		assertEquals("eye color (package private method)", "blue", person.getEyeColor());
-		assertEquals("'likes pets' flag (protected method for a boolean)", true, person.likesPets());
-		assertEquals("'favorite number' (protected method for a Number)", PI, person.getFavoriteNumber());
-
-		assertEquals(new Long(99), invokeGetterMethod(person, "id"));
-		assertEquals("Tom", invokeGetterMethod(person, "name"));
-		assertEquals(new Integer(42), invokeGetterMethod(person, "age"));
-		assertEquals("blue", invokeGetterMethod(person, "eyeColor"));
-		assertEquals(Boolean.TRUE, invokeGetterMethod(person, "likesPets"));
-		assertEquals(PI, invokeGetterMethod(person, "favoriteNumber"));
-
-		// ---------------------------------------------------------------------
-		// Standard - setter methods
-
+	public void invokeSetterMethodWithExplicitSetterMethodNames() throws Exception {
 		invokeSetterMethod(person, "setId", new Long(1), long.class);
 		invokeSetterMethod(person, "setName", "Jerry", String.class);
 		invokeSetterMethod(person, "setAge", new Integer(33), int.class);
@@ -172,10 +123,34 @@ public class ReflectionTestUtilsTests {
 		assertEquals("green", invokeGetterMethod(person, "getEyeColor"));
 		assertEquals(Boolean.FALSE, invokeGetterMethod(person, "likesPets"));
 		assertEquals(new Integer(42), invokeGetterMethod(person, "getFavoriteNumber"));
+	}
 
-		// ---------------------------------------------------------------------
-		// Null - non-primitives
+	@Test
+	public void invokeSetterMethodWithJavaBeanPropertyNames() throws Exception {
+		invokeSetterMethod(person, "id", new Long(99), long.class);
+		invokeSetterMethod(person, "name", "Tom");
+		invokeSetterMethod(person, "age", new Integer(42));
+		invokeSetterMethod(person, "eyeColor", "blue", String.class);
+		invokeSetterMethod(person, "likesPets", Boolean.TRUE);
+		invokeSetterMethod(person, "favoriteNumber", PI, Number.class);
 
+		assertEquals("ID (protected method in a superclass)", 99, person.getId());
+		assertEquals("name (private method)", "Tom", person.getName());
+		assertEquals("age (protected method)", 42, person.getAge());
+		assertEquals("eye color (package private method)", "blue", person.getEyeColor());
+		assertEquals("'likes pets' flag (protected method for a boolean)", true, person.likesPets());
+		assertEquals("'favorite number' (protected method for a Number)", PI, person.getFavoriteNumber());
+
+		assertEquals(new Long(99), invokeGetterMethod(person, "id"));
+		assertEquals("Tom", invokeGetterMethod(person, "name"));
+		assertEquals(new Integer(42), invokeGetterMethod(person, "age"));
+		assertEquals("blue", invokeGetterMethod(person, "eyeColor"));
+		assertEquals(Boolean.TRUE, invokeGetterMethod(person, "likesPets"));
+		assertEquals(PI, invokeGetterMethod(person, "favoriteNumber"));
+	}
+
+	@Test
+	public void invokeSetterMethodWithNullValuesForNonPrimitives() throws Exception {
 		invokeSetterMethod(person, "name", null, String.class);
 		invokeSetterMethod(person, "eyeColor", null, String.class);
 		invokeSetterMethod(person, "favoriteNumber", null, Number.class);
@@ -183,36 +158,21 @@ public class ReflectionTestUtilsTests {
 		assertNull("name (private method)", person.getName());
 		assertNull("eye color (package private method)", person.getEyeColor());
 		assertNull("'favorite number' (protected method for a Number)", person.getFavoriteNumber());
+	}
 
-		// ---------------------------------------------------------------------
-		// Null - primitives
+	@Test(expected = IllegalArgumentException.class)
+	public void invokeSetterMethodWithNullValueForPrimitiveLong() throws Exception {
+		invokeSetterMethod(person, "id", null, long.class);
+	}
 
-		new AssertThrows(IllegalArgumentException.class,
-			"Calling invokeSetterMethod() with NULL for a primitive type should throw an IllegalArgumentException.") {
+	@Test(expected = IllegalArgumentException.class)
+	public void invokeSetterMethodWithNullValueForPrimitiveInt() throws Exception {
+		invokeSetterMethod(person, "age", null, int.class);
+	}
 
-			@Override
-			public void test() throws Exception {
-				invokeSetterMethod(person, "id", null, long.class);
-			}
-		}.runTest();
-
-		new AssertThrows(IllegalArgumentException.class,
-			"Calling invokeSetterMethod() with NULL for a primitive type should throw an IllegalArgumentException.") {
-
-			@Override
-			public void test() throws Exception {
-				invokeSetterMethod(person, "age", null, int.class);
-			}
-		}.runTest();
-
-		new AssertThrows(IllegalArgumentException.class,
-			"Calling invokeSetterMethod() with NULL for a primitive type should throw an IllegalArgumentException.") {
-
-			@Override
-			public void test() throws Exception {
-				invokeSetterMethod(person, "likesPets", null, boolean.class);
-			}
-		}.runTest();
+	@Test(expected = IllegalArgumentException.class)
+	public void invokeSetterMethodWithNullValueForPrimitiveBoolean() throws Exception {
+		invokeSetterMethod(person, "likesPets", null, boolean.class);
 	}
 
 	@Test
@@ -222,8 +182,8 @@ public class ReflectionTestUtilsTests {
 		assertEquals("subtract(5, 2)", 3, difference.intValue());
 	}
 
-	@Ignore("[SPR-8644] findMethod() does not currently support var-args")
 	@Test
+	@Ignore("[SPR-8644] findMethod() does not currently support var-args")
 	public void invokeMethodWithPrimitiveVarArgs() {
 		// IntelliJ IDEA 11 won't accept int assignment here
 		Integer sum = invokeMethod(component, "add", 1, 2, 3, 4);
@@ -238,7 +198,7 @@ public class ReflectionTestUtilsTests {
 	}
 
 	@Test
-	public void invokeMethodsSimulatingLifecycleEvents() {
+	public void invokeMethodSimulatingLifecycleEvents() {
 		assertNull("number", component.getNumber());
 		assertNull("text", component.getText());
 

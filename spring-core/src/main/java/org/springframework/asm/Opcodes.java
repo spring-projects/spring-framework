@@ -46,6 +46,7 @@ public interface Opcodes {
     // ASM API versions
 
     int ASM4 = 4 << 16 | 0 << 8 | 0;
+    int ASM5 = 5 << 16 | 0 << 8 | 0;
 
     // versions
 
@@ -56,6 +57,7 @@ public interface Opcodes {
     int V1_5 = 0 << 16 | 49;
     int V1_6 = 0 << 16 | 50;
     int V1_7 = 0 << 16 | 51;
+    int V1_8 = 0 << 16 | 52;
 
     // access flags
 
@@ -63,7 +65,7 @@ public interface Opcodes {
     int ACC_PRIVATE = 0x0002; // class, field, method
     int ACC_PROTECTED = 0x0004; // class, field, method
     int ACC_STATIC = 0x0008; // field, method
-    int ACC_FINAL = 0x0010; // class, field, method
+    int ACC_FINAL = 0x0010; // class, field, method, parameter
     int ACC_SUPER = 0x0020; // class
     int ACC_SYNCHRONIZED = 0x0020; // method
     int ACC_VOLATILE = 0x0040; // field
@@ -74,9 +76,10 @@ public interface Opcodes {
     int ACC_INTERFACE = 0x0200; // class
     int ACC_ABSTRACT = 0x0400; // class, method
     int ACC_STRICT = 0x0800; // method
-    int ACC_SYNTHETIC = 0x1000; // class, field, method
+    int ACC_SYNTHETIC = 0x1000; // class, field, method, parameter
     int ACC_ANNOTATION = 0x2000; // class
     int ACC_ENUM = 0x4000; // class(?) field inner
+    int ACC_MANDATED = 0x8000; // parameter
 
     // ASM specific pseudo access flags
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.util.Assert;
@@ -43,6 +42,7 @@ public class CompositeRequestCondition extends AbstractRequestCondition<Composit
 
 	private final RequestConditionHolder[] requestConditions;
 
+
 	/**
 	 * Create an instance with 0 or more {@code RequestCondition} types. It is
 	 * important to create {@code CompositeRequestCondition} instances with the
@@ -53,16 +53,17 @@ public class CompositeRequestCondition extends AbstractRequestCondition<Composit
 		this.requestConditions = wrap(requestConditions);
 	}
 
+	private CompositeRequestCondition(RequestConditionHolder[] requestConditions) {
+		this.requestConditions = requestConditions;
+	}
+
+
 	private RequestConditionHolder[] wrap(RequestCondition<?>... rawConditions) {
 		RequestConditionHolder[] wrappedConditions = new RequestConditionHolder[rawConditions.length];
 		for (int i = 0; i < rawConditions.length; i++) {
 			wrappedConditions[i] = new RequestConditionHolder(rawConditions[i]);
 		}
 		return wrappedConditions;
-	}
-
-	private CompositeRequestCondition(RequestConditionHolder[] requestConditions) {
-		this.requestConditions = requestConditions;
 	}
 
 	/**
@@ -129,8 +130,9 @@ public class CompositeRequestCondition extends AbstractRequestCondition<Composit
 
 	private void assertNumberOfConditions(CompositeRequestCondition other) {
 		Assert.isTrue(getLength() == other.getLength(),
-				"Cannot combine CompositeRequestConditions with a different number of conditions. "
-					+ this.requestConditions + " and  " + other.requestConditions);
+				"Cannot combine CompositeRequestConditions with a different number of conditions. " +
+				ObjectUtils.nullSafeToString(this.requestConditions) + " and  " +
+				ObjectUtils.nullSafeToString(other.requestConditions));
 	}
 
 	/**

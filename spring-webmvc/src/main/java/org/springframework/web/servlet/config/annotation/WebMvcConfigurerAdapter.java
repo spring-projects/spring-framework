@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,6 +53,14 @@ public abstract class WebMvcConfigurerAdapter implements WebMvcConfigurer {
 
 	/**
 	 * {@inheritDoc}
+	 * <p>This implementation is empty.
+	 */
+	@Override
+	public void extendMessageConverters(List<HttpMessageConverter<?>> converters) {
+	}
+
+	/**
+	 * {@inheritDoc}
 	 * <p>This implementation returns {@code null}
 	 */
 	@Override
@@ -74,6 +82,14 @@ public abstract class WebMvcConfigurerAdapter implements WebMvcConfigurer {
 	 */
 	@Override
 	public void configureAsyncSupport(AsyncSupportConfigurer configurer) {
+	}
+
+	/**
+	 * {@inheritDoc}
+	 * <p>This implementation is empty.
+	 */
+	@Override
+	public void configurePathMatch(PathMatchConfigurer configurer) {
 	}
 
 	/**
@@ -123,6 +139,14 @@ public abstract class WebMvcConfigurerAdapter implements WebMvcConfigurer {
 	 */
 	@Override
 	public void addViewControllers(ViewControllerRegistry registry) {
+	}
+
+	/**
+	 * {@inheritDoc}
+	 * <p>This implementation is empty.
+	 */
+	@Override
+	public void configureViewResolvers(ViewResolverRegistry registry) {
 	}
 
 	/**

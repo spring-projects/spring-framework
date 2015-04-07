@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -21,19 +21,19 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.Test;
-import org.springframework.messaging.Message;
-import org.springframework.messaging.simp.SimpMessageType;
-import org.springframework.messaging.support.MessageBuilder;
-
 import reactor.function.Consumer;
 import reactor.function.Function;
 import reactor.io.Buffer;
 
+import org.springframework.messaging.Message;
+import org.springframework.messaging.simp.SimpMessageType;
+import org.springframework.messaging.support.MessageBuilder;
+import org.springframework.util.InvalidMimeTypeException;
+
 import static org.junit.Assert.*;
 
-
 /**
- * Test fixture for {@link StompCodec}.
+ * Test fixture for {@link Reactor11StompCodec}.
  *
  * @author Andy Wilkinson
  */
@@ -41,7 +41,7 @@ public class StompCodecTests {
 
 	private final ArgumentCapturingConsumer<Message<byte[]>> consumer = new ArgumentCapturingConsumer<Message<byte[]>>();
 
-	private final Function<Buffer, Message<byte[]>> decoder = new StompCodec().decoder(consumer);
+	private final Function<Buffer, Message<byte[]>> decoder = new Reactor11StompCodec().decoder(consumer);
 
 	@Test
 	public void decodeFrameWithCrLfEols() {
@@ -49,7 +49,7 @@ public class StompCodecTests {
 		StompHeaderAccessor headers = StompHeaderAccessor.wrap(frame);
 
 		assertEquals(StompCommand.DISCONNECT, headers.getCommand());
-		assertEquals(0, headers.toStompHeaderMap().size());
+		assertEquals(0, headers.toNativeHeaderMap().size());
 		assertEquals(0, frame.getPayload().length);
 	}
 
@@ -59,7 +59,7 @@ public class StompCodecTests {
 		StompHeaderAccessor headers = StompHeaderAccessor.wrap(frame);
 
 		assertEquals(StompCommand.DISCONNECT, headers.getCommand());
-		assertEquals(0, headers.toStompHeaderMap().size());
+		assertEquals(0, headers.toNativeHeaderMap().size());
 		assertEquals(0, frame.getPayload().length);
 	}
 
@@ -73,7 +73,7 @@ public class StompCodecTests {
 
 		assertEquals(StompCommand.CONNECT, headers.getCommand());
 
-		assertEquals(2, headers.toStompHeaderMap().size());
+		assertEquals(2, headers.toNativeHeaderMap().size());
 		assertEquals("1.1", headers.getFirstNativeHeader("accept-version"));
 		assertEquals("github.org", headers.getHost());
 
@@ -87,7 +87,7 @@ public class StompCodecTests {
 
 		assertEquals(StompCommand.SEND, headers.getCommand());
 
-		assertEquals(1, headers.toStompHeaderMap().size());
+		assertEquals(headers.toNativeHeaderMap().toString(), 1, headers.toNativeHeaderMap().size());
 		assertEquals("test", headers.getDestination());
 
 		String bodyText = new String(frame.getPayload());
@@ -96,16 +96,46 @@ public class StompCodecTests {
 
 	@Test
 	public void decodeFrameWithContentLength() {
-		Message<byte[]> frame = decode("SEND\ncontent-length:23\n\nThe body of the message\0");
+		Message<byte[]> message = decode("SEND\ncontent-length:23\n\nThe body of the message\0");
+		StompHeaderAccessor headers = StompHeaderAccessor.wrap(message);
+
+		assertEquals(StompCommand.SEND, headers.getCommand());
+
+		assertEquals(1, headers.toNativeHeaderMap().size());
+		assertEquals(Integer.valueOf(23), headers.getContentLength());
+
+		String bodyText = new String(message.getPayload());
+		assertEquals("The body of the message", bodyText);
+	}
+
+	// SPR-11528
+
+	@Test
+	public void decodeFrameWithInvalidContentLength() {
+		Message<byte[]> message = decode("SEND\ncontent-length:-1\n\nThe body of the message\0");
+		StompHeaderAccessor headers = StompHeaderAccessor.wrap(message);
+
+		assertEquals(StompCommand.SEND, headers.getCommand());
+
+		assertEquals(1, headers.toNativeHeaderMap().size());
+		assertEquals(Integer.valueOf(-1), headers.getContentLength());
+
+		String bodyText = new String(message.getPayload());
+		assertEquals("The body of the message", bodyText);
+	}
+
+	@Test
+	public void decodeFrameWithContentLengthZero() {
+		Message<byte[]> frame = decode("SEND\ncontent-length:0\n\n\0");
 		StompHeaderAccessor headers = StompHeaderAccessor.wrap(frame);
 
 		assertEquals(StompCommand.SEND, headers.getCommand());
 
-		assertEquals(1, headers.toStompHeaderMap().size());
-		assertEquals(Integer.valueOf(23), headers.getContentLength());
+		assertEquals(1, headers.toNativeHeaderMap().size());
+		assertEquals(Integer.valueOf(0), headers.getContentLength());
 
 		String bodyText = new String(frame.getPayload());
-		assertEquals("The body of the message", bodyText);
+		assertEquals("", bodyText);
 	}
 
 	@Test
@@ -115,7 +145,7 @@ public class StompCodecTests {
 
 		assertEquals(StompCommand.SEND, headers.getCommand());
 
-		assertEquals(1, headers.toStompHeaderMap().size());
+		assertEquals(1, headers.toNativeHeaderMap().size());
 		assertEquals(Integer.valueOf(23), headers.getContentLength());
 
 		String bodyText = new String(frame.getPayload());
@@ -129,7 +159,7 @@ public class StompCodecTests {
 
 		assertEquals(StompCommand.DISCONNECT, headers.getCommand());
 
-		assertEquals(1, headers.toStompHeaderMap().size());
+		assertEquals(1, headers.toNativeHeaderMap().size());
 		assertEquals("alpha:bravo\r\n\\", headers.getFirstNativeHeader("a:\r\n\\b"));
 	}
 
@@ -146,7 +176,7 @@ public class StompCodecTests {
 		Buffer buffer = Buffer.wrap(frame1 + frame2);
 
 		final List<Message<byte[]>> messages = new ArrayList<Message<byte[]>>();
-		new StompCodec().decoder(new Consumer<Message<byte[]>>() {
+		new Reactor11StompCodec().decoder(new Consumer<Message<byte[]>>() {
 			@Override
 			public void accept(Message<byte[]> message) {
 				messages.add(message);
@@ -159,13 +189,52 @@ public class StompCodecTests {
 	}
 
 	@Test
+	public void decodeFrameWithIncompleteCommand() {
+		assertIncompleteDecode("MESSAG");
+	}
+
+	@Test
+	public void decodeFrameWithIncompleteHeader() {
+		assertIncompleteDecode("SEND\ndestination");
+		assertIncompleteDecode("SEND\ndestination:");
+		assertIncompleteDecode("SEND\ndestination:test");
+	}
+
+	@Test
+	public void decodeFrameWithoutNullOctetTerminator() {
+		assertIncompleteDecode("SEND\ndestination:test\n");
+		assertIncompleteDecode("SEND\ndestination:test\n\n");
+		assertIncompleteDecode("SEND\ndestination:test\n\nThe body");
+	}
+
+	@Test
+	public void decodeFrameWithInsufficientContent() {
+		assertIncompleteDecode("SEND\ncontent-length:23\n\nThe body of the mess");
+	}
+
+	@Test
+	public void decodeFrameWithIncompleteContentType() {
+		assertIncompleteDecode("SEND\ncontent-type:text/plain;charset=U");
+	}
+
+	@Test(expected = InvalidMimeTypeException.class)
+	public void decodeFrameWithInvalidContentType() {
+		assertIncompleteDecode("SEND\ncontent-type:text/plain;charset=U\n\nThe body\0");
+	}
+
+	@Test(expected=StompConversionException.class)
+	public void decodeFrameWithIncorrectTerminator() {
+		decode("SEND\ncontent-length:23\n\nThe body of the message*");
+	}
+
+	@Test
 	public void decodeHeartbeat() {
 		String frame = "\n";
 
 		Buffer buffer = Buffer.wrap(frame);
 
 		final List<Message<byte[]>> messages = new ArrayList<Message<byte[]>>();
-		new StompCodec().decoder(new Consumer<Message<byte[]>>() {
+		new Reactor11StompCodec().decoder(new Consumer<Message<byte[]>>() {
 			@Override
 			public void accept(Message<byte[]> message) {
 				messages.add(message);
@@ -180,9 +249,9 @@ public class StompCodecTests {
 	public void encodeFrameWithNoHeadersAndNoBody() {
 		StompHeaderAccessor headers = StompHeaderAccessor.create(StompCommand.DISCONNECT);
 
-		Message<byte[]> frame = MessageBuilder.withPayload(new byte[0]).setHeaders(headers).build();
+		Message<byte[]> frame = MessageBuilder.createMessage(new byte[0], headers.getMessageHeaders());
 
-		assertEquals("DISCONNECT\n\n\0", new StompCodec().encoder().apply(frame).asString());
+		assertEquals("DISCONNECT\n\n\0", new Reactor11StompCodec().encoder().apply(frame).asString());
 	}
 
 	@Test
@@ -191,9 +260,9 @@ public class StompCodecTests {
 		headers.setAcceptVersion("1.2");
 		headers.setHost("github.org");
 
-		Message<byte[]> frame = MessageBuilder.withPayload(new byte[0]).setHeaders(headers).build();
+		Message<byte[]> frame = MessageBuilder.createMessage(new byte[0], headers.getMessageHeaders());
 
-		String frameString = new StompCodec().encoder().apply(frame).asString();
+		String frameString = new Reactor11StompCodec().encoder().apply(frame).asString();
 
 		assertTrue(frameString.equals("CONNECT\naccept-version:1.2\nhost:github.org\n\n\0") ||
 				frameString.equals("CONNECT\nhost:github.org\naccept-version:1.2\n\n\0"));
@@ -204,9 +273,10 @@ public class StompCodecTests {
 		StompHeaderAccessor headers = StompHeaderAccessor.create(StompCommand.DISCONNECT);
 		headers.addNativeHeader("a:\r\n\\b",  "alpha:bravo\r\n\\");
 
-		Message<byte[]> frame = MessageBuilder.withPayload(new byte[0]).setHeaders(headers).build();
+		Message<byte[]> frame = MessageBuilder.createMessage(new byte[0], headers.getMessageHeaders());
 
-		assertEquals("DISCONNECT\na\\c\\r\\n\\\\b:alpha\\cbravo\\r\\n\\\\\n\n\0", new StompCodec().encoder().apply(frame).asString());
+		assertEquals("DISCONNECT\na\\c\\r\\n\\\\b:alpha\\cbravo\\r\\n\\\\\n\n\0",
+				new Reactor11StompCodec().encoder().apply(frame).asString());
 	}
 
 	@Test
@@ -214,15 +284,44 @@ public class StompCodecTests {
 		StompHeaderAccessor headers = StompHeaderAccessor.create(StompCommand.SEND);
 		headers.addNativeHeader("a", "alpha");
 
-		Message<byte[]> frame = MessageBuilder.withPayload("Message body".getBytes()).setHeaders(headers).build();
+		Message<byte[]> frame = MessageBuilder.createMessage("Message body".getBytes(), headers.getMessageHeaders());
 
-		assertEquals("SEND\na:alpha\ncontent-length:12\n\nMessage body\0", new StompCodec().encoder().apply(frame).asString());
+		assertEquals("SEND\na:alpha\ncontent-length:12\n\nMessage body\0",
+				new Reactor11StompCodec().encoder().apply(frame).asString());
+	}
+
+	@Test
+	public void encodeFrameWithContentLengthPresent() {
+		StompHeaderAccessor headers = StompHeaderAccessor.create(StompCommand.SEND);
+		headers.setContentLength(12);
+
+		Message<byte[]> frame = MessageBuilder.createMessage("Message body".getBytes(), headers.getMessageHeaders());
+
+		assertEquals("SEND\ncontent-length:12\n\nMessage body\0",
+				new Reactor11StompCodec().encoder().apply(frame).asString());
+	}
+
+	private void assertIncompleteDecode(String partialFrame) {
+		Buffer buffer = Buffer.wrap(partialFrame);
+		assertNull(decode(buffer));
+		assertEquals(0, buffer.position());
 	}
 
 	private Message<byte[]> decode(String stompFrame) {
-		this.decoder.apply(Buffer.wrap(stompFrame));
-		return consumer.arguments.get(0);
+		Buffer buffer = Buffer.wrap(stompFrame);
+		return decode(buffer);
 	}
+
+	private Message<byte[]> decode(Buffer buffer) {
+		this.decoder.apply(buffer);
+		if (consumer.arguments.isEmpty()) {
+			return null;
+		} else {
+			return consumer.arguments.get(0);
+		}
+	}
+
+
 
 	private static final class ArgumentCapturingConsumer<T> implements Consumer<T> {
 

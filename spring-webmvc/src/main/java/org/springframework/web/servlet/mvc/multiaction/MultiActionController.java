@@ -168,7 +168,7 @@ public class MultiActionController extends AbstractController implements LastMod
 	private final Map<String, Method> lastModifiedMethodMap = new HashMap<String, Method>();
 
 	/** Methods, keyed by exception class */
-	private final Map<Class, Method> exceptionHandlerMap = new HashMap<Class, Method>();
+	private final Map<Class<?>, Method> exceptionHandlerMap = new HashMap<Class<?>, Method>();
 
 
 	/**
@@ -287,10 +287,10 @@ public class MultiActionController extends AbstractController implements LastMod
 	 * as handler method (to avoid potential stack overflow).
 	 */
 	private boolean isHandlerMethod(Method method) {
-		Class returnType = method.getReturnType();
+		Class<?> returnType = method.getReturnType();
 		if (ModelAndView.class.equals(returnType) || Map.class.equals(returnType) || String.class.equals(returnType) ||
 				void.class.equals(returnType)) {
-			Class[] parameterTypes = method.getParameterTypes();
+			Class<?>[] parameterTypes = method.getParameterTypes();
 			return (parameterTypes.length >= 2 &&
 					HttpServletRequest.class.equals(parameterTypes[0]) &&
 					HttpServletResponse.class.equals(parameterTypes[1]) &&
@@ -327,8 +327,8 @@ public class MultiActionController extends AbstractController implements LastMod
 		try {
 			Method lastModifiedMethod = delegate.getClass().getMethod(
 					method.getName() + LAST_MODIFIED_METHOD_SUFFIX,
-					new Class[] {HttpServletRequest.class});
-			Class returnType = lastModifiedMethod.getReturnType();
+					new Class<?>[] {HttpServletRequest.class});
+			Class<?> returnType = lastModifiedMethod.getReturnType();
 			if (!(long.class.equals(returnType) || Long.class.equals(returnType))) {
 				throw new IllegalStateException("last-modified method [" + lastModifiedMethod +
 						"] declares an invalid return type - needs to be 'long' or 'Long'");
@@ -447,7 +447,7 @@ public class MultiActionController extends AbstractController implements LastMod
 		}
 
 		try {
-			Class[] paramTypes = method.getParameterTypes();
+			Class<?>[] paramTypes = method.getParameterTypes();
 			List<Object> params = new ArrayList<Object>(4);
 			params.add(request);
 			params.add(response);
@@ -493,7 +493,7 @@ public class MultiActionController extends AbstractController implements LastMod
 			return (ModelAndView) returnValue;
 		}
 		else if (returnValue instanceof Map) {
-			return new ModelAndView().addAllObjects((Map) returnValue);
+			return new ModelAndView().addAllObjects((Map<String, ?>) returnValue);
 		}
 		else if (returnValue instanceof String) {
 			return new ModelAndView((String) returnValue);
@@ -603,7 +603,7 @@ public class MultiActionController extends AbstractController implements LastMod
 	 * @param exception the exception to handle
 	 */
 	protected Method getExceptionHandler(Throwable exception) {
-		Class exceptionClass = exception.getClass();
+		Class<?> exceptionClass = exception.getClass();
 		if (logger.isDebugEnabled()) {
 			logger.debug("Trying to find handler for exception class [" + exceptionClass.getName() + "]");
 		}

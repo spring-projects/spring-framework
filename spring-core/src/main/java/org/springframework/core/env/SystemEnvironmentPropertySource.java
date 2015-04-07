@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,21 +40,22 @@ import org.springframework.util.Assert;
  * {@code true} if any of the above properties are present, otherwise {@code false}.
  *
  * <p>This feature is particularly useful when specifying active or default profiles as
- * environment variables. The following is not allowable under Bash
+ * environment variables. The following is not allowable under Bash:
  *
  * <pre class="code">spring.profiles.active=p1 java -classpath ... MyApp</pre>
  *
- * However, the following syntax is permitted and is also more conventional.
+ * However, the following syntax is permitted and is also more conventional:
  *
  * <pre class="code">SPRING_PROFILES_ACTIVE=p1 java -classpath ... MyApp</pre>
  *
  * <p>Enable debug- or trace-level logging for this class (or package) for messages
  * explaining when these 'property name resolutions' occur.
  *
- * <p>This property source is included by default in {@link StandardEnvironment} and all
- * its subclasses.
+ * <p>This property source is included by default in {@link StandardEnvironment}
+ * and all its subclasses.
  *
  * @author Chris Beams
+ * @author Juergen Hoeller
  * @since 3.1
  * @see StandardEnvironment
  * @see AbstractEnvironment#getSystemEnvironment()
@@ -70,28 +71,26 @@ public class SystemEnvironmentPropertySource extends MapPropertySource {
 		super(name, source);
 	}
 
+
 	/**
-	 * Return true if a property with the given name or any underscore/uppercase variant
+	 * Return {@code true} if a property with the given name or any underscore/uppercase variant
 	 * thereof exists in this property source.
 	 */
 	@Override
 	public boolean containsProperty(String name) {
-		return getProperty(name) != null;
+		return (getProperty(name) != null);
 	}
 
 	/**
-	 * {@inheritDoc}
-	 * <p>This implementation returns {@code true} if a property with the given name or
+	 * This implementation returns {@code true} if a property with the given name or
 	 * any underscore/uppercase variant thereof exists in this property source.
 	 */
 	@Override
 	public Object getProperty(String name) {
-		Assert.notNull(name, "property name must not be null");
 		String actualName = resolvePropertyName(name);
 		if (logger.isDebugEnabled() && !name.equals(actualName)) {
-			logger.debug(String.format(
-					"PropertySource [%s] does not contain '%s', but found equivalent '%s'",
-					this.getName(), name, actualName));
+			logger.debug(String.format("PropertySource [%s] does not contain '%s', but found equivalent '%s'",
+					getName(), name, actualName));
 		}
 		return super.getProperty(actualName);
 	}
@@ -102,22 +101,24 @@ public class SystemEnvironmentPropertySource extends MapPropertySource {
 	 * found or otherwise the original name. Never returns {@code null}.
 	 */
 	private String resolvePropertyName(String name) {
-		if (super.containsProperty(name)) {
+		Assert.notNull(name, "Property name must not be null");
+		if (containsKey(name)) {
 			return name;
 		}
 
 		String usName = name.replace('.', '_');
-		if (!name.equals(usName) && super.containsProperty(usName)) {
+		if (!name.equals(usName) && containsKey(usName)) {
 			return usName;
 		}
 
 		String ucName = name.toUpperCase();
 		if (!name.equals(ucName)) {
-			if (super.containsProperty(ucName)) {
+			if (containsKey(ucName)) {
 				return ucName;
-			} else {
+			}
+			else {
 				String usUcName = ucName.replace('.', '_');
-				if (!ucName.equals(usUcName) && super.containsProperty(usUcName)) {
+				if (!ucName.equals(usUcName) && containsKey(usUcName)) {
 					return usUcName;
 				}
 			}
@@ -125,4 +126,13 @@ public class SystemEnvironmentPropertySource extends MapPropertySource {
 
 		return name;
 	}
+
+	private boolean containsKey(String name) {
+		return (isSecurityManagerPresent() ? this.source.keySet().contains(name) : this.source.containsKey(name));
+	}
+
+	protected boolean isSecurityManagerPresent() {
+		return (System.getSecurityManager() != null);
+	}
+
 }

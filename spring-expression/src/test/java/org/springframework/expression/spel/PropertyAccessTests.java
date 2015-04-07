@@ -16,16 +16,11 @@
 
 package org.springframework.expression.spel;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-
 import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.Test;
+
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.expression.AccessException;
 import org.springframework.expression.EvaluationContext;
@@ -37,6 +32,8 @@ import org.springframework.expression.spel.standard.SpelExpression;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 
+import static org.junit.Assert.*;
+
 ///CLOVER:OFF
 
 /**
@@ -44,7 +41,7 @@ import org.springframework.expression.spel.support.StandardEvaluationContext;
  *
  * @author Andy Clement
  */
-public class PropertyAccessTests extends ExpressionTestCase {
+public class PropertyAccessTests extends AbstractExpressionTests {
 
 	@Test
 	public void testSimpleAccess01() {

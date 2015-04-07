@@ -16,18 +16,19 @@
 
 package org.springframework.aop.aspectj;
 
-import static org.junit.Assert.fail;
-
 import java.lang.reflect.Method;
 
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.junit.Before;
 import org.junit.Test;
+
 import org.springframework.aop.MethodBeforeAdvice;
-import org.springframework.tests.sample.beans.ITestBean;
 import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.core.Ordered;
+import org.springframework.tests.sample.beans.ITestBean;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Adrian Colyer

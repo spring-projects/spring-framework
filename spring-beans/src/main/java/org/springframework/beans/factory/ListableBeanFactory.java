@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import java.lang.annotation.Annotation;
 import java.util.Map;
 
 import org.springframework.beans.BeansException;
+import org.springframework.core.ResolvableType;
 
 /**
  * Extension of the {@link BeanFactory} interface to be implemented by bean factories
@@ -41,7 +42,7 @@ import org.springframework.beans.BeansException;
  * such manually registered singletons too. Of course, BeanFactory's {@code getBean}
  * does allow transparent access to such special beans as well. However, in typical
  * scenarios, all beans will be defined by external bean definitions anyway, so most
- * applications don't need to worry about this differentation.
+ * applications don't need to worry about this differentiation.
  *
  * <p><b>NOTE:</b> With the exception of {@code getBeanDefinitionCount}
  * and {@code containsBeanDefinition}, the methods in this interface
@@ -101,7 +102,35 @@ public interface ListableBeanFactory extends BeanFactory {
 	 * by other means than bean definitions.
 	 * <p>This version of {@code getBeanNamesForType} matches all kinds of beans,
 	 * be it singletons, prototypes, or FactoryBeans. In most implementations, the
-	 * result will be the same as for {@code getBeanNamesOfType(type, true, true)}.
+	 * result will be the same as for {@code getBeanNamesForType(type, true, true)}.
+	 * <p>Bean names returned by this method should always return bean names <i>in the
+	 * order of definition</i> in the backend configuration, as far as possible.
+	 * @param type the class or interface to match, or {@code null} for all bean names
+	 * @return the names of beans (or objects created by FactoryBeans) matching
+	 * the given object type (including subclasses), or an empty array if none
+	 * @since 4.2
+	 * @see FactoryBean#getObjectType
+	 * @see BeanFactoryUtils#beanNamesForTypeIncludingAncestors(ListableBeanFactory, ResolvableType)
+	 */
+	String[] getBeanNamesForType(ResolvableType type);
+
+	/**
+	 * Return the names of beans matching the given type (including subclasses),
+	 * judging from either bean definitions or the value of {@code getObjectType}
+	 * in the case of FactoryBeans.
+	 * <p><b>NOTE: This method introspects top-level beans only.</b> It does <i>not</i>
+	 * check nested beans which might match the specified type as well.
+	 * <p>Does consider objects created by FactoryBeans, which means that FactoryBeans
+	 * will get initialized. If the object created by the FactoryBean doesn't match,
+	 * the raw FactoryBean itself will be matched against the type.
+	 * <p>Does not consider any hierarchy this factory may participate in.
+	 * Use BeanFactoryUtils' {@code beanNamesForTypeIncludingAncestors}
+	 * to include beans in ancestor factories too.
+	 * <p>Note: Does <i>not</i> ignore singleton beans that have been registered
+	 * by other means than bean definitions.
+	 * <p>This version of {@code getBeanNamesForType} matches all kinds of beans,
+	 * be it singletons, prototypes, or FactoryBeans. In most implementations, the
+	 * result will be the same as for {@code getBeanNamesForType(type, true, true)}.
 	 * <p>Bean names returned by this method should always return bean names <i>in the
 	 * order of definition</i> in the backend configuration, as far as possible.
 	 * @param type the class or interface to match, or {@code null} for all bean names
@@ -212,23 +241,36 @@ public interface ListableBeanFactory extends BeanFactory {
 			throws BeansException;
 
 	/**
-	 * Find all beans whose {@code Class} has the supplied {@link java.lang.annotation.Annotation} type.
+	 * Find all names of beans whose {@code Class} has the supplied {@link Annotation}
+	 * type, without creating any bean instances yet.
+	 * @param annotationType the type of annotation to look for
+	 * @return the names of all matching beans
+	 * @since 4.0
+	 */
+	String[] getBeanNamesForAnnotation(Class<? extends Annotation> annotationType);
+
+	/**
+	 * Find all beans whose {@code Class} has the supplied {@link Annotation} type,
+	 * returning a Map of bean names with corresponding bean instances.
 	 * @param annotationType the type of annotation to look for
 	 * @return a Map with the matching beans, containing the bean names as
 	 * keys and the corresponding bean instances as values
 	 * @throws BeansException if a bean could not be created
+	 * @since 3.0
 	 */
-	Map<String, Object> getBeansWithAnnotation(Class<? extends Annotation> annotationType)
-			throws BeansException;
+	Map<String, Object> getBeansWithAnnotation(Class<? extends Annotation> annotationType) throws BeansException;
 
 	/**
-	 * Find a {@link Annotation} of {@code annotationType} on the specified
+	 * Find an {@link Annotation} of {@code annotationType} on the specified
 	 * bean, traversing its interfaces and super classes if no annotation can be
 	 * found on the given class itself.
 	 * @param beanName the name of the bean to look for annotations on
 	 * @param annotationType the annotation class to look for
-	 * @return the annotation of the given type found, or {@code null}
+	 * @return the annotation of the given type if found, or {@code null}
+	 * @throws NoSuchBeanDefinitionException if there is no bean with the given name
+	 * @since 3.0
 	 */
-	<A extends Annotation> A findAnnotationOnBean(String beanName, Class<A> annotationType);
+	<A extends Annotation> A findAnnotationOnBean(String beanName, Class<A> annotationType)
+			throws NoSuchBeanDefinitionException;
 
 }

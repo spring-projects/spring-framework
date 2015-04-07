@@ -17,6 +17,7 @@
 package org.springframework.context.access;
 
 import org.junit.Test;
+
 import org.springframework.context.ConfigurableApplicationContext;
 
 import static org.junit.Assert.*;

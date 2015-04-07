@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,6 @@
 
 package org.springframework.expression.spel.standard;
 
-import static org.junit.Assert.*;
-
 import org.junit.Test;
 
 import org.springframework.expression.EvaluationContext;
@@ -30,6 +28,8 @@ import org.springframework.expression.spel.SpelParseException;
 import org.springframework.expression.spel.ast.OpAnd;
 import org.springframework.expression.spel.ast.OpOr;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Andy Clement
@@ -328,30 +328,33 @@ public class SpelParserTests {
 	public void token() {
 		Token token = new Token(TokenKind.NOT, 0, 3);
 		assertEquals(TokenKind.NOT, token.kind);
-		assertEquals(0, token.startpos);
-		assertEquals(3, token.endpos);
+		assertEquals(0, token.startPos);
+		assertEquals(3, token.endPos);
 		assertEquals("[NOT(!)](0,3)", token.toString());
 
 		token = new Token(TokenKind.LITERAL_STRING, "abc".toCharArray(), 0, 3);
 		assertEquals(TokenKind.LITERAL_STRING, token.kind);
-		assertEquals(0, token.startpos);
-		assertEquals(3, token.endpos);
+		assertEquals(0, token.startPos);
+		assertEquals(3, token.endPos);
 		assertEquals("[LITERAL_STRING:abc](0,3)", token.toString());
 	}
 
 	@Test
 	public void exceptions() {
 		ExpressionException exprEx = new ExpressionException("test");
-		assertEquals("test", exprEx.getMessage());
+		assertEquals("test", exprEx.getSimpleMessage());
 		assertEquals("test", exprEx.toDetailedString());
+		assertEquals("test", exprEx.getMessage());
 
 		exprEx = new ExpressionException("wibble", "test");
-		assertEquals("test", exprEx.getMessage());
+		assertEquals("test", exprEx.getSimpleMessage());
 		assertEquals("Expression 'wibble': test", exprEx.toDetailedString());
+		assertEquals("Expression 'wibble': test", exprEx.getMessage());
 
 		exprEx = new ExpressionException("wibble", 3, "test");
-		assertEquals("test", exprEx.getMessage());
+		assertEquals("test", exprEx.getSimpleMessage());
 		assertEquals("Expression 'wibble' @ 3: test", exprEx.toDetailedString());
+		assertEquals("Expression 'wibble' @ 3: test", exprEx.getMessage());
 	}
 
 	@Test

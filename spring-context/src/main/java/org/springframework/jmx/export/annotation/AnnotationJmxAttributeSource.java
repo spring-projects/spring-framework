@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -70,7 +70,7 @@ public class AnnotationJmxAttributeSource implements JmxAttributeSource, BeanFac
 	@Override
 	public ManagedResource getManagedResource(Class<?> beanClass) throws InvalidMetadataException {
 		org.springframework.jmx.export.annotation.ManagedResource ann =
-				beanClass.getAnnotation(org.springframework.jmx.export.annotation.ManagedResource.class);
+				AnnotationUtils.getAnnotation(beanClass, org.springframework.jmx.export.annotation.ManagedResource.class);
 		if (ann == null) {
 			return null;
 		}
@@ -148,8 +148,8 @@ public class AnnotationJmxAttributeSource implements JmxAttributeSource, BeanFac
 
 	@Override
 	public ManagedNotification[] getManagedNotifications(Class<?> clazz) throws InvalidMetadataException {
-		ManagedNotifications notificationsAnn = clazz.getAnnotation(ManagedNotifications.class);
-		if(notificationsAnn == null) {
+		ManagedNotifications notificationsAnn = AnnotationUtils.getAnnotation(clazz, ManagedNotifications.class);
+		if (notificationsAnn == null) {
 			return new ManagedNotification[0];
 		}
 		Annotation[] notifications = notificationsAnn.value();

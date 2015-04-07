@@ -89,7 +89,7 @@ public class StaticApplicationContext extends GenericApplicationContext {
 	 * <p>For more advanced needs, register with the underlying BeanFactory directly.
 	 * @see #getDefaultListableBeanFactory
 	 */
-	public void registerSingleton(String name, Class clazz) throws BeansException {
+	public void registerSingleton(String name, Class<?> clazz) throws BeansException {
 		GenericBeanDefinition bd = new GenericBeanDefinition();
 		bd.setBeanClass(clazz);
 		getDefaultListableBeanFactory().registerBeanDefinition(name, bd);
@@ -100,7 +100,7 @@ public class StaticApplicationContext extends GenericApplicationContext {
 	 * <p>For more advanced needs, register with the underlying BeanFactory directly.
 	 * @see #getDefaultListableBeanFactory
 	 */
-	public void registerSingleton(String name, Class clazz, MutablePropertyValues pvs) throws BeansException {
+	public void registerSingleton(String name, Class<?> clazz, MutablePropertyValues pvs) throws BeansException {
 		GenericBeanDefinition bd = new GenericBeanDefinition();
 		bd.setBeanClass(clazz);
 		bd.setPropertyValues(pvs);
@@ -112,7 +112,7 @@ public class StaticApplicationContext extends GenericApplicationContext {
 	 * <p>For more advanced needs, register with the underlying BeanFactory directly.
 	 * @see #getDefaultListableBeanFactory
 	 */
-	public void registerPrototype(String name, Class clazz) throws BeansException {
+	public void registerPrototype(String name, Class<?> clazz) throws BeansException {
 		GenericBeanDefinition bd = new GenericBeanDefinition();
 		bd.setScope(GenericBeanDefinition.SCOPE_PROTOTYPE);
 		bd.setBeanClass(clazz);
@@ -124,7 +124,7 @@ public class StaticApplicationContext extends GenericApplicationContext {
 	 * <p>For more advanced needs, register with the underlying BeanFactory directly.
 	 * @see #getDefaultListableBeanFactory
 	 */
-	public void registerPrototype(String name, Class clazz, MutablePropertyValues pvs) throws BeansException {
+	public void registerPrototype(String name, Class<?> clazz, MutablePropertyValues pvs) throws BeansException {
 		GenericBeanDefinition bd = new GenericBeanDefinition();
 		bd.setScope(GenericBeanDefinition.SCOPE_PROTOTYPE);
 		bd.setBeanClass(clazz);

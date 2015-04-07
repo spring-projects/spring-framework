@@ -16,14 +16,15 @@
 
 package org.springframework.test.context.junit4;
 
-import static org.junit.Assert.fail;
-
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
 import org.springframework.test.annotation.IfProfileValue;
 import org.springframework.test.context.TestContext;
 import org.springframework.test.context.TestExecutionListener;
 import org.springframework.test.context.TestExecutionListeners;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Juergen Hoeller

@@ -1,5 +1,5 @@
 Spring Framework ${version}
-Copyright (c) 2002-${copyright} SpringSource, a division of VMware, Inc.
+Copyright (c) 2002-${copyright} Pivotal, Inc.
 
 This product is licensed to you under the Apache License, Version 2.0
 (the "License"). You may not use this product except in compliance with

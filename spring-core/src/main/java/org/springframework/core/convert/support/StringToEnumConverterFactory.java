@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,27 +18,29 @@ package org.springframework.core.convert.support;
 
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.core.convert.converter.ConverterFactory;
-import org.springframework.util.Assert;
 
 /**
- * Converts from a String to a java.lang.Enum by calling {@link Enum#valueOf(Class, String)}.
+ * Converts from a String to a {@link java.lang.Enum} by calling {@link Enum#valueOf(Class, String)}.
  *
  * @author Keith Donald
  * @since 3.0
  */
-@SuppressWarnings({ "unchecked", "rawtypes" })
+@SuppressWarnings({"unchecked", "rawtypes"})
 final class StringToEnumConverterFactory implements ConverterFactory<String, Enum> {
 
 	@Override
 	public <T extends Enum> Converter<String, T> getConverter(Class<T> targetType) {
 		Class<?> enumType = targetType;
-		while(enumType != null && !enumType.isEnum()) {
+		while (enumType != null && !enumType.isEnum()) {
 			enumType = enumType.getSuperclass();
 		}
-		Assert.notNull(enumType, "The target type " + targetType.getName()
-				+ " does not refer to an enum");
+		if (enumType == null) {
+			throw new IllegalArgumentException(
+					"The target type " + targetType.getName() + " does not refer to an enum");
+		}
 		return new StringToEnum(enumType);
 	}
+
 
 	private class StringToEnum<T extends Enum> implements Converter<String, T> {
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,9 +19,7 @@ package org.springframework.web.servlet;
 import java.io.IOException;
 import java.security.Principal;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.concurrent.Callable;
-
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -29,7 +27,6 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpServletResponseWrapper;
 
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ApplicationContextException;
@@ -41,14 +38,17 @@ import org.springframework.context.event.SourceFilteringListener;
 import org.springframework.context.i18n.LocaleContext;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.context.i18n.SimpleLocaleContext;
+import org.springframework.core.GenericTypeResolver;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.core.env.ConfigurableEnvironment;
+import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.context.ConfigurableWebApplicationContext;
 import org.springframework.web.context.ConfigurableWebEnvironment;
+import org.springframework.web.context.ContextLoader;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.RequestAttributes;
@@ -161,6 +161,11 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 	private static final String INIT_PARAM_DELIMITERS = ",; \t\n";
 
 
+	/** Checking for Servlet 3.0+ HttpServletResponse.getStatus() */
+	private static final boolean responseGetStatusAvailable =
+			ClassUtils.hasMethod(HttpServletResponse.class, "getStatus");
+
+
 	/** ServletContext attribute to find the WebApplicationContext in */
 	private String contextAttribute;
 
@@ -175,6 +180,13 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 
 	/** Explicit context config location */
 	private String contextConfigLocation;
+
+	/** Actual ApplicationContextInitializer instances to apply to the context */
+	private final ArrayList<ApplicationContextInitializer<ConfigurableApplicationContext>> contextInitializers =
+			new ArrayList<ApplicationContextInitializer<ConfigurableApplicationContext>>();
+
+	/** Comma-delimited ApplicationContextInitializer class names set through init param */
+	private String contextInitializerClasses;
 
 	/** Should we publish the context as a ServletContext attribute? */
 	private boolean publishContext = true;
@@ -199,13 +211,6 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 
 	/** Flag used to detect whether onRefresh has already been called */
 	private boolean refreshEventReceived = false;
-
-	/** Comma-delimited ApplicationContextInitializer classnames set through init param */
-	private String contextInitializerClasses;
-
-	/** Actual ApplicationContextInitializer instances to apply to the context */
-	private ArrayList<ApplicationContextInitializer<ConfigurableApplicationContext>> contextInitializers =
-			new ArrayList<ApplicationContextInitializer<ConfigurableApplicationContext>>();
 
 
 	/**
@@ -341,28 +346,6 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 	}
 
 	/**
-	 * Specify the set of fully-qualified {@link ApplicationContextInitializer} class
-	 * names, per the optional "contextInitializerClasses" servlet init-param.
-	 * @see #configureAndRefreshWebApplicationContext(ConfigurableWebApplicationContext)
-	 * @see #applyInitializers(ConfigurableApplicationContext)
-	 */
-	public void setContextInitializerClasses(String contextInitializerClasses) {
-		this.contextInitializerClasses = contextInitializerClasses;
-	}
-
-	/**
-	 * Specify which {@link ApplicationContextInitializer} instances should be used
-	 * to initialize the application context used by this {@code FrameworkServlet}.
-	 * @see #configureAndRefreshWebApplicationContext(ConfigurableWebApplicationContext)
-	 * @see #applyInitializers(ConfigurableApplicationContext)
-	 */
-	public void setContextInitializers(ApplicationContextInitializer<ConfigurableApplicationContext>... contextInitializers) {
-		for (ApplicationContextInitializer<ConfigurableApplicationContext> initializer : contextInitializers) {
-			this.contextInitializers.add(initializer);
-		}
-	}
-
-	/**
 	 * Set the context config location explicitly, instead of relying on the default
 	 * location built from the namespace. This location string can consist of
 	 * multiple locations separated by any number of commas and spaces.
@@ -376,6 +359,29 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 	 */
 	public String getContextConfigLocation() {
 		return this.contextConfigLocation;
+	}
+
+	/**
+	 * Specify which {@link ApplicationContextInitializer} instances should be used
+	 * to initialize the application context used by this {@code FrameworkServlet}.
+	 * @see #configureAndRefreshWebApplicationContext(ConfigurableWebApplicationContext)
+	 * @see #applyInitializers(ConfigurableApplicationContext)
+	 */
+	@SuppressWarnings("unchecked")
+	public void setContextInitializers(ApplicationContextInitializer<? extends ConfigurableApplicationContext>... contextInitializers) {
+		for (ApplicationContextInitializer<? extends ConfigurableApplicationContext> initializer : contextInitializers) {
+			this.contextInitializers.add((ApplicationContextInitializer<ConfigurableApplicationContext>) initializer);
+		}
+	}
+
+	/**
+	 * Specify the set of fully-qualified {@link ApplicationContextInitializer} class
+	 * names, per the optional "contextInitializerClasses" servlet init-param.
+	 * @see #configureAndRefreshWebApplicationContext(ConfigurableWebApplicationContext)
+	 * @see #applyInitializers(ConfigurableApplicationContext)
+	 */
+	public void setContextInitializerClasses(String contextInitializerClasses) {
+		this.contextInitializerClasses = contextInitializerClasses;
 	}
 
 	/**
@@ -447,6 +453,23 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 	 */
 	public void setDispatchTraceRequest(boolean dispatchTraceRequest) {
 		this.dispatchTraceRequest = dispatchTraceRequest;
+	}
+
+	/**
+	 * Called by Spring via {@link ApplicationContextAware} to inject the current
+	 * application context. This method allows FrameworkServlets to be registered as
+	 * Spring beans inside an existing {@link WebApplicationContext} rather than
+	 * {@link #findWebApplicationContext() finding} a
+	 * {@link org.springframework.web.context.ContextLoaderListener bootstrapped} context.
+	 * <p>Primarily added to support use in embedded servlet containers.
+	 * @since 4.0
+	 */
+	@Override
+	public void setApplicationContext(ApplicationContext applicationContext) {
+		if (this.webApplicationContext == null && applicationContext instanceof WebApplicationContext) {
+			this.webApplicationContext = (WebApplicationContext) applicationContext;
+			this.webApplicationContextInjected = true;
+		}
 	}
 
 
@@ -617,23 +640,8 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 			}
 			else {
 				// Generate default id...
-				ServletContext sc = getServletContext();
-				if (sc.getMajorVersion() == 2 && sc.getMinorVersion() < 5) {
-					// Servlet <= 2.4: resort to name specified in web.xml, if any.
-					String servletContextName = sc.getServletContextName();
-					if (servletContextName != null) {
-						wac.setId(ConfigurableWebApplicationContext.APPLICATION_CONTEXT_ID_PREFIX + servletContextName +
-								"." + getServletName());
-					}
-					else {
-						wac.setId(ConfigurableWebApplicationContext.APPLICATION_CONTEXT_ID_PREFIX + getServletName());
-					}
-				}
-				else {
-					// Servlet 2.5's getContextPath available!
-					wac.setId(ConfigurableWebApplicationContext.APPLICATION_CONTEXT_ID_PREFIX +
-							ObjectUtils.getDisplayString(sc.getContextPath()) + "/" + getServletName());
-				}
+				wac.setId(ConfigurableWebApplicationContext.APPLICATION_CONTEXT_ID_PREFIX +
+						ObjectUtils.getDisplayString(getServletContext().getContextPath()) + "/" + getServletName());
 			}
 		}
 
@@ -642,19 +650,16 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 		wac.setNamespace(getNamespace());
 		wac.addApplicationListener(new SourceFilteringListener(wac, new ContextRefreshListener()));
 
-		// the wac environment's #initPropertySources will be called in any case when
-		// the context is refreshed; do it eagerly here to ensure servlet property sources
-		// are in place for use in any post-processing or initialization that occurs
-		// below prior to #refresh
+		// The wac environment's #initPropertySources will be called in any case when the context
+		// is refreshed; do it eagerly here to ensure servlet property sources are in place for
+		// use in any post-processing or initialization that occurs below prior to #refresh
 		ConfigurableEnvironment env = wac.getEnvironment();
 		if (env instanceof ConfigurableWebEnvironment) {
-			((ConfigurableWebEnvironment)env).initPropertySources(getServletContext(), getServletConfig());
+			((ConfigurableWebEnvironment) env).initPropertySources(getServletContext(), getServletConfig());
 		}
 
 		postProcessWebApplicationContext(wac);
-
 		applyInitializers(wac);
-
 		wac.refresh();
 	}
 
@@ -673,43 +678,6 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 	}
 
 	/**
-	 * Delegate the WebApplicationContext before it is refreshed to any
-	 * {@link ApplicationContextInitializer} instances specified by the
-	 * "contextInitializerClasses" servlet init-param.
-	 * <p>See also {@link #postProcessWebApplicationContext}, which is designed to allow
-	 * subclasses (as opposed to end-users) to modify the application context, and is
-	 * called immediately after this method.
-	 * @param wac the configured WebApplicationContext (not refreshed yet)
-	 * @see #createWebApplicationContext
-	 * @see #postProcessWebApplicationContext
-	 * @see ConfigurableApplicationContext#refresh()
-	 */
-	@SuppressWarnings("unchecked")
-	protected void applyInitializers(ConfigurableApplicationContext wac) {
-		if (this.contextInitializerClasses != null) {
-			String[] initializerClassNames =
-					StringUtils.tokenizeToStringArray(this.contextInitializerClasses, INIT_PARAM_DELIMITERS);
-			for (String initializerClassName : initializerClassNames) {
-				ApplicationContextInitializer<ConfigurableApplicationContext> initializer;
-				try {
-					Class<?> initializerClass = ClassUtils.forName(initializerClassName, wac.getClassLoader());
-					initializer = BeanUtils.instantiateClass(initializerClass, ApplicationContextInitializer.class);
-				}
-				catch (Exception ex) {
-					throw new IllegalArgumentException(
-							String.format("Could not instantiate class [%s] specified via " +
-							"'contextInitializerClasses' init-param", initializerClassName), ex);
-				}
-				this.contextInitializers.add(initializer);
-			}
-		}
-		Collections.sort(this.contextInitializers, new AnnotationAwareOrderComparator());
-		for (ApplicationContextInitializer<ConfigurableApplicationContext> initializer : this.contextInitializers) {
-			initializer.initialize(wac);
-		}
-	}
-
-	/**
 	 * Post-process the given WebApplicationContext before it is refreshed
 	 * and activated as context for this servlet.
 	 * <p>The default implementation is empty. {@code refresh()} will
@@ -724,6 +692,60 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 	 * @see ConfigurableWebApplicationContext#refresh()
 	 */
 	protected void postProcessWebApplicationContext(ConfigurableWebApplicationContext wac) {
+	}
+
+	/**
+	 * Delegate the WebApplicationContext before it is refreshed to any
+	 * {@link ApplicationContextInitializer} instances specified by the
+	 * "contextInitializerClasses" servlet init-param.
+	 * <p>See also {@link #postProcessWebApplicationContext}, which is designed to allow
+	 * subclasses (as opposed to end-users) to modify the application context, and is
+	 * called immediately before this method.
+	 * @param wac the configured WebApplicationContext (not refreshed yet)
+	 * @see #createWebApplicationContext
+	 * @see #postProcessWebApplicationContext
+	 * @see ConfigurableApplicationContext#refresh()
+	 */
+	protected void applyInitializers(ConfigurableApplicationContext wac) {
+		String globalClassNames = getServletContext().getInitParameter(ContextLoader.GLOBAL_INITIALIZER_CLASSES_PARAM);
+		if (globalClassNames != null) {
+			for (String className : StringUtils.tokenizeToStringArray(globalClassNames, INIT_PARAM_DELIMITERS)) {
+				this.contextInitializers.add(loadInitializer(className, wac));
+			}
+		}
+
+		if (this.contextInitializerClasses != null) {
+			for (String className : StringUtils.tokenizeToStringArray(this.contextInitializerClasses, INIT_PARAM_DELIMITERS)) {
+				this.contextInitializers.add(loadInitializer(className, wac));
+			}
+		}
+
+		AnnotationAwareOrderComparator.sort(this.contextInitializers);
+		for (ApplicationContextInitializer<ConfigurableApplicationContext> initializer : this.contextInitializers) {
+			initializer.initialize(wac);
+		}
+	}
+
+	@SuppressWarnings("unchecked")
+	private ApplicationContextInitializer<ConfigurableApplicationContext> loadInitializer(
+			String className, ConfigurableApplicationContext wac) {
+		try {
+			Class<?> initializerClass = ClassUtils.forName(className, wac.getClassLoader());
+			Class<?> initializerContextClass =
+					GenericTypeResolver.resolveTypeArgument(initializerClass, ApplicationContextInitializer.class);
+			if (initializerContextClass != null) {
+				Assert.isAssignable(initializerContextClass, wac.getClass(), String.format(
+						"Could not add context initializer [%s] since its generic parameter [%s] " +
+						"is not assignable from the type of application context used by this " +
+						"framework servlet [%s]: ", initializerClass.getName(), initializerContextClass.getName(),
+						wac.getClass().getName()));
+			}
+			return BeanUtils.instantiateClass(initializerClass, ApplicationContextInitializer.class);
+		}
+		catch (Exception ex) {
+			throw new IllegalArgumentException(String.format("Could not instantiate class [%s] specified " +
+					"via 'contextInitializerClasses' init-param", className), ex);
+		}
 	}
 
 	/**
@@ -796,11 +818,9 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 	 */
 	@Override
 	public void destroy() {
-		if (this.webApplicationContextInjected) {
-			return;
-		}
 		getServletContext().log("Destroying Spring FrameworkServlet '" + getServletName() + "'");
-		if (this.webApplicationContext instanceof ConfigurableApplicationContext) {
+		// Only call close() on WebApplicationContext if locally managed...
+		if (this.webApplicationContext instanceof ConfigurableApplicationContext && !this.webApplicationContextInjected) {
 			((ConfigurableApplicationContext) this.webApplicationContext).close();
 		}
 	}
@@ -978,7 +998,7 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 				}
 			}
 
-			publishRequestHandledEvent(request, startTime, failureCause);
+			publishRequestHandledEvent(request, response, startTime, failureCause);
 		}
 	}
 
@@ -1008,7 +1028,7 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 			HttpServletRequest request, HttpServletResponse response, RequestAttributes previousAttributes) {
 
 		if (previousAttributes == null || previousAttributes instanceof ServletRequestAttributes) {
-			return new ServletRequestAttributes(request);
+			return new ServletRequestAttributes(request, response);
 		}
 		else {
 			return null;  // preserve the pre-bound RequestAttributes instance
@@ -1039,16 +1059,19 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 		}
 	}
 
-	private void publishRequestHandledEvent(HttpServletRequest request, long startTime, Throwable failureCause) {
+	private void publishRequestHandledEvent(
+			HttpServletRequest request, HttpServletResponse response, long startTime, Throwable failureCause) {
+
 		if (this.publishEvents) {
 			// Whether or not we succeeded, publish an event.
 			long processingTime = System.currentTimeMillis() - startTime;
+			int statusCode = (responseGetStatusAvailable ? response.getStatus() : -1);
 			this.webApplicationContext.publishEvent(
 					new ServletRequestHandledEvent(this,
 							request.getRequestURI(), request.getRemoteAddr(),
 							request.getMethod(), getServletConfig().getServletName(),
 							WebUtils.getSessionId(request), getUsernameForRequest(request),
-							processingTime, failureCause));
+							processingTime, failureCause, statusCode));
 		}
 	}
 
@@ -1065,31 +1088,6 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 		return (userPrincipal != null ? userPrincipal.getName() : null);
 	}
 
-	/**
-	 * Called by Spring via {@link ApplicationContextAware} to inject the current
-	 * application context. This method allows FrameworkServlets to be registered as
-	 * Spring Beans inside an existing {@link WebApplicationContext} rather than
-	 * {@link #findWebApplicationContext() finding} a
-	 * {@link org.springframework.web.context.ContextLoaderListener bootstrapped} context.
-	 *
-	 * <p>Primarily added to support use in embedded servlet containers, this method is not
-	 * intended to be called directly.
-	 *
-	 * @since 4.0
-	 */
-	@Override
-	public void setApplicationContext(ApplicationContext applicationContext)
-			throws BeansException {
-		if (this.webApplicationContext == null
-				&& applicationContext instanceof WebApplicationContext) {
-			if (logger.isDebugEnabled()) {
-				logger.debug("Using existing application context for "
-						+ ClassUtils.getShortName(getClass()));
-			}
-			this.webApplicationContext = (WebApplicationContext) applicationContext;
-			this.webApplicationContextInjected = true;
-		}
-	}
 
 	/**
 	 * Subclasses must implement this method to do the work of request handling,

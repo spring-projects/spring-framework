@@ -76,9 +76,9 @@ class Tokenizer {
 	List<Token> tokens = new ArrayList<Token>();
 
 
-	public Tokenizer(String inputdata) {
-		this.expressionString = inputdata;
-		this.toProcess = (inputdata + "\0").toCharArray();
+	public Tokenizer(String inputData) {
+		this.expressionString = inputData;
+		this.toProcess = (inputData + "\0").toCharArray();
 		this.max = this.toProcess.length;
 		this.pos = 0;
 		process();
@@ -266,11 +266,9 @@ class Tokenizer {
 						break;
 					case '\\':
 						throw new InternalParseException(
-								new SpelParseException(this.expressionString, this.pos,
-										SpelMessage.UNEXPECTED_ESCAPE_CHAR));
+								new SpelParseException(this.expressionString, this.pos, SpelMessage.UNEXPECTED_ESCAPE_CHAR));
 					default:
-						throw new IllegalStateException("Cannot handle ("
-								+ Integer.valueOf(ch) + ") '" + ch + "'");
+						throw new IllegalStateException("Cannot handle (" + Integer.valueOf(ch) + ") '" + ch + "'");
 				}
 			}
 		}
@@ -297,8 +295,8 @@ class Tokenizer {
 				}
 			}
 			if (ch == 0) {
-				throw new InternalParseException(new SpelParseException(this.expressionString,
-						start, SpelMessage.NON_TERMINATING_QUOTED_STRING));
+				throw new InternalParseException(new SpelParseException(this.expressionString, start,
+						SpelMessage.NON_TERMINATING_QUOTED_STRING));
 			}
 		}
 		this.pos++;
@@ -595,4 +593,5 @@ class Tokenizer {
 		}
 		return (FLAGS[ch] & IS_HEXDIGIT) != 0;
 	}
+
 }

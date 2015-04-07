@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,6 @@ import java.io.Writer;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.GregorianCalendar;
-
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletResponse;
 
@@ -50,6 +49,7 @@ import static org.junit.Assert.*;
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
  */
+@SuppressWarnings("deprecation")
 public class UriTemplateServletAnnotationControllerTests {
 
 	private DispatcherServlet servlet;

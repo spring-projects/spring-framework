@@ -20,9 +20,9 @@ import javax.servlet.jsp.PageContext;
 import javax.servlet.jsp.tagext.Tag;
 import javax.servlet.jsp.tagext.TagSupport;
 
-import static org.junit.Assert.*;
 import org.junit.Test;
 
+import static org.junit.Assert.*;
 
 /**
  * Unit tests for the {@link TagUtils} class.

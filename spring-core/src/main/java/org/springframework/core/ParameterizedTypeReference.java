@@ -61,7 +61,7 @@ public abstract class ParameterizedTypeReference<T> {
 	@Override
 	public boolean equals(Object obj) {
 		return (this == obj || (obj instanceof ParameterizedTypeReference &&
-				this.type.equals(((ParameterizedTypeReference) obj).type)));
+				this.type.equals(((ParameterizedTypeReference<?>) obj).type)));
 	}
 
 	@Override

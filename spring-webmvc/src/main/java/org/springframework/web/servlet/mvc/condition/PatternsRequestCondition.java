@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,6 @@ import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
-
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.util.AntPathMatcher;
@@ -54,6 +53,7 @@ public final class PatternsRequestCondition extends AbstractRequestCondition<Pat
 
 	private final List<String> fileExtensions = new ArrayList<String>();
 
+
 	/**
 	 * Creates a new instance with the given URL patterns.
 	 * Each pattern that is not empty and does not start with "/" is prepended with "/".
@@ -66,7 +66,6 @@ public final class PatternsRequestCondition extends AbstractRequestCondition<Pat
 	/**
 	 * Additional constructor with flags for using suffix pattern (.*) and
 	 * trailing slash matches.
-	 *
 	 * @param patterns the URL patterns to use; if 0, the condition will match to every request.
 	 * @param urlPathHelper for determining the lookup path of a request
 	 * @param pathMatcher for path matching with patterns
@@ -98,7 +97,6 @@ public final class PatternsRequestCondition extends AbstractRequestCondition<Pat
 
 	/**
 	 * Private constructor accepting a collection of patterns.
-	 * @param fileExtensionResolver
 	 */
 	private PatternsRequestCondition(Collection<String> patterns, UrlPathHelper urlPathHelper,
 			PathMatcher pathMatcher, boolean useSuffixPatternMatch, boolean useTrailingSlashMatch,
@@ -119,8 +117,9 @@ public final class PatternsRequestCondition extends AbstractRequestCondition<Pat
 		}
 	}
 
+
 	private static List<String> asList(String... patterns) {
-		return patterns != null ? Arrays.asList(patterns) : Collections.<String>emptyList();
+		return (patterns != null ? Arrays.asList(patterns) : Collections.<String>emptyList());
 	}
 
 	private static Set<String> prependLeadingSlash(Collection<String> patterns) {
@@ -155,10 +154,10 @@ public final class PatternsRequestCondition extends AbstractRequestCondition<Pat
 	 * Returns a new instance with URL patterns from the current instance ("this") and
 	 * the "other" instance as follows:
 	 * <ul>
-	 * 	<li>If there are patterns in both instances, combine the patterns in "this" with
-	 * 		the patterns in "other" using {@link PathMatcher#combine(String, String)}.
-	 * 	<li>If only one instance has patterns, use them.
-	 *  <li>If neither instance has patterns, use an empty String (i.e. "").
+	 * <li>If there are patterns in both instances, combine the patterns in "this" with
+	 * the patterns in "other" using {@link PathMatcher#combine(String, String)}.
+	 * <li>If only one instance has patterns, use them.
+	 * <li>If neither instance has patterns, use an empty String (i.e. "").
 	 * </ul>
 	 */
 	@Override
@@ -188,40 +187,53 @@ public final class PatternsRequestCondition extends AbstractRequestCondition<Pat
 	 * Checks if any of the patterns match the given request and returns an instance
 	 * that is guaranteed to contain matching patterns, sorted via
 	 * {@link PathMatcher#getPatternComparator(String)}.
-	 *
 	 * <p>A matching pattern is obtained by making checks in the following order:
 	 * <ul>
-	 * 	<li>Direct match
-	 * 	<li>Pattern match with ".*" appended if the pattern doesn't already contain a "."
-	 * 	<li>Pattern match
-	 * 	<li>Pattern match with "/" appended if the pattern doesn't already end in "/"
+	 * <li>Direct match
+	 * <li>Pattern match with ".*" appended if the pattern doesn't already contain a "."
+	 * <li>Pattern match
+	 * <li>Pattern match with "/" appended if the pattern doesn't already end in "/"
 	 * </ul>
-	 *
 	 * @param request the current request
-	 *
 	 * @return the same instance if the condition contains no patterns;
-	 * 		or a new condition with sorted matching patterns;
-	 * 		or {@code null} if no patterns match.
+	 * or a new condition with sorted matching patterns;
+	 * or {@code null} if no patterns match.
 	 */
 	@Override
 	public PatternsRequestCondition getMatchingCondition(HttpServletRequest request) {
+
 		if (this.patterns.isEmpty()) {
 			return this;
 		}
 
 		String lookupPath = this.pathHelper.getLookupPathForRequest(request);
+		List<String> matches = getMatchingPatterns(lookupPath);
 
+		return matches.isEmpty() ? null :
+			new PatternsRequestCondition(matches, this.pathHelper, this.pathMatcher, this.useSuffixPatternMatch,
+					this.useTrailingSlashMatch, this.fileExtensions);
+	}
+
+	/**
+	 * Find the patterns matching the given lookup path. Invoking this method should
+	 * yield results equivalent to those of calling
+	 * {@link #getMatchingCondition(javax.servlet.http.HttpServletRequest)}.
+	 * This method is provided as an alternative to be used if no request is available
+	 * (e.g. introspection, tooling, etc).
+	 *
+	 * @param lookupPath the lookup path to match to existing patterns
+	 * @return a collection of matching patterns sorted with the closest match at the top
+	 */
+	public List<String> getMatchingPatterns(String lookupPath) {
 		List<String> matches = new ArrayList<String>();
-		for (String pattern : patterns) {
+		for (String pattern : this.patterns) {
 			String match = getMatchingPattern(pattern, lookupPath);
 			if (match != null) {
 				matches.add(match);
 			}
 		}
 		Collections.sort(matches, this.pathMatcher.getPatternComparator(lookupPath));
-		return matches.isEmpty() ? null :
-			new PatternsRequestCondition(matches, this.pathHelper, this.pathMatcher, this.useSuffixPatternMatch,
-					this.useTrailingSlashMatch, this.fileExtensions);
+		return matches;
 	}
 
 	private String getMatchingPattern(String pattern, String lookupPath) {
@@ -260,7 +272,6 @@ public final class PatternsRequestCondition extends AbstractRequestCondition<Pat
 	 * {@link PathMatcher#getPatternComparator(String)}. If all compared
 	 * patterns match equally, but one instance has more patterns, it is
 	 * considered a closer match.
-	 *
 	 * <p>It is assumed that both instances have been obtained via
 	 * {@link #getMatchingCondition(HttpServletRequest)} to ensure they
 	 * contain only patterns that match the request and are sorted with
@@ -270,8 +281,7 @@ public final class PatternsRequestCondition extends AbstractRequestCondition<Pat
 	public int compareTo(PatternsRequestCondition other, HttpServletRequest request) {
 		String lookupPath = this.pathHelper.getLookupPathForRequest(request);
 		Comparator<String> patternComparator = this.pathMatcher.getPatternComparator(lookupPath);
-
-		Iterator<String> iterator = patterns.iterator();
+		Iterator<String> iterator = this.patterns.iterator();
 		Iterator<String> iteratorOther = other.patterns.iterator();
 		while (iterator.hasNext() && iteratorOther.hasNext()) {
 			int result = patternComparator.compare(iterator.next(), iteratorOther.next());

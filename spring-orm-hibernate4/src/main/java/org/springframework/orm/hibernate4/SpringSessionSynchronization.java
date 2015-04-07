@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,19 +33,27 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * @author Juergen Hoeller
  * @since 3.1
  */
-class SpringSessionSynchronization implements TransactionSynchronization, Ordered {
+public class SpringSessionSynchronization implements TransactionSynchronization, Ordered {
 
 	private final SessionHolder sessionHolder;
 
 	private final SessionFactory sessionFactory;
 
+	private final boolean newSession;
+
 	private boolean holderActive = true;
 
 
 	public SpringSessionSynchronization(SessionHolder sessionHolder, SessionFactory sessionFactory) {
+		this(sessionHolder, sessionFactory, false);
+	}
+
+	public SpringSessionSynchronization(SessionHolder sessionHolder, SessionFactory sessionFactory, boolean newSession) {
 		this.sessionHolder = sessionHolder;
 		this.sessionFactory = sessionFactory;
+		this.newSession = newSession;
 	}
+
 
 	private Session getCurrentSession() {
 		return this.sessionHolder.getSession();
@@ -90,7 +98,7 @@ class SpringSessionSynchronization implements TransactionSynchronization, Ordere
 			Session session = getCurrentSession();
 			// Read-write transaction -> flush the Hibernate Session.
 			// Further check: only flush when not FlushMode.MANUAL.
-			if (!FlushMode.isManualFlushMode(session.getFlushMode())) {
+			if (!session.getFlushMode().equals(FlushMode.MANUAL)) {
 				try {
 					SessionFactoryUtils.logger.debug("Flushing Hibernate Session on transaction synchronization");
 					session.flush();
@@ -111,6 +119,12 @@ class SpringSessionSynchronization implements TransactionSynchronization, Ordere
 		}
 		// Eagerly disconnect the Session here, to make release mode "on_close" work nicely.
 		session.disconnect();
+
+		// Unbind at this point if it's a new Session...
+		if (this.newSession) {
+			TransactionSynchronizationManager.unbindResource(this.sessionFactory);
+			this.holderActive = false;
+		}
 	}
 
 	@Override
@@ -128,6 +142,10 @@ class SpringSessionSynchronization implements TransactionSynchronization, Ordere
 		}
 		finally {
 			this.sessionHolder.setSynchronizedWithTransaction(false);
+			// Call close() at this point if it's a new Session...
+			if (this.newSession) {
+				SessionFactoryUtils.closeSession(this.sessionHolder.getSession());
+			}
 		}
 	}
 

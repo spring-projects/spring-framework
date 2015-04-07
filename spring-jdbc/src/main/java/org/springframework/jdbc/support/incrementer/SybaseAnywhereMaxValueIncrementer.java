@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,7 +31,7 @@ import javax.sql.DataSource;
  *
  * <p>Example:
  *
- * <pre class="code"> create table tab (id int not null primary key, text varchar(100))
+ * <pre class="code">create table tab (id int not null primary key, text varchar(100))
  * create table tab_sequence (id bigint identity)
  * insert into tab_sequence values(DEFAULT)</pre>
  *
@@ -40,7 +40,7 @@ import javax.sql.DataSource;
  * is rolled back, the unused values will never be served. The maximum hole size in
  * numbering is consequently the value of cacheSize.
  *
- * <b>HINT:</b>  Since Sybase Anywhere supports the JDBC 3.0 {@code getGeneratedKeys} method,
+ * <b>HINT:</b> Since Sybase Anywhere supports the JDBC 3.0 {@code getGeneratedKeys} method,
  * it is recommended to use IDENTITY columns directly in the tables and then using a
  * {@link org.springframework.jdbc.core.simple.SimpleJdbcInsert} or utilizing
  * a {@link org.springframework.jdbc.support.KeyHolder} when calling the with the
@@ -72,6 +72,7 @@ public class SybaseAnywhereMaxValueIncrementer extends SybaseMaxValueIncrementer
 	public SybaseAnywhereMaxValueIncrementer(DataSource dataSource, String incrementerName, String columnName) {
 		super(dataSource, incrementerName, columnName);
 	}
+
 
 	@Override
 	protected String getIncrementStatement() {

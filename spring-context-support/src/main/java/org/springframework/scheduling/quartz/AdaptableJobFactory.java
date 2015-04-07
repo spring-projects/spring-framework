@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,21 +16,17 @@
 
 package org.springframework.scheduling.quartz;
 
-import java.lang.reflect.Method;
-
 import org.quartz.Job;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
 import org.quartz.spi.JobFactory;
 import org.quartz.spi.TriggerFiredBundle;
 
-import org.springframework.util.ReflectionUtils;
-
 /**
  * JobFactory implementation that supports {@link java.lang.Runnable}
  * objects as well as standard Quartz {@link org.quartz.Job} instances.
  *
- * <p>Compatible with Quartz 1.8 as well as Quartz 2.0-2.2, as of Spring 4.0.
+ * <p>Compatible with Quartz 2.1.4 and higher, as of Spring 4.1.
  *
  * @author Juergen Hoeller
  * @since 2.0
@@ -39,19 +35,8 @@ import org.springframework.util.ReflectionUtils;
  */
 public class AdaptableJobFactory implements JobFactory {
 
-	/**
-	 * Quartz 2.0 version of newJob: simply delegates to old newJob variant.
-	 * @see #newJob(org.quartz.spi.TriggerFiredBundle)
-	 */
-	public Job newJob(TriggerFiredBundle bundle, Scheduler scheduler) throws SchedulerException {
-		return newJob(bundle);
-	}
-
-	/**
-	 * Quartz 1.x version of newJob: contains actual implementation code.
-	 */
 	@Override
-	public Job newJob(TriggerFiredBundle bundle) throws SchedulerException {
+	public Job newJob(TriggerFiredBundle bundle, Scheduler scheduler) throws SchedulerException {
 		try {
 			Object jobObject = createJobInstance(bundle);
 			return adaptJob(jobObject);
@@ -70,12 +55,7 @@ public class AdaptableJobFactory implements JobFactory {
 	 * @throws Exception if job instantiation failed
 	 */
 	protected Object createJobInstance(TriggerFiredBundle bundle) throws Exception {
-		// Reflectively adapting to differences between Quartz 1.x and Quartz 2.0...
-		Method getJobDetail = bundle.getClass().getMethod("getJobDetail");
-		Object jobDetail = ReflectionUtils.invokeMethod(getJobDetail, bundle);
-		Method getJobClass = jobDetail.getClass().getMethod("getJobClass");
-		Class jobClass = (Class) ReflectionUtils.invokeMethod(getJobClass, jobDetail);
-		return jobClass.newInstance();
+		return bundle.getJobDetail().getJobClass().newInstance();
 	}
 
 	/**

@@ -22,6 +22,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 import org.junit.Test;
+
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.beans.factory.BeanFactory;
@@ -47,7 +48,6 @@ public class ImportBeanDefinitionRegistrarTests {
 
 	@Test
 	public void shouldInvokeAwareMethodsInImportBeanDefinitionRegistrar() {
-
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(Config.class);
 		context.getBean(MessageSource.class);
 
@@ -57,18 +57,19 @@ public class ImportBeanDefinitionRegistrarTests {
 		assertThat(SampleRegistrar.environment, is((Environment) context.getEnvironment()));
 	}
 
+
 	@Sample
 	@Configuration
 	static class Config {
-
 	}
+
 
 	@Target(ElementType.TYPE)
 	@Retention(RetentionPolicy.RUNTIME)
 	@Import(SampleRegistrar.class)
 	public static @interface Sample {
-
 	}
+
 
 	static class SampleRegistrar implements ImportBeanDefinitionRegistrar, BeanClassLoaderAware, ResourceLoaderAware,
 			BeanFactoryAware, EnvironmentAware {
@@ -102,4 +103,5 @@ public class ImportBeanDefinitionRegistrarTests {
 		public void registerBeanDefinitions(AnnotationMetadata importingClassMetadata, BeanDefinitionRegistry registry) {
 		}
 	}
+
 }

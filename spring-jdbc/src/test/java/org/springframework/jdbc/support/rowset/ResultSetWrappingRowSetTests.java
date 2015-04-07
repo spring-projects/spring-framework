@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ import java.sql.Timestamp;
 
 import org.junit.Before;
 import org.junit.Test;
+
 import org.springframework.jdbc.InvalidResultSetAccessException;
 
 import static org.junit.Assert.*;
@@ -50,21 +51,21 @@ public class ResultSetWrappingRowSetTests {
 	public void testGetBigDecimalInt() throws Exception {
 		Method rset = ResultSet.class.getDeclaredMethod("getBigDecimal", new Class[] {int.class});
 		Method rowset = ResultSetWrappingSqlRowSet.class.getDeclaredMethod("getBigDecimal", new Class[] {int.class});
-		doTest(rset, rowset, new Integer(1), BigDecimal.valueOf(1));
+		doTest(rset, rowset, 1, BigDecimal.ONE);
 	}
 
 	@Test
 	public void testGetBigDecimalString() throws Exception {
 		Method rset = ResultSet.class.getDeclaredMethod("getBigDecimal", new Class[] {int.class});
 		Method rowset = ResultSetWrappingSqlRowSet.class.getDeclaredMethod("getBigDecimal", new Class[] {String.class});
-		doTest(rset, rowset, "test", BigDecimal.valueOf(1));
+		doTest(rset, rowset, "test", BigDecimal.ONE);
 	}
 
 	@Test
 	public void testGetStringInt() throws Exception {
 		Method rset = ResultSet.class.getDeclaredMethod("getString", new Class[] {int.class});
 		Method rowset = ResultSetWrappingSqlRowSet.class.getDeclaredMethod("getString", new Class[] {int.class});
-		doTest(rset, rowset, new Integer(1), "test");
+		doTest(rset, rowset, 1, "test");
 	}
 
 	@Test
@@ -78,7 +79,7 @@ public class ResultSetWrappingRowSetTests {
 	public void testGetTimestampInt() throws Exception {
 		Method rset = ResultSet.class.getDeclaredMethod("getTimestamp", new Class[] {int.class});
 		Method rowset = ResultSetWrappingSqlRowSet.class.getDeclaredMethod("getTimestamp", new Class[] {int.class});
-		doTest(rset, rowset, new Integer(1), new Timestamp(1234l));
+		doTest(rset, rowset, 1, new Timestamp(1234l));
 	}
 
 	@Test
@@ -92,7 +93,7 @@ public class ResultSetWrappingRowSetTests {
 	public void testGetDateInt() throws Exception {
 		Method rset = ResultSet.class.getDeclaredMethod("getDate", new Class[] {int.class});
 		Method rowset = ResultSetWrappingSqlRowSet.class.getDeclaredMethod("getDate", new Class[] {int.class});
-		doTest(rset, rowset, new Integer(1), new Date(1234l));
+		doTest(rset, rowset, 1, new Date(1234l));
 	}
 
 	@Test
@@ -106,7 +107,7 @@ public class ResultSetWrappingRowSetTests {
 	public void testGetTimeInt() throws Exception {
 		Method rset = ResultSet.class.getDeclaredMethod("getTime", new Class[] {int.class});
 		Method rowset = ResultSetWrappingSqlRowSet.class.getDeclaredMethod("getTime", new Class[] {int.class});
-		doTest(rset, rowset, new Integer(1), new Time(1234l));
+		doTest(rset, rowset, 1, new Time(1234l));
 	}
 
 	@Test
@@ -120,7 +121,7 @@ public class ResultSetWrappingRowSetTests {
 	public void testGetObjectInt() throws Exception {
 		Method rset = ResultSet.class.getDeclaredMethod("getObject", new Class[] {int.class});
 		Method rowset = ResultSetWrappingSqlRowSet.class.getDeclaredMethod("getObject", new Class[] {int.class});
-		doTest(rset, rowset, new Integer(1), new Object());
+		doTest(rset, rowset, 1, new Object());
 	}
 
 	@Test
@@ -134,70 +135,70 @@ public class ResultSetWrappingRowSetTests {
 	public void testGetIntInt() throws Exception {
 		Method rset = ResultSet.class.getDeclaredMethod("getInt", new Class[] {int.class});
 		Method rowset = ResultSetWrappingSqlRowSet.class.getDeclaredMethod("getInt", new Class[] {int.class});
-		doTest(rset, rowset, new Integer(1), new Integer(1));
+		doTest(rset, rowset, 1, 1);
 	}
 
 	@Test
 	public void testGetIntString() throws Exception {
 		Method rset = ResultSet.class.getDeclaredMethod("getInt", new Class[] {int.class});
 		Method rowset = ResultSetWrappingSqlRowSet.class.getDeclaredMethod("getInt", new Class[] {String.class});
-		doTest(rset, rowset, "test", new Integer(1));
+		doTest(rset, rowset, "test", 1);
 	}
 
 	@Test
 	public void testGetFloatInt() throws Exception {
 		Method rset = ResultSet.class.getDeclaredMethod("getFloat", new Class[] {int.class});
 		Method rowset = ResultSetWrappingSqlRowSet.class.getDeclaredMethod("getFloat", new Class[] {int.class});
-		doTest(rset, rowset, new Integer(1), new Float(1));
+		doTest(rset, rowset, 1, 1.0f);
 	}
 
 	@Test
 	public void testGetFloatString() throws Exception {
 		Method rset = ResultSet.class.getDeclaredMethod("getFloat", new Class[] {int.class});
 		Method rowset = ResultSetWrappingSqlRowSet.class.getDeclaredMethod("getFloat", new Class[] {String.class});
-		doTest(rset, rowset, "test", new Float(1));
+		doTest(rset, rowset, "test", 1.0f);
 	}
 
 	@Test
 	public void testGetDoubleInt() throws Exception {
 		Method rset = ResultSet.class.getDeclaredMethod("getDouble", new Class[] {int.class});
 		Method rowset = ResultSetWrappingSqlRowSet.class.getDeclaredMethod("getDouble", new Class[] {int.class});
-		doTest(rset, rowset, new Integer(1), new Double(1));
+		doTest(rset, rowset, 1, 1.0d);
 	}
 
 	@Test
 	public void testGetDoubleString() throws Exception {
 		Method rset = ResultSet.class.getDeclaredMethod("getDouble", new Class[] {int.class});
 		Method rowset = ResultSetWrappingSqlRowSet.class.getDeclaredMethod("getDouble", new Class[] {String.class});
-		doTest(rset, rowset, "test", new Double(1));
+		doTest(rset, rowset, "test", 1.0d);
 	}
 
 	@Test
 	public void testGetLongInt() throws Exception {
 		Method rset = ResultSet.class.getDeclaredMethod("getLong", new Class[] {int.class});
 		Method rowset = ResultSetWrappingSqlRowSet.class.getDeclaredMethod("getLong", new Class[] {int.class});
-		doTest(rset, rowset, new Integer(1), new Long(1));
+		doTest(rset, rowset, 1, 1L);
 	}
 
 	@Test
 	public void testGetLongString() throws Exception {
 		Method rset = ResultSet.class.getDeclaredMethod("getLong", new Class[] {int.class});
 		Method rowset = ResultSetWrappingSqlRowSet.class.getDeclaredMethod("getLong", new Class[] {String.class});
-		doTest(rset, rowset, "test", new Long(1));
+		doTest(rset, rowset, "test", 1L);
 	}
 
 	@Test
 	public void testGetBooleanInt() throws Exception {
 		Method rset = ResultSet.class.getDeclaredMethod("getBoolean", new Class[] {int.class});
 		Method rowset = ResultSetWrappingSqlRowSet.class.getDeclaredMethod("getBoolean", new Class[] {int.class});
-		doTest(rset, rowset, new Integer(1), new Boolean(true));
+		doTest(rset, rowset, 1, true);
 	}
 
 	@Test
 	public void testGetBooleanString() throws Exception {
 		Method rset = ResultSet.class.getDeclaredMethod("getBoolean", new Class[] {int.class});
 		Method rowset = ResultSetWrappingSqlRowSet.class.getDeclaredMethod("getBoolean", new Class[] {String.class});
-		doTest(rset, rowset, "test", new Boolean(true));
+		doTest(rset, rowset, "test", true);
 	}
 
 	private void doTest(Method rsetMethod, Method rowsetMethod, Object arg, Object ret) throws Exception {

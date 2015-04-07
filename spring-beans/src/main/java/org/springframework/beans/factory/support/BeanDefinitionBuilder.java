@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,7 +45,7 @@ public class BeanDefinitionBuilder {
 	 * Create a new {@code BeanDefinitionBuilder} used to construct a {@link GenericBeanDefinition}.
 	 * @param beanClass the {@code Class} of the bean that the definition is being created for
 	 */
-	public static BeanDefinitionBuilder genericBeanDefinition(Class beanClass) {
+	public static BeanDefinitionBuilder genericBeanDefinition(Class<?> beanClass) {
 		BeanDefinitionBuilder builder = new BeanDefinitionBuilder();
 		builder.beanDefinition = new GenericBeanDefinition();
 		builder.beanDefinition.setBeanClass(beanClass);
@@ -67,7 +67,7 @@ public class BeanDefinitionBuilder {
 	 * Create a new {@code BeanDefinitionBuilder} used to construct a {@link RootBeanDefinition}.
 	 * @param beanClass the {@code Class} of the bean that the definition is being created for
 	 */
-	public static BeanDefinitionBuilder rootBeanDefinition(Class beanClass) {
+	public static BeanDefinitionBuilder rootBeanDefinition(Class<?> beanClass) {
 		return rootBeanDefinition(beanClass, null);
 	}
 
@@ -76,7 +76,7 @@ public class BeanDefinitionBuilder {
 	 * @param beanClass the {@code Class} of the bean that the definition is being created for
 	 * @param factoryMethodName the name of the method to use to construct the bean instance
 	 */
-	public static BeanDefinitionBuilder rootBeanDefinition(Class beanClass, String factoryMethodName) {
+	public static BeanDefinitionBuilder rootBeanDefinition(Class<?> beanClass, String factoryMethodName) {
 		BeanDefinitionBuilder builder = new BeanDefinitionBuilder();
 		builder.beanDefinition = new RootBeanDefinition();
 		builder.beanDefinition.setBeanClass(beanClass);
@@ -164,16 +164,6 @@ public class BeanDefinitionBuilder {
 	public BeanDefinitionBuilder setFactoryMethod(String factoryMethod) {
 		this.beanDefinition.setFactoryMethodName(factoryMethod);
 		return this;
-	}
-
-	/**
-	 * Add an indexed constructor arg value. The current index is tracked internally
-	 * and all additions are at the present point.
-	 * @deprecated since Spring 2.5, in favor of {@link #addConstructorArgValue}
-	 */
-	@Deprecated
-	public BeanDefinitionBuilder addConstructorArg(Object value) {
-		return addConstructorArgValue(value);
 	}
 
 	/**
@@ -279,7 +269,7 @@ public class BeanDefinitionBuilder {
 	 */
 	public BeanDefinitionBuilder addDependsOn(String beanName) {
 		if (this.beanDefinition.getDependsOn() == null) {
-			this.beanDefinition.setDependsOn(new String[] {beanName});
+			this.beanDefinition.setDependsOn(beanName);
 		}
 		else {
 			String[] added = ObjectUtils.addObjectToArray(this.beanDefinition.getDependsOn(), beanName);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,15 +21,14 @@ import javax.servlet.http.HttpServletRequest;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 /**
- * The contract for request conditions.
+ * The contract for request conditions in Spring MVC's mapping infrastructure.
  *
  * <p>Request conditions can be combined via {@link #combine(Object)}, matched to
  * a request via {@link #getMatchingCondition(HttpServletRequest)}, and compared
  * to each other via {@link #compareTo(Object, HttpServletRequest)} to determine
  * which matches a request more closely.
  *
- * @param <T> The type of objects that this RequestCondition can be combined
- * with compared to.
+ * @param <T> the type of objects that this RequestCondition can be combined with and compared to
  *
  * @author Rossen Stoyanchev
  * @author Arjen Poutsma
@@ -41,10 +40,9 @@ public interface RequestCondition<T> {
 	 * Defines the rules for combining this condition (i.e. the current instance)
 	 * with another condition. For example combining type- and method-level
 	 * {@link RequestMapping} conditions.
-	 *
 	 * @param other the condition to combine with.
 	 * @return a request condition instance that is the result of combining
-	 * 	the two condition instances.
+	 * the two condition instances.
 	 */
 	T combine(T other);
 
@@ -54,9 +52,8 @@ public interface RequestCondition<T> {
 	 * current request. For example a condition with URL patterns might
 	 * return a new condition that contains matching patterns sorted
 	 * with best matching patterns on top.
-	 *
 	 * @return a condition instance in case of a match;
-	 * 		or {@code null} if there is no match.
+	 * or {@code null} if there is no match
 	 */
 	T getMatchingCondition(HttpServletRequest request);
 

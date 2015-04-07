@@ -92,7 +92,7 @@ public class ArgumentConvertingMethodInvoker extends MethodInvoker {
 	 * @see #setTypeConverter
 	 * @see org.springframework.beans.PropertyEditorRegistry#registerCustomEditor
 	 */
-	public void registerCustomEditor(Class requiredType, PropertyEditor propertyEditor) {
+	public void registerCustomEditor(Class<?> requiredType, PropertyEditor propertyEditor) {
 		TypeConverter converter = getTypeConverter();
 		if (!(converter instanceof PropertyEditorRegistry)) {
 			throw new IllegalStateException(
@@ -139,7 +139,7 @@ public class ArgumentConvertingMethodInvoker extends MethodInvoker {
 			for (Method candidate : candidates) {
 				if (candidate.getName().equals(targetMethod)) {
 					// Check if the inspected method has the correct number of parameters.
-					Class[] paramTypes = candidate.getParameterTypes();
+					Class<?>[] paramTypes = candidate.getParameterTypes();
 					if (paramTypes.length == argCount) {
 						Object[] convertedArguments = new Object[argCount];
 						boolean match = true;

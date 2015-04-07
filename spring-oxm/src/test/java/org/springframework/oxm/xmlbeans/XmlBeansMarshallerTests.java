@@ -20,14 +20,14 @@ import java.io.ByteArrayOutputStream;
 import javax.xml.transform.stream.StreamResult;
 
 import org.apache.xmlbeans.XmlObject;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 
 import org.springframework.oxm.AbstractMarshallerTests;
 import org.springframework.oxm.Marshaller;
 import org.springframework.samples.flight.FlightType;
 import org.springframework.samples.flight.FlightsDocument;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Arjen Poutsma

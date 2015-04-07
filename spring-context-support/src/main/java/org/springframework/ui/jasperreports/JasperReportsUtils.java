@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,15 +23,12 @@ import java.util.Map;
 
 import net.sf.jasperreports.engine.JRDataSource;
 import net.sf.jasperreports.engine.JRException;
-import net.sf.jasperreports.engine.JRExporter;
-import net.sf.jasperreports.engine.JRExporterParameter;
 import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.JasperReport;
 import net.sf.jasperreports.engine.data.JRBeanArrayDataSource;
 import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
 import net.sf.jasperreports.engine.export.JRCsvExporter;
-import net.sf.jasperreports.engine.export.JRHtmlExporter;
 import net.sf.jasperreports.engine.export.JRPdfExporter;
 import net.sf.jasperreports.engine.export.JRXlsExporter;
 
@@ -39,10 +36,15 @@ import net.sf.jasperreports.engine.export.JRXlsExporter;
  * Utility methods for working with JasperReports. Provides a set of convenience
  * methods for generating reports in a CSV, HTML, PDF and XLS formats.
  *
+ * <p><b>This class is compatible with classic JasperReports releases back until 2.x.</b>
+ * As a consequence, it keeps using the {@link net.sf.jasperreports.engine.JRExporter}
+ * API which has been deprecated in early 2014.
+ *
  * @author Rob Harrop
  * @author Juergen Hoeller
  * @since 1.1.3
  */
+@SuppressWarnings({"deprecation", "rawtypes"})
 public abstract class JasperReportsUtils {
 
 	/**
@@ -63,7 +65,7 @@ public abstract class JasperReportsUtils {
 			return (JRDataSource) value;
 		}
 		else if (value instanceof Collection) {
-			return new JRBeanCollectionDataSource((Collection) value);
+			return new JRBeanCollectionDataSource((Collection<?>) value);
 		}
 		else if (value instanceof Object[]) {
 			return new JRBeanArrayDataSource((Object[]) value);
@@ -84,11 +86,11 @@ public abstract class JasperReportsUtils {
 	 * @param writer the {@code Writer} to write the result to
 	 * @throws JRException if rendering failed
 	 */
-	public static void render(JRExporter exporter, JasperPrint print, Writer writer)
+	public static void render(net.sf.jasperreports.engine.JRExporter exporter, JasperPrint print, Writer writer)
 			throws JRException {
 
-		exporter.setParameter(JRExporterParameter.JASPER_PRINT, print);
-		exporter.setParameter(JRExporterParameter.OUTPUT_WRITER, writer);
+		exporter.setParameter(net.sf.jasperreports.engine.JRExporterParameter.JASPER_PRINT, print);
+		exporter.setParameter(net.sf.jasperreports.engine.JRExporterParameter.OUTPUT_WRITER, writer);
 		exporter.exportReport();
 	}
 
@@ -103,11 +105,11 @@ public abstract class JasperReportsUtils {
 	 * @param outputStream the {@code OutputStream} to write the result to
 	 * @throws JRException if rendering failed
 	 */
-	public static void render(JRExporter exporter, JasperPrint print, OutputStream outputStream)
-			throws JRException {
+	public static void render(net.sf.jasperreports.engine.JRExporter exporter, JasperPrint print,
+			OutputStream outputStream) throws JRException {
 
-		exporter.setParameter(JRExporterParameter.JASPER_PRINT, print);
-		exporter.setParameter(JRExporterParameter.OUTPUT_STREAM, outputStream);
+		exporter.setParameter(net.sf.jasperreports.engine.JRExporterParameter.JASPER_PRINT, print);
+		exporter.setParameter(net.sf.jasperreports.engine.JRExporterParameter.OUTPUT_STREAM, outputStream);
 		exporter.exportReport();
 	}
 
@@ -137,12 +139,13 @@ public abstract class JasperReportsUtils {
 	 * @param writer the {@code Writer} to write the rendered report to
 	 * @param reportData a {@code JRDataSource}, {@code java.util.Collection} or object array
 	 * (converted accordingly), representing the report data to read fields from
-	 * @param exporterParameters a {@link Map} of {@link JRExporterParameter exporter parameters}
+	 * @param exporterParameters a {@link Map} of {@code JRExporterParameter exporter parameters}
 	 * @throws JRException if rendering failed
 	 * @see #convertReportData
 	 */
 	public static void renderAsCsv(JasperReport report, Map<String, Object> parameters, Object reportData,
-			Writer writer, Map<JRExporterParameter, Object> exporterParameters) throws JRException {
+			Writer writer, Map<net.sf.jasperreports.engine.JRExporterParameter, Object> exporterParameters)
+			throws JRException {
 
 		JasperPrint print = JasperFillManager.fillReport(report, parameters, convertReportData(reportData));
 		JRCsvExporter exporter = new JRCsvExporter();
@@ -165,7 +168,7 @@ public abstract class JasperReportsUtils {
 			Writer writer) throws JRException {
 
 		JasperPrint print = JasperFillManager.fillReport(report, parameters, convertReportData(reportData));
-		render(new JRHtmlExporter(), print, writer);
+		render(new net.sf.jasperreports.engine.export.JRHtmlExporter(), print, writer);
 	}
 
 	/**
@@ -176,15 +179,16 @@ public abstract class JasperReportsUtils {
 	 * @param writer the {@code Writer} to write the rendered report to
 	 * @param reportData a {@code JRDataSource}, {@code java.util.Collection} or object array
 	 * (converted accordingly), representing the report data to read fields from
-	 * @param exporterParameters a {@link Map} of {@link JRExporterParameter exporter parameters}
+	 * @param exporterParameters a {@link Map} of {@code JRExporterParameter exporter parameters}
 	 * @throws JRException if rendering failed
 	 * @see #convertReportData
 	 */
 	public static void renderAsHtml(JasperReport report, Map<String, Object> parameters, Object reportData,
-			Writer writer, Map<JRExporterParameter, Object> exporterParameters) throws JRException {
+			Writer writer, Map<net.sf.jasperreports.engine.JRExporterParameter, Object> exporterParameters)
+			throws JRException {
 
 		JasperPrint print = JasperFillManager.fillReport(report, parameters, convertReportData(reportData));
-		JRHtmlExporter exporter = new JRHtmlExporter();
+		net.sf.jasperreports.engine.export.JRHtmlExporter exporter = new net.sf.jasperreports.engine.export.JRHtmlExporter();
 		exporter.setParameters(exporterParameters);
 		render(exporter, print, writer);
 	}
@@ -215,12 +219,13 @@ public abstract class JasperReportsUtils {
 	 * @param stream the {@code OutputStream} to write the rendered report to
 	 * @param reportData a {@code JRDataSource}, {@code java.util.Collection} or object array
 	 * (converted accordingly), representing the report data to read fields from
-	 * @param exporterParameters a {@link Map} of {@link JRExporterParameter exporter parameters}
+	 * @param exporterParameters a {@link Map} of {@code JRExporterParameter exporter parameters}
 	 * @throws JRException if rendering failed
 	 * @see #convertReportData
 	 */
 	public static void renderAsPdf(JasperReport report, Map<String, Object> parameters, Object reportData,
-			OutputStream stream, Map<JRExporterParameter, Object> exporterParameters) throws JRException {
+			OutputStream stream, Map<net.sf.jasperreports.engine.JRExporterParameter, Object> exporterParameters)
+			throws JRException {
 
 		JasperPrint print = JasperFillManager.fillReport(report, parameters, convertReportData(reportData));
 		JRPdfExporter exporter = new JRPdfExporter();
@@ -254,12 +259,13 @@ public abstract class JasperReportsUtils {
 	 * @param stream the {@code OutputStream} to write the rendered report to
 	 * @param reportData a {@code JRDataSource}, {@code java.util.Collection} or object array
 	 * (converted accordingly), representing the report data to read fields from
-	 * @param exporterParameters a {@link Map} of {@link JRExporterParameter exporter parameters}
+	 * @param exporterParameters a {@link Map} of {@code JRExporterParameter exporter parameters}
 	 * @throws JRException if rendering failed
 	 * @see #convertReportData
 	 */
 	public static void renderAsXls(JasperReport report, Map<String, Object> parameters, Object reportData,
-			OutputStream stream, Map<JRExporterParameter, Object> exporterParameters) throws JRException {
+			OutputStream stream, Map<net.sf.jasperreports.engine.JRExporterParameter, Object> exporterParameters)
+			throws JRException {
 
 		JasperPrint print = JasperFillManager.fillReport(report, parameters, convertReportData(reportData));
 		JRXlsExporter exporter = new JRXlsExporter();

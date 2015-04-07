@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -210,7 +210,7 @@ public abstract class RdbmsOperation implements InitializingBean {
 	 * Set the column names of the auto-generated keys.
 	 * @see java.sql.Connection#prepareStatement(String, String[])
 	 */
-	public void setGeneratedKeysColumnNames(String[] names) {
+	public void setGeneratedKeysColumnNames(String... names) {
 		if (isCompiled()) {
 			throw new InvalidDataAccessApiUsageException(
 					"The column names for the generated keys must be set before the operation is compiled");
@@ -401,7 +401,7 @@ public abstract class RdbmsOperation implements InitializingBean {
 	 */
 	protected void validateNamedParameters(Map<String, ?> parameters) throws InvalidDataAccessApiUsageException {
 		checkCompiled();
-		Map paramsToUse = (parameters != null ? parameters : Collections.emptyMap());
+		Map<String, ?> paramsToUse = (parameters != null ? parameters : Collections.<String, Object> emptyMap());
 		int declaredInParameters = 0;
 		for (SqlParameter param : this.declaredParameters) {
 			if (param.isInputValueProvided()) {

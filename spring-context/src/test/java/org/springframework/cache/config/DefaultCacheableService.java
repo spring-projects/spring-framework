@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ import org.springframework.cache.annotation.Caching;
  *
  * @author Costin Leau
  * @author Phillip Webb
+ * @author Stephane Nicoll
  */
 public class DefaultCacheableService implements CacheableService<Long> {
 
@@ -35,94 +36,118 @@ public class DefaultCacheableService implements CacheableService<Long> {
 	private final AtomicLong nullInvocations = new AtomicLong();
 
 	@Override
-	@Cacheable("default")
+	@Cacheable("testCache")
 	public Long cache(Object arg1) {
 		return counter.getAndIncrement();
 	}
 
 	@Override
-	@CacheEvict("default")
+	@CacheEvict("testCache")
 	public void invalidate(Object arg1) {
 	}
 
 	@Override
-	@CacheEvict("default")
+	@CacheEvict("testCache")
 	public void evictWithException(Object arg1) {
 		throw new RuntimeException("exception thrown - evict should NOT occur");
 	}
 
 	@Override
-	@CacheEvict(value = "default", allEntries = true)
+	@CacheEvict(value = "testCache", allEntries = true)
 	public void evictAll(Object arg1) {
 	}
 
 	@Override
-	@CacheEvict(value = "default", beforeInvocation = true)
+	@CacheEvict(value = "testCache", beforeInvocation = true)
 	public void evictEarly(Object arg1) {
 		throw new RuntimeException("exception thrown - evict should still occur");
 	}
 
 	@Override
-	@CacheEvict(value = "default", key = "#p0")
+	@CacheEvict(value = "testCache", key = "#p0")
 	public void evict(Object arg1, Object arg2) {
 	}
 
 	@Override
-	@CacheEvict(value = "default", key = "#p0", beforeInvocation = true)
+	@CacheEvict(value = "testCache", key = "#p0", beforeInvocation = true)
 	public void invalidateEarly(Object arg1, Object arg2) {
 		throw new RuntimeException("exception thrown - evict should still occur");
 	}
 
 	@Override
-	@Cacheable(value = "default", condition = "#classField == 3")
+	@Cacheable(value = "testCache", condition = "#classField == 3")
 	public Long conditional(int classField) {
 		return counter.getAndIncrement();
 	}
 
 	@Override
-	@Cacheable(value = "default", unless = "#result > 10")
+	@Cacheable(value = "testCache", unless = "#result > 10")
 	public Long unless(int arg) {
 		return (long) arg;
 	}
 
 	@Override
-	@Cacheable(value = "default", key = "#p0")
+	@Cacheable(value = "testCache", key = "#p0")
 	public Long key(Object arg1, Object arg2) {
 		return counter.getAndIncrement();
 	}
 
 	@Override
-	@Cacheable(value = "default")
+	@Cacheable(value = "testCache")
 	public Long varArgsKey(Object... args) {
 		return counter.getAndIncrement();
 	}
 
 	@Override
-	@Cacheable(value = "default", key = "#root.methodName")
+	@Cacheable(value = "testCache", key = "#root.methodName")
 	public Long name(Object arg1) {
 		return counter.getAndIncrement();
 	}
 
 	@Override
-	@Cacheable(value = "default", key = "#root.methodName + #root.method.name + #root.targetClass + #root.target")
+	@Cacheable(value = "testCache", key = "#root.methodName + #root.method.name + #root.targetClass + #root.target")
 	public Long rootVars(Object arg1) {
 		return counter.getAndIncrement();
 	}
 
 	@Override
-	@CachePut("default")
+	@Cacheable(value = "testCache", keyGenerator = "customKeyGenerator")
+	public Long customKeyGenerator(Object arg1) {
+		return counter.getAndIncrement();
+	}
+
+	@Override
+	@Cacheable(value = "testCache", keyGenerator = "unknownBeanName")
+	public Long unknownCustomKeyGenerator(Object arg1) {
+		return counter.getAndIncrement();
+	}
+
+	@Override
+	@Cacheable(value = "testCache", cacheManager = "customCacheManager")
+	public Long customCacheManager(Object arg1) {
+		return counter.getAndIncrement();
+	}
+
+	@Override
+	@Cacheable(value = "testCache", cacheManager = "unknownBeanName")
+	public Long unknownCustomCacheManager(Object arg1) {
+		return counter.getAndIncrement();
+	}
+
+	@Override
+	@CachePut("testCache")
 	public Long update(Object arg1) {
 		return counter.getAndIncrement();
 	}
 
 	@Override
-	@CachePut(value = "default", condition = "#arg.equals(3)")
+	@CachePut(value = "testCache", condition = "#arg.equals(3)")
 	public Long conditionalUpdate(Object arg) {
 		return Long.valueOf(arg.toString());
 	}
 
 	@Override
-	@Cacheable("default")
+	@Cacheable("testCache")
 	public Long nullValue(Object arg1) {
 		nullInvocations.incrementAndGet();
 		return null;
@@ -134,13 +159,13 @@ public class DefaultCacheableService implements CacheableService<Long> {
 	}
 
 	@Override
-	@Cacheable("default")
+	@Cacheable("testCache")
 	public Long throwChecked(Object arg1) throws Exception {
 		throw new Exception(arg1.toString());
 	}
 
 	@Override
-	@Cacheable("default")
+	@Cacheable("testCache")
 	public Long throwUnchecked(Object arg1) {
 		throw new UnsupportedOperationException(arg1.toString());
 	}

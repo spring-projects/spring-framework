@@ -20,10 +20,9 @@ import javax.servlet.ServletException;
 import org.springframework.http.HttpHeaders;
 
 /**
- * Exception to be thrown if DispatcherServlet is unable to determine
- * a corresponding handler for an incoming HTTP request.
- * The DispatcherServlet throws this exception only if its
- * throwExceptionIfNoHandlerFound property is set to "true".
+ * Exception to be thrown if DispatcherServlet is unable to determine a corresponding
+ * handler for an incoming HTTP request. The DispatcherServlet throws this exception only
+ * if its throwExceptionIfNoHandlerFound property is set to "true".
  *
  * @author Brian Clozel
  * @since 4.0

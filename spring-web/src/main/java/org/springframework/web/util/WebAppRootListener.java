@@ -25,7 +25,7 @@ import javax.servlet.ServletContextListener;
  * parameter at the servlet context level (i.e. context-param in web.xml),
  * the default key is "webapp.root".
  *
- * <p>Can be used for toolkits that support substition with system properties
+ * <p>Can be used for toolkits that support substitution with system properties
  * (i.e. System.getProperty values), like log4j's "${key}" syntax within log
  * file locations.
  *

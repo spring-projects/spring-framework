@@ -66,7 +66,7 @@ public class ResourceAdapterFactoryBean implements FactoryBean<ResourceAdapter>,
 	 * through the "resourceAdapter" property.
 	 * @see #setResourceAdapter
 	 */
-	public void setResourceAdapterClass(Class resourceAdapterClass) {
+	public void setResourceAdapterClass(Class<?> resourceAdapterClass) {
 		Assert.isAssignable(ResourceAdapter.class, resourceAdapterClass);
 		this.resourceAdapter = (ResourceAdapter) BeanUtils.instantiateClass(resourceAdapterClass);
 	}

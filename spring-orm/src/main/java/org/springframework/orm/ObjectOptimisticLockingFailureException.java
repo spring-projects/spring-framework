@@ -49,7 +49,7 @@ public class ObjectOptimisticLockingFailureException extends OptimisticLockingFa
 	 * @param persistentClass the persistent class
 	 * @param identifier the ID of the object for which the locking failed
 	 */
-	public ObjectOptimisticLockingFailureException(Class persistentClass, Object identifier) {
+	public ObjectOptimisticLockingFailureException(Class<?> persistentClass, Object identifier) {
 		this(persistentClass, identifier, null);
 	}
 
@@ -61,7 +61,7 @@ public class ObjectOptimisticLockingFailureException extends OptimisticLockingFa
 	 * @param cause the source exception
 	 */
 	public ObjectOptimisticLockingFailureException(
-			Class persistentClass, Object identifier, Throwable cause) {
+			Class<?> persistentClass, Object identifier, Throwable cause) {
 
 		this(persistentClass, identifier,
 				"Object of class [" + persistentClass.getName() + "] with identifier [" + identifier +
@@ -77,7 +77,7 @@ public class ObjectOptimisticLockingFailureException extends OptimisticLockingFa
 	 * @param cause the source exception
 	 */
 	public ObjectOptimisticLockingFailureException(
-			Class persistentClass, Object identifier, String msg, Throwable cause) {
+			Class<?> persistentClass, Object identifier, String msg, Throwable cause) {
 
 		super(msg, cause);
 		this.persistentClass = persistentClass;
@@ -130,8 +130,8 @@ public class ObjectOptimisticLockingFailureException extends OptimisticLockingFa
 	 * Return the persistent class of the object for which the locking failed.
 	 * If no Class was specified, this method returns null.
 	 */
-	public Class getPersistentClass() {
-		return (this.persistentClass instanceof Class ? (Class) this.persistentClass : null);
+	public Class<?> getPersistentClass() {
+		return (this.persistentClass instanceof Class ? (Class<?>) this.persistentClass : null);
 	}
 
 	/**
@@ -140,7 +140,7 @@ public class ObjectOptimisticLockingFailureException extends OptimisticLockingFa
 	 */
 	public String getPersistentClassName() {
 		if (this.persistentClass instanceof Class) {
-			return ((Class) this.persistentClass).getName();
+			return ((Class<?>) this.persistentClass).getName();
 		}
 		return (this.persistentClass != null ? this.persistentClass.toString() : null);
 	}

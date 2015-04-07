@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,15 +14,6 @@
  * limitations under the License.
  */
 package org.springframework.aop.aspectj.annotation;
-
-import static org.hamcrest.Matchers.instanceOf;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotSame;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 import java.io.FileNotFoundException;
 import java.lang.annotation.Retention;
@@ -46,7 +37,13 @@ import org.aspectj.lang.annotation.DeclareParents;
 import org.aspectj.lang.annotation.DeclarePrecedence;
 import org.aspectj.lang.annotation.Pointcut;
 import org.aspectj.lang.reflect.MethodSignature;
+import org.junit.Ignore;
 import org.junit.Test;
+import test.aop.DefaultLockable;
+import test.aop.Lockable;
+import test.aop.PerTargetAspect;
+import test.aop.TwoAdviceAspect;
+
 import org.springframework.aop.Advisor;
 import org.springframework.aop.aspectj.annotation.ReflectiveAspectJAdvisorFactory.SyntheticInstantiationAdvisor;
 import org.springframework.aop.framework.Advised;
@@ -61,10 +58,8 @@ import org.springframework.tests.sample.beans.ITestBean;
 import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.util.ObjectUtils;
 
-import test.aop.DefaultLockable;
-import test.aop.Lockable;
-import test.aop.PerTargetAspect;
-import test.aop.TwoAdviceAspect;
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
 
 /**
  * Abstract tests for AspectJAdvisorFactory.
@@ -406,8 +401,8 @@ public abstract class AbstractAspectJAdvisorFactoryTests {
 
 	@Test
 	public void testIntroductionOnTargetExcludedByTypePattern() {
-		LinkedList target = new LinkedList();
-		List proxy = (List) createProxy(target,
+		LinkedList<Object> target = new LinkedList<Object>();
+		List<?> proxy = (List<?>) createProxy(target,
 				AopUtils.findAdvisorsThatCanApply(
 						getFixture().getAdvisors(new SingletonMetadataAwareAspectInstanceFactory(new MakeLockable(), "someBean")),
 						List.class
@@ -435,7 +430,9 @@ public abstract class AbstractAspectJAdvisorFactoryTests {
 
 	// TODO: Why does this test fail? It hasn't been run before, so it maybe never actually passed...
 
-	public void XtestIntroductionWithArgumentBinding() {
+	@Test
+	@Ignore
+	public void testIntroductionWithArgumentBinding() {
 		TestBean target = new TestBean();
 
 		List<Advisor> advisors = getFixture().getAdvisors(

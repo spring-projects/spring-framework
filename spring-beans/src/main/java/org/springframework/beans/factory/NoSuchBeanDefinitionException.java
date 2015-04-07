@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,21 +20,23 @@ import org.springframework.beans.BeansException;
 import org.springframework.util.StringUtils;
 
 /**
- * Exception thrown when a {@code BeanFactory} is asked for a bean instance
- * for which it cannot find a definition.
+ * Exception thrown when a {@code BeanFactory} is asked for a bean instance for which it
+ * cannot find a definition. This may point to a non-existing bean, a non-unique bean,
+ * or a manually registered singleton instance without an associated bean definition.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @see BeanFactory#getBean(String)
  * @see BeanFactory#getBean(Class)
+ * @see NoUniqueBeanDefinitionException
  */
 @SuppressWarnings("serial")
 public class NoSuchBeanDefinitionException extends BeansException {
 
-	/** Name of the missing bean. */
+	/** Name of the missing bean */
 	private String beanName;
 
-	/** Required type of the missing bean. */
+	/** Required type of the missing bean */
 	private Class<?> beanType;
 
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,7 +34,6 @@ import static java.lang.String.*;
  */
 public enum TestGroup {
 
-
 	/**
 	 * Tests that take a considerable amount of time to run. Any test lasting longer than
 	 * 500ms should be considered a candidate in order to avoid making the overall test
@@ -64,12 +63,13 @@ public enum TestGroup {
 	/**
 	 * Tests that require custom compilation beyond that of the standard JDK. This helps to
 	 * allow running tests that will otherwise fail when using JDK >  1.8 b88. See
-	 * <a href="https://jira.springsource.org/browse/SPR-10558">SPR-10558</a>
+	 * <a href="https://jira.spring.io/browse/SPR-10558">SPR-10558</a>
 	 */
 	CUSTOM_COMPILATION;
 
+
 	/**
-	 * Parse the specified comma separates string of groups.
+	 * Parse the specified comma separated string of groups.
 	 * @param value the comma separated string of groups
 	 * @return a set of groups
 	 */
@@ -77,9 +77,18 @@ public enum TestGroup {
 		if (value == null || "".equals(value)) {
 			return Collections.emptySet();
 		}
-		if("ALL".equalsIgnoreCase(value)) {
+		if ("ALL".equalsIgnoreCase(value)) {
 			return EnumSet.allOf(TestGroup.class);
 		}
+		if (value.toUpperCase().startsWith("ALL-")) {
+			Set<TestGroup> groups = new HashSet<TestGroup>(EnumSet.allOf(TestGroup.class));
+			groups.removeAll(parseGroups(value.substring(4)));
+			return groups;
+		}
+		return parseGroups(value);
+	}
+
+	private static Set<TestGroup> parseGroups(String value) {
 		Set<TestGroup> groups = new HashSet<TestGroup>();
 		for (String group : value.split(",")) {
 			try {
@@ -93,4 +102,5 @@ public enum TestGroup {
 		}
 		return groups;
 	}
+
 }

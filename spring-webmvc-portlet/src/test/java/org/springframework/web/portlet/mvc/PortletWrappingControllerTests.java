@@ -16,10 +16,7 @@
 
 package org.springframework.web.portlet.mvc;
 
-import static org.junit.Assert.assertEquals;
-
 import java.io.IOException;
-
 import javax.portlet.ActionRequest;
 import javax.portlet.ActionResponse;
 import javax.portlet.Portlet;
@@ -30,6 +27,7 @@ import javax.portlet.RenderResponse;
 
 import org.junit.Before;
 import org.junit.Test;
+
 import org.springframework.beans.BeansException;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.mock.web.portlet.MockActionRequest;
@@ -40,6 +38,8 @@ import org.springframework.mock.web.portlet.MockRenderRequest;
 import org.springframework.mock.web.portlet.MockRenderResponse;
 import org.springframework.web.portlet.context.ConfigurablePortletApplicationContext;
 import org.springframework.web.portlet.context.StaticPortletApplicationContext;
+
+import static org.junit.Assert.*;
 
 /**
  * Unit tests for the {@link PortletWrappingController} class.

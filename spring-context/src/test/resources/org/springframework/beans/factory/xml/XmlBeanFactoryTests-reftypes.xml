@@ -1,0 +1,195 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<bones>
+
+	<bean id="jenny" name="jenny" class="org.springframework.tests.sample.beans.TestBean">
+		<property name="name"><value>Jenny</value></property>
+		<property name="age"><value>30</value></property>
+		<property name="spouse"><ref local="david"/></property>
+	</bean>
+
+	<bean id="david" class="org.springframework.tests.sample.beans.TestBean">
+		<property name="name" value="David"/>
+		<property name="age" value="27"/>
+		<property name="spouse" ref="jenny"/>
+	</bean>
+
+	<bean id="jenks" class="org.springframework.tests.sample.beans.TestBean" scope="prototype">
+		<property name="name"><value>Andrew</value></property>
+		<property name="age"><value>36</value></property>
+		<property name="spouse"><ref local="jenny"/></property>
+	</bean>
+
+	<bean id="emma" class="org.springframework.tests.sample.beans.TestBean">
+		<property name="name" value="Emma"/>
+		<property name="age" value="31"/>
+		<property name="spouse" ref="jenks"/>
+	</bean>
+
+	<bean id="georgia" class="org.springframework.tests.sample.beans.TestBean">
+		<property name="name"><value>Georgia</value></property>
+		<property name="age"><value>33</value></property>
+		<property name="spouse"><ref local="jenks"/></property>
+	</bean>
+
+	<bean id="ego" class="org.springframework.tests.sample.beans.TestBean">
+		<property name="name" value="ego"/>
+		<property name="age" value="1"/>
+		<property name="spouse" ref="ego"/>
+	</bean>
+
+	<bean id="complexInnerEgo" class="org.springframework.tests.sample.beans.TestBean">
+		<property name="name" value="ego"/>
+		<property name="age" value="1"/>
+		<property name="spouse">
+			<bean class="org.springframework.tests.sample.beans.factory.DummyFactory">
+				<property name="otherTestBean" ref="complexInnerEgo"/>
+			</bean>
+		</property>
+	</bean>
+
+	<bean id="complexEgo" class="org.springframework.tests.sample.beans.TestBean">
+		<property name="name" value="ego"/>
+		<property name="age" value="1"/>
+		<property name="spouse" ref="egoBridge"/>
+	</bean>
+
+	<bean id="egoBridge" class="org.springframework.tests.sample.beans.factory.DummyFactory">
+		<property name="otherTestBean" ref="complexEgo"/>
+	</bean>
+
+	<bean id="ego1" class="org.springframework.tests.sample.beans.factory.DummyFactory">
+		<property name="otherTestBean" ref="ego2"/>
+	</bean>
+
+	<bean id="ego2" class="org.springframework.tests.sample.beans.factory.DummyFactory">
+		<property name="otherTestBean" ref="ego1"/>
+	</bean>
+
+	<bean id="ego3" class="org.springframework.tests.sample.beans.factory.DummyFactory">
+		<property name="otherTestBean">
+			<bean class="org.springframework.tests.sample.beans.factory.DummyFactory">
+				<property name="otherTestBean" ref="ego3"/>
+			</bean>
+		</property>
+	</bean>
+
+	<!-- This bean must not conflict with the actual inner beans named "innerBean" -->
+	<bean id="innerBean" class="org.springframework.tests.sample.beans.TestBean" destroy-method="destroy">
+		<constructor-arg><value>outer</value></constructor-arg>
+		<constructor-arg type="int"><value>0</value></constructor-arg>
+	</bean>
+
+	<bean id="hasInnerBeans" class="org.springframework.tests.sample.beans.TestBean">
+		<constructor-arg><value>hasInner</value></constructor-arg>
+		<constructor-arg index="1" type="int"><value>5</value></constructor-arg>
+		<property name="spouse">
+			<bean id="innerBean" class="org.springframework.tests.sample.beans.TestBean" destroy-method="destroy">
+				<constructor-arg><value>inner1</value></constructor-arg>
+				<constructor-arg type="int"><value>6</value></constructor-arg>
+			</bean>
+		</property>
+		<property name="friends">
+			<list>
+				<bean class="org.springframework.tests.sample.beans.DerivedTestBean">
+					<property name="name"><value>inner2</value></property>
+					<property name="age"><value>7</value></property>
+				</bean>
+				<bean id="innerBeanFactory" class="org.springframework.tests.sample.beans.factory.DummyFactory"/>
+				<bean id="innerBean" class="org.springframework.tests.sample.beans.TestBean" destroy-method="destroy">
+					<constructor-arg><value>inner5</value></constructor-arg>
+					<constructor-arg type="int"><value>6</value></constructor-arg>
+				</bean>
+			</list>
+		</property>
+		<property name="someMap">
+			<map>
+				<entry key="someKey">
+					<bean class="org.springframework.tests.sample.beans.TestBean" parent="jenny">
+						<constructor-arg><value>inner3</value></constructor-arg>
+						<constructor-arg type="int"><value>8</value></constructor-arg>
+					</bean>
+				</entry>
+				<entry key="someOtherKey">
+					<bean parent="jenny">
+						<property name="name"><value>inner4</value></property>
+						<property name="age"><value>9</value></property>
+					</bean>
+				</entry>
+			</map>
+		</property>
+	</bean>
+
+	<bean id="hasInnerBeansForConstructor" class="org.springframework.tests.sample.beans.TestBean">
+		<constructor-arg>
+			<bean id="innerBean" class="org.springframework.tests.sample.beans.TestBean" destroy-method="destroy">
+				<constructor-arg><value>inner1</value></constructor-arg>
+				<constructor-arg type="int"><value>6</value></constructor-arg>
+			</bean>
+		</constructor-arg>
+	</bean>
+
+	<bean id="hasInnerBeansAsPrototype" class="org.springframework.tests.sample.beans.TestBean" scope="prototype">
+		<constructor-arg>
+			<bean id="innerBean" class="org.springframework.tests.sample.beans.TestBean" destroy-method="destroy">
+				<constructor-arg><value>inner1</value></constructor-arg>
+				<constructor-arg type="int"><value>6</value></constructor-arg>
+			</bean>
+		</constructor-arg>
+	</bean>
+
+	<bean id="hasInnerBeansWithoutDestroy" class="org.springframework.tests.sample.beans.TestBean">
+		<constructor-arg><value>hasInner</value></constructor-arg>
+		<constructor-arg index="1" type="int"><value>5</value></constructor-arg>
+		<property name="spouse">
+			<bean id="innerBean" class="org.springframework.tests.sample.beans.TestBean" scope="prototype">
+				<constructor-arg><value>inner1</value></constructor-arg>
+				<constructor-arg type="int"><value>6</value></constructor-arg>
+			</bean>
+		</property>
+		<property name="friends">
+			<list>
+				<bean class="org.springframework.tests.sample.beans.DerivedTestBean">
+					<property name="name"><value>inner2</value></property>
+					<property name="age"><value>7</value></property>
+				</bean>
+				<bean id="innerBeanFactory" class="org.springframework.tests.sample.beans.factory.DummyFactory"/>
+				<bean id="innerBean" class="org.springframework.tests.sample.beans.TestBean" scope="prototype">
+					<constructor-arg><value>inner5</value></constructor-arg>
+					<constructor-arg type="int"><value>6</value></constructor-arg>
+				</bean>
+			</list>
+		</property>
+	</bean>
+
+	<bean id="failsOnInnerBean" class="org.springframework.tests.sample.beans.TestBean">
+		<property name="someMap">
+			<map>
+				<entry key="someKey">
+					<bean class="org.springframework.tests.sample.beans.TestBean" parent="jenny">
+						<constructor-arg><value>inner3</value></constructor-arg>
+						<constructor-arg type="int"><value>8</value></constructor-arg>
+						<property name="touchy" value="."/>
+					</bean>
+				</entry>
+				<entry key="someOtherKey">
+					<bean parent="jenny">
+						<property name="name"><value>inner4</value></property>
+						<property name="age"><value>9</value></property>
+					</bean>
+				</entry>
+			</map>
+		</property>
+	</bean>
+
+	<bean id="failsOnInnerBeanForConstructor" class="org.springframework.tests.sample.beans.TestBean">
+		<constructor-arg>
+			<bean id="innerBean" class="org.springframework.tests.sample.beans.TestBean" destroy-method="destroy">
+				<constructor-arg><value>inner1</value></constructor-arg>
+				<constructor-arg type="int"><value>6</value></constructor-arg>
+				<property name="touchy" value="."/>
+			</bean>
+		</constructor-arg>
+	</bean>
+
+</bones>

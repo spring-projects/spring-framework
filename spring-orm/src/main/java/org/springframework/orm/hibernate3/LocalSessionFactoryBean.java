@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -88,7 +88,7 @@ import org.springframework.util.StringUtils;
  * {@link org.springframework.orm.hibernate3.support.OpenSessionInViewFilter} /
  * {@link org.springframework.orm.hibernate3.support.OpenSessionInViewInterceptor}.
  *
- * <p>Requires Hibernate 3.6 or later, as of Spring 4.0.
+ * <p>Requires Hibernate 3.6.x, as of Spring 4.0.
  * Note that this factory will use "on_close" as default Hibernate connection
  * release mode, unless in the case of a "jtaTransactionManager" specified,
  * for the reason that this is appropriate for most Spring-based applications
@@ -113,10 +113,6 @@ public class LocalSessionFactoryBean extends AbstractSessionFactoryBean implemen
 
 	private static final ThreadLocal<Object> configTimeRegionFactoryHolder =
 			new ThreadLocal<Object>();
-
-	@SuppressWarnings("deprecation")
-	private static final ThreadLocal<org.hibernate.cache.CacheProvider> configTimeCacheProviderHolder =
-			new ThreadLocal<org.hibernate.cache.CacheProvider>();
 
 	private static final ThreadLocal<LobHandler> configTimeLobHandlerHolder =
 			new ThreadLocal<LobHandler>();
@@ -250,7 +246,7 @@ public class LocalSessionFactoryBean extends AbstractSessionFactoryBean implemen
 	 * resources are specified locally via this bean.
 	 * @see org.hibernate.cfg.Configuration#configure(java.net.URL)
 	 */
-	public void setConfigLocations(Resource[] configLocations) {
+	public void setConfigLocations(Resource... configLocations) {
 		this.configLocations = configLocations;
 	}
 
@@ -264,7 +260,7 @@ public class LocalSessionFactoryBean extends AbstractSessionFactoryBean implemen
 	 * @see #setMappingLocations
 	 * @see org.hibernate.cfg.Configuration#addResource
 	 */
-	public void setMappingResources(String[] mappingResources) {
+	public void setMappingResources(String... mappingResources) {
 		this.mappingResources = mappingResources;
 	}
 
@@ -277,7 +273,7 @@ public class LocalSessionFactoryBean extends AbstractSessionFactoryBean implemen
 	 * or to specify all mappings locally.
 	 * @see org.hibernate.cfg.Configuration#addInputStream
 	 */
-	public void setMappingLocations(Resource[] mappingLocations) {
+	public void setMappingLocations(Resource... mappingLocations) {
 		this.mappingLocations = mappingLocations;
 	}
 
@@ -290,7 +286,7 @@ public class LocalSessionFactoryBean extends AbstractSessionFactoryBean implemen
 	 * or to specify all mappings locally.
 	 * @see org.hibernate.cfg.Configuration#addCacheableFile(java.io.File)
 	 */
-	public void setCacheableMappingLocations(Resource[] cacheableMappingLocations) {
+	public void setCacheableMappingLocations(Resource... cacheableMappingLocations) {
 		this.cacheableMappingLocations = cacheableMappingLocations;
 	}
 
@@ -301,7 +297,7 @@ public class LocalSessionFactoryBean extends AbstractSessionFactoryBean implemen
 	 * or to specify all mappings locally.
 	 * @see org.hibernate.cfg.Configuration#addJar(java.io.File)
 	 */
-	public void setMappingJarLocations(Resource[] mappingJarLocations) {
+	public void setMappingJarLocations(Resource... mappingJarLocations) {
 		this.mappingJarLocations = mappingJarLocations;
 	}
 
@@ -312,7 +308,7 @@ public class LocalSessionFactoryBean extends AbstractSessionFactoryBean implemen
 	 * or to specify all mappings locally.
 	 * @see org.hibernate.cfg.Configuration#addDirectory(java.io.File)
 	 */
-	public void setMappingDirectoryLocations(Resource[] mappingDirectoryLocations) {
+	public void setMappingDirectoryLocations(Resource... mappingDirectoryLocations) {
 		this.mappingDirectoryLocations = mappingDirectoryLocations;
 	}
 
@@ -412,7 +408,7 @@ public class LocalSessionFactoryBean extends AbstractSessionFactoryBean implemen
 	 * @see TypeDefinitionBean
 	 * @see org.hibernate.cfg.Mappings#addTypeDef(String, String, java.util.Properties)
 	 */
-	public void setTypeDefinitions(TypeDefinitionBean[] typeDefinitions) {
+	public void setTypeDefinitions(TypeDefinitionBean... typeDefinitions) {
 		this.typeDefinitions = typeDefinitions;
 	}
 
@@ -426,7 +422,7 @@ public class LocalSessionFactoryBean extends AbstractSessionFactoryBean implemen
 	 * @see FilterDefinitionFactoryBean
 	 * @see org.hibernate.cfg.Configuration#addFilterDefinition
 	 */
-	public void setFilterDefinitions(FilterDefinition[] filterDefinitions) {
+	public void setFilterDefinitions(FilterDefinition... filterDefinitions) {
 		this.filterDefinitions = filterDefinitions;
 	}
 

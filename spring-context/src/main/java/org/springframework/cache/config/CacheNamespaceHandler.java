@@ -16,11 +16,12 @@
 
 package org.springframework.cache.config;
 
+import org.w3c.dom.Element;
+
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.xml.NamespaceHandlerSupport;
 import org.springframework.util.StringUtils;
-import org.w3c.dom.Element;
 
 /**
  * {@code NamespaceHandler} allowing for the configuration of declarative

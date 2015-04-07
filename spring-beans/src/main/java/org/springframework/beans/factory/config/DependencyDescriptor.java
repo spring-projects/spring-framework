@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,7 +52,7 @@ public class DependencyDescriptor implements Serializable {
 
 	private String methodName;
 
-	private Class[] parameterTypes;
+	private Class<?>[] parameterTypes;
 
 	private int parameterIndex;
 
@@ -213,6 +213,29 @@ public class DependencyDescriptor implements Serializable {
 	}
 
 	/**
+	 * Return whether a fallback match is allowed.
+	 * <p>This is {@code false} by default but may be overridden to return {@code true} in order
+	 * to suggest to a {@link org.springframework.beans.factory.support.AutowireCandidateResolver}
+	 * that a fallback match is acceptable as well.
+	 */
+	public boolean fallbackMatchAllowed() {
+		return false;
+	}
+
+	/**
+	 * Return a variant of this descriptor that is intended for a fallback match.
+	 * @see #fallbackMatchAllowed()
+	 */
+	public DependencyDescriptor forFallbackMatch() {
+		return new DependencyDescriptor(this) {
+			@Override
+			public boolean fallbackMatchAllowed() {
+				return true;
+			}
+		};
+	}
+
+	/**
 	 * Initialize parameter name discovery for the underlying method parameter, if any.
 	 * <p>This method does not actually try to retrieve the parameter name at
 	 * this point; it just allows discovery to happen when the application calls
@@ -240,16 +263,19 @@ public class DependencyDescriptor implements Serializable {
 		if (this.field != null) {
 			if (this.nestingLevel > 1) {
 				Type type = this.field.getGenericType();
-				if (type instanceof ParameterizedType) {
-					Type arg = ((ParameterizedType) type).getActualTypeArguments()[0];
-					if (arg instanceof Class) {
-						return (Class) arg;
+				for (int i = 2; i <= this.nestingLevel; i++) {
+					if (type instanceof ParameterizedType) {
+						Type[] args = ((ParameterizedType) type).getActualTypeArguments();
+						type = args[args.length - 1];
 					}
-					else if (arg instanceof ParameterizedType) {
-						arg = ((ParameterizedType) arg).getRawType();
-						if (arg instanceof Class) {
-							return (Class) arg;
-						}
+				}
+				if (type instanceof Class) {
+					return (Class<?>) type;
+				}
+				else if (type instanceof ParameterizedType) {
+					Type arg = ((ParameterizedType) type).getRawType();
+					if (arg instanceof Class) {
+						return (Class<?>) arg;
 					}
 				}
 				return Object.class;

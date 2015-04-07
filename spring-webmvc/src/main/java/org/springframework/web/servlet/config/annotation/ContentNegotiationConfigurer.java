@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,12 +17,12 @@ package org.springframework.web.servlet.config.annotation;
 
 import java.util.HashMap;
 import java.util.Map;
-
 import javax.servlet.ServletContext;
 
 import org.springframework.http.MediaType;
 import org.springframework.web.accept.ContentNegotiationManager;
 import org.springframework.web.accept.ContentNegotiationManagerFactoryBean;
+import org.springframework.web.accept.ContentNegotiationStrategy;
 
 /**
  * Helps with configuring a {@link ContentNegotiationManager}.
@@ -95,6 +95,18 @@ public class ContentNegotiationConfigurer {
 	}
 
 	/**
+	 * Whether to ignore requests that have a file extension that does not match
+	 * any mapped media types. Setting this to {@code false} will result in a
+	 * {@code HttpMediaTypeNotAcceptableException} when there is no match.
+	 *
+	 * <p>By default this is set to {@code true}.
+	 */
+	public ContentNegotiationConfigurer ignoreUnknownPathExtensions(boolean ignore) {
+		this.factoryBean.setIgnoreUnknownPathExtensions(ignore);
+		return this;
+	}
+
+	/**
 	 * Indicate whether to use the Java Activation Framework as a fallback option
 	 * to map from file extensions to media types. This is used only when
 	 * {@link #favorPathExtension(boolean)} is set to {@code true}.
@@ -146,13 +158,26 @@ public class ContentNegotiationConfigurer {
 	}
 
 	/**
-	 * Set the default content type.
-	 * <p>This content type will be used when neither the request path extension,
-	 * nor a request parameter, nor the {@code Accept} header could help determine
-	 * the requested content type.
+	 * Set the default content type to use when no content type was requested.
+	 * <p>Note that internally this method creates and adds a
+	 * {@link org.springframework.web.accept.FixedContentNegotiationStrategy
+	 * FixedContentNegotiationStrategy}. Alternatively you can also provide a
+	 * custom strategy via {@link #defaultContentTypeStrategy}.
 	 */
 	public ContentNegotiationConfigurer defaultContentType(MediaType defaultContentType) {
 		this.factoryBean.setDefaultContentType(defaultContentType);
+		return this;
+	}
+
+	/**
+	 * Configure a custom {@link ContentNegotiationStrategy} to use to determine
+	 * the default content type to use when no content type was requested.
+	 * <p>However also consider using {@link #defaultContentType} which provides
+	 * a simpler alternative to doing the same.
+	 * @since 4.1.2
+	 */
+	public ContentNegotiationConfigurer defaultContentTypeStrategy(ContentNegotiationStrategy defaultStrategy) {
+		this.factoryBean.setDefaultContentTypeStrategy(defaultStrategy);
 		return this;
 	}
 

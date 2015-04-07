@@ -96,7 +96,7 @@ public class BeanFactoryAspectJAdvisorsBuilder {
 					// We must be careful not to instantiate beans eagerly as in this
 					// case they would be cached by the Spring container but would not
 					// have been weaved
-					Class beanType = this.beanFactory.getType(beanName);
+					Class<?> beanType = this.beanFactory.getType(beanName);
 					if (beanType == null) {
 						continue;
 					}
@@ -134,7 +134,7 @@ public class BeanFactoryAspectJAdvisorsBuilder {
 		}
 
 		if (aspectNames.isEmpty()) {
-			return Collections.EMPTY_LIST;
+			return Collections.emptyList();
 		}
 		List<Advisor> advisors = new LinkedList<Advisor>();
 		for (String aspectName : aspectNames) {

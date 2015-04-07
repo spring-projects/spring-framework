@@ -16,81 +16,32 @@
 
 package org.springframework.web.socket;
 
-import org.springframework.util.Assert;
-import org.springframework.util.ObjectUtils;
-
 /**
  * A message that can be handled or sent on a WebSocket connection.
  *
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public abstract class WebSocketMessage<T> {
-
-	private final T payload;
-
-	private final boolean last;
-
-
-	/**
-	 * Create a new {@link WebSocketMessage} instance with the given payload.
-	 */
-	WebSocketMessage(T payload) {
-		this(payload, true);
-	}
-
-	/**
-	 * Create a new {@link WebSocketMessage} instance with the given payload.
-	 * @param payload a non-null payload
-	 */
-	WebSocketMessage(T payload, boolean isLast) {
-		Assert.notNull(payload, "payload is required");
-		this.payload = payload;
-		this.last = isLast;
-	}
-
+public interface WebSocketMessage<T> {
 
 	/**
 	 * Returns the message payload. This will never be {@code null}.
 	 */
-	public T getPayload() {
-		return this.payload;
-	}
+	T getPayload();
+
 
 	/**
-	 * Whether this is the last part of a message, when partial message support on a
-	 * {@link WebSocketHandler} is enabled. If partial message support is not enabled the
-	 * returned value is always {@code true}.
+	 * Return the number of bytes contained in the message.
 	 */
-	public boolean isLast() {
-		return this.last;
-	}
+	int getPayloadLength();
 
-	@Override
-	public int hashCode() {
-		return WebSocketMessage.class.hashCode() * 13 + ObjectUtils.nullSafeHashCode(this.payload);
-	}
-
-	@Override
-	public boolean equals(Object other) {
-		if (this == other) {
-			return true;
-		}
-		if (!(other instanceof WebSocketMessage)) {
-			return false;
-		}
-		WebSocketMessage otherMessage = (WebSocketMessage) other;
-		return ObjectUtils.nullSafeEquals(this.payload, otherMessage.payload);
-	}
-
-	@Override
-	public String toString() {
-		return getClass().getSimpleName() + " payload= " + toStringPayload()
-				+ ", length=" + getPayloadSize() + ", last=" + isLast() + "]";
-	}
-
-	protected abstract String toStringPayload();
-
-	protected abstract int getPayloadSize();
+	/**
+	 * When partial message support is available and requested via
+	 * {@link org.springframework.web.socket.WebSocketHandler#supportsPartialMessages()},
+	 * this method returns {@code true} if the current message is the last part of the
+	 * complete WebSocket message sent by the client. Otherwise {@code false} is returned
+	 * if partial message support is either not available or not enabled.
+	 */
+	boolean isLast();
 
 }

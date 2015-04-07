@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,9 @@ package org.springframework.core.env;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.util.Assert;
+import org.springframework.util.ObjectUtils;
 
 /**
  * Abstract base class representing a source of name/value property pairs. The underlying
@@ -55,11 +57,12 @@ import org.springframework.util.Assert;
  */
 public abstract class PropertySource<T> {
 
-	protected final Log logger = LogFactory.getLog(this.getClass());
+	protected final Log logger = LogFactory.getLog(getClass());
 
 	protected final String name;
 
 	protected final T source;
+
 
 	/**
 	 * Create a new {@code PropertySource} with the given name and source object.
@@ -72,16 +75,16 @@ public abstract class PropertySource<T> {
 	}
 
 	/**
-	 * Create a new {@code PropertySource} with the given name and with a new {@code Object}
-	 * instance as the underlying source.
-	 * <p>Often useful in testing scenarios when creating
-	 * anonymous implementations that never query an actual source, but rather return
-	 * hard-coded values.
+	 * Create a new {@code PropertySource} with the given name and with a new
+	 * {@code Object} instance as the underlying source.
+	 * <p>Often useful in testing scenarios when creating anonymous implementations
+	 * that never query an actual source but rather return hard-coded values.
 	 */
 	@SuppressWarnings("unchecked")
 	public PropertySource(String name) {
 		this(name, (T) new Object());
 	}
+
 
 	/**
 	 * Return the name of this {@code PropertySource}
@@ -94,91 +97,75 @@ public abstract class PropertySource<T> {
 	 * Return the underlying source object for this {@code PropertySource}.
 	 */
 	public T getSource() {
-		return source;
+		return this.source;
 	}
 
 	/**
 	 * Return whether this {@code PropertySource} contains the given name.
-	 * <p>This implementation simply checks for a null return value
-	 * from {@link #getProperty(String)}. Subclasses may wish to
-	 * implement a more efficient algorithm if possible.
+	 * <p>This implementation simply checks for a {@code null} return value
+	 * from {@link #getProperty(String)}. Subclasses may wish to implement
+	 * a more efficient algorithm if possible.
 	 * @param name the property name to find
 	 */
 	public boolean containsProperty(String name) {
-		return this.getProperty(name) != null;
+		return (getProperty(name) != null);
 	}
 
 	/**
-	 * Return the value associated with the given name, {@code null} if not found.
+	 * Return the value associated with the given name,
+	 * or {@code null} if not found.
 	 * @param name the property to find
 	 * @see PropertyResolver#getRequiredProperty(String)
 	 */
 	public abstract Object getProperty(String name);
 
-	/**
-	 * Return a hashcode derived from the {@code name} property of this {@code PropertySource}
-	 * object.
-	 */
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((this.name == null) ? 0 : this.name.hashCode());
-		return result;
-	}
 
 	/**
 	 * This {@code PropertySource} object is equal to the given object if:
 	 * <ul>
-	 *   <li>they are the same instance
-	 *   <li>the {@code name} properties for both objects are equal
+	 * <li>they are the same instance
+	 * <li>the {@code name} properties for both objects are equal
 	 * </ul>
-	 *
-	 * <P>No properties other than {@code name} are evaluated.
+	 * <p>No properties other than {@code name} are evaluated.
 	 */
 	@Override
 	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (!(obj instanceof PropertySource))
-			return false;
-		PropertySource<?> other = (PropertySource<?>) obj;
-		if (this.name == null) {
-			if (other.name != null)
-				return false;
-		} else if (!this.name.equals(other.name))
-			return false;
-		return true;
+		return (this == obj || (obj instanceof PropertySource &&
+				ObjectUtils.nullSafeEquals(this.name, ((PropertySource<?>) obj).name)));
+	}
+
+	/**
+	 * Return a hash code derived from the {@code name} property
+	 * of this {@code PropertySource} object.
+	 */
+	@Override
+	public int hashCode() {
+		return ObjectUtils.nullSafeHashCode(this.name);
 	}
 
 	/**
 	 * Produce concise output (type and name) if the current log level does not include
-	 * debug. If debug is enabled, produce verbose output including hashcode of the
+	 * debug. If debug is enabled, produce verbose output including the hash code of the
 	 * PropertySource instance and every name/value property pair.
-	 *
-	 * This variable verbosity is useful as a property source such as system properties
+	 * <p>This variable verbosity is useful as a property source such as system properties
 	 * or environment variables may contain an arbitrary number of property pairs,
 	 * potentially leading to difficult to read exception and log messages.
-	 *
 	 * @see Log#isDebugEnabled()
 	 */
 	@Override
 	public String toString() {
 		if (logger.isDebugEnabled()) {
 			return String.format("%s@%s [name='%s', properties=%s]",
-					this.getClass().getSimpleName(), System.identityHashCode(this), this.name, this.source);
+					getClass().getSimpleName(), System.identityHashCode(this), this.name, this.source);
 		}
-
-		return String.format("%s [name='%s']",
-				this.getClass().getSimpleName(), this.name);
+		else {
+			return String.format("%s [name='%s']", getClass().getSimpleName(), this.name);
+		}
 	}
 
 
 	/**
 	 * Return a {@code PropertySource} implementation intended for collection comparison purposes only.
-	 *
 	 * <p>Primarily for internal use, but given a collection of {@code PropertySource} objects, may be
 	 * used as follows:
 	 * <pre class="code">
@@ -189,11 +176,9 @@ public abstract class PropertySource<T> {
 	 * assert sources.contains(PropertySource.named("sourceB"));
 	 * assert !sources.contains(PropertySource.named("sourceC"));
 	 * }</pre>
-	 *
 	 * The returned {@code PropertySource} will throw {@code UnsupportedOperationException}
 	 * if any methods other than {@code equals(Object)}, {@code hashCode()}, and {@code toString()}
 	 * are called.
-	 *
 	 * @param name the name of the comparison {@code PropertySource} to be created and returned.
 	 */
 	public static PropertySource<?> named(String name) {
@@ -209,7 +194,6 @@ public abstract class PropertySource<T> {
 	 * {@code ApplicationContext}.  In such cases, a stub should be used to hold the
 	 * intended default position/order of the property source, then be replaced
 	 * during context refresh.
-	 *
 	 * @see org.springframework.context.support.AbstractApplicationContext#initPropertySources()
 	 * @see org.springframework.web.context.support.StandardServletEnvironment
 	 * @see org.springframework.web.context.support.ServletContextPropertySource
@@ -221,7 +205,7 @@ public abstract class PropertySource<T> {
 		}
 
 		/**
-		 * Always return {@code null}.
+		 * Always returns {@code null}.
 		 */
 		@Override
 		public String getProperty(String name) {
@@ -236,8 +220,7 @@ public abstract class PropertySource<T> {
 	static class ComparisonPropertySource extends StubPropertySource {
 
 		private static final String USAGE_ERROR =
-			"ComparisonPropertySource instances are for collection comparison " +
-			"use only";
+				"ComparisonPropertySource instances are for use with collection comparison only";
 
 		public ComparisonPropertySource(String name) {
 			super(name);

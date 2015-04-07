@@ -27,7 +27,7 @@ import org.springframework.expression.TypedValue;
  * string literal. It is used with CompositeStringExpression when representing a template
  * expression which is made up of pieces - some being real expressions to be handled by an
  * EL implementation like Spel, and some being just textual elements.
- * 
+ *
  * @author Andy Clement
  * @since 3.0
  */
@@ -63,7 +63,7 @@ public class LiteralExpression implements Expression {
 	}
 
 	@Override
-	public Class getValueType(EvaluationContext context) {
+	public Class<?> getValueType(EvaluationContext context) {
 		return String.class;
 	}
 
@@ -100,7 +100,7 @@ public class LiteralExpression implements Expression {
 	}
 
 	@Override
-	public Class getValueType() {
+	public Class<?> getValueType() {
 		return String.class;
 	}
 
@@ -118,16 +118,16 @@ public class LiteralExpression implements Expression {
 	@Override
 	public <T> T getValue(EvaluationContext context, Object rootObject, Class<T> desiredResultType) throws EvaluationException {
 		Object value = getValue(context, rootObject);
-		return ExpressionUtils.convertTypedValue(null, new TypedValue(value), desiredResultType);
+		return ExpressionUtils.convertTypedValue(context, new TypedValue(value), desiredResultType);
 	}
 
 	@Override
-	public Class getValueType(Object rootObject) throws EvaluationException {
+	public Class<?> getValueType(Object rootObject) throws EvaluationException {
 		return String.class;
 	}
 
 	@Override
-	public Class getValueType(EvaluationContext context, Object rootObject) throws EvaluationException {
+	public Class<?> getValueType(EvaluationContext context, Object rootObject) throws EvaluationException {
 		return String.class;
 	}
 

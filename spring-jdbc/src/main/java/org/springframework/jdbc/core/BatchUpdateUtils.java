@@ -16,9 +16,9 @@
 
 package org.springframework.jdbc.core;
 
-import java.util.List;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.List;
 
 /**
  * Generic utility methods for working with JDBC batch statements. Mainly for internal use

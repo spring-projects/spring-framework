@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,8 +18,7 @@ package org.springframework.aop.aspectj.annotation;
 
 import org.springframework.aop.aspectj.SimpleAspectInstanceFactory;
 import org.springframework.core.Ordered;
-import org.springframework.core.annotation.AnnotationUtils;
-import org.springframework.core.annotation.Order;
+import org.springframework.core.annotation.OrderUtils;
 
 /**
  * Implementation of {@link MetadataAwareAspectInstanceFactory} that
@@ -40,7 +39,7 @@ public class SimpleMetadataAwareAspectInstanceFactory extends SimpleAspectInstan
 	 * @param aspectClass the aspect class
 	 * @param aspectName the aspect name
 	 */
-	public SimpleMetadataAwareAspectInstanceFactory(Class aspectClass, String aspectName) {
+	public SimpleMetadataAwareAspectInstanceFactory(Class<?> aspectClass, String aspectName) {
 		super(aspectClass);
 		this.metadata = new AspectMetadata(aspectClass, aspectName);
 	}
@@ -51,20 +50,9 @@ public class SimpleMetadataAwareAspectInstanceFactory extends SimpleAspectInstan
 		return this.metadata;
 	}
 
-	/**
-	 * Determine a fallback order for the case that the aspect instance
-	 * does not express an instance-specific order through implementing
-	 * the {@link org.springframework.core.Ordered} interface.
-	 * <p>The default implementation simply returns {@code Ordered.LOWEST_PRECEDENCE}.
-	 * @param aspectClass the aspect class
-	 */
 	@Override
 	protected int getOrderForAspectClass(Class<?> aspectClass) {
-		Order order = AnnotationUtils.findAnnotation(aspectClass, Order.class);
-		if (order != null) {
-			return order.value();
-		}
-		return Ordered.LOWEST_PRECEDENCE;
+		return OrderUtils.getOrder(aspectClass, Ordered.LOWEST_PRECEDENCE);
 	}
 
 }

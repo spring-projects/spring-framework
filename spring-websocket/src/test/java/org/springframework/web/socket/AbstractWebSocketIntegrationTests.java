@@ -1,10 +1,11 @@
 /*
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -22,19 +23,21 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
+import org.junit.rules.TestName;
 import org.junit.runners.Parameterized.Parameter;
+
 import org.springframework.context.Lifecycle;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
 import org.springframework.web.socket.client.WebSocketClient;
-import org.springframework.web.socket.server.DefaultHandshakeHandler;
-import org.springframework.web.socket.server.HandshakeHandler;
 import org.springframework.web.socket.server.RequestUpgradeStrategy;
-import org.springframework.web.socket.server.support.JettyRequestUpgradeStrategy;
-import org.springframework.web.socket.server.support.TomcatRequestUpgradeStrategy;
-
+import org.springframework.web.socket.server.jetty.JettyRequestUpgradeStrategy;
+import org.springframework.web.socket.server.standard.TomcatRequestUpgradeStrategy;
+import org.springframework.web.socket.server.standard.UndertowRequestUpgradeStrategy;
+import org.springframework.web.socket.server.support.DefaultHandshakeHandler;
 
 /**
  * Base class for WebSocket integration tests.
@@ -50,7 +53,11 @@ public abstract class AbstractWebSocketIntegrationTests {
 	static {
 		upgradeStrategyConfigTypes.put(JettyWebSocketTestServer.class, JettyUpgradeStrategyConfig.class);
 		upgradeStrategyConfigTypes.put(TomcatWebSocketTestServer.class, TomcatUpgradeStrategyConfig.class);
+		upgradeStrategyConfigTypes.put(UndertowTestServer.class, UndertowUpgradeStrategyConfig.class);
 	}
+
+	@Rule
+	public final TestName testName = new TestName();
 
 	@Parameter(0)
 	public WebSocketTestServer server;
@@ -64,6 +71,10 @@ public abstract class AbstractWebSocketIntegrationTests {
 	@Before
 	public void setup() throws Exception {
 
+		logger.debug("Setting up '" + this.testName.getMethodName() + "', client=" +
+				this.webSocketClient.getClass().getSimpleName() + ", server=" +
+				this.server.getClass().getSimpleName());
+
 		this.wac = new AnnotationConfigWebApplicationContext();
 		this.wac.register(getAnnotatedConfigClasses());
 		this.wac.register(upgradeStrategyConfigTypes.get(this.server.getClass()));
@@ -73,6 +84,7 @@ public abstract class AbstractWebSocketIntegrationTests {
 			((Lifecycle) this.webSocketClient).start();
 		}
 
+		this.server.setup();
 		this.server.deployConfig(this.wac);
 		this.server.start();
 	}
@@ -89,19 +101,23 @@ public abstract class AbstractWebSocketIntegrationTests {
 		catch (Throwable t) {
 			logger.error("Failed to stop WebSocket client", t);
 		}
-
 		try {
 			this.server.undeployConfig();
 		}
 		catch (Throwable t) {
 			logger.error("Failed to undeploy application config", t);
 		}
-
 		try {
 			this.server.stop();
 		}
 		catch (Throwable t) {
 			logger.error("Failed to stop server", t);
+		}
+		try {
+			this.wac.close();
+		}
+		catch (Throwable t) {
+			logger.error("Failed to close WebApplicationContext", t);
 		}
 	}
 
@@ -117,7 +133,7 @@ public abstract class AbstractWebSocketIntegrationTests {
 	static abstract class AbstractRequestUpgradeStrategyConfig {
 
 		@Bean
-		public HandshakeHandler handshakeHandler() {
+		public DefaultHandshakeHandler handshakeHandler() {
 			return new DefaultHandshakeHandler(requestUpgradeStrategy());
 		}
 
@@ -140,6 +156,15 @@ public abstract class AbstractWebSocketIntegrationTests {
 		@Bean
 		public RequestUpgradeStrategy requestUpgradeStrategy() {
 			return new TomcatRequestUpgradeStrategy();
+		}
+	}
+
+	@Configuration
+	static class UndertowUpgradeStrategyConfig extends AbstractRequestUpgradeStrategyConfig {
+
+		@Bean
+		public RequestUpgradeStrategy requestUpgradeStrategy() {
+			return new UndertowRequestUpgradeStrategy();
 		}
 	}
 

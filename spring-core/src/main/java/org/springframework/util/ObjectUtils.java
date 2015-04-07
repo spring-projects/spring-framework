@@ -21,10 +21,7 @@ import java.util.Arrays;
 
 /**
  * Miscellaneous object utility methods.
- *
- * <p>Mainly for internal use within the framework; consider
- * <a href="http://jakarta.apache.org/commons/lang/">Jakarta's Commons Lang</a>
- * for a more comprehensive suite of object utilities.
+ * Mainly for internal use within the framework.
  *
  * <p>Thanks to Alex Ruiz for contributing several enhancements to this class!
  *
@@ -34,7 +31,6 @@ import java.util.Arrays;
  * @author Rob Harrop
  * @author Chris Beams
  * @since 19.03.2004
- * @see org.apache.commons.lang.ObjectUtils
  */
 public abstract class ObjectUtils {
 
@@ -63,23 +59,21 @@ public abstract class ObjectUtils {
 	}
 
 	/**
-	 * Check whether the given exception is compatible with the exceptions
-	 * declared in a throws clause.
-	 * @param ex the exception to checked
-	 * @param declaredExceptions the exceptions declared in the throws clause
+	 * Check whether the given exception is compatible with the specified
+	 * exception types, as declared in a throws clause.
+	 * @param ex the exception to check
+	 * @param declaredExceptions the exception types declared in the throws clause
 	 * @return whether the given exception is compatible
 	 */
-	public static boolean isCompatibleWithThrowsClause(Throwable ex, Class[] declaredExceptions) {
+	public static boolean isCompatibleWithThrowsClause(Throwable ex, Class<?>... declaredExceptions) {
 		if (!isCheckedException(ex)) {
 			return true;
 		}
 		if (declaredExceptions != null) {
-			int i = 0;
-			while (i < declaredExceptions.length) {
-				if (declaredExceptions[i].isAssignableFrom(ex.getClass())) {
+			for (Class<?> declaredException : declaredExceptions) {
+				if (declaredException.isInstance(ex)) {
 					return true;
 				}
-				i++;
 			}
 		}
 		return false;
@@ -161,7 +155,7 @@ public abstract class ObjectUtils {
 	 */
 	public static <E extends Enum<?>> E caseInsensitiveValueOf(E[] enumValues, String constant) {
 		for (E candidate : enumValues) {
-			if(candidate.toString().equalsIgnoreCase(constant)) {
+			if (candidate.toString().equalsIgnoreCase(constant)) {
 				return candidate;
 			}
 		}
@@ -177,7 +171,7 @@ public abstract class ObjectUtils {
 	 * @param obj the object to append
 	 * @return the new array (of the same component type; never {@code null})
 	 */
-	public static <A,O extends A> A[] addObjectToArray(A[] array, O obj) {
+	public static <A, O extends A> A[] addObjectToArray(A[] array, O obj) {
 		Class<?> compType = Object.class;
 		if (array != null) {
 			compType = array.getClass().getComponentType();
@@ -218,7 +212,7 @@ public abstract class ObjectUtils {
 		if (length == 0) {
 			return new Object[0];
 		}
-		Class wrapperType = Array.get(source, 0).getClass();
+		Class<?> wrapperType = Array.get(source, 0).getClass();
 		Object[] newArray = (Object[]) Array.newInstance(wrapperType, length);
 		for (int i = 0; i < length; i++) {
 			newArray[i] = Array.get(source, i);
@@ -286,7 +280,7 @@ public abstract class ObjectUtils {
 
 	/**
 	 * Return as hash code for the given object; typically the value of
-	 * {@code {@link Object#hashCode()}}. If the object is an array,
+	 * {@code Object#hashCode()}}. If the object is an array,
 	 * this method will delegate to any of the {@code nullSafeHashCode}
 	 * methods for arrays in this class. If the object is {@code null},
 	 * this method returns 0.
@@ -345,9 +339,8 @@ public abstract class ObjectUtils {
 			return 0;
 		}
 		int hash = INITIAL_HASH;
-		int arraySize = array.length;
-		for (int i = 0; i < arraySize; i++) {
-			hash = MULTIPLIER * hash + nullSafeHashCode(array[i]);
+		for (Object element : array) {
+			hash = MULTIPLIER * hash + nullSafeHashCode(element);
 		}
 		return hash;
 	}
@@ -361,9 +354,8 @@ public abstract class ObjectUtils {
 			return 0;
 		}
 		int hash = INITIAL_HASH;
-		int arraySize = array.length;
-		for (int i = 0; i < arraySize; i++) {
-			hash = MULTIPLIER * hash + hashCode(array[i]);
+		for (boolean element : array) {
+			hash = MULTIPLIER * hash + hashCode(element);
 		}
 		return hash;
 	}
@@ -377,9 +369,8 @@ public abstract class ObjectUtils {
 			return 0;
 		}
 		int hash = INITIAL_HASH;
-		int arraySize = array.length;
-		for (int i = 0; i < arraySize; i++) {
-			hash = MULTIPLIER * hash + array[i];
+		for (byte element : array) {
+			hash = MULTIPLIER * hash + element;
 		}
 		return hash;
 	}
@@ -393,9 +384,8 @@ public abstract class ObjectUtils {
 			return 0;
 		}
 		int hash = INITIAL_HASH;
-		int arraySize = array.length;
-		for (int i = 0; i < arraySize; i++) {
-			hash = MULTIPLIER * hash + array[i];
+		for (char element : array) {
+			hash = MULTIPLIER * hash + element;
 		}
 		return hash;
 	}
@@ -409,9 +399,8 @@ public abstract class ObjectUtils {
 			return 0;
 		}
 		int hash = INITIAL_HASH;
-		int arraySize = array.length;
-		for (int i = 0; i < arraySize; i++) {
-			hash = MULTIPLIER * hash + hashCode(array[i]);
+		for (double element : array) {
+			hash = MULTIPLIER * hash + hashCode(element);
 		}
 		return hash;
 	}
@@ -425,9 +414,8 @@ public abstract class ObjectUtils {
 			return 0;
 		}
 		int hash = INITIAL_HASH;
-		int arraySize = array.length;
-		for (int i = 0; i < arraySize; i++) {
-			hash = MULTIPLIER * hash + hashCode(array[i]);
+		for (float element : array) {
+			hash = MULTIPLIER * hash + hashCode(element);
 		}
 		return hash;
 	}
@@ -441,9 +429,8 @@ public abstract class ObjectUtils {
 			return 0;
 		}
 		int hash = INITIAL_HASH;
-		int arraySize = array.length;
-		for (int i = 0; i < arraySize; i++) {
-			hash = MULTIPLIER * hash + array[i];
+		for (int element : array) {
+			hash = MULTIPLIER * hash + element;
 		}
 		return hash;
 	}
@@ -457,9 +444,8 @@ public abstract class ObjectUtils {
 			return 0;
 		}
 		int hash = INITIAL_HASH;
-		int arraySize = array.length;
-		for (int i = 0; i < arraySize; i++) {
-			hash = MULTIPLIER * hash + hashCode(array[i]);
+		for (long element : array) {
+			hash = MULTIPLIER * hash + hashCode(element);
 		}
 		return hash;
 	}
@@ -473,9 +459,8 @@ public abstract class ObjectUtils {
 			return 0;
 		}
 		int hash = INITIAL_HASH;
-		int arraySize = array.length;
-		for (int i = 0; i < arraySize; i++) {
-			hash = MULTIPLIER * hash + array[i];
+		for (short element : array) {
+			hash = MULTIPLIER * hash + element;
 		}
 		return hash;
 	}
@@ -485,7 +470,7 @@ public abstract class ObjectUtils {
 	 * @see Boolean#hashCode()
 	 */
 	public static int hashCode(boolean bool) {
-		return bool ? 1231 : 1237;
+		return (bool ? 1231 : 1237);
 	}
 
 	/**
@@ -493,8 +478,7 @@ public abstract class ObjectUtils {
 	 * @see Double#hashCode()
 	 */
 	public static int hashCode(double dbl) {
-		long bits = Double.doubleToLongBits(dbl);
-		return hashCode(bits);
+		return hashCode(Double.doubleToLongBits(dbl));
 	}
 
 	/**

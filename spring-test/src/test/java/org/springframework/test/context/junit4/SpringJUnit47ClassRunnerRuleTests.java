@@ -16,13 +16,14 @@
 
 package org.springframework.test.context.junit4;
 
-import static org.junit.Assert.assertEquals;
-
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestName;
 import org.junit.runner.RunWith;
+
 import org.springframework.test.context.TestExecutionListeners;
+
+import static org.junit.Assert.*;
 
 /**
  * Verifies support for JUnit 4.7 {@link Rule Rules} in conjunction with the

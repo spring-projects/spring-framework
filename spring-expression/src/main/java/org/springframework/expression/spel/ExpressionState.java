@@ -30,6 +30,7 @@ import org.springframework.expression.PropertyAccessor;
 import org.springframework.expression.TypeComparator;
 import org.springframework.expression.TypeConverter;
 import org.springframework.expression.TypedValue;
+import org.springframework.util.Assert;
 
 /**
  * An ExpressionState is for maintaining per-expression-evaluation state, any changes to
@@ -49,35 +50,33 @@ public class ExpressionState {
 
 	private final EvaluationContext relatedContext;
 
+	private final TypedValue rootObject;
+
+	private final SpelParserConfiguration configuration;
+
 	private Stack<VariableScope> variableScopes;
 
 	private Stack<TypedValue> contextObjects;
 
-	private final TypedValue rootObject;
-
-	private SpelParserConfiguration configuration;
-
 
 	public ExpressionState(EvaluationContext context) {
-		this.relatedContext = context;
-		this.rootObject = context.getRootObject();
+		this(context, context.getRootObject(), new SpelParserConfiguration(false, false));
 	}
 
 	public ExpressionState(EvaluationContext context, SpelParserConfiguration configuration) {
-		this.relatedContext = context;
-		this.configuration = configuration;
-		this.rootObject = context.getRootObject();
+		this(context, context.getRootObject(), configuration);
 	}
 
 	public ExpressionState(EvaluationContext context, TypedValue rootObject) {
-		this.relatedContext = context;
-		this.rootObject = rootObject;
+		this(context, rootObject, new SpelParserConfiguration(false, false));
 	}
 
 	public ExpressionState(EvaluationContext context, TypedValue rootObject, SpelParserConfiguration configuration) {
+		Assert.notNull(context, "EvaluationContext must not be null");
+		Assert.notNull(configuration, "SpelParserConfiguration must not be null");
 		this.relatedContext = context;
-		this.configuration = configuration;
 		this.rootObject = rootObject;
+		this.configuration = configuration;
 	}
 
 
@@ -93,23 +92,22 @@ public class ExpressionState {
 	 * The active context object is what unqualified references to properties/etc are resolved against.
 	 */
 	public TypedValue getActiveContextObject() {
-		if (this.contextObjects==null || this.contextObjects.isEmpty()) {
+		if (this.contextObjects == null || this.contextObjects.isEmpty()) {
 			return this.rootObject;
 		}
-
 		return this.contextObjects.peek();
 	}
 
 	public void pushActiveContextObject(TypedValue obj) {
-		if (this.contextObjects==null) {
-			this.contextObjects =  new Stack<TypedValue>();
+		if (this.contextObjects == null) {
+			this.contextObjects = new Stack<TypedValue>();
 		}
 		this.contextObjects.push(obj);
 	}
 
 	public void popActiveContextObject() {
-		if (this.contextObjects==null) {
-			this.contextObjects =  new Stack<TypedValue>();
+		if (this.contextObjects == null) {
+			this.contextObjects = new Stack<TypedValue>();
 		}
 		this.contextObjects.pop();
 	}
@@ -151,14 +149,12 @@ public class ExpressionState {
 
 	public Object convertValue(TypedValue value, TypeDescriptor targetTypeDescriptor) throws EvaluationException {
 		Object val = value.getValue();
-		return this.relatedContext.getTypeConverter().convertValue(val,
-				TypeDescriptor.forObject(val), targetTypeDescriptor);
+		return this.relatedContext.getTypeConverter().convertValue(val, TypeDescriptor.forObject(val), targetTypeDescriptor);
 	}
 
 	/*
-	 * A new scope is entered when a function is invoked
+	 * A new scope is entered when a function is invoked.
 	 */
-
 	public void enterScope(Map<String, Object> argMap) {
 		ensureVariableScopesInitialized();
 		this.variableScopes.push(new VariableScope(argMap));
@@ -197,8 +193,8 @@ public class ExpressionState {
 			return new TypedValue(returnValue);
 		}
 		else {
-			String leftType = (left==null?"null":left.getClass().getName());
-			String rightType = (right==null?"null":right.getClass().getName());
+			String leftType = (left == null ? "null" : left.getClass().getName());
+			String rightType = (right == null? "null" : right.getClass().getName());
 			throw new SpelEvaluationException(SpelMessage.OPERATOR_NOT_SUPPORTED_BETWEEN_TYPES, op, leftType, rightType);
 		}
 	}
@@ -217,16 +213,18 @@ public class ExpressionState {
 
 
 	/**
-	 * A new scope is entered when a function is called and it is used to hold the parameters to the function call.  If the names
-	 * of the parameters clash with those in a higher level scope, those in the higher level scope will not be accessible whilst
-	 * the function is executing.  When the function returns the scope is exited.
+	 * A new scope is entered when a function is called and it is used to hold the
+	 * parameters to the function call. If the names of the parameters clash with
+	 * those in a higher level scope, those in the higher level scope will not be
+	 * accessible whilst the function is executing. When the function returns,
+	 * the scope is exited.
 	 */
 	private static class VariableScope {
 
 		private final Map<String, Object> vars = new HashMap<String, Object>();
 
-		public VariableScope() { }
-
+		public VariableScope() {
+		}
 
 		public VariableScope(Map<String, Object> arguments) {
 			if (arguments != null) {
@@ -237,7 +235,6 @@ public class ExpressionState {
 		public VariableScope(String name, Object value) {
 			this.vars.put(name,value);
 		}
-
 
 		public Object lookupVariable(String name) {
 			return this.vars.get(name);

@@ -19,7 +19,6 @@ package org.springframework.jdbc.object;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Map;
-
 import javax.sql.DataSource;
 
 import org.springframework.jdbc.core.RowMapper;
@@ -60,7 +59,7 @@ public abstract class UpdatableSqlQuery<T> extends SqlQuery<T> {
 	 * implementation of the {@code updateRow()} method.
 	 */
 	@Override
-	protected RowMapper<T> newRowMapper(Object[] parameters, Map context) {
+	protected RowMapper<T> newRowMapper(Object[] parameters, Map<?, ?> context) {
 		return new RowMapperImpl(context);
 	}
 
@@ -79,7 +78,7 @@ public abstract class UpdatableSqlQuery<T> extends SqlQuery<T> {
 	 * Subclasses can simply not catch SQLExceptions, relying on the
 	 * framework to clean up.
 	 */
-	protected abstract T updateRow(ResultSet rs, int rowNum, Map context) throws SQLException;
+	protected abstract T updateRow(ResultSet rs, int rowNum, Map<?, ?> context) throws SQLException;
 
 
 	/**
@@ -88,9 +87,9 @@ public abstract class UpdatableSqlQuery<T> extends SqlQuery<T> {
 	 */
 	protected class RowMapperImpl implements RowMapper<T> {
 
-		private final Map context;
+		private final Map<?, ?> context;
 
-		public RowMapperImpl(Map context) {
+		public RowMapperImpl(Map<?, ?> context) {
 			this.context = context;
 		}
 

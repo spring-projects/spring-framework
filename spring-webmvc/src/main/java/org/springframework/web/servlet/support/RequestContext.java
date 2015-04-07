@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -114,6 +114,8 @@ public class RequestContext {
 	private Theme theme;
 
 	private Boolean defaultHtmlEscape;
+
+	private Boolean responseEncodedHtmlEscape;
 
 	private UrlPathHelper urlPathHelper;
 
@@ -262,6 +264,10 @@ public class RequestContext {
 		// Determine default HTML escape setting from the "defaultHtmlEscape"
 		// context-param in web.xml, if any.
 		this.defaultHtmlEscape = WebUtils.getDefaultHtmlEscape(this.webApplicationContext.getServletContext());
+
+		// Determine response-encoded HTML escape setting from the "responseEncodedHtmlEscape"
+		// context-param in web.xml, if any.
+		this.responseEncodedHtmlEscape = WebUtils.getResponseEncodedHtmlEscape(this.webApplicationContext.getServletContext());
 
 		this.urlPathHelper = new UrlPathHelper();
 
@@ -485,6 +491,27 @@ public class RequestContext {
 	}
 
 	/**
+	 * Is HTML escaping using the response encoding by default?
+	 * If enabled, only XML markup significant characters will be escaped with UTF-* encodings.
+	 * <p>Falls back to {@code true} in case of no explicit default given, as of Spring 4.2.
+	 * @since 4.1.2
+	 */
+	public boolean isResponseEncodedHtmlEscape() {
+		return (this.responseEncodedHtmlEscape == null || this.responseEncodedHtmlEscape.booleanValue());
+	}
+
+	/**
+	 * Return the default setting about use of response encoding for HTML escape setting,
+	 * differentiating between no default specified and an explicit value.
+	 * @return whether default use of response encoding HTML escaping is enabled (null = no explicit default)
+	 * @since 4.1.2
+	 */
+	public Boolean getResponseEncodedHtmlEscape() {
+		return this.responseEncodedHtmlEscape;
+	}
+
+
+	/**
 	 * Set the UrlPathHelper to use for context path and request URI decoding.
 	 * Can be used to pass a shared UrlPathHelper instance in.
 	 * <p>A default UrlPathHelper is always available.
@@ -624,7 +651,7 @@ public class RequestContext {
 	 * @param defaultMessage String to return if the lookup fails
 	 * @return the message
 	 */
-	public String getMessage(String code, List args, String defaultMessage) {
+	public String getMessage(String code, List<?> args, String defaultMessage) {
 		return getMessage(code, (args != null ? args.toArray() : null), defaultMessage, isDefaultHtmlEscape());
 	}
 
@@ -669,7 +696,7 @@ public class RequestContext {
 	 * @return the message
 	 * @throws org.springframework.context.NoSuchMessageException if not found
 	 */
-	public String getMessage(String code, List args) throws NoSuchMessageException {
+	public String getMessage(String code, List<?> args) throws NoSuchMessageException {
 		return getMessage(code, (args != null ? args.toArray() : null), isDefaultHtmlEscape());
 	}
 
@@ -742,7 +769,7 @@ public class RequestContext {
 	 * @param defaultMessage String to return if the lookup fails
 	 * @return the message
 	 */
-	public String getThemeMessage(String code, List args, String defaultMessage) {
+	public String getThemeMessage(String code, List<?> args, String defaultMessage) {
 		return getTheme().getMessageSource().getMessage(code, (args != null ? args.toArray() : null), defaultMessage,
 				this.locale);
 	}
@@ -781,7 +808,7 @@ public class RequestContext {
 	 * @return the message
 	 * @throws org.springframework.context.NoSuchMessageException if not found
 	 */
-	public String getThemeMessage(String code, List args) throws NoSuchMessageException {
+	public String getThemeMessage(String code, List<?> args) throws NoSuchMessageException {
 		return getTheme().getMessageSource().getMessage(code, (args != null ? args.toArray() : null), this.locale);
 	}
 

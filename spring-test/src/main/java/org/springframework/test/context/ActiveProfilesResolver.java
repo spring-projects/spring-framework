@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -37,7 +37,6 @@ public interface ActiveProfilesResolver {
 	/**
 	 * Resolve the <em>bean definition profiles</em> to use when loading an
 	 * {@code ApplicationContext} for the given {@linkplain Class test class}.
-	 *
 	 * @param testClass the test class for which the profiles should be resolved;
 	 * never {@code null}
 	 * @return the list of bean definition profiles to use when loading the

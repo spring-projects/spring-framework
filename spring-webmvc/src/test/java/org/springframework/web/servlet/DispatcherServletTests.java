@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,12 +23,14 @@ import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletRequestWrapper;
 import javax.servlet.http.HttpServletResponse;
 
 import junit.framework.TestCase;
 
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.PropertyValue;
+import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.DummyEnvironment;
@@ -37,7 +39,9 @@ import org.springframework.mock.web.test.MockHttpServletResponse;
 import org.springframework.mock.web.test.MockServletConfig;
 import org.springframework.mock.web.test.MockServletContext;
 import org.springframework.tests.sample.beans.TestBean;
+import org.springframework.web.context.ConfigurableWebApplicationContext;
 import org.springframework.web.context.ConfigurableWebEnvironment;
+import org.springframework.web.context.ContextLoader;
 import org.springframework.web.context.ServletConfigAwareBean;
 import org.springframework.web.context.ServletContextAwareBean;
 import org.springframework.web.context.WebApplicationContext;
@@ -214,6 +218,22 @@ public class DispatcherServletTests extends TestCase {
 		MultipartHttpServletRequest multipartRequest = multipartResolver.resolveMultipart(request);
 		complexDispatcherServlet.service(multipartRequest, response);
 		multipartResolver.cleanupMultipart(multipartRequest);
+		assertNull(request.getAttribute(SimpleMappingExceptionResolver.DEFAULT_EXCEPTION_ATTRIBUTE));
+		assertNotNull(request.getAttribute("cleanedUp"));
+	}
+
+	public void testExistingMultipartRequestButWrapped() throws Exception {
+		MockHttpServletRequest request = new MockHttpServletRequest(getServletContext(), "GET", "/locale.do;abc=def");
+		request.addPreferredLocale(Locale.CANADA);
+		request.addUserRole("role1");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		ComplexWebApplicationContext.MockMultipartResolver multipartResolver =
+				(ComplexWebApplicationContext.MockMultipartResolver) complexDispatcherServlet.getWebApplicationContext()
+						.getBean("multipartResolver");
+		MultipartHttpServletRequest multipartRequest = multipartResolver.resolveMultipart(request);
+		complexDispatcherServlet.service(new HttpServletRequestWrapper(multipartRequest), response);
+		multipartResolver.cleanupMultipart(multipartRequest);
+		assertNull(request.getAttribute(SimpleMappingExceptionResolver.DEFAULT_EXCEPTION_ATTRIBUTE));
 		assertNotNull(request.getAttribute("cleanedUp"));
 	}
 
@@ -784,12 +804,70 @@ public class DispatcherServletTests extends TestCase {
 		assertThat(response.getHeader("Allow"), equalTo("GET, HEAD, POST, PUT, DELETE, TRACE, OPTIONS, PATCH"));
 	}
 
+	public void testContextInitializers() throws Exception {
+		DispatcherServlet servlet = new DispatcherServlet();
+		servlet.setContextClass(SimpleWebApplicationContext.class);
+		servlet.setContextInitializers(new TestWebContextInitializer(), new OtherWebContextInitializer());
+		servlet.init(servletConfig);
+		assertEquals("true", servletConfig.getServletContext().getAttribute("initialized"));
+		assertEquals("true", servletConfig.getServletContext().getAttribute("otherInitialized"));
+	}
+
+	public void testContextInitializerClasses() throws Exception {
+		DispatcherServlet servlet = new DispatcherServlet();
+		servlet.setContextClass(SimpleWebApplicationContext.class);
+		servlet.setContextInitializerClasses(
+				TestWebContextInitializer.class.getName() + "," + OtherWebContextInitializer.class.getName());
+		servlet.init(servletConfig);
+		assertEquals("true", servletConfig.getServletContext().getAttribute("initialized"));
+		assertEquals("true", servletConfig.getServletContext().getAttribute("otherInitialized"));
+	}
+
+	public void testGlobalInitializerClasses() throws Exception {
+		DispatcherServlet servlet = new DispatcherServlet();
+		servlet.setContextClass(SimpleWebApplicationContext.class);
+		servletConfig.getServletContext().setInitParameter(ContextLoader.GLOBAL_INITIALIZER_CLASSES_PARAM,
+				TestWebContextInitializer.class.getName() + "," + OtherWebContextInitializer.class.getName());
+		servlet.init(servletConfig);
+		assertEquals("true", servletConfig.getServletContext().getAttribute("initialized"));
+		assertEquals("true", servletConfig.getServletContext().getAttribute("otherInitialized"));
+	}
+
+	public void testMixedInitializerClasses() throws Exception {
+		DispatcherServlet servlet = new DispatcherServlet();
+		servlet.setContextClass(SimpleWebApplicationContext.class);
+		servletConfig.getServletContext().setInitParameter(ContextLoader.GLOBAL_INITIALIZER_CLASSES_PARAM,
+				TestWebContextInitializer.class.getName());
+		servlet.setContextInitializerClasses(OtherWebContextInitializer.class.getName());
+		servlet.init(servletConfig);
+		assertEquals("true", servletConfig.getServletContext().getAttribute("initialized"));
+		assertEquals("true", servletConfig.getServletContext().getAttribute("otherInitialized"));
+	}
+
 
 	public static class ControllerFromParent implements Controller {
 
 		@Override
 		public ModelAndView handleRequest(HttpServletRequest request, HttpServletResponse response) throws Exception {
 			return new ModelAndView(ControllerFromParent.class.getName());
+		}
+	}
+
+
+	private static class TestWebContextInitializer implements ApplicationContextInitializer<ConfigurableWebApplicationContext> {
+
+		@Override
+		public void initialize(ConfigurableWebApplicationContext applicationContext) {
+			applicationContext.getServletContext().setAttribute("initialized", "true");
+		}
+	}
+
+
+	private static class OtherWebContextInitializer implements ApplicationContextInitializer<ConfigurableWebApplicationContext> {
+
+		@Override
+		public void initialize(ConfigurableWebApplicationContext applicationContext) {
+			applicationContext.getServletContext().setAttribute("otherInitialized", "true");
 		}
 	}
 

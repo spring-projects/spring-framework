@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,11 @@
 
 package org.springframework.beans;
 
-import static org.junit.Assert.assertEquals;
-
-import javax.swing.JPanel;
-import javax.swing.JTextField;
-
 import org.junit.Test;
+
+import org.springframework.tests.sample.beans.TestBean;
+
+import static org.junit.Assert.*;
 
 /**
  * Unit tests for {@link DirectFieldAccessor}
@@ -29,17 +28,23 @@ import org.junit.Test;
  * @author Jose Luis Martin
  * @author Chris Beams
  */
-public class DirectFieldAccessorTests {
+public class DirectFieldAccessorTests extends AbstractConfigurablePropertyAccessorTests {
+
+	@Override
+	protected ConfigurablePropertyAccessor createAccessor(Object target) {
+		return new DirectFieldAccessor(target);
+	}
 
 	@Test
 	public void withShadowedField() throws Exception {
 		@SuppressWarnings("serial")
-		JPanel p = new JPanel() {
+		TestBean tb = new TestBean() {
 			@SuppressWarnings("unused")
-			JTextField name = new JTextField();
+			StringBuilder name = new StringBuilder();
 		};
 
-		DirectFieldAccessor dfa = new DirectFieldAccessor(p);
-		assertEquals(JTextField.class, dfa.getPropertyType("name"));
+		DirectFieldAccessor dfa = new DirectFieldAccessor(tb);
+		assertEquals(StringBuilder.class, dfa.getPropertyType("name"));
 	}
+
 }

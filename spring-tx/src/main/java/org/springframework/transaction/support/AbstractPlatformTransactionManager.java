@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -361,7 +361,7 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 		}
 		else if (definition.getPropagationBehavior() == TransactionDefinition.PROPAGATION_REQUIRED ||
 				definition.getPropagationBehavior() == TransactionDefinition.PROPAGATION_REQUIRES_NEW ||
-			definition.getPropagationBehavior() == TransactionDefinition.PROPAGATION_NESTED) {
+				definition.getPropagationBehavior() == TransactionDefinition.PROPAGATION_NESTED) {
 			SuspendedResourcesHolder suspendedResources = suspend(null);
 			if (debugEnabled) {
 				logger.debug("Creating new transaction with name [" + definition.getName() + "]: " + definition);
@@ -385,6 +385,10 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 		}
 		else {
 			// Create "empty" transaction: no actual transaction, but potentially synchronization.
+			if (definition.getIsolationLevel() != TransactionDefinition.ISOLATION_DEFAULT && logger.isWarnEnabled()) {
+				logger.warn("Custom isolation level specified but no actual transaction initiated; " +
+						"isolation level will effectively be ignored: " + definition);
+			}
 			boolean newSynchronization = (getTransactionSynchronization() == SYNCHRONIZATION_ALWAYS);
 			return prepareTransactionStatus(definition, null, true, newSynchronization, debugEnabled, null);
 		}
@@ -531,7 +535,7 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 		if (status.isNewSynchronization()) {
 			TransactionSynchronizationManager.setActualTransactionActive(status.hasTransaction());
 			TransactionSynchronizationManager.setCurrentTransactionIsolationLevel(
-					(definition.getIsolationLevel() != TransactionDefinition.ISOLATION_DEFAULT) ?
+					definition.getIsolationLevel() != TransactionDefinition.ISOLATION_DEFAULT ?
 							definition.getIsolationLevel() : null);
 			TransactionSynchronizationManager.setCurrentTransactionReadOnly(definition.isReadOnly());
 			TransactionSynchronizationManager.setCurrentTransactionName(definition.getName());
@@ -1272,6 +1276,7 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 		this.logger = LogFactory.getLog(getClass());
 	}
 
+
 	/**
 	 * Holder for suspended resources.
 	 * Used internally by {@code suspend} and {@code resume}.
@@ -1279,10 +1284,15 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 	protected static class SuspendedResourcesHolder {
 
 		private final Object suspendedResources;
+
 		private List<TransactionSynchronization> suspendedSynchronizations;
+
 		private String name;
+
 		private boolean readOnly;
+
 		private Integer isolationLevel;
+
 		private boolean wasActive;
 
 		private SuspendedResourcesHolder(Object suspendedResources) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,37 +37,24 @@ public abstract class ExpressionUtils {
 	 * attempts to use it to convert the supplied value to the specified type. Throws an
 	 * exception if conversion is not possible.
 	 * @param context the evaluation context that may define a type converter
-	 * @param value the value to convert (may be null)
-	 * @param targetType the type to attempt conversion to
-	 * @return the converted value
-	 * @throws EvaluationException if there is a problem during conversion or conversion
-	 *         of the value to the specified type is not supported
-	 * @deprecated use {@link #convertTypedValue(EvaluationContext, TypedValue, Class)}
-	 */
-	@Deprecated
-	public static <T> T convert(EvaluationContext context, Object value, Class<T> targetType) throws EvaluationException {
-		return convertTypedValue(context, new TypedValue(value), targetType);
-	}
-
-	/**
-	 * Determines if there is a type converter available in the specified context and
-	 * attempts to use it to convert the supplied value to the specified type. Throws an
-	 * exception if conversion is not possible.
-	 * @param context the evaluation context that may define a type converter
 	 * @param typedValue the value to convert and a type descriptor describing it
 	 * @param targetType the type to attempt conversion to
 	 * @return the converted value
 	 * @throws EvaluationException if there is a problem during conversion or conversion
-	 *         of the value to the specified type is not supported
+	 * of the value to the specified type is not supported
 	 */
 	@SuppressWarnings("unchecked")
 	public static <T> T convertTypedValue(EvaluationContext context, TypedValue typedValue, Class<T> targetType) {
 		Object value = typedValue.getValue();
-		if ((targetType == null) || (value != null && ClassUtils.isAssignableValue(targetType, value))) {
+		if (targetType == null) {
 			return (T) value;
 		}
 		if (context != null) {
-			return (T) context.getTypeConverter().convertValue(value, typedValue.getTypeDescriptor(), TypeDescriptor.valueOf(targetType));
+			return (T) context.getTypeConverter().convertValue(
+					value, typedValue.getTypeDescriptor(), TypeDescriptor.valueOf(targetType));
+		}
+		if (ClassUtils.isAssignableValue(targetType, value)) {
+			return (T) value;
 		}
 		throw new EvaluationException("Cannot convert value '" + value + "' to type '" + targetType.getName() + "'");
 	}
@@ -100,8 +87,8 @@ public abstract class ExpressionUtils {
 	 * Attempt to convert a typed value to a long using the supplied type converter.
 	 */
 	public static long toLong(TypeConverter typeConverter, TypedValue typedValue) {
-		return (Long) typeConverter.convertValue(typedValue.getValue(), typedValue.getTypeDescriptor(), TypeDescriptor
-				.valueOf(Long.class));
+		return (Long) typeConverter.convertValue(typedValue.getValue(), typedValue.getTypeDescriptor(),
+				TypeDescriptor.valueOf(Long.class));
 	}
 
 	/**
@@ -116,24 +103,24 @@ public abstract class ExpressionUtils {
 	 * Attempt to convert a typed value to a short using the supplied type converter.
 	 */
 	public static short toShort(TypeConverter typeConverter, TypedValue typedValue) {
-		return (Short) typeConverter.convertValue(typedValue.getValue(), typedValue.getTypeDescriptor(), TypeDescriptor
-				.valueOf(Short.class));
+		return (Short) typeConverter.convertValue(typedValue.getValue(), typedValue.getTypeDescriptor(),
+				TypeDescriptor.valueOf(Short.class));
 	}
 
 	/**
 	 * Attempt to convert a typed value to a float using the supplied type converter.
 	 */
 	public static float toFloat(TypeConverter typeConverter, TypedValue typedValue) {
-		return (Float) typeConverter.convertValue(typedValue.getValue(), typedValue.getTypeDescriptor(), TypeDescriptor
-				.valueOf(Float.class));
+		return (Float) typeConverter.convertValue(typedValue.getValue(), typedValue.getTypeDescriptor(),
+				TypeDescriptor.valueOf(Float.class));
 	}
 
 	/**
 	 * Attempt to convert a typed value to a byte using the supplied type converter.
 	 */
 	public static byte toByte(TypeConverter typeConverter, TypedValue typedValue) {
-		return (Byte) typeConverter.convertValue(typedValue.getValue(), typedValue.getTypeDescriptor(), TypeDescriptor
-				.valueOf(Byte.class));
+		return (Byte) typeConverter.convertValue(typedValue.getValue(), typedValue.getTypeDescriptor(),
+				TypeDescriptor.valueOf(Byte.class));
 	}
 
 }

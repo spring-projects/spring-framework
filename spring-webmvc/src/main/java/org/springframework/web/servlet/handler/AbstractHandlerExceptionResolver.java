@@ -53,7 +53,7 @@ public abstract class AbstractHandlerExceptionResolver implements HandlerExcepti
 
 	private Set<?> mappedHandlers;
 
-	private Class[] mappedHandlerClasses;
+	private Class<?>[] mappedHandlerClasses;
 
 	private Log warnLogger;
 
@@ -90,7 +90,7 @@ public abstract class AbstractHandlerExceptionResolver implements HandlerExcepti
 	 * as fallback for all exceptions; any further HandlerExceptionResolvers in the chain will be
 	 * ignored in this case.
 	 */
-	public void setMappedHandlerClasses(Class[] mappedHandlerClasses) {
+	public void setMappedHandlerClasses(Class<?>[] mappedHandlerClasses) {
 		this.mappedHandlerClasses = mappedHandlerClasses;
 	}
 
@@ -160,7 +160,7 @@ public abstract class AbstractHandlerExceptionResolver implements HandlerExcepti
 				return true;
 			}
 			if (this.mappedHandlerClasses != null) {
-				for (Class handlerClass : this.mappedHandlerClasses) {
+				for (Class<?> handlerClass : this.mappedHandlerClasses) {
 					if (handlerClass.isInstance(handler)) {
 						return true;
 					}
@@ -189,7 +189,7 @@ public abstract class AbstractHandlerExceptionResolver implements HandlerExcepti
 	}
 
 	/**
-	 * Build a log message for the given exception, occured during processing the given request.
+	 * Build a log message for the given exception, occurred during processing the given request.
 	 * @param ex the exception that got thrown during handler execution
 	 * @param request current HTTP request (useful for obtaining metadata)
 	 * @return the log message to use

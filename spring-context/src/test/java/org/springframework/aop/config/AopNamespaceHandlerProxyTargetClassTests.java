@@ -16,12 +16,13 @@
 
 package org.springframework.aop.config;
 
-import static org.junit.Assert.assertTrue;
-
 import org.junit.Test;
-import org.springframework.aop.support.AopUtils;
+
 import org.springframework.aop.framework.Advised;
+import org.springframework.aop.support.AopUtils;
 import org.springframework.tests.sample.beans.ITestBean;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Rob Harrop

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,7 +54,7 @@ public class StandardAnnotationMetadata extends StandardClassMetadata implements
 	 * providing the option to return any nested annotations or annotation arrays in the
 	 * form of {@link org.springframework.core.annotation.AnnotationAttributes} instead
 	 * of actual {@link Annotation} instances.
-	 * @param introspectedClass the Class to instrospect
+	 * @param introspectedClass the Class to introspect
 	 * @param nestedAnnotationsAsMap return nested annotations and annotation arrays as
 	 * {@link org.springframework.core.annotation.AnnotationAttributes} for compatibility
 	 * with ASM-based {@link AnnotationMetadata} implementations
@@ -128,7 +128,7 @@ public class StandardAnnotationMetadata extends StandardClassMetadata implements
 	public boolean hasAnnotatedMethods(String annotationType) {
 		Method[] methods = getIntrospectedClass().getDeclaredMethods();
 		for (Method method : methods) {
-			if (AnnotatedElementUtils.isAnnotated(method, annotationType)) {
+			if (!method.isBridge() && AnnotatedElementUtils.isAnnotated(method, annotationType)) {
 				return true;
 			}
 		}
@@ -140,7 +140,7 @@ public class StandardAnnotationMetadata extends StandardClassMetadata implements
 		Method[] methods = getIntrospectedClass().getDeclaredMethods();
 		Set<MethodMetadata> annotatedMethods = new LinkedHashSet<MethodMetadata>();
 		for (Method method : methods) {
-			if (AnnotatedElementUtils.isAnnotated(method, annotationType)) {
+			if (!method.isBridge() && AnnotatedElementUtils.isAnnotated(method, annotationType)) {
 				annotatedMethods.add(new StandardMethodMetadata(method, this.nestedAnnotationsAsMap));
 			}
 		}

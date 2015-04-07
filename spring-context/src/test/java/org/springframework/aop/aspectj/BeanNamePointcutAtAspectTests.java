@@ -16,16 +16,17 @@
 
 package org.springframework.aop.aspectj;
 
-import static org.junit.Assert.*;
-
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.junit.Test;
+
 import org.springframework.aop.aspectj.annotation.AspectJProxyFactory;
 import org.springframework.aop.framework.Advised;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.tests.sample.beans.ITestBean;
 import org.springframework.tests.sample.beans.TestBean;
-import org.springframework.context.support.ClassPathXmlApplicationContext;
+
+import static org.junit.Assert.*;
 
 /**
  * Test for correct application of the bean() PCD for &#64;AspectJ-based aspects.
@@ -37,21 +38,17 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 public final class BeanNamePointcutAtAspectTests {
 
 	private ITestBean testBean1;
-
-	private ITestBean testBean2;
-
 	private ITestBean testBean3;
-
 	private CounterAspect counterAspect;
 
 
 	@org.junit.Before
+	@SuppressWarnings("resource")
 	public void setUp() {
 		ClassPathXmlApplicationContext ctx =
 			new ClassPathXmlApplicationContext(getClass().getSimpleName() + ".xml", getClass());
 		counterAspect = (CounterAspect) ctx.getBean("counterAspect");
 		testBean1 = (ITestBean) ctx.getBean("testBean1");
-		testBean2 = (ITestBean) ctx.getBean("testBean2");
 		testBean3 = (ITestBean) ctx.getBean("testBean3");
 	}
 

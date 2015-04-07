@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -65,9 +65,23 @@ class WebMvcConfigurerComposite implements WebMvcConfigurer {
 	}
 
 	@Override
+	public void configurePathMatch(PathMatchConfigurer configurer) {
+		for (WebMvcConfigurer delegate : this.delegates) {
+			delegate.configurePathMatch(configurer);
+		}
+	}
+
+	@Override
 	public void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
 		for (WebMvcConfigurer delegate : this.delegates) {
 			delegate.configureMessageConverters(converters);
+		}
+	}
+
+	@Override
+	public void extendMessageConverters(List<HttpMessageConverter<?>> converters) {
+		for (WebMvcConfigurer delegate : this.delegates) {
+			delegate.extendMessageConverters(converters);
 		}
 	}
 
@@ -103,6 +117,13 @@ class WebMvcConfigurerComposite implements WebMvcConfigurer {
 	public void addViewControllers(ViewControllerRegistry registry) {
 		for (WebMvcConfigurer delegate : this.delegates) {
 			delegate.addViewControllers(registry);
+		}
+	}
+
+	@Override
+	public void configureViewResolvers(ViewResolverRegistry registry) {
+		for (WebMvcConfigurer delegate : this.delegates) {
+			delegate.configureViewResolvers(registry);
 		}
 	}
 

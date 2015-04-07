@@ -16,21 +16,22 @@
 
 package org.springframework.expression.spel;
 
-import static org.junit.Assert.assertEquals;
-
 import org.junit.Test;
+
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.Operation;
 import org.springframework.expression.OperatorOverloader;
-import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.expression.spel.standard.SpelExpression;
+import org.springframework.expression.spel.support.StandardEvaluationContext;
+
+import static org.junit.Assert.*;
 
 /**
  * Test providing operator support
  *
  * @author Andy Clement
  */
-public class OperatorOverloaderTests extends ExpressionTestCase {
+public class OperatorOverloaderTests extends AbstractExpressionTests {
 
 	static class StringAndBooleanAddition implements OperatorOverloader {
 

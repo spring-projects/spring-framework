@@ -33,15 +33,13 @@ import org.springframework.util.StringUtils;
  * and rendering them in the UI form.
  *
  * <p>In web MVC code, this editor will typically be registered with
- * {@code binder.registerCustomEditor} calls in a custom
- * {@code initBinder} method.
+ * {@code binder.registerCustomEditor}.
  *
  * @author Juergen Hoeller
  * @since 28.04.2003
  * @see java.util.Date
  * @see java.text.DateFormat
  * @see org.springframework.validation.DataBinder#registerCustomEditor
- * @see org.springframework.web.servlet.mvc.BaseCommandController#initBinder
  */
 public class CustomDateEditor extends PropertyEditorSupport {
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,8 @@ import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -56,10 +58,12 @@ import static org.junit.Assert.*;
  * @author Keith Donald
  * @author Juergen Hoeller
  * @author Phillip Webb
+ * @author David Haraburda
  */
 public class GenericConversionServiceTests {
 
 	private GenericConversionService conversionService = new GenericConversionService();
+
 
 	@Test
 	public void canConvert() {
@@ -442,8 +446,6 @@ public class GenericConversionServiceTests {
 		System.out.println(watch.prettyPrint());
 	}
 
-	public static List<Integer> list;
-
 	@Test
 	public void testPerformance3() throws Exception {
 		Assume.group(TestGroup.PERFORMANCE);
@@ -470,8 +472,6 @@ public class GenericConversionServiceTests {
 		System.out.println(watch.prettyPrint());
 	}
 
-	public static Map<String, Integer> map;
-
 	@Test
 	public void emptyListToArray() {
 		conversionService.addConverter(new CollectionToArrayConverter(conversionService));
@@ -480,7 +480,7 @@ public class GenericConversionServiceTests {
 		TypeDescriptor sourceType = TypeDescriptor.forObject(list);
 		TypeDescriptor targetType = TypeDescriptor.valueOf(String[].class);
 		assertTrue(conversionService.canConvert(sourceType, targetType));
-		assertEquals(0, ((String[])conversionService.convert(list, sourceType, targetType)).length);
+		assertEquals(0, ((String[]) conversionService.convert(list, sourceType, targetType)).length);
 	}
 
 	@Test
@@ -494,82 +494,6 @@ public class GenericConversionServiceTests {
 		assertNull(conversionService.convert(list, sourceType, targetType));
 	}
 
-	private interface MyBaseInterface {
-
-	}
-
-
-	private interface MyInterface extends MyBaseInterface {
-
-	}
-
-
-	private static class MyInterfaceImplementer implements MyInterface {
-
-	}
-
-
-	private static class MyBaseInterfaceConverter implements Converter<MyBaseInterface, String> {
-
-		@Override
-		public String convert(MyBaseInterface source) {
-			return "RESULT";
-		}
-	}
-
-
-	private static class MyStringArrayToResourceArrayConverter implements Converter<String[], Resource[]>	{
-
-		@Override
-		public Resource[] convert(String[] source) {
-			Resource[] result = new Resource[source.length];
-			for (int i = 0; i < source.length; i++) {
-				result[i] = new DescriptiveResource(source[i].substring(1));
-			}
-			return result;
-		}
-	}
-
-
-	private static class MyStringArrayToIntegerArrayConverter implements Converter<String[], Integer[]>	{
-
-		@Override
-		public Integer[] convert(String[] source) {
-			Integer[] result = new Integer[source.length];
-			for (int i = 0; i < source.length; i++) {
-				result[i] = Integer.parseInt(source[i].substring(1));
-			}
-			return result;
-		}
-	}
-
-
-	private static class MyStringToIntegerArrayConverter implements Converter<String, Integer[]>	{
-
-		@Override
-		public Integer[] convert(String source) {
-			String[] srcArray = StringUtils.commaDelimitedListToStringArray(source);
-			Integer[] result = new Integer[srcArray.length];
-			for (int i = 0; i < srcArray.length; i++) {
-				result[i] = Integer.parseInt(srcArray[i].substring(1));
-			}
-			return result;
-		}
-	}
-
-
-	public static class WithCopyConstructor {
-
-		public WithCopyConstructor() {
-		}
-
-		public WithCopyConstructor(WithCopyConstructor value) {
-		}
-	}
-
-
-	public static Map<String, ?> wildcardMap;
-
 	@Test
 	public void stringToArrayCanConvert() {
 		conversionService.addConverter(new StringToArrayConverter(conversionService));
@@ -582,13 +506,11 @@ public class GenericConversionServiceTests {
 	public void stringToCollectionCanConvert() throws Exception {
 		conversionService.addConverter(new StringToCollectionConverter(conversionService));
 		assertTrue(conversionService.canConvert(String.class, Collection.class));
-		TypeDescriptor targetType = new TypeDescriptor(getClass().getField("stringToCollection"));
+		TypeDescriptor targetType = new TypeDescriptor(getClass().getField("integerCollection"));
 		assertFalse(conversionService.canConvert(TypeDescriptor.valueOf(String.class), targetType));
 		conversionService.addConverterFactory(new StringToNumberConverterFactory());
 		assertTrue(conversionService.canConvert(TypeDescriptor.valueOf(String.class), targetType));
 	}
-
-	public Collection<Integer> stringToCollection;
 
 	@Test
 	public void testConvertiblePairsInSet() {
@@ -618,7 +540,7 @@ public class GenericConversionServiceTests {
 		GenericConversionService conversionService = new DefaultConversionService();
 		byte[] byteArray = new byte[] { 1, 2, 3 };
 		Byte[] converted = conversionService.convert(byteArray, Byte[].class);
-		assertTrue(Arrays.equals(converted, new Byte[] { 1, 2, 3 }));
+		assertTrue(Arrays.equals(converted, new Byte[] {1, 2, 3}));
 	}
 
 	@Test
@@ -682,7 +604,7 @@ public class GenericConversionServiceTests {
 	}
 
 	@Test
-	public void shouldNotSuportNullConvertibleTypesFromNonConditionalGenericConverter() {
+	public void shouldNotSupportNullConvertibleTypesFromNonConditionalGenericConverter() {
 		GenericConversionService conversionService = new GenericConversionService();
 		GenericConverter converter = new GenericConverter() {
 			@Override
@@ -738,7 +660,7 @@ public class GenericConversionServiceTests {
 		byte[] byteArray = new byte[] { 1, 2, 3 };
 		byte[] converted = conversionService.convert(byteArray, byte[].class);
 		assertNotSame(byteArray, converted);
-		assertTrue(Arrays.equals(new byte[] { 2, 3, 4 }, converted));
+		assertTrue(Arrays.equals(new byte[] {2, 3, 4}, converted));
 	}
 
 	@Test
@@ -746,6 +668,13 @@ public class GenericConversionServiceTests {
 		conversionService.addConverter(new EnumToStringConverter(conversionService));
 		String result = conversionService.convert(MyEnum.A, String.class);
 		assertEquals("A", result);
+	}
+
+	@Test
+	public void testSubclassOfEnumToString() throws Exception {
+		conversionService.addConverter(new EnumToStringConverter(conversionService));
+		String result = conversionService.convert(EnumWithSubclass.FIRST, String.class);
+		assertEquals("FIRST", result);
 	}
 
 	@Test
@@ -758,6 +687,27 @@ public class GenericConversionServiceTests {
 	}
 
 	@Test
+	public void testStringToEnumWithInterfaceConversion() {
+		conversionService.addConverterFactory(new StringToEnumConverterFactory());
+		conversionService.addConverterFactory(new StringToMyEnumInterfaceConverterFactory());
+		assertEquals(MyEnum.A, conversionService.convert("1", MyEnum.class));
+	}
+
+	@Test
+	public void testStringToEnumWithBaseInterfaceConversion() {
+		conversionService.addConverterFactory(new StringToEnumConverterFactory());
+		conversionService.addConverterFactory(new StringToMyEnumBaseInterfaceConverterFactory());
+		assertEquals(MyEnum.A, conversionService.convert("base1", MyEnum.class));
+	}
+
+	@Test
+	public void testStringToEnumSet() throws Exception {
+		DefaultConversionService.addDefaultConverters(conversionService);
+		assertEquals(EnumSet.of(MyEnum.A),
+				conversionService.convert("A", TypeDescriptor.valueOf(String.class), new TypeDescriptor(getClass().getField("enumSet"))));
+	}
+
+	@Test
 	public void convertNullAnnotatedStringToString() throws Exception {
 		DefaultConversionService.addDefaultConverters(conversionService);
 		String source = null;
@@ -766,14 +716,160 @@ public class GenericConversionServiceTests {
 		conversionService.convert(source, sourceType, targetType);
 	}
 
+	@Test
+	public void multipleCollectionTypesFromSameSourceType() throws Exception {
+		conversionService.addConverter(new MyStringToRawCollectionConverter());
+		conversionService.addConverter(new MyStringToGenericCollectionConverter());
+		conversionService.addConverter(new MyStringToStringCollectionConverter());
+		conversionService.addConverter(new MyStringToIntegerCollectionConverter());
 
-	@ExampleAnnotation
-	public String annotatedString;
+		assertEquals(Collections.singleton("testX"),
+				conversionService.convert("test", TypeDescriptor.valueOf(String.class), new TypeDescriptor(getClass().getField("stringCollection"))));
+		assertEquals(Collections.singleton(4),
+				conversionService.convert("test", TypeDescriptor.valueOf(String.class), new TypeDescriptor(getClass().getField("integerCollection"))));
+		assertEquals(Collections.singleton(4),
+				conversionService.convert("test", TypeDescriptor.valueOf(String.class), new TypeDescriptor(getClass().getField("rawCollection"))));
+		assertEquals(Collections.singleton(4),
+				conversionService.convert("test", TypeDescriptor.valueOf(String.class), new TypeDescriptor(getClass().getField("genericCollection"))));
+		assertEquals(Collections.singleton(4),
+				conversionService.convert("test", TypeDescriptor.valueOf(String.class), new TypeDescriptor(getClass().getField("rawCollection"))));
+		assertEquals(Collections.singleton("testX"),
+				conversionService.convert("test", TypeDescriptor.valueOf(String.class), new TypeDescriptor(getClass().getField("stringCollection"))));
+	}
+
+	@Test
+	public void adaptedCollectionTypesFromSameSourceType() throws Exception {
+		conversionService.addConverter(new MyStringToStringCollectionConverter());
+
+		assertEquals(Collections.singleton("testX"),
+				conversionService.convert("test", TypeDescriptor.valueOf(String.class), new TypeDescriptor(getClass().getField("stringCollection"))));
+		assertEquals(Collections.singleton("testX"),
+				conversionService.convert("test", TypeDescriptor.valueOf(String.class), new TypeDescriptor(getClass().getField("genericCollection"))));
+		assertEquals(Collections.singleton("testX"),
+				conversionService.convert("test", TypeDescriptor.valueOf(String.class), new TypeDescriptor(getClass().getField("rawCollection"))));
+		assertEquals(Collections.singleton("testX"),
+				conversionService.convert("test", TypeDescriptor.valueOf(String.class), new TypeDescriptor(getClass().getField("genericCollection"))));
+		assertEquals(Collections.singleton("testX"),
+				conversionService.convert("test", TypeDescriptor.valueOf(String.class), new TypeDescriptor(getClass().getField("stringCollection"))));
+		assertEquals(Collections.singleton("testX"),
+				conversionService.convert("test", TypeDescriptor.valueOf(String.class), new TypeDescriptor(getClass().getField("rawCollection"))));
+
+		try {
+			conversionService.convert("test", TypeDescriptor.valueOf(String.class), new TypeDescriptor(getClass().getField("integerCollection")));
+			fail("Should have thrown ConverterNotFoundException");
+		}
+		catch (ConverterNotFoundException ex) {
+			// expected
+		}
+	}
+
+	@Test
+	public void genericCollectionAsSource() throws Exception {
+		conversionService.addConverter(new MyStringToGenericCollectionConverter());
+
+		assertEquals(Collections.singleton("testX"),
+				conversionService.convert("test", TypeDescriptor.valueOf(String.class), new TypeDescriptor(getClass().getField("stringCollection"))));
+		assertEquals(Collections.singleton("testX"),
+				conversionService.convert("test", TypeDescriptor.valueOf(String.class), new TypeDescriptor(getClass().getField("genericCollection"))));
+		assertEquals(Collections.singleton("testX"),
+				conversionService.convert("test", TypeDescriptor.valueOf(String.class), new TypeDescriptor(getClass().getField("rawCollection"))));
+
+		// The following is unpleasant but a consequence of the generic collection converter above...
+		assertEquals(Collections.singleton("testX"),
+				conversionService.convert("test", TypeDescriptor.valueOf(String.class), new TypeDescriptor(getClass().getField("integerCollection"))));
+	}
+
+	@Test
+	public void rawCollectionAsSource() throws Exception {
+		conversionService.addConverter(new MyStringToRawCollectionConverter());
+
+		assertEquals(Collections.singleton("testX"),
+				conversionService.convert("test", TypeDescriptor.valueOf(String.class), new TypeDescriptor(getClass().getField("stringCollection"))));
+		assertEquals(Collections.singleton("testX"),
+				conversionService.convert("test", TypeDescriptor.valueOf(String.class), new TypeDescriptor(getClass().getField("genericCollection"))));
+		assertEquals(Collections.singleton("testX"),
+				conversionService.convert("test", TypeDescriptor.valueOf(String.class), new TypeDescriptor(getClass().getField("rawCollection"))));
+
+		// The following is unpleasant but a consequence of the raw collection converter above...
+		assertEquals(Collections.singleton("testX"),
+				conversionService.convert("test", TypeDescriptor.valueOf(String.class), new TypeDescriptor(getClass().getField("integerCollection"))));
+	}
+
 
 	@Retention(RetentionPolicy.RUNTIME)
 	public static @interface ExampleAnnotation {
 	}
 
+
+	private interface MyBaseInterface {
+	}
+
+
+	private interface MyInterface extends MyBaseInterface {
+	}
+
+
+	private static class MyInterfaceImplementer implements MyInterface {
+	}
+
+
+	private static class MyBaseInterfaceConverter implements Converter<MyBaseInterface, String> {
+
+		@Override
+		public String convert(MyBaseInterface source) {
+			return "RESULT";
+		}
+	}
+
+
+	private static class MyStringArrayToResourceArrayConverter implements Converter<String[], Resource[]>	{
+
+		@Override
+		public Resource[] convert(String[] source) {
+			Resource[] result = new Resource[source.length];
+			for (int i = 0; i < source.length; i++) {
+				result[i] = new DescriptiveResource(source[i].substring(1));
+			}
+			return result;
+		}
+	}
+
+
+	private static class MyStringArrayToIntegerArrayConverter implements Converter<String[], Integer[]>	{
+
+		@Override
+		public Integer[] convert(String[] source) {
+			Integer[] result = new Integer[source.length];
+			for (int i = 0; i < source.length; i++) {
+				result[i] = Integer.parseInt(source[i].substring(1));
+			}
+			return result;
+		}
+	}
+
+
+	private static class MyStringToIntegerArrayConverter implements Converter<String, Integer[]>	{
+
+		@Override
+		public Integer[] convert(String source) {
+			String[] srcArray = StringUtils.commaDelimitedListToStringArray(source);
+			Integer[] result = new Integer[srcArray.length];
+			for (int i = 0; i < srcArray.length; i++) {
+				result[i] = Integer.parseInt(srcArray[i].substring(1));
+			}
+			return result;
+		}
+	}
+
+
+	public static class WithCopyConstructor {
+
+		public WithCopyConstructor() {
+		}
+
+		public WithCopyConstructor(WithCopyConstructor value) {
+		}
+	}
 	private static class MyConditionalConverter implements Converter<String, Color>, ConditionalConverter {
 
 		private int matchAttempts = 0;
@@ -794,8 +890,8 @@ public class GenericConversionServiceTests {
 		}
 	}
 
-	private static class MyConditionalGenericConverter implements GenericConverter,
-			ConditionalConverter {
+
+	private static class MyConditionalGenericConverter implements GenericConverter, ConditionalConverter {
 
 		private List<TypeDescriptor> sourceTypes = new ArrayList<TypeDescriptor>();
 
@@ -811,8 +907,7 @@ public class GenericConversionServiceTests {
 		}
 
 		@Override
-		public Object convert(Object source, TypeDescriptor sourceType,
-				TypeDescriptor targetType) {
+		public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
 			return null;
 		}
 
@@ -821,8 +916,8 @@ public class GenericConversionServiceTests {
 		}
 	}
 
-	private static class MyConditionalConverterFactory implements
-			ConverterFactory<String, Color>, ConditionalConverter {
+
+	private static class MyConditionalConverterFactory implements ConverterFactory<String, Color>, ConditionalConverter {
 
 		private MyConditionalConverter converter = new MyConditionalConverter();
 
@@ -849,20 +944,71 @@ public class GenericConversionServiceTests {
 		}
 	}
 
-	interface MyEnumInterface {
+
+	interface MyEnumBaseInterface {
+
+		String getBaseCode();
+	}
+
+
+	interface MyEnumInterface extends MyEnumBaseInterface {
 
 		String getCode();
 	}
 
+
 	public static enum MyEnum implements MyEnumInterface {
 
-		A {
+		A("1"),
+		B("2"),
+		C("3");
+
+		private String code;
+
+		MyEnum(String code) {
+			this.code = code;
+		}
+
+		@Override
+		public String getCode() {
+			return code;
+		}
+
+		@Override
+		public String getBaseCode() {
+			return "base" + code;
+		}
+	}
+
+
+	public enum EnumWithSubclass {
+
+		FIRST {
 			@Override
-			public String getCode() {
-				return "1";
+			public String toString() {
+				return "1st";
 			}
 		}
 	}
+
+
+	public static class MyStringToRawCollectionConverter implements Converter<String, Collection> {
+
+		@Override
+		public Collection convert(String source) {
+			return Collections.singleton(source + "X");
+		}
+	}
+
+
+	public static class MyStringToGenericCollectionConverter implements Converter<String, Collection<?>> {
+
+		@Override
+		public Collection<?> convert(String source) {
+			return Collections.singleton(source + "X");
+		}
+	}
+
 
 	private static class MyEnumInterfaceToStringConverter<T extends MyEnumInterface> implements Converter<T, String> {
 
@@ -871,5 +1017,96 @@ public class GenericConversionServiceTests {
 			return source.getCode();
 		}
 	}
+
+
+	private static class StringToMyEnumInterfaceConverterFactory implements ConverterFactory<String, MyEnumInterface> {
+
+		@SuppressWarnings("unchecked")
+		public <T extends MyEnumInterface> Converter<String, T> getConverter(Class<T> targetType) {
+			return new StringToMyEnumInterfaceConverter(targetType);
+		}
+
+		private static class StringToMyEnumInterfaceConverter<T extends Enum<?> & MyEnumInterface> implements Converter<String, T> {
+			private final Class<T> enumType;
+
+			public StringToMyEnumInterfaceConverter(Class<T> enumType) {
+				this.enumType = enumType;
+			}
+
+			public T convert(String source) {
+				for (T value : enumType.getEnumConstants()) {
+					if (value.getCode().equals(source)) {
+						return value;
+					}
+				}
+				return null;
+			}
+		}
+	}
+
+
+	private static class StringToMyEnumBaseInterfaceConverterFactory implements ConverterFactory<String, MyEnumBaseInterface> {
+
+		@SuppressWarnings("unchecked")
+		public <T extends MyEnumBaseInterface> Converter<String, T> getConverter(Class<T> targetType) {
+			return new StringToMyEnumBaseInterfaceConverter(targetType);
+		}
+
+		private static class StringToMyEnumBaseInterfaceConverter<T extends Enum<?> & MyEnumBaseInterface> implements Converter<String, T> {
+
+			private final Class<T> enumType;
+
+			public StringToMyEnumBaseInterfaceConverter(Class<T> enumType) {
+				this.enumType = enumType;
+			}
+
+			public T convert(String source) {
+				for (T value : enumType.getEnumConstants()) {
+					if (value.getBaseCode().equals(source)) {
+						return value;
+					}
+				}
+				return null;
+			}
+		}
+	}
+
+
+	public static class MyStringToStringCollectionConverter implements Converter<String, Collection<String>> {
+
+		@Override
+		public Collection<String> convert(String source) {
+			return Collections.singleton(source + "X");
+		}
+	}
+
+
+	public static class MyStringToIntegerCollectionConverter implements Converter<String, Collection<Integer>> {
+
+		@Override
+		public Collection<Integer> convert(String source) {
+			return Collections.singleton(source.length());
+		}
+	}
+
+
+	@ExampleAnnotation
+	public String annotatedString;
+
+	public List<Integer> list;
+
+	public Map<String, Integer> map;
+
+	public Map<String, ?> wildcardMap;
+
+	public EnumSet<MyEnum> enumSet;
+
+	public Collection rawCollection;
+
+	public Collection<?> genericCollection;
+
+	public Collection<String> stringCollection;
+
+	public Collection<Integer> integerCollection;
 
 }

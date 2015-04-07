@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -66,6 +66,7 @@ import org.springframework.util.StringUtils;
  * @author Juergen Hoeller
  * @since 2.0
  */
+@SuppressWarnings("unchecked")
 public abstract class EntityManagerFactoryUtils {
 
 	/**
@@ -79,13 +80,14 @@ public abstract class EntityManagerFactoryUtils {
 
 	private static final Log logger = LogFactory.getLog(EntityManagerFactoryUtils.class);
 
+
 	private static Method createEntityManagerWithSynchronizationTypeMethod;
 
 	private static Object synchronizationTypeUnsynchronized;
 
 	static {
 		try {
-			@SuppressWarnings("unchecked")
+			@SuppressWarnings( "rawtypes" )
 			Class<Enum> synchronizationTypeClass = (Class<Enum>) ClassUtils.forName(
 					"javax.persistence.SynchronizationType", EntityManagerFactoryUtils.class.getClassLoader());
 			createEntityManagerWithSynchronizationTypeMethod = EntityManagerFactory.class.getMethod(
@@ -143,9 +145,8 @@ public abstract class EntityManagerFactoryUtils {
 	}
 
 	/**
-	 * Obtain a JPA EntityManager from the given factory. Is aware of a
-	 * corresponding EntityManager bound to the current thread,
-	 * for example when using JpaTransactionManager.
+	 * Obtain a JPA EntityManager from the given factory. Is aware of a corresponding
+	 * EntityManager bound to the current thread, e.g. when using JpaTransactionManager.
 	 * <p>Note: Will return {@code null} if no thread-bound EntityManager found!
 	 * @param emf EntityManagerFactory to create the EntityManager with
 	 * @return the EntityManager, or {@code null} if none found
@@ -159,9 +160,8 @@ public abstract class EntityManagerFactoryUtils {
 	}
 
 	/**
-	 * Obtain a JPA EntityManager from the given factory. Is aware of a
-	 * corresponding EntityManager bound to the current thread,
-	 * for example when using JpaTransactionManager.
+	 * Obtain a JPA EntityManager from the given factory. Is aware of a corresponding
+	 * EntityManager bound to the current thread, e.g. when using JpaTransactionManager.
 	 * <p>Note: Will return {@code null} if no thread-bound EntityManager found!
 	 * @param emf EntityManagerFactory to create the EntityManager with
 	 * @param properties the properties to be passed into the {@code createEntityManager}
@@ -170,7 +170,7 @@ public abstract class EntityManagerFactoryUtils {
 	 * @throws DataAccessResourceFailureException if the EntityManager couldn't be obtained
 	 * @see JpaTransactionManager
 	 */
-	public static EntityManager getTransactionalEntityManager(EntityManagerFactory emf, Map properties)
+	public static EntityManager getTransactionalEntityManager(EntityManagerFactory emf, Map<?, ?> properties)
 			throws DataAccessResourceFailureException {
 		try {
 			return doGetTransactionalEntityManager(emf, properties, true);
@@ -181,9 +181,8 @@ public abstract class EntityManagerFactoryUtils {
 	}
 
 	/**
-	 * Obtain a JPA EntityManager from the given factory. Is aware of a
-	 * corresponding EntityManager bound to the current thread,
-	 * for example when using JpaTransactionManager.
+	 * Obtain a JPA EntityManager from the given factory. Is aware of a corresponding
+	 * EntityManager bound to the current thread, e.g. when using JpaTransactionManager.
 	 * <p>Same as {@code getEntityManager}, but throwing the original PersistenceException.
 	 * @param emf EntityManagerFactory to create the EntityManager with
 	 * @param properties the properties to be passed into the {@code createEntityManager}
@@ -193,16 +192,15 @@ public abstract class EntityManagerFactoryUtils {
 	 * @see #getTransactionalEntityManager(javax.persistence.EntityManagerFactory)
 	 * @see JpaTransactionManager
 	 */
-	public static EntityManager doGetTransactionalEntityManager(EntityManagerFactory emf, Map properties)
+	public static EntityManager doGetTransactionalEntityManager(EntityManagerFactory emf, Map<?, ?> properties)
 			throws PersistenceException {
 
 		return doGetTransactionalEntityManager(emf, properties, true);
 	}
 
 	/**
-	 * Obtain a JPA EntityManager from the given factory. Is aware of a
-	 * corresponding EntityManager bound to the current thread,
-	 * for example when using JpaTransactionManager.
+	 * Obtain a JPA EntityManager from the given factory. Is aware of a corresponding
+	 * EntityManager bound to the current thread, e.g. when using JpaTransactionManager.
 	 * <p>Same as {@code getEntityManager}, but throwing the original PersistenceException.
 	 * @param emf EntityManagerFactory to create the EntityManager with
 	 * @param properties the properties to be passed into the {@code createEntityManager}
@@ -215,7 +213,7 @@ public abstract class EntityManagerFactoryUtils {
 	 * @see JpaTransactionManager
 	 */
 	public static EntityManager doGetTransactionalEntityManager(
-			EntityManagerFactory emf, Map properties, boolean synchronizedWithTransaction) throws PersistenceException {
+			EntityManagerFactory emf, Map<?, ?> properties, boolean synchronizedWithTransaction) throws PersistenceException {
 
 		Assert.notNull(emf, "No EntityManagerFactory specified");
 
@@ -284,8 +282,8 @@ public abstract class EntityManagerFactoryUtils {
 			em = (!CollectionUtils.isEmpty(properties) ? emf.createEntityManager(properties) : emf.createEntityManager());
 		}
 
-		// Use same EntityManager for further JPA actions within the transaction.
-		// Thread object will get removed by synchronization at transaction completion.
+		// Use same EntityManager for further JPA operations within the transaction.
+		// Thread-bound object will get removed by synchronization at transaction completion.
 		logger.debug("Registering transaction synchronization for JPA EntityManager");
 		emHolder = new EntityManagerHolder(em);
 		if (synchronizedWithTransaction) {
@@ -295,7 +293,7 @@ public abstract class EntityManagerFactoryUtils {
 			emHolder.setSynchronizedWithTransaction(true);
 		}
 		else {
-			// unsynchronized - just scope it for the transaction, as demanded by the JPA 2.1 spec
+			// Unsynchronized - just scope it for the transaction, as demanded by the JPA 2.1 spec...
 			TransactionSynchronizationManager.registerSynchronization(
 					new TransactionScopedEntityManagerSynchronization(emHolder, emf));
 		}

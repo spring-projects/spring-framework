@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -104,7 +104,9 @@ public abstract class AbstractFallbackTransactionAttributeSource implements Tran
 			}
 			else {
 				if (logger.isDebugEnabled()) {
-					logger.debug("Adding transactional method '" + method.getName() + "' with attribute: " + txAtt);
+					Class<?> classToLog = (targetClass != null ? targetClass : method.getDeclaringClass());
+					logger.debug("Adding transactional method '" + classToLog.getSimpleName() + "." +
+							method.getName() + "' with attribute: " + txAtt);
 				}
 				this.attributeCache.put(cacheKey, txAtt);
 			}
@@ -203,9 +205,9 @@ public abstract class AbstractFallbackTransactionAttributeSource implements Tran
 
 		private final Method method;
 
-		private final Class targetClass;
+		private final Class<?> targetClass;
 
-		public DefaultCacheKey(Method method, Class targetClass) {
+		public DefaultCacheKey(Method method, Class<?> targetClass) {
 			this.method = method;
 			this.targetClass = targetClass;
 		}
@@ -225,7 +227,7 @@ public abstract class AbstractFallbackTransactionAttributeSource implements Tran
 
 		@Override
 		public int hashCode() {
-			return this.method.hashCode() * 29 + (this.targetClass != null ? this.targetClass.hashCode() : 0);
+			return this.method.hashCode() + (this.targetClass != null ? this.targetClass.hashCode() * 29 : 0);
 		}
 	}
 

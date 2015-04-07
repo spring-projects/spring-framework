@@ -53,7 +53,6 @@ public abstract class JmsGatewaySupport implements InitializingBean {
 	 * Will automatically create a JmsTemplate for the given ConnectionFactory.
 	 * @see #createJmsTemplate
 	 * @see #setConnectionFactory(javax.jms.ConnectionFactory)
-	 * @param connectionFactory
 	 */
 	public final void setConnectionFactory(ConnectionFactory connectionFactory) {
 		this.jmsTemplate = createJmsTemplate(connectionFactory);
@@ -63,11 +62,10 @@ public abstract class JmsGatewaySupport implements InitializingBean {
 	 * Create a JmsTemplate for the given ConnectionFactory.
 	 * Only invoked if populating the gateway with a ConnectionFactory reference.
 	 * <p>Can be overridden in subclasses to provide a JmsTemplate instance with
-	 * a different configuration or the JMS 1.0.2 version, JmsTemplate102.
+	 * a different configuration.
 	 * @param connectionFactory the JMS ConnectionFactory to create a JmsTemplate for
 	 * @return the new JmsTemplate instance
 	 * @see #setConnectionFactory
-	 * @see org.springframework.jms.core.JmsTemplate102
 	 */
 	protected JmsTemplate createJmsTemplate(ConnectionFactory connectionFactory) {
 		return new JmsTemplate(connectionFactory);
@@ -82,7 +80,6 @@ public abstract class JmsGatewaySupport implements InitializingBean {
 
 	/**
 	 * Set the JmsTemplate for the gateway.
-	 * @param jmsTemplate
 	 * @see #setConnectionFactory(javax.jms.ConnectionFactory)
 	 */
 	public final void setJmsTemplate(JmsTemplate jmsTemplate) {

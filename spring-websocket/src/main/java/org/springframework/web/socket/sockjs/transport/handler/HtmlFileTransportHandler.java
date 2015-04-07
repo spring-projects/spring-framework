@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 package org.springframework.web.socket.sockjs.transport.handler;
 
 import java.io.IOException;
-import java.nio.charset.Charset;
 import java.util.Map;
 
 import org.springframework.http.HttpStatus;
@@ -27,20 +26,21 @@ import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.util.StringUtils;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.WebSocketHandler;
+import org.springframework.web.socket.sockjs.SockJsException;
 import org.springframework.web.socket.sockjs.SockJsTransportFailureException;
-import org.springframework.web.socket.sockjs.support.frame.SockJsFrame.DefaultFrameFormat;
-import org.springframework.web.socket.sockjs.support.frame.SockJsFrame.FrameFormat;
+import org.springframework.web.socket.sockjs.frame.DefaultSockJsFrameFormat;
+import org.springframework.web.socket.sockjs.frame.SockJsFrameFormat;
+import org.springframework.web.socket.sockjs.transport.SockJsServiceConfig;
 import org.springframework.web.socket.sockjs.transport.TransportHandler;
 import org.springframework.web.socket.sockjs.transport.TransportType;
 import org.springframework.web.socket.sockjs.transport.session.AbstractHttpSockJsSession;
-import org.springframework.web.socket.sockjs.transport.session.SockJsServiceConfig;
 import org.springframework.web.socket.sockjs.transport.session.StreamingSockJsSession;
 import org.springframework.web.util.JavaScriptUtils;
 
 /**
- * An HTTP {@link TransportHandler} that uses a famous browsder document.domain technique:
+ * An HTTP {@link TransportHandler} that uses a famous browser document.domain technique:
  * <a href="http://stackoverflow.com/questions/1481251/what-does-document-domain-document-domain-do">
- * 		http://stackoverflow.com/questions/1481251/what-does-document-domain-document-domain-do</a>
+ * http://stackoverflow.com/questions/1481251/what-does-document-domain-document-domain-do</a>
  *
  * @author Rossen Stoyanchev
  * @since 4.0
@@ -52,6 +52,7 @@ public class HtmlFileTransportHandler extends AbstractHttpSendingTransportHandle
 	// Safari needs at least 1024 bytes to parse the website.
 	// http://code.google.com/p/browsersec/wiki/Part2#Survey_of_content_sniffing_behaviors
 	private static final int MINIMUM_PARTIAL_HTML_CONTENT_LENGTH = 1024;
+
 
 	static {
 		StringBuilder sb = new StringBuilder(
@@ -69,10 +70,9 @@ public class HtmlFileTransportHandler extends AbstractHttpSendingTransportHandle
 				"  </script>"
 				);
 
-		while(sb.length() < MINIMUM_PARTIAL_HTML_CONTENT_LENGTH) {
+		while (sb.length() < MINIMUM_PARTIAL_HTML_CONTENT_LENGTH) {
 			sb.append(" ");
 		}
-
 		PARTIAL_HTML_CONTENT = sb.toString();
 	}
 
@@ -84,29 +84,29 @@ public class HtmlFileTransportHandler extends AbstractHttpSendingTransportHandle
 
 	@Override
 	protected MediaType getContentType() {
-		return new MediaType("text", "html", Charset.forName("UTF-8"));
+		return new MediaType("text", "html", UTF8_CHARSET);
 	}
 
 	@Override
-	public StreamingSockJsSession createSession(String sessionId, WebSocketHandler wsHandler,
-			Map<String, Object> attributes) {
+	public StreamingSockJsSession createSession(
+			String sessionId, WebSocketHandler handler, Map<String, Object> attributes) {
 
-		return new HtmlFileStreamingSockJsSession(sessionId, getSockJsServiceConfig(), wsHandler, attributes);
+		return new HtmlFileStreamingSockJsSession(sessionId, getServiceConfig(), handler, attributes);
 	}
 
 	@Override
 	public void handleRequestInternal(ServerHttpRequest request, ServerHttpResponse response,
-			AbstractHttpSockJsSession sockJsSession) {
+			AbstractHttpSockJsSession sockJsSession) throws SockJsException {
 
 		String callback = getCallbackParam(request);
-		if (! StringUtils.hasText(callback)) {
+		if (!StringUtils.hasText(callback)) {
 			response.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR);
 			try {
-				response.getBody().write("\"callback\" parameter required".getBytes("UTF-8"));
+				response.getBody().write("\"callback\" parameter required".getBytes(UTF8_CHARSET));
 			}
-			catch (IOException t) {
-				sockJsSession.tryCloseWithSockJsTransportError(t, CloseStatus.SERVER_ERROR);
-				throw new SockJsTransportFailureException("Failed to write to response", sockJsSession.getId(), t);
+			catch (IOException ex) {
+				sockJsSession.tryCloseWithSockJsTransportError(ex, CloseStatus.SERVER_ERROR);
+				throw new SockJsTransportFailureException("Failed to write to response", sockJsSession.getId(), ex);
 			}
 			return;
 		}
@@ -115,8 +115,8 @@ public class HtmlFileTransportHandler extends AbstractHttpSendingTransportHandle
 	}
 
 	@Override
-	protected FrameFormat getFrameFormat(ServerHttpRequest request) {
-		return new DefaultFrameFormat("<script>\np(\"%s\");\n</script>\r\n") {
+	protected SockJsFrameFormat getFrameFormat(ServerHttpRequest request) {
+		return new DefaultSockJsFrameFormat("<script>\np(\"%s\");\n</script>\r\n") {
 			@Override
 			protected String preProcessContent(String content) {
 				return JavaScriptUtils.javaScriptEscape(content);
@@ -125,29 +125,20 @@ public class HtmlFileTransportHandler extends AbstractHttpSendingTransportHandle
 	}
 
 
-	private final class HtmlFileStreamingSockJsSession extends StreamingSockJsSession {
+	private class HtmlFileStreamingSockJsSession extends StreamingSockJsSession {
 
-		private HtmlFileStreamingSockJsSession(String sessionId, SockJsServiceConfig config,
+		public HtmlFileStreamingSockJsSession(String sessionId, SockJsServiceConfig config,
 				WebSocketHandler wsHandler, Map<String, Object> attributes) {
 
 			super(sessionId, config, wsHandler, attributes);
 		}
 
 		@Override
-		protected void afterRequestUpdated() {
-			// we already validated the parameter above..
-			String callback = getCallbackParam(getRequest());
-
+		protected byte[] getPrelude(ServerHttpRequest request) {
+			// We already validated the parameter above...
+			String callback = getCallbackParam(request);
 			String html = String.format(PARTIAL_HTML_CONTENT, callback);
-
-			try {
-				getResponse().getBody().write(html.getBytes("UTF-8"));
-				getResponse().flush();
-			}
-			catch (IOException e) {
-				tryCloseWithSockJsTransportError(e, CloseStatus.SERVER_ERROR);
-				throw new SockJsTransportFailureException("Failed to write HTML content", getId(), e);
-			}
+			return html.getBytes(UTF8_CHARSET);
 		}
 	}
 

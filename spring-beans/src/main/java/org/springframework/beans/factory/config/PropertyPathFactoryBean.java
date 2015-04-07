@@ -91,7 +91,7 @@ public class PropertyPathFactoryBean implements FactoryBean<Object>, BeanNameAwa
 
 	private String propertyPath;
 
-	private Class resultType;
+	private Class<?> resultType;
 
 	private String beanName;
 
@@ -137,7 +137,7 @@ public class PropertyPathFactoryBean implements FactoryBean<Object>, BeanNameAwa
 	 * provided that you need matching by type (for example, for autowiring).
 	 * @param resultType the result type, for example "java.lang.Integer"
 	 */
-	public void setResultType(Class resultType) {
+	public void setResultType(Class<?> resultType) {
 		this.resultType = resultType;
 	}
 

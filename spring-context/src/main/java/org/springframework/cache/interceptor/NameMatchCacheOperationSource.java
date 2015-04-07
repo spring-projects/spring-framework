@@ -24,6 +24,7 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.PatternMatchUtils;
 
@@ -32,6 +33,7 @@ import org.springframework.util.PatternMatchUtils;
  * by registered name.
  *
  * @author Costin Leau
+ * @since 3.1
  */
 @SuppressWarnings("serial")
 public class NameMatchCacheOperationSource implements CacheOperationSource, Serializable {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -81,6 +81,7 @@ class BeanDefinitionValueResolver {
 		this.typeConverter = typeConverter;
 	}
 
+
 	/**
 	 * Given a PropertyValue, return a value, resolving any references to other
 	 * beans in the factory if necessary. The value could be:
@@ -108,7 +109,7 @@ class BeanDefinitionValueResolver {
 		}
 		else if (value instanceof RuntimeBeanNameReference) {
 			String refName = ((RuntimeBeanNameReference) value).getBeanName();
-			refName = String.valueOf(evaluate(refName));
+			refName = String.valueOf(doEvaluate(refName));
 			if (!this.beanFactory.containsBean(refName)) {
 				throw new BeanDefinitionStoreException(
 						"Invalid bean name '" + refName + "' in bean reference for " + argName);
@@ -123,12 +124,14 @@ class BeanDefinitionValueResolver {
 		else if (value instanceof BeanDefinition) {
 			// Resolve plain BeanDefinition, without contained name: use dummy name.
 			BeanDefinition bd = (BeanDefinition) value;
-			return resolveInnerBean(argName, "(inner bean)", bd);
+			String innerBeanName = "(inner bean)" + BeanFactoryUtils.GENERATED_BEAN_NAME_SEPARATOR +
+					ObjectUtils.getIdentityHexString(bd);
+			return resolveInnerBean(argName, innerBeanName, bd);
 		}
 		else if (value instanceof ManagedArray) {
 			// May need to resolve contained runtime references.
 			ManagedArray array = (ManagedArray) value;
-			Class elementType = array.resolvedElementType;
+			Class<?> elementType = array.resolvedElementType;
 			if (elementType == null) {
 				String elementTypeName = array.getElementTypeName();
 				if (StringUtils.hasText(elementTypeName)) {
@@ -164,7 +167,7 @@ class BeanDefinitionValueResolver {
 		else if (value instanceof ManagedProperties) {
 			Properties original = (Properties) value;
 			Properties copy = new Properties();
-			for (Map.Entry propEntry : original.entrySet()) {
+			for (Map.Entry<Object, Object> propEntry : original.entrySet()) {
 				Object propKey = propEntry.getKey();
 				Object propValue = propEntry.getValue();
 				if (propKey instanceof TypedStringValue) {
@@ -208,7 +211,7 @@ class BeanDefinitionValueResolver {
 	 * @return the resolved value
 	 */
 	protected Object evaluate(TypedStringValue value) {
-		Object result = this.beanFactory.evaluateBeanDefinitionString(value.getValue(), this.beanDefinition);
+		Object result = doEvaluate(value.getValue());
 		if (!ObjectUtils.nullSafeEquals(result, value.getValue())) {
 			value.setDynamic();
 		}
@@ -217,16 +220,39 @@ class BeanDefinitionValueResolver {
 
 	/**
 	 * Evaluate the given value as an expression, if necessary.
-	 * @param value the candidate value (may be an expression)
-	 * @return the resolved value
+	 * @param value the original value (may be an expression)
+	 * @return the resolved value if necessary, or the original value
 	 */
 	protected Object evaluate(Object value) {
 		if (value instanceof String) {
-			return this.beanFactory.evaluateBeanDefinitionString((String) value, this.beanDefinition);
+			return doEvaluate((String) value);
+		}
+		else if (value instanceof String[]) {
+			String[] values = (String[]) value;
+			boolean actuallyResolved = false;
+			Object[] resolvedValues = new Object[values.length];
+			for (int i = 0; i < values.length; i++) {
+				String originalValue = values[i];
+				Object resolvedValue = doEvaluate(originalValue);
+				if (resolvedValue != originalValue) {
+					actuallyResolved = true;
+				}
+				resolvedValues[i] = resolvedValue;
+			}
+			return (actuallyResolved ? resolvedValues : values);
 		}
 		else {
 			return value;
 		}
+	}
+
+	/**
+	 * Evaluate the given String value as an expression, if necessary.
+	 * @param value the original value (may be an expression)
+	 * @return the resolved value if necessary, or the original String value
+	 */
+	private Object doEvaluate(String value) {
+		return this.beanFactory.evaluateBeanDefinitionString(value, this.beanDefinition);
 	}
 
 	/**
@@ -260,19 +286,21 @@ class BeanDefinitionValueResolver {
 			if (mbd.isSingleton()) {
 				actualInnerBeanName = adaptInnerBeanName(innerBeanName);
 			}
+			this.beanFactory.registerContainedBean(actualInnerBeanName, this.beanName);
 			// Guarantee initialization of beans that the inner bean depends on.
 			String[] dependsOn = mbd.getDependsOn();
 			if (dependsOn != null) {
 				for (String dependsOnBean : dependsOn) {
-					this.beanFactory.getBean(dependsOnBean);
 					this.beanFactory.registerDependentBean(dependsOnBean, actualInnerBeanName);
+					this.beanFactory.getBean(dependsOnBean);
 				}
 			}
+			// Actually create the inner bean instance now...
 			Object innerBean = this.beanFactory.createBean(actualInnerBeanName, mbd, null);
-			this.beanFactory.registerContainedBean(actualInnerBeanName, this.beanName);
 			if (innerBean instanceof FactoryBean) {
-				boolean synthetic = (mbd != null && mbd.isSynthetic());
-				return this.beanFactory.getObjectFromFactoryBean((FactoryBean) innerBean, actualInnerBeanName, !synthetic);
+				boolean synthetic = mbd.isSynthetic();
+				return this.beanFactory.getObjectFromFactoryBean(
+						(FactoryBean<?>) innerBean, actualInnerBeanName, !synthetic);
 			}
 			else {
 				return innerBean;
@@ -309,7 +337,7 @@ class BeanDefinitionValueResolver {
 	private Object resolveReference(Object argName, RuntimeBeanReference ref) {
 		try {
 			String refName = ref.getBeanName();
-			refName = String.valueOf(evaluate(refName));
+			refName = String.valueOf(doEvaluate(refName));
 			if (ref.isToParent()) {
 				if (this.beanFactory.getParentBeanFactory() == null) {
 					throw new BeanCreationException(
@@ -335,7 +363,7 @@ class BeanDefinitionValueResolver {
 	/**
 	 * For each element in the managed array, resolve reference if necessary.
 	 */
-	private Object resolveManagedArray(Object argName, List<?> ml, Class elementType) {
+	private Object resolveManagedArray(Object argName, List<?> ml, Class<?> elementType) {
 		Object resolved = Array.newInstance(elementType, ml.size());
 		for (int i = 0; i < ml.size(); i++) {
 			Array.set(resolved, i,
@@ -347,7 +375,7 @@ class BeanDefinitionValueResolver {
 	/**
 	 * For each element in the managed list, resolve reference if necessary.
 	 */
-	private List resolveManagedList(Object argName, List<?> ml) {
+	private List<?> resolveManagedList(Object argName, List<?> ml) {
 		List<Object> resolved = new ArrayList<Object>(ml.size());
 		for (int i = 0; i < ml.size(); i++) {
 			resolved.add(
@@ -359,7 +387,7 @@ class BeanDefinitionValueResolver {
 	/**
 	 * For each element in the managed set, resolve reference if necessary.
 	 */
-	private Set resolveManagedSet(Object argName, Set<?> ms) {
+	private Set<?> resolveManagedSet(Object argName, Set<?> ms) {
 		Set<Object> resolved = new LinkedHashSet<Object>(ms.size());
 		int i = 0;
 		for (Object m : ms) {
@@ -372,9 +400,9 @@ class BeanDefinitionValueResolver {
 	/**
 	 * For each element in the managed map, resolve reference if necessary.
 	 */
-	private Map resolveManagedMap(Object argName, Map<?, ?> mm) {
+	private Map<?, ?> resolveManagedMap(Object argName, Map<?, ?> mm) {
 		Map<Object, Object> resolved = new LinkedHashMap<Object, Object>(mm.size());
-		for (Map.Entry entry : mm.entrySet()) {
+		for (Map.Entry<?, ?> entry : mm.entrySet()) {
 			Object resolvedKey = resolveValueIfNecessary(argName, entry.getKey());
 			Object resolvedValue = resolveValueIfNecessary(
 					new KeyedArgName(argName, entry.getKey()), entry.getValue());

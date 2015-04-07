@@ -16,16 +16,16 @@
 
 package org.springframework.jdbc.support;
 
-import org.springframework.dao.DataAccessException;
-import org.springframework.dao.TransientDataAccessResourceException;
-import org.springframework.jdbc.BadSqlGrammarException;
-
 import java.sql.SQLException;
 
 import junit.framework.TestCase;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
-import org.junit.Test;
+
+import org.springframework.dao.DataAccessException;
+import org.springframework.dao.TransientDataAccessResourceException;
+import org.springframework.jdbc.BadSqlGrammarException;
 
 /**
  * Class to test custom SQLException translation.

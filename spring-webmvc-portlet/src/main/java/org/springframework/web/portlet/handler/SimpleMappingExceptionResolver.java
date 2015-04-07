@@ -156,7 +156,7 @@ public class SimpleMappingExceptionResolver extends AbstractHandlerExceptionReso
 		String viewName = null;
 		String dominantMapping = null;
 		int deepest = Integer.MAX_VALUE;
-		for (Enumeration names = exceptionMappings.propertyNames(); names.hasMoreElements();) {
+		for (Enumeration<?> names = exceptionMappings.propertyNames(); names.hasMoreElements();) {
 			String exceptionMapping = (String) names.nextElement();
 			int depth = getDepth(exceptionMapping, ex);
 			if (depth >= 0 && (depth < deepest || (depth == deepest &&
@@ -184,7 +184,7 @@ public class SimpleMappingExceptionResolver extends AbstractHandlerExceptionReso
 		return getDepth(exceptionMapping, ex.getClass(), 0);
 	}
 
-	private int getDepth(String exceptionMapping, Class exceptionClass, int depth) {
+	private int getDepth(String exceptionMapping, Class<?> exceptionClass, int depth) {
 		if (exceptionClass.getName().contains(exceptionMapping)) {
 			// Found it!
 			return depth;

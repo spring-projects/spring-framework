@@ -22,7 +22,6 @@ import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.tests.sample.beans.TestBean;
 
-
 /**
  * @author Juergen Hoeller
  */

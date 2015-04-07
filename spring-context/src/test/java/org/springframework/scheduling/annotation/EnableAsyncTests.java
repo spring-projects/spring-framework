@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-
+import java.lang.reflect.Method;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Future;
@@ -29,6 +29,7 @@ import org.junit.Test;
 
 import org.springframework.aop.Advisor;
 import org.springframework.aop.framework.Advised;
+import org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -38,16 +39,19 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.Ordered;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+import org.springframework.util.ReflectionUtils;
 
-import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.CoreMatchers.anyOf;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.Matchers.startsWith;
-
 import static org.junit.Assert.*;
 
 /**
  * Tests use of @EnableAsync on @Configuration classes.
  *
  * @author Chris Beams
+ * @author Stephane Nicoll
  * @since 3.1
  */
 public class EnableAsyncTests {
@@ -121,6 +125,11 @@ public class EnableAsyncTests {
 		@Async
 		public void work() {
 			this.threadOfExecution = Thread.currentThread();
+		}
+
+		@Async
+		public void fail() {
+			throw new UnsupportedOperationException();
 		}
 
 		public Thread getThreadOfExecution() {
@@ -233,8 +242,18 @@ public class EnableAsyncTests {
 		AsyncBean asyncBean = ctx.getBean(AsyncBean.class);
 		asyncBean.work();
 		Thread.sleep(500);
-		ctx.close();
 		assertThat(asyncBean.getThreadOfExecution().getName(), startsWith("Custom-"));
+
+		TestableAsyncUncaughtExceptionHandler exceptionHandler = (TestableAsyncUncaughtExceptionHandler)
+				ctx.getBean("exceptionHandler");
+		assertFalse("handler should not have been called yet", exceptionHandler.isCalled());
+
+		asyncBean.fail();
+		Thread.sleep(500);
+		Method m = ReflectionUtils.findMethod(AsyncBean.class, "fail");
+		exceptionHandler.assertCalledWith(m, UnsupportedOperationException.class);
+
+		ctx.close();
 	}
 
 
@@ -252,6 +271,16 @@ public class EnableAsyncTests {
 			executor.setThreadNamePrefix("Custom-");
 			executor.initialize();
 			return executor;
+		}
+
+		@Override
+		public AsyncUncaughtExceptionHandler getAsyncUncaughtExceptionHandler() {
+			 return exceptionHandler();
+		}
+
+		@Bean
+		public AsyncUncaughtExceptionHandler exceptionHandler() {
+			return new TestableAsyncUncaughtExceptionHandler();
 		}
 	}
 

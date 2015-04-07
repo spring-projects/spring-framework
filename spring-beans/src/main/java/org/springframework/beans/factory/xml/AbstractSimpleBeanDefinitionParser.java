@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -148,27 +148,9 @@ public abstract class AbstractSimpleBeanDefinitionParser extends AbstractSingleB
 	 * @see #isEligibleAttribute(String)
 	 */
 	protected boolean isEligibleAttribute(Attr attribute, ParserContext parserContext) {
-		boolean eligible = isEligibleAttribute(attribute);
-		if(!eligible) {
-			String fullName = attribute.getName();
-			eligible = (!fullName.equals("xmlns") && !fullName.startsWith("xmlns:") &&
-					isEligibleAttribute(parserContext.getDelegate().getLocalName(attribute)));
-		}
-		return eligible;
-	}
-
-	/**
-	 * Determine whether the given attribute is eligible for being
-	 * turned into a corresponding bean property value.
-	 * <p>The default implementation considers any attribute as eligible,
-	 * except for the "id" attribute and namespace declaration attributes.
-	 * @param attribute the XML attribute to check
-	 * @see #isEligibleAttribute(String)
-	 * @deprecated in favour of {@link #isEligibleAttribute(org.w3c.dom.Attr, ParserContext)}
-	 */
-	@Deprecated
-	protected boolean isEligibleAttribute(Attr attribute) {
-		return false;
+		String fullName = attribute.getName();
+		return (!fullName.equals("xmlns") && !fullName.startsWith("xmlns:") &&
+				isEligibleAttribute(parserContext.getDelegate().getLocalName(attribute)));
 	}
 
 	/**

@@ -16,18 +16,19 @@
 
 package org.springframework.test.context.junit4.spr9051;
 
-import static org.junit.Assert.assertSame;
-
 import javax.sql.DataSource;
 
 import org.junit.Before;
-import org.springframework.tests.sample.beans.Employee;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.tests.sample.beans.Employee;
 import org.springframework.transaction.PlatformTransactionManager;
+
+import static org.junit.Assert.*;
 
 /**
  * Concrete implementation of {@link AbstractTransactionalAnnotatedConfigClassTests}

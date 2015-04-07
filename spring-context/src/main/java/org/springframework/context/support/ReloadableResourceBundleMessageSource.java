@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,11 +21,13 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.text.MessageFormat;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.locks.ReentrantLock;
 
 import org.springframework.context.ResourceLoaderAware;
 import org.springframework.core.io.DefaultResourceLoader;
@@ -92,8 +94,7 @@ import org.springframework.util.StringUtils;
  * @see ResourceBundleMessageSource
  * @see java.util.ResourceBundle
  */
-public class ReloadableResourceBundleMessageSource extends AbstractMessageSource
-		implements ResourceLoaderAware {
+public class ReloadableResourceBundleMessageSource extends AbstractMessageSource implements ResourceLoaderAware {
 
 	private static final String PROPERTIES_SUFFIX = ".properties";
 
@@ -110,19 +111,23 @@ public class ReloadableResourceBundleMessageSource extends AbstractMessageSource
 
 	private long cacheMillis = -1;
 
+	private boolean concurrentRefresh = true;
+
 	private PropertiesPersister propertiesPersister = new DefaultPropertiesPersister();
 
 	private ResourceLoader resourceLoader = new DefaultResourceLoader();
 
 	/** Cache to hold filename lists per Locale */
-	private final Map<String, Map<Locale, List<String>>> cachedFilenames =
-			new HashMap<String, Map<Locale, List<String>>>();
+	private final ConcurrentMap<String, Map<Locale, List<String>>> cachedFilenames =
+			new ConcurrentHashMap<String, Map<Locale, List<String>>>();
 
 	/** Cache to hold already loaded properties per filename */
-	private final Map<String, PropertiesHolder> cachedProperties = new HashMap<String, PropertiesHolder>();
+	private final ConcurrentMap<String, PropertiesHolder> cachedProperties =
+			new ConcurrentHashMap<String, PropertiesHolder>();
 
 	/** Cache to hold merged loaded properties per locale */
-	private final Map<Locale, PropertiesHolder> cachedMergedProperties = new HashMap<Locale, PropertiesHolder>();
+	private final ConcurrentMap<Locale, PropertiesHolder> cachedMergedProperties =
+			new ConcurrentHashMap<Locale, PropertiesHolder>();
 
 
 	/**
@@ -232,6 +237,20 @@ public class ReloadableResourceBundleMessageSource extends AbstractMessageSource
 	}
 
 	/**
+	 * Specify whether to allow for concurrent refresh behavior, i.e. one thread
+	 * locked in a refresh attempt for a specific cached properties file whereas
+	 * other threads keep returning the old properties for the time being, until
+	 * the refresh attempt has completed.
+	 * <p>Default is "true": This behavior is new as of Spring Framework 4.1,
+	 * minimizing contention between threads. If you prefer the old behavior,
+	 * i.e. to fully block on refresh, switch this flag to "false".
+	 * @see #setCacheSeconds
+	 */
+	public void setConcurrentRefresh(boolean concurrentRefresh) {
+		this.concurrentRefresh = concurrentRefresh;
+	}
+
+	/**
 	 * Set the PropertiesPersister to use for parsing properties files.
 	 * <p>The default is a DefaultPropertiesPersister.
 	 * @see org.springframework.util.DefaultPropertiesPersister
@@ -322,26 +341,27 @@ public class ReloadableResourceBundleMessageSource extends AbstractMessageSource
 	 * cached forever.
 	 */
 	protected PropertiesHolder getMergedProperties(Locale locale) {
-		synchronized (this.cachedMergedProperties) {
-			PropertiesHolder mergedHolder = this.cachedMergedProperties.get(locale);
-			if (mergedHolder != null) {
-				return mergedHolder;
-			}
-			Properties mergedProps = new Properties();
-			mergedHolder = new PropertiesHolder(mergedProps, -1);
-			for (int i = this.basenames.length - 1; i >= 0; i--) {
-				List filenames = calculateAllFilenames(this.basenames[i], locale);
-				for (int j = filenames.size() - 1; j >= 0; j--) {
-					String filename = (String) filenames.get(j);
-					PropertiesHolder propHolder = getProperties(filename);
-					if (propHolder.getProperties() != null) {
-						mergedProps.putAll(propHolder.getProperties());
-					}
-				}
-			}
-			this.cachedMergedProperties.put(locale, mergedHolder);
+		PropertiesHolder mergedHolder = this.cachedMergedProperties.get(locale);
+		if (mergedHolder != null) {
 			return mergedHolder;
 		}
+		Properties mergedProps = newProperties();
+		mergedHolder = new PropertiesHolder(mergedProps, -1);
+		for (int i = this.basenames.length - 1; i >= 0; i--) {
+			List<String> filenames = calculateAllFilenames(this.basenames[i], locale);
+			for (int j = filenames.size() - 1; j >= 0; j--) {
+				String filename = filenames.get(j);
+				PropertiesHolder propHolder = getProperties(filename);
+				if (propHolder.getProperties() != null) {
+					mergedProps.putAll(propHolder.getProperties());
+				}
+			}
+		}
+		PropertiesHolder existing = this.cachedMergedProperties.putIfAbsent(locale, mergedHolder);
+		if (existing != null) {
+			mergedHolder = existing;
+		}
+		return mergedHolder;
 	}
 
 	/**
@@ -355,36 +375,34 @@ public class ReloadableResourceBundleMessageSource extends AbstractMessageSource
 	 * @see #calculateFilenamesForLocale
 	 */
 	protected List<String> calculateAllFilenames(String basename, Locale locale) {
-		synchronized (this.cachedFilenames) {
-			Map<Locale, List<String>> localeMap = this.cachedFilenames.get(basename);
-			if (localeMap != null) {
-				List<String> filenames = localeMap.get(locale);
-				if (filenames != null) {
-					return filenames;
-				}
+		Map<Locale, List<String>> localeMap = this.cachedFilenames.get(basename);
+		if (localeMap != null) {
+			List<String> filenames = localeMap.get(locale);
+			if (filenames != null) {
+				return filenames;
 			}
-			List<String> filenames = new ArrayList<String>(7);
-			filenames.addAll(calculateFilenamesForLocale(basename, locale));
-			if (this.fallbackToSystemLocale && !locale.equals(Locale.getDefault())) {
-				List<String> fallbackFilenames = calculateFilenamesForLocale(basename, Locale.getDefault());
-				for (String fallbackFilename : fallbackFilenames) {
-					if (!filenames.contains(fallbackFilename)) {
-						// Entry for fallback locale that isn't already in filenames list.
-						filenames.add(fallbackFilename);
-					}
-				}
-			}
-			filenames.add(basename);
-			if (localeMap != null) {
-				localeMap.put(locale, filenames);
-			}
-			else {
-				localeMap = new HashMap<Locale, List<String>>();
-				localeMap.put(locale, filenames);
-				this.cachedFilenames.put(basename, localeMap);
-			}
-			return filenames;
 		}
+		List<String> filenames = new ArrayList<String>(7);
+		filenames.addAll(calculateFilenamesForLocale(basename, locale));
+		if (this.fallbackToSystemLocale && !locale.equals(Locale.getDefault())) {
+			List<String> fallbackFilenames = calculateFilenamesForLocale(basename, Locale.getDefault());
+			for (String fallbackFilename : fallbackFilenames) {
+				if (!filenames.contains(fallbackFilename)) {
+					// Entry for fallback locale that isn't already in filenames list.
+					filenames.add(fallbackFilename);
+				}
+			}
+		}
+		filenames.add(basename);
+		if (localeMap == null) {
+			localeMap = new ConcurrentHashMap<Locale, List<String>>();
+			Map<Locale, List<String>> existing = this.cachedFilenames.putIfAbsent(basename, localeMap);
+			if (existing != null) {
+				localeMap = existing;
+			}
+		}
+		localeMap.put(locale, filenames);
+		return filenames;
 	}
 
 	/**
@@ -432,15 +450,45 @@ public class ReloadableResourceBundleMessageSource extends AbstractMessageSource
 	 * @return the current PropertiesHolder for the bundle
 	 */
 	protected PropertiesHolder getProperties(String filename) {
-		synchronized (this.cachedProperties) {
-			PropertiesHolder propHolder = this.cachedProperties.get(filename);
-			if (propHolder != null &&
-					(propHolder.getRefreshTimestamp() < 0 ||
-					 propHolder.getRefreshTimestamp() > System.currentTimeMillis() - this.cacheMillis)) {
-				// up to date
+		PropertiesHolder propHolder = this.cachedProperties.get(filename);
+		long originalTimestamp = -2;
+
+		if (propHolder != null) {
+			originalTimestamp = propHolder.getRefreshTimestamp();
+			if (originalTimestamp == -1 || originalTimestamp > System.currentTimeMillis() - this.cacheMillis) {
+				// Up to date
 				return propHolder;
 			}
+		}
+		else {
+			propHolder = new PropertiesHolder();
+			PropertiesHolder existingHolder = this.cachedProperties.putIfAbsent(filename, propHolder);
+			if (existingHolder != null) {
+				propHolder = existingHolder;
+			}
+		}
+
+		// At this point, we need to refresh...
+		if (this.concurrentRefresh && propHolder.getRefreshTimestamp() >= 0) {
+			// A populated but stale holder -> could keep using it.
+			if (!propHolder.refreshLock.tryLock()) {
+				// Getting refreshed by another thread already ->
+				// let's return the existing properties for the time being.
+				return propHolder;
+			}
+		}
+		else {
+			propHolder.refreshLock.lock();
+		}
+		try {
+			PropertiesHolder existingHolder = this.cachedProperties.get(filename);
+			if (existingHolder != null && existingHolder.getRefreshTimestamp() > originalTimestamp) {
+				return existingHolder;
+			}
 			return refreshProperties(filename, propHolder);
+		}
+		finally {
+			propHolder.refreshLock.unlock();
 		}
 	}
 
@@ -476,8 +524,7 @@ public class ReloadableResourceBundleMessageSource extends AbstractMessageSource
 				catch (IOException ex) {
 					// Probably a class path resource: cache it forever.
 					if (logger.isDebugEnabled()) {
-						logger.debug(
-								resource + " could not be resolved in the file system - assuming that is hasn't changed", ex);
+						logger.debug(resource + " could not be resolved in the file system - assuming that it hasn't changed", ex);
 					}
 					fileTimestamp = -1;
 				}
@@ -518,7 +565,7 @@ public class ReloadableResourceBundleMessageSource extends AbstractMessageSource
 	 */
 	protected Properties loadProperties(Resource resource, String filename) throws IOException {
 		InputStream is = resource.getInputStream();
-		Properties props = new Properties();
+		Properties props = newProperties();
 		try {
 			if (resource.getFilename().endsWith(XML_SUFFIX)) {
 				if (logger.isDebugEnabled()) {
@@ -554,6 +601,19 @@ public class ReloadableResourceBundleMessageSource extends AbstractMessageSource
 		}
 	}
 
+	/**
+	 * Template method for creating a plain new {@link Properties} instance.
+	 * The default implementation simply calls {@link Properties#Properties()}.
+	 * <p>Allows for returning a custom {@link Properties} extension in subclasses.
+	 * Overriding methods should just instantiate a custom {@link Properties} subclass,
+	 * with no further initialization or population to be performed at that point.
+	 * @return a plain Properties instance
+	 * @since 4.2
+	 */
+	protected Properties newProperties() {
+		return new Properties();
+	}
+
 
 	/**
 	 * Clear the resource bundle cache.
@@ -561,12 +621,8 @@ public class ReloadableResourceBundleMessageSource extends AbstractMessageSource
 	 */
 	public void clearCache() {
 		logger.debug("Clearing entire resource bundle cache");
-		synchronized (this.cachedProperties) {
-			this.cachedProperties.clear();
-		}
-		synchronized (this.cachedMergedProperties) {
-			this.cachedMergedProperties.clear();
-		}
+		this.cachedProperties.clear();
+		this.cachedMergedProperties.clear();
 	}
 
 	/**
@@ -595,30 +651,34 @@ public class ReloadableResourceBundleMessageSource extends AbstractMessageSource
 	 */
 	protected class PropertiesHolder {
 
-		private Properties properties;
+		private final Properties properties;
 
-		private long fileTimestamp = -1;
+		private final long fileTimestamp;
 
-		private long refreshTimestamp = -1;
+		private volatile long refreshTimestamp = -2;
+
+		private final ReentrantLock refreshLock = new ReentrantLock();
 
 		/** Cache to hold already generated MessageFormats per message code */
-		private final Map<String, Map<Locale, MessageFormat>> cachedMessageFormats =
-				new HashMap<String, Map<Locale, MessageFormat>>();
+		private final ConcurrentMap<String, Map<Locale, MessageFormat>> cachedMessageFormats =
+				new ConcurrentHashMap<String, Map<Locale, MessageFormat>>();
+
+		public PropertiesHolder() {
+			this.properties = null;
+			this.fileTimestamp = -1;
+		}
 
 		public PropertiesHolder(Properties properties, long fileTimestamp) {
 			this.properties = properties;
 			this.fileTimestamp = fileTimestamp;
 		}
 
-		public PropertiesHolder() {
-		}
-
 		public Properties getProperties() {
-			return properties;
+			return this.properties;
 		}
 
 		public long getFileTimestamp() {
-			return fileTimestamp;
+			return this.fileTimestamp;
 		}
 
 		public void setRefreshTimestamp(long refreshTimestamp) {
@@ -626,7 +686,7 @@ public class ReloadableResourceBundleMessageSource extends AbstractMessageSource
 		}
 
 		public long getRefreshTimestamp() {
-			return refreshTimestamp;
+			return this.refreshTimestamp;
 		}
 
 		public String getProperty(String code) {
@@ -640,26 +700,27 @@ public class ReloadableResourceBundleMessageSource extends AbstractMessageSource
 			if (this.properties == null) {
 				return null;
 			}
-			synchronized (this.cachedMessageFormats) {
-				Map<Locale, MessageFormat> localeMap = this.cachedMessageFormats.get(code);
-				if (localeMap != null) {
-					MessageFormat result = localeMap.get(locale);
-					if (result != null) {
-						return result;
-					}
-				}
-				String msg = this.properties.getProperty(code);
-				if (msg != null) {
-					if (localeMap == null) {
-						localeMap = new HashMap<Locale, MessageFormat>();
-						this.cachedMessageFormats.put(code, localeMap);
-					}
-					MessageFormat result = createMessageFormat(msg, locale);
-					localeMap.put(locale, result);
+			Map<Locale, MessageFormat> localeMap = this.cachedMessageFormats.get(code);
+			if (localeMap != null) {
+				MessageFormat result = localeMap.get(locale);
+				if (result != null) {
 					return result;
 				}
-				return null;
 			}
+			String msg = this.properties.getProperty(code);
+			if (msg != null) {
+				if (localeMap == null) {
+					localeMap = new ConcurrentHashMap<Locale, MessageFormat>();
+					Map<Locale, MessageFormat> existing = this.cachedMessageFormats.putIfAbsent(code, localeMap);
+					if (existing != null) {
+						localeMap = existing;
+					}
+				}
+				MessageFormat result = createMessageFormat(msg, locale);
+				localeMap.put(locale, result);
+				return result;
+			}
+			return null;
 		}
 	}
 

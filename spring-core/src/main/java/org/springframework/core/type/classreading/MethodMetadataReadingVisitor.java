@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.core.type.classreading;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.springframework.asm.AnnotationVisitor;
 import org.springframework.asm.MethodVisitor;
@@ -51,33 +52,39 @@ public class MethodMetadataReadingVisitor extends MethodVisitor implements Metho
 
 	protected final ClassLoader classLoader;
 
-	protected final MultiValueMap<String, MethodMetadata> methodMetadataMap;
+	protected final Set<MethodMetadata> methodMetadataSet;
 
-	protected final MultiValueMap<String, AnnotationAttributes> attributeMap = new LinkedMultiValueMap<String, AnnotationAttributes>(2);
+	protected final MultiValueMap<String, AnnotationAttributes> attributeMap =
+			new LinkedMultiValueMap<String, AnnotationAttributes>(4);
 
 
-	public MethodMetadataReadingVisitor(String name, int access, String declaringClassName, ClassLoader classLoader,
-			MultiValueMap<String, MethodMetadata> methodMetadataMap) {
+	public MethodMetadataReadingVisitor(String name, int access, String declaringClassName,
+			ClassLoader classLoader, Set<MethodMetadata> methodMetadataSet) {
 
 		super(SpringAsmInfo.ASM_VERSION);
 		this.name = name;
 		this.access = access;
 		this.declaringClassName = declaringClassName;
 		this.classLoader = classLoader;
-		this.methodMetadataMap = methodMetadataMap;
+		this.methodMetadataSet = methodMetadataSet;
 	}
 
 
 	@Override
 	public AnnotationVisitor visitAnnotation(final String desc, boolean visible) {
 		String className = Type.getType(desc).getClassName();
-		this.methodMetadataMap.add(className, this);
+		this.methodMetadataSet.add(this);
 		return new AnnotationAttributesReadingVisitor(className, this.attributeMap, null, this.classLoader);
 	}
 
 	@Override
 	public String getMethodName() {
 		return this.name;
+	}
+
+	@Override
+	public boolean isAbstract() {
+		return ((this.access & Opcodes.ACC_ABSTRACT) != 0);
 	}
 
 	@Override
@@ -106,8 +113,7 @@ public class MethodMetadataReadingVisitor extends MethodVisitor implements Metho
 	}
 
 	@Override
-	public Map<String, Object> getAnnotationAttributes(String annotationType,
-			boolean classValuesAsString) {
+	public Map<String, Object> getAnnotationAttributes(String annotationType, boolean classValuesAsString) {
 		List<AnnotationAttributes> attributes = this.attributeMap.get(annotationType);
 		return (attributes == null ? null : AnnotationReadingVisitorUtils.convertClassValues(
 				this.classLoader, attributes.get(0), classValuesAsString));
@@ -119,9 +125,8 @@ public class MethodMetadataReadingVisitor extends MethodVisitor implements Metho
 	}
 
 	@Override
-	public MultiValueMap<String, Object> getAllAnnotationAttributes(
-			String annotationType, boolean classValuesAsString) {
-		if(!this.attributeMap.containsKey(annotationType)) {
+	public MultiValueMap<String, Object> getAllAnnotationAttributes(String annotationType, boolean classValuesAsString) {
+		if (!this.attributeMap.containsKey(annotationType)) {
 			return null;
 		}
 		MultiValueMap<String, Object> allAttributes = new LinkedMultiValueMap<String, Object>();

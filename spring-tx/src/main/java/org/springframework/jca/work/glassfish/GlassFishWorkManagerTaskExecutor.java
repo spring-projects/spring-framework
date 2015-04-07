@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,10 @@ import org.springframework.util.ReflectionUtils;
  * {@link org.springframework.scheduling.commonj.WorkManagerTaskExecutor}
  * adapter for WebLogic and WebSphere.
  *
+ * <p>Note: On GlassFish 4 and higher, a
+ * {@link org.springframework.scheduling.concurrent.DefaultManagedTaskExecutor}
+ * should be preferred, following JSR-236 support in Java EE 7.
+ *
  * @author Juergen Hoeller
  * @since 2.5.2
  */
@@ -43,12 +47,12 @@ public class GlassFishWorkManagerTaskExecutor extends WorkManagerTaskExecutor {
 
 	public GlassFishWorkManagerTaskExecutor() {
 		try {
-			Class wmf = getClass().getClassLoader().loadClass(WORK_MANAGER_FACTORY_CLASS);
-			this.getWorkManagerMethod = wmf.getMethod("getWorkManager", new Class[] {String.class});
+			Class<?> wmf = getClass().getClassLoader().loadClass(WORK_MANAGER_FACTORY_CLASS);
+			this.getWorkManagerMethod = wmf.getMethod("getWorkManager", String.class);
 		}
 		catch (Exception ex) {
 			throw new IllegalStateException(
-					"Could not initialize GlassFishWorkManagerTaskExecutor because GlassFish API is not available: " + ex);
+					"Could not initialize GlassFishWorkManagerTaskExecutor because GlassFish API is not available", ex);
 		}
 	}
 

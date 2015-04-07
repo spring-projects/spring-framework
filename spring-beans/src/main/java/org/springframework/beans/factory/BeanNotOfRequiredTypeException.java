@@ -31,10 +31,10 @@ public class BeanNotOfRequiredTypeException extends BeansException {
 	private String beanName;
 
 	/** The required type */
-	private Class requiredType;
+	private Class<?> requiredType;
 
 	/** The offending type */
-	private Class actualType;
+	private Class<?> actualType;
 
 
 	/**
@@ -44,7 +44,7 @@ public class BeanNotOfRequiredTypeException extends BeansException {
 	 * @param actualType the actual type returned, which did not match
 	 * the expected type
 	 */
-	public BeanNotOfRequiredTypeException(String beanName, Class requiredType, Class actualType) {
+	public BeanNotOfRequiredTypeException(String beanName, Class<?> requiredType, Class<?> actualType) {
 		super("Bean named '" + beanName + "' must be of type [" + requiredType.getName() +
 				"], but was actually of type [" + actualType.getName() + "]");
 		this.beanName = beanName;
@@ -63,14 +63,14 @@ public class BeanNotOfRequiredTypeException extends BeansException {
 	/**
 	 * Return the expected type for the bean.
 	 */
-	public Class getRequiredType() {
+	public Class<?> getRequiredType() {
 		return this.requiredType;
 	}
 
 	/**
 	 * Return the actual type of the instance found.
 	 */
-	public Class getActualType() {
+	public Class<?> getActualType() {
 		return this.actualType;
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import javax.resource.cci.LocalTransaction;
 import javax.resource.cci.Record;
 
 import org.junit.Test;
+
 import org.springframework.dao.DataRetrievalFailureException;
 import org.springframework.jca.cci.connection.CciLocalTransactionManager;
 import org.springframework.jca.cci.core.CciTemplate;
@@ -107,9 +108,9 @@ public class CciLocalTransactionTests {
 		TransactionTemplate tt = new TransactionTemplate(tm);
 
 		try {
-			tt.execute(new TransactionCallback() {
+			tt.execute(new TransactionCallback<Void>() {
 				@Override
-				public Object doInTransaction(TransactionStatus status) {
+				public Void doInTransaction(TransactionStatus status) {
 					assertTrue("Has thread connection", TransactionSynchronizationManager.hasResource(connectionFactory));
 					CciTemplate ct = new CciTemplate(connectionFactory);
 					ct.execute(interactionSpec, record, record);

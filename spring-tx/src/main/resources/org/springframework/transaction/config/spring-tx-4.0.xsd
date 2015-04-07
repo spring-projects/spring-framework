@@ -131,7 +131,7 @@
 					]]></xsd:documentation>
 				</xsd:annotation>
 			</xsd:attribute>
-			<xsd:attribute name="order" type="xsd:int">
+			<xsd:attribute name="order" type="xsd:token">
 				<xsd:annotation>
 					<xsd:documentation source="java:org.springframework.core.Ordered"><![CDATA[
 	Controls the ordering of the execution of the transaction advisor
@@ -209,7 +209,7 @@
 							</xsd:restriction>
 						</xsd:simpleType>
 					</xsd:attribute>
-					<xsd:attribute name="timeout" type="xsd:integer" default="-1">
+					<xsd:attribute name="timeout" type="xsd:int" default="-1">
 						<xsd:annotation>
 							<xsd:documentation><![CDATA[
 	The transaction timeout value (in seconds).

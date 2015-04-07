@@ -18,7 +18,6 @@ package org.springframework.jmx.export.assembler;
 
 import java.util.HashMap;
 import java.util.Map;
-
 import javax.management.Descriptor;
 import javax.management.MBeanInfo;
 import javax.management.MBeanParameterInfo;
@@ -27,6 +26,7 @@ import javax.management.modelmbean.ModelMBeanInfo;
 import javax.management.modelmbean.ModelMBeanOperationInfo;
 
 import org.junit.Test;
+
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.jmx.IJmxTestBean;
 import org.springframework.jmx.JmxTestBean;
@@ -175,7 +175,7 @@ public abstract class AbstractMetadataAssemblerTests extends AbstractJmxAssemble
 		Map<String, Object> beans = new HashMap<String, Object>();
 		beans.put(objectName, proxy);
 		exporter.setBeans(beans);
-		exporter.afterPropertiesSet();
+		start(exporter);
 
 		MBeanInfo inf = getServer().getMBeanInfo(ObjectNameManager.getInstance(objectName));
 		assertEquals("Incorrect number of operations", getExpectedOperationCount(), inf.getOperations().length);

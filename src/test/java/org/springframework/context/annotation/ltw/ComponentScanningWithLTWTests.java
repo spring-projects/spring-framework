@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,15 +16,14 @@
 
 package org.springframework.context.annotation.ltw;
 
-import org.springframework.test.jpa.AbstractJpaTests;
-
 /**
  * Test to ensure that component scanning work with load-time weaver.
  * See SPR-3873 for more details.
  *
  * @author Ramnivas Laddad
  */
-public class ComponentScanningWithLTWTests extends AbstractJpaTests {
+@SuppressWarnings("deprecation")
+public class ComponentScanningWithLTWTests extends org.springframework.test.jpa.AbstractJpaTests {
 
 	public ComponentScanningWithLTWTests() {
 		setDependencyCheck(false);

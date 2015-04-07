@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -69,9 +69,9 @@ public class JndiPropertySource extends PropertySource<JndiLocatorDelegate> {
 		super(name, jndiLocator);
 	}
 
+
 	/**
-	 * {@inheritDoc}
-	 * <p>This implementation looks up and returns the value associated with the given
+	 * This implementation looks up and returns the value associated with the given
 	 * name from the underlying {@link JndiLocatorDelegate}. If a {@link NamingException}
 	 * is thrown during the call to {@link JndiLocatorDelegate#lookup(String)}, returns
 	 * {@code null} and issues a DEBUG-level log statement with the exception message.
@@ -80,12 +80,16 @@ public class JndiPropertySource extends PropertySource<JndiLocatorDelegate> {
 	public Object getProperty(String name) {
 		try {
 			Object value = this.source.lookup(name);
-			logger.debug("JNDI lookup for name [" + name + "] returned: [" + value + "]");
+			if (logger.isDebugEnabled()) {
+				logger.debug("JNDI lookup for name [" + name + "] returned: [" + value + "]");
+			}
 			return value;
 		}
 		catch (NamingException ex) {
-			logger.debug("JNDI lookup for name [" + name + "] threw NamingException " +
-					"with message: " + ex.getMessage() + ". Returning null.");
+			if (logger.isDebugEnabled()) {
+				logger.debug("JNDI lookup for name [" + name + "] threw NamingException " +
+						"with message: " + ex.getMessage() + ". Returning null.");
+			}
 			return null;
 		}
 	}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -56,10 +56,20 @@ import org.springframework.core.Ordered;
  * {@code spring-aspects} module JAR must be present on the classpath.
  *
  * <p>By default, a {@link org.springframework.core.task.SimpleAsyncTaskExecutor
- * SimpleAsyncTaskExecutor} will be used to process async method invocations. To
- * customize this behavior, implement {@link AsyncConfigurer} and
- * provide your own {@link java.util.concurrent.Executor Executor} through the
- * {@link AsyncConfigurer#getAsyncExecutor() getExecutor()} method.
+ * SimpleAsyncTaskExecutor} will be used to process async method invocations. Besides,
+ * annotated methods having a {@code void} return type cannot transmit any exception
+ * back to the caller. By default, such uncaught exceptions are only logged.
+ *
+ * <p>To customize all this, implement {@link AsyncConfigurer} and
+ * provide:
+ * <ul>
+ * <li>your own {@link java.util.concurrent.Executor Executor} through the
+ * {@link AsyncConfigurer#getAsyncExecutor() getAsyncExecutor()} method, and</li>
+ * <li>your own {@link org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler
+ * AsyncUncaughtExceptionHandler} through the {@link AsyncConfigurer#getAsyncUncaughtExceptionHandler()
+ * getAsyncUncaughtExceptionHandler()}
+ * method.</li>
+ * </ul>
  *
  * <pre class="code">
  * &#064;Configuration
@@ -81,19 +91,29 @@ import org.springframework.core.Ordered;
  *         executor.initialize();
  *         return executor;
  *     }
+ *
+ *     &#064;Override
+ *     public AsyncUncaughtExceptionHandler getAsyncUncaughtExceptionHandler() {
+ *         return MyAsyncUncaughtExceptionHandler();
+ *     }
  * }</pre>
+ *
+ * <p>If only one item needs to be customized, {@code null} can be returned to
+ * keep the default settings. Consider also extending from {@link AsyncConfigurerSupport}
+ * when possible.
  *
  * <p>For reference, the example above can be compared to the following Spring XML
  * configuration:
  * <pre class="code">
  * {@code
  * <beans>
- *     <task:annotation-driven executor="myExecutor"/>
+ *     <task:annotation-driven executor="myExecutor" exception-handler="exceptionHandler"/>
  *     <task:executor id="myExecutor" pool-size="7-42" queue-capacity="11"/>
  *     <bean id="asyncBean" class="com.foo.MyAsyncBean"/>
+ *     <bean id="exceptionHandler" class="com.foo.MyAsyncUncaughtExceptionHandler"/>
  * </beans>
  * }</pre>
- * the examples are equivalent save the setting of the <em>thread name prefix</em> of the
+ * the examples are equivalent except the setting of the <em>thread name prefix</em> of the
  * Executor; this is because the the {@code task:} namespace {@code executor} element does
  * not expose such an attribute. This demonstrates how the code-based approach allows for
  * maximum configurability through direct access to actual componentry.
@@ -105,6 +125,7 @@ import org.springframework.core.Ordered;
  * automatically when the bean is initialized.
  *
  * @author Chris Beams
+ * @author Stephane Nicoll
  * @since 3.1
  * @see Async
  * @see AsyncConfigurer

@@ -46,7 +46,7 @@ public class WebLogicNativeJdbcExtractor extends NativeJdbcExtractorAdapter {
 	private static final String JDBC_EXTENSION_NAME = "weblogic.jdbc.extensions.WLConnection";
 
 
-	private final Class jdbcExtensionClass;
+	private final Class<?> jdbcExtensionClass;
 
 	private final Method getVendorConnectionMethod;
 

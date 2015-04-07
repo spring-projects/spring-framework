@@ -195,10 +195,9 @@ public class BshScriptFactoryTests extends TestCase {
 		given(script.getScriptAsString()).willReturn(badScript);
 		given(script.isModified()).willReturn(true);
 		BshScriptFactory factory = new BshScriptFactory(
-				ScriptFactoryPostProcessor.INLINE_SCRIPT_PREFIX + badScript,
-				new Class<?>[] {Messenger.class});
+				ScriptFactoryPostProcessor.INLINE_SCRIPT_PREFIX + badScript, Messenger.class);
 		try {
-			Messenger messenger = (Messenger) factory.getScriptedObject(script, new Class<?>[]{Messenger.class});
+			Messenger messenger = (Messenger) factory.getScriptedObject(script, Messenger.class);
 			messenger.getMessage();
 			fail("Must have thrown a BshScriptUtils.BshExecutionException.");
 		}
@@ -208,7 +207,7 @@ public class BshScriptFactoryTests extends TestCase {
 
 	public void testCtorWithNullScriptSourceLocator() throws Exception {
 		try {
-			new BshScriptFactory(null, new Class<?>[] {Messenger.class});
+			new BshScriptFactory(null, Messenger.class);
 			fail("Must have thrown exception by this point.");
 		}
 		catch (IllegalArgumentException expected) {

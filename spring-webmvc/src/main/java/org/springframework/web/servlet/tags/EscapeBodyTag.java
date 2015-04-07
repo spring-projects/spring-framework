@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,6 @@ import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.tagext.BodyContent;
 import javax.servlet.jsp.tagext.BodyTag;
 
-import org.springframework.web.util.HtmlUtils;
 import org.springframework.web.util.JavaScriptUtils;
 
 /**
@@ -79,7 +78,7 @@ public class EscapeBodyTag extends HtmlEscapingAwareTag implements BodyTag {
 		try {
 			String content = readBodyContent();
 			// HTML and/or JavaScript escape, if demanded
-			content = isHtmlEscape() ? HtmlUtils.htmlEscape(content) : content;
+			content = htmlEscape(content);
 			content = this.javaScriptEscape ? JavaScriptUtils.javaScriptEscape(content) : content;
 			writeBodyContent(content);
 		}

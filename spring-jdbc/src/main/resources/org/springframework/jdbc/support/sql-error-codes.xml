@@ -235,7 +235,7 @@
 			<value>2601,2615,2626</value>
 		</property>
 		<property name="dataIntegrityViolationCodes">
-			<value>233,511,515,530,547,2615,2714</value>
+			<value>233,511,515,530,546,547,2615,2714</value>
 		</property>
 		<property name="transientDataAccessResourceCodes">
 			<value>921,1105</value>
@@ -247,5 +247,45 @@
 			<value>1205</value>
 		</property>
 	</bean>
+
+	<!-- http://help.sap.com/saphelp_hanaplatform/helpdata/en/20/a78d3275191014b41bae7c4a46d835/content.htm -->
+	<bean id="Hana" class="org.springframework.jdbc.support.SQLErrorCodes">
+		<property name="databaseProductName">
+			<value>SAP DB</value>
+		</property>
+		<property name="badSqlGrammarCodes">
+			<value>
+				257,259,260,261,262,263,264,267,268,269,270,271,272,273,275,276,277,278,
+				278,279,280,281,282,283,284,285,286,288,289,290,294,295,296,297,299,308,309,
+				313,315,316,318,319,320,321,322,323,324,328,329,330,333,335,336,337,338,340,
+				343,350,351,352,362,368
+			</value>
+		</property>
+		<property name="permissionDeniedCodes">
+			<value>10,258</value>
+		</property>
+		<property name="duplicateKeyCodes">
+			<value>301</value>
+		</property>
+		<property name="dataIntegrityViolationCodes">
+			<value>461,462</value>
+		</property>
+		<property name="dataAccessResourceFailureCodes">
+			<value>-813,-709,-708,1024,1025,1026,1027,1029,1030,1031</value>
+		</property>
+		<property name="invalidResultSetAccessCodes">
+			<value>-11210,582,587,588,594</value>
+		</property>
+		<property name="cannotAcquireLockCodes">
+			<value>131</value>
+		</property>
+		<property name="cannotSerializeTransactionCodes">
+			<value>138,143</value>
+		</property>
+		<property name="deadlockLoserCodes">
+			<value>133</value>
+		</property>
+	</bean>
+
 
 </beans>

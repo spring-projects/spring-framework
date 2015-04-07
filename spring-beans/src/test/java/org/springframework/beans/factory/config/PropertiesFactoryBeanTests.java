@@ -16,13 +16,14 @@
 
 package org.springframework.beans.factory.config;
 
-import static org.junit.Assert.*;
-import static org.springframework.tests.TestResourceUtils.qualifiedResource;
-
 import java.util.Properties;
 
 import org.junit.Test;
+
 import org.springframework.core.io.Resource;
+
+import static org.junit.Assert.*;
+import static org.springframework.tests.TestResourceUtils.*;
 
 /**
  * Unit tests for {@link PropertiesFactoryBean}.

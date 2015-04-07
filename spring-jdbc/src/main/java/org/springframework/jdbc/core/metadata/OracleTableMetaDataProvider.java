@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,8 +29,8 @@ import org.springframework.util.ReflectionUtils;
 
 /**
  * Oracle-specific implementation of the {@link org.springframework.jdbc.core.metadata.TableMetaDataProvider}.
- * Supports a feature for including synonyms in the metadata lookup. Also supports lookup of current schema using
- * the sys_context.
+ * Supports a feature for including synonyms in the metadata lookup. Also supports lookup of current schema
+ * using the sys_context.
  *
  * <p>Thanks to Mike Youngstrom and Bruce Campbell for submitting the original suggestion for the Oracle
  * current schema lookup implementation.
@@ -56,9 +56,10 @@ public class OracleTableMetaDataProvider extends GenericTableMetaDataProvider {
 		lookupDefaultSchema(databaseMetaData);
 	}
 
+
 	@Override
 	protected String getDefaultSchema() {
-		if (defaultSchema != null) {
+		if (this.defaultSchema != null) {
 			return defaultSchema;
 		}
 		return super.getDefaultSchema();
@@ -81,7 +82,7 @@ public class OracleTableMetaDataProvider extends GenericTableMetaDataProvider {
 		}
 		boolean isOracleCon;
 		try {
-			Class<?> oracleConClass = getClass().getClassLoader().loadClass("oracle.jdbc.OracleConnection");
+			Class<?> oracleConClass = con.getClass().getClassLoader().loadClass("oracle.jdbc.OracleConnection");
 			isOracleCon = oracleConClass.isInstance(con);
 		}
 		catch (ClassNotFoundException ex) {
@@ -107,7 +108,7 @@ public class OracleTableMetaDataProvider extends GenericTableMetaDataProvider {
 			ReflectionUtils.makeAccessible(getIncludeSynonyms);
 			originalValueForIncludeSynonyms = (Boolean) getIncludeSynonyms.invoke(con);
 
-			setIncludeSynonyms = con.getClass().getMethod("setIncludeSynonyms", new Class[] {boolean.class});
+			setIncludeSynonyms = con.getClass().getMethod("setIncludeSynonyms", boolean.class);
 			ReflectionUtils.makeAccessible(setIncludeSynonyms);
 			setIncludeSynonyms.invoke(con, Boolean.TRUE);
 		}
@@ -126,9 +127,7 @@ public class OracleTableMetaDataProvider extends GenericTableMetaDataProvider {
 	}
 
 	/*
-	 * Oracle implementation for detecting current schema
-	 *
-	 * @param databaseMetaData
+	 * Oracle-based implementation for detecting the current schema.
 	 */
 	private void lookupDefaultSchema(DatabaseMetaData databaseMetaData) {
 		try {
@@ -144,7 +143,9 @@ public class OracleTableMetaDataProvider extends GenericTableMetaDataProvider {
 					cstmt.close();
 				}
 			}
-		} catch (Exception ignore) {}
+		}
+		catch (Exception ignore) {
+		}
 	}
 
 }

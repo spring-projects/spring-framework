@@ -405,7 +405,7 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 	/**
 	 * Gets the advice implementation class corresponding to the supplied {@link Element}.
 	 */
-	private Class getAdviceClass(Element adviceElement, ParserContext parserContext) {
+	private Class<?> getAdviceClass(Element adviceElement, ParserContext parserContext) {
 		String elementName = parserContext.getDelegate().getLocalName(adviceElement);
 		if (BEFORE.equals(elementName)) {
 			return AspectJMethodBeforeAdvice.class;

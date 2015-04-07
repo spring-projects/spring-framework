@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,7 +49,7 @@ final class PropertyMatches {
 	 * @param propertyName the name of the property to find possible matches for
 	 * @param beanClass the bean class to search for matches
 	 */
-	public static PropertyMatches forProperty(String propertyName, Class beanClass) {
+	public static PropertyMatches forProperty(String propertyName, Class<?> beanClass) {
 		return forProperty(propertyName, beanClass, DEFAULT_MAX_DISTANCE);
 	}
 
@@ -59,7 +59,7 @@ final class PropertyMatches {
 	 * @param beanClass the bean class to search for matches
 	 * @param maxDistance the maximum property distance allowed for matches
 	 */
-	public static PropertyMatches forProperty(String propertyName, Class beanClass, int maxDistance) {
+	public static PropertyMatches forProperty(String propertyName, Class<?> beanClass, int maxDistance) {
 		return new PropertyMatches(propertyName, beanClass, maxDistance);
 	}
 
@@ -76,7 +76,7 @@ final class PropertyMatches {
 	/**
 	 * Create a new PropertyMatches instance for the given property.
 	 */
-	private PropertyMatches(String propertyName, Class beanClass, int maxDistance) {
+	private PropertyMatches(String propertyName, Class<?> beanClass, int maxDistance) {
 		this.propertyName = propertyName;
 		this.possibleMatches = calculateMatches(BeanUtils.getPropertyDescriptors(beanClass), maxDistance);
 	}
@@ -172,7 +172,8 @@ final class PropertyMatches {
 				char t_j = s2.charAt(j - 1);
 				if (s_i == t_j) {
 					cost = 0;
-				} else {
+				}
+				else {
 					cost = 1;
 				}
 				d[i][j] = Math.min(Math.min(d[i - 1][j] + 1, d[i][j - 1] + 1),

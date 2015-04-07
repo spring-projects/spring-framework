@@ -16,8 +16,6 @@
 
 package org.springframework.context.support;
 
-import static org.junit.Assert.*;
-
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -29,8 +27,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.junit.Test;
+
 import org.springframework.aop.support.AopUtils;
-import org.springframework.tests.sample.beans.ResourceTestBean;
 import org.springframework.beans.TypeMismatchException;
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.BeanFactoryUtils;
@@ -41,8 +39,11 @@ import org.springframework.context.MessageSource;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
+import org.springframework.tests.sample.beans.ResourceTestBean;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.util.ObjectUtils;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Juergen Hoeller
@@ -69,7 +70,6 @@ public final class ClassPathXmlApplicationContextTests {
 	private static final String ALIAS_THAT_OVERRIDES_PARENT_CONTEXT = PATH + "aliasThatOverridesParent.xml";
 	private static final String ALIAS_FOR_PARENT_CONTEXT = PATH + "aliasForParent.xml";
 	private static final String TEST_PROPERTIES = "test.properties";
-	private static final String FQ_TEST_PROPERTIES = "classpath:org/springframework/beans/factory/xml/" + TEST_PROPERTIES;
 
 
 	@Test

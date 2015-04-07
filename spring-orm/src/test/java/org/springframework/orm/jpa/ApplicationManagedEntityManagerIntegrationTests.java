@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,16 +16,14 @@
 
 package org.springframework.orm.jpa;
 
-import java.util.List;
 import java.lang.reflect.Proxy;
-
+import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
 import javax.persistence.TransactionRequiredException;
 
 import org.springframework.orm.jpa.domain.Person;
-import org.springframework.orm.jpa.AbstractEntityManagerFactoryIntegrationTests;
-import org.springframework.test.annotation.NotTransactional;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -35,9 +33,10 @@ import org.springframework.transaction.annotation.Transactional;
  * @author Rod Johnson
  * @since 2.0
  */
+@SuppressWarnings("deprecation")
 public class ApplicationManagedEntityManagerIntegrationTests extends AbstractEntityManagerFactoryIntegrationTests {
 
-	@NotTransactional
+	@Transactional(propagation = Propagation.NOT_SUPPORTED)
 	public void testEntityManagerIsProxy() {
 		assertTrue("EntityManagerFactory is proxied", Proxy.isProxyClass(entityManagerFactory.getClass()));
 	}
@@ -93,7 +92,7 @@ public class ApplicationManagedEntityManagerIntegrationTests extends AbstractEnt
 		em.persist(p);
 
 		em.flush();
-		assertEquals("1 row must have been inserted", 1, countRowsInTable("person"));
+		assertEquals("1 row must have been inserted", 1, countRowsInTable(em, "person"));
 	}
 
 	public void testStateClean() {
@@ -121,15 +120,13 @@ public class ApplicationManagedEntityManagerIntegrationTests extends AbstractEnt
 		doInstantiateAndSave(em);
 		setComplete();
 		endTransaction();	// Should rollback
-		assertEquals("Tx must have committed back",
-				1, countRowsInTable("person"));
+		assertEquals("Tx must have committed back", 1, countRowsInTable(em, "person"));
 
 		// Now clean up the database
 		startNewTransaction();
 		em.joinTransaction();
 		deleteAllPeopleUsingEntityManager(em);
-		assertEquals("People have been killed",
-				0, countRowsInTable("person"));
+		assertEquals("People have been killed", 0, countRowsInTable(em, "person"));
 		setComplete();
 	}
 
@@ -142,8 +139,7 @@ public class ApplicationManagedEntityManagerIntegrationTests extends AbstractEnt
 		em.joinTransaction();
 		doInstantiateAndSave(em);
 		endTransaction();	// Should rollback
-		assertEquals("Tx must have been rolled back",
-				0, countRowsInTable("person"));
+		assertEquals("Tx must have been rolled back", 0, countRowsInTable(em, "person"));
 	}
 
 	public void testCommitOccurs() {
@@ -153,11 +149,10 @@ public class ApplicationManagedEntityManagerIntegrationTests extends AbstractEnt
 
 		setComplete();
 		endTransaction();	// Should rollback
-		assertEquals("Tx must have committed back",
-				1, countRowsInTable("person"));
+		assertEquals("Tx must have committed back", 1, countRowsInTable(em, "person"));
 
 		// Now clean up the database
-		deleteFromTables(new String[] { "person" });
+		deleteFromTables("person");
 	}
 
 }

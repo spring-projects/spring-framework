@@ -142,7 +142,7 @@ public abstract class AbstractTraceInterceptor implements MethodInterceptor, Ser
 	 * @return the target class for the given object
 	 * @see #setHideProxyClassNames
 	 */
-	protected Class getClassForLogging(Object target) {
+	protected Class<?> getClassForLogging(Object target) {
 		return (this.hideProxyClassNames ? AopUtils.getTargetClass(target) : target.getClass());
 	}
 

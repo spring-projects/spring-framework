@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 package org.springframework.web.servlet.mvc.multiaction;
 
 import java.util.Properties;
-
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.logging.Log;
@@ -124,7 +123,7 @@ public class ParameterMethodNameResolver implements MethodNameResolver {
 	 * can be considered a logical name only.
 	 * @see #setParamName
 	 */
-	public void setMethodParamNames(String[] methodParamNames) {
+	public void setMethodParamNames(String... methodParamNames) {
 		this.methodParamNames = methodParamNames;
 	}
 

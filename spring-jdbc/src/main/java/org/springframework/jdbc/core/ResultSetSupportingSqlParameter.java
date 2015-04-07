@@ -25,11 +25,11 @@ package org.springframework.jdbc.core;
  */
 public class ResultSetSupportingSqlParameter extends SqlParameter {
 
-	private ResultSetExtractor resultSetExtractor;
+	private ResultSetExtractor<?> resultSetExtractor;
 
 	private RowCallbackHandler rowCallbackHandler;
 
-	private RowMapper rowMapper;
+	private RowMapper<?> rowMapper;
 
 
 	/**
@@ -68,7 +68,7 @@ public class ResultSetSupportingSqlParameter extends SqlParameter {
 	 * @param sqlType SQL type of the parameter according to java.sql.Types
 	 * @param rse ResultSetExtractor to use for parsing the ResultSet
 	 */
-	public ResultSetSupportingSqlParameter(String name, int sqlType, ResultSetExtractor rse) {
+	public ResultSetSupportingSqlParameter(String name, int sqlType, ResultSetExtractor<?> rse) {
 		super(name, sqlType);
 		this.resultSetExtractor = rse;
 	}
@@ -90,7 +90,7 @@ public class ResultSetSupportingSqlParameter extends SqlParameter {
 	 * @param sqlType SQL type of the parameter according to java.sql.Types
 	 * @param rm RowMapper to use for parsing the ResultSet
 	 */
-	public ResultSetSupportingSqlParameter(String name, int sqlType, RowMapper rm) {
+	public ResultSetSupportingSqlParameter(String name, int sqlType, RowMapper<?> rm) {
 		super(name, sqlType);
 		this.rowMapper = rm;
 	}
@@ -107,7 +107,7 @@ public class ResultSetSupportingSqlParameter extends SqlParameter {
 	/**
 	 * Return the ResultSetExtractor held by this parameter, if any.
 	 */
-	public ResultSetExtractor getResultSetExtractor() {
+	public ResultSetExtractor<?> getResultSetExtractor() {
 		return this.resultSetExtractor;
 	}
 
@@ -121,7 +121,7 @@ public class ResultSetSupportingSqlParameter extends SqlParameter {
 	/**
 	 * Return the RowMapper held by this parameter, if any.
 	 */
-	public RowMapper getRowMapper() {
+	public RowMapper<?> getRowMapper() {
 		return this.rowMapper;
 	}
 

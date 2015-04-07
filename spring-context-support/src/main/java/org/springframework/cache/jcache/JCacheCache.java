@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,8 +18,6 @@ package org.springframework.cache.jcache;
 
 import java.io.Serializable;
 
-import javax.cache.Status;
-
 import org.springframework.cache.Cache;
 import org.springframework.cache.support.SimpleValueWrapper;
 import org.springframework.util.Assert;
@@ -28,15 +26,17 @@ import org.springframework.util.Assert;
  * {@link org.springframework.cache.Cache} implementation on top of a
  * {@link javax.cache.Cache} instance.
  *
+ * <p>Note: This class has been updated for JCache 1.0, as of Spring 4.0.
+ *
  * @author Juergen Hoeller
+ * @author Stephane Nicoll
  * @since 3.2
  */
 public class JCacheCache implements Cache {
 
 	private static final Object NULL_HOLDER = new NullHolder();
 
-	@SuppressWarnings("rawtypes")
-	private final javax.cache.Cache cache;
+	private final javax.cache.Cache<Object, Object> cache;
 
 	private final boolean allowNullValues;
 
@@ -45,7 +45,7 @@ public class JCacheCache implements Cache {
 	 * Create an {@link org.springframework.cache.jcache.JCacheCache} instance.
 	 * @param jcache backing JCache Cache instance
 	 */
-	public JCacheCache(javax.cache.Cache<?,?> jcache) {
+	public JCacheCache(javax.cache.Cache<Object, Object> jcache) {
 		this(jcache, true);
 	}
 
@@ -54,32 +54,28 @@ public class JCacheCache implements Cache {
 	 * @param jcache backing JCache Cache instance
 	 * @param allowNullValues whether to accept and convert null values for this cache
 	 */
-	public JCacheCache(javax.cache.Cache<?,?> jcache, boolean allowNullValues) {
+	public JCacheCache(javax.cache.Cache<Object, Object> jcache, boolean allowNullValues) {
 		Assert.notNull(jcache, "Cache must not be null");
-		Status status = jcache.getStatus();
-		Assert.isTrue(Status.STARTED.equals(status),
-				"A 'started' cache is required - current cache is " + status.toString());
 		this.cache = jcache;
 		this.allowNullValues = allowNullValues;
 	}
 
 
 	@Override
-	public String getName() {
+	public final String getName() {
 		return this.cache.getName();
 	}
 
 	@Override
-	public javax.cache.Cache<?,?> getNativeCache() {
+	public final javax.cache.Cache<Object, Object> getNativeCache() {
 		return this.cache;
 	}
 
-	public boolean isAllowNullValues() {
+	public final boolean isAllowNullValues() {
 		return this.allowNullValues;
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
 	public ValueWrapper get(Object key) {
 		Object value = this.cache.get(key);
 		return (value != null ? new SimpleValueWrapper(fromStoreValue(value)) : null);
@@ -87,12 +83,26 @@ public class JCacheCache implements Cache {
 
 	@Override
 	@SuppressWarnings("unchecked")
+	public <T> T get(Object key, Class<T> type) {
+		Object value = fromStoreValue(this.cache.get(key));
+		if (value != null && type != null && !type.isInstance(value)) {
+			throw new IllegalStateException("Cached value is not of required type [" + type.getName() + "]: " + value);
+		}
+		return (T) value;
+	}
+
+	@Override
 	public void put(Object key, Object value) {
 		this.cache.put(key, toStoreValue(value));
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
+	public ValueWrapper putIfAbsent(Object key, Object value) {
+		boolean set = this.cache.putIfAbsent(key, toStoreValue(value));
+		return (set ? null : get(key));
+	}
+
+	@Override
 	public void evict(Object key) {
 		this.cache.remove(key);
 	}

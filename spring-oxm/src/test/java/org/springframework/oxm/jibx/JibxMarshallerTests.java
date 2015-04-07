@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -101,11 +101,10 @@ public class JibxMarshallerTests extends AbstractMarshallerTests {
 	}
 
 	@Test
-	public void testSupports() throws Exception {
+	public void supports() throws Exception {
 		assertTrue("JibxMarshaller does not support Flights", marshaller.supports(Flights.class));
 		assertTrue("JibxMarshaller does not support FlightType", marshaller.supports(FlightType.class));
 		assertFalse("JibxMarshaller supports illegal type", marshaller.supports(getClass()));
 	}
-
 
 }

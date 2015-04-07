@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,17 +16,13 @@
 
 package org.springframework.web.servlet.view;
 
-import java.util.Arrays;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.util.StringUtils;
-import org.springframework.web.context.support.ContextExposingHttpServletRequest;
 import org.springframework.web.util.WebUtils;
 
 /**
@@ -67,10 +63,6 @@ import org.springframework.web.util.WebUtils;
 public class InternalResourceView extends AbstractUrlBasedView {
 
 	private boolean alwaysInclude = false;
-
-	private boolean exposeContextBeansAsAttributes = false;
-
-	private Set<String> exposedContextBeanNames;
 
 	private boolean preventDispatchLoop = false;
 
@@ -116,36 +108,6 @@ public class InternalResourceView extends AbstractUrlBasedView {
 	}
 
 	/**
-	 * Set whether to make all Spring beans in the application context accessible
-	 * as request attributes, through lazy checking once an attribute gets accessed.
-	 * <p>This will make all such beans accessible in plain {@code ${...}}
-	 * expressions in a JSP 2.0 page, as well as in JSTL's {@code c:out}
-	 * value expressions.
-	 * <p>Default is "false". Switch this flag on to transparently expose all
-	 * Spring beans in the request attribute namespace.
-	 * <p><b>NOTE:</b> Context beans will override any custom request or session
-	 * attributes of the same name that have been manually added. However, model
-	 * attributes (as explicitly exposed to this view) of the same name will
-	 * always override context beans.
-	 * @see #getRequestToExpose
-	 */
-	public void setExposeContextBeansAsAttributes(boolean exposeContextBeansAsAttributes) {
-		this.exposeContextBeansAsAttributes = exposeContextBeansAsAttributes;
-	}
-
-	/**
-	 * Specify the names of beans in the context which are supposed to be exposed.
-	 * If this is non-null, only the specified beans are eligible for exposure as
-	 * attributes.
-	 * <p>If you'd like to expose all Spring beans in the application context, switch
-	 * the {@link #setExposeContextBeansAsAttributes "exposeContextBeansAsAttributes"}
-	 * flag on but do not list specific bean names for this property.
-	 */
-	public void setExposedContextBeanNames(String[] exposedContextBeanNames) {
-		this.exposedContextBeanNames = new HashSet<String>(Arrays.asList(exposedContextBeanNames));
-	}
-
-	/**
 	 * Set whether to explicitly prevent dispatching back to the
 	 * current handler path.
 	 * <p>Default is "false". Switch this to "true" for convention-based
@@ -173,32 +135,29 @@ public class InternalResourceView extends AbstractUrlBasedView {
 	protected void renderMergedOutputModel(
 			Map<String, Object> model, HttpServletRequest request, HttpServletResponse response) throws Exception {
 
-		// Determine which request handle to expose to the RequestDispatcher.
-		HttpServletRequest requestToExpose = getRequestToExpose(request);
-
 		// Expose the model object as request attributes.
-		exposeModelAsRequestAttributes(model, requestToExpose);
+		exposeModelAsRequestAttributes(model, request);
 
 		// Expose helpers as request attributes, if any.
-		exposeHelpers(requestToExpose);
+		exposeHelpers(request);
 
 		// Determine the path for the request dispatcher.
-		String dispatcherPath = prepareForRendering(requestToExpose, response);
+		String dispatcherPath = prepareForRendering(request, response);
 
 		// Obtain a RequestDispatcher for the target resource (typically a JSP).
-		RequestDispatcher rd = getRequestDispatcher(requestToExpose, dispatcherPath);
+		RequestDispatcher rd = getRequestDispatcher(request, dispatcherPath);
 		if (rd == null) {
 			throw new ServletException("Could not get RequestDispatcher for [" + getUrl() +
 					"]: Check that the corresponding file exists within your web application archive!");
 		}
 
 		// If already included or response already committed, perform include, else forward.
-		if (useInclude(requestToExpose, response)) {
+		if (useInclude(request, response)) {
 			response.setContentType(getContentType());
 			if (logger.isDebugEnabled()) {
 				logger.debug("Including resource [" + getUrl() + "] in InternalResourceView '" + getBeanName() + "'");
 			}
-			rd.include(requestToExpose, response);
+			rd.include(request, response);
 		}
 
 		else {
@@ -206,25 +165,8 @@ public class InternalResourceView extends AbstractUrlBasedView {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Forwarding to resource [" + getUrl() + "] in InternalResourceView '" + getBeanName() + "'");
 			}
-			rd.forward(requestToExpose, response);
+			rd.forward(request, response);
 		}
-	}
-
-	/**
-	 * Get the request handle to expose to the RequestDispatcher, i.e. to the view.
-	 * <p>The default implementation wraps the original request for exposure of
-	 * Spring beans as request attributes (if demanded).
-	 * @param originalRequest the original servlet request as provided by the engine
-	 * @return the wrapped request, or the original request if no wrapping is necessary
-	 * @see #setExposeContextBeansAsAttributes
-	 * @see org.springframework.web.context.support.ContextExposingHttpServletRequest
-	 */
-	protected HttpServletRequest getRequestToExpose(HttpServletRequest originalRequest) {
-		if (this.exposeContextBeansAsAttributes || this.exposedContextBeanNames != null) {
-			return new ContextExposingHttpServletRequest(
-					originalRequest, getWebApplicationContext(), this.exposedContextBeanNames);
-		}
-		return originalRequest;
 	}
 
 	/**

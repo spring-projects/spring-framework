@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,14 +23,18 @@ import org.springframework.util.Assert;
 
 /**
  * Registry for {@link ListenableFutureCallback} instances.
- * <p>Inspired by {@link com.google.common.util.concurrent.ExecutionList}.
+ *
+ * <p>Inspired by {@code com.google.common.util.concurrent.ExecutionList}.
+ *
  * @author Arjen Poutsma
+ * @author Sebastien Deleuze
  * @since 4.0
  */
 public class ListenableFutureCallbackRegistry<T> {
 
-	private final Queue<ListenableFutureCallback<? super T>> callbacks =
-			new LinkedList<ListenableFutureCallback<? super T>>();
+	private final Queue<SuccessCallback<? super T>> successCallbacks = new LinkedList<SuccessCallback<? super T>>();
+
+	private final Queue<FailureCallback> failureCallbacks = new LinkedList<FailureCallback>();
 
 	private State state = State.NEW;
 
@@ -40,59 +44,98 @@ public class ListenableFutureCallbackRegistry<T> {
 
 
 	/**
-	 * Adds the given callback to this registry.
+	 * Add the given callback to this registry.
 	 * @param callback the callback to add
 	 */
 	@SuppressWarnings("unchecked")
 	public void addCallback(ListenableFutureCallback<? super T> callback) {
 		Assert.notNull(callback, "'callback' must not be null");
-
-		synchronized (mutex) {
-			switch (state) {
+		synchronized (this.mutex) {
+			switch (this.state) {
 				case NEW:
-					callbacks.add(callback);
+					this.successCallbacks.add(callback);
+					this.failureCallbacks.add(callback);
 					break;
 				case SUCCESS:
-					callback.onSuccess((T)result);
+					callback.onSuccess((T) this.result);
 					break;
 				case FAILURE:
-					callback.onFailure((Throwable) result);
+					callback.onFailure((Throwable) this.result);
 					break;
 			}
 		}
 	}
 
 	/**
-	 * Triggers a {@link ListenableFutureCallback#onSuccess(Object)} call on all added
-	 * callbacks with the given result
+	 * Add the given success callback to this registry.
+	 * @param callback the success callback to add
+	 * @since 4.1
+	 */
+	@SuppressWarnings("unchecked")
+	public void addSuccessCallback(SuccessCallback<? super T> callback) {
+		Assert.notNull(callback, "'callback' must not be null");
+		synchronized (this.mutex) {
+			switch (this.state) {
+				case NEW:
+					this.successCallbacks.add(callback);
+					break;
+				case SUCCESS:
+					callback.onSuccess((T) this.result);
+					break;
+			}
+		}
+	}
+
+	/**
+	 * Add the given failure callback to this registry.
+	 * @param callback the failure callback to add
+	 * @since 4.1
+	 */
+	@SuppressWarnings("unchecked")
+	public void addFailureCallback(FailureCallback callback) {
+		Assert.notNull(callback, "'callback' must not be null");
+		synchronized (this.mutex) {
+			switch (this.state) {
+				case NEW:
+					this.failureCallbacks.add(callback);
+					break;
+				case FAILURE:
+					callback.onFailure((Throwable) this.result);
+					break;
+			}
+		}
+	}
+
+	/**
+	 * Trigger a {@link ListenableFutureCallback#onSuccess(Object)} call on all
+	 * added callbacks with the given result.
 	 * @param result the result to trigger the callbacks with
 	 */
 	public void success(T result) {
-		synchronized (mutex) {
-			state = State.SUCCESS;
+		synchronized (this.mutex) {
+			this.state = State.SUCCESS;
 			this.result = result;
-
-			while (!callbacks.isEmpty()) {
-				callbacks.poll().onSuccess(result);
+			while (!this.successCallbacks.isEmpty()) {
+				this.successCallbacks.poll().onSuccess(result);
 			}
 		}
 	}
 
 	/**
-	 * Triggers a {@link ListenableFutureCallback#onFailure(Throwable)} call on all added
-	 * callbacks with the given {@code Throwable}.
-	 * @param t the exception to trigger the callbacks with
+	 * Trigger a {@link ListenableFutureCallback#onFailure(Throwable)} call on all
+	 * added callbacks with the given {@code Throwable}.
+	 * @param ex the exception to trigger the callbacks with
 	 */
-	public void failure(Throwable t) {
-		synchronized (mutex) {
-			state = State.FAILURE;
-			this.result = t;
-
-			while (!callbacks.isEmpty()) {
-				callbacks.poll().onFailure(t);
+	public void failure(Throwable ex) {
+		synchronized (this.mutex) {
+			this.state = State.FAILURE;
+			this.result = ex;
+			while (!this.failureCallbacks.isEmpty()) {
+				this.failureCallbacks.poll().onFailure(ex);
 			}
 		}
 	}
+
 
 	private enum State {NEW, SUCCESS, FAILURE}
 

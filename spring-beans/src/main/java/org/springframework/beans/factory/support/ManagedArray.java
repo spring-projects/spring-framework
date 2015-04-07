@@ -29,7 +29,7 @@ import org.springframework.util.Assert;
 public class ManagedArray extends ManagedList<Object> {
 
 	/** Resolved element type for runtime creation of the target array */
-	volatile Class resolvedElementType;
+	volatile Class<?> resolvedElementType;
 
 
 	/**

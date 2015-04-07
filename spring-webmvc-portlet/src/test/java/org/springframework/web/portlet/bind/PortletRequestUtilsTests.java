@@ -17,9 +17,10 @@
 package org.springframework.web.portlet.bind;
 
 import org.junit.Test;
+
+import org.springframework.mock.web.portlet.MockPortletRequest;
 import org.springframework.tests.Assume;
 import org.springframework.tests.TestGroup;
-import org.springframework.mock.web.portlet.MockPortletRequest;
 import org.springframework.util.StopWatch;
 
 import static org.hamcrest.Matchers.*;

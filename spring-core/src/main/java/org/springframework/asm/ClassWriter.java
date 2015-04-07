@@ -417,6 +417,16 @@ public class ClassWriter extends ClassVisitor {
     private AnnotationWriter ianns;
 
     /**
+     * The runtime visible type annotations of this class.
+     */
+    private AnnotationWriter tanns;
+
+    /**
+     * The runtime invisible type annotations of this class.
+     */
+    private AnnotationWriter itanns;
+
+    /**
      * The non standard attributes of this class.
      */
     private Attribute attrs;
@@ -477,12 +487,12 @@ public class ClassWriter extends ClassVisitor {
      * <tt>true</tt> if the maximum stack size and number of local variables
      * must be automatically computed.
      */
-    private final boolean computeMaxs;
+    private boolean computeMaxs;
 
     /**
      * <tt>true</tt> if the stack map frames must be recomputed from scratch.
      */
-    private final boolean computeFrames;
+    private boolean computeFrames;
 
     /**
      * <tt>true</tt> if the stack map tables of this class are invalid. The
@@ -595,7 +605,7 @@ public class ClassWriter extends ClassVisitor {
      *            {@link #COMPUTE_FRAMES}.
      */
     public ClassWriter(final int flags) {
-        super(Opcodes.ASM4);
+        super(Opcodes.ASM5);
         index = 1;
         pool = new ByteVector();
         items = new Item[256];
@@ -677,7 +687,8 @@ public class ClassWriter extends ClassVisitor {
             sourceFile = newUTF8(file);
         }
         if (debug != null) {
-            sourceDebug = new ByteVector().putUTF8(debug);
+            sourceDebug = new ByteVector().encodeUTF8(debug, 0,
+                    Integer.MAX_VALUE);
         }
     }
 
@@ -711,6 +722,29 @@ public class ClassWriter extends ClassVisitor {
     }
 
     @Override
+    public final AnnotationVisitor visitTypeAnnotation(int typeRef,
+            TypePath typePath, final String desc, final boolean visible) {
+        if (!ClassReader.ANNOTATIONS) {
+            return null;
+        }
+        ByteVector bv = new ByteVector();
+        // write target_type and target_info
+        AnnotationWriter.putTarget(typeRef, typePath, bv);
+        // write type, and reserve space for values count
+        bv.putShort(newUTF8(desc)).putShort(0);
+        AnnotationWriter aw = new AnnotationWriter(this, true, bv, bv,
+                bv.length - 2);
+        if (visible) {
+            aw.next = tanns;
+            tanns = aw;
+        } else {
+            aw.next = itanns;
+            itanns = aw;
+        }
+        return aw;
+    }
+
+    @Override
     public final void visitAttribute(final Attribute attr) {
         attr.next = attrs;
         attrs = attr;
@@ -722,11 +756,29 @@ public class ClassWriter extends ClassVisitor {
         if (innerClasses == null) {
             innerClasses = new ByteVector();
         }
-        ++innerClassesCount;
-        innerClasses.putShort(name == null ? 0 : newClass(name));
-        innerClasses.putShort(outerName == null ? 0 : newClass(outerName));
-        innerClasses.putShort(innerName == null ? 0 : newUTF8(innerName));
-        innerClasses.putShort(access);
+        // Sec. 4.7.6 of the JVMS states "Every CONSTANT_Class_info entry in the
+        // constant_pool table which represents a class or interface C that is
+        // not a package member must have exactly one corresponding entry in the
+        // classes array". To avoid duplicates we keep track in the intVal field
+        // of the Item of each CONSTANT_Class_info entry C whether an inner
+        // class entry has already been added for C (this field is unused for
+        // class entries, and changing its value does not change the hashcode
+        // and equality tests). If so we store the index of this inner class
+        // entry (plus one) in intVal. This hack allows duplicate detection in
+        // O(1) time.
+        Item nameItem = newClassItem(name);
+        if (nameItem.intVal == 0) {
+            ++innerClassesCount;
+            innerClasses.putShort(nameItem.index);
+            innerClasses.putShort(outerName == null ? 0 : newClass(outerName));
+            innerClasses.putShort(innerName == null ? 0 : newUTF8(innerName));
+            innerClasses.putShort(access);
+            nameItem.intVal = innerClassesCount;
+        } else {
+            // Compare the inner classes entry nameItem.intVal - 1 with the
+            // arguments of this method and throw an exception if there is a
+            // difference?
+        }
     }
 
     @Override
@@ -795,7 +847,7 @@ public class ClassWriter extends ClassVisitor {
         }
         if (sourceDebug != null) {
             ++attributeCount;
-            size += sourceDebug.length + 4;
+            size += sourceDebug.length + 6;
             newUTF8("SourceDebugExtension");
         }
         if (enclosingMethodOwner != 0) {
@@ -830,6 +882,16 @@ public class ClassWriter extends ClassVisitor {
             ++attributeCount;
             size += 8 + ianns.getSize();
             newUTF8("RuntimeInvisibleAnnotations");
+        }
+        if (ClassReader.ANNOTATIONS && tanns != null) {
+            ++attributeCount;
+            size += 8 + tanns.getSize();
+            newUTF8("RuntimeVisibleTypeAnnotations");
+        }
+        if (ClassReader.ANNOTATIONS && itanns != null) {
+            ++attributeCount;
+            size += 8 + itanns.getSize();
+            newUTF8("RuntimeInvisibleTypeAnnotations");
         }
         if (attrs != null) {
             attributeCount += attrs.getCount();
@@ -874,9 +936,9 @@ public class ClassWriter extends ClassVisitor {
             out.putShort(newUTF8("SourceFile")).putInt(2).putShort(sourceFile);
         }
         if (sourceDebug != null) {
-            int len = sourceDebug.length - 2;
+            int len = sourceDebug.length;
             out.putShort(newUTF8("SourceDebugExtension")).putInt(len);
-            out.putByteArray(sourceDebug.data, 2, len);
+            out.putByteArray(sourceDebug.data, 0, len);
         }
         if (enclosingMethodOwner != 0) {
             out.putShort(newUTF8("EnclosingMethod")).putInt(4);
@@ -904,13 +966,34 @@ public class ClassWriter extends ClassVisitor {
             out.putShort(newUTF8("RuntimeInvisibleAnnotations"));
             ianns.put(out);
         }
+        if (ClassReader.ANNOTATIONS && tanns != null) {
+            out.putShort(newUTF8("RuntimeVisibleTypeAnnotations"));
+            tanns.put(out);
+        }
+        if (ClassReader.ANNOTATIONS && itanns != null) {
+            out.putShort(newUTF8("RuntimeInvisibleTypeAnnotations"));
+            itanns.put(out);
+        }
         if (attrs != null) {
             attrs.put(this, null, 0, -1, -1, out);
         }
         if (invalidFrames) {
-            ClassWriter cw = new ClassWriter(COMPUTE_FRAMES);
-            new ClassReader(out.data).accept(cw, ClassReader.SKIP_FRAMES);
-            return cw.toByteArray();
+            anns = null;
+            ianns = null;
+            attrs = null;
+            innerClassesCount = 0;
+            innerClasses = null;
+            bootstrapMethodsCount = 0;
+            bootstrapMethods = null;
+            firstField = null;
+            lastField = null;
+            firstMethod = null;
+            lastMethod = null;
+            computeMaxs = false;
+            computeFrames = true;
+            invalidFrames = false;
+            new ClassReader(out.data).accept(this, ClassReader.SKIP_FRAMES);
+            return toByteArray();
         }
         return out.data;
     }
@@ -1577,7 +1660,7 @@ public class ClassWriter extends ClassVisitor {
 
     /**
      * Returns the common super type of the two given types. The default
-     * implementation of this method <i>loads<i> the two given classes and uses
+     * implementation of this method <i>loads</i> the two given classes and uses
      * the java.lang.Class methods to find the common super class. It can be
      * overridden to compute this common super type in other ways, in particular
      * without actually loading any class, or to take into account the class

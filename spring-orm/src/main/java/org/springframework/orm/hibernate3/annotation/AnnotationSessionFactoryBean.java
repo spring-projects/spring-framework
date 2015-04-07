@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,8 @@
 package org.springframework.orm.hibernate3.annotation;
 
 import java.io.IOException;
+import java.util.Set;
+import java.util.TreeSet;
 import javax.persistence.Embeddable;
 import javax.persistence.Entity;
 import javax.persistence.MappedSuperclass;
@@ -41,10 +43,7 @@ import org.springframework.util.ClassUtils;
 
 /**
  * Subclass of Spring's standard LocalSessionFactoryBean for Hibernate,
- * supporting JDK 1.5+ annotation metadata for mappings.
- *
- * <p>Note: As of Spring 4.0, this class requires Hibernate 3.6 or later,
- * with the Java Persistence API present.
+ * supporting annotation metadata for mappings.
  *
  * <p>Example for an AnnotationSessionFactoryBean bean definition:
  *
@@ -67,6 +66,8 @@ import org.springframework.util.ClassUtils;
  *   &lt;property name="packagesToScan" value="test.package"/&gt;
  * &lt;/bean&gt;</pre>
  *
+ * <p>Requires Hibernate 3.6.x, as of Spring 4.0.
+ *
  * @author Juergen Hoeller
  * @since 1.2.2
  * @see #setDataSource
@@ -81,7 +82,7 @@ public class AnnotationSessionFactoryBean extends LocalSessionFactoryBean implem
 	private static final String PACKAGE_INFO_SUFFIX = ".package-info";
 
 
-	private Class[] annotatedClasses;
+	private Class<?>[] annotatedClasses;
 
 	private String[] annotatedPackages;
 
@@ -98,19 +99,19 @@ public class AnnotationSessionFactoryBean extends LocalSessionFactoryBean implem
 
 	/**
 	 * Specify annotated classes, for which mappings will be read from
-	 * class-level JDK 1.5+ annotation metadata.
+	 * class-level annotation metadata.
 	 * @see org.hibernate.cfg.Configuration#addAnnotatedClass(Class)
 	 */
-	public void setAnnotatedClasses(Class[] annotatedClasses) {
+	public void setAnnotatedClasses(Class<?>... annotatedClasses) {
 		this.annotatedClasses = annotatedClasses;
 	}
 
 	/**
 	 * Specify the names of annotated packages, for which package-level
-	 * JDK 1.5+ annotation metadata will be read.
+	 * annotation metadata will be read.
 	 * @see org.hibernate.cfg.Configuration#addPackage(String)
 	 */
-	public void setAnnotatedPackages(String[] annotatedPackages) {
+	public void setAnnotatedPackages(String... annotatedPackages) {
 		this.annotatedPackages = annotatedPackages;
 	}
 
@@ -121,7 +122,7 @@ public class AnnotationSessionFactoryBean extends LocalSessionFactoryBean implem
 	 * classes in the classpath. This is analogous to Spring's component-scan feature
 	 * ({@link org.springframework.context.annotation.ClassPathBeanDefinitionScanner}).
 	 */
-	public void setPackagesToScan(String[] packagesToScan) {
+	public void setPackagesToScan(String... packagesToScan) {
 		this.packagesToScan = packagesToScan;
 	}
 
@@ -133,7 +134,7 @@ public class AnnotationSessionFactoryBean extends LocalSessionFactoryBean implem
 	 * Hibernate's special {@code @org.hibernate.annotations.Entity}.
 	 * @see #setPackagesToScan
 	 */
-	public void setEntityTypeFilters(TypeFilter[] entityTypeFilters) {
+	public void setEntityTypeFilters(TypeFilter... entityTypeFilters) {
 		this.entityTypeFilters = entityTypeFilters;
 	}
 
@@ -150,7 +151,7 @@ public class AnnotationSessionFactoryBean extends LocalSessionFactoryBean implem
 	@Override
 	protected void postProcessMappings(Configuration config) throws HibernateException {
 		if (this.annotatedClasses != null) {
-			for (Class annotatedClass : this.annotatedClasses) {
+			for (Class<?> annotatedClass : this.annotatedClasses) {
 				config.addAnnotatedClass(annotatedClass);
 			}
 		}
@@ -168,6 +169,8 @@ public class AnnotationSessionFactoryBean extends LocalSessionFactoryBean implem
 	 */
 	protected void scanPackages(Configuration config) {
 		if (this.packagesToScan != null) {
+			Set<String> classNames = new TreeSet<String>();
+			Set<String> packageNames = new TreeSet<String>();
 			try {
 				for (String pkg : this.packagesToScan) {
 					String pattern = ResourcePatternResolver.CLASSPATH_ALL_URL_PREFIX +
@@ -179,10 +182,10 @@ public class AnnotationSessionFactoryBean extends LocalSessionFactoryBean implem
 							MetadataReader reader = readerFactory.getMetadataReader(resource);
 							String className = reader.getClassMetadata().getClassName();
 							if (matchesEntityTypeFilter(reader, readerFactory)) {
-								config.addAnnotatedClass(this.resourcePatternResolver.getClassLoader().loadClass(className));
+								classNames.add(className);
 							}
 							else if (className.endsWith(PACKAGE_INFO_SUFFIX)) {
-								config.addPackage(className.substring(0, className.length() - PACKAGE_INFO_SUFFIX.length()));
+								packageNames.add(className.substring(0, className.length() - PACKAGE_INFO_SUFFIX.length()));
 							}
 						}
 					}
@@ -190,6 +193,14 @@ public class AnnotationSessionFactoryBean extends LocalSessionFactoryBean implem
 			}
 			catch (IOException ex) {
 				throw new MappingException("Failed to scan classpath for unlisted classes", ex);
+			}
+			try {
+				for (String className : classNames) {
+					config.addAnnotatedClass(this.resourcePatternResolver.getClassLoader().loadClass(className));
+				}
+				for (String packageName : packageNames) {
+					config.addPackage(packageName);
+				}
 			}
 			catch (ClassNotFoundException ex) {
 				throw new MappingException("Failed to load annotated classes from classpath", ex);

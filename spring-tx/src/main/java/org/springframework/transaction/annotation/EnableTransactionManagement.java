@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -145,7 +145,6 @@ public @interface EnableTransactionManagement {
 	 * opposed to standard Java interface-based proxies ({@code false}). The default is
 	 * {@code false}. <strong>Applicable only if {@link #mode()} is set to
 	 * {@link AdviceMode#PROXY}</strong>.
-	 *
 	 * <p>Note that setting this attribute to {@code true} will affect <em>all</em>
 	 * Spring-managed beans requiring proxying, not just those marked with
 	 * {@code @Transactional}. For example, other beans marked with Spring's
@@ -168,4 +167,5 @@ public @interface EnableTransactionManagement {
 	 * The default is {@link Ordered#LOWEST_PRECEDENCE}.
 	 */
 	int order() default Ordered.LOWEST_PRECEDENCE;
+
 }

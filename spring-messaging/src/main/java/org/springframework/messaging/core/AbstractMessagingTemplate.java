@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,97 +13,61 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.messaging.core;
 
 import java.util.Map;
 
 import org.springframework.messaging.Message;
-import org.springframework.messaging.MessageHeaders;
-
 
 /**
- * Base class for a messaging template that send and receive messages.
+ * An extension of {@link AbstractMessageReceivingTemplate} that adds support for
+ * request-reply style operations as defined by {@link MessageRequestReplyOperations}.
  *
  * @author Mark Fisher
  * @author Rossen Stoyanchev
+ * @author Stephane Nicoll
  * @since 4.0
  */
-public abstract class AbstractMessagingTemplate<D> extends AbstractMessageSendingTemplate<D>
-		implements MessageRequestReplyOperations<D>, MessageReceivingOperations<D> {
-
-
-	@Override
-	public <P> Message<P> receive() {
-		return this.receive(getRequiredDefaultDestination());
-	}
-
-	@Override
-	public <P> Message<P> receive(D destination) {
-		return this.doReceive(destination);
-	}
-
-	protected abstract <P> Message<P> doReceive(D destination);
-
-
-	@Override
-	public <T> T receiveAndConvert(Class<T> targetClass) {
-		return this.receiveAndConvert(getRequiredDefaultDestination(), targetClass);
-	}
-
-	@SuppressWarnings("unchecked")
-	@Override
-	public <T> T receiveAndConvert(D destination, Class<T> targetClass) {
-		Message<?> message = this.doReceive(destination);
-		if (message != null) {
-			return (T) getMessageConverter().fromMessage(message, targetClass);
-		}
-		else {
-			return null;
-		}
-	}
+public abstract class AbstractMessagingTemplate<D> extends AbstractMessageReceivingTemplate<D>
+		implements MessageRequestReplyOperations<D> {
 
 	@Override
 	public Message<?> sendAndReceive(Message<?> requestMessage) {
-		return this.sendAndReceive(getRequiredDefaultDestination(), requestMessage);
+		return sendAndReceive(getRequiredDefaultDestination(), requestMessage);
 	}
 
 	@Override
 	public Message<?> sendAndReceive(D destination, Message<?> requestMessage) {
-		return this.doSendAndReceive(destination, requestMessage);
+		return doSendAndReceive(destination, requestMessage);
 	}
 
-	protected abstract <S, R> Message<R> doSendAndReceive(D destination, Message<S> requestMessage);
+	protected abstract Message<?> doSendAndReceive(D destination, Message<?> requestMessage);
 
 
 	@Override
 	public <T> T convertSendAndReceive(Object request, Class<T> targetClass) {
-		return this.convertSendAndReceive(getRequiredDefaultDestination(), request, targetClass);
+		return convertSendAndReceive(getRequiredDefaultDestination(), request, targetClass);
 	}
 
 	@Override
 	public <T> T convertSendAndReceive(D destination, Object request, Class<T> targetClass) {
-		Map<String, Object> headers = null;
-		return this.convertSendAndReceive(destination, request, headers, targetClass);
+		return convertSendAndReceive(destination, request, null, targetClass);
 	}
 
 	@Override
-	public <T> T convertSendAndReceive(D destination, Object request, Map<String, Object> headers,
-			Class<T> targetClass) {
-
-		return this.convertSendAndReceive(destination, request, null);
+	public <T> T convertSendAndReceive(D destination, Object request, Map<String, Object> headers, Class<T> targetClass) {
+		return convertSendAndReceive(destination, request, headers, targetClass, null);
 	}
 
 	@Override
 	public <T> T convertSendAndReceive(Object request, Class<T> targetClass, MessagePostProcessor postProcessor) {
-		return this.convertSendAndReceive(getRequiredDefaultDestination(), request, targetClass, postProcessor);
+		return convertSendAndReceive(getRequiredDefaultDestination(), request, targetClass, postProcessor);
 	}
 
 	@Override
-	public <T> T convertSendAndReceive(D destination, Object request, Class<T> targetClass,
-			MessagePostProcessor postProcessor) {
-
-		Map<String, Object> headers = null;
-		return this.convertSendAndReceive(destination, request, headers, targetClass, postProcessor);
+	public <T> T convertSendAndReceive(D destination, Object request, Class<T> targetClass, MessagePostProcessor postProcessor) {
+		return convertSendAndReceive(destination, request, null, targetClass, postProcessor);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -111,13 +75,9 @@ public abstract class AbstractMessagingTemplate<D> extends AbstractMessageSendin
 	public <T> T convertSendAndReceive(D destination, Object request, Map<String, Object> headers,
 			Class<T> targetClass, MessagePostProcessor postProcessor) {
 
-		MessageHeaders messageHeaders = (headers != null) ? new MessageHeaders(headers) : null;
-		Message<?> requestMessage = getMessageConverter().toMessage(request, messageHeaders);
-		if (postProcessor != null) {
-			requestMessage = postProcessor.postProcessMessage(requestMessage);
-		}
-		Message<?> replyMessage = this.sendAndReceive(destination, requestMessage);
-		return (T) getMessageConverter().fromMessage(replyMessage, targetClass);
+		Message<?> requestMessage = doConvert(request, headers, postProcessor);
+		Message<?> replyMessage = sendAndReceive(destination, requestMessage);
+		return (replyMessage != null ? (T) getMessageConverter().fromMessage(replyMessage, targetClass) : null);
 	}
 
 }

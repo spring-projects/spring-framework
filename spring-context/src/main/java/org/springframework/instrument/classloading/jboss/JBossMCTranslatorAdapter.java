@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.instrument.classloading.jboss;
 
 import java.lang.instrument.ClassFileTransformer;
@@ -34,44 +35,46 @@ class JBossMCTranslatorAdapter implements InvocationHandler {
 
 	private final ClassFileTransformer transformer;
 
-	/**
-	 * Creates a new {@link JBossMCTranslatorAdapter}.
-	 * @param transformer the {@link ClassFileTransformer} to be adapted (must
-	 * not be {@code null})
-	 */
+
 	public JBossMCTranslatorAdapter(ClassFileTransformer transformer) {
 		this.transformer = transformer;
 	}
 
+
 	@Override
 	public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 		String name = method.getName();
-
 		if ("equals".equals(name)) {
-			return (Boolean.valueOf(proxy == args[0]));
-		} else if ("hashCode".equals(name)) {
+			return proxy == args[0];
+		}
+		else if ("hashCode".equals(name)) {
 			return hashCode();
-		} else if ("toString".equals(name)) {
+		}
+		else if ("toString".equals(name)) {
 			return toString();
-		} else if ("transform".equals(name)) {
-			return transform((ClassLoader) args[0], (String) args[1], (Class<?>) args[2], (ProtectionDomain) args[3],
-					(byte[]) args[4]);
-		} else if ("unregisterClassLoader".equals(name)) {
+		}
+		else if ("transform".equals(name)) {
+			return transform((ClassLoader) args[0], (String) args[1], (Class<?>) args[2],
+					(ProtectionDomain) args[3], (byte[]) args[4]);
+		}
+		else if ("unregisterClassLoader".equals(name)) {
 			unregisterClassLoader((ClassLoader) args[0]);
 			return null;
-
-		} else {
+		}
+		else {
 			throw new IllegalArgumentException("Unknown method: " + method);
 		}
 	}
 
 	public byte[] transform(ClassLoader loader, String className, Class<?> classBeingRedefined,
 			ProtectionDomain protectionDomain, byte[] classfileBuffer) throws Exception {
-		return transformer.transform(loader, className, classBeingRedefined, protectionDomain, classfileBuffer);
+
+		return this.transformer.transform(loader, className, classBeingRedefined, protectionDomain, classfileBuffer);
 	}
 
 	public void unregisterClassLoader(ClassLoader loader) {
 	}
+
 
 	@Override
 	public String toString() {
@@ -80,4 +83,5 @@ class JBossMCTranslatorAdapter implements InvocationHandler {
 		builder.append(this.transformer);
 		return builder.toString();
 	}
+
 }

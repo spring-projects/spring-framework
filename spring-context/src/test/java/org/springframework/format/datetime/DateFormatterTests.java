@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,6 @@
 
 package org.springframework.format.datetime;
 
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
-
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.util.Calendar;
@@ -33,7 +29,11 @@ import org.joda.time.format.DateTimeFormatter;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+
 import org.springframework.format.annotation.DateTimeFormat.ISO;
+
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
 
 /**
  * Tests for {@link DateFormatter}.
@@ -43,10 +43,11 @@ import org.springframework.format.annotation.DateTimeFormat.ISO;
  */
 public class DateFormatterTests {
 
+	private static final TimeZone UTC = TimeZone.getTimeZone("UTC");
+
 	@Rule
 	public ExpectedException thown = ExpectedException.none();
 
-	private static final TimeZone UTC = TimeZone.getTimeZone("UTC");
 
 	@Test
 	public void shouldPrintAndParseDefault() throws Exception {
@@ -210,12 +211,12 @@ public class DateFormatterTests {
 		assertThat("uses style", formatter.print(date, Locale.US), is("6/1/09"));
 	}
 
+
 	private Date getDate(int year, int month, int dayOfMonth) {
 		return getDate(year, month, dayOfMonth, 0, 0, 0, 0);
 	}
 
-	private Date getDate(int year, int month, int dayOfMonth, int hour, int minute,
-			int second, int millisecond) {
+	private Date getDate(int year, int month, int dayOfMonth, int hour, int minute, int second, int millisecond) {
 		Calendar cal = Calendar.getInstance(Locale.US);
 		cal.setTimeZone(UTC);
 		cal.clear();

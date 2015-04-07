@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-
 import javax.portlet.ActionRequest;
 import javax.portlet.ActionResponse;
 import javax.portlet.EventRequest;
@@ -39,6 +38,7 @@ import javax.portlet.ResourceResponse;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.MutablePropertyValues;
+import org.springframework.beans.factory.config.BeanReference;
 import org.springframework.beans.factory.config.ConstructorArgumentValues;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.support.ManagedList;
@@ -118,14 +118,14 @@ public class ComplexPortletApplicationContext extends StaticPortletApplicationCo
 		ParameterMappingInterceptor parameterMappingInterceptor = new ParameterMappingInterceptor();
 		parameterMappingInterceptor.setParameterName("interceptingParam");
 
-		List interceptors = new ArrayList();
+		List<HandlerInterceptor> interceptors = new ArrayList<HandlerInterceptor>(4);
 		interceptors.add(parameterMappingInterceptor);
 		interceptors.add(userRoleInterceptor);
 		interceptors.add(new MyHandlerInterceptor1());
 		interceptors.add(new MyHandlerInterceptor2());
 
 		MutablePropertyValues pvs = new MutablePropertyValues();
-		Map portletModeMap = new ManagedMap();
+		Map<String, BeanReference> portletModeMap = new ManagedMap<String, BeanReference>();
 		portletModeMap.put("view", new RuntimeBeanReference("viewController"));
 		portletModeMap.put("edit", new RuntimeBeanReference("editController"));
 		pvs.add("portletModeMap", portletModeMap);
@@ -133,7 +133,7 @@ public class ComplexPortletApplicationContext extends StaticPortletApplicationCo
 		registerSingleton("handlerMapping3", PortletModeHandlerMapping.class, pvs);
 
 		pvs = new MutablePropertyValues();
-		Map parameterMap = new ManagedMap();
+		Map<String, BeanReference> parameterMap = new ManagedMap<String, BeanReference>();
 		parameterMap.put("test1", new RuntimeBeanReference("testController1"));
 		parameterMap.put("test2", new RuntimeBeanReference("testController2"));
 		parameterMap.put("requestLocaleChecker", new RuntimeBeanReference("requestLocaleCheckingController"));
@@ -148,10 +148,10 @@ public class ComplexPortletApplicationContext extends StaticPortletApplicationCo
 		registerSingleton("handlerMapping2", ParameterHandlerMapping.class, pvs);
 
 		pvs = new MutablePropertyValues();
-		Map innerMap = new ManagedMap();
+		Map<String, Object> innerMap = new ManagedMap<String, Object>();
 		innerMap.put("help1", new RuntimeBeanReference("helpController1"));
 		innerMap.put("help2", new RuntimeBeanReference("helpController2"));
-		Map outerMap = new ManagedMap();
+		Map<String, Object> outerMap = new ManagedMap<String, Object>();
 		outerMap.put("help", innerMap);
 		pvs.add("portletModeParameterMap", outerMap);
 		pvs.add("order", "1");
@@ -171,7 +171,7 @@ public class ComplexPortletApplicationContext extends StaticPortletApplicationCo
 		pvs.add("exceptionMappings",
 				"java.lang.Exception=failed-exception\n" +
 				"java.lang.RuntimeException=failed-runtime");
-		List mappedHandlers = new ManagedList();
+		List<BeanReference> mappedHandlers = new ManagedList<BeanReference>();
 		mappedHandlers.add(new RuntimeBeanReference("exceptionThrowingHandler1"));
 		pvs.add("mappedHandlers", mappedHandlers);
 		pvs.add("defaultErrorView", "failed-default-0");
@@ -533,7 +533,7 @@ public class ComplexPortletApplicationContext extends StaticPortletApplicationCo
 	}
 
 
-	public static class TestApplicationListener implements ApplicationListener {
+	public static class TestApplicationListener implements ApplicationListener<ApplicationEvent> {
 
 		public int counter = 0;
 

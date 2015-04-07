@@ -17,7 +17,6 @@
 package org.springframework.jmx.export.assembler;
 
 import java.util.Properties;
-
 import javax.management.MBeanAttributeInfo;
 import javax.management.modelmbean.ModelMBeanAttributeInfo;
 import javax.management.modelmbean.ModelMBeanInfo;

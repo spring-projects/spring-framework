@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,11 +31,12 @@ import org.springframework.util.Assert;
  * that use JAXB2. Creates {@link JAXBContext} object lazily.
  *
  * @author Arjen Poutsma
+ * @author Rossen Stoyanchev
  * @since 3.0
  */
 public abstract class AbstractJaxb2HttpMessageConverter<T> extends AbstractXmlHttpMessageConverter<T> {
 
-	private final ConcurrentMap<Class, JAXBContext> jaxbContexts = new ConcurrentHashMap<Class, JAXBContext>(64);
+	private final ConcurrentMap<Class<?>, JAXBContext> jaxbContexts = new ConcurrentHashMap<Class<?>, JAXBContext>(64);
 
 
 	/**
@@ -44,10 +45,12 @@ public abstract class AbstractJaxb2HttpMessageConverter<T> extends AbstractXmlHt
 	 * @return the {@code Marshaller}
 	 * @throws HttpMessageConversionException in case of JAXB errors
 	 */
-	protected final Marshaller createMarshaller(Class clazz) {
+	protected final Marshaller createMarshaller(Class<?> clazz) {
 		try {
 			JAXBContext jaxbContext = getJaxbContext(clazz);
-			return jaxbContext.createMarshaller();
+			Marshaller marshaller = jaxbContext.createMarshaller();
+			customizeMarshaller(marshaller);
+			return marshaller;
 		}
 		catch (JAXBException ex) {
 			throw new HttpMessageConversionException(
@@ -56,15 +59,27 @@ public abstract class AbstractJaxb2HttpMessageConverter<T> extends AbstractXmlHt
 	}
 
 	/**
+	 * Customize the {@link Marshaller} created by this
+	 * message converter before using it to write the object to the output.
+	 * @param marshaller the marshaller to customize
+	 * @since 4.0.3
+	 * @see #createMarshaller(Class)
+	 */
+	protected void customizeMarshaller(Marshaller marshaller) {
+	}
+
+	/**
 	 * Create a new {@link Unmarshaller} for the given class.
 	 * @param clazz the class to create the unmarshaller for
 	 * @return the {@code Unmarshaller}
 	 * @throws HttpMessageConversionException in case of JAXB errors
 	 */
-	protected final Unmarshaller createUnmarshaller(Class clazz) throws JAXBException {
+	protected final Unmarshaller createUnmarshaller(Class<?> clazz) throws JAXBException {
 		try {
 			JAXBContext jaxbContext = getJaxbContext(clazz);
-			return jaxbContext.createUnmarshaller();
+			Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
+			customizeUnmarshaller(unmarshaller);
+			return unmarshaller;
 		}
 		catch (JAXBException ex) {
 			throw new HttpMessageConversionException(
@@ -73,12 +88,22 @@ public abstract class AbstractJaxb2HttpMessageConverter<T> extends AbstractXmlHt
 	}
 
 	/**
+	 * Customize the {@link Unmarshaller} created by this
+	 * message converter before using it to read the object from the input.
+	 * @param unmarshaller the unmarshaller to customize
+	 * @since 4.0.3
+	 * @see #createUnmarshaller(Class)
+	 */
+	protected void customizeUnmarshaller(Unmarshaller unmarshaller) {
+	}
+
+	/**
 	 * Return a {@link JAXBContext} for the given class.
 	 * @param clazz the class to return the context for
 	 * @return the {@code JAXBContext}
 	 * @throws HttpMessageConversionException in case of JAXB errors
 	 */
-	protected final JAXBContext getJaxbContext(Class clazz) {
+	protected final JAXBContext getJaxbContext(Class<?> clazz) {
 		Assert.notNull(clazz, "'clazz' must not be null");
 		JAXBContext jaxbContext = this.jaxbContexts.get(clazz);
 		if (jaxbContext == null) {

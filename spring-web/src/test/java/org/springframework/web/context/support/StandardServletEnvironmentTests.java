@@ -16,15 +16,16 @@
 
 package org.springframework.web.context.support;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
-
 import org.junit.Test;
+
 import org.springframework.core.env.ConfigurableEnvironment;
-import org.springframework.core.env.StandardEnvironment;
 import org.springframework.core.env.MutablePropertySources;
 import org.springframework.core.env.PropertySource;
+import org.springframework.core.env.StandardEnvironment;
+import org.springframework.tests.mock.jndi.SimpleNamingContextBuilder;
+
+import static org.hamcrest.CoreMatchers.*;
+import static org.junit.Assert.*;
 
 /**
  * Unit tests for {@link StandardServletEnvironment}.
@@ -35,7 +36,9 @@ import org.springframework.core.env.PropertySource;
 public class StandardServletEnvironmentTests {
 
 	@Test
-	public void propertySourceOrder() {
+	public void propertySourceOrder() throws Exception {
+		SimpleNamingContextBuilder.emptyActivatedContextBuilder();
+
 		ConfigurableEnvironment env = new StandardServletEnvironment();
 		MutablePropertySources sources = env.getPropertySources();
 

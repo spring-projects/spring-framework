@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -73,10 +73,10 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * that acts as "connectionFactory" of the PersistenceManagerFactory, so you usually
  * don't need to explicitly specify the "dataSource" property.
  *
- * <p>On JDBC 3.0, this transaction manager supports nested transactions via JDBC 3.0
- * Savepoints. The {@link #setNestedTransactionAllowed} "nestedTransactionAllowed"}
- * flag defaults to "false", though, as nested transactions will just apply to the
- * JDBC Connection, not to the JDO PersistenceManager and its cached objects.
+ * <p>This transaction manager supports nested transactions via JDBC 3.0 Savepoints.
+ * The {@link #setNestedTransactionAllowed} "nestedTransactionAllowed"} flag defaults
+ * to "false", though, as nested transactions will just apply to the JDBC Connection,
+ * not to the JDO PersistenceManager and its cached entity objects and related context.
  * You can manually set the flag to "true" if you want to use nested transactions
  * for JDBC access code which participates in JDO transactions (provided that your
  * JDBC driver supports Savepoints). <i>Note that JDO itself does not support
@@ -341,15 +341,16 @@ public class JdoTransactionManager extends AbstractPlatformTransactionManager
 						conHolder.setTimeoutInSeconds(timeoutToUse);
 					}
 					if (logger.isDebugEnabled()) {
-						logger.debug("Exposing JDO transaction as JDBC transaction [" + conHolder.getConnectionHandle() + "]");
+						logger.debug("Exposing JDO transaction as JDBC transaction [" +
+								conHolder.getConnectionHandle() + "]");
 					}
 					TransactionSynchronizationManager.bindResource(getDataSource(), conHolder);
 					txObject.setConnectionHolder(conHolder);
 				}
 				else {
 					if (logger.isDebugEnabled()) {
-						logger.debug("Not exposing JDO transaction [" + pm + "] as JDBC transaction because JdoDialect [" +
-								getJdoDialect() + "] does not support JDBC Connection retrieval");
+						logger.debug("Not exposing JDO transaction [" + pm + "] as JDBC transaction because " +
+								"JdoDialect [" + getJdoDialect() + "] does not support JDBC Connection retrieval");
 					}
 				}
 			}
@@ -391,6 +392,7 @@ public class JdoTransactionManager extends AbstractPlatformTransactionManager
 			finally {
 				PersistenceManagerFactoryUtils.releasePersistenceManager(pm, getPersistenceManagerFactory());
 			}
+			txObject.setPersistenceManagerHolder(null, false);
 		}
 	}
 

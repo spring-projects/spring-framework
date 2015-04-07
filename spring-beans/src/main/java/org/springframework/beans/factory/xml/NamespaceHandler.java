@@ -36,7 +36,7 @@ import org.springframework.beans.factory.config.BeanDefinitionHolder;
  * it encounters a custom tag directly under a {@code &lt;bean&gt;} tag.
  *
  * <p>Developers writing their own custom element extensions typically will
- * not implement this interface drectly, but rather make use of the provided
+ * not implement this interface directly, but rather make use of the provided
  * {@link NamespaceHandlerSupport} class.
  *
  * @author Rob Harrop

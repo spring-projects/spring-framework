@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,23 +16,22 @@
 
 package org.springframework.beans.factory.aspectj;
 
-import org.springframework.context.ConfigurableApplicationContext;
+import org.junit.Assert;
+import org.junit.Test;
+
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 /**
  * @author Chris Beams
  */
-public class XmlBeanConfigurerTests extends AbstractBeanConfigurerTests {
+public class XmlBeanConfigurerTests {
 
-	@Override
-	protected ConfigurableApplicationContext createContext() {
-		return new ClassPathXmlApplicationContext("org/springframework/beans/factory/aspectj/beanConfigurerTests.xml");
-	}
-
-	public void testInjectionAfterRefresh() {
-		context.refresh();
+	@Test
+	public void testInjection() {
+		ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext(
+				"org/springframework/beans/factory/aspectj/beanConfigurerTests.xml");
 		ShouldBeConfiguredBySpring myObject = new ShouldBeConfiguredBySpring();
-		assertEquals("Rod", myObject.getName());
+		Assert.assertEquals("Rod", myObject.getName());
 	}
 
 }

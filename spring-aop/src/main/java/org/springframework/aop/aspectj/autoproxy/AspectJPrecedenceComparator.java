@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@ import java.util.Comparator;
 import org.springframework.aop.Advisor;
 import org.springframework.aop.aspectj.AspectJAopUtils;
 import org.springframework.aop.aspectj.AspectJPrecedenceInformation;
-import org.springframework.core.OrderComparator;
+import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.util.Assert;
 
 /**
@@ -29,15 +29,13 @@ import org.springframework.util.Assert;
  *
  * <p>Given two pieces of advice, {@code a} and {@code b}:
  * <ul>
- *   <li>if {@code a} and {@code b} are defined in different
- *   aspects, then the advice in the aspect with the lowest order
- *   value has the highest precedence</li>
- *   <li>if {@code a} and {@code b} are defined in the same
- *   aspect, then if one of {@code a} or {@code b} is a form of
- *   after advice, then the advice declared last in the aspect has the
- *   highest precedence. If neither {@code a} nor {@code b} is a
- *   form of after advice, then the advice declared first in the aspect has
- *   the highest precedence.</li>
+ * <li>if {@code a} and {@code b} are defined in different aspects, then the advice
+ * in the aspect with the lowest order value has the highest precedence</li>
+ * <li>if {@code a} and {@code b} are defined in the same aspect, then if one of
+ * {@code a} or {@code b} is a form of after advice, then the advice declared last
+ * in the aspect has the highest precedence. If neither {@code a} nor {@code b} is
+ * a form of after advice, then the advice declared first in the aspect has the
+ * highest precedence.</li>
  * </ul>
  *
  * <p>Important: Note that unlike a normal comparator a return of 0 means
@@ -48,11 +46,14 @@ import org.springframework.util.Assert;
  * @author Juergen Hoeller
  * @since 2.0
  */
-class AspectJPrecedenceComparator implements Comparator {
+class AspectJPrecedenceComparator implements Comparator<Advisor> {
 
 	private static final int HIGHER_PRECEDENCE = -1;
+
 	private static final int SAME_PRECEDENCE = 0;
+
 	private static final int LOWER_PRECEDENCE = 1;
+
 
 	private final Comparator<? super Advisor> advisorComparator;
 
@@ -61,7 +62,7 @@ class AspectJPrecedenceComparator implements Comparator {
 	 * Create a default AspectJPrecedenceComparator.
 	 */
 	public AspectJPrecedenceComparator() {
-		this.advisorComparator = OrderComparator.INSTANCE;
+		this.advisorComparator = AnnotationAwareOrderComparator.INSTANCE;
 	}
 
 	/**
@@ -76,18 +77,10 @@ class AspectJPrecedenceComparator implements Comparator {
 
 
 	@Override
-	public int compare(Object o1, Object o2) {
-		if (!(o1 instanceof Advisor && o2 instanceof Advisor)) {
-			throw new IllegalArgumentException(
-					"AspectJPrecedenceComparator can only compare the order of Advisors, " +
-					"but was passed [" + o1 + "] and [" + o2 + "]");
-		}
-
-		Advisor advisor1 = (Advisor) o1;
-		Advisor advisor2 = (Advisor) o2;
-		int advisorPrecedence = this.advisorComparator.compare(advisor1, advisor2);
-		if (advisorPrecedence == SAME_PRECEDENCE && declaredInSameAspect(advisor1, advisor2)) {
-			advisorPrecedence = comparePrecedenceWithinAspect(advisor1, advisor2);
+	public int compare(Advisor o1, Advisor o2) {
+		int advisorPrecedence = this.advisorComparator.compare(o1, o2);
+		if (advisorPrecedence == SAME_PRECEDENCE && declaredInSameAspect(o1, o2)) {
+			advisorPrecedence = comparePrecedenceWithinAspect(o1, o2);
 		}
 		return advisorPrecedence;
 	}

@@ -16,8 +16,6 @@
 
 package org.springframework.expression.spel.standard;
 
-import static org.junit.Assert.assertEquals;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -26,8 +24,9 @@ import java.util.UUID;
 import org.junit.Test;
 
 import org.springframework.expression.Expression;
-import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Mark Fisher

@@ -16,11 +16,10 @@
 
 package org.springframework.jdbc.support;
 
-import static org.junit.Assert.*;
-
 import java.sql.SQLException;
 
 import org.junit.Test;
+
 import org.springframework.dao.ConcurrencyFailureException;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataAccessResourceFailureException;
@@ -28,6 +27,8 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.TransientDataAccessResourceException;
 import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.jdbc.UncategorizedSQLException;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Rick Evans

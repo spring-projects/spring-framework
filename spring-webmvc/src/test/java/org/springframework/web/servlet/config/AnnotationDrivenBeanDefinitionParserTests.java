@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,14 +15,12 @@
  */
 package org.springframework.web.servlet.config;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-
 import java.util.List;
 
+import org.hamcrest.Matchers;
 import org.junit.Before;
 import org.junit.Test;
+
 import org.springframework.beans.DirectFieldAccessor;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.core.MethodParameter;
@@ -30,6 +28,7 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.ResourceHttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
+import org.springframework.util.AntPathMatcher;
 import org.springframework.validation.MessageCodesResolver;
 import org.springframework.web.bind.support.ConfigurableWebBindingInitializer;
 import org.springframework.web.bind.support.WebArgumentResolver;
@@ -40,13 +39,21 @@ import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.HandlerMethodReturnValueHandler;
 import org.springframework.web.method.support.ModelAndViewContainer;
 import org.springframework.web.servlet.handler.BeanNameUrlHandlerMapping;
-import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
 import org.springframework.web.servlet.mvc.method.annotation.ExceptionHandlerExceptionResolver;
+import org.springframework.web.servlet.mvc.method.annotation.JsonViewResponseBodyAdvice;
+import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
+import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
+import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice;
 import org.springframework.web.servlet.mvc.method.annotation.ServletWebArgumentResolverAdapter;
+import org.springframework.web.util.UrlPathHelper;
+
+import static org.junit.Assert.*;
 
 /**
  * Test fixture for the configuration in mvc-config-annotation-driven.xml.
  * @author Rossen Stoyanchev
+ * @author Brian Clozel
+ * @author Agim Emruli
  */
 public class AnnotationDrivenBeanDefinitionParserTests {
 
@@ -71,10 +78,27 @@ public class AnnotationDrivenBeanDefinitionParserTests {
 	}
 
 	@Test
+	public void testPathMatchingConfiguration() {
+		loadBeanDefinitions("mvc-config-path-matching.xml");
+		RequestMappingHandlerMapping hm = appContext.getBean(RequestMappingHandlerMapping.class);
+		assertNotNull(hm);
+		assertTrue(hm.useSuffixPatternMatch());
+		assertFalse(hm.useTrailingSlashMatch());
+		assertTrue(hm.useRegisteredSuffixPatternMatch());
+		assertThat(hm.getUrlPathHelper(), Matchers.instanceOf(TestPathHelper.class));
+		assertThat(hm.getPathMatcher(), Matchers.instanceOf(TestPathMatcher.class));
+		List<String> fileExtensions = hm.getContentNegotiationManager().getAllFileExtensions();
+		assertThat(fileExtensions, Matchers.contains("xml"));
+		assertThat(fileExtensions, Matchers.hasSize(1));
+	}
+
+	@Test
 	public void testMessageConverters() {
 		loadBeanDefinitions("mvc-config-message-converters.xml");
 		verifyMessageConverters(appContext.getBean(RequestMappingHandlerAdapter.class), true);
 		verifyMessageConverters(appContext.getBean(ExceptionHandlerExceptionResolver.class), true);
+		verifyResponseBodyAdvice(appContext.getBean(RequestMappingHandlerAdapter.class));
+		verifyResponseBodyAdvice(appContext.getBean(ExceptionHandlerExceptionResolver.class));
 	}
 
 	@Test
@@ -94,9 +118,11 @@ public class AnnotationDrivenBeanDefinitionParserTests {
 		assertNotNull(value);
 		assertTrue(value instanceof List);
 		List<HandlerMethodArgumentResolver> resolvers = (List<HandlerMethodArgumentResolver>) value;
-		assertEquals(2, resolvers.size());
+		assertEquals(3, resolvers.size());
 		assertTrue(resolvers.get(0) instanceof ServletWebArgumentResolverAdapter);
 		assertTrue(resolvers.get(1) instanceof TestHandlerMethodArgumentResolver);
+		assertTrue(resolvers.get(2) instanceof TestHandlerMethodArgumentResolver);
+		assertNotSame(resolvers.get(1), resolvers.get(2));
 	}
 
 	@SuppressWarnings("unchecked")
@@ -109,8 +135,10 @@ public class AnnotationDrivenBeanDefinitionParserTests {
 		assertNotNull(value);
 		assertTrue(value instanceof List);
 		List<HandlerMethodReturnValueHandler> handlers = (List<HandlerMethodReturnValueHandler>) value;
-		assertEquals(1, handlers.size());
+		assertEquals(2, handlers.size());
 		assertEquals(TestHandlerMethodReturnValueHandler.class, handlers.get(0).getClass());
+		assertEquals(TestHandlerMethodReturnValueHandler.class, handlers.get(1).getClass());
+		assertNotSame(handlers.get(0), handlers.get(1));
 	}
 
 	@Test
@@ -142,6 +170,16 @@ public class AnnotationDrivenBeanDefinitionParserTests {
 		}
 		assertTrue(converters.get(0) instanceof StringHttpMessageConverter);
 		assertTrue(converters.get(1) instanceof ResourceHttpMessageConverter);
+	}
+
+	@SuppressWarnings("unchecked")
+	private void verifyResponseBodyAdvice(Object bean) {
+		assertNotNull(bean);
+		Object value = new DirectFieldAccessor(bean).getPropertyValue("responseBodyAdvice");
+		assertNotNull(value);
+		assertTrue(value instanceof List);
+		List<ResponseBodyAdvice> converters = (List<ResponseBodyAdvice>) value;
+		assertTrue(converters.get(0) instanceof JsonViewResponseBodyAdvice);
 	}
 
 }
@@ -198,3 +236,7 @@ class TestMessageCodesResolver implements MessageCodesResolver {
 	}
 
 }
+
+class TestPathMatcher extends AntPathMatcher { }
+
+class TestPathHelper extends UrlPathHelper { }

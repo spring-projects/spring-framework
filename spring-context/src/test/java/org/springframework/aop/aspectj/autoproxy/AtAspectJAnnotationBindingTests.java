@@ -16,17 +16,17 @@
 
 package org.springframework.aop.aspectj.autoproxy;
 
-import static org.junit.Assert.assertEquals;
-
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.junit.Before;
 import org.junit.Test;
+
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.core.io.Resource;
 
+import static org.junit.Assert.*;
 
 /**
  * @author Adrian Colyer

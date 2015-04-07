@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,8 +15,6 @@
  */
 
 package org.springframework.web.servlet.mvc.method.annotation;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 
 import java.io.Serializable;
 import java.lang.reflect.Method;
@@ -25,6 +23,7 @@ import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
+
 import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.MediaType;
@@ -40,6 +39,8 @@ import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.method.support.ModelAndViewContainer;
 
+import static org.junit.Assert.*;
+
 /**
  * Test fixture with {@link HttpEntityMethodProcessor} delegating to
  * actual {@link HttpMessageConverter} instances.
@@ -51,32 +52,31 @@ import org.springframework.web.method.support.ModelAndViewContainer;
 public class HttpEntityMethodProcessorTests {
 
 	private MethodParameter paramList;
+
 	private MethodParameter paramSimpleBean;
 
 	private ModelAndViewContainer mavContainer;
 
-	private ServletWebRequest webRequest;
-
-	private MockHttpServletResponse servletResponse;
+	private WebDataBinderFactory binderFactory;
 
 	private MockHttpServletRequest servletRequest;
 
-	private WebDataBinderFactory binderFactory;
+	private MockHttpServletResponse servletResponse;
+
+	private ServletWebRequest webRequest;
+
 
 	@Before
 	public void setUp() throws Exception {
-
 		Method method = getClass().getMethod("handle", HttpEntity.class, HttpEntity.class);
 		paramList = new MethodParameter(method, 0);
 		paramSimpleBean = new MethodParameter(method, 1);
 
 		mavContainer = new ModelAndViewContainer();
-
+		binderFactory = new ValidatingBinderFactory();
 		servletRequest = new MockHttpServletRequest();
 		servletResponse = new MockHttpServletResponse();
 		webRequest = new ServletWebRequest(servletRequest, servletResponse);
-
-		binderFactory = new ValidatingBinderFactory();
 	}
 
 	@Test
@@ -118,7 +118,6 @@ public class HttpEntityMethodProcessorTests {
 
 	@Test
 	public void resolveArgumentTypeVariable() throws Exception {
-
 		Method method = MySimpleParameterizedController.class.getMethod("handleDto", HttpEntity.class);
 		HandlerMethod handlerMethod = new HandlerMethod(new MySimpleParameterizedController(), method);
 		MethodParameter methodParam = handlerMethod.getMethodParameters()[0];
@@ -132,31 +131,42 @@ public class HttpEntityMethodProcessorTests {
 		HttpEntityMethodProcessor processor = new HttpEntityMethodProcessor(converters);
 
 		@SuppressWarnings("unchecked")
-		HttpEntity<SimpleBean> result = (HttpEntity<SimpleBean>) processor.resolveArgument(methodParam, mavContainer, webRequest, binderFactory);
+		HttpEntity<SimpleBean> result = (HttpEntity<SimpleBean>)
+				processor.resolveArgument(methodParam, mavContainer, webRequest, binderFactory);
 
 		assertNotNull(result);
 		assertEquals("Jad", result.getBody().getName());
 	}
 
+
 	public void handle(HttpEntity<List<SimpleBean>> arg1, HttpEntity<SimpleBean> arg2) {
 	}
 
+
 	private static abstract class MyParameterizedController<DTO extends Identifiable> {
-		@SuppressWarnings("unused")
-		public void handleDto(HttpEntity<DTO> dto) {}
+
+		public void handleDto(HttpEntity<DTO> dto) {
+		}
 	}
 
-	private static class MySimpleParameterizedController extends MyParameterizedController<SimpleBean> { }
+
+	private static class MySimpleParameterizedController extends MyParameterizedController<SimpleBean> {
+	}
+
 
 	private interface Identifiable extends Serializable {
+
 		public Long getId();
+
 		public void setId(Long id);
 	}
+
 
 	@SuppressWarnings({ "serial" })
 	private static class SimpleBean implements Identifiable {
 
 		private Long id;
+
 		private String name;
 
 		@Override
@@ -173,14 +183,17 @@ public class HttpEntityMethodProcessorTests {
 			return name;
 		}
 
+		@SuppressWarnings("unused")
 		public void setName(String name) {
 			this.name = name;
 		}
 	}
 
+
 	private final class ValidatingBinderFactory implements WebDataBinderFactory {
+
 		@Override
-		public WebDataBinder createBinder(NativeWebRequest webRequest, Object target, String objectName) throws Exception {
+		public WebDataBinder createBinder(NativeWebRequest webRequest, Object target, String objectName) {
 			LocalValidatorFactoryBean validator = new LocalValidatorFactoryBean();
 			validator.afterPropertiesSet();
 			WebDataBinder dataBinder = new WebDataBinder(target, objectName);

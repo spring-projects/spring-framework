@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,10 +33,9 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * {@link org.springframework.transaction.PlatformTransactionManager}
  * implementation for a single JDBC {@link javax.sql.DataSource}. This class is
  * capable of working in any environment with any JDBC driver, as long as the setup
- * uses a JDBC 2.0 Standard Extensions / JDBC 3.0 {@code javax.sql.DataSource}
- * as its Connection factory mechanism. Binds a JDBC Connection from the specified
- * DataSource to the current thread, potentially allowing for one thread-bound
- * Connection per DataSource.
+ * uses a {@code javax.sql.DataSource} as its {@code Connection} factory mechanism.
+ * Binds a JDBC Connection from the specified DataSource to the current thread,
+ * potentially allowing for one thread-bound Connection per DataSource.
  *
  * <p><b>Note: The DataSource that this transaction manager operates on needs
  * to return independent Connections.</b> The Connections may come from a pool
@@ -75,8 +74,8 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * an actual JDBC Connection from the target DataSource until a Statement gets executed,
  * lazily applying the specified transaction settings to the target Connection.
  *
- * <p>On JDBC 3.0, this transaction manager supports nested transactions via the
- * JDBC 3.0 {@link java.sql.Savepoint} mechanism. The
+ * <p>This transaction manager supports nested transactions via the JDBC 3.0
+ * {@link java.sql.Savepoint} mechanism. The
  * {@link #setNestedTransactionAllowed "nestedTransactionAllowed"} flag defaults
  * to "true", since nested transactions will work without restrictions on JDBC
  * drivers that support savepoints (such as the Oracle JDBC driver).
@@ -84,7 +83,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * <p>This transaction manager can be used as a replacement for the
  * {@link org.springframework.transaction.jta.JtaTransactionManager} in the single
  * resource case, as it does not require a container that supports JTA, typically
- * in combination with a locally defined JDBC DataSource (e.g. a Jakarta Commons
+ * in combination with a locally defined JDBC DataSource (e.g. an Apache Commons
  * DBCP connection pool). Switching between this local strategy and a JTA
  * environment is just a matter of configuration!
  *
@@ -127,8 +126,8 @@ public class DataSourceTransactionManager extends AbstractPlatformTransactionMan
 
 	/**
 	 * Set the JDBC DataSource that this instance should manage transactions for.
-	 * <p>This will typically be a locally defined DataSource, for example a
-	 * Jakarta Commons DBCP connection pool. Alternatively, you can also drive
+	 * <p>This will typically be a locally defined DataSource, for example an
+	 * Apache Commons DBCP connection pool. Alternatively, you can also drive
 	 * transactions for a non-XA J2EE DataSource fetched from JNDI. For an XA
 	 * DataSource, use JtaTransactionManager.
 	 * <p>The DataSource specified here should be the target DataSource to manage
@@ -180,7 +179,7 @@ public class DataSourceTransactionManager extends AbstractPlatformTransactionMan
 		DataSourceTransactionObject txObject = new DataSourceTransactionObject();
 		txObject.setSavepointAllowed(isNestedTransactionAllowed());
 		ConnectionHolder conHolder =
-			(ConnectionHolder) TransactionSynchronizationManager.getResource(this.dataSource);
+				(ConnectionHolder) TransactionSynchronizationManager.getResource(this.dataSource);
 		txObject.setConnectionHolder(conHolder, false);
 		return txObject;
 	}
@@ -239,7 +238,10 @@ public class DataSourceTransactionManager extends AbstractPlatformTransactionMan
 		}
 
 		catch (Throwable ex) {
-			DataSourceUtils.releaseConnection(con, this.dataSource);
+			if (txObject.isNewConnectionHolder()) {
+				DataSourceUtils.releaseConnection(con, this.dataSource);
+				txObject.setConnectionHolder(null, false);
+			}
 			throw new CannotCreateTransactionException("Could not open JDBC Connection for transaction", ex);
 		}
 	}

@@ -17,7 +17,6 @@
 package org.springframework.web.servlet.mvc.multiaction;
 
 import java.util.Map;
-
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 
@@ -52,7 +51,7 @@ public class NoSuchRequestHandlingMethodException extends ServletException {
 	 * @param method the HTTP request method of the request
 	 * @param parameterMap the request's parameters as map
 	 */
-	public NoSuchRequestHandlingMethodException(String urlPath, String method, Map parameterMap) {
+	public NoSuchRequestHandlingMethodException(String urlPath, String method, Map<String, String[]> parameterMap) {
 		super("No matching handler method found for servlet request: path '" + urlPath +
 				"', method '" + method + "', parameters " + StylerUtils.style(parameterMap));
 	}
@@ -62,7 +61,7 @@ public class NoSuchRequestHandlingMethodException extends ServletException {
 	 * @param methodName the name of the handler method that wasn't found
 	 * @param controllerClass the class the handler method was expected to be in
 	 */
-	public NoSuchRequestHandlingMethodException(String methodName, Class controllerClass) {
+	public NoSuchRequestHandlingMethodException(String methodName, Class<?> controllerClass) {
 		super("No request handling method with name '" + methodName +
 				"' in class [" + controllerClass.getName() + "]");
 		this.methodName = methodName;

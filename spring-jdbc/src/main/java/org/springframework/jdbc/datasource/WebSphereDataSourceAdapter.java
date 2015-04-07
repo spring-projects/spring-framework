@@ -69,7 +69,7 @@ public class WebSphereDataSourceAdapter extends IsolationLevelDataSourceAdapter 
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
-	private Class wsDataSourceClass;
+	private Class<?> wsDataSourceClass;
 
 	private Method newJdbcConnSpecMethod;
 
@@ -91,16 +91,16 @@ public class WebSphereDataSourceAdapter extends IsolationLevelDataSourceAdapter 
 	public WebSphereDataSourceAdapter() {
 		try {
 			this.wsDataSourceClass = getClass().getClassLoader().loadClass("com.ibm.websphere.rsadapter.WSDataSource");
-			Class jdbcConnSpecClass = getClass().getClassLoader().loadClass("com.ibm.websphere.rsadapter.JDBCConnectionSpec");
-			Class wsrraFactoryClass = getClass().getClassLoader().loadClass("com.ibm.websphere.rsadapter.WSRRAFactory");
-			this.newJdbcConnSpecMethod = wsrraFactoryClass.getMethod("createJDBCConnectionSpec", (Class[]) null);
+			Class<?> jdbcConnSpecClass = getClass().getClassLoader().loadClass("com.ibm.websphere.rsadapter.JDBCConnectionSpec");
+			Class<?> wsrraFactoryClass = getClass().getClassLoader().loadClass("com.ibm.websphere.rsadapter.WSRRAFactory");
+			this.newJdbcConnSpecMethod = wsrraFactoryClass.getMethod("createJDBCConnectionSpec", (Class<?>[]) null);
 			this.wsDataSourceGetConnectionMethod =
-					this.wsDataSourceClass.getMethod("getConnection", new Class[] {jdbcConnSpecClass});
+					this.wsDataSourceClass.getMethod("getConnection", new Class<?>[] {jdbcConnSpecClass});
 			this.setTransactionIsolationMethod =
-					jdbcConnSpecClass.getMethod("setTransactionIsolation", new Class[] {int.class});
-			this.setReadOnlyMethod = jdbcConnSpecClass.getMethod("setReadOnly", new Class[] {Boolean.class});
-			this.setUserNameMethod = jdbcConnSpecClass.getMethod("setUserName", new Class[] {String.class});
-			this.setPasswordMethod = jdbcConnSpecClass.getMethod("setPassword", new Class[] {String.class});
+					jdbcConnSpecClass.getMethod("setTransactionIsolation", new Class<?>[] {int.class});
+			this.setReadOnlyMethod = jdbcConnSpecClass.getMethod("setReadOnly", new Class<?>[] {Boolean.class});
+			this.setUserNameMethod = jdbcConnSpecClass.getMethod("setUserName", new Class<?>[] {String.class});
+			this.setPasswordMethod = jdbcConnSpecClass.getMethod("setPassword", new Class<?>[] {String.class});
 		}
 		catch (Exception ex) {
 			throw new IllegalStateException(

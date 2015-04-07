@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,13 +50,17 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.servlet.http.Part;
 
+import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
 import org.springframework.util.LinkedCaseInsensitiveMap;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+import org.springframework.util.StringUtils;
 
 /**
  * Mock implementation of the {@link javax.servlet.http.HttpServletRequest} interface.
  *
- * <p>As of Spring 4.0, this set of mocks is entirely based on Servlet 3.0.
+ * <p>As of Spring 4.0, this set of mocks is designed on a Servlet 3.0 baseline.
  *
  * @author Juergen Hoeller
  * @author Rod Johnson
@@ -64,6 +68,7 @@ import org.springframework.util.LinkedCaseInsensitiveMap;
  * @author Mark Fisher
  * @author Chris Beams
  * @author Sam Brannen
+ * @author Brian Clozel
  * @since 1.0.2
  */
 public class MockHttpServletRequest implements HttpServletRequest {
@@ -101,6 +106,9 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	private static final String CONTENT_TYPE_HEADER = "Content-Type";
 
 	private static final String CHARSET_PREFIX = "charset=";
+
+	private static final ServletInputStream EMPTY_SERVLET_INPUT_STREAM =
+			new DelegatingServletInputStream(new ByteArrayInputStream(new byte[0]));
 
 
 	private boolean active = true;
@@ -194,7 +202,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 
 	private boolean requestedSessionIdFromURL = false;
 
-	private final Map<String, Part> parts = new LinkedHashMap<String, Part>();
+	private final MultiValueMap<String, Part> parts = new LinkedMultiValueMap<String, Part>();
 
 
 	// ---------------------------------------------------------------------
@@ -313,7 +321,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	@Override
 	public Enumeration<String> getAttributeNames() {
 		checkActive();
-		return Collections.enumeration(this.attributes.keySet());
+		return Collections.enumeration(new LinkedHashSet<String>(this.attributes.keySet()));
 	}
 
 	@Override
@@ -328,9 +336,10 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	}
 
 	private void updateContentTypeHeader() {
-		if (this.contentType != null) {
+		if (StringUtils.hasLength(this.contentType)) {
 			StringBuilder sb = new StringBuilder(this.contentType);
-			if (!this.contentType.toLowerCase().contains(CHARSET_PREFIX) && this.characterEncoding != null) {
+			if (!this.contentType.toLowerCase().contains(CHARSET_PREFIX) &&
+					StringUtils.hasLength(this.characterEncoding)) {
 				sb.append(";").append(CHARSET_PREFIX).append(this.characterEncoding);
 			}
 			doAddHeaderValue(CONTENT_TYPE_HEADER, sb.toString(), true);
@@ -346,13 +355,25 @@ public class MockHttpServletRequest implements HttpServletRequest {
 		return (this.content != null ? this.content.length : -1);
 	}
 
+	public long getContentLengthLong() {
+		return getContentLength();
+	}
+
 	public void setContentType(String contentType) {
 		this.contentType = contentType;
 		if (contentType != null) {
-			int charsetIndex = contentType.toLowerCase().indexOf(CHARSET_PREFIX);
-			if (charsetIndex != -1) {
-				String encoding = contentType.substring(charsetIndex + CHARSET_PREFIX.length());
-				this.characterEncoding = encoding;
+			try {
+				MediaType mediaType = MediaType.parseMediaType(contentType);
+				if (mediaType.getCharSet() != null) {
+					this.characterEncoding = mediaType.getCharSet().name();
+				}
+			}
+			catch (Exception ex) {
+				// Try to get charset value anyway
+				int charsetIndex = contentType.toLowerCase().indexOf(CHARSET_PREFIX);
+				if (charsetIndex != -1) {
+					this.characterEncoding = contentType.substring(charsetIndex + CHARSET_PREFIX.length());
+				}
 			}
 			updateContentTypeHeader();
 		}
@@ -369,7 +390,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 			return new DelegatingServletInputStream(new ByteArrayInputStream(this.content));
 		}
 		else {
-			return null;
+			return EMPTY_SERVLET_INPUT_STREAM;
 		}
 	}
 
@@ -946,9 +967,17 @@ public class MockHttpServletRequest implements HttpServletRequest {
 
 	@Override
 	public StringBuffer getRequestURL() {
-		StringBuffer url = new StringBuffer(this.scheme);
-		url.append("://").append(this.serverName).append(':').append(this.serverPort);
-		url.append(getRequestURI());
+		StringBuffer url = new StringBuffer(this.scheme).append("://").append(this.serverName);
+
+		if (this.serverPort > 0
+				&& (("http".equalsIgnoreCase(scheme) && this.serverPort != 80) || ("https".equalsIgnoreCase(scheme) && this.serverPort != 443))) {
+			url.append(':').append(this.serverPort);
+		}
+
+		if (StringUtils.hasText(getRequestURI())) {
+			url.append(getRequestURI());
+		}
+
 		return url;
 	}
 
@@ -986,6 +1015,20 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	@Override
 	public HttpSession getSession() {
 		return getSession(true);
+	}
+
+	/**
+	 * The implementation of this (Servlet 3.1+) method calls
+	 * {@link MockHttpSession#changeSessionId()} if the session is a mock session.
+	 * Otherwise it simply returns the current session id.
+	 * @since 4.0.3
+	 */
+	public String changeSessionId() {
+		Assert.isTrue(this.session != null, "The request does not have a session");
+		if (this.session instanceof MockHttpSession) {
+			return ((MockHttpSession) session).changeSessionId();
+		}
+		return this.session.getId();
 	}
 
 	public void setRequestedSessionIdValid(boolean requestedSessionIdValid) {
@@ -1038,17 +1081,21 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	}
 
 	public void addPart(Part part) {
-		this.parts.put(part.getName(), part);
+		this.parts.add(part.getName(), part);
 	}
 
 	@Override
 	public Part getPart(String name) throws IOException, IllegalStateException, ServletException {
-		return this.parts.get(name);
+		return this.parts.getFirst(name);
 	}
 
 	@Override
 	public Collection<Part> getParts() throws IOException, IllegalStateException, ServletException {
-		return this.parts.values();
+		List<Part> result = new LinkedList<Part>();
+		for(List<Part> list : this.parts.values()) {
+			result.addAll(list);
+		}
+		return result;
 	}
 
 }

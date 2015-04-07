@@ -18,7 +18,7 @@ package org.springframework.util;
 
 import java.util.LinkedList;
 
-import junit.framework.*;
+import junit.framework.TestCase;
 
 import org.springframework.tests.sample.objects.TestObject;
 

@@ -19,7 +19,6 @@ package org.springframework.web.servlet.view.document;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Map;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -103,7 +102,7 @@ public abstract class AbstractPdfStamperView extends AbstractUrlBasedView {
 	 * e.g. setting the "formFlattening" property.
 	 * @param request in case we need locale etc. Shouldn't look at attributes.
 	 * @param response in case we need to set cookies. Shouldn't write to it.
-	 * @throws Exception any exception that occured during document building
+	 * @throws Exception any exception that occurred during document building
      */
 	protected abstract void mergePdfDocument(Map<String, Object> model, PdfStamper stamper,
 			HttpServletRequest request, HttpServletResponse response) throws Exception;

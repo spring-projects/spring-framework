@@ -16,11 +16,11 @@
 
 package org.springframework.test.context.junit4.annotation;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-
 import org.junit.Test;
+
 import org.springframework.test.context.ContextConfiguration;
+
+import static org.junit.Assert.*;
 
 /**
  * Integration tests that verify support for configuration classes in

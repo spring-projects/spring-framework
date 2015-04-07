@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,14 +31,15 @@ import org.springframework.web.context.support.StandardServletEnvironment;
 
 /**
  * {@link Environment} implementation to be used by {@code Servlet}-based web
- * applications. All Portlet-related {@code ApplicationContext} classes initialize an instance
- * by default.
+ * applications. All Portlet-related {@code ApplicationContext} classes
+ * initialize an instance by default.
  *
- * <p>Contributes {@code ServletContext}, {@code PortletContext}, {@code PortletConfig}
- * and JNDI-based {@link PropertySource} instances. See the
- * {@link #customizePropertySources} method for details.
+ * <p>Contributes {@code ServletContext}, {@code PortletContext},
+ * {@code PortletConfig} and JNDI-based {@link PropertySource} instances.
+ * See the {@link #customizePropertySources} method for details.
  *
  * @author Chris Beams
+ * @author Juergen Hoeller
  * @since 3.1
  * @see StandardEnvironment
  * @see StandardServletEnvironment
@@ -50,6 +51,7 @@ public class StandardPortletEnvironment extends StandardEnvironment {
 
 	/** Portlet config init parameters property source name: {@value} */
 	public static final String PORTLET_CONFIG_PROPERTY_SOURCE_NAME = "portletConfigInitParams";
+
 
 	/**
 	 * Customize the set of property sources with those contributed by superclasses as
@@ -86,6 +88,21 @@ public class StandardPortletEnvironment extends StandardEnvironment {
 			propertySources.addLast(new JndiPropertySource(StandardServletEnvironment.JNDI_PROPERTY_SOURCE_NAME));
 		}
 		super.customizePropertySources(propertySources);
+	}
+
+	/**
+	 * Replace any {@linkplain
+	 * org.springframework.core.env.PropertySource.StubPropertySource stub property source}
+	 * instances acting as placeholders with real portlet context/config property sources
+	 * using the given parameters.
+	 * @param servletContext the {@link ServletContext} (may be {@code null})
+	 * @param portletContext the {@link PortletContext} (may not be {@code null})
+	 * @param portletConfig the {@link PortletConfig} ({@code null} if not available)
+	 * @see org.springframework.web.portlet.context.PortletApplicationContextUtils#initPortletPropertySources(
+	 * org.springframework.core.env.MutablePropertySources, ServletContext, PortletContext, PortletConfig)
+	 */
+	public void initPropertySources(ServletContext servletContext, PortletContext portletContext, PortletConfig portletConfig) {
+		PortletApplicationContextUtils.initPortletPropertySources(getPropertySources(), servletContext, portletContext, portletConfig);
 	}
 
 }

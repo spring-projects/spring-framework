@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,20 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.messaging.core;
 
-
 /**
+ * Strategy for resolving a String destination name to an actual destination
+ * of type {@code <D>}.
+ *
  * @author Mark Fisher
  * @since 4.0
  */
 public interface DestinationResolver<D> {
 
-
 	/**
-	 * @param name
-	 * @return
-	 * @throws DestinationResolutionException
+	 * Resolve the given destination name.
+	 * @param name the destination name to resolve
+	 * @return the resolved destination (never {@code null})
+	 * @throws DestinationResolutionException if the specified destination
+	 * wasn't found or wasn't resolvable for any other reason
 	 */
 	D resolveDestination(String name) throws DestinationResolutionException;
 

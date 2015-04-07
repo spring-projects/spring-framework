@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,11 +21,6 @@ import java.net.URI;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpEntityEnclosingRequest;
 import org.apache.http.HttpResponse;
@@ -35,27 +30,34 @@ import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.protocol.HTTP;
 import org.apache.http.protocol.HttpContext;
 
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.util.StringUtils;
+
 /**
  * {@link org.springframework.http.client.ClientHttpRequest} implementation that uses
  * Apache HttpComponents HttpClient to execute requests.
  *
  * <p>Created via the {@link HttpComponentsClientHttpRequestFactory}.
  *
+ * <p><b>NOTE:</b> Requires Apache HttpComponents 4.3 or higher, as of Spring 4.0.
+ *
  * @author Oleg Kalnichevski
  * @author Arjen Poutsma
+ * @author Juergen Hoeller
  * @since 3.1
  * @see HttpComponentsClientHttpRequestFactory#createRequest(URI, HttpMethod)
  */
 final class HttpComponentsClientHttpRequest extends AbstractBufferingClientHttpRequest {
 
-	private final CloseableHttpClient httpClient;
+	private final HttpClient httpClient;
 
 	private final HttpUriRequest httpRequest;
 
 	private final HttpContext httpContext;
 
 
-	public HttpComponentsClientHttpRequest(CloseableHttpClient httpClient, HttpUriRequest httpRequest, HttpContext httpContext) {
+	HttpComponentsClientHttpRequest(HttpClient httpClient, HttpUriRequest httpRequest, HttpContext httpContext) {
 		this.httpClient = httpClient;
 		this.httpRequest = httpRequest;
 		this.httpContext = httpContext;
@@ -72,33 +74,39 @@ final class HttpComponentsClientHttpRequest extends AbstractBufferingClientHttpR
 		return this.httpRequest.getURI();
 	}
 
+	HttpContext getHttpContext() {
+		return this.httpContext;
+	}
+
 
 	@Override
 	protected ClientHttpResponse executeInternal(HttpHeaders headers, byte[] bufferedOutput) throws IOException {
 		addHeaders(this.httpRequest, headers);
 
 		if (this.httpRequest instanceof HttpEntityEnclosingRequest) {
-			HttpEntityEnclosingRequest entityEnclosingRequest =
-					(HttpEntityEnclosingRequest) this.httpRequest;
+			HttpEntityEnclosingRequest entityEnclosingRequest = (HttpEntityEnclosingRequest) this.httpRequest;
 			HttpEntity requestEntity = new ByteArrayEntity(bufferedOutput);
 			entityEnclosingRequest.setEntity(requestEntity);
 		}
-		CloseableHttpResponse httpResponse =
-				this.httpClient.execute(this.httpRequest, this.httpContext);
+		HttpResponse httpResponse = this.httpClient.execute(this.httpRequest, this.httpContext);
 		return new HttpComponentsClientHttpResponse(httpResponse);
 	}
 
+
 	/**
-	 * Adds the given headers to the given HTTP request.
-	 *
+	 * Add the given headers to the given HTTP request.
 	 * @param httpRequest the request to add the headers to
 	 * @param headers the headers to add
 	 */
 	static void addHeaders(HttpUriRequest httpRequest, HttpHeaders headers) {
 		for (Map.Entry<String, List<String>> entry : headers.entrySet()) {
 			String headerName = entry.getKey();
-			if (!headerName.equalsIgnoreCase(HTTP.CONTENT_LEN) &&
-					!headerName.equalsIgnoreCase(HTTP.TRANSFER_ENCODING)) {
+			if (HttpHeaders.COOKIE.equalsIgnoreCase(headerName)) {  // RFC 6265
+				String headerValue = StringUtils.collectionToDelimitedString(entry.getValue(), "; ");
+				httpRequest.addHeader(headerName, headerValue);
+			}
+			else if (!HTTP.CONTENT_LEN.equalsIgnoreCase(headerName) &&
+					!HTTP.TRANSFER_ENCODING.equalsIgnoreCase(headerName)) {
 				for (String headerValue : entry.getValue()) {
 					httpRequest.addHeader(headerName, headerValue);
 				}

@@ -16,11 +16,12 @@
 
 package org.springframework.web.servlet.mvc.annotation;
 
-import static org.junit.Assert.*;
 import org.junit.Test;
 
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.web.bind.annotation.RequestMethod;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Arjen Poutsma

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -63,7 +63,7 @@ import org.springframework.util.StringUtils;
  * will have been set to the primitive's default value instead of null.
  *
  * <p>Please note that this class is designed to provide convenience rather than high performance.
- * For best performance consider using a custom RowMapper.
+ * For best performance, consider using a custom {@link RowMapper} implementation.
  *
  * @author Thomas Risberg
  * @author Juergen Hoeller

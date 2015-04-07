@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,6 +18,7 @@ package org.springframework.web.socket.sockjs.transport.handler;
 
 import org.junit.Before;
 import org.junit.Test;
+
 import org.springframework.http.MediaType;
 import org.springframework.web.socket.AbstractHttpRequestTests;
 import org.springframework.web.socket.TextMessage;
@@ -28,7 +29,7 @@ import org.springframework.web.socket.sockjs.transport.session.StubSockJsService
 import org.springframework.web.socket.sockjs.transport.session.TestHttpSockJsSession;
 
 import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
+import static org.mockito.BDDMockito.*;
 
 /**
  * Test fixture for {@link AbstractHttpReceivingTransportHandler} and sub-classes
@@ -110,11 +111,11 @@ public class HttpReceivingTransportHandlerTests  extends AbstractHttpRequestTest
 		TestHttpSockJsSession session = new TestHttpSockJsSession("1", sockJsConfig, wsHandler, null);
 		session.delegateConnectionEstablished();
 
-		doThrow(new Exception()).when(wsHandler).handleMessage(session, new TextMessage("x"));
+		willThrow(new Exception()).given(wsHandler).handleMessage(session, new TextMessage("x"));
 
 		try {
 			XhrReceivingTransportHandler transportHandler = new XhrReceivingTransportHandler();
-			transportHandler.setSockJsServiceConfiguration(sockJsConfig);
+			transportHandler.initialize(sockJsConfig);
 			transportHandler.handleRequest(this.request, this.response, wsHandler, session);
 			fail("Expected exception");
 		}
@@ -129,7 +130,7 @@ public class HttpReceivingTransportHandlerTests  extends AbstractHttpRequestTest
 		WebSocketHandler wsHandler = mock(WebSocketHandler.class);
 		AbstractSockJsSession session = new TestHttpSockJsSession("1", new StubSockJsServiceConfig(), wsHandler, null);
 
-		transportHandler.setSockJsServiceConfiguration(new StubSockJsServiceConfig());
+		transportHandler.initialize(new StubSockJsServiceConfig());
 		transportHandler.handleRequest(this.request, this.response, wsHandler, session);
 
 		assertEquals("text/plain;charset=UTF-8", this.response.getHeaders().getContentType().toString());

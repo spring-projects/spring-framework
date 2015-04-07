@@ -35,7 +35,7 @@ public class SqlReturnResultSet extends ResultSetSupportingSqlParameter {
 	 * @param name name of the parameter, as used in input and output maps
 	 * @param extractor ResultSetExtractor to use for parsing the {@link java.sql.ResultSet}
 	 */
-	public SqlReturnResultSet(String name, ResultSetExtractor extractor) {
+	public SqlReturnResultSet(String name, ResultSetExtractor<?> extractor) {
 		super(name, 0, extractor);
 	}
 
@@ -53,7 +53,7 @@ public class SqlReturnResultSet extends ResultSetSupportingSqlParameter {
 	 * @param name name of the parameter, as used in input and output maps
 	 * @param mapper RowMapper to use for parsing the {@link java.sql.ResultSet}
 	 */
-	public SqlReturnResultSet(String name, RowMapper mapper) {
+	public SqlReturnResultSet(String name, RowMapper<?> mapper) {
 		super(name, 0, mapper);
 	}
 

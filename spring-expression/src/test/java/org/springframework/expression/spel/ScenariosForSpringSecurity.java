@@ -16,14 +16,11 @@
 
 package org.springframework.expression.spel;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-
 import java.lang.reflect.Method;
 import java.util.List;
 
 import org.junit.Test;
+
 import org.springframework.core.MethodParameter;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.expression.AccessException;
@@ -39,13 +36,15 @@ import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.ReflectionHelper;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 
+import static org.junit.Assert.*;
+
 ///CLOVER:OFF
 /**
  * Spring Security scenarios from https://wiki.springsource.com/display/SECURITY/Spring+Security+Expression-based+Authorization
  *
  * @author Andy Clement
  */
-public class ScenariosForSpringSecurity extends ExpressionTestCase {
+public class ScenariosForSpringSecurity extends AbstractExpressionTests {
 
 	@Test
 	public void testScenario01_Roles() throws Exception {

@@ -35,8 +35,6 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.servlet.jsp.JspWriter;
 import javax.servlet.jsp.PageContext;
-import javax.servlet.jsp.el.ExpressionEvaluator;
-import javax.servlet.jsp.el.VariableResolver;
 
 import org.springframework.util.Assert;
 
@@ -289,7 +287,7 @@ public class MockPageContext extends PageContext {
 	}
 
 	@Override
-	public ExpressionEvaluator getExpressionEvaluator() {
+	public javax.servlet.jsp.el.ExpressionEvaluator getExpressionEvaluator() {
 		return new MockExpressionEvaluator(this);
 	}
 
@@ -299,7 +297,7 @@ public class MockPageContext extends PageContext {
 	}
 
 	@Override
-	public VariableResolver getVariableResolver() {
+	public javax.servlet.jsp.el.VariableResolver getVariableResolver() {
 		return null;
 	}
 

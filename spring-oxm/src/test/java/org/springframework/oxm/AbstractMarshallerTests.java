@@ -28,9 +28,7 @@ import javax.xml.transform.dom.DOMResult;
 import javax.xml.transform.stax.StAXResult;
 import javax.xml.transform.stream.StreamResult;
 
-import static org.custommonkey.xmlunit.XMLAssert.*;
 import org.custommonkey.xmlunit.XMLUnit;
-import static org.junit.Assert.assertTrue;
 import org.junit.Before;
 import org.junit.Test;
 import org.w3c.dom.Attr;
@@ -39,6 +37,9 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Text;
 
 import org.springframework.util.xml.StaxUtils;
+
+import static org.custommonkey.xmlunit.XMLAssert.*;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author Arjen Poutsma

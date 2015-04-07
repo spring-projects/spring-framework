@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,21 +33,18 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.aop.Advisor;
 import org.springframework.aop.TargetSource;
 import org.springframework.aop.framework.AopInfrastructureBean;
-import org.springframework.aop.framework.ProxyConfig;
 import org.springframework.aop.framework.ProxyFactory;
+import org.springframework.aop.framework.ProxyProcessorSupport;
 import org.springframework.aop.framework.adapter.AdvisorAdapterRegistry;
 import org.springframework.aop.framework.adapter.GlobalAdvisorAdapterRegistry;
 import org.springframework.aop.target.SingletonTargetSource;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.PropertyValues;
-import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.config.SmartInstantiationAwareBeanPostProcessor;
-import org.springframework.core.Ordered;
-import org.springframework.util.ClassUtils;
 
 /**
  * {@link org.springframework.beans.factory.config.BeanPostProcessor} implementation
@@ -90,9 +87,8 @@ import org.springframework.util.ClassUtils;
  * @see DefaultAdvisorAutoProxyCreator
  */
 @SuppressWarnings("serial")
-public abstract class AbstractAutoProxyCreator extends ProxyConfig
-		implements SmartInstantiationAwareBeanPostProcessor, BeanClassLoaderAware, BeanFactoryAware,
-		Ordered, AopInfrastructureBean {
+public abstract class AbstractAutoProxyCreator extends ProxyProcessorSupport
+		implements SmartInstantiationAwareBeanPostProcessor, BeanFactoryAware {
 
 	/**
 	 * Convenience constant for subclasses: Return value for "do not proxy".
@@ -111,9 +107,6 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
 	/** Logger available to subclasses */
 	protected final Log logger = LogFactory.getLog(getClass());
 
-	/** Default value is same as non-ordered */
-	private int order = Ordered.LOWEST_PRECEDENCE;
-
 	/** Default is global AdvisorAdapterRegistry */
 	private AdvisorAdapterRegistry advisorAdapterRegistry = GlobalAdvisorAdapterRegistry.getInstance();
 
@@ -130,10 +123,6 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
 
 	private TargetSourceCreator[] customTargetSourceCreators;
 
-	private ClassLoader proxyClassLoader = ClassUtils.getDefaultClassLoader();
-
-	private boolean classLoaderConfigured = false;
-
 	private BeanFactory beanFactory;
 
 	private final Map<Object, Boolean> advisedBeans = new ConcurrentHashMap<Object, Boolean>(64);
@@ -146,21 +135,6 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
 
 	private final Map<Object, Class<?>> proxyTypes = new ConcurrentHashMap<Object, Class<?>>(16);
 
-
-	/**
-	 * Set the ordering which will apply to this class's implementation
-	 * of Ordered, used when applying multiple BeanPostProcessors.
-	 * <p>Default value is {@code Integer.MAX_VALUE}, meaning that it's non-ordered.
-	 * @param order ordering value
-	 */
-	public final void setOrder(int order) {
-		this.order = order;
-	}
-
-	@Override
-	public final int getOrder() {
-		return this.order;
-	}
 
 	/**
 	 * Set whether or not the proxy should be frozen, preventing advice
@@ -201,7 +175,7 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
 	 * Ordering is significant: The TargetSource returned from the first matching
 	 * TargetSourceCreator (that is, the first that returns non-null) will be used.
 	 */
-	public void setCustomTargetSourceCreators(TargetSourceCreator[] targetSourceCreators) {
+	public void setCustomTargetSourceCreators(TargetSourceCreator... targetSourceCreators) {
 		this.customTargetSourceCreators = targetSourceCreators;
 	}
 
@@ -212,7 +186,7 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
 	 * This is perfectly valid, if "specific" interceptors such as matching
 	 * Advisors are all we want.
 	 */
-	public void setInterceptorNames(String[] interceptorNames) {
+	public void setInterceptorNames(String... interceptorNames) {
 		this.interceptorNames = interceptorNames;
 	}
 
@@ -222,24 +196,6 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
 	 */
 	public void setApplyCommonInterceptorsFirst(boolean applyCommonInterceptorsFirst) {
 		this.applyCommonInterceptorsFirst = applyCommonInterceptorsFirst;
-	}
-
-	/**
-	 * Set the ClassLoader to generate the proxy class in.
-	 * <p>Default is the bean ClassLoader, i.e. the ClassLoader used by the
-	 * containing BeanFactory for loading all bean classes. This can be
-	 * overridden here for specific proxies.
-	 */
-	public void setProxyClassLoader(ClassLoader classLoader) {
-		this.proxyClassLoader = classLoader;
-		this.classLoaderConfigured = (classLoader != null);
-	}
-
-	@Override
-	public void setBeanClassLoader(ClassLoader classLoader) {
-		if (!this.classLoaderConfigured) {
-			this.proxyClassLoader = classLoader;
-		}
 	}
 
 	@Override
@@ -270,7 +226,9 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
 	@Override
 	public Object getEarlyBeanReference(Object bean, String beanName) throws BeansException {
 		Object cacheKey = getCacheKey(bean.getClass(), beanName);
-		this.earlyProxyReferences.add(cacheKey);
+		if (!this.earlyProxyReferences.contains(cacheKey)) {
+			this.earlyProxyReferences.add(cacheKey);
+		}
 		return wrapIfNecessary(bean, beanName, cacheKey);
 	}
 
@@ -462,15 +420,14 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
 			Class<?> beanClass, String beanName, Object[] specificInterceptors, TargetSource targetSource) {
 
 		ProxyFactory proxyFactory = new ProxyFactory();
-		// Copy our properties (proxyTargetClass etc) inherited from ProxyConfig.
 		proxyFactory.copyFrom(this);
 
-		if (!shouldProxyTargetClass(beanClass, beanName)) {
-			// Must allow for introductions; can't just set interfaces to
-			// the target's interfaces only.
-			Class<?>[] targetInterfaces = ClassUtils.getAllInterfacesForClass(beanClass, this.proxyClassLoader);
-			for (Class<?> targetInterface : targetInterfaces) {
-				proxyFactory.addInterface(targetInterface);
+		if (!proxyFactory.isProxyTargetClass()) {
+			if (shouldProxyTargetClass(beanClass, beanName)) {
+				proxyFactory.setProxyTargetClass(true);
+			}
+			else {
+				evaluateProxyInterfaces(beanClass, proxyFactory);
 			}
 		}
 
@@ -487,14 +444,12 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
 			proxyFactory.setPreFiltered(true);
 		}
 
-		return proxyFactory.getProxy(this.proxyClassLoader);
+		return proxyFactory.getProxy(getProxyClassLoader());
 	}
 
 	/**
-	 * Determine whether the given bean should be proxied with its target
-	 * class rather than its interfaces. Checks the
-	 * {@link #setProxyTargetClass "proxyTargetClass" setting} as well as the
-	 * {@link AutoProxyUtils#PRESERVE_TARGET_CLASS_ATTRIBUTE "preserveTargetClass" attribute}
+	 * Determine whether the given bean should be proxied with its target class rather than its interfaces.
+	 * <p>Checks the {@link AutoProxyUtils#PRESERVE_TARGET_CLASS_ATTRIBUTE "preserveTargetClass" attribute}
 	 * of the corresponding bean definition.
 	 * @param beanClass the class of the bean
 	 * @param beanName the name of the bean
@@ -502,9 +457,8 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
 	 * @see AutoProxyUtils#shouldProxyTargetClass
 	 */
 	protected boolean shouldProxyTargetClass(Class<?> beanClass, String beanName) {
-		return (isProxyTargetClass() ||
-				(this.beanFactory instanceof ConfigurableListableBeanFactory &&
-						AutoProxyUtils.shouldProxyTargetClass((ConfigurableListableBeanFactory) this.beanFactory, beanName)));
+		return (this.beanFactory instanceof ConfigurableListableBeanFactory &&
+				AutoProxyUtils.shouldProxyTargetClass((ConfigurableListableBeanFactory) this.beanFactory, beanName));
 	}
 
 	/**

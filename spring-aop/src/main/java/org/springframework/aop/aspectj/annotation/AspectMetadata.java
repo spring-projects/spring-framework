@@ -45,7 +45,7 @@ public class AspectMetadata {
 	/**
 	 * AspectJ reflection information (AspectJ 5 / Java 5 specific).
 	 */
-	private final AjType ajType;
+	private final AjType<?> ajType;
 
 	/**
 	 * Spring AOP pointcut corresponding to the per clause of the
@@ -71,9 +71,9 @@ public class AspectMetadata {
 		this.aspectName = aspectName;
 
 		Class<?> currClass = aspectClass;
-		AjType ajType = null;
+		AjType<?> ajType = null;
 		while (!currClass.equals(Object.class)) {
-			AjType ajTypeToCheck = AjTypeSystem.getAjType(currClass);
+			AjType<?> ajTypeToCheck = AjTypeSystem.getAjType(currClass);
 			if (ajTypeToCheck.isAspect()) {
 				ajType = ajTypeToCheck;
 				break;
@@ -124,14 +124,14 @@ public class AspectMetadata {
 	/**
 	 * Return AspectJ reflection information.
 	 */
-	public AjType getAjType() {
+	public AjType<?> getAjType() {
 		return this.ajType;
 	}
 
 	/**
 	 * Return the aspect class.
 	 */
-	public Class getAspectClass() {
+	public Class<?> getAspectClass() {
 		return this.ajType.getJavaClass();
 	}
 

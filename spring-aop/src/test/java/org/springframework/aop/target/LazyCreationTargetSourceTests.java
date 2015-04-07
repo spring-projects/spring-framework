@@ -16,11 +16,12 @@
 
 package org.springframework.aop.target;
 
-import static org.junit.Assert.*;
-
 import org.junit.Test;
+
 import org.springframework.aop.TargetSource;
 import org.springframework.aop.framework.ProxyFactory;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Rob Harrop

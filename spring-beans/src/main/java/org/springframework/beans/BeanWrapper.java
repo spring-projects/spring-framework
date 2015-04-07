@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,7 +59,7 @@ public interface BeanWrapper extends ConfigurablePropertyAccessor {
 	 * @return the type of the wrapped bean instance,
 	 * or {@code null} if no wrapped object has been set
 	 */
-	Class getWrappedClass();
+	Class<?> getWrappedClass();
 
 	/**
 	 * Obtain the PropertyDescriptors for the wrapped object
@@ -77,20 +77,6 @@ public interface BeanWrapper extends ConfigurablePropertyAccessor {
 	 * @throws InvalidPropertyException if there is no such property
 	 */
 	PropertyDescriptor getPropertyDescriptor(String propertyName) throws InvalidPropertyException;
-
-	/**
-	 * Set whether this BeanWrapper should attempt to "auto-grow" a nested path that contains a null value.
-	 * <p>If "true", a null path location will be populated with a default object value and traversed
-	 * instead of resulting in a {@link NullValueInNestedPathException}. Turning this flag on also
-	 * enables auto-growth of collection elements when accessing an out-of-bounds index.
-	 * <p>Default is "false" on a plain BeanWrapper.
-	 */
-	void setAutoGrowNestedPaths(boolean autoGrowNestedPaths);
-
-	/**
-	 * Return whether "auto-growing" of nested paths has been activated.
-	 */
-	boolean isAutoGrowNestedPaths();
 
 	/**
 	 * Specify a limit for array and collection auto-growing.

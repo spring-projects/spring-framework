@@ -73,6 +73,7 @@ public class ResourceLoaderClassLoadHelper implements ClassLoadHelper {
 	}
 
 	@Override
+	@SuppressWarnings("rawtypes")
 	public Class loadClass(String name) throws ClassNotFoundException {
 		return this.resourceLoader.getClassLoader().loadClass(name);
 	}

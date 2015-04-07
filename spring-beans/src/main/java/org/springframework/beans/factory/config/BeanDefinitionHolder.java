@@ -17,6 +17,7 @@
 package org.springframework.beans.factory.config;
 
 import org.springframework.beans.BeanMetadataElement;
+import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
@@ -118,8 +119,9 @@ public class BeanDefinitionHolder implements BeanMetadataElement {
 	 * or the aliases stored in this bean definition.
 	 */
 	public boolean matchesName(String candidateName) {
-		return (candidateName != null &&
-				(candidateName.equals(this.beanName) || ObjectUtils.containsElement(this.aliases, candidateName)));
+		return (candidateName != null && (candidateName.equals(this.beanName) ||
+				candidateName.equals(BeanFactoryUtils.transformedBeanName(this.beanName)) ||
+				ObjectUtils.containsElement(this.aliases, candidateName)));
 	}
 
 

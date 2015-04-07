@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,6 +33,9 @@ import org.springframework.util.ClassUtils;
  * <p>This is an SPI class, typically not used directly by applications.
  * Can be subclassed for additional invocation parameters.
  *
+ * <p>Both {@link RemoteInvocation} and {@link RemoteInvocationResult} are designed
+ * for use with standard Java serialization as well as JavaBean-style serialization.
+ *
  * @author Juergen Hoeller
  * @since 25.02.2004
  * @see RemoteInvocationResult
@@ -51,30 +54,12 @@ public class RemoteInvocation implements Serializable {
 
 	private String methodName;
 
-	private Class[] parameterTypes;
+	private Class<?>[] parameterTypes;
 
 	private Object[] arguments;
 
 	private Map<String, Serializable> attributes;
 
-
-	/**
-	 * Create a new RemoteInvocation for use as JavaBean.
-	 */
-	public RemoteInvocation() {
-	}
-
-	/**
-	 * Create a new RemoteInvocation for the given parameters.
-	 * @param methodName the name of the method to invoke
-	 * @param parameterTypes the parameter types of the method
-	 * @param arguments the arguments for the invocation
-	 */
-	public RemoteInvocation(String methodName, Class[] parameterTypes, Object[] arguments) {
-		this.methodName = methodName;
-		this.parameterTypes = parameterTypes;
-		this.arguments = arguments;
-	}
 
 	/**
 	 * Create a new RemoteInvocation for the given AOP method invocation.
@@ -86,9 +71,29 @@ public class RemoteInvocation implements Serializable {
 		this.arguments = methodInvocation.getArguments();
 	}
 
+	/**
+	 * Create a new RemoteInvocation for the given parameters.
+	 * @param methodName the name of the method to invoke
+	 * @param parameterTypes the parameter types of the method
+	 * @param arguments the arguments for the invocation
+	 */
+	public RemoteInvocation(String methodName, Class<?>[] parameterTypes, Object[] arguments) {
+		this.methodName = methodName;
+		this.parameterTypes = parameterTypes;
+		this.arguments = arguments;
+	}
+
+	/**
+	 * Create a new RemoteInvocation for JavaBean-style deserialization
+	 * (e.g. with Jackson).
+	 */
+	public RemoteInvocation() {
+	}
+
 
 	/**
 	 * Set the name of the target method.
+	 * <p>This setter is intended for JavaBean-style deserialization.
 	 */
 	public void setMethodName(String methodName) {
 		this.methodName = methodName;
@@ -103,20 +108,22 @@ public class RemoteInvocation implements Serializable {
 
 	/**
 	 * Set the parameter types of the target method.
+	 * <p>This setter is intended for JavaBean-style deserialization.
 	 */
-	public void setParameterTypes(Class[] parameterTypes) {
+	public void setParameterTypes(Class<?>[] parameterTypes) {
 		this.parameterTypes = parameterTypes;
 	}
 
 	/**
 	 * Return the parameter types of the target method.
 	 */
-	public Class[] getParameterTypes() {
+	public Class<?>[] getParameterTypes() {
 		return this.parameterTypes;
 	}
 
 	/**
 	 * Set the arguments for the target method call.
+	 * <p>This setter is intended for JavaBean-style deserialization.
 	 */
 	public void setArguments(Object[] arguments) {
 		this.arguments = arguments;

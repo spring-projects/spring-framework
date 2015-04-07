@@ -27,7 +27,6 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.junit.Before;
 import org.junit.Test;
 
@@ -41,7 +40,7 @@ import org.springframework.tests.Assume;
 import org.springframework.tests.TestGroup;
 
 import static org.junit.Assert.*;
-import static org.springframework.tests.TestResourceUtils.qualifiedResource;
+import static org.springframework.tests.TestResourceUtils.*;
 
 /**
  * @author Guillaume Poirier

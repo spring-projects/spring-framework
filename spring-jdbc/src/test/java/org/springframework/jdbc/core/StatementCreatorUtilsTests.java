@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.jdbc.core;
 
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
+import java.sql.ParameterMetaData;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Types;
@@ -26,6 +27,7 @@ import java.util.GregorianCalendar;
 import org.junit.Before;
 import org.junit.Test;
 
+import static org.junit.Assert.*;
 import static org.mockito.BDDMockito.*;
 
 /**
@@ -41,46 +43,129 @@ public class StatementCreatorUtilsTests {
 		preparedStatement = mock(PreparedStatement.class);
 	}
 
-	@Test public void testSetParameterValueWithNullAndType() throws SQLException {
+	@Test
+	public void testSetParameterValueWithNullAndType() throws SQLException {
 		StatementCreatorUtils.setParameterValue(preparedStatement, 1, Types.VARCHAR, null, null);
 		verify(preparedStatement).setNull(1, Types.VARCHAR);
 	}
 
-	@Test public void testSetParameterValueWithNullAndTypeName() throws SQLException {
+	@Test
+	public void testSetParameterValueWithNullAndTypeName() throws SQLException {
 		StatementCreatorUtils.setParameterValue(preparedStatement, 1, Types.VARCHAR, "mytype", null);
 		verify(preparedStatement).setNull(1, Types.VARCHAR, "mytype");
 	}
 
-	@Test public void testSetParameterValueWithNullAndUnknownType() throws SQLException {
+	@Test
+	public void testSetParameterValueWithNullAndUnknownType() throws SQLException {
 		StatementCreatorUtils.setParameterValue(preparedStatement, 1, SqlTypeValue.TYPE_UNKNOWN, null, null);
 		verify(preparedStatement).setNull(1, Types.NULL);
 	}
 
 	@Test
 	public void testSetParameterValueWithNullAndUnknownTypeOnInformix() throws SQLException {
+		StatementCreatorUtils.driversWithNoSupportForGetParameterType.clear();
 		Connection con = mock(Connection.class);
-		DatabaseMetaData metaData = mock(DatabaseMetaData.class);
+		DatabaseMetaData dbmd = mock(DatabaseMetaData.class);
 		given(preparedStatement.getConnection()).willReturn(con);
-		given(con.getMetaData()).willReturn(metaData);
-		given(metaData.getDatabaseProductName()).willReturn("Informix Dynamic Server");
-		given(metaData.getDriverName()).willReturn("Informix Driver");
+		given(con.getMetaData()).willReturn(dbmd);
+		given(dbmd.getDatabaseProductName()).willReturn("Informix Dynamic Server");
+		given(dbmd.getDriverName()).willReturn("Informix Driver");
 		StatementCreatorUtils.setParameterValue(preparedStatement, 1, SqlTypeValue.TYPE_UNKNOWN, null, null);
-		verify(metaData).getDatabaseProductName();
-		verify(metaData).getDriverName();
+		verify(dbmd).getDatabaseProductName();
+		verify(dbmd).getDriverName();
 		verify(preparedStatement).setObject(1, null);
+		assertEquals(1, StatementCreatorUtils.driversWithNoSupportForGetParameterType.size());
 	}
 
-	@Test public void testSetParameterValueWithNullAndUnknownTypeOnDerbyEmbedded() throws SQLException {
+	@Test
+	public void testSetParameterValueWithNullAndUnknownTypeOnDerbyEmbedded() throws SQLException {
+		StatementCreatorUtils.driversWithNoSupportForGetParameterType.clear();
 		Connection con = mock(Connection.class);
-		DatabaseMetaData metaData = mock(DatabaseMetaData.class);
+		DatabaseMetaData dbmd = mock(DatabaseMetaData.class);
 		given(preparedStatement.getConnection()).willReturn(con);
-		given(con.getMetaData()).willReturn(metaData);
-		given(metaData.getDatabaseProductName()).willReturn("Apache Derby");
-		given(metaData.getDriverName()).willReturn("Apache Derby Embedded Driver");
+		given(con.getMetaData()).willReturn(dbmd);
+		given(dbmd.getDatabaseProductName()).willReturn("Apache Derby");
+		given(dbmd.getDriverName()).willReturn("Apache Derby Embedded Driver");
 		StatementCreatorUtils.setParameterValue(preparedStatement, 1, SqlTypeValue.TYPE_UNKNOWN, null, null);
-		verify(metaData).getDatabaseProductName();
-		verify(metaData).getDriverName();
+		verify(dbmd).getDatabaseProductName();
+		verify(dbmd).getDriverName();
 		verify(preparedStatement).setNull(1, Types.VARCHAR);
+		assertEquals(1, StatementCreatorUtils.driversWithNoSupportForGetParameterType.size());
+	}
+
+	@Test
+	public void testSetParameterValueWithNullAndGetParameterTypeWorking() throws SQLException {
+		StatementCreatorUtils.driversWithNoSupportForGetParameterType.clear();
+		ParameterMetaData pmd = mock(ParameterMetaData.class);
+		given(preparedStatement.getParameterMetaData()).willReturn(pmd);
+		given(pmd.getParameterType(1)).willReturn(Types.SMALLINT);
+		StatementCreatorUtils.setParameterValue(preparedStatement, 1, SqlTypeValue.TYPE_UNKNOWN, null, null);
+		verify(pmd).getParameterType(1);
+		verify(preparedStatement, never()).getConnection();
+		verify(preparedStatement).setNull(1, Types.SMALLINT);
+		assertTrue(StatementCreatorUtils.driversWithNoSupportForGetParameterType.isEmpty());
+	}
+
+	@Test
+	public void testSetParameterValueWithNullAndGetParameterTypeWorkingButNotForOtherDriver() throws SQLException {
+		StatementCreatorUtils.driversWithNoSupportForGetParameterType.clear();
+		StatementCreatorUtils.driversWithNoSupportForGetParameterType.add("Oracle JDBC Driver");
+		Connection con = mock(Connection.class);
+		DatabaseMetaData dbmd = mock(DatabaseMetaData.class);
+		ParameterMetaData pmd = mock(ParameterMetaData.class);
+		given(preparedStatement.getConnection()).willReturn(con);
+		given(con.getMetaData()).willReturn(dbmd);
+		given(dbmd.getDriverName()).willReturn("Apache Derby Embedded Driver");
+		given(preparedStatement.getParameterMetaData()).willReturn(pmd);
+		given(pmd.getParameterType(1)).willReturn(Types.SMALLINT);
+		StatementCreatorUtils.setParameterValue(preparedStatement, 1, SqlTypeValue.TYPE_UNKNOWN, null, null);
+		verify(dbmd).getDriverName();
+		verify(pmd).getParameterType(1);
+		verify(preparedStatement).setNull(1, Types.SMALLINT);
+		assertEquals(1, StatementCreatorUtils.driversWithNoSupportForGetParameterType.size());
+	}
+
+	@Test
+	public void testSetParameterValueWithNullAndUnknownTypeAndGetParameterTypeNotWorking() throws SQLException {
+		StatementCreatorUtils.driversWithNoSupportForGetParameterType.clear();
+		Connection con = mock(Connection.class);
+		DatabaseMetaData dbmd = mock(DatabaseMetaData.class);
+		given(preparedStatement.getConnection()).willReturn(con);
+		given(con.getMetaData()).willReturn(dbmd);
+		given(dbmd.getDatabaseProductName()).willReturn("Apache Derby");
+		given(dbmd.getDriverName()).willReturn("Apache Derby Embedded Driver");
+		StatementCreatorUtils.setParameterValue(preparedStatement, 1, SqlTypeValue.TYPE_UNKNOWN, null, null);
+		verify(dbmd).getDatabaseProductName();
+		verify(dbmd).getDriverName();
+		verify(preparedStatement).setNull(1, Types.VARCHAR);
+		assertEquals(1, StatementCreatorUtils.driversWithNoSupportForGetParameterType.size());
+
+		reset(preparedStatement, con, dbmd);
+		ParameterMetaData pmd = mock(ParameterMetaData.class);
+		given(preparedStatement.getConnection()).willReturn(con);
+		given(con.getMetaData()).willReturn(dbmd);
+		given(preparedStatement.getParameterMetaData()).willReturn(pmd);
+		given(pmd.getParameterType(1)).willThrow(new SQLException("unsupported"));
+		given(dbmd.getDatabaseProductName()).willReturn("Informix Dynamic Server");
+		given(dbmd.getDriverName()).willReturn("Informix Driver");
+		StatementCreatorUtils.setParameterValue(preparedStatement, 1, SqlTypeValue.TYPE_UNKNOWN, null, null);
+		verify(pmd).getParameterType(1);
+		verify(dbmd).getDatabaseProductName();
+		verify(dbmd).getDriverName();
+		verify(preparedStatement).setObject(1, null);
+		assertEquals(2, StatementCreatorUtils.driversWithNoSupportForGetParameterType.size());
+
+		reset(preparedStatement, con, dbmd, pmd);
+		given(preparedStatement.getConnection()).willReturn(con);
+		given(con.getMetaData()).willReturn(dbmd);
+		given(dbmd.getDatabaseProductName()).willReturn("Informix Dynamic Server");
+		given(dbmd.getDriverName()).willReturn("Informix Driver");
+		StatementCreatorUtils.setParameterValue(preparedStatement, 1, SqlTypeValue.TYPE_UNKNOWN, null, null);
+		verify(preparedStatement, never()).getParameterMetaData();
+		verify(dbmd).getDatabaseProductName();
+		verify(dbmd).getDriverName();
+		verify(preparedStatement).setObject(1, null);
+		assertEquals(2, StatementCreatorUtils.driversWithNoSupportForGetParameterType.size());
 	}
 
 	@Test
@@ -175,6 +260,17 @@ public class StatementCreatorUtilsTests {
 		java.util.Calendar cal = new GregorianCalendar();
 		StatementCreatorUtils.setParameterValue(preparedStatement, 1, SqlTypeValue.TYPE_UNKNOWN, null, cal);
 		verify(preparedStatement).setTimestamp(1, new java.sql.Timestamp(cal.getTime().getTime()), cal);
+	}
+
+	@Test  // SPR-8571
+	public void testSetParameterValueWithStringAndVendorSpecificType() throws SQLException {
+		StatementCreatorUtils.setParameterValue(preparedStatement, 1, Types.OTHER, null, "test");
+		verify(preparedStatement).setString(1, "test");
+	}
+	@Test  // SPR-8571
+	public void testSetParameterValueWithNullAndVendorSpecificType() throws SQLException {
+		StatementCreatorUtils.setParameterValue(preparedStatement, 1, Types.OTHER, null, null);
+		verify(preparedStatement).setNull(1, Types.NULL);
 	}
 
 }

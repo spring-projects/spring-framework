@@ -35,11 +35,10 @@
 		</property>
 	</bean>
 
-	<bean id="pJenny" class="org.springframework.tests.sample.beans.TestBean" scope="prototype">
+	<bean id="pJenny" class="org.springframework.tests.sample.beans.DerivedTestBean" scope="prototype">
 		<property name="name"><value>Jenny</value></property>
 		<property name="age"><value>30</value></property>
 		<property name="spouse">
-		<!-- Could use id and href -->
 			<ref local="david"/>
 		</property>
 	</bean>

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -86,7 +86,7 @@ public class MutablePropertyValues implements PropertyValues, Serializable {
 		// There is no replacement of existing property values.
 		if (original != null) {
 			this.propertyValueList = new ArrayList<PropertyValue>(original.size());
-			for (Map.Entry entry : original.entrySet()) {
+			for (Map.Entry<?, ?> entry : original.entrySet()) {
 				this.propertyValueList.add(new PropertyValue(entry.getKey().toString(), entry.getValue()));
 			}
 		}
@@ -259,6 +259,19 @@ public class MutablePropertyValues implements PropertyValues, Serializable {
 		return null;
 	}
 
+	/**
+	 * Get the raw property value, if any.
+	 * @param propertyName the name to search for
+	 * @return the raw property value, or {@code null}
+	 * @since 4.0
+	 * @see #getPropertyValue(String)
+	 * @see PropertyValue#getValue()
+	 */
+	public Object get(String propertyName) {
+		PropertyValue pv = getPropertyValue(propertyName);
+		return (pv != null ? pv.getValue() : null);
+	}
+
 	@Override
 	public PropertyValues changesSince(PropertyValues old) {
 		MutablePropertyValues changes = new MutablePropertyValues();
@@ -306,6 +319,16 @@ public class MutablePropertyValues implements PropertyValues, Serializable {
 			this.processedProperties = new HashSet<String>();
 		}
 		this.processedProperties.add(propertyName);
+	}
+
+	/**
+	 * Clear the "processed" registration of the given property, if any.
+	 * @since 3.2.13
+	 */
+	public void clearProcessedProperty(String propertyName) {
+		if (this.processedProperties != null) {
+			this.processedProperties.remove(propertyName);
+		}
 	}
 
 	/**

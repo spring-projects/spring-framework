@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -126,7 +126,7 @@ public class CciLocalTransactionManager extends AbstractPlatformTransactionManag
 	protected Object doGetTransaction() {
 		CciLocalTransactionObject txObject = new CciLocalTransactionObject();
 		ConnectionHolder conHolder =
-			(ConnectionHolder) TransactionSynchronizationManager.getResource(getConnectionFactory());
+				(ConnectionHolder) TransactionSynchronizationManager.getResource(getConnectionFactory());
 		txObject.setConnectionHolder(conHolder);
 		return txObject;
 	}
@@ -159,7 +159,6 @@ public class CciLocalTransactionManager extends AbstractPlatformTransactionManag
 			}
 			TransactionSynchronizationManager.bindResource(getConnectionFactory(), txObject.getConnectionHolder());
 		}
-
 		catch (NotSupportedException ex) {
 			ConnectionFactoryUtils.releaseConnection(con, getConnectionFactory());
 			throw new CannotCreateTransactionException("CCI Connection does not support local transactions", ex);
@@ -268,7 +267,7 @@ public class CciLocalTransactionManager extends AbstractPlatformTransactionManag
 		}
 
 		public ConnectionHolder getConnectionHolder() {
-			return connectionHolder;
+			return this.connectionHolder;
 		}
 	}
 

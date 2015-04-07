@@ -196,7 +196,7 @@ public class TransactionAwareConnectionFactoryProxy
 	 * @return the wrapped Connection
 	 */
 	protected Connection getTransactionAwareConnectionProxy(Connection target) {
-		List<Class> classes = new ArrayList<Class>(3);
+		List<Class<?>> classes = new ArrayList<Class<?>>(3);
 		classes.add(Connection.class);
 		if (target instanceof QueueConnection) {
 			classes.add(QueueConnection.class);
@@ -206,7 +206,7 @@ public class TransactionAwareConnectionFactoryProxy
 		}
 		return (Connection) Proxy.newProxyInstance(
 				Connection.class.getClassLoader(),
-				classes.toArray(new Class[classes.size()]),
+				classes.toArray(new Class<?>[classes.size()]),
 				new TransactionAwareConnectionInvocationHandler(target));
 	}
 
@@ -268,7 +268,7 @@ public class TransactionAwareConnectionFactoryProxy
 		}
 
 		private Session getCloseSuppressingSessionProxy(Session target) {
-			List<Class> classes = new ArrayList<Class>(3);
+			List<Class<?>> classes = new ArrayList<Class<?>>(3);
 			classes.add(SessionProxy.class);
 			if (target instanceof QueueSession) {
 				classes.add(QueueSession.class);
@@ -278,7 +278,7 @@ public class TransactionAwareConnectionFactoryProxy
 			}
 			return (Session) Proxy.newProxyInstance(
 					SessionProxy.class.getClassLoader(),
-					classes.toArray(new Class[classes.size()]),
+					classes.toArray(new Class<?>[classes.size()]),
 					new CloseSuppressingSessionInvocationHandler(target));
 		}
 	}

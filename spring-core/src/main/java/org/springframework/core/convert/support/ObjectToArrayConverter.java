@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,8 +25,8 @@ import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.converter.ConditionalGenericConverter;
 
 /**
- * Converts an Object to a single-element Array containing the Object.
- * Will convert the Object to the target Array's component type if necessary.
+ * Converts an Object to a single-element array containing the Object.
+ * Will convert the Object to the target array's component type if necessary.
  *
  * @author Keith Donald
  * @since 3.0
@@ -35,9 +35,11 @@ final class ObjectToArrayConverter implements ConditionalGenericConverter {
 
 	private final ConversionService conversionService;
 
+
 	public ObjectToArrayConverter(ConversionService conversionService) {
 		this.conversionService = conversionService;
 	}
+
 
 	@Override
 	public Set<ConvertiblePair> getConvertibleTypes() {

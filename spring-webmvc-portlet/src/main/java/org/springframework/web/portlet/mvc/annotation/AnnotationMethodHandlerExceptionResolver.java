@@ -386,7 +386,7 @@ public class AnnotationMethodHandlerExceptionResolver extends AbstractHandlerExc
 			return new ModelAndView().addAllObjects(((Model) returnValue).asMap());
 		}
 		else if (returnValue instanceof Map) {
-			return new ModelAndView().addAllObjects((Map) returnValue);
+			return new ModelAndView().addAllObjects((Map<String, Object>) returnValue);
 		}
 		else if (returnValue instanceof View) {
 			return new ModelAndView(returnValue);

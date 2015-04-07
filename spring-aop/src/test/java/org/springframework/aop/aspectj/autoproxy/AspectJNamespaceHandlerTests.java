@@ -16,10 +16,9 @@
 
 package org.springframework.aop.aspectj.autoproxy;
 
-import static org.junit.Assert.assertEquals;
-
 import org.junit.Before;
 import org.junit.Test;
+
 import org.springframework.aop.config.AopConfigUtils;
 import org.springframework.aop.config.AopNamespaceUtils;
 import org.springframework.beans.factory.config.BeanDefinition;
@@ -31,6 +30,8 @@ import org.springframework.beans.factory.xml.ParserContext;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.beans.factory.xml.XmlReaderContext;
 import org.springframework.tests.beans.CollectingReaderEventListener;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Rob Harrop

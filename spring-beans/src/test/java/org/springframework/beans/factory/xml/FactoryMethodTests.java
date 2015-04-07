@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,14 +21,14 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
 
-import static org.junit.Assert.*;
 import org.junit.Test;
 
 import org.springframework.beans.factory.BeanCreationException;
-import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.tests.sample.beans.TestBean;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Juergen Hoeller
@@ -260,6 +260,34 @@ public class FactoryMethodTests {
 	}
 
 	@Test
+	public void testNonExistingFactoryMethod() {
+		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
+		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
+		reader.loadBeanDefinitions(new ClassPathResource("factory-methods.xml", getClass()));
+		try {
+			xbf.getBean("invalidPrototype");
+			fail("Should have thrown BeanCreationException");
+		}
+		catch (BeanCreationException ex) {
+			assertTrue(ex.getMessage().contains("nonExisting(TestBean)"));
+		}
+	}
+
+	@Test
+	public void testFactoryMethodArgumentsForNonExistingMethod() {
+		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
+		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
+		reader.loadBeanDefinitions(new ClassPathResource("factory-methods.xml", getClass()));
+		try {
+			xbf.getBean("invalidPrototype", new TestBean());
+			fail("Should have thrown BeanCreationException");
+		}
+		catch (BeanCreationException ex) {
+			assertTrue(ex.getMessage().contains("nonExisting(TestBean)"));
+		}
+	}
+
+	@Test
 	public void testCanSpecifyFactoryMethodArgumentsOnFactoryMethodPrototype() {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
@@ -296,17 +324,18 @@ public class FactoryMethodTests {
 	}
 
 	@Test
-	public void testCannotSpecifyFactoryMethodArgumentsOnSingleton() {
+	public void testCanSpecifyFactoryMethodArgumentsOnSingleton() {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
 		reader.loadBeanDefinitions(new ClassPathResource("factory-methods.xml", getClass()));
-		try {
-			xbf.getBean("testBeanOnly", new TestBean());
-			fail("Shouldn't allow args to be passed to a singleton");
-		}
-		catch (BeanDefinitionStoreException ex) {
-			// OK
-		}
+
+		// First getBean call triggers actual creation of the singleton bean
+		TestBean tb = new TestBean();
+		FactoryMethods fm1 = (FactoryMethods) xbf.getBean("testBeanOnly", tb);
+		assertSame(tb, fm1.getTestBean());
+		FactoryMethods fm2 = (FactoryMethods) xbf.getBean("testBeanOnly", new TestBean());
+		assertSame(fm1, fm2);
+		assertSame(tb, fm2.getTestBean());
 	}
 
 	@Test
@@ -314,14 +343,13 @@ public class FactoryMethodTests {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
 		reader.loadBeanDefinitions(new ClassPathResource("factory-methods.xml", getClass()));
-		xbf.getBean("testBeanOnly");
-		try {
-			xbf.getBean("testBeanOnly", new TestBean());
-			fail("Shouldn't allow args to be passed to a singleton");
-		}
-		catch (BeanDefinitionStoreException ex) {
-			// OK
-		}
+
+		// First getBean call triggers actual creation of the singleton bean
+		FactoryMethods fm1 = (FactoryMethods) xbf.getBean("testBeanOnly");
+		TestBean tb = fm1.getTestBean();
+		FactoryMethods fm2 = (FactoryMethods) xbf.getBean("testBeanOnly", new TestBean());
+		assertSame(fm1, fm2);
+		assertSame(tb, fm2.getTestBean());
 	}
 
 	@Test
@@ -357,10 +385,11 @@ public class FactoryMethodTests {
 		assertEquals("someuser", session.getProperty("mail.smtp.user"));
 		assertEquals("somepw", session.getProperty("mail.smtp.password"));
 	}
-
 }
 
+
 class MailSession {
+
 	private Properties props;
 
 	private MailSession() {
@@ -377,6 +406,6 @@ class MailSession {
 	}
 
 	public Object getProperty(String key) {
-		return props.get(key);
+		return this.props.get(key);
 	}
 }

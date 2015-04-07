@@ -16,13 +16,14 @@
 
 package org.springframework.beans.propertyeditors;
 
-import static org.junit.Assert.*;
-
 import java.beans.PropertyEditor;
 import java.net.URL;
 
 import org.junit.Test;
+
 import org.springframework.util.ClassUtils;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Rick Evans

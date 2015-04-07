@@ -16,15 +16,11 @@
 
 package org.springframework.web.servlet.tags;
 
-import static org.hamcrest.Matchers.instanceOf;
-import static org.junit.Assert.assertThat;
-
 import java.lang.reflect.Method;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
-
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.PageContext;
 import javax.servlet.jsp.tagext.Tag;
@@ -32,6 +28,9 @@ import javax.servlet.jsp.tagext.Tag;
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockPageContext;
 import org.springframework.util.ReflectionUtils;
+
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
 
 /**
  * @author Scott Andrews
@@ -427,6 +426,42 @@ public class UrlTagTests extends AbstractTagTests {
 				usedParams);
 
 		assertEquals("url/v%20lue", uri);
+		assertEquals(1, usedParams.size());
+		assertTrue(usedParams.contains("name"));
+	}
+
+	// SPR-11401
+
+	public void testReplaceUriTemplateParamsTemplateWithPathSegment()
+			throws JspException {
+		List<Param> params = new LinkedList<Param>();
+		Set<String> usedParams = new HashSet<String>();
+
+		Param param = new Param();
+		param.setName("name");
+		param.setValue("my/Id");
+		params.add(param);
+
+		String uri = tag.replaceUriTemplateParams("url/{/name}", params, usedParams);
+
+		assertEquals("url/my%2FId", uri);
+		assertEquals(1, usedParams.size());
+		assertTrue(usedParams.contains("name"));
+	}
+
+	public void testReplaceUriTemplateParamsTemplateWithPath()
+			throws JspException {
+		List<Param> params = new LinkedList<Param>();
+		Set<String> usedParams = new HashSet<String>();
+
+		Param param = new Param();
+		param.setName("name");
+		param.setValue("my/Id");
+		params.add(param);
+
+		String uri = tag.replaceUriTemplateParams("url/{name}", params, usedParams);
+
+		assertEquals("url/my/Id", uri);
 		assertEquals(1, usedParams.size());
 		assertTrue(usedParams.contains("name"));
 	}

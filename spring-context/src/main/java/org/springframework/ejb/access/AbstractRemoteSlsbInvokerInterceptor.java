@@ -19,7 +19,6 @@ package org.springframework.ejb.access;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.rmi.RemoteException;
-
 import javax.ejb.EJBHome;
 import javax.ejb.EJBObject;
 import javax.naming.NamingException;
@@ -43,7 +42,7 @@ import org.springframework.remoting.rmi.RmiClientInterceptorUtils;
  */
 public abstract class AbstractRemoteSlsbInvokerInterceptor extends AbstractSlsbInvokerInterceptor {
 
-	private Class homeInterface;
+	private Class<?> homeInterface;
 
 	private boolean refreshHomeOnConnectFailure = false;
 
@@ -60,7 +59,7 @@ public abstract class AbstractRemoteSlsbInvokerInterceptor extends AbstractSlsbI
 	 * sufficient to make a WebSphere 5.0 Remote SLSB work. On other servers,
 	 * the specific home interface for the target SLSB might be necessary.
 	 */
-	public void setHomeInterface(Class homeInterface) {
+	public void setHomeInterface(Class<?> homeInterface) {
 		if (homeInterface != null && !homeInterface.isInterface()) {
 			throw new IllegalArgumentException(
 					"Home interface class [" + homeInterface.getClass() + "] is not an interface");

@@ -16,14 +16,15 @@
 
 package org.springframework.context.annotation;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.junit.Assert.assertThat;
-
 import javax.annotation.Resource;
 
 import org.junit.Test;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
+
+import static org.hamcrest.CoreMatchers.*;
+import static org.junit.Assert.*;
 
 /**
  * Tests changes introduced for SPR-8874, allowing beans of primitive types to be looked

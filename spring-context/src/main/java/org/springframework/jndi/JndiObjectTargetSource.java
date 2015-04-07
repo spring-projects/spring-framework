@@ -66,7 +66,7 @@ public class JndiObjectTargetSource extends JndiObjectLocator implements TargetS
 
 	private Object cachedObject;
 
-	private Class targetClass;
+	private Class<?> targetClass;
 
 
 	/**

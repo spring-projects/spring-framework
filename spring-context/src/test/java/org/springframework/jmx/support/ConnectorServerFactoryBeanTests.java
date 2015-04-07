@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -18,7 +18,6 @@ package org.springframework.jmx.support;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
-
 import javax.management.InstanceNotFoundException;
 import javax.management.MBeanServer;
 import javax.management.MBeanServerConnection;
@@ -29,6 +28,7 @@ import javax.management.remote.JMXConnectorFactory;
 import javax.management.remote.JMXServiceURL;
 
 import org.junit.Test;
+
 import org.springframework.jmx.AbstractMBeanServerTests;
 import org.springframework.tests.Assume;
 import org.springframework.tests.TestGroup;
@@ -36,6 +36,9 @@ import org.springframework.tests.TestGroup;
 import static org.junit.Assert.*;
 
 /**
+ * To run the tests in the class, set the following Java system property:
+ * {@code -DtestGroups=jmxmp}.
+ *
  * @author Rob Harrop
  * @author Chris Beams
  */

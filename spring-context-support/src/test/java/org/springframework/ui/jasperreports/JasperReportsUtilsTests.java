@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,13 +41,13 @@ import net.sf.jasperreports.engine.export.JRPdfExporter;
 import net.sf.jasperreports.engine.export.JRPdfExporterParameter;
 import net.sf.jasperreports.engine.export.JRXlsExporterParameter;
 import net.sf.jasperreports.engine.util.JRLoader;
-
 import org.apache.poi.hssf.usermodel.HSSFCell;
 import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.junit.BeforeClass;
 import org.junit.Test;
+
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.tests.Assume;
 
@@ -140,7 +140,7 @@ public class JasperReportsUtilsTests {
 	public void testRenderAsPdfWithExporterParameters() throws Exception {
 		ByteArrayOutputStream os = new ByteArrayOutputStream();
 		Map<JRExporterParameter, Object> exporterParameters = new HashMap<JRExporterParameter, Object>();
-		exporterParameters.put(JRPdfExporterParameter.PDF_VERSION, JRPdfExporterParameter.PDF_VERSION_1_6);
+		exporterParameters.put(JRPdfExporterParameter.PDF_VERSION, JRPdfExporterParameter.PDF_VERSION_1_6.toString());
 		JasperReportsUtils.renderAsPdf(getReport(), getParameters(), getData(), os, exporterParameters);
 		byte[] output = os.toByteArray();
 		assertPdfOutputCorrect(output);

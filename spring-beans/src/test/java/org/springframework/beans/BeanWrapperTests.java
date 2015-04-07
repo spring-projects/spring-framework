@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,13 +16,6 @@
 
 package org.springframework.beans;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-
 import java.beans.PropertyEditorSupport;
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -35,6 +28,7 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Properties;
 import java.util.Set;
 import java.util.SortedMap;
@@ -44,11 +38,16 @@ import java.util.TreeSet;
 
 import org.apache.commons.logging.LogFactory;
 import org.junit.Test;
+
 import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.beans.propertyeditors.CustomNumberEditor;
 import org.springframework.beans.propertyeditors.StringArrayPropertyEditor;
 import org.springframework.beans.propertyeditors.StringTrimmerEditor;
 import org.springframework.beans.support.DerivedFromProtectedBaseBean;
+import org.springframework.core.convert.ConversionFailedException;
+import org.springframework.core.convert.TypeDescriptor;
+import org.springframework.core.convert.support.DefaultConversionService;
+import org.springframework.core.convert.support.GenericConversionService;
 import org.springframework.tests.Assume;
 import org.springframework.tests.TestGroup;
 import org.springframework.tests.sample.beans.BooleanTestBean;
@@ -56,13 +55,11 @@ import org.springframework.tests.sample.beans.ITestBean;
 import org.springframework.tests.sample.beans.IndexedTestBean;
 import org.springframework.tests.sample.beans.NumberTestBean;
 import org.springframework.tests.sample.beans.TestBean;
-import org.springframework.core.convert.ConversionFailedException;
-import org.springframework.core.convert.TypeDescriptor;
-import org.springframework.core.convert.support.DefaultConversionService;
-import org.springframework.core.convert.support.GenericConversionService;
 import org.springframework.util.StopWatch;
 import org.springframework.util.StringUtils;
 
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
 
 /**
  * @author Rod Johnson
@@ -72,7 +69,12 @@ import org.springframework.util.StringUtils;
  * @author Chris Beams
  * @author Dave Syer
  */
-public final class BeanWrapperTests {
+public final class BeanWrapperTests extends AbstractConfigurablePropertyAccessorTests {
+
+	@Override
+	protected ConfigurablePropertyAccessor createAccessor(Object target) {
+		return new BeanWrapperImpl(target);
+	}
 
 	@Test
 	public void testNullNestedTypeDescriptor() {
@@ -120,48 +122,6 @@ public final class BeanWrapperTests {
 		assertEquals("9", foo.listOfMaps.get(0).get("luckyNumber"));
 	}
 
-	@Test
-	public void testIsReadablePropertyNotReadable() {
-		NoRead nr = new NoRead();
-		BeanWrapper bw = new BeanWrapperImpl(nr);
-		assertFalse(bw.isReadableProperty("age"));
-	}
-
-	/**
-	 * Shouldn't throw an exception: should just return false
-	 */
-	@Test
-	public void testIsReadablePropertyNoSuchProperty() {
-		NoRead nr = new NoRead();
-		BeanWrapper bw = new BeanWrapperImpl(nr);
-		assertFalse(bw.isReadableProperty("xxxxx"));
-	}
-
-	@Test
-	public void testIsReadablePropertyNull() {
-		NoRead nr = new NoRead();
-		BeanWrapper bw = new BeanWrapperImpl(nr);
-		try {
-			bw.isReadableProperty(null);
-			fail("Can't inquire into readability of null property");
-		}
-		catch (IllegalArgumentException ex) {
-			// expected
-		}
-	}
-
-	@Test
-	public void testIsWritablePropertyNull() {
-		NoRead nr = new NoRead();
-		BeanWrapper bw = new BeanWrapperImpl(nr);
-		try {
-			bw.isWritableProperty(null);
-			fail("Can't inquire into writability of null property");
-		}
-		catch (IllegalArgumentException ex) {
-			// expected
-		}
-	}
 
 	@Test
 	public void testReadableAndWritableForIndexedProperties() {
@@ -556,6 +516,36 @@ public final class BeanWrapperTests {
 		bw.setPropertyValue("stringArray", "a1-b2");
 		assertTrue("stringArray length = 2", pt.stringArray.length == 2);
 		assertTrue("correct values", pt.stringArray[0].equals("a1") && pt.stringArray[1].equals("b2"));
+	}
+
+	@Test
+	public void testStringArrayAutoGrow() throws Exception {
+		StringArrayBean target = new StringArrayBean();
+		BeanWrapper bw = new BeanWrapperImpl(target);
+		bw.setAutoGrowNestedPaths(true);
+
+		bw.setPropertyValue("array[0]", "Test0");
+		assertEquals(1, target.getArray().length);
+
+		bw.setPropertyValue("array[2]", "Test2");
+		assertEquals(3, target.getArray().length);
+		assertTrue("correct values", target.getArray()[0].equals("Test0") && target.getArray()[1] == null &&
+				target.getArray()[2].equals("Test2"));
+	}
+
+	@Test
+	public void testPrimitiveArrayAutoGrow() throws Exception {
+		PrimitiveArrayBean target = new PrimitiveArrayBean();
+		BeanWrapper bw = new BeanWrapperImpl(target);
+		bw.setAutoGrowNestedPaths(true);
+
+		bw.setPropertyValue("array[0]", 1);
+		assertEquals(1, target.getArray().length);
+
+		bw.setPropertyValue("array[2]", 3);
+		assertEquals(3, target.getArray().length);
+		assertTrue("correct values", target.getArray()[0] == 1 && target.getArray()[1] == 0 &&
+				target.getArray()[2] == 3);
 	}
 
 	@Test
@@ -1553,14 +1543,91 @@ public final class BeanWrapperTests {
 	@Test
 	public void cornerSpr10115() {
 		Spr10115Bean foo = new Spr10115Bean();
-		BeanWrapperImpl bwi = new BeanWrapperImpl();
-		bwi.setWrappedInstance(foo);
+		BeanWrapperImpl bwi = new BeanWrapperImpl(foo);
 		bwi.setPropertyValue("prop1", "val1");
 		assertEquals("val1", Spr10115Bean.prop1);
 	}
 
+	@Test
+	public void testArrayToObject() {
+		ArrayToObject foo = new ArrayToObject();
+		BeanWrapperImpl bwi = new BeanWrapperImpl(foo);
+
+		Object[] array = new Object[] {"1","2"};
+		bwi.setPropertyValue("object", array);
+		assertThat(foo.getObject(), equalTo((Object) array));
+
+		array = new Object[] {"1"};
+		bwi.setPropertyValue("object", array);
+		assertThat(foo.getObject(), equalTo((Object) array));
+	}
+
+	@Test
+	public void testPropertyTypeMismatch() {
+		PropertyTypeMismatch foo = new PropertyTypeMismatch();
+		BeanWrapperImpl bwi = new BeanWrapperImpl(foo);
+		bwi.setPropertyValue("object", "a String");
+		assertEquals("a String", foo.value);
+		assertTrue(foo.getObject() == 8);
+		assertEquals(8, bwi.getPropertyValue("object"));
+	}
+
+	@Test
+	public void testGetterWithOptional() {
+		GetterWithOptional foo = new GetterWithOptional();
+		TestBean tb = new TestBean("x");
+		BeanWrapperImpl bwi = new BeanWrapperImpl(foo);
+
+		bwi.setPropertyValue("object", tb);
+		assertSame(tb, foo.value);
+		assertSame(tb, foo.getObject().get());
+		assertSame(tb, ((Optional<String>) bwi.getPropertyValue("object")).get());
+		assertEquals("x", foo.value.getName());
+		assertEquals("x", foo.getObject().get().getName());
+		assertEquals("x", bwi.getPropertyValue("object.name"));
+
+		bwi.setPropertyValue("object.name", "y");
+		assertSame(tb, foo.value);
+		assertSame(tb, foo.getObject().get());
+		assertSame(tb, ((Optional<String>) bwi.getPropertyValue("object")).get());
+		assertEquals("y", foo.value.getName());
+		assertEquals("y", foo.getObject().get().getName());
+		assertEquals("y", bwi.getPropertyValue("object.name"));
+	}
+
+	@Test
+	public void testGetterWithOptionalAndAutoGrowing() {
+		GetterWithOptional foo = new GetterWithOptional();
+		BeanWrapperImpl bwi = new BeanWrapperImpl(foo);
+		bwi.setAutoGrowNestedPaths(true);
+
+		bwi.setPropertyValue("object.name", "x");
+		assertEquals("x", foo.value.getName());
+		assertEquals("x", foo.getObject().get().getName());
+		assertEquals("x", bwi.getPropertyValue("object.name"));
+	}
+
+	@Test
+	public void testGenericArraySetter() {
+		SkipReaderStub foo = new SkipReaderStub();
+		BeanWrapperImpl bwi = new BeanWrapperImpl(foo);
+		List<String> values = new LinkedList<String>();
+		values.add("1");
+		values.add("2");
+		values.add("3");
+		values.add("4");
+		bwi.setPropertyValue("items", values);
+		Object[] result = foo.items;
+		assertEquals(4, result.length);
+		assertEquals("1", result[0]);
+		assertEquals("2", result[1]);
+		assertEquals("3", result[2]);
+		assertEquals("4", result[3]);
+	}
+
 
 	static class Spr10115Bean {
+
 		private static String prop1;
 
 		public static void setProp1(String prop1) {
@@ -1599,12 +1666,6 @@ public final class BeanWrapperTests {
 	}
 
 
-	@SuppressWarnings("unused")
-	private static class NoRead {
-
-		public void setAge(int age) {
-		}
-	}
 
 
 	@SuppressWarnings("unused")
@@ -1688,6 +1749,20 @@ public final class BeanWrapperTests {
 		}
 
 		public void setArray(int[] array) {
+			this.array = array;
+		}
+	}
+
+	@SuppressWarnings("unused")
+	private static class StringArrayBean {
+
+		private String[] array;
+
+		public String[] getArray() {
+			return array;
+		}
+
+		public void setArray(String[] array) {
 			this.array = array;
 		}
 	}
@@ -1942,6 +2017,65 @@ public final class BeanWrapperTests {
 	public enum TestEnum {
 
 		TEST_VALUE
+	}
+
+
+	public static class ArrayToObject {
+
+		private Object object;
+
+		public void setObject(Object object) {
+			this.object = object;
+		}
+
+		public Object getObject() {
+			return object;
+		}
+	}
+
+
+	public static class PropertyTypeMismatch {
+
+		public String value;
+
+		public void setObject(String object) {
+			this.value = object;
+		}
+
+		public Integer getObject() {
+			return (this.value != null ? this.value.length() : null);
+		}
+	}
+
+
+	public static class GetterWithOptional {
+
+		public TestBean value;
+
+		public void setObject(TestBean object) {
+			this.value = object;
+		}
+
+		public Optional<TestBean> getObject() {
+			return Optional.ofNullable(this.value);
+		}
+	}
+
+
+	public static class SkipReaderStub<T> {
+
+		public T[] items;
+
+		public SkipReaderStub() {
+		}
+
+		public SkipReaderStub(T... items) {
+			this.items = items;
+		}
+
+		public void setItems(T... items) {
+			this.items = items;
+		}
 	}
 
 }

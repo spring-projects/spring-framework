@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,13 +22,18 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 import org.springframework.util.Assert;
 
 /**
- * Cache decorator which synchronizes its {@link #put} and {@link #evict} operations with
- * Spring-managed transactions (through Spring's {@link TransactionSynchronizationManager},
- * performing the actual cache put/evict operation only in the after-commit phase of a
- * successful transaction. If no transaction is active, {@link #put} and {@link #evict}
- * operations will be performed immediately, as usual.
+ * Cache decorator which synchronizes its {@link #put}, {@link #evict} and {@link #clear}
+ * operations with Spring-managed transactions (through Spring's {@link TransactionSynchronizationManager},
+ * performing the actual cache put/evict/clear operation only in the after-commit phase of a
+ * successful transaction. If no transaction is active, {@link #put}, {@link #evict} and
+ * {@link #clear} operations will be performed immediately, as usual.
+ *
+ * <p>Use of more aggressive operations such as {@link #putIfAbsent} cannot be deferred
+ * to the after-commit phase of a running transaction. Use these with care.
  *
  * @author Juergen Hoeller
+ * @author Stephane Nicoll
+ * @author Stas Volsky
  * @since 3.2
  * @see TransactionAwareCacheManagerProxy
  */
@@ -63,6 +68,11 @@ public class TransactionAwareCacheDecorator implements Cache {
 	}
 
 	@Override
+	public <T> T get(Object key, Class<T> type) {
+		return this.targetCache.get(key, type);
+	}
+
+	@Override
 	public void put(final Object key, final Object value) {
 		if (TransactionSynchronizationManager.isSynchronizationActive()) {
 			TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
@@ -75,6 +85,11 @@ public class TransactionAwareCacheDecorator implements Cache {
 		else {
 			this.targetCache.put(key, value);
 		}
+	}
+
+	@Override
+	public ValueWrapper putIfAbsent(final Object key, final Object value) {
+		return this.targetCache.putIfAbsent(key, value);
 	}
 
 	@Override
@@ -94,7 +109,17 @@ public class TransactionAwareCacheDecorator implements Cache {
 
 	@Override
 	public void clear() {
-		this.targetCache.clear();
+		if (TransactionSynchronizationManager.isSynchronizationActive()) {
+			TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
+				@Override
+				public void afterCommit() {
+					targetCache.clear();
+				}
+			});
+		}
+		else {
+			this.targetCache.clear();
+		}
 	}
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -187,34 +187,39 @@ public class InitDestroyAnnotationBeanPostProcessor
 		return metadata;
 	}
 
-	private LifecycleMetadata buildLifecycleMetadata(Class<?> clazz) {
+	private LifecycleMetadata buildLifecycleMetadata(final Class<?> clazz) {
 		final boolean debug = logger.isDebugEnabled();
 		LinkedList<LifecycleElement> initMethods = new LinkedList<LifecycleElement>();
 		LinkedList<LifecycleElement> destroyMethods = new LinkedList<LifecycleElement>();
 		Class<?> targetClass = clazz;
 
 		do {
-			LinkedList<LifecycleElement> currInitMethods = new LinkedList<LifecycleElement>();
-			LinkedList<LifecycleElement> currDestroyMethods = new LinkedList<LifecycleElement>();
-			for (Method method : targetClass.getDeclaredMethods()) {
-				if (this.initAnnotationType != null) {
-					if (method.getAnnotation(this.initAnnotationType) != null) {
-						LifecycleElement element = new LifecycleElement(method);
-						currInitMethods.add(element);
-						if (debug) {
-							logger.debug("Found init method on class [" + clazz.getName() + "]: " + method);
+			final LinkedList<LifecycleElement> currInitMethods = new LinkedList<LifecycleElement>();
+			final LinkedList<LifecycleElement> currDestroyMethods = new LinkedList<LifecycleElement>();
+
+			ReflectionUtils.doWithLocalMethods(targetClass, new ReflectionUtils.MethodCallback() {
+				@Override
+				public void doWith(Method method) throws IllegalArgumentException, IllegalAccessException {
+					if (initAnnotationType != null) {
+						if (method.getAnnotation(initAnnotationType) != null) {
+							LifecycleElement element = new LifecycleElement(method);
+							currInitMethods.add(element);
+							if (debug) {
+								logger.debug("Found init method on class [" + clazz.getName() + "]: " + method);
+							}
+						}
+					}
+					if (destroyAnnotationType != null) {
+						if (method.getAnnotation(destroyAnnotationType) != null) {
+							currDestroyMethods.add(new LifecycleElement(method));
+							if (debug) {
+								logger.debug("Found destroy method on class [" + clazz.getName() + "]: " + method);
+							}
 						}
 					}
 				}
-				if (this.destroyAnnotationType != null) {
-					if (method.getAnnotation(this.destroyAnnotationType) != null) {
-						currDestroyMethods.add(new LifecycleElement(method));
-						if (debug) {
-							logger.debug("Found destroy method on class [" + clazz.getName() + "]: " + method);
-						}
-					}
-				}
-			}
+			});
+
 			initMethods.addAll(0, currInitMethods);
 			destroyMethods.addAll(currDestroyMethods);
 			targetClass = targetClass.getSuperclass();
@@ -243,7 +248,7 @@ public class InitDestroyAnnotationBeanPostProcessor
 	 */
 	private class LifecycleMetadata {
 
-		private final Class targetClass;
+		private final Class<?> targetClass;
 
 		private final Collection<LifecycleElement> initMethods;
 

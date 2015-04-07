@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,10 +23,10 @@ import java.io.Reader;
 import java.io.Writer;
 import java.nio.charset.Charset;
 
-import com.sun.syndication.feed.WireFeed;
-import com.sun.syndication.io.FeedException;
-import com.sun.syndication.io.WireFeedInput;
-import com.sun.syndication.io.WireFeedOutput;
+import com.rometools.rome.feed.WireFeed;
+import com.rometools.rome.io.FeedException;
+import com.rometools.rome.io.WireFeedInput;
+import com.rometools.rome.io.WireFeedOutput;
 
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpOutputMessage;
@@ -38,7 +38,10 @@ import org.springframework.util.StringUtils;
 
 /**
  * Abstract base class for Atom and RSS Feed message converters, using the
- * <a href="http://rometools.org/">ROME tools</a> project.
+ * <a href="https://github.com/rometools/rome">ROME tools</a> project.
+ *
+ * <p>><b>NOTE: As of Spring 4.1, this is based on the {@code com.rometools}
+ * variant of ROME, version 1.5. Please upgrade your build dependency.</b>
  *
  * @author Arjen Poutsma
  * @since 3.0.2
@@ -49,22 +52,21 @@ public abstract class AbstractWireFeedHttpMessageConverter<T extends WireFeed> e
 
 	public static final Charset DEFAULT_CHARSET = Charset.forName("UTF-8");
 
+
 	protected AbstractWireFeedHttpMessageConverter(MediaType supportedMediaType) {
 		super(supportedMediaType);
 	}
+
 
 	@Override
 	@SuppressWarnings("unchecked")
 	protected T readInternal(Class<? extends T> clazz, HttpInputMessage inputMessage)
 			throws IOException, HttpMessageNotReadableException {
+
 		WireFeedInput feedInput = new WireFeedInput();
 		MediaType contentType = inputMessage.getHeaders().getContentType();
-		Charset charset;
-		if (contentType != null && contentType.getCharSet() != null) {
-			charset = contentType.getCharSet();
-		} else {
-			charset = DEFAULT_CHARSET;
-		}
+		Charset charset =
+				(contentType != null && contentType.getCharSet() != null? contentType.getCharSet() : DEFAULT_CHARSET);
 		try {
 			Reader reader = new InputStreamReader(inputMessage.getBody(), charset);
 			return (T) feedInput.build(reader);
@@ -77,6 +79,7 @@ public abstract class AbstractWireFeedHttpMessageConverter<T extends WireFeed> e
 	@Override
 	protected void writeInternal(T wireFeed, HttpOutputMessage outputMessage)
 			throws IOException, HttpMessageNotWritableException {
+
 		String wireFeedEncoding = wireFeed.getEncoding();
 		if (!StringUtils.hasLength(wireFeedEncoding)) {
 			wireFeedEncoding = DEFAULT_CHARSET.name();
@@ -89,13 +92,13 @@ public abstract class AbstractWireFeedHttpMessageConverter<T extends WireFeed> e
 		}
 
 		WireFeedOutput feedOutput = new WireFeedOutput();
-
 		try {
 			Writer writer = new OutputStreamWriter(outputMessage.getBody(), wireFeedEncoding);
 			feedOutput.output(wireFeed, writer);
 		}
 		catch (FeedException ex) {
-			throw new HttpMessageNotWritableException("Could not write WiredFeed: " + ex.getMessage(), ex);
+			throw new HttpMessageNotWritableException("Could not write WireFeed: " + ex.getMessage(), ex);
 		}
 	}
+
 }

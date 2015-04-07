@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,12 +18,12 @@ package org.springframework.web.portlet;
 
 import javax.portlet.ActionRequest;
 import javax.portlet.ActionResponse;
+import javax.portlet.EventRequest;
+import javax.portlet.EventResponse;
 import javax.portlet.RenderRequest;
 import javax.portlet.RenderResponse;
-import javax.portlet.EventResponse;
-import javax.portlet.EventRequest;
-import javax.portlet.ResourceResponse;
 import javax.portlet.ResourceRequest;
+import javax.portlet.ResourceResponse;
 
 /**
  * Workflow interface that allows for customized handler execution chains.
@@ -74,36 +74,32 @@ import javax.portlet.ResourceRequest;
  *
  * <p><b>Action Request:</b><p>
  * <ol>
- *   <li>{@code DispatcherPortlet} maps the action request to a particular handler
- * 		 and assembles a handler execution chain consisting of the handler that
- * 		 is to be invoked and all of the {@code HandlerInterceptor}
- * 		 instances that apply to the request.</li>
- *   <li>{@link HandlerInterceptor#preHandleAction(javax.portlet.ActionRequest, javax.portlet.ActionResponse, Object) preHandleAction(..)}
- * 		 is called; if the invocation of this method returns {@code true} then
- *		 this workflow continues</li>
- *   <li>The target handler handles the action request (via
- *          {@link HandlerAdapter#handleAction(javax.portlet.ActionRequest, javax.portlet.ActionResponse, Object) HandlerAdapter.handleAction(..)})</li>
- *   <li>{@link HandlerInterceptor#afterActionCompletion(javax.portlet.ActionRequest, javax.portlet.ActionResponse, Object, Exception) afterActionCompletion(..)}
- * 		 is called</li>
+ * <li>{@code DispatcherPortlet} maps the action request to a particular handler and
+ * assembles a handler execution chain consisting of the handler that is to be invoked
+ * and all of the {@code HandlerInterceptor} instances that apply to the request.</li>
+ * <li>{@link HandlerInterceptor#preHandleAction(javax.portlet.ActionRequest, javax.portlet.ActionResponse, Object) preHandleAction(..)}
+ * is called; if the invocation of this method returns {@code true} then this workflow continues.</li>
+ * <li>The target handler handles the action request (via
+ * {@link HandlerAdapter#handleAction(javax.portlet.ActionRequest, javax.portlet.ActionResponse, Object) HandlerAdapter.handleAction(..)}).</li>
+ * <li>{@link HandlerInterceptor#afterActionCompletion(javax.portlet.ActionRequest, javax.portlet.ActionResponse, Object, Exception) afterActionCompletion(..)}
+ * is called.</li>
  * </ol>
  *
  * <p><b>Render Request:</b><p>
  * <ol>
- *   <li>{@code DispatcherPortlet} maps the render request to a particular handler
- * 		 and assembles a handler execution chain consisting of the handler that
- * 		 is to be invoked and all of the {@code HandlerInterceptor}
- * 		 instances that apply to the request.</li>
- *   <li>{@link HandlerInterceptor#preHandleRender(javax.portlet.RenderRequest, javax.portlet.RenderResponse, Object) preHandleRender(..)}
- * 		 is called; if the invocation of this method returns {@code true} then
- *		 this workflow continues</li>
- *   <li>The target handler handles the render request (via
- *          {@link HandlerAdapter#handleRender(javax.portlet.RenderRequest, javax.portlet.RenderResponse, Object) HandlerAdapter.handleRender(..)})</li>
- *   <li>{@link HandlerInterceptor#postHandleRender(javax.portlet.RenderRequest, javax.portlet.RenderResponse, Object, ModelAndView) postHandleRender(..)}
- * 		 is called</li>
- *   <li>If the {@code HandlerAdapter} returned a {@code ModelAndView},
- *       then {@code DispatcherPortlet} renders the view accordingly
- *   <li>{@link HandlerInterceptor#afterRenderCompletion(javax.portlet.RenderRequest, javax.portlet.RenderResponse, Object, Exception) afterRenderCompletion(..)}
- * 		 is called</li>
+ * <li>{@code DispatcherPortlet} maps the render request to a particular handler and
+ * assembles a handler execution chain consisting of the handler that is to be invoked
+ * and all of the {@code HandlerInterceptor} instances that apply to the request.</li>
+ * <li>{@link HandlerInterceptor#preHandleRender(javax.portlet.RenderRequest, javax.portlet.RenderResponse, Object) preHandleRender(..)}
+ * is called; if the invocation of this method returns {@code true} then this workflow continues.</li>
+ * <li>The target handler handles the render request (via
+ * {@link HandlerAdapter#handleRender(javax.portlet.RenderRequest, javax.portlet.RenderResponse, Object) HandlerAdapter.handleRender(..)}).</li>
+ * <li>{@link HandlerInterceptor#postHandleRender(javax.portlet.RenderRequest, javax.portlet.RenderResponse, Object, ModelAndView) postHandleRender(..)}
+ * is called.</li>
+ * <li>If the {@code HandlerAdapter} returned a {@code ModelAndView}, then
+ * {@code DispatcherPortlet} renders the view accordingly.
+ * <li>{@link HandlerInterceptor#afterRenderCompletion(javax.portlet.RenderRequest, javax.portlet.RenderResponse, Object, Exception) afterRenderCompletion(..)}
+ * is called.</li>
  * </ol>
  *
  * @author Juergen Hoeller
@@ -151,8 +147,7 @@ public interface HandlerInterceptor {
 	 * request execution may have failed even when this argument is {@code null})
 	 * @throws Exception in case of errors
 	 */
-	void afterActionCompletion(
-			ActionRequest request, ActionResponse response, Object handler, Exception ex)
+	void afterActionCompletion(ActionRequest request, ActionResponse response, Object handler, Exception ex)
 			throws Exception;
 
 	/**
@@ -191,8 +186,7 @@ public interface HandlerInterceptor {
 	 * (can also be {@code null})
 	 * @throws Exception in case of errors
 	 */
-	void postHandleRender(
-			RenderRequest request, RenderResponse response, Object handler, ModelAndView modelAndView)
+	void postHandleRender(RenderRequest request, RenderResponse response, Object handler, ModelAndView modelAndView)
 			throws Exception;
 
 	/**
@@ -208,8 +202,7 @@ public interface HandlerInterceptor {
 	 * @param ex exception thrown on handler execution, if any
 	 * @throws Exception in case of errors
 	 */
-	void afterRenderCompletion(
-			RenderRequest request, RenderResponse response, Object handler, Exception ex)
+	void afterRenderCompletion(RenderRequest request, RenderResponse response, Object handler, Exception ex)
 			throws Exception;
 
 	/**
@@ -248,8 +241,7 @@ public interface HandlerInterceptor {
 	 * (can also be {@code null})
 	 * @throws Exception in case of errors
 	 */
-	void postHandleResource(
-			ResourceRequest request, ResourceResponse response, Object handler, ModelAndView modelAndView)
+	void postHandleResource(ResourceRequest request, ResourceResponse response, Object handler, ModelAndView modelAndView)
 			throws Exception;
 
 	/**
@@ -265,10 +257,8 @@ public interface HandlerInterceptor {
 	 * @param ex exception thrown on handler execution, if any
 	 * @throws Exception in case of errors
 	 */
-	void afterResourceCompletion(
-			ResourceRequest request, ResourceResponse response, Object handler, Exception ex)
+	void afterResourceCompletion(ResourceRequest request, ResourceResponse response, Object handler, Exception ex)
 			throws Exception;
-
 
 	/**
 	 * Intercept the execution of a handler in the action phase.
@@ -305,8 +295,7 @@ public interface HandlerInterceptor {
 	 * request execution may have failed even when this argument is {@code null})
 	 * @throws Exception in case of errors
 	 */
-	void afterEventCompletion(
-			EventRequest request, EventResponse response, Object handler, Exception ex)
+	void afterEventCompletion(EventRequest request, EventResponse response, Object handler, Exception ex)
 			throws Exception;
 
 }

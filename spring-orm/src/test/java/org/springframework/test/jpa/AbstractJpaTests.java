@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
-
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 
@@ -50,7 +49,9 @@ import org.springframework.test.annotation.AbstractAnnotationAwareTransactionalT
 import org.springframework.util.StringUtils;
 
 /**
- * Convenient support class for JPA-related tests. Offers the same contract as
+ * This class is only used within tests in the spring-orm module.
+ *
+ * <p>Convenient support class for JPA-related tests. Offers the same contract as
  * AbstractTransactionalDataSourceSpringContextTests and equally good performance,
  * even when performing the instrumentation required by the JPA specification.
  *
@@ -168,15 +169,6 @@ public abstract class AbstractJpaTests extends AbstractAnnotationAwareTransactio
 		if (isDisabledInThisEnvironment(getName())) {
 			// Let superclass log that we didn't run the test.
 			super.runBare();
-			return;
-		}
-
-		final Method testMethod = getTestMethod();
-
-		if (isDisabledInThisEnvironment(testMethod)) {
-			recordDisabled();
-			this.logger.info("**** " + getClass().getName() + "." + getName() + " is disabled in this environment: "
-					+ "Total disabled tests=" + getDisabledTestCount());
 			return;
 		}
 

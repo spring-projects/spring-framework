@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.ParameterizedType;
@@ -63,6 +64,7 @@ import javax.xml.transform.Result;
 import javax.xml.transform.Source;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.sax.SAXSource;
+import javax.xml.transform.stax.StAXSource;
 import javax.xml.transform.stream.StreamSource;
 import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
@@ -70,6 +72,7 @@ import javax.xml.validation.SchemaFactory;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.w3c.dom.ls.LSResourceResolver;
+import org.xml.sax.EntityResolver;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
@@ -80,7 +83,6 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.core.JdkVersion;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.core.io.Resource;
-import org.springframework.core.io.ResourceLoader;
 import org.springframework.oxm.GenericMarshaller;
 import org.springframework.oxm.GenericUnmarshaller;
 import org.springframework.oxm.MarshallingFailureException;
@@ -109,6 +111,7 @@ import org.springframework.util.xml.StaxUtils;
  *
  * @author Arjen Poutsma
  * @author Juergen Hoeller
+ * @author Rossen Stoyanchev
  * @since 3.0
  * @see #setContextPath(String)
  * @see #setClassesToBeBound(Class[])
@@ -167,8 +170,6 @@ public class Jaxb2Marshaller implements MimeMarshaller, MimeUnmarshaller, Generi
 	private Class<?> mappedClass;
 
 	private ClassLoader beanClassLoader;
-
-	private ResourceLoader resourceLoader;
 
 	private final Object jaxbContextMonitor = new Object();
 
@@ -229,7 +230,7 @@ public class Jaxb2Marshaller implements MimeMarshaller, MimeUnmarshaller, Generi
 	 * <p>Setting either this property, {@link #setContextPath "contextPath"}
 	 * or {@link #setClassesToBeBound "classesToBeBound"} is required.
 	 */
-	public void setPackagesToScan(String[] packagesToScan) {
+	public void setPackagesToScan(String... packagesToScan) {
 		this.packagesToScan = packagesToScan;
 	}
 
@@ -400,6 +401,13 @@ public class Jaxb2Marshaller implements MimeMarshaller, MimeUnmarshaller, Generi
 	 */
 	public void setProcessExternalEntities(boolean processExternalEntities) {
 		this.processExternalEntities = processExternalEntities;
+	}
+
+	/**
+	 * Returns the configured value for whether XML external entities are allowed.
+	 */
+	public boolean isProcessExternalEntities() {
+		return this.processExternalEntities;
 	}
 
 	@Override
@@ -801,9 +809,11 @@ public class Jaxb2Marshaller implements MimeMarshaller, MimeUnmarshaller, Generi
 			if (xmlReader == null) {
 				xmlReader = XMLReaderFactory.createXMLReader();
 			}
-			xmlReader.setFeature("http://xml.org/sax/features/external-general-entities",
-					this.processExternalEntities);
-
+			String name = "http://xml.org/sax/features/external-general-entities";
+			xmlReader.setFeature(name, isProcessExternalEntities());
+			if (!isProcessExternalEntities()) {
+				xmlReader.setEntityResolver(NO_OP_ENTITY_RESOLVER);
+			}
 			return new SAXSource(xmlReader, inputSource);
 		}
 		catch (SAXException ex) {
@@ -884,7 +894,7 @@ public class Jaxb2Marshaller implements MimeMarshaller, MimeUnmarshaller, Generi
 
 		private final MimeContainer mimeContainer;
 
-		private Jaxb2AttachmentMarshaller(MimeContainer mimeContainer) {
+		public Jaxb2AttachmentMarshaller(MimeContainer mimeContainer) {
 			this.mimeContainer = mimeContainer;
 		}
 
@@ -938,7 +948,7 @@ public class Jaxb2Marshaller implements MimeMarshaller, MimeUnmarshaller, Generi
 
 		private final MimeContainer mimeContainer;
 
-		private Jaxb2AttachmentUnmarshaller(MimeContainer mimeContainer) {
+		public Jaxb2AttachmentUnmarshaller(MimeContainer mimeContainer) {
 			this.mimeContainer = mimeContainer;
 		}
 
@@ -988,7 +998,7 @@ public class Jaxb2Marshaller implements MimeMarshaller, MimeUnmarshaller, Generi
 
 		private final int length;
 
-		private ByteArrayDataSource(String contentType, byte[] data, int offset, int length) {
+		public ByteArrayDataSource(String contentType, byte[] data, int offset, int length) {
 			this.contentType = contentType;
 			this.data = data;
 			this.offset = offset;
@@ -1015,5 +1025,13 @@ public class Jaxb2Marshaller implements MimeMarshaller, MimeUnmarshaller, Generi
 			return "ByteArrayDataSource";
 		}
 	}
+
+
+	private static final EntityResolver NO_OP_ENTITY_RESOLVER = new EntityResolver() {
+		@Override
+		public InputSource resolveEntity(String publicId, String systemId) {
+			return new InputSource(new StringReader(""));
+		}
+	};
 
 }

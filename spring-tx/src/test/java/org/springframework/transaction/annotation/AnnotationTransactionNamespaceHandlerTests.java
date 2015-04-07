@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@ package org.springframework.transaction.annotation;
 import java.lang.management.ManagementFactory;
 import java.util.Collection;
 import java.util.Map;
-
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
 
@@ -32,6 +31,8 @@ import org.springframework.jmx.export.annotation.ManagedOperation;
 import org.springframework.jmx.export.annotation.ManagedResource;
 import org.springframework.stereotype.Service;
 import org.springframework.tests.transaction.CallCountingTransactionManager;
+import org.springframework.transaction.config.TransactionManagementConfigUtils;
+import org.springframework.transaction.event.TransactionalEventListenerFactory;
 
 /**
  * @author Rob Harrop
@@ -55,7 +56,7 @@ public class AnnotationTransactionNamespaceHandlerTests extends TestCase {
 	public void testIsProxy() throws Exception {
 		TransactionalTestBean bean = getTestBean();
 		assertTrue("testBean is not a proxy", AopUtils.isAopProxy(bean));
-		Map services = this.context.getBeansWithAnnotation(Service.class);
+		Map<String, Object> services = this.context.getBeansWithAnnotation(Service.class);
 		assertTrue("Stereotype annotation not visible", services.containsKey("testBean"));
 	}
 
@@ -100,6 +101,12 @@ public class AnnotationTransactionNamespaceHandlerTests extends TestCase {
 				server.invoke(ObjectName.getInstance("test:type=TestBean"), "doSomething", new Object[0], new String[0]));
 	}
 
+	public void testTransactionalEventListenerRegisteredProperly() {
+		assertTrue(this.context.containsBean(TransactionManagementConfigUtils
+				.TRANSACTIONAL_EVENT_LISTENER_FACTORY_BEAN_NAME));
+		assertEquals(1, this.context.getBeansOfType(TransactionalEventListenerFactory.class).size());
+	}
+
 	private TransactionalTestBean getTestBean() {
 		return (TransactionalTestBean) context.getBean("testBean");
 	}
@@ -110,12 +117,16 @@ public class AnnotationTransactionNamespaceHandlerTests extends TestCase {
 	public static class TransactionalTestBean {
 
 		@Transactional(readOnly = true)
-		public Collection findAllFoos() {
+		public Collection<?> findAllFoos() {
 			return null;
 		}
 
 		@Transactional
 		public void saveFoo() {
+		}
+
+		@Transactional("qualifiedTransactionManager")
+		public void saveQualifiedFoo() {
 		}
 
 		@Transactional

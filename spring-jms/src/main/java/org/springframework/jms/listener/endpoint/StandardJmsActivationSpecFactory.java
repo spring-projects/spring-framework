@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,7 +50,7 @@ import org.springframework.jms.support.destination.DestinationResolver;
  */
 public class StandardJmsActivationSpecFactory implements JmsActivationSpecFactory {
 
-	private Class activationSpecClass;
+	private Class<?> activationSpecClass;
 
 	private Map<String, String> defaultProperties;
 
@@ -61,7 +61,7 @@ public class StandardJmsActivationSpecFactory implements JmsActivationSpecFactor
 	 * Specify the fully-qualified ActivationSpec class name for the target
 	 * provider (e.g. "org.apache.activemq.ra.ActiveMQActivationSpec").
 	 */
-	public void setActivationSpecClass(Class activationSpecClass) {
+	public void setActivationSpecClass(Class<?> activationSpecClass) {
 		this.activationSpecClass = activationSpecClass;
 	}
 
@@ -93,7 +93,7 @@ public class StandardJmsActivationSpecFactory implements JmsActivationSpecFactor
 
 	@Override
 	public ActivationSpec createActivationSpec(ResourceAdapter adapter, JmsActivationSpecConfig config) {
-		Class activationSpecClassToUse = this.activationSpecClass;
+		Class<?> activationSpecClassToUse = this.activationSpecClass;
 		if (activationSpecClassToUse == null) {
 			activationSpecClassToUse = determineActivationSpecClass(adapter);
 			if (activationSpecClassToUse == null) {
@@ -118,7 +118,7 @@ public class StandardJmsActivationSpecFactory implements JmsActivationSpecFactor
 	 * if not determinable
 	 * @see #setActivationSpecClass
 	 */
-	protected Class determineActivationSpecClass(ResourceAdapter adapter) {
+	protected Class<?> determineActivationSpecClass(ResourceAdapter adapter) {
 		return null;
 	}
 
@@ -153,17 +153,19 @@ public class StandardJmsActivationSpecFactory implements JmsActivationSpecFactor
 			throw new IllegalArgumentException(
 					"Durable subscriptions not supported by underlying provider: " + this.activationSpecClass.getName());
 		}
-		if (config.getDurableSubscriptionName() != null) {
-			bw.setPropertyValue("subscriptionName", config.getDurableSubscriptionName());
+		if (config.isSubscriptionShared()) {
+			throw new IllegalArgumentException("Shared subscriptions not supported for JCA-driven endpoints");
+		}
+
+		if (config.getSubscriptionName() != null) {
+			bw.setPropertyValue("subscriptionName", config.getSubscriptionName());
 		}
 		if (config.getClientId() != null) {
 			bw.setPropertyValue("clientId", config.getClientId());
 		}
-
 		if (config.getMessageSelector() != null) {
 			bw.setPropertyValue("messageSelector", config.getMessageSelector());
 		}
-
 		applyAcknowledgeMode(bw, config.getAcknowledgeMode());
 	}
 

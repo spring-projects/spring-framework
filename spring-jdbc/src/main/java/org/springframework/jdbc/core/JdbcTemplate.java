@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,7 +35,6 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-
 import javax.sql.DataSource;
 
 import org.springframework.dao.DataAccessException;
@@ -82,6 +81,8 @@ import org.springframework.util.StringUtils;
  * <p>All SQL operations performed by this class are logged at debug level,
  * using "org.springframework.jdbc.core.JdbcTemplate" as log category.
  *
+ * <p><b>NOTE: An instance of this class is thread-safe once configured.</b>
+ *
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @author Thomas Risberg
@@ -110,22 +111,22 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	private boolean ignoreWarnings = true;
 
 	/**
-	 * If this variable is set to a non-zero value, it will be used for setting the
+	 * If this variable is set to a non-negative value, it will be used for setting the
 	 * fetchSize property on statements used for query processing.
 	 */
-	private int fetchSize = 0;
+	private int fetchSize = -1;
 
 	/**
-	 * If this variable is set to a non-zero value, it will be used for setting the
+	 * If this variable is set to a non-negative value, it will be used for setting the
 	 * maxRows property on statements used for query processing.
 	 */
-	private int maxRows = 0;
+	private int maxRows = -1;
 
 	/**
-	 * If this variable is set to a non-zero value, it will be used for setting the
+	 * If this variable is set to a non-negative value, it will be used for setting the
 	 * queryTimeout property on statements used for query processing.
 	 */
-	private int queryTimeout = 0;
+	private int queryTimeout = -1;
 
 	/**
 	 * If this variable is set to true then all results checking will be bypassed for any
@@ -223,7 +224,8 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	 * large result sets: Setting this higher than the default value will increase
 	 * processing speed at the cost of memory consumption; setting this lower can
 	 * avoid transferring row data that will never be read by the application.
-	 * <p>Default is 0, indicating to use the JDBC driver's default.
+	 * <p>Default is -1, indicating to use the JDBC driver's default
+	 * (i.e. to not pass a specific fetch size setting on the driver).
 	 * @see java.sql.Statement#setFetchSize
 	 */
 	public void setFetchSize(int fetchSize) {
@@ -243,7 +245,8 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	 * the entire result set in the database or in the JDBC driver if we're
 	 * never interested in the entire result in the first place (for example,
 	 * when performing searches that might return a large number of matches).
-	 * <p>Default is 0, indicating to use the JDBC driver's default.
+	 * <p>Default is -1, indicating to use the JDBC driver's default
+	 * (i.e. to not pass a specific max rows setting on the driver).
 	 * @see java.sql.Statement#setMaxRows
 	 */
 	public void setMaxRows(int maxRows) {
@@ -259,7 +262,8 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 
 	/**
 	 * Set the query timeout for statements that this JdbcTemplate executes.
-	 * <p>Default is 0, indicating to use the JDBC driver's default.
+	 * <p>Default is -1, indicating to use the JDBC driver's default
+	 * (i.e. to not pass a specific query timeout setting on the driver).
 	 * <p>Note: Any timeout specified here will be overridden by the remaining
 	 * transaction timeout when executing within a transaction that has a
 	 * timeout specified at the transaction level.
@@ -371,7 +375,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	protected Connection createConnectionProxy(Connection con) {
 		return (Connection) Proxy.newProxyInstance(
 				ConnectionProxy.class.getClassLoader(),
-				new Class[] {ConnectionProxy.class},
+				new Class<?>[] {ConnectionProxy.class},
 				new CloseSuppressingInvocationHandler(con));
 	}
 
@@ -494,20 +498,6 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	}
 
 	@Override
-	@Deprecated
-	public long queryForLong(String sql) throws DataAccessException {
-		Number number = queryForObject(sql, Long.class);
-		return (number != null ? number.longValue() : 0);
-	}
-
-	@Override
-	@Deprecated
-	public int queryForInt(String sql) throws DataAccessException {
-		Number number = queryForObject(sql, Integer.class);
-		return (number != null ? number.intValue() : 0);
-	}
-
-	@Override
 	public <T> List<T> queryForList(String sql, Class<T> elementType) throws DataAccessException {
 		return query(sql, getSingleColumnRowMapper(elementType));
 	}
@@ -546,10 +536,8 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	}
 
 	@Override
-	public int[] batchUpdate(final String[] sql) throws DataAccessException {
-
+	public int[] batchUpdate(final String... sql) throws DataAccessException {
 		Assert.notEmpty(sql, "SQL array must not be empty");
-
 		if (logger.isDebugEnabled()) {
 			logger.debug("Executing SQL batch update of " + sql.length + " statements");
 		}
@@ -560,9 +548,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 
 			@Override
 			public int[] doInStatement(Statement stmt) throws SQLException, DataAccessException {
-
 				int[] rowsAffected = new int[sql.length];
-
 				if (JdbcUtils.supportsBatchUpdates(stmt.getConnection())) {
 					for (String sqlStmt : sql) {
 						this.currSql = appendSql(this.currSql, sqlStmt);
@@ -607,6 +593,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 				return this.currSql;
 			}
 		}
+
 		return execute(new BatchUpdateStatementCallback());
 	}
 
@@ -839,34 +826,6 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	}
 
 	@Override
-	@Deprecated
-	public long queryForLong(String sql, Object[] args, int[] argTypes) throws DataAccessException {
-		Number number = queryForObject(sql, args, argTypes, Long.class);
-		return (number != null ? number.longValue() : 0);
-	}
-
-	@Override
-	@Deprecated
-	public long queryForLong(String sql, Object... args) throws DataAccessException {
-		Number number = queryForObject(sql, args, Long.class);
-		return (number != null ? number.longValue() : 0);
-	}
-
-	@Override
-	@Deprecated
-	public int queryForInt(String sql, Object[] args, int[] argTypes) throws DataAccessException {
-		Number number = queryForObject(sql, args, argTypes, Integer.class);
-		return (number != null ? number.intValue() : 0);
-	}
-
-	@Override
-	@Deprecated
-	public int queryForInt(String sql, Object... args) throws DataAccessException {
-		Number number = queryForObject(sql, args, Integer.class);
-		return (number != null ? number.intValue() : 0);
-	}
-
-	@Override
 	public <T> List<T> queryForList(String sql, Object[] args, int[] argTypes, Class<T> elementType) throws DataAccessException {
 		return query(sql, args, argTypes, getSingleColumnRowMapper(elementType));
 	}
@@ -1029,23 +988,19 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	}
 
 	@Override
-	public int[] batchUpdate(String sql, List<Object[]> batchArgs) {
+	public int[] batchUpdate(String sql, List<Object[]> batchArgs) throws DataAccessException {
 		return batchUpdate(sql, batchArgs, new int[0]);
 	}
 
 	@Override
-	public int[] batchUpdate(String sql, List<Object[]> batchArgs, int[] argTypes) {
+	public int[] batchUpdate(String sql, List<Object[]> batchArgs, int[] argTypes) throws DataAccessException {
 		return BatchUpdateUtils.executeBatchUpdate(sql, batchArgs, argTypes, this);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.jdbc.core.JdbcOperations#batchUpdate(java.lang.String, java.util.Collection, int, org.springframework.jdbc.core.ParameterizedPreparedStatementSetter)
-	 *
-	 * Contribution by Nicolas Fabre
-	 */
 	@Override
-	public <T> int[][] batchUpdate(String sql, final Collection<T> batchArgs, final int batchSize, final ParameterizedPreparedStatementSetter<T> pss) {
+	public <T> int[][] batchUpdate(String sql, final Collection<T> batchArgs, final int batchSize,
+			final ParameterizedPreparedStatementSetter<T> pss) throws DataAccessException {
+
 		if (logger.isDebugEnabled()) {
 			logger.debug("Executing SQL batch update [" + sql + "] with a batch size of " + batchSize);
 		}
@@ -1199,28 +1154,29 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	 * @param resultSetParameters Parameter list of declared resultSet parameters for the stored procedure
 	 * @return Map that contains returned results
 	 */
-	@SuppressWarnings("rawtypes")
-	protected Map<String, Object> extractReturnedResults(
-			CallableStatement cs, List updateCountParameters, List resultSetParameters, int updateCount)
+	protected Map<String, Object> extractReturnedResults(CallableStatement cs,
+			List<SqlParameter> updateCountParameters, List<SqlParameter> resultSetParameters, int updateCount)
 			throws SQLException {
 
 		Map<String, Object> returnedResults = new HashMap<String, Object>();
 		int rsIndex = 0;
 		int updateIndex = 0;
 		boolean moreResults;
-		if (!skipResultsProcessing) {
+		if (!this.skipResultsProcessing) {
 			do {
 				if (updateCount == -1) {
 					if (resultSetParameters != null && resultSetParameters.size() > rsIndex) {
-						SqlReturnResultSet declaredRsParam = (SqlReturnResultSet)resultSetParameters.get(rsIndex);
+						SqlReturnResultSet declaredRsParam = (SqlReturnResultSet) resultSetParameters.get(rsIndex);
 						returnedResults.putAll(processResultSet(cs.getResultSet(), declaredRsParam));
 						rsIndex++;
 					}
 					else {
-						if (!skipUndeclaredResults) {
+						if (!this.skipUndeclaredResults) {
 							String rsName = RETURN_RESULT_SET_PREFIX + (rsIndex + 1);
 							SqlReturnResultSet undeclaredRsParam = new SqlReturnResultSet(rsName, new ColumnMapRowMapper());
-							logger.info("Added default SqlReturnResultSet parameter named " + rsName);
+							if (logger.isDebugEnabled()) {
+								logger.debug("Added default SqlReturnResultSet parameter named '" + rsName + "'");
+							}
 							returnedResults.putAll(processResultSet(cs.getResultSet(), undeclaredRsParam));
 							rsIndex++;
 						}
@@ -1228,16 +1184,18 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 				}
 				else {
 					if (updateCountParameters != null && updateCountParameters.size() > updateIndex) {
-						SqlReturnUpdateCount ucParam = (SqlReturnUpdateCount)updateCountParameters.get(updateIndex);
+						SqlReturnUpdateCount ucParam = (SqlReturnUpdateCount) updateCountParameters.get(updateIndex);
 						String declaredUcName = ucParam.getName();
 						returnedResults.put(declaredUcName, updateCount);
 						updateIndex++;
 					}
 					else {
-						if (!skipUndeclaredResults) {
-							String undeclaredUcName = RETURN_UPDATE_COUNT_PREFIX + (updateIndex + 1);
-							logger.info("Added default SqlReturnUpdateCount parameter named " + undeclaredUcName);
-							returnedResults.put(undeclaredUcName, updateCount);
+						if (!this.skipUndeclaredResults) {
+							String undeclaredName = RETURN_UPDATE_COUNT_PREFIX + (updateIndex + 1);
+							if (logger.isDebugEnabled()) {
+								logger.debug("Added default SqlReturnUpdateCount parameter named '" + undeclaredName + "'");
+							}
+							returnedResults.put(undeclaredName, updateCount);
 							updateIndex++;
 						}
 					}
@@ -1281,8 +1239,10 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 						else {
 							String rsName = outParam.getName();
 							SqlReturnResultSet rsParam = new SqlReturnResultSet(rsName, new ColumnMapRowMapper());
-							returnedResults.putAll(processResultSet(cs.getResultSet(), rsParam));
-							logger.info("Added default SqlReturnResultSet parameter named " + rsName);
+							returnedResults.putAll(processResultSet((ResultSet) out, rsParam));
+							if (logger.isDebugEnabled()) {
+								logger.debug("Added default SqlReturnResultSet parameter named '" + rsName + "'");
+							}
 						}
 					}
 					else {
@@ -1387,11 +1347,11 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	 */
 	protected void applyStatementSettings(Statement stmt) throws SQLException {
 		int fetchSize = getFetchSize();
-		if (fetchSize > 0) {
+		if (fetchSize >= 0) {
 			stmt.setFetchSize(fetchSize);
 		}
 		int maxRows = getMaxRows();
-		if (maxRows > 0) {
+		if (maxRows >= 0) {
 			stmt.setMaxRows(maxRows);
 		}
 		DataSourceUtils.applyTimeout(stmt, getDataSource(), getQueryTimeout());

@@ -17,6 +17,7 @@
 package org.springframework.scheduling.config;
 
 import org.junit.Test;
+
 import org.springframework.context.support.GenericXmlApplicationContext;
 
 /**

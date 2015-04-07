@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,8 +38,8 @@ import org.springframework.util.StringUtils;
 /**
  * Base class for concrete, full-fledged
  * {@link org.springframework.beans.factory.config.BeanDefinition} classes,
- * factoring out common properties of {@link RootBeanDefinition} and
- * {@link ChildBeanDefinition}.
+ * factoring out common properties of {@link GenericBeanDefinition},
+ * {@link RootBeanDefinition} and {@link ChildBeanDefinition}.
  *
  * <p>The autowire constants match the ones defined in the
  * {@link org.springframework.beans.factory.config.AutowireCapableBeanFactory}
@@ -123,11 +123,14 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	public static final int DEPENDENCY_CHECK_ALL = 3;
 
 	/**
-	 * Constant that indicates the container should attempt to infer the {@link
-	 * #setDestroyMethodName destroy method name} for a bean as opposed to explicit
-	 * specification of a method name. The value {@value} is specifically designed to
-	 * include characters otherwise illegal in a method name, ensuring no possibility of
-	 * collisions with legitimately named methods having the same name.
+	 * Constant that indicates the container should attempt to infer the
+	 * {@link #setDestroyMethodName destroy method name} for a bean as opposed to
+	 * explicit specification of a method name. The value {@value} is specifically
+	 * designed to include characters otherwise illegal in a method name, ensuring
+	 * no possibility of collisions with legitimately named methods having the same
+	 * name.
+	 * <p>Currently, the method names detected during destroy method inference
+	 * are "close" and "shutdown", if present on the specific bean class.
 	 */
 	public static final String INFER_METHOD = "(inferred)";
 
@@ -357,7 +360,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 			throw new IllegalStateException(
 					"Bean class name [" + beanClassObject + "] has not been resolved into an actual Class");
 		}
-		return (Class) beanClassObject;
+		return (Class<?>) beanClassObject;
 	}
 
 	@Override
@@ -369,7 +372,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	public String getBeanClassName() {
 		Object beanClassObject = this.beanClass;
 		if (beanClassObject instanceof Class) {
-			return ((Class) beanClassObject).getName();
+			return ((Class<?>) beanClassObject).getName();
 		}
 		else {
 			return (String) beanClassObject;
@@ -384,12 +387,12 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	 * @return the resolved bean class
 	 * @throws ClassNotFoundException if the class name could be resolved
 	 */
-	public Class resolveBeanClass(ClassLoader classLoader) throws ClassNotFoundException {
+	public Class<?> resolveBeanClass(ClassLoader classLoader) throws ClassNotFoundException {
 		String className = getBeanClassName();
 		if (className == null) {
 			return null;
 		}
-		Class resolvedClass = ClassUtils.forName(className, classLoader);
+		Class<?> resolvedClass = ClassUtils.forName(className, classLoader);
 		this.beanClass = resolvedClass;
 		return resolvedClass;
 	}
@@ -512,8 +515,8 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 			// Work out whether to apply setter autowiring or constructor autowiring.
 			// If it has a no-arg constructor it's deemed to be setter autowiring,
 			// otherwise we'll try constructor autowiring.
-			Constructor[] constructors = getBeanClass().getConstructors();
-			for (Constructor constructor : constructors) {
+			Constructor<?>[] constructors = getBeanClass().getConstructors();
+			for (Constructor<?> constructor : constructors) {
 				if (constructor.getParameterTypes().length == 0) {
 					return AUTOWIRE_BY_TYPE;
 				}
@@ -553,7 +556,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	 * of dependencies like statics (*ugh*) or database preparation on startup.
 	 */
 	@Override
-	public void setDependsOn(String[] dependsOn) {
+	public void setDependsOn(String... dependsOn) {
 		this.dependsOn = dependsOn;
 	}
 
@@ -644,7 +647,8 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 
 	/**
 	 * Specify whether to allow access to non-public constructors and methods,
-	 * for the case of externalized metadata pointing to those.
+	 * for the case of externalized metadata pointing to those. The default is
+	 * {@code true}; switch this to {@code false} for public access only.
 	 * <p>This applies to constructor resolution, factory method resolution,
 	 * and also init/destroy methods. Bean property accessors have to be public
 	 * in any case and are not affected by this setting.
@@ -666,7 +670,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	/**
 	 * Specify whether to resolve constructors in lenient mode ({@code true},
 	 * which is the default) or to switch to strict resolution (throwing an exception
-	 * in case of ambigious constructors that all match when converting the arguments,
+	 * in case of ambiguous constructors that all match when converting the arguments,
 	 * whereas lenient mode would use the one with the 'closest' type matches).
 	 */
 	public void setLenientConstructorResolution(boolean lenientConstructorResolution) {

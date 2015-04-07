@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,8 +32,7 @@ import org.springframework.expression.EvaluationException;
 import org.springframework.expression.TypeConverter;
 
 /**
- * A constructor resolver that uses reflection to locate the constructor that should be
- * invoked
+ * A constructor resolver that uses reflection to locate the constructor that should be invoked.
  *
  * @author Andy Clement
  * @author Juergen Hoeller
@@ -44,44 +43,41 @@ public class ReflectiveConstructorResolver implements ConstructorResolver {
 	/**
 	 * Locate a constructor on the type. There are three kinds of match that might occur:
 	 * <ol>
-	 * <li>An exact match where the types of the arguments match the types of the
-	 * constructor
-	 * <li>An in-exact match where the types we are looking for are subtypes of those
-	 * defined on the constructor
-	 * <li>A match where we are able to convert the arguments into those expected by the
-	 * constructor, according to the registered type converter.
+	 * <li>An exact match where the types of the arguments match the types of the constructor
+	 * <li>An in-exact match where the types we are looking for are subtypes of those defined on the constructor
+	 * <li>A match where we are able to convert the arguments into those expected by the constructor, according to the
+	 * registered type converter.
 	 * </ol>
 	 */
 	@Override
-	public ConstructorExecutor resolve(EvaluationContext context, String typename, List<TypeDescriptor> argumentTypes)
+	public ConstructorExecutor resolve(EvaluationContext context, String typeName, List<TypeDescriptor> argumentTypes)
 			throws AccessException {
 
 		try {
 			TypeConverter typeConverter = context.getTypeConverter();
-			Class<?> type = context.getTypeLocator().findType(typename);
-			Constructor[] ctors = type.getConstructors();
+			Class<?> type = context.getTypeLocator().findType(typeName);
+			Constructor<?>[] ctors = type.getConstructors();
 
-			Arrays.sort(ctors, new Comparator<Constructor>() {
+			Arrays.sort(ctors, new Comparator<Constructor<?>>() {
 				@Override
-				public int compare(Constructor c1, Constructor c2) {
+				public int compare(Constructor<?> c1, Constructor<?> c2) {
 					int c1pl = c1.getParameterTypes().length;
 					int c2pl = c2.getParameterTypes().length;
-					return (new Integer(c1pl)).compareTo(c2pl);
+					return (c1pl < c2pl ? -1 : (c1pl > c2pl ? 1 : 0));
 				}
 			});
 
-			Constructor closeMatch = null;
-			int[] argsToConvert = null;
-			Constructor matchRequiringConversion = null;
+			Constructor<?> closeMatch = null;
+			Constructor<?> matchRequiringConversion = null;
 
-			for (Constructor ctor : ctors) {
-				Class[] paramTypes = ctor.getParameterTypes();
+			for (Constructor<?> ctor : ctors) {
+				Class<?>[] paramTypes = ctor.getParameterTypes();
 				List<TypeDescriptor> paramDescriptors = new ArrayList<TypeDescriptor>(paramTypes.length);
 				for (int i = 0; i < paramTypes.length; i++) {
 					paramDescriptors.add(new TypeDescriptor(new MethodParameter(ctor, i)));
 				}
 				ReflectionHelper.ArgumentsMatchInfo matchInfo = null;
-				if (ctor.isVarArgs() && argumentTypes.size() >= (paramTypes.length - 1)) {
+				if (ctor.isVarArgs() && argumentTypes.size() >= paramTypes.length - 1) {
 					// *sigh* complicated
 					// Basically.. we have to have all parameters match up until the varargs one, then the rest of what is
 					// being provided should be
@@ -95,23 +91,23 @@ public class ReflectiveConstructorResolver implements ConstructorResolver {
 					matchInfo = ReflectionHelper.compareArguments(paramDescriptors, argumentTypes, typeConverter);
 				}
 				if (matchInfo != null) {
-					if (matchInfo.kind == ReflectionHelper.ArgsMatchKind.EXACT) {
-						return new ReflectiveConstructorExecutor(ctor, null);
+					if (matchInfo.isExactMatch()) {
+						return new ReflectiveConstructorExecutor(ctor);
 					}
-					else if (matchInfo.kind == ReflectionHelper.ArgsMatchKind.CLOSE) {
+					else if (matchInfo.isCloseMatch()) {
 						closeMatch = ctor;
 					}
-					else if (matchInfo.kind == ReflectionHelper.ArgsMatchKind.REQUIRES_CONVERSION) {
-						argsToConvert = matchInfo.argsRequiringConversion;
+					else if (matchInfo.isMatchRequiringConversion()) {
 						matchRequiringConversion = ctor;
 					}
 				}
 			}
+
 			if (closeMatch != null) {
-				return new ReflectiveConstructorExecutor(closeMatch, null);
+				return new ReflectiveConstructorExecutor(closeMatch);
 			}
 			else if (matchRequiringConversion != null) {
-				return new ReflectiveConstructorExecutor(matchRequiringConversion, argsToConvert);
+				return new ReflectiveConstructorExecutor(matchRequiringConversion);
 			}
 			else {
 				return null;

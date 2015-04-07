@@ -69,7 +69,7 @@ public class ClassEditor extends PropertyEditorSupport {
 
 	@Override
 	public String getAsText() {
-		Class clazz = (Class) getValue();
+		Class<?> clazz = (Class<?>) getValue();
 		if (clazz != null) {
 			return ClassUtils.getQualifiedName(clazz);
 		}

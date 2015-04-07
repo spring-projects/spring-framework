@@ -32,17 +32,18 @@ import org.springframework.core.GenericCollectionTypeResolver;
  * @see ListFactoryBean
  * @see MapFactoryBean
  */
-public class SetFactoryBean extends AbstractFactoryBean<Set> {
+public class SetFactoryBean extends AbstractFactoryBean<Set<Object>> {
 
-	private Set sourceSet;
+	private Set<?> sourceSet;
 
-	private Class targetSetClass;
+	@SuppressWarnings("rawtypes")
+	private Class<? extends Set> targetSetClass;
 
 
 	/**
 	 * Set the source Set, typically populated via XML "set" elements.
 	 */
-	public void setSourceSet(Set sourceSet) {
+	public void setSourceSet(Set<?> sourceSet) {
 		this.sourceSet = sourceSet;
 	}
 
@@ -52,7 +53,8 @@ public class SetFactoryBean extends AbstractFactoryBean<Set> {
 	 * <p>Default is a linked HashSet, keeping the registration order.
 	 * @see java.util.LinkedHashSet
 	 */
-	public void setTargetSetClass(Class targetSetClass) {
+	@SuppressWarnings("rawtypes")
+	public void setTargetSetClass(Class<? extends Set> targetSetClass) {
 		if (targetSetClass == null) {
 			throw new IllegalArgumentException("'targetSetClass' must not be null");
 		}
@@ -64,24 +66,25 @@ public class SetFactoryBean extends AbstractFactoryBean<Set> {
 
 
 	@Override
+	@SuppressWarnings("rawtypes")
 	public Class<Set> getObjectType() {
 		return Set.class;
 	}
 
 	@Override
 	@SuppressWarnings("unchecked")
-	protected Set createInstance() {
+	protected Set<Object> createInstance() {
 		if (this.sourceSet == null) {
 			throw new IllegalArgumentException("'sourceSet' is required");
 		}
-		Set result = null;
+		Set<Object> result = null;
 		if (this.targetSetClass != null) {
-			result = (Set) BeanUtils.instantiateClass(this.targetSetClass);
+			result = BeanUtils.instantiateClass(this.targetSetClass);
 		}
 		else {
-			result = new LinkedHashSet(this.sourceSet.size());
+			result = new LinkedHashSet<Object>(this.sourceSet.size());
 		}
-		Class valueType = null;
+		Class<?> valueType = null;
 		if (this.targetSetClass != null) {
 			valueType = GenericCollectionTypeResolver.getCollectionType(this.targetSetClass);
 		}

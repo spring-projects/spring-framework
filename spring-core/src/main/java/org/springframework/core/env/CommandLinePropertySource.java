@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -193,35 +193,37 @@ public abstract class CommandLinePropertySource<T> extends EnumerablePropertySou
 	/** The default name of the property representing non-option arguments: {@value} */
 	public static final String DEFAULT_NON_OPTION_ARGS_PROPERTY_NAME = "nonOptionArgs";
 
+
 	private String nonOptionArgsPropertyName = DEFAULT_NON_OPTION_ARGS_PROPERTY_NAME;
 
+
 	/**
-	 * Create a new {@code CommandLinePropertySource} having the default name {@value
-	 * #COMMAND_LINE_PROPERTY_SOURCE_NAME} and backed by the given source object.
+	 * Create a new {@code CommandLinePropertySource} having the default name
+	 * {@value #COMMAND_LINE_PROPERTY_SOURCE_NAME} and backed by the given source object.
 	 */
 	public CommandLinePropertySource(T source) {
 		super(COMMAND_LINE_PROPERTY_SOURCE_NAME, source);
 	}
 
 	/**
-	 * Create a new {@link CommandLinePropertySource} having the given name and backed by
-	 * the given source object.
+	 * Create a new {@link CommandLinePropertySource} having the given name
+	 * and backed by the given source object.
 	 */
 	public CommandLinePropertySource(String name, T source) {
 		super(name, source);
 	}
 
+
 	/**
-	 * Specify the name of the special "non-option arguments" property. The default is
-	 * {@value #DEFAULT_NON_OPTION_ARGS_PROPERTY_NAME}.
+	 * Specify the name of the special "non-option arguments" property.
+	 * The default is {@value #DEFAULT_NON_OPTION_ARGS_PROPERTY_NAME}.
 	 */
 	public void setNonOptionArgsPropertyName(String nonOptionArgsPropertyName) {
 		this.nonOptionArgsPropertyName = nonOptionArgsPropertyName;
 	}
 
 	/**
-	 * Return whether this {@code PropertySource} contains a property with the given name.
-	 * <p>This implementation first checks to see if the name specified is the special
+	 * This implementation first checks to see if the name specified is the special
 	 * {@linkplain #setNonOptionArgsPropertyName(String) "non-option arguments" property},
 	 * and if so delegates to the abstract {@link #getNonOptionArgs()} method
 	 * checking to see whether it returns an empty collection. Otherwise delegates to and
@@ -236,8 +238,7 @@ public abstract class CommandLinePropertySource<T> extends EnumerablePropertySou
 	}
 
 	/**
-	 * {@inheritDoc}
-	 * <p>This implementation first checks to see if the name specified is the special
+	 * This implementation first checks to see if the name specified is the special
 	 * {@linkplain #setNonOptionArgsPropertyName(String) "non-option arguments" property},
 	 * and if so delegates to the abstract {@link #getNonOptionArgs()} method. If so
 	 * and the collection of non-option arguments is empty, this method returns {@code
@@ -265,6 +266,7 @@ public abstract class CommandLinePropertySource<T> extends EnumerablePropertySou
 		}
 	}
 
+
 	/**
 	 * Return whether the set of option arguments parsed from the command line contains
 	 * an option with the given name.
@@ -288,8 +290,8 @@ public abstract class CommandLinePropertySource<T> extends EnumerablePropertySou
 	protected abstract List<String> getOptionValues(String name);
 
 	/**
-	 * Return the collection of non-option arguments parsed from the command line. Never
-	 * {@code null}.
+	 * Return the collection of non-option arguments parsed from the command line.
+	 * Never {@code null}.
 	 */
 	protected abstract List<String> getNonOptionArgs();
 

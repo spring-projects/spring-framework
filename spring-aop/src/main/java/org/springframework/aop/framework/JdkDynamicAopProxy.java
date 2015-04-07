@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -75,7 +75,7 @@ final class JdkDynamicAopProxy implements AopProxy, InvocationHandler, Serializa
 	 */
 
 	/** We use a static Log to avoid serialization issues */
-	private static Log logger = LogFactory.getLog(JdkDynamicAopProxy.class);
+	private static final Log logger = LogFactory.getLog(JdkDynamicAopProxy.class);
 
 	/** Config used to configure this proxy */
 	private final AdvisedSupport advised;
@@ -116,7 +116,7 @@ final class JdkDynamicAopProxy implements AopProxy, InvocationHandler, Serializa
 		if (logger.isDebugEnabled()) {
 			logger.debug("Creating JDK dynamic proxy: target source is " + this.advised.getTargetSource());
 		}
-		Class[] proxiedInterfaces = AopProxyUtils.completeProxiedInterfaces(this.advised);
+		Class<?>[] proxiedInterfaces = AopProxyUtils.completeProxiedInterfaces(this.advised);
 		findDefinedEqualsAndHashCodeMethods(proxiedInterfaces);
 		return Proxy.newProxyInstance(classLoader, proxiedInterfaces, this);
 	}
@@ -126,8 +126,8 @@ final class JdkDynamicAopProxy implements AopProxy, InvocationHandler, Serializa
 	 * on the supplied set of interfaces.
 	 * @param proxiedInterfaces the interfaces to introspect
 	 */
-	private void findDefinedEqualsAndHashCodeMethods(Class[] proxiedInterfaces) {
-		for (Class proxiedInterface : proxiedInterfaces) {
+	private void findDefinedEqualsAndHashCodeMethods(Class<?>[] proxiedInterfaces) {
+		for (Class<?> proxiedInterface : proxiedInterfaces) {
 			Method[] methods = proxiedInterface.getDeclaredMethods();
 			for (Method method : methods) {
 				if (AopUtils.isEqualsMethod(method)) {
@@ -156,7 +156,7 @@ final class JdkDynamicAopProxy implements AopProxy, InvocationHandler, Serializa
 		boolean setProxyContext = false;
 
 		TargetSource targetSource = this.advised.targetSource;
-		Class targetClass = null;
+		Class<?> targetClass = null;
 		Object target = null;
 
 		try {
@@ -215,8 +215,10 @@ final class JdkDynamicAopProxy implements AopProxy, InvocationHandler, Serializa
 				// is type-compatible. Note that we can't help if the target sets
 				// a reference to itself in another returned object.
 				retVal = proxy;
-			} else if (retVal == null && returnType != Void.TYPE && returnType.isPrimitive()) {
-				throw new AopInvocationException("Null return value from advice does not match primitive return type for: " + method);
+			}
+			else if (retVal == null && returnType != Void.TYPE && returnType.isPrimitive()) {
+				throw new AopInvocationException(
+						"Null return value from advice does not match primitive return type for: " + method);
 			}
 			return retVal;
 		}

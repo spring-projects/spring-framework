@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -78,10 +78,8 @@ public class StaticPortletApplicationContext extends StaticApplicationContext
 	 */
 	@Override
 	protected void initPropertySources() {
-		super.initPropertySources();
-		PortletApplicationContextUtils.initPortletPropertySources(
-				this.getEnvironment().getPropertySources(), this.servletContext,
-				this.portletContext, this.portletConfig);
+		PortletApplicationContextUtils.initPortletPropertySources(getEnvironment().getPropertySources(),
+				this.servletContext, this.portletContext, this.portletConfig);
 	}
 
 	/**
@@ -158,7 +156,7 @@ public class StaticPortletApplicationContext extends StaticApplicationContext
 	 * @throws UnsupportedOperationException <b>always</b>
 	 */
 	@Override
-	public void setConfigLocations(String[] configLocations) {
+	public void setConfigLocations(String... configLocations) {
 		if (configLocations != null) {
 			throw new UnsupportedOperationException("StaticPortletApplicationContext does not support config locations");
 		}

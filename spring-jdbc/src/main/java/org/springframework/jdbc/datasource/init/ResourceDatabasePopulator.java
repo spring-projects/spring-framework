@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,28 +16,28 @@
 
 package org.springframework.jdbc.datasource.init;
 
-import java.io.IOException;
-import java.io.LineNumberReader;
 import java.sql.Connection;
-import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.LinkedList;
 import java.util.List;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import javax.sql.DataSource;
 
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.EncodedResource;
+import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 /**
- * Populates a database from SQL scripts defined in external resources.
+ * Populates, initializes, or cleans up a database using SQL scripts defined in
+ * external resources.
  *
- * <p>Call {@link #addScript(Resource)} to add a SQL script location.
- * Call {@link #setSqlScriptEncoding(String)} to set the encoding for all added scripts.
+ * <ul>
+ * <li>Call {@link #addScript} to add a single SQL script location.
+ * <li>Call {@link #addScripts} to add multiple SQL script locations.
+ * <li>Consult the setter methods in this class for further configuration options.
+ * <li>Call {@link #populate} or {@link #execute} to initialize or clean up the
+ * database using the configured scripts.
+ * </ul>
  *
  * @author Keith Donald
  * @author Dave Syer
@@ -45,24 +45,24 @@ import org.springframework.util.StringUtils;
  * @author Chris Beams
  * @author Oliver Gierke
  * @author Sam Brannen
+ * @author Chris Baldwin
  * @since 3.0
+ * @see DatabasePopulatorUtils
+ * @see ScriptUtils
  */
 public class ResourceDatabasePopulator implements DatabasePopulator {
-
-	private static final String DEFAULT_COMMENT_PREFIX = "--";
-
-	private static final String DEFAULT_STATEMENT_SEPARATOR = ";";
-
-	private static final Log logger = LogFactory.getLog(ResourceDatabasePopulator.class);
-
 
 	private List<Resource> scripts = new ArrayList<Resource>();
 
 	private String sqlScriptEncoding;
 
-	private String separator;
+	private String separator = ScriptUtils.DEFAULT_STATEMENT_SEPARATOR;
 
-	private String commentPrefix = DEFAULT_COMMENT_PREFIX;
+	private String commentPrefix = ScriptUtils.DEFAULT_COMMENT_PREFIX;
+
+	private String blockCommentStartDelimiter = ScriptUtils.DEFAULT_BLOCK_COMMENT_START_DELIMITER;
+
+	private String blockCommentEndDelimiter = ScriptUtils.DEFAULT_BLOCK_COMMENT_END_DELIMITER;
 
 	private boolean continueOnError = false;
 
@@ -70,49 +70,137 @@ public class ResourceDatabasePopulator implements DatabasePopulator {
 
 
 	/**
-	 * Add a script to execute to populate the database.
-	 * @param script the path to a SQL script
+	 * Construct a new {@code ResourceDatabasePopulator} with default settings.
+	 * @since 4.0.3
+	 */
+	public ResourceDatabasePopulator() {
+		/* no-op */
+	}
+
+	/**
+	 * Construct a new {@code ResourceDatabasePopulator} with default settings
+	 * for the supplied scripts.
+	 * @param scripts the scripts to execute to initialize or clean up the database;
+	 * never {@code null}
+	 * @since 4.0.3
+	 */
+	public ResourceDatabasePopulator(Resource... scripts) {
+		this();
+		setScripts(scripts);
+	}
+
+	/**
+	 * Construct a new {@code ResourceDatabasePopulator} with the supplied values.
+	 * @param continueOnError flag to indicate that all failures in SQL should be
+	 * logged but not cause a failure
+	 * @param ignoreFailedDrops flag to indicate that a failed SQL {@code DROP}
+	 * statement can be ignored
+	 * @param sqlScriptEncoding the encoding for the supplied SQL scripts; may
+	 * be {@code null} or <em>empty</em> to indicate platform encoding
+	 * @param scripts the scripts to execute to initialize or clean up the database;
+	 * never {@code null}
+	 * @since 4.0.3
+	 */
+	public ResourceDatabasePopulator(boolean continueOnError, boolean ignoreFailedDrops, String sqlScriptEncoding,
+			Resource... scripts) {
+		this(scripts);
+		this.continueOnError = continueOnError;
+		this.ignoreFailedDrops = ignoreFailedDrops;
+		setSqlScriptEncoding(sqlScriptEncoding);
+	}
+
+	/**
+	 * Add a script to execute to initialize or clean up the database.
+	 * @param script the path to an SQL script; never {@code null}
 	 */
 	public void addScript(Resource script) {
-		this.scripts.add(script);
+		Assert.notNull(script, "Script must not be null");
+		getScripts().add(script);
 	}
 
 	/**
-	 * Set the scripts to execute to populate the database.
-	 * @param scripts the scripts to execute
+	 * Add multiple scripts to execute to initialize or clean up the database.
+	 * @param scripts the scripts to execute; never {@code null}
 	 */
-	public void setScripts(Resource[] scripts) {
-		this.scripts = Arrays.asList(scripts);
+	public void addScripts(Resource... scripts) {
+		assertContentsOfScriptArray(scripts);
+		getScripts().addAll(Arrays.asList(scripts));
 	}
 
 	/**
-	 * Specify the encoding for SQL scripts, if different from the platform encoding.
-	 * Note setting this property has no effect on added scripts that are already
-	 * {@link EncodedResource encoded resources}.
+	 * Set the scripts to execute to initialize or clean up the database,
+	 * replacing any previously added scripts.
+	 * @param scripts the scripts to execute; never {@code null}
+	 */
+	public void setScripts(Resource... scripts) {
+		assertContentsOfScriptArray(scripts);
+		// Ensure that the list is modifiable
+		this.scripts = new ArrayList<Resource>(Arrays.asList(scripts));
+	}
+
+	/**
+	 * Specify the encoding for the configured SQL scripts, if different from the
+	 * platform encoding.
+	 * @param sqlScriptEncoding the encoding used in scripts; may be {@code null}
+	 * or empty to indicate platform encoding
 	 * @see #addScript(Resource)
 	 */
 	public void setSqlScriptEncoding(String sqlScriptEncoding) {
-		this.sqlScriptEncoding = sqlScriptEncoding;
+		this.sqlScriptEncoding = StringUtils.hasText(sqlScriptEncoding) ? sqlScriptEncoding : null;
 	}
 
 	/**
-	 * Specify the statement separator, if a custom one. Default is ";".
+	 * Specify the statement separator, if a custom one.
+	 * <p>Defaults to {@code ";"} if not specified and falls back to {@code "\n"}
+	 * as a last resort; may be set to {@link ScriptUtils#EOF_STATEMENT_SEPARATOR}
+	 * to signal that each script contains a single statement without a separator.
+	 * @param separator the script statement separator
 	 */
 	public void setSeparator(String separator) {
 		this.separator = separator;
 	}
 
 	/**
-	 * Set the line prefix that identifies comments in the SQL script.
-	 * Default is "--".
+	 * Set the prefix that identifies single-line comments within the SQL scripts.
+	 * <p>Defaults to {@code "--"}.
+	 * @param commentPrefix the prefix for single-line comments
 	 */
 	public void setCommentPrefix(String commentPrefix) {
 		this.commentPrefix = commentPrefix;
 	}
 
 	/**
+	 * Set the start delimiter that identifies block comments within the SQL
+	 * scripts.
+	 * <p>Defaults to {@code "/*"}.
+	 * @param blockCommentStartDelimiter the start delimiter for block comments;
+	 * never {@code null} or empty
+	 * @since 4.0.3
+	 * @see #setBlockCommentEndDelimiter
+	 */
+	public void setBlockCommentStartDelimiter(String blockCommentStartDelimiter) {
+		Assert.hasText(blockCommentStartDelimiter, "BlockCommentStartDelimiter must not be null or empty");
+		this.blockCommentStartDelimiter = blockCommentStartDelimiter;
+	}
+
+	/**
+	 * Set the end delimiter that identifies block comments within the SQL
+	 * scripts.
+	 * <p>Defaults to <code>"*&#47;"</code>.
+	 * @param blockCommentEndDelimiter the end delimiter for block comments;
+	 * never {@code null} or empty
+	 * @since 4.0.3
+	 * @see #setBlockCommentStartDelimiter
+	 */
+	public void setBlockCommentEndDelimiter(String blockCommentEndDelimiter) {
+		Assert.hasText(blockCommentEndDelimiter, "BlockCommentEndDelimiter must not be null or empty");
+		this.blockCommentEndDelimiter = blockCommentEndDelimiter;
+	}
+
+	/**
 	 * Flag to indicate that all failures in SQL should be logged but not cause a failure.
-	 * Defaults to false.
+	 * <p>Defaults to {@code false}.
+	 * @param continueOnError {@code true} if script execution should continue on error
 	 */
 	public void setContinueOnError(boolean continueOnError) {
 		this.continueOnError = continueOnError;
@@ -120,238 +208,62 @@ public class ResourceDatabasePopulator implements DatabasePopulator {
 
 	/**
 	 * Flag to indicate that a failed SQL {@code DROP} statement can be ignored.
-	 * <p>This is useful for non-embedded databases whose SQL dialect does not support an
-	 * {@code IF EXISTS} clause in a {@code DROP}. The default is false so that if the
-	 * populator runs accidentally, it will fail fast when the script starts with a {@code DROP}.
+	 * <p>This is useful for a non-embedded database whose SQL dialect does not
+	 * support an {@code IF EXISTS} clause in a {@code DROP} statement.
+	 * <p>The default is {@code false} so that if the populator runs accidentally, it will
+	 * fail fast if a script starts with a {@code DROP} statement.
+	 * @param ignoreFailedDrops {@code true} if failed drop statements should be ignored
 	 */
 	public void setIgnoreFailedDrops(boolean ignoreFailedDrops) {
 		this.ignoreFailedDrops = ignoreFailedDrops;
 	}
 
-
+	/**
+	 * {@inheritDoc}
+	 * @see #execute(DataSource)
+	 */
 	@Override
-	public void populate(Connection connection) throws SQLException {
-		for (Resource script : this.scripts) {
-			executeSqlScript(connection, applyEncodingIfNecessary(script), this.continueOnError, this.ignoreFailedDrops);
-		}
-	}
-
-	private EncodedResource applyEncodingIfNecessary(Resource script) {
-		if (script instanceof EncodedResource) {
-			return (EncodedResource) script;
-		}
-		else {
-			return new EncodedResource(script, this.sqlScriptEncoding);
+	public void populate(Connection connection) throws ScriptException {
+		Assert.notNull(connection, "Connection must not be null");
+		for (Resource script : getScripts()) {
+			ScriptUtils.executeSqlScript(connection, encodeScript(script), this.continueOnError,
+				this.ignoreFailedDrops, this.commentPrefix, this.separator, this.blockCommentStartDelimiter,
+				this.blockCommentEndDelimiter);
 		}
 	}
 
 	/**
-	 * Execute the given SQL script.
-	 * <p>The script will normally be loaded by classpath. There should be one statement
-	 * per line. Any {@link #setSeparator(String) statement separators} will be removed.
-	 * <p><b>Do not use this method to execute DDL if you expect rollback.</b>
-	 * @param connection the JDBC Connection with which to perform JDBC operations
-	 * @param resource the resource (potentially associated with a specific encoding) to load the SQL script from
-	 * @param continueOnError whether or not to continue without throwing an exception in the event of an error
-	 * @param ignoreFailedDrops whether of not to continue in the event of specifically an error on a {@code DROP}
+	 * Execute this {@code ResourceDatabasePopulator} against the given
+	 * {@link DataSource}.
+	 * <p>Delegates to {@link DatabasePopulatorUtils#execute}.
+	 * @param dataSource the {@code DataSource} to execute against; never {@code null}
+	 * @throws ScriptException if an error occurs
+	 * @since 4.1
+	 * @see #populate(Connection)
 	 */
-	private void executeSqlScript(Connection connection, EncodedResource resource, boolean continueOnError,
-			boolean ignoreFailedDrops) throws SQLException {
+	public void execute(DataSource dataSource) throws ScriptException {
+		Assert.notNull(dataSource, "DataSource must not be null");
+		DatabasePopulatorUtils.execute(this, dataSource);
+	}
 
-		if (logger.isInfoEnabled()) {
-			logger.info("Executing SQL script from " + resource);
-		}
-		long startTime = System.currentTimeMillis();
-		List<String> statements = new LinkedList<String>();
-		String script;
-		try {
-			script = readScript(resource);
-		}
-		catch (IOException ex) {
-			throw new CannotReadScriptException(resource, ex);
-		}
-		String delimiter = this.separator;
-		if (delimiter == null) {
-			delimiter = DEFAULT_STATEMENT_SEPARATOR;
-			if (!containsSqlScriptDelimiters(script, delimiter)) {
-				delimiter = "\n";
-			}
-		}
-		splitSqlScript(script, delimiter, this.commentPrefix, statements);
-		int lineNumber = 0;
-		Statement stmt = connection.createStatement();
-		try {
-			for (String statement : statements) {
-				lineNumber++;
-				try {
-					stmt.execute(statement);
-					int rowsAffected = stmt.getUpdateCount();
-					if (logger.isDebugEnabled()) {
-						logger.debug(rowsAffected + " returned as updateCount for SQL: " + statement);
-					}
-				}
-				catch (SQLException ex) {
-					boolean dropStatement = StringUtils.startsWithIgnoreCase(statement.trim(), "drop");
-					if (continueOnError || (dropStatement && ignoreFailedDrops)) {
-						if (logger.isDebugEnabled()) {
-							logger.debug("Failed to execute SQL script statement at line " + lineNumber +
-									" of resource " + resource + ": " + statement, ex);
-						}
-					}
-					else {
-						throw new ScriptStatementFailedException(statement, lineNumber, resource, ex);
-					}
-				}
-			}
-		}
-		finally {
-			try {
-				stmt.close();
-			}
-			catch (Throwable ex) {
-				logger.debug("Could not close JDBC Statement", ex);
-			}
-		}
-		long elapsedTime = System.currentTimeMillis() - startTime;
-		if (logger.isInfoEnabled()) {
-			logger.info("Done executing SQL script from " + resource + " in " + elapsedTime + " ms.");
-		}
+	final List<Resource> getScripts() {
+		return this.scripts;
 	}
 
 	/**
-	 * Read a script from the given resource and build a String containing the lines.
-	 * @param resource the resource to be read
-	 * @return {@code String} containing the script lines
-	 * @throws IOException in case of I/O errors
+	 * {@link EncodedResource} is not a sub-type of {@link Resource}. Thus we
+	 * always need to wrap each script resource in an {@code EncodedResource}
+	 * using the configured {@linkplain #setSqlScriptEncoding encoding}.
+	 * @param script the script to wrap; never {@code null}
 	 */
-	private String readScript(EncodedResource resource) throws IOException {
-		LineNumberReader lnr = new LineNumberReader(resource.getReader());
-		try {
-			String currentStatement = lnr.readLine();
-			StringBuilder scriptBuilder = new StringBuilder();
-			while (currentStatement != null) {
-				if (StringUtils.hasText(currentStatement) &&
-						(this.commentPrefix != null && !currentStatement.startsWith(this.commentPrefix))) {
-					if (scriptBuilder.length() > 0) {
-						scriptBuilder.append('\n');
-					}
-					scriptBuilder.append(currentStatement);
-				}
-				currentStatement = lnr.readLine();
-			}
-			maybeAddSeparatorToScript(scriptBuilder);
-			return scriptBuilder.toString();
-		}
-		finally {
-			lnr.close();
-		}
+	private EncodedResource encodeScript(Resource script) {
+		Assert.notNull(script, "Script must not be null");
+		return new EncodedResource(script, this.sqlScriptEncoding);
 	}
 
-	private void maybeAddSeparatorToScript(StringBuilder scriptBuilder) {
-		if (this.separator == null) {
-			return;
-		}
-		String trimmed = this.separator.trim();
-		if (trimmed.length() == this.separator.length()) {
-			return;
-		}
-		// separator ends in whitespace, so we might want to see if the script is trying
-		// to end the same way
-		if (scriptBuilder.lastIndexOf(trimmed) == scriptBuilder.length() - trimmed.length()) {
-			scriptBuilder.append(this.separator.substring(trimmed.length()));
-		}
-	}
-
-	/**
-	 * Does the provided SQL script contain the specified delimiter?
-	 * @param script the SQL script
-	 * @param delim character delimiting each statement - typically a ';' character
-	 */
-	private boolean containsSqlScriptDelimiters(String script, String delim) {
-		boolean inLiteral = false;
-		char[] content = script.toCharArray();
-		for (int i = 0; i < script.length(); i++) {
-			if (content[i] == '\'') {
-				inLiteral = !inLiteral;
-			}
-			if (!inLiteral && script.startsWith(delim, i)) {
-				return true;
-			}
-		}
-		return false;
-	}
-
-	/**
-	 * Split an SQL script into separate statements delimited by the provided delimiter
-	 * string. Each individual statement will be added to the provided {@code List}.
-	 * <p>Within a statement, the provided {@code commentPrefix} will be honored;
-	 * any text beginning with the comment prefix and extending to the end of the
-	 * line will be omitted from the statement. In addition, multiple adjacent
-	 * whitespace characters will be collapsed into a single space.
-	 * @param script the SQL script
-	 * @param delim character delimiting each statement (typically a ';' character)
-	 * @param commentPrefix the prefix that identifies line comments in the SQL script &mdash; typically "--"
-	 * @param statements the List that will contain the individual statements
-	 */
-	private void splitSqlScript(String script, String delim, String commentPrefix, List<String> statements) {
-		StringBuilder sb = new StringBuilder();
-		boolean inLiteral = false;
-		boolean inEscape = false;
-		char[] content = script.toCharArray();
-		for (int i = 0; i < script.length(); i++) {
-			char c = content[i];
-			if (inEscape) {
-				inEscape = false;
-				sb.append(c);
-				continue;
-			}
-			// MySQL style escapes
-			if (c == '\\') {
-				inEscape = true;
-				sb.append(c);
-				continue;
-			}
-			if (c == '\'') {
-				inLiteral = !inLiteral;
-			}
-			if (!inLiteral) {
-				if (script.startsWith(delim, i)) {
-					// we've reached the end of the current statement
-					if (sb.length() > 0) {
-						statements.add(sb.toString());
-						sb = new StringBuilder();
-					}
-					i += delim.length() - 1;
-					continue;
-				}
-				else if (script.startsWith(commentPrefix, i)) {
-					// skip over any content from the start of the comment to the EOL
-					int indexOfNextNewline = script.indexOf("\n", i);
-					if (indexOfNextNewline > i) {
-						i = indexOfNextNewline;
-						continue;
-					}
-					else {
-						// if there's no newline after the comment, we must be at the end
-						// of the script, so stop here.
-						break;
-					}
-				}
-				else if (c == ' ' || c == '\n' || c == '\t') {
-					// avoid multiple adjacent whitespace characters
-					if (sb.length() > 0 && sb.charAt(sb.length() - 1) != ' ') {
-						c = ' ';
-					}
-					else {
-						continue;
-					}
-				}
-			}
-			sb.append(c);
-		}
-		if (StringUtils.hasText(sb)) {
-			statements.add(sb.toString());
-		}
+	private void assertContentsOfScriptArray(Resource... scripts) {
+		Assert.notNull(scripts, "Scripts must not be null");
+		Assert.noNullElements(scripts, "Scripts array must not contain null elements");
 	}
 
 }

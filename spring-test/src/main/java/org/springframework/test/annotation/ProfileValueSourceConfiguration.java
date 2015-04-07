@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,12 +24,13 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * <p>
- * ProfileValueSourceConfiguration is a class-level annotation which is used to
- * specify what type of {@link ProfileValueSource} to use when retrieving
- * <em>profile values</em> configured via the {@link IfProfileValue
+ * <p>{@code ProfileValueSourceConfiguration} is a class-level annotation which
+ * is used to specify what type of {@link ProfileValueSource} to use when
+ * retrieving <em>profile values</em> configured via the {@link IfProfileValue
  * &#064;IfProfileValue} annotation.
- * </p>
+ *
+ * <p>As of Spring Framework 4.0, this annotation may be used as a
+ * <em>meta-annotation</em> to create custom <em>composed annotations</em>.
  *
  * @author Sam Brannen
  * @since 2.5

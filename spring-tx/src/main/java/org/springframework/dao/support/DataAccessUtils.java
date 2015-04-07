@@ -172,7 +172,7 @@ public abstract class DataAccessUtils {
 	 * @throws TypeMismatchDataAccessException if the unique object
 	 * in the collection is not convertable to an int
 	 */
-	public static int intResult(Collection results)
+	public static int intResult(Collection<?> results)
 			throws IncorrectResultSizeDataAccessException, TypeMismatchDataAccessException {
 
 		return objectResult(results, Number.class).intValue();
@@ -191,7 +191,7 @@ public abstract class DataAccessUtils {
 	 * @throws TypeMismatchDataAccessException if the unique object
 	 * in the collection is not convertable to a long
 	 */
-	public static long longResult(Collection results)
+	public static long longResult(Collection<?> results)
 			throws IncorrectResultSizeDataAccessException, TypeMismatchDataAccessException {
 
 		return objectResult(results, Number.class).longValue();

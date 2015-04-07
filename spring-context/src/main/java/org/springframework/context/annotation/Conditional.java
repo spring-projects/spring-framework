@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,8 +38,8 @@ import java.lang.annotation.Target;
  * </ul>
  *
  * <p>If a {@code @Configuration} class is marked with {@code @Conditional}, all of the
- * {@code @Bean} methods and {@link Import @Import} annotations associated with that class
- * will be subject to the conditions.
+ * {@code @Bean} methods, {@link Import @Import} and {@link ComponentScan @ComponentScan}
+ * annotations associated with that class will be subject to the conditions.
  *
  * <p>NOTE: {@code @Conditional} annotations are not inherited; any conditions from
  * superclasses or from overridden methods are not being considered.

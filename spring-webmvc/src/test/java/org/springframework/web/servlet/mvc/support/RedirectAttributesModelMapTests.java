@@ -16,19 +16,20 @@
 
 package org.springframework.web.servlet.mvc.support;
 
-import static org.junit.Assert.assertEquals;
-
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.springframework.tests.sample.beans.TestBean;
+
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.format.support.DefaultFormattingConversionService;
 import org.springframework.format.support.FormattingConversionService;
+import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.validation.DataBinder;
+
+import static org.junit.Assert.*;
 
 /**
  *

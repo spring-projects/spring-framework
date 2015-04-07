@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,12 +21,12 @@ import java.io.FileNotFoundException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-
 import javax.portlet.PortletContext;
 import javax.portlet.PortletRequest;
 import javax.portlet.PortletSession;
 
 import org.junit.Test;
+
 import org.springframework.mock.web.portlet.MockActionRequest;
 import org.springframework.mock.web.portlet.MockActionResponse;
 import org.springframework.mock.web.portlet.MockPortletContext;
@@ -245,8 +245,7 @@ public final class PortletUtilsTests {
 	public void testClearAllRenderParametersDoesNotPropagateExceptionIfRedirectAlreadySentAtTimeOfCall() throws Exception {
 		MockActionResponse response = new MockActionResponse() {
 			@Override
-			@SuppressWarnings("unchecked")
-			public void setRenderParameters(Map parameters) {
+			public void setRenderParameters(Map<String, String[]> parameters) {
 				throw new IllegalStateException();
 			}
 		};
@@ -302,7 +301,6 @@ public final class PortletUtilsTests {
 		PortletUtils.exposeRequestAttributes(new MockPortletRequest(), null);
 	}
 
-	@SuppressWarnings("unchecked")
 	@Test
 	public void testExposeRequestAttributesSunnyDay() throws Exception {
 		MockPortletRequest request = new MockPortletRequest();
@@ -314,7 +312,6 @@ public final class PortletUtilsTests {
 		assertEquals("Roy Fokker", request.getAttribute("mentor"));
 	}
 
-	@SuppressWarnings("unchecked")
 	@Test
 	public void testExposeRequestAttributesWithEmptyAttributesMapIsAnIdempotentOperation() throws Exception {
 		MockPortletRequest request = new MockPortletRequest();

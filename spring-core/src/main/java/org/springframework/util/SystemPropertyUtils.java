@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,14 +16,12 @@
 
 package org.springframework.util;
 
-import org.springframework.util.PropertyPlaceholderHelper.PlaceholderResolver;
-
 /**
  * Helper class for resolving placeholders in texts. Usually applied to file paths.
  *
- * <p>A text may contain {@code ${...}} placeholders, to be resolved as system properties: e.g.
- * {@code ${user.dir}}.  Default values can be supplied using the ":" separator between key
- * and value.
+ * <p>A text may contain {@code ${...}} placeholders, to be resolved as system properties:
+ * e.g. {@code ${user.dir}}. Default values can be supplied using the ":" separator
+ * between key and value.
  *
  * @author Juergen Hoeller
  * @author Rob Harrop
@@ -53,7 +51,8 @@ public abstract class SystemPropertyUtils {
 
 
 	/**
-	 * Resolve ${...} placeholders in the given text, replacing them with corresponding system property values.
+	 * Resolve {@code ${...}} placeholders in the given text, replacing them with
+	 * corresponding system property values.
 	 * @param text the String to resolve
 	 * @return the resolved String
 	 * @see #PLACEHOLDER_PREFIX
@@ -65,15 +64,16 @@ public abstract class SystemPropertyUtils {
 	}
 
 	/**
-	 * Resolve ${...} placeholders in the given text, replacing them with corresponding system property values.
-	 * Unresolvable placeholders with no default value are ignored and passed through unchanged if the
-	 * flag is set to true.
+	 * Resolve {@code ${...}} placeholders in the given text, replacing them with
+	 * corresponding system property values. Unresolvable placeholders with no default
+	 * value are ignored and passed through unchanged if the flag is set to {@code true}.
 	 * @param text the String to resolve
-	 * @param ignoreUnresolvablePlaceholders flag to determine is unresolved placeholders are ignored
+	 * @param ignoreUnresolvablePlaceholders whether unresolved placeholders are to be ignored
 	 * @return the resolved String
 	 * @see #PLACEHOLDER_PREFIX
 	 * @see #PLACEHOLDER_SUFFIX
-	 * @throws IllegalArgumentException if there is an unresolvable placeholder and the flag is false
+	 * @throws IllegalArgumentException if there is an unresolvable placeholder
+	 * and the "ignoreUnresolvablePlaceholders" flag is {@code false}
 	 */
 	public static String resolvePlaceholders(String text, boolean ignoreUnresolvablePlaceholders) {
 		PropertyPlaceholderHelper helper = (ignoreUnresolvablePlaceholders ? nonStrictHelper : strictHelper);
@@ -81,7 +81,11 @@ public abstract class SystemPropertyUtils {
 	}
 
 
-	private static class SystemPropertyPlaceholderResolver implements PlaceholderResolver {
+	/**
+	 * PlaceholderResolver implementation that resolves against system properties
+	 * and system environment variables.
+	 */
+	private static class SystemPropertyPlaceholderResolver implements PropertyPlaceholderHelper.PlaceholderResolver {
 
 		private final String text;
 
