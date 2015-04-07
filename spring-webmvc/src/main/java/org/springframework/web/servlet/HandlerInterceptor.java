@@ -48,7 +48,7 @@ import org.springframework.web.method.HandlerMethod;
  * in the application context, referenced by the mapping bean definition
  * via its "interceptors" property (in XML: a &lt;list&gt; of &lt;ref&gt;).
  *
- * <p>HandlerInterceptor is basically similar to a Servlet 2.3 Filter, but in
+ * <p>HandlerInterceptor is basically similar to a Servlet Filter, but in
  * contrast to the latter it just allows custom pre-processing with the option
  * of prohibiting the execution of the handler itself, and custom post-processing.
  * Filters are more powerful, for example they allow for exchanging the request

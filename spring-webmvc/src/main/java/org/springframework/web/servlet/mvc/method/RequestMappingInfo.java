@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,8 @@ package org.springframework.web.servlet.mvc.method;
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.util.StringUtils;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.cors.CorsUtils;
 import org.springframework.web.servlet.mvc.condition.ConsumesRequestCondition;
 import org.springframework.web.servlet.mvc.condition.HeadersRequestCondition;
 import org.springframework.web.servlet.mvc.condition.ParamsRequestCondition;
@@ -208,7 +210,15 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 		ProducesRequestCondition produces = this.producesCondition.getMatchingCondition(request);
 
 		if (methods == null || params == null || headers == null || consumes == null || produces == null) {
-			return null;
+			if (CorsUtils.isPreFlightRequest(request)) {
+				methods = getAccessControlRequestMethodCondition(request);
+				if (methods == null || params == null) {
+					return null;
+				}
+			}
+			else {
+				return null;
+			}
 		}
 
 		PatternsRequestCondition patterns = this.patternsCondition.getMatchingCondition(request);
@@ -225,6 +235,21 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 				methods, params, headers, consumes, produces, custom.getCondition());
 	}
 
+	/**
+	 * Return a matching RequestMethodsRequestCondition based on the expected
+	 * HTTP method specified in a CORS pre-flight request.
+	 */
+	private RequestMethodsRequestCondition getAccessControlRequestMethodCondition(HttpServletRequest request) {
+		String expectedMethod = request.getHeader(CorsUtils.ACCESS_CONTROL_REQUEST_METHOD);
+		if (StringUtils.hasText(expectedMethod)) {
+			for (RequestMethod method : getMethodsCondition().getMethods()) {
+				if (expectedMethod.equalsIgnoreCase(method.name())) {
+					return new RequestMethodsRequestCondition(method);
+				}
+			}
+		}
+		return null;
+	}
 
 	/**
 	 * Compares "this" info (i.e. the current instance) with another info in the context of a request.

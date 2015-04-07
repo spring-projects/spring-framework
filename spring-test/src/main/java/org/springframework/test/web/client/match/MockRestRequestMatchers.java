@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.test.web.client.match;
 
 import java.io.IOException;
@@ -31,14 +32,14 @@ import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.test.web.client.RequestMatcher;
 import org.springframework.util.Assert;
 
+import static org.hamcrest.MatcherAssert.*;
 import static org.springframework.test.util.AssertionErrors.*;
-import static org.springframework.test.util.MatcherAssertionErrors.*;
 
 /**
  * Static, factory methods for {@link RequestMatcher} classes. Typically used to
  * provide input for {@link MockRestServiceServer#expect(RequestMatcher)}.
  *
- * <p><strong>Eclipse users:</strong> consider adding this class as a Java editor
+ * <p><strong>Eclipse users:</strong> Consider adding this class as a Java editor
  * favorite. To navigate, open the Preferences and type "favorites".
  *
  * @author Craig Walls
@@ -46,13 +47,6 @@ import static org.springframework.test.util.MatcherAssertionErrors.*;
  * @since 3.2
  */
 public abstract class MockRestRequestMatchers {
-
-
-	/**
-	 * Private class constructor.
-	 */
-	private MockRestRequestMatchers() {
-	}
 
 	/**
 	 * Match to any request.
@@ -67,7 +61,6 @@ public abstract class MockRestRequestMatchers {
 
 	/**
 	 * Assert the request URI string with the given matcher.
-	 *
 	 * @param matcher String matcher for the expected URI
 	 * @return the request matcher
 	 */
@@ -83,7 +76,6 @@ public abstract class MockRestRequestMatchers {
 
 	/**
 	 * Assert the request URI string.
-	 *
 	 * @param expectedUri the expected URI
 	 * @return the request matcher
 	 */
@@ -99,7 +91,6 @@ public abstract class MockRestRequestMatchers {
 
 	/**
 	 * Assert the {@link HttpMethod} of the request.
-	 *
 	 * @param method the HTTP method
 	 * @return the request matcher
 	 */
@@ -115,7 +106,6 @@ public abstract class MockRestRequestMatchers {
 
 	/**
 	 * Expect a request to the given URI.
-	 *
 	 * @param uri the expected URI
 	 * @return the request matcher
 	 */
@@ -181,7 +171,6 @@ public abstract class MockRestRequestMatchers {
 	 * inspect a specific subset of the body. The JSON path expression can be a
 	 * parameterized string using formatting specifiers as defined in
 	 * {@link String#format(String, Object...)}.
-	 *
 	 * @param expression the JSON path optionally parameterized with arguments
 	 * @param args arguments to parameterize the JSON path expression with
 	 */
@@ -194,7 +183,6 @@ public abstract class MockRestRequestMatchers {
 	 * href="http://goessner.net/articles/JsonPath/">JSONPath</a> expression to
 	 * inspect a specific subset of the body and a Hamcrest match for asserting
 	 * the value found at the JSON path.
-	 *
 	 * @param expression the JSON path expression
 	 * @param matcher a matcher for the value expected at the JSON path
 	 */
@@ -207,7 +195,6 @@ public abstract class MockRestRequestMatchers {
 	 * subset of the body. The XPath expression can be a parameterized string
 	 * using formatting specifiers as defined in
 	 * {@link String#format(String, Object...)}.
-	 *
 	 * @param expression the XPath optionally parameterized with arguments
 	 * @param args arguments to parameterize the XPath expression with
 	 */
@@ -220,7 +207,6 @@ public abstract class MockRestRequestMatchers {
 	 * subset of the body. The XPath expression can be a parameterized string
 	 * using formatting specifiers as defined in
 	 * {@link String#format(String, Object...)}.
-	 *
 	 * @param expression the XPath optionally parameterized with arguments
 	 * @param namespaces namespaces referenced in the XPath expression
 	 * @param args arguments to parameterize the XPath expression with

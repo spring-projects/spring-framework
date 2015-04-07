@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,14 +16,20 @@
 
 package org.springframework.web.servlet.handler;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.core.Ordered;
+import org.springframework.web.HttpRequestHandler;
+import org.springframework.web.cors.CorsProcessor;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.util.Assert;
 import org.springframework.util.PathMatcher;
@@ -32,6 +38,8 @@ import org.springframework.web.context.support.WebApplicationObjectSupport;
 import org.springframework.web.servlet.HandlerExecutionChain;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.HandlerMapping;
+import org.springframework.web.cors.DefaultCorsProcessor;
+import org.springframework.web.cors.CorsUtils;
 import org.springframework.web.util.UrlPathHelper;
 
 /**
@@ -70,6 +78,8 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	private final List<HandlerInterceptor> adaptedInterceptors = new ArrayList<HandlerInterceptor>();
 
 	private final List<MappedInterceptor> mappedInterceptors = new ArrayList<MappedInterceptor>();
+
+	private CorsProcessor corsProcessor = new DefaultCorsProcessor();
 
 
 	/**
@@ -184,6 +194,13 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 		this.interceptors.addAll(Arrays.asList(interceptors));
 	}
 
+	/**
+	 * @since 4.2
+	 */
+	public void setCorsProcessor(CorsProcessor corsProcessor) {
+		Assert.notNull(corsProcessor, "CorsProcessor must not be null");
+		this.corsProcessor = corsProcessor;
+	}
 
 	/**
 	 * Initializes the interceptors.
@@ -308,16 +325,29 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 			String handlerName = (String) handler;
 			handler = getApplicationContext().getBean(handlerName);
 		}
-		return getHandlerExecutionChain(handler, request);
+		HandlerExecutionChain executionChain = getHandlerExecutionChain(handler, request);
+		if (CorsUtils.isCorsRequest(request)) {
+			CorsConfiguration config = getCorsConfiguration(handler, request);
+			executionChain = getCorsHandlerExecutionChain(request, executionChain, config);
+		}
+		return executionChain;
 	}
 
 	/**
 	 * Look up a handler for the given request, returning {@code null} if no
 	 * specific one is found. This method is called by {@link #getHandler};
 	 * a {@code null} return value will lead to the default handler, if one is set.
+	 *
+	 * <p>On CORS pre-flight requests this method should return a match not for
+	 * the pre-flight request but for the expected actual request based on the URL
+	 * path, the HTTP methods from the "Access-Control-Request-Method" header, and
+	 * the headers from the "Access-Control-Request-Headers" header thus allowing
+	 * the CORS configuration to be obtained via {@link #getCorsConfiguration},
+	 *
 	 * <p>Note: This method may also return a pre-built {@link HandlerExecutionChain},
 	 * combining a handler object with dynamically determined interceptors.
 	 * Statically specified interceptors will get merged into such an existing chain.
+	 *
 	 * @param request current HTTP request
 	 * @return the corresponding handler instance, or {@code null} if none found
 	 * @throws Exception if there is an internal error
@@ -356,6 +386,74 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 		}
 
 		return chain;
+	}
+
+	/**
+	 * Retrieve the CORS configuration for the given handler.
+	 */
+	protected CorsConfiguration getCorsConfiguration(Object handler, HttpServletRequest request) {
+		handler = (handler instanceof HandlerExecutionChain) ? ((HandlerExecutionChain) handler).getHandler() : handler;
+		if (handler != null && handler instanceof CorsConfigurationSource) {
+			return ((CorsConfigurationSource) handler).getCorsConfiguration(request);
+		}
+		return null;
+	}
+
+	/**
+	 * Update the HandlerExecutionChain for CORS-related handling.
+	 *
+	 * <p>For pre-flight requests, the default implementation replaces the selected
+	 * handler with a simple HttpRequestHandler that invokes the configured
+	 * {@link #setCorsProcessor}.
+	 *
+	 * <p>For actual requests, the default implementation inserts a
+	 * HandlerInterceptor that makes CORS-related checks and adds CORS headers.
+	 */
+	protected HandlerExecutionChain getCorsHandlerExecutionChain(HttpServletRequest request,
+			HandlerExecutionChain chain, CorsConfiguration config) {
+
+		if (config != null) {
+			if (CorsUtils.isPreFlightRequest(request)) {
+				HandlerInterceptor[] interceptors = chain.getInterceptors();
+				chain = new HandlerExecutionChain(new PreFlightHandler(config), interceptors);
+			}
+			else {
+				chain.addInterceptor(new CorsInterceptor(config));
+			}
+		}
+		return chain;
+	}
+
+
+	private class PreFlightHandler implements HttpRequestHandler {
+
+		private final CorsConfiguration config;
+
+
+		public PreFlightHandler(CorsConfiguration config) {
+			this.config = config;
+		}
+
+		@Override
+		public void handleRequest(HttpServletRequest request, HttpServletResponse response) throws IOException {
+			corsProcessor.processPreFlightRequest(this.config, request, response);
+		}
+	}
+
+	private class CorsInterceptor extends HandlerInterceptorAdapter {
+
+		private final CorsConfiguration config;
+
+
+		public CorsInterceptor(CorsConfiguration config) {
+			this.config = config;
+		}
+
+		@Override
+		public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
+			return corsProcessor.processActualRequest(this.config, request, response);
+		}
+
 	}
 
 }

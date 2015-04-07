@@ -210,7 +210,7 @@ public class MockHttpServletRequestBuilderTests {
 
 		MockHttpServletRequest request = this.builder.buildRequest(this.servletContext);
 
-		assertEquals("foo[0]=bar&foo[1]=baz", request.getQueryString());
+		assertEquals("foo%5B0%5D=bar&foo%5B1%5D=baz", request.getQueryString());
 		assertEquals("bar", request.getParameter("foo[0]"));
 		assertEquals("baz", request.getParameter("foo[1]"));
 	}
@@ -221,7 +221,7 @@ public class MockHttpServletRequestBuilderTests {
 
 		MockHttpServletRequest request = this.builder.buildRequest(this.servletContext);
 
-		assertEquals("foo=bar=baz", request.getQueryString());
+		assertEquals("foo=bar%3Dbaz", request.getQueryString());
 		assertEquals("bar=baz", request.getParameter("foo"));
 	}
 

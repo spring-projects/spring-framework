@@ -320,6 +320,14 @@ class MessageBrokerBeanDefinitionParser implements BeanDefinitionParser {
 				String pathMatcherRef = messageBrokerElement.getAttribute("path-matcher");
 				brokerDef.getPropertyValues().add("pathMatcher", new RuntimeBeanReference(pathMatcherRef));
 			}
+			if (simpleBrokerElem.hasAttribute("scheduler")) {
+				String scheduler = simpleBrokerElem.getAttribute("scheduler");
+				brokerDef.getPropertyValues().add("taskScheduler", new RuntimeBeanReference(scheduler));
+			}
+			if (simpleBrokerElem.hasAttribute("heartbeat")) {
+				String heartbeatValue = simpleBrokerElem.getAttribute("heartbeat");
+				brokerDef.getPropertyValues().add("heartbeatValue", heartbeatValue);
+			}
 		}
 		else if (brokerRelayElem != null) {
 			String prefix = brokerRelayElem.getAttribute("prefix");

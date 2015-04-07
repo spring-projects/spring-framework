@@ -16,21 +16,12 @@
 
 package org.springframework.web.socket.messaging;
 
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.reset;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.*;
 
-import java.nio.ByteBuffer;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -42,6 +33,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
+
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.PayloadApplicationEvent;
@@ -53,7 +45,6 @@ import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessageType;
 import org.springframework.messaging.simp.TestPrincipal;
 import org.springframework.messaging.simp.stomp.StompCommand;
-import org.springframework.messaging.simp.stomp.StompDecoder;
 import org.springframework.messaging.simp.stomp.StompEncoder;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.messaging.simp.user.DefaultUserSessionRegistry;
@@ -103,7 +94,7 @@ public class StompSubProtocolHandlerTests {
 	}
 
 	@Test
-	public void handleMessageToClientConnected() {
+	public void handleMessageToClientWithConnectedFrame() {
 
 		UserSessionRegistry registry = new DefaultUserSessionRegistry();
 		this.protocolHandler.setUserSessionRegistry(registry);
@@ -120,7 +111,7 @@ public class StompSubProtocolHandlerTests {
 	}
 
 	@Test
-	public void handleMessageToClientConnectedUniqueUserName() {
+	public void handleMessageToClientWithDestinationUserNameProvider() {
 
 		this.session.setPrincipal(new UniqueUser("joe"));
 
@@ -140,47 +131,197 @@ public class StompSubProtocolHandlerTests {
 	}
 
 	@Test
-	public void handleMessageToClientConnectedWithHeartbeats() {
+	public void handleMessageToClientWithSimpConnectAck() {
 
-		SockJsSession sockJsSession = Mockito.mock(SockJsSession.class);
+		StompHeaderAccessor accessor = StompHeaderAccessor.create(StompCommand.CONNECT);
+		accessor.setHeartbeat(10000, 10000);
+		accessor.setAcceptVersion("1.0,1.1");
+		Message<?> connectMessage = MessageBuilder.createMessage(EMPTY_PAYLOAD, accessor.getMessageHeaders());
 
-		StompHeaderAccessor headers = StompHeaderAccessor.create(StompCommand.CONNECTED);
-		headers.setHeartbeat(0,10);
-		Message<byte[]> message = MessageBuilder.createMessage(EMPTY_PAYLOAD, headers.getMessageHeaders());
-		this.protocolHandler.handleMessageToClient(sockJsSession, message);
+		SimpMessageHeaderAccessor ackAccessor = SimpMessageHeaderAccessor.create(SimpMessageType.CONNECT_ACK);
+		ackAccessor.setHeader(SimpMessageHeaderAccessor.CONNECT_MESSAGE_HEADER, connectMessage);
+		ackAccessor.setHeader(SimpMessageHeaderAccessor.HEART_BEAT_HEADER, new long[] {15000, 15000});
+		Message<byte[]> ackMessage = MessageBuilder.createMessage(EMPTY_PAYLOAD, ackAccessor.getMessageHeaders());
+		this.protocolHandler.handleMessageToClient(this.session, ackMessage);
 
-		verify(sockJsSession).disableHeartbeat();
+		assertEquals(1, this.session.getSentMessages().size());
+		TextMessage actual = (TextMessage) this.session.getSentMessages().get(0);
+		assertEquals("CONNECTED\n" + "version:1.1\n" + "heart-beat:15000,15000\n" +
+				"user-name:joe\n" + "\n" + "\u0000", actual.getPayload());
 	}
 
 	@Test
-	public void handleMessageToClientConnectAck() {
+	public void handleMessageToClientWithSimpHeartbeat() {
 
-		StompHeaderAccessor connectHeaders = StompHeaderAccessor.create(StompCommand.CONNECT);
-		connectHeaders.setHeartbeat(10000, 10000);
-		connectHeaders.setAcceptVersion("1.0,1.1");
-		Message<?> connectMessage = MessageBuilder.createMessage(EMPTY_PAYLOAD, connectHeaders.getMessageHeaders());
-
-		SimpMessageHeaderAccessor connectAckHeaders = SimpMessageHeaderAccessor.create(SimpMessageType.CONNECT_ACK);
-		connectAckHeaders.setHeader(SimpMessageHeaderAccessor.CONNECT_MESSAGE_HEADER, connectMessage);
-		Message<byte[]> connectAckMessage = MessageBuilder.createMessage(EMPTY_PAYLOAD, connectAckHeaders.getMessageHeaders());
-
-		this.protocolHandler.handleMessageToClient(this.session, connectAckMessage);
-
-		verifyNoMoreInteractions(this.channel);
-
-		// Check CONNECTED reply
+		SimpMessageHeaderAccessor accessor = SimpMessageHeaderAccessor.create(SimpMessageType.HEARTBEAT);
+		accessor.setSessionId("s1");
+		accessor.setUser(new TestPrincipal("joe"));
+		Message<byte[]> ackMessage = MessageBuilder.createMessage(EMPTY_PAYLOAD, accessor.getMessageHeaders());
+		this.protocolHandler.handleMessageToClient(this.session, ackMessage);
 
 		assertEquals(1, this.session.getSentMessages().size());
-		TextMessage textMessage = (TextMessage) this.session.getSentMessages().get(0);
+		TextMessage actual = (TextMessage) this.session.getSentMessages().get(0);
+		assertEquals("\n", actual.getPayload());
+	}
 
-		List<Message<byte[]>> messages = new StompDecoder().decode(ByteBuffer.wrap(textMessage.getPayload().getBytes()));
-		assertEquals(1, messages.size());
-		StompHeaderAccessor replyHeaders = StompHeaderAccessor.wrap(messages.get(0));
+	@Test
+	public void handleMessageToClientWithHeartbeatSuppressingSockJsHeartbeat() throws IOException {
 
-		assertEquals(StompCommand.CONNECTED, replyHeaders.getCommand());
-		assertEquals("1.1", replyHeaders.getVersion());
-		assertArrayEquals(new long[] {0, 0}, replyHeaders.getHeartbeat());
-		assertEquals("joe", replyHeaders.getNativeHeader("user-name").get(0));
+		SockJsSession sockJsSession = Mockito.mock(SockJsSession.class);
+		StompHeaderAccessor accessor = StompHeaderAccessor.create(StompCommand.CONNECTED);
+		accessor.setHeartbeat(0, 10);
+		Message<byte[]> message = MessageBuilder.createMessage(EMPTY_PAYLOAD, accessor.getMessageHeaders());
+		this.protocolHandler.handleMessageToClient(sockJsSession, message);
+
+		verify(sockJsSession).getPrincipal();
+		verify(sockJsSession).disableHeartbeat();
+		verify(sockJsSession).sendMessage(any(WebSocketMessage.class));
+		verifyNoMoreInteractions(sockJsSession);
+
+		sockJsSession = Mockito.mock(SockJsSession.class);
+		accessor = StompHeaderAccessor.create(StompCommand.CONNECTED);
+		accessor.setHeartbeat(0, 0);
+		message = MessageBuilder.createMessage(EMPTY_PAYLOAD, accessor.getMessageHeaders());
+		this.protocolHandler.handleMessageToClient(sockJsSession, message);
+
+		verify(sockJsSession).getPrincipal();
+		verify(sockJsSession).sendMessage(any(WebSocketMessage.class));
+		verifyNoMoreInteractions(sockJsSession);
+	}
+
+	@Test
+	public void handleMessageToClientWithUserDestination() {
+
+		StompHeaderAccessor headers = StompHeaderAccessor.create(StompCommand.MESSAGE);
+		headers.setMessageId("mess0");
+		headers.setSubscriptionId("sub0");
+		headers.setDestination("/queue/foo-user123");
+		headers.setNativeHeader(StompHeaderAccessor.ORIGINAL_DESTINATION, "/user/queue/foo");
+		Message<byte[]> message = MessageBuilder.createMessage(EMPTY_PAYLOAD, headers.getMessageHeaders());
+		this.protocolHandler.handleMessageToClient(this.session, message);
+
+		assertEquals(1, this.session.getSentMessages().size());
+		WebSocketMessage<?> textMessage = this.session.getSentMessages().get(0);
+		assertTrue(((String) textMessage.getPayload()).contains("destination:/user/queue/foo\n"));
+		assertFalse(((String) textMessage.getPayload()).contains(SimpMessageHeaderAccessor.ORIGINAL_DESTINATION));
+	}
+
+	// SPR-12475
+
+	@Test
+	public void handleMessageToClientWithBinaryWebSocketMessage() {
+
+		StompHeaderAccessor headers = StompHeaderAccessor.create(StompCommand.MESSAGE);
+		headers.setMessageId("mess0");
+		headers.setSubscriptionId("sub0");
+		headers.setContentType(MimeTypeUtils.APPLICATION_OCTET_STREAM);
+		headers.setDestination("/queue/foo");
+
+		// Non-empty payload
+
+		byte[] payload = new byte[1];
+		Message<byte[]> message = MessageBuilder.createMessage(payload, headers.getMessageHeaders());
+		this.protocolHandler.handleMessageToClient(this.session, message);
+
+		assertEquals(1, this.session.getSentMessages().size());
+		WebSocketMessage<?> webSocketMessage = this.session.getSentMessages().get(0);
+		assertTrue(webSocketMessage instanceof BinaryMessage);
+
+		// Empty payload
+
+		payload = EMPTY_PAYLOAD;
+		message = MessageBuilder.createMessage(payload, headers.getMessageHeaders());
+		this.protocolHandler.handleMessageToClient(this.session, message);
+
+		assertEquals(2, this.session.getSentMessages().size());
+		webSocketMessage = this.session.getSentMessages().get(1);
+		assertTrue(webSocketMessage instanceof TextMessage);
+	}
+
+	@Test
+	public void handleMessageFromClient() {
+
+		TextMessage textMessage = StompTextMessageBuilder.create(StompCommand.CONNECT).headers(
+				"login:guest", "passcode:guest", "accept-version:1.1,1.0", "heart-beat:10000,10000").build();
+
+		this.protocolHandler.afterSessionStarted(this.session, this.channel);
+		this.protocolHandler.handleMessageFromClient(this.session, textMessage, this.channel);
+
+		verify(this.channel).send(this.messageCaptor.capture());
+		Message<?> actual = this.messageCaptor.getValue();
+		assertNotNull(actual);
+
+		assertEquals("s1", SimpMessageHeaderAccessor.getSessionId(actual.getHeaders()));
+		assertNotNull(SimpMessageHeaderAccessor.getSessionAttributes(actual.getHeaders()));
+		assertNotNull(SimpMessageHeaderAccessor.getUser(actual.getHeaders()));
+		assertEquals("joe", SimpMessageHeaderAccessor.getUser(actual.getHeaders()).getName());
+		assertNotNull(SimpMessageHeaderAccessor.getHeartbeat(actual.getHeaders()));
+		assertArrayEquals(new long[] {10000, 10000}, SimpMessageHeaderAccessor.getHeartbeat(actual.getHeaders()));
+
+		StompHeaderAccessor stompAccessor = StompHeaderAccessor.wrap(actual);
+		assertEquals(StompCommand.CONNECT, stompAccessor.getCommand());
+		assertEquals("guest", stompAccessor.getLogin());
+		assertEquals("guest", stompAccessor.getPasscode());
+		assertArrayEquals(new long[] {10000, 10000}, stompAccessor.getHeartbeat());
+		assertEquals(new HashSet<>(Arrays.asList("1.1","1.0")), stompAccessor.getAcceptVersion());
+		assertEquals(0, this.session.getSentMessages().size());
+	}
+
+	@Test
+	public void handleMessageFromClientWithImmutableMessageInterceptor() {
+		AtomicReference<Boolean> mutable = new AtomicReference<>();
+		ExecutorSubscribableChannel channel = new ExecutorSubscribableChannel();
+		channel.addInterceptor(new ChannelInterceptorAdapter() {
+			@Override
+			public Message<?> preSend(Message<?> message, MessageChannel channel) {
+				mutable.set(MessageHeaderAccessor.getAccessor(message, MessageHeaderAccessor.class).isMutable());
+				return message;
+			}
+		});
+		channel.addInterceptor(new ImmutableMessageChannelInterceptor());
+
+		StompSubProtocolHandler handler = new StompSubProtocolHandler();
+		handler.afterSessionStarted(this.session, channel);
+
+		TextMessage message = StompTextMessageBuilder.create(StompCommand.CONNECT).build();
+		handler.handleMessageFromClient(this.session, message, channel);
+		assertNotNull(mutable.get());
+		assertTrue(mutable.get());
+	}
+
+	@Test
+	public void handleMessageFromClientWithoutImmutableMessageInterceptor() {
+		AtomicReference<Boolean> mutable = new AtomicReference<>();
+		ExecutorSubscribableChannel channel = new ExecutorSubscribableChannel();
+		channel.addInterceptor(new ChannelInterceptorAdapter() {
+			@Override
+			public Message<?> preSend(Message<?> message, MessageChannel channel) {
+				mutable.set(MessageHeaderAccessor.getAccessor(message, MessageHeaderAccessor.class).isMutable());
+				return message;
+			}
+		});
+
+		StompSubProtocolHandler handler = new StompSubProtocolHandler();
+		handler.afterSessionStarted(this.session, channel);
+
+		TextMessage message = StompTextMessageBuilder.create(StompCommand.CONNECT).build();
+		handler.handleMessageFromClient(this.session, message, channel);
+		assertNotNull(mutable.get());
+		assertFalse(mutable.get());
+	}
+
+	@Test
+	public void handleMessageFromClientWithInvalidStompCommand() {
+
+		TextMessage textMessage = new TextMessage("FOO\n\n\0");
+
+		this.protocolHandler.afterSessionStarted(this.session, this.channel);
+		this.protocolHandler.handleMessageFromClient(this.session, textMessage, this.channel);
+
+		verifyZeroInteractions(this.channel);
+		assertEquals(1, this.session.getSentMessages().size());
+		TextMessage actual = (TextMessage) this.session.getSentMessages().get(0);
+		assertTrue(actual.getPayload().startsWith("ERROR"));
 	}
 
 	@Test
@@ -263,137 +404,6 @@ public class StompSubProtocolHandlerTests {
 	}
 
 	@Test
-	public void handleMessageToClientUserDestination() {
-
-		StompHeaderAccessor headers = StompHeaderAccessor.create(StompCommand.MESSAGE);
-		headers.setMessageId("mess0");
-		headers.setSubscriptionId("sub0");
-		headers.setDestination("/queue/foo-user123");
-		headers.setNativeHeader(StompHeaderAccessor.ORIGINAL_DESTINATION, "/user/queue/foo");
-		Message<byte[]> message = MessageBuilder.createMessage(EMPTY_PAYLOAD, headers.getMessageHeaders());
-		this.protocolHandler.handleMessageToClient(this.session, message);
-
-		assertEquals(1, this.session.getSentMessages().size());
-		WebSocketMessage<?> textMessage = this.session.getSentMessages().get(0);
-		assertTrue(((String) textMessage.getPayload()).contains("destination:/user/queue/foo\n"));
-		assertFalse(((String) textMessage.getPayload()).contains(SimpMessageHeaderAccessor.ORIGINAL_DESTINATION));
-	}
-
-	// SPR-12475
-
-	@Test
-	public void handleMessageToClientBinaryWebSocketMessage() {
-
-		StompHeaderAccessor headers = StompHeaderAccessor.create(StompCommand.MESSAGE);
-		headers.setMessageId("mess0");
-		headers.setSubscriptionId("sub0");
-		headers.setContentType(MimeTypeUtils.APPLICATION_OCTET_STREAM);
-		headers.setDestination("/queue/foo");
-
-		// Non-empty payload
-
-		byte[] payload = new byte[1];
-		Message<byte[]> message = MessageBuilder.createMessage(payload, headers.getMessageHeaders());
-		this.protocolHandler.handleMessageToClient(this.session, message);
-
-		assertEquals(1, this.session.getSentMessages().size());
-		WebSocketMessage<?> webSocketMessage = this.session.getSentMessages().get(0);
-		assertTrue(webSocketMessage instanceof BinaryMessage);
-
-		// Empty payload
-
-		payload = EMPTY_PAYLOAD;
-		message = MessageBuilder.createMessage(payload, headers.getMessageHeaders());
-		this.protocolHandler.handleMessageToClient(this.session, message);
-
-		assertEquals(2, this.session.getSentMessages().size());
-		webSocketMessage = this.session.getSentMessages().get(1);
-		assertTrue(webSocketMessage instanceof TextMessage);
-	}
-
-	@Test
-	public void handleMessageFromClient() {
-
-		TextMessage textMessage = StompTextMessageBuilder.create(StompCommand.CONNECT).headers(
-				"login:guest", "passcode:guest", "accept-version:1.1,1.0", "heart-beat:10000,10000").build();
-
-		this.protocolHandler.afterSessionStarted(this.session, this.channel);
-		this.protocolHandler.handleMessageFromClient(this.session, textMessage, this.channel);
-
-		verify(this.channel).send(this.messageCaptor.capture());
-		Message<?> actual = this.messageCaptor.getValue();
-		assertNotNull(actual);
-
-		StompHeaderAccessor headers = StompHeaderAccessor.wrap(actual);
-		assertEquals(StompCommand.CONNECT, headers.getCommand());
-		assertEquals("s1", headers.getSessionId());
-		assertNotNull(headers.getSessionAttributes());
-		assertEquals("joe", headers.getUser().getName());
-		assertEquals("guest", headers.getLogin());
-		assertEquals("guest", headers.getPasscode());
-		assertArrayEquals(new long[] {10000, 10000}, headers.getHeartbeat());
-		assertEquals(new HashSet<>(Arrays.asList("1.1","1.0")), headers.getAcceptVersion());
-
-		assertEquals(0, this.session.getSentMessages().size());
-	}
-
-	@Test
-	public void handleMessageFromClientWithImmutableMessageInterceptor() {
-		AtomicReference<Boolean> mutable = new AtomicReference<>();
-		ExecutorSubscribableChannel channel = new ExecutorSubscribableChannel();
-		channel.addInterceptor(new ChannelInterceptorAdapter() {
-			@Override
-			public Message<?> preSend(Message<?> message, MessageChannel channel) {
-				mutable.set(MessageHeaderAccessor.getAccessor(message, MessageHeaderAccessor.class).isMutable());
-				return message;
-			}
-		});
-		channel.addInterceptor(new ImmutableMessageChannelInterceptor());
-
-		StompSubProtocolHandler handler = new StompSubProtocolHandler();
-		handler.afterSessionStarted(this.session, channel);
-
-		TextMessage message = StompTextMessageBuilder.create(StompCommand.CONNECT).build();
-		handler.handleMessageFromClient(this.session, message, channel);
-		assertNotNull(mutable.get());
-		assertTrue(mutable.get());
-	}
-
-	@Test
-	public void handleMessageFromClientWithoutImmutableMessageInterceptor() {
-		AtomicReference<Boolean> mutable = new AtomicReference<>();
-		ExecutorSubscribableChannel channel = new ExecutorSubscribableChannel();
-		channel.addInterceptor(new ChannelInterceptorAdapter() {
-			@Override
-			public Message<?> preSend(Message<?> message, MessageChannel channel) {
-				mutable.set(MessageHeaderAccessor.getAccessor(message, MessageHeaderAccessor.class).isMutable());
-				return message;
-			}
-		});
-
-		StompSubProtocolHandler handler = new StompSubProtocolHandler();
-		handler.afterSessionStarted(this.session, channel);
-
-		TextMessage message = StompTextMessageBuilder.create(StompCommand.CONNECT).build();
-		handler.handleMessageFromClient(this.session, message, channel);
-		assertNotNull(mutable.get());
-		assertFalse(mutable.get());
-	}
-	@Test
-	public void handleMessageFromClientInvalidStompCommand() {
-
-		TextMessage textMessage = new TextMessage("FOO\n\n\0");
-
-		this.protocolHandler.afterSessionStarted(this.session, this.channel);
-		this.protocolHandler.handleMessageFromClient(this.session, textMessage, this.channel);
-
-		verifyZeroInteractions(this.channel);
-		assertEquals(1, this.session.getSentMessages().size());
-		TextMessage actual = (TextMessage) this.session.getSentMessages().get(0);
-		assertTrue(actual.getPayload().startsWith("ERROR"));
-	}
-
-	@Test
 	public void webSocketScope() {
 
 		Runnable runnable = Mockito.mock(Runnable.class);
@@ -421,10 +431,10 @@ public class StompSubProtocolHandlerTests {
 		TextMessage textMessage = new TextMessage(new StompEncoder().encode(message));
 
 		this.protocolHandler.handleMessageFromClient(this.session, textMessage, testChannel);
-		assertEquals(Collections.emptyList(), session.getSentMessages());
+		assertEquals(Collections.<WebSocketMessage<?>>emptyList(), session.getSentMessages());
 
 		this.protocolHandler.afterSessionEnded(this.session, CloseStatus.BAD_DATA, testChannel);
-		assertEquals(Collections.emptyList(), session.getSentMessages());
+		assertEquals(Collections.<WebSocketMessage<?>>emptyList(), this.session.getSentMessages());
 		verify(runnable, times(1)).run();
 	}
 

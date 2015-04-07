@@ -86,6 +86,7 @@ class StubWebApplicationContext implements WebApplicationContext {
 		this.resourcePatternResolver = new ServletContextResourcePatternResolver(servletContext);
 	}
 
+
 	/**
 	 * Returns an instance that can initialize {@link ApplicationContextAware} beans.
 	 */
@@ -194,13 +195,13 @@ class StubWebApplicationContext implements WebApplicationContext {
 	}
 
 	@Override
-	public boolean isTypeMatch(String name, ResolvableType targetType) throws NoSuchBeanDefinitionException {
-		return this.beanFactory.isTypeMatch(name, targetType);
+	public boolean isTypeMatch(String name, ResolvableType typeToMatch) throws NoSuchBeanDefinitionException {
+		return this.beanFactory.isTypeMatch(name, typeToMatch);
 	}
 
 	@Override
-	public boolean isTypeMatch(String name, Class<?> targetType) throws NoSuchBeanDefinitionException {
-		return this.beanFactory.isTypeMatch(name, targetType);
+	public boolean isTypeMatch(String name, Class<?> typeToMatch) throws NoSuchBeanDefinitionException {
+		return this.beanFactory.isTypeMatch(name, typeToMatch);
 	}
 
 	@Override

@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.servlet.mvc.method.annotation;
 
 import java.io.IOException;
@@ -22,7 +23,6 @@ import java.util.Map;
 import org.springframework.http.MediaType;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.util.Assert;
-
 
 /**
  * A controller method return value type for asynchronous request processing
@@ -53,15 +53,12 @@ import org.springframework.util.Assert;
  * emitter.complete();
  * </pre>
  *
- * <p><strong>Note:</strong> this class is not thread-safe. Callers must ensure
- * that use from multiple threads is synchronized.
- *
  * @author Rossen Stoyanchev
  * @since 4.2
  */
 public class ResponseBodyEmitter {
 
-	private Handler handler;
+	private volatile Handler handler;
 
 	/* Cache for objects sent before handler is set. */
 	private final Map<Object, MediaType> initHandlerCache = new LinkedHashMap<Object, MediaType>(10);
@@ -124,7 +121,7 @@ public class ResponseBodyEmitter {
 	 * @throws java.lang.IllegalStateException wraps any other errors
 	 */
 	public void send(Object object, MediaType mediaType) throws IOException {
-		Assert.state(!this.complete, "ResponseBodyEmitter is already set complete.");
+		Assert.state(!this.complete, "ResponseBodyEmitter is already set complete");
 		sendInternal(object, mediaType);
 	}
 
@@ -132,9 +129,9 @@ public class ResponseBodyEmitter {
 		if (object == null) {
 			return;
 		}
-		if (handler == null) {
+		if (this.handler == null) {
 			synchronized (this) {
-				if (handler == null) {
+				if (this.handler == null) {
 					this.initHandlerCache.put(object, mediaType);
 					return;
 				}
@@ -143,11 +140,11 @@ public class ResponseBodyEmitter {
 		try {
 			this.handler.send(object, mediaType);
 		}
-		catch(IOException ex){
+		catch (IOException ex){
 			this.handler.completeWithError(ex);
 			throw ex;
 		}
-		catch(Throwable ex){
+		catch (Throwable ex){
 			this.handler.completeWithError(ex);
 			throw new IllegalStateException("Failed to send " + object, ex);
 		}
@@ -161,7 +158,7 @@ public class ResponseBodyEmitter {
 	public void complete() {
 		synchronized (this) {
 			this.complete = true;
-			if (handler != null) {
+			if (this.handler != null) {
 				this.handler.complete();
 			}
 		}
@@ -176,7 +173,7 @@ public class ResponseBodyEmitter {
 		synchronized (this) {
 			this.complete = true;
 			this.failure = ex;
-			if (handler != null) {
+			if (this.handler != null) {
 				this.handler.completeWithError(ex);
 			}
 		}

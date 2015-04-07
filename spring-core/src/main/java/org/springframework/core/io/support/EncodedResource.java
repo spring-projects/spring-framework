@@ -22,6 +22,7 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.nio.charset.Charset;
 
+import org.springframework.core.io.InputStreamSource;
 import org.springframework.core.io.Resource;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
@@ -39,7 +40,7 @@ import org.springframework.util.ObjectUtils;
  * @see java.io.Reader
  * @see java.nio.charset.Charset
  */
-public class EncodedResource {
+public class EncodedResource implements InputStreamSource {
 
 	private final Resource resource;
 
@@ -84,6 +85,7 @@ public class EncodedResource {
 		this.encoding = encoding;
 		this.charset = charset;
 	}
+
 
 	/**
 	 * Return the {@code Resource} held by this {@code EncodedResource}.
@@ -146,23 +148,24 @@ public class EncodedResource {
 	 * @see #requiresReader()
 	 * @see #getReader()
 	 */
+	@Override
 	public InputStream getInputStream() throws IOException {
 		return this.resource.getInputStream();
 	}
 
 
 	@Override
-	public boolean equals(Object obj) {
-		if (obj == this) {
+	public boolean equals(Object other) {
+		if (this == other) {
 			return true;
 		}
-		if (obj instanceof EncodedResource) {
-			EncodedResource that = (EncodedResource) obj;
-			return (this.resource.equals(that.resource) &&
-					ObjectUtils.nullSafeEquals(this.charset, that.charset) &&
-					ObjectUtils.nullSafeEquals(this.encoding, that.encoding));
+		if (!(other instanceof EncodedResource)) {
+			return false;
 		}
-		return false;
+		EncodedResource otherResource = (EncodedResource) other;
+		return (this.resource.equals(otherResource.resource) &&
+				ObjectUtils.nullSafeEquals(this.charset, otherResource.charset) &&
+				ObjectUtils.nullSafeEquals(this.encoding, otherResource.encoding));
 	}
 
 	@Override

@@ -35,6 +35,8 @@ import org.springframework.util.ClassUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.ReflectionUtils.MethodFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsUtils;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.method.HandlerMethodSelector;
 import org.springframework.web.servlet.HandlerMapping;
@@ -46,13 +48,12 @@ import org.springframework.web.servlet.HandlerMapping;
  * <p>For each registered handler method, a unique mapping is maintained with
  * subclasses defining the details of the mapping type {@code <T>}.
  *
- * @param <T> The mapping for a {@link HandlerMethod} containing the conditions
- * needed to match the handler method to incoming request.
- *
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
  * @author Juergen Hoeller
  * @since 3.1
+ * @param <T> The mapping for a {@link HandlerMethod} containing the conditions
+ * needed to match the handler method to incoming request.
  */
 public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMapping implements InitializingBean {
 
@@ -68,6 +69,9 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 	 */
 	private static final String SCOPED_TARGET_NAME_PREFIX = "scopedTarget.";
 
+	private static final HandlerMethod PREFLIGHT_MULTI_MATCH_HANDLER_METHOD =
+			new HandlerMethod(new EmptyHandler(), ClassUtils.getMethod(EmptyHandler.class, "handle"));
+
 
 	private boolean detectHandlerMethodsInAncestorContexts = false;
 
@@ -78,6 +82,8 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 	private final MultiValueMap<String, T> urlMap = new LinkedMultiValueMap<String, T>();
 
 	private final MultiValueMap<String, HandlerMethod> nameMap = new LinkedMultiValueMap<String, HandlerMethod>();
+
+	private final Map<Method, CorsConfiguration> corsConfigurations = new LinkedHashMap<Method, CorsConfiguration>();
 
 
 	/**
@@ -105,6 +111,20 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 	 */
 	public Map<T, HandlerMethod> getHandlerMethods() {
 		return Collections.unmodifiableMap(this.handlerMethods);
+	}
+
+	protected Map<Method, CorsConfiguration> getCorsConfigurations() {
+		return corsConfigurations;
+	}
+
+	@Override
+	protected CorsConfiguration getCorsConfiguration(Object handler, HttpServletRequest request) {
+		CorsConfiguration config = super.getCorsConfiguration(handler, request);
+		if (config == null && handler instanceof HandlerMethod) {
+			HandlerMethod handlerMethod = (HandlerMethod)handler;
+			config = this.getCorsConfigurations().get(handlerMethod.getMethod());
+		}
+		return config;
 	}
 
 	/**
@@ -145,7 +165,17 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 				detectHandlerMethods(beanName);
 			}
 		}
+		registerMultiMatchCorsConfiguration();
 		handlerMethodsInitialized(getHandlerMethods());
+	}
+
+	private void registerMultiMatchCorsConfiguration() {
+		CorsConfiguration config = new CorsConfiguration();
+		config.addAllowedOrigin("*");
+		config.addAllowedMethod("*");
+		config.addAllowedHeader("*");
+		config.setAllowCredentials(true);
+		this.corsConfigurations.put(PREFLIGHT_MULTI_MATCH_HANDLER_METHOD.getMethod(), config);
 	}
 
 	/**
@@ -229,6 +259,15 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 			String name = this.namingStrategy.getName(newHandlerMethod, mapping);
 			updateNameMap(name, newHandlerMethod);
 		}
+
+		CorsConfiguration config  = initCorsConfiguration(handler, method, mapping);
+		if (config != null) {
+			this.corsConfigurations.put(method, config);
+		}
+	}
+
+	protected CorsConfiguration initCorsConfiguration(Object handler, Method method, T mappingInfo) {
+		return null;
 	}
 
 	private void updateNameMap(String name, HandlerMethod newHandlerMethod) {
@@ -334,6 +373,9 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 			}
 			Match bestMatch = matches.get(0);
 			if (matches.size() > 1) {
+				if (CorsUtils.isPreFlightRequest(request)) {
+					return PREFLIGHT_MULTI_MATCH_HANDLER_METHOD;
+				}
 				Match secondBestMatch = matches.get(1);
 				if (comparator.compare(bestMatch, secondBestMatch) == 0) {
 					Method m1 = bestMatch.handlerMethod.getMethod();
@@ -435,6 +477,15 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 		public int compare(Match match1, Match match2) {
 			return this.comparator.compare(match1.mapping, match2.mapping);
 		}
+	}
+
+
+	private static class EmptyHandler {
+
+		public void handle() {
+			throw new UnsupportedOperationException("not implemented");
+		}
+
 	}
 
 }

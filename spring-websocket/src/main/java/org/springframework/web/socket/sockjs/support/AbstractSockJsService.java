@@ -27,10 +27,11 @@ import java.util.List;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.InvalidMediaTypeException;
@@ -43,6 +44,9 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.DigestUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.CorsUtils;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.sockjs.SockJsException;
 import org.springframework.web.socket.sockjs.SockJsService;
@@ -60,7 +64,7 @@ import org.springframework.web.util.WebUtils;
  * @author Sebastien Deleuze
  * @since 4.0
  */
-public abstract class AbstractSockJsService implements SockJsService {
+public abstract class AbstractSockJsService implements SockJsService, CorsConfigurationSource {
 
 	private static final Charset UTF8_CHARSET = Charset.forName("UTF-8");
 
@@ -447,16 +451,8 @@ public abstract class AbstractSockJsService implements SockJsService {
 	protected abstract void handleTransportRequest(ServerHttpRequest request, ServerHttpResponse response,
 			WebSocketHandler webSocketHandler, String sessionId, String transport) throws SockJsException;
 
-	/**
-	 * Check the {@code Origin} header value and eventually call {@link #addCorsHeaders(ServerHttpRequest, ServerHttpResponse, HttpMethod...)}.
-	 * If the request origin is not allowed, the request is rejected.
-	 * @return false if the request is rejected, else true
-	 * @since 4.1.2
-	 */
-	protected boolean checkAndAddCorsHeaders(ServerHttpRequest request, ServerHttpResponse response, HttpMethod... httpMethods) {
-		HttpHeaders requestHeaders = request.getHeaders();
-		HttpHeaders responseHeaders = response.getHeaders();
-		String origin = requestHeaders.getOrigin();
+	protected boolean checkOrigin(ServerHttpRequest request, ServerHttpResponse response, HttpMethod... httpMethods) throws IOException {
+		String origin = request.getHeaders().getOrigin();
 
 		if (origin == null) {
 			return true;
@@ -468,46 +464,26 @@ public abstract class AbstractSockJsService implements SockJsService {
 			return false;
 		}
 
-		boolean hasCorsResponseHeaders = false;
-		try {
-			// Perhaps a CORS Filter has already added this?
-			hasCorsResponseHeaders = !CollectionUtils.isEmpty(responseHeaders.get("Access-Control-Allow-Origin"));
-		}
-		catch (NullPointerException npe) {
-			// See SPR-11919 and https://issues.jboss.org/browse/WFLY-3474
-		}
-
-		if (!this.suppressCors && !hasCorsResponseHeaders) {
-			addCorsHeaders(request, response, httpMethods);
-		}
 		return true;
 	}
 
-	protected void addCorsHeaders(ServerHttpRequest request, ServerHttpResponse response, HttpMethod... httpMethods) {
-		HttpHeaders requestHeaders = request.getHeaders();
-		HttpHeaders responseHeaders = response.getHeaders();
-
-		responseHeaders.add("Access-Control-Allow-Origin", requestHeaders.getFirst("Origin"));
-		responseHeaders.add("Access-Control-Allow-Credentials", "true");
-
-		List<String> accessControllerHeaders = requestHeaders.get("Access-Control-Request-Headers");
-		if (accessControllerHeaders != null) {
-			for (String header : accessControllerHeaders) {
-				responseHeaders.add("Access-Control-Allow-Headers", header);
-			}
+	@Override
+	public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
+		if (!this.suppressCors && CorsUtils.isCorsRequest(request)) {
+			CorsConfiguration config = new CorsConfiguration();
+			config.addAllowedOrigin("*");
+			config.addAllowedMethod("*");
+			config.setAllowCredentials(true);
+			config.setMaxAge(ONE_YEAR);
+			config.addAllowedHeader("*");
+			return config;
 		}
-
-		if (!ObjectUtils.isEmpty(httpMethods)) {
-			responseHeaders.add("Access-Control-Allow-Methods", StringUtils.arrayToDelimitedString(httpMethods, ", "));
-			responseHeaders.add("Access-Control-Max-Age", String.valueOf(ONE_YEAR));
-		}
-		responseHeaders.add(HttpHeaders.VARY, HttpHeaders.ORIGIN);
+		return null;
 	}
 
 	protected void addCacheHeaders(ServerHttpResponse response) {
 		response.getHeaders().setCacheControl("public, max-age=" + ONE_YEAR);
 		response.getHeaders().setExpires(new Date().getTime() + ONE_YEAR * 1000);
-		response.getHeaders().add(HttpHeaders.VARY, HttpHeaders.ORIGIN);
 	}
 
 	protected void addNoCacheHeaders(ServerHttpResponse response) {
@@ -536,15 +512,15 @@ public abstract class AbstractSockJsService implements SockJsService {
 		public void handle(ServerHttpRequest request, ServerHttpResponse response) throws IOException {
 			if (HttpMethod.GET.equals(request.getMethod())) {
 				addNoCacheHeaders(response);
-				if (checkAndAddCorsHeaders(request, response)) {
+				if (checkOrigin(request, response)) {
 					response.getHeaders().setContentType(new MediaType("application", "json", UTF8_CHARSET));
 					String content = String.format(INFO_CONTENT, random.nextInt(), isSessionCookieNeeded(), isWebSocketEnabled());
 					response.getBody().write(content.getBytes());
 				}
+
 			}
 			else if (HttpMethod.OPTIONS.equals(request.getMethod())) {
-				if (checkAndAddCorsHeaders(request, response, HttpMethod.OPTIONS,
-						HttpMethod.GET)) {
+				if (checkOrigin(request, response)) {
 					addCacheHeaders(response);
 					response.setStatusCode(HttpStatus.NO_CONTENT);
 				}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,9 +41,6 @@ public abstract class MockMvcResultMatchers {
 
 	private static final AntPathMatcher pathMatcher = new AntPathMatcher();
 
-
-	private MockMvcResultMatchers() {
-	}
 
 	/**
 	 * Access to request-related assertions.
@@ -87,7 +84,6 @@ public abstract class MockMvcResultMatchers {
 	 */
 	public static ResultMatcher forwardedUrl(final String expectedUrl) {
 		return new ResultMatcher() {
-
 			@Override
 			public void match(MvcResult result) {
 				assertEquals("Forwarded URL", expectedUrl, result.getResponse().getForwardedUrl());
@@ -99,12 +95,11 @@ public abstract class MockMvcResultMatchers {
 	 * Asserts the request was forwarded to the given URL.
 	 * This methods accepts {@link org.springframework.util.AntPathMatcher} expressions.
 	 * @param urlPattern an AntPath expression to match against
-	 * @see org.springframework.util.AntPathMatcher
 	 * @since 4.0
+	 * @see org.springframework.util.AntPathMatcher
 	 */
 	public static ResultMatcher forwardedUrlPattern(final String urlPattern) {
 		return new ResultMatcher() {
-
 			@Override
 			public void match(MvcResult result) {
 				assertTrue("AntPath expression", pathMatcher.isPattern(urlPattern));
@@ -121,7 +116,6 @@ public abstract class MockMvcResultMatchers {
 	 */
 	public static ResultMatcher redirectedUrl(final String expectedUrl) {
 		return new ResultMatcher() {
-
 			@Override
 			public void match(MvcResult result) {
 				assertEquals("Redirected URL", expectedUrl, result.getResponse().getRedirectedUrl());
@@ -138,7 +132,6 @@ public abstract class MockMvcResultMatchers {
 	 */
 	public static ResultMatcher redirectedUrlPattern(final String expectedUrl) {
 		return new ResultMatcher() {
-
 			@Override
 			public void match(MvcResult result) {
 				assertTrue("AntPath expression",pathMatcher.isPattern(expectedUrl));
@@ -175,7 +168,6 @@ public abstract class MockMvcResultMatchers {
 	 * inspect a specific subset of the body. The JSON path expression can be a
 	 * parameterized string using formatting specifiers as defined in
 	 * {@link String#format(String, Object...)}.
-	 *
 	 * @param expression the JSON path optionally parameterized with arguments
 	 * @param args arguments to parameterize the JSON path expression with
 	 */
@@ -188,7 +180,6 @@ public abstract class MockMvcResultMatchers {
 	 * href="http://goessner.net/articles/JsonPath/">JSONPath</a> expression to
 	 * inspect a specific subset of the body and a Hamcrest match for asserting
 	 * the value found at the JSON path.
-	 *
 	 * @param expression the JSON path expression
 	 * @param matcher a matcher for the value expected at the JSON path
 	 */
@@ -201,7 +192,6 @@ public abstract class MockMvcResultMatchers {
 	 * subset of the body. The XPath expression can be a parameterized string
 	 * using formatting specifiers as defined in
 	 * {@link String#format(String, Object...)}.
-	 *
 	 * @param expression the XPath optionally parameterized with arguments
 	 * @param args arguments to parameterize the XPath expression with
 	 */
@@ -214,7 +204,6 @@ public abstract class MockMvcResultMatchers {
 	 * subset of the body. The XPath expression can be a parameterized string
 	 * using formatting specifiers as defined in
 	 * {@link String#format(String, Object...)}.
-	 *
 	 * @param expression the XPath optionally parameterized with arguments
 	 * @param namespaces namespaces referenced in the XPath expression
 	 * @param args arguments to parameterize the XPath expression with

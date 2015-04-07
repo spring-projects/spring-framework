@@ -223,6 +223,14 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 	protected void configureMessageBroker(MessageBrokerRegistry registry) {
 	}
 
+	/**
+	 * Provide access to the configured PatchMatcher for access from other
+	 * configuration classes.
+	 */
+	public final PathMatcher getPathMatcher() {
+		return getBrokerRegistry().getPathMatcher();
+	}
+
 	@Bean
 	public SimpAnnotationMethodMessageHandler simpAnnotationMethodMessageHandler() {
 		SimpAnnotationMethodMessageHandler handler = createAnnotationMethodMessageHandler();

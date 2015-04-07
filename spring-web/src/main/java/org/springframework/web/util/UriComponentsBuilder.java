@@ -716,35 +716,18 @@ public class UriComponentsBuilder implements Cloneable {
 		}
 
 		public void addPath(String path) {
-			if (!StringUtils.hasText(path)) {
-				return;
+			if (StringUtils.hasText(path)) {
+				PathSegmentComponentBuilder psBuilder = getLastBuilder(PathSegmentComponentBuilder.class);
+				FullPathComponentBuilder fpBuilder = getLastBuilder(FullPathComponentBuilder.class);
+				if (psBuilder != null) {
+					path = path.startsWith("/") ? path : "/" + path;
+				}
+				if (fpBuilder == null) {
+					fpBuilder = new FullPathComponentBuilder();
+					this.builders.add(fpBuilder);
+				}
+				fpBuilder.append(path);
 			}
-			int startIndex = path.indexOf("{/");
-			while (startIndex != -1) {
-				String pathToAdd = path.substring(0, startIndex);
-				addPathInternal(pathToAdd);
-
-				int endIndex = path.indexOf("}", startIndex);
-				String pathSegmentToAdd = "{" + path.substring(startIndex + 2, endIndex) + "}";
-				addPathSegments(pathSegmentToAdd);
-
-				path = (endIndex >= path.length()) ? "" : path.substring(endIndex + 1);
-				startIndex = path.indexOf("{/");
-			}
-			addPathInternal(path);
-		}
-
-		private void addPathInternal(String path) {
-			PathSegmentComponentBuilder psBuilder = getLastBuilder(PathSegmentComponentBuilder.class);
-			FullPathComponentBuilder fpBuilder = getLastBuilder(FullPathComponentBuilder.class);
-			if (psBuilder != null) {
-				path = path.startsWith("/") ? path : "/" + path;
-			}
-			if (fpBuilder == null) {
-				fpBuilder = new FullPathComponentBuilder();
-				this.builders.add(fpBuilder);
-			}
-			fpBuilder.append(path);
 		}
 
 		@SuppressWarnings("unchecked")

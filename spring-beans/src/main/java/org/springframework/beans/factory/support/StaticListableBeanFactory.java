@@ -169,15 +169,15 @@ public class StaticListableBeanFactory implements ListableBeanFactory {
 	}
 
 	@Override
-	public boolean isTypeMatch(String name, ResolvableType targetType) throws NoSuchBeanDefinitionException {
+	public boolean isTypeMatch(String name, ResolvableType typeToMatch) throws NoSuchBeanDefinitionException {
 		Class<?> type = getType(name);
-		return (targetType == null || (type != null && targetType.isAssignableFrom(type)));
+		return (type != null && typeToMatch.isAssignableFrom(type));
 	}
 
 	@Override
-	public boolean isTypeMatch(String name, Class<?> targetType) throws NoSuchBeanDefinitionException {
+	public boolean isTypeMatch(String name, Class<?> typeToMatch) throws NoSuchBeanDefinitionException {
 		Class<?> type = getType(name);
-		return (targetType == null || (type != null && targetType.isAssignableFrom(type)));
+		return (typeToMatch == null || (type != null && typeToMatch.isAssignableFrom(type)));
 	}
 
 	@Override

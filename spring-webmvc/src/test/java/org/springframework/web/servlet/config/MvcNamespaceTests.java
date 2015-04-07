@@ -29,6 +29,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import javax.servlet.RequestDispatcher;
 import javax.validation.constraints.NotNull;
@@ -73,6 +74,7 @@ import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 import org.springframework.web.accept.ContentNegotiationManager;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.http.CacheControl;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.ServletWebRequest;
@@ -202,7 +204,7 @@ public class MvcNamespaceTests {
 		assertTrue(converters.size() > 0);
 		for (HttpMessageConverter<?> converter : converters) {
 			if (converter instanceof AbstractJackson2HttpMessageConverter) {
-				ObjectMapper objectMapper = ((AbstractJackson2HttpMessageConverter)converter).getObjectMapper();
+				ObjectMapper objectMapper = ((AbstractJackson2HttpMessageConverter) converter).getObjectMapper();
 				assertFalse(objectMapper.getDeserializationConfig().isEnabled(MapperFeature.DEFAULT_VIEW_INCLUSION));
 				assertFalse(objectMapper.getSerializationConfig().isEnabled(MapperFeature.DEFAULT_VIEW_INCLUSION));
 				assertFalse(objectMapper.getDeserializationConfig().isEnabled(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES));
@@ -233,7 +235,7 @@ public class MvcNamespaceTests {
 		adapter.handle(request, response, handlerMethod);
 		assertTrue(handler.recordedValidationError);
 		assertEquals(LocalDate.parse("2009-10-31").toDate(), handler.date);
-		assertEquals(Double.valueOf(0.9999),handler.percent);
+		assertEquals(Double.valueOf(0.9999), handler.percent);
 
 		CompositeUriComponentsContributor uriComponentsContributor = this.appContext.getBean(
 				MvcUriComponentsBuilder.MVC_URI_COMPONENTS_CONTRIBUTOR_BEAN_NAME,
@@ -242,7 +244,7 @@ public class MvcNamespaceTests {
 		assertNotNull(uriComponentsContributor);
 	}
 
-	@Test(expected=TypeMismatchException.class)
+	@Test(expected = TypeMismatchException.class)
 	public void testCustomConversionService() throws Exception {
 		loadBeanDefinitions("mvc-config-custom-conversion-service.xml", 13);
 
@@ -384,10 +386,12 @@ public class MvcNamespaceTests {
 		assertEquals(5, mapping.getOrder());
 		assertNotNull(mapping.getUrlMap().get("/resources/**"));
 
-		ResourceHttpRequestHandler handler = appContext.getBean((String)mapping.getUrlMap().get("/resources/**"),
+		ResourceHttpRequestHandler handler = appContext.getBean((String) mapping.getUrlMap().get("/resources/**"),
 				ResourceHttpRequestHandler.class);
 		assertNotNull(handler);
 		assertEquals(3600, handler.getCacheSeconds());
+		assertThat(handler.getCacheControl().getHeaderValue(),
+				Matchers.equalTo(CacheControl.maxAge(1, TimeUnit.HOURS).getHeaderValue()));
 	}
 
 	@Test
@@ -397,7 +401,7 @@ public class MvcNamespaceTests {
 		SimpleUrlHandlerMapping mapping = appContext.getBean(SimpleUrlHandlerMapping.class);
 		assertNotNull(mapping);
 		assertNotNull(mapping.getUrlMap().get("/resources/**"));
-		ResourceHttpRequestHandler handler = appContext.getBean((String)mapping.getUrlMap().get("/resources/**"),
+		ResourceHttpRequestHandler handler = appContext.getBean((String) mapping.getUrlMap().get("/resources/**"),
 				ResourceHttpRequestHandler.class);
 		assertNotNull(handler);
 
@@ -435,9 +439,13 @@ public class MvcNamespaceTests {
 		SimpleUrlHandlerMapping mapping = appContext.getBean(SimpleUrlHandlerMapping.class);
 		assertNotNull(mapping);
 		assertNotNull(mapping.getUrlMap().get("/resources/**"));
-		ResourceHttpRequestHandler handler = appContext.getBean((String)mapping.getUrlMap().get("/resources/**"),
+		ResourceHttpRequestHandler handler = appContext.getBean((String) mapping.getUrlMap().get("/resources/**"),
 				ResourceHttpRequestHandler.class);
 		assertNotNull(handler);
+
+		assertThat(handler.getCacheControl().getHeaderValue(),
+				Matchers.equalTo(CacheControl.maxAge(1, TimeUnit.HOURS)
+						.sMaxAge(30, TimeUnit.MINUTES).cachePublic().getHeaderValue()));
 
 		List<ResourceResolver> resolvers = handler.getResourceResolvers();
 		assertThat(resolvers, Matchers.hasSize(3));
@@ -762,12 +770,12 @@ public class MvcNamespaceTests {
 		};
 		accessor = new DirectFieldAccessor(tilesConfigurer);
 		assertArrayEquals(definitions, (String[]) accessor.getPropertyValue("definitions"));
-		assertTrue((boolean)accessor.getPropertyValue("checkRefresh"));
+		assertTrue((boolean) accessor.getPropertyValue("checkRefresh"));
 
 		FreeMarkerConfigurer freeMarkerConfigurer = appContext.getBean(FreeMarkerConfigurer.class);
 		assertNotNull(freeMarkerConfigurer);
 		accessor = new DirectFieldAccessor(freeMarkerConfigurer);
-		assertArrayEquals(new String[]{"/", "/test"}, (String[]) accessor.getPropertyValue("templateLoaderPaths"));
+		assertArrayEquals(new String[] {"/", "/test"}, (String[]) accessor.getPropertyValue("templateLoaderPaths"));
 
 		VelocityConfigurer velocityConfigurer = appContext.getBean(VelocityConfigurer.class);
 		assertNotNull(velocityConfigurer);
@@ -846,7 +854,7 @@ public class MvcNamespaceTests {
 	}
 
 
-	@DateTimeFormat(iso=ISO.DATE)
+	@DateTimeFormat(iso = ISO.DATE)
 	@Target({ElementType.PARAMETER})
 	@Retention(RetentionPolicy.RUNTIME)
 	public @interface IsoDate {
@@ -868,7 +876,9 @@ public class MvcNamespaceTests {
 	public static class TestController {
 
 		private Date date;
+
 		private Double percent;
+
 		private boolean recordedValidationError;
 
 		@RequestMapping
@@ -900,7 +910,7 @@ public class MvcNamespaceTests {
 
 	private static class TestBean {
 
-		@NotNull(groups=MyGroup.class)
+		@NotNull(groups = MyGroup.class)
 		private String field;
 
 		@SuppressWarnings("unused")
@@ -920,7 +930,8 @@ public class MvcNamespaceTests {
 		public RequestDispatcher getNamedDispatcher(String path) {
 			if (path.equals("default") || path.equals("custom")) {
 				return new MockRequestDispatcher("/");
-			} else {
+			}
+			else {
 				return null;
 			}
 		}

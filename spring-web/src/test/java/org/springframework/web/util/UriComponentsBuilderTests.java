@@ -27,6 +27,7 @@ import static org.junit.Assert.assertTrue;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -195,16 +196,6 @@ public class UriComponentsBuilderTests {
 		assertEquals("1USD=?EUR", result.getQueryParams().getFirst("q"));
 	}
 
-	//SPR-12750
-
-	@Test
-	public void fromUriStringWithVariablesRfc6570() {
-		String url = "http://example.com/part1/{/part2}/{var1}/url/{/urlvar}/";
-		UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(url);
-		UriComponents uriComponents = builder.build().expand("part/2", "var/1", "url/var").encode();
-		assertEquals("/part1/part%2F2/var/1/url/url%2Fvar/", uriComponents.getPath());
-	}
-
 	// SPR-10779
 
 	@Test
@@ -246,6 +237,24 @@ public class UriComponentsBuilderTests {
 		assertEquals("example.com", result.getHost());
 		assertTrue(result.getQueryParams().containsKey("foo"));
 		assertEquals("bar@baz", result.getQueryParams().getFirst("foo"));
+	}
+
+	//SPR-12750
+
+	@Test
+	public void fromUriStringWithSlashPrefixedVariable() {
+		UriComponents result = UriComponentsBuilder.fromUriString(
+				"http://example.com/part1/{/part2}/{var1}/url/{/urlvar}?foo=bar@baz&bar={barvalue}")
+				.build();
+		assertTrue(StringUtils.isEmpty(result.getUserInfo()));
+		assertEquals("example.com", result.getHost());
+		assertEquals("/part1/{/part2}/{var1}/url/{/urlvar}", result.getPath());
+		assertEquals(Arrays.asList("part1", "{/part2}", "{var1}", "url", "{/urlvar}"),
+				result.getPathSegments());
+		assertTrue(result.getQueryParams().containsKey("foo"));
+		assertEquals("bar@baz", result.getQueryParams().getFirst("foo"));
+		assertTrue(result.getQueryParams().containsKey("bar"));
+		assertEquals("{barvalue}", result.getQueryParams().getFirst("bar"));
 	}
 
 	@Test
@@ -506,7 +515,7 @@ public class UriComponentsBuilderTests {
 		UriComponents result = builder.build();
 
 		assertEquals("/foo/", result.getPath());
-		assertEquals(Arrays.asList("foo"), result.getPathSegments());
+		assertEquals(Collections.singletonList("foo"), result.getPathSegments());
 	}
 
 	@Test

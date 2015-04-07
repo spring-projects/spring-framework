@@ -35,8 +35,6 @@ import org.springframework.beans.factory.annotation.RequiredAnnotationBeanPostPr
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.groovy.GroovyBeanDefinitionReader;
-import org.springframework.beans.factory.parsing.Location;
-import org.springframework.beans.factory.parsing.Problem;
 import org.springframework.beans.factory.parsing.ProblemReporter;
 import org.springframework.beans.factory.parsing.SourceExtractor;
 import org.springframework.beans.factory.support.AbstractBeanDefinitionReader;
@@ -160,22 +158,18 @@ class ConfigurationClassBeanDefinitionReader {
 		AnnotationMetadata metadata = configClass.getMetadata();
 		AnnotatedGenericBeanDefinition configBeanDef = new AnnotatedGenericBeanDefinition(metadata);
 
-		if (ConfigurationClassUtils.checkConfigurationClassCandidate(configBeanDef, this.metadataReaderFactory)) {
-			ScopeMetadata scopeMetadata = scopeMetadataResolver.resolveScopeMetadata(configBeanDef);
-			configBeanDef.setScope(scopeMetadata.getScopeName());
-			String configBeanName = this.importBeanNameGenerator.generateBeanName(configBeanDef, this.registry);
-			AnnotationConfigUtils.processCommonDefinitionAnnotations(configBeanDef, metadata);
-			BeanDefinitionHolder definitionHolder = new BeanDefinitionHolder(configBeanDef, configBeanName);
-			definitionHolder = AnnotationConfigUtils.applyScopedProxyMode(scopeMetadata, definitionHolder, this.registry);
-			this.registry.registerBeanDefinition(definitionHolder.getBeanName(), definitionHolder.getBeanDefinition());
-			configClass.setBeanName(configBeanName);
-			if (logger.isDebugEnabled()) {
-				logger.debug(String.format("Registered bean definition for imported @Configuration class %s", configBeanName));
-			}
-		}
-		else {
-			this.problemReporter.error(
-					new InvalidConfigurationImportProblem(metadata.getClassName(), configClass.getResource(), metadata));
+		ScopeMetadata scopeMetadata = scopeMetadataResolver.resolveScopeMetadata(configBeanDef);
+		configBeanDef.setScope(scopeMetadata.getScopeName());
+		String configBeanName = this.importBeanNameGenerator.generateBeanName(configBeanDef, this.registry);
+		AnnotationConfigUtils.processCommonDefinitionAnnotations(configBeanDef, metadata);
+
+		BeanDefinitionHolder definitionHolder = new BeanDefinitionHolder(configBeanDef, configBeanName);
+		definitionHolder = AnnotationConfigUtils.applyScopedProxyMode(scopeMetadata, definitionHolder, this.registry);
+		this.registry.registerBeanDefinition(definitionHolder.getBeanName(), definitionHolder.getBeanDefinition());
+		configClass.setBeanName(configBeanName);
+
+		if (logger.isDebugEnabled()) {
+			logger.debug("Registered bean definition for imported class '" + configBeanName + "'");
 		}
 	}
 
@@ -418,21 +412,6 @@ class ConfigurationClassBeanDefinitionReader {
 		@Override
 		public ConfigurationClassBeanDefinition cloneBeanDefinition() {
 			return new ConfigurationClassBeanDefinition(this);
-		}
-	}
-
-
-	/**
-	 * Configuration classes must be annotated with {@link Configuration @Configuration} or
-	 * declare at least one {@link Bean @Bean} method.
-	 */
-	private static class InvalidConfigurationImportProblem extends Problem {
-
-		public InvalidConfigurationImportProblem(String className, Resource resource, AnnotationMetadata metadata) {
-			super(String.format("%s was @Import'ed but is not annotated with @Configuration " +
-					"nor does it declare any @Bean methods; it does not implement ImportSelector " +
-					"or extend ImportBeanDefinitionRegistrar. Update the class to meet one of these requirements " +
-					"or do not attempt to @Import it.", className), new Location(resource, metadata));
 		}
 	}
 

@@ -34,6 +34,7 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
+import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.simp.SimpAttributes;
 import org.springframework.messaging.simp.SimpAttributesContextHolder;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
@@ -233,15 +234,16 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 				StompHeaderAccessor headerAccessor =
 						MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
 
-				if (logger.isTraceEnabled()) {
-					logger.trace("From client: " + headerAccessor.getShortLogMessage(message.getPayload()));
-				}
-
 				headerAccessor.setSessionId(session.getId());
 				headerAccessor.setSessionAttributes(session.getAttributes());
 				headerAccessor.setUser(session.getPrincipal());
+				headerAccessor.setHeader(SimpMessageHeaderAccessor.HEART_BEAT_HEADER, headerAccessor.getHeartbeat());
 				if (!detectImmutableMessageInterceptor(outputChannel)) {
 					headerAccessor.setImmutable();
+				}
+
+				if (logger.isTraceEnabled()) {
+					logger.trace("From client: " + headerAccessor.getShortLogMessage(message.getPayload()));
 				}
 
 				if (StompCommand.CONNECT.equals(headerAccessor.getCommand())) {
@@ -401,12 +403,16 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 		}
 		else if (accessor instanceof SimpMessageHeaderAccessor) {
 			stompAccessor = StompHeaderAccessor.wrap(message);
-			if (SimpMessageType.CONNECT_ACK.equals(stompAccessor.getMessageType())) {
+			SimpMessageType messageType = SimpMessageHeaderAccessor.getMessageType(message.getHeaders());
+			if (SimpMessageType.CONNECT_ACK.equals(messageType)) {
 				stompAccessor = convertConnectAcktoStompConnected(stompAccessor);
 			}
-			else if (SimpMessageType.DISCONNECT_ACK.equals(stompAccessor.getMessageType())) {
+			else if (SimpMessageType.DISCONNECT_ACK.equals(messageType)) {
 				stompAccessor = StompHeaderAccessor.create(StompCommand.ERROR);
 				stompAccessor.setMessage("Session closed.");
+			}
+			else if (SimpMessageType.HEARTBEAT.equals(messageType)) {
+				stompAccessor = StompHeaderAccessor.createForHeartbeat();
 			}
 			else if (stompAccessor.getCommand() == null || StompCommand.SEND.equals(stompAccessor.getCommand())) {
 				stompAccessor.updateStompCommandAsServerMessage();
@@ -429,23 +435,21 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 		Message<?> message = (Message<?>) connectAckHeaders.getHeader(name);
 		Assert.notNull(message, "Original STOMP CONNECT not found in " + connectAckHeaders);
 		StompHeaderAccessor connectHeaders = MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
-		String version;
+		StompHeaderAccessor connectedHeaders = StompHeaderAccessor.create(StompCommand.CONNECTED);
 		Set<String> acceptVersions = connectHeaders.getAcceptVersion();
 		if (acceptVersions.contains("1.2")) {
-			version = "1.2";
+			connectedHeaders.setVersion("1.2");
 		}
 		else if (acceptVersions.contains("1.1")) {
-			version = "1.1";
+			connectedHeaders.setVersion("1.1");
 		}
-		else if (acceptVersions.isEmpty()) {
-			version = null;
-		}
-		else {
+		else if (!acceptVersions.isEmpty()) {
 			throw new IllegalArgumentException("Unsupported STOMP version '" + acceptVersions + "'");
 		}
-		StompHeaderAccessor connectedHeaders = StompHeaderAccessor.create(StompCommand.CONNECTED);
-		connectedHeaders.setVersion(version);
-		connectedHeaders.setHeartbeat(0, 0); // not supported
+		long[] heartbeat = (long[]) connectAckHeaders.getHeader(SimpMessageHeaderAccessor.HEART_BEAT_HEADER);
+		if (heartbeat != null) {
+			connectedHeaders.setHeartbeat(heartbeat[0], heartbeat[1]);
+		}
 		return connectedHeaders;
 	}
 

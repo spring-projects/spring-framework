@@ -20,24 +20,25 @@ import org.springframework.util.Assert;
 
 /**
  * An {@link ApplicationEvent} that carries an arbitrary payload.
- * <p>
- * Mainly intended for internal use within the framework.
  *
- * @param <T> the payload type of the event
+ * <p>Mainly intended for internal use within the framework.
+ *
  * @author Stephane Nicoll
  * @since 4.2
+ * @param <T> the payload type of the event
  */
 @SuppressWarnings("serial")
-public class PayloadApplicationEvent<T>
-		extends ApplicationEvent {
+public class PayloadApplicationEvent<T> extends ApplicationEvent {
 
 	private final T payload;
+
 
 	public PayloadApplicationEvent(Object source, T payload) {
 		super(source);
 		Assert.notNull(payload, "Payload must not be null");
 		this.payload = payload;
 	}
+
 
 	/**
 	 * Return the payload of the event.

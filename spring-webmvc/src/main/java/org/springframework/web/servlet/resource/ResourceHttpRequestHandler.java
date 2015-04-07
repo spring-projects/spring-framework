@@ -38,7 +38,9 @@ import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpRange;
 import org.springframework.http.MediaType;
+import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.http.server.ServletServerHttpRequest;
+import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
@@ -60,8 +62,8 @@ import org.springframework.web.servlet.support.WebContentGenerator;
  * <p>The {@linkplain #setLocations "locations" property} takes a list of Spring {@link Resource}
  * locations from which static resources are allowed  to be served by this handler. For a given request,
  * the list of locations will be consulted in order for the presence of the requested resource, and the
- * first found match will be written to the response, with {@code Expires} and {@code Cache-Control}
- * headers set as configured. The handler also properly evaluates the {@code Last-Modified} header
+ * first found match will be written to the response, with a HTTP Caching headers
+ * set as configured. The handler also properly evaluates the {@code Last-Modified} header
  * (if present) so that a {@code 304} status code will be returned as appropriate, avoiding unnecessary
  * overhead for resources that are already cached by the client. The use of {@code Resource} locations
  * allows resource requests to easily be mapped to locations other than the web application root.
@@ -88,7 +90,7 @@ import org.springframework.web.servlet.support.WebContentGenerator;
  * @author Arjen Poutsma
  * @since 3.0.4
  */
-public class ResourceHttpRequestHandler extends WebContentGenerator implements HttpRequestHandler, InitializingBean {
+public class ResourceHttpRequestHandler extends WebContentGenerator implements HttpRequestHandler, InitializingBean, CorsConfigurationSource {
 
 	private static final String CONTENT_ENCODING = "Content-Encoding";
 
@@ -103,6 +105,8 @@ public class ResourceHttpRequestHandler extends WebContentGenerator implements H
 	private final List<ResourceResolver> resourceResolvers = new ArrayList<ResourceResolver>(4);
 
 	private final List<ResourceTransformer> resourceTransformers = new ArrayList<ResourceTransformer>(4);
+
+	private CorsConfiguration corsConfiguration;
 
 
 	public ResourceHttpRequestHandler() {
@@ -162,6 +166,9 @@ public class ResourceHttpRequestHandler extends WebContentGenerator implements H
 		return this.resourceTransformers;
 	}
 
+	public void setCorsConfiguration(CorsConfiguration corsConfiguration) {
+		this.corsConfiguration = corsConfiguration;
+	}
 
 	@Override
 	public void afterPropertiesSet() throws Exception {
@@ -170,6 +177,11 @@ public class ResourceHttpRequestHandler extends WebContentGenerator implements H
 					"custom ResourceResolver is configured as an alternative to PathResourceResolver.");
 		}
 		initAllowedLocations();
+	}
+
+	@Override
+	public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
+		return corsConfiguration;
 	}
 
 	/**
@@ -210,7 +222,7 @@ public class ResourceHttpRequestHandler extends WebContentGenerator implements H
 	public void handleRequest(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 
-		checkAndPrepare(request, response, true);
+		checkAndPrepare(request, response);
 
 		// check whether a matching resource exists
 		Resource resource = getResource(request);

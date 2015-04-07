@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,13 +24,19 @@ import org.springframework.context.EmbeddedValueResolverAware;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.Assert;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringValueResolver;
 import org.springframework.web.accept.ContentNegotiationManager;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.mvc.condition.AbstractRequestCondition;
 import org.springframework.web.servlet.mvc.condition.CompositeRequestCondition;
 import org.springframework.web.servlet.mvc.condition.ConsumesRequestCondition;
 import org.springframework.web.servlet.mvc.condition.HeadersRequestCondition;
+import org.springframework.web.servlet.mvc.condition.NameValueExpression;
 import org.springframework.web.servlet.mvc.condition.ParamsRequestCondition;
 import org.springframework.web.servlet.mvc.condition.PatternsRequestCondition;
 import org.springframework.web.servlet.mvc.condition.ProducesRequestCondition;
@@ -259,6 +265,63 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 				resolvedPatterns[i] = this.embeddedValueResolver.resolveStringValue(patterns[i]);
 			}
 			return resolvedPatterns;
+		}
+	}
+
+	@Override
+	protected CorsConfiguration initCorsConfiguration(Object handler, Method method, RequestMappingInfo mappingInfo) {
+		HandlerMethod handlerMethod = createHandlerMethod(handler, method);
+
+		CorsConfiguration config = new CorsConfiguration();
+
+		CrossOrigin typeAnnotation = AnnotationUtils.findAnnotation(handlerMethod.getBeanType(), CrossOrigin.class);
+		applyAnnotation(config, typeAnnotation);
+
+		CrossOrigin methodAnnotation = AnnotationUtils.findAnnotation(method, CrossOrigin.class);
+		applyAnnotation(config, methodAnnotation);
+
+		if (CollectionUtils.isEmpty(config.getAllowedMethods())) {
+			for (RequestMethod allowedMethod : mappingInfo.getMethodsCondition().getMethods()) {
+				config.addAllowedMethod(allowedMethod.name());
+			}
+		}
+		if (CollectionUtils.isEmpty(config.getAllowedHeaders())) {
+			for (NameValueExpression<String> headerExpression : mappingInfo.getHeadersCondition().getExpressions()) {
+				if (!headerExpression.isNegated()) {
+					config.addAllowedHeader(headerExpression.getName());
+				}
+			}
+		}
+		return config;
+	}
+
+	private void applyAnnotation(CorsConfiguration config, CrossOrigin annotation) {
+		if (annotation == null) {
+			return;
+		}
+		for (String origin : annotation.origin()) {
+			config.addAllowedOrigin(origin);
+		}
+		for (RequestMethod method : annotation.method()) {
+			config.addAllowedMethod(method.name());
+		}
+		for (String header : annotation.allowedHeaders()) {
+			config.addAllowedHeader(header);
+		}
+		for (String header : annotation.exposedHeaders()) {
+			config.addExposedHeader(header);
+		}
+		if (annotation.allowCredentials().equalsIgnoreCase("true")) {
+			config.setAllowCredentials(true);
+		}
+		else if (annotation.allowCredentials().equalsIgnoreCase("false")) {
+			config.setAllowCredentials(false);
+		}
+		else if (!annotation.allowCredentials().isEmpty()) {
+			throw new IllegalStateException("AllowCredentials value must be \"true\", \"false\" or \"\" (empty string), current value is " + annotation.allowCredentials());
+		}
+		if (annotation.maxAge() != -1 && config.getMaxAge() == null) {
+			config.setMaxAge(annotation.maxAge());
 		}
 	}
 

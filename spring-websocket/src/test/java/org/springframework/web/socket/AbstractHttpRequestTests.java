@@ -18,7 +18,6 @@ package org.springframework.web.socket;
 
 import org.junit.Before;
 
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.server.ServerHttpAsyncRequestControl;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
@@ -53,10 +52,6 @@ public abstract class AbstractHttpRequestTests {
 	protected void setRequest(String method, String requestUri) {
 		this.servletRequest.setMethod(method);
 		this.servletRequest.setRequestURI(requestUri);
-	}
-
-	protected void setOrigin(String origin) {
-		this.request.getHeaders().add(HttpHeaders.ORIGIN, origin);
 	}
 
 	protected void resetRequestAndResponse() {

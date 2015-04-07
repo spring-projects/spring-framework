@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,9 +53,6 @@ public class WebContentInterceptorTests {
 
 		interceptor.preHandle(request, response, null);
 
-		List expiresHeaders = response.getHeaders("Expires");
-		assertNotNull("'Expires' header not set (must be) : null", expiresHeaders);
-		assertTrue("'Expires' header not set (must be) : empty", expiresHeaders.size() > 0);
 		List cacheControlHeaders = response.getHeaders("Cache-Control");
 		assertNotNull("'Cache-Control' header not set (must be) : null", cacheControlHeaders);
 		assertTrue("'Cache-Control' header not set (must be) : empty", cacheControlHeaders.size() > 0);
@@ -73,17 +70,12 @@ public class WebContentInterceptorTests {
 		request.setRequestURI("http://localhost:7070/example/adminhandle.vm");
 		interceptor.preHandle(request, response, null);
 
-		List expiresHeaders = response.getHeaders("Expires");
-		assertSame("'Expires' header set (must not be) : empty", 0, expiresHeaders.size());
 		List cacheControlHeaders = response.getHeaders("Cache-Control");
-		assertSame("'Cache-Control' header set (must not be) : empty", 0, cacheControlHeaders.size());
+		assertSame("'Cache-Control' header set must be empty", 0, cacheControlHeaders.size());
 
 		request.setRequestURI("http://localhost:7070/example/bingo.html");
 		interceptor.preHandle(request, response, null);
 
-		expiresHeaders = response.getHeaders("Expires");
-		assertNotNull("'Expires' header not set (must be) : null", expiresHeaders);
-		assertTrue("'Expires' header not set (must be) : empty", expiresHeaders.size() > 0);
 		cacheControlHeaders = response.getHeaders("Cache-Control");
 		assertNotNull("'Cache-Control' header not set (must be) : null", cacheControlHeaders);
 		assertTrue("'Cache-Control' header not set (must be) : empty", cacheControlHeaders.size() > 0);
@@ -96,9 +88,6 @@ public class WebContentInterceptorTests {
 
 		interceptor.preHandle(request, response, null);
 
-		List expiresHeaders = response.getHeaders("Expires");
-		assertNotNull("'Expires' header not set (must be) : null", expiresHeaders);
-		assertTrue("'Expires' header not set (must be) : empty", expiresHeaders.size() > 0);
 		List cacheControlHeaders = response.getHeaders("Cache-Control");
 		assertNotNull("'Cache-Control' header not set (must be) : null", cacheControlHeaders);
 		assertTrue("'Cache-Control' header not set (must be) : empty", cacheControlHeaders.size() > 0);

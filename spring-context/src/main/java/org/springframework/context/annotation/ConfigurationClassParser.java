@@ -133,7 +133,7 @@ class ConfigurationClassParser {
 
 	private final ImportStack importStack = new ImportStack();
 
-	private final List<DeferredImportSelectorHolder> deferredImportSelectors = new LinkedList<DeferredImportSelectorHolder>();
+	private List<DeferredImportSelectorHolder> deferredImportSelectors;
 
 
 	/**
@@ -156,6 +156,8 @@ class ConfigurationClassParser {
 
 
 	public void parse(Set<BeanDefinitionHolder> configCandidates) {
+		this.deferredImportSelectors = new LinkedList<DeferredImportSelectorHolder>();
+
 		for (BeanDefinitionHolder holder : configCandidates) {
 			BeanDefinition bd = holder.getBeanDefinition();
 			try {
@@ -177,6 +179,7 @@ class ConfigurationClassParser {
 						"Failed to parse configuration class [" + bd.getBeanClassName() + "]", ex);
 			}
 		}
+
 		processDeferredImportSelectors();
 	}
 
@@ -269,7 +272,7 @@ class ConfigurationClassParser {
 		}
 
 		// Process any @Import annotations
-		processImports(configClass, sourceClass, getImports(sourceClass), true, false);
+		processImports(configClass, sourceClass, getImports(sourceClass), true);
 
 		// Process any @ImportResource annotations
 		if (sourceClass.getMetadata().isAnnotated(ImportResource.class.getName())) {
@@ -427,12 +430,15 @@ class ConfigurationClassParser {
 	}
 
 	private void processDeferredImportSelectors() {
-		Collections.sort(this.deferredImportSelectors, DEFERRED_IMPORT_COMPARATOR);
-		for (DeferredImportSelectorHolder deferredImport : this.deferredImportSelectors) {
+		List<DeferredImportSelectorHolder> deferredImports = this.deferredImportSelectors;
+		this.deferredImportSelectors = null;
+		Collections.sort(deferredImports, DEFERRED_IMPORT_COMPARATOR);
+
+		for (DeferredImportSelectorHolder deferredImport : deferredImports) {
 			ConfigurationClass configClass = deferredImport.getConfigurationClass();
 			try {
 				String[] imports = deferredImport.getImportSelector().selectImports(configClass.getMetadata());
-				processImports(configClass, asSourceClass(configClass), asSourceClasses(imports), false, true);
+				processImports(configClass, asSourceClass(configClass), asSourceClasses(imports), false);
 			}
 			catch (BeanDefinitionStoreException ex) {
 				throw ex;
@@ -442,11 +448,10 @@ class ConfigurationClassParser {
 						configClass.getMetadata().getClassName() + "]", ex);
 			}
 		}
-		this.deferredImportSelectors.clear();
 	}
 
 	private void processImports(ConfigurationClass configClass, SourceClass currentSourceClass,
-			Collection<SourceClass> importCandidates, boolean checkForCircularImports, boolean deferred) throws IOException {
+			Collection<SourceClass> importCandidates, boolean checkForCircularImports) throws IOException {
 
 		if (importCandidates.isEmpty()) {
 			return;
@@ -464,14 +469,14 @@ class ConfigurationClassParser {
 						Class<?> candidateClass = candidate.loadClass();
 						ImportSelector selector = BeanUtils.instantiateClass(candidateClass, ImportSelector.class);
 						invokeAwareMethods(selector);
-						if (!deferred && selector instanceof DeferredImportSelector) {
+						if (this.deferredImportSelectors != null && selector instanceof DeferredImportSelector) {
 							this.deferredImportSelectors.add(
 									new DeferredImportSelectorHolder(configClass, (DeferredImportSelector) selector));
 						}
 						else {
 							String[] importClassNames = selector.selectImports(currentSourceClass.getMetadata());
 							Collection<SourceClass> importSourceClasses = asSourceClasses(importClassNames);
-							processImports(configClass, currentSourceClass, importSourceClasses, false, false);
+							processImports(configClass, currentSourceClass, importSourceClasses, false);
 						}
 					}
 					else if (candidate.isAssignable(ImportBeanDefinitionRegistrar.class)) {

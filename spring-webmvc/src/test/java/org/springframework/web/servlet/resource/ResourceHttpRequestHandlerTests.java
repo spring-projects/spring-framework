@@ -16,13 +16,16 @@
 
 package org.springframework.web.servlet.resource;
 
+import static org.junit.Assert.*;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
 import javax.servlet.http.HttpServletResponse;
 
-import static org.junit.Assert.*;
+import org.hamcrest.Matchers;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -75,11 +78,53 @@ public class ResourceHttpRequestHandlerTests {
 
 		assertEquals("text/css", this.response.getContentType());
 		assertEquals(17, this.response.getContentLength());
-		assertTrue(headerAsLong("Expires") >= System.currentTimeMillis() - 1000 + (3600 * 1000));
-		assertEquals("max-age=3600, must-revalidate", this.response.getHeader("Cache-Control"));
+		assertEquals("max-age=3600", this.response.getHeader("Cache-Control"));
 		assertTrue(this.response.containsHeader("Last-Modified"));
 		assertEquals(headerAsLong("Last-Modified"), resourceLastModified("test/foo.css"));
 		assertEquals("h1 { color:red; }", this.response.getContentAsString());
+	}
+
+	@Test
+	public void getResourceNoCache() throws Exception {
+		this.request.setAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, "foo.css");
+		this.handler.setCacheSeconds(0);
+		this.handler.handleRequest(this.request, this.response);
+
+		assertEquals("no-store", this.response.getHeader("Cache-Control"));
+		assertTrue(this.response.containsHeader("Last-Modified"));
+		assertEquals(headerAsLong("Last-Modified"), resourceLastModified("test/foo.css"));
+	}
+
+	@Test
+	@SuppressWarnings("deprecation")
+	public void getResourcePreviousBehaviorCache() throws Exception {
+		this.request.setAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, "foo.css");
+		this.handler.setCacheSeconds(3600);
+		this.handler.setUseExpiresHeader(true);
+		this.handler.setUseCacheControlHeader(true);
+		this.handler.setAlwaysMustRevalidate(true);
+		this.handler.handleRequest(this.request, this.response);
+
+		assertEquals("max-age=3600, must-revalidate", this.response.getHeader("Cache-Control"));
+		assertTrue(headerAsLong("Expires") >= System.currentTimeMillis() - 1000 + (3600 * 1000));
+		assertTrue(this.response.containsHeader("Last-Modified"));
+		assertEquals(headerAsLong("Last-Modified"), resourceLastModified("test/foo.css"));
+	}
+
+	@Test
+	@SuppressWarnings("deprecation")
+	public void getResourcePreviousBehaviorNoCache() throws Exception {
+		this.request.setAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, "foo.css");
+		this.handler.setCacheSeconds(0);
+		this.handler.setUseCacheControlNoStore(true);
+		this.handler.setUseCacheControlHeader(true);
+		this.handler.handleRequest(this.request, this.response);
+
+		assertEquals("no-cache", this.response.getHeader("Pragma"));
+		assertThat(this.response.getHeaderValues("Cache-Control"), Matchers.contains("no-cache", "no-store"));
+		assertTrue(headerAsLong("Expires") == 1);
+		assertTrue(this.response.containsHeader("Last-Modified"));
+		assertEquals(headerAsLong("Last-Modified"), resourceLastModified("test/foo.css"));
 	}
 
 	@Test
@@ -88,8 +133,7 @@ public class ResourceHttpRequestHandlerTests {
 		this.handler.handleRequest(this.request, this.response);
 
 		assertEquals("text/html", this.response.getContentType());
-		assertTrue(headerAsLong("Expires") >= System.currentTimeMillis() - 1000 + (3600 * 1000));
-		assertEquals("max-age=3600, must-revalidate", this.response.getHeader("Cache-Control"));
+		assertEquals("max-age=3600", this.response.getHeader("Cache-Control"));
 		assertTrue(this.response.containsHeader("Last-Modified"));
 		assertEquals(headerAsLong("Last-Modified"), resourceLastModified("test/foo.html"));
 	}
@@ -101,8 +145,7 @@ public class ResourceHttpRequestHandlerTests {
 
 		assertEquals("text/css", this.response.getContentType());
 		assertEquals(17, this.response.getContentLength());
-		assertTrue(headerAsLong("Expires") >= System.currentTimeMillis() - 1000 + (3600 * 1000));
-		assertEquals("max-age=3600, must-revalidate", this.response.getHeader("Cache-Control"));
+		assertEquals("max-age=3600", this.response.getHeader("Cache-Control"));
 		assertTrue(this.response.containsHeader("Last-Modified"));
 		assertEquals(headerAsLong("Last-Modified"), resourceLastModified("testalternatepath/baz.css"));
 		assertEquals("h1 { color:red; }", this.response.getContentAsString());

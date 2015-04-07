@@ -17,7 +17,6 @@
 package org.springframework.transaction.aspectj;
 
 import java.io.IOException;
-
 import javax.transaction.Transactional;
 
 import org.junit.Before;
@@ -132,6 +131,7 @@ public class JtaTransactionAspectsTests {
 
 	}
 
+
 	protected static class JtaAnnotationProtectedAnnotatedMember {
 
 		public void doSomething() {
@@ -143,6 +143,7 @@ public class JtaTransactionAspectsTests {
 		}
 	}
 
+
 	protected static class JtaAnnotationPrivateAnnotatedMember {
 
 		public void doSomething() {
@@ -153,6 +154,7 @@ public class JtaTransactionAspectsTests {
 		private void doInTransaction() {
 		}
 	}
+
 
 	@Configuration
 	protected static class Config {
@@ -168,7 +170,6 @@ public class JtaTransactionAspectsTests {
 			aspect.setTransactionManager(transactionManager());
 			return aspect;
 		}
-
 	}
 
 }

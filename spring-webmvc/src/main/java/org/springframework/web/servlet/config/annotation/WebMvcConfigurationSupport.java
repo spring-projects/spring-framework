@@ -83,7 +83,9 @@ import org.springframework.web.servlet.mvc.HttpRequestHandlerAdapter;
 import org.springframework.web.servlet.mvc.SimpleControllerHandlerAdapter;
 import org.springframework.web.servlet.mvc.annotation.ResponseStatusExceptionResolver;
 import org.springframework.web.servlet.mvc.method.annotation.ExceptionHandlerExceptionResolver;
+import org.springframework.web.servlet.mvc.method.annotation.JsonViewRequestBodyAdvice;
 import org.springframework.web.servlet.mvc.method.annotation.JsonViewResponseBodyAdvice;
+import org.springframework.web.servlet.mvc.method.annotation.RequestBodyAdvice;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice;
@@ -478,9 +480,13 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 		adapter.setCustomReturnValueHandlers(returnValueHandlers);
 
 		if (jackson2Present) {
-			List<ResponseBodyAdvice<?>> interceptors = new ArrayList<ResponseBodyAdvice<?>>();
-			interceptors.add(new JsonViewResponseBodyAdvice());
-			adapter.setResponseBodyAdvice(interceptors);
+			List<RequestBodyAdvice> requestBodyAdvices = new ArrayList<RequestBodyAdvice>();
+			requestBodyAdvices.add(new JsonViewRequestBodyAdvice());
+			adapter.setRequestBodyAdvice(requestBodyAdvices);
+
+			List<ResponseBodyAdvice<?>> responseBodyAdvices = new ArrayList<ResponseBodyAdvice<?>>();
+			responseBodyAdvices.add(new JsonViewResponseBodyAdvice());
+			adapter.setResponseBodyAdvice(responseBodyAdvices);
 		}
 
 		AsyncSupportConfigurer configurer = new AsyncSupportConfigurer();

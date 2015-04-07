@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +32,7 @@ import org.springframework.web.context.support.WebApplicationContextUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 /**
- * Servlet 2.3 Filter that binds a JDO PersistenceManager to the thread for the
+ * Servlet Filter that binds a JDO PersistenceManager to the thread for the
  * entire processing of the request. Intended for the "Open PersistenceManager in
  * View" pattern, i.e. to allow for lazy loading in web views despite the
  * original transactions already being completed.
@@ -78,6 +78,25 @@ public class OpenPersistenceManagerInViewFilter extends OncePerRequestFilter {
 		return this.persistenceManagerFactoryBeanName;
 	}
 
+
+	/**
+	 * Returns "false" so that the filter may re-bind the opened {@code PersistenceManager}
+	 * to each asynchronously dispatched thread and postpone closing it until the very
+	 * last asynchronous dispatch.
+	 */
+	@Override
+	protected boolean shouldNotFilterAsyncDispatch() {
+		return false;
+	}
+
+	/**
+	 * Returns "false" so that the filter may provide an {@code PersistenceManager}
+	 * to each error dispatches.
+	 */
+	@Override
+	protected boolean shouldNotFilterErrorDispatch() {
+		return false;
+	}
 
 	@Override
 	protected void doFilterInternal(

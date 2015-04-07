@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,8 +37,8 @@ import org.xml.sax.InputSource;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.xml.SimpleNamespaceContext;
 
+import static org.hamcrest.MatcherAssert.*;
 import static org.springframework.test.util.AssertionErrors.*;
-import static org.springframework.test.util.MatcherAssertionErrors.*;
 
 /**
  * A helper class for applying assertions via XPath expressions.
@@ -56,8 +56,7 @@ public class XpathExpectationsHelper {
 
 
 	/**
-	 * Class constructor.
-	 *
+	 * XpathExpectationsHelper constructor.
 	 * @param expression the XPath expression
 	 * @param namespaces XML namespaces referenced in the XPath expression, or {@code null}
 	 * @param args arguments to parameterize the XPath expression with using the
@@ -72,6 +71,7 @@ public class XpathExpectationsHelper {
 		this.hasNamespaces = !CollectionUtils.isEmpty(namespaces);
 	}
 
+
 	private XPathExpression compileXpathExpression(String expression, Map<String, String> namespaces)
 			throws XPathExpressionException {
 
@@ -83,7 +83,7 @@ public class XpathExpectationsHelper {
 	}
 
 	/**
-	 * @return the compiled XPath expression.
+	 * Return the compiled XPath expression.
 	 */
 	protected XPathExpression getXpathExpression() {
 		return this.xpathExpression;
@@ -101,7 +101,6 @@ public class XpathExpectationsHelper {
 
 	/**
 	 * Parse the given XML content to a {@link Document}.
-	 *
 	 * @param xml the content to parse
 	 * @return the parsed document
 	 * @throws Exception in case of errors
@@ -111,8 +110,7 @@ public class XpathExpectationsHelper {
 		factory.setNamespaceAware(this.hasNamespaces);
 		DocumentBuilder documentBuilder = factory.newDocumentBuilder();
 		InputSource inputSource = new InputSource(new StringReader(xml));
-		Document document = documentBuilder.parse(inputSource);
-		return document;
+		return documentBuilder.parse(inputSource);
 	}
 
 	/**
@@ -149,7 +147,6 @@ public class XpathExpectationsHelper {
 	/**
 	 * Apply the XPath expression and assert the resulting content with the
 	 * given Hamcrest matcher.
-	 *
 	 * @throws Exception if content parsing or expression evaluation fails
 	 */
 	public void assertNodeCount(String content, Matcher<Integer> matcher) throws Exception {
@@ -171,7 +168,6 @@ public class XpathExpectationsHelper {
 	/**
 	 * Apply the XPath expression and assert the resulting content with the
 	 * given Hamcrest matcher.
-	 *
 	 * @throws Exception if content parsing or expression evaluation fails
 	 */
 	public void assertString(String content, Matcher<? super String> matcher) throws Exception {
@@ -193,7 +189,6 @@ public class XpathExpectationsHelper {
 	/**
 	 * Apply the XPath expression and assert the resulting content with the
 	 * given Hamcrest matcher.
-	 *
 	 * @throws Exception if content parsing or expression evaluation fails
 	 */
 	public void assertNumber(String content, Matcher<? super Double> matcher) throws Exception {

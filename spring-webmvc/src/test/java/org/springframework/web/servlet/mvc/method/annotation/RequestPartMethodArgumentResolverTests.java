@@ -16,11 +16,16 @@
 
 package org.springframework.web.servlet.mvc.method.annotation;
 
+import static org.junit.Assert.*;
+import static org.mockito.BDDMockito.*;
+
 import java.lang.reflect.Method;
+import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+
 import javax.servlet.http.Part;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
@@ -31,6 +36,7 @@ import org.junit.Test;
 
 import org.springframework.core.LocalVariableTableParameterNameDiscoverer;
 import org.springframework.core.MethodParameter;
+import org.springframework.http.HttpInputMessage;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.mock.web.test.MockHttpServletRequest;
@@ -51,9 +57,6 @@ import org.springframework.web.multipart.MultipartException;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.support.MissingServletRequestPartException;
 import org.springframework.web.multipart.support.RequestPartServletServerHttpRequest;
-
-import static org.junit.Assert.*;
-import static org.mockito.BDDMockito.*;
 
 /**
  * Test fixture with {@link RequestPartMethodArgumentResolver} and mock {@link HttpMessageConverter}.
@@ -89,8 +92,6 @@ public class RequestPartMethodArgumentResolverTests {
 	private NativeWebRequest webRequest;
 
 	private MockMultipartHttpServletRequest multipartRequest;
-
-	private MockHttpServletResponse servletResponse;
 
 
 	@SuppressWarnings("unchecked")
@@ -128,13 +129,14 @@ public class RequestPartMethodArgumentResolverTests {
 		resolver = new RequestPartMethodArgumentResolver(Collections.<HttpMessageConverter<?>>singletonList(messageConverter));
 		reset(messageConverter);
 
-		multipartFile1 = new MockMultipartFile("requestPart", "", "text/plain", (byte[]) null);
-		multipartFile2 = new MockMultipartFile("requestPart", "", "text/plain", (byte[]) null);
+		byte[] content = "doesn't matter as long as not empty".getBytes(Charset.forName("UTF-8"));
+
+		multipartFile1 = new MockMultipartFile("requestPart", "", "text/plain", content);
+		multipartFile2 = new MockMultipartFile("requestPart", "", "text/plain", content);
 		multipartRequest = new MockMultipartHttpServletRequest();
 		multipartRequest.addFile(multipartFile1);
 		multipartRequest.addFile(multipartFile2);
-		servletResponse = new MockHttpServletResponse();
-		webRequest = new ServletWebRequest(multipartRequest, servletResponse);
+		webRequest = new ServletWebRequest(multipartRequest, new MockHttpServletResponse());
 	}
 
 
@@ -361,7 +363,7 @@ public class RequestPartMethodArgumentResolverTests {
 		SimpleBean simpleBean = new SimpleBean("foo");
 
 		given(messageConverter.canRead(SimpleBean.class, MediaType.TEXT_PLAIN)).willReturn(true);
-		given(messageConverter.read(eq(SimpleBean.class), isA(RequestPartServletServerHttpRequest.class))).willReturn(simpleBean);
+		given(messageConverter.read(eq(SimpleBean.class), isA(HttpInputMessage.class))).willReturn(simpleBean);
 
 		ModelAndViewContainer mavContainer = new ModelAndViewContainer();
 		Object actualValue = resolver.resolveArgument(optionalRequestPart, mavContainer, webRequest, new ValidatingBinderFactory());
@@ -385,7 +387,7 @@ public class RequestPartMethodArgumentResolverTests {
 
 	private void testResolveArgument(SimpleBean argValue, MethodParameter parameter) throws Exception {
 		given(messageConverter.canRead(SimpleBean.class, MediaType.TEXT_PLAIN)).willReturn(true);
-		given(messageConverter.read(eq(SimpleBean.class), isA(RequestPartServletServerHttpRequest.class))).willReturn(argValue);
+		given(messageConverter.read(eq(SimpleBean.class), isA(HttpInputMessage.class))).willReturn(argValue);
 
 		ModelAndViewContainer mavContainer = new ModelAndViewContainer();
 		Object actualValue = resolver.resolveArgument(parameter, mavContainer, webRequest, new ValidatingBinderFactory());
@@ -423,7 +425,7 @@ public class RequestPartMethodArgumentResolverTests {
 		}
 	}
 
-
+	@SuppressWarnings("unused")
 	public void handle(@RequestPart SimpleBean requestPart,
 					   @RequestPart(value="requestPart", required=false) SimpleBean namedRequestPart,
 					   @Valid @RequestPart("requestPart") SimpleBean validRequestPart,

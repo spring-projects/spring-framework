@@ -101,13 +101,36 @@ public class ResolvableTypeTests {
 	public void forClass() throws Exception {
 		ResolvableType type = ResolvableType.forClass(ExtendsList.class);
 		assertThat(type.getType(), equalTo((Type) ExtendsList.class));
+		assertThat(type.getRawClass(), equalTo(ExtendsList.class));
+		assertTrue(type.isAssignableFrom(ExtendsList.class));
+		assertFalse(type.isAssignableFrom(ArrayList.class));
 	}
 
 	@Test
-	public void forClassMustNotBeNull() throws Exception {
-		this.thrown.expect(IllegalArgumentException.class);
-		this.thrown.expectMessage("Source class must not be null");
-		ResolvableType.forClass(null);
+	public void forClassWithNull() throws Exception {
+		ResolvableType type = ResolvableType.forClass(null);
+		assertThat(type.getType(), equalTo((Type) Object.class));
+		assertThat(type.getRawClass(), equalTo(Object.class));
+		assertTrue(type.isAssignableFrom(Object.class));
+		assertTrue(type.isAssignableFrom(String.class));
+	}
+
+	@Test
+	public void forRawClass() throws Exception {
+		ResolvableType type = ResolvableType.forRawClass(ExtendsList.class);
+		assertThat(type.getType(), equalTo((Type) ExtendsList.class));
+		assertThat(type.getRawClass(), equalTo(ExtendsList.class));
+		assertTrue(type.isAssignableFrom(ExtendsList.class));
+		assertFalse(type.isAssignableFrom(ArrayList.class));
+	}
+
+	@Test
+	public void forRawClassWithNull() throws Exception {
+		ResolvableType type = ResolvableType.forRawClass(null);
+		assertThat(type.getType(), equalTo((Type) Object.class));
+		assertThat(type.getRawClass(), equalTo(Object.class));
+		assertTrue(type.isAssignableFrom(Object.class));
+		assertTrue(type.isAssignableFrom(String.class));
 	}
 
 	@Test
