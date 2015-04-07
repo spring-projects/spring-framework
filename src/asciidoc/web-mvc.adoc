@@ -1169,8 +1169,8 @@ multiple requests are allowed to access a session concurrently.
 * `org.springframework.web.servlet.mvc.support.RedirectAttributes` to specify the exact
   set of attributes to use in case of a redirect and also to add flash attributes
   (attributes stored temporarily on the server-side to make them available to the
-  request after the redirect). `RedirectAttributes` is used instead of the implicit
-  model if the method returns a "redirect:" prefixed view name or `RedirectView`.
+  request after the redirect). See <<mvc-redirecting-passing-data>> and
+  <<mvc-flash-attributes>>.
 * Command or form objects to bind request parameters to bean properties (via setters)
   or directly to fields, with customizable type conversion, depending on `@InitBinder`
   methods and/or the HandlerAdapter configuration. See the `webBindingInitializer`
@@ -1673,34 +1673,6 @@ attribute name:
 		// ...
 	}
 ----
-
-[[mvc-ann-redirect-attributes]]
-==== Specifying redirect and flash attributes
-By default all model attributes are considered to be exposed as URI template variables
-in the redirect URL. Of the remaining attributes those that are primitive types or
-collections/arrays of primitive types are automatically appended as query parameters.
-
-In annotated controllers however the model may contain additional attributes originally
-added for rendering purposes (e.g. drop-down field values). To gain precise control over
-the attributes used in a redirect scenario, an `@RequestMapping` method can declare an
-argument of type `RedirectAttributes` and use it to add attributes for use in
-`RedirectView`. If the controller method does redirect, the content of
-`RedirectAttributes` is used. Otherwise the content of the default `Model` is used.
-
-The `RequestMappingHandlerAdapter` provides a flag called
-`"ignoreDefaultModelOnRedirect"` that can be used to indicate the content of the default
-`Model` should never be used if a controller method redirects. Instead the controller
-method should declare an attribute of type `RedirectAttributes` or if it doesn't do so
-no attributes should be passed on to `RedirectView`. Both the MVC namespace and the MVC
-Java config keep this flag set to `false` in order to maintain backwards compatibility.
-However, for new applications we recommend setting it to `true`
-
-The `RedirectAttributes` interface can also be used to add flash attributes. Unlike
-other redirect attributes, which end up in the target redirect URL, flash attributes are
-saved in the HTTP session (and hence do not appear in the URL). The model of the
-controller serving the target redirect URL automatically receives these flash attributes
-after which they are removed from the session. See <<mvc-flash-attributes>> for an
-overview of the general support for flash attributes in Spring MVC.
 
 
 [[mvc-ann-form-urlencoded-data]]
@@ -2694,7 +2666,7 @@ the last results in the chain not being fully inspected, because the
 
 
 [[mvc-redirecting]]
-=== Redirecting to views
+=== Redirecting to Views
 As mentioned previously, a controller typically returns a logical view name, which a
 view resolver resolves to a particular view technology. For view technologies such as
 JSPs that are processed through the Servlet or JSP engine, this resolution is usually
@@ -2727,22 +2699,37 @@ One way to force a redirect as the result of a controller response is for the co
 to create and return an instance of Spring's `RedirectView`. In this case,
 `DispatcherServlet` does not use the normal view resolution mechanism. Rather because it
 has been given the (redirect) view already, the `DispatcherServlet` simply instructs the
-view to do its work.
+view to do its work. The `RedirectView` in turn calls `HttpServletResponse.sendRedirect()`
+to send an HTTP redirect to the client browser.
 
-The `RedirectView` issues an `HttpServletResponse.sendRedirect()` call that returns to
-the client browser as an HTTP redirect. By default all model attributes are considered
-to be exposed as URI template variables in the redirect URL. Of the remaining attributes
-those that are primitive types or collections/arrays of primitive types are
-automatically appended as query parameters.
+If you use `RedirectView` and the view is created by the controller itself, it is
+recommended that you configure the redirect URL to be injected into the controller so
+that it is not baked into the controller but configured in the context along with the
+view names. The <<mvc-redirecting-redirect-prefix>> facilitates this decoupling.
+
+[[mvc-redirecting-passing-data]]
+===== Passing Data To the Redirect Target
+
+By default all model attributes are considered to be exposed as URI template variables in
+the redirect URL. Of the remaining attributes those that are primitive types or
+collections/arrays of primitive types are automatically appended as query parameters.
 
 Appending primitive type attributes as query parameters may be the desired result if a
 model instance was prepared specifically for the redirect. However, in annotated
-controllers the model may contain additional attributes added for rendering purposes
-(e.g. drop-down field values). To avoid the possibility of having such attributes appear
-in the URL an annotated controller can declare an argument of type `RedirectAttributes`
-and use it to specify the exact attributes to make available to `RedirectView`. If the
-controller method decides to redirect, the content of `RedirectAttributes` is used.
-Otherwise the content of the model is used.
+controllers the model may contain additional attributes added for rendering purposes (e.g.
+drop-down field values). To avoid the possibility of having such attributes appear in the
+URL, an `@RequestMapping` method can declare an argument of type `RedirectAttributes` and
+use it to specify the exact attributes to make available to `RedirectView`. If the method
+does redirect, the content of `RedirectAttributes` is used.  Otherwise the content of the
+model is used.
+
+The `RequestMappingHandlerAdapter` provides a flag called
+`"ignoreDefaultModelOnRedirect"` that can be used to indicate the content of the default
+`Model` should never be used if a controller method redirects. Instead the controller
+method should declare an attribute of type `RedirectAttributes` or if it doesn't do so
+no attributes should be passed on to `RedirectView`. Both the MVC namespace and the MVC
+Java config keep this flag set to `false` in order to maintain backwards compatibility.
+However, for new applications we recommend setting it to `true`
 
 Note that URI template variables from the present request are automatically made
 available when expanding a redirect URL and do not need to be added explicitly neither
@@ -2758,11 +2745,9 @@ through `Model` nor `RedirectAttributes`. For example:
 	}
 ----
 
-If you use `RedirectView` and the view is created by the controller itself, it is
-recommended that you configure the redirect URL to be injected into the controller so
-that it is not baked into the controller but configured in the context along with the
-view names. The next section discusses this process.
-
+Another way of passing data to the redirect target is via __Flash Attributes__. Unlike
+other redirect attributes, flash attributes are saved in the HTTP session (and hence do
+not appear in the URL). See <<mvc-flash-attributes>> for more information.
 
 [[mvc-redirecting-redirect-prefix]]
 ==== The redirect: prefix
@@ -2967,8 +2952,8 @@ are accessible from anywhere in Spring MVC through static methods in
 Annotated controllers typically do not need to work with `FlashMap` directly. Instead an
 `@RequestMapping` method can accept an argument of type `RedirectAttributes` and use it
 to add flash attributes for a redirect scenario. Flash attributes added via
-`RedirectAttributes` are automatically propagated to the "output" FlashMap. Similarly
-after the redirect attributes from the "input" `FlashMap` are automatically added to the
+`RedirectAttributes` are automatically propagated to the "output" FlashMap. Similarly,
+after the redirect, attributes from the "input" `FlashMap` are automatically added to the
 `Model` of the controller serving the target URL.
 
 .Matching requests to flash attributes
