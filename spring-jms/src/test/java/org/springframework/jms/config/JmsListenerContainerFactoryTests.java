@@ -157,6 +157,7 @@ public class JmsListenerContainerFactoryTests {
 		factory.setPubSubDomain(true);
 		factory.setSubscriptionDurable(true);
 		factory.setClientId("client-1234");
+		factory.setAutoStartup(false);
 	}
 
 	private void assertDefaultJmsConfig(AbstractMessageListenerContainer container) {
@@ -168,6 +169,7 @@ public class JmsListenerContainerFactoryTests {
 		assertEquals(true, container.isPubSubDomain());
 		assertEquals(true, container.isSubscriptionDurable());
 		assertEquals("client-1234", container.getClientId());
+		assertEquals(false, container.isAutoStartup());
 	}
 
 	private void setDefaultJcaConfig(DefaultJcaListenerContainerFactory factory) {
