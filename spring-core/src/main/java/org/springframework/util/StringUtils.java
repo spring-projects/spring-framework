@@ -85,6 +85,19 @@ public abstract class StringUtils {
 	}
 
 	/**
+	 * Check that the given String is not empty.
+	 * Note: Will return {@code true} for a String that purely consists of whitespace.
+	 * Note: Will return {@code false} if the string is {@code null}.
+	 * @param string the String to check (may be {@code null})
+	 * @return {@code true} if the String is not null and has length
+	 * @see #hasLength(String)
+	 * @since 4.2.0
+	 */
+	public static boolean isNotEmpty(String string) {
+		return hasLength(string);
+	}
+
+	/**
 	 * Check that the given CharSequence is neither {@code null} nor of length 0.
 	 * Note: Will return {@code true} for a CharSequence that purely consists of whitespace.
 	 * <p><pre class="code">

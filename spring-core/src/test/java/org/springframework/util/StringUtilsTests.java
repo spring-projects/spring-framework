@@ -49,6 +49,14 @@ public class StringUtilsTests {
 	}
 
 	@Test
+	public void testIsNotEmpty() {
+		assertTrue(StringUtils.isNotEmpty("hi"));
+		assertTrue(StringUtils.isNotEmpty(" "));
+		assertFalse(StringUtils.isNotEmpty(""));
+		assertFalse(StringUtils.isNotEmpty(null));
+	}
+
+	@Test
 	public void testContainsWhitespace() throws Exception {
 		assertFalse(StringUtils.containsWhitespace(null));
 		assertFalse(StringUtils.containsWhitespace(""));
