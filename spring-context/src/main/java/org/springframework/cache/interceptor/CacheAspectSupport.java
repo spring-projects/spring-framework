@@ -184,7 +184,8 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 			}
 			catch (NoUniqueBeanDefinitionException ex) {
 				throw new IllegalStateException("No CacheResolver specified, and no unique bean of type " +
-						"CacheManager found. Mark one as primary or declare a specific CacheManager to use.");
+						"CacheManager found. Mark one as primary (or give it the name 'cacheManager') or " +
+						"declare a specific CacheManager to use, that serves as the default one.");
 			}
 			catch (NoSuchBeanDefinitionException ex) {
 				throw new IllegalStateException("No CacheResolver specified, and no bean of type CacheManager found. " +
