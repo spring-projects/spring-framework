@@ -20,6 +20,7 @@ import java.net.URI;
 import java.nio.charset.Charset;
 import java.util.EnumSet;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
 import org.junit.Before;
@@ -317,16 +318,47 @@ public class AsyncRestTemplateIntegrationTests extends AbstractJettyServerTestCa
 	}
 
 	@Test
-	public void notFound() throws Exception {
+	public void identicalExceptionThroughGetAndCallback() throws Exception {
+		final HttpClientErrorException[] callbackException = new HttpClientErrorException[1];
+
+		ListenableFuture<?> future = template.execute(baseUrl + "/status/notfound", HttpMethod.GET, null, null);
+		future.addCallback(new ListenableFutureCallback<Object>() {
+			@Override
+			public void onSuccess(Object result) {
+				fail("onSuccess not expected");
+			}
+			@Override
+			public void onFailure(Throwable t) {
+				assertTrue(t instanceof HttpClientErrorException);
+				callbackException[0] = (HttpClientErrorException) t;
+			}
+		});
+
+		try {
+			future.get();
+			fail("Exception expected");
+		}
+		catch (ExecutionException ex) {
+			Throwable cause = ex.getCause();
+			assertTrue(cause instanceof HttpClientErrorException);
+			assertSame(callbackException[0], cause);
+		}
+	}
+
+	@Test
+	public void notFoundGet() throws Exception {
 		try {
 			Future<?> future = template.execute(baseUrl + "/status/notfound", HttpMethod.GET, null, null);
 			future.get();
 			fail("HttpClientErrorException expected");
 		}
-		catch (HttpClientErrorException ex) {
-			assertEquals(HttpStatus.NOT_FOUND, ex.getStatusCode());
-			assertNotNull(ex.getStatusText());
-			assertNotNull(ex.getResponseBodyAsString());
+		catch (ExecutionException ex) {
+			assertTrue(ex.getCause() instanceof HttpClientErrorException);
+			HttpClientErrorException cause = (HttpClientErrorException)ex.getCause();
+
+			assertEquals(HttpStatus.NOT_FOUND, cause.getStatusCode());
+			assertNotNull(cause.getStatusText());
+			assertNotNull(cause.getResponseBodyAsString());
 		}
 	}
 
@@ -372,10 +404,13 @@ public class AsyncRestTemplateIntegrationTests extends AbstractJettyServerTestCa
 			future.get();
 			fail("HttpServerErrorException expected");
 		}
-		catch (HttpServerErrorException ex) {
-			assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, ex.getStatusCode());
-			assertNotNull(ex.getStatusText());
-			assertNotNull(ex.getResponseBodyAsString());
+		catch (ExecutionException ex) {
+			assertTrue(ex.getCause() instanceof HttpServerErrorException);
+			HttpServerErrorException cause = (HttpServerErrorException)ex.getCause();
+
+			assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, cause.getStatusCode());
+			assertNotNull(cause.getStatusText());
+			assertNotNull(cause.getResponseBodyAsString());
 		}
 	}
 
