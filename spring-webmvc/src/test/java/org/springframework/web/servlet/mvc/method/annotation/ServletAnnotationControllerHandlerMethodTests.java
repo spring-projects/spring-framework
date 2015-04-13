@@ -113,6 +113,7 @@ import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -282,6 +283,29 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		getServlet().service(request, response);
 		assertEquals("[1, 2]-org.springframework.tests.sample.beans.TestBean", response.getContentAsString());
+	}
+
+	// SPR-12903
+
+	@Test
+	public void pathVariableWithCustomConverter() throws Exception {
+		initServlet(new ApplicationContextInitializer<GenericWebApplicationContext>() {
+			@Override
+			public void initialize(GenericWebApplicationContext context) {
+				RootBeanDefinition csDef = new RootBeanDefinition(FormattingConversionServiceFactoryBean.class);
+				csDef.getPropertyValues().add("converters", new AnnotatedExceptionRaisingConverter());
+				RootBeanDefinition wbiDef = new RootBeanDefinition(ConfigurableWebBindingInitializer.class);
+				wbiDef.getPropertyValues().add("conversionService", csDef);
+				RootBeanDefinition adapterDef = new RootBeanDefinition(RequestMappingHandlerAdapter.class);
+				adapterDef.getPropertyValues().add("webBindingInitializer", wbiDef);
+				context.registerBeanDefinition("handlerAdapter", adapterDef);
+			}
+		}, PathVariableWithCustomConverterController.class);
+
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/myPath/1");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		getServlet().service(request, response);
+		assertEquals(404, response.getStatus());
 	}
 
 	@Test
@@ -2367,6 +2391,26 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 		@Override
 		public ITestBean convert(String source) {
 			return new TestBean(source);
+		}
+	}
+
+	@Controller
+	public static class PathVariableWithCustomConverterController {
+
+		@RequestMapping("/myPath/{id}")
+		public void myHandle(@PathVariable("id") ITestBean bean) throws Exception {
+		}
+	}
+
+	public static class AnnotatedExceptionRaisingConverter implements Converter<String, ITestBean> {
+
+		@Override
+		public ITestBean convert(String source) {
+			throw new NotFoundException();
+		}
+
+		@ResponseStatus(HttpStatus.NOT_FOUND)
+		private static class NotFoundException extends RuntimeException {
 		}
 	}
 

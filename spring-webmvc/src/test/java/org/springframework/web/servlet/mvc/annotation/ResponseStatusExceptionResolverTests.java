@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,20 +16,22 @@
 
 package org.springframework.web.servlet.mvc.annotation;
 
+import static org.junit.Assert.*;
+
 import java.util.Locale;
 
 import org.junit.Before;
 import org.junit.Test;
 
+import org.springframework.beans.TypeMismatchException;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.context.support.StaticMessageSource;
 import org.springframework.http.HttpStatus;
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockHttpServletResponse;
+import org.springframework.tests.sample.beans.ITestBean;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.servlet.ModelAndView;
-
-import static org.junit.Assert.*;
 
 /** @author Arjen Poutsma */
 public class ResponseStatusExceptionResolverTests {
@@ -91,6 +93,18 @@ public class ResponseStatusExceptionResolverTests {
 		exceptionResolver.resolveException(request, response, null, ex);
 		ModelAndView mav = exceptionResolver.resolveException(request, response, null, ex);
 		assertNull("ModelAndView returned", mav);
+	}
+
+	// SPR-12903
+
+	@Test
+	public void nestedException() throws Exception {
+		Exception cause = new StatusCodeAndReasonMessageException();
+		TypeMismatchException ex = new TypeMismatchException("value", ITestBean.class, cause);
+		ModelAndView mav = exceptionResolver.resolveException(request, response, null, ex);
+		assertNotNull("No ModelAndView returned", mav);
+		assertTrue("No Empty ModelAndView returned", mav.isEmpty());
+		assertEquals("Invalid status code", 410, response.getStatus());
 	}
 
 	@ResponseStatus(HttpStatus.BAD_REQUEST)

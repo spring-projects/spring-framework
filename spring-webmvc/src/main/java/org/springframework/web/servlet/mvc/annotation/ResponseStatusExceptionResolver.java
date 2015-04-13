@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -60,6 +60,10 @@ public class ResponseStatusExceptionResolver extends AbstractHandlerExceptionRes
 			catch (Exception resolveEx) {
 				logger.warn("Handling of @ResponseStatus resulted in Exception", resolveEx);
 			}
+		}
+		else if (ex.getCause() != null && ex.getCause() instanceof Exception) {
+			ex = (Exception) ex.getCause();
+			return doResolveException(request, response, handler, ex);
 		}
 		return null;
 	}
