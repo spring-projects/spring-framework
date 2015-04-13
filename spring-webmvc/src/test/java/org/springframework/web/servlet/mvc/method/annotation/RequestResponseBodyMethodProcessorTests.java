@@ -30,6 +30,9 @@ import org.junit.Test;
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.aop.target.SingletonTargetSource;
 import org.springframework.core.MethodParameter;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.Resource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpStatus;
@@ -38,6 +41,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.ByteArrayHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.http.converter.ResourceHttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.http.converter.support.AllEncompassingFormHttpMessageConverter;
@@ -49,6 +53,7 @@ import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.support.WebDataBinderFactory;
@@ -285,6 +290,24 @@ public class RequestResponseBodyMethodProcessorTests {
 		assertEquals("text/plain;charset=UTF-8", servletResponse.getHeader("Content-Type"));
 	}
 
+	// SPR-12894
+
+	@Test
+	public void handleReturnValueImage() throws Exception {
+		this.servletRequest.addHeader("Accept", "*/*");
+
+		Method method = getClass().getMethod("getImage");
+		MethodParameter returnType = new MethodParameter(method, -1);
+
+		List<HttpMessageConverter<?>> converters = Arrays.asList(new ResourceHttpMessageConverter());
+		RequestResponseBodyMethodProcessor processor = new RequestResponseBodyMethodProcessor(converters);
+
+		ClassPathResource resource = new ClassPathResource("logo.jpg", getClass());
+		processor.writeWithMessageConverters(resource, returnType, this.webRequest);
+
+		assertEquals("image/jpeg", this.servletResponse.getHeader("Content-Type"));
+	}
+
 	@Test
 	public void supportsReturnTypeResponseBodyOnType() throws Exception {
 		Method method = ResponseBodyController.class.getMethod("handle");
@@ -512,6 +535,10 @@ public class RequestResponseBodyMethodProcessorTests {
 		return null;
 	}
 
+	@SuppressWarnings("unused")
+	public Resource getImage() {
+		return null;
+	}
 
 	@SuppressWarnings("unused")
 	private static abstract class MyParameterizedController<DTO extends Identifiable> {
