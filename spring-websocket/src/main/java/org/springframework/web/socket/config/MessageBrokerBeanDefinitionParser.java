@@ -112,13 +112,21 @@ class MessageBrokerBeanDefinitionParser implements BeanDefinitionParser {
 		CompositeComponentDefinition compDefinition = new CompositeComponentDefinition(element.getTagName(), source);
 		context.pushContainingComponent(compDefinition);
 
+		RootBeanDefinition handlerMappingDef = new RootBeanDefinition(SimpleUrlHandlerMapping.class);
+
 		String orderAttribute = element.getAttribute("order");
 		int order = orderAttribute.isEmpty() ? DEFAULT_MAPPING_ORDER : Integer.valueOf(orderAttribute);
+		handlerMappingDef.getPropertyValues().add("order", order);
+
+		String pathHelper = element.getAttribute("path-helper");
+		if (StringUtils.hasText(pathHelper)) {
+			handlerMappingDef.getPropertyValues().add("urlPathHelper", new RuntimeBeanReference(pathHelper));
+		}
+
 		ManagedMap<String, Object> urlMap = new ManagedMap<String, Object>();
 		urlMap.setSource(source);
-		RootBeanDefinition handlerMappingDef = new RootBeanDefinition(SimpleUrlHandlerMapping.class);
-		handlerMappingDef.getPropertyValues().add("order", order);
 		handlerMappingDef.getPropertyValues().add("urlMap", urlMap);
+
 		registerBeanDef(handlerMappingDef, context, source);
 
 		Element channelElem = DomUtils.getChildElementByTagName(element, "client-inbound-channel");
@@ -172,7 +180,7 @@ class MessageBrokerBeanDefinitionParser implements BeanDefinitionParser {
 	}
 
 	private RuntimeBeanReference getMessageChannel(String name, Element element, ParserContext context, Object source) {
-		RootBeanDefinition executor = null;
+		RootBeanDefinition executor;
 		if (element == null) {
 			executor = getDefaultExecutorBeanDefinition(name);
 		}
@@ -526,7 +534,6 @@ class MessageBrokerBeanDefinitionParser implements BeanDefinitionParser {
 		context.registerComponent(new BeanComponentDefinition(beanDef, name));
 	}
 
-
 	private static class DecoratingFactoryBean implements FactoryBean<WebSocketHandler> {
 
 		private final WebSocketHandler handler;
@@ -534,6 +541,7 @@ class MessageBrokerBeanDefinitionParser implements BeanDefinitionParser {
 		private final List<WebSocketHandlerDecoratorFactory> factories;
 
 
+		@SuppressWarnings("unused")
 		private DecoratingFactoryBean(WebSocketHandler handler, List<WebSocketHandlerDecoratorFactory> factories) {
 			this.handler = handler;
 			this.factories = factories;

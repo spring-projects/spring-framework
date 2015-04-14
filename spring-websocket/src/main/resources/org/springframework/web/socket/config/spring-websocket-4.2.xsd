@@ -891,6 +891,13 @@
                 ]]></xsd:documentation>
 				</xsd:annotation>
 			</xsd:attribute>
+			<xsd:attribute name="path-helper" type="xsd:string">
+				<xsd:annotation>
+					<xsd:documentation><![CDATA[
+	The bean name of the UrlPathHelper to use for the HandlerMapping used to map handshake requests.
+								]]></xsd:documentation>
+				</xsd:annotation>
+			</xsd:attribute>
 		</xsd:complexType>
 	</xsd:element>
 </xsd:schema>

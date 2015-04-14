@@ -6,7 +6,8 @@
 
 	<websocket:message-broker application-destination-prefix="/app"
 							  user-destination-prefix="/personal"
-							  path-matcher="pathMatcher">
+							  path-matcher="pathMatcher"
+							  path-helper="urlPathHelper">
 
 		<!-- message-size=128*1024, send-buffer-size=1024*1024 -->
 		<websocket:transport message-size="131072" send-timeout="25000" send-buffer-size="1048576">
@@ -38,6 +39,10 @@
 
 	<bean id="pathMatcher" class="org.springframework.util.AntPathMatcher">
 		<property name="pathSeparator" value="." />
+	</bean>
+
+	<bean id="urlPathHelper" class="org.springframework.web.util.UrlPathHelper">
+		<property name="alwaysUseFullPath" value="true"/>
 	</bean>
 
 	<bean id="myHandler" class="org.springframework.web.socket.config.TestHandshakeHandler"/>
