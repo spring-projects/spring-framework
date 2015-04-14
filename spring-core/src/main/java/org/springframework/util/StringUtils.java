@@ -50,6 +50,7 @@ import java.util.TreeSet;
  * @author Rob Harrop
  * @author Rick Evans
  * @author Arjen Poutsma
+ * @author Sam Brannen
  * @since 16 April 2001
  */
 public abstract class StringUtils {
@@ -79,14 +80,48 @@ public abstract class StringUtils {
 	 * Objects since attributes may e.g. be primitive value objects as well.
 	 * @param str the candidate String
 	 * @since 3.2.1
+	 * @see #isNotEmpty(CharSequence)
+	 * @see #isNotEmpty(String)
 	 */
 	public static boolean isEmpty(Object str) {
 		return (str == null || "".equals(str));
 	}
 
 	/**
-	 * Check that the given CharSequence is neither {@code null} nor of length 0.
-	 * Note: Will return {@code true} for a CharSequence that purely consists of whitespace.
+	 * Check that the given {@code CharSequence} is not empty (i.e., neither
+	 * {@code null} nor of length 0).
+	 * <p>This method is an alias for {@link #hasLength(CharSequence)}.
+	 * <p>Note: this method returns {@code true} for a {@code CharSequence}
+	 * that purely consists of whitespace.
+	 * @param str the {@code CharSequence} to check (may be {@code null})
+	 * @return {@code true} if the {@code CharSequence} is not {@code null} and has length
+	 * @see #hasText(CharSequence)
+	 * @since 4.2
+	 */
+	public static boolean isNotEmpty(CharSequence str) {
+		return hasLength(str);
+	}
+
+	/**
+	 * Check that the given {@code String} is not empty (i.e., neither
+	 * {@code null} nor of length 0).
+	 * <p>This method is an alias for {@link #hasLength(String)}.
+	 * <p>Note: this method returns {@code true} for a {@code String} that
+	 * purely consists of whitespace.
+	 * @param str the {@code String} to check (may be {@code null})
+	 * @return {@code true} if the {@code String} is not {@code null} and has length
+	 * @see #hasText(String)
+	 * @since 4.2
+	 */
+	public static boolean isNotEmpty(String str) {
+		return hasLength(str);
+	}
+
+	/**
+	 * Check that the given {@code CharSequence} is neither {@code null} nor
+	 * of length 0.
+	 * <p>Note: this method returns {@code true} for a {@code CharSequence}
+	 * that purely consists of whitespace.
 	 * <p><pre class="code">
 	 * StringUtils.hasLength(null) = false
 	 * StringUtils.hasLength("") = false
