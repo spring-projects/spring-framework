@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -390,8 +390,10 @@ public abstract class AbstractTestContextBootstrapper implements TestContextBoot
 	 * (i.e., as if we were traversing up the class hierarchy)
 	 * @return the resolved {@code ContextLoader} for the supplied {@code testClass}
 	 * (never {@code null})
+	 * @throws IllegalStateException if {@link #getDefaultContextLoaderClass(Class)}
+	 * returns {@code null}
 	 */
-	private ContextLoader resolveContextLoader(Class<?> testClass,
+	protected ContextLoader resolveContextLoader(Class<?> testClass,
 			List<ContextConfigurationAttributes> configAttributesList) {
 
 		Assert.notNull(testClass, "Class must not be null");
@@ -400,6 +402,9 @@ public abstract class AbstractTestContextBootstrapper implements TestContextBoot
 		Class<? extends ContextLoader> contextLoaderClass = resolveExplicitContextLoaderClass(configAttributesList);
 		if (contextLoaderClass == null) {
 			contextLoaderClass = getDefaultContextLoaderClass(testClass);
+			if (contextLoaderClass == null) {
+				throw new IllegalStateException("getDefaultContextLoaderClass() must not return null");
+			}
 		}
 		if (logger.isTraceEnabled()) {
 			logger.trace(String.format("Using ContextLoader class [%s] for test class [%s]",
@@ -428,7 +433,7 @@ public abstract class AbstractTestContextBootstrapper implements TestContextBoot
 	 * @throws IllegalArgumentException if supplied configuration attributes are
 	 * {@code null} or <em>empty</em>
 	 */
-	private Class<? extends ContextLoader> resolveExplicitContextLoaderClass(
+	protected Class<? extends ContextLoader> resolveExplicitContextLoaderClass(
 			List<ContextConfigurationAttributes> configAttributesList) {
 
 		Assert.notEmpty(configAttributesList, "ContextConfigurationAttributes list must not be empty");
@@ -451,12 +456,14 @@ public abstract class AbstractTestContextBootstrapper implements TestContextBoot
 	}
 
 	/**
-	 * Determine the default {@link ContextLoader} class to use for the supplied
-	 * test class.
+	 * Determine the default {@link ContextLoader} {@linkplain Class class}
+	 * to use for the supplied test class.
 	 * <p>The class returned by this method will only be used if a {@code ContextLoader}
 	 * class has not been explicitly declared via {@link ContextConfiguration#loader}.
 	 * @param testClass the test class for which to retrieve the default
 	 * {@code ContextLoader} class
+	 * @return the default {@code ContextLoader} class for the supplied test class
+	 * (never {@code null})
 	 */
 	protected abstract Class<? extends ContextLoader> getDefaultContextLoaderClass(Class<?> testClass);
 
