@@ -27,6 +27,8 @@ import org.springframework.aop.scope.ScopedProxyFactoryBean;
 import org.springframework.asm.Type;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
+import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.beans.factory.support.SimpleInstantiationStrategy;
@@ -303,7 +305,7 @@ class ConfigurationClassEnhancer {
 							"result in a failure to process annotations such as @Autowired, " +
 							"@Resource and @PostConstruct within the method's declaring " +
 							"@Configuration class. Add the 'static' modifier to this method to avoid " +
-							"these container lifecycle issues; see @Bean javadoc for complete details",
+							"these container lifecycle issues; see @Bean javadoc for complete details.",
 							beanMethod.getDeclaringClass().getSimpleName(), beanMethod.getName()));
 				}
 				return cglibMethodProxy.invokeSuper(enhancedConfigInstance, beanMethodArgs);
@@ -318,8 +320,23 @@ class ConfigurationClassEnhancer {
 					if (alreadyInCreation) {
 						beanFactory.setCurrentlyInCreation(beanName, false);
 					}
-					return (!ObjectUtils.isEmpty(beanMethodArgs) ?
+					Object beanInstance = (!ObjectUtils.isEmpty(beanMethodArgs) ?
 							beanFactory.getBean(beanName, beanMethodArgs) : beanFactory.getBean(beanName));
+					if (beanInstance != null && !beanMethod.getReturnType().isInstance(beanInstance)) {
+						String msg = String.format("@Bean method %s.%s called as a bean reference " +
+									"for type [%s] but overridden by non-compatible bean instance of type [%s].",
+									beanMethod.getDeclaringClass().getSimpleName(), beanMethod.getName(),
+									beanMethod.getReturnType().getName(), beanInstance.getClass().getName());
+						try {
+							BeanDefinition beanDefinition = beanFactory.getMergedBeanDefinition(beanName);
+							msg += " Overriding bean of same name declared in: " + beanDefinition.getResourceDescription();
+						}
+						catch (NoSuchBeanDefinitionException ex) {
+							// Ignore - simply no detailed message then.
+						}
+						throw new IllegalStateException(msg);
+					}
+					return beanInstance;
 				}
 				finally {
 					if (alreadyInCreation) {
