@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -289,7 +289,7 @@ class ConfigurationClassEnhancer {
 				}
 				else {
 					// It is a candidate FactoryBean - go ahead with enhancement
-					return enhanceFactoryBean(factoryBean.getClass(), beanFactory, beanName);
+					return enhanceFactoryBean(factoryBean, beanFactory, beanName);
 				}
 			}
 
@@ -365,11 +365,11 @@ class ConfigurationClassEnhancer {
 		 * instance directly. If a FactoryBean instance is fetched through the container via &-dereferencing,
 		 * it will not be proxied. This too is aligned with the way XML configuration works.
 		 */
-		private Object enhanceFactoryBean(Class<?> fbClass, final ConfigurableBeanFactory beanFactory,
+		private Object enhanceFactoryBean(final Object factoryBean, final ConfigurableBeanFactory beanFactory,
 				final String beanName) throws InstantiationException, IllegalAccessException {
 
 			Enhancer enhancer = new Enhancer();
-			enhancer.setSuperclass(fbClass);
+			enhancer.setSuperclass(factoryBean.getClass());
 			enhancer.setUseFactory(false);
 			enhancer.setNamingPolicy(SpringNamingPolicy.INSTANCE);
 			enhancer.setCallback(new MethodInterceptor() {
@@ -378,7 +378,7 @@ class ConfigurationClassEnhancer {
 					if (method.getName().equals("getObject") && args.length == 0) {
 						return beanFactory.getBean(beanName);
 					}
-					return proxy.invokeSuper(obj, args);
+					return proxy.invoke(factoryBean, args);
 				}
 			});
 			return enhancer.create();
