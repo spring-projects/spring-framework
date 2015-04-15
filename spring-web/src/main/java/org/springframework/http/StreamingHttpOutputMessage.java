@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,12 +33,13 @@ public interface StreamingHttpOutputMessage extends HttpOutputMessage {
 	 */
 	void setBody(Body body);
 
+
 	/**
-	 * Defines the contract for bodies that can be written directly to a
-	 * {@link OutputStream}. It is useful with HTTP client libraries that provide indirect
-	 * access to an {@link OutputStream} via a callback mechanism.
+	 * Defines the contract for bodies that can be written directly to an {@link OutputStream}.
+	 * It is useful with HTTP client libraries that provide indirect access to an
+	 * {@link OutputStream} via a callback mechanism.
 	 */
-	public interface Body {
+	interface Body {
 
 		/**
 		 * Writes this body to the given {@link OutputStream}.
@@ -46,7 +47,6 @@ public interface StreamingHttpOutputMessage extends HttpOutputMessage {
 		 * @throws IOException in case of errors
 		 */
 		void writeTo(OutputStream outputStream) throws IOException;
-
 	}
 
 }
