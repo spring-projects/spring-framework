@@ -1741,6 +1741,13 @@ http://activemq.apache.org/delete-inactive-destinations.html[configuration optio
 for purging inactive destinations.
 ====
 
+In a multi-application server scenario a user destination may remain unresolved because
+the user is connected to a different server. In such cases you can configure a
+destination to broadcast unresolved messages to so that other servers have a chance to try.
+This can be done through the `userDestinationBroadcast` property of the
+`MessageBrokerRegistry` in Java config and the `user-destination-broadcast` attribute
+of the `message-broker` element in XML.
+
 
 
 

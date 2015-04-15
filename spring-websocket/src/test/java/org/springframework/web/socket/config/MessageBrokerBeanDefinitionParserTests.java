@@ -275,6 +275,12 @@ public class MessageBrokerBeanDefinitionParserTests {
 			// expected
 		}
 
+		UserDestinationMessageHandler userDestHandler = this.appContext.getBean(UserDestinationMessageHandler.class);
+		assertEquals("/topic/unresolved", userDestHandler.getUserDestinationBroadcast());
+		assertNotNull(messageBroker.getSystemSubscriptions());
+		assertSame(userDestHandler, messageBroker.getSystemSubscriptions().get("/topic/unresolved"));
+
+
 		String name = "webSocketMessageBrokerStats";
 		WebSocketMessageBrokerStats stats = this.appContext.getBean(name, WebSocketMessageBrokerStats.class);
 		String actual = stats.toString();

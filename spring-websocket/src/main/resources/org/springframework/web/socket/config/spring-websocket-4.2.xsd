@@ -856,6 +856,17 @@
                     ]]></xsd:documentation>
 				</xsd:annotation>
 			</xsd:attribute>
+			<xsd:attribute name="user-destination-broadcast" type="xsd:string">
+				<xsd:annotation>
+					<xsd:documentation><![CDATA[
+	Set a destination to broadcast messages to that remain unresolved because
+	the user is not connected. In a multi-application server scenario this
+	gives other application servers a chance to try.
+	Note: this option applies only when the stomp-broker-relay is enabled.
+	By default this is not set.
+                    ]]></xsd:documentation>
+				</xsd:annotation>
+			</xsd:attribute>
 			<xsd:attribute name="path-matcher" type="xsd:string">
 				<xsd:annotation>
 					<xsd:documentation><![CDATA[

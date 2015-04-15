@@ -159,14 +159,17 @@ class MessageBrokerBeanDefinitionParser implements BeanDefinitionParser {
 
 		channelElem = DomUtils.getChildElementByTagName(element, "broker-channel");
 		RuntimeBeanReference brokerChannel = getMessageChannel("brokerChannel", channelElem, context, source);
-		RootBeanDefinition broker = registerMessageBroker(element, inChannel, outChannel, brokerChannel, context, source);
+
+		RuntimeBeanReference resolver = registerUserDestResolver(element, sessionRegistry, context, source);
+		RuntimeBeanReference userDestHandler = registerUserDestHandler(element, inChannel,
+				brokerChannel, resolver, context, source);
+
+		RootBeanDefinition broker = registerMessageBroker(element, userDestHandler, inChannel,
+				outChannel, brokerChannel, context, source);
 
 		RuntimeBeanReference converter = registerMessageConverter(element, context, source);
 		RuntimeBeanReference template = registerMessagingTemplate(element, brokerChannel, converter, context, source);
 		registerAnnotationMethodMessageHandler(element, inChannel, outChannel,converter, template, context, source);
-
-		RuntimeBeanReference resolver = registerUserDestinationResolver(element, sessionRegistry, context, source);
-		registerUserDestinationMessageHandler(inChannel, brokerChannel, resolver, context, source);
 
 		Map<String, Object> scopeMap = Collections.<String, Object>singletonMap("websocket", new SimpSessionScope());
 		RootBeanDefinition scopeConfigurer = new RootBeanDefinition(CustomScopeConfigurer.class);
@@ -308,11 +311,13 @@ class MessageBrokerBeanDefinitionParser implements BeanDefinitionParser {
 		return new RuntimeBeanReference(registerBeanDef(beanDef, context, source));
 	}
 
-	private RootBeanDefinition registerMessageBroker(Element messageBrokerElement, RuntimeBeanReference inChannel,
-			RuntimeBeanReference outChannel, RuntimeBeanReference brokerChannel, ParserContext context, Object source) {
+	private RootBeanDefinition registerMessageBroker(Element brokerElement,
+			RuntimeBeanReference userDestHandler, RuntimeBeanReference inChannel,
+			RuntimeBeanReference outChannel, RuntimeBeanReference brokerChannel,
+			ParserContext context, Object source) {
 
-		Element simpleBrokerElem = DomUtils.getChildElementByTagName(messageBrokerElement, "simple-broker");
-		Element brokerRelayElem = DomUtils.getChildElementByTagName(messageBrokerElement, "stomp-broker-relay");
+		Element simpleBrokerElem = DomUtils.getChildElementByTagName(brokerElement, "simple-broker");
+		Element brokerRelayElem = DomUtils.getChildElementByTagName(brokerElement, "stomp-broker-relay");
 
 		ConstructorArgumentValues cavs = new ConstructorArgumentValues();
 		cavs.addIndexedArgumentValue(0, inChannel);
@@ -324,8 +329,8 @@ class MessageBrokerBeanDefinitionParser implements BeanDefinitionParser {
 			String prefix = simpleBrokerElem.getAttribute("prefix");
 			cavs.addIndexedArgumentValue(3, Arrays.asList(StringUtils.tokenizeToStringArray(prefix, ",")));
 			brokerDef = new RootBeanDefinition(SimpleBrokerMessageHandler.class, cavs, null);
-			if (messageBrokerElement.hasAttribute("path-matcher")) {
-				String pathMatcherRef = messageBrokerElement.getAttribute("path-matcher");
+			if (brokerElement.hasAttribute("path-matcher")) {
+				String pathMatcherRef = brokerElement.getAttribute("path-matcher");
 				brokerDef.getPropertyValues().add("pathMatcher", new RuntimeBeanReference(pathMatcherRef));
 			}
 			if (simpleBrokerElem.hasAttribute("scheduler")) {
@@ -368,6 +373,13 @@ class MessageBrokerBeanDefinitionParser implements BeanDefinitionParser {
 			}
 			if (brokerRelayElem.hasAttribute("virtual-host")) {
 				values.add("virtualHost", brokerRelayElem.getAttribute("virtual-host"));
+			}
+			if (brokerElement.hasAttribute("user-destination-broadcast")) {
+				String destination = brokerElement.getAttribute("user-destination-broadcast");
+				ManagedMap<String, Object> map = new ManagedMap<String, Object>();
+				map.setSource(source);
+				map.put(destination, userDestHandler);
+				values.add("systemSubscriptions", map);
 			}
 			Class<?> handlerType = StompBrokerRelayMessageHandler.class;
 			brokerDef = new RootBeanDefinition(handlerType, cavs, values);
@@ -471,7 +483,7 @@ class MessageBrokerBeanDefinitionParser implements BeanDefinitionParser {
 		return list;
 	}
 
-	private RuntimeBeanReference registerUserDestinationResolver(Element brokerElem,
+	private RuntimeBeanReference registerUserDestResolver(Element brokerElem,
 			RuntimeBeanReference userSessionRegistry, ParserContext context, Object source) {
 
 		ConstructorArgumentValues cavs = new ConstructorArgumentValues();
@@ -483,15 +495,19 @@ class MessageBrokerBeanDefinitionParser implements BeanDefinitionParser {
 		return new RuntimeBeanReference(registerBeanDef(beanDef, context, source));
 	}
 
-	private RuntimeBeanReference registerUserDestinationMessageHandler(RuntimeBeanReference inChannel,
-			RuntimeBeanReference brokerChannel, RuntimeBeanReference userDestinationResolver,
-			ParserContext context, Object source) {
+	private RuntimeBeanReference registerUserDestHandler(Element brokerElem,
+			RuntimeBeanReference inChannel, RuntimeBeanReference brokerChannel,
+			RuntimeBeanReference userDestinationResolver, ParserContext context, Object source) {
 
 		ConstructorArgumentValues cavs = new ConstructorArgumentValues();
 		cavs.addIndexedArgumentValue(0, inChannel);
 		cavs.addIndexedArgumentValue(1, brokerChannel);
 		cavs.addIndexedArgumentValue(2, userDestinationResolver);
 		RootBeanDefinition beanDef = new RootBeanDefinition(UserDestinationMessageHandler.class, cavs, null);
+		if (brokerElem.hasAttribute("user-destination-broadcast")) {
+			String destination = brokerElem.getAttribute("user-destination-broadcast");
+			beanDef.getPropertyValues().add("userDestinationBroadcast", destination);
+		}
 		return new RuntimeBeanReference(registerBeanDef(beanDef, context, source));
 	}
 

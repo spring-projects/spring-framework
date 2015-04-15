@@ -17,6 +17,7 @@
 package org.springframework.messaging.simp.stomp;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
@@ -26,6 +27,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageDeliveryException;
+import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.SubscribableChannel;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
@@ -111,6 +113,8 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 	private long systemHeartbeatReceiveInterval = 10000;
 
 	private String virtualHost;
+
+	private final Map<String, MessageHandler> systemSubscriptions = new HashMap<String, MessageHandler>(4);
 
 	private TcpOperations<byte[]> tcpClient;
 
@@ -279,6 +283,27 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 	 */
 	public String getSystemPasscode() {
 		return this.systemPasscode;
+	}
+
+	/**
+	 * Configure one more destinations to subscribe to on the shared "system"
+	 * connection along with MessageHandler's to handle received messages.
+	 * <p>This is for internal use in a multi-application server scenario where
+	 * servers forward messages to each other (e.g. unresolved user destinations).
+	 * @param subscriptions the destinations to subscribe to.
+	 */
+	public void setSystemSubscriptions(Map<String, MessageHandler> subscriptions) {
+		this.systemSubscriptions.clear();
+		if (subscriptions != null) {
+			this.systemSubscriptions.putAll(subscriptions);
+		}
+	}
+
+	/**
+	 * Return the configured map with subscriptions on the "system" connection.
+	 */
+	public Map<String, MessageHandler> getSystemSubscriptions() {
+		return this.systemSubscriptions;
 	}
 
 	/**
@@ -532,6 +557,10 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 			return this.sessionId;
 		}
 
+		protected TcpConnection<byte[]> getTcpConnection() {
+			return this.tcpConnection;
+		}
+
 		@Override
 		public void afterConnected(TcpConnection<byte[]> connection) {
 			if (logger.isDebugEnabled()) {
@@ -579,13 +608,14 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 				headerAccessor.setUser(this.connectHeaders.getUser());
 				headerAccessor.setMessage(errorText);
 				Message<?> errorMessage = MessageBuilder.createMessage(EMPTY_PAYLOAD, headerAccessor.getMessageHeaders());
-				headerAccessor.setImmutable();
-				sendMessageToClient(errorMessage);
+				handleInboundMessage(errorMessage);
 			}
 		}
 
-		protected void sendMessageToClient(Message<?> message) {
+		protected void handleInboundMessage(Message<?> message) {
 			if (this.isRemoteClientSession) {
+				StompHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
+				accessor.setImmutable();
 				StompBrokerRelayMessageHandler.this.getClientOutboundChannel().send(message);
 			}
 		}
@@ -610,8 +640,7 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 				logger.trace("Received " + accessor.getDetailedLogMessage(message.getPayload()));
 			}
 
-			accessor.setImmutable();
-			sendMessageToClient(message);
+			handleInboundMessage(message);
 		}
 
 		/**
@@ -825,7 +854,6 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 		}
 	}
 
-
 	private class SystemStompConnectionHandler extends StompConnectionHandler {
 
 		public SystemStompConnectionHandler(StompHeaderAccessor connectHeaders) {
@@ -839,6 +867,63 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 			}
 			super.afterStompConnected(connectedHeaders);
 			publishBrokerAvailableEvent();
+			sendSystemSubscriptions();
+		}
+
+		private void sendSystemSubscriptions() {
+			int i = 0;
+			for (String destination : getSystemSubscriptions().keySet()) {
+				StompHeaderAccessor accessor = StompHeaderAccessor.create(StompCommand.SUBSCRIBE);
+				accessor.setSubscriptionId(String.valueOf(i++));
+				accessor.setDestination(destination);
+				if (logger.isDebugEnabled()) {
+					logger.debug("Subscribing to " + destination + " on \"system\" connection.");
+				}
+				TcpConnection<byte[]> conn = getTcpConnection();
+				if (conn != null) {
+					MessageHeaders headers = accessor.getMessageHeaders();
+					conn.send(MessageBuilder.createMessage(EMPTY_PAYLOAD, headers)).addCallback(
+							new ListenableFutureCallback<Void>() {
+								public void onSuccess(Void result) {
+								}
+								public void onFailure(Throwable ex) {
+									String error = "Failed to subscribe in \"system\" session.";
+									handleTcpConnectionFailure(error, ex);
+								}
+							});
+				}
+			}
+		}
+
+		@Override
+		protected void handleInboundMessage(Message<?> message) {
+			StompHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
+			if (StompCommand.MESSAGE.equals(accessor.getCommand())) {
+				String destination = accessor.getDestination();
+				if (destination == null) {
+					if (logger.isDebugEnabled()) {
+						logger.debug("Got message on \"system\" connection, with no destination: " +
+								accessor.getDetailedLogMessage(message.getPayload()));
+					}
+					return;
+				}
+				if (!getSystemSubscriptions().containsKey(destination)) {
+					if (logger.isDebugEnabled()) {
+						logger.debug("Got message on \"system\" connection with no handler: " +
+								accessor.getDetailedLogMessage(message.getPayload()));
+					}
+					return;
+				}
+				try {
+					MessageHandler handler = getSystemSubscriptions().get(destination);
+					handler.handleMessage(message);
+				}
+				catch (Throwable ex) {
+					if (logger.isDebugEnabled()) {
+						logger.debug("Error while handling message on \"system\" connection.", ex);
+					}
+				}
+			}
 		}
 
 		@Override
@@ -857,7 +942,9 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 		public ListenableFuture<Void> forward(Message<?> message, StompHeaderAccessor accessor) {
 			try {
 				ListenableFuture<Void> future = super.forward(message, accessor);
-				future.get();
+				if (message.getHeaders().get(SimpMessageHeaderAccessor.IGNORE_ERROR) == null) {
+					future.get();
+				}
 				return future;
 			}
 			catch (Throwable ex) {

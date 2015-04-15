@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -69,13 +69,16 @@ public class SimpMessageHeaderAccessor extends NativeMessageHeaderAccessor {
 
 
 	/**
-	 * For internal use.
-	 * <p>The original destination used by a client when subscribing. Such a
-	 * destination may have been modified (e.g. user destinations) on the server
-	 * side. This header provides a hint so messages sent to clients may have
-	 * a destination matching to their original subscription.
+	 * A header for internal use with "user" destinations where we need to
+	 * restore the destination prior to sending messages to clients.
 	 */
 	public static final String ORIGINAL_DESTINATION = "simpOrigDestination";
+
+	/**
+	 * A header that indicates to the broker that the sender will ignore errors.
+	 * The header is simply checked for presence or absence.
+	 */
+	public static final String IGNORE_ERROR = "simpIgnoreError";
 
 
 	/**

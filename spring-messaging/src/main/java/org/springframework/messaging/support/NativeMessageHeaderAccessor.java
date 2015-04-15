@@ -115,7 +115,7 @@ public class NativeMessageHeaderAccessor extends MessageHeaderAccessor {
 	 */
 	public boolean containsNativeHeader(String headerName) {
 		Map<String, List<String>> map = getNativeHeaders();
-		return (map != null ? map.containsKey(headerName) : false);
+		return (map != null && map.containsKey(headerName));
 	}
 
 	/**
@@ -205,6 +205,18 @@ public class NativeMessageHeaderAccessor extends MessageHeaderAccessor {
 			return null;
 		}
 		return nativeHeaders.remove(name);
+	}
+
+	@SuppressWarnings("unchecked")
+	public static String getFirstNativeHeader(String headerName, Map<String, Object> headers) {
+		Map<String, List<String>> map = (Map<String, List<String>>) headers.get(NATIVE_HEADERS);
+		if (map != null) {
+			List<String> values = map.get(headerName);
+			if (values != null) {
+				return values.get(0);
+			}
+		}
+		return null;
 	}
 
 }
