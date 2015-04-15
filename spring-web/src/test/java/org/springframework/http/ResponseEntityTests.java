@@ -26,7 +26,6 @@ import org.junit.Test;
 
 import static org.junit.Assert.*;
 
-
 /**
  * @author Arjen Poutsma
  * @author Marcel Overdijk
@@ -210,7 +209,6 @@ public class ResponseEntityTests {
 
 	@Test
 	public void cacheControl() {
-
 		Integer entity = new Integer(42);
 
 		ResponseEntity<Integer> responseEntity =
@@ -229,7 +227,6 @@ public class ResponseEntityTests {
 
 	@Test
 	public void cacheControlNoCache() {
-
 		Integer entity = new Integer(42);
 
 		ResponseEntity<Integer> responseEntity =
