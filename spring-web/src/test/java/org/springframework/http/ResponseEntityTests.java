@@ -163,7 +163,7 @@ public class ResponseEntityTests {
 	}
 
 	@Test
-	public void headersCopy(){
+	public void headersCopy() {
 		HttpHeaders customHeaders = new HttpHeaders();
 		customHeaders.set("X-CustomHeader", "vale");
 
@@ -178,7 +178,7 @@ public class ResponseEntityTests {
 	}
 
 	@Test  // SPR-12792
-	public void headersCopyWithEmptyAndNull(){
+	public void headersCopyWithEmptyAndNull() {
 		ResponseEntity<Void> responseEntityWithEmptyHeaders =
 				ResponseEntity.ok().headers(new HttpHeaders()).build();
 		ResponseEntity<Void> responseEntityWithNullHeaders =
