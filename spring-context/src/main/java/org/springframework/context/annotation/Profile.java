@@ -49,10 +49,10 @@ import org.springframework.core.env.ConfigurableEnvironment;
  * will be bypassed unless one or more of the specified profiles are active. This is very
  * similar to the behavior in Spring XML: if the {@code profile} attribute of the
  * {@code beans} element is supplied e.g., {@code <beans profile="p1,p2">}, the
- * {@code beans} element will not be parsed unless profiles 'p1' and/or 'p2' have been
+ * {@code beans} element will not be parsed unless profiles 'p1' or 'p2' have been
  * activated. Likewise, if a {@code @Component} or {@code @Configuration} class is marked
  * with {@code @Profile({"p1", "p2"})}, that class will not be registered/processed unless
- * profiles 'p1' and/or 'p2' have been activated.
+ * profiles 'p1' or 'p2' have been activated.
  *
  * <p>If a given profile is prefixed with the NOT operator ({@code !}), the annotated
  * will be registered if the profile is <em>not</em> active. e.g., for
