@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -1422,9 +1422,15 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 			return getTypeForFactoryBean(factoryBean);
 		}
 		catch (BeanCreationException ex) {
-			// Can only happen when getting a FactoryBean.
-			if (logger.isWarnEnabled()) {
-				logger.warn("Bean creation exception on FactoryBean type check: " + ex);
+			if (ex instanceof BeanCurrentlyInCreationException) {
+				if (logger.isDebugEnabled()) {
+					logger.debug("Bean currently in creation on FactoryBean type check: " + ex);
+				}
+			}
+			else {
+				if (logger.isWarnEnabled()) {
+					logger.warn("Bean creation exception on FactoryBean type check: " + ex);
+				}
 			}
 			onSuppressedException(ex);
 			return null;
