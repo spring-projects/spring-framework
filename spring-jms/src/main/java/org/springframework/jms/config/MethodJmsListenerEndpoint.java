@@ -21,6 +21,8 @@ import java.util.Arrays;
 
 import org.springframework.aop.framework.AopProxyUtils;
 import org.springframework.aop.support.AopUtils;
+import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.jms.listener.MessageListenerContainer;
 import org.springframework.jms.listener.adapter.MessagingMessageListenerAdapter;
@@ -45,6 +47,8 @@ public class MethodJmsListenerEndpoint extends AbstractJmsListenerEndpoint {
 	private Method method;
 
 	private MessageHandlerMethodFactory messageHandlerMethodFactory;
+
+	private BeanFactory beanFactory;
 
 
 	/**
@@ -78,6 +82,12 @@ public class MethodJmsListenerEndpoint extends AbstractJmsListenerEndpoint {
 		this.messageHandlerMethodFactory = messageHandlerMethodFactory;
 	}
 
+	/**
+	 * Set the {@link BeanFactory} to use to resolve expressions (can be null).
+	 */
+	public void setBeanFactory(BeanFactory beanFactory) {
+		this.beanFactory = beanFactory;
+	}
 
 	@Override
 	protected MessagingMessageListenerAdapter createMessageListener(MessageListenerContainer container) {
@@ -110,7 +120,10 @@ public class MethodJmsListenerEndpoint extends AbstractJmsListenerEndpoint {
 		return new MessagingMessageListenerAdapter();
 	}
 
-	private String getDefaultResponseDestination() {
+	/**
+	 * Return the default response destination, if any.
+	 */
+	protected String getDefaultResponseDestination() {
 		Method specificMethod = getMostSpecificMethod();
 		SendTo ann = AnnotationUtils.getAnnotation(specificMethod, SendTo.class);
 		if (ann != null) {
@@ -119,10 +132,22 @@ public class MethodJmsListenerEndpoint extends AbstractJmsListenerEndpoint {
 				throw new IllegalStateException("Invalid @" + SendTo.class.getSimpleName() + " annotation on '"
 						+ specificMethod + "' one destination must be set (got " + Arrays.toString(destinations) + ")");
 			}
-			return (String) destinations[0];
+			return resolve((String) destinations[0]);
 		}
 		return null;
 	}
+
+	/**
+	 * Resolve the specified value if possible.
+	 * @see ConfigurableBeanFactory#resolveEmbeddedValue
+	 */
+	private String resolve(String value) {
+		if (this.beanFactory instanceof ConfigurableBeanFactory) {
+			return ((ConfigurableBeanFactory) this.beanFactory).resolveEmbeddedValue(value);
+		}
+		return value;
+	}
+
 
 	private Method getMostSpecificMethod() {
 		if (AopUtils.isAopProxy(this.bean)) {

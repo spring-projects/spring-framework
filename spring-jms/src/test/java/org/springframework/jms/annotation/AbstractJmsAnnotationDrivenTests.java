@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.jms.annotation;
 
+import java.lang.reflect.Method;
 import javax.jms.JMSException;
 import javax.jms.Session;
 
@@ -32,7 +33,9 @@ import org.springframework.jms.config.MethodJmsListenerEndpoint;
 import org.springframework.jms.config.SimpleJmsListenerEndpoint;
 import org.springframework.jms.listener.SimpleMessageListenerContainer;
 import org.springframework.jms.listener.adapter.MessagingMessageListenerAdapter;
+import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.stereotype.Component;
+import org.springframework.util.ReflectionUtils;
 import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
 import org.springframework.validation.annotation.Validated;
@@ -111,6 +114,11 @@ public abstract class AbstractJmsAnnotationDrivenTests {
 		assertEquals("mySelector", endpoint.getSelector());
 		assertEquals("mySubscription", endpoint.getSubscription());
 		assertEquals("1-10", endpoint.getConcurrency());
+
+		Method m = ReflectionUtils.findMethod(endpoint.getClass(), "getDefaultResponseDestination");
+		ReflectionUtils.makeAccessible(m);
+		Object destination = ReflectionUtils.invokeMethod(m, endpoint);
+		assertEquals("queueOut", destination);
 	}
 
 	@Component
@@ -118,6 +126,7 @@ public abstract class AbstractJmsAnnotationDrivenTests {
 
 		@JmsListener(id = "listener1", containerFactory = "simpleFactory", destination = "queueIn",
 				selector = "mySelector", subscription = "mySubscription", concurrency = "1-10")
+		@SendTo("queueOut")
 		public String fullHandle(String msg) {
 			return "reply";
 		}
@@ -129,6 +138,7 @@ public abstract class AbstractJmsAnnotationDrivenTests {
 		@JmsListener(id = "${jms.listener.id}", containerFactory = "${jms.listener.containerFactory}",
 				destination = "${jms.listener.destination}", selector = "${jms.listener.selector}",
 				subscription = "${jms.listener.subscription}", concurrency = "${jms.listener.concurrency}")
+		@SendTo("${jms.listener.sendTo}")
 		public String fullHandle(String msg) {
 			return "reply";
 		}
