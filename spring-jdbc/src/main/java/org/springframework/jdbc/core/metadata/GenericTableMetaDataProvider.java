@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -70,7 +70,7 @@ public class GenericTableMetaDataProvider implements TableMetaDataProvider {
 			Arrays.asList("Apache Derby", "HSQL Database Engine");
 
 	/** Collection of TableParameterMetaData objects */
-	private List<TableParameterMetaData> insertParameterMetaData = new ArrayList<TableParameterMetaData>();
+	private List<TableParameterMetaData> tableParameterMetaData = new ArrayList<TableParameterMetaData>();
 
 	/** NativeJdbcExtractor that can be used to retrieve the native connection */
 	private NativeJdbcExtractor nativeJdbcExtractor;
@@ -109,7 +109,7 @@ public class GenericTableMetaDataProvider implements TableMetaDataProvider {
 
 	@Override
 	public List<TableParameterMetaData> getTableParameterMetaData() {
-		return this.insertParameterMetaData;
+		return this.tableParameterMetaData;
 	}
 
 	@Override
@@ -376,17 +376,14 @@ public class GenericTableMetaDataProvider implements TableMetaDataProvider {
 		}
 		try {
 			tableColumns = databaseMetaData.getColumns(
-					metaDataCatalogName,
-					metaDataSchemaName,
-					metaDataTableName,
-					null);
+					metaDataCatalogName, metaDataSchemaName, metaDataTableName, null);
 			while (tableColumns.next()) {
 				String columnName = tableColumns.getString("COLUMN_NAME");
 				int dataType = tableColumns.getInt("DATA_TYPE");
 				if (dataType == Types.DECIMAL) {
 					String typeName = tableColumns.getString("TYPE_NAME");
 					int decimalDigits = tableColumns.getInt("DECIMAL_DIGITS");
-					// override a DECIMAL data type for no-decimal numerics
+					// Override a DECIMAL data type for no-decimal numerics
 					// (this is for better Oracle support where there have been issues
 					// using DECIMAL for certain inserts (see SPR-6912))
 					if ("NUMBER".equals(typeName) && decimalDigits == 0) {
@@ -400,18 +397,11 @@ public class GenericTableMetaDataProvider implements TableMetaDataProvider {
 					}
 				}
 				boolean nullable = tableColumns.getBoolean("NULLABLE");
-				TableParameterMetaData meta = new TableParameterMetaData(
-						columnName,
-						dataType,
-						nullable
-				);
-				this.insertParameterMetaData.add(meta);
+				TableParameterMetaData meta = new TableParameterMetaData(columnName, dataType, nullable);
+				this.tableParameterMetaData.add(meta);
 				if (logger.isDebugEnabled()) {
-					logger.debug("Retrieved metadata: "
-						+ meta.getParameterName() +
-						" " + meta.getSqlType() +
-						" " + meta.isNullable()
-					);
+					logger.debug("Retrieved metadata: " + meta.getParameterName() +
+						" " + meta.getSqlType() + " " + meta.isNullable());
 				}
 			}
 		}
