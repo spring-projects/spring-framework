@@ -24,15 +24,20 @@ import org.aopalliance.intercept.MethodInvocation;
 import org.junit.Test;
 
 import org.springframework.aop.framework.ProxyFactory;
+import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.BeanThatBroadcasts;
 import org.springframework.context.BeanThatListens;
 import org.springframework.context.support.AbstractApplicationContext;
+import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.context.support.StaticApplicationContext;
+import org.springframework.context.support.StaticMessageSource;
 import org.springframework.core.Ordered;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.annotation.Order;
@@ -48,6 +53,7 @@ import static org.mockito.BDDMockito.*;
  * @author Alef Arendsen
  * @author Rick Evans
  * @author Stephane Nicoll
+ * @author Juergen Hoeller
  */
 public class ApplicationContextEventTests extends AbstractApplicationEventListenerTests {
 
@@ -337,6 +343,21 @@ public class ApplicationContextEventTests extends AbstractApplicationEventListen
 		context.close();
 	}
 
+	@Test
+	public void beanPostProcessorPublishesEvents() {
+		GenericApplicationContext context = new GenericApplicationContext();
+		context.registerBeanDefinition("listener", new RootBeanDefinition(BeanThatListens.class));
+		context.registerBeanDefinition("messageSource", new RootBeanDefinition(StaticMessageSource.class));
+		context.registerBeanDefinition("postProcessor", new RootBeanDefinition(EventPublishingBeanPostProcessor.class));
+		context.refresh();
+
+		context.publishEvent(new MyEvent(this));
+		BeanThatListens listener = context.getBean(BeanThatListens.class);
+		assertEquals(4, listener.getEventCount());
+
+		context.close();
+	}
+
 
 	@SuppressWarnings("serial")
 	public static class MyEvent extends ApplicationEvent {
@@ -410,6 +431,7 @@ public class ApplicationContextEventTests extends AbstractApplicationEventListen
 		}
 	}
 
+
 	@Order(5)
 	public static class MyOrderedListener3 implements ApplicationListener<ApplicationEvent> {
 
@@ -421,6 +443,7 @@ public class ApplicationContextEventTests extends AbstractApplicationEventListen
 		}
 
 	}
+
 
 	@Order(50)
 	public static class MyOrderedListener4 implements ApplicationListener<MyEvent> {
@@ -434,6 +457,27 @@ public class ApplicationContextEventTests extends AbstractApplicationEventListen
 		@Override
 		public void onApplicationEvent(MyEvent event) {
 			assertTrue(otherListener.seenEvents.contains(event));
+		}
+	}
+
+
+	public static class EventPublishingBeanPostProcessor implements BeanPostProcessor, ApplicationContextAware {
+
+		private ApplicationContext applicationContext;
+
+		public void setApplicationContext(ApplicationContext applicationContext) {
+			this.applicationContext = applicationContext;
+		}
+
+		@Override
+		public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
+			this.applicationContext.publishEvent(new MyEvent(this));
+			return bean;
+		}
+
+		@Override
+		public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
+			return bean;
 		}
 	}
 
