@@ -11,7 +11,7 @@
 
 	<bean id="gamma" class="org.springframework.beans.factory.FactoryBeanTests$Gamma"/>
 
-  <bean id="betaFactory" class="org.springframework.beans.factory.FactoryBeanTests$BetaFactoryBean">
+  <bean id="betaFactory" class="org.springframework.beans.factory.FactoryBeanTests$BetaFactoryBean" autowire="constructor">
     <property name="beta" ref="beta"/>
   </bean>
 
