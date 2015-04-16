@@ -2410,6 +2410,7 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 		}
 
 		@ResponseStatus(HttpStatus.NOT_FOUND)
+		@SuppressWarnings("serial")
 		private static class NotFoundException extends RuntimeException {
 		}
 	}
