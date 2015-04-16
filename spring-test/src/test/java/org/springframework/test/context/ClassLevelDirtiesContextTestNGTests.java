@@ -21,7 +21,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.junit.runner.JUnitCore;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
@@ -30,25 +29,29 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.test.context.junit4.TrackingRunListener;
 import org.springframework.test.context.support.DependencyInjectionTestExecutionListener;
 import org.springframework.test.context.support.DirtiesContextTestExecutionListener;
+import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
+import org.springframework.test.context.testng.TrackingTestNGTestListener;
+
+import org.testng.TestNG;
 
 import static org.junit.Assert.*;
 import static org.springframework.test.context.ContextCacheTestUtils.*;
 
 /**
  * JUnit 4 based integration test which verifies correct {@linkplain ContextCache
- * application context caching} in conjunction with the
- * {@link SpringJUnit4ClassRunner} and {@link DirtiesContext @DirtiesContext}
- * at the class level.
+ * application context caching} in conjunction with Spring's TestNG support
+ * and {@link DirtiesContext @DirtiesContext} at the class level.
+ * 
+ * <p>This class is a direct copy of {@link ClassLevelDirtiesContextTests},
+ * modified to verify behavior in conjunction with TestNG.
  *
  * @author Sam Brannen
- * @since 3.0
+ * @since 4.2
  */
 @RunWith(JUnit4.class)
-public class ClassLevelDirtiesContextTests {
+public class ClassLevelDirtiesContextTestNGTests {
 
 	private static final AtomicInteger cacheHits = new AtomicInteger(0);
 	private static final AtomicInteger cacheMisses = new AtomicInteger(0);
@@ -59,17 +62,19 @@ public class ClassLevelDirtiesContextTests {
 		final int expectedTestStartedCount = expectedTestCount;
 		final int expectedTestFinishedCount = expectedTestCount;
 
-		TrackingRunListener listener = new TrackingRunListener();
-		JUnitCore jUnitCore = new JUnitCore();
-		jUnitCore.addListener(listener);
-		jUnitCore.run(testClass);
+		final TrackingTestNGTestListener listener = new TrackingTestNGTestListener();
+		final TestNG testNG = new TestNG();
+		testNG.addListener(listener);
+		testNG.setTestClasses(new Class<?>[] { testClass });
+		testNG.setVerbose(0);
+		testNG.run();
 
-		assertEquals("Verifying number of failures for test class [" + testClass + "].", expectedTestFailureCount,
-			listener.getTestFailureCount());
-		assertEquals("Verifying number of tests started for test class [" + testClass + "].", expectedTestStartedCount,
-			listener.getTestStartedCount());
-		assertEquals("Verifying number of tests finished for test class [" + testClass + "].",
-			expectedTestFinishedCount, listener.getTestFinishedCount());
+		assertEquals("Failures for test class [" + testClass + "].", expectedTestFailureCount,
+			listener.testFailureCount);
+		assertEquals("Tests started for test class [" + testClass + "].", expectedTestStartedCount,
+			listener.testStartCount);
+		assertEquals("Successful tests for test class [" + testClass + "].", expectedTestFinishedCount,
+			listener.testSuccessCount);
 	}
 
 	@BeforeClass
@@ -161,10 +166,10 @@ public class ClassLevelDirtiesContextTests {
 
 	// -------------------------------------------------------------------
 
-	@RunWith(SpringJUnit4ClassRunner.class)
-	@TestExecutionListeners({ DependencyInjectionTestExecutionListener.class, DirtiesContextTestExecutionListener.class })
+	@TestExecutionListeners(listeners = { DependencyInjectionTestExecutionListener.class,
+		DirtiesContextTestExecutionListener.class }, inheritListeners = false)
 	@ContextConfiguration
-	public static abstract class BaseTestCase {
+	public static abstract class BaseTestCase extends AbstractTestNGSpringContextTests {
 
 		@Configuration
 		static class Config {
@@ -177,13 +182,14 @@ public class ClassLevelDirtiesContextTests {
 
 
 		protected void assertApplicationContextWasAutowired() {
-			assertNotNull("The application context should have been autowired.", this.applicationContext);
+			org.testng.Assert.assertNotNull(this.applicationContext,
+				"The application context should have been autowired.");
 		}
 	}
 
 	public static final class CleanTestCase extends BaseTestCase {
 
-		@Test
+		@org.testng.annotations.Test
 		public void verifyContextWasAutowired() {
 			assertApplicationContextWasAutowired();
 		}
@@ -193,7 +199,7 @@ public class ClassLevelDirtiesContextTests {
 	@DirtiesContext
 	public static class ClassLevelDirtiesContextWithCleanMethodsAndDefaultModeTestCase extends BaseTestCase {
 
-		@Test
+		@org.testng.annotations.Test
 		public void verifyContextWasAutowired() {
 			assertApplicationContextWasAutowired();
 		}
@@ -206,7 +212,7 @@ public class ClassLevelDirtiesContextTests {
 	@DirtiesContext(classMode = ClassMode.AFTER_CLASS)
 	public static class ClassLevelDirtiesContextWithCleanMethodsAndAfterClassModeTestCase extends BaseTestCase {
 
-		@Test
+		@org.testng.annotations.Test
 		public void verifyContextWasAutowired() {
 			assertApplicationContextWasAutowired();
 		}
@@ -219,17 +225,17 @@ public class ClassLevelDirtiesContextTests {
 	@DirtiesContext(classMode = ClassMode.AFTER_EACH_TEST_METHOD)
 	public static class ClassLevelDirtiesContextWithAfterEachTestMethodModeTestCase extends BaseTestCase {
 
-		@Test
+		@org.testng.annotations.Test
 		public void verifyContextWasAutowired1() {
 			assertApplicationContextWasAutowired();
 		}
 
-		@Test
+		@org.testng.annotations.Test
 		public void verifyContextWasAutowired2() {
 			assertApplicationContextWasAutowired();
 		}
 
-		@Test
+		@org.testng.annotations.Test
 		public void verifyContextWasAutowired3() {
 			assertApplicationContextWasAutowired();
 		}
@@ -242,7 +248,7 @@ public class ClassLevelDirtiesContextTests {
 	@DirtiesContext
 	public static class ClassLevelDirtiesContextWithDirtyMethodsTestCase extends BaseTestCase {
 
-		@Test
+		@org.testng.annotations.Test
 		@DirtiesContext
 		public void dirtyContext() {
 			assertApplicationContextWasAutowired();

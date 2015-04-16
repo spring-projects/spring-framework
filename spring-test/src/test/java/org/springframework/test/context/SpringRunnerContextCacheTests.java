@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,7 @@ import org.springframework.test.context.support.DependencyInjectionTestExecution
 import org.springframework.test.context.support.DirtiesContextTestExecutionListener;
 
 import static org.junit.Assert.*;
+import static org.springframework.test.context.ContextCacheTestUtils.*;
 
 /**
  * JUnit 4 based unit test which verifies correct {@link ContextCache
@@ -53,41 +54,6 @@ public class SpringRunnerContextCacheTests {
 
 	@Autowired
 	protected ApplicationContext applicationContext;
-
-
-	/**
-	 * Asserts the statistics of the context cache in {@link TestContextManager}.
-	 *
-	 * @param usageScenario the scenario in which the statistics are used
-	 * @param expectedSize the expected number of contexts in the cache
-	 * @param expectedHitCount the expected hit count
-	 * @param expectedMissCount the expected miss count
-	 */
-	private static final void assertContextCacheStatistics(String usageScenario, int expectedSize,
-			int expectedHitCount, int expectedMissCount) {
-		assertContextCacheStatistics(TestContextManager.contextCache, usageScenario, expectedSize, expectedHitCount,
-			expectedMissCount);
-	}
-
-	/**
-	 * Asserts the statistics of the supplied context cache.
-	 *
-	 * @param contextCache the cache to assert against
-	 * @param usageScenario the scenario in which the statistics are used
-	 * @param expectedSize the expected number of contexts in the cache
-	 * @param expectedHitCount the expected hit count
-	 * @param expectedMissCount the expected miss count
-	 */
-	public static final void assertContextCacheStatistics(ContextCache contextCache, String usageScenario,
-			int expectedSize, int expectedHitCount, int expectedMissCount) {
-
-		assertEquals("Verifying number of contexts in cache (" + usageScenario + ").", expectedSize,
-			contextCache.size());
-		assertEquals("Verifying number of cache hits (" + usageScenario + ").", expectedHitCount,
-			contextCache.getHitCount());
-		assertEquals("Verifying number of cache misses (" + usageScenario + ").", expectedMissCount,
-			contextCache.getMissCount());
-	}
 
 	@BeforeClass
 	public static void verifyInitialCacheState() {
