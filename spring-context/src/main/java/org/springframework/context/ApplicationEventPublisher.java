@@ -18,7 +18,7 @@ package org.springframework.context;
 
 /**
  * Interface that encapsulates event publication functionality.
- * Serves as super-interface for ApplicationContext.
+ * Serves as super-interface for {@link ApplicationContext}.
  *
  * @author Juergen Hoeller
  * @author Stephane Nicoll
@@ -42,9 +42,10 @@ public interface ApplicationEventPublisher {
 	/**
 	 * Notify all <strong>matching</strong> listeners registered with this
 	 * application of an event.
-	 * <p>If the specified {@code event} is not an {@link ApplicationEvent}, it
-	 * is wrapped in a {@code GenericApplicationEvent}.
+	 * <p>If the specified {@code event} is not an {@link ApplicationEvent},
+	 * it is wrapped in a {@link PayloadApplicationEvent}.
 	 * @param event the event to publish
+	 * @since 4.2
 	 * @see PayloadApplicationEvent
 	 */
 	void publishEvent(Object event);

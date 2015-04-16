@@ -38,7 +38,7 @@ import static org.springframework.tests.TestResourceUtils.*;
  * @author Juergen Hoeller
  * @author Chris Beams
  */
-public final class FactoryBeanTests {
+public class FactoryBeanTests {
 
 	private static final Class<?> CLASS = FactoryBeanTests.class;
 	private static final Resource RETURNS_NULL_CONTEXT = qualifiedResource(CLASS, "returnsNull.xml");
@@ -63,10 +63,13 @@ public final class FactoryBeanTests {
 		BeanFactoryPostProcessor ppc = (BeanFactoryPostProcessor) factory.getBean("propertyPlaceholderConfigurer");
 		ppc.postProcessBeanFactory(factory);
 
+		assertNull(factory.getType("betaFactory"));
+
 		Alpha alpha = (Alpha) factory.getBean("alpha");
 		Beta beta = (Beta) factory.getBean("beta");
 		Gamma gamma = (Gamma) factory.getBean("gamma");
 		Gamma gamma2 = (Gamma) factory.getBean("gammaFactory");
+
 		assertSame(beta, alpha.getBeta());
 		assertSame(gamma, beta.getGamma());
 		assertSame(gamma2, beta.getGamma());
@@ -193,6 +196,9 @@ public final class FactoryBeanTests {
 
 	@Component
 	public static class BetaFactoryBean implements FactoryBean<Object> {
+
+		public BetaFactoryBean(Alpha alpha) {
+		}
 
 		private Beta beta;
 
