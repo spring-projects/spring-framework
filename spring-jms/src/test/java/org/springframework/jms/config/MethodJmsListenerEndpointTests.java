@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -242,10 +242,33 @@ public class MethodJmsListenerEndpointTests {
 	}
 
 	@Test
+	public void processFromTopicAndReplyWithSendToQueue() throws JMSException {
+		String methodName = "processAndReplyWithSendTo";
+		SimpleMessageListenerContainer container = new SimpleMessageListenerContainer();
+		container.setPubSubDomain(true);
+		container.setReplyPubSubDomain(false);
+		MessagingMessageListenerAdapter listener = createInstance(this.factory,
+				getListenerMethod(methodName, String.class), container);
+		processAndReplyWithSendTo(listener, false);
+		assertListenerMethodInvocation(sample, methodName);
+	}
+
+	@Test
 	public void processAndReplyWithSendToTopic() throws JMSException {
 		String methodName = "processAndReplyWithSendTo";
 		SimpleMessageListenerContainer container = new SimpleMessageListenerContainer();
 		container.setPubSubDomain(true);
+		MessagingMessageListenerAdapter listener = createInstance(this.factory,
+				getListenerMethod(methodName, String.class), container);
+		processAndReplyWithSendTo(listener, true);
+		assertListenerMethodInvocation(sample, methodName);
+	}
+
+	@Test
+	public void processFromQueueAndReplyWithSendToTopic() throws JMSException {
+		String methodName = "processAndReplyWithSendTo";
+		SimpleMessageListenerContainer container = new SimpleMessageListenerContainer();
+		container.setReplyPubSubDomain(true);
 		MessagingMessageListenerAdapter listener = createInstance(this.factory,
 				getListenerMethod(methodName, String.class), container);
 		processAndReplyWithSendTo(listener, true);

@@ -153,6 +153,8 @@ public abstract class AbstractMessageListenerContainer extends AbstractJmsListen
 
 	private String subscriptionName;
 
+	private Boolean replyPubSubDomain;
+
 	private boolean pubSubNoLocal = false;
 
 	private MessageConverter messageConverter;
@@ -443,6 +445,34 @@ public abstract class AbstractMessageListenerContainer extends AbstractJmsListen
 	 */
 	public boolean isPubSubNoLocal() {
 		return this.pubSubNoLocal;
+	}
+
+	/**
+	 * Configure the reply destination type. By default, the configured {@code pubSubDomain}
+	 * value is used (see {@link #isPubSubDomain()}.
+	 * <p>This setting primarily indicates what type of destination to resolve
+	 * if dynamic destinations are enabled.
+	 * @param replyPubSubDomain "true" for the Publish/Subscribe domain ({@link javax.jms.Topic Topics}),
+	 * "false" for the Point-to-Point domain ({@link javax.jms.Queue Queues})
+	 * @see #setDestinationResolver
+	 */
+	public void setReplyPubSubDomain(boolean replyPubSubDomain) {
+		this.replyPubSubDomain = replyPubSubDomain;
+	}
+
+	/**
+	 * Return whether the Publish/Subscribe domain ({@link javax.jms.Topic Topics}) is used
+	 * for replies. Otherwise, the Point-to-Point domain ({@link javax.jms.Queue Queues}) is
+	 * used.
+	 */
+	@Override
+	public boolean isReplyPubSubDomain() {
+		if (this.replyPubSubDomain != null) {
+			return replyPubSubDomain;
+		}
+		else {
+			return isPubSubDomain();
+		}
 	}
 
 	/**

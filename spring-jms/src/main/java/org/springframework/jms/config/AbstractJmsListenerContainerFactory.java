@@ -52,6 +52,8 @@ public abstract class AbstractJmsListenerContainerFactory<C extends AbstractMess
 
 	private Boolean pubSubDomain;
 
+	private Boolean replyPubSubDomain;
+
 	private Boolean subscriptionDurable;
 
 	private Boolean subscriptionShared;
@@ -113,6 +115,13 @@ public abstract class AbstractJmsListenerContainerFactory<C extends AbstractMess
 	}
 
 	/**
+	 * @see AbstractMessageListenerContainer#setReplyPubSubDomain(boolean)
+	 */
+	public void setReplyPubSubDomain(Boolean replyPubSubDomain) {
+		this.replyPubSubDomain = replyPubSubDomain;
+	}
+
+	/**
 	 * @see AbstractMessageListenerContainer#setSubscriptionDurable(boolean)
 	 */
 	public void setSubscriptionDurable(Boolean subscriptionDurable) {
@@ -171,6 +180,9 @@ public abstract class AbstractJmsListenerContainerFactory<C extends AbstractMess
 		}
 		if (this.pubSubDomain != null) {
 			instance.setPubSubDomain(this.pubSubDomain);
+		}
+		if (this.replyPubSubDomain != null) {
+			instance.setReplyPubSubDomain(this.replyPubSubDomain);
 		}
 		if (this.subscriptionDurable != null) {
 			instance.setSubscriptionDurable(this.subscriptionDurable);
