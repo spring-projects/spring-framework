@@ -46,6 +46,7 @@ import org.springframework.cglib.transform.ClassEmitterTransformer;
 import org.springframework.cglib.transform.TransformingClassGenerator;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.ReflectionUtils;
 
@@ -322,7 +323,7 @@ class ConfigurationClassEnhancer {
 					}
 					Object beanInstance = (!ObjectUtils.isEmpty(beanMethodArgs) ?
 							beanFactory.getBean(beanName, beanMethodArgs) : beanFactory.getBean(beanName));
-					if (beanInstance != null && !beanMethod.getReturnType().isInstance(beanInstance)) {
+					if (beanInstance != null && !ClassUtils.isAssignableValue(beanMethod.getReturnType(), beanInstance)) {
 						String msg = String.format("@Bean method %s.%s called as a bean reference " +
 									"for type [%s] but overridden by non-compatible bean instance of type [%s].",
 									beanMethod.getDeclaringClass().getSimpleName(), beanMethod.getName(),
