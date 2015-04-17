@@ -26,6 +26,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Properties;
+import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.TimeZone;
@@ -50,6 +51,7 @@ import java.util.TreeSet;
  * @author Rick Evans
  * @author Arjen Poutsma
  * @author Sam Brannen
+ * @author Amey Jadiye
  * @since 16 April 2001
  */
 public abstract class StringUtils {
@@ -1131,12 +1133,12 @@ public abstract class StringUtils {
 	/**
 	 * Convert a comma delimited list (e.g., a row from a CSV file) into a set.
 	 * <p>Note that this will suppress duplicates, and the elements in the
-	 * returned set will be sorted, since a {@link TreeSet} is used internally.
+	 * returned set will be sorted, since a {@link LinkedHashSet} is used internally.
 	 * @param str the input {@code String}
 	 * @return a set of {@code String} entries in the list
 	 */
 	public static Set<String> commaDelimitedListToSet(String str) {
-		Set<String> set = new TreeSet<String>();
+		Set<String> set = new LinkedHashSet<String>();
 		String[] tokens = commaDelimitedListToStringArray(str);
 		for (String token : tokens) {
 			set.add(token);
