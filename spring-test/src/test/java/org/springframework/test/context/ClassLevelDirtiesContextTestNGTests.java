@@ -80,8 +80,7 @@ public class ClassLevelDirtiesContextTestNGTests {
 	@BeforeClass
 	public static void verifyInitialCacheState() {
 		ContextCache contextCache = TestContextManager.contextCache;
-		contextCache.clear();
-		contextCache.clearStatistics();
+		contextCache.reset();
 		cacheHits.set(0);
 		cacheMisses.set(0);
 		assertContextCacheStatistics("BeforeClass", 0, cacheHits.get(), cacheMisses.get());

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,16 +31,18 @@ import org.springframework.test.annotation.DirtiesContext.HierarchyMode;
 import org.springframework.util.Assert;
 
 /**
- * Cache for Spring {@link ApplicationContext ApplicationContexts} in a test environment.
+ * Cache for Spring {@link ApplicationContext ApplicationContexts} in a test
+ * environment.
  *
- * <p>Maintains a cache of {@code ApplicationContexts} keyed by
- * {@link MergedContextConfiguration} instances.
+ * <p>{@code ContextCache} maintains a cache of {@code ApplicationContexts}
+ * keyed by {@link MergedContextConfiguration} instances.
  *
- * <p>This has significant performance benefits if initializing the context would take time.
- * While initializing a Spring context itself is very quick, some beans in a context, such
- * as a {@code LocalSessionFactoryBean} for working with Hibernate, may take some time to
- * initialize. Hence it often makes sense to perform that initialization only once per
- * test suite.
+ * <p>Caching has significant performance benefits if initializing the context
+ * takes a considerable about of time. Although initializing a Spring context
+ * itself is very quick, some beans in a context, such as a
+ * {@code LocalSessionFactoryBean} for working with Hibernate, may take some
+ * time to initialize. Hence it often makes sense to perform that initialization
+ * only once per test suite.
  *
  * @author Sam Brannen
  * @author Juergen Hoeller
@@ -67,21 +69,36 @@ class ContextCache {
 
 	private final AtomicInteger missCount = new AtomicInteger();
 
+	/**
+	 * Reset all state maintained by this cache.
+	 * @see #clear()
+	 * @see #clearStatistics()
+	 */
+	public void reset() {
+		synchronized (contextMap) {
+			clear();
+			clearStatistics();
+		}
+	}
 
 	/**
 	 * Clear all contexts from the cache and clear context hierarchy information as well.
 	 */
 	public void clear() {
-		this.contextMap.clear();
-		this.hierarchyMap.clear();
+		synchronized (contextMap) {
+			this.contextMap.clear();
+			this.hierarchyMap.clear();
+		}
 	}
 
 	/**
 	 * Clear hit and miss count statistics for the cache (i.e., reset counters to zero).
 	 */
 	public void clearStatistics() {
-		this.hitCount.set(0);
-		this.missCount.set(0);
+		synchronized (contextMap) {
+			this.hitCount.set(0);
+			this.missCount.set(0);
+		}
 	}
 
 	/**
@@ -117,8 +134,8 @@ class ContextCache {
 
 	/**
 	 * Get the overall hit count for this cache.
-	 * <p>A <em>hit</em> is an access to the cache, which returned a non-null context
-	 * for a queried key.
+	 * <p>A <em>hit</em> is any access to the cache that returns a non-null
+	 * context for the queried key.
 	 */
 	public int getHitCount() {
 		return this.hitCount.get();
@@ -126,15 +143,16 @@ class ContextCache {
 
 	/**
 	 * Get the overall miss count for this cache.
-	 * <p>A <em>miss</em> is an access to the cache, which returned a {@code null} context
-	 * for a queried key.
+	 * <p>A <em>miss</em> is any access to the cache that returns a {@code null}
+	 * context for the queried key.
 	 */
 	public int getMissCount() {
 		return this.missCount.get();
 	}
 
 	/**
-	 * Explicitly add an {@code ApplicationContext} instance to the cache under the given key.
+	 * Explicitly add an {@code ApplicationContext} instance to the cache
+	 * under the given key.
 	 * @param key the context key (never {@code null})
 	 * @param context the {@code ApplicationContext} instance (never {@code null})
 	 */
@@ -240,9 +258,11 @@ class ContextCache {
 	}
 
 	/**
-	 * Generate a text string, which contains the {@linkplain #size} as well
-	 * as the {@linkplain #getHitCount() hit}, {@linkplain #getMissCount() miss},
-	 * and {@linkplain #getParentContextCount() parent context} counts.
+	 * Generate a text string containing the statistics for this cache.
+	 * <p>Specifically, the returned string contains the {@linkplain #size},
+	 * {@linkplain #getHitCount() hit count}, {@linkplain #getMissCount() miss count},
+	 * and {@linkplain #getParentContextCount() parent context count}.
+	 * @return the statistics for this cache
 	 */
 	@Override
 	public String toString() {
