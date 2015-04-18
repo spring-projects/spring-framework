@@ -73,14 +73,6 @@ public class TestContextManager {
 
 	private static final Log logger = LogFactory.getLog(TestContextManager.class);
 
-	/**
-	 * Cache of Spring application contexts.
-	 * <p>This needs to be static, since test instances may be destroyed and
-	 * recreated between invocations of individual test methods, as is the case
-	 * with JUnit.
-	 */
-	static final ContextCache contextCache = new ContextCache();
-
 	private final TestContext testContext;
 
 	private final List<TestExecutionListener> testExecutionListeners = new ArrayList<TestExecutionListener>();
@@ -88,14 +80,14 @@ public class TestContextManager {
 
 	/**
 	 * Construct a new {@code TestContextManager} for the specified {@linkplain Class test class}
-	 * and automatically {@link #registerTestExecutionListeners register} the
+	 * and automatically {@linkplain #registerTestExecutionListeners register} the
 	 * {@link TestExecutionListener TestExecutionListeners} configured for the test class
 	 * via the {@link TestExecutionListeners @TestExecutionListeners} annotation.
 	 * @param testClass the test class to be managed
 	 * @see #registerTestExecutionListeners
 	 */
 	public TestContextManager(Class<?> testClass) {
-		CacheAwareContextLoaderDelegate cacheAwareContextLoaderDelegate = new DefaultCacheAwareContextLoaderDelegate(contextCache);
+		CacheAwareContextLoaderDelegate cacheAwareContextLoaderDelegate = new DefaultCacheAwareContextLoaderDelegate();
 		BootstrapContext bootstrapContext = new DefaultBootstrapContext(testClass, cacheAwareContextLoaderDelegate);
 		TestContextBootstrapper testContextBootstrapper = BootstrapUtils.resolveTestContextBootstrapper(bootstrapContext);
 		this.testContext = new DefaultTestContext(testContextBootstrapper);

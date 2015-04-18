@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,9 +40,30 @@ class DefaultCacheAwareContextLoaderDelegate implements CacheAwareContextLoaderD
 
 	private static final Log statsLogger = LogFactory.getLog("org.springframework.test.context.cache");
 
+	/**
+	 * Default cache of Spring application contexts.
+	 *
+	 * <p>This default cache is static, so that each context can be cached
+	 * and reused for all subsequent tests that declare the same unique
+	 * context configuration within the same JVM process.
+	 */
+	static final ContextCache defaultContextCache = new ContextCache();
+
 	private final ContextCache contextCache;
 
 
+	/**
+	 * Construct a new {@code DefaultCacheAwareContextLoaderDelegate} that
+	 * uses the default, static {@code ContextCache}.
+	 */
+	DefaultCacheAwareContextLoaderDelegate() {
+		this(defaultContextCache);
+	}
+
+	/**
+	 * Construct a new {@code DefaultCacheAwareContextLoaderDelegate} with
+	 * the supplied {@code ContextCache}.
+	 */
 	DefaultCacheAwareContextLoaderDelegate(ContextCache contextCache) {
 		Assert.notNull(contextCache, "ContextCache must not be null");
 		this.contextCache = contextCache;
