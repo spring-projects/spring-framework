@@ -19,18 +19,27 @@ package org.springframework.test.context;
 import java.util.List;
 
 /**
- * {@code TestContextBootstrapper} defines a strategy SPI for bootstrapping the
+ * {@code TestContextBootstrapper} defines the SPI for bootstrapping the
  * <em>Spring TestContext Framework</em>.
  *
- * <p>A custom bootstrapping strategy can be configured for a test class via
- * {@link BootstrapWith @BootstrapWith}, either directly or as a meta-annotation.
- * See {@link org.springframework.test.context.web.WebAppConfiguration @WebAppConfiguration}
- * for an example.
- *
- * <p>The {@link TestContextManager} uses a {@code TestContextBootstrapper} to
+ * <p>A {@code TestContextBootstrapper} is used by the {@link TestContextManager} to
  * {@linkplain #getTestExecutionListeners get the TestExecutionListeners} for the
  * current test and to {@linkplain #buildTestContext build the TestContext} that
  * it manages.
+ *
+ * <h3>Configuration</h3>
+ *
+ * <p>A custom bootstrapping strategy can be configured for a test class (or
+ * test class hierarchy) via {@link BootstrapWith @BootstrapWith}, either
+ * directly or as a meta-annotation. See
+ * {@link org.springframework.test.context.web.WebAppConfiguration @WebAppConfiguration}
+ * for an example.
+ *
+ * <p>If a bootstrapper is not explicitly configured via {@code @BootstrapWith}, the
+ * {@link org.springframework.test.context.support.DefaultTestContextBootstrapper DefaultTestContextBootstrapper}
+ * will be used.
+ *
+ * <h3>Implementation Notes</h3>
  *
  * <p>Concrete implementations must provide a {@code public} no-args constructor.
  *
