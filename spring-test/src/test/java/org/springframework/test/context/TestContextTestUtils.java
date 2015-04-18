@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,12 +28,12 @@ public abstract class TestContextTestUtils {
 		return buildTestContext(testClass, new DefaultCacheAwareContextLoaderDelegate(contextCache));
 	}
 
-	public static TestContext buildTestContext(
-			Class<?> testClass, CacheAwareContextLoaderDelegate cacheAwareContextLoaderDelegate) {
+	public static TestContext buildTestContext(Class<?> testClass,
+			CacheAwareContextLoaderDelegate cacheAwareContextLoaderDelegate) {
 
 		BootstrapContext bootstrapContext = new DefaultBootstrapContext(testClass, cacheAwareContextLoaderDelegate);
 		TestContextBootstrapper testContextBootstrapper = BootstrapUtils.resolveTestContextBootstrapper(bootstrapContext);
-		return new DefaultTestContext(testContextBootstrapper);
+		return testContextBootstrapper.buildTestContext();
 	}
 
 }

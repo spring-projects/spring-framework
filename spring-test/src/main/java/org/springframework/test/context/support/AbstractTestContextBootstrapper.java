@@ -44,6 +44,7 @@ import org.springframework.test.context.ContextHierarchy;
 import org.springframework.test.context.ContextLoader;
 import org.springframework.test.context.MergedContextConfiguration;
 import org.springframework.test.context.SmartContextLoader;
+import org.springframework.test.context.TestContext;
 import org.springframework.test.context.TestContextBootstrapper;
 import org.springframework.test.context.TestExecutionListener;
 import org.springframework.test.context.TestExecutionListeners;
@@ -91,6 +92,21 @@ public abstract class AbstractTestContextBootstrapper implements TestContextBoot
 	@Override
 	public BootstrapContext getBootstrapContext() {
 		return this.bootstrapContext;
+	}
+
+	/**
+	 * Build a new {@link DefaultTestContext} using the {@linkplain Class test class}
+	 * and {@link CacheAwareContextLoaderDelegate} in the {@link BootstrapContext}
+	 * associated with this bootstrapper and by delegating to
+	 * {@link #buildMergedContextConfiguration()}.
+	 * <p>Concrete subclasses may choose to override this method to return a
+	 * custom {@link TestContext} implementation.
+	 * @since 4.2
+	 */
+	@Override
+	public TestContext buildTestContext() {
+		return new DefaultTestContext(bootstrapContext.getTestClass(), buildMergedContextConfiguration(),
+			bootstrapContext.getCacheAwareContextLoaderDelegate());
 	}
 
 	/**

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.test.context;
+package org.springframework.test.context.support;
 
 import java.lang.reflect.Method;
 
@@ -22,21 +22,19 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.core.AttributeAccessorSupport;
 import org.springframework.core.style.ToStringCreator;
 import org.springframework.test.annotation.DirtiesContext.HierarchyMode;
+import org.springframework.test.context.CacheAwareContextLoaderDelegate;
+import org.springframework.test.context.MergedContextConfiguration;
+import org.springframework.test.context.TestContext;
 import org.springframework.util.Assert;
 
 /**
  * Default implementation of the {@link TestContext} interface.
  *
- * <p>Although {@code DefaultTestContext} was first introduced in Spring Framework
- * 4.0, the initial implementation of this class was extracted from the existing
- * code base for {@code TestContext} when {@code TestContext} was converted into
- * an interface.
- *
  * @author Sam Brannen
  * @author Juergen Hoeller
  * @since 4.0
  */
-class DefaultTestContext extends AttributeAccessorSupport implements TestContext {
+public class DefaultTestContext extends AttributeAccessorSupport implements TestContext {
 
 	private static final long serialVersionUID = -5827157174866681233L;
 
@@ -54,24 +52,42 @@ class DefaultTestContext extends AttributeAccessorSupport implements TestContext
 
 
 	/**
-	 * Construct a new test context using the supplied {@link TestContextBootstrapper}.
-	 * @param testContextBootstrapper the {@code TestContextBootstrapper} to use
-	 * to construct the test context (must not be {@code null})
+	 * Construct a new {@code DefaultTestContext} from the supplied arguments.
+	 * @param testClass the test class for this test context; never {@code null}
+	 * @param mergedContextConfiguration the merged application context
+	 * configuration for this test context; never {@code null}
+	 * @param cacheAwareContextLoaderDelegate the delegate to use for loading
+	 * and closing the application context for this test context; never {@code null}
 	 */
-	DefaultTestContext(TestContextBootstrapper testContextBootstrapper) {
-		Assert.notNull(testContextBootstrapper, "TestContextBootstrapper must not be null");
-
-		BootstrapContext bootstrapContext = testContextBootstrapper.getBootstrapContext();
-		this.testClass = bootstrapContext.getTestClass();
-		this.cacheAwareContextLoaderDelegate = bootstrapContext.getCacheAwareContextLoaderDelegate();
-		this.mergedContextConfiguration = testContextBootstrapper.buildMergedContextConfiguration();
+	public DefaultTestContext(Class<?> testClass, MergedContextConfiguration mergedContextConfiguration,
+			CacheAwareContextLoaderDelegate cacheAwareContextLoaderDelegate) {
+		Assert.notNull(testClass, "testClass must not be null");
+		Assert.notNull(mergedContextConfiguration, "MergedContextConfiguration must not be null");
+		Assert.notNull(cacheAwareContextLoaderDelegate, "CacheAwareContextLoaderDelegate must not be null");
+		this.testClass = testClass;
+		this.mergedContextConfiguration = mergedContextConfiguration;
+		this.cacheAwareContextLoaderDelegate = cacheAwareContextLoaderDelegate;
 	}
 
-
+	/**
+	 * Get the {@linkplain ApplicationContext application context} for this
+	 * test context.
+	 * <p>The default implementation delegates to the {@link CacheAwareContextLoaderDelegate}
+	 * that was supplied when this {@code TestContext} was constructed.
+	 * @see CacheAwareContextLoaderDelegate#loadContext
+	 */
 	public ApplicationContext getApplicationContext() {
 		return this.cacheAwareContextLoaderDelegate.loadContext(this.mergedContextConfiguration);
 	}
 
+	/**
+	 * Mark the {@linkplain ApplicationContext application context} associated
+	 * with this test context as <em>dirty</em> (i.e., by removing it from the
+	 * context cache and closing it).
+	 * <p>The default implementation delegates to the {@link CacheAwareContextLoaderDelegate}
+	 * that was supplied when this {@code TestContext} was constructed.
+	 * @see CacheAwareContextLoaderDelegate#closeContext
+	 */
 	public void markApplicationContextDirty(HierarchyMode hierarchyMode) {
 		this.cacheAwareContextLoaderDelegate.closeContext(this.mergedContextConfiguration, hierarchyMode);
 	}
