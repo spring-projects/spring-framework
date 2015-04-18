@@ -90,19 +90,34 @@ public class TestContextManager {
 
 
 	/**
-	 * Construct a new {@code TestContextManager} for the specified {@linkplain Class test class}
-	 * and automatically {@linkplain #registerTestExecutionListeners register} the
-	 * {@link TestExecutionListener TestExecutionListeners} configured for the test class
-	 * via the {@link TestExecutionListeners @TestExecutionListeners} annotation.
+	 * Construct a new {@code TestContextManager} for the specified {@linkplain Class test class},
+	 * automatically {@linkplain #registerTestExecutionListeners registering} the necessary
+	 * {@link TestExecutionListener TestExecutionListeners}.
+	 * <p>Delegates to a {@link TestContextBootstrapper} for building the {@code TestContext}
+	 * and retrieving the {@code TestExecutionListeners}.
 	 * @param testClass the test class to be managed
+	 * @see TestContextBootstrapper#buildTestContext
+	 * @see TestContextBootstrapper#getTestExecutionListeners
 	 * @see #registerTestExecutionListeners
 	 */
 	public TestContextManager(Class<?> testClass) {
-		CacheAwareContextLoaderDelegate cacheAwareContextLoaderDelegate = new DefaultCacheAwareContextLoaderDelegate();
-		BootstrapContext bootstrapContext = new DefaultBootstrapContext(testClass, cacheAwareContextLoaderDelegate);
+		BootstrapContext bootstrapContext = createBootstrapContext(testClass);
 		TestContextBootstrapper testContextBootstrapper = BootstrapUtils.resolveTestContextBootstrapper(bootstrapContext);
 		this.testContext = testContextBootstrapper.buildTestContext();
 		registerTestExecutionListeners(testContextBootstrapper.getTestExecutionListeners());
+	}
+
+	/**
+	 * Create the {@code BootstrapContext} for the specified {@linkplain Class test class}.
+	 * <p>The default implementation creates a {@link DefaultBootstrapContext} that
+	 * uses the {@link DefaultCacheAwareContextLoaderDelegate}.
+	 * <p>Can be overridden by subclasses as necessary.
+	 * @param testClass the test class for which the bootstrap context should be created
+	 * @return a new {@code BootstrapContext}; never {@code null}
+	 */
+	protected BootstrapContext createBootstrapContext(Class<?> testClass) {
+		CacheAwareContextLoaderDelegate cacheAwareContextLoaderDelegate = new DefaultCacheAwareContextLoaderDelegate();
+		return new DefaultBootstrapContext(testClass, cacheAwareContextLoaderDelegate);
 	}
 
 	/**
