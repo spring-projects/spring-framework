@@ -21,15 +21,11 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.context.ApplicationContext;
 import org.springframework.test.annotation.DirtiesContext.HierarchyMode;
+import org.springframework.test.context.support.DefaultContextCache;
 import org.springframework.util.Assert;
 
 /**
  * Default implementation of the {@link CacheAwareContextLoaderDelegate} interface.
- *
- * <p>Although {@code DefaultCacheAwareContextLoaderDelegate} was first introduced
- * in Spring Framework 4.1, the initial implementation of this class was extracted
- * from the existing code base for {@code CacheAwareContextLoaderDelegate} when
- * {@code CacheAwareContextLoaderDelegate} was converted into an interface.
  *
  * @author Sam Brannen
  * @since 4.1
@@ -47,21 +43,21 @@ class DefaultCacheAwareContextLoaderDelegate implements CacheAwareContextLoaderD
 	 * and reused for all subsequent tests that declare the same unique
 	 * context configuration within the same JVM process.
 	 */
-	static final ContextCache defaultContextCache = new ContextCache();
+	static final ContextCache defaultContextCache = new DefaultContextCache();
 
 	private final ContextCache contextCache;
 
 
 	/**
-	 * Construct a new {@code DefaultCacheAwareContextLoaderDelegate} that
-	 * uses the default, static {@code ContextCache}.
+	 * Construct a new {@code DefaultCacheAwareContextLoaderDelegate} using
+	 * a static {@code DefaultContextCache}.
 	 */
 	DefaultCacheAwareContextLoaderDelegate() {
 		this(defaultContextCache);
 	}
 
 	/**
-	 * Construct a new {@code DefaultCacheAwareContextLoaderDelegate} with
+	 * Construct a new {@code DefaultCacheAwareContextLoaderDelegate} using
 	 * the supplied {@code ContextCache}.
 	 */
 	DefaultCacheAwareContextLoaderDelegate(ContextCache contextCache) {
