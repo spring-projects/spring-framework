@@ -21,7 +21,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.springframework.context.ApplicationContext;
@@ -29,14 +28,13 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.style.ToStringCreator;
 import org.springframework.test.annotation.DirtiesContext.HierarchyMode;
 import org.springframework.util.Assert;
+import org.springframework.util.ConcurrentReferenceHashMap;
 
 /**
  * Cache for Spring {@link ApplicationContext ApplicationContexts} in a test
  * environment.
  *
- * <p>{@code ContextCache} maintains a cache of {@code ApplicationContexts}
- * keyed by {@link MergedContextConfiguration} instances.
- *
+ * <h3>Rationale</h3>
  * <p>Caching has significant performance benefits if initializing the context
  * takes a considerable about of time. Although initializing a Spring context
  * itself is very quick, some beans in a context, such as a
@@ -44,9 +42,17 @@ import org.springframework.util.Assert;
  * time to initialize. Hence it often makes sense to perform that initialization
  * only once per test suite.
  *
+ * <h3>Implementation Details</h3>
+ * <p>{@code ContextCache} maintains a cache of {@code ApplicationContexts}
+ * keyed by {@link MergedContextConfiguration} instances. Behind the scenes,
+ * Spring's {@link ConcurrentReferenceHashMap} is used to store
+ * {@linkplain java.lang.ref.SoftReference soft references} to cached contexts
+ * and {@code MergedContextConfiguration} instances.
+ *
  * @author Sam Brannen
  * @author Juergen Hoeller
  * @since 2.5
+ * @see ConcurrentReferenceHashMap
  */
 class ContextCache {
 
@@ -54,7 +60,7 @@ class ContextCache {
 	 * Map of context keys to Spring {@code ApplicationContext} instances.
 	 */
 	private final Map<MergedContextConfiguration, ApplicationContext> contextMap =
-			new ConcurrentHashMap<MergedContextConfiguration, ApplicationContext>(64);
+			new ConcurrentReferenceHashMap<MergedContextConfiguration, ApplicationContext>(64);
 
 	/**
 	 * Map of parent keys to sets of children keys, representing a top-down <em>tree</em>
@@ -63,7 +69,7 @@ class ContextCache {
 	 * of other contexts.
 	 */
 	private final Map<MergedContextConfiguration, Set<MergedContextConfiguration>> hierarchyMap =
-			new ConcurrentHashMap<MergedContextConfiguration, Set<MergedContextConfiguration>>(64);
+			new ConcurrentReferenceHashMap<MergedContextConfiguration, Set<MergedContextConfiguration>>(64);
 
 	private final AtomicInteger hitCount = new AtomicInteger();
 
