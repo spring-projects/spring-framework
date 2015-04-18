@@ -74,8 +74,9 @@ public class ClassLevelDirtiesContextTests {
 
 	@BeforeClass
 	public static void verifyInitialCacheState() {
-		ContextCache contextCache = TestContextManager.contextCache;
-		contextCache.reset();
+		resetContextCache();
+		// Reset static counters in case tests are run multiple times in a test suite --
+		// for example, via JUnit's @Suite.
 		cacheHits.set(0);
 		cacheMisses.set(0);
 		assertContextCacheStatistics("BeforeClass", 0, cacheHits.get(), cacheMisses.get());

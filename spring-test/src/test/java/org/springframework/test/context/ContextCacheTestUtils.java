@@ -28,6 +28,13 @@ import static org.junit.Assert.*;
 public class ContextCacheTestUtils {
 
 	/**
+	 * Reset the state of the context cache.
+	 */
+	public static final void resetContextCache() {
+		TestContextManager.contextCache.reset();
+	}
+
+	/**
 	 * Assert the statistics of the context cache in {@link TestContextManager}.
 	 *
 	 * @param usageScenario the scenario in which the statistics are used

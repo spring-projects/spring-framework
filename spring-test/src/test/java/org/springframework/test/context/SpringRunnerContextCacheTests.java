@@ -58,8 +58,7 @@ public class SpringRunnerContextCacheTests {
 	@BeforeClass
 	public static void verifyInitialCacheState() {
 		dirtiedApplicationContext = null;
-		ContextCache contextCache = TestContextManager.contextCache;
-		contextCache.reset();
+		resetContextCache();
 		assertContextCacheStatistics("BeforeClass", 0, 0, 0);
 	}
 
