@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -83,8 +83,6 @@ public class TestContextManager {
 
 	private final TestContext testContext;
 
-	private final TestContextBootstrapper testContextBootstrapper;
-
 	private final List<TestExecutionListener> testExecutionListeners = new ArrayList<TestExecutionListener>();
 
 
@@ -99,11 +97,10 @@ public class TestContextManager {
 	public TestContextManager(Class<?> testClass) {
 		CacheAwareContextLoaderDelegate cacheAwareContextLoaderDelegate = new DefaultCacheAwareContextLoaderDelegate(contextCache);
 		BootstrapContext bootstrapContext = new DefaultBootstrapContext(testClass, cacheAwareContextLoaderDelegate);
-		this.testContextBootstrapper = BootstrapUtils.resolveTestContextBootstrapper(bootstrapContext);
-		this.testContext = new DefaultTestContext(this.testContextBootstrapper);
-		registerTestExecutionListeners(this.testContextBootstrapper.getTestExecutionListeners());
+		TestContextBootstrapper testContextBootstrapper = BootstrapUtils.resolveTestContextBootstrapper(bootstrapContext);
+		this.testContext = new DefaultTestContext(testContextBootstrapper);
+		registerTestExecutionListeners(testContextBootstrapper.getTestExecutionListeners());
 	}
-
 
 	/**
 	 * Get the {@link TestContext} managed by this {@code TestContextManager}.
