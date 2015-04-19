@@ -31,7 +31,7 @@ import org.springframework.test.context.support.DependencyInjectionTestExecution
 import org.springframework.test.context.support.DirtiesContextTestExecutionListener;
 
 import static org.junit.Assert.*;
-import static org.springframework.test.context.ContextCacheTestUtils.*;
+import static org.springframework.test.context.support.ContextCacheTestUtils.*;
 
 /**
  * JUnit 4 based unit test which verifies correct {@link ContextCache
@@ -58,8 +58,7 @@ public class SpringRunnerContextCacheTests {
 	@BeforeClass
 	public static void verifyInitialCacheState() {
 		dirtiedApplicationContext = null;
-		ContextCache contextCache = TestContextManager.contextCache;
-		contextCache.reset();
+		resetContextCache();
 		assertContextCacheStatistics("BeforeClass", 0, 0, 0);
 	}
 

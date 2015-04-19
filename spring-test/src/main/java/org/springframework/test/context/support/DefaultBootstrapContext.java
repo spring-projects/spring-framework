@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
-package org.springframework.test.context;
+package org.springframework.test.context.support;
 
 import org.springframework.core.style.ToStringCreator;
+import org.springframework.test.context.BootstrapContext;
+import org.springframework.test.context.CacheAwareContextLoaderDelegate;
 import org.springframework.util.Assert;
 
 /**
@@ -25,13 +27,19 @@ import org.springframework.util.Assert;
  * @author Sam Brannen
  * @since 4.1
  */
-class DefaultBootstrapContext implements BootstrapContext {
+public class DefaultBootstrapContext implements BootstrapContext {
 
 	private final Class<?> testClass;
 	private final CacheAwareContextLoaderDelegate cacheAwareContextLoaderDelegate;
 
 
-	DefaultBootstrapContext(Class<?> testClass, CacheAwareContextLoaderDelegate cacheAwareContextLoaderDelegate) {
+	/**
+	 * Construct a new {@code DefaultBootstrapContext} from the supplied arguments.
+	 * @param testClass the test class for this bootstrap context; never {@code null}
+	 * @param cacheAwareContextLoaderDelegate the context loader delegate to use for
+	 * transparent interaction with the {@code ContextCache}; never {@code null}
+	 */
+	public DefaultBootstrapContext(Class<?> testClass, CacheAwareContextLoaderDelegate cacheAwareContextLoaderDelegate) {
 		Assert.notNull(testClass, "Test class must not be null");
 		Assert.notNull(cacheAwareContextLoaderDelegate, "CacheAwareContextLoaderDelegate must not be null");
 		this.testClass = testClass;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,8 @@
  */
 
 package org.springframework.test.context;
+
+import java.lang.reflect.Constructor;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -36,6 +38,10 @@ import static org.springframework.core.annotation.AnnotationUtils.*;
  */
 abstract class BootstrapUtils {
 
+	private static final String DEFAULT_BOOTSTRAP_CONTEXT_CLASS_NAME = "org.springframework.test.context.support.DefaultBootstrapContext";
+
+	private static final String DEFAULT_CACHE_AWARE_CONTEXT_LOADER_DELEGATE_CLASS_NAME = "org.springframework.test.context.support.DefaultCacheAwareContextLoaderDelegate";
+
 	private static final String DEFAULT_TEST_CONTEXT_BOOTSTRAPPER_CLASS_NAME = "org.springframework.test.context.support.DefaultTestContextBootstrapper";
 
 	private static final Log logger = LogFactory.getLog(BootstrapUtils.class);
@@ -43,6 +49,55 @@ abstract class BootstrapUtils {
 
 	private BootstrapUtils() {
 		/* no-op */
+	}
+
+	/**
+	 * Create the {@code BootstrapContext} for the specified {@linkplain Class test class}.
+	 *
+	 * <p>Uses reflection to create a {@link org.springframework.test.context.support.DefaultBootstrapContext}
+	 * that uses a {@link org.springframework.test.context.support.DefaultCacheAwareContextLoaderDelegate}.
+	 *
+	 * @param testClass the test class for which the bootstrap context should be created
+	 * @return a new {@code BootstrapContext}; never {@code null}
+	 */
+	@SuppressWarnings("unchecked")
+	static BootstrapContext createBootstrapContext(Class<?> testClass) {
+		CacheAwareContextLoaderDelegate cacheAwareContextLoaderDelegate = createCacheAwareContextLoaderDelegate();
+
+		Class<? extends BootstrapContext> clazz = null;
+		try {
+			clazz = (Class<? extends BootstrapContext>) ClassUtils.forName(DEFAULT_BOOTSTRAP_CONTEXT_CLASS_NAME,
+				BootstrapUtils.class.getClassLoader());
+
+			Constructor<? extends BootstrapContext> constructor = clazz.getConstructor(Class.class,
+				CacheAwareContextLoaderDelegate.class);
+
+			if (logger.isDebugEnabled()) {
+				logger.debug(String.format("Instantiating BootstrapContext using constructor [%s]", constructor));
+			}
+			return instantiateClass(constructor, testClass, cacheAwareContextLoaderDelegate);
+		}
+		catch (Throwable t) {
+			throw new IllegalStateException("Could not load BootstrapContext [" + clazz + "]", t);
+		}
+	}
+
+	@SuppressWarnings("unchecked")
+	private static CacheAwareContextLoaderDelegate createCacheAwareContextLoaderDelegate() {
+		Class<? extends CacheAwareContextLoaderDelegate> clazz = null;
+		try {
+			clazz = (Class<? extends CacheAwareContextLoaderDelegate>) ClassUtils.forName(
+				DEFAULT_CACHE_AWARE_CONTEXT_LOADER_DELEGATE_CLASS_NAME, BootstrapUtils.class.getClassLoader());
+
+			if (logger.isDebugEnabled()) {
+				logger.debug(String.format("Instantiating CacheAwareContextLoaderDelegate from class [%s]",
+					clazz.getName()));
+			}
+			return instantiateClass(clazz, CacheAwareContextLoaderDelegate.class);
+		}
+		catch (Throwable t) {
+			throw new IllegalStateException("Could not load CacheAwareContextLoaderDelegate [" + clazz + "]", t);
+		}
 	}
 
 	/**

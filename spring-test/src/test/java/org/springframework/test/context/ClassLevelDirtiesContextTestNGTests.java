@@ -37,7 +37,7 @@ import org.springframework.test.context.testng.TrackingTestNGTestListener;
 import org.testng.TestNG;
 
 import static org.junit.Assert.*;
-import static org.springframework.test.context.ContextCacheTestUtils.*;
+import static org.springframework.test.context.support.ContextCacheTestUtils.*;
 
 /**
  * JUnit 4 based integration test which verifies correct {@linkplain ContextCache
@@ -79,8 +79,9 @@ public class ClassLevelDirtiesContextTestNGTests {
 
 	@BeforeClass
 	public static void verifyInitialCacheState() {
-		ContextCache contextCache = TestContextManager.contextCache;
-		contextCache.reset();
+		resetContextCache();
+		// Reset static counters in case tests are run multiple times in a test suite --
+		// for example, via JUnit's @Suite.
 		cacheHits.set(0);
 		cacheMisses.set(0);
 		assertContextCacheStatistics("BeforeClass", 0, cacheHits.get(), cacheMisses.get());

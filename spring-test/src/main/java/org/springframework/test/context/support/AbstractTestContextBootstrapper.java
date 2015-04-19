@@ -38,12 +38,14 @@ import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.core.io.support.SpringFactoriesLoader;
 import org.springframework.test.context.BootstrapContext;
 import org.springframework.test.context.CacheAwareContextLoaderDelegate;
+import org.springframework.test.context.ContextCache;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.ContextConfigurationAttributes;
 import org.springframework.test.context.ContextHierarchy;
 import org.springframework.test.context.ContextLoader;
 import org.springframework.test.context.MergedContextConfiguration;
 import org.springframework.test.context.SmartContextLoader;
+import org.springframework.test.context.TestContext;
 import org.springframework.test.context.TestContextBootstrapper;
 import org.springframework.test.context.TestExecutionListener;
 import org.springframework.test.context.TestExecutionListeners;
@@ -65,6 +67,9 @@ import org.springframework.util.StringUtils;
  * <li>{@link #getDefaultContextLoaderClass}
  * <li>{@link #processMergedContextConfiguration}
  * </ul>
+ *
+ * <p>To plug in custom {@link ContextCache} support, override
+ * {@link #getCacheAwareContextLoaderDelegate()}.
  *
  * @author Sam Brannen
  * @author Juergen Hoeller
@@ -91,6 +96,21 @@ public abstract class AbstractTestContextBootstrapper implements TestContextBoot
 	@Override
 	public BootstrapContext getBootstrapContext() {
 		return this.bootstrapContext;
+	}
+
+	/**
+	 * Build a new {@link DefaultTestContext} using the {@linkplain Class test class}
+	 * in the {@link BootstrapContext} associated with this bootstrapper and
+	 * by delegating to {@link #buildMergedContextConfiguration()} and
+	 * {@link #getCacheAwareContextLoaderDelegate()}.
+	 * <p>Concrete subclasses may choose to override this method to return a
+	 * custom {@link TestContext} implementation.
+	 * @since 4.2
+	 */
+	@Override
+	public TestContext buildTestContext() {
+		return new DefaultTestContext(getBootstrapContext().getTestClass(), buildMergedContextConfiguration(),
+			getCacheAwareContextLoaderDelegate());
 	}
 
 	/**
@@ -266,7 +286,7 @@ public abstract class AbstractTestContextBootstrapper implements TestContextBoot
 	@Override
 	public final MergedContextConfiguration buildMergedContextConfiguration() {
 		Class<?> testClass = getBootstrapContext().getTestClass();
-		CacheAwareContextLoaderDelegate cacheAwareContextLoaderDelegate = getBootstrapContext().getCacheAwareContextLoaderDelegate();
+		CacheAwareContextLoaderDelegate cacheAwareContextLoaderDelegate = getCacheAwareContextLoaderDelegate();
 
 		if (MetaAnnotationUtils.findAnnotationDescriptorForTypes(testClass, ContextConfiguration.class,
 			ContextHierarchy.class) == null) {
@@ -453,6 +473,20 @@ public abstract class AbstractTestContextBootstrapper implements TestContextBoot
 			}
 		}
 		return null;
+	}
+
+	/**
+	 * Get the {@link CacheAwareContextLoaderDelegate} to use for transparent
+	 * interaction with the {@code ContextCache}.
+	 * <p>The default implementation simply delegates to
+	 * {@code getBootstrapContext().getCacheAwareContextLoaderDelegate()}.
+	 * <p>Concrete subclasses may choose to override this method to return a
+	 * custom {@code CacheAwareContextLoaderDelegate} implementation with
+	 * custom {@link ContextCache} support.
+	 * @return the context loader delegate (never {@code null})
+	 */
+	protected CacheAwareContextLoaderDelegate getCacheAwareContextLoaderDelegate() {
+		return getBootstrapContext().getCacheAwareContextLoaderDelegate();
 	}
 
 	/**

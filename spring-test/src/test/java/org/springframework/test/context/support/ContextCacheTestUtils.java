@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-package org.springframework.test.context;
+package org.springframework.test.context.support;
+
+import org.springframework.test.context.ContextCache;
 
 import static org.junit.Assert.*;
 
@@ -28,7 +30,14 @@ import static org.junit.Assert.*;
 public class ContextCacheTestUtils {
 
 	/**
-	 * Assert the statistics of the context cache in {@link TestContextManager}.
+	 * Reset the state of the static context cache in {@link DefaultCacheAwareContextLoaderDelegate}.
+	 */
+	public static final void resetContextCache() {
+		DefaultCacheAwareContextLoaderDelegate.defaultContextCache.reset();
+	}
+
+	/**
+	 * Assert the statistics of the static context cache in {@link DefaultCacheAwareContextLoaderDelegate}.
 	 *
 	 * @param usageScenario the scenario in which the statistics are used
 	 * @param expectedSize the expected number of contexts in the cache
@@ -37,8 +46,8 @@ public class ContextCacheTestUtils {
 	 */
 	public static final void assertContextCacheStatistics(String usageScenario, int expectedSize, int expectedHitCount,
 			int expectedMissCount) {
-		assertContextCacheStatistics(TestContextManager.contextCache, usageScenario, expectedSize, expectedHitCount,
-			expectedMissCount);
+		assertContextCacheStatistics(DefaultCacheAwareContextLoaderDelegate.defaultContextCache, usageScenario,
+			expectedSize, expectedHitCount, expectedMissCount);
 	}
 
 	/**

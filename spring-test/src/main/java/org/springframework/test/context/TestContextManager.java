@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,15 +28,11 @@ import org.springframework.util.Assert;
 
 /**
  * {@code TestContextManager} is the main entry point into the <em>Spring
- * TestContext Framework</em>, which provides support for loading and accessing
- * {@link org.springframework.context.ApplicationContext application contexts},
- * dependency injection of test instances,
- * {@link org.springframework.transaction.annotation.Transactional transactional}
- * execution of test methods, etc.
+ * TestContext Framework</em>.
  *
  * <p>Specifically, a {@code TestContextManager} is responsible for managing a
  * single {@link TestContext} and signaling events to all registered
- * {@link TestExecutionListener TestExecutionListeners} at well defined test
+ * {@link TestExecutionListener TestExecutionListeners} at the following test
  * execution points:
  *
  * <ul>
@@ -56,6 +52,21 @@ import org.springframework.util.Assert;
  * 4's {@link org.junit.AfterClass @AfterClass})</li>
  * </ul>
  *
+ * <p>Support for loading and accessing
+ * {@link org.springframework.context.ApplicationContext application contexts},
+ * dependency injection of test instances,
+ * {@link org.springframework.transaction.annotation.Transactional transactional}
+ * execution of test methods, etc. is provided by
+ * {@link SmartContextLoader ContextLoaders} and {@link TestExecutionListener
+ * TestExecutionListeners}, which are configured via
+ * {@link ContextConfiguration @ContextConfiguration} and
+ * {@link TestExecutionListeners @TestExecutionListeners}.
+ *
+ * <p>Bootstrapping of the {@code TestContext}, the default {@code ContextLoader},
+ * default {@code TestExecutionListeners}, and their collaborators is performed
+ * by a {@link TestContextBootstrapper}, which is configured via
+ * {@link BootstrapWith @BootstrapWith}.
+ *
  * @author Sam Brannen
  * @author Juergen Hoeller
  * @since 2.5
@@ -73,37 +84,42 @@ public class TestContextManager {
 
 	private static final Log logger = LogFactory.getLog(TestContextManager.class);
 
-	/**
-	 * Cache of Spring application contexts.
-	 * <p>This needs to be static, since test instances may be destroyed and
-	 * recreated between invocations of individual test methods, as is the case
-	 * with JUnit.
-	 */
-	static final ContextCache contextCache = new ContextCache();
-
 	private final TestContext testContext;
-
-	private final TestContextBootstrapper testContextBootstrapper;
 
 	private final List<TestExecutionListener> testExecutionListeners = new ArrayList<TestExecutionListener>();
 
 
 	/**
-	 * Construct a new {@code TestContextManager} for the specified {@linkplain Class test class}
-	 * and automatically {@link #registerTestExecutionListeners register} the
-	 * {@link TestExecutionListener TestExecutionListeners} configured for the test class
-	 * via the {@link TestExecutionListeners @TestExecutionListeners} annotation.
+	 * Construct a new {@code TestContextManager} for the specified {@linkplain Class test class},
+	 * automatically {@linkplain #registerTestExecutionListeners registering} the necessary
+	 * {@link TestExecutionListener TestExecutionListeners}.
+	 * <p>Delegates to a {@link TestContextBootstrapper} for building the {@code TestContext}
+	 * and retrieving the {@code TestExecutionListeners}.
 	 * @param testClass the test class to be managed
+	 * @see TestContextBootstrapper#buildTestContext
+	 * @see TestContextBootstrapper#getTestExecutionListeners
 	 * @see #registerTestExecutionListeners
 	 */
 	public TestContextManager(Class<?> testClass) {
-		CacheAwareContextLoaderDelegate cacheAwareContextLoaderDelegate = new DefaultCacheAwareContextLoaderDelegate(contextCache);
-		BootstrapContext bootstrapContext = new DefaultBootstrapContext(testClass, cacheAwareContextLoaderDelegate);
-		this.testContextBootstrapper = BootstrapUtils.resolveTestContextBootstrapper(bootstrapContext);
-		this.testContext = new DefaultTestContext(this.testContextBootstrapper);
-		registerTestExecutionListeners(this.testContextBootstrapper.getTestExecutionListeners());
+		BootstrapContext bootstrapContext = createBootstrapContext(testClass);
+		TestContextBootstrapper bootstrapper = BootstrapUtils.resolveTestContextBootstrapper(bootstrapContext);
+		this.testContext = bootstrapper.buildTestContext();
+		registerTestExecutionListeners(bootstrapper.getTestExecutionListeners());
 	}
 
+	/**
+	 * Create the {@code BootstrapContext} for the specified {@linkplain Class test class}.
+	 * <p>The default implementation creates a
+	 * {@link org.springframework.test.context.support.DefaultBootstrapContext DefaultBootstrapContext}
+	 * that uses a
+	 * {@link org.springframework.test.context.support.DefaultCacheAwareContextLoaderDelegate DefaultCacheAwareContextLoaderDelegate}.
+	 * <p>Can be overridden by subclasses as necessary.
+	 * @param testClass the test class for which the bootstrap context should be created
+	 * @return a new {@code BootstrapContext}; never {@code null}
+	 */
+	protected BootstrapContext createBootstrapContext(Class<?> testClass) {
+		return BootstrapUtils.createBootstrapContext(testClass);
+	}
 
 	/**
 	 * Get the {@link TestContext} managed by this {@code TestContextManager}.
@@ -201,7 +217,7 @@ public class TestContextManager {
 	 * @see #getTestExecutionListeners()
 	 */
 	public void prepareTestInstance(Object testInstance) throws Exception {
-		Assert.notNull(testInstance, "testInstance must not be null");
+		Assert.notNull(testInstance, "Test instance must not be null");
 		if (logger.isTraceEnabled()) {
 			logger.trace("prepareTestInstance(): instance [" + testInstance + "]");
 		}
@@ -282,7 +298,7 @@ public class TestContextManager {
 	 * @see #getTestExecutionListeners()
 	 */
 	public void afterTestMethod(Object testInstance, Method testMethod, Throwable exception) throws Exception {
-		Assert.notNull(testInstance, "testInstance must not be null");
+		Assert.notNull(testInstance, "Test instance must not be null");
 		if (logger.isTraceEnabled()) {
 			logger.trace("afterTestMethod(): instance [" + testInstance + "], method [" + testMethod +
 					"], exception [" + exception + "]");
