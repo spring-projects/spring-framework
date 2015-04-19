@@ -20,7 +20,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.test.annotation.DirtiesContext.HierarchyMode;
 
 /**
- * {@code ContextCache} defines the public API for caching Spring
+ * {@code ContextCache} defines the SPI for caching Spring
  * {@link ApplicationContext ApplicationContexts} within the <em>Spring
  * TestContext Framework</em>.
  *
@@ -29,11 +29,12 @@ import org.springframework.test.annotation.DirtiesContext.HierarchyMode;
  *
  * <h3>Rationale</h3>
  * <p>Context caching can have significant performance benefits if context
- * initialization is complex. So, although initializing a Spring context itself
- * is typically very quick, some beans in a context &mdash; for example, an
- * in-memory database or a {@code LocalSessionFactoryBean} for working with
- * Hibernate &mdash; may take several seconds to initialize. Hence it often
- * makes sense to perform that initialization only once per test suite.
+ * initialization is complex. Although the initialization of a Spring context
+ * itself is typically very quick, some beans in a context &mdash; for example,
+ * an embedded database or a {@code LocalContainerEntityManagerFactoryBean} for
+ * working with JPA &mdash; may take several seconds to initialize. Hence it
+ * often makes sense to perform that initialization only once per test suite or
+ * JVM process.
  *
  * @author Sam Brannen
  * @author Juergen Hoeller
