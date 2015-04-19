@@ -19,6 +19,7 @@ package org.springframework.test.context.support;
 import java.lang.reflect.Method;
 
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.AttributeAccessorSupport;
 import org.springframework.core.style.ToStringCreator;
 import org.springframework.test.annotation.DirtiesContext.HierarchyMode;
@@ -75,9 +76,18 @@ public class DefaultTestContext extends AttributeAccessorSupport implements Test
 	 * <p>The default implementation delegates to the {@link CacheAwareContextLoaderDelegate}
 	 * that was supplied when this {@code TestContext} was constructed.
 	 * @see CacheAwareContextLoaderDelegate#loadContext
+	 * @throws IllegalStateException if the context returned by the context
+	 * loader delegate is not <em>active</em> (i.e., has been closed).
 	 */
 	public ApplicationContext getApplicationContext() {
-		return this.cacheAwareContextLoaderDelegate.loadContext(this.mergedContextConfiguration);
+		ApplicationContext context = this.cacheAwareContextLoaderDelegate.loadContext(this.mergedContextConfiguration);
+		if (context instanceof ConfigurableApplicationContext) {
+			@SuppressWarnings("resource")
+			ConfigurableApplicationContext cac = (ConfigurableApplicationContext) context;
+			Assert.state(cac.isActive(), "The ApplicationContext loaded for [" + mergedContextConfiguration
+					+ "] is not active. Ensure that the context has not been closed programmatically.");
+		}
+		return context;
 	}
 
 	/**
