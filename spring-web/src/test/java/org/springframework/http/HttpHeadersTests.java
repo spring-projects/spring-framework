@@ -32,12 +32,16 @@ import java.util.TimeZone;
 import org.hamcrest.Matchers;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 import org.junit.Before;
 import org.junit.Test;
 
 /**
  * Unit tests for {@link org.springframework.http.HttpHeaders}.
  * @author Arjen Poutsma
+ * @author Sebastien Deleuze
  */
 public class HttpHeadersTests {
 
@@ -265,6 +269,72 @@ public class HttpHeadersTests {
 	public void getAllowEmptySet() {
 		headers.setAllow(Collections.<HttpMethod> emptySet());
 		assertThat(headers.getAllow(), Matchers.emptyCollectionOf(HttpMethod.class));
+	}
+
+	@Test
+	public void accessControlAllowCredentials() {
+		assertFalse(headers.getAccessControlAllowCredentials());
+		headers.setAccessControlAllowCredentials(false);
+		assertFalse(headers.getAccessControlAllowCredentials());
+		headers.setAccessControlAllowCredentials(true);
+		assertTrue(headers.getAccessControlAllowCredentials());
+	}
+
+	@Test
+	public void accessControlAllowHeaders() {
+		List<String> allowedHeaders = headers.getAccessControlAllowHeaders();
+		assertThat(allowedHeaders, Matchers.emptyCollectionOf(String.class));
+		headers.setAccessControlAllowHeaders(Arrays.asList("header1", "header2"));
+		allowedHeaders = headers.getAccessControlAllowHeaders();
+		assertEquals(allowedHeaders, Arrays.asList("header1", "header2"));
+	}
+
+	@Test
+	public void accessControlAllowMethods() {
+		List<HttpMethod> allowedMethods = headers.getAccessControlAllowMethods();
+		assertThat(allowedMethods, Matchers.emptyCollectionOf(HttpMethod.class));
+		headers.setAccessControlAllowMethods(Arrays.asList(HttpMethod.GET, HttpMethod.POST));
+		allowedMethods = headers.getAccessControlAllowMethods();
+		assertEquals(allowedMethods, Arrays.asList(HttpMethod.GET, HttpMethod.POST));
+	}
+
+	@Test
+	public void accessControlAllowOrigin() {
+		assertNull(headers.getAccessControlAllowOrigin());
+		headers.setAccessControlAllowOrigin("*");
+		assertEquals("*", headers.getAccessControlAllowOrigin());
+	}
+
+	@Test
+	public void accessControlExposeHeaders() {
+		List<String> exposedHeaders = headers.getAccessControlExposeHeaders();
+		assertThat(exposedHeaders, Matchers.emptyCollectionOf(String.class));
+		headers.setAccessControlExposeHeaders(Arrays.asList("header1", "header2"));
+		exposedHeaders = headers.getAccessControlExposeHeaders();
+		assertEquals(exposedHeaders, Arrays.asList("header1", "header2"));
+	}
+
+	@Test
+	public void accessControlMaxAge() {
+		assertEquals(-1, headers.getAccessControlMaxAge());
+		headers.setAccessControlMaxAge(3600);
+		assertEquals(3600, headers.getAccessControlMaxAge());
+	}
+
+	@Test
+	public void accessControlRequestHeaders() {
+		List<String> requestHeaders = headers.getAccessControlRequestHeaders();
+		assertThat(requestHeaders, Matchers.emptyCollectionOf(String.class));
+		headers.setAccessControlRequestHeaders(Arrays.asList("header1", "header2"));
+		requestHeaders = headers.getAccessControlRequestHeaders();
+		assertEquals(requestHeaders, Arrays.asList("header1", "header2"));
+	}
+
+	@Test
+	public void accessControlRequestMethod() {
+		assertNull(headers.getAccessControlRequestMethod());
+		headers.setAccessControlRequestMethod(HttpMethod.POST);
+		assertEquals(HttpMethod.POST, headers.getAccessControlRequestMethod());
 	}
 
 }

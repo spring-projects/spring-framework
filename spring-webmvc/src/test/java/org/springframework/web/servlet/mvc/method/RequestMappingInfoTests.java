@@ -25,7 +25,6 @@ import org.junit.Test;
 import org.springframework.http.HttpHeaders;
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.cors.CorsUtils;
 import org.springframework.web.servlet.mvc.condition.ConsumesRequestCondition;
 import org.springframework.web.servlet.mvc.condition.HeadersRequestCondition;
 import org.springframework.web.servlet.mvc.condition.ParamsRequestCondition;
@@ -321,7 +320,7 @@ public class RequestMappingInfoTests {
 	public void preFlightRequest() {
 		MockHttpServletRequest request = new MockHttpServletRequest("OPTIONS", "/foo");
 		request.addHeader(HttpHeaders.ORIGIN, "http://domain.com");
-		request.addHeader(CorsUtils.ACCESS_CONTROL_REQUEST_METHOD, "POST");
+		request.addHeader(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, "POST");
 
 		RequestMappingInfo info = new RequestMappingInfo(
 				new PatternsRequestCondition("/foo"), new RequestMethodsRequestCondition(RequestMethod.POST), null,

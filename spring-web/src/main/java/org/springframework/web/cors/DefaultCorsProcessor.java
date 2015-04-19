@@ -17,11 +17,11 @@
 package org.springframework.web.cors;
 
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -30,9 +30,12 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.server.ServerHttpRequest;
+import org.springframework.http.server.ServerHttpResponse;
+import org.springframework.http.server.ServletServerHttpRequest;
+import org.springframework.http.server.ServletServerHttpResponse;
 import org.springframework.util.Assert;
-import org.springframework.util.CollectionUtils;
-import org.springframework.util.StringUtils;
 
 /**
  * Default implementation of {@link CorsProcessor}, as defined by the
@@ -43,6 +46,9 @@ import org.springframework.util.StringUtils;
  */
 public class DefaultCorsProcessor implements CorsProcessor {
 
+	private static final Charset UTF8_CHARSET = Charset.forName("UTF-8");
+
+
 	protected final Log logger = LogFactory.getLog(getClass());
 
 
@@ -50,53 +56,74 @@ public class DefaultCorsProcessor implements CorsProcessor {
 	public boolean processPreFlightRequest(CorsConfiguration config, HttpServletRequest request,
 			HttpServletResponse response) throws IOException {
 
-		Assert.isTrue(CorsUtils.isPreFlightRequest(request));
-
-		if (check(request, response, config)) {
-			setAllowOrigin(request, response, config.getAllowedOrigins(), config.isAllowCredentials());
-			setAllowCredentials(response, config.isAllowCredentials());
-			setAllowMethods(request, response, config.getAllowedMethods());
-			setAllowHeadersHeader(request, response, config.getAllowedHeaders());
-			setMaxAgeHeader(response, config.getMaxAge());
+		ServerHttpRequest serverRequest = new ServletServerHttpRequest(request);
+		ServerHttpResponse serverResponse = new ServletServerHttpResponse(response);
+		boolean isPreFlight = CorsUtils.isPreFlightRequest(request);
+		Assert.isTrue(isPreFlight);
+		if (skip(serverResponse)) {
+			return true;
 		}
-		return true;
+
+		if (check(serverRequest, serverResponse, config, isPreFlight)) {
+			setAllowOrigin(serverRequest, serverResponse, config.getAllowedOrigins(), config.isAllowCredentials());
+			setAllowCredentials(serverResponse, config.isAllowCredentials());
+			setAllowMethods(serverRequest, serverResponse, config.getAllowedMethods());
+			setAllowHeadersHeader(serverRequest, serverResponse, config.getAllowedHeaders());
+			setMaxAgeHeader(serverResponse, config.getMaxAge());
+			serverResponse.close();
+			return true;
+		}
+		return false;
 	}
 
 	@Override
 	public boolean processActualRequest(CorsConfiguration config, HttpServletRequest request,
 			HttpServletResponse response) throws IOException {
 
-		Assert.isTrue(CorsUtils.isCorsRequest(request) && !CorsUtils.isPreFlightRequest(request));
-
-		if (check(request, response, config)) {
-			setAllowOrigin(request, response, config.getAllowedOrigins(), config.isAllowCredentials());
-			setAllowCredentials(response, config.isAllowCredentials());
-			setExposeHeadersHeader(response, config.getExposedHeaders());
+		ServerHttpRequest serverRequest = new ServletServerHttpRequest(request);
+		ServerHttpResponse serverResponse = new ServletServerHttpResponse(response);
+		boolean isPreFlight = CorsUtils.isPreFlightRequest(request);
+		Assert.isTrue(CorsUtils.isCorsRequest(request) && !isPreFlight);
+		if (skip(serverResponse)) {
+			return true;
 		}
-		return true;
+
+		if (check(serverRequest, serverResponse, config, isPreFlight)) {
+			setAllowOrigin(serverRequest, serverResponse, config.getAllowedOrigins(), config.isAllowCredentials());
+			setAllowCredentials(serverResponse, config.isAllowCredentials());
+			setExposeHeadersHeader(serverResponse, config.getExposedHeaders());
+			serverResponse.close();
+			return true;
+		}
+		return false;
 	}
 
-	private boolean check(HttpServletRequest request, HttpServletResponse response,
-			CorsConfiguration config) throws IOException {
-
+	private boolean skip(ServerHttpResponse response) {
 		if (hasAllowOriginHeader(response)) {
 			logger.debug("Skip adding CORS headers, response already contains \"Access-Control-Allow-Origin\"");
-			return false;
+			return true;
 		}
-		if (!checkOrigin(request, config.getAllowedOrigins()) || !checkMethod(request, config.getAllowedMethods()) ||
-				!checkHeaders(request, config.getAllowedHeaders())) {
-			response.sendError(HttpServletResponse.SC_FORBIDDEN, "Invalid CORS request");
+		return false;
+	}
+
+	private boolean check(ServerHttpRequest request, ServerHttpResponse response,
+			CorsConfiguration config, boolean isPreFlight) throws IOException {
+
+		if (!checkOrigin(request, config.getAllowedOrigins()) ||
+				!checkMethod(request, config.getAllowedMethods(), isPreFlight) ||
+				!checkHeaders(request, config.getAllowedHeaders(), isPreFlight)) {
+			response.setStatusCode(HttpStatus.FORBIDDEN);
+			response.getBody().write("Invalid CORS request".getBytes(UTF8_CHARSET));
 			return false;
 		}
 		return true;
 	}
 
-	private boolean hasAllowOriginHeader(HttpServletResponse response) {
+	private boolean hasAllowOriginHeader(ServerHttpResponse response) {
 		boolean hasCorsResponseHeaders = false;
 		try {
 			// Perhaps a CORS Filter has already added this?
-			Collection<String> headers = response.getHeaders(CorsUtils.ACCESS_CONTROL_ALLOW_ORIGIN);
-			hasCorsResponseHeaders = !CollectionUtils.isEmpty(headers);
+			hasCorsResponseHeaders = response.getHeaders().getAccessControlAllowOrigin() != null;
 		}
 		catch (NullPointerException npe) {
 			// See SPR-11919 and https://issues.jboss.org/browse/WFLY-3474
@@ -104,8 +131,8 @@ public class DefaultCorsProcessor implements CorsProcessor {
 		return hasCorsResponseHeaders;
 	}
 
-	private boolean checkOrigin(HttpServletRequest request, List<String> allowedOrigins) {
-		String originHeader = request.getHeader(HttpHeaders.ORIGIN);
+	private boolean checkOrigin(ServerHttpRequest request, List<String> allowedOrigins) {
+		String originHeader = request.getHeaders().getOrigin();
 		if (originHeader == null || allowedOrigins == null) {
 			return false;
 		}
@@ -120,9 +147,10 @@ public class DefaultCorsProcessor implements CorsProcessor {
 		return false;
 	}
 
-	private boolean checkMethod(HttpServletRequest request, List<String> allowedMethods) {
-		String requestMethod = CorsUtils.isPreFlightRequest(request) ?
-				request.getHeader(CorsUtils.ACCESS_CONTROL_REQUEST_METHOD) : request.getMethod();
+	private boolean checkMethod(ServerHttpRequest request, List<String> allowedMethods, boolean isPreFlight) {
+		HttpMethod requestMethod = isPreFlight ?
+				request.getHeaders().getAccessControlRequestMethod() :
+				request.getMethod();
 		if (allowedMethods == null) {
 			allowedMethods = Arrays.asList(HttpMethod.GET.name());
 		}
@@ -130,18 +158,16 @@ public class DefaultCorsProcessor implements CorsProcessor {
 			return true;
 		}
 		for (String allowedMethod : allowedMethods) {
-			if (allowedMethod.equalsIgnoreCase(requestMethod)) {
+			if (allowedMethod.equalsIgnoreCase(requestMethod.name())) {
 				return true;
 			}
 		}
 		return false;
 	}
 
-	private boolean checkHeaders(HttpServletRequest request, List<String> allowedHeaders) {
-		String headerValue = request.getHeader(CorsUtils.ACCESS_CONTROL_REQUEST_HEADERS);
-		String[] requestHeaders = CorsUtils.isPreFlightRequest(request) ?
-				StringUtils.commaDelimitedListToStringArray(headerValue) :
-				Collections.list(request.getHeaderNames()).toArray(new String[0]);
+	private boolean checkHeaders(ServerHttpRequest request, List<String> allowedHeaders, boolean isPreFlight) {
+		List<String> requestHeaders = isPreFlight ? request.getHeaders().getAccessControlRequestHeaders() :
+				new ArrayList<String>(request.getHeaders().keySet());
 		if ((allowedHeaders != null) && allowedHeaders.contains("*")) {
 			return true;
 		}
@@ -165,38 +191,41 @@ public class DefaultCorsProcessor implements CorsProcessor {
 		return true;
 	}
 
-	private void setAllowOrigin(HttpServletRequest request, HttpServletResponse response,
+	private void setAllowOrigin(ServerHttpRequest request, ServerHttpResponse response,
 			List<String> allowedOrigins, Boolean allowCredentials) {
 
-		String origin = request.getHeader(HttpHeaders.ORIGIN);
+		String origin = request.getHeaders().getOrigin();
 		if (allowedOrigins.contains("*") && (allowCredentials == null || !allowCredentials)) {
-			response.addHeader(CorsUtils.ACCESS_CONTROL_ALLOW_ORIGIN, "*");
+			response.getHeaders().setAccessControlAllowOrigin("*");
 			return;
 		}
-		response.addHeader(CorsUtils.ACCESS_CONTROL_ALLOW_ORIGIN, origin);
-		response.addHeader(HttpHeaders.VARY, HttpHeaders.ORIGIN);
+		response.getHeaders().setAccessControlAllowOrigin(origin);
+		response.getHeaders().add(HttpHeaders.VARY, HttpHeaders.ORIGIN);
 	}
 
-	private void setAllowMethods(HttpServletRequest request, HttpServletResponse response,
+	private void setAllowMethods(ServerHttpRequest request, ServerHttpResponse response,
 			List<String> allowedMethods) {
 
 		if (allowedMethods == null) {
 			allowedMethods = Arrays.asList(HttpMethod.GET.name());
 		}
 		if (allowedMethods.contains("*")) {
-			String headerValue = request.getHeader(CorsUtils.ACCESS_CONTROL_REQUEST_METHOD);
-			response.addHeader(CorsUtils.ACCESS_CONTROL_ALLOW_METHODS, headerValue);
+			HttpMethod method = request.getHeaders().getAccessControlRequestMethod();
+			response.getHeaders().setAccessControlAllowMethods(Arrays.asList(method));
 		}
 		else {
-			String headerValue = StringUtils.collectionToCommaDelimitedString(allowedMethods);
-			response.addHeader(CorsUtils.ACCESS_CONTROL_ALLOW_METHODS, headerValue);
+			List<HttpMethod> methods = new ArrayList<HttpMethod>();
+			for (String method : allowedMethods) {
+				methods.add(HttpMethod.valueOf(method));
+			}
+			response.getHeaders().setAccessControlAllowMethods(methods);
 		}
 	}
 
-	private void setAllowHeadersHeader(HttpServletRequest request, HttpServletResponse response, List<String> allowedHeaders) {
+	private void setAllowHeadersHeader(ServerHttpRequest request, ServerHttpResponse response,
+			List<String> allowedHeaders) {
 		if ((allowedHeaders != null) && !allowedHeaders.isEmpty()) {
-			String headerValue = request.getHeader(CorsUtils.ACCESS_CONTROL_REQUEST_HEADERS);
-			String[] requestHeaders = StringUtils.commaDelimitedListToStringArray(headerValue);
+			List<String> requestHeaders = request.getHeaders().getAccessControlRequestHeaders();
 			boolean matchAll = allowedHeaders.contains("*");
 			List<String> matchingHeaders = new ArrayList<String>();
 			for (String requestHeader : requestHeaders) {
@@ -209,28 +238,26 @@ public class DefaultCorsProcessor implements CorsProcessor {
 				}
 			}
 			if (!matchingHeaders.isEmpty()) {
-				response.addHeader(CorsUtils.ACCESS_CONTROL_ALLOW_HEADERS,
-						StringUtils.collectionToCommaDelimitedString(matchingHeaders));
+				response.getHeaders().setAccessControlAllowHeaders(matchingHeaders);
 			}
 		}
 	}
 
-	private void setExposeHeadersHeader(HttpServletResponse response, List<String> exposedHeaders) {
+	private void setExposeHeadersHeader(ServerHttpResponse response, List<String> exposedHeaders) {
 		if ((exposedHeaders != null) && !exposedHeaders.isEmpty()) {
-			response.addHeader(CorsUtils.ACCESS_CONTROL_EXPOSE_HEADERS,
-					StringUtils.collectionToCommaDelimitedString(exposedHeaders));
+			response.getHeaders().setAccessControlExposeHeaders(exposedHeaders);
 		}
 	}
 
-	private void setAllowCredentials(HttpServletResponse response, Boolean allowCredentials) {
+	private void setAllowCredentials(ServerHttpResponse response, Boolean allowCredentials) {
 		if ((allowCredentials != null) && allowCredentials) {
-			response.addHeader(CorsUtils.ACCESS_CONTROL_ALLOW_CREDENTIALS, "true");
+			response.getHeaders().setAccessControlAllowCredentials(allowCredentials);
 		}
 	}
 
-	private void setMaxAgeHeader(HttpServletResponse response, Long maxAge) {
+	private void setMaxAgeHeader(ServerHttpResponse response, Long maxAge) {
 		if (maxAge != null) {
-			response.addHeader(CorsUtils.ACCESS_CONTROL_MAX_AGE, maxAge.toString());
+			response.getHeaders().setAccessControlMaxAge(maxAge);
 		}
 	}
 

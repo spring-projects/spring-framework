@@ -20,6 +20,7 @@ import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.springframework.http.HttpHeaders;
 import org.springframework.util.PathMatcher;
 import org.springframework.util.StringUtils;
 import org.springframework.web.accept.ContentNegotiationManager;
@@ -245,7 +246,7 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 	 * HTTP method specified in a CORS pre-flight request.
 	 */
 	private RequestMethodsRequestCondition getAccessControlRequestMethodCondition(HttpServletRequest request) {
-		String expectedMethod = request.getHeader(CorsUtils.ACCESS_CONTROL_REQUEST_METHOD);
+		String expectedMethod = request.getHeader(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD);
 		if (StringUtils.hasText(expectedMethod)) {
 			for (RequestMethod method : getMethodsCondition().getMethods()) {
 				if (expectedMethod.equalsIgnoreCase(method.name())) {

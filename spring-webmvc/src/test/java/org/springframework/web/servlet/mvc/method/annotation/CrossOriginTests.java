@@ -32,7 +32,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.cors.CorsUtils;
 import org.springframework.web.servlet.HandlerExecutionChain;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.mvc.condition.ConsumesRequestCondition;
@@ -138,7 +137,7 @@ public class CrossOriginTests {
 	public void preFlightRequest() throws Exception {
 		this.handlerMapping.registerHandler(new MethodLevelController());
 		this.request.setMethod("OPTIONS");
-		this.request.addHeader(CorsUtils.ACCESS_CONTROL_REQUEST_METHOD, "GET");
+		this.request.addHeader(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, "GET");
 		this.request.setRequestURI("/default");
 		HandlerExecutionChain chain = this.handlerMapping.getHandler(request);
 		CorsConfiguration config = getCorsConfiguration(chain, true);
@@ -155,8 +154,8 @@ public class CrossOriginTests {
 	public void ambiguousHeaderPreFlightRequest() throws Exception {
 		this.handlerMapping.registerHandler(new MethodLevelController());
 		this.request.setMethod("OPTIONS");
-		this.request.addHeader(CorsUtils.ACCESS_CONTROL_REQUEST_METHOD, "GET");
-		this.request.addHeader(CorsUtils.ACCESS_CONTROL_REQUEST_HEADERS, "header1");
+		this.request.addHeader(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, "GET");
+		this.request.addHeader(HttpHeaders.ACCESS_CONTROL_REQUEST_HEADERS, "header1");
 		this.request.setRequestURI("/ambiguous-header");
 		HandlerExecutionChain chain = this.handlerMapping.getHandler(request);
 		CorsConfiguration config = getCorsConfiguration(chain, true);
@@ -173,7 +172,7 @@ public class CrossOriginTests {
 	public void ambiguousProducesPreFlightRequest() throws Exception {
 		this.handlerMapping.registerHandler(new MethodLevelController());
 		this.request.setMethod("OPTIONS");
-		this.request.addHeader(CorsUtils.ACCESS_CONTROL_REQUEST_METHOD, "GET");
+		this.request.addHeader(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, "GET");
 		this.request.setRequestURI("/ambiguous-produces");
 		HandlerExecutionChain chain = this.handlerMapping.getHandler(request);
 		CorsConfiguration config = getCorsConfiguration(chain, true);

@@ -31,7 +31,6 @@ import org.mockito.MockitoAnnotations;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.scheduling.TaskScheduler;
-import org.springframework.web.cors.CorsUtils;
 import org.springframework.web.socket.AbstractHttpRequestTests;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.handler.TestPrincipal;
@@ -149,8 +148,8 @@ public class DefaultSockJsServiceTests extends AbstractHttpRequestTests {
 		verify(taskScheduler).scheduleAtFixedRate(any(Runnable.class), eq(service.getDisconnectDelay()));
 
 		assertEquals("no-store, no-cache, must-revalidate, max-age=0", this.response.getHeaders().getCacheControl());
-		assertNull(this.servletResponse.getHeader(CorsUtils.ACCESS_CONTROL_ALLOW_ORIGIN));
-		assertNull(this.servletResponse.getHeader(CorsUtils.ACCESS_CONTROL_ALLOW_CREDENTIALS));
+		assertNull(this.servletResponse.getHeader(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN));
+		assertNull(this.servletResponse.getHeader(HttpHeaders.ACCESS_CONTROL_ALLOW_CREDENTIALS));
 	}
 
 	@Test  // SPR-12226
