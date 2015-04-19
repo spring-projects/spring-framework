@@ -21,10 +21,12 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.style.ToStringCreator;
@@ -32,19 +34,16 @@ import org.springframework.test.annotation.DirtiesContext.HierarchyMode;
 import org.springframework.test.context.ContextCache;
 import org.springframework.test.context.MergedContextConfiguration;
 import org.springframework.util.Assert;
-import org.springframework.util.ConcurrentReferenceHashMap;
 
 /**
  * Default implementation of the {@link ContextCache} API.
  *
- * <p>Uses Spring's {@link ConcurrentReferenceHashMap} to store
- * {@linkplain java.lang.ref.SoftReference soft references} to cached
- * contexts and {@code MergedContextConfiguration} instances.
+ * <p>Uses {@link ConcurrentHashMap ConcurrentHashMaps} to cache
+ * {@link ApplicationContext} and {@link MergedContextConfiguration} instances.
  *
  * @author Sam Brannen
  * @author Juergen Hoeller
  * @since 2.5
- * @see ConcurrentReferenceHashMap
  */
 public class DefaultContextCache implements ContextCache {
 
@@ -54,7 +53,7 @@ public class DefaultContextCache implements ContextCache {
 	 * Map of context keys to Spring {@code ApplicationContext} instances.
 	 */
 	private final Map<MergedContextConfiguration, ApplicationContext> contextMap =
-			new ConcurrentReferenceHashMap<MergedContextConfiguration, ApplicationContext>(64);
+			new ConcurrentHashMap<MergedContextConfiguration, ApplicationContext>(64);
 
 	/**
 	 * Map of parent keys to sets of children keys, representing a top-down <em>tree</em>
@@ -63,7 +62,7 @@ public class DefaultContextCache implements ContextCache {
 	 * of other contexts.
 	 */
 	private final Map<MergedContextConfiguration, Set<MergedContextConfiguration>> hierarchyMap =
-			new ConcurrentReferenceHashMap<MergedContextConfiguration, Set<MergedContextConfiguration>>(64);
+			new ConcurrentHashMap<MergedContextConfiguration, Set<MergedContextConfiguration>>(64);
 
 	private final AtomicInteger hitCount = new AtomicInteger();
 
