@@ -42,6 +42,13 @@ import org.springframework.test.annotation.DirtiesContext.HierarchyMode;
 public interface ContextCache {
 
 	/**
+	 * The name of the logging category used for reporting {@code ContextCache}
+	 * statistics.
+	 */
+	public static final String CONTEXT_CACHE_LOGGING_CATEGORY = "org.springframework.test.context.cache";
+
+
+	/**
 	 * Determine whether there is a cached context for the given key.
 	 * @param key the context key (never {@code null})
 	 * @return {@code true} if the cache contains a context with the given key
@@ -126,19 +133,18 @@ public interface ContextCache {
 	void clearStatistics();
 
 	/**
-	 * Generate a text string containing the implementation type of this
-	 * cache and its statistics.
-	 * <p>The value returned by this method will be used primarily for
-	 * logging purposes.
-	 * <p>Specifically, the returned string should contain the name of the
-	 * concrete {@code ContextCache} implementation, the {@linkplain #size},
-	 * {@linkplain #getParentContextCount() parent context count},
-	 * {@linkplain #getHitCount() hit count}, {@linkplain #getMissCount()
-	 * miss count}, and any other information useful in monitoring the
-	 * state of this cache.
-	 * @return a string representation of this cache, including statistics
+	 * Log the statistics for this {@code ContextCache} at {@code DEBUG} level
+	 * using the {@value #CONTEXT_CACHE_LOGGING_CATEGORY} logging category.
+	 * <p>The following information should be logged.
+	 * <ul>
+	 * <li>name of the concrete {@code ContextCache} implementation</li>
+	 * <li>{@linkplain #size}</li>
+	 * <li>{@linkplain #getParentContextCount() parent context count}</li>
+	 * <li>{@linkplain #getHitCount() hit count}</li>
+	 * <li>{@linkplain #getMissCount() miss count}</li>
+	 * <li>any other information useful for monitoring the state of this cache</li>
+	 * </ul>
 	 */
-	@Override
-	abstract String toString();
+	void logStatistics();
 
 }

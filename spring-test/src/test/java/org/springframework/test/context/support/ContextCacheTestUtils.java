@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-package org.springframework.test.context;
+package org.springframework.test.context.support;
+
+import org.springframework.test.context.ContextCache;
 
 import static org.junit.Assert.*;
 

@@ -18,6 +18,7 @@ package org.springframework.test.context;
 
 import org.junit.Before;
 import org.junit.Test;
+
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.annotation.DirtiesContext.HierarchyMode;
@@ -26,7 +27,7 @@ import org.springframework.test.context.support.DefaultContextCache;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import static org.junit.Assert.*;
-import static org.springframework.test.context.ContextCacheTestUtils.*;
+import static org.springframework.test.context.support.ContextCacheTestUtils.*;
 
 /**
  * Integration tests for verifying proper behavior of the {@link ContextCache} in

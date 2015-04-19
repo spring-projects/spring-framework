@@ -102,22 +102,23 @@ public class TestContextManager {
 	 */
 	public TestContextManager(Class<?> testClass) {
 		BootstrapContext bootstrapContext = createBootstrapContext(testClass);
-		TestContextBootstrapper testContextBootstrapper = BootstrapUtils.resolveTestContextBootstrapper(bootstrapContext);
-		this.testContext = testContextBootstrapper.buildTestContext();
-		registerTestExecutionListeners(testContextBootstrapper.getTestExecutionListeners());
+		TestContextBootstrapper bootstrapper = BootstrapUtils.resolveTestContextBootstrapper(bootstrapContext);
+		this.testContext = bootstrapper.buildTestContext();
+		registerTestExecutionListeners(bootstrapper.getTestExecutionListeners());
 	}
 
 	/**
 	 * Create the {@code BootstrapContext} for the specified {@linkplain Class test class}.
-	 * <p>The default implementation creates a {@link DefaultBootstrapContext} that
-	 * uses the {@link DefaultCacheAwareContextLoaderDelegate}.
+	 * <p>The default implementation creates a
+	 * {@link org.springframework.test.context.support.DefaultBootstrapContext DefaultBootstrapContext}
+	 * that uses a
+	 * {@link org.springframework.test.context.support.DefaultCacheAwareContextLoaderDelegate DefaultCacheAwareContextLoaderDelegate}.
 	 * <p>Can be overridden by subclasses as necessary.
 	 * @param testClass the test class for which the bootstrap context should be created
 	 * @return a new {@code BootstrapContext}; never {@code null}
 	 */
 	protected BootstrapContext createBootstrapContext(Class<?> testClass) {
-		CacheAwareContextLoaderDelegate cacheAwareContextLoaderDelegate = new DefaultCacheAwareContextLoaderDelegate();
-		return new DefaultBootstrapContext(testClass, cacheAwareContextLoaderDelegate);
+		return BootstrapUtils.createBootstrapContext(testClass);
 	}
 
 	/**

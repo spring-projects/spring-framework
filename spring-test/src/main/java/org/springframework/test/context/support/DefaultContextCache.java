@@ -23,6 +23,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.style.ToStringCreator;
@@ -45,6 +47,8 @@ import org.springframework.util.ConcurrentReferenceHashMap;
  * @see ConcurrentReferenceHashMap
  */
 public class DefaultContextCache implements ContextCache {
+
+	private static final Log statsLogger = LogFactory.getLog(CONTEXT_CACHE_LOGGING_CATEGORY);
 
 	/**
 	 * Map of context keys to Spring {@code ApplicationContext} instances.
@@ -238,6 +242,20 @@ public class DefaultContextCache implements ContextCache {
 
 	/**
 	 * {@inheritDoc}
+	 */
+	@Override
+	public void logStatistics() {
+		if (statsLogger.isDebugEnabled()) {
+			statsLogger.debug("Spring test ApplicationContext cache statistics: " + this);
+		}
+	}
+
+	/**
+	 * Generate a text string containing the implementation type of this
+	 * cache and its statistics.
+	 * <p>The string returned by this method contains all information
+	 * required for compliance with the contract for {@link #logStatistics()}.
+	 * @return a string representation of this cache, including statistics
 	 */
 	@Override
 	public String toString() {

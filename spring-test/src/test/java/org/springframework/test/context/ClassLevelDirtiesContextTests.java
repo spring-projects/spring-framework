@@ -36,7 +36,7 @@ import org.springframework.test.context.support.DependencyInjectionTestExecution
 import org.springframework.test.context.support.DirtiesContextTestExecutionListener;
 
 import static org.junit.Assert.*;
-import static org.springframework.test.context.ContextCacheTestUtils.*;
+import static org.springframework.test.context.support.ContextCacheTestUtils.*;
 
 /**
  * JUnit 4 based integration test which verifies correct {@linkplain ContextCache

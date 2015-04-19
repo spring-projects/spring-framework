@@ -40,6 +40,8 @@ public interface CacheAwareContextLoaderDelegate {
 	 * configured in the given {@code MergedContextConfiguration}.
 	 * <p>If the context is present in the {@code ContextCache} it will simply
 	 * be returned; otherwise, it will be loaded, stored in the cache, and returned.
+	 * <p>The cache statistics should be logged by invoking
+	 * {@link ContextCache#logStatistics()}.
 	 * @param mergedContextConfiguration the merged context configuration to use
 	 * to load the application context; never {@code null}
 	 * @return the application context

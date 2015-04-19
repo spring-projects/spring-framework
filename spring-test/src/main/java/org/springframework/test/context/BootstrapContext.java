@@ -35,7 +35,8 @@ public interface BootstrapContext {
 
 	/**
 	 * Get the {@link CacheAwareContextLoaderDelegate} to use for transparent
-	 * interaction with the <em>context cache</em>.
+	 * interaction with the {@code ContextCache}.
+	 * @return the context loader delegate (never {@code null})
 	 */
 	CacheAwareContextLoaderDelegate getCacheAwareContextLoaderDelegate();
 
