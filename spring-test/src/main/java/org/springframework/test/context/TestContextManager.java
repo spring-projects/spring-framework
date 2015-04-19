@@ -90,35 +90,35 @@ public class TestContextManager {
 
 
 	/**
-	 * Construct a new {@code TestContextManager} for the specified {@linkplain Class test class},
-	 * automatically {@linkplain #registerTestExecutionListeners registering} the necessary
-	 * {@link TestExecutionListener TestExecutionListeners}.
-	 * <p>Delegates to a {@link TestContextBootstrapper} for building the {@code TestContext}
-	 * and retrieving the {@code TestExecutionListeners}.
+	 * Construct a new {@code TestContextManager} for the supplied {@linkplain Class test class}.
+	 * <p>Delegates to {@link #TestContextManager(TestContextBootstrapper)} with
+	 * the {@link TestContextBootstrapper} configured for the test class. If the
+	 * {@link BootstrapWith @BootstrapWith} annotation is present on the test
+	 * class, either directly or as a meta-annotation, then its
+	 * {@link BootstrapWith#value value} will be used as the bootstrapper type;
+	 * otherwise, the {@link org.springframework.test.context.support.DefaultTestContextBootstrapper
+	 * DefaultTestContextBootstrapper} will be used.
 	 * @param testClass the test class to be managed
+	 * @see #TestContextManager(TestContextBootstrapper)
+	 */
+	public TestContextManager(Class<?> testClass) {
+		this(BootstrapUtils.resolveTestContextBootstrapper(BootstrapUtils.createBootstrapContext(testClass)));
+	}
+
+	/**
+	 * Construct a new {@code TestContextManager} using the supplied {@link TestContextBootstrapper}
+	 * and {@linkplain #registerTestExecutionListeners register} the necessary
+	 * {@link TestExecutionListener TestExecutionListeners}.
+	 * <p>Delegates to the supplied {@code TestContextBootstrapper} for building
+	 * the {@code TestContext} and retrieving the {@code TestExecutionListeners}.
+	 * @param testContextBootstrapper the bootstrapper to use
 	 * @see TestContextBootstrapper#buildTestContext
 	 * @see TestContextBootstrapper#getTestExecutionListeners
 	 * @see #registerTestExecutionListeners
 	 */
-	public TestContextManager(Class<?> testClass) {
-		BootstrapContext bootstrapContext = createBootstrapContext(testClass);
-		TestContextBootstrapper bootstrapper = BootstrapUtils.resolveTestContextBootstrapper(bootstrapContext);
-		this.testContext = bootstrapper.buildTestContext();
-		registerTestExecutionListeners(bootstrapper.getTestExecutionListeners());
-	}
-
-	/**
-	 * Create the {@code BootstrapContext} for the specified {@linkplain Class test class}.
-	 * <p>The default implementation creates a
-	 * {@link org.springframework.test.context.support.DefaultBootstrapContext DefaultBootstrapContext}
-	 * that uses a
-	 * {@link org.springframework.test.context.support.DefaultCacheAwareContextLoaderDelegate DefaultCacheAwareContextLoaderDelegate}.
-	 * <p>Can be overridden by subclasses as necessary.
-	 * @param testClass the test class for which the bootstrap context should be created
-	 * @return a new {@code BootstrapContext}; never {@code null}
-	 */
-	protected BootstrapContext createBootstrapContext(Class<?> testClass) {
-		return BootstrapUtils.createBootstrapContext(testClass);
+	public TestContextManager(TestContextBootstrapper testContextBootstrapper) {
+		this.testContext = testContextBootstrapper.buildTestContext();
+		registerTestExecutionListeners(testContextBootstrapper.getTestExecutionListeners());
 	}
 
 	/**
