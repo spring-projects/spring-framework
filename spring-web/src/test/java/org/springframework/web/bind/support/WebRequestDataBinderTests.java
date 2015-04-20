@@ -345,11 +345,11 @@ public class WebRequestDataBinderTests {
 
 	static class TestBeanWithConcreteSpouse extends TestBean {
 		public void setConcreteSpouse(TestBean spouse) {
-			this.spouses = new ITestBean[] {spouse};
+			setSpouse(spouse);
 		}
 
 		public TestBean getConcreteSpouse() {
-			return (spouses != null ? (TestBean) spouses[0] : null);
+			return (TestBean) getSpouse();
 		}
 	}
 
