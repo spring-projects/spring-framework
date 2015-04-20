@@ -192,6 +192,14 @@ public class JmsMessageEndpointManager extends GenericMessageEndpointManager
 	}
 
 	@Override
+	public DestinationResolver getDestinationResolver() {
+		if (this.activationSpecFactory instanceof StandardJmsActivationSpecFactory) {
+			return ((StandardJmsActivationSpecFactory) this.activationSpecFactory).getDestinationResolver();
+		}
+		return null;
+	}
+
+	@Override
 	public boolean isPubSubDomain() {
 		JmsActivationSpecConfig config = getActivationSpecConfig();
 		if (config != null) {

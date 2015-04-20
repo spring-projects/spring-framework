@@ -61,4 +61,10 @@ public class JmsMessageEndpointManagerTests {
 		JmsMessageEndpointManager endpoint = new JmsMessageEndpointManager();
 		assertNull(endpoint.getMessageConverter());
 	}
+
+	@Test
+	public void getDestinationResolverNoConfig() {
+		JmsMessageEndpointManager endpoint = new JmsMessageEndpointManager();
+		assertNull(endpoint.getDestinationResolver());
+	}
 }

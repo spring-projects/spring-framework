@@ -36,6 +36,7 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.rules.TestName;
 
+import org.springframework.beans.DirectFieldAccessor;
 import org.springframework.beans.factory.support.StaticListableBeanFactory;
 import org.springframework.jms.StubTextMessage;
 import org.springframework.jms.listener.DefaultMessageListenerContainer;
@@ -46,6 +47,7 @@ import org.springframework.jms.listener.adapter.MessagingMessageListenerAdapter;
 import org.springframework.jms.listener.adapter.ReplyFailureException;
 import org.springframework.jms.support.JmsHeaders;
 import org.springframework.jms.support.JmsMessageHeaderAccessor;
+import org.springframework.jms.support.converter.MessageConverter;
 import org.springframework.jms.support.destination.DestinationResolver;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
@@ -105,6 +107,20 @@ public class MethodJmsListenerEndpointTests {
 		endpoint.setMessageHandlerMethodFactory(factory);
 
 		assertNotNull(endpoint.createMessageListener(container));
+	}
+
+	@Test
+	public void setExtraCollaborators() {
+		MessageConverter messageConverter = mock(MessageConverter.class);
+		DestinationResolver destinationResolver = mock(DestinationResolver.class);
+		this.container.setMessageConverter(messageConverter);
+		this.container.setDestinationResolver(destinationResolver);
+
+		MessagingMessageListenerAdapter listener = createInstance(this.factory,
+				getListenerMethod("resolveObjectPayload", MyBean.class), container);
+		DirectFieldAccessor accessor = new DirectFieldAccessor(listener);
+		assertSame(messageConverter, accessor.getPropertyValue("messageConverter"));
+		assertSame(destinationResolver, accessor.getPropertyValue("destinationResolver"));
 	}
 
 	@Test
