@@ -47,6 +47,7 @@ import org.springframework.http.converter.support.AllEncompassingFormHttpMessage
 import org.springframework.http.converter.xml.SourceHttpMessageConverter;
 import org.springframework.ui.ModelMap;
 import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ReflectionUtils.MethodFilter;
 import org.springframework.web.accept.ContentNegotiationManager;
@@ -114,6 +115,10 @@ import org.springframework.web.util.WebUtils;
  */
 public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 		implements BeanFactoryAware, InitializingBean {
+
+	private static final boolean completionStagePresent = ClassUtils.isPresent("java.util.concurrent.CompletionStage",
+			RequestMappingHandlerAdapter.class.getClassLoader());
+
 
 	private List<HandlerMethodArgumentResolver> customArgumentResolvers;
 
@@ -653,6 +658,9 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 		handlers.add(new DeferredResultMethodReturnValueHandler());
 		handlers.add(new AsyncTaskMethodReturnValueHandler(this.beanFactory));
 		handlers.add(new ListenableFutureReturnValueHandler());
+		if (completionStagePresent) {
+			handlers.add(new CompletionStageReturnValueHandler());
+		}
 
 		// Annotation-based return value types
 		handlers.add(new ModelAttributeMethodProcessor(false));
