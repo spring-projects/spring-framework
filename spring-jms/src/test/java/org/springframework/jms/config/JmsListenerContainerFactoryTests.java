@@ -186,6 +186,7 @@ public class JmsListenerContainerFactoryTests {
 
 	private void assertDefaultJcaConfig(JmsMessageEndpointManager container) {
 		assertEquals(messageConverter, container.getMessageConverter());
+		assertEquals(destinationResolver, container.getDestinationResolver());
 		JmsActivationSpecConfig config = container.getActivationSpecConfig();
 		assertNotNull(config);
 		assertEquals(Session.DUPS_OK_ACKNOWLEDGE, config.getAcknowledgeMode());

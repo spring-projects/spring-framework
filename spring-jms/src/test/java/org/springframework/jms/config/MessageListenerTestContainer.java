@@ -21,6 +21,7 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.jms.JmsException;
 import org.springframework.jms.listener.MessageListenerContainer;
 import org.springframework.jms.support.converter.MessageConverter;
+import org.springframework.jms.support.destination.DestinationResolver;
 
 /**
  * @author Stephane Nicoll
@@ -100,6 +101,11 @@ public class MessageListenerTestContainer
 
 	@Override
 	public MessageConverter getMessageConverter() {
+		return null;
+	}
+
+	@Override
+	public DestinationResolver getDestinationResolver() {
 		return null;
 	}
 

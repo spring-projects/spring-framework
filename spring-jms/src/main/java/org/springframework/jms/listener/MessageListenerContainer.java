@@ -18,6 +18,7 @@ package org.springframework.jms.listener;
 
 import org.springframework.context.SmartLifecycle;
 import org.springframework.jms.support.converter.MessageConverter;
+import org.springframework.jms.support.destination.DestinationResolver;
 
 /**
  * Internal abstraction used by the framework representing a message
@@ -40,6 +41,12 @@ public interface MessageListenerContainer extends SmartLifecycle {
 	 * convert {@link javax.jms.Message}, if any.
 	 */
 	MessageConverter getMessageConverter();
+
+	/**
+	 * Return the {@link DestinationResolver} to use to resolve
+	 * destinations by names.
+	 */
+	DestinationResolver getDestinationResolver();
 
 	/**
 	 * Return whether the Publish/Subscribe domain ({@link javax.jms.Topic Topics}) is used.

@@ -27,6 +27,7 @@ import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.jms.listener.MessageListenerContainer;
 import org.springframework.jms.listener.adapter.MessagingMessageListenerAdapter;
 import org.springframework.jms.support.converter.MessageConverter;
+import org.springframework.jms.support.destination.DestinationResolver;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.handler.annotation.support.MessageHandlerMethodFactory;
 import org.springframework.messaging.handler.invocation.InvocableHandlerMethod;
@@ -109,6 +110,10 @@ public class MethodJmsListenerEndpoint extends AbstractJmsListenerEndpoint {
 		MessageConverter messageConverter = container.getMessageConverter();
 		if (messageConverter != null) {
 			messageListener.setMessageConverter(messageConverter);
+		}
+		DestinationResolver destinationResolver = container.getDestinationResolver();
+		if (destinationResolver != null) {
+			messageListener.setDestinationResolver(destinationResolver);
 		}
 		return messageListener;
 	}
