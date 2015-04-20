@@ -271,13 +271,15 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	@Override
 	protected CorsConfiguration initCorsConfiguration(Object handler, Method method, RequestMappingInfo mappingInfo) {
 		HandlerMethod handlerMethod = createHandlerMethod(handler, method);
+		CrossOrigin typeAnnotation = AnnotationUtils.findAnnotation(handlerMethod.getBeanType(), CrossOrigin.class);
+		CrossOrigin methodAnnotation = AnnotationUtils.findAnnotation(method, CrossOrigin.class);
+
+		if (typeAnnotation == null && methodAnnotation == null) {
+			return null;
+		}
 
 		CorsConfiguration config = new CorsConfiguration();
-
-		CrossOrigin typeAnnotation = AnnotationUtils.findAnnotation(handlerMethod.getBeanType(), CrossOrigin.class);
 		applyAnnotation(config, typeAnnotation);
-
-		CrossOrigin methodAnnotation = AnnotationUtils.findAnnotation(method, CrossOrigin.class);
 		applyAnnotation(config, methodAnnotation);
 
 		if (CollectionUtils.isEmpty(config.getAllowedMethods())) {

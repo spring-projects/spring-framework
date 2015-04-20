@@ -66,9 +66,28 @@ public class CrossOriginTests {
 	}
 
 	@Test
-	public void noAnnotation() throws Exception {
+	public void noAnnotationWithoutOrigin() throws Exception {
 		this.handlerMapping.registerHandler(new MethodLevelController());
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/no");
+		HandlerExecutionChain chain = this.handlerMapping.getHandler(request);
+		CorsConfiguration config = getCorsConfiguration(chain, false);
+		assertNull(config);
+	}
+
+	@Test  // SPR-12931
+	public void noAnnotationWithOrigin() throws Exception {
+		this.handlerMapping.registerHandler(new MethodLevelController());
+		this.request.setRequestURI("/no");
+		HandlerExecutionChain chain = this.handlerMapping.getHandler(request);
+		CorsConfiguration config = getCorsConfiguration(chain, false);
+		assertNull(config);
+	}
+
+	@Test  // SPR-12931
+	public void noAnnotationPostWithOrigin() throws Exception {
+		this.handlerMapping.registerHandler(new MethodLevelController());
+		this.request.setMethod("POST");
+		this.request.setRequestURI("/no");
 		HandlerExecutionChain chain = this.handlerMapping.getHandler(request);
 		CorsConfiguration config = getCorsConfiguration(chain, false);
 		assertNull(config);
@@ -201,6 +220,10 @@ public class CrossOriginTests {
 
 		@RequestMapping(value = "/no", method = RequestMethod.GET)
 		public void noAnnotation() {
+		}
+
+		@RequestMapping(value = "/no", method = RequestMethod.POST)
+		public void noAnnotationPost() {
 		}
 
 		@CrossOrigin
