@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,8 @@
 package org.springframework.jms.listener.adapter;
 
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.List;
 import javax.jms.Destination;
 import javax.jms.JMSException;
 import javax.jms.Session;
@@ -28,6 +30,7 @@ import org.junit.Test;
 import org.springframework.beans.factory.support.StaticListableBeanFactory;
 import org.springframework.jms.StubTextMessage;
 import org.springframework.jms.support.JmsHeaders;
+import org.springframework.jms.support.converter.MessageConverter;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.converter.MessageConversionException;
 import org.springframework.messaging.handler.annotation.support.DefaultMessageHandlerMethodFactory;
@@ -111,6 +114,38 @@ public class MessagingMessageListenerAdapterTests {
 		}
 	}
 
+	@Test
+	public void incomingMessageUsesMessageConverter() throws JMSException {
+		javax.jms.Message jmsMessage = mock(javax.jms.Message.class);
+		Session session = mock(Session.class);
+		MessageConverter messageConverter = mock(MessageConverter.class);
+		given(messageConverter.fromMessage(jmsMessage)).willReturn("FooBar");
+		MessagingMessageListenerAdapter listener = getSimpleInstance("simple", Message.class);
+		listener.setMessageConverter(messageConverter);
+		listener.onMessage(jmsMessage, session);
+		verify(messageConverter, times(1)).fromMessage(jmsMessage);
+		assertEquals(1, sample.simples.size());
+		assertEquals("FooBar", sample.simples.get(0).getPayload());
+	}
+
+	@Test
+	public void replyUsesMessageConverterForPayload() throws JMSException {
+		Session session = mock(Session.class);
+		MessageConverter messageConverter = mock(MessageConverter.class);
+		given(messageConverter.toMessage("Response", session)).willReturn(new StubTextMessage("Response"));
+
+		Message<String> result = MessageBuilder.withPayload("Response")
+				.build();
+
+		MessagingMessageListenerAdapter listener = getSimpleInstance("echo", Message.class);
+		listener.setMessageConverter(messageConverter);
+		javax.jms.Message replyMessage = listener.buildMessage(session, result);
+
+		verify(messageConverter, times(1)).toMessage("Response", session);
+		assertNotNull("reply should never be null", replyMessage);
+		assertEquals("Response", ((TextMessage) replyMessage).getText());
+	}
+
 	protected MessagingMessageListenerAdapter getSimpleInstance(String methodName, Class... parameterTypes) {
 		Method m = ReflectionUtils.findMethod(SampleBean.class, methodName, parameterTypes);
 		return createInstance(m);
@@ -130,6 +165,12 @@ public class MessagingMessageListenerAdapterTests {
 
 	@SuppressWarnings("unused")
 	private static class SampleBean {
+
+		public final List<Message<String>> simples = new ArrayList<>();
+
+		public void simple(Message<String> input) {
+			simples.add(input);
+		}
 
 		public Message<String> echo(Message<String> input) {
 			return MessageBuilder.withPayload(input.getPayload())
