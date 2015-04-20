@@ -38,7 +38,6 @@ import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.core.io.support.SpringFactoriesLoader;
 import org.springframework.test.context.BootstrapContext;
 import org.springframework.test.context.CacheAwareContextLoaderDelegate;
-import org.springframework.test.context.ContextCache;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.ContextConfigurationAttributes;
 import org.springframework.test.context.ContextHierarchy;
@@ -68,8 +67,9 @@ import org.springframework.util.StringUtils;
  * <li>{@link #processMergedContextConfiguration}
  * </ul>
  *
- * <p>To plug in custom {@link ContextCache} support, override
- * {@link #getCacheAwareContextLoaderDelegate()}.
+ * <p>To plug in custom
+ * {@link org.springframework.test.context.cache.ContextCache ContextCache}
+ * support, override {@link #getCacheAwareContextLoaderDelegate()}.
  *
  * @author Sam Brannen
  * @author Juergen Hoeller
@@ -481,8 +481,9 @@ public abstract class AbstractTestContextBootstrapper implements TestContextBoot
 	 * <p>The default implementation simply delegates to
 	 * {@code getBootstrapContext().getCacheAwareContextLoaderDelegate()}.
 	 * <p>Concrete subclasses may choose to override this method to return a
-	 * custom {@code CacheAwareContextLoaderDelegate} implementation with
-	 * custom {@link ContextCache} support.
+	 * custom {@code CacheAwareContextLoaderDelegate} implementation with custom
+	 * {@link org.springframework.test.context.cache.ContextCache ContextCache}
+	 * support.
 	 * @return the context loader delegate (never {@code null})
 	 */
 	protected CacheAwareContextLoaderDelegate getCacheAwareContextLoaderDelegate() {

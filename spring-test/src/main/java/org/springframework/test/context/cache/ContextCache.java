@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-package org.springframework.test.context;
+package org.springframework.test.context.cache;
 
 import org.springframework.context.ApplicationContext;
 import org.springframework.test.annotation.DirtiesContext.HierarchyMode;
+import org.springframework.test.context.MergedContextConfiguration;
 
 /**
  * {@code ContextCache} defines the SPI for caching Spring

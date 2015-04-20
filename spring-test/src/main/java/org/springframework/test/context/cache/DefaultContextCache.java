@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.test.context.support;
+package org.springframework.test.context.cache;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -31,7 +31,6 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.style.ToStringCreator;
 import org.springframework.test.annotation.DirtiesContext.HierarchyMode;
-import org.springframework.test.context.ContextCache;
 import org.springframework.test.context.MergedContextConfiguration;
 import org.springframework.util.Assert;
 

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.test.context.support;
+package org.springframework.test.context.cache;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -22,7 +22,6 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.test.annotation.DirtiesContext.HierarchyMode;
 import org.springframework.test.context.CacheAwareContextLoaderDelegate;
-import org.springframework.test.context.ContextCache;
 import org.springframework.test.context.ContextLoader;
 import org.springframework.test.context.MergedContextConfiguration;
 import org.springframework.test.context.SmartContextLoader;

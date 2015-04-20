@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.test.context;
+package org.springframework.test.context.cache;
 
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -26,12 +26,14 @@ import org.junit.runners.MethodSorters;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.support.DependencyInjectionTestExecutionListener;
 import org.springframework.test.context.support.DirtiesContextTestExecutionListener;
 
 import static org.junit.Assert.*;
-import static org.springframework.test.context.support.ContextCacheTestUtils.*;
+import static org.springframework.test.context.cache.ContextCacheTestUtils.*;
 
 /**
  * JUnit 4 based unit test which verifies correct {@link ContextCache
@@ -47,7 +49,7 @@ import static org.springframework.test.context.support.ContextCacheTestUtils.*;
 @RunWith(SpringJUnit4ClassRunner.class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @TestExecutionListeners({ DependencyInjectionTestExecutionListener.class, DirtiesContextTestExecutionListener.class })
-@ContextConfiguration("junit4/SpringJUnit4ClassRunnerAppCtxTests-context.xml")
+@ContextConfiguration("../junit4/SpringJUnit4ClassRunnerAppCtxTests-context.xml")
 public class SpringRunnerContextCacheTests {
 
 	private static ApplicationContext dirtiedApplicationContext;

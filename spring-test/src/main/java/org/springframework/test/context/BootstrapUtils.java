@@ -40,7 +40,7 @@ abstract class BootstrapUtils {
 
 	private static final String DEFAULT_BOOTSTRAP_CONTEXT_CLASS_NAME = "org.springframework.test.context.support.DefaultBootstrapContext";
 
-	private static final String DEFAULT_CACHE_AWARE_CONTEXT_LOADER_DELEGATE_CLASS_NAME = "org.springframework.test.context.support.DefaultCacheAwareContextLoaderDelegate";
+	private static final String DEFAULT_CACHE_AWARE_CONTEXT_LOADER_DELEGATE_CLASS_NAME = "org.springframework.test.context.cache.DefaultCacheAwareContextLoaderDelegate";
 
 	private static final String DEFAULT_TEST_CONTEXT_BOOTSTRAPPER_CLASS_NAME = "org.springframework.test.context.support.DefaultTestContextBootstrapper";
 
@@ -55,7 +55,7 @@ abstract class BootstrapUtils {
 	 * Create the {@code BootstrapContext} for the specified {@linkplain Class test class}.
 	 *
 	 * <p>Uses reflection to create a {@link org.springframework.test.context.support.DefaultBootstrapContext}
-	 * that uses a {@link org.springframework.test.context.support.DefaultCacheAwareContextLoaderDelegate}.
+	 * that uses a {@link org.springframework.test.context.cache.DefaultCacheAwareContextLoaderDelegate}.
 	 *
 	 * @param testClass the test class for which the bootstrap context should be created
 	 * @return a new {@code BootstrapContext}; never {@code null}

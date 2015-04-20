@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,9 +19,8 @@ package org.springframework.test.context.junit4;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
-
-import org.springframework.test.context.ClassLevelDirtiesContextTests;
-import org.springframework.test.context.SpringRunnerContextCacheTests;
+import org.springframework.test.context.cache.ClassLevelDirtiesContextTests;
+import org.springframework.test.context.cache.SpringRunnerContextCacheTests;
 import org.springframework.test.context.junit4.annotation.AnnotationConfigSpringJUnit4ClassRunnerAppCtxTests;
 import org.springframework.test.context.junit4.annotation.BeanOverridingDefaultConfigClassesInheritedTests;
 import org.springframework.test.context.junit4.annotation.BeanOverridingExplicitConfigClassesInheritedTests;

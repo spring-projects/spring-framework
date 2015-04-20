@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.test.context;
+package org.springframework.test.context.cache;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -29,6 +29,8 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.support.DependencyInjectionTestExecutionListener;
 import org.springframework.test.context.support.DirtiesContextTestExecutionListener;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
@@ -37,7 +39,7 @@ import org.springframework.test.context.testng.TrackingTestNGTestListener;
 import org.testng.TestNG;
 
 import static org.junit.Assert.*;
-import static org.springframework.test.context.support.ContextCacheTestUtils.*;
+import static org.springframework.test.context.cache.ContextCacheTestUtils.*;
 
 /**
  * JUnit 4 based integration test which verifies correct {@linkplain ContextCache

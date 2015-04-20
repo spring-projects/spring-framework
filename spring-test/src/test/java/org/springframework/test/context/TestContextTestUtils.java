@@ -16,8 +16,9 @@
 
 package org.springframework.test.context;
 
+import org.springframework.test.context.cache.ContextCache;
+import org.springframework.test.context.cache.DefaultCacheAwareContextLoaderDelegate;
 import org.springframework.test.context.support.DefaultBootstrapContext;
-import org.springframework.test.context.support.DefaultCacheAwareContextLoaderDelegate;
 
 /**
  * Collection of test-related utility methods for working with {@link TestContext TestContexts}.

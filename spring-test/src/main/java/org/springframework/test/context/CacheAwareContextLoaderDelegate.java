@@ -23,8 +23,9 @@ import org.springframework.test.annotation.DirtiesContext.HierarchyMode;
 /**
  * A {@code CacheAwareContextLoaderDelegate} is responsible for {@linkplain
  * #loadContext loading} and {@linkplain #closeContext closing} application
- * contexts, interacting transparently with a {@link ContextCache} behind
- * the scenes.
+ * contexts, interacting transparently with a
+ * {@link org.springframework.test.context.cache.ContextCache ContextCache}
+ * behind the scenes.
  *
  * <p>Note: {@code CacheAwareContextLoaderDelegate} does not extend the
  * {@link ContextLoader} or {@link SmartContextLoader} interface.
@@ -41,7 +42,7 @@ public interface CacheAwareContextLoaderDelegate {
 	 * <p>If the context is present in the {@code ContextCache} it will simply
 	 * be returned; otherwise, it will be loaded, stored in the cache, and returned.
 	 * <p>The cache statistics should be logged by invoking
-	 * {@link ContextCache#logStatistics()}.
+	 * {@link org.springframework.test.context.cache.ContextCache#logStatistics()}.
 	 * @param mergedContextConfiguration the merged context configuration to use
 	 * to load the application context; never {@code null}
 	 * @return the application context
