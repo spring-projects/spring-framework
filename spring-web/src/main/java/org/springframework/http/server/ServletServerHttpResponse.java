@@ -49,6 +49,8 @@ public class ServletServerHttpResponse implements ServerHttpResponse {
 
 	private boolean headersWritten = false;
 
+	private boolean bodyUsed = false;
+
 
 	/**
 	 * Construct a new instance of the ServletServerHttpResponse based on the given {@link HttpServletResponse}.
@@ -80,6 +82,7 @@ public class ServletServerHttpResponse implements ServerHttpResponse {
 
 	@Override
 	public OutputStream getBody() throws IOException {
+		this.bodyUsed = true;
 		writeHeaders();
 		return this.servletResponse.getOutputStream();
 	}
@@ -87,7 +90,9 @@ public class ServletServerHttpResponse implements ServerHttpResponse {
 	@Override
 	public void flush() throws IOException {
 		writeHeaders();
-		this.servletResponse.flushBuffer();
+		if (this.bodyUsed) {
+			this.servletResponse.flushBuffer();
+		}
 	}
 
 	@Override

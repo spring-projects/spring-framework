@@ -243,7 +243,7 @@ public class DefaultCorsProcessorTests {
 	}
 
 	@Test
-	public void preflightRequestCrendentialsWithOriginWildcard() throws Exception {
+	public void preflightRequestCredentialsWithOriginWildcard() throws Exception {
 		this.request.setMethod(HttpMethod.OPTIONS.name());
 		this.request.addHeader(HttpHeaders.ORIGIN, "http://domain2.com/test.html");
 		this.request.addHeader(HttpHeaders.ACCESS_CONTROL_REQUEST_HEADERS, "Header1");

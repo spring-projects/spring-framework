@@ -35,7 +35,6 @@ import org.springframework.mock.web.test.MockHttpServletResponse;
 import org.springframework.web.HttpRequestHandler;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.context.support.StaticWebApplicationContext;
-import org.springframework.web.cors.CorsUtils;
 import org.springframework.web.servlet.HandlerExecutionChain;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.support.WebContentGenerator;

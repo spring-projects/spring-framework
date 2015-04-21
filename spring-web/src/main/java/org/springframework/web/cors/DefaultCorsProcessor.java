@@ -19,7 +19,6 @@ package org.springframework.web.cors;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -36,12 +35,14 @@ import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.http.server.ServletServerHttpResponse;
 import org.springframework.util.Assert;
+import org.springframework.util.CollectionUtils;
 
 /**
  * Default implementation of {@link CorsProcessor}, as defined by the
  * <a href="http://www.w3.org/TR/cors/">CORS W3C recommandation</a>.
  *
  * @author Sebastien Deleuze
+ * @author Rossen Stoyanhcev
  * @since 4.2
  */
 public class DefaultCorsProcessor implements CorsProcessor {
@@ -56,23 +57,19 @@ public class DefaultCorsProcessor implements CorsProcessor {
 	public boolean processPreFlightRequest(CorsConfiguration config, HttpServletRequest request,
 			HttpServletResponse response) throws IOException {
 
-		ServerHttpRequest serverRequest = new ServletServerHttpRequest(request);
+		Assert.isTrue(CorsUtils.isPreFlightRequest(request));
+
 		ServerHttpResponse serverResponse = new ServletServerHttpResponse(response);
-		boolean isPreFlight = CorsUtils.isPreFlightRequest(request);
-		Assert.isTrue(isPreFlight);
-		if (skip(serverResponse)) {
+		if (responseHasCors(serverResponse)) {
 			return true;
 		}
 
-		if (check(serverRequest, serverResponse, config, isPreFlight)) {
-			setAllowOrigin(serverRequest, serverResponse, config.getAllowedOrigins(), config.isAllowCredentials());
-			setAllowCredentials(serverResponse, config.isAllowCredentials());
-			setAllowMethods(serverRequest, serverResponse, config.getAllowedMethods());
-			setAllowHeadersHeader(serverRequest, serverResponse, config.getAllowedHeaders());
-			setMaxAgeHeader(serverResponse, config.getMaxAge());
-			serverResponse.close();
+		ServerHttpRequest serverRequest = new ServletServerHttpRequest(request);
+		if (handleInternal(serverRequest, serverResponse, config, true)) {
+			serverResponse.flush();
 			return true;
 		}
+
 		return false;
 	}
 
@@ -80,185 +77,124 @@ public class DefaultCorsProcessor implements CorsProcessor {
 	public boolean processActualRequest(CorsConfiguration config, HttpServletRequest request,
 			HttpServletResponse response) throws IOException {
 
-		ServerHttpRequest serverRequest = new ServletServerHttpRequest(request);
-		ServerHttpResponse serverResponse = new ServletServerHttpResponse(response);
-		boolean isPreFlight = CorsUtils.isPreFlightRequest(request);
-		Assert.isTrue(CorsUtils.isCorsRequest(request) && !isPreFlight);
-		if (skip(serverResponse)) {
+		Assert.isTrue(CorsUtils.isCorsRequest(request) && !CorsUtils.isPreFlightRequest(request));
+
+		ServletServerHttpResponse serverResponse = new ServletServerHttpResponse(response);
+		if (responseHasCors(serverResponse)) {
 			return true;
 		}
 
-		if (check(serverRequest, serverResponse, config, isPreFlight)) {
-			setAllowOrigin(serverRequest, serverResponse, config.getAllowedOrigins(), config.isAllowCredentials());
-			setAllowCredentials(serverResponse, config.isAllowCredentials());
-			setExposeHeadersHeader(serverResponse, config.getExposedHeaders());
-			serverResponse.close();
+		ServletServerHttpRequest serverRequest = new ServletServerHttpRequest(request);
+		if (handleInternal(serverRequest, serverResponse, config, false)) {
+			serverResponse.flush();
 			return true;
 		}
+
 		return false;
 	}
 
-	private boolean skip(ServerHttpResponse response) {
-		if (hasAllowOriginHeader(response)) {
-			logger.debug("Skip adding CORS headers, response already contains \"Access-Control-Allow-Origin\"");
-			return true;
-		}
-		return false;
-	}
-
-	private boolean check(ServerHttpRequest request, ServerHttpResponse response,
-			CorsConfiguration config, boolean isPreFlight) throws IOException {
-
-		if (!checkOrigin(request, config.getAllowedOrigins()) ||
-				!checkMethod(request, config.getAllowedMethods(), isPreFlight) ||
-				!checkHeaders(request, config.getAllowedHeaders(), isPreFlight)) {
-			response.setStatusCode(HttpStatus.FORBIDDEN);
-			response.getBody().write("Invalid CORS request".getBytes(UTF8_CHARSET));
-			return false;
-		}
-		return true;
-	}
-
-	private boolean hasAllowOriginHeader(ServerHttpResponse response) {
-		boolean hasCorsResponseHeaders = false;
+	private boolean responseHasCors(ServerHttpResponse response) {
+		boolean hasAllowOrigin = false;
 		try {
-			// Perhaps a CORS Filter has already added this?
-			hasCorsResponseHeaders = response.getHeaders().getAccessControlAllowOrigin() != null;
+			hasAllowOrigin = (response.getHeaders().getAccessControlAllowOrigin() != null);
 		}
 		catch (NullPointerException npe) {
-			// See SPR-11919 and https://issues.jboss.org/browse/WFLY-3474
+			// SPR-11919 and https://issues.jboss.org/browse/WFLY-3474
 		}
-		return hasCorsResponseHeaders;
+		if (hasAllowOrigin) {
+			logger.debug("Skip adding CORS headers, response already contains \"Access-Control-Allow-Origin\"");
+		}
+		return hasAllowOrigin;
 	}
 
-	private boolean checkOrigin(ServerHttpRequest request, List<String> allowedOrigins) {
-		String originHeader = request.getHeaders().getOrigin();
-		if (originHeader == null || allowedOrigins == null) {
+	protected boolean handleInternal(ServerHttpRequest request, ServerHttpResponse response,
+			CorsConfiguration config, boolean isPreFlight) throws IOException {
+
+		String requestOrigin = request.getHeaders().getOrigin();
+		String allowOrigin = checkOrigin(config, requestOrigin);
+
+		HttpMethod requestMethod = getMethodToUse(request, isPreFlight);
+		List<HttpMethod> allowMethods = checkMethods(config, requestMethod);
+
+		List<String> requestHeaders = getHeadersToUse(request, isPreFlight);
+		List<String> allowHeaders = checkHeaders(config, requestHeaders);
+
+		if (allowOrigin == null || allowMethods == null || (isPreFlight && allowHeaders == null)) {
+			handleInvalidCorsRequest(response);
 			return false;
 		}
-		if (allowedOrigins.contains("*")) {
-			return true;
-		}
-		for (String allowedOrigin : allowedOrigins) {
-			if (originHeader.equalsIgnoreCase(allowedOrigin)) {
-				return true;
-			}
-		}
-		return false;
-	}
 
-	private boolean checkMethod(ServerHttpRequest request, List<String> allowedMethods, boolean isPreFlight) {
-		HttpMethod requestMethod = isPreFlight ?
-				request.getHeaders().getAccessControlRequestMethod() :
-				request.getMethod();
-		if (allowedMethods == null) {
-			allowedMethods = Arrays.asList(HttpMethod.GET.name());
-		}
-		if (allowedMethods.contains("*")) {
-			return true;
-		}
-		for (String allowedMethod : allowedMethods) {
-			if (allowedMethod.equalsIgnoreCase(requestMethod.name())) {
-				return true;
-			}
-		}
-		return false;
-	}
+		HttpHeaders responseHeaders = response.getHeaders();
+		responseHeaders.setAccessControlAllowOrigin(allowOrigin);
+		responseHeaders.add(HttpHeaders.VARY, HttpHeaders.ORIGIN);
 
-	private boolean checkHeaders(ServerHttpRequest request, List<String> allowedHeaders, boolean isPreFlight) {
-		List<String> requestHeaders = isPreFlight ? request.getHeaders().getAccessControlRequestHeaders() :
-				new ArrayList<String>(request.getHeaders().keySet());
-		if ((allowedHeaders != null) && allowedHeaders.contains("*")) {
-			return true;
+		if (isPreFlight) {
+			responseHeaders.setAccessControlAllowMethods(allowMethods);
 		}
-		for (String requestHeader : requestHeaders) {
-			if (!HttpHeaders.ORIGIN.equals(requestHeader)) {
-				requestHeader = requestHeader.trim();
-				boolean found = false;
-				if (allowedHeaders != null) {
-					for (String header : allowedHeaders) {
-						if (requestHeader.equalsIgnoreCase(header)) {
-							found = true;
-							break;
-						}
-					}
-				}
-				if (!found) {
-					return false;
-				}
-			}
+
+		if (isPreFlight && !allowHeaders.isEmpty()) {
+			responseHeaders.setAccessControlAllowHeaders(allowHeaders);
 		}
+
+		if (!CollectionUtils.isEmpty(config.getExposedHeaders())) {
+			responseHeaders.setAccessControlExposeHeaders(config.getExposedHeaders());
+		}
+
+		if (Boolean.TRUE.equals(config.getAllowCredentials())) {
+			responseHeaders.setAccessControlAllowCredentials(true);
+		}
+
+		if (isPreFlight && config.getMaxAge() != null) {
+			responseHeaders.setAccessControlMaxAge(config.getMaxAge());
+		}
+
 		return true;
 	}
 
-	private void setAllowOrigin(ServerHttpRequest request, ServerHttpResponse response,
-			List<String> allowedOrigins, Boolean allowCredentials) {
-
-		String origin = request.getHeaders().getOrigin();
-		if (allowedOrigins.contains("*") && (allowCredentials == null || !allowCredentials)) {
-			response.getHeaders().setAccessControlAllowOrigin("*");
-			return;
-		}
-		response.getHeaders().setAccessControlAllowOrigin(origin);
-		response.getHeaders().add(HttpHeaders.VARY, HttpHeaders.ORIGIN);
+	/**
+	 * Check the origin and determine the origin for the response. The default
+	 * implementation simply delegates to
+	 * {@link org.springframework.web.cors.CorsConfiguration#checkOrigin(String)}
+	 */
+	protected String checkOrigin(CorsConfiguration config, String requestOrigin) {
+		return config.checkOrigin(requestOrigin);
 	}
 
-	private void setAllowMethods(ServerHttpRequest request, ServerHttpResponse response,
-			List<String> allowedMethods) {
-
-		if (allowedMethods == null) {
-			allowedMethods = Arrays.asList(HttpMethod.GET.name());
-		}
-		if (allowedMethods.contains("*")) {
-			HttpMethod method = request.getHeaders().getAccessControlRequestMethod();
-			response.getHeaders().setAccessControlAllowMethods(Arrays.asList(method));
-		}
-		else {
-			List<HttpMethod> methods = new ArrayList<HttpMethod>();
-			for (String method : allowedMethods) {
-				methods.add(HttpMethod.valueOf(method));
-			}
-			response.getHeaders().setAccessControlAllowMethods(methods);
-		}
+	/**
+	 * Check the HTTP method and determine the methods for the response of a
+	 * pre-flight request. The default implementation simply delegates to
+	 * {@link org.springframework.web.cors.CorsConfiguration#checkOrigin(String)}
+	 */
+	protected List<HttpMethod> checkMethods(CorsConfiguration config, HttpMethod requestMethod) {
+		return config.checkHttpMethod(requestMethod);
 	}
 
-	private void setAllowHeadersHeader(ServerHttpRequest request, ServerHttpResponse response,
-			List<String> allowedHeaders) {
-		if ((allowedHeaders != null) && !allowedHeaders.isEmpty()) {
-			List<String> requestHeaders = request.getHeaders().getAccessControlRequestHeaders();
-			boolean matchAll = allowedHeaders.contains("*");
-			List<String> matchingHeaders = new ArrayList<String>();
-			for (String requestHeader : requestHeaders) {
-				for (String header : allowedHeaders) {
-					requestHeader = requestHeader.trim();
-					if (matchAll || requestHeader.equalsIgnoreCase(header)) {
-						matchingHeaders.add(requestHeader);
-						break;
-					}
-				}
-			}
-			if (!matchingHeaders.isEmpty()) {
-				response.getHeaders().setAccessControlAllowHeaders(matchingHeaders);
-			}
-		}
+	private HttpMethod getMethodToUse(ServerHttpRequest request, boolean isPreFlight) {
+		return (isPreFlight ? request.getHeaders().getAccessControlRequestMethod() : request.getMethod());
 	}
 
-	private void setExposeHeadersHeader(ServerHttpResponse response, List<String> exposedHeaders) {
-		if ((exposedHeaders != null) && !exposedHeaders.isEmpty()) {
-			response.getHeaders().setAccessControlExposeHeaders(exposedHeaders);
-		}
+	/**
+	 * Check the headers and determine the headers for the response of a
+	 * pre-flight request. The default implementation simply delegates to
+	 * {@link org.springframework.web.cors.CorsConfiguration#checkOrigin(String)}
+	 */
+	protected List<String> checkHeaders(CorsConfiguration config, List<String> requestHeaders) {
+		return config.checkHeaders(requestHeaders);
 	}
 
-	private void setAllowCredentials(ServerHttpResponse response, Boolean allowCredentials) {
-		if ((allowCredentials != null) && allowCredentials) {
-			response.getHeaders().setAccessControlAllowCredentials(allowCredentials);
-		}
+	private List<String> getHeadersToUse(ServerHttpRequest request, boolean isPreFlight) {
+		HttpHeaders headers = request.getHeaders();
+		return (isPreFlight ? headers.getAccessControlRequestHeaders() : new ArrayList<String>(headers.keySet()));
 	}
 
-	private void setMaxAgeHeader(ServerHttpResponse response, Long maxAge) {
-		if (maxAge != null) {
-			response.getHeaders().setAccessControlMaxAge(maxAge);
-		}
+	/**
+	 * Invoked when one of the CORS checks failed.
+	 * The default implementation sets the response status to 403 and writes
+	 * "Invalid CORS request" to the response.
+	 */
+	protected void handleInvalidCorsRequest(ServerHttpResponse response) throws IOException {
+		response.setStatusCode(HttpStatus.FORBIDDEN);
+		response.getBody().write("Invalid CORS request".getBytes(UTF8_CHARSET));
 	}
 
 }

@@ -25,6 +25,7 @@ import org.junit.Test;
 import org.springframework.beans.DirectFieldAccessor;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.http.HttpHeaders;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.context.support.StaticWebApplicationContext;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.mock.web.test.MockHttpServletRequest;
@@ -101,9 +102,9 @@ public class CrossOriginTests {
 		assertNotNull(config);
 		assertArrayEquals(new String[]{"GET"}, config.getAllowedMethods().toArray());
 		assertArrayEquals(new String[]{"*"}, config.getAllowedOrigins().toArray());
-		assertTrue(config.isAllowCredentials());
+		assertTrue(config.getAllowCredentials());
 		assertArrayEquals(new String[]{"*"}, config.getAllowedHeaders().toArray());
-		assertNull(config.getExposedHeaders());
+		assertTrue(CollectionUtils.isEmpty(config.getExposedHeaders()));
 		assertEquals(new Long(1800), config.getMaxAge());
 	}
 
@@ -119,7 +120,7 @@ public class CrossOriginTests {
 		assertArrayEquals(new String[]{"header1", "header2"}, config.getAllowedHeaders().toArray());
 		assertArrayEquals(new String[]{"header3", "header4"}, config.getExposedHeaders().toArray());
 		assertEquals(new Long(123), config.getMaxAge());
-		assertEquals(false, config.isAllowCredentials());
+		assertEquals(false, config.getAllowCredentials());
 	}
 
 	@Test
@@ -144,9 +145,9 @@ public class CrossOriginTests {
 		assertNotNull(config);
 		assertArrayEquals(new String[]{"GET"}, config.getAllowedMethods().toArray());
 		assertArrayEquals(new String[]{"*"}, config.getAllowedOrigins().toArray());
-		assertTrue(config.isAllowCredentials());
+		assertTrue(config.getAllowCredentials());
 		assertArrayEquals(new String[]{"*"}, config.getAllowedHeaders().toArray());
-		assertNull(config.getExposedHeaders());
+		assertTrue(CollectionUtils.isEmpty(config.getExposedHeaders()));
 		assertEquals(new Long(1800), config.getMaxAge());
 	}
 
@@ -163,8 +164,8 @@ public class CrossOriginTests {
 		assertArrayEquals(new String[]{"*"}, config.getAllowedMethods().toArray());
 		assertArrayEquals(new String[]{"*"}, config.getAllowedOrigins().toArray());
 		assertArrayEquals(new String[]{"*"}, config.getAllowedHeaders().toArray());
-		assertTrue(config.isAllowCredentials());
-		assertNull(config.getExposedHeaders());
+		assertTrue(config.getAllowCredentials());
+		assertTrue(CollectionUtils.isEmpty(config.getExposedHeaders()));
 		assertNull(config.getMaxAge());
 	}
 
@@ -180,8 +181,8 @@ public class CrossOriginTests {
 		assertArrayEquals(new String[]{"*"}, config.getAllowedMethods().toArray());
 		assertArrayEquals(new String[]{"*"}, config.getAllowedOrigins().toArray());
 		assertArrayEquals(new String[]{"*"}, config.getAllowedHeaders().toArray());
-		assertTrue(config.isAllowCredentials());
-		assertNull(config.getExposedHeaders());
+		assertTrue(config.getAllowCredentials());
+		assertTrue(CollectionUtils.isEmpty(config.getExposedHeaders()));
 		assertNull(config.getMaxAge());
 	}
 
