@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -85,25 +85,37 @@ public class AnnotationUtilsTests {
 		assertNull(m.getAnnotation(Order.class));
 		assertNull(getAnnotation(m, Order.class));
 		assertNotNull(findAnnotation(m, Order.class));
-		// TODO: actually found on OpenJDK 8 b99! assertNull(m.getAnnotation(Transactional.class));
+		assertNull(m.getAnnotation(Transactional.class));
 		assertNotNull(getAnnotation(m, Transactional.class));
 		assertNotNull(findAnnotation(m, Transactional.class));
 	}
 
-	// TODO consider whether we want this to handle annotations on interfaces
-	// public void findMethodAnnotationFromInterfaceImplementedByRoot()
-	// throws Exception {
-	// Method m = Leaf.class.getMethod("fromInterfaceImplementedByRoot",
-	// (Class[]) null);
-	// Order o = findAnnotation(Order.class, m, Leaf.class);
-	// assertNotNull(o);
-	// }
+	@Test
+	public void findMethodAnnotationFromInterface() throws Exception {
+		Method method = ImplementsInterfaceWithAnnotatedMethod.class.getMethod("foo");
+		Order order = findAnnotation(method, Order.class);
+		assertNotNull(order);
+	}
+
+	@Test
+	public void findMethodAnnotationFromInterfaceOnSuper() throws Exception {
+		Method method = SubOfImplementsInterfaceWithAnnotatedMethod.class.getMethod("foo");
+		Order order = findAnnotation(method, Order.class);
+		assertNotNull(order);
+	}
+
+	@Test
+	public void findMethodAnnotationFromInterfaceWhenSuperDoesNotImplementMethod() throws Exception {
+		Method method = SubOfAbstractImplementsInterfaceWithAnnotatedMethod.class.getMethod("foo");
+		Order order = findAnnotation(method, Order.class);
+		assertNotNull(order);
+	}
 
 	/**
 	 * @since 4.1.2
 	 */
 	@Test
-	public void findAnnotationFavorsLocalMetaAnnotationsOverInterfaces() {
+	public void findClassAnnotationFavorsLocalMetaAnnotationsOverInterfaces() {
 		Component component = AnnotationUtils.findAnnotation(
 				ClassWithLocalMetaAnnotationAndMetaAnnotatedInterface.class, Component.class);
 		assertNotNull(component);
@@ -114,7 +126,7 @@ public class AnnotationUtilsTests {
 	 * @since 4.0.3
 	 */
 	@Test
-	public void findAnnotationFavorsInheritedAnnotationsOverMoreLocallyDeclaredComposedAnnotations() {
+	public void findClassAnnotationFavorsInheritedAnnotationsOverMoreLocallyDeclaredComposedAnnotations() {
 		Transactional transactional = AnnotationUtils.findAnnotation(
 				SubSubClassWithInheritedAnnotation.class, Transactional.class);
 		assertNotNull(transactional);
@@ -125,7 +137,7 @@ public class AnnotationUtilsTests {
 	 * @since 4.0.3
 	 */
 	@Test
-	public void findAnnotationFavorsInheritedComposedAnnotationsOverMoreLocallyDeclaredComposedAnnotations() {
+	public void findClassAnnotationFavorsInheritedComposedAnnotationsOverMoreLocallyDeclaredComposedAnnotations() {
 		Component component = AnnotationUtils.findAnnotation(
 				SubSubClassWithInheritedMetaAnnotation.class, Component.class);
 		assertNotNull(component);
@@ -133,34 +145,34 @@ public class AnnotationUtilsTests {
 	}
 
 	@Test
-	public void findAnnotationOnMetaMetaAnnotatedClass() {
+	public void findClassAnnotationOnMetaMetaAnnotatedClass() {
 		Component component = AnnotationUtils.findAnnotation(MetaMetaAnnotatedClass.class, Component.class);
 		assertNotNull("Should find meta-annotation on composed annotation on class", component);
 		assertEquals("meta2", component.value());
 	}
 
 	@Test
-	public void findAnnotationOnMetaMetaMetaAnnotatedClass() {
+	public void findClassAnnotationOnMetaMetaMetaAnnotatedClass() {
 		Component component = AnnotationUtils.findAnnotation(MetaMetaMetaAnnotatedClass.class, Component.class);
 		assertNotNull("Should find meta-annotation on meta-annotation on composed annotation on class", component);
 		assertEquals("meta2", component.value());
 	}
 
 	@Test
-	public void findAnnotationOnAnnotatedClassWithMissingTargetMetaAnnotation() {
+	public void findClassAnnotationOnAnnotatedClassWithMissingTargetMetaAnnotation() {
 		// TransactionalClass is NOT annotated or meta-annotated with @Component
 		Component component = AnnotationUtils.findAnnotation(TransactionalClass.class, Component.class);
 		assertNull("Should not find @Component on TransactionalClass", component);
 	}
 
 	@Test
-	public void findAnnotationOnMetaCycleAnnotatedClassWithMissingTargetMetaAnnotation() {
+	public void findClassAnnotationOnMetaCycleAnnotatedClassWithMissingTargetMetaAnnotation() {
 		Component component = AnnotationUtils.findAnnotation(MetaCycleAnnotatedClass.class, Component.class);
 		assertNull("Should not find @Component on MetaCycleAnnotatedClass", component);
 	}
 
 	@Test
-	public void testFindAnnotationDeclaringClass() throws Exception {
+	public void findAnnotationDeclaringClassForAllScenarios() throws Exception {
 		// no class-level annotation
 		assertNull(findAnnotationDeclaringClass(Transactional.class, NonAnnotatedInterface.class));
 		assertNull(findAnnotationDeclaringClass(Transactional.class, NonAnnotatedClass.class));
@@ -250,7 +262,7 @@ public class AnnotationUtilsTests {
 	}
 
 	@Test
-	public void testIsAnnotationDeclaredLocally() throws Exception {
+	public void isAnnotationDeclaredLocallyForAllScenarios() throws Exception {
 		// no class-level annotation
 		assertFalse(isAnnotationDeclaredLocally(Transactional.class, NonAnnotatedInterface.class));
 		assertFalse(isAnnotationDeclaredLocally(Transactional.class, NonAnnotatedClass.class));
@@ -269,7 +281,7 @@ public class AnnotationUtilsTests {
 	}
 
 	@Test
-	public void testIsAnnotationInherited() throws Exception {
+	public void isAnnotationInheritedForAllScenarios() throws Exception {
 		// no class-level annotation
 		assertFalse(isAnnotationInherited(Transactional.class, NonAnnotatedInterface.class));
 		assertFalse(isAnnotationInherited(Transactional.class, NonAnnotatedClass.class));
@@ -334,27 +346,6 @@ public class AnnotationUtilsTests {
 	public void getDefaultValueFromAnnotationType() throws Exception {
 		assertEquals(Ordered.LOWEST_PRECEDENCE, AnnotationUtils.getDefaultValue(Order.class, AnnotationUtils.VALUE));
 		assertEquals(Ordered.LOWEST_PRECEDENCE, AnnotationUtils.getDefaultValue(Order.class));
-	}
-
-	@Test
-	public void findAnnotationFromInterface() throws Exception {
-		Method method = ImplementsInterfaceWithAnnotatedMethod.class.getMethod("foo");
-		Order order = findAnnotation(method, Order.class);
-		assertNotNull(order);
-	}
-
-	@Test
-	public void findAnnotationFromInterfaceOnSuper() throws Exception {
-		Method method = SubOfImplementsInterfaceWithAnnotatedMethod.class.getMethod("foo");
-		Order order = findAnnotation(method, Order.class);
-		assertNotNull(order);
-	}
-
-	@Test
-	public void findAnnotationFromInterfaceWhenSuperDoesNotImplementMethod() throws Exception {
-		Method method = SubOfAbstractImplementsInterfaceWithAnnotatedMethod.class.getMethod("foo");
-		Order order = findAnnotation(method, Order.class);
-		assertNotNull(order);
 	}
 
 	@Test
