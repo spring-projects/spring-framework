@@ -85,7 +85,8 @@ public class AnnotationUtilsTests {
 		assertNull(m.getAnnotation(Order.class));
 		assertNull(getAnnotation(m, Order.class));
 		assertNotNull(findAnnotation(m, Order.class));
-		assertNull(m.getAnnotation(Transactional.class));
+		// TODO: actually found on OpenJDK 8 b99 and higher!
+		// assertNull(m.getAnnotation(Transactional.class));
 		assertNotNull(getAnnotation(m, Transactional.class));
 		assertNotNull(findAnnotation(m, Transactional.class));
 	}
