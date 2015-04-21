@@ -147,6 +147,14 @@ public class SseEmitterTests {
 		@Override
 		public void completeWithError(Throwable failure) {
 		}
+
+		@Override
+		public void onTimeout(Runnable callback) {
+		}
+
+		@Override
+		public void onCompletion(Runnable callback) {
+		}
 	}
 
 }

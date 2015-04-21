@@ -67,6 +67,10 @@ public class ResponseBodyEmitter {
 
 	private Throwable failure;
 
+	private Runnable timeoutCallback;
+
+	private Runnable completionCallback;
+
 
 	/**
 	 * Invoked after the response is updated with the status code and headers,
@@ -95,6 +99,12 @@ public class ResponseBodyEmitter {
 				else {
 					this.handler.complete();
 				}
+			}
+			if (this.timeoutCallback != null) {
+				this.handler.onTimeout(this.timeoutCallback);
+			}
+			if (this.completionCallback != null) {
+				this.handler.onCompletion(this.completionCallback);
 			}
 		}
 	}
@@ -179,6 +189,34 @@ public class ResponseBodyEmitter {
 		}
 	}
 
+	/**
+	 * Register code to invoke when the async request times out. This method is
+	 * called from a container thread when an async request times out.
+	 */
+	public void onTimeout(Runnable callback) {
+		synchronized (this) {
+			this.timeoutCallback = callback;
+			if (this.handler != null) {
+				this.handler.onTimeout(callback);
+			}
+		}
+	}
+
+	/**
+	 * Register code to invoke when the async request completes. This method is
+	 * called from a container thread when an async request completed for any
+	 * reason including timeout and network error. This method is useful for
+	 * detecting that a {@code ResponseBodyEmitter} instance is no longer usable.
+	 */
+	public void onCompletion(Runnable callback) {
+		synchronized (this) {
+			this.completionCallback = callback;
+			if (this.handler != null) {
+				this.handler.onCompletion(callback);
+			}
+		}
+	}
+
 
 	/**
 	 * Handle sent objects and complete request processing.
@@ -190,6 +228,10 @@ public class ResponseBodyEmitter {
 		void complete();
 
 		void completeWithError(Throwable failure);
+
+		void onTimeout(Runnable callback);
+
+		void onCompletion(Runnable callback);
 	}
 
 }

@@ -154,6 +154,16 @@ public class ResponseBodyEmitterReturnValueHandler implements HandlerMethodRetur
 		public void completeWithError(Throwable failure) {
 			this.deferredResult.setErrorResult(failure);
 		}
+
+		@Override
+		public void onTimeout(Runnable callback) {
+			this.deferredResult.onTimeout(callback);
+		}
+
+		@Override
+		public void onCompletion(Runnable callback) {
+			this.deferredResult.onCompletion(callback);
+		}
 	}
 
 
