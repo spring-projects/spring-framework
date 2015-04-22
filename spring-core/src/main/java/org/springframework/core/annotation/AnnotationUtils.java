@@ -663,7 +663,7 @@ public abstract class AnnotationUtils {
 	 * However, the {@code Map} signature has been preserved for binary compatibility.
 	 * @param annotation the annotation to retrieve the attributes for
 	 * @param classValuesAsString whether to turn Class references into Strings (for
-	 * compatibility with {@link org.springframework.core.type.AnnotationMetadata}
+	 * compatibility with {@link org.springframework.core.type.AnnotationMetadata})
 	 * or to preserve them as Class references
 	 * @return the Map of annotation attributes, with attribute names as keys and
 	 * corresponding attribute values as values; never {@code null}
@@ -680,11 +680,11 @@ public abstract class AnnotationUtils {
 	 * the reflection-based {@link org.springframework.core.type.StandardAnnotationMetadata}.
 	 * @param annotation the annotation to retrieve the attributes for
 	 * @param classValuesAsString whether to convert Class references into Strings (for
-	 * compatibility with {@link org.springframework.core.type.AnnotationMetadata}
+	 * compatibility with {@link org.springframework.core.type.AnnotationMetadata})
 	 * or to preserve them as Class references
 	 * @param nestedAnnotationsAsMap whether to turn nested Annotation instances into
 	 * {@link AnnotationAttributes} maps (for compatibility with
-	 * {@link org.springframework.core.type.AnnotationMetadata} or to preserve them as
+	 * {@link org.springframework.core.type.AnnotationMetadata}) or to preserve them as
 	 * Annotation instances
 	 * @return the annotation attributes (a specialized Map) with attribute names as keys
 	 * and corresponding attribute values as values; never {@code null}
@@ -714,11 +714,11 @@ public abstract class AnnotationUtils {
 	 * Adapt the given value according to the given class and nested annotation settings.
 	 * @param value the annotation attribute value
 	 * @param classValuesAsString whether to turn Class references into Strings (for
-	 * compatibility with {@link org.springframework.core.type.AnnotationMetadata}
+	 * compatibility with {@link org.springframework.core.type.AnnotationMetadata})
 	 * or to preserve them as Class references
 	 * @param nestedAnnotationsAsMap whether to turn nested Annotation instances into
 	 * {@link AnnotationAttributes} maps (for compatibility with
-	 * {@link org.springframework.core.type.AnnotationMetadata} or to preserve them as
+	 * {@link org.springframework.core.type.AnnotationMetadata}) or to preserve them as
 	 * Annotation instances
 	 * @return the adapted value, or the original value if no adaptation is needed
 	 */
