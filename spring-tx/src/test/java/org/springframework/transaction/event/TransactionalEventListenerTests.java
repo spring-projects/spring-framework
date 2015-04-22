@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.junit.After;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -40,6 +41,8 @@ import org.springframework.context.event.EventListener;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 import org.springframework.tests.transaction.CallCountingTransactionManager;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronizationAdapter;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -145,6 +148,20 @@ public class TransactionalEventListenerTests {
 		});
 		getEventCollector().assertEvents(EventCollector.AFTER_COMMIT, "test");
 		getEventCollector().assertTotalEventsCount(1); // After rollback not invoked
+	}
+
+	// TODO [SPR-12738] Enable test.
+	@Ignore("Disabled until SPR-12738 is resolved")
+	@Test
+	public void afterCommitWithTransactionalComponentListenerProxiedViaDynamicProxy() {
+		load(TransactionalConfiguration.class, TransactionalComponentAfterCommitTestListener.class);
+		this.transactionTemplate.execute(status -> {
+			getContext().publishEvent("SKIP");
+			getEventCollector().assertNoEventReceived();
+			return null;
+
+		});
+		getEventCollector().assertNoEventReceived();
 	}
 
 	@Test
@@ -307,6 +324,16 @@ public class TransactionalEventListenerTests {
 		}
 	}
 
+	@EnableTransactionManagement
+	@Configuration
+	static class TransactionalConfiguration {
+
+		@Bean
+		public CallCountingTransactionManager transactionManager() {
+			return new CallCountingTransactionManager();
+		}
+	}
+
 
 	protected EventCollector getEventCollector() {
 		return eventCollector;
@@ -359,8 +386,8 @@ public class TransactionalEventListenerTests {
 			}
 			for (String phase : phases) {
 				List<Object> eventsForPhase = getEvents(phase);
-				assertEquals("Expected no event for phase '" + phase + "' " +
-						"but got " + eventsForPhase, 0, eventsForPhase.size());
+				assertEquals("Expected no events for phase '" + phase + "' " +
+						"but got " + eventsForPhase + ":", 0, eventsForPhase.size());
 			}
 		}
 
@@ -428,6 +455,23 @@ public class TransactionalEventListenerTests {
 		@TransactionalEventListener(phase = AFTER_ROLLBACK)
 		public void handleAfterRollback(String data) {
 			handleEvent(EventCollector.AFTER_ROLLBACK, data);
+		}
+	}
+
+	@Transactional
+	@Component
+	static interface TransactionalComponentAfterCommitTestListenerInterface {
+
+		@TransactionalEventListener(phase = AFTER_COMMIT, condition = "!'SKIP'.equals(#data)")
+		void handleAfterCommit(String data);
+	}
+
+	static class TransactionalComponentAfterCommitTestListener extends BaseTransactionalTestListener implements
+			TransactionalComponentAfterCommitTestListenerInterface {
+
+		@Override
+		public void handleAfterCommit(String data) {
+			handleEvent(EventCollector.AFTER_COMMIT, data);
 		}
 	}
 
