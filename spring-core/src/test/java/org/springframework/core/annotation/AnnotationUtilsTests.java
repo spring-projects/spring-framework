@@ -56,6 +56,19 @@ public class AnnotationUtilsTests {
 		assertNotNull(findAnnotation(m, Order.class));
 	}
 
+	/** @since 4.2 */
+	@Test
+	public void findMethodAnnotationWithAnnotationOnMethodInInterface() throws Exception {
+		Method m = Leaf.class.getMethod("fromInterfaceImplementedByRoot");
+		// @Order is not @Inherited
+		assertNull(m.getAnnotation(Order.class));
+		// getAnnotation() does not search on interfaces
+		assertNull(getAnnotation(m, Order.class));
+		// findAnnotation() does search on interfaces
+		assertNotNull(findAnnotation(m, Order.class));
+	}
+
+	/** @since 4.2 */
 	@Test
 	public void findMethodAnnotationWithMetaAnnotationOnLeaf() throws Exception {
 		Method m = Leaf.class.getMethod("metaAnnotatedOnLeaf");
@@ -64,6 +77,7 @@ public class AnnotationUtilsTests {
 		assertNotNull(findAnnotation(m, Order.class));
 	}
 
+	/** @since 4.2 */
 	@Test
 	public void findMethodAnnotationWithMetaMetaAnnotationOnLeaf() throws Exception {
 		Method m = Leaf.class.getMethod("metaMetaAnnotatedOnLeaf");
@@ -80,6 +94,7 @@ public class AnnotationUtilsTests {
 		assertNotNull(findAnnotation(m, Order.class));
 	}
 
+	/** @since 4.2 */
 	@Test
 	public void findMethodAnnotationWithMetaAnnotationOnRoot() throws Exception {
 		Method m = Leaf.class.getMethod("metaAnnotatedOnRoot");
@@ -136,9 +151,7 @@ public class AnnotationUtilsTests {
 		assertNotNull(order);
 	}
 
-	/**
-	 * @since 4.1.2
-	 */
+	/** @since 4.1.2 */
 	@Test
 	public void findClassAnnotationFavorsLocalMetaAnnotationsOverInterfaces() {
 		Component component = AnnotationUtils.findAnnotation(
@@ -147,9 +160,7 @@ public class AnnotationUtilsTests {
 		assertEquals("meta2", component.value());
 	}
 
-	/**
-	 * @since 4.0.3
-	 */
+	/** @since 4.0.3 */
 	@Test
 	public void findClassAnnotationFavorsInheritedAnnotationsOverMoreLocallyDeclaredComposedAnnotations() {
 		Transactional transactional = AnnotationUtils.findAnnotation(
@@ -158,9 +169,7 @@ public class AnnotationUtilsTests {
 		assertTrue("readOnly flag for SubSubClassWithInheritedAnnotation", transactional.readOnly());
 	}
 
-	/**
-	 * @since 4.0.3
-	 */
+	/** @since 4.0.3 */
 	@Test
 	public void findClassAnnotationFavorsInheritedComposedAnnotationsOverMoreLocallyDeclaredComposedAnnotations() {
 		Component component = AnnotationUtils.findAnnotation(
@@ -194,6 +203,48 @@ public class AnnotationUtilsTests {
 	public void findClassAnnotationOnMetaCycleAnnotatedClassWithMissingTargetMetaAnnotation() {
 		Component component = AnnotationUtils.findAnnotation(MetaCycleAnnotatedClass.class, Component.class);
 		assertNull("Should not find @Component on MetaCycleAnnotatedClass", component);
+	}
+
+	/** @since 4.2 */
+	@Test
+	public void findClassAnnotationOnInheritedAnnotationInterface() {
+		Transactional tx = AnnotationUtils.findAnnotation(InheritedAnnotationInterface.class, Transactional.class);
+		assertNotNull("Should find @Transactional on InheritedAnnotationInterface", tx);
+	}
+
+	/** @since 4.2 */
+	@Test
+	public void findClassAnnotationOnSubInheritedAnnotationInterface() {
+		Transactional tx = AnnotationUtils.findAnnotation(SubInheritedAnnotationInterface.class, Transactional.class);
+		assertNotNull("Should find @Transactional on SubInheritedAnnotationInterface", tx);
+	}
+
+	/** @since 4.2 */
+	@Test
+	public void findClassAnnotationOnSubSubInheritedAnnotationInterface() {
+		Transactional tx = AnnotationUtils.findAnnotation(SubSubInheritedAnnotationInterface.class, Transactional.class);
+		assertNotNull("Should find @Transactional on SubSubInheritedAnnotationInterface", tx);
+	}
+
+	/** @since 4.2 */
+	@Test
+	public void findClassAnnotationOnNonInheritedAnnotationInterface() {
+		Order order = AnnotationUtils.findAnnotation(NonInheritedAnnotationInterface.class, Order.class);
+		assertNotNull("Should find @Order on NonInheritedAnnotationInterface", order);
+	}
+
+	/** @since 4.2 */
+	@Test
+	public void findClassAnnotationOnSubNonInheritedAnnotationInterface() {
+		Order order = AnnotationUtils.findAnnotation(SubNonInheritedAnnotationInterface.class, Order.class);
+		assertNotNull("Should find @Order on SubNonInheritedAnnotationInterface", order);
+	}
+
+	/** @since 4.2 */
+	@Test
+	public void findClassAnnotationOnSubSubNonInheritedAnnotationInterface() {
+		Order order = AnnotationUtils.findAnnotation(SubSubNonInheritedAnnotationInterface.class, Order.class);
+		assertNotNull("Should find @Order on SubSubNonInheritedAnnotationInterface", order);
 	}
 
 	@Test
@@ -557,11 +608,17 @@ public class AnnotationUtilsTests {
 	public static interface SubInheritedAnnotationInterface extends InheritedAnnotationInterface {
 	}
 
+	public static interface SubSubInheritedAnnotationInterface extends SubInheritedAnnotationInterface {
+	}
+
 	@Order
 	public static interface NonInheritedAnnotationInterface {
 	}
 
 	public static interface SubNonInheritedAnnotationInterface extends NonInheritedAnnotationInterface {
+	}
+
+	public static interface SubSubNonInheritedAnnotationInterface extends SubNonInheritedAnnotationInterface {
 	}
 
 	public static class NonAnnotatedClass {
