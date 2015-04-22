@@ -46,7 +46,7 @@ import org.springframework.util.StringUtils;
  * an event to an {@link EventListener} annotated method.
  *
  * <p>Delegates to {@link #processEvent(ApplicationEvent)} to give a chance to
- * sub-classes to deviate from the default. Unwrap the content of a
+ * sub-classes to deviate from the default. Unwraps the content of a
  * {@link PayloadApplicationEvent} if necessary to allow method declaration
  * to define any arbitrary event type. If a condition is defined, it is
  * evaluated prior to invoking the underlying method.
@@ -241,19 +241,22 @@ public class ApplicationListenerMethodAdapter implements GenericApplicationListe
 
 	/**
 	 * Return the condition to use. Matches the {@code condition} attribute of the
-	 * {@link EventListener} annotation or any matching attribute on a meta-annotation.
+	 * {@link EventListener} annotation or any matching attribute on a composed
+	 * annotation.
 	 */
 	protected String getCondition() {
 		if (this.condition == null) {
+			// TODO annotationAttributes are null with proxy
 			AnnotationAttributes annotationAttributes = AnnotatedElementUtils
 					.getAnnotationAttributes(this.method, EventListener.class.getName());
 			if (annotationAttributes != null) {
 				String value = annotationAttributes.getString("condition");
 				this.condition = (value != null ? value : "");
 			}
-			else { // TODO annotationAttributes null with proxy
+			// TODO Remove once AnnotatedElementUtils supports annotations on proxies
+			else {
 				EventListener eventListener = getMethodAnnotation(EventListener.class);
-				this.condition = (eventListener != null ? eventListener.condition() : null);
+				this.condition = (eventListener != null ? eventListener.condition() : "");
 			}
 		}
 		return this.condition;
