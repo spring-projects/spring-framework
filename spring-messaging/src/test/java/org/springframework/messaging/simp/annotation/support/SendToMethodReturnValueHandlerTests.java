@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,17 @@
 
 package org.springframework.messaging.simp.annotation.support;
 
+import static org.junit.Assert.*;
+import static org.mockito.BDDMockito.*;
+import static org.springframework.messaging.handler.annotation.support.DestinationVariableMethodArgumentResolver.DESTINATION_TEMPLATE_VARIABLES_HEADER;
+import static org.springframework.messaging.support.MessageHeaderAccessor.*;
+
 import java.lang.reflect.Method;
 import java.nio.charset.Charset;
 import java.security.Principal;
+import java.util.LinkedHashMap;
+import java.util.Map;
+
 import javax.security.auth.Subject;
 
 import org.junit.Before;
@@ -36,6 +44,7 @@ import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.converter.StringMessageConverter;
 import org.springframework.messaging.handler.DestinationPatternsMessageCondition;
 import org.springframework.messaging.handler.annotation.SendTo;
+import org.springframework.messaging.handler.annotation.support.DestinationVariableMethodArgumentResolver;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -45,9 +54,6 @@ import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.messaging.support.MessageHeaderAccessor;
 import org.springframework.util.MimeType;
 
-import static org.junit.Assert.*;
-import static org.mockito.BDDMockito.*;
-
 /**
  * Test fixture for {@link SendToMethodReturnValueHandlerTests}.
  *
@@ -55,7 +61,7 @@ import static org.mockito.BDDMockito.*;
  */
 public class SendToMethodReturnValueHandlerTests {
 
-	public static final MimeType MIME_TYPE = new MimeType("text", "plain", Charset.forName("UTF-8"));
+	private static final MimeType MIME_TYPE = new MimeType("text", "plain", Charset.forName("UTF-8"));
 
 	private static final String PAYLOAD = "payload";
 
@@ -71,6 +77,7 @@ public class SendToMethodReturnValueHandlerTests {
 	private MethodParameter noAnnotationsReturnType;
 	private MethodParameter sendToReturnType;
 	private MethodParameter sendToDefaultDestReturnType;
+	private MethodParameter sendToWithPlaceholdersType;
 	private MethodParameter sendToUserReturnType;
 	private MethodParameter sendToUserSingleSessionReturnType;
 	private MethodParameter sendToUserDefaultDestReturnType;
@@ -96,6 +103,9 @@ public class SendToMethodReturnValueHandlerTests {
 
 		method = this.getClass().getDeclaredMethod("handleAndSendTo");
 		this.sendToReturnType = new MethodParameter(method, -1);
+
+		method = this.getClass().getDeclaredMethod("handleAndSendToWithPlaceholders");
+		this.sendToWithPlaceholdersType = new MethodParameter(method, -1);
 
 		method = this.getClass().getDeclaredMethod("handleAndSendToUser");
 		this.sendToUserReturnType = new MethodParameter(method, -1);
@@ -129,12 +139,11 @@ public class SendToMethodReturnValueHandlerTests {
 
 		verify(this.messageChannel, times(1)).send(this.messageCaptor.capture());
 
-		Message<?> message = this.messageCaptor.getAllValues().get(0);
-		SimpMessageHeaderAccessor headers = SimpMessageHeaderAccessor.wrap(message);
-		assertEquals("sess1", headers.getSessionId());
-		assertEquals("/topic/dest", headers.getDestination());
-		assertEquals(MIME_TYPE, headers.getContentType());
-		assertNull("Subscription id should not be copied", headers.getSubscriptionId());
+		SimpMessageHeaderAccessor accessor = getCapturedAccessor(0);
+		assertEquals("sess1", accessor.getSessionId());
+		assertEquals("/topic/dest", accessor.getDestination());
+		assertEquals(MIME_TYPE, accessor.getContentType());
+		assertNull("Subscription id should not be copied", accessor.getSubscriptionId());
 	}
 
 	@Test
@@ -148,19 +157,17 @@ public class SendToMethodReturnValueHandlerTests {
 
 		verify(this.messageChannel, times(2)).send(this.messageCaptor.capture());
 
-		Message<?> message = this.messageCaptor.getAllValues().get(0);
-		SimpMessageHeaderAccessor headers = SimpMessageHeaderAccessor.wrap(message);
-		assertEquals(sessionId, headers.getSessionId());
-		assertEquals("/dest1", headers.getDestination());
-		assertEquals(MIME_TYPE, headers.getContentType());
-		assertNull("Subscription id should not be copied", headers.getSubscriptionId());
+		SimpMessageHeaderAccessor accessor = getCapturedAccessor(0);
+		assertEquals(sessionId, accessor.getSessionId());
+		assertEquals("/dest1", accessor.getDestination());
+		assertEquals(MIME_TYPE, accessor.getContentType());
+		assertNull("Subscription id should not be copied", accessor.getSubscriptionId());
 
-		message = this.messageCaptor.getAllValues().get(1);
-		headers = SimpMessageHeaderAccessor.wrap(message);
-		assertEquals(sessionId, headers.getSessionId());
-		assertEquals("/dest2", headers.getDestination());
-		assertEquals(MIME_TYPE, headers.getContentType());
-		assertNull("Subscription id should not be copied", headers.getSubscriptionId());
+		accessor = getCapturedAccessor(1);
+		assertEquals(sessionId, accessor.getSessionId());
+		assertEquals("/dest2", accessor.getDestination());
+		assertEquals(MIME_TYPE, accessor.getContentType());
+		assertNull("Subscription id should not be copied", accessor.getSubscriptionId());
 	}
 
 	@Test
@@ -174,12 +181,11 @@ public class SendToMethodReturnValueHandlerTests {
 
 		verify(this.messageChannel, times(1)).send(this.messageCaptor.capture());
 
-		Message<?> message = this.messageCaptor.getAllValues().get(0);
-		SimpMessageHeaderAccessor headers = SimpMessageHeaderAccessor.wrap(message);
-		assertEquals(sessionId, headers.getSessionId());
-		assertEquals("/topic/dest", headers.getDestination());
-		assertEquals(MIME_TYPE, headers.getContentType());
-		assertNull("Subscription id should not be copied", headers.getSubscriptionId());
+		SimpMessageHeaderAccessor accessor = getCapturedAccessor(0);
+		assertEquals(sessionId, accessor.getSessionId());
+		assertEquals("/topic/dest", accessor.getDestination());
+		assertEquals(MIME_TYPE, accessor.getContentType());
+		assertNull("Subscription id should not be copied", accessor.getSubscriptionId());
 	}
 
 	@Test
@@ -192,9 +198,8 @@ public class SendToMethodReturnValueHandlerTests {
 
 		verify(this.messageChannel, times(1)).send(this.messageCaptor.capture());
 
-		Message<?> message = this.messageCaptor.getAllValues().get(0);
-		SimpMessageHeaderAccessor headers = SimpMessageHeaderAccessor.wrap(message);
-		assertEquals("/topic/dest.foo.bar", headers.getDestination());
+		SimpMessageHeaderAccessor accessor = getCapturedAccessor(0);
+		assertEquals("/topic/dest.foo.bar", accessor.getDestination());
 	}
 
 	@Test
@@ -210,13 +215,12 @@ public class SendToMethodReturnValueHandlerTests {
 		ArgumentCaptor<MessageHeaders> captor = ArgumentCaptor.forClass(MessageHeaders.class);
 		verify(messagingTemplate).convertAndSend(eq("/topic/dest"), eq(PAYLOAD), captor.capture());
 
-		SimpMessageHeaderAccessor headerAccessor =
-				MessageHeaderAccessor.getAccessor(captor.getValue(), SimpMessageHeaderAccessor.class);
-
-		assertNotNull(headerAccessor);
-		assertTrue(headerAccessor.isMutable());
-		assertEquals("sess1", headerAccessor.getSessionId());
-		assertNull("Subscription id should not be copied", headerAccessor.getSubscriptionId());
+		MessageHeaders messageHeaders = captor.getValue();
+		SimpMessageHeaderAccessor accessor = getAccessor(messageHeaders, SimpMessageHeaderAccessor.class);
+		assertNotNull(accessor);
+		assertTrue(accessor.isMutable());
+		assertEquals("sess1", accessor.getSessionId());
+		assertNull("Subscription id should not be copied", accessor.getSubscriptionId());
 	}
 
 	@Test
@@ -231,17 +235,40 @@ public class SendToMethodReturnValueHandlerTests {
 
 		verify(this.messageChannel, times(2)).send(this.messageCaptor.capture());
 
-		Message<?> message = this.messageCaptor.getAllValues().get(0);
-		SimpMessageHeaderAccessor headers = SimpMessageHeaderAccessor.wrap(message);
-		assertNull(headers.getSessionId());
-		assertNull(headers.getSubscriptionId());
-		assertEquals("/user/" + user.getName() + "/dest1", headers.getDestination());
+		SimpMessageHeaderAccessor accessor = getCapturedAccessor(0);
+		assertNull(accessor.getSessionId());
+		assertNull(accessor.getSubscriptionId());
+		assertEquals("/user/" + user.getName() + "/dest1", accessor.getDestination());
 
-		message = this.messageCaptor.getAllValues().get(1);
-		headers = SimpMessageHeaderAccessor.wrap(message);
-		assertNull(headers.getSessionId());
-		assertNull(headers.getSubscriptionId());
-		assertEquals("/user/" + user.getName() + "/dest2", headers.getDestination());
+		accessor = getCapturedAccessor(1);
+		assertNull(accessor.getSessionId());
+		assertNull(accessor.getSubscriptionId());
+		assertEquals("/user/" + user.getName() + "/dest2", accessor.getDestination());
+	}
+
+	// SPR-12170
+
+	@Test
+	public void sendToWithDestinationPlaceholders() throws Exception {
+
+		given(this.messageChannel.send(any(Message.class))).willReturn(true);
+
+		Map<String, String> vars = new LinkedHashMap<>(1);
+		vars.put("roomName", "roomA");
+
+		String sessionId = "sess1";
+		SimpMessageHeaderAccessor accessor = SimpMessageHeaderAccessor.create();
+		accessor.setSessionId(sessionId);
+		accessor.setSubscriptionId("sub1");
+		accessor.setHeader(DESTINATION_TEMPLATE_VARIABLES_HEADER, vars);
+		Message<?> message = MessageBuilder.createMessage(PAYLOAD, accessor.getMessageHeaders());
+		this.handler.handleReturnValue(PAYLOAD, this.sendToWithPlaceholdersType, message);
+
+		verify(this.messageChannel, times(1)).send(this.messageCaptor.capture());
+
+		SimpMessageHeaderAccessor actual = getCapturedAccessor(0);
+		assertEquals(sessionId, actual.getSessionId());
+		assertEquals("/topic/chat.message.filtered.roomA", actual.getDestination());
 	}
 
 	@Test
@@ -256,19 +283,17 @@ public class SendToMethodReturnValueHandlerTests {
 
 		verify(this.messageChannel, times(2)).send(this.messageCaptor.capture());
 
-		Message<?> message = this.messageCaptor.getAllValues().get(0);
-		SimpMessageHeaderAccessor headers = SimpMessageHeaderAccessor.wrap(message);
-		assertEquals(sessionId, headers.getSessionId());
-		assertEquals(MIME_TYPE, headers.getContentType());
-		assertEquals("/user/" + user.getName() + "/dest1", headers.getDestination());
-		assertNull("Subscription id should not be copied", headers.getSubscriptionId());
+		SimpMessageHeaderAccessor accessor = getCapturedAccessor(0);
+		assertEquals(sessionId, accessor.getSessionId());
+		assertEquals(MIME_TYPE, accessor.getContentType());
+		assertEquals("/user/" + user.getName() + "/dest1", accessor.getDestination());
+		assertNull("Subscription id should not be copied", accessor.getSubscriptionId());
 
-		message = this.messageCaptor.getAllValues().get(1);
-		headers = SimpMessageHeaderAccessor.wrap(message);
-		assertEquals(sessionId, headers.getSessionId());
-		assertEquals("/user/" + user.getName() + "/dest2", headers.getDestination());
-		assertEquals(MIME_TYPE, headers.getContentType());
-		assertNull("Subscription id should not be copied", headers.getSubscriptionId());
+		accessor = getCapturedAccessor(1);
+		assertEquals(sessionId, accessor.getSessionId());
+		assertEquals("/user/" + user.getName() + "/dest2", accessor.getDestination());
+		assertEquals(MIME_TYPE, accessor.getContentType());
+		assertNull("Subscription id should not be copied", accessor.getSubscriptionId());
 	}
 
 	@Test
@@ -283,11 +308,11 @@ public class SendToMethodReturnValueHandlerTests {
 
 		verify(this.messageChannel, times(2)).send(this.messageCaptor.capture());
 
-		SimpMessageHeaderAccessor headers = SimpMessageHeaderAccessor.wrap(this.messageCaptor.getAllValues().get(0));
-		assertEquals("/user/Me myself and I/dest1", headers.getDestination());
+		SimpMessageHeaderAccessor accessor = getCapturedAccessor(0);
+		assertEquals("/user/Me myself and I/dest1", accessor.getDestination());
 
-		headers = SimpMessageHeaderAccessor.wrap(this.messageCaptor.getAllValues().get(1));
-		assertEquals("/user/Me myself and I/dest2", headers.getDestination());
+		accessor = getCapturedAccessor(1);
+		assertEquals("/user/Me myself and I/dest2", accessor.getDestination());
 	}
 
 	@Test
@@ -302,11 +327,10 @@ public class SendToMethodReturnValueHandlerTests {
 
 		verify(this.messageChannel, times(1)).send(this.messageCaptor.capture());
 
-		Message<?> message = this.messageCaptor.getAllValues().get(0);
-		SimpMessageHeaderAccessor headers = SimpMessageHeaderAccessor.wrap(message);
-		assertNull(headers.getSessionId());
-		assertNull(headers.getSubscriptionId());
-		assertEquals("/user/" + user.getName() + "/queue/dest", headers.getDestination());
+		SimpMessageHeaderAccessor accessor = getCapturedAccessor(0);
+		assertNull(accessor.getSessionId());
+		assertNull(accessor.getSubscriptionId());
+		assertEquals("/user/" + user.getName() + "/queue/dest", accessor.getDestination());
 	}
 
 	@Test
@@ -320,9 +344,8 @@ public class SendToMethodReturnValueHandlerTests {
 
 		verify(this.messageChannel, times(1)).send(this.messageCaptor.capture());
 
-		Message<?> message = this.messageCaptor.getAllValues().get(0);
-		SimpMessageHeaderAccessor headers = SimpMessageHeaderAccessor.wrap(message);
-		assertEquals("/user/" + user.getName() + "/queue/dest.foo.bar", headers.getDestination());
+		SimpMessageHeaderAccessor accessor = getCapturedAccessor(0);
+		assertEquals("/user/" + user.getName() + "/queue/dest.foo.bar", accessor.getDestination());
 	}
 
 	@Test
@@ -337,27 +360,11 @@ public class SendToMethodReturnValueHandlerTests {
 
 		verify(this.messageChannel, times(1)).send(this.messageCaptor.capture());
 
-		Message<?> message = this.messageCaptor.getAllValues().get(0);
-		SimpMessageHeaderAccessor headers = SimpMessageHeaderAccessor.wrap(message);
-		assertEquals(sessionId, headers.getSessionId());
-		assertEquals("/user/" + user.getName() + "/queue/dest", headers.getDestination());
-		assertEquals(MIME_TYPE, headers.getContentType());
-		assertNull("Subscription id should not be copied", headers.getSubscriptionId());
-	}
-
-	@Test
-	public void testHeadersToSendToUser() throws Exception {
-
-		TestUser user = new TestUser();
-		Message<?> inputMessage = createInputMessage("sess1", "sub1", "/app", "/dest", user);
-
-		SimpMessageSendingOperations messagingTemplate = Mockito.mock(SimpMessageSendingOperations.class);
-		SendToMethodReturnValueHandler handler = new SendToMethodReturnValueHandler(messagingTemplate, false);
-
-		handler.handleReturnValue(PAYLOAD, this.sendToUserDefaultDestReturnType, inputMessage);
-
-		verify(messagingTemplate).convertAndSendToUser(eq("joe"), eq("/queue/dest"), eq(PAYLOAD));
-		verifyNoMoreInteractions(messagingTemplate);
+		SimpMessageHeaderAccessor accessor = getCapturedAccessor(0);
+		assertEquals(sessionId, accessor.getSessionId());
+		assertEquals("/user/" + user.getName() + "/queue/dest", accessor.getDestination());
+		assertEquals(MIME_TYPE, accessor.getContentType());
+		assertNull("Subscription id should not be copied", accessor.getSubscriptionId());
 	}
 
 	@Test
@@ -371,13 +378,13 @@ public class SendToMethodReturnValueHandlerTests {
 
 		verify(this.messageChannel, times(2)).send(this.messageCaptor.capture());
 
-		SimpMessageHeaderAccessor headers = SimpMessageHeaderAccessor.wrap(this.messageCaptor.getAllValues().get(0));
-		assertEquals("/user/sess1/dest1", headers.getDestination());
-		assertEquals("sess1", headers.getSessionId());
+		SimpMessageHeaderAccessor accessor = getCapturedAccessor(0);
+		assertEquals("/user/sess1/dest1", accessor.getDestination());
+		assertEquals("sess1", accessor.getSessionId());
 
-		headers = SimpMessageHeaderAccessor.wrap(this.messageCaptor.getAllValues().get(1));
-		assertEquals("/user/sess1/dest2", headers.getDestination());
-		assertEquals("sess1", headers.getSessionId());
+		accessor = getCapturedAccessor(1);
+		assertEquals("/user/sess1/dest2", accessor.getDestination());
+		assertEquals("sess1", accessor.getSessionId());
 	}
 
 
@@ -396,6 +403,12 @@ public class SendToMethodReturnValueHandlerTests {
 		}
 		return MessageBuilder.createMessage(new byte[0], headerAccessor.getMessageHeaders());
 	}
+
+	private SimpMessageHeaderAccessor getCapturedAccessor(int index) {
+		Message<?> message = this.messageCaptor.getAllValues().get(index);
+		return MessageHeaderAccessor.getAccessor(message, SimpMessageHeaderAccessor.class);
+	}
+
 
 	private static class TestUser implements Principal {
 
@@ -416,35 +429,48 @@ public class SendToMethodReturnValueHandlerTests {
 		}
 	}
 
+	@SuppressWarnings("unused")
 	public String handleNoAnnotations() {
 		return PAYLOAD;
 	}
 
+	@SuppressWarnings("unused")
 	@SendTo
 	public String handleAndSendToDefaultDestination() {
 		return PAYLOAD;
 	}
 
+	@SuppressWarnings("unused")
 	@SendTo({"/dest1", "/dest2"})
 	public String handleAndSendTo() {
 		return PAYLOAD;
 	}
 
+	@SuppressWarnings("unused")
+	@SendTo("/topic/chat.message.filtered.{roomName}")
+	public String handleAndSendToWithPlaceholders() {
+		return PAYLOAD;
+	}
+
+	@SuppressWarnings("unused")
 	@SendToUser
 	public String handleAndSendToUserDefaultDestination() {
 		return PAYLOAD;
 	}
 
+	@SuppressWarnings("unused")
 	@SendToUser(broadcast=false)
 	public String handleAndSendToUserDefaultDestinationSingleSession() {
 		return PAYLOAD;
 	}
 
+	@SuppressWarnings("unused")
 	@SendToUser({"/dest1", "/dest2"})
 	public String handleAndSendToUser() {
 		return PAYLOAD;
 	}
 
+	@SuppressWarnings("unused")
 	@SendToUser(value={"/dest1", "/dest2"}, broadcast=false)
 	public String handleAndSendToUserSingleSession() {
 		return PAYLOAD;

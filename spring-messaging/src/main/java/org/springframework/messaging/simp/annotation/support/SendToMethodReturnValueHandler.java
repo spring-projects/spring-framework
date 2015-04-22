@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.messaging.simp.annotation.support;
 
 import java.lang.annotation.Annotation;
 import java.security.Principal;
+import java.util.Map;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.core.annotation.AnnotationUtils;
@@ -26,6 +27,7 @@ import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.handler.DestinationPatternsMessageCondition;
 import org.springframework.messaging.handler.annotation.SendTo;
+import org.springframework.messaging.handler.annotation.support.DestinationVariableMethodArgumentResolver;
 import org.springframework.messaging.handler.invocation.HandlerMethodReturnValueHandler;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
@@ -35,6 +37,8 @@ import org.springframework.messaging.simp.user.DestinationUserNameProvider;
 import org.springframework.messaging.support.MessageHeaderInitializer;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
+import org.springframework.util.PropertyPlaceholderHelper;
+import org.springframework.util.PropertyPlaceholderHelper.PlaceholderResolver;
 
 /**
  * A {@link HandlerMethodReturnValueHandler} for sending to destinations specified in a
@@ -58,6 +62,8 @@ public class SendToMethodReturnValueHandler implements HandlerMethodReturnValueH
 	private String defaultDestinationPrefix = "/topic";
 
 	private String defaultUserDestinationPrefix = "/queue";
+
+	private PropertyPlaceholderHelper placeholderHelper = new PropertyPlaceholderHelper("{", "}", null, false);
 
 	private MessageHeaderInitializer headerInitializer;
 
@@ -139,8 +145,9 @@ public class SendToMethodReturnValueHandler implements HandlerMethodReturnValueH
 		}
 		MessageHeaders headers = message.getHeaders();
 		String sessionId = SimpMessageHeaderAccessor.getSessionId(headers);
-
+		PlaceholderResolver varResolver = initVarResolver(headers);
 		SendToUser sendToUser = returnType.getMethodAnnotation(SendToUser.class);
+
 		if (sendToUser != null) {
 			boolean broadcast = sendToUser.broadcast();
 			String user = getUserName(message, headers);
@@ -153,6 +160,7 @@ public class SendToMethodReturnValueHandler implements HandlerMethodReturnValueH
 			}
 			String[] destinations = getTargetDestinations(sendToUser, message, this.defaultUserDestinationPrefix);
 			for (String destination : destinations) {
+				destination = this.placeholderHelper.replacePlaceholders(destination, varResolver);
 				if (broadcast) {
 					this.messagingTemplate.convertAndSendToUser(user, destination, returnValue);
 				}
@@ -165,9 +173,17 @@ public class SendToMethodReturnValueHandler implements HandlerMethodReturnValueH
 			SendTo sendTo = returnType.getMethodAnnotation(SendTo.class);
 			String[] destinations = getTargetDestinations(sendTo, message, this.defaultDestinationPrefix);
 			for (String destination : destinations) {
+				destination = this.placeholderHelper.replacePlaceholders(destination, varResolver);
 				this.messagingTemplate.convertAndSend(destination, returnValue, createHeaders(sessionId));
 			}
 		}
+	}
+
+	@SuppressWarnings("unchecked")
+	private PlaceholderResolver initVarResolver(MessageHeaders headers) {
+		String name = DestinationVariableMethodArgumentResolver.DESTINATION_TEMPLATE_VARIABLES_HEADER;
+		Map<String, String> vars = (Map<String, String>) headers.get(name);
+		return new DestinationVariablePlaceholderResolver(vars);
 	}
 
 	protected String getUserName(Message<?> message, MessageHeaders headers) {
@@ -208,6 +224,21 @@ public class SendToMethodReturnValueHandler implements HandlerMethodReturnValueH
 	@Override
 	public String toString() {
 		return "SendToMethodReturnValueHandler [annotationRequired=" + annotationRequired + "]";
+	}
+
+	private static class DestinationVariablePlaceholderResolver implements PlaceholderResolver {
+
+		private final Map<String, String> vars;
+
+
+		public DestinationVariablePlaceholderResolver(Map<String, String> vars) {
+			this.vars = vars;
+		}
+
+		@Override
+		public String resolvePlaceholder(String placeholderName) {
+			return (this.vars != null ? this.vars.get(placeholderName) : null);
+		}
 	}
 
 }
