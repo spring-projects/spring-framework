@@ -45,13 +45,14 @@ import org.springframework.util.StringUtils;
  * {@link GenericApplicationListener} adapter that delegates the processing of
  * an event to an {@link EventListener} annotated method.
  *
- * <p>Delegates to {@link #processEvent(ApplicationEvent)} to give a chance to
- * sub-classes to deviate from the default. Unwraps the content of a
+ * <p>Delegates to {@link #processEvent(ApplicationEvent)} to give sub-classes
+ * a chance to deviate from the default. Unwraps the content of a
  * {@link PayloadApplicationEvent} if necessary to allow method declaration
  * to define any arbitrary event type. If a condition is defined, it is
  * evaluated prior to invoking the underlying method.
  *
  * @author Stephane Nicoll
+ * @author Sam Brannen
  * @since 4.2
  */
 public class ApplicationListenerMethodAdapter implements GenericApplicationListener {
@@ -124,6 +125,7 @@ public class ApplicationListenerMethodAdapter implements GenericApplicationListe
 	protected Object[] resolveArguments(ApplicationEvent event) {
 		if (!ApplicationEvent.class.isAssignableFrom(this.declaredEventType.getRawClass())
 				&& event instanceof PayloadApplicationEvent) {
+			@SuppressWarnings("rawtypes")
 			Object payload = ((PayloadApplicationEvent) event).getPayload();
 			if (this.declaredEventType.isAssignableFrom(ResolvableType.forClass(payload.getClass()))) {
 				return new Object[] {payload};
@@ -240,20 +242,20 @@ public class ApplicationListenerMethodAdapter implements GenericApplicationListe
 	}
 
 	/**
-	 * Return the condition to use. Matches the {@code condition} attribute of the
-	 * {@link EventListener} annotation or any matching attribute on a composed
-	 * annotation.
+	 * Return the condition to use.
+	 * <p>Matches the {@code condition} attribute of the {@link EventListener}
+	 * annotation or any matching attribute on a composed annotation that
+	 * is meta-annotated with {@code @EventListener}.
 	 */
 	protected String getCondition() {
 		if (this.condition == null) {
-			// TODO annotationAttributes are null with proxy
 			AnnotationAttributes annotationAttributes = AnnotatedElementUtils
 					.getAnnotationAttributes(this.method, EventListener.class.getName());
 			if (annotationAttributes != null) {
 				String value = annotationAttributes.getString("condition");
 				this.condition = (value != null ? value : "");
 			}
-			// TODO Remove once AnnotatedElementUtils supports annotations on proxies
+			// TODO [SPR-12738] Remove once AnnotatedElementUtils finds annotated methods on interfaces (e.g., in dynamic proxies)
 			else {
 				EventListener eventListener = getMethodAnnotation(EventListener.class);
 				this.condition = (eventListener != null ? eventListener.condition() : "");
