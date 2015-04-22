@@ -50,23 +50,47 @@ public class AnnotationUtilsTests {
 
 	@Test
 	public void findMethodAnnotationOnLeaf() throws Exception {
-		Method m = Leaf.class.getMethod("annotatedOnLeaf", (Class[]) null);
+		Method m = Leaf.class.getMethod("annotatedOnLeaf");
 		assertNotNull(m.getAnnotation(Order.class));
 		assertNotNull(getAnnotation(m, Order.class));
 		assertNotNull(findAnnotation(m, Order.class));
 	}
 
 	@Test
+	public void findMethodAnnotationWithMetaAnnotationOnLeaf() throws Exception {
+		Method m = Leaf.class.getMethod("metaAnnotatedOnLeaf");
+		assertNull(m.getAnnotation(Order.class));
+		assertNotNull(getAnnotation(m, Order.class));
+		assertNotNull(findAnnotation(m, Order.class));
+	}
+
+	@Test
+	public void findMethodAnnotationWithMetaMetaAnnotationOnLeaf() throws Exception {
+		Method m = Leaf.class.getMethod("metaMetaAnnotatedOnLeaf");
+		assertNull(m.getAnnotation(Component.class));
+		assertNull(getAnnotation(m, Component.class));
+		assertNotNull(findAnnotation(m, Component.class));
+	}
+
+	@Test
 	public void findMethodAnnotationOnRoot() throws Exception {
-		Method m = Leaf.class.getMethod("annotatedOnRoot", (Class[]) null);
+		Method m = Leaf.class.getMethod("annotatedOnRoot");
 		assertNotNull(m.getAnnotation(Order.class));
+		assertNotNull(getAnnotation(m, Order.class));
+		assertNotNull(findAnnotation(m, Order.class));
+	}
+
+	@Test
+	public void findMethodAnnotationWithMetaAnnotationOnRoot() throws Exception {
+		Method m = Leaf.class.getMethod("metaAnnotatedOnRoot");
+		assertNull(m.getAnnotation(Order.class));
 		assertNotNull(getAnnotation(m, Order.class));
 		assertNotNull(findAnnotation(m, Order.class));
 	}
 
 	@Test
 	public void findMethodAnnotationOnRootButOverridden() throws Exception {
-		Method m = Leaf.class.getMethod("overrideWithoutNewAnnotation", (Class[]) null);
+		Method m = Leaf.class.getMethod("overrideWithoutNewAnnotation");
 		assertNull(m.getAnnotation(Order.class));
 		assertNull(getAnnotation(m, Order.class));
 		assertNotNull(findAnnotation(m, Order.class));
@@ -74,7 +98,7 @@ public class AnnotationUtilsTests {
 
 	@Test
 	public void findMethodAnnotationNotAnnotated() throws Exception {
-		Method m = Leaf.class.getMethod("notAnnotated", (Class[]) null);
+		Method m = Leaf.class.getMethod("notAnnotated");
 		assertNull(findAnnotation(m, Order.class));
 	}
 
@@ -85,7 +109,7 @@ public class AnnotationUtilsTests {
 		assertNull(m.getAnnotation(Order.class));
 		assertNull(getAnnotation(m, Order.class));
 		assertNotNull(findAnnotation(m, Order.class));
-		// TODO: actually found on OpenJDK 8 b99 and higher!
+		// TODO: getAnnotation() on bridge method actually found on OpenJDK 8 b99 and higher!
 		// assertNull(m.getAnnotation(Transactional.class));
 		assertNotNull(getAnnotation(m, Transactional.class));
 		assertNotNull(findAnnotation(m, Transactional.class));
@@ -462,6 +486,10 @@ public class AnnotationUtilsTests {
 		public void annotatedOnRoot() {
 		}
 
+		@Meta1
+		public void metaAnnotatedOnRoot() {
+		}
+
 		public void overrideToAnnotate() {
 		}
 
@@ -481,6 +509,14 @@ public class AnnotationUtilsTests {
 
 		@Order(25)
 		public void annotatedOnLeaf() {
+		}
+
+		@Meta1
+		public void metaAnnotatedOnLeaf() {
+		}
+
+		@MetaMeta
+		public void metaMetaAnnotatedOnLeaf() {
 		}
 
 		@Override

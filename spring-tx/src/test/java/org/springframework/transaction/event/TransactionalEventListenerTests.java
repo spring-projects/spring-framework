@@ -27,7 +27,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.junit.After;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -51,7 +50,12 @@ import static org.junit.Assert.*;
 import static org.springframework.transaction.event.TransactionPhase.*;
 
 /**
+ * Integration tests for {@link TransactionalEventListener @TransactionalEventListener}
+ * support
+ *
  * @author Stephane Nicoll
+ * @author Sam Brannen
+ * @since 4.2
  */
 public class TransactionalEventListenerTests {
 
@@ -265,8 +269,7 @@ public class TransactionalEventListenerTests {
 	}
 
 	@Test
-	@Ignore("not an event listener if not tagged")
-	public void afterCommitMetaAnnotation() {
+	public void afterCommitMetaAnnotation() throws Exception {
 		load(AfterCommitMetaAnnotationTestListener.class);
 		this.transactionTemplate.execute(status -> {
 			getContext().publishEvent("test");
@@ -279,7 +282,6 @@ public class TransactionalEventListenerTests {
 	}
 
 	@Test
-	@Ignore("not an event listener if not tagged + condition found on wrong annotation")
 	public void conditionFoundOnMetaAnnotation() {
 		load(AfterCommitMetaAnnotationTestListener.class);
 		this.transactionTemplate.execute(status -> {
