@@ -37,6 +37,7 @@ import static org.springframework.core.annotation.AnnotatedElementUtils.*;
  * Unit tests for {@link AnnotatedElementUtils}.
  *
  * @author Sam Brannen
+ * @author Rossen Stoyanchev
  * @since 4.0.3
  */
 public class AnnotatedElementUtilsTests {
@@ -125,33 +126,92 @@ public class AnnotatedElementUtilsTests {
 			attributes.getBoolean("readOnly"));
 	}
 
-	// SPR-12738
-
+	/** @since 4.2 */
 	@Test
-	public void getAnnotationAttributesInheritedFromInterface() {
+	public void getAnnotationAttributesOnInheritedAnnotationInterface() {
 		String name = Transactional.class.getName();
-		AnnotationAttributes attributes = getAnnotationAttributes(ConcreteClassWithInheritedAnnotation.class, name);
-//		assertNotNull(attributes);
+		AnnotationAttributes attributes = getAnnotationAttributes(InheritedAnnotationInterface.class, name);
+		assertNotNull("Should find @Transactional on InheritedAnnotationInterface", attributes);
 	}
 
-	// SPR-12738
+	/** @since 4.2 */
+	@Test
+	public void getAnnotationAttributesOnSubInheritedAnnotationInterface() {
+		String name = Transactional.class.getName();
+		AnnotationAttributes attributes = getAnnotationAttributes(SubInheritedAnnotationInterface.class, name);
+		assertNotNull("Should find @Transactional on SubInheritedAnnotationInterface", attributes);
+	}
 
+	/** @since 4.2 */
+	@Test
+	public void getAnnotationAttributesOnSubSubInheritedAnnotationInterface() {
+		String name = Transactional.class.getName();
+		AnnotationAttributes attributes = getAnnotationAttributes(SubSubInheritedAnnotationInterface.class, name);
+		assertNotNull("Should find @Transactional on SubSubInheritedAnnotationInterface", attributes);
+	}
+
+	/** @since 4.2 */
+	@Test
+	public void getAnnotationAttributesOnNonInheritedAnnotationInterface() {
+		String name = Order.class.getName();
+		AnnotationAttributes attributes = getAnnotationAttributes(NonInheritedAnnotationInterface.class, name);
+		assertNotNull("Should find @Order on NonInheritedAnnotationInterface", attributes);
+	}
+
+	/** @since 4.2 */
+	@Test
+	public void getAnnotationAttributesOnSubNonInheritedAnnotationInterface() {
+		String name = Order.class.getName();
+		AnnotationAttributes attributes = getAnnotationAttributes(SubNonInheritedAnnotationInterface.class, name);
+		assertNotNull("Should find @Order on SubNonInheritedAnnotationInterface", attributes);
+	}
+
+	/** @since 4.2 */
+	@Test
+	public void getAnnotationAttributesOnSubSubNonInheritedAnnotationInterface() {
+		String name = Order.class.getName();
+		AnnotationAttributes attributes = getAnnotationAttributes(SubSubNonInheritedAnnotationInterface.class, name);
+		assertNotNull("Should find @Order on SubSubNonInheritedAnnotationInterface", attributes);
+	}
+
+	// TODO [SPR-11598] Enable test.
+	@Ignore("Disabled until SPR-11598 is resolved")
+	@Test
+	public void getAnnotationAttributesFromInterfaceImplementedBySuperclass() {
+		String name = Transactional.class.getName();
+		AnnotationAttributes attributes = getAnnotationAttributes(ConcreteClassWithInheritedAnnotation.class, name);
+		assertNotNull("Should find @Transactional on ConcreteClassWithInheritedAnnotation", attributes);
+	}
+
+	// TODO [SPR-12738] Enable test.
+	@Ignore("Disabled until SPR-12738 is resolved")
+	@Test
+	public void getAnnotationAttributesInheritedFromInterfaceMethod() throws NoSuchMethodException {
+		String name = Order.class.getName();
+		Method method = ConcreteClassWithInheritedAnnotation.class.getMethod("handleFromInterface");
+		AnnotationAttributes attributes = getAnnotationAttributes(method, name);
+		assertNotNull("Should find @Order on ConcreteClassWithInheritedAnnotation.handleFromInterface() method",
+			attributes);
+	}
+
+	// TODO [SPR-12738] Enable test.
+	@Ignore("Disabled until SPR-12738 is resolved")
 	@Test
 	public void getAnnotationAttributesInheritedFromAbstractMethod() throws NoSuchMethodException {
 		String name = Transactional.class.getName();
 		Method method = ConcreteClassWithInheritedAnnotation.class.getMethod("handle");
 		AnnotationAttributes attributes = getAnnotationAttributes(method, name);
-//		assertNotNull(attributes);
+		assertNotNull("Should find @Transactional on ConcreteClassWithInheritedAnnotation.handle() method", attributes);
 	}
 
-	// SPR-12738
-
+	// TODO [SPR-12738] Enable test.
+	@Ignore("Disabled until SPR-12738 is resolved")
 	@Test
 	public void getAnnotationAttributesInheritedFromParameterizedMethod() throws NoSuchMethodException {
 		String name = Transactional.class.getName();
 		Method method = ConcreteClassWithInheritedAnnotation.class.getMethod("handleParameterized", String.class);
-		AnnotationAttributes attributes = getAnnotationAttributes(ConcreteClassWithInheritedAnnotation.class, name);
-//		assertNotNull(attributes);
+		AnnotationAttributes attributes = getAnnotationAttributes(method, name);
+		assertNotNull("Should find @Transactional on ConcreteClassWithInheritedAnnotation.handleParameterized() method", attributes);
 	}
 
 
@@ -259,6 +319,9 @@ public class AnnotatedElementUtilsTests {
 
 	@Transactional
 	static interface InterfaceWithInheritedAnnotation {
+
+		@Order
+		void handleFromInterface();
 	}
 
 	static abstract class AbstractClassWithInheritedAnnotation<T> implements InterfaceWithInheritedAnnotation {
@@ -280,6 +343,30 @@ public class AnnotatedElementUtilsTests {
 		@Override
 		public void handleParameterized(String s) {
 		}
+
+		@Override
+		public void handleFromInterface() {
+		}
+	}
+
+	@Transactional
+	public static interface InheritedAnnotationInterface {
+	}
+
+	public static interface SubInheritedAnnotationInterface extends InheritedAnnotationInterface {
+	}
+
+	public static interface SubSubInheritedAnnotationInterface extends SubInheritedAnnotationInterface {
+	}
+
+	@Order
+	public static interface NonInheritedAnnotationInterface {
+	}
+
+	public static interface SubNonInheritedAnnotationInterface extends NonInheritedAnnotationInterface {
+	}
+
+	public static interface SubSubNonInheritedAnnotationInterface extends SubNonInheritedAnnotationInterface {
 	}
 
 }

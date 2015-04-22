@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,6 +32,7 @@ import org.springframework.transaction.interceptor.TransactionAttribute;
  * Strategy implementation for parsing JTA 1.2's {@link javax.transaction.Transactional} annotation.
  *
  * @author Juergen Hoeller
+ * @author Sam Brannen
  * @since 4.0
  */
 @SuppressWarnings("serial")
@@ -39,7 +40,8 @@ public class JtaTransactionAnnotationParser implements TransactionAnnotationPars
 
 	@Override
 	public TransactionAttribute parseTransactionAnnotation(AnnotatedElement ae) {
-		AnnotationAttributes ann = AnnotatedElementUtils.getAnnotationAttributes(ae, javax.transaction.Transactional.class.getName());
+		AnnotationAttributes ann = AnnotatedElementUtils.getAnnotationAttributes(ae,
+			javax.transaction.Transactional.class.getName(), false, false, false, false);
 		if (ann != null) {
 			return parseTransactionAnnotation(ann);
 		}
