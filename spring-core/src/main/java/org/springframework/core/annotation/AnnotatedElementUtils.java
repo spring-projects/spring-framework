@@ -243,7 +243,7 @@ public class AnnotatedElementUtils {
 		if (visited.add(element)) {
 			try {
 
-				// Local annotations: either directly declared or inherited.
+				// Local annotations: declared or (declared + inherited).
 				Annotation[] annotations =
 						(searchClassHierarchy ? element.getDeclaredAnnotations() : element.getAnnotations());
 
@@ -263,7 +263,7 @@ public class AnnotatedElementUtils {
 					}
 				}
 
-				// Search in meta annotations on location annotations
+				// Search in meta annotations on local annotations
 				for (Annotation annotation : annotations) {
 					if (!AnnotationUtils.isInJavaLangAnnotationPackage(annotation)) {
 						T result = doProcess(annotation.annotationType(), annotationType, searchInterfaces,
