@@ -364,11 +364,12 @@ public abstract class AnnotationUtils {
 					result = searchOnInterfaces(method, annotationType, clazz.getInterfaces());
 				}
 			}
+
+			if (result != null) {
+				findAnnotationCache.put(cacheKey, result);
+			}
 		}
 
-		if (result != null) {
-			findAnnotationCache.put(cacheKey, result);
-		}
 		return result;
 	}
 
