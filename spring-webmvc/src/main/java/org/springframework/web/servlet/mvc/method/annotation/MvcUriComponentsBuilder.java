@@ -163,26 +163,9 @@ public class MvcUriComponentsBuilder extends UriComponentsBuilder {
 	 * @return a UriComponentsBuilder instance (never {@code null})
 	 */
 	public static UriComponentsBuilder fromController(UriComponentsBuilder builder, Class<?> controllerType) {
-		if (builder != null) {
-			builder = (UriComponentsBuilder) builder.clone();
-		}
-		else {
-			builder = ServletUriComponentsBuilder.fromCurrentServletMapping();
-		}
+		builder = getBaseUrlToUse(builder);
 		String mapping = getTypeRequestMapping(controllerType);
 		return builder.path(mapping);
-	}
-
-	private static String getTypeRequestMapping(Class<?> controllerType) {
-		Assert.notNull(controllerType, "'controllerType' must not be null");
-		RequestMapping annot = AnnotationUtils.findAnnotation(controllerType, RequestMapping.class);
-		if (annot == null || ObjectUtils.isEmpty(annot.value()) || StringUtils.isEmpty(annot.value()[0])) {
-			return "/";
-		}
-		if (annot.value().length > 1 && logger.isWarnEnabled()) {
-			logger.warn("Multiple paths on controller " + controllerType.getName() + ", using first one");
-		}
-		return annot.value()[0];
 	}
 
 	/**
@@ -219,24 +202,6 @@ public class MvcUriComponentsBuilder extends UriComponentsBuilder {
 
 		Method method = getMethod(controllerType, methodName, args);
 		return fromMethod(builder, method, args);
-	}
-
-	private static Method getMethod(Class<?> controllerType, String methodName, Object... args) {
-		Method match = null;
-		for (Method method : controllerType.getDeclaredMethods()) {
-			if (method.getName().equals(methodName) && method.getParameterTypes().length == args.length) {
-				if (match != null) {
-					throw new IllegalArgumentException("Found two methods named '" + methodName + "' having " +
-							Arrays.asList(args) + " arguments, controller " + controllerType.getName());
-				}
-				match = method;
-			}
-		}
-		if (match == null) {
-			throw new IllegalArgumentException("No method '" + methodName + "' with " + args.length +
-					" parameters found in " + controllerType.getName());
-		}
-		return match;
 	}
 
 	/**
@@ -352,21 +317,21 @@ public class MvcUriComponentsBuilder extends UriComponentsBuilder {
 	 * request or to apply a custom baseUrl not matching the current request.
 	 * @param builder the builder for the base URL; the builder will be cloned
 	 * and therefore not modified and may be re-used for further calls.
-	 * @param mappingName the mapping name
+	 * @param name the mapping name
 	 * @return a builder to to prepare the URI String
 	 * @throws IllegalArgumentException if the mapping name is not found or
 	 * if there is no unique match
 	 * @since 4.2
 	 */
-	public static MethodArgumentBuilder fromMappingName(UriComponentsBuilder builder, String mappingName) {
+	public static MethodArgumentBuilder fromMappingName(UriComponentsBuilder builder, String name) {
 		RequestMappingInfoHandlerMapping handlerMapping = getRequestMappingInfoHandlerMapping();
-		List<HandlerMethod> handlerMethods = handlerMapping.getHandlerMethodsForMappingName(mappingName);
+		List<HandlerMethod> handlerMethods = handlerMapping.getHandlerMethodsForMappingName(name);
 		if (handlerMethods == null) {
-			throw new IllegalArgumentException("Mapping mappingName not found: " + mappingName);
+			throw new IllegalArgumentException("Mapping mappingName not found: " + name);
 		}
 		if (handlerMethods.size() != 1) {
-			throw new IllegalArgumentException(
-					"No unique match for mapping mappingName " + mappingName + ": " + handlerMethods);
+			throw new IllegalArgumentException("No unique match for mapping mappingName " +
+					name + ": " + handlerMethods);
 		}
 		return new MethodArgumentBuilder(builder, handlerMethods.get(0).getMethod());
 	}
@@ -393,25 +358,59 @@ public class MvcUriComponentsBuilder extends UriComponentsBuilder {
 	 * This is useful when using MvcUriComponentsBuilder outside the context of
 	 * processing a request or to apply a custom baseUrl not matching the
 	 * current request.
-	 * @param builder the builder for the base URL; the builder will be cloned
+	 * @param baseUrl the builder for the base URL; the builder will be cloned
 	 * and therefore not modified and may be re-used for further calls.
 	 * @param method the controller method
 	 * @param args argument values for the controller method
 	 * @return a UriComponentsBuilder instance, never {@code null}
 	 */
-	public static UriComponentsBuilder fromMethod(UriComponentsBuilder builder, Method method, Object... args) {
-		if (builder != null) {
-			builder = (UriComponentsBuilder) builder.clone();
-		}
-		else {
-			builder = ServletUriComponentsBuilder.fromCurrentServletMapping();
-		}
+	public static UriComponentsBuilder fromMethod(UriComponentsBuilder baseUrl, Method method, Object... args) {
+		baseUrl = getBaseUrlToUse(baseUrl);
 		String typePath = getTypeRequestMapping(method.getDeclaringClass());
 		String methodPath = getMethodRequestMapping(method);
 		String path = pathMatcher.combine(typePath, methodPath);
-		builder.path(path);
-		UriComponents uriComponents = applyContributors(builder, method, args);
+		baseUrl.path(path);
+		UriComponents uriComponents = applyContributors(baseUrl, method, args);
 		return UriComponentsBuilder.newInstance().uriComponents(uriComponents);
+	}
+
+	private static UriComponentsBuilder getBaseUrlToUse(UriComponentsBuilder baseUrl) {
+		if (baseUrl != null) {
+			return (UriComponentsBuilder) baseUrl.clone();
+		}
+		else {
+			return ServletUriComponentsBuilder.fromCurrentServletMapping();
+		}
+	}
+
+	private static String getTypeRequestMapping(Class<?> controllerType) {
+		Assert.notNull(controllerType, "'controllerType' must not be null");
+		RequestMapping annot = AnnotationUtils.findAnnotation(controllerType, RequestMapping.class);
+		if (annot == null || ObjectUtils.isEmpty(annot.value()) || StringUtils.isEmpty(annot.value()[0])) {
+			return "/";
+		}
+		if (annot.value().length > 1 && logger.isWarnEnabled()) {
+			logger.warn("Multiple paths on controller " + controllerType.getName() + ", using first one");
+		}
+		return annot.value()[0];
+	}
+
+	private static Method getMethod(Class<?> controllerType, String methodName, Object... args) {
+		Method match = null;
+		for (Method method : controllerType.getDeclaredMethods()) {
+			if (method.getName().equals(methodName) && method.getParameterTypes().length == args.length) {
+				if (match != null) {
+					throw new IllegalArgumentException("Found two methods named '" + methodName + "' having " +
+							Arrays.asList(args) + " arguments, controller " + controllerType.getName());
+				}
+				match = method;
+			}
+		}
+		if (match == null) {
+			throw new IllegalArgumentException("No method '" + methodName + "' with " + args.length +
+					" parameters found in " + controllerType.getName());
+		}
+		return match;
 	}
 
 	private static String getMethodRequestMapping(Method method) {
