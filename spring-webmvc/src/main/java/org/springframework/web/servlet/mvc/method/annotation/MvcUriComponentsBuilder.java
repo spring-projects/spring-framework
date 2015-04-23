@@ -82,7 +82,7 @@ import org.springframework.web.util.UriComponentsBuilder;
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public class MvcUriComponentsBuilder extends UriComponentsBuilder {
+public class MvcUriComponentsBuilder {
 
 	/**
 	 * Well-known name for the {@link CompositeUriComponentsContributor} object in the bean factory.
@@ -122,14 +122,6 @@ public class MvcUriComponentsBuilder extends UriComponentsBuilder {
 		this.baseUrl = baseUrl;
 	}
 
-	/**
-	 * Create a deep copy of the given MvcUriComponentsBuilder.
-	 * @param other the other builder to copy from
-	 */
-	protected MvcUriComponentsBuilder(MvcUriComponentsBuilder other) {
-		super(other);
-		this.baseUrl = other.baseUrl;
-	}
 
 	/**
 	 * Create an instance of this class with a base URL. After that calls to one
@@ -457,7 +449,7 @@ public class MvcUriComponentsBuilder extends UriComponentsBuilder {
 		});
 	}
 
-	protected static CompositeUriComponentsContributor getConfiguredUriComponentsContributor() {
+	private static CompositeUriComponentsContributor getConfiguredUriComponentsContributor() {
 		WebApplicationContext wac = getWebApplicationContext();
 		if (wac == null) {
 			return null;
@@ -474,7 +466,7 @@ public class MvcUriComponentsBuilder extends UriComponentsBuilder {
 		}
 	}
 
-	protected static RequestMappingInfoHandlerMapping getRequestMappingInfoHandlerMapping() {
+	private static RequestMappingInfoHandlerMapping getRequestMappingInfoHandlerMapping() {
 		WebApplicationContext wac = getWebApplicationContext();
 		Assert.notNull(wac, "Cannot lookup handler method mappings without WebApplicationContext");
 		try {
@@ -610,11 +602,6 @@ public class MvcUriComponentsBuilder extends UriComponentsBuilder {
 	 */
 	public UriComponentsBuilder withMethod(Method method, Object... args) {
 		return fromMethod(this.baseUrl, method, args);
-	}
-
-	@Override
-	public Object clone() {
-		return new MvcUriComponentsBuilder(this);
 	}
 
 
