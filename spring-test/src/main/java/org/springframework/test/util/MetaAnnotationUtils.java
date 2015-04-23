@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -286,8 +286,8 @@ public abstract class MetaAnnotationUtils {
 			this.declaringClass = declaringClass;
 			this.composedAnnotation = composedAnnotation;
 			this.annotation = annotation;
-			this.annotationAttributes = AnnotatedElementUtils.getAnnotationAttributes(
-					rootDeclaringClass, annotation.annotationType().getName());
+			this.annotationAttributes = AnnotatedElementUtils.getAnnotationAttributes(rootDeclaringClass,
+				annotation.annotationType().getName(), true, true, false, false);
 		}
 
 		public Class<?> getRootDeclaringClass() {
