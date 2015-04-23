@@ -100,9 +100,9 @@ public abstract class AnnotationUtils {
 	 * @since 4.0
 	 */
 	@SuppressWarnings("unchecked")
-	public static <T extends Annotation> T getAnnotation(Annotation ann, Class<T> annotationType) {
+	public static <A extends Annotation> A getAnnotation(Annotation ann, Class<A> annotationType) {
 		if (annotationType.isInstance(ann)) {
-			return (T) ann;
+			return (A) ann;
 		}
 		try {
 			return ann.annotationType().getAnnotation(annotationType);
@@ -126,9 +126,9 @@ public abstract class AnnotationUtils {
 	 * @return the matching annotation, or {@code null} if not found
 	 * @since 3.1
 	 */
-	public static <T extends Annotation> T getAnnotation(AnnotatedElement annotatedElement, Class<T> annotationType) {
+	public static <A extends Annotation> A getAnnotation(AnnotatedElement annotatedElement, Class<A> annotationType) {
 		try {
-			T ann = annotatedElement.getAnnotation(annotationType);
+			A ann = annotatedElement.getAnnotation(annotationType);
 			if (ann == null) {
 				for (Annotation metaAnn : annotatedElement.getAnnotations()) {
 					ann = metaAnn.annotationType().getAnnotation(annotationType);
@@ -294,18 +294,18 @@ public abstract class AnnotationUtils {
 	 * @since 4.2
 	 */
 	@SuppressWarnings("unchecked")
-	private static <T extends Annotation> T findAnnotation(AnnotatedElement annotatedElement, Class<T> annotationType, Set<Annotation> visited) {
+	private static <A extends Annotation> A findAnnotation(AnnotatedElement annotatedElement, Class<A> annotationType, Set<Annotation> visited) {
 		Assert.notNull(annotatedElement, "AnnotatedElement must not be null");
 		try {
 			Annotation[] anns = annotatedElement.getDeclaredAnnotations();
 			for (Annotation ann : anns) {
 				if (ann.annotationType().equals(annotationType)) {
-					return (T) ann;
+					return (A) ann;
 				}
 			}
 			for (Annotation ann : anns) {
 				if (!isInJavaLangAnnotationPackage(ann) && visited.add(ann)) {
-					T annotation = findAnnotation((AnnotatedElement) ann.annotationType(), annotationType, visited);
+					A annotation = findAnnotation((AnnotatedElement) ann.annotationType(), annotationType, visited);
 					if (annotation != null) {
 						return annotation;
 					}
@@ -392,16 +392,16 @@ public abstract class AnnotationUtils {
 		return annotation;
 	}
 
-	private static boolean isInterfaceWithAnnotatedMethods(Class<?> iface) {
+	static boolean isInterfaceWithAnnotatedMethods(Class<?> iface) {
 		Boolean flag = annotatedInterfaceCache.get(iface);
 		if (flag != null) {
-			return flag;
+			return flag.booleanValue();
 		}
-		boolean found = false;
+		Boolean found = Boolean.FALSE;
 		for (Method ifcMethod : iface.getMethods()) {
 			try {
 				if (ifcMethod.getAnnotations().length > 0) {
-					found = true;
+					found = Boolean.TRUE;
 					break;
 				}
 			}
@@ -411,7 +411,7 @@ public abstract class AnnotationUtils {
 			}
 		}
 		annotatedInterfaceCache.put(iface, found);
-		return found;
+		return found.booleanValue();
 	}
 
 	/**

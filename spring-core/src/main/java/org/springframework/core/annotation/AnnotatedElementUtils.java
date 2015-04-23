@@ -18,17 +18,19 @@ package org.springframework.core.annotation;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
+import java.lang.reflect.Method;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.springframework.core.BridgeMethodResolver;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
 /**
- * Utility class used to collect all annotation attributes, including those
- * declared on meta-annotations.
+ * Utility class used to collect and merge all annotation attributes on a
+ * given {@link AnnotatedElement}, including those declared via meta-annotations.
  *
  * @author Phillip Webb
  * @author Juergen Hoeller
@@ -39,7 +41,7 @@ public class AnnotatedElementUtils {
 
 	public static Set<String> getMetaAnnotationTypes(AnnotatedElement element, String annotationType) {
 		final Set<String> types = new LinkedHashSet<String>();
-		process(element, annotationType, true, false, new Processor<Object>() {
+		processWithGetSemantics(element, annotationType, new Processor<Object>() {
 			@Override
 			public Object process(Annotation annotation, int metaDepth) {
 				if (metaDepth > 0) {
@@ -55,7 +57,7 @@ public class AnnotatedElementUtils {
 	}
 
 	public static boolean hasMetaAnnotationTypes(AnnotatedElement element, String annotationType) {
-		return Boolean.TRUE.equals(process(element, annotationType, true, false, new Processor<Boolean>() {
+		return Boolean.TRUE.equals(processWithGetSemantics(element, annotationType, new Processor<Boolean>() {
 			@Override
 			public Boolean process(Annotation annotation, int metaDepth) {
 				if (metaDepth > 0) {
@@ -70,7 +72,7 @@ public class AnnotatedElementUtils {
 	}
 
 	public static boolean isAnnotated(AnnotatedElement element, String annotationType) {
-		return Boolean.TRUE.equals(process(element, annotationType, true, false, new Processor<Boolean>() {
+		return Boolean.TRUE.equals(processWithGetSemantics(element, annotationType, new Processor<Boolean>() {
 			@Override
 			public Boolean process(Annotation annotation, int metaDepth) {
 				return Boolean.TRUE;
@@ -82,11 +84,16 @@ public class AnnotatedElementUtils {
 	}
 
 	/**
-	 * Delegates to {@link #getAnnotationAttributes(AnnotatedElement, String, boolean, boolean)},
+	 * <em>Get</em> annotation attributes of the specified {@code annotationType}
+	 * in the annotation hierarchy of the supplied {@link AnnotatedElement},
+	 * and merge the results into an {@link AnnotationAttributes} map.
+	 *
+	 * <p>Delegates to {@link #getAnnotationAttributes(AnnotatedElement, String, boolean, boolean)},
 	 * supplying {@code false} for {@code classValuesAsString} and {@code nestedAnnotationsAsMap}.
 	 *
 	 * @param element the annotated element
 	 * @param annotationType the annotation type to find
+	 * @return the merged {@code AnnotationAttributes}
 	 * @see #getAnnotationAttributes(AnnotatedElement, String, boolean, boolean)
 	 */
 	public static AnnotationAttributes getAnnotationAttributes(AnnotatedElement element, String annotationType) {
@@ -94,62 +101,90 @@ public class AnnotatedElementUtils {
 	}
 
 	/**
-	 * Delegates to {@link #getAnnotationAttributes(AnnotatedElement, String, boolean, boolean, boolean, boolean)},
-	 * supplying {@code true} for {@code searchInterfaces} and {@code false} for {@code searchClassHierarchy}.
-	 *
-	 * @param element the annotated element
-	 * @param annotationType the annotation type to find
-	 * @param classValuesAsString whether to convert Class references into
-	 * Strings or to preserve them as Class references
-	 * @param nestedAnnotationsAsMap whether to turn nested Annotation instances
-	 * into {@link AnnotationAttributes} maps or to preserve them as Annotation
-	 * instances
-	 * @see #getAnnotationAttributes(AnnotatedElement, String, boolean, boolean, boolean, boolean)
-	 */
-	public static AnnotationAttributes getAnnotationAttributes(AnnotatedElement element, String annotationType,
-			boolean classValuesAsString, boolean nestedAnnotationsAsMap) {
-		return getAnnotationAttributes(element, annotationType, true, false, classValuesAsString,
-			nestedAnnotationsAsMap);
-	}
-
-	/**
-	 * Find annotation attributes of the specified {@code annotationType} in
-	 * the annotation hierarchy of the supplied {@link AnnotatedElement},
+	 * <em>Get</em> annotation attributes of the specified {@code annotationType}
+	 * in the annotation hierarchy of the supplied {@link AnnotatedElement},
 	 * and merge the results into an {@link AnnotationAttributes} map.
 	 *
 	 * @param element the annotated element
 	 * @param annotationType the annotation type to find
-	 * @param searchInterfaces whether or not to search on interfaces, if the
-	 * annotated element is a class
-	 * @param searchClassHierarchy whether or not to search the class hierarchy
-	 * recursively, if the annotated element is a class
 	 * @param classValuesAsString whether to convert Class references into
 	 * Strings or to preserve them as Class references
-	 * @param nestedAnnotationsAsMap whether to turn nested Annotation instances
-	 * into {@link AnnotationAttributes} maps or to preserve them as Annotation
-	 * instances
+	 * @param nestedAnnotationsAsMap whether to convert nested Annotation
+	 * instances into {@link AnnotationAttributes} maps or to preserve them
+	 * as Annotation instances
+	 * @return the merged {@code AnnotationAttributes}
 	 */
 	public static AnnotationAttributes getAnnotationAttributes(AnnotatedElement element, String annotationType,
-			boolean searchInterfaces, boolean searchClassHierarchy, final boolean classValuesAsString,
-			final boolean nestedAnnotationsAsMap) {
+			boolean classValuesAsString, boolean nestedAnnotationsAsMap) {
 
-		return process(element, annotationType, searchInterfaces, searchClassHierarchy, new Processor<AnnotationAttributes>() {
-			@Override
-			public AnnotationAttributes process(Annotation annotation, int metaDepth) {
-				return AnnotationUtils.getAnnotationAttributes(annotation, classValuesAsString, nestedAnnotationsAsMap);
-			}
-			@Override
-			public void postProcess(Annotation annotation, AnnotationAttributes result) {
-				for (String key : result.keySet()) {
-					if (!AnnotationUtils.VALUE.equals(key)) {
-						Object value = AnnotationUtils.getValue(annotation, key);
-						if (value != null) {
-							result.put(key, AnnotationUtils.adaptValue(value, classValuesAsString, nestedAnnotationsAsMap));
-						}
-					}
-				}
-			}
-		});
+		return processWithGetSemantics(element, annotationType, new MergeAnnotationAttributesProcessor(
+			classValuesAsString, nestedAnnotationsAsMap));
+	}
+
+	/**
+	 * <em>Find</em> annotation attributes of the specified {@code annotationType}
+	 * in the annotation hierarchy of the supplied {@link AnnotatedElement},
+	 * and merge the results into an {@link AnnotationAttributes} map.
+	 *
+	 * <p>Delegates to
+	 * {@link #findAnnotationAttributes(AnnotatedElement, String, boolean, boolean, boolean, boolean, boolean, boolean)},
+	 * supplying {@code true} for all {@code search*} flags.
+	 *
+	 * @param element the annotated element
+	 * @param annotationType the annotation type to find
+	 * @return the merged {@code AnnotationAttributes}
+	 */
+	public static AnnotationAttributes findAnnotationAttributes(AnnotatedElement element,
+			Class<? extends Annotation> annotationType) {
+		return findAnnotationAttributes(element, annotationType.getName(), true, true, true, true, false, false);
+	}
+
+	/**
+	 * <em>Find</em> annotation attributes of the specified {@code annotationType}
+	 * in the annotation hierarchy of the supplied {@link AnnotatedElement},
+	 * and merge the results into an {@link AnnotationAttributes} map.
+	 *
+	 * <p>Delegates to
+	 * {@link #findAnnotationAttributes(AnnotatedElement, String, boolean, boolean, boolean, boolean, boolean, boolean)},
+	 * supplying {@code true} for all {@code search*} flags.
+	 *
+	 * @param element the annotated element
+	 * @param annotationType the annotation type to find
+	 * @return the merged {@code AnnotationAttributes}
+	 */
+	public static AnnotationAttributes findAnnotationAttributes(AnnotatedElement element, String annotationType) {
+		return findAnnotationAttributes(element, annotationType, true, true, true, true, false, false);
+	}
+
+	/**
+	 * <em>Find</em> annotation attributes of the specified {@code annotationType}
+	 * in the annotation hierarchy of the supplied {@link AnnotatedElement},
+	 * and merge the results into an {@link AnnotationAttributes} map.
+	 *
+	 * @param element the annotated element
+	 * @param annotationType the annotation type to find
+	 * @param searchOnInterfaces whether to search on interfaces, if the
+	 * annotated element is a class
+	 * @param searchOnSuperclasses whether to search on superclasses, if
+	 * the annotated element is a class
+	 * @param searchOnMethodsInInterfaces whether to search on methods in
+	 * interfaces, if the annotated element is a method
+	 * @param searchOnMethodsInSuperclasses whether to search on methods
+	 * in superclasses, if the annotated element is a method
+	 * @param classValuesAsString whether to convert Class references into
+	 * Strings or to preserve them as Class references
+	 * @param nestedAnnotationsAsMap whether to convert nested Annotation
+	 * instances into {@link AnnotationAttributes} maps or to preserve them
+	 * as Annotation instances
+	 * @return the merged {@code AnnotationAttributes}
+	 */
+	public static AnnotationAttributes findAnnotationAttributes(AnnotatedElement element, String annotationType,
+			boolean searchOnInterfaces, boolean searchOnSuperclasses, boolean searchOnMethodsInInterfaces,
+			boolean searchOnMethodsInSuperclasses, boolean classValuesAsString, boolean nestedAnnotationsAsMap) {
+
+		return processWithFindSemantics(element, annotationType, searchOnInterfaces, searchOnSuperclasses,
+			searchOnMethodsInInterfaces, searchOnMethodsInSuperclasses, new MergeAnnotationAttributesProcessor(
+				classValuesAsString, nestedAnnotationsAsMap));
 	}
 
 	public static MultiValueMap<String, Object> getAllAnnotationAttributes(AnnotatedElement element, String annotationType) {
@@ -160,7 +195,7 @@ public class AnnotatedElementUtils {
 			final String annotationType, final boolean classValuesAsString, final boolean nestedAnnotationsAsMap) {
 
 		final MultiValueMap<String, Object> attributes = new LinkedMultiValueMap<String, Object>();
-		process(element, annotationType, true, false, new Processor<Void>() {
+		processWithGetSemantics(element, annotationType, new Processor<Void>() {
 			@Override
 			public Void process(Annotation annotation, int metaDepth) {
 				if (annotation.annotationType().getName().equals(annotationType)) {
@@ -190,26 +225,105 @@ public class AnnotatedElementUtils {
 	 * Process all annotations of the specified {@code annotationType} and
 	 * recursively all meta-annotations on the specified {@code element}.
 	 *
-	 * <p>If the {@code searchClassHierarchy} flag is {@code true} and the sought
-	 * annotation is neither <em>directly present</em> on the given element nor
-	 * present on the given element as a meta-annotation, then the algorithm will
-	 * recursively search through the class hierarchy of the given element.
-	 *
 	 * @param element the annotated element
 	 * @param annotationType the annotation type to find
-	 * @param searchInterfaces whether or not to search on interfaces, if the
-	 * annotated element is a class
-	 * @param searchClassHierarchy whether or not to search the class hierarchy
-	 * recursively, if the annotated element is a class
 	 * @param processor the processor to delegate to
 	 * @return the result of the processor
 	 */
-	private static <T> T process(AnnotatedElement element, String annotationType, boolean searchInterfaces,
-			boolean searchClassHierarchy, Processor<T> processor) {
+	private static <T> T processWithGetSemantics(AnnotatedElement element, String annotationType, Processor<T> processor) {
+		try {
+			return processWithGetSemantics(element, annotationType, processor, new HashSet<AnnotatedElement>(), 0);
+		}
+		catch (Throwable ex) {
+			throw new IllegalStateException("Failed to introspect annotations: " + element, ex);
+		}
+	}
+
+	/**
+	 * Perform the search algorithm for the {@link #processWithGetSemantics}
+	 * method, avoiding endless recursion by tracking which annotated elements
+	 * have already been <em>visited</em>.
+	 *
+	 * <p>The {@code metaDepth} parameter represents the depth of the annotation
+	 * relative to the initial element. For example, an annotation that is
+	 * <em>present</em> on the element will have a depth of 0; a meta-annotation
+	 * will have a depth of 1; and a meta-meta-annotation will have a depth of 2.
+	 *
+	 * @param element the annotated element
+	 * @param annotationType the annotation type to find
+	 * @param processor the processor to delegate to
+	 * @param visited the set of annotated elements that have already been visited
+	 * @param metaDepth the depth of the annotation relative to the initial element
+	 * @return the result of the processor
+	 */
+	private static <T> T processWithGetSemantics(AnnotatedElement element, String annotationType,
+			Processor<T> processor, Set<AnnotatedElement> visited, int metaDepth) {
+
+		if (visited.add(element)) {
+			try {
+				// Local annotations: declared OR inherited
+				Annotation[] annotations = element.getAnnotations();
+
+				// Search in local annotations
+				for (Annotation annotation : annotations) {
+					if (annotation.annotationType().getName().equals(annotationType) || metaDepth > 0) {
+						T result = processor.process(annotation, metaDepth);
+						if (result != null) {
+							return result;
+						}
+						result = processWithGetSemantics(annotation.annotationType(), annotationType, processor,
+							visited, metaDepth + 1);
+						if (result != null) {
+							processor.postProcess(annotation, result);
+							return result;
+						}
+					}
+				}
+
+				// Search in meta annotations on local annotations
+				for (Annotation annotation : annotations) {
+					if (!AnnotationUtils.isInJavaLangAnnotationPackage(annotation)) {
+						T result = processWithGetSemantics(annotation.annotationType(), annotationType, processor,
+							visited, metaDepth);
+						if (result != null) {
+							processor.postProcess(annotation, result);
+							return result;
+						}
+					}
+				}
+
+			}
+			catch (Exception ex) {
+				AnnotationUtils.logIntrospectionFailure(element, ex);
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * Process all annotations of the specified {@code annotationType} and
+	 * recursively all meta-annotations on the specified {@code element}.
+	 *
+	 * @param element the annotated element
+	 * @param annotationType the annotation type to find
+	 * @param searchOnInterfaces whether to search on interfaces, if the
+	 * annotated element is a class
+	 * @param searchOnSuperclasses whether to search on superclasses, if
+	 * the annotated element is a class
+	 * @param searchOnMethodsInInterfaces whether to search on methods in
+	 * interfaces, if the annotated element is a method
+	 * @param searchOnMethodsInSuperclasses whether to search on methods
+	 * in superclasses, if the annotated element is a method
+	 * @param processor the processor to delegate to
+	 * @return the result of the processor
+	 */
+	private static <T> T processWithFindSemantics(AnnotatedElement element, String annotationType,
+			boolean searchOnInterfaces, boolean searchOnSuperclasses, boolean searchOnMethodsInInterfaces,
+			boolean searchOnMethodsInSuperclasses, Processor<T> processor) {
 
 		try {
-			return doProcess(element, annotationType, searchInterfaces, searchClassHierarchy, processor,
-					new HashSet<AnnotatedElement>(), 0);
+			return processWithFindSemantics(element, annotationType, searchOnInterfaces, searchOnSuperclasses,
+				searchOnMethodsInInterfaces, searchOnMethodsInSuperclasses, processor, new HashSet<AnnotatedElement>(), 0);
 		}
 		catch (Throwable ex) {
 			throw new IllegalStateException("Failed to introspect annotations: " + element, ex);
@@ -228,24 +342,29 @@ public class AnnotatedElementUtils {
 	 *
 	 * @param element the annotated element
 	 * @param annotationType the annotation type to find
-	 * @param searchInterfaces whether or not to search on interfaces, if the
+	 * @param searchOnInterfaces whether to search on interfaces, if the
 	 * annotated element is a class
-	 * @param searchClassHierarchy whether or not to search the class hierarchy
-	 * recursively, if the annotated element is a class
+	 * @param searchOnSuperclasses whether to search on superclasses, if
+	 * the annotated element is a class
+	 * @param searchOnMethodsInInterfaces whether to search on methods in
+	 * interfaces, if the annotated element is a method
+	 * @param searchOnMethodsInSuperclasses whether to search on methods
+	 * in superclasses, if the annotated element is a method
 	 * @param processor the processor to delegate to
 	 * @param visited the set of annotated elements that have already been visited
 	 * @param metaDepth the depth of the annotation relative to the initial element
 	 * @return the result of the processor
 	 */
-	private static <T> T doProcess(AnnotatedElement element, String annotationType, boolean searchInterfaces,
-			boolean searchClassHierarchy, Processor<T> processor, Set<AnnotatedElement> visited, int metaDepth) {
+	private static <T> T processWithFindSemantics(AnnotatedElement element, String annotationType,
+			boolean searchOnInterfaces, boolean searchOnSuperclasses, boolean searchOnMethodsInInterfaces,
+			boolean searchOnMethodsInSuperclasses, Processor<T> processor, Set<AnnotatedElement> visited, int metaDepth) {
 
 		if (visited.add(element)) {
 			try {
 
 				// Local annotations: declared or (declared + inherited).
-				Annotation[] annotations =
-						(searchClassHierarchy ? element.getDeclaredAnnotations() : element.getAnnotations());
+				Annotation[] annotations = (searchOnSuperclasses ? element.getDeclaredAnnotations()
+						: element.getAnnotations());
 
 				// Search in local annotations
 				for (Annotation annotation : annotations) {
@@ -254,8 +373,9 @@ public class AnnotatedElementUtils {
 						if (result != null) {
 							return result;
 						}
-						result = doProcess(annotation.annotationType(), annotationType, searchInterfaces,
-							searchClassHierarchy, processor, visited, metaDepth + 1);
+						result = processWithFindSemantics(annotation.annotationType(), annotationType,
+							searchOnInterfaces, searchOnSuperclasses, searchOnMethodsInInterfaces,
+							searchOnMethodsInSuperclasses, processor, visited, metaDepth + 1);
 						if (result != null) {
 							processor.postProcess(annotation, result);
 							return result;
@@ -266,8 +386,9 @@ public class AnnotatedElementUtils {
 				// Search in meta annotations on local annotations
 				for (Annotation annotation : annotations) {
 					if (!AnnotationUtils.isInJavaLangAnnotationPackage(annotation)) {
-						T result = doProcess(annotation.annotationType(), annotationType, searchInterfaces,
-							searchClassHierarchy, processor, visited, metaDepth);
+						T result = processWithFindSemantics(annotation.annotationType(), annotationType,
+							searchOnInterfaces, searchOnSuperclasses, searchOnMethodsInInterfaces,
+							searchOnMethodsInSuperclasses, processor, visited, metaDepth);
 						if (result != null) {
 							processor.postProcess(annotation, result);
 							return result;
@@ -275,26 +396,93 @@ public class AnnotatedElementUtils {
 					}
 				}
 
-				// Search on interfaces
-				if (searchInterfaces && element instanceof Class) {
-					Class<?> clazz = (Class<?>) element;
-					for (Class<?> ifc : clazz.getInterfaces()) {
-						T result = doProcess(ifc, annotationType, searchInterfaces, searchClassHierarchy, processor,
-							visited, metaDepth);
+				if (element instanceof Method) {
+					Method method = (Method) element;
+
+					// Search on possibly bridged method
+					Method resolvedMethod = BridgeMethodResolver.findBridgedMethod(method);
+					T result = processWithFindSemantics(resolvedMethod, annotationType, searchOnInterfaces,
+						searchOnSuperclasses, searchOnMethodsInInterfaces, searchOnMethodsInSuperclasses, processor,
+						visited, metaDepth);
+					if (result != null) {
+						return result;
+					}
+
+					// Search on methods in interfaces declared locally
+					if (searchOnMethodsInInterfaces) {
+						Class<?>[] ifcs = method.getDeclaringClass().getInterfaces();
+						result = searchOnInterfaces(method, annotationType, searchOnInterfaces, searchOnSuperclasses,
+							searchOnMethodsInInterfaces, searchOnMethodsInSuperclasses, processor, visited, metaDepth,
+							ifcs);
 						if (result != null) {
 							return result;
 						}
 					}
+
+					// Search on methods in class hierarchy and interface hierarchy
+					if (searchOnMethodsInSuperclasses) {
+						Class<?> clazz = method.getDeclaringClass();
+						while (true) {
+							clazz = clazz.getSuperclass();
+							if (clazz == null || clazz.equals(Object.class)) {
+								break;
+							}
+
+							try {
+								// TODO [SPR-12738] Resolve equivalent parameterized
+								// method (i.e., bridged method) in superclass.
+								Method equivalentMethod = clazz.getDeclaredMethod(method.getName(),
+									method.getParameterTypes());
+								Method resolvedEquivalentMethod = BridgeMethodResolver.findBridgedMethod(equivalentMethod);
+								result = processWithFindSemantics(resolvedEquivalentMethod, annotationType,
+									searchOnInterfaces, searchOnSuperclasses, searchOnMethodsInInterfaces,
+									searchOnMethodsInSuperclasses, processor, visited, metaDepth);
+								if (result != null) {
+									return result;
+								}
+							}
+							catch (NoSuchMethodException ex) {
+								// No equivalent method found
+							}
+
+							// Search on interfaces declared on superclass
+							if (searchOnMethodsInInterfaces) {
+								result = searchOnInterfaces(method, annotationType, searchOnInterfaces,
+									searchOnSuperclasses, searchOnMethodsInInterfaces, searchOnMethodsInSuperclasses,
+									processor, visited, metaDepth, clazz.getInterfaces());
+								if (result != null) {
+									return result;
+								}
+							}
+						}
+					}
 				}
 
-				// Search on superclass
-				if (searchClassHierarchy && element instanceof Class) {
-					Class<?> superclass = ((Class<?>) element).getSuperclass();
-					if (superclass != null && !superclass.equals(Object.class)) {
-						T result = doProcess(superclass, annotationType, searchInterfaces, searchClassHierarchy,
-							processor, visited, metaDepth);
-						if (result != null) {
-							return result;
+				if (element instanceof Class) {
+					Class<?> clazz = (Class<?>) element;
+
+					// Search on interfaces
+					if (searchOnInterfaces) {
+						for (Class<?> ifc : clazz.getInterfaces()) {
+							T result = processWithFindSemantics(ifc, annotationType, searchOnInterfaces,
+								searchOnSuperclasses, searchOnMethodsInInterfaces, searchOnMethodsInSuperclasses,
+								processor, visited, metaDepth);
+							if (result != null) {
+								return result;
+							}
+						}
+					}
+
+					// Search on superclass
+					if (searchOnSuperclasses) {
+						Class<?> superclass = clazz.getSuperclass();
+						if (superclass != null && !superclass.equals(Object.class)) {
+							T result = processWithFindSemantics(superclass, annotationType, searchOnInterfaces,
+								searchOnSuperclasses, searchOnMethodsInInterfaces, searchOnMethodsInSuperclasses,
+								processor, visited, metaDepth);
+							if (result != null) {
+								return result;
+							}
 						}
 					}
 				}
@@ -306,27 +494,99 @@ public class AnnotatedElementUtils {
 		return null;
 	}
 
+	private static <T> T searchOnInterfaces(Method method, String annotationType, boolean searchOnInterfaces,
+			boolean searchOnSuperclasses, boolean searchOnMethodsInInterfaces, boolean searchOnMethodsInSuperclasses,
+			Processor<T> processor, Set<AnnotatedElement> visited, int metaDepth, Class<?>[] ifcs) {
+
+		for (Class<?> iface : ifcs) {
+			if (AnnotationUtils.isInterfaceWithAnnotatedMethods(iface)) {
+				try {
+					Method equivalentMethod = iface.getMethod(method.getName(), method.getParameterTypes());
+					T result = processWithFindSemantics(equivalentMethod, annotationType, searchOnInterfaces,
+						searchOnSuperclasses, searchOnMethodsInInterfaces, searchOnMethodsInSuperclasses, processor,
+						visited, metaDepth);
+
+					if (result != null) {
+						return result;
+					}
+				}
+				catch (NoSuchMethodException ex) {
+					// Skip this interface - it doesn't have the method...
+				}
+			}
+		}
+
+		return null;
+	}
+
 
 	/**
-	 * Callback interface used to process an annotation.
+	 * Callback interface that is used to process a target annotation that
+	 * was found as the result of a search and to post-process the result as
+	 * the search algorithm goes back down the annotation hierarchy from
+	 * the target annotation to the initial {@link AnnotatedElement}.
+	 *
 	 * @param <T> the result type
 	 */
-	private interface Processor<T> {
+	private static interface Processor<T> {
 
 		/**
-		 * Called to process the annotation.
+		 * Process the actual target annotation once it has been found by
+		 * the search algorithm.
+		 *
 		 * <p>The {@code metaDepth} parameter represents the depth of the
 		 * annotation relative to the initial element. For example, an annotation
 		 * that is <em>present</em> on the element will have a depth of 0; a
 		 * meta-annotation will have a depth of 1; and a meta-meta-annotation
 		 * will have a depth of 2.
+		 *
 		 * @param annotation the annotation to process
 		 * @param metaDepth the depth of the annotation relative to the initial element
 		 * @return the result of the processing, or {@code null} to continue
 		 */
 		T process(Annotation annotation, int metaDepth);
 
+		/**
+		 * Post-process the result returned by the {@link #process} method.
+		 *
+		 * <p>The {@code annotation} supplied to this method is an annotation
+		 * that is present in the annotation hierarchy, above the initial
+		 * {@link AnnotatedElement} but below the target annotation found by
+		 * the search algorithm.
+		 *
+		 * @param annotation the annotation to post-process
+		 * @param result the result to post-process
+		 */
 		void postProcess(Annotation annotation, T result);
+	}
+
+	private static class MergeAnnotationAttributesProcessor implements Processor<AnnotationAttributes> {
+
+		private final boolean classValuesAsString;
+		private final boolean nestedAnnotationsAsMap;
+
+
+		MergeAnnotationAttributesProcessor(boolean classValuesAsString, boolean nestedAnnotationsAsMap) {
+			this.classValuesAsString = classValuesAsString;
+			this.nestedAnnotationsAsMap = nestedAnnotationsAsMap;
+		}
+
+		@Override
+		public AnnotationAttributes process(Annotation annotation, int metaDepth) {
+			return AnnotationUtils.getAnnotationAttributes(annotation, classValuesAsString, nestedAnnotationsAsMap);
+		}
+
+		@Override
+		public void postProcess(Annotation annotation, AnnotationAttributes result) {
+			for (String key : result.keySet()) {
+				if (!AnnotationUtils.VALUE.equals(key)) {
+					Object value = AnnotationUtils.getValue(annotation, key);
+					if (value != null) {
+						result.put(key, AnnotationUtils.adaptValue(value, classValuesAsString, nestedAnnotationsAsMap));
+					}
+				}
+			}
+		}
 	}
 
 }

@@ -162,7 +162,6 @@ public class ApplicationListenerMethodAdapter implements GenericApplicationListe
 		}
 	}
 
-
 	private boolean shouldHandle(ApplicationEvent event, Object[] args) {
 		if (args == null) {
 			return false;
@@ -250,15 +249,10 @@ public class ApplicationListenerMethodAdapter implements GenericApplicationListe
 	protected String getCondition() {
 		if (this.condition == null) {
 			AnnotationAttributes annotationAttributes = AnnotatedElementUtils
-					.getAnnotationAttributes(this.method, EventListener.class.getName());
+					.findAnnotationAttributes(this.method, EventListener.class);
 			if (annotationAttributes != null) {
 				String value = annotationAttributes.getString("condition");
 				this.condition = (value != null ? value : "");
-			}
-			// TODO [SPR-12738] Remove once AnnotatedElementUtils finds annotated methods on interfaces (e.g., in dynamic proxies)
-			else {
-				EventListener eventListener = getMethodAnnotation(EventListener.class);
-				this.condition = (eventListener != null ? eventListener.condition() : "");
 			}
 		}
 		return this.condition;

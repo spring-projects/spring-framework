@@ -27,7 +27,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.junit.After;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -150,16 +149,13 @@ public class TransactionalEventListenerTests {
 		getEventCollector().assertTotalEventsCount(1); // After rollback not invoked
 	}
 
-	// TODO [SPR-12738] Enable test.
-	@Ignore("Disabled until SPR-12738 is resolved")
 	@Test
 	public void afterCommitWithTransactionalComponentListenerProxiedViaDynamicProxy() {
-		load(TransactionalConfiguration.class, TransactionalComponentAfterCommitTestListener.class);
+		load(TransactionalConfiguration.class, TransactionalComponentTestListener.class);
 		this.transactionTemplate.execute(status -> {
 			getContext().publishEvent("SKIP");
 			getEventCollector().assertNoEventReceived();
 			return null;
-
 		});
 		getEventCollector().assertNoEventReceived();
 	}
@@ -280,7 +276,6 @@ public class TransactionalEventListenerTests {
 			getContext().publishEvent("SKIP");
 			getEventCollector().assertNoEventReceived();
 			return null;
-
 		});
 		getEventCollector().assertNoEventReceived();
 	}
@@ -460,14 +455,15 @@ public class TransactionalEventListenerTests {
 
 	@Transactional
 	@Component
-	static interface TransactionalComponentAfterCommitTestListenerInterface {
+	static interface TransactionalComponentTestListenerInterface {
 
-		@TransactionalEventListener(phase = AFTER_COMMIT, condition = "!'SKIP'.equals(#data)")
+		// Cannot use #data in condition due to dynamic proxy.
+		@TransactionalEventListener(condition = "!'SKIP'.equals(#p0)")
 		void handleAfterCommit(String data);
 	}
 
-	static class TransactionalComponentAfterCommitTestListener extends BaseTransactionalTestListener implements
-			TransactionalComponentAfterCommitTestListenerInterface {
+	static class TransactionalComponentTestListener extends BaseTransactionalTestListener implements
+			TransactionalComponentTestListenerInterface {
 
 		@Override
 		public void handleAfterCommit(String data) {

@@ -286,8 +286,8 @@ public abstract class MetaAnnotationUtils {
 			this.declaringClass = declaringClass;
 			this.composedAnnotation = composedAnnotation;
 			this.annotation = annotation;
-			this.annotationAttributes = AnnotatedElementUtils.getAnnotationAttributes(rootDeclaringClass,
-				annotation.annotationType().getName(), true, true, false, false);
+			this.annotationAttributes = AnnotatedElementUtils.findAnnotationAttributes(
+					rootDeclaringClass, annotation.annotationType());
 		}
 
 		public Class<?> getRootDeclaringClass() {
