@@ -15,32 +15,30 @@
  */
 package org.springframework.messaging.simp.stomp;
 
+import org.springframework.messaging.Message;
+import org.springframework.messaging.tcp.TcpOperations;
+import org.springframework.messaging.tcp.reactor.Reactor2TcpClient;
+import org.springframework.util.concurrent.ListenableFuture;
+import reactor.Environment;
+import reactor.core.config.ConfigurationReader;
+import reactor.core.config.DispatcherConfiguration;
+import reactor.core.config.DispatcherType;
+import reactor.core.config.ReactorConfiguration;
+import reactor.fn.Function;
+import reactor.io.net.Spec;
+
 import java.util.Arrays;
 import java.util.Properties;
 
-import reactor.core.Environment;
-import reactor.core.configuration.ConfigurationReader;
-import reactor.core.configuration.DispatcherConfiguration;
-import reactor.core.configuration.DispatcherType;
-import reactor.core.configuration.ReactorConfiguration;
-import reactor.net.netty.tcp.NettyTcpClient;
-import reactor.net.tcp.TcpClient;
-import reactor.net.tcp.spec.TcpClientSpec;
-
-import org.springframework.messaging.Message;
-import org.springframework.messaging.tcp.TcpOperations;
-import org.springframework.messaging.tcp.reactor.Reactor11TcpClient;
-import org.springframework.util.concurrent.ListenableFuture;
-
 /**
  * A STOMP over TCP client that uses
- * {@link org.springframework.messaging.tcp.reactor.Reactor11TcpClient
+ * {@link Reactor2TcpClient
  * Reactor11TcpClient}.
  *
  * @author Rossen Stoyanchev
  * @since 4.2
  */
-public class Reactor11TcpStompClient extends StompClientSupport {
+public class Reactor2TcpStompClient extends StompClientSupport {
 
 	private final TcpOperations<byte[]> tcpClient;
 
@@ -48,32 +46,49 @@ public class Reactor11TcpStompClient extends StompClientSupport {
 	/**
 	 * Create an instance with host "127.0.0.1" and port 61613.
 	 */
-	public Reactor11TcpStompClient() {
+	public Reactor2TcpStompClient() {
 		this("127.0.0.1", 61613);
 	}
 
 	/**
 	 * Create an instance with the given host and port.
+	 *
 	 * @param host the host
 	 * @param port the port
 	 */
-	public Reactor11TcpStompClient(String host, int port) {
-		this.tcpClient = new Reactor11TcpClient<byte[]>(createNettyTcpClient(host, port));
+	public Reactor2TcpStompClient(final String host, final int port) {
+		this.tcpClient = new Reactor2TcpClient<byte[]>(createNettyTcpClientFactory(host, port));
 	}
 
-	private TcpClient<Message<byte[]>, Message<byte[]>> createNettyTcpClient(String host, int port) {
-		return new TcpClientSpec<Message<byte[]>, Message<byte[]>>(NettyTcpClient.class)
-				.env(new Environment(new StompClientDispatcherConfigReader()))
-				.codec(new Reactor11StompCodec(new StompEncoder(), new StompDecoder()))
-				.connect(host, port)
-				.get();
+	private Function<Spec.TcpClientSpec<Message<byte[]>, Message<byte[]>>,
+			Spec.TcpClientSpec<Message<byte[]>, Message<byte[]>>> createNettyTcpClientFactory(
+			final String host, final int port
+	) {
+
+		final Environment environment = new Environment(new StompClientDispatcherConfigReader()).assignErrorJournal();
+
+		return new Function<Spec.TcpClientSpec<Message<byte[]>, Message<byte[]>>,
+				Spec.TcpClientSpec<Message<byte[]>, Message<byte[]>>>() {
+
+			@Override
+			public Spec.TcpClientSpec<Message<byte[]>, Message<byte[]>> apply(Spec.TcpClientSpec<Message<byte[]>,
+					Message<byte[]>> spec) {
+
+				return spec
+						.codec(new Reactor2StompCodec(new StompEncoder(), new StompDecoder()))
+						.env(environment)
+						.dispatcher(environment.getCachedDispatchers("StompClient").get())
+						.connect(host, port);
+			}
+		};
 	}
 
 	/**
 	 * Create an instance with a pre-configured TCP client.
+	 *
 	 * @param tcpClient the client to use
 	 */
-	public Reactor11TcpStompClient(TcpOperations<byte[]> tcpClient) {
+	public Reactor2TcpStompClient(TcpOperations<byte[]> tcpClient) {
 		this.tcpClient = tcpClient;
 	}
 
@@ -81,6 +96,7 @@ public class Reactor11TcpStompClient extends StompClientSupport {
 	/**
 	 * Connect and notify the given {@link StompSessionHandler} when connected
 	 * on the STOMP level,
+	 *
 	 * @param handler the handler for the STOMP session
 	 * @return ListenableFuture for access to the session when ready for use
 	 */
@@ -91,8 +107,9 @@ public class Reactor11TcpStompClient extends StompClientSupport {
 	/**
 	 * An overloaded version of {@link #connect(StompSessionHandler)} that
 	 * accepts headers to use for the STOMP CONNECT frame.
+	 *
 	 * @param connectHeaders headers to add to the CONNECT frame
-	 * @param handler the handler for the STOMP session
+	 * @param handler        the handler for the STOMP session
 	 * @return ListenableFuture for access to the session when ready for use
 	 */
 	public ListenableFuture<StompSession> connect(StompHeaders connectHeaders, StompSessionHandler handler) {
@@ -117,9 +134,10 @@ public class Reactor11TcpStompClient extends StompClientSupport {
 		@Override
 		public ReactorConfiguration read() {
 			String dispatcherName = "StompClient";
-			DispatcherType dispatcherType = DispatcherType.THREAD_POOL_EXECUTOR;
+			DispatcherType dispatcherType = DispatcherType.DISPATCHER_GROUP;
 			DispatcherConfiguration config = new DispatcherConfiguration(dispatcherName, dispatcherType, 128, 0);
-			return new ReactorConfiguration(Arrays.<DispatcherConfiguration>asList(config), dispatcherName, new Properties());
+			return new ReactorConfiguration(Arrays.<DispatcherConfiguration>asList(config), dispatcherName, new Properties
+					());
 		}
 	}
 

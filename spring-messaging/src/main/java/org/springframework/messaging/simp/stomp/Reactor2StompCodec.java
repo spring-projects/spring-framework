@@ -18,13 +18,13 @@ package org.springframework.messaging.simp.stomp;
 
 import java.nio.ByteBuffer;
 
-import reactor.function.Consumer;
-import reactor.function.Function;
-import reactor.io.Buffer;
-import reactor.io.encoding.Codec;
 
 import org.springframework.messaging.Message;
 import org.springframework.util.Assert;
+import reactor.fn.Consumer;
+import reactor.fn.Function;
+import reactor.io.buffer.Buffer;
+import reactor.io.codec.Codec;
 
 /**
  * A Reactor TCP {@link Codec} for sending and receiving STOMP messages.
@@ -33,7 +33,7 @@ import org.springframework.util.Assert;
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public class Reactor11StompCodec implements Codec<Buffer, Message<byte[]>, Message<byte[]>> {
+public class Reactor2StompCodec extends Codec<Buffer, Message<byte[]>, Message<byte[]>> {
 
 	private final StompDecoder stompDecoder;
 
@@ -42,11 +42,11 @@ public class Reactor11StompCodec implements Codec<Buffer, Message<byte[]>, Messa
 	private final Function<Message<byte[]>, Buffer> encodingFunction;
 
 
-	public Reactor11StompCodec() {
+	public Reactor2StompCodec() {
 		this(new StompEncoder(), new StompDecoder());
 	}
 
-	public Reactor11StompCodec(StompEncoder encoder, StompDecoder decoder) {
+	public Reactor2StompCodec(StompEncoder encoder, StompDecoder decoder) {
 		Assert.notNull(encoder, "'encoder' is required");
 		Assert.notNull(decoder, "'decoder' is required");
 		this.stompEncoder = encoder;
@@ -64,6 +64,10 @@ public class Reactor11StompCodec implements Codec<Buffer, Message<byte[]>, Messa
 		return this.encodingFunction;
 	}
 
+	@Override
+	public Buffer apply(Message<byte[]> message) {
+		return encodingFunction.apply(message);
+	}
 
 	private static class EncodingFunction implements Function<Message<byte[]>, Buffer> {
 

@@ -42,20 +42,20 @@ import org.springframework.util.SocketUtils;
 import org.springframework.util.concurrent.ListenableFuture;
 
 /**
- * Integration tests for {@link Reactor11TcpStompClient}.
+ * Integration tests for {@link Reactor2TcpStompClient}.
  *
  * @author Rossen Stoyanchev
  */
-public class Reactor11TcpStompClientTests {
+public class Reactor2TcpStompClientTests {
 
-	private static final Log logger = LogFactory.getLog(Reactor11TcpStompClientTests.class);
+	private static final Log logger = LogFactory.getLog(Reactor2TcpStompClientTests.class);
 
 	@Rule
 	public final TestName testName = new TestName();
 
 	private BrokerService activeMQBroker;
 
-	private Reactor11TcpStompClient client;
+	private Reactor2TcpStompClient client;
 
 
 	@Before
@@ -77,7 +77,7 @@ public class Reactor11TcpStompClientTests {
 		ThreadPoolTaskScheduler taskScheduler = new ThreadPoolTaskScheduler();
 		taskScheduler.afterPropertiesSet();
 
-		this.client = new Reactor11TcpStompClient("127.0.0.1", port);
+		this.client = new Reactor2TcpStompClient("127.0.0.1", port);
 		this.client.setMessageConverter(new StringMessageConverter());
 		this.client.setTaskScheduler(taskScheduler);
 	}
@@ -86,8 +86,7 @@ public class Reactor11TcpStompClientTests {
 	public void tearDown() throws Exception {
 		try {
 			this.client.shutdown();
-		}
-		catch (Throwable ex) {
+		} catch (Throwable ex) {
 			logger.error("Failed to shut client", ex);
 		}
 		final CountDownLatch latch = new CountDownLatch(1);
