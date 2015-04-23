@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ import java.lang.annotation.Target;
 
 /**
  * Annotation indicating that a method (or all methods on a class) trigger(s)
- * a cache invalidate operation.
+ * a cache eviction operation.
  *
  * @author Costin Leau
  * @author Stephane Nicoll
@@ -73,8 +73,9 @@ public @interface CacheEvict {
 	String cacheResolver() default "";
 
 	/**
-	 * Spring Expression Language (SpEL) attribute used for conditioning the method caching.
-	 * <p>Default is "", meaning the method is always cached.
+	 * Spring Expression Language (SpEL) attribute used for making the cache
+	 * eviction operation conditional.
+	 * <p>Default is "", meaning the cache eviction is always performed.
 	 */
 	String condition() default "";
 

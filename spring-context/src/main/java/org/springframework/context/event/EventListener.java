@@ -55,7 +55,8 @@ import org.springframework.context.ApplicationEvent;
 public @interface EventListener {
 
 	/**
-	 * Spring Expression Language (SpEL) attribute used for conditioning the event handling.
+	 * Spring Expression Language (SpEL) attribute used for making the event
+	 * handling conditional.
 	 * <p>Default is "", meaning the event is always handled.
 	 */
 	String condition() default "";
