@@ -21,19 +21,19 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.Test;
-import reactor.function.Consumer;
-import reactor.function.Function;
-import reactor.io.Buffer;
 
 import org.springframework.messaging.Message;
 import org.springframework.messaging.simp.SimpMessageType;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.util.InvalidMimeTypeException;
+import reactor.fn.Consumer;
+import reactor.fn.Function;
+import reactor.io.buffer.Buffer;
 
 import static org.junit.Assert.*;
 
 /**
- * Test fixture for {@link Reactor11StompCodec}.
+ * Test fixture for {@link Reactor2StompCodec}.
  *
  * @author Andy Wilkinson
  */
@@ -41,7 +41,7 @@ public class StompCodecTests {
 
 	private final ArgumentCapturingConsumer<Message<byte[]>> consumer = new ArgumentCapturingConsumer<Message<byte[]>>();
 
-	private final Function<Buffer, Message<byte[]>> decoder = new Reactor11StompCodec().decoder(consumer);
+	private final Function<Buffer, Message<byte[]>> decoder = new Reactor2StompCodec().decoder(consumer);
 
 	@Test
 	public void decodeFrameWithCrLfEols() {
@@ -176,7 +176,7 @@ public class StompCodecTests {
 		Buffer buffer = Buffer.wrap(frame1 + frame2);
 
 		final List<Message<byte[]>> messages = new ArrayList<Message<byte[]>>();
-		new Reactor11StompCodec().decoder(new Consumer<Message<byte[]>>() {
+		new Reactor2StompCodec().decoder(new Consumer<Message<byte[]>>() {
 			@Override
 			public void accept(Message<byte[]> message) {
 				messages.add(message);
@@ -234,7 +234,7 @@ public class StompCodecTests {
 		Buffer buffer = Buffer.wrap(frame);
 
 		final List<Message<byte[]>> messages = new ArrayList<Message<byte[]>>();
-		new Reactor11StompCodec().decoder(new Consumer<Message<byte[]>>() {
+		new Reactor2StompCodec().decoder(new Consumer<Message<byte[]>>() {
 			@Override
 			public void accept(Message<byte[]> message) {
 				messages.add(message);
@@ -251,7 +251,7 @@ public class StompCodecTests {
 
 		Message<byte[]> frame = MessageBuilder.createMessage(new byte[0], headers.getMessageHeaders());
 
-		assertEquals("DISCONNECT\n\n\0", new Reactor11StompCodec().encoder().apply(frame).asString());
+		assertEquals("DISCONNECT\n\n\0", new Reactor2StompCodec().encoder().apply(frame).asString());
 	}
 
 	@Test
@@ -262,7 +262,7 @@ public class StompCodecTests {
 
 		Message<byte[]> frame = MessageBuilder.createMessage(new byte[0], headers.getMessageHeaders());
 
-		String frameString = new Reactor11StompCodec().encoder().apply(frame).asString();
+		String frameString = new Reactor2StompCodec().encoder().apply(frame).asString();
 
 		assertTrue(frameString.equals("CONNECT\naccept-version:1.2\nhost:github.org\n\n\0") ||
 				frameString.equals("CONNECT\nhost:github.org\naccept-version:1.2\n\n\0"));
@@ -276,7 +276,7 @@ public class StompCodecTests {
 		Message<byte[]> frame = MessageBuilder.createMessage(new byte[0], headers.getMessageHeaders());
 
 		assertEquals("DISCONNECT\na\\c\\r\\n\\\\b:alpha\\cbravo\\r\\n\\\\\n\n\0",
-				new Reactor11StompCodec().encoder().apply(frame).asString());
+				new Reactor2StompCodec().encoder().apply(frame).asString());
 	}
 
 	@Test
@@ -287,7 +287,7 @@ public class StompCodecTests {
 		Message<byte[]> frame = MessageBuilder.createMessage("Message body".getBytes(), headers.getMessageHeaders());
 
 		assertEquals("SEND\na:alpha\ncontent-length:12\n\nMessage body\0",
-				new Reactor11StompCodec().encoder().apply(frame).asString());
+				new Reactor2StompCodec().encoder().apply(frame).asString());
 	}
 
 	@Test
@@ -298,7 +298,7 @@ public class StompCodecTests {
 		Message<byte[]> frame = MessageBuilder.createMessage("Message body".getBytes(), headers.getMessageHeaders());
 
 		assertEquals("SEND\ncontent-length:12\n\nMessage body\0",
-				new Reactor11StompCodec().encoder().apply(frame).asString());
+				new Reactor2StompCodec().encoder().apply(frame).asString());
 	}
 
 	private void assertIncompleteDecode(String partialFrame) {
