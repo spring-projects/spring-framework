@@ -64,8 +64,19 @@ import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
 /**
- * A UriComponentsBuilder that helps to build URIs to Spring MVC controllers
- * and methods from their request mappings.
+ * Creates instances of {@link org.springframework.web.util.UriComponentsBuilder}
+ * by pointing to Spring MVC controllers and {@code @RequestMapping} methods.
+ *
+ * <p>The static {@code fromXxx(...)} methods prepare links relative to the
+ * current request as determined by a call to
+ * {@link org.springframework.web.servlet.support.ServletUriComponentsBuilder#fromCurrentServletMapping()}.
+ *
+ * <p>The static {@code fromXxx(UriComponentsBuilder,...)} methods can be given
+ * the baseUrl when operating outside the context of a request.
+ *
+ * <p>You can also create an MvcUriComponentsBuilder instance with a baseUrl
+ * via {@link #relativeTo(org.springframework.web.util.UriComponentsBuilder)}
+ * and then use the non-static {@code withXxx(...)} method variants.
  *
  * @author Oliver Gierke
  * @author Rossen Stoyanchev
@@ -94,6 +105,8 @@ public class MvcUriComponentsBuilder extends UriComponentsBuilder {
 				new PathVariableMethodArgumentResolver(), new RequestParamMethodArgumentResolver(false));
 	}
 
+	private final UriComponentsBuilder baseUrl;
+
 
 	/**
 	 * Default constructor. Protected to prevent direct instantiation.
@@ -104,7 +117,9 @@ public class MvcUriComponentsBuilder extends UriComponentsBuilder {
 	 * @see #fromMappingName(String)
 	 * @see #fromMethod(java.lang.reflect.Method, Object...)
 	 */
-	protected MvcUriComponentsBuilder() {
+	protected MvcUriComponentsBuilder(UriComponentsBuilder baseUrl) {
+		Assert.notNull(baseUrl, "'baseUrl' is required");
+		this.baseUrl = baseUrl;
 	}
 
 	/**
@@ -113,7 +128,18 @@ public class MvcUriComponentsBuilder extends UriComponentsBuilder {
 	 */
 	protected MvcUriComponentsBuilder(MvcUriComponentsBuilder other) {
 		super(other);
+		this.baseUrl = other.baseUrl;
 	}
+
+	/**
+	 * Create an instance of this class with a base URL. After that calls to one
+	 * of the instance based {@code withXxx(...}} methods will create URLs relative
+	 * to the given base URL.
+	 */
+	public static MvcUriComponentsBuilder relativeTo(UriComponentsBuilder baseUrl) {
+		return new MvcUriComponentsBuilder(baseUrl);
+	}
+
 
 	/**
 	 * Create a {@link UriComponentsBuilder} from the mapping of a controller class
@@ -316,6 +342,23 @@ public class MvcUriComponentsBuilder extends UriComponentsBuilder {
 	 * @since 4.1
 	 */
 	public static MethodArgumentBuilder fromMappingName(String mappingName) {
+		return fromMappingName(null, mappingName);
+	}
+
+	/**
+	 * An alternative to {@link #fromMappingName(String)} that accepts a
+	 * {@code UriComponentsBuilder} representing the base URL. This is useful
+	 * when using MvcUriComponentsBuilder outside the context of processing a
+	 * request or to apply a custom baseUrl not matching the current request.
+	 * @param builder the builder for the base URL; the builder will be cloned
+	 * and therefore not modified and may be re-used for further calls.
+	 * @param mappingName the mapping name
+	 * @return a builder to to prepare the URI String
+	 * @throws IllegalArgumentException if the mapping name is not found or
+	 * if there is no unique match
+	 * @since 4.2
+	 */
+	public static MethodArgumentBuilder fromMappingName(UriComponentsBuilder builder, String mappingName) {
 		RequestMappingInfoHandlerMapping handlerMapping = getRequestMappingInfoHandlerMapping();
 		List<HandlerMethod> handlerMethods = handlerMapping.getHandlerMethodsForMappingName(mappingName);
 		if (handlerMethods == null) {
@@ -325,7 +368,7 @@ public class MvcUriComponentsBuilder extends UriComponentsBuilder {
 			throw new IllegalArgumentException(
 					"No unique match for mapping mappingName " + mappingName + ": " + handlerMethods);
 		}
-		return new MethodArgumentBuilder(handlerMethods.get(0).getMethod());
+		return new MethodArgumentBuilder(builder, handlerMethods.get(0).getMethod());
 	}
 
 	/**
@@ -530,6 +573,46 @@ public class MvcUriComponentsBuilder extends UriComponentsBuilder {
 		}
 	}
 
+	/**
+	 * An alternative to {@link #fromController(Class)} for use with an instance
+	 * of this class created via a call to {@link #relativeTo}.
+	 */
+	public UriComponentsBuilder withController(Class<?> controllerType) {
+		return fromController(this.baseUrl, controllerType);
+	}
+
+	/**
+	 * An alternative to {@link #fromMethodName(Class, String, Object...)}} for
+	 * use with an instance of this class created via {@link #relativeTo}.
+	 */
+	public UriComponentsBuilder withMethodName(Class<?> controllerType, String methodName, Object... args) {
+		return fromMethodName(this.baseUrl, controllerType, methodName, args);
+	}
+
+	/**
+	 * An alternative to {@link #fromMethodCall(Object)} for use with an instance
+	 * of this class created via {@link #relativeTo}.
+	 */
+	public UriComponentsBuilder withMethodCall(Object invocationInfo) {
+		return fromMethodCall(this.baseUrl, invocationInfo);
+	}
+
+	/**
+	 * An alternative to {@link #fromMappingName(String)} for use with an instance
+	 * of this class created via {@link #relativeTo}.
+	 */
+	public MethodArgumentBuilder withMappingName(String mappingName) {
+		return fromMappingName(this.baseUrl, mappingName);
+	}
+
+	/**
+	 * An alternative to {@link #fromMethod(java.lang.reflect.Method, Object...)}
+	 * for use with an instance of this class created via {@link #relativeTo}.
+	 */
+	public UriComponentsBuilder withMethod(Method method, Object... args) {
+		return fromMethod(this.baseUrl, method, args);
+	}
+
 	@Override
 	public Object clone() {
 		return new MvcUriComponentsBuilder(this);
@@ -590,9 +673,16 @@ public class MvcUriComponentsBuilder extends UriComponentsBuilder {
 
 		private final Object[] argumentValues;
 
+		private final UriComponentsBuilder baseUrl;
+
 
 		public MethodArgumentBuilder(Method method) {
+			this(null, method);
+		}
+
+		public MethodArgumentBuilder(UriComponentsBuilder baseUrl, Method method) {
 			Assert.notNull(method, "'method' is required");
+			this.baseUrl = baseUrl;
 			this.method = method;
 			this.argumentValues = new Object[method.getParameterTypes().length];
 			for (int i = 0; i < this.argumentValues.length; i++) {
@@ -606,12 +696,12 @@ public class MvcUriComponentsBuilder extends UriComponentsBuilder {
 		}
 
 		public String build() {
-			return MvcUriComponentsBuilder.fromMethod(this.method, this.argumentValues)
+			return MvcUriComponentsBuilder.fromMethod(this.baseUrl, this.method, this.argumentValues)
 					.build(false).encode().toUriString();
 		}
 
 		public String buildAndExpand(Object... uriVariables) {
-			return MvcUriComponentsBuilder.fromMethod(this.method, this.argumentValues)
+			return MvcUriComponentsBuilder.fromMethod(this.baseUrl, this.method, this.argumentValues)
 					.build(false).expand(uriVariables).encode().toString();
 		}
 	}
