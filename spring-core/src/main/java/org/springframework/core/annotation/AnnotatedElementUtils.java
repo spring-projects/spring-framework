@@ -25,6 +25,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.springframework.core.BridgeMethodResolver;
+import org.springframework.util.Assert;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
@@ -39,7 +40,15 @@ import org.springframework.util.MultiValueMap;
  */
 public class AnnotatedElementUtils {
 
+	/**
+	 * @param element the annotated element; never {@code null}
+	 * @param annotationType the fully qualified class name of the annotation
+	 * type to find; never {@code null} or empty
+	 */
 	public static Set<String> getMetaAnnotationTypes(AnnotatedElement element, String annotationType) {
+		Assert.notNull(element, "AnnotatedElement must not be null");
+		Assert.hasText(annotationType, "annotationType must not be null or empty");
+
 		final Set<String> types = new LinkedHashSet<String>();
 		processWithGetSemantics(element, annotationType, new Processor<Object>() {
 			@Override
@@ -56,7 +65,15 @@ public class AnnotatedElementUtils {
 		return (types.isEmpty() ? null : types);
 	}
 
+	/**
+	 * @param element the annotated element; never {@code null}
+	 * @param annotationType the fully qualified class name of the annotation
+	 * type to find; never {@code null} or empty
+	 */
 	public static boolean hasMetaAnnotationTypes(AnnotatedElement element, String annotationType) {
+		Assert.notNull(element, "AnnotatedElement must not be null");
+		Assert.hasText(annotationType, "annotationType must not be null or empty");
+
 		return Boolean.TRUE.equals(processWithGetSemantics(element, annotationType, new Processor<Boolean>() {
 			@Override
 			public Boolean process(Annotation annotation, int metaDepth) {
@@ -71,7 +88,15 @@ public class AnnotatedElementUtils {
 		}));
 	}
 
+	/**
+	 * @param element the annotated element; never {@code null}
+	 * @param annotationType the fully qualified class name of the annotation
+	 * type to find; never {@code null} or empty
+	 */
 	public static boolean isAnnotated(AnnotatedElement element, String annotationType) {
+		Assert.notNull(element, "AnnotatedElement must not be null");
+		Assert.hasText(annotationType, "annotationType must not be null or empty");
+
 		return Boolean.TRUE.equals(processWithGetSemantics(element, annotationType, new Processor<Boolean>() {
 			@Override
 			public Boolean process(Annotation annotation, int metaDepth) {
@@ -91,8 +116,9 @@ public class AnnotatedElementUtils {
 	 * <p>Delegates to {@link #getAnnotationAttributes(AnnotatedElement, String, boolean, boolean)},
 	 * supplying {@code false} for {@code classValuesAsString} and {@code nestedAnnotationsAsMap}.
 	 *
-	 * @param element the annotated element
-	 * @param annotationType the annotation type to find
+	 * @param element the annotated element; never {@code null}
+	 * @param annotationType the fully qualified class name of the annotation
+	 * type to find; never {@code null} or empty
 	 * @return the merged {@code AnnotationAttributes}
 	 * @see #getAnnotationAttributes(AnnotatedElement, String, boolean, boolean)
 	 */
@@ -105,8 +131,9 @@ public class AnnotatedElementUtils {
 	 * in the annotation hierarchy of the supplied {@link AnnotatedElement},
 	 * and merge the results into an {@link AnnotationAttributes} map.
 	 *
-	 * @param element the annotated element
-	 * @param annotationType the annotation type to find
+	 * @param element the annotated element; never {@code null}
+	 * @param annotationType the fully qualified class name of the annotation
+	 * type to find; never {@code null} or empty
 	 * @param classValuesAsString whether to convert Class references into
 	 * Strings or to preserve them as Class references
 	 * @param nestedAnnotationsAsMap whether to convert nested Annotation
@@ -130,12 +157,13 @@ public class AnnotatedElementUtils {
 	 * {@link #findAnnotationAttributes(AnnotatedElement, String, boolean, boolean, boolean, boolean, boolean, boolean)},
 	 * supplying {@code true} for all {@code search*} flags.
 	 *
-	 * @param element the annotated element
-	 * @param annotationType the annotation type to find
+	 * @param element the annotated element; never {@code null}
+	 * @param annotationType the annotation type to find; never {@code null}
 	 * @return the merged {@code AnnotationAttributes}
 	 */
 	public static AnnotationAttributes findAnnotationAttributes(AnnotatedElement element,
 			Class<? extends Annotation> annotationType) {
+		Assert.notNull(annotationType, "annotationType must not be null");
 		return findAnnotationAttributes(element, annotationType.getName(), true, true, true, true, false, false);
 	}
 
@@ -148,8 +176,9 @@ public class AnnotatedElementUtils {
 	 * {@link #findAnnotationAttributes(AnnotatedElement, String, boolean, boolean, boolean, boolean, boolean, boolean)},
 	 * supplying {@code true} for all {@code search*} flags.
 	 *
-	 * @param element the annotated element
-	 * @param annotationType the annotation type to find
+	 * @param element the annotated element; never {@code null}
+	 * @param annotationType the fully qualified class name of the annotation
+	 * type to find; never {@code null} or empty
 	 * @return the merged {@code AnnotationAttributes}
 	 */
 	public static AnnotationAttributes findAnnotationAttributes(AnnotatedElement element, String annotationType) {
@@ -161,8 +190,9 @@ public class AnnotatedElementUtils {
 	 * in the annotation hierarchy of the supplied {@link AnnotatedElement},
 	 * and merge the results into an {@link AnnotationAttributes} map.
 	 *
-	 * @param element the annotated element
-	 * @param annotationType the annotation type to find
+	 * @param element the annotated element; never {@code null}
+	 * @param annotationType the fully qualified class name of the annotation
+	 * type to find; never {@code null} or empty
 	 * @param searchOnInterfaces whether to search on interfaces, if the
 	 * annotated element is a class
 	 * @param searchOnSuperclasses whether to search on superclasses, if
@@ -187,10 +217,20 @@ public class AnnotatedElementUtils {
 				classValuesAsString, nestedAnnotationsAsMap));
 	}
 
+	/**
+	 * @param element the annotated element; never {@code null}
+	 * @param annotationType the fully qualified class name of the annotation
+	 * type to find; never {@code null} or empty
+	 */
 	public static MultiValueMap<String, Object> getAllAnnotationAttributes(AnnotatedElement element, String annotationType) {
 		return getAllAnnotationAttributes(element, annotationType, false, false);
 	}
 
+	/**
+	 * @param element the annotated element; never {@code null}
+	 * @param annotationType the fully qualified class name of the annotation
+	 * type to find; never {@code null} or empty
+	 */
 	public static MultiValueMap<String, Object> getAllAnnotationAttributes(AnnotatedElement element,
 			final String annotationType, final boolean classValuesAsString, final boolean nestedAnnotationsAsMap) {
 
@@ -225,8 +265,9 @@ public class AnnotatedElementUtils {
 	 * Process all annotations of the specified {@code annotationType} and
 	 * recursively all meta-annotations on the specified {@code element}.
 	 *
-	 * @param element the annotated element
-	 * @param annotationType the annotation type to find
+	 * @param element the annotated element; never {@code null}
+	 * @param annotationType the fully qualified class name of the annotation
+	 * type to find; never {@code null} or empty
 	 * @param processor the processor to delegate to
 	 * @return the result of the processor
 	 */
@@ -249,8 +290,9 @@ public class AnnotatedElementUtils {
 	 * <em>present</em> on the element will have a depth of 0; a meta-annotation
 	 * will have a depth of 1; and a meta-meta-annotation will have a depth of 2.
 	 *
-	 * @param element the annotated element
-	 * @param annotationType the annotation type to find
+	 * @param element the annotated element; never {@code null}
+	 * @param annotationType the fully qualified class name of the annotation
+	 * type to find; never {@code null} or empty
 	 * @param processor the processor to delegate to
 	 * @param visited the set of annotated elements that have already been visited
 	 * @param metaDepth the depth of the annotation relative to the initial element
@@ -258,6 +300,9 @@ public class AnnotatedElementUtils {
 	 */
 	private static <T> T processWithGetSemantics(AnnotatedElement element, String annotationType,
 			Processor<T> processor, Set<AnnotatedElement> visited, int metaDepth) {
+
+		Assert.notNull(element, "AnnotatedElement must not be null");
+		Assert.hasText(annotationType, "annotationType must not be null or empty");
 
 		if (visited.add(element)) {
 			try {
@@ -304,8 +349,9 @@ public class AnnotatedElementUtils {
 	 * Process all annotations of the specified {@code annotationType} and
 	 * recursively all meta-annotations on the specified {@code element}.
 	 *
-	 * @param element the annotated element
-	 * @param annotationType the annotation type to find
+	 * @param element the annotated element; never {@code null}
+	 * @param annotationType the fully qualified class name of the annotation
+	 * type to find; never {@code null} or empty
 	 * @param searchOnInterfaces whether to search on interfaces, if the
 	 * annotated element is a class
 	 * @param searchOnSuperclasses whether to search on superclasses, if
@@ -340,8 +386,9 @@ public class AnnotatedElementUtils {
 	 * <em>present</em> on the element will have a depth of 0; a meta-annotation
 	 * will have a depth of 1; and a meta-meta-annotation will have a depth of 2.
 	 *
-	 * @param element the annotated element
-	 * @param annotationType the annotation type to find
+	 * @param element the annotated element; never {@code null}
+	 * @param annotationType the fully qualified class name of the annotation
+	 * type to find; never {@code null} or empty
 	 * @param searchOnInterfaces whether to search on interfaces, if the
 	 * annotated element is a class
 	 * @param searchOnSuperclasses whether to search on superclasses, if
@@ -358,6 +405,9 @@ public class AnnotatedElementUtils {
 	private static <T> T processWithFindSemantics(AnnotatedElement element, String annotationType,
 			boolean searchOnInterfaces, boolean searchOnSuperclasses, boolean searchOnMethodsInInterfaces,
 			boolean searchOnMethodsInSuperclasses, Processor<T> processor, Set<AnnotatedElement> visited, int metaDepth) {
+
+		Assert.notNull(element, "AnnotatedElement must not be null");
+		Assert.hasText(annotationType, "annotationType must not be null or empty");
 
 		if (visited.add(element)) {
 			try {
