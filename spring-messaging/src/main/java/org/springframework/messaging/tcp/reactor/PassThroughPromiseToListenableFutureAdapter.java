@@ -16,7 +16,8 @@
 
 package org.springframework.messaging.tcp.reactor;
 
-import reactor.core.composable.Promise;
+
+import reactor.rx.Promise;
 
 /**
  * A Promise-to-ListenableFutureAdapter where the source and the target from the Promise and

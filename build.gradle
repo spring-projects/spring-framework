@@ -53,7 +53,7 @@ configure(allprojects) { project ->
 	ext.nettyVersion         = "4.0.26.Final"
 	ext.openjpaVersion       = "2.2.2"  // 2.3.0 not Java 8 compatible (based on ASM 4)
 	ext.protobufVersion      = "2.6.1"
-	ext.reactorVersion       = "1.1.6.RELEASE"
+	ext.reactorVersion       = "2.0.1.BUILD-SNAPSHOT"
 	ext.slf4jVersion         = "1.7.11"
 	ext.snakeyamlVersion     = "1.15"
 	ext.snifferVersion       = "1.14"
@@ -117,6 +117,7 @@ configure(allprojects) { project ->
 	}
 
 	repositories {
+		mavenLocal()
 		maven { url "https://repo.spring.io/libs-release" }
 		maven { url "https://repo.spring.io/milestone" }
 	}
@@ -486,16 +487,17 @@ project("spring-messaging") {
 		compile(project(":spring-beans"))
 		compile(project(":spring-core"))
 		compile(project(":spring-context"))
-		optional("org.projectreactor:reactor-core:${reactorVersion}")
-		optional("org.projectreactor:reactor-net:${reactorVersion}") {
+		optional("io.projectreactor:reactor-net:${reactorVersion}") {
 			exclude group: "io.netty", module: "netty-all"
 		}
+		optional "io.netty:netty-all:$nettyVersion"
 		optional("org.eclipse.jetty.websocket:websocket-server:${jettyVersion}") {
 			exclude group: "javax.servlet", module: "javax.servlet-api"
 		}
 		optional("org.eclipse.jetty.websocket:websocket-client:${jettyVersion}")
 		optional("com.fasterxml.jackson.core:jackson-databind:${jackson2Version}")
 		testCompile(project(":spring-test"))
+		testCompile('org.slf4j:slf4j-log4j12:1.7.10')
 		testCompile("javax.inject:javax.inject-tck:1")
 		testCompile("javax.servlet:javax.servlet-api:3.1.0")
 		testCompile("javax.validation:validation-api:1.0.0.GA")
@@ -756,8 +758,7 @@ project("spring-websocket") {
 		testCompile("org.apache.tomcat.embed:tomcat-embed-core:${tomcatVersion}")
 		testCompile("org.apache.tomcat.embed:tomcat-embed-websocket:${tomcatVersion}")
 		testCompile("org.apache.tomcat.embed:tomcat-embed-logging-juli:${tomcatVersion}")
-		testCompile("org.projectreactor:reactor-core:${reactorVersion}")
-		testCompile("org.projectreactor:reactor-net:${reactorVersion}")
+		testCompile("io.projectreactor:reactor-net:${reactorVersion}")
 		testCompile("log4j:log4j:1.2.17")
 		testCompile("org.slf4j:slf4j-jcl:${slf4jVersion}")
 	}
