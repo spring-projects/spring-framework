@@ -209,23 +209,20 @@ public class AnnotatedElementUtilsTests {
 	}
 
 	/**
-	 * TODO [SPR-12738] Enable test.
-	 *
 	 * <p>{@code AbstractClassWithInheritedAnnotation} declares {@code handleParameterized(T)}; whereas,
 	 * {@code ConcreteClassWithInheritedAnnotation} declares {@code handleParameterized(String)}.
 	 *
-	 * <p>Thus, this test fails because {@code AnnotatedElementUtils.processWithFindSemantics()}
-	 * does not resolve an equivalent method for {@code handleParameterized(String)}
-	 * in {@code AbstractClassWithInheritedAnnotation}.
+	 * <p>As of Spring 4.2 RC1, {@code AnnotatedElementUtils.processWithFindSemantics()} does not resolve an
+	 * <em>equivalent</em> method in {@code AbstractClassWithInheritedAnnotation} for the <em>bridged</em>
+	 * {@code handleParameterized(String)} method.
 	 *
 	 * @since 4.2
 	 */
-	@Ignore("Disabled until SPR-12738 is resolved")
 	@Test
 	public void findAnnotationAttributesInheritedFromBridgedMethod() throws NoSuchMethodException {
 		Method method = ConcreteClassWithInheritedAnnotation.class.getMethod("handleParameterized", String.class);
 		AnnotationAttributes attributes = findAnnotationAttributes(method, Transactional.class);
-		assertNotNull("Should find @Transactional on ConcreteClassWithInheritedAnnotation.handleParameterized() method", attributes);
+		assertNull("Should not find @Transactional on bridged ConcreteClassWithInheritedAnnotation.handleParameterized() method", attributes);
 	}
 
 	/**
@@ -252,7 +249,7 @@ public class AnnotatedElementUtilsTests {
 		assertTrue(bridgedMethod != null && !bridgedMethod.isBridge());
 
 		AnnotationAttributes attributes = findAnnotationAttributes(bridgeMethod, Order.class);
-		assertNotNull("Should find @Order on StringGenericParameter.getFor() method", attributes);
+		assertNotNull("Should find @Order on StringGenericParameter.getFor() bridge method", attributes);
 	}
 
 

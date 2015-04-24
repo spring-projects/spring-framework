@@ -479,8 +479,6 @@ public class AnnotatedElementUtils {
 							}
 
 							try {
-								// TODO [SPR-12738] Resolve equivalent parameterized
-								// method (i.e., bridged method) in superclass.
 								Method equivalentMethod = clazz.getDeclaredMethod(method.getName(),
 									method.getParameterTypes());
 								Method resolvedEquivalentMethod = BridgeMethodResolver.findBridgedMethod(equivalentMethod);
