@@ -54,7 +54,8 @@ abstract class AbstractPromiseToListenableFutureAdapter<S, T> implements Listena
 			public void accept(S result) {
 				try {
 					registry.success(adapt(result));
-				} catch (Throwable t) {
+				}
+				catch (Throwable t) {
 					registry.failure(t);
 				}
 			}

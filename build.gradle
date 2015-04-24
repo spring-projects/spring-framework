@@ -117,9 +117,9 @@ configure(allprojects) { project ->
 	}
 
 	repositories {
-		mavenLocal()
 		maven { url "https://repo.spring.io/libs-release" }
 		maven { url "https://repo.spring.io/milestone" }
+		maven { url "https://repo.spring.io/snapshot" } // for reactor 2.0.1 snapshot
 	}
 
 	dependencies {
@@ -487,6 +487,7 @@ project("spring-messaging") {
 		compile(project(":spring-beans"))
 		compile(project(":spring-core"))
 		compile(project(":spring-context"))
+		optional("io.projectreactor:reactor-core:${reactorVersion}")
 		optional("io.projectreactor:reactor-net:${reactorVersion}") {
 			exclude group: "io.netty", module: "netty-all"
 		}
@@ -497,7 +498,6 @@ project("spring-messaging") {
 		optional("org.eclipse.jetty.websocket:websocket-client:${jettyVersion}")
 		optional("com.fasterxml.jackson.core:jackson-databind:${jackson2Version}")
 		testCompile(project(":spring-test"))
-		testCompile('org.slf4j:slf4j-log4j12:1.7.10')
 		testCompile("javax.inject:javax.inject-tck:1")
 		testCompile("javax.servlet:javax.servlet-api:3.1.0")
 		testCompile("javax.validation:validation-api:1.0.0.GA")

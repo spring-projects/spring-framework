@@ -16,64 +16,57 @@
 
 package org.springframework.messaging.tcp.reactor;
 
-import org.reactivestreams.Publisher;
+import reactor.fn.Functions;
+import reactor.io.net.ChannelStream;
+import reactor.rx.Promises;
+import reactor.rx.broadcast.Broadcaster;
+
 import org.springframework.messaging.Message;
 import org.springframework.messaging.tcp.TcpConnection;
 import org.springframework.util.concurrent.ListenableFuture;
-import reactor.fn.Consumer;
-import reactor.fn.Function;
-import reactor.fn.Functions;
-import reactor.io.net.ChannelStream;
-import reactor.rx.Promise;
-import reactor.rx.Promises;
-import reactor.rx.Stream;
-import reactor.rx.broadcast.Broadcaster;
-
-import java.lang.reflect.Constructor;
 
 /**
- * An implementation of {@link org.springframework.messaging.tcp.TcpConnection}
- * based on the TCP client support of the Reactor project.
+ * An implementation of {@link org.springframework.messaging.tcp.TcpConnection
+ * TcpConnection} based on the TCP client support of the Reactor project.
+ *
+ * @param <P> the payload type of messages read or written to the TCP stream.
  *
  * @author Rossen Stoyanchev
- * @since 4.0
- * @param <P> the payload type of Spring Message's read from and written to
- * the TCP stream
+ * @since 4.2
  */
 public class Reactor2TcpConnection<P> implements TcpConnection<P> {
 
-	private final ChannelStream<Message<P>, Message<P>> channel;
-	private final Broadcaster<Message<P>>               sink;
+	private final ChannelStream<Message<P>, Message<P>> channelStream;
+
+	private final Broadcaster<Message<P>> sink;
 
 
-	public Reactor2TcpConnection(ChannelStream<Message<P>, Message<P>> connection) {
-		this.channel = connection;
+	public Reactor2TcpConnection(ChannelStream<Message<P>, Message<P>> channelStream) {
+		this.channelStream = channelStream;
 		this.sink = Broadcaster.create();
-
-		channel.sink(sink);
+		this.channelStream.sink(this.sink);
 	}
 
 
 	@Override
 	public ListenableFuture<Void> send(Message<P> message) {
-		sink.onNext(message);
-		//FIXME need to align Reactor with Reactive IPC to have publish/confirm receipt
+		this.sink.onNext(message);
 		return new PassThroughPromiseToListenableFutureAdapter<Void>(Promises.<Void>success(null));
 	}
 
 	@Override
 	public void onReadInactivity(Runnable runnable, long inactivityDuration) {
-		this.channel.on().readIdle(inactivityDuration, Functions.<Void>consumer(runnable));
+		this.channelStream.on().readIdle(inactivityDuration, Functions.<Void>consumer(runnable));
 	}
 
 	@Override
 	public void onWriteInactivity(Runnable runnable, long inactivityDuration) {
-		this.channel.on().writeIdle(inactivityDuration, Functions.<Void>consumer(runnable));
+		this.channelStream.on().writeIdle(inactivityDuration, Functions.<Void>consumer(runnable));
 	}
 
 	@Override
 	public void close() {
-		sink.onComplete();
+		this.sink.onComplete();
 	}
 
 }

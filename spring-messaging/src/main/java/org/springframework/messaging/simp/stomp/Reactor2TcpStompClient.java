@@ -18,16 +18,17 @@ package org.springframework.messaging.simp.stomp;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.tcp.TcpOperations;
 import org.springframework.messaging.tcp.reactor.Reactor2TcpClient;
+import org.springframework.messaging.tcp.reactor.Reactor2TcpClient.TcpClientSpecFactory;
 import org.springframework.util.concurrent.ListenableFuture;
 import reactor.Environment;
 import reactor.core.config.ConfigurationReader;
 import reactor.core.config.DispatcherConfiguration;
 import reactor.core.config.DispatcherType;
 import reactor.core.config.ReactorConfiguration;
-import reactor.fn.Function;
-import reactor.io.net.Spec;
+import reactor.io.net.Spec.TcpClientSpec;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Properties;
 
 /**
@@ -52,40 +53,18 @@ public class Reactor2TcpStompClient extends StompClientSupport {
 
 	/**
 	 * Create an instance with the given host and port.
-	 *
 	 * @param host the host
 	 * @param port the port
 	 */
 	public Reactor2TcpStompClient(final String host, final int port) {
-		this.tcpClient = new Reactor2TcpClient<byte[]>(createNettyTcpClientFactory(host, port));
-	}
-
-	private Function<Spec.TcpClientSpec<Message<byte[]>, Message<byte[]>>,
-			Spec.TcpClientSpec<Message<byte[]>, Message<byte[]>>> createNettyTcpClientFactory(
-			final String host, final int port
-	) {
-
-		final Environment environment = new Environment(new StompClientDispatcherConfigReader()).assignErrorJournal();
-
-		return new Function<Spec.TcpClientSpec<Message<byte[]>, Message<byte[]>>,
-				Spec.TcpClientSpec<Message<byte[]>, Message<byte[]>>>() {
-
-			@Override
-			public Spec.TcpClientSpec<Message<byte[]>, Message<byte[]>> apply(Spec.TcpClientSpec<Message<byte[]>,
-					Message<byte[]>> spec) {
-
-				return spec
-						.codec(new Reactor2StompCodec(new StompEncoder(), new StompDecoder()))
-						.env(environment)
-						.dispatcher(environment.getCachedDispatchers("StompClient").get())
-						.connect(host, port);
-			}
-		};
+		ConfigurationReader reader = new StompClientDispatcherConfigReader();
+		Environment environment = new Environment(reader).assignErrorJournal();
+		StompTcpClientSpecFactory factory = new StompTcpClientSpecFactory(environment, host, port);
+		this.tcpClient = new Reactor2TcpClient<byte[]>(factory);
 	}
 
 	/**
 	 * Create an instance with a pre-configured TCP client.
-	 *
 	 * @param tcpClient the client to use
 	 */
 	public Reactor2TcpStompClient(TcpOperations<byte[]> tcpClient) {
@@ -136,8 +115,35 @@ public class Reactor2TcpStompClient extends StompClientSupport {
 			String dispatcherName = "StompClient";
 			DispatcherType dispatcherType = DispatcherType.DISPATCHER_GROUP;
 			DispatcherConfiguration config = new DispatcherConfiguration(dispatcherName, dispatcherType, 128, 0);
-			return new ReactorConfiguration(Arrays.<DispatcherConfiguration>asList(config), dispatcherName, new Properties
-					());
+			List<DispatcherConfiguration> configList = Arrays.<DispatcherConfiguration>asList(config);
+			return new ReactorConfiguration(configList, dispatcherName, new Properties());
+		}
+	}
+
+	private static class StompTcpClientSpecFactory
+			implements TcpClientSpecFactory<Message<byte[]>, Message<byte[]>> {
+
+		private final Environment environment;
+
+		private final String host;
+
+		private final int port;
+
+		public StompTcpClientSpecFactory(Environment environment, String host, int port) {
+			this.environment = environment;
+			this.host = host;
+			this.port = port;
+		}
+
+		@Override
+		public TcpClientSpec<Message<byte[]>, Message<byte[]>> apply(
+				TcpClientSpec<Message<byte[]>, Message<byte[]>> tcpClientSpec) {
+
+			return tcpClientSpec
+					.codec(new Reactor2StompCodec(new StompEncoder(), new StompDecoder()))
+					.env(this.environment)
+					.dispatcher(this.environment.getCachedDispatchers("StompClient").get())
+					.connect(this.host, this.port);
 		}
 	}
 
