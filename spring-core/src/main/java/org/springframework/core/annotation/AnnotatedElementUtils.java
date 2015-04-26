@@ -119,7 +119,8 @@ public class AnnotatedElementUtils {
 	 * @param element the annotated element; never {@code null}
 	 * @param annotationType the fully qualified class name of the annotation
 	 * type to find; never {@code null} or empty
-	 * @return the merged {@code AnnotationAttributes}
+	 * @return the merged {@code AnnotationAttributes}, or {@code null} if
+	 * not found
 	 * @see #getAnnotationAttributes(AnnotatedElement, String, boolean, boolean)
 	 */
 	public static AnnotationAttributes getAnnotationAttributes(AnnotatedElement element, String annotationType) {
@@ -139,7 +140,8 @@ public class AnnotatedElementUtils {
 	 * @param nestedAnnotationsAsMap whether to convert nested Annotation
 	 * instances into {@link AnnotationAttributes} maps or to preserve them
 	 * as Annotation instances
-	 * @return the merged {@code AnnotationAttributes}
+	 * @return the merged {@code AnnotationAttributes}, or {@code null} if
+	 * not found
 	 */
 	public static AnnotationAttributes getAnnotationAttributes(AnnotatedElement element, String annotationType,
 			boolean classValuesAsString, boolean nestedAnnotationsAsMap) {
@@ -159,7 +161,8 @@ public class AnnotatedElementUtils {
 	 *
 	 * @param element the annotated element; never {@code null}
 	 * @param annotationType the annotation type to find; never {@code null}
-	 * @return the merged {@code AnnotationAttributes}
+	 * @return the merged {@code AnnotationAttributes}, or {@code null} if
+	 * not found
 	 */
 	public static AnnotationAttributes findAnnotationAttributes(AnnotatedElement element,
 			Class<? extends Annotation> annotationType) {
@@ -179,7 +182,8 @@ public class AnnotatedElementUtils {
 	 * @param element the annotated element; never {@code null}
 	 * @param annotationType the fully qualified class name of the annotation
 	 * type to find; never {@code null} or empty
-	 * @return the merged {@code AnnotationAttributes}
+	 * @return the merged {@code AnnotationAttributes}, or {@code null} if
+	 * not found
 	 */
 	public static AnnotationAttributes findAnnotationAttributes(AnnotatedElement element, String annotationType) {
 		return findAnnotationAttributes(element, annotationType, true, true, true, true, false, false);
@@ -206,7 +210,8 @@ public class AnnotatedElementUtils {
 	 * @param nestedAnnotationsAsMap whether to convert nested Annotation
 	 * instances into {@link AnnotationAttributes} maps or to preserve them
 	 * as Annotation instances
-	 * @return the merged {@code AnnotationAttributes}
+	 * @return the merged {@code AnnotationAttributes}, or {@code null} if
+	 * not found
 	 */
 	public static AnnotationAttributes findAnnotationAttributes(AnnotatedElement element, String annotationType,
 			boolean searchOnInterfaces, boolean searchOnSuperclasses, boolean searchOnMethodsInInterfaces,
@@ -221,6 +226,8 @@ public class AnnotatedElementUtils {
 	 * @param element the annotated element; never {@code null}
 	 * @param annotationType the fully qualified class name of the annotation
 	 * type to find; never {@code null} or empty
+	 * @return a {@link MultiValueMap} containing the annotation attributes
+	 * from all annotations found, or {@code null} if not found
 	 */
 	public static MultiValueMap<String, Object> getAllAnnotationAttributes(AnnotatedElement element, String annotationType) {
 		return getAllAnnotationAttributes(element, annotationType, false, false);
@@ -230,11 +237,19 @@ public class AnnotatedElementUtils {
 	 * @param element the annotated element; never {@code null}
 	 * @param annotationType the fully qualified class name of the annotation
 	 * type to find; never {@code null} or empty
+	 * @param classValuesAsString whether to convert Class references into
+	 * Strings or to preserve them as Class references
+	 * @param nestedAnnotationsAsMap whether to convert nested Annotation
+	 * instances into {@link AnnotationAttributes} maps or to preserve them
+	 * as Annotation instances
+	 * @return a {@link MultiValueMap} containing the annotation attributes
+	 * from all annotations found, or {@code null} if not found
 	 */
 	public static MultiValueMap<String, Object> getAllAnnotationAttributes(AnnotatedElement element,
 			final String annotationType, final boolean classValuesAsString, final boolean nestedAnnotationsAsMap) {
 
 		final MultiValueMap<String, Object> attributes = new LinkedMultiValueMap<String, Object>();
+
 		processWithGetSemantics(element, annotationType, new Processor<Void>() {
 			@Override
 			public Void process(Annotation annotation, int metaDepth) {
@@ -258,6 +273,7 @@ public class AnnotatedElementUtils {
 				}
 			}
 		});
+
 		return (attributes.isEmpty() ? null : attributes);
 	}
 
@@ -269,14 +285,14 @@ public class AnnotatedElementUtils {
 	 * @param annotationType the fully qualified class name of the annotation
 	 * type to find; never {@code null} or empty
 	 * @param processor the processor to delegate to
-	 * @return the result of the processor
+	 * @return the result of the processor, potentially {@code null}
 	 */
 	private static <T> T processWithGetSemantics(AnnotatedElement element, String annotationType, Processor<T> processor) {
 		try {
 			return processWithGetSemantics(element, annotationType, processor, new HashSet<AnnotatedElement>(), 0);
 		}
 		catch (Throwable ex) {
-			throw new IllegalStateException("Failed to introspect annotations: " + element, ex);
+			throw new IllegalStateException("Failed to introspect annotations on " + element, ex);
 		}
 	}
 
@@ -285,18 +301,17 @@ public class AnnotatedElementUtils {
 	 * method, avoiding endless recursion by tracking which annotated elements
 	 * have already been <em>visited</em>.
 	 *
-	 * <p>The {@code metaDepth} parameter represents the depth of the annotation
-	 * relative to the initial element. For example, an annotation that is
-	 * <em>present</em> on the element will have a depth of 0; a meta-annotation
-	 * will have a depth of 1; and a meta-meta-annotation will have a depth of 2.
+	 * <p>The {@code metaDepth} parameter is explained in the
+	 * {@link Processor#process process()} method of the {@link Processor}
+	 * API.
 	 *
 	 * @param element the annotated element; never {@code null}
 	 * @param annotationType the fully qualified class name of the annotation
 	 * type to find; never {@code null} or empty
 	 * @param processor the processor to delegate to
 	 * @param visited the set of annotated elements that have already been visited
-	 * @param metaDepth the depth of the annotation relative to the initial element
-	 * @return the result of the processor
+	 * @param metaDepth the meta-depth of the annotation
+	 * @return the result of the processor, potentially {@code null}
 	 */
 	private static <T> T processWithGetSemantics(AnnotatedElement element, String annotationType,
 			Processor<T> processor, Set<AnnotatedElement> visited, int metaDepth) {
@@ -361,7 +376,7 @@ public class AnnotatedElementUtils {
 	 * @param searchOnMethodsInSuperclasses whether to search on methods
 	 * in superclasses, if the annotated element is a method
 	 * @param processor the processor to delegate to
-	 * @return the result of the processor
+	 * @return the result of the processor, potentially {@code null}
 	 */
 	private static <T> T processWithFindSemantics(AnnotatedElement element, String annotationType,
 			boolean searchOnInterfaces, boolean searchOnSuperclasses, boolean searchOnMethodsInInterfaces,
@@ -372,19 +387,18 @@ public class AnnotatedElementUtils {
 				searchOnMethodsInInterfaces, searchOnMethodsInSuperclasses, processor, new HashSet<AnnotatedElement>(), 0);
 		}
 		catch (Throwable ex) {
-			throw new IllegalStateException("Failed to introspect annotations: " + element, ex);
+			throw new IllegalStateException("Failed to introspect annotations on " + element, ex);
 		}
 	}
 
 	/**
-	 * Perform the search algorithm for the {@link #process} method, avoiding
-	 * endless recursion by tracking which annotated elements have already been
-	 * <em>visited</em>.
+	 * Perform the search algorithm for the {@link #processWithFindSemantics}
+	 * method, avoiding endless recursion by tracking which annotated elements
+	 * have already been <em>visited</em>.
 	 *
-	 * <p>The {@code metaDepth} parameter represents the depth of the annotation
-	 * relative to the initial element. For example, an annotation that is
-	 * <em>present</em> on the element will have a depth of 0; a meta-annotation
-	 * will have a depth of 1; and a meta-meta-annotation will have a depth of 2.
+	 * <p>The {@code metaDepth} parameter is explained in the
+	 * {@link Processor#process process()} method of the {@link Processor}
+	 * API.
 	 *
 	 * @param element the annotated element; never {@code null}
 	 * @param annotationType the fully qualified class name of the annotation
@@ -399,8 +413,8 @@ public class AnnotatedElementUtils {
 	 * in superclasses, if the annotated element is a method
 	 * @param processor the processor to delegate to
 	 * @param visited the set of annotated elements that have already been visited
-	 * @param metaDepth the depth of the annotation relative to the initial element
-	 * @return the result of the processor
+	 * @param metaDepth the meta-depth of the annotation
+	 * @return the result of the processor, potentially {@code null}
 	 */
 	private static <T> T processWithFindSemantics(AnnotatedElement element, String annotationType,
 			boolean searchOnInterfaces, boolean searchOnSuperclasses, boolean searchOnMethodsInInterfaces,
@@ -569,28 +583,32 @@ public class AnnotatedElementUtils {
 
 
 	/**
-	 * Callback interface that is used to process a target annotation that
-	 * was found as the result of a search and to post-process the result as
-	 * the search algorithm goes back down the annotation hierarchy from
-	 * the target annotation to the initial {@link AnnotatedElement}.
+	 * Callback interface that is used to process a target annotation (or
+	 * multiple instances of the target annotation) that has been found by
+	 * the currently executing search and to post-process the result as the
+	 * search algorithm goes back down the annotation hierarchy from the
+	 * target annotation to the initial {@link AnnotatedElement} that was
+	 * supplied to the search algorithm.
 	 *
-	 * @param <T> the result type
+	 * @param <T> the type of result returned by the processor
 	 */
 	private static interface Processor<T> {
 
 		/**
-		 * Process the actual target annotation once it has been found by
+		 * Process an actual target annotation once it has been found by
 		 * the search algorithm.
 		 *
 		 * <p>The {@code metaDepth} parameter represents the depth of the
-		 * annotation relative to the initial element. For example, an annotation
-		 * that is <em>present</em> on the element will have a depth of 0; a
-		 * meta-annotation will have a depth of 1; and a meta-meta-annotation
-		 * will have a depth of 2.
+		 * annotation relative to the first annotated element in the
+		 * annotation hierarchy. For example, an annotation that is
+		 * <em>present</em> on a non-annotation element will have a depth
+		 * of 0; a meta-annotation will have a depth of 1; and a
+		 * meta-meta-annotation will have a depth of 2; etc.
 		 *
 		 * @param annotation the annotation to process
-		 * @param metaDepth the depth of the annotation relative to the initial element
+		 * @param metaDepth the meta-depth of the annotation
 		 * @return the result of the processing, or {@code null} to continue
+		 * searching for additional target annotations
 		 */
 		T process(Annotation annotation, int metaDepth);
 
@@ -599,7 +617,7 @@ public class AnnotatedElementUtils {
 		 *
 		 * <p>The {@code annotation} supplied to this method is an annotation
 		 * that is present in the annotation hierarchy, above the initial
-		 * {@link AnnotatedElement} but below the target annotation found by
+		 * {@link AnnotatedElement} but below a target annotation found by
 		 * the search algorithm.
 		 *
 		 * @param annotation the annotation to post-process
