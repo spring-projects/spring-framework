@@ -17,14 +17,17 @@
 package org.springframework.test.context;
 
 import java.lang.reflect.Constructor;
+import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.core.annotation.AnnotatedElementUtils;
+import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.MultiValueMap;
 
 import static org.springframework.beans.BeanUtils.*;
-import static org.springframework.core.annotation.AnnotationUtils.*;
 
 /**
  * {@code BootstrapUtils} is a collection of utility methods to assist with
@@ -120,9 +123,19 @@ abstract class BootstrapUtils {
 
 		Class<? extends TestContextBootstrapper> clazz = null;
 		try {
-			BootstrapWith bootstrapWith = findAnnotation(testClass, BootstrapWith.class);
-			if (bootstrapWith != null && !TestContextBootstrapper.class.equals(bootstrapWith.value())) {
-				clazz = bootstrapWith.value();
+
+			MultiValueMap<String, Object> attributesMultiMap = AnnotatedElementUtils.getAllAnnotationAttributes(
+				testClass, BootstrapWith.class.getName());
+			List<Object> values = (attributesMultiMap == null ? null : attributesMultiMap.get(AnnotationUtils.VALUE));
+
+			if (values != null) {
+				if (values.size() != 1) {
+					String msg = String.format(
+						"Configuration error: found multiple declarations of @BootstrapWith on test class [%s] with values %s",
+						testClass.getName(), values);
+					throw new IllegalStateException(msg);
+				}
+				clazz = (Class<? extends TestContextBootstrapper>) values.get(0);
 			}
 			else {
 				clazz = (Class<? extends TestContextBootstrapper>) ClassUtils.forName(
@@ -130,7 +143,8 @@ abstract class BootstrapUtils {
 			}
 
 			if (logger.isDebugEnabled()) {
-				logger.debug(String.format("Instantiating TestContextBootstrapper from class [%s]", clazz.getName()));
+				logger.debug(String.format("Instantiating TestContextBootstrapper for test class [%s] from class [%s]",
+					testClass.getName(), clazz.getName()));
 			}
 
 			TestContextBootstrapper testContextBootstrapper = instantiateClass(clazz, TestContextBootstrapper.class);
@@ -139,6 +153,10 @@ abstract class BootstrapUtils {
 			return testContextBootstrapper;
 		}
 		catch (Throwable t) {
+			if (t instanceof IllegalStateException) {
+				throw (IllegalStateException) t;
+			}
+
 			throw new IllegalStateException("Could not load TestContextBootstrapper [" + clazz
 					+ "]. Specify @BootstrapWith's 'value' attribute "
 					+ "or make the default bootstrapper class available.", t);
