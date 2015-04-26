@@ -41,16 +41,46 @@ import org.springframework.util.MultiValueMap;
 public class AnnotatedElementUtils {
 
 	/**
+	 * Get the fully qualified class names of all meta-annotation types
+	 * <em>present</em> on the annotation (of the specified
+	 * {@code annotationType}) on the supplied {@link AnnotatedElement}.
+	 *
+	 * <p>This method also finds all meta-annotations in the annotation
+	 * hierarchy above the specified annotation.
+	 *
+	 * @param element the annotated element; never {@code null}
+	 * @param annotationType the annotation type on which to find
+	 * meta-annotations; never {@code null}
+	 * @return the names of all meta-annotations present on the annotation,
+	 * or {@code null} if not found
+	 */
+	public static Set<String> getMetaAnnotationTypes(AnnotatedElement element,
+			Class<? extends Annotation> annotationType) {
+		Assert.notNull(annotationType, "annotationType must not be null");
+		return getMetaAnnotationTypes(element, annotationType.getName());
+	}
+
+	/**
+	 * Get the fully qualified class names of all meta-annotation types
+	 * <em>present</em> on the annotation (of the specified
+	 * {@code annotationType}) on the supplied {@link AnnotatedElement}.
+	 *
+	 * <p>This method also finds all meta-annotations in the annotation
+	 * hierarchy above the specified annotation.
+	 *
 	 * @param element the annotated element; never {@code null}
 	 * @param annotationType the fully qualified class name of the annotation
-	 * type to find; never {@code null} or empty
+	 * type on which to find meta-annotations; never {@code null} or empty
+	 * @return the names of all meta-annotations present on the annotation,
+	 * or {@code null} if not found
 	 */
 	public static Set<String> getMetaAnnotationTypes(AnnotatedElement element, String annotationType) {
 		Assert.notNull(element, "AnnotatedElement must not be null");
 		Assert.hasText(annotationType, "annotationType must not be null or empty");
 
 		final Set<String> types = new LinkedHashSet<String>();
-		processWithGetSemantics(element, annotationType, new Processor<Object>() {
+
+		processWithGetSemantics(element, annotationType, new SimpleAnnotationProcessor<Object>() {
 			@Override
 			public Object process(Annotation annotation, int metaDepth) {
 				if (metaDepth > 0) {
@@ -58,10 +88,8 @@ public class AnnotatedElementUtils {
 				}
 				return null;
 			}
-			@Override
-			public void postProcess(Annotation annotation, Object result) {
-			}
 		});
+
 		return (types.isEmpty() ? null : types);
 	}
 
@@ -74,16 +102,13 @@ public class AnnotatedElementUtils {
 		Assert.notNull(element, "AnnotatedElement must not be null");
 		Assert.hasText(annotationType, "annotationType must not be null or empty");
 
-		return Boolean.TRUE.equals(processWithGetSemantics(element, annotationType, new Processor<Boolean>() {
+		return Boolean.TRUE.equals(processWithGetSemantics(element, annotationType, new SimpleAnnotationProcessor<Boolean>() {
 			@Override
 			public Boolean process(Annotation annotation, int metaDepth) {
 				if (metaDepth > 0) {
 					return Boolean.TRUE;
 				}
 				return null;
-			}
-			@Override
-			public void postProcess(Annotation annotation, Boolean result) {
 			}
 		}));
 	}
@@ -97,13 +122,10 @@ public class AnnotatedElementUtils {
 		Assert.notNull(element, "AnnotatedElement must not be null");
 		Assert.hasText(annotationType, "annotationType must not be null or empty");
 
-		return Boolean.TRUE.equals(processWithGetSemantics(element, annotationType, new Processor<Boolean>() {
+		return Boolean.TRUE.equals(processWithGetSemantics(element, annotationType, new SimpleAnnotationProcessor<Boolean>() {
 			@Override
 			public Boolean process(Annotation annotation, int metaDepth) {
 				return Boolean.TRUE;
-			}
-			@Override
-			public void postProcess(Annotation annotation, Boolean result) {
 			}
 		}));
 	}
@@ -145,7 +167,6 @@ public class AnnotatedElementUtils {
 	 */
 	public static AnnotationAttributes getAnnotationAttributes(AnnotatedElement element, String annotationType,
 			boolean classValuesAsString, boolean nestedAnnotationsAsMap) {
-
 		return processWithGetSemantics(element, annotationType, new MergeAnnotationAttributesProcessor(
 			classValuesAsString, nestedAnnotationsAsMap));
 	}
@@ -326,6 +347,10 @@ public class AnnotatedElementUtils {
 
 				// Search in local annotations
 				for (Annotation annotation : annotations) {
+					// TODO Add check for !isInJavaLangAnnotationPackage()
+					// if (!AnnotationUtils.isInJavaLangAnnotationPackage(annotation)
+					// && (annotation.annotationType().getName().equals(annotationType) ||
+					// metaDepth > 0)) {
 					if (annotation.annotationType().getName().equals(annotationType) || metaDepth > 0) {
 						T result = processor.process(annotation, metaDepth);
 						if (result != null) {
@@ -432,7 +457,8 @@ public class AnnotatedElementUtils {
 
 				// Search in local annotations
 				for (Annotation annotation : annotations) {
-					if (annotation.annotationType().getName().equals(annotationType) || metaDepth > 0) {
+					if (!AnnotationUtils.isInJavaLangAnnotationPackage(annotation)
+							&& (annotation.annotationType().getName().equals(annotationType) || metaDepth > 0)) {
 						T result = processor.process(annotation, metaDepth);
 						if (result != null) {
 							return result;
@@ -616,14 +642,30 @@ public class AnnotatedElementUtils {
 		 * Post-process the result returned by the {@link #process} method.
 		 *
 		 * <p>The {@code annotation} supplied to this method is an annotation
-		 * that is present in the annotation hierarchy, above the initial
-		 * {@link AnnotatedElement} but below a target annotation found by
-		 * the search algorithm.
+		 * that is present in the annotation hierarchy, between the initial
+		 * {@link AnnotatedElement} and a target annotation found by the
+		 * search algorithm.
 		 *
 		 * @param annotation the annotation to post-process
 		 * @param result the result to post-process
 		 */
 		void postProcess(Annotation annotation, T result);
+	}
+
+	/**
+	 * {@link Processor} that only {@linkplain #process processes} annotations
+	 * and does not {@link #postProcess} results.
+	 * @since 4.2
+	 */
+	private abstract static class SimpleAnnotationProcessor<T> implements Processor<T> {
+
+		/**
+		 * <em>No-op</em>.
+		 */
+		@Override
+		public final void postProcess(Annotation annotation, T result) {
+			/* no-op */
+		}
 	}
 
 	private static class MergeAnnotationAttributesProcessor implements Processor<AnnotationAttributes> {

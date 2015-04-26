@@ -24,10 +24,13 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.lang.reflect.Method;
 import java.util.Arrays;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.junit.Ignore;
 import org.junit.Test;
 
+import org.springframework.stereotype.Component;
 import org.springframework.util.MultiValueMap;
 
 import static org.junit.Assert.*;
@@ -41,6 +44,28 @@ import static org.springframework.core.annotation.AnnotatedElementUtils.*;
  * @since 4.0.3
  */
 public class AnnotatedElementUtilsTests {
+
+	private Set<String> names(Class<?>... classes) {
+		return Arrays.stream(classes).map(clazz -> clazz.getName()).collect(Collectors.toSet());
+	}
+
+	@Test
+	public void getMetaAnnotationTypesOnNonAnnotatedClass() {
+		assertNull(getMetaAnnotationTypes(NonAnnotatedClass.class, TransactionalComponent.class));
+	}
+
+	@Test
+	public void getMetaAnnotationTypesOnClassWithMetaDepth1() {
+		Set<String> names = getMetaAnnotationTypes(TransactionalComponentClass.class, TransactionalComponent.class);
+		assertEquals(names(Transactional.class, Component.class, Retention.class, Documented.class, Target.class, Inherited.class), names);
+	}
+
+	@Test
+	public void getMetaAnnotationTypesOnClassWithMetaDepth2() {
+		Set<String> names = getMetaAnnotationTypes(ComposedTransactionalComponentClass.class,
+			ComposedTransactionalComponent.class);
+		assertEquals(names(TransactionalComponent.class, Transactional.class, Component.class, Retention.class, Documented.class, Target.class, Inherited.class), names);
+	}
 
 	@Test
 	public void getAllAnnotationAttributesOnClassWithLocalAnnotation() {
@@ -318,7 +343,29 @@ public class AnnotatedElementUtilsTests {
 	@interface TxComposed2 {
 	}
 
+	@Transactional
+	@Component
+	@Retention(RetentionPolicy.RUNTIME)
+	@interface TransactionalComponent {
+	}
+
+	@TransactionalComponent
+	@Retention(RetentionPolicy.RUNTIME)
+	@interface ComposedTransactionalComponent {
+	}
+
 	// -------------------------------------------------------------------------
+
+	static class NonAnnotatedClass {
+	}
+
+	@TransactionalComponent
+	static class TransactionalComponentClass {
+	}
+
+	@ComposedTransactionalComponent
+	static class ComposedTransactionalComponentClass {
+	}
 
 	@Transactional
 	static class ClassWithInheritedAnnotation {
