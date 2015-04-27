@@ -759,6 +759,7 @@ project("spring-websocket") {
 		testCompile("org.apache.tomcat.embed:tomcat-embed-websocket:${tomcatVersion}")
 		testCompile("org.apache.tomcat.embed:tomcat-embed-logging-juli:${tomcatVersion}")
 		testCompile("io.projectreactor:reactor-net:${reactorVersion}")
+		testCompile("io.netty:netty-all:${nettyVersion}")
 		testCompile("log4j:log4j:1.2.17")
 		testCompile("org.slf4j:slf4j-jcl:${slf4jVersion}")
 	}
