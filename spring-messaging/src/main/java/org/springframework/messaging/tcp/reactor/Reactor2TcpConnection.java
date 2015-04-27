@@ -49,6 +49,24 @@ public class Reactor2TcpConnection<P> implements TcpConnection<P> {
 		this.closePromise = closePromise;
 	}
 
+	/*
+	TODO should provide an alternate send method to expose batch write/flush
+	It can be as simple as :
+
+	public ListenableFuture<Void> send(Iterable<Message<P>> messages) {
+		Promise<Void> afterWrite = Promises.prepare();
+		this.channelStream.writeWith(Streams.from(messages)).subscribe(afterWrite);
+		return new PassThroughPromiseToListenableFutureAdapter<Void>(afterWrite);
+	}
+
+	An Alternative with Publisher :
+
+	public ListenableFuture<Void> send(Publisher<? extends Message<P>> messages) {
+		Promise<Void> afterWrite = Promises.prepare();
+		this.channelStream.writeWith(messages).subscribe(afterWrite);
+		return new PassThroughPromiseToListenableFutureAdapter<Void>(afterWrite);
+	}
+	*/
 
 	@Override
 	public ListenableFuture<Void> send(Message<P> message) {
