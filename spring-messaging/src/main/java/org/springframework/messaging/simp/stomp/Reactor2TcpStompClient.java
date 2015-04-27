@@ -18,13 +18,13 @@ package org.springframework.messaging.simp.stomp;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.tcp.TcpOperations;
 import org.springframework.messaging.tcp.reactor.Reactor2TcpClient;
-import org.springframework.messaging.tcp.reactor.Reactor2TcpClient.TcpClientSpecFactory;
 import org.springframework.util.concurrent.ListenableFuture;
 import reactor.Environment;
 import reactor.core.config.ConfigurationReader;
 import reactor.core.config.DispatcherConfiguration;
 import reactor.core.config.DispatcherType;
 import reactor.core.config.ReactorConfiguration;
+import reactor.io.net.NetStreams;
 import reactor.io.net.Spec.TcpClientSpec;
 
 import java.util.Arrays;
@@ -33,8 +33,7 @@ import java.util.Properties;
 
 /**
  * A STOMP over TCP client that uses
- * {@link Reactor2TcpClient
- * Reactor11TcpClient}.
+ * {@link Reactor2TcpClient}.
  *
  * @author Rossen Stoyanchev
  * @since 4.2
@@ -121,7 +120,7 @@ public class Reactor2TcpStompClient extends StompClientSupport {
 	}
 
 	private static class StompTcpClientSpecFactory
-			implements TcpClientSpecFactory<Message<byte[]>, Message<byte[]>> {
+			implements NetStreams.TcpClientFactory<Message<byte[]>, Message<byte[]>> {
 
 		private final Environment environment;
 
