@@ -16,15 +16,11 @@
 
 package org.springframework.messaging.tcp.reactor;
 
-import org.reactivestreams.Subscriber;
-import org.reactivestreams.Subscription;
-import org.springframework.util.concurrent.ListenableFutureAdapter;
 import reactor.fn.Functions;
 import reactor.io.net.ChannelStream;
 import reactor.rx.Promise;
 import reactor.rx.Promises;
 import reactor.rx.Streams;
-import reactor.rx.broadcast.Broadcaster;
 
 import org.springframework.messaging.Message;
 import org.springframework.messaging.tcp.TcpConnection;
@@ -42,9 +38,13 @@ import org.springframework.util.concurrent.ListenableFuture;
 public class Reactor2TcpConnection<P> implements TcpConnection<P> {
 
 	private final ChannelStream<Message<P>, Message<P>> channelStream;
+
 	private final Promise<Void> closePromise;
 
-	public Reactor2TcpConnection(ChannelStream<Message<P>, Message<P>> channelStream, Promise<Void> closePromise) {
+
+	public Reactor2TcpConnection(ChannelStream<Message<P>, Message<P>> channelStream,
+			Promise<Void> closePromise) {
+
 		this.channelStream = channelStream;
 		this.closePromise = closePromise;
 	}
@@ -71,4 +71,5 @@ public class Reactor2TcpConnection<P> implements TcpConnection<P> {
 	public void close() {
 		this.closePromise.onComplete();
 	}
+
 }
