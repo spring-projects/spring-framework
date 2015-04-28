@@ -157,7 +157,7 @@ public class Reactor2TcpClient<P> implements TcpOperations<P> {
 	}
 
 	@Override
-	public ListenableFuture<Void> connect(TcpConnectionHandler<P> handler, ReconnectStrategy strategy) {
+	public ListenableFuture<Void> connect(final TcpConnectionHandler<P> handler, ReconnectStrategy strategy) {
 		Assert.notNull(strategy, "ReconnectStrategy must not be null");
 		Class<NettyTcpClient> type = REACTOR_TCP_CLIENT_TYPE;
 
@@ -167,6 +167,13 @@ public class Reactor2TcpClient<P> implements TcpOperations<P> {
 				composeConnectionHandling(tcpClient, handler),
 				new ReactorRectonnectAdapter(strategy)
 		);
+
+		stream.after().next().onError(new Consumer<Throwable>() {
+			@Override
+			public void accept(Throwable throwable) {
+				handler.afterConnectFailure(throwable);
+			}
+		});
 
 		return new PassThroughPromiseToListenableFutureAdapter<Void>(stream.next().after());
 	}
