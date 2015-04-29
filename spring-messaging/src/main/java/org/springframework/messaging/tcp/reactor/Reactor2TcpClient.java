@@ -23,6 +23,8 @@ import java.util.List;
 import java.util.Properties;
 
 import io.netty.channel.nio.NioEventLoopGroup;
+import io.netty.util.concurrent.Future;
+import io.netty.util.concurrent.FutureListener;
 import org.reactivestreams.Publisher;
 import reactor.Environment;
 import reactor.core.config.ConfigurationReader;
@@ -71,6 +73,7 @@ public class Reactor2TcpClient<P> implements TcpOperations<P> {
 	@SuppressWarnings("rawtypes")
 	public static final Class<NettyTcpClient> REACTOR_TCP_CLIENT_TYPE = NettyTcpClient.class;
 
+	private final NioEventLoopGroup                                   sharedEventLoopGroup;
 	private final NetStreams.TcpClientFactory<Message<P>, Message<P>> tcpClientSpecFactory;
 
 	private final List<TcpClient<Message<P>, Message<P>>> tcpClients =
@@ -92,7 +95,7 @@ public class Reactor2TcpClient<P> implements TcpOperations<P> {
 	 */
 	public Reactor2TcpClient(final String host, final int port, final Codec<Buffer, Message<P>, Message<P>> codec) {
 
-		final NioEventLoopGroup eventLoopGroup = initEventLoopGroup();
+		this.sharedEventLoopGroup = initEventLoopGroup();
 
 		this.tcpClientSpecFactory = new NetStreams.TcpClientFactory<Message<P>, Message<P>>() {
 
@@ -102,7 +105,7 @@ public class Reactor2TcpClient<P> implements TcpOperations<P> {
 						.env(new Environment(new SynchronousDispatcherConfigReader()))
 						.codec(codec)
 						.connect(host, port)
-						.options(new NettyClientSocketOptions().eventLoopGroup(eventLoopGroup));
+						.options(new NettyClientSocketOptions().eventLoopGroup(sharedEventLoopGroup));
 			}
 		};
 	}
@@ -135,6 +138,7 @@ public class Reactor2TcpClient<P> implements TcpOperations<P> {
 	public Reactor2TcpClient(NetStreams.TcpClientFactory<Message<P>, Message<P>> tcpClientSpecFactory) {
 		Assert.notNull(tcpClientSpecFactory, "'tcpClientClientFactory' must not be null");
 		this.tcpClientSpecFactory = tcpClientSpecFactory;
+		this.sharedEventLoopGroup = null;
 	}
 
 
@@ -245,6 +249,26 @@ public class Reactor2TcpClient<P> implements TcpOperations<P> {
 				})
 				.next();
 
+		if(sharedEventLoopGroup != null) {
+			promise = promise.flatMap(new Function<Void, Publisher<? extends Void>>() {
+				@Override
+				public Publisher<? extends Void> apply(Void aVoid) {
+					final Promise<Void> shutdownPromise = Promises.prepare();
+					sharedEventLoopGroup.shutdownGracefully().addListener(new FutureListener<Object>() {
+						@Override
+						public void operationComplete(Future<Object> future) throws Exception {
+							if (future.isDone() && future.isSuccess()) {
+								shutdownPromise.onComplete();
+							} else {
+								shutdownPromise.onError(future.cause());
+							}
+						}
+					});
+					return shutdownPromise;
+				}
+			});
+		}
+
 		return new PassThroughPromiseToListenableFutureAdapter<Void>(promise);
 	}
 
@@ -272,7 +296,7 @@ public class Reactor2TcpClient<P> implements TcpOperations<P> {
 	}
 
 	private interface MessageHandler<P>
-			extends ReactorChannelHandler<Message<P>, Message<P>, ChannelStream<Message<P>, Message<P>>>{
+			extends ReactorChannelHandler<Message<P>, Message<P>, ChannelStream<Message<P>, Message<P>>> {
 	}
 
 }
