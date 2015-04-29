@@ -488,9 +488,7 @@ project("spring-messaging") {
 		compile(project(":spring-core"))
 		compile(project(":spring-context"))
 		optional("io.projectreactor:reactor-core:${reactorVersion}")
-		optional("io.projectreactor:reactor-net:${reactorVersion}") {
-			exclude group: "io.netty", module: "netty-all"
-		}
+		optional("io.projectreactor:reactor-net:${reactorVersion}")
 		optional "io.netty:netty-all:$nettyVersion"
 		optional("org.eclipse.jetty.websocket:websocket-server:${jettyVersion}") {
 			exclude group: "javax.servlet", module: "javax.servlet-api"
