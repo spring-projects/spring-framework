@@ -300,8 +300,8 @@ public class StompBrokerRelayMessageHandlerTests {
 		}
 
 		@Override
-		public ListenableFuture<Boolean> shutdown() {
-			return getBooleanFuture();
+		public ListenableFuture<Void> shutdown() {
+			return getVoidFuture();
 		}
 
 		public void handleMessage(Message<byte[]> message) {

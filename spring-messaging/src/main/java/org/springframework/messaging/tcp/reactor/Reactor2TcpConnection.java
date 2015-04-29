@@ -16,9 +16,14 @@
 
 package org.springframework.messaging.tcp.reactor;
 
+import org.reactivestreams.Subscriber;
+import org.reactivestreams.Subscription;
+import org.springframework.util.concurrent.ListenableFutureAdapter;
 import reactor.fn.Functions;
 import reactor.io.net.ChannelStream;
+import reactor.rx.Promise;
 import reactor.rx.Promises;
+import reactor.rx.Streams;
 import reactor.rx.broadcast.Broadcaster;
 
 import org.springframework.messaging.Message;
@@ -37,21 +42,37 @@ import org.springframework.util.concurrent.ListenableFuture;
 public class Reactor2TcpConnection<P> implements TcpConnection<P> {
 
 	private final ChannelStream<Message<P>, Message<P>> channelStream;
+	private final Promise<Void> closePromise;
 
-	private final Broadcaster<Message<P>> sink;
-
-
-	public Reactor2TcpConnection(ChannelStream<Message<P>, Message<P>> channelStream) {
+	public Reactor2TcpConnection(ChannelStream<Message<P>, Message<P>> channelStream, Promise<Void> closePromise) {
 		this.channelStream = channelStream;
-		this.sink = Broadcaster.create();
-		this.channelStream.sink(this.sink);
+		this.closePromise = closePromise;
 	}
 
+	/*
+	TODO should provide an alternate send method to expose batch write/flush
+	It can be as simple as :
+
+	public ListenableFuture<Void> send(Iterable<Message<P>> messages) {
+		Promise<Void> afterWrite = Promises.prepare();
+		this.channelStream.writeWith(Streams.from(messages)).subscribe(afterWrite);
+		return new PassThroughPromiseToListenableFutureAdapter<Void>(afterWrite);
+	}
+
+	An Alternative with Publisher :
+
+	public ListenableFuture<Void> send(Publisher<? extends Message<P>> messages) {
+		Promise<Void> afterWrite = Promises.prepare();
+		this.channelStream.writeWith(messages).subscribe(afterWrite);
+		return new PassThroughPromiseToListenableFutureAdapter<Void>(afterWrite);
+	}
+	*/
 
 	@Override
 	public ListenableFuture<Void> send(Message<P> message) {
-		this.sink.onNext(message);
-		return new PassThroughPromiseToListenableFutureAdapter<Void>(Promises.<Void>success(null));
+		Promise<Void> afterWrite = Promises.prepare();
+		this.channelStream.writeWith(Streams.just(message)).subscribe(afterWrite);
+		return new PassThroughPromiseToListenableFutureAdapter<Void>(afterWrite);
 	}
 
 	@Override
@@ -66,7 +87,6 @@ public class Reactor2TcpConnection<P> implements TcpConnection<P> {
 
 	@Override
 	public void close() {
-		this.sink.onComplete();
+		this.closePromise.onComplete();
 	}
-
 }
