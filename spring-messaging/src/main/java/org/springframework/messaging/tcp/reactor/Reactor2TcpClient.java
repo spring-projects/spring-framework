@@ -250,23 +250,23 @@ public class Reactor2TcpClient<P> implements TcpOperations<P> {
 				.next();
 
 		if(sharedEventLoopGroup != null) {
-			promise = promise.flatMap(new Function<Void, Publisher<? extends Void>>() {
+			final Promise<Void> shutdownPromise = Promises.prepare();
+			promise.onComplete(new Consumer<Promise<Void>>() {
 				@Override
-				public Publisher<? extends Void> apply(Void aVoid) {
-					final Promise<Void> shutdownPromise = Promises.prepare();
-					sharedEventLoopGroup.shutdownGracefully().addListener(new FutureListener<Object>() {
+				public void accept(Promise<Void> voidPromise) {
+					sharedEventLoopGroup.shutdownGracefully().addListener(new FutureListener<Object>(){
 						@Override
-						public void operationComplete(Future<Object> future) throws Exception {
-							if (future.isDone() && future.isSuccess()) {
+						public void operationComplete(Future future) throws Exception {
+							if(future.isSuccess()){
 								shutdownPromise.onComplete();
-							} else {
+							}else{
 								shutdownPromise.onError(future.cause());
 							}
 						}
 					});
-					return shutdownPromise;
 				}
 			});
+			promise = shutdownPromise;
 		}
 
 		return new PassThroughPromiseToListenableFutureAdapter<Void>(promise);
