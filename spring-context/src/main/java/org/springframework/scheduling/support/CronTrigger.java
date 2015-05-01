@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,21 +37,29 @@ public class CronTrigger implements Trigger {
 
 	/**
 	 * Build a {@link CronTrigger} from the pattern provided in the default time zone.
-	 * @param cronExpression a space-separated list of time fields,
-	 * following cron expression conventions
+	 * @param expression a space-separated list of time fields, following cron
+	 * expression conventions
 	 */
-	public CronTrigger(String cronExpression) {
-		this.sequenceGenerator = new CronSequenceGenerator(cronExpression);
+	public CronTrigger(String expression) {
+		this.sequenceGenerator = new CronSequenceGenerator(expression);
 	}
 
 	/**
-	 * Build a {@link CronTrigger} from the pattern provided.
-	 * @param cronExpression a space-separated list of time fields,
-	 * following cron expression conventions
+	 * Build a {@link CronTrigger} from the pattern provided in the given time zone.
+	 * @param expression a space-separated list of time fields, following cron
+	 * expression conventions
 	 * @param timeZone a time zone in which the trigger times will be generated
 	 */
-	public CronTrigger(String cronExpression, TimeZone timeZone) {
-		this.sequenceGenerator = new CronSequenceGenerator(cronExpression, timeZone);
+	public CronTrigger(String expression, TimeZone timeZone) {
+		this.sequenceGenerator = new CronSequenceGenerator(expression, timeZone);
+	}
+
+
+	/**
+	 * Return the cron pattern that this trigger has been built with.
+	 */
+	public String getExpression() {
+		return this.sequenceGenerator.getExpression();
 	}
 
 
@@ -79,14 +87,11 @@ public class CronTrigger implements Trigger {
 		return this.sequenceGenerator.next(date);
 	}
 
-	public String getExpression() {
-		return this.sequenceGenerator.getExpression();
-	}
 
 	@Override
-	public boolean equals(Object obj) {
-		return (this == obj || (obj instanceof CronTrigger &&
-				this.sequenceGenerator.equals(((CronTrigger) obj).sequenceGenerator)));
+	public boolean equals(Object other) {
+		return (this == other || (other instanceof CronTrigger &&
+				this.sequenceGenerator.equals(((CronTrigger) other).sequenceGenerator)));
 	}
 
 	@Override

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,9 +30,9 @@ import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
 /**
- * Encapsulates information about a handler method consisting of a {@linkplain #getMethod() method}
- * and a {@linkplain #getBean() bean}. Provides convenient access to method parameters,
- * method return value, method annotations.
+ * Encapsulates information about a handler method consisting of a
+ * {@linkplain #getMethod() method} and a {@linkplain #getBean() bean}.
+ * Provides convenient access to method parameters, method return value, method annotations.
  *
  * <p>The class may be created with a bean instance or with a bean name (e.g. lazy-init bean,
  * prototype bean). Use {@link #createWithResolvedBean()} to obtain a {@link HandlerMethod}
@@ -40,16 +40,19 @@ import org.springframework.util.ClassUtils;
  *
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
+ * @author Juergen Hoeller
  * @since 3.1
  */
 public class HandlerMethod {
 
 	/** Logger that is available to subclasses */
-	protected final Log logger = LogFactory.getLog(HandlerMethod.class);
+	protected final Log logger = LogFactory.getLog(getClass());
 
 	private final Object bean;
 
 	private final BeanFactory beanFactory;
+
+	private final Class<?> beanType;
 
 	private final Method method;
 
@@ -66,6 +69,7 @@ public class HandlerMethod {
 		Assert.notNull(method, "Method is required");
 		this.bean = bean;
 		this.beanFactory = null;
+		this.beanType = ClassUtils.getUserClass(bean);
 		this.method = method;
 		this.bridgedMethod = BridgeMethodResolver.findBridgedMethod(method);
 		this.parameters = initMethodParameters();
@@ -80,6 +84,7 @@ public class HandlerMethod {
 		Assert.notNull(methodName, "Method name is required");
 		this.bean = bean;
 		this.beanFactory = null;
+		this.beanType = ClassUtils.getUserClass(bean);
 		this.method = bean.getClass().getMethod(methodName, parameterTypes);
 		this.bridgedMethod = BridgeMethodResolver.findBridgedMethod(this.method);
 		this.parameters = initMethodParameters();
@@ -94,22 +99,22 @@ public class HandlerMethod {
 		Assert.hasText(beanName, "Bean name is required");
 		Assert.notNull(beanFactory, "BeanFactory is required");
 		Assert.notNull(method, "Method is required");
-		Assert.isTrue(beanFactory.containsBean(beanName),
-				"BeanFactory [" + beanFactory + "] does not contain bean [" + beanName + "]");
 		this.bean = beanName;
 		this.beanFactory = beanFactory;
+		this.beanType = ClassUtils.getUserClass(beanFactory.getType(beanName));
 		this.method = method;
 		this.bridgedMethod = BridgeMethodResolver.findBridgedMethod(method);
 		this.parameters = initMethodParameters();
 	}
 
 	/**
-	 * Copy constructor for use in sub-classes.
+	 * Copy constructor for use in subclasses.
 	 */
 	protected HandlerMethod(HandlerMethod handlerMethod) {
 		Assert.notNull(handlerMethod, "HandlerMethod is required");
 		this.bean = handlerMethod.bean;
 		this.beanFactory = handlerMethod.beanFactory;
+		this.beanType = handlerMethod.beanType;
 		this.method = handlerMethod.method;
 		this.bridgedMethod = handlerMethod.bridgedMethod;
 		this.parameters = handlerMethod.parameters;
@@ -123,6 +128,7 @@ public class HandlerMethod {
 		Assert.notNull(handler, "Handler object is required");
 		this.bean = handler;
 		this.beanFactory = handlerMethod.beanFactory;
+		this.beanType = handlerMethod.beanType;
 		this.method = handlerMethod.method;
 		this.bridgedMethod = handlerMethod.bridgedMethod;
 		this.parameters = handlerMethod.parameters;
@@ -153,18 +159,17 @@ public class HandlerMethod {
 	}
 
 	/**
-	 * Returns the type of the handler for this handler method.
-	 * Note that if the bean type is a CGLIB-generated class, the original, user-defined class is returned.
+	 * This method returns the type of the handler for this handler method.
+	 * <p>Note that if the bean type is a CGLIB-generated class, the original
+	 * user-defined class is returned.
 	 */
 	public Class<?> getBeanType() {
-		Class<?> clazz = (this.bean instanceof String ?
-				this.beanFactory.getType((String) this.bean) : this.bean.getClass());
-		return ClassUtils.getUserClass(clazz);
+		return this.beanType;
 	}
 
 	/**
-	 * If the bean method is a bridge method, this method returns the bridged (user-defined) method.
-	 * Otherwise it returns the same method as {@link #getMethod()}.
+	 * If the bean method is a bridge method, this method returns the bridged
+	 * (user-defined) method. Otherwise it returns the same method as {@link #getMethod()}.
 	 */
 	protected Method getBridgedMethod() {
 		return this.bridgedMethod;
@@ -199,8 +204,8 @@ public class HandlerMethod {
 	}
 
 	/**
-	 * Returns a single annotation on the underlying method traversing its super methods if no
-	 * annotation can be found on the given method itself.
+	 * Returns a single annotation on the underlying method traversing its super methods
+	 * if no annotation can be found on the given method itself.
 	 * @param annotationType the type of annotation to introspect the method for.
 	 * @return the annotation, or {@code null} if none found
 	 */
@@ -209,8 +214,8 @@ public class HandlerMethod {
 	}
 
 	/**
-	 * If the provided instance contains a bean name rather than an object instance, the bean name is resolved
-	 * before a {@link HandlerMethod} is created and returned.
+	 * If the provided instance contains a bean name rather than an object instance,
+	 * the bean name is resolved before a {@link HandlerMethod} is created and returned.
 	 */
 	public HandlerMethod createWithResolvedBean() {
 		Object handler = this.bean;
@@ -221,21 +226,22 @@ public class HandlerMethod {
 		return new HandlerMethod(this, handler);
 	}
 
+
 	@Override
-	public boolean equals(Object obj) {
-		if (this == obj) {
+	public boolean equals(Object other) {
+		if (this == other) {
 			return true;
 		}
-		if (obj != null && obj instanceof HandlerMethod) {
-			HandlerMethod other = (HandlerMethod) obj;
-			return (this.bean.equals(other.bean) && this.method.equals(other.method));
+		if (!(other instanceof HandlerMethod)) {
+			return false;
 		}
-		return false;
+		HandlerMethod otherMethod = (HandlerMethod) other;
+		return (this.bean.equals(otherMethod.bean) && this.method.equals(otherMethod.method));
 	}
 
 	@Override
 	public int hashCode() {
-		return this.bean.hashCode() * 31 + this.method.hashCode();
+		return (this.bean.hashCode() * 31 + this.method.hashCode());
 	}
 
 	@Override

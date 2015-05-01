@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,13 @@
 
 package org.springframework.web.servlet.mvc.method.annotation;
 
+import static org.junit.Assert.*;
+
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
+
 import javax.servlet.MultipartConfigElement;
 
 import org.eclipse.jetty.server.Server;
@@ -34,8 +39,10 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
+import org.springframework.http.converter.ByteArrayHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.ResourceHttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
@@ -56,8 +63,6 @@ import org.springframework.web.multipart.support.StandardServletMultipartResolve
 import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
-
-import static org.junit.Assert.*;
 
 /**
  * Test access to parts of a multipart request with {@link RequestPart}.
@@ -102,9 +107,16 @@ public class RequestPartIntegrationTests {
 
 	@Before
 	public void setUp() {
+		ByteArrayHttpMessageConverter emptyBodyConverter = new ByteArrayHttpMessageConverter();
+		emptyBodyConverter.setSupportedMediaTypes(Arrays.asList(MediaType.APPLICATION_JSON));
+
+		List<HttpMessageConverter<?>> converters = new ArrayList<>(3);
+		converters.add(emptyBodyConverter);
+		converters.add(new ResourceHttpMessageConverter());
+		converters.add(new MappingJackson2HttpMessageConverter());
+
 		AllEncompassingFormHttpMessageConverter converter = new AllEncompassingFormHttpMessageConverter();
-		converter.setPartConverters(Arrays.<HttpMessageConverter<?>>asList(
-				new ResourceHttpMessageConverter(), new MappingJackson2HttpMessageConverter()));
+		converter.setPartConverters(converters);
 
 		restTemplate = new RestTemplate(new HttpComponentsClientHttpRequestFactory());
 		restTemplate.setMessageConverters(Arrays.<HttpMessageConverter<?>>asList(converter));
@@ -130,9 +142,9 @@ public class RequestPartIntegrationTests {
 
 	private void testCreate(String url) {
 		MultiValueMap<String, Object> parts = new LinkedMultiValueMap<String, Object>();
-		HttpEntity<TestData> jsonEntity = new HttpEntity<TestData>(new TestData("Jason"));
-		parts.add("json-data", jsonEntity);
+		parts.add("json-data", new HttpEntity<TestData>(new TestData("Jason")));
 		parts.add("file-data", new ClassPathResource("logo.jpg", this.getClass()));
+		parts.add("empty-data", new HttpEntity<byte[]>(new byte[0])); // SPR-12860
 
 		URI location = restTemplate.postForLocation(url, parts);
 		assertEquals("http://localhost:8080/test/Jason/logo.jpg", location.toString());
@@ -167,11 +179,15 @@ public class RequestPartIntegrationTests {
 		}
 	}
 
+	@SuppressWarnings("unused")
 	@Controller
 	private static class RequestPartTestController {
 
 		@RequestMapping(value = "/test", method = RequestMethod.POST, consumes = { "multipart/mixed", "multipart/form-data" })
-		public ResponseEntity<Object> create(@RequestPart("json-data") TestData testData, @RequestPart("file-data") MultipartFile file) {
+		public ResponseEntity<Object> create(@RequestPart("json-data") TestData testData,
+				@RequestPart("file-data") MultipartFile file,
+				@RequestPart(value = "empty-data", required = false) TestData emptyData) {
+
 			String url = "http://localhost:8080/test/" + testData.getName() + "/" + file.getOriginalFilename();
 			HttpHeaders headers = new HttpHeaders();
 			headers.setLocation(URI.create(url));

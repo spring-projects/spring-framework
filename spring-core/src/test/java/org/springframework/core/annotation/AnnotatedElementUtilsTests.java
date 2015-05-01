@@ -24,10 +24,13 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.lang.reflect.Method;
 import java.util.Arrays;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.junit.Ignore;
 import org.junit.Test;
 
+import org.springframework.stereotype.Component;
 import org.springframework.util.MultiValueMap;
 
 import static org.junit.Assert.*;
@@ -37,9 +40,32 @@ import static org.springframework.core.annotation.AnnotatedElementUtils.*;
  * Unit tests for {@link AnnotatedElementUtils}.
  *
  * @author Sam Brannen
+ * @author Rossen Stoyanchev
  * @since 4.0.3
  */
 public class AnnotatedElementUtilsTests {
+
+	private Set<String> names(Class<?>... classes) {
+		return Arrays.stream(classes).map(clazz -> clazz.getName()).collect(Collectors.toSet());
+	}
+
+	@Test
+	public void getMetaAnnotationTypesOnNonAnnotatedClass() {
+		assertNull(getMetaAnnotationTypes(NonAnnotatedClass.class, TransactionalComponent.class));
+	}
+
+	@Test
+	public void getMetaAnnotationTypesOnClassWithMetaDepth1() {
+		Set<String> names = getMetaAnnotationTypes(TransactionalComponentClass.class, TransactionalComponent.class);
+		assertEquals(names(Transactional.class, Component.class, Retention.class, Documented.class, Target.class, Inherited.class), names);
+	}
+
+	@Test
+	public void getMetaAnnotationTypesOnClassWithMetaDepth2() {
+		Set<String> names = getMetaAnnotationTypes(ComposedTransactionalComponentClass.class,
+			ComposedTransactionalComponent.class);
+		assertEquals(names(TransactionalComponent.class, Transactional.class, Component.class, Retention.class, Documented.class, Target.class, Inherited.class), names);
+	}
 
 	@Test
 	public void getAllAnnotationAttributesOnClassWithLocalAnnotation() {
@@ -125,33 +151,130 @@ public class AnnotatedElementUtilsTests {
 			attributes.getBoolean("readOnly"));
 	}
 
-	// SPR-12738
-
+	// TODO [SPR-11598] Enable test.
+	@Ignore("Disabled until SPR-11598 is resolved")
 	@Test
-	public void getAnnotationAttributesInheritedFromInterface() {
+	public void getAnnotationAttributesFromInterfaceImplementedBySuperclass() {
 		String name = Transactional.class.getName();
 		AnnotationAttributes attributes = getAnnotationAttributes(ConcreteClassWithInheritedAnnotation.class, name);
-//		assertNotNull(attributes);
+		assertNotNull("Should find @Transactional on ConcreteClassWithInheritedAnnotation", attributes);
 	}
 
-	// SPR-12738
-
+	/** @since 4.2 */
 	@Test
-	public void getAnnotationAttributesInheritedFromAbstractMethod() throws NoSuchMethodException {
+	public void getAnnotationAttributesOnInheritedAnnotationInterface() {
 		String name = Transactional.class.getName();
+		AnnotationAttributes attributes = getAnnotationAttributes(InheritedAnnotationInterface.class, name);
+		assertNotNull("Should get @Transactional on InheritedAnnotationInterface", attributes);
+	}
+
+	/** @since 4.2 */
+	@Test
+	public void findAnnotationAttributesOnInheritedAnnotationInterface() {
+		AnnotationAttributes attributes = findAnnotationAttributes(InheritedAnnotationInterface.class, Transactional.class);
+		assertNotNull("Should find @Transactional on InheritedAnnotationInterface", attributes);
+	}
+
+	/** @since 4.2 */
+	@Test
+	public void findAnnotationAttributesOnSubInheritedAnnotationInterface() {
+		AnnotationAttributes attributes = findAnnotationAttributes(SubInheritedAnnotationInterface.class, Transactional.class);
+		assertNotNull("Should find @Transactional on SubInheritedAnnotationInterface", attributes);
+	}
+
+	/** @since 4.2 */
+	@Test
+	public void findAnnotationAttributesOnSubSubInheritedAnnotationInterface() {
+		AnnotationAttributes attributes = findAnnotationAttributes(SubSubInheritedAnnotationInterface.class, Transactional.class);
+		assertNotNull("Should find @Transactional on SubSubInheritedAnnotationInterface", attributes);
+	}
+
+	/** @since 4.2 */
+	@Test
+	public void findAnnotationAttributesOnNonInheritedAnnotationInterface() {
+		AnnotationAttributes attributes = findAnnotationAttributes(NonInheritedAnnotationInterface.class, Order.class);
+		assertNotNull("Should find @Order on NonInheritedAnnotationInterface", attributes);
+	}
+
+	/** @since 4.2 */
+	@Test
+	public void getAnnotationAttributesOnNonInheritedAnnotationInterface() {
+		AnnotationAttributes attributes = getAnnotationAttributes(NonInheritedAnnotationInterface.class, Order.class.getName());
+		assertNotNull("Should get @Order on NonInheritedAnnotationInterface", attributes);
+	}
+
+	/** @since 4.2 */
+	@Test
+	public void findAnnotationAttributesOnSubNonInheritedAnnotationInterface() {
+		AnnotationAttributes attributes = findAnnotationAttributes(SubNonInheritedAnnotationInterface.class, Order.class);
+		assertNotNull("Should find @Order on SubNonInheritedAnnotationInterface", attributes);
+	}
+
+	/** @since 4.2 */
+	@Test
+	public void findAnnotationAttributesOnSubSubNonInheritedAnnotationInterface() {
+		AnnotationAttributes attributes = findAnnotationAttributes(SubSubNonInheritedAnnotationInterface.class, Order.class);
+		assertNotNull("Should find @Order on SubSubNonInheritedAnnotationInterface", attributes);
+	}
+
+	/** @since 4.2 */
+	@Test
+	public void findAnnotationAttributesInheritedFromInterfaceMethod() throws NoSuchMethodException {
+		Method method = ConcreteClassWithInheritedAnnotation.class.getMethod("handleFromInterface");
+		AnnotationAttributes attributes = findAnnotationAttributes(method, Order.class);
+		assertNotNull("Should find @Order on ConcreteClassWithInheritedAnnotation.handleFromInterface() method", attributes);
+	}
+
+	/** @since 4.2 */
+	@Test
+	public void findAnnotationAttributesInheritedFromAbstractMethod() throws NoSuchMethodException {
 		Method method = ConcreteClassWithInheritedAnnotation.class.getMethod("handle");
-		AnnotationAttributes attributes = getAnnotationAttributes(method, name);
-//		assertNotNull(attributes);
+		AnnotationAttributes attributes = findAnnotationAttributes(method, Transactional.class);
+		assertNotNull("Should find @Transactional on ConcreteClassWithInheritedAnnotation.handle() method", attributes);
 	}
 
-	// SPR-12738
-
+	/**
+	 * <p>{@code AbstractClassWithInheritedAnnotation} declares {@code handleParameterized(T)}; whereas,
+	 * {@code ConcreteClassWithInheritedAnnotation} declares {@code handleParameterized(String)}.
+	 *
+	 * <p>As of Spring 4.2 RC1, {@code AnnotatedElementUtils.processWithFindSemantics()} does not resolve an
+	 * <em>equivalent</em> method in {@code AbstractClassWithInheritedAnnotation} for the <em>bridged</em>
+	 * {@code handleParameterized(String)} method.
+	 *
+	 * @since 4.2
+	 */
 	@Test
-	public void getAnnotationAttributesInheritedFromParameterizedMethod() throws NoSuchMethodException {
-		String name = Transactional.class.getName();
+	public void findAnnotationAttributesInheritedFromBridgedMethod() throws NoSuchMethodException {
 		Method method = ConcreteClassWithInheritedAnnotation.class.getMethod("handleParameterized", String.class);
-		AnnotationAttributes attributes = getAnnotationAttributes(ConcreteClassWithInheritedAnnotation.class, name);
-//		assertNotNull(attributes);
+		AnnotationAttributes attributes = findAnnotationAttributes(method, Transactional.class);
+		assertNull("Should not find @Transactional on bridged ConcreteClassWithInheritedAnnotation.handleParameterized() method", attributes);
+	}
+
+	/**
+	 * Bridge/bridged method setup code copied from
+	 * {@link org.springframework.core.BridgeMethodResolverTests#testWithGenericParameter()}.
+	 * @since 4.2
+	 */
+	@Test
+	public void findAnnotationAttributesFromBridgeMethod() throws NoSuchMethodException {
+		Method[] methods = StringGenericParameter.class.getMethods();
+		Method bridgeMethod = null;
+		Method bridgedMethod = null;
+		for (Method method : methods) {
+			if ("getFor".equals(method.getName()) && !method.getParameterTypes()[0].equals(Integer.class)) {
+				if (method.getReturnType().equals(Object.class)) {
+					bridgeMethod = method;
+				}
+				else {
+					bridgedMethod = method;
+				}
+			}
+		}
+		assertTrue(bridgeMethod != null && bridgeMethod.isBridge());
+		assertTrue(bridgedMethod != null && !bridgedMethod.isBridge());
+
+		AnnotationAttributes attributes = findAnnotationAttributes(bridgeMethod, Order.class);
+		assertNotNull("Should find @Order on StringGenericParameter.getFor() bridge method", attributes);
 	}
 
 
@@ -220,7 +343,29 @@ public class AnnotatedElementUtilsTests {
 	@interface TxComposed2 {
 	}
 
+	@Transactional
+	@Component
+	@Retention(RetentionPolicy.RUNTIME)
+	@interface TransactionalComponent {
+	}
+
+	@TransactionalComponent
+	@Retention(RetentionPolicy.RUNTIME)
+	@interface ComposedTransactionalComponent {
+	}
+
 	// -------------------------------------------------------------------------
+
+	static class NonAnnotatedClass {
+	}
+
+	@TransactionalComponent
+	static class TransactionalComponentClass {
+	}
+
+	@ComposedTransactionalComponent
+	static class ComposedTransactionalComponentClass {
+	}
 
 	@Transactional
 	static class ClassWithInheritedAnnotation {
@@ -259,6 +404,9 @@ public class AnnotatedElementUtilsTests {
 
 	@Transactional
 	static interface InterfaceWithInheritedAnnotation {
+
+		@Order
+		void handleFromInterface();
 	}
 
 	static abstract class AbstractClassWithInheritedAnnotation<T> implements InterfaceWithInheritedAnnotation {
@@ -280,6 +428,50 @@ public class AnnotatedElementUtilsTests {
 		@Override
 		public void handleParameterized(String s) {
 		}
+
+		@Override
+		public void handleFromInterface() {
+		}
+	}
+
+	public static interface GenericParameter<T> {
+
+		T getFor(Class<T> cls);
+	}
+
+	@SuppressWarnings("unused")
+	private static class StringGenericParameter implements GenericParameter<String> {
+
+		@Order
+		@Override
+		public String getFor(Class<String> cls) {
+			return "foo";
+		}
+
+		public String getFor(Integer integer) {
+			return "foo";
+		}
+	}
+
+
+	@Transactional
+	public static interface InheritedAnnotationInterface {
+	}
+
+	public static interface SubInheritedAnnotationInterface extends InheritedAnnotationInterface {
+	}
+
+	public static interface SubSubInheritedAnnotationInterface extends SubInheritedAnnotationInterface {
+	}
+
+	@Order
+	public static interface NonInheritedAnnotationInterface {
+	}
+
+	public static interface SubNonInheritedAnnotationInterface extends NonInheritedAnnotationInterface {
+	}
+
+	public static interface SubSubNonInheritedAnnotationInterface extends SubNonInheritedAnnotationInterface {
 	}
 
 }

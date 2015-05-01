@@ -223,7 +223,7 @@ public class ServletUriComponentsBuilder extends UriComponentsBuilder {
 	}
 
 	@Override
-	protected Object clone() {
+	public Object clone() {
 		return new ServletUriComponentsBuilder(this);
 	}
 

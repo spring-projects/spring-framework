@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -79,11 +79,31 @@ public class EmbeddedDatabaseBuilder {
 	}
 
 	/**
+	 * Specify whether a unique ID should be generated and used as the database name.
+	 * <p>If the configuration for this builder is reused across multiple
+	 * application contexts within a single JVM, this flag should be <em>enabled</em>
+	 * (i.e., set to {@code true}) in order to ensure that each application context
+	 * gets its own embedded database.
+	 * <p>Enabling this flag overrides any explicit name set via {@link #setName}.
+	 * @param flag {@code true} if a unique database name should be generated
+	 * @return {@code this}, to facilitate method chaining
+	 * @see #setName
+	 * @since 4.2
+	 */
+	public EmbeddedDatabaseBuilder generateUniqueName(boolean flag) {
+		this.databaseFactory.setGenerateUniqueDatabaseName(flag);
+		return this;
+	}
+
+	/**
 	 * Set the name of the embedded database.
 	 * <p>Defaults to {@link EmbeddedDatabaseFactory#DEFAULT_DATABASE_NAME} if
 	 * not called.
+	 * <p>Will be overridden if the {@code generateUniqueName} flag has been
+	 * set to {@code true}.
 	 * @param databaseName the name of the embedded database to build
 	 * @return {@code this}, to facilitate method chaining
+	 * @see #generateUniqueName
 	 */
 	public EmbeddedDatabaseBuilder setName(String databaseName) {
 		this.databaseFactory.setDatabaseName(databaseName);

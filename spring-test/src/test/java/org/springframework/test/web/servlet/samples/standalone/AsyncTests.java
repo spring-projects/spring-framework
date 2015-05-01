@@ -22,6 +22,7 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.*;
 
 import java.util.Collection;
 import java.util.concurrent.Callable;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.junit.Before;
@@ -43,6 +44,7 @@ import org.springframework.web.context.request.async.DeferredResult;
  * Tests with asynchronous request handling.
  *
  * @author Rossen Stoyanchev
+ * @author Sebastien Deleuze
  */
 public class AsyncTests {
 
@@ -112,9 +114,21 @@ public class AsyncTests {
 				.andExpect(content().string("{\"name\":\"Joe\",\"someDouble\":0.0,\"someBoolean\":false}"));
 	}
 
-	// SPR-12735
+	@Test  // SPR-12597
+	public void testCompletableFuture() throws Exception {
+		MvcResult mvcResult = this.mockMvc.perform(get("/1").param("completableFuture", "true"))
+				.andExpect(request().asyncStarted())
+				.andReturn();
 
-	@Test
+		this.asyncController.onMessage("Joe");
+
+		this.mockMvc.perform(asyncDispatch(mvcResult))
+				.andExpect(status().isOk())
+				.andExpect(content().contentType(MediaType.APPLICATION_JSON))
+				.andExpect(content().string("{\"name\":\"Joe\",\"someDouble\":0.0,\"someBoolean\":false}"));
+	}
+
+	@Test  // SPR-12735
 	public void testPrintAsyncResult() throws Exception {
 		MvcResult mvcResult = this.mockMvc.perform(get("/1").param("deferredResult", "true"))
 				.andDo(print())
@@ -180,6 +194,14 @@ public class AsyncTests {
 			});
 			this.futureTasks.add(futureTask);
 			return futureTask;
+		}
+
+		@RequestMapping(value="/{id}", params="completableFuture", produces="application/json")
+		@ResponseBody
+		public CompletableFuture<Person> getCompletableFuture() {
+			CompletableFuture<Person> future = new CompletableFuture<Person>();
+			future.complete(new Person("Joe"));
+			return future;
 		}
 
 		public void onMessage(String name) {

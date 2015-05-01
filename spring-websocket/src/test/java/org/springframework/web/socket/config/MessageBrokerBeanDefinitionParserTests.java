@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,12 +18,12 @@ package org.springframework.web.socket.config;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 
 import org.hamcrest.Matchers;
 import org.junit.Before;
 import org.junit.Test;
-
 import org.springframework.beans.DirectFieldAccessor;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.config.CustomScopeConfigurer;
@@ -98,6 +98,7 @@ public class MessageBrokerBeanDefinitionParserTests {
 
 
 	@Test
+	@SuppressWarnings("unchecked")
 	public void simpleBroker() throws Exception {
 		loadBeanDefinitions("websocket-config-broker-simple.xml");
 
@@ -180,8 +181,10 @@ public class MessageBrokerBeanDefinitionParserTests {
 
 		SimpleBrokerMessageHandler brokerMessageHandler = this.appContext.getBean(SimpleBrokerMessageHandler.class);
 		assertNotNull(brokerMessageHandler);
-		assertEquals(Arrays.asList("/topic", "/queue"),
-				new ArrayList<String>(brokerMessageHandler.getDestinationPrefixes()));
+		Collection<String> prefixes = brokerMessageHandler.getDestinationPrefixes();
+		assertEquals(Arrays.asList("/topic", "/queue"), new ArrayList<String>(prefixes));
+		assertNotNull(brokerMessageHandler.getTaskScheduler());
+		assertArrayEquals(new long[] {15000, 15000}, brokerMessageHandler.getHeartbeatValue());
 
 		List<Class<? extends MessageHandler>> subscriberTypes =
 				Arrays.<Class<? extends MessageHandler>>asList(SimpAnnotationMethodMessageHandler.class,
@@ -271,6 +274,12 @@ public class MessageBrokerBeanDefinitionParserTests {
 		catch (NoSuchBeanDefinitionException ex) {
 			// expected
 		}
+
+		UserDestinationMessageHandler userDestHandler = this.appContext.getBean(UserDestinationMessageHandler.class);
+		assertEquals("/topic/unresolved", userDestHandler.getUserDestinationBroadcast());
+		assertNotNull(messageBroker.getSystemSubscriptions());
+		assertSame(userDestHandler, messageBroker.getSystemSubscriptions().get("/topic/unresolved"));
+
 
 		String name = "webSocketMessageBrokerStats";
 		WebSocketMessageBrokerStats stats = this.appContext.getBean(name, WebSocketMessageBrokerStats.class);

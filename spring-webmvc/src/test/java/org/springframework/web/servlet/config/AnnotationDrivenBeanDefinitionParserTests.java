@@ -40,6 +40,7 @@ import org.springframework.web.method.support.HandlerMethodReturnValueHandler;
 import org.springframework.web.method.support.ModelAndViewContainer;
 import org.springframework.web.servlet.handler.BeanNameUrlHandlerMapping;
 import org.springframework.web.servlet.mvc.method.annotation.ExceptionHandlerExceptionResolver;
+import org.springframework.web.servlet.mvc.method.annotation.JsonViewRequestBodyAdvice;
 import org.springframework.web.servlet.mvc.method.annotation.JsonViewResponseBodyAdvice;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
@@ -97,7 +98,7 @@ public class AnnotationDrivenBeanDefinitionParserTests {
 		loadBeanDefinitions("mvc-config-message-converters.xml");
 		verifyMessageConverters(appContext.getBean(RequestMappingHandlerAdapter.class), true);
 		verifyMessageConverters(appContext.getBean(ExceptionHandlerExceptionResolver.class), true);
-		verifyResponseBodyAdvice(appContext.getBean(RequestMappingHandlerAdapter.class));
+		verifyRequestResponseBodyAdvice(appContext.getBean(RequestMappingHandlerAdapter.class));
 		verifyResponseBodyAdvice(appContext.getBean(ExceptionHandlerExceptionResolver.class));
 	}
 
@@ -180,6 +181,17 @@ public class AnnotationDrivenBeanDefinitionParserTests {
 		assertTrue(value instanceof List);
 		List<ResponseBodyAdvice> converters = (List<ResponseBodyAdvice>) value;
 		assertTrue(converters.get(0) instanceof JsonViewResponseBodyAdvice);
+	}
+
+	@SuppressWarnings("unchecked")
+	private void verifyRequestResponseBodyAdvice(Object bean) {
+		assertNotNull(bean);
+		Object value = new DirectFieldAccessor(bean).getPropertyValue("requestResponseBodyAdvice");
+		assertNotNull(value);
+		assertTrue(value instanceof List);
+		List<ResponseBodyAdvice> converters = (List<ResponseBodyAdvice>) value;
+		assertTrue(converters.get(0) instanceof JsonViewRequestBodyAdvice);
+		assertTrue(converters.get(1) instanceof JsonViewResponseBodyAdvice);
 	}
 
 }

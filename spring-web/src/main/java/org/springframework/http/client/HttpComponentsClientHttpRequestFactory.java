@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.http.client;
 
+import java.io.Closeable;
 import java.io.IOException;
 import java.net.URI;
 
@@ -32,7 +33,6 @@ import org.apache.http.client.methods.HttpPut;
 import org.apache.http.client.methods.HttpTrace;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.client.protocol.HttpClientContext;
-import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.protocol.HttpContext;
 
@@ -57,7 +57,7 @@ import org.springframework.util.Assert;
  */
 public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequestFactory, DisposableBean {
 
-	private CloseableHttpClient httpClient;
+	private HttpClient httpClient;
 
 	private RequestConfig requestConfig;
 
@@ -75,25 +75,20 @@ public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequest
 	/**
 	 * Create a new instance of the {@code HttpComponentsClientHttpRequestFactory}
 	 * with the given {@link HttpClient} instance.
-	 * <p>As of Spring Framework 4.0, the given client is expected to be of type
-	 * {@link CloseableHttpClient} (requiring HttpClient 4.3+).
 	 * @param httpClient the HttpClient instance to use for this request factory
 	 */
 	public HttpComponentsClientHttpRequestFactory(HttpClient httpClient) {
-		Assert.notNull(httpClient, "'httpClient' must not be null");
-		Assert.isInstanceOf(CloseableHttpClient.class, httpClient, "'httpClient' is not of type CloseableHttpClient");
-		this.httpClient = (CloseableHttpClient) httpClient;
+		Assert.notNull(httpClient, "HttpClient must not be null");
+		this.httpClient = httpClient;
 	}
 
 
 	/**
 	 * Set the {@code HttpClient} used for
-	 * <p>As of Spring Framework 4.0, the given client is expected to be of type
-	 * {@link CloseableHttpClient} (requiring HttpClient 4.3+).
+	 * {@linkplain #createRequest(URI, HttpMethod) synchronous execution}.
 	 */
 	public void setHttpClient(HttpClient httpClient) {
-		Assert.isInstanceOf(CloseableHttpClient.class, httpClient, "'httpClient' is not of type CloseableHttpClient");
-		this.httpClient = (CloseableHttpClient) httpClient;
+		this.httpClient = httpClient;
 	}
 
 	/**
@@ -200,8 +195,9 @@ public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequest
 
 
 	@Override
+	@SuppressWarnings("deprecation")
 	public ClientHttpRequest createRequest(URI uri, HttpMethod httpMethod) throws IOException {
-		CloseableHttpClient client = (CloseableHttpClient) getHttpClient();
+		HttpClient client = getHttpClient();
 		Assert.state(client != null, "Synchronous execution requires an HttpClient to be set");
 		HttpUriRequest httpRequest = createHttpUriRequest(httpMethod, uri);
 		postProcessHttpRequest(httpRequest);
@@ -232,15 +228,16 @@ public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequest
 	}
 
 	/**
-	 * Create a default {@link RequestConfig} to use with the given client. Can
-	 * return {@code null} to indicate that no custom request config should be set
-	 * and the defaults of the {@link HttpClient} should be used.
-	 * <p>The default implementation tries to merge the defaults of the client with the
-	 * local customizations of this instance, if any.
+	 * Create a default {@link RequestConfig} to use with the given client.
+	 * Can return {@code null} to indicate that no custom request config should
+	 * be set and the defaults of the {@link HttpClient} should be used.
+	 * <p>The default implementation tries to merge the defaults of the client
+	 * with the local customizations of this instance, if any.
 	 * @param client the client
 	 * @return the RequestConfig to use
+	 * @since 4.2
 	 */
-	protected RequestConfig createRequestConfig(CloseableHttpClient client) {
+	protected RequestConfig createRequestConfig(HttpClient client) {
 		if (client instanceof Configurable) {
 			RequestConfig clientRequestConfig = ((Configurable) client).getConfig();
 			return mergeRequestConfig(clientRequestConfig);
@@ -325,7 +322,9 @@ public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequest
 	 */
 	@Override
 	public void destroy() throws Exception {
-		this.httpClient.close();
+		if (this.httpClient instanceof Closeable) {
+			((Closeable) this.httpClient).close();
+		}
 	}
 
 
@@ -349,4 +348,5 @@ public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequest
 			return "DELETE";
 		}
 	}
+
 }

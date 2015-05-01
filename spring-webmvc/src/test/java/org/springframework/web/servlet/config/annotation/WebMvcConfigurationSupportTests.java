@@ -71,6 +71,7 @@ import org.springframework.web.servlet.handler.ConversionServiceExposingIntercep
 import org.springframework.web.servlet.handler.HandlerExceptionResolverComposite;
 import org.springframework.web.servlet.mvc.annotation.ResponseStatusExceptionResolver;
 import org.springframework.web.servlet.mvc.method.annotation.ExceptionHandlerExceptionResolver;
+import org.springframework.web.servlet.mvc.method.annotation.JsonViewRequestBodyAdvice;
 import org.springframework.web.servlet.mvc.method.annotation.JsonViewResponseBodyAdvice;
 import org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
@@ -188,9 +189,11 @@ public class WebMvcConfigurationSupportTests {
 		assertTrue(validator instanceof LocalValidatorFactoryBean);
 
 		DirectFieldAccessor fieldAccessor = new DirectFieldAccessor(adapter);
-		List<Object> interceptors = (List<Object>) fieldAccessor.getPropertyValue("responseBodyAdvice");
-		assertEquals(1, interceptors.size());
-		assertEquals(JsonViewResponseBodyAdvice.class, interceptors.get(0).getClass());
+		@SuppressWarnings("unchecked")
+		List<Object> interceptors = (List<Object>) fieldAccessor.getPropertyValue("requestResponseBodyAdvice");
+		assertEquals(2, interceptors.size());
+		assertEquals(JsonViewRequestBodyAdvice.class, interceptors.get(0).getClass());
+		assertEquals(JsonViewResponseBodyAdvice.class, interceptors.get(1).getClass());
 	}
 
 	@Test

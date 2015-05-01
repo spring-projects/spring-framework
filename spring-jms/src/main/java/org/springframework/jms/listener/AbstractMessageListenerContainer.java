@@ -131,8 +131,8 @@ import org.springframework.util.ReflectionUtils;
  * @see SimpleMessageListenerContainer
  * @see org.springframework.jms.listener.endpoint.JmsMessageEndpointManager
  */
-public abstract class AbstractMessageListenerContainer
-		extends AbstractJmsListeningContainer implements MessageListenerContainer {
+public abstract class AbstractMessageListenerContainer extends AbstractJmsListeningContainer
+		implements MessageListenerContainer {
 
 	private static final Method createSharedConsumerMethod = ClassUtils.getMethodIfAvailable(
 			Session.class, "createSharedConsumer", Topic.class, String.class, String.class);
@@ -152,6 +152,8 @@ public abstract class AbstractMessageListenerContainer
 	private boolean subscriptionShared = false;
 
 	private String subscriptionName;
+
+	private Boolean replyPubSubDomain;
 
 	private boolean pubSubNoLocal = false;
 
@@ -354,6 +356,7 @@ public abstract class AbstractMessageListenerContainer
 	 * <p>Only makes sense when listening to a topic (pub-sub domain),
 	 * therefore this method switches the "pubSubDomain" flag as well.
 	 * <p><b>Requires a JMS 2.0 compatible message broker.</b>
+	 * @since 4.1
 	 * @see #setSubscriptionName
 	 * @see #setSubscriptionDurable
 	 * @see #setPubSubDomain
@@ -367,6 +370,7 @@ public abstract class AbstractMessageListenerContainer
 
 	/**
 	 * Return whether to make the subscription shared.
+	 * @since 4.1
 	 */
 	public boolean isSubscriptionShared() {
 		return this.subscriptionShared;
@@ -380,6 +384,7 @@ public abstract class AbstractMessageListenerContainer
 	 * <p>Note: Only 1 concurrent consumer (which is the default of this
 	 * message listener container) is allowed for each subscription,
 	 * except for a shared subscription (which requires JMS 2.0).
+	 * @since 4.1
 	 * @see #setPubSubDomain
 	 * @see #setSubscriptionDurable
 	 * @see #setSubscriptionShared
@@ -390,6 +395,10 @@ public abstract class AbstractMessageListenerContainer
 		this.subscriptionName = subscriptionName;
 	}
 
+	/**
+	 * Return the name of a subscription to create, if any.
+	 * @since 4.1
+	 */
 	public String getSubscriptionName() {
 		return this.subscriptionName;
 	}
@@ -423,6 +432,7 @@ public abstract class AbstractMessageListenerContainer
 	/**
 	 * Set whether to inhibit the delivery of messages published by its own connection.
 	 * Default is "false".
+	 * @since 4.1
 	 * @see javax.jms.Session#createConsumer(javax.jms.Destination, String, boolean)
 	 */
 	public void setPubSubNoLocal(boolean pubSubNoLocal) {
@@ -431,13 +441,43 @@ public abstract class AbstractMessageListenerContainer
 
 	/**
 	 * Return whether to inhibit the delivery of messages published by its own connection.
+	 * @since 4.1
 	 */
 	public boolean isPubSubNoLocal() {
 		return this.pubSubNoLocal;
 	}
 
 	/**
+	 * Configure the reply destination type. By default, the configured {@code pubSubDomain}
+	 * value is used (see {@link #isPubSubDomain()}.
+	 * <p>This setting primarily indicates what type of destination to resolve
+	 * if dynamic destinations are enabled.
+	 * @param replyPubSubDomain "true" for the Publish/Subscribe domain ({@link javax.jms.Topic Topics}),
+	 * "false" for the Point-to-Point domain ({@link javax.jms.Queue Queues})
+	 * @see #setDestinationResolver
+	 */
+	public void setReplyPubSubDomain(boolean replyPubSubDomain) {
+		this.replyPubSubDomain = replyPubSubDomain;
+	}
+
+	/**
+	 * Return whether the Publish/Subscribe domain ({@link javax.jms.Topic Topics}) is used
+	 * for replies. Otherwise, the Point-to-Point domain ({@link javax.jms.Queue Queues}) is
+	 * used.
+	 */
+	@Override
+	public boolean isReplyPubSubDomain() {
+		if (this.replyPubSubDomain != null) {
+			return replyPubSubDomain;
+		}
+		else {
+			return isPubSubDomain();
+		}
+	}
+
+	/**
 	 * Set the {@link MessageConverter} strategy for converting JMS Messages.
+	 * @since 4.1
 	 */
 	public void setMessageConverter(MessageConverter messageConverter) {
 		this.messageConverter = messageConverter;
@@ -477,6 +517,7 @@ public abstract class AbstractMessageListenerContainer
 	/**
 	 * Return the ErrorHandler to be invoked in case of any uncaught exceptions thrown
 	 * while processing a Message.
+	 * @since 4.1
 	 */
 	public ErrorHandler getErrorHandler() {
 		return this.errorHandler;

@@ -83,7 +83,7 @@ class ApplicationListenerMethodTransactionalAdapter extends ApplicationListenerM
 		TransactionalEventListener annotation = AnnotationUtils
 				.findAnnotation(method, TransactionalEventListener.class);
 		if (annotation == null) {
-			throw new IllegalStateException("No TransactionalEventListener annotation found ou '" + method + "'");
+			throw new IllegalStateException("No TransactionalEventListener annotation found on '" + method + "'");
 		}
 		return annotation;
 	}

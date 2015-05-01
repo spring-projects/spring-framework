@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,6 +32,7 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
+import java.util.zip.ZipException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -517,18 +518,26 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 			// being arbitrary as long as following the entry format.
 			// We'll also handle paths with and without leading "file:" prefix.
 			String urlFile = rootDirResource.getURL().getFile();
-			int separatorIndex = urlFile.indexOf(ResourceUtils.JAR_URL_SEPARATOR);
-			if (separatorIndex != -1) {
-				jarFileUrl = urlFile.substring(0, separatorIndex);
-				rootEntryPath = urlFile.substring(separatorIndex + ResourceUtils.JAR_URL_SEPARATOR.length());
-				jarFile = getJarFile(jarFileUrl);
+			try {
+				int separatorIndex = urlFile.indexOf(ResourceUtils.JAR_URL_SEPARATOR);
+				if (separatorIndex != -1) {
+					jarFileUrl = urlFile.substring(0, separatorIndex);
+					rootEntryPath = urlFile.substring(separatorIndex + ResourceUtils.JAR_URL_SEPARATOR.length());
+					jarFile = getJarFile(jarFileUrl);
+				}
+				else {
+					jarFile = new JarFile(urlFile);
+					jarFileUrl = urlFile;
+					rootEntryPath = "";
+				}
+				newJarFile = true;
 			}
-			else {
-				jarFile = new JarFile(urlFile);
-				jarFileUrl = urlFile;
-				rootEntryPath = "";
+			catch (ZipException ex) {
+				if (logger.isDebugEnabled()) {
+					logger.debug("Skipping invalid jar classpath entry [" + urlFile + "]");
+				}
+				return Collections.emptySet();
 			}
-			newJarFile = true;
 		}
 
 		try {

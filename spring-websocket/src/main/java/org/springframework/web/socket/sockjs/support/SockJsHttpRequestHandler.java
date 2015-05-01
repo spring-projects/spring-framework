@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,8 @@ import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.http.server.ServletServerHttpResponse;
 import org.springframework.util.Assert;
 import org.springframework.web.HttpRequestHandler;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.handler.ExceptionWebSocketHandlerDecorator;
@@ -39,9 +41,10 @@ import org.springframework.web.socket.sockjs.SockJsService;
  * in a Servlet container.
  *
  * @author Rossen Stoyanchev
+ * @author Sebastien Deleuze
  * @since 4.0
  */
-public class SockJsHttpRequestHandler implements HttpRequestHandler {
+public class SockJsHttpRequestHandler implements HttpRequestHandler, CorsConfigurationSource {
 
 	// No logging: HTTP transports too verbose and we don't know enough to log anything of value
 
@@ -98,6 +101,14 @@ public class SockJsHttpRequestHandler implements HttpRequestHandler {
 		String attribute = HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE;
 		String path = (String) servletRequest.getAttribute(attribute);
 		return ((path.length() > 0) && (path.charAt(0) != '/')) ? "/" + path : path;
+	}
+
+	@Override
+	public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
+		if (sockJsService instanceof CorsConfigurationSource) {
+			return ((CorsConfigurationSource)sockJsService).getCorsConfiguration(request);
+		}
+		return null;
 	}
 
 }

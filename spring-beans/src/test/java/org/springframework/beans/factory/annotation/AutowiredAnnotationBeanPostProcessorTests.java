@@ -190,6 +190,32 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 	}
 
 	@Test
+	public void testExtendedResourceInjectionWithDefaultMethod() {
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		bf.registerResolvableDependency(BeanFactory.class, bf);
+		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
+		bpp.setBeanFactory(bf);
+		bf.addBeanPostProcessor(bpp);
+		RootBeanDefinition annotatedBd = new RootBeanDefinition(DefaultMethodResourceInjectionBean.class);
+		bf.registerBeanDefinition("annotatedBean", annotatedBd);
+		TestBean tb = new TestBean();
+		bf.registerSingleton("testBean", tb);
+		NestedTestBean ntb = new NestedTestBean();
+		bf.registerSingleton("nestedTestBean", ntb);
+
+		DefaultMethodResourceInjectionBean bean = (DefaultMethodResourceInjectionBean) bf.getBean("annotatedBean");
+		assertSame(tb, bean.getTestBean());
+		assertNull(bean.getTestBean2());
+		assertSame(tb, bean.getTestBean3());
+		assertSame(tb, bean.getTestBean4());
+		assertSame(ntb, bean.getNestedTestBean());
+		assertNull(bean.getBeanFactory());
+		assertTrue(bean.baseInjected);
+		assertTrue(bean.subInjected);
+		bf.destroySingletons();
+	}
+
+	@Test
 	public void testExtendedResourceInjectionWithAtRequired() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		bf.registerResolvableDependency(BeanFactory.class, bf);
@@ -1872,6 +1898,42 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 		@Autowired
 		private void inject(ITestBean testBean4) {
 			this.subInjected = true;
+		}
+	}
+
+
+	public interface InterfaceWithDefaultMethod {
+
+		@Autowired
+		void setTestBean2(TestBean testBean2);
+
+		@Autowired
+		default void injectDefault(ITestBean testBean4) {
+			markSubInjected();
+		}
+
+		void markSubInjected();
+	}
+
+
+	public static class DefaultMethodResourceInjectionBean extends NonPublicResourceInjectionBean<NestedTestBean>
+			implements InterfaceWithDefaultMethod {
+
+		public boolean subInjected = false;
+
+		@Override
+		public void setTestBean2(TestBean testBean2) {
+			super.setTestBean2(testBean2);
+		}
+
+		@Override
+		protected void initBeanFactory(BeanFactory beanFactory) {
+			this.beanFactory = beanFactory;
+		}
+
+		@Override
+		public void markSubInjected() {
+			subInjected = true;
 		}
 	}
 

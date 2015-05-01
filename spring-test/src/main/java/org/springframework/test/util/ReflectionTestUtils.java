@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,6 +51,10 @@ import org.springframework.util.StringUtils;
  * methods.</li>
  * </ul>
  *
+ * <p>In addition, several methods in this class provide support for {@code static}
+ * fields &mdash; for example, {@link #setField(Class, String, Object)},
+ * {@link #getField(Class, String)}, etc.
+ *
  * @author Sam Brannen
  * @author Juergen Hoeller
  * @since 2.5
@@ -66,87 +70,204 @@ public class ReflectionTestUtils {
 
 
 	/**
-	 * Set the {@link Field field} with the given {@code name} on the provided
-	 * {@link Object target object} to the supplied {@code value}.
+	 * Set the {@linkplain Field field} with the given {@code name} on the
+	 * provided {@code targetObject} to the supplied {@code value}.
 	 *
-	 * <p>This method traverses the class hierarchy in search of the desired field.
-	 * In addition, an attempt will be made to make non-{@code public} fields
-	 * <em>accessible</em>, thus allowing one to set {@code protected},
-	 * {@code private}, and <em>package-private</em> fields.
+	 * <p>This method delegates to {@link #setField(Object, String, Object, Class)},
+	 * supplying {@code null} for the {@code type} argument.
 	 *
-	 * @param target the target object on which to set the field
-	 * @param name the name of the field to set
+	 * @param targetObject the target object on which to set the field; never {@code null}
+	 * @param name the name of the field to set; never {@code null}
 	 * @param value the value to set
-	 * @see ReflectionUtils#findField(Class, String, Class)
-	 * @see ReflectionUtils#makeAccessible(Field)
-	 * @see ReflectionUtils#setField(Field, Object, Object)
 	 */
-	public static void setField(Object target, String name, Object value) {
-		setField(target, name, value, null);
+	public static void setField(Object targetObject, String name, Object value) {
+		setField(targetObject, name, value, null);
 	}
 
 	/**
-	 * Set the {@link Field field} with the given {@code name} on the provided
-	 * {@link Object target object} to the supplied {@code value}.
+	 * Set the {@linkplain Field field} with the given {@code name}/{@code type}
+	 * on the provided {@code targetObject} to the supplied {@code value}.
+	 *
+	 * <p>This method delegates to {@link #setField(Object, Class, String, Object, Class)},
+	 * supplying {@code null} for the {@code targetClass} argument.
+	 *
+	 * @param targetObject the target object on which to set the field; never {@code null}
+	 * @param name the name of the field to set; may be {@code null} if
+	 * {@code type} is specified
+	 * @param value the value to set
+	 * @param type the type of the field to set; may be {@code null} if
+	 * {@code name} is specified
+	 */
+	public static void setField(Object targetObject, String name, Object value, Class<?> type) {
+		setField(targetObject, null, name, value, type);
+	}
+
+	/**
+	 * Set the static {@linkplain Field field} with the given {@code name} on
+	 * the provided {@code targetClass} to the supplied {@code value}.
+	 *
+	 * <p>This method delegates to {@link #setField(Object, Class, String, Object, Class)},
+	 * supplying {@code null} for the {@code targetObject} and {@code type} arguments.
+	 *
+	 * @param targetClass the target class on which to set the static field;
+	 * never {@code null}
+	 * @param name the name of the field to set; never {@code null}
+	 * @param value the value to set
+	 * @since 4.2
+	 */
+	public static void setField(Class<?> targetClass, String name, Object value) {
+		setField(null, targetClass, name, value, null);
+	}
+
+	/**
+	 * Set the static {@linkplain Field field} with the given
+	 * {@code name}/{@code type} on the provided {@code targetClass} to
+	 * the supplied {@code value}.
+	 *
+	 * <p>This method delegates to {@link #setField(Object, Class, String, Object, Class)},
+	 * supplying {@code null} for the {@code targetObject} argument.
+	 *
+	 * @param targetClass the target class on which to set the static field;
+	 * never {@code null}
+	 * @param name the name of the field to set; may be {@code null} if
+	 * {@code type} is specified
+	 * @param value the value to set
+	 * @param type the type of the field to set; may be {@code null} if
+	 * {@code name} is specified
+	 * @since 4.2
+	 */
+	public static void setField(Class<?> targetClass, String name, Object value, Class<?> type) {
+		setField(null, targetClass, name, value, type);
+	}
+
+	/**
+	 * Set the {@linkplain Field field} with the given {@code name}/{@code type}
+	 * on the provided {@code targetObject}/{@code targetClass} to the supplied
+	 * {@code value}.
 	 *
 	 * <p>This method traverses the class hierarchy in search of the desired
 	 * field. In addition, an attempt will be made to make non-{@code public}
 	 * fields <em>accessible</em>, thus allowing one to set {@code protected},
 	 * {@code private}, and <em>package-private</em> fields.
 	 *
-	 * @param target the target object on which to set the field
-	 * @param name the name of the field to set
+	 * @param targetObject the target object on which to set the field; may be
+	 * {@code null} if the field is static
+	 * @param targetClass the target class on which to set the field; may
+	 * be {@code null} if the field is an instance field
+	 * @param name the name of the field to set; may be {@code null} if
+	 * {@code type} is specified
 	 * @param value the value to set
-	 * @param type the type of the field (may be {@code null})
+	 * @param type the type of the field to set; may be {@code null} if
+	 * {@code name} is specified
 	 * @see ReflectionUtils#findField(Class, String, Class)
 	 * @see ReflectionUtils#makeAccessible(Field)
 	 * @see ReflectionUtils#setField(Field, Object, Object)
+	 * @since 4.2
 	 */
-	public static void setField(Object target, String name, Object value, Class<?> type) {
-		Assert.notNull(target, "Target object must not be null");
-		Field field = ReflectionUtils.findField(target.getClass(), name, type);
+	public static void setField(Object targetObject, Class<?> targetClass, String name, Object value, Class<?> type) {
+		Assert.isTrue(targetObject != null || targetClass != null,
+			"Either targetObject or targetClass for the field must be specified");
 
-		// SPR-9571: inline Assert.notNull() in order to avoid accidentally invoking
-		// toString() on a non-null target.
+		if (targetClass == null) {
+			targetClass = targetObject.getClass();
+		}
+		Field field = ReflectionUtils.findField(targetClass, name, type);
+
+		// Inline Assert.notNull() to avoid invoking toString() on a non-null target.
 		if (field == null) {
-			throw new IllegalArgumentException(String.format("Could not find field [%s] of type [%s] on target [%s]",
-				name, type, target));
+			throw new IllegalArgumentException(String.format(
+				"Could not find field [%s] of type [%s] on target object [%s] or target class [%s]", name, type,
+				targetObject, targetClass));
 		}
 
 		if (logger.isDebugEnabled()) {
-			logger.debug(String.format("Setting field [%s] of type [%s] on target [%s] to value [%s]", name, type,
-				target,
-				value));
+			logger.debug(String.format(
+				"Setting field [%s] of type [%s] on target object [%s] or target class [%s] to value [%s]", name, type,
+				targetObject, targetClass, value));
 		}
 		ReflectionUtils.makeAccessible(field);
-		ReflectionUtils.setField(field, target, value);
+		ReflectionUtils.setField(field, targetObject, value);
 	}
 
 	/**
-	 * Get the field with the given {@code name} from the provided target object.
+	 * Get the value of the {@linkplain Field field} with the given {@code name}
+	 * from the provided {@code targetObject}.
+	 *
+	 * <p>This method delegates to {@link #getField(Object, Class, String)},
+	 * supplying {@code null} for the {@code targetClass} argument.
+	 *
+	 * @param targetObject the target object from which to get the field;
+	 * never {@code null}
+	 * @param name the name of the field to get; never {@code null}
+	 * @return the field's current value
+	 * @see #getField(Class, String)
+	 */
+	public static Object getField(Object targetObject, String name) {
+		return getField(targetObject, null, name);
+	}
+
+	/**
+	 * Get the value of the static {@linkplain Field field} with the given
+	 * {@code name} from the provided {@code targetClass}.
+	 *
+	 * <p>This method delegates to {@link #getField(Object, Class, String)},
+	 * supplying {@code null} for the {@code targetObject} argument.
+	 *
+	 * @param targetClass the target class from which to get the static field;
+	 * never {@code null}
+	 * @param name the name of the field to get; never {@code null}
+	 * @return the field's current value
+	 * @see #getField(Object, String)
+	 * @since 4.2
+	 */
+	public static Object getField(Class<?> targetClass, String name) {
+		return getField(null, targetClass, name);
+	}
+
+	/**
+	 * Get the value of the {@linkplain Field field} with the given {@code name}
+	 * from the provided {@code targetObject}/{@code targetClass}.
 	 *
 	 * <p>This method traverses the class hierarchy in search of the desired
 	 * field. In addition, an attempt will be made to make non-{@code public}
 	 * fields <em>accessible</em>, thus allowing one to get {@code protected},
 	 * {@code private}, and <em>package-private</em> fields.
 	 *
-	 * @param target the target object on which to set the field
-	 * @param name the name of the field to get
+	 * @param targetObject the target object from which to get the field; may be
+	 * {@code null} if the field is static
+	 * @param targetClass the target class from which to get the field; may
+	 * be {@code null} if the field is an instance field
+	 * @param name the name of the field to get; never {@code null}
 	 * @return the field's current value
+	 * @see #getField(Object, String)
+	 * @see #getField(Class, String)
 	 * @see ReflectionUtils#findField(Class, String, Class)
 	 * @see ReflectionUtils#makeAccessible(Field)
-	 * @see ReflectionUtils#setField(Field, Object, Object)
+	 * @see ReflectionUtils#getField(Field, Object, Object)
+	 * @since 4.2
 	 */
-	public static Object getField(Object target, String name) {
-		Assert.notNull(target, "Target object must not be null");
-		Field field = ReflectionUtils.findField(target.getClass(), name);
-		Assert.notNull(field, "Could not find field [" + name + "] on target [" + target + "]");
+	public static Object getField(Object targetObject, Class<?> targetClass, String name) {
+		Assert.isTrue(targetObject != null || targetClass != null,
+			"Either targetObject or targetClass for the field must be specified");
+
+		if (targetClass == null) {
+			targetClass = targetObject.getClass();
+		}
+		Field field = ReflectionUtils.findField(targetClass, name);
+
+		// Inline Assert.notNull() to avoid invoking toString() on a non-null target.
+		if (field == null) {
+			throw new IllegalArgumentException(
+				String.format("Could not find field [%s] on target object [%s] or target class [%s]", name,
+					targetObject, targetClass));
+		}
 
 		if (logger.isDebugEnabled()) {
-			logger.debug("Getting field [" + name + "] from target [" + target + "]");
+			logger.debug(String.format("Getting field [%s] from target object [%s] or target class [%s]", name,
+				targetObject, targetClass));
 		}
 		ReflectionUtils.makeAccessible(field);
-		return ReflectionUtils.getField(field, target);
+		return ReflectionUtils.getField(field, targetObject);
 	}
 
 	/**

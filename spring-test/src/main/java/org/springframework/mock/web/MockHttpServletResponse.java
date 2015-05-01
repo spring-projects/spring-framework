@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,6 +33,7 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
 
+import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
 import org.springframework.util.LinkedCaseInsensitiveMap;
 import org.springframework.web.util.WebUtils;
@@ -216,10 +217,20 @@ public class MockHttpServletResponse implements HttpServletResponse {
 	public void setContentType(String contentType) {
 		this.contentType = contentType;
 		if (contentType != null) {
-			int charsetIndex = contentType.toLowerCase().indexOf(CHARSET_PREFIX);
-			if (charsetIndex != -1) {
-				this.characterEncoding = contentType.substring(charsetIndex + CHARSET_PREFIX.length());
-				this.charset = true;
+			try {
+				MediaType mediaType = MediaType.parseMediaType(contentType);
+				if (mediaType.getCharSet() != null) {
+					this.characterEncoding = mediaType.getCharSet().name();
+					this.charset = true;
+				}
+			}
+			catch (Exception ex) {
+				// Try to get charset value anyway
+				int charsetIndex = contentType.toLowerCase().indexOf(CHARSET_PREFIX);
+				if (charsetIndex != -1) {
+					this.characterEncoding = contentType.substring(charsetIndex + CHARSET_PREFIX.length());
+					this.charset = true;
+				}
 			}
 			updateContentTypeHeader();
 		}

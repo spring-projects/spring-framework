@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,20 +22,34 @@ import javax.servlet.http.HttpServletResponse;
 import org.springframework.web.method.HandlerMethod;
 
 /**
- * Extends {@code HandlerInterceptor} with a callback method invoked during
- * asynchronous request handling.
+ * Extends {@code HandlerInterceptor} with a callback method invoked after the
+ * start of asynchronous request handling.
  *
- * <p>When a handler starts asynchronous request handling, the DispatcherServlet
- * exits without invoking {@code postHandle} and {@code afterCompletion}, as it
- * normally does, since the results of request handling (e.g. ModelAndView)
- * will. be produced concurrently in another thread. In such scenarios,
- * {@link #afterConcurrentHandlingStarted(HttpServletRequest, HttpServletResponse, Object)}
- * is invoked instead allowing implementations to perform tasks such as cleaning
- * up thread bound attributes.
+ * <p>When a handler starts an asynchronous request, the DispatcherServlet
+ * exits without invoking {@code postHandle} and {@code afterCompletion} as it
+ * normally does since the results of request handling (e.g. ModelAndView)
+ * is likely not yet ready and will be produced concurrently from another thread.
+ * In such scenarios, {@link #afterConcurrentHandlingStarted} is invoked instead
+ * allowing implementations to perform tasks such as cleaning up thread bound
+ * attributes before releasing the thread to the Servlet container.
  *
  * <p>When asynchronous handling completes, the request is dispatched to the
  * container for further processing. At this stage the DispatcherServlet invokes
- * {@code preHandle}, {@code postHandle} and {@code afterCompletion} as usual.
+ * {@code preHandle}, {@code postHandle} and {@code afterCompletion}.
+ * To distinguish between the initial request and the subsequent dispatch
+ * after asynchronous handling completes, interceptors can check whether the
+ * {@code javax.servlet.DispatcherType} of {@link javax.servlet.ServletRequest}
+ * is "REQUEST" or "ASYNC".
+ *
+ * <p>Note that {@code HandlerInterceptor} implementations may be need to do work
+ * when an async request times out or completes with a network error. For such
+ * cases the Servlet container does not dispatch and therefore the
+ * {@code postHandle} and {@code afterCompletion} methods will not be invoked.
+ * Instead interceptors can register to track an asynchronous request through
+ * the {@code registerCallbackInterceptor} and {@code registerDeferredResultInterceptor}
+ * methods on {@link org.springframework.web.context.request.async.WebAsyncManager
+ * WebAsyncManager}. This can be done proactively on every request from
+ * {@code preHandle} regardless of whether async request processing will start.
  *
  * @author Rossen Stoyanchev
  * @since 3.2

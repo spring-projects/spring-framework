@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,15 +23,15 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 /**
- * Servlet 2.3/2.4 Filter that allows one to specify a character encoding for
- * requests. This is useful because current browsers typically do not set a
- * character encoding even if specified in the HTML page or form.
+ * Servlet Filter that allows one to specify a character encoding for requests.
+ * This is useful because current browsers typically do not set a character
+ * encoding even if specified in the HTML page or form.
  *
- * <p>This filter can either apply its encoding if the request does not
- * already specify an encoding, or enforce this filter's encoding in any case
+ * <p>This filter can either apply its encoding if the request does not already
+ * specify an encoding, or enforce this filter's encoding in any case
  * ("forceEncoding"="true"). In the latter case, the encoding will also be
- * applied as default response encoding on Servlet 2.4+ containers (although
- * this will usually be overridden by a full content type set in the view).
+ * applied as default response encoding (although this will usually be overridden
+ * by a full content type set in the view).
  *
  * @author Juergen Hoeller
  * @since 15.03.2004
@@ -65,9 +65,6 @@ public class CharacterEncodingFilter extends OncePerRequestFilter {
 	 * {@link javax.servlet.http.HttpServletRequest#getCharacterEncoding()}
 	 * returns a non-null value. Switch this to "true" to enforce the specified
 	 * encoding in any case, applying it as default response encoding as well.
-	 * <p>Note that the response encoding will only be set on Servlet 2.4+
-	 * containers, since Servlet 2.3 did not provide a facility for setting
-	 * a default response encoding.
 	 */
 	public void setForceEncoding(boolean forceEncoding) {
 		this.forceEncoding = forceEncoding;

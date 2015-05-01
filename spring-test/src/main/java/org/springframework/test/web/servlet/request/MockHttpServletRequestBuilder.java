@@ -537,7 +537,7 @@ public class MockHttpServletRequestBuilder
 			this.pathInfo = parentBuilder.pathInfo;
 		}
 
-		this.postProcessors.addAll(parentBuilder.postProcessors);
+		this.postProcessors.addAll(0, parentBuilder.postProcessors);
 
 		return this;
 	}
@@ -581,8 +581,7 @@ public class MockHttpServletRequestBuilder
 
 		try {
 			if (this.uriComponents.getQuery() != null) {
-				String query = UriUtils.decode(this.uriComponents.getQuery(), "UTF-8");
-				request.setQueryString(query);
+				request.setQueryString(this.uriComponents.getQuery());
 			}
 
 			for (Entry<String, List<String>> entry : this.uriComponents.getQueryParams().entrySet()) {

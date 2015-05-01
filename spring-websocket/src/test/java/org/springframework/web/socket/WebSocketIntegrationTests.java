@@ -29,7 +29,6 @@ import java.util.concurrent.TimeUnit;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -114,6 +113,7 @@ public class WebSocketIntegrationTests extends  AbstractWebSocketIntegrationTest
 
 	}
 
+	@SuppressWarnings("rawtypes")
 	private static class TestWebSocketHandler extends AbstractWebSocketHandler {
 
 		private List<WebSocketMessage> receivedMessages = new ArrayList<>();

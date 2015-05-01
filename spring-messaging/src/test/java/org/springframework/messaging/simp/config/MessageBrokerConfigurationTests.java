@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -79,8 +79,11 @@ import static org.mockito.Mockito.*;
 public class MessageBrokerConfigurationTests {
 
 	private ApplicationContext defaultContext = new AnnotationConfigApplicationContext(DefaultConfig.class);
+
 	private ApplicationContext simpleBrokerContext = new AnnotationConfigApplicationContext(SimpleBrokerConfig.class);
+
 	private ApplicationContext brokerRelayContext = new AnnotationConfigApplicationContext(BrokerRelayConfig.class);
+
 	private ApplicationContext customContext = new AnnotationConfigApplicationContext(CustomConfig.class);
 
 
@@ -401,7 +404,17 @@ public class MessageBrokerConfigurationTests {
 		assertEquals("a.a", handler.getPathMatcher().combine("a", "a"));
 	}
 
+	@Test
+	public void userDestinationBroadcast() throws Exception {
+		StompBrokerRelayMessageHandler relay = this.brokerRelayContext.getBean(StompBrokerRelayMessageHandler.class);
+		UserDestinationMessageHandler userHandler = this.brokerRelayContext.getBean(UserDestinationMessageHandler.class);
+		assertEquals("/topic/unresolved", userHandler.getUserDestinationBroadcast());
+		assertNotNull(relay.getSystemSubscriptions());
+		assertSame(userHandler, relay.getSystemSubscriptions().get("/topic/unresolved"));
+	}
 
+
+	@SuppressWarnings("unused")
 	@Controller
 	static class TestController {
 
@@ -417,7 +430,7 @@ public class MessageBrokerConfigurationTests {
 		}
 	}
 
-
+	@SuppressWarnings("unused")
 	@Configuration
 	static class SimpleBrokerConfig extends AbstractMessageBrokerConfiguration {
 
@@ -451,6 +464,7 @@ public class MessageBrokerConfigurationTests {
 		@Override
 		public void configureMessageBroker(MessageBrokerRegistry registry) {
 			registry.enableStompBrokerRelay("/topic", "/queue").setAutoStartup(true);
+			registry.setUserDestinationBroadcast("/topic/unresolved");
 		}
 	}
 

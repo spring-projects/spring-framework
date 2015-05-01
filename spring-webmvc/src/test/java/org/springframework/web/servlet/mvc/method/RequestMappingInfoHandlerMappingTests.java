@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,17 @@
 
 package org.springframework.web.servlet.mvc.method;
 
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
+
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
 import javax.servlet.http.HttpServletRequest;
 
 import org.junit.Before;
@@ -53,8 +58,6 @@ import org.springframework.web.servlet.mvc.condition.PatternsRequestCondition;
 import org.springframework.web.servlet.mvc.condition.ProducesRequestCondition;
 import org.springframework.web.servlet.mvc.condition.RequestMethodsRequestCondition;
 import org.springframework.web.util.UrlPathHelper;
-
-import static org.junit.Assert.*;
 
 /**
  * Test fixture with {@link RequestMappingInfoHandlerMapping}.
@@ -211,6 +214,8 @@ public class RequestMappingInfoHandlerMappingTests {
 		}
 	}
 
+	// SPR-12854
+
 	@Test
 	public void testUnsatisfiedServletRequestParameterException() throws Exception {
 		try {
@@ -219,8 +224,10 @@ public class RequestMappingInfoHandlerMappingTests {
 			fail("UnsatisfiedServletRequestParameterException expected");
 		}
 		catch (UnsatisfiedServletRequestParameterException ex) {
-			assertArrayEquals("Invalid request parameter conditions",
-					new String[] { "foo=bar" }, ex.getParamConditions());
+			List<String[]> groups = ex.getParamConditionGroups();
+			assertEquals(2, groups.size());
+			assertThat(Arrays.asList("foo=bar", "bar=baz"),
+					containsInAnyOrder(groups.get(0)[0], groups.get(1)[0]));
 		}
 	}
 
@@ -408,6 +415,7 @@ public class RequestMappingInfoHandlerMappingTests {
 	}
 
 
+	@SuppressWarnings("unused")
 	@Controller
 	private static class TestController {
 
@@ -441,6 +449,11 @@ public class RequestMappingInfoHandlerMappingTests {
 			return "";
 		}
 
+		@RequestMapping(value = "/params", params="bar=baz")
+		public String param2() {
+			return "";
+		}
+
 		@RequestMapping(value = "/content", produces="application/xml")
 		public String xmlContent() {
 			return "";
@@ -452,6 +465,7 @@ public class RequestMappingInfoHandlerMappingTests {
 		}
 	}
 
+	@SuppressWarnings("unused")
 	@Controller
 	private static class UserController {
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -78,7 +78,8 @@ public @interface CachePut {
 	String cacheResolver() default "";
 
 	/**
-	 * Spring Expression Language (SpEL) attribute used for conditioning the cache update.
+	 * Spring Expression Language (SpEL) attribute used for making the cache
+	 * put operation conditional.
 	 * <p>Default is "", meaning the method result is always cached.
 	 */
 	String condition() default "";

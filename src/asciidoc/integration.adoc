@@ -2869,7 +2869,7 @@ describes all available attributes:
 | The name of the default response destination to send response messages to. This will
   be applied in case of a request message that does not carry a "JMSReplyTo" field. The
   type of this destination will be determined by the listener-container's
-  "destination-type" attribute. Note: This only applies to a listener method with a
+  "response-destination-type" attribute. Note: This only applies to a listener method with a
   return value, for which each result object will be converted into a response message.
 
 | subscription
@@ -2957,6 +2957,10 @@ choices and message redelivery scenarios.
   or `sharedDurableTopic`. This enables potentially the `pubSubDomain`, `subscriptionDurable`
   and `subscriptionShared` properties of the container. The default is `queue` (i.e. disabling
   those 3 properties).
+
+| response-destination-type
+| The JMS destination type for responses: "queue", "topic". Default is the value of the
+  "destination-type" attribute.
 
 | client-id
 | The JMS client id for this listener container. Needs to be specified when using
@@ -3063,6 +3067,10 @@ table:
   or `sharedDurableTopic`. This enables potentially the `pubSubDomain`, `subscriptionDurable`
   and `subscriptionShared` properties of the container. The default is `queue` (i.e. disabling
   those 3 properties).
+
+| response-destination-type
+| The JMS destination type for responses: "queue", "topic". Default is the value of the
+  "destination-type" attribute.
 
 | client-id
 | The JMS client id for this listener container. Needs to be specified when using

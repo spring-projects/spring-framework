@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,6 +44,7 @@ import org.springframework.test.context.ContextHierarchy;
 import org.springframework.test.context.ContextLoader;
 import org.springframework.test.context.MergedContextConfiguration;
 import org.springframework.test.context.SmartContextLoader;
+import org.springframework.test.context.TestContext;
 import org.springframework.test.context.TestContextBootstrapper;
 import org.springframework.test.context.TestExecutionListener;
 import org.springframework.test.context.TestExecutionListeners;
@@ -65,6 +66,10 @@ import org.springframework.util.StringUtils;
  * <li>{@link #getDefaultContextLoaderClass}
  * <li>{@link #processMergedContextConfiguration}
  * </ul>
+ *
+ * <p>To plug in custom
+ * {@link org.springframework.test.context.cache.ContextCache ContextCache}
+ * support, override {@link #getCacheAwareContextLoaderDelegate()}.
  *
  * @author Sam Brannen
  * @author Juergen Hoeller
@@ -91,6 +96,21 @@ public abstract class AbstractTestContextBootstrapper implements TestContextBoot
 	@Override
 	public BootstrapContext getBootstrapContext() {
 		return this.bootstrapContext;
+	}
+
+	/**
+	 * Build a new {@link DefaultTestContext} using the {@linkplain Class test class}
+	 * in the {@link BootstrapContext} associated with this bootstrapper and
+	 * by delegating to {@link #buildMergedContextConfiguration()} and
+	 * {@link #getCacheAwareContextLoaderDelegate()}.
+	 * <p>Concrete subclasses may choose to override this method to return a
+	 * custom {@link TestContext} implementation.
+	 * @since 4.2
+	 */
+	@Override
+	public TestContext buildTestContext() {
+		return new DefaultTestContext(getBootstrapContext().getTestClass(), buildMergedContextConfiguration(),
+			getCacheAwareContextLoaderDelegate());
 	}
 
 	/**
@@ -266,7 +286,7 @@ public abstract class AbstractTestContextBootstrapper implements TestContextBoot
 	@Override
 	public final MergedContextConfiguration buildMergedContextConfiguration() {
 		Class<?> testClass = getBootstrapContext().getTestClass();
-		CacheAwareContextLoaderDelegate cacheAwareContextLoaderDelegate = getBootstrapContext().getCacheAwareContextLoaderDelegate();
+		CacheAwareContextLoaderDelegate cacheAwareContextLoaderDelegate = getCacheAwareContextLoaderDelegate();
 
 		if (MetaAnnotationUtils.findAnnotationDescriptorForTypes(testClass, ContextConfiguration.class,
 			ContextHierarchy.class) == null) {
@@ -390,8 +410,10 @@ public abstract class AbstractTestContextBootstrapper implements TestContextBoot
 	 * (i.e., as if we were traversing up the class hierarchy)
 	 * @return the resolved {@code ContextLoader} for the supplied {@code testClass}
 	 * (never {@code null})
+	 * @throws IllegalStateException if {@link #getDefaultContextLoaderClass(Class)}
+	 * returns {@code null}
 	 */
-	private ContextLoader resolveContextLoader(Class<?> testClass,
+	protected ContextLoader resolveContextLoader(Class<?> testClass,
 			List<ContextConfigurationAttributes> configAttributesList) {
 
 		Assert.notNull(testClass, "Class must not be null");
@@ -400,6 +422,9 @@ public abstract class AbstractTestContextBootstrapper implements TestContextBoot
 		Class<? extends ContextLoader> contextLoaderClass = resolveExplicitContextLoaderClass(configAttributesList);
 		if (contextLoaderClass == null) {
 			contextLoaderClass = getDefaultContextLoaderClass(testClass);
+			if (contextLoaderClass == null) {
+				throw new IllegalStateException("getDefaultContextLoaderClass() must not return null");
+			}
 		}
 		if (logger.isTraceEnabled()) {
 			logger.trace(String.format("Using ContextLoader class [%s] for test class [%s]",
@@ -428,7 +453,7 @@ public abstract class AbstractTestContextBootstrapper implements TestContextBoot
 	 * @throws IllegalArgumentException if supplied configuration attributes are
 	 * {@code null} or <em>empty</em>
 	 */
-	private Class<? extends ContextLoader> resolveExplicitContextLoaderClass(
+	protected Class<? extends ContextLoader> resolveExplicitContextLoaderClass(
 			List<ContextConfigurationAttributes> configAttributesList) {
 
 		Assert.notEmpty(configAttributesList, "ContextConfigurationAttributes list must not be empty");
@@ -451,12 +476,29 @@ public abstract class AbstractTestContextBootstrapper implements TestContextBoot
 	}
 
 	/**
-	 * Determine the default {@link ContextLoader} class to use for the supplied
-	 * test class.
+	 * Get the {@link CacheAwareContextLoaderDelegate} to use for transparent
+	 * interaction with the {@code ContextCache}.
+	 * <p>The default implementation simply delegates to
+	 * {@code getBootstrapContext().getCacheAwareContextLoaderDelegate()}.
+	 * <p>Concrete subclasses may choose to override this method to return a
+	 * custom {@code CacheAwareContextLoaderDelegate} implementation with custom
+	 * {@link org.springframework.test.context.cache.ContextCache ContextCache}
+	 * support.
+	 * @return the context loader delegate (never {@code null})
+	 */
+	protected CacheAwareContextLoaderDelegate getCacheAwareContextLoaderDelegate() {
+		return getBootstrapContext().getCacheAwareContextLoaderDelegate();
+	}
+
+	/**
+	 * Determine the default {@link ContextLoader} {@linkplain Class class}
+	 * to use for the supplied test class.
 	 * <p>The class returned by this method will only be used if a {@code ContextLoader}
 	 * class has not been explicitly declared via {@link ContextConfiguration#loader}.
 	 * @param testClass the test class for which to retrieve the default
 	 * {@code ContextLoader} class
+	 * @return the default {@code ContextLoader} class for the supplied test class
+	 * (never {@code null})
 	 */
 	protected abstract Class<? extends ContextLoader> getDefaultContextLoaderClass(Class<?> testClass);
 

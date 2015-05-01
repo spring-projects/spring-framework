@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,7 +34,7 @@ import java.lang.annotation.Target;
  * can replace the default one ({@link #keyGenerator()}).
  *
  * <p>If no value is found in the cache for the computed key, the method is executed
- * and the returned instance is used as the cache value.
+ * and the returned value is used as the cache value.
  *
  * @author Costin Leau
  * @author Phillip Webb
@@ -83,8 +83,9 @@ public @interface Cacheable {
 	String cacheResolver() default "";
 
 	/**
-	 * Spring Expression Language (SpEL) attribute used for conditioning the method caching.
-	 * <p>Default is "", meaning the method is always cached.
+	 * Spring Expression Language (SpEL) attribute used for making the method
+	 * caching conditional.
+	 * <p>Default is "", meaning the method result is always cached.
 	 */
 	String condition() default "";
 

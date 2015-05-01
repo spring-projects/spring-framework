@@ -135,7 +135,7 @@ public class UriComponentsBuilder implements Cloneable {
 	// Factory methods
 
 	/**
-	 * Returns a new, empty builder.
+	 * Create a new, empty builder.
 	 * @return the new {@code UriComponentsBuilder}
 	 */
 	public static UriComponentsBuilder newInstance() {
@@ -143,7 +143,7 @@ public class UriComponentsBuilder implements Cloneable {
 	}
 
 	/**
-	 * Returns a builder that is initialized with the given path.
+	 * Create a builder that is initialized with the given path.
 	 * @param path the path to initialize with
 	 * @return the new {@code UriComponentsBuilder}
 	 */
@@ -154,7 +154,7 @@ public class UriComponentsBuilder implements Cloneable {
 	}
 
 	/**
-	 * Returns a builder that is initialized with the given {@code URI}.
+	 * Create a builder that is initialized with the given {@code URI}.
 	 * @param uri the URI to initialize with
 	 * @return the new {@code UriComponentsBuilder}
 	 */
@@ -165,7 +165,7 @@ public class UriComponentsBuilder implements Cloneable {
 	}
 
 	/**
-	 * Returns a builder that is initialized with the given URI string.
+	 * Create a builder that is initialized with the given URI string.
 	 * <p><strong>Note:</strong> The presence of reserved characters can prevent
 	 * correct parsing of the URI string. For example if a query parameter
 	 * contains {@code '='} or {@code '&'} characters, the query string cannot
@@ -225,7 +225,7 @@ public class UriComponentsBuilder implements Cloneable {
 	}
 
 	/**
-	 * Creates a new {@code UriComponents} object from the string HTTP URL.
+	 * Create a URI components builder from the given HTTP URL String.
 	 * <p><strong>Note:</strong> The presence of reserved characters can prevent
 	 * correct parsing of the URI string. For example if a query parameter
 	 * contains {@code '='} or {@code '&'} characters, the query string cannot
@@ -286,7 +286,7 @@ public class UriComponentsBuilder implements Cloneable {
 			String hostToUse = hosts[0];
 			if (hostToUse.contains(":")) {
 				String[] hostAndPort = StringUtils.split(hostToUse, ":");
-				host  = hostAndPort[0];
+				host = hostAndPort[0];
 				port = Integer.parseInt(hostAndPort[1]);
 			}
 			else {
@@ -297,12 +297,14 @@ public class UriComponentsBuilder implements Cloneable {
 
 		String portHeader = request.getHeaders().getFirst("X-Forwarded-Port");
 		if (StringUtils.hasText(portHeader)) {
-			port = Integer.parseInt(portHeader);
+			String[] ports = StringUtils.commaDelimitedListToStringArray(portHeader);
+			port = Integer.parseInt(ports[0]);
 		}
 
 		String protocolHeader = request.getHeaders().getFirst("X-Forwarded-Proto");
 		if (StringUtils.hasText(protocolHeader)) {
-			scheme = protocolHeader;
+			String[] protocols = StringUtils.commaDelimitedListToStringArray(protocolHeader);
+			scheme = protocols[0];
 		}
 
 		builder.scheme(scheme);
@@ -445,40 +447,7 @@ public class UriComponentsBuilder implements Cloneable {
 	 */
 	public UriComponentsBuilder uriComponents(UriComponents uriComponents) {
 		Assert.notNull(uriComponents, "'uriComponents' must not be null");
-		this.scheme = uriComponents.getScheme();
-		if (uriComponents instanceof OpaqueUriComponents) {
-			this.ssp = uriComponents.getSchemeSpecificPart();
-			resetHierarchicalComponents();
-		}
-		else {
-			if (uriComponents.getUserInfo() != null) {
-				this.userInfo = uriComponents.getUserInfo();
-			}
-			if (uriComponents.getHost() != null) {
-				this.host = uriComponents.getHost();
-			}
-			if (uriComponents.getPort() != -1) {
-				this.port = String.valueOf(uriComponents.getPort());
-			}
-			if (StringUtils.hasLength(uriComponents.getPath())) {
-				List<String> segments = uriComponents.getPathSegments();
-				if (segments.isEmpty()) {
-					// Perhaps "/"
-					this.pathBuilder.addPath(uriComponents.getPath());
-				}
-				else {
-					this.pathBuilder.addPathSegments(segments.toArray(new String[segments.size()]));
-				}
-			}
-			if (!uriComponents.getQueryParams().isEmpty()) {
-				this.queryParams.clear();
-				this.queryParams.putAll(uriComponents.getQueryParams());
-			}
-			resetSchemeSpecificPart();
-		}
-		if (uriComponents.getFragment() != null) {
-			this.fragment = uriComponents.getFragment();
-		}
+		uriComponents.copyToUriComponentsBuilder(this);
 		return this;
 	}
 
@@ -678,6 +647,18 @@ public class UriComponentsBuilder implements Cloneable {
 	}
 
 	/**
+	 * Set the query parameter values overriding all existing query values.
+	 * @param params the query parameter name
+	 * @return this UriComponentsBuilder
+	 */
+	public UriComponentsBuilder replaceQueryParams(MultiValueMap<String, String> params) {
+		Assert.notNull(params, "'params' must not be null");
+		this.queryParams.clear();
+		this.queryParams.putAll(params);
+		return this;
+	}
+
+	/**
 	 * Set the URI fragment. The given fragment may contain URI template variables,
 	 * and may also be {@code null} to clear the fragment of this builder.
 	 * @param fragment the URI fragment
@@ -695,7 +676,7 @@ public class UriComponentsBuilder implements Cloneable {
 	}
 
 	@Override
-	protected Object clone() {
+	public Object clone() {
 		return new UriComponentsBuilder(this);
 	}
 

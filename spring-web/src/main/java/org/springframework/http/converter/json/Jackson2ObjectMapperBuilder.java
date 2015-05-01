@@ -27,6 +27,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
 
+import com.fasterxml.jackson.annotation.JsonFilter;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
@@ -42,6 +43,7 @@ import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.cfg.HandlerInstantiator;
 import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.fasterxml.jackson.databind.ser.FilterProvider;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 
 import org.springframework.beans.BeanUtils;
@@ -108,6 +110,8 @@ public class Jackson2ObjectMapperBuilder {
 	private ClassLoader moduleClassLoader = getClass().getClassLoader();
 
 	private HandlerInstantiator handlerInstantiator;
+
+	private FilterProvider filters;
 
 	private ApplicationContext applicationContext;
 
@@ -487,6 +491,16 @@ public class Jackson2ObjectMapperBuilder {
 	}
 
 	/**
+	 * Set the global filters to use in order to support {@link JsonFilter @JsonFilter} annotated POJO.
+	 * @since 4.2
+	 * @see MappingJacksonValue#setFilters(FilterProvider)
+	 */
+	public Jackson2ObjectMapperBuilder filters(FilterProvider filters) {
+		this.filters = filters;
+		return this;
+	}
+
+	/**
 	 * Set the Spring {@link ApplicationContext} in order to autowire Jackson handlers ({@link JsonSerializer},
 	 * {@link JsonDeserializer}, {@link KeyDeserializer}, {@code TypeResolverBuilder} and {@code TypeIdResolver}).
 	 * @since 4.1.3
@@ -592,6 +606,9 @@ public class Jackson2ObjectMapperBuilder {
 		}
 		if (this.handlerInstantiator != null) {
 			objectMapper.setHandlerInstantiator(this.handlerInstantiator);
+		}
+		if (this.filters != null) {
+			objectMapper.setFilters(this.filters);
 		}
 		else if (this.applicationContext != null) {
 			objectMapper.setHandlerInstantiator(

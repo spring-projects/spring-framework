@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -80,6 +80,11 @@ public class MethodMetadataReadingVisitor extends MethodVisitor implements Metho
 	@Override
 	public String getMethodName() {
 		return this.name;
+	}
+
+	@Override
+	public boolean isAbstract() {
+		return ((this.access & Opcodes.ACC_ABSTRACT) != 0);
 	}
 
 	@Override

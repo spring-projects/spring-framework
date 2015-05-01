@@ -28,7 +28,7 @@ import java.security.MessageDigest;
  * @since 4.2
  */
 abstract class UpdateMessageDigestInputStream extends InputStream {
-	
+
 	/**
 	 * Update the message digest with the rest of the bytes in this stream.
 	 * <p>Using this method is more optimized since it avoids creating new
@@ -42,7 +42,7 @@ abstract class UpdateMessageDigestInputStream extends InputStream {
 			messageDigest.update((byte) data);
 		}
 	}
-	
+
 	/**
 	 * Update the message digest with the next len bytes in this stream.
 	 * <p>Using this method is more optimized since it avoids creating new

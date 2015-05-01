@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,10 +21,13 @@ import java.util.Arrays;
 
 import org.springframework.aop.framework.AopProxyUtils;
 import org.springframework.aop.support.AopUtils;
+import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.jms.listener.MessageListenerContainer;
 import org.springframework.jms.listener.adapter.MessagingMessageListenerAdapter;
 import org.springframework.jms.support.converter.MessageConverter;
+import org.springframework.jms.support.destination.DestinationResolver;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.handler.annotation.support.MessageHandlerMethodFactory;
 import org.springframework.messaging.handler.invocation.InvocableHandlerMethod;
@@ -45,6 +48,8 @@ public class MethodJmsListenerEndpoint extends AbstractJmsListenerEndpoint {
 	private Method method;
 
 	private MessageHandlerMethodFactory messageHandlerMethodFactory;
+
+	private BeanFactory beanFactory;
 
 
 	/**
@@ -78,6 +83,12 @@ public class MethodJmsListenerEndpoint extends AbstractJmsListenerEndpoint {
 		this.messageHandlerMethodFactory = messageHandlerMethodFactory;
 	}
 
+	/**
+	 * Set the {@link BeanFactory} to use to resolve expressions (can be null).
+	 */
+	public void setBeanFactory(BeanFactory beanFactory) {
+		this.beanFactory = beanFactory;
+	}
 
 	@Override
 	protected MessagingMessageListenerAdapter createMessageListener(MessageListenerContainer container) {
@@ -89,7 +100,7 @@ public class MethodJmsListenerEndpoint extends AbstractJmsListenerEndpoint {
 		messageListener.setHandlerMethod(invocableHandlerMethod);
 		String responseDestination = getDefaultResponseDestination();
 		if (StringUtils.hasText(responseDestination)) {
-			if (container.isPubSubDomain()) {
+			if (container.isReplyPubSubDomain()) {
 				messageListener.setDefaultResponseTopicName(responseDestination);
 			}
 			else {
@@ -99,6 +110,10 @@ public class MethodJmsListenerEndpoint extends AbstractJmsListenerEndpoint {
 		MessageConverter messageConverter = container.getMessageConverter();
 		if (messageConverter != null) {
 			messageListener.setMessageConverter(messageConverter);
+		}
+		DestinationResolver destinationResolver = container.getDestinationResolver();
+		if (destinationResolver != null) {
+			messageListener.setDestinationResolver(destinationResolver);
 		}
 		return messageListener;
 	}
@@ -110,7 +125,10 @@ public class MethodJmsListenerEndpoint extends AbstractJmsListenerEndpoint {
 		return new MessagingMessageListenerAdapter();
 	}
 
-	private String getDefaultResponseDestination() {
+	/**
+	 * Return the default response destination, if any.
+	 */
+	protected String getDefaultResponseDestination() {
 		Method specificMethod = getMostSpecificMethod();
 		SendTo ann = AnnotationUtils.getAnnotation(specificMethod, SendTo.class);
 		if (ann != null) {
@@ -119,10 +137,22 @@ public class MethodJmsListenerEndpoint extends AbstractJmsListenerEndpoint {
 				throw new IllegalStateException("Invalid @" + SendTo.class.getSimpleName() + " annotation on '"
 						+ specificMethod + "' one destination must be set (got " + Arrays.toString(destinations) + ")");
 			}
-			return (String) destinations[0];
+			return resolve((String) destinations[0]);
 		}
 		return null;
 	}
+
+	/**
+	 * Resolve the specified value if possible.
+	 * @see ConfigurableBeanFactory#resolveEmbeddedValue
+	 */
+	private String resolve(String value) {
+		if (this.beanFactory instanceof ConfigurableBeanFactory) {
+			return ((ConfigurableBeanFactory) this.beanFactory).resolveEmbeddedValue(value);
+		}
+		return value;
+	}
+
 
 	private Method getMostSpecificMethod() {
 		if (AopUtils.isAopProxy(this.bean)) {

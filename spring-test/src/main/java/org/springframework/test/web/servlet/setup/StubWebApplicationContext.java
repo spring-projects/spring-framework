@@ -38,6 +38,7 @@ import org.springframework.context.MessageSource;
 import org.springframework.context.MessageSourceResolvable;
 import org.springframework.context.NoSuchMessageException;
 import org.springframework.context.support.DelegatingMessageSource;
+import org.springframework.core.ResolvableType;
 import org.springframework.core.env.Environment;
 import org.springframework.core.env.StandardEnvironment;
 import org.springframework.core.io.Resource;
@@ -85,6 +86,7 @@ class StubWebApplicationContext implements WebApplicationContext {
 		this.resourcePatternResolver = new ServletContextResourcePatternResolver(servletContext);
 	}
 
+
 	/**
 	 * Returns an instance that can initialize {@link ApplicationContextAware} beans.
 	 */
@@ -97,6 +99,7 @@ class StubWebApplicationContext implements WebApplicationContext {
 	public ServletContext getServletContext() {
 		return this.servletContext;
 	}
+
 
 	//---------------------------------------------------------------------
 	// Implementation of ApplicationContext interface
@@ -146,6 +149,7 @@ class StubWebApplicationContext implements WebApplicationContext {
 		}
 	}
 
+
 	//---------------------------------------------------------------------
 	// Implementation of BeanFactory interface
 	//---------------------------------------------------------------------
@@ -191,8 +195,13 @@ class StubWebApplicationContext implements WebApplicationContext {
 	}
 
 	@Override
-	public boolean isTypeMatch(String name, Class<?> targetType) throws NoSuchBeanDefinitionException {
-		return this.beanFactory.isTypeMatch(name, targetType);
+	public boolean isTypeMatch(String name, ResolvableType typeToMatch) throws NoSuchBeanDefinitionException {
+		return this.beanFactory.isTypeMatch(name, typeToMatch);
+	}
+
+	@Override
+	public boolean isTypeMatch(String name, Class<?> typeToMatch) throws NoSuchBeanDefinitionException {
+		return this.beanFactory.isTypeMatch(name, typeToMatch);
 	}
 
 	@Override
@@ -204,6 +213,7 @@ class StubWebApplicationContext implements WebApplicationContext {
 	public String[] getAliases(String name) {
 		return this.beanFactory.getAliases(name);
 	}
+
 
 	//---------------------------------------------------------------------
 	// Implementation of ListableBeanFactory interface
@@ -222,6 +232,11 @@ class StubWebApplicationContext implements WebApplicationContext {
 	@Override
 	public String[] getBeanDefinitionNames() {
 		return this.beanFactory.getBeanDefinitionNames();
+	}
+
+	@Override
+	public String[] getBeanNamesForType(ResolvableType type) {
+		return this.beanFactory.getBeanNamesForType(type);
 	}
 
 	@Override
@@ -265,6 +280,7 @@ class StubWebApplicationContext implements WebApplicationContext {
 		return this.beanFactory.findAnnotationOnBean(beanName, annotationType);
 	}
 
+
 	//---------------------------------------------------------------------
 	// Implementation of HierarchicalBeanFactory interface
 	//---------------------------------------------------------------------
@@ -278,6 +294,7 @@ class StubWebApplicationContext implements WebApplicationContext {
 	public boolean containsLocalBean(String name) {
 		return this.beanFactory.containsBean(name);
 	}
+
 
 	//---------------------------------------------------------------------
 	// Implementation of MessageSource interface
@@ -298,6 +315,7 @@ class StubWebApplicationContext implements WebApplicationContext {
 		return this.messageSource.getMessage(resolvable, locale);
 	}
 
+
 	//---------------------------------------------------------------------
 	// Implementation of ResourceLoader interface
 	//---------------------------------------------------------------------
@@ -311,6 +329,7 @@ class StubWebApplicationContext implements WebApplicationContext {
 	public Resource getResource(String location) {
 		return this.resourcePatternResolver.getResource(location);
 	}
+
 
 	//---------------------------------------------------------------------
 	// Other

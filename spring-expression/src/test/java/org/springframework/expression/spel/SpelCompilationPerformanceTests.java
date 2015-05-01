@@ -62,7 +62,7 @@ public class SpelCompilationPerformanceTests extends AbstractExpressionTests {
 			return duration;
 		}
 	}
-	
+
 	public static class NumberHolder {
 		public int payload = 36;
 	}
@@ -97,7 +97,7 @@ public class SpelCompilationPerformanceTests extends AbstractExpressionTests {
 		System.out.println("Now compiled:");
 		o = expression.getValue(nh);
 		assertEquals(2d, o);
-		
+
 		stime = System.currentTimeMillis();
 		for (int i=0;i<1000000;i++) {
 			o = expression.getValue(nh);
@@ -113,7 +113,7 @@ public class SpelCompilationPerformanceTests extends AbstractExpressionTests {
 			o = expression.getValue(nh);
 		}
 		System.out.println("One million iterations: "+(System.currentTimeMillis()-stime)+"ms");
-		
+
 		expression = parser.parseExpression("payload/18D");
 		o = expression.getValue(nh);
 		assertEquals(2d,o);
@@ -137,7 +137,7 @@ public class SpelCompilationPerformanceTests extends AbstractExpressionTests {
 		System.out.println("Now compiled:");
 		o = expression.getValue(nh);
 		assertEquals(2d, o);
-		
+
 		stime = System.currentTimeMillis();
 		for (int i=0;i<1000000;i++) {
 			o = expression.getValue(nh);
@@ -154,7 +154,7 @@ public class SpelCompilationPerformanceTests extends AbstractExpressionTests {
 		}
 		System.out.println("One million iterations: "+(System.currentTimeMillis()-stime)+"ms");
 	}
-	
+
 	@Test
 	public void inlineLists() throws Exception {
 		expression = parser.parseExpression("{'abcde','ijklm'}[0].substring({1,3,4}[0],{1,3,4}[1])");
@@ -180,7 +180,7 @@ public class SpelCompilationPerformanceTests extends AbstractExpressionTests {
 		System.out.println("Now compiled:");
 		o = expression.getValue();
 		assertEquals("bc", o);
-		
+
 		stime = System.currentTimeMillis();
 		for (int i=0;i<1000000;i++) {
 			o = expression.getValue();
@@ -197,7 +197,7 @@ public class SpelCompilationPerformanceTests extends AbstractExpressionTests {
 		}
 		System.out.println("One million iterations: "+(System.currentTimeMillis()-stime)+"ms");
 	}
-	
+
 	@Test
 	public void inlineNestedLists() throws Exception {
 		expression = parser.parseExpression("{'abcde',{'ijklm','nopqr'}}[1][0].substring({1,3,4}[0],{1,3,4}[1])");
@@ -223,7 +223,7 @@ public class SpelCompilationPerformanceTests extends AbstractExpressionTests {
 		System.out.println("Now compiled:");
 		o = expression.getValue();
 		assertEquals("jk", o);
-		
+
 		stime = System.currentTimeMillis();
 		for (int i=0;i<1000000;i++) {
 			o = expression.getValue();
@@ -269,7 +269,7 @@ public class SpelCompilationPerformanceTests extends AbstractExpressionTests {
 		System.out.println("Now compiled:");
 		o = expression.getValue(g);
 		assertEquals("helloworld spring", o);
-		
+
 		stime = System.currentTimeMillis();
 		for (int i=0;i<1000000;i++) {
 			o = expression.getValue(g);
@@ -286,7 +286,7 @@ public class SpelCompilationPerformanceTests extends AbstractExpressionTests {
 		}
 		System.out.println("One million iterations: "+(System.currentTimeMillis()-stime)+"ms");
 	}
-	
+
 	public static class Greeter {
 		public String getWorld() {
 			return "world";

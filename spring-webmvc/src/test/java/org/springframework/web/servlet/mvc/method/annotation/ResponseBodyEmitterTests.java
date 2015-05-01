@@ -20,15 +20,13 @@ import java.io.IOException;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
+import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.verify;
 import org.mockito.MockitoAnnotations;
 
 import org.springframework.http.MediaType;
 
 import static org.junit.Assert.fail;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-
 
 /**
  * Unit tests for {@link ResponseBodyEmitter}.
@@ -132,6 +130,38 @@ public class ResponseBodyEmitterTests {
 		verify(this.handler).send("foo", MediaType.TEXT_PLAIN);
 		verify(this.handler).completeWithError(failure);
 		verifyNoMoreInteractions(this.handler);
+	}
+
+	@Test
+	public void onTimeoutBeforeHandlerInitialized() throws Exception  {
+		Runnable runnable = mock(Runnable.class);
+		this.emitter.onTimeout(runnable);
+		this.emitter.initialize(this.handler);
+		verify(this.handler).onTimeout(runnable);
+	}
+
+	@Test
+	public void onTimeoutAfterHandlerInitialized() throws Exception  {
+		Runnable runnable = mock(Runnable.class);
+		this.emitter.initialize(this.handler);
+		this.emitter.onTimeout(runnable);
+		verify(this.handler).onTimeout(runnable);
+	}
+
+	@Test
+	public void onCompletionBeforeHandlerInitialized() throws Exception  {
+		Runnable runnable = mock(Runnable.class);
+		this.emitter.onCompletion(runnable);
+		this.emitter.initialize(this.handler);
+		verify(this.handler).onCompletion(runnable);
+	}
+
+	@Test
+	public void onCompletionAfterHandlerInitialized() throws Exception  {
+		Runnable runnable = mock(Runnable.class);
+		this.emitter.initialize(this.handler);
+		this.emitter.onCompletion(runnable);
+		verify(this.handler).onCompletion(runnable);
 	}
 
 }

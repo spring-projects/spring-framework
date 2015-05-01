@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,8 +23,8 @@ import org.hamcrest.Matcher;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultMatcher;
 
+import static org.hamcrest.MatcherAssert.*;
 import static org.springframework.test.util.AssertionErrors.*;
-import static org.springframework.test.util.MatcherAssertionErrors.*;
 
 /**
  * Factory for response cookie assertions. An instance of this class is
@@ -36,13 +36,13 @@ import static org.springframework.test.util.MatcherAssertionErrors.*;
  */
 public class CookieResultMatchers {
 
-
 	/**
 	 * Protected constructor.
 	 * Use {@link MockMvcResultMatchers#cookie()}.
 	 */
 	protected CookieResultMatchers() {
 	}
+
 
 	/**
 	 * Assert a cookie value with the given Hamcrest {@link Matcher}.
@@ -241,4 +241,5 @@ public class CookieResultMatchers {
 			}
 		};
 	}
+
 }

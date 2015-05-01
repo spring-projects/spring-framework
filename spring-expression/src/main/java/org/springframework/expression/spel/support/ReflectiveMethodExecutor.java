@@ -35,11 +35,11 @@ import org.springframework.util.ReflectionUtils;
 public class ReflectiveMethodExecutor implements MethodExecutor {
 
 	private final Method method;
-	
+
 	private final Integer varargsPosition;
 
 	private boolean computedPublicDeclaringClass = false;
-	
+
 	private Class<?> publicDeclaringClass;
 
 	private boolean argumentConversionOccurred = false;
@@ -58,10 +58,10 @@ public class ReflectiveMethodExecutor implements MethodExecutor {
 	public Method getMethod() {
 		return this.method;
 	}
-	
+
 	/**
 	 * Find the first public class in the methods declaring class hierarchy that declares this method.
-	 * Sometimes the reflective method discovery logic finds a suitable method that can easily be 
+	 * Sometimes the reflective method discovery logic finds a suitable method that can easily be
 	 * called via reflection but cannot be called from generated code when compiling the expression
 	 * because of visibility restrictions. For example if a non public class overrides toString(), this
 	 * helper method will walk up the type hierarchy to find the first public type that declares the
@@ -81,7 +81,7 @@ public class ReflectiveMethodExecutor implements MethodExecutor {
 				clazz.getDeclaredMethod(method.getName(), method.getParameterTypes());
 				return clazz;
 			} catch (NoSuchMethodException nsme) {
-				
+		
 			}
 		}
 		Class<?>[] intfaces = clazz.getInterfaces();
@@ -93,7 +93,7 @@ public class ReflectiveMethodExecutor implements MethodExecutor {
 		}
 		return null;
 	}
-	
+
 	public boolean didArgumentConversionOccur() {
 		return this.argumentConversionOccurred;
 	}

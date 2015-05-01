@@ -25,6 +25,7 @@ import org.springframework.messaging.Message;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.util.ObjectUtils;
 
 /**
@@ -114,7 +115,7 @@ public class NativeMessageHeaderAccessor extends MessageHeaderAccessor {
 	 */
 	public boolean containsNativeHeader(String headerName) {
 		Map<String, List<String>> map = getNativeHeaders();
-		return (map != null ? map.containsKey(headerName) : false);
+		return (map != null && map.containsKey(headerName));
 	}
 
 	/**
@@ -186,6 +187,17 @@ public class NativeMessageHeaderAccessor extends MessageHeaderAccessor {
 		setModified(true);
 	}
 
+	public void addNativeHeaders(MultiValueMap<String, String> headers) {
+		if (headers == null) {
+			return;
+		}
+		for (String header : headers.keySet()) {
+			for (String value : headers.get(header)) {
+				addNativeHeader(header, value);
+			}
+		}
+	}
+
 	public List<String> removeNativeHeader(String name) {
 		Assert.state(isMutable(), "Already immutable");
 		Map<String, List<String>> nativeHeaders = getNativeHeaders();
@@ -193,6 +205,18 @@ public class NativeMessageHeaderAccessor extends MessageHeaderAccessor {
 			return null;
 		}
 		return nativeHeaders.remove(name);
+	}
+
+	@SuppressWarnings("unchecked")
+	public static String getFirstNativeHeader(String headerName, Map<String, Object> headers) {
+		Map<String, List<String>> map = (Map<String, List<String>>) headers.get(NATIVE_HEADERS);
+		if (map != null) {
+			List<String> values = map.get(headerName);
+			if (values != null) {
+				return values.get(0);
+			}
+		}
+		return null;
 	}
 
 }

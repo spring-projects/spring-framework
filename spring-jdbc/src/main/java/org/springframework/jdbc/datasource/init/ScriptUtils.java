@@ -33,8 +33,9 @@ import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 /**
- * Generic utility methods for working with SQL scripts. Mainly for internal use
- * within the framework.
+ * Generic utility methods for working with SQL scripts.
+ *
+ * <p>Mainly for internal use within the framework.
  *
  * @author Thomas Risberg
  * @author Sam Brannen
@@ -352,7 +353,8 @@ public abstract class ScriptUtils {
 	 * separators, comment delimiters, and exception handling flags.
 	 * <p>Statement separators and comments will be removed before executing
 	 * individual statements within the supplied script.
-	 * <p><b>Do not use this method to execute DDL if you expect rollback.</b>
+	 * <p><strong>Warning</strong>: this method does <em>not</em> release the
+	 * provided {@link Connection}.
 	 * @param connection the JDBC connection to use to execute the script; already
 	 * configured and ready to use
 	 * @param resource the resource to load the SQL script from; encoded with the
@@ -363,6 +365,8 @@ public abstract class ScriptUtils {
 	 * @see #DEFAULT_COMMENT_PREFIX
 	 * @see #DEFAULT_BLOCK_COMMENT_START_DELIMITER
 	 * @see #DEFAULT_BLOCK_COMMENT_END_DELIMITER
+	 * @see org.springframework.jdbc.datasource.DataSourceUtils#getConnection
+	 * @see org.springframework.jdbc.datasource.DataSourceUtils#releaseConnection
 	 */
 	public static void executeSqlScript(Connection connection, Resource resource) throws ScriptException {
 		executeSqlScript(connection, new EncodedResource(resource));
@@ -373,7 +377,8 @@ public abstract class ScriptUtils {
 	 * separators, comment delimiters, and exception handling flags.
 	 * <p>Statement separators and comments will be removed before executing
 	 * individual statements within the supplied script.
-	 * <p><b>Do not use this method to execute DDL if you expect rollback.</b>
+	 * <p><strong>Warning</strong>: this method does <em>not</em> release the
+	 * provided {@link Connection}.
 	 * @param connection the JDBC connection to use to execute the script; already
 	 * configured and ready to use
 	 * @param resource the resource (potentially associated with a specific encoding)
@@ -384,6 +389,8 @@ public abstract class ScriptUtils {
 	 * @see #DEFAULT_COMMENT_PREFIX
 	 * @see #DEFAULT_BLOCK_COMMENT_START_DELIMITER
 	 * @see #DEFAULT_BLOCK_COMMENT_END_DELIMITER
+	 * @see org.springframework.jdbc.datasource.DataSourceUtils#getConnection
+	 * @see org.springframework.jdbc.datasource.DataSourceUtils#releaseConnection
 	 */
 	public static void executeSqlScript(Connection connection, EncodedResource resource) throws ScriptException {
 		executeSqlScript(connection, resource, false, false, DEFAULT_COMMENT_PREFIX, DEFAULT_STATEMENT_SEPARATOR,
@@ -394,7 +401,8 @@ public abstract class ScriptUtils {
 	 * Execute the given SQL script.
 	 * <p>Statement separators and comments will be removed before executing
 	 * individual statements within the supplied script.
-	 * <p><b>Do not use this method to execute DDL if you expect rollback.</b>
+	 * <p><strong>Warning</strong>: this method does <em>not</em> release the
+	 * provided {@link Connection}.
 	 * @param connection the JDBC connection to use to execute the script; already
 	 * configured and ready to use
 	 * @param resource the resource (potentially associated with a specific encoding)
@@ -418,6 +426,8 @@ public abstract class ScriptUtils {
 	 * @see #DEFAULT_STATEMENT_SEPARATOR
 	 * @see #FALLBACK_STATEMENT_SEPARATOR
 	 * @see #EOF_STATEMENT_SEPARATOR
+	 * @see org.springframework.jdbc.datasource.DataSourceUtils#getConnection
+	 * @see org.springframework.jdbc.datasource.DataSourceUtils#releaseConnection
 	 */
 	public static void executeSqlScript(Connection connection, EncodedResource resource, boolean continueOnError,
 			boolean ignoreFailedDrops, String commentPrefix, String separator, String blockCommentStartDelimiter,

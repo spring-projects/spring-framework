@@ -49,6 +49,8 @@ public class MessageBrokerRegistry {
 
 	private String userDestinationPrefix;
 
+	private String userDestinationBroadcast;
+
 	private PathMatcher pathMatcher;
 
 
@@ -135,6 +137,24 @@ public class MessageBrokerRegistry {
 
 	protected String getUserDestinationPrefix() {
 		return this.userDestinationPrefix;
+	}
+
+	/**
+	 * Set a destination to broadcast messages to that remain unresolved because
+	 * the user is not connected. In a multi-application server scenario this
+	 * gives other application servers a chance to try.
+	 * <p><strong>Note:</strong> this option applies only when the
+	 * {@link #enableStompBrokerRelay "broker relay"} is enabled.
+	 * <p>By default this is not set.
+	 * @param destination the destination to forward unresolved
+	 * messages to, e.g. "/topic/unresolved-user-destination".
+	 */
+	public void setUserDestinationBroadcast(String destination) {
+		this.userDestinationBroadcast = destination;
+	}
+
+	protected String getUserDestinationBroadcast() {
+		return this.userDestinationBroadcast;
 	}
 
 	/**

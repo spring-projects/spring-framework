@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ import org.junit.Test;
 import org.springframework.aop.scope.ScopedObject;
 import org.springframework.aop.scope.ScopedProxyUtils;
 import org.springframework.beans.factory.BeanCreationException;
+import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,6 +41,7 @@ import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.componentscan.simple.SimpleComponent;
+import org.springframework.core.annotation.Order;
 import org.springframework.core.env.StandardEnvironment;
 import org.springframework.core.io.DescriptiveResource;
 import org.springframework.stereotype.Component;
@@ -272,6 +274,72 @@ public class ConfigurationClassPostProcessorTests {
 	}
 
 	@Test
+	public void postProcessorFailsOnImplicitOverrideIfOverridingIsNotAllowed() {
+		RootBeanDefinition rbd = new RootBeanDefinition(TestBean.class);
+		rbd.setResource(new DescriptiveResource("XML or something"));
+		beanFactory.registerBeanDefinition("bar", rbd);
+		beanFactory.registerBeanDefinition("config", new RootBeanDefinition(SingletonBeanConfig.class));
+		beanFactory.setAllowBeanDefinitionOverriding(false);
+		ConfigurationClassPostProcessor pp = new ConfigurationClassPostProcessor();
+		try {
+			pp.postProcessBeanFactory(beanFactory);
+			fail("Should have thrown BeanDefinitionStoreException");
+		}
+		catch (BeanDefinitionStoreException ex) {
+			assertTrue(ex.getMessage().contains("bar"));
+			assertTrue(ex.getMessage().contains("SingletonBeanConfig"));
+			assertTrue(ex.getMessage().contains(TestBean.class.getName()));
+		}
+	}
+
+	@Test
+	public void configurationClassesProcessedInCorrectOrder() {
+		beanFactory.registerBeanDefinition("config1", new RootBeanDefinition(OverridingSingletonBeanConfig.class));
+		beanFactory.registerBeanDefinition("config2", new RootBeanDefinition(SingletonBeanConfig.class));
+		ConfigurationClassPostProcessor pp = new ConfigurationClassPostProcessor();
+		pp.postProcessBeanFactory(beanFactory);
+
+		Foo foo = beanFactory.getBean(Foo.class);
+		assertTrue(foo instanceof ExtendedFoo);
+		Bar bar = beanFactory.getBean(Bar.class);
+		assertSame(foo, bar.foo);
+	}
+
+	@Test
+	public void configurationClassesWithValidOverridingForProgrammaticCall() {
+		beanFactory.registerBeanDefinition("config1", new RootBeanDefinition(OverridingAgainSingletonBeanConfig.class));
+		beanFactory.registerBeanDefinition("config2", new RootBeanDefinition(OverridingSingletonBeanConfig.class));
+		beanFactory.registerBeanDefinition("config3", new RootBeanDefinition(SingletonBeanConfig.class));
+		ConfigurationClassPostProcessor pp = new ConfigurationClassPostProcessor();
+		pp.postProcessBeanFactory(beanFactory);
+
+		Foo foo = beanFactory.getBean(Foo.class);
+		assertTrue(foo instanceof ExtendedAgainFoo);
+		Bar bar = beanFactory.getBean(Bar.class);
+		assertSame(foo, bar.foo);
+	}
+
+	@Test
+	public void configurationClassesWithInvalidOverridingForProgrammaticCall() {
+		beanFactory.registerBeanDefinition("config1", new RootBeanDefinition(InvalidOverridingSingletonBeanConfig.class));
+		beanFactory.registerBeanDefinition("config2", new RootBeanDefinition(OverridingSingletonBeanConfig.class));
+		beanFactory.registerBeanDefinition("config3", new RootBeanDefinition(SingletonBeanConfig.class));
+		ConfigurationClassPostProcessor pp = new ConfigurationClassPostProcessor();
+		pp.postProcessBeanFactory(beanFactory);
+
+		try {
+			beanFactory.getBean(Bar.class);
+			fail("Should have thrown BeanCreationException");
+		}
+		catch (BeanCreationException ex) {
+			assertTrue(ex.getMessage().contains("OverridingSingletonBeanConfig.foo"));
+			assertTrue(ex.getMessage().contains(ExtendedFoo.class.getName()));
+			assertTrue(ex.getMessage().contains(Foo.class.getName()));
+			assertTrue(ex.getMessage().contains("InvalidOverridingSingletonBeanConfig"));
+		}
+	}
+
+	@Test
 	public void scopedProxyTargetMarkedAsNonAutowireCandidate() {
 		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
 		bpp.setBeanFactory(beanFactory);
@@ -280,6 +348,7 @@ public class ConfigurationClassPostProcessorTests {
 		beanFactory.registerBeanDefinition("consumer", new RootBeanDefinition(ScopedProxyConsumer.class));
 		ConfigurationClassPostProcessor pp = new ConfigurationClassPostProcessor();
 		pp.postProcessBeanFactory(beanFactory);
+
 		ITestBean injected = beanFactory.getBean("consumer", ScopedProxyConsumer.class).testBean;
 		assertTrue(injected instanceof ScopedObject);
 		assertSame(beanFactory.getBean("scopedClass"), injected);
@@ -439,6 +508,36 @@ public class ConfigurationClassPostProcessorTests {
 		beanFactory.registerBeanDefinition("serviceBeanProvider", new RootBeanDefinition(ServiceBeanProvider.class));
 		new ConfigurationClassPostProcessor().postProcessBeanFactory(beanFactory);
 		beanFactory.preInstantiateSingletons();
+
+		beanFactory.getBean(ServiceBean.class);
+	}
+
+	@Test
+	public void testConfigWithDefaultMethods() {
+		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
+		bpp.setBeanFactory(beanFactory);
+		beanFactory.addBeanPostProcessor(bpp);
+		beanFactory.addBeanPostProcessor(new CommonAnnotationBeanPostProcessor());
+		beanFactory.registerBeanDefinition("configClass", new RootBeanDefinition(ConcreteConfigWithDefaultMethods.class));
+		beanFactory.registerBeanDefinition("serviceBeanProvider", new RootBeanDefinition(ServiceBeanProvider.class));
+		new ConfigurationClassPostProcessor().postProcessBeanFactory(beanFactory);
+		beanFactory.preInstantiateSingletons();
+
+		beanFactory.getBean(ServiceBean.class);
+	}
+
+	@Test
+	public void testConfigWithDefaultMethodsUsingAsm() {
+		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
+		bpp.setBeanFactory(beanFactory);
+		beanFactory.addBeanPostProcessor(bpp);
+		beanFactory.addBeanPostProcessor(new CommonAnnotationBeanPostProcessor());
+		beanFactory.registerBeanDefinition("configClass", new RootBeanDefinition(ConcreteConfigWithDefaultMethods.class.getName()));
+		beanFactory.registerBeanDefinition("serviceBeanProvider", new RootBeanDefinition(ServiceBeanProvider.class.getName()));
+		new ConfigurationClassPostProcessor().postProcessBeanFactory(beanFactory);
+		beanFactory.preInstantiateSingletons();
+
+		beanFactory.getBean(ServiceBean.class);
 	}
 
 	@Test
@@ -485,20 +584,54 @@ public class ConfigurationClassPostProcessorTests {
 	// -------------------------------------------------------------------------
 
 	@Configuration
+	@Order(1)
 	static class SingletonBeanConfig {
 
-		public @Bean
-		Foo foo() {
+		public @Bean Foo foo() {
 			return new Foo();
 		}
 
-		public @Bean
-		Bar bar() {
+		public @Bean Bar bar() {
 			return new Bar(foo());
 		}
 	}
 
+	@Configuration
+	@Order(2)
+	static class OverridingSingletonBeanConfig {
+
+		public @Bean ExtendedFoo foo() {
+			return new ExtendedFoo();
+		}
+
+		public @Bean Bar bar() {
+			return new Bar(foo());
+		}
+	}
+
+	@Configuration
+	static class OverridingAgainSingletonBeanConfig {
+
+		public @Bean ExtendedAgainFoo foo() {
+			return new ExtendedAgainFoo();
+		}
+	}
+
+	@Configuration
+	static class InvalidOverridingSingletonBeanConfig {
+
+		public @Bean Foo foo() {
+			return new Foo();
+		}
+	}
+
 	static class Foo {
+	}
+
+	static class ExtendedFoo extends Foo {
+	}
+
+	static class ExtendedAgainFoo extends ExtendedFoo {
 	}
 
 	static class Bar {
@@ -878,6 +1011,37 @@ public class ConfigurationClassPostProcessorTests {
 
 	@Configuration
 	public static class ConcreteConfig extends AbstractConfig {
+
+		@Autowired
+		private ServiceBeanProvider provider;
+
+		@Bean
+		@Override
+		public ServiceBeanProvider provider() {
+			return provider;
+		}
+
+		@PostConstruct
+		public void validate() {
+			Assert.notNull(provider);
+		}
+	}
+
+	public interface DefaultMethodsConfig {
+
+		@Bean
+		default ServiceBean serviceBean() {
+			return provider().getServiceBean();
+		}
+
+		@Bean
+		default ServiceBeanProvider provider() {
+			return new ServiceBeanProvider();
+		}
+	}
+
+	@Configuration
+	public static class ConcreteConfigWithDefaultMethods implements DefaultMethodsConfig {
 
 		@Autowired
 		private ServiceBeanProvider provider;

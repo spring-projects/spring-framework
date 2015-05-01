@@ -380,48 +380,58 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 		return metadata;
 	}
 
-	private InjectionMetadata buildAutowiringMetadata(Class<?> clazz) {
+	private InjectionMetadata buildAutowiringMetadata(final Class<?> clazz) {
 		LinkedList<InjectionMetadata.InjectedElement> elements = new LinkedList<InjectionMetadata.InjectedElement>();
 		Class<?> targetClass = clazz;
 
 		do {
-			LinkedList<InjectionMetadata.InjectedElement> currElements = new LinkedList<InjectionMetadata.InjectedElement>();
-			for (Field field : targetClass.getDeclaredFields()) {
-				AnnotationAttributes ann = findAutowiredAnnotation(field);
-				if (ann != null) {
-					if (Modifier.isStatic(field.getModifiers())) {
-						if (logger.isWarnEnabled()) {
-							logger.warn("Autowired annotation is not supported on static fields: " + field);
+			final LinkedList<InjectionMetadata.InjectedElement> currElements =
+					new LinkedList<InjectionMetadata.InjectedElement>();
+
+			ReflectionUtils.doWithLocalFields(targetClass, new ReflectionUtils.FieldCallback() {
+				@Override
+				public void doWith(Field field) throws IllegalArgumentException, IllegalAccessException {
+					AnnotationAttributes ann = findAutowiredAnnotation(field);
+					if (ann != null) {
+						if (Modifier.isStatic(field.getModifiers())) {
+							if (logger.isWarnEnabled()) {
+								logger.warn("Autowired annotation is not supported on static fields: " + field);
+							}
+							return;
 						}
-						continue;
+						boolean required = determineRequiredStatus(ann);
+						currElements.add(new AutowiredFieldElement(field, required));
 					}
-					boolean required = determineRequiredStatus(ann);
-					currElements.add(new AutowiredFieldElement(field, required));
 				}
-			}
-			for (Method method : targetClass.getDeclaredMethods()) {
-				Method bridgedMethod = BridgeMethodResolver.findBridgedMethod(method);
-				if (!BridgeMethodResolver.isVisibilityBridgeMethodPair(method, bridgedMethod)) {
-					continue;
-				}
-				AnnotationAttributes ann = findAutowiredAnnotation(bridgedMethod);
-				if (ann != null && method.equals(ClassUtils.getMostSpecificMethod(method, clazz))) {
-					if (Modifier.isStatic(method.getModifiers())) {
-						if (logger.isWarnEnabled()) {
-							logger.warn("Autowired annotation is not supported on static methods: " + method);
+			});
+
+			ReflectionUtils.doWithLocalMethods(targetClass, new ReflectionUtils.MethodCallback() {
+				@Override
+				public void doWith(Method method) throws IllegalArgumentException, IllegalAccessException {
+					Method bridgedMethod = BridgeMethodResolver.findBridgedMethod(method);
+					if (!BridgeMethodResolver.isVisibilityBridgeMethodPair(method, bridgedMethod)) {
+						return;
+					}
+					AnnotationAttributes ann = findAutowiredAnnotation(bridgedMethod);
+					if (ann != null && method.equals(ClassUtils.getMostSpecificMethod(method, clazz))) {
+						if (Modifier.isStatic(method.getModifiers())) {
+							if (logger.isWarnEnabled()) {
+								logger.warn("Autowired annotation is not supported on static methods: " + method);
+							}
+							return;
 						}
-						continue;
-					}
-					if (method.getParameterTypes().length == 0) {
-						if (logger.isWarnEnabled()) {
-							logger.warn("Autowired annotation should be used on methods with actual parameters: " + method);
+						if (method.getParameterTypes().length == 0) {
+							if (logger.isWarnEnabled()) {
+								logger.warn("Autowired annotation should be used on methods with parameters: " + method);
+							}
 						}
+						boolean required = determineRequiredStatus(ann);
+						PropertyDescriptor pd = BeanUtils.findPropertyForMethod(bridgedMethod, clazz);
+						currElements.add(new AutowiredMethodElement(method, required, pd));
 					}
-					boolean required = determineRequiredStatus(ann);
-					PropertyDescriptor pd = BeanUtils.findPropertyForMethod(bridgedMethod, clazz);
-					currElements.add(new AutowiredMethodElement(method, required, pd));
 				}
-			}
+			});
+
 			elements.addAll(0, currElements);
 			targetClass = targetClass.getSuperclass();
 		}

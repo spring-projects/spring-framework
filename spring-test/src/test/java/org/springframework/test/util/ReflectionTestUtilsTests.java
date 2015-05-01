@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,13 +16,18 @@
 
 package org.springframework.test.util;
 
+import org.junit.Before;
 import org.junit.Ignore;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 import org.springframework.test.util.subpackage.Component;
 import org.springframework.test.util.subpackage.LegacyEntity;
 import org.springframework.test.util.subpackage.Person;
+import org.springframework.test.util.subpackage.StaticFields;
 
+import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
 import static org.springframework.test.util.ReflectionTestUtils.*;
 
@@ -39,9 +44,66 @@ public class ReflectionTestUtilsTests {
 	private final Person person = new Person();
 	private final Component component = new Component();
 
+	@Rule
+	public ExpectedException exception = ExpectedException.none();
+
+
+	@Before
+	public void resetStaticFields() {
+		StaticFields.reset();
+	}
 
 	@Test
-	public void setFieldForStandardUseCases() throws Exception {
+	public void setFieldWithNullTargetObject() throws Exception {
+		exception.expect(IllegalArgumentException.class);
+		exception.expectMessage(startsWith("Either targetObject or targetClass"));
+		setField((Object) null, "id", new Long(99));
+	}
+
+	@Test
+	public void getFieldWithNullTargetObject() throws Exception {
+		exception.expect(IllegalArgumentException.class);
+		exception.expectMessage(startsWith("Either targetObject or targetClass"));
+		getField((Object) null, "id");
+	}
+
+	@Test
+	public void setFieldWithNullTargetClass() throws Exception {
+		exception.expect(IllegalArgumentException.class);
+		exception.expectMessage(startsWith("Either targetObject or targetClass"));
+		setField((Class<?>) null, "id", new Long(99));
+	}
+
+	@Test
+	public void getFieldWithNullTargetClass() throws Exception {
+		exception.expect(IllegalArgumentException.class);
+		exception.expectMessage(startsWith("Either targetObject or targetClass"));
+		getField((Class<?>) null, "id");
+	}
+
+	@Test
+	public void setFieldWithNullNameAndNullType() throws Exception {
+		exception.expect(IllegalArgumentException.class);
+		exception.expectMessage(startsWith("Either name or type"));
+		setField(person, null, new Long(99), null);
+	}
+
+	@Test
+	public void setFieldWithBogusName() throws Exception {
+		exception.expect(IllegalArgumentException.class);
+		exception.expectMessage(startsWith("Could not find field [bogus]"));
+		setField(person, "bogus", new Long(99), long.class);
+	}
+
+	@Test
+	public void setFieldWithWrongType() throws Exception {
+		exception.expect(IllegalArgumentException.class);
+		exception.expectMessage(startsWith("Could not find field"));
+		setField(person, "id", new Long(99), String.class);
+	}
+
+	@Test
+	public void setFieldAndGetFieldForStandardUseCases() throws Exception {
 		setField(person, "id", new Long(99), long.class);
 		setField(person, "name", "Tom");
 		setField(person, "age", new Integer(42));
@@ -66,6 +128,15 @@ public class ReflectionTestUtilsTests {
 
 	@Test
 	public void setFieldWithNullValuesForNonPrimitives() throws Exception {
+		// Fields must be non-null to start with
+		setField(person, "name", "Tom");
+		setField(person, "eyeColor", "blue", String.class);
+		setField(person, "favoriteNumber", PI, Number.class);
+		assertNotNull(person.getName());
+		assertNotNull(person.getEyeColor());
+		assertNotNull(person.getFavoriteNumber());
+
+		// Set to null
 		setField(person, "name", null, String.class);
 		setField(person, "eyeColor", null, String.class);
 		setField(person, "favoriteNumber", null, Number.class);
@@ -102,7 +173,48 @@ public class ReflectionTestUtilsTests {
 	}
 
 	@Test
-	public void invokeSetterMethodWithExplicitSetterMethodNames() throws Exception {
+	public void setStaticFieldViaClass() throws Exception {
+		setField(StaticFields.class, "publicField", "xxx");
+		setField(StaticFields.class, "privateField", "yyy");
+
+		assertEquals("public static field", "xxx", StaticFields.publicField);
+		assertEquals("private static field", "yyy", StaticFields.getPrivateField());
+	}
+
+	@Test
+	public void setStaticFieldViaClassWithExplicitType() throws Exception {
+		setField(StaticFields.class, "publicField", "xxx", String.class);
+		setField(StaticFields.class, "privateField", "yyy", String.class);
+
+		assertEquals("public static field", "xxx", StaticFields.publicField);
+		assertEquals("private static field", "yyy", StaticFields.getPrivateField());
+	}
+
+	@Test
+	public void setStaticFieldViaInstance() throws Exception {
+		StaticFields staticFields = new StaticFields();
+		setField(staticFields, null, "publicField", "xxx", null);
+		setField(staticFields, null, "privateField", "yyy", null);
+
+		assertEquals("public static field", "xxx", StaticFields.publicField);
+		assertEquals("private static field", "yyy", StaticFields.getPrivateField());
+	}
+
+	@Test
+	public void getStaticFieldViaClass() throws Exception {
+		assertEquals("public static field", "public", getField(StaticFields.class, "publicField"));
+		assertEquals("private static field", "private", getField(StaticFields.class, "privateField"));
+	}
+
+	@Test
+	public void getStaticFieldViaInstance() throws Exception {
+		StaticFields staticFields = new StaticFields();
+		assertEquals("public static field", "public", getField(staticFields, "publicField"));
+		assertEquals("private static field", "private", getField(staticFields, "privateField"));
+	}
+
+	@Test
+	public void invokeSetterMethodAndInvokeGetterMethodWithExplicitMethodNames() throws Exception {
 		invokeSetterMethod(person, "setId", new Long(1), long.class);
 		invokeSetterMethod(person, "setName", "Jerry", String.class);
 		invokeSetterMethod(person, "setAge", new Integer(33), int.class);
@@ -126,7 +238,7 @@ public class ReflectionTestUtilsTests {
 	}
 
 	@Test
-	public void invokeSetterMethodWithJavaBeanPropertyNames() throws Exception {
+	public void invokeSetterMethodAndInvokeGetterMethodWithJavaBeanPropertyNames() throws Exception {
 		invokeSetterMethod(person, "id", new Long(99), long.class);
 		invokeSetterMethod(person, "name", "Tom");
 		invokeSetterMethod(person, "age", new Integer(42));
@@ -217,23 +329,31 @@ public class ReflectionTestUtilsTests {
 		assertNull("text", component.getText());
 	}
 
-	@Test(expected = IllegalStateException.class)
-	public void invokeMethodWithIncompatibleArgumentTypes() {
-		invokeMethod(component, "subtract", "foo", 2.0);
-	}
-
-	@Test(expected = IllegalStateException.class)
+	@Test
 	public void invokeInitMethodBeforeAutowiring() {
+		exception.expect(IllegalStateException.class);
+		exception.expectMessage(equalTo("number must not be null"));
 		invokeMethod(component, "init");
 	}
 
-	@Test(expected = IllegalStateException.class)
+	@Test
+	public void invokeMethodWithIncompatibleArgumentTypes() {
+		exception.expect(IllegalStateException.class);
+		exception.expectMessage(startsWith("Method not found"));
+		invokeMethod(component, "subtract", "foo", 2.0);
+	}
+
+	@Test
 	public void invokeMethodWithTooFewArguments() {
+		exception.expect(IllegalStateException.class);
+		exception.expectMessage(startsWith("Method not found"));
 		invokeMethod(component, "configure", new Integer(42));
 	}
 
-	@Test(expected = IllegalStateException.class)
+	@Test
 	public void invokeMethodWithTooManyArguments() {
+		exception.expect(IllegalStateException.class);
+		exception.expectMessage(startsWith("Method not found"));
 		invokeMethod(component, "configure", new Integer(42), "enigma", "baz", "quux");
 	}
 

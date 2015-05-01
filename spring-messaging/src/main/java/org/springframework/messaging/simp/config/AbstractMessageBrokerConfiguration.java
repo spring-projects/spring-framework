@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,10 @@
 package org.springframework.messaging.simp.config;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.BeanInitializationException;
@@ -25,6 +28,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.Bean;
 import org.springframework.messaging.Message;
+import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.converter.ByteArrayMessageConverter;
 import org.springframework.messaging.converter.CompositeMessageConverter;
 import org.springframework.messaging.converter.DefaultContentTypeResolver;
@@ -37,6 +41,7 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.messaging.simp.annotation.support.SimpAnnotationMethodMessageHandler;
 import org.springframework.messaging.simp.broker.AbstractBrokerMessageHandler;
 import org.springframework.messaging.simp.broker.SimpleBrokerMessageHandler;
+import org.springframework.messaging.simp.stomp.StompBrokerRelayMessageHandler;
 import org.springframework.messaging.simp.user.DefaultUserDestinationResolver;
 import org.springframework.messaging.simp.user.DefaultUserSessionRegistry;
 import org.springframework.messaging.simp.user.UserDestinationMessageHandler;
@@ -223,11 +228,17 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 	protected void configureMessageBroker(MessageBrokerRegistry registry) {
 	}
 
+	/**
+	 * Provide access to the configured PatchMatcher for access from other
+	 * configuration classes.
+	 */
+	public final PathMatcher getPathMatcher() {
+		return getBrokerRegistry().getPathMatcher();
+	}
+
 	@Bean
 	public SimpAnnotationMethodMessageHandler simpAnnotationMethodMessageHandler() {
-		SimpAnnotationMethodMessageHandler handler = new SimpAnnotationMethodMessageHandler(
-				clientInboundChannel(), clientOutboundChannel(), brokerMessagingTemplate());
-
+		SimpAnnotationMethodMessageHandler handler = createAnnotationMethodMessageHandler();
 		handler.setDestinationPrefixes(getBrokerRegistry().getApplicationDestinationPrefixes());
 		handler.setMessageConverter(brokerMessageConverter());
 		handler.setValidator(simpValidator());
@@ -247,6 +258,17 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 		return handler;
 	}
 
+	/**
+	 * Protected method for plugging in a custom sub-class of
+	 * {@link org.springframework.messaging.simp.annotation.support.SimpAnnotationMethodMessageHandler
+	 * SimpAnnotationMethodMessageHandler}.
+	 * @since 4.2
+	 */
+	protected SimpAnnotationMethodMessageHandler createAnnotationMethodMessageHandler() {
+		return new SimpAnnotationMethodMessageHandler(clientInboundChannel(),
+				clientOutboundChannel(), brokerMessagingTemplate());
+	}
+
 	protected void addArgumentResolvers(List<HandlerMethodArgumentResolver> argumentResolvers) {
 	}
 
@@ -261,13 +283,26 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 
 	@Bean
 	public AbstractBrokerMessageHandler stompBrokerRelayMessageHandler() {
-		AbstractBrokerMessageHandler handler = getBrokerRegistry().getStompBrokerRelay(brokerChannel());
-		return (handler != null ? handler : new NoOpBrokerMessageHandler());
+		StompBrokerRelayMessageHandler handler = getBrokerRegistry().getStompBrokerRelay(brokerChannel());
+		if (handler == null) {
+			return new NoOpBrokerMessageHandler();
+		}
+		String destination = getBrokerRegistry().getUserDestinationBroadcast();
+		if (destination != null) {
+			Map<String, MessageHandler> map = new HashMap<String, MessageHandler>(1);
+			map.put(destination, userDestinationMessageHandler());
+			handler.setSystemSubscriptions(map);
+		}
+		return handler;
 	}
 
 	@Bean
 	public UserDestinationMessageHandler userDestinationMessageHandler() {
-		return new UserDestinationMessageHandler(clientInboundChannel(), brokerChannel(), userDestinationResolver());
+		UserDestinationMessageHandler handler = new UserDestinationMessageHandler(clientInboundChannel(),
+				brokerChannel(), userDestinationResolver());
+		String destination = getBrokerRegistry().getUserDestinationBroadcast();
+		handler.setUserDestinationBroadcast(destination);
+		return handler;
 	}
 
 	@Bean

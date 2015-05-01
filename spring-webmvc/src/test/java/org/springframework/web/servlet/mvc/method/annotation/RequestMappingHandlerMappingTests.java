@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,11 @@
 
 package org.springframework.web.servlet.mvc.method.annotation;
 
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Collections;
@@ -32,6 +37,7 @@ import org.springframework.util.StringValueResolver;
 import org.springframework.web.accept.ContentNegotiationManager;
 import org.springframework.web.accept.PathExtensionContentNegotiationStrategy;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.context.support.StaticWebApplicationContext;
 import org.springframework.web.servlet.mvc.method.RequestMappingInfo;
 
@@ -46,11 +52,14 @@ public class RequestMappingHandlerMappingTests {
 
 	private RequestMappingHandlerMapping handlerMapping;
 
+	private StaticWebApplicationContext applicationContext;
+
 
 	@Before
 	public void setup() {
 		this.handlerMapping = new RequestMappingHandlerMapping();
-		this.handlerMapping.setApplicationContext(new StaticWebApplicationContext());
+		this.applicationContext = new StaticWebApplicationContext();
+		this.handlerMapping.setApplicationContext(applicationContext);
 	}
 
 
@@ -89,7 +98,7 @@ public class RequestMappingHandlerMappingTests {
 		};
 
 		StaticWebApplicationContext wac = new StaticWebApplicationContext();
-		wac.registerSingleton("testController", TestController.class);
+		wac.registerSingleton("testController", MetaAnnotationController.class);
 		wac.refresh();
 
 		hm.setContentNegotiationManager(manager);
@@ -131,13 +140,37 @@ public class RequestMappingHandlerMappingTests {
 		assertArrayEquals(new String[] { "/foo", "/foo/bar" }, result);
 	}
 
+	@Test
+	public void resolveRequestMappingViaMetaAnnotation() throws Exception {
+		Method method = MetaAnnotationController.class.getMethod("handleInput");
+		RequestMappingInfo info = this.handlerMapping.getMappingForMethod(method, MetaAnnotationController.class);
+
+		assertNotNull(info);
+		assertEquals(Collections.singleton("/input"), info.getPatternsCondition().getPatterns());
+	}
+
 
 	@Controller
-	static class TestController {
+	static class MetaAnnotationController {
 
 		@RequestMapping
 		public void handle() {
 		}
+
+		@PostJson(path="/input")
+		public void handleInput() {
+		}
+
+	}
+
+	@RequestMapping(method = RequestMethod.POST,
+			produces = MediaType.APPLICATION_JSON_VALUE,
+			consumes = MediaType.APPLICATION_JSON_VALUE)
+	@Target({ElementType.METHOD, ElementType.TYPE})
+	@Retention(RetentionPolicy.RUNTIME)
+	@Documented
+	@interface PostJson {
+		String[] path() default {};
 	}
 
 }

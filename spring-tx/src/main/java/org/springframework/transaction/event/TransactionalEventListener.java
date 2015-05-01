@@ -26,13 +26,13 @@ import org.springframework.context.event.EventListener;
 
 /**
  * An {@link EventListener} that is invoked according to a {@link TransactionPhase}.
- * <p>
- * If the event is not published in the boundaries of a managed transaction, the event
+ *
+ * <p>If the event is not published within the boundaries of a managed transaction, the event
  * is discarded unless the {@link #fallbackExecution()} flag is explicitly set. If a
  * transaction is running, the event is processed according to its {@link TransactionPhase}.
- * <p>
- * Adding {@link org.springframework.core.annotation.Order @Order} on your annotated method
- * allows you to prioritize that listener amongst other listeners running on the same phase.
+ *
+ * <p>Adding {@link org.springframework.core.annotation.Order @Order} on your annotated method
+ * allows you to prioritize that listener amongst other listeners running in the same phase.
  *
  * @author Stephane Nicoll
  * @since 4.2
@@ -45,7 +45,7 @@ public @interface TransactionalEventListener {
 
 	/**
 	 * Phase to bind the handling of an event to. If no transaction is in progress, the
-	 * event is not processed at all unless {@link #fallbackExecution()} has been
+	 * event is not processed at all unless {@link #fallbackExecution} has been
 	 * enabled explicitly.
 	 */
 	TransactionPhase phase() default TransactionPhase.AFTER_COMMIT;
@@ -56,9 +56,10 @@ public @interface TransactionalEventListener {
 	boolean fallbackExecution() default false;
 
 	/**
-	 * Spring Expression Language (SpEL) attribute used for conditioning the event handling.
+	 * Spring Expression Language (SpEL) attribute used for making the event
+	 * handling conditional.
 	 * <p>Default is "", meaning the event is always handled.
-	 * @see EventListener#condition()
+	 * @see EventListener#condition
 	 */
 	String condition() default "";
 

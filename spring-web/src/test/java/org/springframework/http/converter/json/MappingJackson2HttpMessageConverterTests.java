@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,9 +24,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.fasterxml.jackson.annotation.JsonFilter;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ser.FilterProvider;
+import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
+import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
 import org.junit.Test;
 
 import org.springframework.core.ParameterizedTypeReference;
@@ -42,6 +46,7 @@ import static org.junit.Assert.*;
  * Jackson 2.x converter tests.
  *
  * @author Rossen Stoyanchev
+ * @author Sebastien Deleuze
  */
 public class MappingJackson2HttpMessageConverterTests {
 
@@ -259,6 +264,24 @@ public class MappingJackson2HttpMessageConverterTests {
 	}
 
 	@Test
+	public void filters() throws Exception {
+		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
+		JacksonFilteredBean bean = new JacksonFilteredBean();
+		bean.setProperty1("value");
+		bean.setProperty2("value");
+
+		MappingJacksonValue jacksonValue = new MappingJacksonValue(bean);
+		FilterProvider filters = new SimpleFilterProvider().addFilter("myJacksonFilter",
+				SimpleBeanPropertyFilter.serializeAllExcept("property2"));
+		jacksonValue.setFilters(filters);
+		this.converter.writeInternal(jacksonValue, outputMessage);
+
+		String result = outputMessage.getBodyAsString(Charset.forName("UTF-8"));
+		assertThat(result, containsString("\"property1\":\"value\""));
+		assertThat(result, not(containsString("\"property2\":\"value\"")));
+	}
+
+	@Test
 	public void jsonp() throws Exception {
 		MappingJacksonValue jacksonValue = new MappingJacksonValue("foo");
 		jacksonValue.setSerializationView(MyJacksonView1.class);
@@ -404,6 +427,29 @@ public class MappingJackson2HttpMessageConverterTests {
 
 		public void setWithoutView(String withoutView) {
 			this.withoutView = withoutView;
+		}
+	}
+
+	@JsonFilter("myJacksonFilter")
+	private static class JacksonFilteredBean {
+
+		private String property1;
+		private String property2;
+
+		public String getProperty1() {
+			return property1;
+		}
+
+		public void setProperty1(String property1) {
+			this.property1 = property1;
+		}
+
+		public String getProperty2() {
+			return property2;
+		}
+
+		public void setProperty2(String property2) {
+			this.property2 = property2;
 		}
 	}
 

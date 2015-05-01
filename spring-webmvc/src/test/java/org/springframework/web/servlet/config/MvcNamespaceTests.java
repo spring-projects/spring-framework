@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.lang.reflect.Method;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -29,14 +30,15 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
+
 import javax.servlet.RequestDispatcher;
 import javax.validation.constraints.NotNull;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.MapperFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import org.hamcrest.Matchers;
+
+import org.joda.time.LocalDate;
+
 import org.junit.Before;
 import org.junit.Test;
 
@@ -52,6 +54,7 @@ import org.springframework.core.convert.ConversionService;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.format.annotation.DateTimeFormat.ISO;
+import org.springframework.format.annotation.NumberFormat;
 import org.springframework.format.support.FormattingConversionServiceFactoryBean;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;
@@ -72,6 +75,7 @@ import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 import org.springframework.web.accept.ContentNegotiationManager;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.http.CacheControl;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.ServletWebRequest;
@@ -126,12 +130,20 @@ import org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer;
 import org.springframework.web.servlet.view.freemarker.FreeMarkerViewResolver;
 import org.springframework.web.servlet.view.groovy.GroovyMarkupConfigurer;
 import org.springframework.web.servlet.view.groovy.GroovyMarkupViewResolver;
+import org.springframework.web.servlet.view.script.ScriptTemplateConfigurer;
+import org.springframework.web.servlet.view.script.ScriptTemplateViewResolver;
 import org.springframework.web.servlet.view.tiles3.TilesConfigurer;
 import org.springframework.web.servlet.view.tiles3.TilesViewResolver;
 import org.springframework.web.servlet.view.velocity.VelocityConfigurer;
 import org.springframework.web.servlet.view.velocity.VelocityViewResolver;
 import org.springframework.web.util.UrlPathHelper;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.MapperFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.xml.XmlMapper;
+
+import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
 
 /**
@@ -142,11 +154,13 @@ import static org.junit.Assert.*;
  * @author Jeremy Grelle
  * @author Brian Clozel
  * @author Sebastien Deleuze
+ * @author Kazuki Shimizu
+ * @author Sam Brannen
  */
 public class MvcNamespaceTests {
 
 	public static final String VIEWCONTROLLER_BEAN_NAME = "org.springframework.web.servlet.config.viewControllerHandlerMapping";
-	
+
 	private GenericWebApplicationContext appContext;
 
 	private TestController handler;
@@ -165,7 +179,7 @@ public class MvcNamespaceTests {
 		appContext.getServletContext().setAttribute(attributeName, appContext);
 
 		handler = new TestController();
-		Method method = TestController.class.getMethod("testBind", Date.class, TestBean.class, BindingResult.class);
+		Method method = TestController.class.getMethod("testBind", Date.class, Double.class, TestBean.class, BindingResult.class);
 		handlerMethod = new InvocableHandlerMethod(handler, method);
 	}
 
@@ -193,7 +207,7 @@ public class MvcNamespaceTests {
 		assertTrue(converters.size() > 0);
 		for (HttpMessageConverter<?> converter : converters) {
 			if (converter instanceof AbstractJackson2HttpMessageConverter) {
-				ObjectMapper objectMapper = ((AbstractJackson2HttpMessageConverter)converter).getObjectMapper();
+				ObjectMapper objectMapper = ((AbstractJackson2HttpMessageConverter) converter).getObjectMapper();
 				assertFalse(objectMapper.getDeserializationConfig().isEnabled(MapperFeature.DEFAULT_VIEW_INCLUSION));
 				assertFalse(objectMapper.getSerializationConfig().isEnabled(MapperFeature.DEFAULT_VIEW_INCLUSION));
 				assertFalse(objectMapper.getDeserializationConfig().isEnabled(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES));
@@ -211,6 +225,7 @@ public class MvcNamespaceTests {
 		// default web binding initializer behavior test
 		request = new MockHttpServletRequest("GET", "/");
 		request.addParameter("date", "2009-10-31");
+		request.addParameter("percent", "99.99%");
 		MockHttpServletResponse response = new MockHttpServletResponse();
 
 		HandlerExecutionChain chain = mapping.getHandler(request);
@@ -222,6 +237,8 @@ public class MvcNamespaceTests {
 
 		adapter.handle(request, response, handlerMethod);
 		assertTrue(handler.recordedValidationError);
+		assertEquals(LocalDate.parse("2009-10-31").toDate(), handler.date);
+		assertEquals(Double.valueOf(0.9999), handler.percent);
 
 		CompositeUriComponentsContributor uriComponentsContributor = this.appContext.getBean(
 				MvcUriComponentsBuilder.MVC_URI_COMPONENTS_CONTRIBUTOR_BEAN_NAME,
@@ -230,7 +247,7 @@ public class MvcNamespaceTests {
 		assertNotNull(uriComponentsContributor);
 	}
 
-	@Test(expected=TypeMismatchException.class)
+	@Test(expected = TypeMismatchException.class)
 	public void testCustomConversionService() throws Exception {
 		loadBeanDefinitions("mvc-config-custom-conversion-service.xml", 13);
 
@@ -372,10 +389,12 @@ public class MvcNamespaceTests {
 		assertEquals(5, mapping.getOrder());
 		assertNotNull(mapping.getUrlMap().get("/resources/**"));
 
-		ResourceHttpRequestHandler handler = appContext.getBean((String)mapping.getUrlMap().get("/resources/**"),
+		ResourceHttpRequestHandler handler = appContext.getBean((String) mapping.getUrlMap().get("/resources/**"),
 				ResourceHttpRequestHandler.class);
 		assertNotNull(handler);
 		assertEquals(3600, handler.getCacheSeconds());
+		assertThat(handler.getCacheControl().getHeaderValue(),
+				Matchers.equalTo(CacheControl.maxAge(1, TimeUnit.HOURS).getHeaderValue()));
 	}
 
 	@Test
@@ -385,7 +404,7 @@ public class MvcNamespaceTests {
 		SimpleUrlHandlerMapping mapping = appContext.getBean(SimpleUrlHandlerMapping.class);
 		assertNotNull(mapping);
 		assertNotNull(mapping.getUrlMap().get("/resources/**"));
-		ResourceHttpRequestHandler handler = appContext.getBean((String)mapping.getUrlMap().get("/resources/**"),
+		ResourceHttpRequestHandler handler = appContext.getBean((String) mapping.getUrlMap().get("/resources/**"),
 				ResourceHttpRequestHandler.class);
 		assertNotNull(handler);
 
@@ -423,9 +442,13 @@ public class MvcNamespaceTests {
 		SimpleUrlHandlerMapping mapping = appContext.getBean(SimpleUrlHandlerMapping.class);
 		assertNotNull(mapping);
 		assertNotNull(mapping.getUrlMap().get("/resources/**"));
-		ResourceHttpRequestHandler handler = appContext.getBean((String)mapping.getUrlMap().get("/resources/**"),
+		ResourceHttpRequestHandler handler = appContext.getBean((String) mapping.getUrlMap().get("/resources/**"),
 				ResourceHttpRequestHandler.class);
 		assertNotNull(handler);
+
+		assertThat(handler.getCacheControl().getHeaderValue(),
+				Matchers.equalTo(CacheControl.maxAge(1, TimeUnit.HOURS)
+						.sMaxAge(30, TimeUnit.MINUTES).cachePublic().getHeaderValue()));
 
 		List<ResourceResolver> resolvers = handler.getResourceResolvers();
 		assertThat(resolvers, Matchers.hasSize(3));
@@ -697,14 +720,14 @@ public class MvcNamespaceTests {
 				(DeferredResultProcessingInterceptor[]) fieldAccessor.getPropertyValue("deferredResultInterceptors");
 		assertEquals(1, deferredResultInterceptors.length);
 	}
-	
+
 	@Test
 	public void testViewResolution() throws Exception {
-		loadBeanDefinitions("mvc-config-view-resolution.xml", 6);
+		loadBeanDefinitions("mvc-config-view-resolution.xml", 7);
 
 		ViewResolverComposite compositeResolver = this.appContext.getBean(ViewResolverComposite.class);
 		assertNotNull(compositeResolver);
-		assertEquals("Actual: " + compositeResolver.getViewResolvers(), 8, compositeResolver.getViewResolvers().size());
+		assertEquals("Actual: " + compositeResolver.getViewResolvers(), 9, compositeResolver.getViewResolvers().size());
 		assertEquals(Ordered.LOWEST_PRECEDENCE, compositeResolver.getOrder());
 
 		List<ViewResolver> resolvers = compositeResolver.getViewResolvers();
@@ -718,7 +741,7 @@ public class MvcNamespaceTests {
 		assertEquals(TilesViewResolver.class, resolvers.get(2).getClass());
 
 		resolver = resolvers.get(3);
-		FreeMarkerViewResolver freeMarkerViewResolver = (FreeMarkerViewResolver) resolver;
+		assertThat(resolver, instanceOf(FreeMarkerViewResolver.class));
 		accessor = new DirectFieldAccessor(resolver);
 		assertEquals("freemarker-", accessor.getPropertyValue("prefix"));
 		assertEquals(".freemarker", accessor.getPropertyValue("suffix"));
@@ -726,22 +749,28 @@ public class MvcNamespaceTests {
 		assertEquals(1024, accessor.getPropertyValue("cacheLimit"));
 
 		resolver = resolvers.get(4);
-		VelocityViewResolver velocityViewResolver = (VelocityViewResolver) resolver;
+		assertThat(resolver, instanceOf(VelocityViewResolver.class));
 		accessor = new DirectFieldAccessor(resolver);
 		assertEquals("", accessor.getPropertyValue("prefix"));
 		assertEquals(".vm", accessor.getPropertyValue("suffix"));
 		assertEquals(0, accessor.getPropertyValue("cacheLimit"));
 
 		resolver = resolvers.get(5);
-		GroovyMarkupViewResolver groovyMarkupViewResolver = (GroovyMarkupViewResolver) resolver;
+		assertThat(resolver, instanceOf(GroovyMarkupViewResolver.class));
 		accessor = new DirectFieldAccessor(resolver);
 		assertEquals("", accessor.getPropertyValue("prefix"));
 		assertEquals(".tpl", accessor.getPropertyValue("suffix"));
 		assertEquals(1024, accessor.getPropertyValue("cacheLimit"));
 
-		assertEquals(InternalResourceViewResolver.class, resolvers.get(6).getClass());
-		assertEquals(InternalResourceViewResolver.class, resolvers.get(7).getClass());
+		resolver = resolvers.get(6);
+		assertThat(resolver, instanceOf(ScriptTemplateViewResolver.class));
+		accessor = new DirectFieldAccessor(resolver);
+		assertEquals("", accessor.getPropertyValue("prefix"));
+		assertEquals("", accessor.getPropertyValue("suffix"));
+		assertEquals(1024, accessor.getPropertyValue("cacheLimit"));
 
+		assertEquals(InternalResourceViewResolver.class, resolvers.get(7).getClass());
+		assertEquals(InternalResourceViewResolver.class, resolvers.get(8).getClass());
 
 		TilesConfigurer tilesConfigurer = appContext.getBean(TilesConfigurer.class);
 		assertNotNull(tilesConfigurer);
@@ -751,12 +780,12 @@ public class MvcNamespaceTests {
 		};
 		accessor = new DirectFieldAccessor(tilesConfigurer);
 		assertArrayEquals(definitions, (String[]) accessor.getPropertyValue("definitions"));
-		assertTrue((boolean)accessor.getPropertyValue("checkRefresh"));
+		assertTrue((boolean) accessor.getPropertyValue("checkRefresh"));
 
 		FreeMarkerConfigurer freeMarkerConfigurer = appContext.getBean(FreeMarkerConfigurer.class);
 		assertNotNull(freeMarkerConfigurer);
 		accessor = new DirectFieldAccessor(freeMarkerConfigurer);
-		assertArrayEquals(new String[]{"/", "/test"}, (String[]) accessor.getPropertyValue("templateLoaderPaths"));
+		assertArrayEquals(new String[] {"/", "/test"}, (String[]) accessor.getPropertyValue("templateLoaderPaths"));
 
 		VelocityConfigurer velocityConfigurer = appContext.getBean(VelocityConfigurer.class);
 		assertNotNull(velocityConfigurer);
@@ -768,11 +797,21 @@ public class MvcNamespaceTests {
 		assertEquals("/test", groovyMarkupConfigurer.getResourceLoaderPath());
 		assertTrue(groovyMarkupConfigurer.isAutoIndent());
 		assertFalse(groovyMarkupConfigurer.isCacheTemplates());
+
+		ScriptTemplateConfigurer scriptTemplateConfigurer = appContext.getBean(ScriptTemplateConfigurer.class);
+		assertNotNull(scriptTemplateConfigurer);
+		assertEquals("Mustache", scriptTemplateConfigurer.getRenderObject());
+		assertEquals("render", scriptTemplateConfigurer.getRenderFunction());
+		assertEquals(StandardCharsets.ISO_8859_1, scriptTemplateConfigurer.getCharset());
+		assertEquals("classpath:", scriptTemplateConfigurer.getResourceLoaderPath());
+		String[] scripts = { "/META-INF/resources/webjars/mustachejs/0.8.2/mustache.js" };
+		accessor = new DirectFieldAccessor(scriptTemplateConfigurer);
+		assertArrayEquals(scripts, (String[]) accessor.getPropertyValue("scripts"));
 	}
 
 	@Test
 	public void testViewResolutionWithContentNegotiation() throws Exception {
-		loadBeanDefinitions("mvc-config-view-resolution-content-negotiation.xml", 6);
+		loadBeanDefinitions("mvc-config-view-resolution-content-negotiation.xml", 7);
 
 		ViewResolverComposite compositeResolver = this.appContext.getBean(ViewResolverComposite.class);
 		assertNotNull(compositeResolver);
@@ -782,7 +821,7 @@ public class MvcNamespaceTests {
 		List<ViewResolver> resolvers = compositeResolver.getViewResolvers();
 		assertEquals(ContentNegotiatingViewResolver.class, resolvers.get(0).getClass());
 		ContentNegotiatingViewResolver cnvr = (ContentNegotiatingViewResolver) resolvers.get(0);
-		assertEquals(6, cnvr.getViewResolvers().size());
+		assertEquals(7, cnvr.getViewResolvers().size());
 		assertEquals(1, cnvr.getDefaultViews().size());
 		assertTrue(cnvr.isUseNotAcceptableStatusCode());
 
@@ -835,10 +874,16 @@ public class MvcNamespaceTests {
 	}
 
 
-	@DateTimeFormat(iso=ISO.DATE)
+	@DateTimeFormat(iso = ISO.DATE)
 	@Target({ElementType.PARAMETER})
 	@Retention(RetentionPolicy.RUNTIME)
 	public @interface IsoDate {
+	}
+
+	@NumberFormat(style = NumberFormat.Style.PERCENT)
+	@Target({ElementType.PARAMETER})
+	@Retention(RetentionPolicy.RUNTIME)
+	public @interface PercentNumber {
 	}
 
 	@Validated(MyGroup.class)
@@ -850,10 +895,16 @@ public class MvcNamespaceTests {
 	@Controller
 	public static class TestController {
 
+		private Date date;
+
+		private Double percent;
+
 		private boolean recordedValidationError;
 
 		@RequestMapping
-		public void testBind(@RequestParam @IsoDate Date date, @MyValid TestBean bean, BindingResult result) {
+		public void testBind(@RequestParam @IsoDate Date date, @RequestParam(required = false) @PercentNumber Double percent, @MyValid TestBean bean, BindingResult result) {
+			this.date = date;
+			this.percent = percent;
 			this.recordedValidationError = (result.getErrorCount() == 1);
 		}
 	}
@@ -879,7 +930,7 @@ public class MvcNamespaceTests {
 
 	private static class TestBean {
 
-		@NotNull(groups=MyGroup.class)
+		@NotNull(groups = MyGroup.class)
 		private String field;
 
 		@SuppressWarnings("unused")
@@ -899,7 +950,8 @@ public class MvcNamespaceTests {
 		public RequestDispatcher getNamedDispatcher(String path) {
 			if (path.equals("default") || path.equals("custom")) {
 				return new MockRequestDispatcher("/");
-			} else {
+			}
+			else {
 				return null;
 			}
 		}
@@ -964,6 +1016,5 @@ public class MvcNamespaceTests {
 			return null;
 		}
 	}
-
 
 }

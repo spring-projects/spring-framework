@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,6 +44,16 @@ public class CronSequenceGeneratorTests {
 	public void testAt0Minutes() {
 		assertEquals(new Date(2012, 6, 2, 1, 0),
 				new CronSequenceGenerator("0 */2 1-4 * * *").next(new Date(2012, 6, 1, 9, 0)));
+	}
+
+	@Test(expected = IllegalArgumentException.class)
+	public void testWith0Increment() {
+		new CronSequenceGenerator("*/0 * * * * *").next(new Date(2012, 6, 1, 9, 0));
+	}
+
+	@Test(expected = IllegalArgumentException.class)
+	public void testWithNegativeIncrement() {
+		new CronSequenceGenerator("*/-1 * * * * *").next(new Date(2012, 6, 1, 9, 0));
 	}
 
 }

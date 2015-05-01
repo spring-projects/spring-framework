@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -173,6 +173,10 @@ public abstract class AbstractHttpMessageConverter<T> implements HttpMessageConv
 			MediaType contentTypeToUse = contentType;
 			if (contentType == null || contentType.isWildcardType() || contentType.isWildcardSubtype()) {
 				contentTypeToUse = getDefaultContentType(t);
+			}
+			else if (MediaType.APPLICATION_OCTET_STREAM.equals(contentType)) {
+				MediaType type = getDefaultContentType(t);
+				contentTypeToUse = (type != null ? type : contentTypeToUse);
 			}
 			if (contentTypeToUse != null) {
 				headers.setContentType(contentTypeToUse);

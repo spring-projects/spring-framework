@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
 package org.springframework.jdbc.support.nativejdbc;
 
 /**
- * Simple implementation of the {@link NativeJdbcExtractor} interface.
+ * A simple implementation of the {@link NativeJdbcExtractor} interface.
  * Assumes a pool that wraps Connection handles but not DatabaseMetaData:
  * In this case, the underlying native Connection can be retrieved by simply
  * calling {@code conHandle.getMetaData().getConnection()}.
@@ -35,10 +35,9 @@ package org.springframework.jdbc.support.nativejdbc;
  * flags to "true". If none of the statement types is wrapped - or you solely need
  * Connection unwrapping in the first place -, the defaults are fine.
  *
- * <p>SimpleNativeJdbcExtractor is a common choice for use with OracleLobHandler,
- * which just needs Connection unwrapping via the
- * {@link #getNativeConnectionFromStatement} method. This usage will work
- * with almost any connection pool.
+ * <p>SimpleNativeJdbcExtractor is a common choice for use with OracleLobHandler, which
+ * just needs Connection unwrapping via the {@link #getNativeConnectionFromStatement}
+ * method. This usage will work with almost any connection pool.
  *
  * <p>For full usage with JdbcTemplate, i.e. to also provide Statement unwrapping:
  * <ul>
@@ -47,8 +46,8 @@ package org.springframework.jdbc.support.nativejdbc;
  * <li>Use a SimpleNativeJdbcExtractor with all "nativeConnectionNecessaryForXxx"
  * flags set to "true" for C3P0 (all JDBC Statement objects are wrapped,
  * but none of the wrappers allow for unwrapping).
- * <li>Use a CommonsDbcpNativeJdbcExtractor for Jakarta Commons DBCP respectively
- * a JBossNativeJdbcExtractor for JBoss (all JDBC Statement objects are wrapped,
+ * <li>Use a CommonsDbcpNativeJdbcExtractor for Apache Commons DBCP or a
+ * JBossNativeJdbcExtractor for JBoss (all JDBC Statement objects are wrapped,
  * but all of them can be extracted by casting to implementation classes).
  * </ul>
  *

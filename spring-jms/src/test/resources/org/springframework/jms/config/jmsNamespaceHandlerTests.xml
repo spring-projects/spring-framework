@@ -3,12 +3,13 @@
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 		xmlns:jms="http://www.springframework.org/schema/jms"
 		xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
-				http://www.springframework.org/schema/jms http://www.springframework.org/schema/jms/spring-jms-4.1.xsd">
+				http://www.springframework.org/schema/jms http://www.springframework.org/schema/jms/spring-jms-4.2.xsd">
 
 	<jms:listener-container factory-id="testJmsFactory"
 			connection-factory="testConnectionFactory" task-executor="testTaskExecutor"
 			destination-resolver="testDestinationResolver" message-converter="testMessageConverter"
 			transaction-manager="testTransactionManager" error-handler="testErrorHandler"
+			destination-type="durableTopic" response-destination-type="queue"
 			cache="connection" concurrency="3-5" prefetch="50" receive-timeout="100" back-off="testBackOff" phase="99">
 		<jms:listener id="listener1" destination="testDestination" ref="testBean1" method="setName"/>
 		<jms:listener id="listener2" destination="testDestination" ref="testBean2" method="setName"
@@ -30,7 +31,8 @@
 
 	<jms:jca-listener-container factory-id="testJcaFactory"
 			resource-adapter="testResourceAdapter" activation-spec-factory="testActivationSpecFactory"
-			message-converter="testMessageConverter" concurrency="5" prefetch="50" phase="77">
+			message-converter="testMessageConverter" destination-type="topic" response-destination-type="queue"
+								concurrency="5" prefetch="50" phase="77">
 		<jms:listener id="listener3" destination="testDestination" ref="testBean1" method="setName"/>
 		<jms:listener id="listener4" destination="testDestination" ref="testBean2" method="setName"
 					  concurrency="7" response-destination="responseDestination"/>

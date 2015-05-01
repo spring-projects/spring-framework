@@ -2357,6 +2357,192 @@ https://spring.io/blog/2009/03/16/adding-an-atom-view-to-an-application-using-sp
 
 
 
+[[view-script]]
+== Script templates
+
+It is possible to integrate any templating library running on top of a JSR-223
+script engine in web applications using Spring. The following describes in a
+broad way how to do this. The script engine must implement both `ScriptEngine`
+and `Invocable` interfaces.
+
+It has been tested with:
+
+* http://handlebarsjs.com/[Handlebars] running on http://openjdk.java.net/projects/nashorn/[Nashorn]
+* https://mustache.github.io/[Mustache] running on http://openjdk.java.net/projects/nashorn/[Nashorn]
+* http://facebook.github.io/react/[React] running on http://openjdk.java.net/projects/nashorn/[Nashorn]
+* http://www.embeddedjs.com/[EJS] running on http://openjdk.java.net/projects/nashorn/[Nashorn]
+* http://www.stuartellis.eu/articles/erb/[ERB] running on http://jruby.org[JRuby]
+* https://docs.python.org/2/library/string.html#template-strings[String templates] running on http://www.jython.org/[Jython]
+
+[[view-script-dependencies]]
+=== Dependencies
+
+To be able to use script templates integration, you need to have available in your classpath
+the script engine:
+
+* http://openjdk.java.net/projects/nashorn/[Nashorn] Javascript engine is provided builtin with Java 8+
+* http://docs.oracle.com/javase/7/docs/technotes/guides/scripting/programmer_guide/#jsengine[Rhino]
+   Javascript engine is provided builtin with Java 6 and Java 7.
+   Please notice that using Rhino is not recommended since it does not
+   support running most template engines.
+* http://jruby.org[JRuby] dependency should be added in order to get Ruby support.
+* http://www.jython.org[Jython] dependency should be added in order to get Python support.
+
+You should also need to add dependencies for your script based template engine. For example,
+for Javascript you can use http://www.webjars.org/[WebJars] to add Maven/Gradle dependencies
+in order to make your javascript libraries available in the classpath.
+
+
+[[view-script-integrate]]
+=== How to integrate script based templating
+
+To be able to use script templates, you have to configure it in order to specify various parameters
+like the script engine to use, the script files to load and what function should be called to
+render the templates. This is done thanks to a `ScriptTemplateConfigurer` bean and optional script
+files.
+
+For example, in order to render Mustache templates thanks to the Nashorn Javascript engine
+provided with Java 8+, you should declare the following configuration:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@Configuration
+	@EnableWebMvc
+	public class MustacheConfig extends WebMvcConfigurerAdapter {
+
+		@Override
+		public void configureViewResolvers(ViewResolverRegistry registry) {
+			registry.scriptTemplate();
+		}
+
+		@Bean
+		public ScriptTemplateConfigurer configurer() {
+			ScriptTemplateConfigurer configurer = new ScriptTemplateConfigurer();
+			configurer.setEngineName("nashorn");
+			configurer.setScripts("mustache.js");
+			configurer.setRenderObject("Mustache");
+			configurer.setRenderFunction("render");
+			return configurer;
+		}
+	}
+----
+
+The XML counterpart using MVC namespace is:
+
+[source,xml,indent=0]
+[subs="verbatim,quotes"]
+----
+	<mvc:annotation-driven />
+
+	<mvc:view-resolvers>
+		<mvc:script-template />
+	</mvc:view-resolvers>
+
+	<mvc:script-template-configurer engine-name="nashorn" render-object="Mustache" render-function="render">
+		<mvc:script location="mustache.js" />
+	</mvc:script-template-configurer>
+----
+
+The controller is exactly what you should expect:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@Controller
+	public class SampleController {
+
+		@RequestMapping
+		public ModelAndView test() {
+			ModelAndView mav  = new ModelAndView();
+			mav.addObject("title", "Sample title").addObject("body", "Sample body");
+			mav.setViewName("template.html");
+			return mav;
+		}
+	}
+----
+
+And the Mustache template is:
+
+[source,html,indent=0]
+[subs="verbatim,quotes"]
+----
+	<html>
+		<head>
+			<title>{{title}}</title>
+		</head>
+		<body>
+			<p>{{body}}</p>
+		</body>
+	</html>
+----
+
+The render function is called with the following parameters:
+
+* template: the view template content (String)
+* model: the view model (Map)
+
+`Mustache.render()` is natively compatible with this signature, so you can call it directly.
+
+If your templating technology requires some customization, you may provide a script that
+implements a custom render function. For example, http://handlebarsjs.com[Handlerbars]
+needs to compile templates before using them, and requires a
+http://en.wikipedia.org/wiki/Polyfill[polyfill] in order to emulate some
+browser facilities not available in the server-side script engine.
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@Configuration
+	@EnableWebMvc
+	public class MustacheConfig extends WebMvcConfigurerAdapter {
+
+		@Override
+		public void configureViewResolvers(ViewResolverRegistry registry) {
+			registry.scriptTemplate();
+		}
+
+		@Bean
+		public ScriptTemplateConfigurer configurer() {
+			ScriptTemplateConfigurer configurer = new ScriptTemplateConfigurer();
+			configurer.setEngineName("nashorn");
+			configurer.setScripts("polyfill.js", "handlebars.js", "render.js");
+			configurer.setRenderFunction("render");
+			return configurer;
+		}
+	}
+----
+
+`polyfill.js` only defines the `window` object needed by Handlebars to run properly:
+
+[source,javascript,indent=0]
+[subs="verbatim,quotes"]
+----
+	var window = {};
+----
+
+This basic `render.js` implementation compiles the template before using it. A production
+ready implementation should also store and reused cached templates / pre-compiled templates.
+This can be done on the script side, as well as any customization you need (managing
+template engine configuration for example).
+
+[source,javascript,indent=0]
+[subs="verbatim,quotes"]
+----
+	function render(template, model) {
+		var compiledTemplate = Handlebars.compile(template);
+		return compiledTemplate(model);
+	}
+----
+
+Check out Spring script templates unit tests
+(https://github.com/spring-projects/spring-framework/tree/master/spring-webmvc/src/test/java/org/springframework/web/servlet/view/script[java],
+https://github.com/spring-projects/spring-framework/tree/master/spring-webmvc/src/test/resources/org/springframework/web/servlet/view/script[resources])
+for more configuration examples.
+
+
+
+
 [[view-xml-marshalling]]
 == XML Marshalling View
 The `MarshallingView` uses an XML `Marshaller` defined in the `org.springframework.oxm`

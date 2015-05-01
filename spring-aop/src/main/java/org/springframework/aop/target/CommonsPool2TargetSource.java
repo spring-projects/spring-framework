@@ -84,7 +84,7 @@ public class CommonsPool2TargetSource extends AbstractPoolingTargetSource implem
 	private boolean useObjectEquality;
 
 	/**
-	 * The Jakarta Commons {@code ObjectPool} used to pool target objects
+	 * The Apache Commons {@code ObjectPool} used to pool target objects
 	 */
 	private ObjectPool pool;
 

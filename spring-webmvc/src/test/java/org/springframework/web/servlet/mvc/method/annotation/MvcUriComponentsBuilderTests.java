@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2014 the original author or authors.
+ * Copyright 2012-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,15 @@
 
 package org.springframework.web.servlet.mvc.method.annotation;
 
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
+import static org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder.*;
+
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 import java.util.Arrays;
 import java.util.List;
 
@@ -26,22 +35,28 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import org.springframework.context.annotation.Bean;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.format.annotation.DateTimeFormat.ISO;
 import org.springframework.http.HttpEntity;
+import org.springframework.http.MediaType;
 import org.springframework.mock.web.test.MockHttpServletRequest;
+import org.springframework.mock.web.test.MockServletContext;
+import org.springframework.stereotype.Controller;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
+import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
+import org.springframework.web.servlet.DispatcherServlet;
+import org.springframework.web.servlet.config.annotation.EnableWebMvc;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 import org.springframework.web.util.UriComponents;
-
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
-import static org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder.*;
+import org.springframework.web.util.UriComponentsBuilder;
 
 /**
  * Unit tests for {@link org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder}.
@@ -99,6 +114,25 @@ public class MvcUriComponentsBuilderTests {
 	}
 
 	@Test
+	public void testFromControllerWithCustomBaseUrlViaStaticCall() {
+		UriComponentsBuilder builder = UriComponentsBuilder.fromUriString("http://example.org:9090/base");
+		UriComponents uriComponents = fromController(builder, PersonControllerImpl.class).build();
+
+		assertEquals("http://example.org:9090/base/people", uriComponents.toString());
+		assertEquals("http://example.org:9090/base", builder.toUriString());
+	}
+
+	@Test
+	public void testFromControllerWithCustomBaseUrlViaInstance() {
+		UriComponentsBuilder builder = UriComponentsBuilder.fromUriString("http://example.org:9090/base");
+		MvcUriComponentsBuilder mvcBuilder = MvcUriComponentsBuilder.relativeTo(builder);
+		UriComponents uriComponents = mvcBuilder.withController(PersonControllerImpl.class).build();
+
+		assertEquals("http://example.org:9090/base/people", uriComponents.toString());
+		assertEquals("http://example.org:9090/base", builder.toUriString());
+	}
+
+	@Test
 	public void testFromMethodNamePathVariable() throws Exception {
 		UriComponents uriComponents = fromMethodName(
 				ControllerWithMethods.class, "methodWithPathVariable", new Object[]{"1"}).build();
@@ -152,6 +186,33 @@ public class MvcUriComponentsBuilderTests {
 	}
 
 	@Test
+	public void testFromMethodNameWithCustomBaseUrlViaStaticCall() throws Exception {
+		UriComponentsBuilder builder = UriComponentsBuilder.fromUriString("http://example.org:9090/base");
+		UriComponents uriComponents = fromMethodName(builder, ControllerWithMethods.class,
+				"methodWithPathVariable", new Object[] {"1"}).build();
+
+		assertEquals("http://example.org:9090/base/something/1/foo", uriComponents.toString());
+		assertEquals("http://example.org:9090/base", builder.toUriString());
+	}
+
+	@Test
+	public void testFromMethodNameWithCustomBaseUrlViaInstance() throws Exception {
+		UriComponentsBuilder builder = UriComponentsBuilder.fromUriString("http://example.org:9090/base");
+		MvcUriComponentsBuilder mvcBuilder = MvcUriComponentsBuilder.relativeTo(builder);
+		UriComponents uriComponents = mvcBuilder.withMethodName(ControllerWithMethods.class,
+				"methodWithPathVariable", new Object[] {"1"}).build();
+
+		assertEquals("http://example.org:9090/base/something/1/foo", uriComponents.toString());
+		assertEquals("http://example.org:9090/base", builder.toUriString());
+	}
+
+	@Test
+	public void testFromMethodNameWithMetaAnnotation() throws Exception {
+		UriComponents uriComponents = fromMethodName(MetaAnnotationController.class, "handleInput").build();
+		assertThat(uriComponents.toUriString(), is("http://localhost/input"));
+	}
+
+	@Test
 	public void testFromMethodCall() {
 		UriComponents uriComponents = fromMethodCall(on(ControllerWithMethods.class).myMethod(null)).build();
 
@@ -199,6 +260,57 @@ public class MvcUriComponentsBuilderTests {
 		MultiValueMap<String, String> queryParams = uriComponents.getQueryParams();
 		assertThat(queryParams.get("limit"), contains("5"));
 		assertThat(queryParams.get("items"), containsInAnyOrder("3", "7"));
+	}
+
+	@Test
+	public void testFromMethodCallWithCustomBaseUrlViaStaticCall() {
+		UriComponentsBuilder builder = UriComponentsBuilder.fromUriString("http://example.org:9090/base");
+		UriComponents uriComponents = fromMethodCall(builder, on(ControllerWithMethods.class).myMethod(null)).build();
+
+		assertEquals("http://example.org:9090/base/something/else", uriComponents.toString());
+		assertEquals("http://example.org:9090/base", builder.toUriString());
+	}
+
+	@Test
+	public void testFromMethodCallWithCustomBaseUrlViaInstance() {
+		UriComponentsBuilder builder = UriComponentsBuilder.fromUriString("http://example.org:9090/base");
+		MvcUriComponentsBuilder mvcBuilder = MvcUriComponentsBuilder.relativeTo(builder);
+		UriComponents result = mvcBuilder.withMethodCall(on(ControllerWithMethods.class).myMethod(null)).build();
+
+		assertEquals("http://example.org:9090/base/something/else", result.toString());
+		assertEquals("http://example.org:9090/base", builder.toUriString());
+	}
+
+	@Test
+	public void testFromMappingName() throws Exception {
+		AnnotationConfigWebApplicationContext context = new AnnotationConfigWebApplicationContext();
+		context.setServletContext(new MockServletContext());
+		context.register(WebConfig.class);
+		context.refresh();
+
+		this.request.setAttribute(DispatcherServlet.WEB_APPLICATION_CONTEXT_ATTRIBUTE, context);
+		this.request.setServerName("example.org");
+		this.request.setServerPort(9999);
+		this.request.setContextPath("/base");
+
+		String mappingName = "PAC#getAddressesForCountry";
+		String url = MvcUriComponentsBuilder.fromMappingName(mappingName).arg(0, "DE").buildAndExpand(123);
+		assertEquals("http://example.org:9999/base/people/123/addresses/DE", url);
+	}
+
+	@Test
+	public void testFromMappingNameWithCustomBaseUrl() throws Exception {
+		AnnotationConfigWebApplicationContext context = new AnnotationConfigWebApplicationContext();
+		context.setServletContext(new MockServletContext());
+		context.register(WebConfig.class);
+		context.refresh();
+
+		this.request.setAttribute(DispatcherServlet.WEB_APPLICATION_CONTEXT_ATTRIBUTE, context);
+
+		UriComponentsBuilder baseUrl = UriComponentsBuilder.fromUriString("http://example.org:9999/base");
+		MvcUriComponentsBuilder mvcBuilder = MvcUriComponentsBuilder.relativeTo(baseUrl);
+		String url = mvcBuilder.withMappingName("PAC#getAddressesForCountry").arg(0, "DE").buildAndExpand(123);
+		assertEquals("http://example.org:9999/base/people/123/addresses/DE", url);
 	}
 
 	@Test
@@ -300,12 +412,46 @@ public class MvcUriComponentsBuilderTests {
 		}
 	}
 
+	@SuppressWarnings("unused")
 	@RequestMapping("/user/{userId}/contacts")
 	static class UserContactController {
 
 		@RequestMapping("/create")
 		public String showCreate(@PathVariable Integer userId) {
 			return null;
+		}
+	}
+
+	@SuppressWarnings("unused")
+	@Controller
+	static class MetaAnnotationController {
+
+		@RequestMapping
+		public void handle() {
+		}
+
+		@PostJson(path="/input")
+		public void handleInput() {
+		}
+
+	}
+
+	@RequestMapping(method = RequestMethod.POST,
+			produces = MediaType.APPLICATION_JSON_VALUE,
+			consumes = MediaType.APPLICATION_JSON_VALUE)
+	@Target({ElementType.METHOD, ElementType.TYPE})
+	@Retention(RetentionPolicy.RUNTIME)
+	@Documented
+	@interface PostJson {
+		String[] path() default {};
+	}
+
+	@EnableWebMvc
+	static class WebConfig extends WebMvcConfigurerAdapter {
+
+		@Bean
+		public PersonsAddressesController controller() {
+			return new PersonsAddressesController();
 		}
 	}
 

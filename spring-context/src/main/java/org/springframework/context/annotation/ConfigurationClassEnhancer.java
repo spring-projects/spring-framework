@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,8 @@ import org.springframework.aop.scope.ScopedProxyFactoryBean;
 import org.springframework.asm.Type;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
+import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.beans.factory.support.SimpleInstantiationStrategy;
@@ -44,6 +46,7 @@ import org.springframework.cglib.transform.ClassEmitterTransformer;
 import org.springframework.cglib.transform.TransformingClassGenerator;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.ReflectionUtils;
 
@@ -289,7 +292,7 @@ class ConfigurationClassEnhancer {
 				}
 				else {
 					// It is a candidate FactoryBean - go ahead with enhancement
-					return enhanceFactoryBean(factoryBean.getClass(), beanFactory, beanName);
+					return enhanceFactoryBean(factoryBean, beanFactory, beanName);
 				}
 			}
 
@@ -303,7 +306,7 @@ class ConfigurationClassEnhancer {
 							"result in a failure to process annotations such as @Autowired, " +
 							"@Resource and @PostConstruct within the method's declaring " +
 							"@Configuration class. Add the 'static' modifier to this method to avoid " +
-							"these container lifecycle issues; see @Bean javadoc for complete details",
+							"these container lifecycle issues; see @Bean javadoc for complete details.",
 							beanMethod.getDeclaringClass().getSimpleName(), beanMethod.getName()));
 				}
 				return cglibMethodProxy.invokeSuper(enhancedConfigInstance, beanMethodArgs);
@@ -318,8 +321,23 @@ class ConfigurationClassEnhancer {
 					if (alreadyInCreation) {
 						beanFactory.setCurrentlyInCreation(beanName, false);
 					}
-					return (!ObjectUtils.isEmpty(beanMethodArgs) ?
+					Object beanInstance = (!ObjectUtils.isEmpty(beanMethodArgs) ?
 							beanFactory.getBean(beanName, beanMethodArgs) : beanFactory.getBean(beanName));
+					if (beanInstance != null && !ClassUtils.isAssignableValue(beanMethod.getReturnType(), beanInstance)) {
+						String msg = String.format("@Bean method %s.%s called as a bean reference " +
+									"for type [%s] but overridden by non-compatible bean instance of type [%s].",
+									beanMethod.getDeclaringClass().getSimpleName(), beanMethod.getName(),
+									beanMethod.getReturnType().getName(), beanInstance.getClass().getName());
+						try {
+							BeanDefinition beanDefinition = beanFactory.getMergedBeanDefinition(beanName);
+							msg += " Overriding bean of same name declared in: " + beanDefinition.getResourceDescription();
+						}
+						catch (NoSuchBeanDefinitionException ex) {
+							// Ignore - simply no detailed message then.
+						}
+						throw new IllegalStateException(msg);
+					}
+					return beanInstance;
 				}
 				finally {
 					if (alreadyInCreation) {
@@ -365,11 +383,11 @@ class ConfigurationClassEnhancer {
 		 * instance directly. If a FactoryBean instance is fetched through the container via &-dereferencing,
 		 * it will not be proxied. This too is aligned with the way XML configuration works.
 		 */
-		private Object enhanceFactoryBean(Class<?> fbClass, final ConfigurableBeanFactory beanFactory,
+		private Object enhanceFactoryBean(final Object factoryBean, final ConfigurableBeanFactory beanFactory,
 				final String beanName) throws InstantiationException, IllegalAccessException {
 
 			Enhancer enhancer = new Enhancer();
-			enhancer.setSuperclass(fbClass);
+			enhancer.setSuperclass(factoryBean.getClass());
 			enhancer.setUseFactory(false);
 			enhancer.setNamingPolicy(SpringNamingPolicy.INSTANCE);
 			enhancer.setCallback(new MethodInterceptor() {
@@ -378,7 +396,7 @@ class ConfigurationClassEnhancer {
 					if (method.getName().equals("getObject") && args.length == 0) {
 						return beanFactory.getBean(beanName);
 					}
-					return proxy.invokeSuper(obj, args);
+					return proxy.invoke(factoryBean, args);
 				}
 			});
 			return enhancer.create();

@@ -155,6 +155,17 @@ public class FacesWebRequest extends FacesRequestAttributes implements NativeWeb
 		return false;
 	}
 
+	/**
+	 * Last-modified handling not supported for portlet requests:
+	 * As a consequence, this method always returns {@code false}.
+	 *
+	 * @since 4.2
+	 */
+	@Override
+	public boolean checkNotModified(String etag, long lastModifiedTimestamp) {
+		return false;
+	}
+
 	@Override
 	public String getDescription(boolean includeClientInfo) {
 		ExternalContext externalContext = getExternalContext();

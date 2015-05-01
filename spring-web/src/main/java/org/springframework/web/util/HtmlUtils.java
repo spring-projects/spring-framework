@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,7 @@ import org.springframework.util.Assert;
  * <a href="http://www.w3.org/TR/html4/charset.html">http://www.w3.org/TR/html4/charset.html</a>
  *
  * <p>For a comprehensive set of String escaping utilities,
- * consider Jakarta Commons Lang and its StringEscapeUtils class.
+ * consider Apache Commons Lang and its StringEscapeUtils class.
  * We are not using that class here to avoid a runtime dependency
  * on Commons Lang just for HTML escaping. Furthermore, Spring's
  * HTML escaping is more flexible and 100% HTML 4.0 compliant.
