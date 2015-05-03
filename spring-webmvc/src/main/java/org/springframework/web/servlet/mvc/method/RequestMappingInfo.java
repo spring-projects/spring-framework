@@ -16,9 +16,13 @@
 
 package org.springframework.web.servlet.mvc.method;
 
+import java.util.List;
+
 import javax.servlet.http.HttpServletRequest;
 
+import org.springframework.util.PathMatcher;
 import org.springframework.util.StringUtils;
+import org.springframework.web.accept.ContentNegotiationManager;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.cors.CorsUtils;
 import org.springframework.web.servlet.mvc.condition.ConsumesRequestCondition;
@@ -29,6 +33,7 @@ import org.springframework.web.servlet.mvc.condition.ProducesRequestCondition;
 import org.springframework.web.servlet.mvc.condition.RequestCondition;
 import org.springframework.web.servlet.mvc.condition.RequestConditionHolder;
 import org.springframework.web.servlet.mvc.condition.RequestMethodsRequestCondition;
+import org.springframework.web.util.UrlPathHelper;
 
 /**
  * Encapsulates the following request mapping conditions:
@@ -328,6 +333,287 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 		builder.append(",custom=").append(this.customConditionHolder);
 		builder.append('}');
 		return builder.toString();
+	}
+
+	/**
+	 * Create a new {@code RequestMappingInfo.Builder} with the given paths.
+	 * @param paths the paths to use
+	 * @since 4.2
+	 */
+	public static Builder paths(String... paths) {
+		return new DefaultBuilder(paths);
+	}
+
+
+	/**
+	 * Defines a builder for creating a RequestMappingInfo.
+	 * @since 4.2
+	 */
+	public interface Builder {
+
+		/**
+		 * Set the path patterns.
+		 */
+		Builder paths(String... paths);
+
+		/**
+		 * Set the request method conditions.
+		 */
+		Builder methods(RequestMethod... methods);
+
+		/**
+		 * Set the request param conditions.
+		 */
+		Builder params(String... params);
+
+		/**
+		 * Set the header conditions.
+		 * <p>By default this is not set.
+		 */
+		Builder headers(String... headers);
+
+		/**
+		 * Set the consumes conditions.
+		 */
+		Builder consumes(String... consumes);
+
+		/**
+		 * Set the produces conditions.
+		 */
+		Builder produces(String... produces);
+
+		/**
+		 * Set the mapping name.
+		 */
+		Builder mappingName(String name);
+
+		/**
+		 * Set a custom conditions to use.
+		 */
+		Builder customCondition(RequestCondition<?> condition);
+
+		/**
+		 * Provide additional configuration needed for request mapping purposes.
+		 */
+		Builder options(BuilderConfiguration options);
+
+		/**
+		 * Build the RequestMappingInfo.
+		 */
+		RequestMappingInfo build();
+	}
+
+	private static class DefaultBuilder implements Builder {
+
+		private String[] paths;
+
+		private RequestMethod[] methods;
+
+		private String[] params;
+
+		private String[] headers;
+
+		private String[] consumes;
+
+		private String[] produces;
+
+		private String mappingName;
+
+		private RequestCondition<?> customCondition;
+
+		private BuilderConfiguration options = new BuilderConfiguration();
+
+
+		public DefaultBuilder(String... paths) {
+			this.paths = paths;
+		}
+
+
+		@Override
+		public Builder paths(String... paths) {
+			this.paths = paths;
+			return this;
+		}
+
+		@Override
+		public DefaultBuilder methods(RequestMethod... methods) {
+			this.methods = methods;
+			return this;
+		}
+
+		@Override
+		public DefaultBuilder params(String... params) {
+			this.params = params;
+			return this;
+		}
+
+		@Override
+		public DefaultBuilder headers(String... headers) {
+			this.headers = headers;
+			return this;
+		}
+
+		@Override
+		public DefaultBuilder consumes(String... consumes) {
+			this.consumes = consumes;
+			return this;
+		}
+
+		@Override
+		public DefaultBuilder produces(String... produces) {
+			this.produces = produces;
+			return this;
+		}
+
+		@Override
+		public DefaultBuilder mappingName(String name) {
+			this.mappingName = name;
+			return this;
+		}
+
+		@Override
+		public DefaultBuilder customCondition(RequestCondition<?> condition) {
+			this.customCondition = condition;
+			return this;
+		}
+
+		@Override
+		public Builder options(BuilderConfiguration options) {
+			this.options = options;
+			return this;
+		}
+
+		@Override
+		public RequestMappingInfo build() {
+
+			ContentNegotiationManager manager = this.options.getContentNegotiationManager();
+
+			PatternsRequestCondition patternsCondition = new PatternsRequestCondition(
+					this.paths, this.options.getUrlPathHelper(), this.options.getPathMatcher(),
+					this.options.useSuffixPatternMatch(), this.options.useTrailingSlashMatch(),
+					this.options.getFileExtensions());
+
+			return new RequestMappingInfo(this.mappingName, patternsCondition,
+					new RequestMethodsRequestCondition(methods),
+					new ParamsRequestCondition(this.params),
+					new HeadersRequestCondition(this.headers),
+					new ConsumesRequestCondition(this.consumes, this.headers),
+					new ProducesRequestCondition(this.produces, this.headers, manager),
+					this.customCondition);
+		}
+	}
+
+	/**
+	 * Container for configuration options used for request mapping purposes.
+	 * Such configuration is required to create RequestMappingInfo instances but
+	 * is typically used across all RequestMappingInfo instances.
+	 *
+	 * @see Builder#options
+	 * @since 4.2
+	 */
+	public static class BuilderConfiguration {
+
+		private UrlPathHelper urlPathHelper;
+
+		private PathMatcher pathMatcher;
+
+		private boolean trailingSlashMatch = true;
+
+		private boolean suffixPatternMatch = true;
+
+		private boolean registeredSuffixPatternMatch = false;
+
+		private ContentNegotiationManager contentNegotiationManager;
+
+
+		/**
+		 * Set a custom UrlPathHelper to use for the PatternsRequestCondition.
+		 * <p>By default this is not set.
+		 */
+		public void setPathHelper(UrlPathHelper pathHelper) {
+			this.urlPathHelper = pathHelper;
+		}
+
+		public UrlPathHelper getUrlPathHelper() {
+			return this.urlPathHelper;
+		}
+
+		/**
+		 * Set a custom PathMatcher to use for the PatternsRequestCondition.
+		 * <p>By default this is not set.
+		 */
+		public void setPathMatcher(PathMatcher pathMatcher) {
+			this.pathMatcher = pathMatcher;
+		}
+
+		public PathMatcher getPathMatcher() {
+			return this.pathMatcher;
+		}
+
+		/**
+		 * Whether to apply trailing slash matching in PatternsRequestCondition.
+		 * <p>By default this is set to 'true'.
+		 */
+		public void setTrailingSlashMatch(boolean trailingSlashMatch) {
+			this.trailingSlashMatch = trailingSlashMatch;
+		}
+
+		public boolean useTrailingSlashMatch() {
+			return this.trailingSlashMatch;
+		}
+
+		/**
+		 * Whether to apply suffix pattern matching in PatternsRequestCondition.
+		 * <p>By default this is set to 'true'.
+		 * @see #setRegisteredSuffixPatternMatch(boolean)
+		 */
+		public void setSuffixPatternMatch(boolean suffixPatternMatch) {
+			this.suffixPatternMatch = suffixPatternMatch;
+		}
+
+		public boolean useSuffixPatternMatch() {
+			return this.suffixPatternMatch;
+		}
+
+		/**
+		 * Whether suffix pattern matching should be restricted to registered
+		 * file extensions only. Setting this property also sets
+		 * suffixPatternMatch=true and requires that a
+		 * {@link #setContentNegotiationManager} is also configured in order to
+		 * obtain the registered file extensions.
+		 */
+		public void setRegisteredSuffixPatternMatch(boolean registeredSuffixPatternMatch) {
+			this.registeredSuffixPatternMatch = registeredSuffixPatternMatch;
+			this.suffixPatternMatch = (registeredSuffixPatternMatch || this.suffixPatternMatch);
+		}
+
+		public boolean useRegisteredSuffixPatternMatch() {
+			return this.registeredSuffixPatternMatch;
+		}
+
+		/**
+		 * Return the file extensions to use for suffix pattern matching. If
+		 * {@code registeredSuffixPatternMatch=true}, the extensions are obtained
+		 * from the configured {@code contentNegotiationManager}.
+		 */
+		public List<String> getFileExtensions() {
+			if (useRegisteredSuffixPatternMatch() && getContentNegotiationManager() != null) {
+				return this.contentNegotiationManager.getAllFileExtensions();
+			}
+			return null;
+		}
+
+		/**
+		 * Set the ContentNegotiationManager to use for the ProducesRequestCondition.
+		 * <p>By default this is not set.
+		 */
+		public void setContentNegotiationManager(ContentNegotiationManager manager) {
+			this.contentNegotiationManager = manager;
+		}
+
+		public ContentNegotiationManager getContentNegotiationManager() {
+			return this.contentNegotiationManager;
+		}
 	}
 
 }

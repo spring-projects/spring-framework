@@ -18,7 +18,6 @@ package org.springframework.web.servlet.mvc.method.annotation;
 
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.context.EmbeddedValueResolverAware;
@@ -38,14 +37,8 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.mvc.condition.AbstractRequestCondition;
 import org.springframework.web.servlet.mvc.condition.CompositeRequestCondition;
-import org.springframework.web.servlet.mvc.condition.ConsumesRequestCondition;
-import org.springframework.web.servlet.mvc.condition.HeadersRequestCondition;
 import org.springframework.web.servlet.mvc.condition.NameValueExpression;
-import org.springframework.web.servlet.mvc.condition.ParamsRequestCondition;
-import org.springframework.web.servlet.mvc.condition.PatternsRequestCondition;
-import org.springframework.web.servlet.mvc.condition.ProducesRequestCondition;
 import org.springframework.web.servlet.mvc.condition.RequestCondition;
-import org.springframework.web.servlet.mvc.condition.RequestMethodsRequestCondition;
 import org.springframework.web.servlet.mvc.method.RequestMappingInfo;
 import org.springframework.web.servlet.mvc.method.RequestMappingInfoHandlerMapping;
 
@@ -69,9 +62,9 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 
 	private ContentNegotiationManager contentNegotiationManager = new ContentNegotiationManager();
 
-	private final List<String> fileExtensions = new ArrayList<String>();
-
 	private StringValueResolver embeddedValueResolver;
+
+	private RequestMappingInfo.BuilderConfiguration config = new RequestMappingInfo.BuilderConfiguration();
 
 
 	/**
@@ -130,13 +123,17 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 
 	@Override
 	public void afterPropertiesSet() {
-		if (this.useRegisteredSuffixPatternMatch) {
-			this.fileExtensions.addAll(this.contentNegotiationManager.getAllFileExtensions());
-		}
+
+		this.config = new RequestMappingInfo.BuilderConfiguration();
+		this.config.setPathHelper(getUrlPathHelper());
+		this.config.setPathMatcher(getPathMatcher());
+		this.config.setSuffixPatternMatch(this.useSuffixPatternMatch);
+		this.config.setTrailingSlashMatch(this.useTrailingSlashMatch);
+		this.config.setRegisteredSuffixPatternMatch(this.useRegisteredSuffixPatternMatch);
+		this.config.setContentNegotiationManager(getContentNegotiationManager());
+
 		super.afterPropertiesSet();
 	}
-
-
 
 	/**
 	 * Whether to use suffix pattern matching.
@@ -170,7 +167,7 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	 * Return the file extensions to use for suffix pattern matching.
 	 */
 	public List<String> getFileExtensions() {
-		return this.fileExtensions;
+		return this.config.getFileExtensions();
 	}
 
 
@@ -215,6 +212,7 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	 * @param handlerType the handler type for which to create the condition
 	 * @return the condition, or {@code null}
 	 */
+	@SuppressWarnings("unused")
 	protected RequestCondition<?> getCustomTypeCondition(Class<?> handlerType) {
 		return null;
 	}
@@ -230,6 +228,7 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	 * @param method the handler method for which to create the condition
 	 * @return the condition, or {@code null}
 	 */
+	@SuppressWarnings("unused")
 	protected RequestCondition<?> getCustomMethodCondition(Method method) {
 		return null;
 	}
@@ -238,6 +237,7 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	 * Transitional method used to invoke one of two createRequestMappingInfo
 	 * variants one of which is deprecated.
 	 */
+	@SuppressWarnings("deprecation")
 	private RequestMappingInfo createRequestMappingInfo(AnnotatedElement annotatedElement) {
 		RequestMapping annotation;
 		AnnotationAttributes attributes;
@@ -272,6 +272,7 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	 * {@link #createRequestMappingInfo(AnnotationAttributes, RequestCondition)}.
 	 */
 	@Deprecated
+	@SuppressWarnings("unused")
 	protected RequestMappingInfo createRequestMappingInfo(RequestMapping annotation,
 			RequestCondition<?> customCondition) {
 
@@ -287,31 +288,20 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	protected RequestMappingInfo createRequestMappingInfo(AnnotationAttributes attributes,
 			RequestCondition<?> customCondition) {
 
-		String mappingName = attributes.getString("name");
-
 		String[] paths = attributes.getStringArray("path");
 		paths = ObjectUtils.isEmpty(paths) ? attributes.getStringArray("value") : paths;
-		PatternsRequestCondition patternsCondition = new PatternsRequestCondition(
-				resolveEmbeddedValuesInPatterns(paths), getUrlPathHelper(), getPathMatcher(),
-				this.useSuffixPatternMatch, this.useTrailingSlashMatch, this.fileExtensions);
+		paths = resolveEmbeddedValuesInPatterns(paths);
 
-		RequestMethod[] methods = (RequestMethod[]) attributes.get("method");
-		RequestMethodsRequestCondition methodsCondition = new RequestMethodsRequestCondition(methods);
-
-		String[] params = attributes.getStringArray("params");
-		ParamsRequestCondition paramsCondition = new ParamsRequestCondition(params);
-
-		String[] headers = attributes.getStringArray("headers");
-		String[] consumes = attributes.getStringArray("consumes");
-		String[] produces = attributes.getStringArray("produces");
-
-		HeadersRequestCondition headersCondition = new HeadersRequestCondition(headers);
-		ConsumesRequestCondition consumesCondition = new ConsumesRequestCondition(consumes, headers);
-		ProducesRequestCondition producesCondition = new ProducesRequestCondition(produces,
-				headers, this.contentNegotiationManager);
-
-		return new RequestMappingInfo(mappingName, patternsCondition, methodsCondition, paramsCondition,
-				headersCondition, consumesCondition, producesCondition, customCondition);
+		return RequestMappingInfo.paths(paths)
+				.methods((RequestMethod[]) attributes.get("method"))
+				.params(attributes.getStringArray("params"))
+				.headers(attributes.getStringArray("headers"))
+				.consumes(attributes.getStringArray("consumes"))
+				.produces(attributes.getStringArray("produces"))
+				.mappingName(attributes.getString("name"))
+				.customCondition(customCondition)
+				.options(this.config)
+				.build();
 	}
 
 	/**
@@ -342,8 +332,8 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 		}
 
 		CorsConfiguration config = new CorsConfiguration();
-		applyAnnotation(config, typeAnnotation);
-		applyAnnotation(config, methodAnnotation);
+		updateCorsConfig(config, typeAnnotation);
+		updateCorsConfig(config, methodAnnotation);
 
 		if (CollectionUtils.isEmpty(config.getAllowedMethods())) {
 			for (RequestMethod allowedMethod : mappingInfo.getMethodsCondition().getMethods()) {
@@ -360,7 +350,7 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 		return config;
 	}
 
-	private void applyAnnotation(CorsConfiguration config, CrossOrigin annotation) {
+	private void updateCorsConfig(CorsConfiguration config, CrossOrigin annotation) {
 		if (annotation == null) {
 			return;
 		}
