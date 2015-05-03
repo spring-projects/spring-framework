@@ -91,7 +91,7 @@ public class ContentCachingResponseWrapper extends HttpServletResponseWrapper {
 	}
 
 	@Override
-	public ServletOutputStream getOutputStream() {
+	public ServletOutputStream getOutputStream() throws IOException {
 		return this.outputStream;
 	}
 
