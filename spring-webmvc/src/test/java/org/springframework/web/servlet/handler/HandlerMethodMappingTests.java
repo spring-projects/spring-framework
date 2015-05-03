@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,13 @@
 
 package org.springframework.web.servlet.handler;
 
+import static org.junit.Assert.*;
+
 import java.lang.reflect.Method;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Set;
+
 import javax.servlet.http.HttpServletRequest;
 
 import org.junit.Before;
@@ -33,8 +36,6 @@ import org.springframework.util.PathMatcher;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.util.UrlPathHelper;
-
-import static org.junit.Assert.*;
 
 /**
  * Test for {@link AbstractHandlerMethodMapping}.
@@ -77,7 +78,7 @@ public class HandlerMethodMappingTests {
 	@Test
 	public void patternMatch() throws Exception {
 		mapping.registerHandlerMethod(handler, method1, "/fo*");
-		mapping.registerHandlerMethod(handler, method1, "/f*");
+		mapping.registerHandlerMethod(handler, method2, "/f*");
 
 		HandlerMethod result = mapping.getHandlerInternal(new MockHttpServletRequest("GET", "/foo"));
 		assertEquals(method1, result.getMethod());
@@ -92,7 +93,7 @@ public class HandlerMethodMappingTests {
 	}
 
 	@Test
-	public void testDetectHandlerMethodsInAncestorContexts() {
+	public void detectHandlerMethodsInAncestorContexts() {
 		StaticApplicationContext cxt = new StaticApplicationContext();
 		cxt.registerSingleton("myHandler", MyHandler.class);
 
@@ -108,6 +109,18 @@ public class HandlerMethodMappingTests {
 		mapping2.afterPropertiesSet();
 
 		assertEquals(2, mapping2.getHandlerMethods().size());
+	}
+
+	@Test
+	public void unregister() throws Exception {
+		String key = "foo";
+		mapping.registerHandlerMethod(handler, method1, key);
+
+		HandlerMethod handlerMethod = mapping.getHandlerInternal(new MockHttpServletRequest("GET", key));
+		assertEquals(method1, handlerMethod.getMethod());
+
+		mapping.unregisterHandlerMethod(handlerMethod);
+		assertNull(mapping.getHandlerInternal(new MockHttpServletRequest("GET", key)));
 	}
 
 
