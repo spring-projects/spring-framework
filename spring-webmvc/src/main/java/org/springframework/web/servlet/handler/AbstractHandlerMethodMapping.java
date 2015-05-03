@@ -83,7 +83,7 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 
 	private final MultiValueMap<String, HandlerMethod> nameMap = new LinkedMultiValueMap<String, HandlerMethod>();
 
-	private final Map<Method, CorsConfiguration> corsConfigurations = new LinkedHashMap<Method, CorsConfiguration>();
+	private final Map<Method, CorsConfiguration> corsMap = new LinkedHashMap<Method, CorsConfiguration>();
 
 
 	/**
@@ -111,20 +111,6 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 	 */
 	public Map<T, HandlerMethod> getHandlerMethods() {
 		return Collections.unmodifiableMap(this.handlerMethods);
-	}
-
-	protected Map<Method, CorsConfiguration> getCorsConfigurations() {
-		return corsConfigurations;
-	}
-
-	@Override
-	protected CorsConfiguration getCorsConfiguration(Object handler, HttpServletRequest request) {
-		CorsConfiguration config = super.getCorsConfiguration(handler, request);
-		if (config == null && handler instanceof HandlerMethod) {
-			HandlerMethod handlerMethod = (HandlerMethod)handler;
-			config = this.getCorsConfigurations().get(handlerMethod.getMethod());
-		}
-		return config;
 	}
 
 	/**
@@ -159,10 +145,9 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 				BeanFactoryUtils.beanNamesForTypeIncludingAncestors(getApplicationContext(), Object.class) :
 				getApplicationContext().getBeanNamesForType(Object.class));
 
-		for (String beanName : beanNames) {
-			if (!beanName.startsWith(SCOPED_TARGET_NAME_PREFIX) &&
-					isHandler(getApplicationContext().getType(beanName))){
-				detectHandlerMethods(beanName);
+		for (String name : beanNames) {
+			if (!name.startsWith(SCOPED_TARGET_NAME_PREFIX) && isHandler(getApplicationContext().getType(name))) {
+				detectHandlerMethods(name);
 			}
 		}
 		registerMultiMatchCorsConfiguration();
@@ -175,7 +160,7 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 		config.addAllowedMethod("*");
 		config.addAllowedHeader("*");
 		config.setAllowCredentials(true);
-		this.corsConfigurations.put(PREFLIGHT_MULTI_MATCH_HANDLER_METHOD.getMethod(), config);
+		this.corsMap.put(PREFLIGHT_MULTI_MATCH_HANDLER_METHOD.getMethod(), config);
 	}
 
 	/**
@@ -262,7 +247,7 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 
 		CorsConfiguration config  = initCorsConfiguration(handler, method, mapping);
 		if (config != null) {
-			this.corsConfigurations.put(method, config);
+			this.corsMap.put(method, config);
 		}
 	}
 
@@ -439,6 +424,14 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 	protected HandlerMethod handleNoMatch(Set<T> mappings, String lookupPath, HttpServletRequest request)
 			throws Exception {
 
+		return null;
+	}
+
+	@Override
+	protected CorsConfiguration getCorsConfiguration(Object handler, HttpServletRequest request) {
+		if (handler instanceof HandlerMethod) {
+			this.corsMap.get(((HandlerMethod) handler).getMethod());
+		}
 		return null;
 	}
 

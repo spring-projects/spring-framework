@@ -390,10 +390,15 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 
 	/**
 	 * Retrieve the CORS configuration for the given handler.
+	 * @param handler the handler to check (never {@code null}).
+	 * @param request the current request.
+	 * @return the CORS configuration for the handler or {@code null}.
 	 */
 	protected CorsConfiguration getCorsConfiguration(Object handler, HttpServletRequest request) {
-		handler = (handler instanceof HandlerExecutionChain) ? ((HandlerExecutionChain) handler).getHandler() : handler;
-		if (handler != null && handler instanceof CorsConfigurationSource) {
+		if (handler instanceof HandlerExecutionChain) {
+			handler = ((HandlerExecutionChain) handler).getHandler();
+		}
+		if (handler instanceof CorsConfigurationSource) {
 			return ((CorsConfigurationSource) handler).getCorsConfiguration(request);
 		}
 		return null;
