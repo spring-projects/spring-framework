@@ -62,14 +62,14 @@ public class HandlerMethodMappingTests {
 
 	@Test(expected = IllegalStateException.class)
 	public void registerDuplicates() {
-		mapping.registerHandlerMethod(handler, method1, "foo");
-		mapping.registerHandlerMethod(handler, method2, "foo");
+		mapping.registerMapping("foo", handler, method1);
+		mapping.registerMapping("foo", handler, method2);
 	}
 
 	@Test
 	public void directMatch() throws Exception {
 		String key = "foo";
-		mapping.registerHandlerMethod(handler, method1, key);
+		mapping.registerMapping(key, handler, method1);
 
 		HandlerMethod result = mapping.getHandlerInternal(new MockHttpServletRequest("GET", key));
 		assertEquals(method1, result.getMethod());
@@ -77,8 +77,8 @@ public class HandlerMethodMappingTests {
 
 	@Test
 	public void patternMatch() throws Exception {
-		mapping.registerHandlerMethod(handler, method1, "/fo*");
-		mapping.registerHandlerMethod(handler, method2, "/f*");
+		mapping.registerMapping("/fo*", handler, method1);
+		mapping.registerMapping("/f*", handler, method2);
 
 		HandlerMethod result = mapping.getHandlerInternal(new MockHttpServletRequest("GET", "/foo"));
 		assertEquals(method1, result.getMethod());
@@ -86,8 +86,8 @@ public class HandlerMethodMappingTests {
 
 	@Test(expected = IllegalStateException.class)
 	public void ambiguousMatch() throws Exception {
-		mapping.registerHandlerMethod(handler, method1, "/f?o");
-		mapping.registerHandlerMethod(handler, method2, "/fo?");
+		mapping.registerMapping("/f?o", handler, method1);
+		mapping.registerMapping("/fo?", handler, method2);
 
 		mapping.getHandlerInternal(new MockHttpServletRequest("GET", "/foo"));
 	}
@@ -114,12 +114,12 @@ public class HandlerMethodMappingTests {
 	@Test
 	public void unregister() throws Exception {
 		String key = "foo";
-		mapping.registerHandlerMethod(handler, method1, key);
+		mapping.registerMapping(key, handler, method1);
 
 		HandlerMethod handlerMethod = mapping.getHandlerInternal(new MockHttpServletRequest("GET", key));
 		assertEquals(method1, handlerMethod.getMethod());
 
-		mapping.unregisterHandlerMethod(handlerMethod);
+		mapping.unregisterMapping(key);
 		assertNull(mapping.getHandlerInternal(new MockHttpServletRequest("GET", key)));
 	}
 
@@ -159,6 +159,7 @@ public class HandlerMethodMappingTests {
 		}
 	}
 
+	@SuppressWarnings("unused")
 	@Controller
 	static class MyHandler {
 

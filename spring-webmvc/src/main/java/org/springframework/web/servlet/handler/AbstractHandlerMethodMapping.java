@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.IdentityHashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -227,26 +228,21 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 	protected abstract T getMappingForMethod(Method method, Class<?> handlerType);
 
 	/**
-	 * Register a handler method and its unique mapping.
-	 * <p>Invoked at startup for each detected handler method. May also be
-	 * invoked at runtime after initialization is complete.
+	 * Register a handler method and its unique mapping. Invoked at startup for
+	 * each detected handler method.
 	 * @param handler the bean name of the handler or the handler instance
 	 * @param method the method to register
 	 * @param mapping the mapping conditions associated with the handler method
 	 * @throws IllegalStateException if another method was already registered
 	 * under the same mapping
+	 * @deprecated as of 4.2 you can invoke the public methods
+	 * {@link #registerMapping(Object, Object, Method)} and
+	 * {@link #unregisterMapping(Object)} during initialization or at runtime,
+	 * i.e. after initialization is complete.
 	 */
-	public void registerHandlerMethod(Object handler, Method method, T mapping) {
-		this.mappingRegistry.register(handler, method, mapping);
-	}
-
-	/**
-	 * Un-register a handler method.
-	 * <p>This method may be invoked at runtime after initialization has completed.
-	 * @param handlerMethod the handler method to be unregistered
-	 */
-	public void unregisterHandlerMethod(HandlerMethod handlerMethod) {
-		this.mappingRegistry.unregister(handlerMethod);
+	@Deprecated
+	protected void registerHandlerMethod(Object handler, Method method, T mapping) {
+		this.mappingRegistry.register(mapping, handler, method);
 	}
 
 	/**
@@ -287,6 +283,25 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 	protected void handlerMethodsInitialized(Map<T, HandlerMethod> handlerMethods) {
 	}
 
+	/**
+	 * Register the given mapping.
+	 * <p>This method may be invoked at runtime after initialization has completed.
+	 * @param mapping the mapping for the handler method
+	 * @param handler the handler
+	 * @param method the method
+	 */
+	public void registerMapping(T mapping, Object handler, Method method) {
+		this.mappingRegistry.register(mapping, handler, method);
+	}
+
+	/**
+	 * Un-register the given mapping.
+	 * <p>This method may be invoked at runtime after initialization has completed.
+	 * @param mapping the mapping to unregister
+	 */
+	public void unregisterMapping(T mapping) {
+		this.mappingRegistry.unregister(mapping);
+	}
 
 	/**
 	 * Look up a handler method for the given request.
@@ -437,8 +452,10 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 		private final Map<String, List<HandlerMethod>> mappingNameLookup =
 				new ConcurrentHashMap<String, List<HandlerMethod>>();
 
-		private final Map<Method, MappingDefinition<T>> methodLookup =
-				new ConcurrentHashMap<Method, MappingDefinition<T>>();
+		private final Map<T, MappingDefinition<T>> definitionMap = new HashMap<T, MappingDefinition<T>>();
+
+		private final Map<Method, CorsConfiguration> corsLookup =
+				new ConcurrentHashMap<Method, CorsConfiguration>();
 
 
 		private final ReentrantReadWriteLock readWriteLock = new ReentrantReadWriteLock();
@@ -480,8 +497,7 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 		 */
 		public CorsConfiguration getCorsConfiguration(HandlerMethod handlerMethod) {
 			Method method = handlerMethod.getMethod();
-			MappingDefinition<T> definition = this.methodLookup.get(method);
-			return (definition != null ? definition.getCorsConfiguration() : null);
+			return this.corsLookup.get(method);
 		}
 
 		/**
@@ -499,7 +515,7 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 		}
 
 
-		public void register(Object handler, Method method, T mapping) {
+		public void register(T mapping, Object handler, Method method) {
 
 			this.readWriteLock.writeLock().lock();
 			try {
@@ -523,8 +539,11 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 				}
 
 				CorsConfiguration corsConfig = initCorsConfiguration(handler, method, mapping);
+				if (corsConfig != null) {
+					this.corsLookup.put(method, corsConfig);
+				}
 
-				this.methodLookup.put(method,
+				this.definitionMap.put(mapping,
 						new MappingDefinition<T>(mapping, handlerMethod, directUrls, name, corsConfig));
 			}
 			finally {
@@ -539,11 +558,6 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 						"Ambiguous mapping. Cannot map '" +	newHandlerMethod.getBean() + "' method \n" +
 								newHandlerMethod + "\nto " +	mapping + ": There is already '" +
 								handlerMethod.getBean() + "' bean method\n" + handlerMethod + " mapped.");
-			}
-			MappingDefinition<T> definition = this.methodLookup.get(newHandlerMethod.getMethod());
-			if (definition != null) {
-				throw new IllegalStateException("Cannot map " + newHandlerMethod.getMethod() +
-						"\nto " + mapping + ".\n It is already mapped to " + definition.getMapping());
 			}
 		}
 
@@ -585,10 +599,10 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 			}
 		}
 
-		public void unregister(HandlerMethod handlerMethod) {
+		public void unregister(T mapping) {
 			this.readWriteLock.writeLock().lock();
 			try {
-				MappingDefinition<T> definition = this.methodLookup.remove(handlerMethod.getMethod());
+				MappingDefinition<T> definition = this.definitionMap.remove(mapping);
 				if (definition == null) {
 					return;
 				}
@@ -606,6 +620,8 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 				}
 
 				removeMappingName(definition);
+
+				this.corsLookup.remove(definition.getHandlerMethod().getMethod());
 			}
 			finally {
 				this.readWriteLock.writeLock().unlock();
