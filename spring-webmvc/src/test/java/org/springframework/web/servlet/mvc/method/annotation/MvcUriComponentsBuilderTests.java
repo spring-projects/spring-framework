@@ -16,6 +16,10 @@
 
 package org.springframework.web.servlet.mvc.method.annotation;
 
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
+import static org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder.*;
+
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -25,13 +29,10 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.hamcrest.Matchers;
-
 import org.joda.time.DateTime;
 import org.joda.time.format.ISODateTimeFormat;
-
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import org.springframework.context.annotation.Bean;
@@ -57,10 +58,6 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
-import static org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder.*;
-
 /**
  * Unit tests for {@link org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder}.
  *
@@ -69,6 +66,7 @@ import static org.springframework.web.servlet.mvc.method.annotation.MvcUriCompon
  * @author Rossen Stoyanchev
  * @author Sam Brannen
  */
+@SuppressWarnings("unused")
 public class MvcUriComponentsBuilderTests {
 
 	private final MockHttpServletRequest request = new MockHttpServletRequest();
@@ -172,12 +170,12 @@ public class MvcUriComponentsBuilderTests {
 		assertThat(queryParams.get("offset"), contains("10"));
 	}
 
+	// SPR-12977
+
 	@Test
-	// TODO [SPR-12977] Enable fromMethodNameWithBridgedMethod() test.
-	@Ignore("Disabled until SPR-12977 is resolved")
 	public void fromMethodNameWithBridgedMethod() throws Exception {
-		UriComponents uriComponents = fromMethodName(PersonCrudController.class, "get", new Long(42)).build();
-		assertThat(uriComponents.toUriString(), is("http://localhost/get/42"));
+		UriComponents uriComponents = fromMethodName(PersonCrudController.class, "get", (long) 42).build();
+		assertThat(uriComponents.toUriString(), is("http://localhost/42"));
 	}
 
 	// SPR-11391
