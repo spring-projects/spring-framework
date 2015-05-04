@@ -81,6 +81,7 @@ import org.springframework.web.util.UriComponentsBuilder;
  *
  * @author Oliver Gierke
  * @author Rossen Stoyanchev
+ * @author Sam Brannen
  * @since 4.0
  */
 public class MvcUriComponentsBuilder {
@@ -218,11 +219,11 @@ public class MvcUriComponentsBuilder {
 	 * // Inline style with static import of "MvcUriComponentsBuilder.on"
 	 *
 	 * MvcUriComponentsBuilder.fromMethodCall(
-	 * 		on(CustomerController.class).showAddresses("US")).buildAndExpand(1);
+	 * 		on(AddressController.class).getAddressesForCountry("US")).buildAndExpand(1);
 	 *
 	 * // Longer form useful for repeated invocation (and void controller methods)
 	 *
-	 * CustomerController controller = MvcUriComponentsBuilder.on(CustomController.class);
+	 * AddressController controller = MvcUriComponentsBuilder.on(AddressController.class);
 	 * controller.addAddress(null);
 	 * builder = MvcUriComponentsBuilder.fromMethodCall(controller);
 	 * controller.getAddressesForCountry("US")
@@ -417,15 +418,17 @@ public class MvcUriComponentsBuilder {
 		for (Method method : controllerType.getDeclaredMethods()) {
 			if (method.getName().equals(methodName) && method.getParameterTypes().length == args.length) {
 				if (match != null) {
-					throw new IllegalArgumentException("Found two methods named '" + methodName + "' having " +
-							Arrays.asList(args) + " arguments, controller " + controllerType.getName());
+					throw new IllegalArgumentException(String.format(
+						"Found two methods named '%s' accepting arguments %s in controller %s: [%s] and [%s]",
+						methodName, Arrays.asList(args), controllerType.getName(), match.toGenericString(),
+						method.toGenericString()));
 				}
 				match = method;
 			}
 		}
 		if (match == null) {
-			throw new IllegalArgumentException("No method '" + methodName + "' with " + args.length +
-					" parameters found in " + controllerType.getName());
+			throw new IllegalArgumentException("No method named '" + methodName + "' with " + args.length +
+					" arguments found in controller " + controllerType.getName());
 		}
 		return match;
 	}
