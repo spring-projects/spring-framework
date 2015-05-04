@@ -16,10 +16,6 @@
 
 package org.springframework.web.servlet.mvc.method.annotation;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
-import static org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder.*;
-
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -29,10 +25,13 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.hamcrest.Matchers;
+
 import org.joda.time.DateTime;
 import org.joda.time.format.ISODateTimeFormat;
+
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import org.springframework.context.annotation.Bean;
@@ -58,21 +57,25 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
+import static org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder.*;
+
 /**
  * Unit tests for {@link org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder}.
  *
  * @author Oliver Gierke
  * @author Dietrich Schulten
  * @author Rossen Stoyanchev
+ * @author Sam Brannen
  */
 public class MvcUriComponentsBuilderTests {
 
-	private MockHttpServletRequest request;
+	private final MockHttpServletRequest request = new MockHttpServletRequest();
 
 
 	@Before
 	public void setUp() {
-		this.request = new MockHttpServletRequest();
 		RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(this.request));
 	}
 
@@ -167,6 +170,14 @@ public class MvcUriComponentsBuilderTests {
 		MultiValueMap<String, String> queryParams = uriComponents.getQueryParams();
 		assertThat(queryParams.get("limit"), contains("5"));
 		assertThat(queryParams.get("offset"), contains("10"));
+	}
+
+	@Test
+	// TODO [SPR-12977] Enable fromMethodNameWithBridgedMethod() test.
+	@Ignore("Disabled until SPR-12977 is resolved")
+	public void fromMethodNameWithBridgedMethod() throws Exception {
+		UriComponents uriComponents = fromMethodName(PersonCrudController.class, "get", new Long(42)).build();
+		assertThat(uriComponents.toUriString(), is("http://localhost/get/42"));
 	}
 
 	// SPR-11391
@@ -356,7 +367,6 @@ public class MvcUriComponentsBuilderTests {
 
 	}
 
-	@SuppressWarnings("unused")
 	@RequestMapping("/people/{id}/addresses")
 	static class PersonsAddressesController {
 
@@ -371,7 +381,6 @@ public class MvcUriComponentsBuilderTests {
 
 	}
 
-	@SuppressWarnings("unused")
 	class UnmappedController {
 
 		@RequestMapping
@@ -379,7 +388,6 @@ public class MvcUriComponentsBuilderTests {
 		}
 	}
 
-	@SuppressWarnings("unused")
 	@RequestMapping("/something")
 	static class ControllerWithMethods {
 
@@ -412,7 +420,6 @@ public class MvcUriComponentsBuilderTests {
 		}
 	}
 
-	@SuppressWarnings("unused")
 	@RequestMapping("/user/{userId}/contacts")
 	static class UserContactController {
 
@@ -422,7 +429,19 @@ public class MvcUriComponentsBuilderTests {
 		}
 	}
 
-	@SuppressWarnings("unused")
+	static abstract class AbstractCrudController<T, ID> {
+
+		abstract T get(ID id);
+	}
+
+	static class PersonCrudController extends AbstractCrudController<Person, Long> {
+
+		@RequestMapping(path = "/{id}", method = RequestMethod.GET)
+		public Person get(@PathVariable Long id) {
+			return new Person();
+		}
+	}
+
 	@Controller
 	static class MetaAnnotationController {
 
