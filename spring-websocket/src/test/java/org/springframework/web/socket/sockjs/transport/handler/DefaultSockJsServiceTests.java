@@ -16,11 +16,13 @@
 
 package org.springframework.web.socket.sockjs.transport.handler;
 
+import static org.junit.Assert.*;
+import static org.mockito.BDDMockito.*;
+
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map;
 
-import org.hamcrest.Matchers;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -38,9 +40,6 @@ import org.springframework.web.socket.sockjs.transport.TransportHandlingSockJsSe
 import org.springframework.web.socket.sockjs.transport.TransportType;
 import org.springframework.web.socket.sockjs.transport.session.StubSockJsServiceConfig;
 import org.springframework.web.socket.sockjs.transport.session.TestSockJsSession;
-
-import static org.junit.Assert.*;
-import static org.mockito.BDDMockito.*;
 
 /**
  * Test fixture for {@link org.springframework.web.socket.sockjs.transport.handler.DefaultSockJsService}.
@@ -123,24 +122,8 @@ public class DefaultSockJsServiceTests extends AbstractHttpRequestTests {
 	}
 
 	@Test(expected = IllegalArgumentException.class)
-	public void nullAllowedOriginList() {
+	public void invalidInput() {
 		this.service.setAllowedOrigins(null);
-	}
-
-	@Test
-	public void emptyAllowedOriginList() {
-		this.service.setAllowedOrigins(Arrays.asList());
-		assertThat(this.service.getAllowedOrigins(), Matchers.empty());
-	}
-
-	@Test(expected = IllegalArgumentException.class)
-	public void invalidAllowedOrigin() {
-		this.service.setAllowedOrigins(Arrays.asList("domain.com"));
-	}
-
-	@Test
-	public void validAllowedOrigins() {
-		this.service.setAllowedOrigins(Arrays.asList("http://domain.com", "https://domain.com", "*"));
 	}
 
 	@Test

@@ -16,13 +16,14 @@
 
 package org.springframework.web.socket.server.support;
 
+import static org.junit.Assert.*;
+
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentSkipListSet;
 
-import static org.junit.Assert.*;
 import org.junit.Test;
 import org.mockito.Mockito;
 
@@ -38,23 +39,8 @@ import org.springframework.web.socket.WebSocketHandler;
 public class OriginHandshakeInterceptorTests extends AbstractHttpRequestTests {
 
 	@Test(expected = IllegalArgumentException.class)
-	public void nullAllowedOriginList() {
+	public void invalidInput() {
 		new OriginHandshakeInterceptor(null);
-	}
-
-	@Test(expected = IllegalArgumentException.class)
-	public void invalidAllowedOrigin() {
-		new OriginHandshakeInterceptor(Arrays.asList("domain.com"));
-	}
-
-	@Test
-	public void emtpyAllowedOriginList() {
-		new OriginHandshakeInterceptor(Arrays.asList());
-	}
-
-	@Test
-	public void validAllowedOrigins() {
-		new OriginHandshakeInterceptor(Arrays.asList("http://domain.com", "https://domain.com", "*"));
 	}
 
 	@Test

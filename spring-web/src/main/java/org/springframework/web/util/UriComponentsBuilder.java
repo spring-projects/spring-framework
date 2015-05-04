@@ -272,7 +272,7 @@ public class UriComponentsBuilder implements Cloneable {
 	 * @return the URI components of the URI
 	 * @since 4.1.5
 	 */
-	public static UriComponentsBuilder fromHttpRequest(HttpRequest request) {
+	public static UriComponentsBuilder 	fromHttpRequest(HttpRequest request) {
 		URI uri = request.getURI();
 		UriComponentsBuilder builder = UriComponentsBuilder.fromUri(uri);
 
@@ -316,6 +316,27 @@ public class UriComponentsBuilder implements Cloneable {
 		return builder;
 	}
 
+	/**
+	 * Create an instance by parsing the "origin" header of an HTTP request.
+	 */
+	public static UriComponentsBuilder fromOriginHeader(String origin) {
+		UriComponentsBuilder builder = UriComponentsBuilder.newInstance();
+		if (StringUtils.hasText(origin)) {
+			int schemaIdx = origin.indexOf("://");
+			String schema = (schemaIdx != -1 ? origin.substring(0, schemaIdx) : "http");
+			builder.scheme(schema);
+			String hostString = (schemaIdx != -1 ? origin.substring(schemaIdx + 3) : origin);
+			if (hostString.contains(":")) {
+				String[] hostAndPort = StringUtils.split(hostString, ":");
+				builder.host(hostAndPort[0]);
+				builder.port(Integer.parseInt(hostAndPort[1]));
+			}
+			else {
+				builder.host(hostString);
+			}
+		}
+		return builder;
+	}
 
 	// build methods
 

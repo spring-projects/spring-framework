@@ -289,14 +289,6 @@ public abstract class AbstractSockJsService implements SockJsService {
 	 */
 	public void setAllowedOrigins(List<String> allowedOrigins) {
 		Assert.notNull(allowedOrigins, "Allowed origin List must not be null");
-		for (String allowedOrigin : allowedOrigins) {
-			Assert.isTrue(
-					allowedOrigin.equals("*") || allowedOrigin.startsWith("http://") ||
-							allowedOrigin.startsWith("https://"),
-					"Invalid allowed origin provided: \"" +
-							allowedOrigin +
-							"\". It must start with \"http://\", \"https://\" or be \"*\"");
-		}
 		this.allowedOrigins.clear();
 		this.allowedOrigins.addAll(allowedOrigins);
 	}

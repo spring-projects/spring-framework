@@ -76,11 +76,6 @@ public class OriginHandshakeInterceptor implements HandshakeInterceptor {
 	 */
 	public void setAllowedOrigins(Collection<String> allowedOrigins) {
 		Assert.notNull(allowedOrigins, "Allowed origin Collection must not be null");
-		for (String allowedOrigin : allowedOrigins) {
-			Assert.isTrue(allowedOrigin.equals("*") || allowedOrigin.startsWith("http://") ||
-					allowedOrigin.startsWith("https://"), "Invalid allowed origin provided: \"" +
-					allowedOrigin + "\". It must start with \"http://\", \"https://\" or be \"*\"");
-		}
 		this.allowedOrigins.clear();
 		this.allowedOrigins.addAll(allowedOrigins);
 	}
