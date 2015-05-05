@@ -48,7 +48,7 @@ public class CorsUtilsTests {
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		request.setMethod("OPTIONS");
 		request.addHeader(HttpHeaders.ORIGIN, "http://domain.com");
-		request.addHeader(CorsUtils.ACCESS_CONTROL_REQUEST_METHOD, "GET");
+		request.addHeader(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, "GET");
 		assertTrue(CorsUtils.isPreFlightRequest(request));
 	}
 
@@ -62,7 +62,7 @@ public class CorsUtilsTests {
 		assertFalse(CorsUtils.isPreFlightRequest(request));
 
 		request = new MockHttpServletRequest();
-		request.addHeader(CorsUtils.ACCESS_CONTROL_REQUEST_METHOD, "GET");
+		request.addHeader(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, "GET");
 		assertFalse(CorsUtils.isPreFlightRequest(request));
 	}
 

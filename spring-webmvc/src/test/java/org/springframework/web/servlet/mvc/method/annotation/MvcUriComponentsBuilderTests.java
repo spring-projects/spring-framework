@@ -64,15 +64,16 @@ import org.springframework.web.util.UriComponentsBuilder;
  * @author Oliver Gierke
  * @author Dietrich Schulten
  * @author Rossen Stoyanchev
+ * @author Sam Brannen
  */
+@SuppressWarnings("unused")
 public class MvcUriComponentsBuilderTests {
 
-	private MockHttpServletRequest request;
+	private final MockHttpServletRequest request = new MockHttpServletRequest();
 
 
 	@Before
 	public void setUp() {
-		this.request = new MockHttpServletRequest();
 		RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(this.request));
 	}
 
@@ -167,6 +168,14 @@ public class MvcUriComponentsBuilderTests {
 		MultiValueMap<String, String> queryParams = uriComponents.getQueryParams();
 		assertThat(queryParams.get("limit"), contains("5"));
 		assertThat(queryParams.get("offset"), contains("10"));
+	}
+
+	// SPR-12977
+
+	@Test
+	public void fromMethodNameWithBridgedMethod() throws Exception {
+		UriComponents uriComponents = fromMethodName(PersonCrudController.class, "get", (long) 42).build();
+		assertThat(uriComponents.toUriString(), is("http://localhost/42"));
 	}
 
 	// SPR-11391
@@ -356,7 +365,6 @@ public class MvcUriComponentsBuilderTests {
 
 	}
 
-	@SuppressWarnings("unused")
 	@RequestMapping("/people/{id}/addresses")
 	static class PersonsAddressesController {
 
@@ -371,7 +379,6 @@ public class MvcUriComponentsBuilderTests {
 
 	}
 
-	@SuppressWarnings("unused")
 	class UnmappedController {
 
 		@RequestMapping
@@ -379,7 +386,6 @@ public class MvcUriComponentsBuilderTests {
 		}
 	}
 
-	@SuppressWarnings("unused")
 	@RequestMapping("/something")
 	static class ControllerWithMethods {
 
@@ -412,7 +418,6 @@ public class MvcUriComponentsBuilderTests {
 		}
 	}
 
-	@SuppressWarnings("unused")
 	@RequestMapping("/user/{userId}/contacts")
 	static class UserContactController {
 
@@ -422,7 +427,19 @@ public class MvcUriComponentsBuilderTests {
 		}
 	}
 
-	@SuppressWarnings("unused")
+	static abstract class AbstractCrudController<T, ID> {
+
+		abstract T get(ID id);
+	}
+
+	static class PersonCrudController extends AbstractCrudController<Person, Long> {
+
+		@RequestMapping(path = "/{id}", method = RequestMethod.GET)
+		public Person get(@PathVariable Long id) {
+			return new Person();
+		}
+	}
+
 	@Controller
 	static class MetaAnnotationController {
 

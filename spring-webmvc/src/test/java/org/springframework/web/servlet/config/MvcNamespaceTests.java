@@ -800,11 +800,10 @@ public class MvcNamespaceTests {
 
 		ScriptTemplateConfigurer scriptTemplateConfigurer = appContext.getBean(ScriptTemplateConfigurer.class);
 		assertNotNull(scriptTemplateConfigurer);
-		assertEquals("Mustache", scriptTemplateConfigurer.getRenderObject());
 		assertEquals("render", scriptTemplateConfigurer.getRenderFunction());
 		assertEquals(StandardCharsets.ISO_8859_1, scriptTemplateConfigurer.getCharset());
 		assertEquals("classpath:", scriptTemplateConfigurer.getResourceLoaderPath());
-		String[] scripts = { "/META-INF/resources/webjars/mustachejs/0.8.2/mustache.js" };
+		String[] scripts = { "org/springframework/web/servlet/view/script/nashorn/render.js" };
 		accessor = new DirectFieldAccessor(scriptTemplateConfigurer);
 		assertArrayEquals(scripts, (String[]) accessor.getPropertyValue("scripts"));
 	}

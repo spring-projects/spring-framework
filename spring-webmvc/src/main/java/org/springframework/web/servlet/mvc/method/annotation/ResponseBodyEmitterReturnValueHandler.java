@@ -19,6 +19,8 @@ package org.springframework.web.servlet.mvc.method.annotation;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.List;
+
+import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.logging.Log;
@@ -37,6 +39,7 @@ import org.springframework.util.Assert;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.async.DeferredResult;
 import org.springframework.web.context.request.async.WebAsyncUtils;
+import org.springframework.web.filter.ShallowEtagHeaderFilter;
 import org.springframework.web.method.support.HandlerMethodReturnValueHandler;
 import org.springframework.web.method.support.ModelAndViewContainer;
 
@@ -94,6 +97,9 @@ public class ResponseBodyEmitterReturnValueHandler implements HandlerMethodRetur
 				return;
 			}
 		}
+
+		ServletRequest request = webRequest.getNativeRequest(ServletRequest.class);
+		ShallowEtagHeaderFilter.disableContentCaching(request);
 
 		Assert.isInstanceOf(ResponseBodyEmitter.class, returnValue);
 		ResponseBodyEmitter emitter = (ResponseBodyEmitter) returnValue;

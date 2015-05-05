@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,7 @@ import org.springframework.util.Assert;
  * delegates to the resolver chain and saves the result in the cache.
  *
  * @author Rossen Stoyanchev
+ * @author Brian Clozel
  * @since 4.1
  */
 public class CachingResourceResolver extends AbstractResourceResolver {
@@ -61,7 +62,7 @@ public class CachingResourceResolver extends AbstractResourceResolver {
 	protected Resource resolveResourceInternal(HttpServletRequest request, String requestPath,
 			List<? extends Resource> locations, ResourceResolverChain chain) {
 
-		String key = RESOLVED_RESOURCE_CACHE_KEY_PREFIX + requestPath;
+		String key = computeKey(request, requestPath);
 		Resource resource = this.cache.get(key, Resource.class);
 
 		if (resource != null) {
@@ -80,6 +81,18 @@ public class CachingResourceResolver extends AbstractResourceResolver {
 		}
 
 		return resource;
+	}
+
+	protected String computeKey(HttpServletRequest request, String requestPath) {
+		StringBuilder key = new StringBuilder(RESOLVED_RESOURCE_CACHE_KEY_PREFIX);
+		key.append(requestPath);
+		if(request != null) {
+			String encoding = request.getHeader("Accept-Encoding");
+			if(encoding != null && encoding.contains("gzip")) {
+				key.append("+encoding=gzip");
+			}
+		}
+		return key.toString();
 	}
 
 	@Override

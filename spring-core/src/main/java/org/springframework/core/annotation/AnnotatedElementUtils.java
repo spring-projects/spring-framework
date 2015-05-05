@@ -176,9 +176,10 @@ public class AnnotatedElementUtils {
 	 * in the annotation hierarchy of the supplied {@link AnnotatedElement},
 	 * and merge the results into an {@link AnnotationAttributes} map.
 	 *
-	 * <p>Delegates to
-	 * {@link #findAnnotationAttributes(AnnotatedElement, String, boolean, boolean, boolean, boolean, boolean, boolean)},
-	 * supplying {@code true} for all {@code search*} flags.
+	 * <p>If the annotated element is a class, this algorithm will additionally
+	 * search on interfaces and superclasses.
+	 * <p>If the annotated element is a method, this algorithm will additionally
+	 * search on methods in interfaces and superclasses.
 	 *
 	 * @param element the annotated element; never {@code null}
 	 * @param annotationType the annotation type to find; never {@code null}
@@ -188,7 +189,7 @@ public class AnnotatedElementUtils {
 	public static AnnotationAttributes findAnnotationAttributes(AnnotatedElement element,
 			Class<? extends Annotation> annotationType) {
 		Assert.notNull(annotationType, "annotationType must not be null");
-		return findAnnotationAttributes(element, annotationType.getName(), true, true, true, true, false, false);
+		return findAnnotationAttributes(element, annotationType.getName());
 	}
 
 	/**
@@ -196,9 +197,10 @@ public class AnnotatedElementUtils {
 	 * in the annotation hierarchy of the supplied {@link AnnotatedElement},
 	 * and merge the results into an {@link AnnotationAttributes} map.
 	 *
-	 * <p>Delegates to
-	 * {@link #findAnnotationAttributes(AnnotatedElement, String, boolean, boolean, boolean, boolean, boolean, boolean)},
-	 * supplying {@code true} for all {@code search*} flags.
+	 * <p>If the annotated element is a class, this algorithm will additionally
+	 * search on interfaces and superclasses.
+	 * <p>If the annotated element is a method, this algorithm will additionally
+	 * search on methods in interfaces and superclasses.
 	 *
 	 * @param element the annotated element; never {@code null}
 	 * @param annotationType the fully qualified class name of the annotation
@@ -207,7 +209,34 @@ public class AnnotatedElementUtils {
 	 * not found
 	 */
 	public static AnnotationAttributes findAnnotationAttributes(AnnotatedElement element, String annotationType) {
-		return findAnnotationAttributes(element, annotationType, true, true, true, true, false, false);
+		return findAnnotationAttributes(element, annotationType, false, false);
+	}
+
+	/**
+	 * <em>Find</em> annotation attributes of the specified {@code annotationType}
+	 * in the annotation hierarchy of the supplied {@link AnnotatedElement},
+	 * and merge the results into an {@link AnnotationAttributes} map.
+	 *
+	 * <p>If the annotated element is a class, this algorithm will additionally
+	 * search on interfaces and superclasses.
+	 * <p>If the annotated element is a method, this algorithm will additionally
+	 * search on methods in interfaces and superclasses.
+	 *
+	 * @param element the annotated element; never {@code null}
+	 * @param annotationType the fully qualified class name of the annotation
+	 * type to find; never {@code null} or empty
+	 * @param classValuesAsString whether to convert Class references into
+	 * Strings or to preserve them as Class references
+	 * @param nestedAnnotationsAsMap whether to convert nested Annotation
+	 * instances into {@link AnnotationAttributes} maps or to preserve them
+	 * as Annotation instances
+	 * @return the merged {@code AnnotationAttributes}, or {@code null} if
+	 * not found
+	 */
+	public static AnnotationAttributes findAnnotationAttributes(AnnotatedElement element, String annotationType,
+			boolean classValuesAsString, boolean nestedAnnotationsAsMap) {
+		return findAnnotationAttributes(element, annotationType, true, true, true, true, classValuesAsString,
+			nestedAnnotationsAsMap);
 	}
 
 	/**
@@ -234,7 +263,7 @@ public class AnnotatedElementUtils {
 	 * @return the merged {@code AnnotationAttributes}, or {@code null} if
 	 * not found
 	 */
-	public static AnnotationAttributes findAnnotationAttributes(AnnotatedElement element, String annotationType,
+	private static AnnotationAttributes findAnnotationAttributes(AnnotatedElement element, String annotationType,
 			boolean searchOnInterfaces, boolean searchOnSuperclasses, boolean searchOnMethodsInInterfaces,
 			boolean searchOnMethodsInSuperclasses, boolean classValuesAsString, boolean nestedAnnotationsAsMap) {
 
@@ -668,6 +697,14 @@ public class AnnotatedElementUtils {
 		}
 	}
 
+	/**
+	 * {@link Processor} that gets the {@code AnnotationAttributes} for the
+	 * target annotation during the {@link #process} phase and then merges
+	 * annotation attributes from lower levels in the annotation hierarchy
+	 * during the {@link #postProcess} phase.
+	 * @see AnnotationUtils#getAnnotationAttributes(Annotation)
+	 * @since 4.2
+	 */
 	private static class MergeAnnotationAttributesProcessor implements Processor<AnnotationAttributes> {
 
 		private final boolean classValuesAsString;

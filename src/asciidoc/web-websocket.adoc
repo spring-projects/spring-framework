@@ -1091,7 +1091,7 @@ The Spring Framework provides support for using STOMP over WebSocket through
 the +spring-messaging+ and +spring-websocket+ modules. It's easy to enable it.
 
 Here is an example of configuring a STOMP WebSocket endpoint with SockJS fallback
-options. The endpoint is available for clients to connect to a URL path `/app/portfolio`:
+options. The endpoint is available for clients to connect to a URL path `/portfolio`:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]

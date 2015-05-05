@@ -25,6 +25,7 @@ import org.junit.Test;
 import org.springframework.beans.DirectFieldAccessor;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.http.HttpHeaders;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.context.support.StaticWebApplicationContext;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.mock.web.test.MockHttpServletRequest;
@@ -32,7 +33,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.cors.CorsUtils;
 import org.springframework.web.servlet.HandlerExecutionChain;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.mvc.condition.ConsumesRequestCondition;
@@ -102,9 +102,9 @@ public class CrossOriginTests {
 		assertNotNull(config);
 		assertArrayEquals(new String[]{"GET"}, config.getAllowedMethods().toArray());
 		assertArrayEquals(new String[]{"*"}, config.getAllowedOrigins().toArray());
-		assertTrue(config.isAllowCredentials());
+		assertTrue(config.getAllowCredentials());
 		assertArrayEquals(new String[]{"*"}, config.getAllowedHeaders().toArray());
-		assertNull(config.getExposedHeaders());
+		assertTrue(CollectionUtils.isEmpty(config.getExposedHeaders()));
 		assertEquals(new Long(1800), config.getMaxAge());
 	}
 
@@ -120,7 +120,7 @@ public class CrossOriginTests {
 		assertArrayEquals(new String[]{"header1", "header2"}, config.getAllowedHeaders().toArray());
 		assertArrayEquals(new String[]{"header3", "header4"}, config.getExposedHeaders().toArray());
 		assertEquals(new Long(123), config.getMaxAge());
-		assertEquals(false, config.isAllowCredentials());
+		assertEquals(false, config.getAllowCredentials());
 	}
 
 	@Test
@@ -138,16 +138,16 @@ public class CrossOriginTests {
 	public void preFlightRequest() throws Exception {
 		this.handlerMapping.registerHandler(new MethodLevelController());
 		this.request.setMethod("OPTIONS");
-		this.request.addHeader(CorsUtils.ACCESS_CONTROL_REQUEST_METHOD, "GET");
+		this.request.addHeader(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, "GET");
 		this.request.setRequestURI("/default");
 		HandlerExecutionChain chain = this.handlerMapping.getHandler(request);
 		CorsConfiguration config = getCorsConfiguration(chain, true);
 		assertNotNull(config);
 		assertArrayEquals(new String[]{"GET"}, config.getAllowedMethods().toArray());
 		assertArrayEquals(new String[]{"*"}, config.getAllowedOrigins().toArray());
-		assertTrue(config.isAllowCredentials());
+		assertTrue(config.getAllowCredentials());
 		assertArrayEquals(new String[]{"*"}, config.getAllowedHeaders().toArray());
-		assertNull(config.getExposedHeaders());
+		assertTrue(CollectionUtils.isEmpty(config.getExposedHeaders()));
 		assertEquals(new Long(1800), config.getMaxAge());
 	}
 
@@ -155,8 +155,8 @@ public class CrossOriginTests {
 	public void ambiguousHeaderPreFlightRequest() throws Exception {
 		this.handlerMapping.registerHandler(new MethodLevelController());
 		this.request.setMethod("OPTIONS");
-		this.request.addHeader(CorsUtils.ACCESS_CONTROL_REQUEST_METHOD, "GET");
-		this.request.addHeader(CorsUtils.ACCESS_CONTROL_REQUEST_HEADERS, "header1");
+		this.request.addHeader(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, "GET");
+		this.request.addHeader(HttpHeaders.ACCESS_CONTROL_REQUEST_HEADERS, "header1");
 		this.request.setRequestURI("/ambiguous-header");
 		HandlerExecutionChain chain = this.handlerMapping.getHandler(request);
 		CorsConfiguration config = getCorsConfiguration(chain, true);
@@ -164,8 +164,8 @@ public class CrossOriginTests {
 		assertArrayEquals(new String[]{"*"}, config.getAllowedMethods().toArray());
 		assertArrayEquals(new String[]{"*"}, config.getAllowedOrigins().toArray());
 		assertArrayEquals(new String[]{"*"}, config.getAllowedHeaders().toArray());
-		assertTrue(config.isAllowCredentials());
-		assertNull(config.getExposedHeaders());
+		assertTrue(config.getAllowCredentials());
+		assertTrue(CollectionUtils.isEmpty(config.getExposedHeaders()));
 		assertNull(config.getMaxAge());
 	}
 
@@ -173,7 +173,7 @@ public class CrossOriginTests {
 	public void ambiguousProducesPreFlightRequest() throws Exception {
 		this.handlerMapping.registerHandler(new MethodLevelController());
 		this.request.setMethod("OPTIONS");
-		this.request.addHeader(CorsUtils.ACCESS_CONTROL_REQUEST_METHOD, "GET");
+		this.request.addHeader(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, "GET");
 		this.request.setRequestURI("/ambiguous-produces");
 		HandlerExecutionChain chain = this.handlerMapping.getHandler(request);
 		CorsConfiguration config = getCorsConfiguration(chain, true);
@@ -181,8 +181,8 @@ public class CrossOriginTests {
 		assertArrayEquals(new String[]{"*"}, config.getAllowedMethods().toArray());
 		assertArrayEquals(new String[]{"*"}, config.getAllowedOrigins().toArray());
 		assertArrayEquals(new String[]{"*"}, config.getAllowedHeaders().toArray());
-		assertTrue(config.isAllowCredentials());
-		assertNull(config.getExposedHeaders());
+		assertTrue(config.getAllowCredentials());
+		assertTrue(CollectionUtils.isEmpty(config.getExposedHeaders()));
 		assertNull(config.getMaxAge());
 	}
 

@@ -65,22 +65,18 @@ public class OriginHandshakeInterceptor implements HandshakeInterceptor {
 	}
 
 	/**
-	 * Configure allowed {@code Origin} header values. This check is mostly designed for
-	 * browser clients. There is nothing preventing other types of client to modify the
-	 * {@code Origin} header value.
+	 * Configure allowed {@code Origin} header values. This check is mostly
+	 * designed for browsers. There is nothing preventing other types of client
+	 * to modify the {@code Origin} header value.
 	 *
-	 * <p>Each provided allowed origin must start by "http://", "https://" or be "*"
-	 * (means that all origins are allowed).
+	 * <p>Each provided allowed origin must have a scheme, and optionally a port
+	 * (e.g. "http://example.org", "http://example.org:9090"). An allowed origin
+	 * string may also be "*" in which case all origins are allowed.
 	 *
 	 * @see <a href="https://tools.ietf.org/html/rfc6454">RFC 6454: The Web Origin Concept</a>
 	 */
 	public void setAllowedOrigins(Collection<String> allowedOrigins) {
 		Assert.notNull(allowedOrigins, "Allowed origin Collection must not be null");
-		for (String allowedOrigin : allowedOrigins) {
-			Assert.isTrue(allowedOrigin.equals("*") || allowedOrigin.startsWith("http://") ||
-					allowedOrigin.startsWith("https://"), "Invalid allowed origin provided: \"" +
-					allowedOrigin + "\". It must start with \"http://\", \"https://\" or be \"*\"");
-		}
 		this.allowedOrigins.clear();
 		this.allowedOrigins.addAll(allowedOrigins);
 	}
@@ -92,6 +88,7 @@ public class OriginHandshakeInterceptor implements HandshakeInterceptor {
 	public Collection<String> getAllowedOrigins() {
 		return Collections.unmodifiableList(this.allowedOrigins);
 	}
+
 
 	@Override
 	public boolean beforeHandshake(ServerHttpRequest request, ServerHttpResponse response,

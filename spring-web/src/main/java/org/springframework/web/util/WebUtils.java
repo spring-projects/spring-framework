@@ -23,6 +23,7 @@ import java.util.Enumeration;
 import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.TreeMap;
+
 import javax.servlet.ServletContext;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletRequestWrapper;
@@ -38,6 +39,7 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.http.HttpRequest;
 import org.springframework.util.Assert;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
@@ -790,21 +792,10 @@ public abstract class WebUtils {
 		if (origin == null || allowedOrigins.contains("*")) {
 			return true;
 		}
-		else if (allowedOrigins.isEmpty()) {
-			UriComponents originComponents;
-			try {
-				originComponents = UriComponentsBuilder.fromHttpUrl(origin).build();
-			}
-			catch (IllegalArgumentException ex) {
-				if (logger.isWarnEnabled()) {
-					logger.warn("Failed to parse Origin header value [" + origin + "]");
-				}
-				return false;
-			}
-			UriComponents requestComponents = UriComponentsBuilder.fromHttpRequest(request).build();
-			int originPort = getPort(originComponents);
-			int requestPort = getPort(requestComponents);
-			return (originComponents.getHost().equals(requestComponents.getHost()) && originPort == requestPort);
+		else if (CollectionUtils.isEmpty(allowedOrigins)) {
+			UriComponents actualUrl = UriComponentsBuilder.fromHttpRequest(request).build();
+			UriComponents originUrl = UriComponentsBuilder.fromOriginHeader(origin).build();
+			return (actualUrl.getHost().equals(originUrl.getHost()) && getPort(actualUrl) == getPort(originUrl));
 		}
 		else {
 			return allowedOrigins.contains(origin);
@@ -814,10 +805,10 @@ public abstract class WebUtils {
 	private static int getPort(UriComponents component) {
 		int port = component.getPort();
 		if (port == -1) {
-			if ("http".equals(component.getScheme())) {
+			if ("http".equals(component.getScheme()) || "ws".equals(component.getScheme())) {
 				port = 80;
 			}
-			else if ("https".equals(component.getScheme())) {
+			else if ("https".equals(component.getScheme()) || "wss".equals(component.getScheme())) {
 				port = 443;
 			}
 		}

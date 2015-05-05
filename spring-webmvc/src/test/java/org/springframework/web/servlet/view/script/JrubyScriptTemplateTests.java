@@ -34,11 +34,11 @@ import org.springframework.mock.web.test.MockServletContext;
 import org.springframework.web.context.WebApplicationContext;
 
 /**
- * Unit tests for String templates running on Jython.
+ * Unit tests for ERB templates running on JRuby.
  *
  * @author Sebastien Deleuze
  */
-public class StringJythonScriptTemplateTests {
+public class JRubyScriptTemplateTests {
 
 	private WebApplicationContext webAppContext;
 
@@ -56,7 +56,7 @@ public class StringJythonScriptTemplateTests {
 		Map<String, Object> model = new HashMap<>();
 		model.put("title", "Layout example");
 		model.put("body", "This is the body");
-		MockHttpServletResponse response = renderViewWithModel("org/springframework/web/servlet/view/script/python/template.html", model);
+		MockHttpServletResponse response = renderViewWithModel("org/springframework/web/servlet/view/script/jruby/template.erb", model);
 		assertEquals("<html><head><title>Layout example</title></head><body><p>This is the body</p></body></html>",
 				response.getContentAsString());
 	}
@@ -85,10 +85,10 @@ public class StringJythonScriptTemplateTests {
 	static class ScriptTemplatingConfiguration {
 
 		@Bean
-		public ScriptTemplateConfigurer jythonConfigurer() {
+		public ScriptTemplateConfigurer jRubyConfigurer() {
 			ScriptTemplateConfigurer configurer = new ScriptTemplateConfigurer();
-			configurer.setScripts("org/springframework/web/servlet/view/script/python/render.py");
-			configurer.setEngineName("jython");
+			configurer.setScripts("org/springframework/web/servlet/view/script/jruby/render.rb");
+			configurer.setEngineName("jruby");
 			configurer.setRenderFunction("render");
 			return configurer;
 		}

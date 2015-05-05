@@ -276,16 +276,18 @@ public abstract class AbstractSockJsService implements SockJsService, CorsConfig
 	}
 
 	/**
-	 * Configure allowed {@code Origin} header values. This check is mostly designed for
-	 * browser clients. There is nothing preventing other types of client to modify the
-	 * {@code Origin} header value.
+	 * Configure allowed {@code Origin} header values. This check is mostly
+	 * designed for browsers. There is nothing preventing other types of client
+	 * to modify the {@code Origin} header value.
 	 *
-	 * <p>When SockJS is enabled and origins are restricted, transport types that do not
-	 * allow to check request origin (JSONP and Iframe based transports) are disabled.
-	 * As a consequence, IE 6 to 9 are not supported when origins are restricted.
+	 * <p>When SockJS is enabled and origins are restricted, transport types
+	 * that do not allow to check request origin (JSONP and Iframe based
+	 * transports) are disabled. As a consequence, IE 6 to 9 are not supported
+	 * when origins are restricted.
 	 *
-	 * <p>Each provided allowed origin must start by "http://", "https://" or be "*"
-	 * (means that all origins are allowed).
+	 * <p>Each provided allowed origin must have a scheme, and optionally a port
+	 * (e.g. "http://example.org", "http://example.org:9090"). An allowed origin
+	 * string may also be "*" in which case all origins are allowed.
 	 *
 	 * @since 4.1.2
 	 * @see <a href="https://tools.ietf.org/html/rfc6454">RFC 6454: The Web Origin Concept</a>
@@ -293,14 +295,6 @@ public abstract class AbstractSockJsService implements SockJsService, CorsConfig
 	 */
 	public void setAllowedOrigins(List<String> allowedOrigins) {
 		Assert.notNull(allowedOrigins, "Allowed origin List must not be null");
-		for (String allowedOrigin : allowedOrigins) {
-			Assert.isTrue(
-					allowedOrigin.equals("*") || allowedOrigin.startsWith("http://") ||
-							allowedOrigin.startsWith("https://"),
-					"Invalid allowed origin provided: \"" +
-							allowedOrigin +
-							"\". It must start with \"http://\", \"https://\" or be \"*\"");
-		}
 		this.allowedOrigins.clear();
 		this.allowedOrigins.addAll(allowedOrigins);
 	}
@@ -451,7 +445,9 @@ public abstract class AbstractSockJsService implements SockJsService, CorsConfig
 	protected abstract void handleTransportRequest(ServerHttpRequest request, ServerHttpResponse response,
 			WebSocketHandler webSocketHandler, String sessionId, String transport) throws SockJsException;
 
-	protected boolean checkOrigin(ServerHttpRequest request, ServerHttpResponse response, HttpMethod... httpMethods) throws IOException {
+	protected boolean checkOrigin(ServerHttpRequest request, ServerHttpResponse response,
+			HttpMethod... httpMethods) throws IOException {
+
 		String origin = request.getHeaders().getOrigin();
 
 		if (origin == null) {
@@ -514,7 +510,8 @@ public abstract class AbstractSockJsService implements SockJsService, CorsConfig
 				addNoCacheHeaders(response);
 				if (checkOrigin(request, response)) {
 					response.getHeaders().setContentType(new MediaType("application", "json", UTF8_CHARSET));
-					String content = String.format(INFO_CONTENT, random.nextInt(), isSessionCookieNeeded(), isWebSocketEnabled());
+					String content = String.format(INFO_CONTENT, random.nextInt(),
+							isSessionCookieNeeded(), isWebSocketEnabled());
 					response.getBody().write(content.getBytes());
 				}
 

@@ -34,11 +34,11 @@ import org.springframework.mock.web.test.MockServletContext;
 import org.springframework.web.context.WebApplicationContext;
 
 /**
- * Unit tests for Mustache templates running on Nashorn Javascript engine.
+ * Unit tests for pure Javascript templates running on Nashorn engine.
  *
  * @author Sebastien Deleuze
  */
-public class MustacheNashornScriptTemplateTests {
+public class NashornScriptTemplateTests {
 
 	private WebApplicationContext webAppContext;
 
@@ -56,7 +56,7 @@ public class MustacheNashornScriptTemplateTests {
 		Map<String, Object> model = new HashMap<>();
 		model.put("title", "Layout example");
 		model.put("body", "This is the body");
-		MockHttpServletResponse response = renderViewWithModel("org/springframework/web/servlet/view/script/mustache/template.html", model);
+		MockHttpServletResponse response = renderViewWithModel("org/springframework/web/servlet/view/script/nashorn/template.html", model);
 		assertEquals("<html><head><title>Layout example</title></head><body><p>This is the body</p></body></html>",
 				response.getContentAsString());
 	}
@@ -85,11 +85,10 @@ public class MustacheNashornScriptTemplateTests {
 	static class ScriptTemplatingConfiguration {
 
 		@Bean
-		public ScriptTemplateConfigurer mustacheConfigurer() {
+		public ScriptTemplateConfigurer nashornConfigurer() {
 			ScriptTemplateConfigurer configurer = new ScriptTemplateConfigurer();
 			configurer.setEngineName("nashorn");
-			configurer.setScripts("/META-INF/resources/webjars/mustachejs/0.8.2/mustache.js");
-			configurer.setRenderObject("Mustache");
+			configurer.setScripts("org/springframework/web/servlet/view/script/nashorn/render.js");
 			configurer.setRenderFunction("render");
 			return configurer;
 		}

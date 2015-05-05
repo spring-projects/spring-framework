@@ -16,14 +16,10 @@
 
 package org.springframework.web.cors;
 
-import java.util.Arrays;
-import java.util.List;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
-import org.springframework.util.CollectionUtils;
 
 /**
  * Utility class for CORS request handling based on the
@@ -33,48 +29,6 @@ import org.springframework.util.CollectionUtils;
  * @since 4.2
  */
 public class CorsUtils {
-
-	/**
-	 * The CORS {@code Access-Control-Request-Headers} request header field name.
-	 * @see <a href="http://www.w3.org/TR/cors/">CORS W3C recommandation</a>
-	 */
-	public static final String ACCESS_CONTROL_REQUEST_HEADERS = "Access-Control-Request-Headers";
-	/**
-	 * The CORS {@code Access-Control-Request-Method} request header field name.
-	 * @see <a href="http://www.w3.org/TR/cors/">CORS W3C recommandation</a>
-	 */
-	public static final String ACCESS_CONTROL_REQUEST_METHOD = "Access-Control-Request-Method";
-	/**
-	 * The CORS {@code Access-Control-Allow-Origin} response header field name.
-	 * @see <a href="http://www.w3.org/TR/cors/">CORS W3C recommandation</a>
-	 */
-	public static final String ACCESS_CONTROL_ALLOW_ORIGIN = "Access-Control-Allow-Origin";
-	/**
-	 * The CORS {@code Access-Control-Allow-Headers} response header field name.
-	 * @see <a href="http://www.w3.org/TR/cors/">CORS W3C recommandation</a>
-	 */
-	public static final String ACCESS_CONTROL_ALLOW_HEADERS = "Access-Control-Allow-Headers";
-	/**
-	 * The CORS {@code Access-Control-Allow-Methods} response header field name.
-	 * @see <a href="http://www.w3.org/TR/cors/">CORS W3C recommandation</a>
-	 */
-	public static final String ACCESS_CONTROL_ALLOW_METHODS = "Access-Control-Allow-Methods";
-	/**
-	 * The CORS {@code Access-Control-Max-Age} response header field name.
-	 * @see <a href="http://www.w3.org/TR/cors/">CORS W3C recommandation</a>
-	 */
-	public static final String ACCESS_CONTROL_MAX_AGE = "Access-Control-Max-Age";
-	/**
-	 * The CORS {@code Access-Control-Allow-Credentials} response header field name.
-	 * @see <a href="http://www.w3.org/TR/cors/">CORS W3C recommandation</a>
-	 */
-	public static final String ACCESS_CONTROL_ALLOW_CREDENTIALS = "Access-Control-Allow-Credentials";
-	/**
-	 * The CORS {@code Access-Control-Expose-Headers} response header field name.
-	 * @see <a href="http://www.w3.org/TR/cors/">CORS W3C recommandation</a>
-	 */
-	public static final String ACCESS_CONTROL_EXPOSE_HEADERS = "Access-Control-Expose-Headers";
-
 
 	/**
 	 * Returns {@code true} if the request is a valid CORS one.

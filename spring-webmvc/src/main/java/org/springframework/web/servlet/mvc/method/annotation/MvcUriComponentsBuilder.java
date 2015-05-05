@@ -21,6 +21,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -49,6 +50,7 @@ import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.PathMatcher;
 import org.springframework.util.ReflectionUtils;
+import org.springframework.util.ReflectionUtils.MethodFilter;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.context.WebApplicationContext;
@@ -56,6 +58,7 @@ import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.method.HandlerMethod;
+import org.springframework.web.method.HandlerMethodSelector;
 import org.springframework.web.method.annotation.RequestParamMethodArgumentResolver;
 import org.springframework.web.method.support.CompositeUriComponentsContributor;
 import org.springframework.web.servlet.DispatcherServlet;
@@ -81,6 +84,7 @@ import org.springframework.web.util.UriComponentsBuilder;
  *
  * @author Oliver Gierke
  * @author Rossen Stoyanchev
+ * @author Sam Brannen
  * @since 4.0
  */
 public class MvcUriComponentsBuilder {
@@ -218,11 +222,11 @@ public class MvcUriComponentsBuilder {
 	 * // Inline style with static import of "MvcUriComponentsBuilder.on"
 	 *
 	 * MvcUriComponentsBuilder.fromMethodCall(
-	 * 		on(CustomerController.class).showAddresses("US")).buildAndExpand(1);
+	 * 		on(AddressController.class).getAddressesForCountry("US")).buildAndExpand(1);
 	 *
 	 * // Longer form useful for repeated invocation (and void controller methods)
 	 *
-	 * CustomerController controller = MvcUriComponentsBuilder.on(CustomController.class);
+	 * AddressController controller = MvcUriComponentsBuilder.on(AddressController.class);
 	 * controller.addAddress(null);
 	 * builder = MvcUriComponentsBuilder.fromMethodCall(controller);
 	 * controller.getAddressesForCountry("US")
@@ -411,23 +415,28 @@ public class MvcUriComponentsBuilder {
 		return paths[0];
 	}
 
-
-	private static Method getMethod(Class<?> controllerType, String methodName, Object... args) {
-		Method match = null;
-		for (Method method : controllerType.getDeclaredMethods()) {
-			if (method.getName().equals(methodName) && method.getParameterTypes().length == args.length) {
-				if (match != null) {
-					throw new IllegalArgumentException("Found two methods named '" + methodName + "' having " +
-							Arrays.asList(args) + " arguments, controller " + controllerType.getName());
-				}
-				match = method;
+	private static Method getMethod(Class<?> controllerType, final String methodName, final Object... args) {
+		MethodFilter selector = new MethodFilter() {
+			@Override
+			public boolean matches(Method method) {
+				String name = method.getName();
+				int argLength = method.getParameterTypes().length;
+				return (name.equals(methodName) && argLength == args.length);
 			}
+		};
+		Set<Method> methods = HandlerMethodSelector.selectMethods(controllerType, selector);
+		if (methods.size() == 1) {
+			return methods.iterator().next();
 		}
-		if (match == null) {
-			throw new IllegalArgumentException("No method '" + methodName + "' with " + args.length +
-					" parameters found in " + controllerType.getName());
+		else if (methods.size() > 1) {
+			throw new IllegalArgumentException(String.format(
+					"Found two methods named '%s' accepting arguments %s in controller %s: [%s]",
+					methodName, Arrays.asList(args), controllerType.getName(), methods));
 		}
-		return match;
+		else {
+			throw new IllegalArgumentException("No method named '" + methodName + "' with " + args.length +
+					" arguments found in controller " + controllerType.getName());
+		}
 	}
 
 	private static UriComponents applyContributors(UriComponentsBuilder builder, Method method, Object... args) {
@@ -686,6 +695,8 @@ public class MvcUriComponentsBuilder {
 				this.argumentValues[i] = null;
 			}
 		}
+
+
 
 		public MethodArgumentBuilder arg(int index, Object value) {
 			this.argumentValues[index] = value;

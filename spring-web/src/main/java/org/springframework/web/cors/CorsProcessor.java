@@ -36,6 +36,7 @@ public interface CorsProcessor {
 	 * comply with the configuration it should be rejected.
 	 * If the request is valid and complies with the configuration, CORS headers
 	 * should be added to the response.
+	 * @return {@code false} if the request is rejected, else {@code true}.
 	 */
 	boolean processPreFlightRequest(CorsConfiguration conf, HttpServletRequest request,
 			HttpServletResponse response) throws IOException;
@@ -46,6 +47,7 @@ public interface CorsProcessor {
 	 * not comply with the configuration, it should be rejected.
 	 * If the request is valid and comply with the configuration, this method adds the related
 	 * CORS headers to the response.
+	 * @return {@code false} if the request is rejected, else {@code true}.
 	 */
 	boolean processActualRequest(CorsConfiguration conf, HttpServletRequest request,
 			HttpServletResponse response) throws IOException;
