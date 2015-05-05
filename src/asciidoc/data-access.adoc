@@ -5660,9 +5660,6 @@ example of a corresponding DAO implementation:
 	}
 ----
 
-Because the above DAO follows the dependency injection pattern, it fits nicely into a
-Spring container, just as it would if coded against Spring's `JdoTemplate`:
-
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -5840,12 +5837,10 @@ JDO 2.0 implementations by default.
 [[orm-jdo-dialect]]
 ==== JdoDialect
 
-As an advanced feature, both `JdoTemplate` and `JdoTransactionManager` support a custom
-`JdoDialect` that can be passed into the `jdoDialect` bean property. In this scenario,
-the DAOs will not receive a `PersistenceManagerFactory` reference but rather a full
-`JdoTemplate` instance (for example, passed into the `jdoTemplate` property of
-`JdoDaoSupport`). Using a `JdoDialect` implementation, you can enable advanced features
-supported by Spring, usually in a vendor-specific manner:
+As an advanced feature, both `LocalPersistenceManagerFactoryBean` and `JdoTransactionManager`
+support a custom `JdoDialect` that can be passed into the `jdoDialect` bean property.
+Using a `JdoDialect` implementation, you can enable advanced features supported by Spring,
+usually in a vendor-specific manner:
 
 * Applying specific transaction semantics such as custom isolation level or transaction
   timeout
@@ -6331,13 +6326,10 @@ the next section for details on the `JpaDialect` mechanism.
 [[orm-jpa-dialect]]
 ==== JpaDialect
 
-As an advanced feature `JpaTemplate`, `JpaTransactionManager` and subclasses of
+As an advanced feature `JpaTransactionManager` and subclasses of
 `AbstractEntityManagerFactoryBean` support a custom `JpaDialect`, to be passed into the
-`jpaDialect` bean property. In such a scenario, the DAOs do not receive an
-`EntityManagerFactory` reference but rather a full `JpaTemplate` instance (for example,
-passed into the `jpaTemplate` property of `JpaDaoSupport`). A `JpaDialect`
-implementation can enable some advanced features supported by Spring, usually in a
-vendor-specific manner:
+`jpaDialect` bean property. A `JpaDialect` implementation can enable some advanced
+features supported by Spring, usually in a vendor-specific manner:
 
 * Applying specific transaction semantics such as custom isolation level or transaction
   timeout)
