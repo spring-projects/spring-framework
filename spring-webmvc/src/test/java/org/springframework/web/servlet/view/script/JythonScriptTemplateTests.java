@@ -34,11 +34,11 @@ import org.springframework.mock.web.test.MockServletContext;
 import org.springframework.web.context.WebApplicationContext;
 
 /**
- * Unit tests for Handlebars templates running on Nashorn Javascript engine.
+ * Unit tests for String templates running on Jython.
  *
  * @author Sebastien Deleuze
  */
-public class HandlebarsNashornScriptTemplateTests {
+public class JythonScriptTemplateTests {
 
 	private WebApplicationContext webAppContext;
 
@@ -56,7 +56,7 @@ public class HandlebarsNashornScriptTemplateTests {
 		Map<String, Object> model = new HashMap<>();
 		model.put("title", "Layout example");
 		model.put("body", "This is the body");
-		MockHttpServletResponse response = renderViewWithModel("org/springframework/web/servlet/view/script/handlebars/template.html", model);
+		MockHttpServletResponse response = renderViewWithModel("org/springframework/web/servlet/view/script/jython/template.html", model);
 		assertEquals("<html><head><title>Layout example</title></head><body><p>This is the body</p></body></html>",
 				response.getContentAsString());
 	}
@@ -85,12 +85,10 @@ public class HandlebarsNashornScriptTemplateTests {
 	static class ScriptTemplatingConfiguration {
 
 		@Bean
-		public ScriptTemplateConfigurer handlebarsConfigurer() {
+		public ScriptTemplateConfigurer jythonConfigurer() {
 			ScriptTemplateConfigurer configurer = new ScriptTemplateConfigurer();
-			configurer.setEngineName("nashorn");
-			configurer.setScripts(  "org/springframework/web/servlet/view/script/handlebars/polyfill.js",
-									"/META-INF/resources/webjars/handlebars/3.0.0-1/handlebars.js",
-									"org/springframework/web/servlet/view/script/handlebars/render.js");
+			configurer.setScripts("org/springframework/web/servlet/view/script/jython/render.py");
+			configurer.setEngineName("jython");
 			configurer.setRenderFunction("render");
 			return configurer;
 		}

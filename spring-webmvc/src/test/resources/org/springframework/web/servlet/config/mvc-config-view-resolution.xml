@@ -34,8 +34,8 @@
 
 	<mvc:groovy-configurer resource-loader-path="/test" cache-templates="false" auto-indent="true" />
 
-	<mvc:script-template-configurer engine-name="nashorn" render-object="Mustache" render-function="render" charset="ISO-8859-1" resource-loader-path="classpath:">
-		<mvc:script location="/META-INF/resources/webjars/mustachejs/0.8.2/mustache.js" />
+	<mvc:script-template-configurer engine-name="nashorn" render-function="render" charset="ISO-8859-1" resource-loader-path="classpath:">
+		<mvc:script location="org/springframework/web/servlet/view/script/nashorn/render.js" />
 	</mvc:script-template-configurer>
 
 </beans>
