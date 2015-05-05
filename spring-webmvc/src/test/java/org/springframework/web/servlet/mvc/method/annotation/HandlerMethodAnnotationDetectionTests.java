@@ -65,28 +65,27 @@ import static org.junit.Assert.*;
 public class HandlerMethodAnnotationDetectionTests {
 
 	@Parameters(name = "controller [{0}], auto-proxy [{1}]")
-	public static Collection<Object[]> handlerTypes() {
-		Object[][] array = new Object[12][2];
+	public static Object[][] handlerTypes() {
+		return new Object[][] {
 
-		array[0] = new Object[] { SimpleController.class, true};  // CGLib proxy
-		array[1] = new Object[] { SimpleController.class, false};
+			{ SimpleController.class, true }, // CGLib proxy
+			{ SimpleController.class, false },
 
-		array[2] = new Object[] { AbstractClassController.class, true };	// CGLib proxy
-		array[3] = new Object[] { AbstractClassController.class, false };
+			{ AbstractClassController.class, true }, // CGLib proxy
+			{ AbstractClassController.class, false },
 
-		array[4] = new Object[] { ParameterizedAbstractClassController.class, false}; // CGLib proxy
-		array[5] = new Object[] { ParameterizedAbstractClassController.class, false};
+			{ ParameterizedAbstractClassController.class, true }, // CGLib proxy
+			{ ParameterizedAbstractClassController.class, false },
 
-		array[6] = new Object[] { InterfaceController.class, true };	// JDK dynamic proxy
-		array[7] = new Object[] { InterfaceController.class, false };
+			{ InterfaceController.class, true }, // JDK dynamic proxy
+			{ InterfaceController.class, false },
 
-		array[8] = new Object[] { ParameterizedInterfaceController.class, false}; // no AOP
-		array[9] = new Object[] { ParameterizedInterfaceController.class, false};
+			{ ParameterizedInterfaceController.class, false }, // no AOP
 
-		array[10] = new Object[] { SupportClassController.class, true};  // CGLib proxy
-		array[11] = new Object[] { SupportClassController.class, false};
+			{ SupportClassController.class, true }, // CGLib proxy
+			{ SupportClassController.class, false }
 
-		return Arrays.asList(array);
+		};
 	}
 
 	private RequestMappingHandlerMapping handlerMapping = new RequestMappingHandlerMapping();
