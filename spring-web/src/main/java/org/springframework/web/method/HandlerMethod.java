@@ -60,6 +60,8 @@ public class HandlerMethod {
 
 	private final MethodParameter[] parameters;
 
+	private final HandlerMethod resolvedFromHandlerMethod;
+
 
 	/**
 	 * Create an instance from a bean instance and a method.
@@ -73,6 +75,7 @@ public class HandlerMethod {
 		this.method = method;
 		this.bridgedMethod = BridgeMethodResolver.findBridgedMethod(method);
 		this.parameters = initMethodParameters();
+		this.resolvedFromHandlerMethod = null;
 	}
 
 	/**
@@ -88,6 +91,7 @@ public class HandlerMethod {
 		this.method = bean.getClass().getMethod(methodName, parameterTypes);
 		this.bridgedMethod = BridgeMethodResolver.findBridgedMethod(this.method);
 		this.parameters = initMethodParameters();
+		this.resolvedFromHandlerMethod = null;
 	}
 
 	/**
@@ -105,6 +109,7 @@ public class HandlerMethod {
 		this.method = method;
 		this.bridgedMethod = BridgeMethodResolver.findBridgedMethod(method);
 		this.parameters = initMethodParameters();
+		this.resolvedFromHandlerMethod = null;
 	}
 
 	/**
@@ -118,6 +123,7 @@ public class HandlerMethod {
 		this.method = handlerMethod.method;
 		this.bridgedMethod = handlerMethod.bridgedMethod;
 		this.parameters = handlerMethod.parameters;
+		this.resolvedFromHandlerMethod = handlerMethod.resolvedFromHandlerMethod;
 	}
 
 	/**
@@ -132,6 +138,7 @@ public class HandlerMethod {
 		this.method = handlerMethod.method;
 		this.bridgedMethod = handlerMethod.bridgedMethod;
 		this.parameters = handlerMethod.parameters;
+		this.resolvedFromHandlerMethod = handlerMethod;
 	}
 
 
@@ -180,6 +187,14 @@ public class HandlerMethod {
 	 */
 	public MethodParameter[] getMethodParameters() {
 		return this.parameters;
+	}
+
+	/**
+	 * Return the HandlerMethod from which this HandlerMethod instance was
+	 * resolved via {@link #createWithResolvedBean()}.
+	 */
+	public HandlerMethod getResolvedFromHandlerMethod() {
+		return this.resolvedFromHandlerMethod;
 	}
 
 	/**

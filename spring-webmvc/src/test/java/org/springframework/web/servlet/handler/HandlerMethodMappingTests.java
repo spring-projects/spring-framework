@@ -29,12 +29,15 @@ import javax.servlet.http.HttpServletRequest;
 import org.junit.Before;
 import org.junit.Test;
 
+import org.springframework.beans.factory.support.StaticListableBeanFactory;
+import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.context.support.StaticApplicationContext;
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.util.PathMatcher;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.context.support.StaticWebApplicationContext;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.util.UrlPathHelper;
@@ -44,6 +47,7 @@ import org.springframework.web.util.UrlPathHelper;
  * Test for {@link AbstractHandlerMethodMapping}.
  *
  * @author Arjen Poutsma
+ * @author Rossen Stoyanchev
  */
 @SuppressWarnings("unused")
 public class HandlerMethodMappingTests {
@@ -153,11 +157,53 @@ public class HandlerMethodMappingTests {
 
 		CorsConfiguration config = this.mapping.getMappingRegistry().getCorsConfiguration(handlerMethod1);
 		assertNotNull(config);
-		assertEquals("http://" + name1, config.getAllowedOrigins().get(0));
+		assertEquals("http://" + handler.hashCode() + name1, config.getAllowedOrigins().get(0));
 
 		config = this.mapping.getMappingRegistry().getCorsConfiguration(handlerMethod2);
 		assertNotNull(config);
-		assertEquals("http://" + name2, config.getAllowedOrigins().get(0));
+		assertEquals("http://" + handler.hashCode() + name2, config.getAllowedOrigins().get(0));
+	}
+
+	@Test
+	public void registerMappingWithSameMethodAndTwoHandlerInstances() throws Exception {
+
+		String key1 = "foo";
+		String key2 = "bar";
+
+		MyHandler handler1 = new MyHandler();
+		MyHandler handler2 = new MyHandler();
+
+		HandlerMethod handlerMethod1 = new HandlerMethod(handler1, this.method1);
+		HandlerMethod handlerMethod2 = new HandlerMethod(handler2, this.method1);
+
+		this.mapping.registerMapping(key1, handler1, this.method1);
+		this.mapping.registerMapping(key2, handler2, this.method1);
+
+		// Direct URL lookup
+
+		List directUrlMatches = this.mapping.getMappingRegistry().getMappingsByUrl(key1);
+		assertNotNull(directUrlMatches);
+		assertEquals(1, directUrlMatches.size());
+		assertEquals(key1, directUrlMatches.get(0));
+
+		// Mapping name lookup
+
+		String name = this.method1.getName();
+		List<HandlerMethod> handlerMethods = this.mapping.getMappingRegistry().getHandlerMethodsByMappingName(name);
+		assertNotNull(handlerMethods);
+		assertEquals(2, handlerMethods.size());
+		assertEquals(handlerMethod1, handlerMethods.get(0));
+		assertEquals(handlerMethod2, handlerMethods.get(1));
+
+		// CORS lookup
+
+		CorsConfiguration config = this.mapping.getMappingRegistry().getCorsConfiguration(handlerMethod1);
+		assertNotNull(config);
+		assertEquals("http://" + handler1.hashCode() + name, config.getAllowedOrigins().get(0));
+
+		config = this.mapping.getMappingRegistry().getCorsConfiguration(handlerMethod2);
+		assertNotNull(config);
+		assertEquals("http://" + handler2.hashCode() + name, config.getAllowedOrigins().get(0));
 	}
 
 	@Test
@@ -175,6 +221,25 @@ public class HandlerMethodMappingTests {
 		assertNull(this.mapping.getMappingRegistry().getHandlerMethodsByMappingName(this.method1.getName()));
 		assertNull(this.mapping.getMappingRegistry().getCorsConfiguration(handlerMethod));
 	}
+
+	@Test
+	public void getCorsConfigWithBeanNameHandler() throws Exception {
+
+		String key = "foo";
+		String beanName = "handler1";
+
+		StaticWebApplicationContext context = new StaticWebApplicationContext();
+		context.registerSingleton(beanName, MyHandler.class);
+
+		this.mapping.setApplicationContext(context);
+		this.mapping.registerMapping(key, beanName, this.method1);
+		HandlerMethod handlerMethod = this.mapping.getHandlerInternal(new MockHttpServletRequest("GET", key));
+
+		CorsConfiguration config = this.mapping.getMappingRegistry().getCorsConfiguration(handlerMethod);
+		assertNotNull(config);
+		assertEquals("http://" + beanName.hashCode() + this.method1.getName(), config.getAllowedOrigins().get(0));
+	}
+
 
 
 	private static class MyHandlerMethodMapping extends AbstractHandlerMethodMapping<String> {
@@ -207,7 +272,7 @@ public class HandlerMethodMappingTests {
 		@Override
 		protected CorsConfiguration initCorsConfiguration(Object handler, Method method, String mapping) {
 			CorsConfiguration corsConfig = new CorsConfiguration();
-			corsConfig.setAllowedOrigins(Collections.singletonList("http://" + method.getName()));
+			corsConfig.setAllowedOrigins(Collections.singletonList("http://" + handler.hashCode() + method.getName()));
 			return corsConfig;
 		}
 

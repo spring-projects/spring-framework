@@ -467,8 +467,8 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 		private final Map<String, List<HandlerMethod>> nameLookup =
 				new ConcurrentHashMap<String, List<HandlerMethod>>();
 
-		private final Map<Method, CorsConfiguration> corsLookup =
-				new ConcurrentHashMap<Method, CorsConfiguration>();
+		private final Map<HandlerMethod, CorsConfiguration> corsLookup =
+				new ConcurrentHashMap<HandlerMethod, CorsConfiguration>();
 
 
 		private final ReentrantReadWriteLock readWriteLock = new ReentrantReadWriteLock();
@@ -501,8 +501,8 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 		 * Return CORS configuration. Thread-safe for concurrent use.
 		 */
 		public CorsConfiguration getCorsConfiguration(HandlerMethod handlerMethod) {
-			Method method = handlerMethod.getMethod();
-			return this.corsLookup.get(method);
+			HandlerMethod original = handlerMethod.getResolvedFromHandlerMethod();
+			return this.corsLookup.get(original != null ? original : handlerMethod);
 		}
 
 		/**
@@ -545,11 +545,10 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 
 				CorsConfiguration corsConfig = initCorsConfiguration(handler, method, mapping);
 				if (corsConfig != null) {
-					this.corsLookup.put(method, corsConfig);
+					this.corsLookup.put(handlerMethod, corsConfig);
 				}
 
-				this.registry.put(mapping,
-						new MappingRegistration<T>(mapping, handlerMethod, directUrls, name, corsConfig));
+				this.registry.put(mapping, new MappingRegistration<T>(mapping, handlerMethod, directUrls, name));
 			}
 			finally {
 				this.readWriteLock.writeLock().unlock();
@@ -582,7 +581,7 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 					this.nameLookup.get(name) : Collections.<HandlerMethod>emptyList();
 
 			for (HandlerMethod current : oldList) {
-				if (handlerMethod.getMethod().equals(current.getMethod())) {
+				if (handlerMethod.equals(current)) {
 					return;
 				}
 			}
@@ -597,8 +596,8 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 			this.nameLookup.put(name, newList);
 
 			if (newList.size() > 1) {
-				if (logger.isDebugEnabled()) {
-					logger.debug("Mapping name clash for handlerMethods=" + newList +
+				if (logger.isTraceEnabled()) {
+					logger.trace("Mapping name clash for handlerMethods=" + newList +
 							". Consider assigning explicit names.");
 				}
 			}
@@ -626,7 +625,7 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 
 				removeMappingName(definition);
 
-				this.corsLookup.remove(definition.getHandlerMethod().getMethod());
+				this.corsLookup.remove(definition.getHandlerMethod());
 			}
 			finally {
 				this.readWriteLock.writeLock().unlock();
@@ -668,11 +667,9 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 
 		private final String mappingName;
 
-		private final CorsConfiguration corsConfiguration;
 
-
-		public MappingRegistration(T mapping, HandlerMethod handlerMethod, List<String> directUrls,
-				String mappingName, CorsConfiguration corsConfiguration) {
+		public MappingRegistration(T mapping, HandlerMethod handlerMethod,
+				List<String> directUrls, String mappingName) {
 
 			Assert.notNull(mapping);
 			Assert.notNull(handlerMethod);
@@ -681,7 +678,6 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 			this.handlerMethod = handlerMethod;
 			this.directUrls = (directUrls != null ? directUrls : Collections.<String>emptyList());
 			this.mappingName = mappingName;
-			this.corsConfiguration = corsConfiguration;
 		}
 
 
@@ -699,10 +695,6 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 
 		public String getMappingName() {
 			return this.mappingName;
-		}
-
-		public CorsConfiguration getCorsConfiguration() {
-			return this.corsConfiguration;
 		}
 	}
 
