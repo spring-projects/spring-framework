@@ -4379,11 +4379,11 @@ The next example shows how to create and insert a BLOB. Later you will see how t
 it back from the database.
 
 This example uses a `JdbcTemplate` and an implementation of the
-`AbstractLobCreatingPreparedStatementCallbac` `k`. It implements one method,
+`AbstractLobCreatingPreparedStatementCallback`. It implements one method,
 `setValues`. This method provides a `LobCreator` that you use to set the values for the
 LOB columns in your SQL insert statement.
 
-For this example we assume that there is a variable, `lobHandle` `r`, that already is
+For this example we assume that there is a variable, `lobHandler`, that already is
 set to an instance of a `DefaultLobHandler`. You typically set this value through
 dependency injection.
 
@@ -4414,7 +4414,7 @@ dependency injection.
 <3> Using the method `setBlobAsBinaryStream`, pass in the contents of the BLOB.
 
 Now it's time to read the LOB data from the database. Again, you use a `JdbcTemplate`
-with the same instance variable `l` `obHandler` and a reference to a `DefaultLobHandler`.
+with the same instance variable `lobHandler` and a reference to a `DefaultLobHandler`.
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
