@@ -62,9 +62,31 @@ public class AnnotatedElementUtilsTests {
 
 	@Test
 	public void getMetaAnnotationTypesOnClassWithMetaDepth2() {
-		Set<String> names = getMetaAnnotationTypes(ComposedTransactionalComponentClass.class,
-			ComposedTransactionalComponent.class);
+		Set<String> names = getMetaAnnotationTypes(ComposedTransactionalComponentClass.class, ComposedTransactionalComponent.class);
 		assertEquals(names(TransactionalComponent.class, Transactional.class, Component.class, Retention.class, Documented.class, Target.class, Inherited.class), names);
+	}
+
+	@Test
+	public void hasMetaAnnotationTypesOnNonAnnotatedClass() {
+		assertFalse(hasMetaAnnotationTypes(NonAnnotatedClass.class, Transactional.class.getName()));
+	}
+
+	@Test
+	public void hasMetaAnnotationTypesOnClassWithMetaDepth0() {
+		assertFalse(hasMetaAnnotationTypes(TransactionalComponentClass.class, TransactionalComponent.class.getName()));
+	}
+
+	@Test
+	public void hasMetaAnnotationTypesOnClassWithMetaDepth1() {
+		assertTrue(hasMetaAnnotationTypes(TransactionalComponentClass.class, Transactional.class.getName()));
+		assertTrue(hasMetaAnnotationTypes(TransactionalComponentClass.class, Component.class.getName()));
+	}
+
+	@Test
+	public void hasMetaAnnotationTypesOnClassWithMetaDepth2() {
+		assertTrue(hasMetaAnnotationTypes(ComposedTransactionalComponentClass.class, Transactional.class.getName()));
+		assertTrue(hasMetaAnnotationTypes(ComposedTransactionalComponentClass.class, Component.class.getName()));
+		assertFalse(hasMetaAnnotationTypes(ComposedTransactionalComponentClass.class, ComposedTransactionalComponent.class.getName()));
 	}
 
 	@Test
@@ -277,6 +299,14 @@ public class AnnotatedElementUtilsTests {
 		assertNotNull("Should find @Order on StringGenericParameter.getFor() bridge method", attributes);
 	}
 
+	/** @since 4.2 */
+	@Test
+	public void findAnnotationAttributesOnClassWithMetaAndLocalTxConfig() {
+		AnnotationAttributes attributes = findAnnotationAttributes(MetaAndLocalTxConfigClass.class, Transactional.class);
+		assertNotNull("Should find @Transactional on MetaAndLocalTxConfigClass", attributes);
+		assertEquals("TX qualifier for MetaAndLocalTxConfigClass.", "localTxMgr", attributes.getString("qualifier"));
+	}
+
 
 	// -------------------------------------------------------------------------
 
@@ -315,6 +345,8 @@ public class AnnotatedElementUtilsTests {
 
 		String value() default "";
 
+		String qualifier() default "transactionManager";
+
 		boolean readOnly() default false;
 	}
 
@@ -331,6 +363,13 @@ public class AnnotatedElementUtilsTests {
 	@Target(ElementType.TYPE)
 	@Documented
 	@interface Composed2 {
+	}
+
+	@Transactional
+	@Retention(RetentionPolicy.RUNTIME)
+	@interface TxComposedWithOverride {
+
+		String qualifier() default "txMgr";
 	}
 
 	@Transactional("TxComposed1")
@@ -352,6 +391,14 @@ public class AnnotatedElementUtilsTests {
 	@TransactionalComponent
 	@Retention(RetentionPolicy.RUNTIME)
 	@interface ComposedTransactionalComponent {
+	}
+
+	@TxComposedWithOverride
+	// Override default "txMgr" from @TxComposedWithOverride with "localTxMgr"
+	@Transactional(qualifier = "localTxMgr")
+	@Retention(RetentionPolicy.RUNTIME)
+	@Target(ElementType.TYPE)
+	@interface MetaAndLocalTxConfig {
 	}
 
 	// -------------------------------------------------------------------------
@@ -387,6 +434,10 @@ public class AnnotatedElementUtilsTests {
 	}
 
 	static class SubSubClassWithInheritedComposedAnnotation extends SubClassWithInheritedComposedAnnotation {
+	}
+
+	@MetaAndLocalTxConfig
+	static class MetaAndLocalTxConfigClass {
 	}
 
 	@Transactional("TxConfig")
