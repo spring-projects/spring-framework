@@ -3914,7 +3914,7 @@ rows from the t_actor table. Here is the MySQL source for this procedure:
 ----
 
 To call this procedure you declare the `RowMapper`. Because the class you want to map to
-follows the JavaBean rules, you can use a `ParameterizedBeanPropertyRowMapper` that is
+follows the JavaBean rules, you can use a `BeanPropertyRowMapper` that is
 created by passing in the required class to map to in the `newInstance` method.
 
 [source,java,indent=0]
@@ -3930,7 +3930,7 @@ created by passing in the required class to map to in the `newInstance` method.
 			this.procReadAllActors = new SimpleJdbcCall(jdbcTemplate)
 					.withProcedureName("read_all_actors")
 					.returningResultSet("actors",
-					ParameterizedBeanPropertyRowMapper.newInstance(Actor.class));
+					BeanPropertyRowMapper.newInstance(Actor.class));
 		}
 
 		public List getActorsList() {
