@@ -449,6 +449,8 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 		long[] heartbeat = (long[]) connectAckHeaders.getHeader(SimpMessageHeaderAccessor.HEART_BEAT_HEADER);
 		if (heartbeat != null) {
 			connectedHeaders.setHeartbeat(heartbeat[0], heartbeat[1]);
+		} else {
+			connectedHeaders.setHeartbeat(0, 0);
 		}
 		return connectedHeaders;
 	}
