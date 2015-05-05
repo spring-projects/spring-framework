@@ -3700,12 +3700,10 @@ data retrieved. Again, it is important to use the names of the `out` parameters 
 are declared in the stored procedure. Also, the case in the names of the `out`
 parameters stored in the results map matches that of the `out` parameter names in the
 database, which could vary between databases. To make your code more portable you should
-do a case-insensitive lookup or instruct Spring to use a `CaseInsensitiveMap` from the
-Jakarta Commons project. To do the latter, you create your own `JdbcTemplate` and set
-the `setResultsMapCaseInsensitive` property to `true`. Then you pass this customized
-`JdbcTemplate` instance into the constructor of your `SimpleJdbcCall`. You must include
-the `commons-collections.jar` in your classpath for this to work. Here is an example of
-this configuration:
+do a case-insensitive lookup or instruct Spring to use a `LinkedCaseInsensitiveMap`.
+To do the latter, you create your own `JdbcTemplate` and set the `setResultsMapCaseInsensitive`
+property to `true`. Then you pass this customized `JdbcTemplate` instance into
+the constructor of your `SimpleJdbcCall`. Here is an example of this configuration:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
