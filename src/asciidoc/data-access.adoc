@@ -6323,8 +6323,8 @@ declarative transaction facilities. For example:
 Spring JPA allows a configured `JpaTransactionManager` to expose a JPA transaction to
 JDBC access code that accesses the same JDBC `DataSource`, provided that the registered
 `JpaDialect` supports retrieval of the underlying JDBC `Connection`. Out of the box,
-Spring provides dialects for the Toplink, Hibernate and OpenJPA JPA implementations. See
-the next section for details on the `JpaDialect` mechanism.
+Spring provides dialects for the EclipseLink, Hibernate and OpenJPA JPA implementations.
+See the next section for details on the `JpaDialect` mechanism.
 
 
 
