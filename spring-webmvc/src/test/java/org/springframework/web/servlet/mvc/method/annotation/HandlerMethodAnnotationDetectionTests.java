@@ -18,8 +18,6 @@ package org.springframework.web.servlet.mvc.method.annotation;
 
 import java.lang.reflect.Method;
 import java.text.SimpleDateFormat;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.Date;
 
 import org.junit.Test;
@@ -76,6 +74,13 @@ public class HandlerMethodAnnotationDetectionTests {
 
 			{ ParameterizedAbstractClassController.class, true }, // CGLib proxy
 			{ ParameterizedAbstractClassController.class, false },
+
+			{ ParameterizedSubclassOverridesDefaultMappings.class, true }, // CGLib proxy
+			{ ParameterizedSubclassOverridesDefaultMappings.class, false },
+
+			// TODO [SPR-9517] Enable ParameterizedSubclassDoesNotOverrideConcreteImplementationsFromGenericAbstractSuperclass test cases
+			// { ParameterizedSubclassDoesNotOverrideConcreteImplementationsFromGenericAbstractSuperclass.class, true }, // CGLib proxy
+			// { ParameterizedSubclassDoesNotOverrideConcreteImplementationsFromGenericAbstractSuperclass.class, false },
 
 			{ InterfaceController.class, true }, // JDK dynamic proxy
 			{ InterfaceController.class, false },
@@ -138,8 +143,8 @@ public class HandlerMethodAnnotationDetectionTests {
 
 		ModelAndView mav = handlerAdapter.handle(request, new MockHttpServletResponse(), chain.getHandler());
 
-		assertEquals(mav.getModel().get("attr1"), dateFormat.parse(dateA));
-		assertEquals(mav.getModel().get("attr2"), dateFormat.parse(dateB));
+		assertEquals("model attr1:", dateFormat.parse(dateA), mav.getModel().get("attr1"));
+		assertEquals("model attr2:", dateFormat.parse(dateB), mav.getModel().get("attr2"));
 
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		exceptionResolver.resolveException(request, response, chain.getHandler(), new Exception("failure"));
@@ -281,7 +286,7 @@ public class HandlerMethodAnnotationDetectionTests {
 
 
 	@Controller
-	static abstract class MappingParameterizedAbstractClass<A, B, C> {
+	static abstract class MappingGenericAbstractClass<A, B, C> {
 
 		@InitBinder
 		public abstract void initBinder(WebDataBinder dataBinder, A thePattern);
@@ -303,7 +308,7 @@ public class HandlerMethodAnnotationDetectionTests {
 	 *
 	 * <p>All annotations can be on methods in the abstract class except parameter annotations.
 	 */
-	static class ParameterizedAbstractClassController extends MappingParameterizedAbstractClass<String, Date, Date> {
+	static class ParameterizedAbstractClassController extends MappingGenericAbstractClass<String, Date, Date> {
 
 		@Override
 		public void initBinder(WebDataBinder dataBinder, @RequestParam("datePattern") String thePattern) {
@@ -327,8 +332,99 @@ public class HandlerMethodAnnotationDetectionTests {
 		}
 	}
 
+	@Controller
+	static abstract class MappedGenericAbstractClassWithConcreteImplementations<A, B, C> {
+
+		@InitBinder
+		public abstract void initBinder(WebDataBinder dataBinder, A thePattern);
+
+		@ModelAttribute
+		public abstract void initModel(B date, Model model);
+
+		@RequestMapping(value = "/path1/path2", method = RequestMethod.POST)
+		@ModelAttribute("attr2")
+		public Date handle(C date, Model model) throws Exception {
+			return (Date) date;
+		}
+
+		@ExceptionHandler(Exception.class)
+		@ResponseBody
+		public abstract String handleException(Exception exception);
+	}
+
+	static class ParameterizedSubclassDoesNotOverrideConcreteImplementationsFromGenericAbstractSuperclass extends
+			MappedGenericAbstractClassWithConcreteImplementations<String, Date, Date> {
+
+		@Override
+		public void initBinder(WebDataBinder dataBinder, @RequestParam("datePattern") String thePattern) {
+			CustomDateEditor dateEditor = new CustomDateEditor(new SimpleDateFormat(thePattern), false);
+			dataBinder.registerCustomEditor(Date.class, dateEditor);
+		}
+
+		@Override
+		public void initModel(@RequestHeader("header1") Date date, Model model) {
+			model.addAttribute("attr1", date);
+		}
+
+		// does not override handle()
+
+		@Override
+		public String handleException(Exception exception) {
+			return exception.getMessage();
+		}
+	}
+
+	@Controller
+	static abstract class GenericAbstractClassDeclaresDefaultMappings<A, B, C> {
+
+		@InitBinder
+		public abstract void initBinder(WebDataBinder dataBinder, A thePattern);
+
+		@ModelAttribute
+		public abstract void initModel(B date, Model model);
+
+		// /foo/bar should be overridden in concrete subclass
+		@RequestMapping(value = "/foo/bar", method = RequestMethod.POST)
+		// attrFoo should be overridden in concrete subclass
+		@ModelAttribute("attrFoo")
+		public abstract Date handle(C date, Model model) throws Exception;
+
+		@ExceptionHandler(Exception.class)
+		@ResponseBody
+		public abstract String handleException(Exception exception);
+	}
+
+	static class ParameterizedSubclassOverridesDefaultMappings extends GenericAbstractClassDeclaresDefaultMappings<String, Date, Date> {
+
+		@Override
+		public void initBinder(WebDataBinder dataBinder, @RequestParam("datePattern") String thePattern) {
+			CustomDateEditor dateEditor = new CustomDateEditor(new SimpleDateFormat(thePattern), false);
+			dataBinder.registerCustomEditor(Date.class, dateEditor);
+		}
+
+		@Override
+		public void initModel(@RequestHeader("header1") Date date, Model model) {
+			model.addAttribute("attr1", date);
+		}
+
+		@Override
+		@RequestMapping(value = "/path1/path2", method = RequestMethod.POST)
+		// NOTE: @ModelAttribute will NOT be found on the abstract superclass if
+		// @RequestMapping is declared locally. Thus, we have to redeclare
+		// @ModelAttribute locally as well.
+		@ModelAttribute("attr2")
+		public Date handle(@RequestHeader("header2") Date date, Model model) throws Exception {
+			return date;
+		}
+
+		@Override
+		public String handleException(Exception exception) {
+			return exception.getMessage();
+		}
+	}
+
 	@RequestMapping
-	static interface MappingParameterizedInterface<A, B, C> {
+	static interface MappingGenericInterface<A, B, C> {
 
 		@InitBinder
 		void initBinder(WebDataBinder dataBinder, A thePattern);
@@ -352,7 +448,7 @@ public class HandlerMethodAnnotationDetectionTests {
 	 *
 	 * <p>Cannot be used as JDK dynamic proxy since parameterized interface does not contain type information.
 	 */
-	static class ParameterizedInterfaceController implements MappingParameterizedInterface<String, Date, Date> {
+	static class ParameterizedInterfaceController implements MappingGenericInterface<String, Date, Date> {
 
 		@Override
 		@InitBinder
