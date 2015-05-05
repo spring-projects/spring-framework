@@ -32,7 +32,7 @@ import org.springframework.util.Assert;
  * @since 3.0
  * @see org.springframework.context.ApplicationListener#onApplicationEvent
  */
-public class GenericApplicationListenerAdapter implements GenericApplicationListener {
+public class GenericApplicationListenerAdapter implements GenericApplicationListener, SmartApplicationListener {
 
 	private final ApplicationListener<ApplicationEvent> delegate;
 
@@ -65,6 +65,11 @@ public class GenericApplicationListenerAdapter implements GenericApplicationList
 		else {
 			return (this.declaredEventType == null || this.declaredEventType.isAssignableFrom(eventType));
 		}
+	}
+
+	@Override
+	public boolean supportsEventType(Class<? extends ApplicationEvent> eventType) {
+		return supportsEventType(ResolvableType.forType(eventType));
 	}
 
 	@Override
