@@ -16,8 +16,6 @@
 
 package org.springframework.web.context.request;
 
-import static org.junit.Assert.*;
-
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
@@ -27,10 +25,13 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
+import org.junit.runners.Parameterized.Parameter;
 import org.junit.runners.Parameterized.Parameters;
 
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockHttpServletResponse;
+
+import static org.junit.Assert.*;
 
 /**
  * Parameterized tests for ServletWebRequest
@@ -49,18 +50,15 @@ public class ServletWebRequestHttpMethodsTests {
 
 	private ServletWebRequest request;
 
-	private String method;
+	@Parameter
+	public String method;
 
-	@Parameters
+	@Parameters(name = "{0}")
 	static public Iterable<Object[]> safeMethods() {
 		return Arrays.asList(new Object[][] {
 				{"GET"},
 				{"HEAD"}
 		});
-	}
-
-	public ServletWebRequestHttpMethodsTests(String method) {
-		this.method = method;
 	}
 
 	@Before

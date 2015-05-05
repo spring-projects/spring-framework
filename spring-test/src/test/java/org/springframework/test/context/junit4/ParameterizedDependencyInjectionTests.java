@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
+import org.junit.runners.Parameterized.Parameter;
 import org.junit.runners.Parameterized.Parameters;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,26 +59,22 @@ public class ParameterizedDependencyInjectionTests {
 
 	private static final List<Employee> employees = new ArrayList<Employee>();
 
+	private final TestContextManager testContextManager = new TestContextManager(getClass());
+
 	@Autowired
 	private ApplicationContext applicationContext;
 
 	@Autowired
 	private Pet pet;
 
-	private final String employeeBeanName;
-	private final String employeeName;
+	@Parameter(0)
+	public String employeeBeanName;
 
-	private final TestContextManager testContextManager;
+	@Parameter(1)
+	public String employeeName;
 
 
-	public ParameterizedDependencyInjectionTests(final String employeeBeanName, final String employeeName)
-			throws Exception {
-		this.testContextManager = new TestContextManager(getClass());
-		this.employeeBeanName = employeeBeanName;
-		this.employeeName = employeeName;
-	}
-
-	@Parameters
+	@Parameters(name = "bean [{0}], employee [{1}]")
 	public static Collection<String[]> employeeData() {
 		return Arrays.asList(new String[][] { { "employee1", "John Smith" }, { "employee2", "Jane Smith" } });
 	}

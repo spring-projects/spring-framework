@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,6 +33,7 @@ import org.junit.runners.Parameterized.Parameters;
 import org.springframework.test.annotation.Repeat;
 import org.springframework.test.annotation.Timed;
 import org.springframework.test.context.TestExecutionListeners;
+import org.springframework.util.ClassUtils;
 
 import static org.junit.Assert.*;
 
@@ -52,7 +53,7 @@ public class RepeatedSpringRunnerTests {
 
 	private static final AtomicInteger invocationCount = new AtomicInteger();
 
-	private final Class<? extends AbstractRepeatedTestCase> testClass;
+	private final Class<?> testClass;
 
 	private final int expectedFailureCount;
 
@@ -63,26 +64,26 @@ public class RepeatedSpringRunnerTests {
 	private final int expectedInvocationCount;
 
 
-	public RepeatedSpringRunnerTests(Class<? extends AbstractRepeatedTestCase> testClass, int expectedFailureCount,
-			int expectedTestStartedCount, int expectedTestFinishedCount, int expectedInvocationCount) {
-		this.testClass = testClass;
+	@Parameters(name = "{0}")
+	public static Collection<Object[]> repetitionData() {
+		return Arrays.asList(new Object[][] {//
+		//
+			{ NonAnnotatedRepeatedTestCase.class.getSimpleName(), 0, 1, 1, 1 },//
+			{ DefaultRepeatValueRepeatedTestCase.class.getSimpleName(), 0, 1, 1, 1 },//
+			{ NegativeRepeatValueRepeatedTestCase.class.getSimpleName(), 0, 1, 1, 1 },//
+			{ RepeatedFiveTimesRepeatedTestCase.class.getSimpleName(), 0, 1, 1, 5 },//
+			{ RepeatedFiveTimesViaMetaAnnotationRepeatedTestCase.class.getSimpleName(), 0, 1, 1, 5 },//
+			{ TimedRepeatedTestCase.class.getSimpleName(), 3, 4, 4, (5 + 1 + 4 + 10) } //
+		});
+	}
+
+	public RepeatedSpringRunnerTests(String testClassName, int expectedFailureCount,
+			int expectedTestStartedCount, int expectedTestFinishedCount, int expectedInvocationCount) throws Exception {
+		this.testClass = ClassUtils.forName(getClass().getName() + "." + testClassName, getClass().getClassLoader());
 		this.expectedFailureCount = expectedFailureCount;
 		this.expectedTestStartedCount = expectedTestStartedCount;
 		this.expectedTestFinishedCount = expectedTestFinishedCount;
 		this.expectedInvocationCount = expectedInvocationCount;
-	}
-
-	@Parameters
-	public static Collection<Object[]> repetitionData() {
-		return Arrays.asList(new Object[][] {//
-		//
-			{ NonAnnotatedRepeatedTestCase.class, 0, 1, 1, 1 },//
-			{ DefaultRepeatValueRepeatedTestCase.class, 0, 1, 1, 1 },//
-			{ NegativeRepeatValueRepeatedTestCase.class, 0, 1, 1, 1 },//
-			{ RepeatedFiveTimesRepeatedTestCase.class, 0, 1, 1, 5 },//
-			{ RepeatedFiveTimesViaMetaAnnotationRepeatedTestCase.class, 0, 1, 1, 5 },//
-			{ TimedRepeatedTestCase.class, 3, 4, 4, (5 + 1 + 4 + 10) } //
-		});
 	}
 
 	@Test
