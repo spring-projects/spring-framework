@@ -148,6 +148,13 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 		return this.mappingRegistry.getHandlerMethodsByMappingName(mappingName);
 	}
 
+	/**
+	 * Return the internal mapping registry. Provided for testing purposes.
+	 */
+	MappingRegistry getMappingRegistry() {
+		return this.mappingRegistry;
+	}
+
 
 	/**
 	 * Detects handler methods at initialization.
@@ -341,7 +348,7 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 	 */
 	protected HandlerMethod lookupHandlerMethod(String lookupPath, HttpServletRequest request) throws Exception {
 		List<Match> matches = new ArrayList<Match>();
-		List<T> directPathMatches = this.mappingRegistry.getMappingKeysByUrl(lookupPath);
+		List<T> directPathMatches = this.mappingRegistry.getMappingsByUrl(lookupPath);
 		if (directPathMatches != null) {
 			addMatchingMappings(directPathMatches, matches, request);
 		}
@@ -382,7 +389,7 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 		for (T mapping : mappings) {
 			T match = getMatchingMapping(mapping, request);
 			if (match != null) {
-				matches.add(new Match(match, this.mappingRegistry.getHandlerMethod(mapping)));
+				matches.add(new Match(match, this.mappingRegistry.getMappings().get(mapping)));
 			}
 		}
 	}
@@ -443,16 +450,22 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 	}
 
 
-	private class MappingRegistry {
+	/**
+	 * A registry that maintains all mappings to handler methods, exposing methods
+	 * to perform lookups and providing concurrent access.
+	 *
+	 * <p>Package-private for testing purposes.
+	 */
+	class MappingRegistry {
+
+		private final Map<T, MappingRegistration<T>> registry = new HashMap<T, MappingRegistration<T>>();
 
 		private final Map<T, HandlerMethod> mappingLookup = new LinkedHashMap<T, HandlerMethod>();
 
 		private final MultiValueMap<String, T> urlLookup = new LinkedMultiValueMap<String, T>();
 
-		private final Map<String, List<HandlerMethod>> mappingNameLookup =
+		private final Map<String, List<HandlerMethod>> nameLookup =
 				new ConcurrentHashMap<String, List<HandlerMethod>>();
-
-		private final Map<T, MappingDefinition<T>> definitionMap = new HashMap<T, MappingDefinition<T>>();
 
 		private final Map<Method, CorsConfiguration> corsLookup =
 				new ConcurrentHashMap<Method, CorsConfiguration>();
@@ -473,23 +486,15 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 		 * Return matches for the given URL path. Not thread-safe.
 		 * @see #acquireReadLock()
 		 */
-		public List<T> getMappingKeysByUrl(String urlPath) {
+		public List<T> getMappingsByUrl(String urlPath) {
 			return this.urlLookup.get(urlPath);
-		}
-
-		/**
-		 * Return the handler method for the mapping key. Not thread-safe.
-		 * @see #acquireReadLock()
-		 */
-		public HandlerMethod getHandlerMethod(T mapping) {
-			return this.mappingLookup.get(mapping);
 		}
 
 		/**
 		 * Return handler methods by mapping name. Thread-safe for concurrent use.
 		 */
 		public List<HandlerMethod> getHandlerMethodsByMappingName(String mappingName) {
-			return this.mappingNameLookup.get(mappingName);
+			return this.nameLookup.get(mappingName);
 		}
 
 		/**
@@ -501,14 +506,14 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 		}
 
 		/**
-		 * Acquire the read lock when using getMappings and getMappingKeysByUrl.
+		 * Acquire the read lock when using getMappings and getMappingsByUrl.
 		 */
 		public void acquireReadLock() {
 			this.readWriteLock.readLock().lock();
 		}
 
 		/**
-		 * Release the read lock after using getMappings and getMappingKeysByUrl.
+		 * Release the read lock after using getMappings and getMappingsByUrl.
 		 */
 		public void releaseReadLock() {
 			this.readWriteLock.readLock().unlock();
@@ -543,8 +548,8 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 					this.corsLookup.put(method, corsConfig);
 				}
 
-				this.definitionMap.put(mapping,
-						new MappingDefinition<T>(mapping, handlerMethod, directUrls, name, corsConfig));
+				this.registry.put(mapping,
+						new MappingRegistration<T>(mapping, handlerMethod, directUrls, name, corsConfig));
 			}
 			finally {
 				this.readWriteLock.writeLock().unlock();
@@ -573,8 +578,8 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 
 		private void addMappingName(String name, HandlerMethod handlerMethod) {
 
-			List<HandlerMethod> oldList = this.mappingNameLookup.containsKey(name) ?
-					this.mappingNameLookup.get(name) : Collections.<HandlerMethod>emptyList();
+			List<HandlerMethod> oldList = this.nameLookup.containsKey(name) ?
+					this.nameLookup.get(name) : Collections.<HandlerMethod>emptyList();
 
 			for (HandlerMethod current : oldList) {
 				if (handlerMethod.getMethod().equals(current.getMethod())) {
@@ -589,7 +594,7 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 			List<HandlerMethod> newList = new ArrayList<HandlerMethod>(oldList.size() + 1);
 			newList.addAll(oldList);
 			newList.add(handlerMethod);
-			this.mappingNameLookup.put(name, newList);
+			this.nameLookup.put(name, newList);
 
 			if (newList.size() > 1) {
 				if (logger.isDebugEnabled()) {
@@ -602,7 +607,7 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 		public void unregister(T mapping) {
 			this.readWriteLock.writeLock().lock();
 			try {
-				MappingDefinition<T> definition = this.definitionMap.remove(mapping);
+				MappingRegistration<T> definition = this.registry.remove(mapping);
 				if (definition == null) {
 					return;
 				}
@@ -628,18 +633,18 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 			}
 		}
 
-		private void removeMappingName(MappingDefinition<T> definition) {
-			String name = definition.getName();
+		private void removeMappingName(MappingRegistration<T> definition) {
+			String name = definition.getMappingName();
 			if (name == null) {
 				return;
 			}
 			HandlerMethod handlerMethod = definition.getHandlerMethod();
-			List<HandlerMethod> oldList = this.mappingNameLookup.get(name);
+			List<HandlerMethod> oldList = this.nameLookup.get(name);
 			if (oldList == null) {
 				return;
 			}
 			if (oldList.size() <= 1) {
-				this.mappingNameLookup.remove(name);
+				this.nameLookup.remove(name);
 				return;
 			}
 			List<HandlerMethod> newList = new ArrayList<HandlerMethod>(oldList.size() - 1);
@@ -648,12 +653,12 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 					newList.add(current);
 				}
 			}
-			this.mappingNameLookup.put(name, newList);
+			this.nameLookup.put(name, newList);
 		}
 
 	}
 
-	private static class MappingDefinition<T> {
+	private static class MappingRegistration<T> {
 
 		private final T mapping;
 
@@ -661,13 +666,13 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 
 		private final List<String> directUrls;
 
-		private final String name;
+		private final String mappingName;
 
 		private final CorsConfiguration corsConfiguration;
 
 
-		public MappingDefinition(T mapping, HandlerMethod handlerMethod, List<String> directUrls,
-				String name, CorsConfiguration corsConfiguration) {
+		public MappingRegistration(T mapping, HandlerMethod handlerMethod, List<String> directUrls,
+				String mappingName, CorsConfiguration corsConfiguration) {
 
 			Assert.notNull(mapping);
 			Assert.notNull(handlerMethod);
@@ -675,7 +680,7 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 			this.mapping = mapping;
 			this.handlerMethod = handlerMethod;
 			this.directUrls = (directUrls != null ? directUrls : Collections.<String>emptyList());
-			this.name = name;
+			this.mappingName = mappingName;
 			this.corsConfiguration = corsConfiguration;
 		}
 
@@ -692,8 +697,8 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 			return this.directUrls;
 		}
 
-		public String getName() {
-			return this.name;
+		public String getMappingName() {
+			return this.mappingName;
 		}
 
 		public CorsConfiguration getCorsConfiguration() {
