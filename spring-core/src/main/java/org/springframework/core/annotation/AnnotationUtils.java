@@ -636,7 +636,19 @@ public abstract class AnnotationUtils {
 	 */
 	public static boolean isInJavaLangAnnotationPackage(Annotation annotation) {
 		Assert.notNull(annotation, "Annotation must not be null");
-		return annotation.annotationType().getName().startsWith("java.lang.annotation");
+		return isInJavaLangAnnotationPackage(annotation.annotationType().getName());
+	}
+
+	/**
+	 * Determine if the {@link Annotation} with the supplied name is defined
+	 * in the core JDK {@code java.lang.annotation} package.
+	 * @param annotationType the name of the annotation type to check (never {@code null} or empty)
+	 * @return {@code true} if the annotation is in the {@code java.lang.annotation} package
+	 * @since 4.2
+	 */
+	public static boolean isInJavaLangAnnotationPackage(String annotationType) {
+		Assert.hasText(annotationType, "annotationType must not be null or empty");
+		return annotationType.startsWith("java.lang.annotation");
 	}
 
 	/**

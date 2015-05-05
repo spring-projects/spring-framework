@@ -406,8 +406,8 @@ public class AnnotatedElementUtils {
 
 				// Search in local annotations
 				for (Annotation annotation : annotations) {
-					// TODO Test for !AnnotationUtils.isInJavaLangAnnotationPackage(annotation)
-					if (annotation.annotationType().getName().equals(annotationType) || metaDepth > 0) {
+					if (!AnnotationUtils.isInJavaLangAnnotationPackage(annotation)
+							&& (annotation.annotationType().getName().equals(annotationType) || metaDepth > 0)) {
 						T result = processor.process(annotation, metaDepth);
 						if (result != null) {
 							return result;
