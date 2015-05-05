@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,11 +59,12 @@ import static org.junit.Assert.*;
  * combination with proxies.
  *
  * @author Rossen Stoyanchev
+ * @author Sam Brannen
  */
 @RunWith(Parameterized.class)
 public class HandlerMethodAnnotationDetectionTests {
 
-	@Parameters
+	@Parameters(name = "controller [{0}], auto-proxy [{1}]")
 	public static Collection<Object[]> handlerTypes() {
 		Object[][] array = new Object[12][2];
 
@@ -111,6 +112,7 @@ public class HandlerMethodAnnotationDetectionTests {
 		this.handlerMapping = context.getBean(RequestMappingHandlerMapping.class);
 		this.handlerAdapter = context.getBean(RequestMappingHandlerAdapter.class);
 		this.exceptionResolver = context.getBean(ExceptionHandlerExceptionResolver.class);
+		context.close();
 	}
 
 	class TestPointcut extends StaticMethodMatcherPointcut {
