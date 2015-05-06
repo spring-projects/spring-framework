@@ -84,18 +84,6 @@ model and corresponding services:
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	public interface RemoteAccountService extends Remote {
-
-		public void insertAccount(Account account) throws RemoteException;
-
-		public List<Account> getAccounts(String name) throws RemoteException;
-
-	}
-----
-
-[source,java,indent=0]
-[subs="verbatim,quotes"]
-----
 	// the implementation doing nothing at the moment
 	public class AccountServiceImpl implements AccountService {
 
