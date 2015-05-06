@@ -4411,6 +4411,17 @@ dependency injection.
 <2> Using the method `setClobAsCharacterStream`, pass in the contents of the CLOB.
 <3> Using the method `setBlobAsBinaryStream`, pass in the contents of the BLOB.
 
+
+[NOTE]
+====
+If you use `setBlobAsBinaryStream` or `setClobAsAsciiStream` or `setClobAsCharacterStream`
+of the `DefaultLobHanlder`, you can specify a negative integer against the contentLength argument.
+If you specify a negative integer, the `DefaultLobHandler` invoke a `PreparedStatement`'s
+method without the content length that it added from the JDBC 4.0.
+If will be specify a negative integer, please confirm the support status of the jdbc driver.
+====
+
+
 Now it's time to read the LOB data from the database. Again, you use a `JdbcTemplate`
 with the same instance variable `lobHandler` and a reference to a `DefaultLobHandler`.
 
