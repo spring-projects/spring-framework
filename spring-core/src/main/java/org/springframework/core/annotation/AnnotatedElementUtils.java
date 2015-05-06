@@ -226,6 +226,8 @@ public class AnnotatedElementUtils {
 	 * @return the merged {@code AnnotationAttributes}, or {@code null} if
 	 * not found
 	 * @see #getAnnotationAttributes(AnnotatedElement, String, boolean, boolean)
+	 * @see #findAnnotationAttributes(AnnotatedElement, Class)
+	 * @see #findAnnotationAttributes(AnnotatedElement, String)
 	 */
 	public static AnnotationAttributes getAnnotationAttributes(AnnotatedElement element, String annotationType) {
 		return getAnnotationAttributes(element, annotationType, false, false);
@@ -249,6 +251,9 @@ public class AnnotatedElementUtils {
 	 * as Annotation instances
 	 * @return the merged {@code AnnotationAttributes}, or {@code null} if
 	 * not found
+	 * @see #findAnnotationAttributes(AnnotatedElement, Class)
+	 * @see #findAnnotationAttributes(AnnotatedElement, String)
+	 * @see #findAnnotationAttributes(AnnotatedElement, String, boolean, boolean)
 	 */
 	public static AnnotationAttributes getAnnotationAttributes(AnnotatedElement element, String annotationType,
 			boolean classValuesAsString, boolean nestedAnnotationsAsMap) {

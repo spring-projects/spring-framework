@@ -170,16 +170,24 @@ public class AnnotatedElementUtilsTests {
 
 	@Test
 	public void getAnnotationAttributesOnClassWithLocalAnnotation() {
-		AnnotationAttributes attributes = getAnnotationAttributes(TxConfig.class, Transactional.class.getName());
+		Class<?> element = TxConfig.class;
+		String name = Transactional.class.getName();
+		AnnotationAttributes attributes = getAnnotationAttributes(element, name);
 		assertNotNull("Annotation attributes for @Transactional on TxConfig", attributes);
 		assertEquals("value for TxConfig.", "TxConfig", attributes.getString("value"));
+		// Verify contracts between utility methods:
+		assertTrue(isAnnotated(element, name));
 	}
 
 	@Test
 	public void getAnnotationAttributesOnClassWithLocalAnnotationThatShadowsAnnotationFromSuperclass() {
-		AnnotationAttributes attributes = getAnnotationAttributes(DerivedTxConfig.class, Transactional.class.getName());
+		Class<?> element = DerivedTxConfig.class;
+		String name = Transactional.class.getName();
+		AnnotationAttributes attributes = getAnnotationAttributes(element, name);
 		assertNotNull("Annotation attributes for @Transactional on DerivedTxConfig", attributes);
 		assertEquals("value for DerivedTxConfig.", "DerivedTxConfig", attributes.getString("value"));
+		// Verify contracts between utility methods:
+		assertTrue(isAnnotated(element, name));
 	}
 
 	@Test
@@ -191,9 +199,12 @@ public class AnnotatedElementUtilsTests {
 
 	@Test
 	public void getAnnotationAttributesFavorsInheritedAnnotationsOverMoreLocallyDeclaredComposedAnnotations() {
-		AnnotationAttributes attributes = getAnnotationAttributes(SubSubClassWithInheritedAnnotation.class,
-			Transactional.class.getName());
+		Class<?> element = SubSubClassWithInheritedAnnotation.class;
+		String name = Transactional.class.getName();
+		AnnotationAttributes attributes = getAnnotationAttributes(element, name);
 		assertNotNull("AnnotationAttributes for @Transactional on SubSubClassWithInheritedAnnotation", attributes);
+		// Verify contracts between utility methods:
+		assertTrue(isAnnotated(element, name));
 
 		// TODO [SPR-11598] Set expected to true.
 		boolean expected = false;
@@ -202,10 +213,12 @@ public class AnnotatedElementUtilsTests {
 
 	@Test
 	public void getAnnotationAttributesFavorsInheritedComposedAnnotationsOverMoreLocallyDeclaredComposedAnnotations() {
-		AnnotationAttributes attributes = getAnnotationAttributes(SubSubClassWithInheritedComposedAnnotation.class,
-			Transactional.class.getName());
-		assertNotNull("AnnotationAttributtes for @Transactional on SubSubClassWithInheritedComposedAnnotation.",
-			attributes);
+		Class<?> element = SubSubClassWithInheritedComposedAnnotation.class;
+		String name = Transactional.class.getName();
+		AnnotationAttributes attributes = getAnnotationAttributes(element, name);
+		assertNotNull("AnnotationAttributtes for @Transactional on SubSubClassWithInheritedComposedAnnotation.", attributes);
+		// Verify contracts between utility methods:
+		assertTrue(isAnnotated(element, name));
 
 		// TODO [SPR-11598] Set expected to true.
 		boolean expected = false;
@@ -217,16 +230,32 @@ public class AnnotatedElementUtilsTests {
 	@Ignore("Disabled until SPR-11598 is resolved")
 	@Test
 	public void getAnnotationAttributesFromInterfaceImplementedBySuperclass() {
+		Class<?> element = ConcreteClassWithInheritedAnnotation.class;
 		String name = Transactional.class.getName();
-		AnnotationAttributes attributes = getAnnotationAttributes(ConcreteClassWithInheritedAnnotation.class, name);
+		AnnotationAttributes attributes = getAnnotationAttributes(element, name);
 		assertNotNull("Should find @Transactional on ConcreteClassWithInheritedAnnotation", attributes);
+		// Verify contracts between utility methods:
+		assertTrue(isAnnotated(element, name));
 	}
 
 	@Test
 	public void getAnnotationAttributesOnInheritedAnnotationInterface() {
+		Class<?> element = InheritedAnnotationInterface.class;
 		String name = Transactional.class.getName();
-		AnnotationAttributes attributes = getAnnotationAttributes(InheritedAnnotationInterface.class, name);
+		AnnotationAttributes attributes = getAnnotationAttributes(element, name);
 		assertNotNull("Should get @Transactional on InheritedAnnotationInterface", attributes);
+		// Verify contracts between utility methods:
+		assertTrue(isAnnotated(element, name));
+	}
+
+	@Test
+	public void getAnnotationAttributesOnNonInheritedAnnotationInterface() {
+		Class<?> element = NonInheritedAnnotationInterface.class;
+		String name = Order.class.getName();
+		AnnotationAttributes attributes = getAnnotationAttributes(element, name);
+		assertNotNull("Should get @Order on NonInheritedAnnotationInterface", attributes);
+		// Verify contracts between utility methods:
+		assertTrue(isAnnotated(element, name));
 	}
 
 	@Test
@@ -251,12 +280,6 @@ public class AnnotatedElementUtilsTests {
 	public void findAnnotationAttributesOnNonInheritedAnnotationInterface() {
 		AnnotationAttributes attributes = findAnnotationAttributes(NonInheritedAnnotationInterface.class, Order.class);
 		assertNotNull("Should find @Order on NonInheritedAnnotationInterface", attributes);
-	}
-
-	@Test
-	public void getAnnotationAttributesOnNonInheritedAnnotationInterface() {
-		AnnotationAttributes attributes = getAnnotationAttributes(NonInheritedAnnotationInterface.class, Order.class.getName());
-		assertNotNull("Should get @Order on NonInheritedAnnotationInterface", attributes);
 	}
 
 	@Test
