@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,7 @@
  */
 
 package org.springframework.core.env;
+
 
 import java.io.File;
 import java.io.IOException;
@@ -65,43 +66,40 @@ import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 import static org.springframework.beans.factory.support.BeanDefinitionBuilder.*;
 import static org.springframework.context.ConfigurableApplicationContext.*;
-import static org.springframework.core.env.EnvironmentIntegrationTests.Constants.*;
+import static org.springframework.core.env.EnvironmentSystemIntegrationTests.Constants.*;
 
 /**
- * Integration tests for container support of {@link Environment}
- * interface.
+ * System integration tests for container support of the {@link Environment} API.
  *
- * Tests all existing BeanFactory and ApplicationContext implementations to
- * ensure that:
- * - a standard environment object is always present
- * - a custom environment object can be set and retrieved against the factory/context
- * - the {@link EnvironmentAware} interface is respected
- * - the environment object is registered with the container as a singleton
- *   bean (if an ApplicationContext)
- * - bean definition files (if any, and whether XML or @Configuration) are
- *   registered conditionally based on environment metadata
+ * <p>
+ * Tests all existing BeanFactory and ApplicationContext implementations to ensure that:
+ * <ul>
+ * <li>a standard environment object is always present
+ * <li>a custom environment object can be set and retrieved against the factory/context
+ * <li>the {@link EnvironmentAware} interface is respected
+ * <li>the environment object is registered with the container as a singleton bean (if an
+ * ApplicationContext)
+ * <li>bean definition files (if any, and whether XML or @Configuration) are registered
+ * conditionally based on environment metadata
+ * </ul>
  *
  * @author Chris Beams
+ * @author Sam Brannen
+ * @see org.springframework.context.support.EnvironmentIntegrationTests
  */
 @SuppressWarnings("resource")
-public class EnvironmentIntegrationTests {
+public class EnvironmentSystemIntegrationTests {
 
-	private ConfigurableEnvironment prodEnv;
+	private final ConfigurableEnvironment prodEnv = new StandardEnvironment();
 
-	private ConfigurableEnvironment devEnv;
+	private final ConfigurableEnvironment devEnv = new StandardEnvironment();
 
-	private ConfigurableEnvironment prodWebEnv;
-
+	private final ConfigurableEnvironment prodWebEnv = new StandardServletEnvironment();
 
 	@Before
 	public void setUp() {
-		prodEnv = new StandardEnvironment();
 		prodEnv.setActiveProfiles(PROD_ENV_NAME);
-
-		devEnv = new StandardEnvironment();
 		devEnv.setActiveProfiles(DEV_ENV_NAME);
-
-		prodWebEnv = new StandardServletEnvironment();
 		prodWebEnv.setActiveProfiles(PROD_ENV_NAME);
 	}
 
@@ -640,8 +638,8 @@ public class EnvironmentIntegrationTests {
 
 
 	/**
-	 * Mirrors the structure of beans and environment-specific config files
-	 * in EnvironmentIntegrationTests-context.xml
+	 * Mirrors the structure of beans and environment-specific config files in
+	 * EnvironmentSystemIntegrationTests-context.xml
 	 */
 	@Configuration
 	@Import({DevConfig.class, ProdConfig.class})
@@ -694,7 +692,7 @@ public class EnvironmentIntegrationTests {
 	 */
 	public static class Constants {
 
-		public static final String XML_PATH = "org/springframework/core/env/EnvironmentIntegrationTests-context.xml";
+		public static final String XML_PATH = "org/springframework/core/env/EnvironmentSystemIntegrationTests-context.xml";
 
 		public static final String ENVIRONMENT_AWARE_BEAN_NAME = "envAwareBean";
 
