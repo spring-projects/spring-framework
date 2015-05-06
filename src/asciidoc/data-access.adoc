@@ -6504,6 +6504,7 @@ provide a distinction between marshalling and unmarshalling operations, even tho
 underlying O/X mapping tool does not do so.
 
 The O/X Mapping exception hierarchy is shown in the following figure:
+
 image::images/oxm-exceptions.png[width=400]
 
 O/X Mapping exception hierarchy
