@@ -30,13 +30,59 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
 /**
- * Utility class used to collect and merge all annotation attributes on a
- * given {@link AnnotatedElement}, including those declared via meta-annotations.
+ * General utility methods for working with annotations and meta-annotations
+ * <em>present</em> on {@link AnnotatedElement AnnotatedElements}.
+ *
+ * <p>{@code AnnotatedElementUtils} defines the public API for Spring's
+ * meta-annotation programming model with support for annotation attribute
+ * overrides. If you do not need support for annotation attribute overrides,
+ * consider using {@link AnnotationUtils} instead.
+ *
+ * <p>Note that the features of this class are not provided by the JDK's
+ * introspection facilities themselves.
+ *
+ * <h3>Annotation Attribute Override Support</h3>
+ * <p>Support for meta-annotations with <em>attribute overrides</em> in
+ * <em>composed annotations</em> is provided by all
+ * {@code getAnnotationAttributes()} and {@code findAnnotationAttributes()}
+ * methods.
+ *
+ * <h3>Find vs. Get Semantics</h3>
+ * <p>The search algorithms used by methods in this class follow either
+ * <em>find</em> or <em>get</em> semantics. Consult the Javadoc for each
+ * individual method for details on which search algorithm is used.
+ *
+ * <p><strong>Get semantics</strong> are limited to searching for annotations
+ * that are either <em>present</em> on an {@code AnnotatedElement} (i.e.,
+ * declared locally or {@linkplain java.lang.annotation.Inherited inherited})
+ * or declared within the annotation hierarchy above an {@code AnnotatedElement}.
+ *
+ * <p><strong>Find semantics</strong> are much more exhaustive, providing
+ * <em>get semantics</em> plus support for the following:
+ *
+ * <ul>
+ * <li>Searching on interfaces, if the annotated element is a class
+ * <li>Searching on superclasses, if the annotated element is a class
+ * <li>Resolving bridged methods, if the annotated element is a method
+ * <li>Searching on methods in interfaces, if the annotated element is a method
+ * <li>Searching on methods in superclasses, if the annotated element is a method
+ * </ul>
+ * 
+ * <h3>Support for {@code @Inherited}</h3>
+ * <p>Methods following <em>get semantics</em> will honor the contract of
+ * Java's {@link java.lang.annotation.Inherited @Inherited} annotation.
+ * However, methods following <em>find semantics</em> will ignore the
+ * presence of {@code @Inherited} since the <em>find</em> search algorithm
+ * manually traverses type and method hierarchies and thereby implicitly
+ * supports annotation inheritance without the need for {@code @Inherited}.
  *
  * @author Phillip Webb
  * @author Juergen Hoeller
  * @author Sam Brannen
  * @since 4.0
+ * @see AnnotationUtils
+ * @see AnnotationAttributes
+ * @see BridgeMethodResolver
  */
 public class AnnotatedElementUtils {
 
@@ -44,12 +90,12 @@ public class AnnotatedElementUtils {
 
 
 	/**
-	 * <em>Get</em> the fully qualified class names of all meta-annotation
+	 * Get the fully qualified class names of all meta-annotation
 	 * types <em>present</em> on the annotation (of the specified
 	 * {@code annotationType}) on the supplied {@link AnnotatedElement}.
 	 *
-	 * <p>This method finds all meta-annotations in the annotation hierarchy
-	 * above the specified annotation.
+	 * <p>This method follows <em>get semantics</em> as described in the
+	 * {@linkplain AnnotatedElementUtils class-level Javadoc}.
 	 *
 	 * @param element the annotated element; never {@code null}
 	 * @param annotationType the annotation type on which to find
@@ -66,12 +112,12 @@ public class AnnotatedElementUtils {
 	}
 
 	/**
-	 * <em>Get</em> the fully qualified class names of all meta-annotation
+	 * Get the fully qualified class names of all meta-annotation
 	 * types <em>present</em> on the annotation (of the specified
 	 * {@code annotationType}) on the supplied {@link AnnotatedElement}.
 	 *
-	 * <p>This method finds all meta-annotations in the annotation hierarchy
-	 * above the specified annotation.
+	 * <p>This method follows <em>get semantics</em> as described in the
+	 * {@linkplain AnnotatedElementUtils class-level Javadoc}.
 	 *
 	 * @param element the annotated element; never {@code null}
 	 * @param annotationType the fully qualified class name of the annotation
@@ -90,7 +136,7 @@ public class AnnotatedElementUtils {
 		try {
 			Annotation annotation = getAnnotation(element, annotationType);
 			if (annotation != null) {
-				processWithGetSemantics(annotation.annotationType(), annotationType, new SimpleAnnotationProcessor<Object>() {
+				searchWithGetSemantics(annotation.annotationType(), annotationType, new SimpleAnnotationProcessor<Object>() {
 
 					@Override
 					public Object process(Annotation annotation, int metaDepth) {
@@ -112,8 +158,8 @@ public class AnnotatedElementUtils {
 	 * a <em>composed annotation</em> that is meta-annotated with an
 	 * annotation of the specified {@code annotationType}.
 	 *
-	 * <p>This method finds all meta-annotations in the annotation hierarchy
-	 * above the specified element.
+	 * <p>This method follows <em>get semantics</em> as described in the
+	 * {@linkplain AnnotatedElementUtils class-level Javadoc}.
 	 *
 	 * @param element the annotated element; never {@code null}
 	 * @param annotationType the fully qualified class name of the meta-annotation
@@ -125,7 +171,7 @@ public class AnnotatedElementUtils {
 		Assert.notNull(element, "AnnotatedElement must not be null");
 		Assert.hasText(annotationType, "annotationType must not be null or empty");
 
-		return Boolean.TRUE.equals(processWithGetSemantics(element, annotationType, new SimpleAnnotationProcessor<Boolean>() {
+		return Boolean.TRUE.equals(searchWithGetSemantics(element, annotationType, new SimpleAnnotationProcessor<Boolean>() {
 			@Override
 			public Boolean process(Annotation annotation, int metaDepth) {
 				boolean found = annotation.annotationType().getName().equals(annotationType);
@@ -142,6 +188,9 @@ public class AnnotatedElementUtils {
 	 * <p>If this method returns {@code true}, then {@link #getAnnotationAttributes}
 	 * will return a non-null value.
 	 *
+	 * <p>This method follows <em>get semantics</em> as described in the
+	 * {@linkplain AnnotatedElementUtils class-level Javadoc}.
+	 *
 	 * @param element the annotated element; never {@code null}
 	 * @param annotationType the fully qualified class name of the annotation
 	 * type to find; never {@code null} or empty
@@ -151,7 +200,7 @@ public class AnnotatedElementUtils {
 		Assert.notNull(element, "AnnotatedElement must not be null");
 		Assert.hasText(annotationType, "annotationType must not be null or empty");
 
-		return Boolean.TRUE.equals(processWithGetSemantics(element, annotationType, new SimpleAnnotationProcessor<Boolean>() {
+		return Boolean.TRUE.equals(searchWithGetSemantics(element, annotationType, new SimpleAnnotationProcessor<Boolean>() {
 			@Override
 			public Boolean process(Annotation annotation, int metaDepth) {
 				boolean found = annotation.annotationType().getName().equals(annotationType);
@@ -161,12 +210,15 @@ public class AnnotatedElementUtils {
 	}
 
 	/**
-	 * <em>Get</em> annotation attributes of the specified {@code annotationType}
-	 * in the annotation hierarchy of the supplied {@link AnnotatedElement},
+	 * Get annotation attributes of the specified {@code annotationType}
+	 * in the annotation hierarchy of the supplied {@link AnnotatedElement}
 	 * and merge the results into an {@link AnnotationAttributes} map.
 	 *
 	 * <p>Delegates to {@link #getAnnotationAttributes(AnnotatedElement, String, boolean, boolean)},
 	 * supplying {@code false} for {@code classValuesAsString} and {@code nestedAnnotationsAsMap}.
+	 *
+	 * <p>This method follows <em>get semantics</em> as described in the
+	 * {@linkplain AnnotatedElementUtils class-level Javadoc}.
 	 *
 	 * @param element the annotated element; never {@code null}
 	 * @param annotationType the fully qualified class name of the annotation
@@ -180,9 +232,12 @@ public class AnnotatedElementUtils {
 	}
 
 	/**
-	 * <em>Get</em> annotation attributes of the specified {@code annotationType}
-	 * in the annotation hierarchy of the supplied {@link AnnotatedElement},
+	 * Get annotation attributes of the specified {@code annotationType}
+	 * in the annotation hierarchy of the supplied {@link AnnotatedElement}
 	 * and merge the results into an {@link AnnotationAttributes} map.
+	 *
+	 * <p>This method follows <em>get semantics</em> as described in the
+	 * {@linkplain AnnotatedElementUtils class-level Javadoc}.
 	 *
 	 * @param element the annotated element; never {@code null}
 	 * @param annotationType the fully qualified class name of the annotation
@@ -197,25 +252,26 @@ public class AnnotatedElementUtils {
 	 */
 	public static AnnotationAttributes getAnnotationAttributes(AnnotatedElement element, String annotationType,
 			boolean classValuesAsString, boolean nestedAnnotationsAsMap) {
-		return processWithGetSemantics(element, annotationType, new MergedAnnotationAttributesProcessor(annotationType,
+		return searchWithGetSemantics(element, annotationType, new MergedAnnotationAttributesProcessor(annotationType,
 			classValuesAsString, nestedAnnotationsAsMap));
 	}
 
 	/**
-	 * <em>Find</em> annotation attributes of the specified {@code annotationType}
-	 * in the annotation hierarchy of the supplied {@link AnnotatedElement},
-	 * and merge the results into an {@link AnnotationAttributes} map.
+	 * Find annotation attributes of the specified {@code annotationType}
+	 * within annotation hierarchies <em>above</em> the supplied
+	 * {@link AnnotatedElement} and merge the results into an
+	 * {@link AnnotationAttributes} map.
 	 *
-	 * <p>If the annotated element is a class, this algorithm will additionally
-	 * search on interfaces and superclasses.
-	 * <p>If the annotated element is a method, this algorithm will additionally
-	 * search on methods in interfaces and superclasses.
+	 * <p>This method follows <em>find semantics</em> as described in the
+	 * {@linkplain AnnotatedElementUtils class-level Javadoc}.
 	 *
 	 * @param element the annotated element; never {@code null}
 	 * @param annotationType the annotation type to find; never {@code null}
 	 * @return the merged {@code AnnotationAttributes}, or {@code null} if
 	 * not found
 	 * @since 4.2
+	 * @see #findAnnotationAttributes(AnnotatedElement, String)
+	 * @see #findAnnotationAttributes(AnnotatedElement, String, boolean, boolean)
 	 */
 	public static AnnotationAttributes findAnnotationAttributes(AnnotatedElement element,
 			Class<? extends Annotation> annotationType) {
@@ -224,14 +280,13 @@ public class AnnotatedElementUtils {
 	}
 
 	/**
-	 * <em>Find</em> annotation attributes of the specified {@code annotationType}
-	 * in the annotation hierarchy of the supplied {@link AnnotatedElement},
-	 * and merge the results into an {@link AnnotationAttributes} map.
+	 * Find annotation attributes of the specified {@code annotationType}
+	 * within annotation hierarchies <em>above</em> the supplied
+	 * {@link AnnotatedElement} and merge the results into an
+	 * {@link AnnotationAttributes} map.
 	 *
-	 * <p>If the annotated element is a class, this algorithm will additionally
-	 * search on interfaces and superclasses.
-	 * <p>If the annotated element is a method, this algorithm will additionally
-	 * search on methods in interfaces and superclasses.
+	 * <p>This method follows <em>find semantics</em> as described in the
+	 * {@linkplain AnnotatedElementUtils class-level Javadoc}.
 	 *
 	 * @param element the annotated element; never {@code null}
 	 * @param annotationType the fully qualified class name of the annotation
@@ -239,20 +294,21 @@ public class AnnotatedElementUtils {
 	 * @return the merged {@code AnnotationAttributes}, or {@code null} if
 	 * not found
 	 * @since 4.2
+	 * @see #findAnnotationAttributes(AnnotatedElement, Class)
+	 * @see #findAnnotationAttributes(AnnotatedElement, String, boolean, boolean)
 	 */
 	public static AnnotationAttributes findAnnotationAttributes(AnnotatedElement element, String annotationType) {
 		return findAnnotationAttributes(element, annotationType, false, false);
 	}
 
 	/**
-	 * <em>Find</em> annotation attributes of the specified {@code annotationType}
-	 * in the annotation hierarchy of the supplied {@link AnnotatedElement},
-	 * and merge the results into an {@link AnnotationAttributes} map.
+	 * Find annotation attributes of the specified {@code annotationType}
+	 * within annotation hierarchies <em>above</em> the supplied
+	 * {@link AnnotatedElement} and merge the results into an
+	 * {@link AnnotationAttributes} map.
 	 *
-	 * <p>If the annotated element is a class, this algorithm will additionally
-	 * search on interfaces and superclasses.
-	 * <p>If the annotated element is a method, this algorithm will additionally
-	 * search on methods in interfaces and superclasses.
+	 * <p>This method follows <em>find semantics</em> as described in the
+	 * {@linkplain AnnotatedElementUtils class-level Javadoc}.
 	 *
 	 * @param element the annotated element; never {@code null}
 	 * @param annotationType the fully qualified class name of the annotation
@@ -265,6 +321,9 @@ public class AnnotatedElementUtils {
 	 * @return the merged {@code AnnotationAttributes}, or {@code null} if
 	 * not found
 	 * @since 4.2
+	 * @see #findAnnotationAttributes(AnnotatedElement, Class)
+	 * @see #findAnnotationAttributes(AnnotatedElement, String)
+	 * @see #getAnnotationAttributes(AnnotatedElement, String, boolean, boolean)
 	 */
 	public static AnnotationAttributes findAnnotationAttributes(AnnotatedElement element, String annotationType,
 			boolean classValuesAsString, boolean nestedAnnotationsAsMap) {
@@ -273,9 +332,10 @@ public class AnnotatedElementUtils {
 	}
 
 	/**
-	 * <em>Find</em> annotation attributes of the specified {@code annotationType}
-	 * in the annotation hierarchy of the supplied {@link AnnotatedElement},
-	 * and merge the results into an {@link AnnotationAttributes} map.
+	 * Find annotation attributes of the specified {@code annotationType}
+	 * within annotation hierarchies <em>above</em> the supplied
+	 * {@link AnnotatedElement} and merge the results into an
+	 * {@link AnnotationAttributes} map.
 	 *
 	 * @param element the annotated element; never {@code null}
 	 * @param annotationType the fully qualified class name of the annotation
@@ -296,24 +356,29 @@ public class AnnotatedElementUtils {
 	 * @return the merged {@code AnnotationAttributes}, or {@code null} if
 	 * not found
 	 * @since 4.2
+	 * @see #searchWithFindSemantics
+	 * @see MergedAnnotationAttributesProcessor
 	 */
 	private static AnnotationAttributes findAnnotationAttributes(AnnotatedElement element, String annotationType,
 			boolean searchOnInterfaces, boolean searchOnSuperclasses, boolean searchOnMethodsInInterfaces,
 			boolean searchOnMethodsInSuperclasses, boolean classValuesAsString, boolean nestedAnnotationsAsMap) {
 
-		return processWithFindSemantics(element, annotationType, searchOnInterfaces, searchOnSuperclasses,
+		return searchWithFindSemantics(element, annotationType, searchOnInterfaces, searchOnSuperclasses,
 			searchOnMethodsInInterfaces, searchOnMethodsInSuperclasses, new MergedAnnotationAttributesProcessor(
 				annotationType, classValuesAsString, nestedAnnotationsAsMap));
 	}
 
 	/**
-	 * <em>Get</em> the annotation attributes of <strong>all</strong> annotations
+	 * Get the annotation attributes of <strong>all</strong> annotations
 	 * of the specified {@code annotationType} in the annotation hierarchy above
 	 * the supplied {@link AnnotatedElement} and store the results in a
 	 * {@link MultiValueMap}.
 	 *
 	 * <p>Note: in contrast to {@link #getAnnotationAttributes(AnnotatedElement, String)},
-	 * this method does <em>not</em> take attribute overrides into account.
+	 * this method does <em>not</em> support attribute overrides.
+	 *
+	 * <p>This method follows <em>get semantics</em> as described in the
+	 * {@linkplain AnnotatedElementUtils class-level Javadoc}.
 	 *
 	 * @param element the annotated element; never {@code null}
 	 * @param annotationType the fully qualified class name of the annotation
@@ -328,13 +393,16 @@ public class AnnotatedElementUtils {
 	}
 
 	/**
-	 * <em>Get</em> the annotation attributes of <strong>all</strong> annotations
+	 * Get the annotation attributes of <strong>all</strong> annotations
 	 * of the specified {@code annotationType} in the annotation hierarchy above
 	 * the supplied {@link AnnotatedElement} and store the results in a
 	 * {@link MultiValueMap}.
 	 *
 	 * <p>Note: in contrast to {@link #getAnnotationAttributes(AnnotatedElement, String)},
-	 * this method does <em>not</em> take attribute overrides into account.
+	 * this method does <em>not</em> support attribute overrides.
+	 *
+	 * <p>This method follows <em>get semantics</em> as described in the
+	 * {@linkplain AnnotatedElementUtils class-level Javadoc}.
 	 *
 	 * @param element the annotated element; never {@code null}
 	 * @param annotationType the fully qualified class name of the annotation
@@ -353,7 +421,7 @@ public class AnnotatedElementUtils {
 
 		final MultiValueMap<String, Object> attributesMap = new LinkedMultiValueMap<String, Object>();
 
-		processWithGetSemantics(element, annotationType, new SimpleAnnotationProcessor<Void>() {
+		searchWithGetSemantics(element, annotationType, new SimpleAnnotationProcessor<Void>() {
 
 			@Override
 			public Void process(Annotation annotation, int metaDepth) {
@@ -375,8 +443,8 @@ public class AnnotatedElementUtils {
 	}
 
 	/**
-	 * Process all annotations of the specified {@code annotationType} and
-	 * recursively all meta-annotations on the specified {@code element}.
+	 * Search for annotations of the specified {@code annotationType} on
+	 * the specified {@code element}, following <em>get semantics</em>.
 	 *
 	 * @param element the annotated element; never {@code null}
 	 * @param annotationType the fully qualified class name of the annotation
@@ -384,9 +452,9 @@ public class AnnotatedElementUtils {
 	 * @param processor the processor to delegate to
 	 * @return the result of the processor, potentially {@code null}
 	 */
-	private static <T> T processWithGetSemantics(AnnotatedElement element, String annotationType, Processor<T> processor) {
+	private static <T> T searchWithGetSemantics(AnnotatedElement element, String annotationType, Processor<T> processor) {
 		try {
-			return processWithGetSemantics(element, annotationType, processor, new HashSet<AnnotatedElement>(), 0);
+			return searchWithGetSemantics(element, annotationType, processor, new HashSet<AnnotatedElement>(), 0);
 		}
 		catch (Throwable ex) {
 			throw new IllegalStateException("Failed to introspect annotations on " + element, ex);
@@ -394,7 +462,7 @@ public class AnnotatedElementUtils {
 	}
 
 	/**
-	 * Perform the search algorithm for the {@link #processWithGetSemantics}
+	 * Perform the search algorithm for the {@link #searchWithGetSemantics}
 	 * method, avoiding endless recursion by tracking which annotated elements
 	 * have already been <em>visited</em>.
 	 *
@@ -410,7 +478,7 @@ public class AnnotatedElementUtils {
 	 * @param metaDepth the meta-depth of the annotation
 	 * @return the result of the processor, potentially {@code null}
 	 */
-	private static <T> T processWithGetSemantics(AnnotatedElement element, String annotationType,
+	private static <T> T searchWithGetSemantics(AnnotatedElement element, String annotationType,
 			Processor<T> processor, Set<AnnotatedElement> visited, int metaDepth) {
 
 		Assert.notNull(element, "AnnotatedElement must not be null");
@@ -435,7 +503,7 @@ public class AnnotatedElementUtils {
 				// Search in meta annotations on local annotations
 				for (Annotation annotation : annotations) {
 					if (!AnnotationUtils.isInJavaLangAnnotationPackage(annotation)) {
-						T result = processWithGetSemantics(annotation.annotationType(), annotationType, processor,
+						T result = searchWithGetSemantics(annotation.annotationType(), annotationType, processor,
 							visited, metaDepth + 1);
 						if (result != null) {
 							processor.postProcess(annotation, result);
@@ -453,8 +521,8 @@ public class AnnotatedElementUtils {
 	}
 
 	/**
-	 * Process all annotations of the specified {@code annotationType} and
-	 * recursively all meta-annotations on the specified {@code element}.
+	 * Search for annotations of the specified {@code annotationType} on
+	 * the specified {@code element}, following <em>find semantics</em>.
 	 *
 	 * @param element the annotated element; never {@code null}
 	 * @param annotationType the fully qualified class name of the annotation
@@ -470,12 +538,12 @@ public class AnnotatedElementUtils {
 	 * @param processor the processor to delegate to
 	 * @return the result of the processor, potentially {@code null}
 	 */
-	private static <T> T processWithFindSemantics(AnnotatedElement element, String annotationType,
+	private static <T> T searchWithFindSemantics(AnnotatedElement element, String annotationType,
 			boolean searchOnInterfaces, boolean searchOnSuperclasses, boolean searchOnMethodsInInterfaces,
 			boolean searchOnMethodsInSuperclasses, Processor<T> processor) {
 
 		try {
-			return processWithFindSemantics(element, annotationType, searchOnInterfaces, searchOnSuperclasses,
+			return searchWithFindSemantics(element, annotationType, searchOnInterfaces, searchOnSuperclasses,
 				searchOnMethodsInInterfaces, searchOnMethodsInSuperclasses, processor, new HashSet<AnnotatedElement>(), 0);
 		}
 		catch (Throwable ex) {
@@ -484,7 +552,7 @@ public class AnnotatedElementUtils {
 	}
 
 	/**
-	 * Perform the search algorithm for the {@link #processWithFindSemantics}
+	 * Perform the search algorithm for the {@link #searchWithFindSemantics}
 	 * method, avoiding endless recursion by tracking which annotated elements
 	 * have already been <em>visited</em>.
 	 *
@@ -508,7 +576,7 @@ public class AnnotatedElementUtils {
 	 * @param metaDepth the meta-depth of the annotation
 	 * @return the result of the processor, potentially {@code null}
 	 */
-	private static <T> T processWithFindSemantics(AnnotatedElement element, String annotationType,
+	private static <T> T searchWithFindSemantics(AnnotatedElement element, String annotationType,
 			boolean searchOnInterfaces, boolean searchOnSuperclasses, boolean searchOnMethodsInInterfaces,
 			boolean searchOnMethodsInSuperclasses, Processor<T> processor, Set<AnnotatedElement> visited, int metaDepth) {
 
@@ -536,7 +604,7 @@ public class AnnotatedElementUtils {
 				// Search in meta annotations on local annotations
 				for (Annotation annotation : annotations) {
 					if (!AnnotationUtils.isInJavaLangAnnotationPackage(annotation)) {
-						T result = processWithFindSemantics(annotation.annotationType(), annotationType,
+						T result = searchWithFindSemantics(annotation.annotationType(), annotationType,
 							searchOnInterfaces, searchOnSuperclasses, searchOnMethodsInInterfaces,
 							searchOnMethodsInSuperclasses, processor, visited, metaDepth + 1);
 						if (result != null) {
@@ -551,7 +619,7 @@ public class AnnotatedElementUtils {
 
 					// Search on possibly bridged method
 					Method resolvedMethod = BridgeMethodResolver.findBridgedMethod(method);
-					T result = processWithFindSemantics(resolvedMethod, annotationType, searchOnInterfaces,
+					T result = searchWithFindSemantics(resolvedMethod, annotationType, searchOnInterfaces,
 						searchOnSuperclasses, searchOnMethodsInInterfaces, searchOnMethodsInSuperclasses, processor,
 						visited, metaDepth);
 					if (result != null) {
@@ -582,7 +650,7 @@ public class AnnotatedElementUtils {
 								Method equivalentMethod = clazz.getDeclaredMethod(method.getName(),
 									method.getParameterTypes());
 								Method resolvedEquivalentMethod = BridgeMethodResolver.findBridgedMethod(equivalentMethod);
-								result = processWithFindSemantics(resolvedEquivalentMethod, annotationType,
+								result = searchWithFindSemantics(resolvedEquivalentMethod, annotationType,
 									searchOnInterfaces, searchOnSuperclasses, searchOnMethodsInInterfaces,
 									searchOnMethodsInSuperclasses, processor, visited, metaDepth);
 								if (result != null) {
@@ -612,7 +680,7 @@ public class AnnotatedElementUtils {
 					// Search on interfaces
 					if (searchOnInterfaces) {
 						for (Class<?> ifc : clazz.getInterfaces()) {
-							T result = processWithFindSemantics(ifc, annotationType, searchOnInterfaces,
+							T result = searchWithFindSemantics(ifc, annotationType, searchOnInterfaces,
 								searchOnSuperclasses, searchOnMethodsInInterfaces, searchOnMethodsInSuperclasses,
 								processor, visited, metaDepth);
 							if (result != null) {
@@ -625,7 +693,7 @@ public class AnnotatedElementUtils {
 					if (searchOnSuperclasses) {
 						Class<?> superclass = clazz.getSuperclass();
 						if (superclass != null && !superclass.equals(Object.class)) {
-							T result = processWithFindSemantics(superclass, annotationType, searchOnInterfaces,
+							T result = searchWithFindSemantics(superclass, annotationType, searchOnInterfaces,
 								searchOnSuperclasses, searchOnMethodsInInterfaces, searchOnMethodsInSuperclasses,
 								processor, visited, metaDepth);
 							if (result != null) {
@@ -650,7 +718,7 @@ public class AnnotatedElementUtils {
 			if (AnnotationUtils.isInterfaceWithAnnotatedMethods(iface)) {
 				try {
 					Method equivalentMethod = iface.getMethod(method.getName(), method.getParameterTypes());
-					T result = processWithFindSemantics(equivalentMethod, annotationType, searchOnInterfaces,
+					T result = searchWithFindSemantics(equivalentMethod, annotationType, searchOnInterfaces,
 						searchOnSuperclasses, searchOnMethodsInInterfaces, searchOnMethodsInSuperclasses, processor,
 						visited, metaDepth);
 
