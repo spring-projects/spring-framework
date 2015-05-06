@@ -45,7 +45,7 @@ import static org.springframework.test.context.cache.ContextCacheTestUtils.*;
  * JUnit 4 based integration test which verifies correct {@linkplain ContextCache
  * application context caching} in conjunction with Spring's TestNG support
  * and {@link DirtiesContext @DirtiesContext} at the class level.
- * 
+ *
  * <p>This class is a direct copy of {@link ClassLevelDirtiesContextTests},
  * modified to verify behavior in conjunction with TestNG.
  *

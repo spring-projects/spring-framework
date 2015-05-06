@@ -104,9 +104,9 @@ public class StompHeaders implements MultiValueMap<String, String>, Serializable
 	 * Create a new instance to be populated with new header values.
 	 */
 	public StompHeaders() {
-		this(new LinkedMultiValueMap<String, String>(4), false);	
+		this(new LinkedMultiValueMap<String, String>(4), false);
 	}
-	
+
 	private StompHeaders(Map<String, List<String>> headers, boolean readOnly) {
 		Assert.notNull(headers, "'headers' must not be null");
 		if (readOnly) {

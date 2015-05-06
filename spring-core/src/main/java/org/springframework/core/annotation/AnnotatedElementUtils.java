@@ -67,7 +67,7 @@ import org.springframework.util.MultiValueMap;
  * <li>Searching on methods in interfaces, if the annotated element is a method
  * <li>Searching on methods in superclasses, if the annotated element is a method
  * </ul>
- * 
+ *
  * <h3>Support for {@code @Inherited}</h3>
  * <p>Methods following <em>get semantics</em> will honor the contract of
  * Java's {@link java.lang.annotation.Inherited @Inherited} annotation.

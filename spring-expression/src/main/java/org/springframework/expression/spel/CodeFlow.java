@@ -222,7 +222,7 @@ public class CodeFlow implements Opcodes {
 					mv.visitTypeInsn(CHECKCAST, "java/lang/Number");
 				}
 				mv.visitMethodInsn(INVOKEVIRTUAL, "java/lang/Number", "doubleValue", "()D", false);
-				break;		
+				break;	
 			case 'F':
 				if (stackDescriptor.equals("Ljava/lang/Object")) {
 					mv.visitTypeInsn(CHECKCAST, "java/lang/Number");
