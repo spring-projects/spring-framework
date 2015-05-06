@@ -90,6 +90,35 @@ public class AnnotatedElementUtilsTests {
 	}
 
 	@Test
+	public void isAnnotatedOnNonAnnotatedClass() {
+		assertFalse(isAnnotated(NonAnnotatedClass.class, Transactional.class.getName()));
+	}
+
+	@Test
+	public void isAnnotatedOnClassWithMetaDepth0() {
+		assertTrue(isAnnotated(TransactionalComponentClass.class, TransactionalComponent.class.getName()));
+	}
+
+	@Test
+	public void isAnnotatedOnSubclassWithMetaDepth0() {
+		assertFalse("isAnnotated() does not search the class hierarchy.",
+			isAnnotated(SubTransactionalComponentClass.class, TransactionalComponent.class.getName()));
+	}
+
+	@Test
+	public void isAnnotatedOnClassWithMetaDepth1() {
+		assertTrue(isAnnotated(TransactionalComponentClass.class, Transactional.class.getName()));
+		assertTrue(isAnnotated(TransactionalComponentClass.class, Component.class.getName()));
+	}
+
+	@Test
+	public void isAnnotatedOnClassWithMetaDepth2() {
+		assertTrue(isAnnotated(ComposedTransactionalComponentClass.class, Transactional.class.getName()));
+		assertTrue(isAnnotated(ComposedTransactionalComponentClass.class, Component.class.getName()));
+		assertTrue(isAnnotated(ComposedTransactionalComponentClass.class, ComposedTransactionalComponent.class.getName()));
+	}
+
+	@Test
 	public void getAllAnnotationAttributesOnClassWithLocalAnnotation() {
 		MultiValueMap<String, Object> attributes = getAllAnnotationAttributes(TxConfig.class,
 			Transactional.class.getName());
@@ -408,6 +437,9 @@ public class AnnotatedElementUtilsTests {
 
 	@TransactionalComponent
 	static class TransactionalComponentClass {
+	}
+
+	static class SubTransactionalComponentClass extends TransactionalComponentClass {
 	}
 
 	@ComposedTransactionalComponent
