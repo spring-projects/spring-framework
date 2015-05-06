@@ -573,7 +573,7 @@ annotation for expressing such dependencies on Spring-managed beans.
 	}
 ----
 
-Our `AccountServletEndpoint` needs to run in the same web application as the Spring
+Our `AccountServiceEndpoint` needs to run in the same web application as the Spring
 context to allow for access to Spring's facilities. This is the case by default in Java
 EE 5 environments, using the standard contract for JAX-WS servlet endpoint deployment.
 See Java EE 5 web service tutorials for details.
