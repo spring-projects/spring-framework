@@ -16,6 +16,8 @@
 
 package org.springframework.web.socket.config.annotation;
 
+import static org.junit.Assert.*;
+
 import java.util.Map;
 
 import org.junit.Before;
@@ -23,16 +25,11 @@ import org.junit.Test;
 import org.mockito.Mockito;
 
 import org.springframework.messaging.SubscribableChannel;
-import org.springframework.messaging.simp.user.DefaultUserSessionRegistry;
-import org.springframework.messaging.simp.user.UserSessionRegistry;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.web.servlet.handler.SimpleUrlHandlerMapping;
-import org.springframework.web.socket.messaging.StompSubProtocolHandler;
 import org.springframework.web.socket.messaging.SubProtocolHandler;
 import org.springframework.web.socket.messaging.SubProtocolWebSocketHandler;
 import org.springframework.web.util.UrlPathHelper;
-
-import static org.junit.Assert.*;
 
 /**
  * Test fixture for
@@ -46,17 +43,16 @@ public class WebMvcStompEndpointRegistryTests {
 
 	private SubProtocolWebSocketHandler webSocketHandler;
 
-	private UserSessionRegistry userSessionRegistry;
-
 
 	@Before
 	public void setup() {
 		SubscribableChannel inChannel = Mockito.mock(SubscribableChannel.class);
 		SubscribableChannel outChannel = Mockito.mock(SubscribableChannel.class);
 		this.webSocketHandler = new SubProtocolWebSocketHandler(inChannel, outChannel);
-		this.userSessionRegistry = new DefaultUserSessionRegistry();
-		this.endpointRegistry = new WebMvcStompEndpointRegistry(this.webSocketHandler,
-				new WebSocketTransportRegistration(), this.userSessionRegistry, Mockito.mock(TaskScheduler.class));
+
+		WebSocketTransportRegistration transport = new WebSocketTransportRegistration();
+		TaskScheduler scheduler = Mockito.mock(TaskScheduler.class);
+		this.endpointRegistry = new WebMvcStompEndpointRegistry(this.webSocketHandler, transport, scheduler);
 	}
 
 
@@ -69,9 +65,6 @@ public class WebMvcStompEndpointRegistryTests {
 		assertNotNull(protocolHandlers.get("v10.stomp"));
 		assertNotNull(protocolHandlers.get("v11.stomp"));
 		assertNotNull(protocolHandlers.get("v12.stomp"));
-
-		StompSubProtocolHandler stompHandler = (StompSubProtocolHandler) protocolHandlers.get("v10.stomp");
-		assertSame(this.userSessionRegistry, stompHandler.getUserSessionRegistry());
 	}
 
 	@Test

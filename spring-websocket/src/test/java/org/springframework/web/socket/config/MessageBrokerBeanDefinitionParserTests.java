@@ -16,14 +16,20 @@
 
 package org.springframework.web.socket.config;
 
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import org.hamcrest.Matchers;
 import org.junit.Before;
 import org.junit.Test;
+
 import org.springframework.beans.DirectFieldAccessor;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.config.CustomScopeConfigurer;
@@ -46,9 +52,11 @@ import org.springframework.messaging.simp.annotation.support.SimpAnnotationMetho
 import org.springframework.messaging.simp.broker.SimpleBrokerMessageHandler;
 import org.springframework.messaging.simp.stomp.StompBrokerRelayMessageHandler;
 import org.springframework.messaging.simp.user.DefaultUserDestinationResolver;
+import org.springframework.messaging.simp.user.MultiServerUserRegistry;
+import org.springframework.messaging.simp.user.SimpUserRegistry;
 import org.springframework.messaging.simp.user.UserDestinationMessageHandler;
 import org.springframework.messaging.simp.user.UserDestinationResolver;
-import org.springframework.messaging.simp.user.UserSessionRegistry;
+import org.springframework.messaging.simp.user.UserRegistryMessageHandler;
 import org.springframework.messaging.support.AbstractSubscribableChannel;
 import org.springframework.messaging.support.ChannelInterceptor;
 import org.springframework.messaging.support.ImmutableMessageChannelInterceptor;
@@ -64,7 +72,9 @@ import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TestWebSocketSession;
 import org.springframework.web.socket.handler.WebSocketHandlerDecorator;
 import org.springframework.web.socket.handler.WebSocketHandlerDecoratorFactory;
+import org.springframework.web.socket.messaging.DefaultSimpUserRegistry;
 import org.springframework.web.socket.messaging.StompSubProtocolHandler;
+import org.springframework.web.socket.messaging.SubProtocolHandler;
 import org.springframework.web.socket.messaging.SubProtocolWebSocketHandler;
 import org.springframework.web.socket.server.HandshakeHandler;
 import org.springframework.web.socket.server.HandshakeInterceptor;
@@ -74,9 +84,6 @@ import org.springframework.web.socket.sockjs.support.SockJsHttpRequestHandler;
 import org.springframework.web.socket.sockjs.transport.TransportType;
 import org.springframework.web.socket.sockjs.transport.handler.DefaultSockJsService;
 import org.springframework.web.socket.sockjs.transport.handler.WebSocketTransportHandler;
-
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
 
 /**
  * Test fixture for MessageBrokerBeanDefinitionParser.
@@ -133,7 +140,8 @@ public class MessageBrokerBeanDefinitionParserTests {
 		assertEquals(25 * 1000, subProtocolWsHandler.getSendTimeLimit());
 		assertEquals(1024 * 1024, subProtocolWsHandler.getSendBufferSizeLimit());
 
-		StompSubProtocolHandler stompHandler = (StompSubProtocolHandler) subProtocolWsHandler.getProtocolHandlerMap().get("v12.stomp");
+		Map<String, SubProtocolHandler> handlerMap = subProtocolWsHandler.getProtocolHandlerMap();
+		StompSubProtocolHandler stompHandler = (StompSubProtocolHandler) handlerMap.get("v12.stomp");
 		assertNotNull(stompHandler);
 		assertEquals(128 * 1024, stompHandler.getMessageSizeLimit());
 
@@ -166,15 +174,15 @@ public class MessageBrokerBeanDefinitionParserTests {
 				instanceOf(BarTestInterceptor.class), instanceOf(OriginHandshakeInterceptor.class)));
 		assertEquals(Arrays.asList("http://mydomain3.com", "http://mydomain4.com"), defaultSockJsService.getAllowedOrigins());
 
-		UserSessionRegistry userSessionRegistry = this.appContext.getBean(UserSessionRegistry.class);
-		assertNotNull(userSessionRegistry);
+		SimpUserRegistry userRegistry = this.appContext.getBean(SimpUserRegistry.class);
+		assertNotNull(userRegistry);
+		assertEquals(DefaultSimpUserRegistry.class, userRegistry.getClass());
 
 		UserDestinationResolver userDestResolver = this.appContext.getBean(UserDestinationResolver.class);
 		assertNotNull(userDestResolver);
 		assertThat(userDestResolver, Matchers.instanceOf(DefaultUserDestinationResolver.class));
 		DefaultUserDestinationResolver defaultUserDestResolver = (DefaultUserDestinationResolver) userDestResolver;
 		assertEquals("/personal/", defaultUserDestResolver.getDestinationPrefix());
-		assertSame(stompHandler.getUserSessionRegistry(), defaultUserDestResolver.getUserSessionRegistry());
 
 		UserDestinationMessageHandler userDestHandler = this.appContext.getBean(UserDestinationMessageHandler.class);
 		assertNotNull(userDestHandler);
@@ -192,11 +200,12 @@ public class MessageBrokerBeanDefinitionParserTests {
 		testChannel("clientInboundChannel", subscriberTypes, 2);
 		testExecutor("clientInboundChannel", Runtime.getRuntime().availableProcessors() * 2, Integer.MAX_VALUE, 60);
 
-		subscriberTypes = Arrays.<Class<? extends MessageHandler>>asList(SubProtocolWebSocketHandler.class);
+		subscriberTypes = Collections.singletonList(SubProtocolWebSocketHandler.class);
 		testChannel("clientOutboundChannel", subscriberTypes, 1);
 		testExecutor("clientOutboundChannel", Runtime.getRuntime().availableProcessors() * 2, Integer.MAX_VALUE, 60);
 
-		subscriberTypes = Arrays.<Class<? extends MessageHandler>>asList(SimpleBrokerMessageHandler.class, UserDestinationMessageHandler.class);
+		subscriberTypes = Arrays.<Class<? extends MessageHandler>>asList(
+				SimpleBrokerMessageHandler.class, UserDestinationMessageHandler.class);
 		testChannel("brokerChannel", subscriberTypes, 1);
 		try {
 			this.appContext.getBean("brokerChannelExecutor", ThreadPoolTaskExecutor.class);
@@ -260,7 +269,7 @@ public class MessageBrokerBeanDefinitionParserTests {
 		testChannel("clientInboundChannel", subscriberTypes, 2);
 		testExecutor("clientInboundChannel", Runtime.getRuntime().availableProcessors() * 2, Integer.MAX_VALUE, 60);
 
-		subscriberTypes = Arrays.<Class<? extends MessageHandler>>asList(SubProtocolWebSocketHandler.class);
+		subscriberTypes = Collections.singletonList(SubProtocolWebSocketHandler.class);
 		testChannel("clientOutboundChannel", subscriberTypes, 1);
 		testExecutor("clientOutboundChannel", Runtime.getRuntime().availableProcessors() * 2, Integer.MAX_VALUE, 60);
 
@@ -275,11 +284,20 @@ public class MessageBrokerBeanDefinitionParserTests {
 			// expected
 		}
 
+		String destination = "/topic/unresolved-user-destination";
 		UserDestinationMessageHandler userDestHandler = this.appContext.getBean(UserDestinationMessageHandler.class);
-		assertEquals("/topic/unresolved", userDestHandler.getUserDestinationBroadcast());
+		assertEquals(destination, userDestHandler.getBroadcastDestination());
 		assertNotNull(messageBroker.getSystemSubscriptions());
-		assertSame(userDestHandler, messageBroker.getSystemSubscriptions().get("/topic/unresolved"));
+		assertSame(userDestHandler, messageBroker.getSystemSubscriptions().get(destination));
 
+		destination = "/topic/simp-user-registry";
+		UserRegistryMessageHandler userRegistryHandler = this.appContext.getBean(UserRegistryMessageHandler.class);
+		assertEquals(destination, userRegistryHandler.getBroadcastDestination());
+		assertNotNull(messageBroker.getSystemSubscriptions());
+		assertSame(userRegistryHandler, messageBroker.getSystemSubscriptions().get(destination));
+
+		SimpUserRegistry userRegistry = this.appContext.getBean(SimpUserRegistry.class);
+		assertEquals(MultiServerUserRegistry.class, userRegistry.getClass());
 
 		String name = "webSocketMessageBrokerStats";
 		WebSocketMessageBrokerStats stats = this.appContext.getBean(name, WebSocketMessageBrokerStats.class);
@@ -339,7 +357,7 @@ public class MessageBrokerBeanDefinitionParserTests {
 		testChannel("clientInboundChannel", subscriberTypes, 3);
 		testExecutor("clientInboundChannel", 100, 200, 600);
 
-		subscriberTypes = Arrays.<Class<? extends MessageHandler>>asList(SubProtocolWebSocketHandler.class);
+		subscriberTypes = Collections.singletonList(SubProtocolWebSocketHandler.class);
 
 		testChannel("clientOutboundChannel", subscriberTypes, 3);
 		testExecutor("clientOutboundChannel", 101, 201, 601);

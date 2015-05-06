@@ -22,7 +22,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.context.ApplicationContext;
-import org.springframework.messaging.simp.user.UserSessionRegistry;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.util.Assert;
 import org.springframework.util.MultiValueMap;
@@ -63,11 +62,10 @@ public class WebMvcStompEndpointRegistry implements StompEndpointRegistry {
 
 	public WebMvcStompEndpointRegistry(WebSocketHandler webSocketHandler,
 			WebSocketTransportRegistration transportRegistration,
-			UserSessionRegistry userSessionRegistry, TaskScheduler defaultSockJsTaskScheduler) {
+			TaskScheduler defaultSockJsTaskScheduler) {
 
 		Assert.notNull(webSocketHandler, "'webSocketHandler' is required ");
 		Assert.notNull(transportRegistration, "'transportRegistration' is required");
-		Assert.notNull(userSessionRegistry, "'userSessionRegistry' is required");
 
 		this.webSocketHandler = webSocketHandler;
 		this.subProtocolWebSocketHandler = unwrapSubProtocolWebSocketHandler(webSocketHandler);
@@ -80,7 +78,6 @@ public class WebMvcStompEndpointRegistry implements StompEndpointRegistry {
 		}
 
 		this.stompHandler = new StompSubProtocolHandler();
-		this.stompHandler.setUserSessionRegistry(userSessionRegistry);
 
 		if (transportRegistration.getMessageSizeLimit() != null) {
 			this.stompHandler.setMessageSizeLimit(transportRegistration.getMessageSizeLimit());

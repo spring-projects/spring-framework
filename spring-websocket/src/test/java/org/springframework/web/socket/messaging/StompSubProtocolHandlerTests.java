@@ -47,9 +47,7 @@ import org.springframework.messaging.simp.TestPrincipal;
 import org.springframework.messaging.simp.stomp.StompCommand;
 import org.springframework.messaging.simp.stomp.StompEncoder;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
-import org.springframework.messaging.simp.user.DefaultUserSessionRegistry;
 import org.springframework.messaging.simp.user.DestinationUserNameProvider;
-import org.springframework.messaging.simp.user.UserSessionRegistry;
 import org.springframework.messaging.support.ChannelInterceptorAdapter;
 import org.springframework.messaging.support.ExecutorSubscribableChannel;
 import org.springframework.messaging.support.ImmutableMessageChannelInterceptor;
@@ -96,9 +94,6 @@ public class StompSubProtocolHandlerTests {
 	@Test
 	public void handleMessageToClientWithConnectedFrame() {
 
-		UserSessionRegistry registry = new DefaultUserSessionRegistry();
-		this.protocolHandler.setUserSessionRegistry(registry);
-
 		StompHeaderAccessor headers = StompHeaderAccessor.create(StompCommand.CONNECTED);
 		Message<byte[]> message = MessageBuilder.createMessage(EMPTY_PAYLOAD, headers.getMessageHeaders());
 		this.protocolHandler.handleMessageToClient(this.session, message);
@@ -106,8 +101,6 @@ public class StompSubProtocolHandlerTests {
 		assertEquals(1, this.session.getSentMessages().size());
 		WebSocketMessage<?> textMessage = this.session.getSentMessages().get(0);
 		assertEquals("CONNECTED\n" + "user-name:joe\n" + "\n" + "\u0000", textMessage.getPayload());
-
-		assertEquals(Collections.singleton("s1"), registry.getSessionIds("joe"));
 	}
 
 	@Test
@@ -115,9 +108,6 @@ public class StompSubProtocolHandlerTests {
 
 		this.session.setPrincipal(new UniqueUser("joe"));
 
-		UserSessionRegistry registry = new DefaultUserSessionRegistry();
-		this.protocolHandler.setUserSessionRegistry(registry);
-
 		StompHeaderAccessor headers = StompHeaderAccessor.create(StompCommand.CONNECTED);
 		Message<byte[]> message = MessageBuilder.createMessage(EMPTY_PAYLOAD, headers.getMessageHeaders());
 		this.protocolHandler.handleMessageToClient(this.session, message);
@@ -125,9 +115,6 @@ public class StompSubProtocolHandlerTests {
 		assertEquals(1, this.session.getSentMessages().size());
 		WebSocketMessage<?> textMessage = this.session.getSentMessages().get(0);
 		assertEquals("CONNECTED\n" + "user-name:joe\n" + "\n" + "\u0000", textMessage.getPayload());
-
-		assertEquals(Collections.<String>emptySet(), registry.getSessionIds("joe"));
-		assertEquals(Collections.singleton("s1"), registry.getSessionIds("Me myself and I"));
 	}
 
 	@Test
@@ -348,8 +335,6 @@ public class StompSubProtocolHandlerTests {
 
 		TestPublisher publisher = new TestPublisher();
 
-		UserSessionRegistry registry = new DefaultUserSessionRegistry();
-		this.protocolHandler.setUserSessionRegistry(registry);
 		this.protocolHandler.setApplicationEventPublisher(publisher);
 		this.protocolHandler.afterSessionStarted(this.session, this.channel);
 
@@ -387,8 +372,6 @@ public class StompSubProtocolHandlerTests {
 
 		ApplicationEventPublisher publisher = mock(ApplicationEventPublisher.class);
 
-		UserSessionRegistry registry = new DefaultUserSessionRegistry();
-		this.protocolHandler.setUserSessionRegistry(registry);
 		this.protocolHandler.setApplicationEventPublisher(publisher);
 		this.protocolHandler.afterSessionStarted(this.session, this.channel);
 

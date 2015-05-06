@@ -34,7 +34,6 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
-import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.simp.SimpAttributes;
 import org.springframework.messaging.simp.SimpAttributesContextHolder;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
@@ -44,8 +43,6 @@ import org.springframework.messaging.simp.stomp.StompCommand;
 import org.springframework.messaging.simp.stomp.StompDecoder;
 import org.springframework.messaging.simp.stomp.StompEncoder;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
-import org.springframework.messaging.simp.user.DestinationUserNameProvider;
-import org.springframework.messaging.simp.user.UserSessionRegistry;
 import org.springframework.messaging.support.AbstractMessageChannel;
 import org.springframework.messaging.support.ChannelInterceptor;
 import org.springframework.messaging.support.ImmutableMessageChannelInterceptor;
@@ -94,8 +91,6 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 
 	private int messageSizeLimit = 64 * 1024;
 
-	private UserSessionRegistry userSessionRegistry;
-
 	private final StompEncoder stompEncoder = new StompEncoder();
 
 	private final StompDecoder stompDecoder = new StompDecoder();
@@ -132,21 +127,6 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 	 */
 	public int getMessageSizeLimit() {
 		return this.messageSizeLimit;
-	}
-
-	/**
-	 * Provide a registry with which to register active user session ids.
-	 * @see org.springframework.messaging.simp.user.UserDestinationMessageHandler
-	 */
-	public void setUserSessionRegistry(UserSessionRegistry registry) {
-		this.userSessionRegistry = registry;
-	}
-
-	/**
-	 * @return the configured UserSessionRegistry.
-	 */
-	public UserSessionRegistry getUserSessionRegistry() {
-		return this.userSessionRegistry;
 	}
 
 	/**
@@ -234,9 +214,11 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 				StompHeaderAccessor headerAccessor =
 						MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
 
+				Principal user = session.getPrincipal();
+
 				headerAccessor.setSessionId(session.getId());
 				headerAccessor.setSessionAttributes(session.getAttributes());
-				headerAccessor.setUser(session.getPrincipal());
+				headerAccessor.setUser(user);
 				headerAccessor.setHeader(SimpMessageHeaderAccessor.HEART_BEAT_HEADER, headerAccessor.getHeartbeat());
 				if (!detectImmutableMessageInterceptor(outputChannel)) {
 					headerAccessor.setImmutable();
@@ -257,13 +239,13 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 					SimpAttributesContextHolder.setAttributesFromMessage(message);
 					if (this.eventPublisher != null) {
 						if (StompCommand.CONNECT.equals(headerAccessor.getCommand())) {
-							publishEvent(new SessionConnectEvent(this, message));
+							publishEvent(new SessionConnectEvent(this, message, user));
 						}
 						else if (StompCommand.SUBSCRIBE.equals(headerAccessor.getCommand())) {
-							publishEvent(new SessionSubscribeEvent(this, message));
+							publishEvent(new SessionSubscribeEvent(this, message, user));
 						}
 						else if (StompCommand.UNSUBSCRIBE.equals(headerAccessor.getCommand())) {
-							publishEvent(new SessionUnsubscribeEvent(this, message));
+							publishEvent(new SessionUnsubscribeEvent(this, message, user));
 						}
 					}
 					outputChannel.send(message);
@@ -349,7 +331,8 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 				try {
 					SimpAttributes simpAttributes = new SimpAttributes(session.getId(), session.getAttributes());
 					SimpAttributesContextHolder.setAttributes(simpAttributes);
-					publishEvent(new SessionConnectedEvent(this, (Message<byte[]>) message));
+					Principal user = session.getPrincipal();
+					publishEvent(new SessionConnectedEvent(this, (Message<byte[]>) message, user));
 				}
 				finally {
 					SimpAttributesContextHolder.resetAttributes();
@@ -466,10 +449,6 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 		if (principal != null) {
 			accessor = toMutableAccessor(accessor, message);
 			accessor.setNativeHeader(CONNECTED_USER_HEADER, principal.getName());
-			if (this.userSessionRegistry != null) {
-				String userName = getSessionRegistryUserName(principal);
-				this.userSessionRegistry.registerSessionId(userName, session.getId());
-			}
 		}
 		long[] heartbeat = accessor.getHeartbeat();
 		if (heartbeat[1] > 0) {
@@ -479,14 +458,6 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 			}
 		}
 		return accessor;
-	}
-
-	private String getSessionRegistryUserName(Principal principal) {
-		String userName = principal.getName();
-		if (principal instanceof DestinationUserNameProvider) {
-			userName = ((DestinationUserNameProvider) principal).getDestinationUserName();
-		}
-		return userName;
 	}
 
 	@Override
@@ -505,17 +476,13 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 	@Override
 	public void afterSessionEnded(WebSocketSession session, CloseStatus closeStatus, MessageChannel outputChannel) {
 		this.decoders.remove(session.getId());
-		Principal principal = session.getPrincipal();
-		if (principal != null && this.userSessionRegistry != null) {
-			String userName = getSessionRegistryUserName(principal);
-			this.userSessionRegistry.unregisterSessionId(userName, session.getId());
-		}
 		Message<byte[]> message = createDisconnectMessage(session);
 		SimpAttributes simpAttributes = SimpAttributes.fromMessage(message);
 		try {
 			SimpAttributesContextHolder.setAttributes(simpAttributes);
 			if (this.eventPublisher != null) {
-				publishEvent(new SessionDisconnectEvent(this, message, session.getId(), closeStatus));
+				Principal user = session.getPrincipal();
+				publishEvent(new SessionDisconnectEvent(this, message, session.getId(), closeStatus, user));
 			}
 			outputChannel.send(message);
 		}
