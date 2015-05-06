@@ -659,21 +659,42 @@ public class AnnotatedElementUtils {
 		return null;
 	}
 
+
 	/**
-	 * Callback interface that is used to process a target annotation (or
-	 * multiple instances of the target annotation) that has been found by
-	 * the currently executing search and to post-process the result as the
-	 * search algorithm goes back down the annotation hierarchy from the
-	 * target annotation to the initial {@link AnnotatedElement} that was
-	 * supplied to the search algorithm.
+	 * Callback interface that is used to process annotations during a search.
+	 *
+	 * <p>Depending on the use case, a processor may choose to
+	 * {@linkplain #process} a single target annotation, multiple target
+	 * annotations, or all annotations discovered by the currently executing
+	 * search. The term "target" in this context refers to a matching
+	 * annotation (i.e., a specific annotation type that was found during
+	 * the search). Returning a non-null value from the {@link #process}
+	 * method instructs the search algorithm to stop searching further;
+	 * whereas, returning {@code null} from the {@link #process} method
+	 * instructs the search algorithm to continue searching for additional
+	 * annotations.
+	 *
+	 * <p>Processors can optionally {@linkplain #postProcess post-process}
+	 * the result of the {@link #process} method as the search algorithm
+	 * goes back down the annotation hierarchy from an invocation of
+	 * {@link #process} that returned a non-null value down to the
+	 * {@link AnnotatedElement} that was supplied as the starting point to
+	 * the search algorithm.
 	 *
 	 * @param <T> the type of result returned by the processor
 	 */
 	private static interface Processor<T> {
 
 		/**
-		 * Process an actual target annotation once it has been found by
-		 * the search algorithm.
+		 * Process the supplied annotation.
+		 *
+		 * <p>Depending on the use case, the supplied annotation may be an
+		 * actual target annotation that has been found by the search
+		 * algorithm, or it may be some other annotation within the
+		 * annotation hierarchy. In the latter case, the {@code metaDepth}
+		 * should have a value greater than {@code 0}. In any case, it is
+		 * up to concrete implementations of this method to decide what to
+		 * do with the supplied annotation.
 		 *
 		 * <p>The {@code metaDepth} parameter represents the depth of the
 		 * annotation relative to the first annotated element in the
@@ -685,7 +706,7 @@ public class AnnotatedElementUtils {
 		 * @param annotation the annotation to process
 		 * @param metaDepth the meta-depth of the annotation
 		 * @return the result of the processing, or {@code null} to continue
-		 * searching for additional target annotations
+		 * searching for additional annotations
 		 */
 		T process(Annotation annotation, int metaDepth);
 
@@ -694,8 +715,8 @@ public class AnnotatedElementUtils {
 		 *
 		 * <p>The {@code annotation} supplied to this method is an annotation
 		 * that is present in the annotation hierarchy, between the initial
-		 * {@link AnnotatedElement} and a target annotation found by the
-		 * search algorithm.
+		 * {@link AnnotatedElement} and an invocation of {@link #process}
+		 * that returned a non-null value.
 		 *
 		 * @param annotation the annotation to post-process
 		 * @param result the result to post-process
