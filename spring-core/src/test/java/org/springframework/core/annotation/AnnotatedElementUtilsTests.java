@@ -119,11 +119,23 @@ public class AnnotatedElementUtilsTests {
 	}
 
 	@Test
+	public void getAllAnnotationAttributesOnNonAnnotatedClass() {
+		assertNull(getAllAnnotationAttributes(NonAnnotatedClass.class, Transactional.class.getName()));
+	}
+
+	@Test
 	public void getAllAnnotationAttributesOnClassWithLocalAnnotation() {
-		MultiValueMap<String, Object> attributes = getAllAnnotationAttributes(TxConfig.class,
-			Transactional.class.getName());
+		MultiValueMap<String, Object> attributes = getAllAnnotationAttributes(TxConfig.class, Transactional.class.getName());
 		assertNotNull("Annotation attributes map for @Transactional on TxConfig", attributes);
 		assertEquals("value for TxConfig.", Arrays.asList("TxConfig"), attributes.get("value"));
+	}
+
+	@Test
+	public void getAllAnnotationAttributesFavorsInheritedComposedAnnotationsOverMoreLocallyDeclaredComposedAnnotations() {
+		MultiValueMap<String, Object> attributes = getAllAnnotationAttributes(SubSubClassWithInheritedComposedAnnotation.class,
+			Transactional.class.getName());
+		assertNotNull("Annotation attributes map for @Transactional on SubSubClassWithInheritedComposedAnnotation", attributes);
+		assertEquals(Arrays.asList("composed1"), attributes.get("qualifier"));
 	}
 
 	/**
@@ -133,12 +145,11 @@ public class AnnotatedElementUtilsTests {
 	 * logic in {@link org.springframework.context.annotation.ProfileCondition}
 	 * to fail.
 	 *
-	 * @see org.springframework.core.env.EnvironmentIntegrationTests#mostSpecificDerivedClassDrivesEnvironment_withDevEnvAndDerivedDevConfigClass
+	 * @see org.springframework.core.env.EnvironmentSystemIntegrationTests#mostSpecificDerivedClassDrivesEnvironment_withDevEnvAndDerivedDevConfigClass
 	 */
 	@Test
 	public void getAllAnnotationAttributesOnClassWithLocalAnnotationThatShadowsAnnotationFromSuperclass() {
-		MultiValueMap<String, Object> attributes = getAllAnnotationAttributes(DerivedTxConfig.class,
-			Transactional.class.getName());
+		MultiValueMap<String, Object> attributes = getAllAnnotationAttributes(DerivedTxConfig.class, Transactional.class.getName());
 		assertNotNull("Annotation attributes map for @Transactional on DerivedTxConfig", attributes);
 		assertEquals("value for DerivedTxConfig.", Arrays.asList("DerivedTxConfig"), attributes.get("value"));
 	}
@@ -146,7 +157,7 @@ public class AnnotatedElementUtilsTests {
 	/**
 	 * Note: this functionality is required by {@link org.springframework.context.annotation.ProfileCondition}.
 	 *
-	 * @see org.springframework.core.env.EnvironmentIntegrationTests
+	 * @see org.springframework.core.env.EnvironmentSystemIntegrationTests
 	 */
 	@Test
 	public void getAllAnnotationAttributesOnClassWithMultipleComposedAnnotations() {
@@ -211,7 +222,6 @@ public class AnnotatedElementUtilsTests {
 		assertNotNull("Should find @Transactional on ConcreteClassWithInheritedAnnotation", attributes);
 	}
 
-	/** @since 4.2 */
 	@Test
 	public void getAnnotationAttributesOnInheritedAnnotationInterface() {
 		String name = Transactional.class.getName();
@@ -219,56 +229,48 @@ public class AnnotatedElementUtilsTests {
 		assertNotNull("Should get @Transactional on InheritedAnnotationInterface", attributes);
 	}
 
-	/** @since 4.2 */
 	@Test
 	public void findAnnotationAttributesOnInheritedAnnotationInterface() {
 		AnnotationAttributes attributes = findAnnotationAttributes(InheritedAnnotationInterface.class, Transactional.class);
 		assertNotNull("Should find @Transactional on InheritedAnnotationInterface", attributes);
 	}
 
-	/** @since 4.2 */
 	@Test
 	public void findAnnotationAttributesOnSubInheritedAnnotationInterface() {
 		AnnotationAttributes attributes = findAnnotationAttributes(SubInheritedAnnotationInterface.class, Transactional.class);
 		assertNotNull("Should find @Transactional on SubInheritedAnnotationInterface", attributes);
 	}
 
-	/** @since 4.2 */
 	@Test
 	public void findAnnotationAttributesOnSubSubInheritedAnnotationInterface() {
 		AnnotationAttributes attributes = findAnnotationAttributes(SubSubInheritedAnnotationInterface.class, Transactional.class);
 		assertNotNull("Should find @Transactional on SubSubInheritedAnnotationInterface", attributes);
 	}
 
-	/** @since 4.2 */
 	@Test
 	public void findAnnotationAttributesOnNonInheritedAnnotationInterface() {
 		AnnotationAttributes attributes = findAnnotationAttributes(NonInheritedAnnotationInterface.class, Order.class);
 		assertNotNull("Should find @Order on NonInheritedAnnotationInterface", attributes);
 	}
 
-	/** @since 4.2 */
 	@Test
 	public void getAnnotationAttributesOnNonInheritedAnnotationInterface() {
 		AnnotationAttributes attributes = getAnnotationAttributes(NonInheritedAnnotationInterface.class, Order.class.getName());
 		assertNotNull("Should get @Order on NonInheritedAnnotationInterface", attributes);
 	}
 
-	/** @since 4.2 */
 	@Test
 	public void findAnnotationAttributesOnSubNonInheritedAnnotationInterface() {
 		AnnotationAttributes attributes = findAnnotationAttributes(SubNonInheritedAnnotationInterface.class, Order.class);
 		assertNotNull("Should find @Order on SubNonInheritedAnnotationInterface", attributes);
 	}
 
-	/** @since 4.2 */
 	@Test
 	public void findAnnotationAttributesOnSubSubNonInheritedAnnotationInterface() {
 		AnnotationAttributes attributes = findAnnotationAttributes(SubSubNonInheritedAnnotationInterface.class, Order.class);
 		assertNotNull("Should find @Order on SubSubNonInheritedAnnotationInterface", attributes);
 	}
 
-	/** @since 4.2 */
 	@Test
 	public void findAnnotationAttributesInheritedFromInterfaceMethod() throws NoSuchMethodException {
 		Method method = ConcreteClassWithInheritedAnnotation.class.getMethod("handleFromInterface");
@@ -276,7 +278,6 @@ public class AnnotatedElementUtilsTests {
 		assertNotNull("Should find @Order on ConcreteClassWithInheritedAnnotation.handleFromInterface() method", attributes);
 	}
 
-	/** @since 4.2 */
 	@Test
 	public void findAnnotationAttributesInheritedFromAbstractMethod() throws NoSuchMethodException {
 		Method method = ConcreteClassWithInheritedAnnotation.class.getMethod("handle");
@@ -328,7 +329,6 @@ public class AnnotatedElementUtilsTests {
 		assertNotNull("Should find @Order on StringGenericParameter.getFor() bridge method", attributes);
 	}
 
-	/** @since 4.2 */
 	@Test
 	public void findAnnotationAttributesOnClassWithMetaAndLocalTxConfig() {
 		AnnotationAttributes attributes = findAnnotationAttributes(MetaAndLocalTxConfigClass.class, Transactional.class);
@@ -379,7 +379,7 @@ public class AnnotatedElementUtilsTests {
 		boolean readOnly() default false;
 	}
 
-	@Transactional
+	@Transactional(qualifier = "composed1")
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target(ElementType.TYPE)
 	@Documented
@@ -387,7 +387,7 @@ public class AnnotatedElementUtilsTests {
 	@interface Composed1 {
 	}
 
-	@Transactional(readOnly = true)
+	@Transactional(qualifier = "composed2", readOnly = true)
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target(ElementType.TYPE)
 	@Documented
