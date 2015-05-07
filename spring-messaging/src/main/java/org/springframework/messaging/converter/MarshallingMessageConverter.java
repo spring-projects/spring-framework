@@ -57,19 +57,8 @@ public class MarshallingMessageConverter extends AbstractMessageConverter {
 
 
 	/**
-	 * Construct a {@code MarshallingMessageConverter} supporting one or more custom MIME
-	 * types.
-	 * @param supportedMimeTypes the supported MIME types
-	 */
-	public MarshallingMessageConverter(MimeType... supportedMimeTypes) {
-		super(Arrays.asList(supportedMimeTypes));
-	}
-
-	/**
-	 * Construct a new {@code MarshallingMessageConverter} with no {@link Marshaller} or
-	 * {@link Unmarshaller} set. The Marshaller and Unmarshaller must be set after
-	 * construction by invoking {@link #setMarshaller(Marshaller)} and {@link
-	 * #setUnmarshaller(Unmarshaller)} .
+	 * Default construct allowing for {@link #setMarshaller(Marshaller)} and/or
+	 * {@link #setUnmarshaller(Unmarshaller)} to be invoked separately.
 	 */
 	public MarshallingMessageConverter() {
 		this(new MimeType("application", "xml"), new MimeType("text", "xml"),
@@ -77,15 +66,20 @@ public class MarshallingMessageConverter extends AbstractMessageConverter {
 	}
 
 	/**
-	 * Construct a new {@code MarshallingMessageConverter} with the given {@link
-	 * Marshaller} set.
+	 * Constructor with a given list of MIME types to support.
+	 * @param supportedMimeTypes the MIME types
+	 */
+	public MarshallingMessageConverter(MimeType... supportedMimeTypes) {
+		super(Arrays.asList(supportedMimeTypes));
+	}
+
+	/**
+	 * Constructor with {@link Marshaller}. If the given {@link Marshaller} also
+	 * implements {@link Unmarshaller}, it is also used for unmarshalling.
 	 *
-	 * <p>If the given {@link Marshaller} also implements the {@link Unmarshaller}
-	 * interface, it is used for both marshalling and unmarshalling. Otherwise, an
-	 * exception is thrown.
+	 * <p>Note that all {@code Marshaller} implementations in Spring also implement
+	 * {@code Unmarshaller} so that you can safely use this constructor.
 	 *
-	 * <p>Note that all {@code Marshaller} implementations in Spring also implement the
-	 * {@code Unmarshaller} interface, so that you can safely use this constructor.
 	 * @param marshaller object used as marshaller and unmarshaller
 	 */
 	public MarshallingMessageConverter(Marshaller marshaller) {
@@ -97,20 +91,6 @@ public class MarshallingMessageConverter extends AbstractMessageConverter {
 		}
 	}
 
-	/**
-	 * Construct a new {@code MarshallingMessageConverter} with the given {@code
-	 * Marshaller} and {@code Unmarshaller}.
-	 * @param marshaller the Marshaller to use
-	 * @param unmarshaller the Unmarshaller to use
-	 */
-	public MarshallingMessageConverter(Marshaller marshaller, Unmarshaller unmarshaller) {
-		this();
-		Assert.notNull(marshaller, "Marshaller must not be null");
-		Assert.notNull(unmarshaller, "Unmarshaller must not be null");
-		this.marshaller = marshaller;
-		this.unmarshaller = unmarshaller;
-	}
-
 
 	/**
 	 * Set the {@link Marshaller} to be used by this message converter.
@@ -120,22 +100,37 @@ public class MarshallingMessageConverter extends AbstractMessageConverter {
 	}
 
 	/**
+	 * Return the configured Marshaller.
+	 */
+	public Marshaller getMarshaller() {
+		return this.marshaller;
+	}
+
+	/**
 	 * Set the {@link Unmarshaller} to be used by this message converter.
 	 */
 	public void setUnmarshaller(Unmarshaller unmarshaller) {
 		this.unmarshaller = unmarshaller;
 	}
 
+	/**
+	 * Return the configured unmarshaller.
+	 */
+	public Unmarshaller getUnmarshaller() {
+		return this.unmarshaller;
+	}
+
+
 	@Override
 	protected boolean canConvertFrom(Message<?> message, Class<?> targetClass) {
-		return supportsMimeType(message.getHeaders()) && (this.unmarshaller != null) &&
-				this.unmarshaller.supports(targetClass);
+		return (supportsMimeType(message.getHeaders()) && this.unmarshaller != null &&
+				this.unmarshaller.supports(targetClass));
 	}
 
 	@Override
 	protected boolean canConvertTo(Object payload, MessageHeaders headers) {
-		return supportsMimeType(headers) && (this.marshaller != null) &&
-				this.marshaller.supports(payload.getClass());
+		return (supportsMimeType(headers) && this.marshaller != null &&
+				this.marshaller.supports(payload.getClass()));
 	}
 
 	@Override
@@ -157,12 +152,10 @@ public class MarshallingMessageConverter extends AbstractMessageConverter {
 			return result;
 		}
 		catch (UnmarshallingFailureException ex) {
-			throw new MessageConversionException(message,
-					"Could not unmarshal XML: " + ex.getMessage(), ex);
+			throw new MessageConversionException(message, "Could not unmarshal XML: " + ex.getMessage(), ex);
 		}
 		catch (IOException ex) {
-			throw new MessageConversionException(message,
-					"Could not unmarshal XML: " + ex.getMessage(), ex);
+			throw new MessageConversionException(message, "Could not unmarshal XML: " + ex.getMessage(), ex);
 		}
 	}
 
@@ -197,12 +190,10 @@ public class MarshallingMessageConverter extends AbstractMessageConverter {
 			}
 		}
 		catch (MarshallingFailureException ex) {
-			throw new MessageConversionException(
-					"Could not marshal XML: " + ex.getMessage(), ex);
+			throw new MessageConversionException("Could not marshal XML: " + ex.getMessage(), ex);
 		}
 		catch (IOException ex) {
-			throw new MessageConversionException(
-					"Could not marshal XML: " + ex.getMessage(), ex);
+			throw new MessageConversionException("Could not marshal XML: " + ex.getMessage(), ex);
 		}
 		return payload;
 	}

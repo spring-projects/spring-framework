@@ -28,7 +28,7 @@ import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.oxm.jaxb.Jaxb2Marshaller;
 
 import static org.custommonkey.xmlunit.XMLAssert.assertXMLEqual;
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 /**
  * @author Arjen Poutsma
@@ -47,14 +47,16 @@ public class MarshallingMessageConverterTests {
 		marshaller.setClassesToBeBound(MyBean.class);
 		marshaller.afterPropertiesSet();
 
-		converter = new MarshallingMessageConverter(marshaller);
+		this.converter = new MarshallingMessageConverter(marshaller);
 	}
+
 	@Test
 	public void fromMessage() throws Exception {
 		String payload = "<myBean><name>Foo</name></myBean>";
 		Message<?> message = MessageBuilder.withPayload(payload.getBytes(UTF_8)).build();
-		MyBean actual = (MyBean) converter.fromMessage(message, MyBean.class);
+		MyBean actual = (MyBean) this.converter.fromMessage(message, MyBean.class);
 
+		assertNotNull(actual);
 		assertEquals("Foo", actual.getName());
 	}
 
@@ -62,14 +64,14 @@ public class MarshallingMessageConverterTests {
 	public void fromMessageInvalidXml() throws Exception {
 		String payload = "<myBean><name>Foo</name><myBean>";
 		Message<?> message = MessageBuilder.withPayload(payload.getBytes(UTF_8)).build();
-		converter.fromMessage(message, MyBean.class);
+		this.converter.fromMessage(message, MyBean.class);
 	}
 
 	@Test(expected = MessageConversionException.class)
 	public void fromMessageValidXmlWithUnknownProperty() throws IOException {
 		String payload = "<myBean><age>42</age><myBean>";
 		Message<?> message = MessageBuilder.withPayload(payload.getBytes(UTF_8)).build();
-		MyBean myBean = (MyBean)converter.fromMessage(message, MyBean.class);
+		this.converter.fromMessage(message, MyBean.class);
 	}
 
 	@Test
@@ -77,7 +79,8 @@ public class MarshallingMessageConverterTests {
 		MyBean payload = new MyBean();
 		payload.setName("Foo");
 
-		Message<?> message = converter.toMessage(payload, null);
+		Message<?> message = this.converter.toMessage(payload, null);
+		assertNotNull(message);
 		String actual = new String((byte[]) message.getPayload(), UTF_8);
 
 		assertXMLEqual("<myBean><name>Foo</name></myBean>", actual);
