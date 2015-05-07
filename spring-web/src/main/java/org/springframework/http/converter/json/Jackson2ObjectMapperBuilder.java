@@ -664,6 +664,17 @@ public class Jackson2ObjectMapperBuilder {
 
 	@SuppressWarnings("unchecked")
 	private void registerWellKnownModulesIfAvailable(ObjectMapper objectMapper) {
+		// Java 8 java.util.Optional class present?
+		if (ClassUtils.isPresent("java.util.Optional", this.moduleClassLoader)) {
+			try {
+				Class<? extends Module> jdk8Module = (Class<? extends Module>)
+						ClassUtils.forName("com.fasterxml.jackson.datatype.jdk8.Jdk8Module", this.moduleClassLoader);
+				objectMapper.registerModule(BeanUtils.instantiate(jdk8Module));
+			}
+			catch (ClassNotFoundException ex) {
+				// jackson-datatype-jdk8 not available
+			}
+		}
 		// Java 8 java.time package present?
 		if (ClassUtils.isPresent("java.time.LocalDate", this.moduleClassLoader)) {
 			try {

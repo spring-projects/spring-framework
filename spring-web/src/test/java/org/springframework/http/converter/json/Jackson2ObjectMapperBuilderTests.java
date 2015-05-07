@@ -25,6 +25,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import java.util.TimeZone;
 
 import com.fasterxml.jackson.annotation.JsonFilter;
@@ -238,9 +239,13 @@ public class Jackson2ObjectMapperBuilderTests {
 	@Test
 	public void defaultModules() throws JsonProcessingException, UnsupportedEncodingException {
 		ObjectMapper objectMapper = Jackson2ObjectMapperBuilder.json().build();
+		
 		Long timestamp = 1322903730000L;
 		DateTime dateTime = new DateTime(timestamp, DateTimeZone.UTC);
 		assertEquals(timestamp.toString(), new String(objectMapper.writeValueAsBytes(dateTime), "UTF-8"));
+		
+		Optional<String> optional = Optional.of("test");
+		assertEquals("\"test\"", new String(objectMapper.writeValueAsBytes(optional), "UTF-8"));
 	}
 
 	@Test // SPR-12634
