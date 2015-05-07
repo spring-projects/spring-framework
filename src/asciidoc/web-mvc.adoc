@@ -3055,12 +3055,7 @@ also have the literal part of the servlet mapping included:
 [[mvc-links-to-controllers]]
 === Building URIs to Controllers and methods
 
-Spring MVC provides another mechanism for building and encoding URIs that link to
-Controllers and methods defined within an application.
-{javadoc-baseurl}/org/springframework/web/servlet/mvc/method/annotation/MvcUriComponentsBuilder.html[`MvcUriComponentsBuilder`]
-extends `UriComponentsBuilder` and provides such possibilities.
-
-Given this Controller:
+Spring MVC also provides a mechanism for building links to controller methods. For example, given:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -3077,19 +3072,27 @@ Given this Controller:
 	}
 ----
 
-and using the `MvcUriComponentsBuilder`, the previous example is now:
+You can prepare a link by referring to the method by name:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
 	UriComponents uriComponents = MvcUriComponentsBuilder
-		.fromMethodName(BookingController.class, "getBooking",21).buildAndExpand(42);
+		.fromMethodName(BookingController.class, "getBooking", 21).buildAndExpand(42);
 
 	URI uri = uriComponents.encode().toUri();
 ----
 
-The `MvcUriComponentsBuilder` can also create "mock Controllers", thus enabling to create
-URIs by coding against the actual Controller's API:
+In the above example we provided actual method argument values, in this case the long value 21,
+to be used as a path variable and inserted into the URL. Furthermore, we provided the
+value 42 in order to fill in any remaining URI variables such as the "hotel" variable inherited
+from the type-level request mapping. If the method had more arguments you can supply null for
+arguments not needed for the URL. In general only `@PathVariable` and `@RequestParam` arguments
+are relevant for constructing the URL.
+
+There are additional ways to use `MvcUriComponentsBuilder`. For example you can use a technique
+akin to mock testing through proxies to avoid referring to the controller method by name
+(the example assumes static import of `MvcUriComponentsBuilder.on`):
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -3100,19 +3103,44 @@ URIs by coding against the actual Controller's API:
 	URI uri = uriComponents.encode().toUri();
 ----
 
+The above examples use static methods in `MvcUriComponentsBuilder`. Internally they rely
+on `ServletUriComponentsBuilder` to prepare a base URL from the scheme, host, port,
+context path and servlet path of the current request. This works well in most cases,
+however sometimes it may be insufficient. For example you may be outside the context of
+a request (e.g. a batch process that prepares links) or perhaps you need to insert a path
+prefix (e.g. a locale prefix that was removed from the request path and needs to be
+re-inserted into links).
+
+For such cases you can use the static "fromXxx" overloaded methods that accept a
+`UriComponentsBuilder` to use base URL. Or you can create an instance of `MvcUriComponentsBuilder`
+with a base URL and then use the instance-based "withXxx" methods. For example:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	UriComponentsBuilder base = ServletUriComponentsBuilder.fromCurrentContextPath().path("/en");
+	MvcUriComponentsBuilder builder = MvcUriComponentsBuilder.relativeTo(base);
+	builder.withMethodCall(on(BookingController.class).getBooking(21)).buildAndExpand(42);
+
+	URI uri = uriComponents.encode().toUri();
+----
+
+
 [[mvc-links-to-controllers-from-views]]
 === Building URIs to Controllers and methods from views
 
-It is also useful to build links to annotated controllers from views (e.g. JSP).
-This can be done through a method on `MvcUriComponentsBuilder` which refers to mappings
-by name called `fromMappingName`.
+You can also build links to annotated controllers from views such as JSP, Thymeleaf,
+FreeMarker. This can be done using the `fromMappingName` method in `MvcUriComponentsBuilder`
+which refers to mappings by name.
 
-As of 4.1 every `@RequestMapping` is assigned a default name based on the
-capital letters of the class and the full method name. For example, the method `getFoo` in class
-`FooController` is assigned the name "FC#getFoo". This naming strategy is pluggable
-by implementing `HandlerMethodMappingNamingStrategy` and configuring it on your
-`RequestMappingHandlerMapping`. Furthermore the `@RequestMapping` annotation includes
-a name attribute that can be used to override the default strategy.
+Every `@RequestMapping` is assigned a default name based on the capital letters of the
+class and the full method name. For example, the method `getFoo` in class `FooController`
+is assigned the name "FC#getFoo". This strategy can be replaced or customized by creating
+an instance of `HandlerMethodMappingNamingStrategy` and plugging it into your
+`RequestMappingHandlerMapping`. The default strategy implementation also looks at the
+name attribute on `@RequestMapping` and uses that if present. That means if the default
+mapping name assigned conflicts with another (e.g. overloaded methods) you can assign
+a name explicitly on the `@RequestMapping`.
 
 [NOTE]
 ====
@@ -3135,7 +3163,7 @@ For example given:
     }
 ----
 
-The following JSP code can prepare a link:
+You can prepare a link from a JSP as follows:
 
 [source,jsp,indent=0]
 [subs="verbatim,quotes"]
@@ -3145,8 +3173,10 @@ The following JSP code can prepare a link:
 <a href="${s:mvcUrl(''PC#getPerson'').arg(0,''US'').buildAndExpand(''123'')}">Get Person</a>
 ----
 
-
-
+The above example relies on the `mvcUrl` JSP function declared in the Spring tag library
+(i.e. META-INF/spring.tld). For more advanced cases (e.g. a custom base URL as explained
+in the previous section), it is easy to define your own function, or use a custom tag file,
+in order to use a specific instance of `MvcUriComponentsBuilder` with a custom base URL.
 
 
 [[mvc-localeresolver]]
