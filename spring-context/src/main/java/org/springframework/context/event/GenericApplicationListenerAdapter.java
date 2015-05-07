@@ -38,6 +38,7 @@ public class GenericApplicationListenerAdapter implements GenericApplicationList
 
 	private final ResolvableType declaredEventType;
 
+
 	/**
 	 * Create a new GenericApplicationListener for the given delegate.
 	 * @param delegate the delegate listener to be invoked
@@ -86,6 +87,7 @@ public class GenericApplicationListenerAdapter implements GenericApplicationList
 	public int getOrder() {
 		return (this.delegate instanceof Ordered ? ((Ordered) this.delegate).getOrder() : Ordered.LOWEST_PRECEDENCE);
 	}
+
 
 	static ResolvableType resolveDeclaredEventType(Class<?> listenerType) {
 		ResolvableType resolvableType = ResolvableType.forClass(listenerType).as(ApplicationListener.class);

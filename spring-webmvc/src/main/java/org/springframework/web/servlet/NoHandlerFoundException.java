@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,20 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.servlet;
 
 import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.http.HttpHeaders;
 
 /**
  * Exception to be thrown if DispatcherServlet is unable to determine a corresponding
- * handler for an incoming HTTP request. The DispatcherServlet throws this exception only
- * if its throwExceptionIfNoHandlerFound property is set to "true".
+ * handler for an incoming HTTP request. The DispatcherServlet throws this exception
+ * only if its "throwExceptionIfNoHandlerFound" property is set to "true".
  *
  * @author Brian Clozel
  * @since 4.0
- * @see org.springframework.web.servlet.DispatcherServlet
+ * @see DispatcherServlet#setThrowExceptionIfNoHandlerFound(boolean)
+ * @see DispatcherServlet#noHandlerFound(HttpServletRequest, HttpServletResponse)
  */
 @SuppressWarnings("serial")
 public class NoHandlerFoundException extends ServletException {
@@ -50,6 +54,7 @@ public class NoHandlerFoundException extends ServletException {
 		this.requestURL = requestURL;
 		this.headers = headers;
 	}
+
 
 	public String getHttpMethod() {
 		return this.httpMethod;
