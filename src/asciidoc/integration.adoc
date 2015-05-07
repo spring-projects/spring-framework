@@ -1258,9 +1258,9 @@ to serialize only a subset of the object properties. For example:
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	JacksonSerializationValue jsv = new JacksonSerializationValue(new User("eric", "7!jd#h23"),
-		User.WithoutPasswordView.class);
-	HttpEntity<JacksonSerializationValue> entity = new HttpEntity<JacksonSerializationValue>(jsv);
+	MappingJacksonValue value = new MappingJacksonValue(new User("eric", "7!jd#h23"));
+	value.setSerializationView(User.WithoutPasswordView.class);
+	HttpEntity<MappingJacksonValue> entity = new HttpEntity<MappingJacksonValue>(value);
 	String s = template.postForObject("http://example.com/user", entity, String.class);
 ----
 
