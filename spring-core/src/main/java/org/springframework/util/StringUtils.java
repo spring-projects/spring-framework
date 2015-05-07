@@ -22,6 +22,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
@@ -29,7 +30,6 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.TimeZone;
-import java.util.TreeSet;
 
 /**
  * Miscellaneous {@link String} utility methods.
@@ -880,7 +880,7 @@ public abstract class StringUtils {
 
 	/**
 	 * Remove duplicate strings from the given array.
-	 * <p>Also sorts the array, as it uses a {@link TreeSet}.
+	 * <p>As of 4.2, it preserves the original order, as it uses a {@link LinkedHashSet}.
 	 * @param array the {@code String} array
 	 * @return an array without duplicates, in natural sort order
 	 */
@@ -888,7 +888,7 @@ public abstract class StringUtils {
 		if (ObjectUtils.isEmpty(array)) {
 			return array;
 		}
-		Set<String> set = new TreeSet<String>();
+		Set<String> set = new LinkedHashSet<String>();
 		for (String element : array) {
 			set.add(element);
 		}
@@ -1098,13 +1098,14 @@ public abstract class StringUtils {
 
 	/**
 	 * Convert a comma delimited list (e.g., a row from a CSV file) into a set.
-	 * <p>Note that this will suppress duplicates, and the elements in the
-	 * returned set will be sorted, since a {@link TreeSet} is used internally.
+	 * <p>Note that this will suppress duplicates, and as of 4.2, the elements in
+	 * the returned set will preserve the original order in a {@link LinkedHashSet}.
 	 * @param str the input {@code String}
 	 * @return a set of {@code String} entries in the list
+	 * @see #removeDuplicateStrings(String[])
 	 */
 	public static Set<String> commaDelimitedListToSet(String str) {
-		Set<String> set = new TreeSet<String>();
+		Set<String> set = new LinkedHashSet<String>();
 		String[] tokens = commaDelimitedListToStringArray(str);
 		for (String token : tokens) {
 			set.add(token);
