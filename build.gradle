@@ -486,6 +486,7 @@ project("spring-messaging") {
 		compile(project(":spring-beans"))
 		compile(project(":spring-core"))
 		compile(project(":spring-context"))
+		optional(project(":spring-oxm"))
 		optional("io.projectreactor:reactor-core:${reactorVersion}")
 		optional("io.projectreactor:reactor-net:${reactorVersion}") {
 			exclude group: "io.netty", module: "netty-all"
@@ -516,6 +517,7 @@ project("spring-messaging") {
 		testCompile("commons-dbcp:commons-dbcp:1.4")
 		testCompile("log4j:log4j:1.2.17")
 		testCompile("org.slf4j:slf4j-jcl:${slf4jVersion}")
+		testCompile("xmlunit:xmlunit:${xmlunitVersion}")
 	}
 }
 
