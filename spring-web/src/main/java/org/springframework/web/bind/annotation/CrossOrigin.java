@@ -26,9 +26,9 @@ import java.lang.annotation.Target;
  * Marks the annotated method as permitting cross origin requests.
  * By default, all origins and headers are permitted.
  *
- * @since 4.2
  * @author Russell Allen
  * @author Sebastien Deleuze
+ * @since 4.2
  */
 @Target({ElementType.METHOD, ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
@@ -37,7 +37,7 @@ public @interface CrossOrigin {
 
 	/**
 	 * List of allowed origins. {@code "*"} means that all origins are allowed. These values
-	 * are placed in the {@code Access-Control-Allow-Origin } header of both the pre-flight
+	 * are placed in the {@code Access-Control-Allow-Origin} header of both the pre-flight
 	 * and actual responses. Default value is <b>"*"</b>.
 	 */
 	String[] origin() default {"*"};
@@ -71,7 +71,7 @@ public @interface CrossOrigin {
 	String allowCredentials() default "true";
 
 	/**
-	 * Controls the cache duration for pre-flight responses.  Setting this to a reasonable
+	 * Controls the cache duration for pre-flight responses. Setting this to a reasonable
 	 * value can reduce the number of pre-flight request/response interaction required by
 	 * the browser. This property controls the value of the {@code Access-Control-Max-Age header}
 	 * in the pre-flight response. Value set to -1 means undefined. Default value is

@@ -33,6 +33,11 @@ public class PayloadApplicationEvent<T> extends ApplicationEvent {
 	private final T payload;
 
 
+	/**
+	 * Create a new PayloadApplicationEvent.
+	 * @param source the component that published the event (never {@code null})
+	 * @param payload the payload object
+	 */
 	public PayloadApplicationEvent(Object source, T payload) {
 		super(source);
 		Assert.notNull(payload, "Payload must not be null");
@@ -44,8 +49,7 @@ public class PayloadApplicationEvent<T> extends ApplicationEvent {
 	 * Return the payload of the event.
 	 */
 	public T getPayload() {
-		return payload;
+		return this.payload;
 	}
 
 }
-
