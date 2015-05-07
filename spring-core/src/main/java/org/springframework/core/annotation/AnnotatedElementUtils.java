@@ -30,20 +30,20 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
 /**
- * General utility methods for working with annotations and meta-annotations
- * <em>present</em> on {@link AnnotatedElement AnnotatedElements}.
+ * General utility methods for finding annotations and meta-annotations on
+ * {@link AnnotatedElement AnnotatedElements}.
  *
  * <p>{@code AnnotatedElementUtils} defines the public API for Spring's
- * meta-annotation programming model with support for annotation attribute
- * overrides. If you do not need support for annotation attribute overrides,
- * consider using {@link AnnotationUtils} instead.
+ * meta-annotation programming model with support for <em>annotation attribute
+ * overrides</em>. If you do not need support for annotation attribute
+ * overrides, consider using {@link AnnotationUtils} instead.
  *
  * <p>Note that the features of this class are not provided by the JDK's
  * introspection facilities themselves.
  *
- * <h3>Annotation Attribute Override Support</h3>
+ * <h3>Annotation Attribute Overrides</h3>
  * <p>Support for meta-annotations with <em>attribute overrides</em> in
- * <em>composed annotations</em> is provided by all
+ * <em>composed annotations</em> is provided by all variants of the
  * {@code getAnnotationAttributes()} and {@code findAnnotationAttributes()}
  * methods.
  *
