@@ -1591,7 +1591,7 @@ The above configuration is equivalent to the following Java code:
 The p-namespace enables you to use the `bean` element's attributes, instead of nested
 `<property/>` elements, to describe your property values and/or collaborating beans.
 
-Spring supports extensible configuration formats <<xsd-config,with namespaces>>, which are
+Spring supports extensible configuration formats <<xsd-configuration,with namespaces>>, which are
 based on an XML Schema definition. The `beans` configuration format discussed in this
 chapter is defined in an XML Schema document. However, the p-namespace is not defined in
 an XSD file and exists only in the core of Spring.
@@ -2549,7 +2549,7 @@ understand the "why" as well as the "how" behind it.
 
 To create such a proxy, you insert a child `<aop:scoped-proxy/>` element into a scoped
 bean definition. See <<beans-factory-scopes-other-injection-proxies>> and
-<<xsd-config>>.) Why do definitions of beans scoped at the `request`, `session`,
+<<xsd-configuration>>.) Why do definitions of beans scoped at the `request`, `session`,
 `globalSession` and custom-scope levels require the `<aop:scoped-proxy/>` element ?
 Let's examine the following singleton bean definition and contrast it with what you need
 to define for the aforementioned scopes. (The following `userPreferences` bean
@@ -3493,7 +3493,7 @@ you write your own `BeanPostProcessor` you should consider implementing the `Ord
 interface too. For further details, consult the javadocs of the `BeanPostProcessor` and
 `Ordered` interfaces. See also the note below on
 <<beans-factory-programmatically-registering-beanpostprocessors, programmatic
-registration of `BeanPostProcessors`>>
+registration of `BeanPostProcessors`>>.
 
 [NOTE]
 ====
@@ -3537,11 +3537,11 @@ interface, clearly indicating the post-processor nature of that bean. Otherwise,
 Since a ++BeanPostProcessor++ needs to be instantiated early in order to apply to the
 initialization of other beans in the context, this early type detection is critical.
 
+
+[[beans-factory-programmatically-registering-beanpostprocessors]]
+.Programmatically registering BeanPostProcessors
 [NOTE]
 ====
-
-*Programmatically registering BeanPostProcessors*
-
 While the recommended approach for `BeanPostProcessor` registration is through
 `ApplicationContext` auto-detection (as described above), it is also possible to
 register them __programmatically__ against a `ConfigurableBeanFactory` using the
@@ -3554,11 +3554,9 @@ programmatically are always processed before those registered through auto-detec
 regardless of any explicit ordering.
 ====
 
+.BeanPostProcessors and AOP auto-proxying
 [NOTE]
 ====
-
-*BeanPostProcessors and AOP auto-proxying*
-
 Classes that implement the `BeanPostProcessor` interface are __special__ and are treated
 differently by the container. All `BeanPostProcessors` __and beans that they reference
 directly__ are instantiated on startup, as part of the special startup phase of the

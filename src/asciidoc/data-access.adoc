@@ -306,7 +306,7 @@ infrastructure.
 [NOTE]
 ====
 The above definition of the `dataSource` bean uses the `<jndi-lookup/>` tag from the
-`jee` namespace. For more information on schema-based configuration, see <<xsd-config>>,
+`jee` namespace. For more information on schema-based configuration, see <<xsd-configuration>>,
 and for more information on the `<jee/>` tags see the section entitled
 <<xsd-config-body-schemas-jee>>.
 ====

@@ -185,13 +185,13 @@ style.
 Spring AOP defaults to using standard JDK __dynamic proxies__ for AOP proxies. This
 enables any interface (or set of interfaces) to be proxied.
 
-Spring AOP can also use CGLIB proxies. This is necessary to proxy classes, rather than
+Spring AOP can also use CGLIB proxies. This is necessary to proxy classes rather than
 interfaces. CGLIB is used by default if a business object does not implement an
-interface. As it is good practice to program to interfaces rather than classes, business
+interface. As it is good practice to program to interfaces rather than classes; business
 classes normally will implement one or more business interfaces. It is possible to
-<<aop-autoproxy-force-CGLIB,force the use of CGLIB>>, in those (hopefully rare) cases
-where you need to advise a method that is not declared on an interface, or where you
-need to pass a proxied object to a method as a concrete type.
+<<aop-proxying,force the use of CGLIB>>, in those (hopefully rare) cases where you
+need to advise a method that is not declared on an interface, or where you need to
+pass a proxied object to a method as a concrete type.
 
 It is important to grasp the fact that Spring AOP is __proxy-based__. See
 <<aop-understanding-aop-proxies>> for a thorough examination of exactly what this
@@ -259,8 +259,8 @@ element:
 	<aop:aspectj-autoproxy/>
 ----
 
-This assumes that you are using schema support as described in <<xsd-config>>. See
-<<xsd-config-body-schemas-aop>> for how to import the tags in the aop namespace.
+This assumes that you are using schema support as described in <<xsd-configuration>>. See
+<<xsd-config-body-schemas-aop>> for how to import the tags in the `aop` namespace.
 
 
 
@@ -1546,8 +1546,8 @@ the new __syntax__ and refer the reader to the discussion in the previous sectio
 of advice parameters.
 
 To use the aop namespace tags described in this section, you need to import the
-spring-aop schema as described in <<xsd-config>>. See <<xsd-config-body-schemas-aop>>
-for how to import the tags in the aop namespace.
+`spring-aop` schema as described in <<xsd-configuration>>. See <<xsd-config-body-schemas-aop>>
+for how to import the tags in the `aop` namespace.
 
 Within your Spring configurations, all aspect and advisor elements must be placed within
 an `<aop:config>` element (you can have more than one `<aop:config>` element in an

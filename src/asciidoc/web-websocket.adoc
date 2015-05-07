@@ -263,7 +263,7 @@ XML configuration equivalent:
 ----
 
 The above is for use in Spring MVC applications and should be included in the
-configuration of a <<mvc-serlvet,DispatcherServlet>>. However, Spring's WebSocket
+configuration of a <<mvc-servlet,DispatcherServlet>>. However, Spring's WebSocket
 support does not depend on Spring MVC. It is relatively simple to integrate a `WebSocketHandler`
 into other HTTP serving environments with the help of
 {javadoc-baseurl}/org/springframework/web/socket/server/support/WebSocketHttpRequestHandler.html[WebSocketHttpRequestHandler].
@@ -731,7 +731,7 @@ and the XML configuration equivalent:
 ----
 
 The above is for use in Spring MVC applications and should be included in the
-configuration of a <<mvc-serlvet,DispatcherServlet>>. However, Spring's WebSocket
+configuration of a <<mvc-servlet,DispatcherServlet>>. However, Spring's WebSocket
 and SockJS support does not depend on Spring MVC. It is relatively simple to
 integrate into other HTTP serving environments with the help of
 {javadoc-baseurl}/org/springframework/web/socket/sockjs/support/SockJsHttpRequestHandler.html[SockJsHttpRequestHandler].
