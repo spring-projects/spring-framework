@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,26 +26,38 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * PathMatcher implementation for Ant-style path patterns. Examples are provided below.
+ * {@link PathMatcher} implementation for Ant-style path patterns.
  *
  * <p>Part of this mapping code has been kindly borrowed from <a href="http://ant.apache.org">Apache Ant</a>.
  *
- * <p>The mapping matches URLs using the following rules:<br> <ul> <li>? matches one character</li> <li>* matches zero
- * or more characters</li> <li>** matches zero or more 'directories' in a path</li> </ul>
+ * <p>The mapping matches URLs using the following rules:<br>
+ * <ul>
+ * <li>{@code ?} matches one character</li>
+ * <li>{@code *} matches zero or more characters</li>
+ * <li>{@code **} matches zero or more <em>directories</em> in a path</li>
+ * </ul>
  *
- * <p>Some examples:<br> <ul> <li>{@code com/t?st.jsp} - matches {@code com/test.jsp} but also
- * {@code com/tast.jsp} or {@code com/txst.jsp}</li> <li>{@code com/*.jsp} - matches all
- * {@code .jsp} files in the {@code com} directory</li> <li>{@code com/&#42;&#42;/test.jsp} - matches all
- * {@code test.jsp} files underneath the {@code com} path</li> <li>{@code org/springframework/&#42;&#42;/*.jsp}
- * - matches all {@code .jsp} files underneath the {@code org/springframework} path</li>
- * <li>{@code org/&#42;&#42;/servlet/bla.jsp} - matches {@code org/springframework/servlet/bla.jsp} but also
- * {@code org/springframework/testing/servlet/bla.jsp} and {@code org/servlet/bla.jsp}</li> </ul>
+ * <h3>Examples</h3>
+ * <ul>
+ * <li>{@code com/t?st.jsp} &mdash; matches {@code com/test.jsp} but also
+ * {@code com/tast.jsp} or {@code com/txst.jsp}</li>
+ * <li>{@code com/*.jsp} &mdash; matches all {@code .jsp} files in the
+ * {@code com} directory</li>
+ * <li><code>com/&#42;&#42;/test.jsp</code> &mdash; matches all {@code test.jsp}
+ * files underneath the {@code com} path</li>
+ * <li><code>org/springframework/&#42;&#42;/*.jsp</code> &mdash; matches all
+ * {@code .jsp} files underneath the {@code org/springframework} path</li>
+ * <li><code>org/&#42;&#42;/servlet/bla.jsp</code> &mdash; matches
+ * {@code org/springframework/servlet/bla.jsp} but also
+ * {@code org/springframework/testing/servlet/bla.jsp} and {@code org/servlet/bla.jsp}</li>
+ * </ul>
  *
  * @author Alef Arendsen
  * @author Juergen Hoeller
  * @author Rob Harrop
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
+ * @author Sam Brannen
  * @since 16.07.2003
  */
 public class AntPathMatcher implements PathMatcher {
@@ -80,7 +92,7 @@ public class AntPathMatcher implements PathMatcher {
 	}
 
 	/**
-	 * A convenience alternative constructor to use with a custom path separator.
+	 * A convenient, alternative constructor to use with a custom path separator.
 	 * @param pathSeparator the path separator to use, must not be {@code null}.
 	 * @since 4.1
 	 */
@@ -93,7 +105,7 @@ public class AntPathMatcher implements PathMatcher {
 
 	/**
 	 * Set the path separator to use for pattern parsing.
-	 * Default is "/", as in Ant.
+	 * <p>Default is "/", as in Ant.
 	 */
 	public void setPathSeparator(String pathSeparator) {
 		this.pathSeparator = (pathSeparator != null ? pathSeparator : DEFAULT_PATH_SEPARATOR);
@@ -102,7 +114,7 @@ public class AntPathMatcher implements PathMatcher {
 
 	/**
 	 * Specify whether to trim tokenized paths and patterns.
-	 * Default is {@code true}.
+	 * <p>Default is {@code true}.
 	 */
 	public void setTrimTokens(boolean trimTokens) {
 		this.trimTokens = trimTokens;
@@ -116,7 +128,7 @@ public class AntPathMatcher implements PathMatcher {
 	 * <p>Default is for the cache to be on, but with the variant to automatically
 	 * turn it off when encountering too many patterns to cache at runtime
 	 * (the threshold is 65536), assuming that arbitrary permutations of patterns
-	 * are coming in, with little chance for encountering a reoccurring pattern.
+	 * are coming in, with little chance for encountering a recurring pattern.
 	 * @see #getStringMatcher(String)
 	 */
 	public void setCachePatterns(boolean cachePatterns) {
@@ -317,7 +329,7 @@ public class AntPathMatcher implements PathMatcher {
 	}
 
 	/**
-	 * Tests whether or not a string matches against a pattern.
+	 * Test whether or not a string matches against a pattern.
 	 * @param pattern the pattern to match against (never {@code null})
 	 * @param str the String which must be matched against the pattern (never {@code null})
 	 * @return {@code true} if the string matches against the pattern, or {@code false} otherwise
@@ -331,10 +343,10 @@ public class AntPathMatcher implements PathMatcher {
 	 * <p>The default implementation checks this AntPathMatcher's internal cache
 	 * (see {@link #setCachePatterns}), creating a new AntPathStringMatcher instance
 	 * if no cached copy is found.
-	 * When encountering too many patterns to cache at runtime (the threshold is 65536),
+	 * <p>When encountering too many patterns to cache at runtime (the threshold is 65536),
 	 * it turns the default cache off, assuming that arbitrary permutations of patterns
-	 * are coming in, with little chance for encountering a reoccurring pattern.
-	 * <p>This method may get overridden to implement a custom cache strategy.
+	 * are coming in, with little chance for encountering a recurring pattern.
+	 * <p>This method may be overridden to implement a custom cache strategy.
 	 * @param pattern the pattern to match against (never {@code null})
 	 * @return a corresponding AntPathStringMatcher (never {@code null})
 	 * @see #setCachePatterns
@@ -406,23 +418,35 @@ public class AntPathMatcher implements PathMatcher {
 	}
 
 	/**
-	 * Combines two patterns into a new pattern that is returned.
-	 * <p>This implementation simply concatenates the two patterns, unless the first pattern
-	 * contains a file extension match (such as {@code *.html}. In that case, the second pattern
-	 * should be included in the first, or an {@code IllegalArgumentException} is thrown.
-	 * <p>For example: <table>
-	 * <tr><th>Pattern 1</th><th>Pattern 2</th><th>Result</th></tr> <tr><td>/hotels</td><td>{@code
-	 * null}</td><td>/hotels</td></tr> <tr><td>{@code null}</td><td>/hotels</td><td>/hotels</td></tr>
-	 * <tr><td>/hotels</td><td>/bookings</td><td>/hotels/bookings</td></tr> <tr><td>/hotels</td><td>bookings</td><td>/hotels/bookings</td></tr>
-	 * <tr><td>/hotels/*</td><td>/bookings</td><td>/hotels/bookings</td></tr> <tr><td>/hotels/&#42;&#42;</td><td>/bookings</td><td>/hotels/&#42;&#42;/bookings</td></tr>
-	 * <tr><td>/hotels</td><td>{hotel}</td><td>/hotels/{hotel}</td></tr> <tr><td>/hotels/*</td><td>{hotel}</td><td>/hotels/{hotel}</td></tr>
+	 * Combine two patterns into a new pattern.
+	 *
+	 * <p>This implementation simply concatenates the two patterns, unless
+	 * the first pattern contains a file extension match (e.g., {@code *.html}).
+	 * In that case, the second pattern will be merged into the first. Otherwise,
+	 * an {@code IllegalArgumentException} will be thrown.
+	 *
+	 * <h3>Examples</h3>
+	 * <table border="1">
+	 * <tr><th>Pattern 1</th><th>Pattern 2</th><th>Result</th></tr>
+	 * <tr><td>{@code null}</td><td>{@code null}</td><td>&nbsp;</td></tr>
+	 * <tr><td>/hotels</td><td>{@code null}</td><td>/hotels</td></tr>
+	 * <tr><td>{@code null}</td><td>/hotels</td><td>/hotels</td></tr>
+	 * <tr><td>/hotels</td><td>/bookings</td><td>/hotels/bookings</td></tr>
+	 * <tr><td>/hotels</td><td>bookings</td><td>/hotels/bookings</td></tr>
+	 * <tr><td>/hotels/*</td><td>/bookings</td><td>/hotels/bookings</td></tr>
+	 * <tr><td>/hotels/&#42;&#42;</td><td>/bookings</td><td>/hotels/&#42;&#42;/bookings</td></tr>
+	 * <tr><td>/hotels</td><td>{hotel}</td><td>/hotels/{hotel}</td></tr>
+	 * <tr><td>/hotels/*</td><td>{hotel}</td><td>/hotels/{hotel}</td></tr>
 	 * <tr><td>/hotels/&#42;&#42;</td><td>{hotel}</td><td>/hotels/&#42;&#42;/{hotel}</td></tr>
-	 * <tr><td>/*.html</td><td>/hotels.html</td><td>/hotels.html</td></tr> <tr><td>/*.html</td><td>/hotels</td><td>/hotels.html</td></tr>
-	 * <tr><td>/*.html</td><td>/*.txt</td><td>IllegalArgumentException</td></tr> </table>
+	 * <tr><td>/*.html</td><td>/hotels.html</td><td>/hotels.html</td></tr>
+	 * <tr><td>/*.html</td><td>/hotels</td><td>/hotels.html</td></tr>
+	 * <tr><td>/*.html</td><td>/*.txt</td><td>{@code IllegalArgumentException}</td></tr>
+	 * </table>
+	 *
 	 * @param pattern1 the first pattern
 	 * @param pattern2 the second pattern
 	 * @return the combination of the two patterns
-	 * @throws IllegalArgumentException when the two patterns cannot be combined
+	 * @throws IllegalArgumentException if the two patterns cannot be combined
 	 */
 	@Override
 	public String combine(String pattern1, String pattern2) {
@@ -469,10 +493,18 @@ public class AntPathMatcher implements PathMatcher {
 	}
 
 	private String concat(String path1, String path2) {
-		if (path1.endsWith(this.pathSeparator) || path2.startsWith(this.pathSeparator)) {
+		boolean path1EndsWithSeparator = path1.endsWith(this.pathSeparator);
+		boolean path2StartsWithSeparator = path2.startsWith(this.pathSeparator);
+
+		if (path1EndsWithSeparator && path2StartsWithSeparator) {
+			return path1 + path2.substring(1);
+		}
+		else if (path1EndsWithSeparator || path2StartsWithSeparator) {
 			return path1 + path2;
 		}
-		return path1 + this.pathSeparator + path2;
+		else {
+			return path1 + this.pathSeparator + path2;
+		}
 	}
 
 	/**

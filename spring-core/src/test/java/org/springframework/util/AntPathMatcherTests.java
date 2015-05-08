@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -63,7 +63,7 @@ public class AntPathMatcherTests {
 		assertFalse(pathMatcher.match("tes?", "testt"));
 		assertFalse(pathMatcher.match("tes?", "tsst"));
 
-		// test matchin with *'s
+		// test matching with *'s
 		assertTrue(pathMatcher.match("*", "test"));
 		assertTrue(pathMatcher.match("test*", "test"));
 		assertTrue(pathMatcher.match("test*", "testTest"));
@@ -148,7 +148,7 @@ public class AntPathMatcherTests {
 		assertFalse(pathMatcher.matchStart("tes?", "testt"));
 		assertFalse(pathMatcher.matchStart("tes?", "tsst"));
 
-		// test matchin with *'s
+		// test matching with *'s
 		assertTrue(pathMatcher.matchStart("*", "test"));
 		assertTrue(pathMatcher.matchStart("test*", "test"));
 		assertTrue(pathMatcher.matchStart("test*", "testTest"));
@@ -237,7 +237,7 @@ public class AntPathMatcherTests {
 		assertFalse(pathMatcher.match("tes?", "testt"));
 		assertFalse(pathMatcher.match("tes?", "tsst"));
 
-		// test matchin with *'s
+		// test matching with *'s
 		assertTrue(pathMatcher.match("*", "test"));
 		assertTrue(pathMatcher.match("test*", "test"));
 		assertTrue(pathMatcher.match("test*", "testTest"));
@@ -354,8 +354,9 @@ public class AntPathMatcherTests {
 		assertEquals("1.0.0", result.get("version"));
 	}
 
-	// SPR-7787
-
+	/**
+	 * SPR-7787
+	 */
 	@Test
 	public void extractUriTemplateVarsRegexQualifiers() {
 		Map<String, String> result = pathMatcher.extractUriTemplateVariables(
@@ -380,8 +381,9 @@ public class AntPathMatcherTests {
 		assertEquals("1.0.0.{12}", result.get("version"));
 	}
 
-	// SPR-8455
-
+	/**
+	 * SPR-8455
+	 */
 	@Test
 	public void extractUriTemplateVarsRegexCapturingGroups() {
 		try {
@@ -421,6 +423,8 @@ public class AntPathMatcherTests {
 		assertEquals("/user/user", pathMatcher.combine("/user", "/user"));	// SPR-7970
 		assertEquals("/{foo:.*[^0-9].*}/edit/", pathMatcher.combine("/{foo:.*[^0-9].*}", "/edit/")); // SPR-10062
 		assertEquals("/1.0/foo/test", pathMatcher.combine("/1.0", "/foo/test")); // SPR-10554
+		assertEquals("/hotel", pathMatcher.combine("/", "/hotel")); // SPR-12975
+		assertEquals("/hotel/booking", pathMatcher.combine("/hotel/", "/booking")); // SPR-12975
 	}
 
 	@Test
@@ -568,8 +572,9 @@ public class AntPathMatcherTests {
 		paths.clear();
 	}
 
-	// SPR-8687
-
+	/**
+	 * SPR-8687
+	 */
 	@Test
 	public void trimTokensOff() {
 		pathMatcher.setTrimTokens(false);
@@ -579,7 +584,7 @@ public class AntPathMatcherTests {
 	}
 
 	@Test
-	public void testDefaultCacheSetting() {
+	public void defaultCacheSetting() {
 		match();
 		assertTrue(pathMatcher.stringMatcherCache.size() > 20);
 
@@ -591,7 +596,7 @@ public class AntPathMatcherTests {
 	}
 
 	@Test
-	public void testCacheSetToTrue() {
+	public void cachePatternsSetToTrue() {
 		pathMatcher.setCachePatterns(true);
 		match();
 		assertTrue(pathMatcher.stringMatcherCache.size() > 20);
@@ -604,14 +609,14 @@ public class AntPathMatcherTests {
 	}
 
 	@Test
-	public void testCacheSetToFalse() {
+	public void cachePatternsSetToFalse() {
 		pathMatcher.setCachePatterns(false);
 		match();
 		assertTrue(pathMatcher.stringMatcherCache.isEmpty());
 	}
 
 	@Test
-	public void testExtensionMappingWithDotPathSeparator() {
+	public void extensionMappingWithDotPathSeparator() {
 		pathMatcher.setPathSeparator(".");
 		assertEquals("Extension mapping should be disabled with \".\" as path separator",
 				"/*.html.hotel.*", pathMatcher.combine("/*.html", "hotel.*"));
