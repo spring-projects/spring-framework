@@ -25,11 +25,16 @@ import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Ignore;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
+import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
 
 /**
+ * Unit tests for {@link AntPathMatcher}.
+ *
  * @author Alef Arendsen
  * @author Seth Ladd
  * @author Juergen Hoeller
@@ -40,6 +45,9 @@ import static org.junit.Assert.*;
 public class AntPathMatcherTests {
 
 	private AntPathMatcher pathMatcher;
+
+	@Rule
+	public ExpectedException exception = ExpectedException.none();
 
 	@Before
 	public void createMatcher() {
@@ -388,14 +396,9 @@ public class AntPathMatcherTests {
 	 */
 	@Test
 	public void extractUriTemplateVarsRegexCapturingGroups() {
-		try {
-			pathMatcher.extractUriTemplateVariables("/web/{id:foo(bar)?}", "/web/foobar");
-			fail("Expected exception");
-		}
-		catch (IllegalArgumentException ex) {
-			assertTrue("Expected helpful message on the use of capturing groups",
-					ex.getMessage().contains("The number of capturing groups in the pattern"));
-		}
+		exception.expect(IllegalArgumentException.class);
+		exception.expectMessage(containsString("The number of capturing groups in the pattern"));
+		pathMatcher.extractUriTemplateVariables("/web/{id:foo(bar)?}", "/web/foobar");
 	}
 
 	@Test
@@ -430,8 +433,9 @@ public class AntPathMatcherTests {
 	}
 
 	@Ignore("Disabled until SPR-12998 is resolved")
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void combineWithTwoFileExtensionPatterns() {
+		exception.expect(IllegalArgumentException.class);
 		pathMatcher.combine("/*.html", "/*.txt");
 	}
 
