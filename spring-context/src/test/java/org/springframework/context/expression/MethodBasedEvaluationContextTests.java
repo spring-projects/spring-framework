@@ -27,9 +27,11 @@ import org.springframework.util.ReflectionUtils;
 import static org.junit.Assert.*;
 
 /**
+ * Unit tests for {@link MethodBasedEvaluationContext}.
+ *
  * @author Stephane Nicoll
  */
-public class MethodBasedEvaluationContextTest {
+public class MethodBasedEvaluationContextTests {
 
 	private final ParameterNameDiscoverer paramDiscover = new DefaultParameterNameDiscoverer();
 
