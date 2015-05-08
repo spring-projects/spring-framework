@@ -28,6 +28,11 @@ import org.springframework.test.annotation.Timed;
  * if the next statement in the execution chain takes more than the specified
  * number of milliseconds.
  *
+ * <p>In contrast to JUnit's
+ * {@link org.junit.internal.runners.statements.FailOnTimeout FailOnTimeout},
+ * the next {@code statement} will be executed in the same thread as the
+ * caller and will therefore not be aborted preemptively.
+ *
  * @see #evaluate()
  * @author Sam Brannen
  * @since 3.0
@@ -53,11 +58,9 @@ public class SpringFailOnTimeout extends Statement {
 
 	/**
 	 * Evaluate the next {@link Statement statement} in the execution chain
-	 * (typically an instance of
-	 * {@link org.junit.internal.runners.statements.InvokeMethod InvokeMethod}
-	 * or {@link org.junit.internal.runners.statements.ExpectException
-	 * ExpectException}) and throw a {@link TimeoutException} if the next
-	 * {@code statement} executes longer than the specified {@code timeout}.
+	 * (typically an instance of {@link SpringRepeat}) and throw a
+	 * {@link TimeoutException} if the next {@code statement} executes longer
+	 * than the specified {@code timeout}.
 	 */
 	@Override
 	public void evaluate() throws Throwable {

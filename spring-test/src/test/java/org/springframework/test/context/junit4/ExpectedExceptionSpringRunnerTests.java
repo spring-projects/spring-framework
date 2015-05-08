@@ -43,23 +43,19 @@ public class ExpectedExceptionSpringRunnerTests {
 
 	@Test
 	public void expectedExceptions() throws Exception {
-		Class<ExpectedExceptionSpringRunnerTestCase> testClass = ExpectedExceptionSpringRunnerTestCase.class;
+		Class<?> testClass = ExpectedExceptionSpringRunnerTestCase.class;
 		TrackingRunListener listener = new TrackingRunListener();
 		RunNotifier notifier = new RunNotifier();
 		notifier.addListener(listener);
 
 		new SpringJUnit4ClassRunner(testClass).run(notifier);
-		assertEquals("Verifying number of failures for test class [" + testClass + "].", 0,
-			listener.getTestFailureCount());
-		assertEquals("Verifying number of tests started for test class [" + testClass + "].", 1,
-			listener.getTestStartedCount());
-		assertEquals("Verifying number of tests finished for test class [" + testClass + "].", 1,
-			listener.getTestFinishedCount());
+		assertEquals("failures for test class [" + testClass + "].", 0, listener.getTestFailureCount());
+		assertEquals("tests started for test class [" + testClass + "].", 1, listener.getTestStartedCount());
+		assertEquals("tests finished for test class [" + testClass + "].", 1, listener.getTestFinishedCount());
 	}
 
 
 	@Ignore("TestCase classes are run manually by the enclosing test class")
-	@RunWith(SpringJUnit4ClassRunner.class)
 	@TestExecutionListeners({})
 	public static final class ExpectedExceptionSpringRunnerTestCase {
 

@@ -16,6 +16,7 @@
 
 package org.springframework.test.context.junit4;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
 import org.apache.commons.logging.Log;
@@ -41,6 +42,8 @@ import org.springframework.test.annotation.ProfileValueUtils;
 import org.springframework.test.annotation.Repeat;
 import org.springframework.test.annotation.Timed;
 import org.springframework.test.context.TestContextManager;
+import org.springframework.test.context.junit4.rules.SpringClassRule;
+import org.springframework.test.context.junit4.rules.SpringMethodRule;
 import org.springframework.test.context.junit4.statements.RunAfterTestClassCallbacks;
 import org.springframework.test.context.junit4.statements.RunAfterTestMethodCallbacks;
 import org.springframework.test.context.junit4.statements.RunBeforeTestClassCallbacks;
@@ -72,6 +75,9 @@ import org.springframework.util.ReflectionUtils;
  * <li>{@link org.springframework.test.annotation.IfProfileValue @IfProfileValue}</li>
  * </ul>
  *
+ * <p>If you would like to use the Spring TestContext Framework with a runner
+ * other than this one, use {@link SpringClassRule} and {@link SpringMethodRule}.
+ *
  * <p><strong>NOTE:</strong> As of Spring Framework 4.1, this class requires JUnit 4.9 or higher.
  *
  * @author Sam Brannen
@@ -80,6 +86,8 @@ import org.springframework.util.ReflectionUtils;
  * @see TestContextManager
  * @see AbstractJUnit4SpringContextTests
  * @see AbstractTransactionalJUnit4SpringContextTests
+ * @see org.springframework.test.context.junit4.rules.SpringClassRule
+ * @see org.springframework.test.context.junit4.rules.SpringMethodRule
  */
 @SuppressWarnings("deprecation")
 public class SpringJUnit4ClassRunner extends BlockJUnit4ClassRunner {
@@ -101,6 +109,19 @@ public class SpringJUnit4ClassRunner extends BlockJUnit4ClassRunner {
 	private final TestContextManager testContextManager;
 
 
+	private static void ensureSpringRulesAreNotPresent(Class<?> testClass) {
+		for (Field field : testClass.getFields()) {
+			if (SpringClassRule.class.isAssignableFrom(field.getType())) {
+				throw new IllegalStateException(String.format("Detected SpringClassRule field in test class [%s], but "
+						+ "SpringClassRule cannot be used with the SpringJUnit4ClassRunner.", testClass.getName()));
+			}
+			if (SpringMethodRule.class.isAssignableFrom(field.getType())) {
+				throw new IllegalStateException(String.format("Detected SpringMethodRule field in test class [%s], "
+						+ "but SpringMethodRule cannot be used with the SpringJUnit4ClassRunner.", testClass.getName()));
+			}
+		}
+	}
+
 	/**
 	 * Construct a new {@code SpringJUnit4ClassRunner} and initialize a
 	 * {@link TestContextManager} to provide Spring testing functionality to
@@ -113,6 +134,7 @@ public class SpringJUnit4ClassRunner extends BlockJUnit4ClassRunner {
 		if (logger.isDebugEnabled()) {
 			logger.debug("SpringJUnit4ClassRunner constructor called with [" + clazz + "].");
 		}
+		ensureSpringRulesAreNotPresent(clazz);
 		this.testContextManager = createTestContextManager(clazz);
 	}
 
@@ -166,7 +188,7 @@ public class SpringJUnit4ClassRunner extends BlockJUnit4ClassRunner {
 
 	/**
 	 * Wrap the {@link Statement} returned by the parent implementation with a
-	 * {@link RunBeforeTestClassCallbacks} statement, thus preserving the
+	 * {@code RunBeforeTestClassCallbacks} statement, thus preserving the
 	 * default JUnit functionality while adding support for the Spring TestContext
 	 * Framework.
 	 * @see RunBeforeTestClassCallbacks
@@ -179,7 +201,7 @@ public class SpringJUnit4ClassRunner extends BlockJUnit4ClassRunner {
 
 	/**
 	 * Wrap the {@link Statement} returned by the parent implementation with a
-	 * {@link RunAfterTestClassCallbacks} statement, thus preserving the default
+	 * {@code RunAfterTestClassCallbacks} statement, thus preserving the default
 	 * JUnit functionality while adding support for the Spring TestContext Framework.
 	 * @see RunAfterTestClassCallbacks
 	 */
@@ -393,7 +415,7 @@ public class SpringJUnit4ClassRunner extends BlockJUnit4ClassRunner {
 
 	/**
 	 * Wrap the {@link Statement} returned by the parent implementation with a
-	 * {@link RunBeforeTestMethodCallbacks} statement, thus preserving the
+	 * {@code RunBeforeTestMethodCallbacks} statement, thus preserving the
 	 * default functionality while adding support for the Spring TestContext
 	 * Framework.
 	 * @see RunBeforeTestMethodCallbacks
@@ -407,7 +429,7 @@ public class SpringJUnit4ClassRunner extends BlockJUnit4ClassRunner {
 
 	/**
 	 * Wrap the {@link Statement} returned by the parent implementation with a
-	 * {@link RunAfterTestMethodCallbacks} statement, thus preserving the
+	 * {@code RunAfterTestMethodCallbacks} statement, thus preserving the
 	 * default functionality while adding support for the Spring TestContext
 	 * Framework.
 	 * @see RunAfterTestMethodCallbacks
@@ -423,10 +445,10 @@ public class SpringJUnit4ClassRunner extends BlockJUnit4ClassRunner {
 	 * Return a {@link Statement} that potentially repeats the execution of
 	 * the {@code next} statement.
 	 * <p>Supports Spring's {@link Repeat @Repeat} annotation by returning a
-	 * {@link SpringRepeat} statement initialized with the configured repeat
+	 * {@code SpringRepeat} statement initialized with the configured repeat
 	 * count (if greater than {@code 1}); otherwise, the supplied statement
 	 * is returned unmodified.
-	 * @return either a {@link SpringRepeat} or the supplied {@link Statement}
+	 * @return either a {@code SpringRepeat} or the supplied {@code Statement}
 	 * as appropriate
 	 * @see SpringRepeat
 	 */

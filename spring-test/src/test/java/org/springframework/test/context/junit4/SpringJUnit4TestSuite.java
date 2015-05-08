@@ -21,6 +21,7 @@ import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
 import org.springframework.test.context.cache.ClassLevelDirtiesContextTests;
 import org.springframework.test.context.cache.SpringRunnerContextCacheTests;
+import org.springframework.test.context.jdbc.RequiresNewTransactionSqlScriptsTests;
 import org.springframework.test.context.junit4.annotation.AnnotationConfigSpringJUnit4ClassRunnerAppCtxTests;
 import org.springframework.test.context.junit4.annotation.BeanOverridingDefaultConfigClassesInheritedTests;
 import org.springframework.test.context.junit4.annotation.BeanOverridingExplicitConfigClassesInheritedTests;
@@ -41,6 +42,7 @@ import org.springframework.test.context.junit4.profile.annotation.DevProfileReso
 import org.springframework.test.context.junit4.profile.xml.DefaultProfileXmlConfigTests;
 import org.springframework.test.context.junit4.profile.xml.DevProfileResolverXmlConfigTests;
 import org.springframework.test.context.junit4.profile.xml.DevProfileXmlConfigTests;
+import org.springframework.test.context.transaction.programmatic.ProgrammaticTxMgmtTests;
 
 /**
  * JUnit test suite for tests involving {@link SpringJUnit4ClassRunner} and the
@@ -99,6 +101,7 @@ StandardJUnit4FeaturesTests.class,//
 	SpringRunnerContextCacheTests.class,//
 	ClassLevelDirtiesContextTests.class,//
 	ParameterizedDependencyInjectionTests.class,//
+	ConcreteTransactionalJUnit4SpringContextTests.class,//
 	ClassLevelTransactionalSpringRunnerTests.class,//
 	MethodLevelTransactionalSpringRunnerTests.class,//
 	DefaultRollbackTrueTransactionalSpringRunnerTests.class,//
@@ -107,6 +110,8 @@ StandardJUnit4FeaturesTests.class,//
 	RollbackOverrideDefaultRollbackFalseTransactionalSpringRunnerTests.class,//
 	BeforeAndAfterTransactionAnnotationTests.class,//
 	TimedTransactionalSpringRunnerTests.class,//
+	ProgrammaticTxMgmtTests.class,//
+	RequiresNewTransactionSqlScriptsTests.class,//
 	HibernateSessionFlushingTests.class //
 })
 public class SpringJUnit4TestSuite {
