@@ -66,20 +66,22 @@ public class MethodParameter {
 
 
 	/**
-	 * Create a new MethodParameter for the given method, with nesting level 1.
+	 * Create a new {@code MethodParameter} for the given method, with nesting level 1.
 	 * @param method the Method to specify a parameter for
-	 * @param parameterIndex the index of the parameter
+	 * @param parameterIndex the index of the parameter: -1 for the method
+	 * return type; 0 for the first method parameter; 1 for the second method
+	 * parameter, etc.
 	 */
 	public MethodParameter(Method method, int parameterIndex) {
 		this(method, parameterIndex, 1);
 	}
 
 	/**
-	 * Create a new MethodParameter for the given method.
+	 * Create a new {@code MethodParameter} for the given method.
 	 * @param method the Method to specify a parameter for
-	 * @param parameterIndex the index of the parameter
-	 * (-1 for the method return type; 0 for the first method parameter,
-	 * 1 for the second method parameter, etc)
+	 * @param parameterIndex the index of the parameter: -1 for the method
+	 * return type; 0 for the first method parameter; 1 for the second method
+	 * parameter, etc.
 	 * @param nestingLevel the nesting level of the target type
 	 * (typically 1; e.g. in case of a List of Lists, 1 would indicate the
 	 * nested List, whereas 2 would indicate the element of the nested List)
