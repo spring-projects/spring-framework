@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,6 +55,8 @@ import org.springframework.util.xml.DomUtils;
  */
 class ScriptBeanDefinitionParser extends AbstractBeanDefinitionParser {
 
+	private static final String ENGINE_ATTRIBUTE = "engine";
+
 	private static final String SCRIPT_SOURCE_ATTRIBUTE = "script-source";
 
 	private static final String INLINE_SCRIPT_ELEMENT = "inline-script";
@@ -104,6 +106,9 @@ class ScriptBeanDefinitionParser extends AbstractBeanDefinitionParser {
 	@Override
 	@SuppressWarnings("deprecation")
 	protected AbstractBeanDefinition parseInternal(Element element, ParserContext parserContext) {
+		// Engine attribute only supported for <lang:std>
+		String engine = element.getAttribute(ENGINE_ATTRIBUTE);
+
 		// Resolve the script source.
 		String value = resolveScriptSource(element, parserContext.getReaderContext());
 		if (value == null) {
@@ -184,9 +189,13 @@ class ScriptBeanDefinitionParser extends AbstractBeanDefinitionParser {
 		// Add constructor arguments.
 		ConstructorArgumentValues cav = bd.getConstructorArgumentValues();
 		int constructorArgNum = 0;
+		if (StringUtils.hasLength(engine)) {
+			cav.addIndexedArgumentValue(constructorArgNum++, engine);
+		}
 		cav.addIndexedArgumentValue(constructorArgNum++, value);
 		if (element.hasAttribute(SCRIPT_INTERFACES_ATTRIBUTE)) {
-			cav.addIndexedArgumentValue(constructorArgNum++, element.getAttribute(SCRIPT_INTERFACES_ATTRIBUTE));
+			cav.addIndexedArgumentValue(
+					constructorArgNum++, element.getAttribute(SCRIPT_INTERFACES_ATTRIBUTE), "java.lang.Class[]");
 		}
 
 		// This is used for Groovy. It's a bean reference to a customizer bean.

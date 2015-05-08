@@ -3,14 +3,13 @@
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 		xmlns:lang="http://www.springframework.org/schema/lang"
 		xsi:schemaLocation="http://www.springframework.org/schema/beans
-				http://www.springframework.org/schema/beans/spring-beans.xsd
-				http://www.springframework.org/schema/lang
-				http://www.springframework.org/schema/lang/spring-lang.xsd"
+				http://www.springframework.org/schema/beans/spring-beans.xsd"
  		default-lazy-init="true">
 
 	<bean class="org.springframework.scripting.support.ScriptFactoryPostProcessor"/>
 
-	<bean id="calculator" class="org.springframework.scripting.groovy.GroovyScriptFactory">
+	<bean id="calculator" class="org.springframework.scripting.support.StandardScriptFactory">
+		<constructor-arg value="Groovy"/>
 		<constructor-arg>
 			<value>inline:
 package org.springframework.scripting.groovy;
@@ -24,23 +23,24 @@ class GroovyCalculator implements Calculator {
 		</constructor-arg>
 	</bean>
 
-	<bean id="messenger" class="org.springframework.scripting.groovy.GroovyScriptFactory">
+	<bean id="messenger" class="org.springframework.scripting.support.StandardScriptFactory">
 		<constructor-arg value="classpath:org/springframework/scripting/groovy/Messenger.groovy"/>
 		<property name="message" value="Hello World!"/>
 	</bean>
 
-	<bean id="messengerPrototype" class="org.springframework.scripting.groovy.GroovyScriptFactory"
+	<bean id="messengerPrototype" class="org.springframework.scripting.support.StandardScriptFactory"
 		  scope="prototype">
 		<constructor-arg value="classpath:org/springframework/scripting/groovy/Messenger.groovy"/>
 		<property name="message" value="Hello World!"/>
 	</bean>
 
-	<bean id="messengerInstance" class="org.springframework.scripting.groovy.GroovyScriptFactory">
+	<bean id="messengerInstance" class="org.springframework.scripting.support.StandardScriptFactory">
 		<constructor-arg value="classpath:org/springframework/scripting/groovy/MessengerInstance.groovy"/>
 		<property name="message" ref="myMessage"/>
 	</bean>
 
-  <bean id="messengerInstanceInline" class="org.springframework.scripting.groovy.GroovyScriptFactory">
+  <bean id="messengerInstanceInline" class="org.springframework.scripting.support.StandardScriptFactory">
+	  <constructor-arg value="Groovy"/>
 	  <constructor-arg>
       <value>inline:
 package org.springframework.scripting.groovy;
@@ -57,10 +57,5 @@ return new GroovyMessenger();
 	<bean id="myMessage" class="java.lang.String">
 		<constructor-arg value="Hello World!"/>
 	</bean>
-
-	<lang:groovy id="refreshableFactory" refresh-check-delay="5000"
-			script-source="org/springframework/scripting/groovy/TestFactoryBean.groovy"/>
-
-	<lang:groovy id="factory" script-source="classpath:org/springframework/scripting/groovy/TestFactoryBean.groovy"/>
 
 </beans>
