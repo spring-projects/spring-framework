@@ -455,7 +455,6 @@ project("spring-context") {
 	dependencies {
 		compile(project(":spring-aop"))
 		compile(project(":spring-beans"))
-		compile(project(":spring-beans-groovy"))
 		compile(project(":spring-expression"))
 		compile(project(":spring-core"))
 		compile(files(project(":spring-core").cglibRepackJar))
