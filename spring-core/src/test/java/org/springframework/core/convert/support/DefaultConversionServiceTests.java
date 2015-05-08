@@ -20,12 +20,14 @@ import java.awt.Color;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.nio.charset.Charset;
 import java.time.ZoneId;
 import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Currency;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -37,6 +39,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Properties;
 import java.util.Set;
+import java.util.TimeZone;
 import java.util.UUID;
 import java.util.stream.Stream;
 
@@ -275,6 +278,26 @@ public class DefaultConversionServiceTests {
 	@Test
 	public void testStringToLocale() {
 		assertEquals(Locale.ENGLISH, conversionService.convert("en", Locale.class));
+	}
+
+	@Test
+	public void testStringToCharset() {
+		assertEquals(Charset.forName("UTF-8"), conversionService.convert("UTF-8", Charset.class));
+	}
+
+	@Test
+	public void testCharsetToString() {
+		assertEquals("UTF-8", conversionService.convert(Charset.forName("UTF-8"), String.class));
+	}
+
+	@Test
+	public void testStringToCurrency() {
+		assertEquals(Currency.getInstance("EUR"), conversionService.convert("EUR", Currency.class));
+	}
+
+	@Test
+	public void testCurrencyToString() {
+		assertEquals("USD", conversionService.convert(Currency.getInstance("USD"), String.class));
 	}
 
 	@Test
@@ -799,6 +822,11 @@ public class DefaultConversionServiceTests {
 
 		assertEquals("constructor invocations", 2, SSN.constructorCount);
 		assertEquals("toString() invocations", 0, SSN.toStringCount);
+	}
+
+	@Test
+	public void convertStringToTimezone() {
+		assertEquals("GMT+02:00", conversionService.convert("GMT+2", TimeZone.class).getID());
 	}
 
 	@Test
