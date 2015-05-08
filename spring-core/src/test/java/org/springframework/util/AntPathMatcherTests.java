@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
@@ -34,6 +35,7 @@ import static org.junit.Assert.*;
  * @author Juergen Hoeller
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
+ * @author Sam Brannen
  */
 public class AntPathMatcherTests {
 
@@ -425,6 +427,12 @@ public class AntPathMatcherTests {
 		assertEquals("/1.0/foo/test", pathMatcher.combine("/1.0", "/foo/test")); // SPR-10554
 		assertEquals("/hotel", pathMatcher.combine("/", "/hotel")); // SPR-12975
 		assertEquals("/hotel/booking", pathMatcher.combine("/hotel/", "/booking")); // SPR-12975
+	}
+
+	@Ignore("Disabled until SPR-12998 is resolved")
+	@Test(expected = IllegalArgumentException.class)
+	public void combineWithTwoFileExtensionPatterns() {
+		pathMatcher.combine("/*.html", "/*.txt");
 	}
 
 	@Test
