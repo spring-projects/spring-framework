@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ import org.springframework.aop.TargetSource;
 /**
  * Interface to be implemented by classes that hold the configuration
  * of a factory of AOP proxies. This configuration includes the
- * Interceptors and other advice, and Advisors, and the proxied interfaces.
+ * Interceptors and other advice, Advisors, and the proxied interfaces.
  *
  * <p>Any AOP proxy obtained from Spring can be cast to this interface to
  * allow manipulation of its AOP advice.
@@ -49,8 +49,8 @@ public interface Advised extends TargetClassAware {
 	boolean isProxyTargetClass();
 
 	/**
-	 * Return the interfaces proxied by the AOP proxy. Will not
-	 * include the target class, which may also be proxied.
+	 * Return the interfaces proxied by the AOP proxy.
+	 * <p>Will not include the target class, which may also be proxied.
 	 */
 	Class<?>[] getProxiedInterfaces();
 
@@ -60,33 +60,34 @@ public interface Advised extends TargetClassAware {
 	 */
 	boolean isInterfaceProxied(Class<?> intf);
 
-
 	/**
-	 * Change the TargetSource used by this Advised object.
-	 * Only works if the configuration isn't frozen.
+	 * Change the {@code TargetSource} used by this {@code Advised} object.
+	 * <p>Only works if the configuration isn't {@linkplain #isFrozen frozen}.
 	 * @param targetSource new TargetSource to use
 	 */
 	void setTargetSource(TargetSource targetSource);
 
 	/**
-	 * Return the TargetSource used by this Advised object.
+	 * Return the {@code TargetSource} used by this {@code Advised} object.
 	 */
 	TargetSource getTargetSource();
 
 	/**
 	 * Set whether the proxy should be exposed by the AOP framework as a
-	 * ThreadLocal for retrieval via the AopContext class. This is useful
-	 * if an advised object needs to call another advised method on itself.
-	 * (If it uses {@code this}, the invocation will not be advised).
-	 * <p>Default is "false", for optimal performance.
+	 * {@link ThreadLocal} for retrieval via the {@link AopContext} class.
+	 * <p>It can be necessary to expose the proxy if an advised object needs
+	 * to invoke a method on itself with advice applied. Otherwise, if an
+	 * advised object invokes a method on {@code this}, no advice will be applied.
+	 * <p>Default is {@code false}, for optimal performance.
 	 */
 	void setExposeProxy(boolean exposeProxy);
 
 	/**
-	 * Return whether the factory should expose the proxy as a ThreadLocal.
-	 * This can be necessary if a target object needs to invoke a method on itself
-	 * benefitting from advice. (If it invokes a method on {@code this} no advice
-	 * will apply.) Getting the proxy is analogous to an EJB calling getEJBObject().
+	 * Return whether the factory should expose the proxy as a {@link ThreadLocal}.
+	 * <p>It can be necessary to expose the proxy if an advised object needs
+	 * to invoke a method on itself with advice applied. Otherwise, if an
+	 * advised object invokes a method on {@code this}, no advice will be applied.
+	 * <p>Getting the proxy is analogous to an EJB calling {@code getEJBObject()}.
 	 * @see AopContext
 	 */
 	boolean isExposeProxy();
@@ -106,7 +107,6 @@ public interface Advised extends TargetClassAware {
 	 * contains applicable advisors (matching this proxy's target class).
 	 */
 	boolean isPreFiltered();
-
 
 	/**
 	 * Return the advisors applying to this proxy.
@@ -170,7 +170,6 @@ public interface Advised extends TargetClassAware {
 	 */
 	boolean replaceAdvisor(Advisor a, Advisor b) throws AopConfigException;
 
-
 	/**
 	 * Add the given AOP Alliance advice to the tail of the advice (interceptor) chain.
 	 * <p>This will be wrapped in a DefaultPointcutAdvisor with a pointcut that always
@@ -216,7 +215,6 @@ public interface Advised extends TargetClassAware {
 	 * @return index from 0 of this advice, or -1 if there's no such advice
 	 */
 	int indexOf(Advice advice);
-
 
 	/**
 	 * As {@code toString()} will normally be delegated to the target,

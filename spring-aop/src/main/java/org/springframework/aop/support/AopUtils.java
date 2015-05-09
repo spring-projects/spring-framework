@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,7 +40,8 @@ import org.springframework.util.ReflectionUtils;
 
 /**
  * Utility methods for AOP support code.
- * Mainly for internal use within Spring's AOP support.
+ *
+ * <p>Mainly for internal use within Spring's AOP support.
  *
  * <p>See {@link org.springframework.aop.framework.AopProxyUtils} for a
  * collection of framework-specific AOP utility methods which depend
@@ -55,6 +56,8 @@ public abstract class AopUtils {
 
 	/**
 	 * Check whether the given object is a JDK dynamic proxy or a CGLIB proxy.
+	 * <p>This method additionally checks if the given object is an instance
+	 * of {@link SpringProxy}.
 	 * @param object the object to check
 	 * @see #isJdkDynamicProxy
 	 * @see #isCglibProxy
@@ -66,6 +69,9 @@ public abstract class AopUtils {
 
 	/**
 	 * Check whether the given object is a JDK dynamic proxy.
+	 * <p>This method goes beyond the implementation of
+	 * {@link Proxy#isProxyClass(Class)} by additionally checking if the
+	 * given object is an instance of {@link SpringProxy}.
 	 * @param object the object to check
 	 * @see java.lang.reflect.Proxy#isProxyClass
 	 */
@@ -74,9 +80,10 @@ public abstract class AopUtils {
 	}
 
 	/**
-	 * Check whether the given object is a CGLIB proxy. Goes beyond the implementation
-	 * in {@link ClassUtils#isCglibProxy(Object)} by checking also to see if the given
-	 * object is an instance of {@link SpringProxy}.
+	 * Check whether the given object is a CGLIB proxy.
+	 * <p>This method goes beyond the implementation of
+	 * {@link ClassUtils#isCglibProxy(Object)} by additionally checking if
+	 * the given object is an instance of {@link SpringProxy}.
 	 * @param object the object to check
 	 * @see ClassUtils#isCglibProxy(Object)
 	 */
@@ -86,7 +93,7 @@ public abstract class AopUtils {
 
 	/**
 	 * Determine the target class of the given bean instance which might be an AOP proxy.
-	 * <p>Returns the target class for an AOP proxy and the plain class else.
+	 * <p>Returns the target class for an AOP proxy or the plain class otherwise.
 	 * @param candidate the instance to check (might be an AOP proxy)
 	 * @return the target class (or the plain class of the given object as fallback;
 	 * never {@code null})
@@ -159,7 +166,6 @@ public abstract class AopUtils {
 		// If we are dealing with method with generic parameters, find the original method.
 		return BridgeMethodResolver.findBridgedMethod(resolvedMethod);
 	}
-
 
 	/**
 	 * Can the given pointcut apply at all on the given class?
@@ -277,7 +283,6 @@ public abstract class AopUtils {
 		}
 		return eligibleAdvisors;
 	}
-
 
 	/**
 	 * Invoke the given target via reflection, as part of an AOP method invocation.
