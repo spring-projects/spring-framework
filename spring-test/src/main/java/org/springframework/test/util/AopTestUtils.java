@@ -18,6 +18,7 @@ package org.springframework.test.util;
 
 import org.springframework.aop.framework.Advised;
 import org.springframework.aop.support.AopUtils;
+import org.springframework.util.Assert;
 
 /**
  * {@code AopTestUtils} is a collection of AOP-related utility methods for
@@ -41,7 +42,8 @@ public class AopTestUtils {
 	 * be returned; otherwise, the {@code candidate} will be returned
 	 * <em>as is</em>.
 	 *
-	 * @param candidate the instance to check (potentially a Spring AOP proxy)
+	 * @param candidate the instance to check (potentially a Spring AOP proxy);
+	 * never {@code null}
 	 * @return the target object or the {@code candidate}; never {@code null}
 	 * @throws IllegalStateException if an error occurs while unwrapping a proxy
 	 * @see Advised#getTargetSource()
@@ -49,6 +51,7 @@ public class AopTestUtils {
 	 */
 	@SuppressWarnings("unchecked")
 	public static <T> T getTargetObject(Object candidate) {
+		Assert.notNull(candidate, "candidate must not be null");
 		try {
 			if (AopUtils.isAopProxy(candidate) && (candidate instanceof Advised)) {
 				return (T) ((Advised) candidate).getTargetSource().getTarget();
@@ -57,8 +60,6 @@ public class AopTestUtils {
 		catch (Exception e) {
 			throw new IllegalStateException("Failed to unwrap proxied object.", e);
 		}
-
-		// else
 		return (T) candidate;
 	}
 
@@ -71,7 +72,8 @@ public class AopTestUtils {
 	 * nested proxies will be returned; otherwise, the {@code candidate}
 	 * will be returned <em>as is</em>.
 	 *
-	 * @param candidate the instance to check (potentially a Spring AOP proxy)
+	 * @param candidate the instance to check (potentially a Spring AOP proxy);
+	 * never {@code null}
 	 * @return the ultimate target object or the {@code candidate}; never
 	 * {@code null}
 	 * @throws IllegalStateException if an error occurs while unwrapping a proxy
@@ -80,6 +82,7 @@ public class AopTestUtils {
 	 */
 	@SuppressWarnings("unchecked")
 	public static <T> T getUltimateTargetObject(Object candidate) {
+		Assert.notNull(candidate, "candidate must not be null");
 		try {
 			if (AopUtils.isAopProxy(candidate) && (candidate instanceof Advised)) {
 				return (T) getUltimateTargetObject(((Advised) candidate).getTargetSource().getTarget());
@@ -88,8 +91,6 @@ public class AopTestUtils {
 		catch (Exception e) {
 			throw new IllegalStateException("Failed to unwrap proxied object.", e);
 		}
-
-		// else
 		return (T) candidate;
 	}
 

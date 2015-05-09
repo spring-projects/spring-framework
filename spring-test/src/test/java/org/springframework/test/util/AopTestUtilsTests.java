@@ -36,6 +36,11 @@ public class AopTestUtilsTests {
 	private final FooImpl foo = new FooImpl();
 
 
+	@Test(expected = IllegalArgumentException.class)
+	public void getTargetObjectForNull() {
+		getTargetObject(null);
+	}
+
 	@Test
 	public void getTargetObjectForNonProxiedObject() {
 		Foo target = getTargetObject(foo);
@@ -64,6 +69,11 @@ public class AopTestUtilsTests {
 	public void getTargetObjectWrappedInDoubleCglibProxy() {
 		Foo target = getTargetObject(cglibProxy(cglibProxy(foo)));
 		assertNotSame(foo, target);
+	}
+
+	@Test(expected = IllegalArgumentException.class)
+	public void getUltimateTargetObjectForNull() {
+		getUltimateTargetObject(null);
 	}
 
 	@Test
