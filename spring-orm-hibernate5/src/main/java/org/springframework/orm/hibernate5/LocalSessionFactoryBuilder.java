@@ -118,7 +118,7 @@ public class LocalSessionFactoryBuilder extends Configuration {
 	/**
 	 * Set the Spring {@link JtaTransactionManager} or the JTA {@link TransactionManager}
 	 * to be used with Hibernate, if any. Allows for using a Spring-managed transaction
-	 * manager for Hibernate 4's session and cache synchronization, with the
+	 * manager for Hibernate 5's session and cache synchronization, with the
 	 * "hibernate.transaction.jta.platform" automatically set to it.
 	 * <p>A passed-in Spring {@link JtaTransactionManager} needs to contain a JTA
 	 * {@link TransactionManager} reference to be usable here, except for the WebSphere

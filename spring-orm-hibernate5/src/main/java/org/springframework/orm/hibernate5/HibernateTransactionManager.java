@@ -92,9 +92,6 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * support nested transactions! Hence, do not expect Hibernate access code to
  * semantically participate in a nested transaction.</i>
  *
- * <p><b>NOTE: Hibernate 4.2+ is strongly recommended for efficient transaction
- * management with Spring, in particular for transactional Spring JDBC access.</b>
- *
  * @author Juergen Hoeller
  * @since 4.2
  * @see #setSessionFactory

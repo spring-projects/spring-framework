@@ -70,7 +70,7 @@ import org.springframework.util.Assert;
  * style of coding data access objects instead, based on
  * {@link SessionFactory#getCurrentSession()}.
  * This HibernateTemplate primarily exists as a migration helper for Hibernate 3
- * based data access code, to benefit from bug fixes in Hibernate 4.x.</b>
+ * based data access code, to benefit from bug fixes in Hibernate 5.x.</b>
  *
  * @author Juergen Hoeller
  * @since 4.2

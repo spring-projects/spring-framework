@@ -31,7 +31,7 @@ import org.springframework.transaction.jta.UserTransactionAdapter;
 import org.springframework.util.Assert;
 
 /**
- * Implementation of Hibernate 4's JtaPlatform SPI, exposing passed-in {@link TransactionManager},
+ * Implementation of Hibernate 5's JtaPlatform SPI, exposing passed-in {@link TransactionManager},
  * {@link UserTransaction} and {@link TransactionSynchronizationRegistry} references.
  *
  * @author Juergen Hoeller
