@@ -419,12 +419,10 @@ public class AntPathMatcher implements PathMatcher {
 
 	/**
 	 * Combine two patterns into a new pattern.
-	 *
 	 * <p>This implementation simply concatenates the two patterns, unless
 	 * the first pattern contains a file extension match (e.g., {@code *.html}).
 	 * In that case, the second pattern will be merged into the first. Otherwise,
 	 * an {@code IllegalArgumentException} will be thrown.
-	 *
 	 * <h3>Examples</h3>
 	 * <table border="1">
 	 * <tr><th>Pattern 1</th><th>Pattern 2</th><th>Result</th></tr>
@@ -442,7 +440,6 @@ public class AntPathMatcher implements PathMatcher {
 	 * <tr><td>/*.html</td><td>/hotels</td><td>/hotels.html</td></tr>
 	 * <tr><td>/*.html</td><td>/*.txt</td><td>{@code IllegalArgumentException}</td></tr>
 	 * </table>
-	 *
 	 * @param pattern1 the first pattern
 	 * @param pattern2 the second pattern
 	 * @return the combination of the two patterns
@@ -460,7 +457,7 @@ public class AntPathMatcher implements PathMatcher {
 			return pattern1;
 		}
 
-		boolean pattern1ContainsUriVar = pattern1.indexOf('{') != -1;
+		boolean pattern1ContainsUriVar = (pattern1.indexOf('{') != -1);
 		if (!pattern1.equals(pattern2) && !pattern1ContainsUriVar && match(pattern1, pattern2)) {
 			// /* + /hotel -> /hotel ; "/*.*" + "/*.html" -> /*.html
 			// However /user + /user -> /usr/user ; /{foo} + /bar -> /{foo}/bar
@@ -484,12 +481,18 @@ public class AntPathMatcher implements PathMatcher {
 			// simply concatenate the two patterns
 			return concat(pattern1, pattern2);
 		}
-		String extension1 = pattern1.substring(starDotPos1 + 1);
+
+		String ext1 = pattern1.substring(starDotPos1 + 1);
 		int dotPos2 = pattern2.indexOf('.');
-		String fileName2 = (dotPos2 == -1 ? pattern2 : pattern2.substring(0, dotPos2));
-		String extension2 = (dotPos2 == -1 ? "" : pattern2.substring(dotPos2));
-		String extension = extension1.startsWith("*") ? extension2 : extension1;
-		return fileName2 + extension;
+		String file2 = (dotPos2 == -1 ? pattern2 : pattern2.substring(0, dotPos2));
+		String ext2 = (dotPos2 == -1 ? "" : pattern2.substring(dotPos2));
+		boolean ext1All = (ext1.equals(".*") || ext1.equals(""));
+		boolean ext2All = (ext2.equals(".*") || ext2.equals(""));
+		if (!ext1All && !ext2All) {
+			throw new IllegalArgumentException("Cannot combine patterns: " + pattern1 + " vs " + pattern2);
+		}
+		String ext = (ext1All ? ext2 : ext1);
+		return file2 + ext;
 	}
 
 	private String concat(String path1, String path2) {
@@ -508,14 +511,18 @@ public class AntPathMatcher implements PathMatcher {
 	}
 
 	/**
-	 * Given a full path, returns a {@link Comparator} suitable for sorting patterns in order of explicitness.
-	 * <p>The returned {@code Comparator} will {@linkplain java.util.Collections#sort(java.util.List,
-	 * java.util.Comparator) sort} a list so that more specific patterns (without uri templates or wild cards) come before
-	 * generic patterns. So given a list with the following patterns: <ol> <li>{@code /hotels/new}</li>
-	 * <li>{@code /hotels/{hotel}}</li> <li>{@code /hotels/*}</li> </ol> the returned comparator will sort this
-	 * list so that the order will be as indicated.
-	 * <p>The full path given as parameter is used to test for exact matches. So when the given path is {@code /hotels/2},
-	 * the pattern {@code /hotels/2} will be sorted before {@code /hotels/1}.
+	 * Given a full path, returns a {@link Comparator} suitable for sorting patterns in order of
+	 * explicitness.
+	 * <p>This{@code Comparator} will {@linkplain java.util.Collections#sort(List, Comparator) sort}
+	 * a list so that more specific patterns (without uri templates or wild cards) come before
+	 * generic patterns. So given a list with the following patterns:
+	 * <ol>
+	 * <li>{@code /hotels/new}</li>
+	 * <li>{@code /hotels/{hotel}}</li> <li>{@code /hotels/*}</li>
+	 * </ol>
+	 * the returned comparator will sort this list so that the order will be as indicated.
+	 * <p>The full path given as parameter is used to test for exact matches. So when the given path
+	 * is {@code /hotels/2}, the pattern {@code /hotels/2} will be sorted before {@code /hotels/1}.
 	 * @param path the full path to use for comparison
 	 * @return a comparator capable of sorting patterns in order of explicitness
 	 */

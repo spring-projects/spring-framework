@@ -44,15 +44,11 @@ import static org.junit.Assert.*;
  */
 public class AntPathMatcherTests {
 
-	private AntPathMatcher pathMatcher;
+	private final AntPathMatcher pathMatcher = new AntPathMatcher();
 
 	@Rule
-	public ExpectedException exception = ExpectedException.none();
+	public final ExpectedException exception = ExpectedException.none();
 
-	@Before
-	public void createMatcher() {
-		pathMatcher = new AntPathMatcher();
-	}
 
 	@Test
 	public void match() {
@@ -432,7 +428,6 @@ public class AntPathMatcherTests {
 		assertEquals("/hotel/booking", pathMatcher.combine("/hotel/", "/booking")); // SPR-12975
 	}
 
-	@Ignore("Disabled until SPR-12998 is resolved")
 	@Test
 	public void combineWithTwoFileExtensionPatterns() {
 		exception.expect(IllegalArgumentException.class);
