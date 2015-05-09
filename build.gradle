@@ -827,6 +827,21 @@ project("spring-orm-hibernate4") {
 	}
 }
 
+project("spring-orm-hibernate5") {
+	description = "Spring Object/Relational Mapping - Hibernate 5 support"
+	merge.into = project(":spring-orm")
+
+	dependencies {
+		provided(project(":spring-jdbc"))
+		provided(project(":spring-tx"))
+		optional(project(":spring-web"))
+		optional("org.hibernate:hibernate-core:5.0.0.Beta2")
+		optional("org.hibernate:hibernate-entitymanager:5.0.0.Beta2")
+		optional("javax.servlet:javax.servlet-api:3.0.1")
+		optional("aopalliance:aopalliance:1.0")
+	}
+}
+
 project("spring-webmvc") {
 	description = "Spring Web MVC"
 
