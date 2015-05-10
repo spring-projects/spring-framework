@@ -117,7 +117,7 @@ public class AnnotationAttributes extends LinkedHashMap<String, Object> {
 			else {
 				throw new IllegalArgumentException(
 						String.format("Attribute '%s' is of type [%s], but [%s] was expected.",
-						attributeName, value.getClass().getName(), expectedType.getName()));
+						attributeName, value.getClass().getSimpleName(), expectedType.getSimpleName()));
 			}
 		}
 		return (T) value;

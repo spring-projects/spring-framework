@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,9 @@
 
 package org.springframework.core.annotation;
 
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
@@ -25,84 +27,77 @@ import static org.junit.Assert.*;
  * Unit tests for {@link AnnotationAttributes}.
  *
  * @author Chris Beams
+ * @author Sam Brannen
  * @since 3.1.1
  */
 public class AnnotationAttributesTests {
 
-	enum Color { RED, WHITE, BLUE }
+	static enum Color {
+		RED, WHITE, BLUE
+	}
+
+	private final AnnotationAttributes attributes = new AnnotationAttributes();
+
+	@Rule
+	public final ExpectedException exception = ExpectedException.none();
+
 
 	@Test
-	public void testTypeSafeAttributeAccess() {
-		AnnotationAttributes a = new AnnotationAttributes();
-		a.put("name", "dave");
-		a.put("names", new String[] { "dave", "frank", "hal" });
-		a.put("bool1", true);
-		a.put("bool2", false);
-		a.put("color", Color.RED);
-		a.put("clazz", Integer.class);
-		a.put("classes", new Class<?>[] { Number.class, Short.class, Integer.class });
-		a.put("number", 42);
-		a.put("numbers", new int[] { 42, 43 });
-		AnnotationAttributes anno = new AnnotationAttributes();
-		anno.put("value", 10);
-		anno.put("name", "algernon");
-		a.put("anno", anno);
-		a.put("annoArray", new AnnotationAttributes[] { anno });
+	public void typeSafeAttributeAccess() {
+		attributes.put("name", "dave");
+		attributes.put("names", new String[] { "dave", "frank", "hal" });
+		attributes.put("bool1", true);
+		attributes.put("bool2", false);
+		attributes.put("color", Color.RED);
+		attributes.put("clazz", Integer.class);
+		attributes.put("classes", new Class<?>[] { Number.class, Short.class, Integer.class });
+		attributes.put("number", 42);
+		attributes.put("numbers", new int[] { 42, 43 });
+		AnnotationAttributes nestedAttributes = new AnnotationAttributes();
+		nestedAttributes.put("value", 10);
+		nestedAttributes.put("name", "algernon");
+		attributes.put("anno", nestedAttributes);
+		attributes.put("annoArray", new AnnotationAttributes[] { nestedAttributes });
 
-		assertThat(a.getString("name"), equalTo("dave"));
-		assertThat(a.getStringArray("names"), equalTo(new String[] { "dave", "frank", "hal" }));
-		assertThat(a.getBoolean("bool1"), equalTo(true));
-		assertThat(a.getBoolean("bool2"), equalTo(false));
-		assertThat(a.<Color>getEnum("color"), equalTo(Color.RED));
-		assertTrue(a.getClass("clazz").equals(Integer.class));
-		assertThat(a.getClassArray("classes"), equalTo(new Class[] { Number.class, Short.class, Integer.class }));
-		assertThat(a.<Integer>getNumber("number"), equalTo(42));
-		assertThat(a.getAnnotation("anno").<Integer>getNumber("value"), equalTo(10));
-		assertThat(a.getAnnotationArray("annoArray")[0].getString("name"), equalTo("algernon"));
+		assertThat(attributes.getString("name"), equalTo("dave"));
+		assertThat(attributes.getStringArray("names"), equalTo(new String[] { "dave", "frank", "hal" }));
+		assertThat(attributes.getBoolean("bool1"), equalTo(true));
+		assertThat(attributes.getBoolean("bool2"), equalTo(false));
+		assertThat(attributes.<Color>getEnum("color"), equalTo(Color.RED));
+		assertTrue(attributes.getClass("clazz").equals(Integer.class));
+		assertThat(attributes.getClassArray("classes"), equalTo(new Class[] { Number.class, Short.class, Integer.class }));
+		assertThat(attributes.<Integer>getNumber("number"), equalTo(42));
+		assertThat(attributes.getAnnotation("anno").<Integer>getNumber("value"), equalTo(10));
+		assertThat(attributes.getAnnotationArray("annoArray")[0].getString("name"), equalTo("algernon"));
 	}
 
 	@Test
-	public void getEnum_emptyAttributeName() {
-		AnnotationAttributes a = new AnnotationAttributes();
-		a.put("color", "RED");
-		try {
-			a.getEnum("");
-			fail();
-		} catch (IllegalArgumentException ex) {
-			assertThat(ex.getMessage(), equalTo("attributeName must not be null or empty"));
-		}
-		try {
-			a.getEnum(null);
-			fail();
-		} catch (IllegalArgumentException ex) {
-			assertThat(ex.getMessage(), equalTo("attributeName must not be null or empty"));
-		}
+	public void getEnumWithNullAttributeName() {
+		exception.expect(IllegalArgumentException.class);
+		exception.expectMessage(containsString("attributeName must not be null or empty"));
+		attributes.getEnum(null);
 	}
 
 	@Test
-	public void getEnum_notFound() {
-		AnnotationAttributes a = new AnnotationAttributes();
-		a.put("color", "RED");
-		try {
-			a.getEnum("colour");
-			fail();
-		} catch (IllegalArgumentException ex) {
-			assertThat(ex.getMessage(), equalTo("Attribute 'colour' not found"));
-		}
+	public void getEnumWithEmptyAttributeName() {
+		exception.expect(IllegalArgumentException.class);
+		exception.expectMessage(containsString("attributeName must not be null or empty"));
+		attributes.getEnum("");
 	}
 
 	@Test
-	public void getEnum_typeMismatch() {
-		AnnotationAttributes a = new AnnotationAttributes();
-		a.put("color", "RED");
-		try {
-			a.getEnum("color");
-			fail();
-		} catch (IllegalArgumentException ex) {
-			String expected =
-					"Attribute 'color' is of type [String], but [Enum] was expected";
-			assertThat(ex.getMessage().substring(0, expected.length()), equalTo(expected));
-		}
+	public void getEnumWithUnknownAttributeName() {
+		exception.expect(IllegalArgumentException.class);
+		exception.expectMessage(containsString("Attribute 'bogus' not found"));
+		attributes.getEnum("bogus");
+	}
+
+	@Test
+	public void getEnumWithTypeMismatch() {
+		attributes.put("color", "RED");
+		exception.expect(IllegalArgumentException.class);
+		exception.expectMessage(containsString("Attribute 'color' is of type [String], but [Enum] was expected"));
+		attributes.getEnum("color");
 	}
 
 }
