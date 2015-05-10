@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -105,7 +105,9 @@ public class AnnotationAttributes extends LinkedHashMap<String, Object> {
 	private <T> T doGet(String attributeName, Class<T> expectedType) {
 		Assert.hasText(attributeName, "attributeName must not be null or empty");
 		Object value = get(attributeName);
-		Assert.notNull(value, String.format("Attribute '%s' not found", attributeName));
+		if (value == null) {
+			throw new IllegalArgumentException(String.format("Attribute '%s' not found", attributeName));
+		}
 		if (!expectedType.isInstance(value)) {
 			if (expectedType.isArray() && expectedType.getComponentType().isInstance(value)) {
 				Object arrayValue = Array.newInstance(expectedType.getComponentType(), 1);
@@ -114,8 +116,8 @@ public class AnnotationAttributes extends LinkedHashMap<String, Object> {
 			}
 			else {
 				throw new IllegalArgumentException(
-						String.format("Attribute '%s' is of type [%s], but [%s] was expected. Cause: ",
-						attributeName, value.getClass().getSimpleName(), expectedType.getSimpleName()));
+						String.format("Attribute '%s' is of type [%s], but [%s] was expected.",
+						attributeName, value.getClass().getName(), expectedType.getName()));
 			}
 		}
 		return (T) value;
