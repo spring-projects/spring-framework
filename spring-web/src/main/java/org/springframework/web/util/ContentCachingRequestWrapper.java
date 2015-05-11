@@ -31,7 +31,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
 
 /**
- * {@link javax.servlet.http-HttpServletRequest} wrapper that caches all content read from
+ * {@link javax.servlet.http.HttpServletRequest} wrapper that caches all content read from
  * the {@linkplain #getInputStream() input stream} and {@linkplain #getReader() reader},
  * and allows this content to be retrieved via a {@link #getContentAsByteArray() byte array}.
  *
@@ -40,6 +40,7 @@ import javax.servlet.http.HttpServletRequestWrapper;
  * @author Juergen Hoeller
  * @author Brian Clozel
  * @since 4.1.3
+ * @see ContentCachingResponseWrapper
  */
 public class ContentCachingRequestWrapper extends HttpServletRequestWrapper {
 

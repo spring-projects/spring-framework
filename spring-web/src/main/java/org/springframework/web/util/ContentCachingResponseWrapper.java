@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,7 @@ import org.springframework.util.ResizableByteArrayOutputStream;
 import org.springframework.util.StreamUtils;
 
 /**
- * {@link javax.servlet.http-HttpServletResponse} wrapper that caches all content written to
+ * {@link javax.servlet.http.HttpServletResponse} wrapper that caches all content written to
  * the {@linkplain #getOutputStream() output stream} and {@linkplain #getWriter() writer},
  * and allows this content to be retrieved via a {@link #getContentAsByteArray() byte array}.
  *
@@ -36,6 +36,7 @@ import org.springframework.util.StreamUtils;
  *
  * @author Juergen Hoeller
  * @since 4.1.3
+ * @see ContentCachingRequestWrapper
  */
 public class ContentCachingResponseWrapper extends HttpServletResponseWrapper {
 
@@ -142,7 +143,7 @@ public class ContentCachingResponseWrapper extends HttpServletResponseWrapper {
 	}
 
 	/**
-	 * Return the status code as specifed on the response.
+	 * Return the status code as specified on the response.
 	 */
 	public int getStatusCode() {
 		return this.statusCode;
