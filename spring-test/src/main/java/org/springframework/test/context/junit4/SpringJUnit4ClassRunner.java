@@ -353,6 +353,7 @@ public class SpringJUnit4ClassRunner extends BlockJUnit4ClassRunner {
 			statement = new SpringFailOnTimeout(next, springTimeout);
 		}
 		else if (junitTimeout > 0) {
+			// TODO Use FailOnTimeout.builder() once JUnit 4.12 is the minimum supported version.
 			statement = new FailOnTimeout(next, junitTimeout);
 		}
 		else {
