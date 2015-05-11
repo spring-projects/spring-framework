@@ -21,7 +21,9 @@ import java.io.InputStream;
 import java.io.PushbackInputStream;
 import java.lang.reflect.Type;
 import java.util.List;
+import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletRequestWrapper;
 
 import org.springframework.core.Conventions;
 import org.springframework.core.MethodParameter;
@@ -137,7 +139,23 @@ public class RequestResponseBodyMethodProcessor extends AbstractMessageConverter
 			else {
 				pushbackInputStream.unread(b);
 			}
-			inputMessage = new ServletServerHttpRequest(servletRequest) {
+			HttpServletRequest wrappedRequest = new HttpServletRequestWrapper(servletRequest) {
+				@Override
+				public ServletInputStream getInputStream() throws IOException {
+					return new ServletInputStream() {
+						@Override
+						public int read() throws IOException {
+							return pushbackInputStream.read();
+						}
+						@Override
+						public void close() throws IOException {
+							super.close();
+							pushbackInputStream.close();
+						}
+					};
+				}
+			};
+			inputMessage = new ServletServerHttpRequest(wrappedRequest) {
 				@Override
 				public InputStream getBody() {
 					// Form POST should not get here
