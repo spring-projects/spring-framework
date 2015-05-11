@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,8 +37,8 @@ import org.springframework.util.StringUtils;
 /**
  * ServletContext-aware subclass of {@link PathMatchingResourcePatternResolver},
  * able to find matching resources below the web application root directory
- * via Servlet 2.3's {@code ServletContext.getResourcePaths}.
- * Falls back to the superclass' file system checking for other resources.
+ * via {@link ServletContext#getResourcePaths}. Falls back to the superclass'
+ * file system checking for other resources.
  *
  * @author Juergen Hoeller
  * @since 1.1.2
@@ -160,14 +160,19 @@ public class ServletContextResourcePatternResolver extends PathMatchingResourceP
 		}
 		try {
 			JarFile jarFile = new JarFile(jarFilePath);
-			for (Enumeration<JarEntry> entries = jarFile.entries(); entries.hasMoreElements();) {
-				JarEntry entry = entries.nextElement();
-				String entryPath = entry.getName();
-				if (getPathMatcher().match(entryPattern, entryPath)) {
-					result.add(new UrlResource(
-							ResourceUtils.URL_PROTOCOL_JAR,
-							ResourceUtils.FILE_URL_PREFIX + jarFilePath + ResourceUtils.JAR_URL_SEPARATOR + entryPath));
+			try {
+				for (Enumeration<JarEntry> entries = jarFile.entries(); entries.hasMoreElements();) {
+					JarEntry entry = entries.nextElement();
+					String entryPath = entry.getName();
+					if (getPathMatcher().match(entryPattern, entryPath)) {
+						result.add(new UrlResource(
+								ResourceUtils.URL_PROTOCOL_JAR,
+								ResourceUtils.FILE_URL_PREFIX + jarFilePath + ResourceUtils.JAR_URL_SEPARATOR + entryPath));
+					}
 				}
+			}
+			finally {
+				jarFile.close();
 			}
 		}
 		catch (IOException ex) {
