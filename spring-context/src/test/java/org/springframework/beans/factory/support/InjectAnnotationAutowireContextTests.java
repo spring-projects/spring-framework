@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -667,27 +667,27 @@ public class InjectAnnotationAutowireContextTests {
 	@Target({ElementType.FIELD, ElementType.PARAMETER, ElementType.TYPE})
 	@Retention(RetentionPolicy.RUNTIME)
 	@Qualifier
-	public static @interface TestQualifier {
+	public @interface TestQualifier {
 	}
 
 
 	@Target(ElementType.FIELD)
 	@Retention(RetentionPolicy.RUNTIME)
 	@Qualifier
-	public static @interface TestQualifierWithDefaultValue {
+	public @interface TestQualifierWithDefaultValue {
 
-		public abstract String value() default "default";
+		String value() default "default";
 	}
 
 
 	@Target(ElementType.FIELD)
 	@Retention(RetentionPolicy.RUNTIME)
 	@Qualifier
-	public static @interface TestQualifierWithMultipleAttributes {
+	public @interface TestQualifierWithMultipleAttributes {
 
-		public abstract String value() default "default";
+		String value() default "default";
 
-		public abstract int number();
+		int number();
 	}
 
 }
