@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@ import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.List;
-
 import javax.sql.DataSource;
 
 import org.apache.commons.logging.Log;
@@ -32,15 +31,13 @@ import org.springframework.jdbc.support.JdbcUtils;
 import org.springframework.jdbc.support.MetaDataAccessException;
 
 /**
- * Factory used to create a {@link CallMetaDataProvider} implementation based on the type of databse being used.
+ * Factory used to create a {@link CallMetaDataProvider} implementation
+ * based on the type of database being used.
  *
  * @author Thomas Risberg
  * @since 2.5
  */
 public class CallMetaDataProviderFactory {
-
-	/** Logger */
-	private static final Log logger = LogFactory.getLog(CallMetaDataProviderFactory.class);
 
 	/** List of supported database products for procedure calls */
 	public static final List<String> supportedDatabaseProductsForProcedures = Arrays.asList(
@@ -52,6 +49,7 @@ public class CallMetaDataProviderFactory {
 			"PostgreSQL",
 			"Sybase"
 		);
+
 	/** List of supported database products for function calls */
 	public static final List<String> supportedDatabaseProductsForFunctions = Arrays.asList(
 			"MySQL",
@@ -60,10 +58,13 @@ public class CallMetaDataProviderFactory {
 			"PostgreSQL"
 		);
 
+	private static final Log logger = LogFactory.getLog(CallMetaDataProviderFactory.class);
+
+
 	/**
-	 * Create a CallMetaDataProvider based on the database metedata
-	 * @param dataSource used to retrieve metedata
-	 * @param context the class that holds configuration and metedata
+	 * Create a CallMetaDataProvider based on the database metadata
+	 * @param dataSource used to retrieve metadata
+	 * @param context the class that holds configuration and metadata
 	 * @return instance of the CallMetaDataProvider implementation to be used
 	 */
 	static public CallMetaDataProvider createMetaDataProvider(DataSource dataSource, final CallMetaDataContext context) {
@@ -124,17 +125,16 @@ public class CallMetaDataProviderFactory {
 					}
 					provider.initializeWithMetaData(databaseMetaData);
 					if (accessProcedureColumnMetaData) {
-						provider.initializeWithProcedureColumnMetaData(
-								databaseMetaData, context.getCatalogName(), context.getSchemaName(), context.getProcedureName());
+						provider.initializeWithProcedureColumnMetaData(databaseMetaData,
+								context.getCatalogName(), context.getSchemaName(), context.getProcedureName());
 					}
 					return provider;
 				}
 			});
 		}
 		catch (MetaDataAccessException ex) {
-			throw new DataAccessResourceFailureException("Error retreiving database metadata", ex);
+			throw new DataAccessResourceFailureException("Error retrieving database metadata", ex);
 		}
-
 	}
 
 }

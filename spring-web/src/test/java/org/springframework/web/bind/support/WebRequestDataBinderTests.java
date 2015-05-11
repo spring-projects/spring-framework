@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,19 +21,20 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.junit.Assert.*;
 import org.junit.Test;
 
-import org.springframework.tests.sample.beans.ITestBean;
 import org.springframework.beans.PropertyValue;
 import org.springframework.beans.PropertyValues;
-import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockMultipartFile;
 import org.springframework.mock.web.test.MockMultipartHttpServletRequest;
+import org.springframework.tests.sample.beans.ITestBean;
+import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.web.bind.ServletRequestParameterPropertyValues;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.multipart.support.StringMultipartFileEditor;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Juergen Hoeller
@@ -144,6 +145,28 @@ public class WebRequestDataBinderTests {
 		request.removeParameter("!postProcessed");
 		binder.bind(new ServletWebRequest(request));
 		assertFalse(target.isPostProcessed());
+	}
+
+	@Test
+	public void testFieldDefaultWithNestedProperty() throws Exception {
+		TestBean target = new TestBean();
+		target.setSpouse(new TestBean());
+		WebRequestDataBinder binder = new WebRequestDataBinder(target);
+
+		MockHttpServletRequest request = new MockHttpServletRequest();
+		request.addParameter("!spouse.postProcessed", "on");
+		request.addParameter("_spouse.postProcessed", "visible");
+		request.addParameter("spouse.postProcessed", "on");
+		binder.bind(new ServletWebRequest(request));
+		assertTrue(((TestBean) target.getSpouse()).isPostProcessed());
+
+		request.removeParameter("spouse.postProcessed");
+		binder.bind(new ServletWebRequest(request));
+		assertTrue(((TestBean) target.getSpouse()).isPostProcessed());
+
+		request.removeParameter("!spouse.postProcessed");
+		binder.bind(new ServletWebRequest(request));
+		assertFalse(((TestBean) target.getSpouse()).isPostProcessed());
 	}
 
 	@Test

@@ -91,7 +91,8 @@ public abstract class ReflectionUtils {
 		while (!Object.class.equals(searchType) && searchType != null) {
 			Field[] fields = searchType.getDeclaredFields();
 			for (Field field : fields) {
-				if ((name == null || name.equals(field.getName())) && (type == null || type.equals(field.getType()))) {
+				if ((name == null || name.equals(field.getName())) &&
+						(type == null || type.equals(field.getType()))) {
 					return field;
 				}
 			}
@@ -424,7 +425,8 @@ public abstract class ReflectionUtils {
 	 * @see java.lang.reflect.Field#setAccessible
 	 */
 	public static void makeAccessible(Field field) {
-		if ((!Modifier.isPublic(field.getModifiers()) || !Modifier.isPublic(field.getDeclaringClass().getModifiers()) ||
+		if ((!Modifier.isPublic(field.getModifiers()) ||
+				!Modifier.isPublic(field.getDeclaringClass().getModifiers()) ||
 				Modifier.isFinal(field.getModifiers())) && !field.isAccessible()) {
 			field.setAccessible(true);
 		}

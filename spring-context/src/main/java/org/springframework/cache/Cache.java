@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
 package org.springframework.cache;
 
 /**
- * Interface that defines the common cache operations.
+ * Interface that defines common cache operations.
  *
  * <b>Note:</b> Due to the generic use of caching, it is recommended that
  * implementations allow storage of <tt>null</tt> values (for example to
