@@ -5,7 +5,7 @@ buildscript {
 	dependencies {
 		classpath("org.springframework.build.gradle:propdeps-plugin:0.0.7")
 		classpath("org.asciidoctor:asciidoctor-gradle-plugin:0.7.0")
-		classpath("io.spring.gradle:docbook-reference-plugin:0.3.0")
+		classpath("io.spring.gradle:docbook-reference-plugin:0.3.1")
 		classpath("ws.antonov.gradle.plugins:gradle-plugin-protobuf:0.9.1")
 	}
 }
@@ -34,27 +34,27 @@ configure(allprojects) { project ->
 	ext.groovyVersion        = "2.3.11"
 	ext.gsonVersion          = "2.3.1"
 	ext.hibernate3Version    = "3.6.10.Final"
-	ext.hibernate4Version    = "4.3.8.Final"
+	ext.hibernate4Version    = "4.3.9.Final"
 	ext.hibVal4Version       = "4.3.2.Final"
 	ext.hibVal5Version       = "5.1.3.Final"
 	ext.hsqldbVersion        = "2.3.2"
-	ext.jackson2Version      = "2.4.5"
-	ext.jasperReportsVersion = "6.0.3"
+	ext.jackson2Version      = "2.4.6"
+	ext.jasperReportsVersion = "6.0.4"
 	ext.jettyVersion         = "9.2.10.v20150310"
 	ext.jodaVersion          = "2.7"
 	ext.junitVersion         = "4.12"
-	ext.nettyVersion         = "4.0.26.Final"
+	ext.nettyVersion         = "4.0.27.Final"
 	ext.openJpaVersion       = "2.2.2"  // 2.3.0 not Java 8 compatible (based on ASM 4)
 	ext.protobufVersion      = "2.6.1"
 	ext.reactorVersion       = "1.1.6.RELEASE"
-	ext.slf4jVersion         = "1.7.11"
+	ext.slf4jVersion         = "1.7.12"
 	ext.snakeYamlVersion     = "1.15"
 	ext.snifferVersion       = "1.11"
 	ext.tiles2Version        = "2.2.2"
 	ext.tiles3Version        = "3.0.5"
-	ext.tomcatVersion        = "8.0.21"
+	ext.tomcatVersion        = "8.0.22"
 	ext.tyrusVersion         = "1.3.5"  // constrained by WebLogic 12.1.3 support
-	ext.undertowVersion      = "1.1.3.Final"
+	ext.undertowVersion      = "1.1.4.Final"
 	ext.woodstoxVersion      = "4.4.1"
 	ext.xstreamVersion       = "1.4.7"
 
