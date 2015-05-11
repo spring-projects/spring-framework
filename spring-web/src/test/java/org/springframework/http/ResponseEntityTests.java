@@ -193,7 +193,6 @@ public class ResponseEntityTests {
 
 	@Test
 	public void emptyCacheControl() {
-
 		Integer entity = new Integer(42);
 
 		ResponseEntity<Integer> responseEntity =

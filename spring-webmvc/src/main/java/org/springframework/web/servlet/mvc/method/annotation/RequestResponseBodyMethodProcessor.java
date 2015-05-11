@@ -58,7 +58,6 @@ import org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolv
  */
 public class RequestResponseBodyMethodProcessor extends AbstractMessageConverterMethodProcessor {
 
-
 	/**
 	 * Basic constructor with converters only. Suitable for resolving
 	 * {@code @RequestBody}. For handling {@code @ResponseBody} consider also
@@ -126,6 +125,7 @@ public class RequestResponseBodyMethodProcessor extends AbstractMessageConverter
 
 		Object arg = readWithMessageConverters(webRequest, parameter, parameter.getGenericParameterType());
 		String name = Conventions.getVariableNameForParameter(parameter);
+
 		WebDataBinder binder = binderFactory.createBinder(webRequest, arg, name);
 		if (arg != null) {
 			validateIfApplicable(binder, parameter);
@@ -134,6 +134,7 @@ public class RequestResponseBodyMethodProcessor extends AbstractMessageConverter
 			}
 		}
 		mavContainer.addAttribute(BindingResult.MODEL_KEY_PREFIX + name, binder.getBindingResult());
+
 		return arg;
 	}
 
