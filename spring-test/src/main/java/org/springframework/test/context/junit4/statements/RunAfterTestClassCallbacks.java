@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,7 +43,7 @@ public class RunAfterTestClassCallbacks extends Statement {
 
 
 	/**
-	 * Constructs a new {@code RunAfterTestClassCallbacks} statement.
+	 * Construct a new {@code RunAfterTestClassCallbacks} statement.
 	 *
 	 * @param next the next {@code Statement} in the execution chain
 	 * @param testContextManager the TestContextManager upon which to call
@@ -55,11 +55,11 @@ public class RunAfterTestClassCallbacks extends Statement {
 	}
 
 	/**
-	 * Invokes the next {@link Statement} in the execution chain (typically an instance of
+	 * Evaluate the next {@link Statement} in the execution chain (typically an instance of
 	 * {@link org.junit.internal.runners.statements.RunAfters RunAfters}), catching any
-	 * exceptions thrown, and then calls {@link TestContextManager#afterTestClass()}. If
-	 * the call to {@code afterTestClass()} throws an exception, it will also be tracked.
-	 * Multiple exceptions will be combined into a {@link MultipleFailureException}.
+	 * exceptions thrown, and then invoke {@link TestContextManager#afterTestClass()}.
+	 * <p>If the invocation of {@code afterTestClass()} throws an exception, it will also
+	 * be tracked. Multiple exceptions will be combined into a {@link MultipleFailureException}.
 	 */
 	@Override
 	public void evaluate() throws Throwable {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,7 +40,7 @@ public class SpringFailOnTimeout extends Statement {
 
 
 	/**
-	 * Constructs a new {@code SpringFailOnTimeout} statement.
+	 * Construct a new {@code SpringFailOnTimeout} statement.
 	 *
 	 * @param next the next {@code Statement} in the execution chain
 	 * @param timeout the configured {@code timeout} for the current test
@@ -52,12 +52,12 @@ public class SpringFailOnTimeout extends Statement {
 	}
 
 	/**
-	 * Invokes the next {@link Statement statement} in the execution chain
+	 * Evaluate the next {@link Statement statement} in the execution chain
 	 * (typically an instance of
 	 * {@link org.junit.internal.runners.statements.InvokeMethod InvokeMethod}
 	 * or {@link org.junit.internal.runners.statements.ExpectException
-	 * ExpectException}) and throws an exception if the next {@code statement}
-	 * takes more than the specified {@code timeout}.
+	 * ExpectException}) and throw a {@link TimeoutException} if the next
+	 * {@code statement} executes longer than the specified {@code timeout}.
 	 */
 	@Override
 	public void evaluate() throws Throwable {
