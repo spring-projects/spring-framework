@@ -61,6 +61,12 @@ import org.springframework.util.StringUtils;
  * <em>attribute overrides</em> in <em>composed annotations</em>, use
  * {@link AnnotatedElementUtils} instead.
  *
+ * <h3>Search Scope</h3>
+ * <p>The search algorithms used by methods in this class stop searching for
+ * an annotation once the first annotation of the specified type has been
+ * found. As a consequence, additional annotations of the specified type will
+ * be silently ignored.
+ *
  * @author Rob Harrop
  * @author Juergen Hoeller
  * @author Sam Brannen
@@ -96,7 +102,7 @@ public abstract class AnnotationUtils {
 	 * {@code find*()} methods instead.
 	 * @param ann the Annotation to check
 	 * @param annotationType the annotation type to look for, both locally and as a meta-annotation
-	 * @return the matching annotation, or {@code null} if not found
+	 * @return the first matching annotation, or {@code null} if not found
 	 * @since 4.0
 	 */
 	@SuppressWarnings("unchecked")
@@ -123,7 +129,7 @@ public abstract class AnnotationUtils {
 	 * {@link #findAnnotation(AnnotatedElement, Class)} instead.
 	 * @param annotatedElement the {@code AnnotatedElement} from which to get the annotation
 	 * @param annotationType the annotation type to look for, both locally and as a meta-annotation
-	 * @return the matching annotation, or {@code null} if not found
+	 * @return the first matching annotation, or {@code null} if not found
 	 * @since 3.1
 	 */
 	public static <A extends Annotation> A getAnnotation(AnnotatedElement annotatedElement, Class<A> annotationType) {
@@ -156,7 +162,7 @@ public abstract class AnnotationUtils {
 	 * {@link #findAnnotation(Method, Class)} instead.
 	 * @param method the method to look for annotations on
 	 * @param annotationType the annotation type to look for
-	 * @return the matching annotation, or {@code null} if not found
+	 * @return the first matching annotation, or {@code null} if not found
 	 * @see org.springframework.core.BridgeMethodResolver#findBridgedMethod(Method)
 	 * @see #getAnnotation(AnnotatedElement, Class)
 	 */
@@ -274,7 +280,7 @@ public abstract class AnnotationUtils {
 	 * instead.
 	 * @param annotatedElement the {@code AnnotatedElement} on which to find the annotation
 	 * @param annotationType the annotation type to look for, both locally and as a meta-annotation
-	 * @return the matching annotation, or {@code null} if not found
+	 * @return the first matching annotation, or {@code null} if not found
 	 * @since 4.2
 	 */
 	public static <A extends Annotation> A findAnnotation(AnnotatedElement annotatedElement, Class<A> annotationType) {
@@ -290,7 +296,7 @@ public abstract class AnnotationUtils {
 	 * @param annotatedElement the {@code AnnotatedElement} on which to find the annotation
 	 * @param annotationType the annotation type to look for, both locally and as a meta-annotation
 	 * @param visited the set of annotations that have already been visited
-	 * @return the matching annotation, or {@code null} if not found
+	 * @return the first matching annotation, or {@code null} if not found
 	 * @since 4.2
 	 */
 	@SuppressWarnings("unchecked")
@@ -330,7 +336,7 @@ public abstract class AnnotationUtils {
 	 * this explicitly.
 	 * @param method the method to look for annotations on
 	 * @param annotationType the annotation type to look for
-	 * @return the matching annotation, or {@code null} if not found
+	 * @return the first matching annotation, or {@code null} if not found
 	 * @see #getAnnotation(Method, Class)
 	 */
 	@SuppressWarnings("unchecked")
@@ -434,7 +440,7 @@ public abstract class AnnotationUtils {
 	 * annotation, or superclass as the class to look for annotations on.
 	 * @param clazz the class to look for annotations on
 	 * @param annotationType the type of annotation to look for
-	 * @return the matching annotation, or {@code null} if not found
+	 * @return the first matching annotation, or {@code null} if not found
 	 */
 	@SuppressWarnings("unchecked")
 	public static <A extends Annotation> A findAnnotation(Class<?> clazz, Class<A> annotationType) {
@@ -456,7 +462,7 @@ public abstract class AnnotationUtils {
 	 * @param clazz the class to look for annotations on
 	 * @param annotationType the type of annotation to look for
 	 * @param visited the set of annotations that have already been visited
-	 * @return the matching annotation, or {@code null} if not found
+	 * @return the first matching annotation, or {@code null} if not found
 	 */
 	@SuppressWarnings("unchecked")
 	private static <A extends Annotation> A findAnnotation(Class<?> clazz, Class<A> annotationType, Set<Annotation> visited) {
