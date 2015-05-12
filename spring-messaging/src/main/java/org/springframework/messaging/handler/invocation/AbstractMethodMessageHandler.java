@@ -41,7 +41,6 @@ import org.springframework.messaging.handler.DestinationPatternsMessageCondition
 import org.springframework.messaging.handler.HandlerMethod;
 import org.springframework.messaging.handler.HandlerMethodSelector;
 import org.springframework.messaging.handler.MessagingAdviceBean;
-import org.springframework.messaging.handler.annotation.support.AnnotationExceptionHandlerMethodResolver;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.messaging.support.MessageHeaderAccessor;
 import org.springframework.util.ClassUtils;
@@ -333,18 +332,8 @@ public abstract class AbstractMethodMessageHandler<T>
 	 * (e.g. to support "global" {@code @MessageExceptionHandler}).
 	 * @since 4.2
 	 */
-	protected void initMessagingAdviceCache(List<MessagingAdviceBean> beans) {
-		if (beans == null) {
-			return;
-		}
-		for (MessagingAdviceBean bean : beans) {
-			Class<?> beanType = bean.getBeanType();
-			AnnotationExceptionHandlerMethodResolver resolver = new AnnotationExceptionHandlerMethodResolver(beanType);
-			if (resolver.hasExceptionMappings()) {
-				this.exceptionHandlerAdviceCache.put(bean, resolver);
-				logger.info("Detected @MessageExceptionHandler methods in " + bean);
-			}
-		}
+	protected void registerExceptionHandlerAdvice(MessagingAdviceBean bean, AbstractExceptionHandlerMethodResolver resolver) {
+		this.exceptionHandlerAdviceCache.put(bean, resolver);
 	}
 
 
