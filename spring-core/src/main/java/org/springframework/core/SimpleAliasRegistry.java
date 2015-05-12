@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -122,7 +122,7 @@ public class SimpleAliasRegistry implements AliasRegistry {
 				String registeredName = aliasCopy.get(alias);
 				String resolvedAlias = valueResolver.resolveStringValue(alias);
 				String resolvedName = valueResolver.resolveStringValue(registeredName);
-				if (resolvedAlias.equals(resolvedName)) {
+				if (resolvedAlias == null || resolvedName == null || resolvedAlias.equals(resolvedName)) {
 					this.aliasMap.remove(alias);
 				}
 				else if (!resolvedAlias.equals(alias)) {
