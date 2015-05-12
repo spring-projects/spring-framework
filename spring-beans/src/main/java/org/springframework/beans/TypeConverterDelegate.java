@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,6 +34,7 @@ import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.NumberUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -204,7 +205,7 @@ class TypeConverterDelegate {
 				if (Object.class.equals(requiredType)) {
 					return (T) convertedValue;
 				}
-				if (requiredType.isArray()) {
+				else if (requiredType.isArray()) {
 					// Array required -> apply appropriate conversion of elements.
 					if (convertedValue instanceof String && Enum.class.isAssignableFrom(requiredType.getComponentType())) {
 						convertedValue = StringUtils.commaDelimitedListToStringArray((String) convertedValue);
@@ -255,6 +256,11 @@ class TypeConverterDelegate {
 						return null;
 					}
 					convertedValue = attemptToConvertStringToEnum(requiredType, trimmedValue, convertedValue);
+					standardConversion = true;
+				}
+				else if (convertedValue instanceof Number && Number.class.isAssignableFrom(requiredType)) {
+					convertedValue = NumberUtils.convertNumberToTargetClass(
+							(Number) convertedValue, (Class<Number>) requiredType);
 					standardConversion = true;
 				}
 			}
@@ -339,7 +345,6 @@ class TypeConverterDelegate {
 			catch (Throwable ex) {
 				if (logger.isTraceEnabled()) {
 					logger.trace("Field [" + convertedValue + "] isn't an enum value", ex);
-
 				}
 			}
 		}
