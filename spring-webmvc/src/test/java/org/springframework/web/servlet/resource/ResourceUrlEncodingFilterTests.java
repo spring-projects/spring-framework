@@ -89,6 +89,23 @@ public class ResourceUrlEncodingFilterTests {
 		});
 	}
 
+	// SPR-13018
+	@Test
+	public void encodeEmptyURLWithContext() throws Exception {
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/context/foo");
+		request.setContextPath("/context");
+		request.setAttribute(ResourceUrlProviderExposingInterceptor.RESOURCE_URL_PROVIDER_ATTR, this.resourceUrlProvider);
+		MockHttpServletResponse response = new MockHttpServletResponse();
+
+		this.filter.doFilterInternal(request, response, new FilterChain() {
+			@Override
+			public void doFilter(ServletRequest request, ServletResponse response) throws IOException, ServletException {
+				String result = ((HttpServletResponse)response).encodeURL("?foo=1");
+				assertEquals("?foo=1", result);
+			}
+		});
+	}
+
 	protected ResourceUrlProvider createResourceUrlProvider(List<ResourceResolver> resolvers) {
 		ResourceHttpRequestHandler handler = new ResourceHttpRequestHandler();
 		handler.setLocations(Arrays.asList(new ClassPathResource("test/", getClass())));
