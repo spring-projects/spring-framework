@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,6 +46,7 @@ import org.springframework.util.StringUtils;
  *
  * @author Thomas Risberg
  * @author Juergen Hoeller
+ * @author Kiril Nugmanov
  * @since 2.5
  */
 public class CallMetaDataContext {
@@ -82,6 +83,9 @@ public class CallMetaDataContext {
 
 	/** Should we access call parameter meta data info or not */
 	private boolean accessCallParameterMetaData = true;
+
+	/** Should we bind parameter by name **/
+	private boolean namedBinding;
 
 	/** The provider of call meta data */
 	private CallMetaDataProvider metaDataProvider;
@@ -213,6 +217,19 @@ public class CallMetaDataContext {
 		return this.accessCallParameterMetaData;
 	}
 
+	/**
+	 * Specify whether parameters should be bound by name.
+	 */
+	public void setNamedBinding(boolean namedBinding) {
+		this.namedBinding = namedBinding;
+	}
+
+	/**
+	 * Check whether parameters should be bound by name.
+	 */
+	public boolean isNamedBinding() {
+		return namedBinding;
+	}
 
 	/**
 	 * Create a ReturnResultSetParameter/SqlOutParameter depending on the support provided
@@ -595,7 +612,7 @@ public class CallMetaDataContext {
 					callString += ", ";
 				}
 				if (parameterCount >= 0) {
-					callString += "?";
+					callString += createParameterBinding(parameter);
 				}
 				parameterCount++;
 			}
@@ -603,6 +620,19 @@ public class CallMetaDataContext {
 		callString += ")}";
 
 		return callString;
+	}
+
+	/**
+	 * Build the parameter binding fragment.
+	 * @param parameter call parameter
+	 * @return parameter binding fragment
+	 */
+	protected String createParameterBinding(SqlParameter parameter) {
+		if (isNamedBinding()) {
+			return parameter.getName() + " => ?";
+		} else {
+			return "?";
+		}
 	}
 
 }
