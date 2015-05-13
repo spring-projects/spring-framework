@@ -177,6 +177,20 @@ public abstract class UriUtils {
 		return HierarchicalUriComponents.encodeUriComponent(fragment, encoding, HierarchicalUriComponents.Type.FRAGMENT);
 	}
 
+	/**
+	 * Encode characters outside the unreserved character set as defined in
+	 * <a href="https://tools.ietf.org/html/rfc3986#section-2">RFC 3986 Section 2</a>.
+	 * <p>This can be used to ensure the given String will not contain any
+	 * characters with reserved URI meaning regardless of URI component.
+	 * @param source the string to be encoded
+	 * @param encoding the character encoding to encode to
+	 * @return the encoded string
+	 * @throws UnsupportedEncodingException when the given encoding parameter is not supported
+	 */
+	public static String encode(String source, String encoding) throws UnsupportedEncodingException {
+		HierarchicalUriComponents.Type type = HierarchicalUriComponents.Type.URI;
+		return HierarchicalUriComponents.encodeUriComponent(source, encoding, type);
+	}
 
 	// decoding
 
