@@ -1831,8 +1831,8 @@ arguments of annotated handler methods.
 
 Such init-binder methods support all arguments that `@RequestMapping` supports, except
 for command/form objects and corresponding validation result objects. Init-binder
-methods must not have a return value. Thus, they are usually declared as `void`. Typical
-arguments include `WebDataBinder` in combination with `WebRequest` or
+methods must not have a return value. Thus, they are usually declared as `void`.
+Typical arguments include `WebDataBinder` in combination with `WebRequest` or
 `java.util.Locale`, allowing code to register context-specific editors.
 
 The following example demonstrates the use of `@InitBinder` to configure a
@@ -1852,7 +1852,27 @@ The following example demonstrates the use of `@InitBinder` to configure a
 		}
 
 		// ...
+	}
+----
 
+Alternatively, as of Spring 4.2, consider using `addCustomFormatter` to specify
+`Formatter` implementations instead of `PropertyEditor` instances. This is
+particularly useful if you happen to have a `Formatter`-based setup in a shared
+`FormattingConversionService` as well, with the same approach to be reused for
+controller-specific tweaking of the binding rules.
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@Controller
+	public class MyFormController {
+
+		**@InitBinder**
+		public void initBinder(WebDataBinder binder) {
+			binder.addCustomFormatter(new DateFormatter("yyyy-MM-dd"));
+		}
+
+		// ...
 	}
 ----
 
