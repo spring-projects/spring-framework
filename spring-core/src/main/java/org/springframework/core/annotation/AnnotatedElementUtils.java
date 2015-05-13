@@ -19,8 +19,11 @@ package org.springframework.core.annotation;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -71,11 +74,13 @@ import org.springframework.util.MultiValueMap;
  *
  * <h3>Support for {@code @Inherited}</h3>
  * <p>Methods following <em>get semantics</em> will honor the contract of
- * Java's {@link java.lang.annotation.Inherited @Inherited} annotation.
- * However, methods following <em>find semantics</em> will ignore the
- * presence of {@code @Inherited} since the <em>find</em> search algorithm
- * manually traverses type and method hierarchies and thereby implicitly
- * supports annotation inheritance without the need for {@code @Inherited}.
+ * Java's {@link java.lang.annotation.Inherited @Inherited} annotation except
+ * that locally declared annotations (including custom composed annotations)
+ * will be favored over inherited annotations. In contrast, methods following
+ * <em>find semantics</em> will completely ignore the presence of
+ * {@code @Inherited} since the <em>find</em> search algorithm manually
+ * traverses type and method hierarchies and thereby implicitly supports
+ * annotation inheritance without the need for {@code @Inherited}.
  *
  * @author Phillip Webb
  * @author Juergen Hoeller
@@ -352,45 +357,8 @@ public class AnnotatedElementUtils {
 	 */
 	public static AnnotationAttributes findAnnotationAttributes(AnnotatedElement element, String annotationType,
 			boolean classValuesAsString, boolean nestedAnnotationsAsMap) {
-		return findAnnotationAttributes(element, annotationType, true, true, true, true, classValuesAsString,
-			nestedAnnotationsAsMap);
-	}
-
-	/**
-	 * Find the first annotation of the specified {@code annotationType} within
-	 * the annotation hierarchy <em>above</em> the supplied {@code element} and
-	 * merge that annotation's attributes with <em>matching</em> attributes from
-	 * annotations in lower levels of the annotation hierarchy.
-	 *
-	 * @param element the annotated element; never {@code null}
-	 * @param annotationType the fully qualified class name of the annotation
-	 * type to find; never {@code null} or empty
-	 * @param searchOnInterfaces whether to search on interfaces, if the
-	 * annotated element is a class
-	 * @param searchOnSuperclasses whether to search on superclasses, if
-	 * the annotated element is a class
-	 * @param searchOnMethodsInInterfaces whether to search on methods in
-	 * interfaces, if the annotated element is a method
-	 * @param searchOnMethodsInSuperclasses whether to search on methods
-	 * in superclasses, if the annotated element is a method
-	 * @param classValuesAsString whether to convert Class references into
-	 * Strings or to preserve them as Class references
-	 * @param nestedAnnotationsAsMap whether to convert nested Annotation
-	 * instances into {@code AnnotationAttributes} maps or to preserve them
-	 * as Annotation instances
-	 * @return the merged {@code AnnotationAttributes}, or {@code null} if
-	 * not found
-	 * @since 4.2
-	 * @see #searchWithFindSemantics
-	 * @see MergedAnnotationAttributesProcessor
-	 */
-	private static AnnotationAttributes findAnnotationAttributes(AnnotatedElement element, String annotationType,
-			boolean searchOnInterfaces, boolean searchOnSuperclasses, boolean searchOnMethodsInInterfaces,
-			boolean searchOnMethodsInSuperclasses, boolean classValuesAsString, boolean nestedAnnotationsAsMap) {
-
-		return searchWithFindSemantics(element, annotationType, searchOnInterfaces, searchOnSuperclasses,
-			searchOnMethodsInInterfaces, searchOnMethodsInSuperclasses, new MergedAnnotationAttributesProcessor(
-				annotationType, classValuesAsString, nestedAnnotationsAsMap));
+		return searchWithFindSemantics(element, annotationType, new MergedAnnotationAttributesProcessor(annotationType,
+			classValuesAsString, nestedAnnotationsAsMap));
 	}
 
 	/**
@@ -511,38 +479,97 @@ public class AnnotatedElementUtils {
 
 		if (visited.add(element)) {
 			try {
-				// Local annotations: declared OR inherited
-				Annotation[] annotations = element.getAnnotations();
 
-				// Search in local annotations
-				for (Annotation annotation : annotations) {
-					if (!AnnotationUtils.isInJavaLangAnnotationPackage(annotation)
-							&& (annotation.annotationType().getName().equals(annotationType) || metaDepth > 0)) {
-						T result = processor.process(annotation, metaDepth);
-						if (result != null) {
-							return result;
-						}
+				// Start searching within locally declared annotations
+				List<Annotation> declaredAnnotations = Arrays.asList(element.getDeclaredAnnotations());
+				T result = searchWithGetSemanticsInAnnotations(declaredAnnotations, annotationType, processor, visited,
+					metaDepth);
+				if (result != null) {
+					return result;
+				}
+
+				List<Annotation> inheritedAnnotations = new ArrayList<Annotation>();
+				for (Annotation annotation : element.getAnnotations()) {
+					if (!declaredAnnotations.contains(annotation)) {
+						inheritedAnnotations.add(annotation);
 					}
 				}
 
-				// Search in meta annotations on local annotations
-				for (Annotation annotation : annotations) {
-					if (!AnnotationUtils.isInJavaLangAnnotationPackage(annotation)) {
-						T result = searchWithGetSemantics(annotation.annotationType(), annotationType, processor,
-							visited, metaDepth + 1);
-						if (result != null) {
-							processor.postProcess(annotation, result);
-							return result;
-						}
-					}
+				// Continue searching within inherited annotations
+				result = searchWithGetSemanticsInAnnotations(inheritedAnnotations, annotationType, processor, visited,
+					metaDepth);
+				if (result != null) {
+					return result;
 				}
-
 			}
 			catch (Exception ex) {
 				AnnotationUtils.logIntrospectionFailure(element, ex);
 			}
 		}
 		return null;
+	}
+
+	/**
+	 * This method is invoked by
+	 * {@link #searchWithGetSemantics(AnnotatedElement, String, Processor, Set, int)}
+	 * to perform the actual search within the supplied list of annotations.
+	 * <p>This method should be invoked first with locally declared annotations
+	 * and then subsequently with inherited annotations, thereby allowing
+	 * local annotations to take precedence over inherited annotations.
+	 *
+	 * <p>The {@code metaDepth} parameter is explained in the
+	 * {@link Processor#process process()} method of the {@link Processor}
+	 * API.
+	 *
+	 * @param annotations the annotations to search in; never {@code null}
+	 * @param annotationType the fully qualified class name of the annotation
+	 * type to find; never {@code null} or empty
+	 * @param processor the processor to delegate to
+	 * @param visited the set of annotated elements that have already been visited
+	 * @param metaDepth the meta-depth of the annotation
+	 * @return the result of the processor, potentially {@code null}
+	 */
+	private static <T> T searchWithGetSemanticsInAnnotations(List<Annotation> annotations, String annotationType,
+			Processor<T> processor, Set<AnnotatedElement> visited, int metaDepth) {
+
+		// Search in annotations
+		for (Annotation annotation : annotations) {
+			if (!AnnotationUtils.isInJavaLangAnnotationPackage(annotation)
+					&& (annotation.annotationType().getName().equals(annotationType) || metaDepth > 0)) {
+				T result = processor.process(annotation, metaDepth);
+				if (result != null) {
+					return result;
+				}
+			}
+		}
+
+		// Recursively search in meta-annotations
+		for (Annotation annotation : annotations) {
+			if (!AnnotationUtils.isInJavaLangAnnotationPackage(annotation)) {
+				T result = searchWithGetSemantics(annotation.annotationType(), annotationType, processor, visited,
+					metaDepth + 1);
+				if (result != null) {
+					processor.postProcess(annotation, result);
+					return result;
+				}
+			}
+		}
+
+		return null;
+	}
+
+	/**
+	 * Search for annotations of the specified {@code annotationType} on
+	 * the specified {@code element}, following <em>find semantics</em>.
+	 *
+	 * @param element the annotated element; never {@code null}
+	 * @param annotationType the fully qualified class name of the annotation
+	 * type to find; never {@code null} or empty
+	 * @param processor the processor to delegate to
+	 * @return the result of the processor, potentially {@code null}
+	 */
+	private static <T> T searchWithFindSemantics(AnnotatedElement element, String annotationType, Processor<T> processor) {
+		return searchWithFindSemantics(element, annotationType, true, true, true, true, processor);
 	}
 
 	/**

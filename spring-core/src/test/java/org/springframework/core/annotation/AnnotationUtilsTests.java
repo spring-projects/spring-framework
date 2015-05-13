@@ -153,27 +153,24 @@ public class AnnotationUtilsTests {
 
 	/** @since 4.1.2 */
 	@Test
-	public void findClassAnnotationFavorsLocalMetaAnnotationsOverInterfaces() {
-		Component component = AnnotationUtils.findAnnotation(
-				ClassWithLocalMetaAnnotationAndMetaAnnotatedInterface.class, Component.class);
+	public void findClassAnnotationFavorsMoreLocallyDeclaredComposedAnnotationsOverAnnotationsOnInterfaces() {
+		Component component = AnnotationUtils.findAnnotation(ClassWithLocalMetaAnnotationAndMetaAnnotatedInterface.class, Component.class);
 		assertNotNull(component);
 		assertEquals("meta2", component.value());
 	}
 
 	/** @since 4.0.3 */
 	@Test
-	public void findClassAnnotationFavorsInheritedAnnotationsOverMoreLocallyDeclaredComposedAnnotations() {
-		Transactional transactional = AnnotationUtils.findAnnotation(
-				SubSubClassWithInheritedAnnotation.class, Transactional.class);
+	public void findClassAnnotationFavorsMoreLocallyDeclaredComposedAnnotationsOverInheritedAnnotations() {
+		Transactional transactional = AnnotationUtils.findAnnotation(SubSubClassWithInheritedAnnotation.class, Transactional.class);
 		assertNotNull(transactional);
 		assertTrue("readOnly flag for SubSubClassWithInheritedAnnotation", transactional.readOnly());
 	}
 
 	/** @since 4.0.3 */
 	@Test
-	public void findClassAnnotationFavorsInheritedComposedAnnotationsOverMoreLocallyDeclaredComposedAnnotations() {
-		Component component = AnnotationUtils.findAnnotation(
-				SubSubClassWithInheritedMetaAnnotation.class, Component.class);
+	public void findClassAnnotationFavorsMoreLocallyDeclaredComposedAnnotationsOverInheritedComposedAnnotations() {
+		Component component = AnnotationUtils.findAnnotation(SubSubClassWithInheritedMetaAnnotation.class, Component.class);
 		assertNotNull(component);
 		assertEquals("meta2", component.value());
 	}
