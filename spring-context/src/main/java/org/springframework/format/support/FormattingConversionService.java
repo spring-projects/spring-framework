@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -88,8 +88,8 @@ public class FormattingConversionService extends GenericConversionService
 	}
 
 	@Override
-	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public void addFormatterForFieldAnnotation(AnnotationFormatterFactory annotationFormatterFactory) {
+	@SuppressWarnings("unchecked")
+	public void addFormatterForFieldAnnotation(AnnotationFormatterFactory<? extends Annotation> annotationFormatterFactory) {
 		Class<? extends Annotation> annotationType = (Class<? extends Annotation>)
 				GenericTypeResolver.resolveTypeArgument(annotationFormatterFactory.getClass(), AnnotationFormatterFactory.class);
 		if (annotationType == null) {
@@ -148,7 +148,7 @@ public class FormattingConversionService extends GenericConversionService
 
 		@Override
 		public String toString() {
-			return this.fieldType.getName() + " -> " + String.class.getName() + " : " + this.printer;
+			return (this.fieldType.getName() + " -> " + String.class.getName() + " : " + this.printer);
 		}
 	}
 
@@ -197,7 +197,7 @@ public class FormattingConversionService extends GenericConversionService
 
 		@Override
 		public String toString() {
-			return String.class.getName() + " -> " + this.fieldType.getName() + ": " + this.parser;
+			return (String.class.getName() + " -> " + this.fieldType.getName() + ": " + this.parser);
 		}
 	}
 
@@ -249,8 +249,8 @@ public class FormattingConversionService extends GenericConversionService
 
 		@Override
 		public String toString() {
-			return "@" + this.annotationType.getName() + " " + this.fieldType.getName() + " -> " +
-					String.class.getName() + ": " + this.annotationFormatterFactory;
+			return ("@" + this.annotationType.getName() + " " + this.fieldType.getName() + " -> " +
+					String.class.getName() + ": " + this.annotationFormatterFactory);
 		}
 	}
 
@@ -302,8 +302,8 @@ public class FormattingConversionService extends GenericConversionService
 
 		@Override
 		public String toString() {
-			return String.class.getName() + " -> @" + this.annotationType.getName() + " " +
-					this.fieldType.getName() + ": " + this.annotationFormatterFactory;
+			return (String.class.getName() + " -> @" + this.annotationType.getName() + " " +
+					this.fieldType.getName() + ": " + this.annotationFormatterFactory);
 		}
 	}
 

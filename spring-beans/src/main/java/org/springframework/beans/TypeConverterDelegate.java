@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -204,7 +204,7 @@ class TypeConverterDelegate {
 				if (Object.class.equals(requiredType)) {
 					return (T) convertedValue;
 				}
-				if (requiredType.isArray()) {
+				else if (requiredType.isArray()) {
 					// Array required -> apply appropriate conversion of elements.
 					if (convertedValue instanceof String && Enum.class.isAssignableFrom(requiredType.getComponentType())) {
 						convertedValue = StringUtils.commaDelimitedListToStringArray((String) convertedValue);
@@ -339,7 +339,6 @@ class TypeConverterDelegate {
 			catch (Throwable ex) {
 				if (logger.isTraceEnabled()) {
 					logger.trace("Field [" + convertedValue + "] isn't an enum value", ex);
-
 				}
 			}
 		}

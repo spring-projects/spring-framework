@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,8 +59,7 @@ public class ResourceUrlEncodingFilter extends OncePerRequestFilter {
 		/* Cache the index of the path within the DispatcherServlet mapping. */
 		private Integer indexLookupPath;
 
-
-		private ResourceUrlEncodingResponseWrapper(HttpServletRequest request, HttpServletResponse wrapped) {
+		public ResourceUrlEncodingResponseWrapper(HttpServletRequest request, HttpServletResponse wrapped) {
 			super(wrapped);
 			this.request = request;
 		}
@@ -69,11 +68,11 @@ public class ResourceUrlEncodingFilter extends OncePerRequestFilter {
 		public String encodeURL(String url) {
 			ResourceUrlProvider resourceUrlProvider = getResourceUrlProvider();
 			if (resourceUrlProvider == null) {
-				logger.debug("Request attribute exposing ResourceUrlProvider not found.");
+				logger.debug("Request attribute exposing ResourceUrlProvider not found");
 				return super.encodeURL(url);
 			}
 			initIndexLookupPath(resourceUrlProvider);
-			if(url.length() >= this.indexLookupPath) {
+			if (url.length() >= this.indexLookupPath) {
 				String prefix = url.substring(0, this.indexLookupPath);
 				String lookupPath = url.substring(this.indexLookupPath);
 				lookupPath = resourceUrlProvider.getForLookupPath(lookupPath);
