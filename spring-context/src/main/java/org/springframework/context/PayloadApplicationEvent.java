@@ -35,8 +35,8 @@ public class PayloadApplicationEvent<T> extends ApplicationEvent {
 
 	/**
 	 * Create a new PayloadApplicationEvent.
-	 * @param source the component that published the event (never {@code null})
-	 * @param payload the payload object
+	 * @param source the object on which the event initially occurred (never {@code null})
+	 * @param payload the payload object (never {@code null})
 	 */
 	public PayloadApplicationEvent(Object source, T payload) {
 		super(source);
