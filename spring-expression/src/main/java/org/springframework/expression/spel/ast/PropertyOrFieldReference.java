@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -80,8 +80,9 @@ public class PropertyOrFieldReference extends SpelNodeImpl {
 	public TypedValue getValueInternal(ExpressionState state) throws EvaluationException {
 		TypedValue tv = getValueInternal(state.getActiveContextObject(), state.getEvaluationContext(),
 				state.getConfiguration().isAutoGrowNullReferences());
-		if (this.cachedReadAccessor instanceof CompilablePropertyAccessor) {
-			CompilablePropertyAccessor accessor = (CompilablePropertyAccessor) this.cachedReadAccessor;
+		PropertyAccessor accessorToUse = this.cachedReadAccessor;
+		if (accessorToUse instanceof CompilablePropertyAccessor) {
+			CompilablePropertyAccessor accessor = (CompilablePropertyAccessor) accessorToUse;
 			this.exitTypeDescriptor = CodeFlow.toDescriptor(accessor.getPropertyType());
 		}
 		return tv;
@@ -338,13 +339,18 @@ public class PropertyOrFieldReference extends SpelNodeImpl {
 	
 	@Override
 	public boolean isCompilable() {
-		return (this.cachedReadAccessor instanceof CompilablePropertyAccessor &&
-				((CompilablePropertyAccessor) this.cachedReadAccessor).isCompilable());
+		PropertyAccessor accessorToUse = this.cachedReadAccessor;
+		return (accessorToUse instanceof CompilablePropertyAccessor &&
+				((CompilablePropertyAccessor) accessorToUse).isCompilable());
 	}
 	
 	@Override
 	public void generateCode(MethodVisitor mv, CodeFlow cf) {
-		((CompilablePropertyAccessor) this.cachedReadAccessor).generateCode(this.name, mv, cf);
+		PropertyAccessor accessorToUse = this.cachedReadAccessor;
+		if (!(accessorToUse instanceof CompilablePropertyAccessor)) {
+			throw new IllegalStateException("Property accessor is not compilable: " + accessorToUse);
+		}
+		((CompilablePropertyAccessor) accessorToUse).generateCode(this.name, mv, cf);
 		cf.pushDescriptor(this.exitTypeDescriptor);
 	}
 
