@@ -16,7 +16,6 @@
 
 package org.springframework.core.annotation;
 
-import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
@@ -26,10 +25,13 @@ import java.lang.reflect.Method;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.junit.Rule;
 import org.junit.Test;
-
+import org.junit.rules.ExpectedException;
 import org.springframework.stereotype.Component;
 import org.springframework.util.MultiValueMap;
+
+import static org.hamcrest.Matchers.*;
 
 import static java.util.Arrays.*;
 import static org.junit.Assert.*;
@@ -46,9 +48,8 @@ public class AnnotatedElementUtilsTests {
 
 	private static final String TX_NAME = Transactional.class.getName();
 
-	private Set<String> names(Class<?>... classes) {
-		return stream(classes).map(clazz -> clazz.getName()).collect(Collectors.toSet());
-	}
+	@Rule
+	public final ExpectedException exception = ExpectedException.none();
 
 	@Test
 	public void getMetaAnnotationTypesOnNonAnnotatedClass() {
@@ -180,7 +181,8 @@ public class AnnotatedElementUtilsTests {
 	public void getAllAnnotationAttributesOnClassWithMultipleComposedAnnotations() {
 		MultiValueMap<String, Object> attributes = getAllAnnotationAttributes(TxFromMultipleComposedAnnotations.class, TX_NAME);
 		assertNotNull("Annotation attributes map for @Transactional on TxFromMultipleComposedAnnotations", attributes);
-		assertEquals("value for TxFromMultipleComposedAnnotations.", asList("TxComposed1", "TxComposed2"), attributes.get("value"));
+		assertEquals("value for TxFromMultipleComposedAnnotations.", asList("TxInheritedComposed", "TxComposed"),
+			attributes.get("value"));
 	}
 
 	@Test
@@ -272,6 +274,77 @@ public class AnnotatedElementUtilsTests {
 		assertNotNull("Should find @Order on NonInheritedAnnotationInterface", attributes);
 		// Verify contracts between utility methods:
 		assertTrue(isAnnotated(element, name));
+	}
+
+	@Test
+	public void getAnnotationAttributesWithConventionBasedComposedAnnotation() {
+		Class<?> element = ConventionBasedComposedContextConfigClass.class;
+		String name = ContextConfig.class.getName();
+		AnnotationAttributes attributes = getAnnotationAttributes(element, name);
+
+		assertNotNull("Should find @ContextConfig on " + element.getSimpleName(), attributes);
+		assertArrayEquals("locations", new String[] { "explicitDeclaration" }, attributes.getStringArray("locations"));
+		assertArrayEquals("value", new String[] { "explicitDeclaration" }, attributes.getStringArray("value"));
+
+		// Verify contracts between utility methods:
+		assertTrue(isAnnotated(element, name));
+	}
+
+	@Test
+	public void getAnnotationAttributesWithAliasedComposedAnnotation() {
+		Class<?> element = AliasedComposedContextConfigClass.class;
+		String name = ContextConfig.class.getName();
+		AnnotationAttributes attributes = getAnnotationAttributes(element, name);
+
+		assertNotNull("Should find @ContextConfig on " + element.getSimpleName(), attributes);
+		assertArrayEquals("value", new String[] { "test.xml" }, attributes.getStringArray("value"));
+		assertArrayEquals("locations", new String[] { "test.xml" }, attributes.getStringArray("locations"));
+
+		// Verify contracts between utility methods:
+		assertTrue(isAnnotated(element, name));
+	}
+
+	@Test
+	public void getAnnotationAttributesWithAliasedValueComposedAnnotation() {
+		Class<?> element = AliasedValueComposedContextConfigClass.class;
+		String name = ContextConfig.class.getName();
+		AnnotationAttributes attributes = getAnnotationAttributes(element, name);
+
+		assertNotNull("Should find @ContextConfig on " + element.getSimpleName(), attributes);
+		assertArrayEquals("locations", new String[] { "test.xml" }, attributes.getStringArray("locations"));
+		assertArrayEquals("value", new String[] { "test.xml" }, attributes.getStringArray("value"));
+
+		// Verify contracts between utility methods:
+		assertTrue(isAnnotated(element, name));
+	}
+
+	@Test
+	public void getAnnotationAttributesWithInvalidConventionBasedComposedAnnotation() {
+		Class<?> element = InvalidConventionBasedComposedContextConfigClass.class;
+		String name = ContextConfig.class.getName();
+
+		exception.expect(AnnotationConfigurationException.class);
+		exception.expectMessage(either(containsString("attribute [value] and its alias [locations]")).or(
+			containsString("attribute [locations] and its alias [value]")));
+		exception.expectMessage(either(
+			containsString("values of [{duplicateDeclaration}] and [{requiredLocationsDeclaration}]")).or(
+			containsString("values of [{requiredLocationsDeclaration}] and [{duplicateDeclaration}]")));
+		exception.expectMessage(containsString("but only one declaration is permitted"));
+		getAnnotationAttributes(element, name);
+	}
+
+	@Test
+	public void getAnnotationAttributesWithInvalidAliasedComposedAnnotation() {
+		Class<?> element = InvalidAliasedComposedContextConfigClass.class;
+		String name = ContextConfig.class.getName();
+
+		exception.expect(AnnotationConfigurationException.class);
+		exception.expectMessage(either(containsString("attribute [value] and its alias [locations]")).or(
+			containsString("attribute [locations] and its alias [value]")));
+		exception.expectMessage(either(containsString("values of [{duplicateDeclaration}] and [{test.xml}]")).or(
+			containsString("values of [{test.xml}] and [{duplicateDeclaration}]")));
+		exception.expectMessage(containsString("but only one declaration is permitted"));
+		getAnnotationAttributes(element, name);
 	}
 
 	@Test
@@ -375,27 +448,39 @@ public class AnnotatedElementUtilsTests {
 		assertEquals("TX qualifier for MetaAndLocalTxConfigClass.", "localTxMgr", attributes.getString("qualifier"));
 	}
 
+	@Test
+	public void findAnnotationAttributesOnClassWithAttributeAliasesInTargetAnnotation() {
+		AnnotationAttributes attributes = findAnnotationAttributes(AliasedTransactionalComponentClass.class,
+			AliasedTransactional.class);
+		assertNotNull("Should find @AliasedTransactional on AliasedTransactionalComponentClass", attributes);
+		assertEquals("TX value for AliasedTransactionalComponentClass.", "aliasForQualifier",
+			attributes.getString("value"));
+		assertEquals("TX qualifier for AliasedTransactionalComponentClass.", "aliasForQualifier",
+			attributes.getString("qualifier"));
+	}
+
+	private Set<String> names(Class<?>... classes) {
+		return stream(classes).map(clazz -> clazz.getName()).collect(Collectors.toSet());
+	}
+
 
 	// -------------------------------------------------------------------------
 
 	@MetaCycle3
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target(ElementType.ANNOTATION_TYPE)
-	@Documented
 	@interface MetaCycle1 {
 	}
 
 	@MetaCycle1
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target(ElementType.ANNOTATION_TYPE)
-	@Documented
 	@interface MetaCycle2 {
 	}
 
 	@MetaCycle2
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target(ElementType.TYPE)
-	@Documented
 	@interface MetaCycle3 {
 	}
 
@@ -407,7 +492,6 @@ public class AnnotatedElementUtilsTests {
 
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target({ ElementType.TYPE, ElementType.METHOD })
-	@Documented
 	@Inherited
 	@interface Transactional {
 
@@ -418,19 +502,29 @@ public class AnnotatedElementUtilsTests {
 		boolean readOnly() default false;
 	}
 
+	@Retention(RetentionPolicy.RUNTIME)
+	@Target({ ElementType.TYPE, ElementType.METHOD })
+	@Inherited
+	@interface AliasedTransactional {
+
+		@AliasFor(attribute = "qualifier")
+		String value() default "";
+
+		@AliasFor(attribute = "value")
+		String qualifier() default "";
+	}
+
 	@Transactional(qualifier = "composed1")
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target(ElementType.TYPE)
-	@Documented
 	@Inherited
-	@interface Composed1 {
+	@interface InheritedComposed {
 	}
 
 	@Transactional(qualifier = "composed2", readOnly = true)
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target(ElementType.TYPE)
-	@Documented
-	@interface Composed2 {
+	@interface Composed {
 	}
 
 	@Transactional
@@ -440,14 +534,14 @@ public class AnnotatedElementUtilsTests {
 		String qualifier() default "txMgr";
 	}
 
-	@Transactional("TxComposed1")
+	@Transactional("TxInheritedComposed")
 	@Retention(RetentionPolicy.RUNTIME)
-	@interface TxComposed1 {
+	@interface TxInheritedComposed {
 	}
 
-	@Transactional("TxComposed2")
+	@Transactional("TxComposed")
 	@Retention(RetentionPolicy.RUNTIME)
-	@interface TxComposed2 {
+	@interface TxComposed {
 	}
 
 	@Transactional
@@ -461,12 +555,75 @@ public class AnnotatedElementUtilsTests {
 	@interface ComposedTransactionalComponent {
 	}
 
+	@AliasedTransactional(value = "aliasForQualifier")
+	@Component
+	@Retention(RetentionPolicy.RUNTIME)
+	@interface AliasedTransactionalComponent {
+	}
+
 	@TxComposedWithOverride
 	// Override default "txMgr" from @TxComposedWithOverride with "localTxMgr"
 	@Transactional(qualifier = "localTxMgr")
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target(ElementType.TYPE)
 	@interface MetaAndLocalTxConfig {
+	}
+
+	/**
+	 * Mock of {@link org.springframework.test.context.ContextConfiguration}.
+	 */
+	@Retention(RetentionPolicy.RUNTIME)
+	static @interface ContextConfig {
+
+		@AliasFor(attribute = "locations")
+		String[] value() default {};
+
+		@AliasFor(attribute = "value")
+		String[] locations() default {};
+	}
+
+	@ContextConfig
+	@Retention(RetentionPolicy.RUNTIME)
+	static @interface ConventionBasedComposedContextConfig {
+
+		String[] locations() default {};
+	}
+
+	@ContextConfig(value = "duplicateDeclaration")
+	@Retention(RetentionPolicy.RUNTIME)
+	static @interface InvalidConventionBasedComposedContextConfig {
+
+		String[] locations();
+	}
+
+	@ContextConfig
+	@Retention(RetentionPolicy.RUNTIME)
+	static @interface AliasedComposedContextConfig {
+
+		@AliasFor(annotation = ContextConfig.class, attribute = "locations")
+		String[] xmlConfigFiles();
+	}
+
+	@ContextConfig
+	@Retention(RetentionPolicy.RUNTIME)
+	static @interface AliasedValueComposedContextConfig {
+
+		@AliasFor(annotation = ContextConfig.class, attribute = "value")
+		String[] locations();
+	}
+
+	/**
+	 * Invalid because the configuration declares a value for 'value' and
+	 * requires a value for the aliased 'locations'. So we likely end up with
+	 * both 'value' and 'locations' being present in {@link AnnotationAttributes}
+	 * but with different values, which violates the contract of {@code @AliasFor}.
+	 */
+	@ContextConfig(value = "duplicateDeclaration")
+	@Retention(RetentionPolicy.RUNTIME)
+	static @interface InvalidAliasedComposedContextConfig {
+
+		@AliasFor(annotation = ContextConfig.class, attribute = "locations")
+		String[] xmlConfigFiles();
 	}
 
 	// -------------------------------------------------------------------------
@@ -485,22 +642,26 @@ public class AnnotatedElementUtilsTests {
 	static class ComposedTransactionalComponentClass {
 	}
 
+	@AliasedTransactionalComponent
+	static class AliasedTransactionalComponentClass {
+	}
+
 	@Transactional
 	static class ClassWithInheritedAnnotation {
 	}
 
-	@Composed2
+	@Composed
 	static class SubClassWithInheritedAnnotation extends ClassWithInheritedAnnotation {
 	}
 
 	static class SubSubClassWithInheritedAnnotation extends SubClassWithInheritedAnnotation {
 	}
 
-	@Composed1
+	@InheritedComposed
 	static class ClassWithInheritedComposedAnnotation {
 	}
 
-	@Composed2
+	@Composed
 	static class SubClassWithInheritedComposedAnnotation extends ClassWithInheritedComposedAnnotation {
 	}
 
@@ -519,8 +680,8 @@ public class AnnotatedElementUtilsTests {
 	static class DerivedTxConfig extends TxConfig {
 	}
 
-	@TxComposed1
-	@TxComposed2
+	@TxInheritedComposed
+	@TxComposed
 	static class TxFromMultipleComposedAnnotations {
 	}
 
@@ -595,4 +756,23 @@ public class AnnotatedElementUtilsTests {
 	public static interface SubSubNonInheritedAnnotationInterface extends SubNonInheritedAnnotationInterface {
 	}
 
+	@ConventionBasedComposedContextConfig(locations = "explicitDeclaration")
+	static class ConventionBasedComposedContextConfigClass {
+	}
+
+	@InvalidConventionBasedComposedContextConfig(locations = "requiredLocationsDeclaration")
+	static class InvalidConventionBasedComposedContextConfigClass {
+	}
+
+	@AliasedComposedContextConfig(xmlConfigFiles = "test.xml")
+	static class AliasedComposedContextConfigClass {
+	}
+
+	@AliasedValueComposedContextConfig(locations = "test.xml")
+	static class AliasedValueComposedContextConfigClass {
+	}
+
+	@InvalidAliasedComposedContextConfig(xmlConfigFiles = "test.xml")
+	static class InvalidAliasedComposedContextConfigClass {
+	}
 }

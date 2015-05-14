@@ -31,6 +31,8 @@ import org.springframework.core.BridgeMethodResolver;
 import org.springframework.util.Assert;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.util.ReflectionUtils;
+import org.springframework.util.StringUtils;
 
 /**
  * General utility methods for finding annotations and meta-annotations on
@@ -145,7 +147,7 @@ public class AnnotatedElementUtils {
 				searchWithGetSemantics(annotation.annotationType(), annotationType, new SimpleAnnotationProcessor<Object>() {
 
 					@Override
-					public Object process(Annotation annotation, int metaDepth) {
+					public Object process(AnnotatedElement annotatedElement, Annotation annotation, int metaDepth) {
 						types.add(annotation.annotationType().getName());
 						return CONTINUE;
 					}
@@ -153,6 +155,7 @@ public class AnnotatedElementUtils {
 			}
 		}
 		catch (Throwable ex) {
+			AnnotationUtils.rethrowAnnotationConfigurationException(ex);
 			throw new IllegalStateException("Failed to introspect annotations on " + element, ex);
 		}
 
@@ -179,7 +182,7 @@ public class AnnotatedElementUtils {
 
 		return Boolean.TRUE.equals(searchWithGetSemantics(element, annotationType, new SimpleAnnotationProcessor<Boolean>() {
 			@Override
-			public Boolean process(Annotation annotation, int metaDepth) {
+			public Boolean process(AnnotatedElement annotatedElement, Annotation annotation, int metaDepth) {
 				boolean found = annotation.annotationType().getName().equals(annotationType);
 				return ((found && (metaDepth > 0)) ? Boolean.TRUE : CONTINUE);
 			}
@@ -208,7 +211,7 @@ public class AnnotatedElementUtils {
 
 		return Boolean.TRUE.equals(searchWithGetSemantics(element, annotationType, new SimpleAnnotationProcessor<Boolean>() {
 			@Override
-			public Boolean process(Annotation annotation, int metaDepth) {
+			public Boolean process(AnnotatedElement annotatedElement, Annotation annotation, int metaDepth) {
 				boolean found = annotation.annotationType().getName().equals(annotationType);
 				return (found ? Boolean.TRUE : CONTINUE);
 			}
@@ -273,8 +276,12 @@ public class AnnotatedElementUtils {
 	 */
 	public static AnnotationAttributes getAnnotationAttributes(AnnotatedElement element, String annotationType,
 			boolean classValuesAsString, boolean nestedAnnotationsAsMap) {
-		return searchWithGetSemantics(element, annotationType, new MergedAnnotationAttributesProcessor(annotationType,
-			classValuesAsString, nestedAnnotationsAsMap));
+
+		AnnotationAttributes attributes = searchWithGetSemantics(element, annotationType,
+			new MergedAnnotationAttributesProcessor(annotationType, classValuesAsString, nestedAnnotationsAsMap));
+		AnnotationUtils.postProcessAnnotationAttributes(element, attributes, classValuesAsString,
+			nestedAnnotationsAsMap);
+		return attributes;
 	}
 
 	/**
@@ -297,7 +304,7 @@ public class AnnotatedElementUtils {
 	public static AnnotationAttributes findAnnotationAttributes(AnnotatedElement element,
 			Class<? extends Annotation> annotationType) {
 		Assert.notNull(annotationType, "annotationType must not be null");
-		return findAnnotationAttributes(element, annotationType.getName(), false, false);
+		return findAnnotationAttributes(element, annotationType.getName());
 	}
 
 	/**
@@ -357,8 +364,12 @@ public class AnnotatedElementUtils {
 	 */
 	public static AnnotationAttributes findAnnotationAttributes(AnnotatedElement element, String annotationType,
 			boolean classValuesAsString, boolean nestedAnnotationsAsMap) {
-		return searchWithFindSemantics(element, annotationType, new MergedAnnotationAttributesProcessor(annotationType,
-			classValuesAsString, nestedAnnotationsAsMap));
+
+		AnnotationAttributes attributes = searchWithFindSemantics(element, annotationType,
+			new MergedAnnotationAttributesProcessor(annotationType, classValuesAsString, nestedAnnotationsAsMap));
+		AnnotationUtils.postProcessAnnotationAttributes(element, attributes, classValuesAsString,
+			nestedAnnotationsAsMap);
+		return attributes;
 	}
 
 	/**
@@ -417,7 +428,7 @@ public class AnnotatedElementUtils {
 		searchWithGetSemantics(element, annotationType, new SimpleAnnotationProcessor<Void>() {
 
 			@Override
-			public Void process(Annotation annotation, int metaDepth) {
+			public Void process(AnnotatedElement annotatedElement, Annotation annotation, int metaDepth) {
 				boolean found = annotation.annotationType().getName().equals(annotationType);
 				if (found) {
 					AnnotationAttributes annotationAttributes = AnnotationUtils.getAnnotationAttributes(annotation,
@@ -450,6 +461,7 @@ public class AnnotatedElementUtils {
 			return searchWithGetSemantics(element, annotationType, processor, new HashSet<AnnotatedElement>(), 0);
 		}
 		catch (Throwable ex) {
+			AnnotationUtils.rethrowAnnotationConfigurationException(ex);
 			throw new IllegalStateException("Failed to introspect annotations on " + element, ex);
 		}
 	}
@@ -482,8 +494,8 @@ public class AnnotatedElementUtils {
 
 				// Start searching within locally declared annotations
 				List<Annotation> declaredAnnotations = Arrays.asList(element.getDeclaredAnnotations());
-				T result = searchWithGetSemanticsInAnnotations(declaredAnnotations, annotationType, processor, visited,
-					metaDepth);
+				T result = searchWithGetSemanticsInAnnotations(element, declaredAnnotations, annotationType, processor,
+					visited, metaDepth);
 				if (result != null) {
 					return result;
 				}
@@ -496,16 +508,17 @@ public class AnnotatedElementUtils {
 				}
 
 				// Continue searching within inherited annotations
-				result = searchWithGetSemanticsInAnnotations(inheritedAnnotations, annotationType, processor, visited,
-					metaDepth);
+				result = searchWithGetSemanticsInAnnotations(element, inheritedAnnotations, annotationType, processor,
+					visited, metaDepth);
 				if (result != null) {
 					return result;
 				}
 			}
 			catch (Exception ex) {
-				AnnotationUtils.logIntrospectionFailure(element, ex);
+				AnnotationUtils.handleIntrospectionFailure(element, ex);
 			}
 		}
+
 		return null;
 	}
 
@@ -521,6 +534,8 @@ public class AnnotatedElementUtils {
 	 * {@link Processor#process process()} method of the {@link Processor}
 	 * API.
 	 *
+	 * @param annotatedElement the element that is annotated with the supplied
+	 * annotations, used for contextual logging; may be {@code null} if unknown
 	 * @param annotations the annotations to search in; never {@code null}
 	 * @param annotationType the fully qualified class name of the annotation
 	 * type to find; never {@code null} or empty
@@ -529,14 +544,15 @@ public class AnnotatedElementUtils {
 	 * @param metaDepth the meta-depth of the annotation
 	 * @return the result of the processor, potentially {@code null}
 	 */
-	private static <T> T searchWithGetSemanticsInAnnotations(List<Annotation> annotations, String annotationType,
-			Processor<T> processor, Set<AnnotatedElement> visited, int metaDepth) {
+	private static <T> T searchWithGetSemanticsInAnnotations(AnnotatedElement annotatedElement,
+			List<Annotation> annotations, String annotationType, Processor<T> processor, Set<AnnotatedElement> visited,
+			int metaDepth) {
 
 		// Search in annotations
 		for (Annotation annotation : annotations) {
 			if (!AnnotationUtils.isInJavaLangAnnotationPackage(annotation)
 					&& (annotation.annotationType().getName().equals(annotationType) || metaDepth > 0)) {
-				T result = processor.process(annotation, metaDepth);
+				T result = processor.process(annotatedElement, annotation, metaDepth);
 				if (result != null) {
 					return result;
 				}
@@ -549,7 +565,7 @@ public class AnnotatedElementUtils {
 				T result = searchWithGetSemantics(annotation.annotationType(), annotationType, processor, visited,
 					metaDepth + 1);
 				if (result != null) {
-					processor.postProcess(annotation, result);
+					processor.postProcess(annotatedElement, annotation, result);
 					return result;
 				}
 			}
@@ -599,6 +615,7 @@ public class AnnotatedElementUtils {
 				searchOnMethodsInInterfaces, searchOnMethodsInSuperclasses, processor, new HashSet<AnnotatedElement>(), 0);
 		}
 		catch (Throwable ex) {
+			AnnotationUtils.rethrowAnnotationConfigurationException(ex);
 			throw new IllegalStateException("Failed to introspect annotations on " + element, ex);
 		}
 	}
@@ -646,7 +663,7 @@ public class AnnotatedElementUtils {
 				for (Annotation annotation : annotations) {
 					if (!AnnotationUtils.isInJavaLangAnnotationPackage(annotation)
 							&& (annotation.annotationType().getName().equals(annotationType) || metaDepth > 0)) {
-						T result = processor.process(annotation, metaDepth);
+						T result = processor.process(element, annotation, metaDepth);
 						if (result != null) {
 							return result;
 						}
@@ -660,7 +677,7 @@ public class AnnotatedElementUtils {
 							searchOnInterfaces, searchOnSuperclasses, searchOnMethodsInInterfaces,
 							searchOnMethodsInSuperclasses, processor, visited, metaDepth + 1);
 						if (result != null) {
-							processor.postProcess(annotation, result);
+							processor.postProcess(annotation.annotationType(), annotation, result);
 							return result;
 						}
 					}
@@ -756,7 +773,7 @@ public class AnnotatedElementUtils {
 				}
 			}
 			catch (Exception ex) {
-				AnnotationUtils.logIntrospectionFailure(element, ex);
+				AnnotationUtils.handleIntrospectionFailure(element, ex);
 			}
 		}
 		return null;
@@ -840,12 +857,15 @@ public class AnnotatedElementUtils {
 		 * of 0; a meta-annotation will have a depth of 1; and a
 		 * meta-meta-annotation will have a depth of 2; etc.
 		 *
+		 * @param annotatedElement the element that is annotated with the
+		 * supplied annotation, used for contextual logging; may be
+		 * {@code null} if unknown
 		 * @param annotation the annotation to process
 		 * @param metaDepth the meta-depth of the annotation
 		 * @return the result of the processing, or {@code null} to continue
 		 * searching for additional annotations
 		 */
-		T process(Annotation annotation, int metaDepth);
+		T process(AnnotatedElement annotatedElement, Annotation annotation, int metaDepth);
 
 		/**
 		 * Post-process the result returned by the {@link #process} method.
@@ -855,10 +875,13 @@ public class AnnotatedElementUtils {
 		 * {@link AnnotatedElement} and an invocation of {@link #process}
 		 * that returned a non-null value.
 		 *
+		 * @param annotatedElement the element that is annotated with the
+		 * supplied annotation, used for contextual logging; may be
+		 * {@code null} if unknown
 		 * @param annotation the annotation to post-process
 		 * @param result the result to post-process
 		 */
-		void postProcess(Annotation annotation, T result);
+		void postProcess(AnnotatedElement annotatedElement, Annotation annotation, T result);
 	}
 
 	/**
@@ -872,7 +895,7 @@ public class AnnotatedElementUtils {
 		 * <em>No-op</em>.
 		 */
 		@Override
-		public final void postProcess(Annotation annotation, T result) {
+		public final void postProcess(AnnotatedElement annotatedElement, Annotation annotation, T result) {
 			/* no-op */
 		}
 	}
@@ -887,30 +910,64 @@ public class AnnotatedElementUtils {
 	 */
 	private static class MergedAnnotationAttributesProcessor implements Processor<AnnotationAttributes> {
 
-		private final String annotationType;
+		private final String annotationTypeName;
 		private final boolean classValuesAsString;
 		private final boolean nestedAnnotationsAsMap;
 
 
-		MergedAnnotationAttributesProcessor(String annotationType, boolean classValuesAsString, boolean nestedAnnotationsAsMap) {
-			this.annotationType = annotationType;
+		MergedAnnotationAttributesProcessor(String annotationType, boolean classValuesAsString,
+				boolean nestedAnnotationsAsMap) {
+			this.annotationTypeName = annotationType;
 			this.classValuesAsString = classValuesAsString;
 			this.nestedAnnotationsAsMap = nestedAnnotationsAsMap;
 		}
 
 		@Override
-		public AnnotationAttributes process(Annotation annotation, int metaDepth) {
-			boolean found = annotation.annotationType().getName().equals(annotationType);
-			return (found ? AnnotationUtils.getAnnotationAttributes(annotation, classValuesAsString, nestedAnnotationsAsMap) : null);
+		public AnnotationAttributes process(AnnotatedElement annotatedElement, Annotation annotation, int metaDepth) {
+			boolean found = annotation.annotationType().getName().equals(this.annotationTypeName);
+			return (found ? AnnotationUtils.getAnnotationAttributes(annotatedElement, annotation,
+				this.classValuesAsString, this.nestedAnnotationsAsMap, true, false) : null);
 		}
 
 		@Override
-		public void postProcess(Annotation annotation, AnnotationAttributes attributes) {
-			for (String key : attributes.keySet()) {
-				if (!AnnotationUtils.VALUE.equals(key)) {
-					Object value = AnnotationUtils.getValue(annotation, key);
-					if (value != null) {
-						attributes.put(key, AnnotationUtils.adaptValue(value, classValuesAsString, nestedAnnotationsAsMap));
+		public void postProcess(AnnotatedElement element, Annotation annotation, AnnotationAttributes attributes) {
+			annotation = AnnotationUtils.synthesizeAnnotation(annotation);
+			Class<? extends Annotation> targetAnnotationType = attributes.annotationType();
+
+			for (Method attributeMethod : AnnotationUtils.getAttributeMethods(annotation.annotationType())) {
+				String attributeName = attributeMethod.getName();
+				String aliasedAttributeName = AnnotationUtils.getAliasedAttributeName(attributeMethod,
+					targetAnnotationType);
+
+				// Explicit annotation attribute override declared via @AliasFor
+				if (StringUtils.hasText(aliasedAttributeName)) {
+					if (attributes.containsKey(aliasedAttributeName)) {
+						Object value = AnnotationUtils.getValue(annotation, attributeName);
+						attributes.put(aliasedAttributeName, AnnotationUtils.adaptValue(element, value,
+							this.classValuesAsString, this.nestedAnnotationsAsMap));
+					}
+				}
+				// Implicit annotation attribute override based on convention
+				else if (!AnnotationUtils.VALUE.equals(attributeName) && attributes.containsKey(attributeName)) {
+					Object value = AnnotationUtils.getValue(annotation, attributeName);
+					Object adaptedValue = AnnotationUtils.adaptValue(element, value, this.classValuesAsString,
+						this.nestedAnnotationsAsMap);
+					attributes.put(attributeName, adaptedValue);
+
+					// If an aliased attribute defined by @AliasFor semantics does not
+					// already have an explicit value, ensure that the aliased attribute
+					// is also present in the map with a value identical to its mirror
+					// alias.
+					Method attributeMethodInTarget = ReflectionUtils.findMethod(targetAnnotationType, attributeName);
+					if (attributeMethodInTarget != null) {
+						String aliasedAttributeNameInTarget = AnnotationUtils.getAliasedAttributeName(
+							attributeMethodInTarget, null);
+						if (aliasedAttributeNameInTarget != null) {
+							Object aliasedValueInTarget = attributes.get(aliasedAttributeNameInTarget);
+							if (aliasedValueInTarget == null) {
+								attributes.put(aliasedAttributeNameInTarget, adaptedValue);
+							}
+						}
 					}
 				}
 			}

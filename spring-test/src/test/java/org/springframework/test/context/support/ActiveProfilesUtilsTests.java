@@ -28,6 +28,7 @@ import java.util.Set;
 
 import org.junit.Test;
 
+import org.springframework.core.annotation.AnnotationConfigurationException;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ActiveProfilesResolver;
 import org.springframework.util.StringUtils;
@@ -190,7 +191,7 @@ public class ActiveProfilesUtilsTests extends AbstractContextConfigurationUtilsT
 	/**
 	 * @since 4.0
 	 */
-	@Test(expected = IllegalStateException.class)
+	@Test(expected = AnnotationConfigurationException.class)
 	public void resolveActiveProfilesWithConflictingProfilesAndValue() {
 		resolveActiveProfiles(ConflictingProfilesAndValueTestCase.class);
 	}

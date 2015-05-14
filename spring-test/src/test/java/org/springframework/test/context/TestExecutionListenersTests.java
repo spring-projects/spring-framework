@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import java.util.stream.Collectors;
 import org.junit.Test;
 
 import org.springframework.core.Ordered;
+import org.springframework.core.annotation.AnnotationConfigurationException;
 import org.springframework.test.context.jdbc.SqlScriptsTestExecutionListener;
 import org.springframework.test.context.support.AbstractTestExecutionListener;
 import org.springframework.test.context.support.DependencyInjectionTestExecutionListener;
@@ -185,7 +186,7 @@ public class TestExecutionListenersTests {
 			testContextManager.getTestExecutionListeners().size());
 	}
 
-	@Test(expected = IllegalStateException.class)
+	@Test(expected = AnnotationConfigurationException.class)
 	public void listenersAndValueAttributesDeclared() {
 		new TestContextManager(DuplicateListenersConfigTestCase.class);
 	}

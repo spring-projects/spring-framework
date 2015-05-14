@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,6 @@ import org.springframework.test.context.ActiveProfilesResolver;
 import org.springframework.test.util.MetaAnnotationUtils;
 import org.springframework.test.util.MetaAnnotationUtils.AnnotationDescriptor;
 import org.springframework.util.Assert;
-import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -94,7 +93,6 @@ abstract class ActiveProfilesUtils {
 				logger.trace(String.format("Retrieved @ActiveProfiles attributes [%s] for declaring class [%s].",
 					annAttrs, declaringClass.getName()));
 			}
-			validateActiveProfilesConfiguration(declaringClass, annAttrs);
 
 			Class<? extends ActiveProfilesResolver> resolverClass = annAttrs.getClass("resolver");
 			if (ActiveProfilesResolver.class == resolverClass) {
@@ -132,22 +130,6 @@ abstract class ActiveProfilesUtils {
 		}
 
 		return StringUtils.toStringArray(activeProfiles);
-	}
-
-	private static void validateActiveProfilesConfiguration(Class<?> declaringClass, AnnotationAttributes annAttrs) {
-		String[] valueProfiles = annAttrs.getStringArray("value");
-		String[] profiles = annAttrs.getStringArray("profiles");
-		boolean valueDeclared = !ObjectUtils.isEmpty(valueProfiles);
-		boolean profilesDeclared = !ObjectUtils.isEmpty(profiles);
-
-		if (valueDeclared && profilesDeclared) {
-			String msg = String.format("Class [%s] has been configured with @ActiveProfiles' 'value' [%s] "
-					+ "and 'profiles' [%s] attributes. Only one declaration of active bean "
-					+ "definition profiles is permitted per @ActiveProfiles annotation.", declaringClass.getName(),
-				ObjectUtils.nullSafeToString(valueProfiles), ObjectUtils.nullSafeToString(profiles));
-			logger.error(msg);
-			throw new IllegalStateException(msg);
-		}
 	}
 
 }

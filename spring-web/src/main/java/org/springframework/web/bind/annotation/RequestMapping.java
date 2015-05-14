@@ -23,6 +23,8 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.util.concurrent.Callable;
 
+import org.springframework.core.annotation.AliasFor;
+
 /**
  * Annotation for mapping web requests onto specific handler classes and/or
  * handler methods. Provides a consistent style between Servlet and Portlet
@@ -298,7 +300,7 @@ public @interface RequestMapping {
 
 	/**
 	 * The primary mapping expressed by this annotation.
-	 * <p>In a Servlet environment this is an alias for {@link #path()}.
+	 * <p>In a Servlet environment this is an alias for {@link #path}.
 	 * For example {@code @RequestMapping("/foo")} is equivalent to
 	 * {@code @RequestMapping(path="/foo")}.
 	 * <p>In a Portlet environment this is the mapped portlet modes
@@ -307,6 +309,7 @@ public @interface RequestMapping {
 	 * When used at the type level, all method-level mappings inherit
 	 * this primary mapping, narrowing it for a specific handler method.
 	 */
+	@AliasFor(attribute = "path")
 	String[] value() default {};
 
 	/**
@@ -321,6 +324,7 @@ public @interface RequestMapping {
 	 * @see org.springframework.web.bind.annotation.ValueConstants#DEFAULT_NONE
 	 * @since 4.2
 	 */
+	@AliasFor(attribute = "value")
 	String[] path() default {};
 
 	/**

@@ -53,7 +53,6 @@ import org.springframework.test.util.MetaAnnotationUtils;
 import org.springframework.test.util.MetaAnnotationUtils.AnnotationDescriptor;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
-import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -147,18 +146,7 @@ public abstract class AbstractTestContextBootstrapper implements TestContextBoot
 						declaringClass.getName()));
 				}
 
-				Class<? extends TestExecutionListener>[] valueListenerClasses = (Class<? extends TestExecutionListener>[]) annAttrs.getClassArray("value");
 				Class<? extends TestExecutionListener>[] listenerClasses = (Class<? extends TestExecutionListener>[]) annAttrs.getClassArray("listeners");
-				if (!ObjectUtils.isEmpty(valueListenerClasses) && !ObjectUtils.isEmpty(listenerClasses)) {
-					throw new IllegalStateException(String.format(
-						"Class [%s] configured with @TestExecutionListeners' "
-								+ "'value' [%s] and 'listeners' [%s] attributes. Use one or the other, but not both.",
-						declaringClass.getName(), ObjectUtils.nullSafeToString(valueListenerClasses),
-						ObjectUtils.nullSafeToString(listenerClasses)));
-				}
-				else if (!ObjectUtils.isEmpty(valueListenerClasses)) {
-					listenerClasses = valueListenerClasses;
-				}
 
 				boolean inheritListeners = annAttrs.getBoolean("inheritListeners");
 				AnnotationDescriptor<TestExecutionListeners> superDescriptor = MetaAnnotationUtils.findAnnotationDescriptor(
