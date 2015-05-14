@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -500,7 +500,7 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 		if (this.configurationAttributes == null) {
 			Class<?> clazz = testContext.getTestClass();
 
-			AnnotationAttributes annAttrs = AnnotatedElementUtils.getAnnotationAttributes(clazz,
+			AnnotationAttributes annAttrs = AnnotatedElementUtils.findAnnotationAttributes(clazz,
 				TransactionConfiguration.class.getName());
 			if (logger.isDebugEnabled()) {
 				logger.debug(String.format("Retrieved @TransactionConfiguration attributes [%s] for test class [%s].",

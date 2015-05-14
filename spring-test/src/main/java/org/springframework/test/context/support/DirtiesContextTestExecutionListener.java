@@ -156,8 +156,8 @@ public class DirtiesContextTestExecutionListener extends AbstractTestExecutionLi
 		Assert.notNull(testMethod, "The test method of the supplied TestContext must not be null");
 
 		final String annotationType = DirtiesContext.class.getName();
-		AnnotationAttributes methodAnnAttrs = AnnotatedElementUtils.getAnnotationAttributes(testMethod, annotationType);
-		AnnotationAttributes classAnnAttrs = AnnotatedElementUtils.getAnnotationAttributes(testClass, annotationType);
+		AnnotationAttributes methodAnnAttrs = AnnotatedElementUtils.findAnnotationAttributes(testMethod, annotationType);
+		AnnotationAttributes classAnnAttrs = AnnotatedElementUtils.findAnnotationAttributes(testClass, annotationType);
 		boolean methodAnnotated = methodAnnAttrs != null;
 		boolean classAnnotated = classAnnAttrs != null;
 		MethodMode methodMode = methodAnnotated ? methodAnnAttrs.<MethodMode> getEnum("methodMode") : null;
@@ -186,7 +186,7 @@ public class DirtiesContextTestExecutionListener extends AbstractTestExecutionLi
 		Assert.notNull(testClass, "The test class of the supplied TestContext must not be null");
 
 		final String annotationType = DirtiesContext.class.getName();
-		AnnotationAttributes classAnnAttrs = AnnotatedElementUtils.getAnnotationAttributes(testClass, annotationType);
+		AnnotationAttributes classAnnAttrs = AnnotatedElementUtils.findAnnotationAttributes(testClass, annotationType);
 		boolean classAnnotated = classAnnAttrs != null;
 		ClassMode classMode = classAnnotated ? classAnnAttrs.<ClassMode> getEnum("classMode") : null;
 

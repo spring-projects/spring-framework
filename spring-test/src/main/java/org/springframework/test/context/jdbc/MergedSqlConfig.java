@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -86,7 +86,7 @@ class MergedSqlConfig {
 		Assert.notNull(testClass, "testClass must not be null");
 
 		// Get global attributes, if any.
-		AnnotationAttributes attributes = AnnotatedElementUtils.getAnnotationAttributes(testClass,
+		AnnotationAttributes attributes = AnnotatedElementUtils.findAnnotationAttributes(testClass,
 			SqlConfig.class.getName());
 
 		// Override global attributes with local attributes.

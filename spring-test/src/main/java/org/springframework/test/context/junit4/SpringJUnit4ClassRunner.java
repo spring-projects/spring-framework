@@ -380,7 +380,7 @@ public class SpringJUnit4ClassRunner extends BlockJUnit4ClassRunner {
 	 * @return the timeout, or {@code 0} if none was specified
 	 */
 	protected long getSpringTimeout(FrameworkMethod frameworkMethod) {
-		AnnotationAttributes annAttrs = AnnotatedElementUtils.getAnnotationAttributes(frameworkMethod.getMethod(),
+		AnnotationAttributes annAttrs = AnnotatedElementUtils.findAnnotationAttributes(frameworkMethod.getMethod(),
 			Timed.class.getName());
 		if (annAttrs == null) {
 			return 0;
