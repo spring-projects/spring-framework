@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,7 +49,8 @@ import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.util.concurrent.ListenableFutureAdapter;
 import org.springframework.util.concurrent.ListenableFutureCallback;
 import org.springframework.util.concurrent.SuccessCallback;
-import org.springframework.web.util.UriTemplate;
+import org.springframework.web.util.DefaultUriTemplateHandler;
+import org.springframework.web.util.UriTemplateHandler;
 
 /**
  * <strong>Spring's central class for asynchronous client-side HTTP access.</strong>
@@ -144,6 +145,22 @@ public class AsyncRestTemplate extends AsyncHttpAccessor implements AsyncRestOpe
 	/** Return the error handler. */
 	public ResponseErrorHandler getErrorHandler() {
 		return this.syncTemplate.getErrorHandler();
+	}
+
+	/**
+	 * Set a custom {@link UriTemplateHandler} for expanding URI templates.
+	 * <p>By default, RestTemplate uses {@link DefaultUriTemplateHandler}.
+	 * @param handler the URI template handler to use
+	 */
+	public void setUriTemplateHandler(UriTemplateHandler handler) {
+		this.syncTemplate.setUriTemplateHandler(handler);
+	}
+
+	/**
+	 * Return the configured URI template handler.
+	 */
+	public UriTemplateHandler getUriTemplateHandler() {
+		return this.syncTemplate.getUriTemplateHandler();
 	}
 
 	@Override
@@ -493,7 +510,7 @@ public class AsyncRestTemplate extends AsyncHttpAccessor implements AsyncRestOpe
 	public <T> ListenableFuture<T> execute(String url, HttpMethod method, AsyncRequestCallback requestCallback,
 			ResponseExtractor<T> responseExtractor, Object... urlVariables) throws RestClientException {
 
-		URI expanded = new UriTemplate(url).expand(urlVariables);
+		URI expanded = getUriTemplateHandler().expand(url, urlVariables);
 		return doExecute(expanded, method, requestCallback, responseExtractor);
 	}
 
@@ -501,7 +518,7 @@ public class AsyncRestTemplate extends AsyncHttpAccessor implements AsyncRestOpe
 	public <T> ListenableFuture<T> execute(String url, HttpMethod method, AsyncRequestCallback requestCallback,
 			ResponseExtractor<T> responseExtractor, Map<String, ?> urlVariables) throws RestClientException {
 
-		URI expanded = new UriTemplate(url).expand(urlVariables);
+		URI expanded = getUriTemplateHandler().expand(url, urlVariables);
 		return doExecute(expanded, method, requestCallback, responseExtractor);
 	}
 

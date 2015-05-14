@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
 import javax.xml.transform.Source;
 
 import org.springframework.core.ParameterizedTypeReference;
@@ -51,7 +52,8 @@ import org.springframework.http.converter.xml.MappingJackson2XmlHttpMessageConve
 import org.springframework.http.converter.xml.SourceHttpMessageConverter;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
-import org.springframework.web.util.UriTemplate;
+import org.springframework.web.util.DefaultUriTemplateHandler;
+import org.springframework.web.util.UriTemplateHandler;
 
 /**
  * <strong>Spring's central class for synchronous client-side HTTP access.</strong>
@@ -134,6 +136,8 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 	private final List<HttpMessageConverter<?>> messageConverters = new ArrayList<HttpMessageConverter<?>>();
 
 	private ResponseErrorHandler errorHandler = new DefaultResponseErrorHandler();
+
+	private UriTemplateHandler uriTemplateHandler = new DefaultUriTemplateHandler();
 
 	private final ResponseExtractor<HttpHeaders> headersExtractor = new HeadersExtractor();
 
@@ -224,6 +228,23 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 	 */
 	public ResponseErrorHandler getErrorHandler() {
 		return this.errorHandler;
+	}
+
+	/**
+	 * Set a custom {@link UriTemplateHandler} for expanding URI templates.
+	 * <p>By default, RestTemplate uses {@link DefaultUriTemplateHandler}.
+	 * @param handler the URI template handler to use
+	 */
+	public void setUriTemplateHandler(UriTemplateHandler handler) {
+		Assert.notNull(handler, "'uriTemplateHandler' is required.");
+		this.uriTemplateHandler = handler;
+	}
+
+	/**
+	 * Return the configured URI template handler.
+	 */
+	public UriTemplateHandler getUriTemplateHandler() {
+		return this.uriTemplateHandler;
 	}
 
 
@@ -526,7 +547,7 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 	public <T> T execute(String url, HttpMethod method, RequestCallback requestCallback,
 			ResponseExtractor<T> responseExtractor, Object... urlVariables) throws RestClientException {
 
-		URI expanded = new UriTemplate(url).expand(urlVariables);
+		URI expanded = getUriTemplateHandler().expand(url, urlVariables);
 		return doExecute(expanded, method, requestCallback, responseExtractor);
 	}
 
@@ -534,7 +555,7 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 	public <T> T execute(String url, HttpMethod method, RequestCallback requestCallback,
 			ResponseExtractor<T> responseExtractor, Map<String, ?> urlVariables) throws RestClientException {
 
-		URI expanded = new UriTemplate(url).expand(urlVariables);
+		URI expanded = getUriTemplateHandler().expand(url, urlVariables);
 		return doExecute(expanded, method, requestCallback, responseExtractor);
 	}
 
