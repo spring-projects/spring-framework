@@ -23,9 +23,10 @@ import javax.servlet.http.HttpServletResponse;
 import org.springframework.http.HttpHeaders;
 
 /**
- * Exception to be thrown if DispatcherServlet is unable to determine a corresponding
- * handler for an incoming HTTP request. The DispatcherServlet throws this exception
- * only if its "throwExceptionIfNoHandlerFound" property is set to "true".
+ * By default when the DispatcherServlet can't find a handler for a request it
+ * sends a 404 response. However if its property "throwExceptionIfNoHandlerFound"
+ * is set to {@code true} this exception is raised and may be handled with
+ * a configured HandlerExceptionResolver.
  *
  * @author Brian Clozel
  * @since 4.0
@@ -49,7 +50,7 @@ public class NoHandlerFoundException extends ServletException {
 	 * @param headers the HTTP request headers
 	 */
 	public NoHandlerFoundException(String httpMethod, String requestURL, HttpHeaders headers) {
-		super("No handler found for " + httpMethod + " " + requestURL + ", headers=" + headers);
+		super("No handler found for " + httpMethod + " " + requestURL);
 		this.httpMethod = httpMethod;
 		this.requestURL = requestURL;
 		this.headers = headers;

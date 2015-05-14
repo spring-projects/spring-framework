@@ -34,6 +34,7 @@ import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.DummyEnvironment;
+import org.springframework.http.HttpHeaders;
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockHttpServletResponse;
 import org.springframework.mock.web.test.MockServletConfig;
@@ -572,6 +573,16 @@ public class DispatcherServletTests extends TestCase {
 
 		complexDispatcherServlet.service(request, response);
 		assertTrue("correct error code", response.getStatus() == HttpServletResponse.SC_NOT_FOUND);
+	}
+
+	// SPR-12984
+
+	public void testNoHandlerFoundExceptionMessage() {
+		HttpHeaders headers = new HttpHeaders();
+		headers.add("foo", "bar");
+		NoHandlerFoundException ex = new NoHandlerFoundException("GET", "/foo", headers);
+		assertTrue(!ex.getMessage().contains("bar"));
+		assertTrue(!ex.toString().contains("bar"));
 	}
 
 	public void testCleanupAfterIncludeWithRemove() throws ServletException, IOException {
