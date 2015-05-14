@@ -16,13 +16,8 @@
 
 package org.springframework.web.util;
 
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.nullValue;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -237,24 +232,6 @@ public class UriComponentsBuilderTests {
 		assertEquals("example.com", result.getHost());
 		assertTrue(result.getQueryParams().containsKey("foo"));
 		assertEquals("bar@baz", result.getQueryParams().getFirst("foo"));
-	}
-
-	//SPR-12750
-
-	@Test
-	public void fromUriStringWithSlashPrefixedVariable() {
-		UriComponents result = UriComponentsBuilder.fromUriString(
-				"http://example.com/part1/{/part2}/{var1}/url/{/urlvar}?foo=bar@baz&bar={barvalue}")
-				.build();
-		assertTrue(StringUtils.isEmpty(result.getUserInfo()));
-		assertEquals("example.com", result.getHost());
-		assertEquals("/part1/{/part2}/{var1}/url/{/urlvar}", result.getPath());
-		assertEquals(Arrays.asList("part1", "{/part2}", "{var1}", "url", "{/urlvar}"),
-				result.getPathSegments());
-		assertTrue(result.getQueryParams().containsKey("foo"));
-		assertEquals("bar@baz", result.getQueryParams().getFirst("foo"));
-		assertTrue(result.getQueryParams().containsKey("bar"));
-		assertEquals("{barvalue}", result.getQueryParams().getFirst("bar"));
 	}
 
 	@Test

@@ -22,11 +22,11 @@ import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Pattern;
 
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
@@ -646,60 +646,11 @@ final class HierarchicalUriComponents extends UriComponents {
 	 */
 	static final class FullPathComponent implements PathComponent {
 
-		// Pattern used to split the path into segments: '/' if not preceded by '{',
-		// using negative look-behind
-		private static final Pattern DELIMITER_PATTERN = Pattern.compile("(?<!\\{)/");
-
-
-		private final List<PartialPath> partialPaths;
-
 		private final String path;
 
 
 		public FullPathComponent(String path) {
-			this.partialPaths = Collections.unmodifiableList(initPartialPaths(path));
 			this.path = path;
-		}
-
-		private FullPathComponent(List<PartialPath> partialPaths) {
-			this.partialPaths = Collections.unmodifiableList(partialPaths);
-			this.path = initPath(partialPaths);
-		}
-
-		private static String initPath(List<PartialPath> partialPaths) {
-			StringBuilder builder = new StringBuilder();
-			for (PartialPath partialPath : partialPaths) {
-				builder.append(partialPath.getValue());
-			}
-			return builder.toString();
-		}
-
-		private static List<PartialPath> initPartialPaths(String path) {
-			List<PartialPath> result = new ArrayList<PartialPath>();
-			int startIdx;
-			int endIdx = 0;
-			while ((startIdx = path.indexOf("{/", endIdx)) != -1) {
-				if (startIdx > endIdx) {
-					String prevPart = path.substring(endIdx, startIdx);
-					result.add(new PartialPath(prevPart, Type.PATH));
-				}
-				endIdx = path.indexOf('}', startIdx + 2) + 1;
-				if (endIdx == -1) {
-					throw new IllegalArgumentException("Path \"" + path + "\" has no " +
-							"closing \"}\" after \"{/\" at index " + startIdx);
-				}
-				String part = path.substring(startIdx, endIdx);
-				result.add(new PartialPath(part, Type.PATH_SEGMENT));
-			}
-			if (endIdx < path.length()) {
-				String endPart = path.substring(endIdx);
-				result.add(new PartialPath(endPart, Type.PATH));
-			}
-			return result;
-		}
-
-		List<PartialPath> getPartialPaths() {
-			return this.partialPaths;
 		}
 
 		@Override
@@ -709,41 +660,25 @@ final class HierarchicalUriComponents extends UriComponents {
 
 		@Override
 		public List<String> getPathSegments() {
-			String[] pathSegments = DELIMITER_PATTERN.split(getPath());
-			List<String> result = new ArrayList<String>(pathSegments.length);
-			for (String pathSegment : pathSegments) {
-				if (StringUtils.hasLength(pathSegment)) {
-					result.add(pathSegment);
-				}
-			}
-			return Collections.unmodifiableList(result);
+			String delimiter = new String(new char[]{PATH_DELIMITER});
+			String[] pathSegments = StringUtils.tokenizeToStringArray(path, delimiter);
+			return Collections.unmodifiableList(Arrays.asList(pathSegments));
 		}
 
 		@Override
 		public PathComponent encode(String encoding) throws UnsupportedEncodingException {
-			List<PartialPath> result = new ArrayList<PartialPath>();
-			for (PartialPath partialPath : this.partialPaths) {
-				PartialPath encoded = partialPath.encode(encoding);
-				result.add(encoded);
-			}
-			return new FullPathComponent(result);
-		}
+			String encodedPath = encodeUriComponent(getPath(),encoding, Type.PATH);
+			return new FullPathComponent(encodedPath);		}
 
 		@Override
 		public void verify() {
-			for (PartialPath partialPath : this.partialPaths) {
-				partialPath.verify();
-			}
+			verifyUriComponent(this.path, Type.PATH);
 		}
 
 		@Override
 		public PathComponent expand(UriTemplateVariables uriVariables) {
-			List<PartialPath> result = new ArrayList<PartialPath>();
-			for (PartialPath partialPath : this.partialPaths) {
-				PartialPath expanded = partialPath.expand(uriVariables);
-				result.add(expanded);
-			}
-			return new FullPathComponent(result);
+			String expandedPath = expandUriComponent(getPath(), uriVariables);
+			return new FullPathComponent(expandedPath);
 		}
 
 		@Override
@@ -762,47 +697,6 @@ final class HierarchicalUriComponents extends UriComponents {
 			return getPath().hashCode();
 		}
 
-		/**
-		 * Represents a part of the full path, with a separate encoding type.
-		 * Required because of {/...} uri variables, which need to encoded as PATH_SEGMENT
-		 * rather than PATH.
-		 */
-		static final class PartialPath implements Serializable {
-
-			final String value;
-
-			final Type type;
-
-			private PartialPath(String value, Type type) {
-				Assert.hasLength(value);
-				Assert.isTrue(Type.PATH == type || Type.PATH_SEGMENT == type);
-				this.value = value;
-				this.type = type;
-			}
-
-			public String getValue() {
-				return this.value;
-			}
-
-			private PartialPath expand(UriTemplateVariables uriVariables) {
-				String expandedValue = expandUriComponent(this.value, uriVariables);
-				return new PartialPath(expandedValue, this.type);
-			}
-
-			private PartialPath encode(String encoding) throws UnsupportedEncodingException {
-				String encodedPath = encodeUriComponent(this.value, encoding, this.type);
-				return new PartialPath(encodedPath, this.type);
-			}
-
-			public void verify() {
-				verifyUriComponent(this.value, this.type);
-			}
-
-			@Override
-			public String toString() {
-				return this.value;
-			}
-		}
 	}
 
 	/**
