@@ -24,6 +24,7 @@ import java.sql.SQLException;
 import java.sql.Types;
 import javax.sql.DataSource;
 
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -33,6 +34,7 @@ import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.jdbc.core.SqlOutParameter;
 import org.springframework.jdbc.core.SqlParameter;
+import org.springframework.jdbc.core.metadata.NamedCallMetaDataContext;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 
 import static org.hamcrest.Matchers.*;
@@ -202,6 +204,33 @@ public class SimpleJdbcCallTests {
 		verify(connection, atLeastOnce()).close();
 
 	}
+
+    @Test
+    public void testCorrectFunctionStatement() throws Exception {
+        initializeAddInvoiceWithMetaData(true);
+        SimpleJdbcCall adder = new SimpleJdbcCall(dataSource).withFunctionName("add_invoice");
+        adder.compile();
+        verifyStatement(adder, "{? = call ADD_INVOICE(?, ?)}");
+    }
+    @Test
+    public void testCorrectFunctionStatementNamed() throws Exception {
+        initializeAddInvoiceWithMetaData(true);
+        SimpleJdbcCall adder = new SimpleJdbcCall(dataSource, new NamedCallMetaDataContext()).withFunctionName("add_invoice");
+        adder.compile();
+        verifyStatement(adder, "{? = call ADD_INVOICE(AMOUNT => ?, CUSTID => ?)}");
+    }
+
+    @Test
+    public void testCorrectProcedureStatementNamed() throws Exception {
+        initializeAddInvoiceWithMetaData(false);
+        SimpleJdbcCall adder = new SimpleJdbcCall(dataSource, new NamedCallMetaDataContext()).withProcedureName("add_invoice");
+        adder.compile();
+        verifyStatement(adder, "{call ADD_INVOICE(AMOUNT => ?, CUSTID => ?, NEWID => ?)}");
+    }
+
+    private void verifyStatement(SimpleJdbcCall adder, String expected) {
+        Assert.assertEquals("Incorrect call statement", expected, adder.getCallString());
+    }
 
 	private void initializeAddInvoiceWithoutMetaData(boolean isFunction)
 			throws SQLException {

@@ -24,6 +24,7 @@ import javax.sql.DataSource;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.SqlParameter;
+import org.springframework.jdbc.core.metadata.CallMetaDataContext;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 
 /**
@@ -78,6 +79,28 @@ public class SimpleJdbcCall extends AbstractJdbcCall implements SimpleJdbcCallOp
 		super(jdbcTemplate);
 	}
 
+	/**
+	 * Constructor that takes one parameter with the JDBC DataSource and CallMetaDataContext to use when creating the
+	 * JdbcTemplate.
+	 *
+	 * @param dataSource the {@code DataSource} to use
+	 * @param callMetaDataContext the {@code CallMetaDataContext} to use
+	 * @see org.springframework.jdbc.core.JdbcTemplate#setDataSource
+	 */
+	public SimpleJdbcCall(DataSource dataSource, CallMetaDataContext callMetaDataContext) {
+		super(dataSource, callMetaDataContext);
+	}
+
+	/**
+	 * Alternative Constructor that takes JdbcTemplate and CallMetaDataContext.
+	 *
+	 * @param jdbcTemplate        the {@code JdbcTemplate} to use
+	 * @param callMetaDataContext the {@code CallMetaDataContext} to use
+	 * @see org.springframework.jdbc.core.JdbcTemplate#setDataSource
+	 */
+	public SimpleJdbcCall(JdbcTemplate jdbcTemplate, CallMetaDataContext callMetaDataContext) {
+		super(jdbcTemplate, callMetaDataContext);
+	}
 
 	@Override
 	public SimpleJdbcCall withProcedureName(String procedureName) {
