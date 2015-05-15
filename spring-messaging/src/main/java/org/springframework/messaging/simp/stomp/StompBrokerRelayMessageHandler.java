@@ -572,7 +572,7 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 
 		@Override
 		public void afterConnectFailure(Throwable ex) {
-			handleTcpConnectionFailure("failed to establish TCP connection in session " + this.sessionId, ex);
+			handleTcpConnectionFailure("Failed to connect: " + ex.getMessage(), ex);
 		}
 
 		/**
@@ -675,8 +675,8 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 										public void onSuccess(Void result) {
 										}
 										public void onFailure(Throwable ex) {
-											String error = "failed to forward heartbeat in \"system\" session.";
-											handleTcpConnectionFailure(error, ex);
+											handleTcpConnectionFailure(
+													"Failed to forward heartbeat: " + ex.getMessage(), ex);
 										}
 									});
 						}
@@ -688,7 +688,7 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 				this.tcpConnection.onReadInactivity(new Runnable() {
 					@Override
 					public void run() {
-						handleTcpConnectionFailure("no messages received for more than " + interval + " ms.", null);
+						handleTcpConnectionFailure("No messages received in " + interval + " ms.", null);
 					}
 				}, interval);
 			}
@@ -697,7 +697,7 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 		@Override
 		public void handleFailure(Throwable ex) {
 			if (this.tcpConnection != null) {
-				handleTcpConnectionFailure("transport failure.", ex);
+				handleTcpConnectionFailure("Transport failure: " + ex.getMessage(), ex);
 			}
 			else if (logger.isErrorEnabled()) {
 				logger.error("Transport failure: " + ex);

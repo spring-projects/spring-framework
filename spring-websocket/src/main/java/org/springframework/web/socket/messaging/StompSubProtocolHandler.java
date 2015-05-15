@@ -89,6 +89,8 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 	private static final byte[] EMPTY_PAYLOAD = new byte[0];
 
 
+	private StompSubProtocolErrorHandler errorHandler;
+
 	private int messageSizeLimit = 64 * 1024;
 
 	private final StompEncoder stompEncoder = new StompEncoder();
@@ -105,6 +107,24 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 
 	private final Stats stats = new Stats();
 
+
+	/**
+	 * Configure a handler for error messages sent to clients which allows
+	 * customizing the error messages or preventing them from being sent.
+	 * <p>By default this isn't configured in which case an ERROR frame is sent
+	 * with a message header reflecting the error.
+	 * @param errorHandler the error handler
+	 */
+	public void setErrorHandler(StompSubProtocolErrorHandler errorHandler) {
+		this.errorHandler = errorHandler;
+	}
+
+	/**
+	 * Return the configured error handler.
+	 */
+	public StompSubProtocolErrorHandler getErrorHandler() {
+		return this.errorHandler;
+	}
 
 	/**
 	 * Configure the maximum size allowed for an incoming STOMP message.
@@ -205,7 +225,7 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 				logger.error("Failed to parse " + webSocketMessage +
 						" in session " + session.getId() + ". Sending STOMP ERROR to client.", ex);
 			}
-			sendErrorMessage(session, ex);
+			handleError(session, ex, null);
 			return;
 		}
 
@@ -257,9 +277,45 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 			catch (Throwable ex) {
 				logger.error("Failed to send client message to application via MessageChannel" +
 						" in session " + session.getId() + ". Sending STOMP ERROR to client.", ex);
-				sendErrorMessage(session, ex);
-
+				handleError(session, ex, message);
 			}
+		}
+	}
+
+	@SuppressWarnings("deprecation")
+	private void handleError(WebSocketSession session, Throwable ex, Message<byte[]> clientMessage) {
+		if (getErrorHandler() == null) {
+			sendErrorMessage(session, ex);
+			return;
+		}
+		Message<byte[]> message = getErrorHandler().handleClientMessageProcessingError(clientMessage, ex);
+		if (message == null) {
+			return;
+		}
+		StompHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
+		Assert.notNull(accessor, "Expected STOMP headers.");
+		sendToClient(session, accessor, message.getPayload());
+	}
+
+	/**
+	 * Invoked when no
+	 * {@link #setErrorHandler(StompSubProtocolErrorHandler) errorHandler} is
+	 * configured to send an ERROR frame to the client.
+	 * @deprecated as of 4.2 this method is deprecated in favor of
+	 * {@link #setErrorHandler(StompSubProtocolErrorHandler) configuring} a
+	 * {@code StompSubProtocolErrorHandler}.
+	 */
+	@Deprecated
+	protected void sendErrorMessage(WebSocketSession session, Throwable error) {
+		StompHeaderAccessor headerAccessor = StompHeaderAccessor.create(StompCommand.ERROR);
+		headerAccessor.setMessage(error.getMessage());
+		byte[] bytes = this.stompEncoder.encode(headerAccessor.getMessageHeaders(), EMPTY_PAYLOAD);
+		try {
+			session.sendMessage(new TextMessage(bytes));
+		}
+		catch (Throwable ex) {
+			// Could be part of normal workflow (e.g. browser tab closed)
+			logger.debug("Failed to send STOMP ERROR to client.", ex);
 		}
 	}
 
@@ -285,19 +341,6 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 		}
 		catch (Throwable ex) {
 			logger.error("Error publishing " + event + ".", ex);
-		}
-	}
-
-	protected void sendErrorMessage(WebSocketSession session, Throwable error) {
-		StompHeaderAccessor headerAccessor = StompHeaderAccessor.create(StompCommand.ERROR);
-		headerAccessor.setMessage(error.getMessage());
-		byte[] bytes = this.stompEncoder.encode(headerAccessor.getMessageHeaders(), EMPTY_PAYLOAD);
-		try {
-			session.sendMessage(new TextMessage(bytes));
-		}
-		catch (Throwable ex) {
-			// Could be part of normal workflow (e.g. browser tab closed)
-			logger.debug("Failed to send STOMP ERROR to client.", ex);
 		}
 	}
 
@@ -339,8 +382,22 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 				}
 			}
 		}
+
+		byte[] payload = (byte[]) message.getPayload();
+
+		if (StompCommand.ERROR.equals(command) && getErrorHandler() != null) {
+			Message<byte[]> errorMessage = getErrorHandler().handleErrorMessageToClient((Message<byte[]>) message);
+			stompAccessor = MessageHeaderAccessor.getAccessor(errorMessage, StompHeaderAccessor.class);
+			Assert.notNull(stompAccessor, "Expected STOMP headers.");
+			payload = errorMessage.getPayload();
+		}
+
+		sendToClient(session, stompAccessor, payload);
+	}
+
+	private void sendToClient(WebSocketSession session, StompHeaderAccessor stompAccessor, byte[] payload) {
+		StompCommand command = stompAccessor.getCommand();
 		try {
-			byte[] payload = (byte[]) message.getPayload();
 			byte[] bytes = this.stompEncoder.encode(stompAccessor.getMessageHeaders(), payload);
 
 			boolean useBinary = (payload.length > 0 && !(session instanceof SockJsSession) &&
