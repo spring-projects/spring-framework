@@ -648,7 +648,7 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 				return CollectionFactory.createMap(type, (keyDesc != null ? keyDesc.getType() : null), 16);
 			}
 			else {
-				return type.newInstance();
+				return BeanUtils.instantiate(type);
 			}
 		}
 		catch (Exception ex) {
