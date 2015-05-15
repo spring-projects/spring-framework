@@ -66,6 +66,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.support.ConfigurableWebBindingInitializer;
 import org.springframework.web.context.ServletContextAware;
+import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.method.support.CompositeUriComponentsContributor;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.HandlerMethodReturnValueHandler;
@@ -199,6 +200,8 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	private ContentNegotiationManager contentNegotiationManager;
 
 	private List<HttpMessageConverter<?>> messageConverters;
+	
+	private Map<String, CorsConfiguration> corsConfigurations;
 
 
 	/**
@@ -236,6 +239,7 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 		handlerMapping.setOrder(0);
 		handlerMapping.setInterceptors(getInterceptors());
 		handlerMapping.setContentNegotiationManager(mvcContentNegotiationManager());
+		handlerMapping.setCorsConfigurations(getCorsConfigurations());
 
 		PathMatchConfigurer configurer = getPathMatchConfigurer();
 		if (configurer.isUseSuffixPatternMatch() != null) {
@@ -367,6 +371,7 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 		handlerMapping.setPathMatcher(mvcPathMatcher());
 		handlerMapping.setUrlPathHelper(mvcUrlPathHelper());
 		handlerMapping.setInterceptors(getInterceptors());
+		handlerMapping.setCorsConfigurations(getCorsConfigurations());
 		return handlerMapping;
 	}
 
@@ -386,6 +391,7 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 		BeanNameUrlHandlerMapping mapping = new BeanNameUrlHandlerMapping();
 		mapping.setOrder(2);
 		mapping.setInterceptors(getInterceptors());
+		mapping.setCorsConfigurations(getCorsConfigurations());
 		return mapping;
 	}
 
@@ -405,6 +411,7 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 			handlerMapping.setUrlPathHelper(mvcUrlPathHelper());
 			handlerMapping.setInterceptors(new HandlerInterceptor[] {
 					new ResourceUrlProviderExposingInterceptor(mvcResourceUrlProvider())});
+			handlerMapping.setCorsConfigurations(getCorsConfigurations());
 		}
 		else {
 			handlerMapping = new EmptyHandlerMapping();
@@ -861,6 +868,26 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	 * @see ViewResolverRegistry
 	 */
 	protected void configureViewResolvers(ViewResolverRegistry registry) {
+	}
+
+	/**
+	 * @since 4.2
+	 */
+	protected final Map<String, CorsConfiguration> getCorsConfigurations() {
+		if (this.corsConfigurations == null) {
+			CrossOriginConfigurer registry = new CrossOriginConfigurer();
+			configureCrossOrigin(registry);
+			this.corsConfigurations = registry.getCorsConfigurations();
+		}
+		return this.corsConfigurations;
+	}
+	
+	/**
+	 * Override this method to configure cross-origin requests handling.
+	 * @since 4.2
+	 * @see CrossOriginConfigurer
+	 */
+	protected void configureCrossOrigin(CrossOriginConfigurer configurer) {
 	}
 
 

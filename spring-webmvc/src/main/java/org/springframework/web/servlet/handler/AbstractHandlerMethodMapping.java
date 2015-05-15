@@ -436,17 +436,18 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 
 	@Override
 	protected CorsConfiguration getCorsConfiguration(Object handler, HttpServletRequest request) {
+		CorsConfiguration corsConfig = super.getCorsConfiguration(handler, request);
 		if (handler instanceof HandlerMethod) {
 			HandlerMethod handlerMethod = (HandlerMethod) handler;
-			CorsConfiguration corsConfig = this.mappingRegistry.getCorsConfiguration(handlerMethod);
-			if (corsConfig != null) {
-				return corsConfig;
-			}
-			else if (handlerMethod.equals(PREFLIGHT_AMBIGUOUS_MATCH)) {
+			if (handlerMethod.equals(PREFLIGHT_AMBIGUOUS_MATCH)) {
 				return AbstractHandlerMethodMapping.ALLOW_CORS_CONFIG;
 			}
+			else {
+				CorsConfiguration corsConfigFromMethod = this.mappingRegistry.getCorsConfiguration(handlerMethod);
+				corsConfig = (corsConfig == null ? corsConfigFromMethod : corsConfig.combine(corsConfigFromMethod));
+			}
 		}
-		return null;
+		return corsConfig;
 	}
 
 

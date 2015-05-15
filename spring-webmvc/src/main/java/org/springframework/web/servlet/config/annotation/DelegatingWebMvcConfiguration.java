@@ -132,4 +132,9 @@ public class DelegatingWebMvcConfiguration extends WebMvcConfigurationSupport {
 		this.configurers.configureHandlerExceptionResolvers(exceptionResolvers);
 	}
 
+	@Override
+	protected void configureCrossOrigin(CrossOriginConfigurer configurer) {
+		this.configurers.configureCrossOrigin(configurer);
+	}
+	
 }

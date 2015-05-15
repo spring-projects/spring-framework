@@ -182,4 +182,10 @@ public interface WebMvcConfigurer {
 	 */
 	void configureDefaultServletHandling(DefaultServletHandlerConfigurer configurer);
 
+	/**
+	 * Configure cross-origin requests handling.
+	 * @since 4.2
+	 */
+	void configureCrossOrigin(CrossOriginConfigurer configurer);
+
 }

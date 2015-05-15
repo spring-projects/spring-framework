@@ -20,8 +20,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -39,6 +38,115 @@ public class CorsConfigurationTests {
 	@Before
 	public void setup() {
 		config = new CorsConfiguration();
+	}
+	
+	@Test
+	public void setNullValues() {
+		config.setAllowedOrigins(null);
+		assertNull(config.getAllowedOrigins());
+		config.setAllowedHeaders(null);
+		assertNull(config.getAllowedHeaders());
+		config.setAllowedMethods(null);
+		assertNull(config.getAllowedMethods());
+		config.setExposedHeaders(null);
+		assertNull(config.getExposedHeaders());
+		config.setAllowCredentials(null);
+		assertNull(config.getAllowCredentials());
+		config.setMaxAge(null);
+		assertNull(config.getMaxAge());
+	}
+	
+	@Test
+	public void setValues() {
+		config.addAllowedOrigin("*");
+		assertEquals(Arrays.asList("*"), config.getAllowedOrigins());
+		config.addAllowedHeader("*");
+		assertEquals(Arrays.asList("*"), config.getAllowedHeaders());
+		config.addAllowedMethod("*");
+		assertEquals(Arrays.asList("*"), config.getAllowedMethods());
+		config.addExposedHeader("header1");
+		config.addExposedHeader("header2");
+		assertEquals(Arrays.asList("header1", "header2"), config.getExposedHeaders());
+		config.setAllowCredentials(true);
+		assertTrue(config.getAllowCredentials());
+		config.setMaxAge(123L);
+		assertEquals(new Long(123), config.getMaxAge());
+	}
+	
+	@Test(expected = IllegalArgumentException.class)
+	public void asteriskWildCardOnAddExposedHeader() {
+		config.addExposedHeader("*");
+	}
+	
+	@Test(expected = IllegalArgumentException.class)
+	public void asteriskWildCardOnSetExposedHeaders() {
+		config.setExposedHeaders(Arrays.asList("*"));
+	}
+	
+	@Test
+	public void combineWithNull() {
+		config.setAllowedOrigins(Arrays.asList("*"));
+		config.combine(null);
+		assertEquals(Arrays.asList("*"), config.getAllowedOrigins());
+	}
+	
+	@Test
+	public void combineWithNullProperties() {
+		config.addAllowedOrigin("*");
+		config.addAllowedHeader("header1");
+		config.addExposedHeader("header3");
+		config.addAllowedMethod(HttpMethod.GET.name());
+		config.setMaxAge(123L);
+		config.setAllowCredentials(true);
+		CorsConfiguration other = new CorsConfiguration();
+		config = config.combine(other);
+		assertEquals(Arrays.asList("*"), config.getAllowedOrigins());
+		assertEquals(Arrays.asList("header1"), config.getAllowedHeaders());
+		assertEquals(Arrays.asList("header3"), config.getExposedHeaders());
+		assertEquals(Arrays.asList(HttpMethod.GET.name()), config.getAllowedMethods());
+		assertEquals(new Long(123), config.getMaxAge());
+		assertTrue(config.getAllowCredentials());
+	}
+	
+	@Test
+	public void combineWithAsteriskWildCard() {
+		config.addAllowedOrigin("*");
+		config.addAllowedHeader("*");
+		config.addAllowedMethod("*");
+		CorsConfiguration other = new CorsConfiguration();
+		other.addAllowedOrigin("http://domain.com");
+		other.addAllowedHeader("header1");
+		other.addExposedHeader("header2");
+		other.addAllowedMethod(HttpMethod.PUT.name());
+		config = config.combine(other);
+		assertEquals(Arrays.asList("http://domain.com"), config.getAllowedOrigins());
+		assertEquals(Arrays.asList("header1"), config.getAllowedHeaders());
+		assertEquals(Arrays.asList("header2"), config.getExposedHeaders());
+		assertEquals(Arrays.asList(HttpMethod.PUT.name()), config.getAllowedMethods());
+	}
+	
+	@Test
+	public void combine() {
+		config.addAllowedOrigin("http://domain1.com");
+		config.addAllowedHeader("header1");
+		config.addExposedHeader("header3");
+		config.addAllowedMethod(HttpMethod.GET.name());
+		config.setMaxAge(123L);
+		config.setAllowCredentials(true);
+		CorsConfiguration other = new CorsConfiguration();
+		other.addAllowedOrigin("http://domain2.com");
+		other.addAllowedHeader("header2");
+		other.addExposedHeader("header4");
+		other.addAllowedMethod(HttpMethod.PUT.name());
+		other.setMaxAge(456L);
+		other.setAllowCredentials(false);
+		config = config.combine(other);
+		assertEquals(Arrays.asList("http://domain1.com", "http://domain2.com"), config.getAllowedOrigins());
+		assertEquals(Arrays.asList("header1", "header2"), config.getAllowedHeaders());
+		assertEquals(Arrays.asList("header3", "header4"), config.getExposedHeaders());
+		assertEquals(Arrays.asList(HttpMethod.GET.name(), HttpMethod.PUT.name()), config.getAllowedMethods());
+		assertEquals(new Long(456), config.getMaxAge());
+		assertFalse(config.getAllowCredentials());
 	}
 
 	@Test

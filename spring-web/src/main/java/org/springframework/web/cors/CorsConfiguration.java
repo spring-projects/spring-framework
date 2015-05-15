@@ -53,6 +53,55 @@ public class CorsConfiguration {
 	public CorsConfiguration() {
 	}
 
+	/**
+	 * Copy constructor.
+	 */
+	public CorsConfiguration(CorsConfiguration other) {
+		this.allowedOrigins = other.allowedOrigins;
+		this.allowedMethods = other.allowedMethods;
+		this.allowedHeaders = other.allowedHeaders;
+		this.exposedHeaders = other.exposedHeaders;
+		this.allowCredentials = other.allowCredentials;
+		this.maxAge = other.maxAge;
+	}
+
+	/**
+	 * Combine the specified {@link CorsConfiguration} with this one.
+	 * Properties of this configuration are overridden only by non-null properties
+	 * of the provided one.
+	 * @return the combined {@link CorsConfiguration}
+	 */
+	public CorsConfiguration combine(CorsConfiguration other) {
+		if (other == null) {
+			return this;
+		}
+		CorsConfiguration config = new CorsConfiguration(this);
+		config.setAllowedOrigins(combine(this.getAllowedOrigins(), other.getAllowedOrigins()));
+		config.setAllowedMethods(combine(this.getAllowedMethods(), other.getAllowedMethods()));
+		config.setAllowedHeaders(combine(this.getAllowedHeaders(), other.getAllowedHeaders()));
+		config.setExposedHeaders(combine(this.getExposedHeaders(), other.getExposedHeaders()));
+		Boolean allowCredentials = other.getAllowCredentials();
+		if (allowCredentials != null) {
+			config.setAllowCredentials(allowCredentials);
+		}
+		Long maxAge = other.getMaxAge();
+		if (maxAge != null) {
+			config.setMaxAge(maxAge);
+		}
+		return config;
+	}
+
+	private List<String> combine(List<String> source, List<String> other) {
+		if (other == null) {
+			return source;
+		}
+		if (source == null || source.contains("*")) {
+			return other;
+		}
+		List<String> combined = new ArrayList<String>(source);
+		combined.addAll(other);
+		return combined;
+	} 
 
 	/**
 	 * Configure origins to allow, e.g. "http://domain1.com". The special value
@@ -142,6 +191,9 @@ public class CorsConfiguration {
 	 * <p>By default this is not set.
 	 */
 	public void setExposedHeaders(List<String> exposedHeaders) {
+		if (exposedHeaders != null && exposedHeaders.contains("*")) {
+			throw new IllegalArgumentException("'*' is not a valid exposed header value");
+		}
 		this.exposedHeaders = exposedHeaders;
 	}
 
@@ -149,6 +201,9 @@ public class CorsConfiguration {
 	 * Add a single response header to expose.
 	 */
 	public void addExposedHeader(String exposedHeader) {
+		if ("*".equals(exposedHeader)) {
+			throw new IllegalArgumentException("'*' is not a valid exposed header value");
+		}
 		if (this.exposedHeaders == null) {
 			this.exposedHeaders = new ArrayList<String>();
 		}
