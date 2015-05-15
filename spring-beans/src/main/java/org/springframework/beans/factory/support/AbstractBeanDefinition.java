@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -303,7 +303,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 				setInitMethodName(otherAbd.getInitMethodName());
 				setEnforceInitMethod(otherAbd.isEnforceInitMethod());
 			}
-			if (StringUtils.hasLength(otherAbd.getDestroyMethodName())) {
+			if (otherAbd.getDestroyMethodName() != null) {
 				setDestroyMethodName(otherAbd.getDestroyMethodName());
 				setEnforceDestroyMethod(otherAbd.isEnforceDestroyMethod());
 			}

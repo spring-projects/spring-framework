@@ -165,8 +165,8 @@ class ScriptBeanDefinitionParser extends AbstractBeanDefinitionParser {
 			bd.setInitMethodName(beanDefinitionDefaults.getInitMethodName());
 		}
 
-		String destroyMethod = element.getAttribute(DESTROY_METHOD_ATTRIBUTE);
-		if (StringUtils.hasLength(destroyMethod)) {
+		if (element.hasAttribute(DESTROY_METHOD_ATTRIBUTE)) {
+			String destroyMethod = element.getAttribute(DESTROY_METHOD_ATTRIBUTE);
 			bd.setDestroyMethodName(destroyMethod);
 		}
 		else if (beanDefinitionDefaults.getDestroyMethodName() != null) {

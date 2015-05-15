@@ -641,9 +641,7 @@ public class BeanDefinitionParserDelegate {
 
 		if (ele.hasAttribute(DESTROY_METHOD_ATTRIBUTE)) {
 			String destroyMethodName = ele.getAttribute(DESTROY_METHOD_ATTRIBUTE);
-			if (!"".equals(destroyMethodName)) {
-				bd.setDestroyMethodName(destroyMethodName);
-			}
+			bd.setDestroyMethodName(destroyMethodName);
 		}
 		else {
 			if (this.defaults.getDestroyMethod() != null) {

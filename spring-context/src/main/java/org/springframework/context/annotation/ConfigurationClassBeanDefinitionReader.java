@@ -236,7 +236,7 @@ class ConfigurationClassBeanDefinitionReader {
 		}
 
 		String destroyMethodName = bean.getString("destroyMethod");
-		if (StringUtils.hasText(destroyMethodName)) {
+		if (destroyMethodName != null) {
 			beanDef.setDestroyMethodName(destroyMethodName);
 		}
 
