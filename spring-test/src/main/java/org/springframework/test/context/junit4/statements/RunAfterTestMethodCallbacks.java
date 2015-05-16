@@ -28,8 +28,10 @@ import org.springframework.test.context.TestContextManager;
 /**
  * {@code RunAfterTestMethodCallbacks} is a custom JUnit {@link Statement} which allows
  * the <em>Spring TestContext Framework</em> to be plugged into the JUnit execution chain
- * by calling {@link TestContextManager#afterTestMethod(Object, Method, Throwable)
- * afterTestMethod()} on the supplied {@link TestContextManager}.
+ * by calling {@link TestContextManager#afterTestMethod afterTestMethod()} on the supplied
+ * {@link TestContextManager}.
+ *
+ * <p><strong>NOTE:</strong> This class requires JUnit 4.9 or higher.
  *
  * @see #evaluate()
  * @see RunBeforeTestMethodCallbacks

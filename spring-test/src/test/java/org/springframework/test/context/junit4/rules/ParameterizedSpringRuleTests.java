@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-package org.springframework.test.context.junit4;
+package org.springframework.test.context.junit4.rules;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.AfterClass;
-import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.ClassRule;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -30,34 +31,31 @@ import org.junit.runners.Parameterized.Parameters;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.TestContextManager;
-import org.springframework.test.context.TestExecutionListeners;
-import org.springframework.test.context.support.DependencyInjectionTestExecutionListener;
 import org.springframework.tests.sample.beans.Employee;
 import org.springframework.tests.sample.beans.Pet;
 
 import static org.junit.Assert.*;
 
 /**
- * Simple JUnit 4 based integration test which demonstrates how to use JUnit's
- * {@link Parameterized} Runner in conjunction with
- * {@link ContextConfiguration @ContextConfiguration}, the
- * {@link DependencyInjectionTestExecutionListener}, and a
- * {@link TestContextManager} to provide dependency injection to a
- * <em>parameterized test instance</em>.
+ * Integration test which demonstrates how to use JUnit's {@link Parameterized}
+ * runner in conjunction with {@link SpringClassRule} and {@link SpringMethodRule}
+ * to provide dependency injection to a <em>parameterized test instance</em>.
  *
  * @author Sam Brannen
- * @since 2.5
- * @see org.springframework.test.context.junit4.rules.ParameterizedSpringRuleTests
+ * @since 4.2
+ * @see org.springframework.test.context.junit4.ParameterizedDependencyInjectionTests
  */
 @RunWith(Parameterized.class)
-@ContextConfiguration
-@TestExecutionListeners({ DependencyInjectionTestExecutionListener.class })
-public class ParameterizedDependencyInjectionTests {
+@ContextConfiguration("/org/springframework/test/context/junit4/ParameterizedDependencyInjectionTests-context.xml")
+public class ParameterizedSpringRuleTests {
 
 	private static final AtomicInteger invocationCount = new AtomicInteger();
 
-	private static final TestContextManager testContextManager = new TestContextManager(ParameterizedDependencyInjectionTests.class);
+	@ClassRule
+	public static final SpringClassRule SPRING_CLASS_RULE = new SpringClassRule();
+
+	@Rule
+	public final SpringMethodRule springMethodRule = new SpringMethodRule(this);
 
 	@Autowired
 	private ApplicationContext applicationContext;
@@ -80,11 +78,6 @@ public class ParameterizedDependencyInjectionTests {
 	@BeforeClass
 	public static void BeforeClass() {
 		invocationCount.set(0);
-	}
-
-	@Before
-	public void injectDependencies() throws Exception {
-		testContextManager.prepareTestInstance(this);
 	}
 
 	@Test

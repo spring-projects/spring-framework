@@ -22,13 +22,12 @@ import java.lang.annotation.RetentionPolicy;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.junit.runner.Runner;
 import org.junit.runner.notification.RunNotifier;
 import org.junit.runners.JUnit4;
 
 import org.springframework.test.annotation.Timed;
 import org.springframework.test.context.TestExecutionListeners;
-import org.springframework.tests.Assume;
-import org.springframework.tests.TestGroup;
 
 import static org.junit.Assert.*;
 
@@ -46,32 +45,33 @@ import static org.junit.Assert.*;
 @RunWith(JUnit4.class)
 public class TimedSpringRunnerTests {
 
+	protected Class<?> getTestCase() {
+		return TimedSpringRunnerTestCase.class;
+	}
+
+	protected Runner getRunner(Class<?> testClass) throws Exception {
+		return new SpringJUnit4ClassRunner(testClass);
+	}
+
 	@Test
 	public void timedTests() throws Exception {
-		Assume.group(TestGroup.PERFORMANCE);
-		Class<TimedSpringRunnerTestCase> testClass = TimedSpringRunnerTestCase.class;
+		Class<?> testClass = getTestCase();
 		TrackingRunListener listener = new TrackingRunListener();
 		RunNotifier notifier = new RunNotifier();
 		notifier.addListener(listener);
 
-		new SpringJUnit4ClassRunner(testClass).run(notifier);
-		assertEquals("Verifying number of tests started for test class [" + testClass + "].", 7,
-			listener.getTestStartedCount());
-		assertEquals("Verifying number of tests ignored for test class [" + testClass + "].", 0,
-			listener.getTestIgnoredCount());
-		assertEquals("Verifying number of assumption failures for test class [" + testClass + "].", 0,
-			listener.getTestAssumptionFailureCount());
-		assertEquals("Verifying number of test failures for test class [" + testClass + "].", 5,
-			listener.getTestFailureCount());
-		assertEquals("Verifying number of tests finished for test class [" + testClass + "].", 7,
-			listener.getTestFinishedCount());
+		getRunner(testClass).run(notifier);
+		assertEquals("tests started for [" + testClass + "].", 7, listener.getTestStartedCount());
+		assertEquals("tests ignored for [" + testClass + "].", 0, listener.getTestIgnoredCount());
+		assertEquals("assumption failures for [" + testClass + "].", 0, listener.getTestAssumptionFailureCount());
+		assertEquals("test failures for [" + testClass + "].", 5, listener.getTestFailureCount());
+		assertEquals("tests finished for [" + testClass + "].", 7, listener.getTestFinishedCount());
 	}
 
 
 	@Ignore("TestCase classes are run manually by the enclosing test class")
-	@RunWith(SpringJUnit4ClassRunner.class)
 	@TestExecutionListeners({})
-	public static final class TimedSpringRunnerTestCase {
+	public static class TimedSpringRunnerTestCase {
 
 		// Should Pass.
 		@Test(timeout = 2000)

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,10 +19,13 @@ package org.springframework.test.context.junit4;
 import javax.annotation.Resource;
 import javax.sql.DataSource;
 
+import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TestName;
 import org.junit.runner.RunWith;
 
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -55,6 +58,9 @@ public class BeforeAndAfterTransactionAnnotationTests extends AbstractTransactio
 	protected static int numAfterTransactionCalls = 0;
 
 	protected boolean inTransaction = false;
+
+	@Rule
+	public final TestName testName = new TestName();
 
 
 	@BeforeClass
@@ -94,8 +100,19 @@ public class BeforeAndAfterTransactionAnnotationTests extends AbstractTransactio
 
 	@Before
 	public void before() {
+		assertShouldBeInTransaction();
 		assertEquals("Verifying the number of rows in the person table before a test method.", (this.inTransaction ? 1
 				: 0), countRowsInPersonTable(jdbcTemplate));
+	}
+
+	private void assertShouldBeInTransaction() {
+		boolean shouldBeInTransaction = !testName.getMethodName().equals("nonTransactionalMethod");
+		assertInTransaction(shouldBeInTransaction);
+	}
+
+	@After
+	public void after() {
+		assertShouldBeInTransaction();
 	}
 
 	@Test
