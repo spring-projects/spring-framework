@@ -19,8 +19,8 @@ package org.springframework.test.context.junit4.statements;
 import java.util.concurrent.TimeoutException;
 
 import org.junit.runners.model.Statement;
-
 import org.springframework.test.annotation.Timed;
+import org.springframework.util.Assert;
 
 /**
  * {@code SpringFailOnTimeout} is a custom JUnit {@link Statement} which adds
@@ -52,6 +52,8 @@ public class SpringFailOnTimeout extends Statement {
 	 * @see Timed#millis()
 	 */
 	public SpringFailOnTimeout(Statement next, long timeout) {
+		Assert.notNull(next, "next statement must not be null");
+		Assert.isTrue(timeout >= 0, "timeout must be non-negative");
 		this.next = next;
 		this.timeout = timeout;
 	}
@@ -64,14 +66,20 @@ public class SpringFailOnTimeout extends Statement {
 	 */
 	@Override
 	public void evaluate() throws Throwable {
-		long startTime = System.currentTimeMillis();
-		try {
+		if (this.timeout == 0) {
 			this.next.evaluate();
 		}
-		finally {
-			long elapsed = System.currentTimeMillis() - startTime;
-			if (elapsed > this.timeout) {
-				throw new TimeoutException(String.format("Test took %s ms; limit was %s ms.", elapsed, this.timeout));
+		else {
+			long startTime = System.currentTimeMillis();
+			try {
+				this.next.evaluate();
+			}
+			finally {
+				long elapsed = System.currentTimeMillis() - startTime;
+				if (elapsed > this.timeout) {
+					throw new TimeoutException(
+						String.format("Test took %s ms; limit was %s ms.", elapsed, this.timeout));
+				}
 			}
 		}
 	}

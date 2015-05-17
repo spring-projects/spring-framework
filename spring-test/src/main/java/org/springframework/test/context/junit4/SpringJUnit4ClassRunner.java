@@ -35,12 +35,8 @@ import org.junit.runners.model.FrameworkMethod;
 import org.junit.runners.model.InitializationError;
 import org.junit.runners.model.Statement;
 
-import org.springframework.core.annotation.AnnotatedElementUtils;
-import org.springframework.core.annotation.AnnotationAttributes;
-import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.test.annotation.ProfileValueUtils;
-import org.springframework.test.annotation.Repeat;
-import org.springframework.test.annotation.Timed;
+import org.springframework.test.annotation.TestAnnotationUtils;
 import org.springframework.test.context.TestContextManager;
 import org.springframework.test.context.junit4.rules.SpringClassRule;
 import org.springframework.test.context.junit4.rules.SpringMethodRule;
@@ -68,8 +64,8 @@ import org.springframework.util.ReflectionUtils;
  * <ul>
  * <li>{@link Test#expected() @Test(expected=...)}</li>
  * <li>{@link Test#timeout() @Test(timeout=...)}</li>
- * <li>{@link Timed @Timed}</li>
- * <li>{@link Repeat @Repeat}</li>
+ * <li>{@link org.springframework.test.annotation.Timed @Timed}</li>
+ * <li>{@link org.springframework.test.annotation.Repeat @Repeat}</li>
  * <li>{@link Ignore @Ignore}</li>
  * <li>{@link org.springframework.test.annotation.ProfileValueSourceConfiguration @ProfileValueSourceConfiguration}</li>
  * <li>{@link org.springframework.test.annotation.IfProfileValue @IfProfileValue}</li>
@@ -338,19 +334,16 @@ public class SpringJUnit4ClassRunner extends BlockJUnit4ClassRunner {
 	 * @return the expected exception, or {@code null} if none was specified
 	 */
 	protected Class<? extends Throwable> getExpectedException(FrameworkMethod frameworkMethod) {
-		Test testAnnotation = frameworkMethod.getAnnotation(Test.class);
-		Class<? extends Throwable> junitExpectedException = (testAnnotation != null
-				&& testAnnotation.expected() != Test.None.class ? testAnnotation.expected() : null);
-
-		return junitExpectedException;
+		Test test = frameworkMethod.getAnnotation(Test.class);
+		return ((test != null) && (test.expected() != Test.None.class) ? test.expected() : null);
 	}
 
 	/**
 	 * Perform the same logic as
 	 * {@link BlockJUnit4ClassRunner#withPotentialTimeout(FrameworkMethod, Object, Statement)}
 	 * but with additional support for Spring's {@code @Timed} annotation.
-	 * <p>Supports both Spring's {@link Timed @Timed} and JUnit's
-	 * {@link Test#timeout() @Test(timeout=...)} annotations, but not both
+	 * <p>Supports both Spring's {@link org.springframework.test.annotation.Timed @Timed}
+	 * and JUnit's {@link Test#timeout() @Test(timeout=...)} annotations, but not both
 	 * simultaneously.
 	 * @return either a {@link SpringFailOnTimeout}, a {@link FailOnTimeout},
 	 * or the supplied {@link Statement} as appropriate
@@ -391,26 +384,19 @@ public class SpringJUnit4ClassRunner extends BlockJUnit4ClassRunner {
 	 * @return the timeout, or {@code 0} if none was specified
 	 */
 	protected long getJUnitTimeout(FrameworkMethod frameworkMethod) {
-		Test testAnnotation = frameworkMethod.getAnnotation(Test.class);
-		return (testAnnotation != null && testAnnotation.timeout() > 0 ? testAnnotation.timeout() : 0);
+		Test test = frameworkMethod.getAnnotation(Test.class);
+		return ((test != null) && (test.timeout() > 0) ? test.timeout() : 0);
 	}
 
 	/**
 	 * Retrieve the configured Spring-specific {@code timeout} from the
-	 * {@link Timed @Timed} annotation on the supplied
-	 * {@linkplain FrameworkMethod test method}.
+	 * {@link org.springframework.test.annotation.Timed @Timed} annotation
+	 * on the supplied {@linkplain FrameworkMethod test method}.
 	 * @return the timeout, or {@code 0} if none was specified
+	 * @see TestAnnotationUtils#getTimeout(Method)
 	 */
 	protected long getSpringTimeout(FrameworkMethod frameworkMethod) {
-		AnnotationAttributes annAttrs = AnnotatedElementUtils.findAnnotationAttributes(frameworkMethod.getMethod(),
-			Timed.class.getName());
-		if (annAttrs == null) {
-			return 0;
-		}
-		else {
-			long millis = annAttrs.<Long> getNumber("millis").longValue();
-			return millis > 0 ? millis : 0;
-		}
+		return TestAnnotationUtils.getTimeout(frameworkMethod.getMethod());
 	}
 
 	/**
@@ -442,20 +428,14 @@ public class SpringJUnit4ClassRunner extends BlockJUnit4ClassRunner {
 	}
 
 	/**
-	 * Return a {@link Statement} that potentially repeats the execution of
-	 * the {@code next} statement.
-	 * <p>Supports Spring's {@link Repeat @Repeat} annotation by returning a
-	 * {@code SpringRepeat} statement initialized with the configured repeat
-	 * count (if greater than {@code 1}); otherwise, the supplied statement
-	 * is returned unmodified.
-	 * @return either a {@code SpringRepeat} or the supplied {@code Statement}
-	 * as appropriate
+	 * Wrap the supplied {@link Statement} with a {@code SpringRepeat} statement.
+	 * <p>Supports Spring's {@link org.springframework.test.annotation.Repeat @Repeat}
+	 * annotation.
+	 * @see TestAnnotationUtils#getRepeatCount(Method)
 	 * @see SpringRepeat
 	 */
 	protected Statement withPotentialRepeat(FrameworkMethod frameworkMethod, Object testInstance, Statement next) {
-		Repeat repeatAnnotation = AnnotationUtils.getAnnotation(frameworkMethod.getMethod(), Repeat.class);
-		int repeat = (repeatAnnotation != null ? repeatAnnotation.value() : 1);
-		return (repeat > 1 ? new SpringRepeat(next, frameworkMethod.getMethod(), repeat) : next);
+		return new SpringRepeat(next, frameworkMethod.getMethod());
 	}
 
 }

@@ -26,11 +26,7 @@ import org.junit.rules.MethodRule;
 import org.junit.runners.model.FrameworkMethod;
 import org.junit.runners.model.Statement;
 
-import org.springframework.core.annotation.AnnotatedElementUtils;
-import org.springframework.core.annotation.AnnotationAttributes;
-import org.springframework.core.annotation.AnnotationUtils;
-import org.springframework.test.annotation.Repeat;
-import org.springframework.test.annotation.Timed;
+import org.springframework.test.annotation.TestAnnotationUtils;
 import org.springframework.test.context.TestContextManager;
 import org.springframework.test.context.junit4.statements.ProfileValueChecker;
 import org.springframework.test.context.junit4.statements.RunAfterTestMethodCallbacks;
@@ -78,8 +74,8 @@ import org.springframework.util.ReflectionUtils;
  * implementations.)</em>
  *
  * <ul>
- * <li>{@link Timed @Timed}</li>
- * <li>{@link Repeat @Repeat}</li>
+ * <li>{@link org.springframework.test.annotation.Timed @Timed}</li>
+ * <li>{@link org.springframework.test.annotation.Repeat @Repeat}</li>
  * <li>{@link org.springframework.test.annotation.ProfileValueSourceConfiguration @ProfileValueSourceConfiguration}</li>
  * <li>{@link org.springframework.test.annotation.IfProfileValue @IfProfileValue}</li>
  * </ul>
@@ -180,54 +176,25 @@ public class SpringMethodRule implements MethodRule {
 	}
 
 	/**
-	 * Return a {@link Statement} that potentially repeats the execution of
-	 * the {@code next} statement.
-	 * <p>Supports Spring's {@link Repeat @Repeat} annotation by returning a
-	 * {@link SpringRepeat} statement initialized with the configured repeat
-	 * count (if greater than {@code 1}); otherwise, the supplied statement
-	 * is returned unmodified.
-	 * @return either a {@code SpringRepeat} or the supplied {@code Statement}
+	 * Wrap the supplied {@link Statement} with a {@code SpringRepeat} statement.
+	 * <p>Supports Spring's {@link org.springframework.test.annotation.Repeat @Repeat}
+	 * annotation.
+	 * @see TestAnnotationUtils#getRepeatCount(java.lang.reflect.Method)
 	 * @see SpringRepeat
 	 */
 	private Statement withPotentialRepeat(Statement next, FrameworkMethod frameworkMethod, Object testInstance) {
-		Repeat repeatAnnotation = AnnotationUtils.getAnnotation(frameworkMethod.getMethod(), Repeat.class);
-		int repeat = (repeatAnnotation != null ? repeatAnnotation.value() : 1);
-		return (repeat > 1 ? new SpringRepeat(next, frameworkMethod.getMethod(), repeat) : next);
+		return new SpringRepeat(next, frameworkMethod.getMethod());
 	}
 
 	/**
-	 * Return a {@link Statement} that potentially throws an exception if
-	 * the {@code next} statement in the execution chain takes longer than
-	 * a specified timeout.
-	 * <p>Supports Spring's {@link Timed @Timed} annotation by returning a
-	 * {@link SpringFailOnTimeout} statement initialized with the configured
-	 * timeout (if greater than {@code 0}); otherwise, the supplied statement
-	 * is returned unmodified.
-	 * @return either a {@code SpringFailOnTimeout} or the supplied {@code Statement}
-	 * @see #getSpringTimeout(FrameworkMethod)
+	 * Wrap the supplied {@link Statement} with a {@code SpringFailOnTimeout} statement.
+	 * <p>Supports Spring's {@link org.springframework.test.annotation.Timed @Timed}
+	 * annotation.
+	 * @see TestAnnotationUtils#getTimeout(java.lang.reflect.Method)
 	 * @see SpringFailOnTimeout
 	 */
 	private Statement withPotentialTimeout(Statement next, FrameworkMethod frameworkMethod, Object testInstance) {
-		long springTimeout = getSpringTimeout(frameworkMethod);
-		return (springTimeout > 0 ? new SpringFailOnTimeout(next, springTimeout) : next);
-	}
-
-	/**
-	 * Retrieve the configured Spring-specific {@code timeout} from the
-	 * {@link Timed @Timed} annotation on the supplied
-	 * {@linkplain FrameworkMethod test method}.
-	 * @return the timeout, or {@code 0} if none was specified
-	 */
-	private long getSpringTimeout(FrameworkMethod frameworkMethod) {
-		AnnotationAttributes annAttrs = AnnotatedElementUtils.findAnnotationAttributes(frameworkMethod.getMethod(),
-			Timed.class.getName());
-		if (annAttrs == null) {
-			return 0;
-		}
-		else {
-			long millis = annAttrs.<Long> getNumber("millis").longValue();
-			return millis > 0 ? millis : 0;
-		}
+		return new SpringFailOnTimeout(next, TestAnnotationUtils.getTimeout(frameworkMethod.getMethod()));
 	}
 
 	/**
