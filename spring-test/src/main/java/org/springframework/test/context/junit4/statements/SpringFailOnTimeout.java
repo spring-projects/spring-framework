@@ -16,17 +16,19 @@
 
 package org.springframework.test.context.junit4.statements;
 
+import java.lang.reflect.Method;
 import java.util.concurrent.TimeoutException;
 
 import org.junit.runners.model.Statement;
-import org.springframework.test.annotation.Timed;
+
+import org.springframework.test.annotation.TestAnnotationUtils;
 import org.springframework.util.Assert;
 
 /**
  * {@code SpringFailOnTimeout} is a custom JUnit {@link Statement} which adds
- * support for Spring's {@link Timed @Timed} annotation by throwing an exception
- * if the next statement in the execution chain takes more than the specified
- * number of milliseconds.
+ * support for Spring's {@link org.springframework.test.annotation.Timed @Timed}
+ * annotation by throwing an exception if the next statement in the execution
+ * chain takes more than the specified number of milliseconds.
  *
  * <p>In contrast to JUnit's
  * {@link org.junit.internal.runners.statements.FailOnTimeout FailOnTimeout},
@@ -45,11 +47,27 @@ public class SpringFailOnTimeout extends Statement {
 
 
 	/**
-	 * Construct a new {@code SpringFailOnTimeout} statement.
+	 * Construct a new {@code SpringFailOnTimeout} statement for the supplied
+	 * {@code testMethod}, retrieving the configured timeout from the
+	 * {@code @Timed} annotation on the supplied method.
 	 *
 	 * @param next the next {@code Statement} in the execution chain
-	 * @param timeout the configured {@code timeout} for the current test
-	 * @see Timed#millis()
+	 * @param testMethod the current test method
+	 * @see TestAnnotationUtils#getTimeout(Method)
+	 */
+	public SpringFailOnTimeout(Statement next, Method testMethod) {
+		this(next, TestAnnotationUtils.getTimeout(testMethod));
+	}
+
+	/**
+	 * Construct a new {@code SpringFailOnTimeout} statement for the supplied
+	 * {@code timeout}.
+	 * <p>If the supplied {@code timeout} is {@code 0}, the execution of the
+	 * {@code next} statement will not be timed.
+	 *
+	 * @param next the next {@code Statement} in the execution chain; never {@code null}
+	 * @param timeout the configured {@code timeout} for the current test, in milliseconds;
+	 * never negative
 	 */
 	public SpringFailOnTimeout(Statement next, long timeout) {
 		Assert.notNull(next, "next statement must not be null");

@@ -26,7 +26,6 @@ import org.junit.rules.MethodRule;
 import org.junit.runners.model.FrameworkMethod;
 import org.junit.runners.model.Statement;
 
-import org.springframework.test.annotation.TestAnnotationUtils;
 import org.springframework.test.context.TestContextManager;
 import org.springframework.test.context.junit4.statements.ProfileValueChecker;
 import org.springframework.test.context.junit4.statements.RunAfterTestMethodCallbacks;
@@ -179,7 +178,6 @@ public class SpringMethodRule implements MethodRule {
 	 * Wrap the supplied {@link Statement} with a {@code SpringRepeat} statement.
 	 * <p>Supports Spring's {@link org.springframework.test.annotation.Repeat @Repeat}
 	 * annotation.
-	 * @see TestAnnotationUtils#getRepeatCount(java.lang.reflect.Method)
 	 * @see SpringRepeat
 	 */
 	private Statement withPotentialRepeat(Statement next, FrameworkMethod frameworkMethod, Object testInstance) {
@@ -190,11 +188,10 @@ public class SpringMethodRule implements MethodRule {
 	 * Wrap the supplied {@link Statement} with a {@code SpringFailOnTimeout} statement.
 	 * <p>Supports Spring's {@link org.springframework.test.annotation.Timed @Timed}
 	 * annotation.
-	 * @see TestAnnotationUtils#getTimeout(java.lang.reflect.Method)
 	 * @see SpringFailOnTimeout
 	 */
 	private Statement withPotentialTimeout(Statement next, FrameworkMethod frameworkMethod, Object testInstance) {
-		return new SpringFailOnTimeout(next, TestAnnotationUtils.getTimeout(frameworkMethod.getMethod()));
+		return new SpringFailOnTimeout(next, frameworkMethod.getMethod());
 	}
 
 	/**
