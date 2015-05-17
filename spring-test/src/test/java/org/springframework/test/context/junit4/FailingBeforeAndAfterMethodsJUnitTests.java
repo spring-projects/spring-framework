@@ -16,17 +16,13 @@
 
 package org.springframework.test.context.junit4;
 
-import java.lang.reflect.Constructor;
-
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runner.Runner;
-import org.junit.runner.notification.RunNotifier;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
-import org.springframework.beans.BeanUtils;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestContext;
 import org.springframework.test.context.TestExecutionListener;
@@ -38,6 +34,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ClassUtils;
 
 import static org.junit.Assert.*;
+import static org.springframework.test.context.junit4.JUnitTestingUtils.*;
 
 /**
  * JUnit 4 based integration test for verifying that '<i>before</i>' and '<i>after</i>'
@@ -65,7 +62,7 @@ public class FailingBeforeAndAfterMethodsJUnitTests {
 
 
 	@Parameters(name = "{0}")
-	public static Object[] testData() {
+	public static Object[] testCases() {
 		return new Object[] {//
 			AlwaysFailingBeforeTestClassTestCase.class.getSimpleName(),//
 			AlwaysFailingAfterTestClassTestCase.class.getSimpleName(),//
@@ -81,20 +78,16 @@ public class FailingBeforeAndAfterMethodsJUnitTests {
 		this.clazz = ClassUtils.forName(getClass().getName() + "." + testClassName, getClass().getClassLoader());
 	}
 
-	protected Runner getRunner(Class<?> testClass) throws Exception {
-		Class<? extends Runner> runnerClass = testClass.getAnnotation(RunWith.class).value();
-		Constructor<?> constructor = runnerClass.getConstructor(Class.class);
-		return (Runner) BeanUtils.instantiateClass(constructor, testClass);
+	protected Class<? extends Runner> getRunnerClass() {
+		return SpringJUnit4ClassRunner.class;
 	}
 
 	@Test
 	public void runTestAndAssertCounters() throws Exception {
-		TrackingRunListener listener = new TrackingRunListener();
-		RunNotifier notifier = new RunNotifier();
-		notifier.addListener(listener);
+		int expectedStartedCount = this.clazz.getSimpleName().startsWith("AlwaysFailingBeforeTestClass") ? 0 : 1;
+		int expectedFinishedCount = this.clazz.getSimpleName().startsWith("AlwaysFailingBeforeTestClass") ? 0 : 1;
 
-		getRunner(this.clazz).run(notifier);
-		assertEquals("Failures for test class [" + this.clazz + "].", 1, listener.getTestFailureCount());
+		runTestsAndAssertCounters(getRunnerClass(), this.clazz, expectedStartedCount, 1, expectedFinishedCount, 0, 0);
 	}
 
 

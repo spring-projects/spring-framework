@@ -23,13 +23,12 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runner.Runner;
-import org.junit.runner.notification.RunNotifier;
 import org.junit.runners.JUnit4;
 
 import org.springframework.test.annotation.Timed;
 import org.springframework.test.context.TestExecutionListeners;
 
-import static org.junit.Assert.*;
+import static org.springframework.test.context.junit4.JUnitTestingUtils.*;
 
 /**
  * Verifies proper handling of the following in conjunction with the
@@ -49,23 +48,13 @@ public class TimedSpringRunnerTests {
 		return TimedSpringRunnerTestCase.class;
 	}
 
-	protected Runner getRunner(Class<?> testClass) throws Exception {
-		return new SpringJUnit4ClassRunner(testClass);
+	protected Class<? extends Runner> getRunnerClass() {
+		return SpringJUnit4ClassRunner.class;
 	}
 
 	@Test
 	public void timedTests() throws Exception {
-		Class<?> testClass = getTestCase();
-		TrackingRunListener listener = new TrackingRunListener();
-		RunNotifier notifier = new RunNotifier();
-		notifier.addListener(listener);
-
-		getRunner(testClass).run(notifier);
-		assertEquals("tests started for [" + testClass + "].", 7, listener.getTestStartedCount());
-		assertEquals("tests ignored for [" + testClass + "].", 0, listener.getTestIgnoredCount());
-		assertEquals("assumption failures for [" + testClass + "].", 0, listener.getTestAssumptionFailureCount());
-		assertEquals("test failures for [" + testClass + "].", 5, listener.getTestFailureCount());
-		assertEquals("tests finished for [" + testClass + "].", 7, listener.getTestFinishedCount());
+		runTestsAndAssertCounters(getRunnerClass(), getTestCase(), 7, 5, 7, 0, 0);
 	}
 
 

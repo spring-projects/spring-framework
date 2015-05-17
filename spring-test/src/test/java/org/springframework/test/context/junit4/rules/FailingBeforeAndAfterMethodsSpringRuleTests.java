@@ -21,6 +21,7 @@ import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.junit.runner.Runner;
 import org.junit.runners.JUnit4;
 import org.junit.runners.Parameterized.Parameters;
 
@@ -58,6 +59,11 @@ public class FailingBeforeAndAfterMethodsSpringRuleTests extends FailingBeforeAn
 
 	public FailingBeforeAndAfterMethodsSpringRuleTests(String testClassName) throws Exception {
 		super(testClassName);
+	}
+
+	@Override
+	protected Class<? extends Runner> getRunnerClass() {
+		return JUnit4.class;
 	}
 
 	// All tests are in superclass.

@@ -45,8 +45,8 @@ public class TimedSpringRuleTests extends TimedSpringRunnerTests {
 	}
 
 	@Override
-	protected Runner getRunner(Class<?> testClass) throws Exception {
-		return new JUnit4(testClass);
+	protected Class<? extends Runner> getRunnerClass() {
+		return JUnit4.class;
 	}
 
 

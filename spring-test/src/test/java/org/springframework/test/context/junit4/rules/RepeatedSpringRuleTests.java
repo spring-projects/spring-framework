@@ -46,7 +46,6 @@ public class RepeatedSpringRuleTests extends RepeatedSpringRunnerTests {
 	@Parameters(name = "{0}")
 	public static Object[][] repetitionData() {
 		return new Object[][] {//
-		//
 			{ NonAnnotatedRepeatedTestCase.class.getSimpleName(), 0, 1, 1, 1 },//
 			{ DefaultRepeatValueRepeatedTestCase.class.getSimpleName(), 0, 1, 1, 1 },//
 			{ NegativeRepeatValueRepeatedTestCase.class.getSimpleName(), 0, 1, 1, 1 },//
@@ -64,10 +63,9 @@ public class RepeatedSpringRuleTests extends RepeatedSpringRunnerTests {
 	}
 
 	@Override
-	protected Runner getRunner(Class<?> testClass) throws Exception {
-		return new JUnit4(testClass);
+	protected Class<? extends Runner> getRunnerClass() {
+		return JUnit4.class;
 	}
-
 
 	// All tests are in superclass.
 

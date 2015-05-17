@@ -25,7 +25,6 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runner.Runner;
-import org.junit.runner.notification.RunNotifier;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
@@ -35,6 +34,7 @@ import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.util.ClassUtils;
 
 import static org.junit.Assert.*;
+import static org.springframework.test.context.junit4.JUnitTestingUtils.*;
 
 /**
  * Verifies proper handling of the following in conjunction with the
@@ -55,15 +55,14 @@ public class RepeatedSpringRunnerTests {
 	private final Class<?> testClass;
 
 	private final int expectedFailureCount;
-	private final int expectedTestStartedCount;
-	private final int expectedTestFinishedCount;
+	private final int expectedStartedCount;
+	private final int expectedFinishedCount;
 	private final int expectedInvocationCount;
 
 
 	@Parameters(name = "{0}")
 	public static Object[][] repetitionData() {
 		return new Object[][] {//
-		//
 			{ NonAnnotatedRepeatedTestCase.class.getSimpleName(), 0, 1, 1, 1 },//
 			{ DefaultRepeatValueRepeatedTestCase.class.getSimpleName(), 0, 1, 1, 1 },//
 			{ NegativeRepeatValueRepeatedTestCase.class.getSimpleName(), 0, 1, 1, 1 },//
@@ -77,27 +76,23 @@ public class RepeatedSpringRunnerTests {
 			int expectedTestStartedCount, int expectedTestFinishedCount, int expectedInvocationCount) throws Exception {
 		this.testClass = ClassUtils.forName(getClass().getName() + "." + testClassName, getClass().getClassLoader());
 		this.expectedFailureCount = expectedFailureCount;
-		this.expectedTestStartedCount = expectedTestStartedCount;
-		this.expectedTestFinishedCount = expectedTestFinishedCount;
+		this.expectedStartedCount = expectedTestStartedCount;
+		this.expectedFinishedCount = expectedTestFinishedCount;
 		this.expectedInvocationCount = expectedInvocationCount;
 	}
 
-	protected Runner getRunner(Class<?> testClass) throws Exception {
-		return new SpringJUnit4ClassRunner(testClass);
+	protected Class<? extends Runner> getRunnerClass() {
+		return SpringJUnit4ClassRunner.class;
 	}
 
 	@Test
 	public void assertRepetitions() throws Exception {
-		TrackingRunListener listener = new TrackingRunListener();
-		RunNotifier notifier = new RunNotifier();
-		notifier.addListener(listener);
 		invocationCount.set(0);
 
-		getRunner(this.testClass).run(notifier);
-		assertEquals("failures for [" + testClass + "].", expectedFailureCount, listener.getTestFailureCount());
-		assertEquals("tests started for [" + testClass + "].", expectedTestStartedCount, listener.getTestStartedCount());
-		assertEquals("tests finished for [" + testClass + "].", expectedTestFinishedCount, listener.getTestFinishedCount());
-		assertEquals("invocations for [" + testClass + "].", expectedInvocationCount, invocationCount.get());
+		runTestsAndAssertCounters(getRunnerClass(), this.testClass, expectedStartedCount, expectedFailureCount,
+			expectedFinishedCount, 0, 0);
+
+		assertEquals("invocations for [" + testClass + "]:", expectedInvocationCount, invocationCount.get());
 	}
 
 
