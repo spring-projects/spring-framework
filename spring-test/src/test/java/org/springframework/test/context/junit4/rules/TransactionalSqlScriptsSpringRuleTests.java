@@ -49,7 +49,7 @@ public class TransactionalSqlScriptsSpringRuleTests extends TransactionalSqlScri
 	public static final SpringClassRule SPRING_CLASS_RULE = new SpringClassRule();
 
 	@Rule
-	public final SpringMethodRule springMethodRule = new SpringMethodRule(this);
+	public final SpringMethodRule springMethodRule = new SpringMethodRule();
 
 	@Rule
 	public Timeout timeout = Timeout.builder().withTimeout(10, TimeUnit.SECONDS).build();

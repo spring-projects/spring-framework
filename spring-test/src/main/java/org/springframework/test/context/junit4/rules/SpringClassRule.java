@@ -18,6 +18,8 @@ package org.springframework.test.context.junit4.rules;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -31,12 +33,13 @@ import org.springframework.test.context.TestContextManager;
 import org.springframework.test.context.junit4.statements.ProfileValueChecker;
 import org.springframework.test.context.junit4.statements.RunAfterTestClassCallbacks;
 import org.springframework.test.context.junit4.statements.RunBeforeTestClassCallbacks;
+import org.springframework.util.Assert;
 
 /**
- * {@code SpringClassRule} is a custom JUnit {@link TestRule} that provides
- * <em>class-level</em> functionality of the <em>Spring TestContext Framework</em>
- * to standard JUnit tests by means of the {@link TestContextManager} and associated
- * support classes and annotations.
+ * {@code SpringClassRule} is a custom JUnit {@link TestRule} that supports
+ * <em>class-level</em> features of the <em>Spring TestContext Framework</em>
+ * in standard JUnit tests by means of the {@link TestContextManager} and
+ * associated support classes and annotations.
  *
  * <p>In contrast to the {@link org.springframework.test.context.junit4.SpringJUnit4ClassRunner
  * SpringJUnit4ClassRunner}, Spring's rule-based JUnit support has the advantage
@@ -46,7 +49,7 @@ import org.springframework.test.context.junit4.statements.RunBeforeTestClassCall
  *
  * <p>In order to achieve the same functionality as the {@code SpringJUnit4ClassRunner},
  * however, a {@code SpringClassRule} must be combined with a {@link SpringMethodRule},
- * since {@code SpringClassRule} only provides the class-level features of the
+ * since {@code SpringClassRule} only supports the class-level features of the
  * {@code SpringJUnit4ClassRunner}.
  *
  * <h3>Example Usage</h3>
@@ -56,7 +59,7 @@ import org.springframework.test.context.junit4.statements.RunBeforeTestClassCall
  *    public static final SpringClassRule SPRING_CLASS_RULE = new SpringClassRule();
  *
  *    &#064;Rule
- *    public final SpringMethodRule springMethodRule = new SpringMethodRule(this);
+ *    public final SpringMethodRule springMethodRule = new SpringMethodRule();
  *
  *    // ...
  * }</code></pre>
@@ -88,39 +91,20 @@ public class SpringClassRule implements TestRule {
 	private static final Log logger = LogFactory.getLog(SpringClassRule.class);
 
 	/**
-	 * This field is {@code volatile} since a {@code SpringMethodRule} can
-	 * potentially access it from a different thread, depending on the type
-	 * of JUnit runner in use.
+	 * Cache of {@code TestContextManagers} keyed by test class.
 	 */
-	private volatile TestContextManager testContextManager;
+	private static final Map<Class<?>, TestContextManager> testContextManagerCache =
+			new ConcurrentHashMap<Class<?>, TestContextManager>(64);
 
 
 	/**
-	 * Create a new {@link TestContextManager} for the supplied test class.
-	 * <p>Can be overridden by subclasses.
-	 * @param clazz the test class to be managed
-	 */
-	protected TestContextManager createTestContextManager(Class<?> clazz) {
-		return new TestContextManager(clazz);
-	}
-
-	/**
-	 * Get the {@link TestContextManager} associated with this rule.
-	 * <p>Will be {@code null} until the {@link #apply} method is invoked
-	 * by a JUnit runner.
-	 */
-	protected final TestContextManager getTestContextManager() {
-		return this.testContextManager;
-	}
-
-	/**
-	 * Apply <em>class-level</em> functionality of the <em>Spring TestContext
+	 * Apply <em>class-level</em> features of the <em>Spring TestContext
 	 * Framework</em> to the supplied {@code base} statement.
 	 *
-	 * <p>Specifically, this method creates the {@link TestContextManager} used
-	 * by this rule and its associated {@link SpringMethodRule} and invokes the
-	 * {@link TestContextManager#beforeTestClass() beforeTestClass()} and
-	 * {@link TestContextManager#afterTestClass() afterTestClass()} methods
+	 * <p>Specifically, this method retrieves the {@link TestContextManager}
+	 * used by this rule and its associated {@link SpringMethodRule} and
+	 * invokes the {@link TestContextManager#beforeTestClass() beforeTestClass()}
+	 * and {@link TestContextManager#afterTestClass() afterTestClass()} methods
 	 * on the {@code TestContextManager}.
 	 *
 	 * <p>In addition, this method checks whether the test is enabled in
@@ -132,14 +116,15 @@ public class SpringClassRule implements TestRule {
 	 * @param base the base {@code Statement} that this rule should be applied to
 	 * @param description a {@code Description} of the current test execution
 	 * @return a statement that wraps the supplied {@code base} with class-level
-	 * functionality of the Spring TestContext Framework
-	 * @see #createTestContextManager
+	 * features of the Spring TestContext Framework
+	 * @see #getTestContextManager
 	 * @see #withBeforeTestClassCallbacks
 	 * @see #withAfterTestClassCallbacks
 	 * @see #withProfileValueCheck
+	 * @see #withTestContextManagerCacheEviction
 	 */
 	@Override
-	public Statement apply(final Statement base, final Description description) {
+	public Statement apply(Statement base, Description description) {
 		Class<?> testClass = description.getTestClass();
 
 		if (logger.isDebugEnabled()) {
@@ -148,12 +133,13 @@ public class SpringClassRule implements TestRule {
 
 		validateSpringMethodRuleConfiguration(testClass);
 
-		this.testContextManager = createTestContextManager(testClass);
+		TestContextManager testContextManager = getTestContextManager(testClass);
 
 		Statement statement = base;
-		statement = withBeforeTestClassCallbacks(statement);
-		statement = withAfterTestClassCallbacks(statement);
-		statement = withProfileValueCheck(testClass, statement);
+		statement = withBeforeTestClassCallbacks(statement, testContextManager);
+		statement = withAfterTestClassCallbacks(statement, testContextManager);
+		statement = withProfileValueCheck(statement, testClass);
+		statement = withTestContextManagerCacheEviction(statement, testClass);
 		return statement;
 	}
 
@@ -161,33 +147,46 @@ public class SpringClassRule implements TestRule {
 	 * Wrap the supplied {@code statement} with a {@code RunBeforeTestClassCallbacks} statement.
 	 * @see RunBeforeTestClassCallbacks
 	 */
-	protected Statement withBeforeTestClassCallbacks(Statement statement) {
-		return new RunBeforeTestClassCallbacks(statement, getTestContextManager());
+	private Statement withBeforeTestClassCallbacks(Statement statement, TestContextManager testContextManager) {
+		return new RunBeforeTestClassCallbacks(statement, testContextManager);
 	}
 
 	/**
 	 * Wrap the supplied {@code statement} with a {@code RunAfterTestClassCallbacks} statement.
 	 * @see RunAfterTestClassCallbacks
 	 */
-	protected Statement withAfterTestClassCallbacks(Statement statement) {
-		return new RunAfterTestClassCallbacks(statement, getTestContextManager());
+	private Statement withAfterTestClassCallbacks(Statement statement, TestContextManager testContextManager) {
+		return new RunAfterTestClassCallbacks(statement, testContextManager);
 	}
 
 	/**
 	 * Wrap the supplied {@code statement} with a {@code ProfileValueChecker} statement.
 	 * @see ProfileValueChecker
 	 */
-	protected Statement withProfileValueCheck(Class<?> testClass, Statement statement) {
+	private Statement withProfileValueCheck(Statement statement, Class<?> testClass) {
 		return new ProfileValueChecker(statement, testClass, null);
 	}
 
-	private void validateSpringMethodRuleConfiguration(Class<?> testClass) {
+	/**
+	 * Wrap the supplied {@code statement} with a {@code TestContextManagerCacheEvictor} statement.
+	 * @see TestContextManagerCacheEvictor
+	 */
+	private Statement withTestContextManagerCacheEviction(Statement statement, Class<?> testClass) {
+		return new TestContextManagerCacheEvictor(statement, testClass);
+	}
+
+	/**
+	 * Throw an {@link IllegalStateException} if the supplied {@code testClass}
+	 * does not declare a {@code public SpringMethodRule} field that is
+	 * annotated with {@code @Rule}.
+	 */
+	private static final void validateSpringMethodRuleConfiguration(Class<?> testClass) {
 		Field ruleField = null;
 
 		for (Field field : testClass.getFields()) {
 			int modifiers = field.getModifiers();
 			if (!Modifier.isStatic(modifiers) && Modifier.isPublic(modifiers)
-					&& (SpringMethodRule.class.isAssignableFrom(field.getType()))) {
+					&& SpringMethodRule.class.isAssignableFrom(field.getType())) {
 				ruleField = field;
 				break;
 			}
@@ -203,6 +202,46 @@ public class SpringClassRule implements TestRule {
 			throw new IllegalStateException(String.format(
 				"SpringMethodRule field [%s] must be annotated with JUnit's @Rule annotation. "
 						+ "Consult the Javadoc for SpringClassRule for details.", ruleField));
+		}
+	}
+
+	/**
+	 * Get the {@link TestContextManager} associated with the supplied test class.
+	 * @param testClass the test class to be managed; never {@code null}
+	 */
+	static final TestContextManager getTestContextManager(Class<?> testClass) {
+		Assert.notNull(testClass, "testClass must not be null");
+		synchronized (testContextManagerCache) {
+			TestContextManager testContextManager = testContextManagerCache.get(testClass);
+			if (testContextManager == null) {
+				testContextManager = new TestContextManager(testClass);
+				testContextManagerCache.put(testClass, testContextManager);
+			}
+			return testContextManager;
+		}
+	}
+
+
+	private static class TestContextManagerCacheEvictor extends Statement {
+
+		private final Statement next;
+
+		private final Class<?> testClass;
+
+
+		TestContextManagerCacheEvictor(Statement next, Class<?> testClass) {
+			this.next = next;
+			this.testClass = testClass;
+		}
+
+		@Override
+		public void evaluate() throws Throwable {
+			try {
+				next.evaluate();
+			}
+			finally {
+				testContextManagerCache.remove(testClass);
+			}
 		}
 	}
 

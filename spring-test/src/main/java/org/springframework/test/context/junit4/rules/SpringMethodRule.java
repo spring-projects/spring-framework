@@ -38,13 +38,12 @@ import org.springframework.test.context.junit4.statements.RunBeforeTestMethodCal
 import org.springframework.test.context.junit4.statements.RunPrepareTestInstanceCallbacks;
 import org.springframework.test.context.junit4.statements.SpringFailOnTimeout;
 import org.springframework.test.context.junit4.statements.SpringRepeat;
-import org.springframework.util.Assert;
 import org.springframework.util.ReflectionUtils;
 
 /**
  * {@code SpringMethodRule} is a custom JUnit {@link MethodRule} that
- * provides instance-level and method-level functionality of the
- * <em>Spring TestContext Framework</em> to standard JUnit tests by means
+ * supports instance-level and method-level features of the
+ * <em>Spring TestContext Framework</em> in standard JUnit tests by means
  * of the {@link TestContextManager} and associated support classes and
  * annotations.
  *
@@ -56,8 +55,8 @@ import org.springframework.util.ReflectionUtils;
  *
  * <p>In order to achieve the same functionality as the {@code SpringJUnit4ClassRunner},
  * however, a {@code SpringMethodRule} must be combined with a {@link SpringClassRule},
- * since {@code SpringMethodRule} only provides the method-level features of the
- * {@code SpringJUnit4ClassRunner}.
+ * since {@code SpringMethodRule} only supports the instance-level and method-level
+ * features of the {@code SpringJUnit4ClassRunner}.
  *
  * <h3>Example Usage</h3>
  * <pre><code> public class ExampleSpringIntegrationTest {
@@ -66,7 +65,7 @@ import org.springframework.util.ReflectionUtils;
  *    public static final SpringClassRule SPRING_CLASS_RULE = new SpringClassRule();
  *
  *    &#064;Rule
- *    public final SpringMethodRule springMethodRule = new SpringMethodRule(this);
+ *    public final SpringMethodRule springMethodRule = new SpringMethodRule();
  *
  *    // ...
  * }</code></pre>
@@ -99,36 +98,10 @@ public class SpringMethodRule implements MethodRule {
 
 	private static final Log logger = LogFactory.getLog(SpringMethodRule.class);
 
-	/**
-	 * {@code SpringMethodRule} retains a reference to the {@code SpringClassRule}
-	 * instead of the {@code TestContextManager}, since the class rule <em>owns</em>
-	 * the {@code TestContextManager}.
-	 */
-	private final SpringClassRule springClassRule;
-
 
 	/**
-	 * Construct a new {@code SpringMethodRule} for the supplied test instance.
-	 *
-	 * <p>The test class must declare a {@code public static final SpringClassRule}
-	 * field (i.e., a <em>constant</em>) that is annotated with JUnit's
-	 * {@link ClassRule @ClassRule} &mdash; for example:
-	 *
-	 * <pre><code> &#064;ClassRule
-	 * public static final SpringClassRule SPRING_CLASS_RULE = new SpringClassRule();</code></pre>
-	 *
-	 * @param testInstance the test instance, never {@code null}
-	 * @throws IllegalStateException if the test class does not declare an
-	 * appropriate {@code SpringClassRule} constant.
-	 */
-	public SpringMethodRule(Object testInstance) {
-		Assert.notNull(testInstance, "testInstance must not be null");
-		this.springClassRule = retrieveAndValidateSpringClassRule(testInstance.getClass());
-	}
-
-	/**
-	 * Apply <em>instance-level</em> and <em>method-level</em> functionality
-	 * of the <em>Spring TestContext Framework</em> to the supplied {@code base}
+	 * Apply <em>instance-level</em> and <em>method-level</em> features of
+	 * the <em>Spring TestContext Framework</em> to the supplied {@code base}
 	 * statement.
 	 *
 	 * <p>Specifically, this method invokes the
@@ -148,7 +121,7 @@ public class SpringMethodRule implements MethodRule {
 	 * @param frameworkMethod the method which is about to be invoked on the test instance
 	 * @param testInstance the current test instance
 	 * @return a statement that wraps the supplied {@code base} with instance-level
-	 * and method-level functionality of the Spring TestContext Framework
+	 * and method-level features of the Spring TestContext Framework
 	 * @see #withBeforeTestMethodCallbacks
 	 * @see #withAfterTestMethodCallbacks
 	 * @see #withPotentialRepeat
@@ -157,62 +130,53 @@ public class SpringMethodRule implements MethodRule {
 	 * @see #withProfileValueCheck
 	 */
 	@Override
-	public Statement apply(final Statement base, final FrameworkMethod frameworkMethod, final Object testInstance) {
+	public Statement apply(Statement base, FrameworkMethod frameworkMethod, Object testInstance) {
+		Class<?> testClass = testInstance.getClass();
+
 		if (logger.isDebugEnabled()) {
 			logger.debug("Applying SpringMethodRule to test method [" + frameworkMethod.getMethod() + "].");
 		}
 
+		validateSpringClassRuleConfiguration(testClass);
+
+		TestContextManager testContextManager = SpringClassRule.getTestContextManager(testClass);
+
 		Statement statement = base;
-		statement = withBeforeTestMethodCallbacks(frameworkMethod, testInstance, statement);
-		statement = withAfterTestMethodCallbacks(frameworkMethod, testInstance, statement);
-		statement = withTestInstancePreparation(testInstance, statement);
-		statement = withPotentialRepeat(frameworkMethod, testInstance, statement);
-		statement = withPotentialTimeout(frameworkMethod, testInstance, statement);
-		statement = withProfileValueCheck(frameworkMethod, testInstance, statement);
+		statement = withBeforeTestMethodCallbacks(statement, frameworkMethod, testInstance, testContextManager);
+		statement = withAfterTestMethodCallbacks(statement, frameworkMethod, testInstance, testContextManager);
+		statement = withTestInstancePreparation(statement, testInstance, testContextManager);
+		statement = withPotentialRepeat(statement, frameworkMethod, testInstance);
+		statement = withPotentialTimeout(statement, frameworkMethod, testInstance);
+		statement = withProfileValueCheck(statement, frameworkMethod, testInstance);
 		return statement;
-	}
-
-	/**
-	 * Get the {@link TestContextManager} associated with this rule.
-	 */
-	protected final TestContextManager getTestContextManager() {
-		return this.springClassRule.getTestContextManager();
-	}
-
-	/**
-	 * Wrap the supplied {@link Statement} with a {@code ProfileValueChecker} statement.
-	 * @see ProfileValueChecker
-	 */
-	protected Statement withProfileValueCheck(FrameworkMethod frameworkMethod, Object testInstance, Statement statement) {
-		return new ProfileValueChecker(statement, testInstance.getClass(), frameworkMethod.getMethod());
-	}
-
-	/**
-	 * Wrap the supplied {@link Statement} with a {@code RunPrepareTestInstanceCallbacks} statement.
-	 * @see RunPrepareTestInstanceCallbacks
-	 */
-	protected Statement withTestInstancePreparation(Object testInstance, Statement statement) {
-		return new RunPrepareTestInstanceCallbacks(statement, testInstance, getTestContextManager());
 	}
 
 	/**
 	 * Wrap the supplied {@link Statement} with a {@code RunBeforeTestMethodCallbacks} statement.
 	 * @see RunBeforeTestMethodCallbacks
 	 */
-	protected Statement withBeforeTestMethodCallbacks(FrameworkMethod frameworkMethod, Object testInstance,
-			Statement statement) {
+	private Statement withBeforeTestMethodCallbacks(Statement statement, FrameworkMethod frameworkMethod,
+			Object testInstance, TestContextManager testContextManager) {
 		return new RunBeforeTestMethodCallbacks(statement, testInstance, frameworkMethod.getMethod(),
-			getTestContextManager());
+			testContextManager);
 	}
 
 	/**
 	 * Wrap the supplied {@link Statement} with a {@code RunAfterTestMethodCallbacks} statement.
 	 * @see RunAfterTestMethodCallbacks
 	 */
-	protected Statement withAfterTestMethodCallbacks(FrameworkMethod frameworkMethod, Object testInstance,
-			Statement statement) {
-		return new RunAfterTestMethodCallbacks(statement, testInstance, frameworkMethod.getMethod(),
-			getTestContextManager());
+	private Statement withAfterTestMethodCallbacks(Statement statement, FrameworkMethod frameworkMethod,
+			Object testInstance, TestContextManager testContextManager) {
+		return new RunAfterTestMethodCallbacks(statement, testInstance, frameworkMethod.getMethod(), testContextManager);
+	}
+
+	/**
+	 * Wrap the supplied {@link Statement} with a {@code RunPrepareTestInstanceCallbacks} statement.
+	 * @see RunPrepareTestInstanceCallbacks
+	 */
+	private Statement withTestInstancePreparation(Statement statement, Object testInstance,
+			TestContextManager testContextManager) {
+		return new RunPrepareTestInstanceCallbacks(statement, testInstance, testContextManager);
 	}
 
 	/**
@@ -225,7 +189,7 @@ public class SpringMethodRule implements MethodRule {
 	 * @return either a {@code SpringRepeat} or the supplied {@code Statement}
 	 * @see SpringRepeat
 	 */
-	protected Statement withPotentialRepeat(FrameworkMethod frameworkMethod, Object testInstance, Statement next) {
+	private Statement withPotentialRepeat(Statement next, FrameworkMethod frameworkMethod, Object testInstance) {
 		Repeat repeatAnnotation = AnnotationUtils.getAnnotation(frameworkMethod.getMethod(), Repeat.class);
 		int repeat = (repeatAnnotation != null ? repeatAnnotation.value() : 1);
 		return (repeat > 1 ? new SpringRepeat(next, frameworkMethod.getMethod(), repeat) : next);
@@ -243,7 +207,7 @@ public class SpringMethodRule implements MethodRule {
 	 * @see #getSpringTimeout(FrameworkMethod)
 	 * @see SpringFailOnTimeout
 	 */
-	protected Statement withPotentialTimeout(FrameworkMethod frameworkMethod, Object testInstance, Statement next) {
+	private Statement withPotentialTimeout(Statement next, FrameworkMethod frameworkMethod, Object testInstance) {
 		long springTimeout = getSpringTimeout(frameworkMethod);
 		return (springTimeout > 0 ? new SpringFailOnTimeout(next, springTimeout) : next);
 	}
@@ -254,7 +218,7 @@ public class SpringMethodRule implements MethodRule {
 	 * {@linkplain FrameworkMethod test method}.
 	 * @return the timeout, or {@code 0} if none was specified
 	 */
-	protected long getSpringTimeout(FrameworkMethod frameworkMethod) {
+	private long getSpringTimeout(FrameworkMethod frameworkMethod) {
 		AnnotationAttributes annAttrs = AnnotatedElementUtils.findAnnotationAttributes(frameworkMethod.getMethod(),
 			Timed.class.getName());
 		if (annAttrs == null) {
@@ -266,29 +230,42 @@ public class SpringMethodRule implements MethodRule {
 		}
 	}
 
-	private static SpringClassRule retrieveAndValidateSpringClassRule(Class<?> testClass) {
-		Field springClassRuleField = null;
+	/**
+	 * Wrap the supplied {@link Statement} with a {@code ProfileValueChecker} statement.
+	 * @see ProfileValueChecker
+	 */
+	private Statement withProfileValueCheck(Statement statement, FrameworkMethod frameworkMethod, Object testInstance) {
+		return new ProfileValueChecker(statement, testInstance.getClass(), frameworkMethod.getMethod());
+	}
+
+	/**
+	 * Throw an {@link IllegalStateException} if the supplied {@code testClass}
+	 * does not declare a {@code public static final SpringClassRule} field
+	 * that is annotated with {@code @ClassRule}.
+	 */
+	private static final SpringClassRule validateSpringClassRuleConfiguration(Class<?> testClass) {
+		Field ruleField = null;
 
 		for (Field field : testClass.getFields()) {
-			if (ReflectionUtils.isPublicStaticFinal(field) && (SpringClassRule.class.isAssignableFrom(field.getType()))) {
-				springClassRuleField = field;
+			if (ReflectionUtils.isPublicStaticFinal(field) && SpringClassRule.class.isAssignableFrom(field.getType())) {
+				ruleField = field;
 				break;
 			}
 		}
 
-		if (springClassRuleField == null) {
+		if (ruleField == null) {
 			throw new IllegalStateException(String.format(
 				"Failed to find 'public static final SpringClassRule' field in test class [%s]. "
 						+ "Consult the Javadoc for SpringClassRule for details.", testClass.getName()));
 		}
 
-		if (!springClassRuleField.isAnnotationPresent(ClassRule.class)) {
+		if (!ruleField.isAnnotationPresent(ClassRule.class)) {
 			throw new IllegalStateException(String.format(
 				"SpringClassRule field [%s] must be annotated with JUnit's @ClassRule annotation. "
-						+ "Consult the Javadoc for SpringClassRule for details.", springClassRuleField));
+						+ "Consult the Javadoc for SpringClassRule for details.", ruleField));
 		}
 
-		return (SpringClassRule) ReflectionUtils.getField(springClassRuleField, null);
+		return (SpringClassRule) ReflectionUtils.getField(ruleField, null);
 	}
 
 }

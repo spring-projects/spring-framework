@@ -43,6 +43,22 @@ import static org.junit.Assert.*;
 @ContextConfiguration
 public class BaseAppCtxRuleTests {
 
+	@ClassRule
+	public static final SpringClassRule SPRING_CLASS_RULE = new SpringClassRule();
+
+	@Rule
+	public final SpringMethodRule springMethodRule = new SpringMethodRule();
+
+	@Autowired
+	private String foo;
+
+
+	@Test
+	public void foo() {
+		assertEquals("foo", foo);
+	}
+
+
 	@Configuration
 	static class Config {
 
@@ -51,21 +67,4 @@ public class BaseAppCtxRuleTests {
 			return "foo";
 		}
 	}
-
-
-	@ClassRule
-	public static final SpringClassRule SPRING_CLASS_RULE = new SpringClassRule();
-
-	@Rule
-	public final SpringMethodRule springMethodRule = new SpringMethodRule(this);
-
-	@Autowired
-	String foo;
-
-
-	@Test
-	public void test() {
-		assertEquals("foo", foo);
-	}
-
 }

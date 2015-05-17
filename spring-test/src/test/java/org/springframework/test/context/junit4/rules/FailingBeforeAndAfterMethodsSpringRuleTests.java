@@ -76,7 +76,7 @@ public class FailingBeforeAndAfterMethodsSpringRuleTests extends FailingBeforeAn
 		public static final SpringClassRule SPRING_CLASS_RULE = new SpringClassRule();
 
 		@Rule
-		public final SpringMethodRule springMethodRule = new SpringMethodRule(this);
+		public final SpringMethodRule springMethodRule = new SpringMethodRule();
 
 
 		@Test
@@ -119,7 +119,7 @@ public class FailingBeforeAndAfterMethodsSpringRuleTests extends FailingBeforeAn
 		public static final SpringClassRule SPRING_CLASS_RULE = new SpringClassRule();
 
 		@Rule
-		public final SpringMethodRule springMethodRule = new SpringMethodRule(this);
+		public final SpringMethodRule springMethodRule = new SpringMethodRule();
 
 
 		@Test
@@ -142,7 +142,7 @@ public class FailingBeforeAndAfterMethodsSpringRuleTests extends FailingBeforeAn
 		public static final SpringClassRule SPRING_CLASS_RULE = new SpringClassRule();
 
 		@Rule
-		public final SpringMethodRule springMethodRule = new SpringMethodRule(this);
+		public final SpringMethodRule springMethodRule = new SpringMethodRule();
 
 
 		@Test

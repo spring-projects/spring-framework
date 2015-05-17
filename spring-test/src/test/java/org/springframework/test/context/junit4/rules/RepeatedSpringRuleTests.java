@@ -76,7 +76,7 @@ public class RepeatedSpringRuleTests extends RepeatedSpringRunnerTests {
 		public static final SpringClassRule SPRING_CLASS_RULE = new SpringClassRule();
 
 		@Rule
-		public final SpringMethodRule springMethodRule = new SpringMethodRule(this);
+		public final SpringMethodRule springMethodRule = new SpringMethodRule();
 
 
 		protected void incrementInvocationCount() throws IOException {

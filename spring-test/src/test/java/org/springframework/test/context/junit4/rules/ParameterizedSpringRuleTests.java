@@ -55,7 +55,7 @@ public class ParameterizedSpringRuleTests {
 	public static final SpringClassRule SPRING_CLASS_RULE = new SpringClassRule();
 
 	@Rule
-	public final SpringMethodRule springMethodRule = new SpringMethodRule(this);
+	public final SpringMethodRule springMethodRule = new SpringMethodRule();
 
 	@Autowired
 	private ApplicationContext applicationContext;
