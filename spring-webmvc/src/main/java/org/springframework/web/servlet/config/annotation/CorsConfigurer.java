@@ -17,7 +17,7 @@
 package org.springframework.web.servlet.config.annotation;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -34,6 +34,7 @@ public class CorsConfigurer {
 	
 	private final List<CorsRegistration> registrations = new ArrayList<CorsRegistration>();
 
+
 	/**
 	 * Enable cross origin requests on the specified path patterns. If no path pattern is specified,
 	 * cross-origin request handling is mapped on "/**" .
@@ -47,7 +48,7 @@ public class CorsConfigurer {
 	}
 	
 	protected Map<String, CorsConfiguration> getCorsConfigurations() {
-		Map<String, CorsConfiguration> configs = new HashMap<String, CorsConfiguration>();
+		Map<String, CorsConfiguration> configs = new LinkedHashMap<String, CorsConfiguration>(this.registrations.size());
 		for (CorsRegistration registration : this.registrations) {
 			for (String pathPattern : registration.getPathPatterns()) {
 				configs.put(pathPattern, registration.getCorsConfiguration());

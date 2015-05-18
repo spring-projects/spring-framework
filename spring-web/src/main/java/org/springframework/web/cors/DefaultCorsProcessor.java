@@ -39,7 +39,11 @@ import org.springframework.util.CollectionUtils;
 
 /**
  * Default implementation of {@link CorsProcessor}, as defined by the
- * <a href="http://www.w3.org/TR/cors/">CORS W3C recommandation</a>.
+ * <a href="http://www.w3.org/TR/cors/">CORS W3C recommendation</a>.
+ *
+ * <p>Note that when input {@link CorsConfiguration} is {@code null}, this
+ * implementation does not reject simple or actual requests outright but simply
+ * avoid adding CORS headers to the response.
  *
  * @author Sebastien Deleuze
  * @author Rossen Stoyanhcev
@@ -49,48 +53,37 @@ public class DefaultCorsProcessor implements CorsProcessor {
 
 	private static final Charset UTF8_CHARSET = Charset.forName("UTF-8");
 
+	private static final Log logger = LogFactory.getLog(DefaultCorsProcessor.class);
 
-	protected final Log logger = LogFactory.getLog(getClass());
-
-
-	@Override
-	public boolean processPreFlightRequest(CorsConfiguration config, HttpServletRequest request,
-			HttpServletResponse response) throws IOException {
-
-		Assert.isTrue(CorsUtils.isPreFlightRequest(request));
-
-		ServerHttpResponse serverResponse = new ServletServerHttpResponse(response);
-		if (responseHasCors(serverResponse)) {
-			return true;
-		}
-
-		ServerHttpRequest serverRequest = new ServletServerHttpRequest(request);
-		if (handleInternal(serverRequest, serverResponse, config, true)) {
-			serverResponse.flush();
-			return true;
-		}
-
-		return false;
-	}
 
 	@Override
-	public boolean processActualRequest(CorsConfiguration config, HttpServletRequest request,
+	public boolean processRequest(CorsConfiguration config, HttpServletRequest request,
 			HttpServletResponse response) throws IOException {
 
-		Assert.isTrue(CorsUtils.isCorsRequest(request) && !CorsUtils.isPreFlightRequest(request));
+		if (!CorsUtils.isCorsRequest(request)) {
+			return true;
+		}
 
 		ServletServerHttpResponse serverResponse = new ServletServerHttpResponse(response);
+		ServletServerHttpRequest serverRequest = new ServletServerHttpRequest(request);
+
 		if (responseHasCors(serverResponse)) {
 			return true;
 		}
 
-		ServletServerHttpRequest serverRequest = new ServletServerHttpRequest(request);
-		if (handleInternal(serverRequest, serverResponse, config, false)) {
-			serverResponse.flush();
-			return true;
+		boolean preFlightRequest = CorsUtils.isPreFlightRequest(request);
+
+		if (config == null) {
+			if (preFlightRequest) {
+				rejectRequest(serverResponse);
+				return false;
+			}
+			else {
+				return true;
+			}
 		}
 
-		return false;
+		return handleInternal(serverRequest, serverResponse, config, preFlightRequest);
 	}
 
 	private boolean responseHasCors(ServerHttpResponse response) {
@@ -107,20 +100,33 @@ public class DefaultCorsProcessor implements CorsProcessor {
 		return hasAllowOrigin;
 	}
 
+	/**
+	 * Invoked when one of the CORS checks failed.
+	 * The default implementation sets the response status to 403 and writes
+	 * "Invalid CORS request" to the response.
+	 */
+	protected void rejectRequest(ServerHttpResponse response) throws IOException {
+		response.setStatusCode(HttpStatus.FORBIDDEN);
+		response.getBody().write("Invalid CORS request".getBytes(UTF8_CHARSET));
+	}
+
+	/**
+	 * Handle the given request.
+	 */
 	protected boolean handleInternal(ServerHttpRequest request, ServerHttpResponse response,
-			CorsConfiguration config, boolean isPreFlight) throws IOException {
+			CorsConfiguration config, boolean preFlightRequest) throws IOException {
 
 		String requestOrigin = request.getHeaders().getOrigin();
 		String allowOrigin = checkOrigin(config, requestOrigin);
 
-		HttpMethod requestMethod = getMethodToUse(request, isPreFlight);
+		HttpMethod requestMethod = getMethodToUse(request, preFlightRequest);
 		List<HttpMethod> allowMethods = checkMethods(config, requestMethod);
 
-		List<String> requestHeaders = getHeadersToUse(request, isPreFlight);
+		List<String> requestHeaders = getHeadersToUse(request, preFlightRequest);
 		List<String> allowHeaders = checkHeaders(config, requestHeaders);
 
-		if (allowOrigin == null || allowMethods == null || (isPreFlight && allowHeaders == null)) {
-			handleInvalidCorsRequest(response);
+		if (allowOrigin == null || allowMethods == null || (preFlightRequest && allowHeaders == null)) {
+			rejectRequest(response);
 			return false;
 		}
 
@@ -128,11 +134,11 @@ public class DefaultCorsProcessor implements CorsProcessor {
 		responseHeaders.setAccessControlAllowOrigin(allowOrigin);
 		responseHeaders.add(HttpHeaders.VARY, HttpHeaders.ORIGIN);
 
-		if (isPreFlight) {
+		if (preFlightRequest) {
 			responseHeaders.setAccessControlAllowMethods(allowMethods);
 		}
 
-		if (isPreFlight && !allowHeaders.isEmpty()) {
+		if (preFlightRequest && !allowHeaders.isEmpty()) {
 			responseHeaders.setAccessControlAllowHeaders(allowHeaders);
 		}
 
@@ -144,10 +150,11 @@ public class DefaultCorsProcessor implements CorsProcessor {
 			responseHeaders.setAccessControlAllowCredentials(true);
 		}
 
-		if (isPreFlight && config.getMaxAge() != null) {
+		if (preFlightRequest && config.getMaxAge() != null) {
 			responseHeaders.setAccessControlMaxAge(config.getMaxAge());
 		}
 
+		response.flush();
 		return true;
 	}
 
@@ -185,16 +192,6 @@ public class DefaultCorsProcessor implements CorsProcessor {
 	private List<String> getHeadersToUse(ServerHttpRequest request, boolean isPreFlight) {
 		HttpHeaders headers = request.getHeaders();
 		return (isPreFlight ? headers.getAccessControlRequestHeaders() : new ArrayList<String>(headers.keySet()));
-	}
-
-	/**
-	 * Invoked when one of the CORS checks failed.
-	 * The default implementation sets the response status to 403 and writes
-	 * "Invalid CORS request" to the response.
-	 */
-	protected void handleInvalidCorsRequest(ServerHttpResponse response) throws IOException {
-		response.setStatusCode(HttpStatus.FORBIDDEN);
-		response.getBody().write("Invalid CORS request".getBytes(UTF8_CHARSET));
 	}
 
 }
