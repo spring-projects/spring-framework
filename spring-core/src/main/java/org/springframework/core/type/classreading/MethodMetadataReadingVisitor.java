@@ -44,11 +44,13 @@ import org.springframework.util.MultiValueMap;
  */
 public class MethodMetadataReadingVisitor extends MethodVisitor implements MethodMetadata {
 
-	protected final String name;
+	protected final String methodName;
 
 	protected final int access;
 
 	protected final String declaringClassName;
+
+	protected final String returnTypeName;
 
 	protected final ClassLoader classLoader;
 
@@ -58,13 +60,14 @@ public class MethodMetadataReadingVisitor extends MethodVisitor implements Metho
 			new LinkedMultiValueMap<String, AnnotationAttributes>(4);
 
 
-	public MethodMetadataReadingVisitor(String name, int access, String declaringClassName,
-			ClassLoader classLoader, Set<MethodMetadata> methodMetadataSet) {
+	public MethodMetadataReadingVisitor(String methodName, int access, String declaringClassName,
+			String returnTypeName, ClassLoader classLoader, Set<MethodMetadata> methodMetadataSet) {
 
 		super(SpringAsmInfo.ASM_VERSION);
-		this.name = name;
+		this.methodName = methodName;
 		this.access = access;
 		this.declaringClassName = declaringClassName;
+		this.returnTypeName = returnTypeName;
 		this.classLoader = classLoader;
 		this.methodMetadataSet = methodMetadataSet;
 	}
@@ -79,7 +82,7 @@ public class MethodMetadataReadingVisitor extends MethodVisitor implements Metho
 
 	@Override
 	public String getMethodName() {
-		return this.name;
+		return this.methodName;
 	}
 
 	@Override
@@ -142,6 +145,11 @@ public class MethodMetadataReadingVisitor extends MethodVisitor implements Metho
 	@Override
 	public String getDeclaringClassName() {
 		return this.declaringClassName;
+	}
+
+	@Override
+	public String getReturnTypeName() {
+		return this.returnTypeName;
 	}
 
 }

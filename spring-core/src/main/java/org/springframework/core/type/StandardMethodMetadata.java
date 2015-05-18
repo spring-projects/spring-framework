@@ -85,6 +85,11 @@ public class StandardMethodMetadata implements MethodMetadata {
 	}
 
 	@Override
+	public String getReturnTypeName() {
+		return this.introspectedMethod.getReturnType().getName();
+	}
+
+	@Override
 	public boolean isAbstract() {
 		return Modifier.isAbstract(this.introspectedMethod.getModifiers());
 	}

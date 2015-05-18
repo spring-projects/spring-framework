@@ -76,7 +76,8 @@ public class AnnotationMetadataReadingVisitor extends ClassMetadataReadingVisito
 		if ((access & Opcodes.ACC_BRIDGE) != 0) {
 			return super.visitMethod(access, name, desc, signature, exceptions);
 		}
-		return new MethodMetadataReadingVisitor(name, access, getClassName(), this.classLoader, this.methodMetadataSet);
+		return new MethodMetadataReadingVisitor(name, access, getClassName(),
+				Type.getReturnType(desc).getClassName(), this.classLoader, this.methodMetadataSet);
 	}
 
 	@Override
