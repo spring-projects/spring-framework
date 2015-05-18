@@ -1858,7 +1858,7 @@ advantages:
 When using XML-based configuration metadata footnote:[See
 pass:specialcharacters,macros[<<beans-factory-collaborators>>]], you specify autowire
 mode for a bean definition with the `autowire` attribute of the `<bean/>` element. The
-autowiring functionality has five modes. You specify autowiring __per__ bean and thus
+autowiring functionality has four modes. You specify autowiring __per__ bean and thus
 can choose which ones to autowire.
 
 [[beans-factory-autowiring-modes-tbl]]
