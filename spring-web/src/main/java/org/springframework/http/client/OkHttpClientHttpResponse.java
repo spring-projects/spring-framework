@@ -18,7 +18,6 @@ package org.springframework.http.client;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Map;
 
 import com.squareup.okhttp.Response;
 
@@ -48,17 +47,17 @@ class OkHttpClientHttpResponse extends AbstractClientHttpResponse {
 
 	@Override
 	public int getRawStatusCode() {
-		return response.code();
+		return this.response.code();
 	}
 
 	@Override
 	public String getStatusText() {
-		return response.message();
+		return this.response.message();
 	}
 
 	@Override
 	public InputStream getBody() throws IOException {
-		return response.body().byteStream();
+		return this.response.body().byteStream();
 	}
 
 	@Override
@@ -78,9 +77,10 @@ class OkHttpClientHttpResponse extends AbstractClientHttpResponse {
 	@Override
 	public void close() {
 		try {
-			response.body().close();
+			this.response.body().close();
 		}
-		catch (IOException ignored) {
+		catch (IOException ex) {
+			// Ignore
 		}
 	}
 }

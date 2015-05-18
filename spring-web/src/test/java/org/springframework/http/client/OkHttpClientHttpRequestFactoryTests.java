@@ -16,8 +16,8 @@
 
 package org.springframework.http.client;
 
-import com.squareup.okhttp.OkHttpClient;
 import org.junit.Test;
+
 import org.springframework.http.HttpMethod;
 
 /**

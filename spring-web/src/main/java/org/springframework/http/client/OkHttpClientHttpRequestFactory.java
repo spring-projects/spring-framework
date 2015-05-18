@@ -34,8 +34,7 @@ import org.springframework.util.Assert;
  * @since 4.2
  */
 public class OkHttpClientHttpRequestFactory
-		implements ClientHttpRequestFactory, AsyncClientHttpRequestFactory,
-		DisposableBean {
+		implements ClientHttpRequestFactory, AsyncClientHttpRequestFactory, DisposableBean {
 
 	private final OkHttpClient client;
 
@@ -43,29 +42,27 @@ public class OkHttpClientHttpRequestFactory
 
 
 	/**
-	 * Create a new {@code OkHttpClientHttpRequestFactory} with a default
-	 * {@link OkHttpClient}.
+	 * Create a factory with a default {@link OkHttpClient} instance.
 	 */
 	public OkHttpClientHttpRequestFactory() {
-		client = new OkHttpClient();
-		defaultClient = true;
+		this.client = new OkHttpClient();
+		this.defaultClient = true;
 	}
 
 	/**
-	 * Create a new {@code OkHttpClientHttpRequestFactory} with the given
-	 * {@link OkHttpClient}.
-	 * @param okHttpClient the client to use
+	 * Create a factory with the given {@link OkHttpClient} instance.
+	 * @param client the client to use
 	 */
-	public OkHttpClientHttpRequestFactory(OkHttpClient okHttpClient) {
-		Assert.notNull(okHttpClient, "'okHttpClient' must not be null");
-		client = okHttpClient;
-		defaultClient = false;
+	public OkHttpClientHttpRequestFactory(OkHttpClient client) {
+		Assert.notNull(client, "'client' must not be null");
+		this.client = client;
+		this.defaultClient = false;
 	}
 
 
 	/**
-	 * Sets the underlying read timeout (in milliseconds).
-	 * A timeout value of 0 specifies an infinite timeout.
+	 * Sets the underlying read timeout in milliseconds.
+	 * A value of 0 specifies an infinite timeout.
 	 * @see OkHttpClient#setReadTimeout(long, TimeUnit)
 	 */
 	public void setReadTimeout(int readTimeout) {
@@ -73,8 +70,8 @@ public class OkHttpClientHttpRequestFactory
 	}
 
 	/**
-	 * Sets the underlying write timeout (in milliseconds).
-	 * A timeout value of 0 specifies an infinite timeout.
+	 * Sets the underlying write timeout in milliseconds.
+	 * A value of 0 specifies an infinite timeout.
 	 * @see OkHttpClient#setWriteTimeout(long, TimeUnit)
 	 */
 	public void setWriteTimeout(int writeTimeout) {
@@ -82,8 +79,8 @@ public class OkHttpClientHttpRequestFactory
 	}
 
 	/**
-	 * Sets the underlying connect timeout (in milliseconds).
-	 * A timeout value of 0 specifies an infinite timeout.
+	 * Sets the underlying connect timeout in milliseconds.
+	 * A value of 0 specifies an infinite timeout.
 	 * @see OkHttpClient#setConnectTimeout(long, TimeUnit)
 	 */
 	public void setConnectTimeout(int connectTimeout) {
@@ -107,7 +104,7 @@ public class OkHttpClientHttpRequestFactory
 
 	@Override
 	public void destroy() throws Exception {
-		if (defaultClient) {
+		if (this.defaultClient) {
 			// Clean up the client if we created it in the constructor
 			if (this.client.getCache() != null) {
 				this.client.getCache().close();

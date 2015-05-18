@@ -18,6 +18,7 @@ package org.springframework.http.client;
 
 import java.io.IOException;
 import java.net.URI;
+import java.net.URL;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
@@ -32,6 +33,7 @@ import com.squareup.okhttp.Response;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.util.StringUtils;
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.util.concurrent.SettableListenableFuture;
 
@@ -63,23 +65,24 @@ class OkHttpClientHttpRequest extends AbstractBufferingAsyncClientHttpRequest
 
 	@Override
 	public HttpMethod getMethod() {
-		return method;
+		return this.method;
 	}
 
 	@Override
 	public URI getURI() {
-		return uri;
+		return this.uri;
 	}
 
 	@Override
 	protected ListenableFuture<ClientHttpResponse> executeInternal(HttpHeaders headers,
-			byte[] bufferedOutput) throws IOException {
-		RequestBody body = bufferedOutput.length > 0 ?
-				RequestBody.create(getContentType(headers), bufferedOutput) : null;
+			byte[] content) throws IOException {
 
-		Request.Builder builder = new Request.Builder().
-				url(this.uri.toURL()).
-				method(this.method.name(), body);
+		MediaType contentType = getContentType(headers);
+		RequestBody body = (content.length > 0 ? RequestBody.create(contentType, content) : null);
+
+		URL url = this.uri.toURL();
+		String methodName = this.method.name();
+		Request.Builder builder = new Request.Builder().url(url).method(methodName, body);
 
 		for (Map.Entry<String, List<String>> entry : headers.entrySet()) {
 			String headerName = entry.getKey();
@@ -89,12 +92,12 @@ class OkHttpClientHttpRequest extends AbstractBufferingAsyncClientHttpRequest
 		}
 		Request request = builder.build();
 
-		return new ListenableFutureCall(client.newCall(request));
+		return new OkHttpListenableFuture(this.client.newCall(request));
 	}
 
 	private MediaType getContentType(HttpHeaders headers) {
-		org.springframework.http.MediaType contentType = headers.getContentType();
-		return contentType != null ? MediaType.parse(contentType.toString()) : null;
+		String rawContentType = headers.getFirst("Content-Type");
+		return (StringUtils.hasText(rawContentType) ? MediaType.parse(rawContentType) : null);
 	}
 
 	@Override
@@ -106,25 +109,24 @@ class OkHttpClientHttpRequest extends AbstractBufferingAsyncClientHttpRequest
 			throw new IOException(ex.getMessage(), ex);
 		}
 		catch (ExecutionException ex) {
-			if (ex.getCause() instanceof IOException) {
-				throw (IOException) ex.getCause();
+			Throwable cause = ex.getCause();
+			if (cause instanceof IOException) {
+				throw (IOException) cause;
 			}
-			else {
-				throw new IOException(ex.getMessage(), ex);
-			}
+			throw new IOException(cause.getMessage(), cause);
 		}
 	}
 
-	private static class ListenableFutureCall extends
-			SettableListenableFuture<ClientHttpResponse> {
+	private static class OkHttpListenableFuture extends SettableListenableFuture<ClientHttpResponse> {
 
 	    private final Call call;
 
-	    public ListenableFutureCall(Call call) {
+	    public OkHttpListenableFuture(Call call) {
 	        this.call = call;
 	        this.call.enqueue(new Callback() {
-		        @Override
-		        public void onResponse(Response response) throws IOException {
+
+				@Override
+		        public void onResponse(Response response) {
 			        set(new OkHttpClientHttpResponse(response));
 		        }
 
@@ -137,7 +139,7 @@ class OkHttpClientHttpRequest extends AbstractBufferingAsyncClientHttpRequest
 
 	    @Override
 	    protected void interruptTask() {
-	        call.cancel();
+	        this.call.cancel();
 	    }
 	}
 
