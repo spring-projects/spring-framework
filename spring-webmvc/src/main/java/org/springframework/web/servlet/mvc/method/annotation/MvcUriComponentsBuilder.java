@@ -254,7 +254,7 @@ public class MvcUriComponentsBuilder {
 	public static UriComponentsBuilder fromMethodCall(UriComponentsBuilder builder, Object invocationInfo) {
 		Assert.isInstanceOf(MethodInvocationInfo.class, invocationInfo);
 		MethodInvocationInfo info = (MethodInvocationInfo) invocationInfo;
-		return fromMethod(builder, info.getControllerMethod(), info.getArgumentValues());
+		return fromMethod(builder, info.getControllerType(), info.getControllerMethod(), info.getArgumentValues());
 	}
 
 	/**
@@ -362,8 +362,12 @@ public class MvcUriComponentsBuilder {
 	 * @return a UriComponentsBuilder instance, never {@code null}
 	 */
 	public static UriComponentsBuilder fromMethod(UriComponentsBuilder baseUrl, Method method, Object... args) {
+		return fromMethod(baseUrl, method.getDeclaringClass(), method, args);
+	}
+	
+	private static UriComponentsBuilder fromMethod(UriComponentsBuilder baseUrl, Class<?> controllerType, Method method, Object... args) {
 		baseUrl = getBaseUrlToUse(baseUrl);
-		String typePath = getTypeRequestMapping(method.getDeclaringClass());
+		String typePath = getTypeRequestMapping(controllerType);
 		String methodPath = getMethodRequestMapping(method);
 		String path = pathMatcher.combine(typePath, methodPath);
 		baseUrl.path(path);
@@ -560,7 +564,7 @@ public class MvcUriComponentsBuilder {
 	 */
 	public static <T> T controller(Class<T> controllerType) {
 		Assert.notNull(controllerType, "'controllerType' must not be null");
-		return initProxy(controllerType, new ControllerMethodInvocationInterceptor());
+		return initProxy(controllerType, new ControllerMethodInvocationInterceptor(controllerType));
 	}
 
 	@SuppressWarnings("unchecked")
@@ -634,11 +638,19 @@ public class MvcUriComponentsBuilder {
 		private static final Method getArgumentValues =
 				ReflectionUtils.findMethod(MethodInvocationInfo.class, "getArgumentValues");
 
+		private static final Method getControllerType =
+				ReflectionUtils.findMethod(MethodInvocationInfo.class, "getControllerType");
+
 		private Method controllerMethod;
 
 		private Object[] argumentValues;
 
+		private Class<?> controllerType;
 
+		ControllerMethodInvocationInterceptor(Class<?> controllerType) {
+			this.controllerType = controllerType;
+		}
+		
 		@Override
 		public Object intercept(Object obj, Method method, Object[] args, MethodProxy proxy) {
 			if (getControllerMethod.equals(method)) {
@@ -646,6 +658,9 @@ public class MvcUriComponentsBuilder {
 			}
 			else if (getArgumentValues.equals(method)) {
 				return this.argumentValues;
+			}
+			else if (getControllerType.equals(method)) {
+				return this.controllerType;
 			}
 			else if (ReflectionUtils.isObjectMethod(method)) {
 				return ReflectionUtils.invokeMethod(method, obj, args);
@@ -670,6 +685,8 @@ public class MvcUriComponentsBuilder {
 		Method getControllerMethod();
 
 		Object[] getArgumentValues();
+
+		Class<?> getControllerType();
 	}
 
 
