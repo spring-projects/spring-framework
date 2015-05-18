@@ -159,28 +159,27 @@ class TypeConverterDelegate {
 	public <T> T convertIfNecessary(String propertyName, Object oldValue, Object newValue,
 			Class<T> requiredType, TypeDescriptor typeDescriptor) throws IllegalArgumentException {
 
-		Object convertedValue = newValue;
-
 		// Custom editor for this type?
 		PropertyEditor editor = this.propertyEditorRegistry.findCustomEditor(requiredType, propertyName);
 
-		ConversionFailedException firstAttemptEx = null;
+		ConversionFailedException conversionAttemptEx = null;
 
 		// No custom editor but custom ConversionService specified?
 		ConversionService conversionService = this.propertyEditorRegistry.getConversionService();
-		if (editor == null && conversionService != null && convertedValue != null && typeDescriptor != null) {
+		if (editor == null && conversionService != null && newValue != null && typeDescriptor != null) {
 			TypeDescriptor sourceTypeDesc = TypeDescriptor.forObject(newValue);
-			TypeDescriptor targetTypeDesc = typeDescriptor;
-			if (conversionService.canConvert(sourceTypeDesc, targetTypeDesc)) {
+			if (conversionService.canConvert(sourceTypeDesc, typeDescriptor)) {
 				try {
-					return (T) conversionService.convert(convertedValue, sourceTypeDesc, targetTypeDesc);
+					return (T) conversionService.convert(newValue, sourceTypeDesc, typeDescriptor);
 				}
 				catch (ConversionFailedException ex) {
 					// fallback to default conversion logic below
-					firstAttemptEx = ex;
+					conversionAttemptEx = ex;
 				}
 			}
 		}
+
+		Object convertedValue = newValue;
 
 		// Value not of required type?
 		if (editor != null || (requiredType != null && !ClassUtils.isAssignableValue(requiredType, convertedValue))) {
@@ -233,7 +232,7 @@ class TypeConverterDelegate {
 					return (T) convertedValue.toString();
 				}
 				else if (convertedValue instanceof String && !requiredType.isInstance(convertedValue)) {
-					if (firstAttemptEx == null && !requiredType.isInterface() && !requiredType.isEnum()) {
+					if (conversionAttemptEx == null && !requiredType.isInterface() && !requiredType.isEnum()) {
 						try {
 							Constructor<T> strCtor = requiredType.getConstructor(String.class);
 							return BeanUtils.instantiateClass(strCtor, convertedValue);
@@ -272,9 +271,19 @@ class TypeConverterDelegate {
 			}
 
 			if (!ClassUtils.isAssignableValue(requiredType, convertedValue)) {
-				if (firstAttemptEx != null) {
-					throw firstAttemptEx;
+				if (conversionAttemptEx != null) {
+					// Original exception from former ConversionService call above...
+					throw conversionAttemptEx;
 				}
+				else if (conversionService != null) {
+					// ConversionService not tried before, probably custom editor found
+					// but editor couldn't produce the required type...
+					TypeDescriptor sourceTypeDesc = TypeDescriptor.forObject(newValue);
+					if (conversionService.canConvert(sourceTypeDesc, typeDescriptor)) {
+						return (T) conversionService.convert(newValue, sourceTypeDesc, typeDescriptor);
+					}
+				}
+
 				// Definitely doesn't match: throw IllegalArgumentException/IllegalStateException
 				StringBuilder msg = new StringBuilder();
 				msg.append("Cannot convert value of type [").append(ClassUtils.getDescriptiveType(newValue));
@@ -295,12 +304,12 @@ class TypeConverterDelegate {
 			}
 		}
 
-		if (firstAttemptEx != null) {
+		if (conversionAttemptEx != null) {
 			if (editor == null && !standardConversion && requiredType != null && !Object.class.equals(requiredType)) {
-				throw firstAttemptEx;
+				throw conversionAttemptEx;
 			}
 			logger.debug("Original ConversionService attempt failed - ignored since " +
-					"PropertyEditor based conversion eventually succeeded", firstAttemptEx);
+					"PropertyEditor based conversion eventually succeeded", conversionAttemptEx);
 		}
 
 		return (T) convertedValue;

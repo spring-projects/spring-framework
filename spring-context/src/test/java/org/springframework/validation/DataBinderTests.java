@@ -43,12 +43,15 @@ import org.springframework.beans.NotWritablePropertyException;
 import org.springframework.beans.NullValueInNestedPathException;
 import org.springframework.beans.propertyeditors.CustomCollectionEditor;
 import org.springframework.beans.propertyeditors.CustomNumberEditor;
+import org.springframework.beans.propertyeditors.StringTrimmerEditor;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.context.support.ResourceBundleMessageSource;
 import org.springframework.context.support.StaticMessageSource;
+import org.springframework.core.convert.converter.Converter;
 import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.format.Formatter;
 import org.springframework.format.number.NumberStyleFormatter;
+import org.springframework.format.support.DefaultFormattingConversionService;
 import org.springframework.format.support.FormattingConversionService;
 import org.springframework.tests.sample.beans.BeanWithObjectProperty;
 import org.springframework.tests.sample.beans.DerivedTestBean;
@@ -590,6 +593,19 @@ public class DataBinderTests {
 		binder.bind(pvs);
 		assertTrue(binder.getBindingResult().hasFieldErrors("name"));
 		assertEquals("test", binder.getBindingResult().getFieldValue("name"));
+	}
+
+	@Test
+	public void testConversionWithInappropriateStringEditor() {
+		DataBinder dataBinder = new DataBinder(null);
+		DefaultFormattingConversionService conversionService = new DefaultFormattingConversionService();
+		dataBinder.setConversionService(conversionService);
+		dataBinder.registerCustomEditor(String.class, new StringTrimmerEditor(true));
+
+		NameBean bean = new NameBean("Fred");
+		assertEquals("ConversionService should have invoked toString()", "Fred", dataBinder.convertIfNecessary(bean, String.class));
+		conversionService.addConverter(new NameBeanConverter());
+		assertEquals("Type converter should have been used", "[Fred]", dataBinder.convertIfNecessary(bean, String.class));
 	}
 
 	@Test
@@ -2084,6 +2100,32 @@ public class DataBinderTests {
 
 		public Map<String, Object> getF() {
 			return f;
+		}
+	}
+
+
+	public static class NameBean {
+
+		private final String name;
+
+		public NameBean(String name) {
+			this.name = name;
+		}
+		public String getName() {
+			return name;
+		}
+		@Override
+		public String toString() {
+			return name;
+		}
+	}
+
+
+	public static class NameBeanConverter implements Converter<NameBean, String> {
+
+		@Override
+		public String convert(NameBean source) {
+			return "[" + source.getName() + "]";
 		}
 	}
 
