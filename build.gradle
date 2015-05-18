@@ -57,12 +57,12 @@ configure(allprojects) { project ->
 	ext.slf4jVersion         = "1.7.12"
 	ext.snakeyamlVersion     = "1.15"
 	ext.snifferVersion       = "1.14"
-	ext.testngVersion        = "6.8.21"
+	ext.testngVersion        = "6.9.4"
 	ext.tiles2Version        = "2.2.2"
 	ext.tiles3Version        = "3.0.5"
 	ext.tomcatVersion        = "8.0.22"
 	ext.tyrusVersion         = "1.3.5"  // constrained by WebLogic 12.1.3 support
-	ext.undertowVersion      = "1.2.5.Final"
+	ext.undertowVersion      = "1.2.6.Final"
 	ext.woodstoxVersion      = "4.4.1"
 	ext.xmlunitVersion       = "1.6"
 	ext.xstreamVersion       = "1.4.8"
@@ -118,7 +118,7 @@ configure(allprojects) { project ->
 
 	repositories {
 		maven { url "https://repo.spring.io/libs-release" }
-		maven { url "https://repo.spring.io/milestone" }
+		// maven { url "https://repo.spring.io/milestone" }
 	}
 
 	dependencies {
@@ -413,7 +413,7 @@ project("spring-aop") {
 		compile("aopalliance:aopalliance:1.0")
 		optional("org.aspectj:aspectjweaver:${aspectjVersion}")
 		optional("commons-pool:commons-pool:1.6")
-		optional("org.apache.commons:commons-pool2:2.2")
+		optional("org.apache.commons:commons-pool2:2.3")
 		optional("com.jamonapi:jamon:2.81")
 	}
 }
@@ -1054,7 +1054,8 @@ project("spring-aspects") {
 
 	dependencies {
 		aspects(project(":spring-orm"))
-		ajc("org.aspectj:aspectjtools:1.9.0.BETA-1")  // for the ability to build on JDK 9, not exposed in the POMs yet
+		// ajc("org.aspectj:aspectjtools:1.9.0.BETA-1")  // for the ability to build on JDK 9, not exposed in the POMs yet
+		ajc("org.aspectj:aspectjtools:${aspectjVersion}")  // alternative to the above while Gradle fails on JDK 9 anyway
 		rt("org.aspectj:aspectjrt:${aspectjVersion}")  // regular AspectJ version here, to be exposed in the POMs
 		compile("org.aspectj:aspectjweaver:${aspectjVersion}")
 		provided("org.eclipse.persistence:javax.persistence:2.0.0")
