@@ -170,7 +170,7 @@ public abstract class WebMvcConfigurerAdapter implements WebMvcConfigurer {
 	 * <p>This implementation is empty.
 	 */
 	@Override
-	public void configureCrossOrigin(CrossOriginConfigurer configurer) {
+	public void configureCors(CorsConfigurer configurer) {
 	}
 	
 }

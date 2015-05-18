@@ -154,9 +154,9 @@ class WebMvcConfigurerComposite implements WebMvcConfigurer {
 	}
 
 	@Override
-	public void configureCrossOrigin(CrossOriginConfigurer configurer) {
+	public void configureCors(CorsConfigurer configurer) {
 		for (WebMvcConfigurer delegate : this.delegates) {
-			delegate.configureCrossOrigin(configurer);
+			delegate.configureCors(configurer);
 		}
 	}
 

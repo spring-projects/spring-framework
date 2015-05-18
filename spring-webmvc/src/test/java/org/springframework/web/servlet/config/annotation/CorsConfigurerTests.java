@@ -27,34 +27,34 @@ import org.junit.Test;
 import org.springframework.web.cors.CorsConfiguration;
 
 /**
- * Test fixture with a {@link CrossOriginConfigurer}.
+ * Test fixture with a {@link CorsConfigurer}.
  * 
  * @author Sebastien Deleuze
  */
-public class CrossOriginConfigurerTests {
+public class CorsConfigurerTests {
 	
-	private CrossOriginConfigurer configurer;
+	private CorsConfigurer configurer;
 	
 	@Before
 	public void setUp() {
-		this.configurer = new CrossOriginConfigurer();
+		this.configurer = new CorsConfigurer();
 	}
 	
 	@Test
-	public void noCrossOriginConfigured() {
+	public void noCorsConfigured() {
 		assertTrue(this.configurer.getCorsConfigurations().isEmpty());
 	}
 	
 	@Test
-	public void multipleCrossOriginConfigured() {
-		this.configurer.enableCrossOrigin("/foo");
-		this.configurer.enableCrossOrigin("/bar");
+	public void multipleCorsConfigured() {
+		this.configurer.enableCors("/foo");
+		this.configurer.enableCors("/bar");
 		assertEquals(2, this.configurer.getCorsConfigurations().size());
 	}
 	
 	@Test
-	public void defaultCrossOriginRegistration() {
-		this.configurer.enableCrossOrigin();
+	public void defaultCorsRegistration() {
+		this.configurer.enableCors();
 		Map<String, CorsConfiguration> configs = this.configurer.getCorsConfigurations();
 		assertEquals(1, configs.size());
 		CorsConfiguration config = configs.get("/**");
@@ -66,8 +66,8 @@ public class CrossOriginConfigurerTests {
 	}
 	
 	@Test
-	public void customizedCrossOriginRegistration() {
-		this.configurer.enableCrossOrigin("/foo").allowedOrigins("http://domain2.com", "http://domain2.com")
+	public void customizedCorsRegistration() {
+		this.configurer.enableCors("/foo").allowedOrigins("http://domain2.com", "http://domain2.com")
 				.allowedMethods("DELETE").allowCredentials(false).allowedHeaders("header1", "header2")
 				.exposedHeaders("header3", "header4").maxAge(3600);
 		Map<String, CorsConfiguration> configs = this.configurer.getCorsConfigurations();

@@ -186,6 +186,6 @@ public interface WebMvcConfigurer {
 	 * Configure cross-origin requests handling.
 	 * @since 4.2
 	 */
-	void configureCrossOrigin(CrossOriginConfigurer configurer);
+	void configureCors(CorsConfigurer configurer);
 
 }

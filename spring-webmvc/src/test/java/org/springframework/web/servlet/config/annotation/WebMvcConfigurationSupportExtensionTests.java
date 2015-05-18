@@ -404,8 +404,8 @@ public class WebMvcConfigurationSupportExtensionTests {
 		}
 
 		@Override
-		public void configureCrossOrigin(CrossOriginConfigurer registry) {
-			registry.enableCrossOrigin("/resources/**");
+		public void configureCors(CorsConfigurer registry) {
+			registry.enableCors("/resources/**");
 		}
 		
 	}

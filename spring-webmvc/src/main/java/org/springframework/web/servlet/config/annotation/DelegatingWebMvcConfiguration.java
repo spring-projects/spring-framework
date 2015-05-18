@@ -133,8 +133,8 @@ public class DelegatingWebMvcConfiguration extends WebMvcConfigurationSupport {
 	}
 
 	@Override
-	protected void configureCrossOrigin(CrossOriginConfigurer configurer) {
-		this.configurers.configureCrossOrigin(configurer);
+	protected void configureCors(CorsConfigurer configurer) {
+		this.configurers.configureCors(configurer);
 	}
 	
 }

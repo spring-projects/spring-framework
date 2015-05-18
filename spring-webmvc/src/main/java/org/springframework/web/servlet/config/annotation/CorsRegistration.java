@@ -32,13 +32,13 @@ import org.springframework.web.cors.CorsConfiguration;
  * @author Sebastien Deleuze
  * @since 4.2
  */
-public class CrossOriginRegistration {
+public class CorsRegistration {
 	
 	private final String[] pathPatterns;
 	
 	private final CorsConfiguration config;
 	
-	public CrossOriginRegistration(String... pathPatterns) {
+	public CorsRegistration(String... pathPatterns) {
 		this.pathPatterns = (pathPatterns.length == 0 ? new String[]{ "/**" } : pathPatterns);
 		// Same default values than @CrossOrigin annotation + allows simple methods
 		this.config = new CorsConfiguration();
@@ -51,32 +51,32 @@ public class CrossOriginRegistration {
 		this.config.setMaxAge(1800L);
 	}
 	
-	public CrossOriginRegistration allowedOrigins(String... origins) {
+	public CorsRegistration allowedOrigins(String... origins) {
 		this.config.setAllowedOrigins(new ArrayList<String>(Arrays.asList(origins)));
 		return this;
 	}
 	
-	public CrossOriginRegistration allowedMethods(String... methods) {
+	public CorsRegistration allowedMethods(String... methods) {
 		this.config.setAllowedMethods(new ArrayList<String>(Arrays.asList(methods)));
 		return this;
 	}
 	
-	public CrossOriginRegistration allowedHeaders(String... headers) {
+	public CorsRegistration allowedHeaders(String... headers) {
 		this.config.setAllowedHeaders(new ArrayList<String>(Arrays.asList(headers)));
 		return this;
 	}
 	
-	public CrossOriginRegistration exposedHeaders(String... headers) {
+	public CorsRegistration exposedHeaders(String... headers) {
 		this.config.setExposedHeaders(new ArrayList<String>(Arrays.asList(headers)));
 		return this;
 	}
 	
-	public CrossOriginRegistration maxAge(long maxAge) {
+	public CorsRegistration maxAge(long maxAge) {
 		this.config.setMaxAge(maxAge);
 		return this;
 	}
 	
-	public CrossOriginRegistration allowCredentials(boolean allowCredentials) {
+	public CorsRegistration allowCredentials(boolean allowCredentials) {
 		this.config.setAllowCredentials(allowCredentials);
 		return this;
 	}

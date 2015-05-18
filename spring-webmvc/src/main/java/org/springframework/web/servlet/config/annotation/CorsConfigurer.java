@@ -28,11 +28,11 @@ import org.springframework.web.cors.CorsConfiguration;
  * @author Sebastien Deleuze
  * 
  * @since 4.2
- * @see CrossOriginRegistration
+ * @see CorsRegistration
  */
-public class CrossOriginConfigurer {
+public class CorsConfigurer {
 	
-	private final List<CrossOriginRegistration> registrations = new ArrayList<CrossOriginRegistration>();
+	private final List<CorsRegistration> registrations = new ArrayList<CorsRegistration>();
 
 	/**
 	 * Enable cross origin requests on the specified path patterns. If no path pattern is specified,
@@ -40,15 +40,15 @@ public class CrossOriginConfigurer {
 	 * 
 	 * <p>By default, all origins, all headers and credentials are allowed. Max age is set to 30 minutes.</p>
 	 */
-	public CrossOriginRegistration enableCrossOrigin(String... pathPatterns) {
-		CrossOriginRegistration registration = new CrossOriginRegistration(pathPatterns);
+	public CorsRegistration enableCors(String... pathPatterns) {
+		CorsRegistration registration = new CorsRegistration(pathPatterns);
 		this.registrations.add(registration);
 		return registration;
 	}
 	
 	protected Map<String, CorsConfiguration> getCorsConfigurations() {
 		Map<String, CorsConfiguration> configs = new HashMap<String, CorsConfiguration>();
-		for (CrossOriginRegistration registration : this.registrations) {
+		for (CorsRegistration registration : this.registrations) {
 			for (String pathPattern : registration.getPathPatterns()) {
 				configs.put(pathPattern, registration.getCorsConfiguration());
 			}
