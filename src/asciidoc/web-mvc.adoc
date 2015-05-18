@@ -3176,7 +3176,7 @@ For example given:
 [subs="verbatim,quotes"]
 ----
     @RequestMapping("/people/{id}/addresses")
-    public class MyController {
+    public class PersonAddressController {
 
         @RequestMapping("/{country}")
         public HttpEntity getAddress(@PathVariable String country) { ... }
@@ -3190,7 +3190,7 @@ You can prepare a link from a JSP as follows:
 ----
 <%@ taglib uri="http://www.springframework.org/tags" prefix="s" %>
 ...
-<a href="${s:mvcUrl(''PC#getPerson'').arg(0,''US'').buildAndExpand(''123'')}">Get Person</a>
+<a href="${s:mvcUrl(''PAC#getAddress'').arg(0,''US'').buildAndExpand(''123'')}">Get Address</a>
 ----
 
 The above example relies on the `mvcUrl` JSP function declared in the Spring tag library
