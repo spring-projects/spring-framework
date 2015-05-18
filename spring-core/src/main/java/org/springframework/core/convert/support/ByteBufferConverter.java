@@ -97,6 +97,7 @@ final class ByteBufferConverter implements ConditionalGenericConverter {
 	private Object convertFromByteBuffer(ByteBuffer source, TypeDescriptor targetType) {
 		byte[] bytes = new byte[source.remaining()];
 		source.get(bytes);
+
 		if (targetType.isAssignableTo(BYTE_ARRAY_TYPE)) {
 			return bytes;
 		}
@@ -113,9 +114,7 @@ final class ByteBufferConverter implements ConditionalGenericConverter {
 		// Extra cast necessary for compiling on JDK 9 plus running on JDK 8, since
 		// otherwise the overridden ByteBuffer-returning rewind method would be chosen
 		// which isn't available on JDK 8.
-		((Buffer) byteBuffer).rewind();
-
-		return byteBuffer;
+		return ((Buffer) byteBuffer).rewind();
 	}
 
 }
