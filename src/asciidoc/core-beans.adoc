@@ -7351,7 +7351,7 @@ package also provides the following functionality:
 
 * __Access to messages in i18n-style__, through the `MessageSource` interface.
 * __Access to resources__, such as URLs and files, through the `ResourceLoader` interface.
-* __Event publication__ to beans implementing the `ApplicationListener` interface,
+* __Event publication__ to namely beans implementing the `ApplicationListener` interface,
   through the use of the `ApplicationEventPublisher` interface.
 * __Loading of multiple (hierarchical) contexts__, allowing each to be focused on one
   particular layer, such as the web layer of an application, through the
@@ -7571,8 +7571,18 @@ Event handling in the `ApplicationContext` is provided through the `ApplicationE
 class and `ApplicationListener` interface. If a bean that implements the
 `ApplicationListener` interface is deployed into the context, every time an
 `ApplicationEvent` gets published to the `ApplicationContext`, that bean is notified.
-Essentially, this is the standard __Observer__ design pattern. Spring provides the
-following standard events:
+Essentially, this is the standard __Observer__ design pattern.
+
+[TIP]
+====
+As of Spring 4.2, the event infrastructure has been significantly improved and offer
+an <<context-functionality-events-annotation,annotation-based model>> as well as the
+ability to publish any arbitrary event, that is an object that does not necessarily
+extend from `ApplicationEvent`. When such an object is published we wrap it in a
+`PayloadApplicationEvent` for you.
+====
+
+Spring provides the following standard events:
 
 [[beans-ctx-events-tbl]]
 .Built-in Events
@@ -7747,6 +7757,97 @@ http://www.enterpriseintegrationpatterns.com[pattern-oriented], event-driven
 architectures that build upon the well-known Spring programming model.
 ====
 
+[[context-functionality-events-annotation]]
+==== Annotation-based Event Listeners
+
+As of Spring 4.2, an event listener can be registered on any public method of a managed
+bean via the `EventListener` annotation. The `BlackListNotifier` can be rewritten as
+follows:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	public class BlackListNotifier {
+
+		private String notificationAddress;
+
+		public void setNotificationAddress(String notificationAddress) {
+			this.notificationAddress = notificationAddress;
+		}
+
+		@EventListener
+		public void processBlackListEvent(BlackListEvent event) {
+			// notify appropriate parties via notificationAddress...
+		}
+
+	}
+----
+
+As you can see above, the method signature actually _infer_ which even type it listens to. This
+also works for nested generics as long as the actual event resolves the generics parameter you
+would filter on.
+
+It is also possible to add additional runtime filtering via the `condition` attribute of the
+annotation that defines a <<expressions,`SpEL` expression>> that should match to actually invoke
+the method for a particular event.
+
+For instance, our notifier can be rewritten to be only invoked if the `test` attribute of the
+event is equal to `foo`:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@EventListener(condition = "#event.test == 'foo'")
+	public void processBlackListEvent(BlackListEvent event) {
+		// notify appropriate parties via notificationAddress...
+	}
+----
+
+Each `SpEL` expression evaluates again a dedicated context. The next table lists the items made
+available to the context so one can use them for conditional event processing:
+
+[[context-functionality-events-annotation-tbl]]
+.Event SpEL available metadata
+|===
+| Name| Location| Description| Example
+
+| event
+| root object
+| The actual `ApplicationEvent`
+| `#root.event`
+
+| args
+| root object
+| The arguments (as array) used for invoking the target
+| `#root.args[0]`
+
+| __argument name__
+| evaluation context
+| Name of any of the method argument. If for some reason the names are not available
+  (ex: no debug information), the argument names are also available under the `a<#arg>`
+  where __#arg__ stands for the argument index (starting from 0).
+| `iban` or `a0` (one can also use `p0` or `p<#arg>` notation as an alias).
+|===
+
+Note that `#root.event` allows you to access to the underlying event, even if your method
+signature actually refers to an arbitrary object that was published.
+
+If you need to publish an event as the result of processing another, just change the
+method signature to return the event that should be published, something like:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@EventListener
+	public ListUpdateEvent handleBlackListEvent(BlackListEvent event) {
+		// notify appropriate parties via notificationAddress and
+		// then publish a ListUpdateEvent...
+	}
+----
+
+This new method will publish a new `ListUpdateEvent` for every `BlackListEvent` handled
+by the method above. If you need to publish several events, just return a `Collection` of
+events instead.
 
 
 [[context-functionality-resources]]
