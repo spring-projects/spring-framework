@@ -89,7 +89,7 @@ public class JsonPathExpectationsHelper {
 	@SuppressWarnings("unchecked")
 	public <T> void assertValue(String content, Matcher<T> matcher) throws ParseException {
 		T value = (T) evaluateJsonPath(content);
-		assertThat("JSON path" + this.expression, value, matcher);
+		assertThat("JSON path " + this.expression, value, matcher);
 	}
 
 	private Object evaluateJsonPath(String content) throws ParseException  {
