@@ -22,7 +22,6 @@ import java.util.Map;
 
 import groovy.lang.DelegatingMetaClass;
 import groovy.lang.GroovyObject;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import org.springframework.aop.support.AopUtils;

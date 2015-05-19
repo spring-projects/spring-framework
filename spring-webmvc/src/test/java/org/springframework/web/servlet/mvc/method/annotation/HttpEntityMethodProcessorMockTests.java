@@ -17,10 +17,7 @@
 package org.springframework.web.servlet.mvc.method.annotation;
 
 import static org.junit.Assert.*;
-import static org.mockito.BDDMockito.any;
 import static org.mockito.BDDMockito.*;
-import static org.mockito.BDDMockito.isA;
-import static org.mockito.Matchers.eq;
 import static org.springframework.web.servlet.HandlerMapping.*;
 
 import java.lang.reflect.Method;

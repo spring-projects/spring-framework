@@ -22,8 +22,6 @@ import java.util.Arrays;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 
-import static org.junit.Assert.assertEquals;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.http.HttpHeaders;

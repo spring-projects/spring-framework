@@ -16,9 +16,6 @@
 
 package org.springframework.messaging.simp.config;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-
 import org.junit.Test;
 
 import org.springframework.messaging.MessageChannel;

@@ -24,7 +24,7 @@ import javax.script.ScriptEngine;
 
 import org.hamcrest.Matchers;
 import static org.junit.Assert.*;
-import static org.junit.Assert.assertThat;
+
 import org.junit.Before;
 import org.junit.Test;
 import static org.mockito.BDDMockito.given;

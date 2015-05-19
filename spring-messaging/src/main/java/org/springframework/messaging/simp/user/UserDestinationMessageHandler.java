@@ -17,7 +17,6 @@
 package org.springframework.messaging.simp.user;
 
 import static org.springframework.messaging.simp.SimpMessageHeaderAccessor.*;
-import static org.springframework.messaging.support.MessageHeaderAccessor.getAccessor;
 
 import java.util.Arrays;
 import java.util.List;
