@@ -77,9 +77,7 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 
 	private final List<Object> interceptors = new ArrayList<Object>();
 
-	private final List<HandlerInterceptor> handlerInterceptors = new ArrayList<HandlerInterceptor>();
-
-	private final List<MappedInterceptor> detectedMappedInterceptors = new ArrayList<MappedInterceptor>();
+	private final List<HandlerInterceptor> adaptedInterceptors = new ArrayList<HandlerInterceptor>();
 
 	private CorsProcessor corsProcessor = new DefaultCorsProcessor();
 	
@@ -245,7 +243,7 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	@Override
 	protected void initApplicationContext() throws BeansException {
 		extendInterceptors(this.interceptors);
-		detectMappedInterceptors(this.detectedMappedInterceptors);
+		detectMappedInterceptors(this.adaptedInterceptors);
 		initInterceptors();
 	}
 
@@ -268,7 +266,7 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	 * from the current context and its ancestors. Subclasses can override and refine this policy.
 	 * @param mappedInterceptors an empty list to add {@link MappedInterceptor} instances to
 	 */
-	protected void detectMappedInterceptors(List<MappedInterceptor> mappedInterceptors) {
+	protected void detectMappedInterceptors(List<HandlerInterceptor> mappedInterceptors) {
 		mappedInterceptors.addAll(
 				BeanFactoryUtils.beansOfTypeIncludingAncestors(
 						getApplicationContext(), MappedInterceptor.class, true, false).values());
@@ -287,11 +285,9 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 				if (interceptor == null) {
 					throw new IllegalArgumentException("Entry number " + i + " in interceptors array is null");
 				}
-				this.handlerInterceptors.add(adaptInterceptor(interceptor));
+				this.adaptedInterceptors.add(adaptInterceptor(interceptor));
 			}
 		}
-		this.handlerInterceptors.addAll(this.detectedMappedInterceptors);
-		this.interceptors.clear();
 	}
 
 	/**
@@ -323,14 +319,8 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	 * @return the array of {@link HandlerInterceptor}s, or {@code null} if none
 	 */
 	protected final HandlerInterceptor[] getAdaptedInterceptors() {
-		List<HandlerInterceptor> adaptedInterceptors = new ArrayList<HandlerInterceptor>();
-		for (HandlerInterceptor interceptor : this.handlerInterceptors) {
-			if (!(interceptor instanceof MappedInterceptor)) {
-				adaptedInterceptors.add(interceptor);
-			}
-		}
-		int count = adaptedInterceptors.size();
-		return (count > 0 ? adaptedInterceptors.toArray(new HandlerInterceptor[count]) : null);
+		int count = this.adaptedInterceptors.size();
+		return (count > 0 ? this.adaptedInterceptors.toArray(new HandlerInterceptor[count]) : null);
 	}
 
 	/**
@@ -339,7 +329,7 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	 */
 	protected final MappedInterceptor[] getMappedInterceptors() {
 		List<MappedInterceptor> mappedInterceptors = new ArrayList<MappedInterceptor>();
-		for (HandlerInterceptor interceptor : this.handlerInterceptors) {
+		for (HandlerInterceptor interceptor : this.adaptedInterceptors) {
 			if (interceptor instanceof MappedInterceptor) {
 				mappedInterceptors.add((MappedInterceptor) interceptor);
 			}
@@ -425,7 +415,7 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 				(HandlerExecutionChain) handler : new HandlerExecutionChain(handler));
 
 		String lookupPath = this.urlPathHelper.getLookupPathForRequest(request);
-		for (HandlerInterceptor interceptor : this.handlerInterceptors) {
+		for (HandlerInterceptor interceptor : this.adaptedInterceptors) {
 			if (interceptor instanceof MappedInterceptor) {
 				MappedInterceptor mappedInterceptor = (MappedInterceptor) interceptor;
 				if (mappedInterceptor.matches(lookupPath, this.pathMatcher)) {

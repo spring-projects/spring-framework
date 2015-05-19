@@ -30,7 +30,6 @@ import org.mockito.Mockito;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.mock.web.test.MockHttpServletRequest;
-import org.springframework.mock.web.test.MockHttpServletResponse;
 import org.springframework.web.HttpRequestHandler;
 import org.springframework.web.context.support.StaticWebApplicationContext;
 import org.springframework.web.servlet.HandlerExecutionChain;
@@ -38,9 +37,11 @@ import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.support.WebContentGenerator;
 
 /**
+ * Unit tests for
+ * {@link org.springframework.web.servlet.handler.HandlerMappingTests}.
  * @author Brian Clozel
  */
-public class AbstractHandlerMappingTests {
+public class HandlerMappingTests {
 
 	private MockHttpServletRequest request;
 	private AbstractHandlerMapping handlerMapping;
@@ -65,7 +66,8 @@ public class AbstractHandlerMappingTests {
 		this.handlerMapping.setApplicationContext(this.context);
 		HandlerExecutionChain chain = this.handlerMapping.getHandlerExecutionChain(new SimpleHandler(), this.request);
 		Assert.assertThat(chain.getInterceptors(),
-				Matchers.arrayContaining(firstMappedInterceptor, secondHandlerInterceptor, thirdMappedInterceptor, fourthHandlerInterceptor));
+				Matchers.arrayContaining(firstMappedInterceptor.getInterceptor(), secondHandlerInterceptor,
+						thirdMappedInterceptor.getInterceptor(), fourthHandlerInterceptor));
 	}
 
 	class TestHandlerMapping extends AbstractHandlerMapping {
