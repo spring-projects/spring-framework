@@ -144,52 +144,51 @@ public abstract class JdbcUtils {
 		Object value;
 
 		// Explicitly extract typed value, as far as possible.
-		if (String.class.equals(requiredType)) {
-			return rs.getString(index);
-		}
-		else if (boolean.class.equals(requiredType) || Boolean.class.equals(requiredType)) {
-			value = rs.getBoolean(index);
-		}
-		else if (byte.class.equals(requiredType) || Byte.class.equals(requiredType)) {
-			value = rs.getByte(index);
-		}
-		else if (short.class.equals(requiredType) || Short.class.equals(requiredType)) {
-			value = rs.getShort(index);
-		}
-		else if (int.class.equals(requiredType) || Integer.class.equals(requiredType)) {
-			value = rs.getInt(index);
-		}
-		else if (long.class.equals(requiredType) || Long.class.equals(requiredType)) {
-			value = rs.getLong(index);
-		}
-		else if (float.class.equals(requiredType) || Float.class.equals(requiredType)) {
-			value = rs.getFloat(index);
-		}
-		else if (double.class.equals(requiredType) || Double.class.equals(requiredType) ||
-				Number.class.equals(requiredType)) {
-			value = rs.getDouble(index);
-		}
-		else if (BigDecimal.class.equals(requiredType)) {
-			return rs.getBigDecimal(index);
-		}
-		else if (java.sql.Date.class.equals(requiredType)) {
-			return rs.getDate(index);
-		}
-		else if (java.sql.Time.class.equals(requiredType)) {
-			return rs.getTime(index);
-		}
-		else if (java.sql.Timestamp.class.equals(requiredType) || java.util.Date.class.equals(requiredType)) {
-			return rs.getTimestamp(index);
-		}
-		else if (byte[].class.equals(requiredType)) {
-			return rs.getBytes(index);
-		}
-		else if (Blob.class.equals(requiredType)) {
-			return rs.getBlob(index);
-		}
-		else if (Clob.class.equals(requiredType)) {
-			return rs.getClob(index);
-		}
+		if (String.class == requiredType) {
+	            return rs.getString(index);
+	        }
+	        else if (boolean.class == requiredType || Boolean.class == requiredType) {
+	            value = rs.getBoolean(index);
+	        }
+	        else if (byte.class == requiredType || Byte.class == requiredType) {
+	            value = rs.getByte(index);
+	        }
+	        else if (short.class == requiredType || Short.class == requiredType) {
+	            value = rs.getShort(index);
+	        }
+	        else if (int.class == requiredType || Integer.class == requiredType) {
+	            value = rs.getInt(index);
+	        }
+	        else if (long.class == requiredType || Long.class == requiredType) {
+	            value = rs.getLong(index);
+	        }
+	        else if (float.class == requiredType || Float.class == requiredType) {
+	            value = rs.getFloat(index);
+	        }
+	        else if (double.class == requiredType || Double.class == requiredType || Number.class == requiredType) {
+	            value = rs.getDouble(index);
+	        }
+	        else if (BigDecimal.class == requiredType) {
+	            return rs.getBigDecimal(index);
+	        }
+	        else if (java.sql.Date.class == requiredType) {
+	            return rs.getDate(index);
+	        }
+	        else if (java.sql.Time.class == requiredType) {
+	            return rs.getTime(index);
+	        }
+	        else if (java.sql.Timestamp.class == requiredType || java.util.Date.class == requiredType) {
+	            return rs.getTimestamp(index);
+	        }
+	        else if (byte[].class == requiredType) {
+	            return rs.getBytes(index);
+	        }
+	        else if (Blob.class == requiredType) {
+	            return rs.getBlob(index);
+	        }
+	        else if (Clob.class == requiredType) {
+	            return rs.getClob(index);
+	        }
 		else {
 			// Some unknown type desired -> rely on getObject.
 			if (getObjectWithTypeAvailable) {
