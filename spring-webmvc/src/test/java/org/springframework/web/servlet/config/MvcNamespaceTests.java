@@ -119,6 +119,7 @@ import org.springframework.web.servlet.resource.ResourceTransformer;
 import org.springframework.web.servlet.resource.ResourceUrlProvider;
 import org.springframework.web.servlet.resource.ResourceUrlProviderExposingInterceptor;
 import org.springframework.web.servlet.resource.VersionResourceResolver;
+import org.springframework.web.servlet.resource.WebJarsResourceResolver;
 import org.springframework.web.servlet.theme.ThemeChangeInterceptor;
 import org.springframework.web.servlet.view.BeanNameViewResolver;
 import org.springframework.web.servlet.view.ContentNegotiatingViewResolver;
@@ -409,10 +410,11 @@ public class MvcNamespaceTests {
 		assertNotNull(handler);
 
 		List<ResourceResolver> resolvers = handler.getResourceResolvers();
-		assertThat(resolvers, Matchers.hasSize(3));
+		assertThat(resolvers, Matchers.hasSize(4));
 		assertThat(resolvers.get(0), Matchers.instanceOf(CachingResourceResolver.class));
 		assertThat(resolvers.get(1), Matchers.instanceOf(VersionResourceResolver.class));
-		assertThat(resolvers.get(2), Matchers.instanceOf(PathResourceResolver.class));
+		assertThat(resolvers.get(2), Matchers.instanceOf(WebJarsResourceResolver.class));
+		assertThat(resolvers.get(3), Matchers.instanceOf(PathResourceResolver.class));
 
 		CachingResourceResolver cachingResolver = (CachingResourceResolver) resolvers.get(0);
 		assertThat(cachingResolver.getCache(), Matchers.instanceOf(ConcurrentMapCache.class));
