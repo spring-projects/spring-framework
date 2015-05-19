@@ -26,11 +26,14 @@ import static org.mockito.Mockito.verify;
 import java.util.Collections;
 import java.util.List;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.junit.Before;
 import org.junit.Test;
 
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
+import org.springframework.mock.web.test.MockHttpServletRequest;
 
 /**
  * Unit tests for
@@ -45,6 +48,8 @@ public class WebJarsResourceResolverTests {
 	private WebJarsResourceResolver resolver;
 
 	private ResourceResolverChain chain;
+
+	private HttpServletRequest request = new MockHttpServletRequest();
 
 	@Before
 	public void setup() {
@@ -102,6 +107,33 @@ public class WebJarsResourceResolverTests {
 
 		assertNull(actual);
 		verify(this.chain, times(1)).resolveUrlPath(file, this.locations);
+	}
+
+	@Test
+	public void resolveResourceExisting() {
+		Resource expected = mock(Resource.class);
+		this.locations = Collections.singletonList(new ClassPathResource("/META-INF/resources/webjars/", getClass()));
+		String file = "/foo/2.3/foo.txt";
+		given(this.chain.resolveResource(this.request, file, this.locations)).willReturn(expected);
+
+		Resource actual = this.resolver.resolveResource(this.request, file, this.locations, this.chain);
+
+		assertEquals(expected, actual);
+		verify(this.chain, times(1)).resolveResource(this.request, file, this.locations);
+	}
+
+	@Test
+	public void resolveResourceWebJar() {
+		Resource expected = mock(Resource.class);
+		String file = "/underscorejs/underscore.js";
+		String expectedPath = "/underscorejs/1.8.2/underscore.js";
+		this.locations = Collections.singletonList(new ClassPathResource("/META-INF/resources/webjars/", getClass()));
+		given(this.chain.resolveResource(this.request, expectedPath, this.locations)).willReturn(expected);
+
+		Resource actual = this.resolver.resolveResource(this.request, file, this.locations, this.chain);
+
+		assertEquals(expected, actual);
+		verify(this.chain, times(1)).resolveResource(this.request, file, this.locations);
 	}
 
 }

@@ -29,15 +29,19 @@ import org.springframework.core.io.Resource;
  * A {@code ResourceResolver} that delegates to the chain to locate a resource
  * and then attempts to find a matching versioned resource contained in a WebJar JAR file.
  *
- * <p>This allows WabJar users to use version-less paths in their templates, like {@code "/jquery/jquery.min.js"}
- * while this path is resolved to the unique version {@code "/jquery/1.2.0/jquery.min.js"}, which is a better fit
- * for HTTP caching and version management in applications.
+ * <p>This allows WebJars.org users to write version agnostic paths in their templates,
+ * like {@code <script src="/jquery/jquery.min.js"/>}.
+ * This path will be resolved to the unique version {@code <script src="/jquery/1.2.0/jquery.min.js"/>},
+ * which is a better fit for HTTP caching and version management in applications.
+ *
+ * <p>This also resolves Resources for version agnostic HTTP requests {@code "GET /jquery/jquery.min.js"}.
  *
  * <p>This resolver requires the "org.webjars:webjars-locator" library on classpath, and is automatically
  * registered if that library is present.
  *
  * @author Brian Clozel
  * @since 4.2
+ * @see org.springframework.web.servlet.config.annotation.ResourceChainRegistration
  * @see <a href="http://www.webjars.org">webjars.org</a>
  */
 public class WebJarsResourceResolver extends AbstractResourceResolver {
@@ -56,7 +60,12 @@ public class WebJarsResourceResolver extends AbstractResourceResolver {
 	protected Resource resolveResourceInternal(HttpServletRequest request, String requestPath,
 			List<? extends Resource> locations, ResourceResolverChain chain) {
 
-		return chain.resolveResource(request, requestPath, locations);
+		Resource resolved = chain.resolveResource(request, requestPath, locations);
+		if (resolved == null) {
+			String webJarResourcePath = findWebJarResourcePath(requestPath);
+			return chain.resolveResource(request, webJarResourcePath, locations);
+		}
+		return resolved;
 	}
 
 	@Override
@@ -65,26 +74,31 @@ public class WebJarsResourceResolver extends AbstractResourceResolver {
 
 		String path = chain.resolveUrlPath(resourceUrlPath, locations);
 		if (path == null) {
-			try {
-				int startOffset = resourceUrlPath.startsWith("/") ? 1 : 0;
-				int endOffset = resourceUrlPath.indexOf("/", 1);
-				if (endOffset != -1) {
-					String webjar = resourceUrlPath.substring(startOffset, endOffset);
-					String partialPath = resourceUrlPath.substring(endOffset);
-					String webJarPath = webJarAssetLocator.getFullPath(webjar, partialPath);
-					return chain.resolveUrlPath(webJarPath.substring(WEBJARS_LOCATION_LENGTH), locations);
-				}
-			}
-			catch (MultipleMatchesException ex) {
-				logger.warn("WebJar version conflict for \"" + resourceUrlPath + "\"", ex);
-			}
-			catch (IllegalArgumentException ex) {
-				if (logger.isTraceEnabled()) {
-					logger.trace("No WebJar resource found for \"" + resourceUrlPath + "\"");
-				}
-			}
+			String webJarResourcePath = findWebJarResourcePath(resourceUrlPath);
+			return chain.resolveUrlPath(webJarResourcePath, locations);
 		}
 		return path;
+	}
+
+	protected String findWebJarResourcePath(String path) {
+		try {
+			int startOffset = path.startsWith("/") ? 1 : 0;
+			int endOffset = path.indexOf("/", 1);
+			if (endOffset != -1) {
+				String webjar = path.substring(startOffset, endOffset);
+				String partialPath = path.substring(endOffset);
+				String webJarPath = webJarAssetLocator.getFullPath(webjar, partialPath);
+				return webJarPath.substring(WEBJARS_LOCATION_LENGTH);
+			}
+		} catch (MultipleMatchesException ex) {
+			logger.warn("WebJar version conflict for \"" + path + "\"", ex);
+		}
+		catch (IllegalArgumentException ex) {
+			if (logger.isTraceEnabled()) {
+				logger.trace("No WebJar resource found for \"" + path + "\"");
+			}
+		}
+		return null;
 	}
 
 }
