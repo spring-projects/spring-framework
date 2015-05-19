@@ -19,7 +19,6 @@ package org.springframework.web.servlet.handler;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -78,9 +77,9 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 
 	private final List<Object> interceptors = new ArrayList<Object>();
 
-	private final List<HandlerInterceptor> adaptedInterceptors = new ArrayList<HandlerInterceptor>();
+	private final List<HandlerInterceptor> handlerInterceptors = new ArrayList<HandlerInterceptor>();
 
-	private final List<MappedInterceptor> mappedInterceptors = new ArrayList<MappedInterceptor>();
+	private final List<MappedInterceptor> detectedMappedInterceptors = new ArrayList<MappedInterceptor>();
 
 	private CorsProcessor corsProcessor = new DefaultCorsProcessor();
 	
@@ -246,7 +245,7 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	@Override
 	protected void initApplicationContext() throws BeansException {
 		extendInterceptors(this.interceptors);
-		detectMappedInterceptors(this.mappedInterceptors);
+		detectMappedInterceptors(this.detectedMappedInterceptors);
 		initInterceptors();
 	}
 
@@ -288,14 +287,11 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 				if (interceptor == null) {
 					throw new IllegalArgumentException("Entry number " + i + " in interceptors array is null");
 				}
-				if (interceptor instanceof MappedInterceptor) {
-					this.mappedInterceptors.add((MappedInterceptor) interceptor);
-				}
-				else {
-					this.adaptedInterceptors.add(adaptInterceptor(interceptor));
-				}
+				this.handlerInterceptors.add(adaptInterceptor(interceptor));
 			}
 		}
+		this.handlerInterceptors.addAll(this.detectedMappedInterceptors);
+		this.interceptors.clear();
 	}
 
 	/**
@@ -327,8 +323,14 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	 * @return the array of {@link HandlerInterceptor}s, or {@code null} if none
 	 */
 	protected final HandlerInterceptor[] getAdaptedInterceptors() {
-		int count = this.adaptedInterceptors.size();
-		return (count > 0 ? this.adaptedInterceptors.toArray(new HandlerInterceptor[count]) : null);
+		List<HandlerInterceptor> adaptedInterceptors = new ArrayList<HandlerInterceptor>();
+		for (HandlerInterceptor interceptor : this.handlerInterceptors) {
+			if (!(interceptor instanceof MappedInterceptor)) {
+				adaptedInterceptors.add(interceptor);
+			}
+		}
+		int count = adaptedInterceptors.size();
+		return (count > 0 ? adaptedInterceptors.toArray(new HandlerInterceptor[count]) : null);
 	}
 
 	/**
@@ -336,8 +338,14 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	 * @return the array of {@link MappedInterceptor}s, or {@code null} if none
 	 */
 	protected final MappedInterceptor[] getMappedInterceptors() {
-		int count = this.mappedInterceptors.size();
-		return (count > 0 ? this.mappedInterceptors.toArray(new MappedInterceptor[count]) : null);
+		List<MappedInterceptor> mappedInterceptors = new ArrayList<MappedInterceptor>();
+		for (HandlerInterceptor interceptor : this.handlerInterceptors) {
+			if (interceptor instanceof MappedInterceptor) {
+				mappedInterceptors.add((MappedInterceptor) interceptor);
+			}
+		}
+		int count = mappedInterceptors.size();
+		return (count > 0 ? mappedInterceptors.toArray(new MappedInterceptor[count]) : null);
 	}
 
 	/**
@@ -397,8 +405,9 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	 * applicable interceptors.
 	 * <p>The default implementation builds a standard {@link HandlerExecutionChain}
 	 * with the given handler, the handler mapping's common interceptors, and any
-	 * {@link MappedInterceptor}s matching to the current request URL. Subclasses
-	 * may override this in order to extend/rearrange the list of interceptors.
+	 * {@link MappedInterceptor}s matching to the current request URL. Interceptors
+	 * are added in the order they were registered. Subclasses may override this
+	 * in order to extend/rearrange the list of interceptors.
 	 * <p><b>NOTE:</b> The passed-in handler object may be a raw handler or a
 	 * pre-built {@link HandlerExecutionChain}. This method should handle those
 	 * two cases explicitly, either building a new {@link HandlerExecutionChain}
@@ -414,15 +423,19 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	protected HandlerExecutionChain getHandlerExecutionChain(Object handler, HttpServletRequest request) {
 		HandlerExecutionChain chain = (handler instanceof HandlerExecutionChain ?
 				(HandlerExecutionChain) handler : new HandlerExecutionChain(handler));
-		chain.addInterceptors(getAdaptedInterceptors());
 
 		String lookupPath = this.urlPathHelper.getLookupPathForRequest(request);
-		for (MappedInterceptor mappedInterceptor : this.mappedInterceptors) {
-			if (mappedInterceptor.matches(lookupPath, this.pathMatcher)) {
-				chain.addInterceptor(mappedInterceptor.getInterceptor());
+		for (HandlerInterceptor interceptor : this.handlerInterceptors) {
+			if (interceptor instanceof MappedInterceptor) {
+				MappedInterceptor mappedInterceptor = (MappedInterceptor) interceptor;
+				if (mappedInterceptor.matches(lookupPath, this.pathMatcher)) {
+					chain.addInterceptor(mappedInterceptor.getInterceptor());
+				}
+			}
+			else {
+				chain.addInterceptor(interceptor);
 			}
 		}
-
 		return chain;
 	}
 
