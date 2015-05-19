@@ -24,6 +24,7 @@ import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicReference;
 
+import com.fasterxml.jackson.annotation.JsonView;
 import com.fasterxml.jackson.core.JsonEncoding;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
@@ -33,6 +34,7 @@ import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 
+import org.springframework.core.MethodParameter;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.util.Assert;
@@ -212,16 +214,27 @@ public class MappingJackson2MessageConverter extends AbstractMessageConverter {
 	@Override
 	public Object convertToInternal(Object payload, MessageHeaders headers) {
 		try {
+			Class<?> serializationView = getSerializationView(headers);
 			if (byte[].class.equals(getSerializedPayloadClass())) {
 				ByteArrayOutputStream out = new ByteArrayOutputStream(1024);
 				JsonEncoding encoding = getJsonEncoding(getMimeType(headers));
 				JsonGenerator generator = this.objectMapper.getFactory().createGenerator(out, encoding);
-				this.objectMapper.writeValue(generator, payload);
+				if (serializationView != null) {
+					this.objectMapper.writerWithView(serializationView).writeValue(generator, payload);
+				}
+				else {
+					this.objectMapper.writeValue(generator, payload);
+				}
 				payload = out.toByteArray();
 			}
 			else {
 				Writer writer = new StringWriter();
-				this.objectMapper.writeValue(writer, payload);
+				if (serializationView != null) {
+					this.objectMapper.writerWithView(serializationView).writeValue(writer, payload);
+				}
+				else {
+					this.objectMapper.writeValue(writer, payload);
+				}
 				payload = writer.toString();
 			}
 		}
@@ -229,6 +242,24 @@ public class MappingJackson2MessageConverter extends AbstractMessageConverter {
 			throw new MessageConversionException("Could not write JSON: " + ex.getMessage(), ex);
 		}
 		return payload;
+	}
+
+	private Class<?> getSerializationView(MessageHeaders headers) {
+		MethodParameter returnType = (headers == null ? null :
+				(MethodParameter)headers.get(METHOD_PARAMETER_HINT_HEADER));
+		if (returnType == null) {
+			return null;
+		}
+		JsonView annotation = returnType.getMethodAnnotation(JsonView.class);
+		if (annotation == null) {
+			return null;
+		}
+		Class<?>[] classes = annotation.value();
+		if (classes.length != 1) {
+			throw new IllegalArgumentException(
+					"@JsonView only supported for handler methods with exactly 1 class argument: " + returnType);
+		}
+		return classes[0];
 	}
 
 	/**

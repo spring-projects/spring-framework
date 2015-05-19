@@ -24,6 +24,7 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.core.MethodParameter;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.support.MessageBuilder;
@@ -38,12 +39,23 @@ import org.springframework.util.MimeType;
  * and MIME type.
  *
  * @author Rossen Stoyanchev
+ * @author Sebastien Deleuze
  * @since 4.0
  */
 public abstract class AbstractMessageConverter implements MessageConverter {
 
-	protected final Log logger = LogFactory.getLog(getClass());
+	/**
+	 * Name of the header that can be set to provide further information
+	 * ({@link MethodParameter} instance) about the origin of the payload (for
+	 * {@link #toMessage(Object, MessageHeaders)}) or about the target of the payload
+	 * ({@link #fromMessage(Message, Class)}).
+	 *
+	 * @since 4.2
+	 */
+	public static final String METHOD_PARAMETER_HINT_HEADER = "methodParameterHint";
 
+
+	protected final Log logger = LogFactory.getLog(getClass());
 
 	private final List<MimeType> supportedMimeTypes;
 

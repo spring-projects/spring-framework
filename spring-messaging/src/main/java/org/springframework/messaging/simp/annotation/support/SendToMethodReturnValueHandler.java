@@ -25,6 +25,7 @@ import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageHeaders;
+import org.springframework.messaging.converter.AbstractMessageConverter;
 import org.springframework.messaging.handler.DestinationPatternsMessageCondition;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.handler.annotation.support.DestinationVariableMethodArgumentResolver;
@@ -51,6 +52,7 @@ import org.springframework.util.PropertyPlaceholderHelper.PlaceholderResolver;
  * the message is sent to each destination.
  *
  * @author Rossen Stoyanchev
+ * @author Sebastien Deleuze
  * @since 4.0
  */
 public class SendToMethodReturnValueHandler implements HandlerMethodReturnValueHandler {
@@ -162,10 +164,10 @@ public class SendToMethodReturnValueHandler implements HandlerMethodReturnValueH
 			for (String destination : destinations) {
 				destination = this.placeholderHelper.replacePlaceholders(destination, varResolver);
 				if (broadcast) {
-					this.messagingTemplate.convertAndSendToUser(user, destination, returnValue);
+					this.messagingTemplate.convertAndSendToUser(user, destination, returnValue, createHeaders(null, returnType));
 				}
 				else {
-					this.messagingTemplate.convertAndSendToUser(user, destination, returnValue, createHeaders(sessionId));
+					this.messagingTemplate.convertAndSendToUser(user, destination, returnValue, createHeaders(sessionId, returnType));
 				}
 			}
 		}
@@ -174,7 +176,7 @@ public class SendToMethodReturnValueHandler implements HandlerMethodReturnValueH
 			String[] destinations = getTargetDestinations(sendTo, message, this.defaultDestinationPrefix);
 			for (String destination : destinations) {
 				destination = this.placeholderHelper.replacePlaceholders(destination, varResolver);
-				this.messagingTemplate.convertAndSend(destination, returnValue, createHeaders(sessionId));
+				this.messagingTemplate.convertAndSend(destination, returnValue, createHeaders(sessionId, returnType));
 			}
 		}
 	}
@@ -210,12 +212,15 @@ public class SendToMethodReturnValueHandler implements HandlerMethodReturnValueH
 				new String[] {defaultPrefix + destination} : new String[] {defaultPrefix + "/" + destination});
 	}
 
-	private MessageHeaders createHeaders(String sessionId) {
+	private MessageHeaders createHeaders(String sessionId, MethodParameter returnType) {
 		SimpMessageHeaderAccessor headerAccessor = SimpMessageHeaderAccessor.create(SimpMessageType.MESSAGE);
 		if (getHeaderInitializer() != null) {
 			getHeaderInitializer().initHeaders(headerAccessor);
 		}
-		headerAccessor.setSessionId(sessionId);
+		if (sessionId != null) {
+			headerAccessor.setSessionId(sessionId);
+		}
+		headerAccessor.setHeader(AbstractMessageConverter.METHOD_PARAMETER_HINT_HEADER, returnType);
 		headerAccessor.setLeaveMutable(true);
 		return headerAccessor.getMessageHeaders();
 	}

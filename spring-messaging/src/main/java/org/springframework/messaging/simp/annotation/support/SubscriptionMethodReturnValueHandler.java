@@ -22,6 +22,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.core.MethodParameter;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
+import org.springframework.messaging.converter.AbstractMessageConverter;
 import org.springframework.messaging.core.MessageSendingOperations;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.handler.invocation.HandlerMethodReturnValueHandler;
@@ -44,6 +45,7 @@ import org.springframework.util.Assert;
  * input message. The message is then sent directly back to the connected client.
  *
  * @author Rossen Stoyanchev
+ * @author Sebastien Deleuze
  * @since 4.0
  */
 public class SubscriptionMethodReturnValueHandler implements HandlerMethodReturnValueHandler {
@@ -109,16 +111,17 @@ public class SubscriptionMethodReturnValueHandler implements HandlerMethodReturn
 			logger.debug("Reply to @SubscribeMapping: " + returnValue);
 		}
 
-		this.messagingTemplate.convertAndSend(destination, returnValue, createHeaders(sessionId, subscriptionId));
+		this.messagingTemplate.convertAndSend(destination, returnValue, createHeaders(sessionId, subscriptionId, returnType));
 	}
 
-	private MessageHeaders createHeaders(String sessionId, String subscriptionId) {
+	private MessageHeaders createHeaders(String sessionId, String subscriptionId, MethodParameter returnType) {
 		SimpMessageHeaderAccessor headerAccessor = SimpMessageHeaderAccessor.create(SimpMessageType.MESSAGE);
 		if (getHeaderInitializer() != null) {
 			getHeaderInitializer().initHeaders(headerAccessor);
 		}
 		headerAccessor.setSessionId(sessionId);
 		headerAccessor.setSubscriptionId(subscriptionId);
+		headerAccessor.setHeader(AbstractMessageConverter.METHOD_PARAMETER_HINT_HEADER, returnType);
 		headerAccessor.setLeaveMutable(true);
 		return headerAccessor.getMessageHeaders();
 	}
