@@ -295,7 +295,7 @@ public class ScheduledAnnotationBeanPostProcessor implements BeanPostProcessor, 
 					initialDelayString = this.embeddedValueResolver.resolveStringValue(initialDelayString);
 				}
 				try {
-					initialDelay = Integer.parseInt(initialDelayString);
+					initialDelay = Long.parseLong(initialDelayString);
 				}
 				catch (NumberFormatException ex) {
 					throw new IllegalArgumentException(
@@ -343,7 +343,7 @@ public class ScheduledAnnotationBeanPostProcessor implements BeanPostProcessor, 
 					fixedDelayString = this.embeddedValueResolver.resolveStringValue(fixedDelayString);
 				}
 				try {
-					fixedDelay = Integer.parseInt(fixedDelayString);
+					fixedDelay = Long.parseLong(fixedDelayString);
 				}
 				catch (NumberFormatException ex) {
 					throw new IllegalArgumentException(
@@ -367,7 +367,7 @@ public class ScheduledAnnotationBeanPostProcessor implements BeanPostProcessor, 
 					fixedRateString = this.embeddedValueResolver.resolveStringValue(fixedRateString);
 				}
 				try {
-					fixedRate = Integer.parseInt(fixedRateString);
+					fixedRate = Long.parseLong(fixedRateString);
 				}
 				catch (NumberFormatException ex) {
 					throw new IllegalArgumentException(
