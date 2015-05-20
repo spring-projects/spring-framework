@@ -80,7 +80,7 @@ public class ResourceHttpMessageConverter extends AbstractHttpMessageConverter<R
 	protected Long getContentLength(Resource resource, MediaType contentType) throws IOException {
 		// Don't try to determine contentLength on InputStreamResource - cannot be read afterwards...
 		// Note: custom InputStreamResource subclasses could provide a pre-calculated content length!
-		return (InputStreamResource.class.equals(resource.getClass()) ? null : resource.contentLength());
+		return (InputStreamResource.class == resource.getClass() ? null : resource.contentLength());
 	}
 
 	@Override

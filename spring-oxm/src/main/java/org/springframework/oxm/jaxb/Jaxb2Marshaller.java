@@ -557,7 +557,7 @@ public class Jaxb2Marshaller implements MimeMarshaller, MimeUnmarshaller, Generi
 	public boolean supports(Type genericType) {
 		if (genericType instanceof ParameterizedType) {
 			ParameterizedType parameterizedType = (ParameterizedType) genericType;
-			if (JAXBElement.class.equals(parameterizedType.getRawType()) &&
+			if (JAXBElement.class == parameterizedType.getRawType() &&
 					parameterizedType.getActualTypeArguments().length == 1) {
 				Type typeArgument = parameterizedType.getActualTypeArguments()[0];
 				if (typeArgument instanceof Class) {
@@ -610,13 +610,13 @@ public class Jaxb2Marshaller implements MimeMarshaller, MimeUnmarshaller, Generi
 	 * Compare section 8.5.1 of the JAXB2 spec.
 	 */
 	private boolean isPrimitiveWrapper(Class<?> clazz) {
-		return Boolean.class.equals(clazz) ||
-				Byte.class.equals(clazz) ||
-				Short.class.equals(clazz) ||
-				Integer.class.equals(clazz) ||
-				Long.class.equals(clazz) ||
-				Float.class.equals(clazz) ||
-				Double.class.equals(clazz);
+		return Boolean.class == clazz ||
+				Byte.class == clazz ||
+				Short.class == clazz ||
+				Integer.class == clazz ||
+				Long.class == clazz ||
+				Float.class == clazz ||
+				Double.class == clazz;
 	}
 
 	/**
@@ -624,20 +624,20 @@ public class Jaxb2Marshaller implements MimeMarshaller, MimeUnmarshaller, Generi
 	 * Compare section 8.5.2 of the JAXB2 spec.
 	 */
 	private boolean isStandardClass(Class<?> clazz) {
-		return String.class.equals(clazz) ||
+		return String.class == clazz ||
 				BigInteger.class.isAssignableFrom(clazz) ||
 				BigDecimal.class.isAssignableFrom(clazz) ||
 				Calendar.class.isAssignableFrom(clazz) ||
 				Date.class.isAssignableFrom(clazz) ||
 				QName.class.isAssignableFrom(clazz) ||
-				URI.class.equals(clazz) ||
+				URI.class == clazz ||
 				XMLGregorianCalendar.class.isAssignableFrom(clazz) ||
 				Duration.class.isAssignableFrom(clazz) ||
-				Image.class.equals(clazz) ||
-				DataHandler.class.equals(clazz) ||
+				Image.class == clazz ||
+				DataHandler.class == clazz ||
 				// Source and subclasses should be supported according to the JAXB2 spec, but aren't in the RI
 				// Source.class.isAssignableFrom(clazz) ||
-				UUID.class.equals(clazz);
+				UUID.class == clazz;
 
 	}
 

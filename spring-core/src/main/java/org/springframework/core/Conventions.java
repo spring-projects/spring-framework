@@ -168,7 +168,7 @@ public abstract class Conventions {
 	public static String getVariableNameForReturnType(Method method, Class<?> resolvedType, Object value) {
 		Assert.notNull(method, "Method must not be null");
 
-		if (Object.class.equals(resolvedType)) {
+		if (Object.class == resolvedType) {
 			if (value == null) {
 				throw new IllegalArgumentException("Cannot generate variable name for an Object return type with null value");
 			}

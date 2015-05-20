@@ -102,8 +102,8 @@ public class HttpEntityMethodProcessor extends AbstractMessageConverterMethodPro
 
 	@Override
 	public boolean supportsParameter(MethodParameter parameter) {
-		return (HttpEntity.class.equals(parameter.getParameterType()) ||
-				RequestEntity.class.equals(parameter.getParameterType()));
+		return (HttpEntity.class == parameter.getParameterType() ||
+				RequestEntity.class == parameter.getParameterType());
 	}
 
 	@Override
@@ -121,7 +121,7 @@ public class HttpEntityMethodProcessor extends AbstractMessageConverterMethodPro
 		Type paramType = getHttpEntityType(parameter);
 
 		Object body = readWithMessageConverters(webRequest, parameter, paramType);
-		if (RequestEntity.class.equals(parameter.getParameterType())) {
+		if (RequestEntity.class == parameter.getParameterType()) {
 			URI url = inputMessage.getURI();
 			HttpMethod httpMethod = inputMessage.getMethod();
 			return new RequestEntity<Object>(body, inputMessage.getHeaders(), httpMethod, url);

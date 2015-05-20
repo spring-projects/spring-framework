@@ -103,7 +103,7 @@ public abstract class MetaAnnotationUtils {
 
 		Assert.notNull(annotationType, "Annotation type must not be null");
 
-		if (clazz == null || clazz.equals(Object.class)) {
+		if (clazz == null || Object.class == clazz) {
 			return null;
 		}
 
@@ -181,7 +181,7 @@ public abstract class MetaAnnotationUtils {
 			Set<Annotation> visited, Class<? extends Annotation>... annotationTypes) {
 
 		assertNonEmptyAnnotationTypeArray(annotationTypes, "The list of annotation types must not be empty");
-		if (clazz == null || clazz.equals(Object.class)) {
+		if (clazz == null || Object.class == clazz) {
 			return null;
 		}
 

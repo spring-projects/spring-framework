@@ -215,7 +215,7 @@ public class MappingJackson2MessageConverter extends AbstractMessageConverter {
 	public Object convertToInternal(Object payload, MessageHeaders headers) {
 		try {
 			Class<?> serializationView = getSerializationView(headers);
-			if (byte[].class.equals(getSerializedPayloadClass())) {
+			if (byte[].class == getSerializedPayloadClass()) {
 				ByteArrayOutputStream out = new ByteArrayOutputStream(1024);
 				JsonEncoding encoding = getJsonEncoding(getMimeType(headers));
 				JsonGenerator generator = this.objectMapper.getFactory().createGenerator(out, encoding);

@@ -68,7 +68,7 @@ public class ViewNameMethodReturnValueHandler implements HandlerMethodReturnValu
 	@Override
 	public boolean supportsReturnType(MethodParameter returnType) {
 		Class<?> paramType = returnType.getParameterType();
-		return (void.class.equals(paramType) || String.class.equals(paramType));
+		return (void.class == paramType || String.class == paramType);
 	}
 
 	@Override

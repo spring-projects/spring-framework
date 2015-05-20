@@ -166,7 +166,7 @@ public class Indexer extends SpelNodeImpl {
 
 		// Try and treat the index value as a property of the context object
 		// TODO could call the conversion service to convert the value to a String
-		if (String.class.equals(indexValue.getTypeDescriptor().getType())) {
+		if (String.class == indexValue.getTypeDescriptor().getType()) {
 			this.indexedType = IndexedType.OBJECT;
 			return new PropertyIndexingValueRef(targetObject, (String) indexValue.getValue(),
 					state.getEvaluationContext(), targetDescriptor);

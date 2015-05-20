@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -93,7 +93,7 @@ public class AspectJAfterReturningAdvice extends AbstractAspectJAdvice implement
 		if (returnValue != null) {
 			return ClassUtils.isAssignableValue(type, returnValue);
 		}
-		else if (type.equals(Object.class) && method.getReturnType().equals(void.class)) {
+		else if (Object.class == type && void.class == method.getReturnType()) {
 			return true;
 		}
 		else{

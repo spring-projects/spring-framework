@@ -146,7 +146,7 @@ public abstract class AbstractMessageConverter implements MessageConverter {
 	 * @param payloadClass either byte[] or String
 	 */
 	public void setSerializedPayloadClass(Class<?> payloadClass) {
-		Assert.isTrue(byte[].class.equals(payloadClass) || String.class.equals(payloadClass),
+		Assert.isTrue(byte[].class == payloadClass || String.class == payloadClass,
 				"Payload class must be byte[] or String: " + payloadClass);
 		this.serializedPayloadClass = payloadClass;
 	}

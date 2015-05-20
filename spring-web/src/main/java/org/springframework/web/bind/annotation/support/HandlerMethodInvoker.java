@@ -740,7 +740,7 @@ public class HandlerMethodInvoker {
 
 	private Object checkValue(String name, Object value, Class<?> paramType) {
 		if (value == null) {
-			if (boolean.class.equals(paramType)) {
+			if (boolean.class == paramType) {
 				return Boolean.FALSE;
 			}
 			else if (paramType.isPrimitive()) {

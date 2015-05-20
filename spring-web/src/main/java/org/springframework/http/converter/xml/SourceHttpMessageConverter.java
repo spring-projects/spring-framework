@@ -118,16 +118,16 @@ public class SourceHttpMessageConverter<T extends Source> extends AbstractHttpMe
 			throws IOException, HttpMessageNotReadableException {
 
 		InputStream body = inputMessage.getBody();
-		if (DOMSource.class.equals(clazz)) {
+		if (DOMSource.class == clazz) {
 			return (T) readDOMSource(body);
 		}
-		else if (SAXSource.class.equals(clazz)) {
+		else if (SAXSource.class == clazz) {
 			return (T) readSAXSource(body);
 		}
-		else if (StAXSource.class.equals(clazz)) {
+		else if (StAXSource.class == clazz) {
 			return (T) readStAXSource(body);
 		}
-		else if (StreamSource.class.equals(clazz) || Source.class.equals(clazz)) {
+		else if (StreamSource.class == clazz || Source.class == clazz) {
 			return (T) readStreamSource(body);
 		}
 		else {

@@ -182,10 +182,10 @@ public class Jaxb2CollectionHttpMessageConverter<T extends Collection>
 								collectionClass.getName() + "]: " + ex.getMessage());
 			}
 		}
-		else if (List.class.equals(collectionClass)) {
+		else if (List.class == collectionClass) {
 			return (T) new ArrayList();
 		}
-		else if (SortedSet.class.equals(collectionClass)) {
+		else if (SortedSet.class == collectionClass) {
 			return (T) new TreeSet();
 		}
 		else {

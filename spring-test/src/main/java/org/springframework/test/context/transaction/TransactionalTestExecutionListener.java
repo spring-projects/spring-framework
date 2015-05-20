@@ -410,7 +410,7 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 	private List<Class<?>> getSuperClasses(Class<?> clazz) {
 		List<Class<?>> results = new ArrayList<Class<?>>();
 		Class<?> current = clazz;
-		while (current != null && !current.equals(Object.class)) {
+		while (current != null && Object.class != current) {
 			results.add(current);
 			current = current.getSuperclass();
 		}

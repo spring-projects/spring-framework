@@ -52,7 +52,7 @@ public class JsonPathExpectationsHelper {
 		for (Method candidate : JsonPath.class.getMethods()) {
 			if (candidate.getName().equals("compile")) {
 				Class<?>[] paramTypes = candidate.getParameterTypes();
-				if (paramTypes.length == 2 && paramTypes[0].equals(String.class) && paramTypes[1].isArray()) {
+				if (paramTypes.length == 2 && String.class == paramTypes[0] && paramTypes[1].isArray()) {
 					compileMethod = candidate;
 					emptyFilters = Array.newInstance(paramTypes[1].getComponentType(), 0);
 					break;

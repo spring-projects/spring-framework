@@ -328,7 +328,7 @@ public class AnnotationMethodHandlerExceptionResolver extends AbstractHandlerExc
 		else if (Principal.class.isAssignableFrom(parameterType)) {
 			return request.getUserPrincipal();
 		}
-		else if (Locale.class.equals(parameterType)) {
+		else if (Locale.class == parameterType) {
 			return request.getLocale();
 		}
 		else if (InputStream.class.isAssignableFrom(parameterType)) {
@@ -355,7 +355,7 @@ public class AnnotationMethodHandlerExceptionResolver extends AbstractHandlerExc
 			}
 			return ((MimeResponse) response).getWriter();
 		}
-		else if (Event.class.equals(parameterType)) {
+		else if (Event.class == parameterType) {
 			if (!(request instanceof EventRequest)) {
 				throw new IllegalStateException("Event can only get obtained from EventRequest");
 			}

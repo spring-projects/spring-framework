@@ -97,7 +97,7 @@ abstract class ActiveProfilesUtils {
 			validateActiveProfilesConfiguration(declaringClass, annAttrs);
 
 			Class<? extends ActiveProfilesResolver> resolverClass = annAttrs.getClass("resolver");
-			if (ActiveProfilesResolver.class.equals(resolverClass)) {
+			if (ActiveProfilesResolver.class == resolverClass) {
 				resolverClass = DefaultActiveProfilesResolver.class;
 			}
 

@@ -172,7 +172,7 @@ public class MarshallingMessageConverter extends AbstractMessageConverter {
 	public Object convertToInternal(Object payload, MessageHeaders headers) {
 		Assert.notNull(this.marshaller, "Property 'marshaller' is required");
 		try {
-			if (byte[].class.equals(getSerializedPayloadClass())) {
+			if (byte[].class == getSerializedPayloadClass()) {
 				ByteArrayOutputStream out = new ByteArrayOutputStream();
 				Result result = new StreamResult(out);
 

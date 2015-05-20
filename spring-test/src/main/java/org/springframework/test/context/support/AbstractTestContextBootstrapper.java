@@ -463,7 +463,7 @@ public abstract class AbstractTestContextBootstrapper implements TestContextBoot
 					configAttributes));
 			}
 			Class<? extends ContextLoader> contextLoaderClass = configAttributes.getContextLoaderClass();
-			if (!ContextLoader.class.equals(contextLoaderClass)) {
+			if (ContextLoader.class != contextLoaderClass) {
 				if (logger.isDebugEnabled()) {
 					logger.debug(String.format(
 						"Found explicit ContextLoader class [%s] for context configuration attributes %s",
@@ -480,10 +480,9 @@ public abstract class AbstractTestContextBootstrapper implements TestContextBoot
 	 * interaction with the {@code ContextCache}.
 	 * <p>The default implementation simply delegates to
 	 * {@code getBootstrapContext().getCacheAwareContextLoaderDelegate()}.
-	 * <p>Concrete subclasses may choose to override this method to return a
-	 * custom {@code CacheAwareContextLoaderDelegate} implementation with custom
-	 * {@link org.springframework.test.context.cache.ContextCache ContextCache}
-	 * support.
+	 * <p>Concrete subclasses may choose to override this method to return a custom
+	 * {@code CacheAwareContextLoaderDelegate} implementation with custom
+	 * {@link org.springframework.test.context.cache.ContextCache ContextCache} support.
 	 * @return the context loader delegate (never {@code null})
 	 */
 	protected CacheAwareContextLoaderDelegate getCacheAwareContextLoaderDelegate() {
@@ -509,10 +508,8 @@ public abstract class AbstractTestContextBootstrapper implements TestContextBoot
 	 * <p>The default implementation simply returns the supplied instance unmodified.
 	 * <p>Concrete subclasses may choose to return a specialized subclass of
 	 * {@link MergedContextConfiguration} based on properties in the supplied instance.
-	 * @param mergedConfig the {@code MergedContextConfiguration} to process;
-	 * never {@code null}
-	 * @return a fully initialized {@code MergedContextConfiguration}; never
-	 * {@code null}
+	 * @param mergedConfig the {@code MergedContextConfiguration} to process; never {@code null}
+	 * @return a fully initialized {@code MergedContextConfiguration}; never {@code null}
 	 */
 	protected MergedContextConfiguration processMergedContextConfiguration(MergedContextConfiguration mergedConfig) {
 		return mergedConfig;

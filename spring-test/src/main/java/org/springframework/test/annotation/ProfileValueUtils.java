@@ -85,7 +85,7 @@ public abstract class ProfileValueUtils {
 		}
 
 		ProfileValueSource profileValueSource;
-		if (SystemProfileValueSource.class.equals(profileValueSourceType)) {
+		if (SystemProfileValueSource.class == profileValueSourceType) {
 			profileValueSource = SystemProfileValueSource.getInstance();
 		}
 		else {

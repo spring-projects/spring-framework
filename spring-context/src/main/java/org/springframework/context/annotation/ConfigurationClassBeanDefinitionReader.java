@@ -320,7 +320,7 @@ class ConfigurationClassBeanDefinitionReader {
 			Class<? extends BeanDefinitionReader> readerClass = entry.getValue();
 
 			// Default reader selection necessary?
-			if (readerClass.equals(BeanDefinitionReader.class)) {
+			if (BeanDefinitionReader.class == readerClass) {
 				if (StringUtils.endsWithIgnoreCase(resource, ".groovy")) {
 					// When clearly asking for Groovy, that's what they'll get...
 					readerClass = GroovyBeanDefinitionReader.class;

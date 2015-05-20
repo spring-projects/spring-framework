@@ -159,10 +159,10 @@ public class CustomCollectionEditor extends PropertyEditorSupport {
 						"Could not instantiate collection class [" + collectionType.getName() + "]: " + ex.getMessage());
 			}
 		}
-		else if (List.class.equals(collectionType)) {
+		else if (List.class == collectionType) {
 			return new ArrayList<Object>(initialCapacity);
 		}
-		else if (SortedSet.class.equals(collectionType)) {
+		else if (SortedSet.class == collectionType) {
 			return new TreeSet<Object>();
 		}
 		else {

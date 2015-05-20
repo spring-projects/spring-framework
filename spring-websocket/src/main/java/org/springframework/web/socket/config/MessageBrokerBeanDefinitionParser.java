@@ -573,7 +573,7 @@ class MessageBrokerBeanDefinitionParser implements BeanDefinitionParser {
 		RuntimeBeanReference webSocketHandler = new RuntimeBeanReference(WEB_SOCKET_HANDLER_BEAN_NAME);
 		beanDef.getPropertyValues().add("subProtocolWebSocketHandler", webSocketHandler);
 
-		if (StompBrokerRelayMessageHandler.class.equals(broker.getBeanClass())) {
+		if (StompBrokerRelayMessageHandler.class == broker.getBeanClass()) {
 			beanDef.getPropertyValues().add("stompBrokerRelay", broker);
 		}
 		String name = inChannel.getBeanName() + "Executor";

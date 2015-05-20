@@ -891,7 +891,7 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 			else if (Principal.class.isAssignableFrom(parameterType)) {
 				return request.getUserPrincipal();
 			}
-			else if (Locale.class.equals(parameterType)) {
+			else if (Locale.class == parameterType) {
 				return RequestContextUtils.getLocale(request);
 			}
 			else if (InputStream.class.isAssignableFrom(parameterType)) {

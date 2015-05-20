@@ -520,7 +520,7 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator
 		}
 
 		private String determineDefaultPhase(Method handlerMethod) {
-			if (!void.class.equals(handlerMethod.getReturnType())) {
+			if (void.class != handlerMethod.getReturnType()) {
 				return PortletRequest.RENDER_PHASE;
 			}
 			for (Class<?> argType : handlerMethod.getParameterTypes()) {
@@ -650,7 +650,7 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator
 			else if (Principal.class.isAssignableFrom(parameterType)) {
 				return request.getUserPrincipal();
 			}
-			else if (Locale.class.equals(parameterType)) {
+			else if (Locale.class == parameterType) {
 				return request.getLocale();
 			}
 			else if (InputStream.class.isAssignableFrom(parameterType)) {
@@ -677,7 +677,7 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator
 				}
 				return ((MimeResponse) response).getWriter();
 			}
-			else if (Event.class.equals(parameterType)) {
+			else if (Event.class == parameterType) {
 				if (!(request instanceof EventRequest)) {
 					throw new IllegalStateException("Event can only get obtained from EventRequest");
 				}

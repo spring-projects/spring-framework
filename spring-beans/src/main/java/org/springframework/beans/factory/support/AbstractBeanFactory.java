@@ -516,7 +516,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 			RootBeanDefinition mbd = getMergedLocalBeanDefinition(beanName);
 
 			Class<?> classToMatch = typeToMatch.getRawClass();
-			Class<?>[] typesToMatch = (FactoryBean.class.equals(classToMatch) ?
+			Class<?>[] typesToMatch = (FactoryBean.class == classToMatch ?
 					new Class<?>[] {classToMatch} : new Class<?>[] {FactoryBean.class, classToMatch});
 
 			// Check decorated bean definition, if any: We assume it'll be easier

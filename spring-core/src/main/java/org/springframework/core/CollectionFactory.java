@@ -178,20 +178,20 @@ public abstract class CollectionFactory {
 	public static <E> Collection<E> createCollection(Class<?> collectionType, Class<?> elementType, int capacity) {
 		Assert.notNull(collectionType, "Collection type must not be null");
 		if (collectionType.isInterface()) {
-			if (Set.class.equals(collectionType) || Collection.class.equals(collectionType)) {
+			if (Set.class == collectionType || Collection.class == collectionType) {
 				return new LinkedHashSet<E>(capacity);
 			}
-			else if (List.class.equals(collectionType)) {
+			else if (List.class == collectionType) {
 				return new ArrayList<E>(capacity);
 			}
-			else if (SortedSet.class.equals(collectionType) || NavigableSet.class.equals(collectionType)) {
+			else if (SortedSet.class == collectionType || NavigableSet.class == collectionType) {
 				return new TreeSet<E>();
 			}
 			else {
 				throw new IllegalArgumentException("Unsupported Collection interface: " + collectionType.getName());
 			}
 		}
-		else if (EnumSet.class.equals(collectionType)) {
+		else if (EnumSet.class == collectionType) {
 			Assert.notNull(elementType, "Cannot create EnumSet for unknown element type");
 			// Cast is necessary for compilation in Eclipse 4.4.1.
 			return (Collection<E>) EnumSet.noneOf(asEnumType(elementType));
@@ -294,20 +294,20 @@ public abstract class CollectionFactory {
 	public static <K, V> Map<K, V> createMap(Class<?> mapType, Class<?> keyType, int capacity) {
 		Assert.notNull(mapType, "Map type must not be null");
 		if (mapType.isInterface()) {
-			if (Map.class.equals(mapType)) {
+			if (Map.class == mapType) {
 				return new LinkedHashMap<K, V>(capacity);
 			}
-			else if (SortedMap.class.equals(mapType) || NavigableMap.class.equals(mapType)) {
+			else if (SortedMap.class == mapType || NavigableMap.class == mapType) {
 				return new TreeMap<K, V>();
 			}
-			else if (MultiValueMap.class.equals(mapType)) {
+			else if (MultiValueMap.class == mapType) {
 				return new LinkedMultiValueMap();
 			}
 			else {
 				throw new IllegalArgumentException("Unsupported Map interface: " + mapType.getName());
 			}
 		}
-		else if (EnumMap.class.equals(mapType)) {
+		else if (EnumMap.class == mapType) {
 			Assert.notNull(keyType, "Cannot create EnumMap for unknown key type");
 			return new EnumMap(asEnumType(keyType));
 		}

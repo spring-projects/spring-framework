@@ -83,7 +83,7 @@ class ComponentScanAnnotationParser {
 		scanner.setResourceLoader(this.resourceLoader);
 
 		Class<? extends BeanNameGenerator> generatorClass = componentScan.getClass("nameGenerator");
-		boolean useInheritedGenerator = BeanNameGenerator.class.equals(generatorClass);
+		boolean useInheritedGenerator = BeanNameGenerator.class == generatorClass;
 		scanner.setBeanNameGenerator(useInheritedGenerator ? this.beanNameGenerator :
 				BeanUtils.instantiateClass(generatorClass));
 

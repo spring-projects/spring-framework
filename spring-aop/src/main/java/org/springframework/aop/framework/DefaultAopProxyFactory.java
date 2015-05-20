@@ -71,7 +71,7 @@ public class DefaultAopProxyFactory implements AopProxyFactory, Serializable {
 	 */
 	private boolean hasNoUserSuppliedProxyInterfaces(AdvisedSupport config) {
 		Class<?>[] interfaces = config.getProxiedInterfaces();
-		return (interfaces.length == 0 || (interfaces.length == 1 && SpringProxy.class.equals(interfaces[0])));
+		return (interfaces.length == 0 || (interfaces.length == 1 && SpringProxy.class == interfaces[0]));
 	}
 
 }

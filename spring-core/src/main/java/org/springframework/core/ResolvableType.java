@@ -527,7 +527,7 @@ public class ResolvableType implements Serializable {
 			WildcardType wt = (WildcardType) this.type;
 			if (wt.getLowerBounds().length == 0) {
 				Type[] upperBounds = wt.getUpperBounds();
-				if (upperBounds.length == 0 || (upperBounds.length == 1 && Object.class.equals(upperBounds[0]))) {
+				if (upperBounds.length == 0 || (upperBounds.length == 1 && Object.class == upperBounds[0])) {
 					return true;
 				}
 			}
@@ -770,7 +770,7 @@ public class ResolvableType implements Serializable {
 	}
 
 	private Type resolveBounds(Type[] bounds) {
-		if (ObjectUtils.isEmpty(bounds) || Object.class.equals(bounds[0])) {
+		if (ObjectUtils.isEmpty(bounds) || Object.class == bounds[0]) {
 			return null;
 		}
 		return bounds[0];

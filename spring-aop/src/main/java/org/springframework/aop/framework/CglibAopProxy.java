@@ -255,7 +255,7 @@ class CglibAopProxy implements AopProxy, Serializable {
 	 * methods across ClassLoaders, and writes warnings to the log for each one found.
 	 */
 	private void doValidateClass(Class<?> proxySuperClass, ClassLoader proxyClassLoader) {
-		if (!Object.class.equals(proxySuperClass)) {
+		if (Object.class != proxySuperClass) {
 			Method[] methods = proxySuperClass.getDeclaredMethods();
 			for (Method method : methods) {
 				int mod = method.getModifiers();

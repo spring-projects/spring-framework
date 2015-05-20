@@ -79,7 +79,7 @@ public class StringHttpMessageConverter extends AbstractHttpMessageConverter<Str
 
 	@Override
 	public boolean supports(Class<?> clazz) {
-		return String.class.equals(clazz);
+		return String.class == clazz;
 	}
 
 	@Override

@@ -111,7 +111,7 @@ public class RequestPartMethodArgumentResolver extends AbstractMessageConverterM
 			if (parameter.hasParameterAnnotation(RequestParam.class)){
 				return false;
 			}
-			else if (MultipartFile.class.equals(parameter.getParameterType())) {
+			else if (MultipartFile.class == parameter.getParameterType()) {
 				return true;
 			}
 			else if ("javax.servlet.http.Part".equals(parameter.getParameterType().getName())) {
@@ -144,7 +144,7 @@ public class RequestPartMethodArgumentResolver extends AbstractMessageConverterM
 		String partName = getPartName(parameter);
 		Object arg;
 
-		if (MultipartFile.class.equals(paramType)) {
+		if (MultipartFile.class == paramType) {
 			Assert.notNull(multipartRequest, "Expected MultipartHttpServletRequest: is a MultipartResolver configured?");
 			arg = multipartRequest.getFile(partName);
 		}
@@ -224,12 +224,12 @@ public class RequestPartMethodArgumentResolver extends AbstractMessageConverterM
 
 	private boolean isMultipartFileCollection(MethodParameter methodParam) {
 		Class<?> collectionType = getCollectionParameterType(methodParam);
-		return MultipartFile.class.equals(collectionType);
+		return MultipartFile.class == collectionType;
 	}
 
 	private boolean isMultipartFileArray(MethodParameter methodParam) {
 		Class<?> paramType = methodParam.getNestedParameterType().getComponentType();
-		return MultipartFile.class.equals(paramType);
+		return MultipartFile.class == paramType;
 	}
 
 	private boolean isPartCollection(MethodParameter methodParam) {
@@ -244,7 +244,7 @@ public class RequestPartMethodArgumentResolver extends AbstractMessageConverterM
 
 	private Class<?> getCollectionParameterType(MethodParameter methodParam) {
 		Class<?> paramType = methodParam.getNestedParameterType();
-		if (Collection.class.equals(paramType) || List.class.isAssignableFrom(paramType)){
+		if (Collection.class == paramType || List.class.isAssignableFrom(paramType)){
 			Class<?> valueType = GenericCollectionTypeResolver.getCollectionParameterType(methodParam);
 			if (valueType != null) {
 				return valueType;

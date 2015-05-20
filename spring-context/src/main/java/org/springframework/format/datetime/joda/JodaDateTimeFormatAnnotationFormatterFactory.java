@@ -92,13 +92,13 @@ public class JodaDateTimeFormatAnnotationFormatterFactory extends EmbeddedValueR
 
 	@Override
 	public Parser<?> getParser(DateTimeFormat annotation, Class<?> fieldType) {
-		if (LocalDate.class.equals(fieldType)) {
+		if (LocalDate.class == fieldType) {
 			return new LocalDateParser(getFormatter(annotation, fieldType));
 		}
-		else if (LocalTime.class.equals(fieldType)) {
+		else if (LocalTime.class == fieldType) {
 			return new LocalTimeParser(getFormatter(annotation, fieldType));
 		}
-		else if (LocalDateTime.class.equals(fieldType)) {
+		else if (LocalDateTime.class == fieldType) {
 			return new LocalDateTimeParser(getFormatter(annotation, fieldType));
 		}
 		else {

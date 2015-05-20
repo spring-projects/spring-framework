@@ -759,7 +759,7 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 		@Override
 		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 			String methodName = method.getName();
-			if (Object.class.equals(method.getDeclaringClass())) {
+			if (Object.class == method.getDeclaringClass()) {
 				if (methodName.equals("equals")) {
 					// Only consider equal when proxies are identical.
 					return (proxy == args[0]);

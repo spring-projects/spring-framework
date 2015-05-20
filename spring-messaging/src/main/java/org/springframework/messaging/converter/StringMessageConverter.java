@@ -46,7 +46,7 @@ public class StringMessageConverter extends AbstractMessageConverter {
 
 	@Override
 	protected boolean supports(Class<?> clazz) {
-		return String.class.equals(clazz);
+		return String.class == clazz;
 	}
 
 	@Override
@@ -58,7 +58,7 @@ public class StringMessageConverter extends AbstractMessageConverter {
 
 	@Override
 	public Object convertToInternal(Object payload, MessageHeaders headers) {
-		if (byte[].class.equals(getSerializedPayloadClass())) {
+		if (byte[].class == getSerializedPayloadClass()) {
 			Charset charset = getContentTypeCharset(getMimeType(headers));
 			payload = ((String) payload).getBytes(charset);
 		}

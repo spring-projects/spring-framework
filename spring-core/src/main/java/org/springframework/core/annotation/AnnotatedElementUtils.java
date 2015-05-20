@@ -694,7 +694,7 @@ public class AnnotatedElementUtils {
 						Class<?> clazz = method.getDeclaringClass();
 						while (true) {
 							clazz = clazz.getSuperclass();
-							if (clazz == null || clazz.equals(Object.class)) {
+							if (clazz == null || Object.class == clazz) {
 								break;
 							}
 
@@ -744,7 +744,7 @@ public class AnnotatedElementUtils {
 					// Search on superclass
 					if (searchOnSuperclasses) {
 						Class<?> superclass = clazz.getSuperclass();
-						if (superclass != null && !superclass.equals(Object.class)) {
+						if (superclass != null && Object.class != superclass) {
 							T result = searchWithFindSemantics(superclass, annotationType, searchOnInterfaces,
 								searchOnSuperclasses, searchOnMethodsInInterfaces, searchOnMethodsInSuperclasses,
 								processor, visited, metaDepth);

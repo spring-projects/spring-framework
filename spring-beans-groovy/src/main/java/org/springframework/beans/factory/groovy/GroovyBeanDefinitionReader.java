@@ -619,7 +619,7 @@ public class GroovyBeanDefinitionReader extends AbstractBeanDefinitionReader imp
 			try {
 				Closure callable = (Closure) value;
 				Class<?> parameterType = callable.getParameterTypes()[0];
-				if (parameterType.equals(Object.class)) {
+				if (Object.class == parameterType) {
 					this.currentBeanDefinition = new GroovyBeanDefinitionWrapper("");
 					callable.call(this.currentBeanDefinition);
 				}

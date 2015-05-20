@@ -50,7 +50,7 @@ final class FallbackObjectToStringConverter implements ConditionalGenericConvert
 	@Override
 	public boolean matches(TypeDescriptor sourceType, TypeDescriptor targetType) {
 		Class<?> sourceClass = sourceType.getObjectType();
-		if (String.class.equals(sourceClass)) {
+		if (String.class == sourceClass) {
 			// no conversion required
 			return false;
 		}

@@ -701,7 +701,7 @@ public class MvcUriComponentsBuilder {
 				this.controllerMethod = method;
 				this.argumentValues = args;
 				Class<?> returnType = method.getReturnType();
-				return (void.class.equals(returnType) ? null : returnType.cast(initProxy(returnType, this)));
+				return (void.class == returnType ? null : returnType.cast(initProxy(returnType, this)));
 			}
 		}
 

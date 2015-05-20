@@ -368,7 +368,7 @@ public abstract class AnnotationUtils {
 			Class<?> clazz = method.getDeclaringClass();
 			while (result == null) {
 				clazz = clazz.getSuperclass();
-				if (clazz == null || clazz.equals(Object.class)) {
+				if (clazz == null || Object.class == clazz) {
 					break;
 				}
 				try {
@@ -511,7 +511,7 @@ public abstract class AnnotationUtils {
 		}
 
 		Class<?> superclass = clazz.getSuperclass();
-		if (superclass == null || superclass.equals(Object.class)) {
+		if (superclass == null || Object.class == superclass) {
 			return null;
 		}
 		return findAnnotation(superclass, annotationType, visited);
@@ -541,7 +541,7 @@ public abstract class AnnotationUtils {
 	 */
 	public static Class<?> findAnnotationDeclaringClass(Class<? extends Annotation> annotationType, Class<?> clazz) {
 		Assert.notNull(annotationType, "Annotation type must not be null");
-		if (clazz == null || clazz.equals(Object.class)) {
+		if (clazz == null || Object.class == clazz) {
 			return null;
 		}
 		if (isAnnotationDeclaredLocally(annotationType, clazz)) {
@@ -576,7 +576,7 @@ public abstract class AnnotationUtils {
 	 */
 	public static Class<?> findAnnotationDeclaringClassForTypes(List<Class<? extends Annotation>> annotationTypes, Class<?> clazz) {
 		Assert.notEmpty(annotationTypes, "The list of annotation types must not be empty");
-		if (clazz == null || clazz.equals(Object.class)) {
+		if (clazz == null || Object.class == clazz) {
 			return null;
 		}
 		for (Class<? extends Annotation> annotationType : annotationTypes) {

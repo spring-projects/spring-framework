@@ -459,7 +459,7 @@ public abstract class AbstractMethodMessageHandler<T>
 		try {
 			Object returnValue = invocable.invoke(message);
 			MethodParameter returnType = handlerMethod.getReturnType();
-			if (void.class.equals(returnType.getParameterType())) {
+			if (void.class == returnType.getParameterType()) {
 				return;
 			}
 			this.returnValueHandlers.handleReturnValue(returnValue, returnType, message);
@@ -485,7 +485,7 @@ public abstract class AbstractMethodMessageHandler<T>
 		try {
 			Object returnValue = invocable.invoke(message, ex);
 			MethodParameter returnType = invocable.getReturnType();
-			if (void.class.equals(returnType.getParameterType())) {
+			if (void.class == returnType.getParameterType()) {
 				return;
 			}
 			this.returnValueHandlers.handleReturnValue(returnValue, returnType, message);

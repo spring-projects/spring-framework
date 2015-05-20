@@ -69,12 +69,12 @@ public class ServletRequestMethodArgumentResolver implements HandlerMethodArgume
 				MultipartRequest.class.isAssignableFrom(paramType) ||
 				HttpSession.class.isAssignableFrom(paramType) ||
 				Principal.class.isAssignableFrom(paramType) ||
-				Locale.class.equals(paramType) ||
-				TimeZone.class.equals(paramType) ||
+				Locale.class == paramType ||
+				TimeZone.class == paramType ||
 				"java.time.ZoneId".equals(paramType.getName()) ||
 				InputStream.class.isAssignableFrom(paramType) ||
 				Reader.class.isAssignableFrom(paramType) ||
-				HttpMethod.class.equals(paramType));
+				HttpMethod.class == paramType);
 	}
 
 	@Override
@@ -98,16 +98,16 @@ public class ServletRequestMethodArgumentResolver implements HandlerMethodArgume
 		else if (HttpSession.class.isAssignableFrom(paramType)) {
 			return request.getSession();
 		}
-		else if (HttpMethod.class.equals(paramType)) {
+		else if (HttpMethod.class == paramType) {
 			return ((ServletWebRequest) webRequest).getHttpMethod();
 		}
 		else if (Principal.class.isAssignableFrom(paramType)) {
 			return request.getUserPrincipal();
 		}
-		else if (Locale.class.equals(paramType)) {
+		else if (Locale.class == paramType) {
 			return RequestContextUtils.getLocale(request);
 		}
-		else if (TimeZone.class.equals(paramType)) {
+		else if (TimeZone.class == paramType) {
 			TimeZone timeZone = RequestContextUtils.getTimeZone(request);
 			return (timeZone != null ? timeZone : TimeZone.getDefault());
 		}

@@ -165,7 +165,7 @@ public class SingleColumnRowMapper<T> implements RowMapper<T> {
 	 */
 	@SuppressWarnings("unchecked")
 	protected Object convertValueToRequiredType(Object value, Class<?> requiredType) {
-		if (String.class.equals(requiredType)) {
+		if (String.class == requiredType) {
 			return value.toString();
 		}
 		else if (Number.class.isAssignableFrom(requiredType)) {

@@ -201,7 +201,7 @@ class TypeConverterDelegate {
 			// Try to apply some standard type conversion rules if appropriate.
 
 			if (convertedValue != null) {
-				if (Object.class.equals(requiredType)) {
+				if (Object.class == requiredType) {
 					return (T) convertedValue;
 				}
 				else if (requiredType.isArray()) {
@@ -227,7 +227,7 @@ class TypeConverterDelegate {
 					convertedValue = Array.get(convertedValue, 0);
 					standardConversion = true;
 				}
-				if (String.class.equals(requiredType) && ClassUtils.isPrimitiveOrWrapper(convertedValue.getClass())) {
+				if (String.class == requiredType && ClassUtils.isPrimitiveOrWrapper(convertedValue.getClass())) {
 					// We can stringify any primitive value...
 					return (T) convertedValue.toString();
 				}
@@ -305,7 +305,7 @@ class TypeConverterDelegate {
 		}
 
 		if (conversionAttemptEx != null) {
-			if (editor == null && !standardConversion && requiredType != null && !Object.class.equals(requiredType)) {
+			if (editor == null && !standardConversion && requiredType != null && Object.class != requiredType) {
 				throw conversionAttemptEx;
 			}
 			logger.debug("Original ConversionService attempt failed - ignored since " +
@@ -318,7 +318,7 @@ class TypeConverterDelegate {
 	private Object attemptToConvertStringToEnum(Class<?> requiredType, String trimmedValue, Object currentConvertedValue) {
 		Object convertedValue = currentConvertedValue;
 
-		if (Enum.class.equals(requiredType)) {
+		if (Enum.class == requiredType) {
 			// target type is declared as raw enum, treat the trimmed value as <enum.fqn>.FIELD_NAME
 			int index = trimmedValue.lastIndexOf(".");
 			if (index > - 1) {
@@ -370,7 +370,7 @@ class TypeConverterDelegate {
 		if (requiredType != null) {
 			// No custom editor -> check BeanWrapperImpl's default editors.
 			editor = this.propertyEditorRegistry.getDefaultEditor(requiredType);
-			if (editor == null && !String.class.equals(requiredType)) {
+			if (editor == null && String.class != requiredType) {
 				// No BeanWrapper default editor -> check standard JavaBean editor.
 				editor = BeanUtils.findEditorByConvention(requiredType);
 			}
@@ -436,7 +436,7 @@ class TypeConverterDelegate {
 				String newTextValue = (String) convertedValue;
 				return doConvertTextValue(oldValue, newTextValue, editor);
 			}
-			else if (String.class.equals(requiredType)) {
+			else if (String.class == requiredType) {
 				returnValue = convertedValue;
 			}
 		}
