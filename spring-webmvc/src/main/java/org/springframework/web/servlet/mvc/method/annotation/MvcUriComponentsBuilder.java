@@ -740,7 +740,7 @@ public class MvcUriComponentsBuilder {
 		public MethodArgumentBuilder(UriComponentsBuilder baseUrl, Class<?> controllerType, Method method) {
 			Assert.notNull(controllerType, "'controllerType' is required");
 			Assert.notNull(method, "'method' is required");
-			this.baseUrl = baseUrl;
+			this.baseUrl = (baseUrl != null ? baseUrl : initBaseUrl());
 			this.controllerType = controllerType;
 			this.method = method;
 			this.argumentValues = new Object[method.getParameterTypes().length];
@@ -749,11 +749,17 @@ public class MvcUriComponentsBuilder {
 			}
 		}
 
+		private static UriComponentsBuilder initBaseUrl() {
+			UriComponentsBuilder builder = ServletUriComponentsBuilder.fromCurrentServletMapping();
+			return UriComponentsBuilder.fromPath(builder.build().getPath());
+		}
+
 		/**
 		 * @deprecated as of 4.2 deprecated in favor of alternative constructors
 		 * that accept the controllerType.
 		 */
 		@Deprecated
+		@SuppressWarnings("unused")
 		public MethodArgumentBuilder(Method method) {
 			this(method.getDeclaringClass(), method);
 		}

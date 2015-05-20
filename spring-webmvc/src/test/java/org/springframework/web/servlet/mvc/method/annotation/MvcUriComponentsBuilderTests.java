@@ -312,7 +312,7 @@ public class MvcUriComponentsBuilderTests {
 
 		String mappingName = "PAC#getAddressesForCountry";
 		String url = MvcUriComponentsBuilder.fromMappingName(mappingName).arg(0, "DE").buildAndExpand(123);
-		assertEquals("http://example.org:9999/base/people/123/addresses/DE", url);
+		assertEquals("/base/people/123/addresses/DE", url);
 	}
 
 	@Test
