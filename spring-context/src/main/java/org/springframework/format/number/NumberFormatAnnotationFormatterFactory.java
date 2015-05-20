@@ -61,11 +61,11 @@ public class NumberFormatAnnotationFormatterFactory extends EmbeddedValueResolut
 		}
 		else {
 			Style style = annotation.style();
-			if (style == Style.PERCENT) {
-				return new PercentStyleFormatter();
-			}
-			else if (style == Style.CURRENCY) {
+			if (style == Style.CURRENCY) {
 				return new CurrencyStyleFormatter();
+			}
+			else if (style == Style.PERCENT) {
+				return new PercentStyleFormatter();
 			}
 			else {
 				return new NumberStyleFormatter();
