@@ -40,6 +40,24 @@ public class DefaultUriTemplateHandlerTests {
 
 
 	@Test
+	public void baseUrl() throws Exception {
+		this.handler.setBaseUrl("http://localhost:8080");
+		URI actual = this.handler.expand("/myapiresource");
+
+		URI expected = new URI("http://localhost:8080/myapiresource");
+		assertEquals(expected, actual);
+	}
+
+	@Test
+	public void baseUrlWithPartialPath() throws Exception {
+		this.handler.setBaseUrl("http://localhost:8080/context");
+		URI actual = this.handler.expand("/myapiresource");
+
+		URI expected = new URI("http://localhost:8080/context/myapiresource");
+		assertEquals(expected, actual);
+	}
+
+	@Test
 	public void expandWithFullPath() throws Exception {
 		Map<String, String> vars = new HashMap<String, String>(2);
 		vars.put("hotel", "1");
@@ -49,11 +67,11 @@ public class DefaultUriTemplateHandlerTests {
 		URI actual = this.handler.expand(template, vars);
 
 		URI expected = new URI("http://example.com/hotels/1/pic/pics/logo.png");
-		assertEquals("Invalid expanded template", expected, actual);
+		assertEquals(expected, actual);
 	}
 
 	@Test
-	public void expandWithFullPathParsedIntoPathSegments() throws Exception {
+	public void expandWithFullPathAndParsePathEnabled() throws Exception {
 		Map<String, String> vars = new HashMap<String, String>(2);
 		vars.put("hotel", "1");
 		vars.put("publicpath", "pics/logo.png");
@@ -64,7 +82,7 @@ public class DefaultUriTemplateHandlerTests {
 		URI actual = this.handler.expand(template, vars);
 
 		URI expected = new URI("http://example.com/hotels/1/pic/pics%2Flogo.png/size/150x150");
-		assertEquals("Invalid expanded template", expected, actual);
+		assertEquals(expected, actual);
 	}
 
 }

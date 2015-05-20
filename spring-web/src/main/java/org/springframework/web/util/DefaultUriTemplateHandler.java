@@ -16,8 +16,11 @@
 package org.springframework.web.util;
 
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Map;
+
+import org.springframework.util.Assert;
 
 /**
  * Default implementation of {@link UriTemplateHandler} that relies on
@@ -28,8 +31,41 @@ import java.util.Map;
  */
 public class DefaultUriTemplateHandler implements UriTemplateHandler {
 
+	private String baseUrl;
+
 	private boolean parsePath;
 
+
+	/**
+	 * Configure a base URL to prepend URI templates with. The base URL should
+	 * have a scheme and host but may also contain a port and a partial path.
+	 * Individual URI templates then may provide the remaining part of the URL
+	 * including additional path, query and fragment.
+	 *
+	 * <p><strong>Note: </strong>Individual URI templates are expanded and
+	 * encoded before being appended to the base URL. Therefore the base URL is
+	 * expected to be fully expanded and encoded, which can be done with the help
+	 * of {@link UriComponentsBuilder}.
+	 *
+	 * @param baseUrl the base URL.
+	 */
+	public void setBaseUrl(String baseUrl) {
+		if (baseUrl != null) {
+			UriComponents uriComponents = UriComponentsBuilder.fromUriString(baseUrl).build();
+			Assert.hasText(uriComponents.getScheme(), "'baseUrl' must have a scheme");
+			Assert.hasText(uriComponents.getHost(), "'baseUrl' must have a host");
+			Assert.isNull(uriComponents.getQuery(), "'baseUrl' cannot have a query");
+			Assert.isNull(uriComponents.getFragment(), "'baseUrl' cannot have a fragment");
+		}
+		this.baseUrl = baseUrl;
+	}
+
+	/**
+	 * Return the configured base URL.
+	 */
+	public String getBaseUrl() {
+		return this.baseUrl;
+	}
 
 	/**
 	 * Whether to parse the path of a URI template string into path segments.
@@ -55,17 +91,19 @@ public class DefaultUriTemplateHandler implements UriTemplateHandler {
 
 	@Override
 	public URI expand(String uriTemplate, Map<String, ?> uriVariables) {
-		UriComponentsBuilder builder = initBuilder(uriTemplate);
-		return builder.build().expand(uriVariables).encode().toUri();
+		UriComponentsBuilder uriComponentsBuilder = initUriComponentsBuilder(uriTemplate);
+		UriComponents uriComponents = uriComponentsBuilder.build().expand(uriVariables).encode();
+		return insertBaseUrl(uriComponents);
 	}
 
 	@Override
 	public URI expand(String uriTemplate, Object... uriVariableValues) {
-		UriComponentsBuilder builder = initBuilder(uriTemplate);
-		return builder.build().expand(uriVariableValues).encode().toUri();
+		UriComponentsBuilder uriComponentsBuilder = initUriComponentsBuilder(uriTemplate);
+		UriComponents uriComponents = uriComponentsBuilder.build().expand(uriVariableValues).encode();
+		return insertBaseUrl(uriComponents);
 	}
 
-	protected UriComponentsBuilder initBuilder(String uriTemplate) {
+	protected UriComponentsBuilder initUriComponentsBuilder(String uriTemplate) {
 		UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(uriTemplate);
 		if (shouldParsePath()) {
 			List<String> pathSegments = builder.build().getPathSegments();
@@ -75,6 +113,19 @@ public class DefaultUriTemplateHandler implements UriTemplateHandler {
 			}
 		}
 		return builder;
+	}
+
+	protected URI insertBaseUrl(UriComponents uriComponents) {
+		if (getBaseUrl() == null || uriComponents.getHost() != null) {
+			return uriComponents.toUri();
+		}
+		String url = getBaseUrl() + uriComponents.toUriString();
+		try {
+			return new URI(url);
+		}
+		catch (URISyntaxException ex) {
+			throw new IllegalArgumentException("Invalid URL after inserting base URL: " + url, ex);
+		}
 	}
 
 }
