@@ -20,6 +20,7 @@ import java.beans.PropertyChangeEvent;
 import java.lang.reflect.Array;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.UndeclaredThrowableException;
+import java.security.PrivilegedActionException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -523,7 +524,18 @@ public abstract class AbstractPropertyAccessor extends TypeConverterSupport impl
 					}
 					else {
 						if (isExtractOldValueForEditor() && ph.isReadable()) {
-							oldValue = ph.getValue();
+							try {
+								oldValue = ph.getValue();
+							}
+							catch (Exception ex) {
+								if (ex instanceof PrivilegedActionException) {
+									ex = ((PrivilegedActionException) ex).getException();
+								}
+								if (logger.isDebugEnabled()) {
+									logger.debug("Could not read previous value of property '" +
+											this.nestedPath + propertyName + "'", ex);
+								}
+							}
 						}
 						valueToApply = convertForProperty(
 								propertyName, oldValue, originalValue, ph.toTypeDescriptor());

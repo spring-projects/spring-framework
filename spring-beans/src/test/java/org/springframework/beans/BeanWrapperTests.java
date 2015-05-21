@@ -52,6 +52,15 @@ public final class BeanWrapperTests extends AbstractConfigurablePropertyAccessor
 	}
 
 	@Test
+	public void getterSilentlyFailWithOldValueExtraction() {
+		GetterBean target = new GetterBean();
+		BeanWrapper accessor = createAccessor(target);
+		accessor.setExtractOldValueForEditor(true); // This will call the getter
+		accessor.setPropertyValue("name", "tom");
+		assertTrue("Set name to tom", target.getName().equals("tom"));
+	}
+
+	@Test
 	public void setValidAndInvalidPropertyValuesShouldContainExceptionDetails() {
 		TestBean target = new TestBean();
 		String newName = "tony";
