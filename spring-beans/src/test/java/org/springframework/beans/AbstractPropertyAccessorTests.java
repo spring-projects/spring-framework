@@ -76,7 +76,7 @@ import static org.junit.Assert.*;
  * @author Dave Syer
  * @author Stephane Nicoll
  */
-public abstract class AbstractConfigurablePropertyAccessorTests {
+public abstract class AbstractPropertyAccessorTests {
 
 	@Rule
 	public final ExpectedException thrown = ExpectedException.none();
@@ -1035,7 +1035,7 @@ public abstract class AbstractConfigurablePropertyAccessorTests {
 	@Test
 	public void setPrimitiveArrayPropertyLargeMatching() {
 		Assume.group(TestGroup.PERFORMANCE);
-		Assume.notLogging(LogFactory.getLog(AbstractConfigurablePropertyAccessorTests.class));
+		Assume.notLogging(LogFactory.getLog(AbstractPropertyAccessorTests.class));
 
 		PrimitiveArrayBean target = new PrimitiveArrayBean();
 		AbstractPropertyAccessor accessor = createAccessor(target);

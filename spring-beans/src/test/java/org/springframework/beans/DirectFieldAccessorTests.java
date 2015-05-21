@@ -29,7 +29,7 @@ import static org.junit.Assert.*;
  * @author Chris Beams
  * @@author Stephane Nicoll
  */
-public class DirectFieldAccessorTests extends AbstractConfigurablePropertyAccessorTests {
+public class DirectFieldAccessorTests extends AbstractPropertyAccessorTests {
 
 	@Override
 	protected DirectFieldAccessor createAccessor(Object target) {

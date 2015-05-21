@@ -36,7 +36,7 @@ import static org.junit.Assert.*;
  * @author Chris Beams
  * @author Dave Syer
  */
-public final class BeanWrapperTests extends AbstractConfigurablePropertyAccessorTests {
+public final class BeanWrapperTests extends AbstractPropertyAccessorTests {
 
 	@Override
 	protected BeanWrapperImpl createAccessor(Object target) {

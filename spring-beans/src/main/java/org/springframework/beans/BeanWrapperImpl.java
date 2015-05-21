@@ -60,7 +60,7 @@ import org.springframework.util.Assert;
  * @see BeanWrapper
  * @see PropertyEditorRegistrySupport
  */
-public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWrapper {
+public class BeanWrapperImpl extends AbstractNestablePropertyAccessor implements BeanWrapper {
 
 	/**
 	 * Cached introspections results for this object, to prevent encountering
