@@ -88,6 +88,10 @@ public class UriComponentsBuilder implements Cloneable {
 			"^" + HTTP_PATTERN + "(//(" + USERINFO_PATTERN + "@)?" + HOST_PATTERN + "(:" + PORT_PATTERN + ")?" + ")?" +
 					PATH_PATTERN + "(\\?" + LAST_PATTERN + ")?");
 
+	private static final Pattern FORWARDED_HOST_PATTERN = Pattern.compile("host=\"?([^;,\"]+)\"?");
+
+	private static final Pattern FORWARDED_PROTO_PATTERN = Pattern.compile("proto=\"?([^;,\"]+)\"?");
+
 
 	private String scheme;
 
@@ -267,7 +271,9 @@ public class UriComponentsBuilder implements Cloneable {
 	/**
 	 * Create a new {@code UriComponents} object from the URI associated with
 	 * the given HttpRequest while also overlaying with values from the headers
-	 * "X-Forwarded-Host", "X-Forwarded-Port", and "X-Forwarded-Proto" if present.
+	 * "Forwarded" (<a href="http://tools.ietf.org/html/rfc7239">RFC 7239</a>, or
+	 * "X-Forwarded-Host", "X-Forwarded-Port", and "X-Forwarded-Proto" if "Forwarded" is
+	 * not found.
 	 * @param request the source request
 	 * @return the URI components of the URI
 	 * @since 4.1.5
@@ -280,31 +286,45 @@ public class UriComponentsBuilder implements Cloneable {
 		String host = uri.getHost();
 		int port = uri.getPort();
 
-		String hostHeader = request.getHeaders().getFirst("X-Forwarded-Host");
-		if (StringUtils.hasText(hostHeader)) {
-			String[] hosts = StringUtils.commaDelimitedListToStringArray(hostHeader);
-			String hostToUse = hosts[0];
-			if (hostToUse.contains(":")) {
-				String[] hostAndPort = StringUtils.split(hostToUse, ":");
-				host = hostAndPort[0];
-				port = Integer.parseInt(hostAndPort[1]);
+		String forwardedHeader = request.getHeaders().getFirst("Forwarded");
+		if (StringUtils.hasText(forwardedHeader)) {
+			String forwardedToUse = StringUtils.commaDelimitedListToStringArray(forwardedHeader)[0];
+			Matcher m = FORWARDED_HOST_PATTERN.matcher(forwardedToUse);
+			if (m.find()) {
+				host = m.group(1).trim();
 			}
-			else {
-				host = hostToUse;
-				port = -1;
+			m = FORWARDED_PROTO_PATTERN.matcher(forwardedToUse);
+			if (m.find()) {
+				scheme = m.group(1).trim();
 			}
 		}
+		else {
+			String hostHeader = request.getHeaders().getFirst("X-Forwarded-Host");
+			if (StringUtils.hasText(hostHeader)) {
+				String[] hosts = StringUtils.commaDelimitedListToStringArray(hostHeader);
+				String hostToUse = hosts[0];
+				if (hostToUse.contains(":")) {
+					String[] hostAndPort = StringUtils.split(hostToUse, ":");
+					host = hostAndPort[0];
+					port = Integer.parseInt(hostAndPort[1]);
+				}
+				else {
+					host = hostToUse;
+					port = -1;
+				}
+			}
 
-		String portHeader = request.getHeaders().getFirst("X-Forwarded-Port");
-		if (StringUtils.hasText(portHeader)) {
-			String[] ports = StringUtils.commaDelimitedListToStringArray(portHeader);
-			port = Integer.parseInt(ports[0]);
-		}
+			String portHeader = request.getHeaders().getFirst("X-Forwarded-Port");
+			if (StringUtils.hasText(portHeader)) {
+				String[] ports = StringUtils.commaDelimitedListToStringArray(portHeader);
+				port = Integer.parseInt(ports[0]);
+			}
 
-		String protocolHeader = request.getHeaders().getFirst("X-Forwarded-Proto");
-		if (StringUtils.hasText(protocolHeader)) {
-			String[] protocols = StringUtils.commaDelimitedListToStringArray(protocolHeader);
-			scheme = protocols[0];
+			String protocolHeader = request.getHeaders().getFirst("X-Forwarded-Proto");
+			if (StringUtils.hasText(protocolHeader)) {
+				String[] protocols = StringUtils.commaDelimitedListToStringArray(protocolHeader);
+				scheme = protocols[0];
+			}
 		}
 
 		builder.scheme(scheme);
