@@ -16,6 +16,7 @@
 
 package org.springframework.web.servlet.resource;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -432,17 +433,22 @@ public class ResourceHttpRequestHandler extends WebContentGenerator implements H
 	 * @throws IOException in case of errors while writing the content
 	 */
 	protected void writeContent(HttpServletResponse response, Resource resource) throws IOException {
-		InputStream in = resource.getInputStream();
 		try {
-			StreamUtils.copy(in, response.getOutputStream());
-		}
-		finally {
+			InputStream in = resource.getInputStream();
 			try {
-				in.close();
+				StreamUtils.copy(in, response.getOutputStream());
 			}
-			catch (IOException ex) {
-				// ignore
+			finally {
+				try {
+					in.close();
+				}
+				catch (Throwable ex) {
+					// ignore, see SPR-12999
+				}
 			}
+		}
+		catch (FileNotFoundException ex) {
+			// ignore, see SPR-12999
 		}
 	}
 
