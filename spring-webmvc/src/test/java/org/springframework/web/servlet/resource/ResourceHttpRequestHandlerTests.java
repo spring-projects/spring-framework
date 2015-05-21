@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,13 @@
 
 package org.springframework.web.servlet.resource;
 
+import static org.junit.Assert.*;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.*;
+
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -34,7 +40,6 @@ import org.springframework.mock.web.test.MockServletContext;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.servlet.HandlerMapping;
 
-import static org.junit.Assert.*;
 
 /**
  * Unit tests for ResourceHttpRequestHandler.
@@ -57,6 +62,7 @@ public class ResourceHttpRequestHandlerTests {
 		List<Resource> paths = new ArrayList<>(2);
 		paths.add(new ClassPathResource("test/", getClass()));
 		paths.add(new ClassPathResource("testalternatepath/", getClass()));
+		paths.add(new ClassPathResource("META-INF/resources/webjars/"));
 
 		this.handler = new ResourceHttpRequestHandler();
 		this.handler.setLocations(paths);
@@ -204,9 +210,10 @@ public class ResourceHttpRequestHandlerTests {
 		PathResourceResolver resolver = (PathResourceResolver) this.handler.getResourceResolvers().get(0);
 		Resource[] locations = resolver.getAllowedLocations();
 
-		assertEquals(2, locations.length);
+		assertEquals(3, locations.length);
 		assertEquals("test/", ((ClassPathResource) locations[0]).getPath());
 		assertEquals("testalternatepath/", ((ClassPathResource) locations[1]).getPath());
+		assertEquals("META-INF/resources/webjars/", ((ClassPathResource) locations[2]).getPath());
 	}
 
 	@Test
@@ -252,6 +259,14 @@ public class ResourceHttpRequestHandlerTests {
 	}
 
 	@Test
+	public void directoryInJarFile() throws Exception {
+		this.request.setAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, "underscorejs/");
+		this.handler.handleRequest(this.request, this.response);
+		assertEquals(200, this.response.getStatus());
+		assertEquals(0, this.response.getContentLength());
+	}
+
+	@Test
 	public void missingResourcePath() throws Exception {
 		this.request.setAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, "");
 		this.handler.handleRequest(this.request, this.response);
@@ -277,6 +292,32 @@ public class ResourceHttpRequestHandlerTests {
 		assertEquals(404, this.response.getStatus());
 	}
 
+	// SPR-12999
+	@Test
+	public void writeContentNotGettingInputStream() throws Exception {
+		Resource resource = mock(Resource.class);
+		given(resource.getInputStream()).willThrow(FileNotFoundException.class);
+
+		this.handler.writeContent(this.response, resource);
+
+		assertEquals(200, this.response.getStatus());
+		assertEquals(0, this.response.getContentLength());
+	}
+
+	// SPR-12999
+	@Test
+	public void writeContentNotClosingInputStream() throws Exception {
+		Resource resource = mock(Resource.class);
+		InputStream inputStream = mock(InputStream.class);
+		given(resource.getInputStream()).willReturn(inputStream);
+		given(inputStream.read(any())).willReturn(-1);
+		doThrow(new NullPointerException()).when(inputStream).close();
+
+		this.handler.writeContent(this.response, resource);
+
+		assertEquals(200, this.response.getStatus());
+		assertEquals(0, this.response.getContentLength());
+	}
 
 	private long headerAsLong(String responseHeaderName) {
 		return Long.valueOf(this.response.getHeader(responseHeaderName));
