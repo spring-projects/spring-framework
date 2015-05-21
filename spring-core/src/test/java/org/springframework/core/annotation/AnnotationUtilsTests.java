@@ -23,11 +23,13 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.reflect.Method;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.subpackage.NonPublicAnnotatedClass;
@@ -47,6 +49,9 @@ import static org.springframework.core.annotation.AnnotationUtils.*;
  * @author Phillip Webb
  */
 public class AnnotationUtilsTests {
+
+	@Rule
+	public final ExpectedException exception = ExpectedException.none();
 
 	@Test
 	public void findMethodAnnotationOnLeaf() throws Exception {
@@ -154,7 +159,8 @@ public class AnnotationUtilsTests {
 	/** @since 4.1.2 */
 	@Test
 	public void findClassAnnotationFavorsMoreLocallyDeclaredComposedAnnotationsOverAnnotationsOnInterfaces() {
-		Component component = AnnotationUtils.findAnnotation(ClassWithLocalMetaAnnotationAndMetaAnnotatedInterface.class, Component.class);
+		Component component = findAnnotation(ClassWithLocalMetaAnnotationAndMetaAnnotatedInterface.class,
+			Component.class);
 		assertNotNull(component);
 		assertEquals("meta2", component.value());
 	}
@@ -162,7 +168,7 @@ public class AnnotationUtilsTests {
 	/** @since 4.0.3 */
 	@Test
 	public void findClassAnnotationFavorsMoreLocallyDeclaredComposedAnnotationsOverInheritedAnnotations() {
-		Transactional transactional = AnnotationUtils.findAnnotation(SubSubClassWithInheritedAnnotation.class, Transactional.class);
+		Transactional transactional = findAnnotation(SubSubClassWithInheritedAnnotation.class, Transactional.class);
 		assertNotNull(transactional);
 		assertTrue("readOnly flag for SubSubClassWithInheritedAnnotation", transactional.readOnly());
 	}
@@ -170,21 +176,21 @@ public class AnnotationUtilsTests {
 	/** @since 4.0.3 */
 	@Test
 	public void findClassAnnotationFavorsMoreLocallyDeclaredComposedAnnotationsOverInheritedComposedAnnotations() {
-		Component component = AnnotationUtils.findAnnotation(SubSubClassWithInheritedMetaAnnotation.class, Component.class);
+		Component component = findAnnotation(SubSubClassWithInheritedMetaAnnotation.class, Component.class);
 		assertNotNull(component);
 		assertEquals("meta2", component.value());
 	}
 
 	@Test
 	public void findClassAnnotationOnMetaMetaAnnotatedClass() {
-		Component component = AnnotationUtils.findAnnotation(MetaMetaAnnotatedClass.class, Component.class);
+		Component component = findAnnotation(MetaMetaAnnotatedClass.class, Component.class);
 		assertNotNull("Should find meta-annotation on composed annotation on class", component);
 		assertEquals("meta2", component.value());
 	}
 
 	@Test
 	public void findClassAnnotationOnMetaMetaMetaAnnotatedClass() {
-		Component component = AnnotationUtils.findAnnotation(MetaMetaMetaAnnotatedClass.class, Component.class);
+		Component component = findAnnotation(MetaMetaMetaAnnotatedClass.class, Component.class);
 		assertNotNull("Should find meta-annotation on meta-annotation on composed annotation on class", component);
 		assertEquals("meta2", component.value());
 	}
@@ -192,55 +198,55 @@ public class AnnotationUtilsTests {
 	@Test
 	public void findClassAnnotationOnAnnotatedClassWithMissingTargetMetaAnnotation() {
 		// TransactionalClass is NOT annotated or meta-annotated with @Component
-		Component component = AnnotationUtils.findAnnotation(TransactionalClass.class, Component.class);
+		Component component = findAnnotation(TransactionalClass.class, Component.class);
 		assertNull("Should not find @Component on TransactionalClass", component);
 	}
 
 	@Test
 	public void findClassAnnotationOnMetaCycleAnnotatedClassWithMissingTargetMetaAnnotation() {
-		Component component = AnnotationUtils.findAnnotation(MetaCycleAnnotatedClass.class, Component.class);
+		Component component = findAnnotation(MetaCycleAnnotatedClass.class, Component.class);
 		assertNull("Should not find @Component on MetaCycleAnnotatedClass", component);
 	}
 
 	/** @since 4.2 */
 	@Test
 	public void findClassAnnotationOnInheritedAnnotationInterface() {
-		Transactional tx = AnnotationUtils.findAnnotation(InheritedAnnotationInterface.class, Transactional.class);
+		Transactional tx = findAnnotation(InheritedAnnotationInterface.class, Transactional.class);
 		assertNotNull("Should find @Transactional on InheritedAnnotationInterface", tx);
 	}
 
 	/** @since 4.2 */
 	@Test
 	public void findClassAnnotationOnSubInheritedAnnotationInterface() {
-		Transactional tx = AnnotationUtils.findAnnotation(SubInheritedAnnotationInterface.class, Transactional.class);
+		Transactional tx = findAnnotation(SubInheritedAnnotationInterface.class, Transactional.class);
 		assertNotNull("Should find @Transactional on SubInheritedAnnotationInterface", tx);
 	}
 
 	/** @since 4.2 */
 	@Test
 	public void findClassAnnotationOnSubSubInheritedAnnotationInterface() {
-		Transactional tx = AnnotationUtils.findAnnotation(SubSubInheritedAnnotationInterface.class, Transactional.class);
+		Transactional tx = findAnnotation(SubSubInheritedAnnotationInterface.class, Transactional.class);
 		assertNotNull("Should find @Transactional on SubSubInheritedAnnotationInterface", tx);
 	}
 
 	/** @since 4.2 */
 	@Test
 	public void findClassAnnotationOnNonInheritedAnnotationInterface() {
-		Order order = AnnotationUtils.findAnnotation(NonInheritedAnnotationInterface.class, Order.class);
+		Order order = findAnnotation(NonInheritedAnnotationInterface.class, Order.class);
 		assertNotNull("Should find @Order on NonInheritedAnnotationInterface", order);
 	}
 
 	/** @since 4.2 */
 	@Test
 	public void findClassAnnotationOnSubNonInheritedAnnotationInterface() {
-		Order order = AnnotationUtils.findAnnotation(SubNonInheritedAnnotationInterface.class, Order.class);
+		Order order = findAnnotation(SubNonInheritedAnnotationInterface.class, Order.class);
 		assertNotNull("Should find @Order on SubNonInheritedAnnotationInterface", order);
 	}
 
 	/** @since 4.2 */
 	@Test
 	public void findClassAnnotationOnSubSubNonInheritedAnnotationInterface() {
-		Order order = AnnotationUtils.findAnnotation(SubSubNonInheritedAnnotationInterface.class, Order.class);
+		Order order = findAnnotation(SubSubNonInheritedAnnotationInterface.class, Order.class);
 		assertNotNull("Should find @Order on SubSubNonInheritedAnnotationInterface", order);
 	}
 
@@ -376,12 +382,52 @@ public class AnnotationUtilsTests {
 	}
 
 	@Test
+	public void getAnnotationAttributesWithoutAttributeAliases() {
+		Component component = WebController.class.getAnnotation(Component.class);
+		assertNotNull(component);
+
+		AnnotationAttributes attributes = (AnnotationAttributes) getAnnotationAttributes(component);
+		assertNotNull(attributes);
+		assertEquals("value attribute: ", "webController", attributes.getString(VALUE));
+		assertEquals(Component.class, attributes.annotationType());
+	}
+
+	@Test
+	public void getAnnotationAttributesWithAttributeAliases() throws Exception {
+		Method method = WebController.class.getMethod("handleMappedWithValueAttribute");
+		WebMapping webMapping = method.getAnnotation(WebMapping.class);
+		AnnotationAttributes attributes = (AnnotationAttributes) getAnnotationAttributes(webMapping);
+		assertNotNull(attributes);
+		assertEquals(WebMapping.class, attributes.annotationType());
+		assertEquals("name attribute: ", "foo", attributes.getString("name"));
+		assertEquals("value attribute: ", "/test", attributes.getString(VALUE));
+		assertEquals("path attribute: ", "/test", attributes.getString("path"));
+
+		method = WebController.class.getMethod("handleMappedWithPathAttribute");
+		webMapping = method.getAnnotation(WebMapping.class);
+		attributes = (AnnotationAttributes) getAnnotationAttributes(webMapping);
+		assertNotNull(attributes);
+		assertEquals(WebMapping.class, attributes.annotationType());
+		assertEquals("name attribute: ", "bar", attributes.getString("name"));
+		assertEquals("value attribute: ", "/test", attributes.getString(VALUE));
+		assertEquals("path attribute: ", "/test", attributes.getString("path"));
+
+		method = WebController.class.getMethod("handleMappedWithPathValueAndAttributes");
+		webMapping = method.getAnnotation(WebMapping.class);
+		exception.expect(AnnotationConfigurationException.class);
+		exception.expectMessage(containsString("attribute [value] and its alias [path]"));
+		exception.expectMessage(containsString("values of [/enigma] and [/test]"));
+		exception.expectMessage(containsString("but only one declaration is permitted"));
+		getAnnotationAttributes(webMapping);
+	}
+
+	@Test
 	public void getValueFromAnnotation() throws Exception {
 		Method method = SimpleFoo.class.getMethod("something", Object.class);
 		Order order = findAnnotation(method, Order.class);
 
-		assertEquals(1, AnnotationUtils.getValue(order, AnnotationUtils.VALUE));
-		assertEquals(1, AnnotationUtils.getValue(order));
+		assertEquals(1, getValue(order, VALUE));
+		assertEquals(1, getValue(order));
 	}
 
 	@Test
@@ -391,8 +437,8 @@ public class AnnotationUtilsTests {
 		Annotation annotation = declaredAnnotations[0];
 		assertNotNull(annotation);
 		assertEquals("NonPublicAnnotation", annotation.annotationType().getSimpleName());
-		assertEquals(42, AnnotationUtils.getValue(annotation, AnnotationUtils.VALUE));
-		assertEquals(42, AnnotationUtils.getValue(annotation));
+		assertEquals(42, getValue(annotation, VALUE));
+		assertEquals(42, getValue(annotation));
 	}
 
 	@Test
@@ -400,8 +446,8 @@ public class AnnotationUtilsTests {
 		Method method = SimpleFoo.class.getMethod("something", Object.class);
 		Order order = findAnnotation(method, Order.class);
 
-		assertEquals(Ordered.LOWEST_PRECEDENCE, AnnotationUtils.getDefaultValue(order, AnnotationUtils.VALUE));
-		assertEquals(Ordered.LOWEST_PRECEDENCE, AnnotationUtils.getDefaultValue(order));
+		assertEquals(Ordered.LOWEST_PRECEDENCE, getDefaultValue(order, VALUE));
+		assertEquals(Ordered.LOWEST_PRECEDENCE, getDefaultValue(order));
 	}
 
 	@Test
@@ -411,14 +457,14 @@ public class AnnotationUtilsTests {
 		Annotation annotation = declaredAnnotations[0];
 		assertNotNull(annotation);
 		assertEquals("NonPublicAnnotation", annotation.annotationType().getSimpleName());
-		assertEquals(-1, AnnotationUtils.getDefaultValue(annotation, AnnotationUtils.VALUE));
-		assertEquals(-1, AnnotationUtils.getDefaultValue(annotation));
+		assertEquals(-1, getDefaultValue(annotation, VALUE));
+		assertEquals(-1, getDefaultValue(annotation));
 	}
 
 	@Test
 	public void getDefaultValueFromAnnotationType() throws Exception {
-		assertEquals(Ordered.LOWEST_PRECEDENCE, AnnotationUtils.getDefaultValue(Order.class, AnnotationUtils.VALUE));
-		assertEquals(Ordered.LOWEST_PRECEDENCE, AnnotationUtils.getDefaultValue(Order.class));
+		assertEquals(Ordered.LOWEST_PRECEDENCE, getDefaultValue(Order.class, VALUE));
+		assertEquals(Ordered.LOWEST_PRECEDENCE, getDefaultValue(Order.class));
 	}
 
 	@Test
@@ -431,14 +477,174 @@ public class AnnotationUtilsTests {
 	@Test
 	public void getRepeatableFromMethod() throws Exception {
 		Method method = InterfaceWithRepeated.class.getMethod("foo");
-		Set<MyRepeatable> annotions = AnnotationUtils.getRepeatableAnnotation(method,
-				MyRepeatableContainer.class, MyRepeatable.class);
-		Set<String> values = new HashSet<String>();
-		for (MyRepeatable myRepeatable : annotions) {
-			values.add(myRepeatable.value());
+		Set<MyRepeatable> annotations = getRepeatableAnnotation(method, MyRepeatableContainer.class, MyRepeatable.class);
+		assertNotNull(annotations);
+		List<String> values = annotations.stream().map(MyRepeatable::value).collect(Collectors.toList());
+		assertThat(values, equalTo(Arrays.asList("a", "b", "c", "meta")));
+	}
+
+	@Test
+	public void getRepeatableWithAttributeAliases() throws Exception {
+		Set<ContextConfig> annotations = getRepeatableAnnotation(TestCase.class, Hierarchy.class, ContextConfig.class);
+		assertNotNull(annotations);
+
+		List<String> locations = annotations.stream().map(ContextConfig::locations).collect(Collectors.toList());
+		assertThat(locations, equalTo(Arrays.asList("A", "B")));
+
+		List<String> values = annotations.stream().map(ContextConfig::value).collect(Collectors.toList());
+		assertThat(values, equalTo(Arrays.asList("A", "B")));
+	}
+
+	@Test
+	public void getAliasedAttributeNameFromAliasedComposedAnnotation() throws Exception {
+		Method attribute = AliasedComposedContextConfig.class.getDeclaredMethod("xmlConfigFile");
+		assertEquals("locations", getAliasedAttributeName(attribute, ContextConfig.class));
+	}
+
+	@Test
+	public void synthesizeAnnotationWithoutAttributeAliases() throws Exception {
+		Component component = findAnnotation(WebController.class, Component.class);
+		assertNotNull(component);
+		Component synthesizedComponent = synthesizeAnnotation(component);
+		assertNotNull(synthesizedComponent);
+		assertSame(component, synthesizedComponent);
+		assertEquals("value attribute: ", "webController", synthesizedComponent.value());
+	}
+
+	@Test
+	public void synthesizeAnnotationWithAttributeAliasForNonexistentAttribute() throws Exception {
+		AliasForNonexistentAttribute annotation = AliasForNonexistentAttributeClass.class.getAnnotation(AliasForNonexistentAttribute.class);
+		exception.expect(AnnotationConfigurationException.class);
+		exception.expectMessage(containsString("Attribute [foo] in"));
+		exception.expectMessage(containsString(AliasForNonexistentAttribute.class.getName()));
+		exception.expectMessage(containsString("is declared as an @AliasFor nonexistent attribute [bar]"));
+		synthesizeAnnotation(annotation);
+	}
+
+	@Test
+	public void synthesizeAnnotationWithAttributeAliasWithoutMirroredAliasFor() throws Exception {
+		AliasForWithoutMirroredAliasFor annotation = AliasForWithoutMirroredAliasForClass.class.getAnnotation(AliasForWithoutMirroredAliasFor.class);
+		exception.expect(AnnotationConfigurationException.class);
+		exception.expectMessage(containsString("Attribute [bar] in"));
+		exception.expectMessage(containsString(AliasForWithoutMirroredAliasFor.class.getName()));
+		exception.expectMessage(containsString("must be declared as an @AliasFor [foo]"));
+		synthesizeAnnotation(annotation);
+	}
+
+	@Test
+	public void synthesizeAnnotationWithAttributeAliasWithMirroredAliasForWrongAttribute() throws Exception {
+		AliasForWithMirroredAliasForWrongAttribute annotation = AliasForWithMirroredAliasForWrongAttributeClass.class.getAnnotation(AliasForWithMirroredAliasForWrongAttribute.class);
+
+		// Since JDK 7+ does not guarantee consistent ordering of methods returned using
+		// reflection, we cannot make the test dependent on any specific ordering.
+		//
+		// In other words, we can't be certain which type of exception message we'll get,
+		// so we allow for both possibilities.
+		exception.expect(AnnotationConfigurationException.class);
+		exception.expectMessage(containsString("Attribute [bar] in"));
+		exception.expectMessage(containsString(AliasForWithMirroredAliasForWrongAttribute.class.getName()));
+		exception.expectMessage(either(containsString("must be declared as an @AliasFor [foo], not [quux]")).
+			or(containsString("is declared as an @AliasFor nonexistent attribute [quux]")));
+		synthesizeAnnotation(annotation);
+	}
+
+	@Test
+	public void synthesizeAnnotationWithAttributeAliasForAttributeOfDifferentType() throws Exception {
+		AliasForAttributeOfDifferentType annotation = AliasForAttributeOfDifferentTypeClass.class.getAnnotation(AliasForAttributeOfDifferentType.class);
+		exception.expect(AnnotationConfigurationException.class);
+		exception.expectMessage(startsWith("Misconfigured aliases"));
+		exception.expectMessage(containsString(AliasForAttributeOfDifferentType.class.getName()));
+		// Since JDK 7+ does not guarantee consistent ordering of methods returned using
+		// reflection, we cannot make the test dependent on any specific ordering.
+		//
+		// In other words, we don't know if "foo" or "bar" will come first.
+		exception.expectMessage(containsString("attribute [foo]"));
+		exception.expectMessage(containsString("attribute [bar]"));
+		exception.expectMessage(containsString("must declare the same return type"));
+		synthesizeAnnotation(annotation);
+	}
+
+	@Test
+	public void synthesizeAnnotationWithAttributeAliasForWithMissingDefaultValues() throws Exception {
+		AliasForWithMissingDefaultValues annotation = AliasForWithMissingDefaultValuesClass.class.getAnnotation(AliasForWithMissingDefaultValues.class);
+		exception.expectMessage(startsWith("Misconfigured aliases"));
+		exception.expectMessage(containsString(AliasForWithMissingDefaultValues.class.getName()));
+		// Since JDK 7+ does not guarantee consistent ordering of methods returned using
+		// reflection, we cannot make the test dependent on any specific ordering.
+		//
+		// In other words, we don't know if "foo" or "bar" will come first.
+		exception.expectMessage(containsString("attribute [foo]"));
+		exception.expectMessage(containsString("attribute [bar]"));
+		exception.expectMessage(containsString("must declare default values"));
+		synthesizeAnnotation(annotation);
+	}
+
+	@Test
+	public void synthesizeAnnotationWithAttributeAliasForAttributeWithDifferentDefaultValue() throws Exception {
+		AliasForAttributeWithDifferentDefaultValue annotation = AliasForAttributeWithDifferentDefaultValueClass.class.getAnnotation(AliasForAttributeWithDifferentDefaultValue.class);
+		exception.expectMessage(startsWith("Misconfigured aliases"));
+		exception.expectMessage(containsString(AliasForAttributeWithDifferentDefaultValue.class.getName()));
+		// Since JDK 7+ does not guarantee consistent ordering of methods returned using
+		// reflection, we cannot make the test dependent on any specific ordering.
+		//
+		// In other words, we don't know if "foo" or "bar" will come first.
+		exception.expectMessage(containsString("attribute [foo]"));
+		exception.expectMessage(containsString("attribute [bar]"));
+		exception.expectMessage(containsString("must declare the same default value"));
+		synthesizeAnnotation(annotation);
+	}
+
+	@Test
+	public void synthesizeAnnotationWithAttributeAliases() throws Exception {
+		Method method = WebController.class.getMethod("handleMappedWithValueAttribute");
+		WebMapping webMapping = method.getAnnotation(WebMapping.class);
+		assertNotNull(webMapping);
+		WebMapping synthesizedWebMapping = synthesizeAnnotation(webMapping);
+		assertNotSame(webMapping, synthesizedWebMapping);
+		assertThat(synthesizedWebMapping, instanceOf(SynthesizedAnnotation.class));
+
+		assertNotNull(synthesizedWebMapping);
+		assertEquals("name attribute: ", "foo", synthesizedWebMapping.name());
+		assertEquals("aliased path attribute: ", "/test", synthesizedWebMapping.path());
+		assertEquals("actual value attribute: ", "/test", synthesizedWebMapping.value());
+	}
+
+	@Test
+	public void synthesizeAnnotationWithAttributeAliasesInNestedAnnotations() throws Exception {
+		Hierarchy hierarchy = TestCase.class.getAnnotation(Hierarchy.class);
+		assertNotNull(hierarchy);
+		Hierarchy synthesizedHierarchy = synthesizeAnnotation(hierarchy);
+		assertNotSame(hierarchy, synthesizedHierarchy);
+		assertThat(synthesizedHierarchy, instanceOf(SynthesizedAnnotation.class));
+
+		ContextConfig[] configs = synthesizedHierarchy.value();
+		assertNotNull(configs);
+		for (ContextConfig contextConfig : configs) {
+			assertThat(contextConfig, instanceOf(SynthesizedAnnotation.class));
 		}
-		assertThat(values, equalTo((Set<String>) new HashSet<String>(
-				Arrays.asList("a", "b", "c", "meta"))));
+
+		List<String> locations = Arrays.stream(configs).map(ContextConfig::locations).collect(Collectors.toList());
+		assertThat(locations, equalTo(Arrays.asList("A", "B")));
+
+		List<String> values = Arrays.stream(configs).map(ContextConfig::value).collect(Collectors.toList());
+		assertThat(values, equalTo(Arrays.asList("A", "B")));
+	}
+
+	@Test
+	public void synthesizeAlreadySynthesizedAnnotation() throws Exception {
+		Method method = WebController.class.getMethod("handleMappedWithValueAttribute");
+		WebMapping webMapping = method.getAnnotation(WebMapping.class);
+		assertNotNull(webMapping);
+		WebMapping synthesizedWebMapping = synthesizeAnnotation(webMapping);
+		assertNotSame(webMapping, synthesizedWebMapping);
+		WebMapping synthesizedAgainWebMapping = synthesizeAnnotation(synthesizedWebMapping);
+		assertSame(synthesizedWebMapping, synthesizedAgainWebMapping);
+		assertThat(synthesizedAgainWebMapping, instanceOf(SynthesizedAnnotation.class));
+
+		assertNotNull(synthesizedAgainWebMapping);
+		assertEquals("name attribute: ", "foo", synthesizedAgainWebMapping.name());
+		assertEquals("aliased path attribute: ", "/test", synthesizedAgainWebMapping.path());
+		assertEquals("actual value attribute: ", "/test", synthesizedAgainWebMapping.value());
 	}
 
 
@@ -708,6 +914,151 @@ public class AnnotationUtilsTests {
 		@MyRepeatableContainer({ @MyRepeatable("b"), @MyRepeatable("c") })
 		@MyRepeatableMeta
 		void foo();
+	}
+
+	/**
+	 * Mock of {@link org.springframework.web.bind.annotation.RequestMapping}.
+	 */
+	@Retention(RetentionPolicy.RUNTIME)
+	@interface WebMapping {
+
+		String name();
+
+		@AliasFor(attribute = "path")
+		String value() default "";
+
+		@AliasFor(attribute = "value")
+		String path() default "";
+	}
+
+	@Component("webController")
+	static class WebController {
+
+		@WebMapping(value = "/test", name = "foo")
+		public void handleMappedWithValueAttribute() {
+		}
+
+		@WebMapping(path = "/test", name = "bar")
+		public void handleMappedWithPathAttribute() {
+		}
+
+		@WebMapping(value = "/enigma", path = "/test", name = "baz")
+		public void handleMappedWithPathValueAndAttributes() {
+		}
+	}
+
+	/**
+	 * Mock of {@link org.springframework.test.context.ContextConfiguration}.
+	 */
+	@Retention(RetentionPolicy.RUNTIME)
+	static @interface ContextConfig {
+
+		@AliasFor(attribute = "locations")
+		String value() default "";
+
+		@AliasFor(attribute = "value")
+		String locations() default "";
+	}
+
+	/**
+	 * Mock of {@link org.springframework.test.context.ContextHierarchy}.
+	 */
+	@Retention(RetentionPolicy.RUNTIME)
+	static @interface Hierarchy {
+
+		ContextConfig[] value();
+	}
+
+	@Hierarchy({ @ContextConfig("A"), @ContextConfig(locations = "B") })
+	static class TestCase {
+	}
+
+	@Retention(RetentionPolicy.RUNTIME)
+	static @interface AliasForNonexistentAttribute {
+
+		@AliasFor(attribute = "bar")
+		String foo() default "";
+	}
+
+	@AliasForNonexistentAttribute
+	static class AliasForNonexistentAttributeClass {
+	}
+
+	@Retention(RetentionPolicy.RUNTIME)
+	static @interface AliasForWithoutMirroredAliasFor {
+
+		@AliasFor(attribute = "bar")
+		String foo() default "";
+
+		String bar() default "";
+	}
+
+	@AliasForWithoutMirroredAliasFor
+	static class AliasForWithoutMirroredAliasForClass {
+	}
+
+	@Retention(RetentionPolicy.RUNTIME)
+	static @interface AliasForWithMirroredAliasForWrongAttribute {
+
+		@AliasFor(attribute = "bar")
+		String[] foo() default "";
+
+		@AliasFor(attribute = "quux")
+		String[] bar() default "";
+	}
+
+	@AliasForWithMirroredAliasForWrongAttribute
+	static class AliasForWithMirroredAliasForWrongAttributeClass {
+	}
+
+	@Retention(RetentionPolicy.RUNTIME)
+	static @interface AliasForAttributeOfDifferentType {
+
+		@AliasFor(attribute = "bar")
+		String[] foo() default "";
+
+		@AliasFor(attribute = "foo")
+		boolean bar() default true;
+	}
+
+	@AliasForAttributeOfDifferentType
+	static class AliasForAttributeOfDifferentTypeClass {
+	}
+
+	@Retention(RetentionPolicy.RUNTIME)
+	static @interface AliasForWithMissingDefaultValues {
+
+		@AliasFor(attribute = "bar")
+		String foo();
+
+		@AliasFor(attribute = "foo")
+		String bar();
+	}
+
+	@AliasForWithMissingDefaultValues(foo = "foo", bar = "bar")
+	static class AliasForWithMissingDefaultValuesClass {
+	}
+
+	@Retention(RetentionPolicy.RUNTIME)
+	static @interface AliasForAttributeWithDifferentDefaultValue {
+
+		@AliasFor(attribute = "bar")
+		String foo() default "X";
+
+		@AliasFor(attribute = "foo")
+		String bar() default "Z";
+	}
+
+	@AliasForAttributeWithDifferentDefaultValue
+	static class AliasForAttributeWithDifferentDefaultValueClass {
+	}
+
+	@ContextConfig
+	@Retention(RetentionPolicy.RUNTIME)
+	static @interface AliasedComposedContextConfig {
+
+		@AliasFor(annotation = ContextConfig.class, attribute = "locations")
+		String xmlConfigFile();
 	}
 
 }

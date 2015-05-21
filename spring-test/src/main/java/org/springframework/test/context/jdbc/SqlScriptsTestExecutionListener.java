@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -255,24 +255,6 @@ public class SqlScriptsTestExecutionListener extends AbstractTestExecutionListen
 
 	private String[] getScripts(Sql sql, TestContext testContext, boolean classLevel) {
 		String[] scripts = sql.scripts();
-		String[] value = sql.value();
-		boolean scriptsDeclared = !ObjectUtils.isEmpty(scripts);
-		boolean valueDeclared = !ObjectUtils.isEmpty(value);
-
-		if (valueDeclared && scriptsDeclared) {
-			String elementType = (classLevel ? "class" : "method");
-			String elementName = (classLevel ? testContext.getTestClass().getName()
-					: testContext.getTestMethod().toString());
-			String msg = String.format("Test %s [%s] has been configured with @Sql's 'value' [%s] "
-					+ "and 'scripts' [%s] attributes. Only one declaration of SQL script "
-					+ "paths is permitted per @Sql annotation.", elementType, elementName,
-				ObjectUtils.nullSafeToString(value), ObjectUtils.nullSafeToString(scripts));
-			logger.error(msg);
-			throw new IllegalStateException(msg);
-		}
-		if (valueDeclared) {
-			scripts = value;
-		}
 		if (ObjectUtils.isEmpty(scripts)) {
 			scripts = new String[] { detectDefaultScript(testContext, classLevel) };
 		}

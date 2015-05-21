@@ -25,6 +25,7 @@ import java.lang.annotation.Target;
 
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.core.annotation.AliasFor;
 
 /**
  * {@code @ContextConfiguration} defines class-level metadata that is used to determine
@@ -97,6 +98,7 @@ public @interface ContextConfiguration {
 	 * @since 3.0
 	 * @see #inheritLocations
 	 */
+	@AliasFor(attribute = "locations")
 	String[] value() default {};
 
 	/**
@@ -127,6 +129,7 @@ public @interface ContextConfiguration {
 	 * @since 2.5
 	 * @see #inheritLocations
 	 */
+	@AliasFor(attribute = "value")
 	String[] locations() default {};
 
 	/**

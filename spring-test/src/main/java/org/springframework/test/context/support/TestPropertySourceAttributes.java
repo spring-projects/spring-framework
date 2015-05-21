@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -67,8 +67,7 @@ class TestPropertySourceAttributes {
 	 * @param annAttrs the annotation attributes from which to retrieve the attributes
 	 */
 	TestPropertySourceAttributes(Class<?> declaringClass, AnnotationAttributes annAttrs) {
-		this(declaringClass, resolveLocations(declaringClass, annAttrs.getStringArray("locations"),
-			annAttrs.getStringArray("value")), annAttrs.getBoolean("inheritLocations"),
+		this(declaringClass, annAttrs.getStringArray("locations"), annAttrs.getBoolean("inheritLocations"),
 			annAttrs.getStringArray("properties"), annAttrs.getBoolean("inheritProperties"));
 	}
 
@@ -154,31 +153,6 @@ class TestPropertySourceAttributes {
 		.append("properties", ObjectUtils.nullSafeToString(properties))//
 		.append("inheritProperties", inheritProperties)//
 		.toString();
-	}
-
-	/**
-	 * Resolve resource locations from the supplied {@code locations} and
-	 * {@code value} arrays, which correspond to attributes of the same names in
-	 * the {@link TestPropertySource} annotation.
-	 *
-	 * @throws IllegalStateException if both the locations and value attributes have been declared
-	 */
-	private static String[] resolveLocations(Class<?> declaringClass, String[] locations, String[] value) {
-		Assert.notNull(declaringClass, "declaringClass must not be null");
-
-		if (!ObjectUtils.isEmpty(value) && !ObjectUtils.isEmpty(locations)) {
-			String msg = String.format("Class [%s] has been configured with @TestPropertySource's 'value' [%s] "
-					+ "and 'locations' [%s] attributes. Only one declaration of resource "
-					+ "locations is permitted per @TestPropertySource annotation.", declaringClass.getName(),
-				ObjectUtils.nullSafeToString(value), ObjectUtils.nullSafeToString(locations));
-			logger.error(msg);
-			throw new IllegalStateException(msg);
-		}
-		else if (!ObjectUtils.isEmpty(value)) {
-			locations = value;
-		}
-
-		return locations;
 	}
 
 	/**

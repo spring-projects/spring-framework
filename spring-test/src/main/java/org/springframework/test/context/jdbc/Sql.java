@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,8 @@ import java.lang.annotation.Inherited;
 import java.lang.annotation.Repeatable;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
+
+import org.springframework.core.annotation.AliasFor;
 
 import static java.lang.annotation.ElementType.*;
 import static java.lang.annotation.RetentionPolicy.*;
@@ -93,6 +95,7 @@ public @interface Sql {
 	 * <p>This attribute may <strong>not</strong> be used in conjunction with
 	 * {@link #scripts}, but it may be used instead of {@link #scripts}.
 	 */
+	@AliasFor(attribute = "scripts")
 	String[] value() default {};
 
 	/**
@@ -126,6 +129,7 @@ public @interface Sql {
 	 * {@code "classpath:com/example/MyTest.testMethod.sql"}.</li>
 	 * </ul>
 	 */
+	@AliasFor(attribute = "value")
 	String[] scripts() default {};
 
 	/**

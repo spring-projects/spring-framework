@@ -18,9 +18,13 @@ package org.springframework.core.annotation;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.Arrays;
+import java.lang.reflect.Proxy;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -29,9 +33,9 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.core.BridgeMethodResolver;
 import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.ConcurrentReferenceHashMap;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.ReflectionUtils;
@@ -88,8 +92,16 @@ import org.springframework.util.StringUtils;
  */
 public abstract class AnnotationUtils {
 
-	/** The attribute name for annotations with a single element */
+	/**
+	 * The attribute name for annotations with a single element.
+	 */
 	public static final String VALUE = "value";
+
+	/**
+	 * A object that can be stored in {@link AnnotationAttributes} as a
+	 * placeholder for an attribute's declared default value.
+	 */
+	public static final Object DEFAULT_VALUE_PLACEHOLDER = "<SPRING DEFAULT VALUE PLACEHOLDER>";
 
 
 	private static final Map<AnnotationCacheKey, Annotation> findAnnotationCache =
@@ -116,14 +128,15 @@ public abstract class AnnotationUtils {
 	@SuppressWarnings("unchecked")
 	public static <A extends Annotation> A getAnnotation(Annotation ann, Class<A> annotationType) {
 		if (annotationType.isInstance(ann)) {
-			return (A) ann;
+			return synthesizeAnnotation((A) ann);
 		}
+		Class<? extends Annotation> annotatedElement = ann.annotationType();
 		try {
-			return ann.annotationType().getAnnotation(annotationType);
+			return synthesizeAnnotation(annotatedElement, annotatedElement.getAnnotation(annotationType));
 		}
 		catch (Exception ex) {
 			// Assuming nested Class values not resolvable within annotation attributes...
-			logIntrospectionFailure(ann.annotationType(), ex);
+			handleIntrospectionFailure(annotatedElement, ex);
 			return null;
 		}
 	}
@@ -151,11 +164,11 @@ public abstract class AnnotationUtils {
 					}
 				}
 			}
-			return ann;
+			return synthesizeAnnotation(annotatedElement, ann);
 		}
 		catch (Exception ex) {
 			// Assuming nested Class values not resolvable within annotation attributes...
-			logIntrospectionFailure(annotatedElement, ex);
+			handleIntrospectionFailure(annotatedElement, ex);
 			return null;
 		}
 	}
@@ -195,7 +208,7 @@ public abstract class AnnotationUtils {
 		}
 		catch (Exception ex) {
 			// Assuming nested Class values not resolvable within annotation attributes...
-			logIntrospectionFailure(annotatedElement, ex);
+			handleIntrospectionFailure(annotatedElement, ex);
 		}
 		return null;
 	}
@@ -218,7 +231,7 @@ public abstract class AnnotationUtils {
 		}
 		catch (Exception ex) {
 			// Assuming nested Class values not resolvable within annotation attributes...
-			logIntrospectionFailure(method, ex);
+			handleIntrospectionFailure(method, ex);
 		}
 		return null;
 	}
@@ -274,7 +287,7 @@ public abstract class AnnotationUtils {
 		}
 		catch (Exception ex) {
 			// Assuming nested Class values not resolvable within annotation attributes...
-			logIntrospectionFailure(annotatedElement, ex);
+			handleIntrospectionFailure(annotatedElement, ex);
 		}
 		return Collections.emptySet();
 	}
@@ -298,7 +311,8 @@ public abstract class AnnotationUtils {
 	public static <A extends Annotation> A findAnnotation(AnnotatedElement annotatedElement, Class<A> annotationType) {
 		// Do NOT store result in the findAnnotationCache since doing so could break
 		// findAnnotation(Class, Class) and findAnnotation(Method, Class).
-		return findAnnotation(annotatedElement, annotationType, new HashSet<Annotation>());
+		return synthesizeAnnotation(annotatedElement,
+			findAnnotation(annotatedElement, annotationType, new HashSet<Annotation>()));
 	}
 
 	/**
@@ -332,7 +346,7 @@ public abstract class AnnotationUtils {
 		}
 		catch (Exception ex) {
 			// Assuming nested Class values not resolvable within annotation attributes...
-			logIntrospectionFailure(annotatedElement, ex);
+			handleIntrospectionFailure(annotatedElement, ex);
 		}
 		return null;
 	}
@@ -389,7 +403,7 @@ public abstract class AnnotationUtils {
 			}
 		}
 
-		return result;
+		return synthesizeAnnotation(method, result);
 	}
 
 	private static <A extends Annotation> A searchOnInterfaces(Method method, Class<A> annotationType, Class<?>... ifcs) {
@@ -426,7 +440,7 @@ public abstract class AnnotationUtils {
 			}
 			catch (Exception ex) {
 				// Assuming nested Class values not resolvable within annotation attributes...
-				logIntrospectionFailure(ifcMethod, ex);
+				handleIntrospectionFailure(ifcMethod, ex);
 			}
 		}
 		annotatedInterfaceCache.put(iface, found);
@@ -465,7 +479,7 @@ public abstract class AnnotationUtils {
 				findAnnotationCache.put(cacheKey, result);
 			}
 		}
-		return result;
+		return synthesizeAnnotation(clazz, result);
 	}
 
 	/**
@@ -499,7 +513,7 @@ public abstract class AnnotationUtils {
 		}
 		catch (Exception ex) {
 			// Assuming nested Class values not resolvable within annotation attributes...
-			logIntrospectionFailure(clazz, ex);
+			handleIntrospectionFailure(clazz, ex);
 			return null;
 		}
 
@@ -617,7 +631,7 @@ public abstract class AnnotationUtils {
 		}
 		catch (Exception ex) {
 			// Assuming nested Class values not resolvable within annotation attributes...
-			logIntrospectionFailure(clazz, ex);
+			handleIntrospectionFailure(clazz, ex);
 		}
 		return false;
 	}
@@ -682,9 +696,10 @@ public abstract class AnnotationUtils {
 	 * @return the Map of annotation attributes, with attribute names as keys and
 	 * corresponding attribute values as values; never {@code null}
 	 * @see #getAnnotationAttributes(Annotation, boolean, boolean)
+	 * @see #getAnnotationAttributes(AnnotatedElement, Annotation, boolean, boolean)
 	 */
 	public static Map<String, Object> getAnnotationAttributes(Annotation annotation) {
-		return getAnnotationAttributes(annotation, false, false);
+		return getAnnotationAttributes(null, annotation);
 	}
 
 	/**
@@ -706,8 +721,7 @@ public abstract class AnnotationUtils {
 	}
 
 	/**
-	 * Retrieve the given annotation's attributes as an {@link AnnotationAttributes}
-	 * map structure.
+	 * Retrieve the given annotation's attributes as an {@link AnnotationAttributes} map.
 	 * <p>This method provides fully recursive annotation reading capabilities on par with
 	 * the reflection-based {@link org.springframework.core.type.StandardAnnotationMetadata}.
 	 * @param annotation the annotation to retrieve the attributes for
@@ -724,19 +738,106 @@ public abstract class AnnotationUtils {
 	 */
 	public static AnnotationAttributes getAnnotationAttributes(Annotation annotation, boolean classValuesAsString,
 			boolean nestedAnnotationsAsMap) {
+		return getAnnotationAttributes(null, annotation, classValuesAsString, nestedAnnotationsAsMap);
+	}
 
-		AnnotationAttributes attrs = new AnnotationAttributes();
-		Method[] methods = annotation.annotationType().getDeclaredMethods();
-		for (Method method : methods) {
-			if (method.getParameterTypes().length == 0 && method.getReturnType() != void.class) {
-				try {
-					ReflectionUtils.makeAccessible(method);
-					Object value = method.invoke(annotation);
-					attrs.put(method.getName(), adaptValue(value, classValuesAsString, nestedAnnotationsAsMap));
+	/**
+	 * Retrieve the given annotation's attributes as an {@link AnnotationAttributes} map.
+	 * <p>Equivalent to calling {@link #getAnnotationAttributes(AnnotatedElement, Annotation, boolean, boolean)}
+	 * with the {@code classValuesAsString} and {@code nestedAnnotationsAsMap} parameters
+	 * set to {@code false}.
+	 * @param annotation the annotation to retrieve the attributes for
+	 * @return the Map of annotation attributes, with attribute names as keys and
+	 * corresponding attribute values as values; never {@code null}
+	 * @see #getAnnotationAttributes(AnnotatedElement, Annotation, boolean, boolean)
+	 * @since 4.2
+	 */
+	public static AnnotationAttributes getAnnotationAttributes(AnnotatedElement annotatedElement, Annotation annotation) {
+		return getAnnotationAttributes(annotatedElement, annotation, false, false);
+	}
+
+	/**
+	 * Retrieve the given annotation's attributes as an {@link AnnotationAttributes} map.
+	 * <p>This method provides fully recursive annotation reading capabilities on par with
+	 * the reflection-based {@link org.springframework.core.type.StandardAnnotationMetadata}.
+	 * @param annotatedElement the element that is annotated with the supplied annotation,
+	 * used for contextual logging; may be {@code null} if unknown
+	 * @param annotation the annotation to retrieve the attributes for
+	 * @param classValuesAsString whether to convert Class references into Strings (for
+	 * compatibility with {@link org.springframework.core.type.AnnotationMetadata})
+	 * or to preserve them as Class references
+	 * @param nestedAnnotationsAsMap whether to convert nested Annotation instances into
+	 * {@link AnnotationAttributes} maps (for compatibility with
+	 * {@link org.springframework.core.type.AnnotationMetadata}) or to preserve them as
+	 * Annotation instances
+	 * @param defaultValuesAsPlaceholder whether to replace default values with
+	 * {@link #DEFAULT_VALUE_PLACEHOLDER} or leave them as is
+	 * @return the annotation attributes (a specialized Map) with attribute names as keys
+	 * and corresponding attribute values as values; never {@code null}
+	 * @since 4.2
+	 */
+	public static AnnotationAttributes getAnnotationAttributes(AnnotatedElement annotatedElement,
+			Annotation annotation, boolean classValuesAsString, boolean nestedAnnotationsAsMap) {
+
+		return getAnnotationAttributes(annotatedElement, annotation, classValuesAsString, nestedAnnotationsAsMap,
+			false, true);
+	}
+
+	/**
+	 * Retrieve the given annotation's attributes as an {@link AnnotationAttributes} map.
+	 *
+	 * <p>This method provides fully recursive annotation reading capabilities on par with
+	 * the reflection-based {@link org.springframework.core.type.StandardAnnotationMetadata}.
+	 *
+	 * @param annotatedElement the element that is annotated with the supplied annotation,
+	 * used for contextual logging; may be {@code null} if unknown
+	 * @param annotation the annotation to retrieve the attributes for
+	 * @param classValuesAsString whether to convert Class references into Strings (for
+	 * compatibility with {@link org.springframework.core.type.AnnotationMetadata})
+	 * or to preserve them as Class references
+	 * @param nestedAnnotationsAsMap whether to convert nested Annotation instances into
+	 * {@link AnnotationAttributes} maps (for compatibility with
+	 * {@link org.springframework.core.type.AnnotationMetadata}) or to preserve them as
+	 * Annotation instances
+	 * @param defaultValuesAsPlaceholder whether to replace default values with
+	 * {@link #DEFAULT_VALUE_PLACEHOLDER} or leave them as is
+	 * @param synthesizeAnnotation whether or not the annotation should be
+	 * {@linkplain #synthesizeAnnotation synthesized} before processing
+	 * @return the annotation attributes (a specialized Map) with attribute names as keys
+	 * and corresponding attribute values as values; never {@code null}
+	 * @since 4.2
+	 */
+	static AnnotationAttributes getAnnotationAttributes(AnnotatedElement annotatedElement,
+			Annotation annotation, boolean classValuesAsString, boolean nestedAnnotationsAsMap,
+			boolean defaultValuesAsPlaceholder, boolean synthesizeAnnotation) {
+
+		if (synthesizeAnnotation) {
+			annotation = synthesizeAnnotation(annotatedElement, annotation);
+		}
+
+		Class<? extends Annotation> annotationType = annotation.annotationType();
+		AnnotationAttributes attrs = new AnnotationAttributes(annotationType);
+		for (Method method : getAttributeMethods(annotationType)) {
+			try {
+				ReflectionUtils.makeAccessible(method);
+				Object value = method.invoke(annotation);
+
+				Object defaultValue = method.getDefaultValue();
+				if (defaultValuesAsPlaceholder && (defaultValue != null)) {
+					if (ObjectUtils.nullSafeEquals(value, defaultValue)) {
+						value = DEFAULT_VALUE_PLACEHOLDER;
+					}
 				}
-				catch (Exception ex) {
-					throw new IllegalStateException("Could not obtain annotation attribute values", ex);
+
+				attrs.put(method.getName(),
+					adaptValue(annotatedElement, value, classValuesAsString, nestedAnnotationsAsMap));
+			}
+			catch (Exception ex) {
+				if (ex instanceof InvocationTargetException) {
+					Throwable targetException = ((InvocationTargetException) ex).getTargetException();
+					rethrowAnnotationConfigurationException(targetException);
 				}
+				throw new IllegalStateException("Could not obtain annotation attribute value for " + method, ex);
 			}
 		}
 		return attrs;
@@ -744,6 +845,10 @@ public abstract class AnnotationUtils {
 
 	/**
 	 * Adapt the given value according to the given class and nested annotation settings.
+	 * <p>Nested annotations will be
+	 * {@linkplain #synthesizeAnnotation(AnnotatedElement, Annotation) synthesized}.
+	 * @param annotatedElement the element that is annotated, used for contextual
+	 * logging; may be {@code null} if unknown
 	 * @param value the annotation attribute value
 	 * @param classValuesAsString whether to turn Class references into Strings (for
 	 * compatibility with {@link org.springframework.core.type.AnnotationMetadata})
@@ -754,34 +859,57 @@ public abstract class AnnotationUtils {
 	 * Annotation instances
 	 * @return the adapted value, or the original value if no adaptation is needed
 	 */
-	static Object adaptValue(Object value, boolean classValuesAsString, boolean nestedAnnotationsAsMap) {
+	static Object adaptValue(AnnotatedElement annotatedElement, Object value, boolean classValuesAsString,
+			boolean nestedAnnotationsAsMap) {
+
 		if (classValuesAsString) {
 			if (value instanceof Class) {
-				value = ((Class<?>) value).getName();
+				return ((Class<?>) value).getName();
 			}
 			else if (value instanceof Class[]) {
 				Class<?>[] clazzArray = (Class<?>[]) value;
-				String[] newValue = new String[clazzArray.length];
+				String[] classNames = new String[clazzArray.length];
 				for (int i = 0; i < clazzArray.length; i++) {
-					newValue[i] = clazzArray[i].getName();
+					classNames[i] = clazzArray[i].getName();
 				}
-				value = newValue;
+				return classNames;
 			}
 		}
-		if (nestedAnnotationsAsMap && value instanceof Annotation) {
-			return getAnnotationAttributes((Annotation) value, classValuesAsString, true);
-		}
-		else if (nestedAnnotationsAsMap && value instanceof Annotation[]) {
-			Annotation[] realAnnotations = (Annotation[]) value;
-			AnnotationAttributes[] mappedAnnotations = new AnnotationAttributes[realAnnotations.length];
-			for (int i = 0; i < realAnnotations.length; i++) {
-				mappedAnnotations[i] = getAnnotationAttributes(realAnnotations[i], classValuesAsString, true);
+
+		if (value instanceof Annotation) {
+			Annotation annotation = (Annotation) value;
+
+			if (nestedAnnotationsAsMap) {
+				return getAnnotationAttributes(annotatedElement, annotation, classValuesAsString,
+					nestedAnnotationsAsMap);
 			}
-			return mappedAnnotations;
+			else {
+				return synthesizeAnnotation(annotatedElement, annotation);
+			}
 		}
-		else {
-			return value;
+
+		if (value instanceof Annotation[]) {
+			Annotation[] annotations = (Annotation[]) value;
+
+			if (nestedAnnotationsAsMap) {
+				AnnotationAttributes[] mappedAnnotations = new AnnotationAttributes[annotations.length];
+				for (int i = 0; i < annotations.length; i++) {
+					mappedAnnotations[i] = getAnnotationAttributes(annotatedElement, annotations[i],
+						classValuesAsString, nestedAnnotationsAsMap);
+				}
+				return mappedAnnotations;
+			}
+			else {
+				Annotation[] synthesizedAnnotations = new Annotation[annotations.length];
+				for (int i = 0; i < annotations.length; i++) {
+					synthesizedAnnotations[i] = synthesizeAnnotation(annotatedElement, annotations[i]);
+				}
+				return synthesizedAnnotations;
+			}
 		}
+
+		// Fallback
+		return value;
 	}
 
 	/**
@@ -803,7 +931,7 @@ public abstract class AnnotationUtils {
 	 * @see #getValue(Annotation)
 	 */
 	public static Object getValue(Annotation annotation, String attributeName) {
-		if (annotation == null || !StringUtils.hasLength(attributeName)) {
+		if (annotation == null || !StringUtils.hasText(attributeName)) {
 			return null;
 		}
 		try {
@@ -861,7 +989,7 @@ public abstract class AnnotationUtils {
 	 * @see #getDefaultValue(Annotation, String)
 	 */
 	public static Object getDefaultValue(Class<? extends Annotation> annotationType, String attributeName) {
-		if (annotationType == null || !StringUtils.hasLength(attributeName)) {
+		if (annotationType == null || !StringUtils.hasText(attributeName)) {
 			return null;
 		}
 		try {
@@ -872,14 +1000,343 @@ public abstract class AnnotationUtils {
 		}
 	}
 
+	/**
+	 * TODO Document synthesizeAnnotation().
+	 *
+	 * @param annotation the annotation to synthesize
+	 * @since 4.2
+	 * @see #synthesizeAnnotation(AnnotatedElement, Annotation)
+	 */
+	public static <A extends Annotation> A synthesizeAnnotation(A annotation) {
+		return synthesizeAnnotation(null, annotation);
+	}
 
 	/**
-	 * Log an introspection failure (in particular {@code TypeNotPresentExceptions}) -
-	 * before moving on, pretending there were no annotations on this specific element.
+	 * TODO Document synthesizeAnnotation().
+	 *
+	 * @param annotatedElement the element that is annotated with the supplied
+	 * annotation, used for contextual logging; may be {@code null} if unknown
+	 * @param annotation the annotation to synthesize
+	 * @since 4.2
+	 */
+	@SuppressWarnings("unchecked")
+	public static <A extends Annotation> A synthesizeAnnotation(AnnotatedElement annotatedElement, A annotation) {
+		if (annotation == null) {
+			return null;
+		}
+		if (annotation instanceof SynthesizedAnnotation) {
+			return annotation;
+		}
+
+		Class<? extends Annotation> annotationType = annotation.annotationType();
+
+		// No need to synthesize?
+		if (!isSynthesizable(annotationType)) {
+			return annotation;
+		}
+
+		InvocationHandler handler = new SynthesizedAnnotationInvocationHandler(annotatedElement, annotation, getAliasMap(annotationType));
+		A synthesizedAnnotation = (A) Proxy.newProxyInstance(ClassUtils.getDefaultClassLoader(), new Class<?>[] {
+			(Class<A>) annotationType, SynthesizedAnnotation.class }, handler);
+
+		return synthesizedAnnotation;
+	}
+
+	/**
+	 * TODO Document getAliasMap().
+	 * @since 4.2
+	 */
+	private static Map<String, String> getAliasMap(Class<? extends Annotation> annotationType) {
+		if (annotationType == null) {
+			return null;
+		}
+
+		Map<String, String> map = new HashMap<String, String>();
+		for (Method attribute : getAttributeMethods(annotationType)) {
+			String attributeName = attribute.getName();
+			String aliasedAttributeName = getAliasedAttributeName(attribute);
+			if (aliasedAttributeName != null) {
+				map.put(attributeName, aliasedAttributeName);
+			}
+		}
+		return map;
+	}
+
+	/**
+	 * TODO Document isSynthesizable().
+	 * @since 4.2
+	 */
+	@SuppressWarnings("unchecked")
+	private static boolean isSynthesizable(Class<? extends Annotation> annotationType) {
+
+		for (Method attribute : getAttributeMethods(annotationType)) {
+			if (getAliasedAttributeName(attribute) != null) {
+				return true;
+			}
+
+			Class<?> returnType = attribute.getReturnType();
+
+			if (Annotation[].class.isAssignableFrom(returnType)) {
+				Class<? extends Annotation> nestedAnnotationType = (Class<? extends Annotation>) returnType.getComponentType();
+				if (isSynthesizable(nestedAnnotationType)) {
+					return true;
+				}
+			}
+			else if (Annotation.class.isAssignableFrom(returnType)) {
+				Class<? extends Annotation> nestedAnnotationType = (Class<? extends Annotation>) returnType;
+				if (isSynthesizable(nestedAnnotationType)) {
+					return true;
+				}
+			}
+		}
+
+		return false;
+	}
+
+	/**
+	 * Get the name of the aliased attribute configured via
+	 * {@link AliasFor @AliasFor} on the supplied annotation {@code attribute}.
+	 *
+	 * <p>This method does not resolve aliases in other annotations. In
+	 * other words, if {@code @AliasFor} is present on the supplied
+	 * {@code attribute} but {@linkplain AliasFor#annotation references an
+	 * annotation} other than {@link Annotation}, this method will return
+	 * {@code null} immediately.
+	 *
+	 * @param attribute the attribute to find an alias for
+	 * @return the name of the aliased attribute, or {@code null} if not found
+	 * @throws IllegalArgumentException if the supplied attribute method is
+	 * not from an annotation, or if the supplied target type is {@link Annotation}
+	 * @throws AnnotationConfigurationException if invalid configuration of
+	 * {@code @AliasFor} is detected
+	 * @see #getAliasedAttributeName(Method, Class)
+	 * @since 4.2
+	 */
+	static String getAliasedAttributeName(Method attribute) {
+		return getAliasedAttributeName(attribute, null);
+	}
+
+	/**
+	 * Get the name of the aliased attribute configured via
+	 * {@link AliasFor @AliasFor} on the supplied annotation {@code attribute}.
+	 *
+	 * @param attribute the attribute to find an alias for
+	 * @param targetAnnotationType the type of annotation in which the
+	 * aliased attribute is allowed to be declared; {@code null} implies
+	 * <em>within the same annotation</em>
+	 * @return the name of the aliased attribute, or {@code null} if not found
+	 * @throws IllegalArgumentException if the supplied attribute method is
+	 * not from an annotation, or if the supplied target type is {@link Annotation}
+	 * @throws AnnotationConfigurationException if invalid configuration of
+	 * {@code @AliasFor} is detected
+	 * @since 4.2
+	 */
+	@SuppressWarnings("unchecked")
+	static String getAliasedAttributeName(Method attribute, Class<? extends Annotation> targetAnnotationType) {
+		Class<?> declaringClass = attribute.getDeclaringClass();
+		Assert.isTrue(declaringClass.isAnnotation(), "attribute method must be from an annotation");
+		Assert.isTrue(!Annotation.class.equals(targetAnnotationType),
+			"targetAnnotationType must not be java.lang.annotation.Annotation");
+
+		AliasFor aliasFor = attribute.getAnnotation(AliasFor.class);
+
+		// Nothing to check
+		if (aliasFor == null) {
+			return null;
+		}
+
+		Class<? extends Annotation> sourceAnnotationType = (Class<? extends Annotation>) declaringClass;
+		Class<? extends Annotation> aliasedAnnotationType = aliasFor.annotation();
+
+		boolean searchWithinSameAnnotation = (targetAnnotationType == null);
+		boolean sameTargetDeclared = (sourceAnnotationType.equals(aliasedAnnotationType) || Annotation.class.equals(aliasedAnnotationType));
+
+		// Wrong search scope?
+		if (searchWithinSameAnnotation && !sameTargetDeclared) {
+			return null;
+		}
+
+		String attributeName = attribute.getName();
+		String aliasedAttributeName = aliasFor.attribute();
+
+		if (!StringUtils.hasText(aliasedAttributeName)) {
+			String msg = String.format(
+				"@AliasFor declaration on attribute [%s] in annotation [%s] is missing required 'attribute' value.",
+				attributeName, sourceAnnotationType.getName());
+			throw new AnnotationConfigurationException(msg);
+		}
+
+		if (sameTargetDeclared) {
+			aliasedAnnotationType = sourceAnnotationType;
+		}
+
+		Method aliasedAttribute = null;
+		try {
+			aliasedAttribute = aliasedAnnotationType.getDeclaredMethod(aliasedAttributeName);
+		}
+		catch (NoSuchMethodException e) {
+			String msg = String.format(
+				"Attribute [%s] in annotation [%s] is declared as an @AliasFor nonexistent attribute [%s] in annotation [%s].",
+				attributeName, sourceAnnotationType.getName(), aliasedAttributeName, aliasedAnnotationType.getName());
+			throw new AnnotationConfigurationException(msg, e);
+		}
+
+		if (sameTargetDeclared) {
+			AliasFor mirrorAliasFor = aliasedAttribute.getAnnotation(AliasFor.class);
+			if (mirrorAliasFor == null) {
+				String msg = String.format("Attribute [%s] in annotation [%s] must be declared as an @AliasFor [%s].",
+					aliasedAttributeName, sourceAnnotationType.getName(), attributeName);
+				throw new AnnotationConfigurationException(msg);
+			}
+
+			String mirrorAliasedAttributeName = mirrorAliasFor.attribute();
+			if (!attributeName.equals(mirrorAliasedAttributeName)) {
+				String msg = String.format(
+					"Attribute [%s] in annotation [%s] must be declared as an @AliasFor [%s], not [%s].",
+					aliasedAttributeName, sourceAnnotationType.getName(), attributeName, mirrorAliasedAttributeName);
+				throw new AnnotationConfigurationException(msg);
+			}
+		}
+
+		Class<?> returnType = attribute.getReturnType();
+		Class<?> aliasedReturnType = aliasedAttribute.getReturnType();
+		if (!returnType.equals(aliasedReturnType)) {
+			String msg = String.format("Misconfigured aliases: attribute [%s] in annotation [%s] "
+					+ "and attribute [%s] in annotation [%s] must declare the same return type.", attributeName,
+				sourceAnnotationType.getName(), aliasedAttributeName, aliasedAnnotationType.getName());
+			throw new AnnotationConfigurationException(msg);
+		}
+
+		if (sameTargetDeclared) {
+			Object defaultValue = attribute.getDefaultValue();
+			Object aliasedDefaultValue = aliasedAttribute.getDefaultValue();
+
+			if ((defaultValue == null) || (aliasedDefaultValue == null)) {
+				String msg = String.format("Misconfigured aliases: attribute [%s] in annotation [%s] "
+						+ "and attribute [%s] in annotation [%s] must declare default values.", attributeName,
+					sourceAnnotationType.getName(), aliasedAttributeName, aliasedAnnotationType.getName());
+				throw new AnnotationConfigurationException(msg);
+			}
+
+			if (!ObjectUtils.nullSafeEquals(defaultValue, aliasedDefaultValue)) {
+				String msg = String.format("Misconfigured aliases: attribute [%s] in annotation [%s] "
+						+ "and attribute [%s] in annotation [%s] must declare the same default value.", attributeName,
+					sourceAnnotationType.getName(), aliasedAttributeName, aliasedAnnotationType.getName());
+				throw new AnnotationConfigurationException(msg);
+			}
+		}
+
+		return aliasedAttributeName;
+	}
+
+	/**
+	 * TODO Document getAttributeMethods().
+	 *
+	 * @since 4.2
+	 */
+	static List<Method> getAttributeMethods(Class<? extends Annotation> annotationType) {
+		List<Method> methods = new ArrayList<Method>();
+		for (Method method : annotationType.getDeclaredMethods()) {
+			if ((method.getParameterTypes().length == 0) && (method.getReturnType() != void.class)) {
+				methods.add(method);
+			}
+		}
+		return methods;
+	}
+
+	/**
+	 * TODO Document postProcessAnnotationAttributes().
+	 *
+	 * @param annotatedElement the element that is annotated with the supplied
+	 * annotation, used for contextual logging; may be {@code null} if unknown
+	 * @param attributes the annotation attributes to validate
+	 * @since 4.2
+	 */
+	static void postProcessAnnotationAttributes(AnnotatedElement element, AnnotationAttributes attributes,
+			boolean classValuesAsString, boolean nestedAnnotationsAsMap) {
+
+		// Abort?
+		if (attributes == null) {
+			return;
+		}
+
+		Class<? extends Annotation> annotationType = attributes.annotationType();
+		Map<String, String> aliasMap = getAliasMap(annotationType);
+
+		// Validate @AliasFor configuration
+		if (aliasMap != null) {
+			Set<String> validated = new HashSet<String>();
+
+			for (String attributeName : aliasMap.keySet()) {
+				String aliasedAttributeName = aliasMap.get(attributeName);
+
+				if (validated.add(attributeName) && validated.add(aliasedAttributeName)) {
+					Object value = attributes.get(attributeName);
+					Object aliasedValue = attributes.get(aliasedAttributeName);
+
+					if (!ObjectUtils.nullSafeEquals(value, aliasedValue) && !DEFAULT_VALUE_PLACEHOLDER.equals(value)
+							&& !DEFAULT_VALUE_PLACEHOLDER.equals(aliasedValue)) {
+						String elementAsString = (element == null ? "unknown element" : element.toString());
+						String msg = String.format(
+							"In AnnotationAttributes for annotation [%s] declared on [%s], attribute [%s] and its alias [%s] are "
+									+ "declared with values of [%s] and [%s], but only one declaration is permitted.",
+							annotationType.getName(), elementAsString, attributeName, aliasedAttributeName,
+							ObjectUtils.nullSafeToString(value), ObjectUtils.nullSafeToString(aliasedValue));
+						throw new AnnotationConfigurationException(msg);
+					}
+
+					// Replace default values with aliased values...
+					if (DEFAULT_VALUE_PLACEHOLDER.equals(value)) {
+						attributes.put(attributeName,
+							adaptValue(element, aliasedValue, classValuesAsString, nestedAnnotationsAsMap));
+					}
+					if (DEFAULT_VALUE_PLACEHOLDER.equals(aliasedValue)) {
+						attributes.put(aliasedAttributeName,
+							adaptValue(element, value, classValuesAsString, nestedAnnotationsAsMap));
+					}
+				}
+			}
+		}
+
+		for (String attributeName : attributes.keySet()) {
+			Object value = attributes.get(attributeName);
+			if (DEFAULT_VALUE_PLACEHOLDER.equals(value)) {
+				attributes.put(attributeName,
+					adaptValue(element, getDefaultValue(annotationType, attributeName), classValuesAsString,
+						nestedAnnotationsAsMap));
+			}
+		}
+	}
+
+	/**
+	 * <p>If the supplied throwable is an {@link AnnotationConfigurationException},
+	 * it will be cast to an {@code AnnotationConfigurationException} and thrown,
+	 * allowing it to propagate to the caller.
+	 * <p>Otherwise, this method does nothing.
+	 * @since 4.2
+	 */
+	static void rethrowAnnotationConfigurationException(Throwable t) {
+		if (t instanceof AnnotationConfigurationException) {
+			throw (AnnotationConfigurationException) t;
+		}
+	}
+
+	/**
+	 * Handle the supplied annotation introspection exception.
+	 * <p>If the supplied exception is an {@link AnnotationConfigurationException},
+	 * it will simply be thrown, allowing it to propagate to the caller, and
+	 * nothing will be logged.
+	 * <p>Otherwise, this method logs an introspection failure (in particular
+	 * {@code TypeNotPresentExceptions}) &mdash; before moving on, pretending
+	 * there were no annotations on this specific element.
 	 * @param element the element that we tried to introspect annotations on
 	 * @param ex the exception that we encountered
+	 * @see #rethrowAnnotationConfigurationException
 	 */
-	static void logIntrospectionFailure(AnnotatedElement element, Exception ex) {
+	static void handleIntrospectionFailure(AnnotatedElement element, Exception ex) {
+
+		rethrowAnnotationConfigurationException(ex);
+
 		Log loggerToUse = logger;
 		if (loggerToUse == null) {
 			loggerToUse = LogFactory.getLog(AnnotationUtils.class);
@@ -896,7 +1353,6 @@ public abstract class AnnotationUtils {
 			if (loggerToUse.isInfoEnabled()) {
 				logger.info("Failed to introspect annotations on [" + element + "]: " + ex);
 			}
-
 		}
 	}
 
@@ -962,10 +1418,10 @@ public abstract class AnnotationUtils {
 					for (Annotation ann : element.getAnnotations()) {
 						Class<? extends Annotation> currentAnnotationType = ann.annotationType();
 						if (ObjectUtils.nullSafeEquals(this.annotationType, currentAnnotationType)) {
-							this.result.add((A) ann);
+							this.result.add(synthesizeAnnotation(element, (A) ann));
 						}
 						else if (ObjectUtils.nullSafeEquals(this.containerAnnotationType, currentAnnotationType)) {
-							this.result.addAll(getValue(ann));
+							this.result.addAll(getValue(element, ann));
 						}
 						else if (!isInJavaLangAnnotationPackage(ann)) {
 							process(currentAnnotationType);
@@ -973,17 +1429,23 @@ public abstract class AnnotationUtils {
 					}
 				}
 				catch (Exception ex) {
-					logIntrospectionFailure(element, ex);
+					handleIntrospectionFailure(element, ex);
 				}
 			}
 		}
 
 		@SuppressWarnings("unchecked")
-		private List<A> getValue(Annotation annotation) {
+		private List<A> getValue(AnnotatedElement element, Annotation annotation) {
 			try {
 				Method method = annotation.annotationType().getDeclaredMethod("value");
 				ReflectionUtils.makeAccessible(method);
-				return Arrays.asList((A[]) method.invoke(annotation));
+				A[] annotations = (A[]) method.invoke(annotation);
+
+				List<A> synthesizedAnnotations = new ArrayList<A>();
+				for (A anno : annotations) {
+					synthesizedAnnotations.add(synthesizeAnnotation(element, anno));
+				}
+				return synthesizedAnnotations;
 			}
 			catch (Exception ex) {
 				// Unable to read value from repeating annotation container -> ignore it.

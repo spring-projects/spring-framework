@@ -16,6 +16,7 @@
 
 package org.springframework.core.annotation;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Array;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -25,21 +26,41 @@ import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 /**
- * {@link LinkedHashMap} subclass representing annotation attribute key/value pairs
- * as read by Spring's reflection- or ASM-based {@link org.springframework.core.type.AnnotationMetadata}
- * implementations. Provides 'pseudo-reification' to avoid noisy Map generics in the calling code
- * as well as convenience methods for looking up annotation attributes in a type-safe fashion.
+ * {@link LinkedHashMap} subclass representing annotation attribute key/value
+ * pairs as read by Spring's reflection- or ASM-based
+ * {@link org.springframework.core.type.AnnotationMetadata} implementations,
+ * {@link AnnotationUtils}, and {@link AnnotatedElementUtils}.
+ *
+ * <p>Provides 'pseudo-reification' to avoid noisy Map generics in the calling
+ * code as well as convenience methods for looking up annotation attributes
+ * in a type-safe fashion.
  *
  * @author Chris Beams
+ * @author Sam Brannen
  * @since 3.1.1
  */
 @SuppressWarnings("serial")
 public class AnnotationAttributes extends LinkedHashMap<String, Object> {
 
+	private final Class<? extends Annotation> annotationType;
+
+
 	/**
 	 * Create a new, empty {@link AnnotationAttributes} instance.
 	 */
 	public AnnotationAttributes() {
+		this.annotationType = null;
+	}
+
+	/**
+	 * Create a new, empty {@link AnnotationAttributes} instance for the
+	 * specified {@code annotationType}.
+	 * @param annotationType the type of annotation represented by this
+	 * {@code AnnotationAttributes} instance
+	 * @since 4.2
+	 */
+	public AnnotationAttributes(Class<? extends Annotation> annotationType) {
+		this.annotationType = annotationType;
 	}
 
 	/**
@@ -49,6 +70,7 @@ public class AnnotationAttributes extends LinkedHashMap<String, Object> {
 	 */
 	public AnnotationAttributes(int initialCapacity) {
 		super(initialCapacity);
+		this.annotationType = null;
 	}
 
 	/**
@@ -59,8 +81,18 @@ public class AnnotationAttributes extends LinkedHashMap<String, Object> {
 	 */
 	public AnnotationAttributes(Map<String, Object> map) {
 		super(map);
+		this.annotationType = null;
 	}
 
+	/**
+	 * Get the type of annotation represented by this {@code AnnotationAttributes}
+	 * instance.
+	 * @return the annotation type, or {@code null} if unknown
+	 * @since 4.2
+	 */
+	public Class<? extends Annotation> annotationType() {
+		return this.annotationType;
+	}
 
 	public String getString(String attributeName) {
 		return doGet(attributeName, String.class);
@@ -106,7 +138,9 @@ public class AnnotationAttributes extends LinkedHashMap<String, Object> {
 		Assert.hasText(attributeName, "attributeName must not be null or empty");
 		Object value = get(attributeName);
 		if (value == null) {
-			throw new IllegalArgumentException(String.format("Attribute '%s' not found", attributeName));
+			throw new IllegalArgumentException(String.format(
+				"Attribute '%s' not found in attributes for annotation [%s]",
+				attributeName, (annotationType() != null ? annotationType.getName() : "unknown")));
 		}
 		if (!expectedType.isInstance(value)) {
 			if (expectedType.isArray() && expectedType.getComponentType().isInstance(value)) {
@@ -115,9 +149,10 @@ public class AnnotationAttributes extends LinkedHashMap<String, Object> {
 				value = arrayValue;
 			}
 			else {
-				throw new IllegalArgumentException(
-						String.format("Attribute '%s' is of type [%s], but [%s] was expected.",
-						attributeName, value.getClass().getSimpleName(), expectedType.getSimpleName()));
+				throw new IllegalArgumentException(String.format(
+					"Attribute '%s' is of type [%s], but [%s] was expected in attributes for annotation [%s]",
+					attributeName, value.getClass().getSimpleName(), expectedType.getSimpleName(),
+					(annotationType() != null ? annotationType.getName() : "unknown")));
 			}
 		}
 		return (T) value;
@@ -150,10 +185,11 @@ public class AnnotationAttributes extends LinkedHashMap<String, Object> {
 
 
 	/**
-	 * Return an {@link AnnotationAttributes} instance based on the given map; if the map
-	 * is already an {@code AnnotationAttributes} instance, it is casted and returned
-	 * immediately without creating any new instance; otherwise create a new instance by
-	 * wrapping the map with the {@link #AnnotationAttributes(Map)} constructor.
+	 * Return an {@link AnnotationAttributes} instance based on the given map.
+	 * <p>If the map is already an {@code AnnotationAttributes} instance, it
+	 * will be cast and returned immediately without creating a new instance.
+	 * Otherwise a new instance will be created by passing the supplied map
+	 * to the {@link #AnnotationAttributes(Map)} constructor.
 	 * @param map original source of annotation attribute key/value pairs
 	 */
 	public static AnnotationAttributes fromMap(Map<String, Object> map) {
