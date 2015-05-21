@@ -259,14 +259,6 @@ public class ResourceHttpRequestHandlerTests {
 	}
 
 	@Test
-	public void directoryInJarFile() throws Exception {
-		this.request.setAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, "underscorejs/");
-		this.handler.handleRequest(this.request, this.response);
-		assertEquals(200, this.response.getStatus());
-		assertEquals(0, this.response.getContentLength());
-	}
-
-	@Test
 	public void missingResourcePath() throws Exception {
 		this.request.setAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, "");
 		this.handler.handleRequest(this.request, this.response);
