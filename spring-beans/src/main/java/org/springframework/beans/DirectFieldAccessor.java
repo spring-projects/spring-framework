@@ -76,9 +76,10 @@ public class DirectFieldAccessor extends AbstractPropertyAccessor {
 
 	@Override
 	protected NotWritablePropertyException createNotWritablePropertyException(String propertyName) {
+		PropertyMatches matches = PropertyMatches.forField(propertyName, getRootClass());
 		throw new NotWritablePropertyException(
-				getRootClass(), getNestedPath() + propertyName, "Field does not exist",
-				new String[0]);
+				getRootClass(), getNestedPath() + propertyName,
+				matches.buildErrorMessage(), matches.getPossibleMatches());
 	}
 
 
