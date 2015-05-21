@@ -27,8 +27,11 @@ import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 
 /**
- * Helper class for calculating bean property matches, according to.
- * Used by BeanWrapperImpl to suggest alternatives for an invalid property name.
+ * Helper class for calculating property matches, according to a configurable
+ * distance. Provide the list of potential matches and an easy way to generate
+ * an error message. Works for both java bean properties and fields.
+ * <p>
+ * Mainly for use within the framework and in particular the binding facility
  *
  * @author Alef Arendsen
  * @author Arjen Poutsma
@@ -36,8 +39,9 @@ import org.springframework.util.StringUtils;
  * @author Stephane Nicoll
  * @since 2.0
  * @see #forProperty(String, Class)
+ * @see #forField(String, Class)
  */
-abstract class PropertyMatches {
+public abstract class PropertyMatches {
 
 	//---------------------------------------------------------------------
 	// Static section
@@ -122,6 +126,21 @@ abstract class PropertyMatches {
 	 * indicating the possible property matches.
 	 */
 	public abstract String buildErrorMessage();
+
+	protected void appendHintMessage(StringBuilder msg) {
+		msg.append("Did you mean ");
+		for (int i = 0; i < this.possibleMatches.length; i++) {
+			msg.append('\'');
+			msg.append(this.possibleMatches[i]);
+			if (i < this.possibleMatches.length - 2) {
+				msg.append("', ");
+			}
+			else if (i == this.possibleMatches.length - 2) {
+				msg.append("', or ");
+			}
+		}
+		msg.append("'?");
+	}
 
 	/**
 	 * Calculate the distance between the given two Strings
@@ -208,18 +227,7 @@ abstract class PropertyMatches {
 				msg.append("Does the parameter type of the setter match the return type of the getter?");
 			}
 			else {
-				msg.append("Did you mean ");
-				for (int i = 0; i < possibleMatches.length; i++) {
-					msg.append('\'');
-					msg.append(possibleMatches[i]);
-					if (i < possibleMatches.length - 2) {
-						msg.append("', ");
-					}
-					else if (i == possibleMatches.length - 2) {
-						msg.append("', or ");
-					}
-				}
-				msg.append("'?");
+				appendHintMessage(msg);
 			}
 			return msg.toString();
 		}
@@ -258,18 +266,7 @@ abstract class PropertyMatches {
 			msg.append("' has no matching field. ");
 
 			if (!ObjectUtils.isEmpty(possibleMatches)) {
-				msg.append("Did you mean ");
-				for (int i = 0; i < possibleMatches.length; i++) {
-					msg.append('\'');
-					msg.append(possibleMatches[i]);
-					if (i < possibleMatches.length - 2) {
-						msg.append("', ");
-					}
-					else if (i == possibleMatches.length - 2) {
-						msg.append("', or ");
-					}
-				}
-				msg.append("'?");
+				appendHintMessage(msg);
 			}
 			return msg.toString();
 		}
