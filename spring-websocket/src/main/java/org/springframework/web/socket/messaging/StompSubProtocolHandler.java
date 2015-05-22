@@ -103,6 +103,8 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 
 	private MessageHeaderInitializer headerInitializer;
 
+    private StompSubProtocolErrorHandler stompSubProtocolErrorHandler = new DefaultStompSubProtocolErrorHandler();
+
 	private Boolean immutableMessageInterceptorPresent;
 
 	private ApplicationEventPublisher eventPublisher;
@@ -167,7 +169,27 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 		return this.headerInitializer;
 	}
 
-	@Override
+    /**
+     * Override the default {@link StompSubProtocolErrorHandler} for handling errors that occur during
+     * clients message handling.
+     *
+     * @see {@link StompSubProtocolHandler#sendErrorMessage(WebSocketSession, Throwable)}
+     *
+     * @param stompSubProtocolErrorHandler to use instead of the DefaultStompSubProtocolErrorHandler
+     */
+    public void setStompSubProtocolErrorHandler(StompSubProtocolErrorHandler stompSubProtocolErrorHandler) {
+        Assert.notNull(stompSubProtocolErrorHandler, "Stomp sub protocol error handler cannot be null");
+        this.stompSubProtocolErrorHandler = stompSubProtocolErrorHandler;
+    }
+
+    /**
+     * @return the configured stomp sub protocol error handler
+     */
+    public StompSubProtocolErrorHandler getStompSubProtocolErrorHandler() {
+        return stompSubProtocolErrorHandler;
+    }
+
+    @Override
 	public List<String> getSupportedProtocols() {
 		return Arrays.asList("v10.stomp", "v11.stomp", "v12.stomp");
 	}
@@ -305,16 +327,7 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 	}
 
 	protected void sendErrorMessage(WebSocketSession session, Throwable error) {
-		StompHeaderAccessor headerAccessor = StompHeaderAccessor.create(StompCommand.ERROR);
-		headerAccessor.setMessage(error.getMessage());
-		byte[] bytes = this.stompEncoder.encode(headerAccessor.getMessageHeaders(), EMPTY_PAYLOAD);
-		try {
-			session.sendMessage(new TextMessage(bytes));
-		}
-		catch (Throwable ex) {
-			// Could be part of normal workflow (e.g. browser tab closed)
-			logger.debug("Failed to send STOMP ERROR to client.", ex);
-		}
+        stompSubProtocolErrorHandler.handleError(session, error);
 	}
 
 	/**
@@ -563,4 +576,23 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 		}
 	}
 
+    /**
+     * A default implementation for {@link StompSubProtocolErrorHandler} that
+     * maps {@link Throwable#getMessage()} in to a Stomp ERROR frame
+     */
+    private class DefaultStompSubProtocolErrorHandler extends AbstractStompSubProtocolErrorHandler {
+        @Override
+        public void handleError(WebSocketSession session, Throwable error) {
+            StompHeaderAccessor errorHeaders = getStompErrorMessage();
+            errorHeaders.setMessage(error.getMessage());
+
+            try {
+                sendErrorMessage(session, errorHeaders);
+            }
+            catch (Throwable ex) {
+                // Could be part of normal workflow (e.g. browser tab closed)
+                logger.debug("Failed to send STOMP ERROR to client.", ex);
+            }
+        }
+    }
 }
