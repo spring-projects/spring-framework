@@ -53,7 +53,7 @@ configure(allprojects) { project ->
 	ext.nettyVersion         = "4.0.28.Final"
 	ext.openjpaVersion       = "2.2.2"  // 2.3.0 not Java 8 compatible (based on ASM 4)
 	ext.protobufVersion      = "2.6.1"
-	ext.reactorVersion       = "2.0.1.RELEASE"
+	ext.reactorVersion       = "2.0.2.RELEASE"
 	ext.slf4jVersion         = "1.7.12"
 	ext.snakeyamlVersion     = "1.15"
 	ext.snifferVersion       = "1.14"
