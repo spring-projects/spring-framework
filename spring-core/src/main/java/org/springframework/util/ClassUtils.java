@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -272,7 +272,7 @@ public abstract class ClassUtils {
 					return (clToUse != null ? clToUse.loadClass(innerClassName) : Class.forName(innerClassName));
 				}
 				catch (ClassNotFoundException ex2) {
-					// swallow - let original exception get through
+					// Swallow - let original exception get through
 				}
 			}
 			throw ex;
@@ -380,9 +380,9 @@ public abstract class ClassUtils {
 	 */
 	public static Class<?> getUserClass(Class<?> clazz) {
 		if (clazz != null && clazz.getName().contains(CGLIB_CLASS_SEPARATOR)) {
-			Class<?> superClass = clazz.getSuperclass();
-			if (superClass != null && !Object.class.equals(superClass)) {
-				return superClass;
+			Class<?> superclass = clazz.getSuperclass();
+			if (superclass != null && !Object.class.equals(superclass)) {
+				return superclass;
 			}
 		}
 		return clazz;
@@ -829,8 +829,8 @@ public abstract class ClassUtils {
 
 	/**
 	 * Return a public static method of a class.
-	 * @param methodName the static method name
 	 * @param clazz the class which defines the method
+	 * @param methodName the static method name
 	 * @param args the parameter types to the method
 	 * @return the static method, or {@code null} if no static method was found
 	 * @throws IllegalArgumentException if the method name is blank or the clazz is null
@@ -901,7 +901,7 @@ public abstract class ClassUtils {
 	 */
 	public static Class<?> resolvePrimitiveIfNecessary(Class<?> clazz) {
 		Assert.notNull(clazz, "Class must not be null");
-		return (clazz.isPrimitive() && clazz != void.class? primitiveTypeToWrapperMap.get(clazz) : clazz);
+		return (clazz.isPrimitive() && clazz != void.class ? primitiveTypeToWrapperMap.get(clazz) : clazz);
 	}
 
 	/**
@@ -978,7 +978,7 @@ public abstract class ClassUtils {
 	 * loading a resource file that is in the same package as a class file,
 	 * although {@link org.springframework.core.io.ClassPathResource} is usually
 	 * even more convenient.
-	 * @param clazz    the Class whose package will be used as the base
+	 * @param clazz the Class whose package will be used as the base
 	 * @param resourceName the resource name to append. A leading slash is optional.
 	 * @return the built-up resource path
 	 * @see ClassLoader#getResource

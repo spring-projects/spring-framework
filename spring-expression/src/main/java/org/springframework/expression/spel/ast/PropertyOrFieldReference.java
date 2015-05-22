@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -88,42 +88,39 @@ public class PropertyOrFieldReference extends SpelNodeImpl {
 		if (result.getValue() == null && isAutoGrowNullReferences &&
 				nextChildIs(Indexer.class, PropertyOrFieldReference.class)) {
 			TypeDescriptor resultDescriptor = result.getTypeDescriptor();
-			// Creating lists and maps
-			if ((resultDescriptor.getType().equals(List.class) || resultDescriptor.getType().equals(Map.class))) {
-				// Create a new collection or map ready for the indexer
-				if (resultDescriptor.getType().equals(List.class)) {
-					try {
-						if (isWritableProperty(this.name,contextObject,eContext)) {
-							List<?> newList = ArrayList.class.newInstance();
-							writeProperty(contextObject, eContext, this.name, newList);
-							result = readProperty(contextObject, eContext, this.name);
-						}
-					}
-					catch (InstantiationException ex) {
-						throw new SpelEvaluationException(getStartPosition(), ex,
-								SpelMessage.UNABLE_TO_CREATE_LIST_FOR_INDEXING);
-					}
-					catch (IllegalAccessException ex) {
-						throw new SpelEvaluationException(getStartPosition(), ex,
-								SpelMessage.UNABLE_TO_CREATE_LIST_FOR_INDEXING);
+			// Create a new collection or map ready for the indexer
+			if (List.class.equals(resultDescriptor.getType())) {
+				try {
+					if (isWritableProperty(this.name, contextObject, eContext)) {
+						List<?> newList = ArrayList.class.newInstance();
+						writeProperty(contextObject, eContext, this.name, newList);
+						result = readProperty(contextObject, eContext, this.name);
 					}
 				}
-				else {
-					try {
-						if (isWritableProperty(this.name,contextObject,eContext)) {
-							Map<?,?> newMap = HashMap.class.newInstance();
-							writeProperty(contextObject, eContext, this.name, newMap);
-							result = readProperty(contextObject, eContext, this.name);
-						}
+				catch (InstantiationException ex) {
+					throw new SpelEvaluationException(getStartPosition(), ex,
+							SpelMessage.UNABLE_TO_CREATE_LIST_FOR_INDEXING);
+				}
+				catch (IllegalAccessException ex) {
+					throw new SpelEvaluationException(getStartPosition(), ex,
+							SpelMessage.UNABLE_TO_CREATE_LIST_FOR_INDEXING);
+				}
+			}
+			else if (Map.class.equals(resultDescriptor.getType())) {
+				try {
+					if (isWritableProperty(this.name, contextObject, eContext)) {
+						Map<?,?> newMap = HashMap.class.newInstance();
+						writeProperty(contextObject, eContext, this.name, newMap);
+						result = readProperty(contextObject, eContext, this.name);
 					}
-					catch (InstantiationException ex) {
-						throw new SpelEvaluationException(getStartPosition(), ex,
-								SpelMessage.UNABLE_TO_CREATE_MAP_FOR_INDEXING);
-					}
-					catch (IllegalAccessException ex) {
-						throw new SpelEvaluationException(getStartPosition(), ex,
-								SpelMessage.UNABLE_TO_CREATE_MAP_FOR_INDEXING);
-					}
+				}
+				catch (InstantiationException ex) {
+					throw new SpelEvaluationException(getStartPosition(), ex,
+							SpelMessage.UNABLE_TO_CREATE_MAP_FOR_INDEXING);
+				}
+				catch (IllegalAccessException ex) {
+					throw new SpelEvaluationException(getStartPosition(), ex,
+							SpelMessage.UNABLE_TO_CREATE_MAP_FOR_INDEXING);
 				}
 			}
 			else {

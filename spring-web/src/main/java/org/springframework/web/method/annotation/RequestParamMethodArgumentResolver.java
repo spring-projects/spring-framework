@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,8 +47,8 @@ import org.springframework.web.util.WebUtils;
  * type {@link MultipartFile} in conjunction with Spring's {@link MultipartResolver}
  * abstraction, and arguments of type {@code javax.servlet.http.Part} in conjunction
  * with Servlet 3.0 multipart requests. This resolver can also be created in default
- * resolution mode in which simple types (int, long, etc.) not annotated
- * with @{@link RequestParam} are also treated as request parameters with the
+ * resolution mode in which simple types (int, long, etc.) not annotated with
+ * @{@link RequestParam} are also treated as request parameters with the
  * parameter name derived from the argument name.
  *
  * <p>If the method parameter type is {@link Map}, the name specified in the
@@ -131,19 +131,16 @@ public class RequestParamMethodArgumentResolver extends AbstractNamedValueMethod
 
 	@Override
 	protected NamedValueInfo createNamedValueInfo(MethodParameter parameter) {
-		RequestParam annotation = parameter.getParameterAnnotation(RequestParam.class);
-		return (annotation != null) ?
-				new RequestParamNamedValueInfo(annotation) :
-				new RequestParamNamedValueInfo();
+		RequestParam ann = parameter.getParameterAnnotation(RequestParam.class);
+		return (ann != null ? new RequestParamNamedValueInfo(ann) : new RequestParamNamedValueInfo());
 	}
 
 	@Override
 	protected Object resolveName(String name, MethodParameter parameter, NativeWebRequest webRequest) throws Exception {
-		Object arg;
-
 		HttpServletRequest servletRequest = webRequest.getNativeRequest(HttpServletRequest.class);
 		MultipartHttpServletRequest multipartRequest =
-			WebUtils.getNativeRequest(servletRequest, MultipartHttpServletRequest.class);
+				WebUtils.getNativeRequest(servletRequest, MultipartHttpServletRequest.class);
+		Object arg;
 
 		if (MultipartFile.class.equals(parameter.getParameterType())) {
 			assertIsMultipartRequest(servletRequest);
@@ -170,7 +167,7 @@ public class RequestParamMethodArgumentResolver extends AbstractNamedValueMethod
 			if (arg == null) {
 				String[] paramValues = webRequest.getParameterValues(name);
 				if (paramValues != null) {
-					arg = paramValues.length == 1 ? paramValues[0] : paramValues;
+					arg = (paramValues.length == 1 ? paramValues[0] : paramValues);
 				}
 			}
 		}
@@ -189,7 +186,7 @@ public class RequestParamMethodArgumentResolver extends AbstractNamedValueMethod
 		Class<?> paramType = parameter.getParameterType();
 		if (Collection.class.equals(paramType) || List.class.isAssignableFrom(paramType)){
 			Class<?> valueType = GenericCollectionTypeResolver.getCollectionParameterType(parameter);
-			if (valueType != null && valueType.equals(MultipartFile.class)) {
+			if (MultipartFile.class.equals(valueType)) {
 				return true;
 			}
 		}
