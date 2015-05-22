@@ -115,6 +115,9 @@ public abstract class AnnotationUtils {
 	private static final Map<Class<?>, Boolean> annotatedInterfaceCache =
 			new ConcurrentReferenceHashMap<Class<?>, Boolean>(256);
 
+	private static final Map<Class<? extends Annotation>, Boolean> synthesizableCache =
+			new ConcurrentReferenceHashMap<Class<? extends Annotation>, Boolean>(256);
+
 	private static transient Log logger;
 
 
@@ -1074,9 +1077,17 @@ public abstract class AnnotationUtils {
 	@SuppressWarnings("unchecked")
 	private static boolean isSynthesizable(Class<? extends Annotation> annotationType) {
 
+		Boolean flag = synthesizableCache.get(annotationType);
+		if (flag != null) {
+			return flag.booleanValue();
+		}
+
+		Boolean synthesizable = Boolean.FALSE;
+
 		for (Method attribute : getAttributeMethods(annotationType)) {
 			if (getAliasedAttributeName(attribute) != null) {
-				return true;
+				synthesizable = Boolean.TRUE;
+				break;
 			}
 
 			Class<?> returnType = attribute.getReturnType();
@@ -1084,18 +1095,22 @@ public abstract class AnnotationUtils {
 			if (Annotation[].class.isAssignableFrom(returnType)) {
 				Class<? extends Annotation> nestedAnnotationType = (Class<? extends Annotation>) returnType.getComponentType();
 				if (isSynthesizable(nestedAnnotationType)) {
-					return true;
+					synthesizable = Boolean.TRUE;
+					break;
 				}
 			}
 			else if (Annotation.class.isAssignableFrom(returnType)) {
 				Class<? extends Annotation> nestedAnnotationType = (Class<? extends Annotation>) returnType;
 				if (isSynthesizable(nestedAnnotationType)) {
-					return true;
+					synthesizable = Boolean.TRUE;
+					break;
 				}
 			}
 		}
 
-		return false;
+		synthesizableCache.put(annotationType, synthesizable);
+
+		return synthesizable.booleanValue();
 	}
 
 	/**
