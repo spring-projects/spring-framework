@@ -140,7 +140,7 @@ public abstract class AnnotationUtils {
 		}
 		Class<? extends Annotation> annotatedElement = ann.annotationType();
 		try {
-			return synthesizeAnnotation(annotatedElement, annotatedElement.getAnnotation(annotationType));
+			return synthesizeAnnotation(annotatedElement.getAnnotation(annotationType), annotatedElement);
 		}
 		catch (Exception ex) {
 			// Assuming nested Class values not resolvable within annotation attributes...
@@ -163,16 +163,16 @@ public abstract class AnnotationUtils {
 	 */
 	public static <A extends Annotation> A getAnnotation(AnnotatedElement annotatedElement, Class<A> annotationType) {
 		try {
-			A ann = annotatedElement.getAnnotation(annotationType);
-			if (ann == null) {
+			A annotation = annotatedElement.getAnnotation(annotationType);
+			if (annotation == null) {
 				for (Annotation metaAnn : annotatedElement.getAnnotations()) {
-					ann = metaAnn.annotationType().getAnnotation(annotationType);
-					if (ann != null) {
+					annotation = metaAnn.annotationType().getAnnotation(annotationType);
+					if (annotation != null) {
 						break;
 					}
 				}
 			}
-			return synthesizeAnnotation(annotatedElement, ann);
+			return synthesizeAnnotation(annotation, annotatedElement);
 		}
 		catch (Exception ex) {
 			// Assuming nested Class values not resolvable within annotation attributes...
@@ -319,8 +319,8 @@ public abstract class AnnotationUtils {
 	public static <A extends Annotation> A findAnnotation(AnnotatedElement annotatedElement, Class<A> annotationType) {
 		// Do NOT store result in the findAnnotationCache since doing so could break
 		// findAnnotation(Class, Class) and findAnnotation(Method, Class).
-		return synthesizeAnnotation(annotatedElement,
-			findAnnotation(annotatedElement, annotationType, new HashSet<Annotation>()));
+		return synthesizeAnnotation(findAnnotation(annotatedElement, annotationType, new HashSet<Annotation>()),
+			annotatedElement);
 	}
 
 	/**
@@ -411,7 +411,7 @@ public abstract class AnnotationUtils {
 			}
 		}
 
-		return synthesizeAnnotation(method, result);
+		return synthesizeAnnotation(result, method);
 	}
 
 	private static <A extends Annotation> A searchOnInterfaces(Method method, Class<A> annotationType, Class<?>... ifcs) {
@@ -487,7 +487,7 @@ public abstract class AnnotationUtils {
 				findAnnotationCache.put(cacheKey, result);
 			}
 		}
-		return synthesizeAnnotation(clazz, result);
+		return synthesizeAnnotation(result, clazz);
 	}
 
 	/**
@@ -820,7 +820,7 @@ public abstract class AnnotationUtils {
 			boolean defaultValuesAsPlaceholder, boolean synthesizeAnnotation) {
 
 		if (synthesizeAnnotation) {
-			annotation = synthesizeAnnotation(annotatedElement, annotation);
+			annotation = synthesizeAnnotation(annotation, annotatedElement);
 		}
 
 		Class<? extends Annotation> annotationType = annotation.annotationType();
@@ -854,7 +854,7 @@ public abstract class AnnotationUtils {
 	/**
 	 * Adapt the given value according to the given class and nested annotation settings.
 	 * <p>Nested annotations will be
-	 * {@linkplain #synthesizeAnnotation(AnnotatedElement, Annotation) synthesized}.
+	 * {@linkplain #synthesizeAnnotation(Annotation, AnnotatedElement) synthesized}.
 	 * @param annotatedElement the element that is annotated, used for contextual
 	 * logging; may be {@code null} if unknown
 	 * @param value the annotation attribute value
@@ -892,7 +892,7 @@ public abstract class AnnotationUtils {
 					nestedAnnotationsAsMap);
 			}
 			else {
-				return synthesizeAnnotation(annotatedElement, annotation);
+				return synthesizeAnnotation(annotation, annotatedElement);
 			}
 		}
 
@@ -910,7 +910,7 @@ public abstract class AnnotationUtils {
 			else {
 				Annotation[] synthesizedAnnotations = new Annotation[annotations.length];
 				for (int i = 0; i < annotations.length; i++) {
-					synthesizedAnnotations[i] = synthesizeAnnotation(annotatedElement, annotations[i]);
+					synthesizedAnnotations[i] = synthesizeAnnotation(annotations[i], annotatedElement);
 				}
 				return synthesizedAnnotations;
 			}
@@ -1009,26 +1009,42 @@ public abstract class AnnotationUtils {
 	}
 
 	/**
-	 * TODO Document synthesizeAnnotation().
+	 * <em>Synthesize</em> the supplied {@code annotation} by wrapping it in
+	 * a dynamic proxy that transparently enforces <em>attribute alias</em>
+	 * semantics for annotation attributes that are annotated with
+	 * {@link AliasFor @AliasFor}.
 	 *
 	 * @param annotation the annotation to synthesize
+	 * @return the synthesized annotation, if the supplied annotation is
+	 * <em>synthesizable</em>; {@code null} if the supplied annotation is
+	 * {@code null}; otherwise, the supplied annotation unmodified
+	 * @throws AnnotationConfigurationException if invalid configuration of
+	 * {@code @AliasFor} is detected
 	 * @since 4.2
-	 * @see #synthesizeAnnotation(AnnotatedElement, Annotation)
+	 * @see #synthesizeAnnotation(Annotation, AnnotatedElement)
 	 */
-	public static <A extends Annotation> A synthesizeAnnotation(A annotation) {
-		return synthesizeAnnotation(null, annotation);
+	static <A extends Annotation> A synthesizeAnnotation(A annotation) {
+		return synthesizeAnnotation(annotation, null);
 	}
 
 	/**
-	 * TODO Document synthesizeAnnotation().
+	 * <em>Synthesize</em> the supplied {@code annotation} by wrapping it in
+	 * a dynamic proxy that transparently enforces <em>attribute alias</em>
+	 * semantics for annotation attributes that are annotated with
+	 * {@link AliasFor @AliasFor}.
 	 *
-	 * @param annotatedElement the element that is annotated with the supplied
-	 * annotation, used for contextual logging; may be {@code null} if unknown
 	 * @param annotation the annotation to synthesize
+	 * @param annotatedElement the element that is annotated with the supplied
+	 * annotation; may be {@code null} if unknown
+	 * @return the synthesized annotation, if the supplied annotation is
+	 * <em>synthesizable</em>; {@code null} if the supplied annotation is
+	 * {@code null}; otherwise, the supplied annotation unmodified
+	 * @throws AnnotationConfigurationException if invalid configuration of
+	 * {@code @AliasFor} is detected
 	 * @since 4.2
 	 */
 	@SuppressWarnings("unchecked")
-	public static <A extends Annotation> A synthesizeAnnotation(AnnotatedElement annotatedElement, A annotation) {
+	public static <A extends Annotation> A synthesizeAnnotation(A annotation, AnnotatedElement annotatedElement) {
 		if (annotation == null) {
 			return null;
 		}
@@ -1438,7 +1454,7 @@ public abstract class AnnotationUtils {
 					for (Annotation ann : element.getAnnotations()) {
 						Class<? extends Annotation> currentAnnotationType = ann.annotationType();
 						if (ObjectUtils.nullSafeEquals(this.annotationType, currentAnnotationType)) {
-							this.result.add(synthesizeAnnotation(element, (A) ann));
+							this.result.add(synthesizeAnnotation((A) ann, element));
 						}
 						else if (ObjectUtils.nullSafeEquals(this.containerAnnotationType, currentAnnotationType)) {
 							this.result.addAll(getValue(element, ann));
@@ -1463,7 +1479,7 @@ public abstract class AnnotationUtils {
 
 				List<A> synthesizedAnnotations = new ArrayList<A>();
 				for (A anno : annotations) {
-					synthesizedAnnotations.add(synthesizeAnnotation(element, anno));
+					synthesizedAnnotations.add(synthesizeAnnotation(anno, element));
 				}
 				return synthesizedAnnotations;
 			}

@@ -932,7 +932,7 @@ public class AnnotatedElementUtils {
 
 		@Override
 		public void postProcess(AnnotatedElement element, Annotation annotation, AnnotationAttributes attributes) {
-			annotation = AnnotationUtils.synthesizeAnnotation(annotation);
+			annotation = AnnotationUtils.synthesizeAnnotation(annotation, element);
 			Class<? extends Annotation> targetAnnotationType = attributes.annotationType();
 
 			for (Method attributeMethod : AnnotationUtils.getAttributeMethods(annotation.annotationType())) {

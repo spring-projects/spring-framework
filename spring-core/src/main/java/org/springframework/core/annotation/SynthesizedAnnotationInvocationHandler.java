@@ -26,10 +26,20 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.util.ReflectionUtils;
 
 /**
- * TODO Document SynthesizedAnnotationInvocationHandler.
+ * {@link InvocationHandler} for an {@link Annotation} that Spring has
+ * <em>synthesized</em> (i.e., wrapped in a dynamic proxy) with additional
+ * functionality.
+ *
+ * <p>{@code SynthesizedAnnotationInvocationHandler} transparently enforces
+ * attribute alias semantics for annotation attributes that are annotated
+ * with {@link AliasFor @AliasFor}. In addition, nested annotations and
+ * arrays of nested annotations will be synthesized upon first access (i.e.,
+ * <em>lazily</em>).
  *
  * @author Sam Brannen
  * @since 4.2
+ * @see AliasFor
+ * @see AnnotationUtils#synthesizeAnnotation(Annotation, AnnotatedElement)
  */
 class SynthesizedAnnotationInvocationHandler implements InvocationHandler {
 
@@ -37,18 +47,17 @@ class SynthesizedAnnotationInvocationHandler implements InvocationHandler {
 
 	private final Annotation annotation;
 
-	private final Map<String, String> aliasPairs;
+	private final Class<? extends Annotation> annotationType;
 
+	private final Map<String, String> aliasMap;
 
-	public SynthesizedAnnotationInvocationHandler(Annotation annotation, Map<String, String> aliasPairs) {
-		this(null, annotation, aliasPairs);
-	}
 
 	public SynthesizedAnnotationInvocationHandler(AnnotatedElement annotatedElement, Annotation annotation,
-			Map<String, String> aliasPairs) {
+			Map<String, String> aliasMap) {
 		this.annotatedElement = annotatedElement;
 		this.annotation = annotation;
-		this.aliasPairs = aliasPairs;
+		this.annotationType = annotation.annotationType();
+		this.aliasMap = aliasMap;
 	}
 
 	@Override
@@ -56,8 +65,8 @@ class SynthesizedAnnotationInvocationHandler implements InvocationHandler {
 		String attributeName = method.getName();
 		Class<?> returnType = method.getReturnType();
 		boolean nestedAnnotation = (Annotation[].class.isAssignableFrom(returnType) || Annotation.class.isAssignableFrom(returnType));
-		String aliasedAttributeName = aliasPairs.get(attributeName);
-		boolean aliasPresent = aliasedAttributeName != null;
+		String aliasedAttributeName = aliasMap.get(attributeName);
+		boolean aliasPresent = (aliasedAttributeName != null);
 
 		ReflectionUtils.makeAccessible(method);
 		Object value = ReflectionUtils.invokeMethod(method, this.annotation, args);
@@ -70,26 +79,26 @@ class SynthesizedAnnotationInvocationHandler implements InvocationHandler {
 		if (aliasPresent) {
 			Method aliasedMethod = null;
 			try {
-				aliasedMethod = annotation.annotationType().getDeclaredMethod(aliasedAttributeName);
+				aliasedMethod = this.annotationType.getDeclaredMethod(aliasedAttributeName);
 			}
 			catch (NoSuchMethodException e) {
 				String msg = String.format("In annotation [%s], attribute [%s] is declared as an @AliasFor [%s], "
-						+ "but attribute [%s] does not exist.", annotation.annotationType().getName(), attributeName,
+						+ "but attribute [%s] does not exist.", this.annotationType.getName(), attributeName,
 					aliasedAttributeName, aliasedAttributeName);
 				throw new AnnotationConfigurationException(msg);
 			}
 
 			ReflectionUtils.makeAccessible(aliasedMethod);
 			Object aliasedValue = ReflectionUtils.invokeMethod(aliasedMethod, this.annotation, args);
-			Object defaultValue = AnnotationUtils.getDefaultValue(annotation, attributeName);
+			Object defaultValue = AnnotationUtils.getDefaultValue(this.annotation, attributeName);
 
 			if (!ObjectUtils.nullSafeEquals(value, aliasedValue) && !ObjectUtils.nullSafeEquals(value, defaultValue)
 					&& !ObjectUtils.nullSafeEquals(aliasedValue, defaultValue)) {
-				String elementAsString = (annotatedElement == null ? "unknown element" : annotatedElement.toString());
+				String elementName = (this.annotatedElement == null ? "unknown element" : this.annotatedElement.toString());
 				String msg = String.format(
 					"In annotation [%s] declared on [%s], attribute [%s] and its alias [%s] are "
 							+ "declared with values of [%s] and [%s], but only one declaration is permitted.",
-					annotation.annotationType().getName(), elementAsString, attributeName, aliasedAttributeName,
+					this.annotationType.getName(), elementName, attributeName, aliasedAttributeName,
 					ObjectUtils.nullSafeToString(value), ObjectUtils.nullSafeToString(aliasedValue));
 				throw new AnnotationConfigurationException(msg);
 			}
@@ -103,12 +112,12 @@ class SynthesizedAnnotationInvocationHandler implements InvocationHandler {
 
 		// Synthesize nested annotations before returning them.
 		if (value instanceof Annotation) {
-			value = AnnotationUtils.synthesizeAnnotation(annotatedElement, (Annotation) value);
+			value = AnnotationUtils.synthesizeAnnotation((Annotation) value, this.annotatedElement);
 		}
 		else if (value instanceof Annotation[]) {
 			Annotation[] annotations = (Annotation[]) value;
 			for (int i = 0; i < annotations.length; i++) {
-				annotations[i] = AnnotationUtils.synthesizeAnnotation(annotatedElement, annotations[i]);
+				annotations[i] = AnnotationUtils.synthesizeAnnotation(annotations[i], this.annotatedElement);
 			}
 		}
 
