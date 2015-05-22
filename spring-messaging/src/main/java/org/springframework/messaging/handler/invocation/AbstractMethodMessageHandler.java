@@ -48,6 +48,8 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.ReflectionUtils;
+import org.springframework.util.concurrent.ListenableFuture;
+import org.springframework.util.concurrent.ListenableFutureCallback;
 
 /**
  * Abstract base class for HandlerMethod-based message handling. Provides most of
@@ -462,7 +464,15 @@ public abstract class AbstractMethodMessageHandler<T>
 			if (void.class == returnType.getParameterType()) {
 				return;
 			}
-			this.returnValueHandlers.handleReturnValue(returnValue, returnType, message);
+			if (this.returnValueHandlers.isAsyncReturnValue(returnValue, returnType)) {
+				ListenableFuture<?> future = this.returnValueHandlers.toListenableFuture(returnValue, returnType);
+				if (future != null) {
+					future.addCallback(new ReturnValueListenableFutureCallback(returnType, invocable, message));
+				}
+			}
+			else {
+				this.returnValueHandlers.handleReturnValue(returnValue, returnType, message);
+			}
 		}
 		catch (Exception ex) {
 			processHandlerMethodException(handlerMethod, ex, message);
@@ -581,6 +591,44 @@ public abstract class AbstractMethodMessageHandler<T>
 		@Override
 		public int compare(Match match1, Match match2) {
 			return this.comparator.compare(match1.mapping, match2.mapping);
+		}
+	}
+
+	private class ReturnValueListenableFutureCallback implements ListenableFutureCallback<Object> {
+
+		private final MethodParameter returnType;
+
+		private final InvocableHandlerMethod handlerMethod;
+
+		private final Message<?> message;
+
+
+		public ReturnValueListenableFutureCallback(MethodParameter returnType,
+				InvocableHandlerMethod handlerMethod, Message<?> message) {
+
+			this.returnType = returnType;
+			this.handlerMethod = handlerMethod;
+			this.message = message;
+		}
+
+		@Override
+		public void onSuccess(Object result) {
+			try {
+				returnValueHandlers.handleReturnValue(result, handlerMethod.getAsyncReturnValueType(result), this.message);
+			}
+			catch (Throwable ex) {
+				handleFailure(ex);
+			}
+		}
+
+		@Override
+		public void onFailure(Throwable ex) {
+			handleFailure(ex);
+		}
+
+		private void handleFailure(Throwable ex) {
+			Exception cause = (ex instanceof Exception ? (Exception) ex : new RuntimeException(ex));
+			processHandlerMethodException(this.handlerMethod, cause, this.message);
 		}
 	}
 

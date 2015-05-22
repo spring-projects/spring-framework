@@ -18,14 +18,17 @@ package org.springframework.messaging.handler.invocation;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Type;
 import java.util.Arrays;
 
 import org.springframework.core.DefaultParameterNameDiscoverer;
 import org.springframework.core.GenericTypeResolver;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ParameterNameDiscoverer;
+import org.springframework.core.ResolvableType;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.handler.HandlerMethod;
+import org.springframework.util.Assert;
 import org.springframework.util.ReflectionUtils;
 
 /**
@@ -240,6 +243,37 @@ public class InvocableHandlerMethod extends HandlerMethod {
 			}
 		}
 		return sb.toString();
+	}
+
+	MethodParameter getAsyncReturnValueType(Object returnValue) {
+		return new AsyncResultMethodParameter(returnValue);
+	}
+
+	private class AsyncResultMethodParameter extends HandlerMethodParameter {
+
+		private final Object returnValue;
+
+		private final ResolvableType returnType;
+
+		public AsyncResultMethodParameter(Object returnValue) {
+			super(-1);
+			this.returnValue = returnValue;
+			this.returnType = ResolvableType.forType(super.getGenericParameterType()).getGeneric(0);
+		}
+
+		@Override
+		public Class<?> getParameterType() {
+			if (this.returnValue != null) {
+				return this.returnValue.getClass();
+			}
+			Assert.isTrue(!ResolvableType.NONE.equals(this.returnType), "Expected Future-like type with generic parameter");
+			return this.returnType.getRawClass();
+		}
+
+		@Override
+		public Type getGenericParameterType() {
+			return this.returnType.getType();
+		}
 	}
 
 }
