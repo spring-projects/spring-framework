@@ -28,6 +28,7 @@ import java.util.stream.Collectors;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+
 import org.springframework.stereotype.Component;
 import org.springframework.util.MultiValueMap;
 
@@ -570,7 +571,7 @@ public class AnnotatedElementUtilsTests {
 	}
 
 	/**
-	 * Mock of {@link org.springframework.test.context.ContextConfiguration}.
+	 * Mock of {@code org.springframework.test.context.ContextConfiguration}.
 	 */
 	@Retention(RetentionPolicy.RUNTIME)
 	@interface ContextConfig {

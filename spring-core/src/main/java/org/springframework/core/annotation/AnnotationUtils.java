@@ -33,6 +33,7 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.core.BridgeMethodResolver;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
@@ -86,6 +87,10 @@ import org.springframework.util.StringUtils;
  * @author Chris Beams
  * @author Phillip Webb
  * @since 2.0
+ * @see AliasFor
+ * @see AnnotationAttributes
+ * @see AnnotatedElementUtils
+ * @see BridgeMethodResolver
  * @see java.lang.reflect.AnnotatedElement#getAnnotations()
  * @see java.lang.reflect.AnnotatedElement#getAnnotation(Class)
  * @see java.lang.reflect.AnnotatedElement#getDeclaredAnnotations()
@@ -98,7 +103,7 @@ public abstract class AnnotationUtils {
 	public static final String VALUE = "value";
 
 	/**
-	 * A object that can be stored in {@link AnnotationAttributes} as a
+	 * An object that can be stored in {@link AnnotationAttributes} as a
 	 * placeholder for an attribute's declared default value.
 	 */
 	public static final Object DEFAULT_VALUE_PLACEHOLDER = "<SPRING DEFAULT VALUE PLACEHOLDER>";

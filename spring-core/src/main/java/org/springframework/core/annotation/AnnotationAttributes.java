@@ -44,12 +44,15 @@ public class AnnotationAttributes extends LinkedHashMap<String, Object> {
 
 	private final Class<? extends Annotation> annotationType;
 
+	private final String displayName;
+
 
 	/**
 	 * Create a new, empty {@link AnnotationAttributes} instance.
 	 */
 	public AnnotationAttributes() {
 		this.annotationType = null;
+		this.displayName = "unknown";
 	}
 
 	/**
@@ -61,6 +64,7 @@ public class AnnotationAttributes extends LinkedHashMap<String, Object> {
 	 */
 	public AnnotationAttributes(Class<? extends Annotation> annotationType) {
 		this.annotationType = annotationType;
+		this.displayName = (annotationType() != null ? annotationType.getName() : "unknown");
 	}
 
 	/**
@@ -71,6 +75,7 @@ public class AnnotationAttributes extends LinkedHashMap<String, Object> {
 	public AnnotationAttributes(int initialCapacity) {
 		super(initialCapacity);
 		this.annotationType = null;
+		this.displayName = "unknown";
 	}
 
 	/**
@@ -82,6 +87,7 @@ public class AnnotationAttributes extends LinkedHashMap<String, Object> {
 	public AnnotationAttributes(Map<String, Object> map) {
 		super(map);
 		this.annotationType = null;
+		this.displayName = "unknown";
 	}
 
 	/**
@@ -139,8 +145,7 @@ public class AnnotationAttributes extends LinkedHashMap<String, Object> {
 		Object value = get(attributeName);
 		if (value == null) {
 			throw new IllegalArgumentException(String.format(
-				"Attribute '%s' not found in attributes for annotation [%s]",
-				attributeName, (annotationType() != null ? annotationType.getName() : "unknown")));
+				"Attribute '%s' not found in attributes for annotation [%s]", attributeName, this.displayName));
 		}
 		if (!expectedType.isInstance(value)) {
 			if (expectedType.isArray() && expectedType.getComponentType().isInstance(value)) {
@@ -151,8 +156,7 @@ public class AnnotationAttributes extends LinkedHashMap<String, Object> {
 			else {
 				throw new IllegalArgumentException(String.format(
 					"Attribute '%s' is of type [%s], but [%s] was expected in attributes for annotation [%s]",
-					attributeName, value.getClass().getSimpleName(), expectedType.getSimpleName(),
-					(annotationType() != null ? annotationType.getName() : "unknown")));
+					attributeName, value.getClass().getSimpleName(), expectedType.getSimpleName(), this.displayName));
 			}
 		}
 		return (T) value;

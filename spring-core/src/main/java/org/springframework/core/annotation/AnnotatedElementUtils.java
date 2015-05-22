@@ -88,8 +88,9 @@ import org.springframework.util.StringUtils;
  * @author Juergen Hoeller
  * @author Sam Brannen
  * @since 4.0
- * @see AnnotationUtils
+ * @see AliasFor
  * @see AnnotationAttributes
+ * @see AnnotationUtils
  * @see BridgeMethodResolver
  */
 public class AnnotatedElementUtils {
