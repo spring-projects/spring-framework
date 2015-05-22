@@ -387,6 +387,8 @@ method has been added.
   common setup for any 3rd party framework or within a project.
 * `MockRestServiceServer` now supports the `AsyncRestTemplate` for client-side testing.
 
+
+
 [[new-in-4.2]]
 == New Features and Enhancements in Spring Framework 4.2
 
@@ -407,6 +409,12 @@ method has been added.
 * `ScheduledTaskRegistrar` exposes scheduled tasks.
 * Support for Apache `commons-pool2`
 * `javax.transaction.Transactional` support in AspectJ
+
+=== JDBC Improvements
+
+* Embedded databases can now be automatically assigned unique names, and
+  `<jdbc:embedded-database>` supports a new `database-name` attribute.
+  See "Testing Improvements" below for further details.
 
 === JMS Improvements
 
@@ -452,3 +460,51 @@ method has been added.
 * `ListenableFuture` and `CompletableFuture` as return value types from
   `@MessageMapping` and `@SubscribeMapping` methods.
 * `MarshallingMessageConverter` for XML payloads.
+
+=== Testing Improvements
+
+* JUnit-based integration tests can now be executed with JUnit rules
+  instead of the `SpringJUnit4ClassRunner`. This allows Spring-based
+  integration tests to be run with alternative runners like JUnit's
+  `Parameterized` or third-party runners such as the 
+  `MockitoJUnitRunner`.
+** Spring JUnit rule configuration requires the following two rules.
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+    @ClassRule
+    public static final SpringClassRule SPRING_CLASS_RULE = new SpringClassRule();
+
+    @Rule
+    public final SpringMethodRule springMethodRule = new SpringMethodRule();
+----
+* The `ContextCache` that is used for caching ++ApplicationContext++s
+  between tests is now a public API with a default implementation that
+  can be replaced for custom caching needs.
+* `DefaultTestContext`, `DefaultBootstrapContext`, and
+  `DefaultCacheAwareContextLoaderDelegate` are now public classes in the
+  `support` subpackage, allowing for custom extensions.
+* ++TestContextBootstrapper++s are now responsible for building the
+  `TestContext`.
+* `ReflectionTestUtils` now supports setting and getting `static` fields,
+  including constants.
+* `@DirtiesContext` supports new `BEFORE_METHOD`, `BEFORE_CLASS`, and
+  `BEFORE_EACH_TEST_METHOD` modes for closing the `ApplicationContext`
+  _before_ a test -- for example, if some rogue (i.e., yet to be
+  determined) test within a large test suite has corrupted the original
+  configuration for the `ApplicationContext`.
+* The JDBC XML namespace supports a new `database-name` attribute in
+  `<jdbc:embedded-database>`, allowing developers to set unique names
+  for embedded databases –- for example, via a SpEL expression or a
+  property placeholder that is influenced by the current active bean
+  definition profiles.
+* Embedded databases can now be automatically assigned a unique name,
+  allowing common test database configuration to be reused in different
+  ++ApplicationContext++s within a test suite. This support can be enabled
+  via:
+** `EmbeddedDatabaseFactory.setGenerateUniqueDatabaseName()`
+** `EmbeddedDatabaseBuilder.generateUniqueName()`
+** `<jdbc:embedded-database generate-name="true" ... >`
+* `AopTestUtils` is a new testing utility that allows developers to
+  obtain a reference to the underlying target object hidden behind one
+  or more Spring proxies.
