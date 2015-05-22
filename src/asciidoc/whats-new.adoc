@@ -390,6 +390,29 @@ method has been added.
 [[new-in-4.2]]
 == New Features and Enhancements in Spring Framework 4.2
 
+=== Core Container Improvements
+
+* The application event infrastructure now offers an <<context-functionality-events-annotation,
+  annotation-based model>> as well as the ability to publish any arbitrary event.
+** Any managed bean public method can be annotated with `@EventListener` to consume events.
+** `@TransactionalEventListener` provides transaction-bound event support.
+* The features of field-based data binding (`DirectFieldAccessor`) have been aligned to the current
+  property-based data binding (`BeanWrapper`). In particular, field-based binding now supports
+  navigation for Collections, Arrays, and Maps.
+* `DefaultConversionService` now provides extra out-of-the-box converters for `Stream`, `Charset`,
+  `Currency`, and `TimeZone`. Such converters can be added individually to any arbitrary
+  `ConversionService` as well.
+* `SimpleJdbcCallOperations` now supports named binding.
+* `JavaMailSender` has a connectivity check method.
+* `ScheduledTaskRegistrar` exposes scheduled tasks.
+* Support for Apache `commons-pool2`
+* `javax.transaction.Transactional` support in AspectJ
+
+=== JMS Improvements
+
+* The `autoStartup` attribute can be controlled via `JmsListenerContainerFactory`.
+* The type of the reply `Destination` can now be configured per listener container.
+* The value of the `@SendTo` annotation can now use a SpEL expression.
 
 === Web Improvements
 
@@ -405,15 +428,14 @@ method has been added.
   on`@RequestBody` method arguments.
 * `HandlerMethod` as a method argument on `@ExceptionHandler` methods, especially
   handy in `@ControllerAdvice` components.
-* `java.util.concurrent.CompletableFuture` as an @Controller method return value type.
-* Byte-range request support in `HttpHeaders` and for serving static resource.
+* `java.util.concurrent.CompletableFuture` as an `@Controller` method return value type.
+* Byte-range request support in `HttpHeaders` and for serving static resources.
 * `@ResponseStatus` detected on nested exceptions.
-* `UriTemplateHandler` extension point in the RestTemplate.
-** `DefaultUriTemplateHandler` exposes "baseUrl" property and path segment encoding options.
-** the extension point can also be used to plug any URI template library.
-* http://square.github.io/okhttp/[OkHTTP] integration with the RestTemplate.
-* Custom "baseUrl" alternative for methods in MvcUriComponentsBuilder.
-
+* `UriTemplateHandler` extension point in the `RestTemplate`.
+** `DefaultUriTemplateHandler` exposes `baseUrl` property and path segment encoding options.
+** the extension point can also be used to plug in any URI template library.
+* http://square.github.io/okhttp/[OkHTTP] integration with the `RestTemplate`.
+* Custom `baseUrl" alternative for methods in `MvcUriComponentsBuilder`.
 
 === WebSocket Messaging Improvements
 
@@ -424,33 +446,9 @@ method has been added.
 * `StompSubProtocolErrorHandler` extension point to customize and control STOMP ERROR frames to clients.
 * Global `@MessageExceptionHandler` methods via `@ControllerAdvice` components.
 * Heart-beats and a SpEL expression 'selector' header for subscriptions with `SimpleBrokerMessageHandler`.
-* STOMP client for use over TCP and WebSocket, see <<websocket-stomp-client>>.
+* STOMP client for use over TCP and WebSocket; see <<websocket-stomp-client>>.
 * `@SendTo` and `@SendToUser` can contain destination variable placeholders.
 * Jackson's `@JsonView` supported for return values on `@MessageMapping` and `@SubscribeMapping` methods.
 * `ListenableFuture` and `CompletableFuture` as return value types from
   `@MessageMapping` and `@SubscribeMapping` methods.
 * `MarshallingMessageConverter` for XML payloads.
-
-=== Core Container Improvements
-
-* The application event infrastructure now offers an <<context-functionality-events-annotation,
-  annotation-based model>> as well as the ability to publish any arbitrary event.
-** Any managed bean public method can be annotated with `@EventListener` to consume events
-** `@TransactionalEventListener` provides transaction-bound event support
-* The features of field-based data binding (`DirectFieldAccessor`) has been aligned to the current
-  property-based data binding (`BeanWrapper`). In particular, field-based binding now supports
-  navigation for Collections, Arrays and Maps.
-* `DefaultConversionService` now provides extra out-of-the-box converters for `Stream`, `Charset`,
-  `Currency` and `TimeZone`. Such converters can be added individually to any arbitrary
-  `ConversionService` as well.
-* `SimpleJdbcCallOperations` now supports named binding.
-* `JavaMailSender` has a connectivity check method.
-* `ScheduledTaskRegistrar` exposes scheduled tasks.
-* Support for Apache `commons-pool2`.
-* `javax.transaction.Transactional` support in AspectJ.
-
-=== JMS Improvements
-
-* The `autoStartup` attribute can be controlled via `JmsListenerContainerFactory`.
-* The type of the reply `Destination` can now be configured per listener container.
-* The value of the `@SendTo` annotation can now use an expression.
