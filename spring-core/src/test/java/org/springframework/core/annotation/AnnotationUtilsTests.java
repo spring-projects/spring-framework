@@ -34,6 +34,7 @@ import org.junit.rules.ExpectedException;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.subpackage.NonPublicAnnotatedClass;
 import org.springframework.stereotype.Component;
+import org.springframework.util.ClassUtils;
 
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
@@ -607,6 +608,32 @@ public class AnnotationUtilsTests {
 		assertEquals("name attribute: ", "foo", synthesizedWebMapping.name());
 		assertEquals("aliased path attribute: ", "/test", synthesizedWebMapping.path());
 		assertEquals("actual value attribute: ", "/test", synthesizedWebMapping.value());
+	}
+
+	/**
+	 * Fully reflection-based test that verifies support for
+	 * {@linkplain AnnotationUtils#synthesizeAnnotation synthesizing annotations}
+	 * across packages with non-public visibility of user types (e.g., a non-public
+	 * annotation that uses {@code @AliasFor}).
+	 */
+	@Test
+	@SuppressWarnings("unchecked")
+	public void synthesizeNonPublicAnnotationWithAttributeAliasesFromDifferentPackage() throws Exception {
+
+		Class<?> clazz =
+			ClassUtils.forName("org.springframework.core.annotation.subpackage.NonPublicAliasedAnnotatedClass", null);
+		Class<? extends Annotation> annotationType = (Class<? extends Annotation>)
+			ClassUtils.forName("org.springframework.core.annotation.subpackage.NonPublicAliasedAnnotation", null);
+
+		Annotation annotation = clazz.getAnnotation(annotationType);
+		assertNotNull(annotation);
+		Annotation synthesizedAnnotation = synthesizeAnnotation(annotation);
+		assertNotSame(annotation, synthesizedAnnotation);
+
+		assertNotNull(synthesizedAnnotation);
+		assertEquals("name attribute: ", "test", getValue(synthesizedAnnotation, "name"));
+		assertEquals("aliased path attribute: ", "/test", getValue(synthesizedAnnotation, "path"));
+		assertEquals("aliased path attribute: ", "/test", getValue(synthesizedAnnotation, "value"));
 	}
 
 	@Test
