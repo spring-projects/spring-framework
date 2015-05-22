@@ -467,7 +467,7 @@ public abstract class AbstractMethodMessageHandler<T>
 			if (this.returnValueHandlers.isAsyncReturnValue(returnValue, returnType)) {
 				ListenableFuture<?> future = this.returnValueHandlers.toListenableFuture(returnValue, returnType);
 				if (future != null) {
-					future.addCallback(new ReturnValueListenableFutureCallback(returnType, invocable, message));
+					future.addCallback(new ReturnValueListenableFutureCallback(invocable, message));
 				}
 			}
 			else {
@@ -596,17 +596,12 @@ public abstract class AbstractMethodMessageHandler<T>
 
 	private class ReturnValueListenableFutureCallback implements ListenableFutureCallback<Object> {
 
-		private final MethodParameter returnType;
-
 		private final InvocableHandlerMethod handlerMethod;
 
 		private final Message<?> message;
 
 
-		public ReturnValueListenableFutureCallback(MethodParameter returnType,
-				InvocableHandlerMethod handlerMethod, Message<?> message) {
-
-			this.returnType = returnType;
+		public ReturnValueListenableFutureCallback(InvocableHandlerMethod handlerMethod, Message<?> message) {
 			this.handlerMethod = handlerMethod;
 			this.message = message;
 		}
@@ -614,7 +609,8 @@ public abstract class AbstractMethodMessageHandler<T>
 		@Override
 		public void onSuccess(Object result) {
 			try {
-				returnValueHandlers.handleReturnValue(result, handlerMethod.getAsyncReturnValueType(result), this.message);
+				MethodParameter returnType = this.handlerMethod.getAsyncReturnValueType(result);
+				returnValueHandlers.handleReturnValue(result, returnType, this.message);
 			}
 			catch (Throwable ex) {
 				handleFailure(ex);

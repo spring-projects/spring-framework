@@ -20,8 +20,10 @@ import org.springframework.core.MethodParameter;
 import org.springframework.messaging.Message;
 
 /**
- * Abstract base class for {@link AsyncHandlerMethodReturnValueHandler} implementations
- * only intended for asynchronous return value handling.
+ * Convenient base class for {@link AsyncHandlerMethodReturnValueHandler}
+ * implementations that support only asynchronous (Future-like) return values a
+ * and merely serve as adapters of such types to Spring's
+ * {@link org.springframework.util.concurrent.ListenableFuture ListenableFuture}.
  *
  * @author Sebastien Deleuze
  * @since 4.2
@@ -29,12 +31,14 @@ import org.springframework.messaging.Message;
 public abstract class AbstractAsyncReturnValueHandler implements AsyncHandlerMethodReturnValueHandler {
 
 	@Override
-	public void handleReturnValue(Object returnValue, MethodParameter returnType, Message<?> message) throws Exception {
-		throw new UnsupportedOperationException("Not supported");
-	}
-
-	@Override
 	public boolean isAsyncReturnValue(Object returnValue, MethodParameter returnType) {
 		return true;
 	}
+
+	@Override
+	public void handleReturnValue(Object returnValue, MethodParameter returnType, Message<?> message) {
+		// Should never be called since we return "true" from isAsyncReturnValue
+		throw new IllegalStateException("Unexpected invocation.");
+	}
+
 }

@@ -28,7 +28,6 @@ import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.core.ResolvableType;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.handler.HandlerMethod;
-import org.springframework.util.Assert;
 import org.springframework.util.ReflectionUtils;
 
 /**
@@ -152,15 +151,15 @@ public class InvocableHandlerMethod extends HandlerMethod {
 	}
 
 	/**
-	 * Adds HandlerMethod details such as the controller type and method signature to the given error message.
+	 * Adds HandlerMethod details such as the controller type and method
+	 * signature to the given error message.
 	 * @param message error message to append the HandlerMethod details to
 	 */
 	protected String getDetailedErrorMessage(String message) {
-		StringBuilder sb = new StringBuilder(message).append("\n");
-		sb.append("HandlerMethod details: \n");
-		sb.append("Controller [").append(getBeanType().getName()).append("]\n");
-		sb.append("Method [").append(getBridgedMethod().toGenericString()).append("]\n");
-		return sb.toString();
+		return message + "\n" +
+				"HandlerMethod details: \n" +
+				"Controller [" + getBeanType().getName() + "]\n" +
+				"Method [" + getBridgedMethod().toGenericString() + "]\n";
 	}
 
 	/**
@@ -249,6 +248,7 @@ public class InvocableHandlerMethod extends HandlerMethod {
 		return new AsyncResultMethodParameter(returnValue);
 	}
 
+
 	private class AsyncResultMethodParameter extends HandlerMethodParameter {
 
 		private final Object returnValue;
@@ -266,7 +266,9 @@ public class InvocableHandlerMethod extends HandlerMethod {
 			if (this.returnValue != null) {
 				return this.returnValue.getClass();
 			}
-			Assert.isTrue(!ResolvableType.NONE.equals(this.returnType), "Expected Future-like type with generic parameter");
+			if (ResolvableType.NONE.equals(this.returnType)) {
+				throw new IllegalArgumentException("Expected Future-like type with generic parameter");
+			}
 			return this.returnType.getRawClass();
 		}
 

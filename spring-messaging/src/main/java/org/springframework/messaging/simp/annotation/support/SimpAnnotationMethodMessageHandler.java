@@ -318,14 +318,13 @@ public class SimpAnnotationMethodMessageHandler extends AbstractMethodMessageHan
 
 	@Override
 	protected List<? extends HandlerMethodReturnValueHandler> initReturnValueHandlers() {
+
 		List<HandlerMethodReturnValueHandler> handlers = new ArrayList<HandlerMethodReturnValueHandler>();
 
 		// Single-purpose return value types
-		ListenableFutureReturnValueHandler lfh = new ListenableFutureReturnValueHandler();
-		handlers.add(lfh);
+		handlers.add(new ListenableFutureReturnValueHandler());
 		if (completableFuturePresent) {
-			CompletableFutureReturnValueHandler cfh = new CompletableFutureReturnValueHandler();
-			handlers.add(cfh);
+			handlers.add(new CompletableFutureReturnValueHandler());
 		}
 
 		// Annotation-based return value types

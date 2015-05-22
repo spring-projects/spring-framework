@@ -24,7 +24,7 @@ import org.springframework.util.concurrent.CompletableToListenableFutureAdapter;
 import org.springframework.util.concurrent.ListenableFuture;
 
 /**
- * An {@link AsyncHandlerMethodReturnValueHandler} for {@link CompletableFuture} return type handling.
+ * Support for {@link CompletableFuture} as a return value type.
  *
  * @author Sebastien Deleuze
  * @since 4.2
@@ -40,7 +40,7 @@ public class CompletableFutureReturnValueHandler extends AbstractAsyncReturnValu
 	@Override
 	@SuppressWarnings("unchecked")
 	public ListenableFuture<?> toListenableFuture(Object returnValue, MethodParameter returnType) {
-		return new CompletableToListenableFutureAdapter<Object>((CompletableFuture<Object>)returnValue);
+		return new CompletableToListenableFutureAdapter<Object>((CompletableFuture<Object>) returnValue);
 	}
 
 }

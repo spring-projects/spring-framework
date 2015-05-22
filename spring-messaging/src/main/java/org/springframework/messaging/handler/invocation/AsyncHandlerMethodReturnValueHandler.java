@@ -16,14 +16,16 @@
 package org.springframework.messaging.handler.invocation;
 
 import org.springframework.core.MethodParameter;
+import org.springframework.messaging.Message;
 import org.springframework.util.concurrent.ListenableFuture;
 
 /**
- * An extension of {@link HandlerMethodReturnValueHandler} for handling async
- * return value types.
+ * An extension of {@link HandlerMethodReturnValueHandler} for handling async,
+ * Future-like return value types that support success and error callbacks.
+ * Essentially anything that can be adapted to a {@link ListenableFuture}.
  *
- * <p>Implementations only intended for asynchronous return value handling can extend
- * {@link AbstractAsyncReturnValueHandler}.</p>
+ * <p>Implementations should consider extending the convenient base class
+ * {@link AbstractAsyncReturnValueHandler}.
  *
  * @author Rossen Stoyanchev
  * @since 4.2
@@ -32,30 +34,36 @@ import org.springframework.util.concurrent.ListenableFuture;
 public interface AsyncHandlerMethodReturnValueHandler extends HandlerMethodReturnValueHandler {
 
 	/**
-	 * Whether the return value type represents a value that will be produced
-	 * asynchronously. If this method returns {@code true}, the
-	 * {@link #toListenableFuture(Object, MethodParameter)}  will be invoked next.
-	 * @param returnValue the value returned from the handler method
-	 * @param returnType the type of the return value. This type must have
-	 * previously been passed to
+	 * Whether the return value represents an asynchronous, Future-like type
+	 * with success and error callbacks. If this method returns {@code true},
+	 * then {@link #toListenableFuture} is invoked next. If it returns
+	 * {@code false}, then {@link #handleReturnValue} is called.
+	 *
+	 * <p><strong>Note:</strong> this method will only be invoked after
 	 * {@link #supportsReturnType(org.springframework.core.MethodParameter)}
-	 * and it must have returned {@code true}
+	 * is called and it returns {@code true}.
+	 *
+	 * @param returnValue the value returned from the handler method
+	 * @param returnType the type of the return value.
 	 * @return true if the return value type represents an async value.
 	 */
 	boolean isAsyncReturnValue(Object returnValue, MethodParameter returnType);
 
 	/**
-	 * Adapt the given asynchronous return value to a ListenableFuture.
-	 * Implementations can return an instance of
-	 * {@link org.springframework.util.concurrent.SettableListenableFuture} and
-	 * then set it to an Object (success) or a Throwable (failure) to complete
-	 * handling.
-	 * @param returnValue the value returned from the handler method
-	 * @param returnType the type of the return value. This type must have
-	 * previously been passed to
+	 * Adapt the asynchronous return value to a {@link ListenableFuture}.
+	 * Implementations should consider returning an instance of
+	 * {@link org.springframework.util.concurrent.SettableListenableFuture
+	 * SettableListenableFuture}. Return value handling will then continue when
+	 * the ListenableFuture is completed with either success or error.
+	 *
+	 * <p><strong>Note:</strong> this method will only be invoked after
 	 * {@link #supportsReturnType(org.springframework.core.MethodParameter)}
-	 * and it must have returned {@code true}
-	 * @return a ListenableFuture
+	 * is called and it returns {@code true}.
+	 *
+	 * @param returnValue the value returned from the handler method
+	 * @param returnType the type of the return value.
+	 * @return the resulting ListenableFuture or {@code null} in which case no
+	 * further handling will be performed.
 	 */
 	ListenableFuture<?> toListenableFuture(Object returnValue, MethodParameter returnType);
 
