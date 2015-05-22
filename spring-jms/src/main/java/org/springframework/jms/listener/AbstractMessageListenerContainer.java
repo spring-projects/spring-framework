@@ -63,7 +63,7 @@ import org.springframework.util.ErrorHandler;
  * consider setting "sessionTransacted" to "true" instead.
  * <li>"sessionAcknowledgeMode" set to "CLIENT_ACKNOWLEDGE":
  * Automatic message acknowledgment <i>after</i> successful listener execution;
- * no redelivery in case of exception thrown.
+ * best-effort redelivery in case of exception thrown.
  * <li>"sessionAcknowledgeMode" set to "DUPS_OK_ACKNOWLEDGE":
  * <i>Lazy</i> message acknowledgment during or after listener execution;
  * <i>potential redelivery</i> in case of exception thrown.
@@ -469,6 +469,7 @@ public abstract class AbstractMessageListenerContainer extends AbstractJmsListen
 			rollbackIfNecessary(session);
 			throw new MessageRejectedWhileStoppingException();
 		}
+
 		try {
 			invokeListener(session, message);
 		}
@@ -498,6 +499,7 @@ public abstract class AbstractMessageListenerContainer extends AbstractJmsListen
 	@SuppressWarnings("rawtypes")
 	protected void invokeListener(Session session, Message message) throws JMSException {
 		Object listener = getMessageListener();
+
 		if (listener instanceof SessionAwareMessageListener) {
 			doInvokeListener((SessionAwareMessageListener) listener, session, message);
 		}
@@ -599,7 +601,7 @@ public abstract class AbstractMessageListenerContainer extends AbstractJmsListen
 				JmsUtils.rollbackIfNecessary(session);
 			}
 		}
-		else {
+		else if (isClientAcknowledge(session)) {
 			session.recover();
 		}
 	}
@@ -621,7 +623,7 @@ public abstract class AbstractMessageListenerContainer extends AbstractJmsListen
 					JmsUtils.rollbackIfNecessary(session);
 				}
 			}
-			else {
+			else if (isClientAcknowledge(session)) {
 				session.recover();
 			}
 		}
