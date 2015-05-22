@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -86,6 +86,7 @@ public class Selection extends SpelNodeImpl {
 				try {
 					TypedValue kvPair = new TypedValue(entry);
 					state.pushActiveContextObject(kvPair);
+					state.enterScope();
 					Object val = selectionCriteria.getValueInternal(state).getValue();
 					if (val instanceof Boolean) {
 						if ((Boolean) val) {
@@ -104,6 +105,7 @@ public class Selection extends SpelNodeImpl {
 				}
 				finally {
 					state.popActiveContextObject();
+					state.exitScope();
 				}
 			}
 			if ((this.variant == FIRST || this.variant == LAST) && result.isEmpty()) {
