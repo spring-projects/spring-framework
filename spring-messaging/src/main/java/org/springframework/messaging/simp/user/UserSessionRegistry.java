@@ -21,9 +21,9 @@ import java.util.Set;
 /**
  * A contract for adding and removing user sessions.
  *
- * <p>As of 4.2 this interface extends {@link SimpUserRegistry}.
- * exposing methods to return all registered users as well as to provide more
- * extensive information for each user.
+ * <p>As of 4.2, this interface is replaced by {@link SimpUserRegistry},
+ * exposing methods to return all registered users as well as to provide
+ * more extensive information for each user.
  *
  * @author Rossen Stoyanchev
  * @since 4.0

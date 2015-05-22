@@ -450,10 +450,11 @@ public abstract class AbstractMessageListenerContainer extends AbstractJmsListen
 	/**
 	 * Configure the reply destination type. By default, the configured {@code pubSubDomain}
 	 * value is used (see {@link #isPubSubDomain()}.
-	 * <p>This setting primarily indicates what type of destination to resolve
-	 * if dynamic destinations are enabled.
-	 * @param replyPubSubDomain "true" for the Publish/Subscribe domain ({@link javax.jms.Topic Topics}),
-	 * "false" for the Point-to-Point domain ({@link javax.jms.Queue Queues})
+	 * <p>This setting primarily indicates what type of destination to resolve if dynamic
+	 * destinations are enabled.
+	 * @param replyPubSubDomain "true" for the Publish/Subscribe domain ({@link Topic Topics}),
+	 * "false" for the Point-to-Point domain ({@link Queue Queues})
+	 * @since 4.2
 	 * @see #setDestinationResolver
 	 */
 	public void setReplyPubSubDomain(boolean replyPubSubDomain) {
@@ -462,8 +463,9 @@ public abstract class AbstractMessageListenerContainer extends AbstractJmsListen
 
 	/**
 	 * Return whether the Publish/Subscribe domain ({@link javax.jms.Topic Topics}) is used
-	 * for replies. Otherwise, the Point-to-Point domain ({@link javax.jms.Queue Queues}) is
-	 * used.
+	 * for replies. Otherwise, the Point-to-Point domain ({@link javax.jms.Queue Queues})
+	 * is used.
+	 * @since 4.2
 	 */
 	@Override
 	public boolean isReplyPubSubDomain() {

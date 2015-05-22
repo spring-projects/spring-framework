@@ -218,8 +218,11 @@ public class RequestParamMethodArgumentResolver extends AbstractNamedValueMethod
 	}
 
 	private boolean isMultipartFileCollection(MethodParameter parameter) {
-		Class<?> collectionType = getCollectionParameterType(parameter);
-		return (collectionType != null && MultipartFile.class == collectionType);
+		return (MultipartFile.class == getCollectionParameterType(parameter));
+	}
+
+	private boolean isMultipartFileArray(MethodParameter parameter) {
+		return (MultipartFile.class == parameter.getParameterType().getComponentType());
 	}
 
 	private boolean isPartCollection(MethodParameter parameter) {
@@ -230,11 +233,6 @@ public class RequestParamMethodArgumentResolver extends AbstractNamedValueMethod
 	private boolean isPartArray(MethodParameter parameter) {
 		Class<?> paramType = parameter.getParameterType().getComponentType();
 		return (paramType != null && "javax.servlet.http.Part".equals(paramType.getName()));
-	}
-
-	private boolean isMultipartFileArray(MethodParameter parameter) {
-		Class<?> paramType = parameter.getParameterType().getComponentType();
-		return (paramType != null && MultipartFile.class == paramType);
 	}
 
 	private Class<?> getCollectionParameterType(MethodParameter parameter) {
