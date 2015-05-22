@@ -27,7 +27,6 @@ import org.springframework.messaging.simp.config.AbstractMessageBrokerConfigurat
 import org.springframework.messaging.simp.stomp.StompBrokerRelayMessageHandler;
 import org.springframework.messaging.simp.user.SimpUserRegistry;
 import org.springframework.messaging.simp.user.UserSessionRegistryAdapter;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.config.WebSocketMessageBrokerStats;
@@ -59,12 +58,22 @@ public abstract class WebSocketMessageBrokerConfigurationSupport extends Abstrac
 				clientOutboundChannel(), brokerMessagingTemplate());
 	}
 
+	@Override
+	@SuppressWarnings("deprecation")
+	protected SimpUserRegistry createLocalUserRegistry() {
+		org.springframework.messaging.simp.user.UserSessionRegistry sessionRegistry = userSessionRegistry();
+		if (sessionRegistry != null) {
+			return new UserSessionRegistryAdapter(sessionRegistry);
+		}
+		return new DefaultSimpUserRegistry();
+	}
+
 	@Bean
+	@SuppressWarnings("deprecation")
 	public HandlerMapping stompWebSocketHandlerMapping() {
 		WebSocketHandler handler = decorateWebSocketHandler(subProtocolWebSocketHandler());
-		WebSocketTransportRegistration transport = getTransportRegistration();
-		ThreadPoolTaskScheduler scheduler = messageBrokerTaskScheduler();
-		WebMvcStompEndpointRegistry registry = new WebMvcStompEndpointRegistry(handler, transport, scheduler);
+		WebMvcStompEndpointRegistry registry = new WebMvcStompEndpointRegistry(handler,
+				getTransportRegistration(), userSessionRegistry(), messageBrokerTaskScheduler());
 		registry.setApplicationContext(getApplicationContext());
 		registerStompEndpoints(registry);
 		return registry.getHandlerMapping();
@@ -91,19 +100,6 @@ public abstract class WebSocketMessageBrokerConfigurationSupport extends Abstrac
 	}
 
 	protected void configureWebSocketTransport(WebSocketTransportRegistration registry) {
-	}
-
-	@Override
-	@SuppressWarnings("deprecation")
-	protected SimpUserRegistry createLocalUserRegistry() {
-		org.springframework.messaging.simp.user.UserSessionRegistry sessionRegistry = userSessionRegistry();
-		if (sessionRegistry == null) {
-			return new DefaultSimpUserRegistry();
-		}
-		else {
-			return (userSessionRegistry() instanceof SimpUserRegistry ?
-					(SimpUserRegistry) userSessionRegistry() : new UserSessionRegistryAdapter(sessionRegistry));
-		}
 	}
 
 	protected abstract void registerStompEndpoints(StompEndpointRegistry registry);

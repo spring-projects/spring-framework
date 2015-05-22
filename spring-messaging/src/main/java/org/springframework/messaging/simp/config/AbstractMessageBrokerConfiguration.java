@@ -384,12 +384,14 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 	}
 
 	@Bean
-	@SuppressWarnings("deprecation")
 	public SimpUserRegistry userRegistry() {
 		return (getBrokerRegistry().getUserRegistryBroadcast() != null ?
 				new MultiServerUserRegistry(createLocalUserRegistry()) : createLocalUserRegistry());
 	}
 
+	/**
+	 * Create the user registry that provides access to the local users.
+	 */
 	protected abstract SimpUserRegistry createLocalUserRegistry();
 
 	/**

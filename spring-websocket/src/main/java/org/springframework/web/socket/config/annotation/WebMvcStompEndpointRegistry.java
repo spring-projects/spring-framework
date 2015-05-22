@@ -60,8 +60,10 @@ public class WebMvcStompEndpointRegistry implements StompEndpointRegistry {
 	private UrlPathHelper urlPathHelper;
 
 
+	@SuppressWarnings("deprecation")
 	public WebMvcStompEndpointRegistry(WebSocketHandler webSocketHandler,
 			WebSocketTransportRegistration transportRegistration,
+			org.springframework.messaging.simp.user.UserSessionRegistry userSessionRegistry,
 			TaskScheduler defaultSockJsTaskScheduler) {
 
 		Assert.notNull(webSocketHandler, "'webSocketHandler' is required ");
@@ -78,10 +80,12 @@ public class WebMvcStompEndpointRegistry implements StompEndpointRegistry {
 		}
 
 		this.stompHandler = new StompSubProtocolHandler();
+		this.stompHandler.setUserSessionRegistry(userSessionRegistry);
 
 		if (transportRegistration.getMessageSizeLimit() != null) {
 			this.stompHandler.setMessageSizeLimit(transportRegistration.getMessageSizeLimit());
 		}
+
 
 		this.sockJsScheduler = defaultSockJsTaskScheduler;
 	}

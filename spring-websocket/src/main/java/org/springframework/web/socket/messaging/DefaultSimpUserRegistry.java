@@ -37,7 +37,9 @@ import org.springframework.messaging.support.MessageHeaderAccessor;
 import org.springframework.util.Assert;
 
 /**
- * Default, mutable, thread-safe implementation of {@link SimpUserRegistry}.
+ * Default, mutable, thread-safe implementation of {@link SimpUserRegistry} that
+ * listens ApplicationContext events of type {@link AbstractSubProtocolEvent} to
+ * keep track of user presence and subscription information.
  *
  * @author Rossen Stoyanchev
  * @since 4.2

@@ -52,7 +52,7 @@ public class WebMvcStompEndpointRegistryTests {
 
 		WebSocketTransportRegistration transport = new WebSocketTransportRegistration();
 		TaskScheduler scheduler = Mockito.mock(TaskScheduler.class);
-		this.endpointRegistry = new WebMvcStompEndpointRegistry(this.webSocketHandler, transport, scheduler);
+		this.endpointRegistry = new WebMvcStompEndpointRegistry(this.webSocketHandler, transport, null, scheduler);
 	}
 
 
