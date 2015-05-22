@@ -34,7 +34,7 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageDeliveryException;
 import org.springframework.messaging.converter.MessageConversionException;
 import org.springframework.messaging.converter.MessageConverter;
-import org.springframework.messaging.converter.StringMessageConverter;
+import org.springframework.messaging.converter.SimpleMessageConverter;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.messaging.support.MessageHeaderAccessor;
 import org.springframework.messaging.tcp.TcpConnection;
@@ -82,7 +82,7 @@ public class DefaultStompSession implements ConnectionHandlingStompSession {
 
 	private final SettableListenableFuture<StompSession> sessionFuture = new SettableListenableFuture<StompSession>();
 
-	private MessageConverter converter = new StringMessageConverter();
+	private MessageConverter converter = new SimpleMessageConverter();
 
 	private TaskScheduler taskScheduler;
 
@@ -141,7 +141,7 @@ public class DefaultStompSession implements ConnectionHandlingStompSession {
 	 * Set the {@link MessageConverter} to use to convert the payload of incoming
 	 * and outgoing messages to and from {@code byte[]} based on object type, or
 	 * expected object type, and the "content-type" header.
-	 * <p>By default, {@link StringMessageConverter} is configured.
+	 * <p>By default, {@link SimpleMessageConverter} is configured.
 	 * @param messageConverter the message converter to use
 	 */
 	public void setMessageConverter(MessageConverter messageConverter) {
@@ -415,7 +415,8 @@ public class DefaultStompSession implements ConnectionHandlingStompSession {
 		Class<?> payloadType = ResolvableType.forType(type).getRawClass();
 		Object object = getMessageConverter().fromMessage(message, payloadType);
 		if (object == null) {
-			throw new MessageConversionException("No suitable converter, payloadType=" + payloadType);
+			throw new MessageConversionException("No suitable converter, payloadType=" + payloadType +
+					", handlerType=" + handler.getClass());
 		}
 		handler.handleFrame(stompHeaders, object);
 	}

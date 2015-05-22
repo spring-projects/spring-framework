@@ -162,6 +162,21 @@ public class DefaultSimpUserRegistryTests {
 		assertEquals(new HashSet<>(Arrays.asList("sub1", "sub2")), sessionIds);
 	}
 
+	@Test
+	public void nullSessionId() throws Exception {
+
+		DefaultSimpUserRegistry registry = new DefaultSimpUserRegistry();
+
+		TestPrincipal user = new TestPrincipal("joe");
+		Message<byte[]> message = createMessage(SimpMessageType.CONNECT_ACK, "123");
+		SessionConnectedEvent event = new SessionConnectedEvent(this, message, user);
+		registry.onApplicationEvent(event);
+
+		SimpUser simpUser = registry.getUser("joe");
+		assertNull(simpUser.getSession(null));
+	}
+
+
 	private Message<byte[]> createMessage(SimpMessageType type, String sessionId) {
 		return createMessage(type, sessionId, null, null);
 	}

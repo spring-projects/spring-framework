@@ -178,7 +178,7 @@ public class DefaultSimpUserRegistry implements SimpUserRegistry, SmartApplicati
 
 		@Override
 		public SimpSession getSession(String sessionId) {
-			return this.sessions.get(sessionId);
+			return (sessionId != null ? this.sessions.get(sessionId) : null);
 		}
 
 		@Override
