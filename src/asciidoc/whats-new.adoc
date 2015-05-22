@@ -398,6 +398,57 @@ method has been added.
   annotation-based model>> as well as the ability to publish any arbitrary event.
 ** Any public method in a managed bean can be annotated with `@EventListener` to consume events.
 ** `@TransactionalEventListener` provides transaction-bound event support.
+* Spring Framework 4.2 introduces first-class support for declaring and
+  looking up aliases for annotation attributes. The new `@AliasFor`
+  annotation can be used to declare a pair of aliased attributes within
+  a single annotation or to declare an alias from one attribute in a
+  custom composed annotation to an attribute in a meta-annotation.
+** The following annotations have been retrofitted with `@AliasFor`
+   support: `@ManagedResource`, `@ContextConfiguration`,
+   `@ActiveProfiles`, `@TestExecutionListeners`, `@TestPropertySource`,
+   `@Sql`, `@ControllerAdvice`, `@RequestMapping`.
+** For example, `@ContextConfiguration` from the `spring-test` module
+   is now declared as follows:
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+public @interface ContextConfiguration {
+ 
+    @AliasFor(attribute = "locations")
+    String[] value() default {};
+ 
+    @AliasFor(attribute = "value")
+    String[] locations() default {};
+ 
+    // ...
+}
+----
+** Similarly, _composed annotations_ that override attributes from
+   meta-annotations can now use `@AliasFor` for fine-grained control
+   over exactly which attributes are overridden within an annotation
+   hierarchy. In fact, it is now possible to declare an alias for the
+   `value` attribute of a meta-annotation.
+** For example, one can now develop a composed annotation with a custom 
+   attribute override as follows.
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+@ContextConfiguration
+public @interface MyTestConfig {
+ 
+    @AliasFor(annotation = ContextConfiguration.class, attribute = "locations")
+    String[] xmlFiles();
+ 
+    // ...
+}
+----
+* Numerous improvements to Spring's search algorithms used for finding
+  meta-annotations. For example, locally declared _composed annotations_
+  are now favored over inherited annotations.
+* _Composed annotations_ that override attributes from meta-annotations
+  can now be discovered on interfaces and on abstract, bridge, & interface
+  methods as well as on classes, standard methods, constructors, and 
+  fields.
 * The features of field-based data binding (`DirectFieldAccessor`) have been aligned with the current
   property-based data binding (`BeanWrapper`). In particular, field-based binding now supports
   navigation for Collections, Arrays, and Maps.
@@ -406,7 +457,8 @@ method has been added.
   `ConversionService` as well.
 * `JavaMailSenderImpl` has a new `testConnection()` method for checking connectivity to the server.
 * `ScheduledTaskRegistrar` exposes scheduled tasks.
-* Support for Apache `commons-pool2`
+* Apache `commons-pool2` is now supported.
+* `@NumberFormat` can now be used as a meta-annotation.
 
 === Data Access Improvements
 
