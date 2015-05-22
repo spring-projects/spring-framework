@@ -396,25 +396,25 @@ method has been added.
 
 * The application event infrastructure now offers an <<context-functionality-events-annotation,
   annotation-based model>> as well as the ability to publish any arbitrary event.
-** Any managed bean public method can be annotated with `@EventListener` to consume events.
+** Any public method in a managed bean can be annotated with `@EventListener` to consume events.
 ** `@TransactionalEventListener` provides transaction-bound event support.
-* The features of field-based data binding (`DirectFieldAccessor`) have been aligned to the current
+* The features of field-based data binding (`DirectFieldAccessor`) have been aligned with the current
   property-based data binding (`BeanWrapper`). In particular, field-based binding now supports
   navigation for Collections, Arrays, and Maps.
-* `DefaultConversionService` now provides extra out-of-the-box converters for `Stream`, `Charset`,
+* `DefaultConversionService` now provides out-of-the-box converters for `Stream`, `Charset`,
   `Currency`, and `TimeZone`. Such converters can be added individually to any arbitrary
   `ConversionService` as well.
-* `SimpleJdbcCallOperations` now supports named binding.
-* `JavaMailSender` has a connectivity check method.
+* `JavaMailSenderImpl` has a new `testConnection()` method for checking connectivity to the server.
 * `ScheduledTaskRegistrar` exposes scheduled tasks.
 * Support for Apache `commons-pool2`
-* `javax.transaction.Transactional` support in AspectJ
 
-=== JDBC Improvements
+=== Data Access Improvements
 
 * Embedded databases can now be automatically assigned unique names, and
   `<jdbc:embedded-database>` supports a new `database-name` attribute.
   See "Testing Improvements" below for further details.
+* `SimpleJdbcCallOperations` now supports named binding.
+* `javax.transaction.Transactional` is now supported via AspectJ.
 
 === JMS Improvements
 
