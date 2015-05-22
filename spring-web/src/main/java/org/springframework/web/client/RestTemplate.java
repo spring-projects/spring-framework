@@ -78,7 +78,7 @@ import org.springframework.web.util.UriTemplate;
  * HTTP PATCH, HTTP PUT with response body, etc.). Note however that the underlying HTTP
  * library used must also support the desired combination.
  *
- * <p>For each HTTP method there are 3 variants -- two accept a URI template string
+ * <p>For each HTTP method there are three variants: two accept a URI template string
  * and URI variables (array or map) while a third accepts a {@link URI}.
  * Note that for URI templates it is assumed encoding is necessary, e.g.
  * {@code restTemplate.getForObject("http://example.com/hotel list")} becomes

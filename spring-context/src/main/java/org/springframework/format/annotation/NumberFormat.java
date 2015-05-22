@@ -67,7 +67,7 @@ public @interface NumberFormat {
 	/**
 	 * Common number format styles.
 	 */
-	public enum Style {
+	enum Style {
 
 		/**
 		 * The general-purpose number format for the current locale.

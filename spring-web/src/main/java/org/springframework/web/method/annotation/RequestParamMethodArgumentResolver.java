@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,8 +53,8 @@ import org.springframework.web.util.WebUtils;
  * type {@link MultipartFile} in conjunction with Spring's {@link MultipartResolver}
  * abstraction, and arguments of type {@code javax.servlet.http.Part} in conjunction
  * with Servlet 3.0 multipart requests. This resolver can also be created in default
- * resolution mode in which simple types (int, long, etc.) not annotated
- * with @{@link RequestParam} are also treated as request parameters with the
+ * resolution mode in which simple types (int, long, etc.) not annotated with
+ * @{@link RequestParam} are also treated as request parameters with the
  * parameter name derived from the argument name.
  *
  * <p>If the method parameter type is {@link Map}, the name specified in the
@@ -202,7 +202,7 @@ public class RequestParamMethodArgumentResolver extends AbstractNamedValueMethod
 			if (arg == null) {
 				String[] paramValues = webRequest.getParameterValues(name);
 				if (paramValues != null) {
-					arg = paramValues.length == 1 ? paramValues[0] : paramValues;
+					arg = (paramValues.length == 1 ? paramValues[0] : paramValues);
 				}
 			}
 		}
@@ -218,23 +218,21 @@ public class RequestParamMethodArgumentResolver extends AbstractNamedValueMethod
 	}
 
 	private boolean isMultipartFileCollection(MethodParameter parameter) {
-		Class<?> collectionType = getCollectionParameterType(parameter);
-		return ((collectionType != null) && collectionType.equals(MultipartFile.class));
+		return MultipartFile.class.equals(getCollectionParameterType(parameter));
+	}
+
+	private boolean isMultipartFileArray(MethodParameter parameter) {
+		return MultipartFile.class.equals(parameter.getParameterType().getComponentType());
 	}
 
 	private boolean isPartCollection(MethodParameter parameter) {
 		Class<?> collectionType = getCollectionParameterType(parameter);
-		return ((collectionType != null) && "javax.servlet.http.Part".equals(collectionType.getName()));
+		return (collectionType != null && "javax.servlet.http.Part".equals(collectionType.getName()));
 	}
 
 	private boolean isPartArray(MethodParameter parameter) {
 		Class<?> paramType = parameter.getParameterType().getComponentType();
-		return ((paramType != null) && "javax.servlet.http.Part".equals(paramType.getName()));
-	}
-
-	private boolean isMultipartFileArray(MethodParameter parameter) {
-		Class<?> paramType = parameter.getParameterType().getComponentType();
-		return ((paramType != null) && MultipartFile.class.equals(paramType));
+		return (paramType != null && "javax.servlet.http.Part".equals(paramType.getName()));
 	}
 
 	private Class<?> getCollectionParameterType(MethodParameter parameter) {

@@ -35,13 +35,13 @@ import java.lang.annotation.Target;
  * A date or time may be omitted by specifying the style character '-'.
  *
  * <p>For ISO-based formatting, set the {@link #iso} attribute to be the desired {@link ISO} format,
- * such as {@link ISO#DATE}. For custom formatting, set the {@link #pattern} attribute to be the
+ * such as {@link ISO#DATE}. For custom formatting, set the {@link #pattern()} attribute to be the
  * DateTime pattern, such as {@code yyyy/MM/dd hh:mm:ss a}.
  *
  * <p>Each attribute is mutually exclusive, so only set one attribute per annotation instance
- * (the most convenient one for your formatting needs).
+ * (the one most convenient one for your formatting needs).
  * When the pattern attribute is specified, it takes precedence over both the style and ISO attribute.
- * When the iso attribute is specified, it takes precedence over the style attribute.
+ * When the {@link #iso} attribute is specified, if takes precedence over the style attribute.
  * When no annotation attributes are specified, the default format applied is style-based
  * with a style code of 'SS' (short date, short time).
  *
@@ -82,23 +82,23 @@ public @interface DateTimeFormat {
 	/**
 	 * Common ISO date time format patterns.
 	 */
-	public enum ISO {
+	enum ISO {
 
 		/**
 		 * The most common ISO Date Format {@code yyyy-MM-dd},
-		 * e.g. 2000-10-31.
+		 * e.g. "2000-10-31".
 		 */
 		DATE,
 
 		/**
 		 * The most common ISO Time Format {@code HH:mm:ss.SSSZ},
-		 * e.g. 01:30:00.000-05:00.
+		 * e.g. "01:30:00.000-05:00".
 		 */
 		TIME,
 
 		/**
 		 * The most common ISO DateTime Format {@code yyyy-MM-dd'T'HH:mm:ss.SSSZ},
-		 * e.g. 2000-10-31 01:30:00.000-05:00.
+		 * e.g. "2000-10-31 01:30:00.000-05:00".
 		 * <p>This is the default if no annotation value is specified.
 		 */
 		DATE_TIME,
