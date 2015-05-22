@@ -30,6 +30,7 @@ import static org.junit.Assert.*;
  * Tests for {@link ByteBufferConverter}.
  *
  * @author Phillip Webb
+ * @author Juergen Hoeller
  */
 public class ByteBufferConverterTests {
 
@@ -38,8 +39,7 @@ public class ByteBufferConverterTests {
 
 	@Before
 	public void setup() {
-		this.conversionService = new GenericConversionService();
-		this.conversionService.addConverter(new ByteBufferConverter(conversionService));
+		this.conversionService = new DefaultConversionService();
 		this.conversionService.addConverter(new ByteArrayToOtherTypeConverter());
 		this.conversionService.addConverter(new OtherTypeToByteArrayConverter());
 	}
@@ -87,6 +87,8 @@ public class ByteBufferConverterTests {
 		ByteBuffer convert = this.conversionService.convert(byteBuffer, ByteBuffer.class);
 		assertThat(convert, not(sameInstance(byteBuffer.rewind())));
 		assertThat(convert, equalTo(byteBuffer.rewind()));
+		assertThat(convert, equalTo(ByteBuffer.wrap(bytes)));
+		assertThat(convert.array(), equalTo(bytes));
 	}
 
 
