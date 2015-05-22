@@ -25,7 +25,6 @@ import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.junit.Rule;
 import org.junit.Test;
@@ -36,6 +35,7 @@ import org.springframework.core.annotation.subpackage.NonPublicAnnotatedClass;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ClassUtils;
 
+import static java.util.stream.Collectors.*;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 import static org.springframework.core.annotation.AnnotationUtils.*;
@@ -480,7 +480,7 @@ public class AnnotationUtilsTests {
 		Method method = InterfaceWithRepeated.class.getMethod("foo");
 		Set<MyRepeatable> annotations = getRepeatableAnnotation(method, MyRepeatableContainer.class, MyRepeatable.class);
 		assertNotNull(annotations);
-		List<String> values = annotations.stream().map(MyRepeatable::value).collect(Collectors.toList());
+		List<String> values = annotations.stream().map(MyRepeatable::value).collect(toList());
 		assertThat(values, equalTo(Arrays.asList("a", "b", "c", "meta")));
 	}
 
@@ -489,10 +489,10 @@ public class AnnotationUtilsTests {
 		Set<ContextConfig> annotations = getRepeatableAnnotation(TestCase.class, Hierarchy.class, ContextConfig.class);
 		assertNotNull(annotations);
 
-		List<String> locations = annotations.stream().map(ContextConfig::locations).collect(Collectors.toList());
+		List<String> locations = annotations.stream().map(ContextConfig::locations).collect(toList());
 		assertThat(locations, equalTo(Arrays.asList("A", "B")));
 
-		List<String> values = annotations.stream().map(ContextConfig::value).collect(Collectors.toList());
+		List<String> values = annotations.stream().map(ContextConfig::value).collect(toList());
 		assertThat(values, equalTo(Arrays.asList("A", "B")));
 	}
 
@@ -646,14 +646,13 @@ public class AnnotationUtilsTests {
 
 		ContextConfig[] configs = synthesizedHierarchy.value();
 		assertNotNull(configs);
-		for (ContextConfig contextConfig : configs) {
-			assertThat(contextConfig, instanceOf(SynthesizedAnnotation.class));
-		}
+		assertTrue("nested annotations must be synthesized",
+			Arrays.stream(configs).allMatch(c -> c instanceof SynthesizedAnnotation));
 
-		List<String> locations = Arrays.stream(configs).map(ContextConfig::locations).collect(Collectors.toList());
+		List<String> locations = Arrays.stream(configs).map(ContextConfig::locations).collect(toList());
 		assertThat(locations, equalTo(Arrays.asList("A", "B")));
 
-		List<String> values = Arrays.stream(configs).map(ContextConfig::value).collect(Collectors.toList());
+		List<String> values = Arrays.stream(configs).map(ContextConfig::value).collect(toList());
 		assertThat(values, equalTo(Arrays.asList("A", "B")));
 	}
 

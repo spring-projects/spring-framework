@@ -573,7 +573,7 @@ public class AnnotatedElementUtilsTests {
 	 * Mock of {@link org.springframework.test.context.ContextConfiguration}.
 	 */
 	@Retention(RetentionPolicy.RUNTIME)
-	static @interface ContextConfig {
+	@interface ContextConfig {
 
 		@AliasFor(attribute = "locations")
 		String[] value() default {};
@@ -584,21 +584,21 @@ public class AnnotatedElementUtilsTests {
 
 	@ContextConfig
 	@Retention(RetentionPolicy.RUNTIME)
-	static @interface ConventionBasedComposedContextConfig {
+	@interface ConventionBasedComposedContextConfig {
 
 		String[] locations() default {};
 	}
 
 	@ContextConfig(value = "duplicateDeclaration")
 	@Retention(RetentionPolicy.RUNTIME)
-	static @interface InvalidConventionBasedComposedContextConfig {
+	@interface InvalidConventionBasedComposedContextConfig {
 
 		String[] locations();
 	}
 
 	@ContextConfig
 	@Retention(RetentionPolicy.RUNTIME)
-	static @interface AliasedComposedContextConfig {
+	@interface AliasedComposedContextConfig {
 
 		@AliasFor(annotation = ContextConfig.class, attribute = "locations")
 		String[] xmlConfigFiles();
@@ -606,7 +606,7 @@ public class AnnotatedElementUtilsTests {
 
 	@ContextConfig
 	@Retention(RetentionPolicy.RUNTIME)
-	static @interface AliasedValueComposedContextConfig {
+	@interface AliasedValueComposedContextConfig {
 
 		@AliasFor(annotation = ContextConfig.class, attribute = "value")
 		String[] locations();
@@ -620,7 +620,7 @@ public class AnnotatedElementUtilsTests {
 	 */
 	@ContextConfig(value = "duplicateDeclaration")
 	@Retention(RetentionPolicy.RUNTIME)
-	static @interface InvalidAliasedComposedContextConfig {
+	@interface InvalidAliasedComposedContextConfig {
 
 		@AliasFor(annotation = ContextConfig.class, attribute = "locations")
 		String[] xmlConfigFiles();
