@@ -431,3 +431,26 @@ method has been added.
   `@MessageMapping` and `@SubscribeMapping` methods.
 * `MarshallingMessageConverter` for XML payloads.
 
+=== Core Container Improvements
+
+* The application event infrastructure now offers an <<context-functionality-events-annotation,
+  annotation-based model>> as well as the ability to publish any arbitrary event.
+** Any managed bean public method can be annotated with `@EventListener` to consume events
+** `@TransactionalEventListener` provides transaction-bound event support
+* The features of field-based data binding (`DirectFieldAccessor`) has been aligned to the current
+  property-based data binding (`BeanWrapper`). In particular, field-based binding now supports
+  navigation for Collections, Arrays and Maps.
+* `DefaultConversionService` now provides extra out-of-the-box converters for `Stream`, `Charset`,
+  `Currency` and `TimeZone`. Such converters can be added individually to any arbitrary
+  `ConversionService` as well.
+* `SimpleJdbcCallOperations` now supports named binding.
+* `JavaMailSender` has a connectivity check method.
+* `ScheduledTaskRegistrar` exposes scheduled tasks.
+* Support for Apache `commons-pool2`.
+* `javax.transaction.Transactional` support in AspectJ.
+
+=== JMS Improvements
+
+* The `autoStartup` attribute can be controlled via `JmsListenerContainerFactory`.
+* The type of the reply `Destination` can now be configured per listener container.
+* The value of the `@SendTo` annotation can now use an expression.
