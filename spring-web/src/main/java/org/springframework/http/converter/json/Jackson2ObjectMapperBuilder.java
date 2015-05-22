@@ -65,7 +65,7 @@ import org.springframework.util.StringUtils;
  * <p>Note that Jackson's JSR-310 and Joda-Time support modules will be registered automatically
  * when available (and when Java 8 and Joda-Time themselves are available, respectively).
  *
- * <p>Tested against Jackson 2.2, 2.3 and 2.4; compatible with Jackson 2.0 and higher.
+ * <p>Tested against Jackson 2.2, 2.3, 2.4, 2.5, 2.6; compatible with Jackson 2.0 and higher.
  *
  * @author Sebastien Deleuze
  * @author Juergen Hoeller
@@ -91,11 +91,13 @@ public class Jackson2ObjectMapperBuilder {
 
 	private JsonInclude.Include serializationInclusion;
 
+	private FilterProvider filters;
+
+	private final Map<Class<?>, Class<?>> mixIns = new HashMap<Class<?>, Class<?>>();
+
 	private final Map<Class<?>, JsonSerializer<?>> serializers = new LinkedHashMap<Class<?>, JsonSerializer<?>>();
 
 	private final Map<Class<?>, JsonDeserializer<?>> deserializers = new LinkedHashMap<Class<?>, JsonDeserializer<?>>();
-
-	private final Map<Class<?>, Class<?>> mixIns = new HashMap<Class<?>, Class<?>>();
 
 	private final Map<Object, Boolean> features = new HashMap<Object, Boolean>();
 
@@ -110,8 +112,6 @@ public class Jackson2ObjectMapperBuilder {
 	private ClassLoader moduleClassLoader = getClass().getClassLoader();
 
 	private HandlerInstantiator handlerInstantiator;
-
-	private FilterProvider filters;
 
 	private ApplicationContext applicationContext;
 
@@ -217,65 +217,12 @@ public class Jackson2ObjectMapperBuilder {
 	}
 
 	/**
-	 * Configure custom serializers. Each serializer is registered for the type
-	 * returned by {@link JsonSerializer#handledType()}, which must not be
-	 * {@code null}.
-	 * @see #serializersByType(Map)
+	 * Set the global filters to use in order to support {@link JsonFilter @JsonFilter} annotated POJO.
+	 * @since 4.2
+	 * @see MappingJacksonValue#setFilters(FilterProvider)
 	 */
-	public Jackson2ObjectMapperBuilder serializers(JsonSerializer<?>... serializers) {
-		if (serializers != null) {
-			for (JsonSerializer<?> serializer : serializers) {
-				Class<?> handledType = serializer.handledType();
-				if (handledType == null || handledType == Object.class) {
-					throw new IllegalArgumentException("Unknown handled type in " + serializer.getClass().getName());
-				}
-				this.serializers.put(serializer.handledType(), serializer);
-			}
-		}
-		return this;
-	}
-
-	/**
-	 * Configure a custom serializer for the given type.
-	 * @see #serializers(JsonSerializer...)
-	 * @since 4.1.2
-	 */
-	public Jackson2ObjectMapperBuilder serializerByType(Class<?> type, JsonSerializer<?> serializer) {
-		if (serializers != null) {
-			this.serializers.put(type, serializer);
-		}
-		return this;
-	}
-
-	/**
-	 * Configure custom serializers for the given types.
-	 * @see #serializers(JsonSerializer...)
-	 */
-	public Jackson2ObjectMapperBuilder serializersByType(Map<Class<?>, JsonSerializer<?>> serializers) {
-		if (serializers != null) {
-			this.serializers.putAll(serializers);
-		}
-		return this;
-	}
-
-	/**
-	 * Configure a custom deserializer for the given type.
-	 * @since 4.1.2
-	 */
-	public Jackson2ObjectMapperBuilder deserializerByType(Class<?> type, JsonDeserializer<?> deserializer) {
-		if (deserializers != null) {
-			this.deserializers.put(type, deserializer);
-		}
-		return this;
-	}
-
-	/**
-	 * Configure custom deserializers for the given types.
-	 */
-	public Jackson2ObjectMapperBuilder deserializersByType(Map<Class<?>, JsonDeserializer<?>> deserializers) {
-		if (deserializers != null) {
-			this.deserializers.putAll(deserializers);
-		}
+	public Jackson2ObjectMapperBuilder filters(FilterProvider filters) {
+		this.filters = filters;
 		return this;
 	}
 
@@ -305,6 +252,69 @@ public class Jackson2ObjectMapperBuilder {
 	public Jackson2ObjectMapperBuilder mixIns(Map<Class<?>, Class<?>> mixIns) {
 		if (mixIns != null) {
 			this.mixIns.putAll(mixIns);
+		}
+		return this;
+	}
+
+	/**
+	 * Configure custom serializers. Each serializer is registered for the type
+	 * returned by {@link JsonSerializer#handledType()}, which must not be
+	 * {@code null}.
+	 * @see #serializersByType(Map)
+	 */
+	public Jackson2ObjectMapperBuilder serializers(JsonSerializer<?>... serializers) {
+		if (serializers != null) {
+			for (JsonSerializer<?> serializer : serializers) {
+				Class<?> handledType = serializer.handledType();
+				if (handledType == null || handledType == Object.class) {
+					throw new IllegalArgumentException("Unknown handled type in " + serializer.getClass().getName());
+				}
+				this.serializers.put(serializer.handledType(), serializer);
+			}
+		}
+		return this;
+	}
+
+	/**
+	 * Configure a custom serializer for the given type.
+	 * @see #serializers(JsonSerializer...)
+	 * @since 4.1.2
+	 */
+	public Jackson2ObjectMapperBuilder serializerByType(Class<?> type, JsonSerializer<?> serializer) {
+		if (serializer != null) {
+			this.serializers.put(type, serializer);
+		}
+		return this;
+	}
+
+	/**
+	 * Configure custom serializers for the given types.
+	 * @see #serializers(JsonSerializer...)
+	 */
+	public Jackson2ObjectMapperBuilder serializersByType(Map<Class<?>, JsonSerializer<?>> serializers) {
+		if (serializers != null) {
+			this.serializers.putAll(serializers);
+		}
+		return this;
+	}
+
+	/**
+	 * Configure a custom deserializer for the given type.
+	 * @since 4.1.2
+	 */
+	public Jackson2ObjectMapperBuilder deserializerByType(Class<?> type, JsonDeserializer<?> deserializer) {
+		if (deserializer != null) {
+			this.deserializers.put(type, deserializer);
+		}
+		return this;
+	}
+
+	/**
+	 * Configure custom deserializers for the given types.
+	 */
+	public Jackson2ObjectMapperBuilder deserializersByType(Map<Class<?>, JsonDeserializer<?>> deserializers) {
+		if (deserializers != null) {
+			this.deserializers.putAll(deserializers);
 		}
 		return this;
 	}
@@ -491,16 +501,6 @@ public class Jackson2ObjectMapperBuilder {
 	}
 
 	/**
-	 * Set the global filters to use in order to support {@link JsonFilter @JsonFilter} annotated POJO.
-	 * @since 4.2
-	 * @see MappingJacksonValue#setFilters(FilterProvider)
-	 */
-	public Jackson2ObjectMapperBuilder filters(FilterProvider filters) {
-		this.filters = filters;
-		return this;
-	}
-
-	/**
 	 * Set the Spring {@link ApplicationContext} in order to autowire Jackson handlers ({@link JsonSerializer},
 	 * {@link JsonDeserializer}, {@link KeyDeserializer}, {@code TypeResolverBuilder} and {@code TypeIdResolver}).
 	 * @since 4.1.3
@@ -580,9 +580,21 @@ public class Jackson2ObjectMapperBuilder {
 		if (this.annotationIntrospector != null) {
 			objectMapper.setAnnotationIntrospector(this.annotationIntrospector);
 		}
-
+		if (this.propertyNamingStrategy != null) {
+			objectMapper.setPropertyNamingStrategy(this.propertyNamingStrategy);
+		}
 		if (this.serializationInclusion != null) {
 			objectMapper.setSerializationInclusion(this.serializationInclusion);
+		}
+
+		if (this.filters != null) {
+			// Deprecated as of Jackson 2.6, but just in favor of a fluent variant.
+			objectMapper.setFilters(this.filters);
+		}
+
+		for (Class<?> target : this.mixIns.keySet()) {
+			// Deprecated as of Jackson 2.5, but just in favor of a fluent variant.
+			objectMapper.addMixInAnnotations(target, this.mixIns.get(target));
 		}
 
 		if (!this.serializers.isEmpty() || !this.deserializers.isEmpty()) {
@@ -597,18 +609,8 @@ public class Jackson2ObjectMapperBuilder {
 			configureFeature(objectMapper, feature, this.features.get(feature));
 		}
 
-		if (this.propertyNamingStrategy != null) {
-			objectMapper.setPropertyNamingStrategy(this.propertyNamingStrategy);
-		}
-		for (Class<?> target : this.mixIns.keySet()) {
-			// Deprecated as of Jackson 2.5, but just in favor of a fluent variant.
-			objectMapper.addMixInAnnotations(target, this.mixIns.get(target));
-		}
 		if (this.handlerInstantiator != null) {
 			objectMapper.setHandlerInstantiator(this.handlerInstantiator);
-		}
-		if (this.filters != null) {
-			objectMapper.setFilters(this.filters);
 		}
 		else if (this.applicationContext != null) {
 			objectMapper.setHandlerInstantiator(
