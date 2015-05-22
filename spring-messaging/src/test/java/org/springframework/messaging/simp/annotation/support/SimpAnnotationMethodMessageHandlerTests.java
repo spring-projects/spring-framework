@@ -21,6 +21,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.junit.Before;
@@ -294,6 +295,51 @@ public class SimpAnnotationMethodMessageHandlerTests {
 		assertTrue(controller.exceptionCatched);
 	}
 
+	@Test
+	@SuppressWarnings("unchecked")
+	public void completableFutureSuccess() {
+
+		given(this.channel.send(any(Message.class))).willReturn(true);
+		given(this.converter.toMessage(anyObject(), any(MessageHeaders.class)))
+				.willReturn((Message) MessageBuilder.withPayload(new byte[0]).build());
+
+		CompletableFutureController controller = new CompletableFutureController();
+		this.messageHandler.registerHandler(controller);
+		this.messageHandler.setDestinationPrefixes(Arrays.asList("/app1", "/app2/"));
+		SimpMessageHeaderAccessor headers = SimpMessageHeaderAccessor.create();
+		headers.setSessionId("session1");
+		headers.setSessionAttributes(new HashMap<>());
+		headers.setDestination("/app1/completable-future");
+		Message<?> message = MessageBuilder.withPayload(new byte[0]).setHeaders(headers).build();
+		this.messageHandler.handleMessage(message);
+
+		assertNotNull(controller.future);
+		controller.future.complete("foo");
+		verify(this.converter).toMessage(this.payloadCaptor.capture(), any(MessageHeaders.class));
+		assertEquals("foo", this.payloadCaptor.getValue());
+	}
+
+	@Test
+	@SuppressWarnings("unchecked")
+	public void completableFutureFailure() {
+
+		given(this.channel.send(any(Message.class))).willReturn(true);
+		given(this.converter.toMessage(anyObject(), any(MessageHeaders.class)))
+				.willReturn((Message) MessageBuilder.withPayload(new byte[0]).build());
+
+		CompletableFutureController controller = new CompletableFutureController();
+		this.messageHandler.registerHandler(controller);
+		this.messageHandler.setDestinationPrefixes(Arrays.asList("/app1", "/app2/"));
+		SimpMessageHeaderAccessor headers = SimpMessageHeaderAccessor.create();
+		headers.setSessionId("session1");
+		headers.setSessionAttributes(new HashMap<>());
+		headers.setDestination("/app1/completable-future");
+		Message<?> message = MessageBuilder.withPayload(new byte[0]).setHeaders(headers).build();
+		this.messageHandler.handleMessage(message);
+
+		controller.future.completeExceptionally(new IllegalStateException());
+		assertTrue(controller.exceptionCatched);
+	}
 
 	private static class TestSimpAnnotationMethodMessageHandler extends SimpAnnotationMethodMessageHandler {
 
@@ -413,6 +459,24 @@ public class SimpAnnotationMethodMessageHandlerTests {
 
 	}
 
+	@Controller
+	private static class CompletableFutureController {
+
+		private CompletableFuture<String> future;
+		private boolean exceptionCatched = false;
+
+		@MessageMapping("completable-future")
+		public CompletableFuture<String> handleCompletableFuture() {
+			this.future = new CompletableFuture<>();
+			return this.future;
+		}
+
+		@MessageExceptionHandler(IllegalStateException.class)
+		public void handleValidationException() {
+			this.exceptionCatched = true;
+		}
+
+	}
 
 	private static class StringTestValidator implements Validator {
 

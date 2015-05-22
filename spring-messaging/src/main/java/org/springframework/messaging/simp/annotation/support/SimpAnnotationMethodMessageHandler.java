@@ -50,6 +50,7 @@ import org.springframework.messaging.handler.annotation.support.MessageMethodArg
 import org.springframework.messaging.handler.annotation.support.PayloadArgumentResolver;
 import org.springframework.messaging.handler.invocation.AbstractExceptionHandlerMethodResolver;
 import org.springframework.messaging.handler.invocation.AbstractMethodMessageHandler;
+import org.springframework.messaging.handler.invocation.CompletableFutureReturnValueHandler;
 import org.springframework.messaging.handler.invocation.HandlerMethodArgumentResolver;
 import org.springframework.messaging.handler.invocation.HandlerMethodReturnValueHandler;
 import org.springframework.messaging.handler.invocation.ListenableFutureReturnValueHandler;
@@ -82,6 +83,10 @@ import org.springframework.validation.Validator;
  */
 public class SimpAnnotationMethodMessageHandler extends AbstractMethodMessageHandler<SimpMessageMappingInfo>
 		implements SmartLifecycle {
+
+	private static final boolean completableFuturePresent = ClassUtils.isPresent("java.util.concurrent.CompletableFuture",
+			SimpAnnotationMethodMessageHandler.class.getClassLoader());
+
 
 	private final SubscribableChannel clientInboundChannel;
 
@@ -318,6 +323,10 @@ public class SimpAnnotationMethodMessageHandler extends AbstractMethodMessageHan
 		// Single-purpose return value types
 		ListenableFutureReturnValueHandler lfh = new ListenableFutureReturnValueHandler();
 		handlers.add(lfh);
+		if (completableFuturePresent) {
+			CompletableFutureReturnValueHandler cfh = new CompletableFutureReturnValueHandler();
+			handlers.add(cfh);
+		}
 
 		// Annotation-based return value types
 		SendToMethodReturnValueHandler sth = new SendToMethodReturnValueHandler(this.brokerTemplate, true);
