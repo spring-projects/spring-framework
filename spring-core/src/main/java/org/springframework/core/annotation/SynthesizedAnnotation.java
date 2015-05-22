@@ -24,5 +24,5 @@ package org.springframework.core.annotation;
  * @author Sam Brannen
  * @since 4.2
  */
-interface SynthesizedAnnotation {
+public interface SynthesizedAnnotation {
 }
