@@ -394,6 +394,14 @@ method has been added.
 
 === Core Container Improvements
 
+* Annotations such as `@Bean` get detected and processed on Java 8 default methods as well,
+  allowing for composing a configuration class from interfaces with default `@Bean` methods.
+* Configuration classes may declare `@Import` with regular component classes now, allowing
+  for a mix of imported configuration classes and component classes.
+* Configuration classes may declare an `@Order` value, getting processed in a corresponding
+  order (e.g. for overriding beans by name) even when detected through classpath scanning.
+* `@Resource` injection points support an `@Lazy` declaration, analogous to `@Autowired`,
+  receiving a lazy-initializing proxy for the requested target bean.
 * The application event infrastructure now offers an <<context-functionality-events-annotation,
   annotation-based model>> as well as the ability to publish any arbitrary event.
 ** Any public method in a managed bean can be annotated with `@EventListener` to consume events.
@@ -455,18 +463,23 @@ public @interface MyTestConfig {
 * `DefaultConversionService` now provides out-of-the-box converters for `Stream`, `Charset`,
   `Currency`, and `TimeZone`. Such converters can be added individually to any arbitrary
   `ConversionService` as well.
+* `DefaultFormattingConversionService` comes with out-of-the-box support for the value types
+  in JSR-354 Money & Currency (if the 'javax.money' API is present on the classpath): namely,
+  `MonetaryAmount` and `CurrencyUnit`. This includes support for applying `@NumberFormat`.
+* `@NumberFormat` can now be used as a meta-annotation.
 * `JavaMailSenderImpl` has a new `testConnection()` method for checking connectivity to the server.
 * `ScheduledTaskRegistrar` exposes scheduled tasks.
 * Apache `commons-pool2` is now supported.
-* `@NumberFormat` can now be used as a meta-annotation.
 
 === Data Access Improvements
 
+* `javax.transaction.Transactional` is now supported via AspectJ.
+* `SimpleJdbcCallOperations` now supports named binding.
+* Full support for Hibernate ORM 5.0: as a JPA provider (automatically adapted) as well as
+  through its native API (covered by the new `org.springframework.orm.hibernate5` package).
 * Embedded databases can now be automatically assigned unique names, and
   `<jdbc:embedded-database>` supports a new `database-name` attribute.
   See "Testing Improvements" below for further details.
-* `SimpleJdbcCallOperations` now supports named binding.
-* `javax.transaction.Transactional` is now supported via AspectJ.
 
 === JMS Improvements
 
