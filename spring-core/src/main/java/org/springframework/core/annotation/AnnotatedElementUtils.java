@@ -963,10 +963,7 @@ public class AnnotatedElementUtils {
 						String aliasedAttributeNameInTarget = AnnotationUtils.getAliasedAttributeName(
 							attributeMethodInTarget, null);
 						if (aliasedAttributeNameInTarget != null) {
-							Object aliasedValueInTarget = attributes.get(aliasedAttributeNameInTarget);
-							if (aliasedValueInTarget == null) {
-								attributes.put(aliasedAttributeNameInTarget, adaptedValue);
-							}
+							attributes.putIfAbsent(aliasedAttributeNameInTarget, adaptedValue);
 						}
 					}
 				}

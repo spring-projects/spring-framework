@@ -158,6 +158,25 @@ public class AnnotationAttributes extends LinkedHashMap<String, Object> {
 		return (T) value;
 	}
 
+	/**
+	 * Store the supplied {@code value} in this map under the specified
+	 * {@code key}, unless a value is already stored under the key.
+	 * @param key the key under which to store the value
+	 * @param value the value to store
+	 * @return the current value stored in this map, or {@code null} if no
+	 * value was previously stored in this map
+	 * @see #get
+	 * @see #put
+	 */
+	@Override
+	public Object putIfAbsent(String key, Object value) {
+		Object obj = get(key);
+		if (obj == null) {
+			obj = put(key, value);
+		}
+		return obj;
+	}
+
 	@Override
 	public String toString() {
 		Iterator<Map.Entry<String, Object>> entries = entrySet().iterator();
