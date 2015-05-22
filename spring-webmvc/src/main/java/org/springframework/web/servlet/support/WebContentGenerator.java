@@ -312,6 +312,19 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 		checkAndPrepare(request, response, this.cacheControl);
 	}
 
+	@Deprecated
+	protected final void checkAndPrepare(
+			HttpServletRequest request, HttpServletResponse response, boolean lastModified)
+			throws ServletException {
+
+		if (lastModified) {
+			checkAndPrepare(request, response, this.cacheControl.mustRevalidate());
+		}
+		else {
+			checkAndPrepare(request, response);
+		}
+	}
+
 	protected final void checkAndPrepare(
 			HttpServletRequest request, HttpServletResponse response, int cacheSeconds) throws ServletException {
 
