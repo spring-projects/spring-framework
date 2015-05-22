@@ -37,13 +37,14 @@ configure(allprojects) { project ->
 	ext.gsonVersion          = "2.3.1"
 	ext.hibernate3Version    = "3.6.10.Final"
 	ext.hibernate4Version    = "4.3.10.Final"
+	ext.hibernate5Version    = "5.0.0.Beta2"  // to be upgraded to 5.0 final in time for Spring Framework 4.2 GA
 	ext.hibval4Version       = "4.3.2.Final"
 	ext.hibval5Version       = "5.2.0.Beta1"  // to be upgraded to 5.2 final in time for Spring Framework 4.2 GA
 	ext.hsqldbVersion        = "2.3.2"
 	ext.httpclientVersion    = "4.4"
 	ext.httpasyncVersion     = "4.0.2"
-	ext.jackson2Version      = "2.5.3"
-	ext.jasperreportsVersion = "6.0.4"
+	ext.jackson2Version      = "2.6.0-rc1"  // to be upgraded to 2.6 final in time for Spring Framework 4.2 GA
+	ext.jasperreportsVersion = "6.1.0"
 	ext.javamailVersion      = "1.5.3"
 	ext.jettyVersion         = "9.2.10.v20150310"
 	ext.jodaVersion          = "2.7"
@@ -51,7 +52,7 @@ configure(allprojects) { project ->
 	ext.jtaVersion           = "1.2"
 	ext.junitVersion         = "4.12"
 	ext.nettyVersion         = "4.0.28.Final"
-	ext.openjpaVersion       = "2.2.2"  // 2.3.0 not Java 8 compatible (based on ASM 4)
+	ext.openjpaVersion       = "2.4.0"
 	ext.protobufVersion      = "2.6.1"
 	ext.reactorVersion       = "2.0.2.RELEASE"
 	ext.slf4jVersion         = "1.7.12"
@@ -836,8 +837,8 @@ project("spring-orm-hibernate5") {
 		provided(project(":spring-jdbc"))
 		provided(project(":spring-tx"))
 		optional(project(":spring-web"))
-		optional("org.hibernate:hibernate-core:5.0.0.Beta2")
-		optional("org.hibernate:hibernate-entitymanager:5.0.0.Beta2")
+		optional("org.hibernate:hibernate-core:${hibernate5Version}")
+		optional("org.hibernate:hibernate-entitymanager:${hibernate5Version}")
 		optional("javax.servlet:javax.servlet-api:3.0.1")
 		optional("aopalliance:aopalliance:1.0")
 	}
