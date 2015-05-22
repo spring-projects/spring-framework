@@ -687,7 +687,7 @@ public class AnnotationUtilsTests {
 	}
 
 	@Meta1
-	static interface InterfaceWithMetaAnnotation {
+	interface InterfaceWithMetaAnnotation {
 	}
 
 	@Meta2
@@ -728,7 +728,7 @@ public class AnnotationUtilsTests {
 	static class MetaCycleAnnotatedClass {
 	}
 
-	public static interface AnnotatedInterface {
+	public interface AnnotatedInterface {
 
 		@Order(0)
 		void fromInterfaceImplementedByRoot();
@@ -805,29 +805,29 @@ public class AnnotationUtilsTests {
 	}
 
 	@Transactional
-	public static interface InheritedAnnotationInterface {
+	public interface InheritedAnnotationInterface {
 	}
 
-	public static interface SubInheritedAnnotationInterface extends InheritedAnnotationInterface {
+	public interface SubInheritedAnnotationInterface extends InheritedAnnotationInterface {
 	}
 
-	public static interface SubSubInheritedAnnotationInterface extends SubInheritedAnnotationInterface {
+	public interface SubSubInheritedAnnotationInterface extends SubInheritedAnnotationInterface {
 	}
 
 	@Order
-	public static interface NonInheritedAnnotationInterface {
+	public interface NonInheritedAnnotationInterface {
 	}
 
-	public static interface SubNonInheritedAnnotationInterface extends NonInheritedAnnotationInterface {
+	public interface SubNonInheritedAnnotationInterface extends NonInheritedAnnotationInterface {
 	}
 
-	public static interface SubSubNonInheritedAnnotationInterface extends SubNonInheritedAnnotationInterface {
+	public interface SubSubNonInheritedAnnotationInterface extends SubNonInheritedAnnotationInterface {
 	}
 
 	public static class NonAnnotatedClass {
 	}
 
-	public static interface NonAnnotatedInterface {
+	public interface NonAnnotatedInterface {
 	}
 
 	@Transactional
@@ -855,7 +855,7 @@ public class AnnotationUtilsTests {
 	public static class SubTransactionalAndOrderedClass extends TransactionalAndOrderedClass {
 	}
 
-	public static interface InterfaceWithAnnotatedMethod {
+	public interface InterfaceWithAnnotatedMethod {
 
 		@Order
 		void foo();
@@ -908,7 +908,7 @@ public class AnnotationUtilsTests {
 	@interface MyRepeatableMeta {
 	}
 
-	public static interface InterfaceWithRepeated {
+	public interface InterfaceWithRepeated {
 
 		@MyRepeatable("a")
 		@MyRepeatableContainer({ @MyRepeatable("b"), @MyRepeatable("c") })
@@ -917,7 +917,7 @@ public class AnnotationUtilsTests {
 	}
 
 	/**
-	 * Mock of {@link org.springframework.web.bind.annotation.RequestMapping}.
+	 * Mock of {@code org.springframework.web.bind.annotation.RequestMapping}.
 	 */
 	@Retention(RetentionPolicy.RUNTIME)
 	@interface WebMapping {
@@ -948,10 +948,10 @@ public class AnnotationUtilsTests {
 	}
 
 	/**
-	 * Mock of {@link org.springframework.test.context.ContextConfiguration}.
+	 * Mock of {@code org.springframework.test.context.ContextConfiguration}.
 	 */
 	@Retention(RetentionPolicy.RUNTIME)
-	static @interface ContextConfig {
+	@interface ContextConfig {
 
 		@AliasFor(attribute = "locations")
 		String value() default "";
@@ -961,10 +961,10 @@ public class AnnotationUtilsTests {
 	}
 
 	/**
-	 * Mock of {@link org.springframework.test.context.ContextHierarchy}.
+	 * Mock of {@code org.springframework.test.context.ContextHierarchy}.
 	 */
 	@Retention(RetentionPolicy.RUNTIME)
-	static @interface Hierarchy {
+	@interface Hierarchy {
 
 		ContextConfig[] value();
 	}
@@ -974,7 +974,7 @@ public class AnnotationUtilsTests {
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
-	static @interface AliasForNonexistentAttribute {
+	@interface AliasForNonexistentAttribute {
 
 		@AliasFor(attribute = "bar")
 		String foo() default "";
@@ -985,7 +985,7 @@ public class AnnotationUtilsTests {
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
-	static @interface AliasForWithoutMirroredAliasFor {
+	@interface AliasForWithoutMirroredAliasFor {
 
 		@AliasFor(attribute = "bar")
 		String foo() default "";
@@ -998,7 +998,7 @@ public class AnnotationUtilsTests {
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
-	static @interface AliasForWithMirroredAliasForWrongAttribute {
+	@interface AliasForWithMirroredAliasForWrongAttribute {
 
 		@AliasFor(attribute = "bar")
 		String[] foo() default "";
@@ -1012,7 +1012,7 @@ public class AnnotationUtilsTests {
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
-	static @interface AliasForAttributeOfDifferentType {
+	@interface AliasForAttributeOfDifferentType {
 
 		@AliasFor(attribute = "bar")
 		String[] foo() default "";
@@ -1026,7 +1026,7 @@ public class AnnotationUtilsTests {
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
-	static @interface AliasForWithMissingDefaultValues {
+	@interface AliasForWithMissingDefaultValues {
 
 		@AliasFor(attribute = "bar")
 		String foo();
@@ -1040,7 +1040,7 @@ public class AnnotationUtilsTests {
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
-	static @interface AliasForAttributeWithDifferentDefaultValue {
+	@interface AliasForAttributeWithDifferentDefaultValue {
 
 		@AliasFor(attribute = "bar")
 		String foo() default "X";
@@ -1055,7 +1055,7 @@ public class AnnotationUtilsTests {
 
 	@ContextConfig
 	@Retention(RetentionPolicy.RUNTIME)
-	static @interface AliasedComposedContextConfig {
+	@interface AliasedComposedContextConfig {
 
 		@AliasFor(annotation = ContextConfig.class, attribute = "locations")
 		String xmlConfigFile();

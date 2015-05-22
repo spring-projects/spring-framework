@@ -32,7 +32,7 @@ import static org.junit.Assert.*;
  */
 public class AnnotationAttributesTests {
 
-	static enum Color {
+	enum Color {
 		RED, WHITE, BLUE
 	}
 
