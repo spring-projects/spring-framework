@@ -237,7 +237,7 @@ public class Jackson2ObjectMapperBuilder {
 	 * @since 4.1.2
 	 */
 	public Jackson2ObjectMapperBuilder serializerByType(Class<?> type, JsonSerializer<?> serializer) {
-		if (serializers != null) {
+		if (serializer != null) {
 			this.serializers.put(type, serializer);
 		}
 		return this;
@@ -259,7 +259,7 @@ public class Jackson2ObjectMapperBuilder {
 	 * @since 4.1.2
 	 */
 	public Jackson2ObjectMapperBuilder deserializerByType(Class<?> type, JsonDeserializer<?> deserializer) {
-		if (deserializers != null) {
+		if (deserializer != null) {
 			this.deserializers.put(type, deserializer);
 		}
 		return this;
@@ -566,7 +566,9 @@ public class Jackson2ObjectMapperBuilder {
 		if (this.annotationIntrospector != null) {
 			objectMapper.setAnnotationIntrospector(this.annotationIntrospector);
 		}
-
+		if (this.propertyNamingStrategy != null) {
+			objectMapper.setPropertyNamingStrategy(this.propertyNamingStrategy);
+		}
 		if (this.serializationInclusion != null) {
 			objectMapper.setSerializationInclusion(this.serializationInclusion);
 		}
@@ -583,13 +585,11 @@ public class Jackson2ObjectMapperBuilder {
 			configureFeature(objectMapper, feature, this.features.get(feature));
 		}
 
-		if (this.propertyNamingStrategy != null) {
-			objectMapper.setPropertyNamingStrategy(this.propertyNamingStrategy);
-		}
 		for (Class<?> target : this.mixIns.keySet()) {
 			// Deprecated as of Jackson 2.5, but just in favor of a fluent variant.
 			objectMapper.addMixInAnnotations(target, this.mixIns.get(target));
 		}
+
 		if (this.handlerInstantiator != null) {
 			objectMapper.setHandlerInstantiator(this.handlerInstantiator);
 		}
