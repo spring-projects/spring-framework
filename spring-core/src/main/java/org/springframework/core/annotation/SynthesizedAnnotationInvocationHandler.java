@@ -21,12 +21,13 @@ import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
+
+import static org.springframework.core.annotation.AnnotationUtils.*;
 
 /**
  * {@link InvocationHandler} for an {@link Annotation} that Spring has
@@ -56,7 +57,7 @@ class SynthesizedAnnotationInvocationHandler implements InvocationHandler {
 	private final Map<String, String> aliasMap;
 
 
-	public SynthesizedAnnotationInvocationHandler(AnnotatedElement annotatedElement, Annotation annotation,
+	SynthesizedAnnotationInvocationHandler(AnnotatedElement annotatedElement, Annotation annotation,
 			Map<String, String> aliasMap) {
 		this.annotatedElement = annotatedElement;
 		this.annotation = annotation;
@@ -70,7 +71,10 @@ class SynthesizedAnnotationInvocationHandler implements InvocationHandler {
 		Class<?>[] parameterTypes = method.getParameterTypes();
 		int parameterCount = parameterTypes.length;
 
-		if ("toString".equals(methodName) && (parameterCount == 0)) {
+		if ("equals".equals(methodName) && (parameterCount == 1) && (parameterTypes[0] == Object.class)) {
+			return equals(proxy, args[0]);
+		}
+		else if ("toString".equals(methodName) && (parameterCount == 0)) {
 			return toString(proxy);
 		}
 
@@ -82,7 +86,7 @@ class SynthesizedAnnotationInvocationHandler implements InvocationHandler {
 		ReflectionUtils.makeAccessible(method);
 		Object value = ReflectionUtils.invokeMethod(method, this.annotation, args);
 
-		// Nothing special to do?
+		// No custom processing necessary?
 		if (!aliasPresent && !nestedAnnotation) {
 			return value;
 		}
@@ -101,11 +105,12 @@ class SynthesizedAnnotationInvocationHandler implements InvocationHandler {
 
 			ReflectionUtils.makeAccessible(aliasedMethod);
 			Object aliasedValue = ReflectionUtils.invokeMethod(aliasedMethod, this.annotation, args);
-			Object defaultValue = AnnotationUtils.getDefaultValue(this.annotation, methodName);
+			Object defaultValue = getDefaultValue(this.annotation, methodName);
 
 			if (!ObjectUtils.nullSafeEquals(value, aliasedValue) && !ObjectUtils.nullSafeEquals(value, defaultValue)
 					&& !ObjectUtils.nullSafeEquals(aliasedValue, defaultValue)) {
-				String elementName = (this.annotatedElement == null ? "unknown element" : this.annotatedElement.toString());
+				String elementName = (this.annotatedElement == null ? "unknown element"
+						: this.annotatedElement.toString());
 				String msg = String.format(
 					"In annotation [%s] declared on [%s], attribute [%s] and its alias [%s] are "
 							+ "declared with values of [%s] and [%s], but only one declaration is permitted.",
@@ -123,23 +128,41 @@ class SynthesizedAnnotationInvocationHandler implements InvocationHandler {
 
 		// Synthesize nested annotations before returning them.
 		if (value instanceof Annotation) {
-			value = AnnotationUtils.synthesizeAnnotation((Annotation) value, this.annotatedElement);
+			value = synthesizeAnnotation((Annotation) value, this.annotatedElement);
 		}
 		else if (value instanceof Annotation[]) {
 			Annotation[] annotations = (Annotation[]) value;
 			for (int i = 0; i < annotations.length; i++) {
-				annotations[i] = AnnotationUtils.synthesizeAnnotation(annotations[i], this.annotatedElement);
+				annotations[i] = synthesizeAnnotation(annotations[i], this.annotatedElement);
 			}
 		}
 
 		return value;
 	}
 
+	private boolean equals(Object proxy, Object other) {
+		if (this == other) {
+			return true;
+		}
+		if (!this.annotationType.isInstance(other)) {
+			return false;
+		}
+
+		for (Method attributeMethod : getAttributeMethods(this.annotationType)) {
+			Object thisValue = ReflectionUtils.invokeMethod(attributeMethod, proxy);
+			Object otherValue = ReflectionUtils.invokeMethod(attributeMethod, other);
+			if (!ObjectUtils.nullSafeEquals(thisValue, otherValue)) {
+				return false;
+			}
+		}
+
+		return true;
+	}
+
 	private String toString(Object proxy) {
 		StringBuilder sb = new StringBuilder("@").append(annotationType.getName()).append("(");
 
-		List<Method> attributeMethods = AnnotationUtils.getAttributeMethods(this.annotationType);
-		Iterator<Method> iterator = attributeMethods.iterator();
+		Iterator<Method> iterator = getAttributeMethods(this.annotationType).iterator();
 		while (iterator.hasNext()) {
 			Method attributeMethod = iterator.next();
 			sb.append(attributeMethod.getName());
