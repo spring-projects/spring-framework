@@ -23,7 +23,6 @@ import java.util.Enumeration;
 import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.TreeMap;
-
 import javax.servlet.ServletContext;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletRequestWrapper;
@@ -752,7 +751,7 @@ public abstract class WebUtils {
 	 * keys {@code "q1"} and {@code "q2"} with values {@code ["a","b"]} and
 	 * {@code ["a","b","c"]} respectively.
 	 * @param matrixVariables the unparsed matrix variables string
-	 * @return a map with matrix variable names and values, never {@code null}
+	 * @return a map with matrix variable names and values (never {@code null})
 	 * @since 3.2
 	 */
 	public static MultiValueMap<String, String> parseMatrixVariables(String matrixVariables) {
@@ -782,7 +781,7 @@ public abstract class WebUtils {
 	 * Check the given request origin against a list of allowed origins.
 	 * A list containing "*" means that all origins are allowed.
 	 * An empty list means only same origin is allowed.
-	 * @return true if the request origin is valid, false otherwise
+	 * @return {@code true} if the request origin is valid, {@code false} otherwise
 	 * @since 4.1.5
 	 * @see <a href="https://tools.ietf.org/html/rfc6454">RFC 6454: The Web Origin Concept</a>
 	 */
