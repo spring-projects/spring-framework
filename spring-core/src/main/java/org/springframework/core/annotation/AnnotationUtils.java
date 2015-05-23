@@ -1110,8 +1110,19 @@ public abstract class AnnotationUtils {
 	}
 
 	/**
-	 * TODO Document isSynthesizable().
+	 * Determine if annotations of the supplied {@code annotationType} are
+	 * <em>synthesizable</em> (i.e., in need of being wrapped in a dynamic
+	 * proxy that provides functionality above that of a standard JDK
+	 * annotation).
+	 *
+	 * <p>Specifically, an annotation is <em>synthesizable</em> if it declares
+	 * any attributes that are configured as <em>aliased pairs</em> via
+	 * {@link AliasFor @AliasFor} or if any nested annotations used by the
+	 * annotation declare such <em>aliased pairs</em>.
+	 *
 	 * @since 4.2
+	 * @see SynthesizedAnnotation
+	 * @see SynthesizedAnnotationInvocationHandler
 	 */
 	@SuppressWarnings("unchecked")
 	private static boolean isSynthesizable(Class<? extends Annotation> annotationType) {
