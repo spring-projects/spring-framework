@@ -827,7 +827,6 @@ public abstract class AnnotationUtils {
 		AnnotationAttributes attrs = new AnnotationAttributes(annotationType);
 		for (Method method : getAttributeMethods(annotationType)) {
 			try {
-				ReflectionUtils.makeAccessible(method);
 				Object value = method.invoke(annotation);
 
 				Object defaultValue = method.getDefaultValue();
@@ -1274,6 +1273,7 @@ public abstract class AnnotationUtils {
 		List<Method> methods = new ArrayList<Method>();
 		for (Method method : annotationType.getDeclaredMethods()) {
 			if ((method.getParameterTypes().length == 0) && (method.getReturnType() != void.class)) {
+				ReflectionUtils.makeAccessible(method);
 				methods.add(method);
 			}
 		}

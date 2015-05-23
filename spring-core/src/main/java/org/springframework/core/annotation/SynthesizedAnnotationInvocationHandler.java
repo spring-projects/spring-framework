@@ -20,10 +20,13 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.ReflectionUtils;
+import org.springframework.util.StringUtils;
 
 /**
  * {@link InvocationHandler} for an {@link Annotation} that Spring has
@@ -38,6 +41,7 @@ import org.springframework.util.ReflectionUtils;
  *
  * @author Sam Brannen
  * @since 4.2
+ * @see Annotation
  * @see AliasFor
  * @see AnnotationUtils#synthesizeAnnotation(Annotation, AnnotatedElement)
  */
@@ -62,10 +66,16 @@ class SynthesizedAnnotationInvocationHandler implements InvocationHandler {
 
 	@Override
 	public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-		String attributeName = method.getName();
+		String methodName = method.getName();
+		int parameterCount = method.getParameterCount();
+
+		if ("toString".equals(methodName) && (parameterCount == 0)) {
+			return toString(proxy);
+		}
+
 		Class<?> returnType = method.getReturnType();
 		boolean nestedAnnotation = (Annotation[].class.isAssignableFrom(returnType) || Annotation.class.isAssignableFrom(returnType));
-		String aliasedAttributeName = aliasMap.get(attributeName);
+		String aliasedAttributeName = aliasMap.get(methodName);
 		boolean aliasPresent = (aliasedAttributeName != null);
 
 		ReflectionUtils.makeAccessible(method);
@@ -83,14 +93,14 @@ class SynthesizedAnnotationInvocationHandler implements InvocationHandler {
 			}
 			catch (NoSuchMethodException e) {
 				String msg = String.format("In annotation [%s], attribute [%s] is declared as an @AliasFor [%s], "
-						+ "but attribute [%s] does not exist.", this.annotationType.getName(), attributeName,
+						+ "but attribute [%s] does not exist.", this.annotationType.getName(), methodName,
 					aliasedAttributeName, aliasedAttributeName);
 				throw new AnnotationConfigurationException(msg);
 			}
 
 			ReflectionUtils.makeAccessible(aliasedMethod);
 			Object aliasedValue = ReflectionUtils.invokeMethod(aliasedMethod, this.annotation, args);
-			Object defaultValue = AnnotationUtils.getDefaultValue(this.annotation, attributeName);
+			Object defaultValue = AnnotationUtils.getDefaultValue(this.annotation, methodName);
 
 			if (!ObjectUtils.nullSafeEquals(value, aliasedValue) && !ObjectUtils.nullSafeEquals(value, defaultValue)
 					&& !ObjectUtils.nullSafeEquals(aliasedValue, defaultValue)) {
@@ -98,7 +108,7 @@ class SynthesizedAnnotationInvocationHandler implements InvocationHandler {
 				String msg = String.format(
 					"In annotation [%s] declared on [%s], attribute [%s] and its alias [%s] are "
 							+ "declared with values of [%s] and [%s], but only one declaration is permitted.",
-					this.annotationType.getName(), elementName, attributeName, aliasedAttributeName,
+					this.annotationType.getName(), elementName, methodName, aliasedAttributeName,
 					ObjectUtils.nullSafeToString(value), ObjectUtils.nullSafeToString(aliasedValue));
 				throw new AnnotationConfigurationException(msg);
 			}
@@ -122,6 +132,31 @@ class SynthesizedAnnotationInvocationHandler implements InvocationHandler {
 		}
 
 		return value;
+	}
+
+	private String toString(Object proxy) {
+		StringBuilder sb = new StringBuilder("@").append(annotationType.getName()).append("(");
+
+		List<Method> attributeMethods = AnnotationUtils.getAttributeMethods(this.annotationType);
+		Iterator<Method> iterator = attributeMethods.iterator();
+		while (iterator.hasNext()) {
+			Method attributeMethod = iterator.next();
+			sb.append(attributeMethod.getName());
+			sb.append('=');
+			sb.append(valueToString(ReflectionUtils.invokeMethod(attributeMethod, proxy)));
+			sb.append(iterator.hasNext() ? ", " : "");
+		}
+
+		return sb.append(")").toString();
+	}
+
+	private String valueToString(Object value) {
+		if (value instanceof Object[]) {
+			return "[" + StringUtils.arrayToDelimitedString((Object[]) value, ", ") + "]";
+		}
+
+		// else
+		return String.valueOf(value);
 	}
 
 }

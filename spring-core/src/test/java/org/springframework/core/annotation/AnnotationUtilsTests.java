@@ -413,7 +413,7 @@ public class AnnotationUtilsTests {
 		assertEquals("value attribute: ", "/test", attributes.getString(VALUE));
 		assertEquals("path attribute: ", "/test", attributes.getString("path"));
 
-		method = WebController.class.getMethod("handleMappedWithPathValueAndAttributes");
+		method = WebController.class.getMethod("handleMappedWithDifferentPathAndValueAttributes");
 		webMapping = method.getAnnotation(WebMapping.class);
 		exception.expect(AnnotationConfigurationException.class);
 		exception.expectMessage(containsString("attribute [value] and its alias [path]"));
@@ -600,14 +600,60 @@ public class AnnotationUtilsTests {
 		Method method = WebController.class.getMethod("handleMappedWithValueAttribute");
 		WebMapping webMapping = method.getAnnotation(WebMapping.class);
 		assertNotNull(webMapping);
-		WebMapping synthesizedWebMapping = synthesizeAnnotation(webMapping);
-		assertNotSame(webMapping, synthesizedWebMapping);
-		assertThat(synthesizedWebMapping, instanceOf(SynthesizedAnnotation.class));
 
-		assertNotNull(synthesizedWebMapping);
-		assertEquals("name attribute: ", "foo", synthesizedWebMapping.name());
-		assertEquals("aliased path attribute: ", "/test", synthesizedWebMapping.path());
-		assertEquals("actual value attribute: ", "/test", synthesizedWebMapping.value());
+		WebMapping synthesizedWebMapping1 = synthesizeAnnotation(webMapping);
+		assertNotNull(synthesizedWebMapping1);
+		assertNotSame(webMapping, synthesizedWebMapping1);
+		assertThat(synthesizedWebMapping1, instanceOf(SynthesizedAnnotation.class));
+
+		assertEquals("name attribute: ", "foo", synthesizedWebMapping1.name());
+		assertEquals("aliased path attribute: ", "/test", synthesizedWebMapping1.path());
+		assertEquals("actual value attribute: ", "/test", synthesizedWebMapping1.value());
+
+		WebMapping synthesizedWebMapping2 = synthesizeAnnotation(webMapping);
+		assertNotNull(synthesizedWebMapping2);
+		assertNotSame(webMapping, synthesizedWebMapping2);
+		assertThat(synthesizedWebMapping2, instanceOf(SynthesizedAnnotation.class));
+
+		assertEquals("name attribute: ", "foo", synthesizedWebMapping2.name());
+		assertEquals("aliased path attribute: ", "/test", synthesizedWebMapping2.path());
+		assertEquals("actual value attribute: ", "/test", synthesizedWebMapping2.value());
+	}
+
+	@Test
+	public void toStringForSynthesizedAnnotations() throws Exception {
+		Method methodWithPath = WebController.class.getMethod("handleMappedWithPathAttribute");
+		WebMapping webMappingWithAliases = methodWithPath.getAnnotation(WebMapping.class);
+		assertNotNull(webMappingWithAliases);
+
+		Method methodWithPathAndValue = WebController.class.getMethod("handleMappedWithSamePathAndValueAttributes");
+		WebMapping webMappingWithPathAndValue = methodWithPathAndValue.getAnnotation(WebMapping.class);
+		assertNotNull(webMappingWithPathAndValue);
+
+		WebMapping synthesizedWebMapping1 = synthesizeAnnotation(webMappingWithAliases);
+		assertNotNull(synthesizedWebMapping1);
+		WebMapping synthesizedWebMapping2 = synthesizeAnnotation(webMappingWithAliases);
+		assertNotNull(synthesizedWebMapping2);
+
+		assertThat(webMappingWithAliases.toString(), is(not(synthesizedWebMapping1.toString())));
+
+		// The unsynthesized annotation for handleMappedWithSamePathAndValueAttributes()
+		// should produce the same toString() results as synthesized annotations for
+		// handleMappedWithPathAttribute()
+		assertToStringForWebMappingWithPathAndValue(webMappingWithPathAndValue);
+		assertToStringForWebMappingWithPathAndValue(synthesizedWebMapping1);
+		assertToStringForWebMappingWithPathAndValue(synthesizedWebMapping2);
+	}
+
+	private void assertToStringForWebMappingWithPathAndValue(WebMapping webMapping) {
+		String string = webMapping.toString();
+		assertThat(string, startsWith("@" + WebMapping.class.getName() + "("));
+		assertThat(string, containsString("value=/test"));
+		assertThat(string, containsString("path=/test"));
+		assertThat(string, containsString("name=bar"));
+		assertThat(string, containsString("method="));
+		assertThat(string, either(containsString("[GET, POST]")).or(containsString("[POST, GET]")));
+		assertThat(string, endsWith(")"));
 	}
 
 	/**
@@ -942,6 +988,10 @@ public class AnnotationUtilsTests {
 		void foo();
 	}
 
+	enum RequestMethod {
+		GET, POST
+	}
+
 	/**
 	 * Mock of {@code org.springframework.web.bind.annotation.RequestMapping}.
 	 */
@@ -955,6 +1005,8 @@ public class AnnotationUtilsTests {
 
 		@AliasFor(attribute = "value")
 		String path() default "";
+
+		RequestMethod[] method() default {};
 	}
 
 	@Component("webController")
@@ -964,12 +1016,19 @@ public class AnnotationUtilsTests {
 		public void handleMappedWithValueAttribute() {
 		}
 
-		@WebMapping(path = "/test", name = "bar")
+		@WebMapping(path = "/test", name = "bar", method = { RequestMethod.GET, RequestMethod.POST })
 		public void handleMappedWithPathAttribute() {
 		}
 
+		/**
+		 * mapping is logically "equal" to handleMappedWithPathAttribute().
+		 */
+		@WebMapping(value = "/test", path = "/test", name = "bar", method = { RequestMethod.GET, RequestMethod.POST })
+		public void handleMappedWithSamePathAndValueAttributes() {
+		}
+
 		@WebMapping(value = "/enigma", path = "/test", name = "baz")
-		public void handleMappedWithPathValueAndAttributes() {
+		public void handleMappedWithDifferentPathAndValueAttributes() {
 		}
 	}
 
